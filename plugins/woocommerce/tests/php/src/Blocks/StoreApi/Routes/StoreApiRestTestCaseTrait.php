@@ -12,6 +12,33 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
  */
 trait StoreApiRestTestCaseTrait {
 	/**
+	 * Create class-owned products without leaving asynchronous lookup actions.
+	 *
+	 * @param array[] $product_properties Product properties for each fixture.
+	 * @return \WC_Product[]
+	 */
+	protected static function create_class_fixture_products( array $product_properties ): array {
+		$enable_direct_updates = static function () {
+			return 'yes';
+		};
+
+		add_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', $enable_direct_updates );
+
+		try {
+			$fixtures = new \Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData();
+
+			return array_map(
+				static function ( array $properties ) use ( $fixtures ) {
+					return $fixtures->get_simple_product( $properties );
+				},
+				$product_properties
+			);
+		} finally {
+			remove_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', $enable_direct_updates );
+		}
+	}
+
+	/**
 	 * Create a REST server with only the relevant WooCommerce namespace loaded.
 	 */
 	protected function initialize_store_api_server(): void {

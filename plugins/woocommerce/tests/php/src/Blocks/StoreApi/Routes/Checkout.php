@@ -43,35 +43,29 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 * Create immutable catalog rows shared by all test methods.
 	 */
 	public static function wpSetUpBeforeClass(): void {
-		$fixtures = new FixtureData();
-
 		self::$product_ids = array_map(
 			fn( $product ) => $product->get_id(),
-			array(
-				$fixtures->get_simple_product(
+			self::create_class_fixture_products(
+				array(
 					array(
 						'name'          => 'Test Product 1',
 						'stock_status'  => ProductStockStatus::IN_STOCK,
 						'regular_price' => 10,
 						'weight'        => 10,
-					)
-				),
-				$fixtures->get_simple_product(
+					),
 					array(
 						'name'          => 'Test Product 2',
 						'stock_status'  => ProductStockStatus::IN_STOCK,
 						'regular_price' => 10,
 						'weight'        => 10,
-					)
-				),
-				$fixtures->get_simple_product(
+					),
 					array(
 						'name'          => 'Virtual Test Product 2',
 						'stock_status'  => ProductStockStatus::IN_STOCK,
 						'regular_price' => 10,
 						'weight'        => 10,
 						'virtual'       => true,
-					)
+					),
 				),
 			)
 		);

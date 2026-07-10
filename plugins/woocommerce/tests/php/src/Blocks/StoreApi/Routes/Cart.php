@@ -38,39 +38,33 @@ class Cart extends ControllerTestCase {
 	 */
 	public static function wpSetUpBeforeClass(): void {
 		$fixtures = new FixtureData();
-		$products = array(
-			$fixtures->get_simple_product(
+		$products = self::create_class_fixture_products(
+			array(
 				array(
 					'name'          => 'Test Product 1',
 					'stock_status'  => ProductStockStatus::IN_STOCK,
 					'regular_price' => 10,
 					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
+				),
 				array(
 					'name'          => 'Test Product 2',
 					'stock_status'  => ProductStockStatus::IN_STOCK,
 					'regular_price' => 10,
 					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
+				),
 				array(
 					'name'          => 'Test Product 3',
 					'stock_status'  => ProductStockStatus::IN_STOCK,
 					'regular_price' => 10,
 					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
+				),
 				array(
 					'name'          => 'Test Product 4',
 					'stock_status'  => ProductStockStatus::IN_STOCK,
 					'regular_price' => 10,
 					'weight'        => 10,
 					'virtual'       => true,
-				)
+				),
 			),
 		);
 
