@@ -549,8 +549,14 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->markTestSkipped( 'Abilities API category registry is not available.' );
 		}
 
-		AbilitiesCategories::register_categories();
-		AbilitiesCategories::register_categories();
+		$callback = static function () {
+			AbilitiesCategories::register_categories();
+			AbilitiesCategories::register_categories();
+		};
+
+		add_action( 'wp_abilities_api_categories_init', $callback );
+		do_action( 'wp_abilities_api_categories_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Exercise category registration on its required lifecycle hook.
+		remove_action( 'wp_abilities_api_categories_init', $callback );
 
 		$this->assertTrue( wp_has_ability_category( 'woocommerce' ) );
 		$this->assertTrue( wp_has_ability_category( 'woocommerce-rest' ) );
