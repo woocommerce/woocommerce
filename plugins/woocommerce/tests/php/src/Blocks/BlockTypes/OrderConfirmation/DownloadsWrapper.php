@@ -31,10 +31,11 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 	 * Test `store_has_downloadable_products`: query product meta lookup table.
 	 *
 	 * @dataProvider provider_downloadable_products
-	 * @param \WC_Product $product The product instance.
+	 * @param bool $downloadable Whether the product is downloadable.
 	 */
-	public function test_store_has_downloadable_products_via_product_meta_lookup_table_with_downloadable( \WC_Product $product ): void {
-		$proxy = new class() extends DownloadsWrapperClass {
+	public function test_store_has_downloadable_products_via_product_meta_lookup_table_with_downloadable( bool $downloadable ): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'downloadable' => $downloadable ) );
+		$proxy   = new class() extends DownloadsWrapperClass {
 			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			public function __construct() {
 			}
@@ -44,7 +45,7 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 			}
 		};
 
-		$this->assertSame( $product->is_downloadable(), $proxy->store_has_downloadable_products_proxy() );
+		$this->assertSame( $downloadable, $proxy->store_has_downloadable_products_proxy() );
 	}
 
 	/**
@@ -54,8 +55,8 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 	 */
 	public function provider_downloadable_products(): array {
 		return array(
-			array( \WC_Helper_Product::create_simple_product( true, array( 'downloadable' => true ) ) ),
-			array( \WC_Helper_Product::create_simple_product( true, array( 'downloadable' => false ) ) ),
+			array( true ),
+			array( false ),
 		);
 	}
 
