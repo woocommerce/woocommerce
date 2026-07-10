@@ -44,6 +44,8 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 
+		self::$attributes = array();
+
 		for ( $i = 1; $i <= 3; $i++ ) {
 			$taxonomy_id   = wc_create_attribute(
 				array(
