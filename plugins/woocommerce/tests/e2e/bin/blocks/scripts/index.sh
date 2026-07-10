@@ -14,5 +14,8 @@ bash $script_dir/products.sh
 # Run all scripts in parallel at maximum 10 at a time.
 find $script_dir/parallel/*.sh -maxdepth 1 -type f | xargs -P10 -n1 bash
 
+# Add deterministic ratings and sales data for product collection sorting.
+bash $script_dir/product-collection-sort-data.sh || exit 1
+
 # Run rewrite script last to ensure all posts are created before running it.
 bash $script_dir/rewrite.sh

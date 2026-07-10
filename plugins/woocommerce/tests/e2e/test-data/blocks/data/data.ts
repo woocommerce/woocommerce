@@ -92,6 +92,22 @@ const capReviews = [
 
 const allReviews = hoodieReviews.concat( capReviews );
 
+const productCollectionTopRatedProducts = [
+	'V-Neck T-Shirt',
+	'Hoodie',
+	'Hoodie with Logo',
+	'T-Shirt',
+	'Beanie',
+];
+
+const productCollectionBestSellers = [
+	'Album',
+	'Hoodie',
+	'Single',
+	'Hoodie with Logo',
+	'T-Shirt with Logo',
+];
+
 const storeDetails = {
 	us: {
 		store: {
@@ -136,6 +152,8 @@ module.exports = {
 	hoodieReviews,
 	capReviews,
 	allReviews,
+	productCollectionTopRatedProducts,
+	productCollectionBestSellers,
 	storeDetails,
 	translations,
 };
