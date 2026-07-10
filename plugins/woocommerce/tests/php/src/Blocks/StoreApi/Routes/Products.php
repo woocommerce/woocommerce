@@ -113,11 +113,22 @@ class Products extends ControllerTestCase {
 	 * Test getting items.
 	 */
 	public function test_get_items() {
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
-		$data     = $response->get_data();
+		$product_ids = array_merge(
+			array_map(
+				function ( $product ) {
+					return $product->get_id();
+				},
+				$this->products
+			),
+			$this->products[2]->get_children()
+		);
+		$request     = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'include', $product_ids );
+		$response    = rest_get_server()->dispatch( $request );
+		$data        = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 6, count( $data ) );
+		$this->assertCount( count( $product_ids ), $data );
 		$this->assertArrayHasKey( 'id', $data[0] );
 		$this->assertArrayHasKey( 'name', $data[0] );
 		$this->assertArrayHasKey( 'variation', $data[0] );
