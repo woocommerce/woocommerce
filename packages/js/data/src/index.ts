@@ -28,6 +28,7 @@ export { EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME } from './product-categories
 export { EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME } from './product-attribute-terms';
 export { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from './product-variations';
 export { EXPERIMENTAL_TAX_CLASSES_STORE_NAME } from './tax-classes';
+export { ACTIVITY_PANEL_STORE_NAME } from './activity-panel';
 export type { PaymentGateway } from './payment-gateways/types';
 export type {
 	PaymentsEntity,
@@ -79,6 +80,7 @@ export { store as woopaymentsOnboardingStore } from './woopayments-onboarding';
 export { store as reportsStore } from './reports';
 export { store as itemsStore } from './items';
 export { store as experimentalSettingOptionsStore } from './setting-options';
+export { store as activityPanelStore } from './activity-panel';
 
 // Export hooks
 export { withSettingsHydration } from './settings/with-settings-hydration';
@@ -205,6 +207,7 @@ import type { EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME } from './product-
 import type { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from './product-variations';
 import type { EXPERIMENTAL_TAX_CLASSES_STORE_NAME } from './tax-classes';
 import type { EXPERIMENTAL_PRODUCT_FORM_STORE_NAME } from './product-form';
+import type { ACTIVITY_PANEL_STORE_NAME } from './activity-panel';
 
 export type WCDataStoreName =
 	| typeof REVIEWS_STORE_NAME
@@ -232,7 +235,8 @@ export type WCDataStoreName =
 	| typeof EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME
 	| typeof EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	| typeof EXPERIMENTAL_TAX_CLASSES_STORE_NAME
-	| typeof EXPERIMENTAL_PRODUCT_FORM_STORE_NAME;
+	| typeof EXPERIMENTAL_PRODUCT_FORM_STORE_NAME
+	| typeof ACTIVITY_PANEL_STORE_NAME;
 
 /**
  * Internal dependencies
@@ -256,6 +260,7 @@ import { ProductVariationSelectors } from './product-variations/types';
 import { TaxClassSelectors } from './tax-classes/types';
 import { ProductFormSelectors } from './product-form/selectors';
 import { WooPaymentsOnboardingSelectors } from './woopayments-onboarding/selectors';
+import { ActivityPanelSelectors } from './activity-panel/types';
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
 // of the already typed selectors for an example of how you can do this.
@@ -311,6 +316,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? TaxClassSelectors
 	: T extends typeof EXPERIMENTAL_PRODUCT_FORM_STORE_NAME
 	? ProductFormSelectors
+	: T extends typeof ACTIVITY_PANEL_STORE_NAME
+	? ActivityPanelSelectors
 	: never;
 
 export interface WCDataSelector {

@@ -9,11 +9,11 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * User ID for an admin user.
+	 * Shared admin user ID, used for REST authentication across the class.
 	 *
 	 * @var int
 	 */
-	private $user_id;
+	protected static $user_id;
 
 	/**
 	 * Enable the REST API v4 feature.
@@ -47,14 +47,22 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Create the shared admin user once for the whole class.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		self::enable_rest_api_v4_feature();
 		parent::setUp();
 
-		$this->user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 	}
 
 	/**
@@ -87,7 +95,7 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 */
 	private function create_order_with_product( string $status = 'completed' ): WC_Order {
 		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '10.00' ) );
-		$order   = WC_Helper_Order::create_order( $this->user_id, $product );
+		$order   = WC_Helper_Order::create_order( self::$user_id, $product );
 		$order->set_status( $status );
 		$order->save();
 		$order->calculate_totals( true );
@@ -141,7 +149,7 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '10.00' ) );
 		$product_b = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '20.00' ) );
 
-		$order = wc_create_order( array( 'customer_id' => $this->user_id ) );
+		$order = wc_create_order( array( 'customer_id' => self::$user_id ) );
 
 		$item_a = new WC_Order_Item_Product();
 		$item_a->set_props(
@@ -275,7 +283,7 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 * @testdox Line item with product_id 0 has can_be_refunded false.
 	 */
 	public function test_line_item_without_product_not_refundable(): void {
-		$order = wc_create_order( array( 'customer_id' => $this->user_id ) );
+		$order = wc_create_order( array( 'customer_id' => self::$user_id ) );
 
 		$item = new WC_Order_Item_Product();
 		$item->set_props(
@@ -350,7 +358,7 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 * @testdox Shipping line with remaining amount has can_be_refunded true.
 	 */
 	public function test_shipping_line_can_be_refunded(): void {
-		$order = WC_Helper_Order::create_order_with_fees_and_shipping( $this->user_id );
+		$order = WC_Helper_Order::create_order_with_fees_and_shipping( self::$user_id );
 		$order->set_status( 'completed' );
 		$order->save();
 		$order->calculate_totals( true );
@@ -365,7 +373,7 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 * @testdox Fee line with remaining amount has can_be_refunded true.
 	 */
 	public function test_fee_line_can_be_refunded(): void {
-		$order = WC_Helper_Order::create_order_with_fees_and_shipping( $this->user_id );
+		$order = WC_Helper_Order::create_order_with_fees_and_shipping( self::$user_id );
 		$order->set_status( 'completed' );
 		$order->save();
 		$order->calculate_totals( true );
@@ -380,7 +388,7 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 * @testdox Fully refunded shipping line has can_be_refunded false.
 	 */
 	public function test_fully_refunded_shipping_line(): void {
-		$order = WC_Helper_Order::create_order_with_fees_and_shipping( $this->user_id );
+		$order = WC_Helper_Order::create_order_with_fees_and_shipping( self::$user_id );
 		$order->set_status( 'completed' );
 		$order->save();
 		$order->calculate_totals( true );
@@ -410,7 +418,7 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 * @testdox Fully refunded fee line has can_be_refunded false.
 	 */
 	public function test_fully_refunded_fee_line(): void {
-		$order = WC_Helper_Order::create_order_with_fees_and_shipping( $this->user_id );
+		$order = WC_Helper_Order::create_order_with_fees_and_shipping( self::$user_id );
 		$order->set_status( 'completed' );
 		$order->save();
 		$order->calculate_totals( true );
@@ -440,7 +448,7 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 * @testdox Fully refunded shipping line with tax has can_be_refunded false.
 	 */
 	public function test_fully_refunded_shipping_line_with_tax(): void {
-		$order = wc_create_order( array( 'customer_id' => $this->user_id ) );
+		$order = wc_create_order( array( 'customer_id' => self::$user_id ) );
 
 		$shipping_item = new WC_Order_Item_Shipping();
 		$shipping_item->set_props(
@@ -487,7 +495,7 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 * @testdox Fully refunded fee line with tax has can_be_refunded false.
 	 */
 	public function test_fully_refunded_fee_line_with_tax(): void {
-		$order = wc_create_order( array( 'customer_id' => $this->user_id ) );
+		$order = wc_create_order( array( 'customer_id' => self::$user_id ) );
 
 		$fee_item = new WC_Order_Item_Fee();
 		$fee_item->set_props(
@@ -538,7 +546,7 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 * so OrderSchema::can_be_refunded must compare against tax-inclusive line totals.
 	 */
 	public function test_partially_refunded_shipping_line_with_tax(): void {
-		$order = wc_create_order( array( 'customer_id' => $this->user_id ) );
+		$order = wc_create_order( array( 'customer_id' => self::$user_id ) );
 
 		$shipping_item = new WC_Order_Item_Shipping();
 		$shipping_item->set_props(
@@ -587,7 +595,7 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 * Regression test for WOOPLUG-6819.
 	 */
 	public function test_partially_refunded_fee_line_with_tax(): void {
-		$order = wc_create_order( array( 'customer_id' => $this->user_id ) );
+		$order = wc_create_order( array( 'customer_id' => self::$user_id ) );
 
 		$fee_item = new WC_Order_Item_Fee();
 		$fee_item->set_props(
@@ -638,7 +646,7 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_zero_priced_item_follows_quantity_logic(): void {
 		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '0.00' ) );
-		$order   = wc_create_order( array( 'customer_id' => $this->user_id ) );
+		$order   = wc_create_order( array( 'customer_id' => self::$user_id ) );
 
 		$item = new WC_Order_Item_Product();
 		$item->set_props(
@@ -672,7 +680,7 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_negative_fee_line_can_be_refunded(): void {
 		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '50.00' ) );
-		$order   = wc_create_order( array( 'customer_id' => $this->user_id ) );
+		$order   = wc_create_order( array( 'customer_id' => self::$user_id ) );
 
 		$item = new WC_Order_Item_Product();
 		$item->set_props(

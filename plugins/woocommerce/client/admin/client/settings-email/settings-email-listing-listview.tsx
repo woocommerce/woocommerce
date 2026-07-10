@@ -18,6 +18,38 @@ import { shouldShowReviewUpdate } from './settings-email-listing-update-state';
 import { Status, EMAIL_STATUSES } from './settings-email-listing-status';
 import { RecipientsList } from './settings-email-listing-recipients';
 import { UpdatesCell } from './settings-email-listing-update-cell';
+import {
+	SendTestEmailForm,
+	useSendTestEmail,
+} from './settings-email-send-test';
+
+const SendTestEmailModalContent = ( {
+	postId,
+	emailId,
+	onClose,
+}: {
+	postId: number;
+	emailId: string;
+	onClose: () => void;
+} ) => {
+	const { email, setEmail, isSending, notice, noticeType, sendEmail } =
+		useSendTestEmail(
+			{ endpoint: 'editor', postId, emailType: emailId },
+			'email_listing'
+		);
+
+	return (
+		<SendTestEmailForm
+			email={ email }
+			onEmailChange={ setEmail }
+			isSending={ isSending }
+			notice={ notice }
+			noticeType={ noticeType }
+			onSend={ sendEmail }
+			onCancel={ onClose }
+		/>
+	);
+};
 
 export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 	const [ view, setView ] = useState< View >( {
@@ -172,11 +204,26 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			{
 				id: 'test',
 				label: __( 'Send test email', 'woocommerce' ),
-				disabled: true,
 				supportsBulk: false,
-				callback: () => {
-					return true; // TODO: Implement send test email
-				},
+				// The editor's send_preview_email endpoint renders the
+				// woo_email post, so a numeric post ID is required — rows
+				// without one offer the "Recreate email post" action instead.
+				isEligible: ( item: EmailType ) =>
+					Number.isFinite( parseInt( item.post_id, 10 ) ),
+				modalHeader: __( 'Send a test email', 'woocommerce' ),
+				RenderModal: ( {
+					items,
+					closeModal,
+				}: {
+					items: EmailType[];
+					closeModal?: () => void;
+				} ) => (
+					<SendTestEmailModalContent
+						postId={ parseInt( items[ 0 ].post_id, 10 ) }
+						emailId={ items[ 0 ].id }
+						onClose={ closeModal ?? ( () => {} ) }
+					/>
+				),
 			},
 			{
 				id: 'change-status',

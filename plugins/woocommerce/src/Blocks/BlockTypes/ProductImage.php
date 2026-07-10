@@ -164,7 +164,8 @@ class ProductImage extends AbstractBlock {
 
 		// For backwards compatibility, we interpret "thumbnail" as following
 		// the store thumbnail cropping settings.
-		if ( 'thumbnail' === $attributes['imageSizing'] ) {
+		// "cropped" was used as a synonym for "thumbnail" in the past, but it's now deprecated.
+		if ( 'thumbnail' === $attributes['imageSizing'] || 'cropped' === $attributes['imageSizing'] ) {
 			return $this->get_store_thumbnail_aspect_ratio();
 		}
 
