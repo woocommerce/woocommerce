@@ -19,7 +19,7 @@ use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProx
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
@@ -31,7 +31,7 @@ use WC_Gateway_Paypal;
  *
  * @class PaymentsRestController
  */
-class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
+class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	/**
 	 * Endpoint.
 	 *
@@ -60,6 +60,13 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	 * @var int
 	 */
 	protected $store_admin_id;
+
+	/**
+	 * REST server used by the controller tests.
+	 *
+	 * @var \WP_REST_Server
+	 */
+	protected $server;
 
 	/**
 	 * The current time in seconds.
@@ -147,6 +154,10 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		$gateways                   = \WC_Payment_Gateways::instance();
+		$gateways->payment_gateways = array();
+		$gateways->init();
+
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
 
@@ -180,6 +191,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$container = wc_get_container();
 		$container->reset_all_resolved();
 
+		$this->clear_rest_server();
 		parent::tearDown();
 	}
 
@@ -1729,9 +1741,16 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->service           = $container->get( Payments::class );
 
 		// Register the REST controller routes again to make sure the dependency tree is using our mocks.
-		$sut = new PaymentsRestController();
-		$sut->init( $this->service );
-		$sut->register_routes( true );
+		$this->controller = new PaymentsRestController();
+		$this->controller->init( $this->service );
+		$this->server = $this->create_rest_server_with_routes(
+			array(
+				function () {
+					$this->controller->register_routes( true );
+				},
+			),
+			true
+		);
 	}
 
 	/**
