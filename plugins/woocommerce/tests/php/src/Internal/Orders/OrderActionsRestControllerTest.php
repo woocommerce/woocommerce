@@ -5,19 +5,27 @@ namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
 use Automattic\WooCommerce\Internal\Orders\OrderActionsRestController;
 use WC_Helper_Order;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
+use WP_REST_Server;
 
 /**
  * OrderActionsRestController API controller test.
  *
  * @class OrderActionsRestController
  */
-class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
+class OrderActionsRestControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * @var OrderActionsRestController
 	 */
 	protected $controller;
+
+	/**
+	 * REST server used to dispatch order action requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
 
 	/**
 	 * @var int[] Associative array of user IDs.
@@ -31,7 +39,10 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 
 		$this->controller = new OrderActionsRestController();
-		$this->controller->register_routes();
+		$this->server     = $this->create_rest_server_with_routes(
+			array( array( $this->controller, 'register_routes' ) ),
+			true
+		);
 
 		$this->user['shop_manager'] = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
 		$this->user['customer']     = $this->factory->user->create( array( 'role' => 'customer' ) );
@@ -43,6 +54,16 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-pos-refunded-order.php';
 		new \WC_Email_Customer_POS_Completed_Order();
 		new \WC_Email_Customer_POS_Refunded_Order();
+	}
+
+	/**
+	 * Tear down test.
+	 */
+	public function tearDown(): void {
+		$this->clear_rest_server();
+		unset( $this->server, $this->controller );
+
+		parent::tearDown();
 	}
 
 	/**
