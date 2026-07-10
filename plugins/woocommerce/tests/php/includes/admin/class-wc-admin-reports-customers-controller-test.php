@@ -10,7 +10,21 @@ use Automattic\WooCommerce\Enums\OrderStatus;
  *
  * @package WooCommerce\Admin\Tests\API
  */
-class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case {
+class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
+	/**
+	 * REST server used to dispatch customer report requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
+
+	/**
+	 * Customer reports controller registered on the test server.
+	 *
+	 * @var CustomersController
+	 */
+	private $controller;
+
 	/**
 	 * Endpoint.
 	 *
@@ -138,6 +152,12 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	public function setUp(): void {
 		parent::setUp();
 
+		$this->controller = new CustomersController();
+		$this->server     = $this->create_rest_server_with_routes(
+			array( array( $this->controller, 'register_routes' ) ),
+			true
+		);
+
 		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
@@ -145,6 +165,15 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		);
 
 		wp_set_current_user( $this->user );
+	}
+
+	/**
+	 * Clear the scoped REST server.
+	 */
+	public function tearDown(): void {
+		$this->clear_rest_server();
+		unset( $this->server, $this->controller );
+		parent::tearDown();
 	}
 
 	/**
