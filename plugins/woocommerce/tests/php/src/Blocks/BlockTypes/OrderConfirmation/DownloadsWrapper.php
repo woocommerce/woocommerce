@@ -9,6 +9,23 @@ use Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\DownloadsWrapper 
  */
 final class DownloadsWrapper extends \WP_UnitTestCase {
 	/**
+	 * Enable synchronous product attribute lookup updates for test fixtures.
+	 *
+	 * @return string
+	 */
+	public static function enable_direct_attribute_lookup_updates(): string {
+		return 'yes';
+	}
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function set_up() {
+		parent::set_up();
+		add_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', array( self::class, 'enable_direct_attribute_lookup_updates' ) );
+	}
+
+	/**
 	 * Perform products/options/cache cleanup.
 	 */
 	public function tear_down() {
@@ -23,6 +40,7 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 
 		delete_option( 'woocommerce_product_lookup_table_is_generating' );
 		wp_cache_delete( 'woocommerce_has_downloadable_products', 'woocommerce' );
+		remove_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', array( self::class, 'enable_direct_attribute_lookup_updates' ) );
 
 		parent::tear_down();
 	}
