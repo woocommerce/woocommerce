@@ -20,6 +20,7 @@ use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
  */
 class AdditionalFields extends \WP_Test_REST_TestCase {
 	use MockeryPHPUnitIntegration;
+	use StoreApiRestTestCaseTrait;
 
 	/**
 	 * Fields to register.
@@ -49,9 +50,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 
-		global $wp_rest_server;
-		$wp_rest_server = new \Spy_REST_Server();
-		do_action( 'rest_api_init', $wp_rest_server );
+		$this->initialize_store_api_server();
 
 		$this->register_fields();
 		$this->controller = Package::container()->get( CheckoutFields::class );

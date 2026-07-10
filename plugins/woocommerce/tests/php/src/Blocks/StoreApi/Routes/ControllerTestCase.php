@@ -15,6 +15,8 @@ use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
  * ControllerTestCase class.
  */
 abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
+	use StoreApiRestTestCaseTrait;
+
 	/**
 	 * ExtendSchema class instance.
 	 *
@@ -28,24 +30,7 @@ abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		/** @var \WP_REST_Server $wp_rest_server */
-		global $wp_rest_server;
-		$wp_rest_server = new \Spy_REST_Server();
-
-		$had_rest_route = array_key_exists( 'rest_route', $GLOBALS['wp']->query_vars );
-		$rest_route     = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
-		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/v1';
-
-		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			do_action( 'rest_api_init', $wp_rest_server );
-		} finally {
-			if ( $had_rest_route ) {
-				$GLOBALS['wp']->query_vars['rest_route'] = $rest_route;
-			} else {
-				unset( $GLOBALS['wp']->query_vars['rest_route'] );
-			}
-		}
+		$this->initialize_store_api_server();
 
 		wp_set_current_user( 0 );
 		update_option( 'woocommerce_weight_unit', 'g' );
