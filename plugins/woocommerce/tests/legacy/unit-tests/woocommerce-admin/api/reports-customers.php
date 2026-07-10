@@ -13,9 +13,6 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
  * Reports Customers REST API Test Class
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
- * @group run-in-separate-process
  * @package WooCommerce\Admin\Tests\API
  * @since 3.5.0
  */
