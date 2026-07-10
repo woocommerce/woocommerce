@@ -149,6 +149,8 @@ class Checkout extends \WP_Test_REST_TestCase {
 		unset( WC()->countries->locale );
 		WC()->cart->empty_cart();
 		WC()->session->destroy_session();
+		WC()->customer = null;
+		WC()->initialize_cart();
 
 		$GLOBALS['wp_rest_server'] = null;
 
