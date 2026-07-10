@@ -1497,9 +1497,7 @@ WHERE
 		if ( is_array( $raw_meta_data ) ) {
 			$valid_meta_data = array_filter(
 				$raw_meta_data,
-				static function ( $meta ) {
-					return is_object( $meta ) && property_exists( $meta, 'meta_key' );
-				}
+				static fn( $meta ) => is_object( $meta ) && property_exists( $meta, 'meta_key' )
 			);
 			$is_corrupt      = count( $valid_meta_data ) !== count( $raw_meta_data );
 			$raw_meta_data   = $valid_meta_data;
