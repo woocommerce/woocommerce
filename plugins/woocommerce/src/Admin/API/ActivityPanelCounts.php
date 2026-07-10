@@ -59,17 +59,27 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 	 * @return \WP_REST_Response
 	 */
 	public function get_counts( $request ) {
+$order_statuses = (array) $request->get_param( 'order_statuses' );
+
+		// When a merchant has cleared every actionable order status there is nothing
+		// "to fulfill". Short-circuit to 0 rather than querying: an empty status list
+		// would otherwise count every order, and the previous client-side
+		// getUnreadOrders() returned 0 in this case.
+		$orders_to_fulfill_count = empty( $order_statuses )
+			? 0
+			: $this->get_count_via(
+				'/wc-analytics/orders',
+				array(
+					'page'     => 1,
+					'per_page' => 1,
+					'status'   => $order_statuses,
+					'_fields'  => array( 'id' ),
+				)
+			);
+
 		return rest_ensure_response(
 			array(
-				'orders_to_fulfill_count'     => $this->get_count_via(
-					'/wc-analytics/orders',
-					array(
-						'page'     => 1,
-						'per_page' => 1,
-						'status'   => $request->get_param( 'order_statuses' ),
-						'_fields'  => array( 'id' ),
-					)
-				),
+				'orders_to_fulfill_count'     => $orders_to_fulfill_count,
 				'reviews_to_moderate_count'   => $this->get_count_via(
 					'/wc-analytics/products/reviews',
 					array(
@@ -81,7 +91,7 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 				),
 				'products_low_in_stock_count' => $this->get_count_via(
 					'/wc-analytics/products/count-low-in-stock',
-					array( 'status' => $request->get_param( 'stock_status' ) )
+array( 'status' => $request->get_param( 'product_status' ) )
 				),
 			)
 		);
@@ -143,8 +153,12 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['stock_status']   = array(
-			'description'       => __( 'Product status used for the low stock count.', 'woocommerce' ),
+$params['product_status'] = array(
+			'description'       => __( 'Product post status used for the low stock count.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'publish',
+			'sanitize_callback' => 'sanitize_key',
+		);
 			'type'              => 'string',
 			'default'           => 'publish',
 			'sanitize_callback' => 'sanitize_key',
@@ -161,8 +175,13 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 	 * @return array
 	 */
 	private function get_default_order_statuses() {
-		$actionable = get_option( 'woocommerce_actionable_order_statuses', array() );
-		return is_array( $actionable ) && ! empty( $actionable ) ? $actionable : array( 'processing', 'on-hold' );
+$actionable = get_option( 'woocommerce_actionable_order_statuses', false );
+
+		// Any array is respected as-is, including an explicitly empty one: the merchant
+		// intentionally cleared all actionable statuses, so there is nothing to fulfill,
+		// matching the previous client-side behaviour. A missing (never configured) or
+		// malformed option falls back to the built-in defaults.
+		return is_array( $actionable ) ? $actionable : array( 'processing', 'on-hold' );
 	}
 
 	/**
