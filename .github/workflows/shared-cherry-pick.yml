@@ -396,7 +396,7 @@ jobs:
               core.info(`Created PR #${newPr.number}: ${newPr.html_url}`);
 
               // Request reviewers separately so an outside collaborator doesn't fail PR creation.
-              for (const reviewer of [context.actor, originalPr.user.login]) {
+              for (const reviewer of [context.actor, originalPr.user?.login].filter(Boolean)) {
                 try {
                   await github.rest.pulls.requestReviewers({
                     owner: context.repo.owner,
