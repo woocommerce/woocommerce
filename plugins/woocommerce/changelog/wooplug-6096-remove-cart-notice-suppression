@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Remove the notice-suppression workaround from the iAPI `woocommerce` cart store and fix a batch-add optimistic-render defect it was masking: a batched add that requests the same product more than once now previews the correct combined quantity immediately, instead of under-showing it or briefly splitting into multiple lines. Whether the "quantity was changed" notice fires is now decided solely by comparing the post-optimistic cart to the server-committed cart, with no exemption step. No merchant-facing behavior change.
