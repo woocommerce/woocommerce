@@ -180,6 +180,48 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'validate_posted_data' skips the required check for fields hidden via the country locale.
+	 *
+	 * @testWith [true, false]
+	 *           [false, true]
+	 *
+	 * @param bool $hidden Whether the locale marks the postcode field as hidden.
+	 * @param bool $expect_required_error Whether a required-field error is expected.
+	 */
+	public function test_validate_posted_data_skips_required_check_for_hidden_fields( $hidden, $expect_required_error ) {
+		$locale_filter = function ( $locale ) use ( $hidden ) {
+			$locale['ES']['postcode']['hidden']   = $hidden;
+			$locale['ES']['postcode']['required'] = true;
+			return $locale;
+		};
+		add_filter( 'woocommerce_get_country_locale', $locale_filter );
+		WC()->countries->locale   = array();
+		$_POST['billing_country'] = 'ES';
+
+		$data = array(
+			'billing_country'           => 'ES',
+			'billing_postcode'          => '',
+			'ship_to_different_address' => false,
+		);
+
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_posted_data( $data, $errors );
+		} finally {
+			remove_filter( 'woocommerce_get_country_locale', $locale_filter );
+			WC()->countries->locale = array();
+			unset( $_POST['billing_country'] );
+		}
+
+		if ( $expect_required_error ) {
+			$this->assertStringContainsString( 'is a required field', $errors->get_error_message( 'billing_postcode_required' ) );
+		} else {
+			$this->assertEmpty( $errors->get_error_message( 'billing_postcode_required' ) );
+		}
+	}
+
+	/**
 	 * @testdox 'validate_checkout' adds a "We don't ship to country X" error but only if the country exists.
 	 *
 	 * @testWith [ "XX", false ]

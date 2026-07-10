@@ -195,7 +195,7 @@ class WC_Form_Handler {
 			$value = apply_filters( 'woocommerce_process_myaccount_field_' . $key, $value );
 
 			// Validation: Required fields.
-			if ( ! empty( $field['required'] ) && empty( $value ) ) {
+			if ( ! empty( $field['required'] ) && empty( $field['hidden'] ) && empty( $value ) ) {
 				/* translators: %s: Field name. */
 				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), $field['label'] ), 'error', array( 'id' => $key ) );
 			}
