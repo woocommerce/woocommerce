@@ -13,6 +13,8 @@ namespace Automattic\WooCommerce\Blocks\Domain;
  * Runs during bootstrap on `plugins_loaded`, before the main query is parsed, so it inspects only $_SERVER,
  * $_GET and constants set before wp-load — not query-dependent helpers such as is_favicon()/is_robots().
  *
+ * @internal
+ *
  * @since 11.1.0
  */
 class BlockRegistrationContext {
