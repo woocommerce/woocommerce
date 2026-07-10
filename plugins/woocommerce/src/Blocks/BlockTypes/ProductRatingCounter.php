@@ -22,22 +22,6 @@ class ProductRatingCounter extends AbstractBlock {
 	protected $api_version = '3';
 
 	/**
-	 * Get the block's attributes.
-	 *
-	 * @param array $attributes Block attributes. Default empty array.
-	 * @return array  Block attributes merged with defaults.
-	 */
-	private function parse_attributes( $attributes ) {
-		// These should match what's set in JS `registerBlockType`.
-		$defaults = array(
-			'productId' => 0,
-			'textAlign' => '',
-		);
-
-		return wp_parse_args( $attributes, $defaults );
-	}
-
-	/**
 	 * Overwrite parent method to prevent script registration.
 	 *
 	 * It is necessary to register and enqueues assets during the render
@@ -84,9 +68,8 @@ class ProductRatingCounter extends AbstractBlock {
 		if ( $product && $product->get_review_count() > 0 ) {
 			$product_reviews_count                    = $product->get_review_count();
 			$product_rating                           = $product->get_average_rating();
-			$parsed_attributes                        = $this->parse_attributes( $attributes );
-			$is_descendent_of_single_product_block    = get_the_ID() !== $post_id;
-			$is_descendent_of_single_product_template = is_singular( 'product' ) && get_the_ID() === $post_id;
+			$is_descendent_of_single_product_template = is_singular( 'product' ) && get_queried_object_id() === (int) $post_id;
+			$is_descendent_of_single_product_block    = ! $is_descendent_of_single_product_template;
 
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );

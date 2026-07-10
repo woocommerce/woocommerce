@@ -8,7 +8,6 @@ import { registerBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import edit from './edit';
-
 import deprecated from './deprecated';
 import metadata from './block.json';
 

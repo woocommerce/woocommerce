@@ -21,7 +21,6 @@ export interface BlockAttributes {
 	product?: ProductEntityResponse | undefined;
 	isAdmin?: boolean | undefined;
 	collection?: string | undefined;
-
 }
 
 export interface AddToCartProductDetails {

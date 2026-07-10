@@ -154,7 +154,6 @@ const Edit = ( {
 			<Block
 				{ ...{ ...attributes, ...context } }
 				showSaleBadge={ showSaleBadge }
-
 				isAdmin={ true }
 				product={ product }
 				isResolving={ isResolving }
