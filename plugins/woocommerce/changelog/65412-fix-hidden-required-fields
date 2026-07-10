@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Honor the hidden flag from country locale overrides when validating required address fields on the classic checkout and the My Account address form.
