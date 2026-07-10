@@ -35,6 +35,13 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	protected $user;
 
 	/**
+	 * Administrator fixture user ID.
+	 *
+	 * @var int
+	 */
+	protected static $fixture_user;
+
+	/**
 	 * Saves the `woocommerce_hide_out_of_stock_items` option value for restoration after tests that modify it.
 	 * @var mixed
 	 */
@@ -57,11 +64,14 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	protected static $products = array();
 
 	/**
-	 * Create products for tests.
+	 * Create class fixtures for tests.
 	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
 	 * @return void
 	 */
-	public static function wpSetUpBeforeClass() {
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$fixture_user = $factory->user->create( array( 'role' => 'administrator' ) );
+
 		self::$products[] = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -133,11 +143,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 			array( array( $this->endpoint, 'register_routes' ) ),
 			true
 		);
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user     = self::$fixture_user;
 		wp_set_current_user( $this->user );
 
 		$this->original_hid_out_of_stock_value = get_option( 'woocommerce_hide_out_of_stock_items' );
