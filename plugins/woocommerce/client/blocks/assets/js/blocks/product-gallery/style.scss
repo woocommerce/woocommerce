@@ -13,7 +13,6 @@ $dialog-padding: 20px;
 	position: relative;
 	flex-grow: 1;
 	overflow: hidden;
-	aspect-ratio: var(--wc-block-product-gallery-large-image-ratio-width, 1) / var(--wc-block-product-gallery-large-image-ratio-height, 1);
 
 	:where(.wc-block-product-gallery-large-image__container) {
 		display: flex;
