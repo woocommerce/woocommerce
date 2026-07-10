@@ -10,8 +10,9 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as Pro
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 use WC_Helper_Product;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
+use WP_REST_Server;
 
 
 
@@ -19,15 +20,25 @@ use WP_REST_Request;
  * class ProductsControllerTest.
  * Product Controller tests for V4 REST API.
  */
-class ProductsControllerTest extends WC_REST_Unit_Test_Case {
+class ProductsControllerTest extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 	use MetaDataAssertionTrait;
 
+	/**
+	 * REST server used to dispatch product requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
 
 	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
+		global $wp_rest_server;
+		$wp_rest_server = null;
+		unset( $this->server );
+
 		parent::tearDown();
 		$this->disable_cogs_feature();
 		$this->disable_rest_api_v4_feature();
@@ -140,12 +151,39 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Register only the product routes used by this test class.
+	 */
+	private function reset_rest_server(): void {
+		global $wp_filter, $wp_rest_server;
+
+		$wp_rest_server = new WP_REST_Server();
+		$this->server   = $wp_rest_server;
+
+		$rest_api_init_hook          = $wp_filter['rest_api_init'] ?? null;
+		$wp_filter['rest_api_init'] = new \WP_Hook();
+		add_action( 'rest_api_init', 'rest_api_default_filters' );
+		add_action( 'rest_api_init', array( $this->endpoint, 'register_routes' ) );
+
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			do_action( 'rest_api_init' );
+		} finally {
+			if ( null === $rest_api_init_hook ) {
+				unset( $wp_filter['rest_api_init'] );
+			} else {
+				$wp_filter['rest_api_init'] = $rest_api_init_hook;
+			}
+		}
+	}
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
 		$this->enable_rest_api_v4_feature();
 		parent::setUp();
 		$this->endpoint = new ProductsController();
+		$this->reset_rest_server();
 		$this->user     = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
