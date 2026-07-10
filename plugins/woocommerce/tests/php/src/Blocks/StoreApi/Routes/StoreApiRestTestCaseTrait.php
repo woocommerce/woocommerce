@@ -12,12 +12,12 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
  */
 trait StoreApiRestTestCaseTrait {
 	/**
-	 * Create class-owned products without leaving asynchronous lookup actions.
+	 * Run class fixture changes without leaving asynchronous lookup actions.
 	 *
-	 * @param array[] $product_properties Product properties for each fixture.
-	 * @return \WC_Product[]
+	 * @param callable $callback Fixture lifecycle callback.
+	 * @return mixed
 	 */
-	protected static function create_class_fixture_products( array $product_properties ): array {
+	protected static function with_direct_product_attribute_lookup_updates( callable $callback ) {
 		$enable_direct_updates = static function () {
 			return 'yes';
 		};
@@ -25,17 +25,31 @@ trait StoreApiRestTestCaseTrait {
 		add_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', $enable_direct_updates );
 
 		try {
-			$fixtures = new \Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData();
-
-			return array_map(
-				static function ( array $properties ) use ( $fixtures ) {
-					return $fixtures->get_simple_product( $properties );
-				},
-				$product_properties
-			);
+			return $callback();
 		} finally {
 			remove_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', $enable_direct_updates );
 		}
+	}
+
+	/**
+	 * Create class-owned products without leaving asynchronous lookup actions.
+	 *
+	 * @param array[] $product_properties Product properties for each fixture.
+	 * @return \WC_Product[]
+	 */
+	protected static function create_class_fixture_products( array $product_properties ): array {
+		return self::with_direct_product_attribute_lookup_updates(
+			static function () use ( $product_properties ) {
+				$fixtures = new \Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData();
+
+				return array_map(
+					static function ( array $properties ) use ( $fixtures ) {
+						return $fixtures->get_simple_product( $properties );
+					},
+					$product_properties
+				);
+			}
+		);
 	}
 
 	/**

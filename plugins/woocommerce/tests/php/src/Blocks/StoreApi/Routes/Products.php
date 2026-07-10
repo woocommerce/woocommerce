@@ -15,35 +15,84 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  * Products Controller Tests.
  */
 class Products extends ControllerTestCase {
+	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
 
 	/**
-	 * Setup test product data. Called before every test.
+	 * All product IDs owned by the class, including grouped children.
+	 *
+	 * @var int[]
+	 */
+	private static $owned_product_ids = array();
+
+	/**
+	 * Create immutable catalog rows shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$products = self::with_direct_product_attribute_lookup_updates(
+			static function () {
+				$fixtures = new FixtureData();
+
+				return array(
+					$fixtures->get_simple_product(
+						array(
+							'name'          => 'Test Product 1',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
+							'regular_price' => 10,
+							'weight'        => '2.5',
+							'length'        => '10',
+							'width'         => '5',
+							'height'        => '3',
+						)
+					),
+					$fixtures->get_simple_product(
+						array(
+							'name'          => 'Test Product 2',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
+							'regular_price' => 10,
+						)
+					),
+					$fixtures->get_grouped_product( array() ),
+				);
+			}
+		);
+
+		self::$product_ids       = array_map(
+			static fn( $product ) => $product->get_id(),
+			$products
+		);
+		self::$owned_product_ids = array_merge( self::$product_ids, $products[2]->get_children() );
+	}
+
+	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::with_direct_product_attribute_lookup_updates(
+			static function () {
+				foreach ( self::$owned_product_ids as $product_id ) {
+					$product = wc_get_product( $product_id );
+					if ( $product ) {
+						$product->delete( true );
+					}
+				}
+			}
+		);
+	}
+
+	/**
+	 * Reload shared test product data before every test.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
 
-		$fixtures = new FixtureData();
-
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => '2.5',
-					'length'        => '10',
-					'width'         => '5',
-					'height'        => '3',
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-				)
-			),
-			$fixtures->get_grouped_product( array() ),
+		$this->products = array_map(
+			'wc_get_product',
+			self::$product_ids
 		);
 	}
 
