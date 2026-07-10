@@ -58,8 +58,10 @@ const ShippingRecommendations = () => {
 	const recommendationsDismissState = useOptionDismiss(
 		SHIPPING_RECOMMENDATIONS_DISMISS_OPTION
 	);
-	const { isDismissed: isRecommendationsHidden } =
-		recommendationsDismissState;
+	const {
+		isDismissed: isRecommendationsHidden,
+		hasResolved: hasRecommendationsDismissResolved,
+	} = recommendationsDismissState;
 
 	const {
 		installedPlugins,
@@ -101,8 +103,12 @@ const ShippingRecommendations = () => {
 		: extensionsForCountry;
 
 	const hasVisibleExtensions = visibleExtensions.length > 0;
+	const shouldWaitForDismissOption =
+		! hasRecommendationsDismissResolved &&
+		hasVisibleExtensions &&
+		! isSellingDigitalProductsOnly;
 	const shouldShowRecommendationsFallback =
-		isRecommendationsHidden ||
+		( hasRecommendationsDismissResolved && isRecommendationsHidden ) ||
 		! hasVisibleExtensions ||
 		isSellingDigitalProductsOnly;
 	const shouldTrackRecommendationsImpression =
@@ -138,6 +144,10 @@ const ShippingRecommendations = () => {
 		normalizedCountry,
 		visiblePluginSlugs,
 	] );
+
+	if ( shouldWaitForDismissOption ) {
+		return <ShippingTour showShippingRecommendationsStep={ false } />;
+	}
 
 	if ( shouldShowRecommendationsFallback ) {
 		return (

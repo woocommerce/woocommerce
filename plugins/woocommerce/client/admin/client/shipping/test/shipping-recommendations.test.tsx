@@ -121,6 +121,29 @@ describe( 'ShippingRecommendations', () => {
 		);
 	} );
 
+	it( 'does not render the marketplace fallback before the dismissal option resolves', () => {
+		mockSelect( {
+			hasFinishedResolution: jest.fn().mockReturnValue( false ),
+		} );
+
+		render( <ShippingRecommendations /> );
+
+		expect(
+			screen.queryByText( 'the WooCommerce Marketplace' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByTestId( 'dismissable-list' )
+		).not.toBeInTheDocument();
+		expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
+			'data-show-recommendations-step',
+			'false'
+		);
+		expect( recordEvent ).not.toHaveBeenCalledWith(
+			'shipping_partner_impression',
+			expect.anything()
+		);
+	} );
+
 	it( 'renders the marketplace fallback when recommendations are dismissed', () => {
 		mockSelect( {
 			getOption: ( option: string ) =>
