@@ -38,10 +38,10 @@
 <!-- /wp:heading -->
 
 <!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical"}} -->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Ceramics', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Furniture', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Cardigans', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Sweaters', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Shirts', 'purple' ); ?>","url":"#"} /-->
 <!-- wp:navigation-link {"label":"<?php esc_html_e( 'Accessories', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Clothing', 'purple' ); ?>","url":"#"} /-->
 <!-- /wp:navigation --></div>
 <!-- /wp:column -->
 
@@ -80,7 +80,7 @@
 <!-- /wp:group -->
 
 <!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|30"},"typography":{"lineHeight":"1.71"}},"fontSize":"small","layout":{"type":"flex","flexWrap":"nowrap"}} -->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Shipping & returns', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Shipping & Returns', 'purple' ); ?>","url":"#"} /-->
 <!-- wp:navigation-link {"label":"<?php esc_html_e( 'Privacy Policy', 'purple' ); ?>","url":"#"} /-->
 <!-- wp:navigation-link {"label":"<?php esc_html_e( 'Terms & Conditions', 'purple' ); ?>","url":"#"} /-->
 <!-- /wp:navigation --></div>
