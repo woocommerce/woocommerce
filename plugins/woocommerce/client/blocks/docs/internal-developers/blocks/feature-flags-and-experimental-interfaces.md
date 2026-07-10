@@ -103,9 +103,6 @@ See the [available SlotFills](https://github.com/woocommerce/woocommerce/blob/tr
 | `experimental__woocommerce_blocks-cart-set-item-quantity` | `product`, `quantity` |
 | `experimental__woocommerce_blocks-product-view-link` | `product` |
 | `experimental__woocommerce_blocks-product-list-render` | `products`, `listName` |
-| `experimental__woocommerce_blocks-product-search` | `event`, `searchTerm` |
-
-The Product Search block emits its action directly in [`ProductSearch`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/BlockTypes/ProductSearch.php). Classic product grids also emit `product-list-render` from [`AbstractProductGrid`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/BlockTypes/AbstractProductGrid.php).
 
 Examples:
 
