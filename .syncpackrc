@@ -119,7 +119,6 @@
 			"dependencies": [
 				"react",
 				"react-dom",
-				"react-test-renderer",
 				"@types/react-dom",
 				"@types/react"
 			],
@@ -333,7 +332,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^1.57.0"
+			"pinVersion": "^1.61.1"
 		},
 		{
 			"dependencies": [
@@ -358,25 +357,12 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/interface",
 				"@wordpress/router",
 				"@wordpress/edit-site",
-				"@wordpress/private-apis",
-				"@wordpress/dataviews",
-				"@wordpress/icons"
+				"@wordpress/private-apis"
 			],
 			"packages": [
 				"@woocommerce/admin-library"
-			],
-			"isIgnored": true
-		},
-		{
-			"label": "Ignore all syncpack rules for experimental-products-app",
-			"dependencies": [
-				"**"
-			],
-			"packages": [
-				"@woocommerce/experimental-products-app"
 			],
 			"isIgnored": true
 		},
@@ -414,16 +400,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "11.0.1-next.v.20260206T143.0"
-		},
-		{
-			"dependencies": [
-				"@wordpress/e2e-test-utils-playwright"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "wp-6.8"
+			"pinVersion": "11.9.0"
 		},
 		{
 			"label": "Ensure @woocommerce/* dependencies are locked to the monorepo itself - except certain dependencies (migration pending).",
@@ -473,6 +450,43 @@
 				"**"
 			],
 			"isIgnored": true
+		},
+		{
+			"label": "experimental-products-app uses custom WordPress package versions",
+			"dependencies": [
+				"@wordpress/base-styles",
+				"@wordpress/dataviews",
+				"@wordpress/icons",
+				"@wordpress/router",
+				"@wordpress/theme"
+			],
+			"packages": [
+				"@woocommerce/experimental-products-app"
+			],
+			"isIgnored": true
+		},
+		{
+			"label": "@wordpress/* dependencies that WooCommerce bundles instead of externalizing to WordPress",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
+			"dependencies": [
+				"@wordpress/admin-ui",
+				"@wordpress/base-styles",
+				"@wordpress/dataviews",
+				"@wordpress/fields",
+				"@wordpress/icons",
+				"@wordpress/interface",
+				"@wordpress/style-runtime",
+				"@wordpress/ui",
+				"@wordpress/undo-manager",
+				"@wordpress/views"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "catalog:wp-bundled"
 		},
 		{
 			"label": "@wordpress/* runtime-dependencies (pnpm 10 requires valid semver in peerDependencies, so peer deps are excluded here)",
@@ -632,6 +646,15 @@
 				"**"
 			],
 			"pinVersion": "^3.2.6"
+		},
+		{
+			"dependencies": [
+				"@automattic/site-admin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^0.0.1"
 		},
 		{
 			"label": "Only manage versions for these dependencies",

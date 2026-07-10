@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Decouple the blocks reformat-files script from .eslintignore by using a dedicated .prettierignore.

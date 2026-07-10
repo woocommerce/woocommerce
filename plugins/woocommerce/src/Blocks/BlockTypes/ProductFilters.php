@@ -111,17 +111,26 @@ class ProductFilters extends AbstractBlock {
 			'forcePageReload' => isset( $block->context['forcePageReload'] ) ? (bool) $block->context['forcePageReload'] : null,
 		);
 
+		$show_filter_drawer = ! isset( $attributes['showFilterDrawer'] ) || false !== $attributes['showFilterDrawer'];
+		$wrapper_classes    = array( 'wc-block-product-filters' );
+		if ( ! $show_filter_drawer ) {
+			$wrapper_classes[] = 'is-filter-drawer-disabled';
+		}
+
 		$wrapper_attributes = array(
-			'class'                            => 'wc-block-product-filters',
-			'data-wp-interactive'              => $this->get_full_block_name(),
-			'data-wp-init--colors'             => 'callbacks.initColors',
-			'data-wp-watch--scrolling'         => 'callbacks.scrollLimit',
-			'data-wp-watch--active-filters'    => 'callbacks.syncActiveFiltersWithServer',
-			'data-wp-on--keyup'                => 'actions.closeOverlayOnEscape',
-			'data-wp-context'                  => (string) wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-wp-class--is-overlay-opened' => 'context.isOverlayOpened',
-			'style'                            => $this->get_css_variables( $attributes ),
+			'class'                         => implode( ' ', $wrapper_classes ),
+			'data-wp-interactive'           => $this->get_full_block_name(),
+			'data-wp-init--colors'          => 'callbacks.initColors',
+			'data-wp-watch--active-filters' => 'callbacks.syncActiveFiltersWithServer',
+			'data-wp-context'               => (string) wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'style'                         => $this->get_css_variables( $attributes ),
 		);
+
+		if ( $show_filter_drawer ) {
+			$wrapper_attributes['data-wp-watch--scrolling']         = 'callbacks.scrollLimit';
+			$wrapper_attributes['data-wp-on--keyup']                = 'actions.closeOverlayOnEscape';
+			$wrapper_attributes['data-wp-class--is-overlay-opened'] = 'context.isOverlayOpened';
+		}
 
 		// TODO: Remove this conditional once the fix is released in WP. https://github.com/woocommerce/gutenberg/pull/4.
 		if ( ! isset( $block->context['productCollectionLocation'] ) ) {
@@ -131,46 +140,55 @@ class ProductFilters extends AbstractBlock {
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<button
-				class="wc-block-product-filters__open-overlay"
-				data-wp-on--click="actions.openOverlay"
-			>
-				<?php echo $this->get_svg_icon( 'filter-icon-2' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				<span><?php echo esc_html__( 'Filter products', 'woocommerce' ); ?></span>
-			</button>
-			<div class="wc-block-product-filters__overlay">
-				<div class="wc-block-product-filters__overlay-wrapper">
-					<div
-						class="wc-block-product-filters__overlay-dialog"
-						role="dialog"
-						aria-label="<?php echo esc_html__( 'Product Filters', 'woocommerce' ); ?>"
-					>
-						<header class="wc-block-product-filters__overlay-header">
-							<button
-								class="wc-block-product-filters__close-overlay"
-								data-wp-on--click="actions.closeOverlay"
-							>
-								<span><?php echo esc_html__( 'Close', 'woocommerce' ); ?></span>
-								<?php echo $this->get_svg_icon( 'close' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							</button>
-						</header>
-						<div class="wc-block-product-filters__overlay-content">
-							<?php echo $inner_blocks; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-						</div>
-						<footer
-							class="wc-block-product-filters__overlay-footer"
+			<?php if ( $show_filter_drawer ) : ?>
+				<button
+					type="button"
+					class="wc-block-product-filters__open-overlay"
+					data-wp-on--click="actions.openOverlay"
+				>
+					<?php echo $this->get_svg_icon( 'filter-icon-2' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<span><?php echo esc_html__( 'Filter products', 'woocommerce' ); ?></span>
+				</button>
+				<div class="wc-block-product-filters__overlay">
+					<div class="wc-block-product-filters__overlay-wrapper">
+						<div
+							class="wc-block-product-filters__overlay-dialog"
+							role="dialog"
+							aria-label="<?php echo esc_html__( 'Product Filters', 'woocommerce' ); ?>"
 						>
-							<button
-								class="wc-block-product-filters__apply wp-element-button"
-								data-wp-interactive="<?php echo esc_attr( $this->get_full_block_name() ); ?>"
-								data-wp-on--click="actions.closeOverlay"
+							<header class="wc-block-product-filters__overlay-header">
+								<button
+									type="button"
+									class="wc-block-product-filters__close-overlay"
+									data-wp-on--click="actions.closeOverlay"
+								>
+									<span><?php echo esc_html__( 'Close', 'woocommerce' ); ?></span>
+									<?php echo $this->get_svg_icon( 'close' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								</button>
+							</header>
+							<div class="wc-block-product-filters__overlay-content">
+								<?php echo $inner_blocks; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							</div>
+							<footer
+								class="wc-block-product-filters__overlay-footer"
 							>
-								<span><?php echo esc_html__( 'Apply', 'woocommerce' ); ?></span>
-							</button>
-						</footer>
+								<button
+									type="button"
+									class="wc-block-product-filters__apply wp-element-button"
+									data-wp-interactive="<?php echo esc_attr( $this->get_full_block_name() ); ?>"
+									data-wp-on--click="actions.closeOverlay"
+								>
+									<span><?php echo esc_html__( 'Apply', 'woocommerce' ); ?></span>
+								</button>
+							</footer>
+						</div>
 					</div>
 				</div>
-			</div>
+			<?php else : ?>
+				<div class="wc-block-product-filters__content">
+					<?php echo $inner_blocks; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</div>
+			<?php endif; ?>
 		</div>
 		<?php
 		return ob_get_clean();
@@ -234,7 +252,14 @@ class ProductFilters extends AbstractBlock {
 	private function generate_navigation_id( $block ) {
 		return sprintf(
 			'wc-product-filters-%s',
-			md5( wp_json_encode( $block->parsed_block['innerBlocks'] ) )
+			md5(
+				wp_json_encode(
+					array(
+						'attrs'       => $block->parsed_block['attrs'] ?? array(),
+						'innerBlocks' => $block->parsed_block['innerBlocks'] ?? array(),
+					)
+				)
+			)
 		);
 	}
 

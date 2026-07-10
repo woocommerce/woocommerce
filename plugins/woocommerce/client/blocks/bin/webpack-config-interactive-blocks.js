@@ -7,26 +7,17 @@ const [
 	,
 	moduleConfig,
 ] = require( '@wordpress/scripts/config/webpack.config' );
-const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
-
-/**
- * Internal dependencies
- */
-const { getResolve } = require( './webpack-helpers' );
-
-// Blocks' webpack writes directly to the WooCommerce plugin's
-// `assets/client/blocks/` so PHP can enqueue files from their final location
-// without an intermediate rsync step.
-const BUILD_DIR = path.resolve( __dirname, '../../../assets/client/blocks' );
-
-/**
- * Internal dependencies
- */
 const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
-const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const {
 	WebpackRTLPlugin,
 } = require( '@woocommerce/internal-build/style-build' );
+
+/**
+ * Internal dependencies
+ */
+const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
+const { getResolve } = require( './webpack-helpers' );
+const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const {
 	scriptModuleEntries,
@@ -34,15 +25,16 @@ const {
 	editorStyleEntries,
 } = require( './webpack-interactivity-entries' );
 
+// Blocks' webpack writes directly to the WooCommerce plugin's
+// `assets/client/blocks/` so PHP can enqueue files from their final location
+// without an intermediate rsync step.
+const BUILD_DIR = path.resolve( __dirname, '../../../assets/client/blocks' );
+
 const entries = {
 	// Blocks
 	...scriptModuleEntries,
 	...styleEntries,
 	...editorStyleEntries,
-
-	// Experimental mini cart frontend modules, only enqueued when experimental-iapi-mini-cart feature flag is enabled.
-	'woocommerce/mini-cart': './assets/js/blocks/mini-cart/iapi-frontend.ts',
-
 	// Product elements frontend module. Share by several blocks.
 	'woocommerce/product-elements':
 		'./assets/js/atomic/blocks/product-elements/frontend.ts',
@@ -50,7 +42,6 @@ const entries = {
 	// Product Quantity block and the Grouped Product Selector block.
 	'woocommerce/add-to-cart-with-options-quantity-selector':
 		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
-
 	// Other
 	'@woocommerce/stores/woocommerce/cart':
 		'./assets/js/base/stores/woocommerce/cart.ts',

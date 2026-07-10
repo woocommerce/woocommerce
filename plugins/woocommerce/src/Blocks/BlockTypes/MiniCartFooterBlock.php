@@ -1,7 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
+
 
 /**
  * MiniCartFooterBlock class.
@@ -30,20 +31,20 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 	}
 
 	/**
-	 * Render experimental iAPI powered Mini-Cart Footer block.
+	 * Render the markup for the Mini-Cart Contents block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
-	protected function render_experimental_iapi_mini_cart_footer( $attributes, $content, $block ) {
+	protected function render( $attributes, $content, $block ) {
 		ob_start();
 
 		$cart                             = $this->get_cart_instance();
 		$subtotal_label                   = __( 'Subtotal', 'woocommerce' );
 		$other_costs_label                = $this->get_totals_item_description();
-		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
+		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === TaxDisplayMode::INCLUSIVE;
 		$subtotal                         = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
 		$formatted_subtotal               = '';
 		$html                             = new \WP_HTML_Tag_Processor( wc_price( $subtotal ) );
@@ -94,7 +95,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 			</div>
 		</div>
 		<?php
-		return ob_get_clean();
+		return (string) ob_get_clean();
 	}
 
 	/**
@@ -171,21 +172,5 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 
 		// None enabled.
 		return '';
-	}
-
-	/**
-	 * Render the markup for the Mini-Cart Contents block.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render( $attributes, $content, $block ) {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_iapi_mini_cart_footer( $attributes, $content, $block );
-		}
-
-		return $content;
 	}
 }

@@ -7,7 +7,6 @@ import { SlotFillProvider, ProgressBar } from '@wordpress/components';
 import { store as coreStore, Post } from '@wordpress/core-data';
 import { CommandMenu, store as commandsStore } from '@wordpress/commands';
 import { PluginArea } from '@wordpress/plugins';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	AutosaveMonitor as _AutosaveMonitor,
 	LocalAutosaveMonitor,
