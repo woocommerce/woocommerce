@@ -329,12 +329,11 @@ class WC_Form_Handler {
 		$save_pass            = true;
 
 		// Current user data.
-		/** @var WP_User $current_user */
 		$current_user         = get_user_by( 'id', $user_id );
 		$current_first_name   = $current_user->first_name;
 		$current_last_name    = $current_user->last_name;
 		$current_email        = $current_user->user_email;
-		$current_display_name = $current_user->display_name;
+		$current_display_name = $current_user ? $current_user->display_name : '';
 
 		// New user data.
 		$user               = new stdClass();
