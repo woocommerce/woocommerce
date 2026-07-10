@@ -11,16 +11,31 @@ namespace Automattic\WooCommerce\Tests\Admin\API;
 
 use Automattic\WooCommerce\Admin\API\MobileAppQRLogin;
 use Automattic\WooCommerce\Admin\API\RateLimits\QRLoginRateLimits;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_Application_Passwords;
 use WP_REST_Request;
+use WP_REST_Server;
 
 /**
  * MobileAppQRLogin API controller test.
  *
  * @class MobileAppQRLoginTest.
  */
-class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
+class MobileAppQRLoginTest extends WC_Unit_Test_Case {
+
+	/**
+	 * REST server used to dispatch QR login requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
+
+	/**
+	 * QR login controller registered on the test server.
+	 *
+	 * @var MobileAppQRLogin
+	 */
+	private $controller;
 
 	/**
 	 * Token generation endpoint.
@@ -146,6 +161,12 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		$this->controller = new MobileAppQRLogin();
+		$this->server     = $this->create_rest_server_with_routes(
+			array( array( $this->controller, 'register_routes' ) ),
+			true
+		);
+
 		$this->admin_id        = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		$this->shop_manager_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
 		$this->subscriber_id   = $this->factory->user->create( array( 'role' => 'subscriber' ) );
@@ -217,6 +238,8 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			remove_filter( 'pre_option_siteurl', $filter, $priority );
 		}
 		$this->site_url_filters = array();
+		$this->clear_rest_server();
+		unset( $this->server, $this->controller );
 
 		parent::tearDown();
 	}
