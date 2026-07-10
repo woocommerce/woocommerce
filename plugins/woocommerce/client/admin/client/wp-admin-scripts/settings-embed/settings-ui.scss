@@ -83,7 +83,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 	}
 
-	.wc-settings-ui-shell.admin-ui-page {
+	.wc-settings-ui-shell {
 		background: transparent;
 		box-sizing: border-box;
 		color: var(--wpds-color-foreground-content-neutral);
@@ -93,23 +93,18 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		margin: 0 -48px;
 	}
 
-	.wc-settings-ui-shell .admin-ui-page__header {
-		background: var(--wpds-color-background-surface-neutral-strong);
+	// The Page header is its first child; admin-ui 2.4.1 hashes its classnames,
+	// so this targets it structurally until the shell owns its header markup.
+	.wc-settings-ui-shell > :first-child {
 		padding-left: 48px;
 		padding-right: 48px;
 		position: static;
 	}
 
 	.wc-settings-ui-shell {
-		&:has(.wc-settings-ui-shell__navigation) .admin-ui-page__header {
+		&:has(.wc-settings-ui-shell__navigation) > :first-child {
 			border-bottom: 0;
 		}
-	}
-
-	.wc-settings-ui-shell .admin-ui-page__header-title {
-		font-size: var(--wpds-typography-font-size-xl);
-		font-weight: var(--wpds-typography-font-weight-medium);
-		line-height: var(--wpds-typography-line-height-md);
 	}
 
 	.wc-settings-ui-shell__breadcrumbs {
@@ -331,15 +326,12 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			padding-right: 24px;
 		}
 
-		// Match the base `.wc-settings-ui-shell.admin-ui-page` specificity so
-		// this breakpoint's full-bleed margin actually overrides the -48px
-		// base value instead of losing the cascade.
-		.wc-settings-ui-shell.admin-ui-page {
+		.wc-settings-ui-shell {
 			margin-left: -24px;
 			margin-right: -24px;
 		}
 
-		.wc-settings-ui-shell .admin-ui-page__header {
+		.wc-settings-ui-shell > :first-child {
 			padding-left: 24px;
 			padding-right: 24px;
 		}
