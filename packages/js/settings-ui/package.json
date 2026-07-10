@@ -40,7 +40,8 @@
 		"@wordpress/a11y": "catalog:wp-min",
 		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/element": "catalog:wp-min",
-		"@wordpress/i18n": "catalog:wp-min"
+		"@wordpress/i18n": "catalog:wp-min",
+		"@wordpress/ui": "catalog:wp-bundled"
 	},
 	"devDependencies": {
 		"@babel/core": "7.25.7",
