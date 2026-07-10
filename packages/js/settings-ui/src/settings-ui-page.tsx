@@ -118,10 +118,12 @@ const BADGE_INTENTS: Record<
 
 // TS unions erase at runtime, so guard against unexpected strings from
 // PHP-supplied schemas.
-const getBadgeIntent = ( intent?: string ): SettingsUIShellBadgeIntent =>
+const getBadgeIntent = (
+	intent?: string
+): ComponentProps< typeof Badge >[ 'intent' ] =>
 	intent && intent in BADGE_INTENTS
-		? ( intent as SettingsUIShellBadgeIntent )
-		: 'default';
+		? BADGE_INTENTS[ intent as SettingsUIShellBadgeIntent ]
+		: BADGE_INTENTS.default;
 
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 	schema.save || { adapter: 'form_post' };
@@ -455,18 +457,14 @@ const ShellHeader = ( {
 		) : undefined;
 
 	const badges = shell.badges?.length
-		? shell.badges.map( ( badge, index ) => {
-				const intent = getBadgeIntent( badge.intent );
-				return (
-					<Badge
-						className={ `wc-settings-ui-shell__badge wc-settings-ui-shell__badge--${ intent }` }
-						intent={ BADGE_INTENTS[ intent ] }
-						key={ `${ badge.label }-${ index }` }
-					>
-						{ badge.label }
-					</Badge>
-				);
-		  } )
+		? shell.badges.map( ( badge, index ) => (
+				<Badge
+					intent={ getBadgeIntent( badge.intent ) }
+					key={ `${ badge.label }-${ index }` }
+				>
+					{ badge.label }
+				</Badge>
+		  ) )
 		: undefined;
 
 	const saveButtonLabel = __( 'Save', 'woocommerce' );
