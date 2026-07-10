@@ -318,6 +318,25 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Status widget out-of-stock count excludes managed products on backorder.
+	 */
+	public function test_status_widget_out_of_stock_count_excludes_managed_products_on_backorder(): void {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 0,
+				'backorders'     => 'yes',
+			)
+		);
+
+		$html = $this->capture_status_widget_stock_rows();
+
+		$this->assertSame( ProductStockStatus::ON_BACKORDER, $product->get_stock_status( 'edit' ) );
+		$this->assertStringContainsString( 'Out of stock <strong>0 products</strong>', $html );
+	}
+
+	/**
 	 * @testdox Status widget out-of-stock count excludes unmanaged in-stock products.
 	 */
 	public function test_status_widget_out_of_stock_count_excludes_unmanaged_in_stock_products(): void {
