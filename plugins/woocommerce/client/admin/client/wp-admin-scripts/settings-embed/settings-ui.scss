@@ -2,13 +2,13 @@
 @import "@wordpress/dataviews/build-style/style.css";
 
 body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
-	background-color: var(--wpds-color-background-surface-neutral-strong);
+	background-color: var(--wpds-color-background-surface-neutral);
 
 	#mainform,
 	#wpcontent,
 	#wpbody-content,
 	.wrap.woocommerce {
-		background-color: var(--wpds-color-background-surface-neutral-strong);
+		background-color: var(--wpds-color-background-surface-neutral);
 	}
 
 	#mainform {
@@ -20,6 +20,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	#mainform .subsubsub:not(.list-table-filters) {
+		background: var(--wpds-color-background-surface-neutral-strong);
 		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
 		box-sizing: border-box;
 		color: transparent;
@@ -84,6 +85,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui-shell.admin-ui-page {
+		background: transparent;
 		box-sizing: border-box;
 		color: var(--wpds-color-foreground-content-neutral);
 		font-size: var(--wpds-typography-font-size-md);
@@ -93,6 +95,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui-shell .admin-ui-page__header {
+		background: var(--wpds-color-background-surface-neutral-strong);
 		padding-left: 48px;
 		padding-right: 48px;
 		position: static;
