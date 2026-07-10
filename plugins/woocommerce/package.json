@@ -2,6 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
+	"description": "Temporary: touched to trigger the full CI test matrix and exercise the wp-env start retry. Revert before merge.",
 	"version": "11.1.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {

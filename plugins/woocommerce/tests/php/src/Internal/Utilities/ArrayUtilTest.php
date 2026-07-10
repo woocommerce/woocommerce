@@ -8,8 +8,6 @@ use WC_Unit_Test_Case;
 
 /**
  * A collection of tests for the Internal\Utilities\ArrayUtil class.
- *
- * Note: touched to trigger a CI run exercising the wp-env start retry; revert before merge.
  */
 class ArrayUtilTest extends WC_Unit_Test_Case {
 
