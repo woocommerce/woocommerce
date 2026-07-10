@@ -31,8 +31,21 @@ abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 		/** @var \WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
 		$wp_rest_server = new \Spy_REST_Server();
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-		do_action( 'rest_api_init', $wp_rest_server );
+
+		$had_rest_route = array_key_exists( 'rest_route', $GLOBALS['wp']->query_vars );
+		$rest_route     = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
+		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/v1';
+
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			do_action( 'rest_api_init', $wp_rest_server );
+		} finally {
+			if ( $had_rest_route ) {
+				$GLOBALS['wp']->query_vars['rest_route'] = $rest_route;
+			} else {
+				unset( $GLOBALS['wp']->query_vars['rest_route'] );
+			}
+		}
 
 		wp_set_current_user( 0 );
 		update_option( 'woocommerce_weight_unit', 'g' );
