@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Preserve rewrite state during WordPress installing-mode requests.
