@@ -1,4 +1,4 @@
-@import "@wordpress/admin-ui/build-style/style.css";
+@import "@wordpress/dataviews/build-style/style.css";
 
 body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	background-color: #fff;
@@ -97,8 +97,10 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		position: static;
 	}
 
-	.wc-settings-ui-shell:has(.wc-settings-ui-shell__navigation) .admin-ui-page__header {
-		border-bottom: 0;
+	.wc-settings-ui-shell {
+		&:has(.wc-settings-ui-shell__navigation) .admin-ui-page__header {
+			border-bottom: 0;
+		}
 	}
 
 	.wc-settings-ui-shell .admin-ui-page__header-title {
@@ -131,6 +133,42 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 	}
 
+	.wc-settings-ui-shell__badge {
+		align-items: center;
+		border-radius: 2px;
+		display: inline-flex;
+		font-size: 12px;
+		font-weight: 400;
+		line-height: 16px;
+		min-height: 24px;
+		padding: 0 8px;
+
+		// Default / neutral — also applies to `&--default`, which inherits the base styling.
+		background: var(--Alias-bg-bg-surface-secondary, #f5f5f5);
+		color: var(--Alias-text-text, #070707);
+
+		&--success {
+			background: var(--Alias-bg-bg-surface-success, #daffe0);
+			color: var(--Alias-text-text-success, #144722);
+		}
+
+		&--info {
+			background: var(--Alias-bg-bg-surface-secondary, #f5f5f5);
+			color: var(--Alias-text-text, #070707);
+		}
+
+		&--warning {
+			background: var(--Alias-bg-bg-surface-warning, #fff2d7);
+			color: var(--Alias-text-text-warning, #4d3716);
+		}
+
+		&--error {
+			// No `--Alias-*-error` token is defined in the admin design-token set,
+			// so use a direct color until one ships.
+			background: #fce4e4;
+			color: #5a0000;
+		}
+	}
 
 	.wc-settings-ui-shell__navigation {
 		border-bottom: 1px solid #f0f0f0;
@@ -140,6 +178,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	.wc-settings-ui-shell__tabs {
 		background: #fff;
+		box-sizing: border-box;
 		display: flex;
 		margin: 0 !important;
 		overflow-x: auto;
@@ -193,72 +232,59 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui {
-		--wc-settings-ui-panel-width: 681px;
-		--wc-settings-ui-sidebar-width: 296px;
-
 		box-sizing: border-box;
-		color: #1e1e1e;
-		font-size: 13px;
-		line-height: 20px;
-		margin: 48px 48px;
-		max-width: calc(var(--wc-settings-ui-sidebar-width) + var(--wc-settings-ui-panel-width) + 24px);
+		margin: 32px auto 48px;
+		max-width: var(--wpds-dimension-surface-width-xl, 720px);
 	}
 
-	.wc-settings-ui__group {
+	.wc-settings-ui__section {
+		margin: 0 0 24px;
+	}
+
+	// Surface styling (background, border, radius, padding) comes from the
+	// @wordpress/ui Card components.
+	.wc-settings-ui__section-card {
+		box-sizing: border-box;
+		width: 100%;
+	}
+
+	.wc-settings-ui__section-header {
 		align-items: flex-start;
 		display: flex;
 		gap: 24px;
-		margin: 0 0 48px;
+		justify-content: space-between;
 	}
 
-	.wc-settings-ui__group-header {
-		flex: 0 0 var(--wc-settings-ui-sidebar-width);
-		max-width: var(--wc-settings-ui-sidebar-width);
+	.wc-settings-ui__section-heading {
 		min-width: 0;
+	}
 
-		h2 {
-			color: #070707;
-			font-size: 16px;
-			font-weight: 600;
-			line-height: 24px;
-			margin: 0;
+	.wc-settings-ui__section-description {
+		color: #757575;
+		font-size: 13px;
+		line-height: 20px;
+		margin: 8px 0 0;
+
+		p {
+			margin: 0 0 8px;
 		}
 
-		.wc-settings-ui__group-description {
-			color: #505050;
-			font-size: 14px;
-			line-height: 20px;
-			margin: 4px 0 0;
-			max-width: 240px;
-
-			p {
-				margin: 0 0 8px;
-			}
-
-			p:last-child {
-				margin-bottom: 0;
-			}
-		}
-
-		.wc-settings-ui__group-actions {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 8px;
-			margin-top: 16px;
+		p:last-child {
+			margin-bottom: 0;
 		}
 	}
 
-	.wc-settings-ui__group-panel {
-		background: #fff;
-		border: 1px solid #e0e0e0;
-		border-radius: 4px;
+	.wc-settings-ui__section-actions {
 		display: flex;
-		flex: 0 1 var(--wc-settings-ui-panel-width);
+		flex: 0 0 auto;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.wc-settings-ui__section-fields {
+		display: flex;
 		flex-direction: column;
 		gap: 16px;
-		max-width: var(--wc-settings-ui-panel-width);
-		padding: 24px;
-		width: 100%;
 	}
 
 	.wc-settings-ui__field {
@@ -266,22 +292,13 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		width: 100%;
 	}
 
-	.wc-settings-ui__actions {
-		margin-left: calc(var(--wc-settings-ui-sidebar-width) + 24px);
-	}
-
 	.wc-settings-ui__info {
-		background: #f0f0f1;
+		background: #f6f7f7;
 		border-radius: 4px;
-		color: #505050;
-		font-size: 13px;
-		line-height: 20px;
 		padding: 16px;
 
 		strong {
-			color: #1e1e1e;
 			display: block;
-			font-weight: 500;
 			margin-bottom: 4px;
 		}
 
@@ -300,89 +317,92 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			margin-bottom: 0;
 		}
 
-		.components-base-control__label {
-			color: #1e1e1e;
-			display: block;
-			font-size: 11px;
-			font-weight: 500;
-			line-height: 16px;
-			margin: 0 0 8px;
-			text-transform: uppercase;
-		}
-
 		.components-base-control__help {
-			color: #505050;
-			font-size: 12px;
-			line-height: 16px;
-			margin: 8px 0 0;
-		}
-	}
-
-	.wc-settings-ui__control input[type="text"],
-	.wc-settings-ui__control input[type="password"],
-	.wc-settings-ui__control input[type="datetime-local"],
-	.wc-settings-ui__control input[type="date"],
-	.wc-settings-ui__control input[type="time"],
-	.wc-settings-ui__control input[type="email"],
-	.wc-settings-ui__control input[type="url"],
-	.wc-settings-ui__control input[type="tel"],
-	.wc-settings-ui__control input[type="number"],
-	.wc-settings-ui__control select,
-	.wc-settings-ui__control textarea {
-		border-color: #949494;
-		border-radius: 2px;
-		color: #1e1e1e;
-		font-size: 13px;
-		line-height: 20px;
-		margin: 0;
-		max-width: none;
-		min-height: 40px;
-		width: 100%;
-	}
-
-	.wc-settings-ui__control input[type="text"],
-	.wc-settings-ui__control input[type="password"],
-	.wc-settings-ui__control input[type="datetime-local"],
-	.wc-settings-ui__control input[type="date"],
-	.wc-settings-ui__control input[type="time"],
-	.wc-settings-ui__control input[type="email"],
-	.wc-settings-ui__control input[type="url"],
-	.wc-settings-ui__control input[type="tel"],
-	.wc-settings-ui__control input[type="number"],
-	.wc-settings-ui__control select {
-		padding: 8px 12px;
-	}
-
-	.wc-settings-ui__control textarea {
-		padding: 10px 12px;
-	}
-
-	.wc-settings-ui__field--checkbox {
-		.components-base-control__field {
-			align-items: flex-start;
-			display: flex;
-			gap: 12px;
-		}
-
-		.components-h-stack {
-			align-items: flex-start;
-			gap: 12px;
-		}
-
-		.components-checkbox-control__input-container {
-			flex: 0 0 auto;
-			margin: 0;
-		}
-
-		.components-checkbox-control__label {
-			color: #1e1e1e;
+			color: #757575;
 			font-size: 13px;
 			line-height: 20px;
+			margin-top: 8px;
+		}
+	}
+
+	.wc-settings-ui__number-control {
+		position: relative;
+	}
+
+	// Owned input skin: deliberately not borrowing internal
+	// @wordpress/components classnames, which carry no compatibility
+	// guarantee. Values mirror the 40px TextControl input.
+	.wc-settings-ui__number-control-input {
+		appearance: textfield;
+		border: 1px solid #949494;
+		border-radius: 2px;
+		box-shadow: 0 0 0 transparent;
+		box-sizing: border-box;
+		font-family: inherit;
+		// Fonts smaller than 16px cause mobile Safari to zoom on focus.
+		font-size: 16px;
+		line-height: normal;
+		margin: 0;
+		min-height: 40px;
+		padding: 6px 12px;
+		// Keep typed values clear of the spin buttons.
+		padding-right: 64px;
+		transition: box-shadow 0.1s linear;
+		width: 100%;
+
+		@media (min-width: 600px) {
+			font-size: 13px;
 		}
 
-		.components-base-control__help {
-			margin-left: 32px;
+		&:focus {
+			border-color: var(--wp-admin-theme-color);
+			box-shadow: 0 0 0 0.5px var(--wp-admin-theme-color);
+			outline: 2px solid transparent;
 		}
+
+		&::-webkit-inner-spin-button,
+		&::-webkit-outer-spin-button {
+			appearance: none;
+			margin: 0;
+		}
+	}
+
+	.wc-settings-ui__number-control-spin-buttons {
+		display: flex;
+		position: absolute;
+		right: 6px;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	.wc-settings-ui__unsaved-changes-modal {
+		.components-modal__header {
+			min-height: 72px;
+			padding: 24px 32px 8px;
+		}
+
+		.components-modal__header-heading {
+			font-size: 20px;
+			font-weight: 500;
+			line-height: 24px;
+		}
+
+		.components-modal__content {
+			padding: 4px 32px 32px;
+		}
+
+		p {
+			font-size: 13px;
+			line-height: 20px;
+			margin: 0;
+		}
+	}
+
+	.wc-settings-ui__unsaved-changes-actions {
+		display: flex;
+		gap: 8px;
+		justify-content: flex-end;
+		margin-top: 24px;
 	}
 
 	@media (max-width: 960px) {
@@ -397,7 +417,10 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			padding-right: 24px;
 		}
 
-		.wc-settings-ui-shell {
+		// Match the base `.wc-settings-ui-shell.admin-ui-page` specificity so
+		// this breakpoint's full-bleed margin actually overrides the -48px
+		// base value instead of losing the cascade.
+		.wc-settings-ui-shell.admin-ui-page {
 			margin-left: -24px;
 			margin-right: -24px;
 		}
@@ -405,12 +428,6 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		.wc-settings-ui-shell .admin-ui-page__header {
 			padding-left: 24px;
 			padding-right: 24px;
-		}
-
-		.wc-settings-ui-shell__navigation {
-			margin-left: -24px;
-			margin-right: -24px;
-			width: calc(100% + 48px);
 		}
 
 		.wc-settings-ui-shell__tabs {
@@ -424,25 +441,16 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 
 		.wc-settings-ui {
-			margin: 32px 24px;
+			margin: 48px 24px 32px;
 			max-width: none;
 		}
 
-		.wc-settings-ui__group {
+		.wc-settings-ui__section-header {
 			display: block;
 		}
 
-		.wc-settings-ui__group-header {
-			margin-bottom: 16px;
-			max-width: none;
-		}
-
-		.wc-settings-ui__group-panel {
-			max-width: none;
-		}
-
-		.wc-settings-ui__actions {
-			margin-left: 0;
+		.wc-settings-ui__section-actions {
+			margin-top: 16px;
 		}
 	}
 }

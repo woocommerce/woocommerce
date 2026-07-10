@@ -8,6 +8,7 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -186,26 +187,26 @@ function wc_get_weight( $weight, $to_unit, $from_unit = '' ) {
 	// Unify all units to kg first.
 	if ( $from_unit !== $to_unit ) {
 		switch ( $from_unit ) {
-			case 'g':
+			case WeightUnit::GRAM:
 				$weight *= 0.001;
 				break;
-			case 'lbs':
+			case WeightUnit::POUND:
 				$weight *= 0.453592;
 				break;
-			case 'oz':
+			case WeightUnit::OUNCE:
 				$weight *= 0.0283495;
 				break;
 		}
 
 		// Output desired unit.
 		switch ( $to_unit ) {
-			case 'g':
+			case WeightUnit::GRAM:
 				$weight *= 1000;
 				break;
-			case 'lbs':
+			case WeightUnit::POUND:
 				$weight *= 2.20462;
 				break;
-			case 'oz':
+			case WeightUnit::OUNCE:
 				$weight *= 35.274;
 				break;
 		}
@@ -1081,12 +1082,23 @@ function wc_normalize_postcode( $postcode ) {
  * @return string
  */
 function wc_format_phone_number( $phone ) {
-	$phone = $phone ?? '';
+	$original = $phone ?? '';
 
-	if ( ! WC_Validation::is_phone( $phone ) ) {
-		return '';
-	}
-	return preg_replace( '/[^0-9\+\-\(\)\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $phone ) );
+	$is_valid  = WC_Validation::is_phone_format( $original );
+	$formatted = $is_valid
+		? (string) preg_replace( '/[^0-9\+\-\(\)\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $original ) )
+		: '';
+
+	/**
+	 * Filters the formatted phone number.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param string $formatted The formatted phone number, or an empty string if $original isn't a valid phone number.
+	 * @param string $original  The phone number passed to the function.
+	 * @param bool   $is_valid  Whether $original passed the default phone number validation.
+	 */
+	return apply_filters( 'woocommerce_format_phone_number', $formatted, $original, $is_valid );
 }
 
 /**

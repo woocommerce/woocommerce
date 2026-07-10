@@ -1,10 +1,7 @@
-// We need to disable the following eslint check as it's only applicable
-// to testing-library/react not `react-test-renderer` used here
-/* eslint-disable testing-library/await-async-query */
 /**
  * External dependencies
  */
-import TestRenderer from 'react-test-renderer';
+import { render, act } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -37,39 +34,48 @@ const defaultArgs = {
 	per_page: 2,
 	product_id: 1,
 };
-const TestComponent = withReviews( ( props ) => {
-	return (
-		<div
-			data-error={ props.error }
-			data-getReviews={ props.getReviews }
-			data-appendReviews={ props.appendReviews }
-			data-onChangeArgs={ props.onChangeArgs }
-			data-isLoading={ props.isLoading }
-			data-reviews={ props.reviews }
-			data-totalReviews={ props.totalReviews }
-		/>
-	);
+
+// Capture the props the HOC injects into the wrapped component.
+let lastProps;
+const CapturedComponent = jest.fn( ( props ) => {
+	lastProps = props;
+	return null;
 } );
-const render = () => {
-	return TestRenderer.create(
-		<TestComponent
-			attributes={ {} }
-			order="desc"
-			orderby="date_gmt"
-			productId={ 1 }
-			reviewsToDisplay={ 2 }
-		/>
-	);
+const TestComponent = withReviews( CapturedComponent );
+
+// Run an interaction and flush the async state updates it triggers inside
+// `act`, so React's async fetch-then-setState work does not leak past the test.
+const settle = async ( fn ) => {
+	await act( async () => {
+		fn();
+		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+	} );
 };
 
 describe( 'withReviews Component', () => {
-	let renderer;
+	let renderResult;
+	const renderComponent = ( props ) =>
+		settle( () => {
+			renderResult = render(
+				<TestComponent
+					attributes={ {} }
+					order="desc"
+					orderby="date_gmt"
+					productId={ 1 }
+					reviewsToDisplay={ 2 }
+					{ ...props }
+				/>
+			);
+		} );
+
 	afterEach( () => {
 		mockUtils.getReviews.mockReset();
+		CapturedComponent.mockClear();
+		lastProps = undefined;
 	} );
 
 	describe( 'lifecycle events', () => {
-		beforeEach( () => {
+		beforeEach( async () => {
 			mockUtils.getReviews
 				.mockImplementationOnce( () =>
 					Promise.resolve( {
@@ -83,7 +89,7 @@ describe( 'withReviews Component', () => {
 						totalReviews: mockReviews.length,
 					} )
 				);
-			renderer = render();
+			await renderComponent();
 		} );
 
 		it( 'getReviews is called on mount with default args', () => {
@@ -93,15 +99,17 @@ describe( 'withReviews Component', () => {
 			expect( getReviews ).toHaveBeenCalledTimes( 1 );
 		} );
 
-		it( 'getReviews is called on component update', () => {
+		it( 'getReviews is called on component update', async () => {
 			const { getReviews } = mockUtils;
-			renderer.update(
-				<TestComponent
-					order="desc"
-					orderby="date_gmt"
-					productId={ 1 }
-					reviewsToDisplay={ 3 }
-				/>
+			await settle( () =>
+				renderResult.rerender(
+					<TestComponent
+						order="desc"
+						orderby="date_gmt"
+						productId={ 1 }
+						reviewsToDisplay={ 3 }
+					/>
+				)
 			);
 
 			expect( getReviews ).toHaveBeenNthCalledWith( 2, {
@@ -114,54 +122,46 @@ describe( 'withReviews Component', () => {
 	} );
 
 	describe( 'when the API returns product data', () => {
-		beforeEach( () => {
+		beforeEach( async () => {
 			mockUtils.getReviews.mockImplementation( () =>
 				Promise.resolve( {
 					reviews: mockReviews.slice( 0, 2 ),
 					totalReviews: mockReviews.length,
 				} )
 			);
-			renderer = render();
+			await renderComponent();
 		} );
 
 		it( 'sets reviews based on API response', () => {
-			const props = renderer.root.findByType( 'div' ).props;
-
-			expect( props[ 'data-error' ] ).toBeNull();
-			expect( props[ 'data-isLoading' ] ).toBe( false );
-			expect( props[ 'data-reviews' ] ).toEqual(
-				mockReviews.slice( 0, 2 )
-			);
-			expect( props[ 'data-totalReviews' ] ).toEqual(
-				mockReviews.length
-			);
+			expect( lastProps.error ).toBeNull();
+			expect( lastProps.isLoading ).toBe( false );
+			expect( lastProps.reviews ).toEqual( mockReviews.slice( 0, 2 ) );
+			expect( lastProps.totalReviews ).toEqual( mockReviews.length );
 		} );
 	} );
 
 	describe( 'when the API returns an error', () => {
 		const error = { message: 'There was an error.' };
-		const getReviewsPromise = Promise.reject( error );
 		const formattedError = { message: 'There was an error.', type: 'api' };
 
-		beforeEach( () => {
-			mockUtils.getReviews.mockImplementation( () => getReviewsPromise );
+		beforeEach( async () => {
+			mockUtils.getReviews.mockImplementation( () =>
+				Promise.reject( error )
+			);
 			mockBaseUtils.formatError.mockImplementation(
 				() => formattedError
 			);
-			renderer = render();
+			await renderComponent();
 		} );
 
-		test( 'sets the error prop', async () => {
-			await expect( () => getReviewsPromise() ).toThrow();
-
+		test( 'sets the error prop', () => {
 			const { formatError } = mockBaseUtils;
-			const props = renderer.root.findByType( 'div' ).props;
 
 			expect( formatError ).toHaveBeenCalledWith( error );
 			expect( formatError ).toHaveBeenCalledTimes( 1 );
-			expect( props[ 'data-error' ] ).toEqual( formattedError );
-			expect( props[ 'data-isLoading' ] ).toBe( false );
-			expect( props[ 'data-reviews' ] ).toEqual( [] );
+			expect( lastProps.error ).toEqual( formattedError );
+			expect( lastProps.isLoading ).toBe( false );
+			expect( lastProps.reviews ).toEqual( [] );
 		} );
 	} );
 } );

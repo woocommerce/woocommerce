@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import TestRenderer from 'react-test-renderer';
+import { render } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -11,31 +11,29 @@ import Label from '../';
 describe( 'Label', () => {
 	describe( 'without wrapperElement', () => {
 		test( 'should render both label and screen reader label', () => {
-			const component = TestRenderer.create(
+			const { container } = render(
 				<Label label="Lorem" screenReaderLabel="Ipsum" />
 			);
 
-			expect( component.toJSON() ).toMatchSnapshot();
+			expect( container ).toMatchSnapshot();
 		} );
 
 		test( 'should render only the label', () => {
-			const component = TestRenderer.create( <Label label="Lorem" /> );
+			const { container } = render( <Label label="Lorem" /> );
 
-			expect( component.toJSON() ).toMatchSnapshot();
+			expect( container ).toMatchSnapshot();
 		} );
 
 		test( 'should render only the screen reader label', () => {
-			const component = TestRenderer.create(
-				<Label screenReaderLabel="Ipsum" />
-			);
+			const { container } = render( <Label screenReaderLabel="Ipsum" /> );
 
-			expect( component.toJSON() ).toMatchSnapshot();
+			expect( container ).toMatchSnapshot();
 		} );
 	} );
 
 	describe( 'with wrapperElement', () => {
 		test( 'should render both label and screen reader label', () => {
-			const component = TestRenderer.create(
+			const { container } = render(
 				<Label
 					label="Lorem"
 					screenReaderLabel="Ipsum"
@@ -47,11 +45,11 @@ describe( 'Label', () => {
 				/>
 			);
 
-			expect( component.toJSON() ).toMatchSnapshot();
+			expect( container ).toMatchSnapshot();
 		} );
 
 		test( 'should render only the label', () => {
-			const component = TestRenderer.create(
+			const { container } = render(
 				<Label
 					label="Lorem"
 					wrapperElement="label"
@@ -62,11 +60,11 @@ describe( 'Label', () => {
 				/>
 			);
 
-			expect( component.toJSON() ).toMatchSnapshot();
+			expect( container ).toMatchSnapshot();
 		} );
 
 		test( 'should render only the screen reader label', () => {
-			const component = TestRenderer.create(
+			const { container } = render(
 				<Label
 					screenReaderLabel="Ipsum"
 					wrapperElement="label"
@@ -77,7 +75,7 @@ describe( 'Label', () => {
 				/>
 			);
 
-			expect( component.toJSON() ).toMatchSnapshot();
+			expect( container ).toMatchSnapshot();
 		} );
 	} );
 } );

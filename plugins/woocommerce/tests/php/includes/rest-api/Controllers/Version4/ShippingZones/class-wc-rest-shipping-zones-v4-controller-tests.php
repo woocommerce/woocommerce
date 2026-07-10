@@ -24,11 +24,11 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	protected $endpoint;
 
 	/**
-	 * Test user ID.
+	 * Admin user ID, shared across all tests in the class for REST authentication.
 	 *
 	 * @var int
 	 */
-	protected $user;
+	protected static $user;
 
 	/**
 	 * Created shipping zones for cleanup.
@@ -64,6 +64,22 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * Create the shared admin user once for the whole class.
+	 *
+	 * The user is read-only (used only for REST authentication), so it is safe to
+	 * share across every test method instead of recreating it per test.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -71,12 +87,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		parent::setUp();
 		$this->endpoint = new ShippingZonesController();
 		$this->endpoint->init( new ShippingZoneSchema(), new ShippingZoneService() );
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-		wp_set_current_user( $this->user );
+		wp_set_current_user( self::$user );
 		$this->zones = array();
 	}
 

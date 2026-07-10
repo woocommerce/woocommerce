@@ -69,16 +69,13 @@
 			"path": "../../../../packages/js/onboarding"
 		},
 		{
-			"path": "../../../../packages/js/product-editor"
-		},
-		{
 			"path": "../../../../packages/js/remote-logging"
 		},
 		{
 			"path": "../../../../packages/js/sanitize"
 		},
 		{
-			"path": "../../../../packages/js/settings-ui-sdk"
+			"path": "../../../../packages/js/settings-ui"
 		},
 		{
 			"path": "../../../../packages/js/tracks"

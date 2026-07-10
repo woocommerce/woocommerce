@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Updates anchor rendering logic to not show an anchor tag when product image link is disabled

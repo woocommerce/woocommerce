@@ -8,9 +8,9 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use _WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
-use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 use Automattic\WooCommerce\Internal\Admin\Loader;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
+
 /**
  * WCAdminAssets Class.
  */
@@ -274,31 +274,18 @@ class WCAdminAssets {
 			$dependencies
 		);
 
-		switch ( $script ) {
-			case WC_ADMIN_APP:
-				// Remove wp-editor dependency if we're not on a customize store page since we don't use wp-editor in other pages.
-				$is_customize_store_page = (
-					PageController::is_admin_page() &&
-					isset( $_GET['path'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store' ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				);
-				if ( ! $is_customize_store_page ) {
-					$dependencies = array_diff( $dependencies, array( 'wp-editor' ) );
-				}
-
-				// Remove product editor dependency from WC_ADMIN_APP when feature is disabled.
-				if ( ! FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-					$dependencies = array_diff( $dependencies, array( 'wc-product-editor' ) );
-				}
-				break;
-			case 'wc-product-editor':
-				// Remove wp-editor dependency if the product editor feature is disabled as we don't need it.
-				$is_product_data_view_page = \Automattic\WooCommerce\Admin\Features\ProductDataViews\Init::is_product_data_view_page();
-				if ( ! ( FeaturesUtil::feature_is_enabled( 'product_block_editor' ) || $is_product_data_view_page ) ) {
-					$dependencies = array_diff( $dependencies, array( 'wp-editor' ) );
-				}
-				break;
+		if ( WC_ADMIN_APP === $script ) {
+			// Remove wp-editor dependency if we're not on a customize store page since we don't use wp-editor in other pages.
+			$is_customize_store_page = (
+				PageController::is_admin_page() &&
+				isset( $_GET['path'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store' ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			);
+			if ( ! $is_customize_store_page ) {
+				$dependencies = array_diff( $dependencies, array( 'wp-editor' ) );
+			}
 		}
+
 		return $dependencies;
 	}
 
@@ -327,10 +314,8 @@ class WCAdminAssets {
 			'wc-store-data',
 			'wc-currency',
 			'wc-navigation',
-			'wc-block-templates',
 			'wc-experimental-products-app',
-			'wc-product-editor',
-			'wc-settings-ui-sdk',
+			'wc-settings-ui',
 			'wc-remote-logging',
 			'wc-sanitize',
 		);
@@ -349,8 +334,7 @@ class WCAdminAssets {
 			'wc-experimental-products-app',
 			'wc-experimental',
 			'wc-navigation',
-			'wc-product-editor',
-			'wc-settings-ui-sdk',
+			'wc-settings-ui',
 			WC_ADMIN_APP,
 		);
 
@@ -401,13 +385,7 @@ class WCAdminAssets {
 				'handle' => 'wc-components',
 			),
 			array(
-				'handle' => 'wc-block-templates',
-			),
-			array(
 				'handle' => 'wc-experimental-products-app',
-			),
-			array(
-				'handle' => 'wc-product-editor',
 			),
 			array(
 				'handle' => 'wc-customer-effort-score',
@@ -455,102 +433,26 @@ class WCAdminAssets {
 	 * @return array
 	 */
 	private function get_settings_ui_script_dependencies(): array {
-		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'settings-ui' ) || ! current_user_can( 'manage_woocommerce' ) ) {
-			return array();
-		}
-
-		$settings_ui_page = $this->get_current_settings_ui_page();
-		if ( ! $settings_ui_page ) {
-			return array();
-		}
-
-		$extension_handles = array();
 		try {
-			$extension_handles = $settings_ui_page->get_script_handles( $this->get_current_settings_section() );
-		} catch ( \Throwable $e ) {
-			if ( $e instanceof \Exception ) {
-				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
+			if ( ! class_exists( SettingsUIRequestContext::class ) ) {
+				return array();
 			}
+
+			$context = SettingsUIRequestContext::get_current();
+		} catch ( \Throwable $e ) {
+			return array();
 		}
 
-		/**
-		 * Extension-provided handles may violate the interface contract.
-		 *
-		 * @var mixed[] $extension_handles
-		 */
+		if ( ! $context ) {
+			return array();
+		}
+
 		$dependencies = array_merge(
-			array( 'wc-settings-ui-sdk' ),
-			array_filter(
-				$extension_handles,
-				static function ( $script_handle ): bool {
-					return is_string( $script_handle ) && '' !== $script_handle;
-				}
-			)
+			array( 'wc-settings-ui' ),
+			$context->get_script_handles()
 		);
 
 		return array_values( array_unique( $dependencies ) );
-	}
-
-	/**
-	 * Get the settings UI adapter for the current settings tab.
-	 *
-	 * @return SettingsUIPageInterface|null
-	 */
-	private function get_current_settings_ui_page(): ?SettingsUIPageInterface {
-		if ( ! class_exists( '\WC_Admin_Settings' ) ) {
-			return null;
-		}
-
-		$current_tab = $this->get_current_settings_tab();
-		foreach ( \WC_Admin_Settings::get_settings_pages() as $settings_page ) {
-			if ( ! $settings_page instanceof \WC_Settings_Page || $settings_page->get_id() !== $current_tab ) {
-				continue;
-			}
-
-			$settings_ui_page = $settings_page->get_settings_ui_page();
-			return $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page : null;
-		}
-
-		return null;
-	}
-
-	/**
-	 * Get the current WooCommerce settings tab.
-	 *
-	 * @return string
-	 */
-	private function get_current_settings_tab(): string {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( ! isset( $_GET['tab'] ) ) {
-			return 'general';
-		}
-
-		$tab = wp_unslash( $_GET['tab'] );
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		if ( ! is_string( $tab ) ) {
-			return 'general';
-		}
-
-		$tab = sanitize_title( $tab );
-		return '' !== $tab ? $tab : 'general';
-	}
-
-	/**
-	 * Get the current WooCommerce settings section.
-	 *
-	 * @return string
-	 */
-	private function get_current_settings_section(): string {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( ! isset( $_GET['section'] ) ) {
-			return '';
-		}
-
-		$section = wp_unslash( $_GET['section'] );
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		return is_string( $section ) ? sanitize_title( $section ) : '';
 	}
 
 	/**
@@ -573,8 +475,6 @@ class WCAdminAssets {
 				'wc-date',
 				'wc-components',
 				'wc-tracks',
-				'wc-block-templates',
-				'wc-product-editor',
 			);
 			foreach ( $handles_for_injection as $handle ) {
 				$script = $wp_scripts->query( $handle, 'registered' );

@@ -1296,6 +1296,16 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		);
 		$this->assertCount( 12, $query->orders, 'A limit of -1 can successfully be combined with an offset.' );
 		$this->assertEquals( array_slice( $test_orders, 18 ), $query->orders, 'The expected dataset is supplied when an offset is combined with a limit of -1.' );
+		$this->assertEquals(
+			30,
+			$query->found_orders,
+			'A limit of -1 combined with an offset still calculates all found orders.'
+		);
+		$this->assertEquals(
+			0,
+			$query->max_num_pages,
+			'A limit of -1 combined with an offset is treated as unpaged.'
+		);
 
 		$query = new OrdersTableQuery( array( 'limit' => 5 ) );
 		$this->assertCount( 5, $query->orders, 'Limits are respected when applied.' );
@@ -3214,7 +3224,12 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
 
 		$different_request && $this->reset_order_data_store_state( $cot_store );
-		sleep( 2 );
+
+		// Backdate the modified date on both records (save() backfills the post while sync is on) so the
+		// upcoming sync-off meta update bumps the order's modified date past the post's, without waiting
+		// on the real clock.
+		$r_order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$r_order->save();
 
 		$this->disable_cot_sync();
 		$r_order->update_meta_data( 'test_key', 'test_value_updated' );

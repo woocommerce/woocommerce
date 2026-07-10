@@ -65,11 +65,25 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	protected static $products = array();
 
 	/**
-	 * Create products for tests.
+	 * Admin user ID, shared across all tests in the class for REST authentication.
 	 *
+	 * @var int
+	 */
+	protected static $user;
+
+	/**
+	 * Create the shared admin user and products once for the whole class.
+	 *
+	 * @param object $factory Factory object.
 	 * @return void
 	 */
-	public static function wpSetUpBeforeClass() {
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+
 		self::$products[] = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -132,12 +146,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->enable_rest_api_v4_feature();
 		parent::setUp();
 		$this->endpoint = new ProductsController();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-		wp_set_current_user( $this->user );
+		wp_set_current_user( self::$user );
 
 		// Reset tax settings to ensure consistent product pricing.
 		// Some tests (like OrderHelper::create_complex_wp_post_order) modify tax settings globally,

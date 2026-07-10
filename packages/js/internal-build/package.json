@@ -42,8 +42,8 @@
 		"scripts"
 	],
 	"scripts": {
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
-		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build": "pnpm build:project",
+		"build:project": "pnpm --stream '/^build:project:.*$/'",
 		"build:project:lib": "tsc --build src/tsconfig.json",
 		"build:project:type-overrides": "node scripts/generate-types.mjs generate",
 		"postinstall": "pnpm build:project",
@@ -55,7 +55,7 @@
 	},
 	"dependencies": {
 		"@automattic/color-studio": "^4.0.0",
-		"@wordpress/base-styles": "catalog:wp-min",
+		"@wordpress/base-styles": "catalog:wp-bundled",
 		"@wordpress/postcss-plugins-preset": "catalog:wp-min",
 		"chokidar": "^3.6.0",
 		"css-loader": "6.11.x",
@@ -69,12 +69,12 @@
 		"webpack-remove-empty-scripts": "1.0.x"
 	},
 	"devDependencies": {
-		"@types/wordpress__block-editor": "14.21.8",
+		"@types/wordpress__block-editor": "15.0.6",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/core-data": "7.19.6",
-		"@wordpress/data": "10.19.2",
-		"@wordpress/editor": "14.19.7",
-		"@wordpress/notices": "5.19.2",
+		"@wordpress/core-data": "7.33.9",
+		"@wordpress/data": "10.33.1",
+		"@wordpress/editor": "14.33.11",
+		"@wordpress/notices": "5.33.1",
 		"eslint": "^8.55.0",
 		"typescript": "5.7.x"
 	},

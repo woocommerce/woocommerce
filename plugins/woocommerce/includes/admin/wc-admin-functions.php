@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use Automattic\WooCommerce\Internal\Utilities\OrderItemMetaUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -362,9 +363,16 @@ function wc_save_order_items( $order_id, $items ) {
 			}
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				$reserved_meta_keys = OrderItemMetaUtil::get_reserved_keys( $item );
+
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_key   = substr( wp_unslash( $meta_key ), 0, 255 );
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
+
+					// Skip reserved keys, which cannot be added or edited as custom meta.
+					if ( in_array( $meta_key, $reserved_meta_keys, true ) ) {
+						continue;
+					}
 
 					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {
@@ -428,8 +436,15 @@ function wc_save_order_items( $order_id, $items ) {
 			);
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				$reserved_meta_keys = OrderItemMetaUtil::get_reserved_keys( $item );
+
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
+
+					// Skip reserved keys, which cannot be added or edited as custom meta.
+					if ( in_array( $meta_key, $reserved_meta_keys, true ) ) {
+						continue;
+					}
 
 					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {

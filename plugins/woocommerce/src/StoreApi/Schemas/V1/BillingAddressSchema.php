@@ -55,7 +55,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 	public function sanitize_callback( $address, $request, $param ) {
 		$address = parent::sanitize_callback( $address, $request, $param );
 		if ( isset( $address['email'] ) ) {
-			$address['email'] = sanitize_email( wp_unslash( $address['email'] ) );
+			$address['email'] = sanitize_email( $address['email'] );
 		}
 		return $address;
 	}
@@ -131,6 +131,8 @@ class BillingAddressSchema extends AbstractAddressSchema {
 			foreach ( $address_object as $key => $value ) {
 				if ( isset( $this->get_properties()[ $key ]['type'] ) && 'boolean' === $this->get_properties()[ $key ]['type'] ) {
 					$address_object[ $key ] = (bool) $value;
+				} elseif ( 'email' === $key ) {
+					$address_object[ $key ] = sanitize_email( $value );
 				} else {
 					$address_object[ $key ] = $this->prepare_html_response( $value );
 				}
