@@ -39,6 +39,25 @@ class FiltererTest extends \WC_Unit_Test_Case {
 
 		parent::setUpBeforeClass();
 
+		foreach ( wc_get_attribute_taxonomy_ids() as $attribute_name => $attribute_id ) {
+			$taxonomy_name = wc_attribute_taxonomy_name( wc_sanitize_taxonomy_name( $attribute_name ) );
+			$terms         = get_terms(
+				array(
+					'taxonomy'   => $taxonomy_name,
+					'hide_empty' => false,
+				)
+			);
+
+			if ( ! is_wp_error( $terms ) ) {
+				foreach ( $terms as $term ) {
+					wp_delete_term( $term->term_id, $taxonomy_name );
+				}
+			}
+
+			unregister_taxonomy( $taxonomy_name );
+			wc_delete_attribute( $attribute_id );
+		}
+
 		$wpdb->query(
 			"
 			  CREATE TABLE IF NOT EXISTS {$wpdb->prefix}wc_product_attributes_lookup (
