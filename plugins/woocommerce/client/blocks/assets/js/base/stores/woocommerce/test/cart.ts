@@ -790,6 +790,41 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( added ).toBeDefined();
 			expect( added?.quantity ).toBe( 2 );
 		} );
+
+		it( 'accumulates optimistic bumps for two keyless batch items targeting the same pre-existing line (no lost update)', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await runAction(
+				actions.batchAddCartItems( [
+					{ id: 42, quantityToAdd: 1 },
+					{ id: 42, quantityToAdd: 1 },
+				] )
+			);
+
+			expect( mockState.cart.items ).toHaveLength( 1 );
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 5 );
+		} );
+
+		it( 'collapses two keyless batch items for the same not-yet-in-cart product into one optimistic line at quantity 2', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+
+			await runAction(
+				actions.batchAddCartItems( [
+					{ id: 99, quantityToAdd: 1 },
+					{ id: 99, quantityToAdd: 1 },
+				] )
+			);
+
+			const matching = mockState.cart.items.filter(
+				( item ) => item.id === 99
+			);
+			expect( matching ).toHaveLength( 1 );
+			expect( matching[ 0 ].quantity ).toBe( 2 );
+		} );
 	} );
 
 	describe( 'notice-diff suppression for keyless meta-only adds', () => {

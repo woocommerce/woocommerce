@@ -915,20 +915,57 @@ const { actions } = store< Store >(
 							method: 'POST',
 							body: itemToSend,
 							applyOptimistic: () => {
-								if ( existingItem ) {
-									// As in addCartItem, this in-place
-									// bump is render-only and must never feed back into
-									// endpoint selection or the posted amount, which are
-									// already fixed above as a pure function of
-									// key-presence and the delta. Bumping a server-keyed
-									// line's rendered quantity on a keyless add is the
-									// accepted meta-only blip the server reconciles; it
-									// must not flip the add into `update-item` or post an
-									// absolute quantity. Letting this match drive the
-									// endpoint or amount reintroduces the bug.
-									existingItem.quantity = quantity;
+								// Look up the line fresh against the live
+								// (already-partially-mutated) optimistic cart at
+								// call time, rather than reusing `existingItem`
+								// (matched once, at .map() time, against the
+								// pre-batch cart). Multiple batch items for the
+								// same product otherwise all compute against the
+								// same stale pre-batch quantity and each
+								// overwrite the render with the same absolute
+								// value, silently dropping every bump but the
+								// last. A fresh lookup lets each item's bump
+								// stack on the previous item's.
+								//
+								// As in addCartItem, this render is display-only
+								// and must never feed back into endpoint
+								// selection or the posted amount, which are
+								// already fixed above as a pure function of
+								// key-presence and the delta computed at .map()
+								// time. Bumping a server-keyed line's rendered
+								// quantity on a keyless add is the accepted
+								// meta-only blip the server reconciles; it must
+								// not flip the add into `update-item` or post an
+								// absolute quantity. Letting this match drive the
+								// endpoint or amount reintroduces the bug.
+								//
+								// This intentionally has no `sold_individually`
+								// guard (unlike the single-item addCartItem
+								// path): suppressing the render here would also
+								// suppress a legitimate cap notice for a batch
+								// re-add of a sold-individually product.
+								const found = state.findItemInCart( {
+									id: item.id,
+									key: item.key,
+									variation: item.variation,
+								} );
+								if ( found ) {
+									if ( isUpdate ) {
+										// Caller-keyed update: itemToSend.quantity
+										// is the absolute target quantity.
+										found.quantity = itemToSend.quantity;
+									} else {
+										// Keyless add: itemToSend.quantity is the
+										// posted delta, so bump the live quantity
+										// rather than overwriting it.
+										found.quantity += itemToSend.quantity;
+									}
 								} else {
-									state.cart.items.push( itemToSend );
+									// No live match: push a shallow copy so a
+									// later mutation of this line (e.g. a
+									// subsequent bump) never aliases the shared
+									// itemToSend object posted to the server.
+									state.cart.items.push( { ...itemToSend } );
 								}
 							},
 							// Only fire events on the last item to avoid
