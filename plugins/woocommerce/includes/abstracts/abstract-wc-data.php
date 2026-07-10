@@ -676,7 +676,7 @@ abstract class WC_Data {
 	 * misses the cache and re-reads from the database. Used to recover from a corrupt persistent
 	 * object cache entry.
 	 *
-	 * @since 11.1.0
+	 * @since 11.0.0
 	 */
 	public function delete_meta_cache() {
 		if ( empty( $this->cache_group ) || ! $this->get_id() ) {
