@@ -19,17 +19,26 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  */
 class Cart extends ControllerTestCase {
 
+	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
 
 	/**
-	 * Setup test product data. Called before every test.
+	 * Coupon ID shared by the class.
+	 *
+	 * @var int
 	 */
-	protected function setUp(): void {
-		parent::setUp();
+	private static $coupon_id;
 
+	/**
+	 * Create immutable catalog rows shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
 		$fixtures = new FixtureData();
-		$fixtures->shipping_add_flat_rate();
-
-		$this->products = array(
+		$products = array(
 			$fixtures->get_simple_product(
 				array(
 					'name'          => 'Test Product 1',
@@ -65,17 +74,30 @@ class Cart extends ControllerTestCase {
 			),
 		);
 
-		// Add product #3 as a cross-sell for product #1.
-		$this->products[0]->set_cross_sell_ids( array( $this->products[2]->get_id() ) );
-		$this->products[0]->save();
+		$products[0]->set_cross_sell_ids( array( $products[2]->get_id() ) );
+		$products[0]->save();
 
-		$this->coupon = $fixtures->get_coupon(
+		self::$product_ids = array_map( fn( $product ) => $product->get_id(), $products );
+		self::$coupon_id   = $fixtures->get_coupon(
 			array(
 				'code'          => 'test_coupon',
 				'discount_type' => 'fixed_cart',
 				'amount'        => 1,
 			)
-		);
+		)->get_id();
+	}
+
+	/**
+	 * Setup test product data. Called before every test.
+	 */
+	protected function setUp(): void {
+		parent::setUp();
+
+		$fixtures = new FixtureData();
+		$fixtures->shipping_add_flat_rate();
+
+		$this->products = array_map( 'wc_get_product', self::$product_ids );
+		$this->coupon   = new \WC_Coupon( self::$coupon_id );
 
 		wc_empty_cart();
 		$this->reset_customer_state();
