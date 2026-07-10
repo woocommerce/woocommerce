@@ -58,33 +58,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		// Clean up created refunds.
-		foreach ( $this->created_refunds as $refund_id ) {
-			$refund = wc_get_order( $refund_id );
-			if ( $refund ) {
-				$refund->delete( true );
-			}
-		}
 		$this->created_refunds = array();
-
-		// Clean up created orders.
-		foreach ( $this->created_orders as $order_id ) {
-			$order = wc_get_order( $order_id );
-			if ( $order ) {
-				$order->delete( true );
-			}
-		}
-		$this->created_orders = array();
-
-		// Clean up tax data.
-		global $wpdb;
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
-
-		// Reset tax-calculation options to their defaults. Several tests toggle these and
-		// not all restore them individually; resetting here keeps the suite order-independent.
-		update_option( 'woocommerce_calc_taxes', 'no' );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
+		$this->created_orders  = array();
 
 		parent::tearDown();
 		$this->disable_rest_api_v4_feature();
