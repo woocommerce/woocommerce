@@ -14,7 +14,14 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\ShippingZone
 /**
  * Shipping Zones V4 Controller tests class.
  */
-class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
+class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_Unit_Test_Case {
+
+	/**
+	 * REST server used to dispatch shipping zone requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	protected $server;
 
 	/**
 	 * Test endpoint.
@@ -71,6 +78,10 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		parent::setUp();
 		$this->endpoint = new ShippingZonesController();
 		$this->endpoint->init( new ShippingZoneSchema(), new ShippingZoneService() );
+		$this->server = $this->create_rest_server_with_routes(
+			array( array( $this->endpoint, 'register_routes' ) ),
+			true
+		);
 		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
@@ -92,6 +103,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		}
 		$this->zones = array();
 
+		$this->clear_rest_server();
 		parent::tearDown();
 		$this->disable_rest_api_v4_feature();
 	}
