@@ -14,6 +14,11 @@ on:
 
 permissions: {}
 
+env:
+  SVN_URL: ${{ secrets.wporg_svn_url }}
+  SVN_USERNAME: ${{ secrets.wporg_svn_username }}
+  SVN_PASSWORD: ${{ secrets.wporg_svn_password }}
+
 concurrency:
   group: release-wporg-svn
 
@@ -89,9 +94,6 @@ jobs:
         id: check-asset
         env:
           RELEASE_TAG: ${{ steps.fetch-release.outputs.release_tag }}
-          SVN_URL: ${{ secrets.wporg_svn_url }}
-          SVN_USERNAME: ${{ secrets.wporg_svn_username }}
-          SVN_PASSWORD: ${{ secrets.wporg_svn_password }}
 
           # GH CLI.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -164,9 +166,6 @@ jobs:
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     env:
-      SVN_URL: ${{ secrets.wporg_svn_url }}
-      SVN_USERNAME: ${{ secrets.wporg_svn_username }}
-      SVN_PASSWORD: ${{ secrets.wporg_svn_password }}
       RELEASE_TAG: ${{ needs.get-and-validate-release-asset.outputs.release_tag }}
     steps:
       - name: Download and unzip asset
@@ -225,40 +224,30 @@ jobs:
             svn status | grep '^?' | awk '{print $2"@"}' | xargs -r svn add
             svn status | grep '^!' | awk '{print $2"@"}' | xargs -r svn delete
 
-            # plugins.svn.wordpress.org can return errors on large changesets even after the
-            # commit has landed; verify against live trunk before treating non-zero as fatal.
-            if ! svn commit \
+            svn commit \
               --username "$SVN_USERNAME" \
               --password "$SVN_PASSWORD" \
               --message "Updating trunk to version $RELEASE_TAG." \
               --no-auth-cache \
               --non-interactive \
               --config-option=servers:global:http-timeout=3600
-            then
-              echo "::warning::svn commit returned non-zero; verifying whether trunk actually landed."
-              committed_version=$(
-                svn cat "$SVN_URL/trunk/woocommerce.php" \
-                  --username "$SVN_USERNAME" --password "$SVN_PASSWORD" \
-                  | grep -oP '(?<=Version: )(.+)' | head -n1
-              )
-              if [ "$committed_version" != "$RELEASE_TAG" ]; then
-                echo "::error::svn commit failed and trunk is at '$committed_version' (expected '$RELEASE_TAG')."
-                exit 1
-              fi
-              echo "::notice::svn commit reported an error but trunk is at $RELEASE_TAG — continuing to tag copy."
-            fi
           fi
 
-          # Copy trunk to tag.
-          svn copy \
-            "$SVN_URL/trunk" \
-            "$SVN_URL/tags/$RELEASE_TAG" \
-            --username "$SVN_USERNAME" \
-            --password "$SVN_PASSWORD" \
-            --message "Tagging version $RELEASE_TAG." \
-            --no-auth-cache \
-            --non-interactive \
-            --config-option=servers:global:http-timeout=3600
+          # Skip the tag copy if it already exists, so partial-success runs
+          # can recover by simply re-triggering the workflow.
+          if svn list "$SVN_URL/tags/$RELEASE_TAG" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" > /dev/null 2>&1; then
+            echo "::notice::tag $RELEASE_TAG already exists; skipping tag copy."
+          else
+            svn copy \
+              "$SVN_URL/trunk" \
+              "$SVN_URL/tags/$RELEASE_TAG" \
+              --username "$SVN_USERNAME" \
+              --password "$SVN_PASSWORD" \
+              --message "Tagging version $RELEASE_TAG." \
+              --no-auth-cache \
+              --non-interactive \
+              --config-option=servers:global:http-timeout=3600
+          fi
 
           # Write success to summary.
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -300,3 +289,38 @@ jobs:
           echo "✅ Release committed to WordPress.org (tag only): [view tag](https://plugins.trac.wordpress.org/browser/woocommerce/tags/$RELEASE_TAG)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "⏭️ **Next step:** Validate the release as described in the [release docs](https://developer.woocommerce.com/docs/contribution/releases/building-and-publishing/)." >> $GITHUB_STEP_SUMMARY
+
+  handle-failure:
+    name: Report SVN state after failure
+    runs-on: ubuntu-latest
+    needs: [get-and-validate-release-asset, commit]
+    if: failure() && github.event.inputs.confirm-update == 'true'
+    permissions: {}
+    env:
+      RELEASE_TAG: ${{ needs.get-and-validate-release-asset.outputs.release_tag }}
+    steps:
+      - name: Install SVN
+        run: |
+          sudo apt-get -qq install -y subversion
+
+      - name: Check live SVN state
+        run: |
+          if [ -z "$RELEASE_TAG" ]; then
+            exit 0
+          fi
+
+          trunk_version=$( svn cat "$SVN_URL/trunk/woocommerce.php" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" 2>/dev/null | grep -oP '(?<=Version: )(.+)' | head -n1 )
+
+          tag_exists="no"
+          if svn list "$SVN_URL/tags/$RELEASE_TAG" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" > /dev/null 2>&1; then
+            tag_exists="yes"
+          fi
+
+          {
+            echo "### ⚠️ Workflow failed — current SVN state"
+            echo ""
+            echo "- trunk version: \`${trunk_version:-unknown}\` ([view trunk](https://plugins.trac.wordpress.org/browser/woocommerce/trunk))"
+            echo "- tag \`$RELEASE_TAG\` exists: \`$tag_exists\` ([view tag](https://plugins.trac.wordpress.org/browser/woocommerce/tags/$RELEASE_TAG))"
+            echo ""
+            echo "If necessary, it's fine to re-trigger this workflow."
+          } >> $GITHUB_STEP_SUMMARY
