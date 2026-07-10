@@ -876,8 +876,10 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$orders            = array();
 
 		foreach ( range( 1, 3 ) as $order_number ) {
-			$order = WC_Helper_Order::create_order( $customer->get_id(), $product );
-			$order->set_date_created( $order_time++ );
+			$order      = WC_Helper_Order::create_order( $customer->get_id(), $product );
+			$order_date = $order_time++;
+			$order->set_date_created( $order_date );
+			$order->set_date_paid( $order_date );
 			$order->set_status( OrderStatus::COMPLETED );
 
 			foreach ( $coupons as $amount => $coupon ) {
