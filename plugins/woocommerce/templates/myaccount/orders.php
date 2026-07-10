@@ -14,7 +14,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 9.5.0
+ * @version 11.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -51,41 +51,63 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 							<?php if ( has_action( 'woocommerce_my_account_my_orders_column_' . $column_id ) ) : ?>
 								<?php do_action( 'woocommerce_my_account_my_orders_column_' . $column_id, $order ); ?>
 
-							<?php elseif ( $is_order_number ) : ?>
-								<?php /* translators: %s: the order number, usually accompanied by a leading # */ ?>
-								<a href="<?php echo esc_url( $order->get_view_order_url() ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'View order number %s', 'woocommerce' ), $order->get_order_number() ) ); ?>">
-									<?php echo esc_html( _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() ); ?>
-								</a>
+							<?php else : ?>
+								<?php ob_start(); ?>
 
-							<?php elseif ( 'order-date' === $column_id ) : ?>
-								<time datetime="<?php echo esc_attr( $order->get_date_created()->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $order->get_date_created() ) ); ?></time>
+								<?php if ( $is_order_number ) : ?>
+									<?php /* translators: %s: the order number, usually accompanied by a leading # */ ?>
+									<a href="<?php echo esc_url( $order->get_view_order_url() ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'View order number %s', 'woocommerce' ), $order->get_order_number() ) ); ?>">
+										<?php echo esc_html( _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number() ); ?>
+									</a>
 
-							<?php elseif ( 'order-status' === $column_id ) : ?>
-								<?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?>
+								<?php elseif ( 'order-date' === $column_id ) : ?>
+									<time datetime="<?php echo esc_attr( $order->get_date_created()->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $order->get_date_created() ) ); ?></time>
 
-							<?php elseif ( 'order-total' === $column_id ) : ?>
-								<?php
-								/* translators: 1: formatted order total 2: total order items */
-								echo wp_kses_post( sprintf( _n( '%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ) );
-								?>
+								<?php elseif ( 'order-status' === $column_id ) : ?>
+									<?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?>
 
-							<?php elseif ( 'order-actions' === $column_id ) : ?>
-								<?php
-								$actions = wc_get_account_orders_actions( $order );
+								<?php elseif ( 'order-total' === $column_id ) : ?>
+									<?php
+									/* translators: 1: formatted order total 2: total order items */
+									echo wp_kses_post( sprintf( _n( '%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ) );
+									?>
 
-								if ( ! empty( $actions ) ) {
-									foreach ( $actions as $key => $action ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-										if ( empty( $action['aria-label'] ) ) {
-											// Generate the aria-label based on the action name.
-											/* translators: %1$s Action name, %2$s Order number. */
-											$action_aria_label = sprintf( __( '%1$s order number %2$s', 'woocommerce' ), $action['name'], $order->get_order_number() );
-										} else {
-											$action_aria_label = $action['aria-label'];
+								<?php elseif ( 'order-actions' === $column_id ) : ?>
+									<?php
+									$actions = wc_get_account_orders_actions( $order );
+
+									if ( ! empty( $actions ) ) {
+										foreach ( $actions as $key => $action ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+											if ( empty( $action['aria-label'] ) ) {
+												// Generate the aria-label based on the action name.
+												/* translators: %1$s Action name, %2$s Order number. */
+												$action_aria_label = sprintf( __( '%1$s order number %2$s', 'woocommerce' ), $action['name'], $order->get_order_number() );
+											} else {
+												$action_aria_label = $action['aria-label'];
+											}
+											echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button' . esc_attr( $wp_button_class ) . ' button ' . sanitize_html_class( $key ) . '" aria-label="' . esc_attr( $action_aria_label ) . '">' . esc_html( $action['name'] ) . '</a>';
+											unset( $action_aria_label );
 										}
-										echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button' . esc_attr( $wp_button_class ) . ' button ' . sanitize_html_class( $key ) . '" aria-label="' . esc_attr( $action_aria_label ) . '">' . esc_html( $action['name'] ) . '</a>';
-										unset( $action_aria_label );
 									}
-								}
+									?>
+								<?php endif; ?>
+
+								<?php
+								$column_content = ob_get_clean();
+
+								/**
+								 * Filters the default My Account orders table column content.
+								 *
+								 * The dynamic portion of the hook name, `$column_id`, refers to the
+								 * order table column ID.
+								 *
+								 * @since 11.1.0
+								 *
+								 * @param string   $column_content Default column HTML.
+								 * @param WC_Order $order          Current order object.
+								 * @param string   $column_id      Current column ID.
+								 */
+								echo apply_filters( 'woocommerce_account_orders_column_' . $column_id, $column_content, $order, $column_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 								?>
 							<?php endif; ?>
 
