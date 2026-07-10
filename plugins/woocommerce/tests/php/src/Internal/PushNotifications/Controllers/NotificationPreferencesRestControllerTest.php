@@ -15,6 +15,7 @@ use WC_Unit_Test_Case;
 use WP_Http;
 use WP_REST_Request;
 use WP_REST_Server;
+use WP_UnitTest_Factory;
 
 /**
  * Tests for the NotificationPreferencesRestController class.
@@ -32,6 +33,20 @@ class NotificationPreferencesRestControllerTest extends WC_Unit_Test_Case {
 	private $server;
 
 	/**
+	 * Shop manager fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_user_id;
+
+	/**
+	 * Subscriber fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_subscriber_id;
+
+	/**
 	 * Shop manager user ID for testing.
 	 *
 	 * @var int
@@ -46,6 +61,16 @@ class NotificationPreferencesRestControllerTest extends WC_Unit_Test_Case {
 	private $subscriber_id;
 
 	/**
+	 * Create immutable users shared by the test class.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$fixture_user_id       = $factory->user->create( array( 'role' => 'shop_manager' ) );
+		self::$fixture_subscriber_id = $factory->user->create( array( 'role' => 'subscriber' ) );
+	}
+
+	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
@@ -53,8 +78,8 @@ class NotificationPreferencesRestControllerTest extends WC_Unit_Test_Case {
 
 		$this->reset_push_notifications_cache();
 
-		$this->user_id       = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		$this->subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$this->user_id       = self::$fixture_user_id;
+		$this->subscriber_id = self::$fixture_subscriber_id;
 	}
 
 	/**
@@ -77,8 +102,6 @@ class NotificationPreferencesRestControllerTest extends WC_Unit_Test_Case {
 		wp_set_current_user( 0 );
 
 		Users::delete_site_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY );
-		wp_delete_user( $this->user_id );
-		wp_delete_user( $this->subscriber_id );
 
 		$this->reset_container_replacements();
 		wc_get_container()->reset_all_resolved();
