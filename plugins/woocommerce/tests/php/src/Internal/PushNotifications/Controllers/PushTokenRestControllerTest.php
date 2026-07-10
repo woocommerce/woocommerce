@@ -15,18 +15,33 @@ use Exception;
 use RuntimeException;
 use ReflectionClass;
 use WC_Data_Exception;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_Error;
 use WP_Http;
 use WP_REST_Request;
+use WP_REST_Server;
 
 /**
  * Tests for the PushTokenRestController class.
  *
  * @package WooCommerce\Tests\PushNotifications
  */
-class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
+class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	use PushNotificationsTestTrait;
+
+	/**
+	 * REST server used to dispatch push token requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
+
+	/**
+	 * Push token controller registered on the test server.
+	 *
+	 * @var PushTokenRestController
+	 */
+	private $controller;
 
 	/**
 	 * Shop manager user ID for testing.
@@ -64,7 +79,11 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->reset_push_notifications_cache();
 
-		( new PushTokenRestController() )->register_routes();
+		$this->controller = new PushTokenRestController();
+		$this->server     = $this->create_rest_server_with_routes(
+			array( array( $this->controller, 'register_routes' ) ),
+			true
+		);
 
 		$this->user_id               = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
 		$this->customer_id           = $this->factory->user->create( array( 'role' => 'customer' ) );
@@ -85,6 +104,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->reset_container_replacements();
 		wc_get_container()->reset_all_resolved();
+		$this->clear_rest_server();
+		unset( $this->server, $this->controller );
 
 		parent::tearDown();
 	}
