@@ -454,13 +454,11 @@
 		{
 			"label": "experimental-products-app uses custom WordPress package versions",
 			"dependencies": [
-				"@wordpress/admin-ui",
 				"@wordpress/base-styles",
 				"@wordpress/dataviews",
 				"@wordpress/icons",
 				"@wordpress/router",
-				"@wordpress/theme",
-				"@wordpress/ui"
+				"@wordpress/theme"
 			],
 			"packages": [
 				"@woocommerce/experimental-products-app"

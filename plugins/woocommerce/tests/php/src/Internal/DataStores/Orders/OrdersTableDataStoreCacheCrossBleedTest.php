@@ -302,6 +302,356 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox A corrupt (non-object) order data cache entry is discarded, re-read from the database, and logged.
+	 */
+	public function test_corrupt_order_data_cache_entry_is_discarded_and_reread(): void {
+		$fake_logger = $this->create_fake_logger();
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$sut = $container->get( OrdersTableDataStore::class );
+
+		$order = new WC_Order();
+		$order->set_status( 'completed' );
+		$order->set_total( '100.00' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$sut->clear_cached_data( array( $order_id ) );
+		wp_cache_flush();
+
+		// Poison the order data cache with a non-object value, simulating a corrupt object cache entry.
+		$cache_engine = $container->get( WPCacheEngine::class );
+		$cache_engine->cache_objects( array( $order_id => 'corrupt-cache-entry' ), 0, 'orders_data' );
+
+		$call_get_data = function ( $ids ) {
+			return $this->get_order_data_for_ids( $ids );
+		};
+		$order_data    = $call_get_data->call( $sut, array( $order_id ) );
+
+		$this->assertArrayHasKey( $order_id, $order_data, 'Order data should still be returned after the corrupt cache entry is discarded.' );
+		$this->assertInstanceOf( \stdClass::class, $order_data[ $order_id ], 'The corrupt cache entry should be replaced by a fresh object read from the database.' );
+		$this->assertSame( $order_id, (int) $order_data[ $order_id ]->id );
+
+		// The corrupt entry should have been invalidated and re-cached with a valid object (self-heal).
+		$recached = $cache_engine->get_cached_objects( array( $order_id ), 'orders_data' );
+		$this->assertInstanceOf( \stdClass::class, $recached[ $order_id ], 'The corrupt entry should be replaced in cache by a valid object.' );
+
+		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS order cache entry' );
+
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * @testdox A non-stdClass object order data cache entry is discarded, re-read from the database, and logged.
+	 */
+	public function test_corrupt_object_order_data_cache_entry_is_discarded_and_reread(): void {
+		$fake_logger = $this->create_fake_logger();
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$sut = $container->get( OrdersTableDataStore::class );
+
+		$order = new WC_Order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$sut->clear_cached_data( array( $order_id ) );
+		wp_cache_flush();
+
+		// Poison the order data cache with a foreign object (not a plain stdClass), simulating a
+		// cross-contaminated or unserialized-incomplete cache entry.
+		$cache_engine = $container->get( WPCacheEngine::class );
+		$cache_engine->cache_objects( array( $order_id => new WC_Order() ), 0, 'orders_data' );
+
+		$call_get_data = function ( $ids ) {
+			return $this->get_order_data_for_ids( $ids );
+		};
+		$order_data    = $call_get_data->call( $sut, array( $order_id ) );
+
+		$this->assertArrayHasKey( $order_id, $order_data, 'Order data should still be returned after the corrupt object entry is discarded.' );
+		$this->assertInstanceOf( \stdClass::class, $order_data[ $order_id ], 'The foreign-object cache entry should be replaced by a fresh stdClass read from the database.' );
+		$this->assertSame( $order_id, (int) $order_data[ $order_id ]->id );
+
+		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS order cache entry' );
+
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * @testdox A corrupt (non-array) meta cache entry is discarded, re-read from the database, and logged, without fataling the order read.
+	 */
+	public function test_corrupt_meta_cache_entry_is_discarded_and_reread(): void {
+		$fake_logger = $this->create_fake_logger();
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$sut = $container->get( OrdersTableDataStore::class );
+
+		$order = new WC_Order();
+		$order->add_meta_data( 'custom_meta_key', 'custom_value', true );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$sut->clear_cached_data( array( $order_id ) );
+		wp_cache_flush();
+
+		// Poison the meta cache with a non-array value, simulating a corrupt object cache entry.
+		$cache_engine = $container->get( WPCacheEngine::class );
+		$cache_engine->cache_objects( array( $order_id => 'corrupt-meta-entry' ), 0, 'orders_meta' );
+
+		// Reading the order must not fatal in filter_raw_meta_data().
+		$reloaded_order = wc_get_order( $order_id );
+
+		$this->assertInstanceOf( WC_Order::class, $reloaded_order, 'The order should load instead of fataling on the corrupt meta cache entry.' );
+		$this->assertSame( 'custom_value', $reloaded_order->get_meta( 'custom_meta_key' ), 'Meta should be re-read from the database after the corrupt cache entry is discarded.' );
+
+		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS meta cache entry' );
+
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * @testdox A well-formed meta cache array whose elements are not meta rows does not fatal; the order self-heals on the next read.
+	 */
+	public function test_corrupt_meta_element_cache_entry_does_not_fatal_and_self_heals(): void {
+		$fake_logger = $this->create_fake_logger();
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$sut = $container->get( OrdersTableDataStore::class );
+
+		$order = new WC_Order();
+		$order->add_meta_data( 'custom_meta_key', 'custom_value', true );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$sut->clear_cached_data( array( $order_id ) );
+		wp_cache_flush();
+
+		/*
+		 * Poison the meta cache with a well-formed array whose elements are scalars instead of
+		 * meta-row objects. This passes a naive top-level is_array() check but is rejected by the
+		 * full row-shape validation at the cache boundary, so it is re-read from the database in
+		 * the same request rather than fataling in filter_raw_meta_data() ($meta->meta_key).
+		 */
+		$cache_engine = $container->get( WPCacheEngine::class );
+		$cache_engine->cache_objects( array( $order_id => array( 'not-a-meta-row', 'another-string' ) ), 0, 'orders_meta' );
+
+		// The read must not fatal and must self-heal in the same request from the database.
+		$reloaded_order = wc_get_order( $order_id );
+		$this->assertInstanceOf( WC_Order::class, $reloaded_order, 'The order should load instead of fataling on the corrupt meta elements.' );
+		$this->assertSame( 'custom_value', $reloaded_order->get_meta( 'custom_meta_key' ), 'Meta should be re-read correctly from the database, not the corrupt scalar elements.' );
+		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS meta cache entry' );
+
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * @testdox A meta row missing required fields (e.g. only meta_key) is treated as corrupt and re-read from the database.
+	 */
+	public function test_incomplete_meta_row_cache_entry_is_rejected_and_reread(): void {
+		$fake_logger = $this->create_fake_logger();
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$sut = $container->get( OrdersTableDataStore::class );
+
+		$order = new WC_Order();
+		$order->add_meta_data( 'custom_meta_key', 'custom_value', true );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$sut->clear_cached_data( array( $order_id ) );
+		wp_cache_flush();
+
+		// A row carrying only meta_key (no meta_id/meta_value) would otherwise load the real key
+		// with a null value instead of the database value.
+		$cache_engine = $container->get( WPCacheEngine::class );
+		$cache_engine->cache_objects( array( $order_id => array( (object) array( 'meta_key' => 'custom_meta_key' ) ) ), 0, 'orders_meta' ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+
+		$reloaded_order = wc_get_order( $order_id );
+		$this->assertInstanceOf( WC_Order::class, $reloaded_order, 'The order should load instead of using the incomplete cached row.' );
+		$this->assertSame( 'custom_value', $reloaded_order->get_meta( 'custom_meta_key' ), 'The incomplete row should be discarded and the real value re-read from the database.' );
+		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS meta cache entry' );
+
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * @testdox An order data cache entry whose id does not match the requested key (cross-bleed) is discarded and re-read.
+	 */
+	public function test_order_data_cache_entry_with_mismatched_id_is_discarded_and_reread(): void {
+		$fake_logger = $this->create_fake_logger();
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$sut = $container->get( OrdersTableDataStore::class );
+
+		$order = new WC_Order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$sut->clear_cached_data( array( $order_id ) );
+		wp_cache_flush();
+
+		// Poison the cache with a stdClass whose id belongs to a different order (cross-bleed).
+		$cross_bled     = new \stdClass();
+		$cross_bled->id = $order_id + 999;
+		$cache_engine   = $container->get( WPCacheEngine::class );
+		$cache_engine->cache_objects( array( $order_id => $cross_bled ), 0, 'orders_data' );
+
+		$call_get_data = function ( $ids ) {
+			return $this->get_order_data_for_ids( $ids );
+		};
+		$order_data    = $call_get_data->call( $sut, array( $order_id ) );
+
+		$this->assertArrayHasKey( $order_id, $order_data, 'Order data should still be returned after the cross-bled entry is discarded.' );
+		$this->assertSame( $order_id, (int) $order_data[ $order_id ]->id, 'The mismatched-id entry should be replaced by the correct order read from the database.' );
+		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS order cache entry' );
+
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * @testdox A cached order data record with the correct id but a missing mapped column is rejected and re-read.
+	 */
+	public function test_truncated_order_data_cache_entry_is_rejected_and_reread(): void {
+		$fake_logger = $this->create_fake_logger();
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$sut = $container->get( OrdersTableDataStore::class );
+
+		$order = new WC_Order();
+		$order->set_status( 'completed' );
+		$order->set_total( '60.00' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$sut->clear_cached_data( array( $order_id ) );
+		wp_cache_flush();
+
+		$call_get_data = function ( $ids ) {
+			return $this->get_order_data_for_ids( $ids );
+		};
+
+		// Prime the cache with a complete record, then read it back.
+		$call_get_data->call( $sut, array( $order_id ) );
+		$cache_engine = $container->get( WPCacheEngine::class );
+		$cached       = $cache_engine->get_cached_objects( array( $order_id ), 'orders_data' );
+		$this->assertInstanceOf( \stdClass::class, $cached[ $order_id ] );
+		$this->assertTrue( property_exists( $cached[ $order_id ], 'status' ), 'Sanity: the primed cache record should carry the status column.' );
+
+		// Truncate the record: keep the correct id but drop a mapped column, then re-cache it.
+		$truncated = $cached[ $order_id ];
+		unset( $truncated->status );
+		$cache_engine->cache_objects( array( $order_id => $truncated ), 0, 'orders_data' );
+
+		$order_data = $call_get_data->call( $sut, array( $order_id ) );
+
+		$this->assertArrayHasKey( $order_id, $order_data, 'Order data should still be returned after the truncated entry is discarded.' );
+		$this->assertTrue( property_exists( $order_data[ $order_id ], 'status' ), 'The truncated entry should be replaced by a complete record read from the database.' );
+		$this->assertSame( $order_id, (int) $order_data[ $order_id ]->id );
+		$this->assert_hpos_cache_warning_logged( $fake_logger, 'corrupt HPOS order cache entry' );
+
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * @testdox filter_raw_meta_data() treats a non-array argument as empty meta instead of fataling.
+	 */
+	public function test_filter_raw_meta_data_tolerates_non_array_input(): void {
+		$fake_logger = $this->create_fake_logger();
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$sut = $container->get( OrdersTableDataStore::class );
+
+		$order = new WC_Order();
+		$order->save();
+
+		$call_filter = function ( $order_object, $raw_meta_data ) {
+			return $this->filter_raw_meta_data( $order_object, $raw_meta_data );
+		};
+
+		$result = $call_filter->call( $sut, $order, 'not-an-array' );
+
+		$this->assertSame( array(), $result, 'A non-array meta argument should be treated as empty meta.' );
+		$this->assert_hpos_cache_warning_logged( $fake_logger, 'Discarded malformed meta data' );
+
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * Assert that a warning with the "hpos-data-cache" source and the given message fragment was logged.
+	 *
+	 * @param object $fake_logger The fake logger capturing log calls.
+	 * @param string $needle      A substring expected in the warning message.
+	 */
+	private function assert_hpos_cache_warning_logged( object $fake_logger, string $needle ): void {
+		$found = false;
+		foreach ( $fake_logger->warning_calls as $call ) {
+			if ( 'hpos-data-cache' === ( $call['context']['source'] ?? '' ) && false !== strpos( $call['message'], $needle ) ) {
+				$found = true;
+				break;
+			}
+		}
+
+		$this->assertTrue( $found, "Expected a 'hpos-data-cache' warning containing: $needle" );
+	}
+
+	/**
 	 * Create a fake logger for testing.
 	 *
 	 * @return object Fake logger implementing WC_Logger_Interface.
