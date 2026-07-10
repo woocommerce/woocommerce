@@ -621,6 +621,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$ids                          = $data_store->search_products( wc_clean( wp_unslash( $query_vars['s'] ) ), '', true, true );
 			$query_vars['post__in']       = array_merge( $ids, array( 0 ) );
 			$query_vars['product_search'] = true;
+			if ( empty( $query_vars['orderby'] ) ) {
+				$query_vars['orderby'] = 'post__in';
+			}
 			unset( $query_vars['s'] );
 		}
 
