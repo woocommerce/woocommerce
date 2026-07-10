@@ -15,8 +15,9 @@ use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransact
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
+use WP_REST_Server;
 use WC_Emails;
 
 /**
@@ -24,7 +25,21 @@ use WC_Emails;
  *
  * @class EmailsSettingsControllerTest
  */
-class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
+class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
+
+	/**
+	 * REST server used to dispatch email settings requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
+
+	/**
+	 * Email settings controller registered on the test server.
+	 *
+	 * @var Controller
+	 */
+	private $controller;
 
 	/**
 	 * Sample email ID for testing.
@@ -95,11 +110,14 @@ class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Manually initialize controller with schema that has the registry.
 		// We do this to ensure personalization tags wrapping/unwrapping uses the registry.
-		$controller = new Controller();
-		$schema     = new EmailsSettingsSchema();
+		$this->controller = new Controller();
+		$schema           = new EmailsSettingsSchema();
 		$schema->init();
-		$controller->init( $schema );
-		$controller->register_routes();
+		$this->controller->init( $schema );
+		$this->server = $this->create_rest_server_with_routes(
+			array( array( $this->controller, 'register_routes' ) ),
+			true
+		);
 
 		// Snapshot current option values to restore on tearDown.
 		$option_key                        = 'woocommerce_' . self::SAMPLE_EMAIL_ID . '_settings';
@@ -140,6 +158,8 @@ class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Clean up email template posts transient.
 		delete_transient( 'wc_email_editor_initial_templates_generated' );
+		$this->clear_rest_server();
+		unset( $this->server, $this->controller );
 
 		parent::tearDown();
 	}
