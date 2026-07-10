@@ -344,6 +344,9 @@ class Checkout extends MockeryTestCase {
 		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
 	}
 
+	/**
+	 * Ensure a free order (zero total) is accepted when the client sends a matching expected total.
+	 */
 	public function test_post_data_accepts_matching_expected_total_for_free_order() {
 		$fixtures     = new FixtureData();
 		$free_product = $fixtures->get_simple_product(
