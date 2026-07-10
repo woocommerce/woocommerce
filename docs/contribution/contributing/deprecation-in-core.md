@@ -25,13 +25,22 @@ _*Store owners:* deprecation warnings do not mean your store is broken, it just 
 
 When we deprecate something in WooCommerce, we take a few actions to make it clear to developers and to maintain backwards compatibility.
 
-1. We add a docblock to the function or method showing what version the function was deprecated in, e.g., `@deprecated 2.x.x`.
+1. We add a docblock to the function or method showing what version the function was deprecated in, e.g., `@deprecated $$next-version$$` (see [Which version do I use?](#which-version-do-i-use) below).
 2. We add a warning notice using our own `wc_deprecated_function` function that shows what version, what function, and what replacement is available. More on that in a bit.
 3. We remove usage of the deprecated function throughout the codebase.
 
 The function or method itself is not removed from the codebase. This preserves backwards compatibility until removed - usually over a year or several major releases into the future.
 
 We mentioned `wc_deprecated_function` above - this is our own wrapper for the `_deprecated_function` WordPress function. It works very similar except for that it forces a log entry instead of displaying it - regardless of the value of `WP_DEBUG` during AJAX events - so that AJAX requests are not broken by the notice.
+
+## Which version do I use?
+
+When you add a deprecation you usually don't know which WooCommerce version it will ship in, since branch cuts can shift it. Rather than guessing or hardcoding a number, use the `$$next-version$$` placeholder token:
+
+- Docblocks: `@deprecated $$next-version$$` (and `@since $$next-version$$` for newly added code).
+- Deprecation calls: `wc_deprecated_function( 'old_function', '$$next-version$$', 'new_function' )`. The same token works in `wc_deprecated_hook()`, `wc_deprecated_argument()`, and `wc_doing_it_wrong()`, in their WordPress core equivalents such as `_deprecated_function()` and `_doing_it_wrong()`, and in `do_action_deprecated()` and `apply_filters_deprecated()`.
+
+At code freeze the release tooling (`tools/replace-next-version-tag.sh`) replaces every `$$next-version$$` token with the version being released, so you never have to update these annotations by hand.
 
 ## What happens when a deprecated function is called?
 
