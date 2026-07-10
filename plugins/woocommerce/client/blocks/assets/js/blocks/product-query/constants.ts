@@ -11,7 +11,6 @@ import { isBoolean } from '@woocommerce/types';
 import { QueryBlockAttributes } from './types';
 import { VARIATION_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
 import { VARIATION_NAME as PRODUCT_TEMPLATE_ID } from './variations/elements/product-template';
-import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 
 export const PRODUCT_QUERY_VARIATION_NAME = 'woocommerce/product-query';
 
@@ -95,7 +94,11 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 			[
 				'woocommerce/product-image',
 				{
-					imageSizing: ImageSizing.THUMBNAIL,
+					style: {
+						dimensions: {
+							aspectRatio: '1/1',
+						},
+					},
 				},
 			],
 			[

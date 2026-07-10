@@ -7,6 +7,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WP_Filesystem_Base;
+use WP_Filesystem_Direct;
 
 /**
  * FilesystemUtil class.
@@ -34,6 +35,14 @@ class FilesystemUtil {
 	private const FTP_INIT_COOLDOWN_MINUTES = 2;
 
 	/**
+	 * Memoized direct filesystem. Only ever holds a genuine WP_Filesystem_Direct;
+	 * the defensive fallback is never cached so a later call can retry direct.
+	 *
+	 * @var WP_Filesystem_Base|null
+	 */
+	private static ?WP_Filesystem_Base $cached_direct_filesystem = null;
+
+	/**
 	 * Wrapper to retrieve the class instance contained in the $wp_filesystem global, after initializing if necessary.
 	 *
 	 * @return WP_Filesystem_Base
@@ -49,6 +58,61 @@ class FilesystemUtil {
 		}
 
 		return $wp_filesystem;
+	}
+
+	/**
+	 * Get a direct filesystem instance, bypassing the configured FS_METHOD.
+	 *
+	 * This is appropriate for paths that are guaranteed to be writable by the
+	 * web server process (such as anything inside the uploads directory). Using
+	 * the configured FS_METHOD for those paths is unnecessary and breaks on
+	 * sites where FS_METHOD is set to an FTP-based method without complete
+	 * credentials, even though the target paths are directly writable.
+	 *
+	 * Defensive fallback: if WP_Filesystem_Direct cannot be loaded or instantiated,
+	 * fall back to {@see self::get_wp_filesystem()} with a _doing_it_wrong notice.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return WP_Filesystem_Base Normally a WP_Filesystem_Direct instance.
+	 * @throws Exception If both the direct class and the configured FS_METHOD
+	 *                   filesystem fail to initialize (the fallback path).
+	 */
+	public static function get_wp_filesystem_direct(): WP_Filesystem_Base {
+		if ( null !== self::$cached_direct_filesystem ) {
+			return self::$cached_direct_filesystem;
+		}
+
+		// require_once is a no-op if the class is already loaded, so no class_exists guard is needed.
+		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
+
+		if ( class_exists( WP_Filesystem_Direct::class ) ) {
+			try {
+				// WP_Filesystem_Direct::chmod()/put_contents() use the FS_CHMOD_* constants when no mode is
+				// passed; core only defines them in WP_Filesystem(), which we skip, so mirror them here.
+				if ( ! defined( 'FS_CHMOD_DIR' ) ) {
+					define( 'FS_CHMOD_DIR', ( fileperms( ABSPATH ) & 0777 | 0755 ) );
+				}
+				if ( ! defined( 'FS_CHMOD_FILE' ) ) {
+					define( 'FS_CHMOD_FILE', ( fileperms( ABSPATH . 'index.php' ) & 0777 | 0644 ) );
+				}
+
+				self::$cached_direct_filesystem = new WP_Filesystem_Direct( null );
+				return self::$cached_direct_filesystem;
+			} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- Fall through to the fallback below.
+			}
+		}
+
+		_doing_it_wrong(
+			__METHOD__,
+			esc_html__( 'WP_Filesystem_Direct could not be loaded. Falling back to the configured FS_METHOD; operations on the uploads directory may fail if FS_METHOD is misconfigured.', 'woocommerce' ),
+			'11.0.0'
+		);
+
+		// Deliberately uncached: the fallback may be a non-direct (FTP) instance, and caching it would pin
+		// every later "direct" caller to FS_METHOD; leaving it uncached lets a later call retry direct.
+		return self::get_wp_filesystem();
 	}
 
 	/**
@@ -111,6 +175,10 @@ class FilesystemUtil {
 	 * Recursively creates a directory (if it doesn't exist) and adds an empty index.html and a .htaccess to prevent
 	 * directory listing.
 	 *
+	 * Always uses a direct filesystem for the file operations, since the
+	 * caller is responsible for choosing a path that is writable by the web
+	 * server process.
+	 *
 	 * @since 9.3.0
 	 *
 	 * @param string $path Directory to create.
@@ -118,7 +186,7 @@ class FilesystemUtil {
 	 * @throws \Exception In case of error.
 	 */
 	public static function mkdir_p_not_indexable( string $path, bool $allow_file_access = false ): void {
-		$wp_fs = self::get_wp_filesystem();
+		$wp_fs = self::get_wp_filesystem_direct();
 
 		if ( $wp_fs->is_dir( $path ) ) {
 			return;
@@ -218,11 +286,15 @@ class FilesystemUtil {
 	/**
 	 * Validate that a file path is a valid upload path.
 	 *
+	 * Uses a direct filesystem instance rather than honoring FS_METHOD: this
+	 * check only inspects paths under ABSPATH or the uploads directory, both
+	 * of which the web server can read directly.
+	 *
 	 * @param string $path The path to validate.
 	 * @throws \Exception If the file path is not a valid upload path.
 	 */
 	public static function validate_upload_file_path( string $path ): void {
-		$wp_filesystem = self::get_wp_filesystem();
+		$wp_filesystem = self::get_wp_filesystem_direct();
 
 		// File must exist and be readable.
 		$is_valid_file = $wp_filesystem->is_readable( $path );

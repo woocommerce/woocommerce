@@ -35,6 +35,17 @@ function flushMicrotasks() {
 	return new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 }
 
+function resolvePendingFetch(
+	fetchPromise: { resolve?: ( value: Response ) => void },
+	response: Response
+) {
+	const { resolve } = fetchPromise;
+	if ( ! resolve ) {
+		throw new Error( 'Expected fetch resolver to be set.' );
+	}
+	resolve( response );
+}
+
 describe( 'createMutationQueue', () => {
 	let originalFetch: typeof global.fetch;
 	let mockState: TestState;
@@ -846,8 +857,8 @@ describe( 'createMutationQueue', () => {
 				...stateHandler,
 			} );
 
-			// Should resolve immediately — nothing in progress.
-			await queue.waitForIdle();
+			// Should resolve immediately: nothing in progress.
+			await expect( queue.waitForIdle() ).resolves.toBeUndefined();
 		} );
 
 		it( 'resolves after the processing cycle completes', async () => {
@@ -877,7 +888,7 @@ describe( 'createMutationQueue', () => {
 			expect( idleResolved ).toBe( false );
 
 			// Resolve the fetch — completes the cycle.
-			fetchPromise.resolve!( {
+			resolvePendingFetch( fetchPromise, {
 				ok: true,
 				json: () =>
 					Promise.resolve( {
@@ -923,7 +934,7 @@ describe( 'createMutationQueue', () => {
 			expect( waiter1Resolved ).toBe( false );
 			expect( waiter2Resolved ).toBe( false );
 
-			fetchPromise.resolve!( {
+			resolvePendingFetch( fetchPromise, {
 				ok: true,
 				json: () =>
 					Promise.resolve( {

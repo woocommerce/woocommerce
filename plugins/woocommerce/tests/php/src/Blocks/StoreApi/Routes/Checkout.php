@@ -214,6 +214,135 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
+	 * Billing address used by the shipping address fallback tests.
+	 *
+	 * @return array
+	 */
+	private function get_fallback_billing_address() {
+		return array(
+			'first_name' => 'Billing',
+			'last_name'  => 'Person',
+			'company'    => '',
+			'address_1'  => '10 Billing Street',
+			'address_2'  => '',
+			'city'       => 'Cambridge',
+			'state'      => '',
+			'postcode'   => 'cb241ab',
+			'country'    => 'GB',
+			'phone'      => '01223 000000',
+			'email'      => 'testaccount@test.com',
+		);
+	}
+
+	/**
+	 * Shipping address used by the shipping address fallback tests.
+	 *
+	 * @return array
+	 */
+	private function get_fallback_shipping_address() {
+		return array(
+			'first_name' => 'Shipping',
+			'last_name'  => 'Person',
+			'company'    => '',
+			'address_1'  => '20 Shipping Street',
+			'address_2'  => '',
+			'city'       => 'Oxford',
+			'state'      => '',
+			'postcode'   => 'ox11aa',
+			'country'    => 'GB',
+			'phone'      => '01865 000000',
+		);
+	}
+
+	/**
+	 * When the cart needs shipping and the request omits the shipping address, the billing address is used as the
+	 * shipping address.
+	 *
+	 * Regression test: the fallback never ran because `(array)` binds tighter than `??`, so the null coalesce
+	 * operated on an already-cast empty array instead of on the missing `shipping_address` param. That left the
+	 * order without a shipping address, which then failed pre-payment validation.
+	 */
+	public function test_omitted_shipping_address_falls_back_to_billing_address() {
+		$this->assertTrue( WC()->cart->needs_shipping(), 'Test cart is expected to need shipping.' );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address' => (object) $this->get_fallback_billing_address(),
+				'payment_method'  => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertInstanceOf( \WC_Order::class, $order );
+		$this->assertEquals( 'Billing', $order->get_shipping_first_name() );
+		$this->assertEquals( 'Person', $order->get_shipping_last_name() );
+		$this->assertEquals( '10 Billing Street', $order->get_shipping_address_1() );
+		$this->assertEquals( 'Cambridge', $order->get_shipping_city() );
+		$this->assertEquals( 'CB24 1AB', $order->get_shipping_postcode() );
+		$this->assertEquals( 'GB', $order->get_shipping_country() );
+	}
+
+	/**
+	 * When the cart needs shipping and a shipping address is provided, it is used as-is rather than being overwritten
+	 * by the billing address fallback.
+	 */
+	public function test_provided_shipping_address_is_used_when_cart_needs_shipping() {
+		$this->assertTrue( WC()->cart->needs_shipping(), 'Test cart is expected to need shipping.' );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $this->get_fallback_billing_address(),
+				'shipping_address' => (object) $this->get_fallback_shipping_address(),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertInstanceOf( \WC_Order::class, $order );
+		$this->assertEquals( 'Shipping', $order->get_shipping_first_name() );
+		$this->assertEquals( '20 Shipping Street', $order->get_shipping_address_1() );
+		$this->assertEquals( 'Oxford', $order->get_shipping_city() );
+	}
+
+	/**
+	 * When the cart does not need shipping, the provided shipping address is ignored in favour of the billing address.
+	 */
+	public function test_shipping_address_is_ignored_when_cart_does_not_need_shipping() {
+		wc_empty_cart();
+		WC()->cart->add_to_cart( $this->products[2]->get_id(), 1 );
+		$this->assertFalse( WC()->cart->needs_shipping(), 'Test cart is expected to not need shipping.' );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $this->get_fallback_billing_address(),
+				'shipping_address' => (object) $this->get_fallback_shipping_address(),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertInstanceOf( \WC_Order::class, $order );
+		$this->assertEquals( 'Billing', $order->get_shipping_first_name() );
+		$this->assertEquals( '10 Billing Street', $order->get_shipping_address_1() );
+		$this->assertEquals( 'Cambridge', $order->get_shipping_city() );
+	}
+
+	/**
 	 * Ensure that orders can be placed with virtual products.
 	 */
 	public function test_virtual_product_post_data() {
@@ -2366,5 +2495,74 @@ class Checkout extends MockeryTestCase {
 			)
 		);
 		return $request;
+	}
+
+	/**
+	 * @testdox Checkout route does not resolve the available payment gateways when the request carries no payment method.
+	 */
+	public function test_get_request_payment_method_skips_gateway_resolution_when_missing() {
+		$schema_controller = new SchemaController( $this->mock_extend );
+		$sut               = new CheckoutRoute( $schema_controller, $schema_controller->get( 'checkout' ) );
+
+		$gateway_resolution_count = 0;
+		$counter                  = function ( $gateways ) use ( &$gateway_resolution_count ) {
+			++$gateway_resolution_count;
+			return $gateways;
+		};
+		add_filter( 'woocommerce_available_payment_gateways', $counter );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+
+		$method = new \ReflectionMethod( CheckoutRoute::class, 'get_request_payment_method' );
+		$method->setAccessible( true );
+
+		try {
+			$result = $method->invoke( $sut, $request );
+		} finally {
+			remove_filter( 'woocommerce_available_payment_gateways', $counter );
+		}
+
+		$this->assertNull( $result, 'No payment method should resolve to a null gateway.' );
+		$this->assertSame( 0, $gateway_resolution_count, 'Available payment gateways must not be resolved when no payment method is supplied.' );
+	}
+
+	/**
+	 * @testdox Checkout-order route does not resolve the available payment gateways when the request carries no payment method and the order needs no payment.
+	 */
+	public function test_order_get_request_payment_method_skips_gateway_resolution_when_missing() {
+		$schema_controller = new SchemaController( $this->mock_extend );
+		$sut               = new CheckoutOrderRoute( $schema_controller, $schema_controller->get( 'checkout-order' ) );
+
+		$order = new \WC_Order();
+		$order->save();
+
+		// This scenario depends on the order not needing payment, so the empty-method branch returns null instead of throwing.
+		$this->assertFalse( $order->needs_payment(), 'A zero-total order should not need payment in this scenario.' );
+
+		$order_property = new \ReflectionProperty( CheckoutOrderRoute::class, 'order' );
+		$order_property->setAccessible( true );
+		$order_property->setValue( $sut, $order );
+
+		$gateway_resolution_count = 0;
+		$counter                  = function ( $gateways ) use ( &$gateway_resolution_count ) {
+			++$gateway_resolution_count;
+			return $gateways;
+		};
+		add_filter( 'woocommerce_available_payment_gateways', $counter );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+
+		$method = new \ReflectionMethod( CheckoutOrderRoute::class, 'get_request_payment_method' );
+		$method->setAccessible( true );
+
+		try {
+			$result = $method->invoke( $sut, $request );
+		} finally {
+			remove_filter( 'woocommerce_available_payment_gateways', $counter );
+			$order->delete( true );
+		}
+
+		$this->assertNull( $result, 'No payment method on a zero-total order should resolve to a null gateway.' );
+		$this->assertSame( 0, $gateway_resolution_count, 'Available payment gateways must not be resolved when no payment method is supplied.' );
 	}
 }

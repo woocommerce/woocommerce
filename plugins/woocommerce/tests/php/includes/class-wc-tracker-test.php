@@ -344,29 +344,32 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $tracking_data['woocommerce_allow_tracking_last_modified'], 'unknown' );
 		$this->assertEquals( $tracking_data['woocommerce_allow_tracking_first_optin'], 'unknown' );
 
-		$time_one = time();
+		$before = time();
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$tracking_data = WC_Tracker::get_tracking_data();
 		$this->assertEquals( $tracking_data['woocommerce_allow_tracking'], 'yes' );
-		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_last_modified'] >= $time_one );
-		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_first_optin'] >= $time_one );
+		$this->assertGreaterThanOrEqual( $before, (int) $tracking_data['woocommerce_allow_tracking_last_modified'] );
+		$this->assertGreaterThanOrEqual( $before, (int) $tracking_data['woocommerce_allow_tracking_first_optin'] );
 
-		sleep( 1 ); // be sure $time_two is at least one second after $time_one.
-		$time_two = time();
+		// first_optin is recorded once on the first opt-in and must never change afterwards.
+		$first_optin = (int) get_option( 'woocommerce_allow_tracking_first_optin' );
+
+		// last_modified must be refreshed to the current time on every tracking change. Capturing the
+		// time immediately before each update keeps this deterministic without waiting on the clock.
+		$before = time();
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		$tracking_data = WC_Tracker::get_tracking_data();
 
 		$this->assertEquals( $tracking_data['woocommerce_allow_tracking'], 'no' );
-		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_last_modified'] >= $time_two );
-		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_first_optin'] >= $time_one && $tracking_data['woocommerce_allow_tracking_first_optin'] < $time_two );
+		$this->assertGreaterThanOrEqual( $before, (int) $tracking_data['woocommerce_allow_tracking_last_modified'] );
+		$this->assertEquals( $first_optin, (int) $tracking_data['woocommerce_allow_tracking_first_optin'] );
 
-		sleep( 1 ); // be sure $time_three is at least one second after $time_two.
-		$time_three = time();
+		$before = time();
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$tracking_data = WC_Tracker::get_tracking_data();
 		$this->assertEquals( $tracking_data['woocommerce_allow_tracking'], 'yes' );
-		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_last_modified'] >= $time_three );
-		$this->assertTrue( $tracking_data['woocommerce_allow_tracking_first_optin'] >= $time_one && $tracking_data['woocommerce_allow_tracking_first_optin'] < $time_two );
+		$this->assertGreaterThanOrEqual( $before, (int) $tracking_data['woocommerce_allow_tracking_last_modified'] );
+		$this->assertEquals( $first_optin, (int) $tracking_data['woocommerce_allow_tracking_first_optin'] );
 
 		// Restore everything as it was.
 		update_option( 'woocommerce_allow_tracking', $current_woocommerce_allow_tracking );

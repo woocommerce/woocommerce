@@ -17,6 +17,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
 use DomainException;
+use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 
 defined( 'ABSPATH' ) || exit;
@@ -28,8 +29,6 @@ defined( 'ABSPATH' ) || exit;
  * {@see self::from_payload()} (a serialized payload).
  */
 final class PlanSnapshot {
-
-	use ScalarCoercion;
 
 	/**
 	 * The plan terms payload, as stored on the snapshot row.
@@ -99,7 +98,59 @@ final class PlanSnapshot {
 	 * A weak link back to the source plan; a missing key surfaces here as null.
 	 */
 	public function get_selling_plan_id(): ?int {
-		return isset( $this->data['selling_plan_id'] ) ? self::coerce_int( $this->data['selling_plan_id'] ) : null;
+		return isset( $this->data['selling_plan_id'] ) ? ScalarCoercion::coerce_int( $this->data['selling_plan_id'] ) : null;
+	}
+
+	/**
+	 * The frozen billing cadence, reconstructed from the snapshot payload.
+	 *
+	 * Sourced from the `billing_policy` entry captured at signup, NOT the live plan -
+	 * so a consumer reads the cadence a contract is billed under straight off the
+	 * snapshot, even after the plan it came from is edited or deleted, with no live
+	 * {@see \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository}
+	 * join. Returns null when the payload carries no (or an unreadable) billing policy,
+	 * so a caller degrades to "no cadence" rather than fataling.
+	 */
+	public function get_billing_policy(): ?BillingPolicy {
+		$policy = $this->data['billing_policy'] ?? null;
+		if ( ! is_array( $policy ) ) {
+			return null;
+		}
+
+		try {
+			return BillingPolicy::from_array( self::string_keyed( $policy ) );
+		} catch ( DomainException $e ) {
+			// A structurally-invalid stored policy degrades to "no cadence" rather than
+			// fataling the read; snapshots this engine writes always carry a valid policy.
+			unset( $e );
+			return null;
+		}
+	}
+
+	/**
+	 * The frozen pricing policy, reconstructed from the snapshot payload.
+	 *
+	 * Sourced from the `pricing_policy` entry captured at signup, NOT the live plan -
+	 * the same frozen-terms contract as {@see self::get_billing_policy()}. Returns
+	 * null when the payload carries no pricing policy (the plan had none at signup,
+	 * or the snapshot predates the key) or an unreadable one, so a caller degrades
+	 * to "no price adjustments" rather than fataling.
+	 */
+	public function get_pricing_policy(): ?PricingPolicy {
+		$policy = $this->data['pricing_policy'] ?? null;
+		if ( ! is_array( $policy ) ) {
+			return null;
+		}
+
+		try {
+			return PricingPolicy::from_array( self::string_keyed( $policy ) );
+		} catch ( InvalidArgumentException $e ) {
+			// A structurally-invalid stored policy degrades to "no price adjustments"
+			// rather than fataling the read (same fail-soft rationale as the billing
+			// accessor); snapshots this engine writes always carry a valid policy.
+			unset( $e );
+			return null;
+		}
 	}
 
 	/**
@@ -119,5 +170,22 @@ final class PlanSnapshot {
 	 */
 	public function to_payload(): array {
 		return $this->data;
+	}
+
+	/**
+	 * Re-key a nested payload array as string-keyed for the typed value-object factory.
+	 * A no-op at runtime (decoded JSON object keys are already strings); it recovers the
+	 * string-keyed type that erases to `array<int|string, mixed>`.
+	 *
+	 * @param array<int|string, mixed> $value Nested payload array.
+	 * @return array<string, mixed>
+	 */
+	private static function string_keyed( array $value ): array {
+		$out = array();
+		foreach ( $value as $key => $item ) {
+			$out[ (string) $key ] = $item;
+		}
+
+		return $out;
 	}
 }

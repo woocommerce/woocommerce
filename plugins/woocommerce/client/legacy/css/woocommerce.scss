@@ -52,6 +52,23 @@ p.demo_store,
 	top: 32px;
 }
 
+.woocommerce-product-gallery__photoswipe-video-wrapper {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+}
+
+.woocommerce-product-gallery__photoswipe-video {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
 /**
  * Utility classes
  */
@@ -190,6 +207,12 @@ p.demo_store,
 				outline-offset: -2px;
 			}
 
+			.woocommerce-product-gallery__video .wp-post-video {
+				display: block;
+				width: 100%;
+				height: auto;
+			}
+
 			.woocommerce-product-gallery__trigger {
 				@include woocommerce-product-gallery__trigger;
 			}
@@ -205,14 +228,52 @@ p.demo_store,
 					float: left;
 					margin: 0;
 					list-style: none;
+					position: relative;
 
-					img {
+					img,
+					.woocommerce-product-gallery__video-thumbnail-preview {
 						cursor: pointer;
 						opacity: 0.5;
 						margin: 0;
 
 						&.flex-active,
 						&:hover {
+							opacity: 1;
+						}
+					}
+
+					&.woocommerce-product-gallery__video-thumbnail {
+						&::before {
+							content: "\25B6";
+							position: absolute;
+							left: 50%;
+							top: 50%;
+							transform: translate(-50%, -50%);
+							z-index: 1;
+							color: $contentbg;
+							font-size: 1.4em;
+							text-shadow: 0 0 0.25em rgba(0, 0, 0, 0.8);
+							pointer-events: none;
+						}
+
+						img.woocommerce-product-gallery__video-thumbnail-placeholder,
+						img.woocommerce-product-gallery__video-thumbnail-placeholder.flex-active,
+						img.woocommerce-product-gallery__video-thumbnail-placeholder:hover {
+							opacity: 0;
+						}
+
+						.woocommerce-product-gallery__video-thumbnail-preview {
+							position: absolute;
+							inset: 0;
+							width: 100%;
+							height: 100%;
+							object-fit: cover;
+							pointer-events: none;
+						}
+
+						&:hover .woocommerce-product-gallery__video-thumbnail-preview,
+						.woocommerce-product-gallery__video-thumbnail-placeholder.flex-active
+							+ .woocommerce-product-gallery__video-thumbnail-preview {
 							opacity: 1;
 						}
 					}

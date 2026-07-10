@@ -68,4 +68,34 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 		}
 		remove_filter( 'woocommerce_product_export_product_query_args', array( $this, 'set_export_product_query_args' ) );
 	}
+
+	/**
+	 * @testdox pending review products should export with a distinct published value.
+	 */
+	public function test_get_column_value_published_for_pending_product() {
+		$product = new WC_Product_Simple();
+		$product->set_status( ProductStatus::PENDING );
+		$product->save();
+
+		$reflected_exporter = new ReflectionClass( WC_Product_CSV_Exporter::class );
+		$get_data_to_export = $reflected_exporter->getMethod( 'get_data_to_export' );
+		$get_data_to_export->setAccessible( true );
+
+		$this->product_ids = array( $product->get_id() );
+
+		add_filter( 'woocommerce_product_export_product_query_args', array( $this, 'set_export_product_query_args' ) );
+
+		try {
+			$exporter = new WC_Product_CSV_Exporter();
+			$exporter->prepare_data_to_export();
+			$data = $get_data_to_export->invoke( $exporter );
+
+			$this->assertNotEmpty( $data, 'Pending review product should be included in the export.' );
+			foreach ( $data as $row ) {
+				$this->assertEquals( 2, $row['published'], 'Pending review products should not export as draft (-1).' );
+			}
+		} finally {
+			remove_filter( 'woocommerce_product_export_product_query_args', array( $this, 'set_export_product_query_args' ) );
+		}
+	}
 }

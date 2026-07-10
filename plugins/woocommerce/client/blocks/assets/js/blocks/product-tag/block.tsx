@@ -1,5 +1,4 @@
 // @ts-expect-error: `ServerSideRender ` currently does not have a type definition in WordPress core
-// eslint-disable-next-line @woocommerce/dependency-group
 import ServerSideRender from '@wordpress/server-side-render';
 /**
  * External dependencies

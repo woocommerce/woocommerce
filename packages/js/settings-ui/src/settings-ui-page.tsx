@@ -14,6 +14,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { Card } from '@wordpress/ui';
 import type { ErrorInfo, ReactNode } from 'react';
 
 /**
@@ -48,6 +49,8 @@ type SaveNotice = {
 type PendingNavigation = {
 	href: string;
 };
+
+const FORM_POST_REDIRECT_INPUT_NAME = 'wc_settings_ui_redirect_to';
 
 const normalizeSection = ( section?: string ) =>
 	section === 'default' ? '' : section;
@@ -115,6 +118,21 @@ const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 
 const clearLegacyFormPrompt = () => {
 	window.onbeforeunload = null;
+};
+
+const setFormPostRedirectInput = ( form: HTMLFormElement, href: string ) => {
+	let redirectInput = form.querySelector< HTMLInputElement >(
+		`input[name="${ FORM_POST_REDIRECT_INPUT_NAME }"]`
+	);
+
+	if ( ! redirectInput ) {
+		redirectInput = document.createElement( 'input' );
+		redirectInput.type = 'hidden';
+		redirectInput.name = FORM_POST_REDIRECT_INPUT_NAME;
+		form.appendChild( redirectInput );
+	}
+
+	redirectInput.value = href;
 };
 
 const shouldPromptForNavigation = ( event: MouseEvent ) => {
@@ -212,9 +230,19 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 	}
 
 	return (
-		<header className="wc-settings-ui__section-header">
+		<Card.Header
+			className="wc-settings-ui__section-header"
+			render={ <header /> }
+		>
 			<div className="wc-settings-ui__section-heading">
-				{ group.title ? <h2>{ group.title }</h2> : null }
+				{ group.title ? (
+					<Card.Title
+						// eslint-disable-next-line jsx-a11y/heading-has-content -- Card.Title injects its children into the render element.
+						render={ <h2 /> }
+					>
+						{ group.title }
+					</Card.Title>
+				) : null }
 				{ group.description ? (
 					<div className="wc-settings-ui__section-description">
 						<RawHTML>
@@ -238,7 +266,7 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 					) ) }
 				</div>
 			) : null }
-		</header>
+		</Card.Header>
 	);
 };
 
@@ -562,27 +590,31 @@ export const SettingsUIPage = ( {
 		clearLegacyFormPrompt();
 	}, [] );
 
-	const submitSettingsForm = useCallback( () => {
-		allowNavigation();
+	const submitSettingsForm = useCallback(
+		( redirectTo?: string ) => {
+			const form = document.getElementById( 'mainform' );
 
-		const form = document.getElementById( 'mainform' );
+			if ( ! ( form instanceof HTMLFormElement ) ) {
+				return;
+			}
 
-		if ( ! ( form instanceof HTMLFormElement ) ) {
-			return;
-		}
+			if ( typeof redirectTo === 'string' && redirectTo ) {
+				setFormPostRedirectInput( form, redirectTo );
+			}
 
-		const saveButton = document.querySelector( '.woocommerce-save-button' );
+			allowNavigation();
 
-		if (
-			saveButton instanceof HTMLButtonElement &&
-			saveButton.form === form
-		) {
-			form.requestSubmit( saveButton );
-			return;
-		}
+			const saveButton = form.querySelector( '.woocommerce-save-button' );
 
-		form.requestSubmit();
-	}, [ allowNavigation ] );
+			if ( saveButton instanceof HTMLButtonElement ) {
+				form.requestSubmit( saveButton );
+				return;
+			}
+
+			form.requestSubmit();
+		},
+		[ allowNavigation ]
+	);
 
 	const setValues = useCallback(
 		( nextValues: Partial< SettingsValues > ) => {
@@ -736,7 +768,7 @@ export const SettingsUIPage = ( {
 		}
 
 		if ( saveStrategy.adapter === 'form_post' ) {
-			submitSettingsForm();
+			submitSettingsForm( pendingNavigation.href );
 			return;
 		}
 
@@ -829,9 +861,9 @@ export const SettingsUIPage = ( {
 						className="wc-settings-ui__section"
 						key={ group.id }
 					>
-						<div className="wc-settings-ui__section-card">
+						<Card.Root className="wc-settings-ui__section-card">
 							<GroupHeader group={ group } />
-							<div className="wc-settings-ui__section-fields">
+							<Card.Content className="wc-settings-ui__section-fields">
 								{ group.fields.map( ( field ) => {
 									const FieldComponent =
 										resolveFieldComponent(
@@ -868,8 +900,8 @@ export const SettingsUIPage = ( {
 										</div>
 									);
 								} ) }
-							</div>
-						</div>
+							</Card.Content>
+						</Card.Root>
 					</section>
 				) ) }
 			</div>
