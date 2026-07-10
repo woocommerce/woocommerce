@@ -180,16 +180,18 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'get_posted_data' uses billing address values when hidden shipping fields are posted.
+	 * @testdox 'get_posted_data' respects the selected shipping address.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $ship_to_different_address Whether a separate shipping address was selected.
 	 */
-	public function test_get_posted_data_uses_billing_address_when_hidden_shipping_fields_are_posted() {
-		$product = WC_Helper_Product::create_simple_product();
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
+	public function test_get_posted_data_respects_shipping_address_selection( $ship_to_different_address ) {
 		add_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
 
 		$posted_data = array(
 			'woocommerce-process-checkout-nonce' => 'test-nonce',
-			'payment_method'                     => WC_Gateway_BACS::ID,
 			'billing_first_name'                 => 'Billing',
 			'billing_last_name'                  => 'Customer',
 			'billing_company'                    => 'Billing Company',
@@ -199,8 +201,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			'billing_postcode'                   => '12345',
 			'billing_country'                    => 'US',
 			'billing_state'                      => 'CA',
-			'billing_email'                      => 'billing@example.com',
-			'billing_phone'                      => '555-1234',
 			'shipping_first_name'                => 'Hidden',
 			'shipping_last_name'                 => 'Autofill',
 			'shipping_company'                   => 'Hidden Company',
@@ -210,8 +210,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			'shipping_postcode'                  => '99999',
 			'shipping_country'                   => 'CA',
 			'shipping_state'                     => 'BC',
-			'shipping_phone'                     => '555-9999',
 		);
+		if ( $ship_to_different_address ) {
+			$posted_data['ship_to_different_address'] = '1';
+		}
 
 		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
 		$_POST         = $posted_data;
@@ -221,22 +223,19 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		} finally {
 			$_POST = $original_post;
 			remove_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
-			WC()->cart->empty_cart();
 		}
 
-		$this->assertFalse( $data['ship_to_different_address'] );
+		$this->assertSame( $ship_to_different_address, $data['ship_to_different_address'] );
+		$expected_address_type = $ship_to_different_address ? 'shipping' : 'billing';
 
 		foreach ( array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'postcode', 'country', 'state' ) as $field ) {
-			$this->assertArrayHasKey( 'shipping_' . $field, $data, "Shipping {$field} should be present after fallback normalization." );
+			$this->assertArrayHasKey( 'shipping_' . $field, $data, "Shipping {$field} should be present after checkout normalization." );
 			$this->assertSame(
-				$data[ 'billing_' . $field ],
+				$posted_data[ $expected_address_type . '_' . $field ],
 				$data[ 'shipping_' . $field ],
-				"Shipping {$field} should fall back to billing {$field} when separate shipping is not requested."
+				"Shipping {$field} should use the {$expected_address_type} {$field} value."
 			);
 		}
-
-		$this->assertNotSame( $posted_data['shipping_address_1'], $data['shipping_address_1'] );
-		$this->assertNotSame( $posted_data['shipping_country'], $data['shipping_country'] );
 	}
 
 	/**
