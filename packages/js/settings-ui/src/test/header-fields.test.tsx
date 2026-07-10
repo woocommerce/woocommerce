@@ -6,8 +6,7 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { ReactNode } from 'react';
 
-// Surface the Badge intent prop so the schema-to-Badge intent mapping can be
-// asserted; the real Badge's intent classes come from mocked CSS modules.
+// Jest stubs CSS modules, so the real Badge renders nothing that reveals its intent.
 jest.mock( '@wordpress/ui', () => ( {
 	...jest.requireActual( '@wordpress/ui' ),
 	Badge: ( {
