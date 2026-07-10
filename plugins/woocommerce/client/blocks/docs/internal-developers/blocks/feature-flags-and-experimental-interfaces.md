@@ -107,6 +107,42 @@ See the [available SlotFills](https://github.com/woocommerce/woocommerce/blob/tr
 
 The Product Search block emits its action directly in [`ProductSearch`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/BlockTypes/ProductSearch.php). Classic product grids also emit `product-list-render` from [`AbstractProductGrid`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/BlockTypes/AbstractProductGrid.php).
 
+Examples:
+
+```js
+wp.hooks.addAction(
+	'experimental__woocommerce_blocks-cart-add-item',
+	'plugin/namespace',
+	( { product } ) => {
+		console.log( `${ product.name } was added to the cart` );
+	}
+);
+
+wp.hooks.addAction(
+	'experimental__woocommerce_blocks-cart-set-item-quantity',
+	'plugin/namespace',
+	( { product, quantity } ) => {
+		console.log( `${ product.name } quantity changed to ${ quantity }` );
+	}
+);
+
+wp.hooks.addAction(
+	'experimental__woocommerce_blocks-cart-remove-item',
+	'plugin/namespace',
+	( { product, quantity } ) => {
+		console.log( `${ quantity } of ${ product.name } were removed` );
+	}
+);
+
+wp.hooks.addAction(
+	'experimental__woocommerce_blocks-product-view-link',
+	'plugin/namespace',
+	( { product } ) => {
+		console.log( `${ product.name } view link was selected` );
+	}
+);
+```
+
 ### Checkout events
 
 Checkout events use the `experimental__woocommerce_blocks-checkout-` prefix. `dispatchCheckoutEvent()` adds the current `storeCart` value to every event payload in addition to the parameters listed below.
@@ -121,14 +157,62 @@ Checkout events use the `experimental__woocommerce_blocks-checkout-` prefix. `di
 | `experimental__woocommerce_blocks-checkout-set-shipping-address` | None |
 | `experimental__woocommerce_blocks-checkout-set-billing-address` | None |
 
-Example:
+Examples:
 
 ```js
 wp.hooks.addAction(
-	'experimental__woocommerce_blocks-cart-add-item',
+	'experimental__woocommerce_blocks-checkout-submit',
 	'plugin/namespace',
-	( { product } ) => {
-		console.log( `${ product.name } was added to the cart` );
+	( { storeCart } ) => {
+		console.log( 'The checkout form was submitted', storeCart );
+	}
+);
+
+wp.hooks.addAction(
+	'experimental__woocommerce_blocks-checkout-set-selected-shipping-rate',
+	'plugin/namespace',
+	( { shippingRateId, storeCart } ) => {
+		console.log( `Selected shipping rate: ${ shippingRateId }`, storeCart );
+	}
+);
+
+wp.hooks.addAction(
+	'experimental__woocommerce_blocks-checkout-set-active-payment-method',
+	'plugin/namespace',
+	( { paymentMethodSlug, storeCart } ) => {
+		console.log( `Selected payment method: ${ paymentMethodSlug }`, storeCart );
+	}
+);
+
+wp.hooks.addAction(
+	'experimental__woocommerce_blocks-checkout-render-checkout-form',
+	'plugin/namespace',
+	( { storeCart } ) => {
+		console.log( 'The checkout form was rendered', storeCart );
+	}
+);
+
+wp.hooks.addAction(
+	'experimental__woocommerce_blocks-checkout-set-email-address',
+	'plugin/namespace',
+	( { storeCart } ) => {
+		console.log( 'The email address changed', storeCart );
+	}
+);
+
+wp.hooks.addAction(
+	'experimental__woocommerce_blocks-checkout-set-shipping-address',
+	'plugin/namespace',
+	( { storeCart } ) => {
+		console.log( 'The shipping address changed', storeCart );
+	}
+);
+
+wp.hooks.addAction(
+	'experimental__woocommerce_blocks-checkout-set-billing-address',
+	'plugin/namespace',
+	( { storeCart } ) => {
+		console.log( 'The billing address changed', storeCart );
 	}
 );
 ```
