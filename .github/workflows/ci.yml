@@ -220,6 +220,7 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: 'last-run__${{ strategy.job-index }}'
+          path: '${{ runner.temp }}/last-run-info'
 
       - name: 'Run tests (${{ matrix.testType }})'
         timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 20 ) ) ) || 360 }}
@@ -232,7 +233,7 @@ jobs:
           PLAYWRIGHT_JUNIT_SUITE_NAME: 'WooCommerce Core'
           PLAYWRIGHT_JUNIT_SUITE_ID: 'woocommerce-core'
         run: |
-          lastRunFile="${{ steps.download-last-run-info.outputs.download-path }}/last-run__${{ strategy.job-index }}/.last-run.json"
+          lastRunFile="${{ runner.temp }}/last-run-info/.last-run.json"
           lastRunFileDest="$ARTIFACTS_PATH/.last-run.json"
 
           if [ -f "$lastRunFile" ]; then
