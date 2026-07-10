@@ -12,7 +12,7 @@
  *
  * @see         https://woocommerce.com/document/template-structure/
  * @package     WooCommerce\Templates
- * @version     9.7.0
+ * @version     11.1.0
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
@@ -33,7 +33,19 @@ global $product;
 
 	<?php endif; ?>
 
-	<?php echo wc_get_product_category_list( $product->get_id(), ', ', '<span class="posted_in">' . _n( 'Category:', 'Categories:', count( $product->get_category_ids() ), 'woocommerce' ) . ' ', '</span>' ); ?>
+	<?php
+	$product_category_list = wc_get_product_category_list(
+		$product->get_id(),
+		', ',
+		'<span class="posted_in">' . _n( 'Category:', 'Categories:', count( $product->get_category_ids() ), 'woocommerce' ) . ' ',
+		'</span>',
+		'breadcrumb'
+	);
+
+	if ( ! is_wp_error( $product_category_list ) ) {
+		echo $product_category_list; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+	?>
 
 	<?php echo wc_get_product_tag_list( $product->get_id(), ', ', '<span class="tagged_as">' . _n( 'Tag:', 'Tags:', count( $product->get_tag_ids() ), 'woocommerce' ) . ' ', '</span>' ); ?>
 

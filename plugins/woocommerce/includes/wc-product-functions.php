@@ -1710,14 +1710,137 @@ function wc_get_price_to_display( $product, $args = array() ) {
 /**
  * Returns the product categories in a list.
  *
+ * @since 11.1.0 Added the `$orderby` argument.
+ *
  * @param int    $product_id Product ID.
  * @param string $sep (default: ', ').
  * @param string $before (default: '').
  * @param string $after (default: '').
- * @return string
+ * @param string $orderby Optional ordering mode. Supports 'name', 'breadcrumb', and 'hierarchy'. Default empty string preserves WordPress term-list order.
+ * @return string|false|WP_Error
  */
-function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $after = '' ) {
-	return get_the_term_list( $product_id, 'product_cat', $before, $sep, $after );
+function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $after = '', $orderby = '' ) {
+	$orderby = is_string( $orderby ) ? sanitize_key( $orderby ) : '';
+
+	if ( '' === $orderby ) {
+		return get_the_term_list( $product_id, 'product_cat', $before, $sep, $after );
+	}
+
+	$terms = get_the_terms( $product_id, 'product_cat' );
+
+	if ( is_wp_error( $terms ) ) {
+		return $terms;
+	}
+
+	if ( empty( $terms ) || ! is_array( $terms ) ) {
+		return false;
+	}
+
+	$terms = array_values( $terms );
+
+	if ( 'name' === $orderby ) {
+		usort(
+			$terms,
+			function ( $a, $b ) {
+				$name_comparison = strnatcasecmp( $a->name, $b->name );
+
+				return 0 !== $name_comparison ? $name_comparison : $a->term_id <=> $b->term_id;
+			}
+		);
+	} elseif ( in_array( $orderby, array( 'breadcrumb', 'hierarchy' ), true ) ) {
+		$term_sort_data = array();
+		$term_paths     = array();
+
+		$get_term_sort_data = function ( $term_id ) use ( &$term_sort_data ) {
+			$term_id = absint( $term_id );
+
+			if ( isset( $term_sort_data[ $term_id ] ) ) {
+				return $term_sort_data[ $term_id ];
+			}
+
+			$term       = get_term( $term_id, 'product_cat' );
+			$term_order = get_term_meta( $term_id, 'order', true );
+
+			$term_sort_data[ $term_id ] = array(
+				'order'   => '' === $term_order ? 0 : (int) $term_order,
+				'name'    => $term instanceof WP_Term ? (string) $term->name : '',
+				'term_id' => $term_id,
+			);
+
+			return $term_sort_data[ $term_id ];
+		};
+
+		$compare_term_sort_data = function ( $a, $b ) {
+			if ( $a['order'] !== $b['order'] ) {
+				return $a['order'] <=> $b['order'];
+			}
+
+			$name_comparison = strnatcasecmp( $a['name'], $b['name'] );
+
+			return 0 !== $name_comparison ? $name_comparison : $a['term_id'] <=> $b['term_id'];
+		};
+
+		$get_term_path = function ( $term ) use ( &$term_paths, $get_term_sort_data ) {
+			if ( isset( $term_paths[ $term->term_id ] ) ) {
+				return $term_paths[ $term->term_id ];
+			}
+
+			$path_ids = array_merge(
+				array_reverse( get_ancestors( $term->term_id, 'product_cat', 'taxonomy' ) ),
+				array( $term->term_id )
+			);
+
+			$term_paths[ $term->term_id ] = array_map( $get_term_sort_data, $path_ids );
+
+			return $term_paths[ $term->term_id ];
+		};
+
+		usort(
+			$terms,
+			function ( $a, $b ) use ( $get_term_path, $compare_term_sort_data ) {
+				$a_path       = $get_term_path( $a );
+				$b_path       = $get_term_path( $b );
+				$shared_depth = min( count( $a_path ), count( $b_path ) );
+
+				for ( $index = 0; $index < $shared_depth; $index++ ) {
+					$path_comparison = $compare_term_sort_data( $a_path[ $index ], $b_path[ $index ] );
+
+					if ( 0 !== $path_comparison ) {
+						return $path_comparison;
+					}
+				}
+
+				return count( $a_path ) <=> count( $b_path );
+			}
+		);
+	} else {
+		return get_the_term_list( $product_id, 'product_cat', $before, $sep, $after );
+	}
+
+	$links = array();
+
+	foreach ( $terms as $term ) {
+		$link = get_term_link( $term, 'product_cat' );
+
+		if ( is_wp_error( $link ) ) {
+			return $link;
+		}
+
+		$links[] = '<a href="' . esc_url( $link ) . '" rel="tag">' . $term->name . '</a>';
+	}
+
+	/**
+	 * Filters the product category links.
+	 *
+	 * This keeps ordered product category list output aligned with WordPress core's `get_the_term_list()` filtering.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string[] $links An array of term links.
+	 */
+	$term_links = apply_filters( 'term_links-product_cat', $links ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+
+	return $before . implode( $sep, $term_links ) . $after;
 }
 
 /**

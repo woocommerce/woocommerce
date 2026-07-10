@@ -791,6 +791,110 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product category list preserves WordPress term-list order by default.
+	 */
+	public function test_wc_get_product_category_list_preserves_default_order(): void {
+		$suffix  = wp_unique_id();
+		$root    = wp_insert_term( 'Default Root ' . $suffix, 'product_cat' );
+		$child   = wp_insert_term( 'Default Child ' . $suffix, 'product_cat', array( 'parent' => $root['term_id'] ) );
+		$product = WC_Helper_Product::create_simple_product();
+
+		try {
+			wp_set_object_terms( $product->get_id(), array( $root['term_id'], $child['term_id'] ), 'product_cat' );
+
+			$expected = get_the_term_list( $product->get_id(), 'product_cat', 'Before ', ' > ', ' After' );
+			$actual   = wc_get_product_category_list( $product->get_id(), ' > ', 'Before ', ' After' );
+
+			$this->assertSame( $expected, $actual, 'Default helper output should remain identical to WordPress term-list output.' );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $child['term_id'], 'product_cat' );
+			wp_delete_term( $root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list can render assigned terms in breadcrumb order.
+	 */
+	public function test_wc_get_product_category_list_can_render_breadcrumb_order(): void {
+		$suffix    = wp_unique_id();
+		$root_name = 'Breadcrumb Root ' . $suffix;
+		$mid_name  = 'Breadcrumb Mid ' . $suffix;
+		$leaf_name = 'Breadcrumb Leaf ' . $suffix;
+		$root      = wp_insert_term( $root_name, 'product_cat' );
+		$mid       = wp_insert_term( $mid_name, 'product_cat', array( 'parent' => $root['term_id'] ) );
+		$leaf      = wp_insert_term( $leaf_name, 'product_cat', array( 'parent' => $mid['term_id'] ) );
+		$product   = WC_Helper_Product::create_simple_product();
+
+		try {
+			wp_set_object_terms( $product->get_id(), array( $leaf['term_id'], $root['term_id'], $mid['term_id'] ), 'product_cat' );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$root_name} > {$mid_name} > {$leaf_name}", $actual );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $leaf['term_id'], 'product_cat' );
+			wp_delete_term( $mid['term_id'], 'product_cat' );
+			wp_delete_term( $root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list breadcrumb ordering respects category order for siblings.
+	 */
+	public function test_wc_get_product_category_list_breadcrumb_order_respects_sibling_order(): void {
+		$suffix      = wp_unique_id();
+		$first_name  = 'Sibling First ' . $suffix;
+		$second_name = 'Sibling Second ' . $suffix;
+		$root        = wp_insert_term( 'Sibling Root ' . $suffix, 'product_cat' );
+		$second      = wp_insert_term( $second_name, 'product_cat', array( 'parent' => $root['term_id'] ) );
+		$first       = wp_insert_term( $first_name, 'product_cat', array( 'parent' => $root['term_id'] ) );
+		$product     = WC_Helper_Product::create_simple_product();
+
+		try {
+			update_term_meta( $first['term_id'], 'order', 1 );
+			update_term_meta( $second['term_id'], 'order', 2 );
+			wp_set_object_terms( $product->get_id(), array( $second['term_id'], $first['term_id'] ), 'product_cat' );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+
+			$this->assertSame( "{$first_name} > {$second_name}", $actual );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $first['term_id'], 'product_cat' );
+			wp_delete_term( $second['term_id'], 'product_cat' );
+			wp_delete_term( $root['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
+	 * @testdox Product category list can render assigned terms alphabetically by name.
+	 */
+	public function test_wc_get_product_category_list_can_render_name_order(): void {
+		$suffix     = wp_unique_id();
+		$alpha_name = 'Alpha Category ' . $suffix;
+		$zulu_name  = 'Zulu Category ' . $suffix;
+		$zulu       = wp_insert_term( $zulu_name, 'product_cat' );
+		$alpha      = wp_insert_term( $alpha_name, 'product_cat' );
+		$product    = WC_Helper_Product::create_simple_product();
+
+		try {
+			update_term_meta( $alpha['term_id'], 'order', 2 );
+			update_term_meta( $zulu['term_id'], 'order', 1 );
+			wp_set_object_terms( $product->get_id(), array( $zulu['term_id'], $alpha['term_id'] ), 'product_cat' );
+
+			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'name' ) );
+
+			$this->assertSame( "{$alpha_name} > {$zulu_name}", $actual );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $alpha['term_id'], 'product_cat' );
+			wp_delete_term( $zulu['term_id'], 'product_cat' );
+		}
+	}
+
+	/**
 	 * @testdox Product permalink should use deepest category, not the one with highest parent term ID.
 	 */
 	public function test_wc_product_post_type_link_uses_deepest_category() {
