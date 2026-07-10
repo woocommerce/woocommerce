@@ -419,32 +419,23 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	 * @testdox Should preserve pagination when labeling product search breadcrumbs.
 	 */
 	public function test_core_breadcrumbs_label_paginated_product_search_items(): void {
-		$original_posts_per_page = get_option( 'posts_per_page' );
+		global $wp_query;
 
-		self::factory()->post->create_many(
-			12,
-			array(
-				'post_type'   => 'product',
-				'post_status' => 'publish',
-				'post_title'  => 'Hoodie',
-			)
+		$this->go_to( '/?s=hoodie&post_type=product' );
+
+		$wp_query->is_search            = true;
+		$wp_query->is_post_type_archive = true;
+		$wp_query->is_archive           = true;
+		$wp_query->is_404               = false;
+
+		set_query_var( 'paged', 2 );
+
+		$this->assert_core_breadcrumb_labels(
+			array( 'Home', 'Catalog', 'Search results for &ldquo;hoodie&rdquo;', 'Page 2' ),
+			'Paginated product search breadcrumbs should keep the pagination crumb.',
+			$this->get_breadcrumb_item( 'Search results for: "hoodie"', get_pagenum_link( 1 ) ),
+			$this->get_breadcrumb_item( 'Page 2' )
 		);
-
-		try {
-			update_option( 'posts_per_page', 5 );
-
-			$this->go_to( '/?s=hoodie&post_type=product&paged=2' );
-			set_query_var( 'paged', 2 );
-
-			$this->assert_core_breadcrumb_labels(
-				array( 'Home', 'Catalog', 'Search results for &ldquo;hoodie&rdquo;', 'Page 2' ),
-				'Paginated product search breadcrumbs should keep the pagination crumb.',
-				$this->get_breadcrumb_item( 'Search results for: "hoodie"', get_pagenum_link( 1 ) ),
-				$this->get_breadcrumb_item( 'Page 2' )
-			);
-		} finally {
-			update_option( 'posts_per_page', $original_posts_per_page );
-		}
 	}
 
 	/**
