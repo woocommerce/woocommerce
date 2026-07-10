@@ -22,9 +22,6 @@ env:
 concurrency:
   group: release-wporg-svn
 
-env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
-
 jobs:
   get-and-validate-release-asset:
     name: Get intended release details
@@ -215,25 +212,24 @@ jobs:
             --set-depth infinity \
             trunk/
 
-          # Skip if trunk is already at $RELEASE_TAG, so a re-run can recover.
-          trunk_version=$( cat trunk/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
-          if [ "$trunk_version" = "$RELEASE_TAG" ]; then
-            echo "::notice::trunk already at $RELEASE_TAG; skipping trunk update."
-          else
-            rm -rf trunk/*
-            cp -a ../release/woocommerce/. trunk
+          rm -rf trunk/*
+          cp -a ../release/woocommerce/. trunk
 
-            svn status | grep '^?' | awk '{print $2"@"}' | xargs -r svn add
-            svn status | grep '^!' | awk '{print $2"@"}' | xargs -r svn delete
+          svn status | grep '^?' | awk '{print $2"@"}' | xargs -r svn add
+          svn status | grep '^!' | awk '{print $2"@"}' | xargs -r svn delete
 
-            svn commit \
-              --username "$SVN_USERNAME" \
-              --password "$SVN_PASSWORD" \
-              --message "Updating trunk to version $RELEASE_TAG." \
-              --no-auth-cache \
-              --non-interactive \
-              --config-option=servers:global:http-timeout=3600
+          # On a re-run where trunk already matches the release there are no local changes and the commit is a no-op.
+          if [ -z "$( svn status )" ]; then
+            echo "::notice::trunk already matches release $RELEASE_TAG."
           fi
+
+          svn commit \
+            --username "$SVN_USERNAME" \
+            --password "$SVN_PASSWORD" \
+            --message "Updating trunk to version $RELEASE_TAG." \
+            --no-auth-cache \
+            --non-interactive \
+            --config-option=servers:global:http-timeout=3600
 
           # Skip if the tag already exists, so a re-run can recover.
           if svn list "$SVN_URL/tags/$RELEASE_TAG" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" > /dev/null 2>&1; then
@@ -295,7 +291,7 @@ jobs:
     name: Report SVN state
     runs-on: ubuntu-latest
     needs: [get-and-validate-release-asset, commit]
-    if: failure() && github.event.inputs.confirm-update == 'true' && needs.get-and-validate-release-asset.outputs.release_tag != ''
+    if: failure() && github.repository == 'woocommerce/woocommerce' && github.event.inputs.confirm-update == 'true' && needs.get-and-validate-release-asset.outputs.release_tag != ''
     permissions: {}
     env:
       RELEASE_TAG: ${{ needs.get-and-validate-release-asset.outputs.release_tag }}
