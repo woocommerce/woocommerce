@@ -8174,6 +8174,115 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test account step keeps reporting completed after being skipped forward even if an invalid test account exists.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_step_reports_completed_after_skip_despite_invalid_test_account() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$stored_profile          = array();
+		$updated_stored_profiles = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$updated_stored_profiles, $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Arrange the account state: no account before the initialization, and a test-drive
+		// account that requires verification (i.e. is not valid) after the platform fell back to it.
+		$account_connected = false;
+		$this->mock_provider
+			->expects( $this->any() )
+			->method( 'is_account_connected' )
+			->willReturnCallback(
+				function () use ( &$account_connected ) {
+					return $account_connected;
+				}
+			);
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'is_stripe_account_valid' )
+			->willReturn( false );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'restricted',
+					'testDrive'        => true,
+					'isLive'           => false,
+					'paymentsEnabled'  => false,
+					'detailsSubmitted' => false,
+				)
+			);
+
+		// Arrange the REST API requests.
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$account_connected ) {
+						unset( $params );
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							// The platform fell back to an account that requires verification.
+							$account_connected = true;
+
+							return array(
+								'success' => false,
+							);
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+			$this->fail( 'Expected ApiException was not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame(
+				'woocommerce_woopayments_onboarding_test_account_non_recoverable_error',
+				$e->getErrorCode(),
+				'A dedicated error code should signal the non-recoverable failure to the client.'
+			);
+		}
+
+		$status = $this->sut->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		$this->assertSame(
+			WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+			$status,
+			'The skipped step should keep reporting completed so the merchant is not routed back to it.'
+		);
+	}
+
+	/**
 	 * @testdox Test account init falls back to the failure path when the skipped step completion fails to persist.
 	 *
 	 * @return void
