@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Recognize registered WooCommerce Admin page route parameters on direct loads.
