@@ -14,6 +14,11 @@ on:
 
 permissions: {}
 
+env:
+  SVN_URL: ${{ secrets.wporg_svn_url }}
+  SVN_USERNAME: ${{ secrets.wporg_svn_username }}
+  SVN_PASSWORD: ${{ secrets.wporg_svn_password }}
+
 concurrency:
   group: release-wporg-svn
 
@@ -92,9 +97,6 @@ jobs:
         id: check-asset
         env:
           RELEASE_TAG: ${{ steps.fetch-release.outputs.release_tag }}
-          SVN_URL: ${{ secrets.wporg_svn_url }}
-          SVN_USERNAME: ${{ secrets.wporg_svn_username }}
-          SVN_PASSWORD: ${{ secrets.wporg_svn_password }}
 
           # GH CLI.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -140,7 +142,7 @@ jobs:
             exit 1
           fi
 
-          if php -r "die( version_compare( '$RELEASE_TAG', '$svn_plugin_version', '>' ) ? 0 : 1 );"; then
+          if php -r "die( version_compare( '$RELEASE_TAG', '$svn_plugin_version', '>=' ) ? 0 : 1 );"; then
             # Check that the stable tag in the release matches the stable tag in SVN.
             svn_stable_version=$( svn cat "$SVN_URL/trunk/readme.txt" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
             stable_tag_in_release=$(cat woocommerce/readme.txt | grep -oP '(?<=Stable tag: )(.+)' | head -n1)
@@ -167,9 +169,6 @@ jobs:
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     env:
-      SVN_URL: ${{ secrets.wporg_svn_url }}
-      SVN_USERNAME: ${{ secrets.wporg_svn_username }}
-      SVN_PASSWORD: ${{ secrets.wporg_svn_password }}
       RELEASE_TAG: ${{ needs.get-and-validate-release-asset.outputs.release_tag }}
     steps:
       - name: Download and unzip asset
@@ -216,25 +215,40 @@ jobs:
             --set-depth infinity \
             trunk/
 
-          # Remove previous trunk files.
-          rm -rf trunk/*
-          cp -a ../release/woocommerce/. trunk
+          # Skip if trunk is already at $RELEASE_TAG, so a re-run can recover.
+          trunk_version=$( cat trunk/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+          if [ "$trunk_version" = "$RELEASE_TAG" ]; then
+            echo "::notice::trunk already at $RELEASE_TAG; skipping trunk update."
+          else
+            rm -rf trunk/*
+            cp -a ../release/woocommerce/. trunk
 
-          # SVN add/delete new or removed files as needed.
-          svn status | grep '^?' | awk '{print $2"@"}' | xargs -r svn add
-          svn status | grep '^!' | awk '{print $2"@"}' | xargs -r svn delete
+            svn status | grep '^?' | awk '{print $2"@"}' | xargs -r svn add
+            svn status | grep '^!' | awk '{print $2"@"}' | xargs -r svn delete
 
-          # Copy trunk to tag.
-          svn copy trunk "tags/$RELEASE_TAG"
+            svn commit \
+              --username "$SVN_USERNAME" \
+              --password "$SVN_PASSWORD" \
+              --message "Updating trunk to version $RELEASE_TAG." \
+              --no-auth-cache \
+              --non-interactive \
+              --config-option=servers:global:http-timeout=3600
+          fi
 
-          # Commit.
-          svn commit \
-            --username "$SVN_USERNAME" \
-            --password "$SVN_PASSWORD" \
-            --message "Tagging version $RELEASE_TAG." \
-            --no-auth-cache \
-            --non-interactive \
-            --config-option=servers:global:http-timeout=3600
+          # Skip if the tag already exists, so a re-run can recover.
+          if svn list "$SVN_URL/tags/$RELEASE_TAG" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" > /dev/null 2>&1; then
+            echo "::notice::tag $RELEASE_TAG already exists; skipping tag copy."
+          else
+            svn copy \
+              "$SVN_URL/trunk" \
+              "$SVN_URL/tags/$RELEASE_TAG" \
+              --username "$SVN_USERNAME" \
+              --password "$SVN_PASSWORD" \
+              --message "Tagging version $RELEASE_TAG." \
+              --no-auth-cache \
+              --non-interactive \
+              --config-option=servers:global:http-timeout=3600
+          fi
 
           # Write success to summary.
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -276,3 +290,34 @@ jobs:
           echo "✅ Release committed to WordPress.org (tag only): [view tag](https://plugins.trac.wordpress.org/browser/woocommerce/tags/$RELEASE_TAG)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "⏭️ **Next step:** Validate the release as described in the [release docs](https://developer.woocommerce.com/docs/contribution/releases/building-and-publishing/)." >> $GITHUB_STEP_SUMMARY
+
+  handle-failure:
+    name: Report SVN state
+    runs-on: ubuntu-latest
+    needs: [get-and-validate-release-asset, commit]
+    if: failure() && github.event.inputs.confirm-update == 'true' && needs.get-and-validate-release-asset.outputs.release_tag != ''
+    permissions: {}
+    env:
+      RELEASE_TAG: ${{ needs.get-and-validate-release-asset.outputs.release_tag }}
+    steps:
+      - name: Install SVN
+        run: |
+          sudo apt-get -qq install -y subversion
+
+      - name: Check SVN state
+        run: |
+          trunk_version=$( svn cat "$SVN_URL/trunk/woocommerce.php" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" 2>/dev/null | grep -oP '(?<=Version: )(.+)' | head -n1 )
+
+          tag_line="tag \`$RELEASE_TAG\` does not exist"
+          if svn list "$SVN_URL/tags/$RELEASE_TAG" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" > /dev/null 2>&1; then
+            tag_line="tag \`$RELEASE_TAG\` exists ([view tag](https://plugins.trac.wordpress.org/browser/woocommerce/tags/$RELEASE_TAG))"
+          fi
+
+          {
+            echo "### WordPress.org SVN state"
+            echo ""
+            echo "- trunk version: \`${trunk_version:-unknown}\` ([view trunk](https://plugins.trac.wordpress.org/browser/woocommerce/trunk))"
+            echo "- $tag_line"
+            echo ""
+            echo "⚠️ If this failure was caused by a timeout or a temporary SVN error, it's safe to re-trigger this workflow."
+          } >> $GITHUB_STEP_SUMMARY
