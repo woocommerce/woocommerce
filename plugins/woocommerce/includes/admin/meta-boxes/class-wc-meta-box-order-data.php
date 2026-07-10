@@ -582,8 +582,12 @@ class WC_Meta_Box_Order_Data {
 
 								$shipping_fields = self::get_shipping_fields( $order, 'view' );
 
-								if ( $needs_shipping_address && ! empty( $shipping_fields ) ) {
+								if ( ! empty( $shipping_fields ) ) {
 									foreach ( $shipping_fields as $key => $field ) {
+										if ( ! $needs_shipping_address && 'phone' === $key && ! isset( $field['value'] ) ) {
+											continue;
+										}
+
 										if ( isset( $field['show'] ) && false === $field['show'] ) {
 											continue;
 										}
