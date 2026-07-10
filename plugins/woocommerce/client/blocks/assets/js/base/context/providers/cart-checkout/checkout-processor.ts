@@ -277,9 +277,7 @@ const CheckoutProcessor = () => {
 			// Send the total the shopper is currently seeing so the server can reject the
 			// order if it no longer matches (e.g. a product, price or quantity changed during
 			// checkout). Express payment methods may not know the final total up front, so
-			// they opt out of this check. `total_price` is '' only before the cart resolves; a
-			// real total of zero serialises to '0', so free (e.g. fully-discounted) orders are
-			// still guarded.
+			// they opt out of this check.
 			...( ! isExpressPaymentMethodActive &&
 			cartTotals &&
 			cartTotals.total_price !== ''

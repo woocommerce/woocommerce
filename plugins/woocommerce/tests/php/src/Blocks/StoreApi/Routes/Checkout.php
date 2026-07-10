@@ -344,6 +344,50 @@ class Checkout extends MockeryTestCase {
 		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
 	}
 
+	public function test_post_data_accepts_matching_expected_total_for_free_order() {
+		$fixtures     = new FixtureData();
+		$free_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Free Test Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 0,
+				'virtual'       => true,
+			)
+		);
+
+		wc_empty_cart();
+		wc()->cart->add_to_cart( $free_product->get_id(), 1 );
+		wc()->cart->calculate_totals();
+
+		// The cart is genuinely free, and a zero total serialises to the string "0".
+		$expected_total = (string) (int) round( (float) WC()->cart->get_total( 'edit' ) * pow( 10, wc_get_price_decimals() ), 0, PHP_ROUND_HALF_UP );
+		$this->assertSame( '0', $expected_total );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'payment_method'  => WC_Gateway_BACS::ID,
+				'expected_total'  => $expected_total,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
 	/**
 	 * Billing address used by the shipping address fallback tests.
 	 *

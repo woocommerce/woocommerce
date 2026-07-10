@@ -1058,23 +1058,14 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
-	 * Ensure the order total the shopper confirmed on the client still matches the total the
-	 * server calculates while processing this place-order request.
+	 * Reject the order if the total the shopper confirmed on the client no longer matches the
+	 * total the server recalculates for this place-order request. Without this guard the order
+	 * could be placed — and the shopper charged — at a total they never saw.
 	 *
-	 * The total the shopper sees was rendered by an earlier request. When they press "Place
-	 * order" the server recalculates from scratch, and that result can differ from what was
-	 * rendered: server-side filters and hooks may adjust totals or fees, another concurrent
-	 * Store API request may have mutated the cart or session, or the store's own data may
-	 * have changed since the render (a product price or quantity edited, a stock limit
-	 * clamping a quantity, a coupon expiring, shipping or tax recalculating). Under deferred
-	 * draft orders no order exists until this POST, so nothing pins the total between render
-	 * and place-order. Without this guard the order is placed — and the shopper charged — at
-	 * the recalculated total without their knowledge.
-	 *
-	 * The check is opt-in: it only runs when the client sends the total it displayed. Flows
-	 * that legitimately cannot know the final total up front (e.g. some express payment
-	 * methods) simply omit it and are unaffected. Runs on POST /checkout only, before the
-	 * draft order is materialised, so a mismatch leaves no order behind.
+	 * Runs on POST /checkout only, before the draft order is materialised, so a mismatch leaves
+	 * no order behind. The check only runs when the client sends the total it displayed; flows
+	 * that cannot know the final total up front (e.g. some express payment methods) omit it and
+	 * are unaffected.
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
@@ -1082,20 +1073,20 @@ class Checkout extends AbstractCartRoute {
 	 * @throws RouteException When the totals differ. Returns HTTP 409 with the refreshed cart so the client can display the updated total.
 	 */
 	private function validate_order_totals( \WP_REST_Request $request ): void {
-		$expected_total = $request['expected_total'] ?? '';
+		$expected_total = (string) ( $request['expected_total'] ?? '' );
 
-		// Opt-in: skip the check unless the client told us what total it displayed.
 		if ( '' === $expected_total ) {
 			return;
 		}
 
-		// Mirror the minor-unit conversion the cart schema uses for `totals.total_price` so the
-		// two integer values are directly comparable.
-		$decimals           = wc_get_price_decimals();
-		$cart_total         = (float) $this->cart_controller->get_cart_instance()->get_total( 'edit' );
-		$actual_total_minor = (int) round( $cart_total * pow( 10, $decimals ), 0, PHP_ROUND_HALF_UP );
+		// CartSchema::prepare_money_response() is not exported, so we use the money formatter directly here to match the total_price format.
+		$decimals     = wc_get_price_decimals();
+		$actual_total = woocommerce_store_api_get_formatter( 'money' )->format(
+			$this->cart_controller->get_cart_instance()->get_total( 'edit' ),
+			[ 'decimals' => $decimals ]
+		);
 
-		if ( (int) $expected_total !== $actual_total_minor ) {
+		if ( $expected_total !== $actual_total ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_total_mismatch',
 				esc_html__( 'The order total changed while you were checking out. Please review the updated total and place your order again.', 'woocommerce' ),
