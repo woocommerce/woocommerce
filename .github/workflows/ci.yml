@@ -210,6 +210,7 @@ jobs:
         # "::warning::wp-env-start-retry reason=<subsystem>" marker (grep-friendly) so the
         # underlying incident rate stays measurable even when the retry keeps the job green.
         run: |
+          set -o pipefail
           attempt=1
           max_attempts=3
           log="$(mktemp)"
