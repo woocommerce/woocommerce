@@ -15,6 +15,7 @@ use WC_Unit_Test_Case;
 use WP_Application_Passwords;
 use WP_REST_Request;
 use WP_REST_Server;
+use WP_UnitTest_Factory;
 
 /**
  * MobileAppQRLogin API controller test.
@@ -36,6 +37,27 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	 * @var MobileAppQRLogin
 	 */
 	private $controller;
+
+	/**
+	 * Administrator fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_admin_id;
+
+	/**
+	 * Shop manager fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_shop_manager_id;
+
+	/**
+	 * Subscriber fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_subscriber_id;
 
 	/**
 	 * Token generation endpoint.
@@ -156,6 +178,17 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	private $site_url_filters = array();
 
 	/**
+	 * Create immutable users shared by the test class.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$fixture_admin_id        = $factory->user->create( array( 'role' => 'administrator' ) );
+		self::$fixture_shop_manager_id = $factory->user->create( array( 'role' => 'shop_manager' ) );
+		self::$fixture_subscriber_id   = $factory->user->create( array( 'role' => 'subscriber' ) );
+	}
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -167,9 +200,9 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 			true
 		);
 
-		$this->admin_id        = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		$this->shop_manager_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		$this->subscriber_id   = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$this->admin_id        = self::$fixture_admin_id;
+		$this->shop_manager_id = self::$fixture_shop_manager_id;
+		$this->subscriber_id   = self::$fixture_subscriber_id;
 
 		// Remember existing $_SERVER values so we can restore them in tearDown.
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Unit-test fixture: values are captured for restoration only, never used for processing.
@@ -198,10 +231,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
-
-		wp_delete_user( $this->admin_id );
-		wp_delete_user( $this->shop_manager_id );
-		wp_delete_user( $this->subscriber_id );
 
 		// Clear any QR login data the tests may have written.
 		$this->delete_all_qr_login_data();
