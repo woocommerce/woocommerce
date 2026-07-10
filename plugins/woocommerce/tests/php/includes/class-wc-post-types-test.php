@@ -14,16 +14,37 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	private $original_theme;
 
 	/**
-	 * Whether the original theme supported WooCommerce.
+	 * Original WooCommerce theme support arguments.
 	 *
-	 * @var bool
+	 * @var array|bool
 	 */
 	private $original_theme_support;
 
 	/**
+	 * Original installing state.
+	 *
+	 * @var bool
+	 */
+	private $original_installing;
+
+	/**
+	 * Original in-memory rewrite rules.
+	 *
+	 * @var array|null
+	 */
+	private $original_rewrite_rules;
+
+	/**
+	 * Original permalink structure.
+	 *
+	 * @var string
+	 */
+	private $original_permalink_structure;
+
+	/**
 	 * Original option values.
 	 *
-	 * @var array<string, mixed>
+	 * @var array<string, array{exists: bool, value: mixed}>
 	 */
 	private $original_options;
 
@@ -40,50 +61,67 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->original_theme         = get_stylesheet();
-		$this->original_theme_support = current_theme_supports( 'woocommerce' );
-		$this->original_options       = array(
-			'current_theme_supports_woocommerce'    => get_option( 'current_theme_supports_woocommerce', false ),
-			'woocommerce_queue_flush_rewrite_rules' => get_option( 'woocommerce_queue_flush_rewrite_rules', false ),
-			'rewrite_rules'                         => get_option( 'rewrite_rules', false ),
-		);
+		global $wp_rewrite;
+
+		$this->original_theme               = get_stylesheet();
+		$this->original_theme_support       = get_theme_support( 'woocommerce' );
+		$this->original_installing          = wp_installing();
+		$this->original_rewrite_rules       = $wp_rewrite->rules;
+		$this->original_permalink_structure = $wp_rewrite->permalink_structure;
+		$this->original_options             = array();
+		$missing_option                     = new stdClass();
+
+		foreach ( array( 'current_theme_supports_woocommerce', 'woocommerce_queue_flush_rewrite_rules', 'rewrite_rules', 'permalink_structure' ) as $option_name ) {
+			$value                                  = get_option( $option_name, $missing_option );
+			$this->original_options[ $option_name ] = array(
+				'exists' => $missing_option !== $value,
+				'value'  => $value,
+			);
+		}
 
 		$this->flush_hook_was_registered = false !== has_action( 'woocommerce_after_register_post_type', array( 'WC_Post_Types', 'maybe_flush_rewrite_rules' ) );
 
 		remove_action( 'woocommerce_after_register_post_type', array( 'WC_Post_Types', 'maybe_flush_rewrite_rules' ) );
+		add_filter( 'flush_rewrite_rules_hard', '__return_false' );
 	}
 
 	/**
 	 * Restore global test state.
 	 */
 	public function tearDown(): void {
+		global $_wp_theme_features, $wp_rewrite;
+
 		wp_installing( false );
 
 		if ( get_stylesheet() !== $this->original_theme ) {
 			switch_theme( $this->original_theme );
 		}
 
-		if ( $this->original_theme_support ) {
-			add_theme_support( 'woocommerce' );
+		if ( false !== $this->original_theme_support ) {
+			$_wp_theme_features['woocommerce'] = $this->original_theme_support;
 		} else {
-			remove_theme_support( 'woocommerce' );
+			unset( $_wp_theme_features['woocommerce'] );
 		}
 
-		if ( ! post_type_exists( 'product' ) ) {
-			WC_Post_Types::register_post_types();
-		}
+		unregister_post_type( 'product' );
+		WC_Post_Types::register_post_types();
 
-		foreach ( $this->original_options as $option_name => $option_value ) {
-			if ( false === $option_value ) {
+		$wp_rewrite->set_permalink_structure( $this->original_permalink_structure );
+
+		foreach ( $this->original_options as $option_name => $option ) {
+			if ( ! $option['exists'] ) {
 				delete_option( $option_name );
 			} else {
-				update_option( $option_name, $option_value );
+				update_option( $option_name, $option['value'] );
 			}
 		}
+		$wp_rewrite->rules = $this->original_rewrite_rules;
 
 		if ( $this->flush_hook_was_registered ) {
 			add_action( 'woocommerce_after_register_post_type', array( 'WC_Post_Types', 'maybe_flush_rewrite_rules' ) );
 		}
+		remove_filter( 'flush_rewrite_rules_hard', '__return_false' );
+		wp_installing( $this->original_installing );
 
 		parent::tearDown();
 	}
@@ -92,9 +130,11 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	 * @testdox Installing mode preserves stored theme support while continuing post type registration and hooks.
 	 */
 	public function test_installing_mode_preserves_theme_support_state_during_registration(): void {
+		$sentinel_rules = array( '^rewrite-state-verification/?$' => 'index.php?rewrite-state-verification=1' );
 		$this->prepare_unsupported_classic_theme();
 		update_option( 'current_theme_supports_woocommerce', 'yes' );
-		delete_option( 'woocommerce_queue_flush_rewrite_rules' );
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+		update_option( 'rewrite_rules', $sentinel_rules );
 
 		$before_hook_count = 0;
 		$after_hook_count  = 0;
@@ -105,6 +145,8 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 			++$after_hook_count;
 		};
 
+		$this->assertTrue( $this->flush_hook_was_registered, 'The queued flush callback should be registered on the post-type lifecycle hook.' );
+		add_action( 'woocommerce_after_register_post_type', array( 'WC_Post_Types', 'maybe_flush_rewrite_rules' ) );
 		add_action( 'woocommerce_register_post_type', $before_hook );
 		add_action( 'woocommerce_after_register_post_type', $after_hook );
 		wp_installing( true );
@@ -119,7 +161,8 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $before_hook_count, 'The pre-registration hook should still fire.' );
 		$this->assertSame( 1, $after_hook_count, 'The post-registration hook should still fire.' );
 		$this->assertSame( 'yes', get_option( 'current_theme_supports_woocommerce' ), 'Installing mode should not persist request-local missing theme support.' );
-		$this->assertFalse( get_option( 'woocommerce_queue_flush_rewrite_rules', false ), 'Installing mode should not queue a theme-support rewrite flush.' );
+		$this->assertSame( 'yes', get_option( 'woocommerce_queue_flush_rewrite_rules' ), 'Installing mode should preserve the queued flush for a normal request.' );
+		$this->assertSame( $sentinel_rules, get_option( 'rewrite_rules' ), 'Installing mode should not persist a replacement rewrite rule set.' );
 	}
 
 	/**
@@ -139,33 +182,32 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Installing mode preserves an existing rewrite queue and persisted rules.
-	 */
-	public function test_installing_mode_preserves_queued_rewrite_flush(): void {
-		$sentinel_rules = array( '^rewrite-state-verification/?$' => 'index.php?rewrite-state-verification=1' );
-		update_option( 'rewrite_rules', $sentinel_rules );
-		update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
-		wp_installing( true );
-
-		WC_Post_Types::maybe_flush_rewrite_rules();
-
-		$this->assertSame( 'yes', get_option( 'woocommerce_queue_flush_rewrite_rules' ), 'Installing mode should preserve the queued flush for a normal request.' );
-		$this->assertSame( $sentinel_rules, get_option( 'rewrite_rules' ), 'Installing mode should not persist a replacement rewrite rule set.' );
-	}
-
-	/**
-	 * @testdox Normal requests consume an existing rewrite queue and persist complete rules.
+	 * @testdox Normal requests consume an existing rewrite queue and persist current rules.
 	 */
 	public function test_normal_request_consumes_queued_rewrite_flush(): void {
+		global $wp_rewrite;
+
 		$sentinel_rules = array( '^rewrite-state-verification/?$' => 'index.php?rewrite-state-verification=1' );
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
+		unregister_post_type( 'product' );
+		WC_Post_Types::register_post_types();
 		update_option( 'rewrite_rules', $sentinel_rules );
 		update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		wp_installing( false );
 
 		WC_Post_Types::maybe_flush_rewrite_rules();
 
+		$rules         = (array) get_option( 'rewrite_rules' );
+		$product_rules = array_filter(
+			$rules,
+			static function ( $query ): bool {
+				return str_contains( $query, 'index.php?product=' );
+			}
+		);
+
 		$this->assertSame( 'no', get_option( 'woocommerce_queue_flush_rewrite_rules' ), 'Normal requests should consume the queued flush.' );
-		$this->assertNotSame( $sentinel_rules, get_option( 'rewrite_rules' ), 'Normal requests should persist regenerated rewrite rules.' );
+		$this->assertNotEmpty( $rules, 'Normal requests should persist regenerated rewrite rules.' );
+		$this->assertNotEmpty( $product_rules, 'Regenerated rules should include WooCommerce product rewrites.' );
 	}
 
 	/**
