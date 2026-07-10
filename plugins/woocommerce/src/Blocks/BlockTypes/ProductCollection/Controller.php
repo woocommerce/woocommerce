@@ -254,7 +254,7 @@ class Controller extends AbstractBlock {
 			'woocommerce_catalog_products_per_page',
 			array(
 				'type'              => 'integer',
-				'description'       => __( 'Number of products to display per page in the catalog.', 'woocommerce' ),
+				'description'       => __( 'Number of products to display per page in the catalog. A value of 0 falls back to the default catalog columns x rows.', 'woocommerce' ),
 				'show_in_rest'      => array(
 					'name'   => 'woocommerce_catalog_products_per_page',
 					'schema' => array(

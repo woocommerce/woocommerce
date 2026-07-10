@@ -329,16 +329,26 @@ const ProductTemplateEdit = (
 						}
 					}
 				}
-				query.per_page = loopShopPerPage;
-
 				const settings = getEditedEntityRecord(
 					'root',
 					'site',
 					undefined
-				) as unknown as Record< string, string >;
+				) as unknown as Record< string, string | number >;
+
+				// Use the live (unsaved) value of the global "Products per page"
+				// setting so the preview reacts immediately when it changes in
+				// the inspector controls, falling back to the same default used
+				// on the frontend (see WC_Query::get_catalog_products_per_page()).
+				const catalogProductsPerPage = Number(
+					settings.woocommerce_catalog_products_per_page
+				);
+				query.per_page =
+					catalogProductsPerPage > 0
+						? catalogProductsPerPage
+						: loopShopPerPage;
 
 				const orderProperties = getOrderPropertiesForDefaultQuery(
-					settings.woocommerce_default_catalog_orderby
+					settings.woocommerce_default_catalog_orderby as string
 				);
 				query.orderby = orderProperties.orderby;
 				query.order = orderProperties.order;
