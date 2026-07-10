@@ -571,15 +571,18 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
 								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-								if ( $order->get_formatted_shipping_address() ) {
-									echo '<p>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
+								$needs_shipping_address = $order->needs_shipping_address();
+								$shipping_address       = $needs_shipping_address ? $order->get_formatted_shipping_address() : '';
+
+								if ( $shipping_address ) {
+									echo '<p>' . wp_kses( $shipping_address, array( 'br' => array() ) ) . '</p>';
 								} else {
 									echo '<p class="none_set">' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
 								}
 
 								$shipping_fields = self::get_shipping_fields( $order, 'view' );
 
-								if ( ! empty( $shipping_fields ) ) {
+								if ( $needs_shipping_address && ! empty( $shipping_fields ) ) {
 									foreach ( $shipping_fields as $key => $field ) {
 										if ( isset( $field['show'] ) && false === $field['show'] ) {
 											continue;
