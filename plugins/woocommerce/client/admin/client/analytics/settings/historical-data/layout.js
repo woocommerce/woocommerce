@@ -18,6 +18,7 @@ import HistoricalDataProgress from './progress';
 import HistoricalDataStatus from './status';
 import HistoricalDataSkipCheckbox from './skip-checkbox';
 import FailedOrdersNotice from './failed-orders-notice';
+import RefundDoubleCountNotice from './refund-double-count-notice';
 import './style.scss';
 
 class HistoricalDataLayout extends Component {
@@ -88,6 +89,7 @@ class HistoricalDataLayout extends Component {
 								status={ status }
 							/>
 							<FailedOrdersNotice />
+							<RefundDoubleCountNotice />
 						</div>
 					</div>
 				</div>

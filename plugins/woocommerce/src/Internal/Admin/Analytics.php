@@ -33,6 +33,34 @@ class Analytics {
 	const FULL_REFUND_FIX_DATA_TOOL_ID = 'fix_woocommerce_analytics_full_refund_data';
 
 	/**
+	 * Option holding the refund double-count scan state: running_count, cursor, complete.
+	 *
+	 * @since 11.1.0
+	 */
+	const REFUND_DOUBLE_COUNT_OPTION = 'woocommerce_analytics_refund_double_count';
+
+	/**
+	 * Action Scheduler hook for a refund double-count detection batch.
+	 *
+	 * @since 11.1.0
+	 */
+	const REFUND_DOUBLE_COUNT_SCAN_HOOK = 'woocommerce_analytics_refund_double_count_scan_batch';
+
+	/**
+	 * Action Scheduler hook for a refund double-count fix (re-import) batch.
+	 *
+	 * @since 11.1.0
+	 */
+	const REFUND_DOUBLE_COUNT_FIX_HOOK = 'woocommerce_analytics_refund_double_count_fix_batch';
+
+	/**
+	 * Size of the parent_id window scanned/fixed per batch.
+	 *
+	 * @since 11.1.0
+	 */
+	const REFUND_DOUBLE_COUNT_WINDOW = 500000;
+
+	/**
 	 * Class instance.
 	 *
 	 * @var Analytics instance
@@ -76,6 +104,16 @@ class Analytics {
 		// Always register the batch hook so in-flight jobs survive after the legacy
 		// flag is cleared (clearing happens before the first batch is queued).
 		add_action( 'woocommerce_analytics_refund_fix_batch', array( $this, 'process_refund_fix_batch' ) );
+
+		// Refund double-count (#66320) historical cleanup: one-time scan scheduled by the
+		// 11.1.0 DB upgrade, plus an on-demand fix. Batch hooks are always registered so
+		// in-flight self-scheduling jobs survive across requests.
+		add_action( self::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( $this, 'process_refund_double_count_scan_batch' ) );
+		add_action( self::REFUND_DOUBLE_COUNT_FIX_HOOK, array( $this, 'process_refund_double_count_fix_batch' ) );
+
+		// A re-import that reprocesses existing rows (skip-existing unchecked) repairs the
+		// double-counted rows, so clear the stale scan count when that import starts.
+		add_action( 'woocommerce_analytics_regenerate_init', array( $this, 'maybe_clear_refund_double_count_on_regenerate' ), 10, 2 );
 
 		if ( $this->should_show_refund_fix_tool() ) {
 			add_filter( 'woocommerce_debug_tools', array( $this, 'register_full_refund_fix_data_tool' ) );
@@ -346,6 +384,247 @@ class Analytics {
 				array( $last_order_id ),
 				'wc-admin-data'
 			);
+		}
+	}
+
+	/**
+	 * Return the parsed refund double-count scan state with sane defaults.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return array{count:int, cursor:int, complete:bool}
+	 */
+	public static function get_refund_double_count_state(): array {
+		$state = get_option( self::REFUND_DOUBLE_COUNT_OPTION );
+
+		return array(
+			'count'    => is_array( $state ) && isset( $state['running_count'] ) ? (int) $state['running_count'] : 0,
+			'cursor'   => is_array( $state ) && isset( $state['cursor'] ) ? (int) $state['cursor'] : 0,
+			'complete' => is_array( $state ) && ! empty( $state['complete'] ),
+		);
+	}
+
+	/**
+	 * Whether a refund double-count fix batch is currently pending or running.
+	 *
+	 * Detected live from Action Scheduler so a batch that dies never leaves a
+	 * stuck "in progress" flag behind.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return bool
+	 */
+	public static function is_refund_double_count_fix_in_progress(): bool {
+		return ! empty(
+			as_get_scheduled_actions(
+				array(
+					'hook'     => self::REFUND_DOUBLE_COUNT_FIX_HOOK,
+					'status'   => array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ),
+					'per_page' => 1,
+					'orderby'  => 'none',
+				),
+				'ids'
+			)
+		);
+	}
+
+	/**
+	 * Schedule the first refund double-count fix batch.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return void
+	 */
+	public static function schedule_refund_double_count_fix(): void {
+		WC()->queue()->schedule_single(
+			time(),
+			self::REFUND_DOUBLE_COUNT_FIX_HOOK,
+			array( 0 ),
+			'wc-admin-data'
+		);
+	}
+
+	/**
+	 * Build the SQL that selects the parent order IDs whose refund rows over-sum
+	 * their parent's own totals within a parent_id window — the signature of the
+	 * #66320 partial-then-full double-count.
+	 *
+	 * The +0.01 tolerance guards against floating-point noise; COUNT(*) > 1 keeps
+	 * single full refunds out (they cannot double-count).
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param int $window_start Inclusive lower bound on parent_id.
+	 * @param int $window_end   Exclusive upper bound on parent_id.
+	 * @return string Prepared SQL selecting distinct affected parent_id values.
+	 */
+	private function get_refund_double_count_parents_sql( int $window_start, int $window_end ): string {
+		global $wpdb;
+
+		return $wpdb->prepare(
+			"SELECT r.parent_id
+			FROM {$wpdb->prefix}wc_order_stats AS r
+			INNER JOIN {$wpdb->prefix}wc_order_stats AS o ON o.order_id = r.parent_id
+			WHERE r.parent_id >= %d AND r.parent_id < %d
+			GROUP BY r.parent_id, o.net_total, o.tax_total, o.shipping_total
+			HAVING COUNT(*) > 1
+				AND ABS( SUM( r.net_total + r.tax_total + r.shipping_total ) ) > ( o.net_total + o.tax_total + o.shipping_total ) + 0.01",
+			$window_start,
+			$window_end
+		);
+	}
+
+	/**
+	 * Process one window of the refund double-count detection scan.
+	 *
+	 * Counts affected parents in the [cursor, cursor + window) parent_id range,
+	 * accumulates the running total in a single option, and self-schedules the
+	 * next window until the whole table is covered. Only stores a count — never
+	 * an ID list — so the notice read stays O(1).
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param int $cursor Inclusive lower bound on parent_id for this window; 0 for the first batch.
+	 * @return void
+	 * @throws \Exception On database error so Action Scheduler marks the job as failed.
+	 */
+	public function process_refund_double_count_scan_batch( $cursor = 0 ): void {
+		$cursor = intval( $cursor );
+
+		// Only new-data stores are affected by #66320. Old-data stores are repaired by
+		// their own migration re-import, so mark the scan complete with a zero count.
+		if ( ! OrderUtil::uses_new_full_refund_data() ) {
+			$this->finish_refund_double_count_scan( 0 );
+			return;
+		}
+
+		global $wpdb;
+
+		$state         = self::get_refund_double_count_state();
+		$running_count = ( $cursor > 0 ) ? $state['count'] : 0;
+
+		$window_end = $cursor + self::REFUND_DOUBLE_COUNT_WINDOW;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		$window_count = $wpdb->get_var( 'SELECT COUNT(*) FROM ( ' . $this->get_refund_double_count_parents_sql( $cursor, $window_end ) . ' ) sub' );
+
+		if ( null === $window_count && $wpdb->last_error ) {
+			throw new \Exception( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
+		$running_count += intval( $window_count );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$max_order_id = intval( $wpdb->get_var( "SELECT MAX(order_id) FROM {$wpdb->prefix}wc_order_stats" ) );
+
+		if ( $window_end > $max_order_id ) {
+			$this->finish_refund_double_count_scan( $running_count );
+			return;
+		}
+
+		update_option(
+			self::REFUND_DOUBLE_COUNT_OPTION,
+			array(
+				'running_count' => $running_count,
+				'cursor'        => $window_end,
+				'complete'      => false,
+			),
+			false
+		);
+
+		WC()->queue()->schedule_single(
+			time() + 5,
+			self::REFUND_DOUBLE_COUNT_SCAN_HOOK,
+			array( $window_end ),
+			'wc-admin-data'
+		);
+	}
+
+	/**
+	 * Persist the terminal scan state.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param int $count Final affected-order count.
+	 * @return void
+	 */
+	private function finish_refund_double_count_scan( int $count ): void {
+		update_option(
+			self::REFUND_DOUBLE_COUNT_OPTION,
+			array(
+				'running_count' => $count,
+				'cursor'        => 0,
+				'complete'      => true,
+			),
+			false
+		);
+	}
+
+	/**
+	 * Process one window of the refund double-count fix.
+	 *
+	 * Re-imports each affected parent order (which re-syncs the parent and every
+	 * refund row with the corrected #66320 logic), advances the parent_id cursor,
+	 * and self-schedules until the table is covered. On the final window the stored
+	 * count is reset to zero so the notice self-heals.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param int $cursor Inclusive lower bound on parent_id for this window; 0 for the first batch.
+	 * @return void
+	 * @throws \Exception On database error so Action Scheduler marks the job as failed.
+	 */
+	public function process_refund_double_count_fix_batch( $cursor = 0 ): void {
+		$cursor = intval( $cursor );
+
+		global $wpdb;
+
+		$window_end = $cursor + self::REFUND_DOUBLE_COUNT_WINDOW;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		$parent_ids = $wpdb->get_col( $this->get_refund_double_count_parents_sql( $cursor, $window_end ) );
+
+		if ( $wpdb->last_error ) {
+			throw new \Exception( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
+		foreach ( $parent_ids as $parent_id ) {
+			OrdersScheduler::import( intval( $parent_id ) );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$max_order_id = intval( $wpdb->get_var( "SELECT MAX(order_id) FROM {$wpdb->prefix}wc_order_stats" ) );
+
+		if ( $window_end > $max_order_id ) {
+			// The whole table has been swept; the affected rows are now correct.
+			$this->finish_refund_double_count_scan( 0 );
+			return;
+		}
+
+		WC()->queue()->schedule_single(
+			time() + 5,
+			self::REFUND_DOUBLE_COUNT_FIX_HOOK,
+			array( $window_end ),
+			'wc-admin-data'
+		);
+	}
+
+	/**
+	 * Clear the refund double-count scan state when a historical re-import reprocesses
+	 * existing rows (skip-existing unchecked), since that repairs the affected rows.
+	 *
+	 * A skip-existing-checked import leaves the affected orders untouched, so the state
+	 * is kept to avoid permanently hiding a real issue.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param int|bool $days          Number of days to import (unused).
+	 * @param bool     $skip_existing Whether the import skips already-imported records.
+	 * @return void
+	 */
+	public function maybe_clear_refund_double_count_on_regenerate( $days, $skip_existing ): void {
+		if ( ! $skip_existing ) {
+			delete_option( self::REFUND_DOUBLE_COUNT_OPTION );
 		}
 	}
 

@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Admin\API;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
@@ -77,9 +78,11 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->clear_scheduled_actions();
+		as_unschedule_all_actions( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK );
 		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
+		delete_option( Analytics::REFUND_DOUBLE_COUNT_OPTION );
 		parent::tearDown();
 	}
 
@@ -455,5 +458,128 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 0, $data['failed_count'] );
 		$this->assertSame( 0, $data['failed_overflow_count'] );
+	}
+
+	/**
+	 * @testdox Status endpoint reports refund double-count fields, defaulting to an incomplete scan.
+	 */
+	public function test_status_includes_refund_double_count_defaults(): void {
+		wp_set_current_user( $this->admin_user );
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/status' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 0, $data['refund_double_count'] );
+		$this->assertFalse( $data['refund_double_count_scan_complete'] );
+		$this->assertFalse( $data['refund_double_count_fix_in_progress'] );
+	}
+
+	/**
+	 * @testdox Status endpoint surfaces the stored refund double-count once the scan is complete.
+	 */
+	public function test_status_reflects_completed_refund_scan(): void {
+		wp_set_current_user( $this->admin_user );
+		update_option(
+			Analytics::REFUND_DOUBLE_COUNT_OPTION,
+			array(
+				'running_count' => 4,
+				'cursor'        => 0,
+				'complete'      => true,
+			),
+			false
+		);
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/status' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 4, $data['refund_double_count'] );
+		$this->assertTrue( $data['refund_double_count_scan_complete'] );
+	}
+
+	/**
+	 * @testdox Fix-refund-double-counting schedules a fix batch when the scan is complete.
+	 */
+	public function test_fix_refund_double_counting_schedules_batch(): void {
+		wp_set_current_user( $this->admin_user );
+		update_option(
+			Analytics::REFUND_DOUBLE_COUNT_OPTION,
+			array(
+				'running_count' => 2,
+				'cursor'        => 0,
+				'complete'      => true,
+			),
+			false
+		);
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/fix-refund-double-counting' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $data['success'] );
+		$this->assertNotFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK, array( 0 ), 'wc-admin-data' ),
+			'A fix batch should be scheduled'
+		);
+	}
+
+	/**
+	 * @testdox Fix-refund-double-counting fails while the scan is still running.
+	 */
+	public function test_fix_refund_double_counting_fails_when_scan_incomplete(): void {
+		wp_set_current_user( $this->admin_user );
+		update_option(
+			Analytics::REFUND_DOUBLE_COUNT_OPTION,
+			array(
+				'running_count' => 0,
+				'cursor'        => 500000,
+				'complete'      => false,
+			),
+			false
+		);
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/fix-refund-double-counting' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_analytics_refund_scan_incomplete', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Fix-refund-double-counting fails when a fix batch is already scheduled.
+	 */
+	public function test_fix_refund_double_counting_fails_when_already_in_progress(): void {
+		wp_set_current_user( $this->admin_user );
+		update_option(
+			Analytics::REFUND_DOUBLE_COUNT_OPTION,
+			array(
+				'running_count' => 2,
+				'cursor'        => 0,
+				'complete'      => true,
+			),
+			false
+		);
+		as_schedule_single_action( time() + 60, Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK, array( 0 ), 'wc-admin-data' );
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/fix-refund-double-counting' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_analytics_refund_fix_in_progress', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Fix-refund-double-counting requires the manage_woocommerce capability.
+	 */
+	public function test_fix_refund_double_counting_requires_permission(): void {
+		wp_set_current_user( $this->customer_user );
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/fix-refund-double-counting' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
 	}
 }
