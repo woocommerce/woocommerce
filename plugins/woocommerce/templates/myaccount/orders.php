@@ -107,7 +107,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 								 * @param WC_Order $order          Current order object.
 								 * @param string   $column_id      Current column ID.
 								 */
-								echo apply_filters( 'woocommerce_account_orders_column_' . $column_id, $column_content, $order, $column_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+								echo apply_filters( 'woocommerce_account_orders_column_content_' . $column_id, $column_content, $order, $column_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 								?>
 							<?php endif; ?>
 
