@@ -11,17 +11,25 @@ use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPrefe
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use WC_Data_Exception;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_Http;
 use WP_REST_Request;
+use WP_REST_Server;
 
 /**
  * Tests for the NotificationPreferencesRestController class.
  *
  * @package WooCommerce\Tests\PushNotifications
  */
-class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
+class NotificationPreferencesRestControllerTest extends WC_Unit_Test_Case {
 	use PushNotificationsTestTrait;
+
+	/**
+	 * REST server used to dispatch notification preference requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
 
 	/**
 	 * Shop manager user ID for testing.
@@ -55,7 +63,11 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * mocks they need (e.g. replacing the service) so the resolved controller picks them up.
 	 */
 	private function register_routes(): void {
-		wc_get_container()->get( NotificationPreferencesRestController::class )->register_routes();
+		$controller   = wc_get_container()->get( NotificationPreferencesRestController::class );
+		$this->server = $this->create_rest_server_with_routes(
+			array( array( $controller, 'register_routes' ) ),
+			true
+		);
 	}
 
 	/**
@@ -70,6 +82,8 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->reset_container_replacements();
 		wc_get_container()->reset_all_resolved();
+		$this->clear_rest_server();
+		unset( $this->server );
 
 		parent::tearDown();
 	}
