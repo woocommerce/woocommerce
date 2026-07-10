@@ -914,8 +914,6 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		global $wp_rest_server;
 		$wp_rest_server = new WP_REST_Server();
 		$this->server   = $wp_rest_server;
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-		do_action( 'rest_api_init' );
 		$this->sut->register_routes();
 	}
 
