@@ -48,55 +48,6 @@
 			<directory suffix=".php">./tests/php/src/Api/Mutations</directory>
 		</testsuite>
 
-		<!-- Local shard suites used by the no-argument wp-env PHPUnit runner.
-		     They partition wc-phpunit-default so local full-suite runs can use
-		     isolated wp-env databases in parallel while filtered invocations and
-		     CI sharding can continue to use the existing suites above. -->
-		<testsuite name="wc-phpunit-local-shard-legacy">
-			<directory suffix=".php">./tests/legacy/unit-tests</directory>
-		</testsuite>
-		<testsuite name="wc-phpunit-local-shard-main-includes">
-			<directory suffix=".php">./tests/php/includes</directory>
-			<exclude>./tests/php/includes/settings</exclude>
-		</testsuite>
-		<testsuite name="wc-phpunit-local-shard-main-src-ui">
-			<directory suffix=".php">./tests/php/src/Admin</directory>
-			<directory suffix=".php">./tests/php/src/Blocks</directory>
-			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
-		</testsuite>
-		<testsuite name="wc-phpunit-local-shard-main-src-other">
-			<directory suffix=".php">./tests/php/src</directory>
-			<exclude>./tests/php/src/Admin</exclude>
-			<exclude>./tests/php/src/Blocks</exclude>
-			<exclude>./tests/php/src/Internal</exclude>
-			<exclude>./tests/php/src/Api/Infrastructure</exclude>
-			<exclude>./tests/php/src/Api/Queries</exclude>
-			<exclude>./tests/php/src/Api/Mutations</exclude>
-		</testsuite>
-		<testsuite name="wc-phpunit-local-shard-main-internal-admin">
-			<directory suffix=".php">./tests/php/src/Internal/Admin</directory>
-		</testsuite>
-		<testsuite name="wc-phpunit-local-shard-main-internal-core">
-			<directory suffix=".php">./tests/php/src/Internal/Caches</directory>
-			<directory suffix=".php">./tests/php/src/Internal/CLI</directory>
-			<directory suffix=".php">./tests/php/src/Internal/DataStores</directory>
-			<directory suffix=".php">./tests/php/src/Internal/ProductAttributesLookup</directory>
-			<directory suffix=".php">./tests/php/src/Internal/PushNotifications</directory>
-			<directory suffix=".php">./tests/php/src/Internal/Utilities</directory>
-		</testsuite>
-		<testsuite name="wc-phpunit-local-shard-main-internal-other">
-			<directory suffix=".php">./tests/php/includes/settings</directory>
-			<directory suffix=".php">./tests/php/src/Internal</directory>
-			<exclude>./tests/php/src/Internal/Admin</exclude>
-			<exclude>./tests/php/src/Internal/Api</exclude>
-			<exclude>./tests/php/src/Internal/Caches</exclude>
-			<exclude>./tests/php/src/Internal/CLI</exclude>
-			<exclude>./tests/php/src/Internal/DataStores</exclude>
-			<exclude>./tests/php/src/Internal/ProductAttributesLookup</exclude>
-			<exclude>./tests/php/src/Internal/PushNotifications</exclude>
-			<exclude>./tests/php/src/Internal/Utilities</exclude>
-		</testsuite>
-
 		<!-- Umbrella suites used for local invocation. PHPUnit does not
 		     support testsuite composition by reference, so the directory
 		     and exclude lists below are duplicated from the granular
