@@ -141,9 +141,9 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 			$this->markTestSkipped( 'Skipped in older versions of WordPress due to a bug in WP when validating arrays.' );
 		}
 
-		global $wpdb;
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
+		update_option( 'woocommerce_attribute_lookup_direct_updates', 'yes' );
 
 		// Create a variable product.
 		$variable_product   = WC_Helper_Product::create_variation_product( new WC_Product_Variable() );
@@ -192,7 +192,6 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 		}
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
-		WC_Helper_Queue::run_all_pending( 'woocommerce-db-updates' );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array( 'per_page' => 15 ) );
