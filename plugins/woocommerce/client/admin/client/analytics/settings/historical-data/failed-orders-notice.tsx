@@ -9,9 +9,13 @@ import {
 	useState,
 } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { Button, Notice } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
+
+/**
+ * Internal dependencies
+ */
+import ImportWarningNotice from './import-warning-notice';
 
 const LOG_URL_PATH =
 	'admin.php?page=wc-status&tab=logs&source=wc-analytics-order-import';
@@ -136,22 +140,13 @@ function FailedOrdersNotice() {
 	);
 
 	return (
-		<Notice
+		<ImportWarningNotice
 			className="woocommerce-settings-historical-data__failed-orders"
-			status="warning"
-			isDismissible={ false }
-		>
-			<p>{ message }</p>
-			<Button
-				variant="secondary"
-				isBusy={ isRetrying }
-				disabled={ isRetrying }
-				aria-disabled={ isRetrying }
-				onClick={ handleRetry }
-			>
-				{ __( 'Retry failed imports', 'woocommerce' ) }
-			</Button>
-		</Notice>
+			message={ message }
+			buttonLabel={ __( 'Retry failed imports', 'woocommerce' ) }
+			isBusy={ isRetrying }
+			onAction={ handleRetry }
+		/>
 	);
 }
 

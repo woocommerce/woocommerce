@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Admin\API;
 
 use WP_Error;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 
 defined( 'ABSPATH' ) || exit;
@@ -78,6 +79,19 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_retry_failed_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/fix-refund-double-counting',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'fix_refund_double_counting' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
+				),
+				'schema' => array( $this, 'get_fix_refund_double_counting_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -110,13 +124,18 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 
 		$failed_imports = OrdersScheduler::get_failed_order_imports();
 
+		$refund_double_count = Analytics::get_refund_double_count_state();
+
 		$response = array(
-			'mode'                      => $mode,
-			'last_processed_date'       => null,
-			'next_scheduled'            => null,
-			'import_in_progress_or_due' => null,
-			'failed_count'              => count( $failed_imports['ids'] ),
-			'failed_overflow_count'     => $failed_imports['overflow'],
+			'mode'                                => $mode,
+			'last_processed_date'                 => null,
+			'next_scheduled'                      => null,
+			'import_in_progress_or_due'           => null,
+			'failed_count'                        => count( $failed_imports['ids'] ),
+			'failed_overflow_count'               => $failed_imports['overflow'],
+			'refund_double_count'                 => $refund_double_count['count'],
+			'refund_double_count_scan_complete'   => $refund_double_count['complete'],
+			'refund_double_count_fix_in_progress' => Analytics::is_refund_double_count_fix_in_progress(),
 		);
 
 		// For scheduled mode, populate additional fields.
@@ -277,6 +296,74 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	}
 
 	/**
+	 * Schedule the re-import of orders whose refunds are double-counted in Analytics
+	 * (the historical rows written by the bug fixed in PR #66320).
+	 *
+	 * Refuses when the detection scan has not finished, or when a fix batch is already
+	 * pending or running, so repeated requests cannot pile up overlapping work.
+	 *
+	 * @param  \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function fix_refund_double_counting( $request ) {
+		$state = Analytics::get_refund_double_count_state();
+
+		if ( ! $state['complete'] ) {
+			return new WP_Error(
+				'woocommerce_rest_analytics_refund_scan_incomplete',
+				__( 'The scan for affected orders has not finished yet. Please try again shortly.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( Analytics::is_refund_double_count_fix_in_progress() ) {
+			return new WP_Error(
+				'woocommerce_rest_analytics_refund_fix_in_progress',
+				__( 'A fix is already in progress. Please wait for it to complete.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		Analytics::schedule_refund_double_count_fix();
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'message' => __( 'Re-importing affected orders. Your Analytics totals will be corrected shortly.', 'woocommerce' ),
+			)
+		);
+	}
+
+	/**
+	 * Get the schema for the fix-refund-double-counting endpoint, conforming to JSON Schema.
+	 *
+	 * @return array
+	 */
+	public function get_fix_refund_double_counting_schema() {
+		$schema = array(
+			'$schema'    => 'https://json-schema.org/draft-04/schema#',
+			'title'      => 'analytics_import_fix_refund_double_counting',
+			'type'       => 'object',
+			'properties' => array(
+				'success' => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whether the fix was scheduled successfully.', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'message' => array(
+					'type'        => 'string',
+					'description' => __( 'Result message.', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+			),
+		);
+
+		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
 	 * Get the schema for the retry-failed endpoint, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -372,40 +459,58 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 			'title'      => 'analytics_import_status',
 			'type'       => 'object',
 			'properties' => array(
-				'mode'                      => array(
+				'mode'                                => array(
 					'type'        => 'string',
 					'enum'        => array( 'scheduled', 'immediate' ),
 					'description' => __( 'Current import mode.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'last_processed_date'       => array(
+				'last_processed_date'                 => array(
 					'type'        => array( 'string', 'null' ),
 					'description' => __( 'Last processed order date (null in immediate mode).', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'next_scheduled'            => array(
+				'next_scheduled'                      => array(
 					'type'        => array( 'string', 'null' ),
 					'description' => __( 'Next scheduled import time (null in immediate mode).', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'import_in_progress_or_due' => array(
+				'import_in_progress_or_due'           => array(
 					'type'        => array( 'boolean', 'null' ),
 					'description' => __( 'Whether a batch import is currently running or scheduled to run within the next minute (null in immediate mode).', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'failed_count'              => array(
+				'failed_count'                        => array(
 					'type'        => 'integer',
 					'description' => __( 'Number of orders that failed analytics import and are pending retry.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'failed_overflow_count'     => array(
+				'failed_overflow_count'               => array(
 					'type'        => 'integer',
 					'description' => __( 'Number of failed order IDs dropped because the stored list reached its limit.', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'refund_double_count'                 => array(
+					'type'        => 'integer',
+					'description' => __( 'Number of orders whose refunds are double-counted in Analytics (meaningful once the scan is complete).', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'refund_double_count_scan_complete'   => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whether the one-time scan for refund double-counts has finished.', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'refund_double_count_fix_in_progress' => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whether a refund double-count fix re-import is currently running.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
