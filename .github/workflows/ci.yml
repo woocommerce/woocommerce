@@ -201,7 +201,24 @@ jobs:
       - name: 'Start Test Environment: start'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
-        run: pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
+        # `wp-env start` fails on transient network timeouts from several subsystems:
+        # composer fetching packagist inside the Docker build ("curl error 28"), wp-env's
+        # own `got` client downloading WordPress core ("ETIMEDOUT"), and the Docker daemon
+        # pulling images from Docker Hub ("context deadline exceeded"). Retry the whole
+        # start to ride out those blips -- BuildKit reuses layers that already succeeded,
+        # so a retry only re-runs whatever failed.
+        run: |
+          attempt=1
+          max_attempts=3
+          until pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}; do
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "::error::wp-env start failed after ${max_attempts} attempts"
+              exit 1
+            fi
+            echo "::warning::wp-env start failed (attempt ${attempt}/${max_attempts}). Retrying in $((attempt * 15))s..."
+            sleep "$((attempt * 15))"
+            attempt=$((attempt + 1))
+          done
 
       - name: 'Resolve artifacts path'
         if: ${{ always() && matrix.report.resultsPath != '' }}
