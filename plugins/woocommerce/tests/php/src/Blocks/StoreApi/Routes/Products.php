@@ -27,15 +27,13 @@ class Products extends ControllerTestCase {
 		$this->products = array(
 			$fixtures->get_simple_product(
 				array(
-					'name'              => 'Test Product 1',
-					'stock_status'      => ProductStockStatus::IN_STOCK,
-					'regular_price'     => 10,
-					'weight'            => '2.5',
-					'length'            => '10',
-					'width'             => '5',
-					'height'            => '3',
-					'image_id'          => $fixtures->sideload_image(),
-					'gallery_image_ids' => array(),
+					'name'          => 'Test Product 1',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+					'regular_price' => 10,
+					'weight'        => '2.5',
+					'length'        => '10',
+					'width'         => '5',
+					'height'        => '3',
 				)
 			),
 			$fixtures->get_simple_product(
@@ -43,7 +41,6 @@ class Products extends ControllerTestCase {
 					'name'          => 'Test Product 2',
 					'stock_status'  => ProductStockStatus::IN_STOCK,
 					'regular_price' => 10,
-					'image_id'      => $fixtures->sideload_image(),
 				)
 			),
 			$fixtures->get_grouped_product( array() ),
@@ -54,6 +51,11 @@ class Products extends ControllerTestCase {
 	 * Test getting item.
 	 */
 	public function test_get_item() {
+		$fixtures = new FixtureData();
+		$image_id = $fixtures->sideload_image( $this->products[0]->get_id() );
+		$this->products[0]->set_image_id( $image_id );
+		$this->products[0]->save();
+
 		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $this->products[0]->get_id() ) );
 		$data     = $response->get_data();
 
@@ -84,6 +86,8 @@ class Products extends ControllerTestCase {
 		$this->assertCount( 1, $data['images'] );
 		$this->assertIsObject( $data['images'][0] );
 		$this->assertEquals( $this->products[0]->get_image_id(), $data['images'][0]->id );
+
+		wp_delete_attachment( $image_id, true );
 	}
 
 	/**
