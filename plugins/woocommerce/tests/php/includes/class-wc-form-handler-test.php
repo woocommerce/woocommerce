@@ -27,6 +27,13 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	private array $original_request = array();
 
 	/**
+	 * Original WooCommerce session.
+	 *
+	 * @var WC_Session|null
+	 */
+	private $original_session;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -34,12 +41,13 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 		$this->original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$this->original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->original_session = WC()->session;
 
 		if ( ! WC()->session ) {
-			WC()->session = new WC_Session_Handler();
-			WC()->session->init();
+			WC()->initialize_session();
 		}
 
+		add_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 		wc_clear_notices();
 	}
 
@@ -54,6 +62,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 		wp_set_current_user( 0 );
 		wc_clear_notices();
+		WC()->session = $this->original_session;
 
 		parent::tearDown();
 	}
@@ -66,7 +75,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * @throws RuntimeException Always.
 	 */
 	public function intercept_redirect( string $location ): void {
-		throw new RuntimeException( 'wp_redirect intercepted: ' . esc_url_raw( $location ) );
+		throw new RuntimeException( esc_url_raw( $location ) );
 	}
 
 	/**
@@ -76,11 +85,12 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_save_account_details_allows_unchanged_email_like_display_name(): void {
 		$user_email = 'display-name-customer@example.test';
-		$user_id    = $this->create_customer(
+		$user_id    = self::factory()->user->create(
 			array(
 				'user_login'   => $user_email,
 				'user_email'   => $user_email,
 				'display_name' => $user_email,
+				'role'         => 'customer',
 			)
 		);
 
@@ -111,11 +121,14 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * @covers WC_Form_Handler::save_account_details()
 	 */
 	public function test_save_account_details_blocks_new_email_like_display_name(): void {
-		$user_id = $this->create_customer(
+		$user_id = self::factory()->user->create(
 			array(
 				'user_login'   => 'display-name-customer',
 				'user_email'   => 'display-name-customer@example.test',
+				'first_name'   => 'Original',
+				'last_name'    => 'Customer',
 				'display_name' => 'Display Customer',
+				'role'         => 'customer',
 			)
 		);
 
@@ -135,6 +148,8 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$updated_user  = get_userdata( $user_id );
 
 		$this->assertContains( 'Display name cannot be changed to email address due to privacy concern.', $error_notices );
+		$this->assertSame( 'Original', $updated_user->first_name, 'First name should not change when account validation fails.' );
+		$this->assertSame( 'Customer', $updated_user->last_name, 'Last name should not change when account validation fails.' );
 		$this->assertSame( 'Display Customer', $updated_user->display_name, 'Display name should not change to a new email-like value.' );
 	}
 
@@ -144,11 +159,12 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * @covers WC_Form_Handler::save_account_details()
 	 */
 	public function test_save_account_details_allows_non_email_display_name_change(): void {
-		$user_id = $this->create_customer(
+		$user_id = self::factory()->user->create(
 			array(
 				'user_login'   => 'display-name-customer',
 				'user_email'   => 'display-name-customer@example.test',
 				'display_name' => 'Display Customer',
+				'role'         => 'customer',
 			)
 		);
 
@@ -169,23 +185,6 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 		$this->assertNotContains( 'Display name cannot be changed to email address due to privacy concern.', $error_notices );
 		$this->assertSame( 'Updated Customer', $updated_user->display_name, 'Display name should save when changed to a non-email value.' );
-	}
-
-	/**
-	 * Creates a customer user for account details tests.
-	 *
-	 * @param array<string,mixed> $args User arguments.
-	 * @return int Created user ID.
-	 */
-	private function create_customer( array $args ): int {
-		return self::factory()->user->create(
-			array_merge(
-				array(
-					'role' => 'customer',
-				),
-				$args
-			)
-		);
 	}
 
 	/**
@@ -211,15 +210,15 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * Dispatches the account-details save handler and expects its success redirect.
 	 */
 	private function dispatch_account_details_save_expecting_redirect(): void {
-		add_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
-
 		try {
 			WC_Form_Handler::save_account_details();
 		} catch ( RuntimeException $e ) {
-			$this->assertStringContainsString( 'wp_redirect intercepted:', $e->getMessage() );
+			$this->assertSame(
+				wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ),
+				$e->getMessage(),
+				'Successful account saves should redirect to Account details.'
+			);
 			return;
-		} finally {
-			remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 		}
 
 		$this->fail( 'Expected save_account_details() to redirect after a successful save.' );
