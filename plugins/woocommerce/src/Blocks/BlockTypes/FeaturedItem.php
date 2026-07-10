@@ -206,10 +206,18 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	/**
 	 * Returns the featured item image attachment ID.
 	 *
+	 * Note: Ideally, this method would be declared as abstract.
+	 * However, it remains a concrete method returning 0 to preserve legacy
+	 * compatibility with existing child classes that may not implement it.
+	 * See:
+	 * https://github.com/woocommerce/woocommerce/pull/66466#discussion_r3559124282
+	 *
 	 * @param \WP_Term|\WC_Product $item Item object.
 	 * @return int
 	 */
-	abstract protected function get_item_image_id( $item );
+	protected function get_item_image_id( $item ) {
+		return 0;
+	}
 
 	/**
 	 * Renders the featured item attributes.
