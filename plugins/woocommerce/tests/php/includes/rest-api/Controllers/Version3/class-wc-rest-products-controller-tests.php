@@ -9,9 +9,30 @@ use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
  * class WC_REST_Products_Controller_Tests.
  * Product Controller tests for V3 REST API.
  */
-class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
+class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 	use MetaDataAssertionTrait;
+
+	/**
+	 * REST server used to dispatch product requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	protected $server;
+
+	/**
+	 * Products controller registered on the test server.
+	 *
+	 * @var WC_REST_Products_Controller
+	 */
+	protected $endpoint;
+
+	/**
+	 * Administrator user ID.
+	 *
+	 * @var int
+	 */
+	protected $user;
 
 	/**
 	 * Saves the `woocommerce_hide_out_of_stock_items` option value for restoration after tests that modify it.
@@ -24,6 +45,8 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
+		$this->clear_rest_server();
+		unset( $this->server, $this->endpoint );
 		$this->disable_cogs_feature();
 		update_option( 'woocommerce_hide_out_of_stock_items', $this->original_hid_out_of_stock_value );
 	}
@@ -106,6 +129,10 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Products_Controller();
+		$this->server   = $this->create_rest_server_with_routes(
+			array( array( $this->endpoint, 'register_routes' ) ),
+			true
+		);
 		$this->user     = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
