@@ -25,6 +25,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 	use HPOSToggleTrait;
 
+	/**
+	 * Shared administrator used as the default current user.
+	 *
+	 * @var int
+	 */
+	private static $administrator_id;
+
 	private const CANONICAL_ABILITY_IDS = array(
 		'woocommerce/products-query',
 		'woocommerce/product-create',
@@ -85,6 +92,15 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private $cot_setup_for_test = false;
 
 	/**
+	 * Create immutable class fixtures.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$administrator_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -106,9 +122,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		// WordPress 6.9+ requires init to have fired before the Abilities API registry can be initialized.
 		$wp_actions['init'] = max( 1, (int) ( $wp_actions['init'] ?? 0 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		wp_set_current_user(
-			$this->factory->user->create( array( 'role' => 'administrator' ) )
-		);
+		wp_set_current_user( self::$administrator_id );
 
 		$this->register_woocommerce_category();
 		$this->register_domain_abilities();
