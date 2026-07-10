@@ -797,19 +797,17 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			if ( ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
 				$args['where'] .= $wpdb->prepare(
 					" AND {$wpdb->posts}.ID IN (
-						SELECT stock_status_lookup.product_id
-						FROM {$wpdb->wc_product_meta_lookup} stock_status_lookup
-						WHERE stock_status_lookup.stock_status = %s
-						UNION
-						SELECT stock_status_variations.post_parent
-						FROM {$wpdb->wc_product_meta_lookup} stock_status_variation_lookup
-						INNER JOIN {$wpdb->posts} stock_status_variations
-							ON stock_status_variations.ID = stock_status_variation_lookup.product_id
-						WHERE stock_status_variation_lookup.stock_status = %s
-							AND stock_status_variations.post_type = 'product_variation'
-							AND stock_status_variations.post_status = 'publish'
+						SELECT stock_status_products.product_id
+						FROM (
+							SELECT DISTINCT COALESCE( stock_status_variations.post_parent, stock_status_lookup.product_id ) AS product_id
+							FROM {$wpdb->wc_product_meta_lookup} stock_status_lookup
+							LEFT JOIN {$wpdb->posts} stock_status_variations
+								ON stock_status_variations.ID = stock_status_lookup.product_id
+								AND stock_status_variations.post_type = 'product_variation'
+								AND stock_status_variations.post_status = 'publish'
+							WHERE stock_status_lookup.stock_status = %s
+						) stock_status_products
 					) ",
-					$stock_status,
 					$stock_status
 				);
 			} else {

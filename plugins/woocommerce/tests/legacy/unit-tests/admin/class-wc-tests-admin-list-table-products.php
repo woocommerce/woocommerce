@@ -55,28 +55,59 @@ class WC_Tests_Admin_List_Table_Products extends WC_Unit_Test_Case {
 		$simple_out_of_stock = WC_Helper_Product::create_simple_product();
 		$simple_out_of_stock->set_manage_stock( false );
 		$simple_out_of_stock->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$simple_out_of_stock->set_virtual( true );
 		$simple_out_of_stock->save();
 
 		$variable_with_out_of_stock_child = $this->create_variable_product_with_child_stock_statuses(
 			array(
 				ProductStockStatus::OUT_OF_STOCK,
+				ProductStockStatus::OUT_OF_STOCK,
 				ProductStockStatus::IN_STOCK,
 			)
 		);
-		$variable_in_stock                = $this->create_variable_product_with_child_stock_statuses(
+
+		$variable_in_stock = $this->create_variable_product_with_child_stock_statuses(
 			array(
 				ProductStockStatus::IN_STOCK,
 				ProductStockStatus::IN_STOCK,
 			)
 		);
 
+		$variable_with_private_out_of_stock_child = $this->create_variable_product_with_child_stock_statuses(
+			array(
+				ProductStockStatus::OUT_OF_STOCK,
+				ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		$private_variation = wc_get_product( $variable_with_private_out_of_stock_child->get_children()[0] );
+		$private_variation->set_status( 'private' );
+		$private_variation->save();
+		WC_Product_Variable::sync( $variable_with_private_out_of_stock_child );
+		$variable_with_private_out_of_stock_child = wc_get_product( $variable_with_private_out_of_stock_child->get_id() );
+
 		$this->assertSame( ProductStockStatus::IN_STOCK, $variable_with_out_of_stock_child->get_stock_status() );
+		$this->assertSame( ProductStockStatus::IN_STOCK, $variable_with_private_out_of_stock_child->get_stock_status() );
 
-		$product_ids = $this->query_product_ids_for_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$fixture_ids = array(
+			$simple_out_of_stock->get_id(),
+			$variable_with_out_of_stock_child->get_id(),
+			$variable_in_stock->get_id(),
+			$variable_with_private_out_of_stock_child->get_id(),
+		);
 
-		$this->assertContains( $simple_out_of_stock->get_id(), $product_ids );
-		$this->assertContains( $variable_with_out_of_stock_child->get_id(), $product_ids );
-		$this->assertNotContains( $variable_in_stock->get_id(), $product_ids );
+		$this->assertSame(
+			array( $simple_out_of_stock->get_id(), $variable_with_out_of_stock_child->get_id() ),
+			array_values( array_intersect( $this->query_product_ids_for_stock_status( ProductStockStatus::OUT_OF_STOCK ), $fixture_ids ) )
+		);
+		$this->assertSame(
+			array( $variable_with_out_of_stock_child->get_id(), $variable_in_stock->get_id(), $variable_with_private_out_of_stock_child->get_id() ),
+			array_values( array_intersect( $this->query_product_ids_for_stock_status( ProductStockStatus::IN_STOCK ), $fixture_ids ) )
+		);
+		$this->assertSame(
+			array( $simple_out_of_stock->get_id() ),
+			array_values( array_intersect( $this->query_product_ids_for_stock_status( ProductStockStatus::OUT_OF_STOCK, 'filter_virtual_post_clauses' ), $fixture_ids ) )
+		);
 	}
 
 	/**
@@ -109,15 +140,19 @@ class WC_Tests_Admin_List_Table_Products extends WC_Unit_Test_Case {
 	/**
 	 * Query product IDs through the products list table stock-status filter.
 	 *
-	 * @param string $stock_status Stock status to query.
+	 * @param string      $stock_status      Stock status to query.
+	 * @param string|null $additional_filter Optional clause filter to register after the stock filter.
 	 * @return array
 	 */
-	private function query_product_ids_for_stock_status( $stock_status ) {
-		$list_table   = new WC_Admin_List_Table_Products();
+	private function query_product_ids_for_stock_status( $stock_status, $additional_filter = null ) {
+		$list_table   = ( new ReflectionClass( WC_Admin_List_Table_Products::class ) )->newInstanceWithoutConstructor();
 		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
 
 		$_GET['stock_status'] = $stock_status;
 		add_filter( 'posts_clauses', array( $list_table, 'filter_stock_status_post_clauses' ) );
+		if ( $additional_filter ) {
+			add_filter( 'posts_clauses', array( $list_table, $additional_filter ) );
+		}
 
 		try {
 			$query = new WP_Query(
@@ -134,6 +169,9 @@ class WC_Tests_Admin_List_Table_Products extends WC_Unit_Test_Case {
 			return array_map( 'intval', $query->posts );
 		} finally {
 			remove_filter( 'posts_clauses', array( $list_table, 'filter_stock_status_post_clauses' ) );
+			if ( $additional_filter ) {
+				remove_filter( 'posts_clauses', array( $list_table, $additional_filter ) );
+			}
 			$_GET = $original_get;
 		}
 	}
