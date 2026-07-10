@@ -6,7 +6,7 @@ import { ShippingMethod } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { PluginBanner } from '../../experimental-shipping-recommendation/components/plugin-banner';
+import { PluginBanner } from '../../shipping-recommendation/components/plugin-banner';
 
 /**
  * Renders a column layout for the shipping method. Used for rendering a single shipping partner.
@@ -22,8 +22,15 @@ export const ShippingLayoutColumn = ( {
 } ) => {
 	return (
 		<PluginBanner
+			description={
+				shippingMethod.layout_column?.description ||
+				shippingMethod.description
+			}
 			features={ shippingMethod.layout_column?.features || [] }
-			logo={ { image: shippingMethod.layout_column?.image || '' } }
+			logo={ {
+				image: shippingMethod.layout_column?.image || '',
+				label: shippingMethod.layout_column?.image_label,
+			} }
 		/>
 	);
 };
@@ -47,8 +54,14 @@ export const ShippingLayoutRow = ( {
 		<PluginBanner
 			layout="dual"
 			features={ shippingMethod.layout_row?.features || [] }
-			logo={ { image: shippingMethod.layout_row?.image || '' } }
-			description={ shippingMethod.description }
+			logo={ {
+				image: shippingMethod.layout_row?.image || '',
+				label: shippingMethod.layout_row?.image_label,
+			} }
+			description={
+				shippingMethod.layout_row?.description ||
+				shippingMethod.description
+			}
 		>
 			{ children }
 		</PluginBanner>

@@ -2,6 +2,14 @@
 	"name": "@woocommerce/sanitize",
 	"version": "1.0.0",
 	"description": "WooCommerce HTML sanitization utilities.",
+	"exports": {
+		".": {
+			"wc-source": "./src/index.ts",
+			"types": "./build-types/index.d.ts",
+			"import": "./build-module/index.js",
+			"require": "./build/index.js"
+		}
+	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",
 	"types": "build-types/index.d.ts",
@@ -38,8 +46,8 @@
 		"@types/jest": "29.5.x",
 		"@types/trusted-types": "^2.0.7",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"@woocommerce/internal-ts-config": "workspace:*",
 		"@wordpress/scripts": "^27.0.0",
 		"eslint": "^8.55.0",
 		"jest": "29.5.x",
@@ -47,35 +55,39 @@
 		"jest-environment-jsdom": "29.5.x",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
-		"typescript": "5.7.x",
-		"wireit": "0.14.12"
+		"typescript": "5.7.x"
 	},
-	"peerDependencies": {
-		"@types/react": "18.3.x",
-		"@types/react-dom": "18.3.x",
-		"react": "18.3.x",
-		"react-dom": "18.3.x"
-	},
+	"peerDependencies": {},
 	"publishConfig": {
-		"access": "public"
+		"access": "public",
+		"exports": {
+			".": {
+				"types": "./build-types/index.d.ts",
+				"import": "./build-module/index.js",
+				"require": "./build/index.js"
+			}
+		}
 	},
 	"scripts": {
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
-		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:cjs": "wireit",
-		"build:project:esm": "wireit",
+		"build": "pnpm build:project",
+		"build:project": "pnpm --stream '/^build:project:.*$/'",
+		"build:project:esm": "node build.mjs",
+		"build:publish:project": "pnpm --stream '/^build:publish:project:.*$/'",
+		"build:publish:project:cjs": "node build.mjs --commonjs",
+		"build:publish:project:types": "tsc --build --emitDeclarationOnly",
+		"build:publish:project:runtime": "pnpm build:project",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
-		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
 		"lint:lang:js": "eslint src",
-		"prepack": "pnpm build",
+		"lint:lang:types": "tsc --build --emitDeclarationOnly",
+		"prepack": "pnpm build:publish:project",
 		"test:js": "jest --config ./jest.config.json --passWithNoTests",
-		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
-		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:cjs": "wireit",
-		"watch:build:project:esm": "wireit"
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
+		"watch:build": "pnpm watch:build:project",
+		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
+		"watch:build:project:esm": "node build.mjs --watch"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
@@ -103,63 +115,6 @@
 						"push"
 					]
 				}
-			]
-		}
-	},
-	"wireit": {
-		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --noCheck",
-			"clean": "if-file-deleted",
-			"files": [
-				"tsconfig-cjs.json",
-				"src/**/*.{js,jsx,ts,tsx}",
-				"typings/**/*.ts"
-			],
-			"output": [
-				"build"
-			],
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
-		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
-			"service": true
-		},
-		"build:project:esm": {
-			"command": "tsc --project tsconfig.json",
-			"clean": "if-file-deleted",
-			"files": [
-				"tsconfig.json",
-				"src/**/*.{js,jsx,ts,tsx}",
-				"typings/**/*.ts"
-			],
-			"output": [
-				"build-module",
-				"build-types"
-			],
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
-		"watch:build:project:esm": {
-			"command": "tsc --project tsconfig.json --watch",
-			"service": true
-		},
-		"dependencyOutputs": {
-			"allowUsuallyExcludedPaths": true,
-			"files": [
-				"package.json",
-				"../../../pnpm-lock.yaml",
-				"node_modules/@woocommerce/eslint-plugin/configs",
-				"node_modules/@woocommerce/eslint-plugin/rules",
-				"node_modules/@woocommerce/eslint-plugin/index.js",
-				"node_modules/@woocommerce/internal-js-tests/build",
-				"node_modules/@woocommerce/internal-js-tests/build-module",
-				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
-				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
-				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
-				"node_modules/@woocommerce/internal-ts-config/types"
 			]
 		}
 	}

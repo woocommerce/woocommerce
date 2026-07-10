@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix horizontal page overflow caused by the Settings UI tab bar including its padding outside the declared width.

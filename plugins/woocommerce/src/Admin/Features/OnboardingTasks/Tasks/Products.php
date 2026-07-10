@@ -3,9 +3,11 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 use Automattic\WooCommerce\Enums\ProductStatus;
-use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 /**
  * Products Task
@@ -33,7 +35,10 @@ class Products extends Task {
 		add_action( 'woocommerce_update_product', array( $this, 'maybe_set_has_product_transient' ), 10, 2 );
 		add_action( 'woocommerce_new_product', array( $this, 'maybe_set_has_product_transient' ), 10, 2 );
 		add_action( 'untrashed_post', array( $this, 'maybe_set_has_product_transient_on_untrashed_post' ) );
-		add_action( 'current_screen', array( $this, 'maybe_redirect_to_add_product_tasklist' ), 30, 0 );
+
+		if ( ! $this->is_complete() ) {
+			add_action( 'current_screen', array( $this, 'maybe_redirect_to_add_product_tasklist' ), 30, 0 );
+		}
 
 		add_action( 'trashed_post', array( $this, 'on_product_trashed' ) );
 		add_action( 'deleted_post_product', array( $this, 'on_product_deleted' ) );
@@ -183,7 +188,7 @@ class Products extends Task {
 	 * @param WC_Product $product Product object.
 	 */
 	public function maybe_set_has_product_transient( $product_id, $product ) {
-		if ( ! $this->has_previously_completed() && $this->is_valid_product( $product ) ) {
+		if ( ! $this->has_previously_completed() && ProductStatus::PUBLISH === $product->get_status() ) {
 			set_transient( self::HAS_PRODUCT_TRANSIENT, 'yes' );
 			$this->possibly_track_completion();
 		}
@@ -255,18 +260,6 @@ class Products extends Task {
 	}
 
 	/**
-	 * Check if the product qualifies as a user created product.
-	 *
-	 * @param WC_Product $product Product object.
-	 * @return bool
-	 */
-	private function is_valid_product( $product ) {
-		return ProductStatus::PUBLISH === $product->get_status() &&
-			( ! $product->get_meta( '_headstart_post' ) ||
-			get_post_meta( $product->get_id(), '_edit_last', true ) );
-	}
-
-	/**
 	 * Check if the store has any user created published products.
 	 *
 	 * @return bool
@@ -277,56 +270,8 @@ class Products extends Task {
 			return 'yes' === $product_exists;
 		}
 
-		global $wpdb;
-
-		/*
-		 * Check if any valid products exist and return 'yes' or 'no'
-		 * A valid product must:
-		 * 1. Be a published product post type
-		 * 2. Meet one of these conditions:
-		 *    - Have been edited by a user (_edit_last meta exists), OR
-		 *    - Not have _headstart_post meta, OR
-		 *    - Have _headstart_post meta but it's NULL
-		 */
-		$value = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT IF(
-					EXISTS (
-						SELECT 1 FROM {$wpdb->posts} p
-						WHERE p.post_type = %s
-						AND p.post_status = %s
-						AND (
-							EXISTS (
-								SELECT 1 FROM {$wpdb->postmeta} pm
-								WHERE pm.post_id = p.ID
-								AND pm.meta_key = %s
-							)
-							OR
-							NOT EXISTS (
-								SELECT 1 FROM {$wpdb->postmeta} pm
-								WHERE pm.post_id = p.ID
-								AND pm.meta_key = %s
-							)
-							OR
-							EXISTS (
-								SELECT 1 FROM {$wpdb->postmeta} pm
-								WHERE pm.post_id = p.ID
-								AND pm.meta_key = %s
-								AND pm.meta_value = ''
-							)
-						)
-						LIMIT 1
-					),
-					'yes', 'no'
-				)",
-				'product',
-				ProductStatus::PUBLISH,
-				'_edit_last',
-				'_headstart_post',
-				'_headstart_post'
-			)
-		);
-
+		$counts = wp_count_posts( 'product' );
+		$value  = isset( $counts->publish ) && $counts->publish > 0 ? 'yes' : 'no';
 		set_transient( self::HAS_PRODUCT_TRANSIENT, $value );
 		return 'yes' === $value;
 	}
@@ -338,14 +283,13 @@ class Products extends Task {
 	 */
 	public function maybe_redirect_to_add_product_tasklist() {
 		$screen = get_current_screen();
-		if ( 'edit' === $screen->base && 'product' === $screen->post_type ) {
-			// wp_count_posts is cached.
-			$counts = (array) wp_count_posts( $screen->post_type );
-			unset( $counts['auto-draft'] );
-			$count = array_sum( $counts );
+		if ( $screen && 'edit' === $screen->base && 'product' === $screen->post_type ) {
+			$counts = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
+			$count  = array_sum( $counts ) - ( $counts[ ProductStatus::AUTO_DRAFT ] ?? 0 );
 			if ( $count > 0 ) {
 				return;
 			}
+
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&task=products' ) );
 			exit;
 		}

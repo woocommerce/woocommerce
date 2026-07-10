@@ -40,6 +40,12 @@ Consult the `woocommerce-backend-dev` skill for detailed standards. Using these 
 - ❌ **Missing `@testdox`** - Required in test method docblocks ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md))
 - ❌ **Test file naming** - Must follow convention for `includes/` vs `src/` ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md))
 
+### Frontend JS/TS Code
+
+**Architecture & Structure:**
+
+- ❌ **Barrel self-import (circular dependency)** — a JS/TS file anywhere in the monorepo importing from its own package barrel (`from '../'`, `from '../../'`, `from '../index'`, `from '../../index'`) when that barrel re-exports it. Relevant to SWC TDZ / esbuild tree-shaking / tsc incremental builds. Fix: use the direct module path instead.
+
 ### UI Text & Copy
 
 Consult the `woocommerce-copy-guidelines` skill. Flag:

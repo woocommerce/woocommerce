@@ -240,7 +240,8 @@ const getTrashEmailPostAction = () => {
 										}
 										// If we were trying to permanently delete multiple posts
 									} else {
-										const errorMessages = new Set();
+										const errorMessages =
+											new Set< string >();
 										const failedPromises =
 											promiseResult.filter(
 												( { status } ) =>

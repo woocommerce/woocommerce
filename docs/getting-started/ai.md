@@ -23,7 +23,7 @@ To feed the WooCommerce Developer Documentation into your LLM or AI-assisted IDE
 
 If you are using an IDE like Cursor or Windsurf, we recommend adding these links as custom documentation so that you can reference them as needed.
 
-**Note** that these do not include the contents of the [WC REST API documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction) or the [WooCommerce Code Reference](https://woocommerce.github.io/code-reference/).
+**Note** that these do not include the contents of the [WooCommerce Code Reference](https://woocommerce.github.io/code-reference/).
 
 ### Serve as Markdown
 
@@ -41,7 +41,7 @@ On every page of the Developer Docs, you'll see a Clipboard icon in the upper-ri
 
 ### Agent Skills for Contributors
 
-The WooCommerce monorepo includes agent skills that provide AI assistants with procedural guidance for common development tasks. These skills are located in the `.ai/skills/` directory at the root of the repository.
+The WooCommerce monorepo includes [agent skills](https://agentskills.io/home) that provide AI assistants with procedural guidance for common development tasks. These skills are located in the `.ai/skills/` directory at the root of the repository.
 
 Each skill contains a `SKILL.md` file with step-by-step instructions for tasks like:
 
@@ -52,6 +52,12 @@ Each skill contains a `SKILL.md` file with step-by-step instructions for tasks l
 - UI copy and documentation guidelines
 
 Skills are designed to be tool-agnostic and can be used with various AI coding assistants. To explore available skills, browse the [`.ai/skills/` directory](https://github.com/woocommerce/woocommerce/tree/trunk/.ai/skills) in the repository.
+
+### Agent Skills for Extending
+
+If you are building on top of WordPress and WooCommerce, the [WordPress/agent-skills](https://github.com/WordPress/agent-skills) and [woocommerce/agent-skills](https://github.com/woocommerce/agent-skills) repositories provide reusable guidance for AI coding assistants.
+
+The WordPress skills cover foundational WordPress development patterns, while the WooCommerce skills build on those foundations with guidance for WooCommerce extension development. Review both repositories for installation instructions.
 
 ### Cursor Rules files for contributors
 

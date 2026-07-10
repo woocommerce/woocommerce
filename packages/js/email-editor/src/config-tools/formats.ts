@@ -14,6 +14,7 @@ type WPFormat = {
 	edit: any;
 	className?: string;
 	attributes?: Record< string, string >;
+	object?: boolean;
 };
 
 // Registry to track changes applied by the email editor
@@ -28,7 +29,7 @@ export function registerFormatForEmail(
 	name: string,
 	settings: WPFormat
 ): void {
-	registerFormatType( name, settings );
+	registerFormatType( name, { object: false, ...settings } );
 	newlyRegisteredFormats.add( name );
 }
 
@@ -57,7 +58,7 @@ export function resetFormats(): void {
 
 	// Restore preserved formats
 	for ( const [ name, format ] of preservedUnregisteredFormats.entries() ) {
-		registerFormatType( name, format );
+		registerFormatType( name, { object: false, ...format } );
 		preservedUnregisteredFormats.delete( name );
 	}
 }

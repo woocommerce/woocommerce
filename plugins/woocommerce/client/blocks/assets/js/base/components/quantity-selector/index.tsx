@@ -275,7 +275,7 @@ const QuantitySelector = ( {
 							);
 						} }
 					>
-						&#65291;
+						+
 					</button>
 				</>
 			) }

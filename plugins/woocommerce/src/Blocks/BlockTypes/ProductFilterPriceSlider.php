@@ -32,18 +32,18 @@ class ProductFilterPriceSlider extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( is_admin() || wp_doing_ajax() || empty( $block->context['filterData'] ) || empty( $block->context['filterData']['price'] ) ) {
+		if ( is_admin() || wp_doing_ajax() || empty( $block->context['woocommerce/rangeInput'] ) ) {
 			return '';
 		}
 
-		$price_data = $block->context['filterData']['price'];
-		$min_price  = $price_data['minPrice'];
-		$max_price  = $price_data['maxPrice'];
-		$min_range  = $price_data['minRange'];
-		$max_range  = $price_data['maxRange'];
+		$range_data = $block->context['woocommerce/rangeInput'];
+		$min_range  = $range_data['min'] ?? 0;
+		$max_range  = $range_data['max'] ?? 0;
+		$min_price  = $range_data['currentMin'] ?? $min_range;
+		$max_price  = $range_data['currentMax'] ?? $max_range;
 
 		if ( $min_range === $max_range ) {
-			return;
+			return '';
 		}
 
 		$classes = '';
@@ -126,7 +126,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						min="<?php echo esc_attr( $min_range ); ?>"
 						max="<?php echo esc_attr( $max_range ); ?>"
 						data-wp-bind--value="state.minPrice"
-						data-wp-on--input="actions.setMinPrice"
+						data-wp-on--input="actions.setMin"
 						data-wp-on--mouseup="actions.navigate"
 						data-wp-on--keyup="actions.navigate"
 						data-wp-on--touchend="actions.navigate"
@@ -138,7 +138,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						min="<?php echo esc_attr( $min_range ); ?>"
 						max="<?php echo esc_attr( $max_range ); ?>"
 						data-wp-bind--value="state.maxPrice"
-						data-wp-on--input="actions.setMaxPrice"
+						data-wp-on--input="actions.setMax"
 						data-wp-on--mouseup="actions.navigate"
 						data-wp-on--keyup="actions.navigate"
 						data-wp-on--touchend="actions.navigate"

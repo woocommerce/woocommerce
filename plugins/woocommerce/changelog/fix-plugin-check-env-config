@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Install and activate the plugin-check plugin via the E2E wp-env config instead of the e2e test setup script, so it is provisioned before lifecycle scripts run and no longer races with the backgrounded theme install that intermittently left `wp plugin check` unregistered in the nightly CI job.

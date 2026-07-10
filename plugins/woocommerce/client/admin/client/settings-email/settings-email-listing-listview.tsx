@@ -2,26 +2,60 @@
  * External dependencies
  */
 import { useState, useMemo } from '@wordpress/element';
-import { edit, external } from '@wordpress/icons';
+import { pencil, external } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 // @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
-import { DataViews, View } from '@wordpress/dataviews/wp'; // eslint-disable-line @woocommerce/dependency-group
+import { DataViews, View } from '@wordpress/dataviews/wp';
 
 /**
  * Internal dependencies
  */
 import { EmailType } from './settings-email-listing-slotfill';
 import { useTransactionalEmails } from './settings-email-listing-data';
+import { shouldShowReviewUpdate } from './settings-email-listing-update-state';
 import { Status, EMAIL_STATUSES } from './settings-email-listing-status';
 import { RecipientsList } from './settings-email-listing-recipients';
+import { UpdatesCell } from './settings-email-listing-update-cell';
+import {
+	SendTestEmailForm,
+	useSendTestEmail,
+} from './settings-email-send-test';
+
+const SendTestEmailModalContent = ( {
+	postId,
+	emailId,
+	onClose,
+}: {
+	postId: number;
+	emailId: string;
+	onClose: () => void;
+} ) => {
+	const { email, setEmail, isSending, notice, noticeType, sendEmail } =
+		useSendTestEmail(
+			{ endpoint: 'editor', postId, emailType: emailId },
+			'email_listing'
+		);
+
+	return (
+		<SendTestEmailForm
+			email={ email }
+			onEmailChange={ setEmail }
+			isSending={ isSending }
+			notice={ notice }
+			noticeType={ noticeType }
+			onSend={ sendEmail }
+			onCancel={ onClose }
+		/>
+	);
+};
 
 export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 	const [ view, setView ] = useState< View >( {
 		type: 'table',
 		search: '',
-		fields: [ 'recipients', 'status' ],
+		fields: [ 'recipients', 'status', 'updates' ],
 		filters: [],
 		page: 1,
 		perPage: 20,
@@ -104,6 +138,31 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				},
 				elements: EMAIL_STATUSES,
 			},
+			{
+				id: 'updates',
+				label: __( 'Updates', 'woocommerce' ),
+				enableHiding: true,
+				enableSorting: false,
+				getValue: ( { item }: { item: EmailType } ) =>
+					shouldShowReviewUpdate( item ) ? 'available' : 'none',
+				elements: [
+					{
+						value: 'available',
+						label: __( 'Update available', 'woocommerce' ),
+					},
+					{
+						value: 'none',
+						label: __( 'Up to date', 'woocommerce' ),
+					},
+				],
+				filterBy: {
+					operators: [ 'is' ],
+					isPrimary: true,
+				},
+				render: ( { item }: { item: EmailType } ) => (
+					<UpdatesCell post={ item } />
+				),
+			},
 		];
 	}, [ emailTypes ] );
 
@@ -112,7 +171,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			{
 				id: 'edit',
 				label: __( 'Edit', 'woocommerce' ),
-				icon: <Icon icon={ edit } />,
+				icon: <Icon icon={ pencil } />,
 				supportsBulk: false,
 				callback: ( items: EmailType[] ) => {
 					const email = items[ 0 ];
@@ -145,11 +204,26 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 			{
 				id: 'test',
 				label: __( 'Send test email', 'woocommerce' ),
-				disabled: true,
 				supportsBulk: false,
-				callback: () => {
-					return true; // TODO: Implement send test email
-				},
+				// The editor's send_preview_email endpoint renders the
+				// woo_email post, so a numeric post ID is required — rows
+				// without one offer the "Recreate email post" action instead.
+				isEligible: ( item: EmailType ) =>
+					Number.isFinite( parseInt( item.post_id, 10 ) ),
+				modalHeader: __( 'Send a test email', 'woocommerce' ),
+				RenderModal: ( {
+					items,
+					closeModal,
+				}: {
+					items: EmailType[];
+					closeModal?: () => void;
+				} ) => (
+					<SendTestEmailModalContent
+						postId={ parseInt( items[ 0 ].post_id, 10 ) }
+						emailId={ items[ 0 ].id }
+						onClose={ closeModal ?? ( () => {} ) }
+					/>
+				),
 			},
 			{
 				id: 'change-status',

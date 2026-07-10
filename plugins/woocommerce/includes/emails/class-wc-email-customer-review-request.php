@@ -5,6 +5,8 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -98,11 +100,58 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 				$this->placeholders['{order_number}'] = $order->get_order_number();
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
+			if ( $this->is_enabled() && $this->get_recipient() && $this->is_order_eligible_for_send() ) {
 				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 			}
 
 			$this->restore_locale();
+		}
+
+		/**
+		 * Defence-in-depth status check at send time.
+		 *
+		 * The scheduler unschedules the pending action when the order leaves
+		 * `completed`, but a race window or a direct invocation of the action
+		 * hook can still reach `trigger()` for an order that is no longer in
+		 * an eligible state. Checking the same `woocommerce_review_order_eligible_statuses`
+		 * filter the page-load endpoint and submission handler use keeps the
+		 * three entry points consistent.
+		 *
+		 * @since 10.8.0
+		 * @return bool
+		 */
+		protected function is_order_eligible_for_send(): bool {
+			if ( ! $this->object instanceof WC_Order ) {
+				return false;
+			}
+
+			/**
+			 * Filter the order statuses that are eligible to receive the review-request email.
+			 *
+			 * Defaults to `completed` only. Same hook the page-load endpoint and the
+			 * submission handler use, so the three entry points stay aligned.
+			 *
+			 * @since 10.8.0
+			 *
+			 * @param string[] $eligible_statuses Default: `[ 'completed' ]`.
+			 * @param WC_Order $order             Order being inspected.
+			 */
+			$eligible_statuses = (array) apply_filters(
+				'woocommerce_review_order_eligible_statuses',
+				array( OrderStatus::COMPLETED ),
+				$this->object
+			);
+
+			if ( ! in_array( $this->object->get_status(), $eligible_statuses, true ) ) {
+				return false;
+			}
+
+			// Eligibility can change between scheduling and sending (e.g. the
+			// admin disables site-wide reviews during the delay window, or the
+			// customer reviews everything via another entry point). Re-check at
+			// send time so the email is silently dropped instead of pointing
+			// the customer at the empty-state page.
+			return ItemEligibility::has_actionable_items( $this->object );
 		}
 
 		/**
@@ -138,30 +187,11 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 		/**
 		 * Get the URL of the per-order Review Order page for this email's order.
 		 *
-		 * Mirrors the pay-for-order URL shape. `wc_get_endpoint_url()` is used so
-		 * plain-permalink stores get a valid query-arg URL rather than an invalid
-		 * concatenation. The endpoint itself is registered in a later milestone.
-		 *
 		 * @since  10.8.0
 		 * @return string
 		 */
 		public function get_review_order_url() {
-			if ( ! ( $this->object instanceof WC_Order ) ) {
-				return '';
-			}
-
-			$endpoint_url = wc_get_endpoint_url( 'review-order', (string) $this->object->get_id(), wc_get_checkout_url() );
-			$url          = add_query_arg( 'key', $this->object->get_order_key(), $endpoint_url );
-
-			/**
-			 * Filter the Review Order URL that the review-request email links to.
-			 *
-			 * @param string   $url   The review-order URL.
-			 * @param WC_Order $order The order object.
-			 *
-			 * @since 10.8.0
-			 */
-			return (string) apply_filters( 'woocommerce_review_order_url', $url, $this->object );
+			return $this->object instanceof WC_Order ? wc_get_review_order_url( $this->object ) : '';
 		}
 
 		/**

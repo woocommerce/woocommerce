@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hardens Store API product/review endpoints checks.

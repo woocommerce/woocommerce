@@ -9,7 +9,7 @@ Current areas of exploration:
 -   A more flexible table-based product view
 -   Better filtering, sorting, and scanning
 -   Inline handling of product variations
--   Faster quick edit and bulk edit flows
+-   Faster quick edit and [bulk edit flows](docs/bulk-editing.md)
 -   A clearer extension surface for integrations
 
 ## Try It Quickly
@@ -22,3 +22,9 @@ The shared Blueprint:
 -   Enables the required feature flags
 -   Imports WooCommerce sample products from CSV
 -   Opens the experimental products dashboard directly
+
+## DataViews Dependency
+
+This package currently uses a custom build of `@wordpress/dataviews` from [WordPress/gutenberg#77905](https://github.com/WordPress/gutenberg/pull/77905). The package is installed from the tarball referenced in `package.json` so the prototype can use the new table tree hierarchy API before it is available in a published WordPress package release.
+
+The custom build is expected to be temporary. Once the DataViews hierarchy changes are published in the regular `@wordpress/dataviews` package, replace the tarball dependency with the published version and refresh `pnpm-lock.yaml`.

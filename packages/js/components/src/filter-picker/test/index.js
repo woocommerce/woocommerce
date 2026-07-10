@@ -53,6 +53,17 @@ describe( 'FilterPicker', () => {
 			};
 		} );
 
+		it( 'should render the label without a trailing colon', () => {
+			const { container } = render(
+				<FilterPicker path="/foo/bar" config={ config } />
+			);
+
+			const label = container.querySelector(
+				'.woocommerce-filters-label'
+			);
+			expect( label.textContent ).toBe( 'Show' );
+		} );
+
 		it( 'should render the Search component', async () => {
 			const path = '/foo/bar';
 
