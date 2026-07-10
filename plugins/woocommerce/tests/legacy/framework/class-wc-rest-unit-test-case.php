@@ -11,6 +11,124 @@
 /**
  * Base class for REST related unit test classes.
  */
+class WC_Lazy_REST_Server extends WP_Test_Spy_REST_Server {
+
+	/**
+	 * Route namespaces initialized on this server.
+	 *
+	 * @var array<string, bool>
+	 */
+	private $initialized_namespaces = array();
+
+	/**
+	 * Whether every REST route has been initialized.
+	 *
+	 * @var bool
+	 */
+	private $all_routes_initialized = false;
+
+	/**
+	 * Whether route initialization is currently running.
+	 *
+	 * @var bool
+	 */
+	private $initializing = false;
+
+	/**
+	 * Number of requests currently being dispatched.
+	 *
+	 * @var int
+	 */
+	private $dispatch_depth = 0;
+
+	/**
+	 * Initialize only the namespace needed by a request before dispatching it.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return WP_REST_Response
+	 */
+	public function dispatch( $request ) {
+		$route     = $request->get_route();
+		$namespace = $this->get_route_namespace( $route );
+
+		if ( ! $this->initializing && ! $this->all_routes_initialized && ! isset( $this->initialized_namespaces[ $namespace ] ) ) {
+			$this->initialize_routes( $route );
+
+			if ( '' === $namespace ) {
+				$this->all_routes_initialized = true;
+			} else {
+				$this->initialized_namespaces[ $namespace ] = true;
+			}
+		}
+
+		++$this->dispatch_depth;
+		try {
+			return parent::dispatch( $request );
+		} finally {
+			--$this->dispatch_depth;
+		}
+	}
+
+	/**
+	 * Get registered routes, initializing all routes for direct inspection.
+	 *
+	 * @param string $namespace Optionally limit results to a namespace.
+	 * @return array
+	 */
+	public function get_routes( $namespace = '' ) {
+		if ( 0 === $this->dispatch_depth && ! $this->initializing && ! $this->all_routes_initialized ) {
+			$this->initialize_routes();
+			$this->all_routes_initialized = true;
+		}
+
+		return parent::get_routes( $namespace );
+	}
+
+	/**
+	 * Run REST route registration with an optional production route context.
+	 *
+	 * @param string|null $route REST route being requested, or null to initialize all routes.
+	 */
+	private function initialize_routes( $route = null ): void {
+		$had_rest_route = array_key_exists( 'rest_route', $GLOBALS['wp']->query_vars );
+		$rest_route     = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
+
+		if ( null === $route ) {
+			unset( $GLOBALS['wp']->query_vars['rest_route'] );
+		} else {
+			$GLOBALS['wp']->query_vars['rest_route'] = $route;
+		}
+
+		$this->initializing = true;
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			do_action( 'rest_api_init' );
+		} finally {
+			$this->initializing = false;
+			if ( $had_rest_route ) {
+				$GLOBALS['wp']->query_vars['rest_route'] = $rest_route;
+			} else {
+				unset( $GLOBALS['wp']->query_vars['rest_route'] );
+			}
+		}
+	}
+
+	/**
+	 * Get a stable namespace key from a REST route.
+	 *
+	 * @param string $route REST route.
+	 * @return string
+	 */
+	private function get_route_namespace( string $route ): string {
+		$segments = explode( '/', trim( $route, '/' ) );
+
+		return implode( '/', array_slice( $segments, 0, 2 ) );
+	}
+}
+
+/**
+ * Base class for REST related unit test classes.
+ */
 class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 
 	/**
@@ -24,9 +142,8 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		global $wp_rest_server;
-		$wp_rest_server = new WP_Test_Spy_REST_Server();
+		$wp_rest_server = new WC_Lazy_REST_Server();
 		$this->server   = $wp_rest_server;
-		do_action( 'rest_api_init' );
 
 		// Reset payment gateways.
 		$gateways                   = WC_Payment_Gateways::instance();
