@@ -3581,3 +3581,14 @@ function wc_update_10902_remove_deprecated_push_notifications_option(): void {
 function wc_update_1100_enable_point_of_sale_feature() {
 	update_option( 'woocommerce_feature_point_of_sale_enabled', 'yes' );
 }
+
+/**
+ * Delete the cached dashboard out-of-stock product count.
+ *
+ * @since 11.1.0
+ *
+ * @return void
+ */
+function wc_update_1110_delete_dashboard_outofstock_count_transient() {
+	delete_transient( 'wc_outofstock_count' );
+}
