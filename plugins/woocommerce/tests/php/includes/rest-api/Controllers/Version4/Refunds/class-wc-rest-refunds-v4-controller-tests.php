@@ -27,11 +27,11 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	private $endpoint;
 
 	/**
-	 * User ID.
+	 * Administrator ID used to authenticate requests.
 	 *
 	 * @var int
 	 */
-	private $user_id;
+	private static $administrator_id;
 
 	/**
 	 * Refund schema instance.
@@ -53,6 +53,22 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @var array
 	 */
 	private $created_refunds = array();
+
+	/**
+	 * Create immutable class fixtures.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$administrator_id = $factory->user->create(
+			array(
+				'user_login' => 'test_admin',
+				'user_email' => 'test@example.com',
+				'user_pass'  => 'password',
+				'role'       => 'administrator',
+			)
+		);
+	}
 
 	/**
 	 * Runs after each test.
@@ -109,15 +125,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->endpoint = new RefundsController();
 		$this->endpoint->init( $this->refund_schema, $preview_schema, $collection_query, $data_utils );
 
-		$this->user_id = wp_insert_user(
-			array(
-				'user_login' => 'test_admin',
-				'user_email' => 'test@example.com',
-				'user_pass'  => 'password',
-				'role'       => 'administrator',
-			)
-		);
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$administrator_id );
 	}
 
 	/**
