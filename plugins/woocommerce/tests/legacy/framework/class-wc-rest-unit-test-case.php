@@ -51,10 +51,10 @@ class WC_Lazy_REST_Server extends WP_Test_Spy_REST_Server {
 		$route     = $request->get_route();
 		$namespace = $this->get_route_namespace( $route );
 
-		if ( ! $this->initializing && ! $this->all_routes_initialized && ! isset( $this->initialized_namespaces[ $namespace ] ) ) {
-			$this->initialize_routes( $route );
+		if ( ! $this->initializing && ! $this->all_routes_initialized && ! isset( $this->initialized_namespaces[ $namespace ] ) && ! $this->has_route( $route ) ) {
+			$initialized_all_routes = $this->initialize_routes( $route );
 
-			if ( '' === $namespace ) {
+			if ( $initialized_all_routes || '' === $namespace ) {
 				$this->all_routes_initialized = true;
 			} else {
 				$this->initialized_namespaces[ $namespace ] = true;
@@ -76,27 +76,41 @@ class WC_Lazy_REST_Server extends WP_Test_Spy_REST_Server {
 	 * @return array
 	 */
 	public function get_routes( $namespace = '' ) {
-		if ( 0 === $this->dispatch_depth && ! $this->initializing && ! $this->all_routes_initialized ) {
-			$this->initialize_routes();
-			$this->all_routes_initialized = true;
+		if ( 0 === $this->dispatch_depth && ! $this->initializing && ! $this->all_routes_initialized && ! $this->has_registered_routes() ) {
+			$this->initialize_all_routes();
 		}
 
 		return parent::get_routes( $namespace );
 	}
 
 	/**
+	 * Initialize every REST route on this server.
+	 */
+	public function initialize_all_routes(): void {
+		if ( ! $this->all_routes_initialized ) {
+			$this->initialize_routes();
+			$this->all_routes_initialized = true;
+		}
+	}
+
+	/**
 	 * Run REST route registration with an optional production route context.
 	 *
 	 * @param string|null $route REST route being requested, or null to initialize all routes.
+	 * @return bool Whether every route was initialized.
 	 */
-	private function initialize_routes( $route = null ): void {
-		$had_rest_route = array_key_exists( 'rest_route', $GLOBALS['wp']->query_vars );
-		$rest_route     = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
+	private function initialize_routes( $route = null ): bool {
+		$wp             = $GLOBALS['wp'] ?? null;
+		$has_wp_context = is_object( $wp );
+		$had_rest_route = $has_wp_context && array_key_exists( 'rest_route', $wp->query_vars );
+		$rest_route     = $has_wp_context ? ( $wp->query_vars['rest_route'] ?? null ) : null;
 
-		if ( null === $route ) {
-			unset( $GLOBALS['wp']->query_vars['rest_route'] );
-		} else {
-			$GLOBALS['wp']->query_vars['rest_route'] = $route;
+		if ( $has_wp_context ) {
+			if ( null === $route ) {
+				unset( $wp->query_vars['rest_route'] );
+			} else {
+				$wp->query_vars['rest_route'] = $route;
+			}
 		}
 
 		$this->initializing = true;
@@ -105,12 +119,45 @@ class WC_Lazy_REST_Server extends WP_Test_Spy_REST_Server {
 			do_action( 'rest_api_init' );
 		} finally {
 			$this->initializing = false;
-			if ( $had_rest_route ) {
-				$GLOBALS['wp']->query_vars['rest_route'] = $rest_route;
-			} else {
-				unset( $GLOBALS['wp']->query_vars['rest_route'] );
+			if ( $has_wp_context ) {
+				if ( $had_rest_route ) {
+					$wp->query_vars['rest_route'] = $rest_route;
+				} else {
+					unset( $wp->query_vars['rest_route'] );
+				}
 			}
 		}
+
+		return ! $has_wp_context || null === $route;
+	}
+
+	/**
+	 * Check whether a non-core route has already been registered.
+	 *
+	 * @return bool
+	 */
+	private function has_registered_routes(): bool {
+		return count( $this->endpoints ) > 2;
+	}
+
+	/**
+	 * Check whether a request can already be served without global initialization.
+	 *
+	 * @param string $request_route REST request route.
+	 * @return bool
+	 */
+	private function has_route( string $request_route ): bool {
+		if ( '/' === $request_route || '/batch/v1' === $request_route ) {
+			return false;
+		}
+
+		foreach ( array_keys( $this->endpoints ) as $route ) {
+			if ( preg_match( '@^' . $route . '$@i', $request_route ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -144,11 +191,41 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 		global $wp_rest_server;
 		$wp_rest_server = new WC_Lazy_REST_Server();
 		$this->server   = $wp_rest_server;
+		$this->initialize_rest_api_defaults();
 
 		// Reset payment gateways.
 		$gateways                   = WC_Payment_Gateways::instance();
 		$gateways->payment_gateways = array();
 		$gateways->init();
+	}
+
+	/**
+	 * Initialize all REST routes for tests that depend on eager registration timing.
+	 */
+	protected function initialize_rest_api_routes(): void {
+		$this->server->initialize_all_routes();
+	}
+
+	/**
+	 * Establish WordPress REST defaults without registering WooCommerce routes.
+	 */
+	private function initialize_rest_api_defaults(): void {
+		global $wp_filter;
+
+		$rest_api_init_hook         = $wp_filter['rest_api_init'] ?? null;
+		$wp_filter['rest_api_init'] = new WP_Hook();
+		add_action( 'rest_api_init', 'rest_api_default_filters' );
+
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			do_action( 'rest_api_init' );
+		} finally {
+			if ( null === $rest_api_init_hook ) {
+				unset( $wp_filter['rest_api_init'] );
+			} else {
+				$wp_filter['rest_api_init'] = $rest_api_init_hook;
+			}
+		}
 	}
 
 	/**
