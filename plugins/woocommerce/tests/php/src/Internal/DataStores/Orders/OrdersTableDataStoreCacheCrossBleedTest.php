@@ -685,7 +685,79 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 			'Meta should self-heal from the database after the corrupt legacy cache entry is invalidated.'
 		);
 
+		// The self-healed read must not re-log: the warning fires once, not on every read.
+		$this->assertSame(
+			1,
+			$this->count_hpos_cache_warnings( $fake_logger, 'Discarded malformed meta data' ),
+			'The corruption warning should fire once and stop once the cache self-heals.'
+		);
+
 		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * @testdox A legacy meta cache array containing an incomplete meta row (missing meta_value) is treated as corrupt, invalidated, and self-heals.
+	 */
+	public function test_incomplete_legacy_meta_row_is_invalidated_and_self_heals(): void {
+		$fake_logger = $this->create_fake_logger();
+		add_filter(
+			'woocommerce_logging_class',
+			function () use ( $fake_logger ) {
+				return $fake_logger;
+			}
+		);
+
+		$order = new WC_Order();
+		$order->add_meta_data( 'custom_meta_key', 'custom_value', true );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$order = wc_get_order( $order_id );
+
+		/*
+		 * Poison the legacy 'orders' meta cache with an object row that has meta_key but is missing
+		 * meta_id and meta_value. This is a valid array of objects with meta_key, so a meta_key-only
+		 * shape check would accept it and hydrate the real key with a null value. The completeness
+		 * check (meta_id + meta_key + meta_value) must treat it as corrupt and self-heal instead.
+		 */
+		$cache_key = $order->get_meta_cache_key();
+		wp_cache_set( $cache_key, array( (object) array( 'meta_key' => 'custom_meta_key' ) ), 'orders' ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+
+		$order->read_meta_data();
+
+		$this->assert_hpos_cache_warning_logged( $fake_logger, 'Discarded malformed meta data' );
+		$this->assertFalse(
+			wp_cache_get( $cache_key, 'orders' ),
+			'The incomplete legacy meta cache entry should be invalidated so the next read re-reads from the database.'
+		);
+
+		$order->read_meta_data();
+		$this->assertSame(
+			'custom_value',
+			$order->get_meta( 'custom_meta_key' ),
+			'The incomplete row should be discarded and the real value re-read from the database, not loaded as null.'
+		);
+
+		remove_all_filters( 'woocommerce_logging_class' );
+	}
+
+	/**
+	 * Count warnings with the "hpos-data-cache" source containing the given message fragment.
+	 *
+	 * @param object $fake_logger The fake logger capturing log calls.
+	 * @param string $needle      A substring expected in the warning message.
+	 *
+	 * @return int Number of matching warnings.
+	 */
+	private function count_hpos_cache_warnings( object $fake_logger, string $needle ): int {
+		$count = 0;
+		foreach ( $fake_logger->warning_calls as $call ) {
+			if ( 'hpos-data-cache' === ( $call['context']['source'] ?? '' ) && false !== strpos( $call['message'], $needle ) ) {
+				++$count;
+			}
+		}
+
+		return $count;
 	}
 
 	/**
