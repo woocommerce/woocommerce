@@ -1089,4 +1089,32 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$line_item  = $line_items[ $line_item_data['id'] ];
 		$this->assertEquals( $complex_meta_value, $line_item->get_meta( '_file_upload_data' ) );
 	}
+
+	/**
+	 * @testdox Published order schema advertises a standard type union for meta_data value/display_value, not the non-standard 'mixed'.
+	 */
+	public function test_meta_data_schema_advertises_type_union(): void {
+		$expected_union = array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' );
+
+		$schema     = $this->endpoint->get_item_schema();
+		$properties = $schema['properties'];
+
+		// Every order meta_data value field, at every level, should advertise the union instead of 'mixed'.
+		$meta_containers = array(
+			$properties['meta_data']['items']['properties'],
+			$properties['line_items']['items']['properties']['meta_data']['items']['properties'],
+			$properties['shipping_lines']['items']['properties']['meta_data']['items']['properties'],
+			$properties['fee_lines']['items']['properties']['meta_data']['items']['properties'],
+			$properties['coupon_lines']['items']['properties']['meta_data']['items']['properties'],
+		);
+		foreach ( $meta_containers as $meta_properties ) {
+			$this->assertEquals( $expected_union, $meta_properties['value']['type'] );
+		}
+
+		// The line item block also exposes read-only display fields with the same union type.
+		$line_item_meta = $properties['line_items']['items']['properties']['meta_data']['items']['properties'];
+		$this->assertEquals( $expected_union, $line_item_meta['display_value']['type'] );
+		$this->assertTrue( $line_item_meta['display_value']['readonly'] );
+		$this->assertTrue( $line_item_meta['display_key']['readonly'] );
+	}
 }

@@ -1480,7 +1480,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							),
 							'value' => array(
 								'description' => __( 'Meta value.', 'woocommerce' ),
-								'type'        => 'mixed',
+								'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 								'context'     => array( 'view', 'edit' ),
 							),
 						),
@@ -1725,7 +1725,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1816,7 +1816,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1914,7 +1914,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1990,7 +1990,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
