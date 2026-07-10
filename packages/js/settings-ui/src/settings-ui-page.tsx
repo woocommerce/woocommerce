@@ -768,7 +768,10 @@ export const SettingsUIPage = ( {
 
 			if (
 				! ( target instanceof Element ) ||
-				! target.closest( '.wc-settings-ui-shell' ) ||
+				// The classic section links render outside the shell on top-level pages.
+				! target.closest(
+					'.wc-settings-ui-shell, #mainform .subsubsub'
+				) ||
 				! shouldPromptForNavigation( event )
 			) {
 				return;

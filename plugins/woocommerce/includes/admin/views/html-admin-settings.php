@@ -56,7 +56,9 @@ $hide_nav = ( 'checkout' === $current_tab && in_array( $current_section, array( 
 $settings_ui_settings_page = $settings_ui_context ? $settings_ui_context->get_settings_page() : null;
 $is_settings_ui_page       = null !== $settings_ui_settings_page;
 
-if ( $settings_ui_settings_page instanceof WC_Settings_Page ) {
+// Drill-down pages replace the section links with header breadcrumbs. Top-level
+// pages keep the classic section links.
+if ( $settings_ui_settings_page instanceof WC_Settings_Page && $settings_ui_context->is_drill_down() ) {
 	remove_action( 'woocommerce_sections_' . $current_tab, array( $settings_ui_settings_page, 'output_sections' ) );
 }
 

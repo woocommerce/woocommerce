@@ -241,19 +241,18 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It exposes section navigation metadata from legacy settings pages.
+	 * It clears shell section navigation for top-level pages, which keep the classic section links.
 	 */
-	public function test_legacy_adapter_adds_shell_navigation_metadata(): void {
+	public function test_request_context_clears_section_navigation_for_top_level_pages(): void {
 		$page    = $this->get_settings_ui_page_with_sections();
-		$adapter = new \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter( $page );
-		$schema  = $adapter->get_schema( '' );
+		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		$schema = $context->get_schema();
 
 		$this->assertSame( 'Settings UI flag test', $schema['shell']['title'] );
 		$this->assertArrayNotHasKey( 'breadcrumbs', $schema['shell'] );
 		$this->assertArrayNotHasKey( 'navigation', $schema['shell'] );
-		$this->assertSame( 'General', $schema['shell']['sectionNavigation'][0]['label'] );
-		$this->assertTrue( $schema['shell']['sectionNavigation'][0]['active'] );
-		$this->assertSame( 'inventory', $schema['shell']['sectionNavigation'][1]['id'] );
+		$this->assertSame( array(), $schema['shell']['sectionNavigation'] );
 	}
 
 	/**
@@ -860,6 +859,15 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			public function __construct() {
 				$this->id    = 'settings_ui_flag_test';
 				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Get the settings UI page adapter.
+			 *
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
+				return new \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter( $this );
 			}
 
 			/**
