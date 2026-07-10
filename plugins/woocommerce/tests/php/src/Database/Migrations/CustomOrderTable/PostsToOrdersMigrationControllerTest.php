@@ -61,6 +61,13 @@ class PostsToOrdersMigrationControllerTest extends \WC_Unit_Test_Case {
 	private $previous_sql_mode;
 
 	/**
+	 * Filter that makes product lookup updates synchronous for committed fixtures.
+	 *
+	 * @var callable
+	 */
+	private $direct_lookup_updates_filter;
+
+	/**
 	 * Setup data_store and sut.
 	 */
 	public function setUp(): void {
@@ -72,8 +79,12 @@ class PostsToOrdersMigrationControllerTest extends \WC_Unit_Test_Case {
 		$this->previous_transactions_option = get_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, null );
 		$this->previous_isolation_option    = get_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, null );
 		$this->previous_sql_mode            = $wpdb->get_var( 'SELECT @@SESSION.sql_mode' );
+		$this->direct_lookup_updates_filter = static function () {
+			return 'yes';
+		};
 
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		add_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', $this->direct_lookup_updates_filter );
 		OrderHelper::toggle_cot_feature_and_usage( false );
 		OrderHelper::create_order_custom_table_if_not_exist();
 		$this->data_store = wc_get_container()->get( OrdersTableDataStore::class );
@@ -91,6 +102,7 @@ class PostsToOrdersMigrationControllerTest extends \WC_Unit_Test_Case {
 		$this->restore_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, $this->previous_transactions_option );
 		$this->restore_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, $this->previous_isolation_option );
 		OrderHelper::toggle_cot_feature_and_usage( $this->previous_hpos_state );
+		remove_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', $this->direct_lookup_updates_filter );
 		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 
 		parent::tearDown();
