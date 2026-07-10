@@ -31,7 +31,7 @@ When we deprecate something in WooCommerce, we take a few actions to make it cle
 
 The function or method itself is not removed from the codebase. This preserves backwards compatibility until removed - usually over a year or several major releases into the future.
 
-We mentioned `wc_deprecated_function` above - this is our own wrapper for the `_deprecated_function` WordPress function. It works very similar except for that it forces a log entry instead of displaying it - regardless of the value of `WP_DEBUG` during AJAX events - so that AJAX requests are not broken by the notice.
+We mentioned `wc_deprecated_function` above - this is our own wrapper for the `_deprecated_function` WordPress function. It works very similar except for that it forces a log entry instead of displaying it - regardless of the value of `WP_DEBUG` during AJAX and REST API requests - so that those requests are not broken by the notice.
 
 ## Which version do I use?
 
@@ -40,7 +40,7 @@ When you add a deprecation you usually don't know which WooCommerce version it w
 - Docblocks: `@deprecated $$next-version$$` (and `@since $$next-version$$` for newly added code).
 - Deprecation calls: `wc_deprecated_function( 'old_function', '$$next-version$$', 'new_function' )`. The same token works in `wc_deprecated_hook()`, `wc_deprecated_argument()`, and `wc_doing_it_wrong()`, in their WordPress core equivalents such as `_deprecated_function()` and `_doing_it_wrong()`, and in `do_action_deprecated()` and `apply_filters_deprecated()`.
 
-At code freeze the release tooling (`tools/replace-next-version-tag.sh`) replaces every `$$next-version$$` token with the version being released, so you never have to update these annotations by hand.
+At code freeze the release tooling (`tools/replace-next-version-tag.sh`) replaces the supported `$$next-version$$` tokens with the version being released, so you never have to update these annotations by hand. The deprecation and `_doing_it_wrong()` calls are only matched when the call is on a single line, indented with tabs, and keeps the token in a single-quoted string. A multi-line or double-quoted call is left untouched; the tooling then fails the build because the token still remains, so the mismatch is caught rather than shipped.
 
 ## What happens when a deprecated function is called?
 
