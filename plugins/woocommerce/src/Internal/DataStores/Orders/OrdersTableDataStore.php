@@ -1490,7 +1490,7 @@ WHERE
 		 * or a well-formed array whose elements are not meta rows. Any of these would otherwise
 		 * fatal downstream (array_filter()/array_diff() on a non-array, or $meta->meta_key on a
 		 * non-object element). Drop anything that is not a usable meta row so the order still
-		 * loads, and when corruption is detected invalidate the cached entry so the next read
+		 * loads, and when corruption is detected invalidate the cached entries so the next read
 		 * self-heals from the database.
 		 */
 		$is_corrupt = false;
@@ -1514,7 +1514,17 @@ WHERE
 				),
 				array( 'source' => 'hpos-data-cache' )
 			);
+			/*
+			 * Invalidate every cache the corrupt value could have come from so the next read
+			 * self-heals from the database. The HPOS meta cache (orders_meta group) is primed by
+			 * init_order_record(), while WC_Data::read_meta_data() reads the object's own legacy
+			 * meta cache (the 'orders' group for orders) and, on a cache hit, skips re-caching -
+			 * so without clearing that group the corrupt entry would persist across reads.
+			 */
 			$this->data_store_meta->clear_cached_data( array( $object->get_id() ) );
+			if ( is_callable( array( $object, 'delete_meta_cache' ) ) ) {
+				$object->delete_meta_cache();
+			}
 		}
 
 		$filtered_meta_data = parent::filter_raw_meta_data( $object, $raw_meta_data );
