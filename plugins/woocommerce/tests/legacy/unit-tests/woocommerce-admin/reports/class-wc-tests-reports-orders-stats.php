@@ -4251,10 +4251,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$i3_end->setTimestamp( $i3_end_timestamp );
 
 		$query_args = array(
-			'after'     => $two_hours_back->format( TimeInterval::$sql_datetime_format ),
-			'before'    => $now->format( TimeInterval::$sql_datetime_format ),
-			'interval'  => 'hour',
-			'segmentby' => 'product',
+			'after'            => $two_hours_back->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $now->format( TimeInterval::$sql_datetime_format ),
+			'interval'         => 'hour',
+			'segmentby'        => 'product',
+			'product_includes' => array( $product_1->get_id(), $product_2->get_id(), $product_3->get_id() ),
 		);
 
 		$shipping_amnt  = 10;
