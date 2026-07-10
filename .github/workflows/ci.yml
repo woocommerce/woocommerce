@@ -213,10 +213,13 @@ jobs:
           attempt=1
           max_attempts=3
           log="$(mktemp)"
+          trap 'rm -f "$log"' EXIT
           until pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }} 2>&1 | tee "$log"; do
-            if grep -q 'curl error 28' "$log"; then reason=packagist
-            elif grep -q 'registry-1.docker.io' "$log"; then reason=dockerhub
-            elif grep -q 'ETIMEDOUT' "$log"; then reason=wordpress
+            # We retry regardless of cause -- transient failures aren't limited to the
+            # patterns below, so reason= is for monitoring only, not a retry gate.
+            if grep -qF 'curl error 28' "$log"; then reason=packagist
+            elif grep -qE 'registry-1\.docker\.io|context deadline exceeded' "$log"; then reason=dockerhub
+            elif grep -qF 'ETIMEDOUT' "$log"; then reason=wordpress
             else reason=unknown
             fi
             if [ "$attempt" -ge "$max_attempts" ]; then
