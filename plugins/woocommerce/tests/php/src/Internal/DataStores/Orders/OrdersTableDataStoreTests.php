@@ -41,6 +41,24 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		OrderHelper::create_order_custom_table_if_not_exist();
+
+		global $wpdb;
+		$tables = array(
+			OrdersTableDataStore::get_meta_table_name(),
+			OrdersTableDataStore::get_operational_data_table_name(),
+			OrdersTableDataStore::get_addresses_table_name(),
+			OrdersTableDataStore::get_orders_table_name(),
+		);
+		foreach ( $tables as $table ) {
+			$wpdb->query( "DELETE FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are provided by the data store.
+		}
+	}
+
+	/**
 	 * Original timezone before this test started.
 	 * @var string
 	 */
@@ -86,7 +104,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
 		update_option( 'timezone_string', 'Asia/Kolkata' );
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
-		$this->setup_cot();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$this->toggle_cot_authoritative( true );
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 		$this->toggle_cot_feature_and_usage( false );
 		$container = wc_get_container();
