@@ -841,30 +841,78 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product category list breadcrumb ordering respects category order for siblings.
+	 * @testdox Product category list breadcrumb ordering batches ancestor loading and respects category order at each level.
 	 */
-	public function test_wc_get_product_category_list_breadcrumb_order_respects_sibling_order(): void {
-		$suffix      = wp_unique_id();
-		$first_name  = 'Sibling First ' . $suffix;
-		$second_name = 'Sibling Second ' . $suffix;
-		$root        = wp_insert_term( 'Sibling Root ' . $suffix, 'product_cat' );
-		$second      = wp_insert_term( $second_name, 'product_cat', array( 'parent' => $root['term_id'] ) );
-		$first       = wp_insert_term( $first_name, 'product_cat', array( 'parent' => $root['term_id'] ) );
-		$product     = WC_Helper_Product::create_simple_product();
+	public function test_wc_get_product_category_list_breadcrumb_order_batches_ancestors(): void {
+		global $wpdb;
+
+		$suffix              = wp_unique_id();
+		$first_branch_name   = 'First branch child ' . $suffix;
+		$second_sibling_name = 'Zulu ordered first ' . $suffix;
+		$third_sibling_name  = 'Alpha ordered second ' . $suffix;
+		$first_root          = wp_insert_term( 'First branch root ' . $suffix, 'product_cat' );
+		$second_root         = wp_insert_term( 'Second branch root ' . $suffix, 'product_cat' );
+		$first_middle        = wp_insert_term( 'First branch middle ' . $suffix, 'product_cat', array( 'parent' => $first_root['term_id'] ) );
+		$second_middle       = wp_insert_term( 'Second branch middle ' . $suffix, 'product_cat', array( 'parent' => $second_root['term_id'] ) );
+		$first_branch        = wp_insert_term( $first_branch_name, 'product_cat', array( 'parent' => $first_middle['term_id'] ) );
+		$third_sibling       = wp_insert_term( $third_sibling_name, 'product_cat', array( 'parent' => $second_middle['term_id'] ) );
+		$second_sibling      = wp_insert_term( $second_sibling_name, 'product_cat', array( 'parent' => $second_middle['term_id'] ) );
+		$product             = WC_Helper_Product::create_simple_product();
+		$query_filter        = null;
 
 		try {
-			update_term_meta( $first['term_id'], 'order', 1 );
-			update_term_meta( $second['term_id'], 'order', 2 );
-			wp_set_object_terms( $product->get_id(), array( $second['term_id'], $first['term_id'] ), 'product_cat' );
+			update_term_meta( $first_root['term_id'], 'order', 2 );
+			update_term_meta( $second_root['term_id'], 'order', 1 );
+			update_term_meta( $second_sibling['term_id'], 'order', 1 );
+			update_term_meta( $third_sibling['term_id'], 'order', 2 );
+			wp_set_object_terms( $product->get_id(), array( $first_branch['term_id'], $third_sibling['term_id'], $second_sibling['term_id'] ), 'product_cat' );
 
-			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+			get_the_terms( $product->get_id(), 'product_cat' );
+			$ancestor_ids = array( $first_root['term_id'], $second_root['term_id'], $first_middle['term_id'], $second_middle['term_id'] );
 
-			$this->assertSame( "{$first_name} > {$second_name}", $actual );
+			foreach ( $ancestor_ids as $ancestor_id ) {
+				wp_cache_delete( $ancestor_id, 'terms' );
+				wp_cache_delete( $ancestor_id, 'term_meta' );
+			}
+
+			$ancestor_id_pattern   = '/\b(?:' . implode( '|', $ancestor_ids ) . ')\b/';
+			$ancestor_term_queries = 0;
+			$ancestor_meta_queries = 0;
+			$query_filter          = static function ( $query ) use ( &$ancestor_meta_queries, &$ancestor_term_queries, $ancestor_id_pattern, $wpdb ) {
+				if ( preg_match( $ancestor_id_pattern, $query ) ) {
+					if ( false !== strpos( $query, "FROM {$wpdb->terms} AS t INNER JOIN {$wpdb->term_taxonomy} AS tt" ) ) {
+						++$ancestor_term_queries;
+					} elseif ( false !== strpos( $query, "FROM {$wpdb->termmeta}" ) ) {
+						++$ancestor_meta_queries;
+					}
+				}
+
+				return $query;
+			};
+			add_filter( 'query', $query_filter );
+
+			try {
+				$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'breadcrumb' ) );
+			} finally {
+				remove_filter( 'query', $query_filter );
+				$query_filter = null;
+			}
+
+			$this->assertSame( "{$second_sibling_name} > {$third_sibling_name} > {$first_branch_name}", $actual );
+			$this->assertLessThanOrEqual( 2, $ancestor_term_queries, 'Ancestor terms should be loaded in one query per hierarchy level.' );
+			$this->assertLessThanOrEqual( 1, $ancestor_meta_queries, 'Ancestor metadata should be primed in one query.' );
 		} finally {
+			if ( null !== $query_filter ) {
+				remove_filter( 'query', $query_filter );
+			}
 			WC_Helper_Product::delete_product( $product->get_id() );
-			wp_delete_term( $first['term_id'], 'product_cat' );
-			wp_delete_term( $second['term_id'], 'product_cat' );
-			wp_delete_term( $root['term_id'], 'product_cat' );
+			wp_delete_term( $second_sibling['term_id'], 'product_cat' );
+			wp_delete_term( $third_sibling['term_id'], 'product_cat' );
+			wp_delete_term( $first_branch['term_id'], 'product_cat' );
+			wp_delete_term( $second_middle['term_id'], 'product_cat' );
+			wp_delete_term( $first_middle['term_id'], 'product_cat' );
+			wp_delete_term( $second_root['term_id'], 'product_cat' );
+			wp_delete_term( $first_root['term_id'], 'product_cat' );
 		}
 	}
 
@@ -872,22 +920,27 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testdox Product category list can render assigned terms alphabetically by name.
 	 */
 	public function test_wc_get_product_category_list_can_render_name_order(): void {
-		$suffix     = wp_unique_id();
-		$alpha_name = 'Alpha Category ' . $suffix;
-		$zulu_name  = 'Zulu Category ' . $suffix;
-		$zulu       = wp_insert_term( $zulu_name, 'product_cat' );
-		$alpha      = wp_insert_term( $alpha_name, 'product_cat' );
-		$product    = WC_Helper_Product::create_simple_product();
+		$suffix            = wp_unique_id();
+		$alpha_name        = 'Alpha Category ' . $suffix;
+		$zulu_name         = 'Zulu Category ' . $suffix;
+		$zulu              = wp_insert_term( $zulu_name, 'product_cat' );
+		$alpha             = wp_insert_term( $alpha_name, 'product_cat' );
+		$product           = WC_Helper_Product::create_simple_product();
+		$term_links_filter = static function ( $links ) {
+			return array_map( static fn( $link ) => 'Filtered ' . $link, $links );
+		};
 
 		try {
 			update_term_meta( $alpha['term_id'], 'order', 2 );
 			update_term_meta( $zulu['term_id'], 'order', 1 );
 			wp_set_object_terms( $product->get_id(), array( $zulu['term_id'], $alpha['term_id'] ), 'product_cat' );
+			add_filter( 'term_links-product_cat', $term_links_filter );
 
 			$actual = wp_strip_all_tags( wc_get_product_category_list( $product->get_id(), ' > ', '', '', 'name' ) );
 
-			$this->assertSame( "{$alpha_name} > {$zulu_name}", $actual );
+			$this->assertSame( "Filtered {$alpha_name} > Filtered {$zulu_name}", $actual );
 		} finally {
+			remove_filter( 'term_links-product_cat', $term_links_filter );
 			WC_Helper_Product::delete_product( $product->get_id() );
 			wp_delete_term( $alpha['term_id'], 'product_cat' );
 			wp_delete_term( $zulu['term_id'], 'product_cat' );

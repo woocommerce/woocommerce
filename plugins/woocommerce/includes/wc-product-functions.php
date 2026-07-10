@@ -1716,7 +1716,7 @@ function wc_get_price_to_display( $product, $args = array() ) {
  * @param string $sep (default: ', ').
  * @param string $before (default: '').
  * @param string $after (default: '').
- * @param string $orderby Optional ordering mode. Supports 'name', 'breadcrumb', and 'hierarchy'. Default empty string preserves WordPress term-list order.
+ * @param string $orderby Optional ordering mode. Supports 'name' and 'breadcrumb'. Default empty string preserves WordPress term-list order.
  * @return string|false|WP_Error
  */
 function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $after = '', $orderby = '' ) {
@@ -1736,9 +1736,10 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 		return false;
 	}
 
-	$terms = array_values( $terms );
+	$terms       = array_values( $terms );
+	$should_sort = 1 < count( $terms );
 
-	if ( 'name' === $orderby ) {
+	if ( 'name' === $orderby && $should_sort ) {
 		usort(
 			$terms,
 			function ( $a, $b ) {
@@ -1747,63 +1748,103 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 				return 0 !== $name_comparison ? $name_comparison : $a->term_id <=> $b->term_id;
 			}
 		);
-	} elseif ( in_array( $orderby, array( 'breadcrumb', 'hierarchy' ), true ) ) {
-		$term_sort_data = array();
-		$term_paths     = array();
+	} elseif ( 'breadcrumb' === $orderby && $should_sort ) {
+		$term_names        = array();
+		$term_parents      = array();
+		$ancestor_frontier = array();
+		$term_paths        = array();
+		$term_orders       = array();
 
-		$get_term_sort_data = function ( $term_id ) use ( &$term_sort_data ) {
-			$term_id = absint( $term_id );
+		foreach ( $terms as $term ) {
+			$term_names[ $term->term_id ]   = (string) $term->name;
+			$term_parents[ $term->term_id ] = (int) $term->parent;
 
-			if ( isset( $term_sort_data[ $term_id ] ) ) {
-				return $term_sort_data[ $term_id ];
+			if ( $term->parent ) {
+				$ancestor_frontier[ $term->parent ] = true;
+			}
+		}
+
+		while ( $ancestor_frontier ) {
+			$frontier_ids = array_values( array_diff( array_keys( $ancestor_frontier ), array_keys( $term_parents ) ) );
+
+			if ( ! $frontier_ids ) {
+				break;
 			}
 
-			$term       = get_term( $term_id, 'product_cat' );
+			$frontier_parents = get_terms(
+				array(
+					'taxonomy'               => 'product_cat',
+					'include'                => $frontier_ids,
+					'hide_empty'             => false,
+					'fields'                 => 'id=>parent',
+					'orderby'                => 'include',
+					'update_term_meta_cache' => false,
+				)
+			);
+
+			if ( is_wp_error( $frontier_parents ) ) {
+				return $frontier_parents;
+			}
+
+			$ancestor_frontier = array();
+
+			foreach ( $frontier_parents as $term_id => $parent_id ) {
+				$term_id                  = (int) $term_id;
+				$parent_id                = (int) $parent_id;
+				$term_parents[ $term_id ] = $parent_id;
+
+				if ( $parent_id ) {
+					$ancestor_frontier[ $parent_id ] = true;
+				}
+			}
+		}
+
+		update_meta_cache( 'term', array_keys( $term_parents ) );
+
+		foreach ( array_diff( array_keys( $term_parents ), array_keys( $term_names ) ) as $ancestor_id ) {
+			$ancestor_term = get_term( $ancestor_id, 'product_cat' );
+
+			$term_names[ $ancestor_id ] = $ancestor_term instanceof WP_Term ? (string) $ancestor_term->name : '';
+		}
+
+		foreach ( array_keys( $term_parents ) as $term_id ) {
 			$term_order = get_term_meta( $term_id, 'order', true );
 
-			$term_sort_data[ $term_id ] = array(
-				'order'   => '' === $term_order ? 0 : (int) $term_order,
-				'name'    => $term instanceof WP_Term ? (string) $term->name : '',
-				'term_id' => $term_id,
-			);
+			$term_orders[ $term_id ] = '' === $term_order ? 0 : (int) $term_order;
+		}
 
-			return $term_sort_data[ $term_id ];
-		};
+		foreach ( $terms as $term ) {
+			$path            = array();
+			$current_term_id = $term->term_id;
 
-		$compare_term_sort_data = function ( $a, $b ) {
-			if ( $a['order'] !== $b['order'] ) {
-				return $a['order'] <=> $b['order'];
+			while ( $current_term_id && ! isset( $path[ $current_term_id ] ) ) {
+				$path[ $current_term_id ] = $current_term_id;
+				$current_term_id          = $term_parents[ $current_term_id ] ?? 0;
 			}
 
-			$name_comparison = strnatcasecmp( $a['name'], $b['name'] );
-
-			return 0 !== $name_comparison ? $name_comparison : $a['term_id'] <=> $b['term_id'];
-		};
-
-		$get_term_path = function ( $term ) use ( &$term_paths, $get_term_sort_data ) {
-			if ( isset( $term_paths[ $term->term_id ] ) ) {
-				return $term_paths[ $term->term_id ];
-			}
-
-			$path_ids = array_merge(
-				array_reverse( get_ancestors( $term->term_id, 'product_cat', 'taxonomy' ) ),
-				array( $term->term_id )
-			);
-
-			$term_paths[ $term->term_id ] = array_map( $get_term_sort_data, $path_ids );
-
-			return $term_paths[ $term->term_id ];
-		};
+			$term_paths[ $term->term_id ] = array_reverse( array_values( $path ) );
+		}
 
 		usort(
 			$terms,
-			function ( $a, $b ) use ( $get_term_path, $compare_term_sort_data ) {
-				$a_path       = $get_term_path( $a );
-				$b_path       = $get_term_path( $b );
+			static function ( $a, $b ) use ( $term_names, $term_orders, $term_paths ) {
+				$a_path       = $term_paths[ $a->term_id ];
+				$b_path       = $term_paths[ $b->term_id ];
 				$shared_depth = min( count( $a_path ), count( $b_path ) );
 
 				for ( $index = 0; $index < $shared_depth; $index++ ) {
-					$path_comparison = $compare_term_sort_data( $a_path[ $index ], $b_path[ $index ] );
+					$a_term_id = $a_path[ $index ];
+					$b_term_id = $b_path[ $index ];
+
+					if ( $term_orders[ $a_term_id ] !== $term_orders[ $b_term_id ] ) {
+						return $term_orders[ $a_term_id ] <=> $term_orders[ $b_term_id ];
+					}
+
+					$path_comparison = strnatcasecmp( $term_names[ $a_term_id ], $term_names[ $b_term_id ] );
+
+					if ( 0 === $path_comparison ) {
+						$path_comparison = $a_term_id <=> $b_term_id;
+					}
 
 					if ( 0 !== $path_comparison ) {
 						return $path_comparison;
@@ -1813,7 +1854,7 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 				return count( $a_path ) <=> count( $b_path );
 			}
 		);
-	} else {
+	} elseif ( ! in_array( $orderby, array( 'name', 'breadcrumb' ), true ) ) {
 		return get_the_term_list( $product_id, 'product_cat', $before, $sep, $after );
 	}
 

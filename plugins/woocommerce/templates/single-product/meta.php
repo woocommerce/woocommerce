@@ -41,10 +41,7 @@ global $product;
 		'</span>',
 		'breadcrumb'
 	);
-
-	if ( ! is_wp_error( $product_category_list ) ) {
-		echo $product_category_list; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	}
+	echo is_string( $product_category_list ) ? $product_category_list : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	?>
 
 	<?php echo wc_get_product_tag_list( $product->get_id(), ', ', '<span class="tagged_as">' . _n( 'Tag:', 'Tags:', count( $product->get_tag_ids() ), 'woocommerce' ) . ' ', '</span>' ); ?>
