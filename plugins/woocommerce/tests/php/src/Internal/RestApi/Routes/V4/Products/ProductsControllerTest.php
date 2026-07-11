@@ -1476,35 +1476,51 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a variable product with stock-managed variations.
+	 *
+	 * @param array<int, array{quantity: int, status?: string}> $variation_data Variation stock and status data.
+	 * @return \WC_Product_Variable
+	 */
+	private function create_variable_product_with_stock( array $variation_data ): \WC_Product_Variable {
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Variable product' );
+		$product->save();
+
+		foreach ( $variation_data as $data ) {
+			$variation = new \WC_Product_Variation();
+			$variation->set_parent_id( $product->get_id() );
+			$variation->set_regular_price( 10 );
+			$variation->set_manage_stock( true );
+			$variation->set_stock_quantity( $data['quantity'] );
+			$variation->set_status( $data['status'] ?? ProductStatus::PUBLISH );
+			$variation->save();
+		}
+
+		return $product;
+	}
+
+	/**
 	 * @testdox Stock quantity parameters include variable products when a variation matches.
 	 */
 	public function test_products_filter_with_stock_quantity_range_matches_variable_product_variations(): void {
-		$variable_product          = WC_Helper_Product::create_variation_product();
-		$variation_ids             = $variable_product->get_children();
-		$matching_variation        = wc_get_product( $variation_ids[0] );
-		$non_matching_variation    = wc_get_product( $variation_ids[1] );
-		$non_matching_product      = WC_Helper_Product::create_simple_product(
+		$variable_product      = $this->create_variable_product_with_stock(
+			array(
+				array( 'quantity' => 5 ),
+				array( 'quantity' => 8 ),
+			)
+		);
+		$non_matching_product  = WC_Helper_Product::create_simple_product(
 			true,
 			array(
 				'manage_stock'   => true,
 				'stock_quantity' => 2,
 			)
 		);
-		$non_matching_variable     = WC_Helper_Product::create_variation_product();
-		$non_matching_variation_id = $non_matching_variable->get_children()[0];
-		$non_matching_variation_2  = wc_get_product( $non_matching_variation_id );
-
-		$matching_variation->set_manage_stock( true );
-		$matching_variation->set_stock_quantity( 5 );
-		$matching_variation->save();
-
-		$non_matching_variation->set_manage_stock( true );
-		$non_matching_variation->set_stock_quantity( 8 );
-		$non_matching_variation->save();
-
-		$non_matching_variation_2->set_manage_stock( true );
-		$non_matching_variation_2->set_stock_quantity( 10 );
-		$non_matching_variation_2->save();
+		$non_matching_variable = $this->create_variable_product_with_stock(
+			array(
+				array( 'quantity' => 10 ),
+			)
+		);
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1533,19 +1549,15 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @testdox Stock quantity parameters ignore unpublished variations when matching variable products.
 	 */
 	public function test_products_filter_with_stock_quantity_range_ignores_unpublished_variations(): void {
-		$variable_product       = WC_Helper_Product::create_variation_product();
-		$variation_ids          = $variable_product->get_children();
-		$draft_variation        = wc_get_product( $variation_ids[0] );
-		$non_matching_variation = wc_get_product( $variation_ids[1] );
-
-		$draft_variation->set_status( ProductStatus::DRAFT );
-		$draft_variation->set_manage_stock( true );
-		$draft_variation->set_stock_quantity( 5 );
-		$draft_variation->save();
-
-		$non_matching_variation->set_manage_stock( true );
-		$non_matching_variation->set_stock_quantity( 8 );
-		$non_matching_variation->save();
+		$variable_product = $this->create_variable_product_with_stock(
+			array(
+				array(
+					'quantity' => 5,
+					'status'   => ProductStatus::DRAFT,
+				),
+				array( 'quantity' => 8 ),
+			)
+		);
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
