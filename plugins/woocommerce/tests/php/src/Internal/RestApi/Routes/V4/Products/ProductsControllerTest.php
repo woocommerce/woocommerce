@@ -671,9 +671,8 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_products_query_by_global_unique_id_param_for_variations() {
-		$parent_product = WC_Helper_Product::create_variation_product();
-		$variation      = $parent_product->get_available_variations()[0];
-		$variation      = wc_get_product( $variation['variation_id'] );
+		$parent_product = $this->create_variable_product_with_variations( 1 );
+		$variation      = wc_get_product( $parent_product->get_children()[0] );
 		$unique_id      = $parent_product->get_id() . '-1';
 		$variation->set_global_unique_id( $unique_id );
 		$variation->save();
