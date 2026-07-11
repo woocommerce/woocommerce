@@ -175,6 +175,12 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 	public function clear( string $source, bool $quiet = false ): int {
 		$source = File::sanitize_source( $source );
 
+		// Bail on an empty source: an empty value would match every file and,
+		// combined with the batched deletion below, wipe out all log files.
+		if ( '' === $source ) {
+			return 0;
+		}
+
 		$deleted = 0;
 		$skipped = 0;
 
@@ -192,10 +198,11 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		do {
 			$files = $this->file_controller->get_files(
 				array(
-					'source'   => $source,
-					'orderby'  => 'created',
-					'per_page' => self::DELETE_BATCH_SIZE,
-					'offset'   => $skipped,
+					'source'       => $source,
+					'exact_source' => true,
+					'orderby'      => 'created',
+					'per_page'     => self::DELETE_BATCH_SIZE,
+					'offset'       => $skipped,
 				)
 			);
 

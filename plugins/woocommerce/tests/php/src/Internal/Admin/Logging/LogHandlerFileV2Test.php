@@ -124,7 +124,7 @@ class LogHandlerFileV2Test extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_message_formatting() {
 		$time    = time();
-		$message = <<<MESSAGE
+		$message = <<<'MESSAGE'
 How to win
 1. Bake cookies
 2. ???
@@ -337,7 +337,8 @@ MESSAGE;
 		$this->assertEquals( 3, $result );
 
 		$paths = glob( Settings::get_log_directory() . '*.log' );
-		$this->assertCount( 2, $paths ); // New log gets created when old logs are deleted!
+		$this->assertCount( 2, $paths );
+		// New log gets created when old logs are deleted!
 
 		$paths = glob( Settings::get_log_directory() . 'wc_logger*.log' );
 		$this->assertCount( 1, $paths );
@@ -492,6 +493,86 @@ MESSAGE;
 	}
 
 	/**
+	 * @testdox Check that clear only deletes files for the exact source, not sources that merely share its prefix.
+	 */
+	public function test_clear_only_deletes_the_exact_source() {
+		$this->sut->handle( time(), 'debug', 'a', array( 'source' => 'foo' ) );
+		$this->sut->handle( time(), 'debug', 'b', array( 'source' => 'foo-two' ) );
+		$this->sut->handle( time(), 'debug', 'c', array( 'source' => 'foobar' ) );
+
+		$this->assertCount( 3, glob( Settings::get_log_directory() . '*.log' ) );
+
+		$result = $this->sut->clear( 'foo' );
+
+		$this->assertEquals( 1, $result, 'clear() should delete only the file belonging to the exact source.' );
+		$this->assertCount( 1, glob( Settings::get_log_directory() . 'foo-two-*.log' ), 'The foo-two source must be left untouched.' );
+		$this->assertCount( 1, glob( Settings::get_log_directory() . 'foobar-*.log' ), 'The foobar source must be left untouched.' );
+	}
+
+	/**
+	 * @testdox Check that clear deletes rotated files of the exact source while leaving a prefix-sibling source alone.
+	 */
+	public function test_clear_deletes_rotated_files_of_the_exact_source() {
+		$file_controller = wc_get_container()->get( FileController::class );
+
+		// Log to 'foo', rotate that file, then log again so there is a current file plus
+		// a rotation of it. Both parse to source 'foo'.
+		$this->sut->handle( time(), 'debug', 'first', array( 'source' => 'foo' ) );
+		$foo = $file_controller->get_files(
+			array(
+				'source'       => 'foo',
+				'exact_source' => true,
+			)
+		);
+		$foo[0]->rotate();
+		$this->sut->handle( time(), 'debug', 'second', array( 'source' => 'foo' ) );
+
+		// A prefix sibling that must survive.
+		$this->sut->handle( time(), 'debug', 'sibling', array( 'source' => 'foo-two' ) );
+
+		$this->assertCount(
+			2,
+			$file_controller->get_files(
+				array(
+					'source'       => 'foo',
+					'exact_source' => true,
+				)
+			),
+			'Setup: expected the current file and one rotation for source foo.'
+		);
+
+		$result = $this->sut->clear( 'foo' );
+
+		$this->assertEquals( 2, $result, 'clear() should delete the current and rotated files of the exact source.' );
+		$this->assertCount(
+			0,
+			$file_controller->get_files(
+				array(
+					'source'       => 'foo',
+					'exact_source' => true,
+				)
+			),
+			'All foo files, including rotations, should be gone.'
+		);
+		$this->assertCount( 1, glob( Settings::get_log_directory() . 'foo-two-*.log' ), 'The foo-two source must be left untouched.' );
+	}
+
+	/**
+	 * @testdox Check that clear does nothing when given a source that sanitizes to an empty string.
+	 */
+	public function test_clear_does_nothing_for_an_empty_source() {
+		$this->sut->handle( time(), 'debug', 'a', array( 'source' => 'keep-me' ) );
+		$this->sut->handle( time(), 'debug', 'b', array( 'source' => 'keep-me-too' ) );
+
+		$this->assertCount( 2, glob( Settings::get_log_directory() . '*.log' ) );
+
+		$result = $this->sut->clear( '' );
+
+		$this->assertEquals( 0, $result, 'clear() must not delete anything for an empty source.' );
+		$this->assertCount( 2, glob( Settings::get_log_directory() . '*.log' ), 'No log files should be deleted for an empty source.' );
+	}
+
+	/**
 	 * @testdox Check that the delete_logs_before_timestamp method deletes files based on their created date.
 	 */
 	public function test_delete_logs_before_timestamp() {
@@ -512,7 +593,8 @@ MESSAGE;
 		$this->assertEquals( 4, $result );
 
 		$paths = glob( Settings::get_log_directory() . '*.log' );
-		$this->assertCount( 3, $paths ); // New log gets created when old logs are deleted!
+		$this->assertCount( 3, $paths );
+		// New log gets created when old logs are deleted!
 
 		$paths = glob( Settings::get_log_directory() . 'wc_logger*.log' );
 		$this->assertCount( 1, $paths );

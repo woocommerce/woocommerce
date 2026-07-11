@@ -271,6 +271,28 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The get_files method prefix-matches source by default but matches exactly when exact_source is set.
+	 */
+	public function test_get_files_exact_source_excludes_prefix_siblings(): void {
+		$this->handler->handle( time(), 'debug', 'a', array( 'source' => 'foo' ) );
+		$this->handler->handle( time(), 'debug', 'b', array( 'source' => 'foo-two' ) );
+
+		// Default matching is a prefix, so 'foo' also returns the 'foo-two' source.
+		$prefix = $this->sut->get_files( array( 'source' => 'foo' ) );
+		$this->assertCount( 2, $prefix );
+
+		// Exact matching returns only the 'foo' source.
+		$exact = $this->sut->get_files(
+			array(
+				'source'       => 'foo',
+				'exact_source' => true,
+			)
+		);
+		$this->assertCount( 1, $exact );
+		$this->assertEquals( 'foo', array_shift( $exact )->get_source() );
+	}
+
+	/**
 	 * @testdox The get_files method should return a count of files that meet the filtering criteria.
 	 */
 	public function test_get_files_count_only(): void {
