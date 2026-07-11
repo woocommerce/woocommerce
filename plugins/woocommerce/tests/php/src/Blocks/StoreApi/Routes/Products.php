@@ -92,7 +92,7 @@ class Products extends ControllerTestCase {
 	 */
 	public function test_get_item() {
 		$fixtures = new FixtureData();
-		$image_id = $fixtures->sideload_image( $this->products[0]->get_id() );
+		$image_id = $fixtures->create_image_attachment( $this->products[0]->get_id() );
 		$this->products[0]->set_image_id( $image_id );
 		$this->products[0]->save();
 
@@ -317,7 +317,7 @@ class Products extends ControllerTestCase {
 		$this->assertIsArray( $data['images'] );
 		$this->assertCount( 0, $data['images'] );
 
-		$image_id = $fixtures->sideload_image();
+		$image_id = $fixtures->create_image_attachment();
 		$product  = $fixtures->get_simple_product(
 			array(
 				'name'              => 'Test Product 1',
@@ -341,7 +341,7 @@ class Products extends ControllerTestCase {
 	 */
 	public function test_product_category_image_return_types() {
 		$fixtures = new FixtureData();
-		$image_id = $fixtures->sideload_image();
+		$image_id = $fixtures->create_image_attachment();
 		$term     = wp_insert_term( 'Test Category', 'product_cat' );
 
 		update_term_meta( $term['term_id'], 'thumbnail_id', $image_id );

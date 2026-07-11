@@ -518,7 +518,7 @@ class CartItems extends ControllerTestCase {
 	 */
 	private function add_image_to_product(): int {
 		$fixtures = new FixtureData();
-		$image_id = $fixtures->sideload_image( $this->products[0]->get_id() );
+		$image_id = $fixtures->create_image_attachment( $this->products[0]->get_id() );
 		$this->products[0]->set_image_id( $image_id );
 		$this->products[0]->save();
 		$cart_item = WC()->cart->get_cart_item( $this->keys[0] );
