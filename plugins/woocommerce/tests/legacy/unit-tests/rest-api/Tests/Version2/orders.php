@@ -68,7 +68,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 
 		// Create 10 orders.
 		for ( $i = 0; $i < 10; $i++ ) {
-			$this->orders[] = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+			$this->orders[] = wc_create_order( array( 'customer_id' => $this->user ) );
 		}
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders' ) );
