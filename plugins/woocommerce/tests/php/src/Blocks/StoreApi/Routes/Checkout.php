@@ -77,6 +77,13 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_class_fixture_products( self::$product_ids );
+	}
+
+	/**
 	 * Setup test product data. Called before every test.
 	 */
 	protected function setUp(): void {
