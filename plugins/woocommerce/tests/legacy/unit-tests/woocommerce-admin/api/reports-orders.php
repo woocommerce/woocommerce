@@ -236,7 +236,8 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$simple_product_order_1->save();
 
 		// Create more orders for simple products.
-		for ( $i = 0; $i < 10; $i++ ) {
+		$unattributed_order_count = 2;
+		for ( $i = 0; $i < $unattributed_order_count; $i++ ) {
 			$order = WC_Helper_Order::create_order( $this->user );
 			$order->set_status( OrderStatus::COMPLETED );
 			$order->save();
@@ -251,7 +252,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 		// Sanity check before filtering by attribute.
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 13, count( $response_orders ) );
+		$this->assertEquals( 3 + $unattributed_order_count, count( $response_orders ) );
 
 		// To filter by later.
 		$size_attr_id = wc_attribute_taxonomy_id_by_name( 'pa_size' );
@@ -277,7 +278,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 			$this->assertEquals( 200, $response->get_status() );
 			// We expect all results since the attribute param is malformed.
-			$this->assertEquals( 13, count( $response_orders ) );
+			$this->assertEquals( 3 + $unattributed_order_count, count( $response_orders ) );
 		}
 
 		// Filter by the "size" attribute, with value "small".
@@ -317,7 +318,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$response_orders = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 11, count( $response_orders ) );
+		$this->assertEquals( 1 + $unattributed_order_count, count( $response_orders ) );
 	}
 
 	/**
