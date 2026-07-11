@@ -1106,10 +1106,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 							if ( $coupon ) {
 								$order->apply_coupon( $coupon );
+							} else {
+								$order->calculate_totals();
 							}
-
-							$order->calculate_totals();
-							$order->save();
 
 							$orders[] = $order;
 
@@ -1132,10 +1131,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 							if ( $coupon ) {
 								$order_2->apply_coupon( $coupon );
+							} else {
+								$order_2->calculate_totals();
 							}
-
-							$order_2->calculate_totals();
-							$order_2->save();
 
 							$orders[] = $order_2;
 						}
