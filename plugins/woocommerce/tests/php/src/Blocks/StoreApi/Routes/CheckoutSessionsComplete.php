@@ -22,6 +22,44 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	use AgenticTestHelpers;
 
 	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
+	/**
+	 * Create immutable products shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$products = self::create_class_fixture_products(
+			array(
+				array(
+					'name'          => 'Test Product 1',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+					'regular_price' => 10,
+					'weight'        => 10,
+				),
+				array(
+					'name'          => 'Test Product 2',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+					'regular_price' => 20,
+					'weight'        => 5,
+				),
+			)
+		);
+
+		self::$product_ids = array_map( static fn( $product ) => $product->get_id(), $products );
+	}
+
+	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_class_fixture_products( self::$product_ids );
+	}
+
+	/**
 	 * Products created for tests.
 	 *
 	 * @var array
@@ -60,24 +98,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
 
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 20,
-					'weight'        => 5,
-				)
-			),
-		);
+		$this->products = array_map( 'wc_get_product', self::$product_ids );
 
 		// Register mock agentic payment gateway.
 		$this->mock_gateway = new MockAgenticPaymentGateway();
