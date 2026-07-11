@@ -7,8 +7,11 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
@@ -188,23 +191,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$created_via_entries    = array( 'api', 'checkout', 'admin' );
 		$payment_method_entries = array( WC_Gateway_Paypal::ID, 'stripe', WC_Gateway_COD::ID );
 
-		$order_count = count( $status_entries ) * count( $created_via_entries ) * count( $payment_method_entries );
-
-		foreach ( $status_entries as $status_entry ) {
-			foreach ( $created_via_entries as $created_via_entry ) {
-				foreach ( $payment_method_entries as $payment_method_entry ) {
-					$order = wc_create_order(
-						array(
-							'status'         => $status_entry,
-							'created_via'    => $created_via_entry,
-							'payment_method' => $payment_method_entry,
-						)
-					);
-					$order->set_total( 10 );
-					$order->save();
-				}
-			}
-		}
+		$order_count = $this->create_tracking_orders( $status_entries, $created_via_entries, $payment_method_entries );
 
 		$order_data = WC_Tracker::get_tracking_data()['orders'];
 
@@ -215,18 +202,95 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		// Gross revenue is for wc-completed and wc-refunded status, so we calculate expected revenue per status, multiply by 2, and then multiply by 10 to account for the 10 USD per status.
 		$this->assertEquals( ( $order_count / count( $status_entries ) ) * 2 * 10, $order_data['gross'] );
 
-		// Gross revenue is for wc-pending status, so we calculate expected revenue per status, multiply by 1, and then multiply by 10 to account for the 10 USD per status.
+		// Processing gross revenue covers one status, so multiply the orders per status by the fixed 10 USD total.
 		$this->assertEquals( ( $order_count / count( $status_entries ) ) * 1 * 10, $order_data['processing_gross'] );
 
-		// Order count per gateway is calculated for three status (completed, processing and refunded) so we multiply order count by 3 and then divide by the number of status entries.
-		$this->assertEquals( ( $order_count * 3 / count( $status_entries ) ), $order_data['gateway__USD_count'] );
-
-		// Order revenue per gateway is calculated for three status (completed, processing and refunded) so we multiply order count by 3, then by 10 to account for 10 USD per order and then divide by the number of status entries.
-		$this->assertEquals( ( $order_count * 3 * 10 / count( $status_entries ) ), $order_data['gateway__USD_total'] );
+		$orders_per_gateway = count( $created_via_entries ) * 3;
+		foreach ( $payment_method_entries as $payment_method_entry ) {
+			$gateway_key = 'gateway_' . $payment_method_entry . '_USD';
+			$this->assertEquals( $orders_per_gateway, $order_data[ $gateway_key . '_count' ] );
+			$this->assertEquals( $orders_per_gateway * 10, $order_data[ $gateway_key . '_total' ] );
+		}
 
 		foreach ( $created_via_entries as $created_via_entry ) {
 			$this->assertEquals( ( $order_count / count( $created_via_entries ) ), $order_data['created_via'][ $created_via_entry ] );
 		}
+	}
+
+	/**
+	 * Persist the order matrix read by the tracker aggregate queries.
+	 *
+	 * @param string[] $statuses        Order statuses.
+	 * @param string[] $created_via     Order origins.
+	 * @param string[] $payment_methods Payment methods.
+	 * @return int Number of inserted orders.
+	 */
+	private function create_tracking_orders( array $statuses, array $created_via, array $payment_methods ): int {
+		global $wpdb;
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order_count = 0;
+			foreach ( $statuses as $status ) {
+				foreach ( $created_via as $origin ) {
+					foreach ( $payment_methods as $payment_method ) {
+						$order = wc_create_order(
+							array(
+								'status'      => $status,
+								'created_via' => $origin,
+							)
+						);
+						$order->set_payment_method( $payment_method );
+						$order->set_total( 10 );
+						$order->save();
+						++$order_count;
+					}
+				}
+			}
+
+			return $order_count;
+		}
+
+		$next_order_id = (int) $wpdb->get_var( "SELECT GREATEST(COALESCE((SELECT MAX(id) FROM {$wpdb->prefix}wc_orders), 0), COALESCE((SELECT MAX(ID) FROM {$wpdb->posts}), 0)) + 1" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are provided by WordPress.
+		$order_date    = gmdate( 'Y-m-d H:i:s' );
+		$order_rows    = array();
+		$order_values  = array();
+		$detail_rows   = array();
+		$detail_values = array();
+
+		foreach ( $statuses as $status ) {
+			foreach ( $created_via as $origin ) {
+				foreach ( $payment_methods as $payment_method ) {
+					$order_rows[] = '(%d, %s, %s, %s, %f, %s, %s, %s)';
+					array_push( $order_values, $next_order_id, $status, 'USD', 'shop_order', 10, $order_date, $order_date, $payment_method );
+
+					$detail_rows[] = '(%d, %s, %s, %d)';
+					array_push( $detail_values, $next_order_id, $origin, WOOCOMMERCE_VERSION, 0 );
+
+					++$next_order_id;
+				}
+			}
+		}
+
+		$order_table    = OrdersTableDataStore::get_orders_table_name();
+		$order_columns  = 'id, status, currency, type, total_amount, date_created_gmt, date_updated_gmt, payment_method';
+		$detail_table   = OrdersTableDataStore::get_operational_data_table_name();
+		$detail_columns = 'order_id, created_via, woocommerce_version, recorded_sales';
+
+		$order_query = $wpdb->prepare(
+			"INSERT INTO {$order_table} ({$order_columns}) VALUES " . implode( ', ', $order_rows ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.NotPrepared -- Table and columns are selected above; placeholders are generated above.
+			$order_values
+		);
+		$wpdb->query( $order_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
+
+		$detail_query = $wpdb->prepare(
+			"INSERT INTO {$detail_table} ({$detail_columns}) VALUES " . implode( ', ', $detail_rows ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.NotPrepared -- Table and columns are selected above; placeholders are generated above.
+			$detail_values
+		);
+		$wpdb->query( $detail_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
+
+		( new OrderCountCache() )->flush( 'shop_order', array_keys( wc_get_order_statuses() ) );
+
+		return count( $order_rows );
 	}
 
 	/**
