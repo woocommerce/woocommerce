@@ -35,6 +35,8 @@ if ( class_exists( ActionScheduler::class ) && ActionScheduler::is_initialized()
 	as_unschedule_all_actions( 'woocommerce_cleanup_logs' );
 	as_unschedule_all_actions( 'woocommerce_geoip_updater' );
 	as_unschedule_all_actions( 'woocommerce_tracker_send_event' );
+	as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper' );
+	as_unschedule_all_actions( 'woocommerce_tracker_send_event_attempt' );
 	as_unschedule_all_actions( 'woocommerce_cleanup_rate_limits' );
 	as_unschedule_all_actions( 'wc_admin_daily' );
 	as_unschedule_all_actions( 'generate_category_lookup_table' );

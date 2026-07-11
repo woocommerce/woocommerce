@@ -29,6 +29,27 @@ defined( 'ABSPATH' ) || exit;
  * WooCommerce Tracker Class
  */
 class WC_Tracker {
+	/**
+	 * Action Scheduler hook for response-aware delivery attempts.
+	 *
+	 * @var string
+	 */
+	private const SEND_ATTEMPT_HOOK = 'woocommerce_tracker_send_event_attempt';
+
+	/**
+	 * Action Scheduler group for response-aware delivery attempts.
+	 *
+	 * @var string
+	 */
+	private const SEND_ATTEMPT_GROUP = 'woocommerce-tracker';
+
+	/**
+	 * Maximum zero-based delivery attempt number.
+	 *
+	 * @var int
+	 */
+	private const MAX_SEND_ATTEMPT = 4;
+
 
 	// phpcs:enable
 	/**
@@ -56,6 +77,10 @@ class WC_Tracker {
 			return;
 		}
 
+		if ( 'yes' !== get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+			return;
+		}
+
 		/**
 		 * Filter whether to send tracking data or not.
 		 *
@@ -75,21 +100,161 @@ class WC_Tracker {
 			}
 		}
 
-		// Update time first before sending to ensure it is set.
-		update_option( 'woocommerce_tracker_last_send', time() );
+		$attempt_args = array( 'attempt' => 0 );
+		try {
+			$action_id = as_enqueue_async_action( self::SEND_ATTEMPT_HOOK, $attempt_args, self::SEND_ATTEMPT_GROUP, true );
+			if ( 0 !== $action_id || as_has_scheduled_action( self::SEND_ATTEMPT_HOOK, null, self::SEND_ATTEMPT_GROUP ) ) {
+				update_option( 'woocommerce_tracker_last_send', time() );
+			}
+		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- Failure is reported with a fixed category below.
+			self::log_send_failure( 0, array( 'error_code' => 'initial_scheduling_failure' ) );
+		}
+	}
 
-		$params = self::get_tracking_data();
-		wp_safe_remote_post(
+	/**
+	 * Send a current tracking snapshot and schedule a retry for transient failures.
+	 *
+	 * @internal
+	 * @since 11.1.0
+	 *
+	 * @param int $attempt Zero-based attempt number.
+	 * @return void
+	 */
+	public static function send_tracking_data_attempt( $attempt = 0 ) {
+		if ( 'yes' !== get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+			return;
+		}
+
+		$attempt = max( 0, (int) $attempt );
+		$body    = wp_json_encode( self::get_tracking_data() );
+		if ( false === $body ) {
+			self::log_send_failure( $attempt, array( 'error_code' => 'serialization_failure' ) );
+			return;
+		}
+
+		$response = wp_safe_remote_post(
 			self::$api_url,
 			array(
 				'method'      => 'POST',
 				'timeout'     => 45,
 				'redirection' => 5,
 				'httpversion' => '1.0',
-				'blocking'    => false,
+				'blocking'    => true,
 				'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url_raw( home_url( '/' ) ) ) . ';' ),
-				'body'        => wp_json_encode( $params ),
+				'body'        => $body,
 				'cookies'     => array(),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			self::log_send_failure( $attempt, array( 'error_code' => 'transport_failure' ) );
+			self::schedule_retry( $attempt );
+			return;
+		}
+
+		$status = (int) wp_remote_retrieve_response_code( $response );
+		if ( 200 <= $status && 300 > $status ) {
+			return;
+		}
+
+		self::log_send_failure( $attempt, array( 'http_status' => $status ) );
+		if ( ! self::is_retryable_status( $status ) ) {
+			return;
+		}
+
+		$retry_after_delay = self::get_retry_after_delay( wp_remote_retrieve_header( $response, 'retry-after' ) );
+		if ( DAY_IN_SECONDS < $retry_after_delay ) {
+			return;
+		}
+
+		self::schedule_retry( $attempt, $retry_after_delay );
+	}
+
+	/**
+	 * Determine whether an HTTP status is retryable.
+	 *
+	 * @param int $status HTTP response status.
+	 * @return bool
+	 */
+	private static function is_retryable_status( $status ) {
+		return 0 === $status || in_array( $status, array( 408, 425, 429 ), true ) || ( 500 <= $status && 600 > $status );
+	}
+
+	/**
+	 * Parse a Retry-After header into a positive delay.
+	 *
+	 * @param string|array $retry_after Retry-After response header.
+	 * @return int
+	 */
+	private static function get_retry_after_delay( $retry_after ) {
+		if ( ! is_string( $retry_after ) ) {
+			return 0;
+		}
+
+		$retry_after = trim( $retry_after );
+		if ( ctype_digit( $retry_after ) ) {
+			return max( 0, (int) $retry_after );
+		}
+
+		$http_date_format = '!D, d M Y H:i:s \G\M\T';
+		$retry_at         = DateTimeImmutable::createFromFormat( $http_date_format, $retry_after, new DateTimeZone( 'UTC' ) );
+		$parse_errors     = DateTimeImmutable::getLastErrors();
+		if (
+			false === $retry_at ||
+			( false !== $parse_errors && ( 0 < $parse_errors['warning_count'] || 0 < $parse_errors['error_count'] ) ) ||
+			$retry_after !== $retry_at->format( 'D, d M Y H:i:s \G\M\T' )
+		) {
+			return 0;
+		}
+
+		$retry_at_timestamp = $retry_at->getTimestamp();
+		return $retry_at_timestamp > time() ? $retry_at_timestamp - time() : 0;
+	}
+
+	/**
+	 * Schedule the next delivery attempt.
+	 *
+	 * @param int $attempt           Current zero-based attempt number.
+	 * @param int $retry_after_delay Server-requested retry delay in seconds.
+	 * @return void
+	 */
+	private static function schedule_retry( $attempt, $retry_after_delay = 0 ) {
+		if ( self::MAX_SEND_ATTEMPT <= $attempt ) {
+			return;
+		}
+
+		$next_attempt      = $attempt + 1;
+		$args              = array( 'attempt' => $next_attempt );
+		$exponential_delay = 900 * ( 2 ** ( $next_attempt - 1 ) );
+		$delay             = max( $exponential_delay, $retry_after_delay );
+
+		try {
+			$action_id = as_schedule_single_action( time() + $delay, self::SEND_ATTEMPT_HOOK, $args, self::SEND_ATTEMPT_GROUP, true );
+			if ( 0 !== $action_id || as_has_scheduled_action( self::SEND_ATTEMPT_HOOK, $args, self::SEND_ATTEMPT_GROUP ) ) {
+				return;
+			}
+		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- Failure is reported with a fixed category below.
+		}
+
+		self::log_send_failure( $attempt, array( 'error_code' => 'retry_scheduling_failure' ) );
+	}
+
+	/**
+	 * Log a delivery failure without payload or response content.
+	 *
+	 * @param int                  $attempt Delivery attempt number.
+	 * @param array<string, mixed> $detail  Error code or HTTP status.
+	 * @return void
+	 */
+	private static function log_send_failure( $attempt, $detail ) {
+		wc_get_logger()->warning(
+			'WooCommerce tracker delivery attempt failed.',
+			array_merge(
+				array(
+					'source'  => 'woocommerce-tracker',
+					'attempt' => $attempt,
+				),
+				$detail
 			)
 		);
 	}

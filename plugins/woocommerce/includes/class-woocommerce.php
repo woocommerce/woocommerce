@@ -1590,6 +1590,7 @@ final class WooCommerce {
 	 */
 	public function add_recurring_action_wrappers() {
 		add_action( 'woocommerce_tracker_send_event_wrapper', array( $this, 'add_woocommerce_tracker_send_event_wrapper' ) );
+		add_action( 'woocommerce_tracker_send_event_attempt', array( $this, 'add_woocommerce_tracker_send_event_attempt' ), 10, 1 );
 		add_action( 'wc_admin_daily_wrapper', array( $this, 'add_wc_admin_daily_wrapper' ) );
 		add_action( 'generate_category_lookup_table_wrapper', array( $this, 'add_generate_category_lookup_table_wrapper' ) );
 		add_action( 'woocommerce_cleanup_rate_limits_wrapper', array( $this, 'add_woocommerce_cleanup_rate_limits_wrapper' ) );
@@ -1630,6 +1631,37 @@ final class WooCommerce {
 		}
 		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_tracker_send_event' );
+	}
+
+	/**
+	 * Run a response-aware WooCommerce tracker delivery attempt.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 11.1.0
+	 *
+	 * @param int $attempt Zero-based delivery attempt number.
+	 * @return void
+	 */
+	public function add_woocommerce_tracker_send_event_attempt( $attempt = 0 ) {
+		if ( true !== wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
+			return;
+		}
+
+		try {
+			include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
+			if ( class_exists( WC_Tracker::class ) ) {
+				WC_Tracker::send_tracking_data_attempt( $attempt );
+			}
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error(
+				'WooCommerce tracker delivery attempt failed.',
+				array(
+					'source'     => 'woocommerce-scheduled-actions',
+					'attempt'    => (int) $attempt,
+					'error_code' => get_class( $e ),
+				)
+			);
+		}
 	}
 
 	/**
@@ -1776,6 +1808,7 @@ final class WooCommerce {
 		}
 		if ( false === wc_string_to_bool( $value ) ) {
 			as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce' );
+			as_unschedule_all_actions( 'woocommerce_tracker_send_event_attempt' );
 		} else {
 			$this->schedule_tracking_action();
 		}

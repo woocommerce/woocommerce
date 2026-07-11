@@ -126,11 +126,45 @@ class WC_Recurring_Actions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The response-aware tracker attempt callback is registered with one accepted argument.
+	 */
+	public function test_tracker_attempt_callback_is_registered(): void {
+		global $wp_filter;
+
+		WC()->add_recurring_action_wrappers();
+
+		$callback_id = _wp_filter_build_unique_id(
+			'woocommerce_tracker_send_event_attempt',
+			array( WC(), 'add_woocommerce_tracker_send_event_attempt' ),
+			10
+		);
+		$this->assertArrayHasKey( $callback_id, $wp_filter['woocommerce_tracker_send_event_attempt']->callbacks[10] );
+		$this->assertSame( 1, $wp_filter['woocommerce_tracker_send_event_attempt']->callbacks[10][ $callback_id ]['accepted_args'] );
+	}
+
+	/**
+	 * @testdox Opting out removes recurrence and all argument-bearing tracker attempts.
+	 */
+	public function test_tracking_opt_out_removes_recurrence_and_all_attempts(): void {
+		update_option( 'woocommerce_allow_tracking', 'no' );
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		as_schedule_single_action( time() + 900, 'woocommerce_tracker_send_event_attempt', array( 'attempt' => 1 ), 'woocommerce-tracker' );
+		as_schedule_single_action( time() + 1800, 'woocommerce_tracker_send_event_attempt', array( 'attempt' => 2 ), 'woocommerce-tracker' );
+
+		update_option( 'woocommerce_allow_tracking', 'no' );
+
+		$this->assertFalse( as_has_scheduled_action( 'woocommerce_tracker_send_event_wrapper' ) );
+		$this->assertFalse( as_has_scheduled_action( 'woocommerce_tracker_send_event_attempt', array( 'attempt' => 1 ), 'woocommerce-tracker' ) );
+		$this->assertFalse( as_has_scheduled_action( 'woocommerce_tracker_send_event_attempt', array( 'attempt' => 2 ), 'woocommerce-tracker' ) );
+	}
+
+	/**
 	 * Helper method to clear all scheduled actions.
 	 */
 	private function clear_scheduled_actions() {
 		$actions = array(
 			'woocommerce_tracker_send_event_wrapper',
+			'woocommerce_tracker_send_event_attempt',
 			'wc_admin_daily_wrapper',
 			'generate_category_lookup_table_wrapper',
 			'woocommerce_cleanup_rate_limits_wrapper',
