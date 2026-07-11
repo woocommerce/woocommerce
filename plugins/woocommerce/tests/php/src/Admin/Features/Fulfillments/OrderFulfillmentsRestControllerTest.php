@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\OrderFulfillmentsRestController;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Helper_Order;
 use WC_Order;
@@ -123,6 +124,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Delete the created orders and their fulfillments.
 		foreach ( self::$created_order_ids as $order_id ) {
+			as_unschedule_action( OrdersScheduler::get_action( 'import' ), array( $order_id ), OrdersScheduler::$group );
 			$fulfillments_data_store->delete_by_entity( WC_Order::class, (string) $order_id );
 			WC_Helper_Order::delete_order( $order_id );
 		}
