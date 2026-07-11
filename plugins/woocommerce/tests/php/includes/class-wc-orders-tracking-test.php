@@ -38,6 +38,7 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->clear_tracks_events();
 
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-orders-tracking.php';
 		update_option( 'woocommerce_allow_tracking', 'yes' );
