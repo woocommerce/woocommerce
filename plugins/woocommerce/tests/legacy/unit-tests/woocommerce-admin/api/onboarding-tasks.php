@@ -129,6 +129,13 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 			10,
 			3
 		);
+		add_filter(
+			'woocommerce_product_csv_importer_args',
+			function ( $args ) {
+				$args['lines'] = 2;
+				return $args;
+			}
+		);
 
 		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/import_sample_products' );
 		$response = $this->server->dispatch( $request );
@@ -139,15 +146,14 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'failed', $data );
 		$this->assertEquals( 0, count( $data['failed'] ) );
 		$this->assertArrayHasKey( 'imported', $data );
+		$this->assertCount( 2, $data['imported'] );
 		$this->assertArrayHasKey( 'skipped', $data );
-		// There might be previous products present.
-		if ( 0 === count( $data['skipped'] ) ) {
-			$this->assertGreaterThan( 1, count( $data['imported'] ) );
-		}
+		$this->assertCount( 0, $data['skipped'] );
 		$this->assertArrayHasKey( 'updated', $data );
 		$this->assertEquals( 0, count( $data['updated'] ) );
 
 		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'woocommerce_product_csv_importer_args' );
 	}
 
 	/**
