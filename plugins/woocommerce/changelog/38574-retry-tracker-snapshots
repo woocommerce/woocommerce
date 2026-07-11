@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Retry failed usage-tracking snapshot deliveries with bounded asynchronous backoff.
