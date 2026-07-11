@@ -84,7 +84,7 @@ class MigrationTest extends \WC_Unit_Test_Case {
 		for ( $index = 0; $index < 251; ++$index ) {
 			$variation_id    = $this->create_variation_post();
 			$variation_ids[] = $variation_id;
-			update_post_meta( $variation_id, '_wc_additional_variation_images', (string) ( $index + 1 ) );
+			add_post_meta( $variation_id, '_wc_additional_variation_images', (string) ( $index + 1 ) );
 		}
 
 		$this->assertTrue( Migration::run() );
