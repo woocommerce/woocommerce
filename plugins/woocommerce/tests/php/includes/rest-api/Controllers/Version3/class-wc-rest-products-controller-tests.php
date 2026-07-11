@@ -1571,6 +1571,13 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$original_product_sku   = 'DUPLICATE_SKU_TEST_TRASHED';
 		// This image `src` is used in other product API tests, using here for consistency.
 		$shared_image_src = 'http://cldup.com/Dr1Bczxq4q.png';
+		// The failed request below exercises upload processing; setup only needs a valid image attachment.
+		$original_attachment_id = self::factory()->attachment->create(
+			array(
+				'file'           => WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png',
+				'post_mime_type' => 'image/png',
+			)
+		);
 
 		// 1. Create the original product with its image.
 		$request_original_product = new WP_REST_Request( 'POST', '/wc/v3/products' );
@@ -1582,7 +1589,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 				'regular_price' => '10',
 				'images'        => array(
 					array(
-						'src' => $shared_image_src,
+						'id' => $original_attachment_id,
 					),
 				),
 			)
@@ -1591,9 +1598,8 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response_original_product->get_status(), 'Failed to create the initial product with an image.' );
 
-		$original_product_data  = $response_original_product->get_data();
-		$original_product_id    = $original_product_data['id'];
-		$original_attachment_id = $original_product_data['images'][0]['id'];
+		$original_product_data = $response_original_product->get_data();
+		$original_product_id   = $original_product_data['id'];
 
 		// 2. Move the original product to trash.
 		wp_trash_post( $original_product_id );
