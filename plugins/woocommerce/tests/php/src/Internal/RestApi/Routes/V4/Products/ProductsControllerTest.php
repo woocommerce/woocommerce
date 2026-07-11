@@ -2143,7 +2143,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	public function test_cogs_values_received_for_variation_product( bool $set_additive_flag ) {
 		$this->enable_cogs_feature();
 
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->create_variable_product_with_variations( 1 );
 		$parent_product->set_cogs_value( 12.34 );
 		$parent_product->save();
 
