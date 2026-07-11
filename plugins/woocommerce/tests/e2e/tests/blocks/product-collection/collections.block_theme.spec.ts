@@ -7,10 +7,6 @@ import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import ProductCollectionPage, { SELECTORS } from './product-collection.page';
-import {
-	productCollectionBestSellers,
-	productCollectionTopRatedProducts,
-} from '../../../test-data/blocks/data/data';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
@@ -43,43 +39,41 @@ test.describe( 'Product Collection: Collections', () => {
 		pageObject,
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock( 'topRated' );
+		const topRatedProducts = [
+			'V-Neck T-Shirt',
+			'Hoodie',
+			'Hoodie with Logo',
+			'T-Shirt',
+			'Beanie',
+		];
 
-		await expect( pageObject.products ).toHaveCount(
-			productCollectionTopRatedProducts.length
-		);
-		await expect( pageObject.productTitles ).toHaveText(
-			productCollectionTopRatedProducts
-		);
+		await expect( pageObject.productTitles ).toHaveText( topRatedProducts );
 
 		await pageObject.publishAndGoToFrontend();
 
-		await expect( pageObject.products ).toHaveCount(
-			productCollectionTopRatedProducts.length
-		);
-		await expect( pageObject.productTitles ).toHaveText(
-			productCollectionTopRatedProducts
-		);
+		await expect( pageObject.productTitles ).toHaveText( topRatedProducts );
 	} );
 
 	test( 'Best Sellers collection can be added and displays proper products', async ( {
 		pageObject,
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock( 'bestSellers' );
+		const bestSellersProducts = [
+			'Album',
+			'Hoodie',
+			'Single',
+			'Hoodie with Logo',
+			'T-Shirt with Logo',
+		];
 
-		await expect( pageObject.products ).toHaveCount(
-			productCollectionBestSellers.length
-		);
 		await expect( pageObject.productTitles ).toHaveText(
-			productCollectionBestSellers
+			bestSellersProducts
 		);
 
 		await pageObject.publishAndGoToFrontend();
 
-		await expect( pageObject.products ).toHaveCount(
-			productCollectionBestSellers.length
-		);
 		await expect( pageObject.productTitles ).toHaveText(
-			productCollectionBestSellers
+			bestSellersProducts
 		);
 	} );
 
