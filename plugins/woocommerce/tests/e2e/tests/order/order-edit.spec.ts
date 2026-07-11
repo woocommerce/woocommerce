@@ -10,6 +10,7 @@ import { tags, expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { random } from '../../utils/helpers';
 import { getMediaBySlug } from '../../utils/media';
+import { wpCLI } from '../../utils/cli';
 
 test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -391,6 +392,15 @@ test.describe(
 			email: 'john.doe@example.com',
 		};
 
+		// The downloads box is hidden by default on the order edit screen. These tests run
+		// in both the HPOS (woocommerce_page_wc-orders) and HPOS-disabled (shop_order) jobs,
+		// so the admin user's hidden-meta-boxes preference is cleared for both screen ids to
+		// keep the box visible. Keys are blog-prefixed user meta (single-site wp-env prefix).
+		const orderScreenHiddenMetaKeys = [
+			'wp_metaboxhidden_woocommerce_page_wc-orders',
+			'wp_metaboxhidden_shop_order',
+		];
+
 		let orderId: number,
 			productId: number,
 			product2Id: number,
@@ -432,6 +442,28 @@ test.describe(
 			( { source_url: downloadFile } = await getMediaBySlug(
 				'image-01'
 			) );
+
+			// Persist a Screen Options preference (an empty hidden-meta-boxes list) for the
+			// admin user (ID 1) so the box stays visible while the tests navigate between
+			// orders. An empty list short-circuits the default_hidden_meta_boxes filter that
+			// would otherwise hide it. --skip-plugins/--skip-themes bootstraps core only:
+			// the meta write needs no plugins, and loading them all exhausts WP-CLI's memory
+			// limit in the @services environment (google-listings-and-ads fatals on boot).
+			for ( const key of orderScreenHiddenMetaKeys ) {
+				await wpCLI(
+					`wp user meta update 1 ${ key } '[]' --format=json --skip-plugins --skip-themes`
+				);
+			}
+		} );
+
+		test.afterAll( async () => {
+			// Restore the default-hidden behaviour so the visible state doesn't leak to
+			// other order-screen tests.
+			for ( const key of orderScreenHiddenMetaKeys ) {
+				await wpCLI(
+					`wp user meta delete 1 ${ key } --skip-plugins --skip-themes`
+				);
+			}
 		} );
 
 		test.beforeEach( async ( { restApi } ) => {
