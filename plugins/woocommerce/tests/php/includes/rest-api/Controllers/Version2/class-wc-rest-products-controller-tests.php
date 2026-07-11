@@ -411,9 +411,13 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		);
 
 		foreach ( $skus_and_names as $sku => $name ) {
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_name( $name );
-			$product->set_sku( $sku );
+			$product = WC_Helper_Product::create_simple_product(
+				false,
+				array(
+					'name' => $name,
+					'sku'  => $sku,
+				)
+			);
 			$product->save();
 		}
 
