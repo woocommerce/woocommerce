@@ -50,6 +50,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		WC()->cart->empty_cart();
+		$this->stock_product = null;
 	}
 
 	/**
