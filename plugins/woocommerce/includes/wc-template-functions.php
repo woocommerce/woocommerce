@@ -3118,7 +3118,7 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 			/**
 			 * Filters the arguments used to retrieve product subcategories.
 			 *
-			 * @since 11.0.0
+			 * @since 11.1.0
 			 *
 			 * @param array $args Array of arguments for get_categories().
 			 */
