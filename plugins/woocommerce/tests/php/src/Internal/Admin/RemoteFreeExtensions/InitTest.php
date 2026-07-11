@@ -73,10 +73,10 @@ class InitTest extends WC_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		RemoteFreeExtensions::delete_specs_transient();
 		remove_all_filters( 'transient_woocommerce_admin_' . RemoteFreeExtensionsDataSourcePoller::ID . '_specs' );
-		update_option( 'woocommerce_default_country', 'US' );
+
+		parent::tearDown();
 	}
 
 	/**
