@@ -291,6 +291,135 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should include an exact taxonomy term match beyond the result limit.
+	 */
+	public function test_json_search_taxonomy_terms_includes_exact_name_beyond_limit(): void {
+		$fixture         = null;
+		$filter_callback = null;
+
+		try {
+			$term_names = array();
+			for ( $index = 0; $index < 50; ++$index ) {
+				$term_names[] = sprintf( 'Candidate 6 %02d', $index );
+			}
+			$term_names[] = '6';
+
+			$fixture       = $this->create_attribute_taxonomy_fixture_for_test( $term_names );
+			$exact_term_id = $fixture['term_ids']['6'];
+
+			$filter_call_count = 0;
+			$filter_taxonomy   = null;
+			$filter_saw_exact  = false;
+			$filter_callback   = function ( $terms, $taxonomy ) use ( &$filter_call_count, &$filter_taxonomy, &$filter_saw_exact, $exact_term_id ) {
+				++$filter_call_count;
+				$filter_taxonomy  = $taxonomy;
+				$filter_saw_exact = in_array( $exact_term_id, wp_list_pluck( $terms, 'term_id' ), true );
+
+				return $terms;
+			};
+
+			add_filter( 'woocommerce_json_search_found_product_attribute_terms', $filter_callback, 20, 2 );
+
+			$response = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], '6', 50, 'menu_order' );
+
+			$this->assertCount( 50, $response, 'The response should respect the requested result limit.' );
+			$this->assertCount( 50, array_unique( wp_list_pluck( $response, 'term_id' ) ), 'The response should not contain duplicate terms.' );
+			$this->assertSame( $exact_term_id, $response[0]['term_id'], 'The exact term match should be the first response item.' );
+			$this->assertSame( 1, $filter_call_count, 'The final results filter should run once.' );
+			$this->assertTrue( $filter_saw_exact, 'The final results filter should receive the exact term match.' );
+			$this->assertSame( $fixture['taxonomy'], $filter_taxonomy, 'The final results filter should receive the requested taxonomy unchanged.' );
+		} finally {
+			if ( null !== $filter_callback ) {
+				remove_filter( 'woocommerce_json_search_found_product_attribute_terms', $filter_callback, 20 );
+			}
+
+			if ( null !== $fixture ) {
+				$this->delete_attribute_taxonomy_fixture_for_test( $fixture );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should preserve the ordering of a visible exact taxonomy term match.
+	 */
+	public function test_json_search_taxonomy_terms_does_not_promote_visible_exact_name(): void {
+		$fixture = null;
+
+		try {
+			$fixture = $this->create_attribute_taxonomy_fixture_for_test(
+				array(
+					'Alpha candidate first',
+					'Alpha',
+					'Alpha candidate third',
+					'Alpha candidate fourth',
+				)
+			);
+
+			$response = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], 'alpha', 3, 'menu_order' );
+
+			$this->assertSame(
+				array( 'Alpha candidate first', 'Alpha', 'Alpha candidate third' ),
+				wp_list_pluck( $response, 'name' ),
+				'The visible exact match should retain its menu order position.'
+			);
+			$this->assertCount(
+				3,
+				array_unique( wp_list_pluck( $response, 'term_id' ) ),
+				'The response should contain three unique term IDs.'
+			);
+		} finally {
+			if ( null !== $fixture ) {
+				$this->delete_attribute_taxonomy_fixture_for_test( $fixture );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should respect exclusion of an exact taxonomy term match through the query arguments filter.
+	 */
+	public function test_json_search_taxonomy_terms_respects_filtered_exact_term_exclusion(): void {
+		$fixture         = null;
+		$filter_callback = null;
+
+		try {
+			$fixture = $this->create_attribute_taxonomy_fixture_for_test(
+				array(
+					'Candidate 6 first',
+					'Candidate 6 second',
+					'Candidate 6 third',
+					'6',
+				)
+			);
+
+			$exact_term_id     = $fixture['term_ids']['6'];
+			$filter_call_count = 0;
+			$filter_callback   = function ( $args ) use ( &$filter_call_count, $exact_term_id ) {
+				++$filter_call_count;
+				$args['exclude'] = array( $exact_term_id );
+
+				return $args;
+			};
+
+			add_filter( 'woocommerce_product_attribute_terms', $filter_callback );
+
+			$response     = $this->search_taxonomy_terms_via_ajax_for_test( $fixture['taxonomy'], '6', 3, 'menu_order' );
+			$response_ids = wp_list_pluck( $response, 'term_id' );
+
+			$this->assertCount( 3, $response, 'The response should contain the requested number of terms.' );
+			$this->assertNotContains( $exact_term_id, $response_ids, 'The excluded exact term should not appear in the response.' );
+			$this->assertSame( 1, $filter_call_count, 'The product attribute term query arguments filter should run exactly once.' );
+		} finally {
+			if ( null !== $filter_callback ) {
+				remove_filter( 'woocommerce_product_attribute_terms', $filter_callback );
+			}
+
+			if ( null !== $fixture ) {
+				$this->delete_attribute_taxonomy_fixture_for_test( $fixture );
+			}
+		}
+	}
+
+	/**
 	 * Register a product attribute taxonomy created inside a test.
 	 *
 	 * @param int $attribute_id Attribute ID.
@@ -318,6 +447,121 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		);
 
 		return $taxonomy;
+	}
+
+	/**
+	 * Create a global product attribute and ordered terms for a test.
+	 *
+	 * @param string[] $term_names Term names in menu order.
+	 * @return array{attribute_id: int, taxonomy: string, term_ids: array<array-key, int>}
+	 */
+	private function create_attribute_taxonomy_fixture_for_test( array $term_names ): array {
+		$fixture = array(
+			'attribute_id' => 0,
+			'taxonomy'     => '',
+			'term_ids'     => array(),
+		);
+
+		try {
+			$suffix       = wp_unique_id();
+			$attribute_id = wc_create_attribute(
+				array(
+					'name'     => 'AJAX search fixture ' . $suffix,
+					'slug'     => 'ajax_search_' . $suffix,
+					'type'     => 'select',
+					'order_by' => 'menu_order',
+				)
+			);
+
+			if ( ! is_int( $attribute_id ) ) {
+				throw new RuntimeException( 'The product attribute fixture could not be created.' );
+			}
+
+			$fixture['attribute_id'] = $attribute_id;
+			$fixture['taxonomy']     = $this->register_attribute_taxonomy_for_test( $attribute_id );
+
+			foreach ( $term_names as $menu_order => $term_name ) {
+				$term = wp_insert_term( $term_name, $fixture['taxonomy'] );
+
+				if ( is_wp_error( $term ) ) {
+					throw new RuntimeException( 'A product attribute term fixture could not be created.' );
+				}
+
+				$term_id                           = (int) $term['term_id'];
+				$fixture['term_ids'][ $term_name ] = $term_id;
+				wc_set_term_order( $term_id, $menu_order, $fixture['taxonomy'] );
+			}
+		} catch ( Throwable $throwable ) {
+			$this->delete_attribute_taxonomy_fixture_for_test( $fixture );
+			throw $throwable;
+		}
+
+		return $fixture;
+	}
+
+	/**
+	 * Delete a global product attribute fixture and its terms.
+	 *
+	 * @param array{attribute_id: int, taxonomy: string, term_ids: array<array-key, int>} $fixture Fixture data.
+	 */
+	private function delete_attribute_taxonomy_fixture_for_test( array $fixture ): void {
+		global $wc_product_attributes;
+
+		if ( taxonomy_exists( $fixture['taxonomy'] ) ) {
+			foreach ( $fixture['term_ids'] as $term_id ) {
+				wp_delete_term( $term_id, $fixture['taxonomy'] );
+			}
+		}
+
+		if ( $fixture['attribute_id'] ) {
+			wc_delete_attribute( $fixture['attribute_id'] );
+		}
+
+		if ( taxonomy_exists( $fixture['taxonomy'] ) ) {
+			unregister_taxonomy( $fixture['taxonomy'] );
+		}
+
+		unset( $wc_product_attributes[ $fixture['taxonomy'] ] );
+	}
+
+	/**
+	 * Run an authenticated taxonomy term AJAX search for a test.
+	 *
+	 * @param string $taxonomy Taxonomy to search.
+	 * @param string $term     Search term.
+	 * @param int    $limit    Maximum result count.
+	 * @param string $orderby  Result ordering.
+	 * @return array
+	 */
+	private function search_taxonomy_terms_via_ajax_for_test( string $taxonomy, string $term, int $limit, string $orderby ): array {
+		$original_get     = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve test globals before building the authenticated request.
+		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the authenticated request.
+		$original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve test globals before building the authenticated request.
+		$original_user_id = get_current_user_id();
+
+		try {
+			$this->_setRole( 'administrator' );
+			$_GET = array(
+				'security' => wp_create_nonce( 'search-taxonomy-terms' ),
+				'taxonomy' => $taxonomy,
+				'term'     => $term,
+				'limit'    => $limit,
+				'orderby'  => $orderby,
+			);
+
+			$response = $this->do_ajax( 'woocommerce_json_search_taxonomy_terms' );
+
+			if ( ! is_array( $response ) ) {
+				throw new RuntimeException( 'The taxonomy term AJAX response should be an array.' );
+			}
+
+			return $response;
+		} finally {
+			$_GET     = $original_get;
+			$_POST    = $original_post;
+			$_REQUEST = $original_request;
+			wp_set_current_user( $original_user_id );
+		}
 	}
 
 	/**

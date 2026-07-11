@@ -2199,7 +2199,9 @@ class WC_AJAX {
 		 * @since 3.4.0
 		 * @param array $args The search arguments.
 		 */
-		$terms = get_terms( apply_filters( 'woocommerce_product_attribute_terms', $args ) );
+		$args  = apply_filters( 'woocommerce_product_attribute_terms', $args );
+		$terms = get_terms( $args );
+		$terms = self::maybe_include_exact_taxonomy_term( $terms, $args, $search_text, $taxonomy );
 
 		/**
 		 * Filter the product attribute terms search results.
@@ -2209,6 +2211,85 @@ class WC_AJAX {
 		 * @param string $taxonomy The terms taxonomy.
 		 */
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_product_attribute_terms', $terms, $taxonomy ) );
+	}
+
+	/**
+	 * Include an exact taxonomy term match omitted by a full broad result set.
+	 *
+	 * @param mixed $terms       The broad search results.
+	 * @param mixed $args        The filtered broad search arguments.
+	 * @param mixed $search_text The requested search text.
+	 * @param mixed $taxonomy    The requested taxonomy.
+	 * @return mixed
+	 */
+	private static function maybe_include_exact_taxonomy_term( $terms, $args, $search_text, $taxonomy ) {
+		if ( ! is_array( $args ) || ! is_string( $search_text ) || ! is_string( $taxonomy ) ) {
+			return $terms;
+		}
+
+		$filtered_number = $args['number'] ?? null;
+		$filtered_offset = $args['offset'] ?? 0;
+
+		if (
+			'' === $search_text ||
+			is_wp_error( $terms ) ||
+			! is_array( $terms ) ||
+			! is_numeric( $filtered_number ) ||
+			! is_finite( (float) $filtered_number ) ||
+			0.0 >= (float) $filtered_number ||
+			! is_numeric( $filtered_offset ) ||
+			! is_finite( (float) $filtered_offset ) ||
+			0.0 !== (float) $filtered_offset ||
+			'all' !== ( $args['fields'] ?? null ) ||
+			( $args['taxonomy'] ?? null ) !== $taxonomy ||
+			( $args['name__like'] ?? null ) !== $search_text ||
+			array_key_exists( 'name', $args ) ||
+			array_key_exists( 'search', $args ) ||
+			! taxonomy_is_product_attribute( $taxonomy ) ||
+			is_taxonomy_hierarchical( $taxonomy )
+		) {
+			return $terms;
+		}
+
+		$number = absint( $filtered_number );
+		if ( 0 === $number || count( $terms ) !== $number ) {
+			return $terms;
+		}
+
+		$term_ids = array();
+		foreach ( $terms as $term ) {
+			if ( ! $term instanceof WP_Term ) {
+				return $terms;
+			}
+
+			if ( $search_text === $term->name ) {
+				return $terms;
+			}
+
+			$term_ids[] = (int) $term->term_id;
+		}
+
+		$exact_args = $args;
+		unset( $exact_args['name__like'] );
+		$exact_args['name']    = $search_text;
+		$exact_args['fields']  = 'all';
+		$exact_args['number']  = 1;
+		$exact_args['offset']  = 0;
+		$exact_args['orderby'] = 'none';
+
+		$exact_terms = get_terms( $exact_args );
+		if ( is_wp_error( $exact_terms ) || ! is_array( $exact_terms ) || 1 !== count( $exact_terms ) ) {
+			return $terms;
+		}
+
+		$exact_term = reset( $exact_terms );
+		if ( ! $exact_term instanceof WP_Term || in_array( (int) $exact_term->term_id, $term_ids, true ) ) {
+			return $terms;
+		}
+
+		array_unshift( $terms, $exact_term );
+
+		return array_slice( $terms, 0, $number );
 	}
 
 	/**
