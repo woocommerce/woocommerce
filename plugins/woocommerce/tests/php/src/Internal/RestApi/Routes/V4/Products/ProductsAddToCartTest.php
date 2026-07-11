@@ -68,13 +68,17 @@ class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 				$product = WC_Helper_Product::create_simple_product();
 				break;
 			case 'grouped':
-				$product = WC_Helper_Product::create_grouped_product();
+				$product = new \WC_Product_Grouped();
+				$product->set_name( 'Dummy Grouped Product' );
+				$product->save();
 				break;
 			case 'external':
 				$product = WC_Helper_Product::create_external_product();
 				break;
 			case 'variable':
-				$product = WC_Helper_Product::create_variation_product();
+				$product = new \WC_Product_Variable();
+				$product->set_name( 'Dummy Variable Product' );
+				$product->save();
 				break;
 		}
 
@@ -83,6 +87,7 @@ class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 
+		$this->assertSame( $product_type, $data['type'] );
 		$this->assertArrayHasKey( 'add_to_cart', $data );
 		$add_to_cart = $data['add_to_cart'];
 
