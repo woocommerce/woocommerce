@@ -134,7 +134,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	 * Saves values of initial country and currency before running test suite.
 	 */
 	public static function wpSetUpBeforeClass(): void {
-		self::$initial_country  = WC()->countries->get_base_country();
+		self::$initial_country  = (string) get_option( 'woocommerce_default_country' );
 		self::$initial_currency = get_woocommerce_currency();
 	}
 
