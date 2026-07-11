@@ -294,30 +294,40 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	 * @testdox Should render radio settings without an invalid header label.
 	 */
 	public function test_output_fields_renders_radio_setting_without_invalid_header_label(): void {
-		$output = $this->get_output_fields_html(
+		$options = array(
 			array(
-				array(
-					'id'       => 'test_radio_setting',
-					'title'    => 'Radio title',
-					'type'     => 'radio',
-					'default'  => 'abc',
-					'value'    => 'abc',
-					'options'  => array(
-						'abc' => 'First option',
-						'xyz' => 'Second option',
-					),
-					'disabled' => array( 'xyz' ),
+				'id'       => 'test_radio_setting',
+				'title'    => 'Radio title',
+				'type'     => 'radio',
+				'value'    => 'abc',
+				'options'  => array(
+					'abc' => 'First option',
+					'xyz' => 'Second option',
 				),
-			)
+				'desc_tip' => 'Radio help',
+			),
 		);
 
-		$this->assertStringNotContainsString( '<label for="test_radio_setting">', $output );
-		$this->assertStringContainsString( '<legend class="screen-reader-text"><span>Radio title</span></legend>', $output );
-		$this->assertStringContainsString( 'name="test_radio_setting"', $output );
-		$this->assertStringContainsString( 'value="abc"', $output );
-		$this->assertStringContainsString( 'checked', $output );
-		$this->assertStringContainsString( 'value="xyz"', $output );
-		$this->assertStringContainsString( 'disabled', $output );
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $options );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$document = new DOMDocument();
+		$document->loadHTML( '<table>' . $output . '</table>' );
+		$xpath = new DOMXPath( $document );
+
+		$header = '//th[contains(concat(" ", normalize-space(@class), " "), " titledesc ")]';
+		$radio  = '//td[contains(concat(" ", normalize-space(@class), " "), " forminp-radio ")]';
+
+		$this->assertSame( 0, $xpath->query( $header . '/label[@for="test_radio_setting"]' )->length );
+		$this->assertSame( 1, $xpath->query( $header . '[contains(normalize-space(.), "Radio title")]' )->length );
+		$this->assertSame( 1, $xpath->query( $header . '//span[contains(concat(" ", normalize-space(@class), " "), " woocommerce-help-tip ")][@aria-label="Radio help"]' )->length );
+		$this->assertSame( 1, $xpath->query( $radio . '/fieldset/legend[contains(concat(" ", normalize-space(@class), " "), " screen-reader-text ")]/span[normalize-space(.)="Radio title"]' )->length );
+		$this->assertSame( 2, $xpath->query( $radio . '//input[@type="radio"]' )->length );
 	}
 
 	/**
@@ -340,18 +350,5 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		if ( null !== $redirect_to ) {
 			$_POST['wc_settings_ui_redirect_to'] = $redirect_to;
 		}
-	}
-
-	/**
-	 * Capture settings field output.
-	 *
-	 * @param array $options Settings options.
-	 * @return string
-	 */
-	private function get_output_fields_html( array $options ): string {
-		ob_start();
-		WC_Admin_Settings::output_fields( $options );
-
-		return (string) ob_get_clean();
 	}
 }
