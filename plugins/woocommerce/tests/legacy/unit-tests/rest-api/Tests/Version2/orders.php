@@ -14,10 +14,30 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Administrator used to authenticate requests.
+	 *
+	 * @var int
+	 */
+	protected static $administrator_user;
+
+	/**
 	 * Array of order to track
 	 * @var array
 	 */
 	protected $orders = array();
+
+	/**
+	 * Create the shared administrator.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$administrator_user = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
 
 	/**
 	 * Setup our test server.
@@ -25,11 +45,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Orders_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user     = self::$administrator_user;
 	}
 
 	/**
