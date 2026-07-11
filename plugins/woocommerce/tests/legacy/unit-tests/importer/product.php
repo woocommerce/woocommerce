@@ -24,11 +24,6 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	protected $csv_file = '';
 
 	/**
-	 * @var WC_Product_CSV_Importer
-	 */
-	private $sut;
-
-	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
 	public function setUp(): void {
@@ -48,7 +43,17 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
 		$this->csv_file       = dirname( __FILE__ ) . '/sample.csv';
-		$this->sut            = new WC_Product_CSV_Importer(
+	}
+
+	/**
+	 * Create the importer used by the full import tests.
+	 *
+	 * @return WC_Product_CSV_Importer
+	 */
+	private function get_importer() {
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->delete_all();
+
+		return new WC_Product_CSV_Importer(
 			$this->csv_file,
 			array(
 				'mapping'          => $this->get_csv_mapped_items(),
@@ -56,9 +61,6 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'prevent_timeouts' => false,
 			)
 		);
-
-		// Clear list of approved download directories before running tests.
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->delete_all();
 	}
 
 	/**
@@ -125,7 +127,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	public function test_import_for_admin_users() {
 		// In most cases, an admin user will run the import.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-		$results = $this->sut->import();
+		$results = $this->get_importer()->import();
 
 		$this->assertEquals( 0, count( $results['failed'] ) );
 		$this->assertEquals( 0, count( $results['updated'] ) );
@@ -143,7 +145,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	public function test_import_for_shop_managers() {
 		// In some cases, a shop manager may run the import.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
-		$results = $this->sut->import();
+		$results = $this->get_importer()->import();
 
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
