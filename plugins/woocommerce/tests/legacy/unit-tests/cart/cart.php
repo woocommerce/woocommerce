@@ -64,6 +64,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'cost'         => '9.59',
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping->load_shipping_methods();
 
 		WC_Helper_Shipping::force_customer_us_address();
 
