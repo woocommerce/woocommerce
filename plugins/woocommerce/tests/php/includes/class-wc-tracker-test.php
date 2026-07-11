@@ -226,8 +226,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 * @return int Number of inserted orders.
 	 */
 	private function create_tracking_orders( array $statuses, array $created_via, array $payment_methods ): int {
-		global $wpdb;
-
 		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$order_count = 0;
 			foreach ( $statuses as $status ) {
@@ -250,25 +248,49 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			return $order_count;
 		}
 
+		$order_date = gmdate( 'Y-m-d H:i:s' );
+		$orders     = array();
+
+		foreach ( $statuses as $status ) {
+			foreach ( $created_via as $origin ) {
+				foreach ( $payment_methods as $payment_method ) {
+					$orders[] = array(
+						'status'         => $status,
+						'date'           => $order_date,
+						'payment_method' => $payment_method,
+						'created_via'    => $origin,
+						'recorded_sales' => 0,
+					);
+				}
+			}
+		}
+
+		return $this->insert_hpos_tracking_orders( $orders );
+	}
+
+	/**
+	 * Insert minimal HPOS rows consumed by tracker queries.
+	 *
+	 * @param array[] $orders Order persistence data.
+	 * @return int Number of inserted orders.
+	 */
+	private function insert_hpos_tracking_orders( array $orders ): int {
+		global $wpdb;
+
 		$next_order_id = (int) $wpdb->get_var( "SELECT GREATEST(COALESCE((SELECT MAX(id) FROM {$wpdb->prefix}wc_orders), 0), COALESCE((SELECT MAX(ID) FROM {$wpdb->posts}), 0)) + 1" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are provided by WordPress.
-		$order_date    = gmdate( 'Y-m-d H:i:s' );
 		$order_rows    = array();
 		$order_values  = array();
 		$detail_rows   = array();
 		$detail_values = array();
 
-		foreach ( $statuses as $status ) {
-			foreach ( $created_via as $origin ) {
-				foreach ( $payment_methods as $payment_method ) {
-					$order_rows[] = '(%d, %s, %s, %s, %f, %s, %s, %s)';
-					array_push( $order_values, $next_order_id, $status, 'USD', 'shop_order', 10, $order_date, $order_date, $payment_method );
+		foreach ( $orders as $order ) {
+			$order_rows[] = '(%d, %s, %s, %s, %f, %s, %s, %s)';
+			array_push( $order_values, $next_order_id, $order['status'], 'USD', 'shop_order', 10, $order['date'], $order['date'], $order['payment_method'] );
 
-					$detail_rows[] = '(%d, %s, %s, %d)';
-					array_push( $detail_values, $next_order_id, $origin, WOOCOMMERCE_VERSION, 0 );
+			$detail_rows[] = '(%d, %s, %s, %d)';
+			array_push( $detail_values, $next_order_id, $order['created_via'], WOOCOMMERCE_VERSION, $order['recorded_sales'] );
 
-					++$next_order_id;
-				}
-			}
+			++$next_order_id;
 		}
 
 		$order_table    = OrdersTableDataStore::get_orders_table_name();
@@ -290,7 +312,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 
 		( new OrderCountCache() )->flush( 'shop_order', array_keys( wc_get_order_statuses() ) );
 
-		return count( $order_rows );
+		return count( $orders );
 	}
 
 	/**
@@ -307,17 +329,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			$last_20[]  = sprintf( '%d-02-%02d 12:00:00', $year + 2, $i );
 		}
 
-		// Create set of orders.
-		foreach ( array_merge( $first_20, $last_20 ) as $order_date ) {
-			$order = wc_create_order(
-				array(
-					'status' => OrderInternalStatus::COMPLETED,
-				)
-			);
-			$order->set_date_created( $order_date );
-			$order->set_total( 10 );
-			$order->save();
-		}
+		$this->create_tracking_snapshot_orders( array_merge( $first_20, $last_20 ) );
 
 		$order_snapshot = WC_Tracker::get_tracking_data()['order_snapshot'];
 
@@ -343,6 +355,39 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			$this->assertEquals( $order_details['recorded_sales'], 'yes' );
 			$this->assertEquals( $order_details['woocommerce_version'], WOOCOMMERCE_VERSION );
 		}
+	}
+
+	/**
+	 * Persist orders read by the first/last order snapshot queries.
+	 *
+	 * @param string[] $order_dates Order creation dates.
+	 */
+	private function create_tracking_snapshot_orders( array $order_dates ): void {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			foreach ( $order_dates as $order_date ) {
+				$order = wc_create_order(
+					array(
+						'status' => OrderInternalStatus::COMPLETED,
+					)
+				);
+				$order->set_date_created( $order_date );
+				$order->set_total( 10 );
+				$order->save();
+			}
+			return;
+		}
+
+		$orders = array_map(
+			static fn( $order_date ) => array(
+				'status'         => OrderInternalStatus::COMPLETED,
+				'date'           => $order_date,
+				'payment_method' => '',
+				'created_via'    => 'admin',
+				'recorded_sales' => 1,
+			),
+			$order_dates
+		);
+		$this->insert_hpos_tracking_orders( $orders );
 	}
 
 	/**
