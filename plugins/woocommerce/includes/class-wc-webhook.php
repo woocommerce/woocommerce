@@ -550,7 +550,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		/**
 		 * Filter to disable webhook delivery logging.
 		 *
-		 * @since 10.8.0
+		 * @since 11.1.0
 		 * @param bool $enable_logging Whether to log the delivery. Default true.
 		 * @param int  $webhook_id     The webhook ID.
 		 */
