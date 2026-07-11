@@ -61,12 +61,20 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
 	protected static $guest_orders = array();
 
 	/**
+	 * Report import action IDs created for the shared orders.
+	 *
+	 * @var int[]
+	 */
+	private static $import_action_ids = array();
+
+	/**
 	 * Set up shared report customer data.
 	 */
 	public static function wpSetUpBeforeClass() {
 		WC_Helper_Reports::reset_stats_dbs();
 		self::$registered_customers = array();
 		self::$guest_orders         = array();
+		self::$import_action_ids    = array();
 
 		// Create a test product.
 		self::$product = new WC_Product_Simple();
@@ -104,6 +112,8 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
 		$customer3->save();
 		self::$registered_customers[] = $customer3;
 
+		add_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
+
 		// Create orders for registered customers with location data.
 		foreach ( self::$registered_customers as $index => $customer ) {
 			$order = WC_Helper_Order::create_order( $customer->get_id(), self::$product );
@@ -139,13 +149,31 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
 
 		// Sync all data to lookup tables.
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+		remove_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
+	}
+
+	/**
+	 * Track report import actions created for shared order fixtures.
+	 *
+	 * @param int $action_id Action ID.
+	 */
+	public static function track_import_action( $action_id ): void {
+		$action = ActionScheduler_Store::instance()->fetch_action( $action_id );
+		if ( 'wc-admin_import_orders' === $action->get_hook() ) {
+			self::$import_action_ids[] = (int) $action_id;
+		}
 	}
 
 	/**
 	 * Clean up shared report customer data.
 	 */
 	public static function wpTearDownAfterClass() {
+		remove_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
 		WC_Helper_Reports::reset_stats_dbs();
+		$action_store = ActionScheduler_Store::instance();
+		foreach ( self::$import_action_ids as $action_id ) {
+			$action_store->delete_action( $action_id );
+		}
 		self::enable_direct_product_attribute_lookup_updates();
 		try {
 			self::$product->delete( true );
@@ -155,6 +183,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
 		self::$product              = null;
 		self::$registered_customers = array();
 		self::$guest_orders         = array();
+		self::$import_action_ids    = array();
 	}
 
 	/**
