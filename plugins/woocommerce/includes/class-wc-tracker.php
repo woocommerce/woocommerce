@@ -105,6 +105,8 @@ class WC_Tracker {
 			$action_id = as_enqueue_async_action( self::SEND_ATTEMPT_HOOK, $attempt_args, self::SEND_ATTEMPT_GROUP, true );
 			if ( 0 !== $action_id || as_has_scheduled_action( self::SEND_ATTEMPT_HOOK, null, self::SEND_ATTEMPT_GROUP ) ) {
 				update_option( 'woocommerce_tracker_last_send', time() );
+			} else {
+				self::log_send_failure( 0, array( 'error_code' => 'initial_scheduling_failure' ) );
 			}
 		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- Failure is reported with a fixed category below.
 			self::log_send_failure( 0, array( 'error_code' => 'initial_scheduling_failure' ) );

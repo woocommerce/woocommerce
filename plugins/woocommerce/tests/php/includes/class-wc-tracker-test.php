@@ -215,15 +215,36 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A failed initial enqueue does not advance the delivery-cycle timestamp.
+	 * @testdox A failed initial enqueue logs a bounded failure without advancing the delivery-cycle timestamp.
 	 */
 	public function test_send_tracking_data_does_not_update_last_send_when_enqueue_fails(): void {
+		$warning_calls = array();
+		$logger        = $this->create_warning_logger( $warning_calls );
+		$logger_filter = function () use ( $logger ) {
+			return $logger;
+		};
 		add_filter( 'pre_as_enqueue_async_action', '__return_zero' );
+		add_filter( 'woocommerce_logging_class', $logger_filter );
 
-		WC_Tracker::send_tracking_data();
+		try {
+			WC_Tracker::send_tracking_data();
+		} finally {
+			remove_filter( 'pre_as_enqueue_async_action', '__return_zero' );
+			remove_filter( 'woocommerce_logging_class', $logger_filter );
+		}
 
 		$this->assertSame( 0, $this->count_attempt_actions() );
 		$this->assertFalse( get_option( 'woocommerce_tracker_last_send', false ) );
+		$this->assertCount( 1, $warning_calls );
+		$this->assertSame( 'WooCommerce tracker delivery attempt failed.', $warning_calls[0]['message'] );
+		$this->assertSame(
+			array(
+				'source'     => 'woocommerce-tracker',
+				'attempt'    => 0,
+				'error_code' => 'initial_scheduling_failure',
+			),
+			$warning_calls[0]['context']
+		);
 	}
 
 	/**
@@ -264,12 +285,23 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 * @testdox An existing cycle is confirmed without duplicating attempt zero.
 	 */
 	public function test_send_tracking_data_confirms_existing_cycle_without_duplicate(): void {
+		$warning_calls = array();
+		$logger        = $this->create_warning_logger( $warning_calls );
+		$logger_filter = function () use ( $logger ) {
+			return $logger;
+		};
 		as_enqueue_async_action( 'woocommerce_tracker_send_event_attempt', array( 'attempt' => 0 ), 'woocommerce-tracker', true );
+		add_filter( 'woocommerce_logging_class', $logger_filter );
 
-		WC_Tracker::send_tracking_data();
+		try {
+			WC_Tracker::send_tracking_data();
+		} finally {
+			remove_filter( 'woocommerce_logging_class', $logger_filter );
+		}
 
 		$this->assertSame( 1, $this->count_attempt_actions( array( 'attempt' => 0 ) ) );
 		$this->assertNotFalse( get_option( 'woocommerce_tracker_last_send', false ) );
+		$this->assertCount( 0, $warning_calls, 'An existing initial action should be treated as a confirmed cycle.' );
 	}
 
 	/**
