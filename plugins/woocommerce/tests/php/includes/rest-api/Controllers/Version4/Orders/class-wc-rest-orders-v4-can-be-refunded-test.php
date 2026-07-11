@@ -152,7 +152,6 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 				'total'    => 20,
 			)
 		);
-		$item_a->save();
 		$order->add_item( $item_a );
 
 		$item_b = new WC_Order_Item_Product();
@@ -164,7 +163,6 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 				'total'    => 20,
 			)
 		);
-		$item_b->save();
 		$order->add_item( $item_b );
 
 		$order->set_status( 'completed' );
@@ -286,7 +284,6 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 				'total'    => 10,
 			)
 		);
-		$item->save();
 		$order->add_item( $item );
 		$order->set_status( 'completed' );
 		$order->save();
@@ -454,7 +451,6 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 				'total' => array( 1 => '1.50' ),
 			)
 		);
-		$shipping_item->save();
 		$order->add_item( $shipping_item );
 		$order->set_status( 'completed' );
 		$order->save();
@@ -501,7 +497,6 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 				'total' => array( 1 => '3.00' ),
 			)
 		);
-		$fee_item->save();
 		$order->add_item( $fee_item );
 		$order->set_status( 'completed' );
 		$order->save();
@@ -552,7 +547,6 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 				'total' => array( 1 => '1.50' ),
 			)
 		);
-		$shipping_item->save();
 		$order->add_item( $shipping_item );
 		$order->set_status( 'completed' );
 		$order->save();
@@ -601,7 +595,6 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 				'total' => array( 1 => '3.00' ),
 			)
 		);
-		$fee_item->save();
 		$order->add_item( $fee_item );
 		$order->set_status( 'completed' );
 		$order->save();
@@ -649,7 +642,6 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 				'total'    => 0,
 			)
 		);
-		$item->save();
 		$order->add_item( $item );
 		$order->set_status( 'completed' );
 		$order->save();
@@ -683,7 +675,6 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 				'total'    => 50,
 			)
 		);
-		$item->save();
 		$order->add_item( $item );
 
 		$fee = new WC_Order_Item_Fee();
@@ -693,7 +684,6 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 				'total' => '-10.00',
 			)
 		);
-		$fee->save();
 		$order->add_item( $fee );
 
 		$order->set_status( 'completed' );
