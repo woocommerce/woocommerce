@@ -163,11 +163,11 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		// Create several dummy orders.
 		$orders = array();
 		for ( $i = 0; $i < 3; $i++ ) {
-			$orders[] = WC_Helper_Order::create_order();
+			$orders[] = wc_create_order();
 		}
 
 		// Create a dummy order that should NOT match.
-		$dummy_order = WC_Helper_Order::create_order();
+		$dummy_order = wc_create_order();
 		$dummy_order->set_billing_first_name( 'NotAMatch' );
 		$dummy_order->save();
 
