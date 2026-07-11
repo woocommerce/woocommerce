@@ -185,6 +185,31 @@ class WC_Meta_Box_Order_Data {
 	}
 
 	/**
+	 * Whether an order contains only virtual products.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private static function has_only_virtual_products( $order ) {
+		/** @var WC_Order_Item_Product[] $items */
+		$items = $order->get_items();
+
+		if ( empty( $items ) ) {
+			return false;
+		}
+
+		foreach ( $items as $item ) {
+			$product = $item->get_product();
+
+			if ( ! $product instanceof WC_Product || $product->needs_shipping() ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Output the metabox.
 	 *
 	 * @param WP_Post|WC_Order $post Post or order object.
@@ -571,8 +596,8 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
 								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-								$needs_shipping_address = $order->needs_shipping_address();
-								$shipping_address       = $needs_shipping_address ? $order->get_formatted_shipping_address() : '';
+								$hide_core_shipping_details = 'store-api' === $order->get_created_via() && self::has_only_virtual_products( $order );
+								$shipping_address           = $hide_core_shipping_details ? '' : $order->get_formatted_shipping_address();
 
 								if ( $shipping_address ) {
 									echo '<p>' . wp_kses( $shipping_address, array( 'br' => array() ) ) . '</p>';
@@ -584,7 +609,7 @@ class WC_Meta_Box_Order_Data {
 
 								if ( ! empty( $shipping_fields ) ) {
 									foreach ( $shipping_fields as $key => $field ) {
-										if ( ! $needs_shipping_address && 'phone' === $key && ! isset( $field['value'] ) ) {
+										if ( $hide_core_shipping_details && 'phone' === $key && ! isset( $field['value'] ) ) {
 											continue;
 										}
 
