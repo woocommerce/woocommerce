@@ -112,7 +112,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - create roles.
 	 */
 	public function test_create_roles() {
-		self::uninstall();
+		WC_Install::remove_roles();
 
 		WC_Install::create_roles();
 
@@ -177,19 +177,5 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		);
 
 		$this->assertContains( 'some_table_name', WC_Install::get_tables() );
-	}
-
-	/**
-	 * Uninstall the plugin.
-	 */
-	private static function uninstall() {
-		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-			define( 'WP_UNINSTALL_PLUGIN', true );
-			define( 'WC_REMOVE_ALL_DATA', true );
-		}
-
-		include dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . '/uninstall.php';
-		delete_transient( 'wc_installing' );
-		delete_option( 'wc_installing' );
 	}
 }
