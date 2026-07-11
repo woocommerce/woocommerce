@@ -23,8 +23,11 @@ if ( ! class_exists( 'WC_REST_Orders_Controller_Tests' ) ) {
 class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Controller_Tests {
 	/**
 	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
 	 */
-	public static function wpSetUpBeforeClass(): void {
+	public static function wpSetUpBeforeClass( $factory ): void {
+		parent::wpSetUpBeforeClass( $factory );
 		self::setup_cot_tables();
 	}
 
