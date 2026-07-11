@@ -1020,10 +1020,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test that the `include_types` parameter filters products by a single type.
 	 */
 	public function test_collection_filter_with_include_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
