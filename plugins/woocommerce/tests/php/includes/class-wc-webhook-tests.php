@@ -116,11 +116,18 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	 * @testDox The woocommerce_webhook_enable_delivery_log filter toggles delivery logging without affecting failure tracking.
 	 */
 	public function test_delivery_logging_respects_enable_delivery_log_filter() {
-		// Swap in a spy logger so the delivery log write can be observed regardless of the site's logging settings.
-		$use_spy_logger = function () {
-			return WC_Webhook_Delivery_Log_Spy_Logger::class;
+		// Ensure logging is enabled and every level is handled so the delivery log write is observable.
+		update_option( 'woocommerce_logs_logging_enabled', 'yes' );
+		update_option( 'woocommerce_logs_level_threshold', 'none' );
+
+		$logged  = 0;
+		$log_spy = function ( $message, $level, $context ) use ( &$logged ) {
+			if ( isset( $context['source'] ) && 'webhooks-delivery' === $context['source'] ) {
+				++$logged;
+			}
+			return $message;
 		};
-		add_filter( 'woocommerce_logging_class', $use_spy_logger );
+		add_filter( 'woocommerce_logger_log_message', $log_spy, 10, 3 );
 
 		$webhook = new WC_Webhook();
 		$webhook->set_status( 'active' );
@@ -153,7 +160,6 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		);
 
 		// By default the delivery is logged, and the filter receives the webhook ID.
-		WC_Webhook_Delivery_Log_Spy_Logger::$count = 0;
 		$received_id = null;
 		$id_spy      = function ( $enable, $webhook_id ) use ( &$received_id ) {
 			$received_id = $webhook_id;
@@ -164,51 +170,24 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_webhook_enable_delivery_log', $id_spy, 10 );
 
 		$this->assertSame( $webhook->get_id(), $received_id, 'The filter should receive the webhook ID.' );
-		$this->assertGreaterThan( 0, WC_Webhook_Delivery_Log_Spy_Logger::$count, 'The delivery should be logged by default.' );
+		$this->assertGreaterThan( 0, $logged, 'The delivery should be logged by default.' );
 
 		// When the filter returns false the log is suppressed, but failure tracking still runs.
-		WC_Webhook_Delivery_Log_Spy_Logger::$count = 0;
+		$logged = 0;
 		$webhook->set_failure_count( 0 );
 		$webhook->save();
 		add_filter( 'woocommerce_webhook_enable_delivery_log', '__return_false' );
 		$webhook->log_delivery( 'delivery-disabled', $request, $failure, 0.1 );
 		remove_filter( 'woocommerce_webhook_enable_delivery_log', '__return_false' );
 
-		$this->assertSame( 0, WC_Webhook_Delivery_Log_Spy_Logger::$count, 'The delivery log should be suppressed when the filter returns false.' );
+		$this->assertSame( 0, $logged, 'The delivery log should be suppressed when the filter returns false.' );
 		$this->assertGreaterThan(
 			0,
 			wc_get_webhook( $webhook->get_id() )->get_failure_count(),
 			'Failure tracking must still run when delivery logging is disabled.'
 		);
 
-		remove_filter( 'woocommerce_logging_class', $use_spy_logger );
+		remove_filter( 'woocommerce_logger_log_message', $log_spy, 10 );
 	}
 
-}
-
-/**
- * Spy logger that counts webhooks-delivery log writes while preserving normal logging behaviour.
- */
-class WC_Webhook_Delivery_Log_Spy_Logger extends WC_Logger {
-
-	/**
-	 * Number of webhooks-delivery log entries recorded.
-	 *
-	 * @var int
-	 */
-	public static $count = 0;
-
-	/**
-	 * Count webhooks-delivery writes, then delegate to the parent logger.
-	 *
-	 * @param string $level   Log level.
-	 * @param string $message Log message.
-	 * @param array  $context Log context.
-	 */
-	public function log( $level, $message, $context = array() ) {
-		if ( isset( $context['source'] ) && 'webhooks-delivery' === $context['source'] ) {
-			++self::$count;
-		}
-		parent::log( $level, $message, $context );
-	}
 }
