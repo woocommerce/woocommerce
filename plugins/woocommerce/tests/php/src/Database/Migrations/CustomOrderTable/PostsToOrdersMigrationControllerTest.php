@@ -440,14 +440,14 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	}
 
 	/**
-	 * Helper method to clear checkout and truncate order tables.
+	 * Helper method to clear checkout and order tables.
 	 */
 	private function clear_all_orders() {
 		global $wpdb;
 		$order_tables = $this->data_store->get_all_table_names();
 		foreach ( $order_tables as $table ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->query( "TRUNCATE table $table;" );
+			$wpdb->query( "DELETE FROM $table;" );
 		}
 	}
 
