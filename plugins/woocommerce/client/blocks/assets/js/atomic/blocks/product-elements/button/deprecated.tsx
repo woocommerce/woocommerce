@@ -4,10 +4,22 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import clsx from 'clsx';
 import metadata from './block.json';
+import { BlockAttributes } from './types';
 
 const { attributes: blockAttributes } = metadata;
 
-const save = ( { attributes, innerBlocks }: any ) => {
+interface V1Attributes extends BlockAttributes {
+	isDescendentOfQueryLoop?: boolean;
+	isDescendentOfSingleProductBlock?: boolean;
+}
+
+const save = ( {
+	attributes,
+	innerBlocks,
+}: {
+	attributes: V1Attributes;
+	innerBlocks?: unknown[];
+} ) => {
 	if (
 		attributes.isDescendentOfQueryLoop ||
 		attributes.isDescendentOfSingleProductBlock ||

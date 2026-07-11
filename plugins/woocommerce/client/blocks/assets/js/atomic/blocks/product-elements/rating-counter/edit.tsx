@@ -15,8 +15,6 @@ import { ProductQueryContext as Context } from '@woocommerce/blocks/product-quer
 import Block from './block';
 import { BlockAttributes } from './types';
 
-
-
 const Edit = (
 	props: BlockEditProps< BlockAttributes > & { context: Context }
 ): JSX.Element => {
@@ -30,7 +28,6 @@ const Edit = (
 		shouldDisplayMockedReviewsWhenProductHasNoReviews: true,
 	};
 
-
 	return (
 		<>
 			<BlockControls>
@@ -42,9 +39,7 @@ const Edit = (
 				/>
 			</BlockControls>
 			<div { ...blockProps }>
-				<Block
-					{ ...blockAttrs }
-				/>
+				<Block { ...blockAttrs } />
 			</div>
 		</>
 	);

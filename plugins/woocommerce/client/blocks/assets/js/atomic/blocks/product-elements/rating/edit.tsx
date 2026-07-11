@@ -17,8 +17,6 @@ import Block from './block';
 import { BlockAttributes } from './types';
 import './editor.scss';
 
-
-
 const Edit = (
 	props: BlockEditProps< BlockAttributes > & { context: Context }
 ): JSX.Element => {
@@ -31,7 +29,6 @@ const Edit = (
 		...context,
 		shouldDisplayMockedReviewsWhenProductHasNoReviews: true,
 	};
-
 
 	const { product } = useProduct( context.postId );
 
@@ -46,11 +43,7 @@ const Edit = (
 				/>
 			</BlockControls>
 			<div { ...blockProps }>
-				<Block
-					isAdmin={ true }
-					{ ...blockAttrs }
-					product={ product }
-				/>
+				<Block isAdmin={ true } { ...blockAttrs } product={ product } />
 			</div>
 		</>
 	);
