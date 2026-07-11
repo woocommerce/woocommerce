@@ -45,6 +45,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_rate_limits" );
 			WC_Cache_Helper::invalidate_cache_group( WC_Rate_Limiter::CACHE_GROUP );
 			Constants::clear_constants();
+			parent::tearDown();
 		}
 
 		/**
@@ -418,10 +419,14 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 
 			$this->sut->set_is_dev_or_local( false );
 			$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+			$request_count = 0;
+			add_filter( 'option_woocommerce_allow_tracking', fn() => 'yes' );
 
 			add_filter(
 				'pre_http_request',
-				function ( $preempt, $args ) {
+				function ( $preempt, $args, $url ) use ( &$request_count ) {
+					++$request_count;
+					$this->assertSame( RemoteLogger::LOG_ENDPOINT, $url );
 					$this->assertArrayHasKey( 'body', $args );
 					$this->assertArrayHasKey( 'headers', $args );
 					return array(
@@ -436,8 +441,9 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				3
 			);
 
-			$this->assertTrue( $this->sut->handle( time(), 'critical', 'Test message', array( 'remote-logging' => true ) ) );
+			$this->assertTrue( $this->sut->handle( time(), 'error', 'Test message', array( 'remote-logging' => true ) ) );
 			$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
+			$this->assertSame( 1, $request_count );
 		}
 
 		/**
