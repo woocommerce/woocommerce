@@ -2,6 +2,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -10,6 +11,22 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  */
 class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	use HPOSToggleTrait;
+
+	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		try {
+			self::setup_cot_tables();
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
+			}
+		} finally {
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
 
 	/**
 	 * Whether HPOS was authoritative before the test.
@@ -25,7 +42,9 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		$this->setup_cot();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$this->toggle_cot_feature_and_usage( true );
 	}
 
 	/**
