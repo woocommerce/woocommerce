@@ -34,17 +34,6 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 
 		// Create importer with default options.
 		$this->importer = new WooCommerceProductImporter();
-
-		// Clean up any existing products.
-		$this->clean_up_products();
-	}
-
-	/**
-	 * Clean up after each test.
-	 */
-	public function tearDown(): void {
-		$this->clean_up_products();
-		parent::tearDown();
 	}
 
 	/**
@@ -848,50 +837,5 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( '', $product->get_length() );
 		$this->assertSame( '', $product->get_width() );
 		$this->assertSame( '', $product->get_height() );
-	}
-
-	/**
-	 * Helper method to clean up test products.
-	 */
-	private function clean_up_products(): void {
-		global $wpdb;
-
-		// Delete test products by SKU pattern.
-		$test_skus = $wpdb->get_col(
-			"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_sku' AND meta_value LIKE 'TEST-SKU-%'"
-		);
-
-		foreach ( $test_skus as $sku ) {
-			$product_id = wc_get_product_id_by_sku( $sku );
-			if ( $product_id ) {
-				wp_delete_post( $product_id, true );
-			}
-		}
-
-		// Clean up test categories.
-		$test_categories = get_terms(
-			array(
-				'taxonomy'   => 'product_cat',
-				'name__like' => 'Test Category',
-				'hide_empty' => false,
-			)
-		);
-
-		foreach ( $test_categories as $category ) {
-			wp_delete_term( $category->term_id, 'product_cat' );
-		}
-
-		// Clean up test tags.
-		$test_tags = get_terms(
-			array(
-				'taxonomy'   => 'product_tag',
-				'name__like' => 'test-tag',
-				'hide_empty' => false,
-			)
-		);
-
-		foreach ( $test_tags as $tag ) {
-			wp_delete_term( $tag->term_id, 'product_tag' );
-		}
 	}
 }
