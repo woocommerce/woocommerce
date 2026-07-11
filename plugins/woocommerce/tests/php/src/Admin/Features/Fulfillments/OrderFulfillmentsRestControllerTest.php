@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\OrderFulfillmentsRestController;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Helper_Order;
@@ -118,11 +119,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public static function tearDownAfterClass(): void {
 		self::enable_direct_product_attribute_lookup_updates();
+		$fulfillments_data_store = new FulfillmentsDataStore();
+
 		// Delete the created orders and their fulfillments.
-		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillments;" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillment_meta;" );
 		foreach ( self::$created_order_ids as $order_id ) {
+			$fulfillments_data_store->delete_by_entity( WC_Order::class, (string) $order_id );
 			WC_Helper_Order::delete_order( $order_id );
 		}
 
