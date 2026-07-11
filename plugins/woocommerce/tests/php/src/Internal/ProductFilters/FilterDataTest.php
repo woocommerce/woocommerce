@@ -5,11 +5,110 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
  * Tests related to Counts service.
  */
 class FilterDataTest extends AbstractProductFiltersTest {
+	/**
+	 * IDs of products owned by this test class.
+	 *
+	 * @var int[]
+	 */
+	private static $fixture_product_ids = array();
+
+	/**
+	 * Product data owned by this test class.
+	 *
+	 * @var array
+	 */
+	private static $fixture_products_data = array();
+
+	/**
+	 * Product categories owned by this test class.
+	 *
+	 * @var array
+	 */
+	private static $fixture_product_categories = array();
+
+	/**
+	 * Product tags owned by this test class.
+	 *
+	 * @var array
+	 */
+	private static $fixture_product_tags = array();
+
+	/**
+	 * Option values to restore after class fixture setup and teardown.
+	 *
+	 * @var array
+	 */
+	private static $fixture_option_values = array();
+
+	/**
+	 * Restore options changed by the product filter fixture builder.
+	 */
+	private static function restore_fixture_options(): void {
+		foreach ( self::$fixture_option_values as $option_name => $option_value ) {
+			if ( null === $option_value ) {
+				delete_option( $option_name );
+			} else {
+				update_option( $option_name, $option_value );
+			}
+		}
+	}
+
+	/**
+	 * Create the immutable catalog before per-test transactions begin.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		parent::wpSetUpBeforeClass();
+		self::enable_direct_product_attribute_lookup_updates();
+		self::$fixture_option_values = array(
+			'woocommerce_attribute_lookup_enabled' => get_option( 'woocommerce_attribute_lookup_enabled', null ),
+			'woocommerce_calc_taxes'               => get_option( 'woocommerce_calc_taxes', null ),
+			'woocommerce_tax_display_shop'         => get_option( 'woocommerce_tax_display_shop', null ),
+		);
+
+		try {
+			$fixture_owner = new self();
+			$fixture_owner->set_up_product_filter_fixtures();
+			$fixture_owner->fixture_data->add_product_review( $fixture_owner->products[0]->get_id(), 5 );
+			$fixture_owner->fixture_data->add_product_review( $fixture_owner->products[1]->get_id(), 3 );
+			$fixture_owner->fixture_data->add_product_review( $fixture_owner->products[3]->get_id(), 5 );
+
+			self::$fixture_product_ids        = array_map(
+				static function ( $product ) {
+					return $product->get_id();
+				},
+				$fixture_owner->products
+			);
+			self::$fixture_products_data      = $fixture_owner->products_data;
+			self::$fixture_product_categories = $fixture_owner->product_categories;
+			self::$fixture_product_tags       = $fixture_owner->product_tags;
+		} finally {
+			self::restore_fixture_options();
+			self::disable_direct_product_attribute_lookup_updates();
+		}
+	}
+
+	/**
+	 * Delete the catalog after all tests have completed.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			$fixture_owner = new self();
+			$fixture_owner->delete_product_filter_fixtures();
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
+
+		parent::wpTearDownAfterClass();
+		self::restore_fixture_options();
+	}
+
 	/**
 	 * The system under test.
 	 *
@@ -28,16 +127,25 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
-		parent::setUp();
+		$this->set_up_test_case();
+		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_tax_display_shop', 'excl' );
+		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+		unregister_taxonomy( 'product_type' );
+		\WC_Post_Types::register_taxonomies();
+		clean_taxonomy_cache( 'pa_color' );
+
+		$this->fixture_data       = new FixtureData();
+		$this->products_data      = self::$fixture_products_data;
+		$this->product_categories = self::$fixture_product_categories;
+		$this->product_tags       = self::$fixture_product_tags;
+		$this->products           = array_map( 'wc_get_product', self::$fixture_product_ids );
 
 		$container = wc_get_container();
 
 		$this->sut                     = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) );
 		$this->taxonomy_hierarchy_data = $container->get( TaxonomyHierarchyData::class );
-
-		$this->fixture_data->add_product_review( $this->products[0]->get_id(), 5 );
-		$this->fixture_data->add_product_review( $this->products[1]->get_id(), 3 );
-		$this->fixture_data->add_product_review( $this->products[3]->get_id(), 5 );
 	}
 
 	/**

@@ -81,8 +81,21 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
-		parent::setUp();
+		$this->set_up_test_case();
+		$this->set_up_product_filter_fixtures();
+	}
 
+	/**
+	 * Start the standard per-test transaction and reset WordPress state.
+	 */
+	protected function set_up_test_case(): void {
+		parent::setUp();
+	}
+
+	/**
+	 * Create the product filter catalog used by a test.
+	 */
+	protected function set_up_product_filter_fixtures(): void {
 		$this->fixture_data = new FixtureData();
 
 		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
@@ -210,6 +223,15 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 			array( $this, 'create_test_product' ),
 			$this->products_data
 		);
+	}
+
+	/**
+	 * Delete product filter fixtures through WooCommerce data stores.
+	 */
+	protected function delete_product_filter_fixtures(): void {
+		$this->remove_all_attributes();
+		$this->remove_all_products();
+		$this->empty_lookup_tables();
 	}
 
 	/**
