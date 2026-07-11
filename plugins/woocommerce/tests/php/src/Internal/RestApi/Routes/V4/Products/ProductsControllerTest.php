@@ -1693,13 +1693,27 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create one product of each parent product type for type-filter tests.
+	 */
+	private function create_products_for_type_filtering(): void {
+		WC_Helper_Product::create_simple_product();
+
+		$variable = new \WC_Product_Variable();
+		$variable->set_name( 'Variable product' );
+		$variable->save();
+
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_name( 'Grouped product' );
+		$grouped->save();
+
+		WC_Helper_Product::create_external_product();
+	}
+
+	/**
 	 * Test that `exclude_types` parameter correctly excludes a single type.
 	 */
 	public function test_products_filter_with_single_exclude_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1721,10 +1735,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * Test that `exclude_types` parameter correctly excludes multiple types.
 	 */
 	public function test_products_filter_with_multiple_exclude_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1752,10 +1763,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * Test that empty `exclude_types` parameter returns all products.
 	 */
 	public function test_products_filter_with_empty_exclude_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1795,10 +1803,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * Test that `exclude_types` with all types returns empty result.
 	 */
 	public function test_products_filter_exclude_types_with_all_types_returns_empty() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1816,10 +1821,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * Test that `exclude_types` parameter takes precedence over `include_types`.
 	 */
 	public function test_products_filter_exclude_types_precedence_over_include() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1843,10 +1845,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * Test that `exclude_types` works correctly with the `type` param.
 	 */
 	public function test_products_filter_exclude_types_with_type_param() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
