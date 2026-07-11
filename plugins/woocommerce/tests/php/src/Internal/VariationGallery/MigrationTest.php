@@ -79,13 +79,7 @@ class MigrationTest extends \WC_Unit_Test_Case {
 		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => LegacyVariationGalleryCompatibility::get_core_managed_meta_key() ) );
 		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 
-		$variation_ids = array();
-
-		for ( $index = 0; $index < 251; ++$index ) {
-			$variation_id    = $this->create_variation_post();
-			$variation_ids[] = $variation_id;
-			add_post_meta( $variation_id, '_wc_additional_variation_images', (string) ( $index + 1 ) );
-		}
+		$variation_ids = $this->create_variation_posts( 251 );
 
 		$this->assertTrue( Migration::run() );
 
@@ -117,15 +111,56 @@ class MigrationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a bare variation post for migration batching tests.
+	 * Create bare variation posts and legacy gallery metadata for migration batching tests.
+	 *
+	 * The migration reads these rows directly, so inserting the fixture in bulk avoids
+	 * running unrelated product hooks hundreds of times.
+	 *
+	 * @param int $count Number of variations to create.
+	 * @return int[] Variation post IDs.
 	 */
-	private function create_variation_post(): int {
-		return self::factory()->post->create(
-			array(
-				'post_type'   => 'product_variation',
-				'post_status' => 'publish',
+	private function create_variation_posts( int $count ): array {
+		global $wpdb;
+
+		$post_title        = 'Variation gallery migration batch fixture';
+		$post_placeholders = array_fill( 0, $count, '(%s, %s, %s)' );
+		$post_values       = array();
+
+		for ( $index = 0; $index < $count; ++$index ) {
+			array_push( $post_values, 'product_variation', 'publish', $post_title );
+		}
+
+		$posts_query = $wpdb->prepare(
+			"INSERT INTO {$wpdb->posts} (post_type, post_status, post_title) VALUES " . implode( ', ', $post_placeholders ), // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.NotPrepared -- Placeholders are generated above.
+			$post_values
+		);
+		$wpdb->query( $posts_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
+
+		$variation_ids = array_map(
+			'intval',
+			$wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_title = %s ORDER BY ID ASC",
+					'product_variation',
+					$post_title
+				)
 			)
 		);
+
+		$meta_placeholders = array_fill( 0, $count, '(%d, %s, %s)' );
+		$meta_values       = array();
+
+		foreach ( $variation_ids as $index => $variation_id ) {
+			array_push( $meta_values, $variation_id, '_wc_additional_variation_images', (string) ( $index + 1 ) );
+		}
+
+		$meta_query = $wpdb->prepare(
+			"INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) VALUES " . implode( ', ', $meta_placeholders ), // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.NotPrepared -- Placeholders are generated above.
+			$meta_values
+		);
+		$wpdb->query( $meta_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
+
+		return $variation_ids;
 	}
 
 	/**
