@@ -377,10 +377,34 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a variable product with the requested number of variations.
+	 *
+	 * @param int $variation_count Number of variations to create.
+	 * @return \WC_Product_Variable
+	 */
+	private function create_variable_product_with_variations( int $variation_count ): \WC_Product_Variable {
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Variable product' );
+		$product->save();
+		$variation_ids = array();
+
+		for ( $index = 0; $index < $variation_count; $index++ ) {
+			$variation = new \WC_Product_Variation();
+			$variation->set_parent_id( $product->get_id() );
+			$variation->set_regular_price( 10 + $index );
+			$variation->save();
+			$variation_ids[] = $variation->get_id();
+		}
+		$product->set_children( $variation_ids );
+
+		return $product;
+	}
+
+	/**
 	 * @testdox Variable product responses include embeddable variation links.
 	 */
 	public function test_variable_product_response_includes_embeddable_variation_links(): void {
-		$product       = WC_Helper_Product::create_variation_product();
+		$product       = $this->create_variable_product_with_variations( 6 );
 		$variation_ids = $product->get_children();
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
@@ -405,7 +429,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @testdox Variable product responses embed variations when requested.
 	 */
 	public function test_variable_product_response_embeds_variations_when_requested(): void {
-		$product       = WC_Helper_Product::create_variation_product();
+		$product       = $this->create_variable_product_with_variations( 6 );
 		$variation_ids = $product->get_children();
 		$request       = new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() );
 		$request->set_param( '_embed', 1 );
@@ -434,7 +458,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @testdox Variation embed links do not propagate parent requested fields.
 	 */
 	public function test_variation_embed_links_do_not_propagate_parent_requested_fields(): void {
-		$product = WC_Helper_Product::create_variation_product();
+		$product = $this->create_variable_product_with_variations( 1 );
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() );
 		$request->set_param( '_fields', 'id,name,_links,_embedded' );
 
@@ -468,7 +492,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @testdox Variation parent links are not embeddable.
 	 */
 	public function test_variation_parent_link_is_not_embeddable(): void {
-		$product      = WC_Helper_Product::create_variation_product();
+		$product      = $this->create_variable_product_with_variations( 1 );
 		$variation_id = $product->get_children()[0];
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $variation_id ) );
