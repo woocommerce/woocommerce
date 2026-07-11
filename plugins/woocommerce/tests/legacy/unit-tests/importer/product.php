@@ -57,6 +57,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			$this->csv_file,
 			array(
 				'mapping'          => $this->get_csv_mapped_items(),
+				'lines'            => 2,
 				'parse'            => true,
 				'prevent_timeouts' => false,
 			)
@@ -133,9 +134,12 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
 		$this->assertEquals(
-			7,
+			2,
 			count( $results['imported'] ) + count( $results['imported_variations'] ),
 			'One import item references a downloadable file stored in an unapproved location: if the import is triggered by an admin user, that location will be automatically approved.'
+		);
+		$this->assertTrue(
+			wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->is_valid_path( 'http://woo.dev/albums/album.flac' )
 		);
 	}
 
@@ -149,11 +153,14 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
-		$this->assertEquals( 6, count( $results['imported'] ) + count( $results['imported_variations'] ) );
+		$this->assertEquals( 1, count( $results['imported'] ) + count( $results['imported_variations'] ) );
 		$this->assertEquals(
 			1,
 			count( $results['failed'] ),
 			'One import item references a downloadable file stored in an unapproved location: if the import is triggered by a non-admin, that item cannot be imported.'
+		);
+		$this->assertFalse(
+			wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->is_valid_path( 'http://woo.dev/albums/album.flac' )
 		);
 	}
 
