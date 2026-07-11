@@ -184,7 +184,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 * @testDox Test orders tracking data.
 	 */
 	public function test_get_tracking_data_orders() {
-		$dummy_product          = WC_Helper_Product::create_simple_product();
 		$status_entries         = array( OrderInternalStatus::PROCESSING, OrderInternalStatus::COMPLETED, OrderInternalStatus::REFUNDED, OrderInternalStatus::PENDING );
 		$created_via_entries    = array( 'api', 'checkout', 'admin' );
 		$payment_method_entries = array( WC_Gateway_Paypal::ID, 'stripe', WC_Gateway_COD::ID );
@@ -201,9 +200,8 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 							'payment_method' => $payment_method_entry,
 						)
 					);
-					$order->add_product( $dummy_product );
+					$order->set_total( 10 );
 					$order->save();
-					$order->calculate_totals();
 				}
 			}
 		}
@@ -235,10 +233,9 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 * @testDox Test order snapshot data.
 	 */
 	public function test_get_tracking_data_order_snapshot() {
-		$dummy_product = WC_Helper_Product::create_simple_product();
-		$year          = gmdate( 'Y' );
-		$first_20      = array();
-		$last_20       = array();
+		$year     = gmdate( 'Y' );
+		$first_20 = array();
+		$last_20  = array();
 
 		// Populate order dates.
 		for ( $i = 1; $i <= 20; $i++ ) {
@@ -253,10 +250,9 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 					'status' => OrderInternalStatus::COMPLETED,
 				)
 			);
-			$order->add_product( $dummy_product );
 			$order->set_date_created( $order_date );
+			$order->set_total( 10 );
 			$order->save();
-			$order->calculate_totals();
 		}
 
 		$order_snapshot = WC_Tracker::get_tracking_data()['order_snapshot'];
