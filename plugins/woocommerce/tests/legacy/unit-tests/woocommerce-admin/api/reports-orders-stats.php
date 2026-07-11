@@ -185,8 +185,9 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 		$simple_product_order_1->save();
 
 		// Create more orders for simple products.
+		$unrelated_product = WC_Helper_Product::create_simple_product();
 		for ( $i = 0; $i < 10; $i++ ) {
-			$order = WC_Helper_Order::create_order( $this->user );
+			$order = WC_Helper_Order::create_order( $this->user, $unrelated_product );
 			$order->set_status( OrderStatus::COMPLETED );
 			$order->save();
 		}
