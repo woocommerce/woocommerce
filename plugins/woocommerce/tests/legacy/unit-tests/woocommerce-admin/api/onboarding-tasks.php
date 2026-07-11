@@ -31,10 +31,18 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	protected $endpoint = '/wc-admin/onboarding/tasks';
 
 	/**
+	 * Attachment IDs created by the current test.
+	 *
+	 * @var int[]
+	 */
+	private $created_attachment_ids = array();
+
+	/**
 	 * Setup test data. Called before every test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_action( 'add_attachment', array( $this, 'track_created_attachment' ) );
 
 		$this->user = $this->factory->user->create(
 			array(
@@ -58,10 +66,25 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
+		remove_action( 'add_attachment', array( $this, 'track_created_attachment' ) );
+		foreach ( array_unique( $this->created_attachment_ids ) as $attachment_id ) {
+			wp_delete_attachment( $attachment_id, true );
+		}
+		$this->created_attachment_ids = array();
+
 		parent::tearDown();
 		$this->cleanup_test_product_attributes();
 		TaskLists::clear_lists();
 		TaskLists::init_default_lists();
+	}
+
+	/**
+	 * Track an attachment created by the current test.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 */
+	public function track_created_attachment( $attachment_id ): void {
+		$this->created_attachment_ids[] = (int) $attachment_id;
 	}
 
 	/**

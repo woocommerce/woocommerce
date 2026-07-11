@@ -24,10 +24,18 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	protected $csv_file = '';
 
 	/**
+	 * Attachment IDs created by the current test.
+	 *
+	 * @var int[]
+	 */
+	private $created_attachment_ids = array();
+
+	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_action( 'add_attachment', array( $this, 'track_created_attachment' ) );
 
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/import/class-wc-product-csv-importer.php';
@@ -43,6 +51,28 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
 		$this->csv_file       = dirname( __FILE__ ) . '/sample.csv';
+	}
+
+	/**
+	 * Remove physical files for attachments created by the current test.
+	 */
+	public function tearDown(): void {
+		remove_action( 'add_attachment', array( $this, 'track_created_attachment' ) );
+		foreach ( array_unique( $this->created_attachment_ids ) as $attachment_id ) {
+			wp_delete_attachment( $attachment_id, true );
+		}
+		$this->created_attachment_ids = array();
+
+		parent::tearDown();
+	}
+
+	/**
+	 * Track an attachment created by the current test.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 */
+	public function track_created_attachment( $attachment_id ): void {
+		$this->created_attachment_ids[] = (int) $attachment_id;
 	}
 
 	/**
