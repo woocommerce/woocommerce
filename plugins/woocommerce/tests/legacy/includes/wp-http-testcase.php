@@ -55,6 +55,13 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 	protected $http_responder;
 
 	/**
+	 * Whether a mocked sample image is waiting to be moved into uploads.
+	 *
+	 * @var bool
+	 */
+	private $sample_image_download_pending = false;
+
+	/**
 	 * Whether the class has been initialized.
 	 *
 	 * @since 1.3.0
@@ -195,8 +202,10 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 		parent::tearDown();
 
 		remove_filter( 'pre_http_request', array( $this, 'http_request_listner' ) );
+		remove_filter( 'wp_handle_sideload_overrides', array( $this, 'set_sample_image_unique_filename_callback' ) );
 
-		$this->skip_cache_next = false;
+		$this->skip_cache_next               = false;
+		$this->sample_image_download_pending = false;
 	}
 
 	//
@@ -256,12 +265,35 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 
 		if ( ! empty( $request['filename'] ) ) {
 			WC_Unit_Test_Case::file_copy( $fixture_path, $request['filename'] );
+			$this->sample_image_download_pending = true;
+			add_filter( 'wp_handle_sideload_overrides', array( $this, 'set_sample_image_unique_filename_callback' ), 10, 2 );
 			$response['filename'] = $request['filename'];
 			return $response;
 		}
 
 		$response['body'] = file_get_contents( $fixture_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a local test fixture.
 		return $response;
+	}
+
+	/**
+	 * Use a unique filename for the pending sample image download.
+	 *
+	 * @param array $overrides Sideload overrides.
+	 * @param array $file      Sideloaded file data.
+	 * @return array
+	 */
+	public function set_sample_image_unique_filename_callback( $overrides, $file ) {
+		if ( ! $this->sample_image_download_pending || self::SAMPLE_IMAGE_FILE !== $file['name'] ) {
+			return $overrides;
+		}
+
+		$this->sample_image_download_pending = false;
+		remove_filter( 'wp_handle_sideload_overrides', array( $this, 'set_sample_image_unique_filename_callback' ) );
+		$overrides['unique_filename_callback'] = static function ( $_dir, $name, $ext ) {
+			return $name . '-' . wp_generate_uuid4() . $ext;
+		};
+
+		return $overrides;
 	}
 
 	/**
