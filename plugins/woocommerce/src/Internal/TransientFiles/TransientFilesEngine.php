@@ -311,8 +311,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	 * @return bool True if the expired files cleanup action is currently scheduled, false otherwise.
 	 */
 	public function expired_files_cleanup_is_scheduled(): bool {
-		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
-		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
+		// Prefer as_has_scheduled_action() (Action Scheduler 3.3.0+); fall back if an older bundled copy is loaded.
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
 
 		return (bool) call_user_func( $has_scheduled_action, self::CLEANUP_ACTION_NAME, array(), self::CLEANUP_ACTION_GROUP );
