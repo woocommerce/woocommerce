@@ -20,6 +20,31 @@ use Automattic\WooCommerce\Caches\OrderCountCache;
 class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 	/**
+	 * Product shared by helper orders within the current test method.
+	 *
+	 * @var WC_Product|null
+	 */
+	private $order_product;
+
+	/**
+	 * Create a complete helper order with a method-owned product.
+	 *
+	 * @param int             $customer_id Customer ID.
+	 * @param WC_Product|null $product     Optional purpose-built product.
+	 * @return WC_Order
+	 */
+	private function create_order( $customer_id = 1, $product = null ) {
+		if ( ! $product instanceof WC_Product ) {
+			if ( ! $this->order_product ) {
+				$this->order_product = WC_Helper_Product::create_simple_product();
+			}
+			$product = $this->order_product;
+		}
+
+		return WC_Helper_Order::create_order( $customer_id, $product );
+	}
+
+	/**
 	 * Test wc_get_order_statuses().
 	 *
 	 * @since 2.3.0
@@ -175,7 +200,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$original_post     = $post;
 		$original_theorder = $theorder;
 
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 
 		// Assert that $order is a WC_Order object.
 		$this->assertInstanceOf( 'WC_Order', $order );
@@ -226,7 +251,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$this->markTestSkipped( 'Test only works against Post Meta' );
 		}
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 		$this->assertEmpty( $order->get_payment_tokens() );
 
 		$token = WC_Helper_Payment_Token::create_cc_token();
@@ -242,7 +267,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6
 	 */
 	public function test_wc_order_add_payment_token() {
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 		$this->assertEmpty( $order->get_payment_tokens() );
 
 		$token = WC_Helper_Payment_Token::create_cc_token();
@@ -257,10 +282,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.0
 	 */
 	public function test_wc_get_orders_customer_params() {
-		$order1  = WC_Helper_Order::create_order( 0 );
-		$order2  = WC_Helper_Order::create_order( 0 );
-		$order3  = WC_Helper_Order::create_order( 1 );
-		$order4  = WC_Helper_Order::create_order( 1 );
+		$order1  = $this->create_order( 0 );
+		$order2  = $this->create_order( 0 );
+		$order3  = $this->create_order( 1 );
+		$order4  = $this->create_order( 1 );
 		$order_1 = $order1->get_id();
 		$order_2 = $order2->get_id();
 		$order_3 = $order3->get_id();
@@ -306,15 +331,15 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.0
 	 */
 	public function test_wc_get_orders_date_params() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_date_created( '2015-01-01 05:20:30' );
 		$order1->save();
 		$order_1 = $order1->get_id();
-		$order2  = WC_Helper_Order::create_order();
+		$order2  = $this->create_order();
 		$order2->set_date_created( '2017-01-01' );
 		$order2->save();
 		$order_2 = $order2->get_id();
-		$order3  = WC_Helper_Order::create_order();
+		$order3  = $this->create_order();
 		$order3->set_date_created( '2017-01-01' );
 		$order3->save();
 		$order_3 = $order3->get_id();
@@ -393,10 +418,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_status_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_status( OrderStatus::PENDING );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_status( OrderStatus::COMPLETED );
 		$order2->save();
 
@@ -425,7 +450,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_type_param() {
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 		$order->save();
 		$refund = new WC_Order_Refund();
 		$refund->save();
@@ -455,7 +480,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_version_param() {
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 		$order->save();
 
 		$orders   = wc_get_orders(
@@ -483,10 +508,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_created_via_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_created_via( 'rest-api' );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_created_via( 'checkout' );
 		$order2->save();
 
@@ -515,13 +540,13 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_parent_param() {
-		$parent = WC_Helper_Order::create_order();
+		$parent = $this->create_order();
 		$parent->save();
 
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_parent_id( $parent->get_id() );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders   = wc_get_orders(
@@ -540,13 +565,13 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_parent_exclude_param() {
-		$parent = WC_Helper_Order::create_order();
+		$parent = $this->create_order();
 		$parent->save();
 
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_parent_id( $parent->get_id() );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders = wc_get_orders(
@@ -566,9 +591,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_exclude_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders   = wc_get_orders(
@@ -587,9 +612,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_limit_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders = wc_get_orders( array( 'limit' => 1 ) );
@@ -602,9 +627,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_paged_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders   = wc_get_orders(
@@ -638,9 +663,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_offset_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders   = wc_get_orders(
@@ -661,9 +686,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_paginate_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders = wc_get_orders( array( 'paginate' => true ) );
@@ -699,9 +724,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_order_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders   = wc_get_orders(
@@ -731,10 +756,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_currency_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_currency( 'BRL' );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_currency( 'USD' );
 		$order2->save();
 
@@ -763,10 +788,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_prices_include_tax_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_prices_include_tax( true );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_prices_include_tax( false );
 		$order2->save();
 
@@ -795,10 +820,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_payment_method_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_payment_method( WC_Gateway_Cheque::ID );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_payment_method( WC_Gateway_COD::ID );
 		$order2->save();
 
@@ -827,10 +852,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_get_order_payment_method_title_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_payment_method_title( 'Check payments' );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_payment_method_title( 'PayPal' );
 		$order2->save();
 
@@ -945,11 +970,11 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$customer2->set_billing_email( 'customer2@test.com' );
 		$customer2->save();
 
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_customer_id( $customer1->get_id() );
 		$order1->set_billing_email( $customer1->get_billing_email() );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_customer_id( $customer2->get_id() );
 		$order2->set_billing_email( $customer2->get_billing_email() );
 		$order2->save();
@@ -999,10 +1024,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$customer2->set_billing_email( 'customer2@test.com' );
 		$customer2->save();
 
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_customer_id( $customer1->get_id() );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_customer_id( $customer2->get_id() );
 		$order2->save();
 
@@ -1031,7 +1056,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_address_params() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_props(
 			array(
 				'billing_email'       => 'test1@test.com',
@@ -1059,7 +1084,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$order1->save();
 		$order1_id = $order1->get_id();
 
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_props(
 			array(
 				'billing_email'       => 'test2@test.com',
@@ -1295,7 +1320,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$date_range = $start . '...' . $end;
 
 		// Populate orders.
-		$us_now = WC_Helper_Order::create_order();
+		$us_now = $this->create_order();
 		$us_now->set_props(
 			array(
 				'shipping_country' => 'US',
@@ -1303,7 +1328,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		);
 		$us_now->save();
 
-		$us_old = WC_Helper_Order::create_order();
+		$us_old = $this->create_order();
 		$us_old->set_props(
 			array(
 				'date_created'     => $yesterday,
@@ -1312,7 +1337,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		);
 		$us_old->save();
 
-		$mx_now = WC_Helper_Order::create_order();
+		$mx_now = $this->create_order();
 		$mx_now->set_props(
 			array(
 				'shipping_country' => 'MX',
@@ -1320,7 +1345,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		);
 		$mx_now->save();
 
-		$mx_old = WC_Helper_Order::create_order();
+		$mx_old = $this->create_order();
 		$mx_old->set_props(
 			array(
 				'date_created'     => $yesterday,
@@ -1425,7 +1450,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @link https://github.com/woocommerce/woocommerce/issues/28969
 	 */
 	public function test_wc_create_refund_28969() {
-		$order = WC_Helper_Order::create_order(
+		$order = $this->create_order(
 			1,
 			WC_Helper_Product::create_simple_product(),
 			array(
@@ -1466,7 +1491,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_order_note() {
 		$note_content = 'Note content';
-		$order        = WC_Helper_Order::create_order();
+		$order        = $this->create_order();
 		$note_id      = (int) $order->add_order_note( $note_content );
 		$expected     = array(
 			'id'            => $note_id,
@@ -1487,7 +1512,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_wc_get_order_notes() {
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 		$order->add_order_note( 'Customer note', 1 );
 		$order->add_order_note( 'Internal note' );
 		$order->add_order_note( 'Another internal note' );
@@ -1518,7 +1543,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_wc_create_order_note() {
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 
 		$note_id = wc_create_order_note( $order->get_id(), 'Note content', false, false );
 		$this->assertTrue( 0 < $note_id );
@@ -1530,7 +1555,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_wc_delete_order_note() {
-		$order   = WC_Helper_Order::create_order();
+		$order   = $this->create_order();
 		$note_id = $order->add_order_note( 'Note content' );
 
 		$this->assertTrue( wc_delete_order_note( $note_id ) );
@@ -1542,7 +1567,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_order_search() {
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 
 		// Should find order searching by billing address name.
 		$this->assertEquals( array( $order->get_id() ), wc_order_search( 'Jeroen' ) );
