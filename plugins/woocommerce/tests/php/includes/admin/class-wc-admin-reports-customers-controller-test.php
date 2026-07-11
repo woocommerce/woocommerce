@@ -72,7 +72,12 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
 		self::$product = new WC_Product_Simple();
 		self::$product->set_name( 'Test Product' );
 		self::$product->set_regular_price( 25 );
-		self::$product->save();
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			self::$product->save();
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
 
 		// Create registered customers with different names for search testing.
 		$customer1 = WC_Helper_Customer::create_customer( 'customer1', 'password', 'customer1@example.com' );
@@ -141,6 +146,12 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
 	 */
 	public static function wpTearDownAfterClass() {
 		WC_Helper_Reports::reset_stats_dbs();
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			self::$product->delete( true );
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
 		self::$product              = null;
 		self::$registered_customers = array();
 		self::$guest_orders         = array();
