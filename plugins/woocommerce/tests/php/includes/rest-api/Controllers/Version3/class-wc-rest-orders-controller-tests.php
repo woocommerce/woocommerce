@@ -1028,7 +1028,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox Updating an order with incomplete meta_data entries does not cause errors.
 	 */
 	public function test_update_meta_data_with_incomplete_entries(): void {
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+		$order = wc_create_order();
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_header( 'content-type', 'application/json' );
