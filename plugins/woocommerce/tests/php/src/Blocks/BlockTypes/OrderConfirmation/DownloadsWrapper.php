@@ -21,23 +21,23 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 	 * Set up test fixtures.
 	 */
 	public function set_up() {
+		global $wpdb;
+
 		parent::set_up();
 		add_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', array( self::class, 'enable_direct_attribute_lookup_updates' ) );
-	}
-
-	/**
-	 * Perform products/options/cache cleanup.
-	 */
-	public function tear_down() {
-		global $wpdb;
 
 		/** @var \WC_Product[] $products */
 		$products = ( new \WC_Product_Query() )->get_products();
 		foreach ( $products as $product ) {
 			$product->delete();
 		}
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->wc_product_meta_lookup}" );
+		$wpdb->query( "DELETE FROM {$wpdb->wc_product_meta_lookup}" );
+	}
 
+	/**
+	 * Perform products/options/cache cleanup.
+	 */
+	public function tear_down() {
 		delete_option( 'woocommerce_product_lookup_table_is_generating' );
 		wp_cache_delete( 'woocommerce_has_downloadable_products', 'woocommerce' );
 		remove_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', array( self::class, 'enable_direct_attribute_lookup_updates' ) );
