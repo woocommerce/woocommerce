@@ -734,11 +734,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_created_via_param_is_filters_order_when_cot_is_enabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
-		$order_admin = WC_Helper_Order::create_order();
+		$order_admin = wc_create_order();
 		$order_admin->set_created_via( 'admin' );
 		$order_admin->save();
 
@@ -760,7 +760,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_get_orders_by_invalid_created_via_when_cot_is_enabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
@@ -780,11 +780,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_created_via_param_is_filters_order_when_cot_is_disabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
-		$order_admin = WC_Helper_Order::create_order();
+		$order_admin = wc_create_order();
 		$order_admin->set_created_via( 'admin' );
 		$order_admin->save();
 
@@ -806,7 +806,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_get_orders_by_invalid_created_via_when_cot_is_disabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
