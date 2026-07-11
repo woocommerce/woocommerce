@@ -562,6 +562,14 @@ class WC_Brands {
 			return '';
 		}
 
+		$args['width']  = $this->normalize_product_brand_shortcode_dimension( $args['width'] );
+		$args['height'] = $this->normalize_product_brand_shortcode_dimension( $args['height'] );
+
+		if ( '' !== $args['width'] || '' !== $args['height'] ) {
+			$args['width']  = '' !== $args['width'] ? $args['width'] : 'auto';
+			$args['height'] = '' !== $args['height'] ? $args['height'] : 'auto';
+		}
+
 		ob_start();
 
 		foreach ( $brands as $brand ) {
@@ -572,16 +580,6 @@ class WC_Brands {
 
 			$args['thumbnail'] = $thumbnail;
 			$args['term']      = get_term_by( 'id', $brand, 'product_brand' );
-
-			$args['width']  = $this->normalize_product_brand_shortcode_dimension( $args['width'] );
-			$args['height'] = $this->normalize_product_brand_shortcode_dimension( $args['height'] );
-			$args['style']  = '';
-
-			if ( '' !== $args['width'] || '' !== $args['height'] ) {
-				$args['width']  = '' !== $args['width'] ? $args['width'] : 'auto';
-				$args['height'] = '' !== $args['height'] ? $args['height'] : 'auto';
-				$args['style']  = sprintf( 'width: %s; height: %s;', $args['width'], $args['height'] );
-			}
 
 			wc_get_template(
 				'shortcodes/single-brand.php',
