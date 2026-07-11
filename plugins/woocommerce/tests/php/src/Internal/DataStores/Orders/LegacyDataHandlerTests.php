@@ -133,7 +133,9 @@ class LegacyDataHandlerTests extends \WC_Unit_Test_Case {
 		$this->enable_cot_sync();
 		$order_ids = array();
 		for ( $i = 0; $i < 10; $i++ ) {
-			$order_id    = OrderHelper::create_order()->get_id();
+			$order = new \WC_Order();
+			$order->save();
+			$order_id    = $order->get_id();
 			$order_ids[] = $order_id;
 		}
 		$this->disable_cot_sync();
