@@ -57,6 +57,112 @@ class CartCoupons extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Sequential percentage coupons should be projected in application order with exact discount totals.
+	 */
+	public function test_get_items_projects_sequential_percentage_coupons_in_application_order(): void {
+		$option_not_set              = 'option-not-set-' . wp_generate_uuid4();
+		$original_sequential_setting = get_option( 'woocommerce_calc_discounts_sequentially', $option_not_set );
+		$original_tax_setting        = get_option( 'woocommerce_calc_taxes', $option_not_set );
+		$product                     = null;
+		$high_coupon                 = null;
+		$low_coupon                  = null;
+
+		try {
+			update_option( 'woocommerce_calc_discounts_sequentially', 'yes' );
+			update_option( 'woocommerce_calc_taxes', 'no' );
+			wc_empty_cart();
+
+			$fixtures    = new FixtureData();
+			$product     = $fixtures->get_simple_product(
+				array(
+					'name'          => 'Product ' . wp_generate_uuid4(),
+					'regular_price' => '1.06',
+					'tax_status'    => 'none',
+				)
+			);
+			$high_coupon = $fixtures->get_coupon(
+				array(
+					'code'          => 'sequential-high-' . wp_generate_uuid4(),
+					'discount_type' => 'percent',
+					'amount'        => '20',
+				)
+			);
+			$low_coupon  = $fixtures->get_coupon(
+				array(
+					'code'          => 'sequential-low-' . wp_generate_uuid4(),
+					'discount_type' => 'percent',
+					'amount'        => '10',
+				)
+			);
+			$high_code   = $high_coupon->get_code();
+			$low_code    = $low_coupon->get_code();
+
+			$this->assertNotFalse( wc()->cart->add_to_cart( $product->get_id(), 1 ), 'The Store API product fixture should be added to the cart.' );
+			$this->assertTrue( wc()->cart->apply_coupon( $high_code ), 'The Store API 20% coupon fixture should be applied first.' );
+			$this->assertTrue( wc()->cart->apply_coupon( $low_code ), 'The Store API 10% coupon fixture should be applied second.' );
+			wc()->cart->calculate_totals();
+
+			$response = $this->getApiResponse( '/wc/store/v1/cart/coupons' );
+			$this->assertSame( 200, $response->get_status(), 'The cart coupons endpoint should return HTTP 200.' );
+
+			$projection = array_map(
+				static function ( $coupon ) {
+					return array(
+						'code'   => $coupon['code'],
+						'totals' => array(
+							'total_discount'     => $coupon['totals']->total_discount,
+							'total_discount_tax' => $coupon['totals']->total_discount_tax,
+						),
+					);
+				},
+				$response->get_data()
+			);
+
+			$this->assertSame(
+				array(
+					array(
+						'code'   => $high_code,
+						'totals' => array(
+							'total_discount'     => '21',
+							'total_discount_tax' => '0',
+						),
+					),
+					array(
+						'code'   => $low_code,
+						'totals' => array(
+							'total_discount'     => '8',
+							'total_discount_tax' => '0',
+						),
+					),
+				),
+				$projection,
+				'The Store API response should preserve high-then-low application order and expose exact schema totals.'
+			);
+		} finally {
+			wc_empty_cart();
+			if ( $product ) {
+				$product->delete( true );
+			}
+			if ( $high_coupon ) {
+				$high_coupon->delete( true );
+			}
+			if ( $low_coupon ) {
+				$low_coupon->delete( true );
+			}
+			if ( $option_not_set === $original_sequential_setting ) {
+				delete_option( 'woocommerce_calc_discounts_sequentially' );
+			} else {
+				update_option( 'woocommerce_calc_discounts_sequentially', $original_sequential_setting );
+			}
+			if ( $option_not_set === $original_tax_setting ) {
+				delete_option( 'woocommerce_calc_taxes' );
+			} else {
+				update_option( 'woocommerce_calc_taxes', $original_tax_setting );
+			}
+		}
+	}
+
+	/**
 	 * Test getting cart item by key.
 	 */
 	public function test_get_item() {

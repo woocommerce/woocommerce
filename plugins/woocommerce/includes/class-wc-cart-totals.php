@@ -69,6 +69,13 @@ final class WC_Cart_Totals {
 	protected $coupons = array();
 
 	/**
+	 * Coupon application positions keyed by coupon object ID.
+	 *
+	 * @var array<int, int>
+	 */
+	private $coupon_application_positions = array();
+
+	/**
 	 * Item/coupon discount totals.
 	 *
 	 * @since 3.2.0
@@ -360,9 +367,16 @@ final class WC_Cart_Totals {
 	 * @since  3.2.0
 	 */
 	protected function get_coupons_from_cart() {
-		$this->coupons = $this->cart->get_coupons();
+		$this->coupons                      = $this->cart->get_coupons();
+		$this->coupon_application_positions = array();
+		$sequential_discounts               = 'yes' === get_option( 'woocommerce_calc_discounts_sequentially' );
+		$position                           = 0;
 
 		foreach ( $this->coupons as $coupon ) {
+			if ( $sequential_discounts ) {
+				$this->coupon_application_positions[ spl_object_id( $coupon ) ] = $position++;
+			}
+
 			switch ( $coupon->get_discount_type() ) {
 				case 'fixed_product':
 					$coupon->sort = 1;
@@ -391,6 +405,7 @@ final class WC_Cart_Totals {
 	 * In order of priority;
 	 *  - sort param
 	 *  - usage restriction
+	 *  - application position for sequential discounts
 	 *  - coupon value
 	 *  - ID
 	 *
@@ -401,6 +416,13 @@ final class WC_Cart_Totals {
 	protected function sort_coupons_callback( $a, $b ) {
 		if ( $a->sort === $b->sort ) {
 			if ( $a->get_limit_usage_to_x_items() === $b->get_limit_usage_to_x_items() ) {
+				$a_position = $this->coupon_application_positions[ spl_object_id( $a ) ] ?? null;
+				$b_position = $this->coupon_application_positions[ spl_object_id( $b ) ] ?? null;
+
+				if ( null !== $a_position && null !== $b_position && $a_position !== $b_position ) {
+					return ( $a_position < $b_position ) ? -1 : 1;
+				}
+
 				if ( $a->get_amount() === $b->get_amount() ) {
 					return $b->get_id() - $a->get_id();
 				}
