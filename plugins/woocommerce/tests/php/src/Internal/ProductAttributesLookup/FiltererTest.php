@@ -68,6 +68,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		foreach ( $attribute_ids_by_name as $attribute_name => $attribute_id ) {
 			$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
 			$taxonomy_name  = wc_attribute_taxonomy_name( $attribute_name );
+			delete_transient( 'wc_layered_nav_counts_' . $taxonomy_name );
+			delete_transient( 'wc_layered_nav_count_generation_' . $taxonomy_name );
 			unregister_taxonomy( $taxonomy_name );
 
 			wc_delete_attribute( $attribute_id );
@@ -98,6 +100,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		}
 
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_attributes_lookup" );
+		\WC_Cache_Helper::delete_transients_on_shutdown();
 
 		\WC_Query::reset_chosen_attributes();
 	}
@@ -141,6 +144,59 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$cached_counts,
 			Filterer::limit_layered_nav_count_cache_entries( $cached_counts, 'third' )
 		);
+	}
+
+	/**
+	 * @testdox Layered nav count results computed during invalidation are not published to the replacement transient.
+	 */
+	public function test_layered_nav_counts_do_not_cache_results_when_invalidated_during_computation(): void {
+		$this->set_use_lookup_table( true );
+		$this->create_product_attribute( 'Race color', array( 'Red' ) );
+		$this->create_simple_product( array( 'Race color' => array( 'Red' ) ), true );
+
+		$taxonomy        = wc_attribute_taxonomy_name( 'Race color' );
+		$transient_key   = 'wc_layered_nav_counts_' . $taxonomy;
+		$red_term        = get_term_by( 'name', 'Red', $taxonomy );
+		$query_count     = 0;
+		$invalidated     = false;
+		$invalidate_fill = function ( $query ) use ( $taxonomy, &$query_count, &$invalidated ) {
+			if ( ! str_contains( $query, 'SELECT COUNT(DISTINCT product_or_parent_id)' ) || ! str_contains( $query, $taxonomy ) ) {
+				return $query;
+			}
+
+			++$query_count;
+			if ( ! $invalidated ) {
+				$invalidated = true;
+				\WC_Cache_Helper::invalidate_attribute_count( array( $taxonomy ) );
+				\WC_Cache_Helper::delete_transients_on_shutdown();
+			}
+
+			return $query;
+		};
+
+		$this->assertInstanceOf( \WP_Term::class, $red_term );
+
+		set_transient(
+			$transient_key,
+			array( 'unrelated-query-hash' => array( $red_term->term_id => 999 ) ),
+			DAY_IN_SECONDS
+		);
+		add_filter( 'query', $invalidate_fill );
+
+		try {
+			$first_counts           = $this->get_counters( 'Race color' );
+			$cache_after_first_fill = get_transient( $transient_key );
+			$second_counts          = $this->get_counters( 'Race color' );
+		} finally {
+			remove_filter( 'query', $invalidate_fill );
+			delete_transient( $transient_key );
+		}
+
+		$expected_counts = array( $red_term->term_id => 1 );
+		$this->assertSame( $expected_counts, $first_counts );
+		$this->assertSame( $expected_counts, $second_counts );
+		$this->assertSame( 2, $query_count, 'The identical second call should recompute after the first in-flight result is discarded.' );
+		$this->assertFalse( $cache_after_first_fill, 'The invalidated transient must not be recreated from the in-flight query.' );
 	}
 
 	/**
@@ -499,14 +555,13 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Assert that the filter by attribute widget lists a given set of terms for an attribute
-	 * (with a count of 1 each)
+	 * Get the filter by attribute widget's term counts for an attribute.
 	 *
 	 * @param string $attribute_name The attribute name the terms belong to.
-	 * @param array  $expected_terms The labelss of the terms that are expected to be listed.
 	 * @param string $filter_type The filter type in use, "and" or "or".
+	 * @return array The term counts keyed by term ID.
 	 */
-	private function assert_counters( $attribute_name, $expected_terms, $filter_type = 'and' ) {
+	private function get_counters( $attribute_name, $filter_type = 'and' ) {
 		$widget = new class() extends \WC_Widget_Layered_Nav {
 			// phpcs:disable Generic.CodeAnalysis.UselessOverridingMethod, Squiz.Commenting.FunctionComment
 			public function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
@@ -515,16 +570,300 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			// phpcs:enable Generic.CodeAnalysis.UselessOverridingMethod, Squiz.Commenting.FunctionComment
 		};
 
-		$taxonomy         = wc_attribute_taxonomy_name( $attribute_name );
-		$term_ids_by_name = wp_list_pluck( get_terms( $taxonomy, array( 'hide_empty' => '1' ) ), 'term_id', 'name' );
+		$taxonomy = wc_attribute_taxonomy_name( $attribute_name );
+		$terms    = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => true,
+			)
+		);
+
+		return $widget->get_filtered_term_product_counts( wp_list_pluck( $terms, 'term_id', 'name' ), $taxonomy, $filter_type );
+	}
+
+	/**
+	 * Assert that the filter by attribute widget lists a given set of terms for an attribute
+	 * (with a count of 1 each)
+	 *
+	 * @param string $attribute_name The attribute name the terms belong to.
+	 * @param array  $expected_terms The labelss of the terms that are expected to be listed.
+	 * @param string $filter_type The filter type in use, "and" or "or".
+	 */
+	private function assert_counters( $attribute_name, $expected_terms, $filter_type = 'and' ) {
+		$taxonomy = wc_attribute_taxonomy_name( $attribute_name );
+		$terms    = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => true,
+			)
+		);
+
+		$term_ids_by_name = wp_list_pluck( $terms, 'term_id', 'name' );
 
 		$expected = array();
 		foreach ( $expected_terms as $term ) {
 			$expected[ $term_ids_by_name[ $term ] ] = 1;
 		}
 
-		$term_counts = $widget->get_filtered_term_product_counts( $term_ids_by_name, $taxonomy, $filter_type );
+		$term_counts = $this->get_counters( $attribute_name, $filter_type );
 		$this->assertEqualsCanonicalizing( $expected, $term_counts );
+	}
+
+	/**
+	 * Create variable products with private and published variations that share the same attribute term.
+	 *
+	 * @return array The private and published product data.
+	 */
+	private function create_variable_products_with_private_and_published_matching_variations() {
+		$this->create_product_attribute( 'Color', array( 'Red' ) );
+
+		$private_variation_product = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Red' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Red',
+						),
+					),
+				),
+			)
+		);
+
+		$published_variation_product = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Red' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Red',
+						),
+					),
+				),
+			)
+		);
+
+		wp_update_post(
+			array(
+				'ID'          => $private_variation_product['variation_ids'][0],
+				'post_status' => 'private',
+			)
+		);
+
+		return array(
+			'private'   => $private_variation_product,
+			'published' => $published_variation_product,
+		);
+	}
+
+	/**
+	 * Assert that a private variation's lookup rows are retained.
+	 *
+	 * @param int   $variation_id The variation ID.
+	 * @param array $expected_terms The expected term names.
+	 */
+	private function assert_private_variation_lookup_rows_are_retained( $variation_id, $expected_terms = array( 'Red' ) ) {
+		global $wpdb;
+
+		$taxonomy = wc_attribute_taxonomy_name( 'Color' );
+
+		$this->assertSame( 'private', get_post_status( $variation_id ) );
+		$this->assertSame(
+			$expected_terms,
+			$wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT terms.name FROM {$wpdb->prefix}wc_product_attributes_lookup lookup_table INNER JOIN {$wpdb->terms} terms ON terms.term_id = lookup_table.term_id WHERE lookup_table.product_id = %d AND lookup_table.taxonomy = %s AND lookup_table.is_variation_attribute = 1 ORDER BY terms.name",
+					$variation_id,
+					$taxonomy
+				)
+			),
+			'The retained private variation lookup rows are required to reproduce the stale lookup data scenario.'
+		);
+	}
+
+	/**
+	 * @testdox Lookup filtering excludes private matching variations while retaining published matching products.
+	 */
+	public function test_lookup_filtering_excludes_private_matching_variations() {
+		$this->set_use_lookup_table( true );
+		$products = $this->create_variable_products_with_private_and_published_matching_variations();
+
+		$this->assert_private_variation_lookup_rows_are_retained( $products['private']['variation_ids'][0] );
+
+		$filtered_product_ids = $this->do_product_request( array( 'Color' => array( 'Red' ) ) );
+
+		$this->assertSame(
+			array( $products['published']['id'] ),
+			$filtered_product_ids,
+			'A private matching variation must not make its published parent match the storefront attribute filter.'
+		);
+	}
+
+	/**
+	 * @testdox Lookup-backed layered nav counts exclude private matching variations while retaining published matches.
+	 */
+	public function test_lookup_layered_nav_counts_exclude_private_matching_variations() {
+		$this->set_use_lookup_table( true );
+		$products = $this->create_variable_products_with_private_and_published_matching_variations();
+
+		$this->assert_private_variation_lookup_rows_are_retained( $products['private']['variation_ids'][0] );
+
+		$this->do_product_request( array() );
+		$this->assert_counters( 'Color', array( 'Red' ) );
+	}
+
+	/**
+	 * @testdox A variation publish-status transition invalidates cached lookup-backed layered nav counts.
+	 */
+	public function test_variation_publish_status_transition_invalidates_cached_lookup_layered_nav_counts() {
+		$this->set_use_lookup_table( true );
+		$this->create_product_attribute( 'Color', array( 'Red' ) );
+
+		$products = array();
+		foreach ( range( 1, 2 ) as $unused ) {
+			$products[] = $this->create_variable_product(
+				array(
+					'variation_attributes'     => array(
+						'Color' => array( 'Red' ),
+					),
+					'non_variation_attributes' => array(),
+					'variations'               => array(
+						array(
+							'in_stock'            => true,
+							'defining_attributes' => array(
+								'Color' => 'Red',
+							),
+						),
+					),
+				)
+			);
+		}
+
+		$taxonomy      = wc_attribute_taxonomy_name( 'Color' );
+		$transient_key = 'wc_layered_nav_counts_' . $taxonomy;
+		$red_term      = get_term_by( 'name', 'Red', $taxonomy );
+
+		\WC_Cache_Helper::delete_transients_on_shutdown();
+		delete_transient( $transient_key );
+		$this->do_product_request( array() );
+
+		$this->assertSame( array( $red_term->term_id => 2 ), $this->get_counters( 'Color' ) );
+
+		$cached_counts = get_transient( $transient_key );
+		$this->assertIsArray( $cached_counts, 'The first count query should create the layered-nav count transient.' );
+		$this->assertContains(
+			array( $red_term->term_id => 2 ),
+			$cached_counts,
+			'The first result must be stored in the layered-nav cache before the status transition.'
+		);
+
+		wp_update_post(
+			array(
+				'ID'          => $products[0]['variation_ids'][0],
+				'post_status' => 'private',
+			)
+		);
+		$this->assert_private_variation_lookup_rows_are_retained( $products[0]['variation_ids'][0] );
+		\WC_Cache_Helper::delete_transients_on_shutdown();
+
+		$this->assertSame(
+			array( $red_term->term_id => 1 ),
+			$this->get_counters( 'Color' ),
+			'The count should be recalculated after a matching variation leaves publish status.'
+		);
+	}
+
+	/**
+	 * @testdox A private Any variation invalidates cross-taxonomy counts for a multi-term AND filter.
+	 */
+	public function test_multi_term_and_filtering_excludes_private_any_variations() {
+		$this->set_use_lookup_table( true );
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
+		$this->create_product_attribute( 'Features', array( 'Washable' ) );
+
+		$products = array();
+		foreach ( range( 1, 2 ) as $unused ) {
+			$products[] = $this->create_variable_product(
+				array(
+					'variation_attributes'     => array(
+						'Color' => array( 'Blue', 'Red' ),
+					),
+					'non_variation_attributes' => array(
+						'Features' => array( 'Washable' ),
+					),
+					'variations'               => array(
+						array(
+							'in_stock'            => true,
+							'defining_attributes' => array(
+								'Color' => null,
+							),
+						),
+					),
+				)
+			);
+		}
+
+		$features_taxonomy  = wc_attribute_taxonomy_name( 'Features' );
+		$features_transient = 'wc_layered_nav_counts_' . $features_taxonomy;
+		$washable_term      = get_term_by( 'name', 'Washable', $features_taxonomy );
+
+		\WC_Cache_Helper::delete_transients_on_shutdown();
+		delete_transient( $features_transient );
+
+		$filtered_product_ids = $this->do_product_request(
+			array( 'Color' => array( 'Blue', 'Red' ) ),
+			array( 'Color' => 'and' )
+		);
+		$this->assertSame(
+			array( $products[0]['id'], $products[1]['id'] ),
+			$filtered_product_ids,
+			'Both parents should satisfy the multi-term AND filter while both Any variations are published.'
+		);
+		$this->assertSame( array( $washable_term->term_id => 2 ), $this->get_counters( 'Features' ) );
+
+		$cached_counts = get_transient( $features_transient );
+		$this->assertIsArray( $cached_counts, 'The initial Features count should create its layered-nav transient.' );
+		$this->assertContains(
+			array( $washable_term->term_id => 2 ),
+			$cached_counts,
+			'The Features transient must contain the two-parent result before the Color variation status changes.'
+		);
+
+		wp_update_post(
+			array(
+				'ID'          => $products[0]['variation_ids'][0],
+				'post_status' => 'private',
+			)
+		);
+		$this->assert_private_variation_lookup_rows_are_retained(
+			$products[0]['variation_ids'][0],
+			array( 'Blue', 'Red' )
+		);
+		\WC_Cache_Helper::delete_transients_on_shutdown();
+
+		$filtered_product_ids = $this->do_product_request(
+			array( 'Color' => array( 'Blue', 'Red' ) ),
+			array( 'Color' => 'and' )
+		);
+
+		$this->assertSame(
+			array( $products[1]['id'] ),
+			$filtered_product_ids,
+			'Only the parent backed by a published Any variation should satisfy the multi-term AND filter.'
+		);
+		$this->assertSame(
+			array( $washable_term->term_id => 1 ),
+			$this->get_counters( 'Features' ),
+			'The cross-taxonomy count should be recalculated after the Color Any variation leaves publish status.'
+		);
 	}
 
 	/**

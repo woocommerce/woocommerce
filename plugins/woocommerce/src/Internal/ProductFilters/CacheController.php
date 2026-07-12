@@ -52,6 +52,7 @@ class CacheController implements RegisterHooksInterface {
 
 		add_action( 'woocommerce_after_product_object_save', array( $this, 'invalidate_filter_data_cache' ) );
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'invalidate_filter_data_cache' ) );
+		add_action( 'transition_post_status', array( $this, 'handle_transition_post_status' ), 10, 3 );
 
 		// Clear taxonomy hierarchy cache when terms change.
 		add_action( 'created_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
@@ -70,11 +71,37 @@ class CacheController implements RegisterHooksInterface {
 	 * Also resets the entry-count counter so the cap starts fresh.
 	 *
 	 * @since 10.8.0 Resets CACHE_ENTRY_COUNT_TRANSIENT on invalidation.
+	 * @since 11.1.0 Fences object-cache prefix rotation with distinct transient generations.
 	 */
 	public function invalidate_filter_data_cache(): void {
-		WC_Cache_Helper::get_transient_version( self::CACHE_GROUP, true );
+		set_transient( self::CACHE_GROUP . '-transient-version', time() . '-' . wp_generate_uuid4() );
 		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
+		set_transient( self::CACHE_GROUP . '-transient-version', time() . '-' . wp_generate_uuid4() );
 		delete_transient( self::CACHE_ENTRY_COUNT_TRANSIENT );
+	}
+
+	/**
+	 * Handle the transition_post_status hook.
+	 *
+	 * @internal
+	 *
+	 * @param string $new_status New post status.
+	 * @param string $old_status Old post status.
+	 * @param mixed  $post       Post object.
+	 */
+	public function handle_transition_post_status( $new_status, $old_status, $post ): void {
+		if ( ! $post instanceof \WP_Post || ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+			return;
+		}
+
+		$was_published = 'publish' === $old_status;
+		$is_published  = 'publish' === $new_status;
+
+		if ( $was_published === $is_published ) {
+			return;
+		}
+
+		$this->invalidate_filter_data_cache();
 	}
 
 	/**

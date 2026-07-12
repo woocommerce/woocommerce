@@ -150,14 +150,37 @@ class WC_Cache_Helper {
 	 * Used to clear layered nav counts based on passed attribute names.
 	 *
 	 * @since 3.6.0
+	 * @since 11.1.0 Advances the persistent generation before queuing transient deletion.
 	 * @param array $attribute_keys Attribute keys.
 	 */
 	public static function invalidate_attribute_count( $attribute_keys ) {
 		if ( $attribute_keys ) {
 			foreach ( $attribute_keys as $attribute_key ) {
+				self::get_attribute_count_generation( $attribute_key, true );
 				self::queue_delete_transient( 'wc_layered_nav_counts_' . $attribute_key );
 			}
 		}
+	}
+
+	/**
+	 * Get the persistent cache generation for a layered navigation attribute count.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param string $attribute_key Attribute taxonomy key.
+	 * @param bool   $refresh       Whether to generate and persist a new generation.
+	 * @return string Persistent generation token.
+	 */
+	public static function get_attribute_count_generation( $attribute_key, $refresh = false ) {
+		$transient_name = 'wc_layered_nav_count_generation_' . sanitize_title( $attribute_key );
+		$generation     = get_transient( $transient_name );
+
+		if ( false === $generation || true === $refresh ) {
+			$generation = time() . '-' . wp_generate_uuid4();
+			set_transient( $transient_name, $generation, DAY_IN_SECONDS );
+		}
+
+		return $generation;
 	}
 
 	/**

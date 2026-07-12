@@ -31,11 +31,57 @@ class Filterer {
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @internal
+	 *
 	 * @param LookupDataStore $data_store The data store to use.
 	 */
 	final public function init( LookupDataStore $data_store ) {
 		$this->data_store        = $data_store;
 		$this->lookup_table_name = $data_store->get_lookup_table_name();
+
+		add_action( 'transition_post_status', array( $this, 'handle_transition_post_status' ), 10, 3 );
+	}
+
+	/**
+	 * Invalidate affected layered navigation counts when a product crosses the publish boundary.
+	 *
+	 * @internal
+	 *
+	 * @param string   $new_status New post status.
+	 * @param string   $old_status Old post status.
+	 * @param \WP_Post $post       Post object.
+	 *
+	 * @since 11.1.0
+	 */
+	public function handle_transition_post_status( $new_status, $old_status, $post ): void {
+		global $wpdb;
+
+		if ( ! $post instanceof \WP_Post || ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+			return;
+		}
+
+		$was_published = 'publish' === $old_status;
+		$is_published  = 'publish' === $new_status;
+
+		if ( $was_published === $is_published ) {
+			return;
+		}
+
+		$product_or_parent_id = 'product_variation' === $post->post_type ? (int) $post->post_parent : (int) $post->ID;
+
+		if ( 0 === $product_or_parent_id ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The lookup table is the source for the taxonomy-specific cache keys to invalidate.
+		$taxonomies = $wpdb->get_col(
+			$wpdb->prepare(
+				'SELECT DISTINCT taxonomy FROM %i WHERE product_or_parent_id = %d',
+				$this->lookup_table_name,
+				$product_or_parent_id
+			)
+		);
+
+		\WC_Cache_Helper::invalidate_attribute_count( $taxonomies );
 	}
 
 	/**
@@ -91,6 +137,7 @@ class Filterer {
 		} else {
 			$in_stock_clause = '';
 		}
+		$filterable_attribute_where_clause = $this->data_store->get_filterable_attribute_where_clause( 'lt' );
 
 		$attribute_ids_for_and_filtering = array();
 		$clauses                         = array();
@@ -113,6 +160,7 @@ class Filterer {
 							SELECT product_or_parent_id
 							FROM {$this->lookup_table_name} lt
 							WHERE term_id in {$term_ids_to_filter_by_list}
+							AND {$filterable_attribute_where_clause}
 							{$in_stock_clause}
 						)";
 				}
@@ -127,6 +175,7 @@ class Filterer {
 				SELECT product_or_parent_id
 				FROM {$this->lookup_table_name} lt
 				WHERE is_variation_attribute=0
+				AND {$filterable_attribute_where_clause}
 				{$in_stock_clause}
 				AND term_id in {$term_ids_to_filter_by_list}
 				GROUP BY product_id
@@ -135,6 +184,7 @@ class Filterer {
 				SELECT product_or_parent_id
 				FROM {$this->lookup_table_name} lt
 				WHERE is_variation_attribute=1
+				AND {$filterable_attribute_where_clause}
 				{$in_stock_clause}
 				AND term_id in {$term_ids_to_filter_by_list}
 				GROUP BY product_or_parent_id
@@ -196,21 +246,23 @@ class Filterer {
 		$query     = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
 		$query_sql = implode( ' ', $query );
 
-		// We have a query - let's see if cached results of this query already exist.
-		$query_hash = md5( $query_sql );
 		// Maybe store a transient of the count values.
 		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true );
 		if ( true === $cache ) {
-			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ) );
+			$cache_generation = \WC_Cache_Helper::get_attribute_count_generation( $taxonomy );
+			$query_hash       = md5( $query_sql . '|' . $cache_generation );
+			$cached_counts    = (array) get_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ) );
 		} else {
-			$cached_counts = array();
+			$cache_generation = null;
+			$query_hash       = md5( $query_sql );
+			$cached_counts    = array();
 		}
 		if ( ! isset( $cached_counts[ $query_hash ] ) ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$results                      = $wpdb->get_results( $query_sql, ARRAY_A );
 			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 			$cached_counts[ $query_hash ] = $counts;
-			if ( true === $cache ) {
+			if ( true === $cache && \WC_Cache_Helper::get_attribute_count_generation( $taxonomy ) === $cache_generation ) {
 				$cached_counts = self::limit_layered_nav_count_cache_entries( $cached_counts, $query_hash );
 				set_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ), $cached_counts, DAY_IN_SECONDS );
 			}
@@ -280,8 +332,10 @@ class Filterer {
 		 *
 		 * @since 9.5.0.
 		 */
-		$hide_out_of_stock = apply_filters( 'woocommerce_product_attributes_filterer_hide_out_of_stock', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
-		$in_stock_clause   = $hide_out_of_stock ? ' AND in_stock = 1' : '';
+		$hide_out_of_stock                           = apply_filters( 'woocommerce_product_attributes_filterer_hide_out_of_stock', 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
+		$in_stock_clause                             = $hide_out_of_stock ? ' AND in_stock = 1' : '';
+		$filterable_attribute_where_clause           = $this->data_store->get_filterable_attribute_where_clause( $this->lookup_table_name );
+		$filterable_attribute_where_clause_for_alias = $this->data_store->get_filterable_attribute_where_clause( 'lt' );
 
 		$query           = array();
 		$query['select'] = 'SELECT COUNT(DISTINCT product_or_parent_id) as term_count, term_id as term_count_id';
@@ -298,6 +352,7 @@ class Filterer {
 			{$tax_query_sql['where']} {$meta_query_sql['where']}
 			AND {$this->lookup_table_name}.taxonomy='{$encoded_taxonomy}'
 			AND {$this->lookup_table_name}.term_id IN $term_ids_sql
+			AND {$filterable_attribute_where_clause}
 			{$in_stock_clause}";
 
 		if ( ! empty( $term_ids ) ) {
@@ -326,6 +381,7 @@ class Filterer {
 							SELECT product_or_parent_id
 							FROM {$this->lookup_table_name} lt
 							WHERE is_variation_attribute=0
+							AND {$filterable_attribute_where_clause_for_alias}
 							{$in_stock_clause}
 							AND term_id in {$term_ids_list}
 							GROUP BY product_id
@@ -334,6 +390,7 @@ class Filterer {
 							SELECT product_or_parent_id
 							FROM {$this->lookup_table_name} lt
 							WHERE is_variation_attribute=1
+							AND {$filterable_attribute_where_clause_for_alias}
 							{$in_stock_clause}
 							AND term_id in {$term_ids_list}
 							GROUP BY product_or_parent_id

@@ -109,6 +109,37 @@ class LookupDataStore {
 	}
 
 	/**
+	 * Get the SQL condition for filterable attribute lookup rows.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
+	 * @param string $lookup_table_alias Lookup table alias.
+	 * @return string SQL condition.
+	 *
+	 * @since 11.1.0
+	 */
+	public function get_filterable_attribute_where_clause( string $lookup_table_alias ): string {
+		global $wpdb;
+
+		return $wpdb->prepare(
+			"(
+				%i.is_variation_attribute = 0
+				OR EXISTS (
+					SELECT 1
+					FROM {$wpdb->posts}
+					WHERE {$wpdb->posts}.ID = %i.product_id
+						AND {$wpdb->posts}.post_type = %s
+						AND {$wpdb->posts}.post_status = %s
+				)
+			)",
+			$lookup_table_alias,
+			$lookup_table_alias,
+			'product_variation',
+			'publish'
+		);
+	}
+
+	/**
 	 * Check if the last lookup data creation operation failed.
 	 *
 	 * @return bool True if the last lookup data creation operation failed.

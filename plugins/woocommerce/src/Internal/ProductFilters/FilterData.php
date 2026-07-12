@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 use WC_Cache_Helper;
@@ -67,8 +68,9 @@ class FilterData {
 			return $pre_filter_counts;
 		}
 
-		$transient_key = $this->get_transient_key( $query_vars, 'price' );
-		$cached_data   = $this->get_cache( $transient_key );
+		$cache_generation = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
+		$transient_key    = $this->get_transient_key( $query_vars, 'price' );
+		$cached_data      = $this->get_cache( $transient_key, $cache_generation );
 
 		if ( ! empty( $cached_data ) ) {
 			return $cached_data;
@@ -110,7 +112,7 @@ class FilterData {
 		 */
 		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'price', $query_vars, array() );
 
-		$this->set_cache( $transient_key, $results );
+		$this->set_cache( $transient_key, $results, $cache_generation );
 
 		return $results;
 	}
@@ -132,8 +134,9 @@ class FilterData {
 			return $pre_filter_counts;
 		}
 
-		$transient_key = $this->get_transient_key( $query_vars, 'stock' );
-		$cached_data   = $this->get_cache( $transient_key );
+		$cache_generation = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
+		$transient_key    = $this->get_transient_key( $query_vars, 'stock' );
+		$cached_data      = $this->get_cache( $transient_key, $cache_generation );
 
 		if ( ! empty( $cached_data ) ) {
 			return $cached_data;
@@ -176,7 +179,7 @@ class FilterData {
 		 */
 		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'stock', $query_vars, array() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
-		$this->set_cache( $transient_key, $results );
+		$this->set_cache( $transient_key, $results, $cache_generation );
 
 		return $results;
 	}
@@ -197,8 +200,9 @@ class FilterData {
 			return $pre_filter_counts;
 		}
 
-		$transient_key = $this->get_transient_key( $query_vars, 'rating' );
-		$cached_data   = $this->get_cache( $transient_key );
+		$cache_generation = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
+		$transient_key    = $this->get_transient_key( $query_vars, 'rating' );
+		$cached_data      = $this->get_cache( $transient_key, $cache_generation );
 
 		if ( ! empty( $cached_data ) ) {
 			return $cached_data;
@@ -235,7 +239,7 @@ class FilterData {
 		 */
 		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'rating', $query_vars, array() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
-		$this->set_cache( $transient_key, $results );
+		$this->set_cache( $transient_key, $results, $cache_generation );
 
 		return $results;
 	}
@@ -257,8 +261,17 @@ class FilterData {
 			return $pre_filter_counts;
 		}
 
-		$transient_key = $this->get_transient_key( $query_vars, 'attribute', array( 'taxonomy' => $attribute_to_count ) );
-		$cached_data   = $this->get_cache( $transient_key );
+		$cache_generation        = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
+		$hide_out_of_stock_items = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
+		$transient_key           = $this->get_transient_key(
+			$query_vars,
+			'attribute',
+			array(
+				'taxonomy'                => $attribute_to_count,
+				'hide_out_of_stock_items' => $hide_out_of_stock_items,
+			)
+		);
+		$cached_data             = $this->get_cache( $transient_key, $cache_generation );
 
 		if ( ! empty( $cached_data ) ) {
 			return $cached_data;
@@ -270,17 +283,21 @@ class FilterData {
 		if ( $product_ids ) {
 			global $wpdb;
 
-			// Optimization note: We evaluated using wc_product_attributes_lookup but decided against it, as removing
-			// the posts table join in the query below produced better benchmarking results and required minimal changes.
-			$taxonomy_escaped    = esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) );
+			$lookup_data_store                      = wc_get_container()->get( LookupDataStore::class );
+			$lookup_table_name                      = $wpdb->prepare( '%i', $lookup_data_store->get_lookup_table_name() );
+			$taxonomy_escaped                       = $wpdb->prepare( '%s', wc_sanitize_taxonomy_name( $attribute_to_count ) );
+			$filterable_attribute_where_clause      = $lookup_data_store->get_filterable_attribute_where_clause( 'attribute_lookup' );
+			$attribute_lookup_in_stock_where_clause = $hide_out_of_stock_items ? 'AND attribute_lookup.in_stock = 1' : '';
+
+			// Aggregate the indexed lookup rows directly; the cached parent IDs already represent the filtered product set.
 			$attribute_count_sql = "
-				SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, terms.term_id as term_count_id
-				FROM {$wpdb->term_relationships} AS term_relationships
-				INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
-				INNER JOIN {$wpdb->terms} AS terms USING( term_id )
-				WHERE term_relationships.object_id IN ( {$product_ids} )
-				AND term_taxonomy.taxonomy = '{$taxonomy_escaped}'
-				GROUP BY terms.term_id
+				SELECT COUNT( DISTINCT attribute_lookup.product_or_parent_id ) as term_count, attribute_lookup.term_id as term_count_id
+				FROM {$lookup_table_name} AS attribute_lookup
+				WHERE attribute_lookup.product_or_parent_id IN ( {$product_ids} )
+				AND attribute_lookup.taxonomy = {$taxonomy_escaped}
+				AND {$filterable_attribute_where_clause}
+				{$attribute_lookup_in_stock_where_clause}
+				GROUP BY attribute_lookup.term_id
 			";
 
 			/**
@@ -301,7 +318,7 @@ class FilterData {
 		 */
 		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'attribute', $query_vars, array( 'taxonomy' => $attribute_to_count ) );
 
-		$this->set_cache( $transient_key, $results );
+		$this->set_cache( $transient_key, $results, $cache_generation );
 
 		return $results;
 	}
@@ -325,8 +342,9 @@ class FilterData {
 			return $pre_filter_counts;
 		}
 
-		$transient_key = $this->get_transient_key( $query_vars, 'taxonomy', array( 'taxonomy' => $taxonomy_to_count ) );
-		$cached_data   = $this->get_cache( $transient_key );
+		$cache_generation = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
+		$transient_key    = $this->get_transient_key( $query_vars, 'taxonomy', array( 'taxonomy' => $taxonomy_to_count ) );
+		$cached_data      = $this->get_cache( $transient_key, $cache_generation );
 
 		if ( ! empty( $cached_data ) ) {
 			return $cached_data;
@@ -371,7 +389,7 @@ class FilterData {
 		 */
 		$results = apply_filters( 'woocommerce_product_filter_data', $results, 'taxonomy', $query_vars, array( 'taxonomy' => $taxonomy_to_count ) );
 
-		$this->set_cache( $transient_key, $results );
+		$this->set_cache( $transient_key, $results, $cache_generation );
 
 		return $results;
 	}
@@ -413,8 +431,9 @@ class FilterData {
 
 			// Count for the term itself and all its descendants.
 			if ( ! isset( $hierarchy_counts[ $term_id ] ) ) {
-				$descendants                  = $this->taxonomy_hierarchy_data->get_descendants( $term_id, $taxonomy_name );
-				$descendants[]                = $term_id; // Include the term itself.
+				$descendants   = $this->taxonomy_hierarchy_data->get_descendants( $term_id, $taxonomy_name );
+				$descendants[] = $term_id;
+				// Include the term itself.
 				$hierarchy_counts[ $term_id ] = $descendants;
 			}
 
@@ -426,7 +445,8 @@ class FilterData {
 				}
 
 				$descendants   = $this->taxonomy_hierarchy_data->get_descendants( $ancestor_id, $taxonomy_name );
-				$descendants[] = $ancestor_id; // Include the ancestor term itself.
+				$descendants[] = $ancestor_id;
+				// Include the ancestor term itself.
 
 				$hierarchy_counts[ $ancestor_id ] = $descendants;
 				$processed_terms[]                = $ancestor_id;
@@ -542,20 +562,22 @@ class FilterData {
 	/**
 	 * Get cached filter data.
 	 *
-	 * @param string $key Transient key.
+	 * @param string $key              Transient key.
+	 * @param string $cache_generation Cache generation captured before the lookup.
 	 */
-	private function get_cache( $key ) {
+	private function get_cache( $key, $cache_generation ) {
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			return null;
 		}
 
-		$cache             = get_transient( $key );
-		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
+		$cache              = get_transient( $key );
+		$current_generation = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
 
 		if ( empty( $cache['version'] ) ||
 			! is_array( $cache['value'] ) ||
 			empty( $cache['value'] ) ||
-			$transient_version !== $cache['version']
+			$cache_generation !== $current_generation ||
+			$cache_generation !== $cache['version']
 		) {
 			return null;
 		}
@@ -575,13 +597,14 @@ class FilterData {
 	 *
 	 * @since 10.8.0 Cache-entry cap added.
 	 *
-	 * @param string $key   Transient key.
-	 * @param mixed  $value Value to set.
+	 * @param string $key              Transient key.
+	 * @param mixed  $value            Value to set.
+	 * @param string $cache_generation Cache generation captured before computation.
 	 *
 	 * @return bool True if the cache was set, false otherwise.
 	 */
-	private function set_cache( $key, $value ) {
-		if ( ! is_array( $value ) ) {
+	private function set_cache( $key, $value, $cache_generation ) {
+		if ( ! is_array( $value ) || WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP ) !== $cache_generation ) {
 			return false;
 		}
 
@@ -618,9 +641,12 @@ class FilterData {
 			set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, $count + 1, DAY_IN_SECONDS );
 		}
 
-		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
-		$transient_value   = array(
-			'version' => $transient_version,
+		if ( WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP ) !== $cache_generation ) {
+			return false;
+		}
+
+		$transient_value = array(
+			'version' => $cache_generation,
 			'value'   => $value,
 		);
 

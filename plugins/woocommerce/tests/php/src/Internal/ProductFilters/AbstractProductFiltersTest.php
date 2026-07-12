@@ -330,6 +330,76 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Get a product variation by one of its attributes.
+	 *
+	 * @param WC_Product $product   Parent product.
+	 * @param string     $taxonomy Attribute taxonomy name.
+	 * @param string     $term_slug Attribute term slug.
+	 * @return \WC_Product_Variation
+	 * @throws \RuntimeException When the variation cannot be found.
+	 */
+	protected function get_variation_by_attribute( WC_Product $product, string $taxonomy, string $term_slug ): \WC_Product_Variation {
+		foreach ( $product->get_children() as $child_id ) {
+			$variation = wc_get_product( $child_id );
+
+			if ( ! $variation instanceof \WC_Product_Variation ) {
+				continue;
+			}
+
+			$variation_attributes = $variation->get_attributes();
+			$variation_term_slug  = $variation_attributes[ $taxonomy ] ?? '';
+			if ( $term_slug === $variation_term_slug ) {
+				return $variation;
+			}
+		}
+
+		throw new \RuntimeException( 'Unable to find the requested product variation.' );
+	}
+
+	/**
+	 * Assert that a private variation retains its attribute lookup row.
+	 *
+	 * @param \WC_Product_Variation $variation      Variation product.
+	 * @param WC_Product            $parent_product Parent product.
+	 * @param string                $taxonomy       Attribute taxonomy name.
+	 * @param int                   $term_id        Attribute term ID.
+	 */
+	protected function assert_private_variation_lookup_row_is_retained( \WC_Product_Variation $variation, WC_Product $parent_product, string $taxonomy, int $term_id ): void {
+		$this->assertSame( 'private', get_post_status( $variation->get_id() ) );
+
+		global $wpdb;
+
+		$lookup_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT product_id, product_or_parent_id, taxonomy, term_id, is_variation_attribute FROM {$wpdb->prefix}wc_product_attributes_lookup WHERE product_id = %d AND product_or_parent_id = %d AND taxonomy = %s AND term_id = %d AND is_variation_attribute = 1",
+				$variation->get_id(),
+				$parent_product->get_id(),
+				$taxonomy,
+				$term_id
+			),
+			ARRAY_A
+		);
+
+		$this->assertIsArray( $lookup_row, 'The private variation should retain its exact attribute lookup row.' );
+		$this->assertSame(
+			array(
+				'product_id'             => $variation->get_id(),
+				'product_or_parent_id'   => $parent_product->get_id(),
+				'taxonomy'               => $taxonomy,
+				'term_id'                => $term_id,
+				'is_variation_attribute' => 1,
+			),
+			array(
+				'product_id'             => (int) $lookup_row['product_id'],
+				'product_or_parent_id'   => (int) $lookup_row['product_or_parent_id'],
+				'taxonomy'               => $lookup_row['taxonomy'],
+				'term_id'                => (int) $lookup_row['term_id'],
+				'is_variation_attribute' => (int) $lookup_row['is_variation_attribute'],
+			)
+		);
+	}
+
+	/**
 	 * Build and create attributes from variations data.
 	 *
 	 * @param array $variations_data Variation data.

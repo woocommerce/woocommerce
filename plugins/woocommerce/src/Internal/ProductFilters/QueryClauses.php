@@ -215,6 +215,8 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
 		// (causes the filtering subquery to be executed only once).
 		$clause_root = " {$wpdb->posts}.ID IN ( SELECT product_or_parent_id FROM (";
+
+		$filterable_attribute_where_clause = wc_get_container()->get( LookupDataStore::class )->get_filterable_attribute_where_clause( 'lt' );
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 			$in_stock_clause = ' AND in_stock = 1';
 		} else {
@@ -269,6 +271,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 							SELECT product_or_parent_id
 							FROM {$this->get_lookup_table_name()} lt
 							WHERE term_id in {$term_ids_to_filter_by_list}
+							AND {$filterable_attribute_where_clause}
 							{$in_stock_clause}
 						)";
 				}
@@ -283,6 +286,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 				SELECT product_or_parent_id
 				FROM {$this->get_lookup_table_name()} lt
 				WHERE is_variation_attribute=0
+				AND {$filterable_attribute_where_clause}
 				{$in_stock_clause}
 				AND term_id in {$term_ids_to_filter_by_list}
 				GROUP BY product_id
@@ -291,6 +295,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 				SELECT product_or_parent_id
 				FROM {$this->get_lookup_table_name()} lt
 				WHERE is_variation_attribute=1
+				AND {$filterable_attribute_where_clause}
 				{$in_stock_clause}
 				AND term_id in {$term_ids_to_filter_by_list}
 			)";

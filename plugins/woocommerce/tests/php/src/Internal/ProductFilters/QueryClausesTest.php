@@ -184,6 +184,74 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox A private variation is excluded from attribute filtering and republishing it restores the parent product.
+	 */
+	public function test_attribute_clauses_exclude_private_variations_until_republished(): void {
+		$green_variation = $this->get_variation_by_attribute( $this->products[4], 'pa_color', 'green-slug' );
+		$green_term      = get_term_by( 'slug', 'green-slug', 'pa_color' );
+
+		$this->assertInstanceOf( \WP_Term::class, $green_term );
+
+		try {
+			$green_variation->set_status( 'private' );
+			$green_variation->save();
+			$this->assert_private_variation_lookup_row_is_retained( $green_variation, $this->products[4], 'pa_color', $green_term->term_id );
+
+			$green_products_while_private = $this->get_product_names_filtered_by_attribute( 'pa_color', array( 'green-slug' ), 'or' );
+			$red_products_while_private   = $this->get_product_names_filtered_by_attribute( 'pa_color', array( 'red-slug' ), 'or' );
+		} finally {
+			$green_variation->set_status( 'publish' );
+			$green_variation->save();
+		}
+
+		$green_products_after_republishing = $this->get_product_names_filtered_by_attribute( 'pa_color', array( 'green-slug' ), 'or' );
+
+		$this->assertEqualsCanonicalizing(
+			array( 'Product 5' ),
+			$red_products_while_private,
+			'Product 5 should still match its published red variation while its green variation is private.'
+		);
+		$this->assertEqualsCanonicalizing(
+			array( 'Product 6' ),
+			$green_products_while_private,
+			'Product 5 should not match green while its green variation is private.'
+		);
+		$this->assertEqualsCanonicalizing(
+			array( 'Product 5', 'Product 6' ),
+			$green_products_after_republishing,
+			'Republishing Product 5\'s green variation should restore the green match.'
+		);
+	}
+
+	/**
+	 * Get product names filtered by an attribute.
+	 *
+	 * @param string   $taxonomy   Attribute taxonomy name.
+	 * @param string[] $terms      Attribute term slugs.
+	 * @param string   $query_type Query type.
+	 * @return string[]
+	 */
+	private function get_product_names_filtered_by_attribute( string $taxonomy, array $terms, string $query_type ): array {
+		$chosen_attributes = array(
+			$taxonomy => array(
+				'terms'      => $terms,
+				'query_type' => $query_type,
+			),
+		);
+		$filter_callback   = function ( $args ) use ( $chosen_attributes ) {
+			return $this->sut->add_attribute_clauses( $args, $chosen_attributes );
+		};
+
+		add_filter( 'posts_clauses', $filter_callback );
+
+		try {
+			return $this->get_data_from_products_array( wc_get_products( array() ) );
+		} finally {
+			remove_filter( 'posts_clauses', $filter_callback );
+		}
+	}
+
+	/**
 	 * Test the product query with post clauses containing taxonomy clauses.
 	 *
 	 * @testWith ["product_cat", ["cat-1"]]
