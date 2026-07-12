@@ -167,12 +167,11 @@ class Products extends ControllerTestCase {
 			$this->products[2]->get_children()
 		);
 		$request     = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
-		$request->set_param( 'include', $product_ids );
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$response    = rest_get_server()->dispatch( $request );
+		$data        = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( count( $product_ids ), $data );
+		$this->assertEqualsCanonicalizing( $product_ids, array_column( $data, 'id' ) );
 		$this->assertArrayHasKey( 'id', $data[0] );
 		$this->assertArrayHasKey( 'name', $data[0] );
 		$this->assertArrayHasKey( 'variation', $data[0] );
