@@ -100,39 +100,27 @@ class WC_Lazy_REST_Server extends WP_Test_Spy_REST_Server {
 	 * @return bool Whether every route was initialized.
 	 */
 	private function initialize_routes( $route = null ): bool {
-		$wp             = $GLOBALS['wp'] ?? null;
-		$has_wp_context = is_object( $wp );
-		$had_rest_route = $has_wp_context && array_key_exists( 'rest_route', $wp->query_vars );
-		$rest_route     = $has_wp_context ? ( $wp->query_vars['rest_route'] ?? null ) : null;
-
-		if ( $has_wp_context ) {
-			if ( null === $route ) {
-				unset( $wp->query_vars['rest_route'] );
-			} else {
-				$wp->query_vars['rest_route'] = $route;
-			}
-		}
-
 		$this->initializing = true;
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			do_action( 'rest_api_init' );
+			WC_Unit_Test_Case::with_rest_route_context(
+				$route,
+				static function () {
+					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+					do_action( 'rest_api_init' );
+				}
+			);
 		} finally {
 			$this->initializing = false;
-			if ( $has_wp_context ) {
-				if ( $had_rest_route ) {
-					$wp->query_vars['rest_route'] = $rest_route;
-				} else {
-					unset( $wp->query_vars['rest_route'] );
-				}
-			}
 		}
 
-		return ! $has_wp_context || null === $route;
+		return ! is_object( $GLOBALS['wp'] ?? null ) || null === $route;
 	}
 
 	/**
 	 * Check whether a non-core route has already been registered.
+	 *
+	 * A pristine server only holds the two endpoints WP_REST_Server registers
+	 * in its constructor: `/` and `/batch/v1`.
 	 *
 	 * @return bool
 	 */
@@ -212,22 +200,7 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 	 * Establish WordPress REST defaults without registering WooCommerce routes.
 	 */
 	private function initialize_rest_api_defaults(): void {
-		global $wp_filter;
-
-		$rest_api_init_hook         = $wp_filter['rest_api_init'] ?? null;
-		$wp_filter['rest_api_init'] = new WP_Hook(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The original hook is restored below.
-		add_action( 'rest_api_init', 'rest_api_default_filters' );
-
-		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			do_action( 'rest_api_init' );
-		} finally {
-			if ( null === $rest_api_init_hook ) {
-				unset( $wp_filter['rest_api_init'] );
-			} else {
-				$wp_filter['rest_api_init'] = $rest_api_init_hook; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the original hook.
-			}
-		}
+		self::do_isolated_rest_api_init( array( 'rest_api_default_filters' ) );
 	}
 
 	/**

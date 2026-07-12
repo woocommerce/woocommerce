@@ -148,25 +148,20 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
-	 * Create a REST server with only the requested route callbacks registered.
+	 * Fire rest_api_init with only the provided callbacks attached.
 	 *
-	 * @param callable[] $route_registration_callbacks Callbacks that register routes on rest_api_init.
-	 * @param bool       $register_default_filters     Whether to register WordPress default REST filters.
-	 * @return WP_REST_Server
+	 * The global rest_api_init hook is stashed, replaced with a fresh hook
+	 * holding just the callbacks, fired, and restored afterwards.
+	 *
+	 * @param callable[] $callbacks Callbacks to run on the isolated hook.
 	 */
-	protected function create_rest_server_with_routes( array $route_registration_callbacks, bool $register_default_filters = false ): WP_REST_Server {
-		global $wp_filter, $wp_rest_server;
-
-		$wp_rest_server = new WP_REST_Server();
+	protected static function do_isolated_rest_api_init( array $callbacks ): void {
+		global $wp_filter;
 
 		$rest_api_init_hook         = $wp_filter['rest_api_init'] ?? null;
 		$wp_filter['rest_api_init'] = new WP_Hook(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The original hook is restored below.
 
-		if ( $register_default_filters ) {
-			add_action( 'rest_api_init', 'rest_api_default_filters' );
-		}
-
-		foreach ( $route_registration_callbacks as $callback ) {
+		foreach ( $callbacks as $callback ) {
 			add_action( 'rest_api_init', $callback );
 		}
 
@@ -180,6 +175,63 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 				$wp_filter['rest_api_init'] = $rest_api_init_hook; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the original hook.
 			}
 		}
+	}
+
+	/**
+	 * Run a callback with $wp->query_vars['rest_route'] temporarily set (or unset).
+	 *
+	 * WooCommerce registers REST namespaces lazily based on the requested route,
+	 * so this lets fixture code scope rest_api_init work to one namespace, or
+	 * force full registration by passing null.
+	 *
+	 * @param string|null $route    REST route to expose during the callback, or null to unset it.
+	 * @param callable    $callback Callback to run.
+	 * @return mixed The callback's return value.
+	 */
+	public static function with_rest_route_context( ?string $route, callable $callback ) {
+		$wp             = $GLOBALS['wp'] ?? null;
+		$has_wp_context = is_object( $wp );
+		$had_rest_route = $has_wp_context && array_key_exists( 'rest_route', $wp->query_vars );
+		$rest_route     = $has_wp_context ? ( $wp->query_vars['rest_route'] ?? null ) : null;
+
+		if ( $has_wp_context ) {
+			if ( null === $route ) {
+				unset( $wp->query_vars['rest_route'] );
+			} else {
+				$wp->query_vars['rest_route'] = $route;
+			}
+		}
+
+		try {
+			return $callback();
+		} finally {
+			if ( $has_wp_context ) {
+				if ( $had_rest_route ) {
+					$wp->query_vars['rest_route'] = $rest_route;
+				} else {
+					unset( $wp->query_vars['rest_route'] );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Create a REST server with only the requested route callbacks registered.
+	 *
+	 * @param callable[] $route_registration_callbacks Callbacks that register routes on rest_api_init.
+	 * @param bool       $register_default_filters     Whether to register WordPress default REST filters.
+	 * @return WP_REST_Server
+	 */
+	protected function create_rest_server_with_routes( array $route_registration_callbacks, bool $register_default_filters = false ): WP_REST_Server {
+		global $wp_rest_server;
+
+		$wp_rest_server = new WP_REST_Server();
+
+		if ( $register_default_filters ) {
+			array_unshift( $route_registration_callbacks, 'rest_api_default_filters' );
+		}
+
+		self::do_isolated_rest_api_init( $route_registration_callbacks );
 
 		return $wp_rest_server;
 	}

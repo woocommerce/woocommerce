@@ -68,20 +68,12 @@ trait StoreApiRestTestCaseTrait {
 		global $wp_rest_server;
 		$wp_rest_server = new \Spy_REST_Server();
 
-		$had_rest_route = array_key_exists( 'rest_route', $GLOBALS['wp']->query_vars );
-		$rest_route     = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
-
-		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/v1';
-
-		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			do_action( 'rest_api_init', $wp_rest_server );
-		} finally {
-			if ( $had_rest_route ) {
-				$GLOBALS['wp']->query_vars['rest_route'] = $rest_route;
-			} else {
-				unset( $GLOBALS['wp']->query_vars['rest_route'] );
+		\WC_Unit_Test_Case::with_rest_route_context(
+			'/wc/store/v1',
+			static function () use ( $wp_rest_server ) {
+				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+				do_action( 'rest_api_init', $wp_rest_server );
 			}
-		}
+		);
 	}
 }
