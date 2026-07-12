@@ -306,6 +306,10 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Tests that the version check reaches the automatic database updater.
+	 *
+	 * This is a single end-to-end smoke test of the check_version() -> install() ->
+	 * maybe_update_db_version() wiring; the auto-update on/off/default decision logic
+	 * itself is covered for all variations by test_db_auto_updates() above.
 	 */
 	public function test_version_check_schedules_db_auto_update(): void {
 		$update_versions = array_keys( WC_Install::get_db_update_callbacks() );
