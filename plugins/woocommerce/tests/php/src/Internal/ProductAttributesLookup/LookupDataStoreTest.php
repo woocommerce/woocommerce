@@ -797,6 +797,33 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The shared fixture helper updates the lookup table synchronously without scheduling an action.
+	 */
+	public function test_direct_fixture_helper_updates_lookup_table_without_scheduling(): void {
+		$attribute = self::$attributes[0];
+		$product   = new \WC_Product_Simple();
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$this->set_product_attributes(
+			$product,
+			array(
+				$attribute['name'] => array(
+					'id'      => $attribute['id'],
+					'options' => array( $attribute['term_ids'][0] ),
+				),
+			)
+		);
+
+		self::with_direct_product_attribute_lookup_updates(
+			static function () use ( $product ) {
+				$product->save();
+			}
+		);
+
+		$this->assertCount( 1, $this->get_lookup_table_data() );
+		$this->assertCount( 0, WC()->get_instance_of( \WC_Queue::class )->get_methods_called() );
+	}
+
+	/**
 	 * Data provider for on_product_changed tests with direct update option set.
 	 *
 	 * @return array[]
