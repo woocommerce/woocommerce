@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import TYPES from './action-types';
+import { getOnSubmitLabel } from './get-on-submit-label';
 
 const DEFAULT_STATE = {
 	queue: [],
@@ -15,7 +16,13 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 		case TYPES.SET_CES_SURVEY_QUEUE:
 			return {
 				...state,
-				queue: [ ...state.queue, ...action.queue ],
+				queue: [
+					...state.queue,
+					...action.queue.map( ( item ) => ( {
+						...item,
+						onSubmitLabel: getOnSubmitLabel( item ),
+					} ) ),
+				],
 			};
 		case TYPES.HIDE_CES_MODAL:
 			return {
@@ -29,7 +36,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				description: action.surveyProps.description,
 				showDescription: action.surveyProps.showDescription,
 				title: action.surveyProps.title,
-				onSubmitLabel: action.onsubmit_label,
+				onSubmitLabel: getOnSubmitLabel( action ),
 				firstQuestion: action.surveyProps.firstQuestion,
 				secondQuestion: action.surveyProps.secondQuestion,
 				onSubmitNoticeProps: action.onSubmitNoticeProps || {},
@@ -62,7 +69,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				icon: action.icon,
 				pagenow: action.pageNow,
 				adminpage: action.adminPage,
-				onSubmitLabel: action.onSubmitLabel,
+				onSubmitLabel: getOnSubmitLabel( action ),
 				props: action.props,
 			};
 			return {

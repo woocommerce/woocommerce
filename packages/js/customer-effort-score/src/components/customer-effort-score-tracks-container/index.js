@@ -61,7 +61,7 @@ function _CustomerEffortScoreTracksContainer( {
 					secondQuestion={ item.secondQuestion }
 					icon={ item.icon }
 					title={ item.title }
-					onSubmitLabel={ item.onsubmit_label }
+					onSubmitLabel={ item.onSubmitLabel }
 					trackProps={ item.props || {} }
 				/>
 			) ) }
