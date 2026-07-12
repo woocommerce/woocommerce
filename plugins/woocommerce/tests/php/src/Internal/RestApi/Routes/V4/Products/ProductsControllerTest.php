@@ -1238,7 +1238,10 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 		$response_products = $response->get_data();
 
 		$this->assertCount( 2, $response_products );
-		$this->assertEquals( ProductType::GROUPED, $response_products[0]['type'] );
+		$this->assertEqualsCanonicalizing(
+			array( ProductType::GROUPED, ProductType::GROUPED ),
+			wp_list_pluck( $response_products, 'type' )
+		);
 	}
 
 	/**
@@ -1765,9 +1768,10 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
 
-		$types = array_unique( array_column( $data, 'type' ) );
-
-		$this->assertNotContains( ProductType::SIMPLE, $types );
+		$this->assertEqualsCanonicalizing(
+			array( ProductType::VARIABLE, ProductType::GROUPED, ProductType::EXTERNAL ),
+			array_values( array_unique( array_column( $data, 'type' ) ) )
+		);
 	}
 
 	/**
