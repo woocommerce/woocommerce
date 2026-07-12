@@ -943,7 +943,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$this->empty_lookup_table();
 
 		$this->insert_lookup_table_data( $another_product_id, $another_product_id, $another_attribute['name'], $another_attribute['term_ids'][0], false, true );
-		if ( 'creation' !== $expected_action && 'deletion' !== $expected_action ) {
+		if ( 'creation' !== $expected_action ) {
 			$this->insert_lookup_table_data( $product_id, $product_id, $attribute['name'], $attribute['term_ids'][0], false, false );
 		}
 
@@ -1041,7 +1041,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$this->empty_lookup_table();
 
 		$this->insert_lookup_table_data( $another_product_id, $another_product_id, $another_attribute['name'], $another_attribute['term_ids'][0], false, true );
-		if ( 'creation' !== $expected_action && 'deletion' !== $expected_action ) {
+		if ( 'creation' !== $expected_action ) {
 			$this->insert_lookup_table_data( $product_id, $product_id, $non_variation_attribute['name'], $non_variation_attribute['term_ids'][0], false, false );
 			$this->insert_lookup_table_data( $variation_id, $product_id, $variation_attribute['name'], $variation_attribute['term_ids'][0], true, false );
 		}
@@ -1150,7 +1150,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$this->empty_lookup_table();
 
 		$this->insert_lookup_table_data( $another_product_id, $another_product_id, $another_attribute['name'], $another_attribute['term_ids'][0], false, true );
-		if ( 'creation' !== $expected_action && 'deletion' !== $expected_action ) {
+		if ( 'creation' !== $expected_action ) {
 			$this->insert_lookup_table_data( $variation_id, $product_id, $variation_attribute['name'], $variation_attribute['term_ids'][0], true, false );
 		}
 
