@@ -385,6 +385,9 @@ class CartItems extends ControllerTestCase {
 	 * Tests schema of both products in cart to cover as much schema as possible.
 	 */
 	public function test_get_item_schema() {
+		// Give the simple product an image so the nested image schema is validated too.
+		$image_id = $this->add_image_to_product();
+
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items', 'v1' );
 		$schema     = $controller->get_item_schema();
@@ -393,7 +396,8 @@ class CartItems extends ControllerTestCase {
 
 		// Simple product.
 		$response = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
-		$diff     = $validate->get_diff_from_object( $response->get_data() );
+		$this->assertNotEmpty( $response->get_data()['images'], 'The simple product response must include an image so its schema is exercised.' );
+		$diff = $validate->get_diff_from_object( $response->get_data() );
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		$this->assertEmpty( $diff, print_r( $diff, true ) );
 
@@ -402,6 +406,8 @@ class CartItems extends ControllerTestCase {
 		$diff     = $validate->get_diff_from_object( $response->get_data() );
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		$this->assertEmpty( $diff, print_r( $diff, true ) );
+
+		wp_delete_attachment( $image_id, true );
 	}
 
 	/**

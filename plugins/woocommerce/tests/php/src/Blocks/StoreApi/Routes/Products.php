@@ -285,14 +285,23 @@ class Products extends ControllerTestCase {
 	 * Test schema matches responses.
 	 */
 	public function test_get_item_schema() {
+		// Give the product an image so the nested image schema is validated too.
+		$fixtures = new FixtureData();
+		$image_id = $fixtures->create_image_attachment( $this->products[0]->get_id() );
+		$this->products[0]->set_image_id( $image_id );
+		$this->products[0]->save();
+
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'products' );
 		$schema     = $controller->get_item_schema();
 		$response   = $controller->prepare_item_for_response( $this->products[0], new \WP_REST_Request() );
 		$validate   = new ValidateSchema( $schema );
 
+		$this->assertNotEmpty( $response->get_data()['images'], 'The product response must include an image so its schema is exercised.' );
 		$diff = $validate->get_diff_from_object( $response->get_data() );
 		$this->assertEmpty( $diff, print_r( $diff, true ) ); // @phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+
+		wp_delete_attachment( $image_id, true );
 	}
 
 	/**
