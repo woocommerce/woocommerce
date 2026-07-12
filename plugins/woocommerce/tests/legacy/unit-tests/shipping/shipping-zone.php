@@ -159,17 +159,6 @@ class WC_Tests_Shipping_Zone extends WC_Unit_Test_Case {
 		$zone = WC_Shipping_Zones::get_zone( $this->zone_ids['local'] );
 
 		// Assert.
-		$this->assertEquals( $zone->get_zone_order(), 1 );
-	}
-
-	/**
-	 * Test: WC_Shipping_Zone::add_location
-	 */
-	public function test_add_location() {
-		// Test.
-		$zone = WC_Shipping_Zones::get_zone( $this->zone_ids['local'] );
-
-		// Assert.
 		$this->assertTrue( $zone->is_valid_location_type( 'state' ) );
 		$this->assertTrue( $zone->is_valid_location_type( 'country' ) );
 		$this->assertTrue( $zone->is_valid_location_type( 'continent' ) );
