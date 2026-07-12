@@ -909,7 +909,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_size-size', true ) );
 			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_Size/Size', true ) );
 		}
-		$product->delete();
 	}
 
 	/**
@@ -953,7 +952,5 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 				'Variable product transient option names must not be added to notoptions when a persistent object cache is active.'
 			);
 		}
-
-		$product->delete();
 	}
 }
