@@ -369,6 +369,10 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
+		if ( ! static::uses_class_product_filter_fixtures() ) {
+			$this->delete_product_filter_fixtures();
+		}
+
 		foreach ( array_keys( wc_get_attribute_taxonomy_ids() ) as $attribute_name ) {
 			$taxonomy_name = wc_attribute_taxonomy_name( wc_sanitize_taxonomy_name( $attribute_name ) );
 			unregister_taxonomy( $taxonomy_name );
