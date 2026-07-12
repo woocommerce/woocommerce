@@ -141,29 +141,42 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public static function tearDownAfterClass(): void {
 		remove_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
 		self::enable_direct_product_attribute_lookup_updates();
-		$fulfillments_data_store = new FulfillmentsDataStore();
-		$action_store            = \ActionScheduler_Store::instance();
-		foreach ( self::$created_import_action_ids as $action_id ) {
-			$action_store->delete_action( $action_id );
-		}
+		try {
+			$fulfillments_data_store = new FulfillmentsDataStore();
+			$action_store            = \ActionScheduler_Store::instance();
+			foreach ( self::$created_import_action_ids as $action_id ) {
+				$action_store->delete_action( $action_id );
+			}
 
-		// Delete the created orders and their fulfillments.
-		foreach ( self::$created_order_ids as $order_id ) {
-			$fulfillments_data_store->delete_by_entity( WC_Order::class, (string) $order_id );
-			WC_Helper_Order::delete_order( $order_id );
-		}
+			// Delete the created orders and their fulfillments.
+			foreach ( self::$created_order_ids as $order_id ) {
+				$fulfillments_data_store->delete_by_entity( WC_Order::class, (string) $order_id );
+				WC_Helper_Order::delete_order( $order_id );
+			}
 
-		// Delete the created user.
-		wp_delete_user( self::$created_user_id );
-		if ( false === self::$original_fulfillments_flag ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
+			// Delete the created user.
+			wp_delete_user( self::$created_user_id );
+		} finally {
+			try {
+				if ( false === self::$original_fulfillments_flag ) {
+					delete_option( 'woocommerce_feature_fulfillments_enabled' );
+				} else {
+					update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
+				}
+			} finally {
+				try {
+					parent::tearDownAfterClass();
+				} finally {
+					self::$created_order_ids          = array();
+					self::$created_import_action_ids  = array();
+					self::$created_fulfillment_ids    = array();
+					self::$created_user_id            = -1;
+					self::$customer_order_id          = -1;
+					self::$original_fulfillments_flag = null;
+					self::disable_direct_product_attribute_lookup_updates();
+				}
+			}
 		}
-
-		parent::tearDownAfterClass();
-		self::$created_import_action_ids = array();
-		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
