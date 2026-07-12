@@ -145,6 +145,8 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 
 		$response = WC_Privacy_Exporters::order_data_exporter( 'test1@test.com', 1 );
 
+		$this->assertCount( 10, $response['data'] );
+		$this->assertFalse( $response['done'] );
 		$this->assertEquals( 'woocommerce_orders', $response['data'][0]['group_id'] );
 		$this->assertEquals( 'Orders', $response['data'][0]['group_label'] );
 		$this->assertStringContainsString( 'order-', $response['data'][0]['item_id'] );
@@ -153,6 +155,7 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 
 		// Next page should be orders.
 		$response = WC_Privacy_Exporters::order_data_exporter( 'test1@test.com', 2 );
+		$this->assertCount( 1, $response['data'] );
 		$this->assertTrue( $response['done'] );
 		$this->assertTrue( 8 === count( $response['data'][0]['data'] ), count( $response['data'][0]['data'] ) );
 	}
