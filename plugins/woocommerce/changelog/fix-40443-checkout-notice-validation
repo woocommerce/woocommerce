@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent non-error checkout update notices from triggering field validation.
