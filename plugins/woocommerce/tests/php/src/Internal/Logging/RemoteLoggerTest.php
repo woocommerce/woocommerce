@@ -410,7 +410,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		}
 
 		/**
-		 * @testdox handle method successfully sends log
+		 * @testdox handle method successfully sends log.
 		 */
 		public function test_handle_successful() {
 			$this->sut = $this->getMockBuilder( RemoteLoggerWithEnvironmentOverride::class )
@@ -420,13 +420,14 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			$this->sut->set_is_dev_or_local( false );
 			$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
 			$request_count = 0;
+			$request_url   = null;
 			add_filter( 'option_woocommerce_allow_tracking', fn() => 'yes' );
 
 			add_filter(
 				'pre_http_request',
-				function ( $preempt, $args, $url ) use ( &$request_count ) {
+				function ( $preempt, $args, $url ) use ( &$request_count, &$request_url ) {
 					++$request_count;
-					$this->assertSame( RemoteLogger::LOG_ENDPOINT, $url );
+					$request_url = $url;
 					$this->assertArrayHasKey( 'body', $args );
 					$this->assertArrayHasKey( 'headers', $args );
 					return array(
@@ -442,6 +443,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			);
 
 			$this->assertTrue( $this->sut->handle( time(), 'error', 'Test message', array( 'remote-logging' => true ) ) );
+			$this->assertSame( 'https://public-api.wordpress.com/rest/v1.1/logstash', $request_url );
 			$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
 			$this->assertSame( 1, $request_count );
 		}
