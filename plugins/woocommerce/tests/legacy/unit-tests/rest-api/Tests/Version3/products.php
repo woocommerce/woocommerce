@@ -256,7 +256,8 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
+		$this->assertSame( 200, $response->get_status(), 'The product image update request should succeed.' );
+		$data = $response->get_data();
 
 		$this->assertStringContainsString( 'Testing', $data['description'] );
 		$this->assertEquals( '8', $data['price'] );
