@@ -38,6 +38,7 @@
 		"env:e2e:restart": "pnpm wp-env:e2e destroy --force && pnpm wp-env:e2e start --update",
 		"env:e2e:start": "pnpm wp-env:e2e start --update",
 		"env:e2e:stop": "pnpm wp-env:e2e stop",
+		"env:e2e:tracking": "ENABLE_TRACKING=1 pnpm env:e2e:start",
 		"env:performance-init": "./tests/performance/bin/init-environment.sh",
 		"env:perf": "pnpm env:e2e:start && pnpm env:performance-init",
 		"env:restart": "pnpm env:dev:restart",
@@ -73,6 +74,8 @@
 		"test:api": "pnpm test:e2e:default --project=api",
 		"test:api:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled",
 		"test:api:object-cache": "pnpm test:e2e:with-env default-object-cache --project=api",
+		"test:api:tracking": "test \"$(pnpm --silent wp-env:e2e run cli wp option get woocommerce_allow_tracking)\" = \"yes\" && pnpm test:api",
+		"test:api:tracking:config": "node ./tests/e2e/bin/validate-api-tracking-ci.mjs",
 		"test:e2e:core-serial": "pnpm test:e2e:default --project=core-serial",
 		"test:e2e:core-parallel": "pnpm test:e2e:default --project=core-parallel",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
@@ -626,6 +629,57 @@
 						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}
+				},
+				{
+					"name": "Core API tests (tracking enabled)",
+					"testType": "api",
+					"command": "test:api:tracking",
+					"optional": false,
+					"changes": [
+						"composer.json",
+						"composer.lock",
+						"i18n/**/*.php",
+						"includes/**/*.php",
+						"src/**/*.php",
+						"tests/e2e/bin/**",
+						"tests/e2e/tests/api-tests/**",
+						"tests/e2e/*.js",
+						"tests/e2e/*.sh",
+						".wp-env.e2e.json",
+						"woocommerce.php",
+						"uninstall.php"
+					],
+					"onlyForDependencies": [],
+					"testEnv": {
+						"start": "env:e2e:tracking --debug"
+					},
+					"events": [
+						"pull_request",
+						"nightly-checks",
+						"release-checks",
+						"core-api-tracking"
+					],
+					"report": {
+						"resultsBlobName": "core-api-report-tracking-enabled",
+						"resultsPath": "tests/e2e/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core API tracking CI configuration",
+					"testType": "unit",
+					"command": "test:api:tracking:config",
+					"optional": false,
+					"changes": [
+						"package.json",
+						"tests/e2e/bin/test-env-setup.sh",
+						"tests/e2e/bin/validate-api-tracking-ci.mjs"
+					],
+					"onlyForDependencies": [],
+					"events": [
+						"pull_request",
+						"push"
+					]
 				},
 				{
 					"name": "Core API tests (HPOS:off)",

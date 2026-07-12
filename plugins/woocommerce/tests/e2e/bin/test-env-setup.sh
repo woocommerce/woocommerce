@@ -16,7 +16,7 @@ if [ ! -z ${CI+y} ]; then
     # Source from the e2e-test-helpers directory mount; a single-file mount of this
     # script can surface as an empty file under Docker gRPC FUSE.
     $WP_ENV_CMD run --debug cli cp wp-content/plugins/e2e-test-helpers/test-env-setup.sh test-env-setup-ci.sh
-    $WP_ENV_CMD run --debug cli env -u CI WP_CLI_PREFIX= bash test-env-setup-ci.sh
+    $WP_ENV_CMD run --debug cli env -u CI WP_CLI_PREFIX= ENABLE_TRACKING="${ENABLE_TRACKING:-0}" bash test-env-setup-ci.sh
     exit $?
 fi
 
