@@ -83,24 +83,6 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	private static $administrator_id;
 
 	/**
-	 * Run class fixture changes without leaving asynchronous lookup actions behind.
-	 *
-	 * @param callable $callback Fixture lifecycle callback.
-	 */
-	private static function with_direct_attribute_lookup_updates( callable $callback ): void {
-		$enable_direct_updates = static function () {
-			return 'yes';
-		};
-		add_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', $enable_direct_updates );
-
-		try {
-			$callback();
-		} finally {
-			remove_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', $enable_direct_updates );
-		}
-	}
-
-	/**
 	 * Create products for tests.
 	 *
 	 * @return void
@@ -112,7 +94,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		self::with_direct_attribute_lookup_updates(
+		self::with_direct_product_attribute_lookup_updates(
 			static function () {
 				self::$products[] = WC_Helper_Product::create_simple_product(
 					true,
@@ -166,7 +148,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpTearDownAfterClass() {
-		self::with_direct_attribute_lookup_updates(
+		self::with_direct_product_attribute_lookup_updates(
 			static function () {
 				foreach ( self::$products as $product ) {
 					WC_Helper_Product::delete_product( $product->get_id() );

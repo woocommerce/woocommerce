@@ -42,7 +42,17 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private static $direct_product_attribute_lookup_updates_filter;
 
 	/**
+	 * How many unbalanced enable_direct_product_attribute_lookup_updates() calls are active.
+	 *
+	 * @var int
+	 */
+	private static $direct_product_attribute_lookup_updates_depth = 0;
+
+	/**
 	 * Enable synchronous product attribute lookup updates for test fixtures.
+	 *
+	 * Calls can be nested; the filter is removed once every enable has been
+	 * balanced by a disable_direct_product_attribute_lookup_updates() call.
 	 */
 	protected static function enable_direct_product_attribute_lookup_updates(): void {
 		if ( null === self::$direct_product_attribute_lookup_updates_filter ) {
@@ -51,15 +61,35 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			};
 		}
 
-		add_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', self::$direct_product_attribute_lookup_updates_filter );
+		if ( 0 === self::$direct_product_attribute_lookup_updates_depth++ ) {
+			add_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', self::$direct_product_attribute_lookup_updates_filter );
+		}
 	}
 
 	/**
 	 * Restore the product attribute lookup update mode after fixture work.
 	 */
 	protected static function disable_direct_product_attribute_lookup_updates(): void {
-		if ( null !== self::$direct_product_attribute_lookup_updates_filter ) {
+		if ( self::$direct_product_attribute_lookup_updates_depth > 0 && 0 === --self::$direct_product_attribute_lookup_updates_depth ) {
 			remove_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', self::$direct_product_attribute_lookup_updates_filter );
+		}
+	}
+
+	/**
+	 * Run a callback with synchronous product attribute lookup updates enabled.
+	 *
+	 * Use for fixture creation/deletion so product writes update the lookup
+	 * table directly instead of leaving scheduled actions behind.
+	 *
+	 * @param callable $callback Fixture lifecycle callback.
+	 * @return mixed The callback's return value.
+	 */
+	public static function with_direct_product_attribute_lookup_updates( callable $callback ) {
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			return $callback();
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
 		}
 	}
 

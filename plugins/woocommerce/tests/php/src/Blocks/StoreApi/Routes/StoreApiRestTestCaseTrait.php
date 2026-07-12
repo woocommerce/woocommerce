@@ -18,17 +18,7 @@ trait StoreApiRestTestCaseTrait {
 	 * @return mixed
 	 */
 	protected static function with_direct_product_attribute_lookup_updates( callable $callback ) {
-		$enable_direct_updates = static function () {
-			return 'yes';
-		};
-
-		add_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', $enable_direct_updates );
-
-		try {
-			return $callback();
-		} finally {
-			remove_filter( 'pre_option_woocommerce_attribute_lookup_direct_updates', $enable_direct_updates );
-		}
+		return \WC_Unit_Test_Case::with_direct_product_attribute_lookup_updates( $callback );
 	}
 
 	/**
