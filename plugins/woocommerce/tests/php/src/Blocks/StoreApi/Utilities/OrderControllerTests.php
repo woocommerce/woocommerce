@@ -29,6 +29,12 @@ class OrderControllerTests extends TestCase {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		// The fixtures in this class do not provide phone numbers, so make the
+		// phone field optional as other Store API test classes do. Without this
+		// the class only passes when run after a class that already did so.
+		update_option( 'woocommerce_checkout_phone_field', 'optional' );
+
 		$this->sut = new class() extends OrderController {
 			/**
 			 * Check all required address fields are set and return errors if not. Parent is protected.
