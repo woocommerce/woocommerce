@@ -4700,6 +4700,62 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that product segmentation without product_includes enumerates the whole catalog.
+	 */
+	public function test_segmenting_by_product_without_includes() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$sold_product = new WC_Product_Simple();
+		$sold_product->set_name( 'Segmented Sold Product' );
+		$sold_product->set_regular_price( 10 );
+		$sold_product->save();
+
+		$unsold_product = new WC_Product_Simple();
+		$unsold_product->set_name( 'Segmented Unsold Product' );
+		$unsold_product->set_regular_price( 15 );
+		$unsold_product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $sold_product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$data_store = new OrdersStatsDataStore();
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
+
+		// Without product_includes the segmenter must return a segment for
+		// every store product, not only the ones with orders.
+		$data = json_decode(
+			wp_json_encode(
+				$data_store->get_data(
+					array(
+						'after'     => $start_time,
+						'before'    => $end_time,
+						'segmentby' => 'product',
+					)
+				)
+			),
+			true
+		);
+
+		$segments             = array_column( $data['totals']['segments'], 'subtotals', 'segment_id' );
+		$expected_product_ids = wc_get_products(
+			array(
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+
+		$this->assertEqualsCanonicalizing( $expected_product_ids, array_keys( $segments ) );
+		$this->assertEquals( 1, $segments[ $sold_product->get_id() ]['orders_count'] );
+		$this->assertEquals( 4, $segments[ $sold_product->get_id() ]['num_items_sold'] );
+		$this->assertEquals( 0, $segments[ $unsold_product->get_id() ]['orders_count'] );
+		$this->assertEquals( 0, $segments[ $unsold_product->get_id() ]['num_items_sold'] );
+	}
+
+	/**
 	 * Test zero filling when ordering by date in descending and ascending order.
 	 */
 	public function test_zero_fill_order_by_date() {
