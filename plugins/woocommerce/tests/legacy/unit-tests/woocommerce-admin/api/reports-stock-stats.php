@@ -72,8 +72,14 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 3, $reports['totals'][ ProductStockStatus::LOW_STOCK ] );
 		$this->assertEquals( 13, $reports['totals'][ ProductStockStatus::IN_STOCK ] );
 
-		// Test backorder and cache update.
-		$this->create_stock_products( 1, ProductStockStatus::ON_BACKORDER );
+		// Test backorder and cache update. Save a real product so the
+		// production lookup-table sync-on-save path is exercised as well.
+		WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'stock_status' => ProductStockStatus::ON_BACKORDER,
+			)
+		);
 
 		// Clear caches.
 		delete_transient( 'wc_admin_stock_count_lowstock' );
