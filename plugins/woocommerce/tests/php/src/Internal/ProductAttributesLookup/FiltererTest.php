@@ -502,6 +502,31 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product requests and counters are scoped to fixtures owned by the current test.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $using_lookup_table Whether attribute filtering uses the lookup table.
+	 */
+	public function test_product_requests_are_scoped_to_owned_products( bool $using_lookup_table ): void {
+		$this->set_use_lookup_table( $using_lookup_table );
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Green' ) );
+
+		$owned_product = $this->create_simple_product( array( 'Color' => array( 'Blue' ) ), true );
+		$this->create_simple_product( array( 'Color' => array( 'Blue' ) ), true );
+		$this->create_simple_product( array( 'Color' => array( 'Green' ) ), true );
+
+		$this->product_ids = array( $owned_product->get_id() );
+
+		$this->assertSame(
+			array( $owned_product->get_id() ),
+			$this->do_product_request( array( 'Color' => array( 'Blue' ) ), array( 'Color' => 'or' ) )
+		);
+		$this->assert_counters( 'Color', array( 'Blue' ), 'or' );
+	}
+
+	/**
 	 * Assert that the filter by attribute widget lists a given set of terms for an attribute
 	 * (with a count of 1 each)
 	 *
@@ -510,6 +535,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * @param string $filter_type The filter type in use, "and" or "or".
 	 */
 	private function assert_counters( $attribute_name, $expected_terms, $filter_type = 'and' ) {
+		global $wpdb;
+
 		$widget = new class() extends \WC_Widget_Layered_Nav {
 			// phpcs:disable Generic.CodeAnalysis.UselessOverridingMethod, Squiz.Commenting.FunctionComment
 			public function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type ) {
@@ -526,7 +553,19 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$expected[ $term_ids_by_name[ $term ] ] = 1;
 		}
 
-		$term_counts = $widget->get_filtered_term_product_counts( $term_ids_by_name, $taxonomy, $filter_type );
+		$scope_to_owned_products = function ( $query ) use ( $wpdb ) {
+			$owned_product_ids = implode( ',', array_map( 'absint', $this->product_ids ) );
+			$query['where']   .= empty( $owned_product_ids ) ? ' AND 1=0' : " AND {$wpdb->posts}.ID IN ({$owned_product_ids})";
+
+			return $query;
+		};
+		add_filter( 'woocommerce_get_filtered_term_product_counts_query', $scope_to_owned_products );
+
+		try {
+			$term_counts = $widget->get_filtered_term_product_counts( $term_ids_by_name, $taxonomy, $filter_type );
+		} finally {
+			remove_filter( 'woocommerce_get_filtered_term_product_counts_query', $scope_to_owned_products );
+		}
 		$this->assertEqualsCanonicalizing( $expected, $term_counts );
 	}
 
