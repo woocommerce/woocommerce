@@ -680,6 +680,164 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Update order review classifies notices by error presence and preserves reload behavior.
+	 * @dataProvider provide_update_order_review_notice_cases
+	 *
+	 * @param array[] $notices         Notices to add during the checkout update.
+	 * @param string  $expected_result Expected AJAX result.
+	 * @param bool    $reload_checkout Whether the callback requests a checkout reload.
+	 */
+	public function test_update_order_review_classifies_notices( array $notices, string $expected_result, bool $reload_checkout ): void {
+		$product            = null;
+		$callback           = null;
+		$original_post      = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the AJAX fixture.
+		$original_customer  = clone WC()->customer;
+		$session_keys       = array( 'chosen_shipping_methods', 'chosen_payment_method', 'reload_checkout', 'refresh_totals', 'customer' );
+		$original_session   = array();
+		$captured_post_data = null;
+		$post_data          = 'payment_method=test-gateway';
+
+		foreach ( $session_keys as $session_key ) {
+			$original_session[ $session_key ] = array(
+				'exists' => isset( WC()->session->{$session_key} ),
+				'value'  => WC()->session->get( $session_key ),
+			);
+		}
+
+		try {
+			wc_clear_notices();
+			unset( WC()->session->reload_checkout, WC()->session->refresh_totals );
+			WC()->cart->empty_cart();
+
+			$product       = WC_Helper_Product::create_simple_product();
+			$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1 );
+			$this->assertNotFalse( $cart_item_key, 'The checkout update fixture product should be added to the cart.' );
+
+			$callback = static function ( $received_post_data ) use ( $notices, $reload_checkout, &$captured_post_data ) {
+				$captured_post_data = $received_post_data;
+				foreach ( $notices as $notice ) {
+					wc_add_notice( $notice['message'], $notice['type'] );
+				}
+				if ( $reload_checkout ) {
+					WC()->session->set( 'reload_checkout', true );
+				}
+			};
+			add_action( 'woocommerce_checkout_update_order_review', $callback, 10, 1 );
+
+			$_POST = array(
+				'security'  => wp_create_nonce( 'update-order-review' ),
+				'post_data' => $post_data,
+			);
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertIsArray( $response, 'The checkout update should return a JSON array.' );
+			$this->assertSame( $post_data, $captured_post_data, 'The public update hook should receive the exact posted checkout data.' );
+			$this->assertSame( $expected_result, $response['result'], 'Only a rendered response containing an error should fail.' );
+			$this->assertSame( $reload_checkout, $response['reload'], 'The response should preserve the requested reload state.' );
+			$this->assertArrayHasKey( '.woocommerce-checkout-review-order-table', $response['fragments'], 'The order review fragment should remain present.' );
+			$this->assertArrayHasKey( '.woocommerce-checkout-payment', $response['fragments'], 'The checkout payment fragment should remain present.' );
+
+			if ( $reload_checkout ) {
+				$this->assertSame( '', $response['messages'], 'Reload responses should not render queued notices.' );
+			} else {
+				foreach ( $notices as $notice ) {
+					$this->assertStringContainsString( $notice['message'], $response['messages'], 'The response should retain each rendered notice message.' );
+					$this->assertStringContainsString( $notice['class'], $response['messages'], 'The response should retain each rendered notice type.' );
+				}
+			}
+		} finally {
+			if ( null !== $callback ) {
+				remove_action( 'woocommerce_checkout_update_order_review', $callback, 10 );
+			}
+			wc_clear_notices();
+			WC()->cart->empty_cart();
+			if ( $product instanceof WC_Product ) {
+				$product->delete( true );
+			}
+			WC()->customer = $original_customer;
+			foreach ( $original_session as $session_key => $session_state ) {
+				if ( $session_state['exists'] ) {
+					WC()->session->set( $session_key, $session_state['value'] );
+				} else {
+					unset( WC()->session->{$session_key} );
+				}
+			}
+			$_POST = $original_post;
+		}
+	}
+
+	/**
+	 * Data provider for update order review notice classification.
+	 *
+	 * @return array[]
+	 */
+	public static function provide_update_order_review_notice_cases(): array {
+		return array(
+			'success notice'              => array(
+				array(
+					array(
+						'type'    => 'success',
+						'message' => 'Coupon applied.',
+						'class'   => 'woocommerce-message',
+					),
+				),
+				'success',
+				false,
+			),
+			'neutral notice'              => array(
+				array(
+					array(
+						'type'    => 'notice',
+						'message' => 'Address details updated.',
+						'class'   => 'woocommerce-info',
+					),
+				),
+				'success',
+				false,
+			),
+			'error notice'                => array(
+				array(
+					array(
+						'type'    => 'error',
+						'message' => 'A checkout error occurred.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'failure',
+				false,
+			),
+			'mixed notices with an error' => array(
+				array(
+					array(
+						'type'    => 'success',
+						'message' => 'Coupon applied.',
+						'class'   => 'woocommerce-message',
+					),
+					array(
+						'type'    => 'error',
+						'message' => 'A checkout error occurred.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'failure',
+				false,
+			),
+			'error notice with reload'    => array(
+				array(
+					array(
+						'type'    => 'error',
+						'message' => 'Payment method configuration changed.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'success',
+				true,
+			),
+		);
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.

@@ -803,26 +803,28 @@ jQuery( function ( $ ) {
 						} );
 					}
 
-					// Check for error
-					if ( data && 'failure' === data.result ) {
-						var $form = $( 'form.checkout' );
+					var $form = $( 'form.checkout' );
 
-						// Remove notices from all sources
+					// Remove notices from all sources before rendering an error.
+					if ( data && 'failure' === data.result ) {
 						$(
 							'.woocommerce-error, .woocommerce-message, .is-error, .is-success'
 						).remove();
+					}
 
-						// Add new errors returned by this event
-						if ( data.messages ) {
-							$form.prepend(
-								'<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
-									data.messages +
-									'</div>'
-							); // eslint-disable-line max-len
-						} else {
-							$form.prepend( data );
-						}
+					// Add notices returned by this event.
+					if ( data && data.messages ) {
+						$form.prepend(
+							'<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
+								data.messages +
+								'</div>'
+						); // eslint-disable-line max-len
+					} else if ( data && 'failure' === data.result ) {
+						$form.prepend( data );
+					}
 
+					// Check for error.
+					if ( data && 'failure' === data.result ) {
 						// Lose focus for all fields
 						$form
 							.find( '.input-text, select, input:checkbox' )

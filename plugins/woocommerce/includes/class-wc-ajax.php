@@ -478,16 +478,19 @@ class WC_AJAX {
 		// Get messages if reload checkout is not true.
 		$reload_checkout = isset( WC()->session->reload_checkout );
 		if ( ! $reload_checkout ) {
-			$messages = wc_print_notices( true );
+			// Capture errors before printing, because wc_print_notices() clears the queue.
+			$has_error_notices = 0 < wc_notice_count( 'error' );
+			$messages          = wc_print_notices( true );
 		} else {
-			$messages = '';
+			$has_error_notices = false;
+			$messages          = '';
 		}
 
 		unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
 
 		wp_send_json(
 			array(
-				'result'    => empty( $messages ) ? 'success' : 'failure',
+				'result'    => $has_error_notices ? 'failure' : 'success',
 				'messages'  => $messages,
 				'reload'    => $reload_checkout,
 				'fragments' => apply_filters(
