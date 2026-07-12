@@ -156,20 +156,31 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_install_plugin_async() {
 		wp_set_current_user( $this->user );
+		as_unschedule_all_actions( 'woocommerce_plugins_install_callback' );
 
-		$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
-		$request->set_query_params(
-			array(
-				'async'   => true,
-				'plugins' => self::TEST_PLUGIN_SLUG,
-			)
-		);
-		$response = $this->server->dispatch( $request );
+		try {
+			$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
+			$request->set_query_params(
+				array(
+					'async'   => true,
+					'plugins' => self::TEST_PLUGIN_SLUG,
+				)
+			);
+			$response = $this->server->dispatch( $request );
 
-		$data = $response->get_data();
+			$data = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertArrayHasKey( 'job_id', $data['data'] );
+			$this->assertEquals( 200, $response->get_status() );
+			$this->assertNotEmpty( $data['data']['job_id'] );
+			$this->assertTrue(
+				as_has_scheduled_action(
+					'woocommerce_plugins_install_callback',
+					array( array( self::TEST_PLUGIN_SLUG ) )
+				)
+			);
+		} finally {
+			as_unschedule_all_actions( 'woocommerce_plugins_install_callback' );
+		}
 	}
 
 	/**
