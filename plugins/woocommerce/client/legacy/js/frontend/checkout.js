@@ -5,6 +5,16 @@ jQuery( function ( $ ) {
 		return false;
 	}
 
+	/**
+	 * Serialize checkout fields while encoding apostrophes for strict intermediaries.
+	 *
+	 * @param {Object} $form Checkout form.
+	 * @return {string} Serialized checkout fields.
+	 */
+	function serializeCheckoutForm( $form ) {
+		return $form.serialize().replace( /'/g, '%27' );
+	}
+
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
 
 	/**
@@ -685,7 +695,7 @@ jQuery( function ( $ ) {
 				s_address: s_address,
 				s_address_2: s_address_2,
 				has_full_address: has_full_address,
-				post_data: $( 'form.checkout' ).serialize(),
+				post_data: serializeCheckoutForm( $( 'form.checkout' ) ),
 			};
 
 			if ( false !== args.update_shipping_method ) {
@@ -961,7 +971,7 @@ jQuery( function ( $ ) {
 				$.ajax( {
 					type: 'POST',
 					url: wc_checkout_params.checkout_url,
-					data: $form.serialize(),
+					data: serializeCheckoutForm( $form ),
 					dataType: 'json',
 					success: function ( result ) {
 						// Detach the unload handler that prevents a reload / redirect
