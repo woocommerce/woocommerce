@@ -112,4 +112,82 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 999, $webhook2->get_user_id() );
 	}
 
+	/**
+	 * @testDox The woocommerce_webhook_enable_delivery_log filter toggles delivery logging without affecting failure tracking.
+	 */
+	public function test_delivery_logging_respects_enable_delivery_log_filter() {
+		// Ensure logging is enabled and every level is handled so the delivery log write is observable.
+		update_option( 'woocommerce_logs_logging_enabled', 'yes' );
+		update_option( 'woocommerce_logs_level_threshold', 'none' );
+
+		$logged  = 0;
+		$log_spy = function ( $message, $level, $context ) use ( &$logged ) {
+			if ( isset( $context['source'] ) && 'webhooks-delivery' === $context['source'] ) {
+				++$logged;
+			}
+			return $message;
+		};
+		add_filter( 'woocommerce_logger_log_message', $log_spy, 10, 3 );
+
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->save();
+
+		$request = array(
+			'method'     => 'POST',
+			'user-agent' => 'WooCommerce',
+			'headers'    => array(),
+			'body'       => '{}',
+		);
+		$success = array(
+			'response' => array(
+				'code'    => 200,
+				'message' => 'OK',
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+		$failure = array(
+			'response' => array(
+				'code'    => 500,
+				'message' => 'Internal Server Error',
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+
+		// By default the delivery is logged, and the filter receives the webhook ID.
+		$received_id = null;
+		$id_spy      = function ( $enable, $webhook_id ) use ( &$received_id ) {
+			$received_id = $webhook_id;
+			return $enable;
+		};
+		add_filter( 'woocommerce_webhook_enable_delivery_log', $id_spy, 10, 2 );
+		$webhook->log_delivery( 'delivery-default', $request, $success, 0.1 );
+		remove_filter( 'woocommerce_webhook_enable_delivery_log', $id_spy, 10 );
+
+		$this->assertSame( $webhook->get_id(), $received_id, 'The filter should receive the webhook ID.' );
+		$this->assertGreaterThan( 0, $logged, 'The delivery should be logged by default.' );
+
+		// When the filter returns false the log is suppressed, but failure tracking still runs.
+		$logged = 0;
+		$webhook->set_failure_count( 0 );
+		$webhook->save();
+		add_filter( 'woocommerce_webhook_enable_delivery_log', '__return_false' );
+		$webhook->log_delivery( 'delivery-disabled', $request, $failure, 0.1 );
+		remove_filter( 'woocommerce_webhook_enable_delivery_log', '__return_false' );
+
+		$this->assertSame( 0, $logged, 'The delivery log should be suppressed when the filter returns false.' );
+		$this->assertGreaterThan(
+			0,
+			wc_get_webhook( $webhook->get_id() )->get_failure_count(),
+			'Failure tracking must still run when delivery logging is disabled.'
+		);
+
+		remove_filter( 'woocommerce_logger_log_message', $log_spy, 10 );
+	}
+
 }

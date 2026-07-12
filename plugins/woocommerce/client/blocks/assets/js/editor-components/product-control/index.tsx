@@ -32,6 +32,7 @@ import ExpandableSearchListItem from '@woocommerce/editor-components/expandable-
  * Internal dependencies
  */
 import './style.scss';
+import { isExpandedOrDescendantIsExpanded } from '../search-list-control/utils';
 
 interface ProductControlProps {
 	/**
@@ -116,7 +117,23 @@ const ProductControl = (
 	const renderItemWithVariations = (
 		args: RenderItemArgs< ProductResponseItem >
 	) => {
-		const { item, search, depth = 0, isSelected, onSelect } = args;
+		const {
+			item,
+			search,
+			depth = 0,
+			isSelected,
+			onSelect,
+			useExpandedPanelId,
+		} = args;
+		const [ expandedPanelId, setExpandedPanelId ] = useExpandedPanelId ?? [
+			null,
+			// eslint-disable-next-line @typescript-eslint/no-empty-function
+			() => {},
+		];
+		const isExpanded = isExpandedOrDescendantIsExpanded(
+			item,
+			expandedPanelId
+		);
 		const variationsCount =
 			item.details?.variations && Array.isArray( item.details.variations )
 				? item.details.variations.length
@@ -149,6 +166,9 @@ const ProductControl = (
 					onSelect={ () => {
 						return () => {
 							onSelect( item )();
+							if ( ! isExpanded ) {
+								setExpandedPanelId( item.id );
+							}
 						};
 					} }
 					isLoading={ isLoading || variationsLoading }

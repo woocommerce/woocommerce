@@ -51,6 +51,7 @@ The product variations API allows you to create, view, update, and delete indivi
 | `shipping_class`        | string          | Shipping class slug.                                                                                                |
 | `shipping_class_id`     | string          | Shipping class ID. `READ-ONLY`                                                        |
 | `image`                 | object          | Variation image data. See [Product variation - Image properties](#product-variation---image-properties)               |
+| `gallery_image_ids`     | array           | Variation gallery image IDs, excluding the featured image (which is set via `image`).                               |
 | `attributes`            | array           | List of attributes. See [Product variation - Attributes properties](#product-variation---attributes-properties)       |
 | `menu_order`            | integer         | Menu order, used to custom sort products.                                                                           |
 | `meta_data`             | array           | Meta data. See [Product variation - Meta data properties](#product-variation---meta-data-properties)                  |
@@ -271,6 +272,7 @@ woocommerce.post("products/22/variations", data).parsed_response
 		"name": "",
 		"alt": ""
 	},
+	"gallery_image_ids": [],
 	"attributes": [
 		{
 			"id": 6,
@@ -310,6 +312,8 @@ This API lets you retrieve and view a specific product variation by ID.
 ```http
 GET /wp-json/wc/v3/products/<product_id>/variations/<id>
 ```
+
+Optional query parameter: `image_size` (string). Use a specific registered image size for returned variation image `src`. Falls back to the full size when the requested size is not registered. Default is `full`.
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -407,6 +411,7 @@ woocommerce.get("products/22/variations/732").parsed_response
 		"name": "",
 		"alt": ""
 	},
+	"gallery_image_ids": [],
 	"attributes": [
 		{
 			"id": 6,
@@ -544,6 +549,7 @@ woocommerce.get("products/22/variations").parsed_response
 			"name": "",
 			"alt": ""
 		},
+		"gallery_image_ids": [],
 		"attributes": [
 			{
 				"id": 6,
@@ -621,6 +627,7 @@ woocommerce.get("products/22/variations").parsed_response
 			"name": "",
 			"alt": ""
 		},
+		"gallery_image_ids": [],
 		"attributes": [
 			{
 				"id": 6,
@@ -684,6 +691,7 @@ woocommerce.get("products/22/variations").parsed_response
 | `stock_status`   | string  | Limit result set to products with specified stock status. Options: `instock`, `outofstock` and `onbackorder`.                                                                                                                                                               |
 | `virtual`        | boolean | Limit result set to virtual product variations                                                                                                                                                                                                                              |
 | `downloadable`   | boolean | Limit result set to downloadable product variations.                                                                                                                                                                                                                        |
+| `image_size`     | string  | Use a specific registered image size for the returned variation image `src`. Falls back to the full size if the requested size is not registered. Default is `full`.                                                                                                        |
 
 ## Update a product variation
 
@@ -811,6 +819,7 @@ woocommerce.put("products/22/variations/733", data).parsed_response
 		"name": "",
 		"alt": ""
 	},
+	"gallery_image_ids": [],
 	"attributes": [
 		{
 			"id": 6,
@@ -949,6 +958,7 @@ woocommerce.delete("products/22/variations/733", force: true).parsed_response
 		"name": "",
 		"alt": ""
 	},
+	"gallery_image_ids": [],
 	"attributes": [
 		{
 			"id": 6,
@@ -1258,6 +1268,7 @@ woocommerce.post("products/22/variations/batch", data).parsed_response
 				"name": "Placeholder",
 				"alt": "Placeholder"
 			},
+			"gallery_image_ids": [],
 			"attributes": [
 				{
 					"id": 6,
@@ -1335,6 +1346,7 @@ woocommerce.post("products/22/variations/batch", data).parsed_response
 				"name": "Placeholder",
 				"alt": "Placeholder"
 			},
+			"gallery_image_ids": [],
 			"attributes": [
 				{
 					"id": 6,
@@ -1414,6 +1426,7 @@ woocommerce.post("products/22/variations/batch", data).parsed_response
 				"name": "",
 				"alt": ""
 			},
+			"gallery_image_ids": [],
 			"attributes": [
 				{
 					"id": 6,
@@ -1493,6 +1506,7 @@ woocommerce.post("products/22/variations/batch", data).parsed_response
 				"name": "",
 				"alt": ""
 			},
+			"gallery_image_ids": [],
 			"attributes": [
 				{
 					"id": 6,

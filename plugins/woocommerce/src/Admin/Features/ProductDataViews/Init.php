@@ -8,7 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Admin\Features\ProductDataViews;
 
 /**
- * Loads assets related to the product block editor.
+ * Loads assets related to product data views.
  */
 class Init {
 	/**

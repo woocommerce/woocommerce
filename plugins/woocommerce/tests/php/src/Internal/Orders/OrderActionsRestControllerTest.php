@@ -695,6 +695,24 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Remove notes added by EmailLogger so endpoint-specific assertions are not affected by the
+	 * private "Email ... sent." notes the logger adds whenever a transactional email fires.
+	 *
+	 * @param array $notes Order notes to filter.
+	 * @return array Notes with EmailLogger-added entries removed (re-indexed).
+	 */
+	private function filter_out_email_logger_notes( array $notes ): array {
+		return array_values(
+			array_filter(
+				$notes,
+				static function ( $note ) {
+					return 0 !== strpos( $note->content, 'Email "' );
+				}
+			)
+		);
+	}
+
+	/**
 	 * Test sending order details email.
 	 */
 	public function test_send_order_details() {
@@ -715,9 +733,10 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'message', $data );
 		$this->assertEquals( 'Order details sent to customer@email.com.', $data['message'] );
 
-		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
-		$this->assertCount( 1, $notes );
-		$this->assertEquals( 'Order details sent to customer@email.com.', $notes[0]->content );
+		$notes          = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$endpoint_notes = $this->filter_out_email_logger_notes( $notes );
+		$this->assertCount( 1, $endpoint_notes );
+		$this->assertEquals( 'Order details sent to customer@email.com.', $endpoint_notes[0]->content );
 	}
 
 	/**
@@ -796,10 +815,11 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'message', $data );
 		$this->assertEquals( 'Billing email updated to another@email.com. Order details sent to another@email.com.', $data['message'] );
 
-		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
-		$this->assertCount( 2, $notes );
+		$notes          = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$endpoint_notes = $this->filter_out_email_logger_notes( $notes );
+		$this->assertCount( 2, $endpoint_notes );
 
-		$notes_content = wp_list_pluck( $notes, 'content' );
+		$notes_content = wp_list_pluck( $endpoint_notes, 'content' );
 		$this->assertContainsEquals( 'Billing email updated to another@email.com.', $notes_content );
 		$this->assertContainsEquals( 'Order details sent to another@email.com.', $notes_content );
 	}

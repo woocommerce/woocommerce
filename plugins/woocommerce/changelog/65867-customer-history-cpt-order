@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent customer history metabox warnings for CPT-backed orders.

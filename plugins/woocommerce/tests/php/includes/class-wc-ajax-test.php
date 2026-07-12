@@ -107,11 +107,18 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$_POST['permissions'] = 'read';
 		$_POST['description'] = $description;
 
+		$output_buffering_level = ob_get_level();
+
 		try {
 			$this->_handleAjax( 'woocommerce_update_api_key' );
 		} catch ( WPAjaxDieContinueException $e ) {
-			// wp_die() doesn't actually occur, so we need to clean up WC_AJAX::update_api_key's output buffer.
-			ob_end_clean();
+			unset( $e );
+		} finally {
+			// wp_die() doesn't actually occur, so clean up any output buffer
+			// WC_AJAX::update_api_key leaves open, keeping the level balanced.
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
 		}
 
 		$response = json_decode( $this->_last_response, true );
@@ -135,25 +142,26 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 *
 	 * @testdox Should save term color only when adding visual attribute terms via AJAX.
 	 */
-	public function test_add_new_attribute_saves_color_only_for_visual_attributes(): void {
+	public function test_add_new_attribute_saves_color_and_image_only_for_visual_attributes(): void {
 		$original_theme      = wp_get_theme()->get_stylesheet();
 		$visual_attribute_id = null;
 		$text_attribute_id   = null;
 		$visual_taxonomy     = null;
 		$text_taxonomy       = null;
 		$visual_term_id      = 0;
+		$image_term_id       = 0;
+		$color_type_term_id  = 0;
 		$text_term_id        = 0;
+		$image_id            = 0;
 		$suffix              = (string) wp_rand( 1000, 9999 );
-
-		$enable_visual_attribute_feature = function ( $features ) {
-			$features[] = 'wc-visual-attribute';
-			return array_unique( $features );
-		};
-
-		add_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
 
 		try {
 			switch_theme( 'twentytwentyfour' );
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
+			$this->assertTrue(
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class )->change_feature_enable( 'wc-visual-attribute', true ),
+				'The visual attribute feature should be toggled on.'
+			);
 
 			$visual_attribute_id = wc_create_attribute(
 				array(
@@ -176,16 +184,57 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 			$this->_setRole( 'administrator' );
 
-			$_POST['security']   = wp_create_nonce( 'add-attribute' );
-			$_POST['taxonomy']   = $visual_taxonomy;
-			$_POST['term']       = 'Cerulean ' . $suffix;
-			$_POST['term_color'] = '#336699';
+			$_POST['security']                 = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']                 = $visual_taxonomy;
+			$_POST['term']                     = 'Cerulean ' . $suffix;
+			$_POST['wc_visual_attribute_type'] = 'color';
+			$_POST['term_color']               = '#336699';
 
 			$visual_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
 			$visual_term_id  = isset( $visual_response['term_id'] ) ? absint( $visual_response['term_id'] ) : 0;
 
 			$this->assertNotEmpty( $visual_term_id, 'The visual attribute term should be created.' );
 			$this->assertSame( '#336699', get_term_meta( $visual_term_id, 'color', true ), 'Visual attribute terms should store the posted color.' );
+			$this->assertSame( '', get_term_meta( $visual_term_id, 'image', true ), 'Visual attribute terms should not store image meta when only color is posted.' );
+
+			$image_id = wp_insert_attachment(
+				array(
+					'post_title'     => 'Visual AJAX term image',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			);
+			$this->assertIsInt( $image_id, 'The image should be created.' );
+
+			update_post_meta( $image_id, '_wp_attached_file', 'visual-ajax-term-image.jpg' );
+
+			$_POST['security']                 = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']                 = $visual_taxonomy;
+			$_POST['term']                     = 'Color selected ' . $suffix;
+			$_POST['wc_visual_attribute_type'] = 'color';
+			$_POST['term_color']               = '#445566';
+			$_POST['term_image']               = (string) $image_id;
+
+			$color_type_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
+			$color_type_term_id  = isset( $color_type_response['term_id'] ) ? absint( $color_type_response['term_id'] ) : 0;
+
+			$this->assertNotEmpty( $color_type_term_id, 'The visual attribute term with selected color type should be created.' );
+			$this->assertSame( '#445566', get_term_meta( $color_type_term_id, 'color', true ), 'Selected color type should store color even when image is posted.' );
+			$this->assertSame( '', get_term_meta( $color_type_term_id, 'image', true ), 'Selected color type should ignore stale image values.' );
+
+			$_POST['security']                 = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']                 = $visual_taxonomy;
+			$_POST['term']                     = 'Pattern ' . $suffix;
+			$_POST['wc_visual_attribute_type'] = 'image';
+			$_POST['term_color']               = '#abcdef';
+			$_POST['term_image']               = (string) $image_id;
+
+			$image_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
+			$image_term_id  = isset( $image_response['term_id'] ) ? absint( $image_response['term_id'] ) : 0;
+
+			$this->assertNotEmpty( $image_term_id, 'The visual attribute term with image should be created.' );
+			$this->assertSame( (string) $image_id, get_term_meta( $image_term_id, 'image', true ), 'Selected image type should store image even when color is posted.' );
+			$this->assertSame( '', get_term_meta( $image_term_id, 'color', true ), 'Selected image type should ignore stale color values.' );
 
 			$_POST['security']   = wp_create_nonce( 'add-attribute' );
 			$_POST['taxonomy']   = $text_taxonomy;
@@ -198,10 +247,22 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			$this->assertNotEmpty( $text_term_id, 'The text attribute term should be created.' );
 			$this->assertSame( '', get_term_meta( $text_term_id, 'color', true ), 'Text attribute terms should ignore posted colors.' );
 		} finally {
-			unset( $_POST['security'], $_POST['taxonomy'], $_POST['term'], $_POST['term_color'] );
+			unset( $_POST['security'], $_POST['taxonomy'], $_POST['term'], $_POST['wc_visual_attribute_type'], $_POST['term_color'], $_POST['term_image'] );
+
+			if ( $image_id ) {
+				wp_delete_attachment( $image_id, true );
+			}
 
 			if ( $visual_term_id && taxonomy_exists( $visual_taxonomy ) ) {
 				wp_delete_term( $visual_term_id, $visual_taxonomy );
+			}
+
+			if ( $image_term_id && taxonomy_exists( $visual_taxonomy ) ) {
+				wp_delete_term( $image_term_id, $visual_taxonomy );
+			}
+
+			if ( $color_type_term_id && taxonomy_exists( $visual_taxonomy ) ) {
+				wp_delete_term( $color_type_term_id, $visual_taxonomy );
 			}
 
 			if ( $text_term_id && taxonomy_exists( $text_taxonomy ) ) {
@@ -224,7 +285,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				unset( $wc_product_attributes[ $taxonomy ] );
 			}
 
-			remove_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
 			switch_theme( $original_theme );
 		}//end try
 	}
@@ -553,6 +614,72 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should clear variation sale dates when bulk schedule dates are blank.
+	 * @group ajax
+	 */
+	public function test_bulk_sale_schedule_clears_blank_dates(): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_date_on_sale_from( '2026-06-01 00:00:00' );
+		$variation->set_date_on_sale_to( '2026-06-30 23:59:59' );
+		$variation->save();
+
+		$method = new ReflectionMethod( WC_AJAX::class, 'variation_bulk_action_variable_sale_schedule' );
+		$method->setAccessible( true );
+
+		$method->invokeArgs(
+			null,
+			array(
+				array( $variation->get_id() ),
+				array(
+					'date_from' => '',
+					'date_to'   => '',
+				),
+			)
+		);
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$this->assertNull( $variation->get_date_on_sale_from( 'edit' ), 'The sale start date should be cleared when the bulk action start date is blank.' );
+		$this->assertNull( $variation->get_date_on_sale_to( 'edit' ), 'The sale end date should be cleared when the bulk action end date is blank.' );
+
+		$variation->delete( true );
+	}
+
+	/**
+	 * @testdox Adding a custom field renders a Delete button with a valid delete nonce.
+	 */
+	public function test_order_add_meta_delete_button_uses_name_value_nonce(): void {
+		$this->_setRole( 'administrator' );
+		$order = WC_Helper_Order::create_order();
+
+		$_POST['_ajax_nonce-add-meta'] = wp_create_nonce( 'add-meta' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['metakeyinput']         = 'my_test_key';
+		$_POST['metavalue']            = 'my_test_value';
+
+		$output_buffering_level = ob_get_level();
+
+		try {
+			// Note that _handleAjax makes use of output buffering, which the die
+			// handler usually cleans up; the finally block below closes only any
+			// buffer it leaves dangling so the buffer level stays balanced.
+			$this->_handleAjax( 'woocommerce_order_add_meta' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		} finally {
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
+		}
+
+		$this->assertStringContainsString(
+			'::_ajax_nonce=',
+			(string) $this->_last_response,
+			'Delete button should use the _ajax_nonce= token.'
+		);
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
@@ -563,13 +690,15 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$output_buffering_level = ob_get_level();
 
 		try {
-			// Note that _handleAjax makes use of output buffering...
+			// Note that _handleAjax makes use of output buffering, which the die
+			// handler usually cleans up; the finally block below closes only any
+			// buffer it leaves dangling so the buffer level stays balanced.
 			$this->_handleAjax( $ajax_action );
 		} catch ( Exception $e ) {
-			// ...However, if an exception is raised, it may not be able to clean-up,
-			// which can lead to PhpUnit emitting risky test warnings.
-			if ( ob_get_level() === $output_buffering_level + 1 ) {
-				ob_get_clean();
+			unset( $e );
+		} finally {
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
 			}
 		}
 

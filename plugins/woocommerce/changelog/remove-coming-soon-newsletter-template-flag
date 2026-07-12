@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove the unused coming soon newsletter template feature flag.

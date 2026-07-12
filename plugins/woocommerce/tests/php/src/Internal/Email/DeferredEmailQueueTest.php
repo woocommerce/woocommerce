@@ -469,8 +469,7 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		$this->sut->push( $filter, $args );
 		$this->sut->dispatch();
 
-		$queue         = $this->get_test_queue();
-		$scheduled_arg = $queue->actions[0]['args'];
+		$scheduled_arg = $this->get_scheduled_email_action()['args'];
 		$encoded_arg   = wp_json_encode( $scheduled_arg );
 
 		$this->assert_queued_object_reference( $scheduled_arg[1][ $wrapped_position ], $expected_type, $expected_id );
@@ -526,6 +525,30 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 			},
 			10,
 			3
+		);
+	}
+
+	/**
+	 * Get the scheduled Action Scheduler email action from the test queue.
+	 *
+	 * Other fixture setup can enqueue unrelated actions before the email queue
+	 * dispatches, so object round-trip assertions must target the email action.
+	 *
+	 * @return array{timestamp: int, hook: string, args: array, group: string}
+	 */
+	private function get_scheduled_email_action(): array {
+		foreach ( $this->get_test_queue()->actions as $action ) {
+			if ( 'woocommerce_send_queued_transactional_email' === $action['hook'] ) {
+				return $action;
+			}
+		}
+
+		$this->fail( 'Expected a queued transactional email action to be scheduled.' );
+		return array(
+			'timestamp' => 0,
+			'hook'      => '',
+			'args'      => array(),
+			'group'     => '',
 		);
 	}
 

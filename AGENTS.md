@@ -24,6 +24,7 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 
 - **`woocommerce-backend-dev`** - Backend PHP conventions and unit tests. **Invoke before writing any PHP test files.**
 - **`woocommerce-dev-cycle`** - Testing and linting workflows (PHP, JS, markdown)
+- **`woocommerce-local-env`** - Local environment setup, wp-env commands, and WooCommerce build watchers
 - **`woocommerce-copy-guidelines`** - UI text standards (sentence case rules)
 - **`woocommerce-code-review`** - Code review standards and critical violations to flag
 - **`woocommerce-markdown`** - Markdown writing and editing guidelines
@@ -73,11 +74,15 @@ plugins/woocommerce/
 - Used for `@since` annotations (remove `-dev` suffix)
 - When changing template files (PHP files used to display UI on the front-end) the version in their header should be updated to the current version, without the `-dev` suffix.
 
+**JavaScript:**
+
+- Prefer vanilla JavaScript/TypeScript over jQuery for new or modified code. Keep existing jQuery when a rewrite is out of scope.
+
 ## Development Workflow
 
 1. Make code changes
 2. Run relevant tests (see `woocommerce-dev-cycle` skill)
-3. Run linting (see `woocommerce-dev-cycle` skill)
+3. Run linting and fix all errors and warnings before committing (see Pre-commit Checks)
 4. Run PHPStan for PHP changes (see below)
 5. Commit only after tests pass and all checks are clean
 6. Create changelog entries for each affected package
@@ -85,27 +90,27 @@ plugins/woocommerce/
 
 ### Pre-commit Checks
 
-**Before committing PHP changes**, run these checks to avoid CI failures:
+**Before committing PHP changes**, run both lint commands and fix what they report:
 
 ```sh
-# Lint changed PHP files
+# Lint the changed PHP files
 pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
 
-# Run PHPStan on modified files (from plugins/woocommerce directory)
+# Lint the full branch diff (phpcs-changed — catches warnings the per-file pass can miss across commits)
+pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
+```
+
+Fix every `phpcs` **error and warning** before committing — the CI **Lint** job treats warnings as failures, so an unaddressed warning turns the check red. If a finding is intentionally suppressed, add a brief inline justification. Re-run `lint:changes:branch` after any commit rewrite, since it compares the whole branch against trunk.
+
+Also run PHPStan on modified PHP files (from the `plugins/woocommerce` directory):
+
+```sh
 composer exec -- phpstan analyse path/to/modified/File.php --memory-limit=2G
 ```
 
 **PHPStan Baseline Policy:** The baseline file (`phpstan-baseline.neon`) must never be added to. It should only shrink over time as existing errors are naturally resolved by code changes. If PHPStan reports a new error, fix it in the code rather than adding it to the baseline. If your fix resolves a previously baselined error, remove the corresponding entry from the baseline.
 
-### Pre-push Checks
-
-**Before pushing**, run the branch-level lint to catch issues across all commits on the branch (e.g. alignment warnings that per-file linting misses):
-
-```sh
-pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
-```
-
-This compares the full branch diff against trunk and runs `phpcs-changed` on it. Fix any warnings before pushing.
+### Changelog Entries
 
 **NEVER create a PR without changelog entries.** Each package modified in the monorepo requires its own changelog entry. Run for each affected package:
 
@@ -150,15 +155,41 @@ For detailed test commands, see `woocommerce-dev-cycle` skill.
 - Never create standalone functions (always use class methods)
 - Tests require Docker environment
 
+## Backward Compatibility
+
+Any change to a **public or externally exposed** class, interface, function, or method signature is **high-risk** and **must state its backward-compatibility impact in the PR description** — regardless of whether the symbol lives in the `Internal` namespace. The `Internal` namespace is not a guarantee that a symbol is safe to change: third-party code implements and consumes some of these contracts in practice (for example, the WooCommerce Stripe Gateway implements `Internal\ProductFeed\Feed\FeedInterface`).
+
+Treat a symbol as **externally exposed** when it is implemented or consumed outside `plugins/woocommerce/` — by extensions, other plugins, or themes — even if it lives under `Internal`. When in doubt, assume it is exposed and state the BC impact.
+
+**Adding a method to an interface that external code can implement must be flagged explicitly.** It is a backward-incompatible change: existing implementers fatal on load because they no longer satisfy the contract. Likewise, **removing a required method from an interface is breaking** for existing implementers (they carry a now-dead method, which static analysis such as PHPStan will flag). Prefer a non-breaking alternative — add the method to the concrete class rather than the interface, introduce a separate new interface, or supply a default implementation via an abstract base class.
+
+**Deprecate, don't rename.** For existing public symbols (classes, interfaces, methods, constants, hooks), never rename or remove them in place. Mark the old symbol `@deprecated`, introduce the replacement alongside it, and keep both working through a deprecation window so external consumers have time to migrate.
+
+> This rule exists because WooCommerce 10.9.0 was reverted on WP Cloud: PR #64394 added a required `get_entry_count(): int` method to `FeedInterface`, fataling older WooCommerce Stripe Gateway versions that implement it. Fixed in PR #65965.
+
+## Block Development
+
+### `block.json` Attribute Defaults
+
+Never include styling options such as `fontSize`, `borderColor`, `textColor`... as block attributes. They should only be listed under `supports`.
+
+Do not add `default` values to block attributes in `block.json`.
+
+- Default attribute values can be indistinguishable from missing attributes when parsed, especially when the default value is not serialized into saved block markup.
+- Defaults can create subtle conflicts with `theme.json`, block supports, editor controls, deprecations, and migrations.
+- During implementation or review, flag any newly inserted `default` in `block.json`.
+
 ## Interactivity API Stores
 
-All WooCommerce Interactivity API stores are **private by design**:
+Most WooCommerce Interactivity API stores are **private by design**. Exception: the `woocommerce/product-filters` store is public for Product Filters inner-block extensibility.
 
-- Stores use `lock: true` indicating they are not intended for extension
+For private stores:
+
+- Not intended for third-party extension
 - Removing or changing store state/selectors is **not a breaking change**
 - No backwards compatibility is required for store internals
-- If a store needs to be extensible in the future, it will be split into private (internal) and public (API) stores
-- General stores (namespace `woocommerce`) may become public eventually, but currently all are locked
+- If another store needs to be extensible in the future, it will be split into private (internal) and public (API) stores
+- General stores (namespace `woocommerce`) may become public eventually, but currently remain private
 
 Reference: [WordPress Interactivity API - Private Stores](https://developer.wordpress.org/block-editor/reference-guides/interactivity-api/api-reference#private-stores)
 

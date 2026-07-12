@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add variation-exclusive fields (tax class, virtual, backorders, downloadable options) and refactor panel field registry to compose from shared main registry

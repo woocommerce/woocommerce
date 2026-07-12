@@ -8,6 +8,7 @@ export const DEFAULT_PRODUCT_TABLE_MEDIA_FIELD = 'images';
 
 export const DEFAULT_PRODUCT_TABLE_FIELDS = [
 	'product_status',
+	'type',
 	'sku',
 	'stock',
 	'categories',

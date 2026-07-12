@@ -466,6 +466,62 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A variation's visibility follows its parent product across ID, slug and SKU lookups.
+	 */
+	public function test_variation_visibility_follows_parent_product() {
+		$fixtures  = new FixtureData();
+		$attribute = FixtureData::get_product_attribute( 'color', array( 'red', 'blue' ) );
+
+		// Variation under a non-public (draft) parent. The variation itself stays published.
+		$hidden_parent    = $fixtures->get_variable_product( array( 'name' => 'Hidden Parent' ), array( $attribute ) );
+		$hidden_variation = $fixtures->get_variation_product(
+			$hidden_parent->get_id(),
+			array( 'pa_color' => 'red' ),
+			array(
+				'regular_price' => 10,
+				'sku'           => 'hidden-parent-variation',
+			)
+		);
+		$hidden_slug      = get_post_field( 'post_name', $hidden_variation->get_id() );
+		$hidden_parent->set_status( ProductStatus::DRAFT );
+		$hidden_parent->save();
+
+		// Variation under a published parent (regression).
+		$public_parent    = $fixtures->get_variable_product( array( 'name' => 'Public Parent' ), array( $attribute ) );
+		$public_variation = $fixtures->get_variation_product(
+			$public_parent->get_id(),
+			array( 'pa_color' => 'blue' ),
+			array(
+				'regular_price' => 10,
+				'sku'           => 'public-parent-variation',
+			)
+		);
+
+		// Hidden parent: the variation must not be exposed by ID, slug, or SKU/slug collection lookups.
+		$by_id   = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $hidden_variation->get_id() ) );
+		$by_slug = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $hidden_slug ) );
+		$this->assertEquals( 404, $by_id->get_status() );
+		$this->assertEquals( 404, $by_slug->get_status() );
+
+		$sku_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$sku_request->set_param( 'sku', 'hidden-parent-variation' );
+		$this->assertCount( 0, rest_get_server()->dispatch( $sku_request )->get_data() );
+
+		$slug_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$slug_request->set_param( 'slug', $hidden_slug );
+		$this->assertCount( 0, rest_get_server()->dispatch( $slug_request )->get_data() );
+
+		// Published parent: the variation is still returned.
+		$public_by_id = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $public_variation->get_id() ) );
+		$this->assertEquals( 200, $public_by_id->get_status() );
+		$this->assertSame( $public_variation->get_id(), $public_by_id->get_data()['id'] );
+
+		$public_sku_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$public_sku_request->set_param( 'sku', 'public-parent-variation' );
+		$this->assertCount( 1, rest_get_server()->dispatch( $public_sku_request )->get_data() );
+	}
+
+	/**
 	 * @testdox Product should always include embeddable related link using related parameter format.
 	 */
 	public function test_product_has_related_link_with_related_parameter_format() {

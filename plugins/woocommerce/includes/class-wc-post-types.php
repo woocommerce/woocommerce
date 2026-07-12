@@ -12,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Post types Class.
@@ -31,6 +30,18 @@ class WC_Post_Types {
 		add_filter( 'rest_api_allowed_post_types', array( __CLASS__, 'rest_api_allowed_post_types' ) );
 		add_action( 'woocommerce_after_register_post_type', array( __CLASS__, 'maybe_flush_rewrite_rules' ) );
 		add_action( 'woocommerce_flush_rewrite_rules', array( __CLASS__, 'flush_rewrite_rules' ) );
+		// Similar logic exists in flush_rewrite_rules_on_shop_page_save(), but REST saves need a queued flush.
+		add_action(
+			'save_post_page',
+			static function ( $post_id, $post, $update ) {
+				if ( ! $update ) {
+					return;
+				}
+				self::queue_rewrite_rules_on_shop_page_save( $post_id, $post );
+			},
+			10,
+			3
+		);
 		add_filter( 'gutenberg_can_edit_post_type', array( __CLASS__, 'gutenberg_can_edit_post_type' ), 10, 2 );
 		add_filter( 'use_block_editor_for_post_type', array( __CLASS__, 'gutenberg_can_edit_post_type' ), 10, 2 );
 	}
@@ -197,6 +208,7 @@ class WC_Post_Types {
 						'add_new_item'      => __( 'Add new shipping class', 'woocommerce' ),
 						'new_item_name'     => __( 'New shipping class Name', 'woocommerce' ),
 					),
+					'public'                => false,
 					'show_ui'               => false,
 					'show_in_quick_edit'    => false,
 					'show_in_nav_menus'     => false,
@@ -405,73 +417,6 @@ class WC_Post_Types {
 				)
 			)
 		);
-
-		// Register the product form post type when the feature is enabled.
-		if ( Features::is_enabled( 'product-editor-template-system' ) ) {
-			register_post_type(
-				'product_form',
-				/**
-				 * Allow developers to customize the product form post type registration arguments.
-				 *
-				 * @since 9.1.0
-				 * @param array $args The default post type registration arguments.
-				 */
-				apply_filters(
-					'woocommerce_register_post_type_product_form',
-					array(
-						'labels'
-						=> array(
-							'name'                  => __( 'Product Forms', 'woocommerce' ),
-							'singular_name'         => __( 'Product Form', 'woocommerce' ),
-							'all_items'             => __( 'All Product Form', 'woocommerce' ),
-							'menu_name'             => _x( 'Product Forms', 'Admin menu name', 'woocommerce' ),
-							'add_new'               => __( 'Add New', 'woocommerce' ),
-							'add_new_item'          => __( 'Add new product form', 'woocommerce' ),
-							'edit'                  => __( 'Edit', 'woocommerce' ),
-							'edit_item'             => __( 'Edit product form', 'woocommerce' ),
-							'new_item'              => __( 'New product form', 'woocommerce' ),
-							'view_item'             => __( 'View product form', 'woocommerce' ),
-							'view_items'            => __( 'View product forms', 'woocommerce' ),
-							'search_items'          => __( 'Search product forms', 'woocommerce' ),
-							'not_found'             => __( 'No product forms found', 'woocommerce' ),
-							'not_found_in_trash'    => __( 'No product forms found in trash', 'woocommerce' ),
-							'parent'                => __( 'Parent product form', 'woocommerce' ),
-							'featured_image'        => __( 'Product form image', 'woocommerce' ),
-							'set_featured_image'    => __( 'Set product form image', 'woocommerce' ),
-							'remove_featured_image' => __( 'Remove product form image', 'woocommerce' ),
-							'use_featured_image'    => __( 'Use as product form image', 'woocommerce' ),
-							'insert_into_item'      => __( 'Insert into product form', 'woocommerce' ),
-							'uploaded_to_this_item' => __( 'Uploaded to this product form', 'woocommerce' ),
-							'filter_items_list'     => __( 'Filter product forms', 'woocommerce' ),
-							'items_list_navigation' => __( 'Product forms navigation', 'woocommerce' ),
-							'items_list'            => __( 'Product forms list', 'woocommerce' ),
-							'item_link'             => __( 'Product form Link', 'woocommerce' ),
-							'item_link_description' => __( 'A link to a product form.', 'woocommerce' ),
-						),
-						'description'         => __( 'This is where you can set up product forms for various product types in your dashboard.', 'woocommerce' ),
-						'public'              => true,
-						'menu_icon'           => 'dashicons-forms',
-						'capability_type'     => 'product',
-						'map_meta_cap'        => true,
-						'publicly_queryable'  => true,
-						'hierarchical'        => false, // Hierarchical causes memory issues - WP loads all records!
-						'rewrite'             => $permalinks['product_rewrite_slug'] ? array(
-							'slug'       => $permalinks['product_rewrite_slug'],
-							'with_front' => false,
-							'feeds'      => true,
-						) : false,
-						'query_var'           => true,
-						'supports'            => $supports,
-						'has_archive'         => $has_archive,
-						'show_in_rest'        => true,
-						'show_ui'             => true,
-						'show_in_menu'        => true,
-						'exclude_from_search' => true,
-						'show_in_nav_menus'   => false,
-					)
-				)
-			);
-		}
 
 		register_post_type(
 			'product_variation',
@@ -744,6 +689,33 @@ class WC_Post_Types {
 		if ( 'yes' === get_option( 'woocommerce_queue_flush_rewrite_rules' ) ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
 			self::flush_rewrite_rules();
+		}
+	}
+
+	/**
+	 * Queue rewrite rules to be flushed after the shop page (or its ancestors) gets saved.
+	 *
+	 * @param int          $post_id Post ID.
+	 * @param WP_Post|null $post    Post object.
+	 */
+	private static function queue_rewrite_rules_on_shop_page_save( $post_id, $post = null ): void {
+		$post_id = absint( $post_id );
+
+		if ( ! $post_id || wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+			return;
+		}
+
+		$post_status = $post instanceof WP_Post ? $post->post_status : get_post_status( $post_id );
+
+		$shop_page_id = wc_get_page_id( 'shop' );
+
+		// Keep the existing behavior where a trashed shop page still serves the product archive at its previous URL.
+		if ( 0 >= $shop_page_id || 'trash' === $post_status ) {
+			return;
+		}
+
+		if ( $shop_page_id === $post_id || in_array( $post_id, get_post_ancestors( $shop_page_id ), true ) ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
 	}
 

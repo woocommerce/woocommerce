@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Structured data: emit a single Offer with the exact variation price (and `inProductGroupWithID`) when a variation-specific URL is requested, instead of the parent AggregateOffer price range, fixing Google Merchant "price mismatch" disapprovals.

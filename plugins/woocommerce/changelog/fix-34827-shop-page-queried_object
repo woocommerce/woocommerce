@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix 'current-menu-item' class not being added to the Shop page in the Page List block

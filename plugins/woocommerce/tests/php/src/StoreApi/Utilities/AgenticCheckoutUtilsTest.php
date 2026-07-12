@@ -195,4 +195,62 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 			$result->get_error_message()
 		);
 	}
+
+	/**
+	 * @testdox Should preserve backslashes in buyer data, which arrives JSON-decoded and is never magic-quoted.
+	 */
+	public function test_set_buyer_data_preserves_backslashes() {
+		$customer = WC()->customer;
+
+		AgenticCheckoutUtils::set_buyer_data(
+			array(
+				'first_name' => 'C:\\Users',
+				'last_name'  => 'O\\Brien',
+			),
+			$customer
+		);
+
+		$this->assertSame( 'C:\\Users', $customer->get_billing_first_name(), 'Backslashes in first name should be preserved.' );
+		$this->assertSame( 'O\\Brien', $customer->get_billing_last_name(), 'Backslashes in last name should be preserved.' );
+	}
+
+	/**
+	 * @testdox Should preserve backslashes in fulfillment address fields.
+	 */
+	public function test_set_fulfillment_address_preserves_backslashes() {
+		$customer = WC()->customer;
+
+		AgenticCheckoutUtils::set_fulfillment_address(
+			array(
+				'name'        => 'O\\Brien Family',
+				'line_one'    => 'Apt 4\\B',
+				'city'        => 'Düsseldorf\\Nord',
+				'country'     => 'US',
+				'postal_code' => '90210',
+			),
+			$customer
+		);
+
+		$this->assertSame( 'O\\Brien', $customer->get_shipping_first_name(), 'Backslashes in the parsed first name should be preserved.' );
+		$this->assertSame( 'Apt 4\\B', $customer->get_shipping_address_1(), 'Backslashes in address line should be preserved.' );
+		$this->assertSame( 'Düsseldorf\\Nord', $customer->get_shipping_city(), 'Backslashes in city should be preserved.' );
+	}
+
+	/**
+	 * @testdox Should preserve backslashes in billing address fields.
+	 */
+	public function test_set_billing_address_preserves_backslashes() {
+		$customer = WC()->customer;
+
+		AgenticCheckoutUtils::set_billing_address(
+			array(
+				'name'     => 'O\\Brien Family',
+				'line_one' => 'Apt 4\\B',
+			),
+			$customer
+		);
+
+		$this->assertSame( 'O\\Brien', $customer->get_billing_first_name(), 'Backslashes in the parsed first name should be preserved.' );
+		$this->assertSame( 'Apt 4\\B', $customer->get_billing_address_1(), 'Backslashes in address line should be preserved.' );
+	}
 }

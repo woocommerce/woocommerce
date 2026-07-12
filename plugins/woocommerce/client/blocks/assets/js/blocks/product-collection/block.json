@@ -61,7 +61,8 @@
 			"default": false
 		},
 		"__privatePreviewState": {
-			"type": "object"
+			"type": "object",
+			"role": "local"
 		}
 	},
 	"providesContext": {
@@ -71,6 +72,7 @@
 		"dimensions": "dimensions",
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection",
+		"forcePageReload": "forcePageReload",
 		"__privateProductCollectionPreviewState": "__privatePreviewState"
 	},
 	"usesContext": [ "templateSlug", "postId" ],
