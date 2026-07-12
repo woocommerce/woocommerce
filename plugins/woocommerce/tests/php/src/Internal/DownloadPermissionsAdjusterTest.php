@@ -49,6 +49,23 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Reset non-transactional test doubles and option caches.
+	 */
+	public function tearDown(): void {
+		try {
+			$this->reset_legacy_proxy_mocks();
+		} finally {
+			try {
+				parent::tearDown();
+			} finally {
+				wp_cache_delete( 'wc_downloads_approved_directories_mode', 'options' );
+				wp_cache_delete( 'alloptions', 'options' );
+				wp_cache_delete( 'notoptions', 'options' );
+			}
+		}
+	}
+
+	/**
 	 * Initialize the subject after test doubles have been registered.
 	 */
 	private function initialize_subject(): void {
