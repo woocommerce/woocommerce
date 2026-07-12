@@ -1477,7 +1477,10 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a variable product with stock-managed variations.
 	 *
-	 * @param array<int, array{quantity: int, status?: string}> $variation_data Variation stock and status data.
+	 * A null quantity creates an unmanaged-stock variation, i.e. a NULL
+	 * stock_quantity row in the product meta lookup table.
+	 *
+	 * @param array<int, array{quantity: int|null, status?: string}> $variation_data Variation stock and status data.
 	 * @return \WC_Product_Variable
 	 */
 	private function create_variable_product_with_stock( array $variation_data ): \WC_Product_Variable {
@@ -1489,8 +1492,12 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 			$variation = new \WC_Product_Variation();
 			$variation->set_parent_id( $product->get_id() );
 			$variation->set_regular_price( 10 );
-			$variation->set_manage_stock( true );
-			$variation->set_stock_quantity( $data['quantity'] );
+			if ( isset( $data['quantity'] ) ) {
+				$variation->set_manage_stock( true );
+				$variation->set_stock_quantity( $data['quantity'] );
+			} else {
+				$variation->set_manage_stock( false );
+			}
 			$variation->set_status( $data['status'] ?? ProductStatus::PUBLISH );
 			$variation->save();
 		}
@@ -1518,6 +1525,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 		$non_matching_variable = $this->create_variable_product_with_stock(
 			array(
 				array( 'quantity' => 10 ),
+				array( 'quantity' => null ),
 			)
 		);
 
@@ -1538,6 +1546,26 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( array( $variable_product->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
+
+		// A zero-inclusive range must not match the unmanaged (NULL stock)
+		// variation of the non-matching variable product.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'min_stock_quantity' => 0,
+				'max_stock_quantity' => 2,
+				'include'            => array(
+					$variable_product->get_id(),
+					$non_matching_product->get_id(),
+					$non_matching_variable->get_id(),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array( $non_matching_product->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
 
 		WC_Helper_Product::delete_product( $variable_product->get_id() );
 		WC_Helper_Product::delete_product( $non_matching_product->get_id() );
