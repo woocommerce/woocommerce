@@ -151,9 +151,9 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$downloads                       = $this->product->get_downloads();
 		$existing_file_key               = key( $downloads );
 		$downloads[ $existing_file_key ] = array(
-			'id'   => $existing_file_key,
-			'file' => 'https://another.bad.location/file.pdf',
-			'name' => 'Yet another file',
+			'download_id' => $existing_file_key,
+			'file'        => 'https://another.bad.location/file.pdf',
+			'name'        => 'Yet another file',
 		);
 
 		$this->expectException( WC_Data_Exception::class );
@@ -168,16 +168,16 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$downloads                       = $this->product->get_downloads();
 		$existing_file_key               = key( $downloads );
 		$downloads[ $existing_file_key ] = array(
-			'id'   => $existing_file_key,
-			'file' => 'https://always.trusted/why-we-test-code.pdf',
-			'name' => 'And one more file',
+			'download_id' => $existing_file_key,
+			'file'        => 'https://always.trusted/why-we-test-code.pdf',
+			'name'        => 'And one more file',
 		);
 
 		$this->product->set_downloads( $downloads );
 		$this->product->save();
 
 		$this->assertCount(
-			3,
+			2,
 			$this->product->get_downloads(),
 			'If a shop manager attempts to change an existing downloadable file to a valid path (that is covered by an approved directory rule) that is okay.'
 		);

@@ -35,6 +35,25 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	use CogsAwareTrait;
 
 	/**
+	 * Product properties whose setters provide complete values.
+	 *
+	 * @var array<string, bool>
+	 */
+	private const WHOLE_VALUE_PROPS = array(
+		'upsell_ids'         => true,
+		'cross_sell_ids'     => true,
+		'attributes'         => true,
+		'default_attributes' => true,
+		'category_ids'       => true,
+		'tag_ids'            => true,
+		'brand_ids'          => true,
+		'downloads'          => true,
+		'gallery_image_ids'  => true,
+		'rating_counts'      => true,
+		'children'           => true,
+	);
+
+	/**
 	 * This is the name of this object type.
 	 *
 	 * @var string
@@ -145,6 +164,26 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$this->data_store = WC_Data_Store::load( 'product-' . $this->get_type() );
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
+		}
+	}
+
+	/**
+	 * Merge product changes with data and clear the pending changes.
+	 *
+	 * Woo-owned collection properties are complete values and must replace their previous values so removed entries
+	 * do not remain in memory. Unknown properties retain WC_Data's recursive behavior for extension compatibility.
+	 *
+	 * @return void
+	 *
+	 * @since 11.1.0
+	 */
+	public function apply_changes() {
+		$whole_value_changes = array_intersect_key( $this->changes, self::WHOLE_VALUE_PROPS );
+
+		parent::apply_changes();
+
+		foreach ( $whole_value_changes as $prop => $value ) {
+			$this->data[ $prop ] = $value;
 		}
 	}
 
