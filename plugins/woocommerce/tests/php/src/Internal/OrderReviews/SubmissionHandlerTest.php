@@ -546,7 +546,7 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$variation_b   = wc_get_product( $variation_ids[1] );
 		$other_order   = $this->make_empty_order();
 
-		// Pre-existing approved review from an older order, same parent, variation A.
+		// Pre-existing approved review from an older order, same parent, variation B.
 		$prior_comment_id = (int) wp_insert_comment(
 			array(
 				'comment_post_ID'      => $variable->get_id(),
@@ -559,7 +559,7 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		);
 		add_comment_meta( $prior_comment_id, 'rating', 4, true );
 		add_comment_meta( $prior_comment_id, ItemEligibility::ORDER_META_KEY, (int) $other_order->get_id(), true );
-		add_comment_meta( $prior_comment_id, ItemEligibility::VARIATION_META_KEY, (int) $variation_a->get_id(), true );
+		add_comment_meta( $prior_comment_id, ItemEligibility::VARIATION_META_KEY, (int) $variation_b->get_id(), true );
 
 		$order = $this->make_empty_order();
 		$order->add_product( $variation_a, 1 );
