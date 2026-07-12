@@ -35,9 +35,10 @@ const testPackageData = generateShippingPackage( {
 } );
 
 test( 'renders available shipping rates', async () => {
+	const selectShippingRate = jest.fn();
 	( useShippingData as jest.Mock ).mockImplementation( () => {
 		return {
-			selectShippingRate: jest.fn(),
+			selectShippingRate,
 			isSelectingRate: false,
 			shippingRates: [ testPackageData ],
 		};
@@ -70,6 +71,50 @@ test( 'renders available shipping rates', async () => {
 	expect(
 		screen.getByRole( 'radio', { name: 'Flat rate (premium) $15.00' } )
 	).toBeInTheDocument();
+	expect( selectShippingRate ).toHaveBeenCalledTimes( 1 );
+	expect( selectShippingRate ).toHaveBeenCalledWith( 'flat_rate:1', 0 );
+} );
+
+test( 'skips mount selection when disabled but still handles user selection', async () => {
+	const selectShippingRate = jest.fn();
+
+	( useShippingData as jest.Mock ).mockImplementation( () => {
+		return {
+			selectShippingRate,
+			isSelectingRate: false,
+			shippingRates: [ testPackageData ],
+		};
+	} );
+
+	( useStoreCart as jest.Mock ).mockImplementation( () => {
+		return {
+			cartItems: [],
+		};
+	} );
+
+	render(
+		<ShippingRatesControlPackage
+			packageData={ testPackageData }
+			packageId={ testPackageData.package_id }
+			noResultsMessage={
+				<span>No shipping rates available at the moment</span>
+			}
+			selectRateOnMount={ false }
+		/>
+	);
+
+	expect( selectShippingRate ).not.toHaveBeenCalled();
+
+	await act( async () => {
+		await userEvent.click(
+			screen.getByRole( 'radio', {
+				name: 'Flat rate (premium) $15.00',
+			} )
+		);
+	} );
+
+	expect( selectShippingRate ).toHaveBeenCalledTimes( 1 );
+	expect( selectShippingRate ).toHaveBeenCalledWith( 'flat_rate:2', 0 );
 } );
 
 test( 'changes rate selection locally and informs API about it', async () => {

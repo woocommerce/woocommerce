@@ -48,4 +48,6 @@ export interface PackageProps {
 	showItems?: TernaryFlag;
 	// Should the selected rate be highlighted.
 	highlightChecked?: boolean;
+	// Whether to synchronize the initial rate selection on mount.
+	selectRateOnMount?: boolean;
 }

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 import { usePrevious } from '@woocommerce/base-hooks';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { ExperimentalOrderShippingPackages } from '@woocommerce/blocks-checkout';
@@ -37,6 +37,48 @@ const Packages = ( {
 	renderOption,
 	context = '',
 }: PackagesProps ): JSX.Element | null => {
+	const { selectShippingRate } = useShippingData();
+	const synchronizedPackageIds = useRef< Set< string | number > >(
+		new Set()
+	);
+
+	useEffect( () => {
+		const currentPackageIds = new Set(
+			packages.map( ( shippingPackage ) => shippingPackage.package_id )
+		);
+
+		synchronizedPackageIds.current.forEach( ( packageId ) => {
+			if ( ! currentPackageIds.has( packageId ) ) {
+				synchronizedPackageIds.current.delete( packageId );
+			}
+		} );
+
+		packages.forEach( ( shippingPackage ) => {
+			const selectedRate = shippingPackage.shipping_rates.find(
+				( rate ) => rate.selected
+			);
+			const rateId =
+				selectedRate?.rate_id ??
+				shippingPackage.shipping_rates[ 0 ]?.rate_id;
+
+			if ( ! rateId ) {
+				synchronizedPackageIds.current.delete(
+					shippingPackage.package_id
+				);
+				return;
+			}
+
+			if (
+				synchronizedPackageIds.current.has( shippingPackage.package_id )
+			) {
+				return;
+			}
+
+			synchronizedPackageIds.current.add( shippingPackage.package_id );
+			selectShippingRate( rateId, shippingPackage.package_id );
+		} );
+	}, [ packages, selectShippingRate ] );
+
 	// If there are no packages, return nothing.
 	if ( ! packages.length ) {
 		return null;
@@ -53,6 +95,7 @@ const Packages = ( {
 					showItems={ showItems }
 					noResultsMessage={ noResultsMessage }
 					renderOption={ renderOption }
+					selectRateOnMount={ false }
 				/>
 			) ) }
 		</>
