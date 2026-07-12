@@ -76,18 +76,22 @@ class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 	public function test_add_to_cart_response_data( string $product_type ) {
 		switch ( $product_type ) {
 			case 'simple':
-				$product = WC_Helper_Product::create_simple_product();
+				$product                   = WC_Helper_Product::create_simple_product();
+				$expected_add_to_cart_text = __( 'Add to cart', 'woocommerce' );
 				break;
 			case 'grouped':
-				$product = new \WC_Product_Grouped();
+				$product                   = new \WC_Product_Grouped();
+				$expected_add_to_cart_text = __( 'View products', 'woocommerce' );
 				$product->set_name( 'Dummy Grouped Product' );
 				$product->save();
 				break;
 			case 'external':
-				$product = WC_Helper_Product::create_external_product();
+				$product                   = WC_Helper_Product::create_external_product();
+				$expected_add_to_cart_text = 'Buy external product';
 				break;
 			case 'variable':
-				$product = new \WC_Product_Variable();
+				$product                   = new \WC_Product_Variable();
+				$expected_add_to_cart_text = __( 'Read more', 'woocommerce' );
 				$product->set_name( 'Dummy Variable Product' );
 				$product->save();
 				break;
@@ -110,7 +114,7 @@ class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( $product->add_to_cart_url(), $add_to_cart['url'] );
 		$this->assertEquals( $product->add_to_cart_description(), $add_to_cart['description'] );
-		$this->assertEquals( $product->add_to_cart_text(), $add_to_cart['text'] );
+		$this->assertSame( $expected_add_to_cart_text, $add_to_cart['text'] );
 		$this->assertEquals( $product->single_add_to_cart_text(), $add_to_cart['single_text'] );
 
 		switch ( $product_type ) {
