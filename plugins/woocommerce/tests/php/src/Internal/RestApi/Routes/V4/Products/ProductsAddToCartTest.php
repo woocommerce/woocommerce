@@ -90,10 +90,29 @@ class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 				$expected_add_to_cart_text = 'Buy external product';
 				break;
 			case 'variable':
-				$product                   = new \WC_Product_Variable();
-				$expected_add_to_cart_text = __( 'Read more', 'woocommerce' );
+				$product   = new \WC_Product_Variable();
+				$attribute = new \WC_Product_Attribute();
+				$attribute->set_name( 'size' );
+				$attribute->set_options( array( 'small' ) );
+				$attribute->set_visible( true );
+				$attribute->set_variation( true );
 				$product->set_name( 'Dummy Variable Product' );
+				$product->set_attributes( array( $attribute ) );
 				$product->save();
+
+				$variation = new \WC_Product_Variation();
+				$variation->set_parent_id( $product->get_id() );
+				$variation->set_regular_price( 10 );
+				$variation->set_status( 'publish' );
+				$variation->set_attributes( array( 'size' => 'small' ) );
+				$variation->save();
+
+				\WC_Product_Variable::sync( $product->get_id() );
+				$product = wc_get_product( $product->get_id() );
+				$this->assertNotEmpty( $product->get_children(), 'Variable fixture should expose its child.' );
+				$this->assertNotSame( '', $product->get_price(), 'Variable fixture should have a synced price.' );
+				$this->assertTrue( $product->is_purchasable(), 'Variable fixture should be purchasable.' );
+				$expected_add_to_cart_text = __( 'Select options', 'woocommerce' );
 				break;
 		}
 
