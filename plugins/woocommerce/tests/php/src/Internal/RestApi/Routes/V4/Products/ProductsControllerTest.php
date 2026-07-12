@@ -148,13 +148,17 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpTearDownAfterClass() {
-		self::with_direct_product_attribute_lookup_updates(
-			static function () {
-				foreach ( self::$products as $product ) {
-					WC_Helper_Product::delete_product( $product->get_id() );
+		try {
+			self::with_direct_product_attribute_lookup_updates(
+				static function () {
+					foreach ( self::$products as $product ) {
+						WC_Helper_Product::delete_product( $product->get_id() );
+					}
 				}
-			}
-		);
+			);
+		} finally {
+			self::$products = array();
+		}
 	}
 
 	/**
