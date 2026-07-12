@@ -79,7 +79,20 @@ class MigrationTest extends \WC_Unit_Test_Case {
 		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => LegacyVariationGalleryCompatibility::get_core_managed_meta_key() ) );
 		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 
+		$this->assertSame(
+			1,
+			$wpdb->insert(
+				$wpdb->posts,
+				array(
+					'post_type'   => 'product_variation',
+					'post_status' => 'publish',
+					'post_title'  => 'Variation gallery migration batch fixture',
+				)
+			)
+		);
+		$decoy_id      = (int) $wpdb->insert_id;
 		$variation_ids = $this->create_variation_posts( 251 );
+		$this->assertNotContains( $decoy_id, $variation_ids );
 
 		$this->assertTrue( Migration::run() );
 
@@ -99,6 +112,9 @@ class MigrationTest extends \WC_Unit_Test_Case {
 		foreach ( $variation_ids as $variation_id ) {
 			$this->assertTrue( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) );
 		}
+		$this->assertFalse( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $decoy_id ) );
+		$this->assertSame( '', get_post_meta( $decoy_id, '_wc_additional_variation_images', true ) );
+		$this->assertSame( '', get_post_meta( $decoy_id, '_product_image_gallery', true ) );
 	}
 
 	/**
@@ -122,7 +138,7 @@ class MigrationTest extends \WC_Unit_Test_Case {
 	private function create_variation_posts( int $count ): array {
 		global $wpdb;
 
-		$post_title        = 'Variation gallery migration batch fixture';
+		$post_title        = 'Variation gallery migration batch fixture ' . wp_generate_uuid4();
 		$post_placeholders = array_fill( 0, $count, '(%s, %s, %s)' );
 		$post_values       = array();
 
@@ -146,6 +162,7 @@ class MigrationTest extends \WC_Unit_Test_Case {
 				)
 			)
 		);
+		$this->assertCount( $count, $variation_ids );
 
 		$meta_placeholders = array_fill( 0, $count, '(%d, %s, %s)' );
 		$meta_values       = array();
