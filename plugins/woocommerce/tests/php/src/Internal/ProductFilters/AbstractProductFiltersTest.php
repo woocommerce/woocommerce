@@ -316,7 +316,9 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 		unregister_taxonomy( 'product_type' );
 		\WC_Post_Types::register_taxonomies();
-		clean_taxonomy_cache( 'pa_color' );
+		foreach ( array_keys( wc_get_attribute_taxonomy_ids() ) as $attribute_name ) {
+			clean_taxonomy_cache( wc_attribute_taxonomy_name( wc_sanitize_taxonomy_name( $attribute_name ) ) );
+		}
 
 		$this->fixture_data       = new FixtureData();
 		$this->products_data      = $fixture_state['products_data'];
