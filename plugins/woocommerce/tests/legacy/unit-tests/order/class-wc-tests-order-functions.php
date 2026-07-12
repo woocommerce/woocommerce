@@ -31,9 +31,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @param int             $customer_id Customer ID.
 	 * @param WC_Product|null $product     Optional purpose-built product.
+	 * @param array           $order_data  Optional order properties to override the helper defaults.
 	 * @return WC_Order
 	 */
-	private function create_order( $customer_id = 1, $product = null ) {
+	private function create_order( $customer_id = 1, $product = null, $order_data = array() ) {
 		if ( ! $product instanceof WC_Product ) {
 			if ( ! $this->order_product ) {
 				$this->order_product = WC_Helper_Product::create_simple_product();
@@ -41,7 +42,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 			$product = $this->order_product;
 		}
 
-		return WC_Helper_Order::create_order( $customer_id, $product );
+		return WC_Helper_Order::create_order( $customer_id, $product, $order_data );
 	}
 
 	/**
