@@ -1514,7 +1514,12 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_order_notes() {
 		$order = $this->create_order();
-		$order->add_order_note( 'Customer note', 1 );
+		add_filter( 'woocommerce_email_log_add_order_note', '__return_false' );
+		try {
+			$order->add_order_note( 'Customer note', 1 );
+		} finally {
+			remove_filter( 'woocommerce_email_log_add_order_note', '__return_false' );
+		}
 		$order->add_order_note( 'Internal note' );
 		$order->add_order_note( 'Another internal note' );
 
