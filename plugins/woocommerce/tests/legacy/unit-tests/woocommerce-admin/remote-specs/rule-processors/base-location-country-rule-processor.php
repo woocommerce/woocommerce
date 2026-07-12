@@ -95,11 +95,11 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_BaseLocationCountryRuleProcessor
 	}
 
 	/**
-	 * Tests that the processor returns false if not default country.
+	 * Tests that the processor returns false if the base country is empty.
 	 *
 	 * @group fast
 	 */
-	public function test_spec_fails_if_wc_get_base_location_is_not_an_array() {
+	public function test_spec_fails_if_base_country_is_empty() {
 		$this->default_country = '';
 
 		$processor = new BaseLocationCountryRuleProcessor();
