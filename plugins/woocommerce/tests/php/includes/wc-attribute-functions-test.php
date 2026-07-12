@@ -225,6 +225,191 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should unregister a deleted attribute after its deletion hook and allow recreating the slug.
+	 */
+	public function test_wc_delete_attribute_unregisters_runtime_entries_and_allows_recreation(): void {
+		global $wc_product_attributes;
+
+		$slug                     = $this->get_unique_attribute_slug( 'normal' );
+		$attribute                = $this->create_registered_attribute( $slug );
+		$replacement_attribute_id = null;
+		$hook_taxonomy            = null;
+		$hook_wc_attribute        = null;
+		$deleted_callback         = static function ( $id, $name, $taxonomy ) use ( &$hook_taxonomy, &$hook_wc_attribute, &$wc_product_attributes ): void {
+			$hook_taxonomy     = get_taxonomy( $taxonomy );
+			$hook_wc_attribute = $wc_product_attributes[ $taxonomy ] ?? null;
+		};
+
+		add_action( 'woocommerce_attribute_deleted', $deleted_callback, 10, 3 );
+
+		try {
+			$this->assertTrue( wc_delete_attribute( $attribute['id'] ), 'The attribute should be deleted successfully.' );
+			$this->assertSame( $attribute['wp_taxonomy'], $hook_taxonomy, 'The deletion hook should observe the original WordPress taxonomy.' );
+			$this->assertSame( $attribute['wc_attribute'], $hook_wc_attribute, 'The deletion hook should observe the original WooCommerce attribute entry.' );
+			$this->assertFalse( taxonomy_exists( $attribute['taxonomy'] ), 'The deleted attribute taxonomy should be unregistered after the deletion hook.' );
+			$this->assertArrayNotHasKey( $attribute['taxonomy'], $wc_product_attributes, 'The deleted WooCommerce attribute entry should be removed after the deletion hook.' );
+
+			$replacement_attribute_id = wc_create_attribute(
+				array(
+					'name' => 'Recreated attribute',
+					'slug' => $slug,
+				)
+			);
+
+			$this->assertIsInt( $replacement_attribute_id, 'The deleted attribute slug should be reusable in the same request.' );
+		} finally {
+			remove_action( 'woocommerce_attribute_deleted', $deleted_callback, 10 );
+			$this->clean_up_attribute_test_state(
+				array( $attribute['id'], $replacement_attribute_id ),
+				$attribute['taxonomy']
+			);
+		}
+	}
+
+	/**
+	 * @testdox Should preserve runtime replacements installed by the $hook_name hook.
+	 *
+	 * @dataProvider runtime_replacement_hooks
+	 *
+	 * @param string $hook_name Attribute deletion hook name.
+	 */
+	public function test_wc_delete_attribute_preserves_hook_runtime_replacements( string $hook_name ): void {
+		global $wc_product_attributes;
+
+		$slug                  = $this->get_unique_attribute_slug( 'replace' );
+		$attribute             = $this->create_registered_attribute( $slug );
+		$replacement_taxonomy  = null;
+		$replacement_attribute = (object) array( 'source' => $hook_name );
+		$replacement_callback  = static function ( $id, $name, $taxonomy ) use ( &$replacement_taxonomy, $replacement_attribute, &$wc_product_attributes ): void {
+			unregister_taxonomy( $taxonomy );
+			register_taxonomy( $taxonomy, array( 'product' ) );
+
+			$replacement_taxonomy               = get_taxonomy( $taxonomy );
+			$wc_product_attributes[ $taxonomy ] = $replacement_attribute;
+		};
+
+		add_action( $hook_name, $replacement_callback, 10, 3 );
+
+		try {
+			$this->assertTrue( wc_delete_attribute( $attribute['id'] ), 'The attribute should be deleted successfully.' );
+			$this->assertInstanceOf( WP_Taxonomy::class, $replacement_taxonomy, 'The deletion hook should install a replacement taxonomy.' );
+			$this->assertSame( $replacement_taxonomy, get_taxonomy( $attribute['taxonomy'] ), 'The replacement WordPress taxonomy should survive deletion cleanup.' );
+			$this->assertSame( $replacement_attribute, $wc_product_attributes[ $attribute['taxonomy'] ] ?? null, 'The replacement WooCommerce attribute entry should survive deletion cleanup.' );
+
+			$duplicate = wc_create_attribute(
+				array(
+					'name' => 'Duplicate attribute',
+					'slug' => $slug,
+				)
+			);
+
+			$this->assertInstanceOf( WP_Error::class, $duplicate, 'A replacement taxonomy should continue to reserve its slug.' );
+			$this->assertSame( 'invalid_product_attribute_slug_already_exists', $duplicate->get_error_code(), 'The replacement taxonomy should prevent a duplicate attribute slug.' );
+		} finally {
+			remove_action( $hook_name, $replacement_callback, 10 );
+			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
+		}
+	}
+
+	/**
+	 * @testdox Should tolerate a deletion callback unregistering the original taxonomy first.
+	 */
+	public function test_wc_delete_attribute_is_idempotent_when_taxonomy_is_pre_unregistered(): void {
+		global $wc_product_attributes;
+
+		$slug                = $this->get_unique_attribute_slug( 'pre-unreg' );
+		$attribute           = $this->create_registered_attribute( $slug );
+		$unregister_callback = static function ( $id, $name, $taxonomy ): void {
+			unregister_taxonomy( $taxonomy );
+		};
+
+		add_action( 'woocommerce_before_attribute_delete', $unregister_callback, 10, 3 );
+
+		try {
+			$this->assertTrue( wc_delete_attribute( $attribute['id'] ), 'The attribute should still be deleted after its taxonomy is unregistered by a callback.' );
+			$this->assertFalse( taxonomy_exists( $attribute['taxonomy'] ), 'The pre-unregistered taxonomy should remain absent.' );
+			$this->assertArrayNotHasKey( $attribute['taxonomy'], $wc_product_attributes, 'The original WooCommerce attribute entry should still be removed.' );
+		} finally {
+			remove_action( 'woocommerce_before_attribute_delete', $unregister_callback, 10 );
+			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
+		}
+	}
+
+	/**
+	 * @testdox Should preserve runtime replacements installed by the WordPress taxonomy unregistration hook.
+	 */
+	public function test_wc_delete_attribute_preserves_unregistered_taxonomy_hook_replacements(): void {
+		global $wc_product_attributes;
+
+		$slug                  = $this->get_unique_attribute_slug( 'unreg-hook' );
+		$attribute             = $this->create_registered_attribute( $slug );
+		$replacement_taxonomy  = null;
+		$replacement_attribute = (object) array( 'source' => 'unregistered_taxonomy' );
+		$unregistered_callback = static function ( $taxonomy ) use ( $attribute, &$replacement_taxonomy, $replacement_attribute, &$wc_product_attributes ): void {
+			if ( $attribute['taxonomy'] !== $taxonomy ) {
+				return;
+			}
+
+			register_taxonomy( $taxonomy, array( 'product' ) );
+			$replacement_taxonomy               = get_taxonomy( $taxonomy );
+			$wc_product_attributes[ $taxonomy ] = $replacement_attribute;
+		};
+
+		add_action( 'unregistered_taxonomy', $unregistered_callback, 10, 1 );
+
+		try {
+			$this->assertTrue( wc_delete_attribute( $attribute['id'] ), 'The attribute should be deleted successfully.' );
+			$this->assertInstanceOf( WP_Taxonomy::class, $replacement_taxonomy, 'The unregistration hook should install a replacement taxonomy.' );
+			$this->assertSame( $replacement_taxonomy, get_taxonomy( $attribute['taxonomy'] ), 'The WordPress replacement installed during unregistration should survive.' );
+			$this->assertSame( $replacement_attribute, $wc_product_attributes[ $attribute['taxonomy'] ] ?? null, 'The WooCommerce replacement installed during unregistration should survive.' );
+		} finally {
+			remove_action( 'unregistered_taxonomy', $unregistered_callback, 10 );
+			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
+		}
+	}
+
+	/**
+	 * @testdox Should preserve callback-installed runtime replacements when the database deletion fails.
+	 */
+	public function test_wc_delete_attribute_failed_delete_preserves_callback_runtime_replacements(): void {
+		global $wpdb, $wc_product_attributes;
+
+		$slug                          = $this->get_unique_attribute_slug( 'failure' );
+		$attribute                     = $this->create_registered_attribute( $slug );
+		$replacement_taxonomy          = null;
+		$replacement_runtime_attribute = (object) array( 'source' => 'recreated' );
+		$before_delete_callback        = static function ( $id, $name, $taxonomy ) use ( $attribute, &$replacement_taxonomy, $replacement_runtime_attribute, $wpdb, &$wc_product_attributes ): void {
+			if ( $attribute['id'] !== $id ) {
+				return;
+			}
+
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = %d",
+					$id
+				)
+			); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The test needs the outer deletion query to affect no rows.
+
+			unregister_taxonomy( $taxonomy );
+			register_taxonomy( $taxonomy, array( 'product' ) );
+			$replacement_taxonomy               = get_taxonomy( $taxonomy );
+			$wc_product_attributes[ $taxonomy ] = $replacement_runtime_attribute;
+		};
+
+		add_action( 'woocommerce_before_attribute_delete', $before_delete_callback, 10, 3 );
+
+		try {
+			$this->assertFalse( wc_delete_attribute( $attribute['id'] ), 'The outer deletion should fail after the callback removes the database row.' );
+			$this->assertInstanceOf( WP_Taxonomy::class, $replacement_taxonomy, 'The callback should install a replacement taxonomy.' );
+			$this->assertSame( $replacement_taxonomy, get_taxonomy( $attribute['taxonomy'] ), 'A failed deletion should not alter the replacement WordPress taxonomy.' );
+			$this->assertSame( $replacement_runtime_attribute, $wc_product_attributes[ $attribute['taxonomy'] ] ?? null, 'A failed deletion should not alter the replacement WooCommerce attribute entry.' );
+		} finally {
+			remove_action( 'woocommerce_before_attribute_delete', $before_delete_callback, 10 );
+			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $attribute['taxonomy'] );
+		}
+	}
+
+	/**
 	 * Describes the behavior of the wc_update_attribute() function.
 	 *
 	 * @return void
@@ -357,5 +542,82 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			array( 'pa_SubStr', 'substr' ),
 			array( 'ĂnîC°Dę', 'anicde' ),
 		);
+	}
+
+	/**
+	 * Data provider for runtime replacement hooks.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function runtime_replacement_hooks(): array {
+		return array(
+			'before deletion' => array( 'woocommerce_before_attribute_delete' ),
+			'after deletion'  => array( 'woocommerce_attribute_deleted' ),
+		);
+	}
+
+	/**
+	 * Creates a uniquely named attribute with entries in both runtime registries.
+	 *
+	 * @param string $slug Attribute slug.
+	 * @return array{id: int, taxonomy: string, wp_taxonomy: WP_Taxonomy, wc_attribute: object}
+	 */
+	private function create_registered_attribute( string $slug ): array {
+		global $wc_product_attributes;
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'Runtime attribute',
+				'slug' => $slug,
+			)
+		);
+		$this->assertIsInt( $attribute_id, 'The runtime attribute fixture should be created.' );
+
+		$taxonomy = wc_attribute_taxonomy_name( $slug );
+		register_taxonomy( $taxonomy, array( 'product' ) );
+		$wp_taxonomy = get_taxonomy( $taxonomy );
+		$this->assertInstanceOf( WP_Taxonomy::class, $wp_taxonomy, 'The runtime attribute fixture should have a registered taxonomy.' );
+
+		$wc_attribute                       = (object) array( 'attribute_id' => $attribute_id );
+		$wc_product_attributes[ $taxonomy ] = $wc_attribute;
+
+		return array(
+			'id'           => $attribute_id,
+			'taxonomy'     => $taxonomy,
+			'wp_taxonomy'  => $wp_taxonomy,
+			'wc_attribute' => $wc_attribute,
+		);
+	}
+
+	/**
+	 * Returns a unique attribute slug within WordPress's taxonomy byte limit.
+	 *
+	 * @param string $context Slug context.
+	 * @return string
+	 */
+	private function get_unique_attribute_slug( string $context ): string {
+		return 'wc38919-' . $context . '-' . strtolower( wp_generate_password( 5, false, false ) );
+	}
+
+	/**
+	 * Removes database and runtime state created by an attribute deletion test.
+	 *
+	 * @param array<int|null> $attribute_ids Attribute IDs to remove.
+	 * @param string          $taxonomy      Attribute taxonomy name.
+	 * @return void
+	 */
+	private function clean_up_attribute_test_state( array $attribute_ids, string $taxonomy ): void {
+		global $wc_product_attributes;
+
+		if ( taxonomy_exists( $taxonomy ) ) {
+			unregister_taxonomy( $taxonomy );
+		}
+		unset( $wc_product_attributes[ $taxonomy ] );
+
+		foreach ( $attribute_ids as $attribute_id ) {
+			if ( is_int( $attribute_id ) ) {
+				wc_delete_attribute( $attribute_id );
+			}
+		}
 	}
 }
