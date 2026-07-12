@@ -4024,6 +4024,58 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that distinct customer counts and same-hour interval aggregation work with multiple customers.
+	 */
+	public function test_populate_and_query_multiple_customers_same_hour() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$customer_1 = WC_Helper_Customer::create_customer( 'cust_multi_1', 'pwd_1', 'multi_user_1@mail.com' );
+		$customer_2 = WC_Helper_Customer::create_customer( 'cust_multi_2', 'pwd_2', 'multi_user_2@mail.com' );
+
+		// Two completed orders by different customers within the same hourly interval.
+		// Set a time near the top of the hour so both orders stay within it.
+		$order_datetime = new DateTime();
+		$order_datetime->setTime( (int) $order_datetime->format( 'H' ), 10, 0 );
+		$order_time = (int) $order_datetime->format( 'U' );
+
+		$order_1 = WC_Helper_Order::create_order( $customer_1->get_id() );
+		$order_1->set_date_created( $order_time );
+		$order_1->set_status( OrderStatus::COMPLETED );
+		$order_1->save();
+
+		// Offset by 1 second to keep both orders in the same hour but distinct.
+		$order_2 = WC_Helper_Order::create_order( $customer_2->get_id() );
+		$order_2->set_date_created( $order_time + 1 );
+		$order_2->set_status( OrderStatus::COMPLETED );
+		$order_2->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$data_store = new OrdersStatsDataStore();
+		$start_time = gmdate( 'Y-m-d H:00:00', $order_1->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', $order_1->get_date_created()->getOffsetTimestamp() );
+
+		$data = json_decode(
+			wp_json_encode(
+				$data_store->get_data(
+					array(
+						'interval' => 'hour',
+						'after'    => $start_time,
+						'before'   => $end_time,
+					)
+				)
+			),
+			true
+		);
+
+		$this->assertEquals( 2, $data['totals']['orders_count'] );
+		$this->assertEquals( 2, $data['totals']['total_customers'] );
+		$this->assertCount( 1, $data['intervals'] );
+		$this->assertEquals( 2, $data['intervals'][0]['subtotals']['orders_count'] );
+		$this->assertEquals( 2, $data['intervals'][0]['subtotals']['total_customers'] );
+	}
+
+	/**
 	 * Test if lookup tables are cleaned after delete an order.
 	 *
 	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::delete_order
