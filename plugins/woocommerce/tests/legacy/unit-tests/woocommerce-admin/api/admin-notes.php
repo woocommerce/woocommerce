@@ -547,7 +547,7 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'noteIds'    => array( (string) $this->note_ids[1], (string) $this->note_ids[4] ),
-				'is_deleted' => '1',
+				'is_deleted' => '0',
 			)
 		);
 
@@ -556,5 +556,14 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $notes ) );
+		foreach ( $notes as $note ) {
+			$this->assertFalse( $note['is_deleted'] );
+		}
+
+		foreach ( array( $this->note_ids[1], $this->note_ids[4] ) as $note_id ) {
+			$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/' . $note_id ) );
+			$note     = $response->get_data();
+			$this->assertFalse( $note['is_deleted'] );
+		}
 	}
 }
