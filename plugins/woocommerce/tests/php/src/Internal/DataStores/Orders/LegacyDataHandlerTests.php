@@ -20,16 +20,7 @@ class LegacyDataHandlerTests extends \WC_Unit_Test_Case {
 	 * Ensure permanent HPOS tables exist before per-test transactions start.
 	 */
 	public static function wpSetUpBeforeClass(): void {
-		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		try {
-			self::setup_cot_tables();
-			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
-				OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
-			}
-		} finally {
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		}
+		self::setup_cot_tables();
 	}
 
 	/**
