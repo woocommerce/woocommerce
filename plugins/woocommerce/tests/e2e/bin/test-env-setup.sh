@@ -54,9 +54,6 @@ $WP_CLI_PREFIX wp plugin activate e2e-test-helpers/process-waiting-actions.php
 echo -e 'Activate Test Helper APIs utility plugin \n'
 $WP_CLI_PREFIX wp plugin activate e2e-test-helpers/test-helper-apis.php
 
-echo -e 'Install Plugin-check utility plugin \n'
-$WP_CLI_PREFIX wp plugin install plugin-check --activate
-
 echo -e 'Add Customer user \n'
 if ! $WP_CLI_PREFIX wp user get customer --field=ID >/dev/null 2>&1; then
 	$WP_CLI_PREFIX wp user create customer customer@woocommercecoree2etestsuite.com \

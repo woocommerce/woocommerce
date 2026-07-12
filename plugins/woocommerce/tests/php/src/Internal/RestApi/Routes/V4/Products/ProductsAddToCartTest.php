@@ -16,6 +16,22 @@ use WP_REST_Request;
 class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * The shared admin user used for REST authentication across all tests in this class.
+	 *
+	 * @var int
+	 */
+	protected static $user;
+
+	/**
+	 * Create the shared admin user once for the whole class.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -29,12 +45,7 @@ class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 		);
 		parent::setUp();
 		$this->endpoint = new ProductsController();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-		wp_set_current_user( $this->user );
+		wp_set_current_user( self::$user );
 	}
 
 	/**

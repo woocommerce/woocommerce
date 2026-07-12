@@ -38,11 +38,20 @@ class PaymentGatewaysSettingsControllerTest extends WC_Unit_Test_Case {
 	private $server;
 
 	/**
-	 * The ID of the store admin user.
+	 * Shared admin user used for REST authentication across all tests in the class.
 	 *
 	 * @var int
 	 */
-	protected $store_admin_id;
+	protected static $store_admin_id;
+
+	/**
+	 * Create the shared admin user once for the whole class.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$store_admin_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
 
 	/**
 	 * Set up test.
@@ -54,8 +63,7 @@ class PaymentGatewaysSettingsControllerTest extends WC_Unit_Test_Case {
 		$gateways->payment_gateways = array();
 		$gateways->init();
 
-		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $this->store_admin_id );
+		wp_set_current_user( self::$store_admin_id );
 
 		// Inject the mock gateway directly — avoids filter pollution and a second init() call.
 		WC()->payment_gateways()->payment_gateways[] = new WCGatewayMockPassword();
