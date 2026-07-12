@@ -824,6 +824,29 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The shared fixture helper preserves nested direct-update scopes and restores the option afterward.
+	 */
+	public function test_direct_fixture_helper_restores_nested_update_mode(): void {
+		update_option( 'woocommerce_attribute_lookup_direct_updates', 'no' );
+
+		self::with_direct_product_attribute_lookup_updates(
+			function () {
+				$this->assertSame( 'yes', get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+
+				self::with_direct_product_attribute_lookup_updates(
+					function () {
+						$this->assertSame( 'yes', get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+					}
+				);
+
+				$this->assertSame( 'yes', get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+			}
+		);
+
+		$this->assertSame( 'no', get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+	}
+
+	/**
 	 * Data provider for on_product_changed tests with direct update option set.
 	 *
 	 * @return array[]
