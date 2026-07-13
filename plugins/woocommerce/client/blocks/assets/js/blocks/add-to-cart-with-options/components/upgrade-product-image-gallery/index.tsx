@@ -54,6 +54,7 @@ export const UpgradeProductImageGallery = () => {
 				);
 				setProductImageGalleryBlock( null );
 			} }
+			status="warning"
 		>
 			{ notice }
 		</UpgradeDowngradeNotice>
