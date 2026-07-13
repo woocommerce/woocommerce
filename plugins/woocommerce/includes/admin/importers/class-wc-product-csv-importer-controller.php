@@ -471,10 +471,13 @@ class WC_Product_CSV_Importer_Controller {
 	public function handle_upload() {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce already verified in WC_Product_CSV_Importer_Controller::upload_form_handler()
 		$file_url = isset( $_POST['file_url'] ) ? wc_clean( wp_unslash( $_POST['file_url'] ) ) : '';
+		if ( ! is_string( $file_url ) ) {
+			$file_url = '';
+		}
 
 		try {
 			if ( ! empty( $file_url ) ) {
-				$path = ABSPATH . $file_url;
+				$path = FilesystemUtil::resolve_upload_file_path( $file_url );
 				self::validate_file_path( $path );
 			} else {
 				$csv_import_util = wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper::class );

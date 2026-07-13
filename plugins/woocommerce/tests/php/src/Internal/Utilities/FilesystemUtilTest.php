@@ -337,6 +337,79 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'resolve_upload_file_path' resolves a path relative to ABSPATH.
+	 */
+	public function test_resolve_upload_file_path_relative_to_abspath(): void {
+		$this->assertSame( ABSPATH . 'index.php', FilesystemUtil::resolve_upload_file_path( 'index.php' ) );
+	}
+
+	/**
+	 * @testdox 'resolve_upload_file_path' returns a readable absolute path as-is.
+	 */
+	public function test_resolve_upload_file_path_absolute(): void {
+		$upload_dir = wp_get_upload_dir();
+		$path       = $this->make_temp_file( $upload_dir['basedir'] );
+
+		$this->assertSame( $path, FilesystemUtil::resolve_upload_file_path( $path ) );
+	}
+
+	/**
+	 * @testdox 'resolve_upload_file_path' resolves a path relative to the uploads directory.
+	 */
+	public function test_resolve_upload_file_path_relative_to_uploads(): void {
+		$upload_dir = wp_get_upload_dir();
+		$path       = $this->make_temp_file( $upload_dir['basedir'] );
+
+		$this->assertSame( $path, FilesystemUtil::resolve_upload_file_path( basename( $path ) ) );
+	}
+
+	/**
+	 * @testdox 'resolve_upload_file_path' resolves a path relative to the site root when wp-content lives outside ABSPATH (e.g. symlinked-core hosts).
+	 */
+	public function test_resolve_upload_file_path_relative_to_site_root(): void {
+		$site_root = sys_get_temp_dir() . '/wc-fsutil-siteroot-' . wp_generate_uuid4();
+		$path      = $this->make_temp_file( $site_root );
+
+		Constants::set_constant( 'WP_CONTENT_DIR', $site_root . '/wp-content' );
+
+		$this->assertSame( $path, FilesystemUtil::resolve_upload_file_path( basename( $path ) ) );
+	}
+
+	/**
+	 * @testdox 'resolve_upload_file_path' never uses a stream URL as-is: probing user-supplied streams (e.g. phar://) with is_readable() could trigger wrapper side effects.
+	 */
+	public function test_resolve_upload_file_path_does_not_use_stream_urls_as_is(): void {
+		$stream_url = 'phar://evil.phar/payload.csv';
+
+		$this->assertSame( ABSPATH . $stream_url, FilesystemUtil::resolve_upload_file_path( $stream_url ) );
+	}
+
+	/**
+	 * @testdox 'resolve_upload_file_path' resolution bases are broader than the validation allowlist: a resolved site-root file outside ABSPATH and uploads is still rejected by 'validate_upload_file_path'.
+	 */
+	public function test_resolved_site_root_path_outside_allowed_locations_fails_validation(): void {
+		$site_root = sys_get_temp_dir() . '/wc-fsutil-siteroot-' . wp_generate_uuid4();
+		$path      = $this->make_temp_file( $site_root );
+
+		Constants::set_constant( 'WP_CONTENT_DIR', $site_root . '/wp-content' );
+
+		$resolved = FilesystemUtil::resolve_upload_file_path( basename( $path ) );
+		$this->assertSame( $path, $resolved );
+
+		$this->expectException( \Exception::class );
+		FilesystemUtil::validate_upload_file_path( $resolved );
+	}
+
+	/**
+	 * @testdox 'resolve_upload_file_path' falls back to the ABSPATH-relative path when nothing is readable.
+	 */
+	public function test_resolve_upload_file_path_fallback_when_unreadable(): void {
+		$file_path = 'definitely-does-not-exist-' . wp_generate_uuid4() . '.csv';
+
+		$this->assertSame( ABSPATH . $file_path, FilesystemUtil::resolve_upload_file_path( $file_path ) );
+	}
+
+	/**
 	 * @testdox 'file_is_in_directory' keeps stream-wrapper (e.g. s3://) containment intact for upload paths.
 	 *
 	 * Exercises the non-file:// protocol branch of the containment check. The

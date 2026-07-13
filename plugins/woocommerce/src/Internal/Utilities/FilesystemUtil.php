@@ -314,6 +314,66 @@ class FilesystemUtil {
 	}
 
 	/**
+	 * Resolve a user-supplied file path to an absolute path on the server.
+	 *
+	 * Relative paths are tried against the WordPress root (ABSPATH), the
+	 * directory containing wp-content (the site root on hosts where wp-content
+	 * lives outside of ABSPATH, e.g. installs with a symlinked core), and the
+	 * uploads directory, in that order; the first readable candidate wins.
+	 * Absolute local paths are used as-is when readable. Stream URLs are never
+	 * used as-is: probing a user-supplied stream (e.g. phar://) with
+	 * is_readable() can trigger wrapper side effects, and stream-backed uploads
+	 * (e.g. s3://) are already reachable through the uploads-basedir candidate.
+	 *
+	 * The result is not validated as a permitted location: pass it through
+	 * validate_upload_file_path() before use. Note that the resolution bases
+	 * are intentionally broader than that validation's allowlist (ABSPATH and
+	 * the uploads directory), so a resolved path may still be rejected — e.g.
+	 * a file sitting at the site root, outside both allowed locations.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param string $file_path The path to resolve, as entered by the user.
+	 * @return string The resolved path. Falls back to the path relative to
+	 *                ABSPATH when no candidate is readable, so validation of
+	 *                the returned value fails with the usual error.
+	 */
+	public static function resolve_upload_file_path( string $file_path ): string {
+		$abspath        = (string) Constants::get_constant( 'ABSPATH' );
+		$wp_content_dir = (string) Constants::get_constant( 'WP_CONTENT_DIR' );
+		$candidates     = array();
+
+		// The stream check must come first: path_is_absolute() probes streams
+		// with is_file(), which must not run on user-supplied stream URLs.
+		if ( ! wp_is_stream( $file_path ) && path_is_absolute( $file_path ) ) {
+			$candidates[] = $file_path;
+		}
+
+		$bases = array(
+			$abspath,
+			trailingslashit( dirname( $wp_content_dir ) ),
+		);
+
+		$upload_dir = wp_get_upload_dir();
+		if ( false === $upload_dir['error'] ) {
+			$bases[] = trailingslashit( $upload_dir['basedir'] );
+		}
+
+		foreach ( $bases as $base ) {
+			$candidates[] = $base . $file_path;
+		}
+
+		$wp_filesystem = self::get_wp_filesystem_direct();
+		foreach ( $candidates as $candidate ) {
+			if ( $wp_filesystem->is_readable( $candidate ) ) {
+				return $candidate;
+			}
+		}
+
+		return $abspath . $file_path;
+	}
+
+	/**
 	 * Check if a given file is inside a given directory.
 	 *
 	 * @param string $file_path The full path of the file to check.
