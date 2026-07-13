@@ -55,15 +55,60 @@ class Server {
 	 * Register REST API routes.
 	 */
 	public function register_rest_routes() {
+		$rest_api_util       = wc_get_container()->get( \Automattic\WooCommerce\Utilities\RestApiUtil::class );
+		$default_controllers = array(
+			'wc/v1'        => $this->get_v1_controllers(),
+			'wc/v2'        => $this->get_v2_controllers(),
+			'wc/v3'        => $this->get_v3_controllers(),
+			'wc-telemetry' => $this->get_telemetry_controllers(),
+			'wc/v4'        => $this->get_v4_controllers(),
+		);
+
+		foreach ( $this->get_rest_namespaces() as $namespace => $controllers ) {
+			if ( empty( $controllers ) ) {
+				continue;
+			}
+
+			// Controllers added through the woocommerce_rest_api_get_rest_namespaces filter may
+			// register routes under a route namespace that differs from the key they are grouped
+			// under (RestApiControllerBase groups everything under wc/v3, for example), so only
+			// WooCommerce's own default controllers are lazy loaded; anything added by the filter
+			// keeps registering eagerly, as before.
+			$defaults          = $default_controllers[ $namespace ] ?? array();
+			$lazy_controllers  = array_intersect_key( $controllers, $defaults );
+			$eager_controllers = array_diff_key( $controllers, $defaults );
+
+			if ( $eager_controllers ) {
+				$this->register_namespace_controllers( $namespace, $eager_controllers );
+			}
+
+			if ( $lazy_controllers ) {
+				$rest_api_util->lazy_load_namespace(
+					$namespace,
+					function () use ( $namespace, $lazy_controllers ) {
+						$this->register_namespace_controllers( $namespace, $lazy_controllers );
+					}
+				);
+			}
+		}
+	}
+
+	/**
+	 * Instantiate the given controllers and register their routes.
+	 *
+	 * @param string $rest_namespace The namespace the controllers are grouped under.
+	 * @param array  $controllers    Map of controller name => controller class.
+	 *
+	 * @return void
+	 */
+	private function register_namespace_controllers( $rest_namespace, $controllers ): void {
 		$container    = wc_get_container();
 		$legacy_proxy = $container->get( LegacyProxy::class );
-		foreach ( $this->get_rest_namespaces() as $namespace => $controllers ) {
-			foreach ( $controllers as $controller_name => $controller_class ) {
-				$this->controllers[ $namespace ][ $controller_name ] = $container->has( $controller_class ) ?
-					$container->get( $controller_class ) :
-					$legacy_proxy->get_instance_of( $controller_class );
-				$this->controllers[ $namespace ][ $controller_name ]->register_routes();
-			}
+		foreach ( $controllers as $controller_name => $controller_class ) {
+			$this->controllers[ $rest_namespace ][ $controller_name ] = $container->has( $controller_class ) ?
+				$container->get( $controller_class ) :
+				$legacy_proxy->get_instance_of( $controller_class );
+			$this->controllers[ $rest_namespace ][ $controller_name ]->register_routes();
 		}
 	}
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Lazy load the wc/v1, wc/v2, wc/v3, wc-telemetry and wc-admin REST API namespaces so their controllers are only instantiated for requests that target them.
