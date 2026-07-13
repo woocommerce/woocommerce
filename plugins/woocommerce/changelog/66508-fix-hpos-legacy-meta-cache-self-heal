@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Invalidate the correct meta cache group when the HPOS order meta corruption guard fires, so a corrupt legacy object-cache entry is re-read from the database instead of persisting across reads.
