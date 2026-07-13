@@ -47,6 +47,20 @@ class Checkout extends \WP_Test_REST_TestCase {
 	private static $coupon_id;
 
 	/**
+	 * Payment gateway registry before the test.
+	 *
+	 * @var array
+	 */
+	private $payment_gateways_before_test = array();
+
+	/**
+	 * PayPal gateway singleton before the test.
+	 *
+	 * @var \WC_Gateway_Paypal
+	 */
+	private $paypal_gateway_before_test;
+
+	/**
 	 * Create immutable catalog rows shared by all test methods.
 	 */
 	public static function wpSetUpBeforeClass(): void {
@@ -138,6 +152,9 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$order_route = new CheckoutOrderRoute( $schema_controller, $schema_controller->get( 'checkout-order' ) );
 		register_rest_route( $order_route->get_namespace(), $order_route->get_path(), $order_route->get_args(), true );
 
+		$this->payment_gateways_before_test = WC()->payment_gateways()->payment_gateways;
+		$this->paypal_gateway_before_test   = \WC_Gateway_Paypal::get_instance();
+
 		$fixtures = new FixtureData();
 		$fixtures->payments_enable_bacs();
 		$fixtures->shipping_add_pickup_location();
@@ -153,38 +170,70 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 * Tear down Rest API server.
 	 */
 	protected function tearDown(): void {
-		remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
+		try {
+			remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 
-		remove_all_filters( 'woocommerce_get_country_locale' );
-		remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
-		remove_all_filters( 'wc_order_statuses' );
-		remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
-		remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
-		remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
+			remove_all_filters( 'woocommerce_get_country_locale' );
+			remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
+			remove_all_filters( 'wc_order_statuses' );
+			remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
+			remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
+			remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
 
-		update_option( 'woocommerce_ship_to_countries', 'all' );
-		update_option( 'woocommerce_allowed_countries', 'all' );
-		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
-		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+			update_option( 'woocommerce_ship_to_countries', 'all' );
+			update_option( 'woocommerce_allowed_countries', 'all' );
+			update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+			update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
-		$fixtures = new FixtureData();
-		$fixtures->shipping_remove_pickup_location();
-		$fixtures->shipping_remove_methods_from_default_zone();
+			$fixtures = new FixtureData();
+			$fixtures->shipping_remove_pickup_location();
+			$fixtures->shipping_remove_methods_from_default_zone();
 
-		$customer_to_delete = get_user_by( 'email', 'testaccount@test.com' );
-		if ( $customer_to_delete ) {
-			wp_delete_user( $customer_to_delete->ID );
+			$customer_to_delete = get_user_by( 'email', 'testaccount@test.com' );
+			if ( $customer_to_delete ) {
+				wp_delete_user( $customer_to_delete->ID );
+			}
+
+			unset( WC()->countries->locale );
+			WC()->cart->empty_cart();
+			WC()->session->destroy_session();
+			WC()->customer = null;
+			WC()->initialize_cart();
+
+			$GLOBALS['wp_rest_server'] = null;
+		} finally {
+			try {
+				parent::tearDown();
+			} finally {
+				$this->invalidate_checkout_option_caches();
+				WC()->payment_gateways()->payment_gateways = $this->payment_gateways_before_test;
+				\WC_Gateway_Paypal::set_instance( $this->paypal_gateway_before_test );
+			}
 		}
+	}
 
-		unset( WC()->countries->locale );
-		WC()->cart->empty_cart();
-		WC()->session->destroy_session();
-		WC()->customer = null;
-		WC()->initialize_cart();
+	/**
+	 * Invalidate caches for options modified by checkout tests.
+	 */
+	private function invalidate_checkout_option_caches(): void {
+		$option_names = array(
+			'woocommerce_checkout_phone_field',
+			'woocommerce_enable_guest_checkout',
+			'woocommerce_enable_signup_and_login_from_checkout',
+			'woocommerce_ship_to_countries',
+			'woocommerce_allowed_countries',
+			'woocommerce_specific_ship_to_countries',
+			'woocommerce_specific_allowed_countries',
+			'woocommerce_bacs_settings',
+			'woocommerce_pickup_location_settings',
+			'pickup_location_pickup_locations',
+		);
 
-		$GLOBALS['wp_rest_server'] = null;
-
-		parent::tearDown();
+		foreach ( $option_names as $option_name ) {
+			wp_cache_delete( $option_name, 'options' );
+		}
+		wp_cache_delete( 'alloptions', 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
 	}
 
 	/**
