@@ -16,6 +16,123 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  * Cart Controller Tests.
  */
 class CartItems extends ControllerTestCase {
+	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
+	/**
+	 * Variation ID shared by the class.
+	 *
+	 * @var int
+	 */
+	private static $variation_id;
+
+	/**
+	 * All product IDs owned by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $owned_product_ids = array();
+
+	/**
+	 * Attribute taxonomy IDs owned by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $attribute_ids = array();
+
+	/**
+	 * Whether an attribute deletion rewrite flush was already scheduled.
+	 *
+	 * @var bool
+	 */
+	private static $had_scheduled_rewrite_flush;
+
+	/**
+	 * Create the immutable cart catalog shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$existing_attribute_ids            = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id' );
+		self::$had_scheduled_rewrite_flush = false !== wp_next_scheduled( 'woocommerce_flush_rewrite_rules' );
+
+		$fixtures = self::with_direct_product_attribute_lookup_updates(
+			static function () {
+				$fixture_data = new FixtureData();
+				$color        = $fixture_data->get_product_attribute( 'color', array( 'red', 'green', 'blue' ) );
+				$size         = $fixture_data->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) );
+
+				foreach ( array( $color, $size ) as $attribute ) {
+					foreach ( $attribute['term_ids'] as $term_id ) {
+						$term = get_term( $term_id, $attribute['attribute_taxonomy'] );
+						wp_update_term( $term_id, $attribute['attribute_taxonomy'], array( 'slug' => sanitize_title( $term->name ) ) );
+					}
+				}
+
+				$simple    = $fixture_data->get_simple_product(
+					array(
+						'name'          => 'Test Product 1',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					)
+				);
+				$variable  = $fixture_data->get_variable_product(
+					array(
+						'name'          => 'Test Product 2',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					),
+					array(
+						$color,
+						$size,
+					)
+				);
+				$variation = $fixture_data->get_variation_product(
+					$variable->get_id(),
+					array(
+						'pa_color' => 'red',
+						'pa_size'  => 'small',
+					)
+				);
+
+				return array( $simple, $variable, $variation );
+			}
+		);
+
+		self::$product_ids       = array( $fixtures[0]->get_id(), $fixtures[1]->get_id() );
+		self::$variation_id      = $fixtures[2]->get_id();
+		self::$owned_product_ids = array( $fixtures[0]->get_id(), $fixtures[2]->get_id(), $fixtures[1]->get_id() );
+		self::$attribute_ids     = array_values( array_diff( wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id' ), $existing_attribute_ids ) );
+	}
+
+	/**
+	 * Delete the class-owned catalog and global attributes.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		global $wc_product_attributes;
+
+		self::delete_class_fixture_products( self::$owned_product_ids );
+
+		foreach ( self::$attribute_ids as $attribute_id ) {
+			$attribute = wc_get_attribute( $attribute_id );
+			$taxonomy  = $attribute ? $attribute->slug : '';
+
+			wc_delete_attribute( $attribute_id );
+
+			if ( $taxonomy && taxonomy_exists( $taxonomy ) ) {
+				unregister_taxonomy( $taxonomy );
+			}
+			unset( $wc_product_attributes[ $taxonomy ] );
+		}
+
+		if ( ! self::$had_scheduled_rewrite_flush ) {
+			wp_clear_scheduled_hook( 'woocommerce_flush_rewrite_rules' );
+		}
+	}
 
 	/**
 	 * The mock logger.
@@ -30,42 +147,8 @@ class CartItems extends ControllerTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		$fixtures = new FixtureData();
-
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-					'image_id'      => $fixtures->sideload_image(),
-				)
-			),
-		);
-
-		$variable_product = $fixtures->get_variable_product(
-			array(
-				'name'          => 'Test Product 2',
-				'stock_status'  => ProductStockStatus::IN_STOCK,
-				'regular_price' => 10,
-				'weight'        => 10,
-				'image_id'      => $fixtures->sideload_image(),
-			),
-			array(
-				$fixtures->get_product_attribute( 'color', array( 'red', 'green', 'blue' ) ),
-				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
-			)
-		);
-		$variation        = $fixtures->get_variation_product(
-			$variable_product->get_id(),
-			array(
-				'pa_color' => 'red',
-				'pa_size'  => 'small',
-			)
-		);
-
-		$this->products[] = $variable_product;
+		$this->products = array_map( 'wc_get_product', self::$product_ids );
+		$variation      = wc_get_product( self::$variation_id );
 
 		wc_empty_cart();
 		$this->keys   = array();
@@ -302,6 +385,9 @@ class CartItems extends ControllerTestCase {
 	 * Tests schema of both products in cart to cover as much schema as possible.
 	 */
 	public function test_get_item_schema() {
+		// Give the simple product an image so the nested image schema is validated too.
+		$image_id = $this->add_image_to_product();
+
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items', 'v1' );
 		$schema     = $controller->get_item_schema();
@@ -310,7 +396,8 @@ class CartItems extends ControllerTestCase {
 
 		// Simple product.
 		$response = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
-		$diff     = $validate->get_diff_from_object( $response->get_data() );
+		$this->assertNotEmpty( $response->get_data()['images'], 'The simple product response must include an image so its schema is exercised.' );
+		$diff = $validate->get_diff_from_object( $response->get_data() );
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		$this->assertEmpty( $diff, print_r( $diff, true ) );
 
@@ -319,6 +406,8 @@ class CartItems extends ControllerTestCase {
 		$diff     = $validate->get_diff_from_object( $response->get_data() );
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		$this->assertEmpty( $diff, print_r( $diff, true ) );
+
+		wp_delete_attachment( $image_id, true );
 	}
 
 	/**
@@ -328,6 +417,7 @@ class CartItems extends ControllerTestCase {
 	 * @throws \Exception When the images are not filtered correctly.
 	 */
 	public function test_cart_item_image_filtering() {
+		$image_id   = $this->add_image_to_product();
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items', 'v1' );
 		$cart       = WC()->cart->get_cart();
@@ -352,6 +442,7 @@ class CartItems extends ControllerTestCase {
 		$this->assertEquals( $image->src, 'https://example.com/image-1.jpg' );
 		$this->assertEquals( $image->thumbnail, 'https://example.com/image-1-thumbnail.jpg' );
 		remove_all_filters( 'woocommerce_store_api_cart_item_images' );
+		wp_delete_attachment( $image_id, true );
 	}
 
 	/**
@@ -361,6 +452,7 @@ class CartItems extends ControllerTestCase {
 	 * @throws \Exception When the errors are not logged correctly.
 	 */
 	public function test_cart_item_image_filtering_logging() {
+		$image_id   = $this->add_image_to_product();
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items', 'v1' );
 		$cart       = WC()->cart->get_cart();
@@ -436,6 +528,23 @@ class CartItems extends ControllerTestCase {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		$this->assertEquals( $image->src, $expected_image );
 		$this->assertEquals( $image->thumbnail, $expected_image );
+		wp_delete_attachment( $image_id, true );
+	}
+
+	/**
+	 * Add an image to the simple product used by image-filter tests.
+	 *
+	 * @return int Attachment ID.
+	 */
+	private function add_image_to_product(): int {
+		$fixtures = new FixtureData();
+		$image_id = $fixtures->create_image_attachment( $this->products[0]->get_id() );
+		$this->products[0]->set_image_id( $image_id );
+		$this->products[0]->save();
+		$cart_item = WC()->cart->get_cart_item( $this->keys[0] );
+		$cart_item['data']->set_image_id( $image_id );
+
+		return $image_id;
 	}
 
 	/**

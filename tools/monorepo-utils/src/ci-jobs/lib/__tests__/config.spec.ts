@@ -441,5 +441,69 @@ describe( 'Config', () => {
 				expect( expectation ).toThrow();
 			}
 		);
+
+		it( 'should parse config with the usesSharedPluginBuild property', () => {
+			const parsed = parseCIConfig( {
+				name: 'foo',
+				config: {
+					ci: {
+						tests: [
+							{
+								name: 'default',
+								changes: [],
+								command: 'foo',
+								usesSharedPluginBuild: true,
+							},
+							{
+								name: 'other',
+								changes: [],
+								command: 'foo',
+							},
+						],
+					},
+				},
+			} );
+
+			expect( parsed ).toMatchObject( {
+				jobs: [
+					{
+						type: JobType.Test,
+						usesSharedPluginBuild: true,
+					},
+					{
+						type: JobType.Test,
+					},
+				],
+			} );
+			expect( parsed?.jobs[ 1 ] ).not.toHaveProperty(
+				'usesSharedPluginBuild'
+			);
+		} );
+
+		it.each( [ [ 'bad' ], [ 1 ] ] )(
+			'should error for config with invalid values for the usesSharedPluginBuild property',
+			( input ) => {
+				const expectation = () => {
+					parseCIConfig( {
+						name: 'foo',
+						config: {
+							ci: {
+								tests: [
+									{
+										name: 'default',
+										changes: [],
+										command: 'foo',
+										usesSharedPluginBuild: input,
+									},
+								],
+							},
+						},
+					} );
+				};
+				expect( expectation ).toThrow(
+					'The "usesSharedPluginBuild" property must be a boolean.'
+				);
+			}
+		);
 	} );
 } );

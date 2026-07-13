@@ -35,7 +35,10 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 		<tbody>
 			<?php
 			foreach ( $customer_orders->orders as $customer_order ) {
-				$order      = wc_get_order( $customer_order ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$order = wc_get_order( $customer_order ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				if ( ! $order instanceof WC_Order ) {
+					continue;
+				}
 				$item_count = $order->get_item_count() - $order->get_item_count_refunded();
 				?>
 				<tr class="woocommerce-orders-table__row woocommerce-orders-table__row--status-<?php echo esc_attr( $order->get_status() ); ?> order">
@@ -93,7 +96,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 								<?php endif; ?>
 
 								<?php
-								$column_content = ob_get_clean();
+								$column_content = (string) ob_get_clean();
 
 								/**
 								 * Filters the default My Account orders table column content.
