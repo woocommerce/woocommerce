@@ -85,7 +85,12 @@ class Cart extends ControllerTestCase {
 	 * Delete class products through WooCommerce data stores.
 	 */
 	public static function wpTearDownAfterClass(): void {
-		self::delete_class_fixture_products( self::$product_ids );
+		try {
+			self::delete_class_fixture_products( self::$product_ids );
+		} finally {
+			$coupon = new \WC_Coupon( self::$coupon_id );
+			$coupon->delete( true );
+		}
 	}
 
 	/**

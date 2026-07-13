@@ -40,6 +40,13 @@ class Checkout extends \WP_Test_REST_TestCase {
 	private static $product_ids = array();
 
 	/**
+	 * Coupon ID shared by the class.
+	 *
+	 * @var int
+	 */
+	private static $coupon_id;
+
+	/**
 	 * Create immutable catalog rows shared by all test methods.
 	 */
 	public static function wpSetUpBeforeClass(): void {
@@ -74,13 +81,19 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$coupon->set_code( self::TEST_COUPON_CODE );
 		$coupon->set_amount( 2 );
 		$coupon->save();
+		self::$coupon_id = $coupon->get_id();
 	}
 
 	/**
 	 * Delete class products through WooCommerce data stores.
 	 */
 	public static function wpTearDownAfterClass(): void {
-		self::delete_class_fixture_products( self::$product_ids );
+		try {
+			self::delete_class_fixture_products( self::$product_ids );
+		} finally {
+			$coupon = new \WC_Coupon( self::$coupon_id );
+			$coupon->delete( true );
+		}
 	}
 
 	/**
