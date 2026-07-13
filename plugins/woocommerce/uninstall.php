@@ -114,9 +114,17 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	 * other plugins' user meta and, critically, WordPress core's own role/capability meta (the
 	 * {prefix}capabilities and {prefix}user_level keys) on any site whose database table prefix is "wc_",
 	 * which would strip every user's roles and could lock the site out. We therefore match only
-	 * WooCommerce's own known wc_ / _wc_ user meta keys (including the wc_admin_ legacy prefix, the
-	 * _wc_egg_ easter-egg meta, and the per-site customer lookup meta, whose keys are suffixed with the
-	 * site's table prefix) rather than a blanket wildcard.
+	 * WooCommerce's own known wc_ / _wc_ user meta keys (the wc_admin_ legacy prefix; the _wc_egg_
+	 * easter-egg meta; the per-site customer lookup, push notification preferences, shopper-list, and
+	 * email-verification meta, whose keys are suffixed with the site's table prefix; and the exact
+	 * wc_last_active and wc_marketplace_suggestions_dismissed_suggestions keys) rather than a blanket
+	 * wildcard.
+	 *
+	 * The push-notification-preferences, shopper-list, and email-verification prefixes below mirror,
+	 * respectively, NotificationPreferencesDataStore::META_KEY, ShopperList::META_KEY_PREFIX, and
+	 * EmailVerificationService::VERIFIED_META / ::KEY_META. This script runs before PSR-4 autoloading is
+	 * available, so those constants cannot be referenced directly here; keep the literals below in sync if
+	 * the constants ever change.
 	 *
 	 * Note: wp_usermeta is shared across a multisite network while this uninstall runs per site, so the
 	 * matching meta is removed network-wide, consistent with the woocommerce_ option/meta cleanup above.
@@ -127,9 +135,13 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 			OR meta_key LIKE '\_woocommerce\_%'
 			OR meta_key LIKE 'wc\_admin\_%'
 			OR meta_key LIKE '\_wc\_egg\_%'
+			OR meta_key LIKE '\_wc\_shopper\_list\_%'
+			OR meta_key LIKE '\_wc\_email\_verified\_%'
+			OR meta_key LIKE '\_wc\_email\_verification\_%'
 			OR meta_key LIKE 'wc\_last\_order\_%'
 			OR meta_key LIKE 'wc\_order\_count\_%'
 			OR meta_key LIKE 'wc\_money\_spent\_%'
+			OR meta_key LIKE 'wc\_push\_notification\_preferences\_%'
 			OR meta_key IN ( 'wc_last_active', 'wc_marketplace_suggestions_dismissed_suggestions' );"
 	);
 
