@@ -50,7 +50,8 @@
 				}
 
 				&.product-remove,
-				&.actions {
+				&.actions,
+				&.payment-method-actions {
 					&::before {
 						display: none;
 					}
