@@ -3886,25 +3886,6 @@ if ( ! function_exists( 'woocommerce_account_downloads' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_account_order_withdrawal' ) ) {
-
-	/**
-	 * My Account > Order withdrawal template.
-	 *
-	 * @return void
-	 */
-	function woocommerce_account_order_withdrawal() {
-		if ( ! wc_get_container()->get( Automattic\WooCommerce\Internal\Features\FeaturesController::class )->feature_is_enabled( 'order_withdrawal' ) ) {
-			return;
-		}
-
-		?>
-		<h2><?php esc_html_e( 'Order withdrawal', 'woocommerce' ); ?></h2>
-		<p><?php esc_html_e( 'This is placeholder content for the order withdrawal page.', 'woocommerce' ); ?></p>
-		<?php
-	}
-}
-
 if ( ! function_exists( 'woocommerce_account_edit_address' ) ) {
 
 	/**

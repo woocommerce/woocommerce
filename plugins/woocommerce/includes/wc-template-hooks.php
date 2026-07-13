@@ -306,7 +306,7 @@ add_action( 'woocommerce_account_navigation', 'woocommerce_account_navigation' )
 add_action( 'woocommerce_account_content', 'woocommerce_account_content' );
 add_action( 'woocommerce_account_orders_endpoint', 'woocommerce_account_orders' );
 add_action( 'woocommerce_account_view-order_endpoint', 'woocommerce_account_view_order' );
-add_action( 'woocommerce_account_order-withdrawal_endpoint', 'woocommerce_account_order_withdrawal' );
+add_action( 'woocommerce_account_order-withdrawal_endpoint', array( 'WC_Shortcode_My_Account', 'order_withdrawal' ) );
 add_action( 'woocommerce_account_downloads_endpoint', 'woocommerce_account_downloads' );
 add_action( 'woocommerce_account_edit-address_endpoint', 'woocommerce_account_edit_address' );
 add_action( 'woocommerce_account_payment-methods_endpoint', 'woocommerce_account_payment_methods' );

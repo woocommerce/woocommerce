@@ -142,6 +142,20 @@ class WC_Shortcode_My_Account {
 	}
 
 	/**
+	 * Order withdrawal page.
+	 */
+	public static function order_withdrawal(): void {
+		if ( ! wc_get_container()->get( FeaturesController::class )->feature_is_enabled( 'order_withdrawal' ) ) {
+			return;
+		}
+
+		?>
+		<h2><?php esc_html_e( 'Order withdrawal', 'woocommerce' ); ?></h2>
+		<p><?php esc_html_e( 'This is placeholder content for the order withdrawal page.', 'woocommerce' ); ?></p>
+		<?php
+	}
+
+	/**
 	 * View order page.
 	 *
 	 * @param int $order_id Order ID.
