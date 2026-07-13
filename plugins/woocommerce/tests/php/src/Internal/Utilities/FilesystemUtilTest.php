@@ -401,6 +401,25 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'resolve_upload_file_path' prefers the ABSPATH candidate when the same relative path is readable in multiple bases.
+	 */
+	public function test_resolve_upload_file_path_prefers_abspath_over_uploads(): void {
+		$upload_dir   = wp_get_upload_dir();
+		$uploads_file = $this->make_temp_file( $upload_dir['basedir'] );
+		$file_name    = basename( $uploads_file );
+		$abspath_file = ABSPATH . $file_name;
+
+		FilesystemUtil::get_wp_filesystem_direct()->put_contents( $abspath_file, '' );
+		$this->temp_files[] = $abspath_file;
+
+		$this->assertSame(
+			$abspath_file,
+			FilesystemUtil::resolve_upload_file_path( $file_name ),
+			'The ABSPATH candidate must take precedence over the uploads-directory candidate.'
+		);
+	}
+
+	/**
 	 * @testdox 'resolve_upload_file_path' falls back to the ABSPATH-relative path when nothing is readable.
 	 */
 	public function test_resolve_upload_file_path_fallback_when_unreadable(): void {

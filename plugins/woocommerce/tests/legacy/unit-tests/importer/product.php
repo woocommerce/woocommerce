@@ -259,6 +259,20 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that a non-string file_url value is treated as empty rather than resolved.
+	 *
+	 * @return void
+	 */
+	public function test_server_file_non_string_file_url() {
+		$_POST['file_url'] = array( 'sample.csv' );
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		$import_result     = $import_controller->handle_upload();
+
+		$this->assertTrue( is_wp_error( $import_result ) );
+		$this->assertEquals( 'woocommerce_product_csv_importer_upload_invalid_file', $import_result->get_error_code() );
+	}
+
+	/**
 	 * Test get_raw_keys.
 	 * @since 3.1.0
 	 */
