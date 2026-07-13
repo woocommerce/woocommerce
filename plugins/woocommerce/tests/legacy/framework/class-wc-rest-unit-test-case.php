@@ -72,11 +72,17 @@ class WC_Lazy_REST_Server extends WP_Test_Spy_REST_Server {
 	/**
 	 * Get registered routes, initializing all routes for direct inspection.
 	 *
+	 * A server holding only manually registered routes (never initialized by a
+	 * dispatch) is left untouched so focused-controller tests can assert on
+	 * exactly the routes they registered.
+	 *
 	 * @param string $route_namespace Optionally limit results to a namespace.
 	 * @return array
 	 */
 	public function get_routes( $route_namespace = '' ) {
-		if ( 0 === $this->dispatch_depth && ! $this->initializing && ! $this->all_routes_initialized && ! $this->has_registered_routes() ) {
+		$scoped_initialization_ran = array() !== $this->initialized_namespaces;
+
+		if ( 0 === $this->dispatch_depth && ! $this->initializing && ! $this->all_routes_initialized && ( $scoped_initialization_ran || ! $this->has_registered_routes() ) ) {
 			$this->initialize_all_routes();
 		}
 
