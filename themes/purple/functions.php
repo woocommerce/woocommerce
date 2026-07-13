@@ -333,6 +333,21 @@ endif;
 
 add_action( 'init', 'purple_remove_upsells' );
 
+if ( ! function_exists( 'purple_woocommerce_template_path' ) ) :
+	/**
+	 * Look for WooCommerce template overrides in includes/ instead of a
+	 * top-level woocommerce/ folder (currently only includes/loop/orderby.php).
+	 *
+	 * @return string
+	 */
+	function purple_woocommerce_template_path(): string {
+		return 'includes/';
+	}
+
+endif;
+
+add_filter( 'woocommerce_template_path', 'purple_woocommerce_template_path' );
+
 require_once get_template_directory() . '/includes/cart-page-content.php';
 
 if ( ! function_exists( 'purple_filter_woocommerce_create_pages' ) ) :
