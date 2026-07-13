@@ -10,8 +10,10 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as Pro
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 use WC_Helper_Product;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
+use WC_Unit_Tests_Bootstrap;
 use WP_REST_Request;
+use WP_REST_Server;
 
 
 
@@ -19,15 +21,24 @@ use WP_REST_Request;
  * class ProductsControllerTest.
  * Product Controller tests for V4 REST API.
  */
-class ProductsControllerTest extends WC_REST_Unit_Test_Case {
+class ProductsControllerTest extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 	use MetaDataAssertionTrait;
 
+	/**
+	 * REST server used to dispatch product requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
 
 	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
+		$this->clear_rest_server();
+		unset( $this->server );
+
 		parent::tearDown();
 		$this->disable_cogs_feature();
 		$this->disable_rest_api_v4_feature();
@@ -65,67 +76,70 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	protected static $products = array();
 
 	/**
-	 * Admin user ID, shared across all tests in the class for REST authentication.
+	 * Administrator ID used to authenticate requests.
 	 *
 	 * @var int
 	 */
-	protected static $user;
+	private static $administrator_id;
 
 	/**
-	 * Create the shared admin user and products once for the whole class.
+	 * Create products for tests.
 	 *
-	 * @param object $factory Factory object.
 	 * @return void
 	 */
-	public static function wpSetUpBeforeClass( $factory ) {
-		self::$user = $factory->user->create(
+	public static function wpSetUpBeforeClass() {
+		self::$administrator_id = self::factory()->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
 
-		self::$products[] = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name' => 'Pancake',
-				'sku'  => 'pancake-1',
-			)
-		);
-		self::$products[] = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name' => 'Waffle 1',
-				'sku'  => 'pancake-2',
-			)
-		);
-		self::$products[] = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name' => 'French Toast',
-				'sku'  => 'waffle-2',
-			)
-		);
-		self::$products[] = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name' => 'Waffle 3',
-				'sku'  => 'waffle-3',
-			)
-		);
+		self::with_direct_product_attribute_lookup_updates(
+			static function () {
+				self::$products[] = WC_Helper_Product::create_simple_product(
+					true,
+					array(
+						'name' => 'Pancake',
+						'sku'  => 'pancake-1',
+					)
+				);
+				self::$products[] = WC_Helper_Product::create_simple_product(
+					true,
+					array(
+						'name' => 'Waffle 1',
+						'sku'  => 'pancake-2',
+					)
+				);
+				self::$products[] = WC_Helper_Product::create_simple_product(
+					true,
+					array(
+						'name' => 'French Toast',
+						'sku'  => 'waffle-2',
+					)
+				);
+				self::$products[] = WC_Helper_Product::create_simple_product(
+					true,
+					array(
+						'name' => 'Waffle 3',
+						'sku'  => 'waffle-3',
+					)
+				);
 
-		$grouped_product       = WC_Helper_Product::create_grouped_product();
-		$children_products_ids = $grouped_product->get_children();
+				$grouped_product       = WC_Helper_Product::create_grouped_product();
+				$children_products_ids = $grouped_product->get_children();
 
-		foreach ( $children_products_ids as $child_product_id ) {
-			self::$products[] = wc_get_product( $child_product_id );
-		}
-		self::$products[] = $grouped_product;
+				foreach ( $children_products_ids as $child_product_id ) {
+					self::$products[] = wc_get_product( $child_product_id );
+				}
+				self::$products[] = $grouped_product;
 
-		foreach ( self::$products as $product ) {
-			$product->add_meta_data( 'test1', 'test1', true );
-			$product->add_meta_data( 'test2', 'test2', true );
-			$product->save();
-		}
+				foreach ( self::$products as $product ) {
+					$product->add_meta_data( 'test1', 'test1', true );
+					$product->add_meta_data( 'test2', 'test2', true );
+					$product->save();
+				}
+			}
+		);
 	}
 
 	/**
@@ -134,9 +148,41 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpTearDownAfterClass() {
-		foreach ( self::$products as $product ) {
-			WC_Helper_Product::delete_product( $product->get_id() );
+		try {
+			self::with_direct_product_attribute_lookup_updates(
+				static function () {
+					foreach ( self::$products as $product ) {
+						WC_Helper_Product::delete_product( $product->get_id() );
+					}
+				}
+			);
+		} finally {
+			self::$products = array();
 		}
+	}
+
+	/**
+	 * Get the IDs of the products owned by this test class.
+	 *
+	 * @return int[]
+	 */
+	private function get_fixture_product_ids(): array {
+		return array_map(
+			static function ( $product ) {
+				return $product->get_id();
+			},
+			self::$products
+		);
+	}
+
+	/**
+	 * Register only the product routes used by this test class.
+	 */
+	private function reset_rest_server(): void {
+		$this->server = $this->create_rest_server_with_routes(
+			array( array( $this->endpoint, 'register_routes' ) ),
+			true
+		);
 	}
 
 	/**
@@ -146,7 +192,8 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->enable_rest_api_v4_feature();
 		parent::setUp();
 		$this->endpoint = new ProductsController();
-		wp_set_current_user( self::$user );
+		$this->reset_rest_server();
+		wp_set_current_user( self::$administrator_id );
 
 		// Reset tax settings to ensure consistent product pricing.
 		// Some tests (like OrderHelper::create_complex_wp_post_order) modify tax settings globally,
@@ -316,10 +363,34 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a variable product with the requested number of variations.
+	 *
+	 * @param int $variation_count Number of variations to create.
+	 * @return \WC_Product_Variable
+	 */
+	private function create_variable_product_with_variations( int $variation_count ): \WC_Product_Variable {
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Variable product' );
+		$product->save();
+		$variation_ids = array();
+
+		for ( $index = 0; $index < $variation_count; $index++ ) {
+			$variation = new \WC_Product_Variation();
+			$variation->set_parent_id( $product->get_id() );
+			$variation->set_regular_price( 10 + $index );
+			$variation->save();
+			$variation_ids[] = $variation->get_id();
+		}
+		$product->set_children( $variation_ids );
+
+		return $product;
+	}
+
+	/**
 	 * @testdox Variable product responses include embeddable variation links.
 	 */
 	public function test_variable_product_response_includes_embeddable_variation_links(): void {
-		$product       = WC_Helper_Product::create_variation_product();
+		$product       = $this->create_variable_product_with_variations( 6 );
 		$variation_ids = $product->get_children();
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
@@ -344,7 +415,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Variable product responses embed variations when requested.
 	 */
 	public function test_variable_product_response_embeds_variations_when_requested(): void {
-		$product       = WC_Helper_Product::create_variation_product();
+		$product       = $this->create_variable_product_with_variations( 6 );
 		$variation_ids = $product->get_children();
 		$request       = new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() );
 		$request->set_param( '_embed', 1 );
@@ -373,7 +444,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Variation embed links do not propagate parent requested fields.
 	 */
 	public function test_variation_embed_links_do_not_propagate_parent_requested_fields(): void {
-		$product = WC_Helper_Product::create_variation_product();
+		$product = $this->create_variable_product_with_variations( 1 );
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() );
 		$request->set_param( '_fields', 'id,name,_links,_embedded' );
 
@@ -407,7 +478,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Variation parent links are not embeddable.
 	 */
 	public function test_variation_parent_link_is_not_embeddable(): void {
-		$product      = WC_Helper_Product::create_variation_product();
+		$product      = $this->create_variable_product_with_variations( 1 );
 		$variation_id = $product->get_children()[0];
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $variation_id ) );
@@ -586,9 +657,8 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_products_query_by_global_unique_id_param_for_variations() {
-		$parent_product = WC_Helper_Product::create_variation_product();
-		$variation      = $parent_product->get_available_variations()[0];
-		$variation      = wc_get_product( $variation['variation_id'] );
+		$parent_product = $this->create_variable_product_with_variations( 1 );
+		$variation      = wc_get_product( $parent_product->get_children()[0] );
 		$unique_id      = $parent_product->get_id() . '-1';
 		$variation->set_global_unique_id( $unique_id );
 		$variation->save();
@@ -612,11 +682,12 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_collection_param_include_meta() {
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_param( 'include_meta', 'test1' );
+		$request->set_param( 'include', $this->get_fixture_product_ids() );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 7, $response_data );
+		$this->assertCount( count( self::$products ), $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -637,11 +708,12 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_collection_param_include_meta_empty() {
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_param( 'include_meta', '' );
+		$request->set_param( 'include', $this->get_fixture_product_ids() );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 7, $response_data );
+		$this->assertCount( count( self::$products ), $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -662,11 +734,12 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_collection_param_exclude_meta() {
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_param( 'exclude_meta', 'test1' );
+		$request->set_param( 'include', $this->get_fixture_product_ids() );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 7, $response_data );
+		$this->assertCount( count( self::$products ), $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -688,11 +761,12 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_param( 'include_meta', 'test1' );
 		$request->set_param( 'exclude_meta', 'test1' );
+		$request->set_param( 'include', $this->get_fixture_product_ids() );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 7, $response_data );
+		$this->assertCount( count( self::$products ), $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -718,7 +792,8 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$response_data       = $this->server->response_to_data( $response, false );
 		$encoded_data_string = wp_json_encode( $response_data );
-		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
+		// Ensure object instead of associative array.
+		$decoded_data_object = json_decode( $encoded_data_string, false );
 
 		$this->assertIsArray( $decoded_data_object[0]->meta_data );
 	}
@@ -1153,10 +1228,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test that the `include_types` parameter filters products by a single type.
 	 */
 	public function test_collection_filter_with_include_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1170,17 +1242,17 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$response_products = $response->get_data();
 
 		$this->assertCount( 2, $response_products );
-		$this->assertEquals( ProductType::GROUPED, $response_products[0]['type'] );
+		$this->assertEqualsCanonicalizing(
+			array( ProductType::GROUPED, ProductType::GROUPED ),
+			wp_list_pluck( $response_products, 'type' )
+		);
 	}
 
 	/**
 	 * Test that the `include_types` parameter filters products by multiple types.
 	 */
 	public function test_collection_filter_with_multiple_include_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1410,35 +1482,59 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a variable product with stock-managed variations.
+	 *
+	 * A null quantity creates an unmanaged-stock variation, i.e. a NULL
+	 * stock_quantity row in the product meta lookup table.
+	 *
+	 * @param array<int, array{quantity: int|null, status?: string}> $variation_data Variation stock and status data.
+	 * @return \WC_Product_Variable
+	 */
+	private function create_variable_product_with_stock( array $variation_data ): \WC_Product_Variable {
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Variable product' );
+		$product->save();
+
+		foreach ( $variation_data as $data ) {
+			$variation = new \WC_Product_Variation();
+			$variation->set_parent_id( $product->get_id() );
+			$variation->set_regular_price( 10 );
+			if ( isset( $data['quantity'] ) ) {
+				$variation->set_manage_stock( true );
+				$variation->set_stock_quantity( $data['quantity'] );
+			} else {
+				$variation->set_manage_stock( false );
+			}
+			$variation->set_status( $data['status'] ?? ProductStatus::PUBLISH );
+			$variation->save();
+		}
+
+		return $product;
+	}
+
+	/**
 	 * @testdox Stock quantity parameters include variable products when a variation matches.
 	 */
 	public function test_products_filter_with_stock_quantity_range_matches_variable_product_variations(): void {
-		$variable_product          = WC_Helper_Product::create_variation_product();
-		$variation_ids             = $variable_product->get_children();
-		$matching_variation        = wc_get_product( $variation_ids[0] );
-		$non_matching_variation    = wc_get_product( $variation_ids[1] );
-		$non_matching_product      = WC_Helper_Product::create_simple_product(
+		$variable_product      = $this->create_variable_product_with_stock(
+			array(
+				array( 'quantity' => 5 ),
+				array( 'quantity' => 8 ),
+			)
+		);
+		$non_matching_product  = WC_Helper_Product::create_simple_product(
 			true,
 			array(
 				'manage_stock'   => true,
 				'stock_quantity' => 2,
 			)
 		);
-		$non_matching_variable     = WC_Helper_Product::create_variation_product();
-		$non_matching_variation_id = $non_matching_variable->get_children()[0];
-		$non_matching_variation_2  = wc_get_product( $non_matching_variation_id );
-
-		$matching_variation->set_manage_stock( true );
-		$matching_variation->set_stock_quantity( 5 );
-		$matching_variation->save();
-
-		$non_matching_variation->set_manage_stock( true );
-		$non_matching_variation->set_stock_quantity( 8 );
-		$non_matching_variation->save();
-
-		$non_matching_variation_2->set_manage_stock( true );
-		$non_matching_variation_2->set_stock_quantity( 10 );
-		$non_matching_variation_2->save();
+		$non_matching_variable = $this->create_variable_product_with_stock(
+			array(
+				array( 'quantity' => 10 ),
+				array( 'quantity' => null ),
+			)
+		);
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1458,6 +1554,26 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( array( $variable_product->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
 
+		// A zero-inclusive range must not match the unmanaged (NULL stock)
+		// variation of the non-matching variable product.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'min_stock_quantity' => 0,
+				'max_stock_quantity' => 2,
+				'include'            => array(
+					$variable_product->get_id(),
+					$non_matching_product->get_id(),
+					$non_matching_variable->get_id(),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array( $non_matching_product->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
+
 		WC_Helper_Product::delete_product( $variable_product->get_id() );
 		WC_Helper_Product::delete_product( $non_matching_product->get_id() );
 		WC_Helper_Product::delete_product( $non_matching_variable->get_id() );
@@ -1467,19 +1583,15 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Stock quantity parameters ignore unpublished variations when matching variable products.
 	 */
 	public function test_products_filter_with_stock_quantity_range_ignores_unpublished_variations(): void {
-		$variable_product       = WC_Helper_Product::create_variation_product();
-		$variation_ids          = $variable_product->get_children();
-		$draft_variation        = wc_get_product( $variation_ids[0] );
-		$non_matching_variation = wc_get_product( $variation_ids[1] );
-
-		$draft_variation->set_status( ProductStatus::DRAFT );
-		$draft_variation->set_manage_stock( true );
-		$draft_variation->set_stock_quantity( 5 );
-		$draft_variation->save();
-
-		$non_matching_variation->set_manage_stock( true );
-		$non_matching_variation->set_stock_quantity( 8 );
-		$non_matching_variation->save();
+		$variable_product = $this->create_variable_product_with_stock(
+			array(
+				array(
+					'quantity' => 5,
+					'status'   => ProductStatus::DRAFT,
+				),
+				array( 'quantity' => 8 ),
+			)
+		);
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1627,13 +1739,27 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Create one product of each parent product type for type-filter tests.
+	 */
+	private function create_products_for_type_filtering(): void {
+		WC_Helper_Product::create_simple_product();
+
+		$variable = new \WC_Product_Variable();
+		$variable->set_name( 'Variable product' );
+		$variable->save();
+
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_name( 'Grouped product' );
+		$grouped->save();
+
+		WC_Helper_Product::create_external_product();
+	}
+
+	/**
 	 * Test that `exclude_types` parameter correctly excludes a single type.
 	 */
 	public function test_products_filter_with_single_exclude_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1646,19 +1772,17 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$data = $response->get_data();
 
-		$types = array_unique( array_column( $data, 'type' ) );
-
-		$this->assertNotContains( ProductType::SIMPLE, $types );
+		$this->assertEqualsCanonicalizing(
+			array( ProductType::VARIABLE, ProductType::GROUPED, ProductType::EXTERNAL ),
+			array_values( array_unique( array_column( $data, 'type' ) ) )
+		);
 	}
 
 	/**
 	 * Test that `exclude_types` parameter correctly excludes multiple types.
 	 */
 	public function test_products_filter_with_multiple_exclude_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1686,10 +1810,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test that empty `exclude_types` parameter returns all products.
 	 */
 	public function test_products_filter_with_empty_exclude_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1729,10 +1850,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test that `exclude_types` with all types returns empty result.
 	 */
 	public function test_products_filter_exclude_types_with_all_types_returns_empty() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1750,10 +1868,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test that `exclude_types` parameter takes precedence over `include_types`.
 	 */
 	public function test_products_filter_exclude_types_precedence_over_include() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -1777,10 +1892,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test that `exclude_types` works correctly with the `type` param.
 	 */
 	public function test_products_filter_exclude_types_with_type_param() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
 		$request->set_query_params(
@@ -2049,7 +2161,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_cogs_values_received_for_variation_product( bool $set_additive_flag ) {
 		$this->enable_cogs_feature();
 
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->create_variable_product_with_variations( 1 );
 		$parent_product->set_cogs_value( 12.34 );
 		$parent_product->save();
 
@@ -2115,6 +2227,13 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$original_product_sku   = 'DUPLICATE_SKU_TEST_TRASHED';
 		// This image `src` is used in other product API tests, using here for consistency.
 		$shared_image_src = 'http://cldup.com/Dr1Bczxq4q.png';
+		// The failed request below exercises upload processing; setup only needs a valid image attachment.
+		$original_attachment_id = self::factory()->attachment->create(
+			array(
+				'file'           => WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png',
+				'post_mime_type' => 'image/png',
+			)
+		);
 
 		// 1. Create the original product with its image.
 		$request_original_product = new WP_REST_Request( 'POST', '/wc/v4/products' );
@@ -2126,7 +2245,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 				'regular_price' => '10',
 				'images'        => array(
 					array(
-						'src' => $shared_image_src,
+						'id' => $original_attachment_id,
 					),
 				),
 			)
@@ -2135,9 +2254,8 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response_original_product->get_status(), 'Failed to create the initial product with an image.' );
 
-		$original_product_data  = $response_original_product->get_data();
-		$original_product_id    = $original_product_data['id'];
-		$original_attachment_id = $original_product_data['images'][0]['id'];
+		$original_product_data = $response_original_product->get_data();
+		$original_product_id   = $original_product_data['id'];
 
 		// 2. Move the original product to trash.
 		wp_trash_post( $original_product_id );
@@ -2157,7 +2275,8 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$create_request_for_failure->set_body_params(
 			array(
 				'name'          => 'New Product Attempt That Fails',
-				'sku'           => $original_product_sku, // Duplicate SKU.
+				// Duplicate SKU.
+				'sku'           => $original_product_sku,
 				'type'          => 'simple',
 				'regular_price' => '20',
 				'images'        => array(

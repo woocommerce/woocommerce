@@ -52438,20 +52438,8 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilters.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGallery.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGallery\:\:render_dialog\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGallery.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGallery\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductGallery.php
 
