@@ -210,7 +210,6 @@
 		"progress-bar-webpack-plugin": "2.1.x",
 		"react-docgen": "5.4.3",
 		"react-docgen-typescript-plugin": "^1.0.5",
-		"react-test-renderer": "18.3.x",
 		"redux": "4.2.1",
 		"request-promise": "4.2.6",
 		"rimraf": "5.0.5",

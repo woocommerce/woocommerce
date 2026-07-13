@@ -251,6 +251,7 @@
 				{
 					"name": "Core e2e tests - parallel",
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-parallel",
 					"shardingArguments": [
 						"--shard=1/2",
@@ -288,6 +289,7 @@
 				{
 					"name": "Core e2e tests - serial",
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
 					"shardingArguments": [
 						"--shard=1/2",
@@ -325,6 +327,7 @@
 				{
 					"name": "Core e2e tests - Gutenberg stable",
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:gb-stable",
 					"shardingArguments": [],
 					"changes": [
@@ -351,6 +354,7 @@
 				{
 					"name": "Core e2e tests - Gutenberg nightly",
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:gb-nightly",
 					"shardingArguments": [],
 					"changes": [
@@ -376,6 +380,7 @@
 				{
 					"name": "Core e2e tests - (HPOS:off)",
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:hpos-off",
 					"shardingArguments": [],
 					"changes": [
@@ -402,6 +407,7 @@
 				{
 					"name": "Core e2e tests - PHP 8.5 - serial",
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
 					"shardingArguments": [
 						"--shard=1/2",
@@ -434,6 +440,7 @@
 				{
 					"name": "Core e2e tests - PHP 8.5 - parallel",
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-parallel",
 					"shardingArguments": [
 						"--shard=1/2",
@@ -466,6 +473,7 @@
 				{
 					"name": "Core e2e tests - WP L-1 - serial",
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
 					"shardingArguments": [
 						"--shard=1/2",
@@ -498,6 +506,7 @@
 				{
 					"name": "Core e2e tests - WP L-1 - parallel",
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-parallel",
 					"shardingArguments": [
 						"--shard=1/2",
@@ -531,6 +540,7 @@
 					"name": "Core e2e tests - WP pre-release - serial",
 					"optional": true,
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
 					"shardingArguments": [
 						"--shard=1/2",
@@ -564,6 +574,7 @@
 					"name": "Core e2e tests - WP pre-release - parallel",
 					"optional": true,
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-parallel",
 					"shardingArguments": [
 						"--shard=1/2",
@@ -596,6 +607,7 @@
 				{
 					"name": "Core API tests",
 					"testType": "api",
+					"usesSharedPluginBuild": true,
 					"command": "test:api",
 					"optional": false,
 					"changes": [
@@ -630,6 +642,7 @@
 				{
 					"name": "Core API tests (HPOS:off)",
 					"testType": "api",
+					"usesSharedPluginBuild": true,
 					"command": "test:api:hpos-off",
 					"optional": false,
 					"changes": [
@@ -695,6 +708,7 @@
 				{
 					"name": "Core API tests (with object cache plugin)",
 					"testType": "api",
+					"usesSharedPluginBuild": true,
 					"command": "test:api:object-cache",
 					"optional": false,
 					"changes": [
@@ -728,6 +742,7 @@
 				{
 					"name": "Core Performance tests (K6)",
 					"testType": "performance",
+					"usesSharedPluginBuild": true,
 					"command": "test:perf",
 					"optional": true,
 					"changes": [
@@ -780,6 +795,7 @@
 				{
 					"name": "Blocks e2e tests",
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
 						"--shard=1/10",
@@ -834,6 +850,7 @@
 					"name": "Blocks e2e tests - WP pre-release",
 					"optional": true,
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
 						"--shard=1/10",
@@ -881,6 +898,7 @@
 				{
 					"name": "Blocks e2e tests - WP latest-1",
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
 						"--shard=1/10",
@@ -958,6 +976,7 @@
 				{
 					"name": "Core e2e tests - PayPal Standard",
 					"testType": "e2e",
+					"usesSharedPluginBuild": true,
 					"command": "test:e2e:paypal-standard",
 					"shardingArguments": [],
 					"changes": [

@@ -206,7 +206,6 @@
 		"prop-types": "^15.8.1",
 		"raw-loader": "4.0.x",
 		"react-refresh": "^0.14.0",
-		"react-test-renderer": "18.3.x",
 		"readline-sync": "^1.4.10",
 		"replace": "^1.2.2",
 		"rimraf": "5.0.5",

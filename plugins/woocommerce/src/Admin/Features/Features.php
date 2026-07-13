@@ -532,6 +532,24 @@ class Features {
 	}
 
 	/**
+	 * Checks if Analytics was disabled by legacy WooCommerce Admin filters.
+	 *
+	 * @return bool True if Analytics was disabled by legacy filters.
+	 */
+	public static function is_analytics_disabled_by_legacy_filters(): bool {
+		/**
+		 * Filter allowing WooCommerce Admin optional features to be disabled.
+		 *
+		 * @param bool $disabled False.
+		 */
+		if ( apply_filters( 'woocommerce_admin_disabled', false ) ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			return true;
+		}
+
+		return ! in_array( 'analytics', self::get_features_with_legacy_compatibility_defaults(), true );
+	}
+
+	/**
 	 * Checks if a feature slug is supported only by the legacy compatibility shim.
 	 *
 	 * @param string $feature Feature slug.
