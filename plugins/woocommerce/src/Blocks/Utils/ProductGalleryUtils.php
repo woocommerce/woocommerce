@@ -45,6 +45,21 @@ class ProductGalleryUtils {
 	}
 
 	/**
+	 * Get the product gallery image count.
+	 *
+	 * @deprecated 11.1.0 Use get_product_gallery_media_count instead.
+	 *
+	 * @param \WC_Product $product The product object to retrieve the gallery images for.
+	 * @return int The number of images in the product gallery.
+	 */
+	public static function get_product_gallery_image_count( $product ) {
+		wc_deprecated_function( __METHOD__, '11.1.0', 'get_product_gallery_media_count' );
+
+		$all_image_ids = self::get_all_image_ids( $product );
+		return count( $all_image_ids );
+	}
+
+	/**
 	 * Get all media items for the product gallery.
 	 *
 	 * @param \WC_Product $product The product object.
