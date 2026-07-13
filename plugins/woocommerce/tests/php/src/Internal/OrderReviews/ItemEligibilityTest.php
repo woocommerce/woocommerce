@@ -63,17 +63,19 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Insert a customer review for a product, optionally tagged with the source order id.
+	 * Insert a customer review for a product, tagged with the source order
+	 * and (optionally) variation id.
 	 *
-	 * @param int      $product_id Product post id.
-	 * @param string   $email      Author email.
-	 * @param string   $body       Comment body.
-	 * @param int      $rating     Rating value 1-5.
-	 * @param int|null $order_id   Source order id stamped as `_review_order_id` commentmeta. Pass null to skip.
-	 * @param int      $approved   1 for approved, 0 for pending moderation.
+	 * @param int      $product_id   Product post id.
+	 * @param string   $email        Author email.
+	 * @param string   $body         Comment body.
+	 * @param int      $rating       Rating value 1-5.
+	 * @param int|null $order_id     Source order id stamped as `_review_order_id` commentmeta. Pass null to skip.
+	 * @param int      $variation_id Variation id stamped as `_review_variation_id` commentmeta. 0 for simple products.
+	 * @param int      $approved     1 for approved, 0 for pending moderation.
 	 * @return int Inserted comment id.
 	 */
-	private function insert_review( int $product_id, string $email, string $body, int $rating, ?int $order_id = null, int $approved = 1 ): int {
+	private function insert_review( int $product_id, string $email, string $body, int $rating, ?int $order_id = null, int $variation_id = 0, int $approved = 1 ): int {
 		$comment_id = (int) wp_insert_comment(
 			array(
 				'comment_post_ID'      => $product_id,
@@ -88,6 +90,7 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 		if ( null !== $order_id ) {
 			add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, $order_id, true );
 		}
+		add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, $variation_id, true );
 		return $comment_id;
 	}
 
@@ -327,5 +330,74 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 		$this->insert_review( $built['product_id'], 'all-done@example.test', 'Done.', 5, (int) $built['order']->get_id() );
 
 		$this->assertFalse( ItemEligibility::has_actionable_items( $built['order'] ) );
+	}
+
+	/**
+	 * @testdox decide() scopes the existing-review lookup by variation id.
+	 *
+	 * Two variation rows of the same parent product on the same order: a
+	 * review tagged with variation A's id must prefill only the row whose
+	 * line item is variation A. The variation B row stays unreviewed.
+	 */
+	public function test_decide_scopes_by_variation_id(): void {
+		$built = $this->make_variation_order( 'shopper@example.test' );
+
+		$this->insert_review(
+			$built['product_id'],
+			'shopper@example.test',
+			'Loved the Small.',
+			5,
+			(int) $built['order']->get_id(),
+			$built['variation_a_id']
+		);
+
+		// Mirror the page-load path: bulk preload, then per-item decide(). This
+		// exercises the preload bucketing logic as well, not just the
+		// fallback single-item query inside `find_existing_review()`.
+		$items = $built['order']->get_items();
+		ItemEligibility::preload_for_items( $items, $built['order'] );
+
+		$decision_a = ItemEligibility::decide( $built['item_a'], $built['order'] );
+		$decision_b = ItemEligibility::decide( $built['item_b'], $built['order'] );
+
+		$this->assertNotNull( $decision_a['comment'], 'Variation A row should prefill from its own review.' );
+		$this->assertNull( $decision_b['comment'], 'Variation B row should stay unreviewed.' );
+		$this->assertSame( $built['variation_a_id'], $decision_a['variation_id'] );
+		$this->assertSame( $built['variation_b_id'], $decision_b['variation_id'] );
+	}
+
+	/**
+	 * Build a completed order with two variations of one parent variable product.
+	 *
+	 * @param string $email Billing email to set on the order.
+	 * @return array{order:\WC_Order, item_a:\WC_Order_Item_Product, item_b:\WC_Order_Item_Product, product_id:int, variation_a_id:int, variation_b_id:int}
+	 */
+	private function make_variation_order( string $email ): array {
+		$variable      = WC_Helper_Product::create_variation_product();
+		$variation_ids = $variable->get_children();
+		$variation_a   = wc_get_product( $variation_ids[0] );
+		$variation_b   = wc_get_product( $variation_ids[1] );
+
+		$order = OrderHelper::create_order();
+		foreach ( $order->get_items() as $line ) {
+			$order->remove_item( $line->get_id() );
+		}
+		$order->set_billing_email( $email );
+		$order->set_status( OrderStatus::COMPLETED );
+
+		$order->add_product( $variation_a, 1 );
+		$order->add_product( $variation_b, 1 );
+		$order->save();
+
+		$items = array_values( $order->get_items() );
+
+		return array(
+			'order'          => $order,
+			'item_a'         => $items[0],
+			'item_b'         => $items[1],
+			'product_id'     => $variable->get_id(),
+			'variation_a_id' => (int) $variation_a->get_id(),
+			'variation_b_id' => (int) $variation_b->get_id(),
+		);
 	}
 }

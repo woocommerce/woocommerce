@@ -238,6 +238,22 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test product object caching is enabled by default for new installations.
+	 *
+	 * @return void
+	 */
+	public function test_enable_product_instance_caching_for_new_installation() {
+		// Ensure the feature option doesn't exist before testing.
+		delete_option( 'woocommerce_feature_product_instance_caching_enabled' );
+
+		// Call the method to enable the feature for new installs.
+		WC_Install::enable_product_instance_caching_for_newly_installed();
+
+		// Verify the feature option was set to 'yes'.
+		$this->assertEquals( 'yes', get_option( 'woocommerce_feature_product_instance_caching_enabled' ) );
+	}
+
+	/**
 	 * Test migrate_options();
 	 * @return void
 	 */

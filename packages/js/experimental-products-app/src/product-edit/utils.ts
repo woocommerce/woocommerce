@@ -2,6 +2,8 @@
  * External dependencies
  */
 import type { Field, FormField } from '@wordpress/dataviews';
+import { __ } from '@wordpress/i18n';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -30,6 +32,13 @@ type ProductType = 'simple' | 'variation' | 'variable' | 'grouped' | 'external';
 type ProductVariationEntityRecord = ProductEntityRecord & {
 	parent_id: number;
 };
+type DimensionKey = keyof ProductEntityRecord[ 'dimensions' ];
+type Feature = {
+	is_enabled?: boolean;
+};
+type AdminSettings = {
+	features?: Record< string, Feature >;
+};
 
 const PRODUCT_EDIT_FIELD_IDS = [
 	'name',
@@ -38,6 +47,7 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'images',
 	'images_count',
 	'product_status',
+	'variation_active',
 	'sku',
 	'price',
 	'regular_price',
@@ -46,6 +56,7 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'schedule_sale',
 	'date_on_sale_from',
 	'date_on_sale_to',
+	'cost_of_goods_sold',
 	'price_summary',
 	'stock',
 	'stock_quantity',
@@ -72,101 +83,174 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'tax_status',
 	'upsell_ids',
 	'cross_sell_ids',
+	'grouped_products',
 	'linked_products_count',
 ] as const;
 
-const DIMENSION_GROUP_FIELD_IDS = [ 'weight', 'length', 'width' ] as const;
+const DIMENSION_KEYS: DimensionKey[] = [ 'length', 'width', 'height' ];
 
 const DIMENSIONS_FORM_FIELD: ProductEditFormField = {
 	id: 'dimensions',
 	layout: { type: 'row' as const },
-	children: [ ...DIMENSION_GROUP_FIELD_IDS ],
-};
-
-const PARENT_DIMENSIONS_FORM_FIELD: ProductEditFormField = {
-	id: 'parent-dimensions',
-	layout: { type: 'row' as const },
 	children: [ 'length', 'width', 'height' ],
 };
 
+function createProductEditFormGroup(
+	id: string,
+	label: string,
+	children: ProductEditFormField[]
+): ProductEditFormField {
+	return {
+		id,
+		label,
+		children,
+	};
+}
+
+const DOWNLOADABLE_FILES_FORM_FIELD: ProductEditFormField =
+	createProductEditFormGroup(
+		'downloadable-files-fields',
+		__( 'Downloadable files', 'woocommerce' ),
+		[ 'downloadable' ]
+	);
+
 const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
-	'name',
-	'product_status',
-	'catalog_visibility',
-	'regular_price',
-	'sale_price',
-	'images',
-	'downloadable',
-	'sku',
-	'stock',
-	'manage_stock',
-	'stock_quantity',
-	'categories',
-	'brands',
-	'tags',
-	'featured',
-	DIMENSIONS_FORM_FIELD,
-	'height',
+	createProductEditFormGroup(
+		'general-fields',
+		__( 'General', 'woocommerce' ),
+		[ 'name', 'product_status', 'catalog_visibility' ]
+	),
+	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
+		'regular_price',
+		'sale_price',
+		'schedule_sale',
+		'cost_of_goods_sold',
+	] ),
+	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
+		'images',
+	] ),
+	DOWNLOADABLE_FILES_FORM_FIELD,
+	createProductEditFormGroup(
+		'inventory-fields',
+		__( 'Inventory', 'woocommerce' ),
+		[ 'sku', 'manage_stock', 'stock', 'stock_quantity' ]
+	),
+	createProductEditFormGroup(
+		'product-organization-fields',
+		__( 'Product organization', 'woocommerce' ),
+		[ 'categories', 'brands', 'tags', 'featured' ]
+	),
+	createProductEditFormGroup(
+		'shipping-fields',
+		__( 'Shipping', 'woocommerce' ),
+		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'weight' ]
+	),
 ] satisfies ProductEditFormField[];
 
 const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
-	'product_status',
-	'regular_price',
-	'sale_price',
-	'images',
-	'sku',
-	'manage_stock',
-	'stock',
-	'stock_quantity',
-	'shipping_class',
-	DIMENSIONS_FORM_FIELD,
-	'height',
+	createProductEditFormGroup(
+		'general-fields',
+		__( 'General', 'woocommerce' ),
+		[ 'variation_active' ]
+	),
+	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
+		'regular_price',
+		'sale_price',
+		'schedule_sale',
+		'cost_of_goods_sold',
+	] ),
+	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
+		'images',
+	] ),
+	DOWNLOADABLE_FILES_FORM_FIELD,
+	createProductEditFormGroup(
+		'inventory-fields',
+		__( 'Inventory', 'woocommerce' ),
+		[ 'sku', 'manage_stock', 'stock', 'stock_quantity' ]
+	),
+	createProductEditFormGroup(
+		'shipping-fields',
+		__( 'Shipping', 'woocommerce' ),
+		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'weight' ]
+	),
 ] satisfies ProductEditFormField[];
 
 const VARIABLE_PRODUCT_EDIT_FORM_FIELDS = [
-	'name',
-	'product_status',
-	'catalog_visibility',
-	'images',
-	'sku',
-	'manage_stock',
-	'stock',
-	'categories',
-	'brands',
-	'tags',
-	'featured',
-	'shipping_class',
-	PARENT_DIMENSIONS_FORM_FIELD,
-	'weight',
+	createProductEditFormGroup(
+		'general-fields',
+		__( 'General', 'woocommerce' ),
+		[ 'name', 'product_status', 'catalog_visibility' ]
+	),
+	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
+		'images',
+	] ),
+	createProductEditFormGroup(
+		'inventory-fields',
+		__( 'Inventory', 'woocommerce' ),
+		[ 'sku', 'manage_stock', 'stock' ]
+	),
+	createProductEditFormGroup(
+		'product-organization-fields',
+		__( 'Product organization', 'woocommerce' ),
+		[ 'categories', 'brands', 'tags', 'featured' ]
+	),
+	createProductEditFormGroup(
+		'shipping-fields',
+		__( 'Shipping', 'woocommerce' ),
+		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'weight' ]
+	),
 ] satisfies ProductEditFormField[];
 
 const EXTERNAL_PRODUCT_EDIT_FORM_FIELDS = [
-	'name',
-	'product_status',
-	'catalog_visibility',
-	'regular_price',
-	'sale_price',
-	'images',
-	'external_url',
-	'button_text',
-	'sku',
-	'categories',
-	'brands',
-	'tags',
-	'featured',
+	createProductEditFormGroup(
+		'general-fields',
+		__( 'General', 'woocommerce' ),
+		[ 'name', 'product_status', 'catalog_visibility' ]
+	),
+	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
+		'regular_price',
+		'sale_price',
+		'schedule_sale',
+	] ),
+	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
+		'images',
+	] ),
+	createProductEditFormGroup(
+		'buy-button-fields',
+		__( 'Buy button', 'woocommerce' ),
+		[ 'external_url', 'button_text' ]
+	),
+	createProductEditFormGroup(
+		'inventory-fields',
+		__( 'Inventory', 'woocommerce' ),
+		[ 'sku' ]
+	),
+	createProductEditFormGroup(
+		'product-organization-fields',
+		__( 'Product organization', 'woocommerce' ),
+		[ 'categories', 'brands', 'tags', 'featured' ]
+	),
 ] satisfies ProductEditFormField[];
 
 const GROUPED_PRODUCT_EDIT_FORM_FIELDS = [
-	'name',
-	'product_status',
-	'catalog_visibility',
-	'upsell_ids',
-	'images',
-	'sku',
-	'categories',
-	'brands',
-	'tags',
-	'featured',
+	createProductEditFormGroup(
+		'general-fields',
+		__( 'General', 'woocommerce' ),
+		[ 'name', 'product_status', 'catalog_visibility', 'grouped_products' ]
+	),
+	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
+		'images',
+	] ),
+	createProductEditFormGroup(
+		'inventory-fields',
+		__( 'Inventory', 'woocommerce' ),
+		[ 'sku' ]
+	),
+	createProductEditFormGroup(
+		'product-organization-fields',
+		__( 'Product organization', 'woocommerce' ),
+		[ 'categories', 'brands', 'tags', 'featured' ]
+	),
 ] satisfies ProductEditFormField[];
 
 const PRODUCT_TYPE_FORM_FIELDS = {
@@ -189,6 +273,7 @@ const PARENT_OWNED_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 	'featured',
 	'upsell_ids',
 	'cross_sell_ids',
+	'grouped_products',
 	'external_url',
 	'button_text',
 ] );
@@ -201,10 +286,16 @@ const SELLABLE_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 	'schedule_sale',
 	'date_on_sale_from',
 	'date_on_sale_to',
+	'cost_of_goods_sold',
 ] );
 
 const BULK_UNSUPPORTED_PRODUCT_EDIT_FIELD_ID_SET =
 	new Set< ProductEditFieldId >( [ 'sku' ] );
+
+function isCostOfGoodsSoldFeatureEnabled() {
+	const adminSettings = getSetting< AdminSettings >( 'admin', {} );
+	return Boolean( adminSettings.features?.cost_of_goods_sold?.is_enabled );
+}
 
 function normalizeValue( value: unknown ) {
 	if ( value === undefined ) {
@@ -230,6 +321,48 @@ function getMixedValueFallback( sample: unknown ) {
 	return undefined;
 }
 
+function isRecord( value: unknown ): value is Record< string, unknown > {
+	return (
+		Boolean( value ) &&
+		typeof value === 'object' &&
+		! Array.isArray( value )
+	);
+}
+
+function buildMergedDimensions(
+	values: unknown[]
+): ProductEntityRecord[ 'dimensions' ] | undefined {
+	const hasDimensionValue = values.some( isRecord );
+
+	if ( ! hasDimensionValue ) {
+		return undefined;
+	}
+
+	const dimensions: Partial< ProductEntityRecord[ 'dimensions' ] > = {};
+
+	DIMENSION_KEYS.forEach( ( dimensionKey ) => {
+		const dimensionValues = values.map( ( value ) =>
+			isRecord( value ) ? value[ dimensionKey ] : undefined
+		);
+		const firstDefinedValue = dimensionValues.find(
+			( value ) => value !== undefined
+		);
+		const areValuesEqual = dimensionValues.every(
+			( value ) =>
+				normalizeValue( value ) ===
+				normalizeValue( dimensionValues[ 0 ] )
+		);
+
+		dimensions[ dimensionKey ] = (
+			areValuesEqual
+				? dimensionValues[ 0 ]
+				: getMixedValueFallback( firstDefinedValue )
+		) as string | undefined;
+	} );
+
+	return dimensions as ProductEntityRecord[ 'dimensions' ];
+}
+
 function isVariableProductParent( product: ProductEntityRecord ) {
 	return product.type === 'variable' && ! product.parent_id;
 }
@@ -250,6 +383,18 @@ export function isProductVariation(
 	return product.type === 'variation' || Boolean( product.parent_id );
 }
 
+function getProductEditFormFieldIds(
+	formField: ProductEditFormField
+): ProductEditFieldId[] {
+	if ( typeof formField === 'string' ) {
+		return [ formField ];
+	}
+
+	return ( formField.children ?? [] ).flatMap( ( child ) =>
+		getProductEditFormFieldIds( child as ProductEditFormField )
+	);
+}
+
 function getProductType( product: ProductEntityRecord ): ProductType {
 	if ( isProductVariation( product ) ) {
 		return 'variation';
@@ -262,16 +407,7 @@ function getProductTypeFieldIds(
 	product: ProductEntityRecord
 ): ProductEditFieldId[] {
 	return PRODUCT_TYPE_FORM_FIELDS[ getProductType( product ) ].flatMap(
-		( formField ) => {
-			if ( typeof formField === 'string' ) {
-				return [ formField ];
-			}
-
-			return ( formField.children ?? [] ).filter(
-				( child ): child is ProductEditFieldId =>
-					typeof child === 'string'
-			);
-		}
+		getProductEditFormFieldIds
 	);
 }
 
@@ -430,6 +566,12 @@ export function buildMergedProductEditData(
 		const values = products.map(
 			( product ) => product[ key as keyof ProductEntityRecord ]
 		);
+
+		if ( key === 'dimensions' ) {
+			mergedData[ key ] = buildMergedDimensions( values );
+			return;
+		}
+
 		const firstDefinedValue = values.find(
 			( value ) => value !== undefined
 		);
@@ -462,6 +604,13 @@ export function getVisibleProductEditFields(
 			const field = fieldsById.get( fieldId );
 
 			if ( ! field ) {
+				return visibleFields;
+			}
+
+			if (
+				field.id === 'cost_of_goods_sold' &&
+				! isCostOfGoodsSoldFeatureEnabled()
+			) {
 				return visibleFields;
 			}
 
@@ -500,8 +649,38 @@ export function getVisibleProductEditFields(
 	);
 }
 
+function pruneProductEditFormField(
+	formField: ProductEditFormField,
+	visibleFieldIds: Set< string >
+): ProductEditFormField | undefined {
+	if ( typeof formField === 'string' ) {
+		return visibleFieldIds.has( formField ) ? formField : undefined;
+	}
+
+	const children = ( formField.children ?? [] )
+		.map( ( child ) =>
+			pruneProductEditFormField(
+				child as ProductEditFormField,
+				visibleFieldIds
+			)
+		)
+		.filter(
+			( child ): child is ProductEditFormField => child !== undefined
+		);
+
+	if ( children.length === 0 ) {
+		return undefined;
+	}
+
+	return {
+		...formField,
+		children,
+	};
+}
+
 export function getProductTypeFormFields(
-	products: ProductEntityRecord[]
+	products: ProductEntityRecord[],
+	visibleFields?: ProductField[]
 ): Array< FormField | string > {
 	const [ firstProduct ] = products;
 
@@ -509,5 +688,24 @@ export function getProductTypeFormFields(
 		return [];
 	}
 
-	return [ ...PRODUCT_TYPE_FORM_FIELDS[ getProductType( firstProduct ) ] ];
+	const formFields = [
+		...PRODUCT_TYPE_FORM_FIELDS[ getProductType( firstProduct ) ],
+	];
+
+	if ( ! visibleFields ) {
+		return formFields;
+	}
+
+	const visibleFieldIds = new Set(
+		visibleFields.map( ( field ) => field.id )
+	);
+
+	return formFields
+		.map( ( formField ) =>
+			pruneProductEditFormField( formField, visibleFieldIds )
+		)
+		.filter(
+			( formField ): formField is ProductEditFormField =>
+				formField !== undefined
+		);
 }

@@ -19,7 +19,6 @@ const {
 } = require( './bin/webpack-configs.js' );
 
 const interactivityBlocksConfig = require( './bin/webpack-config-interactive-blocks.js' );
-const interactivityAPIConfig = require( './bin/webpack-config-interactivity.js' );
 const dependencyDetectionConfig = require( './bin/webpack-config-dependency-detection.js' );
 const isWatch =
 	NODE_ENV === 'development' && process.argv.includes( '--watch' );
@@ -40,7 +39,9 @@ const getCacheConfig = ( name, configPaths = [] ) =>
 						require.resolve(
 							'@woocommerce/dependency-extraction-webpack-plugin'
 						),
-						require.resolve( '@woocommerce/internal-style-build' ),
+						require.resolve(
+							'@woocommerce/internal-build/style-build'
+						),
 						...configPaths.map( ( configPath ) =>
 							path.resolve( __dirname, configPath )
 						),
@@ -140,14 +141,6 @@ const InteractivityBlocksConfig = {
 	...interactivityBlocksConfig,
 };
 
-const InteractivityAPIConfig = {
-	...sharedConfig,
-	cache: getCacheConfig( 'interactivity-api', [
-		'bin/webpack-config-interactivity.js',
-	] ),
-	...interactivityAPIConfig,
-};
-
 /**
  * Config for the dependency detection inline script.
  * This is a standalone IIFE that PHP reads and inlines.
@@ -170,6 +163,5 @@ module.exports = [
 	SiteEditorConfig,
 	StylingConfig,
 	InteractivityBlocksConfig,
-	InteractivityAPIConfig,
 	DependencyDetectionConfig,
 ];

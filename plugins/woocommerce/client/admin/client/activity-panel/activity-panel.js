@@ -13,10 +13,16 @@ import {
 	bellUnread,
 	listView,
 	comment,
+	store,
 } from '@wordpress/icons';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { H, Section } from '@woocommerce/components';
-import { onboardingStore, optionsStore, useUser } from '@woocommerce/data';
+import {
+	activityPanelStore,
+	onboardingStore,
+	optionsStore,
+	useUser,
+} from '@woocommerce/data';
 import { addHistoryListener } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSlot } from '@woocommerce/experimental';
@@ -33,12 +39,6 @@ import { hasUnreadNotes as checkIfHasUnreadNotes } from './unread-indicators';
 import { Tabs } from './tabs';
 import { DisplayOptions } from './display-options';
 import { Panel } from './panel';
-import {
-	getLowStockCount as getLowStockProducts,
-	getOrderStatuses,
-	getUnreadOrders,
-} from '../homescreen/activity-panel/orders/utils';
-import { getUnapprovedReviews } from '../homescreen/activity-panel/reviews/utils';
 import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getUrlParams } from '~/utils';
@@ -128,16 +128,17 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 	const checkIfHasAbbreviatedNotifications = useCallback(
 		( select, setupTaskListHidden, thingsToDoNextCount ) => {
-			const orderStatuses = getOrderStatuses( select );
+			const counts =
+				select( activityPanelStore ).getActivityPanelCounts();
 
 			const isOrdersCardVisible = setupTaskListHidden
-				? getUnreadOrders( select, orderStatuses ) > 0
+				? ( counts?.orders_to_fulfill_count ?? 0 ) > 0
 				: false;
 			const isReviewsCardVisible = setupTaskListHidden
-				? getUnapprovedReviews( select )
+				? ( counts?.reviews_to_moderate_count ?? 0 ) > 0
 				: false;
 			const isLowStockCardVisible = setupTaskListHidden
-				? getLowStockProducts( select )
+				? ( counts?.products_low_in_stock_count ?? 0 ) > 0
 				: false;
 
 			return (
@@ -354,7 +355,11 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		};
 
 		const headerAccount = {
-			component: () => <HeaderAccount page="wc-admin" />,
+			// Stable component reference — an inline arrow would give React a
+			// new component type on every parent render, remounting HeaderAccount
+			// and resetting its DropdownMenu's internal isOpen state.
+			component: HeaderAccount,
+			options: { page: 'wc-admin' },
 			visible: isHomescreen,
 		};
 
@@ -380,6 +385,12 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				( comingSoon === 'yes' &&
 					__( 'Preview store', 'woocommerce' ) ) ||
 				__( 'View store', 'woocommerce' ),
+			// Tiny shopfront icon for the literal "View store" / "Preview
+			// store" semantic, distinct from the other icons in the bar.
+			// Required because activity-panel tabs are now icon-only —
+			// a tab without an icon renders as an empty button on the
+			// floating header.
+			icon: <Icon icon={ store } />,
 			visible: isHomescreen && query.task !== 'appearance',
 			onClick: () => {
 				window.open( getAdminSetting( 'shopUrl' ) );

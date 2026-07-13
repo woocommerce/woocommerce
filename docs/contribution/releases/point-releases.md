@@ -7,119 +7,65 @@ sidebar_position: 2
 # Point Releases
 
 :::important
-The formal Point Release Request (PRR) issue template is not strictly required for all point release fixes. In practice, coordinating directly with the release lead is often sufficient to get fixes included in a point release. The rest of this document remains useful for understanding what types of fixes qualify for point releases and how to prepare them in the repository.
+The formal Point Release Request (PRR) issue template ([`new-prr-template.yml`](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/new-prr-template.yml)) is no longer required for point release fixes; it is preserved only for reference. In practice, coordinating directly with the release lead is sufficient to get fixes included in a point release, and is the most important step. The rest of this document covers what types of fixes qualify for point releases and how to prepare them in the repository.
 :::
 
-## What Are Point Releases?
+Point releases are patch releases that address specific issues in an already-shipped WooCommerce version (for example `9.9.0 → 9.9.1`) without adding new functionality. They apply only to versions that are already in customer production environments.
 
-Point releases are patch releases that address specific issues without adding substantial new functionality. Point releases typically contain:
+## What qualifies as a point release
 
-- **Critical bug fixes** affecting store functionality or checkout processes
-- **Security patches** for urgent vulnerabilities
-- **Compatibility fixes** for WordPress, theme, or plugin conflicts
+Changes appropriate for a point release are:
 
-## Timing a Point Release
+- **Critical bug fixes** affecting store functionality (checkout, orders, payments, product visibility).
+- **Security patches** for urgent vulnerabilities.
+- **Severe performance regressions** introduced by the shipped release.
+- **Compliance fixes** required for regulatory or legal reasons.
+- **Compatibility fixes** for WordPress, theme, or plugin conflicts that are breaking stores.
 
-When considering the exact time to create a point release, use your best judgement based on the urgency and severity of outstanding issues:
+The following are **not** point release material and should ride the next regular release instead:
 
-- If the issue is not very urgent, consider waiting 3–4 days to see if additional related issues are reported before proceeding. This helps consolidate fixes and reduces the number of patch releases.
-- For high-severity or critical issues, prioritize releasing as soon as possible to minimize impact on users.
-- For security issues, coordinate with the team that implemented the security fix to help determine urgency if it is not clear.
-- Consider whether other known issues are already being worked on that could be included in the same release.
+- New features or enhancements.
+- Non-critical bug fixes.
+- Code refactoring or cleanup.
+- Documentation updates.
 
-## The Point Release Requests (PRR) flow
+In all cases, point releases must remain backward compatible. No breaking changes are allowed in a patch.
 
-The **Point Release Request (PRR) flow** is a structured process for requesting and managing critical fixes that need to be included in WooCommerce point releases. This process ensures that urgent bug fixes can be safely incorporated into current stable release and automatically forward-port them to trunk and any frozen branches, preserving code quality, enforcing thorough reviews, and preventing regressions.
+⚠️ Security vulnerability reports must **not** go through this flow. Report them privately via Automattic's HackerOne program: [https://hackerone.com/automattic/](https://hackerone.com/automattic/).
 
-**⚠️ Important:** Security Vulnerability reports must not go through the PRR flow. All potential security issues should be reported privately via Automattic’s HackerOne program: [https://hackerone.com/automattic/](https://hackerone.com/automattic/).
+## Evaluating whether to ship a point release
 
-### Step-by-Step Process
+Use your best judgement based on the urgency and severity of the outstanding issue. The release lead and the reporter should weigh:
 
-#### 1a. Initial Issue Creation
+| Criterion | Guidance |
+| --- | --- |
+| **Scope of impact** | How many stores are already affected? Larger reach increases urgency. |
+| **Error commonality** | Does the problem stem from a widely-used core flow, plugin, or theme? Issues in common components usually merit faster action. |
+| **Workarounds** | Is there an easy, documented workaround (a filter, setting toggle, or temporary feature disable) that store owners can apply? Readily available workarounds lower the need for a point release. |
+| **Impact severity** | Does the bug block critical commerce functionality (checkout, payments, product visibility)? The more business-critical the failure, the higher the priority. |
 
-To ensure the release lead is aware of all planned fixes to be included in the next point release, it is important to create either an issue or PR as soon as a bug is discovered and planned as a patch fix.  This will help reduce the number of patch releases that need to be created.
+Some practical timing notes:
 
-If the initial PR may take more than a few hours to create, please create an issue and set the milestone of the issue to targeted release. E.g. use milestone `10.1.0` for a new point release request for `10.1.x`.
+- If the issue is not very urgent, consider waiting 3–4 days to see if additional related issues are reported before proceeding. This consolidates fixes and reduces the number of patch releases.
+- For high-severity or critical issues, prioritize releasing as soon as possible.
+- For security issues, coordinate with the team that implemented the fix to help determine urgency if it is not clear.
+- Consider whether other known issues already being worked on could be included in the same release.
 
-#### 1b. Initial Pull Request Creation
+## Process
 
-**Author Action**: Create a pull request against the release branch (`release/x.y`) instead of the trunk branch, following the standard PR creation process.
+The work is split between the **fix author** and the **release lead**. These tasks can happen in parallel. The author does not need to wait for the tracking issue before opening a PR, and the release lead can create the tracking issue independently once a point release is on the table.
 
-- The PR should target the specific release branch (e.g., `release/9.5` for an issue found on WooCommerce 9.5.x)
-- Include a regular changelog file as you would for trunk PRs
-- Ensure all standard PR requirements are met (description, testing, etc.)
-- Ensure that the PR has a milestone set to the target release so it can be tracked by the release lead, e.g. use milestone `10.1.0` for a new point release request for `10.1.x`.
+### For the fix author: prepare the fix
 
-#### 2. Point Release Request Submission
+Two paths are acceptable. The first is preferred when the fix applies cleanly to both branches.
 
-**Author Action**: Submit a PRR using the [Point Release Request template](https://github.com/woocommerce/woocommerce/issues/new?template=new-prr-template.yml).
+- **Preferred:** merge to `trunk` with the `X.Y.0` milestone set. The cherry-pick automation handles the rest. See the [Cherry-picking guide](/docs/contribution/releases/backporting) for the full flow, including your responsibility for reviewing and merging the auto-generated cherry-pick PR.
+- **Alternative:** PR directly against the `release/X.Y` branch when the fix doesn't apply cleanly to `trunk`. Use the [cherry-pick label flow](/docs/contribution/releases/backporting) to forward-port to `trunk` (and the next frozen release if applicable).
 
-Provide the required PRR template information:
+Once the PR and any cherry-pick follow-ups have been reviewed, merged, and milestoned, the rest is on the release lead.
 
-**Required Fields:**
+### For the release lead: create the tracking issue and cut the release
 
-- **PR URL**: The pull request URL against the release branch
-- **Justification**: Why this PR needs a point release
-- **Impact Assessment**: Consequences if the fix is not included (number of users affected and how)
-- **Contingency Plan**: What to do if defects are discovered after the point release
-- **Communication Plan**: How the change should be communicated in the release blog post
-- **Workaround**: Any available workarounds and how to communicate them
-- **Alternative Contact**: Who to contact if the author is unavailable
+Run the [`Release: Create Tracking Issue`](https://github.com/woocommerce/woocommerce/actions/workflows/release-create-tracking-issue.yml) workflow for the target point release version (e.g. `9.9.1`). Do **not** reuse an existing tracking issue, even if a previous release in the same series was blocked. The workflow automatically nests the new Linear issue under the `[X.Y] Release tracking` parent for that release series, so the entire release series remains a single tree in Linear.
 
-#### 3. Release-Lead Review
-
-After a PRR is opened, the **release lead** evaluates it.  
-When deciding whether to approve a PRR, the release lead should consider the following:
-
-| Evaluation Criterion | Guidance |
-| ---------------------- | ---------- |
-| **Scope of Impact** | How many stores are already affected? Larger reach increases urgency. |
-| **Error Commonality** | Does the problem stem from a widely-used core flow, plugin, or theme? Issues in common components usually merit faster action. |
-| **Workarounds** | Is there an easy, documented workaround (e.g., a filter, setting toggle, or temporary feature disable) that store owners can apply? Readily available workarounds lower the need for a point release. |
-| **Impact Severity** | Does the bug block critical commerce functionality (checkout, payments, product visibility)? The more business-critical the failure, the higher the priority. |
-
-#### 4. Approval or Rejection
-
-| Outcome | Release-Lead Action | Workflow Triggered |
-| --------- | -------------------- | ------------------- |
-| **Approve** | Apply the **`Approved`** label to the PRR issue and optionally leave a short rationale referencing the criteria above. | Labels are automatically added to the PR (“cherry pick to trunk”, “cherry pick to frozen release”); the issue milestone is set to the current release; the PRR is commented with an approval note. |
-| **Reject** | Apply the **`Rejected`** label and briefly state the reason (e.g., limited impact, simple workaround available). | A workflow adds a comment, closes the PRR, and the author must retarget the PR to `trunk`, resolve conflicts, and merge through the normal path. |
-
-
-#### 5. Merge to Release Branch (Release Lead / Core Contributor)
-
-- **Verify cherry-pick requirements**
-    - Check whether the fix is already included in `trunk` and/or the next frozen branch.
-    - If the fix *should not* be forward-ported, remove the labels `cherry pick to trunk` and `cherry pick to frozen release`.
-
-- **Merge the PR**
-    - After reviewing the labels, merge the PR into the current `release/x.y` branch.
-    - Confirm that the changelog entry and milestone are correct.
-
-- **Resulting automation**
-    - If either cherry-pick label remains, GitHub Actions opens follow-up PRs to `trunk` and/or the frozen release branch.
-    - If both labels were removed, no cherry-pick workflows run.
-
-#### 6. Review & Merge Follow-up PRs (Release Lead)
-
-After the primary fix is merged into `release/x.y`, the labels that remain on the PR determine what happens next:
-
-| Label present | Automation result | What the release lead must do |
-| --------------- | ------------------- | ------------------------------ |
-| `cherry pick to trunk` | Action opens a new PR targeting `trunk` and adds the current milestone. | Review tests / CI and merge this PR. |
-| `cherry pick to frozen release` | Action opens a new PR targeting the **next frozen branch** (e.g., `release/9.6`) and adds the milestone. | Review and merge this PR as well. |
-
-Both follow-up PRs **must be merged before the point-release tag is cut**.  
-If either cherry-pick is not required, ensure its label was removed during Step 5 so no unnecessary PR is generated.
-
-#### 7. Publish the Point Release (Release Lead)
-
-Once all required PRs are merged into:
-
-- `release/x.y` (current maintenance branch)
-- `trunk` (future feature branch)
-- *optional* frozen branch (`release/x.y+1`)
-
-the **release lead** creates and publishes the new point release that contains every approved PRR since the last shipment.
-
-Follow the established [WooCommerce release process](/docs/contribution/releases/building-and-publishing).
+The tracking issue contains the version-specific checklist for cutting and publishing the release. Follow it from there. For underlying mechanics (workflows, draft releases, stable tag updates), refer to [Building and Publishing](/docs/contribution/releases/building-and-publishing).

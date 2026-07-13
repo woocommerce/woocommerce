@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
@@ -617,6 +618,10 @@ class WC_AJAX {
 			wp_die();
 		}
 
+		if ( ! $variable_product->is_viewable() ) {
+			wp_die();
+		}
+
 		$data_store   = WC_Data_Store::load( 'product' );
 		$variation_id = $data_store->find_matching_product_variation( $variable_product, wp_unslash( $_POST ) );
 		$variation    = $variation_id ? $variable_product->get_available_variation( $variation_id ) : false;
@@ -741,29 +746,6 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Check if a product attribute taxonomy supports visual term colors.
-	 *
-	 * @param string $taxonomy Taxonomy slug.
-	 * @return bool
-	 *
-	 * @internal
-	 */
-	private static function is_visual_product_attribute_taxonomy( $taxonomy ) {
-		if ( ! taxonomy_exists( $taxonomy ) || ! taxonomy_is_product_attribute( $taxonomy ) ) {
-			return false;
-		}
-
-		if ( ! array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
-			return false;
-		}
-
-		$attribute_id = wc_attribute_taxonomy_id_by_name( $taxonomy );
-		$attribute    = $attribute_id ? wc_get_attribute( $attribute_id ) : null;
-
-		return $attribute && 'wc-visual' === $attribute->type;
-	}
-
-	/**
 	 * Add a new attribute via ajax function.
 	 *
 	 * @return void
@@ -786,22 +768,29 @@ class WC_AJAX {
 						)
 					);
 				} else {
-					if ( self::is_visual_product_attribute_taxonomy( $taxonomy ) && isset( $_POST['term_color'] ) ) {
-						$color_value = sanitize_hex_color( wp_unslash( $_POST['term_color'] ) );
-
-						if ( $color_value ) {
-							update_term_meta( $result['term_id'], 'color', $color_value );
-						}
-					}
+					VisualAttributeTermMeta::save_term_visual_from_request( (int) $result['term_id'], $taxonomy, $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 					$term = get_term_by( 'id', $result['term_id'], $taxonomy );
-					wp_send_json(
-						array(
-							'term_id' => $term->term_id,
-							'name'    => $term->name,
-							'slug'    => $term->slug,
-						)
+
+					if ( ! $term ) {
+						wp_send_json(
+							array(
+								'error' => __( 'Term not found', 'woocommerce' ),
+							)
+						);
+					}
+
+					$response = array(
+						'term_id' => $term->term_id,
+						'name'    => $term->name,
+						'slug'    => $term->slug,
 					);
+
+					if ( VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
+						$response['visual'] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
+					}
+
+					wp_send_json( $response );
 				}//end if
 			}//end if
 		}//end if
@@ -1048,6 +1037,18 @@ class WC_AJAX {
 		$data  = array();
 		$items = $order->get_items();
 
+		/**
+		 * Customer download data store.
+		 *
+		 * @var WC_Customer_Download_Data_Store $data_store
+		 */
+		$data_store               = WC_Data_Store::load( 'customer-download' );
+		$existing_download_access = array();
+
+		foreach ( $data_store->get_downloads( array( 'order_id' => $order_id ) ) as $download ) {
+			$existing_download_access[ $download->get_product_id() . '|' . $download->get_download_id() ] = true;
+		}
+
 		// Check against order items first.
 		foreach ( $items as $item ) {
 			$product = $item->get_product();
@@ -1076,8 +1077,15 @@ class WC_AJAX {
 
 			if ( ! empty( $download_data['files'] ) ) {
 				foreach ( $download_data['files'] as $download_id => $file ) {
+					$download_access_key = $product_id . '|' . $download_id;
+
+					if ( isset( $existing_download_access[ $download_access_key ] ) ) {
+						continue;
+					}
+
 					$inserted_id = wc_downloadable_file_permission( $download_id, $product->get_id(), $order, $download_data['quantity'], $download_data['order_item'] );
 					if ( $inserted_id ) {
+						$existing_download_access[ $download_access_key ] = true;
 						$download = new WC_Customer_Download( $inserted_id );
 						++$loop;
 						++$file_counter;
@@ -2082,9 +2090,13 @@ class WC_AJAX {
 	/**
 	 * Search for categories and return json.
 	 *
+	 * @deprecated 10.9.0 This callback was used by the removed async product editor category field.
+	 *
 	 * @return void
 	 */
 	public static function json_search_categories_tree() {
+		wc_deprecated_function( __METHOD__, '10.9.0' );
+
 		ob_start();
 
 		check_ajax_referer( 'search-categories', 'security' );
@@ -3017,16 +3029,19 @@ class WC_AJAX {
 			return;
 		}
 
+		$date_from = isset( $data['date_from'] ) ? wc_clean( $data['date_from'] ) : false;
+		$date_to   = isset( $data['date_to'] ) ? wc_clean( $data['date_to'] ) : false;
+
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
 
-			if ( 'false' !== $data['date_from'] ) {
-				$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( wc_clean( $data['date_from'] ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			if ( false !== $date_from && 'false' !== $date_from ) {
+				$date_on_sale_from = '' === $date_from ? null : date( 'Y-m-d 00:00:00', strtotime( $date_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 				$variation->set_date_on_sale_from( $date_on_sale_from );
 			}
 
-			if ( 'false' !== $data['date_to'] ) {
-				$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( wc_clean( $data['date_to'] ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			if ( false !== $date_to && 'false' !== $date_to ) {
+				$date_on_sale_to = '' === $date_to ? null : date( 'Y-m-d 23:59:59', strtotime( $date_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 				$variation->set_date_on_sale_to( $date_on_sale_to );
 			}
 

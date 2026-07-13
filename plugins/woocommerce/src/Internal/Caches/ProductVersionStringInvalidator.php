@@ -523,7 +523,9 @@ class ProductVersionStringInvalidator {
 		$cached    = wp_cache_get( $cache_key, 'woocommerce' );
 
 		if ( false !== $cached ) {
-			return $cached ? $cached : null;
+			// Cast to int: persistent object cache backends (e.g. Redis) can return scalars as strings,
+			// which would violate this method's ?int return type.
+			return $cached ? (int) $cached : null;
 		}
 
 		if ( $this->is_using_cpt_data_store() ) {

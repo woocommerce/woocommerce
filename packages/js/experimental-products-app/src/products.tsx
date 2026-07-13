@@ -10,6 +10,7 @@ import {
 /**
  * Internal dependencies
  */
+import { AppErrorBoundary } from './app-error-boundary';
 
 const ProductsApp = lazy( () =>
 	import( './app' ).then( ( module ) => ( {
@@ -24,12 +25,21 @@ const ProductsApp = lazy( () =>
  */
 export function initializeProductsDashboard( id: string ): Root {
 	const target = document.getElementById( id );
-	const root = createRoot( target! );
+
+	if ( ! target ) {
+		throw new Error(
+			`Could not initialize products dashboard: element with id "${ id }" was not found.`
+		);
+	}
+
+	const root = createRoot( target );
 	root.render(
 		<StrictMode>
-			<Suspense fallback={ null }>
-				<ProductsApp />
-			</Suspense>
+			<AppErrorBoundary>
+				<Suspense fallback={ null }>
+					<ProductsApp />
+				</Suspense>
+			</AppErrorBoundary>
 		</StrictMode>
 	);
 

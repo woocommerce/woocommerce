@@ -130,6 +130,10 @@ input[type="checkbox"].wc-block-product-filter-checkbox-list__input:checked {
 	flex-shrink: 0;
 	height: 1em;
 	margin-right: 0.25em;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	overflow: hidden;
 	width: 1em;
 
 	&.is-empty {

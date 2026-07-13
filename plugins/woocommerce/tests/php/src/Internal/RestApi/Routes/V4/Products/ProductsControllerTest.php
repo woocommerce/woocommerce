@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Products;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as ProductsController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
@@ -64,11 +65,25 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	protected static $products = array();
 
 	/**
-	 * Create products for tests.
+	 * Admin user ID, shared across all tests in the class for REST authentication.
 	 *
+	 * @var int
+	 */
+	protected static $user;
+
+	/**
+	 * Create the shared admin user and products once for the whole class.
+	 *
+	 * @param object $factory Factory object.
 	 * @return void
 	 */
-	public static function wpSetUpBeforeClass() {
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+
 		self::$products[] = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -131,12 +146,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->enable_rest_api_v4_feature();
 		parent::setUp();
 		$this->endpoint = new ProductsController();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-		wp_set_current_user( $this->user );
+		wp_set_current_user( self::$user );
 
 		// Reset tax settings to ensure consistent product pricing.
 		// Some tests (like OrderHelper::create_complex_wp_post_order) modify tax settings globally,
@@ -1190,6 +1200,108 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept scalar and array stock status collection filters.
+	 *
+	 * @dataProvider stock_status_filter_query_provider
+	 *
+	 * @param string|array $stock_status_query Query value for the stock_status parameter.
+	 * @param array        $expected_stock_statuses Expected normalized stock status values.
+	 */
+	public function test_collection_filter_with_stock_statuses( $stock_status_query, array $expected_stock_statuses ): void {
+		$normalized_stock_status = null;
+		$capture_stock_status    = static function ( $response, $handler, $request ) use ( &$normalized_stock_status ) {
+			if ( '/wc/v4/products' === $request->get_route() ) {
+				$normalized_stock_status = $request->get_param( 'stock_status' );
+			}
+
+			return $response;
+		};
+
+		$in_stock_product     = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Stock Filter Target In Stock',
+				'sku'  => 'stock-filter-target-in-stock',
+			)
+		);
+		$out_of_stock_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Stock Filter Target Out Of Stock',
+				'sku'  => 'stock-filter-target-out-of-stock',
+			)
+		);
+		$backorder_product    = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Stock Filter Target Backorder',
+				'sku'  => 'stock-filter-target-backorder',
+			)
+		);
+
+		$in_stock_product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$in_stock_product->save();
+		$out_of_stock_product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$out_of_stock_product->save();
+		$backorder_product->set_stock_status( ProductStockStatus::ON_BACKORDER );
+		$backorder_product->save();
+
+		try {
+			add_filter( 'rest_request_before_callbacks', $capture_stock_status, 10, 3 );
+
+			$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+			$request->set_query_params(
+				array(
+					'search_name_or_sku' => 'stock-filter-target',
+					'stock_status'       => $stock_status_query,
+				)
+			);
+
+			$response = $this->server->dispatch( $request );
+			$this->assertEquals( 200, $response->get_status() );
+			$this->assertEquals( $expected_stock_statuses, $normalized_stock_status, 'Stock status should be normalized to a list.' );
+
+			$product_ids = wp_list_pluck( $response->get_data(), 'id' );
+			$products    = array(
+				ProductStockStatus::IN_STOCK     => $in_stock_product,
+				ProductStockStatus::OUT_OF_STOCK => $out_of_stock_product,
+				ProductStockStatus::ON_BACKORDER => $backorder_product,
+			);
+
+			foreach ( $products as $stock_status => $product ) {
+				if ( in_array( $stock_status, $expected_stock_statuses, true ) ) {
+					$this->assertContains( $product->get_id(), $product_ids );
+				} else {
+					$this->assertNotContains( $product->get_id(), $product_ids );
+				}
+			}
+		} finally {
+			remove_filter( 'rest_request_before_callbacks', $capture_stock_status, 10 );
+			WC_Helper_Product::delete_product( $in_stock_product->get_id() );
+			WC_Helper_Product::delete_product( $out_of_stock_product->get_id() );
+			WC_Helper_Product::delete_product( $backorder_product->get_id() );
+		}
+	}
+
+	/**
+	 * Data provider for stock status collection filters.
+	 *
+	 * @return array
+	 */
+	public function stock_status_filter_query_provider() {
+		return array(
+			'scalar stock status'  => array(
+				ProductStockStatus::IN_STOCK,
+				array( ProductStockStatus::IN_STOCK ),
+			),
+			'array stock statuses' => array(
+				array( ProductStockStatus::OUT_OF_STOCK, ProductStockStatus::ON_BACKORDER ),
+				array( ProductStockStatus::OUT_OF_STOCK, ProductStockStatus::ON_BACKORDER ),
+			),
+		);
+	}
+
+	/**
 	 * Test that the `include_types` parameter handles invalid status values.
 	 */
 	public function test_collection_filter_with_invalid_include_types() {
@@ -1246,6 +1358,272 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $included_product->get_id() );
 		wp_delete_term( $excluded_category['term_id'], 'product_cat' );
 		wp_delete_term( $included_category['term_id'], 'product_cat' );
+	}
+
+	/**
+	 * @testdox The min_stock_quantity and max_stock_quantity parameters filter products by stock quantity.
+	 */
+	public function test_products_filter_with_stock_quantity_range(): void {
+		$low_stock_product  = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 2,
+			)
+		);
+		$in_range_product   = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 5,
+			)
+		);
+		$high_stock_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 8,
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'min_stock_quantity' => 4,
+				'max_stock_quantity' => 6,
+				'include'            => array(
+					$low_stock_product->get_id(),
+					$in_range_product->get_id(),
+					$high_stock_product->get_id(),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array( $in_range_product->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
+
+		WC_Helper_Product::delete_product( $low_stock_product->get_id() );
+		WC_Helper_Product::delete_product( $in_range_product->get_id() );
+		WC_Helper_Product::delete_product( $high_stock_product->get_id() );
+	}
+
+	/**
+	 * @testdox Stock quantity parameters include variable products when a variation matches.
+	 */
+	public function test_products_filter_with_stock_quantity_range_matches_variable_product_variations(): void {
+		$variable_product          = WC_Helper_Product::create_variation_product();
+		$variation_ids             = $variable_product->get_children();
+		$matching_variation        = wc_get_product( $variation_ids[0] );
+		$non_matching_variation    = wc_get_product( $variation_ids[1] );
+		$non_matching_product      = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 2,
+			)
+		);
+		$non_matching_variable     = WC_Helper_Product::create_variation_product();
+		$non_matching_variation_id = $non_matching_variable->get_children()[0];
+		$non_matching_variation_2  = wc_get_product( $non_matching_variation_id );
+
+		$matching_variation->set_manage_stock( true );
+		$matching_variation->set_stock_quantity( 5 );
+		$matching_variation->save();
+
+		$non_matching_variation->set_manage_stock( true );
+		$non_matching_variation->set_stock_quantity( 8 );
+		$non_matching_variation->save();
+
+		$non_matching_variation_2->set_manage_stock( true );
+		$non_matching_variation_2->set_stock_quantity( 10 );
+		$non_matching_variation_2->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'min_stock_quantity' => 4,
+				'max_stock_quantity' => 6,
+				'include'            => array(
+					$variable_product->get_id(),
+					$non_matching_product->get_id(),
+					$non_matching_variable->get_id(),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array( $variable_product->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
+
+		WC_Helper_Product::delete_product( $variable_product->get_id() );
+		WC_Helper_Product::delete_product( $non_matching_product->get_id() );
+		WC_Helper_Product::delete_product( $non_matching_variable->get_id() );
+	}
+
+	/**
+	 * @testdox Stock quantity parameters ignore unpublished variations when matching variable products.
+	 */
+	public function test_products_filter_with_stock_quantity_range_ignores_unpublished_variations(): void {
+		$variable_product       = WC_Helper_Product::create_variation_product();
+		$variation_ids          = $variable_product->get_children();
+		$draft_variation        = wc_get_product( $variation_ids[0] );
+		$non_matching_variation = wc_get_product( $variation_ids[1] );
+
+		$draft_variation->set_status( ProductStatus::DRAFT );
+		$draft_variation->set_manage_stock( true );
+		$draft_variation->set_stock_quantity( 5 );
+		$draft_variation->save();
+
+		$non_matching_variation->set_manage_stock( true );
+		$non_matching_variation->set_stock_quantity( 8 );
+		$non_matching_variation->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'min_stock_quantity' => 4,
+				'max_stock_quantity' => 6,
+				'include'            => array( $variable_product->get_id() ),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array(), wp_list_pluck( $response->get_data(), 'id' ) );
+
+		WC_Helper_Product::delete_product( $variable_product->get_id() );
+	}
+
+	/**
+	 * @testdox The min_stock_quantity parameter includes products with the specified stock quantity.
+	 */
+	public function test_products_filter_with_min_stock_quantity(): void {
+		$low_stock_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 2,
+			)
+		);
+		$matching_product  = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 5,
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'min_stock_quantity' => 5,
+				'include'            => array( $low_stock_product->get_id(), $matching_product->get_id() ),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array( $matching_product->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
+
+		WC_Helper_Product::delete_product( $low_stock_product->get_id() );
+		WC_Helper_Product::delete_product( $matching_product->get_id() );
+	}
+
+	/**
+	 * @testdox The max_stock_quantity parameter includes products with the specified stock quantity.
+	 */
+	public function test_products_filter_with_max_stock_quantity(): void {
+		$matching_product   = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 5,
+			)
+		);
+		$high_stock_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 8,
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'max_stock_quantity' => 5,
+				'include'            => array( $matching_product->get_id(), $high_stock_product->get_id() ),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array( $matching_product->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
+
+		WC_Helper_Product::delete_product( $matching_product->get_id() );
+		WC_Helper_Product::delete_product( $high_stock_product->get_id() );
+	}
+
+	/**
+	 * @testdox The stock quantity and on_sale parameters only include products matching both filters.
+	 */
+	public function test_products_filter_with_stock_quantity_and_on_sale(): void {
+		$matching_on_sale_product  = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 5,
+				'sale_price'     => 5,
+			)
+		);
+		$matching_stock_product    = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 5,
+			)
+		);
+		$low_stock_on_sale_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 2,
+				'sale_price'     => 5,
+			)
+		);
+
+		delete_transient( 'wc_products_onsale' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'min_stock_quantity' => 4,
+				'on_sale'            => true,
+				'include'            => array(
+					$matching_on_sale_product->get_id(),
+					$matching_stock_product->get_id(),
+					$low_stock_on_sale_product->get_id(),
+				),
+				'orderby'            => 'id',
+				'order'              => 'asc',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array( $matching_on_sale_product->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
+
+		WC_Helper_Product::delete_product( $matching_on_sale_product->get_id() );
+		WC_Helper_Product::delete_product( $matching_stock_product->get_id() );
+		WC_Helper_Product::delete_product( $low_stock_on_sale_product->get_id() );
+		delete_transient( 'wc_products_onsale' );
 	}
 
 	/**

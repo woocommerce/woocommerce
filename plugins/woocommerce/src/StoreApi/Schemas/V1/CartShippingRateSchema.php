@@ -342,6 +342,10 @@ class CartShippingRateSchema extends AbstractSchema {
 		return array_reduce(
 			array_keys( $meta_data ),
 			function( $return, $key ) use ( $meta_data ) {
+				if ( 0 === strpos( (string) $key, '_' ) ) {
+					return $return;
+				}
+
 				$return[] = [
 					'key'   => $key,
 					'value' => $meta_data[ $key ],

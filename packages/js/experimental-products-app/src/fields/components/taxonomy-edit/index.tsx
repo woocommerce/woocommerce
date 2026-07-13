@@ -1,19 +1,23 @@
 /**
  * External dependencies
  */
-import type { ReactNode } from 'react';
-import { FormTokenField, Spinner } from '@wordpress/components';
+import { Spinner } from '@wordpress/components';
 import { store as coreStore, type Term } from '@wordpress/core-data';
 import { dispatch, useDispatch } from '@wordpress/data';
 import type { DataFormControlProps } from '@wordpress/dataviews';
 import { useCallback, useMemo, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __, sprintf } from '@wordpress/i18n';
+import { store as noticesStore } from '@wordpress/notices';
 import { Stack } from '@wordpress/ui';
 
 /**
  * Internal dependencies
  */
+import {
+	SearchableChipSelectControl,
+	Combobox,
+} from '../searchable-chip-select';
 import { useElements } from './use-elements';
 import { useAdaptiveTaxonomy } from './use-adaptive-taxonomy';
 import type { Item, ItemImage, TaxonomyTermRef } from './types';
@@ -38,8 +42,6 @@ type TaxonomyEditProps< T > = {
 	 */
 	termCount?: number;
 };
-
-type TokenValue = string | { value: string };
 
 function getErrorMessage( error: unknown ): string {
 	if ( error instanceof Error ) {
@@ -79,7 +81,7 @@ function isTermRecord( value: unknown ): value is Term {
 	if ( ! ( 'id' in value ) || ! ( 'name' in value ) ) {
 		return false;
 	}
-	const term = value as Record< string, unknown >;
+	const term = value as Term;
 	return typeof term.id === 'number' && typeof term.name === 'string';
 }
 
@@ -87,49 +89,23 @@ function createFieldChange< T extends Record< string, unknown > >(
 	fieldProperty: keyof T,
 	value: TaxonomyTermRef[]
 ): Partial< T > {
-	return { [ fieldProperty ]: value } as Partial< T >;
+	const change: Partial< T > = {};
+	( change as Record< keyof T, TaxonomyTermRef[] > )[ fieldProperty ] = value;
+	return change;
 }
 
-function getTokenValue( token: TokenValue ): string {
-	return typeof token === 'string' ? token : token.value;
-}
-
-function normalizeItemLabel( label: string ): string {
-	return label.trim().toLocaleLowerCase();
-}
-
-function getHelpContent(
-	description: ReactNode,
+function getEmptyContent(
 	isLoading: boolean,
 	isServerSearch: boolean,
 	inputValue: string
 ) {
-	const shouldPromptToSearch = isServerSearch && ! inputValue.trim();
-
-	if ( ! description && ! isLoading && ! shouldPromptToSearch ) {
-		return null;
+	if ( isLoading ) {
+		return <Spinner />;
 	}
-
-	return (
-		<div className="components-base-control__help">
-			<Stack direction="column" style={ { gap: '4px' } }>
-				{ description && <span>{ description }</span> }
-				{ isLoading && (
-					<Stack
-						direction="row"
-						align="center"
-						style={ { gap: '4px' } }
-					>
-						<Spinner />
-						<span>{ __( 'Loading results…', 'woocommerce' ) }</span>
-					</Stack>
-				) }
-				{ shouldPromptToSearch && (
-					<span>{ __( 'Type to search…', 'woocommerce' ) }</span>
-				) }
-			</Stack>
-		</div>
-	);
+	if ( isServerSearch && ! inputValue.trim() ) {
+		return __( 'Type to search…', 'woocommerce' );
+	}
+	return __( 'No results found.', 'woocommerce' );
 }
 
 export function TaxonomyEdit< T extends Record< string, unknown > >( {
@@ -169,17 +145,7 @@ export function TaxonomyEdit< T extends Record< string, unknown > >( {
 			} )
 			.filter( ( item ): item is Item => item !== null );
 	} );
-	const { createErrorNotice } = useDispatch(
-		// eslint-disable-next-line @wordpress/data-no-store-string-literals -- @wordpress/notices types are unavailable in this package.
-		'core/notices'
-	) as {
-		createErrorNotice: (
-			message: string,
-			options?: {
-				type?: string;
-			}
-		) => void | Promise< unknown >;
-	};
+	const { createErrorNotice } = useDispatch( noticesStore );
 
 	// Legacy mode: load all elements from field definition.
 	const { elements: fieldItems, isLoading: isFieldLoading } = useElements( {
@@ -219,13 +185,7 @@ export function TaxonomyEdit< T extends Record< string, unknown > >( {
 		return new Map( items.map( ( item ) => [ item.value, item ] ) );
 	}, [ items ] );
 
-	const itemsByLabel = useMemo( () => {
-		return new Map(
-			items.map( ( item ) => [ normalizeItemLabel( item.label ), item ] )
-		);
-	}, [ items ] );
-
-	const selectedItems: Item[] = useMemo( () => {
+	const value: Item[] = useMemo( () => {
 		const rawRefs = data?.[ fieldProperty ];
 		const termRefs: TaxonomyTermRef[] = Array.isArray( rawRefs )
 			? rawRefs.filter( isTaxonomyTermRef )
@@ -235,60 +195,37 @@ export function TaxonomyEdit< T extends Record< string, unknown > >( {
 			.filter( ( item ): item is Item => item !== undefined );
 	}, [ data, fieldProperty, itemsMap ] );
 
-	const value = useMemo(
-		() => selectedItems.map( ( item ) => item.value ),
-		[ selectedItems ]
-	);
-
-	const suggestions = useMemo(
-		() => items.map( ( item ) => item.value ),
-		[ items ]
-	);
+	const creatableItem: Item | undefined = useMemo( () => {
+		const termName = inputValue.trim();
+		if ( ! termName || isCreating ) {
+			return undefined;
+		}
+		return {
+			value: CREATABLE_VALUE,
+			label: sprintf(
+				/* translators: %s: the name of the new term to create */
+				__( 'Create "%s"', 'woocommerce' ),
+				termName
+			),
+		};
+	}, [ inputValue, isCreating ] );
 
 	const hasImages = useMemo(
 		() => items.some( ( item ) => item.image?.src ),
 		[ items ]
 	);
 
-	const displayTransform = useCallback(
-		( token: string ) => itemsMap.get( token )?.label ?? token,
-		[ itemsMap ]
-	);
-
-	const saveTransform = useCallback(
-		( token: string ) => {
-			const trimmedToken = token.trim();
-			return itemsMap.get( trimmedToken )?.label ?? trimmedToken;
-		},
-		[ itemsMap ]
-	);
-
 	const handleValueChange = useCallback(
-		async ( tokens: TokenValue[] ) => {
-			const tokenValues = tokens.map( getTokenValue );
-
-			const createdToken = tokenValues.find(
-				( token ) =>
-					! itemsMap.has( token ) &&
-					! itemsByLabel.has( normalizeItemLabel( token ) )
+		async ( newItems: Item[] ) => {
+			const creatableSelected = newItems.find(
+				( item ) => item.value === CREATABLE_VALUE
 			);
 
-			const resolveSelectedItems = () =>
-				tokenValues
-					.map(
-						( token ) =>
-							itemsMap.get( token ) ??
-							itemsByLabel.get( normalizeItemLabel( token ) )
-					)
-					.filter( ( item ): item is Item => item !== undefined );
-
-			if ( createdToken ) {
-				const termName = createdToken.trim();
+			if ( creatableSelected ) {
+				const termName = inputValue.trim();
 				if ( ! termName ) {
 					return;
 				}
-
-				const resolvedItems = resolveSelectedItems();
 
 				setIsCreating( true );
 
@@ -321,7 +258,12 @@ export function TaxonomyEdit< T extends Record< string, unknown > >( {
 
 						setKnownItems( ( prev ) => [ ...prev, newItem ] );
 
-						const updatedItems = [ ...resolvedItems, newItem ];
+						const updatedItems = [
+							...newItems.filter(
+								( item ) => item.value !== CREATABLE_VALUE
+							),
+							newItem,
+						];
 
 						onChange(
 							createFieldChange< T >(
@@ -333,18 +275,10 @@ export function TaxonomyEdit< T extends Record< string, unknown > >( {
 						setInputValue( '' );
 
 						if ( ! isServerSearch ) {
-							void (
-								dispatch( coreStore ) as unknown as {
-									invalidateResolution: (
-										selectorName: string,
-										args: unknown[]
-									) => void | Promise< unknown >;
-								}
-							 ).invalidateResolution( 'getEntityRecords', [
-								'taxonomy',
-								taxonomy,
-								{ per_page: -1 },
-							] );
+							void dispatch( coreStore ).invalidateResolution(
+								'getEntityRecords',
+								[ 'taxonomy', taxonomy, { per_page: -1 } ]
+							);
 						}
 					}
 				} catch ( error ) {
@@ -362,14 +296,14 @@ export function TaxonomyEdit< T extends Record< string, unknown > >( {
 					setIsCreating( false );
 				}
 			} else {
-				const resolvedItems = resolveSelectedItems();
-
 				// Track selected items so chips persist across search changes.
 				if ( isServerSearch ) {
 					setKnownItems( ( prev ) => {
 						const known = new Set( prev.map( ( i ) => i.value ) );
-						const added = resolvedItems.filter(
-							( item ) => ! known.has( item.value )
+						const added = newItems.filter(
+							( i ) =>
+								i.value !== CREATABLE_VALUE &&
+								! known.has( i.value )
 						);
 						return added.length > 0 ? [ ...prev, ...added ] : prev;
 					} );
@@ -378,14 +312,13 @@ export function TaxonomyEdit< T extends Record< string, unknown > >( {
 				onChange(
 					createFieldChange< T >(
 						fieldProperty,
-						itemsToTermRefs( resolvedItems )
+						itemsToTermRefs( newItems )
 					)
 				);
 			}
 		},
 		[
-			itemsByLabel,
-			itemsMap,
+			inputValue,
 			taxonomy,
 			fieldProperty,
 			onChange,
@@ -394,70 +327,83 @@ export function TaxonomyEdit< T extends Record< string, unknown > >( {
 		]
 	);
 
-	const renderSuggestionItem = useCallback(
-		( { item: token }: { item: string } ) => {
-			const suggestionItem = itemsMap.get( token );
-
-			if ( ! suggestionItem ) {
-				return token;
-			}
-
-			if ( ! hasImages ) {
-				return suggestionItem.label;
-			}
-
-			return (
-				<Stack
-					direction="row"
-					align="center"
-					style={ { gap: '12px' } }
-					className="woocommerce-taxonomy-edit__option"
-				>
-					{ suggestionItem.image?.src ? (
-						<img
-							src={ suggestionItem.image.src }
-							alt={ suggestionItem.image.alt ?? '' }
-							className="woocommerce-taxonomy-edit__option-thumbnail"
-						/>
-					) : (
-						<span className="woocommerce-taxonomy-edit__option-thumbnail woocommerce-taxonomy-edit__option-thumbnail--empty" />
-					) }
-					<span className="woocommerce-taxonomy-edit__option-label">
-						{ suggestionItem.label }
-					</span>
-				</Stack>
-			);
-		},
-		[ hasImages, itemsMap ]
-	);
-
 	return (
-		<div className="woocommerce-taxonomy-edit">
-			<FormTokenField
-				__next40pxDefaultSize
-				__experimentalAutoSelectFirstMatch
-				__experimentalExpandOnFocus
-				__experimentalRenderItem={ renderSuggestionItem }
-				__experimentalShowHowTo={ false }
-				label={ field.label }
-				disabled={ isCreating }
-				displayTransform={ displayTransform }
-				maxSuggestions={ suggestions.length }
-				onChange={ handleValueChange }
-				onInputChange={ setInputValue }
-				placeholder={
-					searchPlaceholder ?? __( 'Search', 'woocommerce' )
-				}
-				saveTransform={ saveTransform }
-				suggestions={ suggestions }
-				value={ value }
-			/>
-			{ getHelpContent(
-				field.description,
+		<SearchableChipSelectControl
+			label={ field.label }
+			description={ field.description }
+			items={ items }
+			value={ value }
+			onValueChange={ handleValueChange }
+			inputValue={ inputValue }
+			onInputValueChange={ setInputValue }
+			creatableItem={ isLoading ? undefined : creatableItem }
+			placeholderChip={
+				value.length === 0 ? field.placeholder : undefined
+			}
+			searchPlaceholder={
+				searchPlaceholder ?? __( 'Search', 'woocommerce' )
+			}
+			disabled={ isCreating }
+			emptyContent={ getEmptyContent(
 				isLoading,
 				isServerSearch,
 				inputValue
 			) }
-		</div>
+			// Disable client-side filtering when using server-side search.
+			{ ...( isServerSearch ? { filter: null } : {} ) }
+			chipsContent={
+				hasImages
+					? ( selectedItems: Item[] ) =>
+							selectedItems.map( ( item ) => (
+								<Combobox.ChipWithRemove
+									key={ item.value }
+									prefix={
+										item.image?.src ? (
+											<img
+												src={ item.image.src }
+												alt={ item.image.alt ?? '' }
+												className="woocommerce-next-taxonomy-edit__chip-thumbnail"
+											/>
+										) : (
+											<span className="woocommerce-next-taxonomy-edit__chip-thumbnail woocommerce-next-taxonomy-edit__chip-thumbnail--empty" />
+										)
+									}
+								>
+									{ item.label }
+								</Combobox.ChipWithRemove>
+							) )
+					: undefined
+			}
+		>
+			{ hasImages
+				? ( item: Item ) => (
+						<Combobox.Item
+							key={ item.value }
+							value={ item }
+							disabled={ item.disabled }
+						>
+							<Stack
+								direction="row"
+								align="center"
+								style={ { gap: '12px' } }
+								className="woocommerce-next-taxonomy-edit__option"
+							>
+								{ item.image?.src ? (
+									<img
+										src={ item.image.src }
+										alt={ item.image.alt ?? '' }
+										className="woocommerce-next-taxonomy-edit__option-thumbnail"
+									/>
+								) : (
+									<span className="woocommerce-next-taxonomy-edit__option-thumbnail woocommerce-next-taxonomy-edit__option-thumbnail--empty" />
+								) }
+								<span className="woocommerce-next-taxonomy-edit__option-label">
+									{ item.label }
+								</span>
+							</Stack>
+						</Combobox.Item>
+				  )
+				: undefined }
+		</SearchableChipSelectControl>
 	);
 }

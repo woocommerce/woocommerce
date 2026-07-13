@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Harden engine boundaries: reject negative cycle_count on Contract hydration, require a persisted order in ContractFactory, and guard ContractRepository::update() against a stale id / concurrent delete.

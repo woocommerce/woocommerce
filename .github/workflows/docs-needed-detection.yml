@@ -136,7 +136,7 @@ jobs:
 
       - name: 'Apply Label'
         if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           STRUCTURED_OUTPUT: ${{ steps.analyze.outputs.structured_output }}
         with:
@@ -163,7 +163,7 @@ jobs:
 
       - name: 'Create Linear Issue'
         if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           STRUCTURED_OUTPUT: ${{ steps.analyze.outputs.structured_output }}
           LINEAR_API_KEY: ${{ secrets.LINEAR_OAUTH_TOKEN }}

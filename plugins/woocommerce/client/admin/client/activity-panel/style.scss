@@ -72,9 +72,11 @@
 		background-color: transparent;
 		// Match wp-admin admin-bar item padding so all five icons in the bar
 		// (bell / list / megaphone / gear / ?) sit at the same tight spacing.
+		// $grid-unit-10 (8px from @wordpress/base-styles) instead of a
+		// literal so the value tracks the WP spacing scale automatically.
 		width: auto;
 		min-width: 0;
-		padding: 0 8px;
+		padding: 0 $grid-unit-10;
 		height: $header-height;
 		// $gray-900 across all states (default, hover, active) — the blue
 		// underline alone signals active, matching Gutenberg's icon tab group.

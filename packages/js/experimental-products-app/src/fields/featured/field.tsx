@@ -21,7 +21,7 @@ const fieldDefinition = {
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
 	type: 'boolean',
-	Edit: 'toggle',
+	Edit: 'checkbox',
 	getValue: ( { item } ) => !! item.featured,
 	setValue: ( { value } ) => ( {
 		featured: !! value,
