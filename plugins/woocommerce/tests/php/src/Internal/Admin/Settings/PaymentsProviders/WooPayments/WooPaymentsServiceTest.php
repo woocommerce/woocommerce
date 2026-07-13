@@ -7230,6 +7230,319 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test account init skips the step forward when the initialization error is non-recoverable.
+	 *
+	 * @dataProvider provider_onboarding_test_account_init_non_recoverable_error_data
+	 *
+	 * @param array $error_data The WP_Error data attached to the initialization error.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_init_skips_step_on_non_recoverable_error( array $error_data ) {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$stored_profile          = array();
+		$updated_stored_profiles = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$updated_stored_profiles, $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Arrange the REST API request to fail with a non-recoverable error.
+		// The error shape mimics what Utils::rest_endpoint_post_request() produces when the
+		// WooPayments extension surfaces the underlying error details in the REST error response.
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( $error_data ) {
+						// Avoid parameter not used PHPCS errors.
+						unset( $params );
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							return new WP_Error(
+								'woocommerce_settings_payments_rest_error',
+								"REST request POST failed with: (bad_request) The statement descriptor matches a common term or website URL, and can't be used.",
+								$error_data
+							);
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+			$this->fail( 'Expected ApiException was not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame(
+				'woocommerce_woopayments_onboarding_test_account_non_recoverable_error',
+				$e->getErrorCode(),
+				'A dedicated error code should signal the non-recoverable failure to the client.'
+			);
+		}
+
+		$this->assertNotEmpty( $updated_stored_profiles );
+		$final_profile = end( $updated_stored_profiles );
+		$statuses      = $final_profile['onboarding'][ $location ]['steps'][ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ]['statuses'];
+		$this->assertArrayHasKey( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, $statuses, 'The step should be marked completed so onboarding can proceed.' );
+		$this->assertArrayNotHasKey( WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED, $statuses, 'The step should not be marked failed.' );
+	}
+
+	/**
+	 * Data provider for the non-recoverable initialization error shapes.
+	 *
+	 * The shapes mimic what Utils::rest_endpoint_post_request() produces, depending on where
+	 * the WooPayments extension surfaces the error details in the REST error response.
+	 *
+	 * @return array<string, array<array>>
+	 */
+	public function provider_onboarding_test_account_init_non_recoverable_error_data(): array {
+		return array(
+			'error type and code in nested data' => array(
+				array(
+					'code'    => 'bad_request',
+					'message' => "The statement descriptor matches a common term or website URL, and can't be used.",
+					'data'    => array(
+						'status'     => 400,
+						'error_type' => 'invalid_request_error',
+						'error_code' => 'invalid_request_error',
+					),
+				),
+			),
+			'error code only in nested data'     => array(
+				array(
+					'code'    => 'bad_request',
+					'message' => "The statement descriptor matches a common term or website URL, and can't be used.",
+					'data'    => array(
+						'status'     => 400,
+						'error_code' => 'invalid_request_error',
+					),
+				),
+			),
+			'error type only in nested data'     => array(
+				array(
+					'code'    => 'bad_request',
+					'message' => "The statement descriptor matches a common term or website URL, and can't be used.",
+					'data'    => array(
+						'status'     => 400,
+						'error_type' => 'invalid_request_error',
+					),
+				),
+			),
+			'error type at top level'            => array(
+				array(
+					'error_type' => 'invalid_request_error',
+				),
+			),
+			'error code at top level'            => array(
+				array(
+					'error_code' => 'invalid_request_error',
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Test account init treats filter-added error identifiers as non-recoverable.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_init_non_recoverable_errors_are_filterable() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$stored_profile          = array();
+		$updated_stored_profiles = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$updated_stored_profiles, $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Arrange the REST API request to fail with an error type that is only
+		// non-recoverable because the filter below adds it to the list.
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) {
+						// Avoid parameter not used PHPCS errors.
+						unset( $params );
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							return new WP_Error(
+								'woocommerce_settings_payments_rest_error',
+								'REST request POST failed with: (bad_request) Some custom platform failure.',
+								array(
+									'code'    => 'bad_request',
+									'message' => 'Some custom platform failure.',
+									'data'    => array(
+										'status'     => 400,
+										'error_type' => 'custom_blocker_error',
+									),
+								)
+							);
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		add_filter(
+			'woocommerce_woopayments_onboarding_test_account_non_recoverable_errors',
+			function ( array $identifiers ) {
+				$identifiers[] = 'custom_blocker_error';
+
+				return $identifiers;
+			}
+		);
+
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+			$this->fail( 'Expected ApiException was not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame(
+				'woocommerce_woopayments_onboarding_test_account_non_recoverable_error',
+				$e->getErrorCode(),
+				'The filter-added error identifier should be treated as non-recoverable.'
+			);
+		}
+
+		$this->assertNotEmpty( $updated_stored_profiles );
+		$final_profile = end( $updated_stored_profiles );
+		$statuses      = $final_profile['onboarding'][ $location ]['steps'][ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ]['statuses'];
+		$this->assertArrayHasKey( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, $statuses, 'The step should be marked completed so onboarding can proceed.' );
+		$this->assertArrayNotHasKey( WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED, $statuses, 'The step should not be marked failed.' );
+	}
+
+	/**
+	 * @testdox Test account init marks the step failed when the response is malformed.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_init_throws_on_malformed_response() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$stored_profile          = array();
+		$updated_stored_profiles = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$updated_stored_profiles, $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Arrange the REST API request to return a response without a `success` entry.
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) {
+						// Avoid parameter not used PHPCS errors.
+						unset( $params );
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							return array( 'status' => 'ok' );
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+			$this->fail( 'Expected ApiException was not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame(
+				'woocommerce_woopayments_onboarding_client_api_error',
+				$e->getErrorCode(),
+				'A malformed response should keep the existing failure behavior.'
+			);
+		}
+
+		$this->assertNotEmpty( $updated_stored_profiles );
+		$final_profile = end( $updated_stored_profiles );
+		$statuses      = $final_profile['onboarding'][ $location ]['steps'][ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ]['statuses'];
+		$this->assertArrayHasKey( WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED, $statuses, 'The step should be marked failed on a malformed response.' );
+		$this->assertArrayNotHasKey( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, $statuses, 'The step should not be marked completed.' );
+	}
+
+	/**
 	 * Test that error sanitization moves extra keys to context when storing a step error.
 	 *
 	 * When an error has keys beyond 'code', 'message', and 'context', those extra keys
@@ -7780,11 +8093,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test onboarding_test_account_init that throws an exception when the REST API call doesn't return success.
+	 * @testdox Test account init skips the step forward when the extension reports the test account was not created.
 	 *
 	 * @return void
 	 */
-	public function test_onboarding_test_account_init_throws_on_not_successful() {
+	public function test_onboarding_test_account_init_skips_step_when_test_account_not_created() {
 		$location = 'US';
 
 		// Arrange the WPCOM connection.
@@ -7799,28 +8112,20 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->willReturn( true );
 
 		// Arrange the NOX profile.
-		$step_id                 = WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT;
 		$stored_profile          = array();
 		$updated_stored_profiles = array();
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				'get_option'    => function ( $option_name, $default_value = null ) use ( $stored_profile ) {
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$updated_stored_profiles, $stored_profile ) {
 					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
-						return $stored_profile;
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
 					}
 
 					return $default_value;
 				},
-				'update_option' => function ( $option_name, $value ) use ( $stored_profile, &$updated_stored_profiles ) {
+				'update_option' => function ( $option_name, $value ) use ( &$updated_stored_profiles ) {
 					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
 						$updated_stored_profiles[] = $value;
-
-						// Mimic the behavior of the original function.
-						if ( $value === $stored_profile || maybe_serialize( $value ) === maybe_serialize( $stored_profile ) ) {
-							return false;
-						}
-
-						return true;
 					}
 
 					return true;
@@ -7848,12 +8153,135 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Assert.
-		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( esc_html__( 'Failed to initialize the test account.', 'woocommerce' ) );
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+			$this->fail( 'Expected ApiException was not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame(
+				'woocommerce_woopayments_onboarding_test_account_non_recoverable_error',
+				$e->getErrorCode(),
+				'A dedicated error code should signal the non-recoverable failure to the client.'
+			);
+		}
 
-		// Act.
-		$this->sut->onboarding_test_account_init( $location );
+		$this->assertCount( 1, $requests_made, 'The test account initialization request should be made exactly once.' );
+
+		$this->assertNotEmpty( $updated_stored_profiles );
+		$final_profile = end( $updated_stored_profiles );
+		$statuses      = $final_profile['onboarding'][ $location ]['steps'][ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ]['statuses'];
+		$this->assertArrayHasKey( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED, $statuses, 'The step should be marked completed so onboarding can proceed.' );
+		$this->assertArrayNotHasKey( WooPaymentsService::ONBOARDING_STEP_STATUS_FAILED, $statuses, 'The step should not be marked failed.' );
+	}
+
+	/**
+	 * @testdox Test account init falls back to the failure path when the skipped step completion fails to persist.
+	 *
+	 * @return void
+	 */
+	public function test_onboarding_test_account_init_skip_step_falls_back_to_failure_when_completion_not_persisted() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange a logger that captures error calls.
+		$logged_errors = array();
+		$mock_logger   = new class( $logged_errors ) {
+			/**
+			 * The captured error calls.
+			 *
+			 * @var array
+			 */
+			public $errors;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param array $errors The captured error calls, by reference.
+			 */
+			public function __construct( array &$errors ) {
+				$this->errors = &$errors;
+			}
+
+			/**
+			 * Capture an error log call.
+			 *
+			 * @param string $message The log message.
+			 * @param array  $context The log context.
+			 *
+			 * @return void
+			 */
+			public function error( string $message, array $context = array() ) {
+				$this->errors[] = array(
+					'message' => $message,
+					'context' => $context,
+				);
+			}
+		};
+
+		// Arrange the NOX profile so that persisting the profile fails.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return array();
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) {
+					// Avoid parameter not used PHPCS errors.
+					unset( $value );
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return false;
+					}
+
+					return true;
+				},
+				'wc_get_logger' => function () use ( $mock_logger ) {
+					return $mock_logger;
+				},
+			)
+		);
+
+		// Arrange the REST API request to report that the test account was not created.
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) {
+						// Avoid parameter not used PHPCS errors.
+						unset( $params );
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							return array( 'success' => false );
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+			$this->fail( 'Expected ApiException was not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame(
+				'woocommerce_woopayments_onboarding_client_api_error',
+				$e->getErrorCode(),
+				'Without the completion persisted, the client should see the regular failure (and retry) instead of being advanced.'
+			);
+		}
+
+		$this->assertNotEmpty( $logged_errors, 'A persistence failure of the skipped step completion should be logged.' );
+		$this->assertStringContainsString( 'Failed to record the test account onboarding step', $logged_errors[0]['message'] );
 	}
 
 	/**

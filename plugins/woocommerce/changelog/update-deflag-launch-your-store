@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Keep Launch Your Store and coming soon behavior enabled without legacy feature flags.
