@@ -129,7 +129,7 @@ const BADGE_INTENTS: Record<
 const getBadgeIntent = (
 	intent?: string
 ): ComponentProps< typeof Badge >[ 'intent' ] =>
-	intent && intent in BADGE_INTENTS
+	intent && Object.prototype.hasOwnProperty.call( BADGE_INTENTS, intent )
 		? BADGE_INTENTS[ intent as SettingsUIShellBadgeIntent ]
 		: BADGE_INTENTS.default;
 
