@@ -83,6 +83,8 @@ jobs:
       lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
       test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
       report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
+      shared-plugin-build-needed: ${{ steps.project-jobs.outputs.shared-plugin-build-needed }}
+      shared-plugin-build-has-required-consumers: ${{ steps.project-jobs.outputs.shared-plugin-build-has-required-consumers }}
     steps:
       - uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
         name: 'Checkout'
@@ -153,11 +155,53 @@ jobs:
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
+  woocommerce-plugin-build-artifact:
+    name: "Build WooCommerce plugin artifact${{ needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' && ' (optional)' || '' }}"
+    runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    needs: 'project-jobs'
+    if: ${{ !cancelled() && needs.project-jobs.result == 'success' && inputs.artifactName == '' && needs.project-jobs.outputs.shared-plugin-build-needed == 'true' }}
+    permissions:
+      contents: read
+    env:
+      # The name must stay stable across run attempts: "Re-run failed jobs" does not
+      # re-run this job when it succeeded, so consumers must find the previous attempt's artifact.
+      WOOCOMMERCE_PLUGIN_ARTIFACT_NAME: woocommerce-plugin-${{ github.run_id }}
+    steps:
+      - uses: 'actions/checkout@v4'
+        name: 'Checkout'
+        with:
+          ref: ${{ inputs.refName != '' && inputs.refName || '' }}
+          persist-credentials: false
+
+      - uses: './.github/actions/setup-woocommerce-monorepo'
+        name: 'Set up build environment'
+        with:
+          install: '@woocommerce/plugin-woocommerce...'
+          pull-package-deps: '@woocommerce/plugin-woocommerce'
+
+      - name: 'Build WooCommerce plugin zip'
+        env:
+          BUILD_ZIP_WITH_MAKEPOT: '0'
+          SKIP_INSTALL: '1'
+          ZIP_COMPRESSION_LEVEL: '1'
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' build:zip
+
+      - name: 'Upload WooCommerce plugin artifact'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.WOOCOMMERCE_PLUGIN_ARTIFACT_NAME }}
+          path: plugins/woocommerce/woocommerce.zip
+          if-no-files-found: error
+          # Long enough to allow re-runs on the following days; these zips are transient CI plumbing.
+          retention-days: 3
+          overwrite: true
+          compression-level: 0
+
   project-test-jobs:
     name: '${{ matrix.name }}'
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    needs: 'project-jobs'
-    if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' }}
+    needs: [ 'project-jobs', 'woocommerce-plugin-build-artifact' ]
+    if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' && ( needs.woocommerce-plugin-build-artifact.result == 'success' || needs.woocommerce-plugin-build-artifact.result == 'skipped' || needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' ) }}
     env: ${{ matrix.testEnv.envVars }}
     strategy:
       fail-fast: false
@@ -175,10 +219,35 @@ jobs:
         id: 'install-monorepo'
         with:
           install: '${{ matrix.projectName }}...'
-          build: ${{ matrix.projectName }}
+          build: ${{ ( matrix.usesSharedPluginBuild == true && inputs.artifactName == '' && 'false' ) || matrix.projectName }}
           build-type: ${{ ( matrix.testType == 'unit:php' && 'backend' ) || ( matrix.testType == 'unit' && 'dependencies' ) || 'full' }}
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && ( matrix.testType == 'e2e' || matrix.testType == 'performance' ) }}
           pull-package-deps: '${{ matrix.projectName }}'
+
+      - name: 'Download WooCommerce plugin artifact'
+        if: ${{ matrix.usesSharedPluginBuild == true && inputs.artifactName == '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: woocommerce-plugin-${{ github.run_id }}
+          path: ${{ github.workspace }}/woocommerce-plugin-artifact
+
+      - name: 'Prepare WooCommerce plugin artifact'
+        if: ${{ matrix.usesSharedPluginBuild == true && inputs.artifactName == '' }}
+        run: |
+          unzip -q "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce.zip" -d "$GITHUB_WORKSPACE/woocommerce-plugin-artifact"
+          test -f "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce/woocommerce.php"
+
+      - name: 'Use WooCommerce plugin artifact in wp-env'
+        if: ${{ matrix.usesSharedPluginBuild == true && inputs.artifactName == '' }}
+        env:
+          PLUGIN_PATH: ${{ github.workspace }}/woocommerce-plugin-artifact/woocommerce
+          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.projectPath }}
+        # WC_SHARED_PLUGIN_BUILD_PATH lets test setup scripts that modify the plugin
+        # (feature flags, generated translations) target the served artifact instead
+        # of the source checkout, which is no longer bind-mounted into wp-env.
+        run: |
+          node .github/workflows/scripts/override-wp-env-plugins.js
+          echo "WC_SHARED_PLUGIN_BUILD_PATH=$PLUGIN_PATH" >> "$GITHUB_ENV"
 
       - name: 'Update wp-env config'
         if: ${{ inputs.artifactName != '' }}
@@ -325,7 +394,7 @@ jobs:
     # on the results of the other jobs in the workflow.
     name: 'Evaluate Project Job Statuses'
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    needs: [ 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
+    needs: [ 'project-jobs', 'woocommerce-plugin-build-artifact', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
     # This job must run for all trigger types (not just PRs) so that alert-on-failure can access its outputs
     if: ${{ !cancelled() }}
     outputs:
@@ -357,7 +426,7 @@ jobs:
   alert-on-failure:
     name: 'Report results on Slack'
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
+    needs: ['project-jobs', 'woocommerce-plugin-build-artifact', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' }}
     env:
       NON_SUCCESSFUL_JOBS: ${{ needs.evaluate-project-jobs.outputs.non_successful_jobs }}
@@ -398,6 +467,8 @@ jobs:
           fi
 
           pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$CHECKS_TYPE build jobs matrix" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
+          # A shared plugin build failure skips the test jobs instead of failing them, so report it explicitly.
+          pnpm utils slack-test-report -c "${{ needs.woocommerce-plugin-build-artifact.result }}" -r "$CHECKS_TYPE WooCommerce plugin build" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
           pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$CHECKS_TYPE linting" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
           pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE tests" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json" --jobs-list "Failed:###$FAILED_JOBS"
 

@@ -1483,6 +1483,40 @@ WHERE
 	 * @return array Filtered meta data.
 	 */
 	public function filter_raw_meta_data( &$object, $raw_meta_data ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
+
+		/*
+		 * Defensive last-resort guard. The meta data should always arrive as an array of meta-row
+		 * objects, but a corrupt persistent object cache entry can surface as a scalar, an object,
+		 * or a well-formed array whose elements are not meta rows. Any of these would otherwise
+		 * fatal downstream (array_filter()/array_diff() on a non-array, or $meta->meta_key on a
+		 * non-object element). Drop anything that is not a usable meta row so the order still
+		 * loads, and when corruption is detected invalidate the cached entry so the next read
+		 * self-heals from the database.
+		 */
+		$is_corrupt = false;
+		if ( is_array( $raw_meta_data ) ) {
+			$valid_meta_data = array_filter(
+				$raw_meta_data,
+				static fn( $meta ) => is_object( $meta ) && property_exists( $meta, 'meta_key' )
+			);
+			$is_corrupt      = count( $valid_meta_data ) !== count( $raw_meta_data );
+			$raw_meta_data   = $valid_meta_data;
+		} else {
+			$is_corrupt    = true;
+			$raw_meta_data = array();
+		}
+
+		if ( $is_corrupt ) {
+			$this->error_logger->warning(
+				sprintf(
+					'Discarded malformed meta data for order %1$d while reading; invalidating the cached entry so it is re-read from the database.',
+					(int) $object->get_id()
+				),
+				array( 'source' => 'hpos-data-cache' )
+			);
+			$this->data_store_meta->clear_cached_data( array( $object->get_id() ) );
+		}
+
 		$filtered_meta_data = parent::filter_raw_meta_data( $object, $raw_meta_data );
 		$allowed_keys       = array(
 			'_billing_address_index',
@@ -1943,8 +1977,71 @@ WHERE
 	 */
 	private function get_order_data_for_ids_from_cache( array $ids ): array {
 		$cache_engine = wc_get_container()->get( WPCacheEngine::class );
+		$order_data   = $cache_engine->get_cached_objects( $ids, $this->get_cache_group() );
 
-		return array_filter( $cache_engine->get_cached_objects( $ids, $this->get_cache_group() ) );
+		foreach ( $order_data as $id => $datum ) {
+			/*
+			 * Cached order data is always a complete plain stdClass whose id matches the cache key
+			 * and which carries every mapped column property (see get_order_data_for_ids_from_db()).
+			 * Accept only that shape. Anything else - a scalar, an array, a foreign/incomplete
+			 * object such as __PHP_Incomplete_Class, a record whose id is missing or belongs to a
+			 * different order (cross-contamination), or a truncated record missing mapped columns -
+			 * would fatal or silently hydrate the wrong/default order state downstream
+			 * (read_multiple() dereferences $order_data->id and indexes $orders[$order_id];
+			 * set_order_props_from_data() defaults any missing property). This can happen when a
+			 * third-party persistent object cache returns a corrupt or cross-contaminated value, or
+			 * when a stale entry written by an older version predates the complete-column-set fix.
+			 * Invalidate the entry so it is re-read from the database, and surface it for diagnosis.
+			 */
+			if ( $this->is_valid_cached_order_data( $datum, (int) $id ) ) {
+				continue;
+			}
+
+			if ( null !== $datum ) {
+				$cache_engine->delete_cached_object( $id, $this->get_cache_group() );
+				$this->error_logger->warning(
+					sprintf(
+						'Discarded a corrupt HPOS order cache entry for order %1$d (unexpected shape, mismatched id, or missing mapped columns); it will be re-read from the database.',
+						(int) $id
+					),
+					array( 'source' => 'hpos-data-cache' )
+				);
+			}
+
+			unset( $order_data[ $id ] );
+		}
+
+		return $order_data;
+	}
+
+	/**
+	 * Determine whether a cached order data record is complete and belongs to the requested order.
+	 *
+	 * A valid entry is a plain stdClass whose id matches the cache key and which carries every
+	 * column property that get_order_data_for_ids_from_db() populates from
+	 * get_all_order_column_mappings_for_cache(). Rejecting truncated records forces a fresh database
+	 * read instead of letting set_order_props_from_data() silently default the missing properties.
+	 *
+	 * @param mixed $datum The cached value to validate.
+	 * @param int   $id    The order id the entry is cached under.
+	 *
+	 * @return bool True when the record is a complete order data object for the given id.
+	 */
+	private function is_valid_cached_order_data( $datum, int $id ): bool {
+		if ( ! $datum instanceof \stdClass || ! property_exists( $datum, 'id' ) || (int) $datum->id !== $id ) {
+			return false;
+		}
+
+		foreach ( $this->get_all_order_column_mappings_for_cache() as $table_name => $column_mappings ) {
+			foreach ( $column_mappings as $field => $map ) {
+				$field_name = $map['name'] ?? "{$table_name}_$field";
+				if ( ! property_exists( $datum, $field_name ) ) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	/**
