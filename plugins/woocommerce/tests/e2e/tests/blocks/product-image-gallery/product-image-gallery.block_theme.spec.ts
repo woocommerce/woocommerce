@@ -132,7 +132,7 @@ test.describe( `${ blockData.name } editor`, () => {
 		).toBeVisible();
 	} );
 
-	test.only( 'shows the Add to Cart + Options compatibility notice and can be migrated to the Product Gallery block', async ( {
+	test( 'shows the Add to Cart + Options compatibility notice and can be migrated to the Product Gallery block', async ( {
 		page,
 		editor,
 		admin,
