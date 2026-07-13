@@ -109,7 +109,10 @@ export const NativeSettingsField = ( {
 				className="wc-settings-ui__control"
 				label={ field.label }
 				help={ getHelp( field.description ) }
-				checked={ value === true || value === 'yes' || value === '1' }
+				checked={
+					value === true ||
+					[ 'yes', '1' ].includes( toStringValue( value ) )
+				}
 				disabled={ field.disabled }
 				onChange={ onChange }
 				__nextHasNoMarginBottom
@@ -137,8 +140,10 @@ export const NativeSettingsField = ( {
 	}
 
 	if ( field.type === 'select' || field.type === 'radio' ) {
+		// Stringify option values so numeric values from extension-supplied
+		// schemas still match, as they did with the native <select>.
 		const items = ( field.options || [] ).map( ( option ) => ( {
-			value: option.value,
+			value: toStringValue( option.value ),
 			label: option.label,
 		} ) );
 		const selectedItem =
