@@ -41,7 +41,7 @@ jobs:
 
       - name: Generate Feature Highlight
         id: highlight
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@073f1348208849e730d13690054b16ac4b2d692b # v1.0.171
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_args: >
@@ -170,7 +170,7 @@ jobs:
 
       - name: Generate Developer Advisory
         id: advisory
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@073f1348208849e730d13690054b16ac4b2d692b # v1.0.171
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_args: >
