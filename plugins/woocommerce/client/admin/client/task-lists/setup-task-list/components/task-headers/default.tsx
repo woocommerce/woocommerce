@@ -5,10 +5,10 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { TaskType } from '@woocommerce/data';
 
-type DefaultTaskHeaderProps = {
+interface DefaultTaskHeaderProps {
 	task: TaskType;
 	goToTask: () => void;
-};
+}
 
 /**
  * Generic task header used for tasks that provide contextual image metadata
