@@ -2351,53 +2351,117 @@ class WC_AJAX {
 		}
 
 		$sorting_id  = absint( $_POST['id'] );
-		$previd      = absint( isset( $_POST['previd'] ) ? $_POST['previd'] : 0 );
-		$nextid      = absint( isset( $_POST['nextid'] ) ? $_POST['nextid'] : 0 );
-		$menu_orders = wp_list_pluck( $wpdb->get_results( "SELECT ID, menu_order FROM {$wpdb->posts} WHERE post_type = 'product' ORDER BY menu_order ASC, post_title ASC" ), 'menu_order', 'ID' );
-		$index       = 0;
+		$previous_id = absint( $_POST['previd'] ?? 0 );
+		$next_id     = absint( $_POST['nextid'] ?? 0 );
 
-		foreach ( $menu_orders as $id => $menu_order ) {
-			$id = absint( $id );
+		// Performance note: fetch positions of the three anchor points; fetch by PK is nearly instant.
+		$anchor_positions  = wp_list_pluck(
+			$wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT ID, menu_order FROM {$wpdb->posts} WHERE ID IN (%d, %d, %d) ORDER BY menu_order ASC",
+					$sorting_id,
+					$previous_id,
+					$next_id
+				)
+			),
+			'menu_order',
+			'ID'
+		);
+		$sorting_position  = (int) ( $anchor_positions[ $sorting_id ] ?? 0 );
+		$previous_position = (int) ( $anchor_positions[ $previous_id ] ?? 0 );
+		$next_position     = (int) ( $anchor_positions[ $next_id ] ?? 0 );
 
-			if ( $sorting_id === $id ) {
-				continue;
-			}
-			if ( $nextid === $id ) {
-				++$index;
-			}
-			++$index;
-			$menu_orders[ $id ] = $index;
-
-			if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $index ), array( 'ID' => $id ) ) ) {
-				// We only need to clean the cache if the menu order was actually modified.
-				clean_post_cache( $id );
-			}
-
-			/**
-			 * When a single product has gotten it's ordering updated.
-			 * $id The product ID
-			 * $index The new menu order
-			*/
-			do_action( 'woocommerce_after_single_product_ordering', $id, $index );
+		// Bail out early if no positioning adjustments are necessary.
+		if ( array_keys( $anchor_positions ) === array_values( array_filter( array( $previous_id, $sorting_id, $next_id ) ) ) ) {
+			wp_send_json( array() );
 		}
 
-		if ( isset( $menu_orders[ $previd ] ) ) {
-			$menu_orders[ $sorting_id ] = $menu_orders[ $previd ] + 1;
-		} elseif ( isset( $menu_orders[ $nextid ] ) ) {
-			$menu_orders[ $sorting_id ] = $menu_orders[ $nextid ] - 1;
+		// Identify the affected range which needs to be updated.
+		if ( $previous_position > $sorting_position ) {
+			// Moving forward: products between current and new position shift down.
+			$range_from   = $sorting_position + 1;
+			$range_to     = $previous_position;
+			$range_delta  = -1;
+			$new_position = $previous_position;
 		} else {
-			$menu_orders[ $sorting_id ] = 0;
+			// Moving backward: products between new and current position shift up.
+			$range_from   = $next_position;
+			$range_to     = $sorting_position - 1;
+			$range_delta  = +1;
+			$new_position = $next_position;
 		}
 
-		if ( $wpdb->update( $wpdb->posts, array( 'menu_order' => $menu_orders[ $sorting_id ] ), array( 'ID' => $sorting_id ) ) ) {
-			// We only need to clean the cache if the menu order was actually modified.
-			clean_post_cache( $sorting_id );
-		}
+		// Performance note: pre-fetch range IDs — no index on menu_order, but re-injecting PKs keeps all follow-up queries instant.
+		$range_positions    = wp_list_pluck(
+			$wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT ID, menu_order FROM {$wpdb->posts} WHERE post_type = 'product' AND menu_order BETWEEN %d AND %d",
+					$range_from,
+					$range_to
+				)
+			),
+			'menu_order',
+			'ID'
+		);
+		$range_ids          = array_merge( array( $sorting_id ), array_keys( $range_positions ) );
+		$range_placeholders = implode( ',', array_fill( 0, count( $range_ids ), '%d' ) );
 
+		// Shift positions in bulk and followup with targeted update for the re-positioned product; update by PK is nearly instant.
+		$wpdb->query(
+			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			$wpdb->prepare(
+				"UPDATE {$wpdb->posts} SET menu_order = menu_order + %d WHERE ID IN ( {$range_placeholders} )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$range_delta,
+				...$range_ids
+			)
+		);
+		$wpdb->update( $wpdb->posts, array( 'menu_order' => $new_position ), array( 'ID' => $sorting_id ) );
+
+		// Fetch updated positions for cache invalidation, hooks, and response; fetch by PK is nearly instant.
+		$updated_positions = wp_list_pluck(
+			$wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT ID, menu_order FROM {$wpdb->posts} WHERE ID IN ( {$range_placeholders} ) ORDER BY menu_order ASC, post_title ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+					$range_ids
+				)
+			),
+			'menu_order',
+			'ID'
+		);
+		foreach ( $updated_positions as $id => $position ) {
+			clean_post_cache( $id );
+			/**
+			 * When a single product has gotten its ordering updated.
+			 *
+			 * @param int $id       The product ID.
+			 * @param int $position The new sort position.
+			 *
+			 * @since 11.1.0 fires for updated entries only; see woocommerce_after_product_ordering for all positions.
+			 * @since 3.1.0
+			 */
+			do_action( 'woocommerce_after_single_product_ordering', $id, $position );
+		}
 		WC_Post_Data::delete_product_query_transients();
 
-		do_action( 'woocommerce_after_product_ordering', $sorting_id, $menu_orders );
-		wp_send_json( $menu_orders );
+		// Performance note: hook below loads all products — no covering index on menu_order, degrades with catalog size; avoid hooking it on large catalogs.
+		if ( has_action( 'woocommerce_after_product_ordering' ) ) {
+			$all_positions = wp_list_pluck(
+				$wpdb->get_results( "SELECT ID, menu_order FROM {$wpdb->posts} WHERE post_type = 'product' ORDER BY menu_order ASC, post_title ASC" ),
+				'menu_order',
+				'ID'
+			);
+			/**
+			 * When products ordering update completed.
+			 *
+			 * @param int            $sorting_id    The product ID that was repositioned.
+			 * @param array<int,int> $all_positions All product sort positions (product ID → actual menu_order value).
+			 *
+			 * @since 3.1.0
+			 */
+			do_action( 'woocommerce_after_product_ordering', $sorting_id, $all_positions );
+		}
+
+		wp_send_json( $updated_positions );
 	}
 
 	/**

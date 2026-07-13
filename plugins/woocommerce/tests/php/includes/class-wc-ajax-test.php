@@ -680,6 +680,113 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * Data provider for test_product_ordering.
+	 *
+	 * Columns: sorting_idx, previd_idx (-1 = none), nextid_idx (-1 = none), expected menu_orders [P1..P5].
+	 */
+	public function product_ordering_provider(): array {
+		return array(
+			'last to first'             => array( 4, -1, 0, array( 2, 3, 4, 5, 1 ) ),
+			'first to last'             => array( 0, 4, -1, array( 5, 1, 2, 3, 4 ) ),
+			'middle one position left'  => array( 2, 0, 1, array( 1, 3, 2, 4, 5 ) ),
+			'middle one position right' => array( 2, 3, 4, array( 1, 2, 4, 3, 5 ) ),
+			'middle to first'           => array( 2, -1, 0, array( 2, 3, 1, 4, 5 ) ),
+			'middle to last'            => array( 2, 4, -1, array( 1, 2, 5, 3, 4 ) ),
+			'drop in place'             => array( 2, 1, 3, array( 1, 2, 3, 4, 5 ) ),
+		);
+	}
+
+	/**
+	 * @testdox 'product_ordering' moves a product to the correct position and shifts the affected range.
+	 * @dataProvider product_ordering_provider
+	 *
+	 * @param int   $sorting_idx     Index (0-based) of the product being dragged.
+	 * @param int   $previd_idx      Index of the product immediately before the drop target, or -1 if dropped at the top.
+	 * @param int   $nextid_idx      Index of the product immediately after the drop target, or -1 if dropped at the bottom.
+	 * @param int[] $expected_orders Expected menu_order values indexed by original product position [P1..P5].
+	 */
+	public function test_product_ordering( int $sorting_idx, int $previd_idx, int $nextid_idx, array $expected_orders ): void {
+		global $wpdb;
+
+		$this->_setRole( 'administrator' );
+
+		$products = array();
+		for ( $i = 1; $i <= 5; ++$i ) {
+			$product                 = WC_Helper_Product::create_simple_product();
+			$product_id              = $product->get_id();
+			$products[ $product_id ] = $product;
+			wp_update_post(
+				array(
+					'ID'         => $product_id,
+					'menu_order' => $i,
+				)
+			);
+		}
+		$product_ids = array_keys( $products );
+
+		$_POST['security'] = wp_create_nonce( 'product-ordering' );
+		$_POST['id']       = $product_ids[ $sorting_idx ];
+		$_POST['previd']   = $previd_idx >= 0 ? $product_ids[ $previd_idx ] : 0;
+		$_POST['nextid']   = $nextid_idx >= 0 ? $product_ids[ $nextid_idx ] : 0;
+
+		$this->do_ajax( 'woocommerce_product_ordering' );
+
+		unset( $_POST['security'], $_POST['id'], $_POST['previd'], $_POST['nextid'] );
+		foreach ( $product_ids as $idx => $product_id ) {
+			$actual = (int) $wpdb->get_var( $wpdb->prepare( "SELECT menu_order FROM {$wpdb->posts} WHERE ID = %d", $product_id ) );
+			$this->assertSame( $expected_orders[ $idx ], $actual, "Product at index {$idx} has wrong menu_order." );
+			$products[ $product_id ]->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox 'product_ordering' fires 'woocommerce_after_product_ordering' with the moved product ID and full positions map.
+	 */
+	public function test_product_ordering_fires_after_product_ordering_action(): void {
+		$this->_setRole( 'administrator' );
+
+		$products = array();
+		for ( $i = 1; $i <= 2; ++$i ) {
+			$product                 = WC_Helper_Product::create_simple_product();
+			$product_id              = $product->get_id();
+			$products[ $product_id ] = $product;
+			wp_update_post(
+				array(
+					'ID'         => $product_id,
+					'menu_order' => $i,
+				)
+			);
+		}
+		$product_ids = array_keys( $products );
+
+		$hook_fired = false;
+		$hook       = function ( $sorting_id, $all_positions ) use ( &$hook_fired, $product_ids ) {
+			$hook_fired = true;
+			$this->assertSame( $product_ids[1], $sorting_id );
+			$this->assertSame( '1', $all_positions[ $product_ids[1] ] );
+			$this->assertSame( '2', $all_positions[ $product_ids[0] ] );
+		};
+		add_action( 'woocommerce_after_product_ordering', $hook, 10, 2 );
+
+		// Move the last one to the front.
+		$_POST['security'] = wp_create_nonce( 'product-ordering' );
+		$_POST['id']       = $product_ids[1];
+		$_POST['previd']   = 0;
+		$_POST['nextid']   = $product_ids[0];
+
+		$this->do_ajax( 'woocommerce_product_ordering' );
+
+		unset( $_POST['security'], $_POST['id'], $_POST['previd'], $_POST['nextid'] );
+		remove_action( 'woocommerce_after_product_ordering', $hook, 10 );
+
+		$this->assertTrue( $hook_fired, 'woocommerce_after_product_ordering was not fired.' );
+
+		foreach ( $product_ids as $product_id ) {
+			$products[ $product_id ]->delete( true );
+		}
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
