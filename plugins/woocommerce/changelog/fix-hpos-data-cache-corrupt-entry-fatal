@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal TypeError on the HPOS Orders screen when a persistent object cache returns a corrupt order or meta cache entry: invalid entries are now discarded and re-read from the database instead of breaking the page.
