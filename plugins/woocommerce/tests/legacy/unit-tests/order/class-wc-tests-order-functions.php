@@ -1446,7 +1446,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that order modified date is updated when a refund is created for it.
+	 * @testdox Creating a refund advances the parent order modified date.
 	 *
 	 * @link https://github.com/woocommerce/woocommerce/issues/28969
 	 */
@@ -1459,10 +1459,32 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 			)
 		);
 		// Ensure the order is a complete object with an initial modified date.
-		$order = wc_get_order( $order->get_id() );
-		$order->set_date_modified( '2020-01-01 00:00:00' );
-		$order->save();
-		$order = wc_get_order( $order->get_id() );
+		$order                 = wc_get_order( $order->get_id() );
+		$initial_date_modified = '2020-01-01 00:00:00';
+
+		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order->set_date_modified( $initial_date_modified );
+			$order->save();
+		} else {
+			global $wpdb;
+
+			$this->assertSame(
+				1,
+				$wpdb->update(
+					$wpdb->posts,
+					array(
+						'post_modified'     => $initial_date_modified,
+						'post_modified_gmt' => $initial_date_modified,
+					),
+					array( 'ID' => $order->get_id() )
+				),
+				'The CPT fixture must update exactly one order row.'
+			);
+			clean_post_cache( $order->get_id() );
+		}
+
+		$order                      = wc_get_order( $order->get_id() );
+		$initial_modified_timestamp = $order->get_date_modified()->getTimestamp();
 
 		$args = array(
 			'order_id' => $order->get_id(),
@@ -1472,7 +1494,11 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		wc_create_refund( $args );
 		$updated_order = wc_get_order( $order->get_id() );
 
-		$this->assertNotEquals( $order->get_date_modified()->getTimestamp(), $updated_order->get_date_modified()->getTimestamp() );
+		$this->assertGreaterThan(
+			$initial_modified_timestamp,
+			$updated_order->get_date_modified()->getTimestamp(),
+			'Creating a refund must advance the persisted parent order modified date.'
+		);
 	}
 
 	/**
