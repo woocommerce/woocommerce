@@ -126,6 +126,8 @@ class Products extends ControllerTestCase {
 		$this->assertCount( 1, $data['images'] );
 		$this->assertIsObject( $data['images'][0] );
 		$this->assertEquals( $this->products[0]->get_image_id(), $data['images'][0]->id );
+		$this->assertNotEmpty( wp_parse_url( $data['images'][0]->src, PHP_URL_HOST ) );
+		$this->assertNotEmpty( wp_parse_url( $data['images'][0]->thumbnail, PHP_URL_HOST ) );
 
 		wp_delete_attachment( $image_id, true );
 	}
