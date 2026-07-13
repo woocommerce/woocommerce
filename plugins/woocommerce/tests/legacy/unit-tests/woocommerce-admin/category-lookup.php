@@ -143,6 +143,8 @@ class WC_Admin_Tests_Category_Lookup extends WP_UnitTestCase {
 
 	/**
 	 * Test resetting report data preserves the test transaction.
+	 *
+	 * @testdox Resetting report data preserves the test transaction.
 	 */
 	public function test_reset_stats_dbs_preserves_transaction() {
 		global $wpdb;

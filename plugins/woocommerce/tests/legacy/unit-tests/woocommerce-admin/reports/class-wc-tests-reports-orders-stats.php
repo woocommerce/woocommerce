@@ -4025,6 +4025,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 	/**
 	 * Test that distinct customer counts and same-hour interval aggregation work with multiple customers.
+	 *
+	 * @testdox Distinct customer counts and same-hour interval aggregation work with multiple customers.
 	 */
 	public function test_populate_and_query_multiple_customers_same_hour() {
 		WC_Helper_Reports::reset_stats_dbs();
@@ -4701,6 +4703,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 	/**
 	 * Test that product segmentation without product_includes enumerates the whole catalog.
+	 *
+	 * @testdox Product segmentation without product_includes enumerates the whole catalog.
 	 */
 	public function test_segmenting_by_product_without_includes() {
 		WC_Helper_Reports::reset_stats_dbs();
