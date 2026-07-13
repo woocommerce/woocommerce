@@ -98,6 +98,7 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 		}
 
 		if ( false !== $this->original_theme_support ) {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact global state changed by the test.
 			$_wp_theme_features['woocommerce'] = $this->original_theme_support;
 		} else {
 			unset( $_wp_theme_features['woocommerce'] );

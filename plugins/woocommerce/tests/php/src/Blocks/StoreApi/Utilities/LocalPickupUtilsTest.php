@@ -1,11 +1,11 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\StoreApi\Utilities;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
-use Automattic\WooCommerce\Tests\StoreApi\Mocks\FakeLocalPickupShippingMethod;
-use Automattic\WooCommerce\Tests\StoreApi\Mocks\FakeRegularShippingMethod;
+use Automattic\WooCommerce\Tests\Blocks\StoreApi\Mocks\FakeLocalPickupShippingMethod;
+use Automattic\WooCommerce\Tests\Blocks\StoreApi\Mocks\FakeRegularShippingMethod;
 use WC_Shipping_Method;
 
 /**
