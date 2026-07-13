@@ -1,7 +1,7 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\StoreApi\Schemas\V1;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\SchemaController;
