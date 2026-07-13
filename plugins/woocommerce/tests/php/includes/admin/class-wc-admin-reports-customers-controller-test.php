@@ -174,11 +174,17 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
 		foreach ( self::$import_action_ids as $action_id ) {
 			$action_store->delete_action( $action_id );
 		}
-		self::enable_direct_product_attribute_lookup_updates();
 		try {
-			self::$product->delete( true );
+			foreach ( self::$registered_customers as $customer ) {
+				$customer->delete();
+			}
 		} finally {
-			self::disable_direct_product_attribute_lookup_updates();
+			self::enable_direct_product_attribute_lookup_updates();
+			try {
+				self::$product->delete( true );
+			} finally {
+				self::disable_direct_product_attribute_lookup_updates();
+			}
 		}
 		self::$product              = null;
 		self::$registered_customers = array();
