@@ -131,7 +131,10 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 
 			// Reset Jetpack auth state.
 			$this->reset_jetpack_auth_state();
+
 		} finally {
+			remove_filter( 'woocommerce_payment_gateways', array( $this, 'add_mock_gateway' ) );
+			remove_filter( 'woocommerce_available_payment_gateways', array( $this, 'add_mock_gateway' ) );
 			try {
 				parent::tearDown();
 			} finally {
