@@ -8501,7 +8501,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$final_profile = end( $updated_stored_profiles );
 		$statuses      = $final_profile['onboarding'][ $location ]['steps'][ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ]['statuses'];
 		$this->assertArrayNotHasKey( WooPaymentsService::ONBOARDING_STEP_SKIPPED_MARKER, $statuses, 'A non-skip completion should clear a stale skip marker.' );
-		$this->assertSame( $this->current_time, $statuses[ WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED ], 'The genuine completion should refresh the completed timestamp.' );
+		$this->assertSame( $this->current_time - 100, $statuses[ WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED ], 'The stored completion timestamp should be preserved — marker maintenance is not a new completion.' );
 
 		// With the marker gone, a lapsed account validity should re-gate the stored completed status again.
 		$account_valid = false;
