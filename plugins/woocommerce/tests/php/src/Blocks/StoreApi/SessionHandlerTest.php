@@ -1,7 +1,7 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\StoreApi;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi;
 
 use Automattic\WooCommerce\StoreApi\SessionHandler;
 use WC_Session;

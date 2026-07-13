@@ -1,15 +1,20 @@
 /* eslint-disable no-console */
 const fs = require( 'fs' );
 
-const { RELEASE_TAG, ARTIFACT_NAME, WP_ENV_CONFIG_PATH } = process.env;
+const { RELEASE_TAG, ARTIFACT_NAME, PLUGIN_PATH, WP_ENV_CONFIG_PATH } =
+	process.env;
 
-if ( ! RELEASE_TAG ) {
-	console.error( 'Please set the RELEASE_TAG environment variable!' );
+if ( ! PLUGIN_PATH && ! RELEASE_TAG ) {
+	console.error(
+		'Please set the PLUGIN_PATH or RELEASE_TAG environment variable!'
+	);
 	process.exit( 1 );
 }
 
-if ( ! ARTIFACT_NAME ) {
-	console.error( 'Please set the ARTIFACT_NAME environment variable!' );
+if ( ! PLUGIN_PATH && ! ARTIFACT_NAME ) {
+	console.error(
+		'Please set the PLUGIN_PATH or ARTIFACT_NAME environment variable!'
+	);
 	process.exit( 1 );
 }
 
@@ -18,20 +23,22 @@ if ( ! WP_ENV_CONFIG_PATH ) {
 	process.exit( 1 );
 }
 
-const artifactUrl = `https://github.com/woocommerce/woocommerce/releases/download/${ RELEASE_TAG }/${ ARTIFACT_NAME }`;
+const pluginSource =
+	PLUGIN_PATH ||
+	`https://github.com/woocommerce/woocommerce/releases/download/${ RELEASE_TAG }/${ ARTIFACT_NAME }`;
 
 // wp-env names an installed plugin's folder after the source basename, so
 // installing WooCommerce straight from the release URL would create a
 // `woocommerce-trunk-nightly` folder - a name no real install produces and which
 // breaks the test setup's `wp-content/plugins/woocommerce/...` assumptions.
-// Instead, mount the release artifact at the canonical `woocommerce` folder via a
-// mapping (wp-env downloads and extracts it for us; the zip's top-level dir is
-// `woocommerce/`, the same one WordPress core unzips for a real user) and drop
-// the source entry from the plugin lists. Mapped plugins are not auto-activated,
-// so `tests/e2e/bin/test-env-setup.sh` activates WooCommerce explicitly.
+// Instead, mount the artifact at the canonical `woocommerce` folder via a
+// mapping (wp-env downloads and extracts release artifacts for us; locally built
+// artifacts are unzipped before this script runs) and drop the source entry from
+// the plugin lists. Mapped plugins are not auto-activated, so
+// `tests/e2e/bin/test-env-setup.sh` activates WooCommerce explicitly.
 const wooCommerceEntries = [ '.', '../woocommerce' ];
 const wooCommerceMapping = {
-	'wp-content/plugins/woocommerce': artifactUrl,
+	'wp-content/plugins/woocommerce': pluginSource,
 };
 
 // The PHP-unit jobs run against the lean `.wp-env.test.json`; the E2E/API/
@@ -86,7 +93,7 @@ for ( const configFile of configFiles ) {
 	console.log(
 		`Removed ${ removed } WooCommerce source entr${
 			removed === 1 ? 'y' : 'ies'
-		} from ${ configFile }; mapping ${ artifactUrl } -> wp-content/plugins/woocommerce`
+		} from ${ configFile }; mapping ${ pluginSource } -> wp-content/plugins/woocommerce`
 	);
 
 	const overrideConfigPath = configPath.endsWith( '.json' )
