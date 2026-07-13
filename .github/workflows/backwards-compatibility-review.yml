@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 0
 
       - name: PR Review with Progress Tracking (inline-only)
-        uses: anthropics/claude-code-action@073f1348208849e730d13690054b16ac4b2d692b # v1.0.171
+        uses: anthropics/claude-code-action@e90deca47693f9457b72f2b53c17d7c445a87342 # v1.0.171
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |

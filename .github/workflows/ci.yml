@@ -304,7 +304,7 @@ jobs:
 
       - name: 'Resolve artifacts path'
         if: ${{ always() && matrix.report.resultsPath != '' }}
-        # Blocks e2e use a relative path which is not supported by actions/upload-artifact@v4
+        # Blocks e2e use a relative path which is not supported by actions/upload-artifact
         # https://github.com/actions/upload-artifact/issues/176
         env:
           ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
