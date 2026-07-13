@@ -114,12 +114,12 @@ describe( 'FrontendBlock', () => {
 		} );
 
 		const errorMessage = await screen.findByText(
-			'Please accept the Terms and Conditions and Privacy Policy to place your order.'
+			'Please read and accept the terms and conditions.'
 		);
 
 		await waitFor( () => {
 			expect( checkbox ).toHaveAttribute(
-				'aria-describedby',
+				'aria-errormessage',
 				errorMessage.closest( 'p' ).id
 			);
 		} );
