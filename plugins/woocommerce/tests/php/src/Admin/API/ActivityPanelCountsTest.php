@@ -16,6 +16,7 @@ use WC_Helper_Product;
 use WC_REST_Unit_Test_Case;
 use WP_Error;
 use WP_REST_Request;
+use WP_REST_Server;
 
 /**
  * ActivityPanelCounts API controller test.
@@ -180,5 +181,67 @@ class ActivityPanelCountsTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertNull( $data['products_low_in_stock_count'] );
 		$this->assertEquals( 1, $data['orders_to_fulfill_count'] );
+	}
+
+	/**
+	 * Re-register REST routes on a fresh server. The endpoint's order_statuses default is
+	 * computed at registration time (which setUp() has already run), so tests that change
+	 * the actionable statuses option must re-register routes for the default to pick it up,
+	 * as it would on a real request.
+	 */
+	private function reregister_routes() {
+		$this->server              = new WP_REST_Server();
+		$GLOBALS['wp_rest_server'] = $this->server;
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Re-firing a core hook to re-register routes in the test, not defining one.
+		do_action( 'rest_api_init' );
+	}
+
+	/**
+	 * Test that clearing all actionable order statuses yields a 0 orders-to-fulfill count,
+	 * matching the previous client-side getUnreadOrders() behaviour, rather than falling back
+	 * to the default statuses. Mirrors the client, which calls the endpoint without passing
+	 * order_statuses and relies on the endpoint default.
+	 *
+	 * Option changes are rolled back by the per-test DB transaction, so no manual cleanup.
+	 */
+	public function test_cleared_actionable_statuses_yield_zero_orders_to_fulfill() {
+		wp_set_current_user( $this->user );
+
+		WC_Helper_Order::create_order( 1, null, array( 'status' => OrderStatus::PROCESSING ) );
+
+		// Merchant cleared every actionable status.
+		update_option( 'woocommerce_actionable_order_statuses', array() );
+		$this->reregister_routes();
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 0, $data['orders_to_fulfill_count'] );
+	}
+
+	/**
+	 * Test that a merchant's custom (non-empty) actionable statuses selection drives the
+	 * endpoint's default orders-to-fulfill count when the client passes no order_statuses
+	 * param. Counts are asymmetric (2 completed vs 1 processing) so falling back to the
+	 * built-in processing/on-hold defaults would fail the assertion.
+	 */
+	public function test_custom_actionable_statuses_option_drives_default_count() {
+		wp_set_current_user( $this->user );
+
+		WC_Helper_Order::create_order( 1, null, array( 'status' => OrderStatus::PROCESSING ) );
+		WC_Helper_Order::create_order( 1, null, array( 'status' => OrderStatus::COMPLETED ) );
+		WC_Helper_Order::create_order( 1, null, array( 'status' => OrderStatus::COMPLETED ) );
+
+		update_option( 'woocommerce_actionable_order_statuses', array( OrderStatus::COMPLETED ) );
+		$this->reregister_routes();
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 2, $data['orders_to_fulfill_count'] );
 	}
 }
