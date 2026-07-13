@@ -1,14 +1,9 @@
 /**
  * External dependencies
  */
-import {
-	BaseControl,
-	CheckboxControl,
-	SelectControl,
-	TextControl,
-	TextareaControl,
-} from '@wordpress/components';
+import { BaseControl, CheckboxControl } from '@wordpress/components';
 import { createElement, RawHTML } from '@wordpress/element';
+import { Field, InputControl, SelectControl, Textarea } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -124,31 +119,41 @@ export const NativeSettingsField = ( {
 
 	if ( field.type === 'textarea' ) {
 		return (
-			<TextareaControl
-				className="wc-settings-ui__control"
-				label={ field.label }
-				help={ getHelp( field.description ) }
-				value={ toStringValue( value ) }
-				placeholder={ field.placeholder }
-				disabled={ field.disabled }
-				onChange={ onChange }
-				__nextHasNoMarginBottom
-			/>
+			<Field.Root className="wc-settings-ui__control">
+				<Field.Label>{ field.label }</Field.Label>
+				<Textarea
+					value={ toStringValue( value ) }
+					placeholder={ field.placeholder }
+					disabled={ field.disabled }
+					onChange={ ( event ) => onChange( event.target.value ) }
+				/>
+				{ field.description ? (
+					<Field.Details>
+						{ getHelp( field.description ) }
+					</Field.Details>
+				) : null }
+			</Field.Root>
 		);
 	}
 
 	if ( field.type === 'select' || field.type === 'radio' ) {
+		const items = ( field.options || [] ).map( ( option ) => ( {
+			value: option.value,
+			label: option.label,
+		} ) );
+		const selectedItem =
+			items.find( ( item ) => item.value === toStringValue( value ) ) ??
+			null;
+
 		return (
 			<SelectControl
 				className="wc-settings-ui__control"
 				label={ field.label }
-				help={ getHelp( field.description ) }
-				value={ toStringValue( value ) }
-				options={ field.options || [] }
+				details={ getHelp( field.description ) }
+				items={ items }
+				value={ selectedItem }
 				disabled={ field.disabled }
-				onChange={ onChange }
-				__next40pxDefaultSize
-				__nextHasNoMarginBottom
+				onValueChange={ ( item ) => onChange( item?.value ?? '' ) }
 			/>
 		);
 	}
@@ -206,17 +211,15 @@ export const NativeSettingsField = ( {
 
 	if ( isTextInputType( field.type ) ) {
 		return (
-			<TextControl
+			<InputControl
 				className="wc-settings-ui__control"
 				type={ field.type }
 				label={ field.label }
-				help={ getHelp( field.description ) }
+				details={ getHelp( field.description ) }
 				value={ toStringValue( value ) }
 				placeholder={ field.placeholder }
 				disabled={ field.disabled }
-				onChange={ onChange }
-				__next40pxDefaultSize
-				__nextHasNoMarginBottom
+				onChange={ ( event ) => onChange( event.target.value ) }
 				{ ...field.customAttributes }
 			/>
 		);
@@ -225,15 +228,13 @@ export const NativeSettingsField = ( {
 	warn( `Field type "${ field.type }" is not supported.`, { field } );
 
 	return (
-		<TextControl
+		<InputControl
 			className="wc-settings-ui__control"
 			label={ field.label }
-			help={ getHelp( field.description ) }
+			details={ getHelp( field.description ) }
 			value={ toStringValue( value ) }
 			disabled={ field.disabled }
-			onChange={ onChange }
-			__next40pxDefaultSize
-			__nextHasNoMarginBottom
+			onChange={ ( event ) => onChange( event.target.value ) }
 		/>
 	);
 };

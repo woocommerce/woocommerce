@@ -291,6 +291,10 @@ class Content_Renderer {
 			// calculations involve round() and division that may produce imprecision.
 			if ( $post_content_num < $content_size_num - 0.01 ) {
 				unset( $styles['spacing']['padding']['left'], $styles['spacing']['padding']['right'] );
+
+				// Constrain user blocks to the (inset) post-content width so they
+				// fit inside it instead of overflowing at the full contentSize.
+				$layout['contentSize'] = $this->post_content_width;
 			}
 
 			// Pass container padding from the first pass so the
