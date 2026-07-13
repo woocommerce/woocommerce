@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use WC_Tracks;
 use WC_Site_Tracking;
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features as WCAdminFeatures;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
@@ -933,6 +934,10 @@ class FeaturesController {
 		// Handle deprecated features - return the backwards-compatible value.
 		if ( ! empty( $feature['deprecated_since'] ) ) {
 			return (bool) ( $feature['deprecated_value'] ?? false );
+		}
+
+		if ( 'analytics' === $feature_id && WCAdminFeatures::is_analytics_disabled_by_legacy_filters() ) {
+			return false;
 		}
 
 		if ( $this->is_preview_email_improvements_enabled( $feature_id ) ) {

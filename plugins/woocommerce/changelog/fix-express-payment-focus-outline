@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix express payment buttons missing a visible focus outline in Cart and Checkout.
