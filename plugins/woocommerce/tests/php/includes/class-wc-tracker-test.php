@@ -298,17 +298,19 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$detail_table   = OrdersTableDataStore::get_operational_data_table_name();
 		$detail_columns = 'order_id, created_via, woocommerce_version, recorded_sales';
 
-		$order_query = $wpdb->prepare(
+		$order_query         = $wpdb->prepare(
 			"INSERT INTO {$order_table} ({$order_columns}) VALUES " . implode( ', ', $order_rows ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.NotPrepared -- Table and columns are selected above; placeholders are generated above.
 			$order_values
 		);
-		$wpdb->query( $order_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
+		$order_rows_inserted = $wpdb->query( $order_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
+		$this->assertSame( count( $orders ), $order_rows_inserted, 'Expected every tracker order row to be inserted.' );
 
-		$detail_query = $wpdb->prepare(
+		$detail_query         = $wpdb->prepare(
 			"INSERT INTO {$detail_table} ({$detail_columns}) VALUES " . implode( ', ', $detail_rows ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.NotPrepared -- Table and columns are selected above; placeholders are generated above.
 			$detail_values
 		);
-		$wpdb->query( $detail_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
+		$detail_rows_inserted = $wpdb->query( $detail_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
+		$this->assertSame( count( $orders ), $detail_rows_inserted, 'Expected operational data for every tracker order row.' );
 
 		( new OrderCountCache() )->flush( 'shop_order', array_keys( wc_get_order_statuses() ) );
 
