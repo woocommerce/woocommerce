@@ -33,11 +33,11 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	 * Tear down the test.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		// Clean up all notifications.
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notifications" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		parent::tearDown();
 	}
 
 	/**
@@ -71,7 +71,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$notification->save();
 
 		// Verify all properties were saved correctly.
-		$this->assertEquals( 1, $notification->get_id() );
+		$this->assertGreaterThan( 0, $notification->get_id() );
 		$this->assertEquals( 1, $notification->get_product_id() );
 		$this->assertEquals( 1, $notification->get_user_id() );
 		$this->assertEquals( 'test@test.com', $notification->get_user_email() );
@@ -125,7 +125,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$notification->set_user_id( 1 );
 		$notification->save();
 
-		$this->assertEquals( 1, $notification->get_id() );
+		$this->assertGreaterThan( 0, $notification->get_id() );
 		$this->assertEquals( 1, $notification->get_product_id() );
 		$this->assertEquals( 1, $notification->get_user_id() );
 		$this->assertEquals( null, $notification->get_user_email() );
@@ -533,8 +533,8 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertCount( 2, $notifications );
-		$this->assertEquals( 2, $notifications[0] );
-		$this->assertEquals( 3, $notifications[1] );
+		$this->assertEquals( $notification_2->get_id(), $notifications[0] );
+		$this->assertEquals( $notification_3->get_id(), $notifications[1] );
 	}
 
 	/**
@@ -579,7 +579,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertCount( 1, $notifications );
-		$this->assertEquals( 1, $notifications[0] );
+		$this->assertEquals( $notification->get_id(), $notifications[0] );
 
 		// Check the return type is ids.
 		$notifications = $this->data_store->query(
@@ -590,7 +590,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertCount( 1, $notifications );
-		$this->assertEquals( 1, $notifications[0] );
+		$this->assertEquals( $notification->get_id(), $notifications[0] );
 	}
 
 	/**

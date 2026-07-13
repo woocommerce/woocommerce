@@ -18,7 +18,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-use Mockery\Adapter\Phpunit\MockeryTestCase;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use WC_Gateway_BACS;
 
 /**
@@ -26,9 +26,90 @@ use WC_Gateway_BACS;
  *
  * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r, WooCommerce.Commenting.CommentHooks.MissingHookComment
  */
-class Checkout extends MockeryTestCase {
+class Checkout extends \WP_Test_REST_TestCase {
+	use MockeryPHPUnitIntegration;
+	use StoreApiRestTestCaseTrait;
 
 	const TEST_COUPON_CODE = 'test_coupon_code';
+
+	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
+	/**
+	 * Coupon ID shared by the class.
+	 *
+	 * @var int
+	 */
+	private static $coupon_id;
+
+	/**
+	 * Payment gateway registry before the test.
+	 *
+	 * @var array
+	 */
+	private $payment_gateways_before_test = array();
+
+	/**
+	 * PayPal gateway singleton before the test.
+	 *
+	 * @var \WC_Gateway_Paypal
+	 */
+	private $paypal_gateway_before_test;
+
+	/**
+	 * Create immutable catalog rows shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::$product_ids = array_map(
+			fn( $product ) => $product->get_id(),
+			self::create_class_fixture_products(
+				array(
+					array(
+						'name'          => 'Test Product 1',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					),
+					array(
+						'name'          => 'Test Product 2',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					),
+					array(
+						'name'          => 'Virtual Test Product 2',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+						'virtual'       => true,
+					),
+				),
+			)
+		);
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( self::TEST_COUPON_CODE );
+		$coupon->set_amount( 2 );
+		$coupon->save();
+		self::$coupon_id = $coupon->get_id();
+	}
+
+	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		try {
+			self::delete_class_fixture_products( self::$product_ids );
+		} finally {
+			$coupon = new \WC_Coupon( self::$coupon_id );
+			$coupon->delete( true );
+		}
+	}
+
 	/**
 	 * Setup test product data. Called before every test.
 	 */
@@ -37,19 +118,13 @@ class Checkout extends MockeryTestCase {
 
 		add_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4 );
 
+		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
-		global $wp_rest_server;
-		$wp_rest_server = new \Spy_REST_Server();
-		do_action( 'rest_api_init', $wp_rest_server );
+		$this->initialize_store_api_server();
 
 		wp_set_current_user( 0 );
-
-		$coupon = new \WC_Coupon();
-		$coupon->set_code( self::TEST_COUPON_CODE );
-		$coupon->set_amount( 2 );
-		$coupon->save();
 
 		$formatters = new Formatters();
 		$formatters->register( 'money', MoneyFormatter::class );
@@ -77,38 +152,15 @@ class Checkout extends MockeryTestCase {
 		$order_route = new CheckoutOrderRoute( $schema_controller, $schema_controller->get( 'checkout-order' ) );
 		register_rest_route( $order_route->get_namespace(), $order_route->get_path(), $order_route->get_args(), true );
 
+		$this->payment_gateways_before_test = WC()->payment_gateways()->payment_gateways;
+		$this->paypal_gateway_before_test   = \WC_Gateway_Paypal::get_instance();
+
 		$fixtures = new FixtureData();
 		$fixtures->payments_enable_bacs();
 		$fixtures->shipping_add_pickup_location();
 		$fixtures->shipping_add_flat_rate_instance();
 
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Virtual Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-					'virtual'       => true,
-				)
-			),
-		);
+		$this->products = array_map( 'wc_get_product', self::$product_ids );
 		wc_empty_cart();
 		wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
 		wc()->cart->add_to_cart( $this->products[1]->get_id(), 1 );
@@ -118,39 +170,70 @@ class Checkout extends MockeryTestCase {
 	 * Tear down Rest API server.
 	 */
 	protected function tearDown(): void {
-		parent::tearDown();
+		try {
+			remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 
-		remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
+			remove_all_filters( 'woocommerce_get_country_locale' );
+			remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
+			remove_all_filters( 'wc_order_statuses' );
+			remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
+			remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
+			remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
 
-		remove_all_filters( 'woocommerce_get_country_locale' );
-		remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
-		remove_all_filters( 'wc_order_statuses' );
-		remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
-		remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
-		remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
+			update_option( 'woocommerce_ship_to_countries', 'all' );
+			update_option( 'woocommerce_allowed_countries', 'all' );
+			update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+			update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
-		update_option( 'woocommerce_ship_to_countries', 'all' );
-		update_option( 'woocommerce_allowed_countries', 'all' );
-		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
-		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+			$fixtures = new FixtureData();
+			$fixtures->shipping_remove_pickup_location();
+			$fixtures->shipping_remove_methods_from_default_zone();
 
-		$fixtures = new FixtureData();
-		$fixtures->shipping_remove_pickup_location();
-		$fixtures->shipping_remove_methods_from_default_zone();
+			$customer_to_delete = get_user_by( 'email', 'testaccount@test.com' );
+			if ( $customer_to_delete ) {
+				wp_delete_user( $customer_to_delete->ID );
+			}
 
-		$coupon_to_delete = new \WC_Coupon( self::TEST_COUPON_CODE );
-		$coupon_to_delete->delete( true );
+			unset( WC()->countries->locale );
+			WC()->cart->empty_cart();
+			WC()->session->destroy_session();
+			WC()->customer = null;
+			WC()->initialize_cart();
 
-		$customer_to_delete = get_user_by( 'email', 'testaccount@test.com' );
-		if ( $customer_to_delete ) {
-			wp_delete_user( $customer_to_delete->ID );
+			$GLOBALS['wp_rest_server'] = null;
+		} finally {
+			try {
+				parent::tearDown();
+			} finally {
+				$this->invalidate_checkout_option_caches();
+				WC()->payment_gateways()->payment_gateways = $this->payment_gateways_before_test;
+				\WC_Gateway_Paypal::set_instance( $this->paypal_gateway_before_test );
+			}
 		}
+	}
 
-		unset( WC()->countries->locale );
-		WC()->cart->empty_cart();
-		WC()->session->destroy_session();
+	/**
+	 * Invalidate caches for options modified by checkout tests.
+	 */
+	private function invalidate_checkout_option_caches(): void {
+		$option_names = array(
+			'woocommerce_checkout_phone_field',
+			'woocommerce_enable_guest_checkout',
+			'woocommerce_enable_signup_and_login_from_checkout',
+			'woocommerce_ship_to_countries',
+			'woocommerce_allowed_countries',
+			'woocommerce_specific_ship_to_countries',
+			'woocommerce_specific_allowed_countries',
+			'woocommerce_bacs_settings',
+			'woocommerce_pickup_location_settings',
+			'pickup_location_pickup_locations',
+		);
 
-		$GLOBALS['wp_rest_server'] = null;
+		foreach ( $option_names as $option_name ) {
+			wp_cache_delete( $option_name, 'options' );
+		}
+		wp_cache_delete( 'alloptions', 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
 	}
 
 	/**

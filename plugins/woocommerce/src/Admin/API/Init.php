@@ -153,6 +153,7 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\ProductVariations',
 			'Automattic\WooCommerce\Admin\API\ProductReviews',
 			'Automattic\WooCommerce\Admin\API\ProductsLowInStock',
+			'Automattic\WooCommerce\Admin\API\ActivityPanelCounts',
 			'Automattic\WooCommerce\Admin\API\SettingOptions',
 			'Automattic\WooCommerce\Admin\API\Taxes',
 		);

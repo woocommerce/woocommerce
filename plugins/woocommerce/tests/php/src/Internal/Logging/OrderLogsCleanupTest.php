@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 use Automattic\WooCommerce\Internal\Logging\OrderLogsDeletionProcessor;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 
@@ -447,9 +448,10 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	 */
 	private function create_orders_with_logs( int $count ): array {
 		$order_ids = array();
+		$product   = ProductHelper::create_simple_product();
 
 		for ( $i = 0; $i < $count; $i++ ) {
-			$order = OrderHelper::create_order();
+			$order = OrderHelper::create_order( 1, $product );
 			$order->add_meta_data( '_debug_log_source_pending_deletion', 'place-order-debug-' . $i );
 			$order->save();
 			$order_ids[] = $order->get_id();
