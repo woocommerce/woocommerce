@@ -359,6 +359,17 @@
 			"core/post-comments-form": {
 				"css": "& .comment-form { margin-top: var(--wp--preset--spacing--20); }"
 			},
+			"core/post-content": {
+				"elements": {
+					"heading": {
+						"spacing": {
+							"margin": {
+								"top": "var(--wp--preset--spacing--50)"
+							}
+						}
+					}
+				}
+			},
 			"core/post-date": {
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--small)",
