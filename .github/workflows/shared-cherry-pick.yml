@@ -57,7 +57,7 @@ jobs:
     steps:
       - name: Validate PR and get merge commit
         id: check-pr
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const prNumber = parseInt('${{ inputs.pr_number }}', 10);
@@ -102,7 +102,7 @@ jobs:
       - name: Verify target branch and cherry-pick branch
         id: verify-branches
         if: steps.check-pr.outcome == 'success'
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const targetBranch = '${{ inputs.target_branch }}';
@@ -222,7 +222,7 @@ jobs:
       cherry_pick_pr_number: ${{ steps.aggregate-status.outputs.cherry_pick_pr_number }}
     steps:
       - name: Checkout target branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ inputs.target_branch }}
 
@@ -322,7 +322,7 @@ jobs:
       - name: Create cherry-pick pull request
         id: create-pr
         if: steps.cherry-pick.outputs.status != 'skipped'
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           CONFLICT_STATUS: ${{ steps.cherry-pick.outputs.conflict_status }}
         with:
@@ -425,7 +425,7 @@ jobs:
 
       - name: Assign PR
         if: steps.create-pr.outcome == 'success'
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
