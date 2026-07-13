@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Honor the gallery block aspect ratio (crop) when rendering emails. Cropped images now fall back to CSS cropping and expose the `woocommerce_email_editor_gallery_cropped_image_url` filter so integrations can serve server-side-cropped images that render the crop in every email client.
