@@ -105,7 +105,9 @@ const FrontendBlock = ( {
 								setChecked( ( value ) => ! value )
 							}
 							hasError={ hasError }
-							aria-describedby={ validationErrorHtmlId }
+							aria-errormessage={
+								hasError ? validationErrorHtmlId : undefined
+							}
 							disabled={ isDisabled }
 						>
 							<span
