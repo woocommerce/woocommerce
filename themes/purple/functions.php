@@ -93,9 +93,9 @@ if ( ! function_exists( 'purple_hide_woocommerce_template_parts' ) ) :
 	 * unregister API — WooCommerce injects them into template queries with its
 	 * own get_block_templates filter (priority 10) — so they are filtered out
 	 * of query results here instead. This only affects listings; rendering a
-	 * template part goes through get_block_file_template and is unaffected,
-	 * and a copy customized in the editor is stored under a different ID, so
-	 * it would remain visible.
+	 * template part goes through get_block_file_template and is unaffected.
+	 * Copies customized in the editor have the 'custom' source and are kept,
+	 * so user-edited content is never hidden.
 	 *
 	 * @param WP_Block_Template[] $templates     Found templates.
 	 * @param array               $query         Template query arguments.
@@ -107,18 +107,19 @@ if ( ! function_exists( 'purple_hide_woocommerce_template_parts' ) ) :
 			return $templates;
 		}
 
-		$hidden_template_part_ids = array(
+		$hidden_template_part_slugs = array(
 			// Referenced only by WooCommerce's coming-soon patterns, which
 			// purple_unregister_patterns() removes; Purple ships its own
 			// coming-soon template.
-			'woocommerce//coming-soon-social-links',
+			'coming-soon-social-links',
 		);
 
 		return array_values(
 			array_filter(
 				$templates,
-				static function ( $template ) use ( $hidden_template_part_ids ) {
-					return ! in_array( $template->id, $hidden_template_part_ids, true );
+				static function ( $template ) use ( $hidden_template_part_slugs ) {
+					return 'custom' === $template->source
+						|| ! in_array( $template->slug, $hidden_template_part_slugs, true );
 				}
 			)
 		);
