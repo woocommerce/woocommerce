@@ -596,7 +596,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 * @return string
 	 */
 	private function get_unique_attribute_slug( string $context ): string {
-		return 'wc38919-' . $context . '-' . strtolower( wp_generate_password( 5, false, false ) );
+		return 'runtime-' . $context . '-' . strtolower( wp_generate_password( 5, false, false ) );
 	}
 
 	/**
