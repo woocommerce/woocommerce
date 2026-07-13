@@ -290,9 +290,6 @@ class AssetsController extends \WP_UnitTestCase {
 		$deprecated_handles = array(
 			'wc-blocks-vendors',
 			'wc-blocks',
-			'wc-blocks-shared-context',
-			'wc-blocks-shared-hocs',
-			'wc-blocks-components',
 		);
 
 		$this->api

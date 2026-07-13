@@ -33,11 +33,11 @@ The entries below are available as enqueueable package handles for extensions an
 
 | Package import | Script handle | Global | Registration owner | Notes |
 | --- | --- | --- | --- | --- |
-| N/A | `wc-blocks-vendors` | N/A | `AssetsController::register_deprecated_package_scripts()` | Compatibility placeholder only; keeps legacy dependencies resolvable but does not print a script, so enqueueing it no longer loads the old vendor bundle. |
-| N/A | `wc-blocks` | N/A | `AssetsController::register_deprecated_package_scripts()` | Compatibility placeholder only; keeps legacy dependencies resolvable but does not print a script. Use `wc-block-library` for the shared editor bundle. |
-| `@woocommerce/blocks-components` | `wc-blocks-components` | `wc.blocksComponents` | `AssetsController::register_deprecated_package_scripts()` | Supported standalone package bundle for shared Blocks components. |
-| `@woocommerce/shared-context` | `wc-blocks-shared-context` | `wc.wcBlocksSharedContext` | `AssetsController::register_deprecated_package_scripts()` | Supported standalone package bundle for shared Blocks context helpers. |
-| `@woocommerce/shared-hocs` | `wc-blocks-shared-hocs` | `wc.wcBlocksSharedHocs` | `AssetsController::register_deprecated_package_scripts()` | Supported standalone package bundle for shared Blocks higher-order components. |
+| N/A | `wc-blocks-vendors` | N/A | `AssetsController::register_deprecated_script_handles()` | Compatibility placeholder only; keeps legacy dependencies resolvable but does not print a script, so enqueueing it no longer loads the old vendor bundle. |
+| N/A | `wc-blocks` | N/A | `AssetsController::register_deprecated_script_handles()` | Compatibility placeholder only; keeps legacy dependencies resolvable but does not print a script. Use `wc-block-library` for the shared editor bundle. |
+| `@woocommerce/blocks-components` | `wc-blocks-components` | `wc.blocksComponents` | `AssetsController::register_assets()` | Supported standalone package bundle for shared Blocks components. |
+| `@woocommerce/shared-context` | `wc-blocks-shared-context` | `wc.wcBlocksSharedContext` | `AssetsController::register_assets()` | Supported standalone package bundle for shared Blocks context helpers. |
+| `@woocommerce/shared-hocs` | `wc-blocks-shared-hocs` | `wc.wcBlocksSharedHocs` | `AssetsController::register_assets()` | Supported standalone package bundle for shared Blocks higher-order components. |
 | `@woocommerce/settings` | `wc-settings` | `wc.wcSettings` | `AssetDataRegistry::register_data_script()` | Still used when scripts need WooCommerce settings data; inline data is only printed when the handle is enqueued. |
 | `@woocommerce/types` | `wc-types` | `wc.wcTypes` | `AssetsController::register_assets()` | Runtime type helpers remain available as a standalone handle. |
 | `@woocommerce/sanitize` | `wc-sanitize` | `wc.sanitize` | `AssetsController::register_assets()` and WooCommerce Admin assets | Sanitization helpers remain available as a standalone handle. |

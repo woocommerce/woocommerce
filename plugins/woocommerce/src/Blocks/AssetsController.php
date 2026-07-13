@@ -78,13 +78,16 @@ final class AssetsController {
 		$this->api->register_script( 'wc-blocks-middleware', 'assets/client/blocks/wc-blocks-middleware.js', array(), false );
 		$this->api->register_script( 'wc-blocks-data-store', 'assets/client/blocks/wc-blocks-data.js', array( 'wc-blocks-middleware' ) );
 		$this->api->register_script( 'wc-blocks-registry', 'assets/client/blocks/wc-blocks-registry.js', array(), false );
+		$this->api->register_script( 'wc-blocks-shared-context', 'assets/client/blocks/wc-blocks-shared-context.js' );
+		$this->api->register_script( 'wc-blocks-shared-hocs', 'assets/client/blocks/wc-blocks-shared-hocs.js', array(), false );
+		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
 		$this->api->register_script(
 			'wc-block-library',
 			$this->api->get_block_asset_build_path( 'wc-block-library' ),
 			array( 'wc-blocks-middleware', 'wc-entities' ),
 			true
 		);
-		$this->register_deprecated_package_scripts();
+		$this->register_deprecated_script_handles();
 
 		// Keep price-format as a dedicated shared package: editor and frontend/runtime assets depend on it, and
 		// externalizing it avoids duplicating price formatting helpers across bundles.
@@ -120,25 +123,11 @@ final class AssetsController {
 	}
 
 	/**
-	 * Register deprecated aggregate handles and standalone package bundles for backward compatibility.
-	 *
-	 * The aggregate handles are placeholders so extensions that declare them directly do not break.
-	 * The package handles below remain real bundles because WooCommerce's consolidated editor build
-	 * externalizes them as shared dependencies for extension compatibility.
+	 * Register deprecated script handles for backward compatibility.
 	 */
-	private function register_deprecated_package_scripts(): void {
-		// Deprecated aggregate handles kept as placeholders for extensions that still declare them.
+	private function register_deprecated_script_handles(): void {
 		wp_register_script( 'wc-blocks-vendors', false, array(), $this->api->wc_version, true );
 		wp_register_script( 'wc-blocks', false, array(), $this->api->wc_version, true );
-
-		// Standalone package bundle for extensions that depend on wc-blocks-shared-context.
-		$this->api->register_script( 'wc-blocks-shared-context', 'assets/client/blocks/wc-blocks-shared-context.js' );
-
-		// Standalone package bundle for extensions that depend on wc-blocks-shared-hocs.
-		$this->api->register_script( 'wc-blocks-shared-hocs', 'assets/client/blocks/wc-blocks-shared-hocs.js', array(), false );
-
-		// Standalone package bundle for extensions that depend on wc-blocks-components.
-		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
 
 		$this->add_deprecated_script_handle_warnings(
 			array(
