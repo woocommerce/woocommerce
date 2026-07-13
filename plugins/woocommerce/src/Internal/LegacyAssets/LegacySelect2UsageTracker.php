@@ -154,12 +154,10 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 	 */
 	protected function record_event( string $event_name, array $properties ): void {
 		if ( ! class_exists( 'WC_Tracks' ) ) {
-			$this->load_tracks();
+			return;
 		}
 
-		if ( class_exists( 'WC_Tracks' ) ) {
-			\WC_Tracks::record_event( $event_name, $properties );
-		}
+		\WC_Tracks::record_event( $event_name, $properties );
 	}
 
 	/**
@@ -222,35 +220,6 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 		$scope_json = wp_json_encode( $scope );
 
 		return self::TRANSIENT_KEY_PREFIX . md5( is_string( $scope_json ) ? $scope_json : '' );
-	}
-
-	/**
-	 * Load Tracks classes when they have not been loaded yet.
-	 *
-	 * @return void
-	 */
-	private function load_tracks(): void {
-		if ( ! defined( 'WC_ABSPATH' ) ) {
-			return;
-		}
-
-		$tracks_files = array(
-			'includes/tracks/class-wc-tracks.php',
-			'includes/tracks/class-wc-tracks-event.php',
-			'includes/tracks/class-wc-tracks-client.php',
-			'includes/tracks/class-wc-tracks-footer-pixel.php',
-			'includes/tracks/class-wc-site-tracking.php',
-		);
-
-		foreach ( $tracks_files as $tracks_file ) {
-			$tracks_file_path = WC_ABSPATH . $tracks_file;
-
-			if ( ! file_exists( $tracks_file_path ) ) {
-				return;
-			}
-
-			include_once $tracks_file_path;
-		}
 	}
 
 	/**
