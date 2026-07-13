@@ -33,12 +33,15 @@ class AttributeSlugLength {
 	 * authoritative.
 	 *
 	 * @since 11.1.0
-	 * @param string $locale Locale to inspect, e.g. 'pt_BR'. Defaults to the site locale.
+	 * @param string $locale Locale to inspect, e.g. 'pt_BR'. Defaults to the current user's locale.
 	 * @return int Approximate maximum number of characters, never less than 1.
 	 */
 	public static function get_character_estimate( string $locale = '' ): int {
 		if ( '' === $locale ) {
-			$locale = get_locale();
+			// Admin screens render in the user's profile language (get_user_locale()),
+			// which can differ from the site language; estimate for what the user
+			// actually reads and types.
+			$locale = get_user_locale();
 		}
 
 		// Reduce the locale to its language subtag, e.g. 'pt_BR' or 'zh-Hans' -> 'pt' / 'zh'.

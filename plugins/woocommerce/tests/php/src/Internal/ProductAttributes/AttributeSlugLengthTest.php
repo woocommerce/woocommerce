@@ -53,14 +53,24 @@ class AttributeSlugLengthTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should defer to the site locale when no locale is given.
+	 * @testdox Should default to the current user's locale rather than the site locale.
 	 */
-	public function test_defaults_to_site_locale(): void {
-		$this->assertSame(
-			AttributeSlugLength::get_character_estimate( get_locale() ),
-			AttributeSlugLength::get_character_estimate(),
-			'The default estimate should follow the site locale'
+	public function test_defaults_to_user_locale(): void {
+		$user_id = self::factory()->user->create(
+			array(
+				'role'   => 'administrator',
+				'locale' => 'ru_RU',
+			)
 		);
+		wp_set_current_user( $user_id );
+
+		$this->assertSame(
+			AttributeSlugLength::get_character_estimate( 'ru_RU' ),
+			AttributeSlugLength::get_character_estimate(),
+			'The default estimate should follow the user profile locale, not the site locale'
+		);
+
+		wp_set_current_user( 0 );
 	}
 
 	/**

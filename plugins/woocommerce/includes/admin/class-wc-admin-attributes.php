@@ -169,15 +169,15 @@ class WC_Admin_Attributes {
 	 * no-JavaScript clients as the static copy).
 	 *
 	 * States the authoritative byte limit alongside a character estimate tailored to the
-	 * site locale's script, so users on non-Latin sites get a meaningful figure rather
-	 * than a raw byte count they must translate into characters themselves.
+	 * script of the user's language, so users on non-Latin scripts get a meaningful
+	 * figure rather than a raw byte count they must translate into characters themselves.
 	 *
 	 * @return string
 	 */
 	private static function slug_field_description(): string {
 		return sprintf(
-			/* translators: 1: maximum slug length in bytes, 2: approximate maximum number of characters for the site language. */
-			__( 'Unique slug/reference for the attribute. Limited to %1$d bytes — roughly %2$d characters in your site language; non-ASCII characters use 2–4 bytes each.', 'woocommerce' ),
+			/* translators: 1: maximum slug length in bytes, 2: approximate maximum number of characters for the user's language. */
+			__( 'Unique slug/reference for the attribute. Limited to %1$d bytes — roughly %2$d characters in your language; non-ASCII characters use 2–4 bytes each.', 'woocommerce' ),
 			wc_get_attribute_slug_max_byte_length(),
 			AttributeSlugLength::get_character_estimate()
 		);
