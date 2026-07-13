@@ -360,4 +360,129 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'blocks-gallery-caption', $rendered );
 		$this->assertStringContainsString( 'text-align: center', $rendered );
 	}
+
+	/**
+	 * Test it applies a gallery-level aspect ratio crop to every image.
+	 */
+	public function testItAppliesGalleryLevelAspectRatioCrop(): void {
+		$parsed_gallery                         = $this->parsed_gallery;
+		$parsed_gallery['attrs']['aspectRatio'] = '1';
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		// Every image should be cropped square via inline CSS the sanitizer would otherwise strip.
+		$this->assertSame( 3, substr_count( $rendered, 'object-fit: cover' ), 'Each image should get object-fit: cover.' );
+		$this->assertSame( 3, substr_count( $rendered, 'aspect-ratio: 1' ), 'Each image should get the gallery aspect ratio.' );
+	}
+
+	/**
+	 * Test a per-image aspect ratio overrides the gallery-level one.
+	 */
+	public function testItLetsPerImageAspectRatioOverrideGalleryLevel(): void {
+		$parsed_gallery                         = $this->parsed_gallery;
+		$parsed_gallery['attrs']['aspectRatio'] = '1';
+		$parsed_gallery['innerBlocks'][0]['attrs']['aspectRatio'] = '4/3';
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		// The overriding image uses its own ratio, the others fall back to the gallery ratio.
+		$this->assertStringContainsString( 'aspect-ratio: 4/3', $rendered );
+		$this->assertSame( 2, substr_count( $rendered, 'aspect-ratio: 1;' ), 'The two non-overridden images keep the gallery ratio.' );
+		$this->assertSame( 3, substr_count( $rendered, 'object-fit: cover' ), 'All three images are still cropped.' );
+	}
+
+	/**
+	 * Test galleries without an aspect ratio are left uncropped (no regression).
+	 */
+	public function testItDoesNotCropWhenNoAspectRatioIsSet(): void {
+		$rendered = $this->gallery_renderer->render( '', $this->parsed_gallery, $this->rendering_context );
+
+		$this->assertStringNotContainsString( 'object-fit', $rendered );
+		$this->assertStringNotContainsString( 'aspect-ratio', $rendered );
+	}
+
+	/**
+	 * Test an invalid aspect ratio value is ignored rather than injected into the markup.
+	 */
+	public function testItIgnoresInvalidAspectRatioValues(): void {
+		$parsed_gallery                         = $this->parsed_gallery;
+		$parsed_gallery['attrs']['aspectRatio'] = 'cover; background:url(javascript:alert(1))';
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		$this->assertStringNotContainsString( 'object-fit', $rendered );
+		$this->assertStringNotContainsString( 'aspect-ratio', $rendered );
+		$this->assertStringNotContainsString( 'javascript:', $rendered );
+	}
+
+	/**
+	 * Test the crop filter receives the image URL, ratio and target dimensions.
+	 */
+	public function testItPassesCropContextToTheImageUrlFilter(): void {
+		$parsed_gallery                         = $this->parsed_gallery;
+		$parsed_gallery['attrs']['aspectRatio'] = '1';
+		$parsed_gallery['attrs']['columns']     = 3;
+
+		$received = array();
+		$filter   = function ( $url, $aspect_ratio, $width, $height, $attrs ) use ( &$received ) {
+			$received[] = array(
+				'url'          => $url,
+				'aspect_ratio' => $aspect_ratio,
+				'width'        => $width,
+				'height'       => $height,
+				'attrs'        => $attrs,
+			);
+			return $url;
+		};
+		add_filter( 'woocommerce_email_editor_gallery_cropped_image_url', $filter, 10, 5 );
+		$this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+		remove_filter( 'woocommerce_email_editor_gallery_cropped_image_url', $filter, 10 );
+
+		$this->assertCount( 3, $received, 'The filter runs once per gallery image.' );
+		$this->assertSame( 'https://example.com/image1.jpg', $received[0]['url'] );
+		$this->assertSame( '1', $received[0]['aspect_ratio'] );
+		// Square crop: derived height equals the target width.
+		$this->assertSame( $received[0]['width'], $received[0]['height'] );
+		$this->assertGreaterThan( 0, $received[0]['width'], 'A concrete cell width is passed for CDN sizing.' );
+		$this->assertSame( 1, $received[0]['attrs']['id'], 'The image block attributes are forwarded.' );
+	}
+
+	/**
+	 * Test a server-cropped URL is used with concrete width/height dimensions.
+	 */
+	public function testItUsesServerCroppedUrlWithConcreteDimensions(): void {
+		$parsed_gallery                         = $this->parsed_gallery;
+		$parsed_gallery['attrs']['aspectRatio'] = '1';
+
+		$filter = function ( $url, $aspect_ratio, $width, $height ) {
+			return $url . '?resize=' . $width . ',' . $height . '&crop=1';
+		};
+		add_filter( 'woocommerce_email_editor_gallery_cropped_image_url', $filter, 10, 5 );
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+		remove_filter( 'woocommerce_email_editor_gallery_cropped_image_url', $filter, 10 );
+
+		// The rewritten (cropped) URL is used.
+		$this->assertStringContainsString( 'crop=1', $rendered );
+		$this->assertSame( 3, substr_count( $rendered, 'crop=1' ), 'Every image URL is rewritten.' );
+
+		// A square crop gets equal, concrete width/height attributes so it renders everywhere.
+		$this->assertSame( 1, preg_match( '/<img\b[^>]*>/', $rendered, $img ), 'The rendered output contains an image tag.' );
+		$this->assertSame( 1, preg_match( '/\bwidth="(\d+)"/', $img[0], $width_match ), 'The image has a concrete width.' );
+		$this->assertSame( 1, preg_match( '/\bheight="(\d+)"/', $img[0], $height_match ), 'The image has a concrete height.' );
+		$this->assertSame( $width_match[1], $height_match[1], 'A square crop has equal width and height.' );
+	}
+
+	/**
+	 * Test an unchanged URL from the filter falls back to CSS-only cropping (no dimensions).
+	 */
+	public function testItFallsBackToCssCropWhenFilterLeavesUrlUnchanged(): void {
+		$parsed_gallery                         = $this->parsed_gallery;
+		$parsed_gallery['attrs']['aspectRatio'] = '1';
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		// Without a cropping integration, images keep CSS cropping and are not given fixed dimensions.
+		$this->assertStringContainsString( 'object-fit: cover', $rendered );
+		$this->assertDoesNotMatchRegularExpression( '/<img[^>]*\bheight="/', $rendered, 'Uncropped images must not get a fixed height that would distort them.' );
+	}
 }
