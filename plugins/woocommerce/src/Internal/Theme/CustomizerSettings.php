@@ -45,11 +45,6 @@ class CustomizerSettings implements RegisterHooksInterface {
 	);
 
 	/**
-	 * Default value used to check whether an option exists.
-	 */
-	private const OPTION_DOES_NOT_EXIST = '__woocommerce_customizer_setting_does_not_exist__';
-
-	/**
 	 * Register this class instance to the appropriate hooks.
 	 *
 	 * @return void
@@ -201,6 +196,6 @@ class CustomizerSettings implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	private function option_exists( string $option_name ): bool {
-		return self::OPTION_DOES_NOT_EXIST !== get_option( $option_name, self::OPTION_DOES_NOT_EXIST );
+		return null !== get_option( $option_name, null );
 	}
 }
