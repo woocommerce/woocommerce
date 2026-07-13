@@ -4549,21 +4549,20 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 				unset( $item_data[ $key ] );
 				continue;
 			}
-			// Resolve the label and display value that will actually be rendered.
-			// Only these two values are escaped during output, so guard against
-			// non-scalar values here to prevent fatals while preserving rows whose
-			// non-rendered fields (or a non-scalar `value` with a scalar `display`)
-			// would still render correctly.
+			// Only the label and display value are rendered; drop rows whose rendered values cannot be cast to a string.
 			$label   = ! empty( $data['key'] ) ? $data['key'] : ( $data['name'] ?? '' );
 			$display = ! empty( $data['display'] ) ? $data['display'] : ( $data['value'] ?? '' );
 
-			if ( ! is_scalar( $label ) || ! is_scalar( $display ) ) {
+			$label_is_renderable   = is_scalar( $label ) || ( is_object( $label ) && method_exists( $label, '__toString' ) );
+			$display_is_renderable = is_scalar( $display ) || ( is_object( $display ) && method_exists( $display, '__toString' ) );
+
+			if ( ! $label_is_renderable || ! $display_is_renderable ) {
 				unset( $item_data[ $key ] );
 				continue;
 			}
 
-			$item_data[ $key ]['key']     = $label;
-			$item_data[ $key ]['display'] = $display;
+			$item_data[ $key ]['key']     = (string) $label;
+			$item_data[ $key ]['display'] = (string) $display;
 		}
 
 		// Output flat or in list format.

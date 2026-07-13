@@ -293,173 +293,112 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_formatted_cart_item_data skips non-scalar item data.
+	 * Item data used by the wc_get_formatted_cart_item_data tests, mixing rows
+	 * that should render (scalar or stringable rendered fields) with rows that
+	 * should be dropped (non-scalar rendered fields or malformed entries).
+	 *
+	 * @param array $item_data Existing item data.
+	 * @return array
 	 */
-	public function test_wc_get_formatted_cart_item_data_skips_non_scalar_item_data() {
-		$filter = function ( $item_data ) {
-			$item_data[] = array(
-				'key'   => 'Gift wrap',
-				'value' => 'Included',
-			);
-			$item_data[] = array(
-				'key'   => 'Attachments',
-				'value' => array( 'file-a.pdf', 'file-b.pdf' ),
-			);
-			$item_data[] = array(
-				'key'     => 'Extra',
-				'value'   => 'Details',
-				'display' => new stdClass(),
-			);
-			$item_data[] = 'Malformed item data';
+	private function get_cart_item_data_fixture( $item_data ) {
+		// Renders: plain scalar row.
+		$item_data[] = array(
+			'key'   => 'Gift wrap',
+			'value' => 'Included',
+		);
+		// Renders: non-scalar `value` but scalar `display`.
+		$item_data[] = array(
+			'key'     => 'Attachments',
+			'value'   => array( 'file-a.pdf', 'file-b.pdf' ),
+			'display' => '2 files',
+		);
+		// Renders: non-scalar field that is never rendered.
+		$item_data[] = array(
+			'key'      => 'Custom',
+			'value'    => 'Hidden value',
+			'display'  => 'Shown',
+			'_private' => array( 'internal' => 'data' ),
+		);
+		// Renders: object implementing __toString as `display`.
+		$item_data[] = array(
+			'key'     => 'Note',
+			'display' => new class() {
+				public function __toString() { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+					return 'From object';
+				}
+			},
+		);
+		// Dropped: non-scalar `value` without a `display`.
+		$item_data[] = array(
+			'key'   => 'Files',
+			'value' => array( 'file-c.pdf' ),
+		);
+		// Dropped: non-stringable object as `display`.
+		$item_data[] = array(
+			'key'     => 'Extra',
+			'value'   => 'Details',
+			'display' => new stdClass(),
+		);
+		// Dropped: not an array.
+		$item_data[] = 'Malformed item data';
 
-			return $item_data;
-		};
-
-		add_filter( 'woocommerce_get_item_data', $filter );
-
-		try {
-			$html = wc_get_formatted_cart_item_data(
-				array(
-					'data'      => new WC_Product_Simple(),
-					'variation' => array(),
-				)
-			);
-		} finally {
-			remove_filter( 'woocommerce_get_item_data', $filter );
-		}
-
-		$this->assertStringContainsString( 'Gift wrap', $html );
-		$this->assertStringContainsString( 'Included', $html );
-		$this->assertStringNotContainsString( 'Attachments', $html );
-		$this->assertStringNotContainsString( 'file-a.pdf', $html );
-		$this->assertStringNotContainsString( 'Extra', $html );
-		$this->assertStringNotContainsString( 'Details', $html );
-		$this->assertStringNotContainsString( 'Malformed item data', $html );
+		return $item_data;
 	}
 
 	/**
-	 * Test wc_get_formatted_cart_item_data skips non-scalar item data in flat output.
+	 * Calls wc_get_formatted_cart_item_data with the shared fixture hooked into
+	 * the woocommerce_get_item_data filter.
+	 *
+	 * @param bool $flat Whether to request flat output.
+	 * @return string
 	 */
-	public function test_wc_get_formatted_cart_item_data_skips_non_scalar_item_data_in_flat_output() {
-		$filter = function ( $item_data ) {
-			$item_data[] = array(
-				'key'   => 'Gift wrap',
-				'value' => 'Included',
-			);
-			$item_data[] = array(
-				'key'   => 'Attachments',
-				'value' => array( 'file-a.pdf', 'file-b.pdf' ),
-			);
-			$item_data[] = array(
-				'key'     => 'Extra',
-				'value'   => 'Details',
-				'display' => new stdClass(),
-			);
-			$item_data[] = 'Malformed item data';
-
-			return $item_data;
-		};
-
+	private function get_formatted_cart_item_data_with_fixture( $flat ) {
+		$filter = array( $this, 'get_cart_item_data_fixture' );
 		add_filter( 'woocommerce_get_item_data', $filter );
 
 		try {
-			$output = wc_get_formatted_cart_item_data(
+			return wc_get_formatted_cart_item_data(
 				array(
 					'data'      => new WC_Product_Simple(),
 					'variation' => array(),
 				),
-				true
+				$flat
 			);
 		} finally {
 			remove_filter( 'woocommerce_get_item_data', $filter );
 		}
-
-		$this->assertSame( "Gift wrap: Included\n", $output );
-		$this->assertStringNotContainsString( 'Malformed item data', $output );
 	}
 
 	/**
-	 * Test wc_get_formatted_cart_item_data renders rows when only the non-rendered
-	 * fields are non-scalar, since the classic cart renders just the label and display.
+	 * Test wc_get_formatted_cart_item_data renders rows whose label and display
+	 * value are stringable and drops the rest.
 	 */
-	public function test_wc_get_formatted_cart_item_data_renders_scalar_display_with_non_scalar_value() {
-		$filter = function ( $item_data ) {
-			// Non-scalar `value`, but a scalar `display` — should render using `display`.
-			$item_data[] = array(
-				'key'     => 'Attachments',
-				'value'   => array( 'file-a.pdf', 'file-b.pdf' ),
-				'display' => '2 files',
-			);
-			// Scalar rendered fields alongside a non-scalar field that is never rendered.
-			$item_data[] = array(
-				'key'      => 'Custom',
-				'value'    => 'Shown',
-				'display'  => 'Shown',
-				'_private' => array( 'internal' => 'data' ),
-			);
+	public function test_wc_get_formatted_cart_item_data_skips_non_renderable_item_data() {
+		$html = $this->get_formatted_cart_item_data_with_fixture( false );
 
-			return $item_data;
-		};
-
-		add_filter( 'woocommerce_get_item_data', $filter );
-
-		try {
-			$html = wc_get_formatted_cart_item_data(
-				array(
-					'data'      => new WC_Product_Simple(),
-					'variation' => array(),
-				)
-			);
-		} finally {
-			remove_filter( 'woocommerce_get_item_data', $filter );
-		}
-
-		// Both rows render, using their scalar display values.
+		$this->assertStringContainsString( 'Gift wrap', $html );
+		$this->assertStringContainsString( 'Included', $html );
 		$this->assertStringContainsString( 'Attachments', $html );
 		$this->assertStringContainsString( '2 files', $html );
 		$this->assertStringContainsString( 'Custom', $html );
 		$this->assertStringContainsString( 'Shown', $html );
-		// The non-scalar value must not leak into the output.
+		$this->assertStringContainsString( 'Note', $html );
+		$this->assertStringContainsString( 'From object', $html );
+		// `display` is preferred over `value`, and non-renderable rows are dropped.
+		$this->assertStringNotContainsString( 'Hidden value', $html );
 		$this->assertStringNotContainsString( 'file-a.pdf', $html );
+		$this->assertStringNotContainsString( 'Files', $html );
+		$this->assertStringNotContainsString( 'Extra', $html );
+		$this->assertStringNotContainsString( 'Malformed item data', $html );
 	}
 
 	/**
-	 * Test wc_get_formatted_cart_item_data renders rows when only the non-rendered
-	 * fields are non-scalar, in flat output.
+	 * Test wc_get_formatted_cart_item_data renders the same rows in flat output.
 	 */
-	public function test_wc_get_formatted_cart_item_data_renders_scalar_display_with_non_scalar_value_in_flat_output() {
-		$filter = function ( $item_data ) {
-			$item_data[] = array(
-				'key'     => 'Attachments',
-				'value'   => array( 'file-a.pdf', 'file-b.pdf' ),
-				'display' => '2 files',
-			);
-			$item_data[] = array(
-				'key'      => 'Custom',
-				'value'    => 'Shown',
-				'display'  => 'Shown',
-				'_private' => array( 'internal' => 'data' ),
-			);
+	public function test_wc_get_formatted_cart_item_data_skips_non_renderable_item_data_in_flat_output() {
+		$output = $this->get_formatted_cart_item_data_with_fixture( true );
 
-			return $item_data;
-		};
-
-		add_filter( 'woocommerce_get_item_data', $filter );
-
-		try {
-			$output = wc_get_formatted_cart_item_data(
-				array(
-					'data'      => new WC_Product_Simple(),
-					'variation' => array(),
-				),
-				true
-			);
-		} finally {
-			remove_filter( 'woocommerce_get_item_data', $filter );
-		}
-
-		$this->assertSame( "Attachments: 2 files\nCustom: Shown\n", $output );
-		$this->assertStringNotContainsString( 'file-a.pdf', $output );
+		$this->assertSame( "Gift wrap: Included\nAttachments: 2 files\nCustom: Shown\nNote: From object\n", $output );
 	}
 
 	public function test_hidden_field() {
