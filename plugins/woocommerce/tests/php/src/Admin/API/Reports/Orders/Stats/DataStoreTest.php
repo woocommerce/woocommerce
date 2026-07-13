@@ -117,4 +117,83 @@ class DataStoreTest extends WC_Unit_Test_Case {
 
 		WC_Helper_Order::delete_order( $order->get_id() );
 	}
+
+	/**
+	 * @testdox A partial refund followed by a full refund does not double-count the returns amount.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/66217: the full-refund
+	 * row used to store the whole parent order total again, ignoring the amount an earlier partial
+	 * refund had already recorded, so the Revenue report over-counted returns.
+	 */
+	public function test_partial_then_full_refund_does_not_double_count_returns(): void {
+		update_option( 'woocommerce_db_version', '10.2.0' );
+		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'no' );
+
+		// Order: net 40 (4 x $10 product) + tax 5 + shipping 10 = 55 gross.
+		$order = WC_Helper_Order::create_order();
+		$order->set_cart_tax( 5.00 );
+		$order->set_total( 55.00 );
+		$order->save();
+		$order->update_status( 'completed' );
+
+		$product_item_id = array_key_first( $order->get_items() );
+
+		// Partial refund: 2 of the 4 product units ($20) with a real line-item breakdown.
+		$partial = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 20.00,
+				'line_items' => array(
+					$product_item_id => array(
+						'qty'          => 2,
+						'refund_total' => 20.00,
+					),
+				),
+			)
+		);
+		$this->assertNotInstanceOf( WP_Error::class, $partial );
+
+		// Full refund of the remainder as a lump sum (no line items), flagged as a full refund.
+		$remaining = (float) wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
+		$full      = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $remaining,
+				'line_items' => array(),
+			)
+		);
+		$this->assertNotInstanceOf( WP_Error::class, $full );
+		$full->update_meta_data( '_refund_type', 'full' );
+		$full->save_meta_data();
+		if ( OrderUtil::orders_cache_usage_is_enabled() ) {
+			wc_get_container()->get( OrderCache::class )->remove( $full->get_id() );
+		}
+
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+		OrdersStatsDataStore::sync_order( $partial->get_id() );
+		OrdersStatsDataStore::sync_order( $full->get_id() );
+
+		global $wpdb;
+
+		// Reported returns = absolute gross (net + tax + shipping) summed over the refund rows.
+		$returns = (float) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT ABS( SUM( net_total + tax_total + shipping_total ) ) FROM {$wpdb->prefix}wc_order_stats WHERE parent_id = %d",
+				$order->get_id()
+			)
+		);
+		// Once (the order gross), not the partial refund counted twice ($75 before the fix).
+		$this->assertEqualsWithDelta( 55.00, $returns, 0.02 );
+
+		// The net portion across refunds should reconstruct the order net exactly once.
+		$refunded_net = (float) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT SUM( net_total ) FROM {$wpdb->prefix}wc_order_stats WHERE parent_id = %d",
+				$order->get_id()
+			)
+		);
+		$this->assertEqualsWithDelta( -40.00, $refunded_net, 0.02 );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
 }
