@@ -26,6 +26,9 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 		global $wp_rest_server;
 		$wp_rest_server = new WP_Test_Spy_REST_Server();
 		$this->server   = $wp_rest_server;
+		// Register namespaces eagerly so controller tests can assert against the route table directly.
+		// The lazy-loading machinery itself is covered by RestApiUtilTest.
+		add_filter( 'woocommerce_rest_should_lazy_load_namespace', '__return_false' );
 		do_action( 'rest_api_init' );
 
 		// Reset payment gateways.
