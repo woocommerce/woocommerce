@@ -15,11 +15,26 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
-	 * Store the COT state before the test.
+	 * Store the COT state before the test class.
 	 *
 	 * @var bool
 	 */
-	private $prev_cot_state;
+	private static $previous_cot_state;
+
+	/**
+	 * Use the CPT order data store for every test in this class.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::$previous_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		OrderHelper::toggle_cot_feature_and_usage( false );
+	}
+
+	/**
+	 * Restore the order data store used before this class.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		OrderHelper::toggle_cot_feature_and_usage( self::$previous_cot_state );
+	}
 
 	/**
 	 * Store the COT state before the test.
@@ -28,8 +43,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->prev_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		OrderHelper::toggle_cot_feature_and_usage( false );
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 	}
 
@@ -39,7 +52,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		$this->disable_cogs_feature();
 		parent::tearDown();
@@ -705,7 +717,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function test_total_filtering_with_operators() {
 		$order_totals_to_test = array( 5, 10, 50, 100.00, 100.00, 250.50, 250.50, 500.75, 1000.00 );
 		foreach ( $order_totals_to_test as $order_total ) {
-			$order = OrderHelper::create_order();
+			$order = wc_create_order();
 			$order->set_total( $order_total );
 			$order->save();
 		}

@@ -25,16 +25,16 @@ import {
 
 const SendTestEmailModalContent = ( {
 	postId,
-	emailId,
+	emailClassName,
 	onClose,
 }: {
 	postId: number;
-	emailId: string;
+	emailClassName: string;
 	onClose: () => void;
 } ) => {
 	const { email, setEmail, isSending, notice, noticeType, sendEmail } =
 		useSendTestEmail(
-			{ endpoint: 'editor', postId, emailType: emailId },
+			{ endpoint: 'editor', postId, emailType: emailClassName },
 			'email_listing'
 		);
 
@@ -220,7 +220,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				} ) => (
 					<SendTestEmailModalContent
 						postId={ parseInt( items[ 0 ].post_id, 10 ) }
-						emailId={ items[ 0 ].id }
+						emailClassName={ items[ 0 ].email_class_name }
 						onClose={ closeModal ?? ( () => {} ) }
 					/>
 				),

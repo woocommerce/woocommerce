@@ -281,18 +281,18 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * @param bool|null $auto_update Whether to enable auto-updates (TRUE) or not. NULL means use the defaults.
 	 */
 	public function test_db_auto_updates( ?bool $auto_update = null ): void {
-		$options = array( 'woocommerce_db_version', 'woocommerce_version' );
+		$update_versions = array_keys( WC_Install::get_db_update_callbacks() );
+		$from_version    = $update_versions[ count( $update_versions ) - 2 ];
+		$maybe_update_db = function () {
+			static::maybe_update_db_version();
+		};
 
 		if ( ! is_null( $auto_update ) ) {
 			add_filter( 'woocommerce_enable_auto_update_db', fn() => $auto_update );
 		}
 
-		foreach ( $options as $option_name ) {
-			update_option( $option_name, '9.4.0' );
-		}
-
-		// Trigger version check.
-		\WC_Install::check_version();
+		update_option( 'woocommerce_db_version', $from_version );
+		$maybe_update_db->call( new WC_Install() );
 
 		// Did we schedule anything automatically?
 		$update_scheduled = ! is_null( WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' ) );
@@ -302,6 +302,27 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertFalse( $update_scheduled );
 		}
+	}
+
+	/**
+	 * Tests that the version check reaches the automatic database updater.
+	 *
+	 * This is a single end-to-end smoke test of the check_version() -> install() ->
+	 * maybe_update_db_version() wiring; the auto-update on/off/default decision logic
+	 * itself is covered for all variations by test_db_auto_updates() above.
+	 *
+	 * @testdox The version check schedules the automatic database update.
+	 */
+	public function test_version_check_schedules_db_auto_update(): void {
+		$update_versions = array_keys( WC_Install::get_db_update_callbacks() );
+		$from_version    = $update_versions[ count( $update_versions ) - 2 ];
+
+		update_option( 'woocommerce_db_version', $from_version );
+		update_option( 'woocommerce_version', $from_version );
+
+		WC_Install::check_version();
+
+		$this->assertNotNull( WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' ) );
 	}
 
 	/**
