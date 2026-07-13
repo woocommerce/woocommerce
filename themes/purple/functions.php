@@ -129,6 +129,55 @@ endif;
 
 add_filter( 'get_block_templates', 'purple_hide_woocommerce_template_parts', 20, 3 );
 
+if ( ! function_exists( 'purple_hide_store_templates_from_template_picker' ) ) :
+	/**
+	 * Keep store templates out of the post editor's "Change template" picker.
+	 *
+	 * Core treats every non-hierarchy template file without a postTypes
+	 * declaration as "available for all post types", so the theme's WooCommerce
+	 * template overrides (Product Catalog, Page: Cart, Single Product, …) are
+	 * offered as page templates. They never make sense there — WooCommerce
+	 * routes to them by URL, not by page-template assignment — and their store
+	 * blocks can't even render in the picker's preview. Only queries that
+	 * specify a post_type come from the picker, so Site Editor listings (no
+	 * post_type) are unaffected and the templates stay editable there.
+	 *
+	 * @param WP_Block_Template[] $templates     Found templates.
+	 * @param array               $query         Template query arguments.
+	 * @param string              $template_type wp_template or wp_template_part.
+	 * @return WP_Block_Template[]
+	 */
+	function purple_hide_store_templates_from_template_picker( array $templates, array $query, string $template_type ): array {
+		if ( 'wp_template' !== $template_type || empty( $query['post_type'] ) ) {
+			return $templates;
+		}
+
+		$hidden_template_slugs = array(
+			'archive-product',
+			'archive-product-without-filters',
+			'coming-soon',
+			'order-confirmation',
+			'page-cart',
+			'page-checkout',
+			'product-search-results',
+			'single-product',
+			'taxonomy-product_attribute',
+		);
+
+		return array_values(
+			array_filter(
+				$templates,
+				static function ( $template ) use ( $hidden_template_slugs ) {
+					return ! in_array( $template->slug, $hidden_template_slugs, true );
+				}
+			)
+		);
+	}
+
+endif;
+
+add_filter( 'get_block_templates', 'purple_hide_store_templates_from_template_picker', 20, 3 );
+
 if ( ! function_exists( 'purple_setup' ) ) :
 	/**
 	 * Sets up theme defaults and registers support for various WordPress features.
