@@ -1694,8 +1694,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * Save an object data.
 	 *
 	 * @since 3.0.0
-	 * @param WP_REST_Request $request  Full details about the request.
-	 * @param bool            $creating If is creating a new object.
+	 * @param WP_REST_Request<array<string, mixed>> $request  Full details about the request.
+	 * @param bool                                  $creating If is creating a new object.
 	 * @return WC_Data|WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {
@@ -1704,7 +1704,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		if ( ! $creating && isset( $request['status'] ) ) {
 			$existing_product = $this->get_object( (int) $request['id'] );
 
-			if ( $existing_product && 0 !== $existing_product->get_id() && $existing_product->is_type( ProductType::VARIABLE ) ) {
+			if ( $existing_product instanceof WC_Product && 0 !== $existing_product->get_id() && $existing_product->is_type( ProductType::VARIABLE ) ) {
 				$previous_status = $existing_product->get_status( 'edit' );
 			}
 		}
@@ -1740,6 +1740,11 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			return false;
 		}
 
+		/**
+		 * Variable product data store.
+		 *
+		 * @var WC_Product_Variable_Data_Store_Interface $data_store
+		 */
 		$data_store = WC_Data_Store::load( 'product-variable' );
 
 		if ( ProductStatus::TRASH === $current_status ) {
