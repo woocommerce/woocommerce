@@ -105,6 +105,14 @@ if ( ! empty( $variations ) ) {
 
 **Choosing between forms:** prefer Form B when variation objects are already loaded — it avoids raw meta key knowledge and scopes the attachment prime to post-filter variations only, so out-of-stock or invisible variations excluded before phase 2 don't contribute attachment IDs that will never be rendered.
 
+**Prefer `ProductUtil::prime_image_caches()` over Form B inline code** when `WC_Product` objects are already in memory. It encapsulates the full collect-and-prime cycle (featured + gallery, dedup, intval, empty guard) in one call:
+
+```php
+wc_get_container()->get( \Automattic\WooCommerce\Internal\Utilities\ProductUtil::class )->prime_image_caches( $variations );
+```
+
+`WC_Product_Variation` extends `WC_Product` so variation collections are accepted directly. Use Form B inline code only when `ProductUtil` is not available in the call context (e.g. a legacy `includes/` file that cannot reach the DI container).
+
 **Scope priming to attachment IDs your code actually accesses.** Prime attachment posts only when the render path calls `get_post()`, `wp_attachment_is_image()`, `wp_get_attachment_image_src()`, or `get_the_title()` on each ID. Returning IDs as raw integers in a response array (e.g. a REST API `gallery_image_ids` field that passes IDs through without hydrating them) requires no attachment priming — the attachment `wp_posts` rows are never read.
 
 ---

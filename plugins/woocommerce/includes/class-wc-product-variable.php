@@ -8,8 +8,9 @@
  * @package WooCommerce\Classes\Products
  */
 
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 defined( 'ABSPATH' ) || exit;
@@ -360,17 +361,7 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		if ( 'array' === $return && ! empty( $variations ) ) {
-			// Prime caches to reduce future queries.
-			$attachment_ids = array();
-			foreach ( $variations as $variation ) {
-				$attachment_ids[] = array( $variation->get_image_id( 'edit' ) );
-				$attachment_ids[] = $variation->get_gallery_image_ids( 'edit' );
-			}
-			$attachment_ids = array_map( 'intval', array_unique( array_filter( array_merge( ...$attachment_ids ) ) ) );
-			if ( ! empty( $attachment_ids ) ) {
-				_prime_post_caches( $attachment_ids );
-			}
-
+			wc_get_container()->get( ProductUtil::class )->prime_image_caches( $variations );
 			$variations_data = array_values( array_filter( array_map( fn ( $variation ) => $this->get_available_variation( $variation ), $variations ) ) );
 
 			/** @var array[] $variations_data */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
