@@ -26,7 +26,7 @@ runs:
     using: 'composite'
     steps:
         - name: 'Setup PNPM'
-          uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+          uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         # Next step is rudimentary - fixes a know composite action bug during post-actions:
         # Error: Index was out of range. Must be non-negative and less than the size of the collection.
         - name: 'Read PNPM version'
@@ -34,14 +34,14 @@ runs:
           shell: 'bash'
           run: 'echo "version=$(pnpm --version)" >> $GITHUB_OUTPUT'
         - name: 'Setup Node'
-          uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+          uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
           with:
               node-version-file: '.nvmrc'
               # The built-in caching is not fit to per-package caching we are aiming.
               cache: ''
         - name: 'Setup PHP'
           if: ${{ inputs.php-version != 'false' && inputs.build-type != 'dependencies' }}
-          uses: 'shivammathur/setup-php@0f7f1d08e3e32076e51cae65eb0b0c871405b16e' # v2.34.1
+          uses: 'shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240' # 2.37.2
           with:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'
@@ -52,28 +52,28 @@ runs:
               echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
         - name: 'Cache: pnpm downloads'
           if: ${{ inputs.pull-package-deps != 'false' }}
-          uses: 'actions/cache@v4'
+          uses: 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9' # v6.1.0
           with:
               path: "${{ env.PNPM_STORE_PATH }}"
               key: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ ( inputs.build-type == 'backend' && 'backend' ) || 'full' }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
               restore-keys: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ ( inputs.build-type == 'backend' && 'backend' ) || 'full' }}-"
         - name: 'Cache: node cache'
           if: ${{ inputs.pull-package-deps != 'false' && inputs.build-type != 'backend' }}
-          uses: 'actions/cache@v4'
+          uses: 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9' # v6.1.0
           with:
               path: './node_modules/.cache'
               key: "${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
               restore-keys: '${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-'
         - name: 'Cache Composer Dependencies'
           if: ${{ inputs.pull-package-deps != 'false' || inputs.pull-package-composer-deps != 'false' }}
-          uses: 'actions/cache@v4'
+          uses: 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9' # v6.1.0
           with:
               path: '~/.cache/composer/files'
               key: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-build:${{ inputs.build-type }}-${{ hashFiles( 'packages/*/*/composer.lock', 'plugins/*/composer.lock' ) }}"
               restore-keys: "${{ runner.os }}-composer-${{ ( inputs.pull-package-deps != 'false' && inputs.pull-package-deps ) || inputs.pull-package-composer-deps }}-build:${{ inputs.build-type }}-"
         - name: 'Cache: playwright downloads'
           if: ${{ inputs.pull-playwright-cache != 'false' }}
-          uses: 'actions/cache@v4'
+          uses: 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9' # v6.1.0
           with:
               path: '~/.cache/ms-playwright/'
               key: "${{ runner.os }}-playwright-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
