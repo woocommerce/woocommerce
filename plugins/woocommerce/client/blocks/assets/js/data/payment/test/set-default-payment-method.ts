@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { select, dispatch } from '@wordpress/data';
+import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -23,6 +24,10 @@ jest.mock( '@wordpress/data', () => {
 	};
 } );
 
+jest.mock( '@woocommerce/blocks-checkout', () => ( {
+	applyCheckoutFilter: jest.fn( ( { defaultValue } ) => defaultValue ),
+} ) );
+
 jest.mock( '@woocommerce/utils', () => {
 	return {
 		isSiteEditorPage: jest.fn().mockReturnValue( true ),
@@ -30,6 +35,12 @@ jest.mock( '@woocommerce/utils', () => {
 } );
 
 describe( 'setDefaultPaymentMethod', () => {
+	beforeEach( () => {
+		( applyCheckoutFilter as jest.Mock ).mockImplementation(
+			( { defaultValue } ) => defaultValue
+		);
+	} );
+
 	afterEach( () => {
 		jest.resetAllMocks();
 		jest.resetModules();
@@ -43,6 +54,30 @@ describe( 'setDefaultPaymentMethod', () => {
 			name: 'wc-payment-gateway-2',
 		},
 	};
+
+	it( 'does not set a default payment method when default selection is disabled via checkout filter', async () => {
+		( applyCheckoutFilter as jest.Mock ).mockReturnValue( false );
+
+		const setPaymentIdleMock = jest.fn();
+		const setActivePaymentMethodMock = jest.fn();
+		( dispatch as jest.Mock ).mockImplementation( ( storeName ) => {
+			const originalStore = originalDispatch( storeName );
+			if ( storeName === paymentStore ) {
+				return {
+					...originalStore,
+					__internalSetPaymentIdle: setPaymentIdleMock,
+					__internalSetActivePaymentMethod:
+						setActivePaymentMethodMock,
+				};
+			}
+			return originalStore;
+		} );
+
+		await setDefaultPaymentMethod( paymentMethods );
+
+		expect( setPaymentIdleMock ).toHaveBeenCalled();
+		expect( setActivePaymentMethodMock ).toHaveBeenCalledWith( '', {} );
+	} );
 
 	it( 'correctly sets the first payment method in the list of available payment methods', async () => {
 		const setActivePaymentMethodMock = jest.fn();

@@ -3,6 +3,7 @@
  */
 import { select, dispatch } from '@wordpress/data';
 import { PlainPaymentMethods } from '@woocommerce/types';
+import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -12,6 +13,17 @@ import { store as paymentStore } from '../index';
 export const setDefaultPaymentMethod = async (
 	paymentMethods: PlainPaymentMethods
 ) => {
+	const shouldSelectDefaultPaymentMethod = applyCheckoutFilter( {
+		filterName: 'defaultPaymentMethodSelection',
+		defaultValue: true,
+	} );
+
+	if ( ! shouldSelectDefaultPaymentMethod ) {
+		dispatch( paymentStore ).__internalSetPaymentIdle();
+		dispatch( paymentStore ).__internalSetActivePaymentMethod( '', {} );
+		return;
+	}
+
 	const paymentMethodKeys = Object.keys( paymentMethods );
 	const expressPaymentMethodKeys = Object.keys(
 		select( paymentStore ).getAvailableExpressPaymentMethods()
