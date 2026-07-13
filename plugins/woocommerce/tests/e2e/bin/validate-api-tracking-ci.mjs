@@ -29,6 +29,7 @@ assert.deepEqual(
 	'The tracking job must use the default Core API change filter.'
 );
 assert.equal( trackingJob.testType, 'api' );
+assert.equal( trackingJob.usesSharedPluginBuild, true );
 assert.equal( trackingJob.command, 'test:api:tracking' );
 assert.equal( trackingJob.optional, false );
 assert.equal( trackingJob.testEnv.start, 'env:e2e:tracking --debug' );
