@@ -5,7 +5,7 @@ import simpleGit from 'simple-git';
 import { execSync } from 'child_process';
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 
 /**
  * Internal dependencies
@@ -382,20 +382,38 @@ export const updateBranchChangelog = async (
 			milestone = `${ m[ 1 ] }.0`;
 		}
 
-		try {
-			await git.raw( [ 'cherry-pick', deletionCommitHash ] );
-		} catch ( e ) {
-			if (
-				e.message.includes( 'nothing to commit, working tree clean' )
-			) {
-				Logger.notice(
-					'Cherry-pick resulted in no changes, continuing without error.'
-				);
-				// No need to skip, just continue
-			} else {
-				throw e; // Re-throw if it's a different error
-			}
+		// deletionCommitHash only ever removes changefiles, so rather than cherry-picking
+		// its diff (which conflicts if a file was independently touched on this branch,
+		// e.g. by a repo-wide formatting pass, after the release branch diverged), just
+		// delete the same paths by name here. Content doesn't matter, only that the file
+		// is now compiled into the release changelog and shouldn't exist on this branch.
+		const changelogFiles = (
+			await git.raw( [
+				'diff-tree',
+				'--no-commit-id',
+				'--name-only',
+				'-r',
+				'--diff-filter=D',
+				deletionCommitHash,
+			] )
+		 )
+			.split( '\n' )
+			.map( ( file ) => file.trim() )
+			.filter( Boolean );
+
+		const filesToDelete = changelogFiles.filter( ( file ) =>
+			existsSync( path.join( tmpRepoPath, file ) )
+		);
+
+		if ( filesToDelete.length === 0 ) {
+			Logger.notice(
+				`None of the ${ version } changelog files exist on ${ releaseBranch }, skipping.`
+			);
+			return -1;
 		}
+
+		await git.rm( filesToDelete );
+		await git.commit( `Delete changelog files from ${ version } release` );
 
 		await git.push( 'origin', branch, [ '--force' ] );
 		Logger.notice( `Creating PR for ${ branch }` );
