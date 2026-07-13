@@ -10,6 +10,13 @@ use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
  */
 class QueryClausesTest extends AbstractProductFiltersTest {
 	/**
+	 * This class only reads its product catalog inside per-test transactions.
+	 */
+	protected static function uses_class_product_filter_fixtures(): bool {
+		return true;
+	}
+
+	/**
 	 * The system under test.
 	 *
 	 * @var QueryClauses
