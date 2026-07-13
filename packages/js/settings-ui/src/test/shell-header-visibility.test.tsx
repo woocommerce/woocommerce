@@ -75,6 +75,25 @@ describe( 'settings UI shell header visibility', () => {
 		document.body.innerHTML = '';
 	} );
 
+	it( 'labels the shell region with a fallback when the schema has no title', () => {
+		const schema = baseSchema( {} );
+		delete schema.title;
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } page="test_page" />
+		);
+
+		expect(
+			container
+				.querySelector( '.wc-settings-ui-shell' )
+				?.getAttribute( 'aria-label' )
+		).toBe( 'Settings' );
+
+		act( () => {
+			root.unmount();
+		} );
+	} );
+
 	it( 'hides the header and saves from the page footer by default', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage

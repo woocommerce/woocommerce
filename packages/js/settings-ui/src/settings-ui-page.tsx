@@ -486,7 +486,10 @@ const ShellHeader = ( {
 		: undefined;
 
 	return (
-		<NavigableRegion className="wc-settings-ui-shell" ariaLabel={ title }>
+		<NavigableRegion
+			className="wc-settings-ui-shell"
+			ariaLabel={ title || __( 'Settings', 'woocommerce' ) }
+		>
 			{ showHeader ? (
 				<header className="wc-settings-ui-shell__header">
 					<div className="wc-settings-ui-shell__header-row">
