@@ -301,25 +301,21 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	 * @return array
 	 */
 	private function get_cart_item_data_fixture( $item_data ) {
-		// Renders: plain scalar row.
 		$item_data[] = array(
 			'key'   => 'Gift wrap',
 			'value' => 'Included',
 		);
-		// Renders: non-scalar `value` but scalar `display`.
 		$item_data[] = array(
 			'key'     => 'Attachments',
 			'value'   => array( 'file-a.pdf', 'file-b.pdf' ),
 			'display' => '2 files',
 		);
-		// Renders: non-scalar field that is never rendered.
 		$item_data[] = array(
 			'key'      => 'Custom',
 			'value'    => 'Hidden value',
 			'display'  => 'Shown',
 			'_private' => array( 'internal' => 'data' ),
 		);
-		// Renders: object implementing __toString as `display`.
 		$item_data[] = array(
 			'key'     => 'Note',
 			'display' => new class() {
@@ -328,18 +324,15 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 				}
 			},
 		);
-		// Dropped: non-scalar `value` without a `display`.
 		$item_data[] = array(
 			'key'   => 'Files',
 			'value' => array( 'file-c.pdf' ),
 		);
-		// Dropped: non-stringable object as `display`.
 		$item_data[] = array(
 			'key'     => 'Extra',
 			'value'   => 'Details',
 			'display' => new stdClass(),
 		);
-		// Dropped: not an array.
 		$item_data[] = 'Malformed item data';
 
 		return $item_data;
@@ -384,7 +377,6 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Shown', $html );
 		$this->assertStringContainsString( 'Note', $html );
 		$this->assertStringContainsString( 'From object', $html );
-		// `display` is preferred over `value`, and non-renderable rows are dropped.
 		$this->assertStringNotContainsString( 'Hidden value', $html );
 		$this->assertStringNotContainsString( 'file-a.pdf', $html );
 		$this->assertStringNotContainsString( 'Files', $html );

@@ -4549,7 +4549,6 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 				unset( $item_data[ $key ] );
 				continue;
 			}
-			// Only the label and display value are rendered; drop rows whose rendered values cannot be cast to a string.
 			$label   = ! empty( $data['key'] ) ? $data['key'] : ( $data['name'] ?? '' );
 			$display = ! empty( $data['display'] ) ? $data['display'] : ( $data['value'] ?? '' );
 
