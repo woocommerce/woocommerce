@@ -23,6 +23,44 @@ jest.mock( '@wordpress/admin-ui', () => ( {
 	),
 } ) );
 
+jest.mock( '@wordpress/ui', () => ( {
+	...jest.requireActual( '@wordpress/ui' ),
+	SelectControl: ( {
+		label,
+		items = [],
+		value,
+		onValueChange,
+	}: {
+		label: string;
+		items?: Array< { label: string; value: string } >;
+		value?: { label: string; value: string } | null;
+		onValueChange: (
+			item: { label: string; value: string } | null
+		) => void;
+	} ) => (
+		<div>
+			<span>{ label }</span>
+			<select
+				aria-label={ label }
+				value={ value?.value ?? '' }
+				onChange={ ( event ) =>
+					onValueChange(
+						items.find(
+							( item ) => item.value === event.target.value
+						) ?? null
+					)
+				}
+			>
+				{ items.map( ( item ) => (
+					<option key={ item.value } value={ item.value }>
+						{ item.label }
+					</option>
+				) ) }
+			</select>
+		</div>
+	),
+} ) );
+
 /**
  * Internal dependencies
  */
@@ -103,6 +141,37 @@ const expectUnsafeMarkupRemoved = ( container: HTMLElement ) => {
 	expect( container.innerHTML ).not.toContain( 'onerror' );
 	expect( container.innerHTML ).not.toContain( 'onclick' );
 	expect( container.innerHTML ).not.toContain( 'javascript:' );
+};
+
+const getSaveButton = ( container: HTMLElement ) => {
+	const button = container.querySelector< HTMLButtonElement >(
+		'.woocommerce-save-button'
+	);
+
+	if ( ! button ) {
+		throw new Error( 'Expected a save button.' );
+	}
+
+	return button;
+};
+
+const clickCheckbox = ( container: HTMLElement ) => {
+	const checkbox = container.querySelector< HTMLInputElement >(
+		'input[type="checkbox"]'
+	);
+
+	if ( ! checkbox ) {
+		throw new Error( 'Expected a checkbox.' );
+	}
+
+	act( () => checkbox.click() );
+};
+
+const changeSelect = ( select: HTMLSelectElement, value: string ) => {
+	act( () => {
+		select.value = value;
+		select.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+	} );
 };
 
 describe( 'settings HTML rendering', () => {
@@ -232,6 +301,289 @@ describe( 'settings HTML rendering', () => {
 		);
 
 		expectUnsafeMarkupRemoved( container );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it.each( [ 'select', 'radio' ] )(
+		'keeps numeric %s values consistent across interaction and dirty tracking',
+		( type ) => {
+			registerSettingsExtension( {
+				scope: { page: 'test-page' },
+				fieldVisibility: {
+					dependent: ( { values } ) => values.numeric_choice === 2,
+				},
+			} );
+
+			const schema: SettingsUISchema = {
+				id: 'test-page',
+				title: 'Test page',
+				save: { adapter: 'form_post' },
+				groups: {
+					general: {
+						id: 'general',
+						fields: [
+							{
+								id: 'numeric_choice',
+								label: 'Numeric choice',
+								type,
+								value: 1,
+								options: [
+									{
+										label: 'One',
+										value: 1 as unknown as string,
+									},
+									{
+										label: 'Two',
+										value: 2 as unknown as string,
+									},
+								],
+							},
+							{
+								id: 'dependent',
+								label: 'Numeric value is two',
+								type: 'text',
+								value: '',
+							},
+						],
+					},
+				},
+			};
+
+			const { container, root } = renderElement(
+				<SettingsUIPage schema={ schema } page="test-page" />
+			);
+			const select = container.querySelector< HTMLSelectElement >(
+				'select[aria-label="Numeric choice"]'
+			);
+			const hiddenInput = container.querySelector< HTMLInputElement >(
+				'input[type="hidden"][name="numeric_choice"]'
+			);
+
+			if ( ! select ) {
+				throw new Error( 'Expected a select control.' );
+			}
+
+			expect( select.value ).toBe( '1' );
+			expect( hiddenInput?.value ).toBe( '1' );
+			expect( container.textContent ).not.toContain(
+				'Numeric value is two'
+			);
+			expect( getSaveButton( container ).disabled ).toBe( true );
+
+			changeSelect( select, '2' );
+			expect( hiddenInput?.value ).toBe( '2' );
+			expect( container.textContent ).toContain( 'Numeric value is two' );
+			expect( getSaveButton( container ).disabled ).toBe( false );
+
+			changeSelect( select, '1' );
+			expect( hiddenInput?.value ).toBe( '1' );
+			expect( container.textContent ).not.toContain(
+				'Numeric value is two'
+			);
+			expect( getSaveButton( container ).disabled ).toBe( true );
+
+			act( () => root.unmount() );
+			container.remove();
+		}
+	);
+
+	it( 'keeps numeric checkbox values consistent across rendering, visibility, and form posts', () => {
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			fieldVisibility: {
+				dependent: ( { values } ) => values.numeric_checkbox === 1,
+			},
+		} );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'numeric_checkbox',
+							label: 'Numeric checkbox',
+							type: 'checkbox',
+							value: 1,
+						},
+						{
+							id: 'dependent',
+							label: 'Numeric checkbox is enabled',
+							type: 'text',
+							value: '',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } page="test-page" />
+		);
+		const hiddenInput = container.querySelector< HTMLInputElement >(
+			'input[type="hidden"][name="numeric_checkbox"]'
+		);
+
+		expect( hiddenInput?.value ).toBe( 'yes' );
+		expect( container.textContent ).toContain(
+			'Numeric checkbox is enabled'
+		);
+		expect( getSaveButton( container ).disabled ).toBe( true );
+
+		clickCheckbox( container );
+		expect( hiddenInput?.value ).toBe( 'no' );
+		expect( container.textContent ).not.toContain(
+			'Numeric checkbox is enabled'
+		);
+		expect( getSaveButton( container ).disabled ).toBe( false );
+
+		clickCheckbox( container );
+		expect( hiddenInput?.value ).toBe( 'yes' );
+		expect( container.textContent ).toContain(
+			'Numeric checkbox is enabled'
+		);
+		expect( getSaveButton( container ).disabled ).toBe( true );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'restores numeric and null representations when native fields revert', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'threshold',
+							label: 'Threshold',
+							type: 'number',
+							value: 5,
+							customAttributes: { step: 1 },
+						},
+						{
+							id: 'nullable',
+							label: 'Nullable',
+							type: 'text',
+							value: null,
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+		const increment = container.querySelector< HTMLButtonElement >(
+			'button[aria-label="Increment Threshold"]'
+		);
+		const decrement = container.querySelector< HTMLButtonElement >(
+			'button[aria-label="Decrement Threshold"]'
+		);
+		const textInput =
+			container.querySelector< HTMLInputElement >( 'input[type="text"]' );
+
+		act( () => increment?.click() );
+		expect( getSaveButton( container ).disabled ).toBe( false );
+		act( () => decrement?.click() );
+		expect( getSaveButton( container ).disabled ).toBe( true );
+
+		if ( ! textInput ) {
+			throw new Error( 'Expected a text input.' );
+		}
+		act( () => changeTextInput( textInput, 'changed' ) );
+		expect( getSaveButton( container ).disabled ).toBe( false );
+		act( () => changeTextInput( textInput, '' ) );
+		expect( getSaveButton( container ).disabled ).toBe( true );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'preserves initial representations for custom setValue and setValues writes', () => {
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			fieldOverrides: {
+				tags: ( { setValue, setValues } ) => (
+					<div>
+						<button
+							type="button"
+							onClick={ () => setValue( 'tags', [] ) }
+						>
+							Clear tags
+						</button>
+						<button
+							type="button"
+							onClick={ () => setValue( 'tags', [ 'featured' ] ) }
+						>
+							Add tag
+						</button>
+						<button
+							type="button"
+							onClick={ () =>
+								setValues( { tags: [], threshold: '5' } )
+							}
+						>
+							Reset fields
+						</button>
+					</div>
+				),
+			},
+		} );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'tags',
+							label: 'Tags',
+							type: 'array',
+							value: '',
+						},
+						{
+							id: 'threshold',
+							label: 'Threshold',
+							type: 'number',
+							value: 5,
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } page="test-page" />
+		);
+		const clickButton = ( label: string ) => {
+			const button = [
+				...container.querySelectorAll< HTMLButtonElement >( 'button' ),
+			].find( ( candidate ) => candidate.textContent === label );
+
+			act( () => button?.click() );
+		};
+
+		clickButton( 'Clear tags' );
+		expect( getSaveButton( container ).disabled ).toBe( true );
+
+		clickButton( 'Add tag' );
+		expect( getSaveButton( container ).disabled ).toBe( false );
+
+		clickButton( 'Reset fields' );
+		expect( getSaveButton( container ).disabled ).toBe( true );
 
 		act( () => root.unmount() );
 		container.remove();

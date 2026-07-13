@@ -8,6 +8,7 @@ import { Field, InputControl, SelectControl, Textarea } from '@wordpress/ui';
 /**
  * Internal dependencies
  */
+import { isCheckboxChecked, toCheckboxValue } from './checkbox-values';
 import { warn } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
 import { NumberSpinControl } from './number-spin-control';
@@ -88,6 +89,7 @@ const getHelp = ( description?: string ) =>
 export const NativeSettingsField = ( {
 	field,
 	value,
+	initialValues,
 	onChange,
 }: SettingsFieldComponentProps ) => {
 	if ( field.type === 'info' ) {
@@ -109,12 +111,13 @@ export const NativeSettingsField = ( {
 				className="wc-settings-ui__control"
 				label={ field.label }
 				help={ getHelp( field.description ) }
-				checked={
-					value === true ||
-					[ 'yes', '1' ].includes( toStringValue( value ) )
-				}
+				checked={ isCheckboxChecked( value ) }
 				disabled={ field.disabled }
-				onChange={ onChange }
+				onChange={ ( checked: boolean ) =>
+					onChange(
+						toCheckboxValue( checked, initialValues[ field.id ] )
+					)
+				}
 				__nextHasNoMarginBottom
 			/>
 		);
@@ -140,9 +143,8 @@ export const NativeSettingsField = ( {
 	}
 
 	if ( field.type === 'select' || field.type === 'radio' ) {
-		// Stringify option values so numeric values from extension-supplied
-		// schemas still match, as they did with the native <select>.
-		const items = ( field.options || [] ).map( ( option ) => ( {
+		const options = field.options || [];
+		const items = options.map( ( option ) => ( {
 			value: toStringValue( option.value ),
 			label: option.label,
 		} ) );
@@ -158,7 +160,13 @@ export const NativeSettingsField = ( {
 				items={ items }
 				value={ selectedItem }
 				disabled={ field.disabled }
-				onValueChange={ ( item ) => onChange( item?.value ?? '' ) }
+				onValueChange={ ( item ) => {
+					const option = options.find(
+						( candidate ) =>
+							toStringValue( candidate.value ) === item?.value
+					);
+					onChange( option?.value ?? '' );
+				} }
 			/>
 		);
 	}

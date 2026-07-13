@@ -6,6 +6,7 @@ import { createElement, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import { isCheckboxChecked } from './checkbox-values';
 import { error } from './diagnostics';
 import type { SettingsUIField, SettingsValue } from './types';
 
@@ -40,10 +41,7 @@ export const getHiddenInputs = (
 		return [
 			{
 				name,
-				value:
-					value === true || value === 'yes' || value === '1'
-						? 'yes'
-						: 'no',
+				value: isCheckboxChecked( value ) ? 'yes' : 'no',
 			},
 		];
 	}

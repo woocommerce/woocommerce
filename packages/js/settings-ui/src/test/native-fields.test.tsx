@@ -516,7 +516,9 @@ describe( 'NativeSettingsField', () => {
 			[ 'yes', true ],
 			[ '1', true ],
 			[ 1, true ],
+			[ false, false ],
 			[ 0, false ],
+			[ '0', false ],
 			[ 'no', false ],
 			[ '', false ],
 		] )( 'renders saved value %p as checked=%p', ( value, checked ) => {
@@ -528,6 +530,36 @@ describe( 'NativeSettingsField', () => {
 
 			expect( getCheckbox( container ).checked ).toBe( checked );
 		} );
+
+		it.each( [
+			[ false, true, true ],
+			[ true, false, false ],
+			[ 'no', true, 'yes' ],
+			[ 'yes', false, 'no' ],
+			[ '0', true, '1' ],
+			[ '1', false, '0' ],
+			[ 0, true, 1 ],
+			[ 1, false, 0 ],
+		] )(
+			'changes initial value %p to %p as %p',
+			( initialValue, checked, expected ) => {
+				const onChange = jest.fn();
+				const container = render(
+					<NativeSettingsField
+						{ ...makeProps(
+							checkboxField,
+							initialValue as SettingsValue,
+							onChange
+						) }
+					/>
+				);
+
+				const checkbox = getCheckbox( container );
+				expect( checkbox.checked ).not.toBe( checked );
+				clickButton( checkbox );
+				expect( onChange ).toHaveBeenCalledWith( expected );
+			}
+		);
 	} );
 
 	describe( 'text fields', () => {
