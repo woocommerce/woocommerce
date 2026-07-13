@@ -68,6 +68,54 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A product's image ID defaults to integer zero in all public data contexts.
+	 */
+	public function test_image_id_defaults_to_integer_zero() {
+		$product = new WC_Product_Simple();
+
+		$this->assertSame( 0, $product->get_image_id(), 'The view-context image ID should default to integer zero.' );
+		$this->assertSame( 0, $product->get_image_id( 'edit' ), 'The edit-context image ID should default to integer zero.' );
+		$this->assertSame( 0, $product->get_data()['image_id'], 'The raw image ID should default to integer zero.' );
+	}
+
+	/**
+	 * @testdox A numeric-string image ID is exposed as an integer before and after saving a product.
+	 */
+	public function test_numeric_string_image_id_is_integer_before_and_after_save() {
+		$image_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$product  = new WC_Product_Simple();
+		$product->set_name( 'Product with an image' );
+		$product->set_image_id( (string) $image_id );
+
+		$this->assertSame( $image_id, $product->get_image_id(), 'The view-context image ID should be an integer before saving.' );
+		$this->assertSame( $image_id, $product->get_image_id( 'edit' ), 'The edit-context image ID should be an integer before saving.' );
+		$this->assertSame( $image_id, $product->get_changes()['image_id'], 'The pending image ID should be an integer before saving.' );
+		$this->assertSame( 0, $product->get_data()['image_id'], 'Committed image data should remain the integer-zero default before saving.' );
+
+		$product_id       = $product->save();
+		$reloaded_product = new WC_Product_Simple( $product_id );
+
+		$this->assertSame( $image_id, $reloaded_product->get_image_id(), 'The view-context image ID should remain an integer after reloading.' );
+		$this->assertSame( $image_id, $reloaded_product->get_image_id( 'edit' ), 'The edit-context image ID should remain an integer after reloading.' );
+		$this->assertSame( $image_id, $reloaded_product->get_data()['image_id'], 'The raw image ID should remain an integer after reloading.' );
+	}
+
+	/**
+	 * @testdox Calling set_image_id() without an argument clears a product's image ID to integer zero.
+	 */
+	public function test_set_image_id_without_argument_clears_to_integer_zero() {
+		$image_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$product  = new WC_Product_Simple();
+		$product->set_image_id( (string) $image_id );
+
+		$product->set_image_id();
+
+		$this->assertSame( 0, $product->get_image_id(), 'The view-context image ID should be integer zero after clearing.' );
+		$this->assertSame( 0, $product->get_changes()['image_id'], 'The pending image ID should be integer zero after clearing.' );
+		$this->assertSame( 0, $product->get_data()['image_id'], 'The raw image ID should be integer zero after clearing.' );
+	}
+
+	/**
 	 * @testdox Ensure that individual Downloadable Products follow the rules regarding Approved Download Directories.
 	 */
 	public function test_fetching_of_approved_downloads() {

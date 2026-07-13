@@ -40,6 +40,81 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A variation's image ID defaults to integer zero in all public data contexts.
+	 */
+	public function test_image_id_defaults_to_integer_zero() {
+		$variation = new WC_Product_Variation();
+
+		$this->assertSame( 0, $variation->get_image_id(), 'The view-context image ID should default to integer zero.' );
+		$this->assertSame( 0, $variation->get_image_id( 'edit' ), 'The edit-context image ID should default to integer zero.' );
+		$this->assertSame( 0, $variation->get_data()['image_id'], 'The raw image ID should default to integer zero.' );
+	}
+
+	/**
+	 * @testdox A numeric-string image ID is exposed as an integer before and after saving a variation.
+	 */
+	public function test_numeric_string_image_id_is_integer_before_and_after_save() {
+		$image_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$this->variation->set_image_id( (string) $image_id );
+
+		$this->assertSame( $image_id, $this->variation->get_image_id(), 'The view-context image ID should be an integer before saving.' );
+		$this->assertSame( $image_id, $this->variation->get_image_id( 'edit' ), 'The edit-context image ID should be an integer before saving.' );
+		$this->assertSame( $image_id, $this->variation->get_changes()['image_id'], 'The pending image ID should be an integer before saving.' );
+		$this->assertSame( 0, $this->variation->get_data()['image_id'], 'Committed image data should remain the integer-zero default before saving.' );
+
+		$variation_id       = $this->variation->save();
+		$reloaded_variation = new WC_Product_Variation( $variation_id );
+
+		$this->assertSame( $image_id, $reloaded_variation->get_image_id(), 'The view-context image ID should remain an integer after reloading.' );
+		$this->assertSame( $image_id, $reloaded_variation->get_image_id( 'edit' ), 'The edit-context image ID should remain an integer after reloading.' );
+		$this->assertSame( $image_id, $reloaded_variation->get_data()['image_id'], 'The raw image ID should remain an integer after reloading.' );
+	}
+
+	/**
+	 * @testdox An inherited image ID is an integer without changing a variation's own image data.
+	 */
+	public function test_inherited_image_id_is_integer_without_changing_own_image_data() {
+		$image_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$this->parent_product->set_image_id( (string) $image_id );
+		$this->parent_product->save();
+
+		$this->variation->set_image_id();
+		$variation_id       = $this->variation->save();
+		$reloaded_variation = new WC_Product_Variation( $variation_id );
+
+		$this->assertSame( $image_id, $reloaded_variation->get_image_id(), 'The inherited view-context image ID should be an integer.' );
+		$this->assertSame( 0, $reloaded_variation->get_image_id( 'edit' ), 'The variation edit-context image ID should remain integer zero.' );
+		$this->assertSame( 0, $reloaded_variation->get_data()['image_id'], 'The variation raw image ID should remain integer zero.' );
+	}
+
+	/**
+	 * @testdox A numeric-string parent image ID is exposed as an integer without changing the variation's own image data.
+	 */
+	public function test_parent_data_numeric_string_image_id_is_integer() {
+		$image_id  = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_data( array( 'image_id' => (string) $image_id ) );
+
+		$this->assertSame( $image_id, $variation->get_image_id(), 'The inherited view-context image ID should be an integer.' );
+		$this->assertSame( $image_id, $variation->get_parent_data()['image_id'], 'The parent image ID should be an integer.' );
+		$this->assertSame( 0, $variation->get_image_id( 'edit' ), 'The variation edit-context image ID should remain integer zero.' );
+		$this->assertSame( 0, $variation->get_data()['image_id'], 'The variation raw image ID should remain integer zero.' );
+	}
+
+	/**
+	 * @testdox Empty parent image data is exposed as integer zero without changing the variation's own image data.
+	 */
+	public function test_parent_data_empty_image_id_is_integer_zero() {
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_data( array( 'image_id' => false ) );
+
+		$this->assertSame( 0, $variation->get_image_id(), 'The inherited view-context image ID should be integer zero for empty parent data.' );
+		$this->assertSame( 0, $variation->get_parent_data()['image_id'], 'The parent image ID should be integer zero for empty parent data.' );
+		$this->assertSame( 0, $variation->get_image_id( 'edit' ), 'The variation edit-context image ID should remain integer zero.' );
+		$this->assertSame( 0, $variation->get_data()['image_id'], 'The variation raw image ID should remain integer zero.' );
+	}
+
+	/**
 	 * @testdox By default the defined Cost of Goods Sold is null, and the value is absolute.
 	 */
 	public function test_default_cogs_values() {

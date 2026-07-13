@@ -106,7 +106,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'brand_ids'          => array(),
 		'shipping_class_id'  => 0,
 		'downloads'          => array(),
-		'image_id'           => '',
+		'image_id'           => 0,
 		'gallery_image_ids'  => array(),
 		'download_limit'     => -1,
 		'download_expiry'    => -1,
@@ -701,9 +701,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get main image ID.
 	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return string
+	 * @since 3.0.0
+	 * @since 11.1.0 Consistently returns an integer.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 * @return int
 	 */
 	public function get_image_id( $context = 'view' ) {
 		return $this->get_prop( 'image_id', $context );
@@ -1465,11 +1467,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Set main image ID.
 	 *
 	 * @since 3.0.0
+	 * @since 11.1.0 Converts image IDs to integers.
+	 *
 	 * @param int|string $image_id Product image id.
 	 * @return void
 	 */
 	public function set_image_id( $image_id = '' ) {
-		$this->set_prop( 'image_id', $image_id );
+		$this->set_prop( 'image_id', absint( $image_id ) );
 	}
 
 	/**

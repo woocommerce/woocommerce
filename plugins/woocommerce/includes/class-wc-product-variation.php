@@ -43,7 +43,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 		'height'            => '',
 		'tax_class'         => '',
 		'shipping_class_id' => '',
-		'image_id'          => '',
+		'image_id'          => 0,
 		'purchase_note'     => '',
 	);
 
@@ -367,8 +367,10 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Get main image ID.
 	 *
 	 * @since 3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return string
+	 * @since 11.1.0 Consistently returns an integer.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 * @return int
 	 */
 	public function get_image_id( $context = 'view' ) {
 		$image_id = $this->get_prop( 'image_id', $context );
@@ -461,6 +463,8 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Set the parent data array for this variation.
 	 *
 	 * @since 3.0.0
+	 * @since 11.1.0 Converts parent image IDs to integers.
+	 *
 	 * @param array $parent_data parent data array for this variation.
 	 */
 	public function set_parent_data( $parent_data ) {
@@ -484,6 +488,8 @@ class WC_Product_Variation extends WC_Product_Simple {
 				'catalog_visibility' => CatalogVisibility::VISIBLE,
 			)
 		);
+
+		$parent_data['image_id'] = absint( $parent_data['image_id'] );
 
 		// Normalize tax class.
 		$parent_data['tax_class'] = sanitize_title( $parent_data['tax_class'] );
