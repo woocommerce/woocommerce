@@ -48,10 +48,11 @@ class AttributeSlugLength {
 		$language = strtolower( (string) strtok( $locale, '_-' ) );
 
 		// Space-padded lists of language subtags grouped by the typical UTF-8 byte width of
-		// their script. Three bytes: CJK, Thai, Georgian, and common Brahmic (Indic) scripts.
+		// their script. Three bytes: CJK, Thai, Georgian, common Brahmic (Indic) scripts, and
+		// Vietnamese (its precomposed tone-marked vowels live in Latin Extended Additional).
 		// Two bytes: Cyrillic, Greek, Hebrew, Arabic, Armenian, and related. Everything else
 		// (Latin and unknown) is treated as single-byte. The padding makes each match whole-word.
-		$three_byte = ' zh ja ko th ka hi bn ta te mr gu kn ml pa or si km lo my ';
+		$three_byte = ' zh ja ko th ka vi hi bn ne ta te mr gu kn ml pa or si km lo my ';
 		$two_byte   = ' ru uk bg sr be mk kk ky tg mn el he ar fa ur ps hy ';
 
 		if ( false !== strpos( $three_byte, " {$language} " ) ) {
