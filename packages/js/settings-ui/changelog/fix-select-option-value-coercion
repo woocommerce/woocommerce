@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix select and radio fields rendering a blank selection for numeric option values, and badge intents matching Object.prototype keys.
+Keep settings field values consistent across controls, dirty tracking, visibility, and form posts, and harden badge intent matching.
