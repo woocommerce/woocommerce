@@ -876,8 +876,10 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$orders            = array();
 
 		foreach ( range( 1, 3 ) as $order_number ) {
-			$order = WC_Helper_Order::create_order( $customer->get_id(), $product );
-			$order->set_date_created( $order_time++ );
+			$order      = WC_Helper_Order::create_order( $customer->get_id(), $product );
+			$order_date = $order_time++;
+			$order->set_date_created( $order_date );
+			$order->set_date_paid( $order_date );
 			$order->set_status( OrderStatus::COMPLETED );
 
 			foreach ( $coupons as $amount => $coupon ) {
@@ -1004,17 +1006,13 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$order_status_2 = OrderStatus::PROCESSING;
 
 		$customer_1 = WC_Helper_Customer::create_customer( 'cust_1', 'pwd_1', 'user_1@mail.com' );
-		$customer_2 = WC_Helper_Customer::create_customer( 'cust_2', 'pwd_2', 'user_2@mail.com' );
 
 		$order_1_datetime = new DateTime();
 		$order_1_hour     = (int) $order_1_datetime->format( 'H' );
 		$order_1_datetime->setTime( $order_1_hour, 10, 0 ); // Set a time near the top of the hour.
 		$order_1_time = $order_1_datetime->format( 'U' );
 
-		// One more order needs to fit into the same hour, but also be one second later than this one.
-		$order_2_time = $order_1_time + 1;
-
-		$this_['hour']  = array( 1, 2 );
+		$this_['hour']  = array( 1 );
 		$this_['day']   = array( 1, 2 );
 		$this_['week']  = array( 1, 2 );
 		$this_['month'] = array( 1, 2 );
@@ -1094,11 +1092,10 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		foreach ( array( $product_1, $product_2, $product_3 ) as $product ) {
 			foreach ( array( null, $coupon_1, $coupon_2 ) as $coupon ) {
 				foreach ( array( $order_status_1, $order_status_2 ) as $order_status ) {
-					foreach ( array( $customer_1, $customer_2 ) as $customer ) {
+					foreach ( array( $customer_1 ) as $customer ) {
 						foreach (
 							array(
 								$order_1_time,
-								$order_2_time,
 							) as $order_time
 						) { // As there are no tests for different timeframes, ignore these for now: $order_3_time, $order_4_time, $order_5_time, $order_6_time, $order_7_time
 							// One order with only 1 product.
@@ -1108,10 +1105,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 							if ( $coupon ) {
 								$order->apply_coupon( $coupon );
+							} else {
+								$order->calculate_totals();
 							}
-
-							$order->calculate_totals();
-							$order->save();
 
 							$orders[] = $order;
 
@@ -1134,10 +1130,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 							if ( $coupon ) {
 								$order_2->apply_coupon( $coupon );
+							} else {
+								$order_2->calculate_totals();
 							}
-
-							$order_2->calculate_totals();
-							$order_2->save();
 
 							$orders[] = $order_2;
 						}
@@ -1162,8 +1157,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$current_hour_end->setTimestamp( $order_1_time + ( HOUR_IN_SECONDS - $order_1_seconds ) - 1 );
 
 		// All orders, no filters.
-		// 72 orders in one batch (3 products * 3 coupon options * 2 order statuses * 2 customers * 2 orders), 4 items of each product per order
-		// 24 orders without coupons, 48 with coupons: 24 with $1 coupon and 24 with $2 coupon.
+		// 36 orders in one batch (3 products * 3 coupon options * 2 order statuses * 2 order shapes), 4 items of each product per order.
+		// 12 orders without coupons, 24 with coupons: 12 with $1 coupon and 12 with $2 coupon.
 		// shipping is $10 per order.
 		$query_args = array(
 			'after'    => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
@@ -1171,9 +1166,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'interval' => 'hour',
 		);
 
-		$order_permutations     = 72;
-		$order_w_coupon_1_perms = 24;
-		$order_w_coupon_2_perms = 24;
+		$order_permutations     = 36;
+		$order_w_coupon_1_perms = 12;
+		$order_w_coupon_2_perms = 12;
 
 		$orders_count    = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold  = $orders_count / 2 * $qty_per_product + $orders_count / 2 * $qty_per_product * 2;
@@ -1189,7 +1184,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						- $coupons;
 		$total_sales     = $net_revenue + $shipping;
 		$gross_sales     = $net_revenue + $coupons;
-		$total_customers = 2;
+		$total_customers = 1;
 
 		$expected_stats = array(
 			'totals'    => array(
@@ -1264,9 +1259,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 36;
-		$order_w_coupon_1_perms = 12;
-		$order_w_coupon_2_perms = 12;
+		$order_permutations     = 18;
+		$order_w_coupon_1_perms = 6;
+		$order_w_coupon_2_perms = 6;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -1343,9 +1338,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 36;
-		$order_w_coupon_1_perms = 12;
-		$order_w_coupon_2_perms = 12;
+		$order_permutations     = 18;
+		$order_w_coupon_1_perms = 6;
+		$order_w_coupon_2_perms = 6;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -1486,9 +1481,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 36;
-		$order_w_coupon_1_perms = 12;
-		$order_w_coupon_2_perms = 12;
+		$order_permutations     = 18;
+		$order_w_coupon_1_perms = 6;
+		$order_w_coupon_2_perms = 6;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -1567,9 +1562,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 48;
-		$order_w_coupon_1_perms = 16;
-		$order_w_coupon_2_perms = 16;
+		$order_permutations     = 24;
+		$order_w_coupon_1_perms = 8;
+		$order_w_coupon_2_perms = 8;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -1644,9 +1639,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 24;
-		$order_w_coupon_1_perms = 8;
-		$order_w_coupon_2_perms = 8;
+		$order_permutations     = 12;
+		$order_w_coupon_1_perms = 4;
+		$order_w_coupon_2_perms = 4;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -1674,7 +1669,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'         => $net_revenue,
 				'avg_items_per_order' => $num_items_sold / $orders_count,
 				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => 2,
+				'total_customers'     => $total_customers,
 				'products'            => 2,
 				'segments'            => array(),
 				// product 3 and product 4 (that is sometimes included in the orders with product 3).
@@ -1699,7 +1694,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'         => $net_revenue,
 						'avg_items_per_order' => $num_items_sold / $orders_count,
 						'avg_order_value'     => $net_revenue / $orders_count,
-						'total_customers'     => 2,
+						'total_customers'     => $total_customers,
 						'segments'            => array(),
 					),
 				),
@@ -1720,9 +1715,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 48;
-		$order_w_coupon_1_perms = 16;
-		$order_w_coupon_2_perms = 16;
+		$order_permutations     = 24;
+		$order_w_coupon_1_perms = 8;
+		$order_w_coupon_2_perms = 8;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -1752,7 +1747,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'         => $net_revenue,
 				'avg_items_per_order' => $num_items_sold / $orders_count,
 				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => 2,
+				'total_customers'     => $total_customers,
 				'products'            => 3,
 				'segments'            => array(),
 			),
@@ -1776,7 +1771,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'         => $net_revenue,
 						'avg_items_per_order' => $num_items_sold / $orders_count,
 						'avg_order_value'     => $net_revenue / $orders_count,
-						'total_customers'     => 2,
+						'total_customers'     => $total_customers,
 						'segments'            => array(),
 					),
 				),
@@ -1798,9 +1793,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 24;
-		$order_w_coupon_1_perms = 8;
-		$order_w_coupon_2_perms = 8;
+		$order_permutations     = 12;
+		$order_w_coupon_1_perms = 4;
+		$order_w_coupon_2_perms = 4;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -1828,7 +1823,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'         => $net_revenue,
 				'avg_items_per_order' => $num_items_sold / $orders_count,
 				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => 2,
+				'total_customers'     => $total_customers,
 				'products'            => 2,
 				'segments'            => array(),
 			),
@@ -1852,7 +1847,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'         => $net_revenue,
 						'avg_items_per_order' => $num_items_sold / $orders_count,
 						'avg_order_value'     => $net_revenue / $orders_count,
-						'total_customers'     => 2,
+						'total_customers'     => $total_customers,
 						'segments'            => array(),
 					),
 				),
@@ -1877,9 +1872,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 24;
-		$order_w_coupon_1_perms = 8;
-		$order_w_coupon_2_perms = 8;
+		$order_permutations     = 12;
+		$order_w_coupon_1_perms = 4;
+		$order_w_coupon_2_perms = 4;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -1907,7 +1902,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'         => $net_revenue,
 				'avg_items_per_order' => $num_items_sold / $orders_count,
 				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => 2,
+				'total_customers'     => $total_customers,
 				'products'            => 2,
 				'segments'            => array(),
 			),
@@ -1931,7 +1926,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'         => $net_revenue,
 						'avg_items_per_order' => $num_items_sold / $orders_count,
 						'avg_order_value'     => $net_revenue / $orders_count,
-						'total_customers'     => 2,
+						'total_customers'     => $total_customers,
 						'segments'            => array(),
 					),
 				),
@@ -1954,9 +1949,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 48;
-		$order_w_coupon_1_perms = 24;
-		$order_w_coupon_2_perms = 24;
+		$order_permutations     = 24;
+		$order_w_coupon_1_perms = 12;
+		$order_w_coupon_2_perms = 12;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -1988,7 +1983,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'         => $net_revenue,
 				'avg_items_per_order' => $num_items_sold / $orders_count,
 				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => 2,
+				'total_customers'     => $total_customers,
 				'products'            => 4,
 				'segments'            => array(),
 			),
@@ -2012,7 +2007,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'         => $net_revenue,
 						'avg_items_per_order' => $num_items_sold / $orders_count,
 						'avg_order_value'     => $net_revenue / $orders_count,
-						'total_customers'     => 2,
+						'total_customers'     => $total_customers,
 						'segments'            => array(),
 					),
 				),
@@ -2033,8 +2028,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 24;
-		$order_w_coupon_1_perms = 24;
+		$order_permutations     = 12;
+		$order_w_coupon_1_perms = 12;
 		$order_w_coupon_2_perms = 0;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
@@ -2067,7 +2062,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'         => $net_revenue,
 				'avg_items_per_order' => $num_items_sold / $orders_count,
 				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => 2,
+				'total_customers'     => $total_customers,
 				'products'            => 4,
 				'segments'            => array(),
 			),
@@ -2091,7 +2086,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'         => $net_revenue,
 						'avg_items_per_order' => $num_items_sold / $orders_count,
 						'avg_order_value'     => $net_revenue / $orders_count,
-						'total_customers'     => 2,
+						'total_customers'     => $total_customers,
 						'segments'            => array(),
 					),
 				),
@@ -2112,9 +2107,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 48;
+		$order_permutations     = 24;
 		$order_w_coupon_1_perms = 0;
-		$order_w_coupon_2_perms = 24;
+		$order_w_coupon_2_perms = 12;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -2192,7 +2187,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 24;
+		$order_permutations     = 12;
 		$order_w_coupon_1_perms = 0;
 		$order_w_coupon_2_perms = 0;
 
@@ -2275,8 +2270,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 24;
-		$order_w_coupon_1_perms = 24;
+		$order_permutations     = 12;
+		$order_w_coupon_1_perms = 12;
 		$order_w_coupon_2_perms = 0;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
@@ -2309,7 +2304,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'         => $net_revenue,
 				'avg_items_per_order' => $num_items_sold / $orders_count,
 				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => 2,
+				'total_customers'     => $total_customers,
 				'products'            => 4,
 				'segments'            => array(),
 			),
@@ -2333,7 +2328,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'         => $net_revenue,
 						'avg_items_per_order' => $num_items_sold / $orders_count,
 						'avg_order_value'     => $net_revenue / $orders_count,
-						'total_customers'     => 2,
+						'total_customers'     => $total_customers,
 						'segments'            => array(),
 					),
 				),
@@ -2353,7 +2348,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'customer_type' => 'new',
 		);
 
-		$orders_count   = 2;
+		$orders_count   = 1;
 		$num_items_sold = $orders_count * $qty_per_product;
 		$coupons        = 0;
 		$shipping       = $orders_count * 10;
@@ -2418,10 +2413,10 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'customer_type' => 'returning',
 		);
 
-		$total_orders_count     = 144;
-		$returning_orders_count = 2;
-		$order_w_coupon_1_perms = 24;
-		$order_w_coupon_2_perms = 24;
+		$total_orders_count     = count( $this_['hour'] ) * 36;
+		$returning_orders_count = 1;
+		$order_w_coupon_1_perms = 12;
+		$order_w_coupon_2_perms = 12;
 
 		$orders_count   = $total_orders_count - $returning_orders_count;
 		$num_items_sold = $total_orders_count * 6 - ( $returning_orders_count * 4 );
@@ -2503,9 +2498,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 12;
-		$order_w_coupon_1_perms = 4;
-		$order_w_coupon_2_perms = 4;
+		$order_permutations     = 6;
+		$order_w_coupon_1_perms = 2;
+		$order_w_coupon_2_perms = 2;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -2581,8 +2576,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 12;
-		$order_w_coupon_1_perms = 12;
+		$order_permutations     = 6;
+		$order_w_coupon_1_perms = 6;
 		$order_w_coupon_2_perms = 0;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
@@ -2615,7 +2610,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'         => $net_revenue,
 				'avg_items_per_order' => $num_items_sold / $orders_count,
 				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => 2,
+				'total_customers'     => $total_customers,
 				'products'            => 4,
 				'segments'            => array(),
 			),
@@ -2639,7 +2634,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'         => $net_revenue,
 						'avg_items_per_order' => $num_items_sold / $orders_count,
 						'avg_order_value'     => $net_revenue / $orders_count,
-						'total_customers'     => 2,
+						'total_customers'     => $total_customers,
 						'segments'            => array(),
 					),
 				),
@@ -2655,87 +2650,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
 			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
 			'interval'         => 'hour',
-			'product_includes' => array(
-				$product_1->get_id(),
-			),
-			'coupon_includes'  => array(
-				$coupon_1->get_id(),
-			),
-		);
-
-		$order_permutations     = 8;
-		$order_w_coupon_1_perms = 8;
-		$order_w_coupon_2_perms = 0;
-
-		$orders_count   = count( $this_['hour'] ) * $order_permutations;
-		$num_items_sold = $orders_count / 2 * $qty_per_product
-						+ $orders_count / 2 * $qty_per_product * 2;
-		$coupons        = count( $this_['hour'] ) * ( $order_w_coupon_1_perms * $coupon_1_amount + $order_w_coupon_2_perms * $coupon_2_amount );
-		$coupons_count  = ( $order_w_coupon_1_perms ? 1 : 0 ) + ( $order_w_coupon_2_perms ? 1 : 0 );
-		$shipping       = $orders_count * 10;
-		$net_revenue    = $product_1_price * $qty_per_product * ( $orders_count / 2 )
-						+ ( $product_1_price + $product_4_price ) * $qty_per_product * ( $orders_count / 2 )
-						- $coupons;
-		$total_sales    = $net_revenue + $shipping;
-		$gross_sales    = $net_revenue + $coupons;
-
-		$expected_stats = array(
-			'totals'    => array(
-				'orders_count'        => $orders_count,
-				'num_items_sold'      => $num_items_sold,
-				'total_sales'         => $total_sales,
-				'gross_sales'         => $gross_sales,
-				'coupons'             => $coupons,
-				'coupons_count'       => $coupons_count,
-				'refunds'             => 0,
-				'taxes'               => 0,
-				'shipping'            => $shipping,
-				'net_revenue'         => $net_revenue,
-				'avg_items_per_order' => $num_items_sold / $orders_count,
-				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => 2,
-				'products'            => 2,
-				'segments'            => array(),
-			),
-			'intervals' => array(
-				array(
-					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
-					'subtotals'      => array(
-						'orders_count'        => $orders_count,
-						'num_items_sold'      => $num_items_sold,
-						'total_sales'         => $total_sales,
-						'gross_sales'         => $gross_sales,
-						'coupons'             => $coupons,
-						'coupons_count'       => $coupons_count,
-						'refunds'             => 0,
-						'taxes'               => 0,
-						'shipping'            => $shipping,
-						'net_revenue'         => $net_revenue,
-						'avg_items_per_order' => $num_items_sold / $orders_count,
-						'avg_order_value'     => $net_revenue / $orders_count,
-						'total_customers'     => 2,
-						'segments'            => array(),
-					),
-				),
-			),
-			'total'     => 1,
-			'pages'     => 1,
-			'page_no'   => 1,
-		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
-
-		// status_is + product_includes + coupon_includes.
-		$query_args = array(
-			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
-			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
-			'interval'         => 'hour',
-			'status_is'        => array(
-				$order_status_1,
-			),
 			'product_includes' => array(
 				$product_1->get_id(),
 			),
@@ -2774,7 +2688,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'         => $net_revenue,
 				'avg_items_per_order' => $num_items_sold / $orders_count,
 				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => 2,
+				'total_customers'     => $total_customers,
 				'products'            => 2,
 				'segments'            => array(),
 			),
@@ -2798,7 +2712,88 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'         => $net_revenue,
 						'avg_items_per_order' => $num_items_sold / $orders_count,
 						'avg_order_value'     => $net_revenue / $orders_count,
-						'total_customers'     => 2,
+						'total_customers'     => $total_customers,
+						'segments'            => array(),
+					),
+				),
+			),
+			'total'     => 1,
+			'pages'     => 1,
+			'page_no'   => 1,
+		);
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
+
+		// status_is + product_includes + coupon_includes.
+		$query_args = array(
+			'after'            => $current_hour_start->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( TimeInterval::$sql_datetime_format ),
+			'interval'         => 'hour',
+			'status_is'        => array(
+				$order_status_1,
+			),
+			'product_includes' => array(
+				$product_1->get_id(),
+			),
+			'coupon_includes'  => array(
+				$coupon_1->get_id(),
+			),
+		);
+
+		$order_permutations     = 2;
+		$order_w_coupon_1_perms = 2;
+		$order_w_coupon_2_perms = 0;
+
+		$orders_count   = count( $this_['hour'] ) * $order_permutations;
+		$num_items_sold = $orders_count / 2 * $qty_per_product
+						+ $orders_count / 2 * $qty_per_product * 2;
+		$coupons        = count( $this_['hour'] ) * ( $order_w_coupon_1_perms * $coupon_1_amount + $order_w_coupon_2_perms * $coupon_2_amount );
+		$coupons_count  = ( $order_w_coupon_1_perms ? 1 : 0 ) + ( $order_w_coupon_2_perms ? 1 : 0 );
+		$shipping       = $orders_count * 10;
+		$net_revenue    = $product_1_price * $qty_per_product * ( $orders_count / 2 )
+						+ ( $product_1_price + $product_4_price ) * $qty_per_product * ( $orders_count / 2 )
+						- $coupons;
+		$total_sales    = $net_revenue + $shipping;
+		$gross_sales    = $net_revenue + $coupons;
+
+		$expected_stats = array(
+			'totals'    => array(
+				'orders_count'        => $orders_count,
+				'num_items_sold'      => $num_items_sold,
+				'total_sales'         => $total_sales,
+				'gross_sales'         => $gross_sales,
+				'coupons'             => $coupons,
+				'coupons_count'       => $coupons_count,
+				'refunds'             => 0,
+				'taxes'               => 0,
+				'shipping'            => $shipping,
+				'net_revenue'         => $net_revenue,
+				'avg_items_per_order' => $num_items_sold / $orders_count,
+				'avg_order_value'     => $net_revenue / $orders_count,
+				'total_customers'     => $total_customers,
+				'products'            => 2,
+				'segments'            => array(),
+			),
+			'intervals' => array(
+				array(
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'subtotals'      => array(
+						'orders_count'        => $orders_count,
+						'num_items_sold'      => $num_items_sold,
+						'total_sales'         => $total_sales,
+						'gross_sales'         => $gross_sales,
+						'coupons'             => $coupons,
+						'coupons_count'       => $coupons_count,
+						'refunds'             => 0,
+						'taxes'               => 0,
+						'shipping'            => $shipping,
+						'net_revenue'         => $net_revenue,
+						'avg_items_per_order' => $num_items_sold / $orders_count,
+						'avg_order_value'     => $net_revenue / $orders_count,
+						'total_customers'     => $total_customers,
 						'segments'            => array(),
 					),
 				),
@@ -2829,8 +2824,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 4;
-		$order_w_coupon_1_perms = 4;
+		$order_permutations     = 2;
+		$order_w_coupon_1_perms = 2;
 		$order_w_coupon_2_perms = 0;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
@@ -2859,7 +2854,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'         => $net_revenue,
 				'avg_items_per_order' => $num_items_sold / $orders_count,
 				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => 2,
+				'total_customers'     => $total_customers,
 				'products'            => 2,
 				'segments'            => array(),
 			),
@@ -2883,7 +2878,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'         => $net_revenue,
 						'avg_items_per_order' => $num_items_sold / $orders_count,
 						'avg_order_value'     => $net_revenue / $orders_count,
-						'total_customers'     => 2,
+						'total_customers'     => $total_customers,
 						'segments'            => array(),
 					),
 				),
@@ -2915,9 +2910,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 12;
-		$order_w_coupon_1_perms = 4;
-		$order_w_coupon_2_perms = 4;
+		$order_permutations     = 6;
+		$order_w_coupon_1_perms = 2;
+		$order_w_coupon_2_perms = 2;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count * $qty_per_product; // No 2-item-orders here.
@@ -3004,8 +2999,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 4;
-		$order_w_coupon_1_perms = 4;
+		$order_permutations     = 2;
+		$order_w_coupon_1_perms = 2;
 		$order_w_coupon_2_perms = 0;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
@@ -3033,7 +3028,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'         => $net_revenue,
 				'avg_items_per_order' => $num_items_sold / $orders_count,
 				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => 2,
+				'total_customers'     => $total_customers,
 				'products'            => 2,
 				'segments'            => array(),
 			),
@@ -3057,7 +3052,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'         => $net_revenue,
 						'avg_items_per_order' => $num_items_sold / $orders_count,
 						'avg_order_value'     => $net_revenue / $orders_count,
-						'total_customers'     => 2,
+						'total_customers'     => $total_customers,
 						'segments'            => array(),
 					),
 				),
@@ -3096,8 +3091,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 4;
-		$order_w_coupon_1_perms = 4;
+		$order_permutations     = 2;
+		$order_w_coupon_1_perms = 2;
 		$order_w_coupon_2_perms = 0;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
@@ -3125,7 +3120,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'         => $net_revenue,
 				'avg_items_per_order' => $num_items_sold / $orders_count,
 				'avg_order_value'     => $net_revenue / $orders_count,
-				'total_customers'     => 2,
+				'total_customers'     => $total_customers,
 				'products'            => 2,
 				'segments'            => array(),
 			),
@@ -3149,7 +3144,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'         => $net_revenue,
 						'avg_items_per_order' => $num_items_sold / $orders_count,
 						'avg_order_value'     => $net_revenue / $orders_count,
-						'total_customers'     => 2,
+						'total_customers'     => $total_customers,
 						'segments'            => array(),
 					),
 				),
@@ -3175,9 +3170,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 72;
-		$order_w_coupon_1_perms = 24;
-		$order_w_coupon_2_perms = 24;
+		$order_permutations     = 36;
+		$order_w_coupon_1_perms = 12;
+		$order_w_coupon_2_perms = 12;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -3258,9 +3253,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 48;
-		$order_w_coupon_1_perms = 16;
-		$order_w_coupon_2_perms = 16;
+		$order_permutations     = 24;
+		$order_w_coupon_1_perms = 8;
+		$order_w_coupon_2_perms = 8;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -3341,9 +3336,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 48;
-		$order_w_coupon_1_perms = 24;
-		$order_w_coupon_2_perms = 12;
+		$order_permutations     = 24;
+		$order_w_coupon_1_perms = 12;
+		$order_w_coupon_2_perms = 6;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -3424,9 +3419,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 60;
-		$order_w_coupon_1_perms = 12;
-		$order_w_coupon_2_perms = 24;
+		$order_permutations     = 30;
+		$order_w_coupon_1_perms = 6;
+		$order_w_coupon_2_perms = 12;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -3507,9 +3502,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 40;
-		$order_w_coupon_1_perms = 24;
-		$order_w_coupon_2_perms = 8;
+		$order_permutations     = 20;
+		$order_w_coupon_1_perms = 12;
+		$order_w_coupon_2_perms = 4;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -3593,9 +3588,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 56;
-		$order_w_coupon_1_perms = 24;
-		$order_w_coupon_2_perms = 16;
+		$order_permutations     = 28;
+		$order_w_coupon_1_perms = 12;
+		$order_w_coupon_2_perms = 8;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -3682,9 +3677,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 56;
-		$order_w_coupon_1_perms = 24;
-		$order_w_coupon_2_perms = 16;
+		$order_permutations     = 28;
+		$order_w_coupon_1_perms = 12;
+		$order_w_coupon_2_perms = 8;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -3771,9 +3766,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 60;
-		$order_w_coupon_1_perms = 20;
-		$order_w_coupon_2_perms = 20;
+		$order_permutations     = 30;
+		$order_w_coupon_1_perms = 10;
+		$order_w_coupon_2_perms = 10;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -3863,9 +3858,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 64;
-		$order_w_coupon_1_perms = 24;
-		$order_w_coupon_2_perms = 20;
+		$order_permutations     = 32;
+		$order_w_coupon_1_perms = 12;
+		$order_w_coupon_2_perms = 10;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -3958,9 +3953,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$order_permutations     = 68;
-		$order_w_coupon_1_perms = 24;
-		$order_w_coupon_2_perms = 20;
+		$order_permutations     = 34;
+		$order_w_coupon_1_perms = 12;
+		$order_w_coupon_2_perms = 10;
 
 		$orders_count   = count( $this_['hour'] ) * $order_permutations;
 		$num_items_sold = $orders_count / 2 * $qty_per_product
@@ -4026,6 +4021,60 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
+	}
+
+	/**
+	 * Test that distinct customer counts and same-hour interval aggregation work with multiple customers.
+	 *
+	 * @testdox Distinct customer counts and same-hour interval aggregation work with multiple customers.
+	 */
+	public function test_populate_and_query_multiple_customers_same_hour() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$customer_1 = WC_Helper_Customer::create_customer( 'cust_multi_1', 'pwd_1', 'multi_user_1@mail.com' );
+		$customer_2 = WC_Helper_Customer::create_customer( 'cust_multi_2', 'pwd_2', 'multi_user_2@mail.com' );
+
+		// Two completed orders by different customers within the same hourly interval.
+		// Set a time near the top of the hour so both orders stay within it.
+		$order_datetime = new DateTime();
+		$order_datetime->setTime( (int) $order_datetime->format( 'H' ), 10, 0 );
+		$order_time = (int) $order_datetime->format( 'U' );
+
+		$order_1 = WC_Helper_Order::create_order( $customer_1->get_id() );
+		$order_1->set_date_created( $order_time );
+		$order_1->set_status( OrderStatus::COMPLETED );
+		$order_1->save();
+
+		// Offset by 1 second to keep both orders in the same hour but distinct.
+		$order_2 = WC_Helper_Order::create_order( $customer_2->get_id() );
+		$order_2->set_date_created( $order_time + 1 );
+		$order_2->set_status( OrderStatus::COMPLETED );
+		$order_2->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$data_store = new OrdersStatsDataStore();
+		$start_time = gmdate( 'Y-m-d H:00:00', $order_1->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', $order_1->get_date_created()->getOffsetTimestamp() );
+
+		$data = json_decode(
+			wp_json_encode(
+				$data_store->get_data(
+					array(
+						'interval' => 'hour',
+						'after'    => $start_time,
+						'before'   => $end_time,
+					)
+				)
+			),
+			true
+		);
+
+		$this->assertEquals( 2, $data['totals']['orders_count'] );
+		$this->assertEquals( 2, $data['totals']['total_customers'] );
+		$this->assertCount( 1, $data['intervals'] );
+		$this->assertEquals( 2, $data['intervals'][0]['subtotals']['orders_count'] );
+		$this->assertEquals( 2, $data['intervals'][0]['subtotals']['total_customers'] );
 	}
 
 	/**
@@ -4255,10 +4304,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$i3_end->setTimestamp( $i3_end_timestamp );
 
 		$query_args = array(
-			'after'     => $two_hours_back->format( TimeInterval::$sql_datetime_format ),
-			'before'    => $now->format( TimeInterval::$sql_datetime_format ),
-			'interval'  => 'hour',
-			'segmentby' => 'product',
+			'after'            => $two_hours_back->format( TimeInterval::$sql_datetime_format ),
+			'before'           => $now->format( TimeInterval::$sql_datetime_format ),
+			'interval'         => 'hour',
+			'segmentby'        => 'product',
+			'product_includes' => array( $product_1->get_id(), $product_2->get_id(), $product_3->get_id() ),
 		);
 
 		$shipping_amnt  = 10;
@@ -4649,6 +4699,64 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$actual = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
 
 		$this->assertEquals( $expected_stats, $actual, 'Segmenting by product, expected: ' . $this->return_print_r( $expected_stats ) . '; actual: ' . $this->return_print_r( $actual ) );
+	}
+
+	/**
+	 * Test that product segmentation without product_includes enumerates the whole catalog.
+	 *
+	 * @testdox Product segmentation without product_includes enumerates the whole catalog.
+	 */
+	public function test_segmenting_by_product_without_includes() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$sold_product = new WC_Product_Simple();
+		$sold_product->set_name( 'Segmented Sold Product' );
+		$sold_product->set_regular_price( 10 );
+		$sold_product->save();
+
+		$unsold_product = new WC_Product_Simple();
+		$unsold_product->set_name( 'Segmented Unsold Product' );
+		$unsold_product->set_regular_price( 15 );
+		$unsold_product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $sold_product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$data_store = new OrdersStatsDataStore();
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
+
+		// Without product_includes the segmenter must return a segment for
+		// every store product, not only the ones with orders.
+		$data = json_decode(
+			wp_json_encode(
+				$data_store->get_data(
+					array(
+						'after'     => $start_time,
+						'before'    => $end_time,
+						'segmentby' => 'product',
+					)
+				)
+			),
+			true
+		);
+
+		$segments             = array_column( $data['totals']['segments'], 'subtotals', 'segment_id' );
+		$expected_product_ids = wc_get_products(
+			array(
+				'return' => 'ids',
+				'limit'  => -1,
+			)
+		);
+
+		$this->assertEqualsCanonicalizing( $expected_product_ids, array_keys( $segments ) );
+		$this->assertEquals( 1, $segments[ $sold_product->get_id() ]['orders_count'] );
+		$this->assertEquals( 4, $segments[ $sold_product->get_id() ]['num_items_sold'] );
+		$this->assertEquals( 0, $segments[ $unsold_product->get_id() ]['orders_count'] );
+		$this->assertEquals( 0, $segments[ $unsold_product->get_id() ]['num_items_sold'] );
 	}
 
 	/**
@@ -6371,11 +6479,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 1, $actual_data->totals->total_customers );
 
-		// Wait a bit so that orders are not created at the same second.
-		sleep( 1 );
-
 		$order_2 = WC_Helper_Order::create_order( 0, $product );
 		$order_2->set_date_created( $order_1_time );
+		$order_2->set_date_modified( $order_1_time + 1 );
 		$order_2->set_date_paid( $order_1_time );
 		$order_2->set_status( OrderStatus::PROCESSING );
 		$order_2->set_total( 100 );
@@ -6480,11 +6586,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 1, $actual_data->totals->total_customers );
 
-		// Wait a bit so that orders are not created at the same second.
-		sleep( 1 );
-
 		$order_2 = WC_Helper_Order::create_order( $customer_1->get_id(), $product );
 		$order_2->set_date_created( $order_1_time );
+		$order_2->set_date_modified( $order_1_time + 1 );
 		$order_2->set_date_paid( $order_1_time );
 		$order_2->set_status( OrderStatus::PROCESSING );
 		$order_2->set_total( 100 );

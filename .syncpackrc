@@ -479,6 +479,7 @@
 				"@wordpress/icons",
 				"@wordpress/interface",
 				"@wordpress/style-runtime",
+				"@wordpress/theme",
 				"@wordpress/ui",
 				"@wordpress/undo-manager",
 				"@wordpress/views"
