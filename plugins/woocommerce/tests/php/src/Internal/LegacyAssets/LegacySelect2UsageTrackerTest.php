@@ -91,7 +91,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 				'page_type'  => 'woocommerce_page_wc-settings',
 				'handles'    => 'select2',
 				'dependents' => 'my-extension-admin',
-				'sources'    => $this->get_my_extension_asset_url( 'admin.js' ),
+				'sources'    => 'my-extension/assets/admin.js',
 			),
 			$this->sut->get_usage_event( 'admin' ),
 			'Admin usage should include only the expected event properties.'
@@ -119,7 +119,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 				'page_type'  => $this->get_expected_frontend_page_type(),
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
-				'sources'    => $this->get_my_extension_asset_url( 'footer.js' ),
+				'sources'    => 'my-extension/assets/footer.js',
 			),
 			$this->sut->get_usage_event( 'frontend' ),
 			'Frontend usage should report the direct wc-select2 handle.'
@@ -232,7 +232,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 				'page_type'  => $this->get_expected_frontend_page_type(),
 				'handles'    => 'wc-select2',
 				'dependents' => 'my-extension-footer',
-				'sources'    => $this->get_my_extension_asset_url( 'footer.js' ),
+				'sources'    => 'my-extension/assets/footer.js',
 			),
 			$this->sut->get_usage_event( 'frontend' ),
 			'Footer dependencies should be reported after footer scripts are printed.'
@@ -265,7 +265,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 			'page_type'  => $this->get_expected_frontend_page_type(),
 			'handles'    => 'wc-select2',
 			'dependents' => 'my-extension-footer',
-			'sources'    => $this->get_my_extension_asset_url( 'footer.js' ),
+			'sources'    => 'my-extension/assets/footer.js',
 		);
 
 		$this->delete_request_scope_transient(
@@ -443,7 +443,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$scope_json = wp_json_encode( $scope );
 
 		delete_transient(
-			'wc_legacy_select2_check_' . md5( is_string( $scope_json ) ? $scope_json : '' )
+			LegacySelect2UsageTracker::EVENT_NAME . md5( is_string( $scope_json ) ? $scope_json : '' )
 		);
 	}
 }

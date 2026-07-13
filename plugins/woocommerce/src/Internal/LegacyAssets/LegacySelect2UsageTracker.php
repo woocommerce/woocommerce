@@ -111,9 +111,10 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 		// Keep only queued handles so dependents identify scripts explicitly enqueued for the page.
 		$printed_queued_scripts = array_intersect( $wp_scripts->queue, $wp_scripts->done );
 
-		$handles    = array();
-		$dependents = array();
-		$sources    = array();
+		$handles      = array();
+		$dependents   = array();
+		$sources      = array();
+		$plugins_path = wp_parse_url( plugins_url( '/' ), PHP_URL_PATH );
 
 		foreach ( $printed_queued_scripts as $handle ) {
 			$legacy_handles = $this->get_legacy_handles( $wp_scripts, $handle );
@@ -126,7 +127,10 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 			$dependents[ $handle ] = true;
 			$source                = isset( $wp_scripts->registered[ $handle ] ) ? $wp_scripts->registered[ $handle ]->src : '';
 			if ( is_string( $source ) && '' !== $source ) {
-				$sources[] = $source;
+				$source_path = wp_parse_url( $source, PHP_URL_PATH );
+				if ( is_string( $source_path ) && is_string( $plugins_path ) && str_starts_with( $source_path, $plugins_path ) ) {
+					$sources[] = ltrim( substr( $source_path, strlen( $plugins_path ) ), '/' );
+				}
 			}
 		}
 
