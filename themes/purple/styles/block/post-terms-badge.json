@@ -7,7 +7,7 @@
 		"core/post-terms"
 	],
 	"styles": {
-		"css": "display: flex; flex-wrap: wrap; gap: var(--wp--preset--spacing--10); justify-content: center;",
+		"css": "display: flex; flex-wrap: wrap; gap: 2px; justify-content: center;",
 		"typography": {
 			"fontSize": "var(--wp--preset--font-size--small)",
 			"lineHeight": "1.71",
