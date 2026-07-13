@@ -163,7 +163,7 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_prime_matches_per_review_path(): void {
 		// Unbatched baseline via the filter gate.
-		list( $product_a, $expected_a ) = $this->build_verified_owner_fixture();
+		list( , $expected_a ) = $this->build_verified_owner_fixture();
 		add_filter( 'woocommerce_prime_review_verification_meta', '__return_false' );
 		$unbatched = array();
 		foreach ( array_keys( $expected_a ) as $comment_id ) {
