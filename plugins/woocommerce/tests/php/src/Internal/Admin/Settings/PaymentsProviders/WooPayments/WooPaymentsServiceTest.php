@@ -8550,40 +8550,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->method( 'has_connected_owner' )
 			->willReturn( true );
 
-		// Arrange a logger that captures warning calls.
-		$logged_warnings = array();
-		$mock_logger     = new class( $logged_warnings ) {
-			/**
-			 * The captured warning calls.
-			 *
-			 * @var array
-			 */
-			public $warnings;
-
-			/**
-			 * Constructor.
-			 *
-			 * @param array $warnings The captured warning calls, by reference.
-			 */
-			public function __construct( array &$warnings ) {
-				$this->warnings = &$warnings;
-			}
-
-			/**
-			 * Capture a warning log call.
-			 *
-			 * @param string $message The log message.
-			 * @param array  $context The log context.
-			 *
-			 * @return void
-			 */
-			public function warning( string $message, array $context = array() ) {
-				$this->warnings[] = array(
-					'message' => $message,
-					'context' => $context,
-				);
-			}
-		};
+		// Arrange a logger that captures log calls.
+		$logged_calls = array();
+		$mock_logger  = $this->mock_capturing_logger( $logged_calls );
 
 		// Arrange the NOX profile with a step completed by being skipped forward,
 		// but make persisting the profile fail.
@@ -8655,9 +8624,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$status,
 			'The step should still report completed since the auto-completion is retried on every status read.'
 		);
-		$this->assertNotEmpty( $logged_warnings, 'A persistence failure of the auto-completion should be logged.' );
-		$this->assertStringContainsString( 'Failed to store the test account onboarding step completion', $logged_warnings[0]['message'] );
-		$this->assertSame( 'settings-payments', $logged_warnings[0]['context']['source'] );
+		$this->assertNotEmpty( $logged_calls, 'A persistence failure of the auto-completion should be logged.' );
+		$this->assertSame( 'warning', $logged_calls[0]['level'] );
+		$this->assertStringContainsString( 'Failed to store the test account onboarding step completion', $logged_calls[0]['message'] );
+		$this->assertSame( 'settings-payments', $logged_calls[0]['context']['source'] );
 	}
 
 	/**
@@ -8868,40 +8838,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->method( 'has_connected_owner' )
 			->willReturn( true );
 
-		// Arrange a logger that captures error calls.
-		$logged_errors = array();
-		$mock_logger   = new class( $logged_errors ) {
-			/**
-			 * The captured error calls.
-			 *
-			 * @var array
-			 */
-			public $errors;
-
-			/**
-			 * Constructor.
-			 *
-			 * @param array $errors The captured error calls, by reference.
-			 */
-			public function __construct( array &$errors ) {
-				$this->errors = &$errors;
-			}
-
-			/**
-			 * Capture an error log call.
-			 *
-			 * @param string $message The log message.
-			 * @param array  $context The log context.
-			 *
-			 * @return void
-			 */
-			public function error( string $message, array $context = array() ) {
-				$this->errors[] = array(
-					'message' => $message,
-					'context' => $context,
-				);
-			}
-		};
+		// Arrange a logger that captures log calls.
+		$logged_calls = array();
+		$mock_logger  = $this->mock_capturing_logger( $logged_calls );
 
 		// Arrange the NOX profile so that persisting the profile fails.
 		$this->mockable_proxy->register_function_mocks(
@@ -8956,8 +8895,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			);
 		}
 
-		$this->assertNotEmpty( $logged_errors, 'A persistence failure of the skipped step completion should be logged.' );
-		$this->assertStringContainsString( 'Failed to record the test account onboarding step', $logged_errors[0]['message'] );
+		$this->assertNotEmpty( $logged_calls, 'A persistence failure of the skipped step completion should be logged.' );
+		$this->assertSame( 'error', $logged_calls[0]['level'] );
+		$this->assertStringContainsString( 'Failed to record the test account onboarding step', $logged_calls[0]['message'] );
 	}
 
 	/**
@@ -11445,5 +11385,49 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				},
 			)
 		);
+	}
+
+	/**
+	 * Helper method to create a logger test double that captures log calls.
+	 *
+	 * @param array $captured_calls The captured log calls, by reference. Each captured call is
+	 *                              an array with 'level', 'message', and 'context' keys.
+	 *
+	 * @return object The logger test double.
+	 */
+	private function mock_capturing_logger( array &$captured_calls ): object {
+		return new class( $captured_calls ) {
+			/**
+			 * The captured log calls.
+			 *
+			 * @var array
+			 */
+			public $calls;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param array $calls The captured log calls, by reference.
+			 */
+			public function __construct( array &$calls ) {
+				$this->calls = &$calls;
+			}
+
+			/**
+			 * Capture a log call of any level (e.g. warning, error).
+			 *
+			 * @param string $name      The log level method being called.
+			 * @param array  $arguments The log message and context.
+			 *
+			 * @return void
+			 */
+			public function __call( string $name, array $arguments ) {
+				$this->calls[] = array(
+					'level'   => $name,
+					'message' => $arguments[0] ?? '',
+					'context' => $arguments[1] ?? array(),
+				);
+			}
+		};
 	}
 }
