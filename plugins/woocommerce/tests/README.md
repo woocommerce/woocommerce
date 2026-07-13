@@ -183,6 +183,12 @@ General guidelines for all the unit tests:
 The full suite runs in a few minutes because every test pays only for what it asserts. Please keep new tests on that budget:
 
 - **Size fixtures to the assertions, not to realism.** Derive the fixture from the production branches under test; if two variations cover the algorithm, don't create twenty-seven. When scale itself is the contract (pagination boundaries, batch limits), keep the boundary — and prefer strengthening assertions (exact values, per-branch checks) over enlarging fixtures.
+- **Climb down the fixture ladder.** Create each fixture on the cheapest rung that still exercises the production branches under test, using orders as the canonical example:
+    1. `WC_Helper_Order::create_order()` (or `OrderHelper::create_order()`) when line items, addresses, shipping, or totals are part of the contract — it builds a complete commerce order (~29 writes plus hook cascades).
+    2. `wc_create_order( array( 'customer_id' => ... ) )` when the test only needs orders to exist with basic properties (counts, collections, permissions, status transitions) — one write through the real production API. Note it only honors the documented argument keys; properties like `payment_method` must be set on the object and saved.
+    3. Direct row inserts when the code under test only reads persisted rows (see "Seed at the boundary the code reads" below).
+
+    The same ladder applies to products and other entities: full helper → minimal production API call → boundary seeding.
 - **Respect the per-test transaction.** Every test runs inside a transaction that is rolled back, so most cleanup is free. Never use `TRUNCATE TABLE` in tests or helpers: it is DDL and implicitly commits the transaction, silently breaking isolation for everything after it. Use `DELETE FROM` instead.
 - **Share immutable fixtures at class level.** Catalogs that no test mutates belong in `wpSetUpBeforeClass()`, reloaded per test with fresh object instances (`wc_get_product()` etc.). Per-test mutations are contained by the transaction rollback and the per-test object-cache flush. Clean up class-created data in `wpTearDownAfterClass()`.
 - **Seed at the boundary the code reads.** If the code under test only reads persisted rows (aggregate SQL, lookup tables, migration sources), fixtures may insert those rows directly — with exactly the columns production writes and collision-safe IDs. Keep at least one real write-path (CRUD) test per area so the sync path stays covered.
