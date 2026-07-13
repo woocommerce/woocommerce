@@ -31,10 +31,27 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	private $fake_plugin_util;
 
 	/**
+	 * Original WooCommerce.com helper data option value.
+	 *
+	 * @var mixed
+	 */
+	private $original_helper_data;
+
+	/**
+	 * Whether the WooCommerce.com helper data option existed before the test.
+	 *
+	 * @var bool
+	 */
+	private $helper_data_option_exists = false;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$this->original_helper_data      = get_option( 'woocommerce_helper_data', null );
+		$this->helper_data_option_exists = null !== $this->original_helper_data;
 
 		$this->set_up_plugins();
 
@@ -190,6 +207,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			11,
 			1
 		);
+		remove_all_filters( 'option_woocommerce_allow_tracking' );
+		$this->restore_helper_data_option();
 		$this->reset_container_replacements();
 		$this->reset_container_resolutions();
 
@@ -261,6 +280,96 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox The remote logging feature setting is not tied to usage tracking.
+	 */
+	public function test_remote_logging_feature_setting_is_not_tied_to_usage_tracking() {
+		add_filter( 'option_woocommerce_allow_tracking', fn() => 'no' );
+		$this->set_wccom_connection_state( true );
+
+		$remote_logging_setting = $this->get_remote_logging_feature_setting();
+		$this->assertFalse( $remote_logging_setting['disabled'] );
+		$this->assertSame( 'yes', $remote_logging_setting['default'] );
+		$this->assertArrayNotHasKey( 'value', $remote_logging_setting );
+		$this->assertSame( '', $remote_logging_setting['desc_tip'] );
+		$this->assertStringContainsString( 'WooCommerce.com', $remote_logging_setting['desc'] );
+		$this->assertStringNotContainsString( 'page=wc-addons', $remote_logging_setting['desc'] );
+		$this->assertStringNotContainsString( 'usage tracking', $remote_logging_setting['desc_tip'] );
+		$this->assertStringNotContainsString( 'usage tracking', $remote_logging_setting['desc'] );
+	}
+
+	/**
+	 * @testdox The remote logging feature setting is disabled when WooCommerce.com is disconnected.
+	 */
+	public function test_remote_logging_feature_setting_is_disabled_when_wccom_disconnected() {
+		$this->set_wccom_connection_state( false );
+
+		$remote_logging_setting = $this->get_remote_logging_feature_setting();
+		$this->assertTrue( $remote_logging_setting['disabled'] );
+		$this->assertSame( 'yes', $remote_logging_setting['default'] );
+		$this->assertSame( 'no', $remote_logging_setting['value'] );
+		$this->assertStringContainsString( 'WooCommerce.com', $remote_logging_setting['desc_tip'] );
+		$this->assertStringContainsString( 'tab=my-subscriptions', $remote_logging_setting['desc_tip'] );
+	}
+
+	/**
+	 * Get the Remote Logging feature setting.
+	 *
+	 * @return array Remote Logging feature setting.
+	 */
+	private function get_remote_logging_feature_setting(): array {
+		remove_action(
+			'woocommerce_register_feature_definitions',
+			array( $this, 'register_dummy_features' ),
+			11
+		);
+
+		$local_sut = new FeaturesController();
+		$local_sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
+
+		foreach ( $local_sut->add_feature_settings( array(), 'features' ) as $setting ) {
+			if ( $local_sut->feature_enable_option_name( 'remote_logging' ) === ( $setting['id'] ?? null ) ) {
+				return $setting;
+			}
+		}
+
+		$this->fail( 'Remote Logging feature setting was not registered.' );
+	}
+
+	/**
+	 * Set the WooCommerce.com connection state for tests.
+	 *
+	 * @param bool $connected Whether the site should be considered connected.
+	 */
+	private function set_wccom_connection_state( bool $connected ) {
+		if ( ! $connected ) {
+			delete_option( 'woocommerce_helper_data' );
+			return;
+		}
+
+		update_option(
+			'woocommerce_helper_data',
+			array(
+				'auth' => array(
+					'access_token' => 'non-empty-value',
+					'site_id'      => 1,
+				),
+			)
+		);
+	}
+
+	/**
+	 * Restore the original WooCommerce.com helper data option.
+	 */
+	private function restore_helper_data_option() {
+		if ( $this->helper_data_option_exists ) {
+			update_option( 'woocommerce_helper_data', $this->original_helper_data );
+			return;
+		}
+
+		delete_option( 'woocommerce_helper_data' );
 	}
 
 	/**

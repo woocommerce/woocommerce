@@ -23,13 +23,29 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		private $sut;
 
 		/**
+		 * Original WooCommerce.com helper data option value.
+		 *
+		 * @var mixed
+		 */
+		private $original_helper_data;
+
+		/**
+		 * Whether the WooCommerce.com helper data option existed before the test.
+		 *
+		 * @var bool
+		 */
+		private $helper_data_option_exists = false;
+
+		/**
 		 * Set up test
 		 *
 		 * @return void
 		 */
 		public function setUp(): void {
 			parent::setUp();
-			$this->sut = wc_get_container()->get( RemoteLogger::class );
+			$this->original_helper_data      = get_option( 'woocommerce_helper_data', null );
+			$this->helper_data_option_exists = null !== $this->original_helper_data;
+			$this->sut                       = wc_get_container()->get( RemoteLogger::class );
 		}
 
 		/**
@@ -40,6 +56,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		public function tearDown(): void {
 			$this->cleanup_filters();
 			delete_option( 'woocommerce_feature_remote_logging_enabled' );
+			$this->restore_helper_data_option();
 			delete_transient( RemoteLogger::WC_NEW_VERSION_TRANSIENT );
 			global $wpdb;
 			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_rate_limits" );
@@ -57,6 +74,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				'option_woocommerce_admin_remote_feature_enabled',
 				'option_woocommerce_allow_tracking',
 				'option_woocommerce_version',
+				'pre_option_woocommerce_helper_data',
 				'plugins_api',
 				'pre_http_request',
 				'woocommerce_remote_logger_formatted_log_data',
@@ -73,6 +91,34 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		public function test_remote_logging_allowed() {
 			$this->setup_remote_logging_conditions( true );
+			$this->assertTrue( $this->sut->is_remote_logging_allowed() );
+		}
+
+		/**
+		 * @testdox Remote logging is allowed when usage tracking is disabled and WooCommerce.com is connected
+		 */
+		public function test_remote_logging_allowed_when_tracking_is_disabled() {
+			$this->setup_remote_logging_conditions( true );
+			add_filter( 'option_woocommerce_allow_tracking', fn() => 'no' );
+
+			$this->assertTrue( $this->sut->is_remote_logging_allowed() );
+		}
+
+		/**
+		 * @testdox Remote logging is allowed when WooCommerce.com helper reports the site is connected.
+		 */
+		public function test_remote_logging_allowed_when_helper_site_is_connected() {
+			$this->setup_remote_logging_conditions( true );
+			update_option(
+				'woocommerce_helper_data',
+				array(
+					'auth' => array(
+						'access_token' => 'non-empty-value',
+						'site_id'      => 1,
+					),
+				)
+			);
+
 			$this->assertTrue( $this->sut->is_remote_logging_allowed() );
 		}
 
@@ -96,15 +142,33 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		public function remote_logging_disallowed_provider() {
 			return array(
-				'feature flag disabled' => array(
+				'feature flag disabled'              => array(
 					'condition' => 'feature flag disabled',
 					'setup'     => fn() => update_option( 'woocommerce_feature_remote_logging_enabled', 'no' ),
 				),
-				'tracking opted out'    => array(
-					'condition' => 'tracking opted out',
-					'setup'     => fn() => add_filter( 'option_woocommerce_allow_tracking', fn() => 'no' ),
+				'woocommerce.com disconnected'       => array(
+					'condition' => 'woocommerce.com disconnected',
+					'setup'     => fn() => delete_option( 'woocommerce_helper_data' ),
 				),
-				'outdated version'      => array(
+				'woocommerce.com auth malformed'     => array(
+					'condition' => 'woocommerce.com auth malformed',
+					'setup'     => fn() => add_filter(
+						'pre_option_woocommerce_helper_data',
+						fn() => array( 'auth' => 'non-empty-value' )
+					),
+				),
+				'woocommerce.com auth missing token' => array(
+					'condition' => 'woocommerce.com auth missing token',
+					'setup'     => fn() => update_option(
+						'woocommerce_helper_data',
+						array(
+							'auth' => array(
+								'access_token_secret' => 'non-empty-value',
+							),
+						)
+					),
+				),
+				'outdated version'                   => array(
 					'condition' => 'outdated version',
 					'setup'     => function () {
 						$version = WC()->version;
@@ -681,8 +745,43 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		private function setup_remote_logging_conditions( $enabled = true ) {
 			update_option( 'woocommerce_feature_remote_logging_enabled', $enabled ? 'yes' : 'no' );
-			add_filter( 'option_woocommerce_allow_tracking', fn() => 'yes' );
+			$this->set_wccom_connection_state( true );
 			$this->setup_mock_plugin_updates( $enabled ? WC()->version : '9.0.0' );
+		}
+
+		/**
+		 * Set the WooCommerce.com connection state for tests.
+		 *
+		 * @param bool $connected Whether the site should be considered connected.
+		 */
+		private function set_wccom_connection_state( bool $connected ) {
+			if ( ! $connected ) {
+				delete_option( 'woocommerce_helper_data' );
+				return;
+			}
+
+			update_option(
+				'woocommerce_helper_data',
+				array(
+					'auth' => array(
+						'access_token'        => 'non-empty-value',
+						'access_token_secret' => 'non-empty-value',
+						'site_id'             => 1,
+					),
+				)
+			);
+		}
+
+		/**
+		 * Restore the original WooCommerce.com helper data option.
+		 */
+		private function restore_helper_data_option() {
+			if ( $this->helper_data_option_exists ) {
+				update_option( 'woocommerce_helper_data', $this->original_helper_data );
+				return;
+			}
+
+			delete_option( 'woocommerce_helper_data' );
 		}
 
 			/**

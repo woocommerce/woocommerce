@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Tie remote logging availability to WooCommerce.com connection instead of usage tracking.
