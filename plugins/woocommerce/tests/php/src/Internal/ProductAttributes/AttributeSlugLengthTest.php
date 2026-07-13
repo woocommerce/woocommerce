@@ -54,6 +54,7 @@ class AttributeSlugLengthTest extends WC_Unit_Test_Case {
 			'Sorani Kurdish (Arabic script)'  => array( 'ckb', 2 ),
 			'Uyghur (Arabic script)'          => array( 'ug_CN', 2 ),
 			'Chinese (CJK)'                   => array( 'zh_CN', 3 ),
+			'Chinese (hyphenated tag)'        => array( 'zh-Hans', 3 ),
 			'Japanese (CJK)'                  => array( 'ja', 3 ),
 			'Thai'                            => array( 'th', 3 ),
 			'Amharic (Ethiopic)'              => array( 'am', 3 ),
