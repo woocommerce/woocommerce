@@ -13,6 +13,42 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
  * Controller Tests.
  */
 class ProductCollectionData extends ControllerTestCase {
+	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
+	/**
+	 * Create immutable products and reviews shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$products = self::create_class_fixture_products(
+			array(
+				array(
+					'name'          => 'Test Product 1',
+					'regular_price' => 10,
+				),
+				array(
+					'name'          => 'Test Product 2',
+					'regular_price' => 100,
+				),
+			)
+		);
+		$fixtures = new FixtureData();
+		$fixtures->add_product_review( $products[0]->get_id(), 5 );
+		$fixtures->add_product_review( $products[1]->get_id(), 4 );
+
+		self::$product_ids = array_map( static fn( $product ) => $product->get_id(), $products );
+	}
+
+	/**
+	 * Delete class products and their reviews through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_class_fixture_products( self::$product_ids );
+	}
 
 	/**
 	 * Product attributes created during a test.
@@ -28,26 +64,7 @@ class ProductCollectionData extends ControllerTestCase {
 		parent::setUp();
 
 		$this->created_product_attributes = array();
-
-		$fixtures = new FixtureData();
-
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'regular_price' => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'regular_price' => 100,
-				)
-			),
-		);
-
-		$fixtures->add_product_review( $this->products[0]->get_id(), 5 );
-		$fixtures->add_product_review( $this->products[1]->get_id(), 4 );
+		$this->products                   = array_map( 'wc_get_product', self::$product_ids );
 	}
 
 	/**
