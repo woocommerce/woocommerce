@@ -8,6 +8,8 @@
  * @version 2.0.0
  */
 
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -44,6 +46,12 @@ class WC_Shortcode_My_Account {
 		// Show the lost password page. This can still be accessed directly by logged in accounts which is important for the initial create password links sent via email.
 		if ( isset( $wp->query_vars['lost-password'] ) ) {
 			self::lost_password();
+			return;
+		}
+
+		// Order withdrawal is an EU regulation requirement which needs to be accessible without logging in.
+		if ( isset( $wp->query_vars['order-withdrawal'] ) && wc_get_container()->get( FeaturesController::class )->feature_is_enabled( 'order_withdrawal' ) ) {
+			woocommerce_account_content();
 			return;
 		}
 
