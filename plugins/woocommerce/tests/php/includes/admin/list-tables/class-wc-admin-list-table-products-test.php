@@ -32,11 +32,11 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	 * @testdox Product searches prioritize title matches for supported search syntax.
 	 * @dataProvider search_term_provider
 	 *
-	 * @param string $search_term Search term.
+	 * @param string $search_format Search term format.
 	 */
-	public function test_product_search_prioritizes_title_matches( string $search_term ): void {
-		list( $title_match, $content_match ) = $this->create_search_products();
-		$results                             = $this->get_search_results( $search_term );
+	public function test_product_search_prioritizes_title_matches( string $search_format ): void {
+		list( $title_match, $content_match, $search_phrase ) = $this->create_search_products();
+		$results = $this->get_search_results( sprintf( $search_format, $search_phrase ) );
 
 		$this->assertSame(
 			array( $title_match->get_id(), $content_match->get_id() ),
@@ -49,9 +49,9 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	 * @testdox Product searches keep explicit admin sorting choices.
 	 */
 	public function test_product_search_keeps_explicit_orderby(): void {
-		list( $title_match, $content_match ) = $this->create_search_products();
-		$results                             = $this->get_search_results(
-			'Night Light 35607',
+		list( $title_match, $content_match, $search_phrase ) = $this->create_search_products();
+		$results = $this->get_search_results(
+			$search_phrase,
 			array(
 				'orderby' => 'title',
 				'order'   => 'ASC',
@@ -72,28 +72,30 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	 */
 	public function search_term_provider(): array {
 		return array(
-			'plain search'  => array( 'Night Light 35607' ),
-			'quoted phrase' => array( '"Night Light 35607"' ),
-			'OR groups'     => array( 'Night Light 35607 OR Missing Lantern 35607' ),
+			'plain search'  => array( '%s' ),
+			'quoted phrase' => array( '"%s"' ),
+			'OR groups'     => array( '%s OR Missing Lantern' ),
 		);
 	}
 
 	/**
 	 * Create title and content-only search matches.
 	 *
-	 * @return WC_Product[]
+	 * @return array{WC_Product, WC_Product, string}
 	 */
 	private function create_search_products(): array {
+		$search_phrase = 'Night Light ' . wp_generate_password( 8, false );
+
 		$title_match = WC_Helper_Product::create_simple_product();
-		$title_match->set_name( 'Night Light 35607' );
+		$title_match->set_name( $search_phrase );
 		$title_match->save();
 
 		$content_match = WC_Helper_Product::create_simple_product();
-		$content_match->set_name( 'Archive Lamp Notes 35607' );
-		$content_match->set_description( 'Night Light 35607' );
+		$content_match->set_name( 'Archive Lamp Notes ' . wp_generate_password( 8, false ) );
+		$content_match->set_description( $search_phrase );
 		$content_match->save();
 
-		return array( $title_match, $content_match );
+		return array( $title_match, $content_match, $search_phrase );
 	}
 
 	/**
