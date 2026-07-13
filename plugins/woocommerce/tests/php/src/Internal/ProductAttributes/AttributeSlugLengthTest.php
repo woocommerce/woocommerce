@@ -1,0 +1,72 @@
+<?php
+/**
+ * Attribute slug length tests.
+ *
+ * @package WooCommerce\Tests\Internal\ProductAttributes
+ */
+
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\ProductAttributes;
+
+use Automattic\WooCommerce\Internal\ProductAttributes\AttributeSlugLength;
+use WC_Unit_Test_Case;
+
+/**
+ * Tests for the attribute slug length utility.
+ */
+class AttributeSlugLengthTest extends WC_Unit_Test_Case {
+
+	/**
+	 * @testdox Should derive the character estimate from the typical byte width of the locale's script.
+	 * @dataProvider locale_estimate_provider
+	 *
+	 * @param string $locale     Locale under test.
+	 * @param int    $byte_width Typical UTF-8 byte width of the locale's script.
+	 */
+	public function test_estimates_characters_by_script_byte_width( string $locale, int $byte_width ): void {
+		$this->assertSame(
+			intdiv( wc_get_attribute_slug_max_byte_length(), $byte_width ),
+			AttributeSlugLength::get_character_estimate( $locale ),
+			"Locale {$locale} should be treated as {$byte_width} byte(s) per character"
+		);
+	}
+
+	/**
+	 * Data provider for the per-locale estimate test.
+	 *
+	 * @return array
+	 */
+	public function locale_estimate_provider(): array {
+		return array(
+			'English (Latin)'        => array( 'en_US', 1 ),
+			'Portuguese (Latin)'     => array( 'pt_BR', 1 ),
+			'Unknown locale (Latin)' => array( 'xx_YY', 1 ),
+			'Russian (Cyrillic)'     => array( 'ru_RU', 2 ),
+			'Greek'                  => array( 'el', 2 ),
+			'Hebrew'                 => array( 'he_IL', 2 ),
+			'Chinese (CJK)'          => array( 'zh_CN', 3 ),
+			'Japanese (CJK)'         => array( 'ja', 3 ),
+			'Thai'                   => array( 'th', 3 ),
+			'Hindi (Devanagari)'     => array( 'hi_IN', 3 ),
+		);
+	}
+
+	/**
+	 * @testdox Should defer to the site locale when no locale is given.
+	 */
+	public function test_defaults_to_site_locale(): void {
+		$this->assertSame(
+			AttributeSlugLength::get_character_estimate( get_locale() ),
+			AttributeSlugLength::get_character_estimate(),
+			'The default estimate should follow the site locale'
+		);
+	}
+
+	/**
+	 * @testdox Should never estimate fewer than one character.
+	 */
+	public function test_estimate_is_at_least_one_character(): void {
+		$this->assertGreaterThanOrEqual( 1, AttributeSlugLength::get_character_estimate( 'zh_CN' ) );
+	}
+}

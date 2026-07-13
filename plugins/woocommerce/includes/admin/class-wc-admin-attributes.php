@@ -10,6 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\ProductAttributes\AttributeSlugLength;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
 
 /**
@@ -178,7 +179,7 @@ class WC_Admin_Attributes {
 			/* translators: 1: maximum slug length in bytes, 2: approximate maximum number of characters for the site language. */
 			__( 'Unique slug/reference for the attribute. Limited to %1$d bytes — roughly %2$d characters in your site language; non-ASCII characters use 2–4 bytes each.', 'woocommerce' ),
 			wc_get_attribute_slug_max_byte_length(),
-			wc_get_attribute_slug_character_estimate()
+			AttributeSlugLength::get_character_estimate()
 		);
 	}
 
