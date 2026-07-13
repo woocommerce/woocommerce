@@ -64,7 +64,7 @@ const FrontendBlock = ( {
 			setValidationErrors( {
 				[ validationErrorId ]: {
 					message: __(
-						'Please accept the Terms and Conditions and Privacy Policy to place your order.',
+						'Please read and accept the terms and conditions.',
 						'woocommerce'
 					),
 					hidden: true,
