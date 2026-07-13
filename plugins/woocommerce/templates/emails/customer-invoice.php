@@ -67,7 +67,6 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
 				array(
 					'a' => array(
 						'href' => array(),
-						'class' => array(),
 					),
 				)
 			),
