@@ -57,7 +57,7 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
 				)
 			),
 			esc_html( get_bloginfo( 'name', 'display' ) ),
-			'<a href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Pay for this order', 'woocommerce' ) . '</a>'
+			'<a href="' . esc_url( $order->get_checkout_payment_url() ) . '" class="email-payment-link">' . esc_html__( 'Pay for this order', 'woocommerce' ) . '</a>'
 		);
 	} else {
 		printf(
