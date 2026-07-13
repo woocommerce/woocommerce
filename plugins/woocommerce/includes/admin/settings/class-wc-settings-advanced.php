@@ -338,6 +338,24 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				),
 			);
 
+		if ( wc_get_container()->get( FeaturesController::class )->feature_is_enabled( 'order_withdrawal' ) ) {
+			array_splice(
+				$settings,
+				-1,
+				0,
+				array(
+					array(
+						'title'    => __( 'Order withdrawal', 'woocommerce' ),
+						'desc'     => __( 'Endpoint for the order withdrawal page.', 'woocommerce' ),
+						'id'       => 'woocommerce_myaccount_order_withdrawal_endpoint',
+						'type'     => 'text',
+						'default'  => 'order-withdrawal',
+						'desc_tip' => true,
+					),
+				)
+			);
+		}
+
 		$settings = apply_filters( 'woocommerce_settings_pages', $settings );
 
 		if ( wc_site_is_https() ) {
