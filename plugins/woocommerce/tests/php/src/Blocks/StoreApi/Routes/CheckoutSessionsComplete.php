@@ -74,10 +74,19 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	protected $mock_gateway;
 
 	/**
+	 * Option state to restore after each test.
+	 *
+	 * @var array<string, array{exists: bool, value: mixed}>
+	 */
+	private $option_state = array();
+
+	/**
 	 * Setup test product data. Called before every test.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+		$this->snapshot_option_state( 'woocommerce_checkout_phone_field' );
+		$this->snapshot_option_state( 'woocommerce_feature_agentic_checkout_enabled' );
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 
 		// Reset customer and cart FIRST before anything else.
@@ -112,18 +121,56 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 * Tear down test.
 	 */
 	protected function tearDown(): void {
-		parent::tearDown();
-		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
+		try {
+			// Clear session data.
+			WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, null );
+			WC()->session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, null );
 
-		// Clear session data.
-		WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, null );
-		WC()->session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, null );
+			// Reset customer state to clean state.
+			$this->reset_customer_state();
 
-		// Reset customer state to clean state.
-		$this->reset_customer_state();
+			// Reset Jetpack auth state.
+			$this->reset_jetpack_auth_state();
+		} finally {
+			try {
+				parent::tearDown();
+			} finally {
+				$this->restore_option_state();
+			}
+		}
+	}
 
-		// Reset Jetpack auth state.
-		$this->reset_jetpack_auth_state();
+	/**
+	 * Capture an option's exact existence and value before changing it.
+	 *
+	 * @param string $option_name Option name.
+	 */
+	private function snapshot_option_state( string $option_name ): void {
+		$missing_option = new \stdClass();
+		$value          = get_option( $option_name, $missing_option );
+
+		$this->option_state[ $option_name ] = array(
+			'exists' => $missing_option !== $value,
+			'value'  => $value,
+		);
+	}
+
+	/**
+	 * Restore options changed by the test, including their original absence.
+	 */
+	private function restore_option_state(): void {
+		foreach ( $this->option_state as $option_name => $state ) {
+			wp_cache_delete( $option_name, 'options' );
+			wp_cache_delete( 'alloptions', 'options' );
+			wp_cache_delete( 'notoptions', 'options' );
+			if ( $state['exists'] ) {
+				update_option( $option_name, $state['value'] );
+			} else {
+				delete_option( $option_name );
+			}
+		}
+
+		$this->option_state = array();
 	}
 
 	/**
