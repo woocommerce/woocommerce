@@ -22,6 +22,7 @@ class Patterns extends ControllerTestCase {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->ptk_request_count = 0;
 
 		$user = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user );
