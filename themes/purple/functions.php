@@ -333,20 +333,27 @@ endif;
 
 add_action( 'init', 'purple_remove_upsells' );
 
-if ( ! function_exists( 'purple_woocommerce_template_path' ) ) :
+if ( ! function_exists( 'purple_woocommerce_locate_template' ) ) :
 	/**
-	 * Look for WooCommerce template overrides in includes/ instead of a
-	 * top-level woocommerce/ folder (currently only includes/loop/orderby.php).
+	 * Serve WooCommerce template overrides from flat files in includes/
+	 * instead of the nested woocommerce/ template-path convention. WooCommerce
+	 * requests templates by their path-shaped name (e.g. loop/orderby.php),
+	 * so each override is mapped here explicitly.
 	 *
+	 * @param string $template      Full path WooCommerce resolved.
+	 * @param string $template_name Template name relative to WooCommerce's templates dir.
 	 * @return string
 	 */
-	function purple_woocommerce_template_path(): string {
-		return 'includes/';
+	function purple_woocommerce_locate_template( string $template, string $template_name ): string {
+		if ( 'loop/orderby.php' === $template_name ) {
+			return get_theme_file_path( 'includes/orderby.php' );
+		}
+		return $template;
 	}
 
 endif;
 
-add_filter( 'woocommerce_template_path', 'purple_woocommerce_template_path' );
+add_filter( 'woocommerce_locate_template', 'purple_woocommerce_locate_template', 10, 2 );
 
 require_once get_template_directory() . '/includes/cart-page-content.php';
 
