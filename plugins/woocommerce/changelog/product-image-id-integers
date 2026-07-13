@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Normalize product image IDs to integers across product and variation CRUD.
