@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 /**
  * Handles WooCommerce Customizer settings when switching between classic and block themes.
  *
- * @since 11.0.0
+ * @since 11.1.0
  * @internal
  */
 class CustomizerSettings implements RegisterHooksInterface {
