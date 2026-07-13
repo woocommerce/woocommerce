@@ -39,18 +39,25 @@ class AttributeSlugLengthTest extends WC_Unit_Test_Case {
 	 */
 	public function locale_estimate_provider(): array {
 		return array(
-			'English (Latin)'         => array( 'en_US', 1 ),
-			'Portuguese (Latin)'      => array( 'pt_BR', 1 ),
-			'Unknown locale (Latin)'  => array( 'xx_YY', 1 ),
-			'Russian (Cyrillic)'      => array( 'ru_RU', 2 ),
-			'Greek'                   => array( 'el', 2 ),
-			'Hebrew'                  => array( 'he_IL', 2 ),
-			'Chinese (CJK)'           => array( 'zh_CN', 3 ),
-			'Japanese (CJK)'          => array( 'ja', 3 ),
-			'Thai'                    => array( 'th', 3 ),
-			'Hindi (Devanagari)'      => array( 'hi_IN', 3 ),
-			'Nepali (Devanagari)'     => array( 'ne_NP', 3 ),
-			'Vietnamese (Latin Ext.)' => array( 'vi', 3 ),
+			'English (Latin)'                 => array( 'en_US', 1 ),
+			'Portuguese (Latin)'              => array( 'pt_BR', 1 ),
+			'Unknown locale (Latin)'          => array( 'xx_YY', 1 ),
+			'Vietnamese (Latin Ext.)'         => array( 'vi', 3 ),
+			'Russian (Cyrillic)'              => array( 'ru_RU', 2 ),
+			'Belarusian (Cyrillic, 3-letter)' => array( 'bel', 2 ),
+			'Kyrgyz (Cyrillic, 3-letter)'     => array( 'kir', 2 ),
+			'Sakha (Cyrillic, 3-letter)'      => array( 'sah', 2 ),
+			'Greek'                           => array( 'el', 2 ),
+			'Hebrew'                          => array( 'he_IL', 2 ),
+			'Sorani Kurdish (Arabic script)'  => array( 'ckb', 2 ),
+			'Uyghur (Arabic script)'          => array( 'ug_CN', 2 ),
+			'Chinese (CJK)'                   => array( 'zh_CN', 3 ),
+			'Japanese (CJK)'                  => array( 'ja', 3 ),
+			'Thai'                            => array( 'th', 3 ),
+			'Amharic (Ethiopic)'              => array( 'am', 3 ),
+			'Tibetan'                         => array( 'bo', 3 ),
+			'Hindi (Devanagari)'              => array( 'hi_IN', 3 ),
+			'Nepali (Devanagari)'             => array( 'ne_NP', 3 ),
 		);
 	}
 

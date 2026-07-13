@@ -48,12 +48,14 @@ class AttributeSlugLength {
 		$language = strtolower( (string) strtok( $locale, '_-' ) );
 
 		// Space-padded lists of language subtags grouped by the typical UTF-8 byte width of
-		// their script. Three bytes: CJK, Thai, Georgian, common Brahmic (Indic) scripts, and
+		// their script, covering the locale IDs WordPress core actually installs — including
+		// its three-letter IDs (kir, ckb, snd, sah, ...) — plus common ISO aliases (ky, be).
+		// Three bytes: CJK, Thai, Georgian, Ethiopic, Tibetan, Brahmic (Indic) scripts, and
 		// Vietnamese (its precomposed tone-marked vowels live in Latin Extended Additional).
-		// Two bytes: Cyrillic, Greek, Hebrew, Arabic, Armenian, and related. Everything else
+		// Two bytes: Cyrillic, Greek, Hebrew, Arabic-script, and Armenian. Everything else
 		// (Latin and unknown) is treated as single-byte. The padding makes each match whole-word.
-		$three_byte = ' zh ja ko th ka vi hi bn ne ta te mr gu kn ml pa or si km lo my ';
-		$two_byte   = ' ru uk bg sr be mk kk ky tg mn el he ar fa ur ps hy ';
+		$three_byte = ' zh ja ko th ka vi hi bn ne ta te mr gu kn ml pa or si km lo my am as bo dzo ';
+		$two_byte   = ' ru uk bg sr be bel mk kk ky kir tg tt mn sah el he ar ary azb ckb fa haz ps skr snd ug ur hy ';
 
 		if ( false !== strpos( $three_byte, " {$language} " ) ) {
 			$byte_width = 3;
