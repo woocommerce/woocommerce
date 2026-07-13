@@ -48,7 +48,7 @@ class Payments {
 	 *
 	 * Multiple consumers (the Payments settings page, the onboarding Payments task, the menu badge logic)
 	 * request the same list during a single request, and computing it is expensive.
-	 * Keyed by the location and flags the list was computed for.
+	 * Keyed by the user, capability state, location, and flags the list was computed for.
 	 *
 	 * @var array
 	 */
@@ -87,7 +87,8 @@ class Payments {
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
 	public function get_payment_providers( string $location, bool $for_display = true, bool $remove_shells = false ): array {
-		$memo_key = strtoupper( $location ) . '__' . ( $for_display ? '1' : '0' ) . ( $remove_shells ? '1' : '0' );
+		$can_install_plugins = current_user_can( 'install_plugins' );
+		$memo_key            = get_current_user_id() . '__' . ( $can_install_plugins ? '1' : '0' ) . '__' . strtoupper( $location ) . '__' . ( $for_display ? '1' : '0' ) . ( $remove_shells ? '1' : '0' );
 		if ( isset( $this->payment_providers_memo[ $memo_key ] ) ) {
 			return $this->payment_providers_memo[ $memo_key ];
 		}
@@ -103,7 +104,7 @@ class Payments {
 
 		// Only include suggestions if the requesting user can install plugins.
 		$suggestions = array();
-		if ( current_user_can( 'install_plugins' ) ) {
+		if ( $can_install_plugins ) {
 			$suggestions = $this->providers->get_extension_suggestions( $location, self::SUGGESTIONS_CONTEXT );
 		}
 		// If we have preferred suggestions, add them to the providers list.
@@ -415,8 +416,8 @@ class Payments {
 	/**
 	 * Reset the memoized data.
 	 *
-	 * Used to invalidate the request-level caches when the underlying data changes mid-request.
-	 * Also useful for testing purposes.
+	 * Call after changing provider ordering, suggestions, incentives, gateway registration,
+	 * settings, or account state during a request. Also useful for testing purposes.
 	 *
 	 * @internal
 	 * @return void

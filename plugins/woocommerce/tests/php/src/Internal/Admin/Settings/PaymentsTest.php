@@ -59,6 +59,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 									->onlyMethods(
 										array(
 											'get_payment_gateways',
+											'remove_shell_payment_gateways',
 											'get_extension_suggestions',
 											'get_extension_suggestion_categories',
 											'attach_extension_suggestion',
@@ -598,10 +599,9 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that getting the payment providers memoizes the result during a request.
+	 * @testdox Payment providers are memoized during a request.
 	 */
-	public function test_get_payment_providers_is_memoized() {
-		// Arrange.
+	public function test_get_payment_providers_is_memoized(): void {
 		$location = 'US';
 
 		$this->mock_providers
@@ -614,152 +614,199 @@ class PaymentsTest extends WC_Unit_Test_Case {
 			->method( 'get_extension_suggestions' )
 			->willReturn( array() );
 
-		// Act.
 		$first  = $this->sut->get_payment_providers( $location );
 		$second = $this->sut->get_payment_providers( $location );
 
-		// Assert.
-		$this->assertSame( $first, $second );
+		$this->assertSame( $first, $second, 'Repeated calls should return the memoized providers' );
 	}
 
 	/**
-	 * Test that the payment providers memoization discriminates between arguments.
+	 * @testdox Payment providers are memoized separately for each argument combination.
 	 */
-	public function test_get_payment_providers_is_memoized_per_arguments() {
-		// Arrange.
+	public function test_get_payment_providers_is_memoized_per_arguments(): void {
 		$this->mock_providers
-			->expects( $this->exactly( 3 ) )
+			->expects( $this->exactly( 4 ) )
 			->method( 'get_payment_gateways' )
 			->willReturn( array() );
 
 		$this->mock_providers
-			->method( 'get_extension_suggestions' )
+			->expects( $this->once() )
+			->method( 'remove_shell_payment_gateways' )
 			->willReturn( array() );
 
-		// Act.
+		$this->mock_providers
+			->expects( $this->exactly( 4 ) )
+			->method( 'get_extension_suggestions' )
+			->willReturnOnConsecutiveCalls(
+				self::get_preferred_suggestions( 'us-display' ),
+				self::get_preferred_suggestions( 'de-display' ),
+				self::get_preferred_suggestions( 'us-logic' ),
+				self::get_preferred_suggestions( 'us-logic-without-shells' )
+			);
+
+		$this->mock_providers
+			->method( 'enhance_order_map' )
+			->willReturnCallback( static fn( array $order_map ): array => $order_map );
+
+		$us_display              = $this->sut->get_payment_providers( 'US' );
+		$de_display              = $this->sut->get_payment_providers( 'DE' );
+		$us_logic                = $this->sut->get_payment_providers( 'US', false );
+		$us_logic_without_shells = $this->sut->get_payment_providers( 'US', false, true );
+
 		$this->sut->get_payment_providers( 'US' );
 		$this->sut->get_payment_providers( 'DE' );
 		$this->sut->get_payment_providers( 'US', false );
-		// Repeated calls should be served from the memo.
-		$this->sut->get_payment_providers( 'US' );
-		$this->sut->get_payment_providers( 'DE' );
-		$this->sut->get_payment_providers( 'US', false );
+		$this->sut->get_payment_providers( 'US', false, true );
+
+		$this->assertSame( array( PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'us-display' ), array_column( $us_display, 'id' ) );
+		$this->assertSame( array( PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'de-display' ), array_column( $de_display, 'id' ) );
+		$this->assertSame( array( PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'us-logic' ), array_column( $us_logic, 'id' ) );
+		$this->assertSame( array( PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'us-logic-without-shells' ), array_column( $us_logic_without_shells, 'id' ) );
 	}
 
 	/**
-	 * Test that resetting the memo forces the payment providers to be recomputed.
+	 * @testdox Payment providers are memoized separately for each user.
 	 */
-	public function test_reset_memo_clears_memoized_payment_providers() {
-		// Arrange.
+	public function test_get_payment_providers_is_memoized_per_user(): void {
 		$this->mock_providers
 			->expects( $this->exactly( 2 ) )
 			->method( 'get_payment_gateways' )
 			->willReturn( array() );
 
 		$this->mock_providers
+			->expects( $this->exactly( 2 ) )
 			->method( 'get_extension_suggestions' )
+			->willReturnOnConsecutiveCalls(
+				self::get_preferred_suggestions( 'first-user' ),
+				self::get_preferred_suggestions( 'second-user' )
+			);
+
+		$this->mock_providers
+			->method( 'enhance_order_map' )
+			->willReturnCallback( static fn( array $order_map ): array => $order_map );
+
+		$first_user_result = $this->sut->get_payment_providers( 'US' );
+
+		$second_user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $second_user_id );
+		$second_user_result = $this->sut->get_payment_providers( 'US' );
+		$this->sut->get_payment_providers( 'US' );
+
+		$this->assertSame( array( PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'first-user' ), array_column( $first_user_result, 'id' ) );
+		$this->assertSame( array( PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'second-user' ), array_column( $second_user_result, 'id' ) );
+	}
+
+	/**
+	 * @testdox Payment providers are memoized separately for users who cannot install plugins.
+	 */
+	public function test_get_payment_providers_is_memoized_per_install_plugins_capability(): void {
+		$this->mock_providers
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_payment_gateways' )
 			->willReturn( array() );
 
-		// Act.
-		$this->sut->get_payment_providers( 'US' );
+		$this->mock_providers
+			->expects( $this->once() )
+			->method( 'get_extension_suggestions' )
+			->willReturn( self::get_preferred_suggestions( 'installable' ) );
+
+		$this->mock_providers
+			->method( 'enhance_order_map' )
+			->willReturnCallback( static fn( array $order_map ): array => $order_map );
+
+		$with_capability = $this->sut->get_payment_providers( 'US' );
+
+		$deny_install_plugins = static function ( array $allcaps ): array {
+			$allcaps['install_plugins'] = false;
+			return $allcaps;
+		};
+		add_filter( 'user_has_cap', $deny_install_plugins );
+		$without_capability = $this->sut->get_payment_providers( 'US' );
+		remove_filter( 'user_has_cap', $deny_install_plugins );
+
+		$this->assertSame( array( PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'installable' ), array_column( $with_capability, 'id' ) );
+		$this->assertSame( array(), $without_capability, 'Users without install_plugins should not receive extension suggestions' );
+	}
+
+	/**
+	 * @testdox Resetting the memo recomputes the payment providers.
+	 */
+	public function test_reset_memo_clears_memoized_payment_providers(): void {
+		$this->expect_payment_providers_to_be_recomputed();
+
+		$before = $this->sut->get_payment_providers( 'US' );
 		$this->sut->reset_memo();
-		$this->sut->get_payment_providers( 'US' );
+		$after = $this->sut->get_payment_providers( 'US' );
+
+		$this->assert_payment_providers_were_recomputed( $before, $after );
 	}
 
 	/**
-	 * Test that updating the payment providers order map resets the memoized payment providers.
+	 * @testdox Updating the payment providers order map resets the memoized providers.
 	 */
-	public function test_update_payment_providers_order_map_resets_memo() {
-		// Arrange.
-		$this->mock_providers
-			->expects( $this->exactly( 2 ) )
-			->method( 'get_payment_gateways' )
-			->willReturn( array() );
-
-		$this->mock_providers
-			->method( 'get_extension_suggestions' )
-			->willReturn( array() );
+	public function test_update_payment_providers_order_map_resets_memo(): void {
+		$this->expect_payment_providers_to_be_recomputed();
 
 		$this->mock_providers
 			->method( 'update_payment_providers_order_map' )
 			->willReturn( true );
 
-		// Act.
-		$this->sut->get_payment_providers( 'US' );
+		$before = $this->sut->get_payment_providers( 'US' );
 		$this->sut->update_payment_providers_order_map( array( 'gateway1' => 1 ) );
-		$this->sut->get_payment_providers( 'US' );
+		$after = $this->sut->get_payment_providers( 'US' );
+
+		$this->assert_payment_providers_were_recomputed( $before, $after );
 	}
 
 	/**
-	 * Test that attaching a payment extension suggestion resets the memoized payment providers.
+	 * @testdox Attaching a payment extension suggestion resets the memoized providers.
 	 */
-	public function test_attach_payment_extension_suggestion_resets_memo() {
-		// Arrange.
-		$this->mock_providers
-			->expects( $this->exactly( 2 ) )
-			->method( 'get_payment_gateways' )
-			->willReturn( array() );
-
-		$this->mock_providers
-			->method( 'get_extension_suggestions' )
-			->willReturn( array() );
+	public function test_attach_payment_extension_suggestion_resets_memo(): void {
+		$this->expect_payment_providers_to_be_recomputed();
 
 		$this->mock_providers
 			->method( 'attach_extension_suggestion' )
 			->willReturn( true );
 
-		// Act.
-		$this->sut->get_payment_providers( 'US' );
+		$before = $this->sut->get_payment_providers( 'US' );
 		$this->sut->attach_payment_extension_suggestion( 'suggestion1' );
-		$this->sut->get_payment_providers( 'US' );
+		$after = $this->sut->get_payment_providers( 'US' );
+
+		$this->assert_payment_providers_were_recomputed( $before, $after );
 	}
 
 	/**
-	 * Test that hiding a payment extension suggestion resets the memoized payment providers.
+	 * @testdox Hiding a payment extension suggestion resets the memoized providers.
 	 */
-	public function test_hide_payment_extension_suggestion_resets_memo() {
-		// Arrange.
-		$this->mock_providers
-			->expects( $this->exactly( 2 ) )
-			->method( 'get_payment_gateways' )
-			->willReturn( array() );
-
-		$this->mock_providers
-			->method( 'get_extension_suggestions' )
-			->willReturn( array() );
+	public function test_hide_payment_extension_suggestion_resets_memo(): void {
+		$this->expect_payment_providers_to_be_recomputed();
 
 		$this->mock_providers
 			->method( 'hide_extension_suggestion' )
 			->willReturn( true );
 
-		// Act.
-		$this->sut->get_payment_providers( 'US' );
+		$before = $this->sut->get_payment_providers( 'US' );
 		$this->sut->hide_payment_extension_suggestion( 'suggestion1' );
-		$this->sut->get_payment_providers( 'US' );
+		$after = $this->sut->get_payment_providers( 'US' );
+
+		$this->assert_payment_providers_were_recomputed( $before, $after );
 	}
 
 	/**
-	 * Test that dismissing an extension suggestion incentive resets the memoized payment providers.
+	 * @testdox Dismissing an extension suggestion incentive resets the memoized providers.
 	 */
-	public function test_dismiss_extension_suggestion_incentive_resets_memo() {
-		// Arrange.
-		$this->mock_providers
-			->expects( $this->exactly( 2 ) )
-			->method( 'get_payment_gateways' )
-			->willReturn( array() );
-
-		$this->mock_providers
-			->method( 'get_extension_suggestions' )
-			->willReturn( array() );
+	public function test_dismiss_extension_suggestion_incentive_resets_memo(): void {
+		$this->expect_payment_providers_to_be_recomputed();
 
 		$this->mock_extension_suggestions
 			->method( 'dismiss_incentive' )
 			->willReturn( true );
 
-		// Act.
-		$this->sut->get_payment_providers( 'US' );
+		$before = $this->sut->get_payment_providers( 'US' );
 		$this->sut->dismiss_extension_suggestion_incentive( 'suggestion1', 'incentive1' );
-		$this->sut->get_payment_providers( 'US' );
+		$after = $this->sut->get_payment_providers( 'US' );
+
+		$this->assert_payment_providers_were_recomputed( $before, $after );
 	}
 
 	/**
@@ -881,5 +928,62 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( $gateway1_index, $stripe_index, 'stripe should be after gateway1' );
 		// Stripe should be the last non-offline-PM provider.
 		$this->assertSame( count( $provider_ids ) - 1, $stripe_index, 'stripe should be the last provider' );
+	}
+
+	/**
+	 * Expect two provider derivations with distinct results.
+	 */
+	private function expect_payment_providers_to_be_recomputed(): void {
+		$this->mock_providers
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_payment_gateways' )
+			->willReturn( array() );
+
+		$this->mock_providers
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_extension_suggestions' )
+			->willReturnOnConsecutiveCalls(
+				self::get_preferred_suggestions( 'before-reset' ),
+				self::get_preferred_suggestions( 'after-reset' )
+			);
+
+		$this->mock_providers
+			->method( 'enhance_order_map' )
+			->willReturnCallback( static fn( array $order_map ): array => $order_map );
+	}
+
+	/**
+	 * Assert that a provider list was recomputed.
+	 *
+	 * @param array $before The providers before invalidation.
+	 * @param array $after  The providers after invalidation.
+	 */
+	private function assert_payment_providers_were_recomputed( array $before, array $after ): void {
+		$this->assertSame( array( PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'before-reset' ), array_column( $before, 'id' ) );
+		$this->assertSame( array( PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'after-reset' ), array_column( $after, 'id' ) );
+	}
+
+	/**
+	 * Create a preferred suggestions response with one suggestion.
+	 *
+	 * @param string $id The suggestion ID.
+	 * @return array The suggestions response.
+	 */
+	private static function get_preferred_suggestions( string $id ): array {
+		return array(
+			'preferred' => array(
+				array(
+					'id'          => $id,
+					'_priority'   => 0,
+					'title'       => $id,
+					'description' => '',
+					'plugin'      => array(
+						'_type' => PaymentsExtensionSuggestions::PLUGIN_TYPE_WPORG,
+						'slug'  => $id,
+					),
+				),
+			),
+			'other'     => array(),
+		);
 	}
 }

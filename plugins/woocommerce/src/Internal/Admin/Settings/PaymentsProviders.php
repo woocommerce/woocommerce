@@ -203,7 +203,7 @@ class PaymentsProviders {
 	 * The memoized payment gateway details to avoid re-deriving them multiple times during a request.
 	 *
 	 * Deriving a gateway's details can be expensive since gateways may run account and state checks.
-	 * Keyed by gateway ID and country code.
+	 * Keyed first by gateway ID, then by country code.
 	 *
 	 * @var array
 	 */
@@ -489,22 +489,16 @@ class PaymentsProviders {
 		// Normalize the country code to uppercase.
 		$country_code = strtoupper( $country_code );
 
-		$memo_key = $payment_gateway->id . '__' . $country_code;
-		if ( isset( $this->payment_gateway_details_memo[ $memo_key ] ) ) {
-			$details = $this->payment_gateway_details_memo[ $memo_key ];
-			// The order is call-specific, so we don't memoize it.
-			$details['_order'] = $payment_gateway_order;
-
-			return $details;
+		if ( ! isset( $this->payment_gateway_details_memo[ $payment_gateway->id ][ $country_code ] ) ) {
+			$this->payment_gateway_details_memo[ $payment_gateway->id ][ $country_code ] = $this->enhance_payment_gateway_details(
+				$this->get_payment_gateway_base_details( $payment_gateway, 0, $country_code ),
+				$payment_gateway,
+				$country_code
+			);
 		}
 
-		$details = $this->enhance_payment_gateway_details(
-			$this->get_payment_gateway_base_details( $payment_gateway, $payment_gateway_order, $country_code ),
-			$payment_gateway,
-			$country_code
-		);
-
-		$this->payment_gateway_details_memo[ $memo_key ] = $details;
+		$details           = $this->payment_gateway_details_memo[ $payment_gateway->id ][ $country_code ];
+		$details['_order'] = $payment_gateway_order;
 
 		return $details;
 	}
@@ -1250,7 +1244,7 @@ class PaymentsProviders {
 	/**
 	 * Reset the memoized data.
 	 *
-	 * Used to invalidate the request-level caches when the underlying data changes mid-request.
+	 * Call after changing gateway registration, settings, or account state during a request.
 	 * Also useful for testing purposes.
 	 *
 	 * @internal

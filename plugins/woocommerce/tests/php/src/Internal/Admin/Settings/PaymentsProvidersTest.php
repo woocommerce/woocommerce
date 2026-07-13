@@ -965,11 +965,9 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that get_payment_gateway_details memoizes the derived details during a request,
-	 * except for the call-specific order.
+	 * @testdox Gateway details are derived once with a neutral order and receive the requested order on every call.
 	 */
-	public function test_get_payment_gateway_details_is_memoized() {
-		// Arrange.
+	public function test_get_payment_gateway_details_is_memoized(): void {
 		$fake_gateway = new FakePaymentGateway(
 			'fake-gateway-id',
 			array(
@@ -978,29 +976,41 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			),
 		);
 
-		// Deriving the details searches for a matching suggestion. A memoized result skips this.
+		$provider = $this->createMock( PaymentGateway::class );
+		$provider
+			->expects( $this->once() )
+			->method( 'get_details' )
+			->with( $fake_gateway, 0, 'US' )
+			->willReturn(
+				array(
+					'id'     => 'fake-gateway-id',
+					'_order' => 0,
+					'title'  => 'Derived details',
+					'plugin' => array(
+						'slug' => 'fake-plugin-slug',
+					),
+				)
+			);
+		$this->set_payment_gateway_provider_instance( 'fake-gateway-id', $provider );
+
 		$this->mock_extension_suggestions
 			->expects( $this->once() )
 			->method( 'get_by_plugin_slug' )
 			->willReturn( null );
 
-		// Act.
 		$first  = $this->sut->get_payment_gateway_details( $fake_gateway, 1, 'US' );
 		$second = $this->sut->get_payment_gateway_details( $fake_gateway, 5, 'US' );
 
-		// Assert.
-		$this->assertSame( 1, $first['_order'], 'The first call should use the given order' );
-		$this->assertSame( 5, $second['_order'], 'The order should not be memoized' );
+		$this->assertSame( 1, $first['_order'], 'The first call should use the requested order' );
+		$this->assertSame( 5, $second['_order'], 'Memoized details should use the latest requested order' );
 		unset( $first['_order'], $second['_order'] );
-		$this->assertSame( $first, $second, 'Memoized details should match the originally derived ones' );
+		$this->assertSame( $first, $second, 'Memoized details should match the originally derived details' );
 	}
 
 	/**
-	 * Test that the payment gateway details memoization discriminates between countries
-	 * and is cleared by reset_memo.
+	 * @testdox Gateway details are memoized per country and recomputed after reset.
 	 */
-	public function test_get_payment_gateway_details_memo_per_country_and_reset() {
-		// Arrange.
+	public function test_get_payment_gateway_details_memo_per_country_and_reset(): void {
 		$fake_gateway = new FakePaymentGateway(
 			'fake-gateway-id',
 			array(
@@ -1008,17 +1018,44 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
 			),
 		);
+
+		$generation = 0;
+		$provider   = $this->createMock( PaymentGateway::class );
+		$provider
+			->expects( $this->exactly( 3 ) )
+			->method( 'get_details' )
+			->willReturnCallback(
+				function ( $gateway, $order, $country_code ) use ( &$generation ) {
+					$this->assertSame( 0, $order, 'Gateway details should always be derived with a neutral order' );
+					++$generation;
+					return array(
+						'id'     => $gateway->id,
+						'_order' => $order,
+						'title'  => $country_code . '-' . $generation,
+						'plugin' => array(
+							'slug' => 'fake-plugin-slug',
+						),
+					);
+				}
+			);
+		$this->set_payment_gateway_provider_instance( 'fake-gateway-id', $provider );
 
 		$this->mock_extension_suggestions
 			->expects( $this->exactly( 3 ) )
 			->method( 'get_by_plugin_slug' )
 			->willReturn( null );
 
-		// Act.
-		$this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
-		$this->sut->get_payment_gateway_details( $fake_gateway, 0, 'DE' );
+		$first_us = $this->sut->get_payment_gateway_details( $fake_gateway, 1, 'US' );
+		$first_de = $this->sut->get_payment_gateway_details( $fake_gateway, 2, 'DE' );
 		$this->sut->reset_memo();
-		$this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+		$second_us = $this->sut->get_payment_gateway_details( $fake_gateway, 3, 'US' );
+
+		$this->assertSame( 'US-1', $first_us['title'] );
+		$this->assertSame( 'DE-2', $first_de['title'] );
+		$this->assertSame( 'US-3', $second_us['title'] );
+		$this->assertSame( 1, $first_us['_order'] );
+		$this->assertSame( 2, $first_de['_order'] );
+		$this->assertSame( 3, $second_us['_order'] );
 	}
 
 	/**
@@ -6006,6 +6043,19 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			$this->assertArrayNotHasKey( $combination, $seen_combinations, 'Each type+URL combination should be unique' );
 			$seen_combinations[ $combination ] = true;
 		}
+	}
+
+	/**
+	 * Set a payment gateway provider instance for testing.
+	 *
+	 * @param string         $gateway_id The gateway ID.
+	 * @param PaymentGateway $provider   The provider instance.
+	 */
+	private function set_payment_gateway_provider_instance( string $gateway_id, PaymentGateway $provider ): void {
+		$reflection = new \ReflectionClass( $this->sut );
+		$property   = $reflection->getProperty( 'instances' );
+		$property->setAccessible( true );
+		$property->setValue( $this->sut, array( $gateway_id => $provider ) );
 	}
 
 	/**
