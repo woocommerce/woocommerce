@@ -107,6 +107,7 @@ class Cart extends ControllerTestCase {
 
 		wc_empty_cart();
 		$this->reset_customer_state();
+		wc()->session->set( 'wc_notices', null );
 		$this->keys   = array();
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[1]->get_id() );
