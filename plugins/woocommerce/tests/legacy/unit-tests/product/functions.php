@@ -29,32 +29,32 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$term_tag_1 = get_term_by( 'id', $test_tag_1['term_id'], 'product_tag' );
 		$term_tag_2 = get_term_by( 'id', $test_tag_2['term_id'], 'product_tag' );
 
-		$product = WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product( false );
 		$product->set_tag_ids( array( $test_tag_1['term_id'] ) );
 		$product->set_category_ids( array( $test_cat_1['term_id'] ) );
 		$product->set_sku( 'GET TEST SKU SIMPLE' );
 		$product->save();
 
-		$product_2 = WC_Helper_Product::create_simple_product();
+		$product_2 = WC_Helper_Product::create_simple_product( false );
 		$product_2->set_category_ids( array( $test_cat_1['term_id'] ) );
 		$product_2->save();
 
-		$external = WC_Helper_Product::create_simple_product();
+		$external = WC_Helper_Product::create_simple_product( false );
 		$external->set_category_ids( array( $test_cat_1['term_id'] ) );
 		$external->set_sku( 'GET TEST SKU EXTERNAL' );
 		$external->save();
 
-		$external_2 = WC_Helper_Product::create_simple_product();
+		$external_2 = WC_Helper_Product::create_simple_product( false );
 		$external_2->set_tag_ids( array( $test_tag_2['term_id'] ) );
 		$external_2->save();
 
 		$grouped = WC_Helper_Product::create_grouped_product();
 
-		$variation = WC_Helper_Product::create_variation_product();
+		$variation = new WC_Product_Variable();
 		$variation->set_tag_ids( array( $test_tag_1['term_id'] ) );
-		$variation->save();
+		$variation = WC_Helper_Product::create_variation_product( $variation );
 
-		$draft = WC_Helper_Product::create_simple_product();
+		$draft = WC_Helper_Product::create_simple_product( false );
 		$draft->set_status( ProductStatus::DRAFT );
 		$draft->save();
 

@@ -25,8 +25,8 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
-		$this->sut = new DownloadPermissionsAdjuster();
-		$this->sut->init();
+		parent::setUp();
+		$this->initialize_subject();
 
 		// This is needed for "product->set_downloads" to work without actual files.
 		add_filter(
@@ -49,12 +49,37 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Reset non-transactional test doubles and option caches.
+	 */
+	public function tearDown(): void {
+		try {
+			$this->reset_legacy_proxy_mocks();
+		} finally {
+			try {
+				parent::tearDown();
+			} finally {
+				wp_cache_delete( 'wc_downloads_approved_directories_mode', 'options' );
+				wp_cache_delete( 'alloptions', 'options' );
+				wp_cache_delete( 'notoptions', 'options' );
+			}
+		}
+	}
+
+	/**
+	 * Initialize the subject after test doubles have been registered.
+	 */
+	private function initialize_subject(): void {
+		$this->sut = new DownloadPermissionsAdjuster();
+		$this->sut->init();
+	}
+
+	/**
 	 * @testdox DownloadPermissionsAdjuster class hooks on 'adjust_download_permissions' on initialization.
 	 */
 	public function test_class_hooks_on_adjust_download_permissions() {
 		remove_all_actions( 'adjust_download_permissions' );
 		$this->assertFalse( has_action( 'adjust_download_permissions' ) );
-		$this->setUp();
+		$this->initialize_subject();
 		$this->assertTrue( has_action( 'adjust_download_permissions' ) );
 	}
 
@@ -192,7 +217,7 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 
 		$data_store = $this->create_mock_data_store( $data_for_data_store );
 
-		$this->setUp();
+		$this->initialize_subject();
 		$this->sut->adjust_download_permissions( $product->get_id() );
 
 		$expected_created_data = array(
@@ -254,7 +279,7 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 
 		$data_store = $this->create_mock_data_store( $data_for_data_store );
 
-		$this->setUp();
+		$this->initialize_subject();
 		$this->sut->adjust_download_permissions( $product->get_id() );
 
 		$this->assertEmpty( $data_store->created_data );
@@ -311,7 +336,7 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 
 		$data_store = $this->create_mock_data_store( $data_for_data_store );
 
-		$this->setUp();
+		$this->initialize_subject();
 		$this->sut->adjust_download_permissions( $product->get_id() );
 
 		$expected = array(
