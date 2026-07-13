@@ -85,6 +85,49 @@ if ( ! function_exists( 'purple_unregister_patterns' ) ) :
 
 endif;
 
+if ( ! function_exists( 'purple_hide_woocommerce_template_parts' ) ) :
+	/**
+	 * Hide WooCommerce template parts the theme doesn't use from the Site Editor.
+	 *
+	 * Companion to purple_unregister_patterns(): template parts have no
+	 * unregister API — WooCommerce injects them into template queries with its
+	 * own get_block_templates filter (priority 10) — so they are filtered out
+	 * of query results here instead. This only affects listings; rendering a
+	 * template part goes through get_block_file_template and is unaffected,
+	 * and a copy customized in the editor is stored under a different ID, so
+	 * it would remain visible.
+	 *
+	 * @param WP_Block_Template[] $templates     Found templates.
+	 * @param array               $query         Template query arguments.
+	 * @param string              $template_type wp_template or wp_template_part.
+	 * @return WP_Block_Template[]
+	 */
+	function purple_hide_woocommerce_template_parts( array $templates, array $query, string $template_type ): array {
+		if ( 'wp_template_part' !== $template_type ) {
+			return $templates;
+		}
+
+		$hidden_template_part_ids = array(
+			// Referenced only by WooCommerce's coming-soon patterns, which
+			// purple_unregister_patterns() removes; Purple ships its own
+			// coming-soon template.
+			'woocommerce//coming-soon-social-links',
+		);
+
+		return array_values(
+			array_filter(
+				$templates,
+				static function ( $template ) use ( $hidden_template_part_ids ) {
+					return ! in_array( $template->id, $hidden_template_part_ids, true );
+				}
+			)
+		);
+	}
+
+endif;
+
+add_filter( 'get_block_templates', 'purple_hide_woocommerce_template_parts', 20, 3 );
+
 if ( ! function_exists( 'purple_setup' ) ) :
 	/**
 	 * Sets up theme defaults and registers support for various WordPress features.
