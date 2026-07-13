@@ -42,7 +42,9 @@ class AttributeSlugLengthTest extends WC_Unit_Test_Case {
 			'English (Latin)'                 => array( 'en_US', 1 ),
 			'Portuguese (Latin)'              => array( 'pt_BR', 1 ),
 			'Unknown locale (Latin)'          => array( 'xx_YY', 1 ),
-			'Vietnamese (Latin Ext.)'         => array( 'vi', 3 ),
+			// Vietnamese diacritics are transliterated to ASCII by sanitize_title()
+			// before the byte limit applies, so it gets the full Latin budget.
+			'Vietnamese (transliterated)'     => array( 'vi', 1 ),
 			'Russian (Cyrillic)'              => array( 'ru_RU', 2 ),
 			'Belarusian (Cyrillic, 3-letter)' => array( 'bel', 2 ),
 			'Kyrgyz (Cyrillic, 3-letter)'     => array( 'kir', 2 ),
