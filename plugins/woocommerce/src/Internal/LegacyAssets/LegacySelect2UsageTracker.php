@@ -77,19 +77,16 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 			return;
 		}
 
-		$scope = $this->get_request_scope( $context );
-
-		if ( $this->was_recently_checked( $scope ) ) {
-			return;
-		}
-
 		$event = $this->get_usage_event( $context );
-		$this->mark_recently_checked( $scope );
-
 		if ( empty( $event ) ) {
 			return;
 		}
 
+		if ( $this->was_recently_checked( $event ) ) {
+			return;
+		}
+
+		$this->mark_recently_checked( $event );
 		$this->record_event( self::EVENT_NAME, $event );
 	}
 
@@ -138,12 +135,20 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 			return array();
 		}
 
+		$handles    = array_keys( $handles );
+		$dependents = array_keys( $dependents );
+		$sources    = array_unique( $sources );
+
+		sort( $handles );
+		sort( $dependents );
+		sort( $sources );
+
 		return array(
 			'context'    => $context,
 			'page_type'  => $this->get_current_page_type( $context ),
-			'handles'    => implode( ',', array_keys( $handles ) ),
-			'dependents' => implode( ',', array_keys( $dependents ) ),
-			'sources'    => implode( ',', array_unique( $sources ) ),
+			'handles'    => implode( ',', $handles ),
+			'dependents' => implode( ',', $dependents ),
+			'sources'    => implode( ',', $sources ),
 		);
 	}
 
@@ -165,23 +170,23 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Whether this request scope was already checked recently.
+	 * Whether this usage event was already checked recently.
 	 *
-	 * @param array<string, string> $scope Request scope.
+	 * @param array<string, string> $event Usage event.
 	 * @return bool
 	 */
-	private function was_recently_checked( array $scope ): bool {
-		return false !== get_transient( $this->get_transient_key( $scope ) );
+	private function was_recently_checked( array $event ): bool {
+		return false !== get_transient( $this->get_transient_key( $event ) );
 	}
 
 	/**
-	 * Mark this request scope as recently checked.
+	 * Mark this usage event as recently checked.
 	 *
-	 * @param array<string, string> $scope Request scope.
+	 * @param array<string, string> $event Usage event.
 	 * @return void
 	 */
-	private function mark_recently_checked( array $scope ): void {
-		set_transient( $this->get_transient_key( $scope ), 'yes', WEEK_IN_SECONDS );
+	private function mark_recently_checked( array $event ): void {
+		set_transient( $this->get_transient_key( $event ), 'yes', WEEK_IN_SECONDS );
 	}
 
 	/**
@@ -200,30 +205,17 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Get the request scope for rate limiting checks.
+	 * Get the transient key for a usage event.
 	 *
-	 * @param string $context The request context.
-	 * @return array<string, string>
-	 */
-	private function get_request_scope( string $context ): array {
-		return array(
-			'context'   => $context,
-			'page_type' => $this->get_current_page_type( $context ),
-		);
-	}
-
-	/**
-	 * Get the transient key for a request scope.
-	 *
-	 * @param array<string, string> $scope Request scope.
+	 * @param array<string, string> $event Usage event.
 	 * @return string
 	 */
-	private function get_transient_key( array $scope ): string {
-		ksort( $scope );
+	private function get_transient_key( array $event ): string {
+		ksort( $event );
 
-		$scope_json = wp_json_encode( $scope );
+		$event_json = wp_json_encode( $event );
 
-		return self::TRANSIENT_KEY_PREFIX . md5( is_string( $scope_json ) ? $scope_json : '' );
+		return self::TRANSIENT_KEY_PREFIX . md5( is_string( $event_json ) ? $event_json : '' );
 	}
 
 	/**
