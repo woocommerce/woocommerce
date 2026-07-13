@@ -10,7 +10,8 @@ import type { Field } from '@wordpress/dataviews';
  */
 import type { ProductEntityRecord } from '../types';
 
-// Radix UI (used by @wordpress/ui SelectControl) rejects empty-string values.
+// Base UI (used by @wordpress/ui SelectControl) treats an empty-string value
+// as "no selection" and shows the placeholder instead of the item label.
 // We use 'parent' as a UI sentinel for the '' API value ("Same as parent").
 const SAME_AS_PARENT = 'parent';
 
