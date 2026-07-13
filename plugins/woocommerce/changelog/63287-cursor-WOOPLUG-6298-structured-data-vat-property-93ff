@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix: Prevent `valueAddedTaxIncluded` from being added to structured data when taxes are disabled.
