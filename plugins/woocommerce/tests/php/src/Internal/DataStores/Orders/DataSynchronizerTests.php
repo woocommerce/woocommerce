@@ -29,6 +29,13 @@ class DataSynchronizerTests extends \HposTestCase {
 	private $sut;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
 	 * Initializes system under test.
 	 */
 	public function setUp(): void {
@@ -41,7 +48,6 @@ class DataSynchronizerTests extends \HposTestCase {
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
-		OrderHelper::delete_order_custom_tables(); // We need this since non-temporary tables won't drop automatically.
 		OrderHelper::create_order_custom_table_if_not_exist();
 		OrderHelper::toggle_cot_feature_and_usage( false );
 		$this->sut = $container->get( DataSynchronizer::class );

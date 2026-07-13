@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Caching;
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use WC_Helper_Order;
 
 /**
  * Class OrderCacheTest.

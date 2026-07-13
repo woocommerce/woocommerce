@@ -30,11 +30,11 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	private $endpoint;
 
 	/**
-	 * Shared admin user ID used for REST authentication across the class.
+	 * Administrator ID used to authenticate requests.
 	 *
 	 * @var int
 	 */
-	protected static $user_id;
+	private static $administrator_id;
 
 	/**
 	 * Customer schema instance.
@@ -42,6 +42,19 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @var CustomerSchema
 	 */
 	private $customer_schema;
+
+	/**
+	 * Create immutable class fixtures.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$administrator_id = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
 
 	/**
 	 * Runs after each test.
@@ -79,15 +92,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Create the shared admin user once for the whole class.
-	 *
-	 * @param object $factory Factory object.
-	 */
-	public static function wpSetUpBeforeClass( $factory ) {
-		self::$user_id = $factory->user->create( array( 'role' => 'administrator' ) );
-	}
-
-	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -104,7 +108,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->endpoint = new CustomersController();
 		$this->endpoint->init( $this->customer_schema, $collection_query, $update_utils );
 
-		wp_set_current_user( self::$user_id );
+		wp_set_current_user( self::$administrator_id );
 	}
 
 	/**

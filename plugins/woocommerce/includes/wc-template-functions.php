@@ -3115,20 +3115,27 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 
 		if ( false === $product_categories ) {
 			// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( https://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work.
-			$product_categories = get_categories(
-				apply_filters(
-					'woocommerce_product_subcategories_args',
-					array(
-						'parent'       => $parent_id,
-						'hide_empty'   => 0,
-						'hierarchical' => 1,
-						'taxonomy'     => 'product_cat',
-						'pad_counts'   => 1,
-					)
+			/**
+			 * Filters the arguments used to retrieve product subcategories.
+			 *
+			 * @since 11.1.0
+			 *
+			 * @param array $args Array of arguments for get_categories().
+			 */
+			$args = apply_filters(
+				'woocommerce_product_subcategories_args',
+				array(
+					'parent'       => $parent_id,
+					'hide_empty'   => 0,
+					'hierarchical' => 1,
+					'taxonomy'     => 'product_cat',
+					'pad_counts'   => 1,
 				)
 			);
 
-			if ( $cache_key ) {
+			$product_categories = get_categories( $args );
+
+			if ( $cache_key && is_array( $args ) && ! empty( $args['taxonomy'] ) ) {
 				wp_cache_set( $cache_key, $product_categories, 'product_cat' );
 			}
 		}

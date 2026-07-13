@@ -17,6 +17,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		parent::tearDown();
 		$this->disable_cogs_feature();
 		remove_all_filters( 'woocommerce_get_cogs_total_value' );
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
@@ -43,6 +44,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 * Setup items we need repeatedly across tests in this class.
 	 */
 	public function set_up() {
+		self::enable_direct_product_attribute_lookup_updates();
 		$this->admin_user           = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		$this->shop_manager_user    = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
 		$this->download_directories = wc_get_container()->get( Download_Directories::class );

@@ -21,6 +21,8 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
+
 		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
 		$this->sut = new class() extends WC_Checkout {
 			public function validate_posted_data( &$data, &$errors ) {
@@ -44,6 +46,8 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 		delete_option( 'woocommerce_calc_taxes' );
+
+		parent::tearDown();
 	}
 
 	/**

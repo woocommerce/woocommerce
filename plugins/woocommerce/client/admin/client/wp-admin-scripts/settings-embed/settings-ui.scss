@@ -1,13 +1,13 @@
 @import "@wordpress/dataviews/build-style/style.css";
 
 body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
-	background-color: #fff;
+	background-color: var(--wpds-color-background-surface-neutral);
 
 	#mainform,
 	#wpcontent,
 	#wpbody-content,
 	.wrap.woocommerce {
-		background-color: #fff;
+		background-color: var(--wpds-color-background-surface-neutral);
 	}
 
 	#mainform {
@@ -19,7 +19,8 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	#mainform .subsubsub:not(.list-table-filters) {
-		border-bottom: 1px solid #f0f0f0;
+		background: var(--wpds-color-background-surface-neutral-strong);
+		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
 		box-sizing: border-box;
 		color: transparent;
 		display: flex;
@@ -40,14 +41,14 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		li:first-child a,
 		li:last-child a {
 			align-items: center;
-			color: #1e1e1e;
+			color: var(--wpds-color-foreground-interactive-neutral);
 			display: inline-flex;
-			font-size: 13px;
-			font-weight: 500;
+			font-size: var(--wpds-typography-font-size-md);
+			font-weight: var(--wpds-typography-font-weight-medium);
 			height: 48px;
-			line-height: 20px;
+			line-height: var(--wpds-typography-line-height-sm);
 			margin: 0;
-			padding: 0 16px;
+			padding: 0 var(--wpds-dimension-padding-lg);
 			position: relative;
 			text-decoration: none;
 			white-space: nowrap;
@@ -56,16 +57,16 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			&:hover,
 			&:active {
 				box-shadow: none;
-				color: var(--wp-admin-theme-color, #3858e9);
+				color: var(--wpds-color-foreground-interactive-brand);
 				outline: none;
 			}
 
 			&.current {
-				color: #1e1e1e;
-				font-weight: 500;
+				color: var(--wpds-color-foreground-interactive-neutral);
+				font-weight: var(--wpds-typography-font-weight-medium);
 
 				&::after {
-					background: var(--wp-admin-theme-color, #3858e9);
+					background: var(--wpds-color-stroke-interactive-brand);
 					border-radius: 999px;
 					bottom: 0;
 					content: "";
@@ -82,37 +83,32 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 	}
 
-	.wc-settings-ui-shell.admin-ui-page {
+	.wc-settings-ui-shell {
+		background: transparent;
 		box-sizing: border-box;
-		color: #1e1e1e;
-		font-size: 13px;
+		color: var(--wpds-color-foreground-content-neutral);
+		font-size: var(--wpds-typography-font-size-md);
 		height: auto;
-		line-height: 20px;
+		line-height: var(--wpds-typography-line-height-sm);
 		margin: 0 -48px;
 	}
 
-	.wc-settings-ui-shell .admin-ui-page__header {
+	.wc-settings-ui-shell > :first-child {
 		padding-left: 48px;
 		padding-right: 48px;
 		position: static;
 	}
 
 	.wc-settings-ui-shell {
-		&:has(.wc-settings-ui-shell__navigation) .admin-ui-page__header {
+		&:has(.wc-settings-ui-shell__navigation) > :first-child {
 			border-bottom: 0;
 		}
 	}
 
-	.wc-settings-ui-shell .admin-ui-page__header-title {
-		font-size: 20px;
-		font-weight: 500;
-		line-height: 24px;
-	}
-
 	.wc-settings-ui-shell__breadcrumbs {
-		color: #757575;
-		font-size: 12px;
-		line-height: 16px;
+		color: var(--wpds-color-foreground-content-neutral-weak);
+		font-size: var(--wpds-typography-font-size-sm);
+		line-height: var(--wpds-typography-line-height-xs);
 		margin: 0 0 8px;
 	}
 
@@ -123,61 +119,24 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 
 		a {
-			color: #505050;
+			color: var(--wpds-color-foreground-interactive-neutral-weak);
 			text-decoration: none;
 
 			&:focus,
 			&:hover {
-				color: var(--wp-admin-theme-color, #3858e9);
+				color: var(--wpds-color-foreground-interactive-brand);
 			}
 		}
 	}
 
-	.wc-settings-ui-shell__badge {
-		align-items: center;
-		border-radius: 2px;
-		display: inline-flex;
-		font-size: 12px;
-		font-weight: 400;
-		line-height: 16px;
-		min-height: 24px;
-		padding: 0 8px;
-
-		// Default / neutral — also applies to `&--default`, which inherits the base styling.
-		background: var(--Alias-bg-bg-surface-secondary, #f5f5f5);
-		color: var(--Alias-text-text, #070707);
-
-		&--success {
-			background: var(--Alias-bg-bg-surface-success, #daffe0);
-			color: var(--Alias-text-text-success, #144722);
-		}
-
-		&--info {
-			background: var(--Alias-bg-bg-surface-secondary, #f5f5f5);
-			color: var(--Alias-text-text, #070707);
-		}
-
-		&--warning {
-			background: var(--Alias-bg-bg-surface-warning, #fff2d7);
-			color: var(--Alias-text-text-warning, #4d3716);
-		}
-
-		&--error {
-			// No `--Alias-*-error` token is defined in the admin design-token set,
-			// so use a direct color until one ships.
-			background: #fce4e4;
-			color: #5a0000;
-		}
-	}
-
 	.wc-settings-ui-shell__navigation {
-		border-bottom: 1px solid #f0f0f0;
+		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
 		margin: 0;
 		width: 100%;
 	}
 
 	.wc-settings-ui-shell__tabs {
-		background: #fff;
+		background: var(--wpds-color-background-surface-neutral-strong);
 		box-sizing: border-box;
 		display: flex;
 		margin: 0 !important;
@@ -192,13 +151,13 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	.wc-settings-ui-shell__tab {
 		align-items: center;
-		color: #1e1e1e;
+		color: var(--wpds-color-foreground-interactive-neutral);
 		display: inline-flex;
-		font-size: 13px;
-		font-weight: 500;
+		font-size: var(--wpds-typography-font-size-md);
+		font-weight: var(--wpds-typography-font-weight-medium);
 		height: 48px;
-		line-height: 20px;
-		padding: 0 16px;
+		line-height: var(--wpds-typography-line-height-sm);
+		padding: 0 var(--wpds-dimension-padding-lg);
 		position: relative;
 		text-decoration: none;
 		white-space: nowrap;
@@ -207,15 +166,15 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		&:hover,
 		&:active {
 			box-shadow: none;
-			color: var(--wp-admin-theme-color, #3858e9);
+			color: var(--wpds-color-foreground-interactive-brand);
 			outline: none;
 		}
 
 		&.is-active {
-			color: #1e1e1e;
+			color: var(--wpds-color-foreground-interactive-neutral);
 
 			&::after {
-				background: var(--wp-admin-theme-color, #3858e9);
+				background: var(--wpds-color-stroke-interactive-brand);
 				border-radius: 999px;
 				bottom: 0;
 				content: "";
@@ -227,32 +186,14 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 	}
 
-	.wc-settings-ui-shell__notice.components-notice {
+	.wc-settings-ui-shell__notice {
 		margin: 24px 48px 0;
 	}
 
 	.wc-settings-ui {
 		box-sizing: border-box;
 		margin: 32px auto 48px;
-		max-width: var(--wpds-dimension-surface-width-xl, 720px);
-	}
-
-	.wc-settings-ui__section {
-		margin: 0 0 24px;
-	}
-
-	// Surface styling (background, border, radius, padding) comes from the
-	// @wordpress/ui Card components.
-	.wc-settings-ui__section-card {
-		box-sizing: border-box;
-		width: 100%;
-	}
-
-	.wc-settings-ui__section-header {
-		align-items: flex-start;
-		display: flex;
-		gap: 24px;
-		justify-content: space-between;
+		max-width: var(--wpds-dimension-surface-width-xl);
 	}
 
 	.wc-settings-ui__section-heading {
@@ -260,9 +201,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui__section-description {
-		color: #757575;
-		font-size: 13px;
-		line-height: 20px;
+		color: var(--wpds-color-foreground-content-neutral-weak);
 		margin: 8px 0 0;
 
 		p {
@@ -275,16 +214,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui__section-actions {
-		display: flex;
 		flex: 0 0 auto;
-		flex-wrap: wrap;
-		gap: 8px;
-	}
-
-	.wc-settings-ui__section-fields {
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
 	}
 
 	.wc-settings-ui__field {
@@ -293,8 +223,8 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui__info {
-		background: #f6f7f7;
-		border-radius: 4px;
+		background: var(--wpds-color-background-surface-neutral-weak);
+		border-radius: var(--wpds-border-radius-md);
 		padding: 16px;
 
 		strong {
@@ -318,7 +248,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 
 		.components-base-control__help {
-			color: #757575;
+			color: var(--wpds-color-foreground-content-neutral-weak);
 			font-size: 13px;
 			line-height: 20px;
 			margin-top: 8px;
@@ -375,34 +305,11 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		transform: translateY(-50%);
 	}
 
-	.wc-settings-ui__unsaved-changes-modal {
-		.components-modal__header {
-			min-height: 72px;
-			padding: 24px 32px 8px;
-		}
-
-		.components-modal__header-heading {
-			font-size: 20px;
-			font-weight: 500;
-			line-height: 24px;
-		}
-
-		.components-modal__content {
-			padding: 4px 32px 32px;
-		}
-
-		p {
-			font-size: 13px;
-			line-height: 20px;
-			margin: 0;
-		}
-	}
-
-	.wc-settings-ui__unsaved-changes-actions {
-		display: flex;
-		gap: 8px;
-		justify-content: flex-end;
-		margin-top: 24px;
+	// Lifts the dialog above the shell's own stacking context; 100000 matches
+	// @wordpress/components modals.
+	.wc-settings-ui__unsaved-changes-portal {
+		position: relative;
+		z-index: 100000;
 	}
 
 	@media (max-width: 960px) {
@@ -417,15 +324,12 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			padding-right: 24px;
 		}
 
-		// Match the base `.wc-settings-ui-shell.admin-ui-page` specificity so
-		// this breakpoint's full-bleed margin actually overrides the -48px
-		// base value instead of losing the cascade.
-		.wc-settings-ui-shell.admin-ui-page {
+		.wc-settings-ui-shell {
 			margin-left: -24px;
 			margin-right: -24px;
 		}
 
-		.wc-settings-ui-shell .admin-ui-page__header {
+		.wc-settings-ui-shell > :first-child {
 			padding-left: 24px;
 			padding-right: 24px;
 		}
@@ -435,7 +339,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			padding-right: 24px;
 		}
 
-		.wc-settings-ui-shell__notice.components-notice {
+		.wc-settings-ui-shell__notice {
 			margin-left: 24px;
 			margin-right: 24px;
 		}

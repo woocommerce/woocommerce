@@ -15,29 +15,30 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * Runs before all tests in the class.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
+		OrderHelper::delete_order_custom_tables();
+		OrderHelper::create_order_custom_table_if_not_exist();
+	}
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-
-		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
-		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
-		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
-		OrderHelper::delete_order_custom_tables();
-		OrderHelper::create_order_custom_table_if_not_exist();
 	}
 
 	/**
-	 * Destroys system under test.
+	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 
-		// Add back removed filter.
-		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
-		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		parent::tearDown();
 	}
 
@@ -171,7 +172,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$base_id + 5,
 			$customer_2_id
 		);
-		$wpdb->query( $query );
+		$this->assertSame( 5, $wpdb->query( $query ), 'All custom order table fixtures should be inserted.' );
 		//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		$sut          = new WC_Customer_Data_Store();

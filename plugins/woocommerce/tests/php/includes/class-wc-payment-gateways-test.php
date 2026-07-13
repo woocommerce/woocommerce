@@ -27,7 +27,6 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		$container = wc_get_container();
 		$container->reset_all_resolved();
 		$this->sut = new WC_Payment_Gateways();
-		$this->sut->init();
 	}
 
 	/**
@@ -42,6 +41,13 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	 * @testdox Enabling a gateway fires the notification action and logs the event.
 	 */
 	public function test_wc_payment_gateway_enabled_notification(): void {
+		$gateways          = $this->sut->payment_gateways();
+		$providers_service = $this->createMock( \Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders::class );
+		$providers_service->expects( $this->exactly( count( $gateways ) ) )
+			->method( 'get_payment_gateway_details' )
+			->willReturn( array() );
+		wc_get_container()->replace( \Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders::class, $providers_service );
+
 		// phpcs:disable Squiz.Commenting
 		$fake_logger = new class() {
 			public $infos = array();
@@ -68,26 +74,32 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		};
 		add_action( 'woocommerce_payment_gateway_enabled', $action_watcher );
 
-		foreach ( $this->sut->payment_gateways() as $gateway ) {
-			$gateway->settings['enabled'] = 'no';
-			$gateway->settings['title']   = null;
-			update_option( $gateway->get_option_key(), $gateway->settings );
+		try {
+			foreach ( $gateways as $gateway ) {
+				$gateway->settings['enabled'] = 'no';
+				$gateway->settings['title']   = null;
+				update_option( $gateway->get_option_key(), $gateway->settings );
 
-			$gateway->settings['enabled'] = 'yes';
-			update_option( $gateway->get_option_key(), $gateway->settings );
+				$gateway->settings['enabled'] = 'yes';
+				update_option( $gateway->get_option_key(), $gateway->settings );
 
-			$this->assertEquals(
-				'Payment gateway enabled: "' . $gateway->get_method_title() . '"',
-				end( $fake_logger->infos )['message'],
-				'Logger should record the gateway enable event'
-			);
+				$this->assertEquals(
+					'Payment gateway enabled: "' . $gateway->get_method_title() . '"',
+					end( $fake_logger->infos )['message'],
+					'Logger should record the gateway enable event'
+				);
 
-			$last_fired = end( $action_fired );
-			$this->assertInstanceOf( WC_Payment_Gateway::class, $last_fired, 'Action should fire with a gateway object' );
-			$this->assertEquals( $gateway->id, $last_fired->id, 'Action should fire with the correct gateway' );
+				$last_fired = end( $action_fired );
+				$this->assertInstanceOf( WC_Payment_Gateway::class, $last_fired, 'Action should fire with a gateway object' );
+				$this->assertEquals( $gateway->id, $last_fired->id, 'Action should fire with the correct gateway' );
+			}
+
+			$this->assertCount( count( $gateways ), $fake_logger->infos, 'Logger should run once per enabled gateway' );
+			$this->assertCount( count( $gateways ), $action_fired, 'Action should fire once per enabled gateway' );
+		} finally {
+			remove_action( 'woocommerce_payment_gateway_enabled', $action_watcher );
+			wc_get_container()->reset_replacement( \Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders::class );
 		}
-
-		remove_action( 'woocommerce_payment_gateway_enabled', $action_watcher );
 	}
 
 	/**

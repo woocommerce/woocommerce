@@ -56,9 +56,20 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->session->set( 'wc_notices', null );
 
-		$variable_product = WC_Helper_Product::create_variation_product();
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'Sold individually variable product' );
+		$variable_product->set_attributes(
+			array( WC_Helper_Product::create_product_attribute_object( 'size', array( 'small' ) ) )
+		);
 		$variable_product->set_sold_individually( true );
 		$variable_product->save();
+		WC_Helper_Product::create_product_variation_object(
+			$variable_product->get_id(),
+			'SOLD INDIVIDUALLY VARIATION ' . microtime(),
+			10,
+			array( 'pa_size' => 'small' )
+		);
+		$variable_product = new WC_Product_Variable( $variable_product->get_id() );
 
 		$variation_ids = $variable_product->get_children();
 		$this->assertNotEmpty( $variation_ids, 'Expected at least one variation.' );

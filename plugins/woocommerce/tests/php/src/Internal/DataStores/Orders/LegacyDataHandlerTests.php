@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Class OrdersTableQueryTests.
@@ -16,9 +17,23 @@ class LegacyDataHandlerTests extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
 	 * @var LegacyDataHandler
 	 */
 	private $sut;
+
+	/**
+	 * Whether HPOS was authoritative before the test.
+	 *
+	 * @var bool
+	 */
+	private $previous_hpos_state;
 
 	/**
 	 * Initializes system under test.
@@ -27,7 +42,10 @@ class LegacyDataHandlerTests extends \WC_Unit_Test_Case {
 		parent::setUp();
 
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		$this->setup_cot();
+		$this->previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		OrderHelper::toggle_cot_feature_and_usage( true );
 
 		$this->sut = wc_get_container()->get( LegacyDataHandler::class );
 	}
@@ -36,9 +54,10 @@ class LegacyDataHandlerTests extends \WC_Unit_Test_Case {
 	 * Destroys system under test.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		$this->clean_up_cot_setup();
+		OrderHelper::toggle_cot_feature_and_usage( $this->previous_hpos_state );
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+		parent::tearDown();
 	}
 
 	/**
@@ -105,7 +124,9 @@ class LegacyDataHandlerTests extends \WC_Unit_Test_Case {
 		$this->enable_cot_sync();
 		$order_ids = array();
 		for ( $i = 0; $i < 10; $i++ ) {
-			$order_id    = OrderHelper::create_order()->get_id();
+			$order = new \WC_Order();
+			$order->save();
+			$order_id    = $order->get_id();
 			$order_ids[] = $order_id;
 		}
 		$this->disable_cot_sync();

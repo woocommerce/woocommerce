@@ -52,6 +52,7 @@ interface TestJob {
 	shardNumber: number;
 	optional: boolean;
 	testType: string;
+	usesSharedPluginBuild?: boolean;
 	report: TestJobReport;
 }
 
@@ -229,6 +230,10 @@ async function createTestJob(
 		optional: config.optional,
 		testType: config.testType,
 	};
+
+	if ( config.usesSharedPluginBuild ) {
+		createdJob.usesSharedPluginBuild = true;
+	}
 
 	// We want to make sure that we're including the configuration for
 	// any test environment that the job will need in order to run.

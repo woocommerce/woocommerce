@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@wordpress/admin-ui';
-import { Button, Modal, Notice } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import {
 	Component,
 	createElement,
@@ -14,8 +14,16 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Card } from '@wordpress/ui';
-import type { ErrorInfo, ReactNode } from 'react';
+import {
+	Badge,
+	Button as UIButton,
+	Card,
+	Dialog,
+	Notice,
+	Stack,
+	Text,
+} from '@wordpress/ui';
+import type { ComponentProps, ErrorInfo, ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -36,6 +44,7 @@ import type {
 	SettingsUIGroup,
 	SettingsUISaveStrategy,
 	SettingsUISchema,
+	SettingsUIShellBadgeIntent,
 	SettingsFieldContext,
 	SettingsValue,
 	SettingsValues,
@@ -104,14 +113,25 @@ const getActionVariant = ( variant?: string ) =>
 		? variant
 		: 'secondary' ) as 'primary' | 'secondary' | 'tertiary' | 'link';
 
-// TS unions erase at runtime, so guard the className interpolation against unexpected
-// strings from PHP-supplied schemas.
-const getBadgeIntent = ( intent?: string ) =>
-	[ 'default', 'info', 'success', 'warning', 'error' ].includes(
-		intent || ''
-	)
-		? intent
-		: 'default';
+const BADGE_INTENTS: Record<
+	SettingsUIShellBadgeIntent,
+	ComponentProps< typeof Badge >[ 'intent' ]
+> = {
+	default: 'draft',
+	info: 'informational',
+	success: 'stable',
+	warning: 'medium',
+	error: 'high',
+};
+
+// TS unions erase at runtime, so guard against unexpected strings from
+// PHP-supplied schemas.
+const getBadgeIntent = (
+	intent?: string
+): ComponentProps< typeof Badge >[ 'intent' ] =>
+	intent && intent in BADGE_INTENTS
+		? BADGE_INTENTS[ intent as SettingsUIShellBadgeIntent ]
+		: BADGE_INTENTS.default;
 
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>
 	schema.save || { adapter: 'form_post' };
@@ -190,34 +210,49 @@ const UnsavedChangesModal = ( {
 	onSave: () => void;
 } ) => {
 	return (
-		<Modal
-			className="wc-settings-ui__unsaved-changes-modal"
-			title={ __( 'You have unsaved changes', 'woocommerce' ) }
-			onRequestClose={ onClose }
+		<Dialog.Root
+			open
+			onOpenChange={ ( open ) => {
+				if ( ! open ) {
+					onClose();
+				}
+			} }
 		>
-			<p>
-				{ __(
-					"If you leave now, your changes won't be saved.",
-					'woocommerce'
-				) }
-			</p>
-			<div className="wc-settings-ui__unsaved-changes-actions">
-				<Button variant="tertiary" onClick={ onDiscard }>
-					{ __( 'Discard', 'woocommerce' ) }
-				</Button>
-				<Button
-					variant="primary"
-					type="button"
-					name="save"
-					value={ __( 'Save', 'woocommerce' ) }
-					isBusy={ isSaving }
-					disabled={ isSaving }
-					onClick={ onSave }
-				>
-					{ __( 'Save', 'woocommerce' ) }
-				</Button>
-			</div>
-		</Modal>
+			<Dialog.Popup
+				className="wc-settings-ui__unsaved-changes-modal"
+				portal={
+					<Dialog.Portal className="wc-settings-ui__unsaved-changes-portal" />
+				}
+				size="small"
+			>
+				<Dialog.Header>
+					<Dialog.Title>
+						{ __( 'You have unsaved changes', 'woocommerce' ) }
+					</Dialog.Title>
+					<Dialog.CloseIcon />
+				</Dialog.Header>
+				<Dialog.Content>
+					<Dialog.Description>
+						{ __(
+							"If you leave now, your changes won't be saved.",
+							'woocommerce'
+						) }
+					</Dialog.Description>
+				</Dialog.Content>
+				<Dialog.Footer className="wc-settings-ui__unsaved-changes-actions">
+					<UIButton variant="minimal" onClick={ onDiscard }>
+						{ __( 'Discard', 'woocommerce' ) }
+					</UIButton>
+					<UIButton
+						loading={ isSaving }
+						disabled={ isSaving }
+						onClick={ onSave }
+					>
+						{ __( 'Save', 'woocommerce' ) }
+					</UIButton>
+				</Dialog.Footer>
+			</Dialog.Popup>
+		</Dialog.Root>
 	);
 };
 
@@ -232,7 +267,15 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 	return (
 		<Card.Header
 			className="wc-settings-ui__section-header"
-			render={ <header /> }
+			render={
+				<Stack
+					render={ <header /> }
+					direction="row"
+					gap="xl"
+					align="flex-start"
+					justify="space-between"
+				/>
+			}
 		>
 			<div className="wc-settings-ui__section-heading">
 				{ group.title ? (
@@ -244,15 +287,24 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 					</Card.Title>
 				) : null }
 				{ group.description ? (
-					<div className="wc-settings-ui__section-description">
+					<Text
+						className="wc-settings-ui__section-description"
+						variant="body-md"
+						render={ <div /> }
+					>
 						<RawHTML>
 							{ sanitizeSettingsHtml( group.description ) }
 						</RawHTML>
-					</div>
+					</Text>
 				) : null }
 			</div>
 			{ group.actions && group.actions.length > 0 ? (
-				<div className="wc-settings-ui__section-actions">
+				<Stack
+					className="wc-settings-ui__section-actions"
+					direction="row"
+					gap="sm"
+					wrap="wrap"
+				>
 					{ group.actions.map( ( action ) => (
 						<Button
 							key={ action.id }
@@ -264,7 +316,7 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 							{ action.label }
 						</Button>
 					) ) }
-				</div>
+				</Stack>
 			) : null }
 		</Card.Header>
 	);
@@ -358,12 +410,14 @@ export class SettingsUIErrorBoundary extends Component<
 	render() {
 		if ( this.state.hasError ) {
 			return (
-				<Notice status="error" isDismissible={ false }>
-					{ __(
-						'Something went wrong while rendering this settings page. Reload the page with the settings UI feature disabled to use the classic settings screen.',
-						'woocommerce'
-					) }
-				</Notice>
+				<Notice.Root intent="error">
+					<Notice.Description>
+						{ __(
+							'Something went wrong while rendering this settings page. Reload the page with the settings UI feature disabled to use the classic settings screen.',
+							'woocommerce'
+						) }
+					</Notice.Description>
+				</Notice.Root>
 			);
 		}
 
@@ -429,14 +483,12 @@ const ShellHeader = ( {
 
 	const badges = shell.badges?.length
 		? shell.badges.map( ( badge, index ) => (
-				<span
-					className={ `wc-settings-ui-shell__badge wc-settings-ui-shell__badge--${ getBadgeIntent(
-						badge.intent
-					) }` }
+				<Badge
+					intent={ getBadgeIntent( badge.intent ) }
 					key={ `${ badge.label }-${ index }` }
 				>
 					{ badge.label }
-				</span>
+				</Badge>
 		  ) )
 		: undefined;
 
@@ -470,7 +522,7 @@ const ShellHeader = ( {
 				<div className="wc-settings-ui-shell__navigation">
 					{ shell.navigation && shell.navigation.length > 0 ? (
 						<nav
-							className="wc-settings-ui-shell__tabs wc-settings-ui-shell__tabs--primary"
+							className="wc-settings-ui-shell__tabs"
 							aria-label={ __( 'Settings pages', 'woocommerce' ) }
 						>
 							{ shell.navigation.map( ( item ) => (
@@ -846,16 +898,17 @@ export const SettingsUIPage = ( {
 				/>
 			) : null }
 			{ saveNotice ? (
-				<Notice
+				<Notice.Root
 					className="wc-settings-ui-shell__notice"
-					status={ saveNotice.status }
-					isDismissible
-					onRemove={ () => setSaveNotice( null ) }
+					intent={ saveNotice.status }
 				>
-					{ saveNotice.message }
-				</Notice>
+					<Notice.Description>
+						{ saveNotice.message }
+					</Notice.Description>
+					<Notice.CloseIcon onClick={ () => setSaveNotice( null ) } />
+				</Notice.Root>
 			) : null }
-			<div className="wc-settings-ui">
+			<Stack className="wc-settings-ui" direction="column" gap="xl">
 				{ visibleGroups.map( ( group ) => (
 					<section
 						className="wc-settings-ui__section"
@@ -863,7 +916,10 @@ export const SettingsUIPage = ( {
 					>
 						<Card.Root className="wc-settings-ui__section-card">
 							<GroupHeader group={ group } />
-							<Card.Content className="wc-settings-ui__section-fields">
+							<Card.Content
+								className="wc-settings-ui__section-fields"
+								render={ <Stack direction="column" gap="lg" /> }
+							>
 								{ group.fields.map( ( field ) => {
 									const FieldComponent =
 										resolveFieldComponent(
@@ -904,7 +960,7 @@ export const SettingsUIPage = ( {
 						</Card.Root>
 					</section>
 				) ) }
-			</div>
+			</Stack>
 			{ formPostFields.length > 0 ? (
 				<div className="wc-settings-ui__hidden-inputs">
 					{ formPostFields.map( ( field ) => (

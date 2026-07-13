@@ -113,11 +113,137 @@ class ProductGallery extends AbstractBlock {
 	}
 
 	/**
+	 * Find the Product Image block attributes used by the gallery.
+	 *
+	 * @param iterable<\WP_Block> $inner_blocks Inner blocks to search.
+	 * @return array|null
+	 */
+	private function get_product_image_attributes( $inner_blocks ) {
+		foreach ( $inner_blocks as $inner_block ) {
+			if ( 'woocommerce/product-image' === $inner_block->name ) {
+				return $inner_block->parsed_block['attrs'] ?? array();
+			}
+
+			$found_attributes = $this->get_product_image_attributes( $inner_block->inner_blocks );
+			if ( null !== $found_attributes ) {
+				return $found_attributes;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the store thumbnail aspect ratio from WooCommerce Customizer settings.
+	 *
+	 * @return string|null CSS aspect ratio value, or null when uncropped.
+	 */
+	private function get_store_thumbnail_aspect_ratio() {
+		$cropping = get_option( 'woocommerce_thumbnail_cropping', '1:1' );
+
+		if ( 'uncropped' === $cropping ) {
+			return null;
+		}
+
+		if ( 'custom' === $cropping ) {
+			$width  = max( 1, (float) get_option( 'woocommerce_thumbnail_cropping_custom_width', '4' ) );
+			$height = max( 1, (float) get_option( 'woocommerce_thumbnail_cropping_custom_height', '3' ) );
+
+			return $width . '/' . $height;
+		}
+
+		return str_replace( ':', '/', $cropping );
+	}
+
+	/**
+	 * Resolve the gallery aspect ratio from the nested Product Image block.
+	 *
+	 * @param \WP_Block $block The Product Gallery block.
+	 * @return string|null CSS aspect ratio value, or null when no ratio should be applied.
+	 */
+	private function resolve_product_image_aspect_ratio( $block ) {
+		$attributes = $this->get_product_image_attributes( $block->inner_blocks );
+
+		if ( empty( $attributes ) ) {
+			return null;
+		}
+
+		if ( ! empty( $attributes['style']['dimensions']['aspectRatio'] ) ) {
+			return $attributes['style']['dimensions']['aspectRatio'];
+		}
+
+		if ( ! empty( $attributes['aspectRatio'] ) ) {
+			return $attributes['aspectRatio'];
+		}
+
+		$image_sizing = $attributes['imageSizing'] ?? 'single';
+
+		if ( 'thumbnail' === $image_sizing || 'cropped' === $image_sizing ) {
+			return $this->get_store_thumbnail_aspect_ratio();
+		}
+
+		return null;
+	}
+
+	/**
+	 * Parse an aspect ratio into CSS variable values.
+	 *
+	 * @param string|null $aspect_ratio CSS aspect ratio value.
+	 * @return array
+	 */
+	private function parse_aspect_ratio( $aspect_ratio ) {
+		$default_aspect_ratio = array(
+			'width'  => '1',
+			'height' => '1',
+		);
+
+		if ( empty( $aspect_ratio ) || ! is_string( $aspect_ratio ) ) {
+			return $default_aspect_ratio;
+		}
+
+		$parts = array_map( 'trim', explode( '/', $aspect_ratio ) );
+		if ( count( $parts ) > 2 ) {
+			return $default_aspect_ratio;
+		}
+
+		$width  = (float) $parts[0];
+		$height = isset( $parts[1] ) ? (float) $parts[1] : $width;
+
+		if ( $width <= 0 || $height <= 0 ) {
+			return $default_aspect_ratio;
+		}
+
+		return array(
+			'width'  => (string) $width,
+			'height' => (string) $height,
+		);
+	}
+
+	/**
+	 * Get the gallery aspect ratio CSS variables.
+	 *
+	 * @param \WP_Block $block The Product Gallery block.
+	 * @return string
+	 */
+	private function get_aspect_ratio_style( $block ) {
+		$aspect_ratio = $this->parse_aspect_ratio(
+			$this->resolve_product_image_aspect_ratio( $block )
+		);
+
+		return sprintf(
+			'--wc-block-product-gallery-large-image-ratio-width:%1$s;' .
+			'--wc-block-product-gallery-large-image-ratio-height:%2$s;',
+			$aspect_ratio['width'],
+			$aspect_ratio['height']
+		);
+	}
+
+	/**
 	 * Include and render the block.
 	 *
-	 * @param array    $attributes Block attributes. Default empty array.
-	 * @param string   $content    Block content. Default empty string.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes. Default empty array.
+	 * @param string    $content    Block content. Default empty string.
+	 * @param \WP_Block $block     Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
@@ -199,6 +325,15 @@ class ProductGallery extends AbstractBlock {
 
 			$p->add_class( $classname );
 			$p->add_class( $classname_single_image );
+
+			$style = $p->get_attribute( 'style' );
+			$style = is_string( $style ) ? trim( $style ) : '';
+
+			if ( '' !== $style && ';' !== substr( $style, -1 ) ) {
+				$style .= ';';
+			}
+
+			$p->set_attribute( 'style', $style . $this->get_aspect_ratio_style( $block ) );
 			$html = $p->get_updated_html();
 		}
 

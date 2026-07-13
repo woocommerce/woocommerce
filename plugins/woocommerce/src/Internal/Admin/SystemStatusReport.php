@@ -77,7 +77,7 @@ class SystemStatusReport {
 		$enabled_features  = array_filter( $features );
 		$disabled_features = array_filter(
 			$features,
-			function( $feature ) {
+			function ( $feature ) {
 				return empty( $feature );
 			}
 		);
@@ -114,7 +114,9 @@ class SystemStatusReport {
 	 * Render daily cron row.
 	 */
 	public function render_daily_cron() {
-		$next_daily_cron = wp_next_scheduled( 'wc_admin_daily' );
+		$next_action_time = function_exists( 'as_next_scheduled_action' )
+			? as_next_scheduled_action( 'wc_admin_daily_wrapper', null, 'woocommerce' )
+			: false;
 		?>
 			<tr>
 				<td data-export-label="Daily Cron">
@@ -123,10 +125,14 @@ class SystemStatusReport {
 				<td class="help"><?php echo wc_help_tip( esc_html__( 'Is the daily cron job active, when does it next run?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 				<td>
 					<?php
-					if ( empty( $next_daily_cron ) ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Not scheduled', 'woocommerce' ) . '</mark>';
+					if ( $next_action_time ) {
+						$status_text = true === $next_action_time
+							? esc_html__( 'Currently running', 'woocommerce' )
+							/* translators: %s: Date and time the daily cron job is next scheduled to run. */
+							: sprintf( esc_html__( 'Next scheduled: %s', 'woocommerce' ), esc_html( date_i18n( 'Y-m-d H:i:s P', (int) $next_action_time ) ) );
+						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . $status_text . '</mark>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $status_text built from esc_html()/esc_html__() above.
 					} else {
-						echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> Next scheduled: ' . esc_html( date_i18n( 'Y-m-d H:i:s P', $next_daily_cron ) ) . '</mark>';
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Not scheduled', 'woocommerce' ) . '</mark>';
 					}
 					?>
 				</td>
@@ -213,5 +219,4 @@ class SystemStatusReport {
 			</tr>
 		<?php
 	}
-
 }

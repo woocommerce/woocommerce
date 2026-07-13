@@ -6,6 +6,22 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { ReactNode } from 'react';
 
+// Jest stubs CSS modules, so the real Badge renders nothing that reveals its intent.
+jest.mock( '@wordpress/ui', () => ( {
+	...jest.requireActual( '@wordpress/ui' ),
+	Badge: ( {
+		intent,
+		children,
+	}: {
+		intent?: string;
+		children: ReactNode;
+	} ) => (
+		<span data-testid="shell-badge" data-intent={ intent }>
+			{ children }
+		</span>
+	),
+} ) );
+
 // Surface the header props the real admin-ui Page would render so the shell
 // header wiring (subtitle, badges) can be asserted.
 jest.mock( '@wordpress/admin-ui', () => ( {
@@ -116,7 +132,7 @@ describe( 'settings UI shell header fields', () => {
 		container.remove();
 	} );
 
-	it( 'renders badges with their intent class', () => {
+	it( 'maps schema intents to Badge intents', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage
 				schema={ baseSchema( {
@@ -131,21 +147,13 @@ describe( 'settings UI shell header fields', () => {
 		);
 
 		const badges = container.querySelectorAll(
-			'.wc-settings-ui-shell__badge'
+			'[data-testid="shell-badge"]'
 		);
 		expect( badges ).toHaveLength( 2 );
 		expect( badges[ 0 ].textContent ).toBe( 'Active' );
-		expect(
-			badges[ 0 ].classList.contains(
-				'wc-settings-ui-shell__badge--success'
-			)
-		).toBe( true );
+		expect( badges[ 0 ].getAttribute( 'data-intent' ) ).toBe( 'stable' );
 		// Defaults to the neutral intent when none is provided.
-		expect(
-			badges[ 1 ].classList.contains(
-				'wc-settings-ui-shell__badge--default'
-			)
-		).toBe( true );
+		expect( badges[ 1 ].getAttribute( 'data-intent' ) ).toBe( 'draft' );
 
 		act( () => root.unmount() );
 		container.remove();
@@ -169,14 +177,9 @@ describe( 'settings UI shell header fields', () => {
 			/>
 		);
 
-		const badge = container.querySelector( '.wc-settings-ui-shell__badge' );
+		const badge = container.querySelector( '[data-testid="shell-badge"]' );
 		expect( badge ).not.toBeNull();
-		expect(
-			badge?.classList.contains( 'wc-settings-ui-shell__badge--default' )
-		).toBe( true );
-		expect(
-			badge?.classList.contains( 'wc-settings-ui-shell__badge--magic' )
-		).toBe( false );
+		expect( badge?.getAttribute( 'data-intent' ) ).toBe( 'draft' );
 
 		act( () => root.unmount() );
 		container.remove();
@@ -194,7 +197,7 @@ describe( 'settings UI shell header fields', () => {
 			container.querySelector( '.admin-ui-page__header-subtitle' )
 		).toBeNull();
 		expect(
-			container.querySelector( '.wc-settings-ui-shell__badge' )
+			container.querySelector( '[data-testid="shell-badge"]' )
 		).toBeNull();
 
 		act( () => root.unmount() );

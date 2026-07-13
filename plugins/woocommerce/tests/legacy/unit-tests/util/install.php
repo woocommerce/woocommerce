@@ -112,7 +112,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - create roles.
 	 */
 	public function test_create_roles() {
-		self::uninstall();
+		WC_Install::remove_roles();
 
 		WC_Install::create_roles();
 

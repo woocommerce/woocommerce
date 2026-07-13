@@ -1,14 +1,14 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\StoreApi\Mocks;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Mocks;
 
 use WC_Shipping_Method;
 
 /**
- * Fake shipping method that does NOT support local pickup for testing.
+ * Fake shipping method that supports local pickup for testing.
  */
-class FakeRegularShippingMethod extends WC_Shipping_Method {
+class FakeLocalPickupShippingMethod extends WC_Shipping_Method {
 
 	/**
 	 * Constructor.
@@ -16,10 +16,10 @@ class FakeRegularShippingMethod extends WC_Shipping_Method {
 	 * @param int $instance_id Instance ID.
 	 */
 	public function __construct( $instance_id = 0 ) {
-		$this->id           = 'test_regular';
+		$this->id           = 'test_local_pickup';
 		$this->instance_id  = $instance_id;
-		$this->method_title = 'Test Regular Shipping';
-		$this->supports     = array( 'shipping-zones', 'instance-settings' );
+		$this->method_title = 'Test Local Pickup';
+		$this->supports     = array( 'shipping-zones', 'instance-settings', 'local-pickup' );
 	}
 
 	/**

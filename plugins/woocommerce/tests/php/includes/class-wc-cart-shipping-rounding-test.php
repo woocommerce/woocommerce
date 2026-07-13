@@ -41,30 +41,51 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 	private $flat_rate_id;
 
 	/**
+	 * Shipping enabled state before the test.
+	 *
+	 * @var bool
+	 */
+	private $shipping_was_enabled;
+
+	/**
+	 * Set up shipping state for the test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->shipping_was_enabled = WC()->shipping()->enabled;
+		WC()->shipping()->enabled   = true;
+	}
+
+	/**
 	 * Clean up after each test.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
-		WC()->cart->empty_cart();
+		try {
+			WC()->cart->empty_cart();
 
-		if ( $this->zone ) {
-			$this->zone->delete();
+			if ( $this->zone ) {
+				$this->zone->delete();
+			}
+
+			if ( $this->flat_rate_id ) {
+				delete_option( 'woocommerce_flat_rate_' . $this->flat_rate_id . '_settings' );
+			}
+
+			if ( $this->tax_rate_id ) {
+				WC_Tax::_delete_tax_rate( $this->tax_rate_id );
+			}
+
+			if ( $this->product ) {
+				WC_Helper_Product::delete_product( $this->product->get_id() );
+			}
+
+			// Clear shipping caches.
+			WC_Cache_Helper::get_transient_version( 'shipping', true );
+			WC()->shipping()->enabled = $this->shipping_was_enabled;
+		} finally {
+			parent::tearDown();
 		}
-
-		if ( $this->flat_rate_id ) {
-			delete_option( 'woocommerce_flat_rate_' . $this->flat_rate_id . '_settings' );
-		}
-
-		if ( $this->tax_rate_id ) {
-			WC_Tax::_delete_tax_rate( $this->tax_rate_id );
-		}
-
-		if ( $this->product ) {
-			WC_Helper_Product::delete_product( $this->product->get_id() );
-		}
-
-		// Clear shipping caches.
-		WC_Cache_Helper::get_transient_version( 'shipping', true );
 	}
 
 	/**

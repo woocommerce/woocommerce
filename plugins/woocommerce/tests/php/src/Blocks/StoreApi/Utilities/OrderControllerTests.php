@@ -16,6 +16,20 @@ use Yoast\PHPUnitPolyfills\TestCases\TestCase;
  */
 class OrderControllerTests extends TestCase {
 	/**
+	 * Whether the checkout phone field option existed before the test.
+	 *
+	 * @var bool
+	 */
+	private $checkout_phone_field_option_existed = false;
+
+	/**
+	 * Checkout phone field option value before the test.
+	 *
+	 * @var mixed
+	 */
+	private $checkout_phone_field_option_value;
+
+	/**
 	 * The system under test.
 	 *
 	 * @var OrderController
@@ -29,6 +43,16 @@ class OrderControllerTests extends TestCase {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$missing_option                            = new \stdClass();
+		$this->checkout_phone_field_option_value   = get_option( 'woocommerce_checkout_phone_field', $missing_option );
+		$this->checkout_phone_field_option_existed = $missing_option !== $this->checkout_phone_field_option_value;
+
+		// The fixtures in this class do not provide phone numbers, so make the
+		// phone field optional as other Store API test classes do. Without this
+		// the class only passes when run after a class that already did so.
+		update_option( 'woocommerce_checkout_phone_field', 'optional' );
+
 		$this->sut = new class() extends OrderController {
 			/**
 			 * Check all required address fields are set and return errors if not. Parent is protected.
@@ -47,9 +71,18 @@ class OrderControllerTests extends TestCase {
 	 * Tear down after test.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
-		WC()->countries->locale = null;
-		$this->sut              = null;
+		try {
+			WC()->countries->locale = null;
+			$this->sut              = null;
+
+			if ( $this->checkout_phone_field_option_existed ) {
+				update_option( 'woocommerce_checkout_phone_field', $this->checkout_phone_field_option_value );
+			} else {
+				delete_option( 'woocommerce_checkout_phone_field' );
+			}
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**

@@ -9,6 +9,12 @@
  * Class WC_Admin_Tests_API_Product_Attributes
  */
 class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
+	/**
+	 * Product IDs created for the class fixtures.
+	 *
+	 * @var int[]
+	 */
+	private static $fixture_product_ids = array();
 
 	/**
 	 * Endpoints.
@@ -31,10 +37,18 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 	}
 
 	public static function tearDownAfterClass(): void {
-		parent::tearDownAfterClass();
-		global $wpdb;
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies" );
-		$wpdb->query('commit');
+		$direct_update_mode = get_option( 'woocommerce_attribute_lookup_direct_updates' );
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			parent::tearDownAfterClass();
+			global $wpdb;
+			$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies" );
+			$wpdb->query( 'commit' );
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
+
+		self::assertSame( $direct_update_mode, get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
 	}
 
 	/**
@@ -42,50 +56,81 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
+		$direct_update_mode = get_option( 'woocommerce_attribute_lookup_direct_updates' );
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			// Use the test helper to populate some global attributes.
+			$product    = \WC_Helper_Product::create_variation_product();
+			$attributes = $product->get_attributes();
 
-		// Use the test helper to populate some global attributes.
-		$product    = \WC_Helper_Product::create_variation_product();
-		$attributes = $product->get_attributes();
+			// Add a custom attribute.
+			$custom_attr = new WC_Product_Attribute();
+			$custom_attr->set_name( 'Numeric Size' );
+			$custom_attr->set_options( array( '1', '2', '3', '4', '5' ) );
+			$custom_attr->set_visible( true );
+			$custom_attr->set_variation( true );
+			$attributes[] = $custom_attr;
 
-		// Add a custom attribute.
-		$custom_attr = new WC_Product_Attribute();
-		$custom_attr->set_name( 'Numeric Size' );
-		$custom_attr->set_options( array( '1', '2', '3', '4', '5' ) );
-		$custom_attr->set_visible( true );
-		$custom_attr->set_variation( true );
-		$attributes[] = $custom_attr;
+			$product->set_attributes( $attributes );
+			$product->save();
 
-		$product->set_attributes( $attributes );
-		$product->save();
+			// Assign one variation to the '1' size.
+			$variation  = $product->get_available_variations( 'objects' )[0];
+			$attributes = $variation->get_attributes();
+			$attributes[ sanitize_title( $custom_attr->get_name() ) ] = '1';
+			$variation->set_attributes( $attributes );
+			$variation->save();
 
-		// Assign one variation to the '1' size.
-		$variation  = $product->get_available_variations( 'objects' )[0];
-		$attributes = $variation->get_attributes();
-		$attributes[ sanitize_title( $custom_attr->get_name() ) ] = '1';
-		$variation->set_attributes( $attributes );
-		$variation->save();
+			// Add more custom Numeric Size values to another product.
+			$product_2 = new WC_Product_Variable();
+			$product_2->set_props(
+				array(
+					'name' => 'Dummy Variable Product 2',
+					'sku'  => 'DUMMY VARIABLE SKU 2' . microtime(),
+				)
+			);
 
-		// Add more custom Numeric Size values to another product.
-		$product_2 = new WC_Product_Variable();
-		$product_2->set_props(
-			array(
-				'name' => 'Dummy Variable Product 2',
-				'sku'  => 'DUMMY VARIABLE SKU 2' . microtime(),
-			)
-		);
+			$custom_attr_2 = new WC_Product_Attribute();
+			$custom_attr_2->set_name( 'Numeric Size' );
+			$custom_attr_2->set_options( array( '6', '7', '8', '9', '10' ) );
+			$custom_attr_2->set_visible( true );
+			$custom_attr_2->set_variation( true );
 
-		$custom_attr_2 = new WC_Product_Attribute();
-		$custom_attr_2->set_name( 'Numeric Size' );
-		$custom_attr_2->set_options( array( '6', '7', '8', '9', '10' ) );
-		$custom_attr_2->set_visible( true );
-		$custom_attr_2->set_variation( true );
+			$product_2->set_attributes(
+				array(
+					$custom_attr_2,
+				)
+			);
+			$product_2->save();
+			self::$fixture_product_ids = array_merge( array( $product->get_id() ), $product->get_children(), array( $product_2->get_id() ) );
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
 
-		$product_2->set_attributes(
-			array(
-				$custom_attr_2,
-			)
-		);
-		$product_2->save();
+		self::assertSame( $direct_update_mode, get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+	}
+
+	/**
+	 * Test that class fixtures do not schedule product attribute lookup updates.
+	 *
+	 * @testdox Class fixtures do not schedule product attribute lookup updates.
+	 */
+	public function test_fixtures_do_not_schedule_attribute_lookup_updates(): void {
+		$queue = WC()->get_instance_of( WC_Queue::class );
+
+		foreach ( self::$fixture_product_ids as $product_id ) {
+			$this->assertEmpty(
+				$queue->search(
+					array(
+						'hook'   => 'woocommerce_run_product_attribute_lookup_update_callback',
+						'args'   => array( $product_id, \Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore::ACTION_INSERT ),
+						'status' => ActionScheduler_Store::STATUS_PENDING,
+					),
+					'ids'
+				),
+				"Product {$product_id} has a pending attribute lookup update."
+			);
+		}
 	}
 
 	/**

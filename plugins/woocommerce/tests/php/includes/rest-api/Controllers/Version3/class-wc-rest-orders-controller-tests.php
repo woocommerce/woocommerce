@@ -28,16 +28,32 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	private $cot_state;
 
 	/**
+	 * Administrator ID used to authenticate requests.
+	 *
+	 * @var int
+	 */
+	protected static $administrator_id;
+
+	/**
+	 * Create immutable class fixtures.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$administrator_id = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Orders_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user     = self::$administrator_id;
 		wp_set_current_user( $this->user );
 
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
@@ -380,10 +396,10 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->toggle_cot_feature_and_usage( true );
 
 		// A refund (type 'shop_order_refund') is used because it's a real in-core order type that shares the same table as orders.
-		$order  = OrderHelper::create_order();
+		$order  = wc_create_order();
 		$refund = wc_create_refund(
 			array(
-				'amount'   => 10,
+				'amount'   => 0,
 				'order_id' => $order->get_id(),
 			)
 		);
@@ -413,7 +429,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->toggle_cot_feature_and_usage( true );
 		wc_register_order_type( 'shop_test' );
 
-		$order = OrderHelper::create_order();
+		$order = wc_create_order();
 		$this->assertSame(
 			1,
 			$wpdb->update(
@@ -718,11 +734,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_created_via_param_is_filters_order_when_cot_is_enabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
-		$order_admin = WC_Helper_Order::create_order();
+		$order_admin = wc_create_order();
 		$order_admin->set_created_via( 'admin' );
 		$order_admin->save();
 
@@ -744,7 +760,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_get_orders_by_invalid_created_via_when_cot_is_enabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
@@ -764,11 +780,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_created_via_param_is_filters_order_when_cot_is_disabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
-		$order_admin = WC_Helper_Order::create_order();
+		$order_admin = wc_create_order();
 		$order_admin->set_created_via( 'admin' );
 		$order_admin->save();
 
@@ -790,7 +806,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_get_orders_by_invalid_created_via_when_cot_is_disabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
@@ -1012,7 +1028,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox Updating an order with incomplete meta_data entries does not cause errors.
 	 */
 	public function test_update_meta_data_with_incomplete_entries(): void {
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+		$order = wc_create_order();
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_header( 'content-type', 'application/json' );

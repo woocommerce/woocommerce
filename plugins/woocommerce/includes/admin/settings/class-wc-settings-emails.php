@@ -624,6 +624,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'description'      => $email->get_description(),
 				'id'               => $email->id,
 				'email_key'        => strtolower( $email_key ),
+				'email_class_name' => get_class( $email ),
 				'post_id'          => $post_id,
 				'enabled'          => $email->is_enabled(),
 				'manual'           => $email->is_manual(),

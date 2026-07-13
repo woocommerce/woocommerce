@@ -6,11 +6,29 @@
 class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 
 	/**
+	 * Shipping enabled state before the test.
+	 *
+	 * @var bool
+	 */
+	private $shipping_was_enabled;
+
+	/**
+	 * Set up non-shipping cart total tests.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->shipping_was_enabled = WC()->shipping()->enabled;
+		WC()->shipping()->enabled   = false;
+	}
+
+	/**
 	 * tearDown.
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
 		WC()->cart->empty_cart();
+		WC()->shipping()->enabled = $this->shipping_was_enabled;
 	}
 
 	/**

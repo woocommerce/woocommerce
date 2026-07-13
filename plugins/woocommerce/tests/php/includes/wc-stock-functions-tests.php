@@ -12,6 +12,12 @@ use Automattic\WooCommerce\Enums\OrderInternalStatus;
  * Class WC_Stock_Functions_Tests.
  */
 class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
+	/**
+	 * Product reused by independent stock transitions within one test method.
+	 *
+	 * @var WC_Product|null
+	 */
+	private $stock_product;
 
 	/**
 	 * @var array List of statuses which reduces stock from inventory.
@@ -44,6 +50,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		WC()->cart->empty_cart();
+		$this->stock_product = null;
 	}
 
 	/**
@@ -52,13 +59,18 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @param string $status Status for the newly created order.
 	 */
 	private function create_order_from_cart_with_status( $status ) {
-		$product = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'manage_stock'   => true,
-				'stock_quantity' => 10,
-			)
-		);
+		if ( ! $this->stock_product ) {
+			$this->stock_product = WC_Helper_Product::create_simple_product(
+				true,
+				array(
+					'manage_stock'   => true,
+					'stock_quantity' => 10,
+				)
+			);
+		} else {
+			wc_update_product_stock( $this->stock_product, 10, 'set' );
+		}
+		$product = $this->stock_product;
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();

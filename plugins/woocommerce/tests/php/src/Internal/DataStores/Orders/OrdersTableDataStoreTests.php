@@ -41,6 +41,13 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
 	 * Original timezone before this test started.
 	 * @var string
 	 */
@@ -86,7 +93,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
 		update_option( 'timezone_string', 'Asia/Kolkata' );
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
-		$this->setup_cot();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$this->toggle_cot_authoritative( true );
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 		$this->toggle_cot_feature_and_usage( false );
 		$container = wc_get_container();
@@ -3756,6 +3765,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 * @param string $datastore_to_use Which datastore to use. Either 'hpos' or 'posts'.
 	 */
 	public function test_order_util_get_count_for_type( $datastore_to_use ) {
+		global $wpdb;
+
 		$this->disable_cot_sync();
 
 		if ( 'hpos' === $datastore_to_use ) {
@@ -3767,16 +3778,42 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		// Create a few orders in various states.
 		$order_statuses = array_keys( wc_get_order_statuses() );
 
-		$expected_counts = array_combine( $order_statuses, array_fill( 0, count( $order_statuses ), 0 ) );
+		$expected_counts    = array_combine( $order_statuses, array_fill( 0, count( $order_statuses ), 0 ) );
+		$order_placeholders = array();
+		$order_values       = array();
+		$next_order_id      = null;
+
+		if ( 'hpos' === $datastore_to_use ) {
+			$next_order_id = (int) $wpdb->get_var( "SELECT GREATEST(COALESCE((SELECT MAX(id) FROM {$wpdb->prefix}wc_orders), 0), COALESCE((SELECT MAX(ID) FROM {$wpdb->posts}), 0)) + 1" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are provided by WordPress.
+		}
+
 		foreach ( $order_statuses as $i => $status ) {
 			foreach ( range( 0, $i ) as $_ ) {
 				$expected_counts[ $status ] = $i + 1;
 
-				$order = WC_Helper_Order::create_order();
-				$order->set_status( $status );
-				$order->save();
+				if ( null !== $next_order_id ) {
+					$order_placeholders[] = '(%d, %s, %s)';
+					array_push( $order_values, $next_order_id++, 'shop_order', $status );
+				} else {
+					$order_placeholders[] = '(%s, %s)';
+					array_push( $order_values, 'shop_order', $status );
+				}
 			}
 		}
+
+		if ( 'hpos' === $datastore_to_use ) {
+			$table_name = $wpdb->prefix . 'wc_orders';
+			$columns    = 'id, type, status';
+		} else {
+			$table_name = $wpdb->posts;
+			$columns    = 'post_type, post_status';
+		}
+
+		$insert_query = $wpdb->prepare(
+			"INSERT INTO {$table_name} ({$columns}) VALUES " . implode( ', ', $order_placeholders ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.NotPrepared -- Table and columns are selected from constants above; placeholders are generated above.
+			$order_values
+		);
+		$wpdb->query( $insert_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
 
 		$real_counts = OrderUtil::get_count_for_type( 'shop_order' );
 		foreach ( $expected_counts as $status => $count ) {

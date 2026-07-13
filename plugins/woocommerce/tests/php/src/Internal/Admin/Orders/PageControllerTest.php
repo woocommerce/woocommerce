@@ -4,6 +4,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 
 	use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 	use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+	use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+	use Automattic\WooCommerce\Utilities\OrderUtil;
 
 	/**
 	 * Tests related to the HPOS orders admin pages controller.
@@ -12,9 +14,44 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 		use HPOSToggleTrait;
 
 		/**
+		 * Previous HPOS state.
+		 *
+		 * @var bool
+		 */
+		private static bool $hpos_prev_state;
+
+		/**
 		 * @var int ID of test admin user.
 		 */
 		private $user_admin;
+
+		/**
+		 * Set up class fixtures.
+		 */
+		public static function setUpBeforeClass(): void {
+			parent::setUpBeforeClass();
+
+			self::$hpos_prev_state = OrderUtil::custom_orders_table_usage_is_enabled();
+			add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+			OrderHelper::create_order_custom_table_if_not_exist();
+
+			if ( self::$hpos_prev_state ) {
+				OrderHelper::toggle_cot_feature_and_usage( false );
+			}
+		}
+
+		/**
+		 * Tear down class fixtures.
+		 */
+		public static function tearDownAfterClass(): void {
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== self::$hpos_prev_state ) {
+				OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
+			}
+
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+			parent::tearDownAfterClass();
+		}
 
 		/**
 		 * Set up before each test.
@@ -23,7 +60,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 		 */
 		public function setUp(): void {
 			parent::setUp();
-			$this->setup_cot();
 			$this->toggle_cot_feature_and_usage( false );
 
 			$this->user_admin = $this->factory->user->create( array( 'role' => 'administrator' ) );
@@ -31,16 +67,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 
 			global $mock_filter_input;
 			$mock_filter_input = false;
-		}
-
-		/**
-		 * Tear down after each test.
-		 *
-		 * @return void
-		 */
-		public function tearDown(): void {
-			$this->clean_up_cot_setup();
-			parent::tearDown();
 		}
 
 		/**

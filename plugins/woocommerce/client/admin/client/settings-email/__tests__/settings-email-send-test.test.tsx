@@ -61,7 +61,7 @@ const Harness = ( {
 const editorTarget: SendTestEmailTarget = {
 	endpoint: 'editor',
 	postId: 123,
-	emailType: 'new_order',
+	emailType: 'WC_Email_New_Order',
 };
 
 const settingsTarget: SendTestEmailTarget = {
@@ -127,7 +127,7 @@ describe( 'useSendTestEmail + SendTestEmailForm', () => {
 		expect( recordEventMock ).toHaveBeenCalledWith(
 			'settings_emails_preview_test_sent_successful',
 			{
-				email_type: 'new_order',
+				email_type: 'WC_Email_New_Order',
 				source: 'email_listing',
 			}
 		);
@@ -183,7 +183,7 @@ describe( 'useSendTestEmail + SendTestEmailForm', () => {
 		expect( recordEventMock ).toHaveBeenCalledWith(
 			'settings_emails_preview_test_sent_failed',
 			{
-				email_type: 'new_order',
+				email_type: 'WC_Email_New_Order',
 				error: 'Cookie check failed',
 				error_code: 'rest_cookie_invalid_nonce',
 				source: 'email_listing',

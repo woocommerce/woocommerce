@@ -321,14 +321,14 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test preprocess_parsed_blocks distributes both root and container padding
-	 * in second pass when a container above post-content has own padding
-	 * (WooCommerce template pattern).
+	 * Test preprocess_parsed_blocks treats a group with its own padding wrapping
+	 * post-content as a box (WooCommerce template pattern): the box takes the root
+	 * inset itself and distributes its own padding to the user blocks as container
+	 * padding in the second pass — so root and container padding nest (30 outer +
+	 * 20 own) instead of stacking to 50 on every block.
 	 */
-	public function testItDistributesBothPaddingsInSecondPassWhenContainerHasPadding(): void {
-		// First pass: template blocks with a group wrapping post-content.
-		// The group has own padding — it distributes both root padding and
-		// container padding per-block to user blocks.
+	public function testItTreatsGroupWithPaddingWrappingPostContentAsBoxAcrossPasses(): void {
+		// First pass: template blocks with a group (own padding) wrapping post-content.
 		$template_blocks = array(
 			array(
 				'blockName'   => 'core/group',
@@ -353,39 +353,52 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		);
 
 		$first_result = $this->renderer->preprocess_parsed_blocks( $template_blocks );
+		$box_group    = $first_result[0];
 
-		// Root group should have suppress-horizontal-padding flag.
-		$root_group = $first_result[0];
-		$this->assertTrue( $root_group['email_attrs']['suppress-horizontal-padding'] );
+		// The box suppresses its own padding and takes the root inset itself.
+		$this->assertTrue( $box_group['email_attrs']['suppress-horizontal-padding'] );
+		$this->assertArrayHasKey( 'root-padding-left', $box_group['email_attrs'] );
 
-		// post-content should have full contentSize width (padding is distributed
-		// per-block, not subtracted from the group).
-		$post_content = $root_group['innerBlocks'][0];
-		$this->assertArrayHasKey( 'width', $post_content['email_attrs'] );
+		// Because the box is inset, post-content is narrower than contentSize —
+		// the signal the second pass uses to drop root padding for user blocks.
+		$post_content     = $box_group['innerBlocks'][0];
+		$post_content_num = (float) str_replace( 'px', '', $post_content['email_attrs']['width'] );
+		$theme_controller = $this->di_container->get( \Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller::class );
+		$content_size_num = (float) str_replace( 'px', '', $theme_controller->get_layout_settings()['contentSize'] );
+		$this->assertLessThan( $content_size_num, $post_content_num );
 
-		// Second pass: user blocks (simulating post-content rendering).
-		$user_blocks = array(
+		// Second pass: user blocks (simulating post-content rendering) — a normal
+		// block and a full-width block.
+		$user_blocks   = array(
 			array(
 				'blockName'   => 'core/paragraph',
 				'attrs'       => array(),
 				'innerBlocks' => array(),
 			),
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array( 'align' => 'full' ),
+				'innerBlocks' => array(),
+			),
 		);
-
 		$second_result = $this->renderer->preprocess_parsed_blocks( $user_blocks );
 
-		// User blocks should have root padding (delegated, not absorbed).
-		$this->assertArrayHasKey( 'root-padding-left', $second_result[0]['email_attrs'] );
-		$this->assertArrayHasKey( 'root-padding-right', $second_result[0]['email_attrs'] );
-
-		// User blocks should also have container padding from the template group.
-		$this->assertArrayHasKey( 'container-padding-left', $second_result[0]['email_attrs'] );
-		$this->assertArrayHasKey( 'container-padding-right', $second_result[0]['email_attrs'] );
+		// Normal block gets only the container padding (not root), so it does not
+		// stack on top of the box's root inset.
+		$this->assertArrayNotHasKey( 'root-padding-left', $second_result[0]['email_attrs'] );
 		$this->assertEquals( '20px', $second_result[0]['email_attrs']['container-padding-left'] );
 		$this->assertEquals( '20px', $second_result[0]['email_attrs']['container-padding-right'] );
 
-		// Width should account for both root and container padding.
-		$this->assertArrayHasKey( 'width', $second_result[0]['email_attrs'] );
+		// Normal block width is the box content width minus the distributed
+		// container padding (20px + 20px), so it fits inside the box's inner padding.
+		$normal_width_num = (float) str_replace( 'px', '', $second_result[0]['email_attrs']['width'] );
+		$this->assertEqualsWithDelta( $post_content_num - 40, $normal_width_num, 1.0 );
+
+		// Full-width block skips the container padding and spans the full box width,
+		// so it breaks out of the box's inner padding (full-width still works).
+		$this->assertArrayNotHasKey( 'container-padding-left', $second_result[1]['email_attrs'] );
+		$full_width_num = (float) str_replace( 'px', '', $second_result[1]['email_attrs']['width'] );
+		$this->assertEqualsWithDelta( $post_content_num, $full_width_num, 1.0 );
 	}
 
 	/**

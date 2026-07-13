@@ -293,13 +293,14 @@ class VariationSelectorAttribute extends AbstractBlock {
 			if ( ! is_array( $attribute_term ) || ! isset( $attribute_term['value'], $attribute_term['label'] ) ) {
 				continue;
 			}
-			$value = (string) $attribute_term['value'];
-			$slug  = sanitize_title( $value );
-			$item  = array(
+			$value     = (string) $attribute_term['value'];
+			$term_name = wp_specialchars_decode( $attribute_term['label'], ENT_QUOTES );
+			$slug      = sanitize_title( $value );
+			$item      = array(
 				'id'        => $id_prefix . '-' . $slug,
-				'label'     => (string) $attribute_term['label'],
+				'label'     => $term_name,
 				'value'     => $value,
-				'ariaLabel' => (string) $attribute_term['label'],
+				'ariaLabel' => $term_name,
 				'selected'  => $default_selected === $value,
 			);
 

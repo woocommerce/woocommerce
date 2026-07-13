@@ -6,6 +6,7 @@
  * External dependencies
  */
 import { createRoot } from '@wordpress/element';
+import '@wordpress/theme/design-tokens.css';
 
 /**
  * Internal dependencies

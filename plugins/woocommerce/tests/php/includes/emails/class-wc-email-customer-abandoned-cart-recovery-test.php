@@ -51,8 +51,6 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-abandoned-cart-recovery.php';
 
-		WC()->mailer()->init();
-
 		$this->sut = new WC_Email_Customer_Abandoned_Cart_Recovery();
 	}
 
@@ -207,6 +205,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 	 * @testdox Email is registered with WC_Emails when the feature flag is on so the WC Settings → Emails page renders it.
 	 */
 	public function test_is_registered_with_wc_emails(): void {
+		WC()->mailer()->init();
 		$emails = WC()->mailer()->get_emails();
 
 		$this->assertArrayHasKey( 'WC_Email_Customer_Abandoned_Cart_Recovery', $emails );

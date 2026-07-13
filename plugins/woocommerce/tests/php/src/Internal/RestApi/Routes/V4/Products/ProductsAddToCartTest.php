@@ -76,16 +76,43 @@ class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 	public function test_add_to_cart_response_data( string $product_type ) {
 		switch ( $product_type ) {
 			case 'simple':
-				$product = WC_Helper_Product::create_simple_product();
+				$product                   = WC_Helper_Product::create_simple_product();
+				$expected_add_to_cart_text = __( 'Add to cart', 'woocommerce' );
 				break;
 			case 'grouped':
-				$product = WC_Helper_Product::create_grouped_product();
+				$product                   = new \WC_Product_Grouped();
+				$expected_add_to_cart_text = __( 'View products', 'woocommerce' );
+				$product->set_name( 'Dummy Grouped Product' );
+				$product->save();
 				break;
 			case 'external':
-				$product = WC_Helper_Product::create_external_product();
+				$product                   = WC_Helper_Product::create_external_product();
+				$expected_add_to_cart_text = 'Buy external product';
 				break;
 			case 'variable':
-				$product = WC_Helper_Product::create_variation_product();
+				$product   = new \WC_Product_Variable();
+				$attribute = new \WC_Product_Attribute();
+				$attribute->set_name( 'size' );
+				$attribute->set_options( array( 'small' ) );
+				$attribute->set_visible( true );
+				$attribute->set_variation( true );
+				$product->set_name( 'Dummy Variable Product' );
+				$product->set_attributes( array( $attribute ) );
+				$product->save();
+
+				$variation = new \WC_Product_Variation();
+				$variation->set_parent_id( $product->get_id() );
+				$variation->set_regular_price( 10 );
+				$variation->set_status( 'publish' );
+				$variation->set_attributes( array( 'size' => 'small' ) );
+				$variation->save();
+
+				\WC_Product_Variable::sync( $product->get_id() );
+				$product = wc_get_product( $product->get_id() );
+				$this->assertNotEmpty( $product->get_children(), 'Variable fixture should expose its child.' );
+				$this->assertNotSame( '', $product->get_price(), 'Variable fixture should have a synced price.' );
+				$this->assertTrue( $product->is_purchasable(), 'Variable fixture should be purchasable.' );
+				$expected_add_to_cart_text = __( 'Select options', 'woocommerce' );
 				break;
 		}
 
@@ -94,6 +121,7 @@ class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 
+		$this->assertSame( $product_type, $data['type'] );
 		$this->assertArrayHasKey( 'add_to_cart', $data );
 		$add_to_cart = $data['add_to_cart'];
 
@@ -105,7 +133,7 @@ class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( $product->add_to_cart_url(), $add_to_cart['url'] );
 		$this->assertEquals( $product->add_to_cart_description(), $add_to_cart['description'] );
-		$this->assertEquals( $product->add_to_cart_text(), $add_to_cart['text'] );
+		$this->assertSame( $expected_add_to_cart_text, $add_to_cart['text'] );
 		$this->assertEquals( $product->single_add_to_cart_text(), $add_to_cart['single_text'] );
 
 		switch ( $product_type ) {

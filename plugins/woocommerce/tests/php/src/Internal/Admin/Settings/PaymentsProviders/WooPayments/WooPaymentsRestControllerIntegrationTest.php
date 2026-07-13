@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProx
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
 
 /**
@@ -23,7 +23,7 @@ use WP_REST_Request;
  *
  * @class WooPaymentsRestController
  */
-class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
+class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	/**
 	 * Endpoint.
 	 *
@@ -74,6 +74,13 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	protected $store_admin_id;
 
 	/**
+	 * REST server used by the controller tests.
+	 *
+	 * @var \WP_REST_Server
+	 */
+	protected $server;
+
+	/**
 	 * The current time in seconds.
 	 *
 	 * Use it instead of time() to avoid using the real time in tests.
@@ -85,38 +92,51 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Gateways mock.
 	 *
-	 * @var callable
+	 * @var callable|null
 	 */
-	private $gateways_mock_ref;
+	private $gateways_mock_ref = null;
 
 	/**
-	 * The initial country that is set before running tests in this test suite.
+	 * Raw option states before the test class mutates them.
 	 *
-	 * @var string $initial_country
+	 * @var array<string, array{exists: bool, value: string|null, autoload: string|null}>
 	 */
-	private static string $initial_country = '';
+	private static array $initial_option_states = array();
 
-	/**
-	 * The initial currency that is set before running tests in this test suite.
-	 *
-	 * @var string $initial_currency
-	 */
-	private static string $initial_currency = '';
+	/** @var bool Whether the WooPayments version override existed before the test. */
+	private bool $initial_wcpay_version_override_exists = false;
+
+	/** @var mixed WooPayments version override value before the test. */
+	private $initial_wcpay_version_override;
 
 	/**
 	 * Saves values of initial country and currency before running test suite.
 	 */
 	public static function wpSetUpBeforeClass(): void {
-		self::$initial_country  = WC()->countries->get_base_country();
-		self::$initial_currency = get_woocommerce_currency();
+		foreach ( self::get_restored_option_names() as $option_name ) {
+			self::$initial_option_states[ $option_name ] = self::get_raw_option_state( $option_name );
+			self::invalidate_option_cache( $option_name );
+		}
 	}
 
 	/**
 	 * Restores initial values of country and currency after running test suite.
 	 */
 	public static function wpTearDownAfterClass(): void {
-		update_option( 'woocommerce_default_country', self::$initial_country );
-		update_option( 'woocommerce_currency', self::$initial_currency );
+		$failures = array();
+		foreach ( self::$initial_option_states as $option_name => $state ) {
+			try {
+				if ( ! self::restore_raw_option_state( $option_name, $state ) ) {
+					$failures[] = "Database write failed for {$option_name}.";
+				}
+			} catch ( \Throwable $error ) {
+				$failures[] = $error->getMessage();
+			}
+		}
+
+		if ( array() !== $failures ) {
+			throw new \RuntimeException( esc_html( implode( ' ', $failures ) ) );
+		}
 	}
 
 	/**
@@ -124,6 +144,12 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->initial_wcpay_version_override_exists = array_key_exists( 'WCPAY_VERSION_NUMBER', Constants::$set_constants );
+		$this->initial_wcpay_version_override        = Constants::$set_constants['WCPAY_VERSION_NUMBER'] ?? null;
+
+		$gateways                   = \WC_Payment_Gateways::instance();
+		$gateways->payment_gateways = array();
+		$gateways->init();
 
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
@@ -279,32 +305,193 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->woopayments_provider_service = $container->get( WooPaymentsService::class );
 
 		// Register the REST controller routes again to make sure the dependency tree is using our mocks.
-		$sut = new WooPaymentsRestController();
-		$sut->init( $container->get( Payments::class ), $this->woopayments_provider_service );
-		$sut->register_routes( true );
+		$this->controller = new WooPaymentsRestController();
+		$this->controller->init( $container->get( Payments::class ), $this->woopayments_provider_service );
+		$this->server = $this->create_rest_server_with_routes(
+			array(
+				function () {
+					$this->controller->register_routes( true );
+				},
+			),
+			true
+		);
 	}
 
 	/**
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		$this->unmock_payment_gateways();
-		delete_option( 'woocommerce_gateway_order' );
+		$cleanup_errors = array();
 
-		delete_option( WooPaymentsService::NOX_PROFILE_OPTION_KEY );
-		delete_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY );
+		$this->run_cleanup_step( fn() => $this->unmock_payment_gateways(), $cleanup_errors );
+		$this->run_cleanup_step(
+			function () {
+				if ( isset( $this->mockable_proxy ) ) {
+					$this->mockable_proxy->reset();
+				}
+			},
+			$cleanup_errors
+		);
+		$this->run_cleanup_step( fn() => wc_get_container()->reset_all_resolved(), $cleanup_errors );
+		$this->run_cleanup_step( fn() => $this->clear_rest_server(), $cleanup_errors );
+		$this->run_cleanup_step( fn() => $this->restore_wcpay_version_override(), $cleanup_errors );
+		$this->run_cleanup_step( fn() => parent::tearDown(), $cleanup_errors );
+		$this->run_cleanup_step( fn() => self::invalidate_test_option_caches(), $cleanup_errors );
 
-		$this->mockable_proxy->reset();
+		if ( array() !== $cleanup_errors ) {
+			throw $cleanup_errors[0];
+		}
+	}
 
-		/**
-		 * TestingContainer instance.
-		 *
-		 * @var TestingContainer $container
-		 */
-		$container = wc_get_container();
-		$container->reset_all_resolved();
+	/**
+	 * Run one teardown phase without preventing later phases.
+	 *
+	 * @param callable     $callback Cleanup phase.
+	 * @param \Throwable[] $errors   Collected cleanup errors.
+	 */
+	private function run_cleanup_step( callable $callback, array &$errors ): void {
+		try {
+			$callback();
+		} catch ( \Throwable $error ) {
+			$errors[] = $error;
+		}
+	}
 
-		parent::tearDown();
+	/**
+	 * Restore only the Jetpack constant override owned by this fixture.
+	 */
+	private function restore_wcpay_version_override(): void {
+		if ( $this->initial_wcpay_version_override_exists ) {
+			Constants::set_constant( 'WCPAY_VERSION_NUMBER', $this->initial_wcpay_version_override );
+		} else {
+			Constants::clear_single_constant( 'WCPAY_VERSION_NUMBER' );
+		}
+	}
+
+	/**
+	 * Get option rows that must survive the class exactly.
+	 *
+	 * @return string[]
+	 */
+	private static function get_restored_option_names(): array {
+		return array(
+			'woocommerce_default_country',
+			'woocommerce_currency',
+		);
+	}
+
+	/**
+	 * Get option caches mutated by the fixture or SUT.
+	 *
+	 * @return string[]
+	 */
+	private static function get_test_option_names(): array {
+		return array_merge( self::get_restored_option_names(), self::get_transactional_option_names() );
+	}
+
+	/**
+	 * Get option rows changed within the inherited transaction.
+	 *
+	 * @return string[]
+	 */
+	private static function get_transactional_option_names(): array {
+		return array(
+			'woocommerce_gateway_order',
+			WooPaymentsService::NOX_PROFILE_OPTION_KEY,
+			WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY,
+		);
+	}
+
+	/**
+	 * Read an option without default filters or value coercion.
+	 *
+	 * @param string $option_name Option name.
+	 * @return array{exists: bool, value: string|null, autoload: string|null}
+	 */
+	private static function get_raw_option_state( string $option_name ): array {
+		global $wpdb;
+
+		$wpdb->last_error = '';
+		$row              = $wpdb->get_row(
+			$wpdb->prepare( "SELECT option_value, autoload FROM {$wpdb->options} WHERE option_name = %s", $option_name ),
+			ARRAY_A
+		);
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( "Failed to read option {$option_name}: {$wpdb->last_error}" ) );
+		}
+
+		return null === $row
+			? array(
+				'exists'   => false,
+				'value'    => null,
+				'autoload' => null,
+			)
+			: array(
+				'exists'   => true,
+				'value'    => $row['option_value'],
+				'autoload' => $row['autoload'],
+			);
+	}
+
+	/**
+	 * Restore an option without invoking setting sanitizers.
+	 *
+	 * @param string                                                         $option_name Option name.
+	 * @param array{exists: bool, value: string|null, autoload: string|null} $state Raw option state.
+	 * @return bool Whether the database operation succeeded.
+	 */
+	private static function restore_raw_option_state( string $option_name, array $state ): bool {
+		global $wpdb;
+
+		try {
+			if ( ! $state['exists'] ) {
+				$result = $wpdb->delete( $wpdb->options, array( 'option_name' => $option_name ) );
+			} elseif ( self::get_raw_option_state( $option_name )['exists'] ) {
+				$result = $wpdb->update(
+					$wpdb->options,
+					array(
+						'option_value' => $state['value'],
+						'autoload'     => $state['autoload'],
+					),
+					array( 'option_name' => $option_name )
+				);
+			} else {
+				$result = $wpdb->insert(
+					$wpdb->options,
+					array(
+						'option_name'  => $option_name,
+						'option_value' => $state['value'],
+						'autoload'     => $state['autoload'],
+					)
+				);
+			}
+
+			return false !== $result;
+		} finally {
+			self::invalidate_option_cache( $option_name );
+		}
+	}
+
+	/**
+	 * Invalidate all WordPress option cache representations.
+	 *
+	 * @param string $option_name Option name.
+	 */
+	private static function invalidate_option_cache( string $option_name ): void {
+		wp_cache_delete( $option_name, 'options' );
+		wp_cache_delete( 'alloptions', 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
+	}
+
+	/**
+	 * Invalidate every option cache representation touched by a test.
+	 */
+	private static function invalidate_test_option_caches(): void {
+		foreach ( self::get_test_option_names() as $option_name ) {
+			wp_cache_delete( $option_name, 'options' );
+		}
+		wp_cache_delete( 'alloptions', 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
 	}
 
 	/**
@@ -1393,12 +1580,16 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	 * Unmock the WC payment gateways.
 	 */
 	private function unmock_payment_gateways() {
-		remove_all_actions( 'wc_payment_gateways_initialized' );
+		if ( null !== $this->gateways_mock_ref ) {
+			remove_action( 'wc_payment_gateways_initialized', $this->gateways_mock_ref, 100 );
+		}
 		// Reinitialize the WC gateways.
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 
-		$this->providers_service->reset_memo();
+		if ( isset( $this->providers_service ) ) {
+			$this->providers_service->reset_memo();
+		}
 	}
 
 	/**

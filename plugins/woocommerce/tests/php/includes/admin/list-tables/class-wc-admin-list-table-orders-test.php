@@ -119,12 +119,14 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		$dummy_order->set_billing_first_name( 'NotAMatch' );
 		$dummy_order->save();
 
+		$order = WC_Helper_Order::create_order();
 		foreach ( $fields as $field => $value ) {
-			$order  = WC_Helper_Order::create_order();
 			$setter = 'set_' . $field;
 			$order->$setter( $value );
-			$order->save();
+		}
+		$order->save();
 
+		foreach ( $fields as $field => $value ) {
 			$_GET['s']          = $value;
 			$GLOBALS['pagenow'] = 'edit.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
@@ -151,8 +153,8 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 			);
 
 			unset( $_GET['s'], $GLOBALS['pagenow'] );
-			wp_delete_post( $order->get_id(), true );
 		}
+		wp_delete_post( $order->get_id(), true );
 		wp_delete_post( $dummy_order->get_id(), true );
 	}
 
@@ -163,11 +165,11 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		// Create several dummy orders.
 		$orders = array();
 		for ( $i = 0; $i < 3; $i++ ) {
-			$orders[] = WC_Helper_Order::create_order();
+			$orders[] = wc_create_order();
 		}
 
 		// Create a dummy order that should NOT match.
-		$dummy_order = WC_Helper_Order::create_order();
+		$dummy_order = wc_create_order();
 		$dummy_order->set_billing_first_name( 'NotAMatch' );
 		$dummy_order->save();
 

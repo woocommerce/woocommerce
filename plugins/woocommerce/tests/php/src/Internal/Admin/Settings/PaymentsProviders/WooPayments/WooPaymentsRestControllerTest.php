@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController;
 use PHPUnit\Framework\MockObject\MockObject;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
 
 /**
@@ -16,7 +16,7 @@ use WP_REST_Request;
  *
  * @class WooPaymentsRestController
  */
-class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
+class WooPaymentsRestControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Endpoint.
 	 *
@@ -47,6 +47,13 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	protected $store_admin_id;
 
 	/**
+	 * REST server used by the controller tests.
+	 *
+	 * @var \WP_REST_Server
+	 */
+	protected $server;
+
+	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
@@ -60,7 +67,22 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->sut = new WooPaymentsRestController();
 		$this->sut->init( $this->mock_payments_service, $this->mock_woopayments_service );
-		$this->sut->register_routes( true );
+		$this->server = $this->create_rest_server_with_routes(
+			array(
+				function () {
+					$this->sut->register_routes( true );
+				},
+			),
+			true
+		);
+	}
+
+	/**
+	 * Tear down the REST server.
+	 */
+	public function tearDown(): void {
+		$this->clear_rest_server();
+		parent::tearDown();
 	}
 
 	/**

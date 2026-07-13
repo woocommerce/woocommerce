@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix: ensure the dropdown inside Add to Cart + Options block render special character correctly.

@@ -2,7 +2,9 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for the WC_User class.
@@ -11,11 +13,37 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		try {
+			self::setup_cot_tables();
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
+			}
+		} finally {
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * Whether HPOS was authoritative before the test.
+	 *
+	 * @var bool
+	 */
+	private $previous_hpos_state;
+
+	/**
 	 * Setup COT.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->setup_cot();
+		$this->previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		$this->toggle_cot_feature_and_usage( true );
 	}
 
@@ -23,8 +51,10 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	 * Clean COT specific things.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		$this->clean_up_cot_setup();
+		$this->toggle_cot_feature_and_usage( $this->previous_hpos_state );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		parent::tearDown();
 
 		// In case `wc_update_user_last_active` test fail, clean the global state.
 		global $wp_current_filter;

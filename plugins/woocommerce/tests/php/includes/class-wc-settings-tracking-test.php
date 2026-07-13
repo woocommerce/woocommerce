@@ -10,11 +10,13 @@ class WC_Settings_Tracking_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function setUp(): void {
+		parent::setUp();
+		$this->clear_tracks_events();
+
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-settings-tracking.php';
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$settings_tracking = new WC_Settings_Tracking();
 		$settings_tracking->init();
-		parent::setUp();
 	}
 
 	/**

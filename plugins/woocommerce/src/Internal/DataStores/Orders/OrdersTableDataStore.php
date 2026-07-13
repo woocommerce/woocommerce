@@ -1485,19 +1485,25 @@ WHERE
 	public function filter_raw_meta_data( &$object, $raw_meta_data ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
 
 		/*
-		 * Defensive last-resort guard. The meta data should always arrive as an array of meta-row
-		 * objects, but a corrupt persistent object cache entry can surface as a scalar, an object,
-		 * or a well-formed array whose elements are not meta rows. Any of these would otherwise
-		 * fatal downstream (array_filter()/array_diff() on a non-array, or $meta->meta_key on a
-		 * non-object element). Drop anything that is not a usable meta row so the order still
-		 * loads, and when corruption is detected invalidate the cached entry so the next read
-		 * self-heals from the database.
+		 * Defensive last-resort guard. The meta data should always arrive as an array of complete
+		 * meta-row objects, but a corrupt persistent object cache entry can surface as a scalar, an
+		 * object, a well-formed array whose elements are not meta rows, or an array of objects that
+		 * are missing required columns. Any of these would otherwise fatal or silently load wrong
+		 * values downstream (array_filter()/array_diff() on a non-array, $meta->meta_key on a
+		 * non-object element, or a real key hydrated with a null value from a partial row). A row is
+		 * only usable when it carries meta_id, meta_key and meta_value - the same completeness check
+		 * OrdersTableDataStoreMeta::is_valid_cached_meta() applies at the HPOS cache boundary. Drop
+		 * anything that is not a usable meta row so the order still loads, and when corruption is
+		 * detected invalidate the cached entries so the next read self-heals from the database.
 		 */
 		$is_corrupt = false;
 		if ( is_array( $raw_meta_data ) ) {
 			$valid_meta_data = array_filter(
 				$raw_meta_data,
-				static fn( $meta ) => is_object( $meta ) && property_exists( $meta, 'meta_key' )
+				static fn( $meta ) => is_object( $meta )
+					&& property_exists( $meta, 'meta_id' )
+					&& property_exists( $meta, 'meta_key' )
+					&& property_exists( $meta, 'meta_value' )
 			);
 			$is_corrupt      = count( $valid_meta_data ) !== count( $raw_meta_data );
 			$raw_meta_data   = $valid_meta_data;
@@ -1514,7 +1520,25 @@ WHERE
 				),
 				array( 'source' => 'hpos-data-cache' )
 			);
+
+			/*
+			 * Invalidate every cache the corrupt value could have come from so the next read
+			 * self-heals from the database. The HPOS meta cache (orders_meta group) is primed by
+			 * init_order_record(), while WC_Data::read_meta_data() reads the object's own legacy
+			 * meta cache (the 'orders' group for orders) and, on a cache hit, skips re-caching -
+			 * so without clearing that group the corrupt entry would persist across reads.
+			 */
 			$this->data_store_meta->clear_cached_data( array( $object->get_id() ) );
+
+			/*
+			 * delete_meta_cache() is defined on WC_Data, so $object always has it in a consistent
+			 * deploy. The guard only covers the brief window during a plugin upgrade where this
+			 * (newer) class can be loaded before an opcode-cached, older abstract-wc-data.php gains
+			 * the method, which would otherwise fatal on an undefined method.
+			 */
+			if ( is_callable( array( $object, 'delete_meta_cache' ) ) ) {
+				$object->delete_meta_cache();
+			}
 		}
 
 		$filtered_meta_data = parent::filter_raw_meta_data( $object, $raw_meta_data );

@@ -181,11 +181,23 @@ class Image extends Abstract_Block_Renderer {
 			'class_name' => 'email-image-border-cell',
 		);
 		$content_with_border_styles = $this->add_style_to_element( $block_content, $border_element_tag, \WP_Style_Engine::compile_css( $border_styles, '' ) );
-		// Remove border styles from the image HTML tag.
+		// Remove border styles from the image HTML tag. The border is applied on the wrapper cell.
 		$content_with_border_styles = $this->remove_style_attribute_from_element( $content_with_border_styles, array( 'tag_name' => 'img' ), 'border-style' );
 		$content_with_border_styles = $this->remove_style_attribute_from_element( $content_with_border_styles, array( 'tag_name' => 'img' ), 'border-width' );
 		$content_with_border_styles = $this->remove_style_attribute_from_element( $content_with_border_styles, array( 'tag_name' => 'img' ), 'border-color' );
 		$content_with_border_styles = $this->remove_style_attribute_from_element( $content_with_border_styles, array( 'tag_name' => 'img' ), 'border-radius' );
+		$content_with_border_styles = $this->remove_style_attribute_from_element( $content_with_border_styles, array( 'tag_name' => 'img' ), 'border-top-left-radius' );
+		$content_with_border_styles = $this->remove_style_attribute_from_element( $content_with_border_styles, array( 'tag_name' => 'img' ), 'border-top-right-radius' );
+		$content_with_border_styles = $this->remove_style_attribute_from_element( $content_with_border_styles, array( 'tag_name' => 'img' ), 'border-bottom-left-radius' );
+		$content_with_border_styles = $this->remove_style_attribute_from_element( $content_with_border_styles, array( 'tag_name' => 'img' ), 'border-bottom-right-radius' );
+
+		// The border sits on the wrapper cell, so the image needs a smaller radius to stay flush
+		// inside it. With equal radii the border width would leave a gap in the corners, so we
+		// subtract the border width from the image radius (clamped to 0).
+		$inner_radius = $this->get_inner_image_border_radius( $parsed_block );
+		if ( '' !== $inner_radius ) {
+			$content_with_border_styles = $this->add_style_to_element( $content_with_border_styles, array( 'tag_name' => 'img' ), 'border-radius:' . $inner_radius . ';' );
+		}
 		// Add Border related classes to proper element. This is required for inlined border-color styles when defined via class.
 		$border_classes = array_filter(
 			explode( ' ', $class_name ),
@@ -200,6 +212,81 @@ class Image extends Abstract_Block_Renderer {
 			$html->set_attribute( 'class', implode( ' ', $border_classes ) );
 		}
 		return $html->get_updated_html();
+	}
+
+	/**
+	 * Get the border radius to apply to the image so it sits flush inside the bordered wrapper cell.
+	 *
+	 * The border is rendered on the wrapper cell, so the image radius is reduced by the border
+	 * width (clamped to 0). Returns a CSS value (single radius or a four-value shorthand), or an
+	 * empty string when there's no radius to apply.
+	 *
+	 * @param array $parsed_block Parsed block.
+	 */
+	private function get_inner_image_border_radius( array $parsed_block ): string {
+		$border     = $parsed_block['attrs']['style']['border'] ?? array();
+		$class_name = $parsed_block['attrs']['className'] ?? '';
+		$is_rounded = strpos( $class_name, 'is-style-rounded' ) !== false;
+
+		$radius = $border['radius'] ?? null;
+		if ( $is_rounded ) {
+			$radius = '9999px'; // Matches the circle radius applied by apply_rounded_style().
+		}
+
+		if ( empty( $radius ) ) {
+			return '';
+		}
+
+		// Use the widest border side so the image never pokes out past the border on any corner.
+		$border_width = $this->get_max_border_width( $border );
+
+		if ( is_array( $radius ) ) {
+			$top_left     = $this->reduce_radius_by_border_width( $radius['topLeft'] ?? null, $border_width );
+			$top_right    = $this->reduce_radius_by_border_width( $radius['topRight'] ?? null, $border_width );
+			$bottom_right = $this->reduce_radius_by_border_width( $radius['bottomRight'] ?? null, $border_width );
+			$bottom_left  = $this->reduce_radius_by_border_width( $radius['bottomLeft'] ?? null, $border_width );
+
+			if ( $top_left === $top_right && $top_right === $bottom_right && $bottom_right === $bottom_left ) {
+				return $top_left;
+			}
+			return "{$top_left} {$top_right} {$bottom_right} {$bottom_left}";
+		}
+
+		return $this->reduce_radius_by_border_width( $radius, $border_width );
+	}
+
+	/**
+	 * Get the largest border width (in px) across all sides.
+	 *
+	 * @param array $border Border style attributes.
+	 */
+	private function get_max_border_width( array $border ): float {
+		$max = isset( $border['width'] ) ? Styles_Helper::parse_value( (string) $border['width'] ) : 0.0;
+		foreach ( array( 'top', 'right', 'bottom', 'left' ) as $side ) {
+			if ( isset( $border[ $side ]['width'] ) ) {
+				$max = max( $max, Styles_Helper::parse_value( (string) $border[ $side ]['width'] ) );
+			}
+		}
+		return $max;
+	}
+
+	/**
+	 * Reduce a single border radius value by the border width, clamped to 0.
+	 *
+	 * Only px (or unitless) values can be combined with the px border width; other units are
+	 * returned unchanged.
+	 *
+	 * @param mixed $radius Border radius value (e.g. "20px"). Non-scalar values are treated as 0.
+	 * @param float $border_width Border width in px.
+	 */
+	private function reduce_radius_by_border_width( $radius, float $border_width ): string {
+		$radius = is_scalar( $radius ) ? trim( (string) $radius ) : '';
+		// Non-px units can't be combined with a px border width, so keep them unchanged.
+		if ( '' !== $radius && ! str_ends_with( $radius, 'px' ) && ! is_numeric( $radius ) ) {
+			return $radius;
+		}
+		$inner = max( 0.0, Styles_Helper::parse_value( $radius ) - $border_width );
+		return $inner . 'px';
 	}
 
 	/**

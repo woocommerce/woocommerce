@@ -23,11 +23,56 @@ class CheckoutSessions extends ControllerTestCase {
 	use AgenticTestHelpers;
 
 	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
+	/**
 	 * Products created for tests.
 	 *
 	 * @var array
 	 */
 	protected $products = array();
+
+	/**
+	 * Create immutable product rows shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::$product_ids = array_map(
+			fn( $product ) => $product->get_id(),
+			self::create_class_fixture_products(
+				array(
+					array(
+						'name'          => 'Test Product 1',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					),
+					array(
+						'name'          => 'Test Product 2',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 20,
+						'weight'        => 5,
+					),
+					array(
+						'name'          => 'Virtual Product',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 15,
+						'virtual'       => true,
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_class_fixture_products( self::$product_ids );
+	}
 
 	/**
 	 * Setup test product data. Called before every test.
@@ -53,32 +98,7 @@ class CheckoutSessions extends ControllerTestCase {
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
 
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 20,
-					'weight'        => 5,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Virtual Product',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 15,
-					'virtual'       => true,
-				)
-			),
-		);
+		$this->products = array_map( 'wc_get_product', self::$product_ids );
 
 		wc_get_container()->get( RoutesController::class )->register_all_routes();
 	}

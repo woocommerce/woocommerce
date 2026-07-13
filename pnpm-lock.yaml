@@ -21,6 +21,9 @@ catalogs:
     '@wordpress/interface':
       specifier: 9.18.5
       version: 9.18.5
+    '@wordpress/theme':
+      specifier: 0.17.0
+      version: 0.17.0
     '@wordpress/ui':
       specifier: 0.17.0
       version: 0.17.0
@@ -2975,6 +2978,9 @@ importers:
       '@wordpress/router':
         specifier: 0.7.0
         version: 0.7.0(react@18.3.1)
+      '@wordpress/theme':
+        specifier: catalog:wp-bundled
+        version: 0.17.0(@types/react@18.3.28)(postcss@8.4.49)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@14.16.1)
       '@wordpress/ui':
         specifier: catalog:wp-bundled
         version: 0.17.0(@date-fns/tz@1.4.1)(@types/react@18.3.28)(date-fns@4.1.0)(postcss@8.4.49)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@14.16.1)

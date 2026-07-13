@@ -51,6 +51,7 @@ const baseEmail: EmailType = {
 	enabled: true,
 	manual: false,
 	email_key: 'new_order',
+	email_class_name: 'WC_Email_New_Order',
 	recipients: { to: '', cc: '', bcc: '' },
 	status: 'enabled',
 	templateStatus: null,
@@ -180,6 +181,7 @@ describe( 'normalizeEmailTypePayload — regression for eligible_count=0', () =>
 		enabled: true,
 		manual: false,
 		email_key: 'customer_processing_order',
+		email_class_name: 'WC_Email_Customer_Processing_Order',
 		recipients: { to: '', cc: '', bcc: '' },
 		status: 'enabled',
 		template_status: 'core_updated_customized',
@@ -222,6 +224,9 @@ describe( 'normalizeEmailTypePayload — regression for eligible_count=0', () =>
 		expect( normalized.templateVersion ).toBe( '9.4.0-test' );
 		expect( normalized.currentVersion ).toBe( '10.7.0' );
 		expect( normalized.wasBackfilled ).toBe( false );
+		expect( normalized.email_class_name ).toBe(
+			'WC_Email_Customer_Processing_Order'
+		);
 
 		render(
 			<EmailListingFill

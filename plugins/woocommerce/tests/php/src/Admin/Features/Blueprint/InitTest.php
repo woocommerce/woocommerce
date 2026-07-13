@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Admin\Features\Blueprint;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\Init;
-use Automattic\WooCommerce\Tests\Admin\Features\Blueprint\stubs\DummyExporter;
+use Automattic\WooCommerce\Tests\Admin\Features\Blueprint\Stubs\DummyExporter;
+use Automattic\WooCommerce\Tests\Admin\Features\Blueprint\Stubs\ThemeStub;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 
@@ -78,13 +79,36 @@ class InitTest extends MockeryTestCase {
 	 */
 	public function test_get_themes_for_export_group() {
 		// Create mock themes that mimic WP_Theme.
-		$mock_theme_1      = $this->createMockTheme( 'theme-one', 'Theme One' );
-		$mock_theme_2      = $this->createMockTheme( 'theme-two', 'Theme Two' );
-		$mock_active_theme = $this->createMockTheme( 'theme-one', 'Theme One' );
+		$mock_theme_1      = $this->createThemeStub( 'theme-one', 'Theme One' );
+		$mock_theme_2      = $this->createThemeStub( 'theme-two', 'Theme Two' );
+		$mock_theme_3      = $this->createThemeStub( 'custom-theme', 'Custom Theme' );
+		$mock_active_theme = $this->createThemeStub( 'theme-one', 'Theme One' );
+		$themes_api        = (object) array(
+			'theme-one' => array( 'download_link' => 'https://example.com/theme-one.zip' ),
+			'theme-two' => array( 'download_link' => 'https://example.com/theme-two.zip' ),
+		);
 
 		// Mock methods.
-		$this->init->shouldReceive( 'wp_get_themes' )->andReturn( array( $mock_theme_1, $mock_theme_2 ) );
+		$this->init->shouldReceive( 'wp_get_themes' )->andReturn(
+			array(
+				'theme-one'    => $mock_theme_1,
+				'theme-two'    => $mock_theme_2,
+				'custom-theme' => $mock_theme_3,
+			)
+		);
 		$this->init->shouldReceive( 'wp_get_theme' )->andReturn( $mock_active_theme );
+		$this->init
+			->shouldReceive( 'wp_themes_api' )
+			->once()
+			->with(
+				'theme_information',
+				Mockery::on(
+					function ( $args ) {
+						return array( 'theme-one', 'theme-two', 'custom-theme' ) === $args['slugs'];
+					}
+				)
+			)
+			->andReturn( $themes_api );
 
 		// Run the function.
 		$result = $this->init->get_themes_for_export_group();
@@ -166,19 +190,15 @@ class InitTest extends MockeryTestCase {
 	}
 
 	/**
-	 * Helper method to create a mock WP_Theme-like object.
+	 * Helper method to create a WP_Theme-like object.
 	 *
 	 * @param string $stylesheet The stylesheet of the theme.
 	 * @param string $name The name of the theme.
 	 *
-	 * @return Mockery\MockInterface The mock WP_Theme object.
+	 * @return ThemeStub The theme object.
 	 */
-	private function createMockTheme( string $stylesheet, string $name ) {
-		$mock_theme = Mockery::mock( 'stdClass' );
-		$mock_theme->shouldReceive( 'get_stylesheet' )->andReturn( $stylesheet );
-		$mock_theme->shouldReceive( 'get' )->with( 'Name' )->andReturn( $name );
-
-		return $mock_theme;
+	private function createThemeStub( string $stylesheet, string $name ): ThemeStub {
+		return new ThemeStub( $stylesheet, $name );
 	}
 
 	/**
@@ -189,5 +209,6 @@ class InitTest extends MockeryTestCase {
 		parent::tearDown();
 
 		delete_transient( $this->init::INSTALLED_WP_ORG_PLUGINS_TRANSIENT );
+		delete_transient( $this->init::INSTALLED_WP_ORG_THEMES_TRANSIENT );
 	}
 }

@@ -547,12 +547,23 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$message['Webhook Delivery']['Response']['Body'] = 'Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.';
 		}
 
-		$logger->info(
-			wc_print_r( $message, true ),
-			array(
-				'source' => 'webhooks-delivery',
-			)
-		);
+		/**
+		 * Filter to disable webhook delivery logging.
+		 *
+		 * @since 11.1.0
+		 * @param bool $enable_logging Whether to log the delivery. Default true.
+		 * @param int  $webhook_id     The webhook ID.
+		 */
+		$enable_logging = apply_filters( 'woocommerce_webhook_enable_delivery_log', true, $this->get_id() );
+
+		if ( $enable_logging ) {
+			$logger->info(
+				wc_print_r( $message, true ),
+				array(
+					'source' => 'webhooks-delivery',
+				)
+			);
+		}
 
 		// Track failures.
 		// Check for a success, which is a 2xx, 301 or 302 Response Code.

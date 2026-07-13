@@ -17,6 +17,41 @@ use WC_Unit_Test_Case;
  * @covers \Automattic\WooCommerce\Internal\OrderReviews\Scheduler
  */
 class SchedulerTest extends WC_Unit_Test_Case {
+	/**
+	 * Product ID shared by generic reviewable-order fixtures.
+	 *
+	 * @var int
+	 */
+	private static $reviewable_product_id;
+
+	/**
+	 * Create the immutable reviewable product before per-test transactions begin.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::enable_direct_product_attribute_lookup_updates();
+
+		try {
+			self::$reviewable_product_id = WC_Helper_Product::create_simple_product()->get_id();
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
+	}
+
+	/**
+	 * Delete the shared product through the WooCommerce data store.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::enable_direct_product_attribute_lookup_updates();
+
+		try {
+			$product = wc_get_product( self::$reviewable_product_id );
+			if ( $product ) {
+				$product->delete( true );
+			}
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
+	}
 
 	/**
 	 * Prepare the mailer and enable the review-request email.
@@ -316,7 +351,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 * Create an order in a non-completed status so transitioning to completed fires the hook cleanly.
 	 */
 	private function create_pending_order(): WC_Order {
-		$order = OrderHelper::create_order();
+		$order = OrderHelper::create_order( 1, wc_get_product( self::$reviewable_product_id ) );
 		$order->set_status( 'pending' );
 		$order->save();
 		return $order;

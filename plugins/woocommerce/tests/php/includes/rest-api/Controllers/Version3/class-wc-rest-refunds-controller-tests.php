@@ -14,31 +14,12 @@ class WC_REST_Refunds_Controller_Test extends WC_REST_Unit_Test_Case {
 		$refund_ids               = array();
 
 		while ( $orders_and_refunds_count < 3 ) {
-			$order = WC_Helper_Order::create_order_with_fees_and_shipping();
-
-			$product_item  = current( $order->get_items( 'line_item' ) );
-			$fee_item      = current( $order->get_items( 'fee' ) );
-			$shipping_item = current( $order->get_items( 'shipping' ) );
+			$order = wc_create_order();
 
 			$refund = wc_create_refund(
 				array(
-					'order_id'   => $order->get_id(),
-					'reason'     => 'testing',
-					'line_items' => array(
-						$product_item->get_id()  =>
-							array(
-								'qty'          => 1,
-								'refund_total' => 1,
-							),
-						$fee_item->get_id()      =>
-							array(
-								'refund_total' => 10,
-							),
-						$shipping_item->get_id() =>
-							array(
-								'refund_total' => 20,
-							),
-					),
+					'order_id' => $order->get_id(),
+					'reason'   => 'testing',
 				)
 			);
 
@@ -53,6 +34,7 @@ class WC_REST_Refunds_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
+		$this->assertCount( 3, $data );
 
 		foreach ( $data as $refund ) {
 			$this->assertContains( $refund['id'], $refund_ids );

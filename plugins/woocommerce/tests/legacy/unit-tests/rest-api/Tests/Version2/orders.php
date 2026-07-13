@@ -14,10 +14,30 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 
 	/**
+	 * Administrator used to authenticate requests.
+	 *
+	 * @var int
+	 */
+	protected static $administrator_user;
+
+	/**
 	 * Array of order to track
 	 * @var array
 	 */
 	protected $orders = array();
+
+	/**
+	 * Create the shared administrator.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$administrator_user = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
 
 	/**
 	 * Setup our test server.
@@ -25,11 +45,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Orders_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user     = self::$administrator_user;
 	}
 
 	/**
@@ -52,7 +68,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 
 		// Create 10 orders.
 		for ( $i = 0; $i < 10; $i++ ) {
-			$this->orders[] = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+			$this->orders[] = wc_create_order( array( 'customer_id' => $this->user ) );
 		}
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders' ) );
@@ -69,7 +85,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_items_without_permission() {
 		wp_set_current_user( 0 );
-		$this->orders[] = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$this->orders[] = wc_create_order();
 		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -153,7 +169,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_item_without_permission() {
 		wp_set_current_user( 0 );
-		$order          = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order          = wc_create_order();
 		$this->orders[] = $order;
 		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders/' . $order->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
@@ -652,7 +668,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_order_without_permission() {
 		wp_set_current_user( 0 );
-		$order   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order   = wc_create_order();
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order->get_id() );
 		$request->set_body_params(
 			array(
@@ -707,7 +723,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_order_without_permission() {
 		wp_set_current_user( 0 );
-		$order   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order   = wc_create_order();
 		$request = new WP_REST_Request( 'DELETE', '/wc/v2/orders/' . $order->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );

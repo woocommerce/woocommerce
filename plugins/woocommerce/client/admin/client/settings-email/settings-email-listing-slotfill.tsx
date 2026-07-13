@@ -40,6 +40,7 @@ export type EmailType = {
 	description: string;
 	id: string;
 	email_key: string;
+	email_class_name: string;
 	post_id: string;
 	recipients: Recipients;
 	enabled: boolean;
