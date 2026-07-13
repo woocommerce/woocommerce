@@ -364,6 +364,18 @@ class CartItems extends ControllerTestCase {
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items', 'v1' );
 		$cart       = WC()->cart->get_cart();
+		$image_id   = $this->products[0]->get_image_id();
+
+		// Capture warnings in the order they are logged so we can assert on them
+		// without relying on the deprecated at() matcher.
+		$logged_warnings = array();
+		$this->mock_logger
+			->method( 'warning' )
+			->willReturnCallback(
+				function ( $message ) use ( &$logged_warnings ) {
+					$logged_warnings[] = $message;
+				}
+			);
 
 		// Ensure warning is logged when image has invalid src.
 		add_filter(
@@ -378,13 +390,14 @@ class CartItems extends ControllerTestCase {
 			1
 		);
 
-		$this->mock_logger
-			->expects( $this->at( 0 ) )
-			->method( 'warning' )
-			->with( sprintf( 'After passing through woocommerce_cart_item_images filter, image with id %s did not have a valid src property.', $this->products[0]->get_image_id() ) );
-
 		$controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
 		remove_all_filters( 'woocommerce_store_api_cart_item_images' );
+
+		$this->assertContains(
+			sprintf( 'After passing through woocommerce_cart_item_images filter, image with id %s did not have a valid src property.', $image_id ),
+			$logged_warnings,
+			'Expected a warning to be logged when the filtered image has an invalid src.'
+		);
 
 		// Ensure warning is logged when image has invalid thumbnail.
 		add_filter(
@@ -399,13 +412,14 @@ class CartItems extends ControllerTestCase {
 			1
 		);
 
-		$this->mock_logger
-			->expects( $this->at( 0 ) )
-			->method( 'warning' )
-			->with( sprintf( 'After passing through woocommerce_cart_item_images filter, image with id %s did not have a valid thumbnail property.', $this->products[0]->get_image_id() ) );
-
 		$controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
 		remove_all_filters( 'woocommerce_store_api_cart_item_images' );
+
+		$this->assertContains(
+			sprintf( 'After passing through woocommerce_cart_item_images filter, image with id %s did not have a valid thumbnail property.', $image_id ),
+			$logged_warnings,
+			'Expected a warning to be logged when the filtered image has an invalid thumbnail.'
+		);
 
 		// Ensure original images are returned if filter returns a non-array.
 		add_filter(
