@@ -8283,7 +8283,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test account skip adds the skip marker to a step previously completed without one.
+	 * @testdox Test account init skips a trapped merchant forward, adding the skip marker to a step previously completed without one.
 	 *
 	 * @return void
 	 */
@@ -8301,7 +8301,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->method( 'has_connected_owner' )
 			->willReturn( true );
 
-		// Arrange the NOX profile with a step completed through a non-skip path (no skip marker).
+		// Arrange the NOX profile with a step completed without a skip marker (the state a
+		// skip-forward from before the marker existed left behind).
 		$stored_profile          = array(
 			'onboarding' => array(
 				$location => array(
@@ -8335,17 +8336,12 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Arrange the account state: no account before the initialization, and a test-drive
-		// account that requires verification (i.e. is not valid) after the platform fell back to it.
-		$account_connected = false;
+		// Arrange the trapped account state, present BEFORE the request starts: the platform
+		// fell back to a test-drive account that requires verification (i.e. is not valid).
 		$this->mock_provider
 			->expects( $this->any() )
 			->method( 'is_account_connected' )
-			->willReturnCallback(
-				function () use ( &$account_connected ) {
-					return $account_connected;
-				}
-			);
+			->willReturn( true );
 		$this->mock_account_service
 			->expects( $this->any() )
 			->method( 'is_stripe_account_valid' )
@@ -8363,18 +8359,19 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				)
 			);
 
-		// Arrange the REST API requests.
+		// Arrange the REST API requests: with an account already connected, the platform
+		// must not be called at all.
+		$init_endpoint_called = false;
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$account_connected ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$init_endpoint_called ) {
 						unset( $params );
 						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
-							// The platform fell back to an account that requires verification.
-							$account_connected = true;
+							$init_endpoint_called = true;
 
 							return array(
-								'success' => false,
+								'success' => true,
 							);
 						}
 
@@ -8384,6 +8381,15 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
+		// The merchant is trapped: the stored completed status is re-gated away by the invalid
+		// test account, routing them back into this step.
+		$status = $this->sut->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+		$this->assertNotSame(
+			WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+			$status,
+			'Without the skip marker, the invalid test account should re-gate the stored completed status.'
+		);
+
 		try {
 			$this->sut->onboarding_test_account_init( $location );
 			$this->fail( 'Expected ApiException was not thrown.' );
@@ -8391,14 +8397,21 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$this->assertSame(
 				'woocommerce_woopayments_onboarding_test_account_non_recoverable_error',
 				$e->getErrorCode(),
-				'A dedicated error code should signal the non-recoverable failure to the client.'
+				'The merchant should be skipped forward instead of dead-ending on an already-existing test account.'
 			);
 		}
+
+		$this->assertFalse( $init_endpoint_called, 'The platform should not be called when a test account is already connected.' );
 
 		$this->assertNotEmpty( $updated_stored_profiles );
 		$final_profile = end( $updated_stored_profiles );
 		$statuses      = $final_profile['onboarding'][ $location ]['steps'][ WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT ]['statuses'];
 		$this->assertArrayHasKey( WooPaymentsService::ONBOARDING_STEP_SKIPPED_MARKER, $statuses, 'The skip marker should be added even when the step was already completed without one.' );
+		$this->assertSame(
+			$this->current_time - 100,
+			$statuses[ WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED ],
+			'The stored completion timestamp should be preserved — marker maintenance is not a new completion.'
+		);
 
 		$status = $this->sut->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 		$this->assertSame(

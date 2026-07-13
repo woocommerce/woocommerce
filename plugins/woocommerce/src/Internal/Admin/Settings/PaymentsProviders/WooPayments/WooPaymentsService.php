@@ -1181,6 +1181,22 @@ class WooPaymentsService {
 
 		// Nothing to do if we already have a connected test account.
 		if ( $this->has_test_account() ) {
+			// A connected test account that is not valid, with the step already recorded completed,
+			// is the state a skipped-forward step leaves behind (the platform fell back to an account
+			// that requires verification). Merchants who reached it before the skip marker existed
+			// keep being routed back into this step, and retrying cannot succeed while an account
+			// is connected. Skip the step forward — recording the marker — so they can move on,
+			// instead of dead-ending them here.
+			if ( ! $this->has_valid_account() &&
+				$this->was_onboarding_step_marked_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location )
+			) {
+				$this->skip_onboarding_test_account_step(
+					$location,
+					$source,
+					array( 'reason' => 'invalid_test_account_exists' )
+				);
+			}
+
 			throw new ApiException(
 				'woocommerce_woopayments_test_account_already_exists',
 				esc_html__( 'A test account is already set up.', 'woocommerce' ),
