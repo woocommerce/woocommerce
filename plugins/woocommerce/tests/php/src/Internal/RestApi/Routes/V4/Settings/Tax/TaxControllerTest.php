@@ -612,4 +612,147 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		// Reset to original value.
 		update_option( 'woocommerce_price_display_suffix', $original_suffix );
 	}
+
+	/**
+	 * @testdox Should accept a valid value when a plugin filters options into the structured format.
+	 */
+	public function test_update_tax_settings_structured_options_accepts_valid_value() {
+		$original = get_option( 'woocommerce_tax_based_on', 'shipping' );
+		$callback = $this->filter_tax_based_on_options(
+			array(
+				array(
+					'value' => 'shipping',
+					'label' => 'Customer shipping address',
+				),
+				array(
+					'value' => 'billing',
+					'label' => 'Customer billing address',
+				),
+				array(
+					'value' => 'base',
+					'label' => 'Shop base address',
+				),
+			)
+		);
+
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_tax_based_on' => 'base',
+					),
+				)
+			)
+		);
+		$request->set_header( 'content-type', 'application/json' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Valid values should pass validation when options are in the structured format' );
+		$this->assertSame( 'base', get_option( 'woocommerce_tax_based_on' ) );
+
+		remove_filter( 'woocommerce_tax_settings', $callback );
+		update_option( 'woocommerce_tax_based_on', $original );
+	}
+
+	/**
+	 * @testdox Should reject numeric option indexes when a plugin filters options into the structured format.
+	 */
+	public function test_update_tax_settings_structured_options_rejects_numeric_index() {
+		$original = get_option( 'woocommerce_tax_based_on', 'shipping' );
+		$callback = $this->filter_tax_based_on_options(
+			array(
+				array(
+					'value' => 'shipping',
+					'label' => 'Customer shipping address',
+				),
+				array(
+					'value' => 'billing',
+					'label' => 'Customer billing address',
+				),
+				array(
+					'value' => 'base',
+					'label' => 'Shop base address',
+				),
+			)
+		);
+
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_tax_based_on' => '0',
+					),
+				)
+			)
+		);
+		$request->set_header( 'content-type', 'application/json' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'Numeric option indexes should not pass validation for structured options' );
+		$data = $response->get_data();
+		$this->assertStringContainsString( 'invalid_param', $data['code'] );
+		$this->assertStringContainsString( 'shipping, billing, base', $data['message'], 'Error message should list the real option values, not numeric indexes' );
+		$this->assertSame( $original, get_option( 'woocommerce_tax_based_on', 'shipping' ) );
+
+		remove_filter( 'woocommerce_tax_settings', $callback );
+	}
+
+	/**
+	 * @testdox Should validate each option entry by its own format when formats are mixed.
+	 */
+	public function test_update_tax_settings_mixed_format_options() {
+		$original = get_option( 'woocommerce_tax_based_on', 'shipping' );
+		$callback = $this->filter_tax_based_on_options(
+			array(
+				array(
+					'value' => 'shipping',
+					'label' => 'Customer shipping address',
+				),
+				'billing' => 'Customer billing address',
+			)
+		);
+
+		foreach ( array( 'shipping', 'billing' ) as $value ) {
+			$request = new WP_REST_Request( 'PUT', self::ENDPOINT );
+			$request->set_body(
+				wp_json_encode(
+					array(
+						'values' => array(
+							'woocommerce_tax_based_on' => $value,
+						),
+					)
+				)
+			);
+			$request->set_header( 'content-type', 'application/json' );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertSame( 200, $response->get_status(), "Value '$value' should pass validation with mixed format options" );
+			$this->assertSame( $value, get_option( 'woocommerce_tax_based_on' ) );
+		}
+
+		remove_filter( 'woocommerce_tax_settings', $callback );
+		update_option( 'woocommerce_tax_based_on', $original );
+	}
+
+	/**
+	 * Register a filter replacing the woocommerce_tax_based_on options, as plugins
+	 * filtering 'woocommerce_tax_settings' can do.
+	 *
+	 * @param array $options Replacement options for the setting.
+	 * @return callable The registered filter callback, so tests can remove it.
+	 */
+	private function filter_tax_based_on_options( array $options ): callable {
+		$callback = function ( $settings ) use ( $options ) {
+			foreach ( $settings as $index => $setting ) {
+				if ( 'woocommerce_tax_based_on' === ( $setting['id'] ?? '' ) ) {
+					$settings[ $index ]['options'] = $options;
+				}
+			}
+			return $settings;
+		};
+		add_filter( 'woocommerce_tax_settings', $callback );
+		return $callback;
+	}
 }
