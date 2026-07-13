@@ -310,6 +310,41 @@ class WooPaymentsService {
 				// Ignore any completed stored statuses because of the critical nature of the WPCOM connection.
 				break;
 			case self::ONBOARDING_STEP_TEST_ACCOUNT:
+				// A stored completed status with no skip marker while a connected test account is not
+				// valid is the state a skip-forward from before the marker existed left behind (the
+				// platform fell back to an account that requires verification). Backfill the marker:
+				// re-gating these merchants buys nothing — the client routes them back into a step
+				// whose initialization can never succeed while an account is connected, so they end up
+				// polling indefinitely. A legitimately in-flight account is not affected because no
+				// completed status is stored for it, and if the account later becomes valid and
+				// working, the auto-completion above clears the backfilled marker again.
+				if ( $meets_requirements &&
+					$this->was_onboarding_step_marked_completed( $step_id, $location ) &&
+					! $this->was_onboarding_step_completed_via_skip( $step_id, $location ) &&
+					$this->has_test_account() && ! $this->has_valid_account()
+				) {
+					if ( $this->record_onboarding_step_completed( $step_id, $location, false, self::SESSION_ENTRY_DEFAULT, true ) ) {
+						// Keep the same telemetry trail as a regular skip-forward.
+						$this->record_event(
+							self::EVENT_PREFIX . 'onboarding_test_account_skipped',
+							$location,
+							array(
+								'source' => self::SESSION_ENTRY_DEFAULT,
+								'reason' => 'skip_marker_backfilled',
+							)
+						);
+					} else {
+						// Leave a trail. This is self-healing since the backfill is retried on every status read.
+						$this->proxy->call_function( 'wc_get_logger' )->warning(
+							'Failed to store the test account onboarding step skip marker while backfilling it.',
+							array(
+								'source'   => 'settings-payments',
+								'location' => $location,
+							)
+						);
+					}
+				}
+
 				// If there is a stored completed status, we respect that IF there is NO invalid test account.
 				// This is the case when the user first creates a test account and then switches to live.
 				// The step can only be completed if the requirements are met.
@@ -1181,22 +1216,6 @@ class WooPaymentsService {
 
 		// Nothing to do if we already have a connected test account.
 		if ( $this->has_test_account() ) {
-			// A connected test account that is not valid, with the step already recorded completed,
-			// is the state a skipped-forward step leaves behind (the platform fell back to an account
-			// that requires verification). Merchants who reached it before the skip marker existed
-			// keep being routed back into this step, and retrying cannot succeed while an account
-			// is connected. Skip the step forward — recording the marker — so they can move on,
-			// instead of dead-ending them here.
-			if ( ! $this->has_valid_account() &&
-				$this->was_onboarding_step_marked_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location )
-			) {
-				$this->skip_onboarding_test_account_step(
-					$location,
-					$source,
-					array( 'reason' => 'invalid_test_account_exists' )
-				);
-			}
-
 			throw new ApiException(
 				'woocommerce_woopayments_test_account_already_exists',
 				esc_html__( 'A test account is already set up.', 'woocommerce' ),
