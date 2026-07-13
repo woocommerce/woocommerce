@@ -17,7 +17,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"is-contact-description"} -->
-<p class="is-contact-description"><?php esc_html_e( 'Navigating life\'s intricate fabric, choices unfold paths to the extraordinary, demanding creativity, curiosity, and courage for a truly fulfilling journey.', 'purple' ); ?></p>
+<p class="is-contact-description"><?php esc_html_e( 'You are always welcome to visit our flagship store, where you have the opportunity to try on our garments and purchase directly in the shop.', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
