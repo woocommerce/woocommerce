@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Correct comments that attributed SelectControl empty-string handling to Radix UI; @wordpress/ui is built on Base UI.
