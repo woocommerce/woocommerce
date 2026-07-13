@@ -8,15 +8,16 @@ use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
 use WC_Payment_Gateway;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
+use WP_REST_Server;
 
 /**
  * Tests for the Payment Gateways Settings REST API controller.
  *
  * @class PaymentGatewaysSettingsControllerTest
  */
-class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
+class PaymentGatewaysSettingsControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Endpoint.
 	 *
@@ -28,6 +29,13 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * @var Controller
 	 */
 	protected Controller $sut;
+
+	/**
+	 * REST server used to dispatch payment gateway settings requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
 
 	/**
 	 * Shared admin user used for REST authentication across all tests in the class.
@@ -51,13 +59,30 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		$gateways                   = \WC_Payment_Gateways::instance();
+		$gateways->payment_gateways = array();
+		$gateways->init();
+
 		wp_set_current_user( self::$store_admin_id );
 
 		// Inject the mock gateway directly — avoids filter pollution and a second init() call.
 		WC()->payment_gateways()->payment_gateways[] = new WCGatewayMockPassword();
 
-		$this->sut = new Controller();
-		$this->sut->register_routes();
+		$this->sut    = new Controller();
+		$this->server = $this->create_rest_server_with_routes(
+			array( array( $this->sut, 'register_routes' ) ),
+			true
+		);
+	}
+
+	/**
+	 * Tear down test.
+	 */
+	public function tearDown(): void {
+		$this->clear_rest_server();
+		unset( $this->server, $this->sut );
+
+		parent::tearDown();
 	}
 
 	/**
