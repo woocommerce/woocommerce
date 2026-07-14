@@ -42,47 +42,25 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		}
 
 		/**
-		 * Render WordPress core's #lost-connection-notice markup on Woo admin
-		 * screens that don't already get it for free.
-		 *
-		 * WP core renders this element on classic post-type edit pages (via
-		 * edit-form-advanced.php), and wp-autosave.js toggles it in response
-		 * to Heartbeat events. By echoing the same markup here and enqueueing
-		 * the `autosave` script (see admin_scripts()), Woo admin screens
-		 * inherit the same offline awareness without any new copy, styling,
-		 * or behavior.
-		 *
-		 * Translation strings use the 'default' text domain so WP core's
-		 * existing translations apply.
-		 *
-		 * Skipped on:
-		 * - Classic post-type edit screens (WP core already renders the notice).
-		 * - wc-admin React pages (they use their own layout rather than the
-		 *   standard admin_notices position).
+		 * Render a #wc-lost-connection-notice on Woo admin screens that don't already get an accurate one.
+		 * Skipped on classic post edit and wc-admin React pages, except classic order edit: core's own notice
+		 * there wrongly claims local autosave backups are running, which disable_autosave() has turned off.
 		 *
 		 * @return void
 		 */
 		public function render_lost_connection_notice() {
-			$screen = get_current_screen();
-			if ( ! $screen ) {
-				return;
-			}
-
-			if ( 'post' === $screen->base ) {
-				return;
-			}
-
-			$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
+			$screen                       = get_current_screen();
+			$is_wc_admin_page             = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
 				&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
-			if ( $is_wc_admin_page ) {
-				return;
-			}
+			$is_classic_order_edit_screen = $screen && 'post' === $screen->base
+				&& in_array( $screen->post_type, wc_get_order_types( 'order-meta-boxes' ), true );
 
-			if ( ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
+			if ( ! $screen || $is_wc_admin_page || ! in_array( $screen->id, wc_get_screen_ids(), true )
+				|| ( 'post' === $screen->base && ! $is_classic_order_edit_screen ) ) {
 				return;
 			}
 			?>
-			<div id="lost-connection-notice" class="notice error hidden">
+			<div id="wc-lost-connection-notice" class="notice error hidden">
 				<p>
 					<span class="spinner"></span>
 					<strong><?php esc_html_e( 'Connection lost.' ); /* phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- Reusing WP core translation. */ ?></strong>
@@ -466,13 +444,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'woocommerce_admin' );
 				wp_enqueue_script( 'wc-enhanced-select' );
 
-				// Pair the #lost-connection-notice markup with core's autosave script.
-				// See render_lost_connection_notice() for scoping rationale.
 				$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
 					&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
-				if ( 'post' !== ( $screen->base ?? '' ) && ! $is_wc_admin_page ) {
-					wp_enqueue_script( 'autosave' );
-				}
+
+				// Matches render_lost_connection_notice()'s own classic-order-edit exception.
+				$is_classic_order_edit_screen = 'post' === ( $screen->base ?? '' )
+					&& in_array( $screen->post_type ?? '', wc_get_order_types( 'order-meta-boxes' ), true );
 
 				wp_enqueue_script( 'jquery-ui-sortable' );
 				wp_enqueue_script( 'jquery-ui-autocomplete' );
@@ -510,6 +487,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
+					'show_lost_connection_notice'       => ! $is_wc_admin_page
+						&& ( 'post' !== ( $screen->base ?? '' ) || $is_classic_order_edit_screen ),
 				);
 
 				wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );

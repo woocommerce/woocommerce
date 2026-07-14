@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix failing AJAX requests and false unsaved-changes warnings on the order edit screen, and make the connection-lost notice consistent between HPOS on and off

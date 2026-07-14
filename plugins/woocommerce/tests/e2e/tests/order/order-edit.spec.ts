@@ -198,6 +198,35 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 		);
 	} );
 
+	test( 'saving an order does not trigger a false unsaved-changes warning', async ( {
+		page,
+	} ) => {
+		if ( process.env.DISABLE_HPOS === '1' ) {
+			await page.goto(
+				`wp-admin/post.php?post=${ orderId }&action=edit`
+			);
+		} else {
+			await page.goto(
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
+		}
+
+		const dialogMessages: string[] = [];
+		page.on( 'dialog', async ( dialog ) => {
+			dialogMessages.push( dialog.message() );
+			await dialog.accept();
+		} );
+
+		await page.locator( 'button.save_order' ).click();
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: 'Order updated.' } )
+		).toBeVisible();
+
+		expect( dialogMessages ).toEqual( [] );
+	} );
+
 	test( 'can add and delete order notes', async ( { page } ) => {
 		// open order we created
 		await page.goto(
@@ -379,6 +408,50 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 				)
 			).toBeVisible();
 		} );
+	} );
+
+	test( 'shows the lost connection notice when the heartbeat request fails', async ( {
+		page,
+	} ) => {
+		if ( process.env.DISABLE_HPOS === '1' ) {
+			await page.goto(
+				`wp-admin/post.php?post=${ orderId }&action=edit`
+			);
+		} else {
+			await page.goto(
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
+		}
+
+		const notice = page.locator( '#wc-lost-connection-notice' );
+		await expect( notice ).toBeHidden();
+
+		// Make the next heartbeat request fail the way this notice specifically checks for.
+		await page.route( '**/admin-ajax.php', async ( route ) => {
+			const postData = route.request().postData() ?? '';
+			if ( postData.includes( 'action=heartbeat' ) ) {
+				await route.fulfill( { status: 603, body: '{}' } );
+			} else {
+				await route.continue();
+			}
+		} );
+
+		await page.evaluate( () =>
+			// @ts-expect-error wp.heartbeat isn't typed here.
+			window.wp.heartbeat.connectNow()
+		);
+
+		await expect( notice ).toBeVisible();
+		await expect( notice ).toContainText( 'Connection lost.' );
+		await expect( notice ).not.toContainText( 'backed up in your browser' );
+
+		await page.unroute( '**/admin-ajax.php' );
+		await page.evaluate( () =>
+			// @ts-expect-error wp.heartbeat isn't typed here.
+			window.wp.heartbeat.connectNow()
+		);
+
+		await expect( notice ).toBeHidden();
 	} );
 } );
 
