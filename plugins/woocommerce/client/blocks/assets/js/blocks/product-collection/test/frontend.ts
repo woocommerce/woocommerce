@@ -171,7 +171,9 @@ describe( 'Product Collection frontend store', () => {
 				'woocommerce/product-collection'
 			) as MockStoreEntry;
 
-			await runAction( ( actions.viewProduct as () => Iterator< unknown > )() );
+			await runAction(
+				( actions.viewProduct as () => Iterator< unknown > )()
+			);
 
 			expect( triggerViewedProductEvent ).toHaveBeenCalledWith( {
 				collection: CoreCollectionNames.PRODUCT_CATALOG,
@@ -188,7 +190,8 @@ describe( 'Product Collection frontend store', () => {
 			const { actions } = entries.get(
 				'woocommerce/product-collection'
 			) as MockStoreEntry;
-			const viewProduct = actions.viewProduct as () => Iterator< unknown >;
+			const viewProduct =
+				actions.viewProduct as () => Iterator< unknown >;
 
 			// First card / first paginated page.
 			mockProductsState.productInContext = {
@@ -224,7 +227,9 @@ describe( 'Product Collection frontend store', () => {
 				'woocommerce/product-collection'
 			) as MockStoreEntry;
 
-			await runAction( ( actions.viewProduct as () => Iterator< unknown > )() );
+			await runAction(
+				( actions.viewProduct as () => Iterator< unknown > )()
+			);
 
 			expect( triggerViewedProductEvent ).not.toHaveBeenCalled();
 		} );
@@ -250,9 +255,9 @@ describe( 'Product Collection frontend store', () => {
 			} );
 
 			await runAction(
-				( actions.navigate as ( e: MouseEvent ) => Iterator< unknown > )(
-					event
-				)
+				(
+					actions.navigate as ( e: MouseEvent ) => Iterator< unknown >
+				 )( event )
 			);
 
 			expect( mockRouterNavigate ).toHaveBeenCalledWith( href );
