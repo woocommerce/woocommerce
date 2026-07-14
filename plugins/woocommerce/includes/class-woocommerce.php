@@ -416,6 +416,9 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Locations\LocationsController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\MultiLocationInventory\ProductInventoryController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\MultiLocationInventory\PosLocationSeeder::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
