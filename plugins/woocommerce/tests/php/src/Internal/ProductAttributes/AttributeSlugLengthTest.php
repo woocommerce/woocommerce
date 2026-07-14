@@ -18,6 +18,15 @@ use WC_Unit_Test_Case;
 class AttributeSlugLengthTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Reset the current user so a locale-specific admin created by a test cannot
+	 * leak into later tests, even if an assertion fails before an inline reset.
+	 */
+	public function tearDown(): void {
+		wp_set_current_user( 0 );
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox Should derive the character estimate from the typical byte width of the locale's script.
 	 * @dataProvider locale_estimate_provider
 	 *
@@ -81,8 +90,6 @@ class AttributeSlugLengthTest extends WC_Unit_Test_Case {
 			AttributeSlugLength::get_character_estimate(),
 			'The default estimate should follow the user profile locale, not the site locale'
 		);
-
-		wp_set_current_user( 0 );
 	}
 
 	/**
