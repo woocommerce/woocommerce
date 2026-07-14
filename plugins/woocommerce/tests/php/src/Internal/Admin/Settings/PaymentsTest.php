@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Caches\RequestCache;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -37,6 +38,13 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	 * @var PaymentsExtensionSuggestions|MockObject
 	 */
 	protected $mock_extension_suggestions;
+
+	/**
+	 * The request cache.
+	 *
+	 * @var RequestCache
+	 */
+	private $request_cache;
 
 	/**
 	 * The ID of the store admin user.
@@ -75,11 +83,22 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->mock_extension_suggestions = $this->getMockBuilder( PaymentsExtensionSuggestions::class )
 			->disableOriginalConstructor()
 			->getMock();
+		$this->request_cache              = wc_get_container()->get( RequestCache::class );
 
-		$this->mock_providers->init( $this->mock_extension_suggestions, wc_get_container()->get( LegacyProxy::class ) );
+		$this->mock_providers->init( $this->mock_extension_suggestions, wc_get_container()->get( LegacyProxy::class ), $this->request_cache );
 
 		$this->sut = new Payments();
-		$this->sut->init( $this->mock_providers, $this->mock_extension_suggestions );
+		$this->sut->init( $this->mock_providers, $this->mock_extension_suggestions, $this->request_cache );
+		$this->sut->reset_memo();
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		$this->sut->reset_memo();
+
+		parent::tearDown();
 	}
 
 	/**
@@ -618,6 +637,29 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$second = $this->sut->get_payment_providers( $location );
 
 		$this->assertSame( $first, $second, 'Repeated calls should return the memoized providers' );
+	}
+
+	/**
+	 * @testdox Payment providers are memoized across service instances during a request.
+	 */
+	public function test_get_payment_providers_is_memoized_across_service_instances(): void {
+		$this->mock_providers
+			->expects( $this->once() )
+			->method( 'get_payment_gateways' )
+			->willReturn( array() );
+
+		$this->mock_providers
+			->expects( $this->once() )
+			->method( 'get_extension_suggestions' )
+			->willReturn( array() );
+
+		$other_service = new Payments();
+		$other_service->init( $this->mock_providers, $this->mock_extension_suggestions, $this->request_cache );
+
+		$first  = $this->sut->get_payment_providers( 'US' );
+		$second = $other_service->get_payment_providers( 'US' );
+
+		$this->assertSame( $first, $second, 'Service instances should share the request-cached providers.' );
 	}
 
 	/**

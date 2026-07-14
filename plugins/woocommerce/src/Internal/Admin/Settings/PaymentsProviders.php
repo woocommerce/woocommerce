@@ -35,6 +35,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Caches\RequestCache;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Payment_Gateway;
@@ -80,6 +81,8 @@ class PaymentsProviders {
 	public const CATEGORY_BNPL             = 'bnpl';
 	public const CATEGORY_CRYPTO           = 'crypto';
 	public const CATEGORY_PSP              = 'psp';
+
+	private const GATEWAY_DETAILS_REQUEST_CACHE_GROUP = 'woocommerce_payment_gateway_details';
 
 	/*
 	 * The provider link types.
@@ -200,14 +203,11 @@ class PaymentsProviders {
 	private array $payment_gateways_for_display_memo = array();
 
 	/**
-	 * The memoized payment gateway details to avoid re-deriving them multiple times during a request.
+	 * The request cache.
 	 *
-	 * Deriving a gateway's details can be expensive since gateways may run account and state checks.
-	 * Keyed first by gateway ID, then by country code.
-	 *
-	 * @var array
+	 * @var RequestCache
 	 */
-	private array $payment_gateway_details_memo = array();
+	private RequestCache $request_cache;
 
 	/**
 	 * The payment extension suggestions service.
@@ -228,12 +228,14 @@ class PaymentsProviders {
 	 *
 	 * @param ExtensionSuggestions $payment_extension_suggestions The payment extension suggestions service.
 	 * @param LegacyProxy          $proxy                         The LegacyProxy instance.
+	 * @param RequestCache         $request_cache                 The request cache.
 	 *
 	 * @internal
 	 */
-	final public function init( ExtensionSuggestions $payment_extension_suggestions, LegacyProxy $proxy ): void {
+	final public function init( ExtensionSuggestions $payment_extension_suggestions, LegacyProxy $proxy, RequestCache $request_cache ): void {
 		$this->extension_suggestions = $payment_extension_suggestions;
 		$this->proxy                 = $proxy;
+		$this->request_cache         = $request_cache;
 	}
 
 	/**
@@ -489,15 +491,19 @@ class PaymentsProviders {
 		// Normalize the country code to uppercase.
 		$country_code = strtoupper( $country_code );
 
-		if ( ! isset( $this->payment_gateway_details_memo[ $payment_gateway->id ][ $country_code ] ) ) {
-			$this->payment_gateway_details_memo[ $payment_gateway->id ][ $country_code ] = $this->enhance_payment_gateway_details(
-				$this->get_payment_gateway_base_details( $payment_gateway, 0, $country_code ),
-				$payment_gateway,
-				$country_code
-			);
-		}
+		$memo_key = $payment_gateway->id . '__' . $country_code;
+		$details  = $this->request_cache->remember(
+			$memo_key,
+			self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP,
+			function () use ( $payment_gateway, $country_code ): array {
+				return $this->enhance_payment_gateway_details(
+					$this->get_payment_gateway_base_details( $payment_gateway, 0, $country_code ),
+					$payment_gateway,
+					$country_code
+				);
+			}
+		);
 
-		$details           = $this->payment_gateway_details_memo[ $payment_gateway->id ][ $country_code ];
 		$details['_order'] = $payment_gateway_order;
 
 		return $details;
@@ -1253,7 +1259,7 @@ class PaymentsProviders {
 	public function reset_memo(): void {
 		$this->payment_gateways_memo             = array();
 		$this->payment_gateways_for_display_memo = array();
-		$this->payment_gateway_details_memo      = array();
+		$this->request_cache->reset_group( self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
 	}
 
 	/**

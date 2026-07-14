@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Caches\RequestCache;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -64,7 +65,11 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			->getMock();
 
 		$this->sut = new PaymentsProviders();
-		$this->sut->init( $this->mock_extension_suggestions, wc_get_container()->get( LegacyProxy::class ) );
+		$this->sut->init(
+			$this->mock_extension_suggestions,
+			wc_get_container()->get( LegacyProxy::class ),
+			wc_get_container()->get( RequestCache::class )
+		);
 	}
 
 	/**

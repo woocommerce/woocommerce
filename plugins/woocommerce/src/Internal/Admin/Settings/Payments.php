@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Caches\RequestCache;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Exception;
 
@@ -29,6 +30,8 @@ class Payments {
 	const FROM_ADDITIONAL_PAYMENTS_TASK = 'WCADMIN_ADDITIONAL_PAYMENT_TASK';
 	const FROM_PROVIDER_ONBOARDING      = 'PROVIDER_ONBOARDING';
 
+	private const PROVIDERS_REQUEST_CACHE_GROUP = 'woocommerce_payments_providers';
+
 	/**
 	 * The payment providers service.
 	 *
@@ -44,27 +47,25 @@ class Payments {
 	private ExtensionSuggestions $extension_suggestions;
 
 	/**
-	 * The memoized payment providers details lists to avoid computing them multiple times during a request.
+	 * The request cache.
 	 *
-	 * Multiple consumers (the Payments settings page, the onboarding Payments task, the menu badge logic)
-	 * request the same list during a single request, and computing it is expensive.
-	 * Keyed by the user, capability state, location, and flags the list was computed for.
-	 *
-	 * @var array
+	 * @var RequestCache
 	 */
-	private array $payment_providers_memo = array();
+	private RequestCache $request_cache;
 
 	/**
 	 * Initialize the class instance.
 	 *
 	 * @param PaymentsProviders    $payment_providers             The payment providers service.
 	 * @param ExtensionSuggestions $payment_extension_suggestions The payment extension suggestions service.
+	 * @param RequestCache         $request_cache                 The request cache.
 	 *
 	 * @internal
 	 */
-	final public function init( PaymentsProviders $payment_providers, ExtensionSuggestions $payment_extension_suggestions ): void {
+	final public function init( PaymentsProviders $payment_providers, ExtensionSuggestions $payment_extension_suggestions, RequestCache $request_cache ): void {
 		$this->providers             = $payment_providers;
 		$this->extension_suggestions = $payment_extension_suggestions;
+		$this->request_cache         = $request_cache;
 	}
 
 	/**
@@ -89,8 +90,10 @@ class Payments {
 	public function get_payment_providers( string $location, bool $for_display = true, bool $remove_shells = false ): array {
 		$can_install_plugins = current_user_can( 'install_plugins' );
 		$memo_key            = get_current_user_id() . '__' . ( $can_install_plugins ? '1' : '0' ) . '__' . strtoupper( $location ) . '__' . ( $for_display ? '1' : '0' ) . ( $remove_shells ? '1' : '0' );
-		if ( isset( $this->payment_providers_memo[ $memo_key ] ) ) {
-			return $this->payment_providers_memo[ $memo_key ];
+		$found               = false;
+		$memoized_providers  = $this->request_cache->get( $memo_key, self::PROVIDERS_REQUEST_CACHE_GROUP, $found );
+		if ( $found && is_array( $memoized_providers ) ) {
+			return $memoized_providers;
 		}
 
 		$payment_gateways = $this->providers->get_payment_gateways( $for_display );
@@ -221,7 +224,7 @@ class Payments {
 			$this->process_payment_provider_states( $payment_providers );
 		}
 
-		$this->payment_providers_memo[ $memo_key ] = $payment_providers;
+		$this->request_cache->set( $memo_key, $payment_providers, self::PROVIDERS_REQUEST_CACHE_GROUP );
 
 		return $payment_providers;
 	}
@@ -423,7 +426,7 @@ class Payments {
 	 * @return void
 	 */
 	public function reset_memo(): void {
-		$this->payment_providers_memo = array();
+		$this->request_cache->reset_group( self::PROVIDERS_REQUEST_CACHE_GROUP );
 		$this->providers->reset_memo();
 	}
 
