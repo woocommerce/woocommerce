@@ -174,7 +174,6 @@ describe( 'Mini-Cart frontend store', () => {
 			findItem: jest.fn( () => ( {
 				cartItem: makeCartItem(),
 				draft: undefined,
-				isInCart: true,
 			} ) ),
 			findItemInCart: jest.fn(),
 		};
@@ -227,7 +226,6 @@ describe( 'Mini-Cart frontend store', () => {
 			mockWooState.findItem.mockReturnValue( {
 				cartItem: undefined,
 				draft: undefined,
-				isInCart: false,
 			} );
 
 			const entries = loadModule();
@@ -247,7 +245,6 @@ describe( 'Mini-Cart frontend store', () => {
 			mockWooState.findItem.mockReturnValue( {
 				cartItem: makeCartItem( { quantity: 5 } ),
 				draft: undefined,
-				isInCart: true,
 			} );
 
 			const entries = loadModule();
@@ -281,7 +278,6 @@ describe( 'Mini-Cart frontend store', () => {
 					},
 				} ),
 				draft: undefined,
-				isInCart: true,
 			} );
 
 			const entries = loadModule();
@@ -306,7 +302,6 @@ describe( 'Mini-Cart frontend store', () => {
 			mockWooState.findItem.mockReturnValue( {
 				cartItem: makeCartItem( { quantity: 4 } ),
 				draft: undefined,
-				isInCart: true,
 			} );
 
 			const entries = loadModule();
