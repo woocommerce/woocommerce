@@ -434,6 +434,35 @@ class MiniCart extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the legacy jQuery-bridge event directives (fired by
+	 * `wc-blocks_added_to_cart`/`wc-blocks_removed_from_cart`) target the
+	 * public `woocommerce/cart::actions.refresh`, not the retired
+	 * `refreshCartItems`.
+	 *
+	 * @return void
+	 */
+	public function test_legacy_event_directives_target_refresh_action() {
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		$this->assertStringContainsString(
+			'data-wp-on-document--wc-blocks_added_to_cart="woocommerce/cart::actions.refresh"',
+			$output,
+			'The "added to cart" legacy-event directive should target actions.refresh.'
+		);
+		$this->assertStringContainsString(
+			'data-wp-on-document--wc-blocks_removed_from_cart="woocommerce/cart::actions.refresh"',
+			$output,
+			'The "removed from cart" legacy-event directive should target actions.refresh.'
+		);
+		$this->assertStringNotContainsString(
+			'refreshCartItems',
+			$output,
+			'No refreshCartItems reference should remain in the Mini-Cart markup.'
+		);
+	}
+
+	/**
 	 * Test that mini-cart renders for logged-out users when site-wide coming soon mode is enabled (not store pages only).
 	 *
 	 * @return void
