@@ -24,7 +24,6 @@ $prefs["core/edit-site"]["welcomeGuidePage"] = false;
 $prefs["core/edit-site"]["welcomeGuideTemplate"] = false;
 update_user_meta( 1, "wp_persisted_preferences", $prefs );
 '
-# The test-helper-apis plugin is auto-activated via the .wp-env.e2e.json "plugins" array.
 
 echo "Generating test translations"
 node $script_dir/generate-test-translations.js

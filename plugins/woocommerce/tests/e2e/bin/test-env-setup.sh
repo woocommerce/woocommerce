@@ -43,10 +43,6 @@ $WP_CLI_PREFIX bash -c 'printf "apache_modules:\n  - mod_rewrite\n" > /var/www/h
 echo -e 'Update URL structure \n'
 $WP_CLI_PREFIX wp rewrite structure '/%postname%/' --hard
 
-# The filter-setter, process-waiting-actions and test-helper-apis helper plugins are
-# self-contained folders under tests/e2e/test-plugins/ and are auto-activated via the
-# .wp-env.e2e.json "plugins" array, so no manual activation is needed here.
-
 echo -e 'Add Customer user \n'
 if ! $WP_CLI_PREFIX wp user get customer --field=ID >/dev/null 2>&1; then
 	$WP_CLI_PREFIX wp user create customer customer@woocommercecoree2etestsuite.com \
