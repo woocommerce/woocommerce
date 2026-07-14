@@ -1061,8 +1061,9 @@ function wc_delete_user_data( $user_id ) {
 		)
 	);
 
-	// Clean up payment tokens.
-	$payment_tokens = WC_Payment_Tokens::get_customer_tokens( $user_id );
+	// Clean up payment tokens. Query without a limit so every token is removed,
+	// not just the customer-facing subset capped by `get_customer_tokens()`.
+	$payment_tokens = WC_Payment_Tokens::get_tokens( array( 'user_id' => $user_id ) );
 
 	foreach ( $payment_tokens as $payment_token ) {
 		$payment_token->delete();

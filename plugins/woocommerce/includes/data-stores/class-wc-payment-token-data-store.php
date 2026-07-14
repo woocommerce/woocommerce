@@ -269,7 +269,8 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 		$limit = isset( $args['limit'] ) ? absint( $args['limit'] ) : 0;
 
 		// Only limit the results when explicitly requested: consumers like the personal data
-		// eraser and user deletion cleanup rely on retrieving every matching token.
+		// eraser and user deletion cleanup rely on retrieving every matching token, reaching
+		// this method via WC_Payment_Tokens::get_tokens() without a limit.
 		$limits = '';
 		if ( $limit > 0 ) {
 			$limits = 'LIMIT ' . absint( ( $page - 1 ) * $limit ) . ', ' . $limit;

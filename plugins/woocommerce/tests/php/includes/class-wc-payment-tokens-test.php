@@ -133,6 +133,27 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_delete_user_data should delete all payment tokens, not just the customer-facing limited subset.
+	 */
+	public function test_wc_delete_user_data_deletes_all_tokens(): void {
+		add_filter(
+			'woocommerce_get_customer_payment_tokens_limit',
+			function () {
+				return 1;
+			}
+		);
+		$this->create_tokens_for_user( 3 );
+
+		wc_delete_user_data( $this->user_id );
+
+		global $wpdb;
+		$remaining = (int) $wpdb->get_var(
+			$wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE user_id = %d", $this->user_id )
+		);
+		$this->assertSame( 0, $remaining, 'Deleting a user must remove every saved payment token' );
+	}
+
+	/**
 	 * @testdox Data store get_tokens should respect an explicit limit and page.
 	 */
 	public function test_data_store_get_tokens_respects_explicit_limit_and_page(): void {
