@@ -7,7 +7,7 @@ const chalk = require( 'chalk' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
 const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
-const SHARED_EDITOR_STYLE_HANDLE = 'wc-blocks-editor-style';
+const CONSOLIDATED_EDITOR_STYLE_HANDLE = 'wc-block-library-style';
 
 // See also @woocommerce/dependency-extraction-webpack-plugin/assets/packages and
 // docs/internal-developers/enqueueable-packages/README.md. They should stay in sync with this map.
@@ -67,16 +67,6 @@ const editorExternalPackages = [
 const shouldBundleWooPackageInEditor = ( request ) =>
 	isWooPackageRequest( request ) &&
 	! editorExternalPackages.includes( request );
-
-const getBlockJsonWithSharedEditorStyle = ( content ) => {
-	const metadata = JSON.parse( content.toString() );
-
-	if ( metadata.editorStyle ) {
-		metadata.editorStyle = SHARED_EDITOR_STYLE_HANDLE;
-	}
-
-	return `${ JSON.stringify( metadata, null, '\t' ) }\n`;
-};
 
 const getEditorPackageAliases = () => ( {
 	'@woocommerce/block-data': path.resolve( __dirname, `../assets/js/data` ),
@@ -324,8 +314,7 @@ module.exports = {
 	NODE_ENV,
 	CHECK_CIRCULAR_DEPS,
 	ASSET_CHECK,
-	SHARED_EDITOR_STYLE_HANDLE,
-	getBlockJsonWithSharedEditorStyle,
+	CONSOLIDATED_EDITOR_STYLE_HANDLE,
 	getAlias,
 	getEditorPackageAliases,
 	getResolve,

@@ -25,8 +25,7 @@ const {
 	ASSET_CHECK,
 	NODE_ENV,
 	CHECK_CIRCULAR_DEPS,
-	SHARED_EDITOR_STYLE_HANDLE,
-	getBlockJsonWithSharedEditorStyle,
+	CONSOLIDATED_EDITOR_STYLE_HANDLE,
 	requestToExternal,
 	requestToEditorExternal,
 	requestToHandle,
@@ -165,26 +164,13 @@ const getCoreConfig = ( options = {} ) => {
  */
 const getMainConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
+	const resolve = getResolve( { alias, resolvePlugins } );
 
-	const resolve = getResolve( {
-		alias: {
-			...getEditorPackageAliases(),
-			...alias,
-		},
-		resolvePlugins,
-	} );
 	return {
 		entry: getEntryConfig( 'main', options.exclude || [] ),
 		output: {
 			devtoolNamespace: 'wc',
 			path: BUILD_DIR,
-			// This is a cache busting mechanism which ensures that the script is loaded via the browser with a ?ver=hash
-			// string. The hash is based on the built file contents.
-			// @see https://github.com/webpack/webpack/issues/2329
-			// Using the ?ver string is needed here so the filename does not change between builds. The WordPress
-			// i18n system relies on the hash of the filename, so changing that frequently would result in broken
-			// translations which we must avoid.
-			// @see https://github.com/Automattic/jetpack/pull/20926
 			chunkFilename: `[name].js?ver=[contenthash]`,
 			filename: `[name].js`,
 			library: [ 'wc', 'blocks', '[name]' ],
@@ -222,29 +208,30 @@ const getMainConfig = ( options = {} ) => {
 		},
 		optimization: {
 			...sharedOptimizationConfig,
-			splitChunks: false,
+			splitChunks: {
+				minSize: 200000,
+				automaticNameDelimiter: '--',
+				cacheGroups: {
+					commons: {
+						test: /[\/\\]node_modules[\/\\]/,
+						name: 'wc-blocks-vendors',
+						chunks: 'all',
+						enforce: true,
+					},
+					...getCacheGroups(),
+				},
+			},
 		},
 		plugins: [
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'Main',
-				dependencyRequestToExternal: requestToEditorExternal,
-				dependencyRequestToHandle: requestToEditorHandle,
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Main' ) ),
-			/**
-			 * Ensure that logic of this CopyWebpackPlugin is kept in sync with the copy-block-json.sh script:
-			 * https://github.com/woocommerce/woocommerce/blob/7d72fb937907bf841aabe959642be524eb093803/plugins/woocommerce/client/blocks/bin/copy-blocks-json.sh
-			 */
 			new CopyWebpackPlugin( {
 				patterns: [
 					{
 						from: './assets/js/**/block.json',
-						transform: getBlockJsonWithSharedEditorStyle,
 						to( { absoluteFilename } ) {
-							/**
-							 * Getting the block name from the JSON metadata is less error prone
-							 * than extracting it from the file path.
-							 */
 							const JSONFile = fs.readFileSync(
 								path.resolve( __dirname, absoluteFilename )
 							);
@@ -263,6 +250,89 @@ const getMainConfig = ( options = {} ) => {
 					},
 				],
 			} ),
+		],
+		resolve: {
+			...resolve,
+			extensions: [ '.js', '.jsx', '.ts', '.tsx' ],
+		},
+	};
+};
+
+/**
+ * Build config for consolidated Blocks editor assets.
+ *
+ * @param {Object} options Build options.
+ */
+const getConsolidatedMainConfig = ( options = {} ) => {
+	const { alias, resolvePlugins = [] } = options;
+
+	const resolve = getResolve( {
+		alias: {
+			...getEditorPackageAliases(),
+			...alias,
+		},
+		resolvePlugins,
+	} );
+	return {
+		entry: getEntryConfig( 'consolidatedMain', options.exclude || [] ),
+		output: {
+			devtoolNamespace: 'wc',
+			path: BUILD_DIR,
+			// This is a cache busting mechanism which ensures that the script is loaded via the browser with a ?ver=hash
+			// string. The hash is based on the built file contents.
+			// @see https://github.com/webpack/webpack/issues/2329
+			// Using the ?ver string is needed here so the filename does not change between builds. The WordPress
+			// i18n system relies on the hash of the filename, so changing that frequently would result in broken
+			// translations which we must avoid.
+			// @see https://github.com/Automattic/jetpack/pull/20926
+			chunkFilename: `wc-block-library-[name].js?ver=[contenthash]`,
+			filename: `[name].js`,
+			library: [ 'wc', 'blocks', '[name]' ],
+			libraryTarget: 'this',
+			uniqueName: 'webpackWcBlocksConsolidatedMainJsonp',
+		},
+		module: {
+			rules: [
+				{
+					test: /\.(j|t)sx?$/,
+					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					use: {
+						loader: 'babel-loader',
+						options: {
+							presets: [ '@wordpress/babel-preset-default' ],
+							plugins: [
+								isProduction
+									? require.resolve(
+											'babel-plugin-transform-react-remove-prop-types'
+									  )
+									: false,
+							].filter( Boolean ),
+							cacheDirectory: BABEL_CACHE_DIR,
+							cacheCompression: false,
+						},
+					},
+				},
+				{
+					test: /\.s[c|a]ss$/,
+					use: {
+						loader: 'ignore-loader',
+					},
+				},
+			],
+		},
+		optimization: {
+			...sharedOptimizationConfig,
+			splitChunks: false,
+		},
+		plugins: [
+			...getSharedPlugins( {
+				bundleAnalyzerReportTitle: 'Consolidated editor',
+				dependencyRequestToExternal: requestToEditorExternal,
+				dependencyRequestToHandle: requestToEditorHandle,
+			} ),
+			new ProgressBarPlugin(
+				getProgressBarPluginConfig( 'Consolidated editor' )
+			),
 		],
 		resolve: {
 			...resolve,
@@ -537,30 +607,115 @@ const getExtensionsConfig = ( options = {} ) => {
 };
 
 /**
+ * Build config for scripts used exclusively in the Site Editor.
+ *
+ * @param {Object} options Build options.
+ */
+const getSiteEditorConfig = ( options = {} ) => {
+	const { alias, resolvePlugins = [] } = options;
+	const resolve = getResolve( { alias, resolvePlugins } );
+
+	return {
+		entry: getEntryConfig( 'editor', options.exclude || [] ),
+		output: {
+			devtoolNamespace: 'wc',
+			path: BUILD_DIR,
+			filename: `[name].js`,
+			chunkLoadingGlobal: 'webpackWcBlocksExtensionsMethodExtensionJsonp',
+		},
+		module: {
+			rules: [
+				{
+					test: /\.(j|t)sx?$/,
+					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					use: {
+						loader: 'babel-loader',
+						options: {
+							presets: [
+								[
+									'@wordpress/babel-preset-default',
+									{
+										modules: false,
+										targets: {
+											browsers: [
+												'extends @wordpress/browserslist-config',
+											],
+										},
+									},
+								],
+							],
+							plugins: [
+								isProduction
+									? require.resolve(
+											'babel-plugin-transform-react-remove-prop-types'
+									  )
+									: false,
+							].filter( Boolean ),
+							cacheDirectory: BABEL_CACHE_DIR,
+							cacheCompression: false,
+						},
+					},
+				},
+				{
+					test: /\.s[c|a]ss$/,
+					use: {
+						loader: 'ignore-loader',
+					},
+				},
+			],
+		},
+		optimization: {
+			...sharedOptimizationConfig,
+			splitChunks: {
+				automaticNameDelimiter: '--',
+				cacheGroups: {
+					...getCacheGroups(),
+				},
+			},
+		},
+		plugins: [
+			...getSharedPlugins( {
+				bundleAnalyzerReportTitle: 'Site Editor',
+			} ),
+			new ProgressBarPlugin(
+				getProgressBarPluginConfig( 'Site Editor' )
+			),
+		],
+		resolve: {
+			...resolve,
+			extensions: [ '.js', '.ts', '.tsx' ],
+		},
+	};
+};
+
+/**
  * Build config for CSS Styles.
  *
  * @param {Object} options Build options.
  */
-const getStylingConfig = ( options = {} ) => {
+const getStyleConfig = ( options = {}, consolidated = false ) => {
 	const { alias, resolvePlugins = [] } = options;
+	const entryType = consolidated ? 'consolidatedStyling' : 'styling';
+	const configName = consolidated ? 'Consolidated styles' : 'Styles';
 
 	const resolve = getResolve( { alias, resolvePlugins } );
 	return {
-		entry: getEntryConfig( 'styling', options.exclude || [] ),
+		entry: getEntryConfig( entryType, options.exclude || [] ),
 		output: {
 			devtoolNamespace: 'wc',
 			path: BUILD_DIR,
 			filename: '[name]-style.js',
 			library: [ 'wc', 'blocks', '[name]' ],
 			libraryTarget: 'this',
-			uniqueName: 'webpackWcBlocksStylingJsonp',
+			uniqueName: consolidated
+				? 'webpackWcBlocksConsolidatedStylingJsonp'
+				: 'webpackWcBlocksStylingJsonp',
 		},
 		optimization: {
 			splitChunks: {
 				automaticNameDelimiter: '--',
 				cacheGroups: {
 					editorStyle: {
-						// Capture all editor stylesheets and editor-bundle stylesheets.
 						test: ( module = {}, { moduleGraph } ) => {
 							if ( ! module.type.includes( 'css' ) ) {
 								return false;
@@ -570,10 +725,10 @@ const getStylingConfig = ( options = {} ) => {
 								typeof module.identifier === 'function'
 									? module.identifier()
 									: '';
-							if (
-								moduleIdentifier.includes( '?editor-bundle' )
-							) {
-								return true;
+							if ( consolidated ) {
+								return moduleIdentifier.includes(
+									'?editor-bundle'
+								);
 							}
 
 							const moduleIssuer =
@@ -593,9 +748,11 @@ const getStylingConfig = ( options = {} ) => {
 								)
 							);
 						},
-						name: SHARED_EDITOR_STYLE_HANDLE,
+						name: consolidated
+							? CONSOLIDATED_EDITOR_STYLE_HANDLE
+							: 'wc-blocks-editor-style',
 						chunks: 'all',
-						enforce: true,
+						enforce: consolidated,
 						priority: 10,
 					},
 					...getCacheGroups(),
@@ -688,8 +845,10 @@ const getStylingConfig = ( options = {} ) => {
 			],
 		},
 		plugins: [
-			...getSharedPlugins( { bundleAnalyzerReportTitle: 'Styles' } ),
-			new ProgressBarPlugin( getProgressBarPluginConfig( 'Styles' ) ),
+			...getSharedPlugins( {
+				bundleAnalyzerReportTitle: configName,
+			} ),
+			new ProgressBarPlugin( getProgressBarPluginConfig( configName ) ),
 			new MiniCssExtractPlugin( {
 				filename: '[name].css',
 			} ),
@@ -703,6 +862,11 @@ const getStylingConfig = ( options = {} ) => {
 		},
 	};
 };
+
+const getStylingConfig = ( options = {} ) => getStyleConfig( options, false );
+
+const getConsolidatedStylingConfig = ( options = {} ) =>
+	getStyleConfig( options, true );
 
 const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
@@ -812,8 +976,11 @@ module.exports = {
 	getCoreConfig,
 	getFrontConfig,
 	getMainConfig,
+	getConsolidatedMainConfig,
 	getPaymentsConfig,
 	getExtensionsConfig,
+	getSiteEditorConfig,
 	getStylingConfig,
+	getConsolidatedStylingConfig,
 	getCartAndCheckoutFrontendConfig,
 };

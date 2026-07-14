@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Admin\Features\Features;
@@ -6,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\Features\BlockEditorAssetConsolidation;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use WP_Block;
 
@@ -364,11 +367,17 @@ abstract class AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
-		$script = [
-			'handle'       => 'wc-block-library',
-			'path'         => $this->asset_api->get_block_asset_build_path( 'wc-block-library' ),
-			'dependencies' => [],
-		];
+		$script = BlockEditorAssetConsolidation::is_enabled()
+			? array(
+				'handle'       => 'wc-block-library',
+				'path'         => $this->asset_api->get_block_asset_build_path( 'wc-block-library' ),
+				'dependencies' => array(),
+			)
+			: array(
+				'handle'       => 'wc-' . $this->block_name . '-block',
+				'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
+				'dependencies' => array( 'wc-blocks' ),
+			);
 		return $key ? $script[ $key ] : $script;
 	}
 
@@ -379,7 +388,7 @@ abstract class AbstractBlock {
 	 * @return string|null
 	 */
 	protected function get_block_type_editor_style() {
-		return 'wc-blocks-editor-style';
+		return BlockEditorAssetConsolidation::is_enabled() ? 'wc-block-library-style' : 'wc-blocks-editor-style';
 	}
 
 	/**

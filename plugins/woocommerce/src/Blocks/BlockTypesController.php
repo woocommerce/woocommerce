@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypes\Cart;
 use Automattic\WooCommerce\Blocks\BlockTypes\Checkout;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents;
+use Automattic\WooCommerce\Internal\Features\BlockEditorAssetConsolidation;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
@@ -700,14 +701,17 @@ final class BlockTypesController {
 	 * @return array Block metadata.
 	 */
 	public function use_single_block_editor_style( $args, $block_name ) {
-		if ( ! is_admin() || false === str_starts_with( $block_name, 'woocommerce/' ) ) {
+		if (
+			! BlockEditorAssetConsolidation::is_enabled() ||
+			! is_admin() ||
+		false === str_starts_with( $block_name, 'woocommerce/' ) ) {
 			return $args;
 		}
 
 		$args['style_handles']        = array();
 		$args['style']                = array();
-		$args['editor_style_handles'] = array( 'wc-blocks-editor-style' );
-		$args['editor_style']         = array( 'wc-blocks-editor-style' );
+		$args['editor_style_handles'] = array( 'wc-block-library-style' );
+		$args['editor_style']         = array( 'wc-block-library-style' );
 
 		return $args;
 	}

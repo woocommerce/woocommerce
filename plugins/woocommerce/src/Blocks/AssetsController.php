@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
+use Automattic\WooCommerce\Internal\Features\BlockEditorAssetConsolidation;
 
 /**
  * AssetsController class.
@@ -72,6 +73,9 @@ final class AssetsController {
 		$this->register_style( 'wc-blocks-packages-style', plugins_url( $this->api->get_block_asset_build_path( 'packages-style', 'css' ), dirname( __DIR__ ) ), array(), 'all', true );
 		$this->register_style( 'wc-blocks-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks', 'css' ), dirname( __DIR__ ) ), array(), 'all', true );
 		$this->register_style( 'wc-blocks-editor-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks-editor-style', 'css' ), dirname( __DIR__ ) ), array( 'wp-edit-blocks' ), 'all', true );
+		if ( BlockEditorAssetConsolidation::is_enabled() ) {
+			$this->register_style( 'wc-block-library-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-block-library-style', 'css' ), dirname( __DIR__ ) ), array( 'wp-edit-blocks' ), 'all', true );
+		}
 
 		$this->api->register_script( 'wc-types', $this->api->get_block_asset_build_path( 'wc-types' ), array(), false );
 		$this->api->register_script( 'wc-entities', 'assets/client/blocks/wc-entities.js', array(), false );
@@ -81,13 +85,7 @@ final class AssetsController {
 		$this->api->register_script( 'wc-blocks-shared-context', 'assets/client/blocks/wc-blocks-shared-context.js' );
 		$this->api->register_script( 'wc-blocks-shared-hocs', 'assets/client/blocks/wc-blocks-shared-hocs.js', array(), false );
 		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
-		$this->api->register_script(
-			'wc-block-library',
-			$this->api->get_block_asset_build_path( 'wc-block-library' ),
-			array( 'wc-blocks-middleware', 'wc-entities' ),
-			true
-		);
-		$this->register_deprecated_script_handles();
+		$this->register_editor_scripts();
 
 		// Keep price-format as a dedicated shared package: editor and frontend/runtime assets depend on it, and
 		// externalizing it avoids duplicating price formatting helpers across bundles.
@@ -120,6 +118,25 @@ final class AssetsController {
 			",
 			'before'
 		);
+	}
+
+	/**
+	 * Register scripts for the active block editor asset configuration.
+	 */
+	private function register_editor_scripts(): void {
+		if ( ! BlockEditorAssetConsolidation::is_enabled() ) {
+			$this->api->register_script( 'wc-blocks-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-vendors' ), array(), false );
+			$this->api->register_script( 'wc-blocks', $this->api->get_block_asset_build_path( 'wc-blocks' ), array( 'wc-blocks-vendors' ), false );
+			return;
+		}
+
+		$this->api->register_script(
+			'wc-block-library',
+			$this->api->get_block_asset_build_path( 'wc-block-library' ),
+			array( 'wc-blocks-middleware', 'wc-entities' ),
+			true
+		);
+		$this->register_deprecated_script_handles();
 	}
 
 	/**

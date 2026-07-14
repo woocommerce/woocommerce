@@ -10,10 +10,13 @@ const { NODE_ENV, getAlias } = require( './bin/webpack-helpers.js' );
 const {
 	getCoreConfig,
 	getMainConfig,
+	getConsolidatedMainConfig,
 	getFrontConfig,
 	getPaymentsConfig,
 	getExtensionsConfig,
+	getSiteEditorConfig,
 	getStylingConfig,
+	getConsolidatedStylingConfig,
 	getCartAndCheckoutFrontendConfig,
 } = require( './bin/webpack-configs.js' );
 
@@ -89,6 +92,13 @@ const MainConfig = {
 	...getMainConfig( { alias: getAlias() } ),
 };
 
+// Consolidated Blocks config enabled at runtime by a WooCommerce feature flag.
+const ConsolidatedMainConfig = {
+	...sharedConfig,
+	cache: getCacheConfig( 'consolidated-main', [] ),
+	...getConsolidatedMainConfig( { alias: getAlias() } ),
+};
+
 // Frontend config for scripts used in the store itself.
 const FrontendConfig = {
 	...sharedConfig,
@@ -123,6 +133,20 @@ const StylingConfig = {
 	...getStylingConfig( { alias: getAlias() } ),
 };
 
+// Consolidated editor styles enabled at runtime by a WooCommerce feature flag.
+const ConsolidatedStylingConfig = {
+	...sharedConfig,
+	cache: getCacheConfig( 'consolidated-styling', [] ),
+	...getConsolidatedStylingConfig( { alias: getAlias() } ),
+};
+
+// Scripts used exclusively in the Site Editor by the legacy asset path.
+const SiteEditorConfig = {
+	...sharedConfig,
+	cache: getCacheConfig( 'site-editor', [] ),
+	...getSiteEditorConfig( { alias: getAlias() } ),
+};
+
 const InteractivityBlocksConfig = {
 	...sharedConfig,
 	cache: getCacheConfig( 'interactivity-blocks', [
@@ -147,10 +171,13 @@ module.exports = [
 	CartAndCheckoutFrontendConfig,
 	CoreConfig,
 	MainConfig,
+	ConsolidatedMainConfig,
 	FrontendConfig,
 	ExtensionsConfig,
 	PaymentsConfig,
+	SiteEditorConfig,
 	StylingConfig,
+	ConsolidatedStylingConfig,
 	InteractivityBlocksConfig,
 	DependencyDetectionConfig,
 ];

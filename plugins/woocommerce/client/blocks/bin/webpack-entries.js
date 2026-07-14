@@ -371,15 +371,17 @@ const entries = {
 
 		// Shared blocks code
 		'wc-blocks': './assets/js/index.js',
-		'wc-blocks-editor-style-source': editorBlockStyleEntries,
-		'interactivity-editor-styles':
-			Object.values( editorStyleEntries ).flat(),
-
 		// Blocks
 		'product-image-gallery':
 			'./assets/js/atomic/blocks/product-elements/product-image-gallery/index.ts',
 
 		...blockStylingEntries,
+	},
+	consolidatedStyling: {
+		'wc-block-library-style-source': editorBlockStyleEntries,
+		'interactivity-editor-styles': Object.values( editorStyleEntries )
+			.flat()
+			.map( addEditorBundleResourceQuery ),
 	},
 	core: {
 		wcBlocksRegistry: './assets/js/blocks-registry/index.js',
@@ -397,6 +399,17 @@ const entries = {
 		wcEntities: './assets/js/entities/index.ts',
 	},
 	main: {
+		// Shared blocks code.
+		'wc-blocks': './assets/js/index.js',
+
+		// Blocks.
+		...getBlockEntries( 'index.{t,j}s{,x}', {
+			...blocks,
+			...genericBlocks,
+			...cartAndCheckoutBlocks,
+		} ),
+	},
+	consolidatedMain: {
 		'wc-block-library': [ './assets/js/index.js', ...editorScriptEntries ],
 	},
 	frontend: {

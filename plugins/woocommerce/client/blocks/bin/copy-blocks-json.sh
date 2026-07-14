@@ -23,13 +23,6 @@ mkdir -p "$TARGET_DIR"
 # Define generic blocks as a space-separated string (keep in sync with webpack-entries.js)
 generic_blocks="accordion-group accordion-header accordion-item accordion-panel"
 
-copy_block_json() {
-    local source_path="$1"
-    local destination_path="$2"
-
-    node plugins/woocommerce/client/blocks/bin/copy-block-json.js "$source_path" "$destination_path"
-}
-
 # Find all block.json files
 find plugins/woocommerce/client/blocks/assets/js -name "block.json" | while read file; do
     # Read the block name from the JSON file
@@ -49,11 +42,11 @@ find plugins/woocommerce/client/blocks/assets/js -name "block.json" | while read
 		# It's an inner block
 		target_path="$TARGET_DIR/inner-blocks/$block_name/block.json"
 		mkdir -p "$TARGET_DIR/inner-blocks/$block_name"
-		copy_block_json "$file" "$target_path"
+		cp "$file" "$target_path"
 	else
 		# It's a regular block
 		target_path="$TARGET_DIR/$block_name/block.json"
 		mkdir -p "$TARGET_DIR/$block_name"
-		copy_block_json "$file" "$target_path"
+		cp "$file" "$target_path"
 	fi
 done
