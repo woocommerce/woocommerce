@@ -229,7 +229,9 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * Each object should contain the fields token_id, gateway_id, token, user_id, type, is_default.
 	 *
 	 * @since 3.0.0
-	 * @param array $args List of accepted args: token_id, gateway_id, user_id, type.
+	 * @since 11.1.0 Results are no longer implicitly limited by the `posts_per_page` option;
+	 *               a `LIMIT` clause is applied only when a positive `limit` arg is passed.
+	 * @param array $args List of accepted args: token_id, gateway_id, user_id, type, limit, page.
 	 * @return array
 	 */
 	public function get_tokens( $args ) {

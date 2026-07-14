@@ -28,6 +28,8 @@ class WC_Payment_Tokens {
 	 * Gets valid tokens from the database based on user defined criteria.
 	 *
 	 * @since  2.6.0
+	 * @since  11.1.0 Results are no longer implicitly limited by the `posts_per_page` option;
+	 *                pass a positive `limit` arg to bound the query.
 	 * @param  array $args Query arguments {
 	 *     Array of query parameters.
 	 *
