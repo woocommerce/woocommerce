@@ -30,23 +30,14 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	private $params;
 
 	/**
-	 * Pre-computed taxonomy hierarchy data.
-	 *
-	 * @var TaxonomyHierarchyData
-	 */
-	private $taxonomy_hierarchy_data;
-
-	/**
 	 * Initialize the query clauses.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 * @param Params                $params                  The filter params.
-	 * @param TaxonomyHierarchyData $taxonomy_hierarchy_data Taxonomy hierarchy data.
+	 * @param Params $params The filter params.
 	 * @return void
 	 */
-	final public function init( Params $params, TaxonomyHierarchyData $taxonomy_hierarchy_data ): void {
-		$this->params                  = $params;
-		$this->taxonomy_hierarchy_data = $taxonomy_hierarchy_data;
+	final public function init( Params $params ): void {
+		$this->params = $params;
 	}
 
 	/**
@@ -367,13 +358,16 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			}
 
 			if ( is_taxonomy_hierarchical( $taxonomy ) ) {
-				// Expand chosen terms to include descendants via the per-taxonomy
-				// hierarchy map. The map itself is built lazily, only when a
-				// hierarchical filter is in play.
+				// Expand chosen terms to include descendants. get_term_children()
+				// resolves from the precomputed {$taxonomy}_children option, so it
+				// adds no per-term query.
 				$descendant_sets = array( $term_ids );
 
 				foreach ( $term_ids as $term_id ) {
-					$descendant_sets[] = $this->taxonomy_hierarchy_data->get_descendants( (int) $term_id, $taxonomy );
+					$children = get_term_children( (int) $term_id, $taxonomy );
+					if ( ! is_wp_error( $children ) ) {
+						$descendant_sets[] = $children;
+					}
 				}
 
 				$term_ids = array_unique( array_merge( ...$descendant_sets ) );

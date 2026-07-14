@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
-use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 
 /**
  * Tests related to QueryClauses service.
@@ -255,9 +254,6 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		// parent > child > grandchild; sibling stays top-level (own branch).
 		wp_update_term( $child['term_id'], 'product_cat', array( 'parent' => $parent['term_id'] ) );
 		wp_update_term( $grandchild['term_id'], 'product_cat', array( 'parent' => $child['term_id'] ) );
-
-		// Mirror the term-change invalidation CacheController performs in production.
-		wc_get_container()->get( TaxonomyHierarchyData::class )->clear_cache( 'product_cat' );
 
 		$make_product = function ( $name, $term ) {
 			return $this->fixture_data->get_simple_product(

@@ -1,4 +1,4 @@
 Significance: minor
 Type: performance
 
-Product Filters: expand hierarchical taxonomy filters via the precomputed hierarchy map instead of a child_of query per chosen term.
+Product Filters: expand hierarchical taxonomy filters with get_term_children() instead of a child_of query per chosen term.
