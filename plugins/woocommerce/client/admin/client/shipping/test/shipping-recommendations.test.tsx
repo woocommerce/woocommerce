@@ -121,9 +121,79 @@ describe( 'ShippingRecommendations', () => {
 		);
 	} );
 
-	it( 'does not render the marketplace fallback before the dismissal option resolves', () => {
+	it( 'waits for the dismissal option without remounting the shipping tour', () => {
+		let hasDismissResolved = false;
 		mockSelect( {
-			hasFinishedResolution: jest.fn().mockReturnValue( false ),
+			hasFinishedResolution: ( selector: string ) =>
+				selector === 'getOption' ? hasDismissResolved : true,
+		} );
+
+		const { rerender } = render( <ShippingRecommendations /> );
+		const initialShippingTour = screen.getByTestId( 'shipping-tour' );
+
+		expect(
+			screen.queryByText( 'the WooCommerce Marketplace' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByTestId( 'dismissable-list' )
+		).not.toBeInTheDocument();
+		expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
+			'data-show-recommendations-step',
+			'false'
+		);
+		expect( recordEvent ).not.toHaveBeenCalledWith(
+			'shipping_partner_impression',
+			expect.anything()
+		);
+
+		hasDismissResolved = true;
+		rerender( <ShippingRecommendations /> );
+
+		expect( screen.getByTestId( 'shipping-tour' ) ).toBe(
+			initialShippingTour
+		);
+		expect( screen.getByTestId( 'dismissable-list' ) ).toBeInTheDocument();
+		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'shipping_partner_impression',
+			{
+				context: 'settings',
+				country: 'US',
+				plugins:
+					'woocommerce-shipping,woocommerce-shipstation-integration',
+			}
+		);
+	} );
+
+	it( 'does not render recommendations before the country settings resolve', () => {
+		mockSelect( {
+			getSettings: () => ( { general: {} } ),
+			hasFinishedResolution: ( selector: string ) =>
+				selector !== 'getSettings',
+		} );
+
+		render( <ShippingRecommendations /> );
+
+		expect(
+			screen.queryByText( 'the WooCommerce Marketplace' )
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByTestId( 'dismissable-list' )
+		).not.toBeInTheDocument();
+		expect( screen.getByTestId( 'shipping-tour' ) ).toHaveAttribute(
+			'data-show-recommendations-step',
+			'false'
+		);
+		expect( recordEvent ).not.toHaveBeenCalledWith(
+			'shipping_partner_impression',
+			expect.anything()
+		);
+	} );
+
+	it( 'does not render recommendations before the product profile resolves', () => {
+		mockSelect( {
+			hasFinishedResolution: ( selector: string ) =>
+				selector !== 'getProfileItems',
 		} );
 
 		render( <ShippingRecommendations /> );

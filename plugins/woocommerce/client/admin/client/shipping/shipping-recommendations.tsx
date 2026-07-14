@@ -68,14 +68,22 @@ const ShippingRecommendations = () => {
 		activePlugins,
 		countryCode,
 		isSellingDigitalProductsOnly,
+		hasRecommendationEligibilityResolved,
 	} = useSelect( ( select ) => {
-		const settings = select( settingsStore ).getSettings( 'general' );
+		const {
+			getSettings,
+			hasFinishedResolution: hasSettingsFinishedResolution,
+		} = select( settingsStore );
+		const {
+			getProfileItems,
+			hasFinishedResolution: hasOnboardingFinishedResolution,
+		} = select( onboardingStore );
+		const settings = getSettings( 'general' );
 
 		const { getInstalledPlugins, getActivePlugins } =
 			select( pluginsStore );
 
-		const profileItems =
-			select( onboardingStore ).getProfileItems()?.product_types;
+		const profileItems = getProfileItems()?.product_types;
 
 		return {
 			installedPlugins: getInstalledPlugins(),
@@ -85,6 +93,9 @@ const ShippingRecommendations = () => {
 			),
 			isSellingDigitalProductsOnly:
 				profileItems?.length === 1 && profileItems[ 0 ] === 'downloads',
+			hasRecommendationEligibilityResolved:
+				hasSettingsFinishedResolution( 'getSettings', [ 'general' ] ) &&
+				hasOnboardingFinishedResolution( 'getProfileItems', [] ),
 		};
 	}, [] );
 
@@ -103,16 +114,20 @@ const ShippingRecommendations = () => {
 		: extensionsForCountry;
 
 	const hasVisibleExtensions = visibleExtensions.length > 0;
-	const shouldWaitForDismissOption =
-		! hasRecommendationsDismissResolved &&
-		hasVisibleExtensions &&
-		! isSellingDigitalProductsOnly;
+	// Country and product type both determine which final state should render.
+	// Wait for them to settle so the fallback and recommendations do not swap.
+	const shouldWaitForRecommendationData =
+		! hasRecommendationEligibilityResolved ||
+		( ! hasRecommendationsDismissResolved && hasVisibleExtensions );
 	const shouldShowRecommendationsFallback =
 		( hasRecommendationsDismissResolved && isRecommendationsHidden ) ||
 		! hasVisibleExtensions ||
 		isSellingDigitalProductsOnly;
 	const shouldTrackRecommendationsImpression =
-		! isRecommendationsHidden && hasVisibleExtensions;
+		hasRecommendationEligibilityResolved &&
+		hasRecommendationsDismissResolved &&
+		! isRecommendationsHidden &&
+		hasVisibleExtensions;
 
 	const visiblePluginSlugs = visibleExtensions
 		.map( ( ext ) => EXTENSION_PLUGIN_SLUGS[ ext ] )
@@ -145,8 +160,12 @@ const ShippingRecommendations = () => {
 		visiblePluginSlugs,
 	] );
 
-	if ( shouldWaitForDismissOption ) {
-		return <ShippingTour showShippingRecommendationsStep={ false } />;
+	if ( shouldWaitForRecommendationData ) {
+		return (
+			<>
+				<ShippingTour showShippingRecommendationsStep={ false } />
+			</>
+		);
 	}
 
 	if ( shouldShowRecommendationsFallback ) {
@@ -159,68 +178,70 @@ const ShippingRecommendations = () => {
 	}
 
 	return (
-		<div style={ { paddingBottom: 60 } }>
+		<>
 			<ShippingTour
 				showShippingRecommendationsStep={ ! isRecommendationsHidden }
 			/>
-			<ShippingRecommendationsList
-				dismissState={ recommendationsDismissState }
-			>
-				{ visibleExtensions.map( ( ext ) => {
-					const isPluginInstalled = installedPlugins.includes(
-						EXTENSION_PLUGIN_SLUGS[ ext ]
-					);
-					const isPluginActive = activePlugins.includes(
-						EXTENSION_PLUGIN_SLUGS[ ext ]
-					);
-					const trackingProps = {
-						context: 'settings' as const,
-						country: normalizedCountry,
-						plugins: visiblePluginSlugs,
-					};
-					switch ( ext ) {
-						case 'woocommerce-shipping':
-							return (
-								<WooCommerceShippingItem
-									key={ ext }
-									isPluginInstalled={ isPluginInstalled }
-									isPluginActive={ isPluginActive }
-									pluginsBeingSetup={ pluginsBeingSetup }
-									onInstallClick={ handleInstall }
-									onActivateClick={ handleActivate }
-									tracking={ trackingProps }
-								/>
-							);
-						case 'shipstation':
-							return (
-								<ShipStationItem
-									key={ ext }
-									isPluginInstalled={ isPluginInstalled }
-									isPluginActive={ isPluginActive }
-									pluginsBeingSetup={ pluginsBeingSetup }
-									onInstallClick={ handleInstall }
-									onActivateClick={ handleActivate }
-									tracking={ trackingProps }
-								/>
-							);
-						case 'packlink':
-							return (
-								<PacklinkItem
-									key={ ext }
-									isPluginInstalled={ isPluginInstalled }
-									isPluginActive={ isPluginActive }
-									pluginsBeingSetup={ pluginsBeingSetup }
-									onInstallClick={ handleInstall }
-									onActivateClick={ handleActivate }
-									tracking={ trackingProps }
-								/>
-							);
-						default:
-							return null;
-					}
-				} ) }
-			</ShippingRecommendationsList>
-		</div>
+			<div style={ { paddingBottom: 60 } }>
+				<ShippingRecommendationsList
+					dismissState={ recommendationsDismissState }
+				>
+					{ visibleExtensions.map( ( ext ) => {
+						const isPluginInstalled = installedPlugins.includes(
+							EXTENSION_PLUGIN_SLUGS[ ext ]
+						);
+						const isPluginActive = activePlugins.includes(
+							EXTENSION_PLUGIN_SLUGS[ ext ]
+						);
+						const trackingProps = {
+							context: 'settings' as const,
+							country: normalizedCountry,
+							plugins: visiblePluginSlugs,
+						};
+						switch ( ext ) {
+							case 'woocommerce-shipping':
+								return (
+									<WooCommerceShippingItem
+										key={ ext }
+										isPluginInstalled={ isPluginInstalled }
+										isPluginActive={ isPluginActive }
+										pluginsBeingSetup={ pluginsBeingSetup }
+										onInstallClick={ handleInstall }
+										onActivateClick={ handleActivate }
+										tracking={ trackingProps }
+									/>
+								);
+							case 'shipstation':
+								return (
+									<ShipStationItem
+										key={ ext }
+										isPluginInstalled={ isPluginInstalled }
+										isPluginActive={ isPluginActive }
+										pluginsBeingSetup={ pluginsBeingSetup }
+										onInstallClick={ handleInstall }
+										onActivateClick={ handleActivate }
+										tracking={ trackingProps }
+									/>
+								);
+							case 'packlink':
+								return (
+									<PacklinkItem
+										key={ ext }
+										isPluginInstalled={ isPluginInstalled }
+										isPluginActive={ isPluginActive }
+										pluginsBeingSetup={ pluginsBeingSetup }
+										onInstallClick={ handleInstall }
+										onActivateClick={ handleActivate }
+										tracking={ trackingProps }
+									/>
+								);
+							default:
+								return null;
+						}
+					} ) }
+				</ShippingRecommendationsList>
+			</div>
+		</>
 	);
 };
 
