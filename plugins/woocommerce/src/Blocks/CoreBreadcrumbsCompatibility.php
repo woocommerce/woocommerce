@@ -188,10 +188,7 @@ final class CoreBreadcrumbsCompatibility {
 		$items = $this->replace_product_tag_breadcrumb_label( $items );
 		$items = $this->replace_search_breadcrumb_label( $items );
 		$items = $this->prepend_my_account_page_to_endpoint_breadcrumbs( $items );
-
-		if ( $this->is_woocommerce_breadcrumb_context() ) {
-			$items = $this->apply_home_breadcrumb_url_filter( $items );
-		}
+		$items = $this->apply_home_breadcrumb_url_filter( $items );
 
 		return $items;
 	}
@@ -406,15 +403,6 @@ final class CoreBreadcrumbsCompatibility {
 	/*
 	 * Utility methods.
 	 */
-
-	/**
-	 * Check whether the current request is a WooCommerce breadcrumb context.
-	 *
-	 * @return bool Whether WooCommerce should adjust Core breadcrumb items.
-	 */
-	private function is_woocommerce_breadcrumb_context(): bool {
-		return is_product() || is_shop() || is_product_taxonomy() || $this->is_product_search() || ( is_wc_endpoint_url() && is_account_page() );
-	}
 
 	/**
 	 * Check whether the current request is a product search.

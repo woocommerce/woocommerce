@@ -232,6 +232,31 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should apply the WooCommerce Home breadcrumb URL filter outside WooCommerce contexts.
+	 */
+	public function test_core_breadcrumbs_apply_home_breadcrumb_url_filter_outside_woocommerce_contexts(): void {
+		$callback = function () {
+			return home_url( '/storefront/' );
+		};
+		add_filter( 'woocommerce_breadcrumb_home_url', $callback );
+		$this->go_to( '/?s=breadcrumb' );
+
+		try {
+			$result = $this->apply_core_breadcrumb_filters(
+				$this->get_breadcrumb_item( 'Search results for: "breadcrumb"' )
+			);
+		} finally {
+			remove_filter( 'woocommerce_breadcrumb_home_url', $callback );
+		}
+
+		$this->assertSame(
+			home_url( '/storefront/' ),
+			$result[0]['url'],
+			'Core Breadcrumbs should use the filtered WooCommerce Home breadcrumb URL outside WooCommerce contexts.'
+		);
+	}
+
+	/**
 	 * @testdox Should use the default Home breadcrumb URL when the WooCommerce Home URL filter returns a non-string.
 	 */
 	public function test_core_breadcrumbs_use_default_home_breadcrumb_url_for_non_string_filter_value(): void {
