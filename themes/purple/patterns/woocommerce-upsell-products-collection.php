@@ -23,7 +23,7 @@
 <!-- /wp:group -->
 
 <!-- wp:woocommerce/product-template {"style":{"typography":{"lineHeight":"1"}},"layout":{"type":"flex","justifyContent":"left","verticalAlignment":"top","flexWrap":"nowrap","orientation":"horizontal"}} -->
-<!-- wp:woocommerce/product-image {"showSaleBadge":false,"isDescendentOfQueryLoop":true,"style":{"dimensions":{"aspectRatio":"3/4"}}} -->
+<!-- wp:woocommerce/product-image {"showSaleBadge":false,"isDescendentOfQueryLoop":true,"style":{"dimensions":{"aspectRatio":"1"}}} -->
 <!-- wp:woocommerce/product-sale-badge /-->
 <!-- /wp:woocommerce/product-image -->
 
