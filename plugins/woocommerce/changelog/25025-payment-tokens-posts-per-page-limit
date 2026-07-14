@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Saved payment methods are no longer capped by the posts_per_page option: customer token queries now default to a dedicated limit of 100 (filterable via woocommerce_get_customer_payment_tokens_limit), and the payment token data store no longer applies a LIMIT unless one is explicitly requested, so the personal data eraser and user deletion clean up all tokens.
