@@ -6,9 +6,7 @@
 	"plugins": [
 		".",
 		"./tests/e2e/test-plugins/wc-email-template-sync-test-helper",
-		"./tests/e2e/test-plugins/filter-setter",
-		"./tests/e2e/test-plugins/process-waiting-actions",
-		"./tests/e2e/test-plugins/test-helper-apis",
+		"./tests/e2e/test-plugins/woocommerce-e2e-test-helper",
 		"https://downloads.wordpress.org/plugin/akismet.zip",
 		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
 		"https://downloads.wordpress.org/plugin/wp-mail-logging.zip",

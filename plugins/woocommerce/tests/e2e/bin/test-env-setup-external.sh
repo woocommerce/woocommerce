@@ -35,9 +35,7 @@ echo "--------------------------------------------------------"
 
 # Define the list of PHP files to process
 mu_plugins=(
-    "filter-setter"
-    "process-waiting-actions"
-    "test-helper-apis"
+    "woocommerce-e2e-test-helper"
 	"woocommerce-cleanup"
 )
 
