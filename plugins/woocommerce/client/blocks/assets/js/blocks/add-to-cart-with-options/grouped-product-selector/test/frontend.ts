@@ -67,27 +67,26 @@ jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ), {
 function loadStore(): MockStore {
 	mockRegisteredStore = null;
 	jest.isolateModules( () => require( '../frontend' ) );
-	if ( ! mockRegisteredStore ) {
-		throw new Error(
-			'Grouped product selector store was not registered.'
-		);
+	const registeredStore = mockRegisteredStore as MockStore | null;
+	if ( ! registeredStore ) {
+		throw new Error( 'Grouped product selector store was not registered.' );
 	}
-	mockRegisteredStore.actions.clearErrors = ( group?: string ) => {
+	registeredStore.actions.clearErrors = ( ( group?: string ) => {
 		mockContext.validationErrors = group
 			? mockContext.validationErrors.filter(
 					( error ) => error.group !== group
 			  )
 			: [];
-	};
-	mockRegisteredStore.actions.addError = ( error: {
+	} ) as ( ...args: unknown[] ) => unknown;
+	registeredStore.actions.addError = ( ( error: {
 		code: string;
 		group: string;
 		message: string;
 	} ) => {
 		mockContext.validationErrors.push( error );
 		return error.code;
-	};
-	return mockRegisteredStore;
+	} ) as ( ...args: unknown[] ) => unknown;
+	return registeredStore;
 }
 
 describe( 'Grouped product selector frontend store', () => {
@@ -134,7 +133,7 @@ describe( 'Grouped product selector frontend store', () => {
 					( {
 						id,
 						add_to_cart: { minimum: 1, maximum: 5 },
-					} ) as unknown as ProductResponseItem
+					} as unknown as ProductResponseItem )
 			);
 
 			const { actions } = loadStore();
@@ -161,7 +160,7 @@ describe( 'Grouped product selector frontend store', () => {
 					( {
 						id,
 						add_to_cart: { minimum: 1, maximum: 5 },
-					} ) as unknown as ProductResponseItem
+					} as unknown as ProductResponseItem )
 			);
 
 			const { actions } = loadStore();

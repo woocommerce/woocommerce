@@ -140,9 +140,12 @@ describe( 'Variation selector frontend store', () => {
 				id: 1,
 				variations: [ { id: 2 }, { id: 3 } ],
 			} as ProductResponseItem;
-			mockProductsState.findProduct = jest.fn( () => ( {
-				id: 2,
-			} ) as ProductResponseItem );
+			mockProductsState.findProduct = jest.fn(
+				() =>
+					( {
+						id: 2,
+					} as ProductResponseItem )
+			);
 
 			const { callbacks } = loadStore();
 			callbacks.setSelectedVariationId();
@@ -169,9 +172,12 @@ describe( 'Variation selector frontend store', () => {
 				id: 1,
 				variations: [ { id: 2 } ],
 			} as ProductResponseItem;
-			mockProductsState.findProduct = jest.fn( () => ( {
-				id: 2,
-			} ) as ProductResponseItem );
+			mockProductsState.findProduct = jest.fn(
+				() =>
+					( {
+						id: 2,
+					} as ProductResponseItem )
+			);
 
 			const { callbacks } = loadStore();
 			callbacks.setSelectedVariationId();
@@ -193,9 +199,12 @@ describe( 'Variation selector frontend store', () => {
 				variations: [ { id: 2 } ],
 			} as ProductResponseItem;
 			// findProduct returns the parent itself when no variation matches.
-			mockProductsState.findProduct = jest.fn( () => ( {
-				id: 1,
-			} ) as ProductResponseItem );
+			mockProductsState.findProduct = jest.fn(
+				() =>
+					( {
+						id: 1,
+					} as ProductResponseItem )
+			);
 
 			const { callbacks } = loadStore();
 			callbacks.setSelectedVariationId();
