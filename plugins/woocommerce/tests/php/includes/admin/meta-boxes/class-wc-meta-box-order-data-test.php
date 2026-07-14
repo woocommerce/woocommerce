@@ -175,6 +175,31 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The read-only summary keeps shipping details after an ordered product is later made virtual.
+	 */
+	public function test_preserves_shipping_details_after_product_becomes_virtual(): void {
+		$order = $this->create_order_with_shipping_data( true );
+
+		$this->assertTrue( $order->needs_shipping_address(), 'The flat-rate order should need a shipping address.' );
+
+		// Simulate a merchant editing the ordered catalog product to be virtual after the order was placed.
+		foreach ( $this->products as $product ) {
+			$product->set_virtual( true );
+			$product->save();
+		}
+
+		// Re-read the order so its line items resolve the updated catalog product state.
+		$order = wc_get_order( $order->get_id() );
+
+		$summary = $this->render_shipping_address_summary( $order );
+
+		$this->assertStringContainsString( 'Virtual Customer', $summary );
+		$this->assertStringContainsString( '500 Billing Avenue', $summary );
+		$this->assertStringContainsString( '555-0100', $summary );
+		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
+	}
+
+	/**
 	 * @testdox The read-only summary preserves custom fields when the order does not need shipping.
 	 */
 	public function test_displays_custom_fields_when_order_does_not_need_shipping(): void {

@@ -185,28 +185,22 @@ class WC_Meta_Box_Order_Data {
 	}
 
 	/**
-	 * Whether an order contains only virtual products.
+	 * Whether an order was placed without any shipping, based on persisted order data.
+	 *
+	 * Store API checkout copies the billing details into the shipping address for
+	 * backwards compatibility even when a purchase needs no fulfillment. Such orders are
+	 * saved without a shipping line item, so the absence of persisted shipping methods is
+	 * what marks the stored shipping address as billing-derived and safe to hide from the
+	 * read-only summary. This deliberately relies on the order's own shipping items rather
+	 * than the current virtual state of the catalog products, which a merchant can change
+	 * after the order is placed — a catalog edit must never rewrite a historical order's
+	 * shipping summary.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return bool
 	 */
-	private static function has_only_virtual_products( $order ) {
-		/** @var WC_Order_Item_Product[] $items */
-		$items = $order->get_items();
-
-		if ( empty( $items ) ) {
-			return false;
-		}
-
-		foreach ( $items as $item ) {
-			$product = $item->get_product();
-
-			if ( ! $product instanceof WC_Product || $product->needs_shipping() ) {
-				return false;
-			}
-		}
-
-		return true;
+	private static function order_has_no_shipping( $order ) {
+		return 0 === count( $order->get_shipping_methods() );
 	}
 
 	/**
@@ -596,7 +590,7 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
 								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-								$hide_core_shipping_details = 'store-api' === $order->get_created_via() && self::has_only_virtual_products( $order );
+								$hide_core_shipping_details = 'store-api' === $order->get_created_via() && self::order_has_no_shipping( $order );
 								$shipping_address           = $hide_core_shipping_details ? '' : $order->get_formatted_shipping_address();
 
 								if ( $shipping_address ) {
