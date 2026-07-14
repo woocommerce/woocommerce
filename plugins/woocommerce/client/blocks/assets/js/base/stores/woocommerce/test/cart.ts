@@ -1,13 +1,18 @@
 /**
  * External dependencies
  */
-import type { Cart, CartItem } from '@woocommerce/types';
+import type {
+	Cart,
+	CartItem,
+	ProductResponseItem,
+} from '@woocommerce/types';
 import type { Notice } from '@woocommerce/stores/store-notices';
 
 /**
  * Internal dependencies
  */
 import type { Store, OptimisticCartItem, DraftItem } from '../cart';
+import type { ProductsStoreState } from '../products';
 
 type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
 
@@ -18,12 +23,25 @@ const mockState = {
 } as Store[ 'state' ];
 
 /**
+ * Mock state for the `woocommerce/products` store that the cart store
+ * consults one-directionally (never the reverse) to resolve the in-context
+ * product and to back its pairing ladder's attribute matching. Tests set
+ * `mockProductsState.productInContext` (and `products`/`productVariations`
+ * when attribute matching is under test) directly rather than exercising the
+ * real `woocommerce/products` getters — those have their own test file.
+ */
+const mockProductsState: Partial< ProductsStoreState > = {
+	products: {},
+	productVariations: {},
+};
+
+/**
  * The value `getContext( 'woocommerce' )` should return for the shared
  * context namespace, controlled per test. `undefined` simulates either an
  * in-directive read where no ancestor emitted a `woocommerce::{...}` context,
  * or (combined with `mockSharedContextThrows`) an out-of-directive read.
  */
-let mockSharedContext: { scope?: string } | undefined;
+let mockSharedContext: { scope?: string; key?: string } | undefined;
 
 /**
  * When `true`, the mocked `getContext` throws instead of returning
@@ -45,7 +63,19 @@ jest.mock(
 			}
 			return mockSharedContext;
 		} ),
-		store: jest.fn( ( _name, definition ) => {
+		store: jest.fn( ( name: string, definition ) => {
+			// The cart store consults `woocommerce/products` one-directionally;
+			// keep its mock state independent of the cart's own so seeding one
+			// never bleeds into the other.
+			if ( name === 'woocommerce/products' ) {
+				if ( definition?.state ) {
+					Object.defineProperties(
+						mockProductsState,
+						Object.getOwnPropertyDescriptors( definition.state )
+					);
+				}
+				return { state: mockProductsState };
+			}
 			// The cart store calls `store()` twice: once to read `state` and
 			// once to register `actions`. Merge the definition's `state`
 			// descriptors (e.g. the `findItemInCart` selector) onto the shared
@@ -66,6 +96,15 @@ jest.mock(
 	} ),
 	{ virtual: true }
 );
+
+// The cart store's side-effecting import of `woocommerce/products` is
+// replaced with an empty virtual module: the mocked `store()` above already
+// handles the `'woocommerce/products'` registration call the cart store
+// makes directly, so the real products store module never needs to load
+// here.
+jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ), {
+	virtual: true,
+} );
 
 jest.mock( '../legacy-events', () => ( {
 	triggerAddedToCartEvent: jest.fn(),
@@ -373,6 +412,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		delete ( mockState as Partial< Store[ 'state' ] > ).cart;
 		mockSharedContext = undefined;
 		mockSharedContextThrows = false;
+		delete mockProductsState.productInContext;
+		mockProductsState.products = {};
+		mockProductsState.productVariations = {};
 	} );
 
 	it( 'refreshCartItems passes cache: no-store to fetch to prevent browser caching', () => {
@@ -1698,6 +1740,291 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			actions.removeDraftItem( { id: 42 } );
 
 			expect( mockState.draftItems[ 'page/9' ] ).toBeUndefined();
+		} );
+	} );
+
+	describe( 'findItem / itemInContext / inCartQuantity', () => {
+		/**
+		 * Seeds `mockProductsState.productInContext` with a minimal product.
+		 *
+		 * @param overrides Partial product fields to override the defaults.
+		 * @return The product object assigned to `productInContext`.
+		 */
+		function seedProductInContext(
+			overrides: Partial< ProductResponseItem > = {}
+		) {
+			const product = {
+				id: 42,
+				type: 'simple',
+				grouped_products: [],
+				...overrides,
+			} as ProductResponseItem;
+			mockProductsState.productInContext = product;
+			return product;
+		}
+
+		/**
+		 * Builds a minimal server-confirmed cart line, optionally carrying
+		 * namespaced extension data under `extensions[namespace]`.
+		 *
+		 * @param overrides Partial cart-line fields to override the defaults.
+		 * @return A cart line suitable for seeding `state.cart.items`.
+		 */
+		function makeLine( overrides: Partial< CartItem > = {} ): CartItem {
+			return makeKeyedLine( { extensions: {}, ...overrides } );
+		}
+
+		it( 'itemInContext has no cartItem/draft and isInCart false when no product is in context', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			seedCart( [] );
+
+			expect( mockState.itemInContext ).toEqual( {
+				cartItem: undefined,
+				draft: undefined,
+				isInCart: false,
+			} );
+		} );
+
+		it( 'itemInContext has no cartItem and isInCart false when the in-context product is not in the cart', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			seedCart( [ makeLine( { id: 99 } ) ] );
+			seedProductInContext( { id: 42 } );
+
+			expect( mockState.itemInContext.cartItem ).toBeUndefined();
+			expect( mockState.itemInContext.isInCart ).toBe( false );
+		} );
+
+		it( 'itemInContext pairs exactly via a context-known line key, regardless of identity', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			// Two lines share the in-context product's id — identity alone is
+			// ambiguous — but the context already names the exact line.
+			const targetLine = makeLine( { id: 42, key: 'the-known-key' } );
+			seedCart( [ makeLine( { id: 42, key: 'other-key' } ), targetLine ] );
+			seedProductInContext( { id: 42 } );
+			mockSharedContext = { scope: 'page/1', key: 'the-known-key' };
+
+			expect( mockState.itemInContext ).toEqual( {
+				cartItem: targetLine,
+				draft: undefined,
+				isInCart: true,
+			} );
+		} );
+
+		it( 'itemInContext pairs via product identity when exactly one line matches', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			const line = makeLine( { id: 42 } );
+			seedCart( [ line, makeLine( { id: 99 } ) ] );
+			seedProductInContext( { id: 42 } );
+
+			expect( mockState.itemInContext ).toEqual( {
+				cartItem: line,
+				draft: undefined,
+				isInCart: true,
+			} );
+		} );
+
+		it( 'itemInContext includes the scope draft for the in-context product alongside the paired line', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			const line = makeLine( { id: 42 } );
+			seedCart( [ line ] );
+			seedProductInContext( { id: 42 } );
+			mockSharedContext = { scope: 'page/1' };
+			actions.upsertDraftItem( { id: 42, quantity: 3 }, { scope: 'page/1' } );
+
+			expect( mockState.itemInContext ).toEqual( {
+				cartItem: line,
+				draft: { id: 42, quantity: 3 },
+				isInCart: true,
+			} );
+		} );
+
+		it( 'itemInContext disambiguates same-id lines via a namespaced extension-prop match against the draft', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			const giftA = makeLine( {
+				id: 42,
+				key: 'line-a',
+				extensions: { 'my-plugin': { giftNote: 'A' } },
+			} );
+			const giftB = makeLine( {
+				id: 42,
+				key: 'line-b',
+				extensions: { 'my-plugin': { giftNote: 'B' } },
+			} );
+			seedCart( [ giftA, giftB ] );
+			seedProductInContext( { id: 42 } );
+			mockSharedContext = { scope: 'page/1' };
+			actions.upsertDraftItem(
+				{ id: 42, quantity: 1, 'my-plugin/giftNote': 'B' },
+				{ scope: 'page/1' }
+			);
+
+			expect( mockState.itemInContext.cartItem ).toEqual( giftB );
+			expect( mockState.itemInContext.isInCart ).toBe( true );
+		} );
+
+		it( 'itemInContext never guesses: ambiguous identity/extension matches leave cartItem undefined but isInCart true', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			// Same id, same (empty) extensions — nothing distinguishes them.
+			seedCart( [
+				makeLine( { id: 42, key: 'line-a' } ),
+				makeLine( { id: 42, key: 'line-b' } ),
+			] );
+			seedProductInContext( { id: 42 } );
+
+			expect( mockState.itemInContext.cartItem ).toBeUndefined();
+			expect( mockState.itemInContext.isInCart ).toBe( true );
+		} );
+
+		it( 'itemInContext leaves cartItem undefined when the draft extension prop matches no line, though the product is in the cart', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeLine( {
+					id: 42,
+					extensions: { 'my-plugin': { giftNote: 'A' } },
+				} ),
+			] );
+			seedProductInContext( { id: 42 } );
+			mockSharedContext = { scope: 'page/1' };
+			actions.upsertDraftItem(
+				{ id: 42, quantity: 1, 'my-plugin/giftNote': 'C' },
+				{ scope: 'page/1' }
+			);
+
+			expect( mockState.itemInContext.cartItem ).toBeUndefined();
+			expect( mockState.itemInContext.isInCart ).toBe( true );
+		} );
+
+		it( 'findItem returns the same envelope for an explicit id, key, or filter', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			const line = makeLine( { id: 42, key: 'the-key' } );
+			seedCart( [ line ] );
+
+			const byId = mockState.findItem( { id: 42 } );
+			const byKey = mockState.findItem( { key: 'the-key' } );
+			const byFilter = mockState.findItem( {
+				filter: ( item ) => item.id === 42,
+			} );
+
+			expect( byId.cartItem ).toEqual( line );
+			expect( byKey.cartItem ).toEqual( line );
+			expect( byFilter.cartItem ).toEqual( line );
+		} );
+
+		it( 'findItem defaults scope to currentScope when none is passed', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockState.pageScope = 'page/9';
+			actions.upsertDraftItem(
+				{ id: 42, quantity: 2 },
+				{ scope: 'page/9' }
+			);
+
+			expect( mockState.findItem( { id: 42 } ).draft ).toEqual( {
+				id: 42,
+				quantity: 2,
+			} );
+		} );
+
+		it( 'findItem honors an explicit scope over currentScope', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockState.pageScope = 'page/9';
+			actions.upsertDraftItem(
+				{ id: 42, quantity: 5 },
+				{ scope: 'collection/q1/1' }
+			);
+
+			expect(
+				mockState.findItem( { id: 42, scope: 'collection/q1/1' } )
+					.draft
+			).toEqual( { id: 42, quantity: 5 } );
+			expect( mockState.findItem( { id: 42 } ).draft ).toBeUndefined();
+		} );
+
+		it( 'inCartQuantity is 0 when no product is in context', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			seedCart( [] );
+
+			expect( mockState.inCartQuantity ).toBe( 0 );
+		} );
+
+		it( 'inCartQuantity returns the paired line quantity for a simple in-context product', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			seedCart( [ makeLine( { id: 42, quantity: 4 } ) ] );
+			seedProductInContext( { id: 42, type: 'simple' } );
+
+			expect( mockState.inCartQuantity ).toBe( 4 );
+		} );
+
+		it( 'inCartQuantity aggregates children in-cart quantities for a grouped in-context product', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			seedCart( [
+				makeLine( { id: 1, quantity: 2 } ),
+				makeLine( { id: 2, quantity: 5 } ),
+				// id 3 has no line — contributes 0.
+			] );
+			seedProductInContext( {
+				id: 99,
+				type: 'grouped',
+				grouped_products: [ 1, 2, 3 ],
+			} );
+
+			expect( mockState.inCartQuantity ).toBe( 7 );
+		} );
+
+		it( 'inCartQuantity resolves the correct per-variation quantity for a variable in-context product', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			const greenLine = makeLine( {
+				id: 55,
+				type: 'variation',
+				quantity: 3,
+				variation: [
+					{
+						attribute: 'Color',
+						value: 'green',
+						raw_attribute: 'attribute_pa_color',
+					},
+				],
+			} );
+			const blueLine = makeLine( {
+				id: 56,
+				type: 'variation',
+				quantity: 9,
+				variation: [
+					{
+						attribute: 'Color',
+						value: 'blue',
+						raw_attribute: 'attribute_pa_color',
+					},
+				],
+			} );
+			seedCart( [ greenLine, blueLine ] );
+			seedProductInContext( { id: 55, type: 'variation' } );
+			mockSharedContext = { scope: 'page/1' };
+			// The scope's draft selection names which variation is "selected".
+			actions.upsertDraftItem(
+				{
+					id: 55,
+					quantity: 1,
+					variation: [ { attribute: 'Color', value: 'green' } ],
+				},
+				{ scope: 'page/1' }
+			);
+
+			expect( mockState.inCartQuantity ).toBe( 3 );
 		} );
 	} );
 } );
