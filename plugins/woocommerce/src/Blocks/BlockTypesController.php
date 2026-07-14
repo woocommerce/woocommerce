@@ -397,7 +397,7 @@ final class BlockTypesController {
 			);
 
 			return $this->remove_allowed_block_types(
-				$registered_block_types,
+				$allowed_block_types,
 				array_diff( $registered_woocommerce_block_types, $this->get_widget_area_block_types() )
 			);
 		}
