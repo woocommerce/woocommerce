@@ -382,11 +382,8 @@ export const updateBranchChangelog = async (
 			milestone = `${ m[ 1 ] }.0`;
 		}
 
-		// deletionCommitHash only ever removes changefiles, so rather than cherry-picking
-		// its diff (which conflicts if a file was independently touched on this branch,
-		// e.g. by a repo-wide formatting pass, after the release branch diverged), just
-		// delete the same paths by name here. Content doesn't matter, only that the file
-		// is now compiled into the release changelog and shouldn't exist on this branch.
+		// Delete by name instead of cherry-picking deletionCommitHash: cherry-pick conflicts
+		// if a file's content drifted independently on this branch (e.g. a formatting pass).
 		const changelogFiles = (
 			await git.raw( [
 				'diff-tree',
