@@ -16,7 +16,6 @@ use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataS
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
-use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * OrdersScheduler Class.
@@ -134,12 +133,10 @@ class OrdersScheduler extends ImportScheduler {
 			add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
 		}
 
-		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
-			// Watch for changes to the scheduled import option.
-			add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );
-			add_action( 'update_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_change' ), 10, 2 );
-			add_action( 'delete_option', array( __CLASS__, 'handle_scheduled_import_option_before_delete' ), 10, 1 );
-		}
+		// Watch for changes to the scheduled import option.
+		add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );
+		add_action( 'update_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_change' ), 10, 2 );
+		add_action( 'delete_option', array( __CLASS__, 'handle_scheduled_import_option_before_delete' ), 10, 1 );
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
@@ -918,8 +915,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	/**
 	 * Check whether scheduled import is enabled.
 	 *
-	 * When the "analytics-scheduled-import" feature is disabled, only immediate
-	 * import is supported (returns false). When enabled, checks the option value.
+	 * Checks the scheduled import option value.
 	 *
 	 * @internal
 	 * @since 10.5.0 Introduced as a private method.
@@ -927,11 +923,6 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @return bool
 	 */
 	public static function is_scheduled_import_enabled(): bool {
-		if ( ! Features::is_enabled( 'analytics-scheduled-import' ) ) {
-			// If the feature is disabled, only immediate import is supported.
-			return false;
-		}
-
 		$value = get_option( self::SCHEDULED_IMPORT_OPTION, false );
 
 		if ( false !== $value ) {
