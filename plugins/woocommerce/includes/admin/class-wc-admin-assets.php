@@ -47,10 +47,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * core's own notice. Classic order edit is the exception: core's notice there wrongly claims local
 		 * autosave backups are running, which disable_autosave() has turned off.
 		 *
-		 * @param WP_Screen|null $screen The current screen.
 		 * @return bool Whether to render and toggle the notice.
 		 */
-		private function should_show_lost_connection_notice( $screen ) {
+		private function should_show_lost_connection_notice() {
+			$screen = get_current_screen();
+
 			if ( ! $screen || ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
 				return false;
 			}
@@ -74,7 +75,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * @return void
 		 */
 		public function render_lost_connection_notice() {
-			if ( ! $this->should_show_lost_connection_notice( get_current_screen() ) ) {
+			if ( ! $this->should_show_lost_connection_notice() ) {
 				return;
 			}
 			?>
@@ -462,7 +463,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'woocommerce_admin' );
 				wp_enqueue_script( 'wc-enhanced-select' );
 
-				$show_lost_connection_notice = $this->should_show_lost_connection_notice( $screen );
+				$show_lost_connection_notice = $this->should_show_lost_connection_notice();
 
 				// The notice is toggled via heartbeat events (see woocommerce_admin.js), so ensure the emitter is loaded.
 				if ( $show_lost_connection_notice ) {
