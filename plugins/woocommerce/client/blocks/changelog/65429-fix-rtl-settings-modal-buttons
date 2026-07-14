@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix right-to-left (RTL) button spacing in the shipping settings modal, where action buttons (for example in Local Pickup) were stuck together.

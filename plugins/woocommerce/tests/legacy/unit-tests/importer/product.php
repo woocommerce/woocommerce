@@ -245,8 +245,9 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$product->set_gallery_image_ids( array( $gallery_id ) );
 		$product->save();
 
-		$expanded = $this->invoke_protected( $this->sut, 'expand_data', array( array( 'images' => array( $new_url ) ) ) );
-		$this->invoke_protected( $this->sut, 'set_image_data', array( &$product, $expanded ) );
+		$importer = new WC_Product_CSV_Importer( $this->csv_file, array( 'parse' => false ) );
+		$expanded = $this->invoke_protected( $importer, 'expand_data', array( array( 'images' => array( $new_url ) ) ) );
+		$this->invoke_protected( $importer, 'set_image_data', array( &$product, $expanded ) );
 
 		$this->assertEquals( $new_id, $product->get_image_id(), 'Featured image should be replaced with the new image.' );
 		$this->assertEquals( array(), $product->get_gallery_image_ids(), 'Removed gallery images should be cleared.' );
@@ -267,8 +268,9 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$product->set_gallery_image_ids( array( $gallery_id ) );
 		$product->save();
 
-		$expanded = $this->invoke_protected( $this->sut, 'expand_data', array( array( 'images' => array() ) ) );
-		$this->invoke_protected( $this->sut, 'set_image_data', array( &$product, $expanded ) );
+		$importer = new WC_Product_CSV_Importer( $this->csv_file, array( 'parse' => false ) );
+		$expanded = $this->invoke_protected( $importer, 'expand_data', array( array( 'images' => array() ) ) );
+		$this->invoke_protected( $importer, 'set_image_data', array( &$product, $expanded ) );
 
 		$this->assertEquals( $featured_id, $product->get_image_id(), 'Featured image should be preserved.' );
 		$this->assertEquals( array( $gallery_id ), $product->get_gallery_image_ids(), 'Existing gallery should be preserved.' );
