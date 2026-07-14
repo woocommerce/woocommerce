@@ -216,7 +216,7 @@ class WC_Meta_Box_Order_Data {
 		$copied_fields = array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' );
 
 		foreach ( $copied_fields as $field ) {
-			if ( $order->{"get_shipping_$field"}() !== $order->{"get_billing_$field"}() ) {
+			if ( $order->{"get_shipping_$field"}( 'edit' ) !== $order->{"get_billing_$field"}( 'edit' ) ) {
 				return false;
 			}
 		}

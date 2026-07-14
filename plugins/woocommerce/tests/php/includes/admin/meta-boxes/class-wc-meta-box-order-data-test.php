@@ -207,18 +207,75 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $order->needs_shipping_address(), 'The virtual-only order should not need a shipping address.' );
 
-		// A merchant or integration edits the shipping fields to values that diverge from billing.
-		$order->set_shipping_address_1( '742 Evergreen Terrace' );
-		$order->set_shipping_city( 'Springfield' );
-		$order->save();
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Simulate the nonce-verified meta-box save request.
+		$previous_post = $_POST;
+		$_POST         = array(
+			'order_status'        => $order->get_status(),
+			'_payment_method'     => $order->get_payment_method(),
+			'customer_user'       => 0,
+			'_shipping_address_1' => '742 Evergreen Terrace',
+			'_shipping_city'      => 'Springfield',
+			'_shipping_phone'     => '555-0199',
+		);
+
+		try {
+			WC_Meta_Box_Order_Data::save( $order->get_id() );
+		} finally {
+			$_POST = $previous_post;
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		// Re-read the order so the summary reflects the persisted, explicit values.
 		$order = wc_get_order( $order->get_id() );
 
 		$summary = $this->render_shipping_address_summary( $order );
 
+		$this->assertCount( 0, $order->get_shipping_methods(), 'Editing shipping fields should not add a shipping method.' );
+		$this->assertSame( '742 Evergreen Terrace', $order->get_shipping_address_1( 'edit' ) );
+		$this->assertSame( '555-0199', $order->get_shipping_phone( 'edit' ) );
 		$this->assertStringContainsString( '742 Evergreen Terrace', $summary );
 		$this->assertStringContainsString( 'Springfield', $summary );
+		$this->assertStringContainsString( '555-0199', $summary );
+		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
+	}
+
+	/**
+	 * @testdox The read-only summary uses persisted address values when view filters make billing and shipping appear equal.
+	 */
+	public function test_displays_persisted_shipping_details_when_view_filters_make_addresses_match(): void {
+		$order = $this->create_order_with_shipping_data( false );
+		$order->set_shipping_address_1( '742 Evergreen Terrace' );
+		$order->save();
+
+		$normalize_address = static function () {
+			return 'Normalized address';
+		};
+		add_filter( 'woocommerce_order_get_billing_address_1', $normalize_address );
+		add_filter( 'woocommerce_order_get_shipping_address_1', $normalize_address );
+
+		try {
+			$summary = $this->render_shipping_address_summary( $order );
+		} finally {
+			remove_filter( 'woocommerce_order_get_billing_address_1', $normalize_address );
+			remove_filter( 'woocommerce_order_get_shipping_address_1', $normalize_address );
+		}
+
+		$this->assertStringContainsString( '742 Evergreen Terrace', $summary );
+		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
+	}
+
+	/**
+	 * @testdox The read-only summary shows a persisted shipping phone that differs from billing.
+	 */
+	public function test_displays_shipping_details_when_only_phone_differs_from_billing(): void {
+		$order = $this->create_order_with_shipping_data( false );
+		$order->set_shipping_phone( '555-0199' );
+		$order->save();
+
+		$summary = $this->render_shipping_address_summary( $order );
+
+		$this->assertStringContainsString( '500 Billing Avenue', $summary );
+		$this->assertStringContainsString( '555-0199', $summary );
 		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
 	}
 
