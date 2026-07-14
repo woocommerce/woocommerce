@@ -27,6 +27,7 @@ class WC_Shipping_Zones_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
+		remove_filter( 'woocommerce_valid_location_types', array( $this, 'add_custom_location_type' ) );
 		WC_Helper_Shipping_Zones::remove_mock_zones();
 	}
 
@@ -81,6 +82,45 @@ class WC_Shipping_Zones_Test extends WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( $zip_zone->get_id(), $zones );
 		$this->assertArrayNotHasKey( 'zone_order_conflict_warning', $zones[ $zip_zone->get_id() ] );
+	}
+
+	/**
+	 * @testdox Should not warn when a higher-priority zone has only custom locations.
+	 */
+	public function test_does_not_warn_when_higher_priority_zone_has_only_custom_locations(): void {
+		add_filter( 'woocommerce_valid_location_types', array( $this, 'add_custom_location_type' ) );
+
+		$this->create_zone(
+			'Custom Region',
+			0,
+			array(
+				array( 'custom-region', 'custom_location' ),
+			)
+		);
+		$state_zone = $this->create_zone(
+			'Washington State',
+			1,
+			array(
+				array( 'US:WA', 'state' ),
+			)
+		);
+
+		$zones = WC_Shipping_Zones::get_zones_with_order_conflict_warnings( 'json' );
+
+		$this->assertArrayHasKey( $state_zone->get_id(), $zones );
+		$this->assertArrayNotHasKey( 'zone_order_conflict_warning', $zones[ $state_zone->get_id() ] );
+	}
+
+	/**
+	 * Add a custom location type for tests.
+	 *
+	 * @param array $location_types Location types.
+	 * @return array Location types.
+	 */
+	public function add_custom_location_type( array $location_types ): array {
+		$location_types[] = 'custom_location';
+
+		return $location_types;
 	}
 
 	/**

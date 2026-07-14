@@ -123,6 +123,13 @@ class WC_Shipping_Zones {
 			return false;
 		}
 
+		if (
+			self::zone_has_unsupported_non_postcode_locations( $possible_broader_zone ) ||
+			self::zone_has_unsupported_non_postcode_locations( $zone )
+		) {
+			return false;
+		}
+
 		$broader_locations = self::get_zone_locations_by_type( $possible_broader_zone, array( 'continent', 'country', 'state' ) );
 		$zone_locations    = self::get_zone_locations_by_type( $zone, array( 'continent', 'country', 'state' ) );
 
@@ -161,6 +168,26 @@ class WC_Shipping_Zones {
 	 */
 	private static function zone_has_postcode_locations( $zone ) {
 		return ! empty( self::get_zone_locations_by_type( $zone, array( 'postcode' ) ) );
+	}
+
+	/**
+	 * Check whether a zone has non-postcode locations not understood by this warning helper.
+	 *
+	 * @since 11.1.0
+	 * @param array $zone Shipping zone.
+	 * @return bool Whether the zone has unsupported non-postcode locations.
+	 */
+	private static function zone_has_unsupported_non_postcode_locations( $zone ) {
+		$locations                = $zone['zone_locations'] ?? array();
+		$supported_location_types = array( 'continent', 'country', 'state', 'postcode' );
+
+		foreach ( $locations as $location ) {
+			if ( isset( $location->type ) && ! in_array( $location->type, $supported_location_types, true ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
