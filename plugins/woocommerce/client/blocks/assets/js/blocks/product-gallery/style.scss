@@ -20,7 +20,6 @@ $dialog-padding: 20px;
 		align-items: center;
 		margin: 0;
 		padding: 0;
-		touch-action: pan-y pinch-zoom;
 		// Chrome drops `scrollTo({behavior:'smooth'})` on `overflow:hidden`
 		// unless `scroll-behavior` is set on the element.
 		scroll-behavior: smooth;

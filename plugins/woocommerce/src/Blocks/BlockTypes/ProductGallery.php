@@ -271,7 +271,6 @@ class ProductGallery extends AbstractBlock {
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
-			$p->set_attribute( 'data-wp-init--touch-move-listener', 'callbacks.initTouchMoveListener' );
 			$p->set_attribute(
 				'data-wp-context',
 				wp_json_encode(
