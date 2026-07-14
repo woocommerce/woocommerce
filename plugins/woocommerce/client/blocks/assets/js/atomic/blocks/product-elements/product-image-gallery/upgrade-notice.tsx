@@ -12,22 +12,29 @@ import { upgradeToBlockifiedProductGallery } from '../../../../blocks/product-ga
 
 export const UpgradeNotice = ( {
 	blockClientId,
+	showAddToCartWithOptionsCompatibilityNotice,
 }: {
 	blockClientId: string;
+	showAddToCartWithOptionsCompatibilityNotice: boolean;
 } ) => {
-	const notice = createInterpolateElement(
-		__(
-			'Upgrade to the <strongText /> for more flexibility.',
-			'woocommerce'
-		),
-		{
-			strongText: (
-				<strong>
-					{ __( `Product Gallery block`, 'woocommerce' ) }
-				</strong>
-			),
-		}
-	);
+	const notice = showAddToCartWithOptionsCompatibilityNotice
+		? __(
+				'The classic Product Image Gallery block is not compatible with the Add to Cart + Options block in this template. Switch to the new Product Gallery block for a better experience.',
+				'woocommerce'
+		  )
+		: createInterpolateElement(
+				__(
+					'Upgrade to the <strongText /> for more flexibility.',
+					'woocommerce'
+				),
+				{
+					strongText: (
+						<strong>
+							{ __( `Product Gallery block`, 'woocommerce' ) }
+						</strong>
+					),
+				}
+		  );
 
 	const buttonLabel = __( 'Use the Product Gallery block', 'woocommerce' );
 
@@ -37,6 +44,9 @@ export const UpgradeNotice = ( {
 			actionLabel={ buttonLabel }
 			onActionClick={ () =>
 				upgradeToBlockifiedProductGallery( blockClientId )
+			}
+			status={
+				showAddToCartWithOptionsCompatibilityNotice ? 'warning' : 'info'
 			}
 		>
 			{ notice }

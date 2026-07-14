@@ -11,7 +11,6 @@ import { findBlock } from '@woocommerce/utils';
 /**
  * Internal dependencies
  */
-import { AddToCartWithOptionsCompatibilityNotice } from './add-to-cart-with-options-compatibility-notice';
 import { UpgradeNotice } from './upgrade-notice';
 import './editor.scss';
 
@@ -49,13 +48,12 @@ const Edit = ( props: BlockEditProps< Record< string, never > > ) => {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				{ hasAddToCartWithOptionsBlock ? (
-					<AddToCartWithOptionsCompatibilityNotice
-						blockClientId={ props.clientId }
-					/>
-				) : (
-					<UpgradeNotice blockClientId={ props.clientId } />
-				) }
+				<UpgradeNotice
+					blockClientId={ props.clientId }
+					showAddToCartWithOptionsCompatibilityNotice={
+						hasAddToCartWithOptionsBlock
+					}
+				/>
 			</InspectorControls>
 			<Disabled>
 				<Placeholder />
