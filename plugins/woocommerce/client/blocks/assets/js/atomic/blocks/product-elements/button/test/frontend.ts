@@ -220,7 +220,8 @@ describe( 'Product Button frontend store', () => {
 				id: 1,
 				type: 'simple',
 			} as ProductResponseItem;
-			mockContext.animationStatus = 'SLIDE-IN' as Context[ 'animationStatus' ];
+			mockContext.animationStatus =
+				'SLIDE-IN' as Context[ 'animationStatus' ];
 			mockContext.tempQuantity = 1;
 			mockWooState.inCartQuantity = 5;
 
@@ -236,7 +237,8 @@ describe( 'Product Button frontend store', () => {
 			} as ProductResponseItem;
 			// Past IDLE/SLIDE_OUT, the label reads live `inCartQuantity`
 			// rather than the locally-tracked `tempQuantity`.
-			mockContext.animationStatus = 'SLIDE-IN' as Context[ 'animationStatus' ];
+			mockContext.animationStatus =
+				'SLIDE-IN' as Context[ 'animationStatus' ];
 			mockWooState.inCartQuantity = 2;
 
 			// No `woocommerce/add-to-cart-with-options` fixture is set up:
