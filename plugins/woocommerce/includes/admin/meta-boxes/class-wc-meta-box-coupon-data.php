@@ -396,7 +396,7 @@ class WC_Meta_Box_Coupon_Data {
 				'minimum_amount'              => wc_format_decimal( $_POST['minimum_amount'] ),
 				'maximum_amount'              => wc_format_decimal( $_POST['maximum_amount'] ),
 				'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) ),
-				'auto_apply'                  => isset( $_POST['auto_apply'] ),
+				'auto_apply'                  => isset( $_POST['auto_apply'] ), // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The coupon nonce is verified before this method is called.
 			)
 		);
 

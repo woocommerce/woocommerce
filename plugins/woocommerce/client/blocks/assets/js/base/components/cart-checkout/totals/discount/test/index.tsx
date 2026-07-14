@@ -517,7 +517,9 @@ describe( 'TotalsDiscount', () => {
 			};
 			render( <TotalsDiscount { ...props } /> );
 
-			expect( screen.getByTestId( 'removable-chip' ) ).toBeInTheDocument();
+			expect(
+				screen.getByTestId( 'removable-chip' )
+			).toBeInTheDocument();
 			expect( screen.queryByTestId( 'chip' ) ).not.toBeInTheDocument();
 		} );
 	} );
