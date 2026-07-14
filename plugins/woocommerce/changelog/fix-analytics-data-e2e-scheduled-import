@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Force immediate analytics import mode in the analytics-data E2E spec so its orders import deterministically regardless of the store's scheduled-import default; test-only, no changes to shipped code.

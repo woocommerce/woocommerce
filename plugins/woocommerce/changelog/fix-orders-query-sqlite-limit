@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Omit the LIMIT clause in OrdersTableQuery when an unlimited (-1) row count is requested, matching WP_Query nopaging behavior. Fixes a datatype mismatch error when the orders query runs against a SQLite database.
