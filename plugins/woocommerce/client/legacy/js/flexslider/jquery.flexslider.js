@@ -455,6 +455,7 @@
           onTouchStart,
           onTouchMove,
           onTouchEnd,
+          touchListenerOptions = { capture: true, passive: false },
           scrolling = false,
           localX = 0,
           localY = 0,
@@ -481,8 +482,8 @@
                          (reverse) ? (slider.last - slider.currentSlide + slider.cloneOffset) * cwidth : (slider.currentSlide + slider.cloneOffset) * cwidth;
                 startX = (vertical) ? localY : localX;
                 startY = (vertical) ? localX : localY;
-                el.addEventListener('touchmove', onTouchMove, false);
-                el.addEventListener('touchend', onTouchEnd, false);
+                el.addEventListener('touchmove', onTouchMove, touchListenerOptions);
+                el.addEventListener('touchend', onTouchEnd, touchListenerOptions);
               }
             };
 
@@ -509,7 +510,7 @@
 
             onTouchEnd = function(e) {
               // finish the touch by undoing the touch session
-              el.removeEventListener('touchmove', onTouchMove, false);
+              el.removeEventListener('touchmove', onTouchMove, touchListenerOptions);
 
               if (slider.animatingTo === slider.currentSlide && !scrolling && !(dx === null)) {
                 var updateDx = (reverse) ? -dx : dx,
@@ -521,7 +522,7 @@
                   if (!fade) { slider.flexAnimate(slider.currentSlide, slider.vars.pauseOnAction, true); }
                 }
               }
-              el.removeEventListener('touchend', onTouchEnd, false);
+              el.removeEventListener('touchend', onTouchEnd, touchListenerOptions);
 
               startX = null;
               startY = null;
@@ -529,7 +530,11 @@
               offset = null;
             };
 
-            el.addEventListener('touchstart', onTouchStart, false);
+            // Register before a gesture starts so embedded WebViews keep touchmove events cancelable.
+            el.addEventListener('touchmove', function() {
+              // Intentionally empty.
+            }, touchListenerOptions);
+            el.addEventListener('touchstart', onTouchStart, touchListenerOptions);
       },
       resize: function() {
         if (!slider.animating && slider.is(':visible')) {
