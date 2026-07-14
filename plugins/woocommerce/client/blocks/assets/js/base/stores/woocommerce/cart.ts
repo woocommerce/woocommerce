@@ -15,6 +15,7 @@ import type {
 	Store as StoreNotices,
 	Notice,
 } from '@woocommerce/stores/store-notices';
+import fastDeepEqual from 'fast-deep-equal/es6';
 
 /**
  * Internal dependencies
@@ -26,7 +27,9 @@ import {
 	type MutationQueue,
 	type MutationResult,
 } from './mutation-batcher';
-import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
+import { attributeNamesMatch } from '../../utils/variations/attribute-matching';
+import '@woocommerce/stores/woocommerce/products';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 export type WooCommerceConfig = {
 	messages?: {
@@ -94,6 +97,36 @@ export type ClientCartItem = Omit<
 	quantityToAdd?: number;
 };
 
+/**
+ * The read-only envelope returned by `findItem`/`itemInContext`.
+ *
+ * Pairing between a scope's draft and a cart line never guesses: `cartItem`
+ * is populated only when the pairing ladder resolves to exactly one
+ * candidate line — a context-known line `key`, or an unambiguous
+ * product/variation identity plus namespaced extension-prop match. Any
+ * remaining ambiguity (including "this product is in the cart, but not as a
+ * single identifiable line") leaves `cartItem` `undefined`; the server owns
+ * cart-line identity, so the client never guesses at it.
+ */
+export type Envelope = {
+	/**
+	 * The paired cart line, when the pairing ladder resolved to exactly one
+	 * candidate. `undefined` when no line matches, or more than one
+	 * candidate line matches and none can be told apart.
+	 */
+	cartItem?: CartItem | OptimisticCartItem | undefined;
+	/** The resolved scope's draft for the product, when one exists. */
+	draft?: DraftItem | undefined;
+	/**
+	 * `true` when at least one cart line shares the product/variation
+	 * identity being looked up, regardless of whether `cartItem` could be
+	 * resolved unambiguously. The only representation of "in the cart, but
+	 * no single line can be paired" — not derivable from `cartItem !==
+	 * undefined`.
+	 */
+	isInCart: boolean;
+};
+
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 export type Store = {
@@ -145,6 +178,57 @@ export type Store = {
 		 * rather than throwing.
 		 */
 		currentScope: Scope;
+		/**
+		 * Finds a scoped item by id/key, or by an extension-supplied
+		 * predicate, returning the read-only envelope pairing its draft with
+		 * its cart line.
+		 *
+		 * Implements the pairing ladder: an explicit `key` pairs exactly
+		 * (no further checks); otherwise product/variation identity plus a
+		 * namespaced extension-prop comparison against the candidate line's
+		 * `extensions[<namespace>]` must resolve to exactly one candidate
+		 * (using the resolved draft's own `variation`/extension props, when
+		 * one exists); any remaining ambiguity leaves `cartItem`
+		 * `undefined` — the server owns line identity, so this never
+		 * guesses. `filter` replaces the id-based identity matching
+		 * entirely, for extensions with their own notion of line identity.
+		 *
+		 * @param args         Lookup arguments.
+		 * @param args.scope   The scope to read the draft from. Defaults to
+		 *                     `currentScope`.
+		 * @param args.id      The product/variation id to pair by identity.
+		 * @param args.key     A known cart-line key; pairs exactly when
+		 *                     given, regardless of `id`/`filter`.
+		 * @param args.filter  An extension-supplied predicate narrowing
+		 *                     candidate lines directly, in place of
+		 *                     id-based identity matching.
+		 * @return The envelope: `{ cartItem?, draft?, isInCart }`.
+		 */
+		findItem: ( args?: {
+			scope?: Scope;
+			id?: DraftItem[ 'id' ];
+			key?: CartItem[ 'key' ];
+			filter?: ( item: CartItem | OptimisticCartItem ) => boolean;
+		} ) => Envelope;
+		/**
+		 * The envelope for the in-context product: its `currentScope`
+		 * draft paired with its cart line, resolved via the products
+		 * store's `productInContext`. `undefined` product in context
+		 * (nothing rendered) yields an empty envelope. See `findItem` for
+		 * the pairing ladder.
+		 */
+		itemInContext: Envelope;
+		/**
+		 * The in-context product's in-cart quantity.
+		 *
+		 * A grouped product aggregates its children's own in-cart
+		 * quantities (each resolved independently, by id); a variable
+		 * product resolves through its currently selected variation (the
+		 * scope's draft selection, same resolution as `itemInContext`); a
+		 * simple product is its own paired line's quantity. `0` when
+		 * nothing pairs, or no product is in context.
+		 */
+		inCartQuantity: number;
 	};
 	actions: {
 		/**
@@ -269,13 +353,17 @@ function isValidScope( scope: unknown ): scope is Scope {
 
 /**
  * The shape of the shared `woocommerce` context namespace relevant to scope
- * resolution.
+ * and item-pairing resolution.
  *
  * Scope-overriding containers (a Product Collection loop item, a Single
- * Product block) emit this via `data-wp-context='woocommerce::{ "scope":
- * "…" }'` on their wrapper element; consumers nested inside inherit it.
+ * Product block) emit `scope` via `data-wp-context='woocommerce::{ "scope":
+ * "…" }'` on their wrapper element; consumers nested inside inherit it. A
+ * surface that already renders one specific, known cart line (e.g. a future
+ * line-item wrapper) may additionally emit `key`, letting `itemInContext`
+ * pair exactly via the pairing ladder's first rung instead of falling back
+ * to product/variation identity matching.
  */
-type SharedContext = { scope?: Scope };
+type SharedContext = { scope?: Scope; key?: CartItem[ 'key' ] };
 
 /**
  * Reads the shared `woocommerce` context namespace, degrading to `undefined`
@@ -345,11 +433,69 @@ function productToken(
 }
 
 /**
+ * Returns `true` when a variation cart line's recorded attribute values
+ * match a set of selected attributes.
+ *
+ * A module-private copy of the pairing algorithm in
+ * `base/utils/variations/does-cart-item-match-attributes.ts`, duplicated
+ * (rather than imported) so the cart store's own pairing ladder
+ * (`lineMatchesProduct`, `findItem`, `itemInContext`) consults
+ * `woocommerce/products` directly instead of through that util's import
+ * chain. The standalone util is left in place, unchanged — it still backs
+ * the shopper-lists blocks.
+ *
+ * Resolves each recorded attribute's term slug from the parent product's
+ * attribute list (`woocommerce/products` state, consulted one-directionally)
+ * to reconcile the Store API's label/slug mismatches, then requires every
+ * recorded attribute to match a selected one, case-insensitively and after
+ * normalizing WordPress's `attribute_`/`attribute_pa_` prefixes.
+ *
+ * @param cartItem           The cart line to test.
+ * @param selectedAttributes The attributes to match against.
+ * @return `true` when every recorded attribute matches a selected one.
+ */
+function matchesSelectedAttributes(
+	cartItem: OptimisticCartItem,
+	selectedAttributes: SelectedAttributes[]
+): boolean {
+	if (
+		! Array.isArray( cartItem.variation ) ||
+		! Array.isArray( selectedAttributes )
+	) {
+		return false;
+	}
+
+	if ( cartItem.variation.length !== selectedAttributes.length ) {
+		return false;
+	}
+
+	const parentProductId =
+		productsState.productVariations[ cartItem.id ]?.parent;
+	const productAttributes =
+		productsState.products[ parentProductId ]?.attributes ?? [];
+
+	return cartItem.variation.every( ( { attribute, value: termName } ) =>
+		selectedAttributes.some( ( selectedAttr ) => {
+			const terms = productAttributes.find( ( attr ) =>
+				attributeNamesMatch( attribute, attr.name )
+			)?.terms;
+			const termSlug =
+				terms?.find( ( term ) => term.name === termName )?.slug ||
+				termName;
+			return (
+				attributeNamesMatch( selectedAttr.attribute, attribute ) &&
+				selectedAttr.value.toLowerCase() === termSlug?.toLowerCase()
+			);
+		} )
+	);
+}
+
+/**
  * Returns `true` when the given cart line matches the product identified by
  * `id` and `variation`, using the same matching logic as `findItemInCart`.
  *
  * Simple items match by `id` equality. Variation items additionally require
- * `variation.length` equality and `doesCartItemMatchAttributes`.
+ * `variation.length` equality and `matchesSelectedAttributes`.
  *
  * @param item      The cart line to test.
  * @param id        The product id to match against.
@@ -370,9 +516,101 @@ function lineMatchesProduct(
 		) {
 			return false;
 		}
-		return doesCartItemMatchAttributes( item, variation );
+		return matchesSelectedAttributes( item, variation );
 	}
 	return id === item.id;
+}
+
+/**
+ * A single namespaced extension prop parsed off a draft's payload root, e.g.
+ * `{ 'my-plugin/gift-note': 'Hi' }` yields `{ namespace: 'my-plugin', key:
+ * 'gift-note', value: 'Hi' }`.
+ */
+type DraftExtensionProp = {
+	/** The plugin namespace the prop rides under (before the `/`). */
+	namespace: string;
+	/** The prop's own key, within its namespace (after the `/`). */
+	key: string;
+	/** The prop's value, as recorded on the draft. */
+	value: unknown;
+};
+
+/**
+ * Extracts a draft's namespaced extension props.
+ *
+ * Per {@link DraftItem}, extension props are payload-root keys carrying a
+ * `/` (e.g. `'my-plugin/gift-note'`); `id`, `quantity`, and `variation`
+ * never contain one, so a slash is what distinguishes an extension prop
+ * from a core draft field.
+ *
+ * @param draft The draft to inspect, or `undefined` when none was resolved.
+ * @return The draft's extension props, or an empty array when `draft` is
+ *         `undefined` or carries none.
+ */
+function draftExtensionProps( draft: DraftItem | undefined ): DraftExtensionProp[] {
+	if ( ! draft ) {
+		return [];
+	}
+	return Object.keys( draft )
+		.filter( ( propKey ) => propKey.includes( '/' ) )
+		.map( ( propKey ) => {
+			const slashIndex = propKey.indexOf( '/' );
+			return {
+				namespace: propKey.slice( 0, slashIndex ),
+				key: propKey.slice( slashIndex + 1 ),
+				value: draft[ propKey ],
+			};
+		} );
+}
+
+/**
+ * Returns `true` when every namespaced extension prop on `draft` deep-equals
+ * the corresponding value under the cart line's `extensions[<namespace>]`.
+ *
+ * A draft carrying no extension props always matches — the extension-prop
+ * comparison is an additional constraint on the pairing ladder only when the
+ * draft actually has one.
+ *
+ * @param draft The draft whose extension props to check, or `undefined`.
+ * @param item  The cart line to compare against.
+ * @return `true` when every extension prop matches, or `draft` has none.
+ */
+function draftExtensionsMatchLine(
+	draft: DraftItem | undefined,
+	item: OptimisticCartItem | CartItem
+): boolean {
+	const extensions = ( item as CartItem ).extensions;
+	return draftExtensionProps( draft ).every(
+		( { namespace, key, value } ) => {
+			const namespaceData = extensions?.[ namespace ] as
+				| Record< string, unknown >
+				| undefined;
+			return (
+				!! namespaceData &&
+				fastDeepEqual( namespaceData[ key ], value )
+			);
+		}
+	);
+}
+
+/**
+ * Finds a scope's draft for the given product/variation id.
+ *
+ * @param scope The scope to look in.
+ * @param id    The draft's product/variation id, or `undefined` (nothing to
+ *              find).
+ * @return The matching draft, or `undefined` when none is found.
+ */
+function findDraftInScope(
+	scope: Scope,
+	id: DraftItem[ 'id' ] | undefined
+): DraftItem | undefined {
+	if ( id === undefined ) {
+		return undefined;
+	}
+	return ( state.draftItems[ scope ] as DraftItem[] | undefined )?.find(
+		( draft ) => draft.id === id
+	);
 }
 
 /**
@@ -583,6 +821,18 @@ async function sendCartRequest(
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
+/**
+ * The `woocommerce/products` store's state, consulted one-directionally
+ * (cart never becomes a dependency of products) to resolve the product in
+ * context for `itemInContext`/`inCartQuantity` and to back the pairing
+ * ladder's attribute matching (`matchesSelectedAttributes`).
+ */
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
+
 // Todo: export this store once the store is public.
 const { state } = store< Store >(
 	'woocommerce/cart',
@@ -607,26 +857,117 @@ const { actions } = store< Store >(
 				key?: ClientCartItem[ 'key' ];
 				variation?: ClientCartItem[ 'variation' ];
 			} ) {
-				return state.cart.items.find( ( cartItem ) => {
-					if ( key ) {
-						return key === cartItem.key;
-					}
-					if ( cartItem.type === 'variation' ) {
-						if (
-							id !== cartItem.id ||
-							! cartItem.variation ||
-							! variation ||
-							cartItem.variation.length !== variation.length
-						) {
-							return false;
-						}
-						return doesCartItemMatchAttributes(
-							cartItem,
-							variation
-						);
-					}
-					return id === cartItem.id;
-				} );
+				if ( key ) {
+					return state.cart.items.find(
+						( cartItem ) => key === cartItem.key
+					);
+				}
+				return state.cart.items.find( ( cartItem ) =>
+					lineMatchesProduct( cartItem, id, variation )
+				);
+			},
+			findItem( {
+				scope = state.currentScope,
+				id,
+				key,
+				filter,
+			}: {
+				scope?: Scope;
+				id?: DraftItem[ 'id' ];
+				key?: CartItem[ 'key' ];
+				filter?: ( item: CartItem | OptimisticCartItem ) => boolean;
+			} = {} ): Envelope {
+				// Rung 1: a context-known line key pairs exactly, no further
+				// identity/extension checks — the caller already knows
+				// precisely which line this is.
+				if ( key !== undefined ) {
+					const cartItem = state.cart.items.find(
+						( item ) => item.key === key
+					);
+					return {
+						cartItem,
+						draft: findDraftInScope( scope, id ?? cartItem?.id ),
+						isInCart: !! cartItem,
+					};
+				}
+
+				// `filter` replaces id-based identity matching entirely,
+				// for extensions with their own notion of line identity.
+				if ( filter ) {
+					const matches = state.cart.items.filter( filter );
+					return {
+						cartItem:
+							matches.length === 1 ? matches[ 0 ] : undefined,
+						draft: findDraftInScope( scope, id ),
+						isInCart: matches.length > 0,
+					};
+				}
+
+				if ( id === undefined ) {
+					return {
+						cartItem: undefined,
+						draft: undefined,
+						isInCart: false,
+					};
+				}
+
+				// Rung 2: product/variation identity (using the resolved
+				// draft's own `variation`, when one exists) plus a
+				// namespaced extension-prop comparison against each
+				// candidate line's `extensions[<namespace>]`. Ambiguity —
+				// zero or more than one line surviving both checks — never
+				// guesses: `cartItem` stays `undefined`.
+				const draft = findDraftInScope( scope, id );
+				const identityMatches = state.cart.items.filter( ( item ) =>
+					lineMatchesProduct( item, id, draft?.variation )
+				);
+				const pairedMatches = identityMatches.filter( ( item ) =>
+					draftExtensionsMatchLine( draft, item )
+				);
+
+				return {
+					cartItem:
+						pairedMatches.length === 1
+							? pairedMatches[ 0 ]
+							: undefined,
+					draft,
+					isInCart: identityMatches.length > 0,
+				};
+			},
+			get itemInContext(): Envelope {
+				const product = productsState.productInContext;
+				if ( ! product ) {
+					return {
+						cartItem: undefined,
+						draft: undefined,
+						isInCart: false,
+					};
+				}
+
+				const contextKey = readSharedContext()?.key;
+				return state.findItem(
+					contextKey !== undefined
+						? { id: product.id, key: contextKey }
+						: { id: product.id }
+				);
+			},
+			get inCartQuantity(): number {
+				const product = productsState.productInContext;
+				if ( ! product ) {
+					return 0;
+				}
+
+				if ( product.type === 'grouped' ) {
+					return product.grouped_products.reduce(
+						( total, childId ) =>
+							total +
+							( state.findItem( { id: childId } ).cartItem
+								?.quantity ?? 0 ),
+						0
+					);
+				}
+
+				return state.itemInContext.cartItem?.quantity ?? 0;
 			},
 		},
 		actions: {
