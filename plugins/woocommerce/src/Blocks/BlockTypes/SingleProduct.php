@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\SharedStores\CartStore;
 use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
 use Automattic\WooCommerce\Enums\ProductType;
 
@@ -35,6 +36,27 @@ class SingleProduct extends AbstractBlock {
 	protected $single_product_inner_blocks_names = [];
 
 	/**
+	 * The scope minted for the currently-rendering Single Product block
+	 * instance (`single-product/<productId>/<n>`), computed and pushed onto
+	 * the `CartStore` scope stack in `update_context()` and read back in
+	 * `render()` to emit the `data-wp-context---scope` attribute.
+	 *
+	 * @var string
+	 */
+	protected $scope = '';
+
+	/**
+	 * Per-request count of how many Single Product block instances have been
+	 * rendered so far for each product id, keyed by product id. Used to mint
+	 * the `<n>` occurrence counter in the scope id so that two Single
+	 * Product blocks of the same product on one page get distinct,
+	 * reproducible scopes.
+	 *
+	 * @var array<int, int>
+	 */
+	protected static $occurrence_counts = array();
+
+	/**
 	 * Initialize the block and Hook into the `render_block_context` filter
 	 * to update the context with the correct data.
 	 *
@@ -45,6 +67,9 @@ class SingleProduct extends AbstractBlock {
 		add_filter( 'render_block_context', [ $this, 'update_context' ], 10, 3 );
 		add_filter( 'render_block_core/post-excerpt', [ $this, 'restore_global_post' ], 10, 3 );
 		add_filter( 'render_block_core/post-title', [ $this, 'restore_global_post' ], 10, 3 );
+		// Pops the scope pushed in `update_context()` once this block instance,
+		// including its inner blocks, has finished rendering.
+		add_filter( 'render_block_woocommerce/single-product', [ $this, 'pop_scope_after_render' ], 10, 1 );
 	}
 
 	/**
@@ -88,11 +113,58 @@ class SingleProduct extends AbstractBlock {
 				$this->single_product_inner_blocks_names = array_reverse(
 					$this->extract_single_product_inner_block_names( $block )
 				);
+
+				$this->scope = $this->mint_scope_and_push( $this->product_id );
 		}
 
 		$this->replace_post_for_single_product_inner_block( $block, $context );
 
 		return $context;
+	}
+
+	/**
+	 * Mint this Single Product block instance's scope id and push it onto the
+	 * `CartStore` render-time scope stack, so purchase-UI PHP nested inside its
+	 * inner blocks resolves the effective scope via `CartStore::get_current_scope()`.
+	 *
+	 * Called from `update_context()`, which runs before this block's inner blocks
+	 * render. Paired with a `pop_scope()` call in `pop_scope_after_render()`, hooked
+	 * to the `render_block_woocommerce/single-product` filter, which fires once this
+	 * block instance (including its inner blocks) has finished rendering.
+	 *
+	 * @param int $product_id The product ID.
+	 * @return string The minted scope id, `single-product/<productId>/<n>`.
+	 */
+	private function mint_scope_and_push( $product_id ) {
+		if ( ! isset( self::$occurrence_counts[ $product_id ] ) ) {
+			self::$occurrence_counts[ $product_id ] = 0;
+		}
+		++self::$occurrence_counts[ $product_id ];
+
+		$scope = 'single-product/' . $product_id . '/' . self::$occurrence_counts[ $product_id ];
+
+		CartStore::push_scope(
+			'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+			$scope
+		);
+
+		return $scope;
+	}
+
+	/**
+	 * Pop this Single Product block instance's scope off the `CartStore`
+	 * render-time scope stack once the block, including its inner blocks, has
+	 * finished rendering.
+	 *
+	 * @param string $block_content The block's rendered content.
+	 * @return string The unmodified block content.
+	 */
+	public function pop_scope_after_render( $block_content ) {
+		CartStore::pop_scope(
+			'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce'
+		);
+
+		return $block_content;
 	}
 
 	/**
@@ -204,6 +276,20 @@ class SingleProduct extends AbstractBlock {
 		if ( $html->next_tag( array( 'tag_name' => 'div' ) ) ) {
 			$html->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
 			$html->set_attribute( 'data-wp-context', 'woocommerce/products::' . wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+
+			// Hand-rolled second context bag: `wp_interactivity_data_wp_context()` always
+			// emits an attribute literally named `data-wp-context`, so it cannot carry the
+			// scope alongside the `woocommerce/products` context above on the same element
+			// — the HTML parser would keep the first and silently drop the second. The
+			// three-hyphen `data-wp-context---scope` form is the supported way to add a
+			// second context bag on one element (see Wishlist.php/SavedForLater.php's
+			// `data-wp-context---notices`). `$this->scope` was minted and pushed onto the
+			// CartStore scope stack in update_context(), before this block's inner blocks
+			// (already baked into $content by now) rendered.
+			$html->set_attribute(
+				'data-wp-context---scope',
+				'woocommerce::' . wp_json_encode( array( 'scope' => $this->scope ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
+			);
 		}
 
 		$updated_html = $html->get_updated_html();
