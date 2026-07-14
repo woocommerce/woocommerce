@@ -388,9 +388,17 @@ final class BlockTypesController {
 		}
 
 		if ( in_array( $editor_name, array( 'core/edit-widgets', 'core/customize-widgets' ), true ) ) {
-			return $this->filter_allowed_woocommerce_block_types(
-				$allowed_block_types,
-				$this->get_widget_area_block_types()
+			$registered_block_types             = $this->get_registered_block_types();
+			$registered_woocommerce_block_types = array_filter(
+				$registered_block_types,
+				static function ( $block_type ) {
+					return 0 === strpos( $block_type, 'woocommerce/' );
+				}
+			);
+
+			return $this->remove_allowed_block_types(
+				$registered_block_types,
+				array_diff( $registered_woocommerce_block_types, $this->get_widget_area_block_types() )
 			);
 		}
 
@@ -412,31 +420,6 @@ final class BlockTypesController {
 			array_diff(
 				$allowed_block_types,
 				$block_types_to_remove
-			)
-		);
-	}
-
-	/**
-	 * Filter WooCommerce block types from the current allowed block list.
-	 *
-	 * @param bool|string[] $allowed_block_types Array of block type slugs, or true to allow all registered block types.
-	 * @param string[]      $allowed_woocommerce_block_types WooCommerce block type slugs to keep available.
-	 * @return string[] Filtered block type slugs.
-	 */
-	private function filter_allowed_woocommerce_block_types( $allowed_block_types, array $allowed_woocommerce_block_types ) {
-		$allowed_block_types = true === $allowed_block_types ? $this->get_registered_block_types() : (array) $allowed_block_types;
-		$allowed_block_types = array_filter( $allowed_block_types, 'is_string' );
-
-		return array_values(
-			array_filter(
-				$allowed_block_types,
-				function ( $block_type ) use ( $allowed_woocommerce_block_types ) {
-					if ( 0 !== strpos( $block_type, 'woocommerce/' ) ) {
-						return true;
-					}
-
-					return in_array( $block_type, $allowed_woocommerce_block_types, true );
-				}
 			)
 		);
 	}
