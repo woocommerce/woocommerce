@@ -405,6 +405,20 @@ export const updateBranchChangelog = async (
 			existsSync( path.join( tmpRepoPath, file ) )
 		);
 
+		const missingFiles = changelogFiles.filter(
+			( file ) => ! filesToDelete.includes( file )
+		);
+
+		if ( missingFiles.length > 0 ) {
+			Logger.warn(
+				`${
+					missingFiles.length
+				} of the ${ version } changelog files were not found on ${ releaseBranch } by name (possibly renamed or already removed): ${ missingFiles.join(
+					', '
+				) }`
+			);
+		}
+
 		if ( filesToDelete.length === 0 ) {
 			Logger.notice(
 				`None of the ${ version } changelog files exist on ${ releaseBranch }, skipping.`
