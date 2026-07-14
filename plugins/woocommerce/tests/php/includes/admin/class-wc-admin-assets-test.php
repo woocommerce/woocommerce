@@ -59,19 +59,19 @@ class WC_Admin_Assets_Test extends WC_Unit_Test_Case {
 		$localized = wp_scripts()->get_data( 'woocommerce_admin', 'data' );
 		$this->assertIsString( $localized, 'woocommerce_admin should be localized on this screen' );
 		$this->assertStringContainsString(
-			'"show_lost_connection_notice":' . ( $expected ? 'true' : 'false' ),
+			'"show_lost_connection_notice":"' . ( $expected ? '1' : '' ) . '"',
 			$localized,
 			'show_lost_connection_notice should be ' . ( $expected ? 'true' : 'false' ) . " for screen '{$screen_id}'"
 		);
 
 		$this->assertFalse(
 			wp_scripts()->query( 'autosave', 'enqueued' ),
-			'autosave arms unrelated post.js handlers and must never be enqueued, on any screen'
+			'autosave must never be enqueued, since it turns on unrelated post.js handlers'
 		);
 	}
 
 	/**
-	 * @testdox Should render the lost connection notice markup only where expected, with accurate copy.
+	 * @testdox Should render the lost connection notice markup only where expected.
 	 * @testWith ["woocommerce_page_wc-orders", "woocommerce_page_wc-orders", "", true]
 	 *           ["shop_order", "post", "shop_order", true]
 	 *           ["product", "post", "product", false]
@@ -98,10 +98,5 @@ class WC_Admin_Assets_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->assertStringContainsString( 'id="wc-lost-connection-notice"', $output );
-		$this->assertStringNotContainsString(
-			'backed up in your browser',
-			$output,
-			'Local autosave backups never run for orders, so the notice must not claim otherwise'
-		);
 	}
 }

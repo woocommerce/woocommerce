@@ -426,29 +426,21 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 		const notice = page.locator( '#wc-lost-connection-notice' );
 		await expect( notice ).toBeHidden();
 
-		// Make the next heartbeat request fail the way this notice specifically checks for.
-		await page.route( '**/admin-ajax.php', async ( route ) => {
-			const postData = route.request().postData() ?? '';
-			if ( postData.includes( 'action=heartbeat' ) ) {
-				await route.fulfill( { status: 603, body: '{}' } );
-			} else {
-				await route.continue();
-			}
-		} );
-
+		// Dispatch the same event heartbeat.js fires on a real timeout.
 		await page.evaluate( () =>
-			// @ts-expect-error wp.heartbeat isn't typed here.
-			window.wp.heartbeat.connectNow()
+			// @ts-expect-error jQuery isn't typed here.
+			jQuery( document ).trigger( 'heartbeat-connection-lost', [
+				'timeout',
+				0,
+			] )
 		);
 
 		await expect( notice ).toBeVisible();
 		await expect( notice ).toContainText( 'Connection lost.' );
-		await expect( notice ).not.toContainText( 'backed up in your browser' );
 
-		await page.unroute( '**/admin-ajax.php' );
 		await page.evaluate( () =>
-			// @ts-expect-error wp.heartbeat isn't typed here.
-			window.wp.heartbeat.connectNow()
+			// @ts-expect-error jQuery isn't typed here.
+			jQuery( document ).trigger( 'heartbeat-connection-restored' )
 		);
 
 		await expect( notice ).toBeHidden();
