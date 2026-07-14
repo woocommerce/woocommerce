@@ -2,10 +2,6 @@
  * External dependencies
  */
 import { store, getContext, getConfig } from '@wordpress/interactivity';
-import type {
-	ClientCartItem,
-	Store as WooCommerce,
-} from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
@@ -31,7 +27,6 @@ export type GroupedProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		actions: {
 			validateGroupedProductQuantity: () => void;
-			batchAddToCart: () => void;
 		};
 		callbacks: {
 			validateQuantities: () => void;
@@ -88,48 +83,6 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 						group: 'invalid-quantities',
 					} );
 				}
-			},
-			*batchAddToCart() {
-				// Todo: Use the module exports instead of `store()` once the
-				// woocommerce store is public.
-				yield import( '@woocommerce/stores/woocommerce/cart' );
-
-				const { quantity, selectedAttributes, groupedProductIds } =
-					getContext< AddToCartWithOptionsStoreContext >();
-
-				const addedItems: ClientCartItem[] = [];
-
-				for ( const childProductId of groupedProductIds ) {
-					if ( quantity[ childProductId ] === 0 ) {
-						continue;
-					}
-
-					const product = productsState.findProduct( {
-						id: Number( childProductId ),
-						selectedAttributes,
-					} );
-
-					if ( ! product ) {
-						continue;
-					}
-
-					addedItems.push( {
-						id: Number( childProductId ),
-						quantityToAdd: quantity[ childProductId ],
-						variation: selectedAttributes,
-						type: product.type,
-					} );
-				}
-
-				const { actions: wooActions } = store< WooCommerce >(
-					'woocommerce/cart',
-					{},
-					{ lock: universalLock }
-				);
-
-				yield wooActions.batchAddCartItems( addedItems, {
-					showCartUpdatesNotices: false,
-				} );
 			},
 		},
 		callbacks: {
