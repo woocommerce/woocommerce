@@ -404,6 +404,21 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 				'style' => $style,
 			);
 
+			// When imageFit is not "cover", the image uses object-fit: none, so it is
+			// not scaled to the block — it renders at its natural pixel size. Before
+			// this block used responsive images, a single large URL was always loaded,
+			// which was typically bigger than the block and got clipped by overflow:
+			// hidden, making the block look filled. wp_get_attachment_image() picks a
+			// smaller srcset candidate on narrow viewports by default, leaving empty
+			// space around the image. Override sizes so the browser still selects the
+			// full image width and the previous appearance is preserved.
+			if ( 'cover' !== $attributes['imageFit'] ) {
+				$image_src = wp_get_attachment_image_src( $image_id, $image_size );
+				if ( $image_src ) {
+					$attr['sizes'] = sprintf( '%dpx', $image_src[1] );
+				}
+			}
+
 			return wp_get_attachment_image( $image_id, $image_size, false, $attr );
 		}
 
