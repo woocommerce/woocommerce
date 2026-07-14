@@ -158,14 +158,14 @@ test.describe( 'Mutation Batcher', () => {
 			);
 
 			// Refresh to start with known state.
-			await actions.refreshCartItems();
+			await actions.refresh();
 
 			// Remove all existing items to start clean.
 			const existingKeys = state.cart.items.map(
 				( item: { key: string } ) => item.key
 			);
 			for ( const key of existingKeys ) {
-				await actions.removeCartItem( key );
+				await actions.removeItem( key );
 			}
 
 			// Now add 3 products synchronously (one batch).
@@ -258,7 +258,7 @@ test.describe( 'Mutation Batcher', () => {
 			);
 
 			// Refresh to get clean state.
-			await actions.refreshCartItems();
+			await actions.refresh();
 
 			// Mix valid and invalid product IDs — all in one microtick.
 			const p1 = actions.addCartItem( { id: 15, quantityToAdd: 1 } );
