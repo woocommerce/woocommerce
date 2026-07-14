@@ -225,6 +225,90 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Reducing the number of images in a CSV clears previously imported gallery images.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/34839: replacing a
+	 * product's two images with a single image left the removed gallery image in place instead
+	 * of clearing it.
+	 */
+	public function test_reducing_images_clears_removed_gallery_images() {
+		$featured_url = 'http://example.com/featured.jpg';
+		$gallery_url  = 'http://example.com/gallery.jpg';
+		$new_url      = 'http://example.com/new.jpg';
+
+		$featured_id = $this->create_sourced_attachment( $featured_url );
+		$gallery_id  = $this->create_sourced_attachment( $gallery_url );
+		$new_id      = $this->create_sourced_attachment( $new_url );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured_id );
+		$product->set_gallery_image_ids( array( $gallery_id ) );
+		$product->save();
+
+		$expanded = $this->invoke_protected( $this->sut, 'expand_data', array( array( 'images' => array( $new_url ) ) ) );
+		$this->invoke_protected( $this->sut, 'set_image_data', array( &$product, $expanded ) );
+
+		$this->assertEquals( $new_id, $product->get_image_id(), 'Featured image should be replaced with the new image.' );
+		$this->assertEquals( array(), $product->get_gallery_image_ids(), 'Removed gallery images should be cleared.' );
+	}
+
+	/**
+	 * @testdox An empty images column leaves the existing featured image and gallery untouched.
+	 *
+	 * Guards against over-clearing: a blank or absent Images value must not wipe images that
+	 * were previously set on the product. See https://github.com/woocommerce/woocommerce/issues/34839.
+	 */
+	public function test_empty_images_column_preserves_existing_images() {
+		$featured_id = $this->create_sourced_attachment( 'http://example.com/featured.jpg' );
+		$gallery_id  = $this->create_sourced_attachment( 'http://example.com/gallery.jpg' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured_id );
+		$product->set_gallery_image_ids( array( $gallery_id ) );
+		$product->save();
+
+		$expanded = $this->invoke_protected( $this->sut, 'expand_data', array( array( 'images' => array() ) ) );
+		$this->invoke_protected( $this->sut, 'set_image_data', array( &$product, $expanded ) );
+
+		$this->assertEquals( $featured_id, $product->get_image_id(), 'Featured image should be preserved.' );
+		$this->assertEquals( array( $gallery_id ), $product->get_gallery_image_ids(), 'Existing gallery should be preserved.' );
+	}
+
+	/**
+	 * Create an attachment whose source URL is recorded, so the importer can resolve it by URL.
+	 *
+	 * @param string $url Source URL of the image.
+	 * @return int Attachment ID.
+	 */
+	private function create_sourced_attachment( $url ) {
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => basename( $url ),
+				'post_mime_type' => 'image/jpeg',
+				'post_status'    => 'inherit',
+			)
+		);
+		update_post_meta( $attachment_id, '_wc_attachment_source', $url );
+
+		return $attachment_id;
+	}
+
+	/**
+	 * Invoke a protected method on an object via reflection.
+	 *
+	 * @param object $target      Object to invoke the method on.
+	 * @param string $method_name Method name.
+	 * @param array  $args        Arguments to pass to the method.
+	 * @return mixed Return value of the method.
+	 */
+	private function invoke_protected( $target, $method_name, $args ) {
+		$method = new ReflectionMethod( $target, $method_name );
+		$method->setAccessible( true );
+
+		return $method->invokeArgs( $target, $args );
+	}
+
+	/**
 	 * Test importing file located on another location on server.
 	 *
 	 * @return void
@@ -576,40 +660,41 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'menu_order'            => 3,
 			),
 			array(
-				'type'               => ProductType::VARIATION,
-				'sku'                => '',
-				'name'               => '',
-				'featured'           => '',
-				'catalog_visibility' => CatalogVisibility::VISIBLE,
-				'short_description'  => '',
-				'description'        => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
-				'date_on_sale_from'  => null,
-				'date_on_sale_to'    => null,
-				'tax_status'         => ProductTaxStatus::TAXABLE,
-				'tax_class'          => 'standard',
-				'stock_status'       => ProductStockStatus::IN_STOCK,
-				'stock_quantity'     => 6,
-				'backorders'         => 'no',
-				'sold_individually'  => '',
-				'weight'             => 1.0,
-				'length'             => 2.0,
-				'width'              => 25.0,
-				'height'             => 55.0,
-				'reviews_allowed'    => '',
-				'purchase_note'      => '',
-				'sale_price'         => '',
-				'regular_price'      => '20',
-				'shipping_class_id'  => 0,
-				'download_limit'     => '',
-				'download_expiry'    => '',
-				'product_url'        => '',
-				'button_text'        => '',
-				'status'             => ProductStatus::PUBLISH,
-				'raw_image_id'       => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_front.jpg',
-				'virtual'            => false,
-				'downloadable'       => false,
-				'manage_stock'       => true,
-				'raw_attributes'     => array(
+				'type'                  => ProductType::VARIATION,
+				'sku'                   => '',
+				'name'                  => '',
+				'featured'              => '',
+				'catalog_visibility'    => CatalogVisibility::VISIBLE,
+				'short_description'     => '',
+				'description'           => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
+				'date_on_sale_from'     => null,
+				'date_on_sale_to'       => null,
+				'tax_status'            => ProductTaxStatus::TAXABLE,
+				'tax_class'             => 'standard',
+				'stock_status'          => ProductStockStatus::IN_STOCK,
+				'stock_quantity'        => 6,
+				'backorders'            => 'no',
+				'sold_individually'     => '',
+				'weight'                => 1.0,
+				'length'                => 2.0,
+				'width'                 => 25.0,
+				'height'                => 55.0,
+				'reviews_allowed'       => '',
+				'purchase_note'         => '',
+				'sale_price'            => '',
+				'regular_price'         => '20',
+				'shipping_class_id'     => 0,
+				'download_limit'        => '',
+				'download_expiry'       => '',
+				'product_url'           => '',
+				'button_text'           => '',
+				'status'                => ProductStatus::PUBLISH,
+				'raw_image_id'          => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_4_front.jpg',
+				'raw_gallery_image_ids' => array(),
+				'virtual'               => false,
+				'downloadable'          => false,
+				'manage_stock'          => true,
+				'raw_attributes'        => array(
 					array(
 						'name' => 'Color',
 					),
@@ -618,43 +703,44 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'name'  => 'Size',
 					),
 				),
-				'menu_order'         => 1,
+				'menu_order'            => 1,
 			),
 			array(
-				'type'               => ProductType::VARIATION,
-				'sku'                => '',
-				'name'               => '',
-				'featured'           => '',
-				'catalog_visibility' => CatalogVisibility::VISIBLE,
-				'short_description'  => '',
-				'description'        => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
-				'date_on_sale_from'  => null,
-				'date_on_sale_to'    => null,
-				'tax_status'         => ProductTaxStatus::TAXABLE,
-				'tax_class'          => 'standard',
-				'stock_status'       => ProductStockStatus::IN_STOCK,
-				'stock_quantity'     => 10,
-				'backorders'         => 'yes',
-				'sold_individually'  => '',
-				'weight'             => 1.0,
-				'length'             => 2.0,
-				'width'              => 25.0,
-				'height'             => 55.0,
-				'reviews_allowed'    => '',
-				'purchase_note'      => '',
-				'sale_price'         => '17.99',
-				'regular_price'      => '20',
-				'shipping_class_id'  => 0,
-				'download_limit'     => '',
-				'download_expiry'    => '',
-				'product_url'        => '',
-				'button_text'        => '',
-				'status'             => ProductStatus::PUBLISH,
-				'raw_image_id'       => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_front.jpg',
-				'virtual'            => false,
-				'downloadable'       => false,
-				'manage_stock'       => true,
-				'raw_attributes'     => array(
+				'type'                  => ProductType::VARIATION,
+				'sku'                   => '',
+				'name'                  => '',
+				'featured'              => '',
+				'catalog_visibility'    => CatalogVisibility::VISIBLE,
+				'short_description'     => '',
+				'description'           => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
+				'date_on_sale_from'     => null,
+				'date_on_sale_to'       => null,
+				'tax_status'            => ProductTaxStatus::TAXABLE,
+				'tax_class'             => 'standard',
+				'stock_status'          => ProductStockStatus::IN_STOCK,
+				'stock_quantity'        => 10,
+				'backorders'            => 'yes',
+				'sold_individually'     => '',
+				'weight'                => 1.0,
+				'length'                => 2.0,
+				'width'                 => 25.0,
+				'height'                => 55.0,
+				'reviews_allowed'       => '',
+				'purchase_note'         => '',
+				'sale_price'            => '17.99',
+				'regular_price'         => '20',
+				'shipping_class_id'     => 0,
+				'download_limit'        => '',
+				'download_expiry'       => '',
+				'product_url'           => '',
+				'button_text'           => '',
+				'status'                => ProductStatus::PUBLISH,
+				'raw_image_id'          => 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_front.jpg',
+				'raw_gallery_image_ids' => array(),
+				'virtual'               => false,
+				'downloadable'          => false,
+				'manage_stock'          => true,
+				'raw_attributes'        => array(
 					array(
 						'name' => 'Color',
 					),
@@ -663,7 +749,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 						'name'  => 'Size',
 					),
 				),
-				'menu_order'         => 2,
+				'menu_order'            => 2,
 			),
 			array(
 				'type'                  => ProductType::GROUPED,
