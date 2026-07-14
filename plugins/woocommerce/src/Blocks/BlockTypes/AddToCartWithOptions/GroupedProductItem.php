@@ -88,7 +88,7 @@ class GroupedProductItem extends AbstractBlock {
 		$post    = get_post( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$product = wc_get_product( $product_id );
 
-		$this->current_row_product_id = $post->ID;
+		$this->current_row_product_id = (int) $product_id;
 
 		add_filter( 'render_block_context', array( $this, 'set_is_descendant_of_grouped_product_selector_context' ), 10, 2 );
 
