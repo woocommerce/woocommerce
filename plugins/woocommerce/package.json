@@ -148,12 +148,7 @@
 					"name": "PHP: 8.5 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
-					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main",
-						"--testsuite=wc-phpunit-graphql-infra",
-						"--testsuite=wc-phpunit-graphql-api"
-					],
+					"shardingArguments": [],
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
@@ -181,8 +176,7 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main"
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main"
 					],
 					"onlyForDependencies": [],
 					"changes": [
@@ -212,8 +206,7 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main"
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main"
 					],
 					"onlyForDependencies": [],
 					"changes": [
@@ -677,12 +670,7 @@
 					"name": "PHP: 8.5 WP: latest (HPOS:off)",
 					"testType": "unit:php",
 					"command": "test:php:env:hpos-off",
-					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main",
-						"--testsuite=wc-phpunit-graphql-infra",
-						"--testsuite=wc-phpunit-graphql-api"
-					],
+					"shardingArguments": [],
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
