@@ -424,6 +424,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 	afterEach( () => {
 		jest.clearAllMocks();
 		delete ( mockState as Partial< Store[ 'state' ] > ).cart;
+		// `pageScope` is server-seeded only — the store definition never
+		// (re)defines it — so clear it here to keep tests isolated.
+		delete ( mockState as Partial< Store[ 'state' ] > ).pageScope;
 		mockSharedContext = undefined;
 		mockSharedContextThrows = false;
 		mockServerContext = undefined;
@@ -1304,11 +1307,28 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 	} );
 
 	describe( 'pageScope / currentScope', () => {
-		it( 'defaults pageScope to an empty string before server hydration', async () => {
+		it( 'defines no client-side pageScope, so the server-seeded value is never clobbered', async () => {
+			// The Interactivity runtime populates server state (override:
+			// false) before client store modules run their `store()` call
+			// (override: true). A client-defined `pageScope` initial value
+			// would therefore overwrite the server-seeded scope during store
+			// registration. Simulate server hydration by seeding the state
+			// before the module loads, and assert registration preserves it.
+			mockBatchFetch();
+			mockState.pageScope = 'page/28';
+
+			await loadCartStore();
+
+			expect( mockState.pageScope ).toBe( 'page/28' );
+			expect( mockState.currentScope ).toBe( 'page/28' );
+		} );
+
+		it( 'leaves pageScope undefined before server hydration and degrades currentScope to an invalid empty scope', async () => {
 			mockBatchFetch();
 			await loadCartStore();
 
-			expect( mockState.pageScope ).toBe( '' );
+			expect( mockState.pageScope ).toBeUndefined();
+			expect( mockState.currentScope ).toBe( '' );
 		} );
 
 		it( 'resolves currentScope to the shared woocommerce context scope when present', async () => {

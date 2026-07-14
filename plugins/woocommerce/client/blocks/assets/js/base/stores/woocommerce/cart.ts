@@ -155,10 +155,15 @@ export type Store = {
 		 * by the server-side scope service, so every surface that is not
 		 * inside a scope-overriding container (a Product Collection loop
 		 * item, a Single Product block) shares this scope and stays in sync.
-		 * Defaults to an empty string on the client until server hydration
-		 * supplies the real value.
+		 *
+		 * Deliberately never given a client-side initial value: the store
+		 * definition's state deep-merges over the server-provided state
+		 * during registration, so a client default would overwrite the
+		 * server-seeded scope. On a page where the server seeds no cart
+		 * state this stays `undefined` and `currentScope` degrades to an
+		 * (invalid) empty scope.
 		 */
-		pageScope: Scope;
+		pageScope?: Scope;
 		/**
 		 * The scope to read from or write to when a consumer passes none.
 		 *
@@ -1481,9 +1486,12 @@ const { actions } = store< Store >(
 	{
 		state: {
 			draftItems: {},
-			pageScope: '',
+			// `pageScope` is intentionally absent here: it is server-seeded,
+			// and a client-side initial value would overwrite the seeded
+			// scope when this definition deep-merges over the server state
+			// during store registration.
 			get currentScope(): Scope {
-				return readSharedContext()?.scope ?? state.pageScope;
+				return readSharedContext()?.scope ?? state.pageScope ?? '';
 			},
 			findItem( {
 				scope = state.currentScope,
