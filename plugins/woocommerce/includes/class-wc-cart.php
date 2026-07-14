@@ -2234,9 +2234,10 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Checks for coupons marked with auto-apply flag and automatically applies
 	 * or removes them based on their validity. Runs silently without notices.
 	 *
-	 * @since 10.4.0
+	 * @since 11.1.0
+	 * @return void
 	 */
-	public function auto_apply_coupons() {
+	public function auto_apply_coupons(): void {
 		if ( $this->is_empty() ) {
 			return;
 		}
@@ -2279,7 +2280,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Retrieves all published coupon codes that have the auto-apply flag enabled.
 	 * Results are cached for performance.
 	 *
-	 * @since 10.4.0
+	 * @since 11.1.0
 	 * @return array Array of auto-apply coupon codes.
 	 */
 	protected function get_auto_apply_coupon_codes() {

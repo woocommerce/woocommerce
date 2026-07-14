@@ -481,7 +481,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Get whether the coupon should be automatically applied.
 	 *
-	 * @since 10.4.0
+	 * @since 11.1.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return bool
 	 */
@@ -801,10 +801,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Set if this coupon should be automatically applied.
 	 *
-	 * @since 10.4.0
+	 * @since 11.1.0
 	 * @param bool $auto_apply If should auto-apply.
+	 * @return void
 	 */
-	public function set_auto_apply( $auto_apply ) {
+	public function set_auto_apply( $auto_apply ): void {
 		$this->set_prop( 'auto_apply', (bool) $auto_apply );
 	}
 
