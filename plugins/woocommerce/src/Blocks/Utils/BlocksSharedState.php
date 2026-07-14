@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Blocks\Utils;
 use InvalidArgumentException;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
+use Automattic\WooCommerce\Blocks\SharedStores\CartStore;
 
 /**
  * Manages the registration of interactivity config and state that is commonly shared by WooCommerce blocks.
@@ -99,6 +100,14 @@ class BlocksSharedState {
 	/**
 	 * Load cart state into interactivity state.
 	 *
+	 * Also mints the deterministic per-page scope (see `CartStore`) and seeds
+	 * it into the same `woocommerce/cart` state, so `state.currentScope`
+	 * resolves correctly even on pages with no scope-establishing container
+	 * (a Product Collection loop item, a Single Product block) overriding it.
+	 * This runs on every render that seeds cart state — i.e. every storefront
+	 * page where the cart store is in play — because it shares this method's
+	 * once-per-request memoization.
+	 *
 	 * @param string $consent_statement The consent statement string.
 	 * @return void
 	 * @throws InvalidArgumentException If consent statement doesn't match.
@@ -124,6 +133,8 @@ class BlocksSharedState {
 				self::$settings_namespace,
 				array( 'nonOptimisticProperties' => self::get_non_optimistic_properties() )
 			);
+
+			CartStore::mint_page_scope( 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
 			wp_interactivity_state(
 				self::$cart_namespace,
