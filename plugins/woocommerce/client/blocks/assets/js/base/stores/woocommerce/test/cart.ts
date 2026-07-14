@@ -2198,6 +2198,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					id: 42,
 					key: 'server-key-abc',
 					quantity: 5,
+					type: 'simple',
 				} )
 			);
 
