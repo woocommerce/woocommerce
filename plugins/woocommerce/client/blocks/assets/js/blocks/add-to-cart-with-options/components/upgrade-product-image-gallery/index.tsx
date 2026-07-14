@@ -11,7 +11,7 @@ import { findBlock } from '@woocommerce/utils';
 /**
  * Internal dependencies
  */
-import { upgradeToBlockifiedProductGallery } from '../../../product-gallery/edit-utils';
+import { upgradeToBlockifiedProductGallery } from '../../../../atomic/blocks/product-elements/product-image-gallery/edit-utils';
 
 export const UpgradeProductImageGallery = () => {
 	const [ productImageGalleryBlock, setProductImageGalleryBlock ] =

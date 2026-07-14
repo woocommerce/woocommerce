@@ -10,14 +10,6 @@ import { findBlock } from '@woocommerce/utils';
  */
 import metadata from './block.json';
 
-const replaceBlockWithProductGallery = ( blockClientId: string ) => {
-	const newBlock = createBlock( 'woocommerce/product-gallery' );
-
-	dispatch( 'core/block-editor' ).replaceBlock( blockClientId, newBlock );
-
-	return true;
-};
-
 export const upgradeToBlockifiedProductGallery = ( blockClientId: string ) => {
 	const blocks = select( 'core/block-editor' ).getBlocks();
 	const foundBlock = findBlock( {
@@ -27,7 +19,11 @@ export const upgradeToBlockifiedProductGallery = ( blockClientId: string ) => {
 	} );
 
 	if ( foundBlock ) {
-		return replaceBlockWithProductGallery( foundBlock.clientId );
+		const newBlock = createBlock( 'woocommerce/product-gallery' );
+
+		dispatch( 'core/block-editor' ).replaceBlock( blockClientId, newBlock );
+
+		return true;
 	}
 	return false;
 };

@@ -8,7 +8,7 @@ import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-d
 /**
  * Internal dependencies
  */
-import { upgradeToBlockifiedProductGallery } from '../../../../blocks/product-gallery/edit-utils';
+import { upgradeToBlockifiedProductGallery } from './edit-utils';
 
 export const UpgradeNotice = ( {
 	blockClientId,
