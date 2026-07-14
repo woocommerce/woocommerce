@@ -98,6 +98,7 @@
 		"test:php:watch": "sh ./client/blocks/bin/copy-blocks-json.sh && ./vendor/bin/phpunit-watcher watch",
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
 		"test:metrics:ci": "../../.github/workflows/scripts/run-metrics.sh",
+		"test:metrics:ci:unified-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes && pnpm test:metrics:ci",
 		"test:php:env": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli vendor/bin/phpunit -c phpunit.xml --verbose",
 		"test:php:env:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli env DISABLE_HPOS=1 vendor/bin/phpunit -c phpunit.xml --verbose",
 		"test:php:env:watch": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli vendor/bin/phpunit-watcher watch --verbose",
@@ -794,6 +795,38 @@
 					}
 				},
 				{
+					"name": "Metrics - unified editor assets",
+					"testType": "performance",
+					"command": "test:metrics:ci:unified-editor-assets",
+					"optional": true,
+					"changes": [
+						"composer.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"templates/**/*.html",
+						"tests/metrics/**",
+						".wp-env.e2e.json"
+					],
+					"onlyForDependencies": [
+						"@woocommerce/admin-library",
+						"@woocommerce/block-library",
+						"@woocommerce/classic-assets"
+					],
+					"testEnv": {
+						"start": "env:perf"
+					},
+					"events": [
+						"pull_request"
+					],
+					"report": {
+						"resultsBlobName": "core-metrics-unified-editor-assets-report",
+						"resultsPath": "../../tools/compare-perf/artifacts/"
+					}
+				},
+				{
 					"name": "Blocks e2e tests",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
@@ -891,10 +924,7 @@
 						}
 					},
 					"events": [
-						"pull_request",
-						"push",
-						"release-checks",
-						"blocks-e2e-unified-editor-assets"
+						"nightly-checks"
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-unified-editor-assets-report",
