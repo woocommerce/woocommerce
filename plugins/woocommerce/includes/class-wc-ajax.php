@@ -339,29 +339,45 @@ class WC_AJAX {
 
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 		$posted_shipping_methods = isset( $_POST['shipping_method'] ) ? wc_clean( wp_unslash( $_POST['shipping_method'] ) ) : array();
-
-		if ( is_array( $posted_shipping_methods ) ) {
-			foreach ( $posted_shipping_methods as $i => $value ) {
-				if ( ! is_string( $value ) ) {
-					continue;
-				}
-				// The checkout page re-posts the currently selected method on every order-review refresh
-				// (page load, address field edits), so a repeat of the existing choice is not a customer
-				// decision. Only a change of method counts as a 'manual' origin; repeats keep the current
-				// origin so an auto-defaulted Local Pickup stays eligible for unsticking.
-				$previous_method = isset( $chosen_shipping_methods[ $i ] ) && is_string( $chosen_shipping_methods[ $i ] ) ? $chosen_shipping_methods[ $i ] : '';
-
-				$chosen_shipping_methods[ $i ] = $value;
-
-				if ( $value !== $previous_method ) {
-					wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( $i, 'manual', $value );
-				}
-			}
-		}
+		$chosen_shipping_methods = self::apply_posted_shipping_methods( $posted_shipping_methods, $chosen_shipping_methods );
 
 		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
 
 		self::get_cart_totals();
+	}
+
+	/**
+	 * Merges posted shipping methods into the chosen-methods array, recording a 'manual'
+	 * shipping-method origin only when the posted method differs from the current choice.
+	 *
+	 * The checkout page re-posts the currently selected method on every order-review refresh
+	 * (page load, address field edits), so a repeat of the existing choice is not a customer
+	 * decision. Only a change of method counts as a 'manual' origin; repeats keep the current
+	 * origin so an auto-defaulted Local Pickup stays eligible for unsticking.
+	 *
+	 * @param mixed $posted_shipping_methods Cleaned `shipping_method` request value.
+	 * @param mixed $chosen_shipping_methods Current chosen methods from the session.
+	 * @return mixed Updated chosen methods array (input returned as-is when nothing was posted).
+	 */
+	private static function apply_posted_shipping_methods( $posted_shipping_methods, $chosen_shipping_methods ) {
+		if ( ! is_array( $posted_shipping_methods ) ) {
+			return $chosen_shipping_methods;
+		}
+
+		foreach ( $posted_shipping_methods as $i => $value ) {
+			if ( ! is_string( $value ) ) {
+				continue;
+			}
+			$previous_method = isset( $chosen_shipping_methods[ $i ] ) && is_string( $chosen_shipping_methods[ $i ] ) ? $chosen_shipping_methods[ $i ] : '';
+
+			$chosen_shipping_methods[ $i ] = $value;
+
+			if ( $value !== $previous_method ) {
+				wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( $i, 'manual', $value );
+			}
+		}
+
+		return $chosen_shipping_methods;
 	}
 
 	/**
@@ -418,24 +434,7 @@ class WC_AJAX {
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 		$posted_shipping_methods = isset( $_POST['shipping_method'] ) ? wc_clean( wp_unslash( $_POST['shipping_method'] ) ) : array();
 
-		if ( is_array( $posted_shipping_methods ) ) {
-			foreach ( $posted_shipping_methods as $i => $value ) {
-				if ( ! is_string( $value ) ) {
-					continue;
-				}
-				// The checkout page re-posts the currently selected method on every order-review refresh
-				// (page load, address field edits), so a repeat of the existing choice is not a customer
-				// decision. Only a change of method counts as a 'manual' origin; repeats keep the current
-				// origin so an auto-defaulted Local Pickup stays eligible for unsticking.
-				$previous_method = isset( $chosen_shipping_methods[ $i ] ) && is_string( $chosen_shipping_methods[ $i ] ) ? $chosen_shipping_methods[ $i ] : '';
-
-				$chosen_shipping_methods[ $i ] = $value;
-
-				if ( $value !== $previous_method ) {
-					wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( $i, 'manual', $value );
-				}
-			}
-		}
+		$chosen_shipping_methods = self::apply_posted_shipping_methods( $posted_shipping_methods, $chosen_shipping_methods );
 
 		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
 		WC()->session->set( 'chosen_payment_method', empty( $_POST['payment_method'] ) ? '' : wc_clean( wp_unslash( $_POST['payment_method'] ) ) );
