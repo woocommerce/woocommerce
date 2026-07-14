@@ -255,9 +255,9 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should record each detected usage event only once per page type per week.
+	 * @testdox Should record each detected usage event only once per week.
 	 */
-	public function test_records_each_detected_usage_event_only_once_per_page_type_per_week(): void {
+	public function test_records_each_detected_usage_event_only_once_per_week(): void {
 		$original_request_uri   = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
 		$_SERVER['REQUEST_URI'] = '/shop/?filter=featured';
 		$event                  = array(
@@ -268,12 +268,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 			'sources'    => 'my-extension/assets/footer.js',
 		);
 
-		$this->delete_request_scope_transient(
-			array(
-				'context'   => 'frontend',
-				'page_type' => $this->get_expected_frontend_page_type(),
-			)
-		);
+		$this->delete_usage_event_transient( $event );
 
 		$sut = new class() extends LegacySelect2UsageTracker {
 			/**
@@ -343,16 +338,11 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 				),
 			),
 			$sut->recorded_events,
-			'Repeated requests for the same legacy Select2 usage page type should be rate limited.'
+			'Repeated detections of the same legacy Select2 usage event should be rate limited.'
 		);
-		$this->assertSame( 1, $sut->usage_event_calls, 'The cached frontend page type should skip repeated script registry scans.' );
+		$this->assertSame( 2, $sut->usage_event_calls, 'Each detection should scan the script registry before rate limiting the exact usage event.' );
 
-		$this->delete_request_scope_transient(
-			array(
-				'context'   => 'frontend',
-				'page_type' => $this->get_expected_frontend_page_type(),
-			)
-		);
+		$this->delete_usage_event_transient( $event );
 
 		if ( null === $original_request_uri ) {
 			unset( $_SERVER['REQUEST_URI'] );
@@ -433,17 +423,17 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Delete the transient used to rate limit a request scope.
+	 * Delete the transient used to rate limit a usage event.
 	 *
-	 * @param array<string, string> $scope Request scope.
+	 * @param array<string, string> $event Usage event.
 	 */
-	private function delete_request_scope_transient( array $scope ): void {
-		ksort( $scope );
+	private function delete_usage_event_transient( array $event ): void {
+		ksort( $event );
 
-		$scope_json = wp_json_encode( $scope );
+		$event_json = wp_json_encode( $event );
 
 		delete_transient(
-			LegacySelect2UsageTracker::EVENT_NAME . md5( is_string( $scope_json ) ? $scope_json : '' )
+			'wc_legacy_select2_check_' . md5( is_string( $event_json ) ? $event_json : '' )
 		);
 	}
 }
