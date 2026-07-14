@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Auto-apply coupons now re-evaluate on cart-page and Cart/Checkout block quantity updates, not just add/remove/restore.

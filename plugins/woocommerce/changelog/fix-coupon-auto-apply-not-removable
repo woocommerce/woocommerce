@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Auto-applied coupons can no longer be manually removed from the cart or checkout (classic and blocks), since they would just be re-added on the next totals recalculation.
