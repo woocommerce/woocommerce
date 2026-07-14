@@ -44,7 +44,7 @@ class BlockTypesController extends \WP_UnitTestCase {
 	/**
 	 * Tear down test fixtures.
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		foreach ( $this->registered_test_block_types as $block_type ) {
 			if ( \WP_Block_Type_Registry::get_instance()->is_registered( $block_type ) ) {
 				unregister_block_type( $block_type );
