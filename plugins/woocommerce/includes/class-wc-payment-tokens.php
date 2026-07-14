@@ -17,6 +17,14 @@ defined( 'ABSPATH' ) || exit;
 class WC_Payment_Tokens {
 
 	/**
+	 * Default maximum number of tokens returned by `get_customer_tokens`.
+	 *
+	 * @since 11.1.0
+	 * @var int
+	 */
+	const DEFAULT_CUSTOMER_TOKENS_LIMIT = 100;
+
+	/**
 	 * Gets valid tokens from the database based on user defined criteria.
 	 *
 	 * @since  2.6.0
@@ -78,10 +86,11 @@ class WC_Payment_Tokens {
 				 * Controls the maximum number of Payment Methods that will be listed via the My Account page.
 				 *
 				 * @since 7.2.0
+				 * @since 11.1.0 The default changed from the value of the `posts_per_page` option to 100.
 				 *
-				 * @param int $limit Defaults to the value of the `posts_per_page` option.
+				 * @param int $limit Maximum number of tokens to return. Defaults to 100.
 				 */
-				'limit'      => apply_filters( 'woocommerce_get_customer_payment_tokens_limit', get_option( 'posts_per_page' ) ),
+				'limit'      => apply_filters( 'woocommerce_get_customer_payment_tokens_limit', self::DEFAULT_CUSTOMER_TOKENS_LIMIT ),
 			)
 		);
 

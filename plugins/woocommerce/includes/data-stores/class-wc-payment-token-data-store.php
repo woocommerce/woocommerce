@@ -263,11 +263,15 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 			$gateway_ids = $gateways->get_payment_gateway_ids();
 		}
 
-		$page           = isset( $args['page'] ) ? absint( $args['page'] ) : 1;
-		$posts_per_page = absint( isset( $args['limit'] ) ? $args['limit'] : get_option( 'posts_per_page' ) );
+		$page  = isset( $args['page'] ) ? absint( $args['page'] ) : 1;
+		$limit = isset( $args['limit'] ) ? absint( $args['limit'] ) : 0;
 
-		$pgstrt = absint( ( $page - 1 ) * $posts_per_page ) . ', ';
-		$limits = 'LIMIT ' . $pgstrt . $posts_per_page;
+		// Only limit the results when explicitly requested: consumers like the personal data
+		// eraser and user deletion cleanup rely on retrieving every matching token.
+		$limits = '';
+		if ( $limit > 0 ) {
+			$limits = 'LIMIT ' . absint( ( $page - 1 ) * $limit ) . ', ' . $limit;
+		}
 
 		$gateway_ids[] = '';
 		$where[]       = "gateway_id IN ('" . implode( "','", array_map( 'esc_sql', $gateway_ids ) ) . "')";
