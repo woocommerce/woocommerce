@@ -303,6 +303,27 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An images cell containing only separators leaves the existing gallery untouched.
+	 *
+	 * An Images cell like "," parses to an array of empty strings. It carries no image values,
+	 * so it must behave like a fully empty cell and not wipe the existing gallery.
+	 */
+	public function test_separators_only_images_cell_preserves_existing_gallery() {
+		$gallery_id = $this->create_sourced_attachment( 'http://example.com/gallery.jpg' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $this->create_sourced_attachment( 'http://example.com/featured.jpg' ) );
+		$product->set_gallery_image_ids( array( $gallery_id ) );
+		$product->save();
+
+		$importer = $this->get_importer();
+		$expanded = $this->invoke_protected( $importer, 'expand_data', array( array( 'images' => array( '', '' ) ) ) );
+		$this->invoke_protected( $importer, 'set_image_data', array( &$product, $expanded ) );
+
+		$this->assertEquals( array( $gallery_id ), $product->get_gallery_image_ids(), 'A separators-only images cell should leave the existing gallery untouched.' );
+	}
+
+	/**
 	 * Create an attachment whose source URL is recorded, so the importer can resolve it by URL.
 	 *
 	 * @param string $url Source URL of the image.
