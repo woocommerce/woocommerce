@@ -277,8 +277,9 @@ class WooPaymentsService {
 						$this->clear_onboarding_step_failed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 						$this->clear_onboarding_step_blocked( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
 						if ( ! $this->mark_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ) {
-							// Leave a trail. This is self-healing since the completion (which also
-							// clears a possible stale skip marker) is retried on every status read.
+							// Leave a trail. The completion (which also clears a possible stale skip
+							// marker) is retried on every status read, but if the underlying option
+							// write keeps failing, those retries won't succeed either.
 							$this->proxy->call_function( 'wc_get_logger' )->warning(
 								'Failed to store the test account onboarding step completion while auto-completing it.',
 								array(
@@ -334,7 +335,8 @@ class WooPaymentsService {
 							)
 						);
 					} else {
-						// Leave a trail. This is self-healing since the backfill is retried on every status read.
+						// Leave a trail. The backfill is retried on every status read, but if the
+						// underlying option write keeps failing, those retries won't succeed either.
 						$this->proxy->call_function( 'wc_get_logger' )->warning(
 							'Failed to store the test account onboarding step skip marker while backfilling it.',
 							array(
