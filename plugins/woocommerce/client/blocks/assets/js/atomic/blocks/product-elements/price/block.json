@@ -36,12 +36,14 @@
 			"__experimentalFontStyle": true,
 			"__experimentalLetterSpacing": true
 		},
-		"__experimentalSelector": ".wp-block-woocommerce-product-price .wc-block-components-product-price",
 		"email": true,
 		"spacing": {
 			"margin": true,
 			"padding": true
 		}
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-product-price .wc-block-components-product-price"
 	},
 	"ancestor": [
 		"woocommerce/all-products",

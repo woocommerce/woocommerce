@@ -54,8 +54,10 @@
 				"style": true,
 				"width": true
 			}
-		},
-		"__experimentalSelector": ".wp-block-woocommerce-order-confirmation-totals table"
+		}
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-order-confirmation-totals table"
 	},
 	"attributes": {
 		"align": {

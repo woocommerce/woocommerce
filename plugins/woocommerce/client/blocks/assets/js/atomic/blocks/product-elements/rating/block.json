@@ -43,8 +43,10 @@
 		"typography": {
 			"fontSize": true,
 			"__experimentalSkipSerialization": true
-		},
-		"__experimentalSelector": ".wc-block-components-product-rating"
+		}
+	},
+	"selectors": {
+		"root": ".wc-block-components-product-rating"
 	},
 	"ancestor": [
 		"woocommerce/all-products",
