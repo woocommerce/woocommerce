@@ -160,18 +160,12 @@ test.describe( `${ blockData.name } editor`, () => {
 		).toBeVisible();
 
 		await expect(
-			sidebarSettings.getByRole( 'button', {
-				name: 'Use the Product Gallery block',
-			} )
-		).toBeHidden();
-
-		await expect(
 			editor.canvas.getByLabel( 'Block: Product Gallery' )
 		).toBeHidden();
 
 		await sidebarSettings
 			.getByRole( 'button', {
-				name: 'Upgrade to the Product Gallery block',
+				name: 'Use the Product Gallery block',
 			} )
 			.click();
 
