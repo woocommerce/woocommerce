@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\SharedStores;
 
 use Automattic\WooCommerce\Blocks\SharedStores\CartStore as TestedCartStore;
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use WC_Helper_Product;
 
 /**
@@ -31,6 +32,7 @@ class CartStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->reset_cart_store_static_state();
+		$this->reset_blocks_shared_state_static_state();
 		$this->reset_interactivity_state();
 		parent::tearDown();
 	}
@@ -217,6 +219,24 @@ class CartStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox load_cart_state() mints the page scope and seeds it into the woocommerce/cart state during a storefront render, with no scope-establishing container in play.
+	 */
+	public function test_load_cart_state_seeds_page_scope(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		BlocksSharedState::load_cart_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+
+		$state = wp_interactivity_state( $this->store_namespace );
+
+		$this->assertArrayHasKey( 'pageScope', $state );
+		$this->assertSame( 'page/' . $product->get_id(), $state['pageScope'] );
+		$this->assertSame( $state['pageScope'], TestedCartStore::get_current_scope( $this->consent ) );
+
+		$product->delete( true );
+	}
+
+	/**
 	 * Reset the CartStore's private static properties between tests.
 	 */
 	private function reset_cart_store_static_state(): void {
@@ -229,6 +249,22 @@ class CartStoreTest extends \WC_Unit_Test_Case {
 		$scope_stack = $reflection->getProperty( 'scope_stack' );
 		$scope_stack->setAccessible( true );
 		$scope_stack->setValue( null, array() );
+	}
+
+	/**
+	 * Reset BlocksSharedState's private static properties between tests so
+	 * load_cart_state() runs its full logic again on a clean slate.
+	 */
+	private function reset_blocks_shared_state_static_state(): void {
+		$reflection = new \ReflectionClass( BlocksSharedState::class );
+
+		$cart_state = $reflection->getProperty( 'blocks_shared_cart_state' );
+		$cart_state->setAccessible( true );
+		$cart_state->setValue( null, null );
+
+		$core_config_registered = $reflection->getProperty( 'core_config_registered' );
+		$core_config_registered->setAccessible( true );
+		$core_config_registered->setValue( null, false );
 	}
 
 	/**
