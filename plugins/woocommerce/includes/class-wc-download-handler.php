@@ -477,11 +477,29 @@ class WC_Download_Handler {
 		$parsed_file_path = self::parse_file_path( $file_path );
 		$download_range   = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) ); // @codingStandardsIgnoreLine.
 
-		self::download_headers( $parsed_file_path['file_path'], $filename, $download_range );
-
 		$start  = isset( $download_range['start'] ) ? $download_range['start'] : 0;
 		$length = isset( $download_range['length'] ) ? $download_range['length'] : 0;
-		if ( ! self::readfile_chunked( $parsed_file_path['file_path'], $start, $length ) ) {
+
+		if ( $parsed_file_path['remote_file'] ) {
+			// Open the remote file before sending our own headers, so the filename announced by
+			// the remote server in its response headers can be used when the URL contains none.
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Streaming a remote file needs fopen (WP_Filesystem cannot stream); a false return is handled below.
+			$handle = @fopen( $parsed_file_path['file_path'], 'r' );
+
+			$served = false;
+			if ( false !== $handle ) {
+				$response_headers = stream_get_meta_data( $handle )['wrapper_data'] ?? array();
+				$filename         = self::resolve_filename_from_response_headers( is_array( $response_headers ) ? $response_headers : array(), $filename );
+
+				self::download_headers( $parsed_file_path['file_path'], $filename, $download_range );
+				$served = self::readfile_from_handle( $handle, $start, $length );
+			}
+		} else {
+			self::download_headers( $parsed_file_path['file_path'], $filename, $download_range );
+			$served = self::readfile_chunked( $parsed_file_path['file_path'], $start, $length );
+		}
+
+		if ( ! $served ) {
 			if ( $parsed_file_path['remote_file'] && 'yes' === get_option( 'woocommerce_downloads_redirect_fallback_allowed' ) ) {
 				wc_get_logger()->warning(
 					sprintf(
@@ -497,6 +515,80 @@ class WC_Download_Handler {
 		}
 
 		exit;
+	}
+
+	/**
+	 * Given the raw HTTP response header lines collected while opening a remote file (possibly
+	 * spanning a redirect chain) and the filename derived from the URL, determine the most
+	 * appropriate filename for serving the download.
+	 *
+	 * The filename derived from the URL wins when it already has an extension. Otherwise the
+	 * filename announced by the remote server in the `Content-Disposition` header of the final
+	 * response is used, falling back to appending an extension derived from its `Content-Type`
+	 * header. This makes downloads hosted on URLs without a filename in their path (for example
+	 * Google Drive links) save under a usable name instead of a bare URL segment like `uc`.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
+	 * @param array  $response_headers Raw HTTP response header lines, e.g. from `stream_get_meta_data()['wrapper_data']`.
+	 * @param string $filename         Filename derived from the URL.
+	 * @return string
+	 */
+	public static function resolve_filename_from_response_headers( array $response_headers, string $filename ): string {
+		if ( '' !== pathinfo( $filename, PATHINFO_EXTENSION ) ) {
+			return $filename;
+		}
+
+		// Only the headers of the final response in a redirect chain describe the actual file.
+		$headers = array();
+		foreach ( $response_headers as $header ) {
+			if ( ! is_string( $header ) ) {
+				continue;
+			}
+
+			if ( 0 === stripos( $header, 'HTTP/' ) ) {
+				$headers = array();
+				continue;
+			}
+
+			$parts = explode( ':', $header, 2 );
+			if ( 2 === count( $parts ) ) {
+				$headers[ strtolower( trim( $parts[0] ) ) ] = trim( $parts[1] );
+			}
+		}
+
+		$remote_filename = '';
+		if ( isset( $headers['content-disposition'] ) ) {
+			// The RFC 5987 encoded `filename*` parameter takes precedence over the plain `filename` one.
+			if ( preg_match( '/filename\*\s*=\s*[^\']*\'[^\']*\'([^;]+)/i', $headers['content-disposition'], $matches ) ) {
+				$remote_filename = rawurldecode( trim( $matches[1], " \t\"" ) );
+			} elseif ( preg_match( '/filename\s*=\s*("([^"]*)"|[^;]+)/i', $headers['content-disposition'], $matches ) ) {
+				$remote_filename = isset( $matches[2] ) ? $matches[2] : trim( $matches[1] );
+			}
+
+			$remote_filename = sanitize_file_name( $remote_filename );
+		}
+
+		if ( '' !== $remote_filename ) {
+			$filename = $remote_filename;
+		}
+
+		if ( '' === pathinfo( $filename, PATHINFO_EXTENSION ) && isset( $headers['content-type'] ) ) {
+			$mime_type = strtolower( trim( (string) strtok( $headers['content-type'], ';' ) ) );
+
+			// application/octet-stream is generic and would map to an arbitrary extension.
+			if ( '' !== $mime_type && 'application/octet-stream' !== $mime_type ) {
+				$extension = wp_get_default_extension_for_mime_type( $mime_type );
+
+				if ( $extension ) {
+					$filename .= '.' . $extension;
+				}
+			}
+		}
+
+		return $filename;
 	}
 
 	/**
@@ -532,8 +624,14 @@ class WC_Download_Handler {
 		self::clean_buffers();
 		wc_nocache_headers();
 
+		$content_type = self::get_download_content_type( $file_path );
+		if ( 'application/force-download' === $content_type && $filename ) {
+			// The URL path may not contain a usable extension; fall back to the resolved filename.
+			$content_type = self::get_download_content_type( $filename );
+		}
+
 		header( 'X-Robots-Tag: noindex, nofollow', true );
-		header( 'Content-Type: ' . self::get_download_content_type( $file_path ) );
+		header( 'Content-Type: ' . $content_type );
 		header( 'Content-Description: File Transfer' );
 		header( 'Content-Disposition: ' . self::get_content_disposition() . '; filename="' . $filename . '";' );
 		header( 'Content-Transfer-Encoding: binary' );
@@ -618,9 +716,6 @@ class WC_Download_Handler {
 	 * @return bool Success or fail
 	 */
 	public static function readfile_chunked( $file, $start = 0, $length = 0 ) {
-		if ( ! defined( 'WC_CHUNK_SIZE' ) ) {
-			define( 'WC_CHUNK_SIZE', 1024 * 1024 );
-		}
 		$handle = @fopen( $file, 'r' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 
 		if ( false === $handle ) {
@@ -628,7 +723,25 @@ class WC_Download_Handler {
 		}
 
 		if ( ! $length ) {
-			$length = @filesize( $file ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+			$length = (int) @filesize( $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Remote paths make filesize error; false is handled by the cast (0 means read until EOF).
+		}
+
+		return self::readfile_from_handle( $handle, $start, $length );
+	}
+
+	/**
+	 * Read an already-open file handle in chunks and echo its content.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param resource $handle Open file handle, e.g. from `fopen()`.
+	 * @param int      $start  Byte offset/position of the beginning from which to read from the file.
+	 * @param int      $length Length of the chunk to be read from the file in bytes, 0 means until the end of file.
+	 * @return bool Success or fail
+	 */
+	private static function readfile_from_handle( $handle, $start = 0, $length = 0 ) {
+		if ( ! defined( 'WC_CHUNK_SIZE' ) ) {
+			define( 'WC_CHUNK_SIZE', 1024 * 1024 );
 		}
 
 		$read_length = (int) WC_CHUNK_SIZE;

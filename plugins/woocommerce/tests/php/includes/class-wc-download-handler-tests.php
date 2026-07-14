@@ -222,6 +222,122 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox resolve_filename_from_response_headers() should keep the URL-derived filename when it already has an extension.
+	 */
+	public function test_resolve_filename_keeps_filename_with_extension(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Disposition: attachment; filename="remote-name.pdf"',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, 'local-name.zip' );
+
+		$this->assertSame( 'local-name.zip', $resolved, 'A filename that already has an extension should not be overridden.' );
+	}
+
+	/**
+	 * @testdox resolve_filename_from_response_headers() should use the Content-Disposition filename when the URL-derived filename has no extension.
+	 */
+	public function test_resolve_filename_uses_content_disposition_filename(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Type: application/pdf',
+			'Content-Disposition: attachment; filename="My Report.pdf"',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, 'uc' );
+
+		$this->assertSame( 'My-Report.pdf', $resolved, 'The sanitized Content-Disposition filename should be used.' );
+	}
+
+	/**
+	 * @testdox resolve_filename_from_response_headers() should prefer the RFC 5987 filename* parameter and percent-decode it.
+	 */
+	public function test_resolve_filename_prefers_rfc5987_filename(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Disposition: attachment; filename="fallback.pdf"; filename*=UTF-8\'\'My%20Report.pdf',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, 'uc' );
+
+		$this->assertSame( 'My-Report.pdf', $resolved, 'The RFC 5987 filename* parameter should win over the plain filename parameter.' );
+	}
+
+	/**
+	 * @testdox resolve_filename_from_response_headers() should use the headers of the last response in a redirect chain.
+	 */
+	public function test_resolve_filename_uses_last_response_of_redirect_chain(): void {
+		$headers = array(
+			'HTTP/1.1 302 Found',
+			'Location: https://cdn.example.com/get',
+			'Content-Disposition: attachment; filename="wrong.pdf"',
+			'HTTP/1.1 200 OK',
+			'Content-Disposition: attachment; filename="right.pdf"',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, 'uc' );
+
+		$this->assertSame( 'right.pdf', $resolved, 'Only the final response of the redirect chain should be considered.' );
+	}
+
+	/**
+	 * @testdox resolve_filename_from_response_headers() should match header names and disposition parameters case-insensitively.
+	 */
+	public function test_resolve_filename_is_case_insensitive(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'CONTENT-DISPOSITION: Attachment; FILENAME="Report.PDF"',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, 'uc' );
+
+		$this->assertSame( 'Report.PDF', $resolved, 'Header and parameter matching should be case-insensitive.' );
+	}
+
+	/**
+	 * @testdox resolve_filename_from_response_headers() should fall back to an extension derived from the Content-Type header when no Content-Disposition filename is available.
+	 */
+	public function test_resolve_filename_falls_back_to_content_type_extension(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Type: application/pdf; charset=binary',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, 'uc' );
+
+		$this->assertSame( 'uc.pdf', $resolved, 'The extension should be derived from the Content-Type header.' );
+	}
+
+	/**
+	 * @testdox resolve_filename_from_response_headers() should return the original filename when the response headers contain nothing usable.
+	 */
+	public function test_resolve_filename_returns_original_when_headers_unusable(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Type: application/octet-stream',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, 'uc' );
+
+		$this->assertSame( 'uc', $resolved, 'The original filename should be kept when the headers provide no better information.' );
+	}
+
+	/**
+	 * @testdox resolve_filename_from_response_headers() should sanitize characters that are unsafe in a filename or header value.
+	 */
+	public function test_resolve_filename_sanitizes_unsafe_characters(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Disposition: attachment; filename*=UTF-8\'\'..%2F..%2Fevil%22name.pdf',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, 'uc' );
+
+		$this->assertSame( 'evilname.pdf', $resolved, 'Path traversal sequences and quotes should be stripped from the filename.' );
+	}
+
+	/**
 	 * Creates a downloadable product, and then places (and completes) an order for that
 	 * object.
 	 *
