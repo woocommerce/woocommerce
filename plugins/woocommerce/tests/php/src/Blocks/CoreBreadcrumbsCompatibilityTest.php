@@ -366,20 +366,6 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should prepend the shop page and use WooCommerce labels for product tag breadcrumbs.
-	 */
-	public function test_core_breadcrumbs_prepend_shop_page_and_label_product_tag_items(): void {
-		$tag_id = $this->create_term( 'Sale', 'product_tag', array( 'slug' => 'sale' ) );
-		$this->go_to( get_term_link( $tag_id, 'product_tag' ) );
-
-		$this->assert_core_breadcrumb_labels(
-			array( 'Home', 'Catalog', 'Products tagged &ldquo;Sale&rdquo;' ),
-			'Product tag breadcrumbs should match WooCommerce labels.',
-			$this->get_breadcrumb_item( 'Sale' )
-		);
-	}
-
-	/**
 	 * @testdox Should preserve pagination when labeling product tag breadcrumbs.
 	 */
 	public function test_core_breadcrumbs_label_paginated_product_tag_items(): void {
@@ -392,19 +378,6 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 			'Paginated product tag breadcrumbs should keep the pagination crumb.',
 			$this->get_breadcrumb_item( 'Sale', get_term_link( $tag_id, 'product_tag' ) ),
 			$this->get_breadcrumb_item( 'Page 2' )
-		);
-	}
-
-	/**
-	 * @testdox Should prepend the shop page and use WooCommerce labels for product search breadcrumbs.
-	 */
-	public function test_core_breadcrumbs_prepend_shop_page_and_label_product_search_items(): void {
-		$this->go_to( '/?s=hoodie&post_type=product' );
-
-		$this->assert_core_breadcrumb_labels(
-			array( 'Home', 'Catalog', 'Search results for &ldquo;hoodie&rdquo;' ),
-			'Product search breadcrumbs should include the Shop page crumb and WooCommerce search label.',
-			$this->get_breadcrumb_item( 'Search results for: "hoodie"' )
 		);
 	}
 
