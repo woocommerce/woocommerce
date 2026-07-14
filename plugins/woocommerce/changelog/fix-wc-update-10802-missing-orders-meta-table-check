@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix fatal DB errors during upgrade on sites where HPOS was never enabled by adding a table existence check before attempting to restore the meta_key_value index on wp_wc_orders_meta.

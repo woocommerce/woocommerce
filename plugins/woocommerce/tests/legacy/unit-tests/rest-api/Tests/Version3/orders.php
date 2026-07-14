@@ -60,7 +60,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		// Create 10 orders.
 		for ( $i = 0; $i < 10; $i++ ) {
-			$this->orders[] = OrderHelper::create_order( $this->user );
+			$this->orders[] = wc_create_order( array( 'customer_id' => $this->user ) );
 		}
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders' ) );
@@ -80,9 +80,11 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$order2 = OrderHelper::create_order( $this->user );
 
 		$order1->set_status( OrderStatus::COMPLETED );
+		$order1->set_date_modified( '2020-01-01 00:00:00' );
 		$order1->save();
-		sleep( 1 );
+
 		$order2->set_status( OrderStatus::COMPLETED );
+		$order2->set_date_modified( '2020-01-02 00:00:00' );
 		$order2->save();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
@@ -114,7 +116,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_items_without_permission() {
 		wp_set_current_user( 0 );
-		$this->orders[] = OrderHelper::create_order();
+		$this->orders[] = wc_create_order();
 		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -149,7 +151,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_item_without_permission() {
 		wp_set_current_user( 0 );
-		$order          = OrderHelper::create_order();
+		$order          = wc_create_order();
 		$this->orders[] = $order;
 		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
@@ -1015,7 +1017,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_order_without_permission() {
 		wp_set_current_user( 0 );
-		$order   = OrderHelper::create_order();
+		$order   = wc_create_order();
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_body_params(
 			array(
@@ -1073,7 +1075,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_order_without_permission() {
 		wp_set_current_user( 0 );
-		$order   = OrderHelper::create_order();
+		$order   = wc_create_order();
 		$request = new WP_REST_Request( 'DELETE', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );

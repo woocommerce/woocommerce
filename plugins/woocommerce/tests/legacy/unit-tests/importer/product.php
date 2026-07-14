@@ -24,15 +24,18 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	protected $csv_file = '';
 
 	/**
-	 * @var WC_Product_CSV_Importer
+	 * Attachment IDs created by the current test.
+	 *
+	 * @var int[]
 	 */
-	private $sut;
+	private $created_attachment_ids = array();
 
 	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_action( 'add_attachment', array( $this, 'track_created_attachment' ) );
 
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/import/class-wc-product-csv-importer.php';
@@ -48,17 +51,47 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
 		$this->csv_file       = dirname( __FILE__ ) . '/sample.csv';
-		$this->sut            = new WC_Product_CSV_Importer(
+	}
+
+	/**
+	 * Remove physical files for attachments created by the current test.
+	 */
+	public function tearDown(): void {
+		remove_action( 'add_attachment', array( $this, 'track_created_attachment' ) );
+		foreach ( array_unique( $this->created_attachment_ids ) as $attachment_id ) {
+			wp_delete_attachment( $attachment_id, true );
+		}
+		$this->created_attachment_ids = array();
+
+		parent::tearDown();
+	}
+
+	/**
+	 * Track an attachment created by the current test.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 */
+	public function track_created_attachment( $attachment_id ): void {
+		$this->created_attachment_ids[] = (int) $attachment_id;
+	}
+
+	/**
+	 * Create the importer used by the full import tests.
+	 *
+	 * @return WC_Product_CSV_Importer
+	 */
+	private function get_importer() {
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->delete_all();
+
+		return new WC_Product_CSV_Importer(
 			$this->csv_file,
 			array(
 				'mapping'          => $this->get_csv_mapped_items(),
+				'lines'            => 2,
 				'parse'            => true,
 				'prevent_timeouts' => false,
 			)
 		);
-
-		// Clear list of approved download directories before running tests.
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->delete_all();
 	}
 
 	/**
@@ -125,15 +158,18 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	public function test_import_for_admin_users() {
 		// In most cases, an admin user will run the import.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-		$results = $this->sut->import();
+		$results = $this->get_importer()->import();
 
 		$this->assertEquals( 0, count( $results['failed'] ) );
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
 		$this->assertEquals(
-			7,
+			2,
 			count( $results['imported'] ) + count( $results['imported_variations'] ),
 			'One import item references a downloadable file stored in an unapproved location: if the import is triggered by an admin user, that location will be automatically approved.'
+		);
+		$this->assertTrue(
+			wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->is_valid_path( 'http://woo.dev/albums/album.flac' )
 		);
 	}
 
@@ -143,15 +179,18 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	public function test_import_for_shop_managers() {
 		// In some cases, a shop manager may run the import.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
-		$results = $this->sut->import();
+		$results = $this->get_importer()->import();
 
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
-		$this->assertEquals( 6, count( $results['imported'] ) + count( $results['imported_variations'] ) );
+		$this->assertEquals( 1, count( $results['imported'] ) + count( $results['imported_variations'] ) );
 		$this->assertEquals(
 			1,
 			count( $results['failed'] ),
 			'One import item references a downloadable file stored in an unapproved location: if the import is triggered by a non-admin, that item cannot be imported.'
+		);
+		$this->assertFalse(
+			wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->is_valid_path( 'http://woo.dev/albums/album.flac' )
 		);
 	}
 
