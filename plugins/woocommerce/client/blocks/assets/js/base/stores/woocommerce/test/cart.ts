@@ -1534,7 +1534,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			return makeKeyedLine( { extensions: {}, ...overrides } );
 		}
 
-		it( 'itemInContext has no cartItem/draft and isInCart false when no product is in context', async () => {
+		it( 'itemInContext has no cartItem/draft when no product is in context', async () => {
 			mockBatchFetch();
 			await loadCartStore();
 			seedCart( [] );
@@ -1542,18 +1542,16 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( mockState.itemInContext ).toEqual( {
 				cartItem: undefined,
 				draft: undefined,
-				isInCart: false,
 			} );
 		} );
 
-		it( 'itemInContext has no cartItem and isInCart false when the in-context product is not in the cart', async () => {
+		it( 'itemInContext has no cartItem when the in-context product is not in the cart', async () => {
 			mockBatchFetch();
 			await loadCartStore();
 			seedCart( [ makeLine( { id: 99 } ) ] );
 			seedProductInContext( { id: 42 } );
 
 			expect( mockState.itemInContext.cartItem ).toBeUndefined();
-			expect( mockState.itemInContext.isInCart ).toBe( false );
 		} );
 
 		it( 'itemInContext pairs exactly via a context-known line key, regardless of identity', async () => {
@@ -1572,7 +1570,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( mockState.itemInContext ).toEqual( {
 				cartItem: targetLine,
 				draft: undefined,
-				isInCart: true,
 			} );
 		} );
 
@@ -1586,7 +1583,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( mockState.itemInContext ).toEqual( {
 				cartItem: line,
 				draft: undefined,
-				isInCart: true,
 			} );
 		} );
 
@@ -1605,7 +1601,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( mockState.itemInContext ).toEqual( {
 				cartItem: line,
 				draft: { id: 42, quantity: 3 },
-				isInCart: true,
 			} );
 		} );
 
@@ -1631,10 +1626,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			);
 
 			expect( mockState.itemInContext.cartItem ).toEqual( giftB );
-			expect( mockState.itemInContext.isInCart ).toBe( true );
 		} );
 
-		it( 'itemInContext never guesses: ambiguous identity/extension matches leave cartItem undefined but isInCart true', async () => {
+		it( 'itemInContext never guesses: ambiguous identity/extension matches leave cartItem undefined', async () => {
 			mockBatchFetch();
 			await loadCartStore();
 			// Same id, same (empty) extensions — nothing distinguishes them.
@@ -1645,7 +1639,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			seedProductInContext( { id: 42 } );
 
 			expect( mockState.itemInContext.cartItem ).toBeUndefined();
-			expect( mockState.itemInContext.isInCart ).toBe( true );
 		} );
 
 		it( 'itemInContext leaves cartItem undefined when the draft extension prop matches no line, though the product is in the cart', async () => {
@@ -1665,7 +1658,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			);
 
 			expect( mockState.itemInContext.cartItem ).toBeUndefined();
-			expect( mockState.itemInContext.isInCart ).toBe( true );
 		} );
 
 		it( 'findItem returns the same envelope for an explicit id, key, or filter', async () => {
@@ -2184,6 +2176,27 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( untypedActions.removeCartItem ).toBeUndefined();
 			expect( untypedActions.refreshCartItems ).toBeUndefined();
 			expect( untypedState?.findItemInCart ).toBeUndefined();
+		} );
+
+		it( 'trims isInCart from the envelope: findItem/itemInContext expose only cartItem/draft, even when a product shares identity with more than one ambiguous line', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			// Same id, same (empty) extensions — nothing distinguishes them,
+			// so the pairing ladder is maximally ambiguous. This is the exact
+			// case the tri-state used to flag; the envelope still must not
+			// carry `isInCart`.
+			seedCart( [
+				makeKeyedLine( { id: 42, key: 'line-a', extensions: {} } ),
+				makeKeyedLine( { id: 42, key: 'line-b', extensions: {} } ),
+			] );
+
+			const envelope = mockState.findItem( { id: 42 } );
+
+			expect( envelope ).toEqual( {
+				cartItem: undefined,
+				draft: undefined,
+			} );
+			expect( Object.keys( envelope ) ).not.toContain( 'isInCart' );
 		} );
 
 		it( 'still resolves an existing keyed line for addCartItem via the internalized private matcher', async () => {

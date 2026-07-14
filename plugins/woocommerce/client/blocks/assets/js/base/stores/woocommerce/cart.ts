@@ -111,7 +111,9 @@ export type ClientCartItem = Omit<
  * product/variation identity plus namespaced extension-prop match. Any
  * remaining ambiguity (including "this product is in the cart, but not as a
  * single identifiable line") leaves `cartItem` `undefined`; the server owns
- * cart-line identity, so the client never guesses at it.
+ * cart-line identity, so the client never guesses at it. No consumer needs
+ * the "in the cart, but no single line can be paired" tri-state, so the
+ * envelope carries only `cartItem`/`draft`.
  */
 export type Envelope = {
 	/**
@@ -122,14 +124,6 @@ export type Envelope = {
 	cartItem?: CartItem | OptimisticCartItem | undefined;
 	/** The resolved scope's draft for the product, when one exists. */
 	draft?: DraftItem | undefined;
-	/**
-	 * `true` when at least one cart line shares the product/variation
-	 * identity being looked up, regardless of whether `cartItem` could be
-	 * resolved unambiguously. The only representation of "in the cart, but
-	 * no single line can be paired" — not derivable from `cartItem !==
-	 * undefined`.
-	 */
-	isInCart: boolean;
 };
 
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
@@ -202,7 +196,7 @@ export type Store = {
 		 * @param args.filter An extension-supplied predicate narrowing
 		 *                    candidate lines directly, in place of
 		 *                    id-based identity matching.
-		 * @return The envelope: `{ cartItem?, draft?, isInCart }`.
+		 * @return The envelope: `{ cartItem?, draft? }`.
 		 */
 		findItem: ( args?: {
 			scope?: Scope;
@@ -1512,7 +1506,6 @@ const { actions } = store< Store >(
 					return {
 						cartItem,
 						draft: findDraftInScope( scope, id ?? cartItem?.id ),
-						isInCart: !! cartItem,
 					};
 				}
 
@@ -1524,7 +1517,6 @@ const { actions } = store< Store >(
 						cartItem:
 							matches.length === 1 ? matches[ 0 ] : undefined,
 						draft: findDraftInScope( scope, id ),
-						isInCart: matches.length > 0,
 					};
 				}
 
@@ -1532,7 +1524,6 @@ const { actions } = store< Store >(
 					return {
 						cartItem: undefined,
 						draft: undefined,
-						isInCart: false,
 					};
 				}
 
@@ -1556,7 +1547,6 @@ const { actions } = store< Store >(
 							? pairedMatches[ 0 ]
 							: undefined,
 					draft,
-					isInCart: identityMatches.length > 0,
 				};
 			},
 			get itemInContext(): Envelope {
@@ -1565,7 +1555,6 @@ const { actions } = store< Store >(
 					return {
 						cartItem: undefined,
 						draft: undefined,
-						isInCart: false,
 					};
 				}
 
