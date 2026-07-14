@@ -466,6 +466,7 @@ class WC_Shipping {
 	 */
 	public function reset_shipping() {
 		unset( WC()->session->chosen_shipping_methods );
+		unset( WC()->session->chosen_shipping_method_origins );
 		$this->packages = array();
 	}
 
