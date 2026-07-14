@@ -65,8 +65,8 @@ class WC_Importer_Tracking {
 	 * @return void
 	 */
 	public function track_product_importer_complete() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( ! isset( $_REQUEST['_wpnonce'] ) ) {
+		$nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_key( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'woocommerce-csv-importer' ) ) {
 			return;
 		}
 
@@ -77,7 +77,6 @@ class WC_Importer_Tracking {
 			'failed'              => isset( $_GET['products-failed'] ) ? absint( $_GET['products-failed'] ) : 0,
 			'skipped'             => isset( $_GET['products-skipped'] ) ? absint( $_GET['products-skipped'] ) : 0,
 		);
-		// phpcs:enable
 
 		WC_Tracks::record_event( 'product_import_complete', $properties );
 	}

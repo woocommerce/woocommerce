@@ -89,4 +89,17 @@ class WC_Importer_Tracking_Test extends \WC_Unit_Test_Case {
 
 		$this->assertNotRecordedTracksEvent( 'wcadmin_product_import_complete' );
 	}
+
+	/**
+	 * With an invalid nonce on the request the completion event must not fire.
+	 */
+	public function test_import_complete_not_recorded_with_invalid_nonce() {
+		$_REQUEST['step']     = 'done';
+		$_REQUEST['_wpnonce'] = 'invalid-nonce';
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'product_page_product_importer' );
+
+		$this->assertNotRecordedTracksEvent( 'wcadmin_product_import_complete' );
+	}
 }
