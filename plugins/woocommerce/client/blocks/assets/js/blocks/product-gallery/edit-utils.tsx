@@ -2,12 +2,32 @@
  * External dependencies
  */
 import { createBlock } from '@wordpress/blocks';
-import { dispatch } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
+import { findBlock } from '@woocommerce/utils';
 
-export const replaceBlockWithProductGallery = ( blockClientId: string ) => {
+/**
+ * Internal dependencies
+ */
+import metadata from './block.json';
+
+const replaceBlockWithProductGallery = ( blockClientId: string ) => {
 	const newBlock = createBlock( 'woocommerce/product-gallery' );
 
 	dispatch( 'core/block-editor' ).replaceBlock( blockClientId, newBlock );
 
 	return true;
+};
+
+export const upgradeToBlockifiedProductGallery = ( blockClientId: string ) => {
+	const blocks = select( 'core/block-editor' ).getBlocks();
+	const foundBlock = findBlock( {
+		blocks,
+		findCondition: ( block ) =>
+			block.name === metadata.name && block.clientId === blockClientId,
+	} );
+
+	if ( foundBlock ) {
+		return replaceBlockWithProductGallery( foundBlock.clientId );
+	}
+	return false;
 };

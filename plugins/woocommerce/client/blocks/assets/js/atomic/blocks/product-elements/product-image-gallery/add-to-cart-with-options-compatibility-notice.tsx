@@ -7,7 +7,7 @@ import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-d
 /**
  * Internal dependencies
  */
-import { replaceBlockWithProductGallery } from '../../../../blocks/product-gallery/edit-utils';
+import { upgradeToBlockifiedProductGallery } from '../../../../blocks/product-gallery/edit-utils';
 
 export const AddToCartWithOptionsCompatibilityNotice = ( {
 	blockClientId,
@@ -29,7 +29,7 @@ export const AddToCartWithOptionsCompatibilityNotice = ( {
 			isDismissible={ false }
 			actionLabel={ buttonLabel }
 			onActionClick={ () => {
-				replaceBlockWithProductGallery( blockClientId );
+				upgradeToBlockifiedProductGallery( blockClientId );
 			} }
 			status="warning"
 		>
