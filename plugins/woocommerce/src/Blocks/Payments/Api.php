@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\BankTransfer;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\CashOnDelivery;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
-use Automattic\WooCommerce\Internal\Features\BlockEditorAssetConsolidation;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 
 /**
  *  The Api class provides an interface to payment method registration.
@@ -79,7 +79,7 @@ class Api {
 	 * @return string[] Script handles.
 	 */
 	private function get_cart_checkout_script_handles(): array {
-		$editor_handles = BlockEditorAssetConsolidation::is_enabled()
+		$editor_handles = BlockEditorUnifiedAssets::is_enabled()
 			? array( 'wc-block-library' )
 			: array( 'wc-checkout-block', 'wc-cart-block' );
 

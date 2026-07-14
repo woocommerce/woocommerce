@@ -10,15 +10,17 @@ const { NODE_ENV, getAlias } = require( './bin/webpack-helpers.js' );
 const {
 	getCoreConfig,
 	getMainConfig,
-	getConsolidatedMainConfig,
 	getFrontConfig,
 	getPaymentsConfig,
 	getExtensionsConfig,
 	getSiteEditorConfig,
 	getStylingConfig,
-	getConsolidatedStylingConfig,
 	getCartAndCheckoutFrontendConfig,
 } = require( './bin/webpack-configs.js' );
+const {
+	getUnifiedMainConfig,
+	getUnifiedStylingConfig,
+} = require( './bin/webpack-config-block-editor-unified-assets.js' );
 
 const interactivityBlocksConfig = require( './bin/webpack-config-interactive-blocks.js' );
 const dependencyDetectionConfig = require( './bin/webpack-config-dependency-detection.js' );
@@ -92,11 +94,11 @@ const MainConfig = {
 	...getMainConfig( { alias: getAlias() } ),
 };
 
-// Consolidated Blocks config enabled at runtime by a WooCommerce feature flag.
-const ConsolidatedMainConfig = {
+// Unified Blocks config enabled at runtime by a WooCommerce feature flag.
+const UnifiedMainConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'consolidated-main', [] ),
-	...getConsolidatedMainConfig( { alias: getAlias() } ),
+	cache: getCacheConfig( 'unified-main', [] ),
+	...getUnifiedMainConfig( { alias: getAlias() } ),
 };
 
 // Frontend config for scripts used in the store itself.
@@ -133,11 +135,11 @@ const StylingConfig = {
 	...getStylingConfig( { alias: getAlias() } ),
 };
 
-// Consolidated editor styles enabled at runtime by a WooCommerce feature flag.
-const ConsolidatedStylingConfig = {
+// Unified editor styles enabled at runtime by a WooCommerce feature flag.
+const UnifiedStylingConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'consolidated-styling', [] ),
-	...getConsolidatedStylingConfig( { alias: getAlias() } ),
+	cache: getCacheConfig( 'unified-styling', [] ),
+	...getUnifiedStylingConfig( { alias: getAlias() } ),
 };
 
 // Scripts used exclusively in the Site Editor by the legacy asset path.
@@ -171,13 +173,13 @@ module.exports = [
 	CartAndCheckoutFrontendConfig,
 	CoreConfig,
 	MainConfig,
-	ConsolidatedMainConfig,
+	UnifiedMainConfig,
 	FrontendConfig,
 	ExtensionsConfig,
 	PaymentsConfig,
 	SiteEditorConfig,
 	StylingConfig,
-	ConsolidatedStylingConfig,
+	UnifiedStylingConfig,
 	InteractivityBlocksConfig,
 	DependencyDetectionConfig,
 ];

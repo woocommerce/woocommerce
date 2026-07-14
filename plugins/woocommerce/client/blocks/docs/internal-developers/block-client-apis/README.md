@@ -5,7 +5,7 @@ This folder contains documentation for API interfaces for Blocks. In _most cases
 | Document                                           | Description                                                                                                   |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------           |
 | [Checkout API interface](checkout/checkout-api.md) | This doc goes into some detail about some of the API specifics for the checkout block architecture.           |
-| [Editor assets](../enqueueable-packages/README.md) | Explains the legacy and experimental consolidated editor assets, external packages, and compatibility handles. |
+| [Editor assets](../enqueueable-packages/README.md) | Explains the legacy and experimental unified editor assets, external packages, and compatibility handles. |
 | [Notices](notices.md)                              | Explains how the notices system works and which methods are available to add an remove them.                  |
 
 Some of the resources from this directory were migrated to WooCommerce Developer Documentation:

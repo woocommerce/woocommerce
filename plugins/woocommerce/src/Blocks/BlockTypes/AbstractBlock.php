@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Enums\ProductStatus;
-use Automattic\WooCommerce\Internal\Features\BlockEditorAssetConsolidation;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use WP_Block;
 
@@ -367,7 +367,7 @@ abstract class AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
-		$script = BlockEditorAssetConsolidation::is_enabled()
+		$script = BlockEditorUnifiedAssets::is_enabled()
 			? array(
 				'handle'       => 'wc-block-library',
 				'path'         => $this->asset_api->get_block_asset_build_path( 'wc-block-library' ),
@@ -388,7 +388,7 @@ abstract class AbstractBlock {
 	 * @return string|null
 	 */
 	protected function get_block_type_editor_style() {
-		return BlockEditorAssetConsolidation::is_enabled() ? 'wc-block-library-style' : 'wc-blocks-editor-style';
+		return BlockEditorUnifiedAssets::is_enabled() ? 'wc-block-library-style' : 'wc-blocks-editor-style';
 	}
 
 	/**

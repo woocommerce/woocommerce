@@ -7,7 +7,6 @@ const chalk = require( 'chalk' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
 const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
-const CONSOLIDATED_EDITOR_STYLE_HANDLE = 'wc-block-library-style';
 
 // See also @woocommerce/dependency-extraction-webpack-plugin/assets/packages and
 // docs/internal-developers/enqueueable-packages/README.md. They should stay in sync with this map.
@@ -47,70 +46,6 @@ const wcHandleMap = {
 	'@woocommerce/sanitize': 'wc-sanitize',
 	'@woocommerce/entities': 'wc-entities',
 };
-
-const isWooPackageRequest = ( request ) =>
-	request.startsWith( '@woocommerce/' );
-
-const editorExternalPackages = [
-	'@woocommerce/block-data',
-	'@woocommerce/blocks-checkout',
-	'@woocommerce/blocks-checkout-events',
-	'@woocommerce/blocks-components',
-	'@woocommerce/blocks-registry',
-	'@woocommerce/data',
-	'@woocommerce/entities',
-	'@woocommerce/price-format',
-	'@woocommerce/shared-context',
-	'@woocommerce/shared-hocs',
-];
-
-const shouldBundleWooPackageInEditor = ( request ) =>
-	isWooPackageRequest( request ) &&
-	! editorExternalPackages.includes( request );
-
-const getEditorPackageAliases = () => ( {
-	'@woocommerce/block-data': path.resolve( __dirname, `../assets/js/data` ),
-	'@woocommerce/blocks-checkout': path.resolve(
-		__dirname,
-		`../packages/checkout`
-	),
-	'@woocommerce/blocks-checkout-events': path.resolve(
-		__dirname,
-		`../assets/js/events`
-	),
-	'@woocommerce/blocks-components': path.resolve(
-		__dirname,
-		`../packages/components`
-	),
-	'@woocommerce/blocks-registry': path.resolve(
-		__dirname,
-		`../assets/js/blocks-registry`
-	),
-	'@woocommerce/data': path.resolve(
-		__dirname,
-		`../../../../../packages/js/data/src/index.ts`
-	),
-	'@woocommerce/price-format': path.resolve(
-		__dirname,
-		`../packages/prices`
-	),
-	'@woocommerce/sanitize': path.resolve(
-		__dirname,
-		`../../../../../packages/js/sanitize/src/index.ts`
-	),
-	'@woocommerce/settings': path.resolve(
-		__dirname,
-		`../assets/js/settings/shared`
-	),
-	'@woocommerce/shared-context': path.resolve(
-		__dirname,
-		`../assets/js/shared/context/`
-	),
-	'@woocommerce/shared-hocs': path.resolve(
-		__dirname,
-		`../assets/js/shared/hocs/`
-	),
-} );
 
 const getAlias = ( options = {} ) => {
 	let { pathPart } = options;
@@ -221,22 +156,6 @@ const requestToHandle = ( request ) => {
 	}
 };
 
-const requestToEditorExternal = ( request ) => {
-	if ( shouldBundleWooPackageInEditor( request ) ) {
-		return false;
-	}
-
-	return requestToExternal( request );
-};
-
-const requestToEditorHandle = ( request ) => {
-	if ( shouldBundleWooPackageInEditor( request ) ) {
-		return false;
-	}
-
-	return requestToHandle( request );
-};
-
 const getProgressBarPluginConfig = ( name ) => {
 	return {
 		format:
@@ -314,14 +233,10 @@ module.exports = {
 	NODE_ENV,
 	CHECK_CIRCULAR_DEPS,
 	ASSET_CHECK,
-	CONSOLIDATED_EDITOR_STYLE_HANDLE,
 	getAlias,
-	getEditorPackageAliases,
 	getResolve,
 	requestToHandle,
 	requestToExternal,
-	requestToEditorHandle,
-	requestToEditorExternal,
 	getProgressBarPluginConfig,
 	getCacheGroups,
 };

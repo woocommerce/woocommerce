@@ -1,8 +1,8 @@
 # WooCommerce Blocks editor assets
 
-WooCommerce includes an experimental configuration that consolidates block editor scripts and styles into shared assets. The experiment is disabled by default so existing per-block assets and handles continue to work unchanged.
+WooCommerce includes an experimental configuration that unifies block editor scripts and styles into shared assets. The experiment is disabled by default so existing per-block assets and handles continue to work unchanged.
 
-Enable **Consolidated block editor assets** under **WooCommerce > Settings > Advanced > Features** to test the shared configuration. The setting is stored in `woocommerce_feature_block_editor_asset_consolidation_enabled` and takes effect on the next request.
+Enable **Unified block editor assets** under **WooCommerce > Settings > Advanced > Features** to test the shared configuration. The setting is stored in `woocommerce_feature_block_editor_unified_assets_enabled` and takes effect on the next request.
 
 ## Default editor assets
 
@@ -15,7 +15,7 @@ When the experiment is disabled, WooCommerce registers and loads its existing ed
 
 This is the backward-compatible default.
 
-## Consolidated editor assets
+## Unified editor assets
 
 When the experiment is enabled, WooCommerce block types use these shared handles:
 
@@ -36,7 +36,7 @@ The generated asset file for `wc-block-library` declares packages that remain se
 | `@woocommerce/entities` | `wc-entities` | `wc.wcEntities` | Shares WooCommerce entity registration in the editor. |
 | `@woocommerce/price-format` | `wc-price-format` | `wc.priceFormat` | Shares price and currency formatting across editor, frontend, and extension code. |
 
-This list comes from `editorExternalPackages` in `webpack-helpers.js`. Other WooCommerce package imports are bundled into `wc-block-library` only in the consolidated editor build.
+This list comes from `editorExternalPackages` in `webpack-helpers.js`. Other WooCommerce package imports are bundled into `wc-block-library` only in the unified editor build.
 
 ## Compatibility handles
 
@@ -51,6 +51,6 @@ The following package handles remain real standalone bundles in both configurati
 | `@woocommerce/types` | `wc-types` | `wc.wcTypes` |
 | `@woocommerce/sanitize` | `wc-sanitize` | `wc.sanitize` |
 
-When consolidation is enabled, `wc-blocks-vendors` and `wc-blocks` are registered as contentless compatibility placeholders and emit a console warning. Extensions can still resolve those dependencies, but must declare the specific package handles for any `window.wc.*` globals they consume. When consolidation is disabled, both handles continue to load their existing bundles.
+When unified assets are enabled, `wc-blocks-vendors` and `wc-blocks` are registered as contentless compatibility placeholders and emit a console warning. Extensions can still resolve those dependencies, but must declare the specific package handles for any `window.wc.*` globals they consume. When unified assets are disabled, both handles continue to load their existing bundles.
 
 `wc-blocks-middleware` is also registered by Blocks and loaded as a dependency of `wc-blocks-data-store`. It does not map to a public `@woocommerce/*` package import.

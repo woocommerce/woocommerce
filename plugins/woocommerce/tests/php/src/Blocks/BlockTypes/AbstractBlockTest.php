@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Internal\Features\BlockEditorAssetConsolidation;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 use WC_Unit_Test_Case;
 
 /**
@@ -21,14 +21,14 @@ class AbstractBlockTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		delete_option( BlockEditorAssetConsolidation::OPTION_NAME );
+		delete_option( BlockEditorUnifiedAssets::OPTION_NAME );
 	}
 
 	/**
 	 * Clean up the feature option.
 	 */
 	public function tearDown(): void {
-		delete_option( BlockEditorAssetConsolidation::OPTION_NAME );
+		delete_option( BlockEditorUnifiedAssets::OPTION_NAME );
 		parent::tearDown();
 	}
 
@@ -148,7 +148,7 @@ class AbstractBlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should use per-block editor assets when consolidation is disabled.
+	 * @testdox Should use per-block editor assets when unified assets are disabled.
 	 */
 	public function test_uses_legacy_editor_assets_by_default(): void {
 		$asset_api = $this->createMock( Api::class );
@@ -166,10 +166,10 @@ class AbstractBlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should use shared editor assets when consolidation is enabled.
+	 * @testdox Should use unified editor assets when the feature is enabled.
 	 */
-	public function test_uses_consolidated_editor_assets_when_enabled(): void {
-		update_option( BlockEditorAssetConsolidation::OPTION_NAME, 'yes' );
+	public function test_uses_unified_editor_assets_when_enabled(): void {
+		update_option( BlockEditorUnifiedAssets::OPTION_NAME, 'yes' );
 		$asset_api = $this->createMock( Api::class );
 		$asset_api->method( 'get_block_asset_build_path' )->willReturnCallback(
 			function ( $filename ) {
@@ -213,10 +213,10 @@ class AbstractBlockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should merge consolidated integration dependencies without duplicates.
+	 * @testdox Should merge unified integration dependencies without duplicates.
 	 */
-	public function test_merges_consolidated_integration_dependencies_without_duplicates(): void {
-		update_option( BlockEditorAssetConsolidation::OPTION_NAME, 'yes' );
+	public function test_merges_unified_integration_dependencies_without_duplicates(): void {
+		update_option( BlockEditorUnifiedAssets::OPTION_NAME, 'yes' );
 		wp_deregister_script( 'wc-block-library' );
 		wp_register_script( 'wc-block-library', '', array( 'existing-script', 'integration-script' ), 'test', true );
 

@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypes\Cart;
 use Automattic\WooCommerce\Blocks\BlockTypes\Checkout;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents;
-use Automattic\WooCommerce\Internal\Features\BlockEditorAssetConsolidation;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
@@ -702,7 +702,7 @@ final class BlockTypesController {
 	 */
 	public function use_single_block_editor_style( $args, $block_name ) {
 		if (
-			! BlockEditorAssetConsolidation::is_enabled() ||
+			! BlockEditorUnifiedAssets::is_enabled() ||
 			! is_admin() ||
 		false === str_starts_with( $block_name, 'woocommerce/' ) ) {
 			return $args;

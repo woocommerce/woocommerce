@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypesController as TestedBlockTypesController;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Internal\Features\BlockEditorAssetConsolidation;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 
 /**
@@ -29,7 +29,7 @@ class BlockTypesController extends \WP_UnitTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
-		delete_option( BlockEditorAssetConsolidation::OPTION_NAME );
+		delete_option( BlockEditorUnifiedAssets::OPTION_NAME );
 		$this->block_types_controller = new TestedBlockTypesController(
 			Package::container()->get( Api::class ),
 			new AssetDataRegistryMock( Package::container()->get( API::class ) )
@@ -40,7 +40,7 @@ class BlockTypesController extends \WP_UnitTestCase {
 	 * Clean up feature and screen state.
 	 */
 	public function tearDown(): void {
-		delete_option( BlockEditorAssetConsolidation::OPTION_NAME );
+		delete_option( BlockEditorUnifiedAssets::OPTION_NAME );
 		set_current_screen( 'front' );
 		parent::tearDown();
 	}
@@ -107,9 +107,9 @@ class BlockTypesController extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should preserve block editor styles when asset consolidation is disabled.
+	 * @testdox Should preserve block editor styles when unified assets are disabled.
 	 */
-	public function test_preserves_editor_styles_when_consolidation_is_disabled(): void {
+	public function test_preserves_editor_styles_when_unified_assets_are_disabled(): void {
 		set_current_screen( 'post.php' );
 		$args = array(
 			'style_handles'        => array( 'core-style' ),
@@ -123,10 +123,10 @@ class BlockTypesController extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should replace styles only for WooCommerce-owned blocks when consolidation is enabled.
+	 * @testdox Should replace styles only for WooCommerce-owned blocks when unified assets are enabled.
 	 */
-	public function test_replaces_only_woocommerce_owned_editor_styles_when_consolidation_is_enabled(): void {
-		update_option( BlockEditorAssetConsolidation::OPTION_NAME, 'yes' );
+	public function test_replaces_only_woocommerce_owned_editor_styles_when_unified_assets_are_enabled(): void {
+		update_option( BlockEditorUnifiedAssets::OPTION_NAME, 'yes' );
 		set_current_screen( 'post.php' );
 		$args = array(
 			'style_handles'        => array( 'extension-style' ),

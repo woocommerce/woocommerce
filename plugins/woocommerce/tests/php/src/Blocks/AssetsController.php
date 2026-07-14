@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\AssetsController as TestedAssetsController;
-use Automattic\WooCommerce\Internal\Features\BlockEditorAssetConsolidation;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 
 /**
  * Unit tests for the PatternRegistry class.
@@ -71,7 +71,7 @@ class AssetsController extends \WP_UnitTestCase {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		delete_option( BlockEditorAssetConsolidation::OPTION_NAME );
+		delete_option( BlockEditorUnifiedAssets::OPTION_NAME );
 		parent::tearDown();
 
 		wp_delete_post( get_option( 'woocommerce_checkout_page_id' ), true );
@@ -281,7 +281,7 @@ class AssetsController extends \WP_UnitTestCase {
 	 * @testdox Should add console warnings for deprecated script handles.
 	 */
 	public function test_register_assets_adds_warnings_for_deprecated_script_handles(): void {
-		update_option( BlockEditorAssetConsolidation::OPTION_NAME, 'yes' );
+		update_option( BlockEditorUnifiedAssets::OPTION_NAME, 'yes' );
 		$this->api->wc_version = 'wc-test';
 		$this->api->method( 'get_block_asset_build_path' )
 			->willReturnCallback(
@@ -314,7 +314,7 @@ class AssetsController extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should register legacy editor scripts when asset consolidation is disabled.
+	 * @testdox Should register legacy editor scripts when unified assets are disabled.
 	 */
 	public function test_register_assets_uses_legacy_editor_scripts_by_default(): void {
 		$registered_handles = array();
@@ -340,10 +340,10 @@ class AssetsController extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should register consolidated editor assets when the feature is enabled.
+	 * @testdox Should register unified editor assets when the feature is enabled.
 	 */
-	public function test_register_assets_uses_consolidated_editor_assets_when_enabled(): void {
-		update_option( BlockEditorAssetConsolidation::OPTION_NAME, 'yes' );
+	public function test_register_assets_uses_unified_editor_assets_when_enabled(): void {
+		update_option( BlockEditorUnifiedAssets::OPTION_NAME, 'yes' );
 		$registered_handles    = array();
 		$this->api->wc_version = 'wc-test';
 		$this->api->method( 'get_block_asset_build_path' )

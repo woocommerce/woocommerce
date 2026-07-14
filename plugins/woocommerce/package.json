@@ -78,7 +78,7 @@
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
 		"test:e2e:blocks": "pnpm playwright test --config=tests/e2e/playwright.config.ts --project=blocks-chromium",
-		"test:e2e:blocks:consolidated-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_asset_consolidation_enabled yes && pnpm test:e2e:blocks",
+		"test:e2e:blocks:unified-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes && pnpm test:e2e:blocks",
 		"test:e2e:blocks:performance": "pnpm playwright test --config=tests/e2e/playwright.performance.config.ts --project=blocks-performance",
 		"test:e2e:email-update-propagation:pr": "pnpm test:e2e:default --project=core-serial --project=core-parallel --grep @pr tests/email-editor/update-propagation",
 		"test:e2e:email-update-propagation:nightly": "pnpm test:e2e:default --project=core-serial --project=core-parallel tests/email-editor/update-propagation",
@@ -848,10 +848,10 @@
 					}
 				},
 				{
-					"name": "Blocks e2e tests - consolidated editor assets",
+					"name": "Blocks e2e tests - unified editor assets",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
-					"command": "test:e2e:blocks:consolidated-editor-assets",
+					"command": "test:e2e:blocks:unified-editor-assets",
 					"shardingArguments": [
 						"--shard=1/10",
 						"--shard=2/10",
@@ -868,7 +868,7 @@
 						"patterns/**/*.php",
 						"includes/**/*.php",
 						"src/Blocks/**/*.php",
-						"src/Internal/Features/BlockEditorAssetConsolidation.php",
+						"src/Internal/Features/BlockEditorUnifiedAssets.php",
 						"templates/**/*.php",
 						"templates/**/*.html",
 						"tests/e2e/bin/blocks/**",
@@ -894,10 +894,10 @@
 						"pull_request",
 						"push",
 						"release-checks",
-						"blocks-e2e-consolidated-editor-assets"
+						"blocks-e2e-unified-editor-assets"
 					],
 					"report": {
-						"resultsBlobName": "blocks-e2e-consolidated-editor-assets-report",
+						"resultsBlobName": "blocks-e2e-unified-editor-assets-report",
 						"resultsPath": "tests/e2e/test-results",
 						"allure": true
 					}

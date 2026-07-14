@@ -3,10 +3,7 @@
  */
 const { omit } = require( 'lodash' );
 const glob = require( 'glob' );
-const {
-	scriptModuleEntries,
-	editorStyleEntries,
-} = require( './webpack-interactivity-entries' );
+const { scriptModuleEntries } = require( './webpack-interactivity-entries' );
 
 // List of blocks that should be used as webpack entry points. They are expected
 // to be in `/assets/js/blocks/[BLOCK_NAME]`. If they are not, their relative
@@ -339,29 +336,6 @@ const blockStylingEntries = getBlockEntries(
 	}
 );
 
-const addEditorBundleResourceQuery = ( filePath ) =>
-	`${ filePath }?editor-bundle`;
-
-const editorBlockStyleEntries = [
-	'./assets/css/style.scss',
-	'./assets/css/editor.scss',
-	...glob.sync( './assets/js/**/{style,editor}.scss', {
-		dotRelative: true,
-	} ),
-	...glob.sync( './packages/**/style.scss', {
-		dotRelative: true,
-		ignore: './packages/**/stories/**',
-	} ),
-].map( addEditorBundleResourceQuery );
-
-const editorScriptEntries = Object.values(
-	getBlockEntries( 'index.{t,j}s{,x}', {
-		...blocks,
-		...genericBlocks,
-		...cartAndCheckoutBlocks,
-	} )
-).flat();
-
 const entries = {
 	styling: {
 		// Packages styles
@@ -376,12 +350,6 @@ const entries = {
 			'./assets/js/atomic/blocks/product-elements/product-image-gallery/index.ts',
 
 		...blockStylingEntries,
-	},
-	consolidatedStyling: {
-		'wc-block-library-style-source': editorBlockStyleEntries,
-		'interactivity-editor-styles': Object.values( editorStyleEntries )
-			.flat()
-			.map( addEditorBundleResourceQuery ),
 	},
 	core: {
 		wcBlocksRegistry: './assets/js/blocks-registry/index.js',
@@ -408,9 +376,6 @@ const entries = {
 			...genericBlocks,
 			...cartAndCheckoutBlocks,
 		} ),
-	},
-	consolidatedMain: {
-		'wc-block-library': [ './assets/js/index.js', ...editorScriptEntries ],
 	},
 	frontend: {
 		reviews: './assets/js/blocks/reviews/frontend.ts',

@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Blocks;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
-use Automattic\WooCommerce\Internal\Features\BlockEditorAssetConsolidation;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 
 /**
  * AssetsController class.
@@ -73,7 +73,7 @@ final class AssetsController {
 		$this->register_style( 'wc-blocks-packages-style', plugins_url( $this->api->get_block_asset_build_path( 'packages-style', 'css' ), dirname( __DIR__ ) ), array(), 'all', true );
 		$this->register_style( 'wc-blocks-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks', 'css' ), dirname( __DIR__ ) ), array(), 'all', true );
 		$this->register_style( 'wc-blocks-editor-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks-editor-style', 'css' ), dirname( __DIR__ ) ), array( 'wp-edit-blocks' ), 'all', true );
-		if ( BlockEditorAssetConsolidation::is_enabled() ) {
+		if ( BlockEditorUnifiedAssets::is_enabled() ) {
 			$this->register_style( 'wc-block-library-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-block-library-style', 'css' ), dirname( __DIR__ ) ), array( 'wp-edit-blocks' ), 'all', true );
 		}
 
@@ -124,7 +124,7 @@ final class AssetsController {
 	 * Register scripts for the active block editor asset configuration.
 	 */
 	private function register_editor_scripts(): void {
-		if ( ! BlockEditorAssetConsolidation::is_enabled() ) {
+		if ( ! BlockEditorUnifiedAssets::is_enabled() ) {
 			$this->api->register_script( 'wc-blocks-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-vendors' ), array(), false );
 			$this->api->register_script( 'wc-blocks', $this->api->get_block_asset_build_path( 'wc-blocks' ), array( 'wc-blocks-vendors' ), false );
 			return;
