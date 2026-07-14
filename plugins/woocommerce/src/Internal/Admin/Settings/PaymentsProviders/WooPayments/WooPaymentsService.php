@@ -311,40 +311,10 @@ class WooPaymentsService {
 				// Ignore any completed stored statuses because of the critical nature of the WPCOM connection.
 				break;
 			case self::ONBOARDING_STEP_TEST_ACCOUNT:
-				// A stored completed status with no skip marker while a connected test account is not
-				// valid is the state a skip-forward from before the marker existed left behind (the
-				// platform fell back to an account that requires verification). Backfill the marker:
-				// re-gating these merchants buys nothing — the client routes them back into a step
-				// whose initialization can never succeed while an account is connected, so they end up
-				// polling indefinitely. A legitimately in-flight account is not affected because no
-				// completed status is stored for it, and if the account later becomes valid and
-				// working, the auto-completion above clears the backfilled marker again.
-				if ( $meets_requirements &&
-					$this->was_onboarding_step_marked_completed( $step_id, $location ) &&
-					! $this->was_onboarding_step_completed_via_skip( $step_id, $location ) &&
-					$this->has_test_account() && ! $this->has_valid_account()
-				) {
-					if ( $this->record_onboarding_step_completed( $step_id, $location, false, self::SESSION_ENTRY_DEFAULT, true ) ) {
-						// Keep the same telemetry trail as a regular skip-forward.
-						$this->record_event(
-							self::EVENT_PREFIX . 'onboarding_test_account_skipped',
-							$location,
-							array(
-								'source' => self::SESSION_ENTRY_DEFAULT,
-								'reason' => 'skip_marker_backfilled',
-							)
-						);
-					} else {
-						// Leave a trail. The backfill is retried on every status read, but if the
-						// underlying option write keeps failing, those retries won't succeed either.
-						$this->proxy->call_function( 'wc_get_logger' )->warning(
-							'Failed to store the test account onboarding step skip marker while backfilling it.',
-							array(
-								'source'   => 'settings-payments',
-								'location' => $location,
-							)
-						);
-					}
+				// Backfill the skip marker for merchants trapped with a marker-less completed
+				// status and an invalid test account. See the method for the full rationale.
+				if ( $meets_requirements ) {
+					$this->maybe_backfill_test_account_skip_marker( $location );
 				}
 
 				// If there is a stored completed status, we respect that IF there is NO invalid test account.
@@ -764,6 +734,61 @@ class WooPaymentsService {
 			'woocommerce_woopayments_onboarding_test_account_non_recoverable_error',
 			esc_html__( 'A test account could not be created, but onboarding can continue without it.', 'woocommerce' ),
 			(int) WP_Http::FAILED_DEPENDENCY
+		);
+	}
+
+	/**
+	 * Backfill the skip marker for a test account step stuck in an unrecoverable state.
+	 *
+	 * A stored completed status with no skip marker while a connected test account is not valid
+	 * is a state the merchant cannot recover from on their own: the status determination would
+	 * re-derive the step as not completed and the client would route the merchant back into it,
+	 * but re-initialization can never succeed while an account is connected — they would end up
+	 * polling indefinitely. This is the state a skip-forward from before the skip marker existed
+	 * left behind (the platform fell back to an account that requires verification), and also
+	 * where a genuine completion lands if the account validity lapses later. Backfilling the
+	 * marker lets the stored completed status be honored so onboarding can move on.
+	 *
+	 * A legitimately in-flight account is not affected because no completed status is stored for
+	 * it, and if the account later becomes valid and working, the auto-completion clears the
+	 * backfilled marker again.
+	 *
+	 * @param string $location The location for which we are onboarding.
+	 *                         This is an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return void
+	 */
+	private function maybe_backfill_test_account_skip_marker( string $location ): void {
+		if ( ! $this->was_onboarding_step_marked_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ||
+			$this->was_onboarding_step_completed_via_skip( self::ONBOARDING_STEP_TEST_ACCOUNT, $location ) ||
+			! $this->has_test_account() || $this->has_valid_account()
+		) {
+			return;
+		}
+
+		if ( ! $this->record_onboarding_step_completed( self::ONBOARDING_STEP_TEST_ACCOUNT, $location, false, self::SESSION_ENTRY_DEFAULT, true ) ) {
+			// Leave a trail. The backfill is retried on every status read, but if the underlying
+			// option write keeps failing, those retries won't succeed either.
+			$this->proxy->call_function( 'wc_get_logger' )->warning(
+				'Failed to store the test account onboarding step skip marker while backfilling it.',
+				array(
+					'source'   => 'settings-payments',
+					'location' => $location,
+				)
+			);
+
+			return;
+		}
+
+		// Record a dedicated event so the backfill can be told apart from a regular skip-forward:
+		// this state is also reachable by a genuine completion whose account validity lapsed
+		// later, i.e. a merchant who never skipped.
+		$this->record_event(
+			self::EVENT_PREFIX . 'onboarding_test_account_skip_marker_backfilled',
+			$location,
+			array(
+				'source' => self::SESSION_ENTRY_DEFAULT,
+			)
 		);
 	}
 
