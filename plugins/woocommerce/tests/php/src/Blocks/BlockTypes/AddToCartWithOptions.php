@@ -520,6 +520,231 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that a simple product's Add to Cart + Options form emits its
+	 * initial `add-item` payload as a `woocommerce/cart` draft-seed context,
+	 * plus the `data-wp-init` trigger that copies it into `draftItems` on the
+	 * client, so the client can seed the correct values without them ever
+	 * appearing in server state.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::render
+	 */
+	public function test_draft_seed_context_for_simple_product() {
+		global $product;
+		$product = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$expected_draft_seed = 'data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
+			array(
+				'draftSeed' => array(
+					'id'       => $product_id,
+					'quantity' => 1,
+				),
+			),
+			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+		) . '\'';
+
+		$this->assertStringContainsString( $expected_draft_seed, $markup, 'The form emits a woocommerce/cart draft-seed context carrying the product id and minimum quantity.' );
+		$this->assertStringContainsString( 'data-wp-init--seed-draft="woocommerce/cart::actions.seedDraftIfAbsent"', $markup, 'The form triggers seedDraftIfAbsent on init.' );
+	}
+
+	/**
+	 * Tests that a Grouped product's own form does not seed a draft for the
+	 * grouped (unpurchasable) parent id, while each purchasable child's own
+	 * quantity selector seeds its own draft, with the allowZero-adjusted
+	 * quantity (0) matching the value actually bound to its input.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::render
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::make_quantity_input_interactive
+	 */
+	public function test_draft_seed_context_for_grouped_product() {
+		$simple_product = new \WC_Product_Simple();
+		$simple_product->set_regular_price( 10 );
+		$simple_product_id = $simple_product->save();
+		$grouped_product    = new \WC_Product_Grouped();
+		$grouped_product->set_children( array( $simple_product_id ) );
+		$grouped_product_id = $grouped_product->save();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $grouped_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$grouped_parent_draft_seed = '"draftSeed":{"id":' . $grouped_product_id . ',';
+		$this->assertStringNotContainsString( $grouped_parent_draft_seed, $markup, 'The grouped product parent does not emit its own draft seed; only its children do.' );
+
+		$expected_child_draft_seed = 'data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
+			array(
+				'draftSeed' => array(
+					'id'       => $simple_product_id,
+					'quantity' => 0,
+				),
+			),
+			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+		) . '\'';
+		$this->assertStringContainsString( $expected_child_draft_seed, $markup, 'The grouped child quantity selector emits its own draft seed with quantity 0 (an optional item), matching the value bound to its input.' );
+	}
+
+	/**
+	 * Tests that a Variable product's form seeds a draft carrying no
+	 * `variation` key until a default attribute selection exists, matching
+	 * the parent-level `selectedAttributes` context, which also starts empty.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::render
+	 */
+	public function test_draft_seed_context_for_variable_product_has_no_variation_key() {
+		global $product;
+
+		$fixtures = new FixtureData();
+
+		$product = $fixtures->get_variable_product(
+			array(),
+			array(
+				$fixtures->get_product_attribute( 'color', array( 'red', 'green' ) ),
+			)
+		);
+
+		$product_id = $product->get_id();
+
+		$fixtures->get_variation_product(
+			$product_id,
+			array( 'pa_color' => 'red-slug' ),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		\WC_Product_Variable::sync( $product_id );
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$expected_draft_seed = 'data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
+			array(
+				'draftSeed' => array(
+					'id'       => $product_id,
+					'quantity' => $product->get_min_purchase_quantity(),
+				),
+			),
+			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+		) . '\'';
+
+		$this->assertStringContainsString( $expected_draft_seed, $markup, 'The variable product form seeds a draft with the parent id and default quantity, carrying no "variation" key until an attribute is selected.' );
+	}
+
+	/**
+	 * Calls `Utils::make_quantity_input_interactive()` with
+	 * `WP_Block_Supports::$block_to_render` set up front, so
+	 * `get_block_wrapper_attributes()` (called internally for layout/style
+	 * supports) has the context it expects when invoked outside the usual
+	 * block-render pipeline (mirrors the pattern in
+	 * AddToWishlistButtonTests::invoke_render() /
+	 * SavedForLaterTests::test_render_seeds_hidden_empty_state_for_new_shopper()).
+	 *
+	 * @param string $quantity_html Quantity input HTML.
+	 * @param array  $context       Optional context for the quantity input.
+	 * @return string The quantity HTML with interactive wrapper.
+	 */
+	private function invoke_make_quantity_input_interactive( $quantity_html, $context = array() ) {
+		$previous_block_to_render = \WP_Block_Supports::$block_to_render;
+		\WP_Block_Supports::$block_to_render = array(
+			'blockName' => 'woocommerce/add-to-cart-with-options-quantity-selector',
+			'attrs'     => array(),
+		);
+
+		try {
+			return Utils::make_quantity_input_interactive( $quantity_html, array(), array(), $context );
+		} finally {
+			\WP_Block_Supports::$block_to_render = $previous_block_to_render;
+		}
+	}
+
+	/**
+	 * Tests that `make_quantity_input_interactive` emits a `woocommerce/cart`
+	 * draft-seed context and its `seedDraftIfAbsent` init trigger for the
+	 * global product in scope.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::make_quantity_input_interactive
+	 */
+	public function test_make_quantity_input_interactive_emits_draft_seed() {
+		global $product;
+		$previous_product = $product;
+		$product           = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+
+		$quantity_html = '<div class="quantity"><input type="number" name="quantity" value="1" /></div>';
+
+		$result = $this->invoke_make_quantity_input_interactive( $quantity_html );
+
+		$expected_draft_seed = 'data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
+			array(
+				'draftSeed' => array(
+					'id'       => $product_id,
+					'quantity' => 1,
+				),
+			),
+			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+		) . '\'';
+
+		$this->assertStringContainsString( $expected_draft_seed, $result, 'The quantity selector emits a woocommerce/cart draft-seed context carrying the product id and quantity.' );
+		$this->assertStringContainsString( 'data-wp-init--seed-draft="woocommerce/cart::actions.seedDraftIfAbsent"', $result, 'The quantity selector triggers seedDraftIfAbsent on init.' );
+
+		$product = $previous_product;
+	}
+
+	/**
+	 * Tests that the draft seed's `quantity` matches the `allowZero`-adjusted
+	 * value actually bound to the rendered input (an optional grouped-product
+	 * child), not the product's raw minimum purchase quantity.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::make_quantity_input_interactive
+	 */
+	public function test_make_quantity_input_interactive_draft_seed_quantity_respects_allow_zero() {
+		global $product;
+		$previous_product = $product;
+		$product           = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+
+		$quantity_html = '<div class="quantity"><input type="number" name="quantity" value="1" /></div>';
+
+		$result = $this->invoke_make_quantity_input_interactive( $quantity_html, array( 'allowZero' => true ) );
+
+		$expected_draft_seed = 'data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
+			array(
+				'draftSeed' => array(
+					'id'       => $product_id,
+					'quantity' => 0,
+				),
+			),
+			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+		) . '\'';
+
+		$this->assertStringContainsString( $expected_draft_seed, $result, 'The draft seed quantity matches the allowZero-adjusted bound value (0), not the product minimum.' );
+
+		$product = $previous_product;
+	}
+
+	/**
+	 * Tests that no draft-seed context is emitted when there is no product in
+	 * scope, since there is nothing to seed.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::make_quantity_input_interactive
+	 */
+	public function test_make_quantity_input_interactive_no_draft_seed_without_product() {
+		global $product;
+		$previous_product = $product;
+		$product           = null;
+
+		$quantity_html = '<div class="quantity"><input type="number" name="quantity" value="1" /></div>';
+		$result        = $this->invoke_make_quantity_input_interactive( $quantity_html );
+
+		$this->assertStringNotContainsString( 'draft-seed', $result, 'No draft seed is emitted when there is no product in scope.' );
+
+		$product = $previous_product;
+	}
+
+	/**
 	 * Tests that the Add to Wishlist Button is injected as the last child only
 	 * when the `product_wishlist` feature flag is enabled.
 	 *

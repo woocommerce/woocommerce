@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { getConfig, getContext, store } from '@wordpress/interactivity';
+import {
+	getConfig,
+	getContext,
+	getServerContext,
+	store,
+} from '@wordpress/interactivity';
 import type { AsyncAction, TypeYield } from '@wordpress/interactivity';
 import type {
 	Cart,
@@ -281,6 +286,26 @@ export type Store = {
 			id?: DraftItem[ 'id' ];
 			scope?: Scope;
 		} ) => void;
+		/**
+		 * Seeds `draftItems[currentScope]` from the server-rendered
+		 * `draftSeed`, when no draft for that product already exists there.
+		 *
+		 * Reads `getServerContext< { draftSeed?: DraftItem } >(
+		 * 'woocommerce/cart' )?.draftSeed` — the **server-rendered** context,
+		 * immune to the reactive proxy's client-side edits, unlike reading
+		 * `state` — then resolves `currentScope` and copies the seed into
+		 * that scope's bucket only when the scope holds no draft for the
+		 * seed's product `id`. A no-op when no seed is present (a surface
+		 * that emits none, or a directive execution context that resolves
+		 * none) or when a draft for that product id already exists in the
+		 * resolved scope — so a router-region re-render's seed read can
+		 * never clobber a shopper's in-progress edits.
+		 *
+		 * Intended to be called from a `data-wp-init` on the purchase
+		 * surface whose subtree context resolves both `currentScope` and the
+		 * server-rendered `draftSeed`.
+		 */
+		seedDraftIfAbsent: () => void;
 		/**
 		 * Posts the in-context product's current-scope draft(s) to the cart,
 		 * or an explicit payload verbatim.
@@ -1699,6 +1724,22 @@ const { actions } = store< Store >(
 				if ( bucket.length === 0 ) {
 					delete state.draftItems[ scope ];
 				}
+			},
+
+			seedDraftIfAbsent() {
+				const seed = getServerContext< { draftSeed?: DraftItem } >(
+					'woocommerce/cart'
+				)?.draftSeed;
+				if ( ! seed ) {
+					return;
+				}
+
+				const scope = state.currentScope;
+				if ( findDraftInScope( scope, seed.id ) ) {
+					return;
+				}
+
+				actions.upsertDraftItem( seed, { scope } );
 			},
 
 			*addItem( payload?: DraftItem ): AsyncAction< void > {
