@@ -46,7 +46,7 @@ class WC_Importer_Tracking_Test extends \WC_Unit_Test_Case {
 		$_REQUEST['step']     = 'done';
 		$_REQUEST['_wpnonce'] = wp_create_nonce( 'woocommerce-csv-importer' );
 
-		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'product_page_product_importer' );
 
 		$this->assertRecordedTracksEvent( 'wcadmin_product_import_complete' );
@@ -65,7 +65,7 @@ class WC_Importer_Tracking_Test extends \WC_Unit_Test_Case {
 		$_GET['products-failed']              = '1';
 		$_GET['products-skipped']             = '4';
 
-		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'product_page_product_importer' );
 
 		$events = $this->get_tracks_events( 'wcadmin_product_import_complete' );
@@ -84,7 +84,7 @@ class WC_Importer_Tracking_Test extends \WC_Unit_Test_Case {
 	public function test_import_complete_not_recorded_without_nonce() {
 		$_REQUEST['step'] = 'done';
 
-		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'product_page_product_importer' );
 
 		$this->assertNotRecordedTracksEvent( 'wcadmin_product_import_complete' );
