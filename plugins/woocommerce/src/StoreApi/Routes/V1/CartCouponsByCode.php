@@ -97,6 +97,10 @@ class CartCouponsByCode extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', esc_html__( 'Coupon does not exist in the cart.', 'woocommerce' ), 404 );
 		}
 
+		if ( ( new \WC_Coupon( $request['code'] ) )->get_auto_apply() ) {
+			throw new RouteException( 'woocommerce_rest_cart_coupon_not_removable', esc_html__( 'This coupon is applied automatically and cannot be removed.', 'woocommerce' ), 403 );
+		}
+
 		$cart = $this->cart_controller->get_cart_instance();
 		$cart->remove_coupon( $request['code'] );
 

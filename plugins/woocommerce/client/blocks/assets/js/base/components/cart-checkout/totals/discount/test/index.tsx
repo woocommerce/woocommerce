@@ -30,6 +30,7 @@ jest.mock( '@woocommerce/blocks-checkout', () => ( {
 
 // Mock the core components to verify they're called with correct props
 const mockRemovableChip = jest.fn();
+const mockChip = jest.fn();
 const mockTotalsItem = jest.fn();
 
 // Mock LoadingMask component
@@ -57,6 +58,14 @@ jest.mock(
 );
 
 jest.mock( '@woocommerce/blocks-components', () => ( {
+	Chip: ( props: { text: string } ) => {
+		mockChip( props );
+		return (
+			<div data-testid="chip">
+				<span>{ props.text }</span>
+			</div>
+		);
+	},
 	RemovableChip: ( props: RemovableChipProps ) => {
 		mockRemovableChip( props );
 		return (
@@ -123,6 +132,7 @@ describe( 'TotalsDiscount', () => {
 		jest.clearAllMocks();
 		// Clear component mocks
 		mockRemovableChip.mockClear();
+		mockChip.mockClear();
 		mockTotalsItem.mockClear();
 		// Default mock implementations
 		( applyCheckoutFilter as jest.Mock ).mockImplementation(
@@ -449,6 +459,66 @@ describe( 'TotalsDiscount', () => {
 
 			// Click should not work when button is disabled
 			expect( mockRemoveCoupon ).not.toHaveBeenCalled();
+		} );
+
+		it( 'should render a plain Chip with no remove button for a non-removable (auto-applied) coupon', () => {
+			const props = {
+				...defaultProps,
+				cartCoupons: [
+					{
+						code: 'AUTO_APPLIED',
+						label: 'Auto-applied Coupon',
+						is_removable: false,
+						totals: {
+							...defaultCouponTotals,
+							total_discount: '500',
+							total_discount_tax: '0',
+						},
+					},
+				],
+				values: {
+					total_discount: '500',
+					total_discount_tax: '0',
+				},
+			};
+			render( <TotalsDiscount { ...props } /> );
+
+			expect( screen.getByTestId( 'chip' ) ).toBeInTheDocument();
+			expect(
+				screen.getByText( 'Auto-applied Coupon' )
+			).toBeInTheDocument();
+			expect(
+				screen.queryByTestId( 'removable-chip' )
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByLabelText( 'Remove coupon "Auto-applied Coupon"' )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'should render a RemovableChip when is_removable is true', () => {
+			const props = {
+				...defaultProps,
+				cartCoupons: [
+					{
+						code: 'REMOVABLE',
+						label: 'Removable Coupon',
+						is_removable: true,
+						totals: {
+							...defaultCouponTotals,
+							total_discount: '500',
+							total_discount_tax: '0',
+						},
+					},
+				],
+				values: {
+					total_discount: '500',
+					total_discount_tax: '0',
+				},
+			};
+			render( <TotalsDiscount { ...props } /> );
+
+			expect( screen.getByTestId( 'removable-chip' ) ).toBeInTheDocument();
+			expect( screen.queryByTestId( 'chip' ) ).not.toBeInTheDocument();
 		} );
 	} );
 

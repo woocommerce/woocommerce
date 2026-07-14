@@ -1570,4 +1570,68 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product->delete( true );
 		$coupon->delete( true );
 	}
+
+	/**
+	 * @testdox remove_coupon() should refuse to remove a coupon flagged for auto-apply while it is still applied.
+	 */
+	public function test_remove_coupon_refuses_auto_apply_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'auto-apply-coupon',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+				'auto_apply'    => 'yes',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+
+		$removed = WC()->cart->remove_coupon( $coupon->get_code() );
+
+		$this->assertFalse( $removed, 'direct removal of an auto-apply coupon should be refused' );
+		$this->assertTrue( WC()->cart->has_discount( $coupon->get_code() ), 'coupon should remain applied' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox auto_apply_coupons() should still remove its own auto-apply coupon once it becomes invalid.
+	 */
+	public function test_auto_apply_coupons_can_remove_its_own_invalid_coupon() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'auto-apply-min-spend',
+			array(
+				'discount_type'  => 'fixed_cart',
+				'coupon_amount'  => '5',
+				'auto_apply'     => 'yes',
+				'minimum_amount' => '15',
+			)
+		);
+
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 2 );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->has_discount( $coupon->get_code() ), 'coupon should auto-apply once minimum spend ($20) is met' );
+
+		// Drop quantity to 1 ($10, below the $15 minimum spend), without emptying the cart.
+		WC()->cart->set_quantity( $cart_item_key, 1 );
+		WC()->cart->calculate_totals();
+
+		$this->assertFalse( WC()->cart->has_discount( $coupon->get_code() ), 'coupon should be auto-removed once cart drops below minimum spend' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
 }

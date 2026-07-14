@@ -75,6 +75,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	protected $has_calculated_shipping = false;
 
 	/**
+	 * Reentrancy guard for auto_apply_coupons(), and shared with remove_coupon() so it can tell
+	 * a user-initiated removal apart from the internal removal of a now-invalid auto-apply coupon.
+	 *
+	 * @var bool
+	 */
+	protected $is_auto_applying_coupons = false;
+
+	/**
 	 * Total defaults used to reset.
 	 *
 	 * @var array
@@ -2195,24 +2203,50 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Remove coupons from the cart of a defined type. Type 1 is before tax, type 2 is after tax.
 	 *
+	 * Auto-apply coupons are kept, for the same reason remove_coupon() will not remove them
+	 * directly: they would just be re-added on the next totals recalculation.
+	 *
 	 * @param null $deprecated No longer used.
 	 * @return void
 	 */
 	public function remove_coupons( $deprecated = null ) {
+		$kept_coupons = array();
+
+		if ( ! $this->is_auto_applying_coupons ) {
+			foreach ( $this->get_applied_coupons() as $code ) {
+				$coupon = new WC_Coupon( $code );
+				if ( $coupon->get_auto_apply() ) {
+					$kept_coupons[] = $code;
+				}
+			}
+		}
+
 		$this->set_coupon_discount_totals( array() );
 		$this->set_coupon_discount_tax_totals( array() );
-		$this->set_applied_coupons( array() );
+		$this->set_applied_coupons( $kept_coupons );
 		$this->session->set_session();
 	}
 
 	/**
 	 * Remove a single coupon by code.
 	 *
+	 * A coupon flagged for auto-apply cannot be removed by a direct/manual request (e.g. the
+	 * cart's remove link, or a Store API request) while it is applied, since auto_apply_coupons()
+	 * would just re-add it on the next totals recalculation. It can still be removed internally
+	 * by auto_apply_coupons() itself once it becomes invalid.
+	 *
 	 * @param  string $coupon_code Code of the coupon to remove.
 	 * @return bool
 	 */
 	public function remove_coupon( $coupon_code ) {
 		$coupon_code = wc_format_coupon_code( $coupon_code );
+
+		if ( ! $this->is_auto_applying_coupons ) {
+			$coupon = new WC_Coupon( $coupon_code );
+			if ( $coupon->get_auto_apply() ) {
+				return false;
+			}
+		}
 
 		// Find the coupon in applied coupons using case-insensitive comparison.
 		foreach ( $this->get_applied_coupons() as $key => $applied_coupon ) {
@@ -2237,16 +2271,15 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * Hooked to 'woocommerce_after_calculate_totals', so applying or removing a coupon here
 	 * triggers another totals recalculation and therefore another call to this method. The
-	 * static $running guard makes each outer call a no-op re-entrant pass instead of an
-	 * unbounded recursive chain across every auto-apply coupon.
+	 * $is_auto_applying_coupons guard makes each outer call a no-op re-entrant pass instead of
+	 * an unbounded recursive chain across every auto-apply coupon; it is also checked by
+	 * remove_coupon() to distinguish this internal removal from a direct/manual one.
 	 *
 	 * @since 11.1.0
 	 * @return void
 	 */
 	public function auto_apply_coupons(): void {
-		static $running = false;
-
-		if ( $running || $this->is_empty() ) {
+		if ( $this->is_auto_applying_coupons || $this->is_empty() ) {
 			return;
 		}
 
@@ -2255,7 +2288,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			return;
 		}
 
-		$running = true;
+		$this->is_auto_applying_coupons = true;
 
 		// Silence coupon notices for this operation only.
 		add_filter( 'woocommerce_coupon_message', '__return_empty_string', PHP_INT_MAX );
@@ -2288,7 +2321,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		remove_filter( 'woocommerce_coupon_message', '__return_empty_string', PHP_INT_MAX );
 		remove_filter( 'woocommerce_coupon_error', '__return_empty_string', PHP_INT_MAX );
 
-		$running = false;
+		$this->is_auto_applying_coupons = false;
 	}
 
 	/**
