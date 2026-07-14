@@ -3,17 +3,14 @@
  */
 import { existsSync, readFileSync } from 'fs';
 
-export function median( array ) {
-	if ( ! array || ! array.length ) return undefined;
-
-	const numbers = [ ...array ].sort( ( a, b ) => a - b );
-	const middleIndex = Math.floor( numbers.length / 2 );
-
-	if ( numbers.length % 2 === 0 ) {
-		return ( numbers[ middleIndex - 1 ] + numbers[ middleIndex ] ) / 2;
-	}
-	return numbers[ middleIndex ];
-}
+/**
+ * Internal dependencies
+ */
+export {
+	median,
+	getMetricUnit,
+	formatMetricValue,
+} from '../../../../tools/compare-perf/metric-utils.js';
 
 export function readFile( filePath ) {
 	if ( ! existsSync( filePath ) ) {
@@ -21,22 +18,6 @@ export function readFile( filePath ) {
 	}
 
 	return readFileSync( filePath, 'utf8' ).trim();
-}
-
-export function getMetricUnit( metric ) {
-	if ( metric.endsWith( 'Size' ) ) {
-		return 'KB';
-	}
-
-	if ( metric.endsWith( 'Count' ) ) {
-		return 'count';
-	}
-
-	return 'ms';
-}
-
-export function formatMetricValue( metric, value ) {
-	return `${ value } ${ getMetricUnit( metric ) }`;
 }
 
 const WOO_BLOCKS_ASSETS_PATH =
