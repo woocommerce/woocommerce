@@ -165,8 +165,6 @@ const getUnifiedMainConfig = ( options = {} ) => {
 			// the query string to invalidate cached chunks after a build.
 			chunkFilename: `wc-block-library-[name].js?ver=[contenthash]`,
 			filename: `[name].js`,
-			library: [ 'wc', 'blocks', '[name]' ],
-			libraryTarget: 'this',
 			uniqueName: 'webpackWcBlocksUnifiedMainJsonp',
 		},
 		module: {
