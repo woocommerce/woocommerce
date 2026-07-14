@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getConfig, store } from '@wordpress/interactivity';
+import { getConfig, getContext, store } from '@wordpress/interactivity';
 import type { AsyncAction, TypeYield } from '@wordpress/interactivity';
 import type {
 	Cart,
@@ -121,16 +121,40 @@ export type Store = {
 		 * `upsertDraftItem`/`removeDraftItem`.
 		 */
 		draftItems: Record< Scope, DraftItem[] >;
+		/**
+		 * The page-wide scope, established once per request.
+		 *
+		 * Server-seeded via `wp_interactivity_state( 'woocommerce/cart', … )`
+		 * by the server-side scope service, so every surface that is not
+		 * inside a scope-overriding container (a Product Collection loop
+		 * item, a Single Product block) shares this scope and stays in sync.
+		 * Defaults to an empty string on the client until server hydration
+		 * supplies the real value.
+		 */
+		pageScope: Scope;
+		/**
+		 * The scope to read from or write to when a consumer passes none.
+		 *
+		 * Resolves the `scope` carried in the shared `woocommerce` context
+		 * namespace — set by a scope-overriding container for its subtree —
+		 * when present, else falls back to `pageScope`. This getter is the
+		 * single place that implements `context.scope ?? pageScope`; no
+		 * other code, client or server, should re-implement that
+		 * conditional. Reading the shared context outside of a directive's
+		 * execution (no active Interactivity scope) degrades to `pageScope`
+		 * rather than throwing.
+		 */
+		currentScope: Scope;
 	};
 	actions: {
 		/**
 		 * Creates or updates a draft cart item in a scope's bucket.
 		 *
-		 * Resolves the target scope from `options.scope`, then merges
-		 * `partial` into the scope's draft whose `id` matches — `id`
-		 * resolves from `options.id` when given, else from `partial.id` —
-		 * appending a new draft otherwise. The scope's bucket is created on
-		 * first write.
+		 * Resolves the target scope from `options.scope`, defaulting to
+		 * `currentScope` when omitted, then merges `partial` into the
+		 * scope's draft whose `id` matches — `id` resolves from
+		 * `options.id` when given, else from `partial.id` — appending a new
+		 * draft otherwise. The scope's bucket is created on first write.
 		 *
 		 * Rejects (leaving state unchanged) when: the resolved scope is not
 		 * a valid, non-empty scope string; no numeric target `id` can be
@@ -143,7 +167,8 @@ export type Store = {
 		 *
 		 * @param partial       The draft fields to create or merge.
 		 * @param options       Targeting options.
-		 * @param options.scope The scope to write into.
+		 * @param options.scope The scope to write into. Defaults to
+		 *                      `currentScope` when omitted.
 		 * @param options.id    An explicit id identifying which existing
 		 *                      draft to update, when it differs from
 		 *                      `partial.id` (e.g. `partial` omits `id`).
@@ -156,15 +181,17 @@ export type Store = {
 		 * Removes a scope's draft for the given product, pruning the
 		 * scope's bucket once it becomes empty.
 		 *
-		 * Rejects (leaving state unchanged) when the resolved scope is not
-		 * a valid, non-empty scope string, or no numeric `id` is given; a
-		 * request naming a product/scope with no matching draft is a
-		 * silent no-op. Every rejection is a dev-build console warning and
-		 * a silent no-op in production.
+		 * Resolves the target scope from `options.scope`, defaulting to
+		 * `currentScope` when omitted. Rejects (leaving state unchanged)
+		 * when the resolved scope is not a valid, non-empty scope string,
+		 * or no numeric `id` is given; a request naming a product/scope
+		 * with no matching draft is a silent no-op. Every rejection is a
+		 * dev-build console warning and a silent no-op in production.
 		 *
 		 * @param options       Targeting options.
 		 * @param options.id    The product id whose draft to remove.
-		 * @param options.scope The scope to remove it from.
+		 * @param options.scope The scope to remove it from. Defaults to
+		 *                      `currentScope` when omitted.
 		 */
 		removeDraftItem: ( options?: {
 			id?: DraftItem[ 'id' ];
@@ -238,6 +265,37 @@ const generateInfoNotice = ( message: string ): Notice => ( {
  */
 function isValidScope( scope: unknown ): scope is Scope {
 	return typeof scope === 'string' && scope.length > 0;
+}
+
+/**
+ * The shape of the shared `woocommerce` context namespace relevant to scope
+ * resolution.
+ *
+ * Scope-overriding containers (a Product Collection loop item, a Single
+ * Product block) emit this via `data-wp-context='woocommerce::{ "scope":
+ * "…" }'` on their wrapper element; consumers nested inside inherit it.
+ */
+type SharedContext = { scope?: Scope };
+
+/**
+ * Reads the shared `woocommerce` context namespace, degrading to `undefined`
+ * instead of throwing when read outside of a directive's execution.
+ *
+ * `getContext()` throws when called with no active Interactivity scope on
+ * the call stack (e.g. from code that runs outside any directive-driven
+ * element). `currentScope` must never propagate that failure — an
+ * out-of-directive read simply means "no context override available", so it
+ * falls back to `state.pageScope` exactly as an in-directive read with no
+ * `scope` key would.
+ *
+ * @return The shared context, or `undefined` when none is available.
+ */
+function readSharedContext(): SharedContext | undefined {
+	try {
+		return getContext< SharedContext >( 'woocommerce' );
+	} catch {
+		return undefined;
+	}
 }
 
 /**
@@ -536,6 +594,10 @@ const { actions } = store< Store >(
 	{
 		state: {
 			draftItems: {},
+			pageScope: '',
+			get currentScope(): Scope {
+				return readSharedContext()?.scope ?? state.pageScope;
+			},
 			findItemInCart( {
 				id,
 				key,
@@ -570,7 +632,10 @@ const { actions } = store< Store >(
 		actions: {
 			upsertDraftItem(
 				partial: Partial< DraftItem >,
-				{ scope, id }: { scope?: Scope; id?: DraftItem[ 'id' ] } = {}
+				{
+					scope = state.currentScope,
+					id,
+				}: { scope?: Scope; id?: DraftItem[ 'id' ] } = {}
 			) {
 				if ( ! isValidScope( scope ) ) {
 					warnDraftInvariant(
@@ -632,7 +697,7 @@ const { actions } = store< Store >(
 
 			removeDraftItem( {
 				id,
-				scope,
+				scope = state.currentScope,
 			}: { id?: DraftItem[ 'id' ]; scope?: Scope } = {} ) {
 				if ( ! isValidScope( scope ) ) {
 					warnDraftInvariant(
