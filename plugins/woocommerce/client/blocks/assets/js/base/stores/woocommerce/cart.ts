@@ -20,6 +20,8 @@ import fastDeepEqual from 'fast-deep-equal/es6';
 /**
  * Internal dependencies
  */
+import '@woocommerce/stores/woocommerce/products';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import { triggerAddedToCartEvent } from './legacy-events';
 import {
 	createMutationQueue,
@@ -28,8 +30,6 @@ import {
 	type MutationResult,
 } from './mutation-batcher';
 import { attributeNamesMatch } from '../../utils/variations/attribute-matching';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 export type WooCommerceConfig = {
 	messages?: {
@@ -193,15 +193,15 @@ export type Store = {
 		 * guesses. `filter` replaces the id-based identity matching
 		 * entirely, for extensions with their own notion of line identity.
 		 *
-		 * @param args         Lookup arguments.
-		 * @param args.scope   The scope to read the draft from. Defaults to
-		 *                     `currentScope`.
-		 * @param args.id      The product/variation id to pair by identity.
-		 * @param args.key     A known cart-line key; pairs exactly when
-		 *                     given, regardless of `id`/`filter`.
-		 * @param args.filter  An extension-supplied predicate narrowing
-		 *                     candidate lines directly, in place of
-		 *                     id-based identity matching.
+		 * @param args        Lookup arguments.
+		 * @param args.scope  The scope to read the draft from. Defaults to
+		 *                    `currentScope`.
+		 * @param args.id     The product/variation id to pair by identity.
+		 * @param args.key    A known cart-line key; pairs exactly when
+		 *                    given, regardless of `id`/`filter`.
+		 * @param args.filter An extension-supplied predicate narrowing
+		 *                    candidate lines directly, in place of
+		 *                    id-based identity matching.
 		 * @return The envelope: `{ cartItem?, draft?, isInCart }`.
 		 */
 		findItem: ( args?: {
@@ -300,6 +300,29 @@ export type Store = {
 		) => Promise< void >;
 	};
 };
+
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+/**
+ * The `woocommerce/products` store's state, consulted one-directionally
+ * (cart never becomes a dependency of products) to resolve the product in
+ * context for `itemInContext`/`inCartQuantity` and to back the pairing
+ * ladder's attribute matching (`matchesSelectedAttributes`).
+ */
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
+
+// Todo: export this store once the store is public.
+const { state } = store< Store >(
+	'woocommerce/cart',
+	{},
+	{ lock: universalLock }
+);
 
 type QuantityChanges = {
 	cartItemsPendingQuantity?: string[];
@@ -547,7 +570,9 @@ type DraftExtensionProp = {
  * @return The draft's extension props, or an empty array when `draft` is
  *         `undefined` or carries none.
  */
-function draftExtensionProps( draft: DraftItem | undefined ): DraftExtensionProp[] {
+function draftExtensionProps(
+	draft: DraftItem | undefined
+): DraftExtensionProp[] {
 	if ( ! draft ) {
 		return [];
 	}
@@ -586,8 +611,7 @@ function draftExtensionsMatchLine(
 				| Record< string, unknown >
 				| undefined;
 			return (
-				!! namespaceData &&
-				fastDeepEqual( namespaceData[ key ], value )
+				!! namespaceData && fastDeepEqual( namespaceData[ key ], value )
 			);
 		}
 	);
@@ -817,28 +841,7 @@ async function sendCartRequest(
 
 	return cartQueue.submit( options );
 }
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-/**
- * The `woocommerce/products` store's state, consulted one-directionally
- * (cart never becomes a dependency of products) to resolve the product in
- * context for `itemInContext`/`inCartQuantity` and to back the pairing
- * ladder's attribute matching (`matchesSelectedAttributes`).
- */
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
-	{},
-	{ lock: universalLock }
-);
-
-// Todo: export this store once the store is public.
-const { state } = store< Store >(
-	'woocommerce/cart',
-	{},
-	{ lock: universalLock }
-);
 const { actions } = store< Store >(
 	'woocommerce/cart',
 	{
