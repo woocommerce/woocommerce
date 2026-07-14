@@ -528,7 +528,7 @@
 			},
 			"woocommerce/product-gallery": {
 				"spacing": {
-					"blockGap": "var(--wp--preset--spacing--50)"
+					"blockGap": "var(--wp--preset--spacing--10)"
 				}
 			},
 			"woocommerce/product-gallery-large-image-next-previous": {
