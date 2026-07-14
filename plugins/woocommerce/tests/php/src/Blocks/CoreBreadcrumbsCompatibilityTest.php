@@ -115,40 +115,6 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		if ( $product_post_type ) {
 			$product_post_type->has_archive = get_page_uri( $this->shop_page_id );
 		}
-
-		register_post_type(
-			'wc_story',
-			array(
-				'labels'       => array(
-					'name'          => 'Stories',
-					'singular_name' => 'Story',
-					'archives'      => 'Story Archives',
-				),
-				'public'       => true,
-				'show_in_rest' => true,
-				'has_archive'  => true,
-				'rewrite'      => array(
-					'slug' => 'stories',
-				),
-			)
-		);
-
-		register_taxonomy(
-			'wc_topic',
-			array( 'wc_story' ),
-			array(
-				'labels'       => array(
-					'name'          => 'Topics',
-					'singular_name' => 'Topic',
-				),
-				'public'       => true,
-				'show_in_rest' => true,
-				'hierarchical' => true,
-				'rewrite'      => array(
-					'slug' => 'topic',
-				),
-			)
-		);
 	}
 
 	/**
@@ -176,12 +142,8 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 			$wp->query_vars = $this->original_wp_query_vars;
 		}
 
-		if ( post_type_exists( 'wc_story' ) ) {
-			unregister_post_type( 'wc_story' );
-		}
-
-		if ( taxonomy_exists( 'wc_topic' ) ) {
-			unregister_taxonomy( 'wc_topic' );
+		if ( taxonomy_exists( 'pa_test_color' ) ) {
+			unregister_taxonomy( 'pa_test_color' );
 		}
 
 		parent::tearDown();
@@ -248,6 +210,8 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 			return home_url( '/storefront/' );
 		};
 		add_filter( 'woocommerce_breadcrumb_home_url', $callback );
+		$this->go_to( $this->get_product_archive_url() );
+		$this->set_product_archive_request();
 
 		try {
 			$result = $this->apply_core_breadcrumb_filters(
@@ -275,6 +239,8 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 			return array();
 		};
 		add_filter( 'woocommerce_breadcrumb_home_url', $callback );
+		$this->go_to( $this->get_product_archive_url() );
+		$this->set_product_archive_request();
 
 		try {
 			$result = $this->apply_core_breadcrumb_filters(
@@ -296,6 +262,8 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	 */
 	public function test_core_breadcrumbs_use_shop_page_title_for_product_archive_item(): void {
 		$product_item = $this->get_breadcrumb_item( 'Logo Tee' );
+		$this->go_to( $this->get_product_archive_url() );
+		$this->set_product_archive_request();
 
 		$result = $this->apply_core_breadcrumb_filters(
 			$this->get_breadcrumb_item( 'All Products', $this->get_product_archive_url() ),
@@ -439,71 +407,43 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should use WooCommerce labels for custom post type archive breadcrumbs.
+	 * @testdox Should leave regular search breadcrumbs unchanged.
 	 */
-	public function test_core_breadcrumbs_label_custom_post_type_archive_items(): void {
-		$this->go_to( get_post_type_archive_link( 'wc_story' ) );
+	public function test_core_breadcrumbs_do_not_adjust_regular_search_items(): void {
+		$this->go_to( '/?s=breadcrumb' );
 
-		$this->assert_core_breadcrumb_labels(
-			array( 'Home', 'Stories' ),
-			'Custom post type archive breadcrumbs should use the WooCommerce archive label.',
-			$this->get_breadcrumb_item( 'Story Archives' )
+		$this->assert_core_breadcrumbs_unchanged(
+			'Regular search breadcrumbs should remain a Core concern.',
+			$this->get_breadcrumb_item( 'Search results for: "breadcrumb"' )
 		);
 	}
 
 	/**
-	 * @testdox Should use WooCommerce trail for custom post type single breadcrumbs.
+	 * @testdox Should prepend taxonomy labels for product attribute breadcrumbs.
 	 */
-	public function test_core_breadcrumbs_replace_custom_post_type_single_items(): void {
-		$parent_topic_id = $this->create_term( 'Topic Parent', 'wc_topic', array( 'slug' => 'topic-parent' ) );
-		$child_topic_id  = $this->create_term(
-			'Topic Child',
-			'wc_topic',
+	public function test_core_breadcrumbs_prepend_taxonomy_label_to_product_attribute_items(): void {
+		register_taxonomy(
+			'pa_test_color',
+			array( 'product' ),
 			array(
-				'slug'   => 'topic-child',
-				'parent' => $parent_topic_id,
+				'labels'       => array(
+					'name'          => 'Colors',
+					'singular_name' => 'Color',
+				),
+				'public'       => true,
+				'show_in_rest' => true,
+				'hierarchical' => true,
 			)
 		);
-		$post_id         = self::factory()->post->create(
-			array(
-				'post_type'  => 'wc_story',
-				'post_title' => 'Breadcrumb Story',
-				'post_name'  => 'breadcrumb-story',
-			)
-		);
-		wp_set_post_terms( $post_id, array( $child_topic_id ), 'wc_topic' );
-		$this->go_to( get_permalink( $post_id ) );
+
+		$term_id = $this->create_term( 'Blue', 'pa_test_color', array( 'slug' => 'blue' ) );
+		$this->go_to( get_term_link( $term_id, 'pa_test_color' ) );
+		$this->set_product_taxonomy_request( $term_id, 'pa_test_color' );
 
 		$this->assert_core_breadcrumb_labels(
-			array( 'Home', 'Story', 'Breadcrumb Story' ),
-			'Custom post type single breadcrumbs should use the WooCommerce trail.',
-			$this->get_breadcrumb_item( 'Story Archives', get_post_type_archive_link( 'wc_story' ) ),
-			$this->get_breadcrumb_item( 'Topic Parent', get_term_link( $parent_topic_id, 'wc_topic' ) ),
-			$this->get_breadcrumb_item( 'Topic Child', get_term_link( $child_topic_id, 'wc_topic' ) ),
-			$this->get_breadcrumb_item( 'Breadcrumb Story' )
-		);
-	}
-
-	/**
-	 * @testdox Should prepend taxonomy labels for custom taxonomy breadcrumbs.
-	 */
-	public function test_core_breadcrumbs_prepend_taxonomy_label_to_custom_taxonomy_items(): void {
-		$parent_topic_id = $this->create_term( 'Topic Parent', 'wc_topic', array( 'slug' => 'topic-parent' ) );
-		$child_topic_id  = $this->create_term(
-			'Topic Child',
-			'wc_topic',
-			array(
-				'slug'   => 'topic-child',
-				'parent' => $parent_topic_id,
-			)
-		);
-		$this->go_to( get_term_link( $child_topic_id, 'wc_topic' ) );
-
-		$this->assert_core_breadcrumb_labels(
-			array( 'Home', 'Topics', 'Topic Parent', 'Topic Child' ),
-			'Custom taxonomy breadcrumbs should include the taxonomy label crumb.',
-			$this->get_breadcrumb_item( 'Topic Parent', get_term_link( $parent_topic_id, 'wc_topic' ) ),
-			$this->get_breadcrumb_item( 'Topic Child' )
+			array( 'Home', 'Colors', 'Blue' ),
+			'Product attribute breadcrumbs should include the attribute taxonomy label crumb.',
+			$this->get_breadcrumb_item( 'Blue' )
 		);
 	}
 
@@ -542,6 +482,8 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 			return $crumbs;
 		};
 		add_filter( 'woocommerce_get_breadcrumb', $callback );
+		$this->go_to( $this->get_product_archive_url() );
+		$this->set_product_archive_request();
 
 		try {
 			$result = $this->apply_core_breadcrumb_filters(
@@ -560,6 +502,32 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not apply legacy WooCommerce breadcrumb filters outside WooCommerce contexts.
+	 */
+	public function test_core_breadcrumbs_do_not_apply_legacy_woocommerce_get_breadcrumb_filter_outside_woocommerce_contexts(): void {
+		$callback = function ( $crumbs ) {
+			$crumbs[1][0] = 'Filtered page';
+			return $crumbs;
+		};
+		add_filter( 'woocommerce_get_breadcrumb', $callback );
+		$this->go_to( '/?s=breadcrumb' );
+
+		try {
+			$result = $this->apply_core_breadcrumb_filters(
+				$this->get_breadcrumb_item( 'Search results for: "breadcrumb"' )
+			);
+		} finally {
+			remove_filter( 'woocommerce_get_breadcrumb', $callback );
+		}
+
+		$this->assertSame(
+			array( 'Home', 'Search results for: "breadcrumb"' ),
+			$this->get_breadcrumb_labels( $result ),
+			'Legacy WooCommerce breadcrumb filters should not run for regular Core breadcrumbs.'
+		);
+	}
+
+	/**
 	 * @testdox Should preserve Core breadcrumb item metadata when legacy filters run.
 	 */
 	public function test_core_breadcrumbs_preserve_core_item_metadata_when_legacy_filters_run(): void {
@@ -567,6 +535,8 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 			return $crumbs;
 		};
 		add_filter( 'woocommerce_get_breadcrumb', $callback );
+		$this->go_to( $this->get_product_archive_url() );
+		$this->set_product_archive_request();
 
 		$product_item = $this->get_breadcrumb_item(
 			'<span>Logo Tee</span>',
@@ -744,6 +714,44 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		$wp->query_vars[ $endpoint ] = '';
 
 		add_filter( 'woocommerce_is_account_page', '__return_true' );
+	}
+
+	/**
+	 * Set the current request as the product archive.
+	 */
+	private function set_product_archive_request(): void {
+		global $wp_query;
+
+		$wp_query->is_post_type_archive = true;
+		$wp_query->is_archive           = true;
+		$wp_query->is_404               = false;
+
+		set_query_var( 'post_type', 'product' );
+	}
+
+	/**
+	 * Set the current request as a product taxonomy archive.
+	 *
+	 * @param int    $term_id Term ID.
+	 * @param string $taxonomy Taxonomy name.
+	 */
+	private function set_product_taxonomy_request( int $term_id, string $taxonomy ): void {
+		global $wp_query;
+
+		$term = get_term( $term_id, $taxonomy );
+
+		if ( ! $term instanceof \WP_Term ) {
+			$this->fail( 'Expected product taxonomy term to be available.' );
+		}
+
+		$wp_query->queried_object    = $term;
+		$wp_query->queried_object_id = $term_id;
+		$wp_query->is_tax            = true;
+		$wp_query->is_archive        = true;
+		$wp_query->is_404            = false;
+
+		set_query_var( 'taxonomy', $taxonomy );
+		set_query_var( 'term', $term->slug );
 	}
 
 	/**

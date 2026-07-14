@@ -116,6 +116,10 @@ final class CoreBreadcrumbsCompatibility {
 	 * @return array Modified breadcrumb items.
 	 */
 	public function apply_woocommerce_breadcrumb_filters( $items ) {
+		if ( ! is_array( $items ) || ! $this->is_woocommerce_breadcrumb_context() ) {
+			return $items;
+		}
+
 		$items = $this->apply_woocommerce_core_breadcrumb_adjustments( $items );
 
 		if ( ! has_filter( 'woocommerce_get_breadcrumb' ) ) {
@@ -178,13 +182,11 @@ final class CoreBreadcrumbsCompatibility {
 		}
 
 		$items = $this->replace_product_archive_breadcrumb_label( $items );
-		$items = $this->replace_post_type_archive_breadcrumb_label( $items );
-		$items = $this->replace_custom_post_type_single_breadcrumbs( $items );
 		$items = $this->prepend_shop_page_to_product_taxonomy_breadcrumbs( $items );
-		$items = $this->prepend_taxonomy_label_to_custom_taxonomy_breadcrumbs( $items );
+		$items = $this->prepend_taxonomy_label_to_product_taxonomy_breadcrumbs( $items );
 		$items = $this->prepend_shop_page_to_product_search_breadcrumbs( $items );
 		$items = $this->replace_product_tag_breadcrumb_label( $items );
-		$items = $this->replace_search_breadcrumb_label( $items );
+		$items = $this->replace_product_search_breadcrumb_label( $items );
 		$items = $this->prepend_my_account_page_to_endpoint_breadcrumbs( $items );
 		$items = $this->apply_home_breadcrumb_url_filter( $items );
 
@@ -253,78 +255,6 @@ final class CoreBreadcrumbsCompatibility {
 	}
 
 	/**
-	 * Replace custom post type archive breadcrumb labels with WooCommerce's archive labels.
-	 *
-	 * @param array $items Array of breadcrumb items from Core.
-	 * @return array Modified breadcrumb items.
-	 */
-	private function replace_post_type_archive_breadcrumb_label( $items ) {
-		if ( ! is_post_type_archive() || is_shop() || empty( $items ) ) {
-			return $items;
-		}
-
-		$post_type = get_query_var( 'post_type' );
-
-		if ( is_array( $post_type ) ) {
-			$post_type = reset( $post_type );
-		}
-
-		if ( ! is_string( $post_type ) || 'product' === $post_type ) {
-			return $items;
-		}
-
-		$post_type_object = get_post_type_object( $post_type );
-		$archive_link     = get_post_type_archive_link( $post_type );
-
-		if ( ! $post_type_object || ! $archive_link ) {
-			return $items;
-		}
-
-		return $this->replace_current_archive_breadcrumb_label( $items, $post_type_object->labels->name, $archive_link );
-	}
-
-	/**
-	 * Replace custom post type single breadcrumbs with WooCommerce's archive trail.
-	 *
-	 * WooCommerce does not add taxonomy breadcrumbs for non-product custom post types.
-	 *
-	 * @param array $items Array of breadcrumb items from Core.
-	 * @return array Modified breadcrumb items.
-	 */
-	private function replace_custom_post_type_single_breadcrumbs( $items ) {
-		if ( ! is_single() || empty( $items ) ) {
-			return $items;
-		}
-
-		$post_type = get_post_type();
-
-		if ( ! is_string( $post_type ) || in_array( $post_type, array( 'post', 'product' ), true ) ) {
-			return $items;
-		}
-
-		$post_type_object = get_post_type_object( $post_type );
-		$last_index       = array_key_last( $items );
-
-		if ( ! $post_type_object || null === $last_index ) {
-			return $items;
-		}
-
-		$modified_items = array_slice( $items, 0, $this->get_first_breadcrumb_insert_index( $items ) );
-		$archive_link   = get_post_type_archive_link( $post_type );
-
-		if ( ! empty( $post_type_object->has_archive ) && $archive_link ) {
-			$modified_items[] = array(
-				'label' => $post_type_object->labels->singular_name,
-				'url'   => $archive_link,
-			);
-		}
-
-		$modified_items[] = $items[ $last_index ];
-
-		return $modified_items;
-	}
-
-	/**
 	 * Prepend the shop page to product taxonomy breadcrumbs.
 	 *
 	 * @param array $items Array of breadcrumb items from Core.
@@ -351,13 +281,13 @@ final class CoreBreadcrumbsCompatibility {
 	}
 
 	/**
-	 * Prepend taxonomy labels to custom taxonomy breadcrumbs.
+	 * Prepend taxonomy labels to product taxonomy breadcrumbs.
 	 *
 	 * @param array $items Array of breadcrumb items from Core.
 	 * @return array Modified breadcrumb items.
 	 */
-	private function prepend_taxonomy_label_to_custom_taxonomy_breadcrumbs( $items ) {
-		if ( ! is_tax() || empty( $items ) ) {
+	private function prepend_taxonomy_label_to_product_taxonomy_breadcrumbs( $items ) {
+		if ( ! is_product_taxonomy() || empty( $items ) ) {
 			return $items;
 		}
 
@@ -394,7 +324,7 @@ final class CoreBreadcrumbsCompatibility {
 	 * @return array Modified breadcrumb items.
 	 */
 	private function prepend_shop_page_to_product_search_breadcrumbs( $items ) {
-		if ( ! is_search() || ! is_shop() || intval( get_option( 'page_on_front' ) ) === wc_get_page_id( 'shop' ) ) {
+		if ( ! $this->is_product_search() || intval( get_option( 'page_on_front' ) ) === wc_get_page_id( 'shop' ) ) {
 			return $items;
 		}
 
@@ -407,8 +337,8 @@ final class CoreBreadcrumbsCompatibility {
 	 * @param array $items Array of breadcrumb items from Core.
 	 * @return array Modified breadcrumb items.
 	 */
-	private function replace_search_breadcrumb_label( $items ) {
-		if ( ! is_search() || empty( $items ) ) {
+	private function replace_product_search_breadcrumb_label( $items ) {
+		if ( ! $this->is_product_search() || empty( $items ) ) {
 			return $items;
 		}
 
@@ -473,6 +403,34 @@ final class CoreBreadcrumbsCompatibility {
 	/*
 	 * Utility methods.
 	 */
+
+	/**
+	 * Check whether the current request is a WooCommerce breadcrumb context.
+	 *
+	 * @return bool Whether WooCommerce should adjust Core breadcrumb items.
+	 */
+	private function is_woocommerce_breadcrumb_context(): bool {
+		return is_product() || is_shop() || is_product_taxonomy() || $this->is_product_search() || ( is_wc_endpoint_url() && is_account_page() );
+	}
+
+	/**
+	 * Check whether the current request is a product search.
+	 *
+	 * @return bool Whether the current request is a product search.
+	 */
+	private function is_product_search(): bool {
+		if ( ! is_search() ) {
+			return false;
+		}
+
+		$post_type = get_query_var( 'post_type' );
+
+		if ( is_array( $post_type ) ) {
+			return in_array( 'product', $post_type, true );
+		}
+
+		return 'product' === $post_type || is_shop();
+	}
 
 	/**
 	 * Prepend the shop page to breadcrumb items.

@@ -7,11 +7,12 @@ use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypesController as TestedBlockTypesController;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
+use WC_Unit_Test_Case;
 
 /**
  * Unit tests for the BlockTypesController class.
  */
-class BlockTypesController extends \WP_UnitTestCase {
+class BlockTypesController extends WC_Unit_Test_Case {
 
 	/**
 	 * Holds the BlockTypesController under test.
@@ -26,7 +27,7 @@ class BlockTypesController extends \WP_UnitTestCase {
 	 * @return void
 	 * @throws \Exception If there is no dependency for the given identifier in the container the setup will fail.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->block_types_controller = new TestedBlockTypesController(
