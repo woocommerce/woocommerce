@@ -152,6 +152,10 @@ endif;
 			foreach ( $item_totals as $total ) {
 				++$i;
 				$last_class = ( $i === $item_totals_count ) ? ' order-totals-last' : '';
+				// The shipping method name is already shown in the row header, so avoid duplicating it in the value cell.
+				if ( $email_improvements_enabled && isset( $total['meta'] ) && $total['value'] === $total['meta'] ) {
+					$total['value'] = __( 'Free', 'woocommerce' );
+				}
 				?>
 				<tr class="order-totals order-totals-<?php echo esc_attr( $total['type'] ?? 'unknown' ); ?><?php echo esc_attr( $last_class ); ?>">
 					<th class="td text-align-left" scope="row" colspan="2" style="<?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>">

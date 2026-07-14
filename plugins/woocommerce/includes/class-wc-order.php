@@ -2634,27 +2634,4 @@ class WC_Order extends WC_Abstract_Order {
 
 		return $value;
 	}
-
-	/**
-	 * Add total row for shipping.
-	 *
-	 * Overrides the parent to show "Free" in the value cell when email improvements
-	 * are enabled, since the method name is already shown in the row header.
-	 *
-	 * @param array  $total_rows Reference to total rows array.
-	 * @param string $tax_display Excl or incl tax display mode.
-	 * @return void
-	 */
-	protected function add_order_item_totals_shipping_row( &$total_rows, $tax_display ) {
-		parent::add_order_item_totals_shipping_row( $total_rows, $tax_display );
-
-		if (
-			FeaturesUtil::feature_is_enabled( 'email_improvements' ) &&
-			isset( $total_rows['shipping'] ) &&
-			$this->get_shipping_method() &&
-			0.0 === abs( (float) $this->get_shipping_total() )
-		) {
-			$total_rows['shipping']['value'] = __( 'Free', 'woocommerce' );
-		}
-	}
 }
