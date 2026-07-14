@@ -562,10 +562,12 @@ class WC_Download_Handler {
 		$remote_filename = '';
 		if ( isset( $headers['content-disposition'] ) ) {
 			// The RFC 5987 encoded `filename*` parameter takes precedence over the plain `filename` one.
-			if ( preg_match( '/filename\*\s*=\s*[^\']*\'[^\']*\'([^;]+)/i', $headers['content-disposition'], $matches ) ) {
-				$remote_filename = rawurldecode( trim( $matches[1], " \t\"" ) );
-			} elseif ( preg_match( '/filename\s*=\s*("([^"]*)"|[^;]+)/i', $headers['content-disposition'], $matches ) ) {
-				$remote_filename = isset( $matches[2] ) ? $matches[2] : trim( $matches[1] );
+			// Matches e.g. `filename*=UTF-8''My%20Report.pdf`: a charset, a language tag between the quotes, then the percent-encoded value.
+			if ( preg_match( '/filename\*\s*=\s*[^\']*\'[^\']*\'(?<encoded_value>[^;]+)/i', $headers['content-disposition'], $matches ) ) {
+				$remote_filename = rawurldecode( trim( $matches['encoded_value'], " \t\"" ) );
+			} elseif ( preg_match( '/filename\s*=\s*(?:"(?<quoted_value>[^"]*)"|(?<bare_value>[^;]+))/i', $headers['content-disposition'], $matches ) ) {
+				// Matches `filename="My Report.pdf"` (quoted) or `filename=report.pdf` (bare token, terminated by `;`).
+				$remote_filename = isset( $matches['bare_value'] ) ? trim( $matches['bare_value'] ) : $matches['quoted_value'];
 			}
 
 			$remote_filename = sanitize_file_name( $remote_filename );
@@ -731,8 +733,6 @@ class WC_Download_Handler {
 
 	/**
 	 * Read an already-open file handle in chunks and echo its content.
-	 *
-	 * @since 11.1.0
 	 *
 	 * @param resource $handle Open file handle, e.g. from `fopen()`.
 	 * @param int      $start  Byte offset/position of the beginning from which to read from the file.

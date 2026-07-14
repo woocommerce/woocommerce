@@ -251,6 +251,20 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox resolve_filename_from_response_headers() should parse the unquoted token form of the filename parameter.
+	 */
+	public function test_resolve_filename_parses_bare_token_filename(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Disposition: attachment; filename=Hello-World-master.zip',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, 'master' );
+
+		$this->assertSame( 'Hello-World-master.zip', $resolved, 'The unquoted filename token form should be parsed.' );
+	}
+
+	/**
 	 * @testdox resolve_filename_from_response_headers() should prefer the RFC 5987 filename* parameter and percent-decode it.
 	 */
 	public function test_resolve_filename_prefers_rfc5987_filename(): void {
