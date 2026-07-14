@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Detect Store API requests made with plain permalinks (?rest_route=/wc/store/) so they are correctly identified.
