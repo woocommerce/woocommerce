@@ -141,11 +141,6 @@ export type Store = {
 		};
 		restUrl: string;
 		nonce: string;
-		findItemInCart: ( args: {
-			id: ClientCartItem[ 'id' ];
-			key?: ClientCartItem[ 'key' ];
-			variation?: ClientCartItem[ 'variation' ];
-		} ) => CartItem | OptimisticCartItem | undefined;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
@@ -360,28 +355,17 @@ export type Store = {
 		/**
 		 * Removes a cart line by key.
 		 *
-		 * The public name for the existing `removeCartItem` behavior.
-		 *
 		 * @param key The cart line's key.
 		 */
 		removeItem: ( key: string ) => Promise< void >;
 		/**
 		 * Re-fetches the server cart, bypassing the browser cache.
-		 *
-		 * The public name for the existing `refreshCartItems` behavior.
 		 */
 		refresh: () => Promise< void >;
-		removeCartItem: ( key: string ) => Promise< void >;
 		addCartItem: (
 			args: ClientCartItem,
 			options?: CartUpdateOptions
 		) => Promise< void >;
-		batchAddCartItems: (
-			items: ClientCartItem[],
-			options?: CartUpdateOptions
-		) => Promise< void >;
-		// Todo: Check why if I switch to an async function here the types of the store stop working.
-		refreshCartItems: () => Promise< void >;
 		waitForIdle: () => Promise< void >;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => Promise< void >;
 		updateNotices: (
@@ -520,32 +504,6 @@ function warnDraftInvariant( message: string ): void {
 }
 
 /**
- * Computes the canonical product token for accumulating per-product totals
- * across a batch.
- *
- * The token is stable: simple items produce `"<id>"` and variation items
- * produce `"<id>|<attr1>=<val1>&..."` with attributes sorted alphabetically
- * by name so insertion order differences do not produce different tokens.
- *
- * @param id        The product id.
- * @param variation The variation attributes, if any.
- * @return A canonical string token that uniquely identifies this product.
- */
-function productToken(
-	id: number,
-	variation?: CartVariationItem[] | SelectedAttributes[]
-): string {
-	if ( ! variation || variation.length === 0 ) {
-		return String( id );
-	}
-	const attrs = [ ...variation ]
-		.sort( ( a, b ) => a.attribute.localeCompare( b.attribute ) )
-		.map( ( v ) => `${ v.attribute }=${ v.value }` )
-		.join( '&' );
-	return `${ id }|${ attrs }`;
-}
-
-/**
  * Returns `true` when a variation cart line's recorded attribute values
  * match a set of selected attributes.
  *
@@ -605,10 +563,11 @@ function matchesSelectedAttributes(
 
 /**
  * Returns `true` when the given cart line matches the product identified by
- * `id` and `variation`, using the same matching logic as `findItemInCart`.
+ * `id` and `variation`.
  *
  * Simple items match by `id` equality. Variation items additionally require
- * `variation.length` equality and `matchesSelectedAttributes`.
+ * `variation.length` equality and `matchesSelectedAttributes`. The private
+ * matcher backing `findItem`'s identity rung and {@link findCartLine}.
  *
  * @param item      The cart line to test.
  * @param id        The product id to match against.
@@ -632,6 +591,39 @@ function lineMatchesProduct(
 		return matchesSelectedAttributes( item, variation );
 	}
 	return id === item.id;
+}
+
+/**
+ * Finds a cart line by key, or by product/variation identity when no key is
+ * given.
+ *
+ * The private matcher behind `addCartItem`/`updateItem`'s keyed-or-keyless
+ * lookup and `addItem`'s per-draft lookup, internalizing the former public
+ * `findItemInCart` getter's exact behavior: an explicit `key` pairs exactly,
+ * otherwise {@link lineMatchesProduct} resolves identity.
+ *
+ * @param args           Lookup arguments.
+ * @param args.id        The product/variation id to match by identity.
+ * @param args.key       A known cart-line key; pairs exactly when given,
+ *                       regardless of `id`/`variation`.
+ * @param args.variation The variation attributes to match against, if any.
+ * @return The matching cart line, or `undefined` when none matches.
+ */
+function findCartLine( {
+	id,
+	key,
+	variation,
+}: {
+	id: ClientCartItem[ 'id' ];
+	key?: ClientCartItem[ 'key' ];
+	variation?: ClientCartItem[ 'variation' ];
+} ): CartItem | OptimisticCartItem | undefined {
+	if ( key ) {
+		return state.cart.items.find( ( cartItem ) => key === cartItem.key );
+	}
+	return state.cart.items.find( ( cartItem ) =>
+		lineMatchesProduct( cartItem, id, variation )
+	);
 }
 
 /**
@@ -733,7 +725,7 @@ function findDraftInScope(
  *
  * For each product entry in `products`, computes:
  *   - `serverTotal` = sum of the committed server cart's lines matching that
- *     product (using the same matcher as `findItemInCart`).
+ *     product (via `lineMatchesProduct`).
  *   - `expectedTotal` = pre-add total + sum of posted deltas.
  *
  * When `serverTotal === expectedTotal`, the add was exact for that product
@@ -803,7 +795,7 @@ function computeKeylessAddSuppressKeys(
  * mutation) still notify because they make the per-product totals diverge and
  * the keys are left out of the set.
  *
- * Keyed `update-item` changes and `removeCartItem` never populate
+ * Keyed `update-item` changes and `removeItem` never populate
  * `suppressKeys` (the parameter defaults to an empty set), so their notice
  * behavior is byte-for-byte unchanged.
  *
@@ -836,7 +828,7 @@ const getInfoNoticesFromCartUpdates = (
 	// Lines whose key appears in suppressKeys are skipped: the action proved that
 	// the product's add was exact (server total == expected total), so any
 	// quantity difference on those lines is an intentional add result, not a
-	// server-initiated change. Keyed update-item lines and removeCartItem lines
+	// server-initiated change. Keyed update-item lines and removeItem lines
 	// are never in suppressKeys, so their notice behavior is unchanged.
 	const autoUpdatedToNotify = newItems.filter( ( item ) => {
 		if ( ! isCartItem( item ) ) {
@@ -976,10 +968,9 @@ function* postDraftItems(
 
 	try {
 		// Per-item capture for the keyless-add exactness test (see
-		// `computeKeylessAddSuppressKeys`), mirroring `batchAddCartItems`.
-		// Drafts are unique per product id by construction (at most one
-		// draft per id per scope; grouped children are distinct ids), so
-		// unlike `batchAddCartItems` no per-token accumulation is needed.
+		// `computeKeylessAddSuppressKeys`). Drafts are unique per product id
+		// by construction (at most one draft per id per scope; grouped
+		// children are distinct ids), so no per-token accumulation is needed.
 		const productCaptures = items.map( ( item ) => {
 			const preExistingKeys: string[] = [];
 			let preAddTotal = 0;
@@ -1001,7 +992,7 @@ function* postDraftItems(
 		} );
 
 		const requests = items.map( ( item, index ) => {
-			const existingItem = state.findItemInCart( {
+			const existingItem = findCartLine( {
 				id: item.id,
 				variation: item.variation,
 			} );
@@ -1093,11 +1084,9 @@ function* postDraftItems(
 /**
  * Removes a cart line by key.
  *
- * The shared implementation behind both `removeCartItem` (retained until
- * its consumers migrate) and `removeItem` (the public name), extracted so
- * both actions reproduce the exact same optimistic-apply,
- * commit-or-rollback, and notice behavior via `yield*` delegation, rather
- * than one re-implementing the other.
+ * Backs the `removeItem` action, extracted to a standalone generator so its
+ * optimistic-apply, commit-or-rollback, and notice behavior lives in one
+ * place.
  *
  * Accepts the store's `actions` as an explicit parameter (rather than
  * closing over the module-level binding) purely so this declaration can
@@ -1133,8 +1122,8 @@ function* removeCartItemGenerator(
 				);
 			},
 			// Side effects run synchronously during reconciliation,
-			// before isProcessing clears. This prevents
-			// refreshCartItems from running during these events.
+			// before isProcessing clears. This prevents `refresh` from
+			// running during these events.
 			onSettled: ( { success } ) => {
 				if ( success ) {
 					emitSyncEvent( { quantityChanges } );
@@ -1216,7 +1205,7 @@ function* addCartItemGenerator(
 	const a11yModulePromise = import( '@wordpress/a11y' );
 
 	// Find existing item
-	const existingItem = state.findItemInCart( {
+	const existingItem = findCartLine( {
 		id,
 		key,
 		variation,
@@ -1369,8 +1358,8 @@ function* addCartItemGenerator(
 				);
 			},
 			// Side effects run synchronously during reconciliation,
-			// before isProcessing clears. This prevents
-			// refreshCartItems from running during these events.
+			// before isProcessing clears. This prevents `refresh` from
+			// running during these events.
 			onSettled: ( { success } ) => {
 				if ( success ) {
 					// Dispatch legacy event
@@ -1384,7 +1373,7 @@ function* addCartItemGenerator(
 			},
 		} ) ) as TypeYield< typeof sendCartRequest >;
 
-		// Success - handle side effects that don't trigger refreshCartItems
+		// Success - handle side effects that don't trigger `refresh`
 		const cart = result.data as Cart;
 
 		// Show notices if enabled
@@ -1427,18 +1416,16 @@ function* addCartItemGenerator(
  * Re-fetches the server cart, bypassing the browser cache, retrying with
  * exponential backoff on failure.
  *
- * The shared implementation behind both `refreshCartItems` (retained
- * until its consumers migrate) and `refresh` (the public name), extracted
- * so both actions reproduce the exact same refresh/retry behavior via
- * `yield*` delegation.
+ * Backs the `refresh` action, extracted to a standalone generator so its
+ * refresh/retry behavior lives in one place.
  *
  * Accepts the store's `actions` as an explicit parameter (rather than
  * closing over the module-level binding) purely so this declaration can
  * sit above the `store()` call that produces it; it is also the retry
  * callback `setTimeout` invokes directly on failure.
  *
- * @param storeActions The store's own actions; `storeActions.refreshCartItems`
- *                     is the retry callback on failure.
+ * @param storeActions The store's own actions; `storeActions.refresh` is
+ *                     the retry callback on failure.
  */
 function* refreshCartItemsGenerator(
 	storeActions: Store[ 'actions' ]
@@ -1486,7 +1473,7 @@ function* refreshCartItemsGenerator(
 		refreshTimeout = 3000;
 	} catch ( error ) {
 		// Tries again after the timeout.
-		setTimeout( storeActions.refreshCartItems, refreshTimeout );
+		setTimeout( storeActions.refresh, refreshTimeout );
 
 		// Increases the timeout exponentially.
 		refreshTimeout *= 2;
@@ -1503,24 +1490,6 @@ const { actions } = store< Store >(
 			pageScope: '',
 			get currentScope(): Scope {
 				return readSharedContext()?.scope ?? state.pageScope;
-			},
-			findItemInCart( {
-				id,
-				key,
-				variation,
-			}: {
-				id: ClientCartItem[ 'id' ];
-				key?: ClientCartItem[ 'key' ];
-				variation?: ClientCartItem[ 'variation' ];
-			} ) {
-				if ( key ) {
-					return state.cart.items.find(
-						( cartItem ) => key === cartItem.key
-					);
-				}
-				return state.cart.items.find( ( cartItem ) =>
-					lineMatchesProduct( cartItem, id, variation )
-				);
 			},
 			findItem( {
 				scope = state.currentScope,
@@ -1806,282 +1775,11 @@ const { actions } = store< Store >(
 				yield* refreshCartItemsGenerator( actions );
 			},
 
-			*removeCartItem( key: string ): AsyncAction< void > {
-				yield* removeCartItemGenerator( key, actions );
-			},
-
 			*addCartItem(
 				args: ClientCartItem,
 				options?: CartUpdateOptions
 			): AsyncAction< void > {
 				yield* addCartItemGenerator( args, actions, options );
-			},
-
-			*batchAddCartItems(
-				items: ClientCartItem[],
-				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			): AsyncAction< void > {
-				const a11yModulePromise = import( '@wordpress/a11y' );
-				const quantityChanges: QuantityChanges = {};
-
-				try {
-					// Per-product capture for the keyless-add exactness test,
-					// accumulated across all keyless batch items. The map key is a
-					// canonical product token (productToken(id, variation)) so that
-					// multiple batch items for the same product accumulate into one
-					// entry. The capture runs synchronously in the .map() below,
-					// before applyOptimistic runs (applyOptimistic is gated behind
-					// `await isNonceReady` inside sendCartRequest, so every
-					// existingItem.quantity read during the .map() sees the same
-					// pre-add cart). Keyed `update-item` items never contribute to
-					// this map, so the "your change was undone" notice keeps firing.
-					type BatchProductCapture = {
-						id: number;
-						variation?:
-							| CartVariationItem[]
-							| SelectedAttributes[]
-							| undefined;
-						preAddTotal: number;
-						deltaTotal: number;
-						preExistingKeys: string[];
-					};
-					const batchProductCaptures = new Map<
-						string,
-						BatchProductCapture
-					>();
-					const promises = items.map( ( item, index ) => {
-						const existingItem = state.findItemInCart( {
-							id: item.id,
-							key: item.key,
-							variation: item.variation,
-						} );
-
-						let quantity: number;
-						if ( typeof item.quantityToAdd === 'number' ) {
-							const currentQuantity = existingItem?.quantity ?? 0;
-							quantity = currentQuantity + item.quantityToAdd;
-						} else {
-							quantity = item.quantity ?? 1;
-						}
-						// Endpoint selection is a pure function of the
-						// caller-supplied `key`, never of a line matched by
-						// id/variation. This mirrors the single-item
-						// `addCartItem` path: a keyless batch item always
-						// issues `add-item` with a delta, even when an existing
-						// line (including a server-keyed one) matches by product
-						// id, so the server owns cart-line identity for adds.
-						// Only an explicit caller `key` targets a specific line
-						// via `update-item`.
-						const isUpdate = !! item.key;
-						const endpoint = isUpdate ? 'update-item' : 'add-item';
-
-						let itemToSend: OptimisticCartItem;
-						if ( isUpdate && existingItem ) {
-							// Caller-keyed update: target the exact line by key
-							// and send the absolute target quantity to the
-							// update-item endpoint.
-							itemToSend = {
-								key: existingItem.key,
-								id: existingItem.id,
-								quantity,
-							} as OptimisticCartItem;
-							quantityChanges.cartItemsPendingQuantity = [
-								...( quantityChanges.cartItemsPendingQuantity ??
-									[] ),
-								existingItem.key as string,
-							];
-						} else {
-							// Keyless add: build a fresh payload for the add-item
-							// endpoint and never copy the matched line's key. As in
-							// addCartItem, the amount sent is always a delta —
-							// add-item adds to the existing quantity rather than
-							// setting it — so a match (by id/variation, possibly
-							// carrying a server key) only tells us how much delta is
-							// already accounted for; with no match we post the full
-							// target quantity. The matched line is never sent as an
-							// absolute quantity.
-							const quantityToSend = existingItem
-								? quantity - existingItem.quantity
-								: quantity;
-							itemToSend = {
-								id: item.id,
-								quantity: quantityToSend,
-								...( item.variation && {
-									variation: item.variation,
-								} ),
-							} as OptimisticCartItem;
-							quantityChanges.productsPendingAdd = [
-								...( quantityChanges.productsPendingAdd ?? [] ),
-								item.id,
-							];
-
-							// Accumulate the per-product capture for the exactness
-							// test. On the first encounter of each product token,
-							// sum all pre-add quantities across every matching line
-							// and collect their keys — both captured as primitives
-							// here, before applyOptimistic mutates the cart. On
-							// subsequent encounters of the same product, add only
-							// the posted delta to the running deltaTotal.
-							const token = productToken(
-								item.id,
-								item.variation
-							);
-							if ( ! batchProductCaptures.has( token ) ) {
-								const preExistingKeys: string[] = [];
-								let preAddTotal = 0;
-								for ( const cartLine of state.cart.items ) {
-									if (
-										lineMatchesProduct(
-											cartLine,
-											item.id,
-											item.variation
-										)
-									) {
-										preAddTotal += cartLine.quantity;
-										if ( cartLine.key ) {
-											preExistingKeys.push(
-												cartLine.key
-											);
-										}
-									}
-								}
-								batchProductCaptures.set( token, {
-									id: item.id,
-									variation: item.variation,
-									preAddTotal,
-									deltaTotal: quantityToSend,
-									preExistingKeys,
-								} );
-							} else {
-								// Same product seen again in this batch — add delta.
-								const capture =
-									batchProductCaptures.get( token );
-								if ( capture ) {
-									capture.deltaTotal += quantityToSend;
-								}
-							}
-						}
-
-						const isLastItem = index === items.length - 1;
-
-						return sendCartRequest( state, {
-							path: `/wc/store/v1/cart/${ endpoint }`,
-							method: 'POST',
-							body: itemToSend,
-							applyOptimistic: () => {
-								if ( existingItem ) {
-									// As in addCartItem, this in-place
-									// bump is render-only and must never feed back into
-									// endpoint selection or the posted amount, which are
-									// already fixed above as a pure function of
-									// key-presence and the delta. Bumping a server-keyed
-									// line's rendered quantity on a keyless add is the
-									// accepted meta-only blip the server reconciles; it
-									// must not flip the add into `update-item` or post an
-									// absolute quantity. Letting this match drive the
-									// endpoint or amount reintroduces the bug.
-									existingItem.quantity = quantity;
-								} else {
-									state.cart.items.push( itemToSend );
-								}
-							},
-							// Only fire events on the last item to avoid
-							// duplicate notifications mid-batch.
-							// Fire events when ANY item in the batch
-							// succeeded (data is set from the last
-							// successful server state). Only the last
-							// item's callback fires to avoid duplicates.
-							...( isLastItem && {
-								onSettled: ( { data } ) => {
-									if ( data ) {
-										triggerAddedToCartEvent( {
-											preserveCartData: true,
-										} );
-										emitSyncEvent( {
-											quantityChanges,
-										} );
-									}
-								},
-							} ),
-						} );
-					} );
-
-					// Capture cart state after optimistic updates for notices.
-					const cartAfterOptimistic = JSON.parse(
-						JSON.stringify( state.cart )
-					);
-
-					const results = ( yield Promise.allSettled(
-						promises
-					) ) as PromiseSettledResult< MutationResult< Cart > >[];
-
-					// Find the last successful result for notices/a11y.
-					const lastSuccess = [ ...results ]
-						.reverse()
-						.find(
-							(
-								r
-							): r is PromiseFulfilledResult<
-								MutationResult< Cart >
-							> => r.status === 'fulfilled' && r.value.success
-						);
-
-					if ( lastSuccess ) {
-						const cart = lastSuccess.value.data as Cart;
-
-						if ( showCartUpdatesNotices ) {
-							// Compute the suppression set from the accumulated
-							// per-product captures. For each product, if the server
-							// total equals preAddTotal + sum of posted deltas, the
-							// add was exact and the pre-existing keys are suppressed.
-							const suppressKeys = computeKeylessAddSuppressKeys(
-								[ ...batchProductCaptures.values() ],
-								cart
-							);
-							const infoNotices = getInfoNoticesFromCartUpdates(
-								cartAfterOptimistic,
-								cart,
-								suppressKeys
-							);
-							const errorNotices =
-								cart.errors.map( generateErrorNotice );
-							yield actions.updateNotices(
-								[ ...infoNotices, ...errorNotices ],
-								true
-							);
-						}
-
-						const { messages } = getConfig(
-							'woocommerce'
-						) as WooCommerceConfig;
-						if ( messages?.addedToCartText ) {
-							const { speak } =
-								( yield a11yModulePromise ) as Awaited<
-									typeof a11yModulePromise
-								>;
-							speak( messages.addedToCartText, 'polite' );
-						}
-					}
-
-					// Show error notices for failed items.
-					const errorNotices = results
-						.filter(
-							( r ): r is PromiseRejectedResult =>
-								r.status === 'rejected'
-						)
-						.map( ( r ) =>
-							generateErrorNotice( r.reason as ApiErrorResponse )
-						);
-					if ( errorNotices.length > 0 ) {
-						yield actions.updateNotices( errorNotices );
-					}
-				} catch ( error ) {
-					actions.showNoticeError( error as Error );
-				}
-			},
-
-			*refreshCartItems(): AsyncAction< void > {
-				yield* refreshCartItemsGenerator( actions );
 			},
 
 			*waitForIdle(): AsyncAction< void > {
@@ -2156,7 +1854,7 @@ const { actions } = store< Store >(
 );
 
 // Trigger initial cart refresh.
-actions.refreshCartItems();
+actions.refresh();
 
 window.addEventListener(
 	'wc-blocks_store_sync_required',
@@ -2166,7 +1864,7 @@ window.addEventListener(
 			id: number;
 		} >;
 		if ( customEvent.detail.type === 'from_@wordpress/data' ) {
-			actions.refreshCartItems();
+			actions.refresh();
 		}
 	}
 );
