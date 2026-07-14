@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E: de-flake the cart-store nonce refresh spec by polling the intercepted nonce instead of waiting for a response that can complete during page load.

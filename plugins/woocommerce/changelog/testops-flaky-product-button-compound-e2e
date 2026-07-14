@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E: remove the flaky classic-theme rapid-click product-button spec; the compounding behavior is already covered by cart store unit tests and the mutation-batcher e2e spec.
