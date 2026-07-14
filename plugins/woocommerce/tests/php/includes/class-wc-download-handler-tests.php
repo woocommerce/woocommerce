@@ -265,6 +265,20 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox resolve_filename_from_response_headers() should handle the non-standard quoted form of the filename* parameter.
+	 */
+	public function test_resolve_filename_handles_quoted_rfc5987_filename(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Disposition: attachment; filename*="UTF-8\'\'My%20Report.pdf"',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, 'uc' );
+
+		$this->assertSame( 'My-Report.pdf', $resolved, 'The quoted filename* form emitted by some non-conforming servers should be parsed too.' );
+	}
+
+	/**
 	 * @testdox resolve_filename_from_response_headers() should use the headers of the last response in a redirect chain.
 	 */
 	public function test_resolve_filename_uses_last_response_of_redirect_chain(): void {
