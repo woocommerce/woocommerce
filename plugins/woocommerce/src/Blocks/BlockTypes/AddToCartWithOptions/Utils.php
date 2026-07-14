@@ -151,7 +151,7 @@ class Utils {
 		// unconditionally so it can also seed the draft-seed context below,
 		// even on the (unexpected) chance the number input isn't found.
 		$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
-		$input_quantity    = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
+		$input_quantity   = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
 
 		if (
 			$processor->next_tag( 'input' ) &&

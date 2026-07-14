@@ -563,7 +563,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$simple_product = new \WC_Product_Simple();
 		$simple_product->set_regular_price( 10 );
 		$simple_product_id = $simple_product->save();
-		$grouped_product    = new \WC_Product_Grouped();
+		$grouped_product   = new \WC_Product_Grouped();
 		$grouped_product->set_children( array( $simple_product_id ) );
 		$grouped_product_id = $grouped_product->save();
 
@@ -645,7 +645,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
 	private function invoke_make_quantity_input_interactive( $quantity_html, $context = array() ) {
-		$previous_block_to_render = \WP_Block_Supports::$block_to_render;
+		$previous_block_to_render            = \WP_Block_Supports::$block_to_render;
 		\WP_Block_Supports::$block_to_render = array(
 			'blockName' => 'woocommerce/add-to-cart-with-options-quantity-selector',
 			'attrs'     => array(),
@@ -668,7 +668,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	public function test_make_quantity_input_interactive_emits_draft_seed() {
 		global $product;
 		$previous_product = $product;
-		$product           = new \WC_Product_Simple();
+		$product          = new \WC_Product_Simple();
 		$product->set_regular_price( 10 );
 		$product_id = $product->save();
 
@@ -702,7 +702,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	public function test_make_quantity_input_interactive_draft_seed_quantity_respects_allow_zero() {
 		global $product;
 		$previous_product = $product;
-		$product           = new \WC_Product_Simple();
+		$product          = new \WC_Product_Simple();
 		$product->set_regular_price( 10 );
 		$product_id = $product->save();
 
@@ -734,7 +734,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	public function test_make_quantity_input_interactive_no_draft_seed_without_product() {
 		global $product;
 		$previous_product = $product;
-		$product           = null;
+		$product          = null;
 
 		$quantity_html = '<div class="quantity"><input type="number" name="quantity" value="1" /></div>';
 		$result        = $this->invoke_make_quantity_input_interactive( $quantity_html );
