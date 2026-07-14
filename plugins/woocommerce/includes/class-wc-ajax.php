@@ -344,8 +344,17 @@ class WC_AJAX {
 				if ( ! is_string( $value ) ) {
 					continue;
 				}
+				// The checkout page re-posts the currently selected method on every order-review refresh
+				// (page load, address field edits), so a repeat of the existing choice is not a customer
+				// decision. Only a change of method counts as a 'manual' origin; repeats keep the current
+				// origin so an auto-defaulted Local Pickup stays eligible for unsticking.
+				$previous_method = isset( $chosen_shipping_methods[ $i ] ) && is_string( $chosen_shipping_methods[ $i ] ) ? $chosen_shipping_methods[ $i ] : '';
+
 				$chosen_shipping_methods[ $i ] = $value;
-				wc_set_chosen_shipping_method_origin( $i, 'manual', $value );
+
+				if ( $value !== $previous_method ) {
+					wc_set_chosen_shipping_method_origin( $i, 'manual', $value );
+				}
 			}
 		}
 
@@ -413,8 +422,17 @@ class WC_AJAX {
 				if ( ! is_string( $value ) ) {
 					continue;
 				}
+				// The checkout page re-posts the currently selected method on every order-review refresh
+				// (page load, address field edits), so a repeat of the existing choice is not a customer
+				// decision. Only a change of method counts as a 'manual' origin; repeats keep the current
+				// origin so an auto-defaulted Local Pickup stays eligible for unsticking.
+				$previous_method = isset( $chosen_shipping_methods[ $i ] ) && is_string( $chosen_shipping_methods[ $i ] ) ? $chosen_shipping_methods[ $i ] : '';
+
 				$chosen_shipping_methods[ $i ] = $value;
-				wc_set_chosen_shipping_method_origin( $i, 'manual', $value );
+
+				if ( $value !== $previous_method ) {
+					wc_set_chosen_shipping_method_origin( $i, 'manual', $value );
+				}
 			}
 		}
 
