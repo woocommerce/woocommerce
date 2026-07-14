@@ -16,7 +16,7 @@ use InvalidArgumentException;
  *   methods below, each keyed by ID.
  * - Selection (`productId`, `variationId`) — set by callers via
  *   `wp_interactivity_state` (global) or `data-wp-context` (per-element) —
- *   plus the derived getters (`mainProductInContext`,
+ *   plus the derived getters (`baseProductInContext`,
  *   `productVariationInContext`, `productInContext`) registered by
  *   `register_getters()`.
  *
@@ -94,7 +94,7 @@ class ProductsStore {
 	 *
 	 * These closures mirror the JS getters in
 	 * client/blocks/assets/js/base/stores/woocommerce/products.ts so that
-	 * directives referencing state.mainProductInContext /
+	 * directives referencing state.baseProductInContext /
 	 * state.productVariationInContext / state.productInContext resolve
 	 * during SSR. Because they read from
 	 * wp_interactivity_state() at call time, they only need to be
@@ -112,7 +112,7 @@ class ProductsStore {
 		wp_interactivity_state(
 			self::$store_namespace,
 			array(
-				'mainProductInContext'      => function () {
+				'baseProductInContext'      => function () {
 					$context    = wp_interactivity_get_context();
 					$state      = wp_interactivity_state( self::$store_namespace );
 					$product_id = array_key_exists( 'productId', $context )
@@ -148,9 +148,9 @@ class ProductsStore {
 						return $selected;
 					}
 
-					return $state['mainProductInContext'] instanceof \Closure
-						? $state['mainProductInContext']()
-						: $state['mainProductInContext'];
+					return $state['baseProductInContext'] instanceof \Closure
+						? $state['baseProductInContext']()
+						: $state['baseProductInContext'];
 				},
 			)
 		);

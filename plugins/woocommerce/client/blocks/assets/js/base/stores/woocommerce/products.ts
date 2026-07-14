@@ -58,11 +58,11 @@ export type ProductsStoreState = {
 	 */
 	variationId: number | null;
 	/**
-	 * The main product for this page/block. Always the top-level product
+	 * The base product for this page/block. Always the top-level product
 	 * (e.g. the variable product "Hoodie"), never a variation.
 	 * Resolves productId from per-block context when available.
 	 */
-	mainProductInContext: ProductResponseItem | null;
+	baseProductInContext: ProductResponseItem | null;
 	/**
 	 * The currently selected variation, or null if none is selected.
 	 * For simple/grouped products, this is always null.
@@ -71,8 +71,8 @@ export type ProductsStoreState = {
 	/**
 	 * The resolved product for the current context:
 	 * `productVariationInContext` if one is set, otherwise
-	 * `mainProductInContext`. This is the property most blocks should
-	 * bind to — use `mainProductInContext` / `productVariationInContext`
+	 * `baseProductInContext`. This is the property most blocks should
+	 * bind to — use `baseProductInContext` / `productVariationInContext`
 	 * explicitly only when the distinction matters.
 	 *
 	 * Blocks can bind directly to properties, e.g.:
@@ -176,7 +176,7 @@ const { state: productsState } = store< ProductsStore >(
 				);
 			},
 
-			get mainProductInContext(): ProductResponseItem | null {
+			get baseProductInContext(): ProductResponseItem | null {
 				const context = getContext< ProductContext >(
 					'woocommerce/products'
 				);
@@ -208,7 +208,7 @@ const { state: productsState } = store< ProductsStore >(
 			get productInContext(): ProductResponseItem | null {
 				return (
 					productsState.productVariationInContext ||
-					productsState.mainProductInContext
+					productsState.baseProductInContext
 				);
 			},
 		},

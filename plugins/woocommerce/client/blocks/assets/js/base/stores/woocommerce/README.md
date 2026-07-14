@@ -37,7 +37,7 @@ PHP                                                  Client
              │                                      │ state.productVariations           │
              ▼                                      │                                   │
    wp_interactivity_state(                          │ Derived getters:                  │
-     'woocommerce/products',                        │ • state.mainProductInContext      │
+     'woocommerce/products',                        │ • state.baseProductInContext      │
      [ 'products' => ..., ... ]                     │ • state.productVariationInContext │
    )                                                │ • state.productInContext          │
                                                     └─────────────────┬─────────────────┘
@@ -65,9 +65,9 @@ Derived getters mirror each other in JS (`products.ts`) and PHP (`ProductsStore:
 | `productVariations`         | `Record<number, ProductResponseItem>`                         | Populated from PHP        | Keyed by variation ID.                                                                                                                                                                                                        |
 | `productId`                 | `number`                                                      | Populated / local context | Current product ID.                                                                                                                                                                                                           |
 | `variationId`               | `number \| null`                                              | Populated / local context | Current variation ID, or `null`.                                                                                                                                                                                              |
-| `mainProductInContext`      | `ProductResponseItem \| null`                                 | Derived                   | The top-level product for the current context. Always the parent product, **never** a variation.                                                                                                                              |
+| `baseProductInContext`      | `ProductResponseItem \| null`                                 | Derived                   | The top-level product for the current context. Always the parent product, **never** a variation.                                                                                                                              |
 | `productVariationInContext` | `ProductResponseItem \| null`                                 | Derived                   | Currently selected variation, or `null` for simple/grouped/non-selected.                                                                                                                                                      |
-| `productInContext`          | `ProductResponseItem \| null`                                 | Derived                   | `productVariationInContext ?? mainProductInContext`. Bind to this in the common case.                                                                                                                                         |
+| `productInContext`          | `ProductResponseItem \| null`                                 | Derived                   | `productVariationInContext ?? baseProductInContext`. Bind to this in the common case.                                                                                                                                         |
 | `findProduct`               | `({ id, selectedAttributes }) => ProductResponseItem \| null` | Function                  | If `id` is a variation ID, returns it directly. For variable products with `selectedAttributes`, resolves to the matching variation. For any other product type (simple, grouped, external, etc.), returns the product as-is. |
 
 ### Populating state (PHP)
@@ -173,7 +173,7 @@ $interactive_attributes = $is_interactive
     : '';
 ```
 
-Any `ProductResponseItem` field can be bound the same way, e.g. `state.productInContext.price_html`, `state.productInContext.stock_availability.text`, `state.mainProductInContext.name`.
+Any `ProductResponseItem` field can be bound the same way, e.g. `state.productInContext.price_html`, `state.productInContext.stock_availability.text`, `state.baseProductInContext.name`.
 
 #### From JS (client)
 
@@ -226,8 +226,8 @@ For variable products, `findProduct` returns `null` when no variation matches th
 
 ### Patterns and pitfalls
 
--   **Always load before you bind.** If `wc_interactivity_api_load_product` was never called for the current `productId`, `state.mainProductInContext` resolves to `null` and directive bindings silently render empty.
--   **Prefer `productInContext`** for "whatever is currently being shown". Use `mainProductInContext` / `productVariationInContext` only when the distinction matters (e.g. rendering a variation-specific description vs. the parent title).
+-   **Always load before you bind.** If `wc_interactivity_api_load_product` was never called for the current `productId`, `state.baseProductInContext` resolves to `null` and directive bindings silently render empty.
+-   **Prefer `productInContext`** for "whatever is currently being shown". Use `baseProductInContext` / `productVariationInContext` only when the distinction matters (e.g. rendering a variation-specific description vs. the parent title).
 -   **`data-wp-context` sets local context.** Use it whenever the same block type can appear multiple times on a page for different products.
 -   **Local context beats state.** If a block is wrapped in a `data-wp-context="woocommerce/products::{ ... }"` element, its `productId` / `variationId` override any globally-set values for descendants of that element. See `test/products.test.ts` for the exact precedence rules — notably, a context that has `productId` but no `variationId` key does **not** fall back to the global `variationId`.
 -   **Keep the consent string in sync.** The literal string is defined in `ProductsStore::$consent_statement` (PHP) and `universalLock` (JS). They are intentionally different (loaders vs. store lock); copy-paste from this README or the source files.

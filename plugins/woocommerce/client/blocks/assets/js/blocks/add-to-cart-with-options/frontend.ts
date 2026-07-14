@@ -167,7 +167,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				const inputElement = quantitySelectorContext?.inputElement;
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
-				const { mainProductInContext: productFromStore } =
+				const { baseProductInContext: productFromStore } =
 					productsState;
 				const variationIds =
 					productFromStore?.variations?.map( ( v ) => v.id ) ?? [];
