@@ -116,7 +116,7 @@ final class CoreBreadcrumbsCompatibility {
 	 * @return array Modified breadcrumb items.
 	 */
 	public function apply_woocommerce_breadcrumb_filters( $items ) {
-		if ( ! is_array( $items ) || ! $this->is_woocommerce_breadcrumb_context() ) {
+		if ( ! is_array( $items ) ) {
 			return $items;
 		}
 
@@ -186,9 +186,12 @@ final class CoreBreadcrumbsCompatibility {
 		$items = $this->prepend_taxonomy_label_to_product_taxonomy_breadcrumbs( $items );
 		$items = $this->prepend_shop_page_to_product_search_breadcrumbs( $items );
 		$items = $this->replace_product_tag_breadcrumb_label( $items );
-		$items = $this->replace_product_search_breadcrumb_label( $items );
+		$items = $this->replace_search_breadcrumb_label( $items );
 		$items = $this->prepend_my_account_page_to_endpoint_breadcrumbs( $items );
-		$items = $this->apply_home_breadcrumb_url_filter( $items );
+
+		if ( $this->is_woocommerce_breadcrumb_context() ) {
+			$items = $this->apply_home_breadcrumb_url_filter( $items );
+		}
 
 		return $items;
 	}
@@ -337,8 +340,8 @@ final class CoreBreadcrumbsCompatibility {
 	 * @param array $items Array of breadcrumb items from Core.
 	 * @return array Modified breadcrumb items.
 	 */
-	private function replace_product_search_breadcrumb_label( $items ) {
-		if ( ! $this->is_product_search() || empty( $items ) ) {
+	private function replace_search_breadcrumb_label( $items ) {
+		if ( ! is_search() || empty( $items ) ) {
 			return $items;
 		}
 

@@ -407,13 +407,14 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave regular search breadcrumbs unchanged.
+	 * @testdox Should use WooCommerce labels for regular search breadcrumbs.
 	 */
-	public function test_core_breadcrumbs_do_not_adjust_regular_search_items(): void {
+	public function test_core_breadcrumbs_label_regular_search_items(): void {
 		$this->go_to( '/?s=breadcrumb' );
 
-		$this->assert_core_breadcrumbs_unchanged(
-			'Regular search breadcrumbs should remain a Core concern.',
+		$this->assert_core_breadcrumb_labels(
+			array( 'Home', 'Search results for &ldquo;breadcrumb&rdquo;' ),
+			'Regular search breadcrumbs should use the WooCommerce search label.',
 			$this->get_breadcrumb_item( 'Search results for: "breadcrumb"' )
 		);
 	}
@@ -502,9 +503,9 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not apply legacy WooCommerce breadcrumb filters outside WooCommerce contexts.
+	 * @testdox Should apply legacy WooCommerce breadcrumb filters outside WooCommerce contexts.
 	 */
-	public function test_core_breadcrumbs_do_not_apply_legacy_woocommerce_get_breadcrumb_filter_outside_woocommerce_contexts(): void {
+	public function test_core_breadcrumbs_apply_legacy_woocommerce_get_breadcrumb_filter_outside_woocommerce_contexts(): void {
 		$callback = function ( $crumbs ) {
 			$crumbs[1][0] = 'Filtered page';
 			return $crumbs;
@@ -521,9 +522,9 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertSame(
-			array( 'Home', 'Search results for: "breadcrumb"' ),
+			array( 'Home', 'Filtered page' ),
 			$this->get_breadcrumb_labels( $result ),
-			'Legacy WooCommerce breadcrumb filters should not run for regular Core breadcrumbs.'
+			'Legacy WooCommerce breadcrumb filters should run for regular Core breadcrumbs.'
 		);
 	}
 
