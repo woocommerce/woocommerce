@@ -61,21 +61,19 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_customer_tokens should return all tokens when the posts_per_page option is an empty string.
+	 * @testdox Data store get_tokens should not consult the posts_per_page option even when it is empty.
 	 */
-	public function test_get_customer_tokens_returns_all_tokens_when_posts_per_page_is_empty(): void {
-		add_filter(
-			'pre_option_posts_per_page',
-			function () {
-				return '';
-			}
-		);
+	public function test_data_store_get_tokens_ignores_empty_posts_per_page(): void {
+		add_filter( 'pre_option_posts_per_page', '__return_empty_string' );
 		$this->create_tokens_for_user( 3 );
 
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		// Regression guard: the data store used to fall back to posts_per_page, and an empty value produced LIMIT 0 (zero rows).
 		$this->assertCount(
 			3,
-			WC_Payment_Tokens::get_customer_tokens( $this->user_id ),
-			'An empty posts_per_page option must not result in zero tokens (LIMIT 0)'
+			$data_store->get_tokens( array( 'user_id' => $this->user_id ) ),
+			'Token queries must not be affected by the posts_per_page option'
 		);
 	}
 
@@ -111,6 +109,26 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 			3,
 			$data_store->get_tokens( array( 'user_id' => $this->user_id ) ),
 			'Without an explicit limit, the data store should return all matching tokens (GDPR eraser and user-deletion cleanup rely on this)'
+		);
+	}
+
+	/**
+	 * @testdox Data store get_tokens should return all tokens when page is passed without a limit.
+	 */
+	public function test_data_store_get_tokens_ignores_page_without_limit(): void {
+		$this->create_tokens_for_user( 3 );
+
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		$this->assertCount(
+			3,
+			$data_store->get_tokens(
+				array(
+					'user_id' => $this->user_id,
+					'page'    => 2,
+				)
+			),
+			'A page argument without an explicit limit should not paginate the results'
 		);
 	}
 
