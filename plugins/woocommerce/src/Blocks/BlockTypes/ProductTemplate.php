@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
+use Automattic\WooCommerce\Blocks\SharedStores\CartStore;
 use WP_Block;
 
 /**
@@ -59,6 +60,10 @@ class ProductTemplate extends AbstractBlock {
 			update_post_thumbnail_cache( $query );
 		}
 
+		// Used to mint each loop item's scope id (`collection/<queryId>/<productId>`);
+		// shared by every item rendered by this instance.
+		$query_id = $block->context['queryId'] ?? 0;
+
 		$classnames = '';
 		if ( isset( $block->context['displayLayout'] ) && isset( $block->context['query'] ) ) {
 			$classnames = 'is-product-collection-layout-' . $block->context['displayLayout']['type'] . ' ';
@@ -94,6 +99,7 @@ class ProductTemplate extends AbstractBlock {
 			$block_instance = $block->parsed_block;
 			$product_id     = (int) get_the_ID();
 			$post_type      = get_post_type();
+			$scope          = 'collection/' . $query_id . '/' . $product_id;
 
 			// Set the block name to one that does not correspond to an existing registered block.
 			// This ensures that for the inner instances of the Post Template block, we do not render any block supports.
@@ -107,6 +113,16 @@ class ProductTemplate extends AbstractBlock {
 
 			// Use an early priority so that other 'render_block_context' filters have access to the values.
 			add_filter( 'render_block_context', $filter_block_context, 1 );
+
+			// Push this item's scope before rendering its inner blocks so purchase-UI
+			// PHP nested inside (e.g. Add to Cart with Options) resolves the effective
+			// scope via CartStore::get_current_scope(), then pop it once rendering
+			// completes so the previous (page or outer container) scope is restored.
+			CartStore::push_scope(
+				'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+				$scope
+			);
+
 			// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
 			// `render_callback` and ensure that no wrapper markup is included.
 			$block_content = (
@@ -115,6 +131,10 @@ class ProductTemplate extends AbstractBlock {
 					$block->context
 				)
 			)->render( array( 'dynamic' => false ) );
+
+			CartStore::pop_scope(
+				'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce'
+			);
 			remove_filter( 'render_block_context', $filter_block_context, 1 );
 
 			// Load product into the shared products store.
@@ -130,9 +150,23 @@ class ProductTemplate extends AbstractBlock {
 				'woocommerce/products'
 			);
 
+			// Hand-rolled second context bag: `wp_interactivity_data_wp_context()` always
+			// emits an attribute literally named `data-wp-context`, so it cannot carry the
+			// scope alongside `$product_context_directive` on the same element — the HTML
+			// parser would keep the first and silently drop the second. The three-hyphen
+			// `data-wp-context---scope` form is the supported way to add a second context
+			// bag on one element (see Wishlist.php/SavedForLater.php's
+			// `data-wp-context---notices`). JSON_HEX_APOS is required because
+			// $li_directives below uses single-quoted attribute values.
+			$scope_context_directive = 'data-wp-context---scope=\'woocommerce::' . wp_json_encode(
+				array( 'scope' => $scope ),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			) . '\'';
+
 			$li_directives = '
 				data-wp-interactive="woocommerce/product-collection"
 				' . $product_context_directive . '
+				' . $scope_context_directive . '
 				data-wp-key="product-item-' . $product_id . '"
 			';
 
