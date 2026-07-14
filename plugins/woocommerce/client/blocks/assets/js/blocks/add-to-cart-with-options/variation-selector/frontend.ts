@@ -7,7 +7,11 @@ import {
 	getConfig,
 	getElement,
 } from '@wordpress/interactivity';
-import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce/cart';
+import type {
+	SelectedAttributes,
+	Store as WooCommerce,
+} from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { ProductResponseItem } from '@woocommerce/types';
@@ -52,6 +56,14 @@ const universalLock =
 
 const { state: productsState } = store< ProductsStore >(
 	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
+
+// Todo: Use the module exports instead of `store()` once the woocommerce
+// store is public.
+const { actions: wooActions } = store< WooCommerce >(
+	'woocommerce/cart',
 	{},
 	{ lock: universalLock }
 );
@@ -430,7 +442,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
+				const { selectedAttributes, quantity } =
+					getContext< Context >();
 				const result = productsState.findProduct( {
 					id: product.id,
 					selectedAttributes,
@@ -450,6 +463,23 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					? productContext
 					: productsState
 				).variationId = variationId;
+
+				// Mirror the attribute selection into the resolved
+				// product/variation's cart draft — the id `itemInContext`
+				// will resolve at submit time. `quantity` rides along so a
+				// variation drafted for the first time here always has one
+				// (an id-only new draft is rejected); it is already tracked
+				// locally for every variation id (see the quantity
+				// selector's `idsToUpdate` sync), so this never disagrees
+				// with what the shopper actually sees in the quantity input.
+				const currentProductId = variationId ?? product.id;
+				wooActions.upsertDraftItem(
+					{
+						quantity: quantity[ currentProductId ],
+						variation: selectedAttributes,
+					},
+					{ id: currentProductId }
+				);
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
