@@ -17,10 +17,34 @@ const mockState = {
 	nonce: 'test-nonce-123',
 } as Store[ 'state' ];
 
+/**
+ * The value `getContext( 'woocommerce' )` should return for the shared
+ * context namespace, controlled per test. `undefined` simulates either an
+ * in-directive read where no ancestor emitted a `woocommerce::{...}` context,
+ * or (combined with `mockSharedContextThrows`) an out-of-directive read.
+ */
+let mockSharedContext: { scope?: string } | undefined;
+
+/**
+ * When `true`, the mocked `getContext` throws instead of returning
+ * {@link mockSharedContext}, reproducing the real Interactivity runtime's
+ * behavior when called with no active scope on the call stack (i.e. outside
+ * of a directive's execution).
+ */
+let mockSharedContextThrows = false;
+
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		getConfig: jest.fn(),
+		getContext: jest.fn( () => {
+			if ( mockSharedContextThrows ) {
+				throw new Error(
+					'Cannot call `getContext()` when there is no scope.'
+				);
+			}
+			return mockSharedContext;
+		} ),
 		store: jest.fn( ( _name, definition ) => {
 			// The cart store calls `store()` twice: once to read `state` and
 			// once to register `actions`. Merge the definition's `state`
@@ -347,6 +371,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 	afterEach( () => {
 		jest.clearAllMocks();
 		delete ( mockState as Partial< Store[ 'state' ] > ).cart;
+		mockSharedContext = undefined;
+		mockSharedContextThrows = false;
 	} );
 
 	it( 'refreshCartItems passes cache: no-store to fetch to prevent browser caching', () => {
@@ -1570,6 +1596,108 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			// ...and mutating the cart mirror never mutates the draft.
 			mockState.cart.items[ 0 ].quantity = 10;
 			expect( mockState.draftItems[ 'page/1' ][ 0 ].quantity ).toBe( 7 );
+		} );
+	} );
+
+	describe( 'pageScope / currentScope', () => {
+		it( 'defaults pageScope to an empty string before server hydration', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+
+			expect( mockState.pageScope ).toBe( '' );
+		} );
+
+		it( 'resolves currentScope to the shared woocommerce context scope when present', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			mockState.pageScope = 'page/7';
+			mockSharedContext = { scope: 'single-product/42/0' };
+
+			expect( mockState.currentScope ).toBe( 'single-product/42/0' );
+		} );
+
+		it( 'falls back to pageScope when no shared context is available', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			mockState.pageScope = 'page/7';
+			mockSharedContext = undefined;
+
+			expect( mockState.currentScope ).toBe( 'page/7' );
+		} );
+
+		it( 'degrades to pageScope, without throwing, when read outside a directive', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			mockState.pageScope = 'page/7';
+			mockSharedContextThrows = true;
+
+			expect( () => mockState.currentScope ).not.toThrow();
+			expect( mockState.currentScope ).toBe( 'page/7' );
+		} );
+
+		it( 'degrades gracefully, without throwing, with no context and no seeded pageScope', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			mockSharedContextThrows = true;
+
+			expect( () => mockState.currentScope ).not.toThrow();
+			expect( mockState.currentScope ).toBe( '' );
+		} );
+
+		it( 'upsertDraftItem defaults its scope to currentScope (pageScope) when none is passed', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockState.pageScope = 'page/9';
+
+			actions.upsertDraftItem( { id: 42, quantity: 1 } );
+
+			expect( mockState.draftItems[ 'page/9' ] ).toEqual( [
+				{ id: 42, quantity: 1 },
+			] );
+		} );
+
+		it( 'upsertDraftItem defaults its scope to currentScope (context override) when none is passed', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockState.pageScope = 'page/9';
+			mockSharedContext = { scope: 'single-product/42/0' };
+
+			actions.upsertDraftItem( { id: 42, quantity: 1 } );
+
+			expect( mockState.draftItems[ 'page/9' ] ).toBeUndefined();
+			expect( mockState.draftItems[ 'single-product/42/0' ] ).toEqual( [
+				{ id: 42, quantity: 1 },
+			] );
+		} );
+
+		it( 'upsertDraftItem prefers an explicit scope over currentScope', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockState.pageScope = 'page/9';
+
+			actions.upsertDraftItem(
+				{ id: 42, quantity: 1 },
+				{ scope: 'collection/q1/1' }
+			);
+
+			expect( mockState.draftItems[ 'page/9' ] ).toBeUndefined();
+			expect( mockState.draftItems[ 'collection/q1/1' ] ).toEqual( [
+				{ id: 42, quantity: 1 },
+			] );
+		} );
+
+		it( 'removeDraftItem defaults its scope to currentScope when none is passed', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockState.pageScope = 'page/9';
+			actions.upsertDraftItem(
+				{ id: 42, quantity: 1 },
+				{ scope: 'page/9' }
+			);
+
+			actions.removeDraftItem( { id: 42 } );
+
+			expect( mockState.draftItems[ 'page/9' ] ).toBeUndefined();
 		} );
 	} );
 } );
