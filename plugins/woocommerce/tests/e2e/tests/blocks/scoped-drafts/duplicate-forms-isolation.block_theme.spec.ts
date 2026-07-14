@@ -81,7 +81,16 @@ test.describe( 'Scoped drafts: duplicate forms stay isolated', () => {
 			await expect( logoCollectionAddToCartButton ).not.toHaveClass(
 				/\bdisabled\b/
 			);
+
+			// Adds are optimistic: the UI reacts before the batched request
+			// lands, so navigating too early can abort the in-flight
+			// mutation. Arm the response wait before each click and hold
+			// the next action until the server has the line.
+			const logoCollectionBatchPromise = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
 			await logoCollectionAddToCartButton.click();
+			await logoCollectionBatchPromise;
 
 			await secondCollectionForm
 				.getByLabel( 'Increase quantity of Beanie' )
@@ -103,7 +112,12 @@ test.describe( 'Scoped drafts: duplicate forms stay isolated', () => {
 			await expect( secondCollectionAddToCartButton ).not.toHaveClass(
 				/\bdisabled\b/
 			);
+
+			const secondCollectionBatchPromise = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
 			await secondCollectionAddToCartButton.click();
+			await secondCollectionBatchPromise;
 
 			await frontendUtils.goToCart();
 			// Beanie is one product, shared by both forms: their
@@ -174,9 +188,16 @@ test.describe( 'Scoped drafts: duplicate forms stay isolated', () => {
 		} );
 
 		await test.step( 'each variation adds as its own independent cart line, with the correct attributes', async () => {
+			// Adds are optimistic: hold the next action until each batched
+			// mutation lands so a later navigation cannot abort it. Arm the
+			// response wait before each click.
+			const blueBatchPromise = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
 			await blueForm
 				.getByRole( 'button', { name: 'Add to cart' } )
 				.click();
+			await blueBatchPromise;
 
 			await greenForm
 				.getByRole( 'radiogroup', { name: 'Color' } )
@@ -189,9 +210,14 @@ test.describe( 'Scoped drafts: duplicate forms stay isolated', () => {
 			const greenQuantity = greenForm.getByLabel( 'Product quantity' );
 			await greenQuantity.fill( '3' );
 			await greenQuantity.blur();
+
+			const greenBatchPromise = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
 			await greenForm
 				.getByRole( 'button', { name: 'Add to cart' } )
 				.click();
+			await greenBatchPromise;
 
 			await frontendUtils.goToCart();
 			// Two independent lines for the same parent product, sorted by
