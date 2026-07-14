@@ -606,7 +606,16 @@ function wc_create_refund( $args = array() ) {
 
 				$qty          = isset( $args['line_items'][ $item_id ]['qty'] ) ? $args['line_items'][ $item_id ]['qty'] : 0;
 				$refund_total = $args['line_items'][ $item_id ]['refund_total'];
-				$refund_tax   = isset( $args['line_items'][ $item_id ]['refund_tax'] ) ? array_filter( (array) $args['line_items'][ $item_id ]['refund_tax'] ) : array();
+
+				// Keep every numeric tax entry, including a 0% amount that a callback-less array_filter would drop as falsy. 0% is a valid rate, not "no tax". See #27118.
+				$refund_tax = array();
+				if ( isset( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
+					foreach ( (array) $args['line_items'][ $item_id ]['refund_tax'] as $tax_rate_id => $tax_amount ) {
+						if ( is_numeric( $tax_amount ) ) {
+							$refund_tax[ $tax_rate_id ] = (float) $tax_amount;
+						}
+					}
+				}
 
 				if ( empty( $qty ) && empty( $refund_total ) && empty( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
 					continue;

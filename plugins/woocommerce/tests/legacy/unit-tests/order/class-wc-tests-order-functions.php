@@ -1502,6 +1502,77 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Refunding a 0% taxed line item preserves the 0-rate tax line on the refund order.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/27118
+	 */
+	public function test_wc_create_refund_preserves_zero_rate_tax_27118() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '0.0000',
+				'tax_rate_name'     => 'Zero Rate',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tax_status( ProductTaxStatus::TAXABLE );
+		$product->set_tax_class( '' );
+		$product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$line_items = $order->get_items( 'line_item' );
+		$item_id    = array_keys( $line_items )[0];
+
+		// The admin refund UI posts the tax total as a numeric 0 (accounting.unformat),
+		// which wc_create_refund() must not silently drop as it would a "no tax" value.
+		$refund = wc_create_refund(
+			array(
+				'amount'     => $order->get_total(),
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 1,
+						'refund_total' => $order->get_total(),
+						'refund_tax'   => array( $rate_id => 0 ),
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
+
+		$refund_tax_items = $refund->get_items( 'tax' );
+		$this->assertCount( 1, $refund_tax_items, 'The 0% tax line must be carried over to the refund order.' );
+
+		$refund_tax_item = array_values( $refund_tax_items )[0];
+		$this->assertEquals( $rate_id, $refund_tax_item->get_rate_id(), 'The preserved tax line must reference the 0% rate.' );
+		$this->assertEquals( 0, $refund_tax_item->get_tax_total(), 'The preserved 0% tax line total must be 0.' );
+
+		$refunded_line_item = array_values( $refund->get_items( 'line_item' ) )[0];
+		$this->assertArrayHasKey(
+			$rate_id,
+			$refunded_line_item->get_taxes()['total'],
+			'The refunded line item must retain the 0% rate in its tax map.'
+		);
+
+		WC_Tax::_delete_tax_rate( $rate_id );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
 	 * Test wc_sanitize_order_id().
 	 */
 	public function test_wc_sanitize_order_id() {
