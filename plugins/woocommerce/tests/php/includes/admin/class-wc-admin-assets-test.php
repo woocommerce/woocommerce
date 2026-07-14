@@ -30,11 +30,12 @@ class WC_Admin_Assets_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		unset( $_GET['page'] );
 		wp_dequeue_script( 'woocommerce_admin' );
+		wp_dequeue_script( 'heartbeat' );
 		parent::tearDown();
 	}
 
 	/**
-	 * @testdox Should set up the lost connection notice correctly per screen, and never re-enqueue autosave.
+	 * @testdox Should set up the lost connection notice and heartbeat correctly per screen, and never re-enqueue autosave.
 	 * @testWith ["woocommerce_page_wc-orders", "woocommerce_page_wc-orders", "", false, true]
 	 *           ["shop_order", "post", "shop_order", false, true]
 	 *           ["product", "post", "product", false, false]
@@ -62,6 +63,12 @@ class WC_Admin_Assets_Test extends WC_Unit_Test_Case {
 			'"show_lost_connection_notice":"' . ( $expected ? '1' : '' ) . '"',
 			$localized,
 			'show_lost_connection_notice should be ' . ( $expected ? 'true' : 'false' ) . " for screen '{$screen_id}'"
+		);
+
+		$this->assertSame(
+			$expected,
+			wp_scripts()->query( 'heartbeat', 'enqueued' ),
+			'heartbeat should be enqueued exactly on the screens that use the notice'
 		);
 
 		$this->assertFalse(
