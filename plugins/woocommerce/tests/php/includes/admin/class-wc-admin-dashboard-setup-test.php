@@ -13,9 +13,29 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * Whether the default country option existed before the test.
+	 *
+	 * @var bool
+	 */
+	private $default_country_option_existed = false;
+
+	/**
+	 * Default country option value before the test.
+	 *
+	 * @var mixed
+	 */
+	private $default_country_option_value;
+
+	/**
 	 * Set up
 	 */
 	public function setUp(): void {
+		$missing_option                       = new stdClass();
+		$this->default_country_option_value   = get_option( 'woocommerce_default_country', $missing_option );
+		$this->default_country_option_existed = $missing_option !== $this->default_country_option_value;
+
+		parent::setUp();
+
 		// Set default country to non-US so that 'payments' task gets added but 'woocommerce-payments' doesn't,
 		// by default it won't be considered completed but we can manually change that as needed.
 		update_option( 'woocommerce_default_country', 'JP' );
@@ -29,17 +49,46 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->admin );
-
-		parent::setUp();
 	}
 
 	/**
 	 * Tear down
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_available_payment_gateways' );
+		try {
+			remove_all_filters( 'woocommerce_available_payment_gateways' );
+		} finally {
+			try {
+				parent::tearDown();
+			} finally {
+				$this->invalidate_dashboard_option_caches();
 
-		parent::tearDown();
+				if ( $this->default_country_option_existed ) {
+					update_option( 'woocommerce_default_country', $this->default_country_option_value );
+				} else {
+					delete_option( 'woocommerce_default_country' );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Invalidate caches for options modified by dashboard tests.
+	 */
+	private function invalidate_dashboard_option_caches(): void {
+		$option_names = array(
+			'woocommerce_default_country',
+			'woocommerce_default_homepage_layout',
+			'woocommerce_onboarding_profile',
+			'woocommerce_task_list_hidden',
+			'woocommerce_task_list_hidden_lists',
+		);
+
+		foreach ( $option_names as $option_name ) {
+			wp_cache_delete( $option_name, 'options' );
+		}
+		wp_cache_delete( 'alloptions', 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
 	}
 
 	/**
@@ -160,13 +209,79 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 
 		$required_strings = array(
 			'Step \d+ of \d+',
-			'You&#039;re almost there! Once you complete store setup you can start receiving orders.',
-			'Start selling',
+			'dashboard-widget-finish-setup__title',
+			'dashboard-widget-finish-setup__image',
 		);
 
 		foreach ( $required_strings as $required_string ) {
 			$this->assertMatchesRegularExpression( "/{$required_string}/", $html );
 		}
+	}
+
+	/**
+	 * Tests the widget output when the next task is in progress.
+	 *
+	 * @testdox Widget output includes the in-progress label for the next task.
+	 */
+	public function test_widget_output_includes_in_progress_label() {
+		// phpcs:disable Squiz.Commenting
+		$task_list = new class() {
+			public function is_complete() {
+				return false;
+			}
+			public function is_hidden() {
+				return false;
+			}
+			public function get_viewable_tasks() {
+				return array(
+					new class() extends \Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task {
+						public function get_id() {
+							return 'payments';
+						}
+						public function get_title() {
+							return 'Set up payments';
+						}
+						public function get_content() {
+							return 'Choose payment providers and enable payment methods at checkout.';
+						}
+						public function get_time() {
+							return '5 minutes';
+						}
+						public function get_action_url() {
+							return 'payments';
+						}
+						public function get_action_label() {
+							return 'Configure payments';
+						}
+						public function is_complete() {
+							return false;
+						}
+						public function is_in_progress() {
+							return true;
+						}
+						public function in_progress_label() {
+							return 'Test account';
+						}
+					},
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$widget = $this->get_widget();
+		$widget->set_task_list( $task_list );
+
+		ob_start();
+		$widget->render();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'dashboard-widget-finish-setup__in-progress', $html );
+		$this->assertStringContainsString( 'Set up payments', $html );
+		$this->assertStringContainsString( 'Choose payment providers and enable payment methods at checkout.', $html );
+		$this->assertStringContainsString( 'Configure payments', $html );
+		$this->assertStringContainsString( 'payment-illustration.svg', $html );
+		$this->assertStringContainsString( 'Test account', $html );
+		$this->assertMatchesRegularExpression( '/<h3 class="dashboard-widget-finish-setup__title">.*Test account.*<\/h3>/s', $html );
 	}
 
 	/**

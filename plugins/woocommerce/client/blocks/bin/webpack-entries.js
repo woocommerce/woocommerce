@@ -12,9 +12,7 @@ const { scriptModuleEntries } = require( './webpack-interactivity-entries' );
 // block directory.
 const blocks = {
 	'active-filters': {},
-	'add-to-cart-form': {
-		customDir: 'product-elements/add-to-cart-form',
-	},
+	'add-to-cart-form': {},
 	'add-to-cart-with-options': {},
 	'add-to-cart-with-options-quantity-selector': {
 		customDir: 'add-to-cart-with-options/quantity-selector',
@@ -30,10 +28,6 @@ const blocks = {
 	},
 	'add-to-cart-with-options-variation-selector-attribute-name': {
 		customDir: 'add-to-cart-with-options/variation-selector/attribute-name',
-	},
-	'add-to-cart-with-options-variation-selector-attribute-options': {
-		customDir:
-			'add-to-cart-with-options/variation-selector/attribute-options',
 	},
 	'add-to-cart-with-options-grouped-product-selector': {
 		customDir: 'add-to-cart-with-options/grouped-product-selector',
@@ -62,7 +56,9 @@ const blocks = {
 	'category-description': {},
 	'category-title': {},
 	'coming-soon': {},
+	'coupon-code': {},
 	'customer-account': {},
+	dropdown: {},
 	'email-content': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
@@ -70,7 +66,10 @@ const blocks = {
 	'featured-product': {
 		customDir: 'featured-items/featured-product',
 	},
-	'filter-wrapper': {},
+	'filter-wrapper': {
+		// Frontend-only lazy component registration; exclude from styling build.
+		skipStyling: true,
+	},
 	'handpicked-products': {},
 	// We need to keep the legacy-template id, so we need to add a custom config to point to the renamed classic-template folder
 	'legacy-template': {
@@ -116,6 +115,9 @@ const blocks = {
 	'reviews-by-product': {
 		customDir: 'reviews/reviews-by-product',
 	},
+	'saved-for-later': {},
+	wishlist: {},
+	'add-to-wishlist-button': {},
 	'single-product': {},
 	'stock-filter': {},
 	'store-notices': {},
@@ -301,6 +303,16 @@ const frontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
 	),
 } );
 
+const cartAndCheckoutFrontendEntries = getBlockEntries( 'frontend.{t,j}s{,x}', {
+	...Object.fromEntries(
+		Object.entries( cartAndCheckoutBlocks ).filter( ( [ blockName ] ) => {
+			return ! frontendScriptModuleBlocksToSkip.includes(
+				`woocommerce/${ blockName }`
+			);
+		} )
+	),
+} );
+
 // Remove styles from style build,
 // that are already included in interactivity
 // script modules build.
@@ -312,7 +324,10 @@ const blockStylingEntries = getBlockEntries(
 				...blocks,
 				...genericBlocks,
 				...cartAndCheckoutBlocks,
-			} ).filter( ( [ blockName ] ) => {
+			} ).filter( ( [ blockName, config ] ) => {
+				if ( config.skipStyling ) {
+					return false;
+				}
 				return ! frontendScriptModuleBlocksToSkip.includes(
 					`woocommerce/${ blockName }`
 				);
@@ -382,11 +397,9 @@ const entries = {
 			'./assets/js/extensions/shipping-methods/pickup-location/index.js',
 	},
 	cartAndCheckoutFrontend: {
-		...getBlockEntries( 'frontend.{t,j}s{,x}', cartAndCheckoutBlocks ),
+		...cartAndCheckoutFrontendEntries,
 		blocksCheckout: './packages/checkout/index.js',
 		blocksComponents: './packages/components/index.ts',
-		'mini-cart-component':
-			'./assets/js/blocks/mini-cart/component-frontend.tsx',
 	},
 };
 

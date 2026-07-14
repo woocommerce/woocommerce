@@ -13,10 +13,13 @@ on:
         required: true
         description: 'The release version (in X.Y or X.Y.Z-beta.N formats) to generate the release summary for.'
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   extract-versions:
     name: Extract release current and previous versions
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     outputs:
       current_version: ${{ steps.calculate-versions.outputs.current_version }}
       previous_version: ${{ steps.calculate-versions.outputs.previous_version }}
@@ -30,7 +33,7 @@ jobs:
 
       - name: Extract version from the provided input version
         id: version-from-input
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const currentVersion = '${{ inputs.version }}';
@@ -55,7 +58,7 @@ jobs:
 
       - name: Calculate current and previous version
         id: calculate-versions
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const major = parseInt('${{ steps.version-from-input.outputs.major }}');
@@ -92,13 +95,13 @@ jobs:
   count-commits-and-contributors:
     name: Count commits and contributors between releases
     needs: extract-versions
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     outputs:
       commit_count: ${{ steps.count-commits.outputs.commit_count }}
       contributor_count: ${{ steps.count-commits.outputs.contributor_count }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
@@ -128,21 +131,21 @@ jobs:
   generate-contributors-list:
     name: Generate contributors list
     needs: extract-versions
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     outputs:
       contributor_list_path: ${{ steps.generate-contributors-list.outputs.filepath }}
       artifact_url: ${{ steps.output-artifact-url.outputs.artifact_url }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
       - name: Setup PNPM
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: Setup Node
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -175,7 +178,7 @@ jobs:
 
       - name: Upload contributors HTML
         id: artifact-upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: contributors-release-${{ needs.extract-versions.outputs.current_version }}
           path: ${{ steps.generate-contributors-list.outputs.filepath }}
@@ -189,14 +192,14 @@ jobs:
   db-updates:
     name: Check for database updates
     needs: extract-versions
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     outputs:
       has_updates: ${{ steps.check-db-updates.outputs.has_updates }}
       updates_list: ${{ steps.check-db-updates.outputs.updates_list }}
       formatted_updates: ${{ steps.find-pr.outputs.formatted_updates }}
     steps:
       - name: Checkout utilities
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: trunk
           path: checkout-trunk
@@ -205,7 +208,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: release/${{ needs.extract-versions.outputs.current_version }}
           path: checkout-release
@@ -213,7 +216,7 @@ jobs:
 
       - name: Check for database updates
         id: check-db-updates
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const fs = require('fs');
@@ -319,7 +322,7 @@ jobs:
   send-slack-notification:
     name: Send Slack Notification
     needs: [extract-versions, count-commits-and-contributors, generate-contributors-list, db-updates]
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     steps:
       - name: Send Slack message
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0

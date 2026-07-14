@@ -2,11 +2,15 @@
  * External dependencies
  */
 import { select } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
+
+/**
+ * Internal dependencies
+ */
+import { CORE_EDITOR_STORE } from './wordpress-stores';
 
 export const isSiteEditorPage = (): boolean => {
-	// @ts-expect-error getCurrentPostType is not typed.
-	const editedPostType = select( editorStore )?.getCurrentPostType();
+	const editor = select( CORE_EDITOR_STORE );
+	const editedPostType = editor?.getCurrentPostType?.();
 
 	return (
 		editedPostType === 'wp_template' ||

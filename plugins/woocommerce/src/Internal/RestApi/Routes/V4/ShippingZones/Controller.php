@@ -120,6 +120,12 @@ class Controller extends AbstractController {
 					'permission_callback' => array( $this, 'check_permissions' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::DELETABLE ),
+				),
 			)
 		);
 	}
@@ -193,10 +199,15 @@ class Controller extends AbstractController {
 
 		$method = $request->get_method();
 
-		// GET requests require 'read' permission, all others require 'edit'.
-		$permission_type = ( WP_REST_Server::READABLE === $method ) ? 'read' : 'edit';
+		if ( 'GET' === $method ) {
+			$context = 'read';
+		} elseif ( 'DELETE' === $method ) {
+			$context = 'delete';
+		} else {
+			$context = 'edit';
+		}
 
-		if ( ! wc_rest_check_manager_permissions( 'settings', $permission_type ) ) {
+		if ( ! wc_rest_check_manager_permissions( 'settings', $context ) ) {
 			return $this->get_authentication_error_by_method( $method );
 		}
 
@@ -226,6 +237,31 @@ class Controller extends AbstractController {
 		$response = rest_ensure_response( $this->prepare_item_for_response( $zone, $request ) );
 		$response->set_status( 201 );
 		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $zone->get_id() ) ) );
+
+		return $response;
+	}
+
+	/**
+	 * Delete a shipping zone by zone id.
+	 *
+	 * Note: In v2/v3, this endpoint required a `force` parameter, but since shipping zones
+	 * do not support trashing, it would either delete (force=true) or return a 501 error (force=false).
+	 * We removed the `force` parameter in v4 as it serves no purpose when soft delete is not supported.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response Response object or WP_Error.
+	 */
+	public function delete_item( $request ) {
+		$zone_id = (int) $request['id'];
+
+		$zone = $this->validate_zone( $zone_id );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		$response = rest_ensure_response( $this->prepare_item_for_response( $zone, $request ) );
+
+		WC_Shipping_Zones::delete_zone( $zone_id );
 
 		return $response;
 	}

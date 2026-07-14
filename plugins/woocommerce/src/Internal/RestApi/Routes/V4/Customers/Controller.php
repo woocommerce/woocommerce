@@ -116,13 +116,13 @@ class Controller extends AbstractController {
 								'description' => __( 'New user email address.', 'woocommerce' ),
 							),
 							'username' => array(
-								'required'    => 'no' === get_option( 'woocommerce_registration_generate_username', 'yes' ),
-								'description' => __( 'New user username.', 'woocommerce' ),
+								'required'    => false,
+								'description' => __( 'New user username. Generated from email if not provided.', 'woocommerce' ),
 								'type'        => 'string',
 							),
 							'password' => array(
-								'required'    => 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ),
-								'description' => __( 'New user password.', 'woocommerce' ),
+								'required'    => false,
+								'description' => __( 'New user password. Generated automatically if not provided.', 'woocommerce' ),
 								'type'        => 'string',
 							),
 						)

@@ -16,16 +16,18 @@ import { base_url, think_time_min, think_time_max } from '../../config.js';
 import {
 	htmlRequestHeader,
 	jsonRequestHeader,
+	jsonAPIRequestHeader,
 	commonRequestHeaders,
 	commonGetRequestHeaders,
 	commonPostRequestHeaders,
+	commonAPIGetRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
 import { getDefaultProduct } from '../../utils.js';
 
 export function cartRemoveItem() {
-	let item_to_remove;
-	let wpnonce;
+	let cartItemKey;
+	let storeApiNonce;
 
 	group( 'Product Page Add to cart', function () {
 		const requestheaders = Object.assign(
@@ -75,32 +77,72 @@ export function cartRemoveItem() {
 				! r.body.includes( 'Your cart is currently empty.' ),
 		} );
 
-		// Correlate cart item value for use in subsequent requests.
-		item_to_remove = findBetween( response.body, '?remove_item=', '&' );
-		wpnonce = findBetween( response.body, '_wpnonce=', '" class="remove"' );
+		// Extract Store API nonce for cart operations.
+		storeApiNonce = findBetween( response.body, "storeApiNonce: '", "'" );
+		if ( ! storeApiNonce ) {
+			storeApiNonce = findBetween(
+				response.body,
+				'storeApiNonce":"',
+				'"'
+			);
+		}
 	} );
 
 	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
 
-	group( 'Remove item from cart', function () {
+	group( 'Get cart item key via Store API', function () {
 		const requestheaders = Object.assign(
 			{},
-			jsonRequestHeader,
+			{ Nonce: storeApiNonce },
+			jsonAPIRequestHeader,
+			commonAPIGetRequestHeaders,
+			commonRequestHeaders,
+			commonNonStandardHeaders
+		);
+
+		const response = http.get( `${ base_url }/wp-json/wc/store/v1/cart`, {
+			headers: requestheaders,
+			tags: { name: 'Shopper - Store API Get Cart' },
+		} );
+		check( response, {
+			'is status 200': ( r ) => r.status === 200,
+		} );
+
+		const cartData = response.json();
+		if ( cartData.items && cartData.items.length > 0 ) {
+			cartItemKey = cartData.items[ 0 ].key;
+		}
+	} );
+
+	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+
+	group( 'Remove item from cart via Store API', function () {
+		const requestheaders = Object.assign(
+			{},
+			{ 'content-type': 'application/json', Nonce: storeApiNonce },
+			jsonAPIRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,
 			commonNonStandardHeaders
 		);
 
-		const response = http.get(
-			`${ base_url }/cart?remove_item=${ item_to_remove }&_wpnonce=${ wpnonce }`,
+		const response = http.post(
+			`${ base_url }/wp-json/wc/store/v1/cart/remove-item`,
+			JSON.stringify( { key: cartItemKey } ),
 			{
 				headers: requestheaders,
-				tags: { name: 'Shopper - Remove Item From Cart' },
+				tags: { name: 'Shopper - Store API Remove Item From Cart' },
 			}
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'removed'": ( r ) => r.body.includes( ' removed.' ),
+			'cart items reduced': ( r ) => {
+				const cart = r.json();
+				return (
+					cart.items &&
+					! cart.items.find( ( item ) => item.key === cartItemKey )
+				);
+			},
 		} );
 	} );
 

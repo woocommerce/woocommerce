@@ -102,9 +102,7 @@ if ( ! class_exists( 'WC_Email_Customer_Cancelled_Order', false ) ) :
 				$this->placeholders['{order_billing_full_name}'] = $this->object->get_formatted_billing_full_name();
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-			}
+			$this->send_notification();
 
 			$this->restore_locale();
 		}
@@ -185,7 +183,7 @@ if ( ! class_exists( 'WC_Email_Customer_Cancelled_Order', false ) ) :
 					'title'   => __( 'Enable/Disable', 'woocommerce' ),
 					'type'    => 'checkbox',
 					'label'   => __( 'Enable this email notification', 'woocommerce' ),
-					'default' => 'no',
+					'default' => $this->block_email_editor_enabled ? 'yes' : 'no',
 				),
 				'subject'            => array(
 					'title'       => __( 'Subject', 'woocommerce' ),

@@ -88,6 +88,8 @@ class WC_Unit_Tests_Bootstrap {
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
+		$this->maybe_announce_skipped_graphql_tests();
+
 		// Ensure theme install tests use direct filesystem method.
 		if ( ! defined( 'FS_METHOD' ) ) {
 			define( 'FS_METHOD', 'direct' );
@@ -178,6 +180,45 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
+	 * Echo a "Not running GraphQL …" message when an explicit `--testsuite`
+	 * filter is given that omits `wc-phpunit-graphql`, mirroring the "Not
+	 * running ajax tests" line printed by WP's own bootstrap for the `ajax`,
+	 * `ms-files` and `external-http` groups.
+	 *
+	 * The GraphQL suite is kept separate because it requires PHP 8.1+, so
+	 * PHP 7.4 / 8.0 CI jobs point `--testsuite` at the legacy + main suites
+	 * only. A default run (no `--testsuite` filter) runs the full suite list,
+	 * which includes the GraphQL suite, so there is nothing to announce. The
+	 * `--testsuite` value may be a comma-joined suite list, hence the substring
+	 * match rather than an exact comparison.
+	 */
+	private function maybe_announce_skipped_graphql_tests() {
+		$argv = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
+
+		$has_testsuite_filter = false;
+		$running_graphql      = false;
+		foreach ( $argv as $arg ) {
+			if ( ! is_string( $arg ) ) {
+				continue;
+			}
+			if ( false !== strpos( $arg, '--testsuite' ) ) {
+				$has_testsuite_filter = true;
+			}
+			if ( false !== strpos( $arg, 'wc-phpunit-graphql' ) ) {
+				$running_graphql = true;
+			}
+		}
+
+		// Without an explicit --testsuite filter the default suite list runs,
+		// which already includes the GraphQL suite: nothing is skipped.
+		if ( ! $has_testsuite_filter || $running_graphql ) {
+			return;
+		}
+
+		echo 'Not running GraphQL tests. To execute these, add wc-phpunit-graphql to --testsuite (a default run without --testsuite includes it).' . PHP_EOL;
+	}
+
+	/**
 	 * Re-initialize the dependency injection engine.
 	 *
 	 * The dependency injection engine has been already initialized as part of the Woo initialization, but we need
@@ -215,8 +256,11 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
 
-		// Enable Back In Stock alpha during tests.
-		define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+		// Default Back In Stock alpha to enabled during tests when no
+		// per-suite override has been set.
+		if ( ! defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+			define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+		}
 
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -244,6 +288,13 @@ class WC_Unit_Tests_Bootstrap {
 		}
 
 		WC_Install::install();
+
+		// Run the test suite with product object caching enabled (the new-install default).
+		// This ensures tests exercise the cache-on path and fail loudly if any code bypasses
+		// the product CRUD/cache interfaces (e.g. raw SQL or direct postmeta writes without
+		// invalidation). install_wc() runs on `setup_theme`, before `init`, so the option is
+		// set in time for ProductCacheController::on_init() to register its invalidation hooks.
+		update_option( 'woocommerce_feature_product_instance_caching_enabled', 'yes' );
 
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
@@ -275,7 +326,6 @@ class WC_Unit_Tests_Bootstrap {
 		// test cases.
 		require_once $this->tests_dir . '/includes/wp-http-testcase.php';
 		require_once $this->tests_dir . '/framework/class-wc-unit-test-case.php';
-		require_once $this->tests_dir . '/framework/class-wc-api-unit-test-case.php';
 		require_once $this->tests_dir . '/framework/class-wc-rest-unit-test-case.php';
 
 		// Helpers.
@@ -297,6 +347,8 @@ class WC_Unit_Tests_Bootstrap {
 		require_once $this->tests_dir . '/framework/traits/trait-wc-rest-api-complex-meta.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/HPOSToggleTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/SerializingCacheTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/LoggerSpyTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/MetaDataAssertionTrait.php';
 	}
 
 	/**

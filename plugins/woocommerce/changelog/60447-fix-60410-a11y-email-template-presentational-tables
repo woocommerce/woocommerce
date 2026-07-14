@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Improve accessibility of emails by setting the aria-role of layout tables to presentation.

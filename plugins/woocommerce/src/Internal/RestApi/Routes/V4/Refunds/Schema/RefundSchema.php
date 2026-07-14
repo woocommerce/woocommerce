@@ -12,12 +12,14 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderItemSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderFeeSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderTaxSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderShippingSchema;
+use WC_Order_Refund;
 use WP_REST_Request;
 
 /**
@@ -145,8 +147,29 @@ class RefundSchema extends AbstractSchema {
 				'readonly'    => true,
 			),
 			'refunded_by'      => array(
-				'description' => __( 'User ID of user who created the refund.', 'woocommerce' ),
-				'type'        => 'integer',
+				'description' => __( 'User who created the refund.', 'woocommerce' ),
+				'type'        => 'object',
+				'properties'  => array(
+					'id'           => array(
+						'description' => __( 'User ID of user who created the refund.', 'woocommerce' ),
+						'type'        => 'integer',
+						'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+						'readonly'    => true,
+					),
+					'display_name' => array(
+						'description' => __( 'Display name of the user who created the refund.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+						'readonly'    => true,
+					),
+					'avatar_url'   => array(
+						'description' => __( 'Avatar URL of the user who created the refund.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+						'readonly'    => true,
+						'format'      => 'uri',
+					),
+				),
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
@@ -206,23 +229,20 @@ class RefundSchema extends AbstractSchema {
 							'validate_callback' => 'rest_validate_request_arg',
 						),
 						'quantity'     => array(
-							'description'       => __( 'Quantity refunded.', 'woocommerce' ),
+							'description'       => __( 'Quantity refunded. Required when refund_total is omitted (the backend computes the total from unit price × quantity); optional when refund_total is provided explicitly.', 'woocommerce' ),
 							'type'              => 'integer',
 							'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
-							'default'           => 0,
 							'sanitize_callback' => 'wc_stock_amount',
 							'validate_callback' => 'rest_validate_request_arg',
 						),
 						'refund_total' => array(
-							'description'       => __( 'Total refunded for this item.', 'woocommerce' ),
-							'type'              => 'number',
+							'description'       => __( 'Optional: Total refunded for this item. Tax-inclusive when refund_tax is omitted (the backend splits out tax automatically); tax-exclusive (net subtotal) when refund_tax is supplied, in which case the line\'s total refund is refund_total + refund_tax. If omitted or set to null, the backend computes it from the order line item\'s unit price multiplied by quantity. A gross line refund that rounds to 0 is rejected.', 'woocommerce' ),
+							'type'              => array( 'number', 'null' ),
 							'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
-							'default'           => 0,
-							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 						),
 						'refund_tax'   => array(
-							'description' => __( 'Taxes refunded for this item.', 'woocommerce' ),
+							'description' => __( 'Optional: Taxes refunded for this item. If not provided, tax is automatically split out of the tax-inclusive refund_total using the line\'s own stored total-to-tax ratio (what was charged), not the order\'s current tax rates. When provided, refund_total is treated as the tax-exclusive subtotal and these taxes are added on top.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 							'default'     => array(),
@@ -303,15 +323,27 @@ class RefundSchema extends AbstractSchema {
 			'date_created_gmt' => wc_rest_prepare_date_response( $refund->get_date_created() ),
 			'amount'           => wc_format_decimal( $refund->get_amount(), $dp ),
 			'reason'           => $refund->get_reason(),
-			'refunded_by'      => $refund->get_refunded_by(),
 			'refunded_payment' => $refund->get_refunded_payment(),
 		);
 
+		if ( in_array( 'refunded_by', $include_fields, true ) ) {
+			$refunded_user = new \WP_User( $refund->get_refunded_by() );
+			if ( $refunded_user->exists() ) {
+				$data['refunded_by'] = array(
+					'id'           => $refunded_user->ID,
+					'display_name' => $refunded_user->display_name,
+					'avatar_url'   => get_avatar_url( $refunded_user ),
+				);
+			} else {
+				$data['refunded_by'] = null;
+			}
+		}
+
 		if ( in_array( 'line_items', $include_fields, true ) ) {
 			$data['line_items'] = array_merge(
-				$this->get_line_items_response( $refund->get_items( 'line_item' ), $request ),
-				$this->get_line_items_response( $refund->get_items( 'fee' ), $request ),
-				$this->get_line_items_response( $refund->get_items( 'shipping' ), $request ),
+				$this->get_line_items_response( $refund->get_items( OrderItemType::LINE_ITEM ), $request ),
+				$this->get_line_items_response( $refund->get_items( OrderItemType::FEE ), $request ),
+				$this->get_line_items_response( $refund->get_items( OrderItemType::SHIPPING ), $request ),
 			);
 		}
 

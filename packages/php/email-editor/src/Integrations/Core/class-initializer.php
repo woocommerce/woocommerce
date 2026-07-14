@@ -86,11 +86,31 @@ class Initializer {
 	private array $renderers = array();
 
 	/**
+	 * Whether hooks have already been registered.
+	 *
+	 * @var bool
+	 */
+	private bool $initialized = false;
+
+	/**
 	 * Initializes the core blocks renderers.
 	 */
 	public function initialize(): void {
+		if ( $this->initialized ) {
+			return;
+		}
+		$this->initialized = true;
+
 		add_filter( 'woocommerce_email_editor_theme_json', array( $this, 'adjust_theme_json' ), 10, 1 );
 		add_filter( 'safe_style_css', array( $this, 'allow_styles' ) );
+		add_action( 'woocommerce_email_editor_render_start', array( $this, 'reset_renderers' ) );
+	}
+
+	/**
+	 * Clear cached renderer instances so stateful renderers reset between emails.
+	 */
+	public function reset_renderers(): void {
+		$this->renderers = array();
 	}
 
 	/**
@@ -148,14 +168,6 @@ class Initializer {
 		// Set rendering callback for render-only blocks (without enabling in editor).
 		if ( in_array( $settings['name'], self::RENDER_ONLY_BLOCK_TYPES, true ) ) {
 			$settings['render_email_callback'] = array( $this, 'render_block' );
-		}
-
-		// Special handling for core/post-content to use stateless renderer.
-		// This prevents issues with WordPress's static $seen_ids array when rendering
-		// multiple emails in a single request (e.g., MailPoet batch processing).
-		if ( 'core/post-content' === $settings['name'] ) {
-			$post_content_renderer       = new Post_Content();
-			$settings['render_callback'] = array( $post_content_renderer, 'render_stateless' );
 		}
 
 		return $settings;

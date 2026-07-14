@@ -1,0 +1,39 @@
+/**
+ * External dependencies
+ */
+import { flatten } from 'lodash';
+import { __ } from '@wordpress/i18n';
+
+/**
+ * WooCommerce dependencies
+ */
+import { TableCard } from '@woocommerce/components';
+
+const UpcomingEvents = ( { config } ) => {
+	const rows = flatten(
+		config.map( ( apple ) => {
+			return apple.events.map( ( event ) => {
+				return [
+					{ display: apple.title, value: 'variety' },
+					{ display: event.title, value: 'event' },
+					{ display: event.date, value: 'date' },
+				];
+			} );
+		} )
+	);
+	return (
+		<TableCard
+			title={ __( 'Upcoming Events', '{{textdomain}}' ) }
+			headers={ [
+				{ label: __( 'Variety', '{{textdomain}}' ), key: 'variety' },
+				{ label: __( 'Event', '{{textdomain}}' ), key: 'event' },
+				{ label: __( 'Date', '{{textdomain}}' ), key: 'date' },
+			] }
+			rows={ rows }
+			rowsPerPage={ 100 }
+			totalRows={ 1 }
+		/>
+	);
+};
+
+export default UpcomingEvents;

@@ -14,7 +14,9 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -93,7 +95,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_suggested_products' ),
+					'callback'            => $this->with_cache(
+						array( $this, 'get_suggested_products' ),
+						array(
+							'endpoint_id'              => 'get_suggested_products',
+							'relevant_version_strings' => array( 'list_products' ),
+						)
+					),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_suggested_products_collection_params(),
 				),
@@ -157,6 +165,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	protected function get_images( $product ) {
+		$image_size = $this->request['image_size'] ?? 'full';
+		$image_size = is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
+
 		$images         = array();
 		$attachment_ids = array();
 
@@ -168,6 +179,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Add gallery images.
 		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
 
+		if ( ! empty( $attachment_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $attachment_ids );
+		}
+
 		// Build image data.
 		foreach ( $attachment_ids as $attachment_id ) {
 			$attachment_post = get_post( $attachment_id );
@@ -175,7 +191,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				continue;
 			}
 
-			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$attachment = wp_get_attachment_image_src( $attachment_id, $image_size );
 
 			if ( ! is_array( $attachment ) ) {
 				continue;
@@ -191,8 +207,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				'src'               => current( $attachment ),
 				'name'              => get_the_title( $attachment_id ),
 				'alt'               => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
-				'srcset'            => (string) wp_get_attachment_image_srcset( $attachment_id, 'full' ),
-				'sizes'             => (string) wp_get_attachment_image_sizes( $attachment_id, 'full' ),
+				'srcset'            => (string) wp_get_attachment_image_srcset( $attachment_id, $image_size ),
+				'sizes'             => (string) wp_get_attachment_image_sizes( $attachment_id, $image_size ),
 				'thumbnail'         => current( $thumbnail ),
 			);
 		}
@@ -321,6 +337,16 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				'field'    => 'name',
 				'terms'    => 'featured',
 				'operator' => true === $request['featured'] ? 'IN' : 'NOT IN',
+			);
+		}
+
+		// Filter by visibility in POS.
+		if ( true === $request['pos_products_only'] ) {
+			$args['tax_query'][] = array(
+				'taxonomy' => 'pos_product_visibility',
+				'field'    => 'slug',
+				'terms'    => 'pos-hidden',
+				'operator' => 'NOT IN',
 			);
 		}
 
@@ -496,6 +522,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			remove_filter( 'posts_where', array( $this, 'exclude_product_statuses' ) );
 
 			$this->exclude_status = array();
+		}
+
+		// Batch-prime image attachment caches for the whole collection, rather than once per
+		// product when get_images() runs during serialization.
+		if ( ! empty( $result['objects'] ) ) {
+			wc_get_container()->get( ProductUtil::class )->prime_image_caches( $result['objects'] );
 		}
 
 		return $result;
@@ -1113,11 +1145,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Allow set meta_data.
-		if ( is_array( $request['meta_data'] ) ) {
-			foreach ( $request['meta_data'] as $meta ) {
-				$product->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-			}
-		}
+		MetaDataUtil::update( $request['meta_data'], $product );
 
 		if ( ! empty( $request['date_created'] ) ) {
 			$date = rest_parse_date( $request['date_created'] );
@@ -1941,6 +1969,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'description'       => __( 'Limit result set to virtual products.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'rest_sanitize_boolean',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['pos_products_only'] = array(
+			'description'       => __( 'Limit result set to products visible in Point of Sale.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

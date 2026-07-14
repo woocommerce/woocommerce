@@ -18,8 +18,8 @@ describe( 'Number Validation Utils - isValidFormattedNumber', () => {
 			thousandSeparator: ','
 		};
 
-		test( 'should return false for empty or invalid input', () => {
-			expect( isValidFormattedNumber( '', config ) ).toBe( false );
+		test( 'should treat empty string as valid and reject non-string/invalid inputs', () => {
+			expect( isValidFormattedNumber( '', config ) ).toBe( true );
 			expect( isValidFormattedNumber( null, config ) ).toBe( false );
 			expect( isValidFormattedNumber( undefined, config ) ).toBe( false );
 			expect( isValidFormattedNumber( 123, config ) ).toBe( false ); // not a string

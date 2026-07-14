@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use event handler to reload page, eliminates deprecated warning in checkout block.

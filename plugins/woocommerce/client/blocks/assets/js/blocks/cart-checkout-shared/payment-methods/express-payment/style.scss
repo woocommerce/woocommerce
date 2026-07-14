@@ -16,11 +16,26 @@ $border-width: 1px;
 			margin: 0;
 			width: 100%;
 			overflow: hidden;
+			border-radius: $universal-border-radius;
+			position: relative;
 			// ensure the buttons don't create a horizontal layout shift
 			min-height: 48px;
 			// ensure the elements take space before the button is loaded
 			// 150 is the minimum width of the button; allows for
 			min-width: 150px;
+
+			&:focus-within::after,
+			&.wc-block-components-express-payment__event-button--focused::after {
+				border: 2px solid $studio-blue;
+				border-radius: inherit;
+				box-shadow: inset 0 0 0 1px $white;
+				content: "";
+				inset: 0;
+				outline: 3px solid transparent;
+				pointer-events: none;
+				position: absolute;
+				z-index: 1;
+			}
 
 			> img {
 				width: 100%;
@@ -79,17 +94,10 @@ $border-width: 1px;
 			pointer-events: none;
 			flex-grow: 1;
 		}
-
-		.has-dark-controls & {
-			&::before,
-			&::after {
-				border-color: $input-border-dark;
-			}
-		}
 	}
 
 	.wc-block-components-express-payment__title {
-		@include font-regular-locked;
+		@include font-small-locked;
 		@include reset-box;
 		word-break: break-word;
 		font-weight: 400;
@@ -105,9 +113,6 @@ $border-width: 1px;
 		border-radius: 0 0 $universal-border-radius $universal-border-radius;
 		margin-top: calc($universal-border-radius + $border-width);
 		min-height: 48px;
-		.has-dark-controls & {
-			border-color: $input-border-dark;
-		}
 
 		> p {
 			margin-bottom: em($gap);
@@ -132,21 +137,24 @@ $border-width: 1px;
 
 .wc-block-components-express-payment--cart {
 	.wc-block-components-express-payment__event-buttons {
+		display: flex;
+		flex-direction: column;
+		gap: $gap-small;
+
 		> div,
 		> li {
-			padding-bottom: $gap-small;
+			margin: 0;
+			padding: 0;
 			text-align: center;
 			width: 100%;
-
-			&:last-child {
-				padding-bottom: 0;
-			}
+			font-size: 0;
+			line-height: 0;
 		}
 	}
 }
 
 .wc-block-components-express-payment-continue-rule {
-	@include font-regular-locked;
+	@include font-small-locked;
 
 	display: flex;
 	align-items: center;
@@ -167,10 +175,6 @@ $border-width: 1px;
 		content: " ";
 		flex: 1;
 		border-bottom: 1px solid $universal-border-light;
-
-		.has-dark-controls & {
-			border-color: $input-border-dark;
-		}
 	}
 }
 @include cart-checkout-below-large-container {

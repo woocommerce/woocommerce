@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-WooCommerce will only load the `brand.css` file when strictly needed.

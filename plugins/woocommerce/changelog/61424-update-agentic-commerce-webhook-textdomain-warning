@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixes a notice with agentic commerce webhooks due to checking whether the feature was enabled before init.

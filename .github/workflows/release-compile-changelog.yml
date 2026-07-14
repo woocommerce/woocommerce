@@ -5,6 +5,10 @@ on:
       version:
         description: 'Version (in X.Y or X.Y.Z format). Branch "release/{x.y.z}" or "release/{x.y}" should already exist.'
         required: true
+      release_date:
+        description: 'Release date in YYYY-MM-DD format. If not provided, the current date will be used.'
+        required: false
+        default: ''        
       append_changelog:
         description: 'Append or replace entries in changelog?'
         type: choice
@@ -14,15 +18,12 @@ on:
           - append
         required: false
         default: auto
-      release_date:
-        description: 'Release date in YYYY-MM-DD format. If not provided, the current date will be used.'
-        required: false
-        default: ''
 
 concurrency:
   group: release-compile-changelog-${{ inputs.version }}
 
 env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   GIT_COMMITTER_NAME: 'woocommercebot'
   GIT_COMMITTER_EMAIL: 'woocommercebot@users.noreply.github.com'
   GIT_AUTHOR_NAME: 'woocommercebot'
@@ -31,14 +32,14 @@ env:
 jobs:
   build-prep:
     name: Create changelog PR
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     permissions:
       contents: write
       pull-requests: write
     steps:
       - name: Validate version input
         id: validate-version
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           VERSION: ${{ github.event.inputs.version }}
         with:
@@ -61,7 +62,7 @@ jobs:
 
       - name: Validate release date input
         if: ${{ github.event.inputs.release_date != '' }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           RELEASE_DATE: ${{ github.event.inputs.release_date }}
         with:
@@ -89,7 +90,7 @@ jobs:
             console.log(`Release date validated: ${releaseDate}`);
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
             ref: trunk
 
@@ -121,15 +122,23 @@ jobs:
           echo "Using branch: $SELECTED_BRANCH"
           echo "selected_branch=${SELECTED_BRANCH}" >> $GITHUB_OUTPUT
 
+      - name: Checkout release branch
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ steps.check-branch.outputs.selected_branch }}
+          path: release-branch
+          sparse-checkout: |
+            /plugins/woocommerce/woocommerce.php
+            /plugins/woocommerce/readme.txt
+          sparse-checkout-cone-mode: false
+
       - name: Validate input version matches current version in the selected branch
         id: validate-selected-branch-version
         env:
           VERSION: ${{ steps.validate-version.outputs.version }}
           SELECTED_BRANCH: ${{ steps.check-branch.outputs.selected_branch }}
         run: |
-          git fetch origin ${SELECTED_BRANCH}
-          git checkout ${SELECTED_BRANCH}
-          current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+          current_version=$( cat release-branch/plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
 
           echo "Current version from woocommerce.php: '$current_version'"
           echo "Input version: '$VERSION'"
@@ -141,14 +150,11 @@ jobs:
 
           echo "current_version=$current_version" >> $GITHUB_OUTPUT
 
-          # Go back to trunk.
-          git checkout trunk
-
       - name: Setup PNPM
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: Setup Node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
             node-version-file: .nvmrc
             cache: pnpm
@@ -167,8 +173,13 @@ jobs:
           SELECTED_BRANCH: ${{ steps.check-branch.outputs.selected_branch }}
           GITHUB_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
-          echo "Using branch: $SELECTED_BRANCH"
-          echo "Generating changelog for version: $VERSION"
+          set -o pipefail
+
+          # Log inputs to console.
+          echo "Compiling changelog: version=$VERSION, branch=$SELECTED_BRANCH, append_changelog=${{ github.event.inputs.append_changelog }}, release_date=${{ github.event.inputs.release_date }}"
+
+          # Write summary header.
+          echo "📝 Compiling changelog for \`$VERSION\` on \`$SELECTED_BRANCH\`." >> $GITHUB_STEP_SUMMARY
 
           # Determine whether to replace or append.
           APPEND_CHANGELOG=""
@@ -177,14 +188,9 @@ jobs:
           if [[ -z "${{ github.event.inputs.append_changelog }}" || "${{ github.event.inputs.append_changelog }}" == "auto" ]]; then
             # If a prerelease, append if there's already content in the changelog.
             if [[ "$VERSION" == *"-"* || "$VERSION" =~ \.0$ ]]; then
-              git checkout ${SELECTED_BRANCH}
-
-              if sed -n '/== Changelog ==/,$p' plugins/woocommerce/readme.txt | grep -Fq '**WooCommerce**'; then
+              if sed -n '/== Changelog ==/,$p' release-branch/plugins/woocommerce/readme.txt | grep -Fq '**WooCommerce**'; then
                 APPEND_CHANGELOG="--append-changelog"
               fi
-
-              # Go back to trunk to run the tools.
-              git checkout trunk
             fi
           elif [[ "${{ github.event.inputs.append_changelog }}" == "append" ]]; then
             # append_changelog: append.
@@ -196,4 +202,18 @@ jobs:
             OVERRIDE_DATE="--override ${{ github.event.inputs.release_date }}"
           fi
 
-          pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION -b $SELECTED_BRANCH $APPEND_CHANGELOG $OVERRIDE_DATE
+          # Run changelog tool and capture output.
+          output=$(pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION -b $SELECTED_BRANCH $APPEND_CHANGELOG $OVERRIDE_DATE -ga ${{ github.actor }} 2>&1 | tee /dev/stderr)
+
+          # Parse PR output (tab-separated: URL, branch, type) and write to summary.
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "$output" | grep "^https://github.com/" | while IFS=$'\t' read -r url branch type; do
+            if [[ "$type" == "changelog" ]]; then
+              echo "✅ Changelog PR targeting \`$branch\` [created]($url)." >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ Changefile deletion PR targeting \`$branch\` [created]($url)." >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ **Next step:** Review and merge the PRs listed above." >> $GITHUB_STEP_SUMMARY

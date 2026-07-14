@@ -175,8 +175,21 @@ class ProductsController {
 			: 'Importing Products from ' . ucfirst( $this->parsed_args['platform'] );
 		$progress       = \WP_CLI\Utils\make_progress_bar( $progress_label, $total_count );
 
+		// Set initial progress - either show resumed progress or 1% for new sessions.
+		$initial_tick = max( 1, (int) ceil( $total_count * 0.01 ) );
+
 		if ( ! $this->parsed_args['dry_run'] ) {
-			$progress->tick( $this->session->count_all_imported_entities() );
+			$already_imported = $this->session->count_all_imported_entities();
+			if ( $already_imported > 0 ) {
+				// Show actual resumed progress.
+				$progress->tick( $already_imported );
+			} else {
+				// Show 1% for new sessions to indicate activity has started.
+				$progress->tick( $initial_tick );
+			}
+		} else {
+			// For dry runs, show initial 1% tick.
+			$progress->tick( $initial_tick );
 		}
 
 		$this->configure_product_importer();
@@ -545,6 +558,13 @@ class ProductsController {
 			WP_CLI::line( sprintf( '  Last Cursor: %s', substr( $session->get_reentrancy_cursor(), 0, 50 ) . '...' ) );
 		}
 
+		$original_args = $session->get_original_arguments();
+		if ( $original_args ) {
+			WP_CLI::line( '' );
+			WP_CLI::line( WP_CLI::colorize( '%YOriginal Command Arguments:%n' ) );
+			$this->display_saved_arguments( $original_args );
+		}
+
 		WP_CLI::line( '' );
 
 		$should_resume = $parsed_args['resume'] ?? false;
@@ -561,6 +581,13 @@ class ProductsController {
 
 		if ( $should_resume ) {
 			WP_CLI::success( sprintf( 'Resuming migration session %d', $session->get_id() ) );
+
+			$original_args = $session->get_original_arguments();
+			if ( $original_args ) {
+				$this->restore_original_arguments( $original_args );
+				WP_CLI::line( 'Original command arguments have been restored.' );
+			}
+
 			return $session;
 		} else {
 			$session->archive();
@@ -594,6 +621,8 @@ class ProductsController {
 					),
 				)
 			);
+
+			$session->set_original_arguments( $parsed_args );
 
 			return $session;
 
@@ -968,5 +997,67 @@ class ProductsController {
 	 */
 	protected function get_user_input(): string {
 		return strtolower( trim( fgets( STDIN ) ) );
+	}
+
+	/**
+	 * Display the saved arguments from a previous session.
+	 *
+	 * @param array $args The saved arguments to display.
+	 */
+	private function display_saved_arguments( array $args ): void {
+		$important_args = array(
+			'platform'                => 'Platform',
+			'limit'                   => 'Product Limit',
+			'batch_size'              => 'Batch Size',
+			'skip_existing'           => 'Skip Existing',
+			'dry_run'                 => 'Dry Run',
+			'verbose'                 => 'Verbose',
+			'assign_default_category' => 'Assign Default Category',
+		);
+
+		foreach ( $important_args as $key => $label ) {
+			if ( isset( $args[ $key ] ) ) {
+				$value = $args[ $key ];
+				if ( is_bool( $value ) ) {
+					$value = $value ? 'Yes' : 'No';
+				} elseif ( is_array( $value ) ) {
+					$value = implode( ', ', $value );
+				} elseif ( 'limit' === $key && PHP_INT_MAX === (int) $value ) {
+					$value = 'All';
+				}
+				WP_CLI::line( sprintf( '  %s: %s', $label, $value ) );
+			}
+		}
+
+		if ( ! empty( $args['filters'] ) && is_array( $args['filters'] ) ) {
+			WP_CLI::line( '  Filters:' );
+			foreach ( $args['filters'] as $filter_key => $filter_value ) {
+				if ( is_array( $filter_value ) ) {
+					$filter_value = implode( ', ', $filter_value );
+				}
+				WP_CLI::line( sprintf( '    %s: %s', $filter_key, $filter_value ) );
+			}
+		}
+
+		if ( ! empty( $args['fields'] ) && is_array( $args['fields'] ) ) {
+			WP_CLI::line( sprintf( '  Fields: %s', implode( ', ', $args['fields'] ) ) );
+		}
+	}
+
+	/**
+	 * Restore the original arguments to the current parsed args.
+	 *
+	 * @param array $original_args The original arguments to restore.
+	 */
+	private function restore_original_arguments( array $original_args ): void {
+		foreach ( $original_args as $key => $value ) {
+			if ( 'resume' !== $key ) {
+				$this->parsed_args[ $key ] = $value;
+			}
+		}
+
+		if ( isset( $original_args['fields'] ) ) {
+			$this->fields_to_process = $original_args['fields'];
+		}
 	}
 }

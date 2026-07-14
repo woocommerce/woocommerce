@@ -168,26 +168,26 @@ class AgenticCheckoutUtils {
 	 */
 	public static function set_buyer_data( $buyer, $customer ) {
 		if ( isset( $buyer['first_name'] ) ) {
-			$first_name = wc_clean( wp_unslash( $buyer['first_name'] ) );
+			$first_name = wc_clean( $buyer['first_name'] );
 			$customer->set_billing_first_name( $first_name );
 			$customer->set_shipping_first_name( $first_name );
 		}
 
 		if ( isset( $buyer['last_name'] ) ) {
-			$last_name = wc_clean( wp_unslash( $buyer['last_name'] ) );
+			$last_name = wc_clean( $buyer['last_name'] );
 			$customer->set_billing_last_name( $last_name );
 			$customer->set_shipping_last_name( $last_name );
 		}
 
 		if ( isset( $buyer['email'] ) ) {
-			$email = sanitize_email( wp_unslash( $buyer['email'] ) );
+			$email = sanitize_email( $buyer['email'] );
 			if ( is_email( $email ) ) {
 				$customer->set_billing_email( $email );
 			}
 		}
 
 		if ( isset( $buyer['phone_number'] ) ) {
-			$phone = wc_clean( wp_unslash( $buyer['phone_number'] ) );
+			$phone = wc_clean( $buyer['phone_number'] );
 			$customer->set_billing_phone( $phone );
 		}
 
@@ -203,7 +203,7 @@ class AgenticCheckoutUtils {
 	public static function set_fulfillment_address( $address, $customer ) {
 		// Only parse and set name if provided and non-empty.
 		if ( ! empty( $address['name'] ) ) {
-			$name       = wc_clean( wp_unslash( $address['name'] ) );
+			$name       = wc_clean( $address['name'] );
 			$name_parts = explode( ' ', $name, 2 );
 			$first_name = $name_parts[0];
 			$last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
@@ -218,12 +218,12 @@ class AgenticCheckoutUtils {
 		}
 
 		// Sanitize all address fields.
-		$line_one    = wc_clean( wp_unslash( $address['line_one'] ?? '' ) );
-		$line_two    = wc_clean( wp_unslash( $address['line_two'] ?? '' ) );
-		$city        = wc_clean( wp_unslash( $address['city'] ?? '' ) );
-		$state       = wc_clean( wp_unslash( $address['state'] ?? '' ) );
-		$postal_code = wc_clean( wp_unslash( $address['postal_code'] ?? '' ) );
-		$country     = wc_clean( wp_unslash( $address['country'] ?? '' ) );
+		$line_one    = wc_clean( $address['line_one'] ?? '' );
+		$line_two    = wc_clean( $address['line_two'] ?? '' );
+		$city        = wc_clean( $address['city'] ?? '' );
+		$state       = wc_clean( $address['state'] ?? '' );
+		$postal_code = wc_clean( $address['postal_code'] ?? '' );
+		$country     = wc_clean( $address['country'] ?? '' );
 
 		// Set shipping address fields.
 		$customer->set_shipping_address_1( $line_one );
@@ -279,7 +279,7 @@ class AgenticCheckoutUtils {
 	public static function set_billing_address( $address, $customer ) {
 		// Only parse and set name if provided and non-empty.
 		if ( ! empty( $address['name'] ) ) {
-			$name       = wc_clean( wp_unslash( $address['name'] ) );
+			$name       = wc_clean( $address['name'] );
 			$name_parts = explode( ' ', $name, 2 );
 			$first_name = $name_parts[0];
 			$last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
@@ -290,12 +290,12 @@ class AgenticCheckoutUtils {
 		}
 
 		// Sanitize all address fields.
-		$line_one    = wc_clean( wp_unslash( $address['line_one'] ?? '' ) );
-		$line_two    = wc_clean( wp_unslash( $address['line_two'] ?? '' ) );
-		$city        = wc_clean( wp_unslash( $address['city'] ?? '' ) );
-		$state       = wc_clean( wp_unslash( $address['state'] ?? '' ) );
-		$postal_code = wc_clean( wp_unslash( $address['postal_code'] ?? '' ) );
-		$country     = wc_clean( wp_unslash( $address['country'] ?? '' ) );
+		$line_one    = wc_clean( $address['line_one'] ?? '' );
+		$line_two    = wc_clean( $address['line_two'] ?? '' );
+		$city        = wc_clean( $address['city'] ?? '' );
+		$state       = wc_clean( $address['state'] ?? '' );
+		$postal_code = wc_clean( $address['postal_code'] ?? '' );
+		$country     = wc_clean( $address['country'] ?? '' );
 
 		// Set billing address fields.
 		$customer->set_billing_address_1( $line_one );
@@ -332,82 +332,23 @@ class AgenticCheckoutUtils {
 	}
 
 	/**
-	 * Check if the Agentic Checkout feature is enabled and request is authorized.
+	 * Validate that the request is signed with Jetpack blog token.
 	 *
-	 * Validates bearer token against registered agents in the agent registry.
+	 * @since 10.6.0
 	 *
-	 * @param \WP_REST_Request $request Request object.
-	 * @return bool|\WP_Error True if authorized, WP_Error otherwise.
+	 * @return true|\WP_Error True if valid, WP_Error otherwise.
 	 */
-	public static function is_authorized( $request = null ) {
-		if ( null === $request ) {
-			return new \WP_Error(
-				'invalid_request',
-				__( 'Invalid request object.', 'woocommerce' ),
-				array(
-					'status' => 400,
-					'type'   => 'invalid_request',
-					'code'   => 'invalid_request',
-				)
-			);
-		}
-
-		$auth_header = $request->get_header( 'Authorization' );
-		if ( empty( $auth_header ) || 0 !== stripos( $auth_header, 'Bearer ' ) ) {
-			return new \WP_Error(
-				'invalid_request',
-				__( 'Invalid authorization.', 'woocommerce' ),
-				array(
-					'status' => 400,
-					'type'   => 'invalid_request',
-					'code'   => 'invalid_authorization_format',
-				)
-			);
-		}
-
-		$provided_token = trim( substr( $auth_header, 7 ) ); // "Bearer " is 7 characters
-		if ( empty( $provided_token ) ) {
-			return new \WP_Error(
-				'invalid_request',
-				__( 'Invalid authorization.', 'woocommerce' ),
-				array(
-					'status' => 400,
-					'type'   => 'invalid_request',
-					'code'   => 'invalid_authorization_format',
-				)
-			);
-		}
-
-		$registry               = get_option( \Automattic\WooCommerce\Internal\Admin\Agentic\AgenticSettingsPage::REGISTRY_OPTION, array() );
-		$authenticated_provider = null;
-
-		// Check each provider's bearer token.
-		foreach ( $registry as $provider_id => $provider_config ) {
-			if ( ! is_array( $provider_config ) || empty( $provider_config['bearer_token'] ) ) {
-				continue;
+	public static function validate_jetpack_request() {
+		if ( class_exists( 'Automattic\Jetpack\Connection\Rest_Authentication' ) ) {
+			if ( \Automattic\Jetpack\Connection\Rest_Authentication::is_signed_with_blog_token() ) {
+				return true;
 			}
-
-			if ( wp_check_password( $provided_token, $provider_config['bearer_token'] ) ) {
-				// Store and continue checking to minimize timing attack.
-				$authenticated_provider = $provider_id;
-			}
-		}
-
-		if ( null !== $authenticated_provider ) {
-			if ( WC()->session ) {
-				WC()->session->set( SessionKey::AGENTIC_CHECKOUT_PROVIDER_ID, $authenticated_provider );
-			}
-			return true;
 		}
 
 		return new \WP_Error(
-			'invalid_request',
-			__( 'Invalid authorization.', 'woocommerce' ),
-			array(
-				'status' => 400,
-				'type'   => 'invalid_request',
-				'code'   => 'authentication_failed',
-			)
+			'rest_forbidden',
+			__( 'This endpoint requires Jetpack blog token authentication.', 'woocommerce' ),
+			array( 'status' => 401 )
 		);
 	}
 

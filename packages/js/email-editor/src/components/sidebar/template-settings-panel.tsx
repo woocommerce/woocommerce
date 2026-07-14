@@ -3,12 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
-// eslint-disable-next-line @woocommerce/dependency-group
-import {
-	// @ts-expect-error Type for PluginDocumentSettingPanel is missing in @types/wordpress__editor
-	PluginDocumentSettingPanel,
-	ErrorBoundary,
-} from '@wordpress/editor';
+import { PluginDocumentSettingPanel, ErrorBoundary } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -45,11 +40,10 @@ export function TemplateSettingsPanel() {
 	return (
 		<PluginDocumentSettingPanel
 			name="template-settings-panel"
-			title={ __( 'Settings', 'woocommerce' ) }
+			title={ __( 'Settings', __i18n_text_domain__ ) }
 			className="woocommerce-email-editor__settings-panel"
 		>
 			{ templateSections.map( ( section ) => (
-				// @ts-expect-error Type for ErrorBoundary is outdated in @types/wordpress__editor
 				<ErrorBoundary key={ `error-boundary-${ section.id }` }>
 					<div key={ section.id }>{ section.render() }</div>
 				</ErrorBoundary>

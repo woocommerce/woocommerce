@@ -1,0 +1,71 @@
+/**
+ * External dependencies
+ */
+
+import { addFilter } from '@wordpress/hooks';
+import { Fragment } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+
+/**
+ * WooCommerce dependencies
+ */
+import { ReportFilters, TableCard } from '@woocommerce/components';
+
+const Report = ( { path, query } ) => {
+	return (
+		<Fragment>
+			<ReportFilters
+				query={ query }
+				path={ path }
+				filters={ [] }
+				advancedFilters={ {} }
+			/>
+			<TableCard
+				title={ __( 'Example Data', '{{textdomain}}' ) }
+				headers={ [
+					{ label: __( 'Type', '{{textdomain}}' ), key: 'type', isLeftAligned: true, required: true },
+					{ label: __( 'Color', '{{textdomain}}' ), key: 'color' },
+					{ label: __( 'Taste', '{{textdomain}}' ), key: 'taste' },
+				] }
+				rows={ [
+					[
+						{ display: __( 'Granny Smith', '{{textdomain}}' ), value: 'type' },
+						{ display: __( 'Green', '{{textdomain}}' ), value: 'color' },
+						{ display: __( 'Tangy and sweet', '{{textdomain}}' ), value: 'taste' },
+					],
+					[
+						{ display: __( 'Golden Delicious', '{{textdomain}}' ), value: 'type' },
+						{ display: __( 'Gold', '{{textdomain}}' ), value: 'color' },
+						{ display: __( 'Sweet and cheery', '{{textdomain}}' ), value: 'taste' },
+					],
+					[
+						{ display: __( 'Gala', '{{textdomain}}' ), value: 'type' },
+						{ display: __( 'Red', '{{textdomain}}' ), value: 'color' },
+						{ display: __( 'Mild, sweet and crisp', '{{textdomain}}' ), value: 'taste' },
+					],
+					[
+						{ display: __( 'Braeburn', '{{textdomain}}' ), value: 'type' },
+						{ display: __( 'Red', '{{textdomain}}' ), value: 'color' },
+						{ display: __( 'Firm, crisp and pleasing', '{{textdomain}}' ), value: 'taste' },
+					],
+				] }
+				rowsPerPage={ 100 }
+				totalRows={ 1 }
+			/>
+		</Fragment>
+	);
+};
+
+/**
+ * Use the 'woocommerce_admin_reports_list' filter to add a report page.
+ */
+addFilter( 'woocommerce_admin_reports_list', '{{textdomain}}', ( reports ) => {
+	return [
+		...reports,
+		{
+			report: '{{slug}}',
+			title: __( '{{title}}', '{{textdomain}}' ),
+			component: Report,
+		},
+	];
+} );

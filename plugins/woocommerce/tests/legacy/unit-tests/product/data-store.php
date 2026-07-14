@@ -901,93 +901,242 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test searching products by global_unique_id (EAN/barcode).
+	 *
+	 * @return void
+	 */
+	public function test_search_products_by_global_unique_id() {
+		$product = new WC_Product();
+		$product->set_regular_price( 42 );
+		$product->set_name( 'Product A' );
+		$product->set_sku( 'PROD-A' );
+		$product->set_global_unique_id( '4521121209036' );
+		$product->save();
+
+		$product2 = new WC_Product();
+		$product2->set_regular_price( 42 );
+		$product2->set_name( 'Product B' );
+		$product2->set_sku( 'PROD-B' );
+		$product2->set_global_unique_id( '1234567890123' );
+		$product2->save();
+
+		$product3 = new WC_Product();
+		$product3->set_regular_price( 42 );
+		$product3->set_name( 'Product C' );
+		$product3->set_sku( 'PROD-C' );
+		$product3->set_global_unique_id( '9876543210987' );
+		$product3->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		// Full barcode search.
+		$results = $data_store->search_products( '4521121209036', '', true, true );
+		$this->assertContains( $product->get_id(), $results );
+		$this->assertNotContains( $product2->get_id(), $results );
+		$this->assertNotContains( $product3->get_id(), $results );
+
+		// Partial barcode search.
+		$results = $data_store->search_products( '123456', '', true, true );
+		$this->assertNotContains( $product->get_id(), $results );
+		$this->assertContains( $product2->get_id(), $results );
+		$this->assertNotContains( $product3->get_id(), $results );
+
+		// Another barcode search.
+		$results = $data_store->search_products( '9876543210987', '', true, true );
+		$this->assertNotContains( $product->get_id(), $results );
+		$this->assertNotContains( $product2->get_id(), $results );
+		$this->assertContains( $product3->get_id(), $results );
+	}
+
+	/**
+	 * @testdox Test searching variations by global_unique_id.
+	 *
+	 * @return void
+	 */
+	public function test_search_products_by_global_unique_id_with_variations() {
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'Variable Product' );
+		$variable_product->set_global_unique_id( '1111111111111' );
+		$variable_product->save();
+
+		// Variation with its own barcode.
+		$variation1 = new WC_Product_Variation();
+		$variation1->set_parent_id( $variable_product->get_id() );
+		$variation1->set_global_unique_id( '2222222222222' );
+		$variation1->save();
+
+		// Variation without barcode - inherits from parent.
+		$variation2 = new WC_Product_Variation();
+		$variation2->set_parent_id( $variable_product->get_id() );
+		$variation2->set_global_unique_id( '' );
+		$variation2->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		// Search parent barcode - finds parent and variation that inherits.
+		$results = $data_store->search_products( '1111111111111', '', true, true );
+		$this->assertContains( $variable_product->get_id(), $results );
+		$this->assertContains( $variation2->get_id(), $results );
+
+		// Search variation barcode - finds variation and parent (WC includes parents when variations match).
+		$results = $data_store->search_products( '2222222222222', '', true, true );
+		$this->assertContains( $variation1->get_id(), $results );
+		$this->assertContains( $variable_product->get_id(), $results );
+		$this->assertNotContains( $variation2->get_id(), $results );
+	}
+
+	/**
+	 * @testdox Test that products with NULL global_unique_id do not interfere with search results.
+	 *
+	 * @return void
+	 */
+	public function test_search_products_by_global_unique_id_with_null_value() {
+		$product_with_id = new WC_Product();
+		$product_with_id->set_regular_price( 42 );
+		$product_with_id->set_name( 'Product With ID' );
+		$product_with_id->set_global_unique_id( '5555555555555' );
+		$product_with_id->save();
+
+		$product_null_id = new WC_Product();
+		$product_null_id->set_regular_price( 42 );
+		$product_null_id->set_name( 'Product Null ID' );
+		$product_null_id->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		// Search should find only the product with the matching global_unique_id.
+		$results = $data_store->search_products( '5555555555555', '', true, true );
+		$this->assertContains( $product_with_id->get_id(), $results );
+		$this->assertNotContains( $product_null_id->get_id(), $results );
+	}
+
+	/**
 	 * Test WC_Product_Data_Store_CPT::create_all_product_variations
 	 */
 	public function test_variable_create_all_product_variations() {
-		$product = new WC_Product_Variable();
-		$product->set_name( 'Test Variable Product' );
-
-		$attribute_1 = new WC_Product_Attribute();
-		$attribute_1->set_name( 'color' );
-		$attribute_1->set_visible( true );
-		$attribute_1->set_variation( true );
-		$attribute_1->set_options( array( 'red', 'green', 'blue' ) );
-
-		$attribute_2 = new WC_Product_Attribute();
-		$attribute_2->set_name( 'size' );
-		$attribute_2->set_visible( true );
-		$attribute_2->set_variation( true );
-		$attribute_2->set_options( array( 'small', 'medium', 'large' ) );
-
-		$attribute_3 = new WC_Product_Attribute();
-		$attribute_3->set_name( 'pattern' );
-		$attribute_3->set_visible( true );
-		$attribute_3->set_variation( true );
-		$attribute_3->set_options( array( 'striped', 'polka-dot', 'plain' ) );
-
-		$attributes = array(
-			$attribute_1,
-			$attribute_2,
-			$attribute_3,
+		$product = $this->create_variable_product_with_attributes(
+			array(
+				'color' => array( 'red', 'blue' ),
+				'size'  => array( 'small', 'large' ),
+			)
 		);
-
-		$product->set_attributes( $attributes );
-		$product_id = $product->save();
 
 		// Test all variations get linked.
 		$data_store = WC_Data_Store::load( 'product' );
-		$count      = $data_store->create_all_product_variations( wc_get_product( $product_id ) );
-		$this->assertEquals( 27, $count );
+		$count      = $data_store->create_all_product_variations( wc_get_product( $product->get_id() ) );
+		$this->assertEquals( 4, $count );
+
+		$created_combinations = array_map(
+			static function ( $variation_id ) {
+				$attributes = wc_get_product( $variation_id )->get_attributes();
+				return $attributes['color'] . ':' . $attributes['size'];
+			},
+			wc_get_product( $product->get_id() )->get_children()
+		);
+		sort( $created_combinations );
+		$this->assertSame( array( 'blue:large', 'blue:small', 'red:large', 'red:small' ), $created_combinations );
 
 		// Test duplicates are not created.
-		$count = $data_store->create_all_product_variations( wc_get_product( $product_id ) );
+		$count = $data_store->create_all_product_variations( wc_get_product( $product->get_id() ) );
 		$this->assertEquals( 0, $count );
+	}
+
+	/**
+	 * @testdox Creating all variations follows the attribute's custom (menu_order) term order, not alphabetical order.
+	 */
+	public function test_create_all_product_variations_respects_custom_attribute_order() {
+		// Custom order is XS, S, M, L; alphabetical order by term name would be L, M, S, XS.
+		$attribute_data = WC_Helper_Product::create_attribute( 'size', array( 'XS', 'S', 'M', 'L' ) );
+		$term_ids       = $attribute_data['term_ids'];
+		foreach ( $term_ids as $index => $term_id ) {
+			update_term_meta( $term_id, 'order', $index + 1 );
+		}
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $attribute_data['attribute_taxonomy'] );
+		$attribute->set_options( $term_ids );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Custom Order Variable Product' );
+		$product->set_attributes( array( $attribute ) );
+		$product_id = $product->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$data_store->create_all_product_variations( wc_get_product( $product_id ) );
+		$data_store->sort_all_product_variations( $product_id );
+
+		$created_order = array();
+		foreach ( wc_get_product( $product_id )->get_children() as $variation_id ) {
+			$variation       = wc_get_product( $variation_id );
+			$created_order[] = $variation->get_attributes()['pa_size'];
+		}
+
+		$this->assertEquals(
+			array( 'xs', 's', 'm', 'l' ),
+			$created_order,
+			'Variations should be created in the attribute custom (menu_order) order, not alphabetical order.'
+		);
+
+		WC_Helper_Product::delete_attribute( $attribute_data['attribute_id'] );
 	}
 
 	/**
 	 * Test WC_Product_Data_Store_CPT::create_all_product_variations
 	 */
 	public function test_variable_create_all_product_variations_limits() {
-		$product = new WC_Product_Variable();
-		$product->set_name( 'Test Variable Product' );
-
-		$attribute_1 = new WC_Product_Attribute();
-		$attribute_1->set_name( 'color' );
-		$attribute_1->set_visible( true );
-		$attribute_1->set_variation( true );
-		$attribute_1->set_options( array( 'red', 'green', 'blue' ) );
-
-		$attribute_2 = new WC_Product_Attribute();
-		$attribute_2->set_name( 'size' );
-		$attribute_2->set_visible( true );
-		$attribute_2->set_variation( true );
-		$attribute_2->set_options( array( 'small', 'medium', 'large' ) );
-
-		$attribute_3 = new WC_Product_Attribute();
-		$attribute_3->set_name( 'pattern' );
-		$attribute_3->set_visible( true );
-		$attribute_3->set_variation( true );
-		$attribute_3->set_options( array( 'striped', 'polka-dot', 'plain' ) );
-
-		$attributes = array(
-			$attribute_1,
-			$attribute_2,
-			$attribute_3,
+		$product = $this->create_variable_product_with_attributes(
+			array(
+				'color' => array( 'red', 'blue' ),
+				'size'  => array( 'small', 'medium', 'large', 'extra-large' ),
+			)
 		);
 
-		$product->set_attributes( $attributes );
-		$product_id = $product->save();
-
-		// Test creation with a limit of 10.
+		// Test creation across multiple limited batches and a partial final batch.
 		$data_store = WC_Data_Store::load( 'product' );
-		$count      = $data_store->create_all_product_variations( wc_get_product( $product_id ), 10 );
-		$this->assertEquals( 10, $count );
+		$count      = $data_store->create_all_product_variations( wc_get_product( $product->get_id() ), 3 );
+		$this->assertEquals( 3, $count );
+		$this->assertCount( 3, wc_get_product( $product->get_id() )->get_children() );
 
-		$count = $data_store->create_all_product_variations( wc_get_product( $product_id ), 10 );
-		$this->assertEquals( 10, $count );
+		$count = $data_store->create_all_product_variations( wc_get_product( $product->get_id() ), 3 );
+		$this->assertEquals( 3, $count );
+		$this->assertCount( 6, wc_get_product( $product->get_id() )->get_children() );
 
-		$count = $data_store->create_all_product_variations( wc_get_product( $product_id ), 10 );
-		$this->assertEquals( 7, $count );
+		$count = $data_store->create_all_product_variations( wc_get_product( $product->get_id() ), 3 );
+		$this->assertEquals( 2, $count );
+		$this->assertCount( 8, wc_get_product( $product->get_id() )->get_children() );
+
+		$count = $data_store->create_all_product_variations( wc_get_product( $product->get_id() ), 3 );
+		$this->assertEquals( 0, $count );
+		$this->assertCount( 8, wc_get_product( $product->get_id() )->get_children() );
+	}
+
+	/**
+	 * Create a variable product with local variation attributes.
+	 *
+	 * @param array $attribute_options Attribute names mapped to option lists.
+	 * @return WC_Product_Variable
+	 */
+	private function create_variable_product_with_attributes( array $attribute_options ) {
+		$attributes = array();
+
+		foreach ( $attribute_options as $name => $options ) {
+			$attribute = new WC_Product_Attribute();
+			$attribute->set_name( $name );
+			$attribute->set_visible( true );
+			$attribute->set_variation( true );
+			$attribute->set_options( $options );
+			$attributes[] = $attribute;
+		}
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Test Variable Product' );
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		return $product;
 	}
 
 	/**

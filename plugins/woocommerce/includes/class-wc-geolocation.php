@@ -10,6 +10,8 @@
  * @version 3.9.0
  */
 
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -45,10 +47,10 @@ class WC_Geolocation {
 	 * @var array
 	 */
 	private static $ip_lookup_apis = array(
-		'ipify'  => 'http://api.ipify.org/',
-		'ipecho' => 'http://ipecho.net/plain',
-		'ident'  => 'http://ident.me',
-		'tnedi'  => 'http://tnedi.me',
+		'ipify'  => 'https://api.ipify.org/',
+		'ipecho' => 'https://ipecho.net/plain',
+		'ident'  => 'https://ident.me',
+		'tnedi'  => 'https://tnedi.me',
 	);
 
 	/**
@@ -58,7 +60,7 @@ class WC_Geolocation {
 	 */
 	private static $geoip_apis = array(
 		'ipinfo.io'  => 'https://ipinfo.io/%s/json',
-		'ip-api.com' => 'http://ip-api.com/json/%s',
+		'country.is' => 'https://api.country.is/%s',
 	);
 
 	/**
@@ -69,7 +71,7 @@ class WC_Geolocation {
 	 * @return bool
 	 */
 	private static function is_geolocation_enabled( $current_settings ) {
-		return in_array( $current_settings, array( 'geolocation', 'geolocation_ajax' ), true );
+		return in_array( $current_settings, array( DefaultCustomerAddress::GEOLOCATION, DefaultCustomerAddress::GEOLOCATION_AJAX ), true );
 	}
 
 	/**
@@ -184,7 +186,7 @@ class WC_Geolocation {
 		$geolocation = apply_filters(
 			'woocommerce_get_geolocation',
 			array(
-				'country'  => $country_code,
+				'country'  => $country_code ? $country_code : '',
 				'state'    => '',
 				'city'     => '',
 				'postcode' => '',
@@ -308,10 +310,12 @@ class WC_Geolocation {
 				if ( ! is_wp_error( $response ) && $response['body'] ) {
 					switch ( $service_name ) {
 						case 'ipinfo.io':
+						case 'country.is':
 							$data         = json_decode( $response['body'] );
 							$country_code = isset( $data->country ) ? $data->country : '';
 							break;
 						case 'ip-api.com':
+							// Not a default provider (HTTP-only), but retained so extensions that re-add it via the woocommerce_geolocation_geoip_apis filter keep working.
 							$data         = json_decode( $response['body'] );
 							$country_code = isset( $data->countryCode ) ? $data->countryCode : ''; // @codingStandardsIgnoreLine
 							break;
@@ -357,7 +361,7 @@ class WC_Geolocation {
 		wc_deprecated_function( 'WC_Geolocation::disable_geolocation_on_legacy_php', '3.9.0' );
 
 		if ( self::is_geolocation_enabled( $default_customer_address ) ) {
-			$default_customer_address = 'base';
+			$default_customer_address = DefaultCustomerAddress::BASE;
 		}
 
 		return $default_customer_address;

@@ -8,7 +8,11 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
 const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
 
+// See also @woocommerce/dependency-extraction-webpack-plugin/assets/packages. It will backfill any missing
+// mapping here and any duplicates are because of switched between Woo and WordPress versions of the plugin.
+// As of 2026 it's Woo version to address pnpm peer dependencies related issues to support filesystem cache.
 const wcDepMap = {
+	'@woocommerce/tracks': false, // Bundle; do not externalize
 	'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
 	'@woocommerce/blocks-checkout-events': [ 'wc', 'blocksCheckoutEvents' ],
 	'@woocommerce/settings': [ 'wc', 'wcSettings' ],
@@ -20,11 +24,10 @@ const wcDepMap = {
 	'@woocommerce/blocks-checkout': [ 'wc', 'blocksCheckout' ],
 	'@woocommerce/blocks-components': [ 'wc', 'blocksComponents' ],
 	'@woocommerce/types': [ 'wc', 'wcTypes' ],
-	'@woocommerce/customer-effort-score': [ 'wc', 'customerEffortScore' ],
 	'@woocommerce/sanitize': [ 'wc', 'sanitize' ],
 };
-
 const wcHandleMap = {
+	'@woocommerce/tracks': false, // Bundle; no PHP handle needed
 	'@woocommerce/blocks-registry': 'wc-blocks-registry',
 	'@woocommerce/settings': 'wc-settings',
 	'@woocommerce/block-data': 'wc-blocks-data-store',
@@ -36,7 +39,6 @@ const wcHandleMap = {
 	'@woocommerce/blocks-checkout-events': 'wc-blocks-checkout-events',
 	'@woocommerce/blocks-components': 'wc-blocks-components',
 	'@woocommerce/types': 'wc-types',
-	'@woocommerce/customer-effort-score': 'wc-customer-effort-score',
 	'@woocommerce/sanitize': 'wc-sanitize',
 };
 
@@ -104,15 +106,40 @@ const getAlias = ( options = {} ) => {
 	};
 };
 
+// Activates the `"wc-source"` conditional export declared in each
+// `packages/js/*` package.json. Webpack walks the package's exports map and
+// picks `./src/index.ts` directly — eliminating the need to pre-build the few
+// `@woocommerce/*` packages that blocks bundles (i.e. not externalized via
+// `wcDepMap`). The condition is namespaced (`wc-` prefix) so it never collides
+// with third-party packages that publish their own `"source"` conditional
+// export. `'...'` extends the default webpack condition list.
+const getResolve = ( { alias, resolvePlugins = [] } = {} ) => ( {
+	conditionNames: [ 'wc-source', '...' ],
+	plugins: resolvePlugins,
+	...( alias ? { alias } : {} ),
+} );
+
 const requestToExternal = ( request ) => {
-	if ( wcDepMap[ request ] ) {
+	if ( request in wcDepMap ) {
 		return wcDepMap[ request ];
+	}
+	if ( request === 'react-dom/client' ) {
+		// React 18 split createRoot/hydrateRoot into react-dom/client.
+		// WordPress's wp-react-dom UMD aggregates both entrypoints onto the
+		// same window.ReactDOM global. DEWP's default mapper doesn't know
+		// about the subpath yet
+		// (https://github.com/WordPress/gutenberg/pull/77326),
+		// so map it here.
+		return 'ReactDOM';
 	}
 };
 
 const requestToHandle = ( request ) => {
-	if ( wcHandleMap[ request ] ) {
+	if ( request in wcHandleMap ) {
 		return wcHandleMap[ request ];
+	}
+	if ( request === 'react-dom/client' ) {
+		return 'react-dom';
 	}
 };
 
@@ -194,6 +221,7 @@ module.exports = {
 	CHECK_CIRCULAR_DEPS,
 	ASSET_CHECK,
 	getAlias,
+	getResolve,
 	requestToHandle,
 	requestToExternal,
 	getProgressBarPluginConfig,

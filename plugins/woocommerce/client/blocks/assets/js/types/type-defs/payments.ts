@@ -15,6 +15,7 @@ import type {
 } from './cart-response';
 import type { EmptyObjectType } from './objects';
 import type { CheckoutResponseSuccess } from './checkout';
+import type { CustomPlaceOrderButtonComponent } from './payment-method-interface';
 
 /**
  * The shape of objects on the `globalPaymentMethods` object from `allSettings`.
@@ -116,6 +117,9 @@ export interface PaymentMethodConfiguration {
 	ariaLabel: string;
 	// Optionally customize the label text for the checkout submit (`Place Order`) button.
 	placeOrderButtonLabel?: string;
+	// Optionally provide a custom React component to replace the Place Order button.
+	// Receives the full payment method interface plus additional button-specific props.
+	placeOrderButton?: CustomPlaceOrderButtonComponent;
 	// A React node that contains logic handling any processing your payment method has to do with saved payment methods if your payment method supports them
 	savedTokenComponent?: ReactNode | null;
 }
@@ -162,9 +166,15 @@ export type PlainPaymentMethods = Record<
 >;
 
 /**
- * Used to represent payment methods in a context where storing objects is not allowed, i.e. in data stores.
+ * Like `PlainPaymentMethods`, but express methods may also carry a `paymentMethodId`
+ * (the server-side gateway id, defaulting to `name`) for matching registered gateways.
  */
-export type PlainExpressPaymentMethods = PlainPaymentMethods;
+export type PlainExpressPaymentMethods = Record<
+	string,
+	PlainPaymentMethods[ string ] & {
+		paymentMethodId?: string;
+	}
+>;
 
 export type ExpressPaymentMethods =
 	| Record< string, ExpressPaymentMethodConfigInstance >
@@ -180,6 +190,7 @@ export interface PaymentMethodConfigInstance {
 	label: ReactNode;
 	ariaLabel: string;
 	placeOrderButtonLabel?: string;
+	placeOrderButton?: CustomPlaceOrderButtonComponent;
 	savedTokenComponent?: ReactNode | null;
 	canMakePaymentFromConfig: CanMakePaymentCallback;
 	canMakePayment: CanMakePaymentCallback;
@@ -194,6 +205,7 @@ export interface ExpressPaymentMethodConfigInstance {
 	edit: ReactNode;
 	paymentMethodId?: string;
 	placeOrderButtonLabel?: string;
+	placeOrderButton?: CustomPlaceOrderButtonComponent;
 	supports: Supports;
 	canMakePaymentFromConfig: CanMakePaymentCallback;
 	canMakePayment: CanMakePaymentCallback;

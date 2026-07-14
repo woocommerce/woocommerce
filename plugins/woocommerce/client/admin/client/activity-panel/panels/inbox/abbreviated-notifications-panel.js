@@ -9,16 +9,11 @@ import { useSelect } from '@wordpress/data';
 import { box, comment, page } from '@wordpress/icons';
 import { createSlotFill } from '@wordpress/components';
 import { isWCAdmin } from '@woocommerce/navigation';
+import { activityPanelStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import {
-	getLowStockCount,
-	getOrderStatuses,
-	getUnreadOrders,
-} from '~/homescreen/activity-panel/orders/utils';
-import { getUnapprovedReviews } from '~/homescreen/activity-panel/reviews/utils';
 import { Bell } from './icons/bell';
 import { isTaskListVisible } from '~/hooks/use-tasklists-state';
 
@@ -28,6 +23,9 @@ const REVIEWS_PANEL_ID = 'reviews-panel';
 const STOCK_PANEL_ID = 'stock-panel';
 
 export const ABBREVIATED_NOTIFICATION_SLOT_NAME = 'AbbreviatedNotification';
+const { Slot: AbbreviatedNotificationSlot } = createSlotFill(
+	ABBREVIATED_NOTIFICATION_SLOT_NAME
+);
 
 export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 	const {
@@ -37,16 +35,16 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 		isSetupTaskListHidden,
 		isExtendedTaskListHidden,
 	} = useSelect( ( select ) => {
-		const orderStatuses = getOrderStatuses( select );
+		const counts = select( activityPanelStore ).getActivityPanelCounts();
 
 		return {
-			ordersToProcessCount: getUnreadOrders( select, orderStatuses ),
-			reviewsToModerateCount: getUnapprovedReviews( select ),
-			stockNoticesCount: getLowStockCount( select ),
+			ordersToProcessCount: counts?.orders_to_fulfill_count ?? 0,
+			reviewsToModerateCount: counts?.reviews_to_moderate_count ?? 0,
+			stockNoticesCount: counts?.products_low_in_stock_count ?? 0,
 			isSetupTaskListHidden: ! isTaskListVisible( 'setup' ),
 			isExtendedTaskListHidden: ! isTaskListVisible( 'extended' ),
 		};
-	} );
+	}, [] );
 
 	const trackAbbreviatedCardClick = ( name ) => {
 		recordEvent( 'activity_panel_click', {
@@ -54,7 +52,6 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 		} );
 	};
 
-	const { Slot } = createSlotFill( ABBREVIATED_NOTIFICATION_SLOT_NAME );
 	const isWCAdminPage = isWCAdmin();
 
 	return (
@@ -161,7 +158,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 					</Text>
 				</AbbreviatedCard>
 			) }
-			{ ! isExtendedTaskListHidden && <Slot /> }
+			{ ! isExtendedTaskListHidden && <AbbreviatedNotificationSlot /> }
 		</div>
 	);
 };

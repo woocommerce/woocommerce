@@ -16,9 +16,10 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
-use Automattic\WooCommerce\Internal\Fulfillments\OrderFulfillmentsRestController;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\OrderFulfillmentsRestController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Schema\FulfillmentSchema;
 use WP_Http;
 use WP_Error;
 use WC_Order;
@@ -42,6 +43,13 @@ class Controller extends AbstractController {
 	protected $rest_base = 'fulfillments';
 
 	/**
+	 * Schema class for this route.
+	 *
+	 * @var FulfillmentSchema
+	 */
+	protected $item_schema;
+
+	/**
 	 * Order fulfillments controller instance.
 	 *
 	 * @var OrderFulfillmentsRestController
@@ -49,12 +57,16 @@ class Controller extends AbstractController {
 	protected $order_fulfillments_controller;
 
 	/**
-	 * Constructor.
+	 * Initialize the controller.
 	 *
-	 * @since 4.0.0
+	 * @param FulfillmentSchema               $item_schema                   Fulfillment schema class.
+	 * @param OrderFulfillmentsRestController $order_fulfillments_controller Order fulfillments controller.
+	 *
+	 * @internal
 	 */
-	public function __construct() {
-		$this->order_fulfillments_controller = new OrderFulfillmentsRestController();
+	final public function init( FulfillmentSchema $item_schema, OrderFulfillmentsRestController $order_fulfillments_controller ) {
+		$this->item_schema                   = $item_schema;
+		$this->order_fulfillments_controller = $order_fulfillments_controller;
 	}
 
 	/**
@@ -68,19 +80,24 @@ class Controller extends AbstractController {
 			$this->namespace,
 			$this->rest_base,
 			array(
+				'schema' => array( $this, 'get_public_item_schema' ),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_fulfillments' ),
 					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
-					'args'                => $this->get_args_for_get_fulfillments(),
-					'schema'              => $this->get_schema_for_get_fulfillments(),
+					'args'                => array(
+						'order_id' => array(
+							'description' => __( 'Unique identifier for the order.', 'woocommerce' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+					),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_fulfillment' ),
 					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
-					'args'                => $this->get_args_for_create_fulfillment(),
-					'schema'              => $this->get_schema_for_create_fulfillment(),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				),
 			),
 		);
@@ -90,28 +107,53 @@ class Controller extends AbstractController {
 			$this->namespace,
 			$this->rest_base . '/(?P<fulfillment_id>[\d]+)',
 			array(
+				'schema' => array( $this, 'get_public_item_schema' ),
+				'args'   => array(
+					'fulfillment_id' => array(
+						'description' => __( 'Unique identifier for the fulfillment.', 'woocommerce' ),
+						'type'        => 'integer',
+						'required'    => true,
+					),
+				),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_fulfillment' ),
 					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
-					'args'                => $this->get_args_for_get_fulfillment(),
-					'schema'              => $this->get_schema_for_get_fulfillment(),
 				),
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_fulfillment' ),
 					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
-					'args'                => $this->get_args_for_update_fulfillment(),
-					'schema'              => $this->get_schema_for_update_fulfillment(),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_fulfillment' ),
 					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
-					'args'                => $this->get_args_for_delete_fulfillment(),
-					'schema'              => $this->get_schema_for_delete_fulfillment(),
+					'args'                => array(
+						'notify_customer' => array(
+							'description' => __( 'Whether to notify the customer about the fulfillment update.', 'woocommerce' ),
+							'type'        => 'boolean',
+							'default'     => false,
+							'required'    => false,
+						),
+					),
 				),
 			),
+		);
+
+		// Register the route for getting shipping providers.
+		register_rest_route(
+			$this->namespace,
+			$this->rest_base . '/providers',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_providers' ),
+					'permission_callback' => array( $this, 'check_permission_for_providers' ),
+					'schema'              => array( $this, 'get_schema_for_providers' ),
+				),
+			)
 		);
 	}
 
@@ -287,7 +329,7 @@ class Controller extends AbstractController {
 						$ex->getMessage(),
 						array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
 					);
-				} catch ( \Exception $e ) {
+				} catch ( \Throwable $e ) {
 					return new WP_Error(
 						'woocommerce_rest_fulfillment_invalid_id',
 						$e->getMessage(),
@@ -328,9 +370,10 @@ class Controller extends AbstractController {
 		}
 
 		// Check if the order exists, and if the current user is the owner of the order, and the request is a read request.
-		// We allow this because we need to render the order fulfillments on the customer's order details and order tracking pages.
-		// But they will be only able to view them, not edit.
-		if ( get_current_user_id() === $order->get_customer_id() && WP_REST_Server::READABLE === $request->get_method() ) {
+		// Guest order fulfillments are rendered server-side via templates, so they don't need REST API access.
+		// The get_current_user_id() > 0 check prevents unauthenticated users from accessing guest orders
+		// where both get_current_user_id() and get_customer_id() would return 0.
+		if ( get_current_user_id() > 0 && get_current_user_id() === $order->get_customer_id() && WP_REST_Server::READABLE === $request->get_method() ) {
 			return true;
 		}
 
@@ -345,17 +388,13 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Get the schema for the fulfillment resource.
+	 * Get the schema for the fulfillment resource. This is consumed by the AbstractController to generate the item schema
+	 * after running various hooks on the response.
 	 *
 	 * @return array The schema for the fulfillment resource.
 	 */
 	protected function get_schema(): array {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'fulfillment',
-			'type'       => 'object',
-			'properties' => $this->get_read_schema_for_fulfillment(),
-		);
+		return $this->item_schema->get_item_schema();
 	}
 
 	/**
@@ -366,342 +405,9 @@ class Controller extends AbstractController {
 	 * @return array The item response.
 	 */
 	protected function get_item_response( $item, WP_REST_Request $request ): array {
-		// This method is required by AbstractController but not used in our implementation
-		// since we delegate to OrderFulfillmentsRestController.
-		return array();
+		return $this->item_schema->get_item_response( $item, $request, $this->get_fields_for_response( $request ) );
 	}
 
-	/**
-	 * Get the arguments for the get order fulfillments endpoint.
-	 *
-	 * @return array
-	 */
-	private function get_args_for_get_fulfillments(): array {
-		return array(
-			'order_id' => array(
-				'description' => __( 'Unique identifier for the order.', 'woocommerce' ),
-				'type'        => 'integer',
-				'required'    => true,
-				'context'     => array( 'view', 'edit' ),
-			),
-		);
-	}
-
-	/**
-	 * Get the schema for the get order fulfillments endpoint.
-	 *
-	 * @return array
-	 */
-	private function get_schema_for_get_fulfillments(): array {
-		$schema          = array(
-			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title'   => 'base',
-			'type'    => 'object',
-		);
-		$schema['title'] = __( 'Get fulfillments response.', 'woocommerce' );
-		$schema['type']  = 'array';
-		$schema['items'] = array(
-			'type'       => 'object',
-			'properties' => $this->get_read_schema_for_fulfillment(),
-		);
-		return $schema;
-	}
-
-	/**
-	 * Get the arguments for the create fulfillment endpoint.
-	 *
-	 * @return array
-	 */
-	private function get_args_for_create_fulfillment(): array {
-		return $this->get_write_args_for_fulfillment( true );
-	}
-
-	/**
-	 * Get the schema for the create fulfillment endpoint.
-	 *
-	 * @return array
-	 */
-	private function get_schema_for_create_fulfillment(): array {
-		$schema               = array(
-			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title'   => 'base',
-			'type'    => 'object',
-		);
-		$schema['title']      = __( 'Create fulfillment response.', 'woocommerce' );
-		$schema['properties'] = $this->get_read_schema_for_fulfillment();
-		return $schema;
-	}
-
-	/**
-	 * Get the arguments for the get fulfillment endpoint.
-	 *
-	 * @return array
-	 */
-	private function get_args_for_get_fulfillment(): array {
-		return array(
-			'fulfillment_id' => array(
-				'description' => __( 'Unique identifier for the fulfillment.', 'woocommerce' ),
-				'type'        => 'integer',
-				'context'     => array( 'view', 'edit' ),
-				'required'    => true,
-			),
-		);
-	}
-
-	/**
-	 * Get the schema for the get fulfillment endpoint.
-	 *
-	 * @return array
-	 */
-	private function get_schema_for_get_fulfillment(): array {
-		$schema               = array(
-			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title'   => 'base',
-			'type'    => 'object',
-		);
-		$schema['title']      = __( 'Get fulfillment response.', 'woocommerce' );
-		$schema['properties'] = $this->get_read_schema_for_fulfillment();
-
-		return $schema;
-	}
-
-	/**
-	 * Get the arguments for the update fulfillment endpoint.
-	 *
-	 * @return array
-	 */
-	private function get_args_for_update_fulfillment(): array {
-		return $this->get_write_args_for_fulfillment( false );
-	}
-
-	/**
-	 * Get the schema for the update fulfillment endpoint.
-	 *
-	 * @return array
-	 */
-	private function get_schema_for_update_fulfillment(): array {
-		$schema               = array(
-			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title'   => 'base',
-			'type'    => 'object',
-		);
-		$schema['title']      = __( 'Update fulfillment response.', 'woocommerce' );
-		$schema['type']       = 'object';
-		$schema['properties'] = $this->get_read_schema_for_fulfillment();
-
-		return $schema;
-	}
-
-	/**
-	 * Get the arguments for the delete fulfillment endpoint.
-	 *
-	 * @return array
-	 */
-	private function get_args_for_delete_fulfillment(): array {
-		return array(
-			'fulfillment_id'  => array(
-				'description' => __( 'Unique identifier for the fulfillment.', 'woocommerce' ),
-				'type'        => 'integer',
-				'required'    => true,
-				'context'     => array( 'view', 'edit' ),
-			),
-			'notify_customer' => array(
-				'description' => __( 'Whether to notify the customer about the fulfillment update.', 'woocommerce' ),
-				'type'        => 'boolean',
-				'default'     => false,
-				'required'    => false,
-				'context'     => array( 'view', 'edit' ),
-			),
-		);
-	}
-
-	/**
-	 * Get the schema for the delete fulfillment endpoint.
-	 *
-	 * @return array
-	 */
-	private function get_schema_for_delete_fulfillment(): array {
-		$schema               = array(
-			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title'   => 'base',
-			'type'    => 'object',
-		);
-		$schema['title']      = __( 'Delete fulfillment response.', 'woocommerce' );
-		$schema['properties'] = array(
-			'message' => array(
-				'description' => __( 'The response message.', 'woocommerce' ),
-				'type'        => 'string',
-				'required'    => true,
-			),
-		);
-
-		return $schema;
-	}
-
-	/**
-	 * Get the base schema for the fulfillment with a read context.
-	 *
-	 * @return array
-	 */
-	private function get_read_schema_for_fulfillment() {
-		return array(
-			'id'           => array(
-				'description' => __( 'Unique identifier for the fulfillment.', 'woocommerce' ),
-				'type'        => 'integer',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
-			'entity_type'  => array(
-				'description' => __( 'The type of entity for which the fulfillment is created.', 'woocommerce' ),
-				'type'        => 'string',
-				'required'    => true,
-				'context'     => array( 'view', 'edit' ),
-			),
-			'entity_id'    => array(
-				'description' => __( 'Unique identifier for the entity.', 'woocommerce' ),
-				'type'        => 'string',
-				'required'    => true,
-				'context'     => array( 'view', 'edit' ),
-			),
-			'status'       => array(
-				'description' => __( 'The status of the fulfillment.', 'woocommerce' ),
-				'type'        => 'string',
-				'default'     => 'unfulfilled',
-				'required'    => true,
-				'context'     => array( 'view', 'edit' ),
-			),
-			'is_fulfilled' => array(
-				'description' => __( 'Whether the fulfillment is fulfilled.', 'woocommerce' ),
-				'type'        => 'boolean',
-				'default'     => false,
-				'required'    => true,
-				'context'     => array( 'view', 'edit' ),
-			),
-			'date_updated' => array(
-				'description' => __( 'The date the fulfillment was last updated.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-				'required'    => true,
-			),
-			'date_deleted' => array(
-				'description' => __( 'The date the fulfillment was deleted.', 'woocommerce' ),
-				'anyOf'       => array(
-					array(
-						'type' => 'string',
-					),
-					array(
-						'type' => 'null',
-					),
-				),
-				'default'     => null,
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-				'required'    => true,
-			),
-			'meta_data'    => array(
-				'description' => __( 'Meta data for the fulfillment.', 'woocommerce' ),
-				'type'        => 'array',
-				'required'    => true,
-				'items'       => $this->get_schema_for_meta_data(),
-			),
-		);
-	}
-
-	/**
-	 * Get the base args for the fulfillment with a write context.
-	 *
-	 * @param bool $is_create Whether the args list is for a create request.
-	 *
-	 * @return array
-	 */
-	private function get_write_args_for_fulfillment( bool $is_create = false ) {
-		return array_merge(
-			! $is_create ? array(
-				'fulfillment_id' => array(
-					'description' => __( 'Unique identifier for the fulfillment.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-			) : array(),
-			array(
-				'entity_type'     => array(
-					'description' => __( 'The type of entity for which the fulfillment is created. Must be "order".', 'woocommerce' ),
-					'type'        => 'string',
-					'required'    => true,
-					'context'     => array( 'view', 'edit' ),
-				),
-				'entity_id'       => array(
-					'description' => __( 'Unique identifier for the entity.', 'woocommerce' ),
-					'type'        => 'string',
-					'required'    => true,
-					'context'     => array( 'view', 'edit' ),
-				),
-				'status'          => array(
-					'description' => __( 'The status of the fulfillment.', 'woocommerce' ),
-					'type'        => 'string',
-					'default'     => 'unfulfilled',
-					'required'    => false,
-					'context'     => array( 'view', 'edit' ),
-				),
-				'is_fulfilled'    => array(
-					'description' => __( 'Whether the fulfillment is fulfilled.', 'woocommerce' ),
-					'type'        => 'boolean',
-					'default'     => false,
-					'required'    => false,
-					'context'     => array( 'view', 'edit' ),
-				),
-				'meta_data'       => array(
-					'description' => __( 'Meta data for the fulfillment.', 'woocommerce' ),
-					'type'        => 'array',
-					'required'    => true,
-					'schema'      => $this->get_schema_for_meta_data(),
-				),
-				'notify_customer' => array(
-					'description' => __( 'Whether to notify the customer about the fulfillment update.', 'woocommerce' ),
-					'type'        => 'boolean',
-					'default'     => false,
-					'required'    => false,
-					'context'     => array( 'view', 'edit' ),
-				),
-			)
-		);
-	}
-
-	/**
-	 * Get the schema for the meta data.
-	 *
-	 * @return array
-	 */
-	private function get_schema_for_meta_data(): array {
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'id'    => array(
-					'description' => __( 'The unique identifier for the meta data. Set `0` for new records.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'key'   => array(
-					'description' => __( 'The key of the meta data.', 'woocommerce' ),
-					'type'        => 'string',
-					'required'    => true,
-					'context'     => array( 'view', 'edit' ),
-				),
-				'value' => array(
-					'description' => __( 'The value of the meta data.', 'woocommerce' ),
-					'type'        => 'string',
-					'required'    => true,
-					'context'     => array( 'view', 'edit' ),
-				),
-			),
-			'required'   => true,
-			'context'    => array( 'view', 'edit' ),
-			'readonly'   => true,
-		);
-	}
 
 	/**
 	 * Prepare an error response.
@@ -720,6 +426,153 @@ class Controller extends AbstractController {
 				'data'    => $data,
 			),
 			$data['status'] ?? WP_Http::BAD_REQUEST
+		);
+	}
+
+	/**
+	 * Get all shipping providers.
+	 *
+	 * @since 10.5.0
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response
+	 */
+	public function get_providers( WP_REST_Request $request ): WP_REST_Response {
+		$providers = array();
+		foreach ( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_shipping_providers() as $provider ) {
+			$providers[ $provider->get_key() ] = array(
+				'label' => $provider->get_name(),
+				'icon'  => $provider->get_icon(),
+				'value' => $provider->get_key(),
+				'url'   => $provider->get_tracking_url( '__PLACEHOLDER__' ) ?? '',
+			);
+		}
+
+		/**
+		 * Filters the shipping providers response before it is returned.
+		 *
+		 * Each provider in the array must have the following structure:
+		 * - 'label' (string): The display name of the provider.
+		 * - 'icon' (string): URL to the provider's icon.
+		 * - 'value' (string): The provider's unique identifier.
+		 * - 'url' (string): The tracking URL template.
+		 *
+		 * @param array           $providers The shipping providers data.
+		 * @param WP_REST_Request $request   The request object.
+		 *
+		 * @since 10.5.0
+		 */
+		$providers = apply_filters( 'woocommerce_rest_prepare_fulfillments_providers', $providers, $request );
+
+		// Validate filtered result to prevent extensions from returning invalid structures.
+		if ( ! is_array( $providers ) ) {
+			_doing_it_wrong(
+				'woocommerce_rest_prepare_fulfillments_providers',
+				esc_html__( 'The filter must return an array of providers.', 'woocommerce' ),
+				'10.5.0'
+			);
+			$providers = array();
+		} else {
+			$providers = $this->validate_providers_structure( $providers );
+		}
+
+		return new WP_REST_Response( $providers, WP_Http::OK );
+	}
+
+	/**
+	 * Validate the structure of providers returned by a filter.
+	 *
+	 * Removes any providers that don't have the required keys (label, icon, value, url).
+	 *
+	 * @since 10.5.0
+	 * @param array $providers The providers array to validate.
+	 * @return array The validated providers array with invalid entries removed.
+	 */
+	private function validate_providers_structure( array $providers ): array {
+		$required_keys   = array( 'label', 'icon', 'value', 'url' );
+		$valid_providers = array();
+		$has_invalid     = false;
+
+		foreach ( $providers as $key => $provider ) {
+			if ( ! is_array( $provider ) ) {
+				$has_invalid = true;
+				continue;
+			}
+
+			$missing_keys = array_diff( $required_keys, array_keys( $provider ) );
+			if ( ! empty( $missing_keys ) ) {
+				$has_invalid = true;
+				continue;
+			}
+
+			$valid_providers[ $key ] = $provider;
+		}
+
+		if ( $has_invalid ) {
+			_doing_it_wrong(
+				'woocommerce_rest_prepare_fulfillments_providers',
+				esc_html__( 'Some providers were removed because they are missing required keys (label, icon, value, url).', 'woocommerce' ),
+				'10.5.0'
+			);
+		}
+
+		return $valid_providers;
+	}
+
+	/**
+	 * Check permissions for accessing shipping providers.
+	 *
+	 * @since 10.5.0
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return bool|WP_Error True if the current user has the capability, otherwise a WP_Error.
+	 */
+	public function check_permission_for_providers( WP_REST_Request $request ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return $this->get_authentication_error_by_method( $request->get_method() );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get the schema for the providers endpoint.
+	 *
+	 * @since 10.5.0
+	 * @return array The schema for the providers endpoint.
+	 */
+	public function get_schema_for_providers(): array {
+		return array(
+			'$schema'              => 'http://json-schema.org/draft-04/schema#',
+			'title'                => __( 'Shipping providers', 'woocommerce' ),
+			'type'                 => 'object',
+			'additionalProperties' => array(
+				'type'       => 'object',
+				'properties' => array(
+					'label' => array(
+						'description' => __( 'The display name of the shipping provider.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'icon'  => array(
+						'description' => __( 'The icon URL for the shipping provider.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'value' => array(
+						'description' => __( 'The unique key for the shipping provider.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'url'   => array(
+						'description' => __( 'The tracking URL template for the shipping provider.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+				),
+			),
 		);
 	}
 }

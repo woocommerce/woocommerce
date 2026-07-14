@@ -1,0 +1,84 @@
+#!/bin/bash
+
+echo "Initializing WooCommerce E2E"
+
+# Command prefix for running wp-cli against the single-container E2E environment
+# (started via `wp-env --config .wp-env.e2e.json`, whose container is `cli`).
+wp_cli="wp-env --config .wp-env.e2e.json run cli"
+
+$wp_cli wp config set WP_HTTP_BLOCK_EXTERNAL false --raw --type=constant
+
+$wp_cli wp plugin activate woocommerce
+
+$wp_cli wp user create customer customer@woocommercecoree2etestsuite.com --user_pass=password --role=subscriber --path=/var/www/html
+
+# Installing and activating the WordPress Importer plugin to import sample products"
+$wp_cli wp plugin install wordpress-importer --activate
+
+# Adding basic WooCommerce settings"
+$wp_cli wp option set woocommerce_store_address 'Example Address Line 1'
+$wp_cli wp option set woocommerce_store_address_2 'Example Address Line 2'
+$wp_cli wp option set woocommerce_store_city 'Example City'
+$wp_cli wp option set woocommerce_default_country 'US:CA'
+$wp_cli wp option set woocommerce_store_postcode '94110'
+$wp_cli wp option set woocommerce_currency 'USD'
+$wp_cli wp option set woocommerce_product_type 'both'
+$wp_cli wp option set woocommerce_allow_tracking 'no'
+$wp_cli wp option set woocommerce_enable_checkout_login_reminder 'yes'
+$wp_cli wp option set --format=json woocommerce_cod_settings '{"enabled":"yes"}'
+$wp_cli wp option set woocommerce_coming_soon 'no'
+
+#  WooCommerce shop pages
+$wp_cli wp wc --user=admin tool run install_pages
+
+# Importing WooCommerce sample products"
+$wp_cli wp import wp-content/plugins/woocommerce/sample-data/sample_products.xml --authors=skip
+
+# install Storefront
+$wp_cli wp theme install storefront --activate
+
+# Pin order storage to the legacy posts table (HPOS off) for deterministic runs.
+# These performance requests assert the classic post.php order-edit screens,
+# which are not authoritative under HPOS. New installs can auto-enable HPOS via
+# the `woocommerce_newly_installed` hook (fired on admin_init - e.g. a Site
+# Health loopback to admin-ajax.php) while no orders exist yet, flipping order
+# storage mid-run and breaking those assertions. Force HPOS off and consume the
+# newly-installed flag so it cannot be re-enabled during the test run.
+$wp_cli wp option update woocommerce_custom_orders_table_enabled no
+$wp_cli wp option update woocommerce_newly_installed no
+
+# reduce the impact of background activities on the testing setup
+$wp_cli wp config set DISABLE_WP_CRON true --raw --type=constant
+$wp_cli wp config set WP_HTTP_BLOCK_EXTERNAL true --raw --type=constant
+
+# Resolve container names once; fail loudly if wp-env is not running.
+# Scope to the E2E env's compose project ("...-woocommerce-e2e-<hash>"), which the
+# performance env runs on, so a co-running dev env ("...-woocommerce-<hash>") can't
+# be matched by mistake (both expose a "...-wordpress-1" container). Match the
+# "woocommerce-e2e-" prefix including its trailing dash: the hash is hex and "e2e" is
+# all hex digits, so a dev hash starting "e2e" is followed by more hex, never a dash.
+_wp_container="$(docker ps --filter name=woocommerce-e2e- --format '{{.Names}}' | grep -- '-wordpress-1$' | head -1)"
+_db_container="$(docker ps --filter name=woocommerce-e2e- --format '{{.Names}}' | grep -- '-mysql-1$' | head -1)"
+if [ -z "$_wp_container" ] || [ -z "$_db_container" ]; then
+    echo "Error: wp-env containers not found. Run 'pnpm env:perf' first." >&2
+    exit 1
+fi
+
+# Remove container-level strains for cleaner performance metrics: OPcache.
+docker exec -u root "$_wp_container" bash -c \
+    "printf '[opcache]\nopcache.enable=1\nopcache.memory_consumption=256\nopcache.max_accelerated_files=20000\nopcache.validate_timestamps=1\nopcache.revalidate_freq=0\n' > /usr/local/etc/php/conf.d/perf-opcache.ini"
+docker restart "$_wp_container"
+
+# Remove container-level strains for cleaner performance metrics: DB buffer and connections pool.
+docker exec -u root "$_db_container" bash -c "printf '[mysqld]\ninnodb_buffer_pool_size=1073741824\ninnodb_flush_log_at_trx_commit=2\n' > /etc/mysql/conf.d/perf-tuning.cnf"
+docker restart "$_db_container"
+_deadline=$((SECONDS + 30))
+until docker exec "$_db_container" mariadb -u root -ppassword -e "SELECT 1" &>/dev/null; do
+    if [ $SECONDS -ge $_deadline ]; then
+        echo "Error: MariaDB did not become ready within 30 seconds." >&2
+        exit 1
+    fi
+    sleep 0.5
+done
+
+echo "Success! Your E2E Test Environment is now ready."

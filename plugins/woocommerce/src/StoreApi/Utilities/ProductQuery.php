@@ -6,7 +6,10 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use WC_Tax;
 
 /**
@@ -20,6 +23,7 @@ class ProductQuery implements QueryClausesGenerator {
 	 *
 	 * @param \WP_REST_Request $request Request data.
 	 * @return array
+	 * @throws RouteException If the related product ID is invalid or the product is not visible.
 	 */
 	public function prepare_objects_query( $request ) {
 		$args = array(
@@ -251,6 +255,32 @@ class ProductQuery implements QueryClausesGenerator {
 			$args['meta_key'] = $ordering_args['meta_key']; // phpcs:ignore
 		}
 
+		// Filter by related products.
+		if ( ! empty( $request['related'] ) ) {
+			$product_id      = absint( $request['related'] );
+			$related_product = wc_get_product( $product_id );
+
+			if ( ! $related_product || ! $related_product->is_visible() ) {
+				throw new RouteException(
+					'woocommerce_rest_product_not_found',
+					__( 'The related product ID is invalid or the product is not visible.', 'woocommerce' ), // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
+					404
+				);
+			}
+
+			$limit   = ! empty( $request['per_page'] ) ? (int) $request['per_page'] : 100;
+			$related = wc_get_related_products( $product_id, $limit );
+
+			if ( ! empty( $related ) ) {
+				$args['post__in'] = ! empty( $args['post__in'] )
+					? array_values( array_intersect( $args['post__in'], $related ) )
+					: array_values( $related );
+			} else {
+				// No related products found, return empty result.
+				$args['post__in'] = array( 0 );
+			}
+		}
+
 		return $args;
 	}
 
@@ -323,28 +353,60 @@ class ProductQuery implements QueryClausesGenerator {
 	public function get_objects( $request ) {
 		$results = $this->get_results( $request );
 
-		if ( is_callable( '_prime_post_caches' ) ) {
+		if ( ! empty( $results['results'] ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $results['results'] );
 		}
 
+		$objects = array_map( 'wc_get_product', $results['results'] );
+
+		// Batch-prime image attachment caches for the whole collection, rather than once per
+		// product when ProductSchema::get_images() runs during serialization.
+		wc_get_container()->get( ProductUtil::class )->prime_image_caches( $objects );
+
 		return array(
-			'objects' => array_map( 'wc_get_product', $results['results'] ),
+			'objects' => $objects,
 			'total'   => $results['total'],
 			'pages'   => $results['pages'],
 		);
 	}
 
 	/**
-	 * Get last modified date for all products.
+	 * Get last modified date for all products as an HTTP-date (RFC 7232).
 	 *
-	 * @return int timestamp.
+	 * The result is cached in the 'wc_products' object cache group and invalidated via the
+	 * clean_post_cache hook in WC_Post_Data::invalidate_products_last_modified().
+	 *
+	 * Note: This intentionally does NOT use WordPress core's wp_cache_get_last_changed() /
+	 * wp_cache_set_last_changed() pattern. Those functions are designed for opaque cache-key
+	 * salting where auto-seeding with the current time on a cache miss is acceptable (a wrong
+	 * salt simply causes a cache miss and re-query). Here, the value is exposed to clients via
+	 * the Last-Modified HTTP header for collection cache invalidation. Auto-seeding with "now"
+	 * on a cache miss would force all clients to unnecessarily invalidate their local caches.
+	 * Instead, on a cache miss we fall back to the database to get the real last modification
+	 * time and cache that.
+	 *
+	 * @return string|null HTTP-date formatted string, or null if no products exist.
 	 */
 	public function get_last_modified() {
-		global $wpdb;
+		$last_modified = wp_cache_get( 'last_modified', 'wc_products' );
 
-		$last_modified = $wpdb->get_var( "SELECT MAX( post_modified_gmt ) FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' );" );
+		if ( false === $last_modified ) {
+			global $wpdb;
 
-		return $last_modified ? strtotime( $last_modified ) : null;
+			$last_modified_gmt = $wpdb->get_var(
+				"SELECT MAX( post_modified_gmt ) FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' )"
+			);
+
+			if ( ! $last_modified_gmt ) {
+				return null;
+			}
+
+			$last_modified = gmdate( 'D, d M Y H:i:s', strtotime( $last_modified_gmt ) ) . ' GMT';
+			wp_cache_set( 'last_modified', $last_modified, 'wc_products' );
+		}
+
+		return $last_modified;
 	}
 
 	/**
@@ -356,6 +418,17 @@ class ProductQuery implements QueryClausesGenerator {
 	 */
 	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		global $wpdb;
+
+		// SKU and slug lookups can return variations, so exclude any whose parent product is not published.
+		if ( in_array( 'product_variation', (array) $wp_query->get( 'post_type' ), true ) ) {
+			$args['where'] .= $wpdb->prepare(
+				" AND ( {$wpdb->posts}.post_type != 'product_variation' OR EXISTS (
+					SELECT 1 FROM {$wpdb->posts} AS parent
+					WHERE parent.ID = {$wpdb->posts}.post_parent AND parent.post_status = %s
+				) ) ",
+				ProductStatus::PUBLISH
+			);
+		}
 
 		if ( $wp_query->get( 'search' ) ) {
 			$search         = '%' . $wpdb->esc_like( $wp_query->get( 'search' ) ) . '%';
@@ -489,7 +562,7 @@ class ProductQuery implements QueryClausesGenerator {
 	 */
 	protected function adjust_price_filters_for_displayed_taxes() {
 		$display  = get_option( 'woocommerce_tax_display_shop' );
-		$database = wc_prices_include_tax() ? 'incl' : 'excl';
+		$database = wc_prices_include_tax() ? TaxDisplayMode::INCLUSIVE : TaxDisplayMode::EXCLUSIVE;
 
 		return $display !== $database;
 	}
@@ -519,7 +592,7 @@ class ProductQuery implements QueryClausesGenerator {
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
 
 		// If prices are shown incl. tax, we want to remove the taxes from the filter amount to match prices stored excl. tax.
-		if ( 'incl' === $tax_display ) {
+		if ( TaxDisplayMode::INCLUSIVE === $tax_display ) {
 			/**
 			 * Filters if taxes should be removed from locations outside the store base location.
 			 *

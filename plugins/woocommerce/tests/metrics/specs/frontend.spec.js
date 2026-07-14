@@ -1,4 +1,4 @@
-/* eslint-disable @woocommerce/dependency-group, jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */
+/* eslint-disable jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */
 
 /**
  * WordPress dependencies
@@ -12,7 +12,7 @@ import { getTotalBlockingTime, median } from '../utils';
 
 // See https://github.com/WordPress/gutenberg/issues/51383#issuecomment-1613460429
 const BROWSER_IDLE_WAIT = 1000;
-const HOME = '/';
+const SHOP = '/shop/';
 
 const results = {
 	totalBlockingTime: [],
@@ -47,10 +47,10 @@ test.describe( 'Frontend Performance', () => {
 				page,
 				metrics,
 			} ) => {
-				await page.goto( HOME );
+				await page.goto( SHOP );
 
-				// Wait for the site title to load.
-				await page.locator( '[aria-current="page"]' ).first().waitFor();
+				// Wait for the products to load.
+				await page.locator( '[id="main"]' ).first().waitFor();
 
 				// Get the durations.
 				const loadingDurations = await metrics.getLoadingDurations();
@@ -92,4 +92,4 @@ test.describe( 'Frontend Performance', () => {
 	} );
 } );
 
-/* eslint-enable @woocommerce/dependency-group, jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */
+/* eslint-enable jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */

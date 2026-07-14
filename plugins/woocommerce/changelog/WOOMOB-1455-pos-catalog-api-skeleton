@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add `/products/catalog` endpoints to v3 API with mock response behind a local feature flag.

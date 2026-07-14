@@ -24,8 +24,10 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMet
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\Controller as CustomersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Controller as GeneralSettingsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Email\Controller as EmailSettingsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Tax\Controller as TaxSettingsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Emails\Controller as EmailsSettingsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Account\Controller as AccountSettingsController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
@@ -168,11 +170,10 @@ class Server {
 	 * @return array
 	 */
 	protected function get_v3_controllers() {
-		$controllers = array(
+		return array(
 			'coupons'                  => 'WC_REST_Coupons_Controller',
 			'customer-downloads'       => 'WC_REST_Customer_Downloads_Controller',
 			'customers'                => 'WC_REST_Customers_Controller',
-			'layout-templates'         => 'WC_REST_Layout_Templates_Controller',
 			'network-orders'           => 'WC_REST_Network_Orders_Controller',
 			'order-notes'              => 'WC_REST_Order_Notes_Controller',
 			'order-refunds'            => 'WC_REST_Order_Refunds_Controller',
@@ -216,12 +217,6 @@ class Server {
 			'paypal-webhooks'          => 'WC_REST_Paypal_Webhooks_Controller',
 			'paypal-buttons'           => 'WC_REST_Paypal_Buttons_Controller',
 		);
-
-		if ( Features::is_enabled( 'products-catalog-api' ) ) {
-			$controllers['products-catalog'] = 'WC_REST_Products_Catalog_Controller';
-		}
-
-		return $controllers;
 	}
 
 	/**
@@ -245,6 +240,8 @@ class Server {
 			'settings-emails'           => EmailsSettingsController::class,
 			'settings-products'         => SettingsProductsController::class,
 			'settings-payment-gateways' => PaymentGatewaysController::class,
+			'settings-tax'              => TaxSettingsController::class,
+			'settings-account'          => AccountSettingsController::class,
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
 			'settings'                  => 'WC_REST_Settings_V4_Controller',
 		);

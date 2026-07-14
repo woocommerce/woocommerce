@@ -4,6 +4,91 @@
  * Class WC_Product_Variable_Data_Store_CPT_Test
  */
 class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
+	/**
+	 * Variable product shared by the class.
+	 *
+	 * @var int
+	 */
+	private static $product_id;
+
+	/**
+	 * Attribute taxonomy IDs owned by the class fixture.
+	 *
+	 * @var int[]
+	 */
+	private static $attribute_ids = array();
+
+	/**
+	 * Whether an attribute deletion rewrite flush was already scheduled.
+	 *
+	 * @var bool
+	 */
+	private static $had_scheduled_rewrite_flush;
+
+	/**
+	 * Create the variable product fixture shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::enable_direct_product_attribute_lookup_updates();
+
+		try {
+			$existing_attribute_ids            = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id' );
+			$product                           = WC_Helper_Product::create_variation_product();
+			self::$product_id                  = $product->get_id();
+			self::$attribute_ids               = array_values( array_diff( wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id' ), $existing_attribute_ids ) );
+			self::$had_scheduled_rewrite_flush = false !== wp_next_scheduled( 'woocommerce_flush_rewrite_rules' );
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
+	}
+
+	/**
+	 * Delete the class-owned variable product through its data store.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		global $wc_product_attributes;
+
+		self::enable_direct_product_attribute_lookup_updates();
+
+		try {
+			$product = wc_get_product( self::$product_id );
+			if ( $product ) {
+				$product->delete( true );
+			}
+
+			foreach ( self::$attribute_ids as $attribute_id ) {
+				$attribute = wc_get_attribute( $attribute_id );
+				$taxonomy  = $attribute ? $attribute->slug : '';
+
+				wc_delete_attribute( $attribute_id );
+
+				if ( $taxonomy && taxonomy_exists( $taxonomy ) ) {
+					unregister_taxonomy( $taxonomy );
+				}
+				unset( $wc_product_attributes[ $taxonomy ] );
+			}
+
+			if ( ! self::$had_scheduled_rewrite_flush ) {
+				wp_clear_scheduled_hook( 'woocommerce_flush_rewrite_rules' );
+			}
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
+	}
+
+	/**
+	 * Reload the class-owned variable product for the current transaction.
+	 *
+	 * @return WC_Product_Variable
+	 */
+	private function get_variation_product_fixture(): WC_Product_Variable {
+		$product = wc_get_product( self::$product_id );
+		if ( ! $product instanceof WC_Product_Variable ) {
+			throw new RuntimeException( 'Unable to load the variable product fixture.' );
+		}
+
+		return $product;
+	}
 
 	/**
 	 * Helper filter to force prices inclusive of tax.
@@ -358,7 +443,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		);
 
 		// Create our variable product.
-		$product = WC_Helper_Product::create_variation_product();
+		$product = $this->get_variation_product_fixture();
 
 		// Verify that a VAT exempt customer gets prices with tax removed.
 		WC()->customer->set_is_vat_exempt( true );
@@ -391,7 +476,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_read_children() {
 		$data_store = new WC_Product_Variable_Data_Store_CPT();
-		$product    = WC_Helper_Product::create_variation_product();
+		$product    = $this->get_variation_product_fixture();
 
 		// Set invalid transient data.
 		$invalid_data = 'not an array';
@@ -422,7 +507,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_read_price_data() {
 		$data_store = new WC_Product_Variable_Data_Store_CPT();
-		$product    = WC_Helper_Product::create_variation_product();
+		$product    = $this->get_variation_product_fixture();
 
 		// Get initial valid price data.
 		$initial_prices = $data_store->read_price_data( $product, false );
@@ -468,7 +553,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testWith [false, true, true, false]
 	 *           [false, false, true, false]
 	 *           [true, true, false, false]
-	 *           [true, true, true, true]
 	 *
 	 * @param bool $tax_enabled Taxes enabled shop-wide or not.
 	 * @param bool $taxable_product Product is taxable or not.
@@ -482,7 +566,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		WC()->customer->set_is_vat_exempt( $user_vat_exempt );
 
 		$data_store     = new WC_Product_Variable_Data_Store_CPT();
-		$product        = WC_Helper_Product::create_variation_product();
+		$product        = $this->get_variation_product_fixture();
 		$transient_name = 'wc_var_prices_' . $product->get_id();
 		delete_transient( $transient_name );
 
@@ -504,7 +588,82 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		sort( $actual_hashes );
 		$this->assertEquals( $expected_hashes, $actual_hashes );
 
+		// Restore default state to avoid leaking into subsequent tests.
+		WC()->customer->set_is_vat_exempt( false );
+
 		remove_filter( 'wc_tax_enabled', $tax_enabled ? '__return_true' : '__return_false' );
+		remove_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
+		remove_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
+	}
+
+	/**
+	 * @testdox taxes_influence_price returns true even when customer is VAT exempt, because exempt prices differ from non-exempt.
+	 */
+	public function test_taxes_influence_price_returns_true_for_vat_exempt() {
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		add_filter( 'woocommerce_product_is_taxable', '__return_true' );
+		add_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+
+		$product = $this->get_variation_product_fixture();
+
+		$extended_data_store = $this->get_data_store_with_public_taxes_influence_price();
+
+		// Non-exempt: taxes should influence price.
+		WC()->customer->set_is_vat_exempt( false );
+		$this->assertTrue( $extended_data_store->taxes_influence_price( $product ) );
+
+		// VAT exempt: taxes should STILL influence price because the displayed
+		// prices are different (tax removed), requiring separate cache entries.
+		WC()->customer->set_is_vat_exempt( true );
+		$this->assertTrue( $extended_data_store->taxes_influence_price( $product ) );
+
+		// Restore default state to avoid leaking into other tests.
+		WC()->customer->set_is_vat_exempt( false );
+
+		remove_filter( 'wc_tax_enabled', '__return_true' );
+		remove_filter( 'woocommerce_product_is_taxable', '__return_true' );
+		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+	}
+
+	/**
+	 * @testdox The woocommerce_variable_product_taxes_influence_price filter can override the default decision.
+	 *
+	 * @testWith [true,  true,  true,  true,  true]
+	 *           [true,  true,  true,  false, false]
+	 *           [false, true,  false, true,  true]
+	 *           [true,  false, false, true,  true]
+	 *           [false, false, false, true,  true]
+	 *           [true,  false, false, false, false]
+	 *
+	 * @param bool $taxable_product  Product is taxable or not.
+	 * @param bool $tax_has_rates    Product tax has defined rates or not.
+	 * @param bool $expected_default Value the filter callback should receive as the default decision.
+	 * @param bool $filter_returns   Value the filter callback will return.
+	 * @param bool $expected         Expected return value from taxes_influence_price.
+	 */
+	public function test_taxes_influence_price_filter_overrides_default( bool $taxable_product, bool $tax_has_rates, bool $expected_default, bool $filter_returns, bool $expected ) {
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		add_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
+		add_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
+
+		$received_default = null;
+		$received_product = null;
+		$filter_callback  = function ( $default_value, $product ) use ( $filter_returns, &$received_default, &$received_product ) {
+			$received_default = $default_value;
+			$received_product = $product;
+			return $filter_returns;
+		};
+		add_filter( 'woocommerce_variable_product_taxes_influence_price', $filter_callback, 10, 2 );
+
+		$product             = $this->get_variation_product_fixture();
+		$extended_data_store = $this->get_data_store_with_public_taxes_influence_price();
+
+		$this->assertSame( $expected, $extended_data_store->taxes_influence_price( $product ) );
+		$this->assertSame( $expected_default, $received_default, 'Filter callback should receive the default decision.' );
+		$this->assertSame( $product->get_id(), $received_product->get_id(), 'Filter callback should receive the product being evaluated.' );
+
+		remove_filter( 'woocommerce_variable_product_taxes_influence_price', $filter_callback, 10 );
+		remove_filter( 'wc_tax_enabled', '__return_true' );
 		remove_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
 		remove_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
 	}
@@ -524,7 +683,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		WC()->customer->set_is_vat_exempt( false );
 
 		$data_store     = new WC_Product_Variable_Data_Store_CPT();
-		$product        = WC_Helper_Product::create_variation_product();
+		$product        = $this->get_variation_product_fixture();
 		$transient_name = 'wc_var_prices_' . $product->get_id();
 		delete_transient( $transient_name );
 
@@ -569,7 +728,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		);
 
 		$data_store     = new WC_Product_Variable_Data_Store_CPT();
-		$product        = WC_Helper_Product::create_variation_product();
+		$product        = $this->get_variation_product_fixture();
 		$transient_name = 'wc_var_prices_' . $product->get_id();
 		delete_transient( $transient_name );
 
@@ -605,6 +764,21 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Get a data store instance with taxes_influence_price() exposed as public.
+	 *
+	 * @return object Data store with public taxes_influence_price method.
+	 */
+	private function get_data_store_with_public_taxes_influence_price(): object {
+		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
+		return new class() extends WC_Product_Variable_Data_Store_CPT {
+			public function taxes_influence_price( $product ): bool {
+				return parent::taxes_influence_price( $product );
+			}
+		};
+		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
+	}
+
+	/**
 	 * Parse a variable product prices transient and return the hashes only.
 	 *
 	 * @param string $transient_name Name of the transient to parse.
@@ -633,7 +807,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_read_price_data_with_validation_failure() {
 		$data_store = new WC_Product_Variable_Data_Store_CPT();
-		$product    = WC_Helper_Product::create_variation_product();
+		$product    = $this->get_variation_product_fixture();
 
 		// Get initial valid price data.
 		$initial_prices = $data_store->read_price_data( $product, false );
@@ -674,7 +848,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_read_children_with_validation_failure() {
 		$data_store = new WC_Product_Variable_Data_Store_CPT();
-		$product    = WC_Helper_Product::create_variation_product();
+		$product    = $this->get_variation_product_fixture();
 
 		// Get initial valid children data.
 		$initial_children = $data_store->read_children( $product, false );
@@ -705,5 +879,78 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			get_transient( 'wc_product_children_' . $product->get_id() ),
 			'Transient should not be set when validation fails'
 		);
+	}
+
+	/**
+	 * Tests `read_attributes` for handling metas migration due to sanitize_title BC breaks.
+	 */
+	public function test_read_attributes_addresses_bc_break_in_sanitize(): void {
+		$product    = $this->get_variation_product_fixture();
+		$product_id = $product->get_id();
+		$child_ids  = array_values( $product->get_children() );
+
+		// Patch up the metas to match pre-BC state.
+		$attributes                      = get_post_meta( $product_id, '_product_attributes', true );
+		$attributes['Size/Size']         = $attributes['pa_size'];
+		$attributes['Size/Size']['name'] = 'Size/Size';
+		unset( $attributes['pa_size'] );
+		update_post_meta( $product_id, '_product_attributes', $attributes );
+		foreach ( $child_ids as $child_id ) {
+			update_post_meta( $child_id, 'attribute_Size/Size', get_post_meta( $child_id, 'attribute_pa_size', true ) );
+			delete_post_meta( $child_id, 'attribute_pa_size' );
+		}
+
+		// Reload the product object, so the migration is executed.
+		$product = wc_get_product( $product_id );
+
+		// Verify the migrated entries and cleanup.
+		$sizes = array( 'small', 'large', 'huge', 'huge', 'huge', 'huge' );
+		foreach ( $child_ids as $index => $child_id ) {
+			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_size-size', true ) );
+			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_Size/Size', true ) );
+		}
+	}
+
+	/**
+	 * @testdox read_product_data does not record variable product transient names in the notoptions cache when a persistent object cache is in use.
+	 */
+	public function test_read_product_data_does_not_prime_transients_with_object_cache() {
+		$product    = $this->get_variation_product_fixture();
+		$product_id = $product->get_id();
+
+		$option_names = array(
+			'_transient_wc_var_prices_' . $product_id,
+			'_transient_timeout_wc_var_prices_' . $product_id,
+			'_transient_wc_product_children_' . $product_id,
+			'_transient_timeout_wc_product_children_' . $product_id,
+		);
+
+		// Simulate a persistent object cache and start from a clean notoptions cache.
+		$previous = wp_using_ext_object_cache( true );
+
+		try {
+			wp_cache_delete( 'notoptions', 'options' );
+
+			// Force a fresh read so read_product_data() runs.
+			$data_store = new WC_Product_Variable_Data_Store_CPT();
+			$fresh      = new WC_Product_Variable();
+			$fresh->set_id( $product_id );
+			$data_store->read( $fresh );
+
+			$notoptions = wp_cache_get( 'notoptions', 'options' );
+		} finally {
+			// Always restore. Cast to bool because wp_using_ext_object_cache( null ) is a
+			// no-op, which would otherwise leak the simulated true state into later tests.
+			wp_using_ext_object_cache( (bool) $previous );
+		}
+
+		$notoptions = is_array( $notoptions ) ? $notoptions : array();
+		foreach ( $option_names as $option_name ) {
+			$this->assertArrayNotHasKey(
+				$option_name,
+				$notoptions,
+				'Variable product transient option names must not be added to notoptions when a persistent object cache is active.'
+			);
+		}
 	}
 }

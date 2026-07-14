@@ -16,7 +16,7 @@ import {
 import { useMachine, useSelector } from '@xstate5/react';
 import { useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
-import { store as coreStore, Settings } from '@wordpress/core-data';
+import { store as coreStore } from '@wordpress/core-data';
 import {
 	updateQueryString,
 	getQuery,
@@ -39,7 +39,7 @@ import {
 } from '@woocommerce/data';
 import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
-import { getAdminLink } from '@woocommerce/settings';
+import { getAdminLink, getSetting } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -148,12 +148,12 @@ const handleTrackingOption = assign( {
 	} ) => event.output !== 'no',
 } );
 
-const getStoreNameOption = fromPromise( async () =>
-	resolveSelect( coreStore )
-		// @ts-expect-error getEntityRecord is not typed correctly in coreStore
-		.getEntityRecord( 'root', 'site' )
-		.then( ( site ) => ( site as Settings ).title )
-);
+// Reading synchronously from wcSettings, but wrapped in fromPromise because
+// xstate's invoke with onDone/onError requires a promise-based actor.
+const getStoreNameOption = fromPromise( () => {
+	const value = getSetting( 'siteTitle', '' );
+	return Promise.resolve( typeof value === 'string' ? value : '' );
+} );
 
 const handleStoreNameOption = assign( {
 	businessInfo: ( {
@@ -249,7 +249,9 @@ const handleCoreProfilerCompletedSteps = assign( {
 } );
 
 const getCurrentUserEmail = fromPromise( async () => {
-	const currentUser = await resolveSelect( userStore ).getCurrentUser();
+	const currentUser = ( await resolveSelect(
+		userStore
+	).getCurrentUser() ) as WCUser | undefined;
 	return currentUser?.email;
 } );
 
@@ -323,9 +325,7 @@ const handleGeolocation = assign( {
 const redirectToWooHome = raise( { type: 'REDIRECT_TO_WOO_HOME' } );
 
 const exitToWooHome = fromPromise( async () => {
-	if ( window.wcAdminFeatures[ 'launch-your-store' ] ) {
-		await dispatch( onboardingStore ).coreProfilerCompleted();
-	}
+	await dispatch( onboardingStore ).coreProfilerCompleted();
 	window.location.href = getNewPath( {}, '/', {} );
 } );
 
@@ -1444,6 +1444,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								actions: [ 'assignCurrentUser' ],
 							},
 						},
+						{
+							src: 'getStoreCountryOption',
+							onDone: {
+								actions: [ 'handleStoreCountryOption' ],
+							},
+						},
 					],
 					meta: {
 						progress: 70,
@@ -1502,6 +1508,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						{
 							type: 'recordTracksStepViewed',
 							params: { step: 'plugins' },
+						},
+						{
+							type: 'recordShippingPartnerImpression',
 						},
 						{
 							type: 'updateQueryStep',
@@ -1648,13 +1657,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				sendToJetpackAuthPage: {
 					invoke: {
 						src: fromPromise( async () => {
-							if (
-								window.wcAdminFeatures[ 'launch-your-store' ]
-							) {
-								await dispatch(
-									onboardingStore
-								).coreProfilerCompleted();
-							}
+							await dispatch(
+								onboardingStore
+							).coreProfilerCompleted();
 							return await resolveSelect(
 								onboardingStore
 							).getJetpackAuthUrl( {
@@ -1774,8 +1779,7 @@ export const CoreProfilerController = ( {
 	const augmentedStateMachine = useMemo( () => {
 		// When adding extensibility, this is the place to manipulate the state machine definition.
 		return coreProfilerStateMachineDefinition.provide( {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore -- there seems to be a flaky error here - it fails sometimes and then not on recompile, will need to investigate further.
+			// @ts-expect-error xstate's MachineImplementationsActions type does not accept the spread of action overrides here; the runtime is unchanged.
 			actions: {
 				...coreProfilerMachineActions,
 				...actionOverrides,
@@ -1814,7 +1818,6 @@ export const CoreProfilerController = ( {
 				},
 				userHasNoInstallPluginsPermission: ( { context } ) => {
 					return (
-						// @ts-expect-error TODO: react-18-upgrade: This comparison appears to be unintentional because the types 'string | undefined' and 'boolean' have no overlap.ts(2367). Need to check if this is a valid comparison.
 						context?.currentUser?.capabilities.install_plugins !==
 						true
 					);

@@ -27,8 +27,9 @@ import {
 import { enhanceQuoteBlock } from './core/quote';
 import { filterSetUrlAttribute } from './core/block-edit';
 import { enhanceSocialLinksBlock } from './core/social-links';
-import { modifyMoveToTrashAction } from './core/move-to-trash';
 import { enhanceSiteLogoBlock } from './core/site-logo';
+import { enableFullWidthBlocks } from './core/full-width';
+import { enableProductImageAlignment } from './woocommerce/product-image';
 
 export { getAllowedBlockNames } from './utils';
 
@@ -52,7 +53,8 @@ export function initBlocks() {
 	activatePersonalizationTagsReplacing();
 	alterSupportConfiguration();
 	enhanceSocialLinksBlock();
-	modifyMoveToTrashAction();
 	enhanceSiteLogoBlock();
+	enableFullWidthBlocks();
+	enableProductImageAlignment();
 	removeBlockStylesFromAllBlocks();
 }

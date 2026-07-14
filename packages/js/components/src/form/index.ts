@@ -1,6 +1,6 @@
 export * from './form';
 export * from './form-context';
-export {
+export type {
 	FormContextType,
 	FormErrors,
 	FormRef,

@@ -177,6 +177,7 @@ function wc_clear_cart_after_payment() {
 
 	$should_clear_cart_after_payment = false;
 	$after_payment                   = false;
+	$order                           = null;
 
 	// If the order has been received, clear the cart.
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
@@ -218,6 +219,11 @@ function wc_clear_cart_after_payment() {
 	 */
 	$should_clear_cart_after_payment = apply_filters( 'woocommerce_should_clear_cart_after_payment', $should_clear_cart_after_payment );
 
+	// If the order is different from the cart, don't clear the cart. This can happen if the user has multiple tabs open and completes a different order than the one in the cart.
+	if ( $should_clear_cart_after_payment && $order instanceof WC_Order && ! WC()->cart->is_empty() ) {
+		$should_clear_cart_after_payment = $order->has_cart_hash( WC()->cart->get_cart_hash() );
+	}
+
 	if ( $should_clear_cart_after_payment ) {
 		WC()->cart->empty_cart();
 	}
@@ -257,8 +263,7 @@ function wc_cart_totals_shipping_html() {
 				'show_package_details'     => count( $packages ) > 1,
 				'show_shipping_calculator' => is_cart() && apply_filters( 'woocommerce_shipping_show_shipping_calculator', $first, $i, $package ),
 				'package_details'          => implode( ', ', $product_names ),
-				/* translators: %d: shipping package number */
-				'package_name'             => apply_filters( 'woocommerce_shipping_package_name', ( ( $i + 1 ) > 1 ) ? sprintf( _x( 'Shipping %d', 'shipping packages', 'woocommerce' ), ( $i + 1 ) ) : _x( 'Shipping', 'shipping packages', 'woocommerce' ), $i, $package ),
+				'package_name'             => $package['package_name'],
 				'index'                    => $i,
 				'chosen_method'            => $chosen_method,
 				'formatted_destination'    => WC()->countries->get_formatted_address( $package['destination'], ', ' ),
@@ -512,6 +517,25 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 				$default = $rate_key;
 				break;
 			}
+		}
+
+		// When shipping costs are hidden until an address is entered, don't auto-select pickup as the default.
+		// Without this, pickup gets silently selected because it's the only remaining rate after filtering.
+		if (
+			'' === $default
+			&& 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' )
+			&& WC()->customer instanceof \WC_Customer
+			&& ! WC()->customer->has_full_shipping_address()
+		) {
+			/**
+			 * Filters the default shipping method for a package.
+			 *
+			 * @since 3.2.0
+			 * @param string $default Default shipping method.
+			 * @param array  $rates   Shipping rates.
+			 * @param string $chosen_method Chosen method id.
+			 */
+			return (string) apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
 		}
 	}
 

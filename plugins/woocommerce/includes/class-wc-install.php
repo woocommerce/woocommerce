@@ -10,6 +10,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
+use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
@@ -20,8 +21,8 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersSta
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
-use Automattic\WooCommerce\Internal\Utilities\PluginInstaller;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -47,7 +48,7 @@ class WC_Install {
 	 * @var array
 	 */
 	private static $db_updates = array(
-		'2.0.0'  => array(
+		'2.0.0'    => array(
 			'wc_update_200_file_paths',
 			'wc_update_200_permalinks',
 			'wc_update_200_subcat_display',
@@ -56,42 +57,42 @@ class WC_Install {
 			'wc_update_200_images',
 			'wc_update_200_db_version',
 		),
-		'2.0.9'  => array(
+		'2.0.9'    => array(
 			'wc_update_209_brazillian_state',
 			'wc_update_209_db_version',
 		),
-		'2.1.0'  => array(
+		'2.1.0'    => array(
 			'wc_update_210_remove_pages',
 			'wc_update_210_file_paths',
 			'wc_update_210_db_version',
 		),
-		'2.2.0'  => array(
+		'2.2.0'    => array(
 			'wc_update_220_shipping',
 			'wc_update_220_order_status',
 			'wc_update_220_variations',
 			'wc_update_220_attributes',
 			'wc_update_220_db_version',
 		),
-		'2.3.0'  => array(
+		'2.3.0'    => array(
 			'wc_update_230_options',
 			'wc_update_230_db_version',
 		),
-		'2.4.0'  => array(
+		'2.4.0'    => array(
 			'wc_update_240_options',
 			'wc_update_240_shipping_methods',
 			'wc_update_240_api_keys',
 			'wc_update_240_refunds',
 			'wc_update_240_db_version',
 		),
-		'2.4.1'  => array(
+		'2.4.1'    => array(
 			'wc_update_241_variations',
 			'wc_update_241_db_version',
 		),
-		'2.5.0'  => array(
+		'2.5.0'    => array(
 			'wc_update_250_currency',
 			'wc_update_250_db_version',
 		),
-		'2.6.0'  => array(
+		'2.6.0'    => array(
 			'wc_update_260_options',
 			'wc_update_260_termmeta',
 			'wc_update_260_zones',
@@ -99,26 +100,26 @@ class WC_Install {
 			'wc_update_260_refunds',
 			'wc_update_260_db_version',
 		),
-		'3.0.0'  => array(
+		'3.0.0'    => array(
 			'wc_update_300_grouped_products',
 			'wc_update_300_settings',
 			'wc_update_300_product_visibility',
 			'wc_update_300_db_version',
 		),
-		'3.1.0'  => array(
+		'3.1.0'    => array(
 			'wc_update_310_downloadable_products',
 			'wc_update_310_old_comments',
 			'wc_update_310_db_version',
 		),
-		'3.1.2'  => array(
+		'3.1.2'    => array(
 			'wc_update_312_shop_manager_capabilities',
 			'wc_update_312_db_version',
 		),
-		'3.2.0'  => array(
+		'3.2.0'    => array(
 			'wc_update_320_mexican_states',
 			'wc_update_320_db_version',
 		),
-		'3.3.0'  => array(
+		'3.3.0'    => array(
 			'wc_update_330_image_options',
 			'wc_update_330_webhooks',
 			'wc_update_330_product_stock_status',
@@ -127,48 +128,48 @@ class WC_Install {
 			'wc_update_330_set_paypal_sandbox_credentials',
 			'wc_update_330_db_version',
 		),
-		'3.4.0'  => array(
+		'3.4.0'    => array(
 			'wc_update_340_states',
 			'wc_update_340_state',
 			'wc_update_340_last_active',
 			'wc_update_340_db_version',
 		),
-		'3.4.3'  => array(
+		'3.4.3'    => array(
 			'wc_update_343_cleanup_foreign_keys',
 			'wc_update_343_db_version',
 		),
-		'3.4.4'  => array(
+		'3.4.4'    => array(
 			'wc_update_344_recreate_roles',
 			'wc_update_344_db_version',
 		),
-		'3.5.0'  => array(
+		'3.5.0'    => array(
 			'wc_update_350_reviews_comment_type',
 			'wc_update_350_db_version',
 		),
-		'3.5.2'  => array(
+		'3.5.2'    => array(
 			'wc_update_352_drop_download_log_fk',
 		),
-		'3.5.4'  => array(
+		'3.5.4'    => array(
 			'wc_update_354_modify_shop_manager_caps',
 			'wc_update_354_db_version',
 		),
-		'3.6.0'  => array(
+		'3.6.0'    => array(
 			'wc_update_360_product_lookup_tables',
 			'wc_update_360_term_meta',
 			'wc_update_360_downloadable_product_permissions_index',
 			'wc_update_360_db_version',
 		),
-		'3.7.0'  => array(
+		'3.7.0'    => array(
 			'wc_update_370_tax_rate_classes',
 			'wc_update_370_mro_std_currency',
 			'wc_update_370_db_version',
 		),
-		'3.9.0'  => array(
+		'3.9.0'    => array(
 			'wc_update_390_move_maxmind_database',
 			'wc_update_390_change_geolocation_database_update_cron',
 			'wc_update_390_db_version',
 		),
-		'4.0.0'  => array(
+		'4.0.0'    => array(
 			'wc_update_product_lookup_tables',
 			'wc_update_400_increase_size_of_column',
 			'wc_update_400_reset_action_scheduler_migration_status',
@@ -177,27 +178,27 @@ class WC_Install {
 			'wc_admin_update_0251_remove_unsnooze_action',
 			'wc_update_400_db_version',
 		),
-		'4.4.0'  => array(
+		'4.4.0'    => array(
 			'wc_update_440_insert_attribute_terms_for_variable_products',
 			'wc_admin_update_110_remove_facebook_note',
 			'wc_admin_update_130_remove_dismiss_action_from_tracking_opt_in_note',
 			'wc_update_440_db_version',
 		),
-		'4.5.0'  => array(
+		'4.5.0'    => array(
 			'wc_update_450_sanitize_coupons_code',
 			'wc_update_450_db_version',
 		),
-		'5.0.0'  => array(
+		'5.0.0'    => array(
 			'wc_update_500_fix_product_review_count',
 			'wc_admin_update_160_remove_facebook_note',
 			'wc_admin_update_170_homescreen_layout',
 			'wc_update_500_db_version',
 		),
-		'5.6.0'  => array(
+		'5.6.0'    => array(
 			'wc_update_560_create_refund_returns_page',
 			'wc_update_560_db_version',
 		),
-		'6.0.0'  => array(
+		'6.0.0'    => array(
 			'wc_update_600_migrate_rate_limit_options',
 			'wc_admin_update_270_delete_report_downloads',
 			'wc_admin_update_271_update_task_list_options',
@@ -206,112 +207,140 @@ class WC_Install {
 			'wc_admin_update_290_delete_default_homepage_layout_option',
 			'wc_update_600_db_version',
 		),
-		'6.3.0'  => array(
+		'6.3.0'    => array(
 			'wc_update_630_create_product_attributes_lookup_table',
 			'wc_admin_update_300_update_is_read_from_last_read',
 			'wc_update_630_db_version',
 		),
-		'6.4.0'  => array(
+		'6.4.0'    => array(
 			'wc_update_640_add_primary_key_to_product_attributes_lookup_table',
 			'wc_admin_update_340_remove_is_primary_from_note_action',
 			'wc_update_640_db_version',
 		),
-		'6.5.0'  => array(
+		'6.5.0'    => array(
 			'wc_update_650_approved_download_directories',
 		),
-		'6.5.1'  => array(
+		'6.5.1'    => array(
 			'wc_update_651_approved_download_directories',
 		),
-		'6.7.0'  => array(
+		'6.7.0'    => array(
 			'wc_update_670_purge_comments_count_cache',
 			'wc_update_670_delete_deprecated_remote_inbox_notifications_option',
 		),
-		'7.0.0'  => array(
+		'7.0.0'    => array(
 			'wc_update_700_remove_download_log_fk',
 			'wc_update_700_remove_recommended_marketing_plugins_transient',
 		),
-		'7.2.1'  => array(
+		'7.2.1'    => array(
 			'wc_update_721_adjust_new_zealand_states',
 			'wc_update_721_adjust_ukraine_states',
 		),
-		'7.2.2'  => array(
+		'7.2.2'    => array(
 			'wc_update_722_adjust_new_zealand_states',
 			'wc_update_722_adjust_ukraine_states',
 		),
-		'7.5.0'  => array(
+		'7.5.0'    => array(
 			'wc_update_750_add_columns_to_order_stats_table',
 			'wc_update_750_disable_new_product_management_experience',
 		),
-		'7.7.0'  => array(
+		'7.7.0'    => array(
 			'wc_update_770_remove_multichannel_marketing_feature_options',
 		),
-		'7.9.0'  => array(
+		'7.9.0'    => array(
 			'wc_update_790_blockified_product_grid_block',
 		),
-		'8.1.0'  => array(
+		'8.1.0'    => array(
 			'wc_update_810_migrate_transactional_metadata_for_hpos',
 		),
-		'8.3.0'  => array(
+		'8.3.0'    => array(
 			'wc_update_830_rename_checkout_template',
 			'wc_update_830_rename_cart_template',
 		),
-		'8.6.0'  => array(
+		'8.6.0'    => array(
 			'wc_update_860_remove_recommended_marketing_plugins_transient',
 		),
-		'8.7.0'  => array(
+		'8.7.0'    => array(
 			'wc_update_870_prevent_listing_of_transient_files_directory',
 		),
-		'8.9.0'  => array(
+		'8.9.0'    => array(
 			'wc_update_890_update_connect_to_woocommerce_note',
 			'wc_update_890_update_paypal_standard_load_eligibility',
 		),
-		'8.9.1'  => array(
+		'8.9.1'    => array(
 			'wc_update_891_create_plugin_autoinstall_history_option',
 		),
-		'9.1.0'  => array(
+		'9.1.0'    => array(
 			'wc_update_910_add_launch_your_store_tour_option',
 			'wc_update_910_remove_obsolete_user_meta',
 		),
-		'9.2.0'  => array(
+		'9.2.0'    => array(
 			'wc_update_920_add_wc_hooked_blocks_version_option',
 		),
-		'9.3.0'  => array(
+		'9.3.0'    => array(
 			'wc_update_930_add_woocommerce_coming_soon_option',
 			'wc_update_930_migrate_user_meta_for_launch_your_store_tour',
 		),
-		'9.4.0'  => array(
+		'9.4.0'    => array(
 			'wc_update_940_add_phone_to_order_address_fts_index',
 			'wc_update_940_remove_help_panel_highlight_shown',
 		),
-		'9.5.0'  => array(
+		'9.5.0'    => array(
 			'wc_update_950_tracking_option_autoload',
 		),
-		'9.6.1'  => array(
+		'9.6.1'    => array(
 			'wc_update_961_migrate_default_email_base_color',
 		),
-		'9.8.0'  => array(
+		'9.8.0'    => array(
 			'wc_update_980_remove_order_attribution_install_banner_dismissed_option',
 		),
-		'9.8.5'  => array(
+		'9.8.5'    => array(
 			'wc_update_985_enable_new_payments_settings_page_feature',
 		),
-		'9.9.0'  => array(
+		'9.9.0'    => array(
 			'wc_update_990_remove_wc_count_comments_transient',
 			'wc_update_990_remove_email_notes',
 		),
-		'10.0.0' => array(
+		'10.0.0'   => array(
 			'wc_update_1000_multisite_visibility_setting',
 			'wc_update_1000_remove_patterns_toolkit_transient',
 		),
-		'10.2.0' => array(
+		'10.2.0'   => array(
 			'wc_update_1020_add_old_refunded_order_items_to_product_lookup_table',
 		),
-		'10.3.0' => array(
+		'10.3.0'   => array(
 			'wc_update_1030_add_comments_date_type_index',
 		),
-		'10.4.0' => array(
+		'10.4.0'   => array(
 			'wc_update_1040_add_idx_date_paid_status_parent',
 			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
+		),
+		'10.5.0'   => array(
+			'wc_update_1050_migrate_brand_permalink_setting',
+			'wc_update_1050_enable_autoload_options',
+			'wc_update_1050_add_idx_user_email',
+			'wc_update_1050_remove_deprecated_marketplace_option',
+		),
+		'10.6.0'   => array(
+			'wc_update_1060_add_woo_idx_comment_approved_type_index',
+		),
+		'10.7.0'   => array(
+			'wc_update_1070_disable_hpos_sync_on_read',
+		),
+		'10.8.0'   => array(
+			'wc_update_1080_migrate_analytics_import_option',
+			'wc_update_1080_backfill_email_template_sync_meta',
+		),
+		'10.8.0-2' => array(
+			'wc_update_10802_restore_orders_meta_key_value_index',
+		),
+		'10.9.0'   => array(
+			'wc_update_1090_remove_task_list_reminder_bar_hidden_option',
+		),
+		'10.9.2'   => array(
+			'wc_update_10902_remove_deprecated_push_notifications_option',
+		),
+		'11.0.0'   => array(
+			'wc_update_1100_enable_point_of_sale_feature',
 		),
 	);
 
@@ -338,6 +367,8 @@ class WC_Install {
 
 	/**
 	 * Hook in tabs.
+	 *
+	 * @return void
 	 */
 	public static function init() {
 		if ( ! empty( $GLOBALS['wc_uninstalling_plugin'] ) ) {
@@ -350,8 +381,9 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'add_coming_soon_option' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_analytics_scheduled_import' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_product_instance_caching_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
-		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'woocommerce_update_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
@@ -361,7 +393,6 @@ class WC_Install {
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 		add_action( 'admin_init', array( __CLASS__, 'newly_installed' ) );
-		add_action( 'woocommerce_activate_legacy_rest_api_plugin', array( __CLASS__, 'maybe_install_legacy_api_plugin' ) );
 
 		// DB update notice.
 		add_filter( 'woocommerce_get_note_from_db', array( \WC_Notes_Run_Db_Update::class, 'maybe_update_notice' ), 10 );
@@ -374,6 +405,8 @@ class WC_Install {
 	 * @since 8.0.0
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
+	 * @return void
 	 */
 	public static function newly_installed() {
 		if ( 'yes' === get_option( self::NEWLY_INSTALLED_OPTION, false ) ) {
@@ -400,6 +433,8 @@ class WC_Install {
 	 * Check WooCommerce version and run the updater is required.
 	 *
 	 * This check is done on all requests and runs if the versions do not match.
+	 *
+	 * @return void
 	 */
 	public static function check_version() {
 		$wc_version      = get_option( 'woocommerce_version' );
@@ -421,6 +456,8 @@ class WC_Install {
 	 * Performan manual database update when triggered by WooCommerce System Tools.
 	 *
 	 * @since 3.6.5
+	 *
+	 * @return void
 	 */
 	public static function manual_database_update() {
 		$blog_id = get_current_blog_id();
@@ -433,6 +470,8 @@ class WC_Install {
 	 *
 	 * @since 4.0.0
 	 * @deprecated 10.3.0
+	 *
+	 * @return void
 	 */
 	public static function wc_admin_db_update_notice() {
 		if (
@@ -447,6 +486,8 @@ class WC_Install {
 	 * Adds the db update notice.
 	 *
 	 * @since 10.3.0
+	 *
+	 * @return void
 	 */
 	private static function add_update_db_notice() {
 		if ( ! \WC_Admin_Notices::has_notice( 'update' ) ) {
@@ -466,6 +507,8 @@ class WC_Install {
 	 * Removes the db update notice.
 	 *
 	 * @since 10.3.0
+	 *
+	 * @return void
 	 */
 	public static function remove_update_db_notice() {
 		if ( \WC_Admin_Notices::has_notice( 'update' ) ) {
@@ -483,6 +526,8 @@ class WC_Install {
 
 	/**
 	 * Run manual database update.
+	 *
+	 * @return void
 	 */
 	public static function run_manual_database_update() {
 		self::update();
@@ -494,6 +539,8 @@ class WC_Install {
 	 * @param string $update_callback Callback name.
 	 *
 	 * @since 3.6.0
+	 *
+	 * @return void
 	 */
 	public static function run_update_callback( $update_callback ) {
 		include_once __DIR__ . '/wc-update-functions.php';
@@ -510,6 +557,8 @@ class WC_Install {
 	 *
 	 * @since 3.6.0
 	 * @param string $callback Callback name.
+	 *
+	 * @return void
 	 */
 	protected static function run_update_callback_start( $callback ) {
 		wc_maybe_define_constant( 'WC_UPDATING', true );
@@ -521,6 +570,8 @@ class WC_Install {
 	 * @since 3.6.0
 	 * @param string $callback Callback name.
 	 * @param bool   $result Return value from callback. Non-false need to run again.
+	 *
+	 * @return void
 	 */
 	protected static function run_update_callback_end( $callback, $result ) {
 		if ( $result ) {
@@ -538,9 +589,12 @@ class WC_Install {
 	 * Install actions when a update button is clicked within the admin area.
 	 *
 	 * This function is hooked into admin_init to affect admin only.
+	 *
+	 * @return void
 	 */
 	public static function install_actions() {
-		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok.
+		if ( ! empty( $_GET['do_update_woocommerce'] ) ) {
+			// WPCS: input var ok.
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			wc_get_logger()->info( 'Manual database update triggered.', array( 'source' => 'wc-updater' ) );
 			self::update();
@@ -563,7 +617,8 @@ class WC_Install {
 				}
 
 				$return_url = esc_url_raw( wp_unslash( $return_url ) );
-				wp_safe_redirect( $return_url ); // WPCS: input var ok.
+				wp_safe_redirect( $return_url );
+				// WPCS: input var ok.
 				exit;
 			}
 		}
@@ -571,25 +626,24 @@ class WC_Install {
 
 	/**
 	 * Install WC.
+	 *
+	 * @return void
 	 */
 	public static function install() {
 		if ( ! is_blog_installed() ) {
 			return;
 		}
 
-		// Check if we are not already running this routine.
-		if ( self::is_installing() ) {
+		// Create a lock to prevent multiple installs from running simultaneously.
+		if ( ! self::create_lock() ) {
 			return;
 		}
 
-		// If we made it till here nothing is running yet, lets set the transient now.
-		set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
-		wc_maybe_define_constant( 'WC_INSTALLING', true );
-
 		try {
+			wc_maybe_define_constant( 'WC_INSTALLING', true );
 			self::install_core();
 		} finally {
-			delete_transient( 'wc_installing' );
+			self::release_lock();
 		}
 
 		// Use add_option() here to avoid overwriting this value with each
@@ -623,6 +677,8 @@ class WC_Install {
 
 	/**
 	 * Core function that performs the WooCommerce install.
+	 *
+	 * @return void
 	 */
 	private static function install_core() {
 		if ( self::is_new_install() && ! get_option( self::NEWLY_INSTALLED_OPTION, false ) ) {
@@ -647,32 +703,66 @@ class WC_Install {
 		self::update_wc_version();
 		self::maybe_update_db_version();
 		self::maybe_set_store_id();
-		self::maybe_install_legacy_api_plugin();
-		self::maybe_activate_legacy_api_enabled_option();
 	}
 
 	/**
-	 * Returns true if we're installing.
+	 * Attempts to acquire an installation lock.
 	 *
-	 * @return bool
+	 * @return bool True if a lock was acquired, otherwise false.
 	 */
-	private static function is_installing() {
-		return 'yes' === get_transient( 'wc_installing' );
-	}
+	private static function create_lock(): bool {
+		global $wpdb;
 
-	/**
-	 * Check if all the base tables are present.
-	 *
-	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
-	 * @param bool $execute       Whether to execute get_schema queries as well.
-	 *
-	 * @return array List of queries.
-	 */
-	public static function verify_base_tables( $modify_notice = true, $execute = false ) {
-		if ( $execute ) {
-			self::create_tables();
+		// Insert will fail if it already exists so this functions as a mutex.
+		$created_lock = $wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_installing', %d, 'no')",
+				time()
+			)
+		);
+
+		// Take over the lock if it's stale (older than 10 minutes).
+		if ( ! $created_lock ) {
+			$created_lock = $wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->options} SET option_value = %d WHERE option_name = 'wc_installing' AND option_value < %d",
+					time(),
+					time() - ( MINUTE_IN_SECONDS * 10 )
+				)
+			);
 		}
 
+		if ( $created_lock ) {
+			// Set the transient for backward compatibility in case others are relying on it to signal an ongoing install.
+			set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Releases the installation lock.
+	 */
+	private static function release_lock(): void {
+		// Delete the transient BEFORE the option to avoid races that might result in an active lock with an empty transient.
+		delete_transient( 'wc_installing' );
+
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name = 'wc_installing'" );
+	}
+
+	/**
+	 * Get the names of any missing WooCommerce base tables.
+	 *
+	 * Unlike verify_base_tables(), this method has no side effects: it only inspects
+	 * the database and reports which required tables are missing.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return string[] List of missing table names.
+	 */
+	public static function get_missing_base_tables(): array {
 		$schema = self::get_schema();
 
 		$hpos_settings = filter_var_array(
@@ -691,14 +781,27 @@ class WC_Install {
 				->get_database_schema();
 		}
 
-		$missing_tables = wc_get_container()
+		return wc_get_container()
 			->get( DatabaseUtil::class )
 			->get_missing_tables( $schema );
+	}
+
+	/**
+	 * Check if all the base tables are present, updating the stored schema status accordingly.
+	 *
+	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
+	 * @param bool $execute       Whether to execute get_schema queries as well.
+	 *
+	 * @return string[] List of missing table names.
+	 */
+	public static function verify_base_tables( $modify_notice = true, $execute = false ) {
+		if ( $execute ) {
+			self::create_tables();
+		}
+
+		$missing_tables = self::get_missing_base_tables();
 
 		if ( 0 < count( $missing_tables ) ) {
-			if ( $modify_notice ) {
-				WC_Admin_Notices::add_notice( 'base_tables_missing' );
-			}
 			update_option( 'woocommerce_schema_missing_tables', $missing_tables );
 		} else {
 			if ( $modify_notice ) {
@@ -714,6 +817,8 @@ class WC_Install {
 	 * Reset any notices added to admin.
 	 *
 	 * @since 3.2.0
+	 *
+	 * @return void
 	 */
 	private static function remove_admin_notices() {
 		include_once __DIR__ . '/admin/class-wc-admin-notices.php';
@@ -726,6 +831,8 @@ class WC_Install {
 	 * Setup WC environment - post types, taxonomies, endpoints.
 	 *
 	 * @since 3.2.0
+	 *
+	 * @return void
 	 */
 	private static function setup_environment() {
 		WC_Post_types::register_post_types();
@@ -739,17 +846,31 @@ class WC_Install {
 	/**
 	 * Is this a brand new WC install?
 	 *
-	 * A brand new install has no version yet. Also treat empty installs as 'new'.
+	 * A brand-new installation has no version yet. Also treat empty installations as 'new'.
 	 *
-	 * @since  3.2.0
+	 * @since 11.0.0 returns false early for stores that are already live or have completed onboarding.
+	 * @since 3.2.0
+	 *
 	 * @return boolean
 	 */
 	public static function is_new_install() {
-		return is_null( get_option( 'woocommerce_version', null ) )
-			|| (
-				-1 === wc_get_page_id( 'shop' )
-				&& 0 === array_sum( (array) wp_count_posts( 'product' ) )
-			);
+		// Performance note: woocommerce_version is absent before the very first install routine completes.
+		if ( false === get_option( 'woocommerce_version' ) ) {
+			return true;
+		}
+
+		// Performance note: verify if the store is live. This option is auto-loaded, and verification is essentially free.
+		if ( 'no' === get_option( 'woocommerce_coming_soon', 'yes' ) ) {
+			return false;
+		}
+
+		// Performance note: verify if onboarding is complete. This option is auto-loaded, and verification is essentially free.
+		if ( in_array( 'setup', (array) get_option( 'woocommerce_task_list_completed_lists', array() ), true ) ) {
+			return false;
+		}
+
+		// Performance note: this is the original fallback. The store setup is incomplete, and even with a cold cache, we do not anticipate performance issues.
+		return -1 === wc_get_page_id( 'shop' ) && 0 === array_sum( wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' ) );
 	}
 
 	/**
@@ -785,6 +906,8 @@ class WC_Install {
 	 * See if we need to set redirect transients for activation or not.
 	 *
 	 * @since 4.6.0
+	 *
+	 * @return void
 	 */
 	private static function maybe_set_activation_transients() {
 		if ( self::is_new_install() ) {
@@ -796,6 +919,8 @@ class WC_Install {
 	 * See if we need to show or run database updates during install.
 	 *
 	 * @since 3.2.0
+	 *
+	 * @return void
 	 */
 	private static function maybe_update_db_version() {
 		if ( self::needs_db_update() ) {
@@ -819,6 +944,8 @@ class WC_Install {
 	 * Set the Store ID if not already present.
 	 *
 	 * @since 8.4.0
+	 *
+	 * @return void
 	 */
 	public static function maybe_set_store_id() {
 		if ( ! get_option( self::STORE_ID_OPTION, false ) ) {
@@ -828,6 +955,8 @@ class WC_Install {
 
 	/**
 	 * Update WC version to current.
+	 *
+	 * @return void
 	 */
 	private static function update_wc_version() {
 		update_option( 'woocommerce_version', WC()->version );
@@ -845,6 +974,8 @@ class WC_Install {
 
 	/**
 	 * Push all needed DB updates to the queue for processing.
+	 *
+	 * @return void
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
@@ -935,6 +1066,8 @@ class WC_Install {
 	 * Update DB version to current.
 	 *
 	 * @param string|null $version New WooCommerce DB version or null.
+	 *
+	 * @return void
 	 */
 	public static function update_db_version( $version = null ) {
 		if ( is_null( $version ) ) {
@@ -966,6 +1099,8 @@ class WC_Install {
 
 	/**
 	 * Removes old cron jobs now that we moved to Action Scheduler.
+	 *
+	 * @return void
 	 */
 	private static function clear_cron_jobs() {
 		wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
@@ -980,6 +1115,8 @@ class WC_Install {
 
 	/**
 	 * Create pages on installation.
+	 *
+	 * @return void
 	 */
 	public static function maybe_create_pages() {
 		if ( empty( get_option( 'woocommerce_db_version' ) ) ) {
@@ -989,6 +1126,8 @@ class WC_Install {
 
 	/**
 	 * Create pages that the plugin relies on, storing page IDs in variables.
+	 *
+	 * @return void
 	 */
 	public static function create_pages() {
 		// WordPress sets fresh_site to 0 after a page gets published.
@@ -1083,6 +1222,8 @@ class WC_Install {
 	 * Default options.
 	 *
 	 * Sets up the default options used on the settings page.
+	 *
+	 * @return void
 	 */
 	private static function create_options() {
 		// Include settings so that we can run through defaults.
@@ -1104,8 +1245,11 @@ class WC_Install {
 			foreach ( $subsections as $subsection ) {
 				foreach ( $section->get_settings( $subsection ) as $value ) {
 					if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
-						$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
-						add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
+						$autoload          = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
+						$skip_initial_save = isset( $value['skip_initial_save'] ) ? (bool) $value['skip_initial_save'] : false;
+						if ( ! $skip_initial_save ) {
+							add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
+						}
 					}
 				}
 			}
@@ -1131,6 +1275,8 @@ class WC_Install {
 	 * Enable HPOS by default for new shops.
 	 *
 	 * @since 8.2.0
+	 *
+	 * @return void
 	 */
 	public static function maybe_enable_hpos() {
 		if ( self::should_enable_hpos_for_new_shop() ) {
@@ -1145,6 +1291,8 @@ class WC_Install {
 	 * Ensure that the options are set for all shops for performance even if core profiler is disabled on the host.
 	 *
 	 * @since 9.3.0
+	 *
+	 * @return void
 	 */
 	public static function add_coming_soon_option() {
 		add_option( 'woocommerce_coming_soon', 'yes' );
@@ -1155,6 +1303,8 @@ class WC_Install {
 	 * Enable email improvements by default for new shops.
 	 *
 	 * @since 9.8.0
+	 *
+	 * @return void
 	 */
 	public static function enable_email_improvements_for_newly_installed() {
 		$feature_controller = wc_get_container()->get( FeaturesController::class );
@@ -1170,15 +1320,49 @@ class WC_Install {
 	 * Enable customer stock notifications signups by default for new shops.
 	 *
 	 * @since 0.0.0
+	 *
+	 * @return void
 	 */
 	public static function enable_customer_stock_notifications_signups() {
 		update_option( 'woocommerce_back_in_stock_allow_signups', 'yes' );
 	}
 
 	/**
+	 * Set scheduled import mode as the default for new installations.
+	 *
+	 * Uses add_option() which only sets the option if it doesn't already exist.
+	 * This ensures existing installations are not affected.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return void
+	 */
+	public static function enable_analytics_scheduled_import(): void {
+		// add_option only sets if option doesn't exist, returns false if it already exists.
+		add_option( 'woocommerce_analytics_scheduled_import', 'yes' );
+	}
+
+	/**
+	 * Enable product object caching by default for new shops.
+	 *
+	 * Only newly installed stores get the feature enabled here; existing installs keep the
+	 * opt-in default so their behavior is unchanged on upgrade.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return void
+	 */
+	public static function enable_product_instance_caching_for_newly_installed(): void {
+		$feature_controller = wc_get_container()->get( FeaturesController::class );
+		$feature_controller->change_feature_enable( ProductCacheController::FEATURE_NAME, true );
+	}
+
+	/**
 	 * Enable email improvements by default for existing shops if conditions are met.
 	 *
 	 * @since 9.9.0
+	 *
+	 * @return void
 	 */
 	public static function enable_email_improvements_for_existing_merchants() {
 		if ( ! EmailImprovements::should_enable_email_improvements_for_existing_stores() ) {
@@ -1280,6 +1464,8 @@ class WC_Install {
 
 	/**
 	 * Delete obsolete notes.
+	 *
+	 * @return void
 	 */
 	public static function delete_obsolete_notes() {
 		global $wpdb;
@@ -1374,6 +1560,8 @@ class WC_Install {
 
 	/**
 	 * Migrate option values to their new keys/names.
+	 *
+	 * @return void
 	 */
 	public static function migrate_options() {
 
@@ -1416,6 +1604,8 @@ class WC_Install {
 	}
 	/**
 	 * Add the default terms for WC taxonomies - product types and order statuses. Modify this at your own risk.
+	 *
+	 * @return void
 	 */
 	public static function create_terms() {
 		$taxonomies = array(
@@ -1466,173 +1656,6 @@ class WC_Install {
 			if ( $default_product_cat_id ) {
 				update_option( 'default_product_cat', $default_product_cat_id );
 			}
-		}
-	}
-
-	/**
-	 * Install and activate the WooCommerce Legacy REST API plugin from the WordPress.org directory if all the following is true:
-	 *
-	 * 1. We are in a WooCommerce upgrade process (not a new install).
-	 * 2. The 'woocommerce_skip_legacy_rest_api_plugin_auto_install' filter returns false (which is the default).
-	 * 3. The plugin is not installed and active already (but see note about multisite below).
-	 * 4. The Legacy REST API is enabled in the site OR the site has at least one webhook defined that uses the Legacy REST API payload format (disabled webhooks also count).
-	 *
-	 * In multisite setups it could happen that the plugin was installed by an installation process performed in another site.
-	 * In this case we check if the plugin was autoinstalled in such a way, and if so we activate it if the conditions are fulfilled.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 */
-	public static function maybe_install_legacy_api_plugin() {
-		if ( self::is_new_install() ) {
-			return;
-		}
-
-		// Did we previously install this plugin?
-		// We check both the woocommerce_history_of_autoinstalled_plugins options (introduced in 9.0)
-		// and the woocommerce_autoinstalled_plugins option (info should still exist here if the plugin has been uninstalled but not manually reinstalled).
-		$legacy_api_plugin          = 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php';
-		$autoinstalled_plugins      = (array) get_site_option( 'woocommerce_history_of_autoinstalled_plugins', array() );
-		$previously_installed_by_us = isset( $autoinstalled_plugins[ $legacy_api_plugin ] );
-		if ( ! $previously_installed_by_us ) {
-			$autoinstalled_plugins      = (array) get_site_option( 'woocommerce_autoinstalled_plugins', array() );
-			$previously_installed_by_us = isset( $autoinstalled_plugins[ $legacy_api_plugin ] );
-		}
-
-		/**
-		 * Filter to skip the automatic installation of the WooCommerce Legacy REST API plugin
-		 * from the WordPress.org plugins directory.
-		 *
-		 * By default, this is true (skip installation) if we have a record of previously installing the legacy plugin,
-		 * and false (do not skip) if we have no record of previously installing the plugin.
-		 *
-		 * @since 8.8.0
-		 *
-		 * @param bool $skip_auto_install False, defaulting to "don't skip the plugin automatic installation".
-		 * @returns bool True to skip the plugin automatic installation, false to install the plugin if necessary.
-		 */
-		if ( apply_filters( 'woocommerce_skip_legacy_rest_api_plugin_auto_install', $previously_installed_by_us ) ) {
-			return;
-		}
-
-		if ( ( 'yes' !== get_option( 'woocommerce_api_enabled' ) &&
-			0 === wc_get_container()->get( Automattic\WooCommerce\Internal\Utilities\WebhookUtil::class )->get_legacy_webhooks_count( true ) ) ) {
-			return;
-		}
-
-		wp_clean_plugins_cache();
-		if ( ! function_exists( 'get_plugins' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-		if ( isset( get_plugins()[ $legacy_api_plugin ] ) ) {
-			if ( ! $previously_installed_by_us ) {
-				// The plugin was installed manually so let's not interfere.
-				return;
-			}
-
-			$active_valid_plugins = wc_get_container()->get( PluginUtil::class )->get_all_active_valid_plugins();
-			if ( in_array( $legacy_api_plugin, $active_valid_plugins, true ) ) {
-				return;
-			}
-
-			// The plugin was automatically installed in a different installation process - can happen in multisite.
-			$install_ok = true;
-		} else {
-			try {
-				$install_result = wc_get_container()->get( PluginInstaller::class )->install_plugin(
-					'https://downloads.wordpress.org/plugin/woocommerce-legacy-rest-api.latest-stable.zip',
-					array(
-						'info_link' => 'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/',
-					)
-				);
-
-				if ( $install_result['already_installing'] ?? null ) {
-					// The plugin is in the process of being installed already (can happen in multisite),
-					// but we still need to activate it for ourselves once it's installed.
-					as_schedule_single_action( time() + 10, 'woocommerce_activate_legacy_rest_api_plugin' );
-					return;
-				}
-
-				$install_ok = $install_result['install_ok'];
-			} catch ( \Exception $ex ) {
-				wc_get_logger()->error(
-					'The autoinstall of the WooCommerce Legacy REST API plugin failed: ' . $ex->getMessage(),
-					array(
-						'source'    => 'plugin_auto_installs',
-						'exception' => $ex,
-					)
-				);
-				$install_ok = false;
-			}
-		}
-
-		$plugin_page_url              = 'https://wordpress.org/plugins/woocommerce-legacy-rest-api/';
-		$blog_post_url                = 'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/';
-		$site_legacy_api_settings_url = get_admin_url( null, '/admin.php?page=wc-settings&tab=advanced&section=legacy_api' );
-		$site_webhooks_settings_url   = get_admin_url( null, '/admin.php?page=wc-settings&tab=advanced&section=webhooks' );
-		$site_logs_url                = get_admin_url( null, '/admin.php?page=wc-status&tab=logs' );
-
-		if ( $install_ok ) {
-			$activation_result = activate_plugin( $legacy_api_plugin );
-			if ( $activation_result instanceof \WP_Error ) {
-				$message = sprintf(
-				/* translators: 1 = URL of Legacy REST API plugin page, 2 = URL of Legacy API settings in current site, 3 = URL of webhooks settings in current site, 4 = URL of logs page in current site, 5 = URL of plugins page in current site, 6 = URL of blog post about the Legacy REST API removal */
-					__( '⚠️ WooCommerce installed <a href="%1$s">the Legacy REST API plugin</a> because this site has <a href="%2$s">the Legacy REST API enabled</a> or has <a href="%3$s">legacy webhooks defined</a>, but it failed to activate it (see error details in <a href="%4$s">the WooCommerce logs</a>). Please go to <a href="%5$s">the plugins page</a> and activate it manually. <a href="%6$s">More information</a>', 'woocommerce' ),
-					$plugin_page_url,
-					$site_legacy_api_settings_url,
-					$site_webhooks_settings_url,
-					$site_logs_url,
-					get_admin_url( null, '/plugins.php' ),
-					$blog_post_url
-				);
-				$notice_name = 'woocommerce_legacy_rest_api_plugin_activation_failed';
-				wc_get_logger()->error(
-					__( 'WooCommerce installed the Legacy REST API plugin but failed to activate it, see context for more details.', 'woocommerce' ),
-					array(
-						'source' => 'plugin_auto_installs',
-						'error'  => $activation_result,
-					)
-				);
-			} else {
-				$message = sprintf(
-				/* translators: 1 = URL of Legacy REST API plugin page, 2 = URL of Legacy API settings in current site, 3 = URL of webhooks settings in current site, 4 = URL of blog post about the Legacy REST API removal */
-					__( 'ℹ️ WooCommerce installed and activated <a href="%1$s">the Legacy REST API plugin</a> because this site has <a href="%2$s">the Legacy REST API enabled</a> or has <a href="%3$s">legacy webhooks defined</a>. <a href="%4$s">More information</a>', 'woocommerce' ),
-					$plugin_page_url,
-					$site_legacy_api_settings_url,
-					$site_webhooks_settings_url,
-					$blog_post_url
-				);
-				$notice_name = 'woocommerce_legacy_rest_api_plugin_activated';
-				wc_get_logger()->info( 'WooCommerce activated the Legacy REST API plugin in this site.', array( 'source' => 'plugin_auto_installs' ) );
-			}
-
-			\WC_Admin_Notices::add_custom_notice( $notice_name, $message );
-		} else {
-			$message = sprintf(
-				/* translators: 1 = URL of Legacy REST API plugin page, 2 = URL of Legacy API settings in current site, 3 = URL of webhooks settings in current site, 4 = URL of logs page in current site, 5 = URL of blog post about the Legacy REST API removal */
-				__( '⚠️ WooCommerce attempted to install <a href="%1$s">the Legacy REST API plugin</a> because this site has <a href="%2$s">the Legacy REST API enabled</a> or has <a href="%3$s">legacy webhooks defined</a>, but the installation failed (see error details in <a href="%4$s">the WooCommerce logs</a>). Please install and activate the plugin manually. <a href="%5$s">More information</a>', 'woocommerce' ),
-				$plugin_page_url,
-				$site_legacy_api_settings_url,
-				$site_webhooks_settings_url,
-				$site_logs_url,
-				$blog_post_url
-			);
-
-			\WC_Admin_Notices::add_custom_notice( 'woocommerce_legacy_rest_api_plugin_install_failed', $message );
-
-			// Note that we aren't adding an entry to the error log because PluginInstaller->install_plugin will have done that already.
-		}
-
-		\WC_Admin_Notices::store_notices();
-	}
-
-	/**
-	 * If in a previous version of WooCommerce the Legacy REST API plugin was installed manually but the core Legacy REST API was kept disabled,
-	 * now the Legacy API is still disabled and can't be manually enabled from settings UI (the plugin, which is now in control, won't allow that),
-	 * which is weird and confusing. So we detect this case and explicitly enable it.
-	 */
-	private static function maybe_activate_legacy_api_enabled_option() {
-		if ( ! self::is_new_install() && is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) && 'yes' !== get_option( 'woocommerce_api_enabled' ) ) {
-			update_option( 'woocommerce_api_enabled', 'yes' );
 		}
 	}
 
@@ -1694,21 +1717,27 @@ class WC_Install {
 			}
 		}
 
+		$suppress_errors = $wpdb->suppress_errors( true );
 		$db_delta_result = dbDelta( self::get_schema() );
+		$wpdb->suppress_errors( $suppress_errors );
 
-		$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
-
-		if ( is_null( $comment_type_index_exists ) ) {
+		$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type'" );
+		if ( null === $comment_type_index_exists ) {
 			// Add an index to the field comment_type to improve the response time of the query
 			// used by WC_Comments::wp_count_comments() to get the number of comments by type.
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
 		}
 
 		$date_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_date_type'" );
-
-		if ( is_null( $date_type_index_exists ) ) {
+		if ( null === $date_type_index_exists ) {
 			// Improve performance of the admin comments query when fetching the latest 25 comments while excluding reviews and internal notes.
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_date_type (comment_date_gmt, comment_type, comment_approved, comment_post_ID)" );
+		}
+
+		$comment_approved_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_approved_type'" );
+		if ( null === $comment_approved_type_index_exists ) {
+			// Improve performance of the admin comments query when counting approved comments while excluding internal notes.
+			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_approved_type (comment_approved, comment_type, comment_post_ID)" );
 		}
 
 		// Clear table caches.
@@ -1754,7 +1783,10 @@ class WC_Install {
 
 		// Stock Notifications Table Schema.
 		$stock_notifications_table_schema = wc_get_container()->get( StockNotificationsDataStore::class )->get_database_schema();
-		$order_stats_table_schema         = self::get_order_stats_table_schema( $collate );
+
+		// Email Unsubscribes table — generic across email types; each row pairs an email hash with an email-kind identifier.
+		$email_unsubscribes_table_schema = wc_get_container()->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class )->get_database_schema();
+		$order_stats_table_schema        = self::get_order_stats_table_schema( $collate );
 
 		$mysql_version = wc_get_server_database_version()['number'];
 		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
@@ -1813,7 +1845,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   KEY download_order_key_product (product_id,order_id,order_key(16),download_id),
   KEY download_order_product (download_id,order_id,product_id),
   KEY order_id (order_id),
-  KEY user_order_remaining_expires (user_id,order_id,downloads_remaining,access_expires)
+  KEY user_order_remaining_expires (user_id,order_id,downloads_remaining,access_expires),
+  KEY idx_user_email (user_email(100))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
   order_item_id bigint(20) unsigned NOT NULL auto_increment,
@@ -1862,7 +1895,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zones (
   zone_id bigint(20) unsigned NOT NULL auto_increment,
   zone_name varchar(200) NOT NULL,
   zone_order bigint(20) unsigned NOT NULL,
-  PRIMARY KEY  (zone_id)
+  PRIMARY KEY  (zone_id),
+  KEY zone_order_id (zone_order, zone_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations (
   location_id bigint(20) unsigned NOT NULL auto_increment,
@@ -1879,7 +1913,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
   method_id varchar(200) NOT NULL,
   method_order bigint(20) unsigned NOT NULL,
   is_enabled tinyint(1) NOT NULL DEFAULT '1',
-  PRIMARY KEY  (instance_id)
+  PRIMARY KEY  (instance_id),
+  KEY zone_id (zone_id),
+  KEY method_id (method_id(20))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokens (
   token_id bigint(20) unsigned NOT NULL auto_increment,
@@ -1976,7 +2012,8 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	`stock_quantity` double NOT NULL DEFAULT 0,
 	`timestamp` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 	`expires` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-	PRIMARY KEY  (`order_id`, `product_id`)
+	PRIMARY KEY  (`order_id`, `product_id`),
+	KEY product_id_expires (product_id, expires)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_rate_limits (
   rate_limit_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -2093,6 +2130,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 ) $collate;
 $hpos_table_schema;
 $stock_notifications_table_schema;
+$email_unsubscribes_table_schema;
 		";
 
 		return $tables;
@@ -2132,6 +2170,7 @@ $stock_notifications_table_schema;
 			"{$wpdb->prefix}wc_product_attributes_lookup",
 			"{$wpdb->prefix}wc_stock_notifications",
 			"{$wpdb->prefix}wc_stock_notificationmeta",
+			"{$wpdb->prefix}wc_email_unsubscribes",
 
 			// WCA Tables.
 			"{$wpdb->prefix}wc_order_stats",
@@ -2194,7 +2233,31 @@ $stock_notifications_table_schema;
 	}
 
 	/**
+	 * Get the list of Action Scheduler database tables.
+	 *
+	 * These are intentionally kept out of get_tables(): Action Scheduler is a shared library that
+	 * may be bundled by other active plugins, so its tables are only dropped during a full uninstall
+	 * when the site owner explicitly opts in by setting the WC_REMOVE_ACTION_SCHEDULER constant.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return string[] Action Scheduler table names.
+	 */
+	public static function get_action_scheduler_tables() {
+		global $wpdb;
+
+		return array(
+			"{$wpdb->prefix}actionscheduler_actions",
+			"{$wpdb->prefix}actionscheduler_claims",
+			"{$wpdb->prefix}actionscheduler_groups",
+			"{$wpdb->prefix}actionscheduler_logs",
+		);
+	}
+
+	/**
 	 * Create roles and capabilities.
+	 *
+	 * @return void
 	 */
 	public static function create_roles() {
 		global $wp_roles;
@@ -2326,6 +2389,8 @@ $stock_notifications_table_schema;
 
 	/**
 	 * Remove WooCommerce roles.
+	 *
+	 * @return void
 	 */
 	public static function remove_roles() {
 		global $wp_roles;
@@ -2353,6 +2418,8 @@ $stock_notifications_table_schema;
 
 	/**
 	 * Create files/directories.
+	 *
+	 * @return void
 	 */
 	private static function create_files() {
 		/**
@@ -2399,6 +2466,8 @@ $stock_notifications_table_schema;
 	 * Create a placeholder image in the media library.
 	 *
 	 * @since 3.5.0
+	 *
+	 * @return void
 	 */
 	private static function create_placeholder_image() {
 		$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
@@ -2448,6 +2517,35 @@ $stock_notifications_table_schema;
 		// Generate the metadata for the attachment, and update the database record.
 		$attach_data = wp_generate_attachment_metadata( $attach_id, $filename );
 		wp_update_attachment_metadata( $attach_id, $attach_data );
+	}
+
+	/**
+	 * Delete the placeholder image created by create_placeholder_image().
+	 *
+	 * Removes the attachment post, its metadata and the underlying file, but only when the stored
+	 * woocommerce_placeholder_image option still points at WooCommerce's own generated placeholder.
+	 * A custom image set by the merchant through the "Placeholder image" setting is left untouched to
+	 * avoid deleting merchant-owned media. The option itself is removed along with the rest of the
+	 * woocommerce_ options during uninstall.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return void
+	 */
+	public static function delete_placeholder_image() {
+		$placeholder_image = absint( get_option( 'woocommerce_placeholder_image', 0 ) );
+
+		if ( ! $placeholder_image ) {
+			return;
+		}
+
+		// Only delete WooCommerce's own generated placeholder, never a custom image the merchant may have set.
+		$attached_file = (string) get_post_meta( $placeholder_image, '_wp_attached_file', true );
+		if ( 'woocommerce-placeholder.webp' !== wp_basename( $attached_file ) ) {
+			return;
+		}
+
+		wp_delete_attachment( $placeholder_image, true );
 	}
 
 	/**
@@ -2524,6 +2622,8 @@ $stock_notifications_table_schema;
 	 *
 	 * @param array  $plugins Associative array of plugin files to paths.
 	 * @param string $key Plugin relative path. Example: woocommerce/woocommerce.php.
+	 *
+	 * @return array
 	 */
 	private static function associate_plugin_file( $plugins, $key ) {
 		$path                 = explode( '/', $key );
@@ -2541,6 +2641,8 @@ $stock_notifications_table_schema;
 	 *
 	 * @throws Exception If unable to proceed with plugin installation.
 	 * @since  2.6.0
+	 *
+	 * @return void
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
 		// Explicitly clear the event.
@@ -2684,6 +2786,8 @@ $stock_notifications_table_schema;
 	 *
 	 * @param string $option Option name.
 	 * @param string $value  Option value.
+	 *
+	 * @return void
 	 */
 	public static function remove_mailchimps_redirect( $option, $value ) {
 		// Remove this action to prevent infinite looping.
@@ -2700,6 +2804,8 @@ $stock_notifications_table_schema;
 	 *
 	 * @throws Exception If unable to proceed with theme installation.
 	 * @since  3.1.0
+	 *
+	 * @return void
 	 */
 	public static function theme_background_installer( $theme_slug ) {
 		// Explicitly clear the event.
@@ -2762,6 +2868,8 @@ $stock_notifications_table_schema;
 	 * Sets whether PayPal Standard will be loaded on install.
 	 *
 	 * @since 5.5.0
+	 *
+	 * @return void
 	 */
 	private static function set_paypal_standard_load_eligibility() {
 		// Initiating the payment gateways sets the flag.
@@ -2777,7 +2885,7 @@ $stock_notifications_table_schema;
 	 * @return string The content for the page
 	 */
 	private static function get_refunds_return_policy_page_content() {
-		return <<<EOT
+		return <<<'EOT'
 <!-- wp:paragraph -->
 <p><b>This is a sample page.</b></p>
 <!-- /wp:paragraph -->
@@ -2927,9 +3035,13 @@ EOT;
 	 * Refund and returns page.
 	 *
 	 * @since 5.6.0
+	 * @deprecated 10.5.0 No longer used.
+	 *
 	 * @return void
 	 */
 	public static function add_admin_note_after_page_created() {
+		wc_deprecated_function( 'WC_Install::add_admin_note_after_page_created', '10.5.0' );
+
 		if ( ! WC()->is_wc_admin_active() ) {
 			return;
 		}
@@ -2945,7 +3057,7 @@ EOT;
 
 	/**
 	 * When pages are created, we might want to take some action.
-	 * In this case we want to set an option when refund and returns
+	 * In this case we want to create an admin note when the refund and returns
 	 * page is created.
 	 *
 	 * @since 5.6.0
@@ -2954,9 +3066,18 @@ EOT;
 	 * @return void
 	 */
 	public static function page_created( $page_id, $page_data ) {
-		if ( 'refund_returns' === $page_data['post_name'] ) {
-			delete_option( 'woocommerce_refund_returns_page_created' );
-			add_option( 'woocommerce_refund_returns_page_created', $page_id, '', false );
+		if ( Constants::is_true( 'WC_INSTALLING' ) ) {
+			return;
+		}
+
+		if ( 'refund_returns' === $page_data['post_name'] && class_exists( 'WC_Notes_Refund_Returns', false ) ) {
+			$callback = fn() => WC_Notes_Refund_Returns::possibly_add_note( $page_id );
+
+			if ( did_action( 'init' ) ) {
+				$callback();
+			} else {
+				add_action( 'init', $callback );
+			}
 		}
 	}
 
@@ -2974,7 +3095,7 @@ EOT;
 <div class="wp-block-woocommerce-cart-line-items-block"></div>
 <!-- /wp:woocommerce/cart-line-items-block -->
 
-<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"perPage":3,"pages":1,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/cross-sells","hideControls":["filterable"],"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":true,"previewMessage":"Actual products will vary depending on the page being viewed."}} -->
+<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"perPage":3,"pages":1,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/cross-sells","hideControls":["filterable"],"queryContextIncludes":["collection"]} -->
 <div class="wp-block-woocommerce-product-collection"><!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} -->
 <h2 class="wp-block-heading has-text-align-left" style="margin-bottom:1rem">' . __( 'You may be interested in&hellip;', 'woocommerce' ) . '</h2>
 

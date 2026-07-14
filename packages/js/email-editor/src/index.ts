@@ -1,4 +1,23 @@
 /**
+ * Runtime fallback for the `__i18n_text_domain__` identifier (see `global.d.ts`).
+ *
+ * Consumers are expected to substitute this identifier with their own text
+ * domain at bundle time via `webpack.DefinePlugin` (see `development.md`).
+ * When the substitution is not configured, this assigns `'woocommerce'` to
+ * the global so `__()` / `_x()` / `_n()` / `_nx()` calls inside the package
+ * don't throw `ReferenceError` at runtime — strings then resolve under the
+ * `woocommerce` text domain (matching the package's pre-1.11 behaviour).
+ *
+ * When `DefinePlugin` is configured the typeof check is statically replaced
+ * with `typeof "<consumer-domain>" === 'undefined'`, which evaluates to
+ * `false`, so the assignment is dead-code-eliminated by the consumer's
+ * minifier and has zero runtime cost.
+ */
+if ( typeof __i18n_text_domain__ === 'undefined' ) {
+	window.__i18n_text_domain__ = 'woocommerce';
+}
+
+/**
  * Internal dependencies
  */
 import { initialize } from './editor';
@@ -10,8 +29,8 @@ import { initialize } from './editor';
 export {
 	storeName,
 	createStore,
-	TemplatePreview,
-	EmailBuiltStyles,
+	type TemplatePreview,
+	type EmailBuiltStyles,
 } from './store';
 
 /**
@@ -167,7 +186,17 @@ export type {
 	EmailEditorSettings,
 	EmailTheme,
 	EmailEditorUrls,
+	PostWithPermissions,
 } from './store/types';
+
+/**
+ * The registerEntityAction and unregisterEntityAction are used to register and unregister entity actions.
+ * These use Gutenberg's private APIs and are highly unstable.
+ * DO NOT USE OUTSIDE WooCommerce.
+ *
+ * If necessary, import the unlock module and access the private APIs for your use case.
+ */
+export { registerEntityAction, unregisterEntityAction } from './private-apis';
 
 /**
  * A modal component for sending test emails from the email editor.
@@ -341,3 +370,99 @@ export {
 	 */
 	isEventTrackingEnabled,
 } from './events';
+
+/**
+ * A Fill component for the email actions slot in the Settings panel.
+ *
+ * Use this Fill together with `registerPlugin` to render content in the
+ * email actions slot inside the email editor's Settings panel. Both
+ * EmailStatus and TemplateSelection are rendered through this slot by default.
+ * Registrations can be removed with `unregisterPlugin` and replaced with
+ * custom implementations.
+ *
+ * @example
+ * ```jsx
+ * import { EmailActionsFill, TemplateSelection } from '@woocommerce/email-editor';
+ * import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
+ *
+ * // Remove the default TemplateSelection from the Settings panel
+ * unregisterPlugin( 'woocommerce-email-editor-template-selection' );
+ *
+ * // Render TemplateSelection in a custom location via registerPlugin
+ * registerPlugin( 'my-custom-template-selection', {
+ *   scope: 'woocommerce-email-editor',
+ *   render: () => (
+ *     <EmailActionsFill>
+ *       <TemplateSelection />
+ *     </EmailActionsFill>
+ *   ),
+ * } );
+ * ```
+ *
+ * @since 1.0.0
+ */
+export { EmailActionsFill } from './components/sidebar/settings-panel';
+
+/**
+ * A sidebar component for selecting and managing email templates.
+ *
+ * Displays the currently active template with options to edit or swap templates.
+ * This component is rendered by default inside the Settings panel via a
+ * `registerPlugin` registration using `EmailActionsFill`. Consumers can remove
+ * it with `unregisterPlugin` and re-render it in a custom location.
+ *
+ * @example
+ * ```jsx
+ * import { EmailActionsFill, TemplateSelection } from '@woocommerce/email-editor';
+ * import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
+ *
+ * // Remove the default TemplateSelection from the Settings panel
+ * unregisterPlugin( 'woocommerce-email-editor-template-selection' );
+ *
+ * // Render TemplateSelection in a custom location
+ * registerPlugin( 'my-custom-template-selection', {
+ *   scope: 'woocommerce-email-editor',
+ *   render: () => (
+ *     <EmailActionsFill>
+ *       <TemplateSelection />
+ *     </EmailActionsFill>
+ *   ),
+ * } );
+ * ```
+ *
+ * @since 1.0.0
+ */
+export { TemplateSelection } from './components/sidebar/template-selection';
+
+/**
+ * A confirmation modal shown before navigating to the template editor.
+ *
+ * Warns the user that editing a template affects all emails using it,
+ * then navigates to the template editor on confirmation. Used internally
+ * by `TemplateSelection` and exported for consumers building custom
+ * template selection UIs.
+ *
+ * @param props       - Component properties
+ * @param props.close - Callback to close the modal without navigating
+ *
+ * @since 1.7.0
+ */
+export { EditTemplateModal } from './components/sidebar/edit-template-modal';
+
+/**
+ * A full-screen modal for browsing and selecting email templates.
+ *
+ * Displays available templates in a categorized grid with previews.
+ * Handles template selection by applying the chosen template to the
+ * current post. Used internally by `TemplateSelection` and exported
+ * for consumers building custom template selection UIs.
+ *
+ * @param props                  - Component properties
+ * @param props.onSelectCallback - Called after a template is selected
+ * @param props.closeCallback    - Called when the modal is closed without selection
+ * @param props.previewContent   - Custom email content for template previews
+ * @param props.postType         - The post type of the current email
+ *
+ * @since 1.7.0
+ */
+export { SelectTemplateModal } from './components/template-select';

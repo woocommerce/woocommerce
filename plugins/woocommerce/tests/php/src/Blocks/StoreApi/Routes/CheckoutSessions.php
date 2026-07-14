@@ -14,11 +14,21 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\ErrorCode;
 use Automattic\WooCommerce\StoreApi\RoutesController;
+use Automattic\WooCommerce\Tests\Internal\Admin\Agentic\AgenticTestHelpers;
 
 /**
  * CheckoutSessions Controller Tests.
  */
 class CheckoutSessions extends ControllerTestCase {
+	use AgenticTestHelpers;
+
+	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
 	/**
 	 * Products created for tests.
 	 *
@@ -27,11 +37,42 @@ class CheckoutSessions extends ControllerTestCase {
 	protected $products = array();
 
 	/**
-	 * Test bearer token for authorization.
-	 *
-	 * @var string
+	 * Create immutable product rows shared by all test methods.
 	 */
-	protected $test_bearer_token;
+	public static function wpSetUpBeforeClass(): void {
+		self::$product_ids = array_map(
+			fn( $product ) => $product->get_id(),
+			self::create_class_fixture_products(
+				array(
+					array(
+						'name'          => 'Test Product 1',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					),
+					array(
+						'name'          => 'Test Product 2',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 20,
+						'weight'        => 5,
+					),
+					array(
+						'name'          => 'Virtual Product',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 15,
+						'virtual'       => true,
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_class_fixture_products( self::$product_ids );
+	}
 
 	/**
 	 * Setup test product data. Called before every test.
@@ -51,47 +92,13 @@ class CheckoutSessions extends ControllerTestCase {
 		// Enable the agentic_checkout feature.
 		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
 
-		// Set up registry with test bearer token for authorization.
-		$this->test_bearer_token = 'test_token_' . uniqid();
-		update_option(
-			'woocommerce_agentic_agent_registry',
-			array(
-				'openai' => array(
-					'bearer_token' => wp_hash_password( $this->test_bearer_token ),
-				),
-			),
-			false
-		);
+		// Set up Jetpack blog token authentication.
+		$this->mock_jetpack_blog_token_auth();
 
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
 
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 20,
-					'weight'        => 5,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Virtual Product',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 15,
-					'virtual'       => true,
-				)
-			),
-		);
+		$this->products = array_map( 'wc_get_product', self::$product_ids );
 
 		wc_get_container()->get( RoutesController::class )->register_all_routes();
 	}
@@ -102,13 +109,15 @@ class CheckoutSessions extends ControllerTestCase {
 	protected function tearDown(): void {
 		parent::tearDown();
 		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
-		delete_option( 'woocommerce_agentic_agent_registry' );
 
 		// Clear session data.
 		WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, null );
 
 		// Reset customer state to clean state.
 		$this->reset_customer_state();
+
+		// Reset Jetpack auth state.
+		$this->reset_jetpack_auth_state();
 	}
 
 	/**
@@ -206,7 +215,6 @@ class CheckoutSessions extends ControllerTestCase {
 	 */
 	private function create_session( $body_params ) {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_body_params( $body_params );
 		return rest_get_server()->dispatch( $request );
 	}
@@ -588,7 +596,6 @@ class CheckoutSessions extends ControllerTestCase {
 	 */
 	private function update_session( $session_id, $body_params ) {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions/' . $session_id );
-		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_body_params( $body_params );
 		return rest_get_server()->dispatch( $request );
 	}
@@ -987,7 +994,6 @@ class CheckoutSessions extends ControllerTestCase {
 		$idempotency_key = 'test-idempotency-123';
 		$request         = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
 		$request->set_body_params( $this->create_checkout_request() );
-		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_header( 'Idempotency-Key', $idempotency_key );
 
 		$response = rest_get_server()->dispatch( $request );
@@ -1004,7 +1010,6 @@ class CheckoutSessions extends ControllerTestCase {
 		$request_id = 'req_' . uniqid();
 		$request    = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
 		$request->set_body_params( $this->create_checkout_request() );
-		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_header( 'Request-Id', $request_id );
 
 		$response = rest_get_server()->dispatch( $request );
@@ -1351,5 +1356,76 @@ class CheckoutSessions extends ControllerTestCase {
 		$this->assertArrayHasKey( 'code', $data );
 		$this->assertArrayHasKey( 'message', $data );
 		$this->assertStringContainsString( 'cannot be updated', $data['message'] );
+	}
+
+	/**
+	 * Test that creating a checkout session without Jetpack authentication fails.
+	 */
+	public function test_create_session_without_jetpack_auth_fails() {
+		// Clear Jetpack authentication to simulate unauthenticated request.
+		$this->mock_jetpack_auth_failure();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
+		$request->set_body_params( $this->create_checkout_request() );
+		$response = rest_get_server()->dispatch( $request );
+
+		// Should return 401 error.
+		$this->assertEquals( 401, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'rest_forbidden', $data['code'] );
+		$this->assertStringContainsString( 'Jetpack blog token', $data['message'] );
+	}
+
+	/**
+	 * Test that updating a checkout session without Jetpack authentication fails.
+	 */
+	public function test_update_session_without_jetpack_auth_fails() {
+		// Create a session first with valid auth.
+		$create_response = $this->create_session( $this->create_checkout_request() );
+		$create_data     = $create_response->get_data();
+		$session_id      = $create_data['id'];
+
+		// Clear Jetpack authentication to simulate unauthenticated request.
+		$this->mock_jetpack_auth_failure();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions/' . $session_id );
+		$request->set_body_params(
+			array(
+				'buyer' => array(
+					'first_name' => 'Test',
+				),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		// Should return 401 error.
+		$this->assertEquals( 401, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'rest_forbidden', $data['code'] );
+	}
+
+	/**
+	 * Test that Jetpack authentication works when re-established after failure.
+	 */
+	public function test_jetpack_auth_recovery() {
+		// First request without auth should fail.
+		$this->mock_jetpack_auth_failure();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
+		$request->set_body_params( $this->create_checkout_request() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
+
+		// Re-establish Jetpack authentication.
+		$this->mock_jetpack_blog_token_auth();
+
+		// Second request with auth should succeed.
+		$response = $this->create_session( $this->create_checkout_request() );
+		$this->assertEquals( 200, $response->get_status() );
 	}
 }

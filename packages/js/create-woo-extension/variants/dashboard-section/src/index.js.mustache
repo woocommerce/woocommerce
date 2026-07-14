@@ -1,0 +1,150 @@
+/**
+ * External dependencies
+ */
+
+import { addFilter } from '@wordpress/hooks';
+import { Component, Fragment } from '@wordpress/element';
+import { wordpress } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
+
+/**
+ * WooCommerce dependencies
+ */
+import {
+	EllipsisMenu,
+	MenuTitle,
+	MenuItem,
+	SectionHeader,
+} from '@woocommerce/components';
+
+/**
+ * Internal dependencies
+ */
+import UpcomingEvents from './components/UpcomingEvents';
+import GlobalPrices from './components/GlobalPrices';
+
+const config = [
+	{
+		title: __( 'Granny Smith', '{{textdomain}}' ),
+		events: [ { date: '2020-01-02', title: __( 'The Granny Apple Fair', '{{textdomain}}' ) } ],
+	},
+	{
+		title: __( 'Golden Delicious', '{{textdomain}}' ),
+		events: [
+			{ date: '2020-04-15', title: __( 'Madrid Manzana Dorada', '{{textdomain}}' ) },
+			{ date: '2020-05-07', title: __( 'Golden CO Golden Delicious Day', '{{textdomain}}' ) },
+		],
+	},
+	{
+		title: __( 'Gala', '{{textdomain}}' ),
+		events: [ { date: '2020-08-31', title: __( 'The Met Gala Pomme', '{{textdomain}}' ) } ],
+	},
+	{
+		title: __( 'Braeburn', '{{textdomain}}' ),
+		events: [ { date: '2020-08-18', title: __( 'Mt. Aoraki Crisper', '{{textdomain}}' ) } ],
+	},
+];
+
+const dashboardItems = [
+	{
+		title: __( 'Upcoming Events', '{{textdomain}}' ),
+		component: UpcomingEvents,
+		key: 'upcoming-events',
+	},
+	{
+		title: __( 'Global Apple Prices', '{{textdomain}}' ),
+		component: GlobalPrices,
+		key: 'global-prices',
+	},
+];
+
+class Section extends Component {
+	renderMenu() {
+		const {
+			hiddenBlocks,
+			onToggleHiddenBlock,
+			onTitleBlur,
+			onTitleChange,
+			titleInput,
+			onMove,
+			onRemove,
+			isFirst,
+			isLast,
+			controls: Controls,
+		} = this.props;
+
+		return (
+			<EllipsisMenu
+				label={ __( 'Choose Items', '{{textdomain}}' ) }
+				renderContent={ ( { onToggle } ) => (
+					<Fragment>
+						<MenuTitle>
+							{ __( 'Dashboard Items', '{{textdomain}}' ) }
+						</MenuTitle>
+						{ dashboardItems.map( ( item ) => (
+							<MenuItem
+								checked={ ! hiddenBlocks.includes( item.key ) }
+								isCheckbox
+								isClickable
+								key={ item.key }
+								onInvoke={ () =>
+									onToggleHiddenBlock( item.key )()
+								}
+							>
+								{ item.title }
+							</MenuItem>
+						) ) }
+						<Controls
+							onToggle={ onToggle }
+							onMove={ onMove }
+							onRemove={ onRemove }
+							isFirst={ isFirst }
+							isLast={ isLast }
+							onTitleBlur={ onTitleBlur }
+							onTitleChange={ onTitleChange }
+							titleInput={ titleInput }
+						/>
+					</Fragment>
+				) }
+			/>
+		);
+	}
+
+	render() {
+		const { title, hiddenBlocks } = this.props;
+
+		return (
+			<Fragment>
+				<SectionHeader title={ title } menu={ this.renderMenu() } />
+				<div className="woocommerce-dashboard__columns">
+					{ dashboardItems.map( ( item ) => {
+						return hiddenBlocks.includes( item.key ) ? null : (
+							<item.component
+								key={ item.key }
+								config={ config }
+							/>
+						);
+					} ) }
+				</div>
+			</Fragment>
+		);
+	}
+}
+
+addFilter(
+	'woocommerce_dashboard_default_sections',
+	'{{textdomain}}',
+	( sections ) => {
+		return [
+			...sections,
+			{
+				key: '{{slugSnakeCase}}-dashboard',
+				component: Section,
+				title: __( '{{title}}', '{{textdomain}}' ),
+				isVisible: true,
+				icon: wordpress,
+				hiddenBlocks: [],
+			},
+		];
+	}
+);

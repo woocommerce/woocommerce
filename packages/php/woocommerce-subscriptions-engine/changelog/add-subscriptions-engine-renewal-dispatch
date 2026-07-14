@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add subscriptions engine batch renewal dispatcher with cycle-aware selection, order-driven completion, admin-triggered renew and retry, and the processing gate.

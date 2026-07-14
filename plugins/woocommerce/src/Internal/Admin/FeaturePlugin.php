@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
 use Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
 use Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
 use Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
+use Automattic\WooCommerce\Internal\Admin\Notes\ScheduledUpdatesPromotion;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstaller;
@@ -111,6 +112,9 @@ class FeaturePlugin {
 
 	/**
 	 * Define Constants.
+	 *
+	 * IMPORTANT: When adding new constants here, also add them to
+	 * php-stubs/wc-constants.php for PHPStan static analysis.
 	 */
 	protected function define_constants() {
 		$this->define( 'WC_ADMIN_APP', 'wc-admin-app' );
@@ -167,15 +171,12 @@ class FeaturePlugin {
 		// Initialize API.
 		API\Init::instance();
 
-		if ( Features::is_enabled( 'onboarding' ) ) {
-			Onboarding::init();
-		}
+		Onboarding::init();
 
-		if ( Features::is_enabled( 'analytics' ) ) {
+		if ( $this->is_analytics_enabled_during_bootstrap() ) {
 			// Initialize Reports syncing.
 			ReportsSync::init();
 			CategoryLookup::instance()->init();
-
 			// Initialize Reports exporter.
 			ReportExporter::init();
 		}
@@ -189,6 +190,20 @@ class FeaturePlugin {
 		new InstallJPAndWCSPlugins();
 		new SellingOnlineCourses();
 		new MagentoMigration();
+		new ScheduledUpdatesPromotion();
+	}
+
+	/**
+	 * Check whether Analytics should be initialized during plugin bootstrap.
+	 *
+	 * Feature definitions contain translated presentation strings and are not safe to build before init.
+	 *
+	 * @return bool
+	 */
+	private function is_analytics_enabled_during_bootstrap(): bool {
+		// Keep this fallback aligned with `enabled_by_default` for Analytics in FeaturesController.
+		return ! Features::is_analytics_disabled_by_legacy_filters()
+			&& 'yes' === get_option( Analytics::TOGGLE_OPTION_NAME, 'yes' );
 	}
 
 	/**
@@ -201,11 +216,11 @@ class FeaturePlugin {
 		WCAdminAssets::get_instance();
 	}
 
-
 	/**
-	 * Overwrites the allowed features array using a local `feature-config.php` file.
+	 * Adds the allowed features from a local `feature-config.php` file.
 	 *
 	 * @param array $features Array of feature slugs.
+	 * @return array
 	 */
 	public function replace_supported_features( $features ) {
 		/**
@@ -214,8 +229,9 @@ class FeaturePlugin {
 		 * @since 6.5.0
 		 */
 		$feature_config = apply_filters( 'woocommerce_admin_get_feature_config', wc_admin_get_feature_config() );
-		$features       = array_keys( array_filter( $feature_config ) );
-		return $features;
+		$features       = array_merge( $features, array_keys( array_filter( $feature_config ) ) );
+
+		return array_values( array_unique( $features ) );
 	}
 
 	/**

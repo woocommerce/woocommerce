@@ -50,7 +50,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'minimum_amount'              => '',
 		'maximum_amount'              => '',
 		'email_restrictions'          => array(),
-		'used_by'                     => array(),
+		'used_by'                     => null,
 		'virtual'                     => false,
 		'auto_apply'                  => false,
 	);
@@ -153,6 +153,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return array
 	 */
 	public function get_data() {
+		// Ensure used_by is populated before the raw data array is returned, since
+		// parent::get_data() reads $this->data directly and bypasses get_used_by().
+		$this->get_used_by( 'edit' );
 		$data = parent::get_data();
 		if ( '' === $data['minimum_amount'] ) {
 			$data['minimum_amount'] = '0';
@@ -168,6 +171,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * If the object has an ID, read using the data store.
 	 *
 	 * @since 3.4.1
+	 * @return void
 	 */
 	protected function read_object_from_database() {
 		$this->data_store = WC_Data_Store::load( 'coupon' );
@@ -455,11 +459,22 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Get records of all users who have used the current coupon.
 	 *
+	 * The list is loaded lazily on first access rather than during object construction,
+	 * because a coupon with hundreds of thousands of usages would otherwise allocate an
+	 * enormous PHP array on every WC_Coupon instantiation — even for code paths such as
+	 * order-status changes or cart validation that never need this data.
+	 *
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return array
 	 */
 	public function get_used_by( $context = 'view' ) {
+		if ( is_null( $this->data['used_by'] ) ) {
+			// Bypass set_prop() so the lazy fetch does not mark the object as dirty.
+			$this->data['used_by'] = $this->get_id()
+				? array_filter( (array) get_post_meta( $this->get_id(), '_used_by', false ) )
+				: array();
+		}
 		return $this->get_prop( 'used_by', $context );
 	}
 
@@ -547,6 +562,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param string $code Coupon code.
+	 * @return void
 	 */
 	public function set_code( $code ) {
 		$this->set_prop( 'code', wc_format_coupon_code( $code ) );
@@ -557,6 +573,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param string $description Description.
+	 * @return void
 	 */
 	public function set_description( $description ) {
 		$this->set_prop( 'description', $description );
@@ -567,6 +584,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param string $status Status.
+	 * @return void
 	 */
 	public function set_status( $status ) {
 		$this->set_prop( 'status', $status );
@@ -577,6 +595,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param string $discount_type Discount type.
+	 * @return void
 	 */
 	public function set_discount_type( $discount_type ) {
 		$this->set_discount_type_core( $discount_type, true );
@@ -588,6 +607,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @since 10.3.0
 	 * @param string $discount_type Discount type.
 	 * @param bool   $verify_discount_type Whether to verify if the discount type is valid.
+	 * @return void
 	 */
 	private function set_discount_type_core( $discount_type, bool $verify_discount_type ) {
 		if ( 'percent_product' === $discount_type ) {
@@ -604,6 +624,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param float|string $amount Amount.
+	 * @return void
 	 */
 	public function set_amount( $amount ) {
 		$amount = wc_format_decimal( $amount );
@@ -628,6 +649,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since  3.0.0
 	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
+	 * @return void
 	 */
 	public function set_date_expires( $date ) {
 		$this->set_date_prop( 'date_expires', $date );
@@ -638,6 +660,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since  3.0.0
 	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
+	 * @return void
 	 */
 	public function set_date_created( $date ) {
 		$this->set_date_prop( 'date_created', $date );
@@ -648,6 +671,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since  3.0.0
 	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
+	 * @return void
 	 */
 	public function set_date_modified( $date ) {
 		$this->set_date_prop( 'date_modified', $date );
@@ -658,6 +682,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param int $usage_count Usage count.
+	 * @return void
 	 */
 	public function set_usage_count( $usage_count ) {
 		$this->set_prop( 'usage_count', absint( $usage_count ) );
@@ -668,6 +693,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param bool $is_individual_use If is for individual use.
+	 * @return void
 	 */
 	public function set_individual_use( $is_individual_use ) {
 		$this->set_prop( 'individual_use', (bool) $is_individual_use );
@@ -678,6 +704,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param array $product_ids Products IDs.
+	 * @return void
 	 */
 	public function set_product_ids( $product_ids ) {
 		$this->set_prop( 'product_ids', array_filter( wp_parse_id_list( (array) $product_ids ) ) );
@@ -688,6 +715,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param array $excluded_product_ids Exclude product IDs.
+	 * @return void
 	 */
 	public function set_excluded_product_ids( $excluded_product_ids ) {
 		$this->set_prop( 'excluded_product_ids', array_filter( wp_parse_id_list( (array) $excluded_product_ids ) ) );
@@ -698,6 +726,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param int $usage_limit Usage limit.
+	 * @return void
 	 */
 	public function set_usage_limit( $usage_limit ) {
 		$this->set_prop( 'usage_limit', absint( $usage_limit ) );
@@ -708,6 +737,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param int $usage_limit Usage limit.
+	 * @return void
 	 */
 	public function set_usage_limit_per_user( $usage_limit ) {
 		$this->set_prop( 'usage_limit_per_user', absint( $usage_limit ) );
@@ -718,6 +748,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param int|null $limit_usage_to_x_items Limit usage to X items.
+	 * @return void
 	 */
 	public function set_limit_usage_to_x_items( $limit_usage_to_x_items ) {
 		$this->set_prop( 'limit_usage_to_x_items', is_null( $limit_usage_to_x_items ) ? null : absint( $limit_usage_to_x_items ) );
@@ -728,6 +759,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param bool $free_shipping If grant free shipping.
+	 * @return void
 	 */
 	public function set_free_shipping( $free_shipping ) {
 		$this->set_prop( 'free_shipping', (bool) $free_shipping );
@@ -738,6 +770,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param array $product_categories List of product categories.
+	 * @return void
 	 */
 	public function set_product_categories( $product_categories ) {
 		$this->set_prop( 'product_categories', array_filter( wp_parse_id_list( (array) $product_categories ) ) );
@@ -748,6 +781,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param array $excluded_product_categories List of excluded product categories.
+	 * @return void
 	 */
 	public function set_excluded_product_categories( $excluded_product_categories ) {
 		$this->set_prop( 'excluded_product_categories', array_filter( wp_parse_id_list( (array) $excluded_product_categories ) ) );
@@ -758,6 +792,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param bool $exclude_sale_items If should exclude sale items.
+	 * @return void
 	 */
 	public function set_exclude_sale_items( $exclude_sale_items ) {
 		$this->set_prop( 'exclude_sale_items', (bool) $exclude_sale_items );
@@ -778,6 +813,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param float|string $amount Minimum amount.
+	 * @return void
 	 */
 	public function set_minimum_amount( $amount ) {
 		$this->set_prop( 'minimum_amount', wc_format_decimal( $amount ) );
@@ -788,6 +824,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param float|string $amount Maximum amount.
+	 * @return void
 	 */
 	public function set_maximum_amount( $amount ) {
 		if ( (float) $amount && (float) $this->get_minimum_amount() > (float) $amount ) {
@@ -802,6 +839,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param array $emails List of emails.
+	 * @return void
 	 */
 	public function set_email_restrictions( $emails = array() ) {
 		$emails = array_filter( array_map( 'sanitize_email', array_map( 'strtolower', (array) $emails ) ) );
@@ -818,6 +856,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 3.0.0
 	 * @param array $used_by List of user IDs.
+	 * @return void
 	 */
 	public function set_used_by( $used_by ) {
 		$this->set_prop( 'used_by', array_filter( $used_by ) );
@@ -828,6 +867,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @param boolean $virtual Whether it is virtual or not.
 	 * @since 3.2.0
+	 * @return void
 	 */
 	public function set_virtual( $virtual ) {
 		$this->set_prop( 'virtual', (bool) $virtual );
@@ -845,6 +885,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @since 3.0.0
 	 * @param string $code   Coupon code.
 	 * @param array  $coupon Array of coupon properties.
+	 * @return void
 	 */
 	public function read_manual_coupon( $code, $coupon ) {
 		foreach ( $coupon as $key => $value ) {
@@ -893,6 +934,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @param string   $used_by  Either user ID or billing email.
 	 * @param WC_Order $order  If provided, will clear the coupons held by this order.
+	 * @return void
 	 */
 	public function increase_usage_count( $used_by = '', $order = null ) {
 		if ( $this->get_id() && $this->data_store ) {
@@ -910,6 +952,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Decrease usage count for current coupon.
 	 *
 	 * @param string $used_by Either user ID or billing email.
+	 * @return void
 	 */
 	public function decrease_usage_count( $used_by = '' ) {
 		if ( $this->get_id() && $this->get_usage_count() > 0 && $this->data_store ) {
@@ -1031,6 +1074,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @param int    $msg_code Message/error code.
 	 * @param string $notice_type Notice type.
+	 * @return void
 	 */
 	public function add_coupon_message( $msg_code, $notice_type = 'success' ) {
 		if ( $msg_code < 200 ) {
@@ -1315,18 +1359,89 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
+	 * Parse short info JSON into an array of coupon properties without validation.
+	 *
+	 * @param string $info JSON string as returned by 'get_short_info'.
+	 * @return array {
+	 *     Parsed coupon properties.
+	 *
+	 *     `@type` int    $id            Coupon ID.
+	 *     `@type` string $code          Coupon code.
+	 *     `@type` string $discount_type Discount type ('fixed_cart', 'percent', etc.).
+	 *     `@type` float  $amount        Discount amount.
+	 *     `@type` bool   $free_shipping Whether free shipping is enabled.
+	 * }
+	 */
+	private static function parse_short_info( string $info ): array {
+		$data = json_decode( $info, true );
+
+		if ( ! is_array( $data ) ) {
+			$data = array();
+		}
+
+		return array(
+			'id'            => $data[0] ?? 0,
+			'code'          => $data[1] ?? '',
+			'discount_type' => $data[2] ?? 'fixed_cart',
+			'amount'        => (float) ( $data[3] ?? 0 ),
+			'free_shipping' => (bool) ( $data[4] ?? false ),
+		);
+	}
+
+	/**
 	 * Sets the coupon parameters from a reapply information set generated with 'get_short_info'.
 	 *
 	 * @param string $info JSON string with reapply information as returned by 'get_short_info'.
+	 * @return void
 	 */
 	public function set_short_info( string $info ) {
-		$info = json_decode( $info, true );
+		$data = self::parse_short_info( $info );
 
-		$this->set_id( $info[0] ?? 0 );
-		$this->set_code( $info[1] ?? '' );
-		$this->set_discount_type_core( $info[2] ?? 'fixed_cart', false );
-		$this->set_amount( $info[3] ?? 0 );
-		$this->set_free_shipping( $info[4] ?? false );
+		$this->set_id( $data['id'] );
+		$this->set_code( $data['code'] );
+		$this->set_discount_type_core( $data['discount_type'], false );
+		$this->set_amount( $data['amount'] );
+		$this->set_free_shipping( $data['free_shipping'] );
+	}
+
+	/**
+	 * Create a WC_Coupon instance from an order's coupon line item without validation.
+	 *
+	 * This is useful for read-only contexts (e.g., REST API responses) where the stored
+	 * data should be returned even if it contains invalid values.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param \WC_Order_Item_Coupon $order_item The coupon line item from an order.
+	 * @return self A WC_Coupon instance populated with the stored data.
+	 */
+	public static function from_order_item( \WC_Order_Item_Coupon $order_item ): self {
+		$coupon_info = $order_item->get_meta( 'coupon_info', true );
+		if ( is_string( $coupon_info ) && '' !== $coupon_info ) {
+			$data = self::parse_short_info( $coupon_info );
+		} else {
+			$coupon_meta = $order_item->get_meta( 'coupon_data', true );
+			if ( is_object( $coupon_meta ) || is_array( $coupon_meta ) ) {
+				$coupon_meta = (array) $coupon_meta;
+				$data        = array(
+					'id'            => 0,
+					'code'          => '',
+					'discount_type' => $coupon_meta['discount_type'] ?? 'fixed_cart',
+					'amount'        => (float) ( $coupon_meta['amount'] ?? 0 ),
+					'free_shipping' => (bool) ( $coupon_meta['free_shipping'] ?? false ),
+				);
+			} else {
+				return new self();
+			}
+		}
+
+		$coupon = new self();
+		$coupon->set_id( $data['id'] );
+		$coupon->set_code( $data['code'] );
+		$coupon->set_discount_type_core( $data['discount_type'], false );
+		$coupon->set_prop( 'amount', $data['amount'] );
+		$coupon->set_free_shipping( $data['free_shipping'] );
+		return $coupon;
 	}
 
 	/**

@@ -4,19 +4,14 @@
 import { __ } from '@wordpress/i18n';
 import { BlockAttributes } from '@wordpress/blocks';
 import {
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalUnitControl as UnitControl,
 } from '@wordpress/components';
@@ -82,6 +77,7 @@ export const ImageSizeSettings = ( {
 			label={ __( 'Image size', 'woocommerce' ) }
 		>
 			<UnitControl
+				__next40pxDefaultSize
 				label={ __( 'Height', 'woocommerce' ) }
 				onChange={ ( value: string ) => {
 					setAttributes( { height: value } );
@@ -90,6 +86,7 @@ export const ImageSizeSettings = ( {
 				units={ sizeUnits }
 			/>
 			<UnitControl
+				__next40pxDefaultSize
 				label={ __( 'Width', 'woocommerce' ) }
 				onChange={ ( value: string ) => {
 					setAttributes( { width: value } );
@@ -103,6 +100,8 @@ export const ImageSizeSettings = ( {
 					label={ __( 'Scale', 'woocommerce' ) }
 				>
 					<ToggleGroupControl
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
 						label={ __( 'Scale', 'woocommerce' ) }
 						value={ scale }
 						help={ scaleHelp[ scale ] }

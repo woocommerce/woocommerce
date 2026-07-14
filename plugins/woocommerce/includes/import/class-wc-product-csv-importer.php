@@ -373,7 +373,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// Remove the ' prepended to fields that start with - if needed.
 		$value = $this->unescape_data( $value );
 
-		return floatval( $value );
+		// Use wc_format_decimal() rather than floatval() so the store's decimal separator
+		// setting is respected (e.g. a comma-separated weight like "1,5"). This mirrors how
+		// price fields are parsed above and how the product setters normalize these values.
+		return (float) wc_format_decimal( $value );
 	}
 
 	/**
@@ -725,12 +728,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Parse the published field. 1 is published, 0 is private, -1 is draft.
+	 * Parse the published field. 1 is published, 0 is private, -1 is draft, 2 is pending review.
 	 * Alternatively, 'true' can be used for published and 'false' for draft.
 	 *
 	 * @param string $value Field value.
 	 *
-	 * @return float|string
+	 * @return int|float|string
 	 */
 	public function parse_published_field( $value ) {
 		if ( '' === $value ) {
@@ -882,7 +885,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$images               = $data['images'];
 			$data['raw_image_id'] = array_shift( $images );
 
-			if ( ! empty( $images ) ) {
+			// When a featured image is provided, treat the remaining values as the full
+			// gallery. Setting the key even when no gallery images remain ensures that
+			// reducing the number of images in the CSV clears previously imported gallery
+			// images instead of leaving them in place.
+			// See https://github.com/woocommerce/woocommerce/issues/34839.
+			if ( ! empty( $data['raw_image_id'] ) ) {
 				$data['raw_gallery_image_ids'] = $images;
 			}
 			unset( $data['images'] );
@@ -913,6 +921,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				-1 => ProductStatus::DRAFT,
 				0  => ProductStatus::PRIVATE,
 				1  => ProductStatus::PUBLISH,
+				2  => ProductStatus::PENDING,
 			);
 			$data['status'] = $statuses[ $published ] ?? ProductStatus::DRAFT;
 

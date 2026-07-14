@@ -47,6 +47,7 @@ dist/
 oclif.manifest.json
 
 # Project files
+.pnpm-store/
 node_modules/
 vendor/
 
@@ -58,6 +59,8 @@ package-lock.json
 
 # wp-env config
 .wp-env.override.json
+.wp-env.test.override.json
+.wp-env.e2e.override.json
 
 # Unit tests
 tmp/
@@ -113,6 +116,10 @@ changes.json
 
 # Claude related files
 **/.claude/**/*.local.*
+.claude/docs/plans/
+.claude/docs/analysis/
+.claude/docs/research/
+CLAUDE.local.md
 
 # Cursor related files
 .cursorignore
@@ -122,3 +129,5 @@ changes.json
 
 # Docusaurus
 .docusaurus
+
+.mcp.json

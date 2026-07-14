@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\ReviewShippingOptions;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -50,7 +49,6 @@ class TaskLists {
 		'Tax',
 		'Shipping',
 		'Marketing',
-		'Appearance',
 		'AdditionalPayments',
 		'ReviewShippingOptions',
 		'GetMobileApp',
@@ -111,18 +109,16 @@ class TaskLists {
 		$tasks = array(
 			'StoreDetails',
 			'Products',
-			'Appearance',
 			'Payments',
+			'CustomizeStore',
 			'Tax',
 			'Shipping',
 			'LaunchYourStore',
 		);
 
-		if ( Features::is_enabled( 'core-profiler' ) ) {
-			$key = array_search( 'StoreDetails', $tasks, true );
-			if ( false !== $key ) {
-				unset( $tasks[ $key ] );
-			}
+		$key = array_search( 'StoreDetails', $tasks, true );
+		if ( false !== $key ) {
+			unset( $tasks[ $key ] );
 		}
 
 		self::add_list(
@@ -162,28 +158,26 @@ class TaskLists {
 			)
 		);
 
-		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
-			self::add_task(
-				'extended',
-				new ReviewShippingOptions(
-					self::get_list( 'extended' )
-				)
-			);
+		self::add_task(
+			'extended',
+			new ReviewShippingOptions(
+				self::get_list( 'extended' )
+			)
+		);
 
-			// Tasklist that will never be shown in homescreen,
-			// used for having tasks that are accessed by other means.
-			self::add_list(
-				array(
-					'id'           => 'secret_tasklist',
-					'hidden_id'    => 'setup',
-					'tasks'        => array(
-						'ExperimentalShippingRecommendation',
-					),
-					'event_prefix' => 'secret_tasklist_',
-					'visible'      => false,
-				)
-			);
-		}
+		// Tasklist that will never be shown in homescreen,
+		// used for having tasks that are accessed by other means.
+		self::add_list(
+			array(
+				'id'           => 'secret_tasklist',
+				'hidden_id'    => 'setup',
+				'tasks'        => array(
+					'ExperimentalShippingRecommendation',
+				),
+				'event_prefix' => 'secret_tasklist_',
+				'visible'      => false,
+			)
+		);
 
 		if ( has_filter( 'woocommerce_admin_experimental_onboarding_tasklists' ) ) {
 			/**
@@ -434,7 +428,7 @@ class TaskLists {
 
 		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
 			if ( 0 === strpos( $menu_item[0], _x( 'Home', 'Admin menu name', 'woocommerce' ) ) ) {
-				$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge"><span class="count-' . esc_attr( $tasks_count ) . '">' . absint( $tasks_count ) . '</span></span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$submenu['woocommerce'][ $key ][0] .= ' <span class="menu-counter remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge"><span class="count-' . esc_attr( $tasks_count ) . '">' . absint( $tasks_count ) . '</span></span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				break;
 			}
 		}

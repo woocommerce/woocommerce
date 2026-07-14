@@ -14,7 +14,7 @@ jobs:
             issues: write
         steps:
             - name: Add developer feedback comment
-              uses: actions/github-script@v5
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   script: |
@@ -34,7 +34,7 @@ jobs:
             issues: write
         steps:
             - name: Add needs reproduction comment
-              uses: actions/github-script@v5
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   script: |
@@ -53,7 +53,7 @@ jobs:
             issues: write
         steps:
             - name: Add support request comment
-              uses: actions/github-script@v5
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   script: |
@@ -74,7 +74,7 @@ jobs:
                         If we missed something, please leave a comment and we will take a second look.'
                       })
             - name: Close support request issue
-              uses: actions/github-script@v5
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   script: |
@@ -92,7 +92,7 @@ jobs:
             issues: write
         steps:
             - name: Add votes needed comment
-              uses: actions/github-script@v5
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   script: |
@@ -110,7 +110,7 @@ jobs:
                         We'll keep an eye on the popularity of this request."
                       })
             - name: Close votes needed issue
-              uses: actions/github-script@v5
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   script: |
@@ -127,7 +127,7 @@ jobs:
             issues: write
         steps:
             - name: Add reply to fill template
-              uses: actions/github-script@v5
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   script: |

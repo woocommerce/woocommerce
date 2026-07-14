@@ -1,5 +1,0 @@
-Significance: patch
-Type: update
-Comment: Update payments providers classes to use the LegacyProxy when making externals calls.
-
-

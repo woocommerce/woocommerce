@@ -61,6 +61,9 @@ class PaymentsExtensionSuggestions {
 	const RAPYD             = 'rapyd';
 	const PAYPAL_BRAINTREE  = 'paypal_braintree';
 	const VISA              = 'visa_as';
+	const NGENIUS           = 'ngenius';
+	const EVERGREEN         = 'evergreen';
+	const MYPOS             = 'mypos';
 
 	/*
 	 * The extension types.
@@ -1327,12 +1330,26 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'AR' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.ar/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1383,9 +1400,24 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'BR' => array(
-			self::STRIPE => array(
+			self::STRIPE       => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
+			self::MERCADO_PAGO => array(
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.br/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.br/ajuda/termos-e-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
@@ -1406,22 +1438,50 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'CL' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.cl/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.cl/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'CO' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.co/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.co/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1554,15 +1614,30 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'MX' => array(
-			self::STRIPE => array(
+			self::STRIPE       => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
+			self::MERCADO_PAGO => array(
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.mx/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.mx/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
 			self::PAYPAL_WALLET,
-			self::KLARNA => array(
+			self::KLARNA       => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1608,12 +1683,26 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'PE' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.pe/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.pe/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1691,12 +1780,26 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'UY' => array(
-			self::VISA => array(
-				'_append' => array(
+			self::MERCADO_PAGO => array(
+				'_append'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
+				),
+				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
+					'links' => array(
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+							'url'   => 'https://www.mercadopago.com.uy/costs-section',
+						),
+						array(
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+							'url'   => 'https://www.mercadopago.com.uy/ayuda/terminos-y-politicas_194',
+						),
+					),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -2711,6 +2814,7 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
 		'KZ' => array(
@@ -2787,6 +2891,7 @@ class PaymentsExtensionSuggestions {
 			),
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
 		'SD' => array(
@@ -2817,6 +2922,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYONEER,
 			self::PAYMOB,
 			self::VISA,
+			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
 		'UZ' => array(
@@ -4143,6 +4249,42 @@ class PaymentsExtensionSuggestions {
 						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=visa-acceptance-solutions',
 					),
+				),
+			),
+			self::NGENIUS           => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'N-Genius Online by Network', 'woocommerce' ),
+				'description' => esc_html__( 'Power your business with N-Genius Online—smart, secure, and built for the future', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/ngenius.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'ngenius',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/ngenius/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/ngenius/',
+					),
+				),
+			),
+			self::MYPOS             => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/mypos.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'mypos-virtual-for-woocommerce',
+				),
+			),
+			self::EVERGREEN         => array(
+				'_type'  => self::TYPE_PSP,
+				// Evergreen does not have an icon on .org. Will be default for now.
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'evergreen-payments-northwest-gateway-wc',
 				),
 			),
 			self::GOCARDLESS        => array(

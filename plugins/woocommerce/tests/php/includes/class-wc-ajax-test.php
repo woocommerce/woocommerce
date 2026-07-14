@@ -16,6 +16,19 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 	/**
+	 * Sets up the test fixture.
+	 */
+	public function set_up() {
+		parent::set_up();
+
+		// The WP AJAX test case removes these before the class runs, but mixed
+		// test sequences can re-add core admin hooks before individual tests.
+		remove_action( 'admin_init', '_maybe_update_core' );
+		remove_action( 'admin_init', '_maybe_update_plugins' );
+		remove_action( 'admin_init', '_maybe_update_themes' );
+	}
+
+	/**
 	 * Stock should not be reduced from AJAX when an item is added to an order.
 	 */
 	public function test_add_item_to_pending_payment_order() {
@@ -107,11 +120,18 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$_POST['permissions'] = 'read';
 		$_POST['description'] = $description;
 
+		$output_buffering_level = ob_get_level();
+
 		try {
 			$this->_handleAjax( 'woocommerce_update_api_key' );
 		} catch ( WPAjaxDieContinueException $e ) {
-			// wp_die() doesn't actually occur, so we need to clean up WC_AJAX::update_api_key's output buffer.
-			ob_end_clean();
+			unset( $e );
+		} finally {
+			// wp_die() doesn't actually occur, so clean up any output buffer
+			// WC_AJAX::update_api_key leaves open, keeping the level balanced.
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
 		}
 
 		$response = json_decode( $this->_last_response, true );
@@ -128,6 +148,189 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		if ( version_compare( PHP_VERSION, '8.1', '>=' ) ) {
 			$this->markTestSkipped( 'Waiting for WordPress compatibility with PHP 8.1' );
 		}
+	}
+
+	/**
+	 * Test to verify that term color is saved in AJAX calls, but only for terms belonging to a visual attribute.
+	 *
+	 * @testdox Should save term color only when adding visual attribute terms via AJAX.
+	 */
+	public function test_add_new_attribute_saves_color_and_image_only_for_visual_attributes(): void {
+		$original_theme      = wp_get_theme()->get_stylesheet();
+		$visual_attribute_id = null;
+		$text_attribute_id   = null;
+		$visual_taxonomy     = null;
+		$text_taxonomy       = null;
+		$visual_term_id      = 0;
+		$image_term_id       = 0;
+		$color_type_term_id  = 0;
+		$text_term_id        = 0;
+		$image_id            = 0;
+		$suffix              = (string) wp_rand( 1000, 9999 );
+
+		try {
+			switch_theme( 'twentytwentyfour' );
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
+			$this->assertTrue(
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class )->change_feature_enable( 'wc-visual-attribute', true ),
+				'The visual attribute feature should be toggled on.'
+			);
+
+			$visual_attribute_id = wc_create_attribute(
+				array(
+					'name' => 'Visual AJAX ' . $suffix,
+					'type' => 'wc-visual',
+				)
+			);
+			$text_attribute_id   = wc_create_attribute(
+				array(
+					'name' => 'Text AJAX ' . $suffix,
+					'type' => 'select',
+				)
+			);
+
+			$this->assertIsInt( $visual_attribute_id, 'The visual attribute should be created.' );
+			$this->assertIsInt( $text_attribute_id, 'The text attribute should be created.' );
+
+			$visual_taxonomy = $this->register_attribute_taxonomy_for_test( $visual_attribute_id );
+			$text_taxonomy   = $this->register_attribute_taxonomy_for_test( $text_attribute_id );
+
+			$this->_setRole( 'administrator' );
+
+			$_POST['security']                 = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']                 = $visual_taxonomy;
+			$_POST['term']                     = 'Cerulean ' . $suffix;
+			$_POST['wc_visual_attribute_type'] = 'color';
+			$_POST['term_color']               = '#336699';
+
+			$visual_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
+			$visual_term_id  = isset( $visual_response['term_id'] ) ? absint( $visual_response['term_id'] ) : 0;
+
+			$this->assertNotEmpty( $visual_term_id, 'The visual attribute term should be created.' );
+			$this->assertSame( '#336699', get_term_meta( $visual_term_id, 'color', true ), 'Visual attribute terms should store the posted color.' );
+			$this->assertSame( '', get_term_meta( $visual_term_id, 'image', true ), 'Visual attribute terms should not store image meta when only color is posted.' );
+
+			$image_id = wp_insert_attachment(
+				array(
+					'post_title'     => 'Visual AJAX term image',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			);
+			$this->assertIsInt( $image_id, 'The image should be created.' );
+
+			update_post_meta( $image_id, '_wp_attached_file', 'visual-ajax-term-image.jpg' );
+
+			$_POST['security']                 = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']                 = $visual_taxonomy;
+			$_POST['term']                     = 'Color selected ' . $suffix;
+			$_POST['wc_visual_attribute_type'] = 'color';
+			$_POST['term_color']               = '#445566';
+			$_POST['term_image']               = (string) $image_id;
+
+			$color_type_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
+			$color_type_term_id  = isset( $color_type_response['term_id'] ) ? absint( $color_type_response['term_id'] ) : 0;
+
+			$this->assertNotEmpty( $color_type_term_id, 'The visual attribute term with selected color type should be created.' );
+			$this->assertSame( '#445566', get_term_meta( $color_type_term_id, 'color', true ), 'Selected color type should store color even when image is posted.' );
+			$this->assertSame( '', get_term_meta( $color_type_term_id, 'image', true ), 'Selected color type should ignore stale image values.' );
+
+			$_POST['security']                 = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']                 = $visual_taxonomy;
+			$_POST['term']                     = 'Pattern ' . $suffix;
+			$_POST['wc_visual_attribute_type'] = 'image';
+			$_POST['term_color']               = '#abcdef';
+			$_POST['term_image']               = (string) $image_id;
+
+			$image_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
+			$image_term_id  = isset( $image_response['term_id'] ) ? absint( $image_response['term_id'] ) : 0;
+
+			$this->assertNotEmpty( $image_term_id, 'The visual attribute term with image should be created.' );
+			$this->assertSame( (string) $image_id, get_term_meta( $image_term_id, 'image', true ), 'Selected image type should store image even when color is posted.' );
+			$this->assertSame( '', get_term_meta( $image_term_id, 'color', true ), 'Selected image type should ignore stale color values.' );
+
+			$_POST['security']   = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']   = $text_taxonomy;
+			$_POST['term']       = 'Plain ' . $suffix;
+			$_POST['term_color'] = '#abcdef';
+
+			$text_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
+			$text_term_id  = isset( $text_response['term_id'] ) ? absint( $text_response['term_id'] ) : 0;
+
+			$this->assertNotEmpty( $text_term_id, 'The text attribute term should be created.' );
+			$this->assertSame( '', get_term_meta( $text_term_id, 'color', true ), 'Text attribute terms should ignore posted colors.' );
+		} finally {
+			unset( $_POST['security'], $_POST['taxonomy'], $_POST['term'], $_POST['wc_visual_attribute_type'], $_POST['term_color'], $_POST['term_image'] );
+
+			if ( $image_id ) {
+				wp_delete_attachment( $image_id, true );
+			}
+
+			if ( $visual_term_id && taxonomy_exists( $visual_taxonomy ) ) {
+				wp_delete_term( $visual_term_id, $visual_taxonomy );
+			}
+
+			if ( $image_term_id && taxonomy_exists( $visual_taxonomy ) ) {
+				wp_delete_term( $image_term_id, $visual_taxonomy );
+			}
+
+			if ( $color_type_term_id && taxonomy_exists( $visual_taxonomy ) ) {
+				wp_delete_term( $color_type_term_id, $visual_taxonomy );
+			}
+
+			if ( $text_term_id && taxonomy_exists( $text_taxonomy ) ) {
+				wp_delete_term( $text_term_id, $text_taxonomy );
+			}
+
+			if ( is_int( $visual_attribute_id ) ) {
+				wc_delete_attribute( $visual_attribute_id );
+			}
+
+			if ( is_int( $text_attribute_id ) ) {
+				wc_delete_attribute( $text_attribute_id );
+			}
+
+			global $wc_product_attributes;
+			foreach ( array_filter( array( $visual_taxonomy, $text_taxonomy ) ) as $taxonomy ) {
+				if ( taxonomy_exists( $taxonomy ) ) {
+					unregister_taxonomy( $taxonomy );
+				}
+				unset( $wc_product_attributes[ $taxonomy ] );
+			}
+
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
+			switch_theme( $original_theme );
+		}//end try
+	}
+
+	/**
+	 * Register a product attribute taxonomy created inside a test.
+	 *
+	 * @param int $attribute_id Attribute ID.
+	 * @return string
+	 */
+	private function register_attribute_taxonomy_for_test( int $attribute_id ): string {
+		global $wc_product_attributes;
+
+		$taxonomy             = wc_attribute_taxonomy_name_by_id( $attribute_id );
+		$attribute_taxonomies = wc_get_attribute_taxonomies();
+
+		$wc_product_attributes[ $taxonomy ] = $attribute_taxonomies[ 'id:' . $attribute_id ];
+
+		register_taxonomy(
+			$taxonomy,
+			array( 'product' ),
+			array(
+				'capabilities' => array(
+					'manage_terms' => 'manage_product_terms',
+					'edit_terms'   => 'edit_product_terms',
+					'delete_terms' => 'delete_product_terms',
+					'assign_terms' => 'assign_product_terms',
+				),
+			)
+		);
+
+		return $taxonomy;
 	}
 
 	/**
@@ -315,6 +518,181 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request when adding an item via AJAX.
+	 */
+	public function test_add_to_cart_fires_cart_item_added_from_user_request(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$_POST['product_id'] = $product->get_id();
+		$_POST['quantity']   = 3;
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		$this->do_ajax( 'woocommerce_add_to_cart' );
+
+		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
+		$this->assertSame( $product->get_id(), $captured_args['product_id'] );
+		$this->assertEquals( 3, $captured_args['quantity'] );
+
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
+
+		WC()->cart->empty_cart();
+		unset( $_POST['product_id'], $_POST['quantity'] );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request with variation ID when adding a variation via AJAX.
+	 */
+	public function test_add_to_cart_fires_cart_item_added_from_user_request_for_variation(): void {
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Test Variable Product' );
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'color', array( 'blue' ) );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'blue' ) );
+		$variation->set_regular_price( 10 );
+		$variation->save();
+
+		$_POST['product_id'] = $variation->get_id();
+		$_POST['quantity']   = 2;
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		$this->do_ajax( 'woocommerce_add_to_cart' );
+
+		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
+		$this->assertSame( $variation->get_id(), $captured_args['product_id'], 'The product_id should be the variation ID, not the parent product ID' );
+		$this->assertEquals( 2, $captured_args['quantity'] );
+
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
+
+		WC()->cart->empty_cart();
+		unset( $_POST['product_id'], $_POST['quantity'] );
+		$variation->delete( true );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_removed_from_user_request when removing an item via AJAX.
+	 */
+	public function test_remove_from_cart_fires_cart_item_removed_from_user_request(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		WC()->cart->empty_cart();
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$_POST['cart_item_key'] = $cart_item_key;
+
+		$captured_args = array();
+		$callback      = function ( $key, $cart ) use ( &$captured_args ) {
+			$captured_args = array(
+				'cart_item_key' => $key,
+				'cart'          => $cart,
+			);
+		};
+
+		add_action( 'internal_woocommerce_cart_item_removed_from_user_request', $callback, 10, 2 );
+
+		$this->do_ajax( 'woocommerce_remove_from_cart' );
+
+		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
+		$this->assertSame( $cart_item_key, $captured_args['cart_item_key'] );
+		$this->assertInstanceOf( WC_Cart::class, $captured_args['cart'] );
+
+		remove_action( 'internal_woocommerce_cart_item_removed_from_user_request', $callback );
+
+		WC()->cart->empty_cart();
+		unset( $_POST['cart_item_key'] );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should clear variation sale dates when bulk schedule dates are blank.
+	 * @group ajax
+	 */
+	public function test_bulk_sale_schedule_clears_blank_dates(): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_date_on_sale_from( '2026-06-01 00:00:00' );
+		$variation->set_date_on_sale_to( '2026-06-30 23:59:59' );
+		$variation->save();
+
+		$method = new ReflectionMethod( WC_AJAX::class, 'variation_bulk_action_variable_sale_schedule' );
+		$method->setAccessible( true );
+
+		$method->invokeArgs(
+			null,
+			array(
+				array( $variation->get_id() ),
+				array(
+					'date_from' => '',
+					'date_to'   => '',
+				),
+			)
+		);
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$this->assertNull( $variation->get_date_on_sale_from( 'edit' ), 'The sale start date should be cleared when the bulk action start date is blank.' );
+		$this->assertNull( $variation->get_date_on_sale_to( 'edit' ), 'The sale end date should be cleared when the bulk action end date is blank.' );
+
+		$variation->delete( true );
+	}
+
+	/**
+	 * @testdox Adding a custom field renders a Delete button with a valid delete nonce.
+	 */
+	public function test_order_add_meta_delete_button_uses_name_value_nonce(): void {
+		$this->_setRole( 'administrator' );
+		$order = WC_Helper_Order::create_order();
+
+		$_POST['_ajax_nonce-add-meta'] = wp_create_nonce( 'add-meta' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['metakeyinput']         = 'my_test_key';
+		$_POST['metavalue']            = 'my_test_value';
+
+		$output_buffering_level = ob_get_level();
+
+		try {
+			// Note that _handleAjax makes use of output buffering, which the die
+			// handler usually cleans up; the finally block below closes only any
+			// buffer it leaves dangling so the buffer level stays balanced.
+			$this->_handleAjax( 'woocommerce_order_add_meta' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		} finally {
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
+		}
+
+		$this->assertStringContainsString(
+			'::_ajax_nonce=',
+			(string) $this->_last_response,
+			'Delete button should use the _ajax_nonce= token.'
+		);
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
@@ -325,13 +703,15 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$output_buffering_level = ob_get_level();
 
 		try {
-			// Note that _handleAjax makes use of output buffering...
+			// Note that _handleAjax makes use of output buffering, which the die
+			// handler usually cleans up; the finally block below closes only any
+			// buffer it leaves dangling so the buffer level stays balanced.
 			$this->_handleAjax( $ajax_action );
 		} catch ( Exception $e ) {
-			// ...However, if an exception is raised, it may not be able to clean-up,
-			// which can lead to PhpUnit emitting risky test warnings.
-			if ( ob_get_level() === $output_buffering_level + 1 ) {
-				ob_get_clean();
+			unset( $e );
+		} finally {
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
 			}
 		}
 

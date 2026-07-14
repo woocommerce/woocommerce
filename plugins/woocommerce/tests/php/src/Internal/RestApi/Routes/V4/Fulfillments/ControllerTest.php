@@ -3,18 +3,20 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Fulfillments;
 
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\OrderFulfillmentsRestController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
-use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\FulfillmentsHelper;
-use WC_REST_Unit_Test_Case;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Schema\FulfillmentSchema;
+use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Helper_Order;
 use WC_Order;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
 
 /**
  * Fulfillments Controller test class
  */
-class ControllerTest extends WC_REST_Unit_Test_Case {
+class ControllerTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Controller instance
@@ -24,18 +26,25 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	private FulfillmentsController $controller;
 
 	/**
-	 * Admin user for tests
+	 * Original value of the fulfillments feature flag.
 	 *
-	 * @var int
+	 * @var mixed
 	 */
-	private int $admin_user_id;
+	private static $original_fulfillments_flag;
 
 	/**
-	 * Customer user for tests
+	 * Admin user for tests, shared across all tests in the class for REST authentication.
 	 *
 	 * @var int
 	 */
-	private int $customer_user_id;
+	private static int $admin_user_id;
+
+	/**
+	 * Customer user for tests, shared across all tests in the class.
+	 *
+	 * @var int
+	 */
+	private static int $customer_user_id;
 
 	/**
 	 * Test order
@@ -56,8 +65,9 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
+		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
 		$controller->register();
 		$controller->initialize_fulfillments();
 	}
@@ -66,8 +76,31 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Tear down the test environment.
 	 */
 	public static function tearDownAfterClass(): void {
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		if ( false === self::$original_fulfillments_flag ) {
+			delete_option( 'woocommerce_feature_fulfillments_enabled' );
+		} else {
+			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
+		}
 		parent::tearDownAfterClass();
+	}
+
+	/**
+	 * Create the shared users once for the whole class.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$admin_user_id = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+
+		self::$customer_user_id = $factory->user->create(
+			array(
+				'role' => 'customer',
+			)
+		);
 	}
 
 	/**
@@ -77,21 +110,13 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 
 		$this->controller = new FulfillmentsController();
-		$this->controller->register_routes();
-
-		$this->admin_user_id = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
+		$this->controller->init( new FulfillmentSchema(), new OrderFulfillmentsRestController() );
+		$this->create_rest_server_with_routes(
+			array( array( $this->controller, 'register_routes' ) ),
+			true
 		);
 
-		$this->customer_user_id = $this->factory->user->create(
-			array(
-				'role' => 'customer',
-			)
-		);
-
-		$this->test_order       = WC_Helper_Order::create_order( $this->customer_user_id );
+		$this->test_order       = WC_Helper_Order::create_order( self::$customer_user_id );
 		$this->test_fulfillment = FulfillmentsHelper::create_fulfillment(
 			array(
 				'entity_id' => $this->test_order->get_id(),
@@ -103,16 +128,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Teardown test environment
 	 */
 	public function tearDown(): void {
-		// Delete the created users.
-		wp_delete_user( $this->admin_user_id );
-		wp_delete_user( $this->customer_user_id );
-
-		// Delete the created orders and their fulfillments.
-		WC_Helper_Order::delete_order( $this->test_order->get_id() );
-		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillments;" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillment_meta;" );
-
+		$this->clear_rest_server();
 		parent::tearDown();
 	}
 
@@ -130,7 +146,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test get_fulfillments endpoint
 	 */
 	public function test_get_fulfillments_success() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
 		$request->set_param( 'order_id', $this->test_order->get_id() );
@@ -144,7 +160,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test get_fulfillments without order_id
 	 */
 	public function test_get_fulfillments_missing_order_id() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
 
@@ -159,7 +175,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test get_fulfillments with invalid order_id
 	 */
 	public function test_get_fulfillments_invalid_order_id() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
 		$request->set_param( 'order_id', 99999 );
@@ -172,7 +188,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test create_fulfillment endpoint
 	 */
 	public function test_create_fulfillment_success() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/fulfillments' );
 		$request->set_header( 'Content-Type', 'application/json' );
@@ -187,7 +203,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test create_fulfillment without entity_id
 	 */
 	public function test_create_fulfillment_missing_entity_id() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 		$test_data = $this->get_test_fulfillment_data();
 		unset( $test_data['entity_id'] );
 
@@ -205,7 +221,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test create_fulfillment with invalid entity_type
 	 */
 	public function test_create_fulfillment_invalid_entity_type() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/fulfillments' );
 		$request->set_header( 'Content-Type', 'application/json' );
@@ -221,7 +237,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test get_fulfillment endpoint
 	 */
 	public function test_get_fulfillment_success() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
 
@@ -232,10 +248,36 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * V4 must format `_date_fulfilled` meta as ISO 8601 with 'Z' suffix in
+	 * responses, matching V3 and the storage UTC contract — clients should not
+	 * see the raw 'Y-m-d H:i:s' form.
+	 */
+	public function test_get_fulfillment_formats_date_fulfilled_meta_as_iso8601() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$this->test_fulfillment->set_date_fulfilled( '2025-01-15T10:30:00Z' );
+		$this->test_fulfillment->save();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data           = $response->get_data();
+		$date_fulfilled = null;
+		foreach ( $data['meta_data'] as $meta ) {
+			if ( '_date_fulfilled' === $meta['key'] ) {
+				$date_fulfilled = $meta['value'];
+				break;
+			}
+		}
+		$this->assertSame( '2025-01-15T10:30:00Z', $date_fulfilled );
+	}
+
+	/**
 	 * Test get_fulfillment with invalid ID
 	 */
 	public function test_get_fulfillment_invalid_id() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/99999' );
 
@@ -249,7 +291,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test update_fulfillment endpoint
 	 */
 	public function test_update_fulfillment_success() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
 		$request->set_header( 'Content-Type', 'application/json' );
@@ -263,7 +305,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test update_fulfillment with invalid ID
 	 */
 	public function test_update_fulfillment_invalid_id() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/fulfillments/99999' );
 		$request->set_header( 'Content-Type', 'application/json' );
@@ -279,7 +321,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test delete_fulfillment endpoint
 	 */
 	public function test_delete_fulfillment_success() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$fulfillment = FulfillmentsHelper::create_fulfillment(
 			array( 'entity_id' => $this->test_order->get_id() )
@@ -299,7 +341,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test delete_fulfillment with invalid ID
 	 */
 	public function test_delete_fulfillment_invalid_id() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'DELETE', '/wc/v4/fulfillments/99999' );
 
@@ -313,7 +355,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test permission check - admin user
 	 */
 	public function test_permission_check_admin() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
 		$request->set_param( 'order_id', $this->test_order->get_id() );
@@ -326,7 +368,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test permission check - customer reading their own order
 	 */
 	public function test_permission_check_customer_own_order() {
-		wp_set_current_user( $this->customer_user_id );
+		wp_set_current_user( self::$customer_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
 		$request->set_param( 'order_id', $this->test_order->get_id() );
@@ -339,7 +381,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test permission check - customer trying to create fulfillment
 	 */
 	public function test_permission_check_customer_create() {
-		wp_set_current_user( $this->customer_user_id );
+		wp_set_current_user( self::$customer_user_id );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/fulfillments' );
 		$request->set_header( 'Content-Type', 'application/json' );
@@ -364,11 +406,37 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Regression test for WOO13-227: an unauthenticated request must not be
+	 * able to read a guest order's fulfillments. The owner-read check compares
+	 * get_current_user_id() to $order->get_customer_id(); for guest orders
+	 * both are 0, so the check needs a `get_current_user_id() > 0` guard.
+	 */
+	public function test_permission_check_unauthenticated_cannot_read_guest_order_fulfillments() {
+		$guest_order       = WC_Helper_Order::create_order( 0 );
+		$guest_fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => $guest_order->get_id() )
+		);
+
+		wp_set_current_user( 0 );
+
+		$list_request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
+		$list_request->set_param( 'order_id', $guest_order->get_id() );
+		$list_response = rest_get_server()->dispatch( $list_request );
+		$this->assertSame( 401, $list_response->get_status() );
+
+		$get_request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $guest_fulfillment->get_id() );
+		$get_response = rest_get_server()->dispatch( $get_request );
+		$this->assertSame( 401, $get_response->get_status() );
+
+		WC_Helper_Order::delete_order( $guest_order->get_id() );
+	}
+
+	/**
 	 * Test permission check - customer accessing other's order
 	 */
 	public function test_permission_check_customer_other_order() {
 		$other_order = WC_Helper_Order::create_order();
-		wp_set_current_user( $this->customer_user_id );
+		wp_set_current_user( self::$customer_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
 		$request->set_param( 'order_id', $other_order->get_id() );
@@ -381,7 +449,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test schema validation for get fulfillments
 	 */
 	public function test_get_fulfillments_schema() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/fulfillments' );
 		$response = rest_get_server()->dispatch( $request );
@@ -404,7 +472,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test schema validation for create fulfillment
 	 */
 	public function test_create_fulfillment_schema() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/fulfillments' );
 		$response = rest_get_server()->dispatch( $request );
@@ -428,7 +496,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test error response format
 	 */
 	public function test_error_response_format() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
 		$request->set_param( 'order_id', 0 );

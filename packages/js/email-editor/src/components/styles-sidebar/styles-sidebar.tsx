@@ -5,13 +5,7 @@ import { memo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { styles } from '@wordpress/icons';
-// eslint-disable-next-line @woocommerce/dependency-group
-import {
-	// @ts-expect-error Type for PluginSidebar is missing in @types/wordpress__editor
-	PluginSidebar,
-	// @ts-expect-error Type for PluginSidebarMoreMenuItem is missing in @types/wordpress__editor
-	PluginSidebarMoreMenuItem,
-} from '@wordpress/editor';
+import { PluginSidebar, PluginSidebarMoreMenuItem } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -41,14 +35,13 @@ export function RawStylesSidebar(): JSX.Element {
 					target="email-styles-sidebar"
 					icon={ styles }
 				>
-					{ __( 'Email styles', 'woocommerce' ) }
+					{ __( 'Email styles', __i18n_text_domain__ ) }
 				</PluginSidebarMoreMenuItem>
 				<PluginSidebar
 					name="email-styles-sidebar"
 					icon={ styles }
-					title={ __( 'Styles', 'woocommerce' ) }
+					title={ __( 'Styles', __i18n_text_domain__ ) }
 					className="woocommerce-email-editor-styles-panel"
-					header={ __( 'Styles', 'woocommerce' ) }
 				>
 					<Navigator initialPath="/">
 						<Navigator.Screen path="/">

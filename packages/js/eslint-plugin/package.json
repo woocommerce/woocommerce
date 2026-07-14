@@ -1,11 +1,11 @@
 {
 	"name": "@woocommerce/eslint-plugin",
-	"version": "2.3.0",
+	"version": "3.0.0",
 	"description": "ESLint plugin for WooCommerce development.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"keywords": [
 		"wordpress",
@@ -24,7 +24,6 @@
 	},
 	"files": [
 		"configs",
-		"rules",
 		"index.js"
 	],
 	"main": "index.js",
@@ -44,8 +43,8 @@
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint ./rules ./configs --fix",
-		"lint:lang:js": "eslint ./rules ./configs"
+		"lint:fix:lang:js": "eslint ./configs ./index.js --fix",
+		"lint:lang:js": "eslint ./configs ./index.js"
 	},
 	"devDependencies": {
 		"@babel/core": "7.25.7",
@@ -54,8 +53,7 @@
 		"jest-cli": "29.5.x",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
-		"typescript": "5.7.x",
-		"wireit": "0.14.12"
+		"typescript": "5.7.x"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
@@ -67,8 +65,8 @@
 			"lint": {
 				"command": "lint",
 				"changes": [
-					"rules/**/*.js",
-					"configs/**/*.js"
+					"configs/**/*.js",
+					"index.js"
 				]
 			}
 		}

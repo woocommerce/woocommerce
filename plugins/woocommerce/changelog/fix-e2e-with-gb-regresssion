@@ -1,5 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Add empty attributes to the block.json to avoid editor crash. Temporary measure before there's a fix in GB
-
-

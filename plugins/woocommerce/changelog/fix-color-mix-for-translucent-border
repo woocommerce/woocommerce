@@ -1,3 +1,0 @@
-Significance: patch
-Type: update
-Comment: Use color-mix instead of ::after hack for translucent borders

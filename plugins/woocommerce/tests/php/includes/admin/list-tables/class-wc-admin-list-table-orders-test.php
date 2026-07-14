@@ -119,12 +119,14 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		$dummy_order->set_billing_first_name( 'NotAMatch' );
 		$dummy_order->save();
 
+		$order = WC_Helper_Order::create_order();
 		foreach ( $fields as $field => $value ) {
-			$order  = WC_Helper_Order::create_order();
 			$setter = 'set_' . $field;
 			$order->$setter( $value );
-			$order->save();
+		}
+		$order->save();
 
+		foreach ( $fields as $field => $value ) {
 			$_GET['s']          = $value;
 			$GLOBALS['pagenow'] = 'edit.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
@@ -151,8 +153,8 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 			);
 
 			unset( $_GET['s'], $GLOBALS['pagenow'] );
-			wp_delete_post( $order->get_id(), true );
 		}
+		wp_delete_post( $order->get_id(), true );
 		wp_delete_post( $dummy_order->get_id(), true );
 	}
 
@@ -163,11 +165,11 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		// Create several dummy orders.
 		$orders = array();
 		for ( $i = 0; $i < 3; $i++ ) {
-			$orders[] = WC_Helper_Order::create_order();
+			$orders[] = wc_create_order();
 		}
 
 		// Create a dummy order that should NOT match.
-		$dummy_order = WC_Helper_Order::create_order();
+		$dummy_order = wc_create_order();
 		$dummy_order->set_billing_first_name( 'NotAMatch' );
 		$dummy_order->save();
 
@@ -268,5 +270,41 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		wp_delete_post( $order->get_id(), true );
 		wp_delete_post( $product->get_id(), true );
 		wp_delete_post( $dummy_order->get_id(), true );
+	}
+
+	/**
+	 * Test that the search without post_type in query does not trigger warnings.
+	 * This is a regression test for https://github.com/woocommerce/woocommerce/pull/55353.
+	 */
+	public function test_search_without_post_type_in_query_does_not_trigger_warning() {
+		$GLOBALS['pagenow'] = 'edit.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		new WC_Admin_List_Table_Orders();
+
+		$warnings = array();
+		set_error_handler( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
+			function () use ( &$warnings ) {
+				$warnings[] = true;
+			}
+		);
+
+		// Do not set post_type in the query.
+		new WP_Query(
+			array(
+				'post_status' => 'all',
+				'fields'      => 'ids',
+			)
+		);
+
+		restore_error_handler();
+
+		// Check no warnings were triggered.
+		$this->assertEmpty(
+			$warnings,
+			'No PHP warnings or notices should be triggered when no post_type is set in WP_Query for admin order search.'
+		);
+
+		// Cleanup.
+		unset( $GLOBALS['pagenow'] );
 	}
 }

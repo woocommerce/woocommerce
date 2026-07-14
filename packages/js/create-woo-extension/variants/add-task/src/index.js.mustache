@@ -1,0 +1,82 @@
+/* eslint-disable @wordpress/i18n-text-domain */
+/**
+ * External dependencies
+ */
+import { createElement } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { Card, CardBody, CardFooter, Button } from '@wordpress/components';
+import { onboardingStore } from '@woocommerce/data';
+import { registerPlugin } from '@wordpress/plugins';
+import { useDispatch } from '@wordpress/data';
+import {
+	WooOnboardingTask,
+	WooOnboardingTaskListItem,
+} from '@woocommerce/onboarding';
+
+const TaskContent = ( { onComplete, task } ) => {
+	const { actionTask } = useDispatch( onboardingStore );
+	const { isActioned } = task;
+
+	return (
+		<Card className="woocommerce-task-card">
+			<CardBody>
+				{ __(
+					"This task's completion status is dependent on being actioned. The action button below will action this task, while the complete button will optimistically complete the task in the task list and redirect back to the task list. Note that in this example, the task must be actioned for completion to persist.",
+					'{{textdomain}}'
+				) }{ ' ' }
+				<br />
+				<br />
+				{ __( 'Task actioned status: ', '{{textdomain}}' ) }{ ' ' }
+				{ isActioned ? 'actioned' : 'not actioned' }
+				<br />
+				<br />
+			</CardBody>
+			<CardFooter>
+				<Button
+					onClick={ () => {
+						actionTask( '{{slugSnakeCase}}-task' );
+					} }
+					variant='primary'
+				>
+					{ __( 'Action task', '{{textdomain}}' ) }
+				</Button>
+				<Button onClick={ onComplete } variant='secondary'>
+					{ __( 'Complete', '{{textdomain}}' ) }
+				</Button>
+			</CardFooter>
+		</Card>
+	);
+};
+
+registerPlugin( '{{textdomain}}-task-content', {
+	render: () => (
+		<WooOnboardingTask id="{{slugSnakeCase}}-task">
+			{ ( {
+				onComplete,
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				query,
+				task,
+			} ) => <TaskContent onComplete={ onComplete } task={ task } /> }
+		</WooOnboardingTask>
+	),
+	scope: 'woocommerce-tasks',
+} );
+
+registerPlugin( '{{textdomain}}-task-list-item', {
+	scope: 'woocommerce-tasks',
+	render: () => (
+		<WooOnboardingTaskListItem id="{{slugSnakeCase}}-task">
+			{ ( { defaultTaskItem: DefaultTaskItem } ) => (
+				// Add a custom wrapper around the default task item.
+				<div
+					className="woocommerce-custom-tasklist-item"
+					style={ {
+						border: '1px solid #e0e0e0',
+					} }
+				>
+					<DefaultTaskItem />
+				</div>
+			) }
+		</WooOnboardingTaskListItem>
+	),
+} );

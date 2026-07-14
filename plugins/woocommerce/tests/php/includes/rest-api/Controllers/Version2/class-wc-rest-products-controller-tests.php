@@ -1,12 +1,15 @@
 <?php
 
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 
 /**
  * class WC_REST_Products_Controller_Tests.
  * Product Controller tests for V2 REST API.
  */
 class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
+	use MetaDataAssertionTrait;
+
 	/**
 	 * @var WC_Product_Simple[]
 	 */
@@ -18,6 +21,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass() {
+		self::enable_direct_product_attribute_lookup_updates();
 		for ( $i = 1; $i <= 4; $i++ ) {
 			self::$products[] = WC_Helper_Product::create_simple_product();
 		}
@@ -27,6 +31,7 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 			$product->add_meta_data( 'test2', 'test2', true );
 			$product->save();
 		}
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
@@ -35,9 +40,11 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpTearDownAfterClass() {
+		self::enable_direct_product_attribute_lookup_updates();
 		foreach ( self::$products as $product ) {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
@@ -404,9 +411,13 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		);
 
 		foreach ( $skus_and_names as $sku => $name ) {
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_name( $name );
-			$product->set_sku( $sku );
+			$product = WC_Helper_Product::create_simple_product(
+				false,
+				array(
+					'name' => $name,
+					'sku'  => $sku,
+				)
+			);
 			$product->save();
 		}
 
@@ -422,5 +433,21 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		$actual_data = ArrayUtil::select( $actual_data, 'sku' );
 
 		$this->assertEqualsCanonicalizing( $expected_obtained_data, $actual_data );
+	}
+
+	/**
+	 * @testdox Updating a product via V2 with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v2/products/' . $product->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'meta_data' => $this->get_incomplete_meta_data_input() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $product->get_id() ) );
 	}
 }

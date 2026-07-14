@@ -1,4 +1,13 @@
 <?php
+/**
+ * Product advanced data panel.
+ *
+ * @package WooCommerce\Admin
+ * @var WC_Product $product_object
+ */
+
+use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\POSProductVisibilitySync;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -52,6 +61,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?>
 		</div>
 	<?php endif; ?>
+	<?php $is_pos_supported = wc_get_container()->get( POSProductVisibilitySync::class )->is_product_supported( $product_object ); ?>
+	<div class="options_group" id="pos_visibility_supported" <?php echo $is_pos_supported ? '' : 'style="display: none;"'; ?>>
+		<?php
+		$visible_in_pos = ! has_term( 'pos-hidden', 'pos_product_visibility', $product_object->get_id() );
+		woocommerce_wp_checkbox(
+			array(
+				'id'          => '_visible_in_pos',
+				'value'       => $visible_in_pos ? 'yes' : 'no',
+				'label'       => __( 'Available for POS', 'woocommerce' ),
+				'desc_tip'    => true,
+				'description' => __( 'Controls whether this product appears in the Point of Sale system.', 'woocommerce' ),
+			)
+		);
+		?>
+	</div>
+	<div class="options_group" id="pos_visibility_unsupported" <?php echo $is_pos_supported ? 'style="display: none;"' : ''; ?>>
+		<?php
+		woocommerce_wp_note(
+			array(
+				'id'      => '_pos_visibility_note',
+				'label'   => __( 'Point of Sale', 'woocommerce' ),
+				'message' => __( 'This product type is not currently supported.', 'woocommerce' ),
+			)
+		);
+		?>
+	</div>
 
 	<?php do_action( 'woocommerce_product_options_advanced' ); ?>
 </div>

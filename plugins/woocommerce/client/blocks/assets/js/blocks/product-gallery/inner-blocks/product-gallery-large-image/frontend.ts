@@ -19,17 +19,17 @@ type Context = {
 
 const getContext = ( ns?: string ) => getContextFn< Context >( ns );
 
-type Store = typeof productGalleryLargeImage & ProductGallery;
+type Store = typeof viewer & ProductGallery;
 
-const productGalleryLargeImage = {
+const viewer = {
 	actions: {
 		startZoom: ( event: MouseEvent ) => {
 			const target = event.target as HTMLElement;
-			const isMouseEventFromLargeImage = target.classList.contains(
+			const isMouseEventFromViewer = target.classList.contains(
 				'wc-block-woocommerce-product-gallery-large-image__image'
 			);
 
-			if ( ! isMouseEventFromLargeImage ) {
+			if ( ! isMouseEventFromViewer ) {
 				return actions.resetZoom( event );
 			}
 
@@ -61,10 +61,6 @@ const productGalleryLargeImage = {
 	},
 };
 
-const { actions } = store< Store >(
-	'woocommerce/product-gallery',
-	productGalleryLargeImage,
-	{
-		lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
-	}
-);
+const { actions } = store< Store >( 'woocommerce/product-gallery', viewer, {
+	lock: 'I acknowledge that using a private store means my plugin will inevitably break on the next store release.',
+} );

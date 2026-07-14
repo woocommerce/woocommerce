@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Payment gateways can now implement get_provider_links() to provide contextual provider links for the Payments settings page.

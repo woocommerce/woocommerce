@@ -17,4 +17,6 @@ export { default as PaymentMethodIcons } from './payment-method-icons';
 export { default as PaymentMethodLabel } from './payment-method-label';
 export { default as AdditionalFieldsPlaceholder } from './additional-fields-placeholder';
 export { default as PasswordStrengthMeter } from './password-strength-meter';
+export { default as PackageItems } from './package-items';
+export { default as ShippingPackageItemIcon } from './shipping-package-item-icon';
 export * from './totals';

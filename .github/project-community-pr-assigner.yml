@@ -1,116 +1,116 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
+#
+# nerrad is the interim reviewer for the paths formerly owned by the flux team
+# (removed), pending a replacement team.
 
 "*":
-  - Flux
+  - nerrad
 
 ".github/**/*":
-  - Flux
+  - nerrad
 
 "bin/*":
-  - Flux
+  - nerrad
 
 "docs/**/*":
-  - Developer Advocacy
+  - team: developer-advocacy
 
 "packages/js/api/**/*":
-  - Flux
+  - nerrad
 
 "packages/js/components/**/*":
-  - Kirigami
+  - team: woo-fse
 
 "packages/js/csv-export/**/*":
-  - SomewhereWarm
+  - team: somewherewarm
 
 "packages/js/currency/**/*":
-  - Rubik
+  - team: rubik
 
 "packages/js/customer-effort-score/**/*":
-  - Kirigami
+  - team: woo-fse
 
 "packages/js/data/**/*":
-  - Ventures
+  - team: ventures
 
 "packages/js/date/**/*":
-  - Rubik
+  - team: rubik
 
 "packages/js/dependency-extraction-webpack-plugin/**/*":
-  - Flux
+  - nerrad
 
 "packages/js/eslint-plugin/**/*":
-  - Flux
+  - nerrad
 
 "packages/js/experimental/**/*":
-  - Kirigami
+  - team: woo-fse
 
 "packages/js/explat/**/*":
-  - Kirigami
+  - team: woo-fse
 
 "packages/js/navigation/**/*":
-  - SomewhereWarm
+  - team: somewherewarm
 
 "packages/js/number/**/*":
-  - Rubik
+  - team: rubik
 
 "packages/js/onboarding/**/*":
-  - Rubik
-
-"packages/js/product-editor/**/*":
-  - Kirigami
+  - team: rubik
 
 "packages/js/tracks/**/*":
-  - Flux
+  - nerrad
 
 "packages/js/email-editor/**/*":
-  - Ballade
+  - team: ballade
 
 "packages/php/email-editor/**/*":
-  - Ballade
+  - team: ballade
 
 "plugins/woocommerce/**/*":
-  - Flux
+  - nerrad
 
 "plugins/woocommerce/templates/**/*":
-  - Rubik
-  - Kirigami
+  - team: rubik
+  - team: woo-fse
 
 "plugins/woocommerce/templates/emails/**/*":
-  - Ballade
+  - team: ballade
 
 "plugins/woocommerce/src/Admin/**/*":
-  - team: Kirigami
+  - team: woo-fse
 
 "plugins/woocommerce/src/Blocks/**/*":
-  - Rubik
-  - Kirigami
+  - team: rubik
+  - team: woo-fse
 
 "plugins/woocommerce/src/Internal/Admin/**/*":
-  - Kirigami
+  - team: woo-fse
 
 "plugins/woocommerce/src/StoreApi/**/*":
-  - Rubik
-  - Kirigami
+  - team: rubik
+  - team: woo-fse
 
 "plugins/woocommerce/client/admin/**/*":
-  - Kirigami
+  - team: woo-fse
 
 "plugins/woocommerce/client/blocks/**/*":
-  - Rubik
-  - Kirigami
+  - team: rubik
+  - team: woo-fse
 
 "plugins/woocommerce-beta-tester/**/*":
-  - Flux
+  - nerrad
 
 "plugins/woocommerce/src/Internal/EmailEditor/**/*":
-  - Ballade
+  - team: ballade
 
 "plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/**/*":
-  - Ballade
+  - team: ballade
 
 "tools/**/*":
-  - Flux
+  - nerrad
 
 '**/composer.json':
-  - Flux
+  - nerrad
 
 '**/package.json':
-  - Flux
+  - nerrad

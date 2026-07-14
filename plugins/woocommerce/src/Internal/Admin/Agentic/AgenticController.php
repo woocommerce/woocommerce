@@ -46,22 +46,5 @@ class AgenticController implements RegisterHooksInterface {
 
 		// Resolve webhook manager from container.
 		wc_get_container()->get( AgenticWebhookManager::class )->register();
-
-		// Register Agentic Commerce integration.
-		add_filter( 'woocommerce_integrations', array( $this, 'add_agentic_commerce_integration' ) );
-	}
-
-	/**
-	 * Add Agentic Commerce integration to WooCommerce integrations.
-	 *
-	 * @param array $integrations Existing integrations.
-	 * @return array Modified integrations.
-	 */
-	public function add_agentic_commerce_integration( $integrations ): array {
-		if ( ! is_array( $integrations ) ) {
-			$integrations = array();
-		}
-		$integrations[] = AgenticCommerceIntegration::class;
-		return $integrations;
 	}
 }

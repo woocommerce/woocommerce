@@ -40,6 +40,7 @@ export const Edit = ( {
 					! displayCartPricesIncludingTax && (
 						<PanelBody title={ __( 'Taxes', 'woocommerce' ) }>
 							<ToggleControl
+								__nextHasNoMarginBottom
 								label={ __(
 									'Show rate after tax name',
 									'woocommerce'

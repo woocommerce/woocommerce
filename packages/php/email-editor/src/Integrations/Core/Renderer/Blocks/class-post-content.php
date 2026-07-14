@@ -32,12 +32,17 @@ class Post_Content {
 	 * - Uses direct post content access instead of get_the_content()
 	 * - Properly backs up and restores global state
 	 *
+	 * IMPORTANT: This method is only set as the render_callback during email rendering.
+	 * Outside of email rendering, the original callback is restored, so this method
+	 * will never be called in non-email contexts.
+	 *
 	 * @param array     $attributes Block attributes.
 	 * @param string    $content    Block content.
 	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered post content HTML.
 	 */
 	public function render_stateless( $attributes, $content, $block ): string {
+		// This method is only called during email rendering, so we always use stateless logic.
 		$post_id = $block->context['postId'] ?? null;
 
 		if ( ! $post_id ) {

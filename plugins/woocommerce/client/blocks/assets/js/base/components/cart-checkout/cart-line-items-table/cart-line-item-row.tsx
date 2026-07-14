@@ -3,6 +3,7 @@
  */
 import clsx from 'clsx';
 import { __, sprintf } from '@wordpress/i18n';
+import { decodeEntities } from '@wordpress/html-entities';
 import { speak } from '@wordpress/a11y';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import ProductPrice from '@woocommerce/base-components/product-price';
@@ -11,24 +12,27 @@ import {
 	useStoreCartItemQuantity,
 	useStoreEvents,
 	useStoreCart,
+	useSaveForLater,
 } from '@woocommerce/base-context/hooks';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	applyCheckoutFilter,
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
-import Dinero from 'dinero.js';
 import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
-import { objectHasProp, Currency } from '@woocommerce/types';
-import { getSetting } from '@woocommerce/settings';
+import { isBoolean, Currency } from '@woocommerce/types';
+import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
+import { Icon, trash } from '@wordpress/icons';
+import { calculateSaleAmount } from '@woocommerce/base-utils';
+import { dinero, transformScale, toSnapshot, type Dinero } from 'dinero.js';
+import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 
 /**
  * Internal dependencies
  */
 import ProductBackorderBadge from '../product-backorder-badge';
 import ProductImage from '../product-image';
-import ProductLowStockBadge from '../product-low-stock-badge';
 import ProductMetadata from '../product-metadata';
 import ProductSaleBadge from '../product-sale-badge';
 
@@ -40,10 +44,11 @@ import ProductSaleBadge from '../product-sale-badge';
  * @return {number} Amount with new minor unit precision.
  */
 const getAmountFromRawPrice = (
-	priceObject: Dinero.Dinero,
+	priceObject: Dinero< number >,
 	currency: Currency
 ) => {
-	return priceObject.convertPrecision( currency.minorUnit ).getAmount();
+	return toSnapshot( transformScale( priceObject, currency.minorUnit ) )
+		.amount;
 };
 
 interface CartLineItemRowProps {
@@ -67,7 +72,6 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 			catalog_visibility: catalogVisibility = 'visible',
 			short_description: shortDescription = '',
 			description: fullDescription = '',
-			low_stock_remaining: lowStockRemaining = null,
 			show_backorder_badge: showBackorderBadge = false,
 			quantity_limits: quantityLimits = {
 				minimum: 1,
@@ -115,7 +119,31 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 
 		const { quantity, setItemQuantity, removeItem, isPendingDelete } =
 			useStoreCartItemQuantity( lineItem );
+		const { saveForLater, isSaving: isSavingForLater } = useSaveForLater();
 		const { dispatchStoreEvent } = useStoreEvents();
+		const isUserLoggedIn = !! getSetting< number >( 'currentUserId', 0 );
+		const isSaveForLaterFeatureEnabled = getSettingWithCoercion(
+			'experimentalCartSaveForLater',
+			false,
+			isBoolean
+		);
+		const cartPageHasSavedForLater = getSettingWithCoercion(
+			'cartPageHasSavedForLater',
+			false,
+			isBoolean
+		);
+		// Three signals, each catching a distinct failure mode.
+		// Disabling the `cart_save_for_later` feature unregisters the
+		// saved-for-later block but leaves any prior insertion in the
+		// cart page's post content (the editor renders it as an
+		// "unsupported block" notice) — so presence alone could render
+		// this link with no working destination. Inversely, the feature
+		// can be enabled on cart pages that never inserted the block.
+		// And the REST endpoints behind the click are auth-only.
+		const showSaveForLater =
+			isUserLoggedIn &&
+			isSaveForLaterFeatureEnabled &&
+			cartPageHasSavedForLater;
 
 		// Prepare props to pass to the applyCheckoutFilter filter.
 		// We need to pluck out receiveCart.
@@ -136,26 +164,32 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 			extensions,
 			arg,
 		} );
+		// `name` is a raw HTML string; decode entities for screen-reader text (aria-label, speak).
+		const decodedName = decodeEntities( name );
 
-		const regularAmountSingle = Dinero( {
+		const regularAmountSingle = dinero( {
 			amount: parseInt( prices.raw_prices.regular_price, 10 ),
-			precision: prices.raw_prices.precision,
+			currency: USD,
+			scale: prices.raw_prices.precision,
 		} );
-		const purchaseAmountSingle = Dinero( {
+		const purchaseAmountSingle = dinero( {
 			amount: parseInt( prices.raw_prices.price, 10 ),
-			precision: prices.raw_prices.precision,
+			currency: USD,
+			scale: prices.raw_prices.precision,
 		} );
-		const saleAmountSingle =
-			regularAmountSingle.subtract( purchaseAmountSingle );
-		const saleAmount = saleAmountSingle.multiply( quantity );
+		const saleAmountSingle = calculateSaleAmount(
+			prices,
+			priceCurrency.minorUnit
+		);
 		const totalsCurrency = getCurrencyFromPriceResponse( totals );
 		let lineSubtotal = parseInt( totals.line_subtotal, 10 );
 		if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
 			lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
 		}
-		const subtotalPrice = Dinero( {
+		const subtotalPrice = dinero( {
 			amount: lineSubtotal,
-			precision: totalsCurrency.minorUnit,
+			currency: USD,
+			scale: totalsCurrency.minorUnit,
 		} );
 
 		const firstImage = images.length ? images[ 0 ] : {};
@@ -203,6 +237,9 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 
 		return (
 			<tr
+				// Restores the row role that `display: grid` strips in the responsive layout.
+				role="row"
+				data-cart-item-key={ lineItem.key }
 				className={ clsx(
 					'wc-block-cart-items__row',
 					cartItemClassNameFilter,
@@ -213,29 +250,32 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 				ref={ ref }
 				tabIndex={ tabIndex }
 			>
-				{ /* If the image has no alt text, this link is unnecessary and can be hidden. */ }
-				<td
-					className="wc-block-cart-item__image"
-					aria-hidden={
-						! objectHasProp( firstImage, 'alt' ) || ! firstImage.alt
-					}
-				>
-					{ /* We don't need to make it focusable, because product name has the same link. */ }
+				{ /* Decorative image, hidden from screen readers so the row isn't announced as an empty "Product" cell. */ }
+				<td className="wc-block-cart-item__image" aria-hidden="true">
 					{ isProductHiddenFromCatalog ? (
 						<ProductImage
 							image={ firstImage }
 							fallbackAlt={ name }
+							width={ 80 }
+							height={ 80 }
 						/>
 					) : (
 						<a href={ permalink } tabIndex={ -1 }>
 							<ProductImage
 								image={ firstImage }
 								fallbackAlt={ name }
+								width={ 80 }
+								height={ 80 }
 							/>
 						</a>
 					) }
 				</td>
-				<td className="wc-block-cart-item__product">
+				<td
+					role="rowheader"
+					// Name the rowheader after the product only, not the whole cell's contents.
+					aria-label={ decodedName }
+					className="wc-block-cart-item__product"
+				>
 					<div className="wc-block-cart-item__wrap">
 						<ProductName
 							disabled={
@@ -244,15 +284,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 							name={ name }
 							permalink={ permalink }
 						/>
-						{ showBackorderBadge ? (
-							<ProductBackorderBadge />
-						) : (
-							!! lowStockRemaining && (
-								<ProductLowStockBadge
-									lowStockRemaining={ lowStockRemaining }
-								/>
-							)
-						) }
+						{ showBackorderBadge && <ProductBackorderBadge /> }
 
 						<div className="wc-block-cart-item__prices">
 							<ProductPrice
@@ -268,15 +300,6 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 								format={ subtotalPriceFormat }
 							/>
 						</div>
-
-						<ProductSaleBadge
-							currency={ priceCurrency }
-							saleAmount={ getAmountFromRawPrice(
-								saleAmountSingle,
-								priceCurrency
-							) }
-							format={ saleBadgePriceFormat }
-						/>
 
 						<ProductMetadata
 							shortDescription={ shortDescription }
@@ -304,7 +327,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 											}
 										);
 									} }
-									itemName={ name }
+									itemName={ decodedName }
 								/>
 							) }
 							{ showRemoveItemLink && (
@@ -316,7 +339,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 											'Remove %s from cart',
 											'woocommerce'
 										),
-										name
+										decodedName
 									) }
 									onClick={ () => {
 										onRemove();
@@ -335,16 +358,69 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 													'%s has been removed from your cart.',
 													'woocommerce'
 												),
-												name
+												decodedName
 											)
 										);
 									} }
 									disabled={ isPendingDelete }
 								>
-									{ __( 'Remove item', 'woocommerce' ) }
+									<Icon icon={ trash } size={ 24 } />
 								</button>
 							) }
 						</div>
+						{ showSaveForLater && (
+							<div className="wc-block-cart-item__save-for-later">
+								<button
+									type="button"
+									className="wc-block-cart-item__save-for-later-link"
+									onClick={ async () => {
+										const saved = await saveForLater(
+											lineItem.key
+										);
+										if ( ! saved ) {
+											return;
+										}
+										// removeItem surfaces its own errors
+										// via processErrorResponse; we still
+										// fire the analytics event and a11y
+										// announcement to mirror the regular
+										// remove flow.
+										await removeItem();
+										// TODO: consider a dedicated
+										// 'cart-save-for-later' store event so
+										// analytics can distinguish a save
+										// from a plain remove.
+										dispatchStoreEvent(
+											'cart-remove-item',
+											{
+												product: lineItem,
+												quantity,
+											}
+										);
+										speak(
+											sprintf(
+												/* translators: %s refers to the item name. */
+												__(
+													'%s has been saved for later and removed from your cart.',
+													'woocommerce'
+												),
+												decodedName
+											)
+										);
+									} }
+									disabled={
+										isPendingDelete || isSavingForLater
+									}
+								>
+									{ isSavingForLater
+										? __( 'Saving…', 'woocommerce' )
+										: __(
+												'Save for later',
+												'woocommerce'
+										  ) }
+								</button>
+							</div>
+						) }
 					</div>
 				</td>
 				<td className="wc-block-cart-item__total">
@@ -352,19 +428,14 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 						<ProductPrice
 							currency={ totalsCurrency }
 							format={ productPriceFormat }
-							price={ subtotalPrice.getAmount() }
+							price={ toSnapshot( subtotalPrice ).amount }
 						/>
 
-						{ quantity > 1 && (
-							<ProductSaleBadge
-								currency={ priceCurrency }
-								saleAmount={ getAmountFromRawPrice(
-									saleAmount,
-									priceCurrency
-								) }
-								format={ saleBadgePriceFormat }
-							/>
-						) }
+						<ProductSaleBadge
+							currency={ priceCurrency }
+							saleAmount={ saleAmountSingle * quantity }
+							format={ saleBadgePriceFormat }
+						/>
 					</div>
 				</td>
 			</tr>

@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Avoid a call to load missing Category Title and Category Description stylesheets
-
-

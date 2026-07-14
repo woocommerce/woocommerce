@@ -12,7 +12,7 @@ import { Icon, link } from '@wordpress/icons';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { MARKETPLACE_MY_ACCOUNT_PATH } from '../constants';
 
-export default function MySubscriptionsAccount(): JSX.Element | null {
+export default function MySubscriptionsAccount(): React.JSX.Element | null {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 	const isConnected = wccomSettings?.isConnected ?? false;
 

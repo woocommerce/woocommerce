@@ -4,7 +4,7 @@
 import { Component } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import { getProductVariations } from '@woocommerce/editor-components/utils';
+import { getProductVariationsWithTotal } from '@woocommerce/editor-components/utils';
 import { ErrorObject } from '@woocommerce/editor-components/error-placeholder';
 import {
 	ProductResponseItem,
@@ -27,7 +27,8 @@ interface WithProductVariationsProps {
 interface State {
 	error: ErrorObject | null;
 	loading: boolean;
-	variations: { [ key: string ]: ProductResponseVariationsItem[] | null };
+	variations: { [ key: number ]: ProductResponseVariationsItem[] | null };
+	totalVariations: { [ key: number ]: number | null };
 }
 
 /**
@@ -47,6 +48,7 @@ const withProductVariations = createHigherOrderComponent(
 				error: null,
 				loading: false,
 				variations: {},
+				totalVariations: {},
 			};
 
 			private prevSelectedItem?: number;
@@ -71,9 +73,9 @@ const withProductVariations = createHigherOrderComponent(
 				}
 			}
 
-			loadVariations = () => {
+			loadVariations = ( { offset = 0 }: { offset?: number } = {} ) => {
 				const { products } = this.props;
-				const { loading, variations } = this.state;
+				const { loading, variations, totalVariations } = this.state;
 
 				if ( loading ) {
 					return;
@@ -81,7 +83,20 @@ const withProductVariations = createHigherOrderComponent(
 
 				const expandedProduct = this.getExpandedProduct();
 
-				if ( ! expandedProduct || variations[ expandedProduct ] ) {
+				if ( ! expandedProduct ) {
+					return;
+				}
+
+				if ( ! offset && variations?.[ expandedProduct ] ) {
+					return;
+				}
+
+				if (
+					variations?.[ expandedProduct ] &&
+					totalVariations?.[ expandedProduct ] &&
+					variations[ expandedProduct ].length >=
+						totalVariations[ expandedProduct ]
+				) {
 					return;
 				}
 
@@ -106,13 +121,19 @@ const withProductVariations = createHigherOrderComponent(
 
 				this.setState( { loading: true } );
 
+				const alreadyLoadedVariations =
+					this.state.variations[ expandedProduct ] || [];
+
 				(
-					getProductVariations( expandedProduct ) as Promise<
-						ProductResponseVariationsItem[]
-					>
+					getProductVariationsWithTotal( expandedProduct, {
+						offset,
+					} ) as Promise< {
+						variations: ProductResponseVariationsItem[];
+						total: number;
+					} >
 				 )
-					.then( ( expandedProductVariations ) => {
-						const newVariations = expandedProductVariations.map(
+					.then( ( { variations: variationsData, total } ) => {
+						const newVariations = variationsData.map(
 							( variation ) => ( {
 								...variation,
 								parent: expandedProduct,
@@ -121,7 +142,14 @@ const withProductVariations = createHigherOrderComponent(
 						this.setState( {
 							variations: {
 								...this.state.variations,
-								[ expandedProduct ]: newVariations,
+								[ expandedProduct ]: [
+									...alreadyLoadedVariations,
+									...newVariations,
+								],
+							},
+							totalVariations: {
+								...this.state.totalVariations,
+								[ expandedProduct ]: total,
 							},
 							loading: false,
 							error: null,
@@ -133,6 +161,10 @@ const withProductVariations = createHigherOrderComponent(
 						this.setState( {
 							variations: {
 								...this.state.variations,
+								[ expandedProduct ]: null,
+							},
+							totalVariations: {
+								...this.state.totalVariations,
 								[ expandedProduct ]: null,
 							},
 							loading: false,
@@ -190,7 +222,12 @@ const withProductVariations = createHigherOrderComponent(
 
 			render() {
 				const { error: propsError, isLoading } = this.props;
-				const { error, loading, variations } = this.state;
+				const { error, loading, variations, totalVariations } =
+					this.state;
+				const expandedProduct = this.getExpandedProduct();
+				const offset = expandedProduct
+					? variations[ expandedProduct ]?.length || 0
+					: 0;
 
 				return (
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -198,8 +235,14 @@ const withProductVariations = createHigherOrderComponent(
 					<OriginalComponent
 						{ ...this.props }
 						error={ error || propsError }
+						onLoadMoreVariations={ () =>
+							this.loadVariations( {
+								offset,
+							} )
+						}
 						expandedProduct={ this.getExpandedProduct() }
 						isLoading={ isLoading }
+						totalVariations={ totalVariations }
 						variations={ variations }
 						variationsLoading={ loading }
 					/>

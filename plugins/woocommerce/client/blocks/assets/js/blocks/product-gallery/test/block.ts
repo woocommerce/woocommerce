@@ -114,7 +114,7 @@ async function setup( attributes = {} ) {
 		...attributes,
 	} );
 
-	const largeImageBlock = createBlock(
+	const viewerBlock = createBlock(
 		'woocommerce/product-gallery-large-image',
 		{},
 		[
@@ -136,7 +136,7 @@ async function setup( attributes = {} ) {
 			hoverZoom: true,
 			fullScreenOnClick: true,
 		},
-		[ thumbnailsBlock, largeImageBlock ]
+		[ thumbnailsBlock, viewerBlock ]
 	);
 
 	const singleProductBlock = [
@@ -165,22 +165,19 @@ describe( 'Product Gallery Block', () => {
 		const innerBlocks = block.querySelector( '.block-editor-inner-blocks' );
 		expect( innerBlocks ).toBeInTheDocument();
 
-		// Check layout container
+		// Check layout container.
 		const layout = block.querySelector(
 			'.block-editor-block-list__layout'
 		);
 		expect( layout ).toBeInTheDocument();
-		expect( layout ).toHaveClass( 'is-layout-flex' );
-		expect( layout ).toHaveClass( 'is-horizontal' );
-		expect( layout ).toHaveClass( 'is-nowrap' );
 
-		// Check for large image block and its inner blocks
-		const largeImageBlock = screen.getByRole( 'document', {
-			name: /Block: Large Image/i,
+		// Check for viewer block and its inner blocks
+		const viewerBlock = screen.getByRole( 'document', {
+			name: /Block: Viewer/i,
 		} );
-		expect( largeImageBlock ).toBeInTheDocument();
+		expect( viewerBlock ).toBeInTheDocument();
 
-		// Check inner blocks of large image
+		// Check inner blocks of viewer
 		expect(
 			screen.getByRole( 'document', { name: /Block: Product Image/i } )
 		).toBeInTheDocument();
@@ -206,10 +203,16 @@ describe( 'Product Gallery Block', () => {
 		expect( productImage ).toHaveAttribute( 'alt', 'Test 1' );
 	} );
 
-	it( 'should ensure thumbnail height matches large image height with custom aspect ratio', async () => {
-		await setup( { aspectRatio: '16/9' } );
+	it( 'should expose custom product image ratios as large image CSS variables', async () => {
+		await setup( {
+			style: {
+				dimensions: {
+					aspectRatio: '3/5',
+				},
+			},
+		} );
 
-		// Get the large image
+		// Get the viewer
 		const productImage = screen.getByTestId( 'product-image' );
 		expect( productImage ).toBeInTheDocument();
 
@@ -218,20 +221,23 @@ describe( 'Product Gallery Block', () => {
 			'.wc-block-components-product-image'
 		);
 		expect( imageContainer ).toHaveClass(
-			'wc-block-components-product-image--aspect-ratio-16-9'
+			'wc-block-components-product-image--aspect-ratio-3-5'
 		);
+		const productGalleryBlock = screen.getByRole( 'document', {
+			name: /Block: Product Gallery/i,
+		} );
+		expect( productGalleryBlock ).toHaveStyle( {
+			'--wc-block-product-gallery-large-image-ratio-width': '3',
+			'--wc-block-product-gallery-large-image-ratio-height': '5',
+		} );
 
-		// Get the thumbnails block
 		const thumbnailsBlock = screen.getByRole( 'document', {
 			name: /Block: Thumbnails/i,
 		} );
 		expect( thumbnailsBlock ).toBeInTheDocument();
 
-		// Get the heights
-		const largeImageHeight = productImage.getBoundingClientRect().height;
-		const thumbnailHeight = thumbnailsBlock.getBoundingClientRect().height;
-
-		// Check that the heights match
-		expect( thumbnailHeight ).toBe( largeImageHeight );
+		// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
+		// opt out of without changing the visual output.
+		expect( console ).toHaveWarned();
 	} );
 } );

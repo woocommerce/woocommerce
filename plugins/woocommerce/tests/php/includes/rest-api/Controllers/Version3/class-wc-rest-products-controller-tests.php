@@ -3,13 +3,43 @@
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 
 /**
  * class WC_REST_Products_Controller_Tests.
  * Product Controller tests for V3 REST API.
  */
-class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
+class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
+	use MetaDataAssertionTrait;
+
+	/**
+	 * REST server used to dispatch product requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	protected $server;
+
+	/**
+	 * Products controller registered on the test server.
+	 *
+	 * @var WC_REST_Products_Controller
+	 */
+	protected $endpoint;
+
+	/**
+	 * Administrator user ID.
+	 *
+	 * @var int
+	 */
+	protected $user;
+
+	/**
+	 * Administrator fixture user ID.
+	 *
+	 * @var int
+	 */
+	protected static $fixture_user;
 
 	/**
 	 * Saves the `woocommerce_hide_out_of_stock_items` option value for restoration after tests that modify it.
@@ -22,6 +52,8 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
+		$this->clear_rest_server();
+		unset( $this->server, $this->endpoint );
 		$this->disable_cogs_feature();
 		update_option( 'woocommerce_hide_out_of_stock_items', $this->original_hid_out_of_stock_value );
 	}
@@ -32,11 +64,15 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	protected static $products = array();
 
 	/**
-	 * Create products for tests.
+	 * Create class fixtures for tests.
 	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
 	 * @return void
 	 */
-	public static function wpSetUpBeforeClass() {
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::enable_direct_product_attribute_lookup_updates();
+		self::$fixture_user = $factory->user->create( array( 'role' => 'administrator' ) );
+
 		self::$products[] = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -71,6 +107,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$product->add_meta_data( 'test2', 'test2', true );
 			$product->save();
 		}
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
@@ -79,9 +116,25 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public static function wpTearDownAfterClass() {
+		self::enable_direct_product_attribute_lookup_updates();
 		foreach ( self::$products as $product ) {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
+		self::disable_direct_product_attribute_lookup_updates();
+	}
+
+	/**
+	 * Get the IDs of the products owned by this test class.
+	 *
+	 * @return int[]
+	 */
+	private function get_fixture_product_ids(): array {
+		return array_map(
+			static function ( $product ) {
+				return $product->get_id();
+			},
+			self::$products
+		);
 	}
 
 	/**
@@ -90,11 +143,11 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Products_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
+		$this->server   = $this->create_rest_server_with_routes(
+			array( array( $this->endpoint, 'register_routes' ) ),
+			true
 		);
+		$this->user     = self::$fixture_user;
 		wp_set_current_user( $this->user );
 
 		$this->original_hid_out_of_stock_value = get_option( 'woocommerce_hide_out_of_stock_items' );
@@ -422,11 +475,12 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_collection_param_include_meta() {
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_param( 'include_meta', 'test1' );
+		$request->set_param( 'include', $this->get_fixture_product_ids() );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 4, $response_data );
+		$this->assertCount( count( self::$products ), $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -447,11 +501,12 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_collection_param_include_meta_empty() {
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_param( 'include_meta', '' );
+		$request->set_param( 'include', $this->get_fixture_product_ids() );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 4, $response_data );
+		$this->assertCount( count( self::$products ), $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -472,11 +527,12 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_collection_param_exclude_meta() {
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_param( 'exclude_meta', 'test1' );
+		$request->set_param( 'include', $this->get_fixture_product_ids() );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 4, $response_data );
+		$this->assertCount( count( self::$products ), $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -498,11 +554,12 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_param( 'include_meta', 'test1' );
 		$request->set_param( 'exclude_meta', 'test1' );
+		$request->set_param( 'include', $this->get_fixture_product_ids() );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 4, $response_data );
+		$this->assertCount( count( self::$products ), $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -963,10 +1020,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test that the `include_types` parameter filters products by a single type.
 	 */
 	public function test_collection_filter_with_include_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
@@ -987,10 +1041,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test that the `include_types` parameter filters products by multiple types.
 	 */
 	public function test_collection_filter_with_multiple_include_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
@@ -1026,13 +1077,27 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Create one product of each parent product type for type-filter tests.
+	 */
+	private function create_products_for_type_filtering(): void {
+		WC_Helper_Product::create_simple_product();
+
+		$variable = new WC_Product_Variable();
+		$variable->set_name( 'Variable product' );
+		$variable->save();
+
+		$grouped = new WC_Product_Grouped();
+		$grouped->set_name( 'Grouped product' );
+		$grouped->save();
+
+		WC_Helper_Product::create_external_product();
+	}
+
+	/**
 	 * Test that `exclude_types` parameter correctly excludes a single type.
 	 */
 	public function test_products_filter_with_single_exclude_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
@@ -1054,10 +1119,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test that `exclude_types` parameter correctly excludes multiple types.
 	 */
 	public function test_products_filter_with_multiple_exclude_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
@@ -1085,10 +1147,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test that empty `exclude_types` parameter returns all products.
 	 */
 	public function test_products_filter_with_empty_exclude_types() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
@@ -1128,10 +1187,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test that `exclude_types` with all types returns empty result.
 	 */
 	public function test_products_filter_exclude_types_with_all_types_returns_empty() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
@@ -1149,10 +1205,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test that `exclude_types` parameter takes precedence over `include_types`.
 	 */
 	public function test_products_filter_exclude_types_precedence_over_include() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
@@ -1176,10 +1229,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test that `exclude_types` works correctly with the `type` param.
 	 */
 	public function test_products_filter_exclude_types_with_type_param() {
-		WC_Helper_Product::create_simple_product();
-		WC_Helper_Product::create_variation_product();
-		WC_Helper_Product::create_grouped_product();
-		WC_Helper_Product::create_external_product();
+		$this->create_products_for_type_filtering();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_query_params(
@@ -1514,6 +1564,13 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$original_product_sku   = 'DUPLICATE_SKU_TEST_TRASHED';
 		// This image `src` is used in other product API tests, using here for consistency.
 		$shared_image_src = 'http://cldup.com/Dr1Bczxq4q.png';
+		// The failed request below exercises upload processing; setup only needs a valid image attachment.
+		$original_attachment_id = self::factory()->attachment->create(
+			array(
+				'file'           => WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png',
+				'post_mime_type' => 'image/png',
+			)
+		);
 
 		// 1. Create the original product with its image.
 		$request_original_product = new WP_REST_Request( 'POST', '/wc/v3/products' );
@@ -1525,7 +1582,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'regular_price' => '10',
 				'images'        => array(
 					array(
-						'src' => $shared_image_src,
+						'id' => $original_attachment_id,
 					),
 				),
 			)
@@ -1534,9 +1591,8 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response_original_product->get_status(), 'Failed to create the initial product with an image.' );
 
-		$original_product_data  = $response_original_product->get_data();
-		$original_product_id    = $original_product_data['id'];
-		$original_attachment_id = $original_product_data['images'][0]['id'];
+		$original_product_data = $response_original_product->get_data();
+		$original_product_id   = $original_product_data['id'];
 
 		// 2. Move the original product to trash.
 		wp_trash_post( $original_product_id );
@@ -2044,5 +2100,90 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
 		$this->assertEquals( $count_before - 1, $count_after, 'Batch delete should decrement term count immediately.' );
+	}
+
+	/**
+	 * Test `pos_products_only` filter returns only POS-visible products when true.
+	 */
+	public function test_pos_products_only_true_returns_only_pos_visible_products() {
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$hidden_product  = WC_Helper_Product::create_simple_product();
+
+		// Mark the hidden product as hidden from POS.
+		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'pos_products_only', true );
+
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $visible_product->get_id(), $product_ids );
+		$this->assertNotContains( $hidden_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * Test `pos_products_only` filter returns all products when false.
+	 */
+	public function test_pos_products_only_false_returns_all_products() {
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$hidden_product  = WC_Helper_Product::create_simple_product();
+
+		// Mark the hidden product as hidden from POS.
+		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'pos_products_only', false );
+
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $visible_product->get_id(), $product_ids );
+		$this->assertContains( $hidden_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * Test that omitting `pos_products_only` filter returns all products regardless of visibility in POS.
+	 */
+	public function test_pos_products_only_omitted_returns_all_products() {
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$hidden_product  = WC_Helper_Product::create_simple_product();
+
+		// Mark the hidden product as hidden from POS.
+		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		// Do not set pos_products_only parameter.
+
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $visible_product->get_id(), $product_ids );
+		$this->assertContains( $hidden_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * @testdox Updating a product with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'meta_data' => $this->get_incomplete_meta_data_input() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $product->get_id() ) );
 	}
 }

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent unnecessary querying of non-existent options on the admin.

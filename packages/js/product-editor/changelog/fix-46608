@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove table separator, move field names to table columns and fix the modal growing when there are validation errors

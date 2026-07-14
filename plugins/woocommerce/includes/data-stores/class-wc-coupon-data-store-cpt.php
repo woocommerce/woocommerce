@@ -146,7 +146,6 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'minimum_amount'              => get_post_meta( $coupon_id, 'minimum_amount', true ),
 				'maximum_amount'              => get_post_meta( $coupon_id, 'maximum_amount', true ),
 				'email_restrictions'          => array_filter( (array) get_post_meta( $coupon_id, 'customer_email', true ) ),
-				'used_by'                     => array_filter( (array) get_post_meta( $coupon_id, '_used_by' ) ),
 				'auto_apply'                  => 'yes' === get_post_meta( $coupon_id, 'auto_apply', true ),
 			)
 		);
@@ -217,7 +216,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 
 		// The `coupon_id_from_code` entry in the object cache must not exist when the coupon is not published, otherwise the coupon will remain available for use.
 		if ( 'publish' !== $coupon->get_status() ) {
-			$hashed_code = md5( $coupon->get_code() );
+			$hashed_code = md5( wc_strtolower( $coupon->get_code() ) );
 			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code, 'coupons' );
 		}
 
@@ -249,7 +248,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		if ( $args['force_delete'] ) {
 			wp_delete_post( $id );
 
-			$hashed_code = md5( $coupon->get_code() );
+			$hashed_code = md5( wc_strtolower( $coupon->get_code() ) );
 			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code, 'coupons' );
 			wp_cache_delete( 'wc_auto_apply_coupon_codes', 'coupons' );
 

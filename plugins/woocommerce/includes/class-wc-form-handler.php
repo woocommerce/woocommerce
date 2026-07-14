@@ -17,10 +17,21 @@ defined( 'ABSPATH' ) || exit;
 class WC_Form_Handler {
 
 	/**
+	 * User meta key tracking the last time the set-password link was resent. Used to rate-limit resends.
+	 */
+	const SET_PASSWORD_RESEND_META = '_wc_set_password_resend_at';
+
+	/**
+	 * Minimum seconds between back-to-back set-password resend requests.
+	 */
+	const SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS = 60;
+
+	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_reset_password_link' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'resend_set_password' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_account_details' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'checkout_action' ), 20 );
@@ -74,6 +85,59 @@ class WC_Form_Handler {
 			);
 			exit;
 		}
+	}
+
+	/**
+	 * Resend the change-password link to a logged-in customer who still has a temporary password.
+	 *
+	 * Triggered by the temporary-password notice on the My Account pages. Generates a fresh
+	 * password-reset key for the current user and dispatches the reset-password email, mirroring
+	 * the lost-password flow but for the already-authenticated user.
+	 *
+	 * @since 11.0.0
+	 */
+	public static function resend_set_password(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['wc-resend-set-password'] ) || ! is_user_logged_in() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$nonce_value = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+
+		if ( ! wp_verify_nonce( $nonce_value, 'wc-resend-set-password' ) ) {
+			return;
+		}
+
+		$user     = wp_get_current_user();
+		$redirect = wc_get_page_permalink( 'myaccount' );
+
+		// Rate-limit resends so the button can't be used to spam the customer's inbox.
+		$last_sent_at = (int) get_user_meta( $user->ID, self::SET_PASSWORD_RESEND_META, true );
+		if ( $last_sent_at > 0 && ( time() - $last_sent_at ) < self::SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS ) {
+			wc_add_notice( __( 'Please wait a moment before requesting another link to change your password.', 'woocommerce' ), 'notice' );
+			wp_safe_redirect( $redirect );
+			exit;
+		}
+
+		$key = get_password_reset_key( $user );
+
+		if ( is_wp_error( $key ) ) {
+			wc_add_notice( __( 'Sorry, we were unable to resend the link. Please try again.', 'woocommerce' ), 'error' );
+		} else {
+			// Persist the rate-limit timestamp before dispatching so two near-simultaneous requests can't both pass.
+			// This timestamp also suppresses the temporary-password notice during the cooldown — see
+			// WC_Shortcode_My_Account::my_account_add_notices() — so the confirmation below isn't contradicted.
+			update_user_meta( $user->ID, self::SET_PASSWORD_RESEND_META, (string) time() );
+			// Load email classes so the reset-password notification has a listener.
+			WC()->mailer();
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Re-fires woocommerce_reset_password_notification, documented in WC_Shortcode_My_Account::retrieve_password().
+			do_action( 'woocommerce_reset_password_notification', $user->user_login, $key );
+			wc_add_notice( __( 'We have emailed you a new link to change your password.', 'woocommerce' ) );
+		}
+
+		wp_safe_redirect( $redirect );
+		exit;
 	}
 
 	/**
@@ -157,7 +221,9 @@ class WC_Form_Handler {
 								}
 								break;
 							case 'phone':
-								if ( '' !== $value && ! WC_Validation::is_phone( $value ) ) {
+								$country = wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) );
+								$country = is_string( $country ) ? $country : '';
+								if ( '' !== $value && ! WC_Validation::is_phone( $value, $country ) ) {
 									/* translators: %s: Phone number. */
 									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 								}
@@ -654,7 +720,19 @@ class WC_Form_Handler {
 			$cart_item     = WC()->cart->get_cart_item( $cart_item_key );
 
 			if ( $cart_item ) {
-				WC()->cart->remove_cart_item( $cart_item_key );
+				$removed = WC()->cart->remove_cart_item( $cart_item_key );
+
+				if ( $removed ) {
+					/**
+					 * Fires when a cart item is removed from a user request.
+					 *
+					 * @param string   $cart_item_key Cart item key.
+					 * @param \WC_Cart $cart          Cart object.
+					 *
+					 * @since 10.6.0
+					 */
+					do_action( 'internal_woocommerce_cart_item_removed_from_user_request', $cart_item_key, WC()->cart );
+				}
 
 				$product = wc_get_product( $cart_item['product_id'] );
 
@@ -725,8 +803,21 @@ class WC_Form_Handler {
 					}
 
 					if ( $passed_validation ) {
+						$old_quantity = $values['quantity'];
 						WC()->cart->set_quantity( $cart_item_key, $quantity, false );
 						$cart_updated = true;
+
+						/**
+						 * Fires when a cart item quantity is updated from a user request.
+						 *
+						 * @param string   $cart_item_key Cart item key.
+						 * @param int|float $quantity     New quantity.
+						 * @param int|float $old_quantity Old quantity.
+						 * @param \WC_Cart $cart          Cart object.
+						 *
+						 * @since 10.6.0
+						 */
+						do_action( 'internal_woocommerce_cart_item_updated_from_user_request', $cart_item_key, $quantity, $old_quantity, WC()->cart );
 					}
 				}
 			}
@@ -838,6 +929,7 @@ class WC_Form_Handler {
 
 		if ( ProductType::VARIABLE === $add_to_cart_handler || ProductType::VARIATION === $add_to_cart_handler ) {
 			$was_added_to_cart = self::add_to_cart_handler_variable( $product_id );
+			$product_id        = ! empty( $_REQUEST['variation_id'] ) ? absint( wp_unslash( $_REQUEST['variation_id'] ) ) : $product_id; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		} elseif ( ProductType::GROUPED === $add_to_cart_handler ) {
 			$was_added_to_cart = self::add_to_cart_handler_grouped( $product_id );
 		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ) {
@@ -848,6 +940,18 @@ class WC_Form_Handler {
 
 		// If we added the product to the cart we can now optionally do a redirect.
 		if ( $was_added_to_cart && 0 === wc_notice_count( 'error' ) ) {
+			$quantity = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			/**
+			 * Fires when an item is added to the cart from a user request.
+			 *
+			 * @param int       $product_id Product ID.
+			 * @param int|float $quantity   Quantity added to the cart.
+			 *
+			 * @since 10.6.0
+			 */
+			do_action( 'internal_woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
+
 			$url = apply_filters( 'woocommerce_add_to_cart_redirect', $url, $adding_to_cart );
 
 			if ( $url ) {
@@ -868,6 +972,11 @@ class WC_Form_Handler {
 	 * @return bool success or not
 	 */
 	private static function add_to_cart_handler_simple( $product_id ) {
+		if ( ! WC()->cart ) {
+			wc_doing_it_wrong( __FUNCTION__, 'Cart is not initialized.', '10.5.0' );
+			return false;
+		}
+
 		$quantity          = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 

@@ -2,22 +2,29 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { PanelBody, ToggleControl, TextControl } from '@wordpress/components';
 import { store as coreStore, useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { createElement, forwardRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { WP_REST_API_Category } from 'wp-types';
 import {
-	// @ts-expect-error AlignmentControl is not exported from @wordpress/block-editor
 	AlignmentControl,
 	BlockControls,
 	InspectorControls,
 	useBlockProps,
 	PlainText,
-	// @ts-expect-error HeadingLevelDropdown is not exported from @wordpress/block-editor
 	HeadingLevelDropdown,
 } from '@wordpress/block-editor';
+import { usePreviewMode } from '@woocommerce/base-hooks';
+import { previewCategories } from '@woocommerce/resource-previews';
+import {
+	ToggleControl,
+	TextControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 
 interface Props {
 	attributes: {
@@ -33,6 +40,12 @@ interface Props {
 		termTaxonomy?: string;
 	};
 }
+
+const DEFAULT_ATTRIBUTES = {
+	isLink: false,
+	linkTarget: '_self',
+	rel: '',
+};
 
 // Helper component to handle dynamic tag names without TypeScript union type issues
 const ContainerElement = forwardRef<
@@ -56,7 +69,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const userCanEdit = useSelect(
 		( select ) => {
 			if ( ! termId ) return false;
-			// @ts-expect-error canUser is not typed correctly
 			// This use actually reflects the use seen in `core/post-title` block.
 			return select( coreStore ).canUser( 'update', {
 				kind: 'taxonomy',
@@ -67,12 +79,32 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		[ termId, termTaxonomy ]
 	);
 
+	const isPreviewMode = usePreviewMode();
 	const [ rawTitle = '', setTitle, fullTitle ] = useEntityProp(
 		'taxonomy',
 		termTaxonomy || 'product_cat',
 		'name',
 		termId ? String( termId ) : undefined
 	);
+
+	let displayRawTitle = '';
+	if ( isPreviewMode ) {
+		displayRawTitle = previewCategories[ 0 ].description;
+	} else if ( typeof rawTitle === 'string' ) {
+		displayRawTitle = rawTitle;
+	}
+
+	let displayFullTitle = '';
+	if ( isPreviewMode ) {
+		displayFullTitle = previewCategories[ 0 ].description;
+	} else if (
+		typeof fullTitle === 'object' &&
+		fullTitle !== null &&
+		'rendered' in fullTitle &&
+		typeof fullTitle.rendered === 'string'
+	) {
+		displayFullTitle = fullTitle.rendered;
+	}
 
 	const link = useSelect(
 		( select ) => {
@@ -103,10 +135,9 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	if ( termId ) {
 		titleElement = userCanEdit ? (
 			<PlainText
-				// @ts-expect-error PlainText component types are not up-to-date
 				tagName={ TagName }
 				placeholder={ __( 'No title', 'woocommerce' ) }
-				value={ rawTitle }
+				value={ displayRawTitle }
 				onChange={ ( v ) => setTitle( v ) }
 				__experimentalVersion={ 2 }
 				{ ...blockProps }
@@ -116,7 +147,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 				tagName={ TagName }
 				{ ...blockProps }
 				dangerouslySetInnerHTML={ {
-					__html: fullTitle?.rendered,
+					__html: displayFullTitle,
 				} }
 			/>
 		);
@@ -126,17 +157,16 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		titleElement = userCanEdit ? (
 			<ContainerElement tagName={ TagName } { ...blockProps }>
 				<PlainText
-					// @ts-expect-error PlainText component types are not up-to-date
 					tagName="a"
 					href={ link }
 					target={ linkTarget }
 					rel={ rel }
 					placeholder={
-						! rawTitle?.length
+						! displayRawTitle?.length
 							? __( 'No title', 'woocommerce' )
 							: undefined
 					}
-					value={ rawTitle }
+					value={ displayRawTitle }
 					onChange={ ( v ) => setTitle( v ) }
 					__experimentalVersion={ 2 }
 				/>
@@ -149,7 +179,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 					rel={ rel }
 					onClick={ ( event ) => event.preventDefault() }
 					dangerouslySetInnerHTML={ {
-						__html: fullTitle?.rendered,
+						__html: displayFullTitle,
 					} }
 				/>
 			</ContainerElement>
@@ -158,7 +188,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	return (
 		<>
-			{ /* @ts-expect-error BlockControls typing */ }
 			<BlockControls group="block">
 				<HeadingLevelDropdown
 					value={ level }
@@ -174,37 +203,85 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 				/>
 			</BlockControls>
 			<InspectorControls>
-				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
-					<ToggleControl
-						__nextHasNoMarginBottom
+				<ToolsPanel
+					label={ __( 'Settings', 'woocommerce' ) }
+					resetAll={ () => {
+						setAttributes( DEFAULT_ATTRIBUTES );
+					} }
+				>
+					<ToolsPanelItem
 						label={ __( 'Make title a link', 'woocommerce' ) }
-						onChange={ () => setAttributes( { isLink: ! isLink } ) }
-						checked={ isLink }
-					/>
+						hasValue={ () => isLink !== DEFAULT_ATTRIBUTES.isLink }
+						onDeselect={ () =>
+							setAttributes( {
+								isLink: DEFAULT_ATTRIBUTES.isLink,
+							} )
+						}
+						isShownByDefault
+					>
+						<ToggleControl
+							__nextHasNoMarginBottom
+							label={ __( 'Make title a link', 'woocommerce' ) }
+							onChange={ () =>
+								setAttributes( { isLink: ! isLink } )
+							}
+							checked={ isLink }
+						/>
+					</ToolsPanelItem>
 					{ isLink && (
 						<>
-							<ToggleControl
-								__nextHasNoMarginBottom
+							<ToolsPanelItem
 								label={ __( 'Open in new tab', 'woocommerce' ) }
-								onChange={ ( v ) =>
+								hasValue={ () =>
+									linkTarget !== DEFAULT_ATTRIBUTES.linkTarget
+								}
+								onDeselect={ () =>
 									setAttributes( {
-										linkTarget: v ? '_blank' : '_self',
+										linkTarget:
+											DEFAULT_ATTRIBUTES.linkTarget,
 									} )
 								}
-								checked={ linkTarget === '_blank' }
-							/>
-							<TextControl
-								__next40pxDefaultSize
-								__nextHasNoMarginBottom
+								isShownByDefault
+							>
+								<ToggleControl
+									__nextHasNoMarginBottom
+									label={ __(
+										'Open in new tab',
+										'woocommerce'
+									) }
+									onChange={ ( v ) =>
+										setAttributes( {
+											linkTarget: v ? '_blank' : '_self',
+										} )
+									}
+									checked={ linkTarget === '_blank' }
+								/>
+							</ToolsPanelItem>
+							<ToolsPanelItem
 								label={ __( 'Link rel', 'woocommerce' ) }
-								value={ rel }
-								onChange={ ( newRel ) =>
-									setAttributes( { rel: newRel } )
+								hasValue={ () =>
+									rel !== DEFAULT_ATTRIBUTES.rel
 								}
-							/>
+								onDeselect={ () =>
+									setAttributes( {
+										rel: DEFAULT_ATTRIBUTES.rel,
+									} )
+								}
+								isShownByDefault
+							>
+								<TextControl
+									__next40pxDefaultSize
+									__nextHasNoMarginBottom
+									label={ __( 'Link rel', 'woocommerce' ) }
+									value={ rel }
+									onChange={ ( newRel ) =>
+										setAttributes( { rel: newRel } )
+									}
+								/>
+							</ToolsPanelItem>
 						</>
 					) }
-				</PanelBody>
+				</ToolsPanel>
 			</InspectorControls>
 			{ titleElement }
 		</>

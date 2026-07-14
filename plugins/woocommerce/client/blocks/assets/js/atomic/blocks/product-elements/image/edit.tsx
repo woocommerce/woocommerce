@@ -9,27 +9,16 @@ import {
 	useInnerBlocksProps,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import {
-	createInterpolateElement,
-	useEffect,
-	useRef,
-} from '@wordpress/element';
-import { getAdminLink, getSettingWithCoercion } from '@woocommerce/settings';
+import { useEffect, useRef } from '@wordpress/element';
 import { useProduct } from '@woocommerce/entities';
-import { isBoolean } from '@woocommerce/types';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 import {
-	PanelBody,
 	ToggleControl,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the type definitions.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControl as ToggleGroupControl,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore - Ignoring because `__experimentalToggleGroupControl` is not yet in the type definitions.
+	__experimentalToolsPanel as ToolsPanel,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 
 /**
@@ -37,7 +26,7 @@ import {
  */
 import Block from './block';
 import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
-import { BlockAttributes, ImageSizing } from './types';
+import { BlockAttributes } from './types';
 import { ImageSizeSettings } from './image-size-settings';
 
 const TEMPLATE = [
@@ -49,13 +38,17 @@ const TEMPLATE = [
 	],
 ];
 
+const DEFAULT_ATTRIBUTES = {
+	showProductLink: true,
+};
+
 const Edit = ( {
 	attributes,
 	setAttributes,
 	context,
 	clientId,
 }: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
-	const { showProductLink, imageSizing, width, height, scale } = attributes;
+	const { showProductLink, width, height, scale } = attributes;
 
 	const ref = useRef< HTMLDivElement >( null );
 
@@ -68,8 +61,6 @@ const Edit = ( {
 					// @ts-expect-error method exists but not typed
 					select( blockEditorStore ).wasBlockJustInserted( clientId ),
 				isInProductGallery:
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-expect-error method exists but not typed
 					select( blockEditorStore ).getBlockParentsByBlockName(
 						clientId,
 						'woocommerce/product-gallery'
@@ -117,12 +108,6 @@ const Edit = ( {
 		}
 	);
 
-	const isBlockTheme = getSettingWithCoercion(
-		'isBlockTheme',
-		false,
-		isBoolean
-	);
-
 	const { product, isResolving } = useProduct( context.postId );
 
 	return (
@@ -137,63 +122,51 @@ const Edit = ( {
 						height={ height }
 						setAttributes={ setAttributes }
 					/>
-					<PanelBody title={ __( 'Content', 'woocommerce' ) }>
-						<ToggleControl
+					<ToolsPanel
+						label={ __( 'Content', 'woocommerce' ) }
+						resetAll={ () =>
+							setAttributes( {
+								showProductLink:
+									DEFAULT_ATTRIBUTES.showProductLink,
+							} )
+						}
+					>
+						<ToolsPanelItem
 							label={ __(
 								'Link to Product Page',
 								'woocommerce'
 							) }
-							help={ __(
-								'Links the image to the single product listing.',
-								'woocommerce'
-							) }
-							checked={ showProductLink }
-							onChange={ () =>
+							hasValue={ () =>
+								showProductLink !==
+								DEFAULT_ATTRIBUTES.showProductLink
+							}
+							onDeselect={ () =>
 								setAttributes( {
-									showProductLink: ! showProductLink,
+									showProductLink:
+										DEFAULT_ATTRIBUTES.showProductLink,
 								} )
 							}
-						/>
-						<ToggleGroupControl
-							label={ __( 'Resolution', 'woocommerce' ) }
-							isBlock
-							help={
-								! isBlockTheme
-									? createInterpolateElement(
-											__(
-												'Product image cropping can be modified in the <a>Customizer</a>.',
-												'woocommerce'
-											),
-											{
-												a: (
-													// eslint-disable-next-line jsx-a11y/anchor-has-content
-													<a
-														href={ `${ getAdminLink(
-															'customize.php'
-														) }?autofocus[panel]=woocommerce&autofocus[section]=woocommerce_product_images` }
-														target="_blank"
-														rel="noopener noreferrer"
-													/>
-												),
-											}
-									  )
-									: null
-							}
-							value={ imageSizing }
-							onChange={ ( value: ImageSizing ) =>
-								setAttributes( { imageSizing: value } )
-							}
+							isShownByDefault
 						>
-							<ToggleGroupControlOption
-								value={ ImageSizing.SINGLE }
-								label={ __( 'Full Size', 'woocommerce' ) }
+							<ToggleControl
+								__nextHasNoMarginBottom
+								label={ __(
+									'Link to Product Page',
+									'woocommerce'
+								) }
+								help={ __(
+									'Links the image to the single product listing.',
+									'woocommerce'
+								) }
+								checked={ showProductLink }
+								onChange={ () =>
+									setAttributes( {
+										showProductLink: ! showProductLink,
+									} )
+								}
 							/>
-							<ToggleGroupControlOption
-								value={ ImageSizing.THUMBNAIL }
-								label={ __( 'Thumbnail', 'woocommerce' ) }
-							/>
-						</ToggleGroupControl>
-					</PanelBody>
+						</ToolsPanelItem>
+					</ToolsPanel>
 				</InspectorControls>
 			) }
 			<Block

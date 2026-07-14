@@ -95,7 +95,7 @@ class WC_Brands_Admin {
 		add_action( 'current_screen', array( $this, 'add_brand_base_setting' ) );
 
 		// CSV Import/Export Support.
-		// https://github.com/woocommerce/woocommerce/wiki/Product-CSV-Importer-&-Exporter
+		// https://woocommerce.com/document/product-csv-importer-exporter/
 		// Import.
 		add_filter( 'woocommerce_csv_product_import_mapping_options', array( $this, 'add_column_to_importer_exporter' ), 10 );
 		add_filter( 'woocommerce_csv_product_import_mapping_default_columns', array( $this, 'add_default_column_mapping' ), 10 );
@@ -332,6 +332,12 @@ class WC_Brands_Admin {
 					// Uploading files
 					var file_frame;
 
+					function clearThumbnailField() {
+						jQuery('#product_cat_thumbnail img').attr('src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>');
+						jQuery('#product_cat_thumbnail_id').val('');
+						jQuery('.remove_image_button').hide();
+					}
+
 					jQuery(document).on( 'click', '.upload_image_button', function( event ){
 
 						event.preventDefault();
@@ -365,11 +371,24 @@ class WC_Brands_Admin {
 					});
 
 					jQuery(document).on( 'click', '.remove_image_button', function( event ){
-						jQuery('#product_cat_thumbnail img').attr('src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>');
-						jQuery('#product_cat_thumbnail_id').val('');
-						jQuery('.remove_image_button').hide();
+						clearThumbnailField();
 						return false;
 					});
+
+					jQuery( document ).on( 'ajaxComplete', function( event, request, options ) {
+						if ( request && 4 === request.readyState && 200 === request.status
+							&& options.data && 0 <= options.data.indexOf( 'action=add-tag' ) ) {
+
+							var res = wpAjax.parseAjaxResponse( request.responseXML, 'ajax-response' );
+							if ( ! res || res.errors ) {
+								return;
+							}
+
+							clearThumbnailField();
+
+							return;
+						}
+					} );
 				});
 
 			</script>
@@ -504,7 +523,12 @@ class WC_Brands_Admin {
 			return $columns;
 		}
 
-		$column_index  = 'taxonomy-product_brand';
+		$column_index = 'taxonomy-product_brand';
+
+		if ( ! isset( $columns[ $column_index ] ) ) {
+			return $columns;
+		}
+
 		$brands_column = $columns[ $column_index ];
 		unset( $columns[ $column_index ] );
 		return array_merge(
@@ -579,8 +603,6 @@ class WC_Brands_Admin {
 		if ( $brands_count <= apply_filters( 'woocommerce_product_brand_filter_threshold', 100 ) ) {
 			wc_product_dropdown_categories(
 				array(
-					'pad_counts'        => true,
-					'show_count'        => true,
 					'orderby'           => 'name',
 					'selected'          => $current_brand_slug,
 					'show_option_none'  => __( 'Filter by brand', 'woocommerce' ),
@@ -589,6 +611,10 @@ class WC_Brands_Admin {
 					'taxonomy'          => 'product_brand',
 					'name'              => 'product_brand',
 					'class'             => 'dropdown_product_brand',
+					// Performance note: pad_counts=0 skips the hierarchical count SQL — O(all published products), degrades linearly
+					// with catalog size. show_count=0 suppresses the raw wp_term_taxonomy.count that would otherwise render in its place.
+					'pad_counts'        => 0,
+					'show_count'        => 0,
 				)
 			);
 		} else {

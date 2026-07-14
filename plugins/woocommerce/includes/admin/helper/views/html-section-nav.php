@@ -7,12 +7,7 @@
  * @deprecated 5.7.0
  */
 
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
-
-$addons_url = admin_url( 'admin.php?page=wc-addons' );
-if ( FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
-	$addons_url = admin_url( 'admin.php?page=wc-admin&path=/extensions&tab=extensions' );
-}
+$addons_url = admin_url( 'admin.php?page=wc-admin&path=/extensions&tab=extensions' );
 
 defined( 'ABSPATH' ) || exit(); ?>
 

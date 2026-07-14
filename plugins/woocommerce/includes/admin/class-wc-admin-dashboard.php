@@ -7,13 +7,14 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+	exit;
+	// Exit if accessed directly.
 }
 
 if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
@@ -42,11 +43,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Init dashboard widgets.
 		 */
 		public function init() {
+			wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce Status', 'woocommerce' ), array( $this, 'status_widget' ), null, null, 'normal', 'high' );
+
 			// Reviews Widget.
-			if ( current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
-				wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), array( $this, 'recent_reviews' ) );
+			if ( 'yes' === get_option( 'woocommerce_enable_reviews', 'yes' ) && current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
+				wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), array( $this, 'recent_reviews' ), null, null, 'normal', 'high' );
 			}
-			wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce Status', 'woocommerce' ), array( $this, 'status_widget' ) );
 
 			// Network Order Widget.
 			if ( is_multisite() && is_main_site() ) {
@@ -71,9 +73,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				return false;
 			}
 
-			$has_permission           = current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' );
-			$task_completed_or_hidden = 'yes' === get_option( 'woocommerce_task_list_complete' ) || 'yes' === get_option( 'woocommerce_task_list_hidden' );
-			return $task_completed_or_hidden && $has_permission;
+			return current_user_can( 'view_woocommerce_reports' ) || current_user_can( 'manage_woocommerce' ) || current_user_can( 'publish_shop_orders' );
 		}
 
 		/**
@@ -136,6 +136,10 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 			$version = Constants::get_constant( 'WC_VERSION' );
 
+			if ( ! wp_script_is( 'wc-flot', 'registered' ) ) {
+				wp_register_script( 'wc-flot', WC()->plugin_url() . '/assets/js/jquery-flot/jquery.flot' . $suffix . '.js', array( 'jquery' ), $version, true );
+			}
+
 			wp_enqueue_script( 'wc-status-widget', WC()->plugin_url() . '/assets/js/admin/wc-status-widget' . $suffix . '.js', array( 'jquery', 'wc-flot' ), $version, true );
 			wp_enqueue_script( 'wc-status-widget-async', WC()->plugin_url() . '/assets/js/admin/wc-status-widget-async' . $suffix . '.js', array( 'jquery' ), $version, true );
 
@@ -143,14 +147,15 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				'wc-status-widget-async',
 				'wc_status_widget_params',
 				array(
-					'ajax_url' => admin_url( 'admin-ajax.php' ),
-					'security' => wp_create_nonce( 'wc-status-widget' ),
+					'ajax_url'      => admin_url( 'admin-ajax.php' ),
+					'security'      => wp_create_nonce( 'wc-status-widget' ),
+					'error_message' => esc_html__( 'Error loading widget', 'woocommerce' ),
 				)
 			);
 
 			// Display loading placeholder.
-			echo '<div id="wc-status-widget-loading" class="wc-status-widget-loading">';
-			echo '<p>' . esc_html__( 'Loading status data...', 'woocommerce' ) . ' <span class="spinner is-active"></span></p>';
+			echo '<div id="wc-status-widget-loading" class="wc-dashboard-widget-loading wc-status-widget-loading" aria-busy="true">';
+			echo '<p><span class="spinner is-active"></span><span class="wc-dashboard-widget-loading__text">' . esc_html__( 'Loading status data...', 'woocommerce' ) . '</span></p>';
 			echo '</div>';
 			echo '<div id="wc-status-widget-content" style="display:none;"></div>';
 		}
@@ -161,7 +166,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 */
 		public function status_widget_content() {
 			//phpcs:ignore
-			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false ) || ! Features::is_enabled( 'analytics' );
+			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false ) || ! FeaturesUtil::feature_is_enabled( 'analytics' );
 
 			$status_widget_reports = array(
 				'net_sales_link'      => 'admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue&chart=net_revenue&orderby=net_revenue&period=month&compare=previous_period',
@@ -216,7 +221,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					<?php
 						printf(
 							/* translators: %s: net sales */
-							esc_html__( '%s net sales this month', 'woocommerce' ),
+							esc_html__( 'Net sales this month %s', 'woocommerce' ),
 							'<strong>' . wc_price( $report_data->net_sales ) . '</strong>'
 						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 					?>
@@ -235,8 +240,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					<?php echo wp_kses( $sparkline, $sparkline_allowed_html ); ?>
 					<?php
 						printf(
-							/* translators: 1: top seller product title 2: top seller quantity */
-							esc_html__( '%1$s top seller this month (sold %2$d)', 'woocommerce' ),
+							/* translators: 1: top seller product title 2: top seller quantity sold */
+							esc_html( _n( 'Top seller this month %1$s (%2$d sale)', 'Top seller this month %1$s (%2$d sales)', $top_seller->qty, 'woocommerce' ) ),
 							'<strong>' . get_the_title( $top_seller->product_id ) . '</strong>',
 							$top_seller->qty
 						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
@@ -284,22 +289,26 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			<li class="processing-orders">
 			<a href="<?php echo esc_url( admin_url( 'edit.php?post_status=wc-processing&post_type=shop_order' ) ); ?>">
 				<?php
-					printf(
-						/* translators: %s: order count */
-						_n( '<strong>%s order</strong> awaiting processing', '<strong>%s orders</strong> awaiting processing', $processing_count, 'woocommerce' ),
-						$processing_count
-					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: order count */
+							_n( 'Awaiting processing <strong>%s order</strong>', 'Awaiting processing <strong>%s orders</strong>', $processing_count, 'woocommerce' ),
+							$processing_count
+						)
+					);
 				?>
 				</a>
 			</li>
 			<li class="on-hold-orders">
 				<a href="<?php echo esc_url( admin_url( 'edit.php?post_status=wc-on-hold&post_type=shop_order' ) ); ?>">
 				<?php
-					printf(
-						/* translators: %s: order count */
-						_n( '<strong>%s order</strong> on-hold', '<strong>%s orders</strong> on-hold', $on_hold_count, 'woocommerce' ),
-						$on_hold_count
-					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: order count */
+							_n( 'On-hold <strong>%s order</strong>', 'On-hold <strong>%s orders</strong>', $on_hold_count, 'woocommerce' ),
+							$on_hold_count
+						)
+					);
 				?>
 				</a>
 			</li>
@@ -389,22 +398,26 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			<li class="low-in-stock">
 				<a href="<?php echo esc_url( $lowstock_url ); ?>">
 				<?php
-					printf(
-						/* translators: %s: order count */
-						_n( '<strong>%s product</strong> low in stock', '<strong>%s products</strong> low in stock', $lowinstock_count, 'woocommerce' ),
-						$lowinstock_count
-					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: order count */
+							_n( 'Low in stock <strong>%s product</strong>', 'Low in stock <strong>%s products</strong>', $lowinstock_count, 'woocommerce' ),
+							$lowinstock_count
+						)
+					);
 				?>
 				</a>
 			</li>
 			<li class="out-of-stock">
 				<a href="<?php echo esc_url( $outofstock_url ); ?>">
 				<?php
-					printf(
-						/* translators: %s: order count */
-						_n( '<strong>%s product</strong> out of stock', '<strong>%s products</strong> out of stock', $outofstock_count, 'woocommerce' ),
-						$outofstock_count
-					); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: order count */
+							_n( 'Out of stock <strong>%s product</strong>', 'Out of stock <strong>%s products</strong>', $outofstock_count, 'woocommerce' ),
+							$outofstock_count
+						)
+					);
 				?>
 				</a>
 			</li>
@@ -412,11 +425,18 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		}
 
 		/**
-		 * Recent reviews widget.
+		 * Recent reviews widget: legacy implementation.
 		 */
-		public function recent_reviews() {
+		private function legacy_recent_reviews(): void {
 			global $wpdb;
 
+			/**
+			 * Filters the from-clause used for fetching latest product reviews.
+			 *
+			 * @since 3.1.0
+			 *
+			 * @param string $clause The from-clause.
+			 */
 			$query_from = apply_filters(
 				'woocommerce_report_recent_reviews_query_from',
 				"FROM {$wpdb->comments} comments
@@ -442,15 +462,107 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 					echo get_avatar( $comment->comment_author_email, '32' );
 
-					$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
+					/**
+					 * Filters the product name for display in the latest reviews.
+					 *
+					 * @param string    $product_title The product name.
+					 * @param \stdClass $comment      The comment.
+					 * @since 2.1.0
+					 */
+					$product_title = apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment );
+					$rating        = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
 					/* translators: %s: rating */
 					echo '<div class="star-rating"><span style="width:' . esc_attr( $rating * 20 ) . '%">' . sprintf( esc_html__( '%s out of 5', 'woocommerce' ), esc_html( $rating ) ) . '</span></div>';
 
 					/* translators: %s: review author */
-					echo '<h4 class="meta"><a href="' . esc_url( get_permalink( $comment->ID ) ) . '#comment-' . esc_attr( absint( $comment->comment_ID ) ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
+					echo '<h4 class="meta"><a href="' . esc_url( get_permalink( $comment->ID ) ) . '#comment-' . esc_attr( absint( $comment->comment_ID ) ) . '">' . esc_html( $product_title ) . '</a> ' . sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
 					echo '<blockquote>' . wp_kses_data( $comment->comment_content ) . '</blockquote></li>';
 
+				}
+				echo '</ul>';
+			} else {
+				echo '<p>' . esc_html__( 'There are no product reviews yet.', 'woocommerce' ) . '</p>';
+			}
+		}
+
+		/**
+		 * Recent reviews widget: placeholder.
+		 */
+		public function recent_reviews() {
+			$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+			$version = Constants::get_constant( 'WC_VERSION' );
+
+			wp_enqueue_script( 'wc-recent-reviews-widget-async', WC()->plugin_url() . '/assets/js/admin/wc-recent-reviews-widget-async' . $suffix . '.js', array( 'jquery' ), $version, true );
+			wp_localize_script(
+				'wc-recent-reviews-widget-async',
+				'wc_recent_reviews_widget_params',
+				array(
+					'ajax_url'      => admin_url( 'admin-ajax.php' ),
+					'security'      => wp_create_nonce( 'wc-recent-reviews-widget' ),
+					'error_message' => esc_html__( 'Error loading widget', 'woocommerce' ),
+				)
+			);
+
+			// Display loading placeholder.
+			echo '<div id="wc-recent-reviews-widget-loading" class="wc-dashboard-widget-loading wc-recent-reviews-widget-loading" aria-busy="true">';
+			echo '<p><span class="spinner is-active"></span><span class="wc-dashboard-widget-loading__text">' . esc_html__( 'Loading reviews data...', 'woocommerce' ) . '</span></p>';
+			echo '</div>';
+			echo '<div id="wc-recent-reviews-widget-content" style="display:none;"></div>';
+		}
+
+		/**
+		 * Recent reviews widget: content.
+		 */
+		public function recent_reviews_content(): void {
+			// Backward compatibility mode: if any of the checked below hooks are in use, use the legacy implementation.
+			$has_legacy_query_filter         = has_filter( 'woocommerce_report_recent_reviews_query_from' );
+			$has_legacy_product_title_filter = has_filter( 'woocommerce_admin_dashboard_recent_reviews' );
+			$use_legacy_implementation       = $has_legacy_query_filter || $has_legacy_product_title_filter;
+			if ( $use_legacy_implementation ) {
+				if ( $has_legacy_query_filter ) {
+					wc_deprecated_hook( 'woocommerce_report_recent_reviews_query_from', '10.5.0' );
+				}
+				if ( $has_legacy_product_title_filter ) {
+					wc_deprecated_hook( 'woocommerce_admin_dashboard_recent_reviews', '10.5.0', 'dashboard-widget-reviews.php template' );
+				}
+				$this->legacy_recent_reviews();
+
+				return;
+			}
+
+			// Optimized version of the widget: faster SQL queries and templates-based rendering for customization.
+			/** @var \WP_Comment[] $comments */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+			$comments = get_comments(
+				array(
+					'type'                      => 'review',
+					'status'                    => 'approve',
+					'parent'                    => 0,
+					'number'                    => 25,
+					'update_comment_post_cache' => true,
+				)
+			);
+			$comments = array_filter(
+				$comments,
+				static fn( \WP_Comment $comment ) => current_user_can( 'read_product', $comment->comment_post_ID ) && ! post_password_required( (int) $comment->comment_post_ID )
+			);
+			if ( $comments ) {
+				echo '<ul>';
+				$count_rendered = 0;
+				foreach ( $comments as $comment ) {
+					$product = wc_get_product( $comment->comment_post_ID );
+					if ( $product ) {
+						wc_get_template(
+							'dashboard-widget-reviews.php',
+							array(
+								'product' => $product,
+								'comment' => $comment,
+							)
+						);
+						if ( 5 === ++$count_rendered ) {
+							break;
+						}
+					}
 				}
 				echo '</ul>';
 			} else {

@@ -59,16 +59,15 @@ export const Edit = ( {
 		showReturnToCart,
 		showRateAfterTaxName,
 		cartPageId,
-		isPreview = false,
 		showFormStepNumbers = false,
 		hasDarkControls = false,
 	} = attributes;
 
 	const fieldSettings = useSelect( ( select ) => {
-		return select(
-			coreStore as unknown as string
-			// @ts-expect-error getEditedEntityRecord is not typed in @wordpress/core-data yet.
-		).getEditedEntityRecord( 'root', 'site' ) as Record< string, string >;
+		return select( coreStore as unknown as string ).getEditedEntityRecord(
+			'root',
+			'site'
+		) as Record< string, string >;
 	}, [] );
 
 	const fieldsWithDefaults = {
@@ -132,7 +131,6 @@ export const Edit = ( {
 				/>
 			</InspectorControls>
 			<EditorProvider
-				isPreview={ !! isPreview }
 				previewData={ {
 					previewCart,
 					previewSavedPaymentMethods,

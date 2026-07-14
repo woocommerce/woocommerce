@@ -10,7 +10,6 @@
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"attributes": {},
 	"supports": {
 		"inserter": false,
 		"interactivity": true,

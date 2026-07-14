@@ -33,7 +33,6 @@ import {
 	SponsoredProductPlacementType,
 } from './constants';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { isFeatureEnabled } from '~/utils/features';
 
 const getOnboardingProductType = (): string[] => {
 	const onboardingData = getAdminSetting( 'onboarding' );
@@ -146,7 +145,6 @@ export const Products = () => {
 		];
 
 		if (
-			!! window.wcAdminFeatures?.printful &&
 			! isRequestingPlugins &&
 			! installedPlugins.includes( 'printful-shipping-for-woocommerce' )
 		) {
@@ -200,18 +198,10 @@ export const Products = () => {
 						'woocommerce'
 					) }
 					eventName="tasklist_add_product_visit_marketplace_click"
-					targetUrl={
-						isFeatureEnabled( 'marketplace' )
-							? getAdminLink(
-									'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
-							  )
-							: 'https://woocommerce.com/product-category/woocommerce-extensions/merchandising/'
-					}
-					linkType={
-						isFeatureEnabled( 'marketplace' )
-							? 'wc-admin'
-							: 'external'
-					}
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
+					) }
+					linkType="wc-admin"
 				/>
 			</div>
 			{ isLoadingSampleProducts ? (

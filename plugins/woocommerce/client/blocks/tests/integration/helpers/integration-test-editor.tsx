@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, type RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { registerCoreBlocks } from '@wordpress/block-library';
 import '@wordpress/format-library';
@@ -14,22 +14,18 @@ import {
 	// @ts-expect-error privateApis exists but is not typed
 	privateApis as blockEditorPrivateApis,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	type BlockAttributes,
 	type BlockInstance,
 	createBlock,
-	// @ts-expect-error Type definitions for this function are missing in Gutenberg
 	createBlocksFromInnerBlocksTemplate,
 } from '@wordpress/blocks';
-
-// @ts-expect-error lock-unlock exists but is not typed
-import { unlock } from '@wordpress/block-library/build/lock-unlock'; // eslint-disable-line
 
 /**
  * Internal dependencies
  */
 import { waitForStoreResolvers } from './wait-for-store-resolvers';
+import { unlock } from '../../utils/lock-unlock';
 import { registerProductEntity } from '../../../assets/js/entities/register-entities';
 
 const { ExperimentalBlockCanvas: BlockCanvas } = unlock(
@@ -78,7 +74,7 @@ let areCoreBlocksRegistered = false;
 export async function initializeEditor(
 	testBlocks: BlockAttributes | BlockAttributes[],
 	settings: Partial< EditorSettings & EditorBlockListSettings > = {}
-) {
+): Promise< RenderResult > {
 	if ( ! areCoreBlocksRegistered ) {
 		registerCoreBlocks();
 		areCoreBlocksRegistered = true;

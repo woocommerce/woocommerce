@@ -3,9 +3,13 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * class WC_REST_Orders_Controller_Tests.
@@ -14,6 +18,34 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use HPOSToggleTrait;
 	use CogsAwareUnitTestSuiteTrait;
+	use MetaDataAssertionTrait;
+
+	/**
+	 * HPOS state captured at setUp so tearDown can restore it.
+	 *
+	 * @var bool
+	 */
+	private $cot_state;
+
+	/**
+	 * Administrator ID used to authenticate requests.
+	 *
+	 * @var int
+	 */
+	protected static $administrator_id;
+
+	/**
+	 * Create immutable class fixtures.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$administrator_id = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -21,12 +53,23 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Orders_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user     = self::$administrator_id;
 		wp_set_current_user( $this->user );
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+	}
+
+	/**
+	 * Tear down test environment.
+	 */
+	public function tearDown(): void {
+		unregister_post_type( 'shop_test' );
+
+		$this->toggle_cot_feature_and_usage( $this->cot_state );
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+
+		parent::tearDown();
 	}
 
 	/**
@@ -318,6 +361,128 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * PUT against an ID belonging to a non 'shop_order' post type must be rejected, never
+	 * silently converted.
+	 */
+	public function test_update_rejects_non_shop_order_post_type(): void {
+		wc_register_order_type( 'shop_test' );
+		$post_id = wp_insert_post(
+			array(
+				'post_type'   => 'shop_test',
+				'post_status' => 'wc-pending',
+				'post_title'  => 'test',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $post_id );
+		$request->set_body_params( array( 'customer_note' => 'should not apply' ) );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertSame( 'woocommerce_rest_shop_order_invalid_id', $data['code'] );
+
+		// The persisted record must be untouched: same post type, no added customer_note.
+		$this->assertSame( 'shop_test', get_post_type( $post_id ) );
+		$this->assertSame( '', (string) get_post_meta( $post_id, '_customer_note', true ) );
+	}
+
+	/**
+	 * PUT against an ID belonging to a 'shop_order_refund' WC order type must be rejected.
+	 */
+	public function test_update_rejects_shop_order_refund_under_hpos(): void {
+		$this->toggle_cot_feature_and_usage( true );
+
+		// A refund (type 'shop_order_refund') is used because it's a real in-core order type that shares the same table as orders.
+		$order  = wc_create_order();
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 0,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		$this->assertSame( 'shop_order_refund', OrderUtil::get_order_type( $refund->get_id() ) );
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $refund->get_id() );
+		$request->set_body_params( array( 'customer_note' => 'should not apply' ) );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertSame( 'woocommerce_rest_shop_order_invalid_id', $data['code'] );
+
+		// The persisted record must be untouched: type still 'shop_order_refund'.
+		$this->assertSame( 'shop_order_refund', OrderUtil::get_order_type( $refund->get_id() ) );
+	}
+
+	/**
+	 * PUT against an HPOS row whose type isn't shop_order must be rejected.
+	 */
+	public function test_update_rejects_non_shop_order_type_under_hpos(): void {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( true );
+		wc_register_order_type( 'shop_test' );
+
+		$order = wc_create_order();
+		$this->assertSame(
+			1,
+			$wpdb->update(
+				OrdersTableDataStore::get_orders_table_name(),
+				array( 'type' => 'shop_test' ),
+				array( 'id' => $order->get_id() )
+			)
+		);
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params( array( 'customer_note' => 'should not apply' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_shop_order_invalid_id', $response->get_data()['code'] );
+		$this->assertSame( 'shop_test', OrderUtil::get_order_type( $order->get_id() ) );
+	}
+
+	/**
+	 * PUT against a non-existent ID returns the standard invalid-id error.
+	 */
+	public function test_update_rejects_nonexistent_id(): void {
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/999999999' );
+		$request->set_body_params( array( 'customer_note' => 'irrelevant' ) );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertSame( 'woocommerce_rest_shop_order_invalid_id', $data['code'] );
+	}
+
+	/**
+	 * The type-mismatch override must still delegate normal shop_order updates to the
+	 * parent controller and apply the request body.
+	 */
+	public function test_update_shop_order_passes_type_guard_and_applies_changes(): void {
+		$order = new \WC_Order();
+		$order->set_customer_note( 'before' );
+		$order->save();
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params( array( 'customer_note' => 'after' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'after', wc_get_order( $order->get_id() )->get_customer_note() );
+	}
+
+	/**
 	 * Tests that the created_via parameter cannot be updated.
 	 */
 	public function test_created_via_cannot_be_updated() {
@@ -569,11 +734,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_created_via_param_is_filters_order_when_cot_is_enabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
-		$order_admin = WC_Helper_Order::create_order();
+		$order_admin = wc_create_order();
 		$order_admin->set_created_via( 'admin' );
 		$order_admin->save();
 
@@ -595,7 +760,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_get_orders_by_invalid_created_via_when_cot_is_enabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
@@ -615,11 +780,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_created_via_param_is_filters_order_when_cot_is_disabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
-		$order_admin = WC_Helper_Order::create_order();
+		$order_admin = wc_create_order();
 		$order_admin->set_created_via( 'admin' );
 		$order_admin->save();
 
@@ -641,7 +806,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_get_orders_by_invalid_created_via_when_cot_is_disabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
@@ -857,5 +1022,115 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$item->set_quantity( $quantity );
 		$item->save();
 		$order->add_item( $item );
+	}
+
+	/**
+	 * @testdox Updating an order with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		$order = wc_create_order();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'meta_data' => $this->get_incomplete_meta_data_input() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assert_incomplete_meta_data_handled_correctly( wc_get_order( $order->get_id() ) );
+	}
+
+	/**
+	 * @testdox Updating an order accepts round-tripped line item meta_data display values with complex values.
+	 */
+	public function test_update_line_item_meta_data_ignores_display_values_with_complex_values(): void {
+		$product            = WC_Helper_Product::create_simple_product();
+		$complex_meta_value = array(
+			array(
+				'guid'      => 'https://example.com/wp-content/uploads/2022/03/upload.jpg',
+				'file_type' => 'image/jpeg',
+				'file_name' => 'upload.jpg',
+				'title'     => 'upload',
+				'key'       => 'file-key',
+			),
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+						'meta_data'  => array(
+							array(
+								'key'   => '_file_upload_data',
+								'value' => $complex_meta_value,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+
+		$response_data  = $response->get_data();
+		$line_item_data = $response_data['line_items'][0];
+		$meta_data      = $line_item_data['meta_data'][0];
+		$this->assertIsArray( $meta_data['display_value'] );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $response_data['id'] );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'     => OrderStatus::PROCESSING,
+					'line_items' => array(
+						array(
+							'id'        => $line_item_data['id'],
+							'meta_data' => array( $meta_data ),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$order      = wc_get_order( $response_data['id'] );
+		$line_items = $order->get_items( 'line_item' );
+		$line_item  = $line_items[ $line_item_data['id'] ];
+		$this->assertEquals( $complex_meta_value, $line_item->get_meta( '_file_upload_data' ) );
+	}
+
+	/**
+	 * @testdox Published order schema advertises a standard type union for meta_data value/display_value, not the non-standard 'mixed'.
+	 */
+	public function test_meta_data_schema_advertises_type_union(): void {
+		$expected_union = array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' );
+
+		$schema     = $this->endpoint->get_item_schema();
+		$properties = $schema['properties'];
+
+		// Every order meta_data value field, at every level, should advertise the union instead of 'mixed'.
+		$meta_containers = array(
+			$properties['meta_data']['items']['properties'],
+			$properties['line_items']['items']['properties']['meta_data']['items']['properties'],
+			$properties['shipping_lines']['items']['properties']['meta_data']['items']['properties'],
+			$properties['fee_lines']['items']['properties']['meta_data']['items']['properties'],
+			$properties['coupon_lines']['items']['properties']['meta_data']['items']['properties'],
+		);
+		foreach ( $meta_containers as $meta_properties ) {
+			$this->assertEquals( $expected_union, $meta_properties['value']['type'] );
+		}
+
+		// The line item block also exposes read-only display fields with the same union type.
+		$line_item_meta = $properties['line_items']['items']['properties']['meta_data']['items']['properties'];
+		$this->assertEquals( $expected_union, $line_item_meta['display_value']['type'] );
+		$this->assertTrue( $line_item_meta['display_value']['readonly'] );
+		$this->assertTrue( $line_item_meta['display_key']['readonly'] );
 	}
 }

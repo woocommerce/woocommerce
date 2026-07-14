@@ -334,7 +334,10 @@ class GeneralSettingsSchema extends AbstractSchema {
 				}
 				return filter_var( $value, FILTER_VALIDATE_BOOLEAN );
 			case 'multiselect':
-				return is_array( $value ) ? $value : array();
+				if ( ! is_array( $value ) ) {
+					return array();
+				}
+				return array_map( 'sanitize_text_field', $value );
 			case 'text':
 			case 'select':
 			default:
