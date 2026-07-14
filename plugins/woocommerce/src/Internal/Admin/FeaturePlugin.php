@@ -201,8 +201,9 @@ class FeaturePlugin {
 	 * @return bool
 	 */
 	private function is_analytics_enabled_during_bootstrap(): bool {
-		return 'yes' === get_option( Analytics::TOGGLE_OPTION_NAME, 'yes' )
-			&& ! Features::is_analytics_disabled_by_legacy_filters();
+		// Keep this fallback aligned with `enabled_by_default` for Analytics in FeaturesController.
+		return ! Features::is_analytics_disabled_by_legacy_filters()
+			&& 'yes' === get_option( Analytics::TOGGLE_OPTION_NAME, 'yes' );
 	}
 
 	/**

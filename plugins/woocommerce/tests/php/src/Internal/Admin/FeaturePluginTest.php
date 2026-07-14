@@ -54,6 +54,28 @@ class FeaturePluginTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The bootstrap analytics gate evaluates legacy filters when the option is disabled.
+	 */
+	public function test_analytics_gate_evaluates_legacy_filters_when_option_disabled(): void {
+		update_option( Analytics::TOGGLE_OPTION_NAME, 'no' );
+		$filter_call_count = 0;
+		$filter            = static function ( $disabled ) use ( &$filter_call_count ) {
+			++$filter_call_count;
+
+			return $disabled;
+		};
+		add_filter( 'woocommerce_admin_disabled', $filter, PHP_INT_MAX );
+
+		try {
+			$this->assertFalse( $this->is_analytics_enabled_during_bootstrap(), 'The disabled Analytics option should keep the bootstrap gate disabled.' );
+		} finally {
+			remove_filter( 'woocommerce_admin_disabled', $filter, PHP_INT_MAX );
+		}
+
+		$this->assertSame( 1, $filter_call_count, 'The bootstrap gate should preserve the canonical legacy-filter evaluation order.' );
+	}
+
+	/**
 	 * @testdox The bootstrap analytics gate respects the legacy WooCommerce Admin disabled filter.
 	 */
 	public function test_analytics_gate_respects_admin_disabled_filter(): void {
