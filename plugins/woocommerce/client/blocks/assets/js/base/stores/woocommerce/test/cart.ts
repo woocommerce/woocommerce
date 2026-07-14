@@ -7,7 +7,7 @@ import type { Notice } from '@woocommerce/stores/store-notices';
 /**
  * Internal dependencies
  */
-import type { Store, OptimisticCartItem } from '../cart';
+import type { Store, OptimisticCartItem, DraftItem } from '../cart';
 
 type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
 
@@ -1386,6 +1386,190 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			expect( mockState.cart.items ).toHaveLength( 1 );
 			expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
+		} );
+	} );
+
+	describe( 'draftItems / upsertDraftItem / removeDraftItem', () => {
+		/**
+		 * Builds a minimal draft payload.
+		 *
+		 * @param overrides Partial draft fields to override the defaults.
+		 * @return A draft carrying only `id` and `quantity` unless overridden.
+		 */
+		function makeDraft( overrides: Partial< DraftItem > = {} ): DraftItem {
+			return { id: 42, quantity: 1, ...overrides } as DraftItem;
+		}
+
+		it( 'starts as an empty object', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+
+			expect( mockState.draftItems ).toEqual( {} );
+		} );
+
+		it( 'appends a new draft under the given scope, creating the bucket on first write', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			actions.upsertDraftItem( makeDraft(), { scope: 'page/1' } );
+
+			expect( mockState.draftItems[ 'page/1' ] ).toEqual( [
+				makeDraft(),
+			] );
+		} );
+
+		it( 'merges a second upsertDraftItem for the same product id in the same scope instead of duplicating it', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			actions.upsertDraftItem( makeDraft( { quantity: 2 } ), {
+				scope: 'page/1',
+			} );
+			actions.upsertDraftItem( makeDraft( { quantity: 5 } ), {
+				scope: 'page/1',
+			} );
+
+			expect( mockState.draftItems[ 'page/1' ] ).toEqual( [
+				makeDraft( { quantity: 5 } ),
+			] );
+		} );
+
+		it( 'keeps drafts for the same product id independent across different scopes', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			actions.upsertDraftItem( makeDraft( { quantity: 1 } ), {
+				scope: 'page/1',
+			} );
+			actions.upsertDraftItem( makeDraft( { quantity: 9 } ), {
+				scope: 'collection/q1/1',
+			} );
+
+			expect( mockState.draftItems[ 'page/1' ] ).toEqual( [
+				makeDraft( { quantity: 1 } ),
+			] );
+			expect( mockState.draftItems[ 'collection/q1/1' ] ).toEqual( [
+				makeDraft( { quantity: 9 } ),
+			] );
+		} );
+
+		it( 'stores namespaced extension props at the draft payload root', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			actions.upsertDraftItem(
+				makeDraft( { 'my-plugin/gift-note': 'Happy birthday!' } ),
+				{ scope: 'page/1' }
+			);
+
+			expect( mockState.draftItems[ 'page/1' ][ 0 ] ).toEqual(
+				expect.objectContaining( {
+					id: 42,
+					quantity: 1,
+					'my-plugin/gift-note': 'Happy birthday!',
+				} )
+			);
+		} );
+
+		it( 'removes the matching draft and prunes the scope bucket once it becomes empty', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			actions.upsertDraftItem( makeDraft(), { scope: 'page/1' } );
+
+			actions.removeDraftItem( { id: 42, scope: 'page/1' } );
+
+			expect( mockState.draftItems[ 'page/1' ] ).toBeUndefined();
+		} );
+
+		it( 'leaves the scope bucket in place when other drafts remain after a removal', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			actions.upsertDraftItem( makeDraft( { id: 42 } ), {
+				scope: 'page/1',
+			} );
+			actions.upsertDraftItem( makeDraft( { id: 43 } ), {
+				scope: 'page/1',
+			} );
+
+			actions.removeDraftItem( { id: 42, scope: 'page/1' } );
+
+			expect( mockState.draftItems[ 'page/1' ] ).toEqual( [
+				makeDraft( { id: 43 } ),
+			] );
+		} );
+
+		it( 'no-ops removeDraftItem when the scope has no bucket', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			actions.removeDraftItem( { id: 42, scope: 'page/1' } );
+
+			expect( mockState.draftItems[ 'page/1' ] ).toBeUndefined();
+		} );
+
+		it( 'rejects an upsert that would change an existing draft id, applying no state change', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			actions.upsertDraftItem( makeDraft(), { scope: 'page/1' } );
+
+			// `id: 42` names the draft to target; the payload's own `id: 99`
+			// disagrees with it, which is an in-place rename attempt.
+			actions.upsertDraftItem(
+				{ id: 99, quantity: 5 },
+				{ scope: 'page/1', id: 42 }
+			);
+
+			expect( mockState.draftItems[ 'page/1' ] ).toEqual( [
+				makeDraft(),
+			] );
+			expect( console ).toHaveWarned();
+		} );
+
+		it( 'rejects a malformed scope value, applying no state change', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			actions.upsertDraftItem( makeDraft(), { scope: '' } );
+
+			expect( mockState.draftItems ).toEqual( {} );
+			expect( console ).toHaveWarned();
+		} );
+
+		it( 'rejects creating a new draft without a numeric quantity, applying no state change', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			actions.upsertDraftItem( { id: 42 }, { scope: 'page/1' } );
+
+			expect( mockState.draftItems[ 'page/1' ] ).toBeUndefined();
+			expect( console ).toHaveWarned();
+		} );
+
+		it( 'rejects an upsert missing both a payload id and an explicit target id', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			actions.upsertDraftItem( { quantity: 1 }, { scope: 'page/1' } );
+
+			expect( mockState.draftItems ).toEqual( {} );
+			expect( console ).toHaveWarned();
+		} );
+
+		it( 'keeps drafts independent from the cart mirror in both directions', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			actions.upsertDraftItem( makeDraft( { quantity: 7 } ), {
+				scope: 'page/1',
+			} );
+
+			// Mutating the draft never mutates the cart mirror...
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
+
+			// ...and mutating the cart mirror never mutates the draft.
+			mockState.cart.items[ 0 ].quantity = 10;
+			expect( mockState.draftItems[ 'page/1' ][ 0 ].quantity ).toBe( 7 );
 		} );
 	} );
 } );
