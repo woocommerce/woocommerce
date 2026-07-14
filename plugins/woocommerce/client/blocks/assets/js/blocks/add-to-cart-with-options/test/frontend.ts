@@ -149,9 +149,7 @@ function loadStore(): MockStore {
 	mockRegisteredStore = null;
 	jest.isolateModules( () => require( '../frontend' ) );
 	if ( ! mockRegisteredStore ) {
-		throw new Error(
-			'Add to Cart + Options store was not registered.'
-		);
+		throw new Error( 'Add to Cart + Options store was not registered.' );
 	}
 	return mockRegisteredStore;
 }
@@ -195,7 +193,7 @@ describe( 'Add to Cart + Options frontend store', () => {
 				id: 42,
 			} as ProductResponseItem;
 			mockProductsState.findProduct = jest.fn(
-				() => ( { id: 42, type: 'simple' } ) as ProductResponseItem
+				() => ( { id: 42, type: 'simple' } as ProductResponseItem )
 			);
 
 			const { actions } = loadStore();
@@ -246,10 +244,13 @@ describe( 'Add to Cart + Options frontend store', () => {
 			mockProductsState.baseProductInContext = {
 				id: 20,
 			} as ProductResponseItem;
-			mockProductsState.findProduct = jest.fn( () => ( {
-				id: 10,
-				type: 'grouped',
-			} ) as ProductResponseItem );
+			mockProductsState.findProduct = jest.fn(
+				() =>
+					( {
+						id: 10,
+						type: 'grouped',
+					} as ProductResponseItem )
+			);
 
 			const { actions } = loadStore();
 			actions.validateGroupedProductQuantity = jest.fn();
