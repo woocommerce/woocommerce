@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E: de-flake the grouped-products cart reconciliation spec by waiting for the cart mutation queue to drain before reloading.
