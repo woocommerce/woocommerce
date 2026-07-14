@@ -6,7 +6,6 @@
  */
 
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
  * Class WC_Tests_Order.
