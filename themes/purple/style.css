@@ -349,10 +349,6 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
    WooCommerce — Single product
    ========================================================================== */
 
-.wp-block-woocommerce-product-gallery-is-layout-flex {
-	gap: var(--wp--preset--spacing--50);
-}
-
 .wp-block-product-specifications-item__value p {
 	margin: 0
 }
@@ -380,6 +376,7 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	border: 0;
 	box-shadow: none;
 	flex: 1 1 auto;
+	font-weight: 400;
 	margin: 0;
 	min-width: 40px;
 	order: 2;
@@ -405,31 +402,23 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	order: 3;
 }
 
-:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills) {
-	gap: var(--wp--preset--spacing--10);
-}
-
-:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill) {
-	border-color: var(--wp--preset--color--theme-4);
-	border-radius: 0;
-	font-size: var(--wp--preset--font-size--small);
-	font-weight: 400;
-	letter-spacing: 0.06em;
-	line-height: 1.142;
-	padding: var(--wp--preset--spacing--10) var(--wp--preset--spacing--20);
-	text-transform: uppercase;
-}
-
-.woocommerce-page label.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill {
-	margin-bottom: 0;
-}
-
 .woocommerce-page label.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-name {
 	margin-bottom: 0;
 }
 
-:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked)) {
-	background-color: var(--wp--preset--color--theme-2);
+:where(.wc-block-product-filter-chips__items) {
+	gap: var(--wp--preset--spacing--10);
+}
+
+/* Product filter chips expose no typography UI and WooCommerce hardcodes .8em. */
+.wc-block-product-filter-chips__item {
+	border-radius: 0;
+	color: var(--wp--preset--color--theme-2);
+	font-size: var(--wp--preset--font-size--small);
+	letter-spacing: 0.06em;
+	line-height: 1.28;
+	padding: 0.625rem 1.25rem;
+	text-transform: uppercase;
 }
 
 .wp-block-accordion-heading__toggle:hover .wp-block-accordion-heading__toggle-title {
