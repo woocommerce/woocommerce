@@ -1,7 +1,10 @@
 <?php
 /**
- * Plugin name: Filter Setter
+ * Plugin Name: Filter Setter
  * Description: Utility intended to be used during E2E testing, to make it easy to setup WordPress filters.
+ * Version: 1.0.0
+ * Requires PHP: 8.1
+ * Author: WooCommerce
  *
  * Intended to function as a (mu-)plugin while tests are running, this code works by inspecting the current cookie
  * for an entry called 'e2e-filters', which is expected to be a JSON description of filter hooks and the values we want
@@ -42,6 +45,8 @@
  *
  * @package Automattic\WooCommerce\E2EPlaywright
  */
+
+declare(strict_types=1);
 
 if ( ! isset( $_COOKIE ) || ! isset( $_COOKIE['e2e-filters'] ) ) {
 	return;
@@ -84,4 +89,3 @@ foreach ( $filters as $hook => $spec ) {
 		add_filter( $hook, $callback, $priority );
 	}
 }
-

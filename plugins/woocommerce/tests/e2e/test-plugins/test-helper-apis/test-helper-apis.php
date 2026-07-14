@@ -1,8 +1,18 @@
 <?php
-
 /**
  * Plugin Name: Test Helper APIs
- * Description: Utility REST API designed for E2E testing purposes. Allows turning features on or off, and setting option values
+ * Description: Utility REST API designed for E2E testing purposes. Allows turning features on or off, and setting option values.
+ * Version: 1.0.0
+ * Requires PHP: 8.1
+ * Author: WooCommerce
+ *
+ * @package Automattic\WooCommerce\E2EPlaywright
+ */
+
+declare(strict_types=1);
+
+/**
+ * Register the E2E test helper REST routes (feature flags and options).
  */
 function register_helper_api() {
 	register_rest_route(
@@ -122,7 +132,8 @@ add_filter( 'comment_flood_filter', '__return_false', 99 );
 
 /**
  * Update a WordPress option.
- * @param WP_REST_Request $request
+ *
+ * @param WP_REST_Request $request The REST request, carrying `option_name` and `option_value`.
  * @return WP_REST_Response
  */
 function api_update_option( WP_REST_Request $request ) {
@@ -145,11 +156,11 @@ function api_update_option( WP_REST_Request $request ) {
 /**
  * Delete a WordPress option.
  *
- * @param WP_REST_Request $request
+ * @param WP_REST_Request $request The REST request, carrying `option_name`.
  * @return WP_REST_Response
  */
 function api_delete_option( WP_REST_Request $request ) {
-	$option_name  = sanitize_text_field( $request['option_name'] );
+	$option_name = sanitize_text_field( $request['option_name'] );
 
 	$option_exists = get_option( $option_name, null );
 
