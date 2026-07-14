@@ -32,8 +32,8 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 			$this->get_full_block_name(),
 			array(
 				'cartItem' => function () {
-					$context = wp_interactivity_get_context( 'woocommerce' );
-					$cart_state = wp_interactivity_state( 'woocommerce' );
+					$context = wp_interactivity_get_context( 'woocommerce/cart' );
+					$cart_state = wp_interactivity_state( 'woocommerce/cart' );
 					$item_key = $context['cartItem']['key'];
 
 					foreach ( $cart_state['cart']['items'] as $item ) {
@@ -107,7 +107,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 				</thead>
 				<tbody>
 					<template
-						data-wp-each--cart-item="woocommerce::state.cart.items"
+						data-wp-each--cart-item="woocommerce/cart::state.cart.items"
 						data-wp-each-key="state.cartItem.key"
 					>
 						<tr

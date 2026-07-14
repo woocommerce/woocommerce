@@ -13,7 +13,7 @@ type BlockActions = {
 };
 
 // `frontend.ts` registers its block store under `woocommerce/wishlist` and opens
-// the shared `woocommerce` cart store plus the `woocommerce/shopper-lists`
+// the shared `woocommerce/cart` cart store plus the `woocommerce/shopper-lists`
 // store, all routed through the mocked `store()`.
 
 // Single shared context the mocked `getContext` returns for the row under test.
@@ -52,7 +52,7 @@ jest.mock(
 					actions: definition?.actions,
 				};
 			}
-			if ( name === 'woocommerce' ) {
+			if ( name === 'woocommerce/cart' ) {
 				return {
 					state: {
 						get cart() {
