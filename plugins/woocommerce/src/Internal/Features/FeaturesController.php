@@ -676,11 +676,11 @@ class FeaturesController {
 			'product_query_separate_count'       => array(
 				'name'                         => __( 'Optimized product count query', 'woocommerce' ),
 				'description'                  => __(
-					'[Performance] Computes product archive pagination totals with a separate COUNT query instead of SQL_CALC_FOUND_ROWS. Only active on MySQL 8.0+; other database engines are unaffected.',
+					'[Performance] Replace SQL_CALC_FOUND_ROWS with a better-performing COUNT query on product archive pages (MySQL 8.0+ only)',
 					'woocommerce'
 				),
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-				'enabled_by_default'           => true,
+				'enabled_by_default'           => false,
 				'is_experimental'              => false,
 				'disable_ui'                   => false,
 			),
