@@ -167,6 +167,7 @@ class LaunchYourStore {
 				// phpcs:ignore
 				'meta_value' => 'test',
 				'return'     => 'ids',
+				'limit'      => 1,
 			)
 		);
 
