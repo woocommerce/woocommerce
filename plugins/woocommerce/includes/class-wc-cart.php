@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\Shipping\ShippingMethodOriginTracker;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
@@ -2105,7 +2106,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 			foreach ( $packages as $i => $package ) {
 				$chosen_shipping_methods[ $i ] = 'free_shipping';
-				wc_set_chosen_shipping_method_origin( $i, 'manual', 'free_shipping' );
+				wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( $i, 'manual', 'free_shipping' );
 			}
 
 			WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );

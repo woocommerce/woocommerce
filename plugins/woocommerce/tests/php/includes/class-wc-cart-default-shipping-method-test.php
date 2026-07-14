@@ -7,6 +7,8 @@
 
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Internal\Shipping\ShippingMethodOriginTracker;
+
 /**
  * Tests for wc_get_default_shipping_method_for_package().
  */
@@ -20,10 +22,19 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	private $zone;
 
 	/**
+	 * Tracker for chosen shipping method origins.
+	 *
+	 * @var ShippingMethodOriginTracker
+	 */
+	private $origin_tracker;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$this->origin_tracker = wc_get_container()->get( ShippingMethodOriginTracker::class );
 
 		// Create a shipping zone with a flat rate so CartCheckoutUtils::shipping_methods_exist() returns true.
 		$this->zone = new WC_Shipping_Zone();
@@ -47,7 +58,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
 		WC()->cart->cart_context = 'shortcode';
 		WC()->session->set( 'chosen_shipping_methods', null );
-		WC()->session->set( 'chosen_shipping_method_origins', null );
+		WC()->session->set( ShippingMethodOriginTracker::SESSION_KEY, null );
 		parent::tearDown();
 	}
 
@@ -165,7 +176,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		$chosen         = WC()->session->get( 'chosen_shipping_methods', array() );
 		$chosen[ $key ] = $rate_id;
 		WC()->session->set( 'chosen_shipping_methods', $chosen );
-		wc_set_chosen_shipping_method_origin( $key, 'auto', $rate_id );
+		$this->origin_tracker->set_origin( $key, 'auto', $rate_id );
 	}
 
 	/**
@@ -194,7 +205,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		$chosen    = WC()->session->get( 'chosen_shipping_methods', array() );
 		$chosen[0] = 'local_pickup:1';
 		WC()->session->set( 'chosen_shipping_methods', $chosen );
-		wc_set_chosen_shipping_method_origin( 0, 'manual', 'local_pickup:1' );
+		$this->origin_tracker->set_origin( 0, 'manual', 'local_pickup:1' );
 
 		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:1' );
@@ -215,7 +226,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		$chosen    = WC()->session->get( 'chosen_shipping_methods', array() );
 		$chosen[0] = 'local_pickup:1';
 		WC()->session->set( 'chosen_shipping_methods', $chosen );
-		WC()->session->set( 'chosen_shipping_method_origins', null );
+		WC()->session->set( ShippingMethodOriginTracker::SESSION_KEY, null );
 
 		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:1' );
@@ -251,11 +262,11 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 
 		wc_get_chosen_shipping_method_for_package( 0, $package );
 
-		$this->assertSame( 'auto', wc_get_chosen_shipping_method_origin( 0 ) );
+		$this->assertSame( 'auto', $this->origin_tracker->get_origin( 0 ) );
 	}
 
 	/**
-	 * `wc_set_chosen_shipping_method_origin()` is the helper manual-write paths
+	 * ShippingMethodOriginTracker::set_origin() is the helper manual-write paths
 	 * call (Store API select-shipping-rate, AJAX update_shipping_method, etc.).
 	 * Origin must round-trip correctly through the session.
 	 *
@@ -263,16 +274,16 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_manual_write_overrides_auto_origin(): void {
 		$this->record_auto_choice( 0, 'local_pickup:1' );
-		$this->assertSame( 'auto', wc_get_chosen_shipping_method_origin( 0 ) );
+		$this->assertSame( 'auto', $this->origin_tracker->get_origin( 0 ) );
 
-		wc_set_chosen_shipping_method_origin( 0, 'manual', 'local_pickup:1' );
-		$this->assertSame( 'manual', wc_get_chosen_shipping_method_origin( 0 ) );
+		$this->origin_tracker->set_origin( 0, 'manual', 'local_pickup:1' );
+		$this->assertSame( 'manual', $this->origin_tracker->get_origin( 0 ) );
 	}
 
 	/**
 	 * Third-party plugins occasionally write directly to `chosen_shipping_methods`
 	 * in the WC session without going through Store API, the AJAX endpoints, or
-	 * `wc_set_chosen_shipping_method_origin()`. The recorded origin must invalidate
+	 * ShippingMethodOriginTracker::set_origin(). The recorded origin must invalidate
 	 * itself in that case, so a stale 'auto' marker can't override a third party's
 	 * deliberate choice on a subsequent re-evaluation.
 	 *
@@ -281,7 +292,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	public function test_external_chosen_shipping_methods_write_invalidates_auto_origin(): void {
 		// Simulate the auto-defaulter having recorded pickup_location:1 as 'auto'.
 		$this->record_auto_choice( 0, 'local_pickup:1' );
-		$this->assertSame( 'auto', wc_get_chosen_shipping_method_origin( 0 ) );
+		$this->assertSame( 'auto', $this->origin_tracker->get_origin( 0 ) );
 
 		// Simulate a third-party plugin overwriting the chosen rate directly.
 		$chosen    = WC()->session->get( 'chosen_shipping_methods', array() );
@@ -290,7 +301,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			'manual',
-			wc_get_chosen_shipping_method_origin( 0 ),
+			$this->origin_tracker->get_origin( 0 ),
 			'External write to chosen_shipping_methods should invalidate the stale auto marker'
 		);
 
@@ -319,7 +330,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		$chosen    = WC()->session->get( 'chosen_shipping_methods', array() );
 		$chosen[0] = 'local_pickup:1';
 		WC()->session->set( 'chosen_shipping_methods', $chosen );
-		wc_set_chosen_shipping_method_origin( 0, 'manual', 'local_pickup:1' );
+		$this->origin_tracker->set_origin( 0, 'manual', 'local_pickup:1' );
 
 		// A non-pickup rate is now available, forcing the auto-defaulter to re-evaluate.
 		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
@@ -328,7 +339,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 'local_pickup:1', $result, 'Manually chosen pickup should be preserved' );
 		$this->assertSame(
 			'manual',
-			wc_get_chosen_shipping_method_origin( 0 ),
+			$this->origin_tracker->get_origin( 0 ),
 			'Preserving a manual choice must not overwrite the origin back to auto'
 		);
 	}

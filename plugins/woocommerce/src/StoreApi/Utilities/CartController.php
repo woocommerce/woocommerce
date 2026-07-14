@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Shipping\ShippingMethodOriginTracker;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\NotPurchasableException;
 use Automattic\WooCommerce\StoreApi\Exceptions\OutOfStockException;
@@ -927,7 +928,7 @@ class CartController {
 		$session_data[ $package_id ] = $rate_id;
 
 		wc()->session->set( 'chosen_shipping_methods', $session_data );
-		wc_set_chosen_shipping_method_origin( $package_id, 'manual', $rate_id );
+		wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( $package_id, 'manual', $rate_id );
 	}
 
 	/**

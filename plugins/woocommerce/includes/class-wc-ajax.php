@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
+use Automattic\WooCommerce\Internal\Shipping\ShippingMethodOriginTracker;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
@@ -353,7 +354,7 @@ class WC_AJAX {
 				$chosen_shipping_methods[ $i ] = $value;
 
 				if ( $value !== $previous_method ) {
-					wc_set_chosen_shipping_method_origin( $i, 'manual', $value );
+					wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( $i, 'manual', $value );
 				}
 			}
 		}
@@ -431,7 +432,7 @@ class WC_AJAX {
 				$chosen_shipping_methods[ $i ] = $value;
 
 				if ( $value !== $previous_method ) {
-					wc_set_chosen_shipping_method_origin( $i, 'manual', $value );
+					wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( $i, 'manual', $value );
 				}
 			}
 		}
