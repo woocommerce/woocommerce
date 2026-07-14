@@ -39,6 +39,42 @@ export type WooCommerceConfig = {
 
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
 
+/**
+ * An opaque scope identifier.
+ *
+ * Scopes are deterministic, namespaced strings minted by the surfaces that
+ * establish them (the page itself, a Product Collection loop item, a Single
+ * Product block, an extension). The only guaranteed property is that equal
+ * strings denote the same scope; no other structure is assumed by the store.
+ */
+export type Scope = string;
+
+/**
+ * A single scope's draft cart item.
+ *
+ * A draft is exactly a Store API `cart/add-item` request payload — no
+ * mapping layer. Extension props (e.g. `'my-plugin/gift-note'`) ride at the
+ * payload root, namespaced, exactly as the Store API accepts them; there is
+ * no separate wrapper for them here (contrast with the read-only
+ * `CartItem.extensions`, which reflects the *server's* response shape once a
+ * line exists).
+ */
+export type DraftItem = {
+	/**
+	 * The product or variation id being drafted. This is also the per-scope
+	 * uniqueness key: `upsertDraftItem` merges into the draft whose `id`
+	 * matches and appends otherwise, so a scope holds at most one draft per
+	 * `id`.
+	 */
+	id: number;
+	/** The quantity to add. */
+	quantity: number;
+	/** Chosen attributes, for a variation draft. */
+	variation?: SelectedAttributes[];
+	/** Namespaced extension props riding at the payload root (e.g. `'my-plugin/gift-note'`). */
+	[ extensionProp: string ]: unknown;
+};
+
 export type OptimisticCartItem = {
 	key?: string | undefined;
 	id: number;
@@ -76,8 +112,64 @@ export type Store = {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
 		};
+		/**
+		 * Draft cart items awaiting `addItem`, keyed by scope.
+		 *
+		 * Each scope holds an array of drafts, at most one per product `id`.
+		 * Drafts live alongside — never inside — the read-only `cart`
+		 * mirror above, and are written exclusively through
+		 * `upsertDraftItem`/`removeDraftItem`.
+		 */
+		draftItems: Record< Scope, DraftItem[] >;
 	};
 	actions: {
+		/**
+		 * Creates or updates a draft cart item in a scope's bucket.
+		 *
+		 * Resolves the target scope from `options.scope`, then merges
+		 * `partial` into the scope's draft whose `id` matches — `id`
+		 * resolves from `options.id` when given, else from `partial.id` —
+		 * appending a new draft otherwise. The scope's bucket is created on
+		 * first write.
+		 *
+		 * Rejects (leaving state unchanged) when: the resolved scope is not
+		 * a valid, non-empty scope string; no numeric target `id` can be
+		 * resolved; `partial.id` disagrees with an already-resolved target
+		 * `id`, i.e. an attempt to change an existing draft's identity in
+		 * place (remove the draft and add a new one instead); or a brand
+		 * new draft is being created without a numeric `quantity`. Every
+		 * rejection is a dev-build console warning and a silent no-op in
+		 * production.
+		 *
+		 * @param partial       The draft fields to create or merge.
+		 * @param options       Targeting options.
+		 * @param options.scope The scope to write into.
+		 * @param options.id    An explicit id identifying which existing
+		 *                      draft to update, when it differs from
+		 *                      `partial.id` (e.g. `partial` omits `id`).
+		 */
+		upsertDraftItem: (
+			partial: Partial< DraftItem >,
+			options?: { scope?: Scope; id?: DraftItem[ 'id' ] }
+		) => void;
+		/**
+		 * Removes a scope's draft for the given product, pruning the
+		 * scope's bucket once it becomes empty.
+		 *
+		 * Rejects (leaving state unchanged) when the resolved scope is not
+		 * a valid, non-empty scope string, or no numeric `id` is given; a
+		 * request naming a product/scope with no matching draft is a
+		 * silent no-op. Every rejection is a dev-build console warning and
+		 * a silent no-op in production.
+		 *
+		 * @param options       Targeting options.
+		 * @param options.id    The product id whose draft to remove.
+		 * @param options.scope The scope to remove it from.
+		 */
+		removeDraftItem: ( options?: {
+			id?: DraftItem[ 'id' ];
+			scope?: Scope;
+		} ) => void;
 		removeCartItem: ( key: string ) => Promise< void >;
 		addCartItem: (
 			args: ClientCartItem,
@@ -133,6 +225,40 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 	type: 'notice',
 	dismissible: true,
 } );
+
+/**
+ * Returns `true` when `scope` is a valid, non-empty scope identifier.
+ *
+ * Scopes are opaque strings (see {@link Scope}); the only requirement is a
+ * non-empty string. `upsertDraftItem`/`removeDraftItem` reject anything
+ * else as a malformed-scope invariant violation.
+ *
+ * @param scope The candidate scope value.
+ * @return `true` when `scope` is a non-empty string.
+ */
+function isValidScope( scope: unknown ): scope is Scope {
+	return typeof scope === 'string' && scope.length > 0;
+}
+
+/**
+ * Reports a draft-write invariant violation.
+ *
+ * Per the write-policy design, invariant violations (a malformed scope, an
+ * upsert that would change an existing draft's `id`, a new draft missing a
+ * required field) never throw and never partially apply — the calling
+ * action returns before touching `state.draftItems`. In a development build
+ * this surfaces as a `console.warn` for the implementer; production builds
+ * stay silent (`process.env.NODE_ENV` is inlined by the bundler, so this
+ * check compiles away entirely there).
+ *
+ * @param message A human-readable description of the violated invariant.
+ */
+function warnDraftInvariant( message: string ): void {
+	if ( process.env.NODE_ENV !== 'production' ) {
+		// eslint-disable-next-line no-console
+		console.warn( `[woocommerce/cart] ${ message }` );
+	}
+}
 
 /**
  * Computes the canonical product token for accumulating per-product totals
@@ -409,6 +535,7 @@ const { actions } = store< Store >(
 	'woocommerce/cart',
 	{
 		state: {
+			draftItems: {},
 			findItemInCart( {
 				id,
 				key,
@@ -441,6 +568,102 @@ const { actions } = store< Store >(
 			},
 		},
 		actions: {
+			upsertDraftItem(
+				partial: Partial< DraftItem >,
+				{ scope, id }: { scope?: Scope; id?: DraftItem[ 'id' ] } = {}
+			) {
+				if ( ! isValidScope( scope ) ) {
+					warnDraftInvariant(
+						`upsertDraftItem: a valid "scope" is required, received ${ JSON.stringify(
+							scope
+						) }.`
+					);
+					return;
+				}
+
+				// The id used to look up an existing draft: an explicit
+				// `id` names "the draft I mean to update" independently of
+				// `partial.id`. When both are given they are compared below
+				// to catch an in-place rename attempt; when only one is
+				// given it doubles as both the lookup key and the value.
+				const targetId = id ?? partial.id;
+				if ( typeof targetId !== 'number' ) {
+					warnDraftInvariant(
+						'upsertDraftItem: a numeric "id" is required, via `partial.id` or `{ id }`.'
+					);
+					return;
+				}
+
+				const bucket = state.draftItems[ scope ] as
+					| DraftItem[]
+					| undefined;
+				const existing = bucket?.find(
+					( draft ) => draft.id === targetId
+				);
+
+				if ( existing ) {
+					if (
+						partial.id !== undefined &&
+						partial.id !== existing.id
+					) {
+						warnDraftInvariant(
+							`upsertDraftItem: cannot change draft id ${ existing.id } to ${ partial.id }; remove the draft and add a new one instead.`
+						);
+						return;
+					}
+					Object.assign( existing, partial, { id: existing.id } );
+					return;
+				}
+
+				if ( typeof partial.quantity !== 'number' ) {
+					warnDraftInvariant(
+						'upsertDraftItem: a new draft requires a numeric "quantity".'
+					);
+					return;
+				}
+
+				const draft = { ...partial, id: targetId } as DraftItem;
+				if ( bucket ) {
+					bucket.push( draft );
+				} else {
+					state.draftItems[ scope ] = [ draft ];
+				}
+			},
+
+			removeDraftItem( {
+				id,
+				scope,
+			}: { id?: DraftItem[ 'id' ]; scope?: Scope } = {} ) {
+				if ( ! isValidScope( scope ) ) {
+					warnDraftInvariant(
+						`removeDraftItem: a valid "scope" is required, received ${ JSON.stringify(
+							scope
+						) }.`
+					);
+					return;
+				}
+				if ( typeof id !== 'number' ) {
+					warnDraftInvariant(
+						'removeDraftItem: a numeric "id" is required.'
+					);
+					return;
+				}
+
+				const bucket = state.draftItems[ scope ] as
+					| DraftItem[]
+					| undefined;
+				const index =
+					bucket?.findIndex( ( draft ) => draft.id === id ) ?? -1;
+				if ( ! bucket || index === -1 ) {
+					return;
+				}
+
+				bucket.splice( index, 1 );
+				if ( bucket.length === 0 ) {
+					delete state.draftItems[ scope ];
+				}
+			},
+
 			*removeCartItem( key: string ): AsyncAction< void > {
 				// Track what changes we're making for the sync event.
 				const quantityChanges: QuantityChanges = {
