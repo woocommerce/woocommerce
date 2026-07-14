@@ -179,25 +179,29 @@ $schema['shell']['sectionNavigation'] = array(
 
 ## Native field migration
 
-The legacy adapter converts the existing `get_settings()` array into a canonical schema for React. It supports common settings fields:
+The legacy adapter converts the existing `get_settings()` array into a canonical schema for React. Native schemas can use canonical types directly. The first column lists legacy types accepted by the adapter, including aliases that it normalizes before rendering.
 
--   `text`
--   `password`
--   `email`
--   `url`
--   `tel`
--   `number`
--   `textarea`
--   `checkbox`
--   `select`
--   `radio`
--   `multiselect`
--   `multi_select_countries`
--   `single_select_country`
--   `single_select_page`
--   `info`
+### Native controls
 
-Fields before the first `title` marker are placed into a default group automatically.
+| Legacy type | Canonical type | Native control | Typical schema value |
+| ------------ | -------------- | -------------- | -------------------- |
+| `text`, `password`, `email`, `url`, `tel` | Same as the legacy type | Single-line input using the corresponding HTML input type | `string` |
+| `date`, `time`, `datetime-local` | Same as the legacy type | Date or time input using the corresponding HTML input type | `string` |
+| `number` | `number` | Number input with increment and decrement buttons | `string` or `number` |
+| `textarea` | `textarea` | Multi-line text input | `string` |
+| `checkbox` | `checkbox` | Checkbox | `boolean` |
+| `select`, `single_select_country`, `single_select_page` | `select` | Single-choice dropdown | `string` |
+| `radio` | `radio` | Single-choice dropdown (current renderer) | `string` |
+| `multiselect`, `multi_select_countries` | `array` | Multiple-selection list | `string[]` |
+| `info` | `info` | Read-only informational content | No editable value |
+
+The `options` array supplies choices for `select`, `radio`, and `array` fields. Use `placeholder` and `disabled` where the control supports them. Text and number inputs also accept HTML input attributes such as `min`, `max`, and `step` through the legacy `custom_attributes` key or canonical `customAttributes` key.
+
+Only the types in the table have dedicated native renderers. Other legacy or plugin-specific types fall back to a text input and log a browser warning unless the extension registers a custom component, field override, or type renderer. Use a custom renderer when the fallback would change the field's intended interaction.
+
+Native control implementations can change without changing the schema contract. Custom renderers should use the [WordPress component reference](https://developer.wordpress.org/block-editor/reference-guides/components/) and [Gutenberg Storybook](https://wordpress.github.io/gutenberg/) rather than depending on the native renderer's generated markup.
+
+The `title` and `sectionend` types define groups rather than controls. Fields before the first `title` marker are placed into a default group automatically.
 
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
 
