@@ -187,20 +187,41 @@ class WC_Meta_Box_Order_Data {
 	/**
 	 * Whether an order was placed without any shipping, based on persisted order data.
 	 *
-	 * Store API checkout copies the billing details into the shipping address for
-	 * backwards compatibility even when a purchase needs no fulfillment. Such orders are
-	 * saved without a shipping line item, so the absence of persisted shipping methods is
-	 * what marks the stored shipping address as billing-derived and safe to hide from the
-	 * read-only summary. This deliberately relies on the order's own shipping items rather
-	 * than the current virtual state of the catalog products, which a merchant can change
-	 * after the order is placed — a catalog edit must never rewrite a historical order's
-	 * shipping summary.
+	 * A purchase that needs no fulfillment is saved without a shipping line item. Relying
+	 * on the order's own shipping items — rather than the current virtual state of the
+	 * catalog products, which a merchant can change after the order is placed — keeps a
+	 * catalog edit from ever rewriting a historical order's shipping summary, and keeps
+	 * orders that retain a shipping line (including Store API local pickup) showing.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return bool
 	 */
 	private static function order_has_no_shipping( $order ) {
 		return 0 === count( $order->get_shipping_methods() );
+	}
+
+	/**
+	 * Whether an order's shipping address is still the billing-derived copy.
+	 *
+	 * Store API checkout copies the billing address into the shipping address for
+	 * backwards compatibility when a purchase needs no fulfillment. There is no persisted
+	 * marker for that copy, so the shipping address is treated as billing-derived only
+	 * while every copied field still matches billing. Once a merchant or integration edits
+	 * the shipping fields to diverge, the values are explicit and must be shown.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private static function order_shipping_matches_billing( $order ) {
+		$copied_fields = array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' );
+
+		foreach ( $copied_fields as $field ) {
+			if ( $order->{"get_shipping_$field"}() !== $order->{"get_billing_$field"}() ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -590,7 +611,7 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
 								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-								$hide_core_shipping_details = 'store-api' === $order->get_created_via() && self::order_has_no_shipping( $order );
+								$hide_core_shipping_details = 'store-api' === $order->get_created_via() && self::order_has_no_shipping( $order ) && self::order_shipping_matches_billing( $order );
 								$shipping_address           = $hide_core_shipping_details ? '' : $order->get_formatted_shipping_address();
 
 								if ( $shipping_address ) {

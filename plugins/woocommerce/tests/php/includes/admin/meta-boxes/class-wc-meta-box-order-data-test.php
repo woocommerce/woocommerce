@@ -200,6 +200,29 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The read-only summary shows explicitly edited shipping details on a Store API order without shipping.
+	 */
+	public function test_displays_explicitly_edited_shipping_details_on_store_api_order(): void {
+		$order = $this->create_order_with_shipping_data( false );
+
+		$this->assertFalse( $order->needs_shipping_address(), 'The virtual-only order should not need a shipping address.' );
+
+		// A merchant or integration edits the shipping fields to values that diverge from billing.
+		$order->set_shipping_address_1( '742 Evergreen Terrace' );
+		$order->set_shipping_city( 'Springfield' );
+		$order->save();
+
+		// Re-read the order so the summary reflects the persisted, explicit values.
+		$order = wc_get_order( $order->get_id() );
+
+		$summary = $this->render_shipping_address_summary( $order );
+
+		$this->assertStringContainsString( '742 Evergreen Terrace', $summary );
+		$this->assertStringContainsString( 'Springfield', $summary );
+		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
+	}
+
+	/**
 	 * @testdox The read-only summary preserves custom fields when the order does not need shipping.
 	 */
 	public function test_displays_custom_fields_when_order_does_not_need_shipping(): void {
@@ -270,6 +293,7 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 		$order->set_billing_state( 'CA' );
 		$order->set_billing_postcode( '94105' );
 		$order->set_billing_country( 'US' );
+		$order->set_billing_phone( '555-0100' );
 		$order->set_shipping_first_name( 'Virtual' );
 		$order->set_shipping_last_name( 'Customer' );
 		$order->set_shipping_address_1( '500 Billing Avenue' );
