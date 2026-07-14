@@ -138,10 +138,11 @@ class WC_Cart extends WC_Legacy_Cart {
 		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_coupons' ), 1 );
 		add_action( 'woocommerce_after_checkout_validation', array( $this, 'check_customer_coupons' ), 1, 2 );
 
-		// Auto-apply coupons after cart changes (but not after coupon operations to avoid recursion).
-		add_action( 'woocommerce_add_to_cart', array( $this, 'auto_apply_coupons' ), 30, 0 );
-		add_action( 'woocommerce_cart_item_removed', array( $this, 'auto_apply_coupons' ), 30, 0 );
-		add_action( 'woocommerce_cart_item_restored', array( $this, 'auto_apply_coupons' ), 30, 0 );
+		// Auto-apply coupons whenever cart totals are recalculated, which covers add/remove/restore
+		// as well as cart-page and Cart/Checkout block quantity updates. A reentrancy guard in
+		// auto_apply_coupons() prevents this from looping, since applying/removing a coupon
+		// triggers another totals recalculation.
+		add_action( 'woocommerce_after_calculate_totals', array( $this, 'auto_apply_coupons' ), 20, 0 );
 	}
 
 	/**
@@ -2234,13 +2235,27 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Checks for coupons marked with auto-apply flag and automatically applies
 	 * or removes them based on their validity. Runs silently without notices.
 	 *
+	 * Hooked to 'woocommerce_after_calculate_totals', so applying or removing a coupon here
+	 * triggers another totals recalculation and therefore another call to this method. The
+	 * static $running guard makes each outer call a no-op re-entrant pass instead of an
+	 * unbounded recursive chain across every auto-apply coupon.
+	 *
 	 * @since 11.1.0
 	 * @return void
 	 */
 	public function auto_apply_coupons(): void {
-		if ( $this->is_empty() ) {
+		static $running = false;
+
+		if ( $running || $this->is_empty() ) {
 			return;
 		}
+
+		// Only relevant for frontend cart calculations, not admin screens (e.g. order edit).
+		if ( is_admin() && ! wp_doing_ajax() ) {
+			return;
+		}
+
+		$running = true;
 
 		// Silence coupon notices for this operation only.
 		add_filter( 'woocommerce_coupon_message', '__return_empty_string', PHP_INT_MAX );
@@ -2272,6 +2287,8 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		remove_filter( 'woocommerce_coupon_message', '__return_empty_string', PHP_INT_MAX );
 		remove_filter( 'woocommerce_coupon_error', '__return_empty_string', PHP_INT_MAX );
+
+		$running = false;
 	}
 
 	/**
