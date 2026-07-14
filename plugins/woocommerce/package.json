@@ -99,8 +99,8 @@
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
 		"test:metrics:ci": "../../.github/workflows/scripts/run-metrics.sh",
 		"test:metrics:ci:unified-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes && pnpm test:metrics:ci",
-		"test:php:env": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli vendor/bin/phpunit -c phpunit.xml --verbose",
-		"test:php:env:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli env DISABLE_HPOS=1 vendor/bin/phpunit -c phpunit.xml --verbose",
+		"test:php:env": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
+		"test:php:env:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli env DISABLE_HPOS=1 tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
 		"test:php:env:watch": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli vendor/bin/phpunit-watcher watch --verbose",
 		"test:plugincheck": "pnpm wp-env:e2e run cli wp plugin check ${PLUGIN_SLUG:-woocommerce}",
 		"test:unit": "pnpm test:php",
@@ -150,12 +150,7 @@
 					"name": "PHP: 8.5 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
-					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main",
-						"--testsuite=wc-phpunit-graphql-infra",
-						"--testsuite=wc-phpunit-graphql-api"
-					],
+					"shardingArguments": [],
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
@@ -183,8 +178,7 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main"
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main"
 					],
 					"onlyForDependencies": [],
 					"changes": [
@@ -214,8 +208,7 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main"
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main"
 					],
 					"onlyForDependencies": [],
 					"changes": [
@@ -679,12 +672,7 @@
 					"name": "PHP: 8.5 WP: latest (HPOS:off)",
 					"testType": "unit:php",
 					"command": "test:php:env:hpos-off",
-					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main",
-						"--testsuite=wc-phpunit-graphql-infra",
-						"--testsuite=wc-phpunit-graphql-api"
-					],
+					"shardingArguments": [],
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",

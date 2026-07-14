@@ -167,7 +167,7 @@ jobs:
       # re-run this job when it succeeded, so consumers must find the previous attempt's artifact.
       WOOCOMMERCE_PLUGIN_ARTIFACT_NAME: woocommerce-plugin-${{ github.run_id }}
     steps:
-      - uses: 'actions/checkout@v4'
+      - uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
         name: 'Checkout'
         with:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
@@ -187,7 +187,7 @@ jobs:
         run: pnpm --filter='@woocommerce/plugin-woocommerce' build:zip
 
       - name: 'Upload WooCommerce plugin artifact'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ env.WOOCOMMERCE_PLUGIN_ARTIFACT_NAME }}
           path: plugins/woocommerce/woocommerce.zip
@@ -226,7 +226,7 @@ jobs:
 
       - name: 'Download WooCommerce plugin artifact'
         if: ${{ matrix.usesSharedPluginBuild == true && inputs.artifactName == '' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: woocommerce-plugin-${{ github.run_id }}
           path: ${{ github.workspace }}/woocommerce-plugin-artifact
@@ -272,9 +272,10 @@ jobs:
         if: ${{ matrix.testEnv.shouldCreate }}
         # `wp-env start` fails on transient network timeouts from several subsystems:
         # composer fetching packagist inside the Docker build ("curl error 28"), wp-env's
-        # own `got` client downloading WordPress core ("ETIMEDOUT"/"socket hang up"), and the Docker daemon
-        # pulling images from Docker Hub ("context deadline exceeded"). Retry the whole
-        # start to ride out those blips -- BuildKit reuses layers that already succeeded,
+        # own `got` client downloading WordPress core ("ETIMEDOUT"/"socket hang up"), and
+        # the Docker daemon pulling images from Docker Hub ("context deadline exceeded"/
+        # "connection reset by peer"). Retry the whole start to ride out those blips --
+        # BuildKit reuses layers that already succeeded,
         # so a retry only re-runs whatever failed. Each retried attempt emits a
         # "::warning::wp-env-start-retry reason=<subsystem>" marker (grep-friendly) so the
         # underlying incident rate stays measurable even when the retry keeps the job green.
@@ -288,7 +289,7 @@ jobs:
             # We retry regardless of cause -- transient failures aren't limited to the
             # patterns below, so reason= is for monitoring only, not a retry gate.
             if grep -qF 'curl error 28' "$log"; then reason=packagist
-            elif grep -qE 'registry-1\.docker\.io|context deadline exceeded' "$log"; then reason=dockerhub
+            elif grep -qE 'registry-1\.docker\.io|context deadline exceeded|failed to receive status: rpc error|connection reset by peer' "$log"; then reason=dockerhub
             elif grep -qE 'ETIMEDOUT|socket hang up|ECONNRESET' "$log"; then reason=wordpress
             else reason=unknown
             fi
@@ -303,7 +304,7 @@ jobs:
 
       - name: 'Resolve artifacts path'
         if: ${{ always() && matrix.report.resultsPath != '' }}
-        # Blocks e2e use a relative path which is not supported by actions/upload-artifact@v4
+        # Blocks e2e use a relative path which is not supported by actions/upload-artifact
         # https://github.com/actions/upload-artifact/issues/176
         env:
           ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
