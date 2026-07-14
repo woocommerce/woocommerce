@@ -474,10 +474,9 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 
 	// If not set, not available, or available methods have changed, set to the DEFAULT option.
 	if ( ! $chosen_method || $changed || ! isset( $package['rates'][ $chosen_method ] ) || count( $package['rates'] ) !== $method_count ) {
-		// Capture the previous choice and its origin before the auto-defaulter runs, so we can tell
-		// whether it computed a new default or simply preserved an existing customer choice.
+		// Capture the previous choice before the auto-defaulter runs, so we can tell whether it
+		// computed a new default or simply preserved an existing customer choice.
 		$previous_chosen_method = $chosen_method;
-		$previous_origin        = wc_get_container()->get( ShippingMethodOriginTracker::class )->get_origin( $key );
 
 		$chosen_method          = wc_get_default_shipping_method_for_package( $key, $package, $chosen_method );
 		$chosen_methods[ $key ] = $chosen_method;
@@ -489,8 +488,9 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 		// Only record the choice as auto-defaulted when the auto-defaulter actually assigned a method
 		// the customer didn't pick. If it kept the customer's existing manual choice (sticky pickup),
 		// preserve that 'manual' origin — otherwise the next re-evaluation would treat it as auto and
-		// could un-stick a deliberately chosen Local Pickup.
-		if ( ! ( $chosen_method === $previous_chosen_method && 'manual' === $previous_origin ) ) {
+		// could un-stick a deliberately chosen Local Pickup. The origin lookup only runs when the
+		// method was preserved (it's irrelevant — and immediately overwritten — otherwise).
+		if ( $chosen_method !== $previous_chosen_method || 'manual' !== wc_get_container()->get( ShippingMethodOriginTracker::class )->get_origin( $key ) ) {
 			wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( $key, 'auto', $chosen_method );
 		}
 
@@ -518,6 +518,17 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	$rate_keys               = array_keys( $package['rates'] );
 	$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
 
+	// The first rate in the package that isn't a local pickup method. Used as the non-shortcode
+	// default and as the replacement rate when un-sticking an auto-defaulted pickup (any context).
+	$first_non_pickup_rate = '';
+	foreach ( $rate_keys as $rate_key ) {
+		$rate_method_id = current( explode( ':', (string) $rate_key ) );
+		if ( ! in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
+			$first_non_pickup_rate = $rate_key;
+			break;
+		}
+	}
+
 	if ( 'shortcode' === WC()->cart->cart_context ) {
 		$default = current( $rate_keys );
 	} else {
@@ -525,12 +536,8 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 		$default = CartCheckoutUtils::shipping_methods_exist() ? '' : current( $rate_keys );
 
 		// Default to the first method in the package that isn't a local pickup method.
-		foreach ( $rate_keys as $rate_key ) {
-			$rate_method_id = current( explode( ':', $rate_key ) );
-			if ( ! in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
-				$default = $rate_key;
-				break;
-			}
+		if ( '' !== $first_non_pickup_rate ) {
+			$default = $first_non_pickup_rate;
 		}
 
 		// When shipping costs are hidden until an address is entered, don't auto-select pickup as the default.
@@ -564,13 +571,15 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	 * non-pickup rate becomes available (e.g. after an Apple Pay / Google Pay wallet supplies an address that
 	 * matches a shipping zone). The origin of the previous choice is tracked via ShippingMethodOriginTracker.
 	 */
-	$chosen_method_id            = current( explode( ':', $chosen_method ) );
-	$chosen_method_exists        = in_array( $chosen_method, $rate_keys, true );
-	$is_local_pickup_chosen      = in_array( $chosen_method_id, $local_pickup_method_ids, true );
-	$default_method_id           = '' === $default ? '' : current( explode( ':', (string) $default ) );
-	$has_non_pickup_alternative  = '' !== $default && ! in_array( $default_method_id, $local_pickup_method_ids, true );
-	$previous_choice_was_auto    = 'auto' === wc_get_container()->get( ShippingMethodOriginTracker::class )->get_origin( $key );
-	$unstick_auto_default_pickup = $previous_choice_was_auto && $has_non_pickup_alternative;
+	$chosen_method_id           = current( explode( ':', $chosen_method ) );
+	$chosen_method_exists       = in_array( $chosen_method, $rate_keys, true );
+	$is_local_pickup_chosen     = in_array( $chosen_method_id, $local_pickup_method_ids, true );
+	$has_non_pickup_alternative = '' !== $first_non_pickup_rate;
+
+	// Only consult the recorded origin when it can actually influence the outcome: a pickup rate is
+	// currently chosen and a non-pickup rate exists to switch to.
+	$unstick_auto_default_pickup = $chosen_method_exists && $is_local_pickup_chosen && $has_non_pickup_alternative
+		&& 'auto' === wc_get_container()->get( ShippingMethodOriginTracker::class )->get_origin( $key );
 
 	// Default to local pickup if it's chosen already — unless the previous pickup choice came from the auto-defaulter
 	// AND a real shipping rate is now available, in which case we prefer the shipping rate.
@@ -578,6 +587,12 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 		$default = $chosen_method;
 
 	} else {
+		if ( $unstick_auto_default_pickup ) {
+			// In shortcode context $default is simply the first rate in the package, which may itself
+			// be a pickup rate; when un-sticking, switch to the first non-pickup rate instead.
+			$default = $first_non_pickup_rate;
+		}
+
 		// Check coupons to see if free shipping is available. If it is, we'll use that method as the default.
 		$coupons = WC()->cart->get_coupons();
 		foreach ( $coupons as $coupon ) {

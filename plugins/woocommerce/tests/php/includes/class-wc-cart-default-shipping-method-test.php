@@ -317,6 +317,58 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * In shortcode (classic checkout) context the pre-sticky default is simply the first rate in
+	 * the package. When Local Pickup sorts first, that default is itself a pickup rate — the
+	 * unstick must still fire and switch to the first non-pickup rate found in the package.
+	 *
+	 * @testdox Replaces auto-chosen pickup with the delivery rate in shortcode context even when pickup sorts first.
+	 */
+	public function test_replaces_auto_local_pickup_in_shortcode_context_when_pickup_sorts_first(): void {
+		WC()->cart->cart_context = 'shortcode';
+		$this->record_auto_choice( 0, 'local_pickup:1' );
+
+		// Pickup deliberately ordered before the delivery rate.
+		$package = $this->build_package( array( 'local_pickup:1', 'flat_rate:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:1' );
+
+		$this->assertSame( 'flat_rate:1', $result, 'Shortcode-context unstick should switch to the first non-pickup rate even when pickup sorts first' );
+	}
+
+	/**
+	 * A different code path (e.g. WC_AJAX::update_order_review clearing chosen_shipping_methods
+	 * when no shipping methods are posted — see the fix for #51197) may empty the chosen-methods
+	 * session entry after an 'auto' origin was recorded. The stale origin must self-invalidate:
+	 * the reader falls back to 'manual' and the stale marker cannot un-stick a later pickup choice.
+	 *
+	 * @testdox Clearing chosen_shipping_methods after an auto origin was recorded invalidates the stale marker.
+	 */
+	public function test_cleared_chosen_methods_invalidates_stale_auto_origin(): void {
+		$this->record_auto_choice( 0, 'local_pickup:1' );
+		$this->assertSame( 'auto', $this->origin_tracker->get_origin( 0 ) );
+
+		// Simulate another code path emptying the chosen methods entirely.
+		WC()->session->set( 'chosen_shipping_methods', array() );
+
+		$this->assertSame(
+			'manual',
+			$this->origin_tracker->get_origin( 0 ),
+			'A cleared chosen_shipping_methods entry should invalidate the recorded auto origin'
+		);
+
+		// A subsequent explicit pickup choice (all real selection paths record 'manual') must stay
+		// sticky — the earlier stale 'auto' record must not leak into the new choice.
+		$chosen    = WC()->session->get( 'chosen_shipping_methods', array() );
+		$chosen[0] = 'local_pickup:1';
+		WC()->session->set( 'chosen_shipping_methods', $chosen );
+		$this->origin_tracker->set_origin( 0, 'manual', 'local_pickup:1' );
+
+		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:1' );
+
+		$this->assertSame( 'local_pickup:1', $result, 'Pickup explicitly chosen after the clear should be preserved' );
+	}
+
+	/**
 	 * Regression: when the auto-defaulter runs and the sticky-pickup path preserves a
 	 * manually-chosen Local Pickup, `wc_get_chosen_shipping_method_for_package()` must not
 	 * overwrite the recorded origin back to 'auto'. Otherwise a subsequent re-evaluation
