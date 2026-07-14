@@ -37,6 +37,8 @@ class WC_Payment_Tokens {
 	 *     @type string $user_id    User ID.
 	 *     @type string $gateway_id Gateway ID.
 	 *     @type string $type       Token type.
+	 *     @type int    $limit      Maximum number of tokens to return. Unlimited when omitted or not positive.
+	 *     @type int    $page       Page of results to return when `limit` is set. Default 1.
 	 * }
 	 * @return WC_Payment_Token[]
 	 */
