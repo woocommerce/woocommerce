@@ -265,7 +265,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 			$gateway_ids = $gateways->get_payment_gateway_ids();
 		}
 
-		$page  = isset( $args['page'] ) ? absint( $args['page'] ) : 1;
+		$page  = isset( $args['page'] ) ? max( 1, absint( $args['page'] ) ) : 1;
 		$limit = isset( $args['limit'] ) ? absint( $args['limit'] ) : 0;
 
 		// Only limit the results when explicitly requested: consumers like the personal data

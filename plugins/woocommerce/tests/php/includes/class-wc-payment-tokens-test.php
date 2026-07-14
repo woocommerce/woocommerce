@@ -154,6 +154,27 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Data store get_tokens should treat page zero as the first page.
+	 */
+	public function test_data_store_get_tokens_treats_page_zero_as_first_page(): void {
+		$this->create_tokens_for_user( 3 );
+
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		$this->assertCount(
+			2,
+			$data_store->get_tokens(
+				array(
+					'user_id' => $this->user_id,
+					'limit'   => 2,
+					'page'    => 0,
+				)
+			),
+			'Page 0 must return the first page of results, not skip past it'
+		);
+	}
+
+	/**
 	 * @testdox Data store get_tokens should respect an explicit limit and page.
 	 */
 	public function test_data_store_get_tokens_respects_explicit_limit_and_page(): void {
