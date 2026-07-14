@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import type {
-	Cart,
-	CartItem,
-	ProductResponseItem,
-} from '@woocommerce/types';
+import type { Cart, CartItem, ProductResponseItem } from '@woocommerce/types';
 import type { Notice } from '@woocommerce/stores/store-notices';
 
 /**
@@ -1802,7 +1798,10 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			// Two lines share the in-context product's id — identity alone is
 			// ambiguous — but the context already names the exact line.
 			const targetLine = makeLine( { id: 42, key: 'the-known-key' } );
-			seedCart( [ makeLine( { id: 42, key: 'other-key' } ), targetLine ] );
+			seedCart( [
+				makeLine( { id: 42, key: 'other-key' } ),
+				targetLine,
+			] );
 			seedProductInContext( { id: 42 } );
 			mockSharedContext = { scope: 'page/1', key: 'the-known-key' };
 
@@ -1834,7 +1833,10 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			seedCart( [ line ] );
 			seedProductInContext( { id: 42 } );
 			mockSharedContext = { scope: 'page/1' };
-			actions.upsertDraftItem( { id: 42, quantity: 3 }, { scope: 'page/1' } );
+			actions.upsertDraftItem(
+				{ id: 42, quantity: 3 },
+				{ scope: 'page/1' }
+			);
 
 			expect( mockState.itemInContext ).toEqual( {
 				cartItem: line,
@@ -1944,8 +1946,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			);
 
 			expect(
-				mockState.findItem( { id: 42, scope: 'collection/q1/1' } )
-					.draft
+				mockState.findItem( { id: 42, scope: 'collection/q1/1' } ).draft
 			).toEqual( { id: 42, quantity: 5 } );
 			expect( mockState.findItem( { id: 42 } ).draft ).toBeUndefined();
 		} );
