@@ -192,6 +192,10 @@ class WC_Admin_Attributes {
 	 * multibyte slug (e.g. Cyrillic, Chinese) can pass the browser's guard
 	 * and still be rejected by `register_taxonomy()`'s 32-byte name limit.
 	 * This counter closes that feedback gap before submission.
+	 *
+	 * When the live counter activates, it also swaps the server-rendered field
+	 * description for a leaner note: the counter now carries the concrete byte
+	 * numbers, so the locale-tailored character estimate becomes redundant.
 	 */
 	private static function slug_byte_counter_script(): void {
 		$max_bytes = wc_get_attribute_slug_max_byte_length();
