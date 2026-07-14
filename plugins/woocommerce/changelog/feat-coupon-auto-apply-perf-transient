@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Cache auto-apply coupon codes lookup with a transient so it persists across requests on sites without a persistent object cache.

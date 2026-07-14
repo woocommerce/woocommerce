@@ -2284,9 +2284,10 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array Array of auto-apply coupon codes.
 	 */
 	protected function get_auto_apply_coupon_codes() {
-		// Check cache first.
+		// Check cache first. A transient is used (rather than wp_cache) so the result
+		// survives across requests on sites without a persistent object cache.
 		$cache_key = 'wc_auto_apply_coupon_codes';
-		$codes     = wp_cache_get( $cache_key, 'coupons' );
+		$codes     = get_transient( $cache_key );
 
 		if ( false !== $codes ) {
 			return $codes;
@@ -2318,7 +2319,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		$codes = array_map( 'wc_format_coupon_code', array_filter( $codes ) );
 
 		// Cache for 1 hour (or until invalidated on coupon save).
-		wp_cache_set( $cache_key, $codes, 'coupons', HOUR_IN_SECONDS );
+		set_transient( $cache_key, $codes, HOUR_IN_SECONDS );
 
 		return $codes;
 	}

@@ -97,7 +97,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$coupon->save_meta_data();
 			$coupon->apply_changes();
 			delete_transient( 'rest_api_coupons_type_count' );
-			wp_cache_delete( 'wc_auto_apply_coupon_codes', 'coupons' );
+			delete_transient( 'wc_auto_apply_coupon_codes' );
 			do_action( 'woocommerce_new_coupon', $coupon_id, $coupon );
 		}
 	}
@@ -212,7 +212,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$this->update_post_meta( $coupon );
 		$coupon->apply_changes();
 		delete_transient( 'rest_api_coupons_type_count' );
-		wp_cache_delete( 'wc_auto_apply_coupon_codes', 'coupons' );
+		delete_transient( 'wc_auto_apply_coupon_codes' );
 
 		// The `coupon_id_from_code` entry in the object cache must not exist when the coupon is not published, otherwise the coupon will remain available for use.
 		if ( 'publish' !== $coupon->get_status() ) {
@@ -250,14 +250,14 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 
 			$hashed_code = md5( wc_strtolower( $coupon->get_code() ) );
 			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code, 'coupons' );
-			wp_cache_delete( 'wc_auto_apply_coupon_codes', 'coupons' );
+			delete_transient( 'wc_auto_apply_coupon_codes' );
 
 			$coupon->set_id( 0 );
 			do_action( 'woocommerce_delete_coupon', $id );
 		} else {
 			wp_trash_post( $id );
 			$coupon->set_status( 'trash' );
-			wp_cache_delete( 'wc_auto_apply_coupon_codes', 'coupons' );
+			delete_transient( 'wc_auto_apply_coupon_codes' );
 			do_action( 'woocommerce_trash_coupon', $id );
 		}
 	}
