@@ -25,6 +25,12 @@
 
 <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"left","fontSize":"large","style":{"spacing":{"margin":{"top":"var:preset|spacing|10","left":"0"}},"typography":{"lineHeight":"1.55","fontStyle":"normal"}}} /-->
 
-<!-- /wp:woocommerce/product-template --></div>
+<!-- /wp:woocommerce/product-template -->
+
+<!-- wp:woocommerce/product-collection-no-results -->
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<p style="margin-top:0;margin-bottom:0"><?php esc_html_e( 'We\'re curating our favorites. Check back soon.', 'purple' ); ?></p>
+<!-- /wp:paragraph -->
+<!-- /wp:woocommerce/product-collection-no-results --></div>
 <!-- /wp:woocommerce/product-collection --></div>
 <!-- /wp:group -->

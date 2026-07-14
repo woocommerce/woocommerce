@@ -23,6 +23,12 @@
 <!-- wp:post-title {"level":3,"isLink":true,"style":{"spacing":{"margin":{"bottom":"0","top":"var:preset|spacing|20"}},"typography":{"lineHeight":"1.18","textAlign":"left"}},"fontSize":"large","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
 <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"left","fontSize":"large","style":{"spacing":{"margin":{"top":"var:preset|spacing|10","left":"0"}},"typography":{"lineHeight":"1.55","fontStyle":"normal"}}} /-->
-<!-- /wp:woocommerce/product-template --></div>
+<!-- /wp:woocommerce/product-template -->
+
+<!-- wp:woocommerce/product-collection-no-results -->
+<!-- wp:paragraph {"style":{"typography":{"textAlign":"center"},"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<p class="has-text-align-center" style="margin-top:0;margin-bottom:0"><?php esc_html_e( 'New products are on their way. Check back soon.', 'purple' ); ?></p>
+<!-- /wp:paragraph -->
+<!-- /wp:woocommerce/product-collection-no-results --></div>
 <!-- /wp:woocommerce/product-collection --></div>
 <!-- /wp:group -->

@@ -34,7 +34,13 @@
 <!-- wp:post-title {"level":3,"isLink":true,"style":{"typography":{"textAlign":"left","lineHeight":"1.18"},"spacing":{"margin":{"top":"var:preset|spacing|20","bottom":"0"}}},"fontSize":"large","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
 <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"left","fontSize":"large","style":{"spacing":{"padding":{"top":"var:preset|spacing|10"}},"typography":{"lineHeight":"1.55"}}} /-->
-<!-- /wp:woocommerce/product-template --></div>
+<!-- /wp:woocommerce/product-template -->
+
+<!-- wp:woocommerce/product-collection-no-results -->
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
+<p style="margin-top:0;margin-bottom:0"><?php esc_html_e( 'Our most popular products will appear here soon.', 'purple' ); ?></p>
+<!-- /wp:paragraph -->
+<!-- /wp:woocommerce/product-collection-no-results --></div>
 <!-- /wp:woocommerce/product-collection --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns --></div>
