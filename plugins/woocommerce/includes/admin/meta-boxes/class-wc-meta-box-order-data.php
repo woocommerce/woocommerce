@@ -208,6 +208,8 @@ class WC_Meta_Box_Order_Data {
 	 * marker for that copy, so the shipping address is treated as billing-derived only
 	 * while every copied field still matches billing. Once a merchant or integration edits
 	 * the shipping fields to diverge, the values are explicit and must be shown.
+	 * Individual getters use the edit context instead of get_address() so view filters
+	 * cannot make distinct persisted values appear equal.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return bool
@@ -612,6 +614,16 @@ class WC_Meta_Box_Order_Data {
 								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
 								$hide_core_shipping_details = 'store-api' === $order->get_created_via() && self::order_has_no_shipping( $order ) && self::order_shipping_matches_billing( $order );
+
+								/**
+								 * Filters whether billing-derived shipping details are hidden in the order admin summary.
+								 *
+								 * @param bool     $hide_core_shipping_details Whether core shipping details are hidden.
+								 * @param WC_Order $order                      Order object.
+								 *
+								 * @since 11.1.0
+								 */
+								$hide_core_shipping_details = apply_filters( 'woocommerce_hide_order_admin_shipping_details', $hide_core_shipping_details, $order );
 								$shipping_address           = $hide_core_shipping_details ? '' : $order->get_formatted_shipping_address();
 
 								if ( $shipping_address ) {

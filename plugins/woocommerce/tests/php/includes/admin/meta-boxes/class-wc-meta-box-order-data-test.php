@@ -127,6 +127,32 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The read-only summary allows extensions to display otherwise suppressed shipping details.
+	 */
+	public function test_filter_can_display_suppressed_shipping_details(): void {
+		$order = $this->create_order_with_shipping_data( false );
+
+		$show_shipping_details = function ( $hide_shipping_details, $filtered_order ) use ( $order ) {
+			$this->assertTrue( $hide_shipping_details, 'The filter should receive the computed suppression decision.' );
+			$this->assertSame( $order, $filtered_order, 'The filter should receive the order being rendered.' );
+
+			return false;
+		};
+		add_filter( 'woocommerce_hide_order_admin_shipping_details', $show_shipping_details, 10, 2 );
+
+		try {
+			$summary = $this->render_shipping_address_summary( $order );
+		} finally {
+			remove_filter( 'woocommerce_hide_order_admin_shipping_details', $show_shipping_details );
+		}
+
+		$this->assertStringContainsString( 'Virtual Customer', $summary );
+		$this->assertStringContainsString( '500 Billing Avenue', $summary );
+		$this->assertStringContainsString( '555-0100', $summary );
+		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
+	}
+
+	/**
 	 * @testdox The read-only summary displays persisted shipping details when the order needs shipping.
 	 */
 	public function test_displays_shipping_details_when_order_needs_shipping(): void {
