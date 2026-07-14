@@ -149,6 +149,8 @@ export async function getWooEditorAssetMetrics( page ) {
 			wooEditorAssetCount: 0,
 		};
 
+		// This intentionally excludes assets loaded only within editor iframes,
+		// which have their own resource performance timelines.
 		performance.getEntriesByType( 'resource' ).forEach( ( entry ) => {
 			const url = new URL( entry.name, window.location.href );
 			const normalizedUrl = url.origin + url.pathname;
