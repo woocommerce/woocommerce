@@ -44,7 +44,7 @@ type ServerState = {
 };
 
 const { state: wooState } = store< WooCommerce >(
-	'woocommerce',
+	'woocommerce/cart',
 	{},
 	{ lock: universalLock }
 );
@@ -151,7 +151,7 @@ const productButtonStore = {
 			yield import( '@woocommerce/stores/woocommerce/cart' );
 
 			const { actions } = store< WooCommerce >(
-				'woocommerce',
+				'woocommerce/cart',
 				{},
 				{ lock: universalLock }
 			);
@@ -178,7 +178,7 @@ const productButtonStore = {
 			// woocommerce store is public.
 			yield import( '@woocommerce/stores/woocommerce/cart' );
 			const { actions } = store< WooCommerce >(
-				'woocommerce',
+				'woocommerce/cart',
 				{},
 				{ lock: universalLock }
 			);

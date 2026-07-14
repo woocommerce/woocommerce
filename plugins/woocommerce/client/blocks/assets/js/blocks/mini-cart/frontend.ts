@@ -177,7 +177,7 @@ const getFocusableElements = ( container: HTMLElement | null ) =>
 		: [];
 
 const { state: woocommerceState, actions } = store< WooCommerce >(
-	'woocommerce',
+	'woocommerce/cart',
 	{},
 	{ lock: universalLock }
 );
@@ -462,7 +462,7 @@ const { state: cartItemState } = store(
 			get cartItem() {
 				const {
 					cartItem: { id, key, variation },
-				} = getContext< CartItemContext >( 'woocommerce' );
+				} = getContext< CartItemContext >( 'woocommerce/cart' );
 
 				const cartItem = ( woocommerceState.findItemInCart( {
 					id,

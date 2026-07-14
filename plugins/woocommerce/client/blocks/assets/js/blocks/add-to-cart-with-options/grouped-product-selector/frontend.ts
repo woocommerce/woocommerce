@@ -122,7 +122,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				}
 
 				const { actions: wooActions } = store< WooCommerce >(
-					'woocommerce',
+					'woocommerce/cart',
 					{},
 					{ lock: universalLock }
 				);

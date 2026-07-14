@@ -299,7 +299,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					getContext< Context >();
 
 				const { actions: wooActions } = store< WooCommerce >(
-					'woocommerce',
+					'woocommerce/cart',
 					{},
 					{ lock: universalLock }
 				);
