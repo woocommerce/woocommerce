@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WC_Unit_Test_Case;
 
 /**
@@ -51,6 +52,31 @@ class FeaturePluginTest extends WC_Unit_Test_Case {
 			'option disabled'  => array( 'no', false ),
 			'unexpected value' => array( 'invalid', false ),
 		);
+	}
+
+	/**
+	 * @testdox The bootstrap analytics gate agrees with the canonical FeaturesController result.
+	 * @dataProvider analytics_option_provider
+	 *
+	 * The bootstrap gate deliberately hardcodes the analytics option name and its 'yes' default so it can run
+	 * before init without building translated feature definitions. This pins that duplication to the canonical
+	 * path: if `enabled_by_default` for analytics ever flips upstream, the two would silently disagree on the
+	 * "option absent" case and this test fails.
+	 *
+	 * @param string|null $option_value   Analytics option value, or null when absent.
+	 * @param bool        $expected_value Expected gate value.
+	 */
+	public function test_analytics_gate_agrees_with_features_controller( ?string $option_value, bool $expected_value ): void {
+		if ( null === $option_value ) {
+			delete_option( Analytics::TOGGLE_OPTION_NAME );
+		} else {
+			update_option( Analytics::TOGGLE_OPTION_NAME, $option_value );
+		}
+
+		$canonical_value = wc_get_container()->get( FeaturesController::class )->feature_is_enabled( 'analytics' );
+
+		$this->assertSame( $expected_value, $canonical_value, 'FeaturesController::feature_is_enabled( "analytics" ) drifted from the documented expectation the bootstrap gate mirrors.' );
+		$this->assertSame( $canonical_value, $this->is_analytics_enabled_during_bootstrap(), 'The bootstrap gate must agree with FeaturesController::feature_is_enabled( "analytics" ) under the same option state.' );
 	}
 
 	/**
