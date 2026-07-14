@@ -357,6 +357,24 @@ class AddToCartWithOptions extends AbstractBlock {
 				}
 			}
 
+			// The initial `add-item` payload for this surface's product, seeded
+			// as a `woocommerce/cart` context bag so the client can copy it into
+			// `draftItems[currentScope]` on first render (initialize-if-absent).
+			// Grouped products seed nothing here: there is no single product id
+			// to add at this level, only children, which seed individually via
+			// their own quantity-selector surface.
+			$draft_seed = null;
+			if ( ProductType::GROUPED !== $product_type ) {
+				$draft_seed = array(
+					'id'       => $product_id,
+					'quantity' => $default_quantity,
+				);
+
+				if ( ! empty( $context['selectedAttributes'] ) ) {
+					$draft_seed['variation'] = $context['selectedAttributes'];
+				}
+			}
+
 			$hooks_before = '';
 			$hooks_after  = '';
 
@@ -547,7 +565,30 @@ class AddToCartWithOptions extends AbstractBlock {
 				'data-wp-interactive'       => 'woocommerce/add-to-cart-with-options',
 				'data-wp-class--is-invalid' => '!state.isFormValid',
 			);
-			$context_directive  = wp_interactivity_data_wp_context( $context );
+
+			// Merged in separately (rather than written onto `$wrapper_attributes`
+			// directly) below, alongside `$form_attributes`, so this variable's
+			// shape stays exactly what it was before draft seeding existed.
+			$draft_seed_init_attribute = null !== $draft_seed
+				? array( 'data-wp-init--seed-draft' => 'woocommerce/cart::actions.seedDraftIfAbsent' )
+				: array();
+
+			$context_directive = wp_interactivity_data_wp_context( $context );
+
+			if ( null !== $draft_seed ) {
+				// Hand-rolled second context bag: `wp_interactivity_data_wp_context()`
+				// always emits an attribute literally named `data-wp-context`, so it
+				// cannot carry the `woocommerce/cart` draft seed alongside the
+				// `woocommerce/add-to-cart-with-options` context above on the same
+				// element — the HTML parser would keep the first and silently drop
+				// the second. The three-hyphen `data-wp-context---draft-seed` form is
+				// the supported way to add a second context bag on one element (see
+				// ProductTemplate.php/SingleProduct.php's `data-wp-context---scope`).
+				$context_directive .= ' data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
+					array( 'draftSeed' => $draft_seed ),
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+				) . '\'';
+			}
 
 			$cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add' );
 			$form_attributes         = '';
@@ -602,6 +643,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					array_merge(
 						$wrapper_attributes,
 						$form_attributes,
+						$draft_seed_init_attribute,
 						array(
 							'class' => implode(
 								' ',

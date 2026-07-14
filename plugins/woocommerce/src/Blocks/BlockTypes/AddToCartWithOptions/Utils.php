@@ -145,14 +145,19 @@ class Utils {
 			}
 		}
 
+		// The quantity actually bound to the rendered input: the product's
+		// minimum purchase quantity, or `0` when this surface allows an empty
+		// starting quantity (an optional grouped-product child). Computed
+		// unconditionally so it can also seed the draft-seed context below,
+		// even on the (unexpected) chance the number input isn't found.
+		$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
+		$input_quantity    = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
+
 		if (
 			$processor->next_tag( 'input' ) &&
 			$processor->get_attribute( 'type' ) === 'number' &&
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
-			$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
-			$input_quantity   = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
-
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options-quantity-selector',
 				array(
@@ -178,6 +183,35 @@ class Utils {
 		);
 
 		$context_attribute = wp_interactivity_data_wp_context( $context );
+
+		if ( $product instanceof \WC_Product ) {
+			// The initial `add-item` payload for this quantity selector's
+			// product, seeded as a `woocommerce/cart` context bag so the client
+			// can copy it into `draftItems[currentScope]` on first render
+			// (initialize-if-absent). `quantity` matches `$input_quantity` — the
+			// value actually bound to the rendered input above — not the
+			// product's raw minimum, so the seed never disagrees with the
+			// initial HTML.
+			$wrapper_attributes['data-wp-init--seed-draft'] = 'woocommerce/cart::actions.seedDraftIfAbsent';
+
+			// Hand-rolled second context bag: `wp_interactivity_data_wp_context()`
+			// always emits an attribute literally named `data-wp-context`, so it
+			// cannot carry the `woocommerce/cart` draft seed alongside the
+			// namespace-default context above on the same element — the HTML
+			// parser would keep the first and silently drop the second. The
+			// three-hyphen `data-wp-context---draft-seed` form is the supported
+			// way to add a second context bag on one element (see
+			// ProductTemplate.php/SingleProduct.php's `data-wp-context---scope`).
+			$context_attribute .= ' data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
+				array(
+					'draftSeed' => array(
+						'id'       => $product->get_id(),
+						'quantity' => $input_quantity,
+					),
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			) . '\'';
+		}
 
 		return sprintf(
 			'<div %1$s %2$s>%3$s</div>',

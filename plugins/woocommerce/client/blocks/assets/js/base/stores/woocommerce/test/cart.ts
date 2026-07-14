@@ -47,6 +47,13 @@ let mockSharedContext: { scope?: string; key?: string } | undefined;
  */
 let mockSharedContextThrows = false;
 
+/**
+ * The value `getServerContext( 'woocommerce/cart' )` should return, controlled
+ * per test. `undefined` simulates a surface that emits no `draftSeed` (or
+ * emits no `woocommerce/cart` context bag at all).
+ */
+let mockServerContext: { draftSeed?: DraftItem } | undefined;
+
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
@@ -59,6 +66,7 @@ jest.mock(
 			}
 			return mockSharedContext;
 		} ),
+		getServerContext: jest.fn( () => mockServerContext ),
 		store: jest.fn( ( name: string, definition ) => {
 			// The cart store consults `woocommerce/products` one-directionally;
 			// keep its mock state independent of the cart's own so seeding one
@@ -110,6 +118,11 @@ jest.mock( '../legacy-events', () => ( {
 const { triggerAddedToCartEvent } = jest.requireMock( '../legacy-events' ) as {
 	triggerAddedToCartEvent: jest.Mock;
 };
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { getServerContext: mockGetServerContext } = jest.requireMock(
+	'@wordpress/interactivity'
+) as { getServerContext: jest.Mock };
 
 /**
  * Captured representation of a single mutation sent through the batch endpoint.
@@ -413,6 +426,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		delete ( mockState as Partial< Store[ 'state' ] > ).cart;
 		mockSharedContext = undefined;
 		mockSharedContextThrows = false;
+		mockServerContext = undefined;
 		delete mockProductsState.productInContext;
 		mockProductsState.products = {};
 		mockProductsState.productVariations = {};
@@ -1741,6 +1755,104 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			actions.removeDraftItem( { id: 42 } );
 
 			expect( mockState.draftItems[ 'page/9' ] ).toBeUndefined();
+		} );
+	} );
+
+	describe( 'seedDraftIfAbsent', () => {
+		it( 'copies the server-seeded draftSeed into draftItems[currentScope] when the scope holds no draft for that product', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockState.pageScope = 'page/1';
+			mockServerContext = { draftSeed: { id: 42, quantity: 3 } };
+
+			actions.seedDraftIfAbsent();
+
+			expect( mockState.draftItems[ 'page/1' ] ).toEqual( [
+				{ id: 42, quantity: 3 },
+			] );
+		} );
+
+		it( 'resolves currentScope (a context override), not always pageScope', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockState.pageScope = 'page/1';
+			mockSharedContext = { scope: 'single-product/42/0' };
+			mockServerContext = { draftSeed: { id: 42, quantity: 2 } };
+
+			actions.seedDraftIfAbsent();
+
+			expect( mockState.draftItems[ 'page/1' ] ).toBeUndefined();
+			expect( mockState.draftItems[ 'single-product/42/0' ] ).toEqual( [
+				{ id: 42, quantity: 2 },
+			] );
+		} );
+
+		it( 'copies the variation and namespaced extension props from the seed verbatim', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockState.pageScope = 'page/1';
+			mockServerContext = {
+				draftSeed: {
+					id: 42,
+					quantity: 1,
+					variation: [ { attribute: 'Color', value: 'red' } ],
+					'my-plugin/gift-note': 'Happy birthday!',
+				} as DraftItem,
+			};
+
+			actions.seedDraftIfAbsent();
+
+			expect( mockState.draftItems[ 'page/1' ] ).toEqual( [
+				{
+					id: 42,
+					quantity: 1,
+					variation: [ { attribute: 'Color', value: 'red' } ],
+					'my-plugin/gift-note': 'Happy birthday!',
+				},
+			] );
+		} );
+
+		it( 'never overwrites an already-edited live draft for the same product id (re-render never clobbers)', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockState.pageScope = 'page/1';
+			// The shopper already edited this scope's draft before the region
+			// re-rendered and re-ran the init.
+			actions.upsertDraftItem(
+				{ id: 42, quantity: 9 },
+				{ scope: 'page/1' }
+			);
+			mockServerContext = { draftSeed: { id: 42, quantity: 1 } };
+
+			actions.seedDraftIfAbsent();
+
+			expect( mockState.draftItems[ 'page/1' ] ).toEqual( [
+				{ id: 42, quantity: 9 },
+			] );
+		} );
+
+		it( 'is a no-op, leaving draftItems untouched, when the server context carries no draftSeed', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockState.pageScope = 'page/1';
+			mockServerContext = undefined;
+
+			actions.seedDraftIfAbsent();
+
+			expect( mockState.draftItems ).toEqual( {} );
+		} );
+
+		it( 'reads the seed via getServerContext( "woocommerce/cart" )', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockState.pageScope = 'page/1';
+			mockServerContext = { draftSeed: { id: 42, quantity: 1 } };
+
+			actions.seedDraftIfAbsent();
+
+			expect( mockGetServerContext ).toHaveBeenCalledWith(
+				'woocommerce/cart'
+			);
 		} );
 	} );
 
