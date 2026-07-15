@@ -82,7 +82,7 @@ class ProductsById extends AbstractRoute {
 	protected function get_route_response( \WP_REST_Request $request ) {
 		$object = wc_get_product( (int) $request['id'] );
 
-		if ( ! $object || 0 === $object->get_id() || ! $object->is_publicly_viewable() ) {
+		if ( ! $object || 0 === $object->get_id() || ! $object->is_viewable() ) {
 			throw new RouteException( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), 404 );
 		}
 

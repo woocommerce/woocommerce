@@ -87,7 +87,7 @@ class ProductsBySlug extends AbstractRoute {
 			$object = $this->get_product_variation_by_slug( $slug );
 		}
 
-		if ( ! $object || 0 === $object->get_id() || ! $object->is_publicly_viewable() ) {
+		if ( ! $object || 0 === $object->get_id() || ! $object->is_viewable() ) {
 			throw new RouteException( 'woocommerce_rest_product_invalid_slug', __( 'Invalid product slug.', 'woocommerce' ), 404 );
 		}
 
