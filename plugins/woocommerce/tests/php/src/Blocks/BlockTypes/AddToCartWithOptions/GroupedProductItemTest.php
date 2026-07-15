@@ -43,6 +43,25 @@ class GroupedProductItemTest extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		if ( ! self::$are_blocks_registered ) {
+			$registry = \WP_Block_Type_Registry::get_instance();
+
+			// Another test class (e.g. AddToCartWithOptions.php) may have
+			// already registered these block types in the same PHPUnit
+			// process. This class still needs its own instance for the
+			// direct method calls below, and re-registering over an existing
+			// block type would otherwise trigger an "already registered"
+			// doing_it_wrong notice (and be a no-op), so unregister first.
+			foreach (
+				array(
+					'woocommerce/add-to-cart-with-options-grouped-product-item',
+					'woocommerce/add-to-cart-with-options-grouped-product-item-selector',
+				) as $block_name
+			) {
+				if ( $registry->is_registered( $block_name ) ) {
+					$registry->unregister( $block_name );
+				}
+			}
+
 			// The blocks are not registered on `init` when running under a
 			// classic theme, so register them explicitly for these tests.
 			self::$grouped_product_item = new AddToCartWithOptionsGroupedProductItemMock();
