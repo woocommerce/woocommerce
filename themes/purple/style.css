@@ -372,6 +372,17 @@ textarea {
    WooCommerce — Single product
    ========================================================================== */
 
+/* Underline links in the product summary and description; remove on hover to match .underline-link. */
+.wc-block-components-product-summary a,
+.wc-block-product-description a {
+	text-decoration: underline;
+}
+
+.wc-block-components-product-summary a:hover,
+.wc-block-product-description a:hover {
+	text-decoration: none;
+}
+
 .wp-block-product-specifications-item__value p {
 	margin: 0
 }
