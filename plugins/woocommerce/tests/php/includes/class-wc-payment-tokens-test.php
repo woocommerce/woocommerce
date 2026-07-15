@@ -31,6 +31,7 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_get_customer_payment_tokens_limit' );
 		remove_all_filters( 'woocommerce_get_payment_tokens_unscoped_limit' );
+		remove_all_filters( 'woocommerce_get_payment_tokens_page_size' );
 		remove_all_filters( 'pre_option_posts_per_page' );
 		update_option( 'posts_per_page', 10 );
 		parent::tearDown();
