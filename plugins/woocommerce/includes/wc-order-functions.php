@@ -617,7 +617,12 @@ function wc_create_refund( $args = array() ) {
 					}
 				}
 
-				if ( empty( $qty ) && empty( $refund_total ) && empty( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
+				// The admin refund form posts a 0 total and 0 tax amounts for every untouched row, so an
+				// all-zero refund_tax alone must not create a refund line item (a genuine 0% tax line
+				// still survives, because its item is refunded via qty or refund_total).
+				$refund_tax_sum = array_sum( array_map( 'abs', $refund_tax ) );
+
+				if ( empty( $qty ) && empty( $refund_total ) && empty( $refund_tax_sum ) ) {
 					continue;
 				}
 
