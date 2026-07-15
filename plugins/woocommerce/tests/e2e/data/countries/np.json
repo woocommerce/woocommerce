@@ -1,74 +1,46 @@
 {
-    "code": "NP",
-    "name": "Nepal",
-    "states": [
-        {
-            "code": "BAG",
-            "name": "Bagmati"
-        },
-        {
-            "code": "BHE",
-            "name": "Bheri"
-        },
-        {
-            "code": "DHA",
-            "name": "Dhaulagiri"
-        },
-        {
-            "code": "GAN",
-            "name": "Gandaki"
-        },
-        {
-            "code": "JAN",
-            "name": "Janakpur"
-        },
-        {
-            "code": "KAR",
-            "name": "Karnali"
-        },
-        {
-            "code": "KOS",
-            "name": "Koshi"
-        },
-        {
-            "code": "LUM",
-            "name": "Lumbini"
-        },
-        {
-            "code": "MAH",
-            "name": "Mahakali"
-        },
-        {
-            "code": "MEC",
-            "name": "Mechi"
-        },
-        {
-            "code": "NAR",
-            "name": "Narayani"
-        },
-        {
-            "code": "RAP",
-            "name": "Rapti"
-        },
-        {
-            "code": "SAG",
-            "name": "Sagarmatha"
-        },
-        {
-            "code": "SET",
-            "name": "Seti"
-        }
-    ],
-    "_links": {
-        "self": [
-            {
-                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/np"
-            }
-        ],
-        "collection": [
-            {
-                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
-            }
-        ]
-    }
+	"code": "NP",
+	"name": "Nepal",
+	"states": [
+		{
+			"code": "P1",
+			"name": "Koshi"
+		},
+		{
+			"code": "P2",
+			"name": "Madhesh"
+		},
+		{
+			"code": "P3",
+			"name": "Bagmati"
+		},
+		{
+			"code": "P4",
+			"name": "Gandaki"
+		},
+		{
+			"code": "P5",
+			"name": "Lumbini"
+		},
+		{
+			"code": "P6",
+			"name": "Karnali"
+		},
+		{
+			"code": "P7",
+			"name": "Sudurpashchim"
+		}
+	],
+	"_links": {
+		"self": [
+			{
+				"href": "http://localhost:8086/wp-json/wc/v3/data/countries/np"
+			}
+		],
+		"collection": [
+			{
+				"href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+			}
+		]
+	}
 }

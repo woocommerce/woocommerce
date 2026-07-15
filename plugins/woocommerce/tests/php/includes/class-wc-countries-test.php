@@ -43,4 +43,25 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 			),
 		);
 	}
+
+	/**
+	 * @testdox Nepal uses current provinces instead of legacy zones.
+	 */
+	public function test_nepal_uses_current_provinces_instead_of_legacy_zones(): void {
+		$expected = array(
+			'P1' => 'Koshi',
+			'P2' => 'Madhesh',
+			'P3' => 'Bagmati',
+			'P4' => 'Gandaki',
+			'P5' => 'Lumbini',
+			'P6' => 'Karnali',
+			'P7' => 'Sudurpashchim',
+		);
+
+		$this->assertSame(
+			$expected,
+			wc()->countries->get_states( 'NP' ),
+			'Nepal should use current ISO 3166-2 province codes and names.'
+		);
+	}
 }
