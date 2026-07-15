@@ -457,7 +457,7 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 		$filter = function ( $url, $aspect_ratio, $width, $height ) {
 			return $url . '?resize=' . $width . ',' . $height . '&crop=1';
 		};
-		add_filter( 'woocommerce_email_editor_gallery_cropped_image_url', $filter, 10, 5 );
+		add_filter( 'woocommerce_email_editor_gallery_cropped_image_url', $filter, 10, 4 );
 		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
 		remove_filter( 'woocommerce_email_editor_gallery_cropped_image_url', $filter, 10 );
 
