@@ -266,7 +266,7 @@ describe( 'Grouped product batchAddToCart', () => {
 		mockAddCartItem = jest.fn( () => new Promise( () => undefined ) );
 
 		const actions = loadBlockStore();
-		const generator = actions.batchAddToCart() as Generator<
+		const generator = actions.batchAddToCart() as unknown as Generator<
 			unknown,
 			void,
 			unknown
