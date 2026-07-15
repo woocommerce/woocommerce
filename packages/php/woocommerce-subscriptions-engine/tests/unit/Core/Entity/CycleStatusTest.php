@@ -22,6 +22,7 @@ class CycleStatusTest extends TestCase {
 		$this->assertSame(
 			array(
 				CycleStatus::PENDING,
+				CycleStatus::PROCESSING,
 				CycleStatus::BILLED,
 				CycleStatus::FAILED,
 				CycleStatus::CANCELLED,
@@ -32,22 +33,33 @@ class CycleStatusTest extends TestCase {
 
 	public function test_known_statuses_are_valid(): void {
 		$this->assertTrue( CycleStatus::is_valid( CycleStatus::PENDING ) );
+		$this->assertTrue( CycleStatus::is_valid( CycleStatus::PROCESSING ) );
 		$this->assertTrue( CycleStatus::is_valid( CycleStatus::BILLED ) );
 		$this->assertTrue( CycleStatus::is_valid( CycleStatus::FAILED ) );
 		$this->assertTrue( CycleStatus::is_valid( CycleStatus::CANCELLED ) );
 		$this->assertFalse( CycleStatus::is_valid( 'nonsense' ) );
 	}
 
-	public function test_pending_reaches_billed_failed_and_cancelled(): void {
+	public function test_pending_reaches_processing_billed_failed_and_cancelled(): void {
+		$this->assertTrue( CycleStatus::is_transition_allowed( CycleStatus::PENDING, CycleStatus::PROCESSING ) );
 		$this->assertTrue( CycleStatus::is_transition_allowed( CycleStatus::PENDING, CycleStatus::BILLED ) );
 		$this->assertTrue( CycleStatus::is_transition_allowed( CycleStatus::PENDING, CycleStatus::FAILED ) );
 		$this->assertTrue( CycleStatus::is_transition_allowed( CycleStatus::PENDING, CycleStatus::CANCELLED ) );
 	}
 
-	public function test_failed_can_only_be_cancelled(): void {
-		// Retry support (failed -> pending re-queue) is deferred; for now a failed cycle can only be cancelled.
+	public function test_processing_settles_to_billed_failed_or_cancelled_but_not_back_to_pending(): void {
+		$this->assertTrue( CycleStatus::is_transition_allowed( CycleStatus::PROCESSING, CycleStatus::BILLED ) );
+		$this->assertTrue( CycleStatus::is_transition_allowed( CycleStatus::PROCESSING, CycleStatus::FAILED ) );
+		$this->assertTrue( CycleStatus::is_transition_allowed( CycleStatus::PROCESSING, CycleStatus::CANCELLED ) );
+		$this->assertFalse( CycleStatus::is_transition_allowed( CycleStatus::PROCESSING, CycleStatus::PENDING ) );
+		$this->assertFalse( CycleStatus::is_terminal( CycleStatus::PROCESSING ) );
+	}
+
+	public function test_failed_can_be_retried_to_pending_or_cancelled(): void {
+		// A failed cycle can be retried (re-queued to pending by an admin trigger) or cancelled,
+		// but not settled directly to billed without re-attempting the charge.
+		$this->assertTrue( CycleStatus::is_transition_allowed( CycleStatus::FAILED, CycleStatus::PENDING ) );
 		$this->assertTrue( CycleStatus::is_transition_allowed( CycleStatus::FAILED, CycleStatus::CANCELLED ) );
-		$this->assertFalse( CycleStatus::is_transition_allowed( CycleStatus::FAILED, CycleStatus::PENDING ) );
 		$this->assertFalse( CycleStatus::is_transition_allowed( CycleStatus::FAILED, CycleStatus::BILLED ) );
 	}
 
@@ -61,8 +73,9 @@ class CycleStatusTest extends TestCase {
 		}
 	}
 
-	public function test_pending_and_failed_are_not_terminal(): void {
+	public function test_pending_processing_and_failed_are_not_terminal(): void {
 		$this->assertFalse( CycleStatus::is_terminal( CycleStatus::PENDING ) );
+		$this->assertFalse( CycleStatus::is_terminal( CycleStatus::PROCESSING ) );
 		$this->assertFalse( CycleStatus::is_terminal( CycleStatus::FAILED ) );
 	}
 
@@ -107,6 +120,7 @@ class CycleStatusTest extends TestCase {
 
 	public function test_named_factories_carry_their_status_value(): void {
 		$this->assertSame( CycleStatus::PENDING, CycleStatus::pending()->get_value() );
+		$this->assertSame( CycleStatus::PROCESSING, CycleStatus::processing()->get_value() );
 		$this->assertSame( CycleStatus::BILLED, CycleStatus::billed()->get_value() );
 		$this->assertSame( CycleStatus::FAILED, CycleStatus::failed()->get_value() );
 		$this->assertSame( CycleStatus::CANCELLED, CycleStatus::cancelled()->get_value() );

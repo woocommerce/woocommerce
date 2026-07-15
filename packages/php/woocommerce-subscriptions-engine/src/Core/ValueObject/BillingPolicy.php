@@ -115,7 +115,7 @@ final class BillingPolicy {
 		$trial = $data['trial_duration'] ?? null;
 		if ( null !== $trial && ! is_array( $trial ) ) {
 			throw new DomainException(
-				sprintf( 'BillingPolicy: trial_duration must be null or an array, got %s.', wp_json_encode( $trial ) )
+				sprintf( 'BillingPolicy: trial_duration must be null or an array, got %s.', gettype( $trial ) )
 			);
 		}
 
