@@ -641,10 +641,10 @@ jobs:
             fail=0
             while IFS= read -r file; do
               if ! awk '
-                NR==1 && $0 !~ /^Significance:/ { exit 0 }
-                /^[[:space:]]*$/ { if (!body) { body=1; next } }
+                !body && /^Significance:/ { sig=1 }
+                !body && /^[[:space:]]*$/ { body=1; next }
                 body { if (NF) c++ }
-                END { exit (c>1) }
+                END { exit (sig && c>1) }
               ' "$file"; then
                 echo "::error file=${file}::Changelog message must be a single line so it can be sorted and rendered correctly during release. Move any extra detail into the 'Comment:' header."
                 fail=1
