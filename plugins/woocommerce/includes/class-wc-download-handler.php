@@ -474,6 +474,9 @@ class WC_Download_Handler {
 	 * @param string $filename  File name.
 	 */
 	public static function download_file_force( $file_path, $filename ) {
+		// Raise the time limit and release the session before any potentially slow remote I/O below.
+		self::check_server_config();
+
 		$parsed_file_path = self::parse_file_path( $file_path );
 		$download_range   = self::get_download_range( @filesize( $parsed_file_path['file_path'] ) ); // @codingStandardsIgnoreLine.
 
