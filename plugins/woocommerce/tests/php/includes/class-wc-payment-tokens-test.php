@@ -247,6 +247,33 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Data store get_tokens should ignore an unscoped ceiling filter value below one.
+	 *
+	 * @testWith [null]
+	 *           [0]
+	 *
+	 * @param mixed $filtered_value Value returned by the unscoped limit filter.
+	 */
+	public function test_data_store_get_tokens_ignores_an_unscoped_ceiling_below_one( $filtered_value ): void {
+		add_filter(
+			'woocommerce_get_payment_tokens_unscoped_limit',
+			function () use ( $filtered_value ) {
+				return $filtered_value;
+			}
+		);
+		$this->create_tokens_for_user( 3 );
+
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		// A ceiling of 0 would empty the result set rather than cap it.
+		$this->assertCount(
+			3,
+			$data_store->get_tokens( array() ),
+			'A ceiling below 1 should fall back to the default rather than return nothing'
+		);
+	}
+
+	/**
 	 * @testdox Data store get_tokens should size an unscoped query passing page by the page size, not the unscoped ceiling.
 	 */
 	public function test_data_store_get_tokens_unscoped_query_with_page_uses_the_page_size(): void {

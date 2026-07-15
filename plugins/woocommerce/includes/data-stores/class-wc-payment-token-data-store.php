@@ -334,10 +334,12 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 			 *
 			 * @since 11.1.0
 			 *
-			 * @param int   $limit Maximum number of tokens to return. Defaults to 500.
+			 * @param int   $limit Maximum number of tokens to return. Defaults to 500. A value below
+			 *                     1 is ignored, as it would empty the result set rather than cap it.
 			 * @param array $args  The arguments passed to `get_tokens()`.
 			 */
-			$limit = absint( apply_filters( 'woocommerce_get_payment_tokens_unscoped_limit', self::DEFAULT_UNSCOPED_TOKENS_LIMIT, $args ) );
+			$ceiling = absint( apply_filters( 'woocommerce_get_payment_tokens_unscoped_limit', self::DEFAULT_UNSCOPED_TOKENS_LIMIT, $args ) );
+			$limit   = $ceiling > 0 ? $ceiling : self::DEFAULT_UNSCOPED_TOKENS_LIMIT;
 		}
 
 		// Without an explicit limit or page, a query scoped to a token_id or user_id stays
