@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Only enqueue the block notices stylesheet (wc-blocks-style) when block notices are actually used - block themes, or classic themes opting in via the woocommerce_use_block_notices_in_classic_theme filter - instead of on every page for all classic themes.
