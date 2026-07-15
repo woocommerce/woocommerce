@@ -37,11 +37,6 @@ const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
 } );
 
 const DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO = 0.25;
-const TOUCH_MOVE_LISTENER_OPTIONS: AddEventListenerOptions = {
-	capture: true,
-	passive: false,
-};
-const keepTouchMoveCancelable = () => undefined;
 
 const getVerticalIntersectionRatio = ( rect: DOMRect, rootRect: DOMRect ) => {
 	const height =
@@ -552,14 +547,14 @@ const productGallery = {
 			context.isDialogOpen = false;
 			document.body.classList.remove( CLASSES.dialogOpenBody );
 		},
-		onTouchStart: withSyncEvent( ( event: TouchEvent ) => {
+		onTouchStart: ( event: TouchEvent ) => {
 			const context = getContext();
 			const { clientX } = event.touches[ 0 ];
 			context.touchStartX = clientX;
 			context.touchCurrentX = clientX;
 			context.isDragging = true;
-		} ),
-		onTouchMove: withSyncEvent( ( event: TouchEvent ) => {
+		},
+		onTouchMove: ( event: TouchEvent ) => {
 			const context = getContext();
 			if ( ! context.isDragging ) {
 				return;
@@ -572,7 +567,7 @@ const productGallery = {
 			if ( Math.abs( delta ) > 10 ) {
 				event.preventDefault();
 			}
-		} ),
+		},
 		onTouchEnd: () => {
 			const context = getContext();
 			if ( ! context.isDragging ) {
@@ -655,32 +650,6 @@ const productGallery = {
 		},
 	},
 	callbacks: {
-		/**
-		 * Register before a gesture starts so embedded WebViews keep touchmove
-		 * events cancelable. The swipe action selectively prevents horizontal
-		 * movement, so vertical page scrolling remains available.
-		 */
-		initTouchMoveListener: () => {
-			const element = getElement()?.ref;
-
-			if ( ! ( element instanceof HTMLElement ) ) {
-				return;
-			}
-
-			element.addEventListener(
-				'touchmove',
-				keepTouchMoveCancelable,
-				TOUCH_MOVE_LISTENER_OPTIONS
-			);
-
-			return () => {
-				element.removeEventListener(
-					'touchmove',
-					keepTouchMoveCancelable,
-					TOUCH_MOVE_LISTENER_OPTIONS
-				);
-			};
-		},
 		/**
 		 * Sync the gallery to the blockified Add to Cart + Options block's
 		 * variation state. Bound via `data-wp-watch`, so it re-runs whenever

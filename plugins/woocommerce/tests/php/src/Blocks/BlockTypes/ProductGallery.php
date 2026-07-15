@@ -191,10 +191,6 @@ class ProductGallery extends \WP_UnitTestCase {
 
 		// Check that the gallery wrapper is rendered.
 		$this->assertStringContainsString( 'wc-block-product-gallery', $markup );
-		$this->assertStringContainsString(
-			'data-wp-init--touch-move-listener="callbacks.initTouchMoveListener"',
-			$markup
-		);
 
 		// Check that the viewer block is rendered.
 		$this->assertStringContainsString( 'wc-block-product-gallery-large-image', $markup );
