@@ -341,6 +341,7 @@ class WC_Install {
 		),
 		'11.0.0'   => array(
 			'wc_update_1100_enable_point_of_sale_feature',
+		'wc_update_1100_increase_download_directories_url_length',
 		),
 	);
 
@@ -2026,7 +2027,7 @@ CREATE TABLE {$wpdb->prefix}wc_rate_limits (
 $product_attributes_lookup_table_creation_sql
 CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
 	url_id bigint(20) unsigned NOT NULL auto_increment,
-	url varchar(256) NOT NULL,
+	url varchar(1000) NOT NULL,
 	enabled tinyint(1) NOT NULL DEFAULT 0,
 	PRIMARY KEY (url_id),
 	KEY url (url($max_index_length))

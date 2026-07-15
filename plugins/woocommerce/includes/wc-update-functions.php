@@ -3581,3 +3581,22 @@ function wc_update_10902_remove_deprecated_push_notifications_option(): void {
 function wc_update_1100_enable_point_of_sale_feature() {
 	update_option( 'woocommerce_feature_point_of_sale_enabled', 'yes' );
 }
+
+/**
+ * Increase the URL column length in wc_product_download_directories from 256 to 1000.
+ *
+ * Domains can be up to 256 characters (RFC 1035), meaning a URL like https://{domain}
+ * exceeds the previous limit. This update alters the column to varchar(1000).
+ *
+ * @since 11.0.0
+ *
+ * @return void
+ */
+function wc_update_1100_increase_download_directories_url_length() {
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'wc_product_download_directories';
+
+	// phpcs:ignore WordPress.DB.PreparedSQL
+	$wpdb->query( "ALTER TABLE {$table_name} MODIFY url varchar(1000) NOT NULL" );
+}
