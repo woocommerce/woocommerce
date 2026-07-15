@@ -400,8 +400,13 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		// file_put_contents/wp_delete_file (not fopen/fputcsv/@unlink) keep this clean
 		// against WooCommerce's phpcs ruleset, which treats warnings as failures.
-		$csv_path = tempnam( sys_get_temp_dir(), 'wc-csv-' ) . '.csv';
-		$lines    = array(
+		// wp_tempnam() always appends a .tmp extension; the importer requires a
+		// .csv/.txt extension, so rename in place (no leftover stub file).
+		$tmp_path = wp_tempnam( 'wc-csv' );
+		$csv_path = $tmp_path . '.csv';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Tests rename a tmp file we control.
+		rename( $tmp_path, $csv_path );
+		$lines = array(
 			'"ID","date sale price starts","date sale price ends","Sale price"',
 			sprintf( '%d,"2022-10-25","2099-01-26","2.00"', $product->get_id() ),
 			sprintf( '%d,"2022-10-25 09:00:00","2099-01-26 10:30:00","2.00"', $timed_product->get_id() ),
@@ -427,8 +432,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$updated   = wc_get_product( $product->get_id() );
 		$date_to   = $updated->get_date_on_sale_to();
 		$date_from = $updated->get_date_on_sale_from();
-		// tempnam() also created this extensionless file.
-		$tmp_stub = preg_replace( '/\.csv$/', '', $csv_path );
 
 		$this->assertNotNull( $date_to, 'date_on_sale_to should be set' );
 		$this->assertNotNull( $date_from, 'date_on_sale_from should be set' );
@@ -453,7 +456,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $product->get_id() );
 		WC_Helper_Product::delete_product( $timed_product->get_id() );
 		wp_delete_file( $csv_path );
-		wp_delete_file( $tmp_stub );
 	}
 
 	/**
@@ -465,8 +467,13 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->set_regular_price( '10.00' );
 		$product->save();
 
-		$csv_path = tempnam( sys_get_temp_dir(), 'wc-csv-' ) . '.csv';
-		$lines    = array(
+		// wp_tempnam() always appends a .tmp extension; the importer requires a
+		// .csv/.txt extension, so rename in place (no leftover stub file).
+		$tmp_path = wp_tempnam( 'wc-csv' );
+		$csv_path = $tmp_path . '.csv';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Tests rename a tmp file we control.
+		rename( $tmp_path, $csv_path );
+		$lines = array(
 			'"ID","date sale price starts","date sale price ends","Sale price"',
 			sprintf( '%d,"2022-10-25","2099-01-26","2.00"', $product->get_id() ),
 		);
@@ -524,7 +531,5 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		WC_Helper_Product::delete_product( $product->get_id() );
 		wp_delete_file( $csv_path );
-		// tempnam() also created this extensionless file.
-		wp_delete_file( preg_replace( '/\.csv$/', '', $csv_path ) );
 	}
 }
