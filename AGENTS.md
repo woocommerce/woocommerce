@@ -167,6 +167,26 @@ Treat a symbol as **externally exposed** when it is implemented or consumed outs
 
 > This rule exists because WooCommerce 10.9.0 was reverted on WP Cloud: PR #64394 added a required `get_entry_count(): int` method to `FeedInterface`, fataling older WooCommerce Stripe Gateway versions that implement it. Fixed in PR #65965.
 
+### The compatibility surface is wider than PHP signatures
+
+WordPress exposes more contracts than class and function signatures. The following are equally binding: a change to any of them is **high-risk** and requires the same backward-compatibility impact statement in the PR description.
+
+**Hooks and filters are public contracts.** Every `do_action` and `apply_filters` call is an interface that third-party callbacks depend on. Removing a hook, renaming it, or removing/reordering its arguments breaks every attached callback. Changing *when* or *whether* a hook fires can break consumers that depend on its timing. Additive is the safe path: append new arguments at the end, never remove or reorder existing ones. To retire a hook, fire it through `do_action_deprecated()` / `apply_filters_deprecated()` for a deprecation window instead of deleting it.
+
+**Do not assume global state.** Code can run in admin, REST, CLI, cron, webhook, and front-end contexts, and not all of them set the globals a front-end request does (`$post`, `$wp_query`, an initialized session or cart). A newly introduced read of a global, or of `WC()->…` state, in a path reachable outside a standard request is a fatal or a silent misbehavior in the contexts that do not set it. Guard the exact dependency explicitly: use `function_exists`/`class_exists` for symbols, `isset` for variables, `did_action` for lifecycle state, and verify that `WC()` and the required component are initialized before dereferencing `WC()->…`.
+
+**Do not assume single-site.** Multisite changes where data lives: site-scoped vs network-scoped options (`get_option` vs `get_site_option`), per-site tables, user roles and capabilities, and upload paths all differ. A change that reads or writes site state must state in its PR whether it behaves correctly under multisite — and if it was not tested there, say so explicitly.
+
+**Do not assume install layout.** WordPress could be configured to run in a subdirectory, with relocated `wp-content`, and behind reverse proxies. Never build paths or URLs by concatenation from the domain root; derive them (`plugins_url()`, `plugin_dir_path()`, `wp_upload_dir()`, and mind the `home_url()` vs `site_url()` distinction). A path that works on a root install and breaks elsewhere is a compatibility bug, not an edge case.
+
+### Before changing any public or externally exposed surface (agent checklist)
+
+1. Identify the contract you are touching: signature, hook, global/scope expectation, site topology, or install layout.
+2. Assume unseen consumers. You cannot enumerate third-party code; if the surface is reachable from outside this plugin, someone consumes it.
+3. Prefer the additive path (new optional method, appended hook argument, new symbol + deprecation) over changing what exists.
+4. State the impact in the PR description: what changed, who could consume it, and why it is safe or what the deprecation path is.
+5. If you cannot establish the impact, stop and flag it to the user as needing review.
+
 ## Block Development
 
 ### `block.json` Attribute Defaults
