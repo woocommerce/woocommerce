@@ -456,6 +456,55 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox download_file_force() should serve a remote file, not fatal, when a woocommerce_file_download_filename callback returns a non-string.
+	 */
+	public function test_download_file_force_tolerates_non_string_filename_from_filter(): void {
+		// Mirrors the report in #66635: a callback that falls off the end and returns null.
+		$broken_filename_filter = function () {};
+
+		$reached_headers = false;
+		// download_headers() derives the content type from the resolved filename via
+		// get_allowed_mime_types(), so this fires once the filename is resolved but before any
+		// header() call. Throwing here unwinds download_file_force() ahead of its terminating
+		// exit(), which would otherwise take the PHPUnit process down with it.
+		$header_stage_marker = function () use ( &$reached_headers ) {
+			$reached_headers = true;
+			throw new RuntimeException( 'reached-download-headers' );
+		};
+
+		add_filter( 'woocommerce_file_download_filename', $broken_filename_filter );
+		add_filter( 'upload_mimes', $header_stage_marker );
+
+		$ob_level = ob_get_level();
+
+		// Stand in for the remote host so the open succeeds and the filename actually reaches
+		// resolve_filename_from_response_headers(), which a real unreachable URL never would.
+		stream_wrapper_unregister( 'http' );
+		stream_wrapper_register( 'http', WC_Download_Handler_Fake_Remote_Stream::class );
+
+		try {
+			WC_Download_Handler::download( 'http://example.test/uc', 0 );
+			$this->fail( 'Expected the download to reach the header stage.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertSame( 'reached-download-headers', $e->getMessage(), 'Only the marker exception should escape; a TypeError here is the #66635 regression.' );
+		} finally {
+			stream_wrapper_restore( 'http' );
+
+			// download_headers() unwinds every output buffer, including the one PHPUnit wraps
+			// each test in, so restore the nesting level it expects to find on the way out.
+			while ( ob_get_level() < $ob_level ) {
+				ob_start();
+			}
+
+			// Remove only what this test added: `upload_mimes` is a shared WordPress hook.
+			remove_filter( 'woocommerce_file_download_filename', $broken_filename_filter );
+			remove_filter( 'upload_mimes', $header_stage_marker );
+		}
+
+		$this->assertTrue( $reached_headers, 'A null filename should flow through to the download headers instead of throwing a TypeError.' );
+	}
+
+	/**
 	 * @testdox download_file_force() should render an error page, not a download, when the remote file cannot be opened.
 	 */
 	public function test_download_file_force_shows_error_when_remote_file_cannot_be_opened(): void {
