@@ -321,7 +321,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$gallery_image_ids = array();
 
 			foreach ( $data['raw_gallery_image_ids'] as $image_id ) {
-				$gallery_image_ids[] = $this->get_attachment_id_from_url( $image_id, $product->get_id() );
+				$gallery_image_id    = $this->get_attachment_id_from_url( $image_id, $product->get_id() );
+				$gallery_image_ids[] = $gallery_image_id;
+				wc_product_attach_image( $gallery_image_id, $product );
 			}
 			$product->set_gallery_image_ids( $gallery_image_ids );
 		}

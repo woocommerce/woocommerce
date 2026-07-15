@@ -2250,13 +2250,39 @@ function wc_product_attach_featured_image( $attachment_id, $product = null, $sav
 	if ( $save_product ) {
 		$product->save();
 	}
-	if ( 0 === $attachment_post->post_parent ) {
-		wp_update_post(
-			array(
-				'ID'          => $attachment_id,
-				'post_parent' => $product->get_id(),
-			)
-		);
-	}
+
+	wc_product_attach_image( $attachment_id, $product );
 }
 add_action( 'add_attachment', 'wc_product_attach_featured_image' );
+
+/**
+ * Attach an image to a product as its parent, only if the image is not already attached to another post.
+ *
+ * @since 11.1.0
+ * @param int        $attachment_id Media attachment ID.
+ * @param WC_Product $product       Product instance.
+ * @return void
+ */
+function wc_product_attach_image( $attachment_id, $product ) {
+	$attachment_id = absint( $attachment_id );
+	if ( ! $attachment_id || ! $product instanceof WC_Product ) {
+		return;
+	}
+
+	$attachment_post = get_post( $attachment_id );
+	if ( ! $attachment_post || 'attachment' !== $attachment_post->post_type ) {
+		return;
+	}
+
+	// Don't reassign an image already attached to another post.
+	if ( 0 !== (int) $attachment_post->post_parent ) {
+		return;
+	}
+
+	wp_update_post(
+		array(
+			'ID'          => $attachment_id,
+			'post_parent' => $product->get_id(),
+		)
+	);
+}

@@ -1196,4 +1196,84 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		return implode( "\n", (array) $before_data );
 	}
+
+	/**
+	 * Create an image attachment with no parent.
+	 *
+	 * @return int Attachment ID.
+	 */
+	private function create_unattached_image(): int {
+		return wp_insert_attachment(
+			array(
+				'post_title'     => 'Unattached product image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+	}
+
+	/**
+	 * @testdox wc_product_attach_image parents an unattached image to the given product.
+	 */
+	public function test_wc_product_attach_image_parents_unattached_image(): void {
+		$product       = WC_Helper_Product::create_simple_product();
+		$attachment_id = $this->create_unattached_image();
+
+		wc_product_attach_image( $attachment_id, $product );
+
+		$this->assertSame(
+			$product->get_id(),
+			(int) get_post( $attachment_id )->post_parent,
+			'An unattached image should be parented to the product.'
+		);
+	}
+
+	/**
+	 * @testdox wc_product_attach_image never overwrites an image already attached to another product.
+	 */
+	public function test_wc_product_attach_image_preserves_existing_parent(): void {
+		$first_product  = WC_Helper_Product::create_simple_product();
+		$second_product = WC_Helper_Product::create_simple_product();
+		$attachment_id  = $this->create_unattached_image();
+
+		wc_product_attach_image( $attachment_id, $first_product );
+		wc_product_attach_image( $attachment_id, $second_product );
+
+		$this->assertSame(
+			$first_product->get_id(),
+			(int) get_post( $attachment_id )->post_parent,
+			'A shared image must stay parented to the first product it was attached to.'
+		);
+	}
+
+	/**
+	 * @testdox wc_product_attach_image ignores non-attachment posts.
+	 */
+	public function test_wc_product_attach_image_ignores_non_attachments(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$post_id = self::factory()->post->create();
+
+		wc_product_attach_image( $post_id, $product );
+
+		$this->assertSame(
+			0,
+			(int) get_post( $post_id )->post_parent,
+			'A regular post should not be parented to the product.'
+		);
+	}
+
+	/**
+	 * @testdox wc_product_attach_image does nothing when not given a product object.
+	 */
+	public function test_wc_product_attach_image_requires_a_product(): void {
+		$attachment_id = $this->create_unattached_image();
+
+		wc_product_attach_image( $attachment_id, null );
+
+		$this->assertSame(
+			0,
+			(int) get_post( $attachment_id )->post_parent,
+			'Without a product object the image should remain unattached.'
+		);
+	}
 }

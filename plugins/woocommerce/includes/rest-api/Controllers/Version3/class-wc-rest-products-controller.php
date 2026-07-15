@@ -705,6 +705,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					wc_product_attach_featured_image( $attachment_id, $product, false );
 				} else {
 					$gallery[] = $attachment_id;
+					wc_product_attach_image( $attachment_id, $product );
 				}
 
 				// Set the image alt if present.
