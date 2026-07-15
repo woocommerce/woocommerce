@@ -314,6 +314,42 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The read-only summary displays shipping details when the ordered variation no longer resolves.
+	 */
+	public function test_displays_shipping_details_after_virtual_variation_is_deleted(): void {
+		$order = $this->create_order_with_shipping_data( false );
+
+		$parent_product = new WC_Product_Variable();
+		$parent_product->set_name( 'Order admin variable product' );
+		$parent_product->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent_product->get_id(),
+			'ORDER ADMIN DELETED VARIATION ' . wp_generate_uuid4(),
+			10,
+			array()
+		);
+		$variation->set_virtual( true );
+		$variation->save();
+
+		$item = current( $order->get_items() );
+		$this->assertInstanceOf( WC_Order_Item_Product::class, $item );
+		$item->set_product( $variation );
+		$item->save();
+
+		$this->products[] = $parent_product;
+		$this->products[] = $variation;
+		$variation->delete( true );
+		$order = wc_get_order( $order->get_id() );
+
+		$summary = $this->render_shipping_address_summary( $order );
+
+		$this->assertStringContainsString( '500 Billing Avenue', $summary );
+		$this->assertStringContainsString( '555-0100', $summary );
+		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
+	}
+
+	/**
 	 * @testdox The read-only summary displays shipping details for a mixed order without a shipping line.
 	 */
 	public function test_displays_shipping_details_for_mixed_order_without_shipping_line(): void {
