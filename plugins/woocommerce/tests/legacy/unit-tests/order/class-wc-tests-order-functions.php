@@ -1502,6 +1502,243 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Refunding a 0% taxed line item preserves the 0-rate tax line on the refund order.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/27118
+	 */
+	public function test_wc_create_refund_preserves_zero_rate_tax_27118() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '0.0000',
+				'tax_rate_name'     => 'Zero Rate',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tax_status( ProductTaxStatus::TAXABLE );
+		$product->set_tax_class( '' );
+		$product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$line_items = $order->get_items( 'line_item' );
+		$item_id    = array_keys( $line_items )[0];
+
+		// The admin refund UI posts the tax total as a numeric 0 (accounting.unformat),
+		// which wc_create_refund() must not silently drop as it would a "no tax" value.
+		$refund = wc_create_refund(
+			array(
+				'amount'     => $order->get_total(),
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 1,
+						'refund_total' => $order->get_total(),
+						'refund_tax'   => array( $rate_id => 0 ),
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
+
+		$refund_tax_items = $refund->get_items( 'tax' );
+		$this->assertCount( 1, $refund_tax_items, 'The 0% tax line must be carried over to the refund order.' );
+
+		$refund_tax_item = array_values( $refund_tax_items )[0];
+		$this->assertEquals( $rate_id, $refund_tax_item->get_rate_id(), 'The preserved tax line must reference the 0% rate.' );
+		$this->assertEquals( 0, $refund_tax_item->get_tax_total(), 'The preserved 0% tax line total must be 0.' );
+
+		$refunded_line_item = array_values( $refund->get_items( 'line_item' ) )[0];
+		$this->assertArrayHasKey(
+			$rate_id,
+			$refunded_line_item->get_taxes()['total'],
+			'The refunded line item must retain the 0% rate in its tax map.'
+		);
+
+		WC_Tax::_delete_tax_rate( $rate_id );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
+	 * @testdox An amount-only refund whose line items carry only zero qty, zero total and zero tax creates no refund line items.
+	 */
+	public function test_wc_create_refund_skips_untouched_items_with_zero_tax() {
+		$product_1 = WC_Helper_Product::create_simple_product();
+		$product_2 = WC_Helper_Product::create_simple_product();
+
+		$order = new WC_Order();
+		$order->add_product( $product_1, 1 );
+		$order->add_product( $product_2, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		$item_ids = array_keys( $order->get_items( 'line_item' ) );
+
+		// The admin refund form posts a 0 total and a 0 tax amount for every
+		// untouched row (only qty fields are omitted when empty), so an
+		// amount-only refund arrives with all-zero line item entries.
+		$line_items = array();
+		foreach ( $item_ids as $item_id ) {
+			$line_items[ $item_id ] = array(
+				'refund_total' => 0,
+				'refund_tax'   => array( 1 => 0 ),
+			);
+		}
+
+		$refund = wc_create_refund(
+			array(
+				'amount'     => 5,
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+
+		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
+		$this->assertCount( 0, $refund->get_items( 'line_item' ), 'Untouched items must not become refund line items.' );
+		$this->assertCount( 0, $refund->get_items( 'tax' ), 'Untouched items must not produce refund tax items.' );
+	}
+
+	/**
+	 * @testdox Partially refunding one item creates no refund line items for its untouched siblings.
+	 */
+	public function test_wc_create_refund_partial_refund_ignores_untouched_siblings() {
+		$refunded_product  = WC_Helper_Product::create_simple_product();
+		$untouched_product = WC_Helper_Product::create_simple_product();
+
+		$order = new WC_Order();
+		$order->add_product( $refunded_product, 1 );
+		$order->add_product( $untouched_product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		$refunded_item_id  = null;
+		$untouched_item_id = null;
+		foreach ( $order->get_items( 'line_item' ) as $item_id => $item ) {
+			if ( $item->get_product_id() === $refunded_product->get_id() ) {
+				$refunded_item_id = $item_id;
+			} else {
+				$untouched_item_id = $item_id;
+			}
+		}
+
+		$refunded_item_total = $order->get_items( 'line_item' )[ $refunded_item_id ]->get_total();
+
+		$refund = wc_create_refund(
+			array(
+				'amount'     => $refunded_item_total,
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$refunded_item_id  => array(
+						'qty'          => 1,
+						'refund_total' => $refunded_item_total,
+						'refund_tax'   => array( 1 => 0 ),
+					),
+					$untouched_item_id => array(
+						'refund_total' => 0,
+						'refund_tax'   => array( 1 => 0 ),
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
+
+		$refund_items = $refund->get_items( 'line_item' );
+		$this->assertCount( 1, $refund_items, 'Only the explicitly refunded item must appear on the refund.' );
+
+		$refunded_item = array_values( $refund_items )[0];
+		$this->assertEquals(
+			$refunded_item_id,
+			$refunded_item->get_meta( '_refunded_item_id' ),
+			'The refund line item must reference the refunded order item, not an untouched sibling.'
+		);
+	}
+
+	/**
+	 * @testdox Partially refunding one item keeps download permissions for products that were not refunded.
+	 */
+	public function test_wc_create_refund_keeps_downloads_of_unrefunded_products() {
+		$refunded_product = WC_Helper_Product::create_simple_product();
+
+		$downloadable_product = WC_Helper_Product::create_simple_product();
+		$downloadable_product->set_downloadable( true );
+		$downloadable_product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $refunded_product, 1 );
+		$order->add_product( $downloadable_product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		$download = new WC_Customer_Download();
+		$download->set_user_id( 1 );
+		$download->set_order_id( $order->get_id() );
+		$download->set_product_id( $downloadable_product->get_id() );
+		$download->set_download_id( wp_generate_uuid4() );
+		$download->save();
+
+		$refunded_item_id     = null;
+		$downloadable_item_id = null;
+		foreach ( $order->get_items( 'line_item' ) as $item_id => $item ) {
+			if ( $item->get_product_id() === $refunded_product->get_id() ) {
+				$refunded_item_id = $item_id;
+			} else {
+				$downloadable_item_id = $item_id;
+			}
+		}
+
+		$refunded_item_total = $order->get_items( 'line_item' )[ $refunded_item_id ]->get_total();
+
+		// The untouched downloadable item still appears in the payload with
+		// zero total and zero tax, exactly as the admin refund form posts it.
+		$refund = wc_create_refund(
+			array(
+				'amount'     => $refunded_item_total,
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$refunded_item_id     => array(
+						'qty'          => 1,
+						'refund_total' => $refunded_item_total,
+						'refund_tax'   => array( 1 => 0 ),
+					),
+					$downloadable_item_id => array(
+						'refund_total' => 0,
+						'refund_tax'   => array( 1 => 0 ),
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
+
+		$download_data_store = WC_Data_Store::load( 'customer-download' );
+		$remaining_downloads = $download_data_store->get_downloads(
+			array(
+				'order_id'   => $order->get_id(),
+				'product_id' => $downloadable_product->get_id(),
+			)
+		);
+		$this->assertCount(
+			1,
+			$remaining_downloads,
+			'Download permissions for a product that was not refunded must be kept.'
+		);
+	}
+
+	/**
 	 * Test wc_sanitize_order_id().
 	 */
 	public function test_wc_sanitize_order_id() {

@@ -98,6 +98,44 @@ test.describe( `${ blockData.name } frontend`, () => {
 			activeImageSrc as string
 		);
 	} );
+
+	test( 'aligns the active slide when the gallery width is fractional', async ( {
+		page,
+	} ) => {
+		await page.goto( blockData.productPage );
+
+		const gallery = page.locator( '.woocommerce-product-gallery' );
+		const viewport = page.locator( '.flex-viewport' );
+		const thumbnails = page.locator(
+			'.flex-control-nav.flex-control-thumbs img'
+		);
+
+		await expect( gallery ).toBeVisible();
+		await expect( viewport ).toBeVisible();
+		await expect( gallery ).toHaveCSS( 'opacity', '1' );
+
+		await gallery.evaluate( ( element ) => {
+			( element as HTMLElement ).style.width = '320.5px';
+			window.dispatchEvent( new Event( 'resize' ) );
+		} );
+
+		const targetThumbnail = thumbnails.nth( 1 );
+		await targetThumbnail.click();
+		await expect( targetThumbnail ).toHaveClass( /flex-active/ );
+
+		await expect
+			.poll( async () => {
+				const activeSlideBox = await gallery
+					.locator( '.flex-active-slide' )
+					.boundingBox();
+				const viewportBox = await viewport.boundingBox();
+
+				return activeSlideBox && viewportBox
+					? activeSlideBox.x - viewportBox.x
+					: null;
+			} )
+			.toBeCloseTo( 0, 1 );
+	} );
 } );
 
 test.describe( `${ blockData.name } editor`, () => {

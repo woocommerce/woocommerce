@@ -329,10 +329,12 @@ class WC_Form_Handler {
 		$save_pass            = true;
 
 		// Current user data.
-		$current_user       = get_user_by( 'id', $user_id );
-		$current_first_name = $current_user->first_name;
-		$current_last_name  = $current_user->last_name;
-		$current_email      = $current_user->user_email;
+		/** @var WP_User $current_user */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- Type hint for PHPStan.
+		$current_user         = get_user_by( 'id', $user_id );
+		$current_first_name   = $current_user->first_name;
+		$current_last_name    = $current_user->last_name;
+		$current_email        = $current_user->user_email;
+		$current_display_name = wc_clean( $current_user->display_name );
 
 		// New user data.
 		$user               = new stdClass();
@@ -341,9 +343,9 @@ class WC_Form_Handler {
 		$user->last_name    = $account_last_name;
 		$user->display_name = $account_display_name;
 
-		// Prevent display name to be changed to email.
-		if ( is_email( $account_display_name ) ) {
-			wc_add_notice( __( 'Display name cannot be changed to email address due to privacy concern.', 'woocommerce' ), 'error' );
+		// Prevent display name from being changed to an email address.
+		if ( is_email( $account_display_name ) && $account_display_name !== $current_display_name ) {
+			wc_add_notice( __( 'Display name cannot be changed to email address due to privacy concern.', 'woocommerce' ), 'error', array( 'id' => 'account_display_name' ) );
 		}
 
 		// Handle required fields.
