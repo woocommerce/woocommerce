@@ -317,11 +317,12 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 			 *
 			 * @param int   $page_size Maximum number of tokens per page. Defaults to 100. A value
 			 *                         below 1 is ignored, as an empty page would stop a paginating
-			 *                         consumer before it read anything.
+			 *                         consumer before it read anything, and `-1` does not mean
+			 *                         unlimited here: pass an explicit `limit` to opt out.
 			 * @param array $args      The arguments passed to `get_tokens()`.
 			 */
-			$page_size = absint( apply_filters( 'woocommerce_get_payment_tokens_page_size', self::DEFAULT_PAGE_SIZE, $args ) );
-			$limit     = $page_size > 0 ? $page_size : self::DEFAULT_PAGE_SIZE;
+			$page_size = apply_filters( 'woocommerce_get_payment_tokens_page_size', self::DEFAULT_PAGE_SIZE, $args );
+			$limit     = self::sanitize_row_count( $page_size, self::DEFAULT_PAGE_SIZE );
 		} elseif ( ! $args['token_id'] && ! $args['user_id'] ) {
 			/**
 			 * Controls the fallback maximum number of tokens returned by an unscoped query, i.e. one
@@ -335,11 +336,13 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 			 * @since 11.1.0
 			 *
 			 * @param int   $limit Maximum number of tokens to return. Defaults to 500. A value below
-			 *                     1 is ignored, as it would empty the result set rather than cap it.
+			 *                     1 is ignored, as it would empty the result set rather than cap it,
+			 *                     and `-1` does not mean unlimited here: pass an explicit `limit` to
+			 *                     opt out.
 			 * @param array $args  The arguments passed to `get_tokens()`.
 			 */
-			$ceiling = absint( apply_filters( 'woocommerce_get_payment_tokens_unscoped_limit', self::DEFAULT_UNSCOPED_TOKENS_LIMIT, $args ) );
-			$limit   = $ceiling > 0 ? $ceiling : self::DEFAULT_UNSCOPED_TOKENS_LIMIT;
+			$ceiling = apply_filters( 'woocommerce_get_payment_tokens_unscoped_limit', self::DEFAULT_UNSCOPED_TOKENS_LIMIT, $args );
+			$limit   = self::sanitize_row_count( $ceiling, self::DEFAULT_UNSCOPED_TOKENS_LIMIT );
 		}
 
 		// Without an explicit limit or page, a query scoped to a token_id or user_id stays
@@ -361,6 +364,22 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 		$token_results = $wpdb->get_results( $sql . ' WHERE ' . implode( ' AND ', $where ) . ' ' . $limits );
 
 		return $token_results;
+	}
+
+	/**
+	 * Reads a filtered row count, falling back to a default unless it is a positive number.
+	 *
+	 * The sign has to be read before any `absint()` coercion: `absint( -1 )` is 1, so a callback
+	 * reaching for WordPress's `-1` means unlimited idiom would otherwise cap the query at a
+	 * single row instead of falling back.
+	 *
+	 * @since 11.1.0
+	 * @param mixed $value   The filtered value.
+	 * @param int   $default_value Row count to use when `$value` is not a positive number.
+	 * @return int
+	 */
+	private static function sanitize_row_count( $value, int $default_value ): int {
+		return is_numeric( $value ) && $value > 0 ? absint( $value ) : $default_value;
 	}
 
 	/**

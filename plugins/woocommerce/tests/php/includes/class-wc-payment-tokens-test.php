@@ -215,11 +215,14 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Data store get_tokens should ignore a page size filter value below one.
+	 * @testdox Data store get_tokens should ignore a page size filter value that is not a positive number.
 	 *
 	 * @testWith [null]
+	 *           [false]
 	 *           [0]
+	 *           [-1]
 	 *           [-5]
+	 *           ["abc"]
 	 *
 	 * @param mixed $filtered_value Value returned by the page size filter.
 	 */
@@ -234,24 +237,35 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 
 		$data_store = WC_Data_Store::load( 'payment-token' );
 
-		// A page size of 0 would make every page empty and stop a paginating consumer dead.
-		$this->assertCount(
-			3,
-			$data_store->get_tokens(
-				array(
-					'user_id' => $this->user_id,
-					'page'    => 1,
-				)
-			),
-			'A page size below 1 should fall back to the default rather than empty every page'
+		// Asserting on the emitted SQL rather than a row count: absint() turns -5 into a page size
+		// of 5, which returns the same 3 rows as the default would and hides the bug.
+		$query = $this->capture_token_query(
+			function () use ( $data_store ) {
+				$data_store->get_tokens(
+					array(
+						'user_id' => $this->user_id,
+						'page'    => 1,
+					)
+				);
+			}
+		);
+
+		$this->assertStringContainsString(
+			'LIMIT 0, ' . WC_Payment_Token_Data_Store::DEFAULT_PAGE_SIZE,
+			$query,
+			'A page size that is not a positive number should fall back to the default'
 		);
 	}
 
 	/**
-	 * @testdox Data store get_tokens should ignore an unscoped ceiling filter value below one.
+	 * @testdox Data store get_tokens should ignore an unscoped ceiling filter value that is not a positive number.
 	 *
 	 * @testWith [null]
+	 *           [false]
 	 *           [0]
+	 *           [-1]
+	 *           [-5]
+	 *           ["abc"]
 	 *
 	 * @param mixed $filtered_value Value returned by the unscoped limit filter.
 	 */
@@ -266,11 +280,18 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 
 		$data_store = WC_Data_Store::load( 'payment-token' );
 
-		// A ceiling of 0 would empty the result set rather than cap it.
-		$this->assertCount(
-			3,
-			$data_store->get_tokens( array() ),
-			'A ceiling below 1 should fall back to the default rather than return nothing'
+		// Asserting on the emitted SQL rather than a row count: absint() turns -5 into a ceiling of
+		// 5, which returns the same 3 rows as the default would and hides the bug.
+		$query = $this->capture_token_query(
+			function () use ( $data_store ) {
+				$data_store->get_tokens( array() );
+			}
+		);
+
+		$this->assertStringContainsString(
+			'LIMIT 0, ' . WC_Payment_Token_Data_Store::DEFAULT_UNSCOPED_TOKENS_LIMIT,
+			$query,
+			'A ceiling that is not a positive number should fall back to the default'
 		);
 	}
 
