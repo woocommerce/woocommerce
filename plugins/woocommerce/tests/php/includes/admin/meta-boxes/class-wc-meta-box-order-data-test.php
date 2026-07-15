@@ -264,6 +264,40 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The read-only summary displays shipping details after a no-line virtual product becomes physical.
+	 */
+	public function test_displays_shipping_details_after_virtual_product_without_shipping_line_becomes_physical(): void {
+		$order = $this->create_order_with_shipping_data( false );
+
+		$this->products[0]->set_virtual( false );
+		$this->products[0]->save();
+		$order = wc_get_order( $order->get_id() );
+
+		$summary = $this->render_shipping_address_summary( $order );
+
+		$this->assertStringContainsString( '500 Billing Avenue', $summary );
+		$this->assertStringContainsString( '555-0100', $summary );
+		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
+	}
+
+	/**
+	 * @testdox The read-only summary hides matching shipping details after a no-line physical product becomes virtual.
+	 */
+	public function test_hides_shipping_details_after_physical_product_without_shipping_line_becomes_virtual(): void {
+		$order = $this->create_order_with_shipping_data( false, 'store-api', 'flat_rate', false );
+
+		$this->products[0]->set_virtual( true );
+		$this->products[0]->save();
+		$order = wc_get_order( $order->get_id() );
+
+		$summary = $this->render_shipping_address_summary( $order );
+
+		$this->assertStringContainsString( 'No shipping address set.', $summary );
+		$this->assertStringNotContainsString( '500 Billing Avenue', $summary );
+		$this->assertStringNotContainsString( '555-0100', $summary );
+	}
+
+	/**
 	 * @testdox The read-only summary shows explicitly edited shipping details on a Store API order without shipping.
 	 */
 	public function test_displays_explicitly_edited_shipping_details_on_store_api_order(): void {
