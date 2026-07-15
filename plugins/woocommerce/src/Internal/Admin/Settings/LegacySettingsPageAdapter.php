@@ -53,17 +53,13 @@ class LegacySettingsPageAdapter implements PublicSettingsUIPageInterface {
 	 * @return array
 	 */
 	public function get_schema( string $section ): array {
-		$schema = SettingsUISchema::from_legacy_settings(
+		return SettingsUISchema::from_legacy_settings(
 			$this->settings_page->get_id(),
 			$section,
 			$this->settings_page->get_label(),
 			$this->settings_page->get_settings( $section ),
 			$this->get_save_adapter( $section )
 		);
-
-		$schema['shell']['sectionNavigation'] = SettingsSectionNavigation::build_default( $this->settings_page, $section );
-
-		return $schema;
 	}
 
 	/**

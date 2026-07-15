@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the filename announced by the remote server (Content-Disposition/Content-Type) when force-downloading an external file whose URL has no filename in its path, such as Google Drive links.

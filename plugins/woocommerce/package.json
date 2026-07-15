@@ -259,7 +259,7 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/e2e/**",
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}",
 						".wp-env.e2e.json",
 						"woocommerce.php",
 						"uninstall.php"
@@ -297,7 +297,7 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/e2e/**",
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}",
 						".wp-env.e2e.json",
 						"woocommerce.php",
 						"uninstall.php"
@@ -324,7 +324,7 @@
 					"command": "test:e2e:gb-stable",
 					"shardingArguments": [],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -377,7 +377,7 @@
 					"command": "test:e2e:hpos-off",
 					"shardingArguments": [],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -407,7 +407,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -440,7 +440,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -473,7 +473,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -506,7 +506,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -540,7 +540,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -574,7 +574,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
