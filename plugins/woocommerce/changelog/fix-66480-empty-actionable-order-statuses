@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Activity Panel counts endpoint now respects an explicitly-empty actionable order statuses setting instead of falling back to the defaults, so a cleared setting reports zero orders to fulfill.

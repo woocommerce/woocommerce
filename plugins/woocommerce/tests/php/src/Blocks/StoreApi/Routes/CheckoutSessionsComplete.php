@@ -22,6 +22,44 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	use AgenticTestHelpers;
 
 	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
+	/**
+	 * Create immutable products shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$products = self::create_class_fixture_products(
+			array(
+				array(
+					'name'          => 'Test Product 1',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+					'regular_price' => 10,
+					'weight'        => 10,
+				),
+				array(
+					'name'          => 'Test Product 2',
+					'stock_status'  => ProductStockStatus::IN_STOCK,
+					'regular_price' => 20,
+					'weight'        => 5,
+				),
+			)
+		);
+
+		self::$product_ids = array_map( static fn( $product ) => $product->get_id(), $products );
+	}
+
+	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_class_fixture_products( self::$product_ids );
+	}
+
+	/**
 	 * Products created for tests.
 	 *
 	 * @var array
@@ -36,10 +74,20 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	protected $mock_gateway;
 
 	/**
+	 * Option state to restore after each test.
+	 *
+	 * @var array<string, array{exists: bool, value: mixed}>
+	 */
+	private $option_state = array();
+
+	/**
 	 * Setup test product data. Called before every test.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+		$this->snapshot_option_state( 'woocommerce_checkout_phone_field' );
+		$this->snapshot_option_state( 'woocommerce_feature_agentic_checkout_enabled' );
+		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 
 		// Reset customer and cart FIRST before anything else.
 		wc_empty_cart();
@@ -59,24 +107,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
 
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 20,
-					'weight'        => 5,
-				)
-			),
-		);
+		$this->products = array_map( 'wc_get_product', self::$product_ids );
 
 		// Register mock agentic payment gateway.
 		$this->mock_gateway = new MockAgenticPaymentGateway();
@@ -90,18 +121,59 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 * Tear down test.
 	 */
 	protected function tearDown(): void {
-		parent::tearDown();
-		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
+		try {
+			// Clear session data.
+			WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, null );
+			WC()->session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, null );
 
-		// Clear session data.
-		WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, null );
-		WC()->session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, null );
+			// Reset customer state to clean state.
+			$this->reset_customer_state();
 
-		// Reset customer state to clean state.
-		$this->reset_customer_state();
+			// Reset Jetpack auth state.
+			$this->reset_jetpack_auth_state();
 
-		// Reset Jetpack auth state.
-		$this->reset_jetpack_auth_state();
+		} finally {
+			remove_filter( 'woocommerce_payment_gateways', array( $this, 'add_mock_gateway' ) );
+			remove_filter( 'woocommerce_available_payment_gateways', array( $this, 'add_mock_gateway' ) );
+			try {
+				parent::tearDown();
+			} finally {
+				$this->restore_option_state();
+			}
+		}
+	}
+
+	/**
+	 * Capture an option's exact existence and value before changing it.
+	 *
+	 * @param string $option_name Option name.
+	 */
+	private function snapshot_option_state( string $option_name ): void {
+		$missing_option = new \stdClass();
+		$value          = get_option( $option_name, $missing_option );
+
+		$this->option_state[ $option_name ] = array(
+			'exists' => $missing_option !== $value,
+			'value'  => $value,
+		);
+	}
+
+	/**
+	 * Restore options changed by the test, including their original absence.
+	 */
+	private function restore_option_state(): void {
+		foreach ( $this->option_state as $option_name => $state ) {
+			wp_cache_delete( $option_name, 'options' );
+			wp_cache_delete( 'alloptions', 'options' );
+			wp_cache_delete( 'notoptions', 'options' );
+			if ( $state['exists'] ) {
+				update_option( $option_name, $state['value'] );
+			} else {
+				delete_option( $option_name );
+			}
+		}
+
+		$this->option_state = array();
 	}
 
 	/**
