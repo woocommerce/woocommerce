@@ -202,20 +202,22 @@ class WC_Customer extends WC_Legacy_Customer {
 			if ( ! $this->get_shipping_country() ) {
 				$tax_based_on = TaxBasedOn::BILLING;
 			} else {
-				$cart                        = WC()->cart;
-				$cart_contents               = $cart instanceof WC_Cart ? $cart->get_cart_contents() : array();
-				$cart_has_no_shippable_items = ! empty( $cart_contents );
+				$cart          = WC()->cart;
+				$cart_contents = $cart instanceof WC_Cart ? $cart->get_cart_contents() : array();
 
-				// Checked per item so it is independent of whether shipping methods happen to be
-				// configured for the store.
+				// Determine whether any item in the cart needs shipping. Checked per item so it is
+				// independent of whether shipping methods happen to be configured for the store.
+				$cart_needs_shipping = false;
 				foreach ( $cart_contents as $cart_item ) {
 					if ( isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product && $cart_item['data']->needs_shipping() ) {
-						$cart_has_no_shippable_items = false;
+						$cart_needs_shipping = true;
 						break;
 					}
 				}
 
-				if ( $cart_has_no_shippable_items ) {
+				// A non-empty cart where nothing needs shipping (e.g. only virtual products) has no
+				// shipping destination to tax against, so use the billing address instead.
+				if ( ! empty( $cart_contents ) && ! $cart_needs_shipping ) {
 					$tax_based_on = TaxBasedOn::BILLING;
 				}
 			}
