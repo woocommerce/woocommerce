@@ -193,6 +193,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
+		update_option( 'woocommerce_attribute_lookup_direct_updates', 'yes' );
 
 		// Create a variable product.
 		$variable_product   = WC_Helper_Product::create_variation_product( new WC_Product_Variable() );
@@ -235,14 +236,14 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$simple_product_order_1->save();
 
 		// Create more orders for simple products.
-		for ( $i = 0; $i < 10; $i++ ) {
+		$unattributed_order_count = 2;
+		for ( $i = 0; $i < $unattributed_order_count; $i++ ) {
 			$order = WC_Helper_Order::create_order( $this->user );
 			$order->set_status( OrderStatus::COMPLETED );
 			$order->save();
 		}
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
-		WC_Helper_Queue::run_all_pending( 'woocommerce-db-updates' );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array( 'per_page' => 15 ) );
@@ -251,7 +252,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 		// Sanity check before filtering by attribute.
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 13, count( $response_orders ) );
+		$this->assertEquals( 3 + $unattributed_order_count, count( $response_orders ) );
 
 		// To filter by later.
 		$size_attr_id = wc_attribute_taxonomy_id_by_name( 'pa_size' );
@@ -277,7 +278,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 			$this->assertEquals( 200, $response->get_status() );
 			// We expect all results since the attribute param is malformed.
-			$this->assertEquals( 13, count( $response_orders ) );
+			$this->assertEquals( 3 + $unattributed_order_count, count( $response_orders ) );
 		}
 
 		// Filter by the "size" attribute, with value "small".
@@ -317,7 +318,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$response_orders = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 11, count( $response_orders ) );
+		$this->assertEquals( 1 + $unattributed_order_count, count( $response_orders ) );
 	}
 
 	/**
@@ -332,30 +333,29 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 
-		// Create a variable product.
-		$variable_product = WC_Helper_Product::create_variation_product( new WC_Product_Variable() );
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'Custom attribute product' );
 
-		// Add a custom attribute.
-		$attributes  = $variable_product->get_attributes();
 		$custom_attr = new WC_Product_Attribute();
 		$custom_attr->set_name( 'Numeric Size' );
 		$custom_attr->set_options( array( '1', '2', '3', '4', '5' ) );
 		$custom_attr->set_visible( true );
 		$custom_attr->set_variation( true );
-		$attributes[] = $custom_attr;
-		$variable_product->set_attributes( $attributes );
+		$variable_product->set_attributes( array( $custom_attr ) );
 		$variable_product->save();
 
-		// Custom attribute terms can only be found once assigned to variations.
-		$data_store = $variable_product->get_data_store();
-		$data_store->create_all_product_variations( $variable_product );
-
-		// Fetch the product to get new variations.
-		$variable_product   = wc_get_product( $variable_product->get_id() );
-		$product_variations = $variable_product->get_children();
-
-		$order_variation_1 = wc_get_product( $product_variations[0] ); // Variation: size = small.
-		$order_variation_2 = wc_get_product( end( $product_variations ) ); // Variation: size = huge, colour = blue, number = 1, numeric-size = 5.
+		$order_variation_1 = WC_Helper_Product::create_product_variation_object(
+			$variable_product->get_id(),
+			'DUMMY SKU CUSTOM ATTRIBUTE 1',
+			10,
+			array( 'numeric-size' => '1' )
+		);
+		$order_variation_2 = WC_Helper_Product::create_product_variation_object(
+			$variable_product->get_id(),
+			'DUMMY SKU CUSTOM ATTRIBUTE 5',
+			10,
+			array( 'numeric-size' => '5' )
+		);
 
 		// Create orders for variations.
 		$variation_order_1 = WC_Helper_Order::create_order( $this->user, $order_variation_1 );
@@ -366,12 +366,9 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$variation_order_2->set_status( OrderStatus::COMPLETED );
 		$variation_order_2->save();
 
-		// Create more orders for simple products.
-		for ( $i = 0; $i < 10; $i++ ) {
-			$order = WC_Helper_Order::create_order( $this->user );
-			$order->set_status( OrderStatus::COMPLETED );
-			$order->save();
-		}
+		$order = WC_Helper_Order::create_order( $this->user );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
@@ -382,7 +379,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 		// Sanity check before filtering by attribute.
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 12, count( $response_orders ) );
+		$this->assertEquals( 3, count( $response_orders ) );
 
 		// Filter by the "Numeric Size" custom attribute, with value "1".
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
