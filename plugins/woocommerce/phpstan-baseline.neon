@@ -11665,36 +11665,6 @@ parameters:
 			path: includes/class-wc-form-handler.php
 
 		-
-			message: '#^Cannot access property \$ID on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot access property \$first_name on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot access property \$last_name on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot access property \$user_email on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot access property \$user_pass on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
 			message: '#^Cannot call method get_billing_city\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 2
