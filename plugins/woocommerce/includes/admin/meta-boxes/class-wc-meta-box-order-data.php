@@ -207,6 +207,17 @@ class WC_Meta_Box_Order_Data {
 	 * or unresolved product sets remain visible because suppressing their persisted
 	 * shipping details would be ambiguous.
 	 *
+	 * Reading live catalog state is a deliberate, bounded departure from PR #66488's
+	 * principle that suppression should rest on order-time evidence immune to later
+	 * catalog edits. This fallback runs only for orders with no persisted shipping line
+	 * (guaranteed by order_has_no_shipping() earlier in the gate's && chain), which is
+	 * exactly the population that carries no such order-time evidence, so the catalog
+	 * read is the only available signal and can never override a persisted shipping line.
+	 * The accepted tradeoff: reclassifying a product as virtual can later re-hide a
+	 * no-line order that genuinely shipped. That recurrence is display-only, admin-only,
+	 * filterable, and pinned as intended by
+	 * test_hides_shipping_details_after_physical_product_without_shipping_line_becomes_virtual().
+	 *
 	 * The aggregation and fallback here are deliberately local rather than reusing
 	 * WC_Order::needs_shipping() or the shipping-label helpers: needs_shipping()
 	 * short-circuits on the global shipping setting and, like those helpers, does not
