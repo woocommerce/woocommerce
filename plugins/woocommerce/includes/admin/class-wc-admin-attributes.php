@@ -458,7 +458,7 @@ class WC_Admin_Attributes {
 										 *
 										 * @since 11.1.0
 										 */
-										$actions     = apply_filters( 'woocommerce_attribute_taxonomy_row_actions', $actions, $tax, $taxonomy );
+										$actions     = (array) apply_filters( 'woocommerce_attribute_taxonomy_row_actions', $actions, $tax, $taxonomy );
 										$row_actions = array();
 
 										foreach ( $actions as $action => $link ) {
