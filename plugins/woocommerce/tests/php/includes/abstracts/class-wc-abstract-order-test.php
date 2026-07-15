@@ -720,9 +720,10 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 * @dataProvider inherited_shipping_tax_without_taxable_products_provider
 	 *
 	 * @param bool  $add_non_taxable_product Whether to add a non-taxable product to the order.
+	 * @param bool  $add_non_taxable_fee     Whether to add a non-taxable fee to the order.
 	 * @param float $expected_shipping_tax   Expected shipping tax total.
 	 */
-	public function test_calculate_taxes_handles_inherited_shipping_tax_without_taxable_products( bool $add_non_taxable_product, float $expected_shipping_tax ): void {
+	public function test_calculate_taxes_handles_inherited_shipping_tax_without_taxable_products( bool $add_non_taxable_product, bool $add_non_taxable_fee, float $expected_shipping_tax ): void {
 		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes', 'no' );
 		$original_shipping_tax_class = get_option( 'woocommerce_shipping_tax_class', 'inherit' );
 		$order                       = new WC_Order();
@@ -753,9 +754,18 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 				$order->add_product( $product );
 			}
 
+			if ( $add_non_taxable_fee ) {
+				$fee_item = new WC_Order_Item_Fee();
+				$fee_item->set_name( 'Manual fee' );
+				$fee_item->set_amount( '5' );
+				$fee_item->set_total( '5' );
+				$fee_item->set_tax_status( ProductTaxStatus::NONE );
+				$order->add_item( $fee_item );
+			}
+
 			$shipping_item = new WC_Order_Item_Shipping();
 			$shipping_item->set_method_title( 'Manual shipping' );
-			$shipping_item->set_total( 10 );
+			$shipping_item->set_total( '10' );
 			$order->add_item( $shipping_item );
 
 			$order->calculate_totals();
@@ -775,12 +785,13 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	/**
 	 * Data provider for inherited shipping tax calculations without taxable products.
 	 *
-	 * @return array<string, array{bool, float}>
+	 * @return array<string, array{bool, bool, float}>
 	 */
 	public function inherited_shipping_tax_without_taxable_products_provider(): array {
 		return array(
-			'shipping-only order' => array( false, 1.0 ),
-			'non-taxable product' => array( true, 0.0 ),
+			'shipping-only order'           => array( false, false, 1.0 ),
+			'non-taxable product'           => array( true, false, 0.0 ),
+			'non-taxable fee with shipping' => array( false, true, 1.0 ),
 		);
 	}
 

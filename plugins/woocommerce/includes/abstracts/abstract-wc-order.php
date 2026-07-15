@@ -1999,7 +1999,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$found_classes      = array_intersect( array_merge( array( '' ), WC_Tax::get_tax_class_slugs() ), $this->get_items_tax_classes() );
 			$shipping_tax_class = count( $found_classes ) ? current( $found_classes ) : false;
 
-			// Shipping-only orders have no product tax class to inherit, so use the standard class.
+			// Orders without product line items have no tax class to inherit, so use the standard class.
 			if ( false === $shipping_tax_class && 0 === count( $this->get_items() ) ) {
 				$shipping_tax_class = '';
 			}
