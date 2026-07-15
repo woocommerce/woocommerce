@@ -33208,12 +33208,6 @@ parameters:
 			path: includes/wc-cart-functions.php
 
 		-
-			message: '#^Parameter \#2 \$str of function explode expects string, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-cart-functions.php
-
-		-
 			message: '#^Parameter \#2 \$user_string of function hash_equals expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
