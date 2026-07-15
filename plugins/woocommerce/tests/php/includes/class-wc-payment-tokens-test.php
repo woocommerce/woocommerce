@@ -227,6 +227,7 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 		return array(
 			'null'                    => array( null ),
 			'false'                   => array( false ),
+			'true'                    => array( true ),
 			'zero'                    => array( 0 ),
 			'fraction below 1'        => array( 0.4 ),
 			'numeric string below 1'  => array( '0.5' ),
