@@ -395,10 +395,8 @@ class WC_Admin_Post_Types {
 	private function quick_edit_save( $post_id, $product ) {
 		$request_data = $this->request_data();
 
-		$data_store        = $product->get_data_store();
-		$old_regular_price = $product->get_regular_price();
-		$old_sale_price    = $product->get_sale_price();
-		$input_to_props    = array(
+		$data_store     = $product->get_data_store();
+		$input_to_props = array(
 			'_weight'     => 'weight',
 			'_length'     => 'length',
 			'_width'      => 'width',
@@ -457,30 +455,12 @@ class WC_Admin_Post_Types {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 				$new_regular_price = ( '' === $request_data['_regular_price'] ) ? '' : wc_format_decimal( $request_data['_regular_price'] );
 				$product->set_regular_price( $new_regular_price );
-			} else {
-				$new_regular_price = null;
 			}
 
 			if ( isset( $request_data['_sale_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 				$new_sale_price = ( '' === $request_data['_sale_price'] ) ? '' : wc_format_decimal( $request_data['_sale_price'] );
 				$product->set_sale_price( $new_sale_price );
-			} else {
-				$new_sale_price = null;
-			}
-
-			// Handle price - remove dates and set to lowest.
-			$price_changed = false;
-
-			if ( ! is_null( $new_regular_price ) && $new_regular_price !== $old_regular_price ) {
-				$price_changed = true;
-			} elseif ( ! is_null( $new_sale_price ) && $new_sale_price !== $old_sale_price ) {
-				$price_changed = true;
-			}
-
-			if ( $price_changed ) {
-				$product->set_date_on_sale_to( '' );
-				$product->set_date_on_sale_from( '' );
 			}
 		}
 
