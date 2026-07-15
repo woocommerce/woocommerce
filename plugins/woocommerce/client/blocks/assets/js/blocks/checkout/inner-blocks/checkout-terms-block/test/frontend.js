@@ -119,7 +119,7 @@ describe( 'FrontendBlock', () => {
 
 		await waitFor( () => {
 			expect( checkbox ).toHaveAttribute(
-				'aria-errormessage',
+				'aria-describedby',
 				errorMessage.closest( 'p' ).id
 			);
 		} );
