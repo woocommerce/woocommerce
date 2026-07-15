@@ -10,11 +10,13 @@ class WC_Importer_Tracking_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function setUp(): void {
+		parent::setUp();
+		$this->clear_tracks_events();
+
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-importer-tracking.php';
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$importer_tracking = new WC_Importer_Tracking();
 		$importer_tracking->init();
-		parent::setUp();
 	}
 
 	/**

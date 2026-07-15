@@ -36,12 +36,12 @@ Start in the repository root folder:
 - `pnpm install` (installs dependencies; PNPM uses the pinned Node version automatically)
 - `pnpm --filter='@woocommerce/plugin-woocommerce' build` (builds WooCommerce locally)
 - `cd plugins/woocommerce` (changes into the WooCommerce plugin folder)
-- `pnpm env:test` (starts the `wp-env` based test environment)
+- `pnpm env:e2e` (starts the `wp-env` based E2E test environment)
 - `pnpm test:e2e` (runs all the tests in headless mode)
 
 To re-create the environment for a fresh state:
 
-`pnpm env:test:restart` (resets and restarts the test environment)
+`pnpm env:e2e:restart` (resets and restarts the E2E test environment)
 
 You can refer to the pnpm scripts in the `package.json` file for more commands. Check out the `env:some-command` scripts
 for managing the `wp-env` environment.
@@ -70,8 +70,8 @@ run `pnpm playwright test --help`
 
 ## Test environment
 
-The e2e test environment configuration can be found in the `.wp-env.test.json` file in the `plugins/woocommerce`
-folder (the `.wp-env.json` file configures the separate dev environment).
+The e2e test environment configuration can be found in the `.wp-env.e2e.json` file in the `plugins/woocommerce`
+folder (the `.wp-env.json` file configures the separate dev environment, and `.wp-env.test.json` the lean PHP-unit environment).
 
 For more information on how to configure the test environment for `wp-env`, please check out
 the official [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env).
@@ -169,7 +169,7 @@ read: [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
 ## Test helper plugins
 
-Some E2E suites need fixture mechanisms that can't be expressed cleanly with REST or WP-CLI alone — for example, filter-driven content overrides, server-side event mirroring, or synchronous triggers for normally-scheduled jobs. These ship as small PHP plugins under `tests/e2e/test-plugins/`, mounted via `.wp-env.test.json`'s `plugins` array.
+Some E2E suites need fixture mechanisms that can't be expressed cleanly with REST or WP-CLI alone — for example, filter-driven content overrides, server-side event mirroring, or synchronous triggers for normally-scheduled jobs. These ship as small PHP plugins under `tests/e2e/test-plugins/`, mounted via `.wp-env.e2e.json`'s `plugins` array.
 
 ### `wc-email-template-sync-test-helper`
 
@@ -182,7 +182,7 @@ Powers the `tests/email-editor/update-propagation/` suite (RSM-146). Exposes:
 
 The plugin is dormant when its driving options are empty. It has a `WP_DEBUG` plus `X-Playwright` header safety rail to prevent accidental activation outside test contexts.
 
-If a test fails with `404` on `/wp-json/wc-email-test-helper/v1/health`, the plugin isn't loaded — run `pnpm env:test:restart`.
+If a test fails with `404` on `/wp-json/wc-email-test-helper/v1/health`, the plugin isn't loaded — run `pnpm env:e2e:restart`.
 
 The PR-tier subset of these tests can be run locally with:
 

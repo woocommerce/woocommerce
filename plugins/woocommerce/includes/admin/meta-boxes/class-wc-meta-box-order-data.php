@@ -185,6 +185,48 @@ class WC_Meta_Box_Order_Data {
 	}
 
 	/**
+	 * Whether an order was placed without any shipping, based on persisted order data.
+	 *
+	 * A purchase that needs no fulfillment is saved without a shipping line item. Relying
+	 * on the order's own shipping items — rather than the current virtual state of the
+	 * catalog products, which a merchant can change after the order is placed — keeps a
+	 * catalog edit from ever rewriting a historical order's shipping summary, and keeps
+	 * orders that retain a shipping line (including Store API local pickup) showing.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private static function order_has_no_shipping( $order ) {
+		return 0 === count( $order->get_shipping_methods() );
+	}
+
+	/**
+	 * Whether an order's shipping address is still the billing-derived copy.
+	 *
+	 * Store API checkout copies the billing address into the shipping address for
+	 * backwards compatibility when a purchase needs no fulfillment. There is no persisted
+	 * marker for that copy, so the shipping address is treated as billing-derived only
+	 * while every copied field still matches billing. Once a merchant or integration edits
+	 * the shipping fields to diverge, the values are explicit and must be shown.
+	 * Individual getters use the edit context instead of get_address() so view filters
+	 * cannot make distinct persisted values appear equal.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private static function order_shipping_matches_billing( $order ) {
+		$copied_fields = array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' );
+
+		foreach ( $copied_fields as $field ) {
+			if ( $order->{"get_shipping_$field"}( 'edit' ) !== $order->{"get_billing_$field"}( 'edit' ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Output the metabox.
 	 *
 	 * @param WP_Post|WC_Order $post Post or order object.
@@ -571,8 +613,21 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
 								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-								if ( $order->get_formatted_shipping_address() ) {
-									echo '<p>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
+								$hide_core_shipping_details = 'store-api' === $order->get_created_via() && self::order_has_no_shipping( $order ) && self::order_shipping_matches_billing( $order );
+
+								/**
+								 * Filters whether billing-derived shipping details are hidden in the order admin summary.
+								 *
+								 * @param bool     $hide_core_shipping_details Whether core shipping details are hidden.
+								 * @param WC_Order $order                      Order object.
+								 *
+								 * @since 11.1.0
+								 */
+								$hide_core_shipping_details = apply_filters( 'woocommerce_hide_order_admin_shipping_details', $hide_core_shipping_details, $order );
+								$shipping_address           = $hide_core_shipping_details ? '' : $order->get_formatted_shipping_address();
+
+								if ( $shipping_address ) {
+									echo '<p>' . wp_kses( $shipping_address, array( 'br' => array() ) ) . '</p>';
 								} else {
 									echo '<p class="none_set">' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
 								}
@@ -581,6 +636,10 @@ class WC_Meta_Box_Order_Data {
 
 								if ( ! empty( $shipping_fields ) ) {
 									foreach ( $shipping_fields as $key => $field ) {
+										if ( $hide_core_shipping_details && 'phone' === $key && ! isset( $field['value'] ) ) {
+											continue;
+										}
+
 										if ( isset( $field['show'] ) && false === $field['show'] ) {
 											continue;
 										}
