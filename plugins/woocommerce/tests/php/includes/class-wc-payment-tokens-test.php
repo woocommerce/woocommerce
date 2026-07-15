@@ -30,6 +30,7 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_get_customer_payment_tokens_limit' );
+		remove_all_filters( 'woocommerce_get_payment_tokens_unscoped_limit' );
 		remove_all_filters( 'pre_option_posts_per_page' );
 		update_option( 'posts_per_page', 10 );
 		parent::tearDown();
@@ -171,6 +172,88 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 				)
 			),
 			'Page 0 must return the first page of results, not skip past it'
+		);
+	}
+
+	/**
+	 * @testdox Data store get_tokens should cap an unscoped query with the fallback ceiling.
+	 */
+	public function test_data_store_get_tokens_caps_unscoped_queries(): void {
+		$received = null;
+		add_filter(
+			'woocommerce_get_payment_tokens_unscoped_limit',
+			function ( $limit ) use ( &$received ) {
+				$received = $limit;
+				return 2;
+			}
+		);
+		$this->create_tokens_for_user( 3 );
+
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		// An unscoped query matches on the unindexed gateway_id/type columns, so it must not read the
+		// whole table.
+		$this->assertCount(
+			2,
+			$data_store->get_tokens( array() ),
+			'An unscoped query should be capped by the fallback ceiling'
+		);
+
+		// Pins the ceiling's default without creating 500 tokens.
+		$this->assertSame(
+			WC_Payment_Token_Data_Store::DEFAULT_UNSCOPED_TOKENS_LIMIT,
+			$received,
+			'The unscoped limit filter should receive DEFAULT_UNSCOPED_TOKENS_LIMIT as its default'
+		);
+		$this->assertSame( 500, WC_Payment_Token_Data_Store::DEFAULT_UNSCOPED_TOKENS_LIMIT );
+	}
+
+	/**
+	 * @testdox Data store get_tokens should not apply the unscoped ceiling to scoped queries.
+	 */
+	public function test_data_store_get_tokens_ceiling_does_not_apply_to_scoped_queries(): void {
+		add_filter(
+			'woocommerce_get_payment_tokens_unscoped_limit',
+			function () {
+				return 1;
+			}
+		);
+		$this->create_tokens_for_user( 3 );
+
+		$data_store = WC_Data_Store::load( 'payment-token' );
+		$token_ids  = wp_list_pluck( $data_store->get_tokens( array( 'user_id' => $this->user_id ) ), 'token_id' );
+
+		// The eraser and user-deletion cleanup scope by user_id and must stay unlimited.
+		$this->assertCount(
+			3,
+			$data_store->get_tokens( array( 'user_id' => $this->user_id ) ),
+			'A user_id-scoped query must not be capped by the unscoped ceiling'
+		);
+		$this->assertCount(
+			3,
+			$data_store->get_tokens( array( 'token_id' => $token_ids ) ),
+			'A token_id-scoped query must not be capped by the unscoped ceiling'
+		);
+	}
+
+	/**
+	 * @testdox An explicit limit should override the unscoped ceiling.
+	 */
+	public function test_data_store_get_tokens_explicit_limit_overrides_unscoped_ceiling(): void {
+		add_filter(
+			'woocommerce_get_payment_tokens_unscoped_limit',
+			function () {
+				return 1;
+			}
+		);
+		$this->create_tokens_for_user( 3 );
+
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		$this->assertCount(
+			3,
+			$data_store->get_tokens( array( 'limit' => 10 ) ),
+			'An explicit limit should take precedence over the unscoped fallback ceiling'
 		);
 	}
 

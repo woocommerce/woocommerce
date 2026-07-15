@@ -37,7 +37,10 @@ class WC_Payment_Tokens {
 	 *     @type string $user_id    User ID.
 	 *     @type string $gateway_id Gateway ID.
 	 *     @type string $type       Token type.
-	 *     @type int    $limit      Maximum number of tokens to return. Unlimited when omitted or not positive.
+	 *     @type int    $limit      Maximum number of tokens to return. When omitted or not positive, queries
+	 *                              scoped to a `token_id` or `user_id` are unlimited, while unscoped queries
+	 *                              fall back to a ceiling filterable via
+	 *                              `woocommerce_get_payment_tokens_unscoped_limit`.
 	 *     @type int    $page       Page of results to return when `limit` is set. Default 1.
 	 * }
 	 * @return WC_Payment_Token[]
