@@ -3,6 +3,7 @@
  */
 import type { ProductResponseItem } from '@woocommerce/types';
 import type { ProductsStoreState } from '@woocommerce/stores/woocommerce/products';
+import type { Envelope } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
@@ -42,6 +43,14 @@ let mockProductsState: Partial< ProductsStoreState >;
 // The `woocommerce/cart` store's `upsertDraftItem` spy, controlled per test.
 let mockUpsertDraftItem: jest.Mock;
 
+// The `woocommerce/cart` store's state this module reads (`itemInContext`).
+// Setting `itemInContext.draft` simulates a draft already present in the
+// current scope — whether written by this same surface or by another
+// surface sharing the scope; an empty envelope simulates no draft for the
+// in-context product (including one belonging to a different scope, which
+// `itemInContext` would never surface here).
+let mockCartState: { itemInContext: Envelope };
+
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
@@ -60,6 +69,7 @@ jest.mock(
 				}
 				if ( name === 'woocommerce/cart' ) {
 					return {
+						state: mockCartState,
 						actions: { upsertDraftItem: mockUpsertDraftItem },
 					};
 				}
@@ -113,6 +123,7 @@ describe( 'Variation selector frontend store', () => {
 		mockProductsContext = undefined;
 		mockProductsState = {};
 		mockUpsertDraftItem = jest.fn();
+		mockCartState = { itemInContext: {} };
 	} );
 
 	afterEach( () => {
@@ -214,6 +225,55 @@ describe( 'Variation selector frontend store', () => {
 				{ quantity: 1, variation: mockContext.selectedAttributes },
 				{ id: 1 }
 			);
+		} );
+	} );
+
+	describe( 'state.selectedAttributes', () => {
+		it( "displays another surface's draft update for the same scope, not this instance's stale local selection", () => {
+			mockContext.selectedAttributes = [
+				{ attribute: 'Color', value: 'blue' },
+			];
+			mockCartState.itemInContext = {
+				draft: {
+					id: 2,
+					quantity: 1,
+					variation: [ { attribute: 'Color', value: 'red' } ],
+				},
+			};
+
+			const { state } = loadStore();
+
+			expect( state.selectedAttributes ).toEqual( [
+				{ attribute: 'Color', value: 'red' },
+			] );
+		} );
+
+		it( 'falls back to the local selection when the scope holds no draft variation (including one belonging to a different scope)', () => {
+			mockContext.selectedAttributes = [
+				{ attribute: 'Color', value: 'blue' },
+			];
+			mockCartState.itemInContext = {};
+
+			const { state } = loadStore();
+
+			expect( state.selectedAttributes ).toEqual( [
+				{ attribute: 'Color', value: 'blue' },
+			] );
+		} );
+
+		it( "falls back to the local selection when the resolved draft carries no `variation` (e.g. a simple product's draft)", () => {
+			mockContext.selectedAttributes = [
+				{ attribute: 'Color', value: 'blue' },
+			];
+			mockCartState.itemInContext = {
+				draft: { id: 1, quantity: 1 },
+			};
+
+			const { state } = loadStore();
+
+			expect( state.selectedAttributes ).toEqual( [
+				{ attribute: 'Color', value: 'blue' },
+			] );
 		} );
 	} );
 } );

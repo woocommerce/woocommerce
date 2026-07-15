@@ -62,7 +62,7 @@ const { state: productsState } = store< ProductsStore >(
 
 // Todo: Use the module exports instead of `store()` once the woocommerce
 // store is public.
-const { actions: wooActions } = store< WooCommerce >(
+const { state: cartState, actions: wooActions } = store< WooCommerce >(
 	'woocommerce/cart',
 	{},
 	{ lock: universalLock }
@@ -227,6 +227,19 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( ! context ) {
 					return [];
 				}
+
+				// Prefer the current scope's cart draft for the in-context
+				// product/variation: the value every surface sharing the
+				// scope writes to and reads from, so an attribute picked on
+				// one surface is reflected on every other. Falls back to
+				// this instance's own locally-tracked selection when the
+				// scope holds no draft yet, or the draft carries no
+				// `variation` (e.g. a simple product's draft).
+				const draftVariation = cartState.itemInContext.draft?.variation;
+				if ( draftVariation ) {
+					return draftVariation;
+				}
+
 				return context.selectedAttributes || [];
 			},
 			get selectableItems(): readonly SelectableItem< {

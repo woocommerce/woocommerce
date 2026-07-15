@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { store, getContext, getElement } from '@wordpress/interactivity';
+import '@woocommerce/stores/woocommerce/cart';
+import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 /**
  * Internal dependencies
@@ -23,11 +25,55 @@ const { state: productsState } = store< ProductsStore >(
 	{ lock: universalLock }
 );
 
+// Todo: Use the module exports instead of `store()` once the woocommerce
+// store is public.
+const { state: cartState } = store< WooCommerce >(
+	'woocommerce/cart',
+	{},
+	{ lock: universalLock }
+);
+
 const addToCartWithOptionsStore = store< AddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{},
 	{ lock: universalLock }
 );
+
+/**
+ * Resolves the quantity to display for a product id.
+ *
+ * Prefers the current scope's cart draft for the id — the value every
+ * surface sharing the scope writes to and reads from, so an edit made on
+ * one surface is reflected on every other — falling back to this block
+ * instance's own locally-tracked quantity when the scope holds no draft for
+ * the id yet.
+ *
+ * A transient `NaN` written to the local quantity (see `setQuantity` in the
+ * parent `woocommerce/add-to-cart-with-options` store) forces the bound
+ * input to refresh when an invalid value is corrected back to its previous
+ * number; that local `NaN` is returned as-is, ahead of the draft, so the
+ * forced refresh still reaches the input.
+ *
+ * @param productId The product id to resolve a displayed quantity for.
+ * @return The quantity to display, or `0` when neither source has one.
+ */
+function resolveDisplayQuantity( productId: number ): number {
+	const localQuantity = addToCartWithOptionsStore.state.quantity?.[
+		productId
+	] as number | undefined;
+
+	if ( typeof localQuantity === 'number' && Number.isNaN( localQuantity ) ) {
+		return localQuantity;
+	}
+
+	const draftQuantity = cartState.itemInContext.draft?.quantity;
+
+	if ( typeof draftQuantity === 'number' ) {
+		return draftQuantity;
+	}
+
+	return localQuantity ?? 0;
+}
 
 export type QuantitySelectorStore = {
 	state: {
@@ -61,8 +107,6 @@ store< QuantitySelectorStore >(
 				return product.is_in_stock && ! product.sold_individually;
 			},
 			get allowsDecrease() {
-				const { quantity } = addToCartWithOptionsStore.state;
-
 				const product = productsState.productInContext;
 
 				if ( ! product ) {
@@ -71,7 +115,7 @@ store< QuantitySelectorStore >(
 
 				const { id, add_to_cart: addToCart } = product;
 
-				const currentQuantity = quantity[ id ] || 0;
+				const currentQuantity = resolveDisplayQuantity( id ) || 0;
 
 				const { allowZero } = getContext< Context >();
 				return (
@@ -80,8 +124,6 @@ store< QuantitySelectorStore >(
 				);
 			},
 			get allowsIncrease() {
-				const { quantity } = addToCartWithOptionsStore.state;
-
 				const product = productsState.productInContext;
 
 				if ( ! product ) {
@@ -90,7 +132,7 @@ store< QuantitySelectorStore >(
 
 				const { id, add_to_cart: addToCart } = product;
 
-				const currentQuantity = quantity[ id ] || 0;
+				const currentQuantity = resolveDisplayQuantity( id ) || 0;
 
 				return (
 					currentQuantity + addToCart.multiple_of <= addToCart.maximum
@@ -103,10 +145,7 @@ store< QuantitySelectorStore >(
 					return 0;
 				}
 
-				const quantity =
-					addToCartWithOptionsStore.state.quantity?.[ product.id ];
-
-				return quantity === undefined ? 0 : quantity;
+				return resolveDisplayQuantity( product.id );
 			},
 		},
 		actions: {
