@@ -369,11 +369,12 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	/**
 	 * Reads a filtered row count, falling back to a default unless it is a number of at least one.
 	 *
-	 * The raw value has to be range-checked before any `absint()` coercion, which both collapses the
-	 * sign and truncates: `absint( -1 )` is 1, so a callback reaching for WordPress's `-1` means
-	 * unlimited idiom would cap the query at a single row, and `absint( 0.4 )` is 0, which would
-	 * empty the result set. Anything from 1 up survives `absint()` as at least 1, so that is the
-	 * threshold.
+	 * Both ends are checked, because `absint()` disagrees with the value it is given in two
+	 * directions: it collapses the sign, so `absint( -1 )` is 1 and a callback reaching for
+	 * WordPress's `-1` means unlimited idiom would cap the query at a single row; and it can
+	 * truncate to nothing, so `absint( 0.4 )` and `absint( INF )` are both 0, which would empty the
+	 * result set. Rather than enumerate every coercion, the raw value is range-checked and the
+	 * coerced result has to hold up as well.
 	 *
 	 * @since 11.1.0
 	 * @param mixed $value         The filtered value.
@@ -381,7 +382,13 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * @return int
 	 */
 	private static function sanitize_row_count( $value, int $default_value ): int {
-		return is_numeric( $value ) && $value >= 1 ? absint( $value ) : $default_value;
+		if ( ! is_numeric( $value ) || $value < 1 ) {
+			return $default_value;
+		}
+
+		$count = absint( $value );
+
+		return $count >= 1 ? $count : $default_value;
 	}
 
 	/**

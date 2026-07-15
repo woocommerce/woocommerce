@@ -215,15 +215,35 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Data store get_tokens should ignore a page size filter value that is not a positive number.
+	 * Filter return values that must not be used as a row count.
 	 *
-	 * @testWith [null]
-	 *           [false]
-	 *           [0]
-	 *           [0.4]
-	 *           [-1]
-	 *           [-5]
-	 *           ["abc"]
+	 * Each either fails to be a number of at least one, or is one that `absint()` turns into 0,
+	 * which would empty the result set.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function unusable_row_count_provider(): array {
+		return array(
+			'null'               => array( null ),
+			'false'              => array( false ),
+			'zero'               => array( 0 ),
+			'fraction below 1'   => array( 0.4 ),
+			'numeric string 0'   => array( '0.5' ),
+			'negative one'       => array( -1 ),
+			'negative'           => array( -5 ),
+			'non-numeric'        => array( 'abc' ),
+			'infinity'           => array( INF ),
+			'negative infinity'  => array( -INF ),
+			'not a number'       => array( NAN ),
+			'overflowing float'  => array( 1e309 ),
+			'overflowing string' => array( '1e309' ),
+		);
+	}
+
+	/**
+	 * @testdox Data store get_tokens should ignore a page size filter value that is not usable as a row count.
+	 *
+	 * @dataProvider unusable_row_count_provider
 	 *
 	 * @param mixed $filtered_value Value returned by the page size filter.
 	 */
@@ -259,15 +279,9 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Data store get_tokens should ignore an unscoped ceiling filter value that is not a positive number.
+	 * @testdox Data store get_tokens should ignore an unscoped ceiling filter value that is not usable as a row count.
 	 *
-	 * @testWith [null]
-	 *           [false]
-	 *           [0]
-	 *           [0.4]
-	 *           [-1]
-	 *           [-5]
-	 *           ["abc"]
+	 * @dataProvider unusable_row_count_provider
 	 *
 	 * @param mixed $filtered_value Value returned by the unscoped limit filter.
 	 */
