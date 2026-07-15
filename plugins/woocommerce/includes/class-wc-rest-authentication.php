@@ -340,7 +340,7 @@ class WC_REST_Authentication {
 	}
 
 	/**
-	 * Perform OAuth 1.0a "one-legged" (http://oauthbible.com/#oauth-10a-one-legged) authentication for non-SSL requests.
+	 * Perform OAuth 1.0a "one-legged" authentication for non-SSL requests.
 	 *
 	 * This is required so API credentials cannot be sniffed or intercepted when making API requests over plain HTTP.
 	 *
