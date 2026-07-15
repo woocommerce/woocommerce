@@ -43,7 +43,9 @@ const readCartScopeState = ( page: import('@playwright/test').Page ) =>
 		const { state } = store( 'woocommerce/cart', {}, { lock: unlockKey } );
 		return {
 			pageScope: state.pageScope as string,
-			draftItems: JSON.parse( JSON.stringify( state.draftItems ) ) as Record<
+			draftItems: JSON.parse(
+				JSON.stringify( state.draftItems )
+			) as Record<
 				string,
 				{ id: number; quantity: number; variation?: unknown[] }[]
 			>,
@@ -139,9 +141,8 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 				overriddenForm.getByLabel( 'Product quantity' )
 			).toHaveValue( '1' );
 
-			const overriddenQuantity = overriddenForm.getByLabel(
-				'Product quantity'
-			);
+			const overriddenQuantity =
+				overriddenForm.getByLabel( 'Product quantity' );
 			await overriddenQuantity.fill( '5' );
 			await overriddenQuantity.blur();
 
@@ -296,9 +297,8 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 				.getByRole( 'radiogroup', { name: 'Logo' } )
 				.getByRole( 'radio', { name: 'No', exact: true } )
 				.click();
-			const overriddenQuantity = overriddenForm.getByLabel(
-				'Product quantity'
-			);
+			const overriddenQuantity =
+				overriddenForm.getByLabel( 'Product quantity' );
 			await overriddenQuantity.fill( '2' );
 			await overriddenQuantity.blur();
 
