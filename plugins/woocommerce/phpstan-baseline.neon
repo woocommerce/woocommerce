@@ -14941,12 +14941,6 @@ parameters:
 			path: includes/class-wc-shipping-zone.php
 
 		-
-			message: '#^Cannot access offset string on array\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/class-wc-shipping-zone.php
-
-		-
 			message: '#^Method WC_Shipping_Zone\:\:add_location\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
