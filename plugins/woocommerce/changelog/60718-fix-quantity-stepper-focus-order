@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Quantity stepper: render the decrease button before the input and the increase button after it, so DOM order matches the visual order (− input +) and keyboard focus and screen-reader reading order are logical.

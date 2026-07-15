@@ -459,6 +459,15 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'wc-block-components-quantity-selector__button--minus', $markup, 'The minus stepper button is rendered.' );
 		$this->assertStringContainsString( 'wc-block-components-quantity-selector__button--plus', $markup, 'The plus stepper button is rendered.' );
+
+		// The DOM order must match the visual order (− input +) so keyboard focus and
+		// screen-reader reading order are logical (see issue #60718).
+		$this->assertMatchesRegularExpression(
+			'/quantity-selector__button--minus.*?quantity-selector__input.*?quantity-selector__button--plus/s',
+			$markup,
+			'The steppers render in − input + DOM order so focus and reading order match the visual order.'
+		);
+
 		$this->assertStringContainsString( 'Reduce quantity of CANADA, $1', $markup, 'The minus button aria-label contains the full product name with dollar sign.' );
 		$this->assertStringContainsString( 'Increase quantity of CANADA, $1', $markup, 'The plus button aria-label contains the full product name with dollar sign.' );
 

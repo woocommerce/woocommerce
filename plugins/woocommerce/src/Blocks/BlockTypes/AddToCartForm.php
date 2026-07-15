@@ -75,7 +75,9 @@ class AddToCartForm extends AbstractBlock {
 	private function add_steppers( $product_html, $product_name ) {
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
-		// Replacement string to add button AFTER the matched <input> element.
+		// The minus button is placed BEFORE the input and the plus button AFTER it,
+		// so the DOM order matches the visual order (− input +). This keeps keyboard
+		// focus and screen-reader reading order logical without using tabindex or JS.
 		// Use preg_replace_callback to avoid backreference interpretation of $, \ sequences in product names.
 		$new_html = preg_replace_callback(
 			$pattern,
@@ -91,7 +93,7 @@ class AddToCartForm extends AbstractBlock {
 			function ( $matches ) use ( $product_name ) {
 				/* translators: %s refers to the item name in the cart. */
 				$minus_aria = esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) );
-				return $matches[1] . '<button aria-label="' . $minus_aria . '" type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
+				return '<button aria-label="' . $minus_aria . '" type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>' . $matches[1];
 			},
 			$new_html ?? ''
 		);
