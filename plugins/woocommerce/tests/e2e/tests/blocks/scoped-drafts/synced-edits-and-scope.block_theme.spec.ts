@@ -168,25 +168,24 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 		} );
 	} );
 
-	test( 'for a variable product, quantity and attribute edits land in the shared page scope; a Single Product block override resolves its own scope', async ( {
+	test( 'for a variable product, quantity and attribute edits land in the shared page scope; a second page-wide surface reflects them without reverting either form; a Single Product block override resolves its own scope', async ( {
 		page,
 		requestUtils,
 		frontendUtils,
 	} ) => {
 		const hoodieId = await getPostIdBySlug( 'hoodie' );
 
-		// Only two renderings here (the template's own main form, and a
-		// Single Product block override) — deliberately no additional,
-		// never-configured page-wide surface for this variable product.
-		// Reading the store directly confirms why: a page-wide "Add to Cart
-		// with Options" instance with no attribute selection of its own
-		// resolves against the same page-wide product/variation state the
-		// main form writes to, and its own idle re-resolution — "no
-		// attributes selected" — eventually overwrites the main form's
-		// selection back to that unconfigured default. Synced quantity
-		// across multiple page-wide surfaces, which does not depend on any
-		// variation resolution, is proven independently on a simple product
-		// in the test above.
+		// A second page-wide surface (no scope declaration of its own, so it
+		// shares the page's scope exactly like the main form) sits alongside
+		// the main form and the Single Product block override, mirroring the
+		// simple-product case above. For a variable product this also
+		// exercises variation resolution: the second surface's own
+		// quantity- and attribute-selection watches re-run whenever the
+		// shared page-wide variation resolves, so this covers that a
+		// surface which never received its own edit displays the resolved
+		// selection and quantity without ever writing its own stale local
+		// state back over them, and that it can submit exactly what it
+		// displays.
 		await requestUtils.createTemplate( 'wp_template', {
 			slug: 'single-product',
 			title: 'Custom Single Product',
@@ -194,6 +193,9 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 <!-- wp:group {"tagName":"main","layout":{"inherit":true,"type":"constrained"}} -->
 <main class="wp-block-group">
 <!-- wp:woocommerce/add-to-cart-with-options /-->
+<!-- wp:group {"className":"page-wide-secondary-surface"} -->
+<div class="wp-block-group page-wide-secondary-surface"><!-- wp:woocommerce/add-to-cart-with-options /--></div>
+<!-- /wp:group -->
 <!-- wp:woocommerce/single-product {"productId":${ hoodieId }} -->
 <div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/add-to-cart-with-options /--></div>
 <!-- /wp:woocommerce/single-product -->
@@ -205,11 +207,12 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 		await page.goto( '/product/hoodie/' );
 
 		const forms = addToCartWithOptionsForms( page );
-		await expect( forms ).toHaveCount( 2 );
+		await expect( forms ).toHaveCount( 3 );
 		const mainForm = forms.nth( 0 );
-		const overriddenForm = forms.nth( 1 );
+		const secondSurface = forms.nth( 1 );
+		const overriddenForm = forms.nth( 2 );
 
-		await test.step( 'configuring the main form writes quantity and attributes into the shared page-scope draft, leaving the override’s own scope untouched', async () => {
+		await test.step( 'configuring the main form writes quantity and attributes into the shared page-scope draft; the second page-wide surface displays the edit and can submit it, without either form’s own values reverting; the override’s own scope stays untouched', async () => {
 			const mainQuantity = mainForm.getByLabel( 'Product quantity' );
 			await mainQuantity.fill( '3' );
 			await mainQuantity.blur();
@@ -258,20 +261,70 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 				} ),
 			] );
 
-			// Submit the main form's resolved draft now, before the next
-			// step configures the override — the override carries its own
-			// local product context (established by `SingleProduct.php`),
-			// so configuring it further below never touches the main
-			// form's own selection; this ordering just keeps the two
-			// submissions, and their resulting cart lines, easy to tell
-			// apart.
-			const mainBatchPromise = page.waitForResponse(
+			// The second surface never received its own edit, yet its
+			// quantity input and attribute chips display exactly what the
+			// main form just set — both surfaces read the same shared
+			// page-scope draft.
+			const secondSurfaceQuantity =
+				secondSurface.getByLabel( 'Product quantity' );
+			await expect( secondSurfaceQuantity ).toHaveValue( '3' );
+			await expect(
+				secondSurface
+					.getByRole( 'radiogroup', { name: 'Color' } )
+					.getByRole( 'radio', { name: 'Blue', exact: true } )
+			).toBeChecked();
+			await expect(
+				secondSurface
+					.getByRole( 'radiogroup', { name: 'Logo' } )
+					.getByRole( 'radio', { name: 'No', exact: true } )
+			).toBeChecked();
+
+			// Hold steady rather than merely agreeing for a moment: the
+			// second surface's own quantity- and attribute-resolution
+			// watches keep re-running while the shared variation stays
+			// resolved, so give them a beat and confirm neither surface's
+			// own values were written back to a stale local default in the
+			// meantime.
+			// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
+			await page.waitForTimeout( 2000 );
+			await expect( mainQuantity ).toHaveValue( '3' );
+			await expect( secondSurfaceQuantity ).toHaveValue( '3' );
+			await expect(
+				mainForm
+					.getByRole( 'radiogroup', { name: 'Color' } )
+					.getByRole( 'radio', { name: 'Blue', exact: true } )
+			).toBeChecked();
+			await expect(
+				mainForm
+					.getByRole( 'radiogroup', { name: 'Logo' } )
+					.getByRole( 'radio', { name: 'No', exact: true } )
+			).toBeChecked();
+			await expect(
+				secondSurface
+					.getByRole( 'radiogroup', { name: 'Color' } )
+					.getByRole( 'radio', { name: 'Blue', exact: true } )
+			).toBeChecked();
+			await expect(
+				secondSurface
+					.getByRole( 'radiogroup', { name: 'Logo' } )
+					.getByRole( 'radio', { name: 'No', exact: true } )
+			).toBeChecked();
+
+			// The second surface displays a fully resolved, purchasable
+			// configuration, so its own Add to cart must act on it.
+			const secondSurfaceAddToCartButton = secondSurface.getByRole(
+				'button',
+				{ name: 'Add to cart' }
+			);
+			await expect( secondSurfaceAddToCartButton ).not.toHaveClass(
+				/\bdisabled\b/
+			);
+
+			const batchPromise = page.waitForResponse(
 				'**/wc/store/v1/batch**'
 			);
-			await mainForm
-				.getByRole( 'button', { name: 'Add to cart' } )
-				.click();
-			await mainBatchPromise;
+			await secondSurfaceAddToCartButton.click();
+			await batchPromise;
 
 			await frontendUtils.goToCart();
 			await expect(
