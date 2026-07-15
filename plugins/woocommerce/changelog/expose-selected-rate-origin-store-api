@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Expose selected_rate_origin ('auto'|'manual'|null) on Store API cart shipping packages, so payment gateways can distinguish an auto-defaulted Local Pickup from one the customer explicitly chose.
