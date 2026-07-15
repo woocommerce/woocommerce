@@ -294,6 +294,10 @@ export default [
 	},
 	{
 		files: [ '**/bin/**.js', '**/storybook/**.js', '**/stories/**.js' ],
+		// These build/tooling scripts run in Node; eslint-env comments are gone in v9+.
+		languageOptions: {
+			globals: { ...globals.node },
+		},
 		rules: {
 			'you-dont-need-lodash-underscore/omit': 'off',
 		},
@@ -336,11 +340,6 @@ export default [
 			'@typescript-eslint/no-use-before-define': [ 'error' ],
 			'jsdoc/require-param': 'off',
 			'no-shadow': 'off',
-			'@typescript-eslint/no-shadow': [ 'error' ],
-			'@typescript-eslint/no-unused-vars': [
-				'error',
-				{ ignoreRestSiblings: true },
-			],
 			camelcase: 'off',
 			'@typescript-eslint/naming-convention': [
 				'error',
