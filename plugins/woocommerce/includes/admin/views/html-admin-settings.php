@@ -87,12 +87,6 @@ $marketplace_links = array(
 		/* translators: %1$s: opening link tag, %2$s: closing link tag */
 		'message'     => __( '%1$sExplore solutions%2$s that help with tax calculations, compliance, and regional requirements.', 'woocommerce' ),
 	),
-	'shipping' => array(
-		'url'         => $marketplace_base_url . 'shipping-delivery-and-fulfillment/',
-		'is_external' => true,
-		/* translators: %1$s: opening link tag, %2$s: closing link tag */
-		'message'     => __( '%1$sExplore solutions%2$s that enhance shipping, delivery, and fulfillment workflows.', 'woocommerce' ),
-	),
 	'account'  => array(
 		'url'         => $marketplace_base_url . 'store-content-and-customizations/cart-and-checkout-features/',
 		'is_external' => true,
