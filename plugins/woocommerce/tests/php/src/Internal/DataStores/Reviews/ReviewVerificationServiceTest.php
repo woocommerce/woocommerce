@@ -3,20 +3,44 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\DataStores\Reviews;
 
-use Automattic\WooCommerce\Internal\DataStores\Reviews\ReviewVerificationQuery;
+use Automattic\WooCommerce\Internal\DataStores\Reviews\ReviewVerificationDataStore;
+use Automattic\WooCommerce\Internal\DataStores\Reviews\ReviewVerificationService;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 
 /**
- * Tests for ReviewVerificationQuery.
+ * Tests for ReviewVerificationService and ReviewVerificationDataStore.
  */
-class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
+class ReviewVerificationServiceTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * The scheduling service under test.
+	 *
+	 * @var ReviewVerificationService
+	 */
+	private ReviewVerificationService $service;
+
+	/**
+	 * The resolving data store under test.
+	 *
+	 * @var ReviewVerificationDataStore
+	 */
+	private ReviewVerificationDataStore $data_store;
+
+	/**
+	 * Resolve the service and data store from the container.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->service    = wc_get_container()->get( ReviewVerificationService::class );
+		$this->data_store = wc_get_container()->get( ReviewVerificationDataStore::class );
+	}
 
 	/**
 	 * Clear any backfill actions scheduled by fixtures or prior tests.
 	 */
 	public function tearDown(): void {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+			as_unschedule_all_actions( ReviewVerificationService::BACKFILL_ACTION );
 		}
 		parent::tearDown();
 	}
@@ -133,7 +157,7 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 	private function count_scheduled_backfills( int $product_id ): int {
 		$ids = as_get_scheduled_actions(
 			array(
-				'hook'     => ReviewVerificationQuery::BACKFILL_ACTION,
+				'hook'     => ReviewVerificationService::BACKFILL_ACTION,
 				'args'     => array( 'product_id' => $product_id ),
 				'status'   => \ActionScheduler_Store::STATUS_PENDING,
 				'per_page' => -1,
@@ -164,7 +188,7 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The backfill must resolve every reviewer in a single query and persist the verified meta,
+	 * The data store must resolve every reviewer in a single query and persist the verified meta,
 	 * so the per-review badge path then issues no further queries.
 	 */
 	public function test_backfill_resolves_all_in_single_query(): void {
@@ -173,7 +197,7 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 		wp_cache_flush();
 		$backfill_queries = $this->count_bought_product_queries(
 			function () use ( $product ) {
-				( new ReviewVerificationQuery() )->backfill( $product->get_id() );
+				$this->data_store->backfill( $product->get_id(), 500 );
 			}
 		);
 
@@ -215,7 +239,7 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 
 		// Backfilled path on a fresh fixture.
 		list( $product_b, $expected_b ) = $this->build_verified_owner_fixture();
-		( new ReviewVerificationQuery() )->backfill( $product_b->get_id() );
+		$this->data_store->backfill( $product_b->get_id(), 500 );
 
 		foreach ( $expected_b as $comment_id => $is_verified ) {
 			$this->assertSame( $is_verified, wc_review_is_from_verified_owner( $comment_id ), "Backfilled path wrong for comment $comment_id." );
@@ -229,7 +253,7 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 		list( $product, $expected ) = $this->build_verified_owner_fixture();
 
 		add_filter( 'woocommerce_prime_review_verification_meta', '__return_false' );
-		( new ReviewVerificationQuery() )->backfill( $product->get_id() );
+		$this->data_store->backfill( $product->get_id(), 500 );
 		remove_filter( 'woocommerce_prime_review_verification_meta', '__return_false' );
 
 		// No meta should have been written by the disabled backfill.
@@ -248,13 +272,12 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 		$comments                   = $this->get_product_reviews( $product_id );
 
 		// Clear the action the fixture's inserts already scheduled, to assert scheduling cleanly.
-		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+		as_unschedule_all_actions( ReviewVerificationService::BACKFILL_ACTION );
 
 		$read_queries = $this->count_bought_product_queries(
 			function () use ( $comments, $product_id ) {
-				$query = new ReviewVerificationQuery();
-				$query->schedule_for_page( $comments, $product_id );
-				$query->schedule_for_page( $comments, $product_id );
+				$this->service->schedule_for_page( $comments, $product_id );
+				$this->service->schedule_for_page( $comments, $product_id );
 			}
 		);
 
@@ -274,10 +297,10 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 		list( $product ) = $this->build_verified_owner_fixture();
 		$product_id      = $product->get_id();
 
-		( new ReviewVerificationQuery() )->backfill( $product_id );
-		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+		$this->data_store->backfill( $product_id, 500 );
+		as_unschedule_all_actions( ReviewVerificationService::BACKFILL_ACTION );
 
-		( new ReviewVerificationQuery() )->schedule_for_page( $this->get_product_reviews( $product_id ), $product_id );
+		$this->service->schedule_for_page( $this->get_product_reviews( $product_id ), $product_id );
 
 		$this->assertSame( 0, $this->count_scheduled_backfills( $product_id ), 'A fully resolved page must not schedule a backfill.' );
 	}
@@ -293,7 +316,7 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 		$this->create_paid_order_for( $product, 0, 'buyer@example.test' );
 		$comment_id = $this->insert_unverified_review( $product_id, 'Buyer@Example.TEST', 0 );
 
-		( new ReviewVerificationQuery() )->backfill( $product_id );
+		$this->data_store->backfill( $product_id, 500 );
 
 		$this->assertSame( '1', get_comment_meta( $comment_id, 'verified', true ), 'A case-different guest email must still resolve as a verified owner.' );
 		$this->assertTrue( wc_review_is_from_verified_owner( $comment_id ), 'The per-review path must agree.' );
@@ -307,7 +330,7 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 		list( $product, $expected ) = $this->build_verified_owner_fixture();
 
 		add_filter( 'woocommerce_pre_customer_bought_product', '__return_true' );
-		( new ReviewVerificationQuery() )->backfill( $product->get_id() );
+		$this->data_store->backfill( $product->get_id(), 500 );
 		remove_filter( 'woocommerce_pre_customer_bought_product', '__return_true' );
 
 		foreach ( array_keys( $expected ) as $comment_id ) {
@@ -320,7 +343,7 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_schedule_for_new_review_ignores_non_reviews(): void {
 		$product_id = ProductHelper::create_simple_product()->get_id();
-		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+		as_unschedule_all_actions( ReviewVerificationService::BACKFILL_ACTION );
 
 		$comment_id = (int) wp_insert_comment(
 			array(
@@ -330,9 +353,9 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 				'comment_approved' => 1,
 			)
 		);
-		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+		as_unschedule_all_actions( ReviewVerificationService::BACKFILL_ACTION );
 
-		( new ReviewVerificationQuery() )->schedule_for_new_review( $comment_id, get_comment( $comment_id ) );
+		$this->service->schedule_for_new_review( $comment_id, get_comment( $comment_id ) );
 
 		$this->assertSame( 0, $this->count_scheduled_backfills( $product_id ), 'A non-review comment must not schedule a backfill.' );
 	}
@@ -346,8 +369,8 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 
 		// Force a batch smaller than the 4-review fixture so the first run is "full".
 		add_filter( 'woocommerce_review_verification_backfill_batch_size', fn() => 2 );
-		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
-		( new ReviewVerificationQuery() )->backfill( $product_id );
+		as_unschedule_all_actions( ReviewVerificationService::BACKFILL_ACTION );
+		$this->service->run_backfill( $product_id );
 		remove_all_filters( 'woocommerce_review_verification_backfill_batch_size' );
 
 		$this->assertSame( 1, $this->count_scheduled_backfills( $product_id ), 'A full batch must reschedule a follow-up for the remainder.' );
@@ -366,12 +389,12 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 		$product_id      = $product->get_id();
 
 		add_filter( 'woocommerce_review_verification_backfill_batch_size', fn() => 2 );
-		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+		as_unschedule_all_actions( ReviewVerificationService::BACKFILL_ACTION );
 
 		// Persist an action for this product and mark it in-progress, mirroring the scheduler runner.
 		$store      = \ActionScheduler::store();
 		$action     = new \ActionScheduler_Action(
-			ReviewVerificationQuery::BACKFILL_ACTION,
+			ReviewVerificationService::BACKFILL_ACTION,
 			array( 'product_id' => $product_id ),
 			new \ActionScheduler_SimpleSchedule( as_get_datetime_object() ),
 			'woocommerce-review-verification'
@@ -379,7 +402,7 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 		$running_id = $store->save_action( $action );
 		$store->log_execution( $running_id );
 
-		( new ReviewVerificationQuery() )->backfill( $product_id );
+		$this->service->run_backfill( $product_id );
 		remove_all_filters( 'woocommerce_review_verification_backfill_batch_size' );
 
 		$this->assertSame( 1, $this->count_scheduled_backfills( $product_id ), 'A follow-up must schedule even while a backfill action for the product is running.' );
@@ -393,9 +416,9 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 		$product_id      = $product->get_id();
 
 		add_filter( 'woocommerce_review_verification_backfill_batch_size', fn() => 2 );
-		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
-		( new ReviewVerificationQuery() )->backfill( $product_id );
-		( new ReviewVerificationQuery() )->backfill( $product_id );
+		as_unschedule_all_actions( ReviewVerificationService::BACKFILL_ACTION );
+		$this->service->run_backfill( $product_id );
+		$this->service->run_backfill( $product_id );
 		remove_all_filters( 'woocommerce_review_verification_backfill_batch_size' );
 
 		$this->assertSame( 1, $this->count_scheduled_backfills( $product_id ), 'Repeated full-batch runs must not stack pending follow-ups.' );
@@ -407,12 +430,12 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 	public function test_schedule_for_new_review_enqueues_backfill(): void {
 		$product    = ProductHelper::create_simple_product();
 		$product_id = $product->get_id();
-		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+		as_unschedule_all_actions( ReviewVerificationService::BACKFILL_ACTION );
 
 		$comment_id = $this->insert_unverified_review( $product_id, 'someone@example.test', 0 );
 		$comment    = get_comment( $comment_id );
 
-		( new ReviewVerificationQuery() )->schedule_for_new_review( $comment_id, $comment );
+		$this->service->schedule_for_new_review( $comment_id, $comment );
 
 		$this->assertSame( 1, $this->count_scheduled_backfills( $product_id ), 'A new product review must schedule a backfill.' );
 	}
