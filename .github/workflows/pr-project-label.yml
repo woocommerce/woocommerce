@@ -16,7 +16,7 @@ jobs:
             contents: read
             pull-requests: write
         steps:
-            - uses: actions/labeler@v3
+            - uses: actions/labeler@b8dd2d9be0f68b860e7dae5dae7d772984eacd6d # v6.2.0
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   configuration-path: .github/project-pr-labeler.yml

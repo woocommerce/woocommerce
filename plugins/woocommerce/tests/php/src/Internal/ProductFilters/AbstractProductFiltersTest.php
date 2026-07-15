@@ -13,6 +13,20 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  */
 abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 	/**
+	 * Class-owned product filter fixture state, keyed by test class.
+	 *
+	 * @var array
+	 */
+	private static $class_fixture_state = array();
+
+	/**
+	 * Option values to restore after class fixture setup and teardown.
+	 *
+	 * @var array
+	 */
+	private static $class_fixture_option_values = array();
+
+	/**
 	 * FixtureData instance.
 	 *
 	 * @var FixtureData
@@ -48,25 +62,11 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 	protected $product_tags;
 
 	/**
-	 * Backup options.
-	 *
-	 * @var array
+	 * Ensure the lookup table exists before per-test transactions start.
 	 */
-	protected $backup_options;
-
-	/**
-	 * Runs before each test.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		$this->fixture_data = new FixtureData();
-
-		/**
-		 * Create the lookup table if it doesn't exist.
-		 * Unit tests can be run selectively, so we need to ensure the lookup table exists.
-		 */
+	public static function wpSetUpBeforeClass(): void {
 		global $wpdb;
+
 		$wpdb->query(
 			"
 			  CREATE TABLE IF NOT EXISTS {$wpdb->prefix}wc_product_attributes_lookup (
@@ -80,11 +80,61 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 			"
 		);
 
-		$this->backup_options = array(
-			'woocommerce_attribute_lookup_enabled' => get_option( 'woocommerce_attribute_lookup_enabled' ),
-			'woocommerce_calc_taxes'               => get_option( 'woocommerce_calc_taxes' ),
-			'woocommerce_tax_display_shop'         => get_option( 'woocommerce_tax_display_shop' ),
-		);
+		if ( static::uses_class_product_filter_fixtures() ) {
+			static::set_up_class_product_filter_fixtures();
+		}
+	}
+
+	/**
+	 * Remove custom-table rows not covered by WordPress's class cleanup.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		global $wpdb;
+
+		if ( static::uses_class_product_filter_fixtures() ) {
+			static::delete_class_product_filter_fixtures();
+		}
+
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_meta_lookup" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_attributes_lookup" );
+
+		if ( static::uses_class_product_filter_fixtures() ) {
+			static::restore_class_product_filter_fixture_options();
+		}
+	}
+
+	/**
+	 * Runs before each test.
+	 */
+	public function setUp(): void {
+		$this->set_up_test_case();
+
+		if ( static::uses_class_product_filter_fixtures() ) {
+			$this->use_class_product_filter_fixtures();
+		} else {
+			$this->set_up_product_filter_fixtures();
+		}
+	}
+
+	/**
+	 * Whether this test class owns one immutable catalog shared by all its methods.
+	 */
+	protected static function uses_class_product_filter_fixtures(): bool {
+		return false;
+	}
+
+	/**
+	 * Start the standard per-test transaction and reset WordPress state.
+	 */
+	protected function set_up_test_case(): void {
+		parent::setUp();
+	}
+
+	/**
+	 * Create the product filter catalog used by a test.
+	 */
+	protected function set_up_product_filter_fixtures(): void {
+		$this->fixture_data = new FixtureData();
 
 		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'no' );
@@ -214,35 +264,134 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Runs after each test.
+	 * Create an immutable product filter catalog before per-test transactions begin.
 	 */
-	public function tearDown(): void {
-		parent::tearDown();
+	protected static function set_up_class_product_filter_fixtures(): void {
+		$class_name = static::class;
 
-		$this->remove_all_attributes();
-		$this->remove_all_products();
-		$this->remove_all_product_categories();
-		$this->remove_all_product_tags();
-		$this->empty_lookup_tables();
+		self::$class_fixture_option_values[ $class_name ] = array(
+			'woocommerce_attribute_lookup_enabled' => get_option( 'woocommerce_attribute_lookup_enabled', null ),
+			'woocommerce_calc_taxes'               => get_option( 'woocommerce_calc_taxes', null ),
+			'woocommerce_tax_display_shop'         => get_option( 'woocommerce_tax_display_shop', null ),
+		);
+		static::enable_direct_product_attribute_lookup_updates();
 
-		foreach ( $this->backup_options as $option => $value ) {
-			if ( false === $value ) {
-				delete_option( $option );
-			} else {
-				update_option( $option, $value );
-			}
+		try {
+			$fixture_owner = new static();
+			$fixture_owner->set_up_product_filter_fixtures();
+			$fixture_owner->set_up_additional_class_product_filter_fixtures();
+
+			self::$class_fixture_state[ $class_name ] = array(
+				'product_ids'        => array_map(
+					static function ( $product ) {
+						return $product->get_id();
+					},
+					$fixture_owner->products
+				),
+				'products_data'      => $fixture_owner->products_data,
+				'product_categories' => $fixture_owner->product_categories,
+				'product_tags'       => $fixture_owner->product_tags,
+			);
+		} finally {
+			static::restore_class_product_filter_fixture_options();
+			static::disable_direct_product_attribute_lookup_updates();
 		}
-
-		wp_cache_flush();
 	}
 
 	/**
-	 * Truncate the lookup table.
+	 * Add fixtures needed by a class after creating its shared catalog.
+	 */
+	protected function set_up_additional_class_product_filter_fixtures(): void {
+	}
+
+	/**
+	 * Rehydrate the class-owned catalog inside a per-test transaction.
+	 */
+	protected function use_class_product_filter_fixtures(): void {
+		$fixture_state = self::$class_fixture_state[ static::class ];
+
+		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_tax_display_shop', 'excl' );
+		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+		unregister_taxonomy( 'product_type' );
+		\WC_Post_Types::register_taxonomies();
+		foreach ( array_keys( wc_get_attribute_taxonomy_ids() ) as $attribute_name ) {
+			clean_taxonomy_cache( wc_attribute_taxonomy_name( wc_sanitize_taxonomy_name( $attribute_name ) ) );
+		}
+
+		$this->fixture_data       = new FixtureData();
+		$this->products_data      = $fixture_state['products_data'];
+		$this->product_categories = $fixture_state['product_categories'];
+		$this->product_tags       = $fixture_state['product_tags'];
+		$this->products           = array_map( 'wc_get_product', $fixture_state['product_ids'] );
+	}
+
+	/**
+	 * Delete a class-owned catalog through WooCommerce data stores.
+	 */
+	protected static function delete_class_product_filter_fixtures(): void {
+		static::enable_direct_product_attribute_lookup_updates();
+
+		try {
+			$fixture_owner = new static();
+			$fixture_owner->delete_product_filter_fixtures();
+		} finally {
+			static::disable_direct_product_attribute_lookup_updates();
+		}
+
+		unset( self::$class_fixture_state[ static::class ] );
+	}
+
+	/**
+	 * Restore options changed while creating or deleting a class-owned catalog.
+	 */
+	protected static function restore_class_product_filter_fixture_options(): void {
+		$class_name = static::class;
+
+		foreach ( self::$class_fixture_option_values[ $class_name ] ?? array() as $option_name => $option_value ) {
+			if ( null === $option_value ) {
+				delete_option( $option_name );
+			} else {
+				update_option( $option_name, $option_value );
+			}
+		}
+	}
+
+	/**
+	 * Delete product filter fixtures through WooCommerce data stores.
+	 */
+	protected function delete_product_filter_fixtures(): void {
+		$this->remove_all_attributes();
+		$this->remove_all_products();
+		$this->empty_lookup_tables();
+	}
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		if ( ! static::uses_class_product_filter_fixtures() ) {
+			$this->delete_product_filter_fixtures();
+		}
+
+		foreach ( array_keys( wc_get_attribute_taxonomy_ids() ) as $attribute_name ) {
+			$taxonomy_name = wc_attribute_taxonomy_name( wc_sanitize_taxonomy_name( $attribute_name ) );
+			unregister_taxonomy( $taxonomy_name );
+		}
+
+		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+		\WC_Query::reset_chosen_attributes();
+		parent::tearDown();
+	}
+
+	/**
+	 * Empty the lookup tables inside the current test transaction.
 	 */
 	private function empty_lookup_tables() {
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_meta_lookup" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_attributes_lookup" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_meta_lookup" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_attributes_lookup" );
 	}
 
 	/**
@@ -289,24 +438,6 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 			}
 
 			$product->delete( true );
-		}
-	}
-
-	/**
-	 * Remove all product taxonomies.
-	 */
-	private function remove_all_product_categories() {
-		foreach ( $this->product_categories as $term ) {
-			wp_delete_term( $term['term_id'], 'product_cat' );
-		}
-	}
-
-	/**
-	 * Remove all product tags.
-	 */
-	private function remove_all_product_tags() {
-		foreach ( $this->product_tags as $term ) {
-			wp_delete_term( $term['term_id'], 'product_tag' );
 		}
 	}
 

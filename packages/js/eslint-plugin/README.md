@@ -39,9 +39,3 @@ If you want to use prettier in your code editor, you'll need to create a `.prett
 ```js
 module.exports = require("@wordpress/prettier-config");
 ```
-
-### Rules
-
-| Rule                                                                       | Description                               | Recommended |
-| -------------------------------------------------------------------------- | ----------------------------------------- | ----------- |
-| [dependency-group](/packages/js/eslint-plugin/docs/rules/dependency-group.md) | Enforce dependencies docblocks formatting | ✓           |

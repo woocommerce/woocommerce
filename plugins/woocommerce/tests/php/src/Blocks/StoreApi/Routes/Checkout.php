@@ -18,7 +18,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-use Mockery\Adapter\Phpunit\MockeryTestCase;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use WC_Gateway_BACS;
 
 /**
@@ -26,9 +26,90 @@ use WC_Gateway_BACS;
  *
  * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r, WooCommerce.Commenting.CommentHooks.MissingHookComment
  */
-class Checkout extends MockeryTestCase {
+class Checkout extends \WP_Test_REST_TestCase {
+	use MockeryPHPUnitIntegration;
+	use StoreApiRestTestCaseTrait;
 
 	const TEST_COUPON_CODE = 'test_coupon_code';
+
+	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
+	/**
+	 * Coupon ID shared by the class.
+	 *
+	 * @var int
+	 */
+	private static $coupon_id;
+
+	/**
+	 * Payment gateway registry before the test.
+	 *
+	 * @var array
+	 */
+	private $payment_gateways_before_test = array();
+
+	/**
+	 * PayPal gateway singleton before the test.
+	 *
+	 * @var \WC_Gateway_Paypal
+	 */
+	private $paypal_gateway_before_test;
+
+	/**
+	 * Create immutable catalog rows shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::$product_ids = array_map(
+			fn( $product ) => $product->get_id(),
+			self::create_class_fixture_products(
+				array(
+					array(
+						'name'          => 'Test Product 1',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					),
+					array(
+						'name'          => 'Test Product 2',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					),
+					array(
+						'name'          => 'Virtual Test Product 2',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+						'virtual'       => true,
+					),
+				),
+			)
+		);
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( self::TEST_COUPON_CODE );
+		$coupon->set_amount( 2 );
+		$coupon->save();
+		self::$coupon_id = $coupon->get_id();
+	}
+
+	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		try {
+			self::delete_class_fixture_products( self::$product_ids );
+		} finally {
+			$coupon = new \WC_Coupon( self::$coupon_id );
+			$coupon->delete( true );
+		}
+	}
+
 	/**
 	 * Setup test product data. Called before every test.
 	 */
@@ -37,19 +118,13 @@ class Checkout extends MockeryTestCase {
 
 		add_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4 );
 
+		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
-		global $wp_rest_server;
-		$wp_rest_server = new \Spy_REST_Server();
-		do_action( 'rest_api_init', $wp_rest_server );
+		$this->initialize_store_api_server();
 
 		wp_set_current_user( 0 );
-
-		$coupon = new \WC_Coupon();
-		$coupon->set_code( self::TEST_COUPON_CODE );
-		$coupon->set_amount( 2 );
-		$coupon->save();
 
 		$formatters = new Formatters();
 		$formatters->register( 'money', MoneyFormatter::class );
@@ -77,38 +152,15 @@ class Checkout extends MockeryTestCase {
 		$order_route = new CheckoutOrderRoute( $schema_controller, $schema_controller->get( 'checkout-order' ) );
 		register_rest_route( $order_route->get_namespace(), $order_route->get_path(), $order_route->get_args(), true );
 
+		$this->payment_gateways_before_test = WC()->payment_gateways()->payment_gateways;
+		$this->paypal_gateway_before_test   = \WC_Gateway_Paypal::get_instance();
+
 		$fixtures = new FixtureData();
 		$fixtures->payments_enable_bacs();
 		$fixtures->shipping_add_pickup_location();
 		$fixtures->shipping_add_flat_rate_instance();
 
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Virtual Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-					'virtual'       => true,
-				)
-			),
-		);
+		$this->products = array_map( 'wc_get_product', self::$product_ids );
 		wc_empty_cart();
 		wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
 		wc()->cart->add_to_cart( $this->products[1]->get_id(), 1 );
@@ -118,39 +170,70 @@ class Checkout extends MockeryTestCase {
 	 * Tear down Rest API server.
 	 */
 	protected function tearDown(): void {
-		parent::tearDown();
+		try {
+			remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 
-		remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
+			remove_all_filters( 'woocommerce_get_country_locale' );
+			remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
+			remove_all_filters( 'wc_order_statuses' );
+			remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
+			remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
+			remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
 
-		remove_all_filters( 'woocommerce_get_country_locale' );
-		remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
-		remove_all_filters( 'wc_order_statuses' );
-		remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
-		remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
-		remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
+			update_option( 'woocommerce_ship_to_countries', 'all' );
+			update_option( 'woocommerce_allowed_countries', 'all' );
+			update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+			update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
-		update_option( 'woocommerce_ship_to_countries', 'all' );
-		update_option( 'woocommerce_allowed_countries', 'all' );
-		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
-		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+			$fixtures = new FixtureData();
+			$fixtures->shipping_remove_pickup_location();
+			$fixtures->shipping_remove_methods_from_default_zone();
 
-		$fixtures = new FixtureData();
-		$fixtures->shipping_remove_pickup_location();
-		$fixtures->shipping_remove_methods_from_default_zone();
+			$customer_to_delete = get_user_by( 'email', 'testaccount@test.com' );
+			if ( $customer_to_delete ) {
+				wp_delete_user( $customer_to_delete->ID );
+			}
 
-		$coupon_to_delete = new \WC_Coupon( self::TEST_COUPON_CODE );
-		$coupon_to_delete->delete( true );
+			unset( WC()->countries->locale );
+			WC()->cart->empty_cart();
+			WC()->session->destroy_session();
+			WC()->customer = null;
+			WC()->initialize_cart();
 
-		$customer_to_delete = get_user_by( 'email', 'testaccount@test.com' );
-		if ( $customer_to_delete ) {
-			wp_delete_user( $customer_to_delete->ID );
+			$GLOBALS['wp_rest_server'] = null;
+		} finally {
+			try {
+				parent::tearDown();
+			} finally {
+				$this->invalidate_checkout_option_caches();
+				WC()->payment_gateways()->payment_gateways = $this->payment_gateways_before_test;
+				\WC_Gateway_Paypal::set_instance( $this->paypal_gateway_before_test );
+			}
 		}
+	}
 
-		unset( WC()->countries->locale );
-		WC()->cart->empty_cart();
-		WC()->session->destroy_session();
+	/**
+	 * Invalidate caches for options modified by checkout tests.
+	 */
+	private function invalidate_checkout_option_caches(): void {
+		$option_names = array(
+			'woocommerce_checkout_phone_field',
+			'woocommerce_enable_guest_checkout',
+			'woocommerce_enable_signup_and_login_from_checkout',
+			'woocommerce_ship_to_countries',
+			'woocommerce_allowed_countries',
+			'woocommerce_specific_ship_to_countries',
+			'woocommerce_specific_allowed_countries',
+			'woocommerce_bacs_settings',
+			'woocommerce_pickup_location_settings',
+			'pickup_location_pickup_locations',
+		);
 
-		$GLOBALS['wp_rest_server'] = null;
+		foreach ( $option_names as $option_name ) {
+			wp_cache_delete( $option_name, 'options' );
+		}
+		wp_cache_delete( 'alloptions', 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
 	}
 
 	/**
@@ -211,6 +294,135 @@ class Checkout extends MockeryTestCase {
 		);
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * Billing address used by the shipping address fallback tests.
+	 *
+	 * @return array
+	 */
+	private function get_fallback_billing_address() {
+		return array(
+			'first_name' => 'Billing',
+			'last_name'  => 'Person',
+			'company'    => '',
+			'address_1'  => '10 Billing Street',
+			'address_2'  => '',
+			'city'       => 'Cambridge',
+			'state'      => '',
+			'postcode'   => 'cb241ab',
+			'country'    => 'GB',
+			'phone'      => '01223 000000',
+			'email'      => 'testaccount@test.com',
+		);
+	}
+
+	/**
+	 * Shipping address used by the shipping address fallback tests.
+	 *
+	 * @return array
+	 */
+	private function get_fallback_shipping_address() {
+		return array(
+			'first_name' => 'Shipping',
+			'last_name'  => 'Person',
+			'company'    => '',
+			'address_1'  => '20 Shipping Street',
+			'address_2'  => '',
+			'city'       => 'Oxford',
+			'state'      => '',
+			'postcode'   => 'ox11aa',
+			'country'    => 'GB',
+			'phone'      => '01865 000000',
+		);
+	}
+
+	/**
+	 * When the cart needs shipping and the request omits the shipping address, the billing address is used as the
+	 * shipping address.
+	 *
+	 * Regression test: the fallback never ran because `(array)` binds tighter than `??`, so the null coalesce
+	 * operated on an already-cast empty array instead of on the missing `shipping_address` param. That left the
+	 * order without a shipping address, which then failed pre-payment validation.
+	 */
+	public function test_omitted_shipping_address_falls_back_to_billing_address() {
+		$this->assertTrue( WC()->cart->needs_shipping(), 'Test cart is expected to need shipping.' );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address' => (object) $this->get_fallback_billing_address(),
+				'payment_method'  => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertInstanceOf( \WC_Order::class, $order );
+		$this->assertEquals( 'Billing', $order->get_shipping_first_name() );
+		$this->assertEquals( 'Person', $order->get_shipping_last_name() );
+		$this->assertEquals( '10 Billing Street', $order->get_shipping_address_1() );
+		$this->assertEquals( 'Cambridge', $order->get_shipping_city() );
+		$this->assertEquals( 'CB24 1AB', $order->get_shipping_postcode() );
+		$this->assertEquals( 'GB', $order->get_shipping_country() );
+	}
+
+	/**
+	 * When the cart needs shipping and a shipping address is provided, it is used as-is rather than being overwritten
+	 * by the billing address fallback.
+	 */
+	public function test_provided_shipping_address_is_used_when_cart_needs_shipping() {
+		$this->assertTrue( WC()->cart->needs_shipping(), 'Test cart is expected to need shipping.' );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $this->get_fallback_billing_address(),
+				'shipping_address' => (object) $this->get_fallback_shipping_address(),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertInstanceOf( \WC_Order::class, $order );
+		$this->assertEquals( 'Shipping', $order->get_shipping_first_name() );
+		$this->assertEquals( '20 Shipping Street', $order->get_shipping_address_1() );
+		$this->assertEquals( 'Oxford', $order->get_shipping_city() );
+	}
+
+	/**
+	 * When the cart does not need shipping, the provided shipping address is ignored in favour of the billing address.
+	 */
+	public function test_shipping_address_is_ignored_when_cart_does_not_need_shipping() {
+		wc_empty_cart();
+		WC()->cart->add_to_cart( $this->products[2]->get_id(), 1 );
+		$this->assertFalse( WC()->cart->needs_shipping(), 'Test cart is expected to not need shipping.' );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) $this->get_fallback_billing_address(),
+				'shipping_address' => (object) $this->get_fallback_shipping_address(),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertInstanceOf( \WC_Order::class, $order );
+		$this->assertEquals( 'Billing', $order->get_shipping_first_name() );
+		$this->assertEquals( '10 Billing Street', $order->get_shipping_address_1() );
+		$this->assertEquals( 'Cambridge', $order->get_shipping_city() );
 	}
 
 	/**
@@ -2366,5 +2578,74 @@ class Checkout extends MockeryTestCase {
 			)
 		);
 		return $request;
+	}
+
+	/**
+	 * @testdox Checkout route does not resolve the available payment gateways when the request carries no payment method.
+	 */
+	public function test_get_request_payment_method_skips_gateway_resolution_when_missing() {
+		$schema_controller = new SchemaController( $this->mock_extend );
+		$sut               = new CheckoutRoute( $schema_controller, $schema_controller->get( 'checkout' ) );
+
+		$gateway_resolution_count = 0;
+		$counter                  = function ( $gateways ) use ( &$gateway_resolution_count ) {
+			++$gateway_resolution_count;
+			return $gateways;
+		};
+		add_filter( 'woocommerce_available_payment_gateways', $counter );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+
+		$method = new \ReflectionMethod( CheckoutRoute::class, 'get_request_payment_method' );
+		$method->setAccessible( true );
+
+		try {
+			$result = $method->invoke( $sut, $request );
+		} finally {
+			remove_filter( 'woocommerce_available_payment_gateways', $counter );
+		}
+
+		$this->assertNull( $result, 'No payment method should resolve to a null gateway.' );
+		$this->assertSame( 0, $gateway_resolution_count, 'Available payment gateways must not be resolved when no payment method is supplied.' );
+	}
+
+	/**
+	 * @testdox Checkout-order route does not resolve the available payment gateways when the request carries no payment method and the order needs no payment.
+	 */
+	public function test_order_get_request_payment_method_skips_gateway_resolution_when_missing() {
+		$schema_controller = new SchemaController( $this->mock_extend );
+		$sut               = new CheckoutOrderRoute( $schema_controller, $schema_controller->get( 'checkout-order' ) );
+
+		$order = new \WC_Order();
+		$order->save();
+
+		// This scenario depends on the order not needing payment, so the empty-method branch returns null instead of throwing.
+		$this->assertFalse( $order->needs_payment(), 'A zero-total order should not need payment in this scenario.' );
+
+		$order_property = new \ReflectionProperty( CheckoutOrderRoute::class, 'order' );
+		$order_property->setAccessible( true );
+		$order_property->setValue( $sut, $order );
+
+		$gateway_resolution_count = 0;
+		$counter                  = function ( $gateways ) use ( &$gateway_resolution_count ) {
+			++$gateway_resolution_count;
+			return $gateways;
+		};
+		add_filter( 'woocommerce_available_payment_gateways', $counter );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+
+		$method = new \ReflectionMethod( CheckoutOrderRoute::class, 'get_request_payment_method' );
+		$method->setAccessible( true );
+
+		try {
+			$result = $method->invoke( $sut, $request );
+		} finally {
+			remove_filter( 'woocommerce_available_payment_gateways', $counter );
+			$order->delete( true );
+		}
+
+		$this->assertNull( $result, 'No payment method on a zero-total order should resolve to a null gateway.' );
+		$this->assertSame( 0, $gateway_resolution_count, 'Available payment gateways must not be resolved when no payment method is supplied.' );
 	}
 }

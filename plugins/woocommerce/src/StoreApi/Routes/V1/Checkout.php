@@ -902,11 +902,9 @@ class Checkout extends AbstractCartRoute {
 			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 
 			if ( 'shipping_address' === $context_data['param'] ) {
-				$field_values = (array) $request['shipping_address'] ?? ( $request['billing_address'] ?? [] );
-
-				if ( ! WC()->cart->needs_shipping() ) {
-					$field_values = $request['billing_address'] ?? [];
-				}
+				$field_values = WC()->cart->needs_shipping()
+					? (array) ( $request['shipping_address'] ?? $request['billing_address'] ?? [] )
+					: (array) ( $request['billing_address'] ?? [] );
 			} else {
 				$field_values = (array) $request[ $context_data['param'] ] ?? [];
 			}
@@ -946,12 +944,13 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WC_Payment_Gateway|null
 	 */
 	private function get_request_payment_method( \WP_REST_Request $request ) {
-		$available_gateways     = WC()->payment_gateways->get_available_payment_gateways();
 		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
 
 		if ( empty( $request_payment_method ) ) {
 			return null;
 		}
+
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		if ( ! isset( $available_gateways[ $request_payment_method ] ) ) {
 			$all_payment_gateways = WC()->payment_gateways->payment_gateways();
