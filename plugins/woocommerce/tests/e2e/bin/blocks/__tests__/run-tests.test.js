@@ -42,7 +42,10 @@ describe( 'buildPlaywrightArguments', () => {
 				manifest,
 				expectedShardCount: 2,
 			} ),
-			[ ...baseArguments, 'tests/e2e/tests/blocks/a\\.spec\\.ts$' ]
+			[
+				...baseArguments,
+				'\\x74ests\\/e2e\\/tests\\/blocks\\/a\\.spec\\.ts$',
+			]
 		);
 	} );
 
@@ -61,7 +64,7 @@ describe( 'buildPlaywrightArguments', () => {
 			} ),
 			[
 				...baseArguments,
-				'tests/e2e/tests/blocks/a\\+\\[draft\\]\\.spec\\.ts$',
+				'\\x74ests\\/e2e\\/tests\\/blocks\\/a\\+\\[draft\\]\\.spec\\.ts$',
 			]
 		);
 	} );
@@ -80,8 +83,8 @@ describe( 'buildPlaywrightArguments', () => {
 			} ),
 			[
 				...baseArguments,
-				'tests/e2e/tests/blocks/b\\.spec\\.ts$',
-				'tests/e2e/tests/blocks/c\\.spec\\.ts$',
+				'\\x74ests\\/e2e\\/tests\\/blocks\\/b\\.spec\\.ts$',
+				'\\x74ests\\/e2e\\/tests\\/blocks\\/c\\.spec\\.ts$',
 				'--last-failed',
 				'--shard=1/1',
 			]

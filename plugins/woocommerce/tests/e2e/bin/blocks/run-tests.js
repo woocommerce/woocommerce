@@ -17,10 +17,6 @@ const PLAYWRIGHT_BASE_ARGUMENTS = [
 	'--project=blocks-chromium',
 ];
 
-function escapeRegularExpression( value ) {
-	return value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
-}
-
 function buildPlaywrightArguments( {
 	cliArguments,
 	files = discoverBlocksSpecs( BLOCKS_TESTS_ROOT ),
@@ -54,8 +50,7 @@ function buildPlaywrightArguments( {
 		( argument ) => ! argument.startsWith( '--duration-shard=' )
 	);
 	const selectedFiles = selectedShard.files.map(
-		( file ) =>
-			`${ escapeRegularExpression( `tests/e2e/tests/${ file }` ) }$`
+		( file ) => `${ RegExp.escape( `tests/e2e/tests/${ file }` ) }$`
 	);
 
 	return [
