@@ -95,7 +95,7 @@
 				},
 				{
 					"name": "X-Small",
-					"size": "clamp(20px, calc(var(--wp--custom--spacing-unit) * 2 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 2 * 1px))",
+					"size": "clamp(10px, calc(var(--wp--custom--spacing-unit) * 2 * 1px * 100vw / var(--wp--style--global--wide-size)), calc(var(--wp--custom--spacing-unit) * 2 * 1px))",
 					"slug": "20"
 				},
 				{

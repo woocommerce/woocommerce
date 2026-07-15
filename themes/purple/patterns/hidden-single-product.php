@@ -85,8 +85,8 @@
 <!-- /wp:accordion --></div>
 <!-- /wp:woocommerce/product-details -->
 
-<!-- wp:spacer {"height":"var:preset|spacing|20","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
-<div style="margin-top:0;margin-bottom:0;height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- wp:spacer {"height":"var:preset|spacing|20","style":{"spacing":{"margin":{"top":"var:preset|spacing|20","bottom":"0"}}}} -->
+<div style="margin-top:var(--wp--preset--spacing--20);margin-bottom:0;height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->
 
 <!-- wp:pattern {"slug":"purple/store-features-two-columns"} /--></div>
