@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Internal\Shipping\ShippingMethodOriginTracker;
 use Automattic\WooCommerce\StoreApi\Formatters;
 use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\HtmlFormatter;
@@ -43,6 +44,17 @@ class CartShippingRateSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		WC()->session->set( 'chosen_shipping_methods', null );
+		WC()->session->set( ShippingMethodOriginTracker::SESSION_KEY, null );
+		WC()->session->set( 'shipping_method_counts', null );
+		WC()->session->set( 'previous_shipping_methods', null );
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox Should exclude hidden shipping rate meta from API response.
 	 */
 	public function test_get_rate_response_excludes_hidden_meta_data(): void {
@@ -70,6 +82,68 @@ class CartShippingRateSchemaTest extends WC_Unit_Test_Case {
 			),
 			$response['meta_data'],
 			'Only public shipping rate meta should be exposed by the Store API.'
+		);
+	}
+
+	/**
+	 * @testdox selected_rate_origin reflects the recorded origin of the chosen rate.
+	 */
+	public function test_selected_rate_origin_exposes_recorded_origin(): void {
+		WC()->session->set( 'chosen_shipping_methods', array( 0 => 'flat_rate:14' ) );
+		wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( 0, 'auto', 'flat_rate:14' );
+
+		$response = $this->sut->get_item_response( $this->build_package() );
+		$this->assertSame( 'auto', $response['selected_rate_origin'] );
+
+		wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( 0, 'manual', 'flat_rate:14' );
+		$response = $this->sut->get_item_response( $this->build_package() );
+		$this->assertSame( 'manual', $response['selected_rate_origin'] );
+	}
+
+	/**
+	 * @testdox selected_rate_origin is null when no rate is chosen for the package.
+	 */
+	public function test_selected_rate_origin_null_without_chosen_rate(): void {
+		WC()->session->set( 'chosen_shipping_methods', null );
+		WC()->session->set( ShippingMethodOriginTracker::SESSION_KEY, null );
+
+		$response = $this->sut->get_item_response( $this->build_package() );
+		$this->assertNull( $response['selected_rate_origin'] );
+	}
+
+	/**
+	 * @testdox selected_rate_origin defaults to manual for sessions predating origin tracking.
+	 */
+	public function test_selected_rate_origin_manual_when_unrecorded(): void {
+		WC()->session->set( 'chosen_shipping_methods', array( 0 => 'flat_rate:14' ) );
+		WC()->session->set( ShippingMethodOriginTracker::SESSION_KEY, null );
+
+		$response = $this->sut->get_item_response( $this->build_package() );
+		$this->assertSame( 'manual', $response['selected_rate_origin'] );
+	}
+
+	/**
+	 * Builds a minimal calculated shipping package as get_item_response() consumes it.
+	 *
+	 * @param int $package_id Package id/key.
+	 * @return array
+	 */
+	private function build_package( int $package_id = 0 ): array {
+		return array(
+			'package_id'   => $package_id,
+			'package_name' => 'Shipping',
+			'destination'  => array(
+				'address_1' => '',
+				'address_2' => '',
+				'city'      => '',
+				'state'     => '',
+				'postcode'  => '',
+				'country'   => 'US',
+			),
+			'contents'     => array(),
+			'rates'        => array(
+				'flat_rate:14' => new WC_Shipping_Rate( 'flat_rate:14', 'Flat rate', 10, array(), 'flat_rate', 14 ),
+			),
 		);
 	}
 

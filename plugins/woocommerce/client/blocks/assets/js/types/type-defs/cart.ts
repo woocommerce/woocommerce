@@ -75,6 +75,7 @@ export interface CartShippingRate {
 	name: string;
 	destination: BaseAddress;
 	items: Array< ShippingRateItem >;
+	selected_rate_origin?: 'auto' | 'manual' | null;
 	shipping_rates: Array< CartShippingPackageShippingRate >;
 }
 

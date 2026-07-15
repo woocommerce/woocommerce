@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Internal\Shipping\ShippingMethodOriginTracker;
 use WC_Shipping_Rate as ShippingRate;
 
 /**
@@ -28,19 +29,19 @@ class CartShippingRateSchema extends AbstractSchema {
 	 */
 	public function get_properties() {
 		return [
-			'package_id'     => [
+			'package_id'           => [
 				'description' => __( 'The ID of the package the shipping rates belong to.', 'woocommerce' ),
 				'type'        => [ 'integer', 'string' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'name'           => [
+			'name'                 => [
 				'description' => __( 'Name of the package.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'destination'    => [
+			'destination'          => [
 				'description' => __( 'Shipping destination address.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
@@ -84,7 +85,7 @@ class CartShippingRateSchema extends AbstractSchema {
 					],
 				],
 			],
-			'items'          => [
+			'items'                => [
 				'description' => __( 'List of cart items the returned shipping rates apply to.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
@@ -113,7 +114,14 @@ class CartShippingRateSchema extends AbstractSchema {
 					],
 				],
 			],
-			'shipping_rates' => [
+			'selected_rate_origin' => [
+				'description' => __( 'How the currently selected shipping rate for this package was chosen: manual when the customer picked it through an explicit selection path, auto when it was assigned by the automatic defaulter. Null when no rate is selected for the package.', 'woocommerce' ),
+				'type'        => [ 'string', 'null' ],
+				'enum'        => [ 'auto', 'manual' ],
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
+			'shipping_rates'       => [
 				'description' => __( 'List of shipping rates.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => [ 'view', 'edit' ],
@@ -223,11 +231,14 @@ class CartShippingRateSchema extends AbstractSchema {
 	 */
 	public function get_item_response( $package ) {
 		return [
-			'package_id'     => $package['package_id'],
-			'name'           => $package['package_name'],
-			'destination'    => $this->prepare_package_destination_response( $package ),
-			'items'          => $this->prepare_package_items_response( $package ),
-			'shipping_rates' => $this->prepare_package_shipping_rates_response( $package ),
+			'package_id'           => $package['package_id'],
+			'name'                 => $package['package_name'],
+			'destination'          => $this->prepare_package_destination_response( $package ),
+			'items'                => $this->prepare_package_items_response( $package ),
+			// Must be evaluated before shipping_rates: prepare_package_shipping_rates_response() can write
+			// an auto-default (and an 'auto' origin) into the session mid-render, breaking the null semantics.
+			'selected_rate_origin' => $this->get_selected_rate_origin( $package ),
+			'shipping_rates'       => $this->prepare_package_shipping_rates_response( $package ),
 		];
 	}
 
@@ -268,6 +279,34 @@ class CartShippingRateSchema extends AbstractSchema {
 			];
 		}
 		return $items;
+	}
+
+	/**
+	 * Returns the recorded origin ('auto'|'manual') of the package's chosen shipping
+	 * rate, or null when no rate is chosen. Reads the session directly (side-effect
+	 * free) rather than wc_get_chosen_shipping_method_for_package(), which can write
+	 * a new default into the session as it resolves.
+	 *
+	 * Unrecorded origins report 'manual' (ShippingMethodOriginTracker's BC default),
+	 * so clients consuming this field treat pre-tracking sessions as deliberate
+	 * choices — the conservative direction.
+	 *
+	 * @param array $package Shipping package complete with rates from WooCommerce.
+	 * @return string|null
+	 */
+	protected function get_selected_rate_origin( $package ) {
+		if ( ! is_callable( array( WC()->session, 'get' ) ) ) {
+			return null;
+		}
+
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+		$package_id     = $package['package_id'] ?? null;
+
+		if ( null === $package_id || empty( $chosen_methods[ $package_id ] ) ) {
+			return null;
+		}
+
+		return wc_get_container()->get( ShippingMethodOriginTracker::class )->get_origin( $package_id );
 	}
 
 	/**
