@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Introduce new upgrade warning to the Product Image Gallery block when used in the same template with the Add to Cart + Options block

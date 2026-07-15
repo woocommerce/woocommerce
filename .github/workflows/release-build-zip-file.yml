@@ -101,7 +101,7 @@ jobs:
           fi
 
         # Checkout trunk.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: trunk
           path: checkout-trunk
@@ -111,7 +111,7 @@ jobs:
         if: ${{ ! inputs.skip_verify }}
 
         # Checkout branch.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ steps.normalize-branch.outputs.branch }}
           path: checkout-branch
@@ -202,7 +202,7 @@ jobs:
 
       - name: 'Pre-build verification: db updates'
         if: ${{ ! inputs.skip_verify && ! contains( steps.pre-build-verification.outputs.release_version, '-dev' ) && ! contains( steps.pre-build-verification.outputs.release_version, '-beta.1' ) }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const { run } = require( './checkout-trunk/.github/workflows/scripts/release-check-db-updates' );
@@ -219,7 +219,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ needs.verify.outputs.branch }}
 
@@ -237,7 +237,7 @@ jobs:
 
       - name: Upload the zip file as an artifact
         id: artifact-upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -268,7 +268,7 @@ jobs:
       contents: write
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: woocommerce
 

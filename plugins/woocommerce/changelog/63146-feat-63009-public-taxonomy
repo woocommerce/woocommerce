@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Updates the `product_shipping_class` taxonomy to be private.
