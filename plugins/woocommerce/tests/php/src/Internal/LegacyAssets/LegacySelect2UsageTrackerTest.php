@@ -87,11 +87,12 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			array(
-				'context'    => 'admin',
-				'page_type'  => 'woocommerce_page_wc-settings',
-				'handles'    => 'select2',
-				'dependents' => 'my-extension-admin',
-				'sources'    => 'my-extension/assets/admin.js',
+				'context'            => 'admin',
+				'page_type'          => 'woocommerce_page_wc-settings',
+				'handles'            => 'select2',
+				'dependents'         => 'my-extension-admin',
+				'dependents_sources' => 'my-extension/assets/admin.js',
+				'handles_sources'    => $this->get_expected_wc_select2_source(),
 			),
 			$this->sut->get_usage_event( 'admin' ),
 			'Admin usage should include only the expected event properties.'
@@ -115,11 +116,12 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			array(
-				'context'    => 'frontend',
-				'page_type'  => $this->get_expected_frontend_page_type(),
-				'handles'    => 'wc-select2',
-				'dependents' => 'my-extension-footer',
-				'sources'    => 'my-extension/assets/footer.js',
+				'context'            => 'frontend',
+				'page_type'          => $this->get_expected_frontend_page_type(),
+				'handles'            => 'wc-select2',
+				'dependents'         => 'my-extension-footer',
+				'dependents_sources' => 'my-extension/assets/footer.js',
+				'handles_sources'    => $this->get_expected_wc_select2_source(),
 			),
 			$this->sut->get_usage_event( 'frontend' ),
 			'Frontend usage should report the direct wc-select2 handle.'
@@ -161,11 +163,12 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			array(
-				'context'    => 'frontend',
-				'page_type'  => $this->get_expected_frontend_page_type(),
-				'handles'    => 'select2',
-				'dependents' => 'select2',
-				'sources'    => '',
+				'context'            => 'frontend',
+				'page_type'          => $this->get_expected_frontend_page_type(),
+				'handles'            => 'select2',
+				'dependents'         => 'select2',
+				'dependents_sources' => '',
+				'handles_sources'    => $this->get_expected_wc_select2_source(),
 			),
 			$this->sut->get_usage_event( 'frontend' ),
 			'Direct Select2 enqueue should report the requested handle.'
@@ -228,11 +231,12 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			array(
-				'context'    => 'frontend',
-				'page_type'  => $this->get_expected_frontend_page_type(),
-				'handles'    => 'wc-select2',
-				'dependents' => 'my-extension-footer',
-				'sources'    => 'my-extension/assets/footer.js',
+				'context'            => 'frontend',
+				'page_type'          => $this->get_expected_frontend_page_type(),
+				'handles'            => 'wc-select2',
+				'dependents'         => 'my-extension-footer',
+				'dependents_sources' => 'my-extension/assets/footer.js',
+				'handles_sources'    => $this->get_expected_wc_select2_source(),
 			),
 			$this->sut->get_usage_event( 'frontend' ),
 			'Footer dependencies should be reported after footer scripts are printed.'
@@ -261,11 +265,12 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 		$original_request_uri   = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
 		$_SERVER['REQUEST_URI'] = '/shop/?filter=featured';
 		$event                  = array(
-			'context'    => 'frontend',
-			'page_type'  => $this->get_expected_frontend_page_type(),
-			'handles'    => 'wc-select2',
-			'dependents' => 'my-extension-footer',
-			'sources'    => 'my-extension/assets/footer.js',
+			'context'            => 'frontend',
+			'page_type'          => $this->get_expected_frontend_page_type(),
+			'handles'            => 'wc-select2',
+			'dependents'         => 'my-extension-footer',
+			'dependents_sources' => 'my-extension/assets/footer.js',
+			'handles_sources'    => $this->get_expected_wc_select2_source(),
 		);
 
 		$this->delete_usage_event_transient( $event );
@@ -420,6 +425,17 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	 */
 	private function get_expected_frontend_page_type(): string {
 		return Constants::is_defined( 'WOOCOMMERCE_CART' ) ? 'cart' : 'other';
+	}
+
+	/**
+	 * Get the expected WooCommerce Select2 source path.
+	 *
+	 * @return string
+	 */
+	private function get_expected_wc_select2_source(): string {
+		$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+
+		return 'woocommerce/assets/js/select2/select2.full' . $suffix . '.js';
 	}
 
 	/**

@@ -108,10 +108,10 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 		// Keep only queued handles so dependents identify scripts explicitly enqueued for the page.
 		$printed_queued_scripts = array_intersect( $wp_scripts->queue, $wp_scripts->done );
 
-		$handles      = array();
-		$dependents   = array();
-		$sources      = array();
-		$plugins_path = wp_parse_url( plugins_url( '/' ), PHP_URL_PATH );
+		$handles            = array();
+		$dependents         = array();
+		$dependents_sources = array();
+		$plugins_path       = wp_parse_url( plugins_url( '/' ), PHP_URL_PATH );
 
 		foreach ( $printed_queued_scripts as $handle ) {
 			$legacy_handles = $this->get_legacy_handles( $wp_scripts, $handle );
@@ -123,11 +123,10 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 			$handles              += array_fill_keys( $legacy_handles, true );
 			$dependents[ $handle ] = true;
 			$source                = isset( $wp_scripts->registered[ $handle ] ) ? $wp_scripts->registered[ $handle ]->src : '';
-			if ( is_string( $source ) && '' !== $source ) {
-				$source_path = wp_parse_url( $source, PHP_URL_PATH );
-				if ( is_string( $source_path ) && is_string( $plugins_path ) && str_starts_with( $source_path, $plugins_path ) ) {
-					$sources[] = ltrim( substr( $source_path, strlen( $plugins_path ) ), '/' );
-				}
+			$source                = self::get_plugin_relative_source( $source, $plugins_path );
+
+			if ( '' !== $source ) {
+				$dependents_sources[] = $source;
 			}
 		}
 
@@ -135,20 +134,34 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 			return array();
 		}
 
-		$handles    = array_keys( $handles );
-		$dependents = array_keys( $dependents );
-		$sources    = array_unique( $sources );
+		$handles            = array_keys( $handles );
+		$dependents         = array_keys( $dependents );
+		$dependents_sources = array_unique( $dependents_sources );
+		$handles_sources    = array();
+
+		foreach ( $handles as $handle ) {
+			$source = self::get_legacy_handle_source( $wp_scripts, $handle );
+			$source = self::get_plugin_relative_source( $source, $plugins_path );
+
+			if ( '' !== $source ) {
+				$handles_sources[] = $source;
+			}
+		}
+
+		$handles_sources = array_unique( $handles_sources );
 
 		sort( $handles );
 		sort( $dependents );
-		sort( $sources );
+		sort( $dependents_sources );
+		sort( $handles_sources );
 
 		return array(
-			'context'    => $context,
-			'page_type'  => $this->get_current_page_type( $context ),
-			'handles'    => implode( ',', $handles ),
-			'dependents' => implode( ',', $dependents ),
-			'sources'    => implode( ',', $sources ),
+			'context'            => $context,
+			'page_type'          => $this->get_current_page_type( $context ),
+			'handles'            => implode( ',', $handles ),
+			'dependents'         => implode( ',', $dependents ),
+			'dependents_sources' => implode( ',', $dependents_sources ),
+			'handles_sources'    => implode( ',', $handles_sources ),
 		);
 	}
 
@@ -242,6 +255,44 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 		}
 
 		return array_keys( $legacy_handles );
+	}
+
+	/**
+	 * Get a script source relative to the plugins directory.
+	 *
+	 * @param string|false      $source       Script source.
+	 * @param string|false|null $plugins_path Plugins directory URL path.
+	 * @return string
+	 */
+	private static function get_plugin_relative_source( $source, $plugins_path ): string {
+		if ( ! is_string( $source ) || '' === $source || ! is_string( $plugins_path ) || '' === $plugins_path ) {
+			return '';
+		}
+
+		$source_path = wp_parse_url( $source, PHP_URL_PATH );
+		if ( ! is_string( $source_path ) || ! str_starts_with( $source_path, $plugins_path ) ) {
+			return '';
+		}
+
+		return ltrim( substr( $source_path, strlen( $plugins_path ) ), '/' );
+	}
+
+	/**
+	 * Get the source for a legacy Select2 handle.
+	 *
+	 * @param WP_Scripts $wp_scripts WordPress scripts registry.
+	 * @param string     $handle     Script handle.
+	 * @return string
+	 */
+	private static function get_legacy_handle_source( WP_Scripts $wp_scripts, string $handle ): string {
+		$source_handle     = 'select2' === $handle ? 'wc-select2' : $handle;
+		$registered_script = $wp_scripts->registered[ $source_handle ] ?? null;
+
+		if ( null === $registered_script ) {
+			return '';
+		}
+
+		return is_string( $registered_script->src ) ? $registered_script->src : '';
 	}
 
 	/**
