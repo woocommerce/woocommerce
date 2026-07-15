@@ -179,7 +179,7 @@ WordPress exposes more contracts than class and function signatures. The followi
 
 **Do not assume install layout.** WordPress could be configured to run in a subdirectory, with relocated `wp-content`, and behind reverse proxies. Never build paths or URLs by concatenation from the domain root; derive them (`plugins_url()`, `plugin_dir_path()`, `wp_upload_dir()`, and mind the `home_url()` vs `site_url()` distinction). A path that works on a root install and breaks elsewhere is a compatibility bug, not an edge case.
 
-### Before changing any exposed surface (agent checklist)
+### Before changing any public or externally exposed surface (agent checklist)
 
 1. Identify the contract you are touching: signature, hook, global/scope expectation, site topology, or install layout.
 2. Assume unseen consumers. You cannot enumerate third-party code; if the surface is reachable from outside this plugin, someone consumes it.
