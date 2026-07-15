@@ -329,6 +329,7 @@ class WC_Form_Handler {
 		$save_pass            = true;
 
 		// Current user data.
+		/** @var WP_User $current_user */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- Type hint for PHPStan.
 		$current_user         = get_user_by( 'id', $user_id );
 		$current_first_name   = $current_user->first_name;
 		$current_last_name    = $current_user->last_name;
