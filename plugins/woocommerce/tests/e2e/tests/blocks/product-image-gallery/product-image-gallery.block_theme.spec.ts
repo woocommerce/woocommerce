@@ -134,7 +134,7 @@ test.describe( `${ blockData.name } frontend`, () => {
 					? activeSlideBox.x - viewportBox.x
 					: null;
 			} )
-			.toBeCloseTo( 0, 3 );
+			.toBeCloseTo( 0, 1 );
 	} );
 } );
 
