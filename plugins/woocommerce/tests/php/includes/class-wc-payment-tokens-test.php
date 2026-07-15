@@ -114,22 +114,75 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Data store get_tokens should return all tokens when page is passed without a limit.
+	 * @testdox Data store get_tokens should paginate when page is passed without a limit.
 	 */
-	public function test_data_store_get_tokens_ignores_page_without_limit(): void {
+	public function test_data_store_get_tokens_paginates_page_without_limit(): void {
 		$this->create_tokens_for_user( 3 );
 
 		$data_store = WC_Data_Store::load( 'payment-token' );
 
+		// A page argument signals pagination intent: with 3 tokens and the default page size, the
+		// second page must be empty so consumers looping until a short/empty page terminate.
 		$this->assertCount(
 			3,
+			$data_store->get_tokens(
+				array(
+					'user_id' => $this->user_id,
+					'page'    => 1,
+				)
+			),
+			'The first page should contain all 3 tokens'
+		);
+		$this->assertCount(
+			0,
 			$data_store->get_tokens(
 				array(
 					'user_id' => $this->user_id,
 					'page'    => 2,
 				)
 			),
-			'A page argument without an explicit limit should not paginate the results'
+			'A page argument without an explicit limit must still paginate the results'
+		);
+		$this->assertSame( 100, WC_Payment_Token_Data_Store::DEFAULT_PAGE_SIZE );
+	}
+
+	/**
+	 * @testdox get_customer_tokens should return no tokens when the limit filter returns zero.
+	 */
+	public function test_get_customer_tokens_returns_no_tokens_when_limit_filtered_to_zero(): void {
+		add_filter( 'woocommerce_get_customer_payment_tokens_limit', '__return_zero' );
+		$this->create_tokens_for_user( 3 );
+
+		// Extensions return 0 from this filter to hide saved methods on My Account and checkout.
+		$this->assertCount(
+			0,
+			WC_Payment_Tokens::get_customer_tokens( $this->user_id ),
+			'A limit of 0 must return zero tokens, not all of them'
+		);
+	}
+
+	/**
+	 * @testdox Data store get_tokens should return no rows for an explicit limit of zero.
+	 */
+	public function test_data_store_get_tokens_explicit_zero_limit_returns_no_rows(): void {
+		$this->create_tokens_for_user( 3 );
+
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		$this->assertCount(
+			0,
+			$data_store->get_tokens(
+				array(
+					'user_id' => $this->user_id,
+					'limit'   => 0,
+				)
+			),
+			'An explicit limit of 0 on a scoped query must return no rows'
+		);
+		$this->assertCount(
+			0,
+			$data_store->get_tokens( array( 'limit' => 0 ) ),
+			'An explicit limit of 0 on an unscoped query must return no rows, not fall back to the ceiling'
 		);
 	}
 

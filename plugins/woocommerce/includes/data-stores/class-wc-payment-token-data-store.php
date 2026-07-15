@@ -37,6 +37,18 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	const DEFAULT_UNSCOPED_TOKENS_LIMIT = 500;
 
 	/**
+	 * Page size applied by `get_tokens()` when a `page` arg is passed without an explicit `limit`.
+	 *
+	 * A `page` arg signals pagination intent, and paginating consumers typically loop until a
+	 * short or empty page: leaving such a query unlimited would return the full set on every
+	 * page and never terminate the loop. Pass an explicit `limit` to control the page size.
+	 *
+	 * @since 11.1.0
+	 * @var int
+	 */
+	const DEFAULT_PAGE_SIZE = 100;
+
+	/**
 	 * If we have already saved our extra data, don't do automatic / default handling.
 	 *
 	 * @var bool
@@ -241,15 +253,16 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * Accepts token_id, user_id, gateway_id, and type.
 	 * Each object should contain the fields token_id, gateway_id, token, user_id, type, is_default.
 	 *
-	 * Queries scoped to a `token_id` or `user_id` are unlimited unless a positive `limit` arg is
-	 * passed. An unscoped query (neither of those, nor a `limit`) reads every token in the store, so
-	 * it falls back to DEFAULT_UNSCOPED_TOKENS_LIMIT rows, filterable via
+	 * An explicit `limit` arg is always honored, including 0 (returns no rows). Without one, a
+	 * `page` arg paginates by DEFAULT_PAGE_SIZE rows; otherwise queries scoped to a `token_id` or
+	 * `user_id` are unlimited, and an unscoped query (which reads every token in the store) falls
+	 * back to DEFAULT_UNSCOPED_TOKENS_LIMIT rows, filterable via
 	 * `woocommerce_get_payment_tokens_unscoped_limit`.
 	 *
 	 * @since 3.0.0
-	 * @since 11.1.0 Results are no longer implicitly limited by the `posts_per_page` option; a `LIMIT`
-	 *               clause is applied when a positive `limit` arg is passed, or as a fallback ceiling
-	 *               on unscoped queries.
+	 * @since 11.1.0 Results are no longer implicitly limited by the `posts_per_page` option; without
+	 *               an explicit `limit`, scoped queries not passing `page` are unlimited and unscoped
+	 *               queries fall back to a ceiling.
 	 * @param array $args List of accepted args: token_id, gateway_id, user_id, type, limit, page.
 	 * @return array
 	 */
@@ -285,13 +298,18 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 		}
 
 		$page  = isset( $args['page'] ) ? max( 1, absint( $args['page'] ) ) : 1;
-		$limit = isset( $args['limit'] ) ? absint( $args['limit'] ) : 0;
+		$limit = null;
 
-		// Without an explicit limit, a query scoped to a token_id or user_id stays unlimited:
-		// consumers like the personal data eraser and user deletion cleanup rely on retrieving
-		// every matching token, reaching this method via WC_Payment_Tokens::get_tokens(). An
-		// unscoped query has no such natural bound, so it falls back to a ceiling instead.
-		if ( $limit < 1 && ! $args['token_id'] && ! $args['user_id'] ) {
+		if ( isset( $args['limit'] ) ) {
+			// An explicit limit is authoritative, including 0, which deliberately yields no rows:
+			// extensions return 0 from the woocommerce_get_customer_payment_tokens_limit filter to
+			// hide a customer's saved methods.
+			$limit = absint( $args['limit'] );
+		} elseif ( isset( $args['page'] ) ) {
+			// A page arg without a limit still signals pagination intent; apply a default page size
+			// so consumers looping until a short/empty page terminate.
+			$limit = self::DEFAULT_PAGE_SIZE;
+		} elseif ( ! $args['token_id'] && ! $args['user_id'] ) {
 			/**
 			 * Controls the fallback maximum number of tokens returned by an unscoped query, i.e. one
 			 * passing neither `user_id`/`token_id` nor an explicit `limit`. Such a query matches on
@@ -308,8 +326,11 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 			$limit = absint( apply_filters( 'woocommerce_get_payment_tokens_unscoped_limit', self::DEFAULT_UNSCOPED_TOKENS_LIMIT, $args ) );
 		}
 
+		// Without an explicit limit or page, a query scoped to a token_id or user_id stays
+		// unlimited: consumers like the personal data eraser and user deletion cleanup rely on
+		// retrieving every matching token, reaching this method via WC_Payment_Tokens::get_tokens().
 		$limits = '';
-		if ( $limit > 0 ) {
+		if ( null !== $limit ) {
 			$limits = 'LIMIT ' . absint( ( $page - 1 ) * $limit ) . ', ' . $limit;
 		}
 
