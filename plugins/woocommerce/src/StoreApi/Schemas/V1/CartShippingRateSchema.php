@@ -115,9 +115,9 @@ class CartShippingRateSchema extends AbstractSchema {
 				],
 			],
 			'selected_rate_origin' => [
-				'description' => __( 'How the currently selected shipping rate for this package was chosen: manual when the customer picked it through an explicit selection path, auto when it was assigned by the automatic defaulter. Null when no rate was selected for the package at the start of the request.', 'woocommerce' ),
+				'description' => __( 'How the currently selected shipping rate for this package was chosen. Auto means it is known to have been assigned by the automatic defaulter. Manual is a conservative fallback meaning anything not known to be automatic: the customer picked it through an explicit selection path, or the origin was never recorded (sessions predating origin tracking), or the choice was overwritten outside the tracked paths. Null when no rate was selected for the package at the start of the request.', 'woocommerce' ),
 				'type'        => [ 'string', 'null' ],
-				'enum'        => [ 'auto', 'manual' ],
+				'enum'        => [ 'auto', 'manual', null ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],

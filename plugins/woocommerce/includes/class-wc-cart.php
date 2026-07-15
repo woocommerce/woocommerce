@@ -2103,10 +2103,11 @@ class WC_Cart extends WC_Legacy_Cart {
 		if ( $the_coupon->get_free_shipping() ) {
 			$packages                = WC()->shipping()->get_packages();
 			$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+			$origin_tracker          = wc_get_container()->get( ShippingMethodOriginTracker::class );
 
 			foreach ( $packages as $i => $package ) {
 				$chosen_shipping_methods[ $i ] = 'free_shipping';
-				wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( $i, 'manual', 'free_shipping' );
+				$origin_tracker->set_origin( $i, 'manual', 'free_shipping' );
 			}
 
 			WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );

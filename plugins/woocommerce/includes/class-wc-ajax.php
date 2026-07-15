@@ -364,6 +364,8 @@ class WC_AJAX {
 			return $chosen_shipping_methods;
 		}
 
+		$origin_tracker = wc_get_container()->get( ShippingMethodOriginTracker::class );
+
 		foreach ( $posted_shipping_methods as $i => $value ) {
 			if ( ! is_string( $value ) ) {
 				continue;
@@ -373,7 +375,7 @@ class WC_AJAX {
 			$chosen_shipping_methods[ $i ] = $value;
 
 			if ( $value !== $previous_method ) {
-				wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( $i, 'manual', $value );
+				$origin_tracker->set_origin( $i, 'manual', $value );
 			}
 		}
 
