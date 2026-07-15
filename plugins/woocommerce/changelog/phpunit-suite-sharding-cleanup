@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Run each PHP version's unit tests as a single CI job instead of fanning them across four wp-env shards, merge the two GraphQL testsuites into one wc-phpunit-graphql, and drop the duplicated wc-phpunit-default/wc-phpunit-full umbrella suites in favour of the default suite list.

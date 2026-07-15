@@ -132,6 +132,10 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'checkout', $settings_ui_page->get_page_id() );
 		$this->assertSame( array( 'acme-payments-settings-ui' ), $settings_ui_page->get_script_handles( 'acme_payments' ) );
 		$this->assertSame( 'form_post', $settings_ui_page->get_save_adapter( 'acme_payments' ) );
+
+		$schema = $settings_ui_page->get_schema( 'acme_payments' );
+		$this->assertSame( 'Acme Payments', $schema['title'] );
+		$this->assertSame( 'Acme Payments', $schema['shell']['title'] );
 	}
 
 	/**
@@ -179,9 +183,9 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should inject default section navigation when a native Settings UI schema omits it.
+	 * @testdox Should default drill-down pages to no section navigation when a native Settings UI schema omits it.
 	 */
-	public function test_injects_default_section_navigation_when_native_settings_ui_schema_omits_it(): void {
+	public function test_defaults_drill_down_pages_to_no_section_navigation_when_native_settings_ui_schema_omits_it(): void {
 		$page = $this->get_parent_page();
 		SettingsSectionRegistry::get_instance()->register(
 			$this->get_registered_section_with_native_settings_ui_page( null, array( 'title' => 'Acme native settings' ) )
@@ -189,11 +193,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 
 		$schema = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' )->get_schema();
 
-		$navigation = $schema['shell']['sectionNavigation'];
-		$this->assertSame( array( 'default', 'acme_payments' ), array_column( $navigation, 'id' ) );
-		$this->assertSame( array( false, true ), array_column( $navigation, 'active' ) );
-		$this->assertStringContainsString( 'tab=checkout', $navigation[1]['href'] );
-		$this->assertStringContainsString( 'section=acme_payments', $navigation[1]['href'] );
+		$this->assertSame( array(), $schema['shell']['sectionNavigation'], 'Drill-down pages replace section navigation with header breadcrumbs.' );
 	}
 
 	/**
