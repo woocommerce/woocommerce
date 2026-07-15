@@ -60,6 +60,30 @@ export type ClientCartItem = Omit<
 
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
+/**
+ * The failure detail carried by a rejected `AddCartItemOutcome`.
+ */
+export type AddCartItemError = {
+	/**
+	 * Server error code for a per-item rejection (e.g.
+	 * `woocommerce_rest_product_out_of_stock`), or the batcher's
+	 * `unknown_error` fallback. Absent on whole-batch/transport failures.
+	 */
+	code?: string;
+	/** Human-readable failure description. Always non-empty. */
+	message: string;
+};
+
+/**
+ * The per-call outcome `addCartItem` resolves with, captured at the moment
+ * its own request settles (accepted or rejected). A later throw in
+ * post-success processing (notices, a11y announcement) never downgrades an
+ * already-captured success into a failure.
+ */
+export type AddCartItemOutcome =
+	| { success: true }
+	| { success: false; error: AddCartItemError };
+
 export type Store = {
 	state: {
 		errorMessages?: {
@@ -82,7 +106,7 @@ export type Store = {
 		addCartItem: (
 			args: ClientCartItem,
 			options?: CartUpdateOptions
-		) => Promise< void >;
+		) => Promise< AddCartItemOutcome >;
 		batchAddCartItems: (
 			items: ClientCartItem[],
 			options?: CartUpdateOptions
@@ -288,11 +312,14 @@ const getInfoNoticesFromCartUpdates = (
 	// Items auto-removed by the server (stock change, product deleted, etc.).
 	// We pass the optimistic snapshot as oldCart, so user-initiated removals
 	// are already absent and do not generate spurious notices here.
-	const autoDeletedToNotify = oldItems.filter(
-		( old ) =>
-			isCartItem( old ) &&
-			! newItems.some( ( item ) => old.key === item.key )
-	);
+	// Filtering on the `isCartItem` type guard first (rather than folding it
+	// into a single predicate) narrows the result to `CartItem[]`, so `.name`
+	// below type-checks without a cast.
+	const autoDeletedToNotify = oldItems
+		.filter( isCartItem )
+		.filter(
+			( old ) => ! newItems.some( ( item ) => old.key === item.key )
+		);
 
 	// Items whose quantity was adjusted by the server (stock cap, sold-individually).
 	// By default a line is compared optimistic → server, so intentional user
@@ -492,7 +519,7 @@ const { actions } = store< Store >(
 			*addCartItem(
 				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			): AsyncAction< void > {
+			): AsyncAction< AddCartItemOutcome > {
 				if ( quantity !== undefined && quantityToAdd !== undefined ) {
 					throw new Error(
 						'addCartItem: pass either quantity or quantityToAdd, not both.'
@@ -643,6 +670,13 @@ const { actions } = store< Store >(
 					} );
 				}
 
+				// Captured at the request-settlement boundary (the line right
+				// after the request-sending yield resolves/throws) and never
+				// overwritten afterwards. A throw from later post-success
+				// processing (notices, a11y announcement) must not downgrade an
+				// already-captured success.
+				let outcome: AddCartItemOutcome | undefined;
+
 				try {
 					const result = ( yield sendCartRequest( state, {
 						path: `/wc/store/v1/cart/${ endpoint }`,
@@ -694,6 +728,12 @@ const { actions } = store< Store >(
 						},
 					} ) ) as TypeYield< typeof sendCartRequest >;
 
+					// The request settled successfully. Capture the outcome
+					// immediately so any later throw in this block (a11y
+					// chunk-load failure, notices import rejection, response-shape
+					// assertion) cannot downgrade it to a failure.
+					outcome = { success: true };
+
 					// Success - handle side effects that don't trigger refreshCartItems
 					const cart = result.data as Cart;
 
@@ -738,7 +778,25 @@ const { actions } = store< Store >(
 				} catch ( error ) {
 					// Show error notice
 					actions.showNoticeError( error as Error );
+
+					// Only record a failure outcome if the request-settlement
+					// boundary above did not already capture a success — a throw
+					// after a successful request must not overwrite it.
+					outcome ??= {
+						success: false,
+						error: {
+							...( ( error as ApiErrorResponse )?.code && {
+								code: ( error as ApiErrorResponse ).code,
+							} ),
+							message:
+								( error instanceof Error && error.message ) ||
+								String( error ) ||
+								'Request failed',
+						},
+					};
 				}
+
+				return outcome as AddCartItemOutcome;
 			},
 
 			*batchAddCartItems(
