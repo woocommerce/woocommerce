@@ -192,33 +192,39 @@ class WC_Customer extends WC_Legacy_Customer {
 			$tax_based_on = TaxBasedOn::BASE;
 		}
 
-		// When tax is based on the shipping address but there is effectively no shipping destination for
-		// the cart, fall back to the billing address the customer provided. This extends the billing
-		// fallback that WC_Abstract_Order::get_tax_location() applies for virtual orders: as well as an
-		// empty shipping country, we also cover a cart whose items don't need shipping at all (e.g. only
+		// When tax is based on the shipping address but there is effectively no shipping destination,
+		// fall back to the billing address the customer provided. This extends the billing fallback that
+		// WC_Abstract_Order::get_tax_location() applies for virtual orders: we cover both an empty
+		// shipping country and the active shopper's cart having no items that need shipping (e.g. only
 		// virtual products), which is the case reported in #58206 where the store base address would
 		// otherwise be used instead of the customer's address.
 		if ( TaxBasedOn::SHIPPING === $tax_based_on ) {
 			if ( ! $this->get_shipping_country() ) {
 				$tax_based_on = TaxBasedOn::BILLING;
-			} else {
-				$cart          = WC()->cart;
-				$cart_contents = $cart instanceof WC_Cart ? $cart->get_cart_contents() : array();
+			} elseif ( $this === WC()->customer && WC()->cart instanceof WC_Cart ) {
+				// Only the active shopper's own cart is consulted, so a customer object built for an
+				// unrelated context (e.g. one passed explicitly to WC_Tax::get_tax_location()) is not
+				// affected by whatever happens to be in the global cart.
+				$cart_contents = WC()->cart->get_cart_contents();
 
-				// Determine whether any item in the cart needs shipping. Checked per item so it is
-				// independent of whether shipping methods happen to be configured for the store.
-				$cart_needs_shipping = false;
-				foreach ( $cart_contents as $cart_item ) {
-					if ( isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product && $cart_item['data']->needs_shipping() ) {
-						$cart_needs_shipping = true;
-						break;
+				if ( ! empty( $cart_contents ) ) {
+					// Decide per item whether the cart needs shipping, then run the same
+					// woocommerce_cart_needs_shipping filter WC_Cart::needs_shipping() applies. This
+					// honors extensions that force a virtual cart to collect a shipping address, while -
+					// unlike needs_shipping() - not treating "no shipping methods configured" as "no
+					// shipping", so a physical cart is still taxed by its shipping address.
+					$cart_needs_shipping = false;
+					foreach ( $cart_contents as $cart_item ) {
+						if ( isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product && $cart_item['data']->needs_shipping() ) {
+							$cart_needs_shipping = true;
+							break;
+						}
 					}
-				}
 
-				// A non-empty cart where nothing needs shipping (e.g. only virtual products) has no
-				// shipping destination to tax against, so use the billing address instead.
-				if ( ! empty( $cart_contents ) && ! $cart_needs_shipping ) {
-					$tax_based_on = TaxBasedOn::BILLING;
+					/** This filter is documented in includes/class-wc-cart.php */
+					if ( ! (bool) apply_filters( 'woocommerce_cart_needs_shipping', $cart_needs_shipping ) ) {
+						$tax_based_on = TaxBasedOn::BILLING;
+					}
 				}
 			}
 		}
