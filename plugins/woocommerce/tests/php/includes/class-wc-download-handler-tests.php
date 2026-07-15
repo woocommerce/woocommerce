@@ -408,6 +408,19 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox download_file_force() should render an error page, not a download, when the remote file cannot be opened.
+	 */
+	public function test_download_file_force_shows_error_when_remote_file_cannot_be_opened(): void {
+		update_option( 'woocommerce_downloads_redirect_fallback_allowed', 'no' );
+
+		$this->expectException( WPDieException::class );
+		$this->expectExceptionMessageMatches( '/File not found/' );
+
+		// Port 1 is never listening, so the remote open fails immediately.
+		WC_Download_Handler::download_file_force( 'http://127.0.0.1:1/missing-file', 'missing-file' );
+	}
+
+	/**
 	 * @testdox The Content-Type fallback to the resolved filename should apply to remote files only.
 	 */
 	public function test_content_type_fallback_applies_only_to_remote_files(): void {
