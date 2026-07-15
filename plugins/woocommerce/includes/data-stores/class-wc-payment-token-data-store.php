@@ -24,6 +24,19 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	protected $meta_type = 'payment_token';
 
 	/**
+	 * Fallback maximum number of rows returned by `get_tokens()` for queries that are neither
+	 * scoped to a `user_id`/`token_id` nor given an explicit `limit`.
+	 *
+	 * Such a query matches on `gateway_id`/`type` only, and neither column is indexed, so it is a
+	 * full table scan across every user's tokens. This ceiling keeps an accidental store-wide
+	 * query bounded; scoped queries ride the primary key or the `user_id` index and stay unlimited.
+	 *
+	 * @since 11.1.0
+	 * @var int
+	 */
+	const DEFAULT_UNSCOPED_TOKENS_LIMIT = 500;
+
+	/**
 	 * If we have already saved our extra data, don't do automatic / default handling.
 	 *
 	 * @var bool
@@ -228,8 +241,16 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * Accepts token_id, user_id, gateway_id, and type.
 	 * Each object should contain the fields token_id, gateway_id, token, user_id, type, is_default.
 	 *
+	 * Queries scoped to a `token_id` or `user_id` are unlimited unless a positive `limit` arg is
+	 * passed. An unscoped query (neither of those, nor a `limit`) reads every token in the store, so
+	 * it falls back to DEFAULT_UNSCOPED_TOKENS_LIMIT rows, filterable via
+	 * `woocommerce_get_payment_tokens_unscoped_limit`.
+	 *
 	 * @since 3.0.0
-	 * @param array $args List of accepted args: token_id, gateway_id, user_id, type.
+	 * @since 11.1.0 Results are no longer implicitly limited by the `posts_per_page` option; a `LIMIT`
+	 *               clause is applied when a positive `limit` arg is passed, or as a fallback ceiling
+	 *               on unscoped queries.
+	 * @param array $args List of accepted args: token_id, gateway_id, user_id, type, limit, page.
 	 * @return array
 	 */
 	public function get_tokens( $args ) {
@@ -263,11 +284,34 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 			$gateway_ids = $gateways->get_payment_gateway_ids();
 		}
 
-		$page           = isset( $args['page'] ) ? absint( $args['page'] ) : 1;
-		$posts_per_page = absint( isset( $args['limit'] ) ? $args['limit'] : get_option( 'posts_per_page' ) );
+		$page  = isset( $args['page'] ) ? max( 1, absint( $args['page'] ) ) : 1;
+		$limit = isset( $args['limit'] ) ? absint( $args['limit'] ) : 0;
 
-		$pgstrt = absint( ( $page - 1 ) * $posts_per_page ) . ', ';
-		$limits = 'LIMIT ' . $pgstrt . $posts_per_page;
+		// Without an explicit limit, a query scoped to a token_id or user_id stays unlimited:
+		// consumers like the personal data eraser and user deletion cleanup rely on retrieving
+		// every matching token, reaching this method via WC_Payment_Tokens::get_tokens(). An
+		// unscoped query has no such natural bound, so it falls back to a ceiling instead.
+		if ( $limit < 1 && ! $args['token_id'] && ! $args['user_id'] ) {
+			/**
+			 * Controls the fallback maximum number of tokens returned by an unscoped query, i.e. one
+			 * passing neither `user_id`/`token_id` nor an explicit `limit`. Such a query matches on
+			 * the unindexed `gateway_id`/`type` columns and would otherwise read every token in the
+			 * store. Pass an explicit `limit` (and `page`) to opt out of this ceiling.
+			 *
+			 * Queries scoped to a `user_id` or `token_id` are unaffected and remain unlimited.
+			 *
+			 * @since 11.1.0
+			 *
+			 * @param int   $limit Maximum number of tokens to return. Defaults to 500.
+			 * @param array $args  The arguments passed to `get_tokens()`.
+			 */
+			$limit = absint( apply_filters( 'woocommerce_get_payment_tokens_unscoped_limit', self::DEFAULT_UNSCOPED_TOKENS_LIMIT, $args ) );
+		}
+
+		$limits = '';
+		if ( $limit > 0 ) {
+			$limits = 'LIMIT ' . absint( ( $page - 1 ) * $limit ) . ', ' . $limit;
+		}
 
 		$gateway_ids[] = '';
 		$where[]       = "gateway_id IN ('" . implode( "','", array_map( 'esc_sql', $gateway_ids ) ) . "')";
