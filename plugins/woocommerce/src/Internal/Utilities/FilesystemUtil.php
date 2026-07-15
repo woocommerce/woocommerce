@@ -331,7 +331,7 @@ class FilesystemUtil {
 	 * the uploads directory), so a resolved path may still be rejected — e.g.
 	 * a file sitting at the site root, outside both allowed locations.
 	 *
-	 * @since 11.1.0
+	 * @internal
 	 *
 	 * @param string $file_path The path to resolve, as entered by the user.
 	 * @return string The resolved path. Falls back to the path relative to
