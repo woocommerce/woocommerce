@@ -185,7 +185,7 @@ WordPress exposes more contracts than class and function signatures. The followi
 2. Assume unseen consumers. You cannot enumerate third-party code; if the surface is reachable from outside this plugin, someone consumes it.
 3. Prefer the additive path (new optional method, appended hook argument, new symbol + deprecation) over changing what exists.
 4. State the impact in the PR description: what changed, who could consume it, and why it is safe or what the deprecation path is.
-5. If you cannot establish the impact, stop and flag it in the PR instead of proceeding.
+5. If you cannot establish the impact, stop and flag it to the user as needing review.
 
 ## Block Development
 
