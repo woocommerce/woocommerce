@@ -42,47 +42,44 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		}
 
 		/**
-		 * Render WordPress core's #lost-connection-notice markup on Woo admin
-		 * screens that don't already get it for free.
+		 * Whether the current screen should get the #wc-lost-connection-notice markup and toggle handler.
+		 * Limited to Woo admin screens, minus wc-admin React pages and classic post edit screens, which get WP
+		 * core's own notice. Classic order edit is the exception: core's notice there wrongly claims local
+		 * autosave backups are running, which disable_autosave() has turned off.
 		 *
-		 * WP core renders this element on classic post-type edit pages (via
-		 * edit-form-advanced.php), and wp-autosave.js toggles it in response
-		 * to Heartbeat events. By echoing the same markup here and enqueueing
-		 * the `autosave` script (see admin_scripts()), Woo admin screens
-		 * inherit the same offline awareness without any new copy, styling,
-		 * or behavior.
-		 *
-		 * Translation strings use the 'default' text domain so WP core's
-		 * existing translations apply.
-		 *
-		 * Skipped on:
-		 * - Classic post-type edit screens (WP core already renders the notice).
-		 * - wc-admin React pages (they use their own layout rather than the
-		 *   standard admin_notices position).
-		 *
-		 * @return void
+		 * @return bool Whether to render and toggle the notice.
 		 */
-		public function render_lost_connection_notice() {
+		private function should_show_lost_connection_notice() {
 			$screen = get_current_screen();
-			if ( ! $screen ) {
-				return;
-			}
 
-			if ( 'post' === $screen->base ) {
-				return;
+			if ( ! $screen || ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
+				return false;
 			}
 
 			$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
 				&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
 			if ( $is_wc_admin_page ) {
-				return;
+				return false;
 			}
 
-			if ( ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
+			$is_classic_order_edit_screen = 'post' === $screen->base
+				&& in_array( $screen->post_type, wc_get_order_types( 'order-meta-boxes' ), true );
+
+			return 'post' !== $screen->base || $is_classic_order_edit_screen;
+		}
+
+		/**
+		 * Render a #wc-lost-connection-notice mirroring WP core's own notice on post edit screens.
+		 * See should_show_lost_connection_notice() for which screens get it.
+		 *
+		 * @return void
+		 */
+		public function render_lost_connection_notice() {
+			if ( ! $this->should_show_lost_connection_notice() ) {
 				return;
 			}
 			?>
-			<div id="lost-connection-notice" class="notice error hidden">
+			<div id="wc-lost-connection-notice" class="notice error hidden">
 				<p>
 					<span class="spinner"></span>
 					<strong><?php esc_html_e( 'Connection lost.' ); /* phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- Reusing WP core translation. */ ?></strong>
@@ -466,12 +463,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'woocommerce_admin' );
 				wp_enqueue_script( 'wc-enhanced-select' );
 
-				// Pair the #lost-connection-notice markup with core's autosave script.
-				// See render_lost_connection_notice() for scoping rationale.
-				$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
-					&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
-				if ( 'post' !== ( $screen->base ?? '' ) && ! $is_wc_admin_page ) {
-					wp_enqueue_script( 'autosave' );
+				$show_lost_connection_notice = $this->should_show_lost_connection_notice();
+
+				// The notice is toggled via heartbeat events (see woocommerce_admin.js), so ensure the emitter is loaded.
+				if ( $show_lost_connection_notice ) {
+					wp_enqueue_script( 'heartbeat' );
 				}
 
 				wp_enqueue_script( 'jquery-ui-sortable' );
@@ -510,6 +506,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
+					'show_lost_connection_notice'       => $show_lost_connection_notice,
 				);
 
 				wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
