@@ -721,6 +721,12 @@ class WC_Download_Handler {
 	 * @return bool Success or fail
 	 */
 	public static function readfile_chunked( $file, $start = 0, $length = 0 ) {
+		// Define before attempting to open the file: the constant has always been defined even
+		// when the open fails, and external code may rely on that side effect.
+		if ( ! defined( 'WC_CHUNK_SIZE' ) ) {
+			define( 'WC_CHUNK_SIZE', 1024 * 1024 );
+		}
+
 		$handle = @fopen( $file, 'r' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
 
 		if ( false === $handle ) {
