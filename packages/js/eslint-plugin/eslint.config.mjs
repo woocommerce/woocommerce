@@ -1,6 +1,11 @@
 /**
  * Internal dependencies
  */
-import woocommerce from '@woocommerce/eslint-config';
+import woocommerce from './index.js';
 
-export default [ ...woocommerce ];
+/*
+ * This package is the base that @woocommerce/eslint-config consumes, so it lints
+ * itself with its own recommended config rather than the private layer -
+ * depending on that layer would be a dependency cycle.
+ */
+export default [ ...woocommerce.configs.recommended ];
