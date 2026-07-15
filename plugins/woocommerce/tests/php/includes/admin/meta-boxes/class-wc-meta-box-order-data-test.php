@@ -375,6 +375,70 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The read-only summary displays shipping details for a Store API order with no product line items.
+	 */
+	public function test_displays_shipping_details_for_store_api_order_without_product_lines(): void {
+		$order = wc_create_order( array( 'customer_id' => 0 ) );
+		$order->set_created_via( 'store-api' );
+
+		// A fee-only order has no product line items, so the virtual-only gate
+		// hits its empty-items fallback and must keep shipping details visible.
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_name( 'Handling fee' );
+		$fee->set_amount( '10' );
+		$fee->set_total( '10' );
+		$order->add_item( $fee );
+
+		$this->apply_billing_derived_shipping_data( $order );
+		$order->save();
+		$this->orders[] = $order;
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertCount( 0, $order->get_shipping_methods(), 'The fee-only order should exercise the missing shipping-method path.' );
+		$this->assertEmpty( $order->get_items(), 'The order should have no product line items so the empty-items fallback is exercised.' );
+
+		$summary = $this->render_shipping_address_summary( $order );
+
+		$this->assertStringContainsString( '500 Billing Avenue', $summary );
+		$this->assertStringContainsString( '555-0100', $summary );
+		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
+	}
+
+	/**
+	 * @testdox The read-only summary displays shipping details when a non-product line item is present on an otherwise virtual order.
+	 */
+	public function test_displays_shipping_details_when_order_has_non_product_line_item(): void {
+		// This order would hide the billing-derived summary on its own (virtual-only,
+		// Store API, no shipping method, shipping matches billing).
+		$order = $this->create_order_with_shipping_data( false );
+
+		// Inject a non-product line item through the items filter to exercise the
+		// conservative guard that keeps details visible for unclassifiable lines.
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_name( 'Handling fee' );
+		$fee->set_amount( '10' );
+		$fee->set_total( '10' );
+
+		$inject_non_product_item = static function ( $items ) use ( $fee ) {
+			$items[] = $fee;
+
+			return $items;
+		};
+		add_filter( 'woocommerce_order_get_items', $inject_non_product_item );
+
+		try {
+			$summary = $this->render_shipping_address_summary( $order );
+		} finally {
+			remove_filter( 'woocommerce_order_get_items', $inject_non_product_item );
+		}
+
+		$this->assertStringContainsString( '500 Billing Avenue', $summary );
+		$this->assertStringContainsString( '555-0100', $summary );
+		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
+	}
+
+	/**
 	 * @testdox The read-only summary shows explicitly edited shipping details on a Store API order without shipping.
 	 */
 	public function test_displays_explicitly_edited_shipping_details_on_store_api_order(): void {
@@ -524,6 +588,32 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 		$item->set_quantity( 1 );
 		$order->add_item( $item );
 
+		$this->apply_billing_derived_shipping_data( $order );
+
+		if ( $add_shipping_method ) {
+			$shipping_item = new WC_Order_Item_Shipping();
+			$shipping_item->set_method_title( 'Shipping method' );
+			$shipping_item->set_method_id( $shipping_method_id );
+			$order->add_item( $shipping_item );
+		}
+
+		$order->save();
+
+		$this->products[] = $product;
+		$this->orders[]   = $order;
+
+		return $order;
+	}
+
+	/**
+	 * Apply billing-derived shipping data to an order.
+	 *
+	 * Mirrors the Store API behavior of copying the billing address into the
+	 * shipping address for a purchase that needs no fulfillment.
+	 *
+	 * @param WC_Order $order Order to populate.
+	 */
+	private function apply_billing_derived_shipping_data( WC_Order $order ): void {
 		$order->set_billing_first_name( 'Virtual' );
 		$order->set_billing_last_name( 'Customer' );
 		$order->set_billing_address_1( '500 Billing Avenue' );
@@ -540,20 +630,6 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 		$order->set_shipping_postcode( '94105' );
 		$order->set_shipping_country( 'US' );
 		$order->set_shipping_phone( '555-0100' );
-
-		if ( $add_shipping_method ) {
-			$shipping_item = new WC_Order_Item_Shipping();
-			$shipping_item->set_method_title( 'Shipping method' );
-			$shipping_item->set_method_id( $shipping_method_id );
-			$order->add_item( $shipping_item );
-		}
-
-		$order->save();
-
-		$this->products[] = $product;
-		$this->orders[]   = $order;
-
-		return $order;
 	}
 
 	/**
