@@ -187,27 +187,27 @@ class PaymentsProviders {
 	private array $instances = array();
 
 	/**
-	 * The memoized payment gateways to avoid computing the list multiple times during a request.
+	 * The cached payment gateways, used to avoid computing the list multiple times during a request.
 	 *
 	 * @var array
 	 */
-	private array $payment_gateways_memo = array();
+	private array $payment_gateways_cache = array();
 
 	/**
-	 * The memoized payment gateways for display to avoid computing the list multiple times during a request.
+	 * The cached payment gateways for display, used to avoid computing the list multiple times during a request.
 	 *
 	 * This is especially important since it avoids triggering the legacy action multiple times during a request.
 	 *
 	 * @var array
 	 */
-	private array $payment_gateways_for_display_memo = array();
+	private array $payment_gateways_for_display_cache = array();
 
 	/**
 	 * The request cache.
 	 *
 	 * @var RequestCache
 	 */
-	private RequestCache $request_cache;
+	private ?RequestCache $request_cache = null;
 
 	/**
 	 * The payment extension suggestions service.
@@ -228,11 +228,11 @@ class PaymentsProviders {
 	 *
 	 * @param ExtensionSuggestions $payment_extension_suggestions The payment extension suggestions service.
 	 * @param LegacyProxy          $proxy                         The LegacyProxy instance.
-	 * @param RequestCache         $request_cache                 The request cache.
+	 * @param RequestCache|null    $request_cache                 Optional request cache.
 	 *
 	 * @internal
 	 */
-	final public function init( ExtensionSuggestions $payment_extension_suggestions, LegacyProxy $proxy, RequestCache $request_cache ): void {
+	final public function init( ExtensionSuggestions $payment_extension_suggestions, LegacyProxy $proxy, ?RequestCache $request_cache = null ): void {
 		$this->extension_suggestions = $payment_extension_suggestions;
 		$this->proxy                 = $proxy;
 		$this->request_cache         = $request_cache;
@@ -259,8 +259,8 @@ class PaymentsProviders {
 
 		// If we are asked for a display gateways list, we need to fire legacy actions and filter out "shells".
 		if ( $for_display ) {
-			if ( isset( $this->payment_gateways_for_display_memo[ $country_code ] ) ) {
-				return $this->payment_gateways_for_display_memo[ $country_code ];
+			if ( isset( $this->payment_gateways_for_display_cache[ $country_code ] ) ) {
+				return $this->payment_gateways_for_display_cache[ $country_code ];
 			}
 
 			// We don't want to output anything from the action. So we buffer it and discard it.
@@ -285,14 +285,14 @@ class PaymentsProviders {
 			$payment_gateways = $this->remove_shell_payment_gateways( $payment_gateways, $country_code );
 
 			// Store the entire payment gateways list for display for later use.
-			$this->payment_gateways_for_display_memo[ $country_code ] = $payment_gateways;
+			$this->payment_gateways_for_display_cache[ $country_code ] = $payment_gateways;
 
 			return $payment_gateways;
 		}
 
 		// We were asked for the raw payment gateways list.
-		if ( isset( $this->payment_gateways_memo[ $country_code ] ) ) {
-			return $this->payment_gateways_memo[ $country_code ];
+		if ( isset( $this->payment_gateways_cache[ $country_code ] ) ) {
+			return $this->payment_gateways_cache[ $country_code ];
 		}
 
 		// Get all payment gateways, ordered by the user.
@@ -302,7 +302,7 @@ class PaymentsProviders {
 		$payment_gateways = $this->handle_non_standard_registration_for_payment_gateways( $payment_gateways );
 
 		// Store the entire payment gateways list for later use.
-		$this->payment_gateways_memo[ $country_code ] = $payment_gateways;
+		$this->payment_gateways_cache[ $country_code ] = $payment_gateways;
 
 		return $payment_gateways;
 	}
@@ -491,18 +491,17 @@ class PaymentsProviders {
 		// Normalize the country code to uppercase.
 		$country_code = strtoupper( $country_code );
 
-		$memo_key = $payment_gateway->id . '__' . $country_code;
-		$details  = $this->request_cache->remember(
-			$memo_key,
-			self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP,
-			function () use ( $payment_gateway, $country_code ): array {
-				return $this->enhance_payment_gateway_details(
-					$this->get_payment_gateway_base_details( $payment_gateway, 0, $country_code ),
-					$payment_gateway,
-					$country_code
-				);
-			}
-		);
+		$cache_key = $payment_gateway->id . '__' . $country_code;
+		$resolver  = function () use ( $payment_gateway, $country_code ): array {
+			return $this->enhance_payment_gateway_details(
+				$this->get_payment_gateway_base_details( $payment_gateway, 0, $country_code ),
+				$payment_gateway,
+				$country_code
+			);
+		};
+		$details   = null === $this->request_cache
+			? $resolver()
+			: $this->request_cache->remember( $cache_key, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP, $resolver );
 
 		$details['_order'] = $payment_gateway_order;
 
@@ -1248,18 +1247,34 @@ class PaymentsProviders {
 	}
 
 	/**
-	 * Reset the memoized data.
+	 * Clear cached payment gateway data.
 	 *
 	 * Call after changing gateway registration, settings, or account state during a request.
 	 * Also useful for testing purposes.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function clear_cache(): void {
+		$this->payment_gateways_cache             = array();
+		$this->payment_gateways_for_display_cache = array();
+		if ( null !== $this->request_cache ) {
+			$this->request_cache->clear_group( self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
+		}
+	}
+
+	/**
+	 * Reset cached payment gateway data.
+	 *
+	 * @deprecated 11.1.0 Use clear_cache() instead.
 	 *
 	 * @internal
 	 * @return void
 	 */
 	public function reset_memo(): void {
-		$this->payment_gateways_memo             = array();
-		$this->payment_gateways_for_display_memo = array();
-		$this->request_cache->reset_group( self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
+		$this->clear_cache();
 	}
 
 	/**

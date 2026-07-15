@@ -51,18 +51,18 @@ class Payments {
 	 *
 	 * @var RequestCache
 	 */
-	private RequestCache $request_cache;
+	private ?RequestCache $request_cache = null;
 
 	/**
 	 * Initialize the class instance.
 	 *
 	 * @param PaymentsProviders    $payment_providers             The payment providers service.
 	 * @param ExtensionSuggestions $payment_extension_suggestions The payment extension suggestions service.
-	 * @param RequestCache         $request_cache                 The request cache.
+	 * @param RequestCache|null    $request_cache                 Optional request cache.
 	 *
 	 * @internal
 	 */
-	final public function init( PaymentsProviders $payment_providers, ExtensionSuggestions $payment_extension_suggestions, RequestCache $request_cache ): void {
+	final public function init( PaymentsProviders $payment_providers, ExtensionSuggestions $payment_extension_suggestions, ?RequestCache $request_cache = null ): void {
 		$this->providers             = $payment_providers;
 		$this->extension_suggestions = $payment_extension_suggestions;
 		$this->request_cache         = $request_cache;
@@ -89,11 +89,13 @@ class Payments {
 	 */
 	public function get_payment_providers( string $location, bool $for_display = true, bool $remove_shells = false ): array {
 		$can_install_plugins = current_user_can( 'install_plugins' );
-		$memo_key            = get_current_user_id() . '__' . ( $can_install_plugins ? '1' : '0' ) . '__' . strtoupper( $location ) . '__' . ( $for_display ? '1' : '0' ) . ( $remove_shells ? '1' : '0' );
-		$found               = false;
-		$memoized_providers  = $this->request_cache->get( $memo_key, self::PROVIDERS_REQUEST_CACHE_GROUP, $found );
-		if ( $found && is_array( $memoized_providers ) ) {
-			return $memoized_providers;
+		$cache_key           = get_current_user_id() . '__' . ( $can_install_plugins ? '1' : '0' ) . '__' . strtoupper( $location ) . '__' . ( $for_display ? '1' : '0' ) . ( $remove_shells ? '1' : '0' );
+		if ( null !== $this->request_cache ) {
+			$found            = false;
+			$cached_providers = $this->request_cache->get( $cache_key, self::PROVIDERS_REQUEST_CACHE_GROUP, $found );
+			if ( $found && is_array( $cached_providers ) ) {
+				return $cached_providers;
+			}
 		}
 
 		$payment_gateways = $this->providers->get_payment_gateways( $for_display );
@@ -224,7 +226,9 @@ class Payments {
 			$this->process_payment_provider_states( $payment_providers );
 		}
 
-		$this->request_cache->set( $memo_key, $payment_providers, self::PROVIDERS_REQUEST_CACHE_GROUP );
+		if ( null !== $this->request_cache ) {
+			$this->request_cache->set( $cache_key, $payment_providers, self::PROVIDERS_REQUEST_CACHE_GROUP );
+		}
 
 		return $payment_providers;
 	}
@@ -309,8 +313,8 @@ class Payments {
 		$result = $this->providers->update_payment_providers_order_map( $order_map );
 
 		if ( $result ) {
-			// The order map influences the providers list, so we reset the memoized data.
-			$this->reset_memo();
+			// The order map influences the providers list, so clear the cached data.
+			$this->clear_cache();
 
 			// Record an event that the payment providers order map was updated.
 			$this->record_event(
@@ -338,8 +342,8 @@ class Payments {
 		$result = $this->providers->attach_extension_suggestion( $id );
 
 		if ( $result ) {
-			// The attachment influences the providers list, so we reset the memoized data.
-			$this->reset_memo();
+			// The attachment influences the providers list, so clear the cached data.
+			$this->clear_cache();
 
 			// Record an event that the suggestion was attached.
 			$this->record_event(
@@ -365,8 +369,8 @@ class Payments {
 		$result = $this->providers->hide_extension_suggestion( $id );
 
 		if ( $result ) {
-			// Hidden suggestions are excluded from the providers list, so we reset the memoized data.
-			$this->reset_memo();
+			// Hidden suggestions are excluded from the providers list, so clear the cached data.
+			$this->clear_cache();
 
 			// Record an event that the suggestion was hidden.
 			$this->record_event(
@@ -397,8 +401,8 @@ class Payments {
 		$result = $this->extension_suggestions->dismiss_incentive( $incentive_id, $suggestion_id, $context );
 
 		if ( $result ) {
-			// Incentives are embedded in the providers list details, so we reset the memoized data.
-			$this->reset_memo();
+			// Incentives are embedded in the providers list details, so clear the cached data.
+			$this->clear_cache();
 		}
 
 		if ( ! $do_not_track && $result ) {
@@ -417,17 +421,21 @@ class Payments {
 	}
 
 	/**
-	 * Reset the memoized data.
+	 * Clear cached payment provider data.
 	 *
 	 * Call after changing provider ordering, suggestions, incentives, gateway registration,
 	 * settings, or account state during a request. Also useful for testing purposes.
 	 *
+	 * @since 11.1.0
+	 *
 	 * @internal
 	 * @return void
 	 */
-	public function reset_memo(): void {
-		$this->request_cache->reset_group( self::PROVIDERS_REQUEST_CACHE_GROUP );
-		$this->providers->reset_memo();
+	public function clear_cache(): void {
+		if ( null !== $this->request_cache ) {
+			$this->request_cache->clear_group( self::PROVIDERS_REQUEST_CACHE_GROUP );
+		}
+		$this->providers->clear_cache();
 	}
 
 	/**

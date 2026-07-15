@@ -89,14 +89,14 @@ class PaymentsTest extends WC_Unit_Test_Case {
 
 		$this->sut = new Payments();
 		$this->sut->init( $this->mock_providers, $this->mock_extension_suggestions, $this->request_cache );
-		$this->sut->reset_memo();
+		$this->sut->clear_cache();
 	}
 
 	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		$this->sut->reset_memo();
+		$this->sut->clear_cache();
 
 		parent::tearDown();
 	}
@@ -618,9 +618,9 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Payment providers are memoized during a request.
+	 * @testdox Payment providers are cached during a request.
 	 */
-	public function test_get_payment_providers_is_memoized(): void {
+	public function test_get_payment_providers_is_cached(): void {
 		$location = 'US';
 
 		$this->mock_providers
@@ -636,13 +636,13 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$first  = $this->sut->get_payment_providers( $location );
 		$second = $this->sut->get_payment_providers( $location );
 
-		$this->assertSame( $first, $second, 'Repeated calls should return the memoized providers' );
+		$this->assertSame( $first, $second, 'Repeated calls should return the cached providers' );
 	}
 
 	/**
-	 * @testdox Payment providers are memoized across service instances during a request.
+	 * @testdox Payment providers are cached across service instances during a request.
 	 */
-	public function test_get_payment_providers_is_memoized_across_service_instances(): void {
+	public function test_get_payment_providers_is_cached_across_service_instances(): void {
 		$this->mock_providers
 			->expects( $this->once() )
 			->method( 'get_payment_gateways' )
@@ -663,9 +663,32 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Payment providers are memoized separately for each argument combination.
+	 * @testdox Payment providers are recomputed when no request cache is provided.
 	 */
-	public function test_get_payment_providers_is_memoized_per_arguments(): void {
+	public function test_get_payment_providers_without_request_cache_is_not_cached(): void {
+		$this->mock_providers
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_payment_gateways' )
+			->willReturn( array() );
+
+		$this->mock_providers
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_extension_suggestions' )
+			->willReturn( array() );
+
+		$service = new Payments();
+		$service->init( $this->mock_providers, $this->mock_extension_suggestions );
+
+		$first  = $service->get_payment_providers( 'US' );
+		$second = $service->get_payment_providers( 'US' );
+
+		$this->assertSame( $first, $second, 'Uncached provider derivations should return the same data.' );
+	}
+
+	/**
+	 * @testdox Payment providers are cached separately for each argument combination.
+	 */
+	public function test_get_payment_providers_is_cached_per_arguments(): void {
 		$this->mock_providers
 			->expects( $this->exactly( 4 ) )
 			->method( 'get_payment_gateways' )
@@ -707,9 +730,9 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Payment providers are memoized separately for each user.
+	 * @testdox Payment providers are cached separately for each user.
 	 */
-	public function test_get_payment_providers_is_memoized_per_user(): void {
+	public function test_get_payment_providers_is_cached_per_user(): void {
 		$this->mock_providers
 			->expects( $this->exactly( 2 ) )
 			->method( 'get_payment_gateways' )
@@ -739,9 +762,9 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Payment providers are memoized separately for users who cannot install plugins.
+	 * @testdox Payment providers are cached separately for users who cannot install plugins.
 	 */
-	public function test_get_payment_providers_is_memoized_per_install_plugins_capability(): void {
+	public function test_get_payment_providers_is_cached_per_install_plugins_capability(): void {
 		$this->mock_providers
 			->expects( $this->exactly( 2 ) )
 			->method( 'get_payment_gateways' )
@@ -771,22 +794,22 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Resetting the memo recomputes the payment providers.
+	 * @testdox Clearing the cache recomputes the payment providers.
 	 */
-	public function test_reset_memo_clears_memoized_payment_providers(): void {
+	public function test_clear_cache_recomputes_payment_providers(): void {
 		$this->expect_payment_providers_to_be_recomputed();
 
 		$before = $this->sut->get_payment_providers( 'US' );
-		$this->sut->reset_memo();
+		$this->sut->clear_cache();
 		$after = $this->sut->get_payment_providers( 'US' );
 
 		$this->assert_payment_providers_were_recomputed( $before, $after );
 	}
 
 	/**
-	 * @testdox Updating the payment providers order map resets the memoized providers.
+	 * @testdox Updating the payment providers order map clears the cached providers.
 	 */
-	public function test_update_payment_providers_order_map_resets_memo(): void {
+	public function test_update_payment_providers_order_map_clears_cache(): void {
 		$this->expect_payment_providers_to_be_recomputed();
 
 		$this->mock_providers
@@ -801,9 +824,9 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Attaching a payment extension suggestion resets the memoized providers.
+	 * @testdox Attaching a payment extension suggestion clears the cached providers.
 	 */
-	public function test_attach_payment_extension_suggestion_resets_memo(): void {
+	public function test_attach_payment_extension_suggestion_clears_cache(): void {
 		$this->expect_payment_providers_to_be_recomputed();
 
 		$this->mock_providers
@@ -818,9 +841,9 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Hiding a payment extension suggestion resets the memoized providers.
+	 * @testdox Hiding a payment extension suggestion clears the cached providers.
 	 */
-	public function test_hide_payment_extension_suggestion_resets_memo(): void {
+	public function test_hide_payment_extension_suggestion_clears_cache(): void {
 		$this->expect_payment_providers_to_be_recomputed();
 
 		$this->mock_providers
@@ -835,9 +858,9 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Dismissing an extension suggestion incentive resets the memoized providers.
+	 * @testdox Dismissing an extension suggestion incentive clears the cached providers.
 	 */
-	public function test_dismiss_extension_suggestion_incentive_resets_memo(): void {
+	public function test_dismiss_extension_suggestion_incentive_clears_cache(): void {
 		$this->expect_payment_providers_to_be_recomputed();
 
 		$this->mock_extension_suggestions

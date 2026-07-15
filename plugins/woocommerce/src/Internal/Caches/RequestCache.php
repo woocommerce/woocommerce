@@ -102,7 +102,7 @@ final class RequestCache {
 	}
 
 	/**
-	 * Invalidate every request-cached value in a group.
+	 * Clear every request-cached value in a group.
 	 *
 	 * @since 11.1.0
 	 *
@@ -110,7 +110,7 @@ final class RequestCache {
 	 *
 	 * @return bool True on success, false on failure.
 	 */
-	public function reset_group( string $group ): bool {
+	public function clear_group( string $group ): bool {
 		$this->register_group( $group );
 
 		return self::invalidate_cache_group( $group );

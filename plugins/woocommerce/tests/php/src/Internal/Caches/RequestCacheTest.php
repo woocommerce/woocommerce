@@ -29,16 +29,16 @@ class RequestCacheTest extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		$this->sut = wc_get_container()->get( RequestCache::class );
-		$this->sut->reset_group( self::CACHE_GROUP );
-		$this->sut->reset_group( self::OTHER_CACHE_GROUP );
+		$this->sut->clear_group( self::CACHE_GROUP );
+		$this->sut->clear_group( self::OTHER_CACHE_GROUP );
 	}
 
 	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		$this->sut->reset_group( self::CACHE_GROUP );
-		$this->sut->reset_group( self::OTHER_CACHE_GROUP );
+		$this->sut->clear_group( self::CACHE_GROUP );
+		$this->sut->clear_group( self::OTHER_CACHE_GROUP );
 
 		parent::tearDown();
 	}
@@ -139,21 +139,21 @@ class RequestCacheTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Reset invalidates one group without changing another group.
+	 * @testdox Clear invalidates one group without changing another group.
 	 */
-	public function test_reset_group_only_invalidates_target_group(): void {
+	public function test_clear_group_only_invalidates_target_group(): void {
 		$this->sut->set( 'shared-key', 'first', self::CACHE_GROUP );
 		$this->sut->set( 'shared-key', 'second', self::OTHER_CACHE_GROUP );
 
-		$this->assertTrue( $this->sut->reset_group( self::CACHE_GROUP ) );
+		$this->assertTrue( $this->sut->clear_group( self::CACHE_GROUP ) );
 
 		$found = true;
 		$this->assertFalse( $this->sut->get( 'shared-key', self::CACHE_GROUP, $found ) );
-		$this->assertFalse( $found, 'The reset group should no longer contain the key.' );
+		$this->assertFalse( $found, 'The cleared group should no longer contain the key.' );
 
 		$other_found = false;
 		$this->assertSame( 'second', $this->sut->get( 'shared-key', self::OTHER_CACHE_GROUP, $other_found ) );
-		$this->assertTrue( $other_found, 'Resetting one group should not invalidate another group.' );
+		$this->assertTrue( $other_found, 'Clearing one group should not invalidate another group.' );
 	}
 
 	/**
