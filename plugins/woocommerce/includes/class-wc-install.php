@@ -14,7 +14,6 @@ use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
-use Automattic\WooCommerce\Internal\Database\Migrations\NepalStateCodeMigration;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
@@ -342,9 +341,6 @@ class WC_Install {
 		),
 		'11.0.0'   => array(
 			'wc_update_1100_enable_point_of_sale_feature',
-		),
-		'11.1.0'   => array(
-			'WC_Install::update_1110_nepal_state_codes',
 		),
 	);
 
@@ -974,15 +970,6 @@ class WC_Install {
 	 */
 	public static function get_db_update_callbacks() {
 		return self::$db_updates;
-	}
-
-	/**
-	 * Preserve legacy Nepal state-code compatibility during the province update.
-	 *
-	 * @since 11.1.0
-	 */
-	public static function update_1110_nepal_state_codes(): void {
-		wc_get_container()->get( NepalStateCodeMigration::class )->run();
 	}
 
 	/**

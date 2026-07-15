@@ -1419,7 +1419,7 @@ return array(
 	'NL' => array(),
 	'NO' => array(),
 	// Nepal's National Statistics Office uses current names while CLDR still has generic province labels.
-	// See https://microdata.nsonepal.gov.np/index.php/catalog/111/variable/F8/V264?name=PROV.
+	// See https://censusresults.nsonepal.gov.np/downloads/provincial/1?type=report.
 	'NP' => array(
 		'P1' => __( 'Koshi', 'woocommerce' ),
 		'P2' => __( 'Madhesh', 'woocommerce' ),

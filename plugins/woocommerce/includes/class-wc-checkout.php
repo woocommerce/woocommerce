@@ -942,8 +942,9 @@ class WC_Checkout {
 				if ( '' !== $data[ $key ] && in_array( 'state', $format, true ) ) {
 					$country                     = isset( $data[ $fieldset_key . '_country' ] ) ? $data[ $fieldset_key . '_country' ] : WC()->customer->{"get_{$fieldset_key}_country"}();
 					$valid_states                = WC()->countries->get_states( $country );
-					$legacy_states               = LegacyStateCodes::get_states( $country );
-					$states_allowed_for_checkout = is_array( $valid_states ) ? array_merge( $legacy_states, $valid_states ) : $valid_states;
+					$states_allowed_for_checkout = is_array( $valid_states )
+						? LegacyStateCodes::add_to_current_states( $country, $valid_states )
+						: $valid_states;
 
 					if ( ! empty( $states_allowed_for_checkout ) && is_array( $states_allowed_for_checkout ) && count( $states_allowed_for_checkout ) > 0 ) {
 						$valid_state_codes  = array_map( 'wc_strtoupper', array_keys( $states_allowed_for_checkout ) );
@@ -957,7 +958,7 @@ class WC_Checkout {
 
 						if ( $validate_fieldset && ! in_array( $data[ $key ], $valid_state_codes, true ) ) {
 							/* translators: 1: state field 2: valid states */
-							$errors->add( $key . '_validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', $states_allowed_for_checkout ) ), array( 'id' => $key ) );
+							$errors->add( $key . '_validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', (array) $valid_states ) ), array( 'id' => $key ) );
 						}
 					}
 				}

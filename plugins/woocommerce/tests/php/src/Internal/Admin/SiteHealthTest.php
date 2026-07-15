@@ -135,4 +135,33 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 			remove_filter( 'pre_http_request', $filter_callback, 10 );
 		}
 	}
+
+	/**
+	 * @testdox Nepal province remediation stays visible until the configuration is fixed.
+	 */
+	public function test_nepal_province_remediation_is_dynamic_and_links_to_each_setting(): void {
+		$original_store_location = get_option( 'woocommerce_default_country', false );
+		update_option( 'woocommerce_default_country', 'NP:BAG' );
+
+		try {
+			$result = $this->sut->run_test( 'woocommerce_nepal_province_configuration' );
+
+			$this->assertSame( 'recommended', $result['status'], 'Legacy Nepal configuration should produce a recommendation.' );
+			$this->assertSame( 'Nepal province settings need attention', $result['label'], 'The recommendation should explain what needs attention.' );
+			$this->assertStringContainsString( 'admin.php?page=wc-settings&#038;tab=general', $result['actions'], 'The store-address action should use the general settings URL.' );
+			$this->assertStringContainsString( 'admin.php?page=wc-settings&#038;tab=shipping', $result['actions'], 'The shipping action should use the shipping settings URL.' );
+			$this->assertStringContainsString( 'admin.php?page=wc-settings&#038;tab=tax', $result['actions'], 'The tax action should use the tax settings URL.' );
+
+			update_option( 'woocommerce_default_country', 'NP:P3' );
+			$result = $this->sut->run_test( 'woocommerce_nepal_province_configuration' );
+
+			$this->assertSame( 'good', $result['status'], 'The recommendation should clear as soon as the setting is fixed.' );
+		} finally {
+			if ( false === $original_store_location ) {
+				delete_option( 'woocommerce_default_country' );
+			} else {
+				update_option( 'woocommerce_default_country', $original_store_location );
+			}
+		}
+	}
 }

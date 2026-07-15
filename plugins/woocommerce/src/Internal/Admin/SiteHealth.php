@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\Address\NepalStateCodeRemediation;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Admin_Notices;
@@ -284,6 +285,41 @@ class SiteHealth {
 						array(
 							'url'   => wp_nonce_url( admin_url( 'admin.php?page=wc-status&tab=tools&action=verify_db_tables' ), 'debug_action' ),
 							'label' => __( 'Check database tables again', 'woocommerce' ),
+						),
+					),
+				),
+			),
+			'woocommerce_nepal_province_configuration' => array(
+				'label' => __( 'WooCommerce Nepal province configuration', 'woocommerce' ),
+				'badge' => 'performance',
+				'check' => fn() => wc_get_container()->get( NepalStateCodeRemediation::class )->get_status(),
+				'good'  => array(
+					'label'       => __( 'Nepal province settings use current codes', 'woocommerce' ),
+					'description' => __( 'Your store address, shipping zones, and tax rates do not use Nepal\'s former zone codes.', 'woocommerce' ),
+				),
+				'fail'  => array(
+					'label'       => function ( ?array $context ) {
+						return ! empty( $context['database_error'] )
+							? __( 'WooCommerce could not check Nepal province settings', 'woocommerce' )
+							: __( 'Nepal province settings need attention', 'woocommerce' );
+					},
+					'description' => function ( ?array $context ) {
+						return ! empty( $context['database_error'] )
+							? __( 'A database query failed, so WooCommerce could not confirm whether Nepal province settings use current codes. Check your database connection and try again.', 'woocommerce' )
+							: __( 'Some settings still use Nepal\'s former zones. Review your store address, shipping zones, and tax rates so province-based rules continue to apply.', 'woocommerce' );
+					},
+					'actions'     => array(
+						array(
+							'url'   => admin_url( 'admin.php?page=wc-settings&tab=general' ),
+							'label' => __( 'Review store address', 'woocommerce' ),
+						),
+						array(
+							'url'   => admin_url( 'admin.php?page=wc-settings&tab=shipping' ),
+							'label' => __( 'Review shipping zones', 'woocommerce' ),
+						),
+						array(
+							'url'   => admin_url( 'admin.php?page=wc-settings&tab=tax' ),
+							'label' => __( 'Review tax rates', 'woocommerce' ),
 						),
 					),
 				),

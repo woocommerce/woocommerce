@@ -112,6 +112,45 @@ class WC_Shipping_Zones_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Legacy and current Nepal state codes continue to match their exact shipping zones.
+	 */
+	public function test_nepal_state_codes_match_exact_shipping_zones(): void {
+		$legacy_zone  = $this->create_zone(
+			'Legacy Bagmati zone',
+			0,
+			array( array( 'NP:BAG', 'state' ) )
+		);
+		$current_zone = $this->create_zone(
+			'Current Bagmati province',
+			1,
+			array( array( 'NP:P3', 'state' ) )
+		);
+
+		$legacy_match  = WC_Shipping_Zones::get_zone_matching_package(
+			array(
+				'destination' => array(
+					'country'  => 'NP',
+					'state'    => 'BAG',
+					'postcode' => '44600',
+				),
+			)
+		);
+		$current_match = WC_Shipping_Zones::get_zone_matching_package(
+			array(
+				'destination' => array(
+					'country'  => 'NP',
+					'state'    => 'P3',
+					'postcode' => '44600',
+				),
+			)
+		);
+
+		$this->assertSame( $legacy_zone->get_id(), $legacy_match->get_id(), 'Persisted legacy addresses should match existing legacy shipping rules.' );
+		$this->assertSame( $current_zone->get_id(), $current_match->get_id(), 'Current addresses should match current province shipping rules.' );
+		$this->assertSame( 'Bagmati', $legacy_zone->get_formatted_location(), 'Legacy shipping zones should retain a readable location name.' );
+	}
+
+	/**
 	 * Add a custom location type for tests.
 	 *
 	 * @param array $location_types Location types.

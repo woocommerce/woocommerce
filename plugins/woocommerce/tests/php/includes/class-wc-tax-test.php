@@ -703,6 +703,62 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Legacy and current Nepal state codes continue to match their exact tax rates.
+	 */
+	public function test_nepal_state_codes_match_exact_tax_rates(): void {
+		$legacy_rate_id  = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'NP',
+				'tax_rate_state'    => 'BAG',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'Legacy Bagmati tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		$current_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'NP',
+				'tax_rate_state'    => 'P3',
+				'tax_rate'          => '12.0000',
+				'tax_rate_name'     => 'Current Bagmati tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '2',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$legacy_rates  = WC_Tax::find_rates(
+			array(
+				'country'   => 'NP',
+				'state'     => 'BAG',
+				'postcode'  => '44600',
+				'city'      => 'Kathmandu',
+				'tax_class' => '',
+			)
+		);
+		$current_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'NP',
+				'state'     => 'P3',
+				'postcode'  => '44600',
+				'city'      => 'Kathmandu',
+				'tax_class' => '',
+			)
+		);
+
+		$this->assertArrayHasKey( $legacy_rate_id, $legacy_rates, 'Persisted legacy addresses should match existing legacy tax rules.' );
+		$this->assertArrayNotHasKey( $current_rate_id, $legacy_rates, 'Legacy addresses should not silently match a different province code.' );
+		$this->assertArrayHasKey( $current_rate_id, $current_rates, 'Current addresses should match current province tax rules.' );
+		$this->assertArrayNotHasKey( $legacy_rate_id, $current_rates, 'Current addresses should not silently match legacy zone rules.' );
+	}
+
+	/**
 	 * Test calc_shipping_tax default behavior (exclusive).
 	 */
 	public function test_calc_shipping_tax_default_behavior() {

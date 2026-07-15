@@ -11,19 +11,6 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 class WC_Install_Test extends \WC_Unit_Test_Case {
 
 	/**
-	 * @testdox The Nepal state compatibility update is registered for WooCommerce 11.1.0.
-	 */
-	public function test_nepal_state_compatibility_update_is_registered(): void {
-		$updates = WC_Install::get_db_update_callbacks();
-
-		$this->assertContains(
-			'WC_Install::update_1110_nepal_state_codes',
-			$updates['11.1.0'],
-			'The Nepal state compatibility update should run on upgrades to WooCommerce 11.1.0.'
-		);
-	}
-
-	/**
 	 * Test if verify base table can detect missing tables and clear the stored missing table list.
 	 */
 	public function test_verify_base_tables_stores_and_removes_missing_tables() {

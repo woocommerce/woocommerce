@@ -9,6 +9,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Address\LegacyStateCodes;
+
 require_once __DIR__ . '/legacy/class-wc-legacy-shipping-zone.php';
 
 /**
@@ -127,7 +129,8 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 
 		foreach ( $states as $location ) {
 			$location_codes   = explode( ':', $location->code );
-			$location_parts[] = $all_states[ $location_codes[0] ][ $location_codes[1] ];
+			$current_states   = $all_states[ $location_codes[0] ] ?? array();
+			$location_parts[] = LegacyStateCodes::get_state_name( $location_codes[0], $location_codes[1], $current_states );
 		}
 
 		foreach ( $postcodes as $location ) {

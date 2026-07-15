@@ -181,6 +181,55 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'validate_posted_data' preserves extension-defined free-form state behavior.
+	 */
+	public function test_validate_posted_data_preserves_filtered_free_form_states(): void {
+		$original_countries = WC()->countries;
+		$filter_callback    = static function ( array $states ): array {
+			$states['NP'] = array();
+
+			return $states;
+		};
+
+		add_filter( 'woocommerce_states', $filter_callback );
+		WC()->countries = new WC_Countries();
+
+		try {
+			$data   = array(
+				'billing_country'           => 'NP',
+				'billing_state'             => 'CUSTOM',
+				'ship_to_different_address' => false,
+			);
+			$errors = new WP_Error();
+
+			$this->sut->validate_posted_data( $data, $errors );
+
+			$this->assertEmpty( $errors->get_error_message( 'billing_state_validation' ), 'An extension-defined empty state list should continue to accept free-form input.' );
+		} finally {
+			WC()->countries = $original_countries;
+			remove_filter( 'woocommerce_states', $filter_callback );
+		}
+	}
+
+	/**
+	 * @testdox Invalid-state errors list selectable provinces without exposing legacy aliases.
+	 */
+	public function test_validate_posted_data_error_lists_only_current_nepal_provinces(): void {
+		$data   = array(
+			'billing_country'           => 'NP',
+			'billing_state'             => 'INVALID',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+
+		$message = $errors->get_error_message( 'billing_state_validation' );
+		$this->assertStringContainsString( 'Sudurpashchim', $message, 'The validation message should list selectable provinces.' );
+		$this->assertStringNotContainsString( 'Bheri', $message, 'The validation message should not expose private compatibility aliases.' );
+	}
+
+	/**
 	 * @testdox 'validate_posted_data' doesn't add errors for empty billing/shipping countries.
 	 *
 	 * @testWith [true]

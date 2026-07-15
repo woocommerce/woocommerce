@@ -679,8 +679,10 @@ class WC_Countries {
 		}
 
 		// Handle full state name, including legacy codes preserved for historical addresses.
-		$legacy_states = $country ? LegacyStateCodes::get_states( $country ) : array();
-		$full_state    = ( $country && $state && isset( $this->states[ $country ][ $state ] ) ) ? $this->states[ $country ][ $state ] : ( $legacy_states[ $state ] ?? $state );
+		$current_states = $country ? (array) $this->get_states( $country ) : array();
+		$full_state     = ( $country && $state && isset( $this->states[ $country ][ $state ] ) )
+			? $this->states[ $country ][ $state ]
+			: LegacyStateCodes::get_state_name( $country, $state, $current_states );
 
 		// Substitute address parts into the string.
 		$replace = array_map(

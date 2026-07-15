@@ -592,6 +592,13 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_Unit_Test_Case {
 		$result         = $method->invoke( $schema, $valid_location );
 		$this->assertEquals( 'California', $result );
 
+		$legacy_nepal_location = (object) array(
+			'code' => 'NP:BAG',
+			'type' => 'state',
+		);
+		$result                = $method->invoke( $schema, $legacy_nepal_location );
+		$this->assertEquals( 'Bagmati', $result, 'Persisted legacy Nepal locations should retain a readable name.' );
+
 		// Test malformed state location (missing state part).
 		$malformed_location = (object) array(
 			'code' => 'US',
