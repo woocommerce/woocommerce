@@ -431,6 +431,31 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox resolve_filename_from_response_headers() should render a filename object that declares __toString(), as string concatenation always did.
+	 */
+	public function test_resolve_filename_renders_stringable_filename(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Disposition: attachment; filename="Quarterly Report.pdf"',
+		);
+
+		$filename = new class() {
+			/**
+			 * Render the filename.
+			 *
+			 * @return string
+			 */
+			public function __toString(): string {
+				return 'Seasons-Catalog';
+			}
+		};
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, $filename, true );
+
+		$this->assertSame( 'Seasons-Catalog.pdf', $resolved, 'A filename object declaring __toString() should be preserved and gain the remote extension, not be discarded.' );
+	}
+
+	/**
 	 * @testdox download_file_force() should render an error page, not a download, when the remote file cannot be opened.
 	 */
 	public function test_download_file_force_shows_error_when_remote_file_cannot_be_opened(): void {

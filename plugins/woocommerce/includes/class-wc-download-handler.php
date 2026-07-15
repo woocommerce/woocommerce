@@ -560,17 +560,23 @@ class WC_Download_Handler {
 	 *
 	 * @param array $response_headers  Raw HTTP response header lines, e.g. from `stream_get_meta_data()['wrapper_data']`.
 	 * @param mixed $filename          Filename derived from the URL. Documented as a string, but a misbehaving
-	 *                                 `woocommerce_file_download_filename` filter callback may produce any type;
-	 *                                 non-string values are coerced (non-scalars to '') instead of fataling, as
-	 *                                 they only ever reached a string concatenation before this method existed.
+	 *                                 `woocommerce_file_download_filename` filter callback may produce any type.
+	 *                                 Anything renderable as a string (scalars, and objects declaring
+	 *                                 `__toString()`) is rendered, matching what string concatenation used to do
+	 *                                 with it; anything else (`null`, arrays) becomes '' instead of fataling.
 	 * @param bool  $preserve_filename When true, `$filename` is kept (it was customized deliberately, e.g. via the
 	 *                                 `woocommerce_file_download_filename` filter) and only completed with an
 	 *                                 extension derived from the response headers, instead of being replaced by
-	 *                                 the remote-announced filename.
+	 *                                 the remote-announced filename. Ignored when `$filename` renders empty, since
+	 *                                 there is then nothing to preserve.
 	 * @return string
 	 */
 	public static function resolve_filename_from_response_headers( array $response_headers, $filename, bool $preserve_filename = false ): string {
-		$filename = is_scalar( $filename ) ? (string) $filename : '';
+		// `is_scalar()` is false for objects, so `__toString()` implementations are admitted separately.
+		// `instanceof Stringable` cannot be used here: it is PHP 8.0+, and WooCommerce supports PHP 7.4.
+		$filename = is_scalar( $filename ) || ( is_object( $filename ) && method_exists( $filename, '__toString' ) )
+			? (string) $filename
+			: '';
 
 		// An empty filename carries nothing to preserve, so let the remote-announced filename win.
 		$preserve_filename = $preserve_filename && '' !== $filename;
