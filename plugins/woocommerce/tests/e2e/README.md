@@ -173,9 +173,9 @@ Some E2E suites need fixture mechanisms that can't be expressed cleanly with RES
 
 ### Convention
 
-Every test helper plugin is a **self-contained folder** at `tests/e2e/test-plugins/<slug>/<slug>.php` (the main file matches the folder name), with a full plugin header (`Plugin Name`, `Description`, `Version`, `Requires PHP`, `Author`). Never add loose single-file plugins — single-file Docker bind mounts surface as empty (0-byte) files under Docker Desktop's gRPC FUSE backend, so only directory mounts and URL/zip downloads are safe.
+Every always-on or externally downloaded helper is a **self-contained folder** at `tests/e2e/test-plugins/<slug>/<slug>.php` (the main file matches the folder name), with a full plugin header (`Plugin Name`, `Description`, `Version`, `Requires PHP`, `Author`). Never bind-mount an individual `.php` file — mount a folder or download a zip. The per-test block plugins under `blocks/` are single files, but their whole parent folder is mounted at once (see below).
 
-Keep `Requires PHP` at the **lowest PHP version any E2E environment runs** (currently `7.4` — the same floor as WooCommerce itself), and keep the helper's code compatible with it. Some environments (the blocks suite among them) run PHP 7.4, and WordPress silently refuses to load a plugin whose `Requires PHP` is higher than the running version. The plugin still shows as active, but none of its hooks run — so its REST routes return `rest_no_route` (404) and the specs relying on them fail for no obvious reason.
+Keep `Requires PHP` at the **lowest PHP version any E2E environment runs** (currently `7.4`, the same floor as WooCommerce itself) and keep the helper's code compatible with it. WordPress silently refuses to load a plugin whose `Requires PHP` is higher than the running version: it still reports as active, but none of its hooks run and its REST routes return `rest_no_route` (404).
 
 How a helper is wired up depends on when it needs to be active:
 
