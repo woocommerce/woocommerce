@@ -8,6 +8,7 @@
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Internal\Shipping\ShippingMethodOriginTracker;
+use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 
 /**
  * Tests for wc_get_default_shipping_method_for_package().
@@ -394,5 +395,48 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 			$this->origin_tracker->get_origin( 0 ),
 			'Preserving a manual choice must not overwrite the origin back to auto'
 		);
+	}
+
+	/**
+	 * The block checkout's pickup-options block re-asserts the currently selected rate
+	 * on mount via the Store API select-shipping-rate route. That repeat of the existing
+	 * selection is not a customer decision — recording it as 'manual' would launder an
+	 * auto-defaulted pickup on every block checkout page load, defeating the unstick and
+	 * corrupting the selected_rate_origin field gateways consume.
+	 *
+	 * @testdox Store API reselect of the same rate preserves the recorded auto origin.
+	 */
+	public function test_store_api_reselect_of_same_rate_preserves_auto_origin(): void {
+		$this->record_auto_choice( 0, 'pickup_location:0' );
+
+		$controller = new CartController();
+		$controller->select_shipping_rate( 0, 'pickup_location:0' );
+
+		$this->assertSame(
+			'auto',
+			$this->origin_tracker->get_origin( 0 ),
+			'Re-asserting the already-chosen rate must not flip the origin to manual'
+		);
+
+		$chosen = WC()->session->get( 'chosen_shipping_methods', array() );
+		$this->assertSame( 'pickup_location:0', $chosen[0], 'Chosen shipping method should be unchanged' );
+	}
+
+	/**
+	 * Selecting a different rate through the Store API select-shipping-rate route is a
+	 * genuine customer decision and must record a 'manual' origin so the choice sticks.
+	 *
+	 * @testdox Store API selection of a different rate records a manual origin.
+	 */
+	public function test_store_api_selecting_different_rate_records_manual_origin(): void {
+		$this->record_auto_choice( 0, 'pickup_location:0' );
+
+		$controller = new CartController();
+		$controller->select_shipping_rate( 0, 'flat_rate:14' );
+
+		$this->assertSame( 'manual', $this->origin_tracker->get_origin( 0 ) );
+
+		$chosen = WC()->session->get( 'chosen_shipping_methods', array() );
+		$this->assertSame( 'flat_rate:14', $chosen[0] );
 	}
 }

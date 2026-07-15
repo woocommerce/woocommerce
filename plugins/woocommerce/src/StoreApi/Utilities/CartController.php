@@ -916,6 +916,10 @@ class CartController {
 	/**
 	 * Selects a shipping rate.
 	 *
+	 * Records a 'manual' shipping-method origin only when the selected rate differs
+	 * from the current choice — a repeat of the existing selection is not a customer
+	 * decision.
+	 *
 	 * @param int|string $package_id ID of the package to choose a rate for.
 	 * @param string     $rate_id ID of the rate being chosen.
 	 */
@@ -923,12 +927,22 @@ class CartController {
 		if ( ! is_string( $rate_id ) ) {
 			return;
 		}
-		$cart                        = $this->get_cart_instance();
-		$session_data                = wc()->session->get( 'chosen_shipping_methods' ) ? wc()->session->get( 'chosen_shipping_methods' ) : [];
+		$cart            = $this->get_cart_instance();
+		$session_data    = wc()->session->get( 'chosen_shipping_methods' ) ? wc()->session->get( 'chosen_shipping_methods' ) : [];
+		$previous_method = isset( $session_data[ $package_id ] ) && is_string( $session_data[ $package_id ] ) ? $session_data[ $package_id ] : '';
+
 		$session_data[ $package_id ] = $rate_id;
 
 		wc()->session->set( 'chosen_shipping_methods', $session_data );
-		wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( $package_id, 'manual', $rate_id );
+
+		// The block checkout's pickup-options block re-asserts the current rate on mount,
+		// so a repeat of the existing selection is not a customer decision — recording it
+		// as 'manual' would launder an auto-defaulted pickup and defeat the unstick (and
+		// the selected_rate_origin field gateways consume). Mirrors the same guard on the
+		// classic path in WC_AJAX::apply_posted_shipping_methods().
+		if ( $rate_id !== $previous_method ) {
+			wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( $package_id, 'manual', $rate_id );
+		}
 	}
 
 	/**
