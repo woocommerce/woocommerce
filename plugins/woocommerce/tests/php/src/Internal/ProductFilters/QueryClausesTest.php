@@ -234,9 +234,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * A hierarchical category filter must match products in descendant categories,
-	 * resolving the whole hierarchy in one pass rather than a child_of query per
-	 * chosen term.
+	 * @testdox A hierarchical category filter must match products in descendant categories without a child_of query per chosen term.
 	 *
 	 * @testWith [["hcat-parent"], ["In Parent", "In Child", "In Grandchild"]]
 	 *           [["hcat-child"], ["In Child", "In Grandchild"]]
