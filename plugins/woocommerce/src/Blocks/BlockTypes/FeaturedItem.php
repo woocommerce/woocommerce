@@ -392,34 +392,42 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 			);
 		}
 
-		$image_id   = empty( $attributes['mediaId'] ) ?
-			$this->get_item_image_id( $item ) :
-			absint( $attributes['mediaId'] );
 		$image_size = $this->get_image_size( $attributes );
 
-		if ( $image_id ) {
-			$attr = array(
-				'alt'   => $img_alt,
-				'class' => "wc-block-{$this->block_name}__background-image",
-				'style' => $style,
-			);
+		// When imageFit is not "cover", the image uses object-fit: none, so it is
+		// not scaled to the block — it renders at its natural pixel size. Before
+		// this block used responsive images, a single large URL was always loaded,
+		// which was typically bigger than the block and got clipped by overflow:
+		// hidden, making the block look filled. wp_get_attachment_image() picks a
+		// smaller srcset candidate on narrow viewports by default, leaving empty
+		// space around the image. Override sizes so the browser still selects the
+		// full image width and the previous appearance is preserved.
+		if ( 'cover' === $attributes['imageFit'] ) {
+			$image_id = empty( $attributes['mediaId'] ) ?
+				$this->get_item_image_id( $item ) :
+				absint( $attributes['mediaId'] );
 
-			// When imageFit is not "cover", the image uses object-fit: none, so it is
-			// not scaled to the block — it renders at its natural pixel size. Before
-			// this block used responsive images, a single large URL was always loaded,
-			// which was typically bigger than the block and got clipped by overflow:
-			// hidden, making the block look filled. wp_get_attachment_image() picks a
-			// smaller srcset candidate on narrow viewports by default, leaving empty
-			// space around the image. Override sizes so the browser still selects the
-			// full image width and the previous appearance is preserved.
-			if ( 'cover' !== $attributes['imageFit'] ) {
-				$image_src = wp_get_attachment_image_src( $image_id, $image_size );
-				if ( $image_src ) {
-					$attr['sizes'] = sprintf( '%dpx', $image_src[1] );
-				}
+			if ( $image_id ) {
+				$attr = array(
+					'alt'   => $img_alt,
+					'class' => "wc-block-{$this->block_name}__background-image",
+					'style' => $style,
+				);
+
+				return wp_get_attachment_image( $image_id, $image_size, false, $attr );
 			}
+		}
 
-			return wp_get_attachment_image( $image_id, $image_size, false, $attr );
+		$image_url = $this->get_item_image( $item, $image_size );
+
+		if ( ! empty( $image_url ) ) {
+			return sprintf(
+				'<img alt="%1$s" class="wc-block-%2$s__background-image" src="%3$s" style="%4$s" />',
+				esc_attr( $img_alt ),
+				$this->block_name,
+				esc_url( $image_url ),
+				esc_attr( $style )
+			);
 		}
 
 		return '';
