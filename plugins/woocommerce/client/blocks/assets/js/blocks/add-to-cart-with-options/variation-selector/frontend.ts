@@ -521,10 +521,17 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				// product/variation's cart draft — the id `itemInContext`
 				// will resolve at submit time. `quantity` rides along so a
 				// variation drafted for the first time here always has one
-				// (an id-only new draft is rejected); it is already tracked
-				// locally for every variation id (see the quantity
-				// selector's `idsToUpdate` sync), so this never disagrees
-				// with what the shopper actually sees in the quantity input.
+				// (an id-only new draft is rejected). This surface's own
+				// locally-tracked quantity for the resolved id (see the
+				// quantity selector's `idsToUpdate` sync) is only guaranteed
+				// to match what the shopper actually sees when this is the
+				// surface being edited — a sibling surface sharing the page
+				// that never itself received a quantity edit carries a
+				// stale local default here instead. That is not a problem
+				// for this initial upsert (a brand new draft has no
+				// competing value to protect); `watchQuantityConstraints`
+				// is the one that must not let a bystander's stale local
+				// value overwrite a draft another surface already resolved.
 				const currentProductId = variationId ?? product.id;
 				wooActions.upsertDraftItem(
 					{
@@ -543,7 +550,16 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
+				// Read through the same draft-backed source
+				// `state.selectedAttributes` gives the display (attribute
+				// chips, `selectableItems`): a surface whose chips render
+				// the scope's resolved selection as checked must validate —
+				// and therefore gate its own Add to cart — against that
+				// same selection, not this instance's local context, which
+				// a sibling surface never editing its own chips would
+				// otherwise validate against forever, dead-ending its
+				// submit even though it displays a complete configuration.
+				const { selectedAttributes } = state;
 				const result = productsState.findProduct( {
 					id: product.id,
 					selectedAttributes,
@@ -605,8 +621,27 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { minimum, maximum } = variation.add_to_cart;
 
+				// Clamp the shared scope draft's own quantity — the same
+				// value `resolveDisplayQuantity` prefers for every surface's
+				// display — rather than this surface's local `quantity`
+				// map. `data-wp-watch` reruns this callback on every
+				// surface sharing the page whenever the globally-resolved
+				// variation changes, whether or not the shopper is using
+				// that particular surface; a surface that never received a
+				// quantity edit of its own carries a stale local default in
+				// its own map, and "correcting" the draft back to that
+				// default the instant another surface resolves a variation
+				// would destroy the editing surface's genuine quantity —
+				// the same bystander-clobber class `setSelectedVariationId`
+				// guards against. Falls back to the local value only when
+				// no draft exists yet for the resolved variation (nothing
+				// else to clamp).
 				const { quantity } = getContext< Context >();
-				const currentValue = quantity[ variation.id ];
+				const draftQuantity = cartState.itemInContext.draft?.quantity;
+				const currentValue =
+					typeof draftQuantity === 'number'
+						? draftQuantity
+						: quantity[ variation.id ];
 
 				let newValue = currentValue;
 				if ( currentValue < minimum ) {
