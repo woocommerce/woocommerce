@@ -450,6 +450,8 @@ class WC_Admin_Post_Types {
 		$product->set_featured( isset( $request_data['_featured'] ) );
 
 		if ( $product->is_type( ProductType::SIMPLE ) || $product->is_type( ProductType::EXTERNAL ) ) {
+			$old_regular_price = $product->get_regular_price( 'edit' );
+			$old_sale_price    = $product->get_sale_price( 'edit' );
 
 			if ( isset( $request_data['_regular_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
@@ -461,6 +463,15 @@ class WC_Admin_Post_Types {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 				$new_sale_price = ( '' === $request_data['_sale_price'] ) ? '' : wc_format_decimal( $request_data['_sale_price'] );
 				$product->set_sale_price( $new_sale_price );
+			}
+
+			$regular_price = $product->get_regular_price( 'edit' );
+			$sale_price    = $product->get_sale_price( 'edit' );
+			$price_changed = $regular_price !== $old_regular_price || $sale_price !== $old_sale_price;
+
+			if ( $price_changed && ( '' === $sale_price || $sale_price >= $regular_price ) ) {
+				$product->set_date_on_sale_to( '' );
+				$product->set_date_on_sale_from( '' );
 			}
 		}
 
