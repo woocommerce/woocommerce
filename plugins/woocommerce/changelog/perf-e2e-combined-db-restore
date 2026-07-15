@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Reduce Blocks E2E per-test database restoration overhead by running reset and snapshot import in one wp-env container invocation.
