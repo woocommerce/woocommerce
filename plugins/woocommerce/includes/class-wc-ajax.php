@@ -3433,7 +3433,7 @@ class WC_AJAX {
 		do_action( 'woocommerce_update_options' );
 		wp_send_json_success(
 			array(
-				'zones' => WC_Shipping_Zones::get_zones( 'json' ),
+				'zones' => WC_Shipping_Zones::get_zones_with_order_conflict_warnings( 'json' ),
 			)
 		);
 	}

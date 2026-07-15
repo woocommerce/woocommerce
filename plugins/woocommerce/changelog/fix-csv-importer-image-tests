@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix CSV importer image unit tests that referenced an importer property removed by a concurrent change.
