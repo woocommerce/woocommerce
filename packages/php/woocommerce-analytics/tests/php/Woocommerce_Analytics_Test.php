@@ -11,6 +11,11 @@ use Automattic\Woocommerce_Analytics;
 use WorDBless\BaseTestCase;
 
 /**
+ * WooCommerce test double.
+ */
+class WooCommerce_Test_Double {}
+
+/**
  * Tests for the Woocommerce_Analytics class.
  *
  * Focuses on testing the MU-plugin auto-update mechanism.
@@ -257,6 +262,25 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		$this->assertSame(
 			'woocommerce_analytics_proxy_speed_module_version_check',
 			Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT
+		);
+	}
+
+	/**
+	 * @testdox Should recognize an active WooCommerce plugin installed in a custom directory.
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_should_track_store_recognizes_woocommerce_in_custom_directory(): void {
+		class_alias( WooCommerce_Test_Double::class, 'WooCommerce' );
+		define( 'WC_VERSION', '10.0.0' );
+		define( 'WC_PLUGIN_FILE', WP_PLUGIN_DIR . '/custom-woocommerce/woocommerce.php' );
+		update_option( 'active_plugins', array( 'custom-woocommerce/woocommerce.php' ) );
+
+		Woocommerce_Analytics::should_track_store();
+
+		$this->assertNotFalse(
+			has_action( 'admin_init', array( Woocommerce_Analytics::class, 'maybe_update_proxy_speed_module' ) ),
+			'WooCommerce Analytics should continue initialization for WooCommerce installed in a custom directory.'
 		);
 	}
 }
