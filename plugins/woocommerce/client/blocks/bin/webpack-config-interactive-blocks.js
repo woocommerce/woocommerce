@@ -22,6 +22,7 @@ const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const {
 	scriptModuleEntries,
 	styleEntries,
+	editorStyleEntries,
 } = require( './webpack-interactivity-entries' );
 
 // Blocks' webpack writes directly to the WooCommerce plugin's
@@ -33,6 +34,7 @@ const entries = {
 	// Blocks
 	...scriptModuleEntries,
 	...styleEntries,
+	...editorStyleEntries,
 	// Product elements frontend module. Share by several blocks.
 	'woocommerce/product-elements':
 		'./assets/js/atomic/blocks/product-elements/frontend.ts',

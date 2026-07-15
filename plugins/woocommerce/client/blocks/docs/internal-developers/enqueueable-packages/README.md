@@ -2,7 +2,7 @@
 
 WooCommerce includes an experimental configuration that unifies block editor scripts and styles into shared assets. The experiment is disabled by default so existing per-block assets and handles continue to work unchanged.
 
-Enable **Unified block editor assets** under **WooCommerce > Settings > Advanced > Features** to test the shared configuration. The setting is stored in `woocommerce_feature_block_editor_unified_assets_enabled` and takes effect on the next request.
+Enable **Unified block editor assets** under **WooCommerce > Settings > Advanced > Features** to test the shared configuration. The feature flag is `block_editor_unified_assets`, its setting is stored in `woocommerce_feature_block_editor_unified_assets_enabled`, and changes take effect on the next request.
 
 ## Default editor assets
 

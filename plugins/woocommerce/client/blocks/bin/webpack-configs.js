@@ -167,6 +167,13 @@ const getMainConfig = ( options = {} ) => {
 		output: {
 			devtoolNamespace: 'wc',
 			path: BUILD_DIR,
+			// This is a cache busting mechanism which ensures that the script is loaded via the browser with a ?ver=hash
+			// string. The hash is based on the built file contents.
+			// @see https://github.com/webpack/webpack/issues/2329
+			// Using the ?ver string is needed here so the filename does not change between builds. The WordPress
+			// i18n system relies on the hash of the filename, so changing that frequently would result in broken
+			// translations which we must avoid.
+			// @see https://github.com/Automattic/jetpack/pull/20926
 			chunkFilename: `[name].js?ver=[contenthash]`,
 			filename: `[name].js`,
 			library: [ 'wc', 'blocks', '[name]' ],
@@ -223,11 +230,19 @@ const getMainConfig = ( options = {} ) => {
 				bundleAnalyzerReportTitle: 'Main',
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Main' ) ),
+			/**
+			 * Ensure that logic of this CopyWebpackPlugin is kept in sync with the copy-block-json.sh script:
+			 * https://github.com/woocommerce/woocommerce/blob/7d72fb937907bf841aabe959642be524eb093803/plugins/woocommerce/client/blocks/bin/copy-blocks-json.sh
+			 */
 			new CopyWebpackPlugin( {
 				patterns: [
 					{
 						from: './assets/js/**/block.json',
 						to( { absoluteFilename } ) {
+							/**
+							 * Getting the block name from the JSON metadata is less error prone
+							 * than extracting it from the file path.
+							 */
 							const JSONFile = fs.readFileSync(
 								path.resolve( __dirname, absoluteFilename )
 							);
@@ -625,6 +640,7 @@ const getStylingConfig = ( options = {} ) => {
 				automaticNameDelimiter: '--',
 				cacheGroups: {
 					editorStyle: {
+						// Capture all `editor` stylesheets and editor-components stylesheets.
 						test: ( module = {}, { moduleGraph } ) => {
 							if ( ! module.type.includes( 'css' ) ) {
 								return false;
