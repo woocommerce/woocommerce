@@ -9,6 +9,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Internal\Address\LegacyStateCodes;
 
 /**
  * The WooCommerce countries class stores country/state data.
@@ -677,8 +678,9 @@ class WC_Countries {
 			$format = str_replace( '{country}', '', $format );
 		}
 
-		// Handle full state name.
-		$full_state = ( $country && $state && isset( $this->states[ $country ][ $state ] ) ) ? $this->states[ $country ][ $state ] : $state;
+		// Handle full state name, including legacy codes preserved for historical addresses.
+		$legacy_states = $country ? LegacyStateCodes::get_states( $country ) : array();
+		$full_state    = ( $country && $state && isset( $this->states[ $country ][ $state ] ) ) ? $this->states[ $country ][ $state ] : ( $legacy_states[ $state ] ?? $state );
 
 		// Substitute address parts into the string.
 		$replace = array_map(

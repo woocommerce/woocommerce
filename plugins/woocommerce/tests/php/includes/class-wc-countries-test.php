@@ -61,7 +61,25 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 		$this->assertSame(
 			$expected,
 			wc()->countries->get_states( 'NP' ),
-			'Nepal should use current ISO 3166-2 province codes and names.'
+			'Nepal should use current province codes and official names.'
 		);
+	}
+
+	/**
+	 * @testdox Legacy Nepal zone codes remain readable in historical addresses.
+	 */
+	public function test_legacy_nepal_zone_codes_remain_readable_in_historical_addresses(): void {
+		$formatted_address = wc()->countries->get_formatted_address(
+			array(
+				'address_1' => '123 Example Street',
+				'city'      => 'Kathmandu',
+				'state'     => 'BAG',
+				'country'   => 'NP',
+			),
+			', '
+		);
+
+		$this->assertStringContainsString( 'Bagmati', $formatted_address, 'Legacy Nepal state codes should retain their historical labels.' );
+		$this->assertStringNotContainsString( 'BAG', $formatted_address, 'Historical addresses should not fall back to an unexplained raw state code.' );
 	}
 }

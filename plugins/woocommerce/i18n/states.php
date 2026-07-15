@@ -1199,7 +1199,6 @@ return array(
 		'mafes' => __( 'Fès-Dar-Dbibegh', 'woocommerce' ),
 		'mafig' => __( 'Figuig', 'woocommerce' ),
 		'mafqh' => __( 'Fquih Ben Salah', 'woocommerce' ),
-		'mafes' => __( 'Fès-Dar-Dbibegh', 'woocommerce' ),
 		'mague' => __( 'Guelmim', 'woocommerce' ),
 		'maguf' => __( 'Guercif', 'woocommerce' ),
 		'mahaj' => __( 'El Hajeb', 'woocommerce' ),
@@ -1419,7 +1418,8 @@ return array(
 	),
 	'NL' => array(),
 	'NO' => array(),
-	// Nepalese provinces.
+	// Nepal's National Statistics Office uses current names while CLDR still has generic province labels.
+	// See https://microdata.nsonepal.gov.np/index.php/catalog/111/variable/F8/V264?name=PROV.
 	'NP' => array(
 		'P1' => __( 'Koshi', 'woocommerce' ),
 		'P2' => __( 'Madhesh', 'woocommerce' ),

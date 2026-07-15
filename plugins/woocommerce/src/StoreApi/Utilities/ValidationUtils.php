@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Internal\Address\LegacyStateCodes;
+
 /**
  * ValidationUtils class.
  * Helper class which validates and update customer info.
@@ -26,9 +28,10 @@ class ValidationUtils {
 	 * @return boolean Valid or not valid.
 	 */
 	public function validate_state( $state, $country ) {
-		$states = $this->get_states_for_country( $country );
+		$states        = $this->get_states_for_country( $country );
+		$legacy_states = LegacyStateCodes::get_states( $country );
 
-		if ( count( $states ) && ! in_array( \wc_strtoupper( $state ), array_map( '\wc_strtoupper', array_keys( $states ) ), true ) ) {
+		if ( count( $states ) && ! in_array( \wc_strtoupper( $state ), array_map( '\wc_strtoupper', array_keys( array_merge( $states, $legacy_states ) ) ), true ) ) {
 			return false;
 		}
 
@@ -44,7 +47,7 @@ class ValidationUtils {
 	 * @return string
 	 */
 	public function format_state( $state, $country ) {
-		$states = $this->get_states_for_country( $country );
+		$states = array_merge( LegacyStateCodes::get_states( $country ), $this->get_states_for_country( $country ) );
 
 		if ( count( $states ) ) {
 			$state        = \wc_strtoupper( $state );

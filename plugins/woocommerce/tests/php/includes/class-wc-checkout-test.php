@@ -161,6 +161,26 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'validate_posted_data' accepts a persisted legacy Nepal state code.
+	 */
+	public function test_validate_posted_data_accepts_legacy_nepal_state_code(): void {
+		$data   = array(
+			'billing_country'           => 'NP',
+			'billing_state'             => 'BAG',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+
+		$this->assertEmpty(
+			$errors->get_error_message( 'billing_state_validation' ),
+			'Persisted legacy Nepal states should pass classic checkout validation: ' . $errors->get_error_message( 'billing_state_validation' )
+		);
+		$this->assertSame( 'BAG', $data['billing_state'], 'The persisted legacy code should remain unchanged.' );
+	}
+
+	/**
 	 * @testdox 'validate_posted_data' doesn't add errors for empty billing/shipping countries.
 	 *
 	 * @testWith [true]
