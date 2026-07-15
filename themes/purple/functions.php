@@ -154,7 +154,6 @@ if ( ! function_exists( 'purple_hide_store_templates_from_template_picker' ) ) :
 
 		$hidden_template_slugs = array(
 			'archive-product',
-			'archive-product-without-filters',
 			'coming-soon',
 			'order-confirmation',
 			'page-cart',
