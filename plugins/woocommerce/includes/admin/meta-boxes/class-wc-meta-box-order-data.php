@@ -207,6 +207,12 @@ class WC_Meta_Box_Order_Data {
 	 * or unresolved product sets remain visible because suppressing their persisted
 	 * shipping details would be ambiguous.
 	 *
+	 * The aggregation and fallback here are deliberately local rather than reusing
+	 * WC_Order::needs_shipping() or the shipping-label helpers: needs_shipping()
+	 * short-circuits on the global shipping setting and, like those helpers, does not
+	 * default unresolved or product-less orders to the conservative "keep visible"
+	 * outcome this summary requires.
+	 *
 	 * @param WC_Order $order Order object.
 	 * @return bool
 	 */
