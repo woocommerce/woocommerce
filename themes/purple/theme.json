@@ -231,6 +231,12 @@
 					}
 				}
 			},
+			"core/breadcrumbs": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--small)",
+					"lineHeight": "1.71"
+				}
+			},
 			"core/button": {
 				"border": {
 					"radius": "0"
