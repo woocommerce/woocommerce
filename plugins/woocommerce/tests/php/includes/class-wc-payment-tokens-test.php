@@ -149,6 +149,31 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	 * @testdox Data store get_tokens should size a page-without-limit query with the default page size.
 	 */
 	public function test_data_store_get_tokens_page_without_limit_uses_the_default_page_size(): void {
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		// Pins the default page size against the emitted SQL, so it holds without creating 100 tokens.
+		$query = $this->capture_token_query(
+			function () use ( $data_store ) {
+				$data_store->get_tokens(
+					array(
+						'user_id' => $this->user_id,
+						'page'    => 2,
+					)
+				);
+			}
+		);
+
+		$this->assertStringContainsString(
+			'LIMIT 100, 100',
+			$query,
+			'A page without an explicit limit should be sized by DEFAULT_PAGE_SIZE and offset by it'
+		);
+	}
+
+	/**
+	 * @testdox Data store get_tokens should respect the woocommerce_get_payment_tokens_page_size filter.
+	 */
+	public function test_data_store_get_tokens_page_size_filter_is_respected(): void {
 		$received = null;
 		add_filter(
 			'woocommerce_get_payment_tokens_page_size',
@@ -181,14 +206,72 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 			),
 			'The second page should return the remaining tokens'
 		);
-
-		// Pins the default without creating 100 tokens.
 		$this->assertSame(
 			WC_Payment_Token_Data_Store::DEFAULT_PAGE_SIZE,
 			$received,
 			'The page size filter should receive DEFAULT_PAGE_SIZE as its default'
 		);
-		$this->assertSame( 100, WC_Payment_Token_Data_Store::DEFAULT_PAGE_SIZE );
+	}
+
+	/**
+	 * @testdox Data store get_tokens should ignore a page size filter value below one.
+	 *
+	 * @testWith [null]
+	 *           [0]
+	 *           [-5]
+	 *
+	 * @param mixed $filtered_value Value returned by the page size filter.
+	 */
+	public function test_data_store_get_tokens_ignores_a_page_size_below_one( $filtered_value ): void {
+		add_filter(
+			'woocommerce_get_payment_tokens_page_size',
+			function () use ( $filtered_value ) {
+				return $filtered_value;
+			}
+		);
+		$this->create_tokens_for_user( 3 );
+
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		// A page size of 0 would make every page empty and stop a paginating consumer dead.
+		$this->assertCount(
+			3,
+			$data_store->get_tokens(
+				array(
+					'user_id' => $this->user_id,
+					'page'    => 1,
+				)
+			),
+			'A page size below 1 should fall back to the default rather than empty every page'
+		);
+	}
+
+	/**
+	 * @testdox Data store get_tokens should size an unscoped query passing page by the page size, not the unscoped ceiling.
+	 */
+	public function test_data_store_get_tokens_unscoped_query_with_page_uses_the_page_size(): void {
+		add_filter(
+			'woocommerce_get_payment_tokens_page_size',
+			function () {
+				return 2;
+			}
+		);
+		add_filter(
+			'woocommerce_get_payment_tokens_unscoped_limit',
+			function () {
+				return 1;
+			}
+		);
+		$this->create_tokens_for_user( 3 );
+
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		// The page tier is evaluated before the unscoped ceiling, so the page size wins here.
+		$this->assertCount(
+			2,
+			$data_store->get_tokens( array( 'page' => 1 ) ),
+			'An unscoped query passing page should be sized by the page size, not the unscoped ceiling'
+		);
 	}
 
 	/**
@@ -212,16 +295,19 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 		};
 
 		add_filter( 'query', $listener );
-		$callback();
-		remove_filter( 'query', $listener );
+		try {
+			$callback();
+		} finally {
+			remove_filter( 'query', $listener );
+		}
 
 		return $captured;
 	}
 
 	/**
-	 * @testdox get_customer_tokens should fall back to the default limit when the filter returns a non-numeric value.
+	 * @testdox get_customer_tokens should fall back to the default limit when the filter returns null.
 	 */
-	public function test_get_customer_tokens_ignores_a_non_numeric_limit_filter(): void {
+	public function test_get_customer_tokens_falls_back_when_the_limit_filter_returns_null(): void {
 		// A callback with a conditional return yields null on its else path; treating that as
 		// "no limit" would leave the saved methods query unbounded.
 		add_filter( 'woocommerce_get_customer_payment_tokens_limit', '__return_null' );
@@ -237,6 +323,52 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 			'LIMIT 0, ' . WC_Payment_Tokens::DEFAULT_CUSTOMER_TOKENS_LIMIT,
 			$query,
 			'A null limit filter should fall back to the documented default rather than dropping the LIMIT clause'
+		);
+	}
+
+	/**
+	 * @testdox get_customer_tokens should keep hiding saved methods when the limit filter returns a falsy non-null value.
+	 *
+	 * @testWith ["__return_false"]
+	 *           ["__return_empty_string"]
+	 *
+	 * @param string $callback Filter callback returning a falsy, non-null value.
+	 */
+	public function test_get_customer_tokens_returns_no_tokens_for_a_falsy_limit_filter( string $callback ): void {
+		// These have always meant "no tokens" via absint(): only null may fall back to the default,
+		// or an extension hiding saved methods would suddenly expose them.
+		add_filter( 'woocommerce_get_customer_payment_tokens_limit', $callback );
+		$this->create_tokens_for_user( 3 );
+
+		$this->assertCount(
+			0,
+			WC_Payment_Tokens::get_customer_tokens( $this->user_id ),
+			'A falsy non-null limit filter must keep returning no tokens'
+		);
+	}
+
+	/**
+	 * @testdox get_customer_tokens should honor numeric-string and float limit filter values.
+	 *
+	 * @testWith ["2", 2]
+	 *           [2.7, 2]
+	 *
+	 * @param mixed $filtered_value Value returned by the limit filter.
+	 * @param int   $expected       Expected number of tokens.
+	 */
+	public function test_get_customer_tokens_casts_numeric_limit_filter_values( $filtered_value, int $expected ): void {
+		add_filter(
+			'woocommerce_get_customer_payment_tokens_limit',
+			function () use ( $filtered_value ) {
+				return $filtered_value;
+			}
+		);
+		$this->create_tokens_for_user( 3 );
+
+		$this->assertCount(
+			$expected,
+			WC_Payment_Tokens::get_customer_tokens( $this->user_id ),
+			'Numeric limit filter values should be cast with absint() as they always have been'
 		);
 	}
 

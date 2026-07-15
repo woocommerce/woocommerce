@@ -25,7 +25,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 
 	/**
 	 * Fallback maximum number of rows returned by `get_tokens()` for queries that are neither
-	 * scoped to a `user_id`/`token_id` nor given an explicit `limit`.
+	 * scoped to a `user_id`/`token_id` nor given an explicit `limit` or `page`.
 	 *
 	 * Such a query matches on `gateway_id`/`type` only, and neither column is indexed, so it is a
 	 * full table scan across every user's tokens. This ceiling keeps an accidental store-wide
@@ -315,10 +315,13 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 			 *
 			 * @since 11.1.0
 			 *
-			 * @param int   $page_size Maximum number of tokens per page. Defaults to 100.
+			 * @param int   $page_size Maximum number of tokens per page. Defaults to 100. A value
+			 *                         below 1 is ignored, as an empty page would stop a paginating
+			 *                         consumer before it read anything.
 			 * @param array $args      The arguments passed to `get_tokens()`.
 			 */
-			$limit = absint( apply_filters( 'woocommerce_get_payment_tokens_page_size', self::DEFAULT_PAGE_SIZE, $args ) );
+			$page_size = absint( apply_filters( 'woocommerce_get_payment_tokens_page_size', self::DEFAULT_PAGE_SIZE, $args ) );
+			$limit     = $page_size > 0 ? $page_size : self::DEFAULT_PAGE_SIZE;
 		} elseif ( ! $args['token_id'] && ! $args['user_id'] ) {
 			/**
 			 * Controls the fallback maximum number of tokens returned by an unscoped query, i.e. one

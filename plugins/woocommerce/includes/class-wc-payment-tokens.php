@@ -97,10 +97,11 @@ class WC_Payment_Tokens {
 		 */
 		$limit = apply_filters( 'woocommerce_get_customer_payment_tokens_limit', self::DEFAULT_CUSTOMER_TOKENS_LIMIT );
 
-		// A callback returning a non-numeric value (e.g. one whose conditional has no else branch,
-		// yielding null) must not be read as "no limit": that would leave this customer-facing
-		// query unbounded. Fall back to the documented default instead.
-		$limit = is_numeric( $limit ) ? absint( $limit ) : self::DEFAULT_CUSTOMER_TOKENS_LIMIT;
+		// Only null is remapped: get_tokens() reads it as "no limit passed" and would leave this
+		// customer-facing query unbounded, which a callback whose conditional has no else branch
+		// returns by accident. Every other value keeps the absint() reading it has always had, so
+		// a callback returning false or an empty string still hides the saved methods.
+		$limit = null === $limit ? self::DEFAULT_CUSTOMER_TOKENS_LIMIT : absint( $limit );
 
 		$tokens = self::get_tokens(
 			array(
