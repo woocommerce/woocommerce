@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make it possible to use the Add to Cart + Options block in scheduled products for users with permissions
