@@ -408,6 +408,42 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The Content-Type fallback to the resolved filename should apply to remote files only.
+	 */
+	public function test_content_type_fallback_applies_only_to_remote_files(): void {
+		$method = new ReflectionMethod( WC_Download_Handler::class, 'get_content_type_for_served_download' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			'application/pdf',
+			$method->invoke( null, 'https://drive.google.com/uc', 'My-Report.pdf', true ),
+			'For remote files the Content-Type should fall back to the resolved filename.'
+		);
+		$this->assertSame(
+			'application/force-download',
+			$method->invoke( null, '/some/local/file', 'My-Report.pdf', false ),
+			'For local files the Content-Type should be derived from the file path only.'
+		);
+	}
+
+	/**
+	 * @testdox The Content-Type fallback should not serve types browsers may render inline, since the extension can come from the remote server.
+	 */
+	public function test_content_type_fallback_rejects_renderable_types(): void {
+		// Only users with unfiltered_html have text/html in their allowed mime types at all.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$method = new ReflectionMethod( WC_Download_Handler::class, 'get_content_type_for_served_download' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			'application/force-download',
+			$method->invoke( null, 'https://evil.example.com/uc', 'payload.html', true ),
+			'A remote-derived .html filename should not switch the response to text/html.'
+		);
+	}
+
+	/**
 	 * Creates a downloadable product, and then places (and completes) an order for that
 	 * object.
 	 *

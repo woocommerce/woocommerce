@@ -517,7 +517,7 @@ class WC_Download_Handler {
 					self::derive_filename_from_file_path( $file_path ) !== $filename
 				);
 
-				self::download_headers( $parsed_file_path['file_path'], $filename, $download_range );
+				self::download_headers( $parsed_file_path['file_path'], $filename, $download_range, true );
 				$served = self::readfile_from_handle( $handle, $start, $length );
 			}
 		} else {
@@ -653,22 +653,55 @@ class WC_Download_Handler {
 	}
 
 	/**
+	 * Determine the Content-Type a download will be served with.
+	 *
+	 * The type is derived from the extension in the file path. The URL path of a remote file may
+	 * not contain a usable extension; in that case the filename resolved from the remote response
+	 * headers is used as a fallback — unless it maps to a type browsers may render or execute
+	 * inline, since for remote files the extension can originate from data controlled by the
+	 * remote server.
+	 *
+	 * @param string $file_path   File path.
+	 * @param string $filename    Filename of the download.
+	 * @param bool   $remote_file Whether the download is a remote file.
+	 * @return string
+	 */
+	private static function get_content_type_for_served_download( $file_path, $filename, $remote_file ) {
+		$content_type = self::get_download_content_type( $file_path );
+
+		if ( $remote_file && 'application/force-download' === $content_type && $filename ) {
+			$filename_content_type = self::get_download_content_type( $filename );
+
+			$renderable_content_types = array(
+				'text/html',
+				'application/xhtml+xml',
+				'image/svg+xml',
+				'text/xml',
+				'application/xml',
+			);
+
+			if ( ! in_array( $filename_content_type, $renderable_content_types, true ) ) {
+				$content_type = $filename_content_type;
+			}
+		}
+
+		return $content_type;
+	}
+
+	/**
 	 * Set headers for the download.
 	 *
 	 * @param string $file_path      File path.
 	 * @param string $filename       File name.
 	 * @param array  $download_range Array containing info about range download request (see {@see get_download_range} for structure).
+	 * @param bool   $remote_file    Whether the download is a remote file.
 	 */
-	private static function download_headers( $file_path, $filename, $download_range = array() ) {
+	private static function download_headers( $file_path, $filename, $download_range = array(), $remote_file = false ) {
 		self::check_server_config();
 		self::clean_buffers();
 		wc_nocache_headers();
 
-		$content_type = self::get_download_content_type( $file_path );
-		if ( 'application/force-download' === $content_type && $filename ) {
-			// The URL path may not contain a usable extension; fall back to the resolved filename.
-			$content_type = self::get_download_content_type( $filename );
-		}
+		$content_type = self::get_content_type_for_served_download( $file_path, $filename, $remote_file );
 
 		header( 'X-Robots-Tag: noindex, nofollow', true );
 		header( 'Content-Type: ' . $content_type );
