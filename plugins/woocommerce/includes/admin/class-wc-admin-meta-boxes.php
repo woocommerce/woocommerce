@@ -297,8 +297,11 @@ class WC_Admin_Meta_Boxes {
 
 			$block_template = get_block_template( $theme . '//' . $template_key );
 
+			$is_product_template = is_array( $block_template->post_types ) && in_array( 'product', $block_template->post_types );
+			$is_user_template    = (bool) $block_template->is_custom && 'plugin' !== $block_template->origin;
+
 			// If the block template has the product post type specified, include it.
-			if ( $block_template && is_array( $block_template->post_types ) && in_array( 'product', $block_template->post_types ) ) {
+			if ( $block_template && ( $is_product_template || $is_user_template ) ) {
 				$filtered_templates[ $template_key ] = $template_name;
 			}
 		}
