@@ -25,14 +25,10 @@ const addToCartWithOptionsForms = ( page: import('@playwright/test').Page ) =>
 /**
  * Reads the `woocommerce/cart` store's scope-keyed draft ledger directly —
  * the same technique `cart-store/mutation-batcher.block_theme.spec.ts` uses
- * to assert the store's internals. Used below to prove that quantity *and*
- * attribute edits land in the one shared `draftItems[pageScope]` bucket,
- * independent of a Single Product block's own scope bucket — a fact that
- * cannot be observed by comparing the two page-wide surfaces' own inputs,
- * because each "Add to Cart with Options" instance renders its *own* local
- * Interactivity context: only the underlying draft record is shared, and
- * that is exactly what `AC4`/`AC6` are about (which scope a submission
- * resolves against), not that a sibling instance's controls repaint.
+ * to assert the store's internals. Used below to confirm that quantity
+ * *and* attribute edits land together in the shared `draftItems[pageScope]`
+ * entry, while a Single Product block override keeps its own separate
+ * scope bucket untouched.
  */
 const readCartScopeState = ( page: import('@playwright/test').Page ) =>
 	page.evaluate( async () => {
@@ -102,16 +98,19 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 			).toHaveValue( '1' );
 		} );
 
-		await test.step( 'editing the main form and submitting via the untouched second surface uses the main form’s quantity', async () => {
+		await test.step( 'editing the main form updates the second page-wide surface’s own display immediately; submitting from the second surface posts what it now shows', async () => {
 			const mainQuantity = mainForm.getByLabel( 'Product quantity' );
 			await mainQuantity.fill( '3' );
 			await mainQuantity.blur();
 
-			// The second surface's own input never repaints to "3" — each
-			// "Add to Cart with Options" instance owns its own local
-			// display — but it shares the *scope* the main form just wrote
-			// to, so submitting from the untouched second surface still
-			// posts the main form's quantity, not its own displayed "1".
+			// The second surface shares the page scope the main form just
+			// wrote to, so its own quantity input repaints to match — a
+			// shopper looking at the second surface sees the same value the
+			// main form was just set to, not a stale one.
+			const secondSurfaceQuantity =
+				secondSurface.getByLabel( 'Product quantity' );
+			await expect( secondSurfaceQuantity ).toHaveValue( '3' );
+
 			const secondSurfaceAddToCartButton = secondSurface.getByRole(
 				'button',
 				{ name: 'Add to cart' }
@@ -177,18 +176,17 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 		const hoodieId = await getPostIdBySlug( 'hoodie' );
 
 		// Only two renderings here (the template's own main form, and a
-		// Single Product block override) — deliberately no third,
-		// never-configured page-wide surface. The "Add to Cart with
-		// Options" variation selector resolves the shopper's *currently
-		// selected* variation through the `woocommerce/products` store's
-		// global "current product" selection whenever a rendering has no
-		// product context of its own (see `products.ts`'s
-		// `baseProductInContext`/`productVariationInContext`); a second,
-		// permanently-unconfigured page-wide instance would keep
-		// re-resolving "no attributes selected" against that same global
-		// selection and race with this test's own edits. Synced quantity
-		// across multiple page-wide surfaces is proven independently, on a
-		// simple product with no variation resolution, in the test above.
+		// Single Product block override) — deliberately no additional,
+		// never-configured page-wide surface for this variable product.
+		// Reading the store directly confirms why: a page-wide "Add to Cart
+		// with Options" instance with no attribute selection of its own
+		// resolves against the same page-wide product/variation state the
+		// main form writes to, and its own idle re-resolution — "no
+		// attributes selected" — eventually overwrites the main form's
+		// selection back to that unconfigured default. Synced quantity
+		// across multiple page-wide surfaces, which does not depend on any
+		// variation resolution, is proven independently on a simple product
+		// in the test above.
 		await requestUtils.createTemplate( 'wp_template', {
 			slug: 'single-product',
 			title: 'Custom Single Product',
@@ -261,13 +259,12 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 			] );
 
 			// Submit the main form's resolved draft now, before the next
-			// step configures the override — both surfaces share the
-			// `woocommerce/products` store's *global* "current product"
-			// selection when neither has its own local product context (see
-			// `products.ts`'s `baseProductInContext`/`productVariationInContext`),
-			// so resolving a second variation on the override further below
-			// would otherwise clear this form's own in-flight selection
-			// before it gets a chance to submit.
+			// step configures the override — the override carries its own
+			// local product context (established by `SingleProduct.php`),
+			// so configuring it further below never touches the main
+			// form's own selection; this ordering just keeps the two
+			// submissions, and their resulting cart lines, easy to tell
+			// apart.
 			const mainBatchPromise = page.waitForResponse(
 				'**/wc/store/v1/batch**'
 			);
