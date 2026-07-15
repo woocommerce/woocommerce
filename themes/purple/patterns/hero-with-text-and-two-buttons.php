@@ -25,8 +25,8 @@
 <div class="wp-block-button"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Shop new arrivals', 'purple' ); ?></a></div>
 <!-- /wp:button -->
 
-<!-- wp:button {"className":"is-style-button-1"} -->
-<div class="wp-block-button is-style-button-1"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Shop all products', 'purple' ); ?></a></div>
+<!-- wp:button {"className":"is-style-button-contrast"} -->
+<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Shop all products', 'purple' ); ?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group --></div></div>

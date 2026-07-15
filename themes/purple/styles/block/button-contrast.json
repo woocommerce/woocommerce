@@ -1,7 +1,7 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/theme.json",
 	"version": 3,
-	"slug": "button-1",
+	"slug": "button-contrast",
 	"title": "Contrast",
 	"blockTypes": [
 		"core/button"

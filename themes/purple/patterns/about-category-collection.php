@@ -33,8 +33,8 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-1"} -->
-<div class="wp-block-button is-style-button-1"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop Cardigans', 'purple');?></a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-contrast"} -->
+<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop Cardigans', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover -->
@@ -49,8 +49,8 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-1"} -->
-<div class="wp-block-button is-style-button-1"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop Sweaters', 'purple');?></a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-contrast"} -->
+<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop Sweaters', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover -->
@@ -65,8 +65,8 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-1"} -->
-<div class="wp-block-button is-style-button-1"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop Socks', 'purple');?></a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-contrast"} -->
+<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop Socks', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover -->
@@ -81,8 +81,8 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-1"} -->
-<div class="wp-block-button is-style-button-1"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop Beanies', 'purple');?></a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-contrast"} -->
+<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop Beanies', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover --></div>

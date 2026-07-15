@@ -22,8 +22,8 @@
 <!-- /wp:heading -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-1"} -->
-<div class="wp-block-button is-style-button-1"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Learn more', 'purple' ); ?></a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-contrast"} -->
+<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Learn more', 'purple' ); ?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover --></div>
@@ -40,8 +40,8 @@
 <!-- /wp:heading -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-1"} -->
-<div class="wp-block-button is-style-button-1"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Learn more', 'purple' ); ?></a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-contrast"} -->
+<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Learn more', 'purple' ); ?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover --></div>
