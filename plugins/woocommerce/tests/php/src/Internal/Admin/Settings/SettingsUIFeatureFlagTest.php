@@ -241,7 +241,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It clears shell section navigation for top-level pages, which keep the classic section links.
+	 * @testdox Should clear shell section navigation for top-level pages, which keep the classic section links.
 	 */
 	public function test_request_context_clears_section_navigation_for_top_level_pages(): void {
 		$page    = $this->get_settings_ui_page_with_sections();
@@ -256,7 +256,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It hides the shell header for pages registered at the top level of settings.
+	 * @testdox Should hide the shell header for pages registered at the top level of settings.
 	 */
 	public function test_request_context_hides_shell_header_for_top_level_pages(): void {
 		$page    = $this->get_settings_ui_test_page();
@@ -268,7 +268,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It overrides a schema-provided shell header for top-level pages.
+	 * @testdox Should override a schema-provided shell header for top-level pages.
 	 */
 	public function test_request_context_overrides_a_schema_provided_shell_header(): void {
 		$page    = $this->get_settings_ui_test_page_with_visible_shell_header();
@@ -280,7 +280,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It shows the shell header for payments drill-down pages.
+	 * @testdox Should show the shell header for payments drill-down pages.
 	 */
 	public function test_request_context_shows_shell_header_for_drill_down_pages(): void {
 		$page    = $this->get_settings_ui_test_page_for_drill_down();
@@ -294,7 +294,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It defaults drill-down breadcrumbs to the parent settings tab.
+	 * @testdox Should default drill-down breadcrumbs to the parent settings tab.
 	 */
 	public function test_request_context_defaults_drill_down_breadcrumbs_to_the_parent_tab(): void {
 		$page    = $this->get_settings_ui_test_page_for_drill_down();
@@ -308,7 +308,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It keeps schema-provided breadcrumbs on drill-down pages.
+	 * @testdox Should keep schema-provided breadcrumbs on drill-down pages.
 	 */
 	public function test_request_context_keeps_schema_breadcrumbs_on_drill_down_pages(): void {
 		$breadcrumbs = array( array( 'label' => 'Custom crumb' ) );
@@ -321,7 +321,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It treats the default payments section as a top-level page.
+	 * @testdox Should treat the default payments section as a top-level page.
 	 */
 	public function test_request_context_hides_shell_header_for_default_payments_section(): void {
 		$page    = $this->get_settings_ui_test_page_for_drill_down();

@@ -42,11 +42,6 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		padding: 24px 48px;
 	}
 
-	.wc-settings-ui-shell__header-row {
-		align-items: center;
-		display: flex;
-	}
-
 	.wc-settings-ui-shell__title {
 		font-size: 16px;
 		font-weight: var(--wpds-typography-font-weight-medium);
@@ -55,19 +50,16 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui-shell__header-row > .wc-settings-ui-shell__badge {
-		margin-left: 8px;
+		margin-inline-start: var(--wpds-dimension-gap-sm, 8px);
 	}
 
 	.wc-settings-ui-shell__header-actions {
-		display: flex;
 		flex: 0 0 auto;
-		gap: 8px;
-		margin-left: auto;
+		margin-inline-start: auto;
 	}
 
 	.wc-settings-ui-shell__subtitle {
 		color: var(--wpds-color-foreground-content-neutral-weak);
-		margin: 8px 0 0;
 	}
 
 	// Carries #mainform so the margins beat extension styles targeting bare
@@ -84,7 +76,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		&::after {
 			color: var(--wpds-color-foreground-content-neutral-weak);
 			content: "/";
-			margin: 0 8px;
+			margin: 0 var(--wpds-dimension-gap-sm, 8px);
 		}
 
 		a {
@@ -112,10 +104,6 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		overflow-x: auto;
 		padding: 0 48px;
 		width: 100%;
-	}
-
-	.wc-settings-ui-shell__tabs--secondary {
-		border-bottom: 0;
 	}
 
 	.wc-settings-ui-shell__tab {

@@ -132,6 +132,10 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'checkout', $settings_ui_page->get_page_id() );
 		$this->assertSame( array( 'acme-payments-settings-ui' ), $settings_ui_page->get_script_handles( 'acme_payments' ) );
 		$this->assertSame( 'form_post', $settings_ui_page->get_save_adapter( 'acme_payments' ) );
+
+		$schema = $settings_ui_page->get_schema( 'acme_payments' );
+		$this->assertSame( 'Acme Payments', $schema['title'] );
+		$this->assertSame( 'Acme Payments', $schema['shell']['title'] );
 	}
 
 	/**

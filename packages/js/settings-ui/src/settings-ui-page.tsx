@@ -491,25 +491,42 @@ const ShellHeader = ( {
 			ariaLabel={ title || __( 'Settings', 'woocommerce' ) }
 		>
 			{ showHeader ? (
-				<header className="wc-settings-ui-shell__header">
-					<div className="wc-settings-ui-shell__header-row">
+				<Stack
+					className="wc-settings-ui-shell__header"
+					direction="column"
+					gap="sm"
+					render={ <header /> }
+				>
+					<Stack
+						className="wc-settings-ui-shell__header-row"
+						direction="row"
+						align="center"
+					>
 						{ breadcrumbs }
 						<h2 className="wc-settings-ui-shell__title">
 							{ title }
 						</h2>
 						{ badges }
 						{ actions ? (
-							<div className="wc-settings-ui-shell__header-actions">
+							<Stack
+								className="wc-settings-ui-shell__header-actions"
+								direction="row"
+								gap="sm"
+							>
 								{ actions }
-							</div>
+							</Stack>
 						) : null }
-					</div>
+					</Stack>
 					{ shell.subtitle ? (
-						<p className="wc-settings-ui-shell__subtitle">
+						<Text
+							className="wc-settings-ui-shell__subtitle"
+							variant="body-md"
+							render={ <p /> }
+						>
 							{ shell.subtitle }
-						</p>
+						</Text>
 					) : null }
-				</header>
+				</Stack>
 			) : null }
 			{ hasNavigation ? (
 				<div className="wc-settings-ui-shell__navigation">
@@ -536,7 +553,7 @@ const ShellHeader = ( {
 					{ shell.sectionNavigation &&
 					shell.sectionNavigation.length > 0 ? (
 						<nav
-							className="wc-settings-ui-shell__tabs wc-settings-ui-shell__tabs--secondary"
+							className="wc-settings-ui-shell__tabs"
 							aria-label={ __(
 								'Settings sections',
 								'woocommerce'
