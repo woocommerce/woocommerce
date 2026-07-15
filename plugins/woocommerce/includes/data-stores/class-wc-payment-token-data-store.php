@@ -367,28 +367,24 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	}
 
 	/**
-	 * Reads a filtered row count, falling back to a default unless it is a number of at least one.
+	 * Reads a filtered row count, falling back to a default unless it is an integer of at least one.
 	 *
-	 * Both ends are checked, because `absint()` disagrees with the value it is given in two
-	 * directions: it collapses the sign, so `absint( -1 )` is 1 and a callback reaching for
-	 * WordPress's `-1` means unlimited idiom would cap the query at a single row; and it can
-	 * truncate to nothing, so `absint( 0.4 )` and `absint( INF )` are both 0, which would empty the
-	 * result set. Rather than enumerate every coercion, the raw value is range-checked and the
-	 * coerced result has to hold up as well.
+	 * The value is validated rather than coerced. `absint()` answers for anything at all, and its
+	 * answers disagree with the input in every direction: it collapses the sign (`absint( -1 )` is
+	 * 1, capping a query at one row for a callback reaching for WordPress's `-1` means unlimited
+	 * idiom), it truncates to nothing (`absint( 0.4 )` and `absint( INF )` are 0, emptying the
+	 * result set), and past the integer range it returns a float, which this method is typed not to
+	 * return. A row count that is not an integer is not a row count, so the default is used.
 	 *
 	 * @since 11.1.0
 	 * @param mixed $value         The filtered value.
-	 * @param int   $default_value Row count to use when `$value` is not a number of at least one.
+	 * @param int   $default_value Row count to use when `$value` is not an integer of at least one.
 	 * @return int
 	 */
 	private static function sanitize_row_count( $value, int $default_value ): int {
-		if ( ! is_numeric( $value ) || $value < 1 ) {
-			return $default_value;
-		}
+		$count = filter_var( $value, FILTER_VALIDATE_INT );
 
-		$count = absint( $value );
-
-		return $count >= 1 ? $count : $default_value;
+		return false !== $count && $count >= 1 ? $count : $default_value;
 	}
 
 	/**

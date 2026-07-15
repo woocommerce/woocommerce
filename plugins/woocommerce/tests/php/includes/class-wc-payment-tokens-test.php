@@ -215,28 +215,33 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Filter return values that must not be used as a row count.
+	 * Filter return values that are not a row count, and so must fall back to the default.
 	 *
-	 * Each either fails to be a number of at least one, or is one that `absint()` turns into 0,
-	 * which would empty the result set.
+	 * Each one either is not an integer of at least one, or is a value `absint()` would answer for
+	 * misleadingly: by dropping a sign, truncating to nothing, or overflowing past the integer
+	 * range.
 	 *
 	 * @return array<string, array{0: mixed}>
 	 */
 	public function unusable_row_count_provider(): array {
 		return array(
-			'null'               => array( null ),
-			'false'              => array( false ),
-			'zero'               => array( 0 ),
-			'fraction below 1'   => array( 0.4 ),
-			'numeric string 0'   => array( '0.5' ),
-			'negative one'       => array( -1 ),
-			'negative'           => array( -5 ),
-			'non-numeric'        => array( 'abc' ),
-			'infinity'           => array( INF ),
-			'negative infinity'  => array( -INF ),
-			'not a number'       => array( NAN ),
-			'overflowing float'  => array( 1e309 ),
-			'overflowing string' => array( '1e309' ),
+			'null'                    => array( null ),
+			'false'                   => array( false ),
+			'zero'                    => array( 0 ),
+			'fraction below 1'        => array( 0.4 ),
+			'numeric string below 1'  => array( '0.5' ),
+			'fraction above 1'        => array( 2.7 ),
+			'negative one'            => array( -1 ),
+			'negative'                => array( -5 ),
+			'non-numeric'             => array( 'abc' ),
+			'infinity'                => array( INF ),
+			'negative infinity'       => array( -INF ),
+			'not a number'            => array( NAN ),
+			'overflowing float'       => array( 1e309 ),
+			'overflowing string'      => array( '1e309' ),
+			'above the integer range' => array( (float) PHP_INT_MAX + 1 ),
+			'wrapping past the range' => array( 1e19 ),
+			'scientific notation'     => array( '1e3' ),
 		);
 	}
 
