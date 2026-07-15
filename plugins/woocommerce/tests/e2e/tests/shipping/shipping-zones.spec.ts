@@ -149,6 +149,25 @@ test( 'keeps save changes enabled after adding a method to an unsaved shipping z
 			} )
 		).toBeVisible();
 		await expect( page.locator( '#submit' ) ).toBeEnabled();
+
+		const dialogMessages: string[] = [];
+		page.on( 'dialog', async ( dialog ) => {
+			dialogMessages.push( dialog.message() );
+			await dialog.dismiss();
+		} );
+
+		await page.locator( '#submit' ).click();
+		await expect( page.locator( '#submit' ) ).toBeDisabled();
+		await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+		expect( dialogMessages ).toEqual( [] );
+
+		await page.reload();
+		await expect( page.getByLabel( 'Zone name' ) ).toHaveValue( zoneName );
+		await expect(
+			page.locator( '.wc-shipping-zone-method-title', {
+				hasText: 'Flat rate',
+			} )
+		).toBeVisible();
 	} finally {
 		const response = await restApi.get( `${ WC_API_PATH }/shipping/zones` );
 		const zones = response.data.filter( ( zoneData ) => {

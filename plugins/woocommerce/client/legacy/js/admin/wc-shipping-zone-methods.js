@@ -38,6 +38,13 @@
 					var changes = _.clone( this.changes );
 					this.saveOptions = options || {};
 
+					// Adding a method can persist all changes while leaving the save button enabled.
+					if ( ! _.size( changes ) ) {
+						this.trigger( 'saved:methods', this.saveOptions );
+						this.saveOptions = {};
+						return;
+					}
+
 					if ( _.has( changes, 'zone_locations' ) && _.isEmpty( changes.zone_locations ) ) {
 						changes.zone_locations = [''];
 					}
