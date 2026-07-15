@@ -408,6 +408,29 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox resolve_filename_from_response_headers() should tolerate a null filename, as produced by a broken `woocommerce_file_download_filename` filter callback, instead of throwing a TypeError.
+	 */
+	public function test_resolve_filename_tolerates_null_filename(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Disposition: attachment; filename="report.pdf"',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, null, true );
+
+		$this->assertSame( 'report.pdf', $resolved, 'A null filename cannot be preserved, so the remote-announced filename should be used.' );
+	}
+
+	/**
+	 * @testdox resolve_filename_from_response_headers() should treat a non-scalar filename as empty instead of throwing a TypeError.
+	 */
+	public function test_resolve_filename_tolerates_non_scalar_filename(): void {
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( array( 'HTTP/1.1 200 OK' ), array( 'not-a-filename' ) );
+
+		$this->assertSame( '', $resolved, 'A non-scalar filename with no usable response headers should resolve to an empty string.' );
+	}
+
+	/**
 	 * @testdox download_file_force() should render an error page, not a download, when the remote file cannot be opened.
 	 */
 	public function test_download_file_force_shows_error_when_remote_file_cannot_be_opened(): void {

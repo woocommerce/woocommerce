@@ -558,15 +558,23 @@ class WC_Download_Handler {
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
-	 * @param array  $response_headers  Raw HTTP response header lines, e.g. from `stream_get_meta_data()['wrapper_data']`.
-	 * @param string $filename          Filename derived from the URL.
-	 * @param bool   $preserve_filename When true, `$filename` is kept (it was customized deliberately, e.g. via the
-	 *                                  `woocommerce_file_download_filename` filter) and only completed with an
-	 *                                  extension derived from the response headers, instead of being replaced by
-	 *                                  the remote-announced filename.
+	 * @param array $response_headers  Raw HTTP response header lines, e.g. from `stream_get_meta_data()['wrapper_data']`.
+	 * @param mixed $filename          Filename derived from the URL. Documented as a string, but a misbehaving
+	 *                                 `woocommerce_file_download_filename` filter callback may produce any type;
+	 *                                 non-string values are coerced (non-scalars to '') instead of fataling, as
+	 *                                 they only ever reached a string concatenation before this method existed.
+	 * @param bool  $preserve_filename When true, `$filename` is kept (it was customized deliberately, e.g. via the
+	 *                                 `woocommerce_file_download_filename` filter) and only completed with an
+	 *                                 extension derived from the response headers, instead of being replaced by
+	 *                                 the remote-announced filename.
 	 * @return string
 	 */
-	public static function resolve_filename_from_response_headers( array $response_headers, string $filename, bool $preserve_filename = false ): string {
+	public static function resolve_filename_from_response_headers( array $response_headers, $filename, bool $preserve_filename = false ): string {
+		$filename = is_scalar( $filename ) ? (string) $filename : '';
+
+		// An empty filename carries nothing to preserve, so let the remote-announced filename win.
+		$preserve_filename = $preserve_filename && '' !== $filename;
+
 		if ( '' !== pathinfo( $filename, PATHINFO_EXTENSION ) ) {
 			return $filename;
 		}
