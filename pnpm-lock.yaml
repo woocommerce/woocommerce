@@ -183,6 +183,9 @@ overrides:
 pnpmfileChecksum: sha256-7lEtYKkj9MKUQ1wDfOySWQ01OX5tYIUQTnfpMq5epMI=
 
 patchedDependencies:
+  '@wordpress/e2e-test-utils-playwright@1.33.2':
+    hash: 0a3df7448f0a035981fcb1ecddf9c699450bcfe7c1f6c334d6cdfea5db1e0d52
+    path: bin/patches/@wordpress__e2e-test-utils-playwright@1.33.2.patch
   '@wordpress/edit-site@5.15.0':
     hash: 63381743e38412fb89154386a5d169639ca10f8315407527829db669201fce9b
     path: bin/patches/@wordpress__edit-site@5.15.0.patch
@@ -2631,7 +2634,7 @@ importers:
         version: 6.43.1-next.v.202604091042.0
       '@wordpress/e2e-test-utils-playwright':
         specifier: catalog:wp-min
-        version: 1.33.2(@playwright/test@1.61.1)
+        version: 1.33.2(patch_hash=0a3df7448f0a035981fcb1ecddf9c699450bcfe7c1f6c334d6cdfea5db1e0d52)(@playwright/test@1.61.1)
       '@wordpress/env':
         specifier: 11.9.0
         version: 11.9.0(@types/node@24.12.2)
@@ -3660,7 +3663,7 @@ importers:
         version: 4.33.1
       '@wordpress/e2e-test-utils-playwright':
         specifier: catalog:wp-min
-        version: 1.33.2(@playwright/test@1.61.1)
+        version: 1.33.2(patch_hash=0a3df7448f0a035981fcb1ecddf9c699450bcfe7c1f6c334d6cdfea5db1e0d52)(@playwright/test@1.61.1)
       '@wordpress/editor':
         specifier: catalog:wp-min
         version: 14.33.11(@date-fns/tz@1.4.1)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
@@ -35618,7 +35621,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@wordpress/e2e-test-utils-playwright@1.33.2(@playwright/test@1.61.1)':
+  '@wordpress/e2e-test-utils-playwright@1.33.2(patch_hash=0a3df7448f0a035981fcb1ecddf9c699450bcfe7c1f6c334d6cdfea5db1e0d52)(@playwright/test@1.61.1)':
     dependencies:
       '@playwright/test': 1.61.1
       change-case: 4.1.2

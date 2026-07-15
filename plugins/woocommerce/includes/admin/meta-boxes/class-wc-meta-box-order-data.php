@@ -185,19 +185,68 @@ class WC_Meta_Box_Order_Data {
 	}
 
 	/**
-	 * Whether an order was placed without any shipping, based on persisted order data.
+	 * Whether an order has no persisted shipping method.
 	 *
-	 * A purchase that needs no fulfillment is saved without a shipping line item. Relying
-	 * on the order's own shipping items — rather than the current virtual state of the
-	 * catalog products, which a merchant can change after the order is placed — keeps a
-	 * catalog edit from ever rewriting a historical order's shipping summary, and keeps
-	 * orders that retain a shipping line (including Store API local pickup) showing.
+	 * A shipping line is order-time fulfillment evidence that remains stable when a
+	 * merchant later changes the ordered catalog products. Orders that retain one,
+	 * including Store API local pickup orders, must keep showing shipping details.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return bool
 	 */
 	private static function order_has_no_shipping( $order ) {
 		return 0 === count( $order->get_shipping_methods() );
+	}
+
+	/**
+	 * Whether every resolvable product line on an order is currently virtual.
+	 *
+	 * This check is used only when no persisted shipping method provides historical
+	 * fulfillment evidence. It intentionally reflects current, filterable catalog
+	 * semantics, so product edits can change the summary for no-line orders. Empty
+	 * or unresolved product sets remain visible because suppressing their persisted
+	 * shipping details would be ambiguous.
+	 *
+	 * Reading live catalog state is a deliberate, bounded departure from PR #66488's
+	 * principle that suppression should rest on order-time evidence immune to later
+	 * catalog edits. This fallback runs only for orders with no persisted shipping line
+	 * (guaranteed by order_has_no_shipping() earlier in the gate's && chain), which is
+	 * exactly the population that carries no such order-time evidence, so the catalog
+	 * read is the only available signal and can never override a persisted shipping line.
+	 * The accepted tradeoff: reclassifying a product as virtual can later re-hide a
+	 * no-line order that genuinely shipped. That recurrence is display-only, admin-only,
+	 * filterable, and pinned as intended by
+	 * test_hides_shipping_details_after_physical_product_without_shipping_line_becomes_virtual().
+	 *
+	 * The aggregation and fallback here are deliberately local rather than reusing
+	 * WC_Order::needs_shipping() or the shipping-label helpers: needs_shipping()
+	 * short-circuits on the global shipping setting and, like those helpers, does not
+	 * default unresolved or product-less orders to the conservative "keep visible"
+	 * outcome this summary requires.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	private static function order_has_only_virtual_products( $order ) {
+		$items = $order->get_items();
+
+		if ( empty( $items ) ) {
+			return false;
+		}
+
+		foreach ( $items as $item ) {
+			if ( ! $item instanceof WC_Order_Item_Product ) {
+				return false;
+			}
+
+			$product = $item->get_product();
+
+			if ( ! $product instanceof WC_Product || $product->needs_shipping() ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -613,7 +662,10 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
 								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-								$hide_core_shipping_details = 'store-api' === $order->get_created_via() && self::order_has_no_shipping( $order ) && self::order_shipping_matches_billing( $order );
+								$hide_core_shipping_details = 'store-api' === $order->get_created_via()
+									&& self::order_has_no_shipping( $order )
+									&& self::order_has_only_virtual_products( $order )
+									&& self::order_shipping_matches_billing( $order );
 
 								/**
 								 * Filters whether billing-derived shipping details are hidden in the order admin summary.
