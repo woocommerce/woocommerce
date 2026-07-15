@@ -244,9 +244,13 @@ class Utils {
 	 * client's cart-line pairing ladder (`lineMatchesProduct`) can match.
 	 *
 	 * @param \WC_Product $product The variation product.
-	 * @return array List of `{ attribute, value }` pairs, one per variation attribute.
+	 * @return array List of `{ attribute, value }` pairs, one per variation attribute. Empty if $product is not a variation.
 	 */
 	public static function format_variation_attributes( $product ) {
+		if ( ! $product instanceof \WC_Product_Variation ) {
+			return array();
+		}
+
 		$variation_attributes = $product->get_variation_attributes();
 
 		return array_map(
