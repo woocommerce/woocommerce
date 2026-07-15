@@ -99,7 +99,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_add_screen_options_registers_per_page_option() : void {
+	public function test_add_screen_options_registers_per_page_option(): void {
 		set_current_screen( 'product_page_product-reviews' );
 
 		$reviews = wc_get_container()->get( Reviews::class );
@@ -121,7 +121,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_set_reviews_per_page_option() : void {
+	public function test_set_reviews_per_page_option(): void {
 		$reviews = wc_get_container()->get( Reviews::class );
 
 		// Saves the sanitized value for the reviews option.
