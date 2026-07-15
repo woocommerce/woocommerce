@@ -4002,6 +4002,13 @@ mark.notice {
 	margin: 0 0 0 10px;
 }
 
+// Mirrors the WP core rule for #lost-connection-notice.
+#wc-lost-connection-notice .spinner {
+	visibility: visible;
+	float: left;
+	margin: 0 5px 0 0;
+}
+
 a.export_rates,
 a.import_rates {
 	float: right;
