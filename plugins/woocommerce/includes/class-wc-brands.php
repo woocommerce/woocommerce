@@ -731,7 +731,7 @@ class WC_Brands {
 			'widgets/brand-thumbnails.php',
 			array(
 				'brands'        => $brands,
-				'columns'       => is_numeric( $args['columns'] ) ? intval( $args['columns'] ) : 4,
+				'columns'       => is_numeric( $args['columns'] ) ? max( 1, absint( $args['columns'] ) ) : 4,
 				'fluid_columns' => wp_validate_boolean( $args['fluid_columns'] ),
 			),
 			'woocommerce',
@@ -790,7 +790,7 @@ class WC_Brands {
 			'widgets/brand-thumbnails-description.php',
 			array(
 				'brands'  => $brands,
-				'columns' => $args['columns'],
+				'columns' => is_numeric( $args['columns'] ) ? max( 1, absint( $args['columns'] ) ) : 1,
 			),
 			'woocommerce',
 			WC()->plugin_path() . '/templates/brands/'

@@ -4,6 +4,11 @@
 import { devices } from '@playwright/test';
 import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
+/**
+ * Internal dependencies
+ */
+import AddToCartWithOptionsPage from '../add-to-cart-with-options/add-to-cart-with-options.page';
+
 const blockData = {
 	name: 'woocommerce/product-image-gallery',
 	productPage: '/product/hoodie/',
@@ -117,6 +122,48 @@ test.describe( `${ blockData.name } editor`, () => {
 		).toBeHidden();
 
 		await page
+			.getByRole( 'button', {
+				name: 'Use the Product Gallery block',
+			} )
+			.click();
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
+		).toBeVisible();
+	} );
+
+	test( 'shows the Add to Cart + Options compatibility notice and can be migrated to the Product Gallery block', async ( {
+		page,
+		editor,
+		admin,
+	} ) => {
+		const pageObject = new AddToCartWithOptionsPage( {
+			page,
+			admin,
+			editor,
+		} );
+		await pageObject.updateSingleProductTemplate();
+
+		const productImageGalleryBlock = await editor.getBlockByName(
+			blockData.name
+		);
+		await editor.selectBlocks( productImageGalleryBlock );
+
+		const sidebarSettings = page.getByRole( 'region', {
+			name: 'Editor settings',
+		} );
+
+		await expect(
+			sidebarSettings.getByText(
+				'The classic Product Image Gallery block is not compatible with the Add to Cart + Options block in this template. Switch to the new Product Gallery block for a better experience.'
+			)
+		).toBeVisible();
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
+		).toBeHidden();
+
+		await sidebarSettings
 			.getByRole( 'button', {
 				name: 'Use the Product Gallery block',
 			} )

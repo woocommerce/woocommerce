@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Migrate Blocks e2e specs into the Core e2e suite under tests/blocks and add a core testIgnore guard so the core e2e project does not collect them; the Blocks suite keeps running them from the new location. Test-only, no changes to shipped code.

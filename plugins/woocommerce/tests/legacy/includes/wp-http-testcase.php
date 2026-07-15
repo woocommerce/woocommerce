@@ -17,6 +17,20 @@ use Automattic\Jetpack\Constants;
 abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 
 	/**
+	 * Shared sample image URL used by WooCommerce tests.
+	 *
+	 * @var string
+	 */
+	private const SAMPLE_IMAGE_URL = 'http://cldup.com/Dr1Bczxq4q.png';
+
+	/**
+	 * Shared sample image fixture used by WooCommerce tests.
+	 *
+	 * @var string
+	 */
+	private const SAMPLE_IMAGE_FILE = 'Dr1Bczxq4q.png';
+
+	/**
 	 * The HTTP requests caught.
 	 *
 	 * Each of the requests has the following keys:
@@ -39,6 +53,13 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 	 * @type callable|false $http_responder
 	 */
 	protected $http_responder;
+
+	/**
+	 * Whether a mocked sample image is waiting to be moved into uploads.
+	 *
+	 * @var bool
+	 */
+	private $sample_image_download_pending = false;
 
 	/**
 	 * Whether the class has been initialized.
@@ -181,8 +202,10 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 		parent::tearDown();
 
 		remove_filter( 'pre_http_request', array( $this, 'http_request_listner' ) );
+		remove_filter( 'wp_handle_sideload_overrides', array( $this, 'set_sample_image_unique_filename_callback' ) );
 
-		$this->skip_cache_next = false;
+		$this->skip_cache_next               = false;
+		$this->sample_image_download_pending = false;
 	}
 
 	//
@@ -213,7 +236,64 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 			$preempt = call_user_func( $this->http_responder, $request, $url );
 		}
 
+		if ( false === $preempt && self::SAMPLE_IMAGE_URL === $url ) {
+			$preempt = $this->mock_sample_image_response( $request );
+		}
+
 		return $preempt;
+	}
+
+	/**
+	 * Mock the shared sample image download from a local fixture.
+	 *
+	 * @param array $request The request arguments.
+	 * @return array
+	 */
+	protected function mock_sample_image_response( $request ) {
+		$fixture_path = WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/' . self::SAMPLE_IMAGE_FILE;
+		$response     = array(
+			'headers'  => array(
+				'content-type' => 'image/png',
+			),
+			'body'     => '',
+			'response' => array(
+				'code'    => 200,
+				'message' => 'OK',
+			),
+			'cookies'  => array(),
+		);
+
+		if ( ! empty( $request['filename'] ) ) {
+			WC_Unit_Test_Case::file_copy( $fixture_path, $request['filename'] );
+			$this->sample_image_download_pending = true;
+			add_filter( 'wp_handle_sideload_overrides', array( $this, 'set_sample_image_unique_filename_callback' ), 10, 2 );
+			$response['filename'] = $request['filename'];
+			return $response;
+		}
+
+		$response['body'] = file_get_contents( $fixture_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading a local test fixture.
+		return $response;
+	}
+
+	/**
+	 * Use a unique filename for the pending sample image download.
+	 *
+	 * @param array $overrides Sideload overrides.
+	 * @param array $file      Sideloaded file data.
+	 * @return array
+	 */
+	public function set_sample_image_unique_filename_callback( $overrides, $file ) {
+		if ( ! $this->sample_image_download_pending || self::SAMPLE_IMAGE_FILE !== $file['name'] ) {
+			return $overrides;
+		}
+
+		$this->sample_image_download_pending = false;
+		remove_filter( 'wp_handle_sideload_overrides', array( $this, 'set_sample_image_unique_filename_callback' ) );
+		$overrides['unique_filename_callback'] = static function ( $_dir, $name, $ext ) {
+			return $name . '-' . wp_generate_uuid4() . $ext;
+		};
+
+		return $overrides;
 	}
 
 	/**

@@ -47,7 +47,7 @@ jobs:
     steps:
       - name: Parse version and determine template
         id: parse-version
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const version = '${{ inputs.version }}';
@@ -85,7 +85,7 @@ jobs:
 
       - name: Validate release branch exists
         if: ${{ !inputs.skip-branch-validation }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const branchName = '${{ steps.parse-version.outputs.branch }}';
@@ -110,7 +110,7 @@ jobs:
 
       - name: Check if tracking issue already exists
         id: check-existing
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
@@ -149,7 +149,7 @@ jobs:
 
       - name: Checkout repository (sparse)
         if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           path: repo
           sparse-checkout: |
@@ -159,7 +159,7 @@ jobs:
       - name: Get Linear data
         if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
         id: get-linear-data
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
@@ -182,7 +182,7 @@ jobs:
       - name: Get parent tracking issue and extract assignee
         if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
         id: get-parent-issue
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
@@ -224,7 +224,7 @@ jobs:
 
       - name: Process template and create Linear issue
         if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const { LinearClient } = require( '@linear/sdk' );

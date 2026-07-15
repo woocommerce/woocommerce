@@ -262,14 +262,25 @@ export class Editor extends CoreEditor {
 			.getByRole( 'button', { name: 'Dismiss this notice' } )
 			.filter( { hasText: /(updated|published)\./ } );
 
-		const staleSaveNoticeCount = await saveNoticeDismissButton.count();
-		for ( let i = 0; i < staleSaveNoticeCount; i++ ) {
-			const staleSaveNotice = saveNoticeDismissButton.first();
-			if ( ! ( await staleSaveNotice.isVisible() ) ) {
-				break;
-			}
-			await staleSaveNotice.click();
+		// Dismiss any save notices left over from earlier saves. The success
+		// assertion at the end reuses this same locator, so a leftover notice
+		// must not survive into it — converge to zero instead of snapshotting
+		// the count once and breaking on the first invisible notice. The loop
+		// is bounded so a notice that regenerates or refuses to dismiss fails
+		// via the assertion below rather than spinning.
+		for (
+			let i = 0;
+			i < 10 && ( await saveNoticeDismissButton.first().isVisible() );
+			i++
+		) {
+			await saveNoticeDismissButton.first().click();
 		}
+		await expect( saveNoticeDismissButton ).toHaveCount( 0 );
+
+		// Wait for the top bar to render its primary action before the
+		// instantaneous pick below; otherwise an unrendered bar falls through
+		// to a Publish button that never exists in the site editor.
+		await expect( saveButton.or( publishButton ).first() ).toBeVisible();
 
 		const buttonToClick = ( await saveButton.isVisible() )
 			? saveButton
