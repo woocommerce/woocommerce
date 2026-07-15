@@ -884,14 +884,24 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( isset( $data['images'] ) ) {
 			$images               = $data['images'];
 			$data['raw_image_id'] = array_shift( $images );
+			$gallery              = array_filter(
+				$images,
+				function ( $image ) {
+					return '' !== $image;
+				}
+			);
 
-			// When a featured image is provided, treat the remaining values as the full
+			// When any image value is provided, treat the remaining values as the full
 			// gallery. Setting the key even when no gallery images remain ensures that
 			// reducing the number of images in the CSV clears previously imported gallery
-			// images instead of leaving them in place.
-			// See https://github.com/woocommerce/woocommerce/issues/34839.
-			if ( ! empty( $data['raw_image_id'] ) ) {
-				$data['raw_gallery_image_ids'] = $images;
+			// images instead of leaving them in place, while a fully empty images cell
+			// (including one containing only separators) still leaves existing images
+			// untouched. Gating on the gallery values too keeps them imported when the
+			// featured-image slot is empty (e.g. a cell starting with a separator).
+			// See https://github.com/woocommerce/woocommerce/issues/34839
+			// and https://github.com/woocommerce/woocommerce/issues/66583.
+			if ( ! empty( $data['raw_image_id'] ) || ! empty( $gallery ) ) {
+				$data['raw_gallery_image_ids'] = $gallery;
 			}
 			unset( $data['images'] );
 		}
