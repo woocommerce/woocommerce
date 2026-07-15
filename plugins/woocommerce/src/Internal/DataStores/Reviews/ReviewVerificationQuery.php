@@ -52,7 +52,7 @@ class ReviewVerificationQuery {
 		}
 
 		foreach ( $comments as $comment ) {
-			if ( 'review' === $comment->comment_type && '' === get_comment_meta( (int) $comment->comment_ID, 'verified', true ) ) {
+			if ( $comment instanceof \WP_Comment && 'review' === $comment->comment_type && '' === get_comment_meta( (int) $comment->comment_ID, 'verified', true ) ) {
 				$this->schedule_backfill( $post_id );
 				break;
 			}
