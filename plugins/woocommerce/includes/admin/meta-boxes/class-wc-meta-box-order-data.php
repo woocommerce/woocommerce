@@ -202,8 +202,10 @@ class WC_Meta_Box_Order_Data {
 	 * Whether every resolvable product line on an order is currently virtual.
 	 *
 	 * This check is used only when no persisted shipping method provides historical
-	 * fulfillment evidence. Empty or unresolved product sets remain visible because
-	 * suppressing their persisted shipping details would be ambiguous.
+	 * fulfillment evidence. It intentionally reflects current, filterable catalog
+	 * semantics, so product edits can change the summary for no-line orders. Empty
+	 * or unresolved product sets remain visible because suppressing their persisted
+	 * shipping details would be ambiguous.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return bool
