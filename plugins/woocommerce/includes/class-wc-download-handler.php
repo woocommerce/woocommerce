@@ -231,13 +231,14 @@ class WC_Download_Handler {
 			self::download_error( __( 'No file defined', 'woocommerce' ) );
 		}
 
-		$filename = basename( $file_path );
-
-		if ( strstr( $filename, '?' ) ) {
-			$filename = current( explode( '?', $filename ) );
-		}
-
-		$filename = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
+		/**
+		 * Filter the filename of a downloadable product file before it is served.
+		 *
+		 * @since 2.2.0
+		 * @param string  $filename   Filename derived from the file URL.
+		 * @param integer $product_id Product ID of the product being downloaded.
+		 */
+		$filename = apply_filters( 'woocommerce_file_download_filename', self::derive_filename_from_file_path( $file_path ), $product_id );
 
 		/**
 		 * Filter download method.
@@ -254,6 +255,22 @@ class WC_Download_Handler {
 
 		// Trigger download via one of the methods.
 		do_action( 'woocommerce_download_file_' . $file_download_method, $file_path, $filename );
+	}
+
+	/**
+	 * Derive a download filename from the file path or URL it will be served from.
+	 *
+	 * @param string $file_path File path or URL.
+	 * @return string
+	 */
+	private static function derive_filename_from_file_path( $file_path ) {
+		$filename = basename( $file_path );
+
+		if ( strstr( $filename, '?' ) ) {
+			$filename = current( explode( '?', $filename ) );
+		}
+
+		return $filename;
 	}
 
 	/**
@@ -492,7 +509,13 @@ class WC_Download_Handler {
 			$served = false;
 			if ( false !== $handle ) {
 				$response_headers = stream_get_meta_data( $handle )['wrapper_data'] ?? array();
-				$filename         = self::resolve_filename_from_response_headers( is_array( $response_headers ) ? $response_headers : array(), $filename );
+				$filename         = self::resolve_filename_from_response_headers(
+					is_array( $response_headers ) ? $response_headers : array(),
+					$filename,
+					// A filename customized via the `woocommerce_file_download_filename` filter (or by a
+					// custom caller of this method) is preserved and only completed with an extension.
+					self::derive_filename_from_file_path( $file_path ) !== $filename
+				);
 
 				self::download_headers( $parsed_file_path['file_path'], $filename, $download_range );
 				$served = self::readfile_from_handle( $handle, $start, $length );
@@ -535,11 +558,15 @@ class WC_Download_Handler {
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 *
-	 * @param array  $response_headers Raw HTTP response header lines, e.g. from `stream_get_meta_data()['wrapper_data']`.
-	 * @param string $filename         Filename derived from the URL.
+	 * @param array  $response_headers  Raw HTTP response header lines, e.g. from `stream_get_meta_data()['wrapper_data']`.
+	 * @param string $filename          Filename derived from the URL.
+	 * @param bool   $preserve_filename When true, `$filename` is kept (it was customized deliberately, e.g. via the
+	 *                                  `woocommerce_file_download_filename` filter) and only completed with an
+	 *                                  extension derived from the response headers, instead of being replaced by
+	 *                                  the remote-announced filename.
 	 * @return string
 	 */
-	public static function resolve_filename_from_response_headers( array $response_headers, string $filename ): string {
+	public static function resolve_filename_from_response_headers( array $response_headers, string $filename, bool $preserve_filename = false ): string {
 		if ( '' !== pathinfo( $filename, PATHINFO_EXTENSION ) ) {
 			return $filename;
 		}
@@ -577,7 +604,15 @@ class WC_Download_Handler {
 		}
 
 		if ( '' !== $remote_filename ) {
-			$filename = $remote_filename;
+			if ( $preserve_filename ) {
+				$remote_extension = pathinfo( $remote_filename, PATHINFO_EXTENSION );
+
+				if ( '' !== $remote_extension ) {
+					$filename .= '.' . $remote_extension;
+				}
+			} else {
+				$filename = $remote_filename;
+			}
 		}
 
 		if ( '' === pathinfo( $filename, PATHINFO_EXTENSION ) && isset( $headers['content-type'] ) ) {

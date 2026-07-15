@@ -366,6 +366,48 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox resolve_filename_from_response_headers() should only append the remote extension to a filename marked as preserved.
+	 */
+	public function test_resolve_filename_preserves_customized_filename(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Disposition: attachment; filename="My Report.pdf"',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, 'Seasons-Catalog', true );
+
+		$this->assertSame( 'Seasons-Catalog.pdf', $resolved, 'A preserved filename should keep its name and only gain the remote extension.' );
+	}
+
+	/**
+	 * @testdox resolve_filename_from_response_headers() should complete a preserved filename from the Content-Type header when the Content-Disposition filename is absent.
+	 */
+	public function test_resolve_filename_preserves_customized_filename_with_content_type_fallback(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Type: application/zip',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, 'Seasons-Catalog', true );
+
+		$this->assertSame( 'Seasons-Catalog.zip', $resolved, 'A preserved filename should gain the extension derived from the Content-Type header.' );
+	}
+
+	/**
+	 * @testdox resolve_filename_from_response_headers() should leave a preserved filename untouched when the remote filename has no extension either.
+	 */
+	public function test_resolve_filename_preserved_filename_untouched_without_remote_extension(): void {
+		$headers = array(
+			'HTTP/1.1 200 OK',
+			'Content-Disposition: attachment; filename="report"',
+		);
+
+		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, 'Seasons-Catalog', true );
+
+		$this->assertSame( 'Seasons-Catalog', $resolved, 'An extensionless remote filename provides nothing to complete a preserved filename with.' );
+	}
+
+	/**
 	 * Creates a downloadable product, and then places (and completes) an order for that
 	 * object.
 	 *
