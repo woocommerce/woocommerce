@@ -143,7 +143,101 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 			),
 			'A page argument without an explicit limit must still paginate the results'
 		);
+	}
+
+	/**
+	 * @testdox Data store get_tokens should size a page-without-limit query with the default page size.
+	 */
+	public function test_data_store_get_tokens_page_without_limit_uses_the_default_page_size(): void {
+		$received = null;
+		add_filter(
+			'woocommerce_get_payment_tokens_page_size',
+			function ( $page_size ) use ( &$received ) {
+				$received = $page_size;
+				return 2;
+			}
+		);
+		$this->create_tokens_for_user( 3 );
+
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		$this->assertCount(
+			2,
+			$data_store->get_tokens(
+				array(
+					'user_id' => $this->user_id,
+					'page'    => 1,
+				)
+			),
+			'The first page should be sized by the filtered page size'
+		);
+		$this->assertCount(
+			1,
+			$data_store->get_tokens(
+				array(
+					'user_id' => $this->user_id,
+					'page'    => 2,
+				)
+			),
+			'The second page should return the remaining tokens'
+		);
+
+		// Pins the default without creating 100 tokens.
+		$this->assertSame(
+			WC_Payment_Token_Data_Store::DEFAULT_PAGE_SIZE,
+			$received,
+			'The page size filter should receive DEFAULT_PAGE_SIZE as its default'
+		);
 		$this->assertSame( 100, WC_Payment_Token_Data_Store::DEFAULT_PAGE_SIZE );
+	}
+
+	/**
+	 * Capture the SELECT issued against the payment tokens table by the given callback.
+	 *
+	 * Asserting on the emitted SQL is the only way to tell a bounded query from an unbounded one
+	 * without creating more tokens than the limit under test.
+	 *
+	 * @param callable $callback Code that triggers the query.
+	 * @return string The captured query, or an empty string if none was issued.
+	 */
+	private function capture_token_query( callable $callback ): string {
+		global $wpdb;
+
+		$captured = '';
+		$listener = function ( $query ) use ( &$captured, $wpdb ) {
+			if ( false !== strpos( $query, "SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens" ) ) {
+				$captured = $query;
+			}
+			return $query;
+		};
+
+		add_filter( 'query', $listener );
+		$callback();
+		remove_filter( 'query', $listener );
+
+		return $captured;
+	}
+
+	/**
+	 * @testdox get_customer_tokens should fall back to the default limit when the filter returns a non-numeric value.
+	 */
+	public function test_get_customer_tokens_ignores_a_non_numeric_limit_filter(): void {
+		// A callback with a conditional return yields null on its else path; treating that as
+		// "no limit" would leave the saved methods query unbounded.
+		add_filter( 'woocommerce_get_customer_payment_tokens_limit', '__return_null' );
+		$this->create_tokens_for_user( 3 );
+
+		$query = $this->capture_token_query(
+			function () {
+				WC_Payment_Tokens::get_customer_tokens( $this->user_id );
+			}
+		);
+
+		$this->assertStringContainsString(
+			'LIMIT 0, ' . WC_Payment_Tokens::DEFAULT_CUSTOMER_TOKENS_LIMIT,
+			$query,
+			'A null limit filter should fall back to the documented default rather than dropping the LIMIT clause'
+		);
 	}
 
 	/**

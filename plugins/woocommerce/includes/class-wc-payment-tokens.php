@@ -28,8 +28,8 @@ class WC_Payment_Tokens {
 	 * Gets valid tokens from the database based on user defined criteria.
 	 *
 	 * @since  2.6.0
-	 * @since  11.1.0 Results are no longer implicitly limited by the `posts_per_page` option;
-	 *                pass a positive `limit` arg to bound the query.
+	 * @since  11.1.0 Results are no longer implicitly limited by the `posts_per_page` option; see
+	 *                the `limit` arg below for how each query is bounded.
 	 * @param  array $args Query arguments {
 	 *     Array of query parameters.
 	 *
@@ -38,8 +38,9 @@ class WC_Payment_Tokens {
 	 *     @type string $gateway_id Gateway ID.
 	 *     @type string $type       Token type.
 	 *     @type int    $limit      Maximum number of tokens to return; an explicit 0 returns no tokens.
-	 *                              When omitted, a query passing `page` paginates by a default page size,
-	 *                              queries scoped to a `token_id` or `user_id` are unlimited, and unscoped
+	 *                              When omitted, a query passing `page` paginates by a default page size
+	 *                              (filterable via `woocommerce_get_payment_tokens_page_size`), queries
+	 *                              scoped to a `token_id` or `user_id` are unlimited, and unscoped
 	 *                              queries fall back to a ceiling filterable via
 	 *                              `woocommerce_get_payment_tokens_unscoped_limit`.
 	 *     @type int    $page       Page of results to return. Default 1.
@@ -86,19 +87,26 @@ class WC_Payment_Tokens {
 			return array();
 		}
 
+		/**
+		 * Controls the maximum number of Payment Methods that will be listed via the My Account page.
+		 *
+		 * @since 7.2.0
+		 * @since 11.1.0 The default changed from the value of the `posts_per_page` option to 100.
+		 *
+		 * @param int $limit Maximum number of tokens to return. Defaults to 100.
+		 */
+		$limit = apply_filters( 'woocommerce_get_customer_payment_tokens_limit', self::DEFAULT_CUSTOMER_TOKENS_LIMIT );
+
+		// A callback returning a non-numeric value (e.g. one whose conditional has no else branch,
+		// yielding null) must not be read as "no limit": that would leave this customer-facing
+		// query unbounded. Fall back to the documented default instead.
+		$limit = is_numeric( $limit ) ? absint( $limit ) : self::DEFAULT_CUSTOMER_TOKENS_LIMIT;
+
 		$tokens = self::get_tokens(
 			array(
 				'user_id'    => $customer_id,
 				'gateway_id' => $gateway_id,
-				/**
-				 * Controls the maximum number of Payment Methods that will be listed via the My Account page.
-				 *
-				 * @since 7.2.0
-				 * @since 11.1.0 The default changed from the value of the `posts_per_page` option to 100.
-				 *
-				 * @param int $limit Maximum number of tokens to return. Defaults to 100.
-				 */
-				'limit'      => apply_filters( 'woocommerce_get_customer_payment_tokens_limit', self::DEFAULT_CUSTOMER_TOKENS_LIMIT ),
+				'limit'      => $limit,
 			)
 		);
 
