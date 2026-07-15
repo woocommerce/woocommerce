@@ -298,6 +298,47 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The read-only summary displays shipping details when the ordered product no longer resolves.
+	 */
+	public function test_displays_shipping_details_after_virtual_product_is_deleted(): void {
+		$order = $this->create_order_with_shipping_data( false );
+
+		$this->products[0]->delete( true );
+		$order = wc_get_order( $order->get_id() );
+
+		$summary = $this->render_shipping_address_summary( $order );
+
+		$this->assertStringContainsString( '500 Billing Avenue', $summary );
+		$this->assertStringContainsString( '555-0100', $summary );
+		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
+	}
+
+	/**
+	 * @testdox The read-only summary displays shipping details for a mixed order without a shipping line.
+	 */
+	public function test_displays_shipping_details_for_mixed_order_without_shipping_line(): void {
+		$order = $this->create_order_with_shipping_data( false );
+
+		$physical_product = WC_Helper_Product::create_simple_product();
+		$physical_product->set_virtual( false );
+		$physical_product->save();
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $physical_product );
+		$item->set_quantity( 1 );
+		$order->add_item( $item );
+		$order->save();
+
+		$this->products[] = $physical_product;
+		$order            = wc_get_order( $order->get_id() );
+		$summary          = $this->render_shipping_address_summary( $order );
+
+		$this->assertStringContainsString( '500 Billing Avenue', $summary );
+		$this->assertStringContainsString( '555-0100', $summary );
+		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
+	}
+
+	/**
 	 * @testdox The read-only summary shows explicitly edited shipping details on a Store API order without shipping.
 	 */
 	public function test_displays_explicitly_edited_shipping_details_on_store_api_order(): void {
