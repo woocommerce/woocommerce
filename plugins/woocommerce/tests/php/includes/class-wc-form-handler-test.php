@@ -106,10 +106,9 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 		$this->dispatch_account_details_save_expecting_redirect();
 
-		$error_notices = wp_list_pluck( wc_get_notices( 'error' ), 'notice' );
-		$updated_user  = get_userdata( $user_id );
+		$updated_user = get_userdata( $user_id );
 
-		$this->assertNotContains( 'Display name cannot be changed to email address due to privacy concern.', $error_notices );
+		$this->assertEmpty( wc_get_notices( 'error' ), 'An unchanged email-like display name should not add error notices.' );
 		$this->assertSame( 'Jane', $updated_user->first_name, 'First name should be saved when the email-like display name is unchanged.' );
 		$this->assertSame( 'Doe', $updated_user->last_name, 'Last name should be saved when the email-like display name is unchanged.' );
 		$this->assertSame( 'Jane Doe', $updated_user->display_name, 'Existing customer sync should continue normalizing email-like display names after the save succeeds.' );
@@ -189,10 +188,11 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 		WC_Form_Handler::save_account_details();
 
-		$error_notices = wp_list_pluck( wc_get_notices( 'error' ), 'notice' );
+		$error_notices = wc_get_notices( 'error' );
 		$updated_user  = get_userdata( $user_id );
 
-		$this->assertContains( 'Display name cannot be changed to email address due to privacy concern.', $error_notices );
+		$this->assertCount( 1, $error_notices, 'Changing the display name to an email address should add one validation error.' );
+		$this->assertSame( 'account_display_name', $error_notices[0]['data']['id'] ?? null, 'The validation error should identify the display-name field.' );
 		$this->assertSame( 'Original', $updated_user->first_name, 'First name should not change when account validation fails.' );
 		$this->assertSame( 'Customer', $updated_user->last_name, 'Last name should not change when account validation fails.' );
 		$this->assertSame( 'Display Customer', $updated_user->display_name, 'Display name should not change to a new email-like value.' );
@@ -225,10 +225,9 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 		$this->dispatch_account_details_save_expecting_redirect();
 
-		$error_notices = wp_list_pluck( wc_get_notices( 'error' ), 'notice' );
-		$updated_user  = get_userdata( $user_id );
+		$updated_user = get_userdata( $user_id );
 
-		$this->assertNotContains( 'Display name cannot be changed to email address due to privacy concern.', $error_notices );
+		$this->assertEmpty( wc_get_notices( 'error' ), 'A non-email display name should not add error notices.' );
 		$this->assertSame( 'Updated Customer', $updated_user->display_name, 'Display name should save when changed to a non-email value.' );
 	}
 
