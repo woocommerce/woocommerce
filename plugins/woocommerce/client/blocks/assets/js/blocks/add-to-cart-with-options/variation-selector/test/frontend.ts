@@ -51,11 +51,28 @@ let mockUpsertDraftItem: jest.Mock;
 // `itemInContext` would never surface here).
 let mockCartState: { itemInContext: Envelope };
 
+// The element `getElement()` returns for the currently-executing directive.
+// Set per test to simulate the quantity input (`watchQuantityConstraints`
+// runs on its own element) or left `null` for callbacks that don't read it.
+let mockElementRef: HTMLElement | null;
+
+// Spies for the sibling actions this module calls (`setQuantity`,
+// `clearErrors`, `addError`) that are actually implemented in the main
+// `add-to-cart-with-options/frontend.ts` module. In production, every
+// `store()` call sharing the `woocommerce/add-to-cart-with-options`
+// namespace merges into one object, so this module's own `actions` binding
+// ends up including them; simulated here by merging these spies onto the
+// registered store's own action definitions, since this test loads the
+// variation-selector module in isolation.
+let mockSetQuantity: jest.Mock;
+let mockClearErrors: jest.Mock;
+let mockAddError: jest.Mock;
+
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		getConfig: jest.fn( () => ( {} ) ),
-		getElement: jest.fn( () => ( { ref: null } ) ),
+		getElement: jest.fn( () => ( { ref: mockElementRef } ) ),
 		getContext: jest.fn( ( namespace?: string ) => {
 			if ( namespace === 'woocommerce/products' ) {
 				return mockProductsContext;
@@ -75,7 +92,12 @@ jest.mock(
 				}
 				mockRegisteredStore = {
 					state: definition?.state ?? {},
-					actions: definition?.actions ?? {},
+					actions: {
+						...( definition?.actions ?? {} ),
+						setQuantity: mockSetQuantity,
+						clearErrors: mockClearErrors,
+						addError: mockAddError,
+					},
 					callbacks: definition?.callbacks ?? {},
 				} as MockStore;
 				return mockRegisteredStore;
@@ -124,6 +146,10 @@ describe( 'Variation selector frontend store', () => {
 		mockProductsState = {};
 		mockUpsertDraftItem = jest.fn();
 		mockCartState = { itemInContext: {} };
+		mockElementRef = null;
+		mockSetQuantity = jest.fn();
+		mockClearErrors = jest.fn();
+		mockAddError = jest.fn();
 	} );
 
 	afterEach( () => {
@@ -332,6 +358,206 @@ describe( 'Variation selector frontend store', () => {
 				{ quantity: 1, variation: [] },
 				{ id: 1 }
 			);
+		} );
+	} );
+
+	describe( 'callbacks.validateVariation', () => {
+		it( 'does nothing beyond clearing errors when the base product has no variations', () => {
+			mockProductsState.baseProductInContext = {
+				id: 1,
+			} as ProductResponseItem;
+
+			const { callbacks } = loadStore();
+			callbacks.validateVariation();
+
+			expect( mockClearErrors ).toHaveBeenCalledWith(
+				'variable-product'
+			);
+			expect( mockAddError ).not.toHaveBeenCalled();
+		} );
+
+		it( 'adds a missing-attributes error when neither the local selection nor the scope draft resolves a variation', () => {
+			mockContext.selectedAttributes = [];
+			mockCartState.itemInContext = {};
+			mockProductsState.baseProductInContext = {
+				id: 1,
+				variations: [ { id: 2 } ],
+			} as ProductResponseItem;
+			// findProduct returns the parent itself when no variation matches.
+			mockProductsState.findProduct = jest.fn(
+				() => ( { id: 1 } as ProductResponseItem )
+			);
+
+			const { callbacks } = loadStore();
+			callbacks.validateVariation();
+
+			expect( mockAddError ).toHaveBeenCalledWith(
+				expect.objectContaining( {
+					code: 'variableProductMissingAttributes',
+					group: 'variable-product',
+				} )
+			);
+		} );
+
+		it( "validates the scope's draft-resolved attribute selection rather than this instance's stale local context, so a sibling surface displaying a complete configuration can also submit it", () => {
+			// This surface's own chips were never touched by the shopper
+			// (local selection stays empty), but another surface sharing
+			// the scope already fully resolved a variation; `selectableItems`
+			// displays that draft selection as checked (`state.selectedAttributes`
+			// is draft-backed), so validation must resolve the same variation.
+			mockContext.selectedAttributes = [];
+			mockCartState.itemInContext = {
+				draft: {
+					id: 2,
+					quantity: 1,
+					variation: [ { attribute: 'Color', value: 'blue' } ],
+				},
+			};
+			mockProductsState.baseProductInContext = {
+				id: 1,
+				variations: [ { id: 2 } ],
+			} as ProductResponseItem;
+			mockProductsState.findProduct = jest.fn(
+				() => ( { id: 2 } as ProductResponseItem )
+			);
+			mockProductsState.productVariations = {
+				2: { is_in_stock: true } as ProductResponseItem,
+			};
+
+			const { callbacks } = loadStore();
+			callbacks.validateVariation();
+
+			expect( mockProductsState.findProduct ).toHaveBeenCalledWith( {
+				id: 1,
+				selectedAttributes: [ { attribute: 'Color', value: 'blue' } ],
+			} );
+			expect( mockAddError ).not.toHaveBeenCalled();
+		} );
+
+		it( 'adds an out-of-stock error when the draft-resolved variation is out of stock', () => {
+			mockContext.selectedAttributes = [];
+			mockCartState.itemInContext = {
+				draft: {
+					id: 2,
+					quantity: 1,
+					variation: [ { attribute: 'Color', value: 'blue' } ],
+				},
+			};
+			mockProductsState.baseProductInContext = {
+				id: 1,
+				variations: [ { id: 2 } ],
+			} as ProductResponseItem;
+			mockProductsState.findProduct = jest.fn(
+				() => ( { id: 2 } as ProductResponseItem )
+			);
+			mockProductsState.productVariations = {
+				2: { is_in_stock: false } as ProductResponseItem,
+			};
+
+			const { callbacks } = loadStore();
+			callbacks.validateVariation();
+
+			expect( mockAddError ).toHaveBeenCalledWith(
+				expect.objectContaining( {
+					code: 'variableProductOutOfStock',
+					group: 'variable-product',
+				} )
+			);
+		} );
+	} );
+
+	describe( 'callbacks.watchQuantityConstraints', () => {
+		/**
+		 * Builds a detached quantity `<input>` for `getElement().ref`.
+		 *
+		 * @param value The input's initial `value`.
+		 * @return The created input element.
+		 */
+		function createQuantityInput( value: number ): HTMLInputElement {
+			const input = document.createElement( 'input' );
+			input.type = 'number';
+			input.value = String( value );
+			return input;
+		}
+
+		it( 'does nothing when there is no resolved variation', () => {
+			mockElementRef = createQuantityInput( 1 );
+			mockProductsState.productVariationInContext = null;
+
+			const { callbacks } = loadStore();
+			callbacks.watchQuantityConstraints();
+
+			expect( mockSetQuantity ).not.toHaveBeenCalled();
+		} );
+
+		it( "does not clobber another surface's shared draft quantity with this surface's own stale local default", () => {
+			// The shopper set quantity 3 on another surface, which resolved
+			// the variation and upserted its draft; this surface's own
+			// quantity input renders that shared draft's value (the same
+			// source `resolveDisplayQuantity` prefers for every surface),
+			// but its own local `quantity` context still holds the
+			// never-touched default of 1.
+			mockElementRef = createQuantityInput( 3 );
+			mockProductsState.productVariationInContext = {
+				id: 25,
+				add_to_cart: { minimum: 1, maximum: 10 },
+			} as ProductResponseItem;
+			mockContext.quantity = { 25: 1 };
+			mockCartState.itemInContext = {
+				draft: { id: 25, quantity: 3 },
+			};
+
+			const { callbacks } = loadStore();
+			callbacks.watchQuantityConstraints();
+
+			expect( mockSetQuantity ).not.toHaveBeenCalled();
+		} );
+
+		it( "clamps the shared draft's own quantity to the resolved variation's maximum when it is out of bounds", () => {
+			mockElementRef = createQuantityInput( 5 );
+			mockProductsState.productVariationInContext = {
+				id: 25,
+				add_to_cart: { minimum: 1, maximum: 3 },
+			} as ProductResponseItem;
+			mockContext.quantity = { 25: 5 };
+			mockCartState.itemInContext = {
+				draft: { id: 25, quantity: 5 },
+			};
+
+			const { callbacks } = loadStore();
+			callbacks.watchQuantityConstraints();
+
+			expect( mockSetQuantity ).toHaveBeenCalledWith( 25, 3 );
+		} );
+
+		it( 'falls back to the local quantity, clamped, when no draft exists yet for the resolved variation', () => {
+			mockElementRef = createQuantityInput( 5 );
+			mockProductsState.productVariationInContext = {
+				id: 25,
+				add_to_cart: { minimum: 1, maximum: 3 },
+			} as ProductResponseItem;
+			mockContext.quantity = { 25: 5 };
+			mockCartState.itemInContext = {};
+
+			const { callbacks } = loadStore();
+			callbacks.watchQuantityConstraints();
+
+			expect( mockSetQuantity ).toHaveBeenCalledWith( 25, 3 );
+		} );
+
+		it( 'does nothing when the resolved value already matches both the input and the constraint bounds', () => {
+			mockElementRef = createQuantityInput( 2 );
+			mockProductsState.productVariationInContext = {
+				id: 25,
+				add_to_cart: { minimum: 1, maximum: 3 },
+			} as ProductResponseItem;
+			mockContext.quantity = { 25: 2 };
+			mockCartState.itemInContext = {};
+
+			const { callbacks } = loadStore();
+			callbacks.watchQuantityConstraints();
+
+			expect( mockSetQuantity ).not.toHaveBeenCalled();
 		} );
 	} );
 
