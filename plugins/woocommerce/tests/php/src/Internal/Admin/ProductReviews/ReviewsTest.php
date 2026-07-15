@@ -93,7 +93,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `add_screen_options` registers the "per page" screen option bound to the `edit_comments_per_page` user option.
+	 * @testdox `add_screen_options` registers the "per page" screen option bound to the dedicated reviews user option.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::add_screen_options()
 	 *
@@ -109,9 +109,26 @@ class ReviewsTest extends WC_Unit_Test_Case {
 
 		$this->assertIsArray( $option );
 		$this->assertArrayHasKey( 'option', $option );
-		$this->assertSame( 'edit_comments_per_page', $option['option'] );
+		$this->assertSame( ReviewsListTable::PER_PAGE_USER_OPTION_KEY, $option['option'] );
 		$this->assertArrayHasKey( 'default', $option );
 		$this->assertSame( 20, $option['default'] );
+	}
+
+	/**
+	 * @testdox `set_reviews_per_page_option` returns the sanitized value only for the reviews per-page option.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::set_reviews_per_page_option()
+	 *
+	 * @return void
+	 */
+	public function test_set_reviews_per_page_option() : void {
+		$reviews = wc_get_container()->get( Reviews::class );
+
+		// Saves the sanitized value for the reviews option.
+		$this->assertSame( 55, $reviews->set_reviews_per_page_option( false, ReviewsListTable::PER_PAGE_USER_OPTION_KEY, 55 ) );
+
+		// Leaves other options untouched (returns the incoming status).
+		$this->assertFalse( $reviews->set_reviews_per_page_option( false, 'some_other_per_page', 55 ) );
 	}
 
 	/**

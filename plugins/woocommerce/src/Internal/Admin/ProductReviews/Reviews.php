@@ -47,6 +47,8 @@ class Reviews {
 
 		add_filter( 'parent_file', array( $this, 'edit_review_parent_file' ) );
 		add_action( 'admin_notices', array( $this, 'display_notices' ) );
+
+		add_filter( 'set_screen_option_' . ReviewsListTable::PER_PAGE_USER_OPTION_KEY, array( $this, 'set_reviews_per_page_option' ), 10, 3 );
 	}
 
 	/**
@@ -564,8 +566,9 @@ class Reviews {
 	/**
 	 * Registers the screen options for the Reviews page.
 	 *
-	 * This adds the "Number of items per page" control to the Screen Options tab. The value is stored in the
-	 * `edit_comments_per_page` user option, which is the same option {@see ReviewsListTable::get_per_page()} reads.
+	 * This adds the "Number of reviews per page" control to the Screen Options tab. The value is stored in the
+	 * dedicated {@see ReviewsListTable::PER_PAGE_USER_OPTION_KEY} user option, which {@see ReviewsListTable::get_per_page()}
+	 * reads when preparing the list.
 	 *
 	 * @since 11.1.0
 	 *
@@ -579,9 +582,25 @@ class Reviews {
 			array(
 				'label'   => __( 'Number of reviews per page:', 'woocommerce' ),
 				'default' => 20,
-				'option'  => 'edit_comments_per_page',
+				'option'  => ReviewsListTable::PER_PAGE_USER_OPTION_KEY,
 			)
 		);
+	}
+
+	/**
+	 * Saves the "number of reviews per page" screen option.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param mixed  $screen_option The value to save instead of the option value. Default false (to skip saving the current option).
+	 * @param string $option        The option name.
+	 * @param int    $value         The number of reviews to show per page.
+	 * @return mixed
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function set_reviews_per_page_option( $screen_option, $option, $value ) {
+		return ReviewsListTable::PER_PAGE_USER_OPTION_KEY === $option ? absint( $value ) : $screen_option;
 	}
 
 	/**

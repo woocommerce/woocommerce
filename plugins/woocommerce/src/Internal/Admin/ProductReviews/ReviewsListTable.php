@@ -17,6 +17,18 @@ use WP_Post;
 class ReviewsListTable extends WP_List_Table {
 
 	/**
+	 * User option key that stores the number of reviews to display per page.
+	 *
+	 * This is a dedicated option for the Product Reviews screen so that its "per page" setting is independent from the
+	 * WordPress Comments screen (which uses `edit_comments_per_page`).
+	 *
+	 * @since 11.1.0
+	 *
+	 * @var string
+	 */
+	const PER_PAGE_USER_OPTION_KEY = 'edit_product_reviews_per_page';
+
+	/**
 	 * Memoization flag to determine if the current user can edit the current review.
 	 *
 	 * @var bool
@@ -121,10 +133,13 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Returns the number of items to show per page.
 	 *
+	 * Reads the dedicated {@see ReviewsListTable::PER_PAGE_USER_OPTION_KEY} user option, which is set through the
+	 * "Number of reviews per page" control in the screen options.
+	 *
 	 * @return int Customized per-page value if available, or 20 as the default.
 	 */
 	protected function get_per_page() : int {
-		return $this->get_items_per_page( 'edit_comments_per_page' );
+		return $this->get_items_per_page( self::PER_PAGE_USER_OPTION_KEY );
 	}
 
 	/**
