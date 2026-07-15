@@ -29,9 +29,7 @@ const collectionForm = ( page: Page ) =>
 const readDraftItems = (
 	page: Page,
 	scope: string
-): Promise<
-	{ id: number; quantity: number; variation?: unknown[] }[]
-> =>
+): Promise< { id: number; quantity: number; variation?: unknown[] }[] > =>
 	page.evaluate( async ( draftScope ) => {
 		const { store } = await import( '@wordpress/interactivity' );
 		const unlockKey =
@@ -45,7 +43,7 @@ const readDraftItems = (
 					{ id: number; quantity: number; variation?: unknown[] }[]
 				>;
 			}
-		).draftItems;
+		 ).draftItems;
 		return JSON.parse( JSON.stringify( draftItems[ draftScope ] ?? [] ) );
 	}, scope );
 
@@ -89,9 +87,8 @@ test.describe( 'Scoped drafts: draft lifecycle across navigation and reload', ()
 		).toBeVisible();
 
 		await test.step( 'editing the draft on the current page updates the scope-keyed ledger', async () => {
-			const quantity = collectionForm( page ).getByLabel(
-				'Product quantity'
-			);
+			const quantity =
+				collectionForm( page ).getByLabel( 'Product quantity' );
 			await quantity.fill( '4' );
 			await quantity.blur();
 			await expect( quantity ).toHaveValue( '4' );
