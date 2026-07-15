@@ -9,11 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
 const metaKey = '_wcpay_mode';
 
 const Payments = () => {
-	const {
-		orders = [],
-		isRequesting,
-		isError,
-	} = useSelect( ( select ) => {
+	const { orders = [], isRequesting } = useSelect( ( select ) => {
 		const { getOrders, hasFinishedResolution, getOrdersError } =
 			select( ordersStore );
 
@@ -21,13 +17,13 @@ const Payments = () => {
 			page: 1,
 			per_page: 10,
 		};
-		const orders = getOrders( query, null );
-		const isRequesting = hasFinishedResolution( 'getOrders', [ query ] );
+		const fetchedOrders = getOrders( query, null );
+		const requesting = hasFinishedResolution( 'getOrders', [ query ] );
 
 		return {
-			orders,
-			isError: Boolean( getOrdersError( orders ) ),
-			isRequesting,
+			orders: fetchedOrders,
+			isError: Boolean( getOrdersError( fetchedOrders ) ),
+			isRequesting: requesting,
 		};
 	} );
 
@@ -51,7 +47,7 @@ const Payments = () => {
 			const updatedOrder = await apiFetch( {
 				path: `/wc/v3/orders/${ order.id }`,
 				method: 'PUT',
-				data: data,
+				data,
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -62,8 +58,8 @@ const Payments = () => {
 		}
 	};
 
-	const renderOrders = ( orders ) => {
-		return orders.map( ( order ) => {
+	const renderOrders = ( orderList ) => {
+		return orderList.map( ( order ) => {
 			return (
 				<tr key={ order.id }>
 					<td className="manage-column column-thumb" key={ 0 }>
