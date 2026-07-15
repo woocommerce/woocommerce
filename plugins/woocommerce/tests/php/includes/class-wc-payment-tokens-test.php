@@ -176,6 +176,30 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_customer_tokens should default the limit filter to DEFAULT_CUSTOMER_TOKENS_LIMIT.
+	 */
+	public function test_get_customer_tokens_defaults_to_the_documented_limit(): void {
+		$received = null;
+		add_filter(
+			'woocommerce_get_customer_payment_tokens_limit',
+			function ( $limit ) use ( &$received ) {
+				$received = $limit;
+				return $limit;
+			}
+		);
+
+		WC_Payment_Tokens::get_customer_tokens( $this->user_id );
+
+		// Pins the default without creating 100 tokens: a silent change to the constant fails here.
+		$this->assertSame(
+			WC_Payment_Tokens::DEFAULT_CUSTOMER_TOKENS_LIMIT,
+			$received,
+			'The customer token limit filter should receive DEFAULT_CUSTOMER_TOKENS_LIMIT as its default'
+		);
+		$this->assertSame( 100, WC_Payment_Tokens::DEFAULT_CUSTOMER_TOKENS_LIMIT );
+	}
+
+	/**
 	 * @testdox Data store get_tokens should cap an unscoped query with the fallback ceiling.
 	 */
 	public function test_data_store_get_tokens_caps_unscoped_queries(): void {
