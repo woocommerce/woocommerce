@@ -389,12 +389,13 @@ export const updateBranchChangelog = async (
 				'diff-tree',
 				'--no-commit-id',
 				'--name-only',
+				'-z',
 				'-r',
 				'--diff-filter=D',
 				deletionCommitHash,
 			] )
 		 )
-			.split( '\n' )
+			.split( '\0' )
 			.map( ( file ) => file.trim() )
 			.filter( Boolean );
 
