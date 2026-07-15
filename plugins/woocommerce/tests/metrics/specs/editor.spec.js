@@ -11,9 +11,8 @@ import { test, Metrics } from '@wordpress/e2e-test-utils-playwright';
 import { PerfUtils } from '../fixtures';
 import {
 	getTotalBlockingTime,
-	getWooEditorAssetMetrics,
 	median,
-	startWooEditorNetworkTransferMetrics,
+	startWooEditorAssetMetrics,
 } from '../utils';
 
 // See https://github.com/WordPress/gutenberg/issues/51383#issuecomment-1613460429
@@ -61,8 +60,8 @@ test.describe( 'Editor Performance', () => {
 				perfUtils,
 				metrics,
 			} ) => {
-				const stopWooEditorNetworkTransferMetrics =
-					await startWooEditorNetworkTransferMetrics( page );
+				const stopWooEditorAssetMetrics =
+					await startWooEditorAssetMetrics( page );
 
 				try {
 					// Open the test draft.
@@ -90,11 +89,9 @@ test.describe( 'Editor Performance', () => {
 						BROWSER_IDLE_WAIT
 					);
 
-					// Measure WooCommerce editor asset sizes.
+					// Measure WooCommerce editor assets.
 					const wooEditorAssetMetrics =
-						await getWooEditorAssetMetrics( page );
-					const wooEditorNetworkTransferMetrics =
-						await stopWooEditorNetworkTransferMetrics();
+						await stopWooEditorAssetMetrics();
 
 					// Save the results.
 					if ( i > throwaway ) {
@@ -131,17 +128,9 @@ test.describe( 'Editor Performance', () => {
 								results[ metric ].push( value );
 							}
 						);
-						Object.entries(
-							wooEditorNetworkTransferMetrics
-						).forEach( ( [ metric, value ] ) => {
-							if ( ! results[ metric ] ) {
-								results[ metric ] = [];
-							}
-							results[ metric ].push( value );
-						} );
 					}
 				} finally {
-					await stopWooEditorNetworkTransferMetrics();
+					await stopWooEditorAssetMetrics();
 				}
 			} );
 		}

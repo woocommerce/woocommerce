@@ -45,16 +45,18 @@ function getWooEditorAssetUrl( rawUrl, baseUrl ) {
 	};
 }
 
-function getEmptyWooEditorNetworkTransferMetrics() {
+function getEmptyWooEditorAssetMetrics() {
 	return {
+		wooEditorAssetCount: 0,
 		wooEditorNetworkTransferAssetSize: 0,
 		wooEditorNetworkTransferScriptSize: 0,
 		wooEditorNetworkTransferStyleSize: 0,
 	};
 }
 
-function formatWooEditorNetworkTransferMetrics( metrics ) {
+function formatWooEditorAssetMetrics( metrics ) {
 	return {
+		wooEditorAssetCount: metrics.wooEditorAssetCount,
 		wooEditorNetworkTransferAssetSize: roundSize(
 			metrics.wooEditorNetworkTransferAssetSize / KB
 		),
@@ -67,14 +69,21 @@ function formatWooEditorNetworkTransferMetrics( metrics ) {
 	};
 }
 
-export async function startWooEditorNetworkTransferMetrics( page ) {
+export async function startWooEditorAssetMetrics( page ) {
 	const client = await page.context().newCDPSession( page );
+	const { frameTree } = await client.send( 'Page.getFrameTree' );
+	const mainFrameId = frameTree.frame.id;
 	const requests = new Map();
 	const assetUrls = new Set();
-	const metrics = getEmptyWooEditorNetworkTransferMetrics();
+	const metrics = getEmptyWooEditorAssetMetrics();
 	let isCollecting = true;
 
 	const onRequestWillBeSent = ( event ) => {
+		// Exclude assets loaded within editor iframes.
+		if ( event.frameId !== mainFrameId ) {
+			return;
+		}
+
 		const assetUrl = getWooEditorAssetUrl( event.request.url, page.url() );
 
 		if ( assetUrl ) {
@@ -90,6 +99,7 @@ export async function startWooEditorNetworkTransferMetrics( page ) {
 		}
 
 		assetUrls.add( assetUrl.normalizedUrl );
+		metrics.wooEditorAssetCount += 1;
 
 		const size = event.encodedDataLength || 0;
 		metrics.wooEditorNetworkTransferAssetSize += size;
@@ -109,7 +119,7 @@ export async function startWooEditorNetworkTransferMetrics( page ) {
 
 	return async () => {
 		if ( ! isCollecting ) {
-			return formatWooEditorNetworkTransferMetrics( metrics );
+			return formatWooEditorAssetMetrics( metrics );
 		}
 
 		isCollecting = false;
@@ -117,41 +127,8 @@ export async function startWooEditorNetworkTransferMetrics( page ) {
 		client.off( 'Network.loadingFinished', onLoadingFinished );
 		await client.detach();
 
-		return formatWooEditorNetworkTransferMetrics( metrics );
+		return formatWooEditorAssetMetrics( metrics );
 	};
-}
-
-export async function getWooEditorAssetMetrics( page ) {
-	return await page.evaluate( () => {
-		const wooBlocksAssetsPath =
-			'/wp-content/plugins/woocommerce/assets/client/blocks/';
-		const assetUrls = new Set();
-		const metrics = {
-			wooEditorAssetCount: 0,
-		};
-
-		// This intentionally excludes assets loaded only within editor iframes,
-		// which have their own resource performance timelines.
-		performance.getEntriesByType( 'resource' ).forEach( ( entry ) => {
-			const url = new URL( entry.name, window.location.href );
-			const normalizedUrl = url.origin + url.pathname;
-
-			if (
-				! url.pathname.includes( wooBlocksAssetsPath ) ||
-				! /\.(js|css)$/.test( url.pathname ) ||
-				assetUrls.has( normalizedUrl )
-			) {
-				return;
-			}
-
-			assetUrls.add( normalizedUrl );
-			metrics.wooEditorAssetCount += 1;
-		} );
-
-		return {
-			wooEditorAssetCount: metrics.wooEditorAssetCount,
-		};
-	} );
 }
 
 export async function getTotalBlockingTime( page, idleWait ) {
