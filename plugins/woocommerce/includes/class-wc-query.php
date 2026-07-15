@@ -623,6 +623,8 @@ class WC_Query {
 		remove_filter( 'posts_clauses', array( $this, 'order_by_price_desc_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( $this, 'order_by_stock_quantity_asc_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( $this, 'order_by_stock_quantity_desc_post_clauses' ) );
 	}
 
 	/**
@@ -758,6 +760,10 @@ class WC_Query {
 			case 'rating':
 				add_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
 				break;
+			case 'stock_quantity':
+				$callback = 'DESC' === $order ? 'order_by_stock_quantity_desc_post_clauses' : 'order_by_stock_quantity_asc_post_clauses';
+				add_filter( 'posts_clauses', array( $this, $callback ) );
+				break;
 		}
 
 		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args, $orderby, $order );
@@ -866,6 +872,38 @@ class WC_Query {
 	public function order_by_rating_post_clauses( $args ) {
 		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
 		$args['orderby'] = ' wc_product_meta_lookup.average_rating DESC, wc_product_meta_lookup.rating_count DESC, wc_product_meta_lookup.product_id DESC ';
+		return $args;
+	}
+
+	/**
+	 * Handle numeric stock quantity sorting in ascending order.
+	 *
+	 * Products without managed stock have a null stock quantity and are sorted last.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $args Query args.
+	 * @return array
+	 */
+	public function order_by_stock_quantity_asc_post_clauses( $args ) {
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['orderby'] = ' wc_product_meta_lookup.stock_quantity IS NULL ASC, wc_product_meta_lookup.stock_quantity ASC, wc_product_meta_lookup.product_id ASC ';
+		return $args;
+	}
+
+	/**
+	 * Handle numeric stock quantity sorting in descending order.
+	 *
+	 * Products without managed stock have a null stock quantity and are sorted last.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $args Query args.
+	 * @return array
+	 */
+	public function order_by_stock_quantity_desc_post_clauses( $args ) {
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['orderby'] = ' wc_product_meta_lookup.stock_quantity IS NULL ASC, wc_product_meta_lookup.stock_quantity DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
 

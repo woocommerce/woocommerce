@@ -506,6 +506,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		$result = parent::get_objects( $query_args );
+		WC()->query->remove_ordering_args();
 
 		// Remove filters for search criteria in product postmeta via the lookup table.
 		if ( $add_search_criteria ) {
@@ -1872,7 +1873,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 */
 	public function get_collection_params() {
 		$params                    = parent::get_collection_params();
-		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating' ) );
+		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating', 'stock_quantity' ) );
 
 		unset( $params['in_stock'] );
 		$params['stock_status'] = array(
