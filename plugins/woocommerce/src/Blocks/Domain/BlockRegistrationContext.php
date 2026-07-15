@@ -30,7 +30,9 @@ class BlockRegistrationContext {
 		 *
 		 * Registration is skipped on known non-rendering contexts (the Store API and other WooCommerce REST
 		 * namespaces, cron, AJAX, XML-RPC, favicon, robots.txt and XML sitemaps) as a performance optimisation.
-		 * An extension that renders WooCommerce blocks in one of those contexts can return true here to opt back in.
+		 * Product and variation descriptions rendered through do_blocks are already handled on demand (see the
+		 * woocommerce_short_description hook in Bootstrap), so this filter is only needed to opt back in when an
+		 * extension renders WooCommerce blocks some other way in one of those contexts.
 		 *
 		 * @since 11.1.0
 		 *
@@ -49,7 +51,10 @@ class BlockRegistrationContext {
 	 * @return bool True unless the request is a known non-rendering context.
 	 */
 	private function is_rendering_request(): bool {
-		// Store API renders no blocks.
+		// The Store API returns data, not rendered pages, so it needs no eager block/pattern/asset registration.
+		// Dynamic blocks in product/cart/order descriptions are registered on demand instead — see the
+		// woocommerce_short_description hook in Bootstrap. Bootstrap's own caller already excludes the Store API
+		// before reaching here, but should_register() is public, so this branch still guards any direct caller.
 		if ( wc()->is_store_api_request() ) {
 			return false;
 		}

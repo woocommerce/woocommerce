@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Register WooCommerce block types on demand when a product or variation description is rendered through do_blocks, so dynamic blocks placed in a description no longer render blank in the products REST API, the Store API, the variation AJAX endpoint or product webhooks.

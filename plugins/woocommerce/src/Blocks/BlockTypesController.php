@@ -41,6 +41,17 @@ final class BlockTypesController {
 	private $registered_blocks_with_woocommerce_parents;
 
 	/**
+	 * Whether block types have already been registered for this request.
+	 *
+	 * Guards register_blocks() so it can be called more than once — on the `init` hook and again on demand
+	 * when a product/variation description is rendered through do_blocks (see Bootstrap) — without
+	 * re-registering block types (which would trigger doing_it_wrong notices).
+	 *
+	 * @var bool
+	 */
+	private $blocks_registered = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi          $asset_api Instance of the asset API.
@@ -110,6 +121,11 @@ final class BlockTypesController {
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
 	public function register_blocks() {
+		if ( $this->blocks_registered ) {
+			return;
+		}
+		$this->blocks_registered = true;
+
 		$this->register_block_metadata();
 		$block_types = $this->get_block_types();
 
