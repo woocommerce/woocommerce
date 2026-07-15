@@ -93,4 +93,24 @@ describe( 'QuantitySelector', () => {
 		);
 		expect( input ).toHaveValue( 30 );
 	} );
+
+	it( 'renders the decrease button before the input and the increase button after (visual DOM order)', () => {
+		const { container } = render( <QuantitySelector { ...defaults } /> );
+
+		const wrapper = container.querySelector(
+			'.wc-block-components-quantity-selector'
+		) as HTMLElement;
+		const children = Array.from( wrapper.children );
+
+		expect( children ).toHaveLength( 3 );
+		expect( children[ 0 ] ).toHaveClass(
+			'wc-block-components-quantity-selector__button--minus'
+		);
+		expect( children[ 1 ] ).toHaveClass(
+			'wc-block-components-quantity-selector__input'
+		);
+		expect( children[ 2 ] ).toHaveClass(
+			'wc-block-components-quantity-selector__button--plus'
+		);
+	} );
 } );
