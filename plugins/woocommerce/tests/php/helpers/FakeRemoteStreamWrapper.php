@@ -12,7 +12,7 @@ declare( strict_types = 1 );
  * exercised without network access. Register it over `http` for the duration of a test:
  *
  *     stream_wrapper_unregister( 'http' );
- *     stream_wrapper_register( 'http', WC_Download_Handler_Fake_Remote_Stream::class );
+ *     stream_wrapper_register( 'http', FakeRemoteStreamWrapper::class );
  *     // ...
  *     stream_wrapper_restore( 'http' );
  *
@@ -20,9 +20,14 @@ declare( strict_types = 1 );
  * Parameter names and signatures are fixed by PHP's streamWrapper prototype, so unused ones are
  * expected: https://www.php.net/manual/en/class.streamwrapper.php
  *
+ * Note that PHP reports `stream_get_meta_data()['wrapper_data']` as the wrapper instance itself for
+ * user-space wrappers, never the array of raw header lines the built-in `http` wrapper provides.
+ * Code reading response headers therefore sees none of them, so this double cannot stand in for a
+ * remote server's `Content-Disposition` or `Content-Type`.
+ *
  * phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
  */
-class WC_Download_Handler_Fake_Remote_Stream {
+class FakeRemoteStreamWrapper {
 
 	/**
 	 * Stream context, assigned by PHP when the wrapper is instantiated.

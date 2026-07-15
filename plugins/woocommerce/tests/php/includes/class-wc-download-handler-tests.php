@@ -456,7 +456,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox download_file_force() should serve a remote file, not fatal, when a woocommerce_file_download_filename callback returns a non-string.
+	 * @testdox download_file_force() should carry a non-string filename from a woocommerce_file_download_filename callback through to the download headers instead of fataling.
 	 */
 	public function test_download_file_force_tolerates_non_string_filename_from_filter(): void {
 		// Mirrors the report in #66635: a callback that falls off the end and returns null.
@@ -467,6 +467,11 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		// get_allowed_mime_types(), so this fires once the filename is resolved but before any
 		// header() call. Throwing here unwinds download_file_force() ahead of its terminating
 		// exit(), which would otherwise take the PHPUnit process down with it.
+		//
+		// That ordering is what this test depends on: should download_headers() ever be reworked so
+		// that nothing hooks in ahead of the exit(), this test would take the test run down with it
+		// rather than fail. Keep the marker on the earliest hook that follows the filename being
+		// resolved.
 		$header_stage_marker = function () use ( &$reached_headers ) {
 			$reached_headers = true;
 			throw new RuntimeException( 'reached-download-headers' );
@@ -480,11 +485,13 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		// Stand in for the remote host so the open succeeds and the filename actually reaches
 		// resolve_filename_from_response_headers(), which a real unreachable URL never would.
 		stream_wrapper_unregister( 'http' );
-		stream_wrapper_register( 'http', WC_Download_Handler_Fake_Remote_Stream::class );
+		stream_wrapper_register( 'http', FakeRemoteStreamWrapper::class );
 
 		try {
+			// No $this->fail() for the no-throw case: PHPUnit's own AssertionFailedError descends
+			// from RuntimeException, so the catch below would swallow it. The assertion after this
+			// block covers that path instead.
 			WC_Download_Handler::download( 'http://example.test/uc', 0 );
-			$this->fail( 'Expected the download to reach the header stage.' );
 		} catch ( RuntimeException $e ) {
 			$this->assertSame( 'reached-download-headers', $e->getMessage(), 'Only the marker exception should escape; a TypeError here is the #66635 regression.' );
 		} finally {
