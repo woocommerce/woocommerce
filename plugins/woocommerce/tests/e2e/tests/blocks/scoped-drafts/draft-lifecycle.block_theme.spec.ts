@@ -121,13 +121,16 @@ test.describe( 'Scoped drafts: draft lifecycle across navigation and reload', ()
 			] );
 		} );
 
-		await test.step( 'the persisted draft — not whatever default the freshly re-rendered card displays — is what actually gets added to the cart', async () => {
+		await test.step( 'the remounted card displays the persisted draft value, and adding to cart posts that same value', async () => {
 			// The returned card is a freshly mounted instance of the same
-			// scope; its own on-screen control is not asserted here (a
-			// display nuance of the rebuilt instance), but the ledger it
-			// reads from for submission is the one just proven to survive,
-			// so clicking "Add to cart" here is the real, user-facing proof
-			// that the edit was not lost: it posts the edited quantity.
+			// scope; its quantity input reads through the shared draft, so
+			// it shows the edited value rather than the block's own
+			// freshly re-initialized default — a shopper looking at the
+			// card after paginating back sees exactly what they last set.
+			const quantity =
+				collectionForm( page ).getByLabel( 'Product quantity' );
+			await expect( quantity ).toHaveValue( '4' );
+
 			const addToCartButton = collectionForm( page ).getByRole(
 				'button',
 				{ name: 'Add to cart' }
@@ -252,6 +255,18 @@ test.describe( 'Scoped drafts: draft lifecycle across navigation and reload', ()
 
 		// The resolved variation's own draft — quantity and selected
 		// attributes alike — is exactly as it was before the round trip.
+		//
+		// This is deliberately a store-level assertion, unlike the simple
+		// product's display-level one in the previous test: a variation
+		// resolution lives in the card's own client-side context (the
+		// resolved `variationId`, the selector's `selectedAttributes`),
+		// which the enhanced-pagination remount discards — the fresh
+		// server render carries no resolved variation, so the remounted
+		// card presents as unconfigured and its Add to cart stays blocked
+		// by the usual missing-attributes validation until the shopper
+		// reselects (display and action agree). What survives the remount
+		// is the variation's own entry in the scope's draft ledger,
+		// asserted here.
 		await expect.poll( variationDraft ).toEqual( draftBeforeNav );
 	} );
 } );
