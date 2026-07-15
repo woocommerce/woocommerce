@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Render Settings UI fields through the DataForm component from @wordpress/dataviews.

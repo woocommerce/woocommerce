@@ -14,6 +14,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { DataForm, useFormValidity } from '@wordpress/dataviews';
 import {
 	Badge,
 	Button as UIButton,
@@ -28,12 +29,15 @@ import type { ComponentProps, ErrorInfo, ReactNode } from 'react';
 /**
  * Internal dependencies
  */
+import {
+	buildDataFormFields,
+	buildDataFormFormConfig,
+} from './dataform-adapter';
+import type { DataFormAdapterRuntime } from './dataform-adapter';
 import { HiddenInputs } from './hidden-inputs';
 import { error, warn } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
-import { NativeSettingsField } from './native-fields';
 import {
-	resolveFieldComponent,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
 	resolveRegionComponent,
@@ -104,9 +108,6 @@ const getChangedValues = (
 
 	return changedValues;
 };
-
-const getFieldTypeClassName = ( type: string ) =>
-	`wc-settings-ui__field--${ type.replace( /[^a-z0-9_-]/gi, '-' ) }`;
 
 const getActionVariant = ( variant?: string ) =>
 	( [ 'primary', 'secondary', 'tertiary', 'link' ].includes( variant || '' )
@@ -853,6 +854,57 @@ export const SettingsUIPage = ( {
 		submitSettingsForm,
 	] );
 
+	const adapterRuntime: DataFormAdapterRuntime = useMemo(
+		() => ( { schema, context, initialValues, setValue, setValues } ),
+		[ schema, context, initialValues, setValue, setValues ]
+	);
+
+	const groupDataForms = useMemo(
+		() =>
+			Object.values( schema.groups ).reduce<
+				Record<
+					string,
+					{
+						fields: ReturnType< typeof buildDataFormFields >;
+						form: ReturnType< typeof buildDataFormFormConfig >;
+					}
+				>
+			>( ( acc, group ) => {
+				acc[ group.id ] = {
+					fields: buildDataFormFields( group, adapterRuntime ),
+					form: buildDataFormFormConfig( group ),
+				};
+				return acc;
+			}, {} ),
+		[ schema, adapterRuntime ]
+	);
+
+	const allDataFormFields = useMemo(
+		() =>
+			Object.values( groupDataForms ).flatMap(
+				( groupConfig ) => groupConfig.fields
+			),
+		[ groupDataForms ]
+	);
+
+	const allFieldsForm = useMemo(
+		() => ( { fields: allDataFormFields.map( ( field ) => field.id ) } ),
+		[ allDataFormFields ]
+	);
+
+	const { validity, isValid: isSchemaValid } = useFormValidity(
+		values,
+		allDataFormFields,
+		allFieldsForm
+	);
+
+	const handleDataFormChange = useCallback(
+		( edits: Record< string, SettingsValue > ) => {
+			setValues( edits );
+		},
+		[ setValues ]
+	);
+
 	const visibleGroups = useMemo(
 		() =>
 			Object.values( schema.groups )
@@ -899,7 +951,7 @@ export const SettingsUIPage = ( {
 				}
 				name="save"
 				value={ saveButtonLabel }
-				disabled={ ! isDirty || isSaving }
+				disabled={ ! isDirty || isSaving || ! isSchemaValid }
 				isBusy={ isSaving }
 				onClick={ () =>
 					saveStrategy.adapter === 'form_post'
@@ -946,46 +998,14 @@ export const SettingsUIPage = ( {
 					>
 						<Card.Root className="wc-settings-ui__section-card">
 							<GroupHeader group={ group } />
-							<Card.Content
-								className="wc-settings-ui__section-fields"
-								render={ <Stack direction="column" gap="lg" /> }
-							>
-								{ group.fields.map( ( field ) => {
-									const FieldComponent =
-										resolveFieldComponent(
-											field,
-											context
-										) || NativeSettingsField;
-									const value = values[ field.id ];
-
-									return (
-										<div
-											className={ [
-												'wc-settings-ui__field',
-												getFieldTypeClassName(
-													field.type
-												),
-											].join( ' ' ) }
-											key={ field.id }
-										>
-											<FieldComponent
-												field={ field }
-												value={ value }
-												context={ context }
-												values={ values }
-												initialValues={ initialValues }
-												setValue={ setValue }
-												setValues={ setValues }
-												onChange={ ( nextValue ) =>
-													setValue(
-														field.id,
-														nextValue
-													)
-												}
-											/>
-										</div>
-									);
-								} ) }
+							<Card.Content className="wc-settings-ui__section-fields">
+								<DataForm
+									data={ values }
+									fields={ groupDataForms[ group.id ].fields }
+									form={ groupDataForms[ group.id ].form }
+									onChange={ handleDataFormChange }
+									validity={ validity }
+								/>
 							</Card.Content>
 						</Card.Root>
 					</section>
