@@ -5,6 +5,8 @@
  * @package WooCommerce\Reports
  */
 
+use Automattic\WooCommerce\Internal\Address\LegacyStateCodes;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -100,7 +102,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 				$state_code   = get_user_meta( $user->ID, 'billing_state', true );
 				$country_code = get_user_meta( $user->ID, 'billing_country', true );
 
-				$state   = isset( WC()->countries->states[ $country_code ][ $state_code ] ) ? WC()->countries->states[ $country_code ][ $state_code ] : $state_code;
+				$states  = (array) WC()->countries->get_states( $country_code );
+				$state   = LegacyStateCodes::get_state_name( $country_code, $state_code, $states );
 				$country = isset( WC()->countries->countries[ $country_code ] ) ? WC()->countries->countries[ $country_code ] : $country_code;
 
 				$value = '';

@@ -86,6 +86,15 @@ jQuery( function ( $ ) {
 					$newstate.append( $option );
 				} );
 
+				// Keep historical or extension-defined values from being erased on save.
+				if ( value && ! Object.prototype.hasOwnProperty.call( state, value ) ) {
+					$newstate.append(
+						$( '<option></option>' )
+							.prop( 'value', value )
+							.text( value )
+					);
+				}
+
 				$newstate.val( value );
 
 				$state.replaceWith( $newstate );

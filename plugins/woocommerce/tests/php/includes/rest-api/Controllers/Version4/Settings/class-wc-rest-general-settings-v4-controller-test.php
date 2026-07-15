@@ -274,6 +274,37 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	}
 
 	/**
+	 * @testdox An unchanged legacy Nepal base location can be round-tripped without enabling new legacy values.
+	 */
+	public function test_round_trips_unchanged_legacy_nepal_default_country() {
+		update_option( 'woocommerce_default_country', 'NP:BAG' );
+		wp_set_current_user( self::$user_id );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_default_country' => 'NP:BAG',
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'NP:BAG', get_option( 'woocommerce_default_country' ) );
+
+		update_option( 'woocommerce_default_country', 'NP:P3' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'NP:P3', get_option( 'woocommerce_default_country' ) );
+	}
+
+	/**
 	 * Test updating country without state (country only).
 	 */
 	public function test_update_country_only() {

@@ -25,6 +25,20 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	private $error_message_26960 = 'Paypal error for GH issue 26960';
 
 	/**
+	 * @testdox PayPal requests use the readable name for a historical Nepal state code.
+	 */
+	public function test_paypal_request_displays_legacy_nepal_state_name(): void {
+		include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
+
+		$sut              = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$get_paypal_state = function ( string $country, string $state ): string {
+			return $this->get_paypal_state( $country, $state );
+		};
+
+		$this->assertSame( 'Bagmati', $get_paypal_state->call( $sut, 'NP', 'BAG' ) );
+	}
+
+	/**
 	 * Test do_capture when API returns error.
 	 *
 	 * see @link https://github.com/woocommerce/woocommerce/issues/26960

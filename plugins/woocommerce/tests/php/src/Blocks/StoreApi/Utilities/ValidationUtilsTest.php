@@ -27,7 +27,7 @@ class ValidationUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Every legacy Nepal zone remains valid and readable for persisted addresses.
+	 * @testdox Every legacy Nepal zone remains readable but is rejected as active checkout input.
 	 *
 	 * @dataProvider provide_legacy_nepal_states
 	 *
@@ -35,8 +35,8 @@ class ValidationUtilsTest extends WC_Unit_Test_Case {
 	 * @param string $name               Legacy state name.
 	 * @param string $expected_name_code Expected code when formatting the name.
 	 */
-	public function test_legacy_nepal_zone_codes_remain_valid_for_persisted_addresses( string $code, string $name, string $expected_name_code ): void {
-		$this->assertTrue( $this->sut->validate_state( $code, 'NP' ), "Persisted legacy Nepal zone {$code} should remain valid." );
+	public function test_legacy_nepal_zone_codes_remain_readable_but_are_rejected_at_checkout( string $code, string $name, string $expected_name_code ): void {
+		$this->assertFalse( $this->sut->validate_state( $code, 'NP' ), "Legacy Nepal zone {$code} should require a current province at checkout." );
 		$this->assertSame( $code, $this->sut->format_state( $code, 'NP' ), "Persisted legacy Nepal zone {$code} should remain unchanged." );
 		$this->assertSame( $expected_name_code, $this->sut->format_state( $name, 'NP' ), "Legacy Nepal zone name {$name} should normalize predictably." );
 	}
@@ -72,14 +72,14 @@ class ValidationUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Extensions can disable legacy state-code compatibility.
+	 * @testdox Extensions can disable legacy state-code display compatibility.
 	 */
 	public function test_legacy_compatibility_filter_can_disable_aliases(): void {
 		$filter_callback = '__return_empty_array';
 		add_filter( 'woocommerce_legacy_state_codes', $filter_callback );
 
 		try {
-			$this->assertFalse( $this->sut->validate_state( 'BAG', 'NP' ), 'Disabled legacy aliases should no longer pass validation.' );
+			$this->assertSame( 'BHERI', $this->sut->format_state( 'Bheri', 'NP' ), 'Disabled legacy aliases should remain unformatted.' );
 		} finally {
 			remove_filter( 'woocommerce_legacy_state_codes', $filter_callback );
 		}

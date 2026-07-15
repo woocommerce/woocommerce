@@ -10,7 +10,6 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\Address\LegacyStateCodes;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 
@@ -940,15 +939,12 @@ class WC_Checkout {
 				}
 
 				if ( '' !== $data[ $key ] && in_array( 'state', $format, true ) ) {
-					$country                     = isset( $data[ $fieldset_key . '_country' ] ) ? $data[ $fieldset_key . '_country' ] : WC()->customer->{"get_{$fieldset_key}_country"}();
-					$valid_states                = WC()->countries->get_states( $country );
-					$states_allowed_for_checkout = is_array( $valid_states )
-						? LegacyStateCodes::add_to_current_states( $country, $valid_states )
-						: $valid_states;
+					$country      = isset( $data[ $fieldset_key . '_country' ] ) ? $data[ $fieldset_key . '_country' ] : WC()->customer->{"get_{$fieldset_key}_country"}();
+					$valid_states = WC()->countries->get_states( $country );
 
-					if ( ! empty( $states_allowed_for_checkout ) && is_array( $states_allowed_for_checkout ) && count( $states_allowed_for_checkout ) > 0 ) {
-						$valid_state_codes  = array_map( 'wc_strtoupper', array_keys( $states_allowed_for_checkout ) );
-						$valid_state_values = array_map( 'wc_strtoupper', array_flip( array_map( 'wc_strtoupper', $states_allowed_for_checkout ) ) );
+					if ( ! empty( $valid_states ) && is_array( $valid_states ) && count( $valid_states ) > 0 ) {
+						$valid_state_codes  = array_map( 'wc_strtoupper', array_keys( $valid_states ) );
+						$valid_state_values = array_map( 'wc_strtoupper', array_flip( array_map( 'wc_strtoupper', $valid_states ) ) );
 						$data[ $key ]       = wc_strtoupper( $data[ $key ] );
 
 						if ( isset( $valid_state_values[ $data[ $key ] ] ) ) {

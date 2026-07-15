@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
+use Automattic\WooCommerce\Internal\Address\LegacyStateCodes;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -631,13 +632,9 @@ class WC_Gateway_Paypal_Request {
 			return $state;
 		}
 
-		$states = WC()->countries->get_states( $cc );
+		$states = (array) WC()->countries->get_states( $cc );
 
-		if ( isset( $states[ $state ] ) ) {
-			return $states[ $state ];
-		}
-
-		return $state;
+		return LegacyStateCodes::get_state_name( $cc, $state, $states );
 	}
 
 	/**

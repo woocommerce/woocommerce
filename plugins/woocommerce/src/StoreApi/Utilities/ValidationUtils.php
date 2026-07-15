@@ -28,7 +28,7 @@ class ValidationUtils {
 	 * @return boolean Valid or not valid.
 	 */
 	public function validate_state( $state, $country ) {
-		$states = LegacyStateCodes::add_to_current_states( $country, $this->get_states_for_country( $country ) );
+		$states = $this->get_states_for_country( $country );
 
 		if ( count( $states ) && ! in_array( \wc_strtoupper( $state ), array_map( '\wc_strtoupper', array_keys( $states ) ), true ) ) {
 			return false;

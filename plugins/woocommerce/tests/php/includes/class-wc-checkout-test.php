@@ -161,9 +161,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'validate_posted_data' accepts a persisted legacy Nepal state code.
+	 * @testdox 'validate_posted_data' requires a current Nepal province at checkout.
 	 */
-	public function test_validate_posted_data_accepts_legacy_nepal_state_code(): void {
+	public function test_validate_posted_data_rejects_legacy_nepal_state_code(): void {
 		$data   = array(
 			'billing_country'           => 'NP',
 			'billing_state'             => 'BAG',
@@ -173,9 +173,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$this->sut->validate_posted_data( $data, $errors );
 
-		$this->assertEmpty(
+		$this->assertNotEmpty(
 			$errors->get_error_message( 'billing_state_validation' ),
-			'Persisted legacy Nepal states should pass classic checkout validation: ' . $errors->get_error_message( 'billing_state_validation' )
+			'Legacy Nepal states should require selecting a current province.'
 		);
 		$this->assertSame( 'BAG', $data['billing_state'], 'The persisted legacy code should remain unchanged.' );
 	}

@@ -11,6 +11,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General;
 
+use Automattic\WooCommerce\Internal\Address\LegacyStateCodes;
 use WP_Error;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Schema\GeneralSettingsSchema;
@@ -270,7 +271,7 @@ class Controller extends AbstractController {
 				break;
 
 			case 'woocommerce_default_country':
-				if ( ! $this->validate_country_or_state_code( $value ) ) {
+				if ( ! $this->validate_country_or_state_code( $value, true ) ) {
 					return new WP_Error(
 						'rest_invalid_param',
 						__( 'Invalid country/state format.', 'woocommerce' ),
@@ -404,10 +405,11 @@ class Controller extends AbstractController {
 	/**
 	 * Validate country or state code.
 	 *
-	 * @param string $country_or_state Country or state code.
+	 * @param string $country_or_state          Country or state code.
+	 * @param bool   $allow_stored_legacy_state Whether to allow an unchanged stored legacy state.
 	 * @return boolean Valid or not valid.
 	 */
-	private function validate_country_or_state_code( $country_or_state ) {
+	private function validate_country_or_state_code( $country_or_state, bool $allow_stored_legacy_state = false ) {
 		list( $country, $state ) = array_pad( explode( ':', (string) $country_or_state, 2 ), 2, '' );
 		if ( '' === $country ) {
 			return false;
@@ -423,7 +425,13 @@ class Controller extends AbstractController {
 		if ( empty( $states_for_country ) ) {
 			return false;
 		}
-		return isset( $states_for_country[ $state ] );
+		if ( isset( $states_for_country[ $state ] ) ) {
+			return true;
+		}
+
+		return $allow_stored_legacy_state
+			&& get_option( 'woocommerce_default_country' ) === $country_or_state
+			&& isset( LegacyStateCodes::get_known_states( $country )[ $state ] );
 	}
 
 	/**
