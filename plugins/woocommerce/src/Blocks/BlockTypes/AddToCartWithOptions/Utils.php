@@ -194,6 +194,22 @@ class Utils {
 			// initial HTML.
 			$wrapper_attributes['data-wp-init--seed-draft'] = 'woocommerce/cart::actions.seedDraftIfAbsent';
 
+			$draft_seed = array(
+				'id'       => $product->get_id(),
+				'quantity' => $input_quantity,
+			);
+
+			// A directly-referenced variation (e.g. a Single Product block
+			// pointing at a variation id) is the only surface that renders this
+			// quantity selector without an enclosing `selectedAttributes`
+			// context, so the seed must carry its own `variation` attributes
+			// here — otherwise this bag would shadow the (attribute-carrying)
+			// outer form-level seed with an incomplete one, and the client's
+			// cart-line pairing ladder could never match the resulting line.
+			if ( $product->is_type( ProductType::VARIATION ) ) {
+				$draft_seed['variation'] = self::format_variation_attributes( $product );
+			}
+
 			// Hand-rolled second context bag: `wp_interactivity_data_wp_context()`
 			// always emits an attribute literally named `data-wp-context`, so it
 			// cannot carry the `woocommerce/cart` draft seed alongside the
@@ -203,12 +219,7 @@ class Utils {
 			// way to add a second context bag on one element (see
 			// ProductTemplate.php/SingleProduct.php's `data-wp-context---scope`).
 			$context_attribute .= ' data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
-				array(
-					'draftSeed' => array(
-						'id'       => $product->get_id(),
-						'quantity' => $input_quantity,
-					),
-				),
+				array( 'draftSeed' => $draft_seed ),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			) . '\'';
 		}
@@ -218,6 +229,35 @@ class Utils {
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			$context_attribute,
 			$quantity_html
+		);
+	}
+
+	/**
+	 * Format a variation product's selected attributes as `{ attribute, value }`
+	 * pairs.
+	 *
+	 * Shared by every surface that needs to describe a variation's selected
+	 * attributes with the same shape: the `selectedAttributes` context set for
+	 * `ProductType::VARIATION` products, and the `variation` field of any
+	 * `woocommerce/cart` draft seed for a variation-type product. Keeping a
+	 * single implementation ensures those seeds always carry a shape the
+	 * client's cart-line pairing ladder (`lineMatchesProduct`) can match.
+	 *
+	 * @param \WC_Product $product The variation product.
+	 * @return array List of `{ attribute, value }` pairs, one per variation attribute.
+	 */
+	public static function format_variation_attributes( $product ) {
+		$variation_attributes = $product->get_variation_attributes();
+
+		return array_map(
+			function ( $attribute, $value ) {
+				return array(
+					'attribute' => $attribute,
+					'value'     => $value,
+				);
+			},
+			array_keys( $variation_attributes ),
+			$variation_attributes
 		);
 	}
 

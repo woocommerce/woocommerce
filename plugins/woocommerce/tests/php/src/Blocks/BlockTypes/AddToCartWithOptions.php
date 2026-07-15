@@ -688,6 +688,67 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$this->assertStringContainsString( $expected_draft_seed, $result, 'The quantity selector emits a woocommerce/cart draft-seed context carrying the product id and quantity.' );
 		$this->assertStringContainsString( 'data-wp-init--seed-draft="woocommerce/cart::actions.seedDraftIfAbsent"', $result, 'The quantity selector triggers seedDraftIfAbsent on init.' );
+		$this->assertStringNotContainsString( '"variation"', $result, 'The draft seed for a simple product carries no "variation" key.' );
+
+		$product = $previous_product;
+	}
+
+	/**
+	 * Tests that `make_quantity_input_interactive` includes the variation's
+	 * selected attributes in its draft-seed context when the global product in
+	 * scope is a variation directly (e.g. a Single Product block referencing a
+	 * variation id). This mirrors the `selectedAttributes` carried by the
+	 * form-level draft seed for variations, so the client-side cart-line
+	 * pairing ladder can match the resulting line by variation attributes, not
+	 * just product id.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::make_quantity_input_interactive
+	 */
+	public function test_make_quantity_input_interactive_draft_seed_includes_variation_attributes() {
+		global $product;
+		$previous_product = $product;
+
+		$fixtures = new FixtureData();
+
+		$variable_product = $fixtures->get_variable_product(
+			array(),
+			array(
+				$fixtures->get_product_attribute( 'color', array( 'red', 'green' ) ),
+			)
+		);
+
+		$variation = $fixtures->get_variation_product(
+			$variable_product->get_id(),
+			array( 'pa_color' => 'red-slug' ),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		$product = $variation;
+
+		$quantity_html = '<div class="quantity"><input type="number" name="quantity" value="1" /></div>';
+
+		$result = $this->invoke_make_quantity_input_interactive( $quantity_html );
+
+		$expected_draft_seed = 'data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
+			array(
+				'draftSeed' => array(
+					'id'        => $variation->get_id(),
+					'quantity'  => 1,
+					'variation' => array(
+						array(
+							'attribute' => 'attribute_pa_color',
+							'value'     => 'red-slug',
+						),
+					),
+				),
+			),
+			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+		) . '\'';
+
+		$this->assertStringContainsString( $expected_draft_seed, $result, 'The quantity selector draft seed for a directly-referenced variation carries its variation attributes, matching the form-level selectedAttributes context.' );
 
 		$product = $previous_product;
 	}
