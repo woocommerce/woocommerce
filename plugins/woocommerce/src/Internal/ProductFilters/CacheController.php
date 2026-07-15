@@ -46,22 +46,22 @@ class CacheController implements RegisterHooksInterface {
 	 * Hook into actions and filters.
 	 */
 	public function register() {
+		// Clear taxonomy hierarchy cache when terms change.
+		add_action( 'created_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
+		add_action( 'edited_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
+		add_action( 'delete_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
+
+		// Clear taxonomy hierarchy cache when relevant term meta changes.
+		add_action( 'added_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
+		add_action( 'updated_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
+		add_action( 'deleted_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
+
 		if ( ! $this->need_cleanup() ) {
 			return;
 		}
 
 		add_action( 'woocommerce_after_product_object_save', array( $this, 'invalidate_filter_data_cache' ) );
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'invalidate_filter_data_cache' ) );
-
-		// Clear taxonomy hierarchy cache when terms change.
-		add_action( 'created_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
-		add_action( 'edited_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
-		add_action( 'delete_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
-
-		// Clear taxonomy hierarchy cache when term meta (like 'order') is added or updated.
-		add_action( 'added_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
-		add_action( 'updated_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
-		add_action( 'deleted_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
 	}
 
 	/**
@@ -135,7 +135,7 @@ class CacheController implements RegisterHooksInterface {
 	/**
 	 * Check if the filter data cache should be cleaned up.
 	 * If the cache group is not set, it means that the store is not using
-	 * the product filters and we don't need to register the hooks.
+	 * the filter data cache and we don't need its invalidation hooks.
 	 *
 	 * @return bool
 	 */
