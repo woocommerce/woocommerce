@@ -231,4 +231,38 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 			'Line items associated with deleted products are not included in the discount calculation.'
 		);
 	}
+
+	/**
+	 * @testdox set_amount removes leading zeros from numeric strings for clean display.
+	 *
+	 * @dataProvider data_provider_for_amount_leading_zeros
+	 */
+	public function test_set_amount_removes_leading_zeros_from_coupon_amount(
+		$input,
+		$expected
+	): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_amount( $input );
+
+		$this->assertSame( $expected, $coupon->get_amount() );
+	}
+
+	/**
+	 * Data provider for leading zero trimming tests.
+	 *
+	 * @return array
+	 */
+	public function data_provider_for_amount_leading_zeros() {
+		return array(
+			'leading zeros like 050'      => array( '050', 50.0 ),
+			'just zero'                    => array( '0', 0.0 ),
+			'decimal with leading zero'    => array( '0.50', 0.5 ),
+			'multiple leading zeros'       => array( '00.50', 0.5 ),
+			'normal number without zeros'  => array( '20', 20.0 ),
+			'negative amount allowed'      => array( -10, -10.0 ),
+			'over 100 for non-percent'     => array( 150, 150.0 ),
+			'empty string becomes zero'    => array( '', 0.0 ),
+			'string 0.0'                   => array( '0.0', 0.0 ),
+		);
+	}
 }
