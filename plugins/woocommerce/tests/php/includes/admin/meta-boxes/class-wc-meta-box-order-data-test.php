@@ -169,6 +169,44 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The read-only summary displays shipping details for a physical Store API order without a shipping method.
+	 */
+	public function test_displays_shipping_details_for_physical_store_api_order_without_shipping_method(): void {
+		$order = $this->create_order_with_shipping_data( false, 'store-api', 'flat_rate', false );
+
+		$this->assertCount( 0, $order->get_shipping_methods(), 'The physical order should exercise the missing shipping-method path.' );
+		$this->assertFalse( $this->products[0]->is_virtual(), 'The ordered product should require physical fulfillment.' );
+
+		$summary = $this->render_shipping_address_summary( $order );
+
+		$this->assertStringContainsString( 'Virtual Customer', $summary );
+		$this->assertStringContainsString( '500 Billing Avenue', $summary );
+		$this->assertStringContainsString( '555-0100', $summary );
+		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
+	}
+
+	/**
+	 * @testdox The read-only summary preserves physical shipping details after the shipping method is removed.
+	 */
+	public function test_preserves_physical_shipping_details_after_shipping_method_is_removed(): void {
+		$order = $this->create_order_with_shipping_data( true );
+
+		foreach ( array_keys( $order->get_shipping_methods() ) as $shipping_item_id ) {
+			$order->remove_item( $shipping_item_id );
+		}
+		$order->save();
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertCount( 0, $order->get_shipping_methods(), 'The shipping method should be removed from the persisted order.' );
+		$summary = $this->render_shipping_address_summary( $order );
+
+		$this->assertStringContainsString( 'Virtual Customer', $summary );
+		$this->assertStringContainsString( '500 Billing Avenue', $summary );
+		$this->assertStringContainsString( '555-0100', $summary );
+		$this->assertStringNotContainsString( 'No shipping address set.', $summary );
+	}
+
+	/**
 	 * @testdox The read-only summary preserves explicit shipping details for non-Store API orders.
 	 */
 	public function test_displays_explicit_shipping_details_for_non_store_api_order(): void {
@@ -350,15 +388,21 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	/**
 	 * Create an order with billing-derived shipping data.
 	 *
-	 * @param bool   $add_shipping_method Whether to add a shipping method to the order.
-	 * @param string $created_via         Order creation source.
-	 * @param string $shipping_method_id  Shipping method ID.
+	 * @param bool      $add_shipping_method Whether to add a shipping method to the order.
+	 * @param string    $created_via         Order creation source.
+	 * @param string    $shipping_method_id  Shipping method ID.
+	 * @param bool|null $product_is_virtual  Whether the ordered product is virtual. Defaults to the inverse of $add_shipping_method.
 	 * @return WC_Order
 	 */
-	private function create_order_with_shipping_data( bool $add_shipping_method, string $created_via = 'store-api', string $shipping_method_id = 'flat_rate' ): WC_Order {
+	private function create_order_with_shipping_data(
+		bool $add_shipping_method,
+		string $created_via = 'store-api',
+		string $shipping_method_id = 'flat_rate',
+		?bool $product_is_virtual = null
+	): WC_Order {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Order admin display product' );
-		$product->set_virtual( ! $add_shipping_method );
+		$product->set_virtual( $product_is_virtual ?? ! $add_shipping_method );
 		$product->save();
 
 		$order = wc_create_order( array( 'customer_id' => 0 ) );
