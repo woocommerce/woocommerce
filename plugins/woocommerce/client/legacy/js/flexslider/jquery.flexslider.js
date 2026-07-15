@@ -816,7 +816,7 @@
       slider.container.css("transition-duration", dur);
 
       if (slider.transforms) {
-        target = (vertical) ? "translate3d(0," + target + ",0)" : "translate3d(" + (parseInt(target)+'px') + ",0,0)";
+        target = (vertical) ? "translate3d(0," + target + ",0)" : "translate3d(" + target + ",0,0)";
       } else {
         slider.container.css("transition-timing-function", easing);
       }
