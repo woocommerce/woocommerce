@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Remove an obsolete OAuth reference from REST API authentication documentation.
