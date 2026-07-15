@@ -333,7 +333,7 @@ class WC_Form_Handler {
 		$current_first_name   = $current_user->first_name;
 		$current_last_name    = $current_user->last_name;
 		$current_email        = $current_user->user_email;
-		$current_display_name = $current_user ? $current_user->display_name : '';
+		$current_display_name = wc_clean( $current_user->display_name );
 
 		// New user data.
 		$user               = new stdClass();

@@ -116,6 +116,51 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox save_account_details() compares cleaned display names for records that bypassed WordPress sanitization.
+	 *
+	 * @covers WC_Form_Handler::save_account_details()
+	 */
+	public function test_save_account_details_allows_unchanged_email_like_display_name_after_cleaning(): void {
+		global $wpdb;
+
+		$user_email = 'legacy-display-name@example.test';
+		$user_id    = self::factory()->user->create(
+			array(
+				'user_login'   => 'legacy-display-name-customer',
+				'user_email'   => $user_email,
+				'display_name' => 'Display Customer',
+				'role'         => 'customer',
+			)
+		);
+
+		// Simulate a legacy or imported record that bypassed WordPress user-field sanitization.
+		$stored_display_name = "  {$user_email}  ";
+		$wpdb->update(
+			$wpdb->users,
+			array( 'display_name' => $stored_display_name ),
+			array( 'ID' => $user_id )
+		);
+		clean_user_cache( $user_id );
+
+		wp_set_current_user( $user_id );
+		$this->prepare_account_details_request(
+			array(
+				'account_first_name'   => 'Jane',
+				'account_last_name'    => 'Doe',
+				'account_display_name' => $stored_display_name,
+				'account_email'        => $user_email,
+			)
+		);
+
+		$this->dispatch_account_details_save_expecting_redirect();
+
+		$updated_user = get_userdata( $user_id );
+
+		$this->assertSame( 'Jane', $updated_user->first_name, 'First name should be saved when cleaned display names match.' );
+		$this->assertSame( 'Doe', $updated_user->last_name, 'Last name should be saved when cleaned display names match.' );
+	}
+
+	/**
 	 * @testdox save_account_details() still blocks changing the display name to an email address.
 	 *
 	 * @covers WC_Form_Handler::save_account_details()
