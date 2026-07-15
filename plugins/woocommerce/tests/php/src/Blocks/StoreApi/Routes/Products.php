@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * Products Controller Tests.
@@ -584,6 +585,48 @@ class Products extends ControllerTestCase {
 		$public_sku_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
 		$public_sku_request->set_param( 'sku', 'public-parent-variation' );
 		$this->assertCount( 1, rest_get_server()->dispatch( $public_sku_request )->get_data() );
+	}
+
+	/**
+	 * @testdox Variations of a scheduled parent are returned via parent[] lookups for users who can view the parent.
+	 */
+	public function test_scheduled_parent_variations_via_parent_query() {
+		$fixtures  = new FixtureData();
+		$attribute = FixtureData::get_product_attribute( 'color', array( 'red', 'blue' ) );
+		$parent    = $fixtures->get_variable_product( array( 'name' => 'Scheduled Parent' ), array( $attribute ) );
+		$variation = $fixtures->get_variation_product(
+			$parent->get_id(),
+			array( 'pa_color' => 'red' ),
+			array(
+				'regular_price' => 10,
+			)
+		);
+
+		wp_update_post(
+			array(
+				'ID'            => $parent->get_id(),
+				'post_status'   => ProductStatus::FUTURE,
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', strtotime( '+1 year' ) ),
+				'post_date'     => gmdate( 'Y-m-d H:i:s', strtotime( '+1 year' ) ),
+			)
+		);
+
+		$parent_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$parent_request->set_param( 'parent', array( $parent->get_id() ) );
+		$parent_request->set_param( 'type', ProductType::VARIATION );
+
+		// Logged-out users should not see variations of a scheduled parent.
+		wp_set_current_user( 0 );
+		$logged_out_response = rest_get_server()->dispatch( $parent_request );
+		$this->assertEquals( 200, $logged_out_response->get_status() );
+		$this->assertCount( 0, $logged_out_response->get_data() );
+
+		// Admins who can view the scheduled parent should receive its variations.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$admin_response = rest_get_server()->dispatch( $parent_request );
+		$this->assertEquals( 200, $admin_response->get_status() );
+		$this->assertCount( 1, $admin_response->get_data() );
+		$this->assertSame( $variation->get_id(), $admin_response->get_data()[0]['id'] );
 	}
 
 	/**

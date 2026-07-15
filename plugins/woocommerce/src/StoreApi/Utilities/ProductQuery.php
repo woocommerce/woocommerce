@@ -359,6 +359,24 @@ class ProductQuery implements QueryClausesGenerator {
 		}
 
 		$objects = array_map( 'wc_get_product', $results['results'] );
+		$total   = $results['total'];
+		$pages   = $results['pages'];
+
+		// Explicit parent lookups (e.g. variation hydration) skip the catalog discovery guard in
+		// add_query_clauses(), so enforce per-product visibility here instead.
+		if ( ! empty( $request['parent'] ) ) {
+			$objects  = array_values(
+				array_filter(
+					$objects,
+					static function ( $product ) {
+						return $product instanceof \WC_Product && $product->is_viewable();
+					}
+				)
+			);
+			$total    = count( $objects );
+			$per_page = $request['per_page'] ? (int) $request['per_page'] : -1;
+			$pages    = $per_page > 0 ? (int) ceil( $total / $per_page ) : 1;
+		}
 
 		// Batch-prime image attachment caches for the whole collection, rather than once per
 		// product when ProductSchema::get_images() runs during serialization.
@@ -366,8 +384,8 @@ class ProductQuery implements QueryClausesGenerator {
 
 		return array(
 			'objects' => $objects,
-			'total'   => $results['total'],
-			'pages'   => $results['pages'],
+			'total'   => $total,
+			'pages'   => $pages,
 		);
 	}
 
@@ -419,8 +437,14 @@ class ProductQuery implements QueryClausesGenerator {
 	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		global $wpdb;
 
-		// SKU and slug lookups can return variations, so exclude any whose parent product is not published.
-		if ( in_array( 'product_variation', (array) $wp_query->get( 'post_type' ), true ) ) {
+		// Catalog discovery queries (SKU, slug, search) can return variations, so exclude any whose
+		// parent product is not published. Explicit parent[] lookups rely on is_viewable() instead.
+		$is_explicit_parent_query = ! empty( $wp_query->get( 'post_parent__in' ) );
+
+		if (
+			in_array( 'product_variation', (array) $wp_query->get( 'post_type' ), true )
+			&& ! $is_explicit_parent_query
+		) {
 			$args['where'] .= $wpdb->prepare(
 				" AND ( {$wpdb->posts}.post_type != 'product_variation' OR EXISTS (
 					SELECT 1 FROM {$wpdb->posts} AS parent

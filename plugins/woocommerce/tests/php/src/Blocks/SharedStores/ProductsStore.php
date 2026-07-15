@@ -132,6 +132,48 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox load_variations() hydrates scheduled variable products into the woocommerce/products store for users who can edit them.
+	 */
+	public function test_load_scheduled_variable_product_variations_hydrates_interactivity_store_for_admin(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_status'   => ProductStatus::FUTURE,
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', strtotime( '+1 year' ) ),
+				'post_date'     => gmdate( 'Y-m-d H:i:s', strtotime( '+1 year' ) ),
+			)
+		);
+		$product = wc_get_product( $product->get_id() );
+
+		$result = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+		$state  = wp_interactivity_state( $this->store_namespace );
+
+		$this->assertNotEmpty( $result, 'Scheduled product variations should not be empty for admins.' );
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertArrayHasKey( $variation_id, $result );
+			$this->assertArrayHasKey( $variation_id, $state['productVariations'] );
+		}
+
+		wp_set_current_user( 0 );
+		$this->reset_products_store_static_state();
+		$this->reset_interactivity_state();
+
+		$logged_out_result = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+
+		$this->assertEmpty(
+			$logged_out_result,
+			'Scheduled product variations should not hydrate into the store for logged-out users.'
+		);
+
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox load_product() fetches each product ID from REST only once.
 	 */
 	public function test_load_product_is_memoized_per_id(): void {
