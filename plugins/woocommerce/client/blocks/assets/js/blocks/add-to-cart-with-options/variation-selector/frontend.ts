@@ -45,6 +45,15 @@ type Context = AddToCartWithOptionsStoreContext & {
 	variationAttributeOptions: VariationOptionItem[];
 	autoselect: boolean;
 	disabledAttributesAction?: 'disable' | 'hide';
+	/**
+	 * Whether this surface has ever had a non-empty attribute selection of
+	 * its own. Set by `callbacks.setSelectedVariationId` the first time it
+	 * observes `selectedAttributes.length > 0`, and never unset — it marks
+	 * this surface as "the one configuring the product" for the rest of its
+	 * lifetime, even if the shopper later clears the selection back to
+	 * empty. Absent (falsy) until then.
+	 */
+	hasSelectedAttribute?: boolean;
 };
 
 type ToggleContext = Context & {
@@ -455,8 +464,42 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes, quantity } =
-					getContext< Context >();
+				const context = getContext< Context >();
+				const { selectedAttributes, quantity } = context;
+				const productContext = getContext< {
+					variationId?: number | null;
+				} >( 'woocommerce/products' );
+				const currentVariationId = productContext
+					? productContext.variationId
+					: productsState.variationId;
+
+				// `data-wp-watch` reruns this callback whenever any
+				// reactive value it reads changes — not only this
+				// surface's own `selectedAttributes` (e.g. variation data
+				// completing an async load re-triggers it on every mounted
+				// surface sharing the page, whether or not the shopper is
+				// using that particular one). A surface with no attribute
+				// selection of its own, that never had one, must not
+				// clobber another surface's already-resolved shared
+				// selection with its own "nothing selected" default — the
+				// same initialize-if-absent discipline `seedDraftIfAbsent`
+				// follows for the draft itself. A surface that *did* make a
+				// real selection at some point keeps writing from then on,
+				// including clearing it back to empty — that is a genuine
+				// edit on this surface, not a bystander's stale
+				// re-evaluation.
+				if (
+					selectedAttributes.length === 0 &&
+					! context.hasSelectedAttribute &&
+					currentVariationId !== null &&
+					currentVariationId !== undefined
+				) {
+					return;
+				}
+				if ( selectedAttributes.length > 0 ) {
+					context.hasSelectedAttribute = true;
+				}
+
 				const result = productsState.findProduct( {
 					id: product.id,
 					selectedAttributes,
@@ -467,9 +510,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					result && result.id !== product.id ? result : null;
 
 				const variationId = matchedVariation?.id ?? null;
-				const productContext = getContext< {
-					variationId?: number | null;
-				} >( 'woocommerce/products' );
 
 				// If there is context, update the context. Otherwise, update the state directly.
 				( productContext

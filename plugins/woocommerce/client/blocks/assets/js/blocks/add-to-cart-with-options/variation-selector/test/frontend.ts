@@ -226,6 +226,113 @@ describe( 'Variation selector frontend store', () => {
 				{ id: 1 }
 			);
 		} );
+
+		it( 'still seeds the unconfigured draft when nothing has resolved a variation yet', () => {
+			// No attribute selection of its own, and nothing else has
+			// resolved a variation yet (the fresh-page-load case): the
+			// initial write establishing the "nothing selected" baseline
+			// must still happen, exactly as today.
+			mockContext.selectedAttributes = [];
+			mockContext.quantity = { 1: 1, 2: 1 };
+			mockProductsState.variationId = null;
+			mockProductsState.baseProductInContext = {
+				id: 1,
+				variations: [ { id: 2 } ],
+			} as ProductResponseItem;
+			mockProductsState.findProduct = jest.fn(
+				() => ( { id: 1 } as ProductResponseItem )
+			);
+
+			const { callbacks } = loadStore();
+			callbacks.setSelectedVariationId();
+
+			expect( mockProductsState.variationId ).toBeNull();
+			expect( mockUpsertDraftItem ).toHaveBeenCalledWith(
+				{ quantity: 1, variation: [] },
+				{ id: 1 }
+			);
+		} );
+
+		it( "does not clobber another surface's already-resolved global variation when this surface has no attribute selection of its own", () => {
+			// Simulates a second, never-configured page-wide surface whose
+			// watch re-runs (e.g. triggered by unrelated variation data
+			// finishing an async load) after another surface has already
+			// resolved a variation into the shared global pointer.
+			mockContext.selectedAttributes = [];
+			mockContext.quantity = { 1: 1, 2: 1 };
+			mockProductsState.variationId = 2;
+			mockProductsState.baseProductInContext = {
+				id: 1,
+				variations: [ { id: 2 } ],
+			} as ProductResponseItem;
+			mockProductsState.findProduct = jest.fn(
+				() => ( { id: 1 } as ProductResponseItem )
+			);
+
+			const { callbacks } = loadStore();
+			callbacks.setSelectedVariationId();
+
+			expect( mockUpsertDraftItem ).not.toHaveBeenCalled();
+			expect( mockProductsState.variationId ).toBe( 2 );
+		} );
+
+		it( "does not clobber another surface's already-resolved per-element variation when this surface has no attribute selection of its own", () => {
+			mockContext.selectedAttributes = [];
+			mockContext.quantity = { 1: 1, 2: 1 };
+			mockProductsContext = { variationId: 2 };
+			mockProductsState.baseProductInContext = {
+				id: 1,
+				variations: [ { id: 2 } ],
+			} as ProductResponseItem;
+			mockProductsState.findProduct = jest.fn(
+				() => ( { id: 1 } as ProductResponseItem )
+			);
+
+			const { callbacks } = loadStore();
+			callbacks.setSelectedVariationId();
+
+			expect( mockUpsertDraftItem ).not.toHaveBeenCalled();
+			expect( mockProductsContext.variationId ).toBe( 2 );
+		} );
+
+		it( 'keeps writing after a real selection made on this surface is cleared back to empty', () => {
+			mockContext.selectedAttributes = [
+				{ attribute: 'Color', value: 'blue' },
+			];
+			mockContext.quantity = { 1: 1, 2: 1 };
+			mockProductsState.baseProductInContext = {
+				id: 1,
+				variations: [ { id: 2 } ],
+			} as ProductResponseItem;
+			mockProductsState.findProduct = jest.fn(
+				() => ( { id: 2 } as ProductResponseItem )
+			);
+
+			const { callbacks } = loadStore();
+			// A real selection made on this surface resolves and writes,
+			// exactly as today.
+			callbacks.setSelectedVariationId();
+			expect( mockProductsState.variationId ).toBe( 2 );
+
+			// The shopper then clears the selection back to empty, on the
+			// same surface: this is a genuine, local edit, not another
+			// surface's stale re-evaluation, so it must still write through
+			// and reset the shared pointer/draft, unlike the never-selected
+			// bystander case above.
+			mockContext.selectedAttributes = [];
+			mockProductsState.findProduct = jest.fn(
+				() => ( { id: 1 } as ProductResponseItem )
+			);
+			mockUpsertDraftItem.mockClear();
+
+			callbacks.setSelectedVariationId();
+
+			expect( mockProductsState.variationId ).toBeNull();
+			expect( mockUpsertDraftItem ).toHaveBeenCalledWith(
+				{ quantity: 1, variation: [] },
+				{ id: 1 }
+			);
+		} );
 	} );
 
 	describe( 'state.selectedAttributes', () => {
