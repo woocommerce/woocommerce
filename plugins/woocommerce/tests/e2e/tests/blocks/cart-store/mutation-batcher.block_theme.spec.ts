@@ -253,7 +253,13 @@ test.describe( 'Mutation Batcher', () => {
 			const p2 = actions.addCartItem( { id: 999999, quantityToAdd: 1 } ); // Invalid
 			const p3 = actions.addCartItem( { id: 16, quantityToAdd: 1 } );
 
-			// addCartItem catches errors internally so all promises resolve.
+			// addCartItem catches errors internally, so all three promises
+			// resolve rather than reject — each with its own outcome for
+			// that call's product: { success: true } for 15 and 16, or
+			// { success: false, error: { code, message } } for the
+			// rejected 999999. Promise.allSettled just waits for all three
+			// to settle; the accept/reject split is verified below via
+			// cart state.
 			await Promise.allSettled( [ p1, p2, p3 ] );
 
 			const cartProductIds = state.cart.items.map(
