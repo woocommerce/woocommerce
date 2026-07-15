@@ -27,7 +27,7 @@ jobs:
     if: ${{ github.event.action == 'published' && ! ( contains( inputs.release_tag_name, '-dev' ) || contains( inputs.release_tag_name, '-rc' ) ) }}
     steps:
       - name: 'Checkout repository'
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: trunk
           sparse-checkout: |
@@ -104,7 +104,7 @@ jobs:
             exit 1
           fi
       - name: 'Fetch latest changelog.txt and changelog script'
-        uses: 'actions/checkout@v4'
+        uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
         with:
           ref: trunk
           sparse-checkout: |

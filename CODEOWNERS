@@ -29,8 +29,9 @@
 /plugins/woocommerce/includes/wc-cart-functions.php @woocommerce/rubik
 /plugins/woocommerce/includes/class-wc-session-handler.php @woocommerce/rubik
 
-# Store API related files
+# Store API and internal REST routes
 /plugins/woocommerce/src/StoreApi/ @woocommerce/rubik
+/plugins/woocommerce/src/Internal/RestApi/ @woocommerce/rubik
 
 # Cart Checkout Blocks
 /plugins/woocommerce/client/blocks/assets/js/blocks/cart @woocommerce/rubik
@@ -39,6 +40,32 @@
 /plugins/woocommerce/client/blocks/assets/js/blocks/mini-cart @woocommerce/rubik
 /plugins/woocommerce/client/blocks/assets/js/blocks/order-confirmation @woocommerce/rubik
 /plugins/woocommerce/client/blocks/packages/checkout @woocommerce/rubik
+
+# Cart and checkout data stores
+/plugins/woocommerce/client/blocks/assets/js/data/cart @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/data/checkout @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/data/payment @woocommerce/rubik
+
+# Order admin page (edit screen, list table, order meta boxes)
+/plugins/woocommerce/src/Internal/Admin/Orders/ @woocommerce/rubik
+/plugins/woocommerce/includes/admin/meta-boxes/class-wc-meta-box-order-*.php @woocommerce/rubik
+/plugins/woocommerce/includes/admin/meta-boxes/views/html-order-*.php @woocommerce/rubik
+
+# Shopper Lists (wishlist, saved for later)
+/plugins/woocommerce/src/Internal/ShopperLists/ @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/Wishlist.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/AddToWishlistButton.php @woocommerce/rubik
+/plugins/woocommerce/src/Blocks/BlockTypes/SavedForLater.php @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/blocks/wishlist @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/blocks/add-to-wishlist-button @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/blocks/saved-for-later @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/blocks/shopper-lists @woocommerce/rubik
+
+# Stock notifications (back-in-stock)
+/plugins/woocommerce/src/Internal/StockNotifications/ @woocommerce/rubik
+
+# Customer email verification
+/plugins/woocommerce/src/Internal/CustomerEmailVerification/ @woocommerce/rubik
 
 # Email Editor packages
 /packages/js/email-editor/ @woocommerce/ballade

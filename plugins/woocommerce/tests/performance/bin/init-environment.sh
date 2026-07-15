@@ -2,9 +2,9 @@
 
 echo "Initializing WooCommerce E2E"
 
-# Command prefix for running wp-cli against the single-container test environment
-# (started via `wp-env --config .wp-env.test.json`, whose container is `cli`).
-wp_cli="wp-env --config .wp-env.test.json run cli"
+# Command prefix for running wp-cli against the single-container E2E environment
+# (started via `wp-env --config .wp-env.e2e.json`, whose container is `cli`).
+wp_cli="wp-env --config .wp-env.e2e.json run cli"
 
 $wp_cli wp config set WP_HTTP_BLOCK_EXTERNAL false --raw --type=constant
 
@@ -52,14 +52,15 @@ $wp_cli wp config set DISABLE_WP_CRON true --raw --type=constant
 $wp_cli wp config set WP_HTTP_BLOCK_EXTERNAL true --raw --type=constant
 
 # Resolve container names once; fail loudly if wp-env is not running.
-# Scope to the test env's compose project ("...-woocommerce-test-<hash>"), which is
-# distinct from a dev env's "...-woocommerce-<hash>" project, so a co-running dev
-# environment can't be matched by mistake (both expose a "...-wordpress-1" container).
-# The project hash is hex, so it can never contain "test" - the match is unambiguous.
-_wp_container="$(docker ps --filter name=woocommerce-test --format '{{.Names}}' | grep -- '-wordpress-1$' | head -1)"
-_db_container="$(docker ps --filter name=woocommerce-test --format '{{.Names}}' | grep -- '-mysql-1$' | head -1)"
+# Scope to the E2E env's compose project ("...-woocommerce-e2e-<hash>"), which the
+# performance env runs on, so a co-running dev env ("...-woocommerce-<hash>") can't
+# be matched by mistake (both expose a "...-wordpress-1" container). Match the
+# "woocommerce-e2e-" prefix including its trailing dash: the hash is hex and "e2e" is
+# all hex digits, so a dev hash starting "e2e" is followed by more hex, never a dash.
+_wp_container="$(docker ps --filter name=woocommerce-e2e- --format '{{.Names}}' | grep -- '-wordpress-1$' | head -1)"
+_db_container="$(docker ps --filter name=woocommerce-e2e- --format '{{.Names}}' | grep -- '-mysql-1$' | head -1)"
 if [ -z "$_wp_container" ] || [ -z "$_db_container" ]; then
-    echo "Error: wp-env test containers not found. Run 'pnpm env:perf' first." >&2
+    echo "Error: wp-env containers not found. Run 'pnpm env:perf' first." >&2
     exit 1
 fi
 

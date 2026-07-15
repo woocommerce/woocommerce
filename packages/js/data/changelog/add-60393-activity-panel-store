@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add activityPanelStore with a getActivityPanelCounts selector, backed by a single combined REST request.

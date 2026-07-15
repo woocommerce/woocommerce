@@ -7,12 +7,12 @@ import { exec } from 'child_process';
 const execPromisified = promisify( exec );
 
 /**
- * Runs a WP-CLI command inside the single-container test environment's `cli`
- * container (started via `wp-env --config .wp-env.test.json`).
+ * Runs a WP-CLI command inside the single-container E2E environment's `cli`
+ * container (started via `wp-env --config .wp-env.e2e.json`).
  */
 export async function wpCLI( command: string ) {
 	return await execPromisified(
-		'npm run wp-env:test run cli -- wp ' + command
+		'npm run wp-env:e2e run cli -- wp ' + command
 	);
 }
 
