@@ -164,4 +164,26 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 			}
 		}
 	}
+
+	/**
+	 * @testdox Nepal province remediation reports database failures as inconclusive.
+	 */
+	public function test_nepal_province_remediation_reports_database_errors(): void {
+		global $wpdb;
+
+		$original_prefix = $wpdb->prefix;
+		$wpdb->prefix    = 'missing_woocommerce_test_';
+
+		try {
+			$result = $this->sut->run_test( 'woocommerce_nepal_province_configuration' );
+
+			$this->assertSame( 'recommended', $result['status'], 'Database failures should not report the configuration as clean.' );
+			$this->assertSame( 'WooCommerce could not check Nepal province settings', $result['label'], 'The result should identify an inconclusive database check.' );
+			$this->assertStringContainsString( 'A database query failed', $result['description'], 'The result should explain why the check is inconclusive.' );
+			$this->assertStringContainsString( 'Review store address', $result['actions'], 'The result should retain remediation links.' );
+		} finally {
+			$wpdb->prefix = $original_prefix;
+			$wpdb->flush();
+		}
+	}
 }

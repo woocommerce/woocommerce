@@ -68,7 +68,11 @@ jQuery( function ( $ ) {
 				} );
 
 				// Keep historical or extension-defined values from being erased on save.
-				if ( value && ! Object.prototype.hasOwnProperty.call( state, value ) ) {
+				if (
+					value &&
+					( stickValue || $this.data( stickstatefield ) ) &&
+					! Object.prototype.hasOwnProperty.call( state, value )
+				) {
 					$newstate.append(
 						$( '<option></option>' )
 							.prop( 'value', value )

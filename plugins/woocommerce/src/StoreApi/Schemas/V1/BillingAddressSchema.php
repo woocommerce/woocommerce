@@ -97,7 +97,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 			$billing_country = $address->get_billing_country();
 			$billing_state   = $address->get_billing_state();
 
-			if ( ! $validation_util->validate_state( $billing_state, $billing_country ) ) {
+			if ( ! $validation_util->validate_state_for_persisted_address( $billing_state, $billing_country ) ) {
 				$billing_state = '';
 			}
 

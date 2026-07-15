@@ -37,6 +37,7 @@ class ValidationUtilsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_legacy_nepal_zone_codes_remain_readable_but_are_rejected_at_checkout( string $code, string $name, string $expected_name_code ): void {
 		$this->assertFalse( $this->sut->validate_state( $code, 'NP' ), "Legacy Nepal zone {$code} should require a current province at checkout." );
+		$this->assertTrue( $this->sut->validate_state_for_persisted_address( $code, 'NP' ), "Persisted legacy Nepal zone {$code} should remain available when read." );
 		$this->assertSame( $code, $this->sut->format_state( $code, 'NP' ), "Persisted legacy Nepal zone {$code} should remain unchanged." );
 		$this->assertSame( $expected_name_code, $this->sut->format_state( $name, 'NP' ), "Legacy Nepal zone name {$name} should normalize predictably." );
 	}

@@ -53,7 +53,8 @@ jQuery( function ( $ ) {
 				stateValue = $state.val(),
 				input_name = $state.attr( 'name' ),
 				input_id = $state.attr( 'id' ),
-				value = $this.data( 'woocommerce.stickState-' + country ) ? $this.data( 'woocommerce.stickState-' + country ) : stateValue,
+				stickstatefield = 'woocommerce.stickState-' + country,
+				value = $this.data( stickstatefield ) ? $this.data( stickstatefield ) : stateValue,
 				placeholder = $state.attr( 'placeholder' ),
 				$newstate;
 
@@ -87,7 +88,11 @@ jQuery( function ( $ ) {
 				} );
 
 				// Keep historical or extension-defined values from being erased on save.
-				if ( value && ! Object.prototype.hasOwnProperty.call( state, value ) ) {
+				if (
+					value &&
+					( stickValue || $this.data( stickstatefield ) ) &&
+					! Object.prototype.hasOwnProperty.call( state, value )
+				) {
 					$newstate.append(
 						$( '<option></option>' )
 							.prop( 'value', value )

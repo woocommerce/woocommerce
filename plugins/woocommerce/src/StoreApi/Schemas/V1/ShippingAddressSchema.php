@@ -38,7 +38,7 @@ class ShippingAddressSchema extends AbstractAddressSchema {
 			$shipping_country = $address->get_shipping_country();
 			$shipping_state   = $address->get_shipping_state();
 
-			if ( ! $validation_util->validate_state( $shipping_state, $shipping_country ) ) {
+			if ( ! $validation_util->validate_state_for_persisted_address( $shipping_state, $shipping_country ) ) {
 				$shipping_state = '';
 			}
 

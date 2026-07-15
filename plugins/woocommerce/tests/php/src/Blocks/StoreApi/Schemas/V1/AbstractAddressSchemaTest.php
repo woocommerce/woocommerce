@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\StoreApi\Schemas\V1\BillingAddressSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\ShippingAddressSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Formatters;
@@ -34,6 +35,13 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * The shipping-address schema under test.
+	 *
+	 * @var ShippingAddressSchema
+	 */
+	private $shipping_sut;
+
+	/**
 	 * Set up before test.
 	 */
 	public function setUp(): void {
@@ -44,9 +52,10 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 		$formatters->register( 'html', HtmlFormatter::class );
 		$formatters->register( 'currency', CurrencyFormatter::class );
 
-		$extend            = new ExtendSchema( $formatters );
-		$schema_controller = new SchemaController( $extend );
-		$this->sut         = $schema_controller->get( BillingAddressSchema::IDENTIFIER );
+		$extend             = new ExtendSchema( $formatters );
+		$schema_controller  = new SchemaController( $extend );
+		$this->sut          = $schema_controller->get( BillingAddressSchema::IDENTIFIER );
+		$this->shipping_sut = $schema_controller->get( ShippingAddressSchema::IDENTIFIER );
 	}
 
 	/**
@@ -128,5 +137,22 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 			$result['email'],
 			'Billing email addresses should be returned as raw data, not typographic display text.'
 		);
+	}
+
+	/**
+	 * @testdox Persisted legacy Nepal states remain present in billing and shipping responses.
+	 */
+	public function test_get_item_response_preserves_legacy_nepal_states(): void {
+		$customer = new \WC_Customer();
+		$customer->set_billing_country( 'NP' );
+		$customer->set_billing_state( 'BAG' );
+		$customer->set_shipping_country( 'NP' );
+		$customer->set_shipping_state( 'BAG' );
+
+		$billing_response  = $this->sut->get_item_response( $customer );
+		$shipping_response = $this->shipping_sut->get_item_response( $customer );
+
+		$this->assertSame( 'BAG', $billing_response['state'], 'Billing responses should preserve known legacy state codes.' );
+		$this->assertSame( 'BAG', $shipping_response['state'], 'Shipping responses should preserve known legacy state codes.' );
 	}
 }
