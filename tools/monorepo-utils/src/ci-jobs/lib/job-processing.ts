@@ -102,8 +102,15 @@ export function getShardedJobs(
 	let createdJobs = [];
 	const shards = jobConfig.shardingArguments.length;
 
-	if ( shards <= 1 ) {
+	if ( shards === 0 ) {
 		createdJobs.push( job );
+	} else if ( shards === 1 ) {
+		// A single sharding argument is not a shard split: apply the argument
+		// but keep it as one job, without an "N/M" suffix on the name.
+		createdJobs.push( {
+			...job,
+			command: `${ job.command } ${ jobConfig.shardingArguments[ 0 ] }`,
+		} );
 	} else {
 		createdJobs = Array( shards )
 			.fill( null )

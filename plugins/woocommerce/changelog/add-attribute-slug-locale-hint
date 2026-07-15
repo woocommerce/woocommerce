@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Product attributes: tailor the slug field hint to the user's language, showing an approximate character limit based on the locale's script alongside the authoritative byte limit, with a leaner description for clients that have the live byte counter.

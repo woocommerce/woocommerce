@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Warn merchants when a higher-priority shipping zone prevents a narrower zone from matching.
