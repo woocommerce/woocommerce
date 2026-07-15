@@ -416,6 +416,35 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * generate_product_title() also applies the include-attributes and attributes-separator filters,
+	 * so a store hooking either one (without the main title filter) must default the skip off too,
+	 * otherwise their customization would be silently dropped on read.
+	 *
+	 * @testWith ["woocommerce_product_variation_title_include_attributes"]
+	 *           ["woocommerce_product_variation_title_attributes_separator"]
+	 *
+	 * @param string $filter The title-shaping filter hooked in isolation.
+	 */
+	public function test_sibling_title_filter_presence_disables_skip_by_default( string $filter ): void {
+		$product  = WC_Helper_Product::create_variation_product();
+		$child_id = $product->get_children()[0];
+
+		$regenerated = false;
+		$spy         = function ( $value ) use ( &$regenerated ) {
+			$regenerated = true;
+			return $value;
+		};
+		add_filter( $filter, $spy );
+
+		wp_cache_flush();
+		wc_get_product( $child_id );
+
+		remove_filter( $filter, $spy );
+
+		$this->assertTrue( $regenerated, 'A hooked title-shaping filter must default the skip off so the title is regenerated.' );
+	}
+
+	/**
 	 * The optimization must not change the computed variation prices.
 	 */
 	public function test_variation_prices_are_unchanged_by_the_title_resync_skip(): void {
