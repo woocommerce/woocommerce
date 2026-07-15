@@ -15,13 +15,21 @@ import {
 type BlockEditorContext = 'post' | 'widgets' | 'other';
 
 const getBlockEditorContext = (): BlockEditorContext => {
-	const adminPage = ( window as Window & { adminpage?: string } ).adminpage;
+	const wordpressWindow = window as Window & {
+		adminpage?: string;
+		pagenow?: string;
+	};
+	const adminPage = wordpressWindow.adminpage;
 
 	if ( [ 'post-php', 'post-new-php' ].includes( adminPage ?? '' ) ) {
 		return 'post';
 	}
 
-	if ( [ 'widgets-php', 'customize-php' ].includes( adminPage ?? '' ) ) {
+	// Customizer controls do not load the admin header, so adminpage is absent.
+	if (
+		[ 'widgets-php', 'customize-php' ].includes( adminPage ?? '' ) ||
+		wordpressWindow.pagenow === 'customize'
+	) {
 		return 'widgets';
 	}
 
