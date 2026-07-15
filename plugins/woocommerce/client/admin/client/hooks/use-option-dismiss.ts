@@ -6,6 +6,7 @@ import { optionsStore } from '@woocommerce/data';
 
 export type DismissState = {
 	isDismissed: boolean;
+	hasResolved: boolean;
 	onDismiss: () => void;
 };
 
@@ -20,7 +21,7 @@ export type DismissState = {
  * @return The current dismissal state and a callback to dismiss.
  */
 export const useOptionDismiss = ( optionName: string ): DismissState => {
-	const isDismissed = useSelect(
+	const { isDismissed, hasResolved } = useSelect(
 		( select ) => {
 			const { getOption, hasFinishedResolution } = select( optionsStore );
 
@@ -31,13 +32,16 @@ export const useOptionDismiss = ( optionName: string ): DismissState => {
 			// the card would stay hidden forever.
 			const value = getOption( optionName );
 
-			const hasResolved = hasFinishedResolution( 'getOption', [
+			const optionHasResolved = hasFinishedResolution( 'getOption', [
 				optionName,
 			] );
 
 			// Treat "not yet resolved" as dismissed so the card does not flash
 			// before the option value is known.
-			return ! hasResolved || value === 'yes';
+			return {
+				isDismissed: ! optionHasResolved || value === 'yes',
+				hasResolved: optionHasResolved,
+			};
 		},
 		[ optionName ]
 	);
@@ -48,5 +52,5 @@ export const useOptionDismiss = ( optionName: string ): DismissState => {
 		updateOptions( { [ optionName ]: 'yes' } );
 	};
 
-	return { isDismissed, onDismiss };
+	return { isDismissed, hasResolved, onDismiss };
 };
