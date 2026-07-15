@@ -175,6 +175,8 @@ Some E2E suites need fixture mechanisms that can't be expressed cleanly with RES
 
 Every test helper plugin is a **self-contained folder** at `tests/e2e/test-plugins/<slug>/<slug>.php` (the main file matches the folder name), with a full plugin header (`Plugin Name`, `Description`, `Version`, `Requires PHP`, `Author`). Never add loose single-file plugins — single-file Docker bind mounts surface as empty (0-byte) files under Docker Desktop's gRPC FUSE backend, so only directory mounts and URL/zip downloads are safe.
 
+Keep `Requires PHP` at the **lowest PHP version any E2E environment runs** (currently `7.4` — the same floor as WooCommerce itself), and keep the helper's code compatible with it. Some environments (the blocks suite among them) run PHP 7.4, and WordPress silently refuses to load a plugin whose `Requires PHP` is higher than the running version. The plugin still shows as active, but none of its hooks run — so its REST routes return `rest_no_route` (404) and the specs relying on them fail for no obvious reason.
+
 How a helper is wired up depends on when it needs to be active:
 
 - **Always-on helpers** are listed in `.wp-env.e2e.json`'s `plugins` array, which mounts the folder **and auto-activates** it. Do not add a manual `wp plugin activate …` line for these. Current always-on helpers:

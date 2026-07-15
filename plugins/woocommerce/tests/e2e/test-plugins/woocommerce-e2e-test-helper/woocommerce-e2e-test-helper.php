@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce E2E Test Helper
  * Description: Always-on utilities for the WooCommerce E2E suite: cookie-driven filter overrides, synchronous Action Scheduler processing, and a REST API for feature flags, options, environment info and theme switching.
  * Version: 1.0.0
- * Requires PHP: 8.1
+ * Requires PHP: 7.4
  * Author: WooCommerce
  *
  * This bundles three previously separate helpers (filter-setter, process-waiting-actions and
