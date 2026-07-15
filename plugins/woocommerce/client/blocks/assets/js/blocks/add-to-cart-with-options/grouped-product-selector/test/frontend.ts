@@ -82,7 +82,7 @@ jest.mock(
 	{ virtual: true }
 );
 
-// The cart store's runtime-exported `emitSyncEvent` (Task 2), reached via the
+// The cart store's runtime-exported `emitSyncEvent`, reached via the
 // consumer's dynamic import of this module. `addCartItem` itself is reached
 // through the `store()` mock above, mirroring how the real cart store is
 // private and only reachable via `store()`.
