@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure emails render the selected global font weight.
