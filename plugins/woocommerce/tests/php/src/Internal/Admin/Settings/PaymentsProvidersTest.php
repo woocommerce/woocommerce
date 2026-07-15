@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
-use Automattic\WooCommerce\Internal\Caches\RequestCache;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -67,8 +66,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->sut = new PaymentsProviders();
 		$this->sut->init(
 			$this->mock_extension_suggestions,
-			wc_get_container()->get( LegacyProxy::class ),
-			wc_get_container()->get( RequestCache::class )
+			wc_get_container()->get( LegacyProxy::class )
 		);
 	}
 
@@ -1010,50 +1008,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertSame( 5, $second['_order'], 'Cached details should use the latest requested order' );
 		unset( $first['_order'], $second['_order'] );
 		$this->assertSame( $first, $second, 'Cached details should match the originally derived details' );
-	}
-
-	/**
-	 * @testdox Gateway details are derived for every call when no request cache is provided.
-	 */
-	public function test_get_payment_gateway_details_without_request_cache_is_not_cached(): void {
-		$fake_gateway = new FakePaymentGateway(
-			'fake-gateway-id',
-			array(
-				'plugin_slug' => 'fake-plugin-slug',
-				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
-			),
-		);
-
-		$provider = $this->createMock( PaymentGateway::class );
-		$provider
-			->expects( $this->exactly( 2 ) )
-			->method( 'get_details' )
-			->with( $fake_gateway, 0, 'US' )
-			->willReturn(
-				array(
-					'id'     => 'fake-gateway-id',
-					'_order' => 0,
-					'title'  => 'Derived details',
-					'plugin' => array(
-						'slug' => 'fake-plugin-slug',
-					),
-				)
-			);
-
-		$this->mock_extension_suggestions
-			->expects( $this->exactly( 2 ) )
-			->method( 'get_by_plugin_slug' )
-			->willReturn( null );
-
-		$service = new PaymentsProviders();
-		$service->init( $this->mock_extension_suggestions, wc_get_container()->get( LegacyProxy::class ) );
-		$this->set_payment_gateway_provider_instance( 'fake-gateway-id', $provider, $service );
-
-		$first  = $service->get_payment_gateway_details( $fake_gateway, 1, 'US' );
-		$second = $service->get_payment_gateway_details( $fake_gateway, 5, 'US' );
-
-		$this->assertSame( 1, $first['_order'] );
-		$this->assertSame( 5, $second['_order'] );
 	}
 
 	/**

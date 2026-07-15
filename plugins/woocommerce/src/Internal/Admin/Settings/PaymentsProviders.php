@@ -35,7 +35,6 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
-use Automattic\WooCommerce\Internal\Caches\RequestCache;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Payment_Gateway;
@@ -83,6 +82,7 @@ class PaymentsProviders {
 	public const CATEGORY_PSP              = 'psp';
 
 	private const GATEWAY_DETAILS_REQUEST_CACHE_GROUP = 'woocommerce_payment_gateway_details';
+	private const GATEWAY_DETAILS_REQUEST_CACHE_KEY   = 'gateway_details';
 
 	/*
 	 * The provider link types.
@@ -203,13 +203,6 @@ class PaymentsProviders {
 	private array $payment_gateways_for_display_cache = array();
 
 	/**
-	 * The request cache.
-	 *
-	 * @var RequestCache
-	 */
-	private ?RequestCache $request_cache = null;
-
-	/**
 	 * The payment extension suggestions service.
 	 *
 	 * @var ExtensionSuggestions
@@ -228,14 +221,14 @@ class PaymentsProviders {
 	 *
 	 * @param ExtensionSuggestions $payment_extension_suggestions The payment extension suggestions service.
 	 * @param LegacyProxy          $proxy                         The LegacyProxy instance.
-	 * @param RequestCache|null    $request_cache                 Optional request cache.
 	 *
 	 * @internal
 	 */
-	final public function init( ExtensionSuggestions $payment_extension_suggestions, LegacyProxy $proxy, ?RequestCache $request_cache = null ): void {
+	final public function init( ExtensionSuggestions $payment_extension_suggestions, LegacyProxy $proxy ): void {
 		$this->extension_suggestions = $payment_extension_suggestions;
 		$this->proxy                 = $proxy;
-		$this->request_cache         = $request_cache;
+
+		wp_cache_add_non_persistent_groups( array( self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP ) );
 	}
 
 	/**
@@ -491,17 +484,23 @@ class PaymentsProviders {
 		// Normalize the country code to uppercase.
 		$country_code = strtoupper( $country_code );
 
-		$cache_key = $payment_gateway->id . '__' . $country_code;
-		$resolver  = function () use ( $payment_gateway, $country_code ): array {
-			return $this->enhance_payment_gateway_details(
+		$cache_key              = $payment_gateway->id . '__' . $country_code;
+		$cached_gateway_details = wp_cache_get( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
+		if ( is_array( $cached_gateway_details ) && isset( $cached_gateway_details[ $cache_key ] ) && is_array( $cached_gateway_details[ $cache_key ] ) ) {
+			$details = $cached_gateway_details[ $cache_key ];
+		} else {
+			$details = $this->enhance_payment_gateway_details(
 				$this->get_payment_gateway_base_details( $payment_gateway, 0, $country_code ),
 				$payment_gateway,
 				$country_code
 			);
-		};
-		$details   = null === $this->request_cache
-			? $resolver()
-			: $this->request_cache->remember( $cache_key, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP, $resolver );
+
+			if ( ! is_array( $cached_gateway_details ) ) {
+				$cached_gateway_details = array();
+			}
+			$cached_gateway_details[ $cache_key ] = $details;
+			wp_cache_set( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, $cached_gateway_details, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
+		}
 
 		$details['_order'] = $payment_gateway_order;
 
@@ -1260,9 +1259,7 @@ class PaymentsProviders {
 	public function clear_cache(): void {
 		$this->payment_gateways_cache             = array();
 		$this->payment_gateways_for_display_cache = array();
-		if ( null !== $this->request_cache ) {
-			$this->request_cache->clear_group( self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
-		}
+		wp_cache_delete( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
 	}
 
 	/**

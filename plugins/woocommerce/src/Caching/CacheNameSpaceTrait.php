@@ -67,7 +67,6 @@ trait CacheNameSpaceTrait {
 	 * Increment group cache prefix (invalidates cache).
 	 *
 	 * @param string $group Group of cache to clear.
-	 * @return void
 	 */
 	public static function incr_cache_prefix( $group ) {
 		wc_deprecated_function( 'WC_Cache_Helper::incr_cache_prefix', '3.9.0', 'WC_Cache_Helper::invalidate_cache_group' );

@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
-use Automattic\WooCommerce\Internal\Caches\RequestCache;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -38,13 +37,6 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	 * @var PaymentsExtensionSuggestions|MockObject
 	 */
 	protected $mock_extension_suggestions;
-
-	/**
-	 * The request cache.
-	 *
-	 * @var RequestCache
-	 */
-	private $request_cache;
 
 	/**
 	 * The ID of the store admin user.
@@ -83,12 +75,11 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->mock_extension_suggestions = $this->getMockBuilder( PaymentsExtensionSuggestions::class )
 			->disableOriginalConstructor()
 			->getMock();
-		$this->request_cache              = wc_get_container()->get( RequestCache::class );
 
-		$this->mock_providers->init( $this->mock_extension_suggestions, wc_get_container()->get( LegacyProxy::class ), $this->request_cache );
+		$this->mock_providers->init( $this->mock_extension_suggestions, wc_get_container()->get( LegacyProxy::class ) );
 
 		$this->sut = new Payments();
-		$this->sut->init( $this->mock_providers, $this->mock_extension_suggestions, $this->request_cache );
+		$this->sut->init( $this->mock_providers, $this->mock_extension_suggestions );
 		$this->sut->clear_cache();
 	}
 
@@ -654,35 +645,12 @@ class PaymentsTest extends WC_Unit_Test_Case {
 			->willReturn( array() );
 
 		$other_service = new Payments();
-		$other_service->init( $this->mock_providers, $this->mock_extension_suggestions, $this->request_cache );
+		$other_service->init( $this->mock_providers, $this->mock_extension_suggestions );
 
 		$first  = $this->sut->get_payment_providers( 'US' );
 		$second = $other_service->get_payment_providers( 'US' );
 
 		$this->assertSame( $first, $second, 'Service instances should share the request-cached providers.' );
-	}
-
-	/**
-	 * @testdox Payment providers are recomputed when no request cache is provided.
-	 */
-	public function test_get_payment_providers_without_request_cache_is_not_cached(): void {
-		$this->mock_providers
-			->expects( $this->exactly( 2 ) )
-			->method( 'get_payment_gateways' )
-			->willReturn( array() );
-
-		$this->mock_providers
-			->expects( $this->exactly( 2 ) )
-			->method( 'get_extension_suggestions' )
-			->willReturn( array() );
-
-		$service = new Payments();
-		$service->init( $this->mock_providers, $this->mock_extension_suggestions );
-
-		$first  = $service->get_payment_providers( 'US' );
-		$second = $service->get_payment_providers( 'US' );
-
-		$this->assertSame( $first, $second, 'Uncached provider derivations should return the same data.' );
 	}
 
 	/**

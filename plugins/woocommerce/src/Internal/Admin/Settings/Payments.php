@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
-use Automattic\WooCommerce\Internal\Caches\RequestCache;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Exception;
 
@@ -31,6 +30,7 @@ class Payments {
 	const FROM_PROVIDER_ONBOARDING      = 'PROVIDER_ONBOARDING';
 
 	private const PROVIDERS_REQUEST_CACHE_GROUP = 'woocommerce_payments_providers';
+	private const PROVIDERS_REQUEST_CACHE_KEY   = 'provider_lists';
 
 	/**
 	 * The payment providers service.
@@ -47,25 +47,18 @@ class Payments {
 	private ExtensionSuggestions $extension_suggestions;
 
 	/**
-	 * The request cache.
-	 *
-	 * @var RequestCache
-	 */
-	private ?RequestCache $request_cache = null;
-
-	/**
 	 * Initialize the class instance.
 	 *
 	 * @param PaymentsProviders    $payment_providers             The payment providers service.
 	 * @param ExtensionSuggestions $payment_extension_suggestions The payment extension suggestions service.
-	 * @param RequestCache|null    $request_cache                 Optional request cache.
 	 *
 	 * @internal
 	 */
-	final public function init( PaymentsProviders $payment_providers, ExtensionSuggestions $payment_extension_suggestions, ?RequestCache $request_cache = null ): void {
+	final public function init( PaymentsProviders $payment_providers, ExtensionSuggestions $payment_extension_suggestions ): void {
 		$this->providers             = $payment_providers;
 		$this->extension_suggestions = $payment_extension_suggestions;
-		$this->request_cache         = $request_cache;
+
+		wp_cache_add_non_persistent_groups( array( self::PROVIDERS_REQUEST_CACHE_GROUP ) );
 	}
 
 	/**
@@ -88,14 +81,11 @@ class Payments {
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
 	public function get_payment_providers( string $location, bool $for_display = true, bool $remove_shells = false ): array {
-		$can_install_plugins = current_user_can( 'install_plugins' );
-		$cache_key           = get_current_user_id() . '__' . ( $can_install_plugins ? '1' : '0' ) . '__' . strtoupper( $location ) . '__' . ( $for_display ? '1' : '0' ) . ( $remove_shells ? '1' : '0' );
-		if ( null !== $this->request_cache ) {
-			$found            = false;
-			$cached_providers = $this->request_cache->get( $cache_key, self::PROVIDERS_REQUEST_CACHE_GROUP, $found );
-			if ( $found && is_array( $cached_providers ) ) {
-				return $cached_providers;
-			}
+		$can_install_plugins   = current_user_can( 'install_plugins' );
+		$cache_key             = get_current_user_id() . '__' . ( $can_install_plugins ? '1' : '0' ) . '__' . strtoupper( $location ) . '__' . ( $for_display ? '1' : '0' ) . ( $remove_shells ? '1' : '0' );
+		$cached_provider_lists = wp_cache_get( self::PROVIDERS_REQUEST_CACHE_KEY, self::PROVIDERS_REQUEST_CACHE_GROUP );
+		if ( is_array( $cached_provider_lists ) && isset( $cached_provider_lists[ $cache_key ] ) && is_array( $cached_provider_lists[ $cache_key ] ) ) {
+			return $cached_provider_lists[ $cache_key ];
 		}
 
 		$payment_gateways = $this->providers->get_payment_gateways( $for_display );
@@ -226,9 +216,11 @@ class Payments {
 			$this->process_payment_provider_states( $payment_providers );
 		}
 
-		if ( null !== $this->request_cache ) {
-			$this->request_cache->set( $cache_key, $payment_providers, self::PROVIDERS_REQUEST_CACHE_GROUP );
+		if ( ! is_array( $cached_provider_lists ) ) {
+			$cached_provider_lists = array();
 		}
+		$cached_provider_lists[ $cache_key ] = $payment_providers;
+		wp_cache_set( self::PROVIDERS_REQUEST_CACHE_KEY, $cached_provider_lists, self::PROVIDERS_REQUEST_CACHE_GROUP );
 
 		return $payment_providers;
 	}
@@ -432,9 +424,7 @@ class Payments {
 	 * @return void
 	 */
 	public function clear_cache(): void {
-		if ( null !== $this->request_cache ) {
-			$this->request_cache->clear_group( self::PROVIDERS_REQUEST_CACHE_GROUP );
-		}
+		wp_cache_delete( self::PROVIDERS_REQUEST_CACHE_KEY, self::PROVIDERS_REQUEST_CACHE_GROUP );
 		$this->providers->clear_cache();
 	}
 
