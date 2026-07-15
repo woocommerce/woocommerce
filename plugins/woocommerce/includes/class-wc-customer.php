@@ -201,28 +201,31 @@ class WC_Customer extends WC_Legacy_Customer {
 		if ( TaxBasedOn::SHIPPING === $tax_based_on ) {
 			if ( ! $this->get_shipping_country() ) {
 				$tax_based_on = TaxBasedOn::BILLING;
-			} elseif ( $this === WC()->customer && WC()->cart instanceof WC_Cart ) {
+			} elseif ( WC()->customer === $this && WC()->cart instanceof WC_Cart ) {
 				// Only the active shopper's own cart is consulted, so a customer object built for an
 				// unrelated context (e.g. one passed explicitly to WC_Tax::get_tax_location()) is not
 				// affected by whatever happens to be in the global cart.
-				$cart_contents = WC()->cart->get_cart_contents();
+				$cart          = WC()->cart;
+				$cart_contents = $cart->get_cart_contents();
 
 				if ( ! empty( $cart_contents ) ) {
-					// Decide per item whether the cart needs shipping, then run the same
-					// woocommerce_cart_needs_shipping filter WC_Cart::needs_shipping() applies. This
-					// honors extensions that force a virtual cart to collect a shipping address, while -
-					// unlike needs_shipping() - not treating "no shipping methods configured" as "no
-					// shipping", so a physical cart is still taxed by its shipping address.
-					$cart_needs_shipping = false;
-					foreach ( $cart_contents as $cart_item ) {
-						if ( isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product && $cart_item['data']->needs_shipping() ) {
-							$cart_needs_shipping = true;
-							break;
+					// WC_Cart::needs_shipping() is the same "does the cart need a shipping address"
+					// decision checkout uses, including the woocommerce_cart_needs_shipping filter, so an
+					// extension that forces a virtual cart to collect shipping keeps shipping-based tax.
+					// It short-circuits to false when the store has no shipping methods configured, so in
+					// that case fall back to a per-item check to keep taxing a physical cart by its
+					// shipping address.
+					$cart_needs_shipping = $cart->needs_shipping();
+					if ( ! $cart_needs_shipping && ( ! wc_shipping_enabled() || 0 === wc_get_shipping_method_count( true ) ) ) {
+						foreach ( $cart_contents as $cart_item ) {
+							if ( isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product && $cart_item['data']->needs_shipping() ) {
+								$cart_needs_shipping = true;
+								break;
+							}
 						}
 					}
 
-					/** This filter is documented in includes/class-wc-cart.php */
-					if ( ! (bool) apply_filters( 'woocommerce_cart_needs_shipping', $cart_needs_shipping ) ) {
+					if ( ! $cart_needs_shipping ) {
 						$tax_based_on = TaxBasedOn::BILLING;
 					}
 				}

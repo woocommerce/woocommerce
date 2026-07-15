@@ -139,6 +139,10 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 		$original_chosen           = WC_Helper_Customer::get_chosen_shipping_methods();
 		$original_customer_details = WC_Helper_Customer::get_customer_details();
 
+		// A shipping method must exist so that WC_Cart::needs_shipping() evaluates the
+		// woocommerce_cart_needs_shipping filter instead of short-circuiting on "no methods".
+		WC_Helper_Shipping::create_simple_flat_rate();
+
 		// Simulate an extension that forces a virtual cart to collect a shipping address.
 		add_filter( 'woocommerce_cart_needs_shipping', '__return_true' );
 
@@ -159,6 +163,7 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 			);
 		} finally {
 			remove_filter( 'woocommerce_cart_needs_shipping', '__return_true' );
+			WC_Helper_Shipping::delete_simple_flat_rate();
 			WC()->cart->empty_cart();
 			WC()->customer = $original_customer;
 			WC_Helper_Customer::set_chosen_shipping_methods( $original_chosen );
