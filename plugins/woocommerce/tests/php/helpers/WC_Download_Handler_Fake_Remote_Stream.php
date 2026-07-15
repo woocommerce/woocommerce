@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests
  */
 
+declare( strict_types = 1 );
+
 /**
  * Minimal stream wrapper standing in for a reachable remote file, so download handling can be
  * exercised without network access. Register it over `http` for the duration of a test:
