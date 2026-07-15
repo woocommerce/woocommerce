@@ -192,6 +192,35 @@ class WC_Customer extends WC_Legacy_Customer {
 			$tax_based_on = TaxBasedOn::BASE;
 		}
 
+		// When tax is based on the shipping address but there is effectively no shipping destination for
+		// the cart, fall back to the billing address the customer provided. This extends the billing
+		// fallback that WC_Abstract_Order::get_tax_location() applies for virtual orders: as well as an
+		// empty shipping country, we also cover a cart whose items don't need shipping at all (e.g. only
+		// virtual products), which is the case reported in #58206 where the store base address would
+		// otherwise be used instead of the customer's address.
+		if ( TaxBasedOn::SHIPPING === $tax_based_on ) {
+			if ( ! $this->get_shipping_country() ) {
+				$tax_based_on = TaxBasedOn::BILLING;
+			} else {
+				$cart                        = WC()->cart;
+				$cart_contents               = $cart instanceof WC_Cart ? $cart->get_cart_contents() : array();
+				$cart_has_no_shippable_items = ! empty( $cart_contents );
+
+				// Checked per item so it is independent of whether shipping methods happen to be
+				// configured for the store.
+				foreach ( $cart_contents as $cart_item ) {
+					if ( isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product && $cart_item['data']->needs_shipping() ) {
+						$cart_has_no_shippable_items = false;
+						break;
+					}
+				}
+
+				if ( $cart_has_no_shippable_items ) {
+					$tax_based_on = TaxBasedOn::BILLING;
+				}
+			}
+		}
+
 		if ( TaxBasedOn::BASE === $tax_based_on ) {
 			$country  = WC()->countries->get_base_country();
 			$state    = WC()->countries->get_base_state();
