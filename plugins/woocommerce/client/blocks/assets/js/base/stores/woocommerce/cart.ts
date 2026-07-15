@@ -58,7 +58,40 @@ export type ClientCartItem = Omit<
 	quantityToAdd?: number;
 };
 
-type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
+type CartUpdateOptions = {
+	showCartUpdatesNotices?: boolean;
+	/**
+	 * When `true`, suppresses `addCartItem`'s per-item post-add side
+	 * effects: the screen-reader announcement, the legacy added-to-cart
+	 * event, the cross-store sync event, and (on server rejection) its own
+	 * error notice. Defaults to `false`.
+	 *
+	 * A caller that adds several items as one grouped gesture sets this to
+	 * `true` so it can fire those side effects once for the whole group —
+	 * using each item's resolved {@link AddCartItemResult} to learn the
+	 * outcome — instead of once per item.
+	 */
+	suppressPostAddSideEffects?: boolean;
+};
+
+/**
+ * The outcome of a single `addCartItem` mutation.
+ *
+ * `addCartItem` never rejects: a server-rejected mutation resolves as
+ * `{ success: false, error }` rather than throwing, so callers can await it
+ * unconditionally.
+ */
+export type AddCartItemResult =
+	| { success: true }
+	| {
+			success: false;
+			/**
+			 * The error raised for this item. `error.message` is the raw
+			 * server-provided message and `error.code` (see
+			 * {@link generateError}) is the server error code.
+			 */
+			error: Error;
+	  };
 
 export type Store = {
 	state: {
@@ -82,7 +115,7 @@ export type Store = {
 		addCartItem: (
 			args: ClientCartItem,
 			options?: CartUpdateOptions
-		) => Promise< void >;
+		) => Promise< AddCartItemResult >;
 		batchAddCartItems: (
 			items: ClientCartItem[],
 			options?: CartUpdateOptions
@@ -381,8 +414,11 @@ const { actions } = store< Store >(
 
 			*addCartItem(
 				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
-				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			): AsyncAction< void > {
+				{
+					showCartUpdatesNotices = true,
+					suppressPostAddSideEffects = false,
+				}: CartUpdateOptions = {}
+			): AsyncAction< AddCartItemResult > {
 				if ( quantity !== undefined && quantityToAdd !== undefined ) {
 					throw new Error(
 						'addCartItem: pass either quantity or quantityToAdd, not both.'
@@ -522,7 +558,7 @@ const { actions } = store< Store >(
 						// before isProcessing clears. This prevents
 						// refreshCartItems from running during these events.
 						onSettled: ( { success } ) => {
-							if ( success ) {
+							if ( success && ! suppressPostAddSideEffects ) {
 								// Dispatch legacy event
 								triggerAddedToCartEvent( {
 									preserveCartData: true,
@@ -555,20 +591,29 @@ const { actions } = store< Store >(
 						);
 					}
 
-					// Announce to screen readers
-					const { messages } = getConfig(
-						'woocommerce'
-					) as WooCommerceConfig;
-					if ( messages?.addedToCartText ) {
-						const { speak } =
-							( yield a11yModulePromise ) as Awaited<
-								typeof a11yModulePromise
-							>;
-						speak( messages.addedToCartText, 'polite' );
+					// Announce to screen readers, unless the caller (a grouped
+					// batch consumer) has opted to handle it itself.
+					if ( ! suppressPostAddSideEffects ) {
+						const { messages } = getConfig(
+							'woocommerce'
+						) as WooCommerceConfig;
+						if ( messages?.addedToCartText ) {
+							const { speak } =
+								( yield a11yModulePromise ) as Awaited<
+									typeof a11yModulePromise
+								>;
+							speak( messages.addedToCartText, 'polite' );
+						}
 					}
+
+					return { success: true };
 				} catch ( error ) {
-					// Show error notice
-					actions.showNoticeError( error as Error );
+					// Show error notice, unless the caller (a grouped batch
+					// consumer) has opted to handle it itself.
+					if ( ! suppressPostAddSideEffects ) {
+						actions.showNoticeError( error as Error );
+					}
+					return { success: false, error: error as Error };
 				}
 			},
 

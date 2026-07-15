@@ -3,11 +3,14 @@
  */
 import type { Cart, CartItem } from '@woocommerce/types';
 import type { Notice } from '@woocommerce/stores/store-notices';
+import { getConfig } from '@wordpress/interactivity';
+import { speak } from '@wordpress/a11y';
 
 /**
  * Internal dependencies
  */
-import type { Store, OptimisticCartItem } from '../cart';
+import type { Store, OptimisticCartItem, AddCartItemResult } from '../cart';
+import { triggerAddedToCartEvent } from '../legacy-events';
 
 type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
 
@@ -20,7 +23,11 @@ const mockState = {
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
-		getConfig: jest.fn(),
+		// Defaults to an empty config so the `addCartItem` a11y-announcement
+		// block (`const { messages } = getConfig(...)`) destructures safely
+		// when a test doesn't care about the screen-reader announcement.
+		// Tests that do care override this once via `mockReturnValueOnce`.
+		getConfig: jest.fn( () => ( {} ) ),
 		store: jest.fn( ( _name, definition ) => {
 			// The cart store calls `store()` twice: once to read `state` and
 			// once to register `actions`. Merge the definition's `state`
@@ -45,6 +52,10 @@ jest.mock(
 
 jest.mock( '../legacy-events', () => ( {
 	triggerAddedToCartEvent: jest.fn(),
+} ) );
+
+jest.mock( '@wordpress/a11y', () => ( {
+	speak: jest.fn(),
 } ) );
 
 /**
@@ -74,10 +85,12 @@ type CapturedRequest = {
  * catch re-throws here so `await runAction(...)` still rejects.
  *
  * @param action The async action return value cast to a generator.
- * @return A promise that resolves once the generator has finished.
+ * @return A promise that resolves to the generator's final return value (e.g.
+ *         `addCartItem`'s `AddCartItemResult`) once it has finished. Actions
+ *         with no explicit `return` resolve `undefined`.
  */
-async function runAction( action: unknown ): Promise< void > {
-	const iterator = action as Generator< unknown, unknown, unknown >;
+async function runAction< T = void >( action: unknown ): Promise< T > {
+	const iterator = action as Generator< unknown, T, unknown >;
 	let next = iterator.next();
 	while ( ! next.done ) {
 		try {
@@ -89,6 +102,7 @@ async function runAction( action: unknown ): Promise< void > {
 			next = iterator.throw( error );
 		}
 	}
+	return next.value;
 }
 
 /**
@@ -587,13 +601,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
 
 			await expect(
-				runAction(
+				runAction< AddCartItemResult >(
 					actions.addCartItem( {
 						id: 42,
 						quantityToAdd: 1,
 					} )
 				)
-			).resolves.toBeUndefined();
+			).resolves.toEqual( { success: true } );
 
 			expect( captured ).toHaveLength( 1 );
 			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
@@ -607,14 +621,14 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			] );
 
 			await expect(
-				runAction(
+				runAction< AddCartItemResult >(
 					actions.addCartItem( {
 						id: 42,
 						key: 'server-key-abc',
 						quantity: 5,
 					} )
 				)
-			).resolves.toBeUndefined();
+			).resolves.toEqual( { success: true } );
 		} );
 
 		it( 'still throws when both quantity and quantityToAdd are passed together', async () => {
@@ -1641,6 +1655,230 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			expect( mockState.cart.items ).toHaveLength( 1 );
 			expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
+		} );
+	} );
+
+	describe( 'addCartItem post-add side effect suppression', () => {
+		describe.each( [
+			[ 'option absent', undefined ],
+			[ 'option explicitly false', false ],
+		] )( '%s', ( _label, suppressPostAddSideEffects ) => {
+			const options =
+				suppressPostAddSideEffects === undefined
+					? undefined
+					: { suppressPostAddSideEffects };
+
+			it( 'fires the screen-reader announcement, the legacy added-to-cart event, and the sync event on a successful add', async () => {
+				( getConfig as jest.Mock ).mockReturnValueOnce( {
+					messages: { addedToCartText: 'Added to your cart.' },
+				} );
+				mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+				const syncEvents: CustomEvent[] = [];
+				const onSync = ( e: Event ) =>
+					syncEvents.push( e as CustomEvent );
+				window.addEventListener(
+					'wc-blocks_store_sync_required',
+					onSync
+				);
+
+				await runAction(
+					actions.addCartItem( { id: 42, quantityToAdd: 1 }, options )
+				);
+
+				window.removeEventListener(
+					'wc-blocks_store_sync_required',
+					onSync
+				);
+
+				expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
+					preserveCartData: true,
+				} );
+				expect( syncEvents ).toHaveLength( 1 );
+				expect( speak as jest.Mock ).toHaveBeenCalledWith(
+					'Added to your cart.',
+					'polite'
+				);
+			} );
+
+			it( 'shows its own error notice on server rejection', async () => {
+				mockBatchFetchFailing( {
+					failForPath: '/wc/store/v1/cart/add-item',
+					status: 400,
+					code: 'woocommerce_rest_cart_product_no_stock',
+					message: 'You cannot add that amount to the cart.',
+				} );
+				const actions = await loadCartStore();
+				seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+				const errors = spyOnShowNoticeError();
+
+				await runAction(
+					actions.addCartItem( { id: 42, quantityToAdd: 1 }, options )
+				);
+
+				expect( errors ).toHaveLength( 1 );
+			} );
+		} );
+
+		it( 'suppresses the screen-reader announcement, the legacy added-to-cart event, and the sync event on a successful add when suppressPostAddSideEffects is true', async () => {
+			( getConfig as jest.Mock ).mockReturnValueOnce( {
+				messages: { addedToCartText: 'Added to your cart.' },
+			} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			const syncEvents: CustomEvent[] = [];
+			const onSync = ( e: Event ) => syncEvents.push( e as CustomEvent );
+			window.addEventListener( 'wc-blocks_store_sync_required', onSync );
+
+			await runAction(
+				actions.addCartItem(
+					{ id: 42, quantityToAdd: 1 },
+					{ suppressPostAddSideEffects: true }
+				)
+			);
+
+			window.removeEventListener(
+				'wc-blocks_store_sync_required',
+				onSync
+			);
+
+			expect( triggerAddedToCartEvent ).not.toHaveBeenCalled();
+			expect( syncEvents ).toHaveLength( 0 );
+			expect( speak as jest.Mock ).not.toHaveBeenCalled();
+		} );
+
+		it( 'suppresses its own error notice on server rejection when suppressPostAddSideEffects is true', async () => {
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+				status: 400,
+			} );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			const errors = spyOnShowNoticeError();
+
+			await runAction(
+				actions.addCartItem(
+					{ id: 42, quantityToAdd: 1 },
+					{ suppressPostAddSideEffects: true }
+				)
+			);
+
+			expect( errors ).toHaveLength( 0 );
+		} );
+
+		it( 'still applies the optimistic render and commits the server-reconciled cart when suppressPostAddSideEffects is true', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await runAction(
+				actions.addCartItem(
+					{ id: 42, quantityToAdd: 1 },
+					{ suppressPostAddSideEffects: true }
+				)
+			);
+
+			expect( mockState.cart.items ).toHaveLength( 1 );
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 4 );
+		} );
+
+		it( 'still emits the showCartUpdatesNotices-gated auto-update notice when suppressPostAddSideEffects is true', async () => {
+			// A genuine concurrent server change (quantity 7, diverging from
+			// the +1 requested delta landing on 4) must still surface through
+			// the showCartUpdatesNotices-gated notice block even though the
+			// per-item side effects are suppressed.
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 7,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'server-key-abc',
+					id: 42,
+					quantity: 3,
+				} ),
+			] );
+			const notices = spyOnUpdateNotices();
+
+			await runAction(
+				actions.addCartItem(
+					{ id: 42, quantityToAdd: 1 },
+					{ suppressPostAddSideEffects: true }
+				)
+			);
+
+			expect(
+				notices.some(
+					( n ) =>
+						n.notice.includes( 'was changed to' ) &&
+						n.notice.includes( '7' )
+				)
+			).toBe( true );
+		} );
+	} );
+
+	describe( 'addCartItem resolved result value', () => {
+		it( 'resolves { success: true } when the server accepts the item', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await expect(
+				runAction< AddCartItemResult >(
+					actions.addCartItem( { id: 42, quantityToAdd: 1 } )
+				)
+			).resolves.toEqual( { success: true } );
+		} );
+
+		it( 'resolves { success: false, error } carrying the server message and code when the server rejects the item, without throwing', async () => {
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+				status: 400,
+				code: 'woocommerce_rest_cart_product_no_stock',
+				message: 'You cannot add that amount to the cart.',
+			} );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			const result = await runAction< AddCartItemResult >(
+				actions.addCartItem( { id: 42, quantityToAdd: 1 } )
+			);
+
+			expect( result.success ).toBe( false );
+			// Narrowed via the assertion above rather than an `if`, so this
+			// stays a single unconditional set of expectations.
+			const { error } = result as AddCartItemResult & {
+				success: false;
+			};
+			expect( error.message ).toBe(
+				'You cannot add that amount to the cart.'
+			);
+			expect( ( error as Error & { code?: string } ).code ).toBe(
+				'woocommerce_rest_cart_product_no_stock'
+			);
+		} );
+
+		it( 'never rejects on a server rejection — the promise always fulfills', async () => {
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+				status: 400,
+			} );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await expect(
+				runAction< AddCartItemResult >(
+					actions.addCartItem( { id: 42, quantityToAdd: 1 } )
+				)
+			).resolves.toEqual( expect.objectContaining( { success: false } ) );
 		} );
 	} );
 } );
