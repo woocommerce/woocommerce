@@ -1881,4 +1881,69 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).resolves.toEqual( expect.objectContaining( { success: false } ) );
 		} );
 	} );
+
+	describe( 'emitSyncEvent runtime export', () => {
+		// The cart store is imported lazily (not statically at the top of the
+		// file) so its module-level `store()` calls run after the shared
+		// `mockState` is initialized, mirroring `loadCartStore`. The runtime
+		// `emitSyncEvent` export is captured once the module has evaluated.
+		let emitSyncEvent: typeof import('../cart')[ 'emitSyncEvent' ];
+
+		beforeAll( async () => {
+			( { emitSyncEvent } = await import( '../cart' ) );
+		} );
+
+		it( 'is importable at runtime as a function', () => {
+			expect( typeof emitSyncEvent ).toBe( 'function' );
+		} );
+
+		it( 'dispatches a wc-blocks_store_sync_required CustomEvent on window carrying { type: from_iAPI, quantityChanges }', () => {
+			const quantityChanges = { productsPendingAdd: [ 42 ] };
+			const received: CustomEvent[] = [];
+			const onSync = ( event: Event ) =>
+				received.push( event as CustomEvent );
+			window.addEventListener( 'wc-blocks_store_sync_required', onSync );
+
+			emitSyncEvent( { quantityChanges } );
+
+			window.removeEventListener(
+				'wc-blocks_store_sync_required',
+				onSync
+			);
+
+			expect( received ).toHaveLength( 1 );
+			expect( received[ 0 ] ).toBeInstanceOf( CustomEvent );
+			expect( received[ 0 ].type ).toBe(
+				'wc-blocks_store_sync_required'
+			);
+			expect( received[ 0 ].detail ).toEqual( {
+				type: 'from_iAPI',
+				quantityChanges,
+			} );
+		} );
+
+		it( 'preserves the full quantityChanges payload, including all selected child ids', () => {
+			const quantityChanges = {
+				productsPendingAdd: [ 10, 20, 30 ],
+				cartItemsPendingQuantity: [ 'key-a', 'key-b' ],
+				cartItemsPendingDelete: [ 'key-c' ],
+			};
+			const received: CustomEvent[] = [];
+			const onSync = ( event: Event ) =>
+				received.push( event as CustomEvent );
+			window.addEventListener( 'wc-blocks_store_sync_required', onSync );
+
+			emitSyncEvent( { quantityChanges } );
+
+			window.removeEventListener(
+				'wc-blocks_store_sync_required',
+				onSync
+			);
+
+			expect( received ).toHaveLength( 1 );
+			expect( received[ 0 ].detail.quantityChanges ).toEqual(
+				quantityChanges
+			);
+		} );
+	} );
 } );

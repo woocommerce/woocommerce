@@ -238,7 +238,21 @@ const isNonceReady = new Promise< void >( ( resolve ) => {
 	resolveNonceReady = resolve;
 } );
 
-function emitSyncEvent( {
+/**
+ * Dispatches the cross-store cart-sync event other stores listen for.
+ *
+ * Fires a `wc-blocks_store_sync_required` {@link CustomEvent} on `window`
+ * whose `detail` carries `type: 'from_iAPI'` and the supplied
+ * `quantityChanges`. Consumers that mutate the cart as one grouped gesture
+ * import this at runtime to fire the identical sync contract once for the
+ * whole group rather than duplicating the private event shape.
+ *
+ * @param args                 The sync payload.
+ * @param args.quantityChanges The pending cart changes to broadcast (products
+ *                             to add, cart items to re-quantity, cart items to
+ *                             delete).
+ */
+export function emitSyncEvent( {
 	quantityChanges,
 }: {
 	quantityChanges: QuantityChanges;
