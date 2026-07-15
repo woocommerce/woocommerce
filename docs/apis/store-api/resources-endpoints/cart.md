@@ -259,6 +259,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 					"quantity": 1
 				}
 			],
+			"selected_rate_origin": "auto",
 			"shipping_rates": [
 				{
 					"rate_id": "flat_rate:10",
