@@ -637,6 +637,57 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse the "date on sale to" field from a CSV.
+	 *
+	 * When a date-only value (with no time component) is supplied, it is treated as the
+	 * end of that day (23:59:59) to match the behaviour of the product edit screen, where
+	 * the "On sale to" date input is stored with an end-of-day time.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param string $value Field value.
+	 *
+	 * @return string|null
+	 */
+	public function parse_date_on_sale_to_field( $value ) {
+		$parsed = $this->parse_datetime_field( $value );
+
+		if ( null === $parsed ) {
+			return null;
+		}
+
+		// If the value is numeric (Unix timestamp) it was already normalised to an ISO8601
+		// UTC string with an explicit time component by parse_datetime_field(); leave it alone.
+		if ( is_numeric( $value ) ) {
+			return $parsed;
+		}
+
+		// Detect any time component in the original string (e.g. "2023-01-26 10:00",
+		// "2023-01-26T10:00:00Z"). If one is present, preserve the caller's intent.
+		if ( preg_match( '/\d{1,2}:\d{2}/', (string) $value ) ) {
+			return $parsed;
+		}
+
+		// Canonical date-only value (Y-m-d): append end-of-day as a pure string operation.
+		// No timestamp round-trip means no timezone can shift the calendar day. The
+		// timezone-less result is interpreted as site-local by WC_Data::set_date_prop(),
+		// exactly like the value the admin product screen produces.
+		if ( preg_match( '/^\s*(\d{4}-\d{2}-\d{2})\s*$/', (string) $parsed, $matches ) ) {
+			return $matches[1] . ' 23:59:59';
+		}
+
+		// Other date-only formats accepted by strtotime() (e.g. "26-01-2099"). WordPress
+		// pins PHP's default timezone to UTC, so strtotime() and gmdate() operate in the
+		// same zone and the reformat cannot shift the calendar day.
+		$timestamp = strtotime( (string) $parsed );
+		if ( false === $timestamp ) {
+			return $parsed;
+		}
+
+		return gmdate( 'Y-m-d', $timestamp ) . ' 23:59:59';
+	}
+
+	/**
 	 * Parse backorders from a CSV.
 	 *
 	 * @param string $value Field value.
