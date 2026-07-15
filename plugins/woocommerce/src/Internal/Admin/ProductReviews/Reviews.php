@@ -556,8 +556,32 @@ class Reviews {
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function load_reviews_screen(): void {
+		$this->add_screen_options();
 		$this->reviews_list_table = $this->make_reviews_list_table();
 		$this->reviews_list_table->process_bulk_action();
+	}
+
+	/**
+	 * Registers the screen options for the Reviews page.
+	 *
+	 * This adds the "Number of items per page" control to the Screen Options tab. The value is stored in the
+	 * `edit_comments_per_page` user option, which is the same option {@see ReviewsListTable::get_per_page()} reads.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return void
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_screen_options(): void {
+		add_screen_option(
+			'per_page',
+			array(
+				'label'   => __( 'Number of reviews per page:', 'woocommerce' ),
+				'default' => 20,
+				'option'  => 'edit_comments_per_page',
+			)
+		);
 	}
 
 	/**

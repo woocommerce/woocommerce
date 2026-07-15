@@ -93,6 +93,28 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `add_screen_options` registers the "per page" screen option bound to the `edit_comments_per_page` user option.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::add_screen_options()
+	 *
+	 * @return void
+	 */
+	public function test_add_screen_options_registers_per_page_option() : void {
+		set_current_screen( 'product_page_product-reviews' );
+
+		$reviews = wc_get_container()->get( Reviews::class );
+		$reviews->add_screen_options();
+
+		$option = get_current_screen()->get_option( 'per_page' );
+
+		$this->assertIsArray( $option );
+		$this->assertArrayHasKey( 'option', $option );
+		$this->assertSame( 'edit_comments_per_page', $option['option'] );
+		$this->assertArrayHasKey( 'default', $option );
+		$this->assertSame( 20, $option['default'] );
+	}
+
+	/**
 	 * @testdox `get_pending_count_bubble` will return the HTML for the pending reviews (awaiting moderation).
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_pending_count_bubble()
