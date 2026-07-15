@@ -5,7 +5,7 @@ This folder contains the Interactivity API (iAPI) stores that WooCommerce blocks
 Stores in this folder:
 
 -   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format.
--   `woocommerce/cart` — cart state and actions (with mutation batching for performance).
+-   [`woocommerce/cart`](#woocommercecart-store) — cart state and actions (with mutation batching for performance). `addCartItem` resolves with a structured per-call outcome (`AddCartItemOutcome`) instead of `void` — see below.
 
 ---
 
@@ -232,3 +232,60 @@ For variable products, `findProduct` returns `null` when no variation matches th
 -   **Local context beats state.** If a block is wrapped in a `data-wp-context="woocommerce/products::{ ... }"` element, its `productId` / `variationId` override any globally-set values for descendants of that element. See `test/products.test.ts` for the exact precedence rules — notably, a context that has `productId` but no `variationId` key does **not** fall back to the global `variationId`.
 -   **Keep the consent string in sync.** The literal string is defined in `ProductsStore::$consent_statement` (PHP) and `universalLock` (JS). They are intentionally different (loaders vs. store lock); copy-paste from this README or the source files.
 -   **Do not extend this store from third-party code.** It is `lock: true` and private by design; anything here can change or disappear without notice.
+
+---
+
+## `woocommerce/cart` store
+
+The `woocommerce` Interactivity API store (`base/stores/woocommerce/cart.ts`) holds cart state and actions, with mutation batching for performance. This section only covers the `addCartItem` outcome contract below — it is not a write-up of the store's full state shape, its other actions, or the mutation batcher's internals.
+
+### The `addCartItem` outcome contract
+
+`addCartItem` returns `Promise< AddCartItemOutcome >` — a structured per-call outcome — instead of `Promise< void >`:
+
+```ts
+export type AddCartItemError = {
+	/** Server error code for a per-item rejection (e.g. `woocommerce_rest_product_out_of_stock`),
+	 *  or the batcher's `unknown_error` fallback. Absent on whole-batch/transport failures. */
+	code?: string;
+	/** Human-readable failure description. Always present. */
+	message: string;
+};
+
+export type AddCartItemOutcome =
+	| { success: true }
+	| { success: false; error: AddCartItemError };
+```
+
+Both types are exported from the cart store module and reach consumers through the existing type-only import path:
+
+```ts
+import type { AddCartItemOutcome } from '@woocommerce/stores/woocommerce/cart';
+```
+
+**`addCartItem` stays fire-and-forget.** It never rejects because of a request or server failure — every request path, whether the Store API accepts or rejects it, resolves with an outcome instead of throwing. The action still throws synchronously for its two programmer-error guards (both `quantity` and `quantityToAdd` supplied together, or a keyless call — no `key` — that passes an absolute `quantity` instead of a `quantityToAdd` delta) — those are argument-validation bugs, unrelated to the request outcome below.
+
+Read the outcome from a consuming generator:
+
+```ts
+const outcome = ( yield cartActions.addCartItem( {
+	id,
+	quantityToAdd,
+} ) ) as AddCartItemOutcome;
+
+if ( ! outcome.success ) {
+	// outcome.error.code   — may be absent (e.g. transport/whole-batch failures)
+	// outcome.error.message — always present
+	return;
+}
+```
+
+**`success: true` means the Store API accepted the request — nothing more needs checking.** That includes a brand-new standalone cart line (e.g. a bundle/booking/add-on "meta" line) as much as an incremented existing line, and a silently server-normalized quantity (capped to a maximum, bumped to a minimum/multiple, or forced to one for a sold-individually product) as much as an exact one. A caller never needs to inspect or diff cart lines to interpret the outcome.
+
+**Attribution is per-call, never per-batch.** When several `addCartItem` calls are dispatched within the same tick and coalesced into one `wc/store/v1/batch` request, or issued one after another in a loop, each call's outcome reflects only that call's own product result — never a shared or last-write-wins value from a sibling call, even when calls in the same batch land different outcomes (one product accepted, another rejected).
+
+**Both call shapes share the same request path.** A keyless call (no `key`, posts to `add-item`) and a keyed call (`key` supplied, posts to `update-item`) both resolve through the same single request and outcome capture — there is no separate contract for either shape.
+
+**`removeCartItem` and `batchAddCartItems` do not share this contract.** Both remain typed `Promise<void>` and swallow their own errors the way `addCartItem` used to. Don't assume parity when touching either of them — extending this contract to other cart actions is a separate decision, not something the store does today.
+
+For a worked example, see `onClickMoveToCart` in `saved-for-later/frontend.ts` and `onClickAddToCart` in `wishlist/frontend.ts` — both read the outcome and gate a destructive list-removal on `outcome.success`.
