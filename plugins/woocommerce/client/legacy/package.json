@@ -44,6 +44,7 @@
 		"grunt-rtlcss": "2.0.2",
 		"grunt-sass": "3.1.0",
 		"grunt-stylelint": "0.16.0",
+		"jest-environment-jsdom": "29.5.x",
 		"jest-fixed-jsdom": "^0.0.10",
 		"sass": "^1.69.5",
 		"stylelint": "^14.16.1"
