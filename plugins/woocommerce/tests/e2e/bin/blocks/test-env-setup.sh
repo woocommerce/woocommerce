@@ -25,15 +25,5 @@ $prefs["core/edit-site"]["welcomeGuideTemplate"] = false;
 update_user_meta( 1, "wp_persisted_preferences", $prefs );
 '
 
-# Ensure the E2E test helper is active before the blocks suite exports its database
-# snapshot (the snapshot is restored between every test, so whatever is active here is
-# what the specs see). Several blocks specs call its REST routes — e2e-feature-flags,
-# e2e-options, e2e-theme — and fail with `rest_no_route` if it is not active. The core
-# E2E env gets this via the .wp-env.e2e.json "plugins" array, but the blocks snapshot
-# needs it pinned explicitly here.
-if ! $wp_cli -- wp plugin is-active woocommerce-e2e-test-helper >/dev/null 2>&1; then
-	$wp_cli -- wp plugin activate woocommerce-e2e-test-helper
-fi
-
 echo "Generating test translations"
 node $script_dir/generate-test-translations.js
