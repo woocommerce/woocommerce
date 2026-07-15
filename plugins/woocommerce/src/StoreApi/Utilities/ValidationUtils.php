@@ -46,6 +46,8 @@ class ValidationUtils {
 	 * @param string $state State code (sanitized).
 	 * @param string $country Country code.
 	 * @return boolean Valid for a persisted address or not valid.
+	 *
+	 * @since 11.1.0
 	 */
 	public function validate_state_for_persisted_address( $state, $country ) {
 		if ( $this->validate_state( $state, $country ) ) {
