@@ -185,6 +185,53 @@ test.describe( `${ blockData.name } Block`, () => {
 		await checkProductLink( page );
 	} );
 
+	test( 'should render the product table with no client-side error for a product with no item data', async ( {
+		page,
+		frontendUtils,
+		miniCartUtils,
+	} ) => {
+		const pageErrors: string[] = [];
+		const consoleErrors: string[] = [];
+
+		// Register listeners before navigating so nothing that happens during
+		// the mini-cart's render is missed. This product has no variation and
+		// no `woocommerce_get_item_data` additions (no fixture plugin is
+		// activated in this describe block), which is the plain rendering
+		// path the item-data/separator getters must not throw on.
+		page.on( 'pageerror', ( error ) => {
+			pageErrors.push( error.message );
+		} );
+		page.on( 'console', ( message ) => {
+			// Exclude the browser's own "failed to load resource" network
+			// diagnostics: they are not JS errors raised by page code (no
+			// `console.error` call is involved) and can fire for reasons
+			// entirely unrelated to the item-data/separator logic under
+			// test, e.g. an unrelated missing stylesheet.
+			if (
+				message.type() === 'error' &&
+				! message.text().includes( 'Failed to load resource' )
+			) {
+				consoleErrors.push( message.text() );
+			}
+		} );
+
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await miniCartUtils.openMiniCart();
+
+		// The product table renders normally: name, price, quantity.
+		await checkProductLink( page );
+		await expect(
+			page.locator( '.wc-block-components-product-price' ).first()
+		).toBeVisible();
+		await expect(
+			page.getByLabel( 'Quantity of Polo in your cart.' )
+		).toHaveValue( '1' );
+
+		expect( pageErrors ).toEqual( [] );
+		expect( consoleErrors ).toEqual( [] );
+	} );
+
 	test( 'should show subtotal, view cart button and checkout button', async ( {
 		page,
 		frontendUtils,
@@ -544,6 +591,39 @@ test.describe( `${ blockData.name } Block (item data)`, () => {
 			.filter( { hasText: 'important' } );
 		await expect( noteValue ).toBeVisible();
 		await expect( noteValue.locator( 'b' ) ).toHaveCount( 0 );
+	} );
+
+	test( 'should show a separator between item-data entries but not after the last one', async ( {
+		page,
+		frontendUtils,
+		miniCartUtils,
+	} ) => {
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await miniCartUtils.openMiniCart();
+
+		const dialog = page.getByRole( 'dialog' );
+		await expect( dialog ).toBeVisible();
+
+		// The fixture plugin injects 4 well-formed entries (Gift Message,
+		// Engraving, Size, Note) onto the cart item. Confirm all 4 rendered
+		// before counting separators, so a count mismatch below can only be
+		// attributed to separator placement, not to a missing entry.
+		const entryNames = dialog.locator(
+			'.wc-block-components-product-details__name'
+		);
+		await expect( entryNames ).toHaveCount( 4 );
+
+		// Each entry's trailing separator is a `span[aria-hidden="true"]`;
+		// the store getter that drives its `hidden` binding removes the
+		// `hidden` attribute exactly for the entries that should show a
+		// separator. Count only the ones that are actually visible (not
+		// `hidden`) — using `textContent` with a regex would also match the
+		// text of `hidden` separators and give a false pass/fail.
+		const visibleSeparators = dialog.locator(
+			'.wc-block-components-product-details span[aria-hidden="true"]:not([hidden])'
+		);
+		await expect( visibleSeparators ).toHaveCount( 3 );
 	} );
 } );
 
