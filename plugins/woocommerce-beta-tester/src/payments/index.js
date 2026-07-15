@@ -10,8 +10,7 @@ const metaKey = '_wcpay_mode';
 
 const Payments = () => {
 	const { orders = [], isRequesting } = useSelect( ( select ) => {
-		const { getOrders, hasFinishedResolution, getOrdersError } =
-			select( ordersStore );
+		const { getOrders, hasFinishedResolution } = select( ordersStore );
 
 		const query = {
 			page: 1,
@@ -22,7 +21,6 @@ const Payments = () => {
 
 		return {
 			orders: fetchedOrders,
-			isError: Boolean( getOrdersError( fetchedOrders ) ),
 			isRequesting: requesting,
 		};
 	} );
