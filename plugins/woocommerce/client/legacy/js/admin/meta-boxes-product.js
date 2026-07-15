@@ -1570,8 +1570,7 @@ jQuery( function ( $ ) {
 			keepAlive: true,
 		} );
 
-	// add a tooltip to the right of the product image meta box "Set product image" and "Add product gallery images"
-	const setProductImageLink = $( '#set-post-thumbnail' );
+	// Add tooltips to the product image and product gallery actions.
 	// Escape the translated label before interpolating into the attribute so a
 	// translation containing quotes or markup cannot break the rendered span.
 	const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="0" aria-label="${ _.escape(
@@ -1585,16 +1584,49 @@ jQuery( function ( $ ) {
 		delay: 200,
 		keepAlive: true,
 	};
+	const productImageContainer = $( '#postimagediv .inside' );
+	const productImageTooltipClass = 'woocommerce-product-image-help-tip';
 
-	if ( setProductImageLink ) {
+	const syncProductImageTooltip = () => {
+		const removeProductImageLink = $( '#remove-post-thumbnail' );
+		const productImageLink = removeProductImageLink.length
+			? removeProductImageLink
+			: $( '#set-post-thumbnail' );
+		const existingTooltip = productImageContainer.find(
+			`.${ productImageTooltipClass }`
+		);
+
+		if ( ! productImageLink.length ) {
+			existingTooltip.remove();
+			return;
+		}
+
+		if (
+			existingTooltip.length &&
+			existingTooltip.prev()[ 0 ] === productImageLink[ 0 ]
+		) {
+			return;
+		}
+
+		existingTooltip.remove();
 		$( tooltipMarkup )
-			.insertAfter( setProductImageLink )
+			.addClass( productImageTooltipClass )
+			.insertAfter( productImageLink )
 			.tipTip( tooltipData );
+	};
+
+	if ( productImageContainer.length ) {
+		syncProductImageTooltip();
+
+		new MutationObserver( syncProductImageTooltip ).observe(
+			productImageContainer[ 0 ],
+			{ childList: true }
+		);
 	}
 
 	const addProductImagesLink = $( '.add_product_images > a' );
 
-	if ( addProductImagesLink ) {
+	if ( addProductImagesLink.length ) {
 		$( tooltipMarkup )
 			.insertAfter( addProductImagesLink )
 			.tipTip( tooltipData );

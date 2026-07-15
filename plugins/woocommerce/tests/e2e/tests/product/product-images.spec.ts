@@ -31,6 +31,41 @@ async function addImageFromLibrary(
 	return dataId;
 }
 
+async function expectProductImageHelpTipNextTo(
+	page: Page,
+	actionName: 'Remove product image' | 'Set product image'
+) {
+	const productImageBox = page.locator( '#postimagediv' );
+	const action = productImageBox
+		.getByRole( 'link', { name: actionName } )
+		.or( productImageBox.getByRole( 'button', { name: actionName } ) );
+	const helpTip = productImageBox.locator(
+		'.woocommerce-product-image-help-tip'
+	);
+
+	await expect( action ).toBeVisible();
+	await expect( helpTip ).toBeVisible();
+	await expect( helpTip ).toHaveAttribute( 'tabindex', '0' );
+	await expect( helpTip ).toHaveAttribute(
+		'aria-label',
+		/For best results, upload JPEG or PNG files/
+	);
+
+	const actionBox = await action.boundingBox();
+	const helpTipBox = await helpTip.boundingBox();
+
+	expect( actionBox ).not.toBeNull();
+	expect( helpTipBox ).not.toBeNull();
+
+	if ( ! actionBox || ! helpTipBox ) {
+		throw new Error(
+			'Unable to determine the action or help tip position.'
+		);
+	}
+
+	expect( Math.abs( actionBox.y - helpTipBox.y ) ).toBeLessThanOrEqual( 4 );
+}
+
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
 	product: async ( { restApi }, use ) => {
@@ -88,6 +123,37 @@ const test = baseTest.extend( {
 } );
 
 test.describe( 'Products > Product Images', () => {
+	test( 'keeps the product image help tip aligned when the image changes', async ( {
+		page,
+		productWithImage,
+	} ) => {
+		await page.goto(
+			`wp-admin/post.php?post=${ productWithImage.id }&action=edit`
+		);
+
+		await expectProductImageHelpTipNextTo( page, 'Remove product image' );
+
+		await page
+			.getByRole( 'link', { name: 'Remove product image' } )
+			.or(
+				page.getByRole( 'button', {
+					name: 'Remove product image',
+				} )
+			)
+			.click();
+		await expectProductImageHelpTipNextTo( page, 'Set product image' );
+
+		await page
+			.getByRole( 'link', { name: 'Set product image' } )
+			.or( page.getByRole( 'button', { name: 'Set product image' } ) )
+			.click();
+		await addImageFromLibrary( page, 'image-02', 'Set product image' );
+		await expectProductImageHelpTipNextTo( page, 'Remove product image' );
+		await expect(
+			page.locator( '.woocommerce-product-image-help-tip' )
+		).toHaveCount( 1 );
+	} );
+
 	test( 'can set product image', async ( { page, product } ) => {
 		await test.step( 'Navigate to product edit page', async () => {
 			await page.goto(
