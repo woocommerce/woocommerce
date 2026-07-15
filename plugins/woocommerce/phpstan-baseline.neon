@@ -4033,12 +4033,6 @@ parameters:
 			path: includes/admin/helper/views/html-section-notices.php
 
 		-
-			message: '#^Binary operation "\." between string and non\-empty\-array\|non\-falsy\-string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/admin/importers/class-wc-product-csv-importer-controller.php
-
-		-
 			message: '#^Method WC_Product_CSV_Importer_Controller\:\:add_error\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
