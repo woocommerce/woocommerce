@@ -369,72 +369,11 @@ final class BlockTypesController {
 	}
 
 	/**
-	 * Get list of block types allowed in Widget Areas. New blocks won't be
-	 * exposed in the Widget Area unless specifically added here.
-	 *
-	 * @return array Array of block types.
-	 */
-	protected function get_widget_area_block_types() {
-		return array(
-			'AllReviews',
-			'Breadcrumbs',
-			'CartLink',
-			'CatalogSorting',
-			'ClassicShortcode',
-			'CustomerAccount',
-			'Dropdown',
-			'FeaturedCategory',
-			'FeaturedProduct',
-			'MiniCart',
-			'ProductCategories',
-			'ProductResultsCount',
-			'ProductSearch',
-			'ReviewsByCategory',
-			'ReviewsByProduct',
-			'ProductFilters',
-			'ProductFilterStatus',
-			'ProductFilterPrice',
-			'ProductFilterPriceSlider',
-			'ProductFilterAttribute',
-			'ProductFilterRating',
-			'ProductFilterActive',
-			'ProductFilterRemovableChips',
-			'ProductFilterClearButton',
-			'ProductFilterCheckboxList',
-			'ProductFilterChips',
-			'ProductFilterTaxonomy',
-
-			// Keep hidden legacy filter blocks for backward compatibility.
-			'ActiveFilters',
-			'AttributeFilter',
-			'FilterWrapper',
-			'PriceFilter',
-			'RatingFilter',
-			'StockFilter',
-			// End: legacy filter blocks.
-
-			// Below product grids are hidden from inserter however they could have been used in widgets.
-			// Keep them for backward compatibility.
-			'HandpickedProducts',
-			'ProductBestSellers',
-			'ProductNew',
-			'ProductOnSale',
-			'ProductTopRated',
-			'ProductsByAttribute',
-			'ProductCategory',
-			'ProductTag',
-			// End: legacy product grids blocks.
-		);
-	}
-
-	/**
 	 * Get list of block types.
 	 *
 	 * @return array
 	 */
 	protected function get_block_types() {
-		global $pagenow;
-
 		$block_types = array(
 			'ActiveFilters',
 			'AddToCartForm',
@@ -576,45 +515,6 @@ final class BlockTypesController {
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItem';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemSelector';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemLabel';
-		}
-
-		/**
-		 * This enables specific blocks in Widget Areas using an opt-in approach.
-		 */
-		if ( in_array( $pagenow, array( 'widgets.php', 'themes.php', 'customize.php' ), true ) && ( empty( $_GET['page'] ) || 'gutenberg-edit-site' !== $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			$block_types = array_intersect(
-				$block_types,
-				$this->get_widget_area_block_types()
-			);
-		}
-
-		/**
-		 * This disables specific blocks in Post and Page editor by not registering them.
-		 */
-		if ( in_array( $pagenow, array( 'post.php', 'post-new.php' ), true ) ) {
-			$block_types = array_diff(
-				$block_types,
-				array(
-					'Breadcrumbs',
-					'CatalogSorting',
-					'ClassicTemplate',
-					'ProductResultsCount',
-					'ProductReviews',
-					'OrderConfirmation\Status',
-					'OrderConfirmation\Summary',
-					'OrderConfirmation\Totals',
-					'OrderConfirmation\TotalsWrapper',
-					'OrderConfirmation\Downloads',
-					'OrderConfirmation\DownloadsWrapper',
-					'OrderConfirmation\BillingAddress',
-					'OrderConfirmation\ShippingAddress',
-					'OrderConfirmation\BillingWrapper',
-					'OrderConfirmation\ShippingWrapper',
-					'OrderConfirmation\AdditionalInformation',
-					'OrderConfirmation\AdditionalFieldsWrapper',
-					'OrderConfirmation\AdditionalFields',
-				)
-			);
 		}
 
 		/**
