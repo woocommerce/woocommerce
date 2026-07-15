@@ -25,6 +25,15 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Clean up after each test.
+	 */
+	public function tearDown(): void {
+		remove_all_filters( 'wc_get_price_decimal_separator' );
+
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox variations need to set the status back to published if parent product is a draft
 	 */
 	public function test_expand_data_with_draft_variable() {
@@ -245,5 +254,51 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $product->get_id() );
 		wc_delete_attribute( $color_attr_id );
 		wc_delete_attribute( $size_attr_id );
+	}
+
+	/**
+	 * @testdox parse_float_field should respect the store's decimal separator setting (issue #38116).
+	 * @dataProvider provider_parse_float_field_decimal_separator
+	 *
+	 * @param string $decimal_sep The store's decimal separator setting.
+	 * @param string $value       The raw CSV value to parse.
+	 * @param float  $expected    The expected parsed float.
+	 */
+	public function test_parse_float_field_respects_decimal_separator( string $decimal_sep, string $value, float $expected ) {
+		add_filter( 'wc_get_price_decimal_separator', fn() => $decimal_sep );
+
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+		$result   = $importer->parse_float_field( $value );
+
+		$this->assertSame( $expected, $result, "Expected '{$value}' to parse to {$expected} with '{$decimal_sep}' as the decimal separator." );
+	}
+
+	/**
+	 * Data provider for test_parse_float_field_respects_decimal_separator.
+	 *
+	 * @return array
+	 */
+	public function provider_parse_float_field_decimal_separator(): array {
+		return array(
+			'comma separator, comma value'   => array( ',', '1,5', 1.5 ),
+			'comma separator, sub-one value' => array( ',', '0,5', 0.5 ),
+			'period separator, period value' => array( '.', '1.5', 1.5 ),
+			'comma separator, integer value' => array( ',', '10', 10.0 ),
+
+			// With a period separator the comma is treated as a grouping separator and
+			// stripped, mirroring how price fields (which also use wc_format_decimal) behave.
+			// A comma-decimal CSV therefore requires the store's separator to be set to comma.
+			'period separator, comma value'  => array( '.', '0,5', 5.0 ),
+			'period separator, comma+int'    => array( '.', '1,5', 15.0 ),
+		);
+	}
+
+	/**
+	 * @testdox parse_float_field should return an empty string unchanged.
+	 */
+	public function test_parse_float_field_returns_empty_string_unchanged() {
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+
+		$this->assertSame( '', $importer->parse_float_field( '' ), 'Empty values should be returned unchanged.' );
 	}
 }

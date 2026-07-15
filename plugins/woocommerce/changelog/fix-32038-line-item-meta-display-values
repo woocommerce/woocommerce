@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow REST order updates to accept round-tripped line item meta display values with complex data.
