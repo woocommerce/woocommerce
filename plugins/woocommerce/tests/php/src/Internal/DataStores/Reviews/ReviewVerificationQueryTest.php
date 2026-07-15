@@ -12,6 +12,16 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 
 	/**
+	 * Clear any backfill actions scheduled by fixtures or prior tests.
+	 */
+	public function tearDown(): void {
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+		}
+		parent::tearDown();
+	}
+
+	/**
 	 * Create a paid order containing a product for a given identity.
 	 *
 	 * @param \WC_Product $product  Product to add.
@@ -99,6 +109,41 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Fetch the approved review comments for a product.
+	 *
+	 * @param int $product_id Product post id.
+	 * @return \WP_Comment[]
+	 */
+	private function get_product_reviews( int $product_id ): array {
+		return get_comments(
+			array(
+				'post_id' => $product_id,
+				'type'    => 'review',
+				'status'  => 'approve',
+			)
+		);
+	}
+
+	/**
+	 * Count the pending backfill actions scheduled for a product.
+	 *
+	 * @param int $product_id Product post id.
+	 * @return int
+	 */
+	private function count_scheduled_backfills( int $product_id ): int {
+		$ids = as_get_scheduled_actions(
+			array(
+				'hook'     => ReviewVerificationQuery::BACKFILL_ACTION,
+				'args'     => array( 'product_id' => $product_id ),
+				'status'   => \ActionScheduler_Store::STATUS_PENDING,
+				'per_page' => -1,
+			),
+			'ids'
+		);
+		return count( $ids );
+	}
+
+	/**
 	 * Count the heavy "bought product" order-join queries while running a callback.
 	 *
 	 * @param callable $callback Code to execute.
@@ -119,28 +164,21 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The batched prime must resolve every reviewer in a single query and persist
-	 * the verified meta, so the per-review badge path issues no further queries.
+	 * The backfill must resolve every reviewer in a single query and persist the verified meta,
+	 * so the per-review badge path then issues no further queries.
 	 */
-	public function test_prime_resolves_all_in_single_query(): void {
+	public function test_backfill_resolves_all_in_single_query(): void {
 		list( $product, $expected ) = $this->build_verified_owner_fixture();
-		$comments                   = get_comments(
-			array(
-				'post_id' => $product->get_id(),
-				'type'    => 'review',
-				'status'  => 'approve',
-			)
-		);
 
 		wp_cache_flush();
-		$prime_queries = $this->count_bought_product_queries(
-			function () use ( $comments, $product ) {
-				( new ReviewVerificationQuery() )->prime( $comments, $product->get_id() );
+		$backfill_queries = $this->count_bought_product_queries(
+			function () use ( $product ) {
+				( new ReviewVerificationQuery() )->backfill( $product->get_id() );
 			}
 		);
 
-		// One query for the whole page of reviews, regardless of reviewer count.
-		$this->assertSame( 1, $prime_queries, 'Batched prime should run exactly one bought-product query.' );
+		// One query for the whole product, regardless of reviewer count.
+		$this->assertSame( 1, $backfill_queries, 'Backfill should run exactly one bought-product query.' );
 
 		// Verified meta is persisted with the correct value for every review.
 		foreach ( $expected as $comment_id => $is_verified ) {
@@ -155,13 +193,13 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 				}
 			}
 		);
-		$this->assertSame( 0, $badge_queries, 'Verified-owner badge should not query after the batched prime.' );
+		$this->assertSame( 0, $badge_queries, 'Verified-owner badge should not query after the backfill.' );
 	}
 
 	/**
-	 * The batched result must be byte-identical to the per-review (unbatched) path.
+	 * The backfilled result must match the per-review (unbatched) path.
 	 */
-	public function test_prime_matches_per_review_path(): void {
+	public function test_backfill_matches_per_review_path(): void {
 		// Unbatched baseline via the filter gate.
 		list( , $expected_a ) = $this->build_verified_owner_fixture();
 		add_filter( 'woocommerce_prime_review_verification_meta', '__return_false' );
@@ -175,42 +213,207 @@ class ReviewVerificationQueryTest extends \WC_Unit_Test_Case {
 			$this->assertSame( $is_verified, $unbatched[ $comment_id ], "Unbatched path wrong for comment $comment_id." );
 		}
 
-		// Batched path on a fresh fixture.
+		// Backfilled path on a fresh fixture.
 		list( $product_b, $expected_b ) = $this->build_verified_owner_fixture();
-		$comments                       = get_comments(
-			array(
-				'post_id' => $product_b->get_id(),
-				'type'    => 'review',
-				'status'  => 'approve',
-			)
-		);
-		( new ReviewVerificationQuery() )->prime( $comments, $product_b->get_id() );
+		( new ReviewVerificationQuery() )->backfill( $product_b->get_id() );
 
 		foreach ( $expected_b as $comment_id => $is_verified ) {
-			$this->assertSame( $is_verified, wc_review_is_from_verified_owner( $comment_id ), "Batched path wrong for comment $comment_id." );
+			$this->assertSame( $is_verified, wc_review_is_from_verified_owner( $comment_id ), "Backfilled path wrong for comment $comment_id." );
 		}
 	}
 
 	/**
-	 * When disabled via filter, the prime is a no-op and leaves resolution to the per-review path.
+	 * When disabled via filter, the backfill is a no-op and leaves resolution to the per-review path.
 	 */
-	public function test_prime_can_be_disabled_via_filter(): void {
+	public function test_backfill_can_be_disabled_via_filter(): void {
 		list( $product, $expected ) = $this->build_verified_owner_fixture();
-		$comments                   = get_comments(
-			array(
-				'post_id' => $product->get_id(),
-				'type'    => 'review',
-				'status'  => 'approve',
-			)
-		);
 
 		add_filter( 'woocommerce_prime_review_verification_meta', '__return_false' );
-		( new ReviewVerificationQuery() )->prime( $comments, $product->get_id() );
+		( new ReviewVerificationQuery() )->backfill( $product->get_id() );
 		remove_filter( 'woocommerce_prime_review_verification_meta', '__return_false' );
 
-		// No meta should have been written by the disabled prime.
+		// No meta should have been written by the disabled backfill.
 		foreach ( array_keys( $expected ) as $comment_id ) {
-			$this->assertSame( '', get_comment_meta( $comment_id, 'verified', true ), "Disabled prime should not write meta for $comment_id." );
+			$this->assertSame( '', get_comment_meta( $comment_id, 'verified', true ), "Disabled backfill should not write meta for $comment_id." );
 		}
+	}
+
+	/**
+	 * A product page with unresolved reviews must schedule a backfill without resolving on read,
+	 * and repeated scheduling must be deduplicated to a single pending action.
+	 */
+	public function test_schedule_for_page_enqueues_single_backfill_without_resolving(): void {
+		list( $product, $expected ) = $this->build_verified_owner_fixture();
+		$product_id                 = $product->get_id();
+		$comments                   = $this->get_product_reviews( $product_id );
+
+		// Clear the action the fixture's inserts already scheduled, to assert scheduling cleanly.
+		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+
+		$read_queries = $this->count_bought_product_queries(
+			function () use ( $comments, $product_id ) {
+				$query = new ReviewVerificationQuery();
+				$query->schedule_for_page( $comments, $product_id );
+				$query->schedule_for_page( $comments, $product_id );
+			}
+		);
+
+		$this->assertSame( 0, $read_queries, 'Scheduling on read must not run the bought-product query.' );
+		$this->assertSame( 1, $this->count_scheduled_backfills( $product_id ), 'Repeated scheduling must dedupe to one pending backfill.' );
+
+		// Nothing resolved yet: meta stays empty until the scheduled task runs.
+		foreach ( array_keys( $expected ) as $comment_id ) {
+			$this->assertSame( '', get_comment_meta( $comment_id, 'verified', true ), "Scheduling must not resolve comment $comment_id on read." );
+		}
+	}
+
+	/**
+	 * A page whose reviews are all already resolved must not schedule a backfill.
+	 */
+	public function test_schedule_for_page_skips_when_all_resolved(): void {
+		list( $product ) = $this->build_verified_owner_fixture();
+		$product_id      = $product->get_id();
+
+		( new ReviewVerificationQuery() )->backfill( $product_id );
+		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+
+		( new ReviewVerificationQuery() )->schedule_for_page( $this->get_product_reviews( $product_id ), $product_id );
+
+		$this->assertSame( 0, $this->count_scheduled_backfills( $product_id ), 'A fully resolved page must not schedule a backfill.' );
+	}
+
+	/**
+	 * A review whose email differs in case from the order billing email must still resolve verified,
+	 * matching the case-insensitive DB collation the per-review path relies on.
+	 */
+	public function test_backfill_matches_verified_owner_across_email_case(): void {
+		$product    = ProductHelper::create_simple_product();
+		$product_id = $product->get_id();
+
+		$this->create_paid_order_for( $product, 0, 'buyer@example.test' );
+		$comment_id = $this->insert_unverified_review( $product_id, 'Buyer@Example.TEST', 0 );
+
+		( new ReviewVerificationQuery() )->backfill( $product_id );
+
+		$this->assertSame( '1', get_comment_meta( $comment_id, 'verified', true ), 'A case-different guest email must still resolve as a verified owner.' );
+		$this->assertTrue( wc_review_is_from_verified_owner( $comment_id ), 'The per-review path must agree.' );
+	}
+
+	/**
+	 * A hooked woocommerce_pre_customer_bought_product filter owns the result, so the batch must
+	 * defer to the per-review path rather than persist its own answer.
+	 */
+	public function test_backfill_defers_when_pre_check_filter_is_hooked(): void {
+		list( $product, $expected ) = $this->build_verified_owner_fixture();
+
+		add_filter( 'woocommerce_pre_customer_bought_product', '__return_true' );
+		( new ReviewVerificationQuery() )->backfill( $product->get_id() );
+		remove_filter( 'woocommerce_pre_customer_bought_product', '__return_true' );
+
+		foreach ( array_keys( $expected ) as $comment_id ) {
+			$this->assertSame( '', get_comment_meta( $comment_id, 'verified', true ), "Backfill must not persist over a pre-check filter for $comment_id." );
+		}
+	}
+
+	/**
+	 * A non-review comment must not schedule a backfill.
+	 */
+	public function test_schedule_for_new_review_ignores_non_reviews(): void {
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+
+		$comment_id = (int) wp_insert_comment(
+			array(
+				'comment_post_ID'  => $product_id,
+				'comment_content'  => 'Not a review.',
+				'comment_type'     => 'comment',
+				'comment_approved' => 1,
+			)
+		);
+		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+
+		( new ReviewVerificationQuery() )->schedule_for_new_review( $comment_id, get_comment( $comment_id ) );
+
+		$this->assertSame( 0, $this->count_scheduled_backfills( $product_id ), 'A non-review comment must not schedule a backfill.' );
+	}
+
+	/**
+	 * A backfill run that fills its batch must reschedule a follow-up for the remaining reviews.
+	 */
+	public function test_backfill_reschedules_when_batch_is_full(): void {
+		list( $product ) = $this->build_verified_owner_fixture();
+		$product_id      = $product->get_id();
+
+		// Force a batch smaller than the 4-review fixture so the first run is "full".
+		add_filter( 'woocommerce_review_verification_backfill_batch_size', fn() => 2 );
+		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+		( new ReviewVerificationQuery() )->backfill( $product_id );
+		remove_all_filters( 'woocommerce_review_verification_backfill_batch_size' );
+
+		$this->assertSame( 1, $this->count_scheduled_backfills( $product_id ), 'A full batch must reschedule a follow-up for the remainder.' );
+	}
+
+	/**
+	 * The follow-up must be scheduled even while an action for the same product is in progress — the
+	 * real state when a backfill reschedules itself. A pending-and-running dedup would drop it.
+	 */
+	public function test_backfill_reschedules_while_an_action_is_running(): void {
+		if ( ! class_exists( '\ActionScheduler_Action' ) || ! class_exists( '\ActionScheduler_SimpleSchedule' ) ) {
+			$this->markTestSkipped( 'Action Scheduler classes unavailable.' );
+		}
+
+		list( $product ) = $this->build_verified_owner_fixture();
+		$product_id      = $product->get_id();
+
+		add_filter( 'woocommerce_review_verification_backfill_batch_size', fn() => 2 );
+		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+
+		// Persist an action for this product and mark it in-progress, mirroring the scheduler runner.
+		$store      = \ActionScheduler::store();
+		$action     = new \ActionScheduler_Action(
+			ReviewVerificationQuery::BACKFILL_ACTION,
+			array( 'product_id' => $product_id ),
+			new \ActionScheduler_SimpleSchedule( as_get_datetime_object() ),
+			'woocommerce-review-verification'
+		);
+		$running_id = $store->save_action( $action );
+		$store->log_execution( $running_id );
+
+		( new ReviewVerificationQuery() )->backfill( $product_id );
+		remove_all_filters( 'woocommerce_review_verification_backfill_batch_size' );
+
+		$this->assertSame( 1, $this->count_scheduled_backfills( $product_id ), 'A follow-up must schedule even while a backfill action for the product is running.' );
+	}
+
+	/**
+	 * A follow-up must not stack on top of one already pending for the same product.
+	 */
+	public function test_backfill_reschedule_dedupes_pending(): void {
+		list( $product ) = $this->build_verified_owner_fixture();
+		$product_id      = $product->get_id();
+
+		add_filter( 'woocommerce_review_verification_backfill_batch_size', fn() => 2 );
+		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+		( new ReviewVerificationQuery() )->backfill( $product_id );
+		( new ReviewVerificationQuery() )->backfill( $product_id );
+		remove_all_filters( 'woocommerce_review_verification_backfill_batch_size' );
+
+		$this->assertSame( 1, $this->count_scheduled_backfills( $product_id ), 'Repeated full-batch runs must not stack pending follow-ups.' );
+	}
+
+	/**
+	 * Inserting a new product review must schedule a backfill for its product.
+	 */
+	public function test_schedule_for_new_review_enqueues_backfill(): void {
+		$product    = ProductHelper::create_simple_product();
+		$product_id = $product->get_id();
+		as_unschedule_all_actions( ReviewVerificationQuery::BACKFILL_ACTION );
+
+		$comment_id = $this->insert_unverified_review( $product_id, 'someone@example.test', 0 );
+		$comment    = get_comment( $comment_id );
+
+		( new ReviewVerificationQuery() )->schedule_for_new_review( $comment_id, $comment );
+
+		$this->assertSame( 1, $this->count_scheduled_backfills( $product_id ), 'A new product review must schedule a backfill.' );
 	}
 }

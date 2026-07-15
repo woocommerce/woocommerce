@@ -84,8 +84,10 @@ class WC_Comments {
 		// Review of verified purchase.
 		add_action( 'comment_post', array( __CLASS__, 'add_comment_purchase_verification' ) );
 
-		// Resolve "verified owner" status for all reviews on a product page in one query.
-		add_filter( 'comments_array', array( __CLASS__, 'prime_review_verification_meta' ), 10, 2 );
+		// Backfill "verified owner" status for a product's reviews off-hours, in one query.
+		add_filter( 'comments_array', array( __CLASS__, 'schedule_review_verification_backfill' ), 10, 2 );
+		add_action( 'wp_insert_comment', array( __CLASS__, 'schedule_review_verification_backfill_for_new_review' ), 10, 2 );
+		add_action( ReviewVerificationQuery::BACKFILL_ACTION, array( __CLASS__, 'run_review_verification_backfill' ) );
 
 		// Set comment type.
 		add_action( 'preprocess_comment', array( __CLASS__, 'update_comment_type' ), 1 );
@@ -516,10 +518,8 @@ class WC_Comments {
 	}
 
 	/**
-	 * Batch-resolve "verified owner" status for a product page's reviews in a single query.
-	 *
-	 * Hooked on `comments_array`; delegates to ReviewVerificationQuery so the per-review badge
-	 * checks become O(1) reads. See that class for the rationale.
+	 * Schedule an off-hours backfill of "verified owner" status when a product page shows reviews
+	 * that still need it. Hooked on `comments_array`; returns the comments unchanged.
 	 *
 	 * @since 11.0.0
 	 *
@@ -527,11 +527,40 @@ class WC_Comments {
 	 * @param int   $post_id  The post (product) ID whose comments are displayed.
 	 * @return mixed The unchanged comments array.
 	 */
-	public static function prime_review_verification_meta( $comments, $post_id ) {
+	public static function schedule_review_verification_backfill( $comments, $post_id ) {
 		if ( empty( $comments ) || ! is_array( $comments ) ) {
 			return $comments;
 		}
-		return ( new ReviewVerificationQuery() )->prime( $comments, (int) $post_id );
+		return ( new ReviewVerificationQuery() )->schedule_for_page( $comments, (int) $post_id );
+	}
+
+	/**
+	 * Schedule an off-hours backfill when a new product review is inserted.
+	 *
+	 * Hooked on `wp_insert_comment`.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param int        $comment_id The new comment ID.
+	 * @param WP_Comment $comment    The new comment object.
+	 * @return void
+	 */
+	public static function schedule_review_verification_backfill_for_new_review( $comment_id, $comment ) {
+		( new ReviewVerificationQuery() )->schedule_for_new_review( (int) $comment_id, $comment );
+	}
+
+	/**
+	 * Run a product's scheduled "verified owner" backfill.
+	 *
+	 * Hooked on the Action Scheduler backfill action.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param int $product_id The product (post) ID to backfill.
+	 * @return void
+	 */
+	public static function run_review_verification_backfill( $product_id ) {
+		( new ReviewVerificationQuery() )->backfill( (int) $product_id );
 	}
 
 	/**
