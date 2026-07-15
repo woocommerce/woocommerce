@@ -3,11 +3,14 @@
  */
 import { store, getContext, getConfig } from '@wordpress/interactivity';
 import type {
+	AddCartItemResult,
 	ClientCartItem,
 	Store as WooCommerce,
+	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
 /**
  * Internal dependencies
@@ -16,6 +19,7 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
+import { triggerAddedToCartEvent } from '../../../base/stores/woocommerce/legacy-events';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -90,9 +94,17 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				}
 			},
 			*batchAddToCart() {
+				// Kick off the a11y module fetch immediately, mirroring the
+				// pattern `addCartItem` itself uses, so it's likely already
+				// resolved by the time the once-per-batch announcement needs
+				// it.
+				const a11yModulePromise = import( '@wordpress/a11y' );
+
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
-				yield import( '@woocommerce/stores/woocommerce/cart' );
+				const { emitSyncEvent } = ( yield import(
+					'@woocommerce/stores/woocommerce/cart'
+				) ) as typeof import('@woocommerce/stores/woocommerce/cart');
 
 				const { quantity, selectedAttributes, groupedProductIds } =
 					getContext< AddToCartWithOptionsStoreContext >();
@@ -127,9 +139,86 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 					{ lock: universalLock }
 				);
 
-				yield wooActions.batchAddCartItems( addedItems, {
-					showCartUpdatesNotices: false,
-				} );
+				// Fire one `addCartItem` per selected child concurrently: a
+				// synchronous `.map()` with no `yield`/`await` between calls,
+				// so every submit lands in the same microtask tick and the
+				// cart store's mutation batcher coalesces them into a single
+				// `POST /wc/store/v1/batch` — the same request shape the
+				// removed `batchAddCartItems` action produced.
+				const promises = addedItems.map( ( item ) =>
+					wooActions.addCartItem( item, {
+						showCartUpdatesNotices: false,
+						suppressPostAddSideEffects: true,
+					} )
+				);
+
+				const results = ( yield Promise.all(
+					promises
+				) ) as AddCartItemResult[];
+
+				// Every rejected child surfaces its own raw-text error
+				// notice, in items order; accepted children produce none.
+				const failedResults = results.filter(
+					(
+						result
+					): result is Extract<
+						AddCartItemResult,
+						{ success: false }
+					> => ! result.success
+				);
+
+				if ( failedResults.length > 0 ) {
+					// Todo: Use the module exports instead of `store()` once
+					// the store-notices store is public.
+					yield import( '@woocommerce/stores/store-notices' );
+					const { actions: noticeActions } = store< StoreNotices >(
+						'woocommerce/store-notices',
+						{},
+						{ lock: universalLock }
+					);
+
+					failedResults.forEach( ( result ) => {
+						noticeActions.addNotice( {
+							notice: result.error.message,
+							type: 'error',
+							dismissible: true,
+						} );
+					} );
+				}
+
+				// Fire the once-per-batch effects only if at least one child
+				// succeeded. When every child is rejected none of the three
+				// fire, matching the removed batch action's fire-zero
+				// behavior.
+				const anySucceeded = results.some(
+					( result ) => result.success
+				);
+
+				if ( anySucceeded ) {
+					triggerAddedToCartEvent( { preserveCartData: true } );
+
+					emitSyncEvent( {
+						quantityChanges: {
+							productsPendingAdd: addedItems.map(
+								( item ) => item.id
+							),
+						},
+					} );
+
+					const addedToCartText = (
+						getConfig( 'woocommerce' ) as
+							| WooCommerceConfig
+							| undefined
+					 )?.messages?.addedToCartText;
+
+					if ( addedToCartText ) {
+						const { speak } =
+							( yield a11yModulePromise ) as Awaited<
+								typeof a11yModulePromise
+							>;
+						speak( addedToCartText, 'polite' );
+					}
+				}
 			},
 		},
 		callbacks: {
