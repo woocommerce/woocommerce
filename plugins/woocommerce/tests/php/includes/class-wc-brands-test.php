@@ -38,6 +38,46 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The admin menu label must keep translating through the non-contextual `Brands` string.
+	 *
+	 * The menu label is the one label the taxonomy update deliberately keeps as `Brands`. Before the
+	 * update WordPress derived `menu_name` from `labels['name']`, i.e. `__( 'Brands', 'woocommerce' )`,
+	 * so existing translations and `gettext_woocommerce` customizations applied to it. This asserts that
+	 * contract by filtering the non-contextual string and confirming it still reaches `menu_name`, which
+	 * would fail if the label were registered with a context (`_x()` routes through
+	 * `gettext_with_context_woocommerce` and a different catalog entry instead).
+	 *
+	 * @testdox Product brand admin menu label keeps translating through the non-contextual `Brands` string.
+	 */
+	public function test_product_brand_menu_name_uses_non_contextual_brands_translation(): void {
+		$translate_brands = static function ( $translation, $text, $domain ) {
+			if ( 'woocommerce' === $domain && 'Brands' === $text ) {
+				return 'Translated brands';
+			}
+			return $translation;
+		};
+
+		add_filter( 'gettext_woocommerce', $translate_brands, 10, 3 );
+
+		try {
+			WC_Brands::init_taxonomy();
+			$taxonomy = get_taxonomy( 'product_brand' );
+
+			$this->assertInstanceOf( WP_Taxonomy::class, $taxonomy, 'The product brand taxonomy should be registered.' );
+			$this->assertSame(
+				'Translated brands',
+				$taxonomy->labels->menu_name,
+				'The admin menu label should keep resolving through the non-contextual `Brands` translation.'
+			);
+		} finally {
+			remove_filter( 'gettext_woocommerce', $translate_brands, 10 );
+
+			// Restore the taxonomy with its unfiltered labels so later tests are unaffected.
+			WC_Brands::init_taxonomy();
+		}
+	}
+
+	/**
 	 * Tear down test data.
 	 */
 	public function tearDown(): void {

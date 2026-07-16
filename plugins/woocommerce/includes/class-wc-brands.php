@@ -323,7 +323,7 @@ class WC_Brands {
 					'labels'                => array(
 						'name'              => __( 'Product brands', 'woocommerce' ),
 						'singular_name'     => __( 'Product brand', 'woocommerce' ),
-						'menu_name'         => _x( 'Brands', 'Admin menu name', 'woocommerce' ),
+						'menu_name'         => __( 'Brands', 'woocommerce' ),
 						'template_name'     => _x( 'Products by Brand', 'Template name', 'woocommerce' ),
 						'search_items'      => __( 'Search Brands', 'woocommerce' ),
 						'all_items'         => __( 'All Brands', 'woocommerce' ),
