@@ -132,14 +132,16 @@ describe( 'settings HTML rendering', () => {
 		);
 
 		expect(
-			container.querySelector( '.wc-settings-ui__section' )
+			container.querySelector( '.dataforms-layouts-card__field' )
 		).not.toBeNull();
+		expect(
+			container.querySelector(
+				'.dataforms-layouts-card__field-description'
+			)?.textContent
+		).toBe( 'Configure the basics.' );
 		expect(
 			container.querySelector( '.wc-settings-ui__section-card' )
-		).not.toBeNull();
-		expect(
-			container.querySelector( '.wc-settings-ui__section-fields' )
-		).not.toBeNull();
+		).toBeNull();
 		expect( container.querySelector( '.wc-settings-ui__row' ) ).toBeNull();
 		expect(
 			container.querySelector( '.wc-settings-ui__group-panel' )

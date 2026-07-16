@@ -49,8 +49,7 @@ export type DataFormAdapterOptions = {
  * A render section is either a run of consecutive groups rendered as one
  * DataForm with card-layout combined fields (the package-recommended
  * shape), or a single group that falls back to the shell-owned card
- * because the package card header has no slot for HTML descriptions or
- * header actions.
+ * because the package card header has no slot for header actions.
  */
 export type DataFormRenderSection =
 	| {
@@ -63,7 +62,7 @@ export type DataFormRenderSection =
 			key: string;
 			form: Form;
 			group: SettingsUIGroup;
-			reasons: ( 'actions' | 'description' )[];
+			reasons: 'actions'[];
 	  };
 
 const toStringValue = ( value: SettingsValue | undefined ) =>
@@ -464,13 +463,17 @@ export const buildDataFormField = (
 };
 
 const getFallbackReasons = ( group: SettingsUIGroup ) => [
-	...( group.description ? ( [ 'description' ] as const ) : [] ),
 	...( group.actions?.length ? ( [ 'actions' ] as const ) : [] ),
 ];
 
+// The card layout renders the combined field's description at the top of
+// the card body, so group descriptions go through the package.
 const getCardFormField = ( group: SettingsUIGroup ): FormField => ( {
 	id: group.id,
 	...( group.title ? { label: group.title } : {} ),
+	...( group.description
+		? { description: toDescriptionNode( group.description ) }
+		: {} ),
 	layout: {
 		type: 'card' as const,
 		...( group.title

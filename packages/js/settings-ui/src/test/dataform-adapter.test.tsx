@@ -467,9 +467,49 @@ describe( 'dataform-adapter', () => {
 			expect( sections[ 0 ].form.fields ).toHaveLength( 2 );
 		} );
 
-		it( 'falls back to the shell card for groups with descriptions, preserving order', () => {
+		it( 'renders group descriptions through the package card, batching with plain groups', () => {
 			const adapter = createDataFormAdapter(
 				makeOptions( [ plainGroup, describedGroup, plainGroupB ] )
+			);
+			const sections = adapter.getRenderSections( {} );
+
+			expect( sections ).toHaveLength( 1 );
+			expect( sections[ 0 ].type ).toBe( 'dataform' );
+			expect( sections[ 0 ].form.fields ).toHaveLength( 3 );
+
+			const { container, cleanup } = render(
+				<DataForm
+					data={ {} }
+					fields={ adapter.fields }
+					form={ sections[ 0 ].form }
+					onChange={ () => {} }
+				/>
+			);
+
+			const description = container.querySelector(
+				'.dataforms-layouts-card__field-description'
+			);
+			expect( description?.textContent ).toBe( 'Rich text' );
+			expect( description?.querySelector( 'strong' ) ).not.toBeNull();
+
+			cleanup();
+		} );
+
+		it( 'falls back to the shell card for groups with header actions, preserving order', () => {
+			const actionsGroup: SettingsUIGroup = {
+				id: 'with-actions',
+				title: 'With actions',
+				actions: [
+					{
+						id: 'manage',
+						label: 'Manage',
+						href: 'https://example.com',
+					},
+				],
+				fields: [ { id: 'd', label: 'D', type: 'text' } ],
+			};
+			const adapter = createDataFormAdapter(
+				makeOptions( [ plainGroup, actionsGroup, plainGroupB ] )
 			);
 			const sections = adapter.getRenderSections( {} );
 
@@ -480,7 +520,7 @@ describe( 'dataform-adapter', () => {
 			] );
 			expect(
 				sections[ 1 ].type === 'fallback' && sections[ 1 ].reasons
-			).toEqual( [ 'description' ] );
+			).toEqual( [ 'actions' ] );
 		} );
 
 		it( 'drops groups whose fields are all hidden', () => {
