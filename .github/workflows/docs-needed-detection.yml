@@ -26,6 +26,7 @@ jobs:
           # defaults its commit to github.sha, which for a merged fork PR is the merge commit
           # that actions/checkout refuses to check out due to its "pwn request" guard.
           ref: ${{ github.event.pull_request.base.ref }}
+          persist-credentials: false
 
       - name: 'Analyze Pull Request'
         id: analyze
