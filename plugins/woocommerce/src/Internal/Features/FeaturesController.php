@@ -463,7 +463,6 @@ class FeaturesController {
 				'description'                  => __( 'Enable the public order withdrawal endpoint for stakeholder testing.', 'woocommerce' ),
 				'enabled_by_default'           => false,
 				'disable_ui'                   => false,
-				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => true,
 			),
