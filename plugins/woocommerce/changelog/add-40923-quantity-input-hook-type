@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Pass the quantity input type to the before and after quantity input field actions.
