@@ -317,13 +317,12 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_subscriptions_url targets the helper section for wc-admin and wc-addons.
+	 * @testdox get_subscriptions_url targets the Extensions - My Subscriptions screen.
 	 */
-	public function test_subscriptions_url_targets_helper_section(): void {
-		$_GET['page'] = 'wc-admin';
-		$this->assertStringEndsWith( 'admin.php?page=wc-admin&section=helper', $this->get_subscriptions_url() );
-
-		$_GET['page'] = 'wc-addons';
-		$this->assertStringEndsWith( 'admin.php?page=wc-addons&section=helper', $this->get_subscriptions_url() );
+	public function test_subscriptions_url_targets_my_subscriptions(): void {
+		$this->assertStringEndsWith(
+			'admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions',
+			$this->get_subscriptions_url()
+		);
 	}
 }

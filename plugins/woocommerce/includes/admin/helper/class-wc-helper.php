@@ -142,7 +142,14 @@ class WC_Helper {
 	 * @return string
 	 */
 	private static function get_subscriptions_url() {
-		return admin_url( 'admin.php?page=' . self::get_source_page() . '&section=helper' );
+		return add_query_arg(
+			array(
+				'page' => 'wc-admin',
+				'tab'  => 'my-subscriptions',
+				'path' => rawurlencode( '/extensions' ),
+			),
+			admin_url( 'admin.php' )
+		);
 	}
 
 	/**
@@ -2532,7 +2539,7 @@ class WC_Helper {
 		return sprintf(
 			/* translators: %1$s: helper url, %2$d: number of extensions */
 			_n( 'Note: You currently have <a href="%1$s">%2$d paid extension</a> which should be updated first before updating WooCommerce.', 'Note: You currently have <a href="%1$s">%2$d paid extensions</a> which should be updated first before updating WooCommerce.', $available, 'woocommerce' ),
-			self::get_subscriptions_url(),
+			esc_url( self::get_subscriptions_url() ),
 			$available
 		);
 	}
