@@ -524,8 +524,7 @@ class Endpoint {
 	 * Render the Review Order page body for the WC-managed page.
 	 *
 	 * Called by `the_content` on the page that hosts `[woocommerce_review_order]`.
-	 * Verifies the request independently rather than assuming the caller
-	 * already did so.
+	 * Confirms the current page and order key before rendering.
 	 *
 	 * @return string
 	 */
