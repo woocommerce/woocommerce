@@ -346,16 +346,27 @@ class WC_Settings_Shipping_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
-	 * Get the flattened region option values produced by get_region_options for a zone.
+	 * Get the flattened region option values produced for the shipping zone editor.
 	 *
 	 * @param WC_Shipping_Zone $zone Zone being edited.
 	 * @return array Option values.
 	 */
 	private function get_region_options_values( WC_Shipping_Zone $zone ): array {
-		$method = new ReflectionMethod( WC_Settings_Shipping::class, 'get_region_options' );
-		$method->setAccessible( true );
+		$sut               = new WC_Settings_Shipping();
+		$allowed_countries = WC()->countries->get_shipping_countries();
 
-		$options = $method->invoke( new WC_Settings_Shipping(), WC()->countries->get_shipping_countries(), WC()->countries->get_shipping_continents(), $zone );
+		$get_region_options = new ReflectionMethod( WC_Settings_Shipping::class, 'get_region_options' );
+		$get_region_options->setAccessible( true );
+
+		$add_legacy_options = new ReflectionMethod( WC_Settings_Shipping::class, 'add_zone_legacy_region_options' );
+		$add_legacy_options->setAccessible( true );
+
+		$options = $add_legacy_options->invoke(
+			$sut,
+			$get_region_options->invoke( $sut, $allowed_countries, WC()->countries->get_shipping_continents() ),
+			$zone,
+			$allowed_countries
+		);
 
 		$values = array();
 		array_walk_recursive(

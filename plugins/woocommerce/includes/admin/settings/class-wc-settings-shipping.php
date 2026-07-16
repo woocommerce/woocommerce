@@ -271,28 +271,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 *
 	 * @param array $allowed_countries Country names indexed by country code.
 	 * @param array $shipping_continents Continent data indexed by continent code.
-	 * @param mixed $zone Zone being edited when it is a WC_Shipping_Zone, used to keep its persisted legacy state locations selectable.
 	 */
-	protected function get_region_options( $allowed_countries, $shipping_continents, $zone = null ) {
-		// The zone's persisted legacy state locations are not part of the current state lists,
-		// but they must remain visible in the editor or merchants cannot see and remove them.
-		$legacy_locations = array();
-		if ( $zone instanceof WC_Shipping_Zone ) {
-			foreach ( $zone->get_zone_locations() as $zone_location ) {
-				if ( 'state' !== $zone_location->type ) {
-					continue;
-				}
-
-				$state_name = LegacyStateCodes::get_known_legacy_location_name( $zone_location->code );
-
-				if ( null !== $state_name ) {
-					$location = wc_format_country_state_string( $zone_location->code );
-
-					$legacy_locations[ $location['country'] ][ $location['state'] ] = $state_name;
-				}
-			}
-		}
-
+	protected function get_region_options( $allowed_countries, $shipping_continents ) {
 		$options = array();
 		foreach ( $shipping_continents as $continent_code => $continent ) {
 			$continent_data = array(
@@ -320,24 +300,72 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 						);
 					}
 				}
-
-				foreach ( $legacy_locations[ $country_code ] ?? array() as $state_code => $state_name ) {
-					if ( isset( $states[ $state_code ] ) ) {
-						continue;
-					}
-
-					$country_data['children'][] = array(
-						'value' => 'state:' . esc_attr( $country_code . ':' . $state_code ),
-						'label' => esc_html( $state_name . ', ' . $allowed_countries[ $country_code ] ),
-					);
-				}
-
 				$continent_data['children'][] = $country_data;
 			}
 			$options[] = $continent_data;
 		}
 
 		return $options;
+	}
+
+	/**
+	 * Add the edited zone's persisted legacy state locations to the region options.
+	 *
+	 * Legacy state codes are not part of the current state lists, but the zone's
+	 * persisted locations must remain visible in the editor or merchants cannot
+	 * see and remove them.
+	 *
+	 * @param array $region_options Region options produced by get_region_options().
+	 * @param mixed $zone Zone being edited when it is a WC_Shipping_Zone.
+	 * @param array $allowed_countries Country names indexed by country code.
+	 * @return array Region options including the zone's legacy locations.
+	 */
+	private function add_zone_legacy_region_options( $region_options, $zone, $allowed_countries ) {
+		if ( ! $zone instanceof WC_Shipping_Zone ) {
+			return $region_options;
+		}
+
+		$legacy_locations = array();
+		foreach ( $zone->get_zone_locations() as $zone_location ) {
+			if ( 'state' !== $zone_location->type ) {
+				continue;
+			}
+
+			$state_name = LegacyStateCodes::get_known_legacy_location_name( $zone_location->code );
+
+			if ( null !== $state_name ) {
+				$location = wc_format_country_state_string( $zone_location->code );
+
+				$legacy_locations[ $location['country'] ][ $location['state'] ] = $state_name;
+			}
+		}
+
+		if ( empty( $legacy_locations ) ) {
+			return $region_options;
+		}
+
+		foreach ( $region_options as &$continent_data ) {
+			foreach ( $continent_data['children'] as &$country_data ) {
+				$country_code = substr( (string) ( $country_data['value'] ?? '' ), strlen( 'country:' ) );
+
+				foreach ( $legacy_locations[ $country_code ] ?? array() as $state_code => $state_name ) {
+					$value = 'state:' . esc_attr( $country_code . ':' . $state_code );
+
+					if ( in_array( $value, array_column( $country_data['children'], 'value' ), true ) ) {
+						continue;
+					}
+
+					$country_data['children'][] = array(
+						'value' => $value,
+						'label' => esc_html( $state_name . ', ' . ( $allowed_countries[ $country_code ] ?? $country_code ) ),
+					);
+				}
+			}
+			unset( $country_data );
+		}
+		unset( $continent_data );
+
+		return $region_options;
 	}
 
 	/**
@@ -393,7 +421,11 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		if ( 0 !== $zone->get_id() ) {
 			WCAdminAssets::register_script( 'wp-admin-scripts', 'shipping-settings-region-picker', true, array( 'wc-shipping-zone-methods' ) );
-			$localized_object['region_options'] = $this->get_region_options( $allowed_countries, $shipping_continents, $zone );
+			$localized_object['region_options'] = $this->add_zone_legacy_region_options(
+				$this->get_region_options( $allowed_countries, $shipping_continents ),
+				$zone,
+				$allowed_countries
+			);
 		}
 
 		wp_localize_script(
