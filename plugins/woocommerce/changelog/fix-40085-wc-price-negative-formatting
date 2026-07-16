@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Pass signed discount and refund amounts to wc_price for localized negative formatting.
