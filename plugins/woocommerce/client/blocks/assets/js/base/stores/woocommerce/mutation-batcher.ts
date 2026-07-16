@@ -13,17 +13,11 @@
  * individual request's success or failure within the batch.
  */
 
-export type MutationRequest< TState = unknown, TMeta = unknown > = {
+export type MutationRequest< TMeta = unknown > = {
 	path: string;
 	method: 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 	body?: unknown;
 	applyOptimistic?: () => void;
-	/**
-	 * Called synchronously after reconciliation, before isProcessing clears.
-	 * Use for side effects that must complete before external code
-	 * (like refreshCartItems) is allowed to run.
-	 */
-	onSettled?: ( result: MutationResult< TState > ) => void;
 	/**
 	 * Opaque, caller-defined data associated with this request. The batcher
 	 * never reads or mutates it; it is carried through unchanged to this
@@ -78,9 +72,9 @@ export type MutationQueueConfig< TState = unknown, TMeta = unknown > = {
 	onCycleSettled?: ( settled: Array< CycleSettledEntry< TMeta > > ) => void;
 };
 
-type TrackedRequest< TState = unknown, TMeta = unknown > = {
+type TrackedRequest< TMeta = unknown > = {
 	id: string;
-	request: MutationRequest< TState, TMeta >;
+	request: MutationRequest< TMeta >;
 	resolve: ( result: MutationResult ) => void;
 	reject: ( error: Error ) => void;
 };
@@ -101,10 +95,7 @@ export function createMutationQueue< TState, TMeta = unknown >(
 	let snapshot: TState | null = null;
 
 	// All tracked requests for the current cycle.
-	const trackedRequests: Map<
-		string,
-		TrackedRequest< TState, TMeta >
-	> = new Map();
+	const trackedRequests: Map< string, TrackedRequest< TMeta > > = new Map();
 
 	// Requests collected this tick, waiting to be sent.
 	let pendingIds: string[] = [];
@@ -130,17 +121,6 @@ export function createMutationQueue< TState, TMeta = unknown >(
 		} else if ( snapshot !== null ) {
 			rollback( snapshot );
 		}
-
-		// Run onSettled callbacks while isProcessing is still true.
-		// This prevents refreshCartItems from running during these callbacks.
-		trackedRequests.forEach( ( tracked ) => {
-			const error = errors.get( tracked.id );
-			tracked.request.onSettled?.( {
-				success: ! error,
-				...( lastServerState !== null && { data: lastServerState } ),
-				...( error && { error } ),
-			} );
-		} );
 
 		// Build the per-cycle settled list, one entry per tracked request in
 		// submission order, and notify the single per-cycle hook — also
@@ -305,7 +285,7 @@ export function createMutationQueue< TState, TMeta = unknown >(
 
 	// submit - Queues a request. First call in a cycle takes a snapshot.
 	function submit(
-		request: MutationRequest< TState, TMeta >
+		request: MutationRequest< TMeta >
 	): Promise< MutationResult< TState > > {
 		return new Promise( ( resolve, reject ) => {
 			const id = String( nextId++ );

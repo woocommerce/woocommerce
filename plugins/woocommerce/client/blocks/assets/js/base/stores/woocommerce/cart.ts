@@ -497,7 +497,7 @@ let cartQueue: MutationQueue< Cart, CartMutationMeta > | null = null;
  */
 async function sendCartRequest(
 	stateRef: Store[ 'state' ],
-	options: MutationRequest< Cart, CartMutationMeta >
+	options: MutationRequest< CartMutationMeta >
 ): Promise< MutationResult< Cart > > {
 	await isNonceReady;
 	// Lazily initialize queue on first use.
