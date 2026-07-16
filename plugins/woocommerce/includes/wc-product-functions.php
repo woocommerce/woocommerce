@@ -444,14 +444,14 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
  * @return string
  */
 function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
-	$dimensions        = wc_get_image_size( $size );
-	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
+	$dimensions           = wc_get_image_size( $size );
+	$placeholder_image    = get_option( 'woocommerce_placeholder_image', 0 );
 	$use_attachment_image = wp_attachment_is_image( $placeholder_image );
 	$image                = null;
 
 	if ( $use_attachment_image && has_filter( 'woocommerce_placeholder_img_src' ) ) {
 		$image                = wc_placeholder_img_src( $size );
-		$use_attachment_image = $image === wp_get_attachment_image_url( $placeholder_image, $size );
+		$use_attachment_image = wp_get_attachment_image_url( $placeholder_image, $size ) === $image;
 	}
 
 	$default_attr = array(
