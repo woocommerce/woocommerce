@@ -8,6 +8,7 @@
 declare( strict_types = 1 );
 
 require_once WC_ABSPATH . 'includes/admin/wc-meta-box-functions.php';
+require_once WC_ABSPATH . 'includes/admin/class-wc-admin-meta-boxes.php';
 require_once WC_ABSPATH . 'includes/admin/meta-boxes/class-wc-meta-box-order-data.php';
 
 /**
@@ -70,6 +71,8 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		WC_Admin_Meta_Boxes::$meta_box_errors = array();
+
 		$this->had_shipping_calculation_option      = false !== get_option( 'woocommerce_calc_shipping', false );
 		$this->original_shipping_calculation_option = get_option( 'woocommerce_calc_shipping' );
 		$this->had_global_order                     = array_key_exists( 'theorder', $GLOBALS );
@@ -106,7 +109,83 @@ class WC_Meta_Box_Order_Data_Test extends WC_Unit_Test_Case {
 			unset( $GLOBALS['theorder'] );
 		}
 
+		WC_Admin_Meta_Boxes::$meta_box_errors = array();
+
 		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Saving an order with an invalid billing email registers an admin error instead of throwing a fatal.
+	 */
+	public function test_invalid_billing_email_registers_error_without_throwing(): void {
+		$order = $this->create_order_with_shipping_data( false );
+		$order->set_billing_email( 'valid@example.com' );
+		$order->save();
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Simulate the nonce-verified meta-box save request.
+		$previous_post = $_POST;
+		$_POST         = array(
+			'order_status'    => $order->get_status(),
+			'_payment_method' => $order->get_payment_method(),
+			'customer_user'   => 0,
+			'_billing_email'  => 'notanemail',
+		);
+
+		try {
+			WC_Meta_Box_Order_Data::save( $order->get_id() );
+		} finally {
+			$_POST = $previous_post;
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		$this->assertContains(
+			'Invalid billing email address.',
+			WC_Admin_Meta_Boxes::$meta_box_errors,
+			'An invalid billing email should register an admin error instead of throwing WC_Data_Exception.'
+		);
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame(
+			'valid@example.com',
+			$order->get_billing_email( 'edit' ),
+			'The invalid billing email should be skipped, leaving the previous value intact.'
+		);
+	}
+
+	/**
+	 * @testdox Saving an order with a valid billing email persists the value without registering an error.
+	 */
+	public function test_valid_billing_email_is_saved_without_error(): void {
+		$order = $this->create_order_with_shipping_data( false );
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Simulate the nonce-verified meta-box save request.
+		$previous_post = $_POST;
+		$_POST         = array(
+			'order_status'    => $order->get_status(),
+			'_payment_method' => $order->get_payment_method(),
+			'customer_user'   => 0,
+			'_billing_email'  => 'shopper@example.com',
+		);
+
+		try {
+			WC_Meta_Box_Order_Data::save( $order->get_id() );
+		} finally {
+			$_POST = $previous_post;
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		$this->assertNotContains(
+			'Invalid billing email address.',
+			WC_Admin_Meta_Boxes::$meta_box_errors,
+			'A valid billing email should not register an admin error.'
+		);
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame(
+			'shopper@example.com',
+			$order->get_billing_email( 'edit' ),
+			'A valid billing email should be persisted on the order.'
+		);
 	}
 
 	/**

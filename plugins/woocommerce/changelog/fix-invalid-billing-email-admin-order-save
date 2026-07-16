@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal error when saving an order with an invalid billing email in wp-admin.
