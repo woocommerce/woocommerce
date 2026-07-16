@@ -55,7 +55,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	);
 
 	/**
-	 * The updated coupon properties
+	 * The coupon properties written by the current update_post_meta() call.
+	 *
+	 * Reset at the start of every call, so it never carries props across saves.
 	 *
 	 * @since 4.1.0
 	 * @var array
@@ -263,6 +265,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @since 3.0.0
 	 */
 	private function update_post_meta( &$coupon ) {
+		$this->updated_props = array();
+
 		$meta_key_to_props = array(
 			'discount_type'              => 'discount_type',
 			'coupon_amount'              => 'amount',
