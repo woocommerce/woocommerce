@@ -300,7 +300,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	 * @param array $item_data Existing item data.
 	 * @return array
 	 */
-	private function get_cart_item_data_fixture( $item_data ) {
+	public function get_cart_item_data_fixture( $item_data ) {
 		$item_data[] = array(
 			'key'   => 'Gift wrap',
 			'value' => 'Included',
