@@ -199,42 +199,6 @@ const toDescriptionNode = ( description?: string ) => {
 	return toSanitizedHtmlNode( description ) as unknown as string;
 };
 
-type TypeAndEdit = {
-	type?: FieldType;
-	Edit?: Field< SettingsValues >[ 'Edit' ];
-};
-
-// Types without an explicit Edit use the package's default control for
-// the DataForm type. Radio and select need one because fields with
-// elements default to the select control, and textarea is a control
-// config on the text type.
-const getPackageTypeAndEdit = ( field: SettingsUIField ): TypeAndEdit => {
-	switch ( field.type ) {
-		case 'checkbox':
-			return { type: 'boolean' };
-		case 'radio':
-			return { type: 'text', Edit: 'radio' };
-		case 'select':
-			return { type: 'text', Edit: 'select' };
-		case 'textarea':
-			return { type: 'text', Edit: { control: 'textarea' } };
-		case 'number':
-			return { type: 'number' };
-		case 'tel':
-			return { type: 'telephone' };
-		case 'array':
-			return { type: 'array' };
-		case 'date':
-		case 'email':
-		case 'password':
-		case 'text':
-		case 'url':
-			return { type: field.type };
-		default:
-			return {};
-	}
-};
-
 // The package controls cannot express a disabled state or arbitrary
 // input attributes (including min/max/step on number fields), so fields
 // carrying them render through the native renderer until upstream
@@ -300,72 +264,125 @@ const createRegisteredEdit = (
 	};
 };
 
-const createGetValue = ( settingsField: SettingsUIField ) => {
-	if ( settingsField.type === 'checkbox' ) {
-		return ( { item }: { item: SettingsValues } ) =>
-			isCheckedValue( item[ settingsField.id ] );
-	}
+type ValueGetter = NonNullable< Field< SettingsValues >[ 'getValue' ] >;
+type ValueSetter = NonNullable< Field< SettingsValues >[ 'setValue' ] >;
 
-	if ( settingsField.type === 'array' ) {
-		return ( { item }: { item: SettingsValues } ) => {
-			const value = item[ settingsField.id ];
-			return Array.isArray( value ) ? value : [];
-		};
-	}
+/**
+ * How one settings field type maps onto DataForm: the field type, an
+ * explicit control where the package default is not the right one, and
+ * value accessors that preserve the saved vocabulary. Types without an
+ * entry warn and render through the native renderer as text.
+ */
+type SettingsTypeDescriptor = {
+	type: FieldType;
+	Edit?: Field< SettingsValues >[ 'Edit' ];
+	// The package has no control for this type; render natively.
+	nativeEdit?: boolean;
+	// Renders a read-only block instead of an edit control.
+	render?: (
+		settingsField: SettingsUIField
+	) => Field< SettingsValues >[ 'render' ];
+	getValue?: ( settingsField: SettingsUIField ) => ValueGetter;
+	setValue?: (
+		settingsField: SettingsUIField,
+		initialValues: SettingsValues
+	) => ValueSetter;
+};
 
-	if ( settingsField.type === 'select' || settingsField.type === 'radio' ) {
-		return ( { item }: { item: SettingsValues } ) =>
-			toStringValue( item[ settingsField.id ] );
-	}
+const optionValue: Pick< SettingsTypeDescriptor, 'getValue' | 'setValue' > = {
+	getValue:
+		( settingsField ) =>
+		( { item } ) =>
+			toStringValue( item[ settingsField.id ] ),
+	setValue:
+		( settingsField ) =>
+		( { value } ) => ( {
+			[ settingsField.id ]: restoreOptionValue(
+				value,
+				settingsField.options
+			),
+		} ),
+};
 
-	if ( settingsField.type === 'number' ) {
-		return ( { item }: { item: SettingsValues } ) =>
-			toNumberControlValue( item[ settingsField.id ] );
-	}
+const settingsTypeDescriptors: Record< string, SettingsTypeDescriptor > = {
+	checkbox: {
+		type: 'boolean',
+		getValue:
+			( settingsField ) =>
+			( { item } ) =>
+				isCheckedValue( item[ settingsField.id ] ),
+		setValue:
+			( settingsField, initialValues ) =>
+			( { value } ) => ( {
+				[ settingsField.id ]: toCheckboxValue(
+					Boolean( value ),
+					initialValues[ settingsField.id ]
+				),
+			} ),
+	},
+	// Radio and select need explicit controls: fields with elements
+	// default to the select control, so radio would lose its buttons and
+	// an options-less select would fall back to a text input.
+	radio: { type: 'text', Edit: 'radio', ...optionValue },
+	select: { type: 'text', Edit: 'select', ...optionValue },
+	textarea: { type: 'text', Edit: { control: 'textarea' } },
+	number: {
+		type: 'number',
+		getValue:
+			( settingsField ) =>
+			( { item } ) =>
+				toNumberControlValue( item[ settingsField.id ] ),
+		setValue:
+			( settingsField, initialValues ) =>
+			( { value } ) => ( {
+				[ settingsField.id ]: toNumberFieldValue(
+					value,
+					initialValues[ settingsField.id ]
+				),
+			} ),
+	},
+	tel: { type: 'telephone' },
+	array: {
+		type: 'array',
+		getValue:
+			( settingsField ) =>
+			( { item } ) => {
+				const value = item[ settingsField.id ];
+				return Array.isArray( value ) ? value : [];
+			},
+		setValue:
+			( settingsField ) =>
+			( { value } ) => ( {
+				[ settingsField.id ]: ( Array.isArray( value )
+					? value
+					: []
+				).map( String ),
+			} ),
+	},
+	date: { type: 'date' },
+	email: { type: 'email' },
+	password: { type: 'password' },
+	text: { type: 'text' },
+	url: { type: 'url' },
+	// The package has no control for precise time inputs.
+	time: { type: 'text', nativeEdit: true },
+	'datetime-local': { type: 'text', nativeEdit: true },
+	// The regular layout skips fields whose normalized Edit control is
+	// null even when read-only, so info carries a control type the
+	// read-only path never mounts.
+	info: { type: 'text', render: createInfoRender },
+};
 
-	return ( { item }: { item: SettingsValues } ) => {
+const defaultGetValue =
+	( settingsField: SettingsUIField ): ValueGetter =>
+	( { item } ) => {
 		const value = item[ settingsField.id ];
 		return typeof value === 'undefined' ? '' : value;
 	};
-};
 
-type SetValueArgs = {
-	item: SettingsValues;
-	value: SettingsValue;
-};
-
-const createSetValue = (
-	settingsField: SettingsUIField,
-	initialValues: SettingsValues
-) => {
-	const { id } = settingsField;
-
-	if ( settingsField.type === 'select' || settingsField.type === 'radio' ) {
-		return ( { value }: SetValueArgs ) => ( {
-			[ id ]: restoreOptionValue( value, settingsField.options ),
-		} );
-	}
-
-	if ( settingsField.type === 'array' ) {
-		return ( { value }: SetValueArgs ) => ( {
-			[ id ]: ( Array.isArray( value ) ? value : [] ).map( String ),
-		} );
-	}
-
-	if ( settingsField.type === 'checkbox' ) {
-		return ( { value }: SetValueArgs ) => ( {
-			[ id ]: toCheckboxValue( Boolean( value ), initialValues[ id ] ),
-		} );
-	}
-
-	if ( settingsField.type === 'number' ) {
-		return ( { value }: SetValueArgs ) => ( {
-			[ id ]: toNumberFieldValue( value, initialValues[ id ] ),
-		} );
-	}
-
-	return ( { value }: SetValueArgs ) => ( { [ id ]: value } );
-};
+const defaultSetValue =
+	( settingsField: SettingsUIField ): ValueSetter =>
+	( { value } ) => ( { [ settingsField.id ]: value } );
 
 // Predicates fail open: a broken visibility callback renders the field
 // or group rather than hiding it.
@@ -427,13 +444,19 @@ export const buildDataFormField = (
 	settingsField: SettingsUIField,
 	options: DataFormAdapterOptions
 ): Field< SettingsValues > => {
+	const descriptor = settingsTypeDescriptors[ settingsField.type ];
+
 	const field: Field< SettingsValues > = {
 		id: settingsField.id,
 		label: settingsField.label,
 		description: toDescriptionNode( settingsField.description ),
 		placeholder: settingsField.placeholder,
-		getValue: createGetValue( settingsField ),
-		setValue: createSetValue( settingsField, options.initialValues ),
+		type: descriptor?.type,
+		getValue: ( descriptor?.getValue ?? defaultGetValue )( settingsField ),
+		setValue: ( descriptor?.setValue ?? defaultSetValue )(
+			settingsField,
+			options.initialValues
+		),
 		isVisible: createIsVisible( settingsField, options ),
 		isValid: options.fieldRules?.[ settingsField.id ],
 	};
@@ -442,38 +465,24 @@ export const buildDataFormField = (
 		field.elements = toElements( settingsField.options );
 	}
 
-	if ( settingsField.type === 'info' ) {
-		// The regular layout skips fields whose normalized Edit control
-		// is null, including read-only render fields, so info needs a
-		// control type even though the read-only path never mounts it.
-		field.type = 'text';
+	if ( descriptor?.render ) {
 		field.readOnly = true;
-		field.render = createInfoRender( settingsField );
+		field.render = descriptor.render( settingsField );
 		return field;
 	}
 
-	const packageControl = getPackageTypeAndEdit( settingsField );
-	field.type = packageControl.type;
-
 	let defaultEdit: Field< SettingsValues >[ 'Edit' ] | undefined;
 
-	if (
-		settingsField.type === 'time' ||
-		settingsField.type === 'datetime-local'
-	) {
-		// No package control exists for precise time inputs.
-		field.type = 'text';
+	if ( descriptor?.nativeEdit || needsNativeEdit( settingsField ) ) {
 		defaultEdit = createNativeEdit( settingsField );
-	} else if ( needsNativeEdit( settingsField ) ) {
-		defaultEdit = createNativeEdit( settingsField );
-	} else if ( typeof packageControl.type === 'undefined' ) {
+	} else if ( ! descriptor ) {
 		warn( `Field type "${ settingsField.type }" is not supported.`, {
 			field: settingsField,
 		} );
 		field.type = 'text';
 		defaultEdit = createNativeEdit( settingsField );
 	} else {
-		defaultEdit = packageControl.Edit;
+		defaultEdit = descriptor.Edit;
 	}
 
 	const registeredAtBuild = Boolean(
