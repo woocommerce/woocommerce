@@ -253,7 +253,7 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	 *
 	 * @param mixed $filtered_value Value returned by the page size filter.
 	 */
-	public function test_data_store_get_tokens_ignores_a_page_size_below_one( $filtered_value ): void {
+	public function test_data_store_get_tokens_ignores_an_unusable_page_size( $filtered_value ): void {
 		add_filter(
 			'woocommerce_get_payment_tokens_page_size',
 			function () use ( $filtered_value ) {
@@ -291,7 +291,7 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	 *
 	 * @param mixed $filtered_value Value returned by the unscoped limit filter.
 	 */
-	public function test_data_store_get_tokens_ignores_an_unscoped_ceiling_below_one( $filtered_value ): void {
+	public function test_data_store_get_tokens_ignores_an_unusable_unscoped_ceiling( $filtered_value ): void {
 		add_filter(
 			'woocommerce_get_payment_tokens_unscoped_limit',
 			function () use ( $filtered_value ) {
