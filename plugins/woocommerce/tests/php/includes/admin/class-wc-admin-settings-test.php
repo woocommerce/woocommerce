@@ -30,8 +30,11 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		update_option( $option_name, $option_value );
 
 		ob_start();
-		WC_Admin_Settings::output_fields( array( $field ) );
-		$output = ob_get_clean();
+		try {
+			WC_Admin_Settings::output_fields( array( $field ) );
+		} finally {
+			$output = ob_get_clean();
+		}
 
 		$this->assertStringContainsString( 'value="' . esc_attr( $expected ) . '"', $output );
 	}
