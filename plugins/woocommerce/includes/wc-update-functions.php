@@ -38,6 +38,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -3590,5 +3591,5 @@ function wc_update_1100_enable_point_of_sale_feature() {
  * @return void
  */
 function wc_update_1110_delete_dashboard_outofstock_count_transient() {
-	delete_transient( 'wc_outofstock_count' );
+	delete_transient( ProductUtil::OUTOFSTOCK_COUNT_TRANSIENT );
 }
