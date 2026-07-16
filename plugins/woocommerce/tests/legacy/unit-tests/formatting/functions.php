@@ -685,6 +685,38 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<bdi>-', $price_html, 'A positive price should render as negative when explicitly requested.' );
 		$this->assertStringContainsString( '<bdi>-', wc_price( 0, array( 'is_negative' => true ) ), 'A zero price should render as negative when explicitly requested.' );
 		$this->assertStringNotContainsString( '<bdi>-', wc_price( -12.34, array( 'is_negative' => false ) ), 'An explicitly unsigned price should not render as negative.' );
+		$this->assertStringContainsString( '<bdi>-', wc_price( -12.34, array( 'is_negative' => null ) ), 'A null display intent should derive the sign from the price.' );
+	}
+
+	/**
+	 * @testdox wc_price preserves the argument shape when negative display intent is omitted.
+	 */
+	public function test_wc_price_does_not_add_negative_display_intent_to_default_args(): void {
+		$filtered_args = array();
+
+		$price_args_filter = static function ( $args ) use ( &$filtered_args ) {
+			$filtered_args['wc_price_args'] = $args;
+
+			return $args;
+		};
+		$price_filter      = static function ( $price_html, $formatted_price, $args ) use ( &$filtered_args ) {
+			unset( $formatted_price );
+
+			$filtered_args['wc_price'] = $args;
+
+			return $price_html;
+		};
+
+		add_filter( 'wc_price_args', $price_args_filter );
+		add_filter( 'wc_price', $price_filter, 10, 3 );
+
+		wc_price( 12.34 );
+
+		remove_filter( 'wc_price_args', $price_args_filter );
+		remove_filter( 'wc_price', $price_filter );
+
+		$this->assertArrayNotHasKey( 'is_negative', $filtered_args['wc_price_args'], 'The wc_price_args filter should retain its existing argument shape for ordinary prices.' );
+		$this->assertArrayNotHasKey( 'is_negative', $filtered_args['wc_price'], 'The wc_price filter should retain its existing argument shape for ordinary prices.' );
 	}
 
 	/**

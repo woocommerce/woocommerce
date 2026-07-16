@@ -336,7 +336,7 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
 			unset( $formatted_price );
 
-			return true === $args['is_negative'] ? 'localized-negative-price:' . (float) $original_price . ':' . $unformatted_price : $price_html;
+			return true === ( $args['is_negative'] ?? false ) ? 'localized-negative-price:' . (float) $original_price . ':' . $unformatted_price : $price_html;
 		};
 		add_filter( 'wc_price', $price_filter, 10, 5 );
 
@@ -389,7 +389,7 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
 			unset( $formatted_price );
 
-			return true === $args['is_negative'] ? 'localized-negative-price:' . (float) $original_price . ':' . $unformatted_price : $price_html;
+			return true === ( $args['is_negative'] ?? false ) ? 'localized-negative-price:' . (float) $original_price . ':' . $unformatted_price : $price_html;
 		};
 		add_filter( 'wc_price', $price_filter, 10, 5 );
 

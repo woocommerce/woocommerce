@@ -590,8 +590,8 @@ function wc_get_price_decimals() {
  *                                      Defaults the result of get_woocommerce_price_format().
  *     @type bool   $in_span            Whether to enclose the formatted price in an HTML <span> element.
  *                                      Defaults to true.
- *     @type bool|null $is_negative      Whether to display the price as negative. Defaults to null, which
- *                                      determines the sign from the price.
+ *     @type bool|null $is_negative      Whether to display the price as negative. When omitted or set to null,
+ *                                      the sign is determined from the price.
  * }
  * @return string
  */
@@ -609,7 +609,6 @@ function wc_price( $price, $args = array() ) {
 				'price_format'       => get_woocommerce_price_format(),
 				'in_span'            => true,
 				'aria-hidden'        => false,
-				'is_negative'        => null,
 			)
 		)
 	);
@@ -621,7 +620,7 @@ function wc_price( $price, $args = array() ) {
 
 	$unformatted_price = $price;
 	$negative          = $price < 0;
-	$is_negative       = null === $args['is_negative'] ? $negative : (bool) $args['is_negative'];
+	$is_negative       = isset( $args['is_negative'] ) ? (bool) $args['is_negative'] : $negative;
 
 	/**
 	 * Filter raw price.
