@@ -3,22 +3,22 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Address;
 
-use Automattic\WooCommerce\Internal\Address\NepalStateCodeRemediation;
+use Automattic\WooCommerce\Internal\Address\LegacyStateCodeRemediation;
 use WC_Shipping_Zone;
 use WC_Tax;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for NepalStateCodeRemediation.
+ * Tests for LegacyStateCodeRemediation.
  */
-class NepalStateCodeRemediationTest extends WC_Unit_Test_Case {
+class LegacyStateCodeRemediationTest extends WC_Unit_Test_Case {
 
 	/**
 	 * The System Under Test.
 	 *
-	 * @var NepalStateCodeRemediation
+	 * @var LegacyStateCodeRemediation
 	 */
-	private NepalStateCodeRemediation $sut;
+	private LegacyStateCodeRemediation $sut;
 
 	/**
 	 * Original store location.
@@ -47,7 +47,7 @@ class NepalStateCodeRemediationTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut                     = wc_get_container()->get( NepalStateCodeRemediation::class );
+		$this->sut                     = wc_get_container()->get( LegacyStateCodeRemediation::class );
 		$this->original_store_location = get_option( 'woocommerce_default_country', false );
 		$this->shipping_zone           = null;
 		$this->tax_rate_id             = null;

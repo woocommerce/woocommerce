@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
-use Automattic\WooCommerce\Internal\Address\NepalStateCodeRemediation;
+use Automattic\WooCommerce\Internal\Address\LegacyStateCodeRemediation;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Admin_Notices;
@@ -147,7 +147,7 @@ class SiteHealth {
 	 */
 	protected function get_woocommerce_site_health_tests(): array {
 		return array(
-			'woocommerce_secure_connection'            => array(
+			'woocommerce_secure_connection'               => array(
 				'label' => __( 'WooCommerce secure connection', 'woocommerce' ),
 				'badge' => 'security',
 				'check' => array( $this, 'is_store_using_secure_connection' ),
@@ -168,7 +168,7 @@ class SiteHealth {
 					),
 				),
 			),
-			'woocommerce_uploads_directory_protection' => array(
+			'woocommerce_uploads_directory_protection'    => array(
 				'label' => __( 'WooCommerce uploads directory protection', 'woocommerce' ),
 				'badge' => 'security',
 				'check' => array( $this, 'is_uploads_directory_protected' ),
@@ -199,7 +199,7 @@ class SiteHealth {
 					),
 				),
 			),
-			'woocommerce_template_overrides'           => array(
+			'woocommerce_template_overrides'              => array(
 				'label' => __( 'WooCommerce template overrides', 'woocommerce' ),
 				'badge' => 'performance',
 				'check' => fn() => ! $this->has_outdated_template_overrides(),
@@ -223,7 +223,7 @@ class SiteHealth {
 					),
 				),
 			),
-			'woocommerce_maxmind_geolocation'          => array(
+			'woocommerce_maxmind_geolocation'             => array(
 				'label' => __( 'WooCommerce MaxMind geolocation', 'woocommerce' ),
 				'badge' => 'performance',
 				'check' => fn() => ! $this->needs_maxmind_license_key(),
@@ -246,7 +246,7 @@ class SiteHealth {
 					),
 				),
 			),
-			'woocommerce_download_method'              => array(
+			'woocommerce_download_method'                 => array(
 				'label' => __( 'WooCommerce download method', 'woocommerce' ),
 				'badge' => 'security',
 				'check' => fn() => 'redirect' !== get_option( 'woocommerce_file_download_method' ),
@@ -265,7 +265,7 @@ class SiteHealth {
 					),
 				),
 			),
-			'woocommerce_database_tables'              => array(
+			'woocommerce_database_tables'                 => array(
 				'label' => __( 'WooCommerce database tables', 'woocommerce' ),
 				'badge' => 'performance',
 				'check' => fn() => WC_Install::get_missing_base_tables(),
@@ -289,24 +289,24 @@ class SiteHealth {
 					),
 				),
 			),
-			'woocommerce_nepal_province_configuration' => array(
-				'label' => __( 'WooCommerce Nepal province configuration', 'woocommerce' ),
+			'woocommerce_legacy_state_code_configuration' => array(
+				'label' => __( 'WooCommerce state and province configuration', 'woocommerce' ),
 				'badge' => 'performance',
-				'check' => fn() => wc_get_container()->get( NepalStateCodeRemediation::class )->get_status(),
+				'check' => fn() => wc_get_container()->get( LegacyStateCodeRemediation::class )->get_status(),
 				'good'  => array(
-					'label'       => __( 'Nepal province settings use current codes', 'woocommerce' ),
-					'description' => __( 'Your store address, shipping zones, and tax rates do not use Nepal\'s former zone codes.', 'woocommerce' ),
+					'label'       => __( 'Location settings use current state codes', 'woocommerce' ),
+					'description' => __( 'Your store address, shipping zones, and tax rates do not use former state or province codes.', 'woocommerce' ),
 				),
 				'fail'  => array(
 					'label'       => function ( ?array $context ) {
 						return ! empty( $context['database_error'] )
-							? __( 'WooCommerce could not check Nepal province settings', 'woocommerce' )
-							: __( 'Nepal province settings need attention', 'woocommerce' );
+							? __( 'WooCommerce could not check state and province settings', 'woocommerce' )
+							: __( 'State and province settings need attention', 'woocommerce' );
 					},
 					'description' => function ( ?array $context ) {
 						return ! empty( $context['database_error'] )
-							? __( 'A database query failed, so WooCommerce could not confirm whether Nepal province settings use current codes. Check your database connection and try again.', 'woocommerce' )
-							: __( 'Some settings still use Nepal\'s former zones. Review your store address, shipping zones, and tax rates so province-based rules continue to apply.', 'woocommerce' );
+							? __( 'A database query failed, so WooCommerce could not confirm whether your location settings use current state codes. Check your database connection and try again.', 'woocommerce' )
+							: __( 'Some settings still use former state or province codes, such as Nepal\'s former zones. Review your store address, shipping zones, and tax rates so location-based rules continue to apply.', 'woocommerce' );
 					},
 					'actions'     => array(
 						array(
@@ -324,7 +324,7 @@ class SiteHealth {
 					),
 				),
 			),
-			'woocommerce_hpos_sync_on_read'            => array(
+			'woocommerce_hpos_sync_on_read'               => array(
 				'label' => __( 'WooCommerce HPOS sync on read', 'woocommerce' ),
 				'badge' => 'performance',
 				'check' => fn() => ! $this->should_show_hpos_sync_on_read_status(),
@@ -348,7 +348,7 @@ class SiteHealth {
 					),
 				),
 			),
-			'woocommerce_legacy_shipping_methods'      => array(
+			'woocommerce_legacy_shipping_methods'         => array(
 				'label' => __( 'WooCommerce legacy shipping methods', 'woocommerce' ),
 				'badge' => 'performance',
 				'check' => fn() => ! $this->has_legacy_shipping_methods_enabled(),
@@ -372,7 +372,7 @@ class SiteHealth {
 					),
 				),
 			),
-			'woocommerce_shipping_methods'             => array(
+			'woocommerce_shipping_methods'                => array(
 				'label' => __( 'WooCommerce shipping methods', 'woocommerce' ),
 				'badge' => 'performance',
 				'check' => fn() => ! $this->needs_shipping_methods(),
@@ -429,7 +429,7 @@ class SiteHealth {
 					),
 				),
 			),
-			'woocommerce_com_extension_updates'        => array(
+			'woocommerce_com_extension_updates'           => array(
 				'label' => __( 'WooCommerce.com plugin updates', 'woocommerce' ),
 				'badge' => 'security',
 				'check' => fn() => ! $this->has_outdated_woocommerce_com_plugins(),

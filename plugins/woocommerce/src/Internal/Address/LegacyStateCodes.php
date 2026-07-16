@@ -62,6 +62,31 @@ final class LegacyStateCodes {
 	}
 
 	/**
+	 * Get the country codes that have known legacy state codes.
+	 *
+	 * @return array<int, string> Country codes.
+	 *
+	 * @since 11.1.0
+	 */
+	public static function get_countries_with_known_states(): array {
+		return array( 'NP' );
+	}
+
+	/**
+	 * Get the display name for a location whose state part is a known legacy code.
+	 *
+	 * @param string $location Location in COUNTRY:STATE format.
+	 * @return string|null Legacy state display name, or null when the location does not use a known legacy code.
+	 *
+	 * @since 11.1.0
+	 */
+	public static function get_known_legacy_location_name( string $location ): ?string {
+		$parts = wc_format_country_state_string( $location );
+
+		return self::get_known_states( $parts['country'] )[ $parts['state'] ] ?? null;
+	}
+
+	/**
 	 * Add legacy aliases to a non-empty list of current states.
 	 *
 	 * An empty current-state list means the country accepts free-form state input,
