@@ -274,6 +274,7 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 		class_alias( WooCommerce_Test_Double::class, 'WooCommerce' );
 		define( 'WC_VERSION', '10.0.0' );
 		define( 'WC_PLUGIN_FILE', WP_PLUGIN_DIR . '/custom-woocommerce/woocommerce.php' );
+		define( 'WP_ADMIN', true );
 		update_option( 'active_plugins', array( 'custom-woocommerce/woocommerce.php' ) );
 
 		Woocommerce_Analytics::should_track_store();
