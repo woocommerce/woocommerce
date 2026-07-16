@@ -23,6 +23,15 @@ defined( 'ABSPATH' ) || exit;
 class ReviewVerificationDataStore {
 
 	/**
+	 * Comment types WooCommerce recognizes as product reviews. Front-end submissions normalize to
+	 * 'review', but imported or migrated reviews keep the default '' or 'comment' type; core counts
+	 * all three as reviews (see WC_Comments::get_review_counts_for_product_ids()).
+	 *
+	 * @var string[]
+	 */
+	public const REVIEW_COMMENT_TYPES = array( 'review', 'comment', '' );
+
+	/**
 	 * Whether the bulk verification path applies to this product.
 	 *
 	 * @param int $product_id The product (post) ID.
@@ -74,7 +83,7 @@ class ReviewVerificationDataStore {
 			(array) get_comments(
 				array(
 					'post_id'    => $product_id,
-					'type'       => 'review',
+					'type__in'   => self::REVIEW_COMMENT_TYPES,
 					'status'     => 'approve',
 					'number'     => $limit,
 					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- One-off off-hours backfill.
@@ -112,7 +121,7 @@ class ReviewVerificationDataStore {
 		$emails   = array();
 
 		foreach ( $comments as $comment ) {
-			if ( 'review' !== $comment->comment_type ) {
+			if ( ! in_array( $comment->comment_type, self::REVIEW_COMMENT_TYPES, true ) ) {
 				continue;
 			}
 			$comment_id = (int) $comment->comment_ID;

@@ -72,20 +72,32 @@ class ReviewVerificationServiceTest extends \WC_Unit_Test_Case {
 	 * @param int    $product_id Product post id.
 	 * @param string $email      Author email.
 	 * @param int    $user_id    Author user id (0 for guest).
+	 * @param string $type       Stored comment type.
 	 * @return int Comment id.
 	 */
-	private function insert_unverified_review( int $product_id, string $email, int $user_id = 0 ) {
-		return (int) wp_insert_comment(
+	private function insert_unverified_review( int $product_id, string $email, int $user_id = 0, string $type = 'review' ) {
+		global $wpdb;
+
+		$comment_id = (int) wp_insert_comment(
 			array(
 				'comment_post_ID'      => $product_id,
 				'comment_author'       => 'Reviewer',
 				'comment_author_email' => $email,
 				'comment_content'      => 'A review.',
-				'comment_type'         => 'review',
+				'comment_type'         => $type,
 				'comment_approved'     => 1,
 				'user_id'              => $user_id,
 			)
 		);
+
+		// wp_insert_comment() coerces an empty comment_type to 'comment', so force the '' type that
+		// imported/migrated reviews actually carry directly on the row.
+		if ( '' === $type ) {
+			$wpdb->update( $wpdb->comments, array( 'comment_type' => '' ), array( 'comment_ID' => $comment_id ) );
+			clean_comment_cache( $comment_id );
+		}
+
+		return $comment_id;
 	}
 
 	/**
@@ -339,7 +351,7 @@ class ReviewVerificationServiceTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A non-review comment must not schedule a backfill.
+	 * A genuine non-review (a pingback) must not schedule a backfill.
 	 */
 	public function test_schedule_for_new_review_ignores_non_reviews(): void {
 		$product_id = ProductHelper::create_simple_product()->get_id();
@@ -349,7 +361,7 @@ class ReviewVerificationServiceTest extends \WC_Unit_Test_Case {
 			array(
 				'comment_post_ID'  => $product_id,
 				'comment_content'  => 'Not a review.',
-				'comment_type'     => 'comment',
+				'comment_type'     => 'pingback',
 				'comment_approved' => 1,
 			)
 		);
@@ -357,7 +369,60 @@ class ReviewVerificationServiceTest extends \WC_Unit_Test_Case {
 
 		$this->service->schedule_for_new_review( $comment_id, get_comment( $comment_id ) );
 
-		$this->assertSame( 0, $this->count_scheduled_backfills( $product_id ), 'A non-review comment must not schedule a backfill.' );
+		$this->assertSame( 0, $this->count_scheduled_backfills( $product_id ), 'A genuine non-review (pingback) must not schedule a backfill.' );
+	}
+
+	/**
+	 * All comment types core recognizes as product reviews.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function provider_review_comment_types(): array {
+		return array(
+			'review type'         => array( 'review' ),
+			'legacy comment type' => array( 'comment' ),
+			'default empty type'  => array( '' ),
+		);
+	}
+
+	/**
+	 * Every comment type core counts as a product review — including the '' and 'comment' types kept
+	 * by imported or REST-created reviews — must schedule a backfill.
+	 *
+	 * @dataProvider provider_review_comment_types
+	 *
+	 * @param string $comment_type The stored comment type.
+	 */
+	public function test_schedule_for_new_review_schedules_all_review_types( string $comment_type ): void {
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$comment_id = $this->insert_unverified_review( $product_id, 'someone@example.test', 0, $comment_type );
+		as_unschedule_all_actions( ReviewVerificationService::BACKFILL_ACTION );
+
+		$this->service->schedule_for_new_review( $comment_id, get_comment( $comment_id ) );
+
+		$this->assertSame( 1, $this->count_scheduled_backfills( $product_id ), "A '$comment_type'-type product review must schedule a backfill." );
+	}
+
+	/**
+	 * Reviews stored with the '' or 'comment' comment types (imported, migrated or REST-created)
+	 * must be resolved and persisted by the backfill just like 'review'-type ones.
+	 *
+	 * @dataProvider provider_review_comment_types
+	 *
+	 * @param string $comment_type The stored comment type.
+	 */
+	public function test_backfill_resolves_all_review_types( string $comment_type ): void {
+		$product    = ProductHelper::create_simple_product();
+		$product_id = $product->get_id();
+
+		$this->create_paid_order_for( $product, 0, 'legacy-buyer@example.test' );
+		$comment_id = $this->insert_unverified_review( $product_id, 'legacy-buyer@example.test', 0, $comment_type );
+
+		$this->data_store->backfill( $product_id, 500 );
+
+		$this->assertSame( '1', get_comment_meta( $comment_id, 'verified', true ), "Backfill must persist verified meta for a '$comment_type'-type review." );
+		$this->assertTrue( wc_review_is_from_verified_owner( $comment_id ), 'The per-review path must agree.' );
 	}
 
 	/**

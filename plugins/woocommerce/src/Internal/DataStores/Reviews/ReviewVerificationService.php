@@ -83,7 +83,7 @@ class ReviewVerificationService implements RegisterHooksInterface {
 		}
 
 		foreach ( $comments as $comment ) {
-			if ( $comment instanceof \WP_Comment && 'review' === $comment->comment_type && '' === get_comment_meta( (int) $comment->comment_ID, 'verified', true ) ) {
+			if ( $comment instanceof \WP_Comment && in_array( $comment->comment_type, ReviewVerificationDataStore::REVIEW_COMMENT_TYPES, true ) && '' === get_comment_meta( (int) $comment->comment_ID, 'verified', true ) ) {
 				$this->schedule_backfill( $post_id );
 				break;
 			}
@@ -104,7 +104,7 @@ class ReviewVerificationService implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function schedule_for_new_review( $comment_id, $comment ): void {
-		if ( ! $comment instanceof \WP_Comment || 'review' !== $comment->comment_type ) {
+		if ( ! $comment instanceof \WP_Comment || ! in_array( $comment->comment_type, ReviewVerificationDataStore::REVIEW_COMMENT_TYPES, true ) ) {
 			return;
 		}
 
