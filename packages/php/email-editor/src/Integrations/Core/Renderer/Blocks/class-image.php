@@ -165,9 +165,24 @@ class Image extends Abstract_Block_Renderer {
 	 */
 	private function get_local_image_width( string $image_url ): ?int {
 		$upload_dir = wp_upload_dir();
-		$image_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $image_url );
+		$base_url   = trailingslashit( $upload_dir['baseurl'] );
 
-		if ( $image_path === $image_url || ! file_exists( $image_path ) ) {
+		// Only measure images served from the uploads directory.
+		if ( ! str_starts_with( $image_url, $base_url ) ) {
+			return null;
+		}
+
+		$base_dir   = realpath( $upload_dir['basedir'] );
+		$image_path = realpath( $upload_dir['basedir'] . '/' . substr( $image_url, strlen( $base_url ) ) );
+
+		if ( false === $base_dir || false === $image_path ) {
+			return null;
+		}
+
+		// Make sure the resolved file stays inside the uploads directory.
+		$base_dir   = trailingslashit( wp_normalize_path( $base_dir ) );
+		$image_path = wp_normalize_path( $image_path );
+		if ( ! str_starts_with( $image_path, $base_dir ) ) {
 			return null;
 		}
 
