@@ -101,7 +101,7 @@ const toCheckboxValue = (
 	return checked ? 'yes' : 'no';
 };
 
-const areValuesEqual = ( a: SettingsValue, b: SettingsValue ) => {
+export const areValuesEqual = ( a: SettingsValue, b: SettingsValue ) => {
 	if ( Array.isArray( a ) || Array.isArray( b ) ) {
 		return (
 			Array.isArray( a ) &&
@@ -237,9 +237,6 @@ const createNativeEdit = ( settingsField: SettingsUIField ) => {
 		);
 	};
 };
-
-const createDateTimeEdit = ( settingsField: SettingsUIField ) =>
-	createNativeEdit( settingsField );
 
 const createInfoRender = ( settingsField: SettingsUIField ) => {
 	return function InfoField() {
@@ -431,7 +428,7 @@ export const buildDataFormField = (
 	) {
 		// No package control exists for precise time inputs.
 		field.type = 'text';
-		defaultEdit = createDateTimeEdit( settingsField );
+		defaultEdit = createNativeEdit( settingsField );
 	} else if ( needsNativeEdit( settingsField ) ) {
 		defaultEdit = createNativeEdit( settingsField );
 	} else if (

@@ -29,7 +29,11 @@ import type { ComponentProps, ErrorInfo, ReactNode } from 'react';
 /**
  * Internal dependencies
  */
-import { createDataFormAdapter, getGroupValidity } from './dataform-adapter';
+import {
+	areValuesEqual,
+	createDataFormAdapter,
+	getGroupValidity,
+} from './dataform-adapter';
 import { HiddenInputs } from './hidden-inputs';
 import { error } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
@@ -42,7 +46,6 @@ import type {
 	SettingsUISchema,
 	SettingsUIShellBadgeIntent,
 	SettingsFieldContext,
-	SettingsValue,
 	SettingsValues,
 } from './types';
 
@@ -71,19 +74,6 @@ const getInitialValues = ( schema: SettingsUISchema ): SettingsValues => {
 	} );
 
 	return values;
-};
-
-const areValuesEqual = ( a: SettingsValue, b: SettingsValue ) => {
-	if ( Array.isArray( a ) || Array.isArray( b ) ) {
-		return (
-			Array.isArray( a ) &&
-			Array.isArray( b ) &&
-			a.length === b.length &&
-			a.every( ( value, index ) => value === b[ index ] )
-		);
-	}
-
-	return a === b;
 };
 
 const getChangedValues = (

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { BaseControl, CheckboxControl } from '@wordpress/components';
-import { createElement, RawHTML } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { Field, InputControl, SelectControl, Textarea } from '@wordpress/ui';
 
 /**
@@ -99,19 +99,6 @@ export const NativeSettingsField = ( {
 	value,
 	onChange,
 }: NativeSettingsFieldProps ) => {
-	if ( field.type === 'info' ) {
-		return (
-			<div className="wc-settings-ui__info" id={ field.id }>
-				<strong>{ field.label }</strong>
-				{ field.description ? (
-					<RawHTML>
-						{ sanitizeSettingsHtml( field.description ) }
-					</RawHTML>
-				) : null }
-			</div>
-		);
-	}
-
 	if ( field.type === 'checkbox' ) {
 		return (
 			<CheckboxControl
