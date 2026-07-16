@@ -21,7 +21,7 @@ class HydrationTest extends \WP_UnitTestCase {
 	/**
 	 * Set up test fixtures.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Initialize Store API.
@@ -33,7 +33,7 @@ class HydrationTest extends \WP_UnitTestCase {
 	/**
 	 * Reset the store session's notice queue after each test so notices don't leak between tests.
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		if ( WC()->session ) {
 			WC()->session->set( 'wc_notices', null );
 		}
