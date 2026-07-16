@@ -1480,18 +1480,24 @@ class CartController {
 			// Size %f0%9f%a4%8f, or an unencoded attribute_pa_size-🤏.
 			$attribute_slug = sanitize_title( $attribute['name'] );
 			if ( isset( $normalized_keys[ $attribute_slug ] ) ) {
-				$posted_key = $normalized_keys[ $attribute_slug ];
+				$posted_value = $variation_data[ $normalized_keys[ $attribute_slug ] ];
 
-				$return[ $variation_attribute_name ] =
-					$attribute['is_taxonomy']
-						?
-						sanitize_title( $variation_data[ $posted_key ] )
-						:
-						html_entity_decode(
-							wc_clean( $variation_data[ $posted_key ] ),
-							ENT_QUOTES,
-							get_bloginfo( 'charset' )
-						);
+				if ( ! is_string( $posted_value ) ) {
+					continue;
+				}
+
+				if ( $attribute['is_taxonomy'] ) {
+					$return[ $variation_attribute_name ] = sanitize_title( $posted_value );
+					continue;
+				}
+
+				$cleaned_value = wc_clean( $posted_value );
+
+				if ( ! is_string( $cleaned_value ) ) {
+					continue;
+				}
+
+				$return[ $variation_attribute_name ] = html_entity_decode( $cleaned_value, ENT_QUOTES, get_bloginfo( 'charset' ) );
 			}
 		}
 		return $return;
