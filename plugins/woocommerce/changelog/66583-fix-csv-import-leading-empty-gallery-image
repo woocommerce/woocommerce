@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Import gallery images from a CSV Images cell whose first value is empty (e.g. a value starting with a separator) instead of silently dropping them and leaving the previous gallery in place.
