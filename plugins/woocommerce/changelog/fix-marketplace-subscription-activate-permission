@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+The Marketplace subscription activate endpoint now requires activate_plugins (for plugins) or switch_themes (for themes) in addition to manage_woocommerce. Previously a Shop Manager could use it to reactivate an installed-but-inactive extension or theme that an Administrator had deliberately left inactive.
