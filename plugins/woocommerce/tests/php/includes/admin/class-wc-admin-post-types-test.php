@@ -138,6 +138,42 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Quick Edit clears expired sale dates when prices change so the new sale takes effect.
+	 * @dataProvider expired_schedule_price_changes_provider
+	 *
+	 * @param string $new_regular_price New regular price.
+	 * @param string $new_sale_price New sale price.
+	 */
+	public function test_quick_edit_clears_expired_sale_dates_when_prices_change( string $new_regular_price, string $new_sale_price ): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$product->set_regular_price( '100' );
+		$product->set_sale_price( '80' );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - 3 * DAY_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) );
+		$product->save();
+
+		$_REQUEST = array(
+			'woocommerce_quick_edit'       => '1',
+			'woocommerce_quick_edit_nonce' => wp_create_nonce( 'woocommerce_quick_edit_nonce' ),
+			'_regular_price'               => $new_regular_price,
+			'_sale_price'                  => $new_sale_price,
+			'_stock_status'                => 'instock',
+		);
+
+		$this->sut->bulk_and_quick_edit_save_post( $product->get_id(), get_post( $product->get_id() ) );
+
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertSame( $new_regular_price, $updated_product->get_regular_price( 'edit' ), 'Quick Edit should persist the regular price.' );
+		$this->assertSame( $new_sale_price, $updated_product->get_sale_price( 'edit' ), 'Quick Edit should persist the sale price.' );
+		$this->assertNull( $updated_product->get_date_on_sale_from( 'edit' ), 'Quick Edit should clear the expired sale start date.' );
+		$this->assertNull( $updated_product->get_date_on_sale_to( 'edit' ), 'Quick Edit should clear the expired sale end date.' );
+		$this->assertTrue( $updated_product->is_on_sale( 'edit' ), 'The product should be on sale once the expired schedule is cleared.' );
+		$this->assertSame( $new_sale_price, $updated_product->get_price( 'edit' ), 'The active price should be the new sale price.' );
+	}
+
+	/**
 	 * Provides valid price changes for active and future sale schedules.
 	 *
 	 * @return array<string, array{int, int, string, string}>
@@ -147,6 +183,18 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 			'active schedule with sale price change'    => array( -DAY_IN_SECONDS, DAY_IN_SECONDS, '100', '70' ),
 			'future schedule with sale price change'    => array( DAY_IN_SECONDS, 2 * DAY_IN_SECONDS, '100', '70' ),
 			'active schedule with regular price change' => array( -DAY_IN_SECONDS, DAY_IN_SECONDS, '90', '80' ),
+		);
+	}
+
+	/**
+	 * Provides price changes for a product whose scheduled sale has already ended.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public static function expired_schedule_price_changes_provider(): array {
+		return array(
+			'expired schedule with new sale price'       => array( '100', '70' ),
+			'expired schedule with regular price change' => array( '90', '80' ),
 		);
 	}
 
