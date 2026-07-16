@@ -319,7 +319,13 @@ class WC_AJAX {
 			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
 		} else {
 			WC()->cart->remove_coupon( $coupon );
-			wc_add_notice( __( 'Coupon has been removed.', 'woocommerce' ) );
+
+			/** This filter is documented in includes/class-wc-coupon.php */
+			$message = apply_filters( 'woocommerce_coupon_message', __( 'Coupon has been removed.', 'woocommerce' ), WC_Coupon::WC_COUPON_REMOVED, new WC_Coupon( $coupon ) );
+
+			if ( ! empty( $message ) ) {
+				wc_add_notice( $message );
+			}
 		}
 
 		wc_print_notices();

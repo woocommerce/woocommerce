@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+The "Coupon has been removed." notice printed by the remove_coupon AJAX endpoint now passes through the woocommerce_coupon_message filter with the WC_COUPON_REMOVED message code, matching how apply-coupon messages are filterable. The default text is unchanged.

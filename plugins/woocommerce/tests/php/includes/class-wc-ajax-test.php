@@ -823,6 +823,68 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox The remove_coupon notice should pass through the woocommerce_coupon_message filter.
+	 */
+	public function test_remove_coupon_notice_respects_coupon_message_filter(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'wc-ajax-remove-coupon' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$_POST['security'] = wp_create_nonce( 'remove-coupon' );
+		$_POST['coupon']   = $coupon->get_code();
+
+		// Without a filter attached, the default notice text is unchanged.
+		$this->assertStringContainsString( 'Coupon has been removed.', $this->handle_remove_coupon_ajax() );
+
+		$captured_code = null;
+		$filter        = function ( $message, $msg_code ) use ( &$captured_code ) {
+			$captured_code = $msg_code;
+			return 'Custom coupon removal message.';
+		};
+		add_filter( 'woocommerce_coupon_message', $filter, 10, 2 );
+
+		$response = $this->handle_remove_coupon_ajax();
+
+		remove_filter( 'woocommerce_coupon_message', $filter );
+		unset( $_POST['security'], $_POST['coupon'] );
+		$coupon->delete( true );
+
+		$this->assertStringContainsString( 'Custom coupon removal message.', $response, 'The filtered message should be printed as the notice.' );
+		$this->assertStringNotContainsString( 'Coupon has been removed.', $response, 'The hardcoded default should not bypass the filter.' );
+		$this->assertSame( WC_Coupon::WC_COUPON_REMOVED, $captured_code, 'The filter should receive the WC_COUPON_REMOVED message code.' );
+	}
+
+	/**
+	 * Triggers the woocommerce_remove_coupon AJAX endpoint and returns its HTML response.
+	 *
+	 * @return string
+	 */
+	private function handle_remove_coupon_ajax(): string {
+		$output_buffering_level = ob_get_level();
+
+		try {
+			// Note that _handleAjax makes use of output buffering, which the die
+			// handler usually cleans up; the finally block below closes only any
+			// buffer it leaves dangling so the buffer level stays balanced.
+			$this->_handleAjax( 'woocommerce_remove_coupon' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		} finally {
+			while ( ob_get_level() > $output_buffering_level ) {
+				ob_end_clean();
+			}
+		}
+
+		$response             = (string) $this->_last_response;
+		$this->_last_response = false;
+		wc_clear_notices();
+
+		return $response;
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
