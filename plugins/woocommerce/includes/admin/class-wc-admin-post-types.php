@@ -597,8 +597,10 @@ class WC_Admin_Post_Types {
 		if ( $can_product_type_change_price ) {
 			$regular_price_changed = $this->set_new_price( $product, 'regular' );
 			$sale_price_changed    = $this->set_new_price( $product, 'sale' );
+			$regular_price         = $product->get_regular_price( 'edit' );
+			$sale_price            = $product->get_sale_price( 'edit' );
 
-			if ( $regular_price_changed || $sale_price_changed ) {
+			if ( ( $regular_price_changed || $sale_price_changed ) && ( '' === $sale_price || $sale_price >= $regular_price ) ) {
 				$product->set_date_on_sale_to( '' );
 				$product->set_date_on_sale_from( '' );
 
