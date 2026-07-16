@@ -305,6 +305,44 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	}
 
 	/**
+	 * @testdox A stored legacy Nepal base location stays representable in the field options until it changes.
+	 */
+	public function test_get_item_exposes_stored_legacy_default_country_option() {
+		wp_set_current_user( self::$user_id );
+		$request = new WP_REST_Request( 'GET', '/wc/v4/settings/general' );
+
+		update_option( 'woocommerce_default_country', 'NP:BAG' );
+		$options = $this->get_default_country_field_options( $this->server->dispatch( $request )->get_data() );
+
+		$this->assertArrayHasKey( 'NP:BAG', $options, 'The stored legacy base location should be listed so clients can represent it.' );
+		$this->assertStringContainsString( 'Bagmati', $options['NP:BAG'], 'The legacy option should carry its readable name.' );
+		$this->assertArrayNotHasKey( 'NP:MEC', $options, 'Legacy codes that are not stored should not become selectable.' );
+
+		update_option( 'woocommerce_default_country', 'NP:P3' );
+		$options = $this->get_default_country_field_options( $this->server->dispatch( $request )->get_data() );
+
+		$this->assertArrayNotHasKey( 'NP:BAG', $options, 'The legacy option should disappear once the stored value uses a current code.' );
+	}
+
+	/**
+	 * Get the options of the default country field from a settings response.
+	 *
+	 * @param array $data Response data.
+	 * @return array Options indexed by value.
+	 */
+	private function get_default_country_field_options( array $data ): array {
+		foreach ( $data['groups'] as $group ) {
+			foreach ( $group['fields'] ?? array() as $field ) {
+				if ( 'woocommerce_default_country' === ( $field['id'] ?? '' ) ) {
+					return $field['options'] ?? array();
+				}
+			}
+		}
+
+		return array();
+	}
+
+	/**
 	 * Test updating country without state (country only).
 	 */
 	public function test_update_country_only() {

@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Schema;
 
+use Automattic\WooCommerce\Internal\Address\LegacyStateCodes;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
 use WP_REST_Request;
 
@@ -289,6 +290,20 @@ class GeneralSettingsSchema extends AbstractSchema {
 					} else {
 						foreach ( $country_states as $state_code => $state_name ) {
 							$options[ $country_code . ':' . $state_code ] = $country_name . ' — ' . $state_name;
+						}
+					}
+				}
+
+				// A stored base location may keep a known legacy state code until the merchant reviews it, so it must stay representable.
+				if ( 'woocommerce_default_country' === $field_id ) {
+					$stored_value = (string) get_option( 'woocommerce_default_country', '' );
+
+					if ( '' !== $stored_value && ! isset( $options[ $stored_value ] ) ) {
+						$legacy_state_name = LegacyStateCodes::get_known_legacy_location_name( $stored_value );
+
+						if ( null !== $legacy_state_name ) {
+							$country                  = wc_format_country_state_string( $stored_value )['country'];
+							$options[ $stored_value ] = ( $countries[ $country ] ?? $country ) . ' — ' . $legacy_state_name;
 						}
 					}
 				}
