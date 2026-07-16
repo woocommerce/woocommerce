@@ -405,6 +405,74 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve the Shop breadcrumb when the current product search item is hidden.
+	 */
+	public function test_core_breadcrumbs_preserve_shop_item_when_product_search_current_item_is_hidden(): void {
+		global $wp_query;
+
+		$this->go_to( '/?s=hoodie&post_type=product' );
+
+		$wp_query->is_search            = true;
+		$wp_query->is_post_type_archive = true;
+		$wp_query->is_archive           = true;
+		$wp_query->is_404               = false;
+
+		$result = $this->apply_core_breadcrumb_filters();
+
+		$this->assertSame(
+			array( 'Home', 'Catalog' ),
+			$this->get_breadcrumb_labels( $result ),
+			'The Shop crumb should not be relabeled as the current search when Core omits that item.'
+		);
+	}
+
+	/**
+	 * @testdox Should preserve Core's hidden Home setting on product searches.
+	 */
+	public function test_core_breadcrumbs_preserve_hidden_home_item_on_product_search(): void {
+		global $wp_query;
+
+		$this->go_to( '/?s=hoodie&post_type=product' );
+
+		$wp_query->is_search            = true;
+		$wp_query->is_post_type_archive = true;
+		$wp_query->is_archive           = true;
+		$wp_query->is_404               = false;
+
+		$result = $this->apply_breadcrumb_filters(
+			array( $this->get_breadcrumb_item( 'Search results for: "hoodie"' ) )
+		);
+
+		$this->assertSame(
+			array( 'Catalog', 'Search results for &ldquo;hoodie&rdquo;' ),
+			$this->get_breadcrumb_labels( $result ),
+			'The Home crumb should remain hidden when WooCommerce compatibility adds the Shop crumb.'
+		);
+	}
+
+	/**
+	 * @testdox Should preserve Core's hidden Home and current item settings on product searches.
+	 */
+	public function test_core_breadcrumbs_preserve_hidden_home_and_current_items_on_product_search(): void {
+		global $wp_query;
+
+		$this->go_to( '/?s=hoodie&post_type=product' );
+
+		$wp_query->is_search            = true;
+		$wp_query->is_post_type_archive = true;
+		$wp_query->is_archive           = true;
+		$wp_query->is_404               = false;
+
+		$result = $this->apply_breadcrumb_filters( array() );
+
+		$this->assertSame(
+			array( 'Catalog' ),
+			$this->get_breadcrumb_labels( $result ),
+			'Home and current crumbs should remain hidden while WooCommerce compatibility keeps the Shop parent.'
+		);
+	}
+
+	/**
 	 * @testdox Should use WooCommerce labels for regular search breadcrumbs.
 	 */
 	public function test_core_breadcrumbs_label_regular_search_items(): void {
@@ -456,6 +524,19 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 			array( 'Home', 'My account', 'Orders' ),
 			'My Account endpoint breadcrumbs should include the account page crumb.',
 			$this->get_breadcrumb_item( 'Orders' )
+		);
+	}
+
+	/**
+	 * @testdox Should replace the account page title with the current endpoint title.
+	 */
+	public function test_core_breadcrumbs_replace_account_page_title_with_endpoint_title(): void {
+		$this->set_account_endpoint_request( 'orders' );
+
+		$this->assert_core_breadcrumb_labels(
+			array( 'Home', 'My account', 'Orders' ),
+			'My Account endpoint breadcrumbs should use the endpoint title for the current item.',
+			$this->get_breadcrumb_item( 'My account' )
 		);
 	}
 

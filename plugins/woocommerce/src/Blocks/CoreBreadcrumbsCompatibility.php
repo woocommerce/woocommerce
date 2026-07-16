@@ -342,8 +342,10 @@ final class CoreBreadcrumbsCompatibility {
 			return $items;
 		}
 
+		$search_url = (int) get_query_var( 'paged' ) > 1 ? get_pagenum_link( 1 ) : '';
+
 		/* translators: %s: search term */
-		return $this->replace_current_archive_breadcrumb_label( $items, sprintf( __( 'Search results for &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() ) );
+		return $this->replace_current_archive_breadcrumb_label( $items, sprintf( __( 'Search results for &ldquo;%s&rdquo;', 'woocommerce' ), get_search_query() ), $search_url );
 	}
 
 	/**
@@ -389,6 +391,18 @@ final class CoreBreadcrumbsCompatibility {
 
 		if ( ! $my_account_page || ! $my_account_url ) {
 			return $items;
+		}
+
+		$woocommerce = WC();
+
+		if ( $woocommerce->query instanceof \WC_Query ) {
+			$endpoint       = $woocommerce->query->get_current_endpoint();
+			$action         = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Used only to select the breadcrumb label.
+			$endpoint_title = $endpoint ? $woocommerce->query->get_endpoint_title( $endpoint, $action ) : '';
+
+			if ( $endpoint_title ) {
+				$items = $this->replace_current_archive_breadcrumb_label( $items, $endpoint_title );
+			}
 		}
 
 		return $this->insert_parent_breadcrumb_item_if_missing_url(
@@ -527,6 +541,10 @@ final class CoreBreadcrumbsCompatibility {
 				if ( $pagination_label === (string) $items[ $item_index ]['label'] ) {
 					$item_index = $item_keys[ count( $item_keys ) - 2 ];
 				}
+			}
+
+			if ( ! empty( $items[ $item_index ]['url'] ) ) {
+				return $items;
 			}
 		}
 
