@@ -4,17 +4,14 @@
 import { speak } from '@wordpress/a11y';
 import { createElement } from '@wordpress/element';
 import { act } from 'react';
-import { createRoot } from 'react-dom/client';
 
 /**
  * Internal dependencies
  */
 import { NativeSettingsField } from '../native-fields';
-import type {
-	SettingsFieldComponentProps,
-	SettingsUIField,
-	SettingsValue,
-} from '../types';
+import type { NativeSettingsFieldProps } from '../native-fields';
+import type { SettingsUIField, SettingsValue } from '../types';
+import { renderElement } from './helpers/render-element';
 
 jest.mock( '@wordpress/a11y', () => ( {
 	speak: jest.fn(),
@@ -27,31 +24,14 @@ afterAll( () => {
 	globalThis.IS_REACT_ACT_ENVIRONMENT = previousActEnvironment;
 } );
 
-const renderElement = ( element: JSX.Element ) => {
-	const container = document.createElement( 'div' );
-	document.body.appendChild( container );
-	const root = createRoot( container );
-
-	act( () => {
-		root.render( element );
-	} );
-
-	return { container, root };
-};
-
 const makeProps = (
 	field: SettingsUIField,
 	value: SettingsValue,
 	onChange: ( next: SettingsValue ) => void = () => {}
-): SettingsFieldComponentProps => ( {
+): NativeSettingsFieldProps => ( {
 	field,
 	value,
 	onChange,
-	values: { [ field.id ]: value },
-	initialValues: { [ field.id ]: value },
-	setValue: () => {},
-	setValues: () => {},
-	context: { page: 'test-page' },
 } );
 
 describe( 'NativeSettingsField', () => {
@@ -63,14 +43,9 @@ describe( 'NativeSettingsField', () => {
 	} );
 
 	const render = ( element: JSX.Element ) => {
-		const { container, root } = renderElement( element );
-		cleanup = () => {
-			act( () => {
-				root.unmount();
-			} );
-			container.remove();
-		};
-		return container;
+		const rendered = renderElement( element );
+		cleanup = rendered.cleanup;
+		return rendered.container;
 	};
 
 	const clickButton = ( button: HTMLElement ) => {

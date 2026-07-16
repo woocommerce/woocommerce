@@ -4,7 +4,6 @@
 import { createElement, useState } from '@wordpress/element';
 import { DataForm, useFormValidity } from '@wordpress/dataviews';
 import { act } from 'react';
-import { createRoot } from 'react-dom/client';
 
 /**
  * Internal dependencies
@@ -19,6 +18,7 @@ import type {
 	SettingsUISchema,
 	SettingsValues,
 } from '../types';
+import { renderElement as render } from './helpers/render-element';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 

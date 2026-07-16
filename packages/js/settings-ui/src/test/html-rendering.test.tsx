@@ -23,23 +23,12 @@ import { SettingsUIPage } from '../settings-ui-page';
 import { __resetRegistry, registerSettingsExtension } from '../registry';
 import { useSettingsUIContext } from '../settings-ui-context';
 import type { SettingsFieldContext, SettingsUISchema } from '../types';
+import { renderElement } from './helpers/render-element';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 const unsafeDescription =
 	'<strong>Safe</strong><script>alert("x")</script><img src=x onerror=alert(1)><a href="javascript:alert(1)" onclick="alert(1)">Link</a><iframe src="https://example.com"></iframe>';
-
-const renderElement = ( element: JSX.Element ) => {
-	const container = document.createElement( 'div' );
-	document.body.appendChild( container );
-	const root = createRoot( container );
-
-	act( () => {
-		root.render( element );
-	} );
-
-	return { container, root };
-};
 
 const renderElementInMainForm = ( element: JSX.Element ) => {
 	const form = document.createElement( 'form' );
