@@ -1900,7 +1900,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$dedicated = static function () {
 			return 30;
 		};
-		$legacy = static function () {
+		$legacy    = static function () {
 			return 45;
 		};
 
