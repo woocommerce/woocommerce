@@ -246,10 +246,6 @@ class EndpointTest extends WC_Unit_Test_Case {
 				)
 			);
 
-		// Matches the pattern in class-wc-breadcrumb-test.php: a plain object
-		// for `$wp` (render_shortcode() only reads ->query_vars) and a bare
-		// `WP_Query` with `is_page`/`queried_object` set directly, instead of
-		// running a real query.
 		global $wp, $wp_query;
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture.
 		$wp             = new \stdClass();
