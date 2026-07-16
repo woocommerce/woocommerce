@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix product CSV importer form crashing when the mbstring extension is unavailable.
