@@ -1885,14 +1885,14 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `get_per_page` honors the dedicated filter and bridges the legacy `edit_comments_per_page` filter, which keeps precedence.
+	 * @testdox `get_per_page` honors the dedicated filter and still applies the legacy `edit_comments_per_page` filter, which keeps precedence.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_per_page()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_per_page_bridges_legacy_comments_filter() {
+	public function test_get_per_page_applies_legacy_comments_filter() {
 		$list_table = $this->get_reviews_list_table();
 		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_per_page' );
 		$method->setAccessible( true );
@@ -1908,10 +1908,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		add_filter( 'edit_product_reviews_per_page', $dedicated );
 		$this->assertSame( 30, $method->invoke( $list_table ) );
 
-		// The legacy `edit_comments_per_page` filter is still bridged, and keeps precedence over the dedicated
-		// filter for backward compatibility during the deprecation window.
+		// The legacy `edit_comments_per_page` filter is still applied for backward compatibility, and keeps
+		// precedence over the dedicated filter (it is applied last).
 		add_filter( 'edit_comments_per_page', $legacy );
-		$this->setExpectedDeprecated( 'edit_comments_per_page' );
 		$this->assertSame( 45, $method->invoke( $list_table ) );
 
 		remove_filter( 'edit_product_reviews_per_page', $dedicated );
