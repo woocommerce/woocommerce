@@ -13,6 +13,31 @@ declare( strict_types = 1);
 class WC_Brands_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * @testdox Product brand taxonomy uses product-qualified primary labels and a compact menu label.
+	 */
+	public function test_product_brand_taxonomy_uses_product_qualified_labels(): void {
+		WC_Brands::init_taxonomy();
+		$taxonomy = get_taxonomy( 'product_brand' );
+
+		$this->assertInstanceOf( WP_Taxonomy::class, $taxonomy, 'The product brand taxonomy should be registered.' );
+		$this->assertSame(
+			array(
+				'label'         => 'Product brands',
+				'name'          => 'Product brands',
+				'singular_name' => 'Product brand',
+				'menu_name'     => 'Brands',
+			),
+			array(
+				'label'         => $taxonomy->label,
+				'name'          => $taxonomy->labels->name,
+				'singular_name' => $taxonomy->labels->singular_name,
+				'menu_name'     => $taxonomy->labels->menu_name,
+			),
+			'The taxonomy should use product-qualified labels while keeping a compact admin menu label.'
+		);
+	}
+
+	/**
 	 * Tear down test data.
 	 */
 	public function tearDown(): void {

@@ -319,10 +319,11 @@ class WC_Brands {
 				array(
 					'hierarchical'          => true,
 					'update_count_callback' => '_wc_term_recount',
-					'label'                 => __( 'Brands', 'woocommerce' ),
+					'label'                 => __( 'Product brands', 'woocommerce' ),
 					'labels'                => array(
-						'name'              => __( 'Brands', 'woocommerce' ),
-						'singular_name'     => __( 'Brand', 'woocommerce' ),
+						'name'              => __( 'Product brands', 'woocommerce' ),
+						'singular_name'     => __( 'Product brand', 'woocommerce' ),
+						'menu_name'         => _x( 'Brands', 'Admin menu name', 'woocommerce' ),
 						'template_name'     => _x( 'Products by Brand', 'Template name', 'woocommerce' ),
 						'search_items'      => __( 'Search Brands', 'woocommerce' ),
 						'all_items'         => __( 'All Brands', 'woocommerce' ),
