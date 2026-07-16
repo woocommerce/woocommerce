@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix email gallery aspect-ratio crop misclassifying images whose src contains a query-string ampersand (e.g. CDN URLs) as server-cropped, which stamped distorting fixed dimensions on uncropped images. The renderer now detects a server crop by comparing the filter result to the original URL before escaping.

@@ -520,6 +520,35 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test an image whose src has a multi-param query string (e.g. a CDN URL with "&") is not
+	 * misclassified as server-cropped when no integration rewrites it.
+	 *
+	 * Regression: get_attribute() returns the entity-decoded src while esc_url() re-encodes "&" to
+	 * "&#038;", so comparing an escaped URL against the decoded original wrongly flagged any "&"-in-src
+	 * image as cropped and stamped it with distorting fixed dimensions.
+	 */
+	public function testItDoesNotMisclassifyAmpersandSrcAsServerCropped(): void {
+		$parsed_gallery                         = $this->parsed_gallery;
+		$parsed_gallery['attrs']['aspectRatio'] = '1';
+		// A CDN-style src with more than one query parameter, so the URL contains an ampersand.
+		$parsed_gallery['innerBlocks'][0]['innerHTML'] = '<figure class="wp-block-image size-large"><img src="https://example.com/image1.jpg?w=600&h=600" alt="Image 1" class="wp-image-1"/></figure>';
+
+		// No filter is attached, so nothing is server-cropped.
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		// The ampersand image keeps CSS-only cropping: no fixed width/height that would distort it.
+		$image_count = 0;
+		$html        = new \WP_HTML_Tag_Processor( $rendered );
+		while ( $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
+			++$image_count;
+			$this->assertNull( $html->get_attribute( 'width' ), 'An uncropped ampersand-src image must not get a fixed width.' );
+			$this->assertNull( $html->get_attribute( 'height' ), 'An uncropped ampersand-src image must not get a fixed height.' );
+		}
+		$this->assertSame( 3, $image_count, 'All three images are present.' );
+		$this->assertStringContainsString( 'object-fit: cover', $rendered, 'Images still get CSS cropping.' );
+	}
+
+	/**
 	 * Test the crop is sized to the actual rendered cell width, so an incomplete final row
 	 * (e.g. a lone trailing image spanning the full width) is not served an undersized file.
 	 */

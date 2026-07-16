@@ -236,18 +236,23 @@ class Gallery extends Abstract_Block_Renderer {
 		 */
 		$filtered_url = apply_filters( 'woocommerce_email_editor_gallery_cropped_image_url', $image_url, $aspect_ratio, $width, $height, $image_attrs );
 
-		// Extensions can return anything (arrays, WP_Error, objects). Only accept a string, and
-		// sanitize it before we compare or use it so an invalid value can't emit a warning, be
-		// misclassified as a server crop, or become an empty src.
-		$cropped_url = is_string( $filtered_url ) ? esc_url( $filtered_url ) : '';
+		// Extensions can return anything (arrays, WP_Error, objects). A crop happened only when an
+		// integration returned a *different*, non-empty string. Compare the raw filter result against
+		// the original src here, BEFORE escaping: get_attribute() returns the entity-decoded src (raw
+		// "&"), while esc_url() re-encodes "&" to "&#038;", so comparing an escaped URL against the
+		// decoded original would misclassify any image whose src has a multi-param query string (e.g.
+		// "?w=600&h=600", common with image CDNs) as server-cropped.
+		$is_server_cropped = is_string( $filtered_url ) && '' !== $image_url && '' !== $filtered_url && $filtered_url !== $image_url;
 
-		$is_server_cropped = '' !== $image_url && '' !== $cropped_url && $cropped_url !== $image_url;
+		// Escape for output only after the decision. If esc_url() reduces a hostile/invalid crop URL
+		// to an empty string, fall through to the CSS branch rather than emit an empty src.
+		$cropped_url = $is_server_cropped ? esc_url( (string) $filtered_url ) : '';
 
 		// These crop styles are appended after Html_Processing_Helper::sanitize_image_html() has run
 		// (its style allowlist would otherwise strip object-fit), so they intentionally bypass that
 		// sanitizer. Only the regex-validated $aspect_ratio may be interpolated here — every other
 		// token is a literal. Do not add dynamic values to $crop_styles without validating them.
-		if ( $is_server_cropped ) {
+		if ( '' !== $cropped_url ) {
 			// The file is already cropped to the requested ratio, so we can give it concrete
 			// dimensions. This renders the crop correctly even in clients without CSS crop support.
 			$html->set_attribute( 'src', $cropped_url );
