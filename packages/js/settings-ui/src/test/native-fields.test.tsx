@@ -417,4 +417,87 @@ describe( 'NativeSettingsField', () => {
 			).toBeNull();
 		} );
 	} );
+
+	describe( 'select and radio fields', () => {
+		// TS unions erase at runtime: extension-supplied PHP schemas can
+		// carry numeric option values, which must still match the saved
+		// value.
+		const numericOptions = [
+			{ label: 'One', value: 1 as unknown as string },
+			{ label: 'Two', value: 2 as unknown as string },
+		];
+
+		it( 'selects a numeric option value matching a numeric saved value', () => {
+			const container = render(
+				<NativeSettingsField
+					{ ...makeProps(
+						{
+							id: 'wc_test_select',
+							label: 'Amount',
+							type: 'select',
+							options: numericOptions,
+						},
+						1
+					) }
+				/>
+			);
+
+			expect(
+				container.querySelector( 'button[role="combobox"]' )
+					?.textContent
+			).toBe( 'One' );
+		} );
+
+		it( 'selects a numeric option value matching a string saved value', () => {
+			const container = render(
+				<NativeSettingsField
+					{ ...makeProps(
+						{
+							id: 'wc_test_radio',
+							label: 'Amount',
+							type: 'radio',
+							options: numericOptions,
+						},
+						'2'
+					) }
+				/>
+			);
+
+			expect(
+				container.querySelector( 'button[role="combobox"]' )
+					?.textContent
+			).toBe( 'Two' );
+		} );
+	} );
+
+	describe( 'checkbox fields', () => {
+		const checkboxField: SettingsUIField = {
+			id: 'wc_test_checkbox',
+			label: 'Enable feature',
+			type: 'checkbox',
+		};
+
+		it.each( [
+			[ true, true ],
+			[ 'yes', true ],
+			[ '1', true ],
+			[ 1, true ],
+			[ 'true', true ],
+			[ false, false ],
+			[ 0, false ],
+			[ '0', false ],
+			[ 'no', false ],
+			[ '', false ],
+		] )( 'renders saved value %p as checked=%p', ( value, checked ) => {
+			const container = render(
+				<NativeSettingsField
+					{ ...makeProps( checkboxField, value as SettingsValue ) }
+				/>
+			);
+
+			const input = container.querySelector( 'input[type="checkbox"]' );
+			expect( input ).toBeInstanceOf( HTMLInputElement );
+			expect( ( input as HTMLInputElement ).checked ).toBe( checked );
+		} );
+	} );
 } );

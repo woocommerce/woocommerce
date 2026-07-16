@@ -125,8 +125,11 @@ export const NativeSettingsField = ( {
 	}
 
 	if ( field.type === 'select' || field.type === 'radio' ) {
+		// PHP-supplied schemas can carry numeric option values at runtime;
+		// items are stringified so saved values match, and the adapter's
+		// setValue restores the original option value type on change.
 		const items = ( field.options || [] ).map( ( option ) => ( {
-			value: option.value,
+			value: toStringValue( option.value ),
 			label: option.label,
 		} ) );
 		const selectedItem =
