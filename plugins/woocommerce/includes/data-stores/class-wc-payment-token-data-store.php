@@ -382,9 +382,14 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * @return int
 	 */
 	private static function sanitize_row_count( $value, int $default_value ): int {
-		// A boolean is not a row count, but filter_var() reads true as 1, which would quietly cap
-		// the query at a single row rather than fall back.
-		$count = is_bool( $value ) ? false : filter_var( $value, FILTER_VALIDATE_INT );
+		// Neither a boolean nor a non-finite float is a row count, and filter_var() cannot be asked
+		// about them: it reads true as 1, which would quietly cap the query at a single row, and it
+		// coerces its argument to a string, which PHP 8.5 raises a diagnostic for when handed NAN.
+		if ( is_bool( $value ) || ( is_float( $value ) && ! is_finite( $value ) ) ) {
+			return $default_value;
+		}
+
+		$count = filter_var( $value, FILTER_VALIDATE_INT );
 
 		return false !== $count && $count >= 1 ? $count : $default_value;
 	}
