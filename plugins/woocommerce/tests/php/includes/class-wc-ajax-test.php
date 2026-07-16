@@ -823,7 +823,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * @testdox The remove_coupon notice should pass through the woocommerce_coupon_message filter.
+	 * @testdox The remove_coupon notice should come from get_coupon_message() and respect the woocommerce_coupon_message filter.
 	 */
 	public function test_remove_coupon_notice_respects_coupon_message_filter(): void {
 		$coupon = new WC_Coupon();
@@ -835,8 +835,10 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$_POST['security'] = wp_create_nonce( 'remove-coupon' );
 		$_POST['coupon']   = $coupon->get_code();
 
-		// Without a filter attached, the default notice text is unchanged.
-		$this->assertStringContainsString( 'Coupon has been removed.', $this->handle_remove_coupon_ajax() );
+		// Without a filter attached, the notice is the get_coupon_message() text for WC_COUPON_REMOVED.
+		$default_response = $this->handle_remove_coupon_ajax();
+		$this->assertStringContainsString( 'Coupon code removed successfully.', $default_response, 'The notice should use the get_coupon_message() text.' );
+		$this->assertStringNotContainsString( 'Coupon has been removed.', $default_response, 'The old hardcoded text should no longer be used.' );
 
 		$captured_code = null;
 		$filter        = function ( $message, $msg_code ) use ( &$captured_code ) {
@@ -852,7 +854,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$coupon->delete( true );
 
 		$this->assertStringContainsString( 'Custom coupon removal message.', $response, 'The filtered message should be printed as the notice.' );
-		$this->assertStringNotContainsString( 'Coupon has been removed.', $response, 'The hardcoded default should not bypass the filter.' );
+		$this->assertStringNotContainsString( 'Coupon code removed successfully.', $response, 'The default text should not bypass the filter.' );
 		$this->assertSame( WC_Coupon::WC_COUPON_REMOVED, $captured_code, 'The filter should receive the WC_COUPON_REMOVED message code.' );
 	}
 
