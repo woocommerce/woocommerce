@@ -1,6 +1,6 @@
 <?php
 
-declare( strict_types = 1);
+declare( strict_types = 1 );
 
 use Automattic\Jetpack\Constants;
 
@@ -12,6 +12,11 @@ use Automattic\Jetpack\Constants;
  * @version 9.5.0
  */
 class WC_Brands {
+
+	/**
+	 * Class name used to identify the managed product brand terms block.
+	 */
+	private const PRODUCT_BRAND_BLOCK_CLASS_NAME = 'wc-block-product-brand-terms';
 
 	/**
 	 * Template URL -- filterable.
@@ -64,10 +69,14 @@ class WC_Brands {
 		// REST API.
 		add_action( 'rest_api_init', array( $this, 'rest_api_register_routes' ) );
 		add_action( 'woocommerce_rest_insert_product', array( $this, 'rest_api_maybe_set_brands' ), 10, 2 );
-		add_filter( 'woocommerce_rest_prepare_product', array( $this, 'rest_api_prepare_brands_to_product' ), 10, 2 ); // WC 2.6.x.
-		add_filter( 'woocommerce_rest_prepare_product_object', array( $this, 'rest_api_prepare_brands_to_product' ), 10, 2 ); // WC 3.x.
-		add_action( 'woocommerce_rest_insert_product', array( $this, 'rest_api_add_brands_to_product' ), 10, 3 ); // WC 2.6.x.
-		add_action( 'woocommerce_rest_insert_product_object', array( $this, 'rest_api_add_brands_to_product' ), 10, 3 ); // WC 3.x.
+		// WC 2.6.x.
+		add_filter( 'woocommerce_rest_prepare_product', array( $this, 'rest_api_prepare_brands_to_product' ), 10, 2 );
+		// WC 3.x.
+		add_filter( 'woocommerce_rest_prepare_product_object', array( $this, 'rest_api_prepare_brands_to_product' ), 10, 2 );
+		// WC 2.6.x.
+		add_action( 'woocommerce_rest_insert_product', array( $this, 'rest_api_add_brands_to_product' ), 10, 3 );
+		// WC 3.x.
+		add_action( 'woocommerce_rest_insert_product_object', array( $this, 'rest_api_add_brands_to_product' ), 10, 3 );
 		add_filter( 'woocommerce_rest_product_object_query', array( $this, 'rest_api_filter_products_by_brand' ), 10, 2 );
 		add_filter( 'rest_product_collection_params', array( $this, 'rest_api_product_collection_params' ), 10, 2 );
 
@@ -81,6 +90,7 @@ class WC_Brands {
 		// Block theme integration.
 		add_filter( 'hooked_block_types', array( $this, 'hook_product_brand_block' ), 10, 4 );
 		add_filter( 'hooked_block_core/post-terms', array( $this, 'configure_product_brand_block' ), 10, 5 );
+		add_filter( 'render_block_data', array( $this, 'handle_render_block_data' ), 10, 3 );
 	}
 
 	/**
@@ -1100,7 +1110,7 @@ class WC_Brands {
 	 * Hooks the product brand terms block into single product templates.
 	 *
 	 * @param array $hooked_block_types The array of hooked block types.
-	 * @param int $relative_position The relative position of the hooked block.
+	 * @param string $relative_position The relative position of the hooked block.
 	 * @param string $anchor_block_type The type of anchor block.
 	 * @param WP_Block_Template $context The context of the block.
 	 *
@@ -1114,13 +1124,13 @@ class WC_Brands {
 			 $context instanceof WP_Block_Template &&
 			 'single-product' === $context->slug ) {
 
-				remove_action( 'woocommerce_product_meta_end', array( $this, 'show_brand' ) );
+			remove_action( 'woocommerce_product_meta_end', array( $this, 'show_brand' ) );
 
-				// Check if the template already has a product brand block
-				if ( ! $this->template_already_has_brand_block( $context ) ) {
-					// Simply add the core/post-terms block type
-					$hooked_block_types[] = 'core/post-terms';
-				}
+			// Check if the template already has a product brand block
+			if ( ! $this->template_already_has_brand_block( $context ) ) {
+				// Simply add the core/post-terms block type
+				$hooked_block_types[] = 'core/post-terms';
+			}
 		}
 
 		return $hooked_block_types;
@@ -1146,7 +1156,7 @@ class WC_Brands {
 	 *
 	 * @param array $parsed_hooked_block The parsed hooked block.
 	 * @param string $hooked_block_type The type of hooked block.
-	 * @param int $relative_position The relative position of the hooked block.
+	 * @param string $relative_position The relative position of the hooked block.
 	 * @param array $parsed_anchor_block The parsed anchor block.
 	 * @param WP_Block_Template $context The context of the block.
 	 *
@@ -1163,12 +1173,51 @@ class WC_Brands {
 			 empty( $parsed_anchor_block['attrs'] ) ) {
 
 			$parsed_hooked_block['attrs'] = array(
-				'term'	 => 'product_brand',
-				'prefix' => __( 'Brands: ', 'woocommerce' ),
+				'term'      => 'product_brand',
+				'prefix'    => __( 'Brands: ', 'woocommerce' ),
+				'className' => self::PRODUCT_BRAND_BLOCK_CLASS_NAME,
 			);
 		}
 
 		return $parsed_hooked_block;
+	}
+
+	/**
+	 * Set the managed product brand block prefix from its product context.
+	 *
+	 * @internal
+	 *
+	 * @param array         $parsed_block The block being rendered.
+	 * @param array         $source_block The unmodified source block.
+	 * @param WP_Block|null $parent_block The parent block, if available.
+	 * @return array The block to render.
+	 */
+	public function handle_render_block_data( $parsed_block, $source_block, $parent_block ) {
+		unset( $source_block );
+
+		if ( 'core/post-terms' !== ( $parsed_block['blockName'] ?? null ) ||
+			'product_brand' !== ( $parsed_block['attrs']['term'] ?? null ) ) {
+			return $parsed_block;
+		}
+
+		$class_names = (array) preg_split( '/\s+/', trim( (string) ( $parsed_block['attrs']['className'] ?? '' ) ) );
+		if ( ! in_array( self::PRODUCT_BRAND_BLOCK_CLASS_NAME, $class_names, true ) || ! ( $parent_block instanceof WP_Block ) ) {
+			return $parsed_block;
+		}
+
+		$post_id = absint( $parent_block->context['postId'] ?? 0 );
+		if ( ! $post_id ) {
+			return $parsed_block;
+		}
+
+		$brand_terms = get_the_terms( $post_id, 'product_brand' );
+		if ( ! is_array( $brand_terms ) ) {
+			return $parsed_block;
+		}
+
+		$parsed_block['attrs']['prefix'] = _n( 'Brand: ', 'Brands: ', count( $brand_terms ), 'woocommerce' );
+
+		return $parsed_block;
 	}
 }
 

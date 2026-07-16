@@ -5,12 +5,29 @@
  * @package woocommerce-brands
  */
 
-declare( strict_types = 1);
+declare( strict_types = 1 );
 
 /**
  * WC Brands test
  */
 class WC_Brands_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var WC_Brands
+	 */
+	private $sut;
+
+	/**
+	 * Set up test data.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		WC_Brands::init_taxonomy();
+		$this->sut = $GLOBALS['WC_Brands'];
+	}
 
 	/**
 	 * Tear down test data.
@@ -21,6 +38,36 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 		// Clear term cache to prevent interference between tests.
 		clean_term_cache( array(), 'product_brand' );
 	}
+
+	/**
+	 * @testdox Should render a singular label for one brand in the managed product brand block.
+	 */
+	public function test_managed_product_brand_block_renders_singular_label(): void {
+		$output = $this->render_product_brand_block( array( 'First brand' ) );
+
+		$this->assertStringContainsString( 'Brand: ', $output );
+		$this->assertStringNotContainsString( 'Brands: ', $output );
+	}
+
+	/**
+	 * @testdox Should render a plural label for multiple brands in the managed product brand block.
+	 */
+	public function test_managed_product_brand_block_renders_plural_label(): void {
+		$output = $this->render_product_brand_block( array( 'First brand', 'Second brand' ) );
+
+		$this->assertStringContainsString( 'Brands: ', $output );
+	}
+
+	/**
+	 * @testdox Should preserve the prefix on a merchant-authored product brand block.
+	 */
+	public function test_custom_product_brand_block_preserves_prefix(): void {
+		$output = $this->render_product_brand_block( array( 'First brand' ), 'Maker: ', false );
+
+		$this->assertStringContainsString( 'Maker: ', $output );
+		$this->assertStringNotContainsString( 'Brand: ', $output );
+	}
+
 	/**
 	 * Test that `product_brand_thumbnails` shortcode's `show_empty` argument works as expected.
 	 * This test prevents regression of the issue where double filtering caused no brands to be displayed.
@@ -219,6 +266,70 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 
 		// Reset the setting.
 		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+	}
+
+	/**
+	 * Render a product brand terms block for a product with the supplied brands.
+	 *
+	 * @param string[] $brand_names Brand names to assign to the product.
+	 * @param string   $prefix      Prefix for a merchant-authored block.
+	 * @param bool     $is_managed  Whether to configure the WooCommerce-managed block.
+	 * @return string Rendered block output.
+	 */
+	private function render_product_brand_block( array $brand_names, string $prefix = 'Brands: ', bool $is_managed = true ): string {
+		$product   = WC_Helper_Product::create_simple_product();
+		$brand_ids = array();
+
+		foreach ( $brand_names as $brand_name ) {
+			$brand_ids[] = self::factory()->term->create(
+				array(
+					'name'     => $brand_name,
+					'taxonomy' => 'product_brand',
+				)
+			);
+		}
+
+		wp_set_object_terms( $product->get_id(), $brand_ids, 'product_brand' );
+
+		$brand_block = array(
+			'blockName'    => 'core/post-terms',
+			'attrs'        => array(
+				'term'   => 'product_brand',
+				'prefix' => $prefix,
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '',
+			'innerContent' => array(),
+		);
+
+		if ( $is_managed ) {
+			$brand_block = $this->sut->configure_product_brand_block(
+				$brand_block,
+				'core/post-terms',
+				'last_child',
+				array(
+					'blockName' => 'woocommerce/product-meta',
+					'attrs'     => array(),
+				),
+				null
+			);
+		}
+
+		$product_meta_block = new WP_Block(
+			array(
+				'blockName'    => 'woocommerce/product-meta',
+				'attrs'        => array(),
+				'innerBlocks'  => array( $brand_block ),
+				'innerHTML'    => '',
+				'innerContent' => array( null ),
+			),
+			array(
+				'postId'   => $product->get_id(),
+				'postType' => 'product',
+			)
+		);
+
+		return $product_meta_block->render();
 	}
 
 	/**
