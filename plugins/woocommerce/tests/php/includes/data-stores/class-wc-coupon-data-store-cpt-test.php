@@ -186,6 +186,9 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$coupon = $this->create_settled_coupon();
 		$this->capture_updated_props();
 
+		// The expected payloads below depend on update_post_meta() writing coupon_amount
+		// before individual_use, which is the order they appear in its $meta_key_to_props
+		// map. Reordering that map changes which write re-enters, and these payloads with it.
 		$nested_save_done  = false;
 		$metadata_listener = function ( $meta_id, $object_id, $meta_key ) use ( $coupon, &$nested_save_done ) {
 			unset( $meta_id );
