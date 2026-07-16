@@ -19,6 +19,6 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:image {"width":"130px","sizeSlug":"full","linkDestination":"none","align":"center","style":{"spacing":{"margin":{"top":"var:preset|spacing|30"}}}} -->
-<figure class="wp-block-image aligncenter size-full is-resized" style="margin-top:var(--wp--preset--spacing--30)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-3.webp" alt="<?php esc_attr_e('Brand logo', 'purple');?>" style="width:130px;height:auto"/></figure>
+<figure class="wp-block-image aligncenter size-full is-resized" style="margin-top:var(--wp--preset--spacing--30)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-3.webp" alt="<?php esc_attr_e('Brand logo', 'purple');?>" style="width:130px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group -->

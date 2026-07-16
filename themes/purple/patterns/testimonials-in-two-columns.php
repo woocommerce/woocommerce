@@ -22,7 +22,7 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:image {"width":"163px","sizeSlug":"full","linkDestination":"none","align":"center","style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}}} -->
-<figure class="wp-block-image aligncenter size-full is-resized" style="margin-top:var(--wp--preset--spacing--50)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-1.webp" alt="<?php esc_attr_e( 'Brand logo', 'purple' ); ?>" style="width:163px;height:auto"/></figure>
+<figure class="wp-block-image aligncenter size-full is-resized" style="margin-top:var(--wp--preset--spacing--50)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-1.webp" alt="<?php esc_attr_e( 'Brand logo', 'purple' ); ?>" style="width:163px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 
@@ -32,7 +32,7 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:image {"width":"135px","sizeSlug":"full","linkDestination":"none","align":"center","style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}}} -->
-<figure class="wp-block-image aligncenter size-full is-resized" style="margin-top:var(--wp--preset--spacing--50)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-2.webp" alt="<?php esc_attr_e( 'Brand logo', 'purple' ); ?>" style="width:135px;height:auto"/></figure>
+<figure class="wp-block-image aligncenter size-full is-resized" style="margin-top:var(--wp--preset--spacing--50)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-2.webp" alt="<?php esc_attr_e( 'Brand logo', 'purple' ); ?>" style="width:135px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns --></div>

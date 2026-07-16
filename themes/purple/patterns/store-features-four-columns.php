@@ -18,7 +18,7 @@
 <div class="wp-block-columns are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center","width":"32px"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:32px"><!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-support.svg","width":"32px","sizeSlug":"full","linkDestination":"none","style":{"border":{"width":"1px","radius":{"topLeft":"999px","topRight":"999px","bottomLeft":"999px","bottomRight":"999px"}},"color":{"duotone":"var:preset|duotone|duotone-2"}},"borderColor":"theme-6"} -->
-<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-support.svg" alt="<?php esc_attr_e( 'Support icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px;height:auto"/></figure>
+<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-support.svg" alt="<?php esc_attr_e( 'Support icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->
@@ -42,7 +42,7 @@
 <div class="wp-block-columns are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center","width":"32px"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:32px"><!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-gift.svg","width":"32px","sizeSlug":"full","linkDestination":"none","style":{"border":{"width":"1px","radius":{"topLeft":"999px","topRight":"999px","bottomLeft":"999px","bottomRight":"999px"}},"color":{"duotone":"var:preset|duotone|duotone-2"}},"borderColor":"theme-6"} -->
-<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-gift.svg" alt="<?php esc_attr_e( 'Gift icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px;height:auto"/></figure>
+<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-gift.svg" alt="<?php esc_attr_e( 'Gift icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->
@@ -70,7 +70,7 @@
 <div class="wp-block-columns are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center","width":"32px"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:32px"><!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-return.svg","width":"32px","sizeSlug":"full","linkDestination":"none","style":{"border":{"width":"1px","radius":{"topLeft":"999px","topRight":"999px","bottomLeft":"999px","bottomRight":"999px"}},"color":{"duotone":"var:preset|duotone|duotone-2"}},"borderColor":"theme-6"} -->
-<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-return.svg" alt="<?php esc_attr_e( 'Return icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px;height:auto"/></figure>
+<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-return.svg" alt="<?php esc_attr_e( 'Return icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->
@@ -94,7 +94,7 @@
 <div class="wp-block-columns are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center","width":"32px"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:32px"><!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-repair.svg","width":"32px","sizeSlug":"full","linkDestination":"none","style":{"border":{"width":"1px","radius":{"topLeft":"999px","topRight":"999px","bottomLeft":"999px","bottomRight":"999px"}},"color":{"duotone":"var:preset|duotone|duotone-2"}},"borderColor":"theme-6"} -->
-<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-repair.svg" alt="<?php esc_attr_e( 'Repair icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px;height:auto"/></figure>
+<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-repair.svg" alt="<?php esc_attr_e( 'Repair icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->

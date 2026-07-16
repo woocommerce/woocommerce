@@ -17,7 +17,7 @@
 <div class="wp-block-column" style="flex-basis:50%"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group"><!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-pin.svg","width":"32px","sizeSlug":"full","linkDestination":"none","style":{"border":{"width":"1px","radius":{"topLeft":"999px","topRight":"999px","bottomLeft":"999px","bottomRight":"999px"}},"color":{"duotone":"var:preset|duotone|duotone-1"}},"borderColor":"theme-6"} -->
-<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-pin.svg" alt="<?php esc_attr_e( 'Pin icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px;height:auto"/></figure>
+<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-pin.svg" alt="<?php esc_attr_e( 'Pin icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group -->
 
@@ -31,7 +31,7 @@
 <div class="wp-block-column" style="flex-basis:50%"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group"><!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-gift.svg","width":"32px","sizeSlug":"full","linkDestination":"none","style":{"border":{"width":"1px","radius":{"topLeft":"999px","topRight":"999px","bottomLeft":"999px","bottomRight":"999px"}},"color":{"duotone":"var:preset|duotone|duotone-1"}},"borderColor":"theme-6"} -->
-<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-gift.svg" alt="<?php esc_attr_e( 'Gift icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px;height:auto"/></figure>
+<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-gift.svg" alt="<?php esc_attr_e( 'Gift icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group -->
 
@@ -49,7 +49,7 @@
 <div class="wp-block-column" style="flex-basis:50%"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group"><!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-return.svg","width":"32px","sizeSlug":"full","linkDestination":"none","style":{"border":{"width":"1px","radius":{"topLeft":"999px","topRight":"999px","bottomLeft":"999px","bottomRight":"999px"}},"color":{"duotone":"var:preset|duotone|duotone-1"}},"borderColor":"theme-6"} -->
-<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-return.svg" alt="<?php esc_attr_e( 'Return icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px;height:auto"/></figure>
+<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-return.svg" alt="<?php esc_attr_e( 'Return icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group -->
 
@@ -63,7 +63,7 @@
 <div class="wp-block-column" style="flex-basis:50%"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group"><!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-payment.svg","width":"32px","sizeSlug":"full","linkDestination":"none","style":{"border":{"width":"1px","radius":{"topLeft":"999px","topRight":"999px","bottomLeft":"999px","bottomRight":"999px"}},"color":{"duotone":"var:preset|duotone|duotone-1"}},"borderColor":"theme-6"} -->
-<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-payment.svg" alt="<?php esc_attr_e( 'Payment icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px;height:auto"/></figure>
+<figure class="wp-block-image size-full is-resized has-custom-border"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-payment.svg" alt="<?php esc_attr_e( 'Payment icon', 'purple' ); ?>" class="has-border-color has-theme-6-border-color" style="border-width:1px;border-top-left-radius:999px;border-top-right-radius:999px;border-bottom-left-radius:999px;border-bottom-right-radius:999px;width:32px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group -->
 

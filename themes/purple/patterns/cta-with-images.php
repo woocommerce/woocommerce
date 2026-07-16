@@ -13,13 +13,13 @@
 <div class="wp-block-group alignfull is-style-section-2" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--90);padding-bottom:var(--wp--preset--spacing--90)"><!-- wp:columns {"verticalAlignment":"center","isStackedOnMobile":false,"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|20","left":"var:preset|spacing|50"}}}} -->
 <div class="wp-block-columns alignwide are-vertically-aligned-center is-not-stacked-on-mobile"><!-- wp:column {"verticalAlignment":"center","width":"50%"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%"><!-- wp:image {"width":"227px","aspectRatio":"3/4","scale":"cover","focalPoint":{"x":0.77,"y":0.49},"sizeSlug":"full","linkDestination":"none","align":"center"} -->
-<figure class="wp-block-image aligncenter size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pink-sweater-woman.webp" alt="<?php esc_attr_e( 'Female model wearing a colourful knit sweater', 'purple' ); ?>" style="aspect-ratio:3/4;object-fit:cover;object-position:77% 49%;width:227px;height:auto"/></figure>
+<figure class="wp-block-image aligncenter size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pink-sweater-woman.webp" alt="<?php esc_attr_e( 'Female model wearing a colourful knit sweater', 'purple' ); ?>" style="aspect-ratio:3/4;object-fit:cover;object-position:77% 49%;width:227px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"verticalAlignment":"center","width":"50%"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%"><!-- wp:image {"width":"553px","aspectRatio":"1","scale":"cover","focalPoint":{"x":0.04,"y":0.57},"sizeSlug":"full","linkDestination":"none","align":"center"} -->
-<figure class="wp-block-image aligncenter size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/blue-sweater-man.webp" alt="<?php esc_attr_e( 'Male model wearing a colourful knit sweater', 'purple' ); ?>" style="aspect-ratio:1;object-fit:cover;object-position:4% 57%;width:553px;height:auto"/></figure>
+<figure class="wp-block-image aligncenter size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/blue-sweater-man.webp" alt="<?php esc_attr_e( 'Male model wearing a colourful knit sweater', 'purple' ); ?>" style="aspect-ratio:1;object-fit:cover;object-position:4% 57%;width:553px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
@@ -27,7 +27,7 @@
 <!-- wp:columns {"verticalAlignment":"center","align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|90"},"blockGap":{"top":"var:preset|spacing|20","left":"var:preset|spacing|50"}}}} -->
 <div class="wp-block-columns alignwide are-vertically-aligned-center" style="margin-top:var(--wp--preset--spacing--90)"><!-- wp:column {"verticalAlignment":"center","width":"50%"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:50%"><!-- wp:image {"width":"592px","aspectRatio":"4/3","scale":"cover","sizeSlug":"full","linkDestination":"none","align":"center"} -->
-<figure class="wp-block-image aligncenter size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/sweaters.webp" alt="<?php esc_attr_e( 'A close-up of a pile of folded knitwear', 'purple' ); ?>" style="aspect-ratio:4/3;object-fit:cover;width:592px;height:auto"/></figure>
+<figure class="wp-block-image aligncenter size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/sweaters.webp" alt="<?php esc_attr_e( 'A close-up of a pile of folded knitwear', 'purple' ); ?>" style="aspect-ratio:4/3;object-fit:cover;width:592px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 

@@ -27,7 +27,7 @@
 <!-- wp:group {"style":{"spacing":{"margin":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20"},"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"left","orientation":"vertical"}} -->
 <div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--20);margin-bottom:var(--wp--preset--spacing--20)"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top"}} -->
 <div class="wp-block-group"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.svg","width":"24px","sizeSlug":"full","linkDestination":"none","style":{"color":{"duotone":"var:preset|duotone|duotone-1"}}} -->
-<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.svg" alt="<?php esc_attr_e( 'Check icon', 'purple' ); ?>" style="width:24px;height:auto"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.svg" alt="<?php esc_attr_e( 'Check icon', 'purple' ); ?>" style="width:24px"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:paragraph -->
@@ -37,7 +37,7 @@
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top"}} -->
 <div class="wp-block-group"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.svg","width":"24px","sizeSlug":"full","linkDestination":"none","style":{"color":{"duotone":"var:preset|duotone|duotone-1"}}} -->
-<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.svg" alt="<?php esc_attr_e( 'Check icon', 'purple' ); ?>" style="width:24px;height:auto"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.svg" alt="<?php esc_attr_e( 'Check icon', 'purple' ); ?>" style="width:24px"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:paragraph -->
@@ -47,7 +47,7 @@
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top"}} -->
 <div class="wp-block-group"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.svg","width":"24px","sizeSlug":"full","linkDestination":"none","style":{"color":{"duotone":"var:preset|duotone|duotone-1"}}} -->
-<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.svg" alt="<?php esc_attr_e( 'Check icon', 'purple' ); ?>" style="width:24px;height:auto"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-check.svg" alt="<?php esc_attr_e( 'Check icon', 'purple' ); ?>" style="width:24px"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:paragraph -->
