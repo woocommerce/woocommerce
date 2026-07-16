@@ -19,6 +19,14 @@ jobs:
       pull-requests: write
 
     steps:
+      - name: 'Checkout'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # Fork PRs need the explicit ref. Without it, under pull_request_target checkout
+          # defaults its commit to github.sha, which for a merged fork PR is the merge commit
+          # that actions/checkout refuses to check out due to its "pwn request" guard.
+          ref: ${{ github.event.pull_request.base.ref }}
+
       - name: 'Analyze Pull Request'
         id: analyze
         uses: anthropics/claude-code-action@e90deca47693f9457b72f2b53c17d7c445a87342 # v1.0.171
