@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+WC_Order_Item_Product::set_product() now resets variation_id to 0 when passed a non-variation product, so reassigning a line item's product no longer leaves a stale variation ID that made get_product() return the previous variation.
