@@ -380,6 +380,207 @@ describe( 'createMutationQueue', () => {
 		} );
 	} );
 
+	describe( 'onCycleSettled callback', () => {
+		it( 'is invoked exactly once per cycle, synchronously while isProcessing is still true', async () => {
+			const mockFetch = createMockFetch( [
+				{ status: 200, body: { value: 1 } },
+				{ status: 200, body: { value: 2 } },
+			] );
+			global.fetch = mockFetch;
+
+			let isProcessingDuringCycleSettled: boolean | undefined;
+			const onCycleSettled = jest.fn();
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+				onCycleSettled: ( settled ) => {
+					isProcessingDuringCycleSettled =
+						queue.getStatus().isProcessing;
+					onCycleSettled( settled );
+				},
+			} );
+
+			await Promise.all( [
+				queue.submit( { path: '/a', method: 'POST' } ),
+				queue.submit( { path: '/b', method: 'POST' } ),
+			] );
+
+			expect( onCycleSettled ).toHaveBeenCalledTimes( 1 );
+			expect( isProcessingDuringCycleSettled ).toBe( true );
+			expect( queue.getStatus().isProcessing ).toBe( false );
+		} );
+
+		it( 'is invoked for a cycle in which every request failed, with all entries success: false', async () => {
+			const mockFetch = createMockFetch( [
+				{ status: 400, body: { message: 'Error 1' } },
+				{ status: 500, body: { message: 'Error 2' } },
+			] );
+			global.fetch = mockFetch;
+
+			const onCycleSettled = jest.fn();
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+				onCycleSettled,
+			} );
+
+			const p1 = queue.submit( { path: '/a', method: 'POST' } );
+			const p2 = queue.submit( { path: '/b', method: 'POST' } );
+
+			await expect( p1 ).rejects.toThrow();
+			await expect( p2 ).rejects.toThrow();
+
+			expect( onCycleSettled ).toHaveBeenCalledTimes( 1 );
+			expect( onCycleSettled ).toHaveBeenCalledWith( [
+				{ success: false, meta: undefined },
+				{ success: false, meta: undefined },
+			] );
+		} );
+
+		it( 'provides one entry per submitted request, in submission order, with per-item success and meta', async () => {
+			const mockFetch = createMockFetch( [
+				{ status: 200, body: { value: 1 } },
+				{ status: 400, body: { message: 'Bad request' } },
+				{ status: 200, body: { value: 2 } },
+			] );
+			global.fetch = mockFetch;
+
+			const onCycleSettled = jest.fn();
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+				onCycleSettled,
+			} );
+
+			const p1 = queue.submit( {
+				path: '/a',
+				method: 'POST',
+				meta: { origin: 'a' },
+			} );
+			const p2 = queue.submit( {
+				path: '/b',
+				method: 'POST',
+				meta: { origin: 'b' },
+			} );
+			const p3 = queue.submit( {
+				path: '/c',
+				method: 'POST',
+				meta: { origin: 'c' },
+			} );
+
+			await Promise.allSettled( [ p1, p2, p3 ] );
+
+			expect( onCycleSettled ).toHaveBeenCalledWith( [
+				{ success: true, meta: { origin: 'a' } },
+				{ success: false, meta: { origin: 'b' } },
+				{ success: true, meta: { origin: 'c' } },
+			] );
+		} );
+
+		it( 'carries the exact meta value through to onCycleSettled without cloning', async () => {
+			const mockFetch = createMockFetch( [
+				{ status: 200, body: { value: 1 } },
+			] );
+			global.fetch = mockFetch;
+
+			let receivedMeta: unknown;
+			const onCycleSettled = jest.fn(
+				( settled: Array< { success: boolean; meta?: unknown } > ) => {
+					receivedMeta = settled[ 0 ].meta;
+				}
+			);
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+				onCycleSettled,
+			} );
+
+			const meta = { origin: 'cart-item-add', nested: { id: 1 } };
+
+			await queue.submit( { path: '/a', method: 'POST', meta } );
+
+			expect( receivedMeta ).toBe( meta );
+		} );
+
+		it( 'catches and logs a throwing onCycleSettled without affecting reconciliation or request outcomes', async () => {
+			const mockFetch = createMockFetch( [
+				{ status: 200, body: { value: 1 } },
+				{ status: 400, body: { message: 'Bad request' } },
+			] );
+			global.fetch = mockFetch;
+
+			const consoleErrorSpy = jest
+				.spyOn( console, 'error' )
+				.mockImplementation( () => {} );
+
+			const onCycleSettled = jest.fn( () => {
+				throw new Error( 'boom' );
+			} );
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+				onCycleSettled,
+			} );
+
+			const p1 = queue.submit( { path: '/a', method: 'POST' } );
+			const p2 = queue.submit( { path: '/b', method: 'POST' } );
+
+			await expect( p1 ).resolves.toMatchObject( { success: true } );
+			await expect( p2 ).rejects.toThrow( 'Bad request' );
+
+			expect( onCycleSettled ).toHaveBeenCalledTimes( 1 );
+			expect( consoleErrorSpy ).toHaveBeenCalledTimes( 1 );
+			expect( mockFetch ).toHaveBeenCalledTimes( 1 );
+			expect( queue.getStatus().isProcessing ).toBe( false );
+
+			consoleErrorSpy.mockRestore();
+		} );
+
+		it( 'does not affect the pre-existing per-request onSettled behavior when both hooks are configured', async () => {
+			const serverState = { value: 42 };
+			const mockFetch = createMockFetch( [
+				{ status: 200, body: serverState },
+			] );
+			global.fetch = mockFetch;
+
+			const onCycleSettled = jest.fn();
+			let settledResult:
+				| { success: boolean; data?: TestState }
+				| undefined;
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+				onCycleSettled,
+			} );
+
+			await queue.submit( {
+				path: '/a',
+				method: 'POST',
+				onSettled: ( result ) => {
+					settledResult = result;
+				},
+			} );
+
+			expect( settledResult ).toEqual( {
+				success: true,
+				data: serverState,
+			} );
+			expect( onCycleSettled ).toHaveBeenCalledTimes( 1 );
+		} );
+	} );
+
 	describe( 'single batch in-flight', () => {
 		it( 'only allows one batch in-flight at a time to prevent server race conditions', async () => {
 			// This test verifies that we don't send multiple batches concurrently,
