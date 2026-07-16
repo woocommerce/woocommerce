@@ -416,7 +416,7 @@ class ProductCollectionPage {
 			| 'Keyword'
 			| 'Show product categories'
 			| 'Show product tags'
-			| 'Show Brands'
+			| 'Show Product Brands'
 			| 'Show Product Attributes'
 			| 'Featured'
 			| 'Created'
