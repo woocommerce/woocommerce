@@ -149,15 +149,18 @@ export interface LintJobConfig extends BaseJobConfig {
 	type: JobType.Lint;
 
 	/**
-	 * A list of dependencies that, when changed, should trigger this lint job.
+	 * A list of dependencies that, when changed, should additionally trigger
+	 * this lint job.
 	 *
-	 * Unlike test jobs, lint jobs do not run on arbitrary dependency changes by
-	 * default. Listing dependencies here opts the job into the dependency
-	 * cascade for those specific dependencies only — useful when a workspace
+	 * This is additive, and the inverse of a test job's `onlyForDependencies`:
+	 * test jobs cascade on any dependency change and `onlyForDependencies`
+	 * narrows that, whereas lint jobs do not cascade by default and
+	 * `alsoForDependencies` extends them to run on the listed dependencies too
+	 * (in addition to the job's own file changes). Useful when a workspace
 	 * dependency (for example `@woocommerce/eslint-plugin`) can change whether
 	 * the project's source passes linting.
 	 */
-	onlyForDependencies?: string[];
+	alsoForDependencies?: string[];
 }
 
 /**
@@ -232,17 +235,17 @@ function parseBaseJobConfig( raw: any ): BaseJobConfig {
 function parseLintJobConfig( raw: any ): LintJobConfig {
 	const baseJob = parseBaseJobConfig( raw );
 
-	if ( raw.onlyForDependencies !== undefined ) {
-		if ( ! Array.isArray( raw.onlyForDependencies ) ) {
+	if ( raw.alsoForDependencies !== undefined ) {
+		if ( ! Array.isArray( raw.alsoForDependencies ) ) {
 			throw new ConfigError(
-				'onlyForDependencies configuration must be an array of strings.'
+				'alsoForDependencies configuration must be an array of strings.'
 			);
 		}
 
-		for ( const entry of raw.onlyForDependencies ) {
+		for ( const entry of raw.alsoForDependencies ) {
 			if ( typeof entry !== 'string' ) {
 				throw new ConfigError(
-					'onlyForDependencies configuration must be an array of strings.'
+					'alsoForDependencies configuration must be an array of strings.'
 				);
 			}
 		}
@@ -251,7 +254,7 @@ function parseLintJobConfig( raw: any ): LintJobConfig {
 	return {
 		...baseJob,
 		type: JobType.Lint,
-		onlyForDependencies: raw.onlyForDependencies,
+		alsoForDependencies: raw.alsoForDependencies,
 	};
 }
 

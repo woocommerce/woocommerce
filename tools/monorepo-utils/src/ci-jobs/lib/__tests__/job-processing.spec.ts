@@ -1022,7 +1022,7 @@ describe( 'Job Processing', () => {
 								changes: [ /test.js$/ ],
 								command: 'test-lint',
 								events: [],
-								onlyForDependencies: [ 'test-a' ],
+								alsoForDependencies: [ 'test-a' ],
 							},
 						],
 					},
@@ -1064,7 +1064,7 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
-		it( 'should not trigger a dependent lint job without onlyForDependencies', async () => {
+		it( 'should not trigger a dependent lint job without alsoForDependencies', async () => {
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',

@@ -116,7 +116,7 @@ describe( 'Config', () => {
 			} );
 		} );
 
-		it( 'should parse lint config with onlyForDependencies', () => {
+		it( 'should parse lint config with alsoForDependencies', () => {
 			const parsed = parseCIConfig( {
 				name: 'foo',
 				config: {
@@ -124,7 +124,7 @@ describe( 'Config', () => {
 						lint: {
 							changes: '/src/**/*.{js,jsx,ts,tsx}',
 							command: 'foo',
-							onlyForDependencies: [ 'bar' ],
+							alsoForDependencies: [ 'bar' ],
 						},
 					},
 				},
@@ -135,13 +135,13 @@ describe( 'Config', () => {
 					{
 						type: JobType.Lint,
 						command: 'foo',
-						onlyForDependencies: [ 'bar' ],
+						alsoForDependencies: [ 'bar' ],
 					},
 				],
 			} );
 		} );
 
-		it( 'should validate lint onlyForDependencies is an array of strings', () => {
+		it( 'should validate lint alsoForDependencies is an array of strings', () => {
 			const expectation = () => {
 				parseCIConfig( {
 					name: 'foo',
@@ -150,7 +150,7 @@ describe( 'Config', () => {
 							lint: {
 								changes: '/src/**/*.{js,jsx,ts,tsx}',
 								command: 'foo',
-								onlyForDependencies: 'bar',
+								alsoForDependencies: 'bar',
 							},
 						},
 					},
@@ -159,7 +159,7 @@ describe( 'Config', () => {
 			expect( expectation ).toThrow();
 		} );
 
-		it( 'should reject a falsy non-array lint onlyForDependencies', () => {
+		it( 'should reject a falsy non-array lint alsoForDependencies', () => {
 			const expectation = () => {
 				parseCIConfig( {
 					name: 'foo',
@@ -168,7 +168,7 @@ describe( 'Config', () => {
 							lint: {
 								changes: '/src/**/*.{js,jsx,ts,tsx}',
 								command: 'foo',
-								onlyForDependencies: null,
+								alsoForDependencies: null,
 							},
 						},
 					},
