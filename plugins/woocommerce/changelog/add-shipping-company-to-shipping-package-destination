@@ -1,4 +1,4 @@
 Significance: minor
-Type: update
+Type: add
 
-Include the customer shipping company in the destination array of cart shipping packages.
+Include the customer shipping company in the destination array of cart shipping packages for shipping methods to use; the rendered cart destination text is unchanged.

@@ -266,7 +266,8 @@ function wc_cart_totals_shipping_html() {
 				'package_name'             => $package['package_name'],
 				'index'                    => $i,
 				'chosen_method'            => $chosen_method,
-				'formatted_destination'    => WC()->countries->get_formatted_address( $package['destination'], ', ' ),
+				// The destination's company name is provided for shipping methods and is excluded from the rendered destination text.
+				'formatted_destination'    => WC()->countries->get_formatted_address( array_diff_key( $package['destination'], array( 'company' => '' ) ), ', ' ),
 				'has_calculated_shipping'  => WC()->customer->has_calculated_shipping(),
 			)
 		);
