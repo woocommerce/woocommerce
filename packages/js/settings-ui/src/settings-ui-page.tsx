@@ -108,11 +108,12 @@ const BADGE_INTENTS: Record<
 };
 
 // TS unions erase at runtime, so guard against unexpected strings from
-// PHP-supplied schemas.
+// PHP-supplied schemas. Own-property check: `in` would accept
+// Object.prototype keys such as "constructor".
 const getBadgeIntent = (
 	intent?: string
 ): ComponentProps< typeof Badge >[ 'intent' ] =>
-	intent && intent in BADGE_INTENTS
+	intent && Object.prototype.hasOwnProperty.call( BADGE_INTENTS, intent )
 		? BADGE_INTENTS[ intent as SettingsUIShellBadgeIntent ]
 		: BADGE_INTENTS.default;
 
