@@ -361,8 +361,7 @@ async function createJobsForProject(
 				// affect its result (e.g. a shared ESLint config) changes.
 				if (
 					dependenciesWithChanges.length > 0 &&
-					jobConfig.onlyForDependencies &&
-					jobConfig.onlyForDependencies.some( ( dep ) =>
+					jobConfig.onlyForDependencies?.some( ( dep ) =>
 						dependenciesWithChanges.includes( dep )
 					)
 				) {

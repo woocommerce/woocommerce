@@ -159,6 +159,24 @@ describe( 'Config', () => {
 			expect( expectation ).toThrow();
 		} );
 
+		it( 'should reject a falsy non-array lint onlyForDependencies', () => {
+			const expectation = () => {
+				parseCIConfig( {
+					name: 'foo',
+					config: {
+						ci: {
+							lint: {
+								changes: '/src/**/*.{js,jsx,ts,tsx}',
+								command: 'foo',
+								onlyForDependencies: null,
+							},
+						},
+					},
+				} );
+			};
+			expect( expectation ).toThrow();
+		} );
+
 		it( 'should parse test config', () => {
 			const parsed = parseCIConfig( {
 				name: 'foo',

@@ -232,7 +232,7 @@ function parseBaseJobConfig( raw: any ): BaseJobConfig {
 function parseLintJobConfig( raw: any ): LintJobConfig {
 	const baseJob = parseBaseJobConfig( raw );
 
-	if ( raw.onlyForDependencies ) {
+	if ( raw.onlyForDependencies !== undefined ) {
 		if ( ! Array.isArray( raw.onlyForDependencies ) ) {
 			throw new ConfigError(
 				'onlyForDependencies configuration must be an array of strings.'
@@ -405,7 +405,7 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		testType = raw.testType.toLowerCase();
 	}
 
-	if ( raw.onlyForDependencies ) {
+	if ( raw.onlyForDependencies !== undefined ) {
 		if ( ! Array.isArray( raw.onlyForDependencies ) ) {
 			throw new ConfigError(
 				'onlyForDependencies configuration must be an array of strings.'
