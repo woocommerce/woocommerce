@@ -11665,36 +11665,6 @@ parameters:
 			path: includes/class-wc-form-handler.php
 
 		-
-			message: '#^Cannot access property \$ID on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot access property \$first_name on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot access property \$last_name on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot access property \$user_email on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot access property \$user_pass on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
 			message: '#^Cannot call method get_billing_city\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 2
@@ -51118,12 +51088,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCartContents.php
 
 		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartContents.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartFooterBlock\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -52438,20 +52402,8 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilters.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGallery.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGallery\:\:render_dialog\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGallery.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGallery\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductGallery.php
 

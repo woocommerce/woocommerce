@@ -4002,6 +4002,13 @@ mark.notice {
 	margin: 0 0 0 10px;
 }
 
+// Mirrors the WP core rule for #lost-connection-notice.
+#wc-lost-connection-notice .spinner {
+	visibility: visible;
+	float: left;
+	margin: 0 5px 0 0;
+}
+
 a.export_rates,
 a.import_rates {
 	float: right;
@@ -7696,6 +7703,16 @@ table.bar_chart {
 		font-size: 13px;
 		font-weight: 400;
 		max-width: 500px;
+
+		// Sizes icon-font glyphs supplied by extension blank states to
+		// match the core mask icons below.
+		&::before {
+			display: block;
+			font-size: 32px;
+			line-height: 1;
+			margin: 0 auto 12px;
+			color: $gray-400;
+		}
 	}
 
 	.woocommerce-BlankState-buttons {

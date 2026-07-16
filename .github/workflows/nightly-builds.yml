@@ -4,8 +4,11 @@ on:
     - cron: '0 0 * * *' # Run at 12 AM UTC.
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
   SOURCE_REF: trunk
   TARGET_REF: nightly
   RELEASE_ID: 25945111
@@ -54,15 +57,13 @@ jobs:
         run: bash bin/build-zip.sh
 
       - name: 'Upload nightly build'
-        uses: 'WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b' #v3.2.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
-          release_id: ${{ env.RELEASE_ID }}
-          asset_path: plugins/woocommerce/woocommerce.zip
-          asset_name: woocommerce-${{ env.SOURCE_REF }}-nightly.zip
-          asset_content_type: application/zip
-          max_releases: 1
+        working-directory: plugins/woocommerce
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          asset_name="woocommerce-${SOURCE_REF}-nightly.zip"
+          cp woocommerce.zip "$asset_name"
+          gh release upload "$TARGET_REF" "$asset_name" --clobber --repo "$GITHUB_REPOSITORY"
 
       - name: 'Update nightly release notes'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+De-flake blocks e2e tests.

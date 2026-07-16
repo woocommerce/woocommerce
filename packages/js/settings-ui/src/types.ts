@@ -74,9 +74,9 @@ export type SettingsUIShellNavigationItem = {
 
 /**
  * Visual intent for a shell header badge. Mirrors common web semantic
- * conventions and maps to the `wc-settings-ui-shell__badge--<intent>`
- * CSS modifiers. Intent conveys color only — the `label` text must
- * carry the actual meaning for screen-reader and color-blind users.
+ * conventions and maps to the design system Badge intents. Intent conveys
+ * color only; the `label` text must carry the actual meaning for
+ * screen-reader and color-blind users.
  */
 export type SettingsUIShellBadgeIntent =
 	| 'default'
@@ -91,6 +91,11 @@ export type SettingsUIShellBadge = {
 };
 
 export type SettingsUIShell = {
+	/**
+	 * Header visibility: drill-down pages show it, top-level pages hide it
+	 * and save from the bottom of the page. Defaults to 'hidden'.
+	 */
+	header?: 'visible' | 'hidden';
 	title?: string;
 	subtitle?: string;
 	breadcrumbs?: SettingsUIShellBreadcrumb[];
