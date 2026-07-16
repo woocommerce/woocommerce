@@ -524,11 +524,8 @@ class Endpoint {
 	 * Render the Review Order page body for the WC-managed page.
 	 *
 	 * Called by `the_content` on the page that hosts `[woocommerce_review_order]`.
-	 * `review-order` is registered as a public query var, so `?review-order={id}`
-	 * resolves on *any* post or page that embeds the shortcode, not only the
-	 * WC-managed one — `gate_request()` only gates the canonical page. Running
-	 * `is_authorised()` here too means the shortcode stays safe even if it ends
-	 * up embedded elsewhere (e.g. a lower-privileged author's own page).
+	 * Verifies the request independently rather than assuming the caller
+	 * already did so.
 	 *
 	 * @return string
 	 */
