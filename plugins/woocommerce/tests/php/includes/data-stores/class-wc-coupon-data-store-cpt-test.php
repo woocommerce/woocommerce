@@ -215,4 +215,58 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'A nested metadata-hook save must not erase or contaminate the outer save\'s props.'
 		);
 	}
+
+	/**
+	 * @testdox Should leave the outer save's props in the data store after a listener triggers a nested save.
+	 */
+	public function test_updated_props_property_settles_on_the_outermost_save(): void {
+		$store = new class() extends WC_Coupon_Data_Store_CPT {
+			/**
+			 * Expose the protected updated-props state, which subclasses may read.
+			 *
+			 * @return array
+			 */
+			public function get_updated_props(): array {
+				return $this->updated_props;
+			}
+		};
+
+		// Returning an object shares one store instance across every coupon in this test.
+		$store_filter = function () use ( $store ) {
+			return $store;
+		};
+		add_filter( 'woocommerce_coupon_data_store', $store_filter );
+
+		try {
+			$coupon = $this->create_settled_coupon();
+
+			$nested_save_done = false;
+			add_action(
+				'woocommerce_coupon_object_updated_props',
+				function ( $listener_coupon ) use ( &$nested_save_done ) {
+					if ( $nested_save_done ) {
+						return;
+					}
+					$nested_save_done = true;
+
+					$listener_coupon->set_usage_limit( 3 );
+					$listener_coupon->save();
+				},
+				20,
+				2
+			);
+
+			$coupon->set_amount( 5 );
+			$coupon->save();
+		} finally {
+			remove_filter( 'woocommerce_coupon_data_store', $store_filter );
+		}
+
+		$this->assertTrue( $nested_save_done, 'The nested save must have run for this test to be meaningful.' );
+		$this->assertSame(
+			array( 'amount' ),
+			$store->get_updated_props(),
+			'The nested save completes before the outer one, so the outer save must restore its own props afterwards.'
+		);
+	}
 }
