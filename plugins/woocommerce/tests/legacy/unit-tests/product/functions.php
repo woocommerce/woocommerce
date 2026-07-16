@@ -1032,6 +1032,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$filter                     = function () use ( $placeholder_src ) {
 			return $placeholder_src;
 		};
+		$passthrough_filter         = function ( $src ) {
+			return $src;
+		};
 
 		wp_update_attachment_metadata(
 			$placeholder_image_id,
@@ -1049,8 +1052,25 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 			$this->assertStringContainsString( 'src="' . $placeholder_src . '"', $image_html );
 			$this->assertStringNotContainsString( 'srcset=', $image_html );
+
+			remove_filter( 'woocommerce_placeholder_img_src', $filter );
+			add_filter( 'woocommerce_placeholder_img_src', $passthrough_filter );
+
+			$this->assertSame(
+				wp_get_attachment_image(
+					$placeholder_image_id,
+					'woocommerce_thumbnail',
+					false,
+					array(
+						'class' => 'woocommerce-placeholder wp-post-image',
+						'alt'   => __( 'Placeholder', 'woocommerce' ),
+					)
+				),
+				wc_placeholder_img()
+			);
 		} finally {
 			remove_filter( 'woocommerce_placeholder_img_src', $filter );
+			remove_filter( 'woocommerce_placeholder_img_src', $passthrough_filter );
 			wp_delete_attachment( $placeholder_image_id, true );
 
 			if ( false === $original_placeholder_image ) {
