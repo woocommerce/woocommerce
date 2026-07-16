@@ -1,32 +1,31 @@
 /**
  * External dependencies
  */
+import { globalIgnores } from 'eslint/config';
 import globals from 'globals';
 
 export default [
-	{
-		ignores: [
-			'**/*.min.js',
-			'js/accounting/**',
-			'js/flexslider/**',
-			'js/jquery-blockui/**',
-			'js/jquery-cookie/**',
-			'js/jquery-flot/**',
-			'js/jquery-payment/**',
-			'js/jquery-qrcode/**',
-			'js/jquery-serializejson/**',
-			'js/jquery-tiptip/**',
-			'js/jquery-ui-touch-punch/**',
-			'js/js-cookie/**',
-			'js/photoswipe/**',
-			'js/prettyPhoto/**',
-			'js/round/**',
-			'js/select2/**',
-			'js/selectWoo/**',
-			'js/stupidtable/**',
-			'js/zoom/**',
-		],
-	},
+	globalIgnores( [
+		'**/*.min.js',
+		'js/accounting/**',
+		'js/flexslider/**',
+		'js/jquery-blockui/**',
+		'js/jquery-cookie/**',
+		'js/jquery-flot/**',
+		'js/jquery-payment/**',
+		'js/jquery-qrcode/**',
+		'js/jquery-serializejson/**',
+		'js/jquery-tiptip/**',
+		'js/jquery-ui-touch-punch/**',
+		'js/js-cookie/**',
+		'js/photoswipe/**',
+		'js/prettyPhoto/**',
+		'js/round/**',
+		'js/select2/**',
+		'js/selectWoo/**',
+		'js/stupidtable/**',
+		'js/zoom/**',
+	] ),
 	{
 		files: [ 'js/**/*.js' ],
 		languageOptions: {

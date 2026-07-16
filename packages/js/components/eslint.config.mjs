@@ -1,13 +1,16 @@
 /**
+ * External dependencies
+ */
+import { globalIgnores } from 'eslint/config';
+
+/**
  * Internal dependencies
  */
 import woocommerce from '@woocommerce/eslint-config';
 
 export default [
 	...woocommerce,
-	{
-		ignores: [ '**/test/*.ts', '**/test/*.tsx' ],
-	},
+	globalIgnores( [ '**/test/*.ts', '**/test/*.tsx' ] ),
 	{
 		settings: {
 			'import/core-modules': [
@@ -34,11 +37,7 @@ export default [
 		},
 	},
 	{
-		files: [
-			'**/stories/*.js',
-			'**/stories/*.jsx',
-			'**/docs/example.js',
-		],
+		files: [ '**/stories/*.js', '**/stories/*.jsx', '**/docs/example.js' ],
 		rules: {
 			'import/no-unresolved': [
 				'warn',

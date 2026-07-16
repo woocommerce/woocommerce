@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { globalIgnores } from 'eslint/config';
 import globals from 'globals';
 
 /**
@@ -9,10 +10,13 @@ import globals from 'globals';
 import woocommerce from '@woocommerce/eslint-config';
 
 export default [
-	{
-		// node_modules is ignored by default.
-		ignores: [ '**/*.min.js', 'build/**', 'build-module/**', 'vendor/**' ],
-	},
+	// node_modules is ignored by default.
+	globalIgnores( [
+		'**/*.min.js',
+		'build/**',
+		'build-module/**',
+		'vendor/**',
+	] ),
 	...woocommerce,
 	{
 		languageOptions: {

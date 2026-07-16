@@ -1,25 +1,28 @@
 /**
+ * External dependencies
+ */
+import { globalIgnores } from 'eslint/config';
+
+/**
  * Internal dependencies
  */
 import woocommerce from '@woocommerce/eslint-config';
 
 export default [
-	{
-		// node_modules is ignored by default. `api` has its own config and command.
-		ignores: [
-			'bin/*',
-			'!bin/generate-docs',
-			'build',
-			'build-module',
-			'build-types',
-			'coverage',
-			'languages',
-			'vendor',
-			'legacy',
-			'tests/e2e',
-			'api',
-		],
-	},
+	// node_modules is ignored by default. `api` has its own config and command.
+	globalIgnores( [
+		'bin/*',
+		'!bin/generate-docs',
+		'build',
+		'build-module',
+		'build-types',
+		'coverage',
+		'languages',
+		'vendor',
+		'legacy',
+		'tests/e2e',
+		'api',
+	] ),
 	/*
 	 * The eslintrc registered the `import` plugin itself. It must not:
 	 * eslint-plugin-import has no ESLint v10 support, and the shared config
@@ -65,7 +68,9 @@ export default [
 				node: {},
 				webpack: {},
 				typescript: {
-					project: [ 'plugins/woocommerce/client/admin/tsconfig.json' ],
+					project: [
+						'plugins/woocommerce/client/admin/tsconfig.json',
+					],
 				},
 			},
 		},

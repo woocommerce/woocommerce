@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { globalIgnores } from 'eslint/config';
 import globals from 'globals';
 import storybook from 'eslint-plugin-storybook';
 import youDontNeedLodashUnderscore from 'eslint-plugin-you-dont-need-lodash-underscore';
@@ -179,22 +180,20 @@ const TEST_FILES = [
 ];
 
 export default [
-	{
-		// node_modules is ignored by default.
-		ignores: [
-			'build',
-			'build-module',
-			'coverage',
-			'languages',
-			'vendor',
-			'legacy',
-			'reports',
-			'storybook/dist',
-			'assets/js/interactivity',
-			'tests/e2e-jest/specs/backend/__fixtures__',
-			'tests/e2e-jest/specs/backend/__snapshots__',
-		],
-	},
+	// node_modules is ignored by default.
+	globalIgnores( [
+		'build',
+		'build-module',
+		'coverage',
+		'languages',
+		'vendor',
+		'legacy',
+		'reports',
+		'storybook/dist',
+		'assets/js/interactivity',
+		'tests/e2e-jest/specs/backend/__fixtures__',
+		'tests/e2e-jest/specs/backend/__snapshots__',
+	] ),
 	/*
 	 * The shared config already registers the jest, @typescript-eslint and
 	 * fixupPluginRules-wrapped `import` plugins, and applies the TypeScript
