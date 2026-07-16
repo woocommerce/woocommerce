@@ -10,6 +10,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -365,7 +366,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				set_transient( $transient_name, (int) $lowinstock_count, DAY_IN_SECONDS * 30 );
 			}
 
-			$transient_name   = 'wc_outofstock_count';
+			$transient_name   = ProductUtil::OUTOFSTOCK_COUNT_TRANSIENT;
 			$outofstock_count = get_transient( $transient_name );
 			$lowstock_url     = $lowstock_link ? admin_url( $lowstock_link ) : '#';
 			$outofstock_url   = $outofstock_link ? admin_url( $outofstock_link ) : '#';
