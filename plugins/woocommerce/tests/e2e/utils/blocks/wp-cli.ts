@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { promisify } from 'util';
-import { exec } from 'child_process';
+import { exec, execFile } from 'child_process';
 
 const execPromisified = promisify( exec );
+const execFilePromisified = promisify( execFile );
 
 /**
  * Runs a WP-CLI command inside the single-container E2E environment's `cli`
@@ -14,6 +15,25 @@ export async function wpCLI( command: string ) {
 	return await execPromisified(
 		'npm run wp-env:e2e run cli -- wp ' + command
 	);
+}
+
+/**
+ * Resets the Blocks E2E database and imports its snapshot in one CLI-container
+ * invocation.
+ */
+export async function restoreBlocksDatabase( databaseFile: string ) {
+	return await execFilePromisified( 'npm', [
+		'run',
+		'wp-env:e2e',
+		'run',
+		'cli',
+		'--',
+		'sh',
+		'-c',
+		'wp db reset --yes && wp db import "$1"',
+		'restore-blocks-database',
+		databaseFile,
+	] );
 }
 
 /**

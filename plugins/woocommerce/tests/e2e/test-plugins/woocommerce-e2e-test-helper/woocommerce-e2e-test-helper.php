@@ -1,8 +1,130 @@
 <?php
+/**
+ * Plugin Name: WooCommerce E2E Test Helper
+ * Description: Always-on utilities for the WooCommerce E2E suite: cookie-driven filter overrides, synchronous Action Scheduler processing, and a REST API for feature flags, options, environment info and theme switching.
+ * Version: 1.0.0
+ * Requires PHP: 7.4
+ * Author: WooCommerce
+ *
+ * This bundles three previously separate helpers (filter-setter, process-waiting-actions and
+ * test-helper-apis). They share the same lifecycle — mounted and auto-activated for every E2E run
+ * via the .wp-env.e2e.json "plugins" array — so they live together here. Each concern is kept in its
+ * own section below and none of them touch the others.
+ *
+ * It hopefully goes without saying, none of this should ever run in a production environment.
+ *
+ * @package Automattic\WooCommerce\E2EPlaywright
+ */
+
+declare(strict_types=1);
+
+/*
+ * -----------------------------------------------------------------------------
+ * Filter setter
+ * -----------------------------------------------------------------------------
+ *
+ * Registers WordPress filters from an 'e2e-filters' cookie, so a spec can override filtered values on
+ * the fly. The cookie is a JSON map of hook => spec. For example (pretty printed here for clarity):
+ *
+ *     { "woocommerce_system_timeout": 10 }
+ *
+ * adds a filter returning 10 for 'woocommerce_system_timeout'. A spec may instead be an object naming
+ * a callback and/or a priority:
+ *
+ *     { "woocommerce_enable_deathray": { "callback": "__return_false", "priority": 20 } }
+ *
+ * or a literal value with a priority:
+ *
+ *     { "woocommerce_default_username": { "value": "Geoffrey", "priority": 20 } }
+ *
+ * Runs at plugin load so the filters are in place before anything reads them.
+ */
 
 /**
- * Plugin Name: Test Helper APIs
- * Description: Utility REST API designed for E2E testing purposes. Allows turning features on or off, and setting option values
+ * Read the `e2e-filters` cookie and register the filters it describes.
+ */
+function woocommerce_e2e_apply_cookie_filters(): void {
+	if ( ! isset( $_COOKIE['e2e-filters'] ) ) {
+		return;
+	}
+
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+	$filters = json_decode( $_COOKIE['e2e-filters'], true );
+
+	if ( ! is_array( $filters ) ) {
+		return;
+	}
+
+	foreach ( $filters as $hook => $spec ) {
+		// A priority may be specified as part of the spec, else use the default priority (10).
+		$priority = isset( $spec['priority'] ) && is_int( $spec['priority'] )
+			? $spec['priority']
+			: 10;
+
+		// If the spec is not an array, then it is probably intended as the literal value.
+		if ( ! is_array( $spec ) ) {
+			$value = $spec;
+		} elseif ( isset( $spec['value'] ) ) {
+			$value = $spec['value'];
+		}
+
+		// If we know the value, we can establish our filter callback.
+		if ( isset( $value ) ) {
+			$callback = function () use ( $value ) {
+				return $value;
+			};
+		}
+
+		// We also support specifying a callback function.
+		if ( is_array( $spec ) && isset( $spec['callback'] ) && is_string( $spec['callback'] ) ) {
+			$callback = $spec['callback'];
+		}
+
+		// Ensure we have a callback, then setup the filter.
+		if ( isset( $callback ) ) {
+			add_filter( $hook, $callback, $priority );
+		}
+	}
+}
+
+woocommerce_e2e_apply_cookie_filters();
+
+/*
+ * -----------------------------------------------------------------------------
+ * Process waiting actions
+ * -----------------------------------------------------------------------------
+ *
+ * Listens for requests carrying the 'process-waiting-actions' query parameter and starts an Action
+ * Scheduler queue runner, exiting immediately afterwards to avoid the overhead of a full response.
+ * Used by the analytics suite so scheduled order data lands in reports synchronously.
+ */
+add_action(
+	'init',
+	function () {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['process-waiting-actions'] ) ) {
+			return;
+		}
+
+		if ( ! class_exists( ActionScheduler_QueueRunner::class ) ) {
+			return;
+		}
+
+		exit( ActionScheduler_QueueRunner::instance()->run( 'E2E Tests' ) ? 1 : 0 );
+	}
+);
+
+/*
+ * -----------------------------------------------------------------------------
+ * Test helper REST API
+ * -----------------------------------------------------------------------------
+ *
+ * REST routes for toggling feature flags, setting/deleting options, reading environment info and
+ * switching themes during a test.
+ */
+
+/**
+ * Register the E2E test helper REST routes (feature flags and options).
  */
 function register_helper_api() {
 	register_rest_route(
@@ -122,7 +244,8 @@ add_filter( 'comment_flood_filter', '__return_false', 99 );
 
 /**
  * Update a WordPress option.
- * @param WP_REST_Request $request
+ *
+ * @param WP_REST_Request $request The REST request, carrying `option_name` and `option_value`.
  * @return WP_REST_Response
  */
 function api_update_option( WP_REST_Request $request ) {
@@ -145,11 +268,11 @@ function api_update_option( WP_REST_Request $request ) {
 /**
  * Delete a WordPress option.
  *
- * @param WP_REST_Request $request
+ * @param WP_REST_Request $request The REST request, carrying `option_name`.
  * @return WP_REST_Response
  */
 function api_delete_option( WP_REST_Request $request ) {
-	$option_name  = sanitize_text_field( $request['option_name'] );
+	$option_name = sanitize_text_field( $request['option_name'] );
 
 	$option_exists = get_option( $option_name, null );
 

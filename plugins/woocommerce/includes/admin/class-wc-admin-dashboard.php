@@ -9,6 +9,8 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -364,7 +366,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				set_transient( $transient_name, (int) $lowinstock_count, DAY_IN_SECONDS * 30 );
 			}
 
-			$transient_name   = 'wc_outofstock_count';
+			$transient_name   = ProductUtil::OUTOFSTOCK_COUNT_TRANSIENT;
 			$outofstock_count = get_transient( $transient_name );
 			$lowstock_url     = $lowstock_link ? admin_url( $lowstock_link ) : '#';
 			$outofstock_url   = $outofstock_link ? admin_url( $outofstock_link ) : '#';
@@ -380,14 +382,20 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				$outofstock_count = apply_filters( 'woocommerce_status_widget_out_of_stock_count_pre_query', null, $nostock );
 
 				if ( is_null( $outofstock_count ) ) {
+					// Count by the canonical, save-time-computed stock_status column (as the Analytics
+					// stock report does), rather than a live stock_quantity threshold. This also captures
+					// products with stock management disabled (a NULL stock_quantity never matched the old
+					// threshold query — see #29698). Note the trade-off: changing the
+					// woocommerce_notify_no_stock_amount option does not reclassify existing products'
+					// stock_status until each is re-saved, so this count reflects that same staleness.
 					$outofstock_count = (int) $wpdb->get_var(
 						$wpdb->prepare(
 							"SELECT COUNT( product_id )
 							FROM {$wpdb->wc_product_meta_lookup} AS lookup
 							INNER JOIN {$wpdb->posts} as posts ON lookup.product_id = posts.ID
-							WHERE stock_quantity <= %d
+							WHERE lookup.stock_status = %s
 							AND posts.post_status = 'publish'",
-							$nostock
+							ProductStockStatus::OUT_OF_STOCK
 						)
 					);
 				}

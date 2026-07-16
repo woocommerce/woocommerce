@@ -11,6 +11,19 @@ use Automattic\WooCommerce\Caches\ProductCountCache;
  */
 class ProductUtil {
 	/**
+	 * Transient name for the cached dashboard "out of stock" product count.
+	 *
+	 * Exposed as a constant so the one-time DB update that clears this transient
+	 * (wc_update_1110_delete_dashboard_outofstock_count_transient) stays in sync
+	 * with the runtime invalidation list below.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @var string
+	 */
+	public const OUTOFSTOCK_COUNT_TRANSIENT = 'wc_outofstock_count';
+
+	/**
 	 * Delete all product transients for a set of products.
 	 *
 	 * Fixed-name transients are deleted once for the whole set, and the
@@ -26,7 +39,7 @@ class ProductUtil {
 		$transients_to_clear = array(
 			'wc_products_onsale',
 			'wc_featured_products',
-			'wc_outofstock_count',
+			self::OUTOFSTOCK_COUNT_TRANSIENT,
 			'wc_low_stock_count',
 		);
 
