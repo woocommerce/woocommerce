@@ -217,7 +217,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_woocommerce_currency_symbol().
+	 * @testdox Should return the requested WooCommerce currency symbol.
 	 *
 	 * @since 2.2
 	 */
@@ -228,6 +228,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 		// Given specific currency.
 		$this->assertEquals( '&pound;', get_woocommerce_currency_symbol( 'GBP' ) );
+		$this->assertEquals( 'MOP&#36;', get_woocommerce_currency_symbol( 'MOP' ) );
 
 		// Each case.
 		foreach ( array_keys( get_woocommerce_currencies() ) as $currency_code ) {
