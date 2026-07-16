@@ -513,10 +513,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value     = $value['value'];
 						$disabled_values  = $value['disabled'] ?? array();
 						$show_desc_at_end = $value['desc_at_end'] ?? false;
+						$has_tooltip      = '' !== $tooltip_html;
 
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
-							<th scope="row" class="titledesc">
+							<th scope="row" class="titledesc <?php echo esc_attr( $has_tooltip ? 'with-tooltip' : '' ); ?>">
 								<?php echo esc_html( $value['title'] ); ?>
 								<?php
 								// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped

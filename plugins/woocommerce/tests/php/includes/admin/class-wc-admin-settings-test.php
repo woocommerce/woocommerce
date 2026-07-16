@@ -316,8 +316,14 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 			ob_end_clean();
 		}
 
-		$document = new DOMDocument();
-		$document->loadHTML( '<table>' . $output . '</table>' );
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<table>' . $output . '</table>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The radio setting output should be valid enough for DOM parsing.' );
+
 		$xpath = new DOMXPath( $document );
 
 		$header = '//th[contains(concat(" ", normalize-space(@class), " "), " titledesc ")]';
@@ -325,7 +331,7 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( 0, $xpath->query( $header . '/label[@for="test_radio_setting"]' )->length );
 		$this->assertSame( 1, $xpath->query( $header . '[contains(normalize-space(.), "Radio title")]' )->length );
-		$this->assertSame( 1, $xpath->query( $header . '//span[contains(concat(" ", normalize-space(@class), " "), " woocommerce-help-tip ")][@aria-label="Radio help"]' )->length );
+		$this->assertSame( 1, $xpath->query( $header . '[contains(concat(" ", normalize-space(@class), " "), " with-tooltip ")]/span[contains(concat(" ", normalize-space(@class), " "), " woocommerce-help-tip ")][@aria-label="Radio help"]' )->length );
 		$this->assertSame( 1, $xpath->query( $radio . '/fieldset/legend[contains(concat(" ", normalize-space(@class), " "), " screen-reader-text ")]/span[normalize-space(.)="Radio title"]' )->length );
 		$this->assertSame( 2, $xpath->query( $radio . '//input[@type="radio"]' )->length );
 	}
