@@ -856,7 +856,8 @@ class WC_Meta_Box_Order_Data {
 				if ( isset( $field['update_callback'] ) ) {
 					call_user_func( $field['update_callback'], $field['id'], $value, $order );
 				} elseif ( is_callable( array( $order, 'set_billing_' . $key ) ) ) {
-					// Validate the billing email to avoid an uncaught WC_Data_Exception on save. Empty is allowed as the field is optional.
+					// An invalid email makes set_billing_email() throw an uncaught WC_Data_Exception, causing a fatal error on save.
+					// Surface an admin notice and skip the value instead. An empty email is allowed as the field is optional.
 					if ( 'email' === $key && '' !== $value && ! is_email( $value ) ) {
 						WC_Admin_Meta_Boxes::add_error( __( 'Invalid billing email address.', 'woocommerce' ) );
 						continue;
