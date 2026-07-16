@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error when WooCommerce checks the current admin screen before the WordPress screen API is available.
