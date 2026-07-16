@@ -66,6 +66,29 @@ function throwProcessFailure( result ) {
 	}
 }
 
+function validateTestListFiles( plannedFiles, matchedFiles, shard ) {
+	const plannedFileSet = new Set( plannedFiles );
+	const matchedFileSet = new Set( matchedFiles );
+	const missingFiles = plannedFiles.filter(
+		( file ) => ! matchedFileSet.has( file )
+	);
+	const unexpectedFiles = matchedFiles.filter(
+		( file ) => ! plannedFileSet.has( file )
+	);
+
+	if ( missingFiles.length === 0 && unexpectedFiles.length === 0 ) {
+		return;
+	}
+
+	throw new Error(
+		`Playwright test list matched ${ matchedFiles.length } of ${
+			plannedFiles.length
+		} planned files for shard ${ shard.index }/${ shard.count }. Missing: ${
+			missingFiles.join( ', ' ) || 'none'
+		}. Unexpected: ${ unexpectedFiles.join( ', ' ) || 'none' }.`
+	);
+}
+
 function run(
 	cliArguments = process.argv.slice( 2 ),
 	spawn = spawnSync,
@@ -110,6 +133,16 @@ function run(
 		writeFileSync(
 			testListPath,
 			buildProjectTestList( BLOCKS_PROJECT, selectedShard.files )
+		);
+
+		const testListDiscovery = discoverBlocksFiles( spawn, testListPath );
+		if ( testListDiscovery.status !== 0 ) {
+			return testListDiscovery.status;
+		}
+		validateTestListFiles(
+			selectedShard.files,
+			testListDiscovery.files,
+			shard
 		);
 
 		const executionResult = spawn(

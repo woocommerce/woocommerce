@@ -12,7 +12,7 @@ const PLAYWRIGHT_BASE_ARGUMENTS = [
 	`--project=${ BLOCKS_PROJECT }`,
 ];
 
-function discoverBlocksFiles( spawn = spawnSync ) {
+function discoverBlocksFiles( spawn = spawnSync, testListPath ) {
 	const temporaryDirectory = mkdtempSync(
 		path.join( tmpdir(), 'wc-blocks-discovery-' )
 	);
@@ -27,6 +27,7 @@ function discoverBlocksFiles( spawn = spawnSync ) {
 			[
 				require.resolve( '@playwright/test/cli' ),
 				...PLAYWRIGHT_BASE_ARGUMENTS,
+				...( testListPath ? [ `--test-list=${ testListPath }` ] : [] ),
 				'--list',
 				'--reporter=json',
 			],

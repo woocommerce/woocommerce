@@ -125,24 +125,37 @@ describe( 'run', () => {
 	test( 'preserves the planner shard for a failed-test retry', () => {
 		const calls = [];
 		let selectedTestList;
-		let reportPath;
+		const reportPaths = [];
 		let testListPath;
 		const spawnHandlers = [
 			( arguments_, options ) => {
-				reportPath = options.env.PLAYWRIGHT_JSON_OUTPUT_FILE;
+				reportPaths.push( options.env.PLAYWRIGHT_JSON_OUTPUT_FILE );
 				writeFileSync(
-					reportPath,
+					reportPaths.at( -1 ),
 					JSON.stringify( playwrightReport( files ) )
 				);
 				return { status: 0 };
 			},
-			( arguments_ ) => {
+			( arguments_, options ) => {
 				testListPath = arguments_
 					.find( ( argument ) =>
 						argument.startsWith( '--test-list=' )
 					)
 					.slice( '--test-list='.length );
 				selectedTestList = readFileSync( testListPath, 'utf8' );
+				reportPaths.push( options.env.PLAYWRIGHT_JSON_OUTPUT_FILE );
+				writeFileSync(
+					reportPaths.at( -1 ),
+					JSON.stringify(
+						playwrightReport( [
+							'blocks/b.spec.ts',
+							'blocks/c.spec.ts',
+						] )
+					)
+				);
+				return { status: 0 };
+			},
+			() => {
 				return { status: 7 };
 			},
 		];
@@ -160,7 +173,7 @@ describe( 'run', () => {
 			),
 			7
 		);
-		assert.equal( calls.length, 2 );
+		assert.equal( calls.length, 3 );
 		assert.deepEqual( calls[ 0 ].arguments_.slice( 1 ), [
 			...baseArguments,
 			'--list',
@@ -178,6 +191,12 @@ describe( 'run', () => {
 		assert.deepEqual( calls[ 1 ].arguments_.slice( 1 ), [
 			...baseArguments,
 			`--test-list=${ testListPath }`,
+			'--list',
+			'--reporter=json',
+		] );
+		assert.deepEqual( calls[ 2 ].arguments_.slice( 1 ), [
+			...baseArguments,
+			`--test-list=${ testListPath }`,
 			'--last-failed',
 		] );
 		assert.equal(
@@ -185,7 +204,9 @@ describe( 'run', () => {
 			'[blocks-chromium] › blocks/b.spec.ts\n' +
 				'[blocks-chromium] › blocks/c.spec.ts\n'
 		);
-		assert.equal( existsSync( reportPath ), false );
+		for ( const reportPath of reportPaths ) {
+			assert.equal( existsSync( reportPath ), false );
+		}
 		assert.equal( existsSync( testListPath ), false );
 	} );
 
@@ -198,6 +219,42 @@ describe( 'run', () => {
 
 		assert.equal( run( [ '--shard=1/2' ], spawn, manifest ), 4 );
 		assert.equal( calls, 1 );
+	} );
+
+	test( 'rejects a test list that does not match every planned shard file', () => {
+		const calls = [];
+		const spawnHandlers = [
+			( arguments_, options ) => {
+				writeFileSync(
+					options.env.PLAYWRIGHT_JSON_OUTPUT_FILE,
+					JSON.stringify( playwrightReport( files ) )
+				);
+				return { status: 0 };
+			},
+			( arguments_, options ) => {
+				writeFileSync(
+					options.env.PLAYWRIGHT_JSON_OUTPUT_FILE,
+					JSON.stringify( playwrightReport( [ 'blocks/b.spec.ts' ] ) )
+				);
+				return { status: 0 };
+			},
+			() => {
+				throw new Error(
+					'Tests should not execute after a partial match'
+				);
+			},
+		];
+		const spawn = ( command, arguments_, options ) => {
+			const handler = spawnHandlers[ calls.length ];
+			calls.push( { command, arguments_, options } );
+			return handler( arguments_, options );
+		};
+
+		assert.throws(
+			() => run( [ '--shard=2/2' ], spawn, manifest ),
+			/Playwright test list matched 1 of 2 planned files for shard 2\/2/
+		);
+		assert.equal( calls.length, 2 );
 	} );
 
 	test( 'rejects malformed and empty Playwright inventories', () => {
