@@ -16,6 +16,68 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	private array $option_names_to_clean = array();
 
 	/**
+	 * @testdox Should resolve field values from the saved option name while preserving existing value precedence.
+	 *
+	 * @dataProvider output_fields_value_data
+	 *
+	 * @param string $option_name  Option name to store.
+	 * @param mixed  $option_value Stored option value.
+	 * @param array  $field        Field definition.
+	 * @param string $expected     Expected rendered field value.
+	 */
+	public function test_output_fields_resolves_field_values( string $option_name, $option_value, array $field, string $expected ): void {
+		$this->option_names_to_clean[] = $option_name;
+		update_option( $option_name, $option_value );
+
+		ob_start();
+		WC_Admin_Settings::output_fields( array( $field ) );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'value="' . esc_attr( $expected ) . '"', $output );
+	}
+
+	/**
+	 * Data provider for test_output_fields_resolves_field_values().
+	 *
+	 * @return array<string, array{string, mixed, array<string, mixed>, string}>
+	 */
+	public static function output_fields_value_data(): array {
+		return array(
+			'nested field name' => array(
+				'test_output_fields_nested',
+				array( 'enabled' => 'saved nested value' ),
+				array(
+					'id'         => 'test_output_fields_nested_enabled',
+					'field_name' => 'test_output_fields_nested[enabled]',
+					'type'       => 'text',
+					'default'    => 'default value',
+				),
+				'saved nested value',
+			),
+			'id fallback'       => array(
+				'test_output_fields_id',
+				'saved scalar value',
+				array(
+					'id'      => 'test_output_fields_id',
+					'type'    => 'text',
+					'default' => 'default value',
+				),
+				'saved scalar value',
+			),
+			'explicit value'    => array(
+				'test_output_fields_explicit',
+				'saved option value',
+				array(
+					'id'    => 'test_output_fields_explicit',
+					'type'  => 'text',
+					'value' => 'explicit field value',
+				),
+				'explicit field value',
+			),
+		);
+	}
+
+	/**
 	 * Clean up options after each test to ensure test isolation even on assertion failure.
 	 */
 	public function tearDown(): void {
