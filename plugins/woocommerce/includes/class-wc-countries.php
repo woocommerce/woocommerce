@@ -679,7 +679,9 @@ class WC_Countries {
 		}
 
 		// Handle full state name, including legacy codes preserved for historical addresses.
-		$full_state = ( $country && $state ) ? LegacyStateCodes::get_state_name( $country, $state ) : $state;
+		// This instance's states are passed explicitly: WC()->countries may not exist yet
+		// when an extension formats an address with its own WC_Countries instance.
+		$full_state = ( $country && $state ) ? LegacyStateCodes::get_state_name( $country, $state, $this->get_states( $country ) ) : $state;
 
 		// Substitute address parts into the string.
 		$replace = array_map(

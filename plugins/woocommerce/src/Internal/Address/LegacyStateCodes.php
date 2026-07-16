@@ -109,21 +109,25 @@ final class LegacyStateCodes {
 	/**
 	 * Resolve a current or legacy state code to its display name.
 	 *
-	 * @param string                     $country_code  Country code.
-	 * @param string                     $state_code    State code.
-	 * @param array<string, string>|null $current_states Current state names indexed by state code, or null to fetch them.
+	 * @param string                           $country_code  Country code.
+	 * @param string                           $state_code    State code.
+	 * @param array<string, string>|false|null $current_states Current state names indexed by state code, false when the
+	 *                                                         country has none, or null to fetch them from WC()->countries.
 	 * @return string State display name, or the original code when it is unknown.
 	 *
 	 * @since 11.1.0
 	 */
-	public static function get_state_name( string $country_code, string $state_code, ?array $current_states = null ): string {
+	public static function get_state_name( string $country_code, string $state_code, $current_states = null ): string {
 		if ( '' === $state_code ) {
 			return $state_code;
 		}
 
 		if ( null === $current_states ) {
-			$states         = WC()->countries->get_states( $country_code );
-			$current_states = is_array( $states ) ? $states : array();
+			$current_states = WC()->countries->get_states( $country_code );
+		}
+
+		if ( ! is_array( $current_states ) ) {
+			$current_states = array();
 		}
 
 		if ( isset( $current_states[ $state_code ] ) ) {
