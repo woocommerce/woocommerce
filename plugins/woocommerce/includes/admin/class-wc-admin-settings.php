@@ -520,7 +520,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<span class="wc-settings-radio-title">
 									<?php echo esc_html( $value['title'] ); ?>
 									<?php
-									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built by self::get_field_description(), which passes the tip through wc_help_tip(); that helper sanitizes the tip text and escapes the aria-label.
 									echo $tooltip_html;
 									?>
 								</span>
