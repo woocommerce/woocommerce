@@ -204,7 +204,7 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 	 * @since 11.0.0
 	 */
 	protected function record_frontend_event( string $event_name, array $properties ): void {
-		if ( $this->is_frontend_tracking_available() ) {
+		if ( ! $this->is_frontend_tracking_available() ) {
 			return;
 		}
 
