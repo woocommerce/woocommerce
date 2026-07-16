@@ -14,7 +14,6 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
-use Automattic\WooCommerce\Internal\ProductAttributes\ReservedAttributeNames;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
@@ -914,17 +913,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					$attributes[] = $attribute_object;
 				}
 			}
-			$blocked_attribute_names = ReservedAttributeNames::get_blocked_reserved_names( $attributes, $product );
-			if ( ! empty( $blocked_attribute_names ) ) {
-				return new WP_Error(
-					'woocommerce_rest_product_attribute_name_reserved',
-					sprintf(
-						/* translators: %s: comma-separated list of attribute names. */
-						__( 'The following attribute names are not allowed because they are reserved terms: %s. Please change them.', 'woocommerce' ),
-						implode( ', ', $blocked_attribute_names )
-					),
-					array( 'status' => 400 )
-				);
+			$reserved_names_error = $this->check_for_reserved_attribute_names( $attributes, $product );
+			if ( is_wp_error( $reserved_names_error ) ) {
+				return $reserved_names_error;
 			}
 			$product->set_attributes( $attributes );
 		}

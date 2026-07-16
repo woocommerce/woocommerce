@@ -324,7 +324,7 @@ function wc_get_attribute_type_label( $type ) {
  * the variation data read back via ArrayAccess.
  *
  * @since  2.4.0
- * @since  11.0.0 Added the `$attribute_type` parameter.
+ * @since  11.1.0 Added the `$attribute_type` parameter.
  * @param  string $attribute_name Attribute name (the slug, already sanitized).
  * @param  string $attribute_type Attribute type, either 'global' (default) or 'custom'.
  * @return bool

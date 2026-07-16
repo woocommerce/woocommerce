@@ -238,25 +238,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function set_variation( $data = array() ) {
 		if ( is_array( $data ) ) {
 			foreach ( $data as $key => $value ) {
-				$meta_key = str_replace( 'attribute_', '', $key );
-
-				if ( wc_check_if_attribute_name_is_reserved( $meta_key, 'custom' ) ) {
-					wc_get_logger()->warning(
-						sprintf(
-							/* translators: 1: attribute meta key, 2: variation ID. */
-							__( 'Variation attribute "%1$s" collides with a reserved structural key on the order item for variation #%2$d, so the variation data may be read incorrectly. Rename the product attribute to resolve this.', 'woocommerce' ),
-							$meta_key,
-							$this->get_variation_id()
-						),
-						array(
-							'source'       => 'attribute-collision',
-							'variation_id' => $this->get_variation_id(),
-							'product_id'   => $this->get_product_id(),
-						)
-					);
-				}
-
-				$this->add_meta_data( $meta_key, $value, true );
+				$this->add_meta_data( str_replace( 'attribute_', '', $key ), $value, true );
 			}
 		}
 	}
