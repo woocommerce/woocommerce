@@ -693,6 +693,136 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Refunding a 0% taxed line item via the AJAX handler preserves the 0-rate tax line on the refund order.
+	 */
+	public function test_refund_line_items_preserves_zero_rate_tax(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '0.0000',
+				'tax_rate_name'     => 'Zero Rate',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$item_id = array_keys( $order->get_items( 'line_item' ) )[0];
+
+		$this->_setRole( 'administrator' );
+
+		// The exact payload shape the admin refund form serializes: the tax
+		// amount arrives as a numeric 0 (accounting.unformat of an empty field).
+		$_POST['security']             = wp_create_nonce( 'order-item' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['refund_amount']        = $order->get_total();
+		$_POST['refunded_amount']      = '0';
+		$_POST['refund_reason']        = '';
+		$_POST['line_item_qtys']       = wp_json_encode( array( $item_id => 1 ) );
+		$_POST['line_item_totals']     = wp_json_encode( array( $item_id => $order->get_total() ) );
+		$_POST['line_item_tax_totals'] = wp_json_encode( array( $item_id => array( $rate_id => 0 ) ) );
+		$_POST['api_refund']           = 'false';
+
+		$response = $this->do_ajax( 'woocommerce_refund_line_items' );
+
+		$this->assertTrue( $response['success'] ?? false, 'The AJAX refund request should succeed.' );
+
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds, 'One refund should be created for the order.' );
+
+		$refund_tax_items = $refunds[0]->get_items( 'tax' );
+		$this->assertCount( 1, $refund_tax_items, 'The 0% tax line must be carried over to the refund order.' );
+		$this->assertEquals(
+			$rate_id,
+			array_values( $refund_tax_items )[0]->get_rate_id(),
+			'The preserved tax line must reference the 0% rate.'
+		);
+
+		unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['refund_reason'], $_POST['line_item_qtys'], $_POST['line_item_totals'], $_POST['line_item_tax_totals'], $_POST['api_refund'] );
+		WC_Tax::_delete_tax_rate( $rate_id );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
+	 * @testdox An amount-only AJAX refund on a multi-item order creates no line items and keeps downloads of unrefunded products.
+	 */
+	public function test_refund_line_items_amount_only_skips_untouched_items(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$downloadable_product = WC_Helper_Product::create_simple_product();
+		$downloadable_product->set_downloadable( true );
+		$downloadable_product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->add_product( $downloadable_product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		$download = new WC_Customer_Download();
+		$download->set_user_id( 1 );
+		$download->set_order_id( $order->get_id() );
+		$download->set_product_id( $downloadable_product->get_id() );
+		$download->set_download_id( wp_generate_uuid4() );
+		$download->save();
+
+		$item_ids = array_keys( $order->get_items( 'line_item' ) );
+
+		$this->_setRole( 'administrator' );
+
+		// An amount-only refund: the form posts no qtys, but a 0 total and a 0
+		// tax amount for every row in the order (those inputs are not gated).
+		$totals     = array();
+		$tax_totals = array();
+		foreach ( $item_ids as $item_id ) {
+			$totals[ $item_id ]     = 0;
+			$tax_totals[ $item_id ] = array( 1 => 0 );
+		}
+
+		$_POST['security']             = wp_create_nonce( 'order-item' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['refund_amount']        = '5';
+		$_POST['refunded_amount']      = '0';
+		$_POST['refund_reason']        = '';
+		$_POST['line_item_qtys']       = wp_json_encode( array() );
+		$_POST['line_item_totals']     = wp_json_encode( $totals );
+		$_POST['line_item_tax_totals'] = wp_json_encode( $tax_totals );
+		$_POST['api_refund']           = 'false';
+
+		$response = $this->do_ajax( 'woocommerce_refund_line_items' );
+
+		$this->assertTrue( $response['success'] ?? false, 'The AJAX refund request should succeed.' );
+
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$this->assertCount( 1, $refunds, 'One refund should be created for the order.' );
+		$this->assertCount( 0, $refunds[0]->get_items( 'line_item' ), 'Untouched items must not become refund line items.' );
+		$this->assertCount( 0, $refunds[0]->get_items( 'tax' ), 'Untouched items must not produce refund tax items.' );
+
+		$download_data_store = WC_Data_Store::load( 'customer-download' );
+		$remaining_downloads = $download_data_store->get_downloads(
+			array(
+				'order_id'   => $order->get_id(),
+				'product_id' => $downloadable_product->get_id(),
+			)
+		);
+		$this->assertCount( 1, $remaining_downloads, 'Download permissions for a product that was not refunded must be kept.' );
+
+		unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['refund_reason'], $_POST['line_item_qtys'], $_POST['line_item_totals'], $_POST['line_item_tax_totals'], $_POST['api_refund'] );
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
