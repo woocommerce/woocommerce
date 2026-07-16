@@ -678,4 +678,55 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$this->assertSame( $variation_b->get_id(), $item->get_variation_id(), 'variation_id should track the most recently set variation.' );
 		$this->assertSame( $parent->get_id(), $item->get_product_id(), 'product_id should remain the shared parent.' );
 	}
+
+	/**
+	 * @testdox Should clear variation_id when set_product() is given the variable parent of the item's own current variation.
+	 */
+	public function test_set_product_clears_variation_id_when_switched_to_own_variable_parent(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'T-Shirt' );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array()
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		$this->assertSame( $variation->get_id(), $item->get_variation_id(), 'Precondition: the item should carry the variation ID before switching to the parent.' );
+
+		$this->assertFalse( $parent->is_type( 'variation' ), 'Precondition: a WC_Product_Variable is not itself a variation.' );
+
+		$item->set_product( $parent );
+
+		$this->assertSame( 0, $item->get_variation_id(), 'A variable parent is not itself a sellable line item, so setting it deliberately clears variation_id rather than preserving the previously selected variation.' );
+		$this->assertSame( $parent->get_id(), $item->get_product_id(), 'product_id should point at the variable parent.' );
+	}
+
+	/**
+	 * @testdox Should set product_id and variation_id when set_product() switches the item from a simple product to a variation.
+	 */
+	public function test_set_product_sets_variation_id_when_switching_from_simple_product_to_variation(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array()
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->product );
+		$item->set_product( $variation );
+
+		$this->assertSame( $parent->get_id(), $item->get_product_id(), 'product_id should point at the variation\'s parent when switching from a simple product.' );
+		$this->assertSame( $variation->get_id(), $item->get_variation_id(), 'variation_id should be set to the variation ID when switching from a simple product.' );
+	}
 }
