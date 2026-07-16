@@ -794,6 +794,17 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await test.step( 'verify cart state persists after reload', async () => {
+			// Reloading while a batch request is still in flight aborts it,
+			// losing the re-add server-side.
+			await page.evaluate( async () => {
+				const { store } = await import( '@wordpress/interactivity' );
+				const unlockKey =
+					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+				await import( '@woocommerce/stores/woocommerce/cart' );
+				const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
+				await actions.waitForIdle();
+			} );
+
 			await page.reload();
 
 			await expect(
