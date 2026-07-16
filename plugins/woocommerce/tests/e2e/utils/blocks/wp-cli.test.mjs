@@ -80,3 +80,36 @@ test( 'fails before restoring when CLI container discovery is malformed', async 
 	);
 	assert.equal( calls.length, 1 );
 } );
+
+test( 'retries CLI container discovery after a failed attempt', async () => {
+	const calls = [];
+	const runCommand = async ( executable, args ) => {
+		calls.push( [ executable, args ] );
+
+		if ( executable === 'npm' ) {
+			if ( calls.length === 1 ) {
+				throw new Error( 'transient wp-env failure' );
+			}
+
+			return {
+				stdout: `npm output\n${ CLI_CONTAINER_ID }\n`,
+				stderr: '',
+			};
+		}
+
+		return { stdout: '', stderr: '' };
+	};
+	const restoreDatabase = createBlocksDatabaseRestorer( runCommand );
+
+	await assert.rejects(
+		restoreDatabase( '/tmp/snapshot.sql' ),
+		/transient wp-env failure/
+	);
+
+	await restoreDatabase( '/tmp/snapshot.sql' );
+
+	assert.deepEqual(
+		calls.map( ( [ executable ] ) => executable ),
+		[ 'npm', 'npm', 'docker' ]
+	);
+} );

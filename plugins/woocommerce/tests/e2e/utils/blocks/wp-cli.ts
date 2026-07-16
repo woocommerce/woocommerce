@@ -61,6 +61,12 @@ export function createBlocksDatabaseRestorer( execute: RunCommand ) {
 
 				return cliContainerId;
 			} );
+
+			// Drop failed discoveries from the cache so the next restore
+			// retries instead of reusing the rejection forever.
+			cliContainerIdPromise.catch( () => {
+				cliContainerIdPromise = undefined;
+			} );
 		}
 
 		return await cliContainerIdPromise;
