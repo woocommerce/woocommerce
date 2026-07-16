@@ -221,6 +221,62 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox render_shortcode() returns nothing when no order key is supplied, even off the WC-managed page.
+	 */
+	public function test_render_shortcode_empty_without_authorisation(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		// `review-order` is a public query var, so WP populates it from the
+		// URL on any post or page — not only the WC-managed one. Stage that
+		// directly instead of going through gate_request()'s page check.
+		global $wp;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
+		$wp                                    = new \WP();
+		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
+		$_GET                                  = array();
+
+		$this->assertSame( '', $this->endpoint->render_shortcode() );
+	}
+
+	/**
+	 * @testdox render_shortcode() returns nothing when the supplied key does not match the order.
+	 */
+	public function test_render_shortcode_empty_when_key_mismatched(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		global $wp;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
+		$wp                                    = new \WP();
+		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
+		$_GET                                  = array( 'key' => 'wc_order_definitelywrong' );
+
+		$this->assertSame( '', $this->endpoint->render_shortcode() );
+	}
+
+	/**
+	 * @testdox render_shortcode() still renders for a correctly-keyed request.
+	 */
+	public function test_render_shortcode_renders_when_authorised(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		global $wp;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
+		$wp                                    = new \WP();
+		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
+		$_GET                                  = array( 'key' => $order->get_order_key() );
+
+		$html = $this->endpoint->render_shortcode();
+
+		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html );
+	}
+
+	/**
 	 * @testdox The woocommerce_review_order_eligible_statuses filter widens the eligible set.
 	 */
 	public function test_eligible_statuses_filter_widens_set(): void {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+The `[woocommerce_review_order]` shortcode now checks the order key before rendering, instead of relying solely on the WC-managed page's own gating. Since `review-order` is a public query var, embedding the shortcode on any other page or post previously exposed a guest order's name, email, and order key to anyone who guessed the order id.

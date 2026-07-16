@@ -524,9 +524,11 @@ class Endpoint {
 	 * Render the Review Order page body for the WC-managed page.
 	 *
 	 * Called by `the_content` on the page that hosts `[woocommerce_review_order]`.
-	 * Returns an empty string when the request did not arrive through the
-	 * tokenised rewrite, so a logged-in admin previewing the page directly
-	 * sees nothing rather than a partial form.
+	 * `review-order` is registered as a public query var, so `?review-order={id}`
+	 * resolves on *any* post or page that embeds the shortcode, not only the
+	 * WC-managed one — `gate_request()` only gates the canonical page. Running
+	 * `is_authorised()` here too means the shortcode stays safe even if it ends
+	 * up embedded elsewhere (e.g. a lower-privileged author's own page).
 	 *
 	 * @return string
 	 */
@@ -537,10 +539,11 @@ class Endpoint {
 			return '';
 		}
 
-		$order_id = absint( $wp->query_vars[ self::QUERY_VAR ] );
-		$order    = $order_id ? wc_get_order( $order_id ) : false;
-		if ( ! $order instanceof WC_Order ) {
-			// gate_request() will already have 404'd; this is defensive.
+		$order_id  = absint( $wp->query_vars[ self::QUERY_VAR ] );
+		$order_key = $this->read_order_key();
+		$order     = $order_id ? wc_get_order( $order_id ) : false;
+
+		if ( ! $this->is_authorised( $order, $order_key ) ) {
 			return '';
 		}
 
