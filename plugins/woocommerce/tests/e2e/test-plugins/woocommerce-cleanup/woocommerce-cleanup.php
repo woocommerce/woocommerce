@@ -15,7 +15,8 @@
 declare(strict_types=1);
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+	// Exit if accessed directly.
+	exit;
 }
 
 /**
