@@ -43,7 +43,7 @@
 		"email": true
 	},
 	"selectors": {
-		"root": ".wc-block-components-product-image"
+		"root": ".wp-block-woocommerce-product-image.wc-block-components-product-image, .wp-block-woocommerce-product-image .wc-block-components-product-image"
 	},
 	"ancestor": [
 		"woocommerce/all-products",

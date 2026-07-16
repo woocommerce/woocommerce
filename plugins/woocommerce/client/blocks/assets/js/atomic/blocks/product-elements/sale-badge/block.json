@@ -50,7 +50,7 @@
 		"email": true
 	},
 	"selectors": {
-		"root": ".wc-block-components-product-sale-badge"
+		"root": ".wp-block-woocommerce-product-sale-badge .wc-block-components-product-sale-badge"
 	},
 	"ancestor": [
 		"woocommerce/single-product",

@@ -31,7 +31,7 @@
 		}
 	},
 	"selectors": {
-		"root": ".wc-block-components-product-title"
+		"root": ".wp-block-woocommerce-product-title .wc-block-components-product-title"
 	},
 	"textdomain": "woocommerce",
 	"attributes": {

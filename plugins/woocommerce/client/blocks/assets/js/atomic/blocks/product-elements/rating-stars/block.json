@@ -48,7 +48,7 @@
 		}
 	},
 	"selectors": {
-		"root": ".wc-block-components-product-rating"
+		"root": ".wp-block-woocommerce-product-rating-stars.wc-block-components-product-rating, .wp-block-woocommerce-product-rating-stars .wc-block-components-product-rating"
 	},
 	"ancestor": [ "woocommerce/single-product" ],
 	"textdomain": "woocommerce",
