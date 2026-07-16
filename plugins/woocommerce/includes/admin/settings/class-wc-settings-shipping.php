@@ -7,7 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Address\LegacyStateCodeRemediation;
 use Automattic\WooCommerce\Internal\Address\LegacyStateCodes;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -272,18 +271,25 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 *
 	 * @param array $allowed_countries Country names indexed by country code.
 	 * @param array $shipping_continents Continent data indexed by continent code.
+	 * @param mixed $zone Zone being edited when it is a WC_Shipping_Zone, used to keep its persisted legacy state locations selectable.
 	 */
-	protected function get_region_options( $allowed_countries, $shipping_continents ) {
-		// Persisted legacy state locations are not part of the current state lists, but they
-		// must remain visible in the editor or merchants cannot see and remove them.
+	protected function get_region_options( $allowed_countries, $shipping_continents, $zone = null ) {
+		// The zone's persisted legacy state locations are not part of the current state lists,
+		// but they must remain visible in the editor or merchants cannot see and remove them.
 		$legacy_locations = array();
-		foreach ( wc_get_container()->get( LegacyStateCodeRemediation::class )->get_legacy_shipping_zone_locations() as $location_code ) {
-			$state_name = LegacyStateCodes::get_known_legacy_location_name( $location_code );
+		if ( $zone instanceof WC_Shipping_Zone ) {
+			foreach ( $zone->get_zone_locations() as $zone_location ) {
+				if ( 'state' !== $zone_location->type ) {
+					continue;
+				}
 
-			if ( null !== $state_name ) {
-				$location = wc_format_country_state_string( $location_code );
+				$state_name = LegacyStateCodes::get_known_legacy_location_name( $zone_location->code );
 
-				$legacy_locations[ $location['country'] ][ $location['state'] ] = $state_name;
+				if ( null !== $state_name ) {
+					$location = wc_format_country_state_string( $zone_location->code );
+
+					$legacy_locations[ $location['country'] ][ $location['state'] ] = $state_name;
+				}
 			}
 		}
 
@@ -387,7 +393,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		if ( 0 !== $zone->get_id() ) {
 			WCAdminAssets::register_script( 'wp-admin-scripts', 'shipping-settings-region-picker', true, array( 'wc-shipping-zone-methods' ) );
-			$localized_object['region_options'] = $this->get_region_options( $allowed_countries, $shipping_continents );
+			$localized_object['region_options'] = $this->get_region_options( $allowed_countries, $shipping_continents, $zone );
 		}
 
 		wp_localize_script(
