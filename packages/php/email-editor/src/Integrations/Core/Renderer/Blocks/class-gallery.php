@@ -98,8 +98,12 @@ class Gallery extends Abstract_Block_Renderer {
 		$image_count = count( $image_blocks );
 
 		foreach ( $image_blocks as $index => $block ) {
-			$image_attrs  = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
-			$aspect_ratio = isset( $image_attrs['aspectRatio'] ) && is_string( $image_attrs['aspectRatio'] ) ? $image_attrs['aspectRatio'] : $gallery_aspect_ratio;
+			$image_attrs = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+
+			// Use the per-image override only when it is a valid ratio; a malformed override falls
+			// back to the gallery ratio instead of silently disabling the crop for that image.
+			$image_ratio  = isset( $image_attrs['aspectRatio'] ) && is_string( $image_attrs['aspectRatio'] ) ? $image_attrs['aspectRatio'] : null;
+			$aspect_ratio = ( null !== $image_ratio && null !== $this->parse_aspect_ratio( $image_ratio ) ) ? $image_ratio : $gallery_aspect_ratio;
 
 			$cell_width      = $this->get_cell_width( $index, $image_count, $columns, $layout_width );
 			$extracted_image = $this->extract_image_from_html( $block['innerHTML'], $aspect_ratio, $cell_width, $image_attrs );
@@ -205,9 +209,10 @@ class Gallery extends Abstract_Block_Renderer {
 			return $img_html;
 		}
 
-		// Derive the target display dimensions from the cell width and the requested ratio.
+		// Derive the target display dimensions from the cell width and the requested ratio. Clamp the
+		// height to at least 1px so a very wide ratio can't round down to a 0-height (unusable) crop.
 		$width  = $cell_width > 0 ? $cell_width : 0;
-		$height = $width > 0 ? (int) round( $width / $ratio_value ) : 0;
+		$height = $width > 0 ? max( 1, (int) round( $width / $ratio_value ) ) : 0;
 
 		/** @var string $image_url */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 		$image_url = $html->get_attribute( 'src' ) ?? '';

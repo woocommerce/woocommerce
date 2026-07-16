@@ -392,6 +392,23 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test an invalid per-image aspect ratio falls back to the gallery ratio rather than
+	 * disabling the crop for that image.
+	 */
+	public function testItFallsBackToGalleryRatioWhenPerImageOverrideIsInvalid(): void {
+		$parsed_gallery                         = $this->parsed_gallery;
+		$parsed_gallery['attrs']['aspectRatio'] = '1';
+		$parsed_gallery['innerBlocks'][0]['attrs']['aspectRatio'] = 'not-a-ratio';
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		// All three images (including the one with the malformed override) use the gallery ratio.
+		$this->assertSame( 3, substr_count( $rendered, 'aspect-ratio: 1;' ), 'The malformed override falls back to the gallery ratio.' );
+		$this->assertSame( 3, substr_count( $rendered, 'object-fit: cover' ), 'Every image is still cropped.' );
+		$this->assertStringNotContainsString( 'not-a-ratio', $rendered, 'The invalid value is never emitted into the markup.' );
+	}
+
+	/**
 	 * Test galleries without an aspect ratio are left uncropped (no regression).
 	 */
 	public function testItDoesNotCropWhenNoAspectRatioIsSet(): void {
