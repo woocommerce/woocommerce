@@ -259,10 +259,10 @@ class PageController {
 	 * @return string Current screen ID.
 	 */
 	public function get_current_screen_id() {
-		// Return early if this is a REST API request.
-		if ( wp_is_serving_rest_request() ) {
+		// Return early when the current screen cannot be determined.
+		if ( wp_is_serving_rest_request() || ! function_exists( 'get_current_screen' ) ) {
 			/**
-			 * Filter the current screen ID for REST API requests.
+			 * Filter the current screen ID when current screen detection is unavailable.
 			 *
 			 * @since 3.9.0
 			 *
