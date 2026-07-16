@@ -141,14 +141,9 @@ class Image extends Abstract_Block_Renderer {
 				}
 			}
 
-			// Fallback to wp_getimagesize if we still don't have a size.
+			// Fall back to reading the local image file if we still don't have a size.
 			if ( ! isset( $image_size ) ) {
-				$upload_dir = wp_upload_dir();
-				$image_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $image_url );
-				$result     = wp_getimagesize( $image_path );
-				if ( $result ) {
-					$image_size = (int) $result[0];
-				}
+				$image_size = $this->get_local_image_width( $image_url );
 			}
 		}
 
@@ -157,6 +152,28 @@ class Image extends Abstract_Block_Renderer {
 
 		$parsed_block['attrs']['width'] = "{$width}px";
 		return $parsed_block;
+	}
+
+	/**
+	 * Get the width of an image stored locally in the uploads directory.
+	 *
+	 * Only local files are measured. External URLs return null so the caller
+	 * can fall back to the max width.
+	 *
+	 * @param string $image_url Image URL.
+	 * @return int|null Image width in pixels, or null if it can't be determined locally.
+	 */
+	private function get_local_image_width( string $image_url ): ?int {
+		$upload_dir = wp_upload_dir();
+		$image_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $image_url );
+
+		if ( $image_path === $image_url || ! file_exists( $image_path ) ) {
+			return null;
+		}
+
+		$result = wp_getimagesize( $image_path );
+
+		return $result ? (int) $result[0] : null;
 	}
 
 	/**
