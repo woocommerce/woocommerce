@@ -220,6 +220,37 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Bulk Edit clears a completed sale schedule when the sale price changes.
+	 */
+	public function test_bulk_edit_clears_completed_sale_schedule_when_price_changes(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$product->set_regular_price( '100' );
+		$product->set_sale_price( '80' );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - ( 2 * DAY_IN_SECONDS ) ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) );
+		$product->save();
+
+		$_REQUEST = array(
+			'woocommerce_quick_edit_nonce' => wp_create_nonce( 'woocommerce_quick_edit_nonce' ),
+			'_stock_status'                => 'instock',
+			'change_stock'                 => 0,
+			'change_cogs_value'            => 0,
+			'change_sale_price'            => 1,
+			'_sale_price'                  => '70',
+		);
+
+		$this->sut->bulk_and_quick_edit_save_post( $product->get_id(), get_post( $product->get_id() ) );
+
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertSame( '70', $updated_product->get_sale_price( 'edit' ), 'Bulk Edit should persist the new sale price.' );
+		$this->assertSame( '70', $updated_product->get_price( 'edit' ), 'Bulk Edit should make the new sale price effective.' );
+		$this->assertNull( $updated_product->get_date_on_sale_from( 'edit' ), 'Bulk Edit should clear a completed sale start date.' );
+		$this->assertNull( $updated_product->get_date_on_sale_to( 'edit' ), 'Bulk Edit should clear a completed sale end date.' );
+	}
+
+	/**
 	 * Provides valid price changes for active and future sale schedules.
 	 *
 	 * @return array<string, array{int, int, string, string}>
@@ -301,6 +332,12 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 				array(
 					'change_sale_price' => 1,
 					'_sale_price'       => '110',
+				),
+			),
+			'sale price equals regular price'          => array(
+				array(
+					'change_sale_price' => 1,
+					'_sale_price'       => '100',
 				),
 			),
 		);

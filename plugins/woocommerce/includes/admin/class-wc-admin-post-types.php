@@ -599,8 +599,10 @@ class WC_Admin_Post_Types {
 			$sale_price_changed    = $this->set_new_price( $product, 'sale' );
 			$regular_price         = $product->get_regular_price( 'edit' );
 			$sale_price            = $product->get_sale_price( 'edit' );
+			$sale_date_to          = $product->get_date_on_sale_to( 'edit' );
+			$sale_has_ended        = $sale_date_to && $sale_date_to->getTimestamp() < time();
 
-			if ( ( $regular_price_changed || $sale_price_changed ) && ( '' === $sale_price || $sale_price >= $regular_price ) ) {
+			if ( ( $regular_price_changed || $sale_price_changed ) && ( '' === $sale_price || $sale_price >= $regular_price || $sale_has_ended ) ) {
 				$product->set_date_on_sale_to( '' );
 				$product->set_date_on_sale_from( '' );
 
