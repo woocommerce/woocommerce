@@ -21,7 +21,8 @@ jest.mock( '@wordpress/admin-ui', () => ( {
  */
 import { SettingsUIPage } from '../settings-ui-page';
 import { __resetRegistry, registerSettingsExtension } from '../registry';
-import type { SettingsUISchema } from '../types';
+import { useSettingsUIContext } from '../settings-ui-context';
+import type { SettingsFieldContext, SettingsUISchema } from '../types';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -157,9 +158,11 @@ describe( 'settings HTML rendering', () => {
 	} );
 
 	it( 'normalizes the default schema section to default-section scope', () => {
-		const DefaultSectionField = jest.fn( () => (
-			<div>Default section field</div>
-		) );
+		const seenContexts: SettingsFieldContext[] = [];
+		const DefaultSectionField = jest.fn( () => {
+			seenContexts.push( useSettingsUIContext().context );
+			return <div>Default section field</div>;
+		} );
 		registerSettingsExtension( {
 			scope: { page: 'test-page', section: '' },
 			fieldOverrides: {
@@ -191,9 +194,7 @@ describe( 'settings HTML rendering', () => {
 		);
 
 		expect( container.textContent ).toContain( 'Default section field' );
-		expect( DefaultSectionField.mock.calls[ 0 ][ 0 ].context.section ).toBe(
-			''
-		);
+		expect( seenContexts[ 0 ].section ).toBe( '' );
 
 		act( () => root.unmount() );
 		container.remove();
@@ -305,7 +306,9 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector( 'input[type="text"]' );
+		const input = container.querySelector(
+			'input.components-input-control__input'
+		);
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);
@@ -383,7 +386,9 @@ describe( 'settings HTML rendering', () => {
 		form.insertBefore( sectionLinks, container );
 
 		try {
-			const input = container.querySelector( 'input[type="text"]' );
+			const input = container.querySelector(
+				'input.components-input-control__input'
+			);
 			const link = sectionLinks.querySelector( 'a' );
 
 			expect( input ).toBeInstanceOf( HTMLInputElement );
@@ -451,7 +456,9 @@ describe( 'settings HTML rendering', () => {
 		);
 
 		try {
-			const input = container.querySelector( 'input[type="text"]' );
+			const input = container.querySelector(
+				'input.components-input-control__input'
+			);
 			const link = container.querySelector(
 				'a[href="https://example.com/next"]'
 			);
@@ -549,7 +556,9 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector( 'input[type="text"]' );
+		const input = container.querySelector(
+			'input.components-input-control__input'
+		);
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);

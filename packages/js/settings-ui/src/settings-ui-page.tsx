@@ -14,6 +14,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { DataForm, useFormValidity } from '@wordpress/dataviews';
 import {
 	Badge,
 	Button as UIButton,
@@ -28,17 +29,12 @@ import type { ComponentProps, ErrorInfo, ReactNode } from 'react';
 /**
  * Internal dependencies
  */
+import { createDataFormAdapter, getGroupValidity } from './dataform-adapter';
 import { HiddenInputs } from './hidden-inputs';
-import { error, warn } from './diagnostics';
+import { error } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
-import { NativeSettingsField } from './native-fields';
-import {
-	resolveFieldComponent,
-	resolveFieldVisibilityPredicate,
-	resolveGroupVisibilityPredicate,
-	resolveRegionComponent,
-	resolveSaveHandler,
-} from './registry';
+import { resolveRegionComponent, resolveSaveHandler } from './registry';
+import { SettingsUIPageContext } from './settings-ui-context';
 import type {
 	SettingsUIField,
 	SettingsUIGroup,
@@ -104,9 +100,6 @@ const getChangedValues = (
 
 	return changedValues;
 };
-
-const getFieldTypeClassName = ( type: string ) =>
-	`wc-settings-ui__field--${ type.replace( /[^a-z0-9_-]/gi, '-' ) }`;
 
 const getActionVariant = ( variant?: string ) =>
 	( [ 'primary', 'secondary', 'tertiary', 'link' ].includes( variant || '' )
@@ -200,11 +193,13 @@ const getNavigationHref = ( event: MouseEvent ) => {
 
 const UnsavedChangesModal = ( {
 	isSaving,
+	isValid,
 	onClose,
 	onDiscard,
 	onSave,
 }: {
 	isSaving: boolean;
+	isValid: boolean;
 	onClose: () => void;
 	onDiscard: () => void;
 	onSave: () => void;
@@ -245,7 +240,7 @@ const UnsavedChangesModal = ( {
 					</UIButton>
 					<UIButton
 						loading={ isSaving }
-						disabled={ isSaving }
+						disabled={ isSaving || ! isValid }
 						onClick={ onSave }
 					>
 						{ __( 'Save', 'woocommerce' ) }
@@ -320,63 +315,6 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 			) : null }
 		</Card.Header>
 	);
-};
-
-const valueMatchesVisibilityRule = (
-	value: SettingsValue,
-	expected: SettingsValue | SettingsValue[] | undefined
-) => {
-	const expectedValues = Array.isArray( expected )
-		? expected
-		: [ expected ?? true ];
-
-	return expectedValues.some( ( expectedValue ) =>
-		areValuesEqual( value, expectedValue )
-	);
-};
-
-const getVisible = ( {
-	id,
-	kind,
-	field,
-	values,
-	initialValues,
-	context,
-	schema,
-}: {
-	id: string;
-	kind: 'field' | 'group';
-	field?: SettingsUIField;
-	values: SettingsValues;
-	initialValues: SettingsValues;
-	context: SettingsFieldContext;
-	schema: SettingsUISchema;
-} ) => {
-	const predicate =
-		kind === 'field'
-			? resolveFieldVisibilityPredicate( id, context )
-			: resolveGroupVisibilityPredicate( id, context );
-
-	if ( predicate ) {
-		try {
-			return predicate( { values, initialValues, context, schema } );
-		} catch ( predicateError ) {
-			warn(
-				`Visibility predicate for ${ kind } "${ id }" failed. Rendering it visible.`,
-				{ error: predicateError, context }
-			);
-			return true;
-		}
-	}
-
-	if ( field?.visibility ) {
-		return valueMatchesVisibilityRule(
-			values[ field.visibility.controller ],
-			field.visibility.value
-		);
-	}
-
-	return true;
 };
 
 const getAllFields = ( schema: SettingsUISchema ): SettingsUIField[] =>
@@ -629,6 +567,28 @@ export const SettingsUIPage = ( {
 	);
 	const isDirty = dirtyFields.length > 0;
 
+	const dataFormAdapter = useMemo(
+		() => createDataFormAdapter( { schema, context, initialValues } ),
+		[ context, initialValues, schema ]
+	);
+	const dataFormSections = useMemo(
+		() => dataFormAdapter.getRenderSections( values ),
+		[ dataFormAdapter, values ]
+	);
+	const validationForm = useMemo(
+		() => dataFormAdapter.getValidationForm( values ),
+		[ dataFormAdapter, values ]
+	);
+	const { validity, isValid } = useFormValidity(
+		values,
+		dataFormAdapter.fields,
+		validationForm
+	);
+	const pageContextValue = useMemo(
+		() => ( { schema, context, initialValues } ),
+		[ schema, context, initialValues ]
+	);
+
 	useEffect( () => {
 		const nextValues = getInitialValues( schema );
 		setInitialValues( nextValues );
@@ -637,16 +597,6 @@ export const SettingsUIPage = ( {
 		setPendingNavigation( null );
 	}, [ schema ] );
 
-	const setValue = useCallback(
-		( fieldId: string, nextValue: SettingsValue ) => {
-			setValuesState( ( currentValues ) => ( {
-				...currentValues,
-				[ fieldId ]: nextValue,
-			} ) );
-		},
-		[]
-	);
-
 	const allowNavigation = useCallback( () => {
 		allowNavigationRef.current = true;
 		clearLegacyFormPrompt();
@@ -654,6 +604,10 @@ export const SettingsUIPage = ( {
 
 	const submitSettingsForm = useCallback(
 		( redirectTo?: string ) => {
+			if ( ! isValid ) {
+				return;
+			}
+
 			const form = document.getElementById( 'mainform' );
 
 			if ( ! ( form instanceof HTMLFormElement ) ) {
@@ -675,7 +629,7 @@ export const SettingsUIPage = ( {
 
 			form.requestSubmit();
 		},
-		[ allowNavigation ]
+		[ allowNavigation, isValid ]
 	);
 
 	const setValues = useCallback(
@@ -698,7 +652,7 @@ export const SettingsUIPage = ( {
 	);
 
 	const handleCustomSave = useCallback( async () => {
-		if ( saveStrategy.adapter !== 'custom' ) {
+		if ( saveStrategy.adapter !== 'custom' || ! isValid ) {
 			return false;
 		}
 
@@ -752,6 +706,7 @@ export const SettingsUIPage = ( {
 		context,
 		dirtyFields,
 		initialValues,
+		isValid,
 		saveStrategy,
 		schema,
 		values,
@@ -853,37 +808,6 @@ export const SettingsUIPage = ( {
 		submitSettingsForm,
 	] );
 
-	const visibleGroups = useMemo(
-		() =>
-			Object.values( schema.groups )
-				.filter( ( group ) =>
-					getVisible( {
-						id: group.id,
-						kind: 'group',
-						values,
-						initialValues,
-						context,
-						schema,
-					} )
-				)
-				.map( ( group ) => ( {
-					...group,
-					fields: group.fields.filter( ( field ) =>
-						getVisible( {
-							id: field.id,
-							kind: 'field',
-							field,
-							values,
-							initialValues,
-							context,
-							schema,
-						} )
-					),
-				} ) )
-				.filter( ( group ) => group.fields.length > 0 ),
-		[ context, initialValues, schema, values ]
-	);
-
 	const formPostFields =
 		saveStrategy.adapter === 'form_post' ? getAllFields( schema ) : [];
 
@@ -899,7 +823,7 @@ export const SettingsUIPage = ( {
 				}
 				name="save"
 				value={ saveButtonLabel }
-				disabled={ ! isDirty || isSaving }
+				disabled={ ! isDirty || isSaving || ! isValid }
 				isBusy={ isSaving }
 				onClick={ () =>
 					saveStrategy.adapter === 'form_post'
@@ -912,101 +836,94 @@ export const SettingsUIPage = ( {
 		) : undefined;
 
 	return (
-		<ShellHeader
-			schema={ schema }
-			context={ context }
-			values={ values }
-			initialValues={ initialValues }
-			actions={ saveButton }
-		>
-			{ pendingNavigation ? (
-				<UnsavedChangesModal
-					isSaving={ isSaving }
-					onClose={ () => setPendingNavigation( null ) }
-					onDiscard={ handleDiscardNavigation }
-					onSave={ handleSavePendingNavigation }
-				/>
-			) : null }
-			{ saveNotice ? (
-				<Notice.Root
-					className="wc-settings-ui-shell__notice"
-					intent={ saveNotice.status }
-				>
-					<Notice.Description>
-						{ saveNotice.message }
-					</Notice.Description>
-					<Notice.CloseIcon onClick={ () => setSaveNotice( null ) } />
-				</Notice.Root>
-			) : null }
-			<Stack className="wc-settings-ui" direction="column" gap="xl">
-				{ visibleGroups.map( ( group ) => (
-					<section
-						className="wc-settings-ui__section"
-						key={ group.id }
+		<SettingsUIPageContext.Provider value={ pageContextValue }>
+			<ShellHeader
+				schema={ schema }
+				context={ context }
+				values={ values }
+				initialValues={ initialValues }
+				actions={ saveButton }
+			>
+				{ pendingNavigation ? (
+					<UnsavedChangesModal
+						isSaving={ isSaving }
+						isValid={ isValid }
+						onClose={ () => setPendingNavigation( null ) }
+						onDiscard={ handleDiscardNavigation }
+						onSave={ handleSavePendingNavigation }
+					/>
+				) : null }
+				{ saveNotice ? (
+					<Notice.Root
+						className="wc-settings-ui-shell__notice"
+						intent={ saveNotice.status }
 					>
-						<Card.Root className="wc-settings-ui__section-card">
-							<GroupHeader group={ group } />
-							<Card.Content
-								className="wc-settings-ui__section-fields"
-								render={ <Stack direction="column" gap="lg" /> }
-							>
-								{ group.fields.map( ( field ) => {
-									const FieldComponent =
-										resolveFieldComponent(
-											field,
-											context
-										) || NativeSettingsField;
-									const value = values[ field.id ];
+						<Notice.Description>
+							{ saveNotice.message }
+						</Notice.Description>
+						<Notice.CloseIcon
+							onClick={ () => setSaveNotice( null ) }
+						/>
+					</Notice.Root>
+				) : null }
+				<Stack className="wc-settings-ui" direction="column" gap="xl">
+					{ dataFormSections.map( ( renderSection ) => {
+						if ( renderSection.type === 'dataform' ) {
+							return (
+								<DataForm
+									data={ values }
+									fields={ dataFormAdapter.fields }
+									form={ renderSection.form }
+									key={ renderSection.key }
+									onChange={ setValues }
+									validity={ validity }
+								/>
+							);
+						}
 
-									return (
-										<div
-											className={ [
-												'wc-settings-ui__field',
-												getFieldTypeClassName(
-													field.type
-												),
-											].join( ' ' ) }
-											key={ field.id }
-										>
-											<FieldComponent
-												field={ field }
-												value={ value }
-												context={ context }
-												values={ values }
-												initialValues={ initialValues }
-												setValue={ setValue }
-												setValues={ setValues }
-												onChange={ ( nextValue ) =>
-													setValue(
-														field.id,
-														nextValue
-													)
-												}
-											/>
-										</div>
-									);
-								} ) }
-							</Card.Content>
-						</Card.Root>
-					</section>
-				) ) }
-				{ ! showHeader && saveButton ? (
-					<div className="wc-settings-ui__footer-actions">
-						{ saveButton }
+						return (
+							<section
+								className="wc-settings-ui__section"
+								key={ renderSection.key }
+							>
+								<Card.Root className="wc-settings-ui__section-card">
+									<GroupHeader
+										group={ renderSection.group }
+									/>
+									<Card.Content className="wc-settings-ui__section-fields">
+										<DataForm
+											data={ values }
+											fields={ dataFormAdapter.fields }
+											form={ renderSection.form }
+											onChange={ setValues }
+											validity={ getGroupValidity(
+												validity,
+												renderSection.group.id
+											) }
+										/>
+									</Card.Content>
+								</Card.Root>
+							</section>
+						);
+					} ) }
+					{ ! showHeader && saveButton ? (
+						<div className="wc-settings-ui__footer-actions">
+							{ saveButton }
+						</div>
+					) : null }
+				</Stack>
+				{ formPostFields.length > 0 ? (
+					<div className="wc-settings-ui__hidden-inputs">
+						{ formPostFields.map( ( field ) => (
+							<HiddenInputs
+								field={ field }
+								value={ values[ field.id ] }
+								key={ field.id }
+							/>
+						) ) }
 					</div>
 				) : null }
-			</Stack>
-			{ formPostFields.length > 0 ? (
-				<div className="wc-settings-ui__hidden-inputs">
-					{ formPostFields.map( ( field ) => (
-						<HiddenInputs
-							field={ field }
-							value={ values[ field.id ] }
-							key={ field.id }
-						/>
-					) ) }
-				</div>
-			) : null }
-		</ShellHeader>
+			</ShellHeader>
+		</SettingsUIPageContext.Provider>
 	);
 };

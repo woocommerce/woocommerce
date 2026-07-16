@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import type { DataFormControlProps, FieldValidity } from '@wordpress/dataviews';
+
 export type SettingsValue = string | number | boolean | string[] | null;
 
 export type SettingsValues = Record< string, SettingsValue >;
@@ -119,20 +124,35 @@ export type SettingsFieldContext = {
 	section?: string;
 };
 
-export type SettingsFieldComponentProps = {
-	field: SettingsUIField;
-	value: SettingsValue;
-	onChange: ( value: SettingsValue ) => void;
-	values: SettingsValues;
-	initialValues: SettingsValues;
-	setValue: ( fieldId: string, value: SettingsValue ) => void;
-	setValues: ( values: Partial< SettingsValues > ) => void;
-	context: SettingsFieldContext;
-};
+/**
+ * The props a registered settings field component receives. This is the
+ * DataForm control contract from @wordpress/dataviews, re-exported under
+ * a Woo name so extensions do not import dataviews types directly and
+ * upgrades are absorbed at this alias.
+ *
+ * `data` holds the current values, `field` is the normalized DataForm
+ * field (use `field.getValue( { item: data } )` for the current value),
+ * and `onChange` takes a partial record of field ids to new values, so
+ * multi-field writes are a single call. Page-level context is available
+ * through the `useSettingsUIContext` hook.
+ */
+export type SettingsEditControlProps = DataFormControlProps< SettingsValues >;
+
+export type SettingsFieldValidity = FieldValidity;
 
 export type SettingsFieldComponent = (
-	props: SettingsFieldComponentProps
+	props: SettingsEditControlProps
 ) => JSX.Element | null;
+
+/**
+ * Page-level state exposed to registered components through the
+ * `useSettingsUIContext` hook.
+ */
+export type SettingsUIPageContextValue = {
+	schema: SettingsUISchema;
+	context: SettingsFieldContext;
+	initialValues: SettingsValues;
+};
 
 export type SettingsVisibilityPredicateArgs = {
 	values: SettingsValues;

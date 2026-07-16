@@ -11,7 +11,16 @@ import { Field, InputControl, SelectControl, Textarea } from '@wordpress/ui';
 import { warn } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
 import { NumberSpinControl } from './number-spin-control';
-import type { SettingsFieldComponentProps, SettingsValue } from './types';
+import type { SettingsUIField, SettingsValue } from './types';
+
+// Internal renderer for fields the DataForm controls cannot express yet
+// (disabled state, custom input attributes). The DataForm adapter wraps
+// it in an Edit control; it is not part of the public API.
+export type NativeSettingsFieldProps = {
+	field: SettingsUIField;
+	value: SettingsValue;
+	onChange: ( value: SettingsValue ) => void;
+};
 
 type TextInputType =
 	| 'text'
@@ -89,7 +98,7 @@ export const NativeSettingsField = ( {
 	field,
 	value,
 	onChange,
-}: SettingsFieldComponentProps ) => {
+}: NativeSettingsFieldProps ) => {
 	if ( field.type === 'info' ) {
 		return (
 			<div className="wc-settings-ui__info" id={ field.id }>

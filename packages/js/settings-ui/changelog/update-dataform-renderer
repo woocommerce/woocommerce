@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Render Settings UI fields through DataForm and align the experimental component contract with DataForm edit controls.
