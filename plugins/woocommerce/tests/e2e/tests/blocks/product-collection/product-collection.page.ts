@@ -185,15 +185,17 @@ class ProductCollectionPage {
 		] );
 	}
 
-	async chooseCollectionInTemplate( collection?: Collections ) {
+	async locateCollectionButtonInEditor( collection?: Collections ) {
 		await this.editor.closeGlobalBlockInserter();
 
 		const buttonName = collection
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		const inserterClass = await this.editor.canvas
-			.locator( SELECTORS.collectionPlaceholder )
+		const placeholderSelector = this.editor.canvas.locator(
+			SELECTORS.collectionPlaceholder
+		);
+		const inserterClass = await placeholderSelector
 			.locator(
 				'.wc-blocks-product-collection__collections-grid, .wc-blocks-product-collection__collections-dropdown'
 			)
@@ -204,22 +206,37 @@ class ProductCollectionPage {
 		);
 
 		if ( isDropdown ) {
-			await this.editor.canvas
+			await placeholderSelector
 				.getByRole( 'button', { name: 'Choose collection' } )
 				.click();
 
-			await this.editor.canvas
-				.locator(
-					'.wc-blocks-product-collection__collections-dropdown-content'
-				)
-				.getByRole( 'button', { name: buttonName, exact: true } )
-				.click();
-		} else {
-			await this.editor.canvas
-				.locator( SELECTORS.collectionPlaceholder )
-				.getByRole( 'button', { name: buttonName, exact: true } )
-				.click();
+			return this.editor.wpCoreVersion >= 7.1
+				? this.admin.page.getByRole( 'button', {
+						name: buttonName,
+						exact: true,
+				  } )
+				: this.editor.canvas
+						.locator(
+							'.wc-blocks-product-collection__collections-dropdown-content'
+						)
+						.getByRole( 'button', {
+							name: buttonName,
+							exact: true,
+						} );
 		}
+
+		return placeholderSelector.getByRole( 'button', {
+			name: buttonName,
+			exact: true,
+		} );
+	}
+
+	async chooseCollectionInTemplate( collection?: Collections ) {
+		const collectionButton = await this.locateCollectionButtonInEditor(
+			collection
+		);
+
+		await collectionButton.click();
 	}
 
 	async chooseProductInEditorProductPickerIfAvailable(
