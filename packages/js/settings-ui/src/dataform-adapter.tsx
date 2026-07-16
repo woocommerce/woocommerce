@@ -38,9 +38,8 @@ export type DataFormAdapterOptions = {
 	context: SettingsFieldContext;
 	initialValues: SettingsValues;
 	/**
-	 * Validation rules per field id. Internal for now: the public
-	 * validation surface is still a design proposal, but the DataForm
-	 * validity pipeline is fully wired and tested through this option.
+	 * Validation rules per field id. Internal until the public
+	 * validation surface is agreed.
 	 */
 	fieldRules?: Record< string, Rules< SettingsValues > >;
 };
@@ -62,7 +61,6 @@ export type DataFormRenderSection =
 			key: string;
 			form: Form;
 			group: SettingsUIGroup;
-			reasons: 'actions'[];
 	  };
 
 const toStringValue = ( value: SettingsValue | undefined ) =>
@@ -190,9 +188,9 @@ const toElements = ( options?: SettingsUIOption[] ) =>
 	} ) );
 
 // DataForm types descriptions as plain strings while the schema carries
-// sanitized HTML. The controls render the description as a node, so a
-// sanitized element keeps links and formatting working. This bypasses
-// the declared type and is flagged upstream.
+// sanitized HTML. The layouts render the description as a node, so a
+// sanitized element keeps links and formatting working despite the
+// declared string type.
 const toDescriptionNode = ( description?: string ) => {
 	if ( ! description ) {
 		return undefined;
@@ -512,10 +510,6 @@ export const buildDataFormField = (
 	return field;
 };
 
-const getFallbackReasons = ( group: SettingsUIGroup ) => [
-	...( group.actions?.length ? ( [ 'actions' ] as const ) : [] ),
-];
-
 // The card layout renders the combined field's description at the top of
 // the card body, so group descriptions go through the package.
 const getCardFormField = ( group: SettingsUIGroup ): FormField => ( {
@@ -525,10 +519,8 @@ const getCardFormField = ( group: SettingsUIGroup ): FormField => ( {
 		? { description: toDescriptionNode( group.description ) }
 		: {} ),
 	layout: {
-		type: 'card' as const,
-		...( group.title
-			? { withHeader: true as const }
-			: { withHeader: false as const } ),
+		type: 'card',
+		withHeader: Boolean( group.title ),
 		isCollapsible: false,
 	},
 	children: group.fields.map( ( field ) => field.id ),
@@ -547,6 +539,9 @@ export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 	const fieldsById = new Map(
 		fields.map( ( field ) => [ field.id, field ] )
 	);
+
+	const isFieldVisible = ( fieldId: string, values: SettingsValues ) =>
+		fieldsById.get( fieldId )?.isVisible?.( values ) !== false;
 
 	const isGroupVisible = (
 		group: SettingsUIGroup,
@@ -581,10 +576,8 @@ export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 		Object.values( schema.groups )
 			.filter( ( group ) => isGroupVisible( group, values ) )
 			.filter( ( group ) =>
-				group.fields.some(
-					( field ) =>
-						fieldsById.get( field.id )?.isVisible?.( values ) !==
-						false
+				group.fields.some( ( field ) =>
+					isFieldVisible( field.id, values )
 				)
 			);
 
@@ -613,9 +606,7 @@ export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 		};
 
 		getVisibleGroups( values ).forEach( ( group ) => {
-			const reasons = getFallbackReasons( group );
-
-			if ( reasons.length === 0 ) {
+			if ( ! group.actions?.length ) {
 				pendingCardFields.push( getCardFormField( group ) );
 				return;
 			}
@@ -625,7 +616,6 @@ export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 				type: 'fallback',
 				key: `fallback-${ group.id }`,
 				group,
-				reasons,
 				form: {
 					layout: { type: 'regular' },
 					fields: group.fields.map( ( field ) => field.id ),
@@ -644,11 +634,7 @@ export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 		fields: getVisibleGroups( values ).map( ( group ) => ( {
 			id: group.id,
 			children: group.fields
-				.filter(
-					( field ) =>
-						fieldsById.get( field.id )?.isVisible?.( values ) !==
-						false
-				)
+				.filter( ( field ) => isFieldVisible( field.id, values ) )
 				.map( ( field ) => field.id ),
 		} ) ),
 	} );

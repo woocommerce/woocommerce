@@ -573,8 +573,8 @@ describe( 'dataform-adapter', () => {
 				'dataform',
 			] );
 			expect(
-				sections[ 1 ].type === 'fallback' && sections[ 1 ].reasons
-			).toEqual( [ 'actions' ] );
+				sections[ 1 ].type === 'fallback' && sections[ 1 ].group.id
+			).toBe( 'with-actions' );
 		} );
 
 		it( 'drops groups whose fields are all hidden', () => {
