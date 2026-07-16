@@ -1409,6 +1409,16 @@ class CartController {
 	protected function sanitize_variation_data( $variation_data, $variable_product_attributes ) {
 		$return = [];
 
+		// Map of normalized posted keys to the original posted key, used as the last
+		// matching step so any key format that normalizes to the attribute slug resolves.
+		$normalized_keys = [];
+		foreach ( array_keys( $variation_data ) as $posted_key ) {
+			$normalized_key = $this->normalize_variation_attribute_key( $posted_key );
+			if ( ! isset( $normalized_keys[ $normalized_key ] ) ) {
+				$normalized_keys[ $normalized_key ] = $posted_key;
+			}
+		}
+
 		foreach ( $variable_product_attributes as $attribute ) {
 			if ( ! $attribute['is_variation'] ) {
 				continue;
@@ -1463,9 +1473,47 @@ class CartController {
 							ENT_QUOTES,
 							get_bloginfo( 'charset' )
 						);
+				continue;
+			}
+
+			// Any other key format that normalizes to the attribute slug, e.g. size,
+			// Size %f0%9f%a4%8f, or an unencoded attribute_pa_size-🤏.
+			$attribute_slug = sanitize_title( $attribute['name'] );
+			if ( isset( $normalized_keys[ $attribute_slug ] ) ) {
+				$posted_key = $normalized_keys[ $attribute_slug ];
+
+				$return[ $variation_attribute_name ] =
+					$attribute['is_taxonomy']
+						?
+						sanitize_title( $variation_data[ $posted_key ] )
+						:
+						html_entity_decode(
+							wc_clean( $variation_data[ $posted_key ] ),
+							ENT_QUOTES,
+							get_bloginfo( 'charset' )
+						);
 			}
 		}
 		return $return;
+	}
+
+	/**
+	 * Normalize a posted variation attribute key to its canonical slug form.
+	 *
+	 * Strips the optional `attribute_` prefix and runs the rest through
+	 * sanitize_title(), so `Color 🖍️`, `Color %f0%9f%96%8d%ef%b8%8f`,
+	 * `color-%f0%9f%96%8d%ef%b8%8f`, and `attribute_color-%f0%9f%96%8d%ef%b8%8f`
+	 * all resolve to `color-%f0%9f%96%8d%ef%b8%8f`.
+	 *
+	 * @param string $key Posted attribute key.
+	 * @return string Normalized key.
+	 */
+	protected function normalize_variation_attribute_key( $key ) {
+		$key = (string) $key;
+		if ( 0 === strpos( $key, 'attribute_' ) ) {
+			$key = substr( $key, 10 );
+		}
+		return sanitize_title( $key );
 	}
 
 	/**

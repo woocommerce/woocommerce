@@ -924,6 +924,114 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * Test adding a variable product to cart with attribute keys that normalize to the attribute slug.
+	 *
+	 * Covers the formats from https://github.com/woocommerce/woocommerce/issues/47792 not handled by
+	 * exact matching: the unprefixed sanitized slug, the label with special characters encoded, and
+	 * the prefixed but unencoded slug shown on the Edit Attribute screen.
+	 */
+	public function test_add_variable_product_to_cart_with_normalized_attribute_keys() {
+		wc_empty_cart();
+
+		$fixtures = new FixtureData();
+
+		$variable_product = $fixtures->get_variable_product(
+			array(
+				'name'          => 'Test Variable Product with normalized attribute keys',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+				'weight'        => 10,
+			),
+			array(
+				// this will create a "taxonomy"/"global" attribute with special characters in its slug.
+				$fixtures->get_product_attribute( 'Sport ⚾️', array( 'Baseball ⚾', 'Cricket' ) ),
+				// this will create a "local" attribute.
+				[
+					'attribute_id'       => 0,
+					'attribute_taxonomy' => 'Color 🖍️',
+					'term_ids'           => [ 'Red 🔴', 'Blue 🔵' ],
+				],
+			)
+		);
+
+		$variation = $fixtures->get_variation_product(
+			$variable_product->get_id(),
+			array(
+				'pa_sport-⚾️'                 => 'baseball-%e2%9a%be',
+				'color-%f0%9f%96%8d%ef%b8%8f' => 'Red 🔴',
+			)
+		);
+
+		// Prefixed but unencoded slug for the global attribute, encoded label with
+		// spaces kept for the local attribute.
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		$request->set_body_params(
+			array(
+				'id'        => $variation->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'attribute_pa_sport-⚾️',
+						'value'     => 'Baseball ⚾',
+					),
+					array(
+						'attribute' => 'Color %f0%9f%96%8d%ef%b8%8f',
+						'value'     => 'Red 🔴',
+					),
+				),
+			)
+		);
+
+		$this->assertAPIResponse( $request, 201 );
+
+		// Unprefixed sanitized slug for both attributes.
+		wc_empty_cart();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		$request->set_body_params(
+			array(
+				'id'        => $variation->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'pa_sport-%e2%9a%be%ef%b8%8f',
+						'value'     => 'baseball-%e2%9a%be',
+					),
+					array(
+						'attribute' => 'color-%f0%9f%96%8d%ef%b8%8f',
+						'value'     => 'Red 🔴',
+					),
+				),
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			201,
+			array(
+				'items' => array(
+					array(
+						'variation' => array(
+							array(
+								'attribute' => 'Color 🖍️',
+								'value'     => 'Red 🔴',
+							),
+							array(
+								'attribute' => 'Sport ⚾️',
+								'value'     => 'baseball-%e2%9a%be',
+							),
+						),
+					),
+				),
+			)
+		);
+	}
+
+	/**
 	 * Test adding a variable product that doesn't exist to cart with attribute_* attributes.
 	 */
 	public function test_fails_add_variable_product_to_cart_with_wrong_attribute_data() {

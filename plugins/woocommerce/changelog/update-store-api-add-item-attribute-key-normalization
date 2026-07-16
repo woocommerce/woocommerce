@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+update: Store API `POST /cart/add-item` to accept any variation attribute key format that normalizes to the attribute slug
