@@ -336,7 +336,7 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
 			unset( $formatted_price, $args, $unformatted_price );
 
-			return 0 > $original_price ? 'localized-negative-price' : $price_html;
+			return 0 > $original_price ? 'localized-negative-price:' . $original_price : $price_html;
 		};
 		add_filter( 'wc_price', $price_filter, 10, 5 );
 
@@ -346,6 +346,18 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		$order->delete( true );
 		$product->delete( true );
 
-		$this->assertStringContainsString( "<small class='refunded'>localized-negative-price</small>", $preview_html, 'The wc_price filter should receive a negative preview refund amount.' );
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<!DOCTYPE html><html><body>' . $preview_html . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The order preview output should be valid enough for DOM parsing.' );
+
+		$xpath          = new DOMXPath( $document );
+		$refunded_nodes = $xpath->query( "//small[contains(concat(' ', normalize-space(@class), ' '), ' refunded ') and normalize-space(.) = 'localized-negative-price:-5']" );
+
+		$this->assertNotFalse( $refunded_nodes, 'The refunded price XPath query should be valid.' );
+		$this->assertSame( 1, $refunded_nodes->length, 'The preview should render the exact negative refund amount returned by the wc_price filter.' );
 	}
 }

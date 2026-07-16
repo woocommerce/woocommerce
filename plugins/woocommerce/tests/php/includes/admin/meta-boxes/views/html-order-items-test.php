@@ -48,7 +48,7 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
 			unset( $formatted_price, $args, $unformatted_price );
 
-			return 0 > $original_price ? 'localized-negative-price' : $price_html;
+			return 0 > $original_price ? 'localized-negative-price:' . $original_price : $price_html;
 		};
 		add_filter( 'wc_price', $price_filter, 10, 5 );
 
@@ -60,20 +60,21 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 		$order->delete( true );
 		$product->delete( true );
 
-		$this->assertMatchesRegularExpression(
-			'/<td class="label">Discount:<\/td>.*?<td class="total">\s*localized-negative-price\s*<\/td>/s',
-			$order_items_html,
-			'The wc_price filter should receive a negative order discount amount.'
-		);
-		$this->assertMatchesRegularExpression(
-			'/<td class="label refunded-total">Refunded:<\/td>.*?<td class="total refunded-total">localized-negative-price<\/td>/s',
-			$order_items_html,
-			'The wc_price filter should receive a negative refunded total.'
-		);
-		$this->assertMatchesRegularExpression(
-			'/<td class="label">Amount already refunded:<\/td>\s*<td class="total">localized-negative-price<\/td>/s',
-			$order_items_html,
-			'The wc_price filter should receive a negative amount already refunded.'
-		);
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<!DOCTYPE html><html><body>' . $order_items_html . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The order items output should be valid enough for DOM parsing.' );
+
+		$xpath          = new DOMXPath( $document );
+		$discount_nodes = $xpath->query( "//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'localized-negative-price:-10']" );
+		$refund_nodes   = $xpath->query( "//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'localized-negative-price:-25']" );
+
+		$this->assertNotFalse( $discount_nodes, 'The discount price XPath query should be valid.' );
+		$this->assertNotFalse( $refund_nodes, 'The refund price XPath query should be valid.' );
+		$this->assertSame( 1, $discount_nodes->length, 'The order items view should render the exact negative discount returned by the wc_price filter.' );
+		$this->assertSame( 2, $refund_nodes->length, 'Both refund total cells should render the exact negative amount returned by the wc_price filter.' );
 	}
 }

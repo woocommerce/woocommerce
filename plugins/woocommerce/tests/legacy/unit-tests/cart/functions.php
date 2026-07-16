@@ -188,7 +188,7 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
 			unset( $formatted_price, $args, $unformatted_price );
 
-			return 0 > $original_price ? 'localized-negative-price' : $price_html;
+			return 0 > $original_price ? 'localized-negative-price:' . $original_price : $price_html;
 		};
 		add_filter( 'wc_price', $price_filter, 10, 5 );
 
@@ -201,7 +201,7 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 		WC_Helper_Product::delete_product( $product->get_id() );
 
-		$this->assertStringStartsWith( 'localized-negative-price ', $coupon_html, 'The wc_price filter should receive a negative coupon amount.' );
+		$this->assertStringStartsWith( 'localized-negative-price:-1 ', $coupon_html, 'The wc_price filter should receive the exact negative coupon amount.' );
 	}
 
 	/**
