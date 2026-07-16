@@ -259,6 +259,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$this->set_variation( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
 		} else {
 			$this->set_product_id( $product->get_id() );
+			$this->set_variation_id( 0 );
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
