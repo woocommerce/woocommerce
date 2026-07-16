@@ -38,6 +38,7 @@ import { HiddenInputs } from './hidden-inputs';
 import { error } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
 import { resolveRegionComponent, resolveSaveHandler } from './registry';
+import { preserveInitialRepresentation } from './values';
 import { SettingsUIPageContext } from './settings-ui-context';
 import type {
 	SettingsUIField,
@@ -631,7 +632,11 @@ export const SettingsUIPage = ( {
 				Object.entries( nextValues ).forEach(
 					( [ fieldId, value ] ) => {
 						if ( typeof value !== 'undefined' ) {
-							mergedValues[ fieldId ] = value;
+							mergedValues[ fieldId ] =
+								preserveInitialRepresentation(
+									value,
+									initialValues[ fieldId ]
+								);
 						}
 					}
 				);
@@ -639,7 +644,7 @@ export const SettingsUIPage = ( {
 				return mergedValues;
 			} );
 		},
-		[]
+		[ initialValues ]
 	);
 
 	const handleCustomSave = useCallback( async () => {

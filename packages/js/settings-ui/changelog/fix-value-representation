@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix value handling for extension-supplied schemas: numeric option values match in the native select, the badge intent lookup ignores Object.prototype keys, and controls preserve the schema's value representation.
