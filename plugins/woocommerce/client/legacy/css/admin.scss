@@ -5351,25 +5351,14 @@ img.help_tip {
 			padding-right: 24px;
 		}
 
-		th label {
+		th label,
+		th .wc-settings-radio-title {
 			position: relative;
 			display: block;
-		}
 
-		th label {
 			img.help_tip,
 			.woocommerce-help-tip {
 				margin: -8px -24px 0 0;
-				position: absolute;
-				right: 0;
-				top: 50%;
-			}
-		}
-
-		th.with-tooltip {
-			img.help_tip,
-			.woocommerce-help-tip {
-				margin: -8px 0 0;
 				position: absolute;
 				right: 0;
 				top: 50%;
@@ -5576,22 +5565,11 @@ img.help_tip {
 				}
 			}
 
-			th label {
+			th label,
+			th .wc-settings-radio-title {
 				img.help_tip,
 				.woocommerce-help-tip {
 					margin: -7px -24px 0 0;
-
-					@media only screen and (max-width: 782px) {
-						right: auto;
-						margin-left: 5px;
-					}
-				}
-			}
-
-			th.with-tooltip {
-				img.help_tip,
-				.woocommerce-help-tip {
-					margin: -7px 0 0;
 
 					@media only screen and (max-width: 782px) {
 						right: auto;

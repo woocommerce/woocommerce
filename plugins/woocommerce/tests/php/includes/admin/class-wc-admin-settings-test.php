@@ -326,12 +326,13 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 
 		$xpath = new DOMXPath( $document );
 
-		$header = '//th[contains(concat(" ", normalize-space(@class), " "), " titledesc ")]';
-		$radio  = '//td[contains(concat(" ", normalize-space(@class), " "), " forminp-radio ")]';
+		$header      = '//th[contains(concat(" ", normalize-space(@class), " "), " titledesc ")]';
+		$radio_title = $header . '/span[contains(concat(" ", normalize-space(@class), " "), " wc-settings-radio-title ")]';
+		$radio       = '//td[contains(concat(" ", normalize-space(@class), " "), " forminp-radio ")]';
 
 		$this->assertSame( 0, $xpath->query( $header . '/label[@for="test_radio_setting"]' )->length );
-		$this->assertSame( 1, $xpath->query( $header . '[contains(normalize-space(.), "Radio title")]' )->length );
-		$this->assertSame( 1, $xpath->query( $header . '[contains(concat(" ", normalize-space(@class), " "), " with-tooltip ")]/span[contains(concat(" ", normalize-space(@class), " "), " woocommerce-help-tip ")][@aria-label="Radio help"]' )->length );
+		$this->assertSame( 1, $xpath->query( $radio_title . '[contains(normalize-space(.), "Radio title")]' )->length );
+		$this->assertSame( 1, $xpath->query( $radio_title . '/span[contains(concat(" ", normalize-space(@class), " "), " woocommerce-help-tip ")][@aria-label="Radio help"]' )->length );
 		$this->assertSame( 1, $xpath->query( $radio . '/fieldset/legend[contains(concat(" ", normalize-space(@class), " "), " screen-reader-text ")]/span[normalize-space(.)="Radio title"]' )->length );
 		$this->assertSame( 2, $xpath->query( $radio . '//input[@type="radio"]' )->length );
 	}
