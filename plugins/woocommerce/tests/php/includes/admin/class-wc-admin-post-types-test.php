@@ -60,13 +60,15 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Quick Edit preserves sale dates when the sale price changes.
-	 * @dataProvider sale_schedule_offsets_provider
+	 * @testdox Quick Edit preserves sale dates when a valid product price changes.
+	 * @dataProvider valid_price_changes_provider
 	 *
-	 * @param int $start_offset Sale start offset from the current time.
-	 * @param int $end_offset Sale end offset from the current time.
+	 * @param int    $start_offset Sale start offset from the current time.
+	 * @param int    $end_offset Sale end offset from the current time.
+	 * @param string $new_regular_price New regular price.
+	 * @param string $new_sale_price New sale price.
 	 */
-	public function test_quick_edit_preserves_sale_dates_when_sale_price_changes( int $start_offset, int $end_offset ): void {
+	public function test_quick_edit_preserves_sale_dates_when_prices_change( int $start_offset, int $end_offset, string $new_regular_price, string $new_sale_price ): void {
 		$now                = time();
 		$product            = WC_Helper_Product::create_simple_product();
 		$sale_date_from     = gmdate( 'Y-m-d H:i:s', $now + $start_offset );
@@ -83,8 +85,8 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 		$_REQUEST = array(
 			'woocommerce_quick_edit'       => '1',
 			'woocommerce_quick_edit_nonce' => wp_create_nonce( 'woocommerce_quick_edit_nonce' ),
-			'_regular_price'               => '100',
-			'_sale_price'                  => '70',
+			'_regular_price'               => $new_regular_price,
+			'_sale_price'                  => $new_sale_price,
 			'_stock_status'                => 'instock',
 		);
 
@@ -94,7 +96,8 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 		$updated_sale_from = $updated_product->get_date_on_sale_from( 'edit' );
 		$updated_sale_to   = $updated_product->get_date_on_sale_to( 'edit' );
 
-		$this->assertSame( '70', $updated_product->get_sale_price( 'edit' ), 'Quick Edit should persist the updated sale price.' );
+		$this->assertSame( $new_regular_price, $updated_product->get_regular_price( 'edit' ), 'Quick Edit should persist the regular price.' );
+		$this->assertSame( $new_sale_price, $updated_product->get_sale_price( 'edit' ), 'Quick Edit should persist the sale price.' );
 		$this->assertInstanceOf( WC_DateTime::class, $updated_sale_from, 'Quick Edit should preserve the sale start date.' );
 		$this->assertInstanceOf( WC_DateTime::class, $updated_sale_to, 'Quick Edit should preserve the sale end date.' );
 		$this->assertSame( $original_sale_from->getTimestamp(), $updated_sale_from->getTimestamp(), 'The sale start date should remain unchanged.' );
@@ -102,9 +105,13 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Quick Edit clears sale dates when a price change invalidates the sale.
+	 * @testdox Quick Edit clears sale dates when a price change ends the sale.
+	 * @dataProvider sale_ending_price_changes_provider
+	 *
+	 * @param string $new_regular_price New regular price.
+	 * @param string $new_sale_price New sale price.
 	 */
-	public function test_quick_edit_clears_sale_dates_when_regular_price_invalidates_sale(): void {
+	public function test_quick_edit_clears_sale_dates_when_sale_ends( string $new_regular_price, string $new_sale_price ): void {
 		$product = WC_Helper_Product::create_simple_product();
 
 		$product->set_regular_price( '100' );
@@ -116,8 +123,8 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 		$_REQUEST = array(
 			'woocommerce_quick_edit'       => '1',
 			'woocommerce_quick_edit_nonce' => wp_create_nonce( 'woocommerce_quick_edit_nonce' ),
-			'_regular_price'               => '70',
-			'_sale_price'                  => '80',
+			'_regular_price'               => $new_regular_price,
+			'_sale_price'                  => $new_sale_price,
 			'_stock_status'                => 'instock',
 		);
 
@@ -125,20 +132,33 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 
 		$updated_product = wc_get_product( $product->get_id() );
 
-		$this->assertSame( '', $updated_product->get_sale_price( 'edit' ), 'Quick Edit should clear a sale price that is not below the regular price.' );
-		$this->assertNull( $updated_product->get_date_on_sale_from( 'edit' ), 'Quick Edit should clear the start date when the sale price is invalidated.' );
-		$this->assertNull( $updated_product->get_date_on_sale_to( 'edit' ), 'Quick Edit should clear the end date when the sale price is invalidated.' );
+		$this->assertSame( '', $updated_product->get_sale_price( 'edit' ), 'Quick Edit should leave the product without a sale price.' );
+		$this->assertNull( $updated_product->get_date_on_sale_from( 'edit' ), 'Quick Edit should clear the start date when the sale ends.' );
+		$this->assertNull( $updated_product->get_date_on_sale_to( 'edit' ), 'Quick Edit should clear the end date when the sale ends.' );
 	}
 
 	/**
-	 * Provides active and future sale schedule offsets.
+	 * Provides valid price changes for active and future sale schedules.
 	 *
-	 * @return array<string, array{int, int}>
+	 * @return array<string, array{int, int, string, string}>
 	 */
-	public static function sale_schedule_offsets_provider(): array {
+	public static function valid_price_changes_provider(): array {
 		return array(
-			'active sale schedule' => array( -DAY_IN_SECONDS, DAY_IN_SECONDS ),
-			'future sale schedule' => array( DAY_IN_SECONDS, 2 * DAY_IN_SECONDS ),
+			'active schedule with sale price change'    => array( -DAY_IN_SECONDS, DAY_IN_SECONDS, '100', '70' ),
+			'future schedule with sale price change'    => array( DAY_IN_SECONDS, 2 * DAY_IN_SECONDS, '100', '70' ),
+			'active schedule with regular price change' => array( -DAY_IN_SECONDS, DAY_IN_SECONDS, '90', '80' ),
+		);
+	}
+
+	/**
+	 * Provides price changes that end an active sale.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public static function sale_ending_price_changes_provider(): array {
+		return array(
+			'regular price no longer above sale price' => array( '70', '80' ),
+			'sale price removed'                       => array( '100', '' ),
 		);
 	}
 }
