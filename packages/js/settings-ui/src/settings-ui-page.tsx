@@ -557,9 +557,13 @@ export const SettingsUIPage = ( {
 	);
 	const isDirty = dirtyFields.length > 0;
 
-	const dataFormAdapter = useMemo(
-		() => createDataFormAdapter( { schema, context, initialValues } ),
+	const pageContextValue = useMemo(
+		() => ( { schema, context, initialValues } ),
 		[ context, initialValues, schema ]
+	);
+	const dataFormAdapter = useMemo(
+		() => createDataFormAdapter( pageContextValue ),
+		[ pageContextValue ]
 	);
 	const dataFormSections = useMemo(
 		() => dataFormAdapter.getRenderSections( values ),
@@ -573,10 +577,6 @@ export const SettingsUIPage = ( {
 		values,
 		dataFormAdapter.fields,
 		validationForm
-	);
-	const pageContextValue = useMemo(
-		() => ( { schema, context, initialValues } ),
-		[ schema, context, initialValues ]
 	);
 
 	useEffect( () => {
