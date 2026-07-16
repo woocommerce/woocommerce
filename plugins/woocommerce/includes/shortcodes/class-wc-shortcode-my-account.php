@@ -51,7 +51,7 @@ class WC_Shortcode_My_Account {
 
 		// Order withdrawal is an EU regulation requirement which needs to be accessible without logging in.
 		if ( wc_get_container()->get( OrderWithdrawalController::class )->is_endpoint_request() ) {
-			wc_get_container()->get( OrderWithdrawalController::class )->render_endpoint();
+			wc_get_container()->get( OrderWithdrawalController::class )->render_view();
 			return;
 		}
 

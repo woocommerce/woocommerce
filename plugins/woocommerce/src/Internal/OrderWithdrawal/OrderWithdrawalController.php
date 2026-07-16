@@ -134,9 +134,9 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Render the order withdrawal endpoint.
+	 * Render the order withdrawal view.
 	 */
-	public function render_endpoint(): void {
+	public function render_view(): void {
 		if ( ! $this->is_enabled() ) {
 			return;
 		}
