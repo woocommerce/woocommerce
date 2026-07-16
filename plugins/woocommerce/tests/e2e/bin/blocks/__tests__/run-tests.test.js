@@ -1,9 +1,10 @@
 /* eslint-disable playwright/expect-expect -- Node's assertion module is not recognized by the Playwright lint rule. */
 const assert = require( 'node:assert/strict' );
+const { existsSync, readFileSync, writeFileSync } = require( 'node:fs' );
 const path = require( 'node:path' );
 const { describe, test } = require( 'node:test' );
 
-const { buildPlaywrightArguments, run } = require( '../run-tests' );
+const { extractShardArgument, run } = require( '../run-tests' );
 
 const manifest = {
 	schemaVersion: 1,
@@ -22,101 +23,90 @@ const baseArguments = [
 	'--project=blocks-chromium',
 ];
 
-describe( 'buildPlaywrightArguments', () => {
-	test( 'preserves the existing unsharded command behavior', () => {
+describe( 'extractShardArgument', () => {
+	test( 'extracts standard equals and separate-value shard arguments', () => {
 		assert.deepEqual(
-			buildPlaywrightArguments( {
-				cliArguments: [ '--grep', 'checkout' ],
-				files,
-				manifest,
-			} ),
-			[ ...baseArguments, '--grep', 'checkout' ]
+			extractShardArgument( [ '--shard=1/2', '--grep', 'checkout' ] ),
+			{
+				shard: { index: 1, count: 2 },
+				passthroughArguments: [ '--grep', 'checkout' ],
+			}
 		);
-	} );
-
-	test( 'replaces the duration shard argument with explicit planned files', () => {
 		assert.deepEqual(
-			buildPlaywrightArguments( {
-				cliArguments: [ '--duration-shard=1/2' ],
-				files,
-				manifest,
-				expectedShardCount: 2,
-			} ),
-			[
-				...baseArguments,
-				'\\x74ests\\/e2e\\/tests\\/blocks\\/a\\.spec\\.ts$',
-			]
+			extractShardArgument( [ '--shard', '2/3', '--last-failed' ] ),
+			{
+				shard: { index: 2, count: 3 },
+				passthroughArguments: [ '--last-failed' ],
+			}
 		);
-	} );
-
-	test( 'escapes explicit paths as exact Playwright regular expressions', () => {
-		const regexManifest = {
-			...manifest,
-			files: { 'blocks/a+[draft].spec.ts': 10 },
-		};
-
 		assert.deepEqual(
-			buildPlaywrightArguments( {
-				cliArguments: [ '--duration-shard=1/1' ],
-				files: Object.keys( regexManifest.files ),
-				manifest: regexManifest,
-				expectedShardCount: 1,
-			} ),
-			[
-				...baseArguments,
-				'\\x74ests\\/e2e\\/tests\\/blocks\\/a\\+\\[draft\\]\\.spec\\.ts$',
-			]
+			extractShardArgument( [ '--', '--shard=1/2', '--list' ] ),
+			{
+				shard: { index: 1, count: 2 },
+				passthroughArguments: [ '--list' ],
+			}
 		);
-	} );
-
-	test( 'passes last-failed and its neutral Playwright shard through unchanged', () => {
 		assert.deepEqual(
-			buildPlaywrightArguments( {
-				cliArguments: [
-					'--duration-shard=2/2',
-					'--last-failed',
-					'--shard=1/1',
-				],
-				files,
-				manifest,
-				expectedShardCount: 2,
-			} ),
-			[
-				...baseArguments,
-				'\\x74ests\\/e2e\\/tests\\/blocks\\/b\\.spec\\.ts$',
-				'\\x74ests\\/e2e\\/tests\\/blocks\\/c\\.spec\\.ts$',
+			extractShardArgument( [
+				'--shard=4/10',
 				'--last-failed',
 				'--shard=1/1',
-			]
+			] ),
+			{
+				shard: { index: 4, count: 10 },
+				passthroughArguments: [ '--last-failed' ],
+			}
 		);
 	} );
 
-	test( 'rejects multiple duration shard arguments', () => {
+	test( 'returns no shard without changing other arguments', () => {
+		assert.deepEqual( extractShardArgument( [ '--grep', 'checkout' ] ), {
+			shard: undefined,
+			passthroughArguments: [ '--grep', 'checkout' ],
+		} );
+	} );
+
+	test( 'rejects missing and unsupported duplicate shard values', () => {
 		assert.throws(
-			() =>
-				buildPlaywrightArguments( {
-					cliArguments: [
-						'--duration-shard=1/2',
-						'--duration-shard=2/2',
-					],
-					files,
-					manifest,
-					expectedShardCount: 2,
-				} ),
-			/Expected at most one --duration-shard argument/
+			() => extractShardArgument( [ '--shard' ] ),
+			/Expected a value after --shard/
 		);
+		for ( const arguments_ of [
+			[ '--shard=1/2', '--shard=1/1' ],
+			[ '--shard=1/2', '--last-failed', '--shard=2/2' ],
+			[ '--shard=1/1', '--last-failed', '--shard=1/2' ],
+			[ '--shard=1/2', '--last-failed', '--shard=1/1', '--shard=1/1' ],
+		] ) {
+			assert.throws(
+				() => extractShardArgument( arguments_ ),
+				/Multiple --shard arguments are only supported for --last-failed retries ending in --shard=1\/1/
+			);
+		}
 	} );
 } );
 
 describe( 'run', () => {
-	test( 'launches Playwright once and returns its exit status', () => {
+	function playwrightReport( reportFiles ) {
+		return {
+			suites: [
+				{
+					specs: reportFiles.map( ( file ) => ( {
+						file,
+						tests: [ { projectName: 'blocks-chromium' } ],
+					} ) ),
+				},
+			],
+		};
+	}
+
+	test( 'launches Playwright once for an unsharded command', () => {
 		const calls = [];
 		const spawn = ( command, arguments_, options ) => {
 			calls.push( { command, arguments_, options } );
 			return { status: 7 };
 		};
 
-		assert.equal( run( [ '--grep', 'checkout' ], spawn ), 7 );
+		assert.equal( run( [ '--', '--grep', 'checkout' ], spawn ), 7 );
 		assert.equal( calls.length, 1 );
 		assert.equal( calls[ 0 ].command, process.execPath );
 		assert.equal(
@@ -132,14 +122,128 @@ describe( 'run', () => {
 		assert.equal( calls[ 0 ].options.env, process.env );
 	} );
 
-	test( 'throws process launch and signal failures', () => {
+	test( 'preserves the planner shard for a failed-test retry', () => {
+		const calls = [];
+		let selectedTestList;
+		let reportPath;
+		let testListPath;
+		const spawnHandlers = [
+			( arguments_, options ) => {
+				reportPath = options.env.PLAYWRIGHT_JSON_OUTPUT_FILE;
+				writeFileSync(
+					reportPath,
+					JSON.stringify( playwrightReport( files ) )
+				);
+				return { status: 0 };
+			},
+			( arguments_ ) => {
+				testListPath = arguments_
+					.find( ( argument ) =>
+						argument.startsWith( '--test-list=' )
+					)
+					.slice( '--test-list='.length );
+				selectedTestList = readFileSync( testListPath, 'utf8' );
+				return { status: 7 };
+			},
+		];
+		const spawn = ( command, arguments_, options ) => {
+			const handler = spawnHandlers[ calls.length ];
+			calls.push( { command, arguments_, options } );
+			return handler( arguments_, options );
+		};
+
+		assert.equal(
+			run(
+				[ '--shard=2/2', '--last-failed', '--shard=1/1' ],
+				spawn,
+				manifest
+			),
+			7
+		);
+		assert.equal( calls.length, 2 );
+		assert.deepEqual( calls[ 0 ].arguments_.slice( 1 ), [
+			...baseArguments,
+			'--list',
+			'--reporter=json',
+		] );
+		assert.match(
+			calls[ 0 ].options.env.PLAYWRIGHT_JSON_OUTPUT_FILE,
+			/playwright-report\.json$/
+		);
+		assert.deepEqual( calls[ 0 ].options.stdio, [
+			'inherit',
+			'ignore',
+			'inherit',
+		] );
+		assert.deepEqual( calls[ 1 ].arguments_.slice( 1 ), [
+			...baseArguments,
+			`--test-list=${ testListPath }`,
+			'--last-failed',
+		] );
+		assert.equal(
+			selectedTestList,
+			'[blocks-chromium] › blocks/b.spec.ts\n' +
+				'[blocks-chromium] › blocks/c.spec.ts\n'
+		);
+		assert.equal( existsSync( reportPath ), false );
+		assert.equal( existsSync( testListPath ), false );
+	} );
+
+	test( 'does not execute tests when Playwright discovery fails', () => {
+		let calls = 0;
+		const spawn = () => {
+			calls++;
+			return { status: 4 };
+		};
+
+		assert.equal( run( [ '--shard=1/2' ], spawn, manifest ), 4 );
+		assert.equal( calls, 1 );
+	} );
+
+	test( 'rejects malformed and empty Playwright inventories', () => {
+		const malformedSpawn = ( command, arguments_, options ) => {
+			writeFileSync(
+				options.env.PLAYWRIGHT_JSON_OUTPUT_FILE,
+				'not JSON'
+			);
+			return { status: 0 };
+		};
+		assert.throws(
+			() => run( [ '--shard=1/2' ], malformedSpawn, manifest ),
+			/Unable to parse Playwright test inventory/
+		);
+
+		const emptySpawn = ( command, arguments_, options ) => {
+			writeFileSync(
+				options.env.PLAYWRIGHT_JSON_OUTPUT_FILE,
+				JSON.stringify( { suites: [] } )
+			);
+			return { status: 0 };
+		};
+		assert.throws(
+			() => run( [ '--shard=1/2' ], emptySpawn, manifest ),
+			/No tests found for Playwright project blocks-chromium/
+		);
+	} );
+
+	test( 'throws process launch and signal failures during discovery', () => {
 		const launchError = new Error( 'could not launch' );
 		assert.throws(
-			() => run( [], () => ( { error: launchError } ) ),
+			() =>
+				run(
+					[ '--shard=1/2' ],
+					() => ( { error: launchError } ),
+					manifest
+				),
 			launchError
 		);
 		assert.throws(
-			() => run( [], () => ( { signal: 'SIGTERM' } ) ),
+			() =>
+				run(
+					[ '--shard=1/2' ],
+					() => ( { signal: 'SIGTERM' } ),
+					manifest
+				),
 			/Playwright terminated with signal SIGTERM/
 		);
 	} );
@@ -156,7 +260,7 @@ describe( 'package configuration', () => {
 		);
 		const expectedArguments = Array.from(
 			{ length: 10 },
-			( _, index ) => `--duration-shard=${ index + 1 }/10`
+			( _, index ) => `--shard=${ index + 1 }/10`
 		);
 
 		assert.deepEqual(
@@ -184,15 +288,19 @@ describe( 'package configuration', () => {
 
 		assert.equal(
 			packageJson.scripts[ 'test:e2e:blocks' ],
-			'node tests/e2e/bin/blocks/run-tests.js'
+			'pnpm test:e2e:sharding && node tests/e2e/bin/blocks/run-tests.js'
 		);
 		assert.equal(
 			packageJson.scripts[ 'test:e2e:sharding' ],
 			'node --test tests/e2e/bin/blocks/__tests__/*.test.js'
 		);
+		assert.equal(
+			packageJson.scripts[ 'test:e2e:blocks:generate-sharding-manifest' ],
+			'node tests/e2e/bin/blocks/generate-duration-manifest.js'
+		);
 	} );
 
-	test( 'runs the fast regression suite when sharding code changes', () => {
+	test( 'does not add a dedicated CI job for the fast regression suite', () => {
 		const packageJson = require( path.resolve(
 			__dirname,
 			'../../../../../package.json'
@@ -201,18 +309,6 @@ describe( 'package configuration', () => {
 			( candidate ) => candidate.name === 'Blocks E2E duration sharding'
 		);
 
-		assert.deepEqual( testDefinition, {
-			name: 'Blocks E2E duration sharding',
-			testType: 'unit',
-			command: 'test:e2e:sharding',
-			changes: [
-				'tests/e2e/bin/blocks/block-test-durations.json',
-				'tests/e2e/bin/blocks/duration-sharding.js',
-				'tests/e2e/bin/blocks/run-tests.js',
-				'tests/e2e/bin/blocks/__tests__/**',
-			],
-			onlyForDependencies: [],
-			events: [ 'pull_request', 'push' ],
-		} );
+		assert.equal( testDefinition, undefined );
 	} );
 } );

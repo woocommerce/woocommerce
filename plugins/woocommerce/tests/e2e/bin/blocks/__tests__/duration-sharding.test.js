@@ -1,14 +1,12 @@
 /* eslint-disable playwright/expect-expect -- Node's assertion module is not recognized by the Playwright lint rule. */
 const assert = require( 'node:assert/strict' );
-const { mkdtempSync, mkdirSync, rmSync, writeFileSync } = require( 'node:fs' );
-const { tmpdir } = require( 'node:os' );
-const path = require( 'node:path' );
 const { describe, test } = require( 'node:test' );
 
 const {
 	assignDurationShards,
-	discoverBlocksSpecs,
-	parseDurationShard,
+	buildProjectTestList,
+	collectProjectFiles,
+	parseShard,
 	planDurationShards,
 	validateDurationManifest,
 } = require( '../duration-sharding' );
@@ -137,23 +135,23 @@ describe( 'assignDurationShards', () => {
 	} );
 } );
 
-describe( 'parseDurationShard', () => {
-	test( 'parses the first and last configured shards', () => {
-		assert.deepEqual( parseDurationShard( '1/10' ), {
+describe( 'parseShard', () => {
+	test( 'parses standard Playwright shard values with arbitrary totals', () => {
+		assert.deepEqual( parseShard( '1/10' ), {
 			index: 1,
 			count: 10,
 		} );
-		assert.deepEqual( parseDurationShard( '10/10' ), {
-			index: 10,
-			count: 10,
+		assert.deepEqual( parseShard( '2/3' ), {
+			index: 2,
+			count: 3,
 		} );
 	} );
 
-	test( 'rejects malformed, out-of-range, and unexpected shard counts', () => {
-		for ( const value of [ '1', '0/10', '11/10', 'one/10', '1/9' ] ) {
+	test( 'rejects malformed and out-of-range shard values', () => {
+		for ( const value of [ '1', '0/10', '11/10', 'one/10', '1/0' ] ) {
 			assert.throws(
-				() => parseDurationShard( value ),
-				/Duration shard must use N\/10 with N between 1 and 10/
+				() => parseShard( value ),
+				/Shard must use N\/M with positive integers and N no greater than M/
 			);
 		}
 	} );
@@ -220,42 +218,63 @@ describe( 'duration manifest', () => {
 	} );
 } );
 
-describe( 'discoverBlocksSpecs', () => {
-	test( 'returns sorted POSIX spec paths and excludes non-spec files', () => {
-		const fixtureRoot = mkdtempSync(
-			path.join( tmpdir(), 'wc-duration-shards-' )
-		);
-		mkdirSync( path.join( fixtureRoot, 'blocks', 'nested' ), {
-			recursive: true,
-		} );
-		writeFileSync( path.join( fixtureRoot, 'blocks', 'z.spec.ts' ), '' );
-		writeFileSync(
-			path.join( fixtureRoot, 'blocks', 'nested', 'a.spec.ts' ),
-			''
-		);
-		writeFileSync(
-			path.join( fixtureRoot, 'blocks', 'nested', 'helper.ts' ),
-			''
-		);
+describe( 'Playwright project inventory', () => {
+	const report = {
+		suites: [
+			{
+				specs: [
+					{
+						file: '../fixtures/blocks-setup.ts',
+						tests: [ { projectName: 'blocks setup' } ],
+					},
+					{
+						file: 'blocks/z.spec.ts',
+						tests: [ { projectName: 'blocks-chromium' } ],
+					},
+				],
+				suites: [
+					{
+						specs: [
+							{
+								file: 'blocks\\nested\\a.test.ts',
+								tests: [ { projectName: 'blocks-chromium' } ],
+							},
+						],
+					},
+				],
+			},
+		],
+	};
 
-		try {
-			assert.deepEqual( discoverBlocksSpecs( fixtureRoot ), [
-				'blocks/nested/a.spec.ts',
-				'blocks/z.spec.ts',
-			] );
-		} finally {
-			rmSync( fixtureRoot, { recursive: true, force: true } );
-		}
+	test( 'returns the sorted files Playwright collected for one project', () => {
+		assert.deepEqual( collectProjectFiles( report, 'blocks-chromium' ), [
+			'blocks/nested/a.test.ts',
+			'blocks/z.spec.ts',
+		] );
 	} );
 
-	test( 'plans the complete current inventory when the manifest drifts', () => {
-		const testsRoot = path.resolve( __dirname, '../../../tests' );
-		const manifest = require( '../block-test-durations.json' );
-		const files = discoverBlocksSpecs( testsRoot );
-		const newFile = files.find( ( file ) =>
-			Object.hasOwn( manifest.files, file )
+	test( 'renders project-qualified file-only test-list entries', () => {
+		assert.equal(
+			buildProjectTestList( 'blocks-chromium', [
+				'blocks/nested/a.test.ts',
+				'blocks/z.spec.ts',
+			] ),
+			'[blocks-chromium] › blocks/nested/a.test.ts\n' +
+				'[blocks-chromium] › blocks/z.spec.ts\n'
 		);
-		assert.ok( newFile, 'Expected at least one measured current spec' );
+	} );
+
+	test( 'plans the complete collected inventory when the manifest drifts', () => {
+		const files = collectProjectFiles( report, 'blocks-chromium' );
+		const manifest = {
+			schemaVersion: 1,
+			fallbackDurationMs: 25,
+			files: {
+				'blocks/nested/a.test.ts': 100,
+				'blocks/z.spec.ts': 50,
+			},
+		};
+		const newFile = files[ 0 ];
 		const driftedManifest = {
 			...manifest,
 			files: {
@@ -268,17 +287,12 @@ describe( 'discoverBlocksSpecs', () => {
 			},
 		};
 
-		validateDurationManifest( manifest );
-		assert.deepEqual(
-			manifest.sourceRuns,
-			[ 29257210019, 29258795060, 29256225917 ]
-		);
 		assert.equal( driftedManifest.files[ newFile ], undefined );
 
 		const plannedFiles = planDurationShards( {
 			files,
 			manifest: driftedManifest,
-			shardCount: 10,
+			shardCount: 2,
 		} )
 			.flatMap( ( shard ) => shard.files )
 			.sort();

@@ -77,7 +77,8 @@
 		"test:e2e:core-parallel": "pnpm test:e2e:default --project=core-parallel",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
-		"test:e2e:blocks": "node tests/e2e/bin/blocks/run-tests.js",
+		"test:e2e:blocks": "pnpm test:e2e:sharding && node tests/e2e/bin/blocks/run-tests.js",
+		"test:e2e:blocks:generate-sharding-manifest": "node tests/e2e/bin/blocks/generate-duration-manifest.js",
 		"test:e2e:blocks:performance": "pnpm playwright test --config=tests/e2e/playwright.performance.config.ts --project=blocks-performance",
 		"test:e2e:sharding": "node --test tests/e2e/bin/blocks/__tests__/*.test.js",
 		"test:e2e:email-update-propagation:pr": "pnpm test:e2e:default --project=core-serial --project=core-parallel --grep @pr tests/email-editor/update-propagation",
@@ -782,37 +783,21 @@
 					}
 				},
 				{
-					"name": "Blocks E2E duration sharding",
-					"testType": "unit",
-					"command": "test:e2e:sharding",
-					"changes": [
-						"tests/e2e/bin/blocks/block-test-durations.json",
-						"tests/e2e/bin/blocks/duration-sharding.js",
-						"tests/e2e/bin/blocks/run-tests.js",
-						"tests/e2e/bin/blocks/__tests__/**"
-					],
-					"onlyForDependencies": [],
-					"events": [
-						"pull_request",
-						"push"
-					]
-				},
-				{
 					"name": "Blocks e2e tests",
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
-						"--duration-shard=1/10",
-						"--duration-shard=2/10",
-						"--duration-shard=3/10",
-						"--duration-shard=4/10",
-						"--duration-shard=5/10",
-						"--duration-shard=6/10",
-						"--duration-shard=7/10",
-						"--duration-shard=8/10",
-						"--duration-shard=9/10",
-						"--duration-shard=10/10"
+						"--shard=1/10",
+						"--shard=2/10",
+						"--shard=3/10",
+						"--shard=4/10",
+						"--shard=5/10",
+						"--shard=6/10",
+						"--shard=7/10",
+						"--shard=8/10",
+						"--shard=9/10",
+						"--shard=10/10"
 					],
 					"changes": [
 						"patterns/**/*.php",
@@ -858,16 +843,16 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
-						"--duration-shard=1/10",
-						"--duration-shard=2/10",
-						"--duration-shard=3/10",
-						"--duration-shard=4/10",
-						"--duration-shard=5/10",
-						"--duration-shard=6/10",
-						"--duration-shard=7/10",
-						"--duration-shard=8/10",
-						"--duration-shard=9/10",
-						"--duration-shard=10/10"
+						"--shard=1/10",
+						"--shard=2/10",
+						"--shard=3/10",
+						"--shard=4/10",
+						"--shard=5/10",
+						"--shard=6/10",
+						"--shard=7/10",
+						"--shard=8/10",
+						"--shard=9/10",
+						"--shard=10/10"
 					],
 					"changes": [
 						"tests/e2e/bin/blocks/**",
@@ -906,16 +891,16 @@
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
-						"--duration-shard=1/10",
-						"--duration-shard=2/10",
-						"--duration-shard=3/10",
-						"--duration-shard=4/10",
-						"--duration-shard=5/10",
-						"--duration-shard=6/10",
-						"--duration-shard=7/10",
-						"--duration-shard=8/10",
-						"--duration-shard=9/10",
-						"--duration-shard=10/10"
+						"--shard=1/10",
+						"--shard=2/10",
+						"--shard=3/10",
+						"--shard=4/10",
+						"--shard=5/10",
+						"--shard=6/10",
+						"--shard=7/10",
+						"--shard=8/10",
+						"--shard=9/10",
+						"--shard=10/10"
 					],
 					"changes": [
 						"tests/e2e/bin/blocks/**",

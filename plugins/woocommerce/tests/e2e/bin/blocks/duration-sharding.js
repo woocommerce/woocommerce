@@ -1,7 +1,4 @@
-const { globSync } = require( 'glob' );
-
 const DURATION_MANIFEST_SCHEMA_VERSION = 1;
-const DURATION_SHARD_COUNT = 10;
 
 function compareFilePaths( first, second ) {
 	if ( first < second ) {
@@ -64,22 +61,21 @@ function assignDurationShards( weightedFiles, shardCount ) {
 	return shards;
 }
 
-function parseDurationShard(
-	value,
-	expectedShardCount = DURATION_SHARD_COUNT
-) {
+function parseShard( value ) {
 	const match = /^(\d+)\/(\d+)$/.exec( value );
 	const index = Number( match?.[ 1 ] );
 	const count = Number( match?.[ 2 ] );
 
 	if (
 		! match ||
-		count !== expectedShardCount ||
+		! Number.isSafeInteger( index ) ||
+		! Number.isSafeInteger( count ) ||
 		index < 1 ||
+		count < 1 ||
 		index > count
 	) {
 		throw new Error(
-			`Duration shard must use N/${ expectedShardCount } with N between 1 and ${ expectedShardCount }`
+			'Shard must use N/M with positive integers and N no greater than M'
 		);
 	}
 
@@ -117,13 +113,34 @@ function validateDurationManifest( manifest ) {
 	}
 }
 
-function discoverBlocksSpecs( testsRoot ) {
-	return globSync( 'blocks/**/*.spec.ts', {
-		cwd: testsRoot,
-		nodir: true,
-	} )
-		.map( ( file ) => file.replaceAll( '\\', '/' ) )
-		.sort();
+function collectProjectFiles( report, projectName ) {
+	const files = new Set();
+
+	function visitSuites( suites ) {
+		for ( const suite of suites ?? [] ) {
+			for ( const spec of suite.specs ?? [] ) {
+				if (
+					spec.tests?.some(
+						( playwrightTest ) =>
+							playwrightTest.projectName === projectName
+					)
+				) {
+					files.add( spec.file.replaceAll( '\\', '/' ) );
+				}
+			}
+			visitSuites( suite.suites );
+		}
+	}
+
+	visitSuites( report?.suites );
+	return [ ...files ].sort( compareFilePaths );
+}
+
+function buildProjectTestList( projectName, files ) {
+	return files
+		.map( ( file ) => `[${ projectName }] › ${ file }` )
+		.join( '\n' )
+		.concat( files.length > 0 ? '\n' : '' );
 }
 
 function planDurationShards( { files, manifest, shardCount } ) {
@@ -138,8 +155,9 @@ function planDurationShards( { files, manifest, shardCount } ) {
 
 module.exports = {
 	assignDurationShards,
-	discoverBlocksSpecs,
-	parseDurationShard,
+	buildProjectTestList,
+	collectProjectFiles,
+	parseShard,
 	planDurationShards,
 	validateDurationManifest,
 };
