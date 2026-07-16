@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+const { defineConfig } = require( 'eslint/config' );
 const wordpress = require( '@wordpress/eslint-plugin' );
 
 /**
@@ -20,19 +21,7 @@ const TEST_FILES = [
 	'**/tests/**/*.[jt]s?(x)',
 ];
 
-/**
- * Restrict a flat config array to the given files.
- *
- * Upstream test configs are shipped unscoped, so consumers must narrow them.
- *
- * @param {Array}          configs Flat config objects.
- * @param {Array<string>}  files   Glob patterns to scope them to.
- * @return {Array} Scoped flat config objects.
- */
-const scopeToFiles = ( configs, files ) =>
-	configs.map( ( config ) => ( { ...config, files } ) );
-
-module.exports = [
+module.exports = defineConfig( [
 	{
 		rules: {
 			// Group external imports before internal ones (`~/…` and relative).
@@ -54,15 +43,17 @@ module.exports = [
 			},
 		},
 	},
-	...scopeToFiles( wordpress.configs[ 'test-unit' ], TEST_FILES ),
-	...scopeToFiles( reactTestingLibraryConfig, TEST_FILES ),
 	{
-		// The `jest` plugin is only registered by the test-unit config above.
+		// Upstream ships these unscoped; `extends` narrows them to test files.
 		files: TEST_FILES,
+		extends: [
+			wordpress.configs[ 'test-unit' ],
+			reactTestingLibraryConfig,
+		],
 		rules: {
 			// Temporary conversion to warnings until the below are all handled.
 			'jest/no-deprecated-functions': 'warn',
 			'jest/valid-title': 'warn',
 		},
 	},
-];
+] );

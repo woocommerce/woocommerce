@@ -16,7 +16,7 @@ However, this ruleset does implement the following (which do not conflict with W
 
 This package is **Flat Config only**. It requires:
 
-- ESLint `^9.0.0 || ^10.0.0`
+- ESLint `^9.22.0 || ^10.0.0` (9.22 ships the `eslint/config` helpers this uses)
 - `prettier` `>=3` (WooCommerce uses `wp-prettier@3`)
 - `typescript` `>=5`
 
@@ -89,7 +89,7 @@ root.
 ## Migrating from v3
 
 `v3` exported an eslintrc config object and peered ESLint 8. `v4` exports Flat
-Config arrays and peers ESLint `^9 || ^10`.
+Config arrays and peers ESLint `^9.22 || ^10`.
 
 - Replace `.eslintrc.js` with `eslint.config.mjs`, and
   `extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ]` with
