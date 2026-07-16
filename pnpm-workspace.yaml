@@ -59,7 +59,7 @@ catalogs:
 	# https://github.com/WordPress/gutenberg/blob/e1d5efda04d8a8d868f220392f89f68cf37f1893/packages/dependency-extraction-webpack-plugin/lib/util.js#L2-L14
     wp-bundled:
         '@wordpress/admin-ui': 2.4.1
-        '@wordpress/dataviews': 10.1.7
+        '@wordpress/dataviews': 10.3.0
         '@wordpress/fields': 0.25.11
         '@wordpress/icons': 11.0.1
         '@wordpress/interface': 9.18.5

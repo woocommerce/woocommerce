@@ -144,6 +144,40 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It preserves supported field validation metadata.
+	 */
+	public function test_from_legacy_settings_preserves_validation_metadata(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'test',
+			'advanced',
+			'Test settings',
+			array(
+				array(
+					'id'         => 'woocommerce_test_validated',
+					'type'       => 'text',
+					'title'      => 'Validated field',
+					'validation' => array(
+						'required'  => true,
+						'elements'  => false,
+						'validator' => 'test/unique-value',
+						'unknown'   => 'ignored',
+					),
+				),
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'required'  => true,
+				'elements'  => false,
+				'validator' => 'test/unique-value',
+			),
+			$schema['groups']['default']['fields'][0]['validation'],
+			'The schema should expose only supported validation metadata.'
+		);
+	}
+
+	/**
 	 * @testdox It preserves sanitized group description markup and header actions.
 	 */
 	public function test_from_legacy_settings_preserves_group_description_and_actions(): void {

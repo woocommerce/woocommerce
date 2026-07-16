@@ -5,6 +5,7 @@ import {
 	__resetRegistry,
 	registerSettingsExtension,
 	resolveFieldComponent,
+	resolveFieldValidator,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
 	resolveRegionComponent,
@@ -13,6 +14,7 @@ import {
 import type {
 	SettingsExtensionRegistration,
 	SettingsFieldComponent,
+	SettingsFieldValidator,
 	SettingsRegionComponent,
 	SettingsSaveHandler,
 	SettingsVisibilityPredicate,
@@ -272,12 +274,16 @@ describe( 'settings extension registry', () => {
 		).toBeUndefined();
 	} );
 
-	it( 'resolves save handlers and region components by scope', () => {
+	it( 'resolves validators, save handlers, and region components by scope', () => {
+		const validator: SettingsFieldValidator = () => null;
 		const saveHandler: SettingsSaveHandler = () => undefined;
 		const region: SettingsRegionComponent = () => null;
 
 		registerSettingsExtension( {
 			scope: { page: 'registry-save-region' },
+			validators: {
+				'field/validator': validator,
+			},
 			saveHandlers: {
 				'save/handler': saveHandler,
 			},
@@ -286,6 +292,11 @@ describe( 'settings extension registry', () => {
 			},
 		} );
 
+		expect(
+			resolveFieldValidator( 'field/validator', {
+				page: 'registry-save-region',
+			} )
+		).toBe( validator );
 		expect(
 			resolveSaveHandler( 'save/handler', {
 				page: 'registry-save-region',

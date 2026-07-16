@@ -1,6 +1,6 @@
 # Settings UI
 
-React utilities for WooCommerce settings pages that opt in to the settings UI renderer.
+React utilities that adapt WooCommerce settings schemas to WordPress DataForm and the shared Settings UI shell.
 
 For the full integration guide, see [Settings UI](../../../docs/extensions/settings-and-config/settings-ui.md).
 
@@ -36,4 +36,4 @@ array(
 )
 ```
 
-Use native fields when possible and register custom components only for fields that need plugin-specific UI.
+Use DataForm controls when possible and register custom components only for fields that need plugin-specific UI.

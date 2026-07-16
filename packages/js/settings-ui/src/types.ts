@@ -28,6 +28,12 @@ export type SettingsUIVisibilityRule = {
 	value?: SettingsValue | SettingsValue[];
 };
 
+export type SettingsUIValidation = {
+	required?: boolean;
+	elements?: boolean;
+	validator?: string;
+};
+
 export type SettingsUIField = {
 	id: string;
 	label: string;
@@ -40,6 +46,7 @@ export type SettingsUIField = {
 	disabled?: boolean;
 	customAttributes?: Record< string, string | number | boolean >;
 	visibility?: SettingsUIVisibilityRule;
+	validation?: SettingsUIValidation;
 	save?: SettingsUISaveSchema;
 };
 
@@ -163,6 +170,19 @@ export type SettingsSaveHandler = (
 	args: SettingsSaveHandlerArgs
 ) => Promise< SettingsSaveResult > | SettingsSaveResult;
 
+export type SettingsFieldValidatorArgs = {
+	field: SettingsUIField;
+	value: SettingsValue;
+	values: SettingsValues;
+	initialValues: SettingsValues;
+	context: SettingsFieldContext;
+	schema: SettingsUISchema;
+};
+
+export type SettingsFieldValidator = (
+	args: SettingsFieldValidatorArgs
+) => Promise< string | null > | string | null;
+
 export type SettingsRegionComponentProps = {
 	values: SettingsValues;
 	initialValues: SettingsValues;
@@ -186,6 +206,7 @@ export type SettingsExtensionRegistration = {
 	typeRenderers?: Record< string, SettingsFieldComponent >;
 	fieldVisibility?: Record< string, SettingsVisibilityPredicate >;
 	groupVisibility?: Record< string, SettingsVisibilityPredicate >;
+	validators?: Record< string, SettingsFieldValidator >;
 	saveHandlers?: Record< string, SettingsSaveHandler >;
 	regions?: Record< string, SettingsRegionComponent >;
 };

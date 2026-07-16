@@ -7,6 +7,7 @@ import type {
 	SettingsExtensionRegistration,
 	SettingsFieldComponent,
 	SettingsFieldContext,
+	SettingsFieldValidator,
 	SettingsRegionComponent,
 	SettingsSaveHandler,
 	SettingsVisibilityPredicate,
@@ -20,6 +21,7 @@ const registrationMapKeys = [
 	'typeRenderers',
 	'fieldVisibility',
 	'groupVisibility',
+	'validators',
 	'saveHandlers',
 	'regions',
 ] as const;
@@ -232,6 +234,23 @@ export const resolveGroupVisibilityPredicate = (
 		context,
 		( registration ) => registration.groupVisibility?.[ groupId ]
 	);
+
+export const resolveFieldValidator = (
+	validator: string,
+	context: SettingsFieldContext
+): SettingsFieldValidator | undefined => {
+	const resolvedValidator = findInMatchingRegistrations(
+		context,
+		( registration ) => registration.validators?.[ validator ]
+	);
+
+	if ( resolvedValidator ) {
+		return resolvedValidator;
+	}
+
+	warn( `Field validator "${ validator }" is not registered.`, { context } );
+	return undefined;
+};
 
 export const resolveSaveHandler = (
 	handler: string,

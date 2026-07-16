@@ -176,6 +176,11 @@ class SettingsUISchema {
 			$field['visibility'] = $visibility;
 		}
 
+		$validation = self::get_validation( $setting );
+		if ( $validation ) {
+			$field['validation'] = $validation;
+		}
+
 		$options = self::get_options( $setting );
 		if ( ! empty( $options ) ) {
 			$field['options'] = $options;
@@ -341,6 +346,34 @@ class SettingsUISchema {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Normalize field validation metadata.
+	 *
+	 * @param array $setting Legacy field definition.
+	 * @return array
+	 */
+	private static function get_validation( array $setting ): array {
+		if ( ! isset( $setting['validation'] ) || ! is_array( $setting['validation'] ) ) {
+			return array();
+		}
+
+		$validation = array();
+		foreach ( array( 'required', 'elements' ) as $rule ) {
+			if ( isset( $setting['validation'][ $rule ] ) && is_bool( $setting['validation'][ $rule ] ) ) {
+				$validation[ $rule ] = $setting['validation'][ $rule ];
+			}
+		}
+
+		if ( isset( $setting['validation']['validator'] ) && is_string( $setting['validation']['validator'] ) ) {
+			$validator = sanitize_text_field( $setting['validation']['validator'] );
+			if ( '' !== $validator ) {
+				$validation['validator'] = $validator;
+			}
+		}
+
+		return $validation;
 	}
 
 	/**

@@ -8,7 +8,7 @@ sidebar_position: 5
 
 The settings UI is an opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow.
 
-It is designed for extension authors who want to migrate incrementally. PHP still owns page registration, settings schema, permissions, script dependencies, and persistence. React owns field rendering and client-side interaction.
+It is designed for extension authors who want to migrate incrementally. PHP still owns page registration, settings schema, permissions, script dependencies, and persistence. The React renderer adapts the schema to WordPress DataForm for controls, field layout, visibility, and validation.
 
 ## Status
 
@@ -176,9 +176,9 @@ $schema['shell']['sectionNavigation'] = array(
 );
 ```
 
-## Native field migration
+## DataForm field migration
 
-The legacy adapter converts the existing `get_settings()` array into a canonical schema for React. It supports common settings fields:
+The legacy adapter converts the existing `get_settings()` array into a canonical schema and the Settings UI adapts that schema to DataForm. It supports common settings fields:
 
 -   `text`
 -   `password`
@@ -199,6 +199,31 @@ The legacy adapter converts the existing `get_settings()` array into a canonical
 Fields before the first `title` marker are placed into a default group automatically.
 
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
+
+Settings groups render as DataForm card layouts by default. A group keeps the Settings UI card renderer when it has header actions or a rich description, because DataForm does not provide equivalent card-header slots.
+
+## Field validation
+
+DataForm provides field-level errors and supports synchronous or asynchronous custom validation. Add serializable rules under the field's `validation` key:
+
+```php
+array(
+	'id'         => 'my_plugin_account_id',
+	'title'      => __( 'Account ID', 'my-plugin' ),
+	'type'       => 'text',
+	'validation' => array(
+		'required'  => true,
+		'elements'  => true,
+		'validator' => 'my-plugin/account-id',
+	),
+)
+```
+
+`required` marks the field as required. `elements` restricts values to the field's declared options. `validator` names a JavaScript validator registered through `registerSettingsExtension()`.
+
+The Settings UI disables saving while DataForm reports an invalid or validating form. This client-side validation does not replace WooCommerce's PHP sanitization, option filters, or save-time validation.
+
+See [Registering settings UI components](./registering-settings-ui-components.md#register-custom-validators) for the validator registration contract.
 
 ## Custom component migration
 

@@ -8,7 +8,7 @@ sidebar_position: 6
 
 Use custom components when a WooCommerce settings field needs plugin-specific React UI that cannot be represented by a native field type.
 
-For most fields, prefer the native renderer. Custom components are best for specialized selectors, previews, or validation flows.
+For most fields, prefer the control supplied by DataForm. Custom components are best for specialized selectors, previews, or controls that DataForm does not provide.
 
 ## PHP field metadata
 
@@ -70,6 +70,17 @@ type SettingsFieldComponentProps = {
 	};
 	value: string | number | boolean | string[] | null;
 	onChange: ( value: string | number | boolean | string[] | null ) => void;
+	values: Record< string, string | number | boolean | string[] | null >;
+	initialValues: Record< string, string | number | boolean | string[] | null >;
+	setValue: (
+		fieldId: string,
+		value: string | number | boolean | string[] | null
+	) => void;
+	setValues: (
+		values: Partial<
+			Record< string, string | number | boolean | string[] | null >
+		>
+	) => void;
 	context: {
 		page: string;
 		section?: string;
@@ -77,7 +88,7 @@ type SettingsFieldComponentProps = {
 };
 ```
 
-Call `onChange()` with the next field value. The settings UI handles hidden input serialization for the field's save adapter.
+Call `onChange()` with the next field value. Use `setValue()` or `setValues()` when one control updates related fields. The settings UI adapts these calls to DataForm and handles hidden input serialization for the field's save adapter.
 
 ## Example component
 
@@ -159,7 +170,41 @@ Resolution order is:
 1. `field.component`
 2. `fieldOverrides[ field.id ]`
 3. `typeRenderers[ field.type ]`
-4. Native field renderer
+4. DataForm's control for the field type
+
+## Register custom validators
+
+Add serializable validation metadata to the PHP field and register named validation logic in JavaScript. Validator names keep executable code out of the PHP schema.
+
+```php
+array(
+	'id'         => 'my_plugin_account_id',
+	'title'      => __( 'Account ID', 'my-plugin' ),
+	'type'       => 'text',
+	'validation' => array(
+		'required'  => true,
+		'validator' => 'my-plugin/account-id',
+	),
+)
+```
+
+```ts
+registerSettingsExtension( {
+	scope: {
+		page: 'my_plugin',
+	},
+	validators: {
+		'my-plugin/account-id': async ( { value } ) => {
+			const isAvailable = await checkAccountId( String( value ) );
+			return isAvailable ? null : 'This account ID is already in use.';
+		},
+	},
+} );
+```
+
+Validators return `null` for a valid value or an error message for an invalid value. They can return the result directly or return a promise. DataForm displays the field error and the Settings UI prevents saving while validation is pending or invalid.
+
+The validation callback also receives `field`, `values`, `initialValues`, `context`, and `schema`. PHP sanitisation and save filters remain the authoritative server-side validation layer.
 
 ## Enqueue the component script
 

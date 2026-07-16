@@ -305,7 +305,7 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector( 'input[type="text"]' );
+		const input = container.querySelector( 'input:not([type="hidden"])' );
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);
@@ -383,7 +383,9 @@ describe( 'settings HTML rendering', () => {
 		form.insertBefore( sectionLinks, container );
 
 		try {
-			const input = container.querySelector( 'input[type="text"]' );
+			const input = container.querySelector(
+				'input:not([type="hidden"])'
+			);
 			const link = sectionLinks.querySelector( 'a' );
 
 			expect( input ).toBeInstanceOf( HTMLInputElement );
@@ -451,7 +453,9 @@ describe( 'settings HTML rendering', () => {
 		);
 
 		try {
-			const input = container.querySelector( 'input[type="text"]' );
+			const input = container.querySelector(
+				'input:not([type="hidden"])'
+			);
 			const link = container.querySelector(
 				'a[href="https://example.com/next"]'
 			);
@@ -549,7 +553,7 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector( 'input[type="text"]' );
+		const input = container.querySelector( 'input:not([type="hidden"])' );
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);
