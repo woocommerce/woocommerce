@@ -632,7 +632,8 @@ class WC_Gateway_Paypal_Request {
 			return $state;
 		}
 
-		$states = (array) WC()->countries->get_states( $cc );
+		$states = WC()->countries->get_states( $cc );
+		$states = is_array( $states ) ? $states : array();
 
 		return LegacyStateCodes::get_state_name( $cc, $state, $states );
 	}
