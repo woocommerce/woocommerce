@@ -209,9 +209,7 @@ jQuery( function ( $ ) {
 					type: 'POST',
 					success: function( response ) {
 						if ( response && response.billing ) {
-							$.each( response.billing, function( key, data ) {
-								wc_meta_boxes_order.set_address_field( $( ':input#_billing_' + key ), data );
-							});
+							wc_meta_boxes_order.set_address_fields( '_billing_', response.billing );
 						}
 						$( 'div.edit_address' ).unblock();
 					}
@@ -251,9 +249,7 @@ jQuery( function ( $ ) {
 					type: 'POST',
 					success: function( response ) {
 						if ( response && response.billing ) {
-							$.each( response.shipping, function( key, data ) {
-								wc_meta_boxes_order.set_address_field( $( ':input#_shipping_' + key ), data );
-							});
+							wc_meta_boxes_order.set_address_fields( '_shipping_', response.shipping );
 						}
 						$( 'div.edit_address' ).unblock();
 					}
@@ -264,14 +260,45 @@ jQuery( function ( $ ) {
 
 		copy_billing_to_shipping: function() {
 			if ( window.confirm( woocommerce_admin_meta_boxes.copy_billing ) ) {
+				// The state must be assigned after every other field: assigning the country
+				// rebuilds the state selector, which would clear an earlier state assignment.
+				var $billing_state = null;
+
 				$('.order_data_column :input[name^="_billing_"]').each( function() {
 					var input_name = $(this).attr('name');
 					input_name     = input_name.replace( '_billing_', '_shipping_' );
-					var label      = $(this).is( 'select' ) ? $(this).find( 'option:selected' ).text() : '';
+					if ( '_shipping_state' === input_name ) {
+						$billing_state = $(this);
+						return;
+					}
+					var label = $(this).is( 'select' ) ? $(this).find( 'option:selected' ).text() : '';
 					wc_meta_boxes_order.set_address_field( $( ':input#' + input_name ), $(this).val(), label );
 				});
+
+				if ( $billing_state && $billing_state.length ) {
+					var state_label = $billing_state.is( 'select' ) ? $billing_state.find( 'option:selected' ).text() : '';
+					wc_meta_boxes_order.set_address_field( $( ':input#_shipping_state' ), $billing_state.val(), state_label );
+				}
 			}
 			return false;
+		},
+
+		set_address_fields: function( prefix, fields ) {
+			// The state must be assigned after every other field: assigning the country
+			// rebuilds the state selector, which would clear an earlier state assignment.
+			var state_value;
+
+			$.each( fields, function( key, data ) {
+				if ( 'state' === key ) {
+					state_value = data;
+					return;
+				}
+				wc_meta_boxes_order.set_address_field( $( ':input#' + prefix + key ), data );
+			});
+
+			if ( undefined !== state_value ) {
+				wc_meta_boxes_order.set_address_field( $( ':input#' + prefix + 'state' ), state_value );
+			}
 		},
 
 		set_address_field: function( $el, value, label ) {

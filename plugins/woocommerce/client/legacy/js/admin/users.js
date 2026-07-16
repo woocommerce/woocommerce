@@ -113,6 +113,10 @@ jQuery( function ( $ ) {
 		copy_billing: function( event ) {
 			event.preventDefault();
 
+			// The state must be assigned after every other field: assigning the country
+			// rebuilds the state selector, which would clear an earlier state assignment.
+			var $billing_state = null;
+
 			$( '#fieldset-billing' ).find( 'input, select' ).each( function( i, el ) {
 				// The address keys match up, except for the prefix
 				var shipName = el.name.replace( /^billing_/, 'shipping_' );
@@ -122,10 +126,24 @@ jQuery( function ( $ ) {
 				if ( ! shipEl.length ) {
 					return;
 				}
+				if ( 'shipping_state' === shipName ) {
+					$billing_state = $( el );
+					return;
+				}
 				// Found a matching shipping element, update the value
 				var label = $( el ).is( 'select' ) ? $( el ).find( 'option:selected' ).text() : '';
 				wc_users_fields.set_field_value( shipEl, el.value, label );
 			} );
+
+			if ( $billing_state && $billing_state.length ) {
+				// Re-query: the country assignment above may have replaced the element.
+				var $shipping_state = $( '[name="shipping_state"]' );
+
+				if ( $shipping_state.length ) {
+					var state_label = $billing_state.is( 'select' ) ? $billing_state.find( 'option:selected' ).text() : '';
+					wc_users_fields.set_field_value( $shipping_state, $billing_state.val(), state_label );
+				}
+			}
 		},
 
 		set_field_value: function( $el, value, label ) {
