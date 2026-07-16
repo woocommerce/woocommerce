@@ -590,6 +590,8 @@ function wc_get_price_decimals() {
  *                                      Defaults the result of get_woocommerce_price_format().
  *     @type bool   $in_span            Whether to enclose the formatted price in an HTML <span> element.
  *                                      Defaults to true.
+ *     @type bool|null $is_negative      Whether to display the price as negative. Defaults to null, which
+ *                                      determines the sign from the price.
  * }
  * @return string
  */
@@ -607,6 +609,7 @@ function wc_price( $price, $args = array() ) {
 				'price_format'       => get_woocommerce_price_format(),
 				'in_span'            => true,
 				'aria-hidden'        => false,
+				'is_negative'        => null,
 			)
 		)
 	);
@@ -618,6 +621,7 @@ function wc_price( $price, $args = array() ) {
 
 	$unformatted_price = $price;
 	$negative          = $price < 0;
+	$is_negative       = null === $args['is_negative'] ? $negative : (bool) $args['is_negative'];
 
 	/**
 	 * Filter raw price.
@@ -644,11 +648,11 @@ function wc_price( $price, $args = array() ) {
 	}
 
 	if ( $args['in_span'] ) {
-		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol" translate="no">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
+		$formatted_price = ( $is_negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol" translate="no">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
 		$aria_hidden     = $args['aria-hidden'] ? ' aria-hidden="true"' : '';
 		$return          = '<span class="woocommerce-Price-amount amount"' . $aria_hidden . '><bdi>' . $formatted_price . '</bdi></span>';
 	} else {
-		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], get_woocommerce_currency_symbol( $args['currency'] ), $price );
+		$formatted_price = ( $is_negative ? '-' : '' ) . sprintf( $args['price_format'], get_woocommerce_currency_symbol( $args['currency'] ), $price );
 		$return          = $formatted_price;
 	}
 

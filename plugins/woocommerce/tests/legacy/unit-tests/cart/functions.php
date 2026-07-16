@@ -174,9 +174,9 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Coupon totals pass discount amounts to wc_price as negative values.
+	 * @testdox Coupon totals pass positive amounts and explicit negative display intent to wc_price.
 	 */
-	public function test_wc_cart_totals_coupon_html_passes_negative_amount_to_wc_price(): void {
+	public function test_wc_cart_totals_coupon_html_passes_explicit_negative_display_intent_to_wc_price(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$coupon  = WC_Helper_Coupon::create_coupon();
 
@@ -186,9 +186,9 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
-			unset( $formatted_price, $args, $unformatted_price );
+			unset( $formatted_price );
 
-			return 0 > $original_price ? 'localized-negative-price:' . $original_price : $price_html;
+			return true === $args['is_negative'] ? 'localized-negative-price:' . (float) $original_price . ':' . $unformatted_price : $price_html;
 		};
 		add_filter( 'wc_price', $price_filter, 10, 5 );
 
@@ -201,13 +201,13 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 		WC_Helper_Product::delete_product( $product->get_id() );
 
-		$this->assertStringStartsWith( 'localized-negative-price:-1 ', $coupon_html, 'The wc_price filter should receive the exact negative coupon amount.' );
+		$this->assertStringStartsWith( 'localized-negative-price:1:1 ', $coupon_html, 'The wc_price filter should receive the positive coupon amount and explicit negative display intent.' );
 	}
 
 	/**
-	 * @testdox Zero-value coupon totals preserve the legacy minus sign.
+	 * @testdox Zero-value coupon totals pass explicit negative display intent to wc_price.
 	 */
-	public function test_wc_cart_totals_coupon_html_preserves_minus_for_zero_amount(): void {
+	public function test_wc_cart_totals_coupon_html_passes_negative_display_intent_for_zero_amount(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$coupon  = WC_Helper_Coupon::create_coupon( 'zero-value-coupon', array( 'coupon_amount' => '0' ) );
 
@@ -217,9 +217,9 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
-			unset( $formatted_price, $args, $unformatted_price );
+			unset( $formatted_price );
 
-			return 0.0 === (float) $original_price ? 'zero-price' : $price_html;
+			return true === $args['is_negative'] ? 'localized-negative-price:' . (float) $original_price . ':' . $unformatted_price : $price_html;
 		};
 		add_filter( 'wc_price', $price_filter, 10, 5 );
 
@@ -232,7 +232,7 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 		WC_Helper_Product::delete_product( $product->get_id() );
 
-		$this->assertStringStartsWith( '-zero-price ', $coupon_html, 'Zero-value coupons should retain the legacy external minus sign.' );
+		$this->assertStringStartsWith( 'localized-negative-price:0:0 ', $coupon_html, 'Zero-value coupons should pass explicit negative display intent without changing the numeric filter values.' );
 	}
 
 	/**

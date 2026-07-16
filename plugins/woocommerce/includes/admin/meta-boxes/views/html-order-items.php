@@ -179,7 +179,15 @@ if ( wc_tax_enabled() ) {
 				<td class="label"><?php esc_html_e( 'Discount:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">
-					<?php echo wc_price( -1 * $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php
+					echo wc_price( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						$order->get_total_discount(),
+						array(
+							'currency'    => $order->get_currency(),
+							'is_negative' => true,
+						)
+					);
+					?>
 				</td>
 			</tr>
 		<?php endif; ?>
@@ -272,7 +280,17 @@ if ( wc_tax_enabled() ) {
 			<tr>
 				<td class="label refunded-total"><?php esc_html_e( 'Refunded', 'woocommerce' ); ?>:</td>
 				<td width="1%"></td>
-				<td class="total refunded-total"><?php echo wc_price( -1 * $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
+				<td class="total refunded-total">
+					<?php
+					echo wc_price( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						$order->get_total_refunded(),
+						array(
+							'currency'    => $order->get_currency(),
+							'is_negative' => true,
+						)
+					);
+					?>
+				</td>
 			</tr>
 
 			<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->get_id() ); ?>
@@ -349,7 +367,13 @@ if ( wc_tax_enabled() ) {
 <?php if ( $render_refunds ) : ?>
 	<?php
 	$refunded_total           = $order->get_total_refunded();
-	$formatted_refunded_total = ( 0.0 === (float) $refunded_total ? '-' : '' ) . wc_price( -1 * $refunded_total, array( 'currency' => $order->get_currency() ) );
+	$formatted_refunded_total = wc_price(
+		$refunded_total,
+		array(
+			'currency'    => $order->get_currency(),
+			'is_negative' => true,
+		)
+	);
 	?>
 <div class="wc-order-data-row wc-order-refund-items wc-order-data-row-toggle" style="display: none;">
 	<table class="wc-order-totals">

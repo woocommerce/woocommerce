@@ -644,6 +644,50 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_price supports explicit negative display intent without changing numeric filter values.
+	 */
+	public function test_wc_price_supports_explicit_negative_display_intent(): void {
+		$filtered_values = array();
+
+		$raw_price_filter       = static function ( $raw_price, $original_price ) use ( &$filtered_values ) {
+			$filtered_values['raw'] = array( $raw_price, $original_price );
+
+			return $raw_price;
+		};
+		$formatted_price_filter = static function ( $formatted_price, $price, $decimals, $decimal_separator, $thousand_separator, $original_price ) use ( &$filtered_values ) {
+			unset( $decimals, $decimal_separator, $thousand_separator );
+
+			$filtered_values['formatted'] = array( $formatted_price, $price, $original_price );
+
+			return $formatted_price;
+		};
+		$price_filter           = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) use ( &$filtered_values ) {
+			unset( $formatted_price );
+
+			$filtered_values['price'] = array( $args['is_negative'], $unformatted_price, $original_price );
+
+			return $price_html;
+		};
+
+		add_filter( 'raw_woocommerce_price', $raw_price_filter, 10, 2 );
+		add_filter( 'formatted_woocommerce_price', $formatted_price_filter, 10, 6 );
+		add_filter( 'wc_price', $price_filter, 10, 5 );
+
+		$price_html = wc_price( 12.34, array( 'is_negative' => true ) );
+
+		remove_filter( 'raw_woocommerce_price', $raw_price_filter );
+		remove_filter( 'formatted_woocommerce_price', $formatted_price_filter );
+		remove_filter( 'wc_price', $price_filter );
+
+		$this->assertSame( array( 12.34, 12.34 ), $filtered_values['raw'], 'The raw price filter should receive the positive price.' );
+		$this->assertSame( array( '12.34', 12.34, 12.34 ), $filtered_values['formatted'], 'The formatted price filter should receive the positive price.' );
+		$this->assertSame( array( true, 12.34, 12.34 ), $filtered_values['price'], 'The wc_price filter should receive the positive price and explicit negative display intent.' );
+		$this->assertStringContainsString( '<bdi>-', $price_html, 'A positive price should render as negative when explicitly requested.' );
+		$this->assertStringContainsString( '<bdi>-', wc_price( 0, array( 'is_negative' => true ) ), 'A zero price should render as negative when explicitly requested.' );
+		$this->assertStringNotContainsString( '<bdi>-', wc_price( -12.34, array( 'is_negative' => false ) ), 'An explicitly unsigned price should not render as negative.' );
+	}
+
+	/**
 	 * Test wc_let_to_num().
 	 *
 	 * @since 2.2

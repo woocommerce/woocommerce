@@ -13,9 +13,9 @@ declare( strict_types = 1 );
 class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox Order item totals pass discount and refund amounts to wc_price as negative values.
+	 * @testdox Order item totals pass positive amounts and explicit negative display intent to wc_price.
 	 */
-	public function test_discount_and_refund_totals_are_passed_to_wc_price_as_negative_values(): void {
+	public function test_discount_and_refund_totals_pass_explicit_negative_display_intent_to_wc_price(): void {
 		$product = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -46,9 +46,9 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 		$order = wc_get_order( $order->get_id() );
 
 		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
-			unset( $formatted_price, $args, $unformatted_price );
+			unset( $formatted_price );
 
-			return 0 > $original_price ? 'localized-negative-price:' . $original_price : $price_html;
+			return true === $args['is_negative'] ? 'localized-negative-price:' . (float) $original_price . ':' . $unformatted_price : $price_html;
 		};
 		add_filter( 'wc_price', $price_filter, 10, 5 );
 
@@ -69,19 +69,19 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( $loaded, 'The order items output should be valid enough for DOM parsing.' );
 
 		$xpath          = new DOMXPath( $document );
-		$discount_nodes = $xpath->query( "//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'localized-negative-price:-10']" );
-		$refund_nodes   = $xpath->query( "//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'localized-negative-price:-25']" );
+		$discount_nodes = $xpath->query( "//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'localized-negative-price:10:10']" );
+		$refund_nodes   = $xpath->query( "//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'localized-negative-price:25:25']" );
 
 		$this->assertNotFalse( $discount_nodes, 'The discount price XPath query should be valid.' );
 		$this->assertNotFalse( $refund_nodes, 'The refund price XPath query should be valid.' );
-		$this->assertSame( 1, $discount_nodes->length, 'The order items view should render the exact negative discount returned by the wc_price filter.' );
-		$this->assertSame( 2, $refund_nodes->length, 'Both refund total cells should render the exact negative amount returned by the wc_price filter.' );
+		$this->assertSame( 1, $discount_nodes->length, 'The order items view should pass the positive discount and explicit negative display intent to the wc_price filter.' );
+		$this->assertSame( 2, $refund_nodes->length, 'Both refund total cells should pass the positive amount and explicit negative display intent to the wc_price filter.' );
 	}
 
 	/**
-	 * @testdox The refund form preserves the legacy minus sign before any amount is refunded.
+	 * @testdox The refund form passes explicit negative display intent before any amount is refunded.
 	 */
-	public function test_refund_form_preserves_minus_for_zero_refunded_total(): void {
+	public function test_refund_form_passes_negative_display_intent_for_zero_refunded_total(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$order   = wc_create_order();
 		$order->add_product( $product, 1 );
@@ -89,9 +89,9 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 		$order->save();
 
 		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
-			unset( $formatted_price, $args, $unformatted_price );
+			unset( $formatted_price );
 
-			return 0.0 === (float) $original_price ? 'zero-price' : $price_html;
+			return true === $args['is_negative'] ? 'localized-negative-price:' . (float) $original_price . ':' . $unformatted_price : $price_html;
 		};
 		add_filter( 'wc_price', $price_filter, 10, 5 );
 
@@ -112,9 +112,9 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( $loaded, 'The order items output should be valid enough for DOM parsing.' );
 
 		$xpath      = new DOMXPath( $document );
-		$zero_nodes = $xpath->query( "//div[contains(concat(' ', normalize-space(@class), ' '), ' wc-order-refund-items ')]//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = '-zero-price']" );
+		$zero_nodes = $xpath->query( "//div[contains(concat(' ', normalize-space(@class), ' '), ' wc-order-refund-items ')]//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'localized-negative-price:0:0']" );
 
 		$this->assertNotFalse( $zero_nodes, 'The zero refunded total XPath query should be valid.' );
-		$this->assertSame( 1, $zero_nodes->length, 'The refund form should retain the legacy external minus sign before any refund.' );
+		$this->assertSame( 1, $zero_nodes->length, 'The refund form should pass explicit negative display intent without changing the zero-valued filter arguments.' );
 	}
 }
