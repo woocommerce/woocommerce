@@ -532,6 +532,11 @@ class Endpoint {
 	public function render_shortcode(): string {
 		global $wp;
 
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( $page_id <= 0 || ! is_page( $page_id ) ) {
+			return '';
+		}
+
 		if ( ! isset( $wp->query_vars[ self::QUERY_VAR ] ) ) {
 			return '';
 		}

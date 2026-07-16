@@ -221,6 +221,23 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Stage the globals render_shortcode()/gate_request() read: a singular
+	 * query for the given page id (`is_page()`), `$wp->query_vars[ QUERY_VAR ]`
+	 * for the order id, and `$_GET['key']` for the order key.
+	 *
+	 * @param int $page_id Page id the main query should resolve to.
+	 */
+	private function stage_page_query( int $page_id ): void {
+		global $wp, $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: singular page query so is_page() returns true.
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: matching main query.
+		$wp_the_query = $wp_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
+		$wp = new \WP();
+	}
+
+	/**
 	 * @testdox render_shortcode() returns nothing when no order key is supplied.
 	 */
 	public function test_render_shortcode_empty_without_authorisation(): void {
@@ -228,9 +245,8 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
+		$this->stage_page_query( (int) wc_get_page_id( Endpoint::PAGE_KEY ) );
 		global $wp;
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
-		$wp                                    = new \WP();
 		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
 		$_GET                                  = array();
 
@@ -245,9 +261,8 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
+		$this->stage_page_query( (int) wc_get_page_id( Endpoint::PAGE_KEY ) );
 		global $wp;
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
-		$wp                                    = new \WP();
 		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
 		$_GET                                  = array( 'key' => 'wc_order_definitelywrong' );
 
@@ -255,16 +270,39 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox render_shortcode() still renders for a correctly-keyed request.
+	 * @testdox render_shortcode() returns nothing when the current page is not the managed one, even with a valid key.
+	 */
+	public function test_render_shortcode_empty_when_not_on_managed_page(): void {
+		$other_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Some other page',
+			)
+		);
+
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$this->stage_page_query( $other_id );
+		global $wp;
+		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
+		$_GET                                  = array( 'key' => $order->get_order_key() );
+
+		$this->assertSame( '', $this->endpoint->render_shortcode() );
+	}
+
+	/**
+	 * @testdox render_shortcode() still renders for a correctly-keyed request on the managed page.
 	 */
 	public function test_render_shortcode_renders_when_authorised(): void {
 		$order = OrderHelper::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
+		$this->stage_page_query( (int) wc_get_page_id( Endpoint::PAGE_KEY ) );
 		global $wp;
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
-		$wp                                    = new \WP();
 		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
 		$_GET                                  = array( 'key' => $order->get_order_key() );
 
