@@ -26,13 +26,9 @@ final class NepalStateCodeRemediation {
 		$legacy_state_codes = array_keys( LegacyStateCodes::get_known_states( self::COUNTRY_CODE ) );
 		$status             = array();
 
-		if ( empty( $legacy_state_codes ) ) {
-			return $status;
-		}
+		$store_location = wc_format_country_state_string( (string) get_option( 'woocommerce_default_country', '' ) );
 
-		$store_location = explode( ':', (string) get_option( 'woocommerce_default_country', '' ), 2 );
-
-		if ( self::COUNTRY_CODE === ( $store_location[0] ?? '' ) && in_array( $store_location[1] ?? '', $legacy_state_codes, true ) ) {
+		if ( self::COUNTRY_CODE === $store_location['country'] && in_array( $store_location['state'], $legacy_state_codes, true ) ) {
 			$status['store_location'] = true;
 		}
 
@@ -40,36 +36,31 @@ final class NepalStateCodeRemediation {
 			static fn( string $state_code ): string => self::COUNTRY_CODE . ':' . $state_code,
 			$legacy_state_codes
 		);
-		$shipping_placeholders = implode( ', ', array_fill( 0, count( $legacy_shipping_codes ), '%s' ) );
-		$shipping_query        = $wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The guarded placeholder list is generated immediately above.
-			"SELECT location_id FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE location_type = 'state' AND location_code IN ({$shipping_placeholders}) LIMIT 1",
-			$legacy_shipping_codes
+		$placeholders          = implode( ', ', array_fill( 0, count( $legacy_state_codes ), '%s' ) );
+
+		$detection_queries = array(
+			'shipping_zones' => $wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The guarded placeholder list is generated immediately above.
+				"SELECT location_id FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE location_type = 'state' AND location_code IN ({$placeholders}) LIMIT 1",
+				$legacy_shipping_codes
+			),
+			'tax_rates'      => $wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The guarded placeholder list is generated immediately above.
+				"SELECT tax_rate_id FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_country = %s AND tax_rate_state IN ({$placeholders}) LIMIT 1",
+				array_merge( array( self::COUNTRY_CODE ), $legacy_state_codes )
+			),
 		);
-		$shipping_query_result = $this->run_detection_query( $shipping_query );
 
-		if ( $shipping_query_result['database_error'] ) {
-			return array( 'database_error' => true );
-		}
+		foreach ( $detection_queries as $status_key => $query ) {
+			$query_result = $this->run_detection_query( $query );
 
-		if ( $shipping_query_result['value'] ) {
-			$status['shipping_zones'] = true;
-		}
+			if ( $query_result['database_error'] ) {
+				return array( 'database_error' => true );
+			}
 
-		$tax_placeholders = implode( ', ', array_fill( 0, count( $legacy_state_codes ), '%s' ) );
-		$tax_query        = $wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The guarded placeholder list is generated immediately above.
-			"SELECT tax_rate_id FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_country = %s AND tax_rate_state IN ({$tax_placeholders}) LIMIT 1",
-			array_merge( array( self::COUNTRY_CODE ), $legacy_state_codes )
-		);
-		$tax_query_result = $this->run_detection_query( $tax_query );
-
-		if ( $tax_query_result['database_error'] ) {
-			return array( 'database_error' => true );
-		}
-
-		if ( $tax_query_result['value'] ) {
-			$status['tax_rates'] = true;
+			if ( $query_result['value'] ) {
+				$status[ $status_key ] = true;
+			}
 		}
 
 		return $status;

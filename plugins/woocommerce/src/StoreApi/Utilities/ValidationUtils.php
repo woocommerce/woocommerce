@@ -30,11 +30,22 @@ class ValidationUtils {
 	public function validate_state( $state, $country ) {
 		$states = $this->get_states_for_country( $country );
 
-		if ( count( $states ) && ! in_array( \wc_strtoupper( $state ), array_map( '\wc_strtoupper', array_keys( $states ) ), true ) ) {
+		if ( count( $states ) && ! $this->state_matches_code( $state, $states ) ) {
 			return false;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Check whether a state matches one of the given state codes, case-insensitively.
+	 *
+	 * @param string $state State code (sanitized).
+	 * @param array  $states State names indexed by state code.
+	 * @return boolean
+	 */
+	private function state_matches_code( $state, array $states ) {
+		return in_array( \wc_strtoupper( $state ), array_map( '\wc_strtoupper', array_keys( $states ) ), true );
 	}
 
 	/**
@@ -54,9 +65,7 @@ class ValidationUtils {
 			return true;
 		}
 
-		$legacy_state_codes = array_map( '\\wc_strtoupper', array_keys( LegacyStateCodes::get_states( $country ) ) );
-
-		return in_array( \wc_strtoupper( $state ), $legacy_state_codes, true );
+		return $this->state_matches_code( $state, LegacyStateCodes::get_states( $country ) );
 	}
 
 

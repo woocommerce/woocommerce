@@ -954,7 +954,7 @@ class WC_Checkout {
 
 						if ( $validate_fieldset && ! in_array( $data[ $key ], $valid_state_codes, true ) ) {
 							/* translators: 1: state field 2: valid states */
-							$errors->add( $key . '_validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', (array) $valid_states ) ), array( 'id' => $key ) );
+							$errors->add( $key . '_validation', sprintf( __( '%1$s is not valid. Please enter one of the following: %2$s', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>', implode( ', ', $valid_states ) ), array( 'id' => $key ) );
 						}
 					}
 				}

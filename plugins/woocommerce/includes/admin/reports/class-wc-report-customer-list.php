@@ -102,9 +102,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 				$state_code   = get_user_meta( $user->ID, 'billing_state', true );
 				$country_code = get_user_meta( $user->ID, 'billing_country', true );
 
-				$states  = WC()->countries->get_states( $country_code );
-				$states  = is_array( $states ) ? $states : array();
-				$state   = LegacyStateCodes::get_state_name( $country_code, $state_code, $states );
+				$state   = LegacyStateCodes::get_state_name( $country_code, $state_code );
 				$country = isset( WC()->countries->countries[ $country_code ] ) ? WC()->countries->countries[ $country_code ] : $country_code;
 
 				$value = '';

@@ -227,9 +227,7 @@ class ShippingZoneSchema extends AbstractSchema {
 			case 'country:state':
 				$parts = explode( ':', $location->code );
 				if ( count( $parts ) === 2 ) {
-					$states     = WC()->countries->get_states( $parts[0] );
-					$states     = is_array( $states ) ? $states : array();
-					$state_name = LegacyStateCodes::get_state_name( $parts[0], $parts[1], $states );
+					$state_name = LegacyStateCodes::get_state_name( $parts[0], $parts[1] );
 					return $parts[1] === $state_name ? $location->code : $state_name;
 				}
 				return $location->code;

@@ -84,16 +84,32 @@ final class LegacyStateCodes {
 	/**
 	 * Resolve a current or legacy state code to its display name.
 	 *
-	 * @param string                $country_code  Country code.
-	 * @param string                $state_code    State code.
-	 * @param array<string, string> $current_states Current state names indexed by state code.
+	 * @param string                     $country_code  Country code.
+	 * @param string                     $state_code    State code.
+	 * @param array<string, string>|null $current_states Current state names indexed by state code, or null to fetch them.
 	 * @return string State display name, or the original code when it is unknown.
 	 *
 	 * @since 11.1.0
 	 */
-	public static function get_state_name( string $country_code, string $state_code, array $current_states ): string {
-		$states = self::add_to_current_states( $country_code, $current_states );
+	public static function get_state_name( string $country_code, string $state_code, ?array $current_states = null ): string {
+		if ( '' === $state_code ) {
+			return $state_code;
+		}
 
-		return $states[ $state_code ] ?? $state_code;
+		if ( null === $current_states ) {
+			$states         = WC()->countries->get_states( $country_code );
+			$current_states = is_array( $states ) ? $states : array();
+		}
+
+		if ( isset( $current_states[ $state_code ] ) ) {
+			return $current_states[ $state_code ];
+		}
+
+		// An empty current-state list means free-form input; legacy aliases do not apply.
+		if ( empty( $current_states ) ) {
+			return $state_code;
+		}
+
+		return self::get_states( $country_code )[ $state_code ] ?? $state_code;
 	}
 }
