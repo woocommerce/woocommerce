@@ -214,8 +214,10 @@ class Gallery extends Abstract_Block_Renderer {
 		$width  = $cell_width > 0 ? $cell_width : 0;
 		$height = $width > 0 ? max( 1, (int) round( $width / $ratio_value ) ) : 0;
 
-		/** @var string $image_url */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
-		$image_url = $html->get_attribute( 'src' ) ?? '';
+		// get_attribute() can return a string, null (absent), or bool true (valueless attribute);
+		// coerce anything that isn't a real URL string to an empty string.
+		$src_attribute = $html->get_attribute( 'src' );
+		$image_url     = is_string( $src_attribute ) ? $src_attribute : '';
 
 		/**
 		 * Filters the URL of an image inside an email gallery so integrations can serve a
@@ -241,6 +243,10 @@ class Gallery extends Abstract_Block_Renderer {
 
 		$is_server_cropped = '' !== $image_url && '' !== $cropped_url && $cropped_url !== $image_url;
 
+		// These crop styles are appended after Html_Processing_Helper::sanitize_image_html() has run
+		// (its style allowlist would otherwise strip object-fit), so they intentionally bypass that
+		// sanitizer. Only the regex-validated $aspect_ratio may be interpolated here — every other
+		// token is a literal. Do not add dynamic values to $crop_styles without validating them.
 		if ( $is_server_cropped ) {
 			// The file is already cropped to the requested ratio, so we can give it concrete
 			// dimensions. This renders the crop correctly even in clients without CSS crop support.
