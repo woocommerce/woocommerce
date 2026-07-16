@@ -145,4 +145,58 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertNotFalse( $cached );
 		$this->assertCount( 3, $cached );
 	}
+
+	/**
+	 * @testdox Quantity input hooks receive the final input type.
+	 * @dataProvider quantity_input_type_provider
+	 *
+	 * @param array  $args          Quantity input arguments.
+	 * @param string $expected_type Expected input type.
+	 */
+	public function test_quantity_input_hooks_receive_input_type( array $args, string $expected_type ): void {
+		$before_types = array();
+		$after_types  = array();
+
+		$before_callback = static function ( string $type ) use ( &$before_types ): void {
+			$before_types[] = $type;
+		};
+		$after_callback  = static function ( string $type ) use ( &$after_types ): void {
+			$after_types[] = $type;
+		};
+
+		add_action( 'woocommerce_before_quantity_input_field', $before_callback );
+		add_action( 'woocommerce_after_quantity_input_field', $after_callback );
+
+		woocommerce_quantity_input( $args, new WC_Product_Simple(), false );
+
+		remove_action( 'woocommerce_before_quantity_input_field', $before_callback );
+		remove_action( 'woocommerce_after_quantity_input_field', $after_callback );
+
+		$this->assertSame( array( $expected_type ), $before_types, 'The before hook should receive the final input type.' );
+		$this->assertSame( array( $expected_type ), $after_types, 'The after hook should receive the final input type.' );
+	}
+
+	/**
+	 * Data provider for quantity input types.
+	 *
+	 * @return array<string, array{array<string, int|string>, string}>
+	 */
+	public static function quantity_input_type_provider(): array {
+		return array(
+			'changeable quantity' => array(
+				array(
+					'min_value' => 1,
+					'max_value' => '',
+				),
+				'number',
+			),
+			'fixed quantity'      => array(
+				array(
+					'min_value' => 1,
+					'max_value' => 1,
+				),
+				'hidden',
+			),
+		);
+	}
 }

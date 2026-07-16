@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.1.0
+ * @version 11.1.0
  *
  * @var bool   $readonly If the input should be set to readonly mode.
  * @var string $type     The input type attribute.
@@ -29,9 +29,12 @@ $label = ! empty( $args['product_name'] ) ? sprintf( esc_html__( '%s quantity', 
 	/**
 	 * Hook to output something before the quantity input field.
 	 *
+	 * @param string $type The quantity input type.
+	 *
 	 * @since 7.2.0
+	 * @since 11.1.0 Added the `$type` parameter.
 	 */
-	do_action( 'woocommerce_before_quantity_input_field' );
+	do_action( 'woocommerce_before_quantity_input_field', $type );
 	?>
 	<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo esc_attr( $label ); ?></label>
 	<input
@@ -58,10 +61,13 @@ $label = ! empty( $args['product_name'] ) ? sprintf( esc_html__( '%s quantity', 
 	/>
 	<?php
 	/**
-	 * Hook to output something after quantity input field
+	 * Hook to output something after the quantity input field.
+	 *
+	 * @param string $type The quantity input type.
 	 *
 	 * @since 3.6.0
+	 * @since 11.1.0 Added the `$type` parameter.
 	 */
-	do_action( 'woocommerce_after_quantity_input_field' );
+	do_action( 'woocommerce_after_quantity_input_field', $type );
 	?>
 </div>
