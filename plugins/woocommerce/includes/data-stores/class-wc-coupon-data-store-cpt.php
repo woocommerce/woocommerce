@@ -55,9 +55,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	);
 
 	/**
-	 * The coupon properties written by the current update_post_meta() call.
-	 *
-	 * Reset at the start of every call, so it never carries props across saves.
+	 * The coupon properties written by the most recently completed update_post_meta() call.
 	 *
 	 * @since 4.1.0
 	 * @var array
@@ -265,7 +263,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @since 3.0.0
 	 */
 	private function update_post_meta( &$coupon ) {
-		$this->updated_props = array();
+		$updated_props = array();
 
 		$meta_key_to_props = array(
 			'discount_type'              => 'discount_type',
@@ -316,11 +314,24 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$updated = $this->update_or_delete_post_meta( $coupon, $meta_key, $value );
 
 			if ( $updated ) {
-				$this->updated_props[] = $prop;
+				$updated_props[] = $prop;
 			}
 		}
 
-		do_action( 'woocommerce_coupon_object_updated_props', $coupon, $this->updated_props );
+		$this->updated_props = $updated_props;
+
+		/**
+		 * Fires after a coupon's properties have been updated.
+		 *
+		 * @param WC_Coupon $coupon        Coupon object.
+		 * @param string[]  $updated_props Array of updated properties.
+		 *
+		 * @since 3.0.0
+		 */
+		do_action( 'woocommerce_coupon_object_updated_props', $coupon, $updated_props );
+
+		// A listener may have triggered a nested save, so restore this invocation's props.
+		$this->updated_props = $updated_props;
 	}
 
 	/**

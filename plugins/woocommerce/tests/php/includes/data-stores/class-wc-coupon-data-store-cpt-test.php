@@ -178,4 +178,41 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'A save triggered from inside the hook must report only its own props, not the outer save\'s.'
 		);
 	}
+
+	/**
+	 * @testdox Should isolate nested and outer props when re-entered during a metadata update.
+	 */
+	public function test_nested_save_from_metadata_hook_does_not_contaminate_outer_payload(): void {
+		$coupon = $this->create_settled_coupon();
+		$this->capture_updated_props();
+
+		$nested_save_done  = false;
+		$metadata_listener = function ( $meta_id, $object_id, $meta_key ) use ( $coupon, &$nested_save_done ) {
+			unset( $meta_id );
+
+			if ( $nested_save_done || $coupon->get_id() !== $object_id || 'individual_use' !== $meta_key ) {
+				return;
+			}
+			$nested_save_done = true;
+
+			$coupon->set_usage_limit( 3 );
+			$coupon->save();
+		};
+
+		add_action( 'updated_post_meta', $metadata_listener, 10, 3 );
+
+		try {
+			$coupon->set_amount( 5 );
+			$coupon->set_individual_use( true );
+			$coupon->save();
+		} finally {
+			remove_action( 'updated_post_meta', $metadata_listener, 10 );
+		}
+
+		$this->assertSame(
+			array( array( 'usage_limit' ), array( 'amount', 'individual_use' ) ),
+			$this->captured_payloads,
+			'A nested metadata-hook save must not erase or contaminate the outer save\'s props.'
+		);
+	}
 }
