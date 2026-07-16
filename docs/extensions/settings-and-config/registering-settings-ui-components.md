@@ -6,9 +6,13 @@ sidebar_position: 6
 
 # Registering settings UI components
 
-Use custom components when a WooCommerce settings field needs plugin-specific React UI that cannot be represented by a native field type.
+> **Experimental.** The Settings UI is behind the default-off `settings-ui` feature flag and its APIs are subject to change. The component contract described here changed in the DataForm migration and may change again before the feature is stable.
 
-For most fields, prefer the native renderer. Custom components are best for specialized selectors, previews, or validation flows.
+Use custom components when a WooCommerce settings field needs plugin-specific React UI that cannot be represented by a supported field type.
+
+For most fields, prefer the built-in renderer. Custom components are best for specialized selectors, previews, or validation flows.
+
+Registered components are [DataForm](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/) edit controls: the same component contract used by WordPress DataForm everywhere else in the admin. A component written for the Settings UI works as a DataForm control and the other way round.
 
 ## PHP field metadata
 
@@ -52,49 +56,49 @@ Registrations are scoped by settings page and, optionally, by section. This prev
 
 ## Component props
 
-Custom components receive stable field props:
+Custom components receive the DataForm control props, re-exported as `SettingsEditControlProps`:
 
 ```ts
-type SettingsFieldComponentProps = {
-	field: {
-		id: string;
-		label: string;
-		type: string;
-		description?: string;
-		value?: string | number | boolean | string[] | null;
-		options?: Array< { label: string; value: string } >;
-		component?: string;
-		placeholder?: string;
-		disabled?: boolean;
-		customAttributes?: Record< string, string | number | boolean >;
-	};
-	value: string | number | boolean | string[] | null;
-	onChange: ( value: string | number | boolean | string[] | null ) => void;
-	context: {
-		page: string;
-		section?: string;
-	};
+type SettingsEditControlProps = {
+	// The current settings values, keyed by field id.
+	data: Record< string, string | number | boolean | string[] | null >;
+	// The normalized DataForm field. Use field.getValue( { item: data } )
+	// to read the current value and field.setValue( { item, value } ) to
+	// build a change record that preserves the saved value format.
+	field: NormalizedField;
+	// Takes a partial record of field ids to new values. Multi-field
+	// writes are a single call.
+	onChange: ( edits: Record< string, unknown > ) => void;
+	hideLabelFromVision?: boolean;
+	validity?: SettingsFieldValidity;
 };
 ```
 
-Call `onChange()` with the next field value. The settings UI handles hidden input serialization for the field's save adapter.
+Page-level state is available through the `useSettingsUIContext()` hook:
+
+```ts
+const { schema, context, initialValues } = useSettingsUIContext();
+```
+
+Call `onChange()` with a record of field ids to next values. The settings UI handles hidden input serialization for the field's save adapter.
 
 ## Example component
 
 ```tsx
-import type { SettingsFieldComponentProps } from '@woocommerce/settings-ui';
+import type { SettingsEditControlProps } from '@woocommerce/settings-ui';
 
 export const PaymentMethodPicker = ( {
+	data,
 	field,
-	value,
 	onChange,
-}: SettingsFieldComponentProps ) => {
+}: SettingsEditControlProps ) => {
+	const value = field.getValue( { item: data } );
 	const selectedValues = Array.isArray( value ) ? value : [];
 
 	return (
 		<fieldset>
 			<legend>{ field.label }</legend>
-			{ field.options?.map( ( option ) => {
+			{ field.elements?.map( ( option ) => {
 				const checked = selectedValues.includes( option.value );
 
 				return (
@@ -104,12 +108,18 @@ export const PaymentMethodPicker = ( {
 							checked={ checked }
 							onChange={ () => {
 								onChange(
-									checked
-										? selectedValues.filter(
-												( item ) =>
-													item !== option.value
-										  )
-										: [ ...selectedValues, option.value ]
+									field.setValue( {
+										item: data,
+										value: checked
+											? selectedValues.filter(
+													( item ) =>
+														item !== option.value
+											  )
+											: [
+													...selectedValues,
+													option.value,
+											  ],
+									} )
 								);
 							} }
 						/>
@@ -159,7 +169,7 @@ Resolution order is:
 1. `field.component`
 2. `fieldOverrides[ field.id ]`
 3. `typeRenderers[ field.type ]`
-4. Native field renderer
+4. The DataForm control for the field type
 
 ## Enqueue the component script
 
