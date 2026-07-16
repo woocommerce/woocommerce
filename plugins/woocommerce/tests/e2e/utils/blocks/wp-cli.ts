@@ -49,9 +49,11 @@ export function createBlocksDatabaseRestorer( execute: RunCommand ) {
 				'printenv',
 				'HOSTNAME',
 			] ).then( ( { stdout, stderr } ) => {
+				// Match a 12 to 64 character hex string (Docker container ID) on its own line,
+				// optionally followed by a carriage return.
 				const cliContainerId = stdout.match(
-					/^([a-f0-9]{12,64})\r?$/m
-				)?.[ 1 ];
+					/^(?<containerId>[a-f0-9]{12,64})\r?$/m
+				)?.groups?.containerId;
 
 				if ( ! cliContainerId ) {
 					throw new Error(
