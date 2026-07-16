@@ -39,8 +39,15 @@ async function expectProductImageHelpTipNextTo(
 	const action = productImageBox
 		.getByRole( 'link', { name: actionName } )
 		.or( productImageBox.getByRole( 'button', { name: actionName } ) );
+	const actionId =
+		actionName === 'Remove product image'
+			? 'remove-post-thumbnail'
+			: 'set-post-thumbnail';
+	// The fix inserts the tip immediately after the active action, so assert
+	// that DOM adjacency directly instead of comparing rendered coordinates,
+	// which vary with the platform font stack.
 	const helpTip = productImageBox.locator(
-		'.woocommerce-product-image-help-tip'
+		`#${ actionId } + .woocommerce-product-image-help-tip`
 	);
 
 	await expect( action ).toBeVisible();
@@ -50,20 +57,6 @@ async function expectProductImageHelpTipNextTo(
 		'aria-label',
 		/For best results, upload JPEG or PNG files/
 	);
-
-	const actionBox = await action.boundingBox();
-	const helpTipBox = await helpTip.boundingBox();
-
-	expect( actionBox ).not.toBeNull();
-	expect( helpTipBox ).not.toBeNull();
-
-	if ( ! actionBox || ! helpTipBox ) {
-		throw new Error(
-			'Unable to determine the action or help tip position.'
-		);
-	}
-
-	expect( Math.abs( actionBox.y - helpTipBox.y ) ).toBeLessThanOrEqual( 4 );
 }
 
 const test = baseTest.extend( {
