@@ -622,4 +622,60 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		// Clean up order.
 		$order->delete( true );
 	}
+
+	/**
+	 * @testdox Should reset variation_id to 0 when set_product() switches the item to a non-variation product.
+	 */
+	public function test_set_product_resets_variation_id_when_switching_to_simple_product(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array()
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		$this->assertSame( $variation->get_id(), $item->get_variation_id(), 'Precondition: the item should carry the variation ID before switching.' );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame( 0, $item->get_variation_id(), 'variation_id should be reset to 0 when switching to a non-variation product.' );
+		$this->assertSame( $this->product->get_id(), $item->get_product_id(), 'product_id should point at the newly set product.' );
+		$this->assertSame( $this->product->get_id(), $item->get_product()->get_id(), 'get_product() should return the newly set product, not the stale variation.' );
+	}
+
+	/**
+	 * @testdox Should update variation_id when set_product() switches the item between two variations.
+	 */
+	public function test_set_product_updates_variation_id_when_switching_between_variations(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+		$parent->save();
+
+		$variation_a = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION A SKU ' . wp_generate_uuid4(),
+			10,
+			array()
+		);
+		$variation_b = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION B SKU ' . wp_generate_uuid4(),
+			15,
+			array()
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation_a );
+		$item->set_product( $variation_b );
+
+		$this->assertSame( $variation_b->get_id(), $item->get_variation_id(), 'variation_id should track the most recently set variation.' );
+		$this->assertSame( $parent->get_id(), $item->get_product_id(), 'product_id should remain the shared parent.' );
+	}
 }
