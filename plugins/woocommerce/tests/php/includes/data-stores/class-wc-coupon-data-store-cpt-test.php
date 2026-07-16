@@ -1,0 +1,181 @@
+<?php
+declare( strict_types = 1 );
+
+/**
+ * Tests for the WC_Coupon_Data_Store_CPT class.
+ *
+ * @package WooCommerce\Tests\DataStores
+ */
+
+/**
+ * Class WC_Coupon_Data_Store_CPT_Test.
+ */
+class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * The payload of every woocommerce_coupon_object_updated_props fire, in order.
+	 *
+	 * @var array[]
+	 */
+	private $captured_payloads = array();
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->captured_payloads = array();
+	}
+
+	/**
+	 * Record the payload of every woocommerce_coupon_object_updated_props fire.
+	 *
+	 * Registered at priority 10 so that it observes the outer payload before any
+	 * listener registered at a later priority can trigger a nested save.
+	 */
+	private function capture_updated_props(): void {
+		add_action(
+			'woocommerce_coupon_object_updated_props',
+			function ( $coupon, $updated_props ) {
+				$this->captured_payloads[] = $updated_props;
+			},
+			10,
+			2
+		);
+	}
+
+	/**
+	 * Create a coupon and save it once before any assertion.
+	 *
+	 * WC_Helper_Coupon::create_coupon() writes every mapped meta key except
+	 * date_expires (it writes the legacy expiry_date instead). On the first save
+	 * that absent row is created with a null value, which counts as an update and
+	 * puts 'date_expires' in the payload. This throwaway save creates the row, and
+	 * reloading the coupon gives the assertions a fresh data store without that
+	 * throwaway write in its updated-props accumulator.
+	 *
+	 * @return WC_Coupon
+	 */
+	private function create_settled_coupon(): WC_Coupon {
+		$coupon = WC_Helper_Coupon::create_coupon( 'updated-props-test' );
+		$coupon->save();
+
+		return new WC_Coupon( $coupon->get_id() );
+	}
+
+	/**
+	 * @testdox Should not accumulate props across repeated saves of the same coupon object.
+	 */
+	public function test_updated_props_do_not_accumulate_across_saves(): void {
+		$coupon = $this->create_settled_coupon();
+		$this->capture_updated_props();
+
+		$coupon->set_amount( 5 );
+		$coupon->save();
+
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$this->assertSame(
+			array( array( 'amount' ), array( 'amount' ) ),
+			$this->captured_payloads,
+			'Each save should report only the props that save changed, with no duplicates carried over.'
+		);
+	}
+
+	/**
+	 * @testdox Should report an empty prop list for a save that changes nothing.
+	 */
+	public function test_no_op_save_reports_no_updated_props(): void {
+		$coupon = $this->create_settled_coupon();
+		$this->capture_updated_props();
+
+		$coupon->set_amount( 5 );
+		$coupon->save();
+
+		$coupon->save();
+
+		$this->assertSame(
+			array( array( 'amount' ), array() ),
+			$this->captured_payloads,
+			'A save that changes nothing must not report props left over from an earlier save.'
+		);
+	}
+
+	/**
+	 * @testdox Should report only the current save's props when different props change.
+	 */
+	public function test_each_save_reports_only_its_own_props(): void {
+		$coupon = $this->create_settled_coupon();
+		$this->capture_updated_props();
+
+		$coupon->set_amount( 5 );
+		$coupon->save();
+
+		$coupon->set_usage_limit( 3 );
+		$coupon->save();
+
+		$this->assertSame(
+			array( array( 'amount' ), array( 'usage_limit' ) ),
+			$this->captured_payloads,
+			'The second save should report usage_limit only, not the amount from the first save.'
+		);
+	}
+
+	/**
+	 * @testdox Should not carry props from a create into a subsequent update.
+	 */
+	public function test_update_after_create_reports_only_changed_props(): void {
+		$this->capture_updated_props();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'create-then-update' );
+		$coupon->set_amount( 5 );
+		$coupon->save();
+
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$this->assertCount( 2, $this->captured_payloads, 'Create and update should each fire the action exactly once.' );
+		$this->assertContains( 'amount', $this->captured_payloads[0], 'The create should report the amount it wrote.' );
+		$this->assertSame(
+			array( 'amount' ),
+			$this->captured_payloads[1],
+			'The update should report amount only, not the props written during the create.'
+		);
+	}
+
+	/**
+	 * @testdox Should report only its own props for a save triggered from inside the hook.
+	 */
+	public function test_nested_save_from_listener_reports_only_its_own_props(): void {
+		$coupon = $this->create_settled_coupon();
+		$this->capture_updated_props();
+
+		$nested_save_done = false;
+
+		add_action(
+			'woocommerce_coupon_object_updated_props',
+			function ( $listener_coupon ) use ( &$nested_save_done ) {
+				if ( $nested_save_done ) {
+					return;
+				}
+				$nested_save_done = true;
+
+				$listener_coupon->set_usage_limit( 3 );
+				$listener_coupon->save();
+			},
+			20,
+			2
+		);
+
+		$coupon->set_amount( 5 );
+		$coupon->save();
+
+		$this->assertSame(
+			array( array( 'amount' ), array( 'usage_limit' ) ),
+			$this->captured_payloads,
+			'A save triggered from inside the hook must report only its own props, not the outer save\'s.'
+		);
+	}
+}
