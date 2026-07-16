@@ -94,7 +94,7 @@ class WC_Tests_Geolocation extends WC_Unit_Test_Case {
 		$apis = $this->get_private_static( 'ip_lookup_apis' );
 
 		$this->assertArrayHasKey( 'ipify', $apis );
-		$this->assertSame( 'https://api64.ipify.org/', $apis['ipify'] );
+		$this->assertSame( 'https://api64.ipify.org', $apis['ipify'] );
 	}
 
 	/**
