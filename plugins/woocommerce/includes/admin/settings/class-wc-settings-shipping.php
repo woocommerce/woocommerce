@@ -7,6 +7,8 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Address\LegacyStateCodeRemediation;
+use Automattic\WooCommerce\Internal\Address\LegacyStateCodes;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -268,10 +270,23 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	/**
 	 * Get all available regions.
 	 *
-	 * @param int $allowed_countries Zone ID.
-	 * @param int $shipping_continents Zone ID.
+	 * @param array $allowed_countries Country names indexed by country code.
+	 * @param array $shipping_continents Continent data indexed by continent code.
 	 */
 	protected function get_region_options( $allowed_countries, $shipping_continents ) {
+		// Persisted legacy state locations are not part of the current state lists, but they
+		// must remain visible in the editor or merchants cannot see and remove them.
+		$legacy_locations = array();
+		foreach ( wc_get_container()->get( LegacyStateCodeRemediation::class )->get_legacy_shipping_zone_locations() as $location_code ) {
+			$state_name = LegacyStateCodes::get_known_legacy_location_name( $location_code );
+
+			if ( null !== $state_name ) {
+				$location = wc_format_country_state_string( $location_code );
+
+				$legacy_locations[ $location['country'] ][ $location['state'] ] = $state_name;
+			}
+		}
+
 		$options = array();
 		foreach ( $shipping_continents as $continent_code => $continent ) {
 			$continent_data = array(
@@ -299,6 +314,18 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 						);
 					}
 				}
+
+				foreach ( $legacy_locations[ $country_code ] ?? array() as $state_code => $state_name ) {
+					if ( isset( $states[ $state_code ] ) ) {
+						continue;
+					}
+
+					$country_data['children'][] = array(
+						'value' => 'state:' . esc_attr( $country_code . ':' . $state_code ),
+						'label' => esc_html( $state_name . ', ' . $allowed_countries[ $country_code ] ),
+					);
+				}
+
 				$continent_data['children'][] = $country_data;
 			}
 			$options[] = $continent_data;

@@ -7591,18 +7591,6 @@ parameters:
 			path: includes/admin/settings/class-wc-settings-products.php
 
 		-
-			message: '#^Argument of an invalid type int supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: includes/admin/settings/class-wc-settings-shipping.php
-
-		-
-			message: '#^Cannot access offset mixed on int\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: includes/admin/settings/class-wc-settings-shipping.php
-
-		-
 			message: '#^Cannot call method display_errors\(\) on WC_Shipping_Method\|true\.$#'
 			identifier: method.nonObject
 			count: 1

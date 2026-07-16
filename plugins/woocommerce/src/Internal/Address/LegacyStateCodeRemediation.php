@@ -70,6 +70,48 @@ final class LegacyStateCodeRemediation {
 	}
 
 	/**
+	 * Get persisted shipping zone state locations that use known legacy state codes.
+	 *
+	 * The shipping region editor only offers current states, so persisted legacy
+	 * locations must be added back as options or merchants cannot see and remove them.
+	 *
+	 * @return array<int, string> Location codes in COUNTRY:STATE format.
+	 *
+	 * @since 11.1.0
+	 */
+	public function get_legacy_shipping_zone_locations(): array {
+		global $wpdb;
+
+		$locations = array();
+
+		foreach ( LegacyStateCodes::get_countries_with_known_states() as $country_code ) {
+			$legacy_state_codes = array_keys( LegacyStateCodes::get_known_states( $country_code ) );
+
+			if ( empty( $legacy_state_codes ) ) {
+				continue;
+			}
+
+			$legacy_shipping_codes = array_map(
+				static fn( string $state_code ): string => $country_code . ':' . $state_code,
+				$legacy_state_codes
+			);
+			$placeholders          = implode( ', ', array_fill( 0, count( $legacy_shipping_codes ), '%s' ) );
+
+			$found = $wpdb->get_col(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The guarded placeholder list is generated immediately above.
+					"SELECT DISTINCT location_code FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE location_type = 'state' AND location_code IN ({$placeholders})",
+					$legacy_shipping_codes
+				)
+			);
+
+			$locations = array_merge( $locations, $found );
+		}
+
+		return $locations;
+	}
+
+	/**
 	 * Run a prepared detection query without printing database errors into Site Health.
 	 *
 	 * @param string $query Prepared SQL query.
