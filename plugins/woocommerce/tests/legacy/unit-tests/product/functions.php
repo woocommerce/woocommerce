@@ -1016,6 +1016,52 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should use the filtered placeholder source for an attachment placeholder.
+	 */
+	public function test_wc_placeholder_img_uses_filtered_src_for_attachment_placeholder() {
+		$option_name                = 'woocommerce_placeholder_image';
+		$original_placeholder_image = get_option( $option_name, false );
+		$placeholder_image_id       = self::factory()->attachment->create(
+			array(
+				'file'           => 'placeholder.png',
+				'guid'           => 'https://example.com/wp-content/uploads/placeholder.png',
+				'post_mime_type' => 'image/png',
+			)
+		);
+		$placeholder_src            = 'https://example.com/custom-placeholder.png';
+		$filter                     = function () use ( $placeholder_src ) {
+			return $placeholder_src;
+		};
+
+		wp_update_attachment_metadata(
+			$placeholder_image_id,
+			array(
+				'width'  => 186,
+				'height' => 144,
+				'file'   => 'placeholder.png',
+			)
+		);
+		update_option( $option_name, $placeholder_image_id );
+		add_filter( 'woocommerce_placeholder_img_src', $filter );
+
+		try {
+			$image_html = wc_placeholder_img();
+
+			$this->assertStringContainsString( 'src="' . $placeholder_src . '"', $image_html );
+			$this->assertStringNotContainsString( 'srcset=', $image_html );
+		} finally {
+			remove_filter( 'woocommerce_placeholder_img_src', $filter );
+			wp_delete_attachment( $placeholder_image_id, true );
+
+			if ( false === $original_placeholder_image ) {
+				delete_option( $option_name );
+			} else {
+				update_option( $option_name, $original_placeholder_image );
+			}
+		}
+	}
+
+	/**
 	 * Test wc_get_product_types().
 	 *
 	 * @since 2.3
