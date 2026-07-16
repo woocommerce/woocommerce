@@ -86,7 +86,7 @@ class WC_Query {
 	 */
 	public function init_query_vars() {
 		// Query vars to add to WP.
-		$query_vars = array(
+		$this->query_vars = array(
 			// Checkout actions.
 			'order-pay'                  => get_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' ),
 			'order-received'             => get_option( 'woocommerce_checkout_order_received_endpoint', 'order-received' ),
@@ -103,8 +103,6 @@ class WC_Query {
 			'delete-payment-method'      => get_option( 'woocommerce_myaccount_delete_payment_method_endpoint', 'delete-payment-method' ),
 			'set-default-payment-method' => get_option( 'woocommerce_myaccount_set_default_payment_method_endpoint', 'set-default-payment-method' ),
 		);
-
-		$this->query_vars = $query_vars;
 	}
 
 	/**
