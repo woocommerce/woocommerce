@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve focus and screen reader feedback when hiding shipping recommendations, and restore marketplace links where the recommendations component is unavailable.
