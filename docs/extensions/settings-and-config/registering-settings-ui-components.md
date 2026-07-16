@@ -6,7 +6,7 @@ sidebar_position: 6
 
 # Registering settings UI components
 
-> **Experimental.** The Settings UI is behind the default-off `settings-ui` feature flag and its APIs are subject to change. The component contract described here changed in the DataForm migration and may change again before the feature is stable.
+> **Experimental.** The Settings UI is behind the default-off `settings-ui` feature flag and its APIs, including the component contract described here, are subject to change while the feature matures.
 
 Use custom components when a WooCommerce settings field needs plugin-specific React UI that cannot be represented by a supported field type.
 
@@ -77,6 +77,8 @@ type SettingsEditControlProps = {
 Page-level state is available through the `useSettingsUIContext()` hook:
 
 ```ts
+import { useSettingsUIContext } from '@woocommerce/settings-ui';
+
 const { schema, context, initialValues } = useSettingsUIContext();
 ```
 
