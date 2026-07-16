@@ -210,19 +210,14 @@ class ProductCollectionPage {
 				.getByRole( 'button', { name: 'Choose collection' } )
 				.click();
 
-			return this.editor.wpCoreVersion >= 7.1
-				? this.admin.page.getByRole( 'button', {
-						name: buttonName,
-						exact: true,
-				  } )
-				: this.editor.canvas
-						.locator(
-							'.wc-blocks-product-collection__collections-dropdown-content'
-						)
-						.getByRole( 'button', {
-							name: buttonName,
-							exact: true,
-						} );
+			return this.admin.page
+				.locator(
+					'.wc-blocks-product-collection__collections-dropdown-content'
+				)
+				.getByRole( 'button', {
+					name: buttonName,
+					exact: true,
+				} );
 		}
 
 		return placeholderSelector.getByRole( 'button', {
