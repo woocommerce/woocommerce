@@ -10,6 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Address\LegacyStateCodes;
+
 /**
  * REST API Setting Options controller class.
  *
@@ -199,7 +201,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 				$setting['type']    = 'multiselect';
 			} elseif ( 'single_select_country' === $setting['type'] ) {
 				$setting['type']    = 'select';
-				$setting['options'] = $this->get_countries_and_states();
+				$setting['options'] = $this->get_countries_and_states( (string) ( $setting['value'] ?? '' ) );
 			}
 
 			$filtered_settings[] = $setting;
@@ -237,9 +239,10 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	 * Returns a list of countries and states for use in the base location setting.
 	 *
 	 * @since  3.0.7
+	 * @param string $stored_value Currently stored setting value, kept selectable while it uses a known legacy state code.
 	 * @return array Array of states and countries.
 	 */
-	private function get_countries_and_states() {
+	private function get_countries_and_states( $stored_value = '' ) {
 		$countries = WC()->countries->get_countries();
 		if ( ! $countries ) {
 			return array();
@@ -255,6 +258,16 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 				}
 			} else {
 				$output[ $key ] = $value;
+			}
+		}
+
+		// A stored value may keep a known legacy state code until the merchant reviews it, so it must round-trip.
+		if ( '' !== $stored_value && ! isset( $output[ $stored_value ] ) ) {
+			$legacy_state_name = LegacyStateCodes::get_known_legacy_location_name( $stored_value );
+
+			if ( null !== $legacy_state_name ) {
+				$country                 = wc_format_country_state_string( $stored_value )['country'];
+				$output[ $stored_value ] = ( $countries[ $country ] ?? $country ) . ' - ' . $legacy_state_name;
 			}
 		}
 

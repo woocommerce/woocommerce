@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Address\LegacyStateCodes;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -765,7 +766,18 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp"><select name="<?php echo esc_attr( $value['field_name'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" style="<?php echo esc_attr( $value['css'] ); ?>" data-placeholder="<?php esc_attr_e( 'Choose a country / region&hellip;', 'woocommerce' ); ?>" aria-label="<?php esc_attr_e( 'Country / Region', 'woocommerce' ); ?>" class="wc-enhanced-select">
-								<?php WC()->countries->country_dropdown_options( $country, $state ); ?>
+								<?php
+								WC()->countries->country_dropdown_options( $country, $state );
+
+								// Keep a stored legacy state selectable so unrelated saves on this screen do not silently change it.
+								$stored_location   = (string) $value['value'];
+								$legacy_state_name = LegacyStateCodes::get_known_legacy_location_name( $stored_location );
+								$current_states    = WC()->countries->get_states( $country );
+
+								if ( null !== $legacy_state_name && ! isset( $current_states[ $state ] ) ) {
+									echo '<option value="' . esc_attr( $stored_location ) . '" selected="selected">' . esc_html( WC()->countries->get_countries()[ $country ] ?? $country ) . ' &mdash; ' . esc_html( $legacy_state_name ) . '</option>';
+								}
+								?>
 							</select> <?php echo $description; // WPCS: XSS ok. ?>
 							</td>
 						</tr>

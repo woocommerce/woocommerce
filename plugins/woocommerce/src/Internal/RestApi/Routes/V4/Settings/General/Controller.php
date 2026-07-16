@@ -431,7 +431,7 @@ class Controller extends AbstractController {
 
 		return $allow_stored_legacy_state
 			&& get_option( 'woocommerce_default_country' ) === $country_or_state
-			&& isset( LegacyStateCodes::get_known_states( $country )[ $state ] );
+			&& null !== LegacyStateCodes::get_known_legacy_location_name( (string) $country_or_state );
 	}
 
 	/**
