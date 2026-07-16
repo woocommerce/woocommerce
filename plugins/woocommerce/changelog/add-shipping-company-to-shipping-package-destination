@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Include the customer shipping company in the destination array of cart shipping packages.

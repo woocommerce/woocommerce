@@ -541,6 +541,22 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_shipping_packages should include the customer shipping company in the package destination.
+	 */
+	public function test_get_shipping_packages_includes_shipping_company_in_destination() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->get_customer()->set_shipping_company( 'Acme Corp' );
+
+		$packages = WC()->cart->get_shipping_packages();
+
+		$this->assertSame( 'Acme Corp', $packages[0]['destination']['company'] );
+
+		WC()->cart->get_customer()->set_shipping_company( '' );
+		$product->delete( true );
+	}
+
+	/**
 	 * Test that show_shipping returns true when Local Pickup is enabled,
 	 * even when "Hide shipping costs until an address is entered" is enabled
 	 * and no customer address is set.

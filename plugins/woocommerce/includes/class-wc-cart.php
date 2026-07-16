@@ -1711,6 +1711,7 @@ class WC_Cart extends WC_Legacy_Cart {
 						'address'   => $this->get_customer()->get_shipping_address(), // This is an alias of address_1, provided for backwards compatibility.
 						'address_1' => $this->get_customer()->get_shipping_address_1(),
 						'address_2' => $this->get_customer()->get_shipping_address_2(),
+						'company'   => $this->get_customer()->get_shipping_company(),
 					),
 					'cart_subtotal'   => $this->get_displayed_subtotal(),
 				),
