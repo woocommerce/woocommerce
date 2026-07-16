@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the woocommerce_coupon_object_updated_props hook so it reports only the props changed by the current save, instead of an array that grows with duplicates across repeated saves of the same coupon.
