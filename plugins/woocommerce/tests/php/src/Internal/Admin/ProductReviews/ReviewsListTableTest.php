@@ -1885,6 +1885,40 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `get_per_page` honors the dedicated filter and bridges the legacy `edit_comments_per_page` filter, which keeps precedence.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_per_page()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method doesn't exist.
+	 */
+	public function test_get_per_page_bridges_legacy_comments_filter() {
+		$list_table = $this->get_reviews_list_table();
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_per_page' );
+		$method->setAccessible( true );
+
+		$dedicated = static function () {
+			return 30;
+		};
+		$legacy = static function () {
+			return 45;
+		};
+
+		// The dedicated `edit_product_reviews_per_page` filter is honored.
+		add_filter( 'edit_product_reviews_per_page', $dedicated );
+		$this->assertSame( 30, $method->invoke( $list_table ) );
+
+		// The legacy `edit_comments_per_page` filter is still bridged, and keeps precedence over the dedicated
+		// filter for backward compatibility during the deprecation window.
+		add_filter( 'edit_comments_per_page', $legacy );
+		$this->setExpectedDeprecated( 'edit_comments_per_page' );
+		$this->assertSame( 45, $method->invoke( $list_table ) );
+
+		remove_filter( 'edit_product_reviews_per_page', $dedicated );
+		remove_filter( 'edit_comments_per_page', $legacy );
+	}
+
+	/**
 	 * @testdox `comments_bubble` displays a bubble with information about pending and approved reviews for the corresponding product.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::comments_bubble()

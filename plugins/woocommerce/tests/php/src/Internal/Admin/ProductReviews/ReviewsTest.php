@@ -115,7 +115,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `set_reviews_per_page_option` returns the sanitized value only for the reviews per-page option.
+	 * @testdox `set_reviews_per_page_option` saves values within the 1–999 bounds and rejects everything else.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::set_reviews_per_page_option()
 	 *
@@ -124,8 +124,15 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	public function test_set_reviews_per_page_option(): void {
 		$reviews = wc_get_container()->get( Reviews::class );
 
-		// Saves the sanitized value for the reviews option.
+		// Values inside the 1–999 range are saved.
+		$this->assertSame( 1, $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 1 ) );
 		$this->assertSame( 55, $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 55 ) );
+		$this->assertSame( 999, $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 999 ) );
+
+		// Values outside the range are rejected: the incoming status is returned unchanged, so nothing is saved.
+		$this->assertFalse( $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 0 ) );
+		$this->assertFalse( $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, -5 ) );
+		$this->assertFalse( $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 1000 ) );
 
 		// Leaves other options untouched (returns the incoming status).
 		$this->assertFalse( $reviews->set_reviews_per_page_option( false, 'some_other_per_page', 55 ) );

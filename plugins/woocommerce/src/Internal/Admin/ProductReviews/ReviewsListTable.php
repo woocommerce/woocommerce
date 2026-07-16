@@ -122,12 +122,37 @@ class ReviewsListTable extends WP_List_Table {
 	 * Returns the number of items to show per page.
 	 *
 	 * Reads the dedicated {@see Reviews::PER_PAGE_USER_OPTION_KEY} user option, which is set through the
-	 * "Number of reviews per page" control in the screen options.
+	 * "Number of reviews per page" control in the screen options. For backward compatibility it then bridges the
+	 * legacy `edit_comments_per_page` filter: this list previously derived its page size via
+	 * {@see WP_List_Table::get_items_per_page()} using that option key, so third-party integrations (including the
+	 * workaround shared in https://github.com/woocommerce/woocommerce/issues/55944) hooked `edit_comments_per_page`
+	 * to size the reviews list. The bridge keeps those integrations working — scoped to this screen, since the method
+	 * only runs while preparing the reviews list — while steering new code towards `edit_product_reviews_per_page`.
+	 * The legacy filter is applied last, so it retains precedence over the dedicated filter during the deprecation
+	 * window.
 	 *
 	 * @return int Customized per-page value if available, or 20 as the default.
 	 */
 	protected function get_per_page() : int {
-		return $this->get_items_per_page( Reviews::PER_PAGE_USER_OPTION_KEY );
+		$per_page = $this->get_items_per_page( Reviews::PER_PAGE_USER_OPTION_KEY );
+
+		/**
+		 * Filters the number of product reviews shown per page on the Product Reviews list table.
+		 *
+		 * @since 6.7.0
+		 * @deprecated 11.1.0 Use the `edit_product_reviews_per_page` filter instead.
+		 *
+		 * @param int $per_page Number of reviews to show per page.
+		 */
+		$per_page = (int) apply_filters_deprecated(
+			'edit_comments_per_page',
+			array( $per_page ),
+			'11.1.0',
+			'edit_product_reviews_per_page',
+			'The Product Reviews list now uses a dedicated per-page option.'
+		);
+
+		return $per_page;
 	}
 
 	/**

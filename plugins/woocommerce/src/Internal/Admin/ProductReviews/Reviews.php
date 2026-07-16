@@ -605,6 +605,12 @@ class Reviews {
 	/**
 	 * Saves the "number of reviews per page" screen option.
 	 *
+	 * Because this is a custom screen-option key, WordPress core does not apply the `1`–`999` bounds it enforces for
+	 * standard per-page options in {@see set_screen_options()}. We reapply those bounds here so a crafted (but
+	 * nonce-authenticated) request cannot persist an out-of-range value that would later be passed to
+	 * {@see get_comments()} as the query size. Out-of-range values are rejected (the incoming status is returned
+	 * unchanged, so nothing is saved), matching core's behaviour.
+	 *
 	 * @since 11.1.0
 	 *
 	 * @param mixed  $screen_option The value to save instead of the option value. Default false (to skip saving the current option).
@@ -615,7 +621,17 @@ class Reviews {
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function set_reviews_per_page_option( $screen_option, $option, $value ) {
-		return self::PER_PAGE_USER_OPTION_KEY === $option ? absint( $value ) : $screen_option;
+		if ( self::PER_PAGE_USER_OPTION_KEY !== $option ) {
+			return $screen_option;
+		}
+
+		$value = (int) $value;
+
+		if ( $value < 1 || $value > 999 ) {
+			return $screen_option;
+		}
+
+		return $value;
 	}
 
 	/**
