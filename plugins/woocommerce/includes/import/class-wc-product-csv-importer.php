@@ -844,9 +844,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			if ( isset( $data_formatting[ $heading ] ) ) {
 				$callback = $data_formatting[ $heading ];
 			} else {
-				foreach ( $regex_match_data_formatting as $regex => $callback ) {
+				foreach ( $regex_match_data_formatting as $regex => $regex_callback ) {
 					if ( preg_match( $regex, $heading ) ) {
-						$callback = $callback;
+						$callback = $regex_callback;
 						break;
 					}
 				}

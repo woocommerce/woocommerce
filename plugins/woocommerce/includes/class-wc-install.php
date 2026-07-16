@@ -342,6 +342,9 @@ class WC_Install {
 		'11.0.0'   => array(
 			'wc_update_1100_enable_point_of_sale_feature',
 		),
+		'11.1.0'   => array(
+			'wc_update_1110_delete_dashboard_outofstock_count_transient',
+		),
 	);
 
 	/**
