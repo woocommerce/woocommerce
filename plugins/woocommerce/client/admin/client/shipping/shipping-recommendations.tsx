@@ -120,9 +120,7 @@ const ShippingRecommendations = () => {
 		! hasRecommendationEligibilityResolved ||
 		( ! hasRecommendationsDismissResolved && hasVisibleExtensions );
 	const shouldShowRecommendationsFallback =
-		( hasRecommendationsDismissResolved && isRecommendationsHidden ) ||
-		! hasVisibleExtensions ||
-		isSellingDigitalProductsOnly;
+		! hasVisibleExtensions || isSellingDigitalProductsOnly;
 	const shouldTrackRecommendationsImpression =
 		hasRecommendationEligibilityResolved &&
 		hasRecommendationsDismissResolved &&
@@ -182,7 +180,11 @@ const ShippingRecommendations = () => {
 			<ShippingTour
 				showShippingRecommendationsStep={ ! isRecommendationsHidden }
 			/>
-			<div style={ { paddingBottom: 60 } }>
+			<div
+				style={ {
+					paddingBottom: isRecommendationsHidden ? 0 : 60,
+				} }
+			>
 				<ShippingRecommendationsList
 					dismissState={ recommendationsDismissState }
 				>
@@ -241,6 +243,7 @@ const ShippingRecommendations = () => {
 					} ) }
 				</ShippingRecommendationsList>
 			</div>
+			{ isRecommendationsHidden && marketplaceFallbackLink }
 		</>
 	);
 };

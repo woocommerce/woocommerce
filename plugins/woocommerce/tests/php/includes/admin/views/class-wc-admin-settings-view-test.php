@@ -79,6 +79,64 @@ class WC_Admin_Settings_View_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render the shipping marketplace link on Shipping settings subsections.
+	 */
+	public function test_shipping_marketplace_link_is_rendered_on_shipping_settings_subsections(): void {
+		$output = $this->render_settings_view( 'shipping', 'options' );
+
+		$this->assertStringContainsString(
+			'data-settings-tab="shipping"',
+			$output
+		);
+		$this->assertStringContainsString(
+			'data-settings-section="options"',
+			$output
+		);
+		$this->assertStringContainsString(
+			'shipping-delivery-and-fulfillment',
+			$output
+		);
+	}
+
+	/**
+	 * @testdox Should render the shipping marketplace link on Shipping zone screens.
+	 */
+	public function test_shipping_marketplace_link_is_rendered_on_shipping_zone_screens(): void {
+		$_GET['zone_id'] = '1';
+
+		$output = $this->render_settings_view( 'shipping' );
+
+		$this->assertStringContainsString(
+			'data-settings-tab="shipping"',
+			$output
+		);
+		$this->assertStringContainsString(
+			'shipping-delivery-and-fulfillment',
+			$output
+		);
+	}
+
+	/**
+	 * @testdox Should render the shipping marketplace link for users who cannot install plugins.
+	 */
+	public function test_shipping_marketplace_link_is_rendered_for_users_without_plugin_install_permissions(): void {
+		$shop_manager_user_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		wp_set_current_user( $shop_manager_user_id );
+		$this->assertFalse( current_user_can( 'install_plugins' ) );
+
+		$output = $this->render_settings_view( 'shipping' );
+
+		$this->assertStringContainsString(
+			'data-settings-tab="shipping"',
+			$output
+		);
+		$this->assertStringContainsString(
+			'shipping-delivery-and-fulfillment',
+			$output
+		);
+	}
+
+	/**
 	 * @testdox Should keep non-shipping marketplace links when shipping smart defaults are enabled.
 	 */
 	public function test_non_shipping_marketplace_links_are_rendered_when_shipping_smart_defaults_are_enabled(): void {
