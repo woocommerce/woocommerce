@@ -360,4 +360,57 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		$this->assertNotFalse( $refunded_nodes, 'The refunded price XPath query should be valid.' );
 		$this->assertSame( 1, $refunded_nodes->length, 'The preview should render the exact negative refund amount returned by the wc_price filter.' );
 	}
+
+	/**
+	 * @testdox Order previews preserve the legacy minus sign for zero-total refund items.
+	 */
+	public function test_order_preview_preserves_minus_for_zero_total_refund(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$item_id = $order->add_product( $product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'amount'        => 0,
+				'order_id'      => $order->get_id(),
+				'line_items'    => array(
+					$item_id => array(
+						'qty'          => 1,
+						'refund_total' => 0,
+						'refund_tax'   => array(),
+					),
+				),
+				'restock_items' => false,
+			)
+		);
+
+		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
+			unset( $formatted_price, $args, $unformatted_price );
+
+			return 0.0 === (float) $original_price ? 'zero-price' : $price_html;
+		};
+		add_filter( 'wc_price', $price_filter, 10, 5 );
+
+		$preview_html = WC_Admin_List_Table_Orders::get_order_preview_item_html( $order );
+
+		remove_filter( 'wc_price', $price_filter );
+		$order->delete( true );
+		$product->delete( true );
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<!DOCTYPE html><html><body>' . $preview_html . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The order preview output should be valid enough for DOM parsing.' );
+
+		$xpath          = new DOMXPath( $document );
+		$refunded_nodes = $xpath->query( "//small[contains(concat(' ', normalize-space(@class), ' '), ' refunded ') and normalize-space(.) = '-zero-price']" );
+
+		$this->assertNotFalse( $refunded_nodes, 'The zero refund XPath query should be valid.' );
+		$this->assertSame( 1, $refunded_nodes->length, 'The preview should retain the legacy external minus sign for a zero-total refund.' );
+	}
 }

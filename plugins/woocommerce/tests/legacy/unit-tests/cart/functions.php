@@ -205,6 +205,37 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Zero-value coupon totals preserve the legacy minus sign.
+	 */
+	public function test_wc_cart_totals_coupon_html_preserves_minus_for_zero_amount(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$coupon  = WC_Helper_Coupon::create_coupon( 'zero-value-coupon', array( 'coupon_amount' => '0' ) );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
+			unset( $formatted_price, $args, $unformatted_price );
+
+			return 0.0 === (float) $original_price ? 'zero-price' : $price_html;
+		};
+		add_filter( 'wc_price', $price_filter, 10, 5 );
+
+		ob_start();
+		wc_cart_totals_coupon_html( $coupon );
+		$coupon_html = ob_get_clean();
+
+		remove_filter( 'wc_price', $price_filter );
+		WC()->cart->empty_cart();
+		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+
+		$this->assertStringStartsWith( '-zero-price ', $coupon_html, 'Zero-value coupons should retain the legacy external minus sign.' );
+	}
+
+	/**
 	 * Test get_cart_url method.
 	 *
 	 * @since 2.5.0

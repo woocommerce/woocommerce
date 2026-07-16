@@ -77,4 +77,44 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $discount_nodes->length, 'The order items view should render the exact negative discount returned by the wc_price filter.' );
 		$this->assertSame( 2, $refund_nodes->length, 'Both refund total cells should render the exact negative amount returned by the wc_price filter.' );
 	}
+
+	/**
+	 * @testdox The refund form preserves the legacy minus sign before any amount is refunded.
+	 */
+	public function test_refund_form_preserves_minus_for_zero_refunded_total(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
+			unset( $formatted_price, $args, $unformatted_price );
+
+			return 0.0 === (float) $original_price ? 'zero-price' : $price_html;
+		};
+		add_filter( 'wc_price', $price_filter, 10, 5 );
+
+		ob_start();
+		include WC_ABSPATH . 'includes/admin/meta-boxes/views/html-order-items.php';
+		$order_items_html = ob_get_clean();
+
+		remove_filter( 'wc_price', $price_filter );
+		$order->delete( true );
+		$product->delete( true );
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<!DOCTYPE html><html><body>' . $order_items_html . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The order items output should be valid enough for DOM parsing.' );
+
+		$xpath      = new DOMXPath( $document );
+		$zero_nodes = $xpath->query( "//div[contains(concat(' ', normalize-space(@class), ' '), ' wc-order-refund-items ')]//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = '-zero-price']" );
+
+		$this->assertNotFalse( $zero_nodes, 'The zero refunded total XPath query should be valid.' );
+		$this->assertSame( 1, $zero_nodes->length, 'The refund form should retain the legacy external minus sign before any refund.' );
+	}
 }
