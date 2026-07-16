@@ -200,7 +200,7 @@ Fields before the first `title` marker are placed into a default group automatic
 
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
 
-Settings groups render as DataForm card layouts by default. A group keeps the Settings UI card renderer when it has header actions or a rich description, because DataForm does not provide equivalent card-header slots.
+Settings groups render as DataForm card layouts by default. A group keeps the Settings UI card renderer when it has header actions or a rich description. DataForm card layouts do not provide an action slot, and `FormField.description` accepts only plain text.
 
 ## Field validation
 
@@ -221,7 +221,7 @@ array(
 
 `required` marks the field as required. `elements` restricts values to the field's declared options. `validator` names a JavaScript validator registered through `registerSettingsExtension()`.
 
-The Settings UI disables saving while DataForm reports an invalid or validating form. This client-side validation does not replace WooCommerce's PHP sanitization, option filters, or save-time validation.
+The Settings UI disables saving while DataForm reports an invalid or validating form. This client-side validation does not replace WooCommerce's PHP sanitization, option filters, or save-time validation. The default form POST redirects after saving, so PHP errors remain page notices and cannot be associated with individual DataForm fields. Add equivalent client-side rules when inline feedback is needed, but keep the PHP rule authoritative.
 
 See [Registering settings UI components](./registering-settings-ui-components.md#register-custom-validators) for the validator registration contract.
 

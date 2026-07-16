@@ -204,7 +204,7 @@ registerSettingsExtension( {
 
 Validators return `null` for a valid value or an error message for an invalid value. They can return the result directly or return a promise. DataForm displays the field error and the Settings UI prevents saving while validation is pending or invalid.
 
-The validation callback also receives `field`, `values`, `initialValues`, `context`, and `schema`. PHP sanitisation and save filters remain the authoritative server-side validation layer.
+The validation callback also receives `field`, `values`, `initialValues`, `context`, and `schema`. PHP sanitization and save filters remain the authoritative server-side validation layer.
 
 ## Enqueue the component script
 
