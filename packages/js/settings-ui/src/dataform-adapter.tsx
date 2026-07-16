@@ -100,6 +100,42 @@ const toCheckboxValue = (
 	return checked ? 'yes' : 'no';
 };
 
+// Legacy PHP settings deliver numeric values as strings, which the
+// package number control and the number type validation reject. Present
+// finite numbers to the package and let toNumberFieldValue restore the
+// saved representation on the way back.
+const toNumberControlValue = ( value: SettingsValue | undefined ) => {
+	if ( value === '' || value === null || typeof value === 'undefined' ) {
+		return undefined;
+	}
+
+	if ( typeof value === 'string' && value.trim() !== '' ) {
+		const parsed = Number( value );
+
+		if ( Number.isFinite( parsed ) ) {
+			return parsed;
+		}
+	}
+
+	return value;
+};
+
+const toNumberFieldValue = (
+	next: SettingsValue,
+	initialValue: SettingsValue | undefined
+): SettingsValue => {
+	// The native renderer already emits the legacy string vocabulary.
+	if ( typeof next === 'string' ) {
+		return next;
+	}
+
+	if ( typeof next === 'undefined' || next === null ) {
+		return '';
+	}
+
+	return typeof initialValue === 'number' ? next : String( next );
+};
+
 export const areValuesEqual = ( a: SettingsValue, b: SettingsValue ) => {
 	if ( Array.isArray( a ) || Array.isArray( b ) ) {
 		return (
@@ -299,6 +335,11 @@ const createGetValue = ( settingsField: SettingsUIField ) => {
 			toStringValue( item[ settingsField.id ] );
 	}
 
+	if ( settingsField.type === 'number' ) {
+		return ( { item }: { item: SettingsValues } ) =>
+			toNumberControlValue( item[ settingsField.id ] );
+	}
+
 	return ( { item }: { item: SettingsValues } ) => {
 		const value = item[ settingsField.id ];
 		return typeof value === 'undefined' ? '' : value;
@@ -340,6 +381,15 @@ const createSetValue = (
 			return {
 				[ settingsField.id ]: toCheckboxValue(
 					Boolean( value ),
+					initialValues[ settingsField.id ]
+				),
+			};
+		}
+
+		if ( settingsField.type === 'number' ) {
+			return {
+				[ settingsField.id ]: toNumberFieldValue(
+					value,
 					initialValues[ settingsField.id ]
 				),
 			};

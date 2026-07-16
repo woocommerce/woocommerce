@@ -317,6 +317,60 @@ describe( 'dataform-adapter', () => {
 				field.setValue?.( { item: {}, value: [ 'GB', 5 ] } )
 			).toEqual( { countries: [ 'GB', '5' ] } );
 		} );
+
+		it( 'presents numeric strings as numbers to the package', () => {
+			const settingsField: SettingsUIField = {
+				id: 'window',
+				label: 'Window',
+				type: 'number',
+			};
+			const field = buildDataFormField(
+				settingsField,
+				fieldOptions( settingsField )
+			);
+
+			expect( field.getValue?.( { item: { window: '30' } } ) ).toBe( 30 );
+			expect( field.getValue?.( { item: { window: 30 } } ) ).toBe( 30 );
+			expect(
+				field.getValue?.( { item: { window: '' } } )
+			).toBeUndefined();
+			expect( field.getValue?.( { item: {} } ) ).toBeUndefined();
+			expect( field.getValue?.( { item: { window: 'abc' } } ) ).toBe(
+				'abc'
+			);
+		} );
+
+		it( 'preserves the initial number value representation on write', () => {
+			const settingsField: SettingsUIField = {
+				id: 'window',
+				label: 'Window',
+				type: 'number',
+			};
+
+			const stringInitial = buildDataFormField(
+				settingsField,
+				fieldOptions( settingsField, { window: '30' } )
+			);
+			expect(
+				stringInitial.setValue?.( { item: {}, value: 35 } )
+			).toEqual( { window: '35' } );
+			expect(
+				stringInitial.setValue?.( { item: {}, value: undefined } )
+			).toEqual( { window: '' } );
+
+			const numberInitial = buildDataFormField(
+				settingsField,
+				fieldOptions( settingsField, { window: 30 } )
+			);
+			expect(
+				numberInitial.setValue?.( { item: {}, value: 35 } )
+			).toEqual( { window: 35 } );
+
+			// The native renderer emits strings; they pass through unchanged.
+			expect(
+				stringInitial.setValue?.( { item: {}, value: '42' } )
+			).toEqual( { window: '42' } );
+		} );
 	} );
 
 	describe( 'visibility', () => {
@@ -620,6 +674,40 @@ describe( 'dataform-adapter', () => {
 			await act( async () => Promise.resolve() );
 
 			expect( results[ results.length - 1 ] ).toBe( false );
+
+			cleanup();
+		} );
+
+		it( 'accepts numeric string values on number fields', async () => {
+			const numberField: SettingsUIField = {
+				id: 'window',
+				label: 'Window',
+				type: 'number',
+			};
+			const options = makeOptions(
+				[ { id: 'general', fields: [ numberField ] } ],
+				{ window: '30' }
+			);
+			const adapter = createDataFormAdapter( options );
+
+			const results: boolean[] = [];
+			const Harness = () => {
+				const [ values ] = useState< SettingsValues >( {
+					window: '30',
+				} );
+				const { isValid } = useFormValidity(
+					values,
+					adapter.fields,
+					adapter.getValidationForm( values )
+				);
+				results.push( isValid );
+				return null;
+			};
+
+			const { cleanup } = render( <Harness /> );
+			await act( async () => Promise.resolve() );
+
+			expect( results[ results.length - 1 ] ).toBe( true );
 
 			cleanup();
 		} );
