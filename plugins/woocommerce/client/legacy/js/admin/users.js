@@ -123,8 +123,27 @@ jQuery( function ( $ ) {
 					return;
 				}
 				// Found a matching shipping element, update the value
-				shipEl.val( el.value ).trigger( 'change' );
+				var label = $( el ).is( 'select' ) ? $( el ).find( 'option:selected' ).text() : '';
+				wc_users_fields.set_field_value( shipEl, el.value, label );
 			} );
+		},
+
+		set_field_value: function( $el, value, label ) {
+			// Keep historical or extension-defined values from being erased when the
+			// target select does not list them (e.g. persisted legacy state codes).
+			if (
+				value &&
+				$el.is( 'select' ) &&
+				! $el.find( 'option' ).filter( function() { return this.value === value; } ).length
+			) {
+				$el.append(
+					$( '<option></option>' )
+						.prop( 'value', value )
+						.text( label || value )
+				);
+			}
+
+			$el.val( value ).trigger( 'change' );
 		}
 	};
 

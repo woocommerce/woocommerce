@@ -210,7 +210,7 @@ jQuery( function ( $ ) {
 					success: function( response ) {
 						if ( response && response.billing ) {
 							$.each( response.billing, function( key, data ) {
-								$( ':input#_billing_' + key ).val( data ).trigger( 'change' );
+								wc_meta_boxes_order.set_address_field( $( ':input#_billing_' + key ), data );
 							});
 						}
 						$( 'div.edit_address' ).unblock();
@@ -252,7 +252,7 @@ jQuery( function ( $ ) {
 					success: function( response ) {
 						if ( response && response.billing ) {
 							$.each( response.shipping, function( key, data ) {
-								$( ':input#_shipping_' + key ).val( data ).trigger( 'change' );
+								wc_meta_boxes_order.set_address_field( $( ':input#_shipping_' + key ), data );
 							});
 						}
 						$( 'div.edit_address' ).unblock();
@@ -267,10 +267,29 @@ jQuery( function ( $ ) {
 				$('.order_data_column :input[name^="_billing_"]').each( function() {
 					var input_name = $(this).attr('name');
 					input_name     = input_name.replace( '_billing_', '_shipping_' );
-					$( ':input#' + input_name ).val( $(this).val() ).trigger( 'change' );
+					var label      = $(this).is( 'select' ) ? $(this).find( 'option:selected' ).text() : '';
+					wc_meta_boxes_order.set_address_field( $( ':input#' + input_name ), $(this).val(), label );
 				});
 			}
 			return false;
+		},
+
+		set_address_field: function( $el, value, label ) {
+			// Keep historical or extension-defined values from being erased when the
+			// target select does not list them (e.g. persisted legacy state codes).
+			if (
+				value &&
+				$el.is( 'select' ) &&
+				! $el.find( 'option' ).filter( function() { return this.value === value; } ).length
+			) {
+				$el.append(
+					$( '<option></option>' )
+						.prop( 'value', value )
+						.text( label || value )
+				);
+			}
+
+			$el.val( value ).trigger( 'change' );
 		}
 	};
 
