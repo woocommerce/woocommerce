@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const { readdirSync, readFileSync, writeFileSync } = require( 'node:fs' );
 const path = require( 'node:path' );
+const prettier = require( 'prettier' );
 
 const { discoverBlocksFiles } = require( './discover-blocks-files' );
 
@@ -221,6 +222,13 @@ function discoverCurrentFiles() {
 	return result.files;
 }
 
+function serializeDurationManifest( manifest ) {
+	return prettier.format( JSON.stringify( manifest ), {
+		...prettier.resolveConfig.sync( __filename ),
+		parser: 'json',
+	} );
+}
+
 function main(
 	args = process.argv.slice( 2 ),
 	discoverFiles = discoverCurrentFiles
@@ -233,10 +241,7 @@ function main(
 			durations: readRunDurations( run.path ),
 		} ) ),
 	} );
-	writeFileSync(
-		outputPath,
-		`${ JSON.stringify( manifest, null, '\t' ) }\n`
-	);
+	writeFileSync( outputPath, serializeDurationManifest( manifest ) );
 }
 
 if ( require.main === module ) {

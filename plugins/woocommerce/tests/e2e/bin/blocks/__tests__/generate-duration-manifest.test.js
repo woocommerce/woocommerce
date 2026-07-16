@@ -10,6 +10,7 @@ const {
 const { tmpdir } = require( 'node:os' );
 const path = require( 'node:path' );
 const { describe, test } = require( 'node:test' );
+const prettier = require( 'prettier' );
 
 const {
 	buildDurationManifest,
@@ -230,7 +231,7 @@ describe( 'parseArguments', () => {
 } );
 
 describe( 'main', () => {
-	test( 'writes a manifest for the current Playwright inventory', () => {
+	test( 'writes a formatted manifest for the current Playwright inventory', () => {
 		const directory = createReportDirectory();
 		const outputPath = path.join( directory, 'manifest.json' );
 		const arguments_ = [];
@@ -260,18 +261,23 @@ describe( 'main', () => {
 				'blocks/a.spec.ts',
 			] );
 
-			assert.deepEqual(
-				JSON.parse( readFileSync( outputPath, 'utf8' ) ),
-				{
-					schemaVersion: 1,
-					sourceRuns: [ 1, 2, 3 ],
-					fallbackDurationMs: 200,
-					files: {
-						'blocks/a.spec.ts': 200,
-						'blocks/new.spec.ts': 200,
-					},
-				}
+			const output = readFileSync( outputPath, 'utf8' );
+			assert.equal(
+				output,
+				prettier.format( output, {
+					...prettier.resolveConfig.sync( __filename ),
+					parser: 'json',
+				} )
 			);
+			assert.deepEqual( JSON.parse( output ), {
+				schemaVersion: 1,
+				sourceRuns: [ 1, 2, 3 ],
+				fallbackDurationMs: 200,
+				files: {
+					'blocks/a.spec.ts': 200,
+					'blocks/new.spec.ts': 200,
+				},
+			} );
 		} finally {
 			rmSync( directory, { recursive: true, force: true } );
 		}
