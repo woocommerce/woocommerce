@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Limit the front end email preview to published emails or users who can read the post, so unpublished emails are no longer shown to logged out visitors.
