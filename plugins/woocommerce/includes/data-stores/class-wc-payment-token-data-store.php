@@ -376,6 +376,12 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * result set), and past the integer range it returns a float, which this method is typed not to
 	 * return. A row count that is not an integer is not a row count, so the default is used.
 	 *
+	 * This validation applies only to the two filters introduced in 11.1.0, which have no
+	 * consumers yet. The released `woocommerce_get_customer_payment_tokens_limit` filter
+	 * (in `WC_Payment_Tokens::get_customer_tokens()`) deliberately keeps its historical
+	 * `absint()` reading: `0` is a supported "hide the saved methods" value there, and
+	 * callbacks in the wild have shipped against `absint()`'s coercions since 7.2.0.
+	 *
 	 * @since 11.1.0
 	 * @param mixed $value         The filtered value.
 	 * @param int   $default_value Row count to use when `$value` is not an integer of at least one.

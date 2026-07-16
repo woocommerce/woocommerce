@@ -78,6 +78,8 @@ class WC_Payment_Tokens {
 	 * Returns an array of payment token objects associated with the passed customer ID.
 	 *
 	 * @since 2.6.0
+	 * @since 11.1.0 A `woocommerce_get_customer_payment_tokens_limit` callback returning `null`
+	 *               falls back to the default limit instead of leaving the query unbounded.
 	 * @param  int    $customer_id Customer ID.
 	 * @param  string $gateway_id  Optional Gateway ID for getting tokens for a specific gateway.
 	 * @return WC_Payment_Token[]  Array of token objects.
@@ -91,9 +93,13 @@ class WC_Payment_Tokens {
 		 * Controls the maximum number of Payment Methods that will be listed via the My Account page.
 		 *
 		 * @since 7.2.0
-		 * @since 11.1.0 The default changed from the value of the `posts_per_page` option to 100.
+		 * @since 11.1.0 The default changed from the value of the `posts_per_page` option to 100,
+		 *               and a callback returning `null` falls back to that default instead of
+		 *               leaving the query unbounded.
 		 *
-		 * @param int $limit Maximum number of tokens to return. Defaults to 100.
+		 * @param int $limit Maximum number of tokens to return. Defaults to 100. Returning `null`
+		 *                   falls back to the default; any other value is read through `absint()`,
+		 *                   so `0` (and anything coercing to it) hides the saved methods.
 		 */
 		$limit = apply_filters( 'woocommerce_get_customer_payment_tokens_limit', self::DEFAULT_CUSTOMER_TOKENS_LIMIT );
 
