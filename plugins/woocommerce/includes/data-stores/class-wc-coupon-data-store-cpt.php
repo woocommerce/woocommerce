@@ -330,7 +330,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		 */
 		do_action( 'woocommerce_coupon_object_updated_props', $coupon, $updated_props );
 
-		// A listener may have triggered a nested save, so restore this invocation's props.
+		/*
+		 * Not a redundant repeat of the assignment above: a listener may have triggered a
+		 * nested save, which leaves its own props in $this->updated_props. PHP unwinds LIFO,
+		 * so this write — the outermost call's — is the last one to run, which is what makes
+		 * the property hold the most recently completed call's props.
+		 */
 		$this->updated_props = $updated_props;
 	}
 
