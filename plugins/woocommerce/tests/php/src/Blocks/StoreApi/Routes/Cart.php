@@ -929,6 +929,10 @@ class Cart extends ControllerTestCase {
 	 * Covers the formats from https://github.com/woocommerce/woocommerce/issues/47792 not handled by
 	 * exact matching: the unprefixed sanitized slug, the label with special characters encoded, and
 	 * the prefixed but unencoded slug shown on the Edit Attribute screen.
+	 *
+	 * The variation deliberately stores no attribute values ("Any ..."): for a fully specified
+	 * variation, parse_variation_data() backfills attributes the sanitizer failed to match, so
+	 * only an "Any" variation surfaces a dropped key as an error.
 	 */
 	public function test_add_variable_product_to_cart_with_normalized_attribute_keys() {
 		wc_empty_cart();
@@ -954,13 +958,9 @@ class Cart extends ControllerTestCase {
 			)
 		);
 
-		$variation = $fixtures->get_variation_product(
-			$variable_product->get_id(),
-			array(
-				'pa_sport-⚾️'                 => 'baseball-%e2%9a%be',
-				'color-%f0%9f%96%8d%ef%b8%8f' => 'Red 🔴',
-			)
-		);
+		// No attribute values: an "Any ..." variation. Posted values for the global
+		// attribute must then be real term slugs (the fixture appends '-slug').
+		$variation = $fixtures->get_variation_product( $variable_product->get_id(), array() );
 
 		// Prefixed but unencoded slug for the global attribute, encoded label with
 		// spaces kept for the local attribute.
@@ -974,7 +974,7 @@ class Cart extends ControllerTestCase {
 				'variation' => array(
 					array(
 						'attribute' => 'attribute_pa_sport-⚾️',
-						'value'     => 'Baseball ⚾',
+						'value'     => 'baseball-%e2%9a%be-slug',
 					),
 					array(
 						'attribute' => 'Color %f0%9f%96%8d%ef%b8%8f',
@@ -999,7 +999,7 @@ class Cart extends ControllerTestCase {
 				'variation' => array(
 					array(
 						'attribute' => 'pa_sport-%e2%9a%be%ef%b8%8f',
-						'value'     => 'baseball-%e2%9a%be',
+						'value'     => 'baseball-%e2%9a%be-slug',
 					),
 					array(
 						'attribute' => 'color-%f0%9f%96%8d%ef%b8%8f',
@@ -1022,7 +1022,7 @@ class Cart extends ControllerTestCase {
 							),
 							array(
 								'attribute' => 'Sport ⚾️',
-								'value'     => 'baseball-%e2%9a%be',
+								'value'     => 'Baseball ⚾',
 							),
 						),
 					),
