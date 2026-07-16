@@ -58,7 +58,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
 		add_filter( 'posts_clauses', array( $this, 'posts_clauses' ), 10, 2 );
-		add_action( 'manage_product_posts_custom_column', array( $this, 'add_sample_product_badge' ), 9, 2 );
 
 		// Use hooks to prime various caches and improve products page performance.
 		add_action( 'load-edit.php', array( $this, 'prime_status_counts_cache' ) );
@@ -209,9 +208,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$show_columns['cogs_value'] = __( 'Cost', 'woocommerce' );
 		}
 		$show_columns['product_cat'] = __( 'Categories', 'woocommerce' );
-		$show_columns['product_tag'] = __( 'Tags', 'woocommerce' );
-		$show_columns['featured']    = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
-		$show_columns['date']        = __( 'Date', 'woocommerce' );
+		if ( is_object_in_taxonomy( 'product', 'product_tag' ) ) {
+			$show_columns['product_tag'] = __( 'Tags', 'woocommerce' );
+		}
+		$show_columns['featured'] = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
+		$show_columns['date']     = __( 'Date', 'woocommerce' );
 
 		return array_merge( $show_columns, $columns );
 	}
@@ -435,6 +436,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				array(
 					'option_select_text' => __( 'Filter by category', 'woocommerce' ),
 					'hide_empty'         => 0,
+					// Performance note: pad_counts=0 skips the hierarchical count SQL — O(all published products), degrades linearly
+					// with catalog size. show_count=0 suppresses the raw wp_term_taxonomy.count that would otherwise render in its place.
+					'pad_counts'         => 0,
+					'show_count'         => 0,
 				)
 			);
 		} else {
@@ -835,13 +840,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @param int    $post_id     Post ID.
 	 *
 	 * @since 8.8.0
+	 * @deprecated 11.1.0
 	 */
 	public function add_sample_product_badge( $column_name, $post_id ) {
-		$is_sample_product = 'product' === get_post_type( $post_id ) && get_post_meta( $post_id, '_headstart_post', true );
-
-		if ( $is_sample_product && 'name' === $column_name ) {
-			echo '<span class="sample-product-badge" style="margin-right: 6px;border-radius: 4px; background: #F6F7F7; padding: 4px; color: #3C434A;font-size: 12px;font-style: normal;font-weight: 400;line-height: 16px; height: 24px;">' . esc_html__( 'Sample', 'woocommerce' ) . '</span>';
-		}
+		wc_deprecated_function( __METHOD__, '11.1.0' );
 	}
 
 	/**

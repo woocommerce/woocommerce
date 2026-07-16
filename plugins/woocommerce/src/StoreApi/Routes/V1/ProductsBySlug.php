@@ -1,7 +1,6 @@
 <?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
-use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductLinksTrait;
 
@@ -88,17 +87,8 @@ class ProductsBySlug extends AbstractRoute {
 			$object = $this->get_product_variation_by_slug( $slug );
 		}
 
-		if ( ! $object || 0 === $object->get_id() || ProductStatus::PUBLISH !== $object->get_status() ) {
+		if ( ! $object || 0 === $object->get_id() || ! $object->is_publicly_viewable() ) {
 			throw new RouteException( 'woocommerce_rest_product_invalid_slug', __( 'Invalid product slug.', 'woocommerce' ), 404 );
-		}
-
-		// A variation's visibility follows its parent product.
-		if ( $object->get_parent_id() ) {
-			$parent = wc_get_product( $object->get_parent_id() );
-
-			if ( ! $parent || ProductStatus::PUBLISH !== $parent->get_status() ) {
-				throw new RouteException( 'woocommerce_rest_product_invalid_slug', __( 'Invalid product slug.', 'woocommerce' ), 404 ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
-			}
 		}
 
 		return $this->prepare_item_for_response( $object, $request );

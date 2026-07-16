@@ -726,13 +726,18 @@ class WC_Admin_Post_Types {
 	/**
 	 * Hidden default Meta-Boxes.
 	 *
-	 * @param  array  $hidden Hidden boxes.
-	 * @param  object $screen Current screen.
+	 * @param  array     $hidden Hidden boxes.
+	 * @param  WP_Screen $screen Current screen.
 	 * @return array
 	 */
 	public function hidden_meta_boxes( $hidden, $screen ) {
 		if ( 'product' === $screen->post_type && 'post' === $screen->base ) {
 			$hidden = array_merge( $hidden, array( 'postcustom' ) );
+		}
+
+		// Download permissions are granted automatically, so hide the box by default on order screens (HPOS and legacy CPT). Merchants can re-enable it via Screen Options.
+		if ( wc_get_page_screen_id( 'shop-order' ) === $screen->id ) {
+			$hidden = array_merge( $hidden, array( 'woocommerce-order-downloads' ) );
 		}
 
 		return $hidden;
