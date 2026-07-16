@@ -20,6 +20,32 @@ use Automattic\WooCommerce\Caches\OrderCountCache;
 class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 	/**
+	 * Product shared by helper orders within the current test method.
+	 *
+	 * @var WC_Product|null
+	 */
+	private $order_product;
+
+	/**
+	 * Create a complete helper order with a method-owned product.
+	 *
+	 * @param int             $customer_id Customer ID.
+	 * @param WC_Product|null $product     Optional purpose-built product.
+	 * @param array           $order_data  Optional order properties to override the helper defaults.
+	 * @return WC_Order
+	 */
+	private function create_order( $customer_id = 1, $product = null, $order_data = array() ) {
+		if ( ! $product instanceof WC_Product ) {
+			if ( ! $this->order_product ) {
+				$this->order_product = WC_Helper_Product::create_simple_product();
+			}
+			$product = $this->order_product;
+		}
+
+		return WC_Helper_Order::create_order( $customer_id, $product, $order_data );
+	}
+
+	/**
 	 * Test wc_get_order_statuses().
 	 *
 	 * @since 2.3.0
@@ -175,7 +201,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$original_post     = $post;
 		$original_theorder = $theorder;
 
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 
 		// Assert that $order is a WC_Order object.
 		$this->assertInstanceOf( 'WC_Order', $order );
@@ -226,7 +252,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$this->markTestSkipped( 'Test only works against Post Meta' );
 		}
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 		$this->assertEmpty( $order->get_payment_tokens() );
 
 		$token = WC_Helper_Payment_Token::create_cc_token();
@@ -242,7 +268,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6
 	 */
 	public function test_wc_order_add_payment_token() {
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 		$this->assertEmpty( $order->get_payment_tokens() );
 
 		$token = WC_Helper_Payment_Token::create_cc_token();
@@ -257,10 +283,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.0
 	 */
 	public function test_wc_get_orders_customer_params() {
-		$order1  = WC_Helper_Order::create_order( 0 );
-		$order2  = WC_Helper_Order::create_order( 0 );
-		$order3  = WC_Helper_Order::create_order( 1 );
-		$order4  = WC_Helper_Order::create_order( 1 );
+		$order1  = $this->create_order( 0 );
+		$order2  = $this->create_order( 0 );
+		$order3  = $this->create_order( 1 );
+		$order4  = $this->create_order( 1 );
 		$order_1 = $order1->get_id();
 		$order_2 = $order2->get_id();
 		$order_3 = $order3->get_id();
@@ -306,15 +332,15 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.0
 	 */
 	public function test_wc_get_orders_date_params() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_date_created( '2015-01-01 05:20:30' );
 		$order1->save();
 		$order_1 = $order1->get_id();
-		$order2  = WC_Helper_Order::create_order();
+		$order2  = $this->create_order();
 		$order2->set_date_created( '2017-01-01' );
 		$order2->save();
 		$order_2 = $order2->get_id();
-		$order3  = WC_Helper_Order::create_order();
+		$order3  = $this->create_order();
 		$order3->set_date_created( '2017-01-01' );
 		$order3->save();
 		$order_3 = $order3->get_id();
@@ -393,10 +419,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_status_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_status( OrderStatus::PENDING );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_status( OrderStatus::COMPLETED );
 		$order2->save();
 
@@ -425,7 +451,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_type_param() {
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 		$order->save();
 		$refund = new WC_Order_Refund();
 		$refund->save();
@@ -455,7 +481,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_version_param() {
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 		$order->save();
 
 		$orders   = wc_get_orders(
@@ -483,10 +509,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_created_via_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_created_via( 'rest-api' );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_created_via( 'checkout' );
 		$order2->save();
 
@@ -515,13 +541,13 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_parent_param() {
-		$parent = WC_Helper_Order::create_order();
+		$parent = $this->create_order();
 		$parent->save();
 
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_parent_id( $parent->get_id() );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders   = wc_get_orders(
@@ -540,13 +566,13 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_parent_exclude_param() {
-		$parent = WC_Helper_Order::create_order();
+		$parent = $this->create_order();
 		$parent->save();
 
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_parent_id( $parent->get_id() );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders = wc_get_orders(
@@ -566,9 +592,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_exclude_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders   = wc_get_orders(
@@ -587,9 +613,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_limit_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders = wc_get_orders( array( 'limit' => 1 ) );
@@ -602,9 +628,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_paged_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders   = wc_get_orders(
@@ -638,9 +664,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_offset_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders   = wc_get_orders(
@@ -661,9 +687,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_paginate_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders = wc_get_orders( array( 'paginate' => true ) );
@@ -699,9 +725,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_order_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->save();
 
 		$orders   = wc_get_orders(
@@ -731,10 +757,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_currency_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_currency( 'BRL' );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_currency( 'USD' );
 		$order2->save();
 
@@ -763,10 +789,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_prices_include_tax_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_prices_include_tax( true );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_prices_include_tax( false );
 		$order2->save();
 
@@ -795,10 +821,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_payment_method_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_payment_method( WC_Gateway_Cheque::ID );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_payment_method( WC_Gateway_COD::ID );
 		$order2->save();
 
@@ -827,10 +853,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_get_order_payment_method_title_param() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_payment_method_title( 'Check payments' );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_payment_method_title( 'PayPal' );
 		$order2->save();
 
@@ -945,11 +971,11 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$customer2->set_billing_email( 'customer2@test.com' );
 		$customer2->save();
 
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_customer_id( $customer1->get_id() );
 		$order1->set_billing_email( $customer1->get_billing_email() );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_customer_id( $customer2->get_id() );
 		$order2->set_billing_email( $customer2->get_billing_email() );
 		$order2->save();
@@ -999,10 +1025,10 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$customer2->set_billing_email( 'customer2@test.com' );
 		$customer2->save();
 
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_customer_id( $customer1->get_id() );
 		$order1->save();
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_customer_id( $customer2->get_id() );
 		$order2->save();
 
@@ -1031,7 +1057,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.1
 	 */
 	public function test_wc_get_order_address_params() {
-		$order1 = WC_Helper_Order::create_order();
+		$order1 = $this->create_order();
 		$order1->set_props(
 			array(
 				'billing_email'       => 'test1@test.com',
@@ -1059,7 +1085,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$order1->save();
 		$order1_id = $order1->get_id();
 
-		$order2 = WC_Helper_Order::create_order();
+		$order2 = $this->create_order();
 		$order2->set_props(
 			array(
 				'billing_email'       => 'test2@test.com',
@@ -1295,7 +1321,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$date_range = $start . '...' . $end;
 
 		// Populate orders.
-		$us_now = WC_Helper_Order::create_order();
+		$us_now = $this->create_order();
 		$us_now->set_props(
 			array(
 				'shipping_country' => 'US',
@@ -1303,7 +1329,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		);
 		$us_now->save();
 
-		$us_old = WC_Helper_Order::create_order();
+		$us_old = $this->create_order();
 		$us_old->set_props(
 			array(
 				'date_created'     => $yesterday,
@@ -1312,7 +1338,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		);
 		$us_old->save();
 
-		$mx_now = WC_Helper_Order::create_order();
+		$mx_now = $this->create_order();
 		$mx_now->set_props(
 			array(
 				'shipping_country' => 'MX',
@@ -1320,7 +1346,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		);
 		$mx_now->save();
 
-		$mx_old = WC_Helper_Order::create_order();
+		$mx_old = $this->create_order();
 		$mx_old->set_props(
 			array(
 				'date_created'     => $yesterday,
@@ -1420,12 +1446,12 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that order modified date is updated when a refund is created for it.
+	 * @testdox Creating a refund advances the parent order modified date.
 	 *
 	 * @link https://github.com/woocommerce/woocommerce/issues/28969
 	 */
 	public function test_wc_create_refund_28969() {
-		$order = WC_Helper_Order::create_order(
+		$order = $this->create_order(
 			1,
 			WC_Helper_Product::create_simple_product(),
 			array(
@@ -1433,10 +1459,32 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 			)
 		);
 		// Ensure the order is a complete object with an initial modified date.
-		$order = wc_get_order( $order->get_id() );
+		$order                 = wc_get_order( $order->get_id() );
+		$initial_date_modified = '2020-01-01 00:00:00';
 
-		// Ensure the order's initial modified date is sufficiently in the past.
-		sleep( 1 );
+		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order->set_date_modified( $initial_date_modified );
+			$order->save();
+		} else {
+			global $wpdb;
+
+			$this->assertSame(
+				1,
+				$wpdb->update(
+					$wpdb->posts,
+					array(
+						'post_modified'     => $initial_date_modified,
+						'post_modified_gmt' => $initial_date_modified,
+					),
+					array( 'ID' => $order->get_id() )
+				),
+				'The CPT fixture must update exactly one order row.'
+			);
+			clean_post_cache( $order->get_id() );
+		}
+
+		$order                      = wc_get_order( $order->get_id() );
+		$initial_modified_timestamp = $order->get_date_modified()->getTimestamp();
 
 		$args = array(
 			'order_id' => $order->get_id(),
@@ -1446,7 +1494,248 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		wc_create_refund( $args );
 		$updated_order = wc_get_order( $order->get_id() );
 
-		$this->assertNotEquals( $order->get_date_modified()->getTimestamp(), $updated_order->get_date_modified()->getTimestamp() );
+		$this->assertGreaterThan(
+			$initial_modified_timestamp,
+			$updated_order->get_date_modified()->getTimestamp(),
+			'Creating a refund must advance the persisted parent order modified date.'
+		);
+	}
+
+	/**
+	 * @testdox Refunding a 0% taxed line item preserves the 0-rate tax line on the refund order.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/27118
+	 */
+	public function test_wc_create_refund_preserves_zero_rate_tax_27118() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '0.0000',
+				'tax_rate_name'     => 'Zero Rate',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tax_status( ProductTaxStatus::TAXABLE );
+		$product->set_tax_class( '' );
+		$product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$line_items = $order->get_items( 'line_item' );
+		$item_id    = array_keys( $line_items )[0];
+
+		// The admin refund UI posts the tax total as a numeric 0 (accounting.unformat),
+		// which wc_create_refund() must not silently drop as it would a "no tax" value.
+		$refund = wc_create_refund(
+			array(
+				'amount'     => $order->get_total(),
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 1,
+						'refund_total' => $order->get_total(),
+						'refund_tax'   => array( $rate_id => 0 ),
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
+
+		$refund_tax_items = $refund->get_items( 'tax' );
+		$this->assertCount( 1, $refund_tax_items, 'The 0% tax line must be carried over to the refund order.' );
+
+		$refund_tax_item = array_values( $refund_tax_items )[0];
+		$this->assertEquals( $rate_id, $refund_tax_item->get_rate_id(), 'The preserved tax line must reference the 0% rate.' );
+		$this->assertEquals( 0, $refund_tax_item->get_tax_total(), 'The preserved 0% tax line total must be 0.' );
+
+		$refunded_line_item = array_values( $refund->get_items( 'line_item' ) )[0];
+		$this->assertArrayHasKey(
+			$rate_id,
+			$refunded_line_item->get_taxes()['total'],
+			'The refunded line item must retain the 0% rate in its tax map.'
+		);
+
+		WC_Tax::_delete_tax_rate( $rate_id );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
+	 * @testdox An amount-only refund whose line items carry only zero qty, zero total and zero tax creates no refund line items.
+	 */
+	public function test_wc_create_refund_skips_untouched_items_with_zero_tax() {
+		$product_1 = WC_Helper_Product::create_simple_product();
+		$product_2 = WC_Helper_Product::create_simple_product();
+
+		$order = new WC_Order();
+		$order->add_product( $product_1, 1 );
+		$order->add_product( $product_2, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		$item_ids = array_keys( $order->get_items( 'line_item' ) );
+
+		// The admin refund form posts a 0 total and a 0 tax amount for every
+		// untouched row (only qty fields are omitted when empty), so an
+		// amount-only refund arrives with all-zero line item entries.
+		$line_items = array();
+		foreach ( $item_ids as $item_id ) {
+			$line_items[ $item_id ] = array(
+				'refund_total' => 0,
+				'refund_tax'   => array( 1 => 0 ),
+			);
+		}
+
+		$refund = wc_create_refund(
+			array(
+				'amount'     => 5,
+				'order_id'   => $order->get_id(),
+				'line_items' => $line_items,
+			)
+		);
+
+		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
+		$this->assertCount( 0, $refund->get_items( 'line_item' ), 'Untouched items must not become refund line items.' );
+		$this->assertCount( 0, $refund->get_items( 'tax' ), 'Untouched items must not produce refund tax items.' );
+	}
+
+	/**
+	 * @testdox Partially refunding one item creates no refund line items for its untouched siblings.
+	 */
+	public function test_wc_create_refund_partial_refund_ignores_untouched_siblings() {
+		$refunded_product  = WC_Helper_Product::create_simple_product();
+		$untouched_product = WC_Helper_Product::create_simple_product();
+
+		$order = new WC_Order();
+		$order->add_product( $refunded_product, 1 );
+		$order->add_product( $untouched_product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		$refunded_item_id  = null;
+		$untouched_item_id = null;
+		foreach ( $order->get_items( 'line_item' ) as $item_id => $item ) {
+			if ( $item->get_product_id() === $refunded_product->get_id() ) {
+				$refunded_item_id = $item_id;
+			} else {
+				$untouched_item_id = $item_id;
+			}
+		}
+
+		$refunded_item_total = $order->get_items( 'line_item' )[ $refunded_item_id ]->get_total();
+
+		$refund = wc_create_refund(
+			array(
+				'amount'     => $refunded_item_total,
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$refunded_item_id  => array(
+						'qty'          => 1,
+						'refund_total' => $refunded_item_total,
+						'refund_tax'   => array( 1 => 0 ),
+					),
+					$untouched_item_id => array(
+						'refund_total' => 0,
+						'refund_tax'   => array( 1 => 0 ),
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
+
+		$refund_items = $refund->get_items( 'line_item' );
+		$this->assertCount( 1, $refund_items, 'Only the explicitly refunded item must appear on the refund.' );
+
+		$refunded_item = array_values( $refund_items )[0];
+		$this->assertEquals(
+			$refunded_item_id,
+			$refunded_item->get_meta( '_refunded_item_id' ),
+			'The refund line item must reference the refunded order item, not an untouched sibling.'
+		);
+	}
+
+	/**
+	 * @testdox Partially refunding one item keeps download permissions for products that were not refunded.
+	 */
+	public function test_wc_create_refund_keeps_downloads_of_unrefunded_products() {
+		$refunded_product = WC_Helper_Product::create_simple_product();
+
+		$downloadable_product = WC_Helper_Product::create_simple_product();
+		$downloadable_product->set_downloadable( true );
+		$downloadable_product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $refunded_product, 1 );
+		$order->add_product( $downloadable_product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		$download = new WC_Customer_Download();
+		$download->set_user_id( 1 );
+		$download->set_order_id( $order->get_id() );
+		$download->set_product_id( $downloadable_product->get_id() );
+		$download->set_download_id( wp_generate_uuid4() );
+		$download->save();
+
+		$refunded_item_id     = null;
+		$downloadable_item_id = null;
+		foreach ( $order->get_items( 'line_item' ) as $item_id => $item ) {
+			if ( $item->get_product_id() === $refunded_product->get_id() ) {
+				$refunded_item_id = $item_id;
+			} else {
+				$downloadable_item_id = $item_id;
+			}
+		}
+
+		$refunded_item_total = $order->get_items( 'line_item' )[ $refunded_item_id ]->get_total();
+
+		// The untouched downloadable item still appears in the payload with
+		// zero total and zero tax, exactly as the admin refund form posts it.
+		$refund = wc_create_refund(
+			array(
+				'amount'     => $refunded_item_total,
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$refunded_item_id     => array(
+						'qty'          => 1,
+						'refund_total' => $refunded_item_total,
+						'refund_tax'   => array( 1 => 0 ),
+					),
+					$downloadable_item_id => array(
+						'refund_total' => 0,
+						'refund_tax'   => array( 1 => 0 ),
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
+
+		$download_data_store = WC_Data_Store::load( 'customer-download' );
+		$remaining_downloads = $download_data_store->get_downloads(
+			array(
+				'order_id'   => $order->get_id(),
+				'product_id' => $downloadable_product->get_id(),
+			)
+		);
+		$this->assertCount(
+			1,
+			$remaining_downloads,
+			'Download permissions for a product that was not refunded must be kept.'
+		);
 	}
 
 	/**
@@ -1466,7 +1755,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_order_note() {
 		$note_content = 'Note content';
-		$order        = WC_Helper_Order::create_order();
+		$order        = $this->create_order();
 		$note_id      = (int) $order->add_order_note( $note_content );
 		$expected     = array(
 			'id'            => $note_id,
@@ -1487,8 +1776,13 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_wc_get_order_notes() {
-		$order = WC_Helper_Order::create_order();
-		$order->add_order_note( 'Customer note', 1 );
+		$order = $this->create_order();
+		add_filter( 'woocommerce_email_log_add_order_note', '__return_false' );
+		try {
+			$order->add_order_note( 'Customer note', 1 );
+		} finally {
+			remove_filter( 'woocommerce_email_log_add_order_note', '__return_false' );
+		}
 		$order->add_order_note( 'Internal note' );
 		$order->add_order_note( 'Another internal note' );
 
@@ -1518,7 +1812,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_wc_create_order_note() {
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 
 		$note_id = wc_create_order_note( $order->get_id(), 'Note content', false, false );
 		$this->assertTrue( 0 < $note_id );
@@ -1530,7 +1824,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_wc_delete_order_note() {
-		$order   = WC_Helper_Order::create_order();
+		$order   = $this->create_order();
 		$note_id = $order->add_order_note( 'Note content' );
 
 		$this->assertTrue( wc_delete_order_note( $note_id ) );
@@ -1542,7 +1836,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_order_search() {
-		$order = WC_Helper_Order::create_order();
+		$order = $this->create_order();
 
 		// Should find order searching by billing address name.
 		$this->assertEquals( array( $order->get_id() ), wc_order_search( 'Jeroen' ) );

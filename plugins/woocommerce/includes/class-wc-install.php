@@ -336,8 +336,14 @@ class WC_Install {
 		'10.9.0'   => array(
 			'wc_update_1090_remove_task_list_reminder_bar_hidden_option',
 		),
+		'10.9.2'   => array(
+			'wc_update_10902_remove_deprecated_push_notifications_option',
+		),
 		'11.0.0'   => array(
 			'wc_update_1100_enable_point_of_sale_feature',
+		),
+		'11.1.0'   => array(
+			'wc_update_1110_delete_dashboard_outofstock_count_transient',
 		),
 	);
 

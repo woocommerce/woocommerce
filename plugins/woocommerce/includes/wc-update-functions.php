@@ -38,6 +38,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -3551,6 +3552,23 @@ function wc_update_1090_remove_task_list_reminder_bar_hidden_option() {
 }
 
 /**
+ * Remove the deprecated push_notifications feature option from the database.
+ *
+ * The push_notifications feature flag was deprecated in 10.9.2 and is now always enabled.
+ * The option is no longer needed as FeaturesUtil::feature_is_enabled('push_notifications')
+ * returns the deprecated_value directly without reading from the database. Removing it also
+ * clears the stale "no" value that wc_update_1050_enable_autoload_options() persisted for
+ * stores upgrading across the 10.5.0 boundary.
+ *
+ * @since 10.9.2
+ *
+ * @return void
+ */
+function wc_update_10902_remove_deprecated_push_notifications_option(): void {
+	delete_option( 'woocommerce_feature_push_notifications_enabled' );
+}
+
+/**
  * Set the stored value of the point_of_sale feature flag to enabled.
  *
  * The feature is deprecated as of 11.0.0 and always enabled in core, but the WooCommerce
@@ -3563,4 +3581,15 @@ function wc_update_1090_remove_task_list_reminder_bar_hidden_option() {
  */
 function wc_update_1100_enable_point_of_sale_feature() {
 	update_option( 'woocommerce_feature_point_of_sale_enabled', 'yes' );
+}
+
+/**
+ * Delete the cached dashboard out-of-stock product count.
+ *
+ * @since 11.1.0
+ *
+ * @return void
+ */
+function wc_update_1110_delete_dashboard_outofstock_count_transient() {
+	delete_transient( ProductUtil::OUTOFSTOCK_COUNT_TRANSIENT );
 }

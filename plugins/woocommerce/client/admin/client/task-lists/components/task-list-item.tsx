@@ -27,6 +27,7 @@ export type TaskListItemProps = {
 	task: TaskType & {
 		onClick?: () => void;
 	};
+	trackClick?: () => void;
 };
 
 export const TaskListItem = ( {
@@ -34,6 +35,7 @@ export const TaskListItem = ( {
 	isExpanded = false,
 	setExpandedTask,
 	task,
+	trackClick: trackTaskListClick,
 }: TaskListItemProps ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { layoutString } = useLayoutContext();
@@ -166,6 +168,7 @@ export const TaskListItem = ( {
 			const onClickActions = (
 				event?: React.MouseEvent | React.KeyboardEvent
 			) => {
+				trackTaskListClick?.();
 				trackClick().then( () => {
 					if ( ! isComplete ) {
 						// Invalidate the task list selector cache to force a re-fetch.
@@ -200,7 +203,10 @@ export const TaskListItem = ( {
 					onClick={
 						! isExpandable || isComplete
 							? onClickActions
-							: () => setExpandedTask( id )
+							: () => {
+									trackTaskListClick?.();
+									setExpandedTask( id );
+							  }
 					}
 				/>
 			);
@@ -214,6 +220,7 @@ export const TaskListItem = ( {
 			actionLabel,
 			isExpandable,
 			isComplete,
+			trackTaskListClick,
 		]
 	);
 

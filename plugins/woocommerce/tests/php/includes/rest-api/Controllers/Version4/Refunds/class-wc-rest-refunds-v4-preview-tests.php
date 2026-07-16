@@ -96,20 +96,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		foreach ( $this->created_orders as $order_id ) {
-			$order = wc_get_order( $order_id );
-			if ( $order ) {
-				foreach ( $order->get_refunds() as $refund ) {
-					$refund->delete( true );
-				}
-				$order->delete( true );
-			}
-		}
 		$this->created_orders = array();
-
-		global $wpdb;
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 
 		parent::tearDown();
 		$this->disable_rest_api_v4_feature();

@@ -3,8 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFeed\Feed;
 
-use WC_Helper_Product;
 use WC_Product;
+use WC_Product_Simple;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\IntegrationInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Utils\MemoryManager;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductLoader;
@@ -40,6 +40,19 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		parent::tearDown();
 		remove_all_filters( 'woocommerce_product_feed_args' );
 		$this->test_container->reset_all_replacements();
+	}
+
+	/**
+	 * Create a product object without persisting data that the walker never reads.
+	 *
+	 * @param int $id Product ID.
+	 * @return WC_Product
+	 */
+	private function create_in_memory_product( int $id ): WC_Product {
+		$product = new WC_Product_Simple();
+		$product->set_id( $id );
+
+		return $product;
 	}
 
 	/**
@@ -100,7 +113,7 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		for ( $i = 0; $i < $expected_iterations; $i++ ) {
 			$page = array();
 			for ( $j = 1; $j <= $batch_size && $generated_products++ < $number_of_products; $j++ ) {
-				$page[] = WC_Helper_Product::create_simple_product();
+				$page[] = $this->create_in_memory_product( $generated_products );
 			}
 
 			$loader_results[] = (object) array(
@@ -206,7 +219,7 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 				}
 			);
 
-		// Make sure that the field is initiated, added to, and ended.
+		// walk() owns the feed lifecycle: it starts the feed once, adds entries, and ends it once.
 		$mock_feed->expects( $this->once() )->method( 'start' );
 		$mock_feed->expects( $this->once() )->method( 'end' );
 		$mock_feed->expects( $this->exactly( $number_of_products - $validation_compensation ) )
@@ -272,5 +285,73 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 
 		$walker->set_batch_size( $batch_size );
 		$walker->walk( $walker_callback );
+	}
+
+	/**
+	 * Test that a bounded walk processes a limited number of batches, resumes from the right page,
+	 * stops at the last page, and never manages the feed lifecycle (start/end).
+	 */
+	public function test_walk_processes_bounded_pages_and_resumes() {
+		$batch_size  = 2;
+		$total       = 6;
+		$total_pages = 3;
+
+		// Build the pages of products the loader will return, keyed by page number.
+		$pages = array();
+		for ( $page = 1; $page <= $total_pages; $page++ ) {
+			$products = array();
+			for ( $i = 0; $i < $batch_size; $i++ ) {
+				$products[] = $this->create_in_memory_product( ( ( $page - 1 ) * $batch_size ) + $i + 1 );
+			}
+			$pages[ $page ] = (object) array(
+				'products'      => $products,
+				'total'         => $total,
+				'max_num_pages' => $total_pages,
+			);
+		}
+
+		$mock_loader = $this->createMock( ProductLoader::class );
+		$this->test_container->replace( ProductLoader::class, $mock_loader );
+		$mock_loader->method( 'get_products' )->willReturnCallback(
+			function ( $args ) use ( $pages ) {
+				return $pages[ $args['page'] ];
+			}
+		);
+
+		$mock_memory_manager = $this->createMock( MemoryManager::class );
+		$this->test_container->replace( MemoryManager::class, $mock_memory_manager );
+		$mock_memory_manager->method( 'get_available_memory' )->willReturn( 90 );
+
+		// The chunked walk must NOT own the feed lifecycle.
+		$mock_feed = $this->createMock( FeedInterface::class );
+		$mock_feed->expects( $this->never() )->method( 'start' );
+		$mock_feed->expects( $this->never() )->method( 'end' );
+
+		$mock_mapper = $this->createMock( ProductMapperInterface::class );
+		$mock_mapper->method( 'map_product' )->willReturnCallback(
+			fn( WC_Product $product ) => array( 'id' => $product->get_id() )
+		);
+		$mock_validator = $this->createMock( FeedValidatorInterface::class );
+		$mock_validator->method( 'validate_entry' )->willReturn( array() );
+
+		$mock_integration = $this->createMock( IntegrationInterface::class );
+		$mock_integration->method( 'get_product_mapper' )->willReturn( $mock_mapper );
+		$mock_integration->method( 'get_feed_validator' )->willReturn( $mock_validator );
+		$mock_integration->method( 'get_product_feed_query_args' )->willReturn( array() );
+
+		$walker = ProductWalker::from_integration( $mock_integration, $mock_feed );
+		$walker->set_batch_size( $batch_size );
+
+		// First chunk: pages 1-2 (allotment of 2 batches reached).
+		$progress = $walker->walk_batches( null, 1, 2 );
+		$this->assertSame( $total, $progress->total_count );
+		$this->assertSame( $total_pages, $progress->total_batch_count );
+		$this->assertSame( 2, $progress->processed_batches );
+		$this->assertSame( 4, $progress->processed_items );
+
+		// Final chunk: resumes at page 3 and stops at the last page even though 2 batches were allowed.
+		$progress = $walker->walk_batches( null, 3, 2 );
+		$this->assertSame( 1, $progress->processed_batches );
+		$this->assertSame( 2, $progress->processed_items );
 	}
 }

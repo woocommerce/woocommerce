@@ -11,10 +11,12 @@ use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use WC_Tracks;
 use WC_Site_Tracking;
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features as WCAdminFeatures;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -303,6 +305,16 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			ProductMediaGallery::FEATURE_ID      => array(
+				'name'                         => __( 'Product gallery videos', 'woocommerce' ),
+				'description'                  => __( 'Enable videos in product galleries.', 'woocommerce' ),
+				'option_key'                   => ProductMediaGallery::ENABLE_OPTION_NAME,
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			'cart_checkout_blocks'               => array(
 				'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 				'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
@@ -358,7 +370,7 @@ class FeaturesController {
 					'woocommerce'
 				),
 				'enabled_by_default'           => true,
-				'disable_ui'                   => false,
+				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
@@ -526,7 +538,7 @@ class FeaturesController {
 				),
 				'option_key'                   => \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME,
 				'is_experimental'              => true,
-				'enabled_by_default'           => false,
+				'enabled_by_default'           => \Automattic\WooCommerce\Internal\VariationGallery\Package::is_in_canary_cohort(),
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
@@ -632,11 +644,13 @@ class FeaturesController {
 					'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.',
 					'woocommerce'
 				),
+				'is_experimental'              => false,
 				'enabled_by_default'           => true,
-				'is_experimental'              => true,
 				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => false,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'deprecated_since'             => '10.9.2',
+				'deprecated_value'             => true,
 			),
 			'rest_api_caching'                   => array(
 				'name'                         => __( 'REST API Caching', 'woocommerce' ),
@@ -920,6 +934,10 @@ class FeaturesController {
 		// Handle deprecated features - return the backwards-compatible value.
 		if ( ! empty( $feature['deprecated_since'] ) ) {
 			return (bool) ( $feature['deprecated_value'] ?? false );
+		}
+
+		if ( 'analytics' === $feature_id && WCAdminFeatures::is_analytics_disabled_by_legacy_filters() ) {
+			return false;
 		}
 
 		if ( $this->is_preview_email_improvements_enabled( $feature_id ) ) {
