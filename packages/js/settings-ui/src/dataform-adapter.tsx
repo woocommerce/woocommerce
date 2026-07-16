@@ -11,12 +11,13 @@ import type {
 	FormValidity,
 	Rules,
 } from '@wordpress/dataviews';
+import type { ComponentType } from 'react';
 
 /**
  * Internal dependencies
  */
 import { warn } from './diagnostics';
-import { sanitizeSettingsHtml } from './html';
+import { toSanitizedHtmlNode } from './html';
 import { NativeSettingsField } from './native-fields';
 import {
 	resolveFieldComponent,
@@ -31,7 +32,9 @@ import type {
 	SettingsUISchema,
 	SettingsValue,
 	SettingsValues,
+	SettingsVisibilityPredicate,
 } from './types';
+import { isCheckedValue, toStringValue } from './values';
 
 export type DataFormAdapterOptions = {
 	schema: SettingsUISchema;
@@ -50,7 +53,7 @@ export type DataFormAdapterOptions = {
  * shape), or a single group that falls back to the shell-owned card
  * because the package card header has no slot for header actions.
  */
-export type DataFormRenderSection =
+type DataFormRenderSection =
 	| {
 			type: 'dataform';
 			key: string;
@@ -63,15 +66,8 @@ export type DataFormRenderSection =
 			group: SettingsUIGroup;
 	  };
 
-const toStringValue = ( value: SettingsValue | undefined ) =>
-	value === null || typeof value === 'undefined' ? '' : String( value );
-
-const isCheckedValue = ( value: SettingsValue | undefined ): boolean =>
-	value === true || value === 1 || value === 'yes' || value === '1';
-
-// Legacy PHP settings express checkbox state as yes/no, 1/0, or booleans
-// depending on the source. Echo the initial representation back so the
-// save flow round-trips values unchanged.
+// Echo the initial checkbox representation back so the save flow
+// round-trips values unchanged.
 const toCheckboxValue = (
 	checked: boolean,
 	initialValue: SettingsValue | undefined
@@ -181,8 +177,8 @@ const restoreOptionValue = (
 	return typeof option === 'undefined' ? next : option.value;
 };
 
-const toElements = ( options?: SettingsUIOption[] ) =>
-	( options || [] ).map( ( option ) => ( {
+const toElements = ( options: SettingsUIOption[] ) =>
+	options.map( ( option ) => ( {
 		value: toStringValue( option.value ),
 		label: option.label,
 	} ) );
@@ -200,11 +196,7 @@ const toDescriptionNode = ( description?: string ) => {
 		return description;
 	}
 
-	return createElement( 'span', {
-		dangerouslySetInnerHTML: {
-			__html: sanitizeSettingsHtml( description ),
-		},
-	} ) as unknown as string;
+	return toSanitizedHtmlNode( description ) as unknown as string;
 };
 
 type TypeAndEdit = {
@@ -212,10 +204,14 @@ type TypeAndEdit = {
 	Edit?: Field< SettingsValues >[ 'Edit' ];
 };
 
+// Types without an explicit Edit use the package's default control for
+// the DataForm type. Radio and select need one because fields with
+// elements default to the select control, and textarea is a control
+// config on the text type.
 const getPackageTypeAndEdit = ( field: SettingsUIField ): TypeAndEdit => {
 	switch ( field.type ) {
 		case 'checkbox':
-			return { type: 'boolean', Edit: 'checkbox' };
+			return { type: 'boolean' };
 		case 'radio':
 			return { type: 'text', Edit: 'radio' };
 		case 'select':
@@ -223,9 +219,9 @@ const getPackageTypeAndEdit = ( field: SettingsUIField ): TypeAndEdit => {
 		case 'textarea':
 			return { type: 'text', Edit: { control: 'textarea' } };
 		case 'number':
-			return { type: 'number', Edit: 'number' };
+			return { type: 'number' };
 		case 'tel':
-			return { type: 'telephone', Edit: 'telephone' };
+			return { type: 'telephone' };
 		case 'array':
 			return { type: 'array' };
 		case 'date':
@@ -233,7 +229,7 @@ const getPackageTypeAndEdit = ( field: SettingsUIField ): TypeAndEdit => {
 		case 'password':
 		case 'text':
 		case 'url':
-			return { type: field.type, Edit: field.type };
+			return { type: field.type };
 		default:
 			return {};
 	}
@@ -276,15 +272,9 @@ const createInfoRender = ( settingsField: SettingsUIField ) => {
 		return (
 			<div className="wc-settings-ui__info" id={ settingsField.id }>
 				<strong>{ settingsField.label }</strong>
-				{ settingsField.description ? (
-					<span
-						dangerouslySetInnerHTML={ {
-							__html: sanitizeSettingsHtml(
-								settingsField.description
-							),
-						} }
-					/>
-				) : null }
+				{ settingsField.description
+					? toSanitizedHtmlNode( settingsField.description )
+					: null }
 			</div>
 		);
 	};
@@ -295,7 +285,7 @@ const createInfoRender = ( settingsField: SettingsUIField ) => {
 const createRegisteredEdit = (
 	settingsField: SettingsUIField,
 	context: SettingsFieldContext,
-	fallback: Field< SettingsValues >[ 'Edit' ]
+	Fallback?: ComponentType< DataFormControlProps< SettingsValues > >
 ) => {
 	return function RegisteredFieldEdit(
 		props: DataFormControlProps< SettingsValues >
@@ -306,12 +296,7 @@ const createRegisteredEdit = (
 			return <Registered { ...props } />;
 		}
 
-		if ( typeof fallback === 'function' ) {
-			const Fallback = fallback;
-			return <Fallback { ...props } />;
-		}
-
-		return null;
+		return Fallback ? <Fallback { ...props } /> : null;
 	};
 };
 
@@ -344,57 +329,67 @@ const createGetValue = ( settingsField: SettingsUIField ) => {
 	};
 };
 
+type SetValueArgs = {
+	item: SettingsValues;
+	value: SettingsValue;
+};
+
 const createSetValue = (
 	settingsField: SettingsUIField,
 	initialValues: SettingsValues
 ) => {
-	return ( {
-		value,
-	}: {
-		item: SettingsValues;
-		value: SettingsValue;
-	} ): Partial< SettingsValues > => {
-		if (
-			settingsField.type === 'select' ||
-			settingsField.type === 'radio'
-		) {
-			return {
-				[ settingsField.id ]: restoreOptionValue(
-					value,
-					settingsField.options
-				),
-			};
-		}
+	const { id } = settingsField;
 
-		if ( settingsField.type === 'array' ) {
-			return {
-				[ settingsField.id ]: ( Array.isArray( value )
-					? value
-					: []
-				).map( String ),
-			};
-		}
+	if ( settingsField.type === 'select' || settingsField.type === 'radio' ) {
+		return ( { value }: SetValueArgs ) => ( {
+			[ id ]: restoreOptionValue( value, settingsField.options ),
+		} );
+	}
 
-		if ( settingsField.type === 'checkbox' ) {
-			return {
-				[ settingsField.id ]: toCheckboxValue(
-					Boolean( value ),
-					initialValues[ settingsField.id ]
-				),
-			};
-		}
+	if ( settingsField.type === 'array' ) {
+		return ( { value }: SetValueArgs ) => ( {
+			[ id ]: ( Array.isArray( value ) ? value : [] ).map( String ),
+		} );
+	}
 
-		if ( settingsField.type === 'number' ) {
-			return {
-				[ settingsField.id ]: toNumberFieldValue(
-					value,
-					initialValues[ settingsField.id ]
-				),
-			};
-		}
+	if ( settingsField.type === 'checkbox' ) {
+		return ( { value }: SetValueArgs ) => ( {
+			[ id ]: toCheckboxValue( Boolean( value ), initialValues[ id ] ),
+		} );
+	}
 
-		return { [ settingsField.id ]: value };
-	};
+	if ( settingsField.type === 'number' ) {
+		return ( { value }: SetValueArgs ) => ( {
+			[ id ]: toNumberFieldValue( value, initialValues[ id ] ),
+		} );
+	}
+
+	return ( { value }: SetValueArgs ) => ( { [ id ]: value } );
+};
+
+// Predicates fail open: a broken visibility callback renders the field
+// or group rather than hiding it.
+const runVisibilityPredicate = (
+	predicate: SettingsVisibilityPredicate,
+	kind: 'field' | 'group',
+	id: string,
+	values: SettingsValues,
+	options: DataFormAdapterOptions
+) => {
+	try {
+		return predicate( {
+			values,
+			initialValues: options.initialValues,
+			context: options.context,
+			schema: options.schema,
+		} );
+	} catch ( predicateError ) {
+		warn(
+			`Visibility predicate for ${ kind } "${ id }" failed. Rendering it visible.`,
+			{ error: predicateError, context: options.context }
+		);
+		return true;
+	}
 };
 
 const createIsVisible = (
@@ -408,20 +403,13 @@ const createIsVisible = (
 		);
 
 		if ( predicate ) {
-			try {
-				return predicate( {
-					values: item,
-					initialValues: options.initialValues,
-					context: options.context,
-					schema: options.schema,
-				} );
-			} catch ( predicateError ) {
-				warn(
-					`Visibility predicate for field "${ settingsField.id }" failed. Rendering it visible.`,
-					{ error: predicateError, context: options.context }
-				);
-				return true;
-			}
+			return runVisibilityPredicate(
+				predicate,
+				'field',
+				settingsField.id,
+				item,
+				options
+			);
 		}
 
 		if ( settingsField.visibility ) {
@@ -478,10 +466,7 @@ export const buildDataFormField = (
 		defaultEdit = createNativeEdit( settingsField );
 	} else if ( needsNativeEdit( settingsField ) ) {
 		defaultEdit = createNativeEdit( settingsField );
-	} else if (
-		typeof packageControl.type === 'undefined' &&
-		typeof packageControl.Edit === 'undefined'
-	) {
+	} else if ( typeof packageControl.type === 'undefined' ) {
 		warn( `Field type "${ settingsField.type }" is not supported.`, {
 			field: settingsField,
 		} );
@@ -502,8 +487,8 @@ export const buildDataFormField = (
 			typeof defaultEdit === 'function' ? defaultEdit : undefined
 		);
 	} else if ( typeof defaultEdit !== 'undefined' ) {
-		// String and config controls resolve inside DataForm; leaving
-		// array fields without an Edit keeps the package's type default.
+		// String and config controls resolve inside DataForm; fields left
+		// without an Edit use the package default for their type.
 		field.Edit = defaultEdit;
 	}
 
@@ -514,10 +499,8 @@ export const buildDataFormField = (
 // the card body, so group descriptions go through the package.
 const getCardFormField = ( group: SettingsUIGroup ): FormField => ( {
 	id: group.id,
-	...( group.title ? { label: group.title } : {} ),
-	...( group.description
-		? { description: toDescriptionNode( group.description ) }
-		: {} ),
+	label: group.title,
+	description: toDescriptionNode( group.description ),
 	layout: {
 		type: 'card',
 		withHeader: Boolean( group.title ),
@@ -552,38 +535,56 @@ export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 			options.context
 		);
 
-		if ( predicate ) {
-			try {
-				return predicate( {
+		return predicate
+			? runVisibilityPredicate(
+					predicate,
+					'group',
+					group.id,
 					values,
-					initialValues: options.initialValues,
-					context: options.context,
-					schema,
-				} );
-			} catch ( predicateError ) {
-				warn(
-					`Visibility predicate for group "${ group.id }" failed. Rendering it visible.`,
-					{ error: predicateError, context: options.context }
-				);
-				return true;
-			}
-		}
-
-		return true;
+					options
+			  )
+			: true;
 	};
 
-	const getVisibleGroups = ( values: SettingsValues ) =>
-		Object.values( schema.groups )
-			.filter( ( group ) => isGroupVisible( group, values ) )
-			.filter( ( group ) =>
-				group.fields.some( ( field ) =>
-					isFieldVisible( field.id, values )
-				)
-			);
+	// The page derives the render sections and the validation form from
+	// the same values object in one render pass, so a one-entry cache
+	// halves the visibility evaluation per change.
+	let lastVisibleGroupsValues: SettingsValues | undefined;
+	let lastVisibleGroups: SettingsUIGroup[] = [];
+
+	const getVisibleGroups = ( values: SettingsValues ) => {
+		if ( values !== lastVisibleGroupsValues ) {
+			lastVisibleGroupsValues = values;
+			lastVisibleGroups = Object.values( schema.groups )
+				.filter( ( group ) => isGroupVisible( group, values ) )
+				.filter( ( group ) =>
+					group.fields.some( ( field ) =>
+						isFieldVisible( field.id, values )
+					)
+				);
+		}
+
+		return lastVisibleGroups;
+	};
+
+	let lastSectionsKey: string | undefined;
+	let lastSections: DataFormRenderSection[] = [];
 
 	const getRenderSections = (
 		values: SettingsValues
 	): DataFormRenderSection[] => {
+		// Sections depend only on which groups are visible, so keep their
+		// identity stable across value changes. Stable form objects let
+		// DataForm's own normalization memos survive keystrokes.
+		const visibleGroups = getVisibleGroups( values );
+		const sectionsKey = visibleGroups
+			.map( ( group ) => group.id )
+			.join( '\n' );
+
+		if ( sectionsKey === lastSectionsKey ) {
+			return lastSections;
+		}
+
 		const sections: DataFormRenderSection[] = [];
 		let pendingCardFields: FormField[] = [];
 		let segmentIndex = 0;
@@ -605,7 +606,7 @@ export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 			segmentIndex += 1;
 		};
 
-		getVisibleGroups( values ).forEach( ( group ) => {
+		visibleGroups.forEach( ( group ) => {
 			if ( ! group.actions?.length ) {
 				pendingCardFields.push( getCardFormField( group ) );
 				return;
@@ -623,6 +624,9 @@ export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 			} );
 		} );
 		flushDataForm();
+
+		lastSectionsKey = sectionsKey;
+		lastSections = sections;
 
 		return sections;
 	};

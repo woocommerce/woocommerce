@@ -48,38 +48,21 @@ const fieldOptions = (
 	initialValues: SettingsValues = {}
 ) => makeOptions( [ { id: 'general', fields: [ field ] } ], initialValues );
 
-const render = ( element: JSX.Element ) => {
-	const container = document.createElement( 'div' );
-	document.body.appendChild( container );
-	const root = createRoot( container );
-
-	act( () => {
-		root.render( element );
-	} );
-
-	return {
-		container,
-		cleanup: () => {
-			act( () => root.unmount() );
-			container.remove();
-		},
-	};
-};
-
 describe( 'dataform-adapter', () => {
 	afterEach( () => {
 		__resetRegistry();
 	} );
 
 	describe( 'package control mapping', () => {
+		// An undefined control means the package default for the type.
 		it.each( [
-			[ 'checkbox', 'boolean', 'checkbox' ],
+			[ 'checkbox', 'boolean', undefined ],
 			[ 'radio', 'text', 'radio' ],
 			[ 'select', 'text', 'select' ],
-			[ 'number', 'number', 'number' ],
-			[ 'tel', 'telephone', 'telephone' ],
-			[ 'text', 'text', 'text' ],
-			[ 'email', 'email', 'email' ],
+			[ 'number', 'number', undefined ],
+			[ 'tel', 'telephone', undefined ],
+			[ 'text', 'text', undefined ],
+			[ 'email', 'email', undefined ],
 		] )(
 			'maps %s to package type %s and control %s',
 			( settingsType, dataFormType, control ) => {
