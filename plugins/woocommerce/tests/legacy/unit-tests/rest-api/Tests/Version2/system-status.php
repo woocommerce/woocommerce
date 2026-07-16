@@ -160,7 +160,9 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 
 		$actual_plugins = array( 'hello.php' );
 		update_option( 'active_plugins', $actual_plugins );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
+		$request = new WP_REST_Request( 'GET', '/wc/v2/system_status' );
+		$request->set_param( '_fields', 'active_plugins' );
+		$response = $this->server->dispatch( $request );
 		update_option( 'active_plugins', array() );
 
 		$data    = $response->get_data();

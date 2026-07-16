@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
@@ -18,9 +19,22 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
+	 * Post statuses registered during a test, to clean up on tear down.
+	 *
+	 * @var string[]
+	 */
+	private $registered_order_statuses = array();
+
+	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
+		// register_post_status() mutates the global registry, which WP_UnitTestCase does not restore.
+		foreach ( $this->registered_order_statuses as $status ) {
+			unset( $GLOBALS['wp_post_statuses'][ $status ] );
+		}
+		$this->registered_order_statuses = array();
+
 		parent::tearDown();
 		$this->disable_cogs_feature();
 	}
@@ -702,6 +716,86 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox calculate_taxes handles inherited shipping tax when no taxable product class is available.
+	 * @dataProvider inherited_shipping_tax_without_taxable_products_provider
+	 *
+	 * @param bool  $add_non_taxable_product Whether to add a non-taxable product to the order.
+	 * @param bool  $add_non_taxable_fee     Whether to add a non-taxable fee to the order.
+	 * @param float $expected_shipping_tax   Expected shipping tax total.
+	 */
+	public function test_calculate_taxes_handles_inherited_shipping_tax_without_taxable_products( bool $add_non_taxable_product, bool $add_non_taxable_fee, float $expected_shipping_tax ): void {
+		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes', 'no' );
+		$original_shipping_tax_class = get_option( 'woocommerce_shipping_tax_class', 'inherit' );
+		$order                       = new WC_Order();
+		$product                     = null;
+
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'Standard tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		try {
+			if ( $add_non_taxable_product ) {
+				$product = WC_Helper_Product::create_simple_product();
+				$product->set_tax_status( ProductTaxStatus::NONE );
+				$product->save();
+				$order->add_product( $product );
+			}
+
+			if ( $add_non_taxable_fee ) {
+				$fee_item = new WC_Order_Item_Fee();
+				$fee_item->set_name( 'Manual fee' );
+				$fee_item->set_amount( '5' );
+				$fee_item->set_total( '5' );
+				$fee_item->set_tax_status( ProductTaxStatus::NONE );
+				$order->add_item( $fee_item );
+			}
+
+			$shipping_item = new WC_Order_Item_Shipping();
+			$shipping_item->set_method_title( 'Manual shipping' );
+			$shipping_item->set_total( '10' );
+			$order->add_item( $shipping_item );
+
+			$order->calculate_totals();
+
+			$this->assertSame( $expected_shipping_tax, (float) $order->get_shipping_tax() );
+		} finally {
+			WC_Tax::_delete_tax_rate( $tax_rate_id );
+			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
+			update_option( 'woocommerce_shipping_tax_class', $original_shipping_tax_class );
+			$order->delete( true );
+			if ( $product ) {
+				$product->delete( true );
+			}
+		}
+	}
+
+	/**
+	 * Data provider for inherited shipping tax calculations without taxable products.
+	 *
+	 * @return array<string, array{bool, bool, float}>
+	 */
+	public function inherited_shipping_tax_without_taxable_products_provider(): array {
+		return array(
+			'shipping-only order'           => array( false, false, 1.0 ),
+			'non-taxable product'           => array( true, false, 0.0 ),
+			'non-taxable fee with shipping' => array( false, true, 1.0 ),
+		);
+	}
+
+	/**
 	 * Get an order object with a fixed total COGS value.
 	 *
 	 * @return WC_Order
@@ -994,5 +1088,57 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		} finally {
 			remove_filter( 'woocommerce_order_type_to_group', $adjust );
 		}
+	}
+
+	/**
+	 * Register a custom order status so it survives set_status() and is prefixed on save.
+	 *
+	 * Registers it in the valid order statuses (so set_status keeps it) and as a post status
+	 * (so get_post_status adds the wc- prefix, which is what pushes it over the column limit).
+	 *
+	 * @param string $status Unprefixed order status key.
+	 */
+	private function register_custom_order_status( string $status ): void {
+		$prefixed = 'wc-' . $status;
+
+		add_filter(
+			'wc_order_statuses',
+			function ( $statuses ) use ( $prefixed ) {
+				$statuses[ $prefixed ] = 'Custom status for testing';
+				return $statuses;
+			}
+		);
+		register_post_status( $prefixed );
+		$this->registered_order_statuses[] = $prefixed;
+	}
+
+	/**
+	 * @testdox Should warn when an order is saved with a status that exceeds the storage limit.
+	 */
+	public function test_saving_an_order_with_a_too_long_status_warns() {
+		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
+
+		// 'wc-' + 18 characters = 21, one over the 20-character storage limit.
+		$status = str_repeat( 'a', 18 );
+		$this->register_custom_order_status( $status );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( $status );
+		$order->save();
+	}
+
+	/**
+	 * @testdox Should not warn when an order is saved with a status at the storage limit.
+	 */
+	public function test_saving_an_order_with_a_status_at_the_limit_does_not_warn() {
+		// 'wc-' + 17 characters = 20, exactly the storage limit.
+		$status = str_repeat( 'a', 17 );
+		$this->register_custom_order_status( $status );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( $status );
+		$order->save();
+
+		$this->assertSame( $status, wc_get_order( $order->get_id() )->get_status() );
 	}
 }

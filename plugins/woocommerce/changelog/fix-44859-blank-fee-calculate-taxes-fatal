@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error when calculating totals for an order that has a fee stored with a blank value; the blank fee total is now treated as 0 during tax calculation.

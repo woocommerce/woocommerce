@@ -12,6 +12,14 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
  * Class WC_Cart_Test
  */
 class WC_Cart_Test extends \WC_Unit_Test_Case {
+
+	/**
+	 * Stores arguments received by the woocommerce_add_to_cart_quantity filter.
+	 *
+	 * @var array
+	 */
+	protected $add_to_cart_quantity_filter_args = array();
+
 	/**
 	 * Called before every test.
 	 */
@@ -30,6 +38,8 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		WC()->session->set( 'wc_notices', null );
+
+		remove_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10 );
 	}
 
 	/**
@@ -46,9 +56,20 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->session->set( 'wc_notices', null );
 
-		$variable_product = WC_Helper_Product::create_variation_product();
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'Sold individually variable product' );
+		$variable_product->set_attributes(
+			array( WC_Helper_Product::create_product_attribute_object( 'size', array( 'small' ) ) )
+		);
 		$variable_product->set_sold_individually( true );
 		$variable_product->save();
+		WC_Helper_Product::create_product_variation_object(
+			$variable_product->get_id(),
+			'SOLD INDIVIDUALLY VARIATION ' . microtime(),
+			10,
+			array( 'pa_size' => 'small' )
+		);
+		$variable_product = new WC_Product_Variable( $variable_product->get_id() );
 
 		$variation_ids = $variable_product->get_children();
 		$this->assertNotEmpty( $variation_ids, 'Expected at least one variation.' );
@@ -1456,6 +1477,64 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		unset( $_REQUEST['add-to-cart'], $_REQUEST['variation_id'], $_REQUEST['quantity'], $_POST['quantity'], $_REQUEST['attribute_pa_color'] );
 		$variation->delete( true );
 		$product->delete( true );
+	}
+
+
+	/**
+	 * Capture all arguments passed to the filter without modifying the quantity.
+	 *
+	 * @param int $quantity       The quantity to add to cart.
+	 * @param int $product_id     The parent product ID.
+	 * @param int $variation_id   The variation ID being added.
+	 *
+	 * @return int
+	 */
+	public function capture_add_to_cart_quantity_filter_args( $quantity, $product_id, $variation_id ) {
+		$this->add_to_cart_quantity_filter_args = func_get_args();
+		return $quantity;
+	}
+
+	/**
+	 * @testdox woocommerce_add_to_cart_quantity filter should receive variation_id when a variable product is added to cart.
+	 */
+	public function test_add_to_cart_quantity_filter_receives_variation_id() {
+		add_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10, 3 );
+
+		// Create a variable product and pick the first available variation to add.
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = $variations[0];
+
+		WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$variation['variation_id'],
+			$variation['attributes']
+		);
+
+		// Ensure all 3 arguments were passed before accessing individual indexes.
+		$this->assertCount( 3, $this->add_to_cart_quantity_filter_args, 'Filter should receive exactly 3 arguments.' );
+
+		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );
+		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );
+		$this->assertEquals( $variation['variation_id'], $this->add_to_cart_quantity_filter_args[2] );
+	}
+
+	/**
+	 * @testdox woocommerce_add_to_cart_quantity filter should receive 0 as variation_id when a simple product is added to cart.
+	 */
+	public function test_add_to_cart_quantity_filter_receives_zero_variation_id_for_simple_product() {
+		add_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10, 3 );
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->assertCount( 3, $this->add_to_cart_quantity_filter_args, 'Filter should receive exactly 3 arguments.' );
+
+		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );
+		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );
+		$this->assertEquals( 0, $this->add_to_cart_quantity_filter_args[2] );
 	}
 
 	/**

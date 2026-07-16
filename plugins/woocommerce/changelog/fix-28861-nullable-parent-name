@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow null parent names in REST API order line items.

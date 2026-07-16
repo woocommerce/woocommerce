@@ -17,10 +17,21 @@ defined( 'ABSPATH' ) || exit;
 class WC_Form_Handler {
 
 	/**
+	 * User meta key tracking the last time the set-password link was resent. Used to rate-limit resends.
+	 */
+	const SET_PASSWORD_RESEND_META = '_wc_set_password_resend_at';
+
+	/**
+	 * Minimum seconds between back-to-back set-password resend requests.
+	 */
+	const SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS = 60;
+
+	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_reset_password_link' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'resend_set_password' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_account_details' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'checkout_action' ), 20 );
@@ -74,6 +85,59 @@ class WC_Form_Handler {
 			);
 			exit;
 		}
+	}
+
+	/**
+	 * Resend the change-password link to a logged-in customer who still has a temporary password.
+	 *
+	 * Triggered by the temporary-password notice on the My Account pages. Generates a fresh
+	 * password-reset key for the current user and dispatches the reset-password email, mirroring
+	 * the lost-password flow but for the already-authenticated user.
+	 *
+	 * @since 11.0.0
+	 */
+	public static function resend_set_password(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['wc-resend-set-password'] ) || ! is_user_logged_in() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$nonce_value = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+
+		if ( ! wp_verify_nonce( $nonce_value, 'wc-resend-set-password' ) ) {
+			return;
+		}
+
+		$user     = wp_get_current_user();
+		$redirect = wc_get_page_permalink( 'myaccount' );
+
+		// Rate-limit resends so the button can't be used to spam the customer's inbox.
+		$last_sent_at = (int) get_user_meta( $user->ID, self::SET_PASSWORD_RESEND_META, true );
+		if ( $last_sent_at > 0 && ( time() - $last_sent_at ) < self::SET_PASSWORD_RESEND_RATE_LIMIT_SECONDS ) {
+			wc_add_notice( __( 'Please wait a moment before requesting another link to change your password.', 'woocommerce' ), 'notice' );
+			wp_safe_redirect( $redirect );
+			exit;
+		}
+
+		$key = get_password_reset_key( $user );
+
+		if ( is_wp_error( $key ) ) {
+			wc_add_notice( __( 'Sorry, we were unable to resend the link. Please try again.', 'woocommerce' ), 'error' );
+		} else {
+			// Persist the rate-limit timestamp before dispatching so two near-simultaneous requests can't both pass.
+			// This timestamp also suppresses the temporary-password notice during the cooldown — see
+			// WC_Shortcode_My_Account::my_account_add_notices() — so the confirmation below isn't contradicted.
+			update_user_meta( $user->ID, self::SET_PASSWORD_RESEND_META, (string) time() );
+			// Load email classes so the reset-password notification has a listener.
+			WC()->mailer();
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks -- Re-fires woocommerce_reset_password_notification, documented in WC_Shortcode_My_Account::retrieve_password().
+			do_action( 'woocommerce_reset_password_notification', $user->user_login, $key );
+			wc_add_notice( __( 'We have emailed you a new link to change your password.', 'woocommerce' ) );
+		}
+
+		wp_safe_redirect( $redirect );
+		exit;
 	}
 
 	/**
@@ -265,10 +329,12 @@ class WC_Form_Handler {
 		$save_pass            = true;
 
 		// Current user data.
-		$current_user       = get_user_by( 'id', $user_id );
-		$current_first_name = $current_user->first_name;
-		$current_last_name  = $current_user->last_name;
-		$current_email      = $current_user->user_email;
+		/** @var WP_User $current_user */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- Type hint for PHPStan.
+		$current_user         = get_user_by( 'id', $user_id );
+		$current_first_name   = $current_user->first_name;
+		$current_last_name    = $current_user->last_name;
+		$current_email        = $current_user->user_email;
+		$current_display_name = wc_clean( $current_user->display_name );
 
 		// New user data.
 		$user               = new stdClass();
@@ -277,9 +343,9 @@ class WC_Form_Handler {
 		$user->last_name    = $account_last_name;
 		$user->display_name = $account_display_name;
 
-		// Prevent display name to be changed to email.
-		if ( is_email( $account_display_name ) ) {
-			wc_add_notice( __( 'Display name cannot be changed to email address due to privacy concern.', 'woocommerce' ), 'error' );
+		// Prevent display name from being changed to an email address.
+		if ( is_email( $account_display_name ) && $account_display_name !== $current_display_name ) {
+			wc_add_notice( __( 'Display name cannot be changed to email address due to privacy concern.', 'woocommerce' ), 'error', array( 'id' => 'account_display_name' ) );
 		}
 
 		// Handle required fields.

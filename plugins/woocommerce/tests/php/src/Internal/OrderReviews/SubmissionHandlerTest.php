@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Tests\Internal\OrderReviews;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility;
 use Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use WC_Helper_Product;
 use WC_Order;
 use WC_Unit_Test_Case;
@@ -42,21 +41,28 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Build an empty completed order for review submissions.
+	 */
+	private function make_empty_order(): WC_Order {
+		$order = new WC_Order();
+		$order->set_customer_id( 1 );
+		$order->set_billing_first_name( 'Jane' );
+		$order->set_billing_last_name( 'Doe' );
+		$order->set_billing_email( 'jane@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
 	 * Build a completed order with the given number of products.
 	 *
 	 * @param int $product_count How many products to attach.
 	 * @return array{order:WC_Order, product_ids:int[], item_ids:int[]}
 	 */
 	private function make_order( int $product_count = 1 ): array {
-		$order = OrderHelper::create_order();
-		// Wipe the default item.
-		foreach ( $order->get_items() as $item ) {
-			$order->remove_item( $item->get_id() );
-		}
-		$order->set_billing_first_name( 'Jane' );
-		$order->set_billing_last_name( 'Doe' );
-		$order->set_billing_email( 'jane@example.test' );
-		$order->set_status( OrderStatus::COMPLETED );
+		$order = $this->make_empty_order();
 
 		$product_ids = array();
 		for ( $i = 0; $i < $product_count; $i++ ) {
@@ -226,12 +232,8 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$variation_a   = wc_get_product( $variation_ids[0] );
 		$variation_b   = wc_get_product( $variation_ids[1] );
 
-		$order = OrderHelper::create_order();
-		foreach ( $order->get_items() as $item ) {
-			$order->remove_item( $item->get_id() );
-		}
+		$order = $this->make_empty_order();
 		$order->set_billing_email( 'shopper@example.test' );
-		$order->set_status( OrderStatus::COMPLETED );
 		$order->add_product( $variation_a, 1 );
 		$order->add_product( $variation_b, 1 );
 		$order->save();
@@ -542,9 +544,9 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$variation_ids = $variable->get_children();
 		$variation_a   = wc_get_product( $variation_ids[0] );
 		$variation_b   = wc_get_product( $variation_ids[1] );
-		$other_order   = OrderHelper::create_order();
+		$other_order   = $this->make_empty_order();
 
-		// Pre-existing approved review from an older order, same parent, variation A.
+		// Pre-existing approved review from an older order, same parent, variation B.
 		$prior_comment_id = (int) wp_insert_comment(
 			array(
 				'comment_post_ID'      => $variable->get_id(),
@@ -557,14 +559,9 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		);
 		add_comment_meta( $prior_comment_id, 'rating', 4, true );
 		add_comment_meta( $prior_comment_id, ItemEligibility::ORDER_META_KEY, (int) $other_order->get_id(), true );
-		add_comment_meta( $prior_comment_id, ItemEligibility::VARIATION_META_KEY, (int) $variation_a->get_id(), true );
+		add_comment_meta( $prior_comment_id, ItemEligibility::VARIATION_META_KEY, (int) $variation_b->get_id(), true );
 
-		$order = OrderHelper::create_order();
-		foreach ( $order->get_items() as $item ) {
-			$order->remove_item( $item->get_id() );
-		}
-		$order->set_billing_email( 'jane@example.test' );
-		$order->set_status( OrderStatus::COMPLETED );
+		$order = $this->make_empty_order();
 		$order->add_product( $variation_a, 1 );
 		$order->add_product( $variation_b, 1 );
 		$order->save();
@@ -608,12 +605,7 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$variation_a   = wc_get_product( $variation_ids[0] );
 		$variation_b   = wc_get_product( $variation_ids[1] );
 
-		$order = OrderHelper::create_order();
-		foreach ( $order->get_items() as $item ) {
-			$order->remove_item( $item->get_id() );
-		}
-		$order->set_billing_email( 'jane@example.test' );
-		$order->set_status( OrderStatus::COMPLETED );
+		$order = $this->make_empty_order();
 		$order->add_product( $variation_a, 1 );
 		$order->add_product( $variation_b, 1 );
 		$order->save();

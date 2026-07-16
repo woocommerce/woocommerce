@@ -24,19 +24,6 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$product, $force = false ) {
-		$this->update_post_meta_internal( $product, $force, false );
-	}
-
-	/**
-	 * Internal implementation of update_post_meta() that also knows whether the product is being created.
-	 *
-	 * @param WC_Product $product Product object.
-	 * @param bool       $force Force update. Used during create.
-	 * @param bool       $creating Whether the product is being created.
-	 * @param array      $existing_meta_keys Existing meta keys map, maintained across calls during creation. Passed by reference.
-	 * @return void
-	 */
-	protected function update_post_meta_internal( &$product, $force, $creating, &$existing_meta_keys = null ) {
 		$meta_key_to_props = array(
 			'_children' => 'children',
 		);
@@ -51,7 +38,7 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 			}
 		}
 
-		parent::update_post_meta_internal( $product, $force, $creating, $existing_meta_keys );
+		parent::update_post_meta( $product, $force );
 	}
 
 	/**
