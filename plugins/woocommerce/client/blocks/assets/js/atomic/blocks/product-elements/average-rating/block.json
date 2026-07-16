@@ -29,10 +29,8 @@
 			"fontSize": true,
 			"__experimentalFontWeight": true,
 			"__experimentalSkipSerialization": true
-		}
-	},
-	"selectors": {
-		"root": ".wc-block-components-product-average-rating"
+		},
+		"__experimentalSelector": ".wc-block-components-product-average-rating"
 	},
 	"textdomain": "woocommerce",
 	"$schema": "https://schemas.wp.org/trunk/block.json"
