@@ -68,6 +68,8 @@ add_action( 'plugins_loaded', static function () {
 
 The first argument may be your plugin directory (the controller class is resolved by convention) or the fully-qualified controller class name. This is a silent no-op when the required infrastructure is not available (see [Prerequisites](#prerequisites)). Your endpoint goes through the same request pipeline as core's and inherits the core [GraphQL settings](./caching-and-settings.md).
 
+**Note:** Call `register_graphql_endpoint()` unconditionally at bootstrap, as shown above: don't wrap it in `rest_api_init`. The actual route registration is already deferred internally, and WooCommerce uses the call itself to know that a plugin endpoint exists on the site (for example, to decide whether to show the shared GraphQL settings section). A call deferred to `rest_api_init` never happens on admin, cron, or CLI requests, so that detection would break there.
+
 ### Gating your endpoint
 
 The `dual_code_graphql_api` feature flag gates WooCommerce core's own endpoint only: your endpoint is registered whenever the required infrastructure is available, regardless of the flag state. Choose how (and whether) to gate it:
