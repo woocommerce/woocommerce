@@ -268,9 +268,25 @@ class SettingsUISchema {
 		}
 
 		$default = $setting['default'] ?? '';
-		$value   = \WC_Admin_Settings::get_option( (string) $setting['id'], $default );
+		$value   = \WC_Admin_Settings::get_option( self::get_option_name( $setting ), $default );
 
 		return self::normalize_value( $value, $type );
+	}
+
+	/**
+	 * Resolve the option name used to read and save a field.
+	 *
+	 * The 'field_name' key can specify an input field name that differs from the field 'id' (for example a nested
+	 * `option_name[key]` path). When present it is authoritative for both reading and saving the value, so the two
+	 * paths stay in sync. Falls back to the field 'id' otherwise.
+	 *
+	 * @param array $setting Legacy field definition.
+	 * @return string
+	 */
+	private static function get_option_name( array $setting ): string {
+		return isset( $setting['field_name'] ) && is_scalar( $setting['field_name'] )
+			? (string) $setting['field_name']
+			: (string) $setting['id'];
 	}
 
 	/**
@@ -307,13 +323,9 @@ class SettingsUISchema {
 			return array( 'adapter' => 'none' );
 		}
 
-		$field_name = isset( $setting['field_name'] ) && is_scalar( $setting['field_name'] )
-			? (string) $setting['field_name']
-			: (string) $setting['id'];
-
 		return array(
 			'adapter' => $default_save_adapter,
-			'name'    => $field_name,
+			'name'    => self::get_option_name( $setting ),
 		);
 	}
 

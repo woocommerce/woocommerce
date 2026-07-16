@@ -267,6 +267,34 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It reads the field value from the legacy field name when it differs from the id.
+	 */
+	public function test_from_legacy_settings_reads_value_from_field_name(): void {
+		update_option( 'woocommerce_test', array( 'nested' => 'saved nested value' ) );
+
+		try {
+			$schema = SettingsUISchema::from_legacy_settings(
+				'test',
+				'',
+				'Test settings',
+				array(
+					array(
+						'id'         => 'woocommerce_test_nested',
+						'type'       => 'text',
+						'title'      => 'Nested field',
+						'field_name' => 'woocommerce_test[nested]',
+						'default'    => 'default value',
+					),
+				)
+			);
+
+			$this->assertSame( 'saved nested value', $schema['groups']['default']['fields'][0]['value'] );
+		} finally {
+			delete_option( 'woocommerce_test' );
+		}
+	}
+
+	/**
 	 * @testdox It sanitizes info field text and marks info fields as non-saving.
 	 */
 	public function test_from_legacy_settings_sanitizes_info_field_text_and_marks_info_fields_as_non_saving(): void {
