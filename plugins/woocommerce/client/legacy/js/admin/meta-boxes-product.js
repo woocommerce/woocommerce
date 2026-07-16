@@ -1618,6 +1618,10 @@ jQuery( function ( $ ) {
 	if ( productImageContainer.length ) {
 		syncProductImageTooltip();
 
+		// WPSetThumbnailHTML() replaces the direct children of `.inside`, so
+		// `childList` alone observes every image change. Omitting `subtree`
+		// also keeps the observer blind to the tooltip's own insertion, which
+		// happens one level deeper.
 		new MutationObserver( syncProductImageTooltip ).observe(
 			productImageContainer[ 0 ],
 			{ childList: true }
