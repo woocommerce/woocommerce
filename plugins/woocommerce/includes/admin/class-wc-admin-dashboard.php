@@ -381,6 +381,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				$outofstock_count = apply_filters( 'woocommerce_status_widget_out_of_stock_count_pre_query', null, $nostock );
 
 				if ( is_null( $outofstock_count ) ) {
+					// Count by the canonical, save-time-computed stock_status column (as the Analytics
+					// stock report does), rather than a live stock_quantity threshold. This also captures
+					// products with stock management disabled (a NULL stock_quantity never matched the old
+					// threshold query — see #29698). Note the trade-off: changing the
+					// woocommerce_notify_no_stock_amount option does not reclassify existing products'
+					// stock_status until each is re-saved, so this count reflects that same staleness.
 					$outofstock_count = (int) $wpdb->get_var(
 						$wpdb->prepare(
 							"SELECT COUNT( product_id )
