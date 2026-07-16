@@ -23,6 +23,7 @@ import { triggerAddedToCartEvent } from './legacy-events';
 import {
 	createMutationQueue,
 	MutationRequest,
+	type CycleSettledEntry,
 	type MutationQueue,
 	type MutationResult,
 } from './mutation-batcher';
@@ -77,8 +78,8 @@ export type AddCartItemError = {
 /**
  * The per-call outcome `addCartItem` resolves with, captured at the moment
  * its own request settles (accepted or rejected). A later throw in
- * post-success processing (notices, a11y announcement) never downgrades an
- * already-captured success into a failure.
+ * post-success processing (notices) never downgrades an already-captured
+ * success into a failure.
  */
 export type AddCartItemOutcome =
 	| { success: true }
@@ -126,6 +127,24 @@ type QuantityChanges = {
 	cartItemsPendingQuantity?: string[];
 	cartItemsPendingDelete?: string[];
 	productsPendingAdd?: number[];
+};
+
+/**
+ * The per-mutation metadata carried through the cart's mutation queue,
+ * submitted with every request and aggregated by the queue's
+ * `onCycleSettled` callback once a cycle finishes.
+ */
+type CartMutationMeta = {
+	/** The quantity changes this single mutation contributes, if it succeeds. */
+	quantityChanges: QuantityChanges;
+	/**
+	 * Whether this mutation was issued by an add-style action (`addCartItem`
+	 * or `batchAddCartItems`, regardless of whether it hit the `add-item` or
+	 * `update-item` endpoint) or by `removeCartItem`. Only `'add'`-origin
+	 * successes trigger the legacy added-to-cart event and the screen-reader
+	 * announcement.
+	 */
+	origin: 'add' | 'remove';
 };
 
 // Guard to distinguish between optimistic and cart items.
@@ -273,6 +292,51 @@ function computeKeylessAddSuppressKeys(
 }
 
 /**
+ * Merges the per-mutation `quantityChanges` records of every successful
+ * mutation in a settled cycle into the single record dispatched with the
+ * sync event.
+ *
+ * Each of the three keys (`productsPendingAdd`, `cartItemsPendingQuantity`,
+ * `cartItemsPendingDelete`) is unioned independently across `list`, with
+ * duplicates collapsed via `Set`. A key that no entry in `list` contributes
+ * is left absent from the result rather than emitted as an empty array, so
+ * the sync event's shape matches today's single-mutation payloads.
+ *
+ * @param list The `quantityChanges` records of every successful mutation in
+ *             the cycle, one per mutation.
+ * @return The unioned `quantityChanges` record.
+ */
+function mergeQuantityChanges( list: QuantityChanges[] ): QuantityChanges {
+	const productsPendingAdd = new Set< number >();
+	const cartItemsPendingQuantity = new Set< string >();
+	const cartItemsPendingDelete = new Set< string >();
+
+	for ( const entry of list ) {
+		entry.productsPendingAdd?.forEach( ( id ) =>
+			productsPendingAdd.add( id )
+		);
+		entry.cartItemsPendingQuantity?.forEach( ( key ) =>
+			cartItemsPendingQuantity.add( key )
+		);
+		entry.cartItemsPendingDelete?.forEach( ( key ) =>
+			cartItemsPendingDelete.add( key )
+		);
+	}
+
+	const merged: QuantityChanges = {};
+	if ( productsPendingAdd.size > 0 ) {
+		merged.productsPendingAdd = [ ...productsPendingAdd ];
+	}
+	if ( cartItemsPendingQuantity.size > 0 ) {
+		merged.cartItemsPendingQuantity = [ ...cartItemsPendingQuantity ];
+	}
+	if ( cartItemsPendingDelete.size > 0 ) {
+		merged.cartItemsPendingDelete = [ ...cartItemsPendingDelete ];
+	}
+	return merged;
+}
+
+/**
  * Derives the auto-update and auto-removal info notices from the diff between
  * the post-optimistic cart and the committed server cart.
  *
@@ -380,12 +444,51 @@ function emitSyncEvent( {
 }
 
 /**
+ * The `speak` binding from `@wordpress/a11y`, populated once the module
+ * import kicked off by {@link preloadA11y} resolves. `null` until then, or if
+ * the import never resolves (e.g. a chunk-load failure).
+ */
+let speakFn: typeof import('@wordpress/a11y')[ 'speak' ] | null = null;
+
+/**
+ * The in-flight (or already-settled) `@wordpress/a11y` import kicked off by
+ * {@link preloadA11y}, reused across calls so the module is only imported
+ * once per page load.
+ */
+let a11yPromise: Promise< typeof import('@wordpress/a11y') > | null = null;
+
+/**
+ * Kicks off (once) the dynamic import of `@wordpress/a11y` and stashes its
+ * `speak` export into {@link speakFn} on resolution.
+ *
+ * Called at the start of `addCartItem` and `batchAddCartItems` so the module
+ * is already loading — often already resolved — by the time the mutation
+ * cycle settles and needs to announce. A rejected import (e.g. a chunk-load
+ * failure) is swallowed: it degrades the eventual announcement to a no-op
+ * without affecting the mutation's own success/failure outcome.
+ */
+function preloadA11y(): void {
+	if ( a11yPromise ) {
+		return;
+	}
+	a11yPromise = import( '@wordpress/a11y' );
+	a11yPromise
+		.then( ( { speak } ) => {
+			speakFn = speak;
+		} )
+		.catch( () => {
+			// Swallowed: a failed a11y chunk load must not affect mutation
+			// settlement. The eventual announcement attempt becomes a no-op.
+		} );
+}
+
+/**
  * Cart request queue singleton
  *
  * Lazily initialized on first use since state isn't available at module load.
  * Queues cart requests and handles optimistic updates and reconciliation.
  */
-let cartQueue: MutationQueue< Cart > | null = null;
+let cartQueue: MutationQueue< Cart, CartMutationMeta > | null = null;
 
 /**
  * Send a cart request through the queue.
@@ -394,12 +497,12 @@ let cartQueue: MutationQueue< Cart > | null = null;
  */
 async function sendCartRequest(
 	stateRef: Store[ 'state' ],
-	options: MutationRequest< Cart >
+	options: MutationRequest< Cart, CartMutationMeta >
 ): Promise< MutationResult< Cart > > {
 	await isNonceReady;
 	// Lazily initialize queue on first use.
 	if ( ! cartQueue ) {
-		cartQueue = createMutationQueue< Cart >( {
+		cartQueue = createMutationQueue< Cart, CartMutationMeta >( {
 			endpoint: `${ stateRef.restUrl }wc/store/v1/batch`,
 			getHeaders: () => ( {
 				Nonce: stateRef.nonce,
@@ -416,6 +519,63 @@ async function sendCartRequest(
 				stateRef.nonce =
 					response.headers.get( 'Nonce' ) || stateRef.nonce;
 				return response;
+			},
+			// The single place that emits the cart's cross-cutting side
+			// effects (the sync event, the legacy added-to-cart event, and
+			// the screen-reader announcement) once per settled cycle, no
+			// matter how many mutations it batched together.
+			onCycleSettled: ( settled ) => {
+				const successful = settled.filter(
+					(
+						entry
+					): entry is Required<
+						CycleSettledEntry< CartMutationMeta >
+					> => entry.success && entry.meta !== undefined
+				);
+				if ( successful.length === 0 ) {
+					// Every mutation in the cycle failed: nothing succeeded,
+					// so no sync event, legacy event, or announcement fires.
+					return;
+				}
+
+				const anyAdd = successful.some(
+					( entry ) => entry.meta.origin === 'add'
+				);
+
+				// Preserve today's relative order: the legacy event fires
+				// before the sync event.
+				if ( anyAdd ) {
+					triggerAddedToCartEvent( { preserveCartData: true } );
+				}
+
+				emitSyncEvent( {
+					quantityChanges: mergeQuantityChanges(
+						successful.map(
+							( entry ) => entry.meta.quantityChanges
+						)
+					),
+				} );
+
+				if ( anyAdd ) {
+					const { messages } = getConfig(
+						'woocommerce'
+					) as WooCommerceConfig;
+					const text = messages?.addedToCartText;
+					if ( text ) {
+						if ( speakFn ) {
+							speakFn( text, 'polite' );
+						} else if ( a11yPromise ) {
+							a11yPromise
+								.then( () => {
+									speakFn?.( text, 'polite' );
+								} )
+								.catch( () => {
+									// Swallowed: a failed a11y chunk load
+									// degrades the announcement to a no-op.
+								} );
+						}
+					}
+				}
 			},
 		} );
 	}
@@ -465,11 +625,6 @@ const { actions } = store< Store >(
 		},
 		actions: {
 			*removeCartItem( key: string ): AsyncAction< void > {
-				// Track what changes we're making for the sync event.
-				const quantityChanges: QuantityChanges = {
-					cartItemsPendingDelete: [ key ],
-				};
-
 				// Capture cart state after optimistic updates for notice comparison.
 				let cartAfterOptimistic: typeof state.cart | null = null;
 
@@ -487,13 +642,11 @@ const { actions } = store< Store >(
 								JSON.stringify( state.cart )
 							);
 						},
-						// Side effects run synchronously during reconciliation,
-						// before isProcessing clears. This prevents
-						// refreshCartItems from running during these events.
-						onSettled: ( { success } ) => {
-							if ( success ) {
-								emitSyncEvent( { quantityChanges } );
-							}
+						meta: {
+							quantityChanges: {
+								cartItemsPendingDelete: [ key ],
+							},
+							origin: 'remove',
 						},
 					} ) ) as TypeYield< typeof sendCartRequest >;
 
@@ -547,7 +700,7 @@ const { actions } = store< Store >(
 					);
 				}
 
-				const a11yModulePromise = import( '@wordpress/a11y' );
+				preloadA11y();
 
 				// Find existing item
 				const existingItem = state.findItemInCart( {
@@ -673,8 +826,8 @@ const { actions } = store< Store >(
 				// Captured at the request-settlement boundary (the line right
 				// after the request-sending yield resolves/throws) and never
 				// overwritten afterwards. A throw from later post-success
-				// processing (notices, a11y announcement) must not downgrade an
-				// already-captured success.
+				// processing (notices) must not downgrade an already-captured
+				// success.
 				let outcome: AddCartItemOutcome | undefined;
 
 				try {
@@ -712,26 +865,13 @@ const { actions } = store< Store >(
 								JSON.stringify( state.cart )
 							);
 						},
-						// Side effects run synchronously during reconciliation,
-						// before isProcessing clears. This prevents
-						// refreshCartItems from running during these events.
-						onSettled: ( { success } ) => {
-							if ( success ) {
-								// Dispatch legacy event
-								triggerAddedToCartEvent( {
-									preserveCartData: true,
-								} );
-
-								// Dispatch sync event
-								emitSyncEvent( { quantityChanges } );
-							}
-						},
+						meta: { quantityChanges, origin: 'add' },
 					} ) ) as TypeYield< typeof sendCartRequest >;
 
 					// The request settled successfully. Capture the outcome
-					// immediately so any later throw in this block (a11y
-					// chunk-load failure, notices import rejection, response-shape
-					// assertion) cannot downgrade it to a failure.
+					// immediately so any later throw in this block (notices
+					// import rejection, response-shape assertion) cannot
+					// downgrade it to a failure.
 					outcome = { success: true };
 
 					// Success - handle side effects that don't trigger refreshCartItems
@@ -763,18 +903,6 @@ const { actions } = store< Store >(
 							true
 						);
 					}
-
-					// Announce to screen readers
-					const { messages } = getConfig(
-						'woocommerce'
-					) as WooCommerceConfig;
-					if ( messages?.addedToCartText ) {
-						const { speak } =
-							( yield a11yModulePromise ) as Awaited<
-								typeof a11yModulePromise
-							>;
-						speak( messages.addedToCartText, 'polite' );
-					}
 				} catch ( error ) {
 					// Show error notice
 					actions.showNoticeError( error as Error );
@@ -803,8 +931,7 @@ const { actions } = store< Store >(
 				items: ClientCartItem[],
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			): AsyncAction< void > {
-				const a11yModulePromise = import( '@wordpress/a11y' );
-				const quantityChanges: QuantityChanges = {};
+				preloadA11y();
 
 				try {
 					// Per-product capture for the keyless-add exactness test,
@@ -831,7 +958,7 @@ const { actions } = store< Store >(
 						string,
 						BatchProductCapture
 					>();
-					const promises = items.map( ( item, index ) => {
+					const promises = items.map( ( item ) => {
 						const existingItem = state.findItemInCart( {
 							id: item.id,
 							key: item.key,
@@ -858,6 +985,7 @@ const { actions } = store< Store >(
 						const endpoint = isUpdate ? 'update-item' : 'add-item';
 
 						let itemToSend: OptimisticCartItem;
+						let itemMeta: CartMutationMeta;
 						if ( isUpdate && existingItem ) {
 							// Caller-keyed update: target the exact line by key
 							// and send the absolute target quantity to the
@@ -867,11 +995,14 @@ const { actions } = store< Store >(
 								id: existingItem.id,
 								quantity,
 							} as OptimisticCartItem;
-							quantityChanges.cartItemsPendingQuantity = [
-								...( quantityChanges.cartItemsPendingQuantity ??
-									[] ),
-								existingItem.key as string,
-							];
+							itemMeta = {
+								quantityChanges: {
+									cartItemsPendingQuantity: [
+										existingItem.key as string,
+									],
+								},
+								origin: 'add',
+							};
 						} else {
 							// Keyless add: build a fresh payload for the add-item
 							// endpoint and never copy the matched line's key. As in
@@ -892,10 +1023,12 @@ const { actions } = store< Store >(
 									variation: item.variation,
 								} ),
 							} as OptimisticCartItem;
-							quantityChanges.productsPendingAdd = [
-								...( quantityChanges.productsPendingAdd ?? [] ),
-								item.id,
-							];
+							itemMeta = {
+								quantityChanges: {
+									productsPendingAdd: [ item.id ],
+								},
+								origin: 'add',
+							};
 
 							// Accumulate the per-product capture for the exactness
 							// test. On the first encounter of each product token,
@@ -944,8 +1077,6 @@ const { actions } = store< Store >(
 							}
 						}
 
-						const isLastItem = index === items.length - 1;
-
 						return sendCartRequest( state, {
 							path: `/wc/store/v1/cart/${ endpoint }`,
 							method: 'POST',
@@ -967,24 +1098,7 @@ const { actions } = store< Store >(
 									state.cart.items.push( itemToSend );
 								}
 							},
-							// Only fire events on the last item to avoid
-							// duplicate notifications mid-batch.
-							// Fire events when ANY item in the batch
-							// succeeded (data is set from the last
-							// successful server state). Only the last
-							// item's callback fires to avoid duplicates.
-							...( isLastItem && {
-								onSettled: ( { data } ) => {
-									if ( data ) {
-										triggerAddedToCartEvent( {
-											preserveCartData: true,
-										} );
-										emitSyncEvent( {
-											quantityChanges,
-										} );
-									}
-								},
-							} ),
+							meta: itemMeta,
 						} );
 					} );
 
@@ -997,7 +1111,7 @@ const { actions } = store< Store >(
 						promises
 					) ) as PromiseSettledResult< MutationResult< Cart > >[];
 
-					// Find the last successful result for notices/a11y.
+					// Find the last successful result for notices.
 					const lastSuccess = [ ...results ]
 						.reverse()
 						.find(
@@ -1031,17 +1145,6 @@ const { actions } = store< Store >(
 								[ ...infoNotices, ...errorNotices ],
 								true
 							);
-						}
-
-						const { messages } = getConfig(
-							'woocommerce'
-						) as WooCommerceConfig;
-						if ( messages?.addedToCartText ) {
-							const { speak } =
-								( yield a11yModulePromise ) as Awaited<
-									typeof a11yModulePromise
-								>;
-							speak( messages.addedToCartText, 'polite' );
 						}
 					}
 

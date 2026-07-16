@@ -3,11 +3,14 @@
  */
 import type { Cart, CartItem } from '@woocommerce/types';
 import type { Notice } from '@woocommerce/stores/store-notices';
+import { getConfig } from '@wordpress/interactivity';
+import { speak } from '@wordpress/a11y';
 
 /**
  * Internal dependencies
  */
 import type { Store, OptimisticCartItem, AddCartItemOutcome } from '../cart';
+import { triggerAddedToCartEvent } from '../legacy-events';
 
 type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
 
@@ -45,6 +48,10 @@ jest.mock(
 
 jest.mock( '../legacy-events', () => ( {
 	triggerAddedToCartEvent: jest.fn(),
+} ) );
+
+jest.mock( '@wordpress/a11y', () => ( {
+	speak: jest.fn(),
 } ) );
 
 /**
@@ -405,6 +412,68 @@ function mockBatchFetchWholeBatchFailure(): void {
 }
 
 /**
+ * The `quantityChanges` shape carried by the sync event's detail. Mirrors the
+ * cart module's internal (unexported) `QuantityChanges` type.
+ */
+type QuantityChangesLike = {
+	cartItemsPendingQuantity?: string[];
+	cartItemsPendingDelete?: string[];
+	productsPendingAdd?: number[];
+};
+
+/**
+ * Installs a listener that captures every `wc-blocks_store_sync_required`
+ * event dispatched on `window`, in dispatch order.
+ *
+ * @return An object with the accumulating `events` list and a `cleanup`
+ *         function the caller must invoke once the test is done asserting,
+ *         so the listener does not leak into later tests.
+ */
+function captureSyncEvents(): {
+	events: Array< { type: string; quantityChanges: QuantityChangesLike } >;
+	cleanup: () => void;
+} {
+	const events: Array< {
+		type: string;
+		quantityChanges: QuantityChangesLike;
+	} > = [];
+	const listener = ( event: Event ) => {
+		events.push(
+			(
+				event as CustomEvent< {
+					type: string;
+					quantityChanges: QuantityChangesLike;
+				} >
+			 ).detail
+		);
+	};
+	window.addEventListener( 'wc-blocks_store_sync_required', listener );
+	return {
+		events,
+		cleanup: () =>
+			window.removeEventListener(
+				'wc-blocks_store_sync_required',
+				listener
+			),
+	};
+}
+
+/**
+ * Waits for a macrotask boundary, letting every microtask (promise
+ * `.then`/`.catch` chain) queued so far run to completion.
+ *
+ * Used after driving an action to its generator's `done` return value, since
+ * the screen-reader announcement may still be chained on the a11y module's
+ * import promise and settle in a microtask queued during — but not
+ * necessarily flushed by the end of — the action's own settlement.
+ *
+ * @return A promise that resolves after the next macrotask tick.
+ */
+function flushMicrotasks(): Promise< void > {
+	return new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+}
+
+/**
  * Builds a minimal server-confirmed cart line carrying a key.
  *
  * @param overrides Partial cart-line fields to override the defaults.
@@ -427,6 +496,11 @@ function makeKeyedLine( overrides: Partial< CartItem > = {} ): CartItem {
 describe( 'WooCommerce Cart Interactivity API Store', () => {
 	afterEach( () => {
 		jest.clearAllMocks();
+		// `getConfig` may have been given a per-test `mockReturnValue` (e.g. to
+		// configure `addedToCartText`); `clearAllMocks` only clears call
+		// history, so reset it explicitly to avoid leaking config into later
+		// tests.
+		( getConfig as jest.Mock ).mockReset();
 		delete ( mockState as Partial< Store[ 'state' ] > ).cart;
 	} );
 
@@ -1622,6 +1696,416 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			expect( mockState.cart.items ).toHaveLength( 1 );
 			expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
+		} );
+	} );
+
+	describe( 'onCycleSettled cross-cutting effects', () => {
+		it( 'dispatches exactly one sync event, one legacy event, and one announcement for a single successful addCartItem call', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {
+				messages: { addedToCartText: 'Added to your cart.' },
+			} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+			const { events, cleanup } = captureSyncEvents();
+
+			await runAction(
+				actions.addCartItem( {
+					id: 1,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+			await flushMicrotasks();
+
+			expect( events ).toHaveLength( 1 );
+			expect( events[ 0 ].type ).toBe( 'from_iAPI' );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
+				preserveCartData: true,
+			} );
+			expect( speak ).toHaveBeenCalledTimes( 1 );
+			expect( speak ).toHaveBeenCalledWith(
+				'Added to your cart.',
+				'polite'
+			);
+
+			cleanup();
+		} );
+
+		it( 'dispatches exactly one sync event, one legacy event, and one announcement for a cycle of concurrent successful addCartItem calls', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {
+				messages: { addedToCartText: 'Added to your cart.' },
+			} );
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+			const { events, cleanup } = captureSyncEvents();
+
+			await Promise.all( [
+				runAction(
+					actions.addCartItem( {
+						id: 1,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 2,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 3,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+			] );
+			await flushMicrotasks();
+
+			// Sanity check: all three mutations landed in the same cycle/batch.
+			expect( captured ).toHaveLength( 3 );
+			expect( events ).toHaveLength( 1 );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
+			expect( speak ).toHaveBeenCalledTimes( 1 );
+
+			cleanup();
+		} );
+
+		it( 'still dispatches exactly one sync event for a cycle mixing a successful and a failed mutation, and surfaces the failure as its own error notice', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {} );
+			mockBatchFetchFailingProduct( { failForId: 99 } );
+			const actions = await loadCartStore();
+			seedCart( [] );
+			const { events, cleanup } = captureSyncEvents();
+			const errors = spyOnShowNoticeError();
+
+			const [ acceptedOutcome, rejectedOutcome ] = await Promise.all( [
+				runAction(
+					actions.addCartItem( {
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 99,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+			] );
+			await flushMicrotasks();
+
+			expect( acceptedOutcome ).toEqual( { success: true } );
+			expect( ( rejectedOutcome as AddCartItemOutcome ).success ).toBe(
+				false
+			);
+			expect( events ).toHaveLength( 1 );
+			expect( errors ).toHaveLength( 1 );
+
+			cleanup();
+		} );
+
+		it( 'dispatches no sync event and no announcement when every mutation in the cycle fails, while the failed mutation still surfaces its own error notice', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {
+				messages: { addedToCartText: 'Added to your cart.' },
+			} );
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+				status: 400,
+			} );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			const { events, cleanup } = captureSyncEvents();
+			const errors = spyOnShowNoticeError();
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+			await flushMicrotasks();
+
+			expect( events ).toHaveLength( 0 );
+			expect( triggerAddedToCartEvent ).not.toHaveBeenCalled();
+			expect( speak ).not.toHaveBeenCalled();
+			expect( errors ).toHaveLength( 1 );
+
+			cleanup();
+		} );
+
+		it( 'unions quantityChanges across successful add, keyed-update, and remove mutations in the same cycle', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'server-key-abc',
+					id: 42,
+					quantity: 3,
+				} ),
+				makeKeyedLine( {
+					key: 'server-key-gone',
+					id: 7,
+					quantity: 1,
+				} ),
+			] );
+			const { events, cleanup } = captureSyncEvents();
+
+			await Promise.all( [
+				runAction(
+					actions.addCartItem( {
+						id: 99,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 42,
+						key: 'server-key-abc',
+						quantity: 5,
+						type: 'simple',
+					} )
+				),
+				runAction( actions.removeCartItem( 'server-key-gone' ) ),
+			] );
+			await flushMicrotasks();
+
+			expect( events ).toHaveLength( 1 );
+			expect( events[ 0 ].quantityChanges ).toEqual( {
+				productsPendingAdd: [ 99 ],
+				cartItemsPendingQuantity: [ 'server-key-abc' ],
+				cartItemsPendingDelete: [ 'server-key-gone' ],
+			} );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
+
+			cleanup();
+		} );
+
+		it( 'dedupes a repeated product id in the sync event quantityChanges when the same product succeeds twice in one cycle', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+			const { events, cleanup } = captureSyncEvents();
+
+			await Promise.all( [
+				runAction(
+					actions.addCartItem( {
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+			] );
+			await flushMicrotasks();
+
+			expect( events ).toHaveLength( 1 );
+			expect( events[ 0 ].quantityChanges ).toEqual( {
+				productsPendingAdd: [ 42 ],
+			} );
+
+			cleanup();
+		} );
+
+		it( 'dispatches the sync event but not the legacy event or announcement for a successful remove-only cycle', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {
+				messages: { addedToCartText: 'Added to your cart.' },
+			} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'server-key-abc',
+					id: 42,
+					quantity: 3,
+				} ),
+			] );
+			const { events, cleanup } = captureSyncEvents();
+
+			await runAction( actions.removeCartItem( 'server-key-abc' ) );
+			await flushMicrotasks();
+
+			expect( events ).toHaveLength( 1 );
+			expect( events[ 0 ].quantityChanges ).toEqual( {
+				cartItemsPendingDelete: [ 'server-key-abc' ],
+			} );
+			expect( triggerAddedToCartEvent ).not.toHaveBeenCalled();
+			expect( speak ).not.toHaveBeenCalled();
+
+			cleanup();
+		} );
+
+		it( 'dispatches one merged sync event, one legacy event, and one announcement for a cycle mixing a successful add and a successful remove', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {
+				messages: { addedToCartText: 'Added to your cart.' },
+			} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'server-key-gone',
+					id: 7,
+					quantity: 1,
+				} ),
+			] );
+			const { events, cleanup } = captureSyncEvents();
+
+			await Promise.all( [
+				runAction(
+					actions.addCartItem( {
+						id: 99,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction( actions.removeCartItem( 'server-key-gone' ) ),
+			] );
+			await flushMicrotasks();
+
+			expect( events ).toHaveLength( 1 );
+			expect( events[ 0 ].quantityChanges ).toEqual( {
+				productsPendingAdd: [ 99 ],
+				cartItemsPendingDelete: [ 'server-key-gone' ],
+			} );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
+			expect( speak ).toHaveBeenCalledTimes( 1 );
+
+			cleanup();
+		} );
+
+		it( "dispatches exactly one sync/legacy/announcement for a batchAddCartItems call where the last item fails but an earlier item succeeds, unioning only the successful item's changes", async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {
+				messages: { addedToCartText: 'Added to your cart.' },
+			} );
+			mockBatchFetchFailingProduct( { failForId: 99 } );
+			const actions = await loadCartStore();
+			seedCart( [] );
+			const { events, cleanup } = captureSyncEvents();
+			const notices = spyOnUpdateNotices();
+
+			await runAction(
+				actions.batchAddCartItems( [
+					{ id: 42, quantityToAdd: 1, type: 'simple' },
+					{ id: 99, quantityToAdd: 1, type: 'simple' },
+				] )
+			);
+			await flushMicrotasks();
+
+			expect( events ).toHaveLength( 1 );
+			expect( events[ 0 ].quantityChanges ).toEqual( {
+				productsPendingAdd: [ 42 ],
+			} );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
+			expect( speak ).toHaveBeenCalledTimes( 1 );
+			// The failed item (id 99) still surfaces its own error notice.
+			expect(
+				notices.some(
+					( n ) => n.type === 'error' && n.notice.includes( '99' )
+				) ||
+					notices.some(
+						( n ) =>
+							n.type === 'error' &&
+							n.notice.includes( 'cannot add' )
+					)
+			).toBe( true );
+
+			cleanup();
+		} );
+
+		it( 'announces once via the already-resolved a11y binding on a later call in the same store instance', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {
+				messages: { addedToCartText: 'Added to your cart.' },
+			} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+
+			// First call kicks off — and, given the many awaits already
+			// driven through by `runAction`, very likely resolves — the
+			// preloaded a11y module import.
+			await runAction(
+				actions.addCartItem( {
+					id: 1,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+			await flushMicrotasks();
+
+			// A second call's announcement — whether it takes the
+			// already-resolved synchronous branch or still has to chain on
+			// the import promise — must still fire exactly once more.
+			await runAction(
+				actions.addCartItem( {
+					id: 2,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+			await flushMicrotasks();
+
+			expect( speak ).toHaveBeenCalledTimes( 2 );
+			expect( speak ).toHaveBeenNthCalledWith(
+				2,
+				'Added to your cart.',
+				'polite'
+			);
+		} );
+
+		it( 'does not let an a11y announcement failure affect the mutation outcome or the already-dispatched sync/legacy events', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {
+				messages: { addedToCartText: 'Added to your cart.' },
+			} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+
+			// Warm up: resolve the a11y binding via a first successful call.
+			await runAction(
+				actions.addCartItem( {
+					id: 1,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+			await flushMicrotasks();
+
+			( speak as jest.Mock ).mockImplementation( () => {
+				throw new Error( 'a11y unavailable' );
+			} );
+
+			const { events, cleanup } = captureSyncEvents();
+			const outcome = await runAction(
+				actions.addCartItem( {
+					id: 2,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+			await flushMicrotasks();
+
+			expect( outcome ).toEqual( { success: true } );
+			expect( events ).toHaveLength( 1 );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 2 );
+
+			cleanup();
 		} );
 	} );
 } );
