@@ -465,11 +465,20 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'crop=1', $rendered );
 		$this->assertSame( 3, substr_count( $rendered, 'crop=1' ), 'Every image URL is rewritten.' );
 
-		// A square crop gets equal, concrete width/height attributes so it renders everywhere.
-		$this->assertSame( 1, preg_match( '/<img\b[^>]*>/', $rendered, $img ), 'The rendered output contains an image tag.' );
-		$this->assertSame( 1, preg_match( '/\bwidth="(\d+)"/', $img[0], $width_match ), 'The image has a concrete width.' );
-		$this->assertSame( 1, preg_match( '/\bheight="(\d+)"/', $img[0], $height_match ), 'The image has a concrete height.' );
-		$this->assertSame( $width_match[1], $height_match[1], 'A square crop has equal width and height.' );
+		// Every image (not just the first) gets equal, positive, concrete width/height attributes so
+		// a square crop renders everywhere.
+		$image_count = 0;
+		$html        = new \WP_HTML_Tag_Processor( $rendered );
+		while ( $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
+			++$image_count;
+			$width  = $html->get_attribute( 'width' );
+			$height = $html->get_attribute( 'height' );
+			$this->assertIsString( $width, 'Each server-cropped image has a concrete width.' );
+			$this->assertIsString( $height, 'Each server-cropped image has a concrete height.' );
+			$this->assertGreaterThan( 0, (int) $width, 'The width is positive.' );
+			$this->assertSame( (int) $width, (int) $height, 'A square crop has equal width and height.' );
+		}
+		$this->assertSame( 3, $image_count, 'All three images are present.' );
 	}
 
 	/**
@@ -483,6 +492,54 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 
 		// Without a cropping integration, images keep CSS cropping and are not given fixed dimensions.
 		$this->assertStringContainsString( 'object-fit: cover', $rendered );
-		$this->assertDoesNotMatchRegularExpression( '/<img[^>]*\bheight="/', $rendered, 'Uncropped images must not get a fixed height that would distort them.' );
+
+		$image_count = 0;
+		$html        = new \WP_HTML_Tag_Processor( $rendered );
+		while ( $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
+			++$image_count;
+			$this->assertNull( $html->get_attribute( 'height' ), 'Uncropped images must not get a fixed height that would distort them.' );
+		}
+		$this->assertSame( 3, $image_count, 'All three images are present.' );
+	}
+
+	/**
+	 * Test the crop is sized to the actual rendered cell width, so an incomplete final row
+	 * (e.g. a lone trailing image spanning the full width) is not served an undersized file.
+	 */
+	public function testItSizesCropToTheRenderedRowWidthForIncompleteRows(): void {
+		$parsed_gallery                         = $this->parsed_gallery;
+		$parsed_gallery['attrs']['aspectRatio'] = '1';
+		$parsed_gallery['attrs']['columns']     = 3;
+		// Add a fourth image so the final row holds a single, full-width image.
+		$parsed_gallery['innerBlocks'][3] = array(
+			'blockName'    => 'core/image',
+			'attrs'        => array(
+				'id'              => 4,
+				'sizeSlug'        => 'large',
+				'linkDestination' => 'none',
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '<figure class="wp-block-image size-large"><img src="https://example.com/image4.jpg" alt="Image 4" class="wp-image-4"/></figure>',
+			'innerContent' => array(
+				0 => '<figure class="wp-block-image size-large"><img src="https://example.com/image4.jpg" alt="Image 4" class="wp-image-4"/></figure>',
+			),
+		);
+
+		$widths = array();
+		$filter = function ( $url, $aspect_ratio, $width ) use ( &$widths ) {
+			$widths[] = $width;
+			return $url;
+		};
+		add_filter( 'woocommerce_email_editor_gallery_cropped_image_url', $filter, 10, 3 );
+		$this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+		remove_filter( 'woocommerce_email_editor_gallery_cropped_image_url', $filter, 10 );
+
+		$this->assertCount( 4, $widths, 'The filter runs once per gallery image.' );
+		// The first three images share a full row (one-third width each); the fourth is alone in the
+		// final row and spans the full width.
+		$this->assertSame( $widths[0], $widths[1], 'Images in the same full row share a width.' );
+		$this->assertSame( $widths[1], $widths[2], 'Images in the same full row share a width.' );
+		$this->assertGreaterThan( $widths[0], $widths[3], 'A lone trailing image is sized to the full row width.' );
+		$this->assertGreaterThanOrEqual( 2 * $widths[0], $widths[3], 'The full-width cell is substantially wider than a one-third cell.' );
 	}
 }

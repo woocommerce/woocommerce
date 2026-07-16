@@ -28,13 +28,14 @@ class Gallery extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		// The number of columns determines how wide each cropped image is displayed, which we pass to
-		// the crop so an image CDN can serve an appropriately sized (and cropped) file.
-		$columns    = $this->get_columns_from_attributes( $parsed_block['attrs'] ?? array() );
-		$cell_width = $this->get_cell_width( $columns, $rendering_context );
+		// The number of columns and the available layout width determine how wide each cropped image
+		// is displayed. We pass that per-image width to the crop so an image CDN can serve an
+		// appropriately sized (and cropped) file.
+		$columns      = $this->get_columns_from_attributes( $parsed_block['attrs'] ?? array() );
+		$layout_width = (int) Styles_Helper::parse_value( $rendering_context->get_layout_width_without_padding() );
 
 		// Extract images directly from the block content (more efficient than re-rendering).
-		$gallery_images = $this->extract_images_from_gallery_content( $block_content, $parsed_block, $cell_width );
+		$gallery_images = $this->extract_images_from_gallery_content( $block_content, $parsed_block, $columns, $layout_width );
 
 		// If we don't have any images, return empty.
 		if ( empty( $gallery_images ) ) {
@@ -46,20 +47,25 @@ class Gallery extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Estimate the display width (in px) of a single gallery cell.
+	 * Estimate the rendered width (in px) of the gallery cell that holds a given image.
 	 *
-	 * Used to size cropped images so an image CDN can serve a file that matches the cell instead of
-	 * the full-size original.
+	 * The gallery packs images into rows of `$columns`. A complete row splits the layout width
+	 * evenly, but an incomplete final row is distributed across only its remaining images — a lone
+	 * trailing image spans the full width (see {@see build_gallery_row_table()}). Sizing the crop to
+	 * the actual cell keeps an image CDN from serving an undersized file for such images.
 	 *
-	 * @param int               $columns Number of gallery columns.
-	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @param int $index Zero-based index of the image among the rendered images.
+	 * @param int $image_count Total number of rendered images.
+	 * @param int $columns Number of gallery columns.
+	 * @param int $layout_width Available layout width in px.
 	 * @return int Cell width in px (at least 1).
 	 */
-	private function get_cell_width( int $columns, Rendering_Context $rendering_context ): int {
-		$layout_width = Styles_Helper::parse_value( $rendering_context->get_layout_width_without_padding() );
-		$columns      = max( 1, $columns );
+	private function get_cell_width( int $index, int $image_count, int $columns, int $layout_width ): int {
+		$columns       = max( 1, $columns );
+		$row_start     = intdiv( $index, $columns ) * $columns;
+		$images_in_row = max( 1, min( $columns, $image_count - $row_start ) );
 
-		return (int) max( 1, floor( $layout_width / $columns ) );
+		return (int) max( 1, floor( $layout_width / $images_in_row ) );
 	}
 
 	/**
@@ -67,26 +73,38 @@ class Gallery extends Abstract_Block_Renderer {
 	 *
 	 * @param string $block_content The rendered gallery block HTML.
 	 * @param array  $parsed_block The parsed block data.
-	 * @param int    $cell_width Estimated display width of a gallery cell in px.
+	 * @param int    $columns Number of gallery columns.
+	 * @param int    $layout_width Available layout width in px.
 	 * @return array Array of sanitized image HTML strings.
 	 */
-	private function extract_images_from_gallery_content( string $block_content, array $parsed_block, int $cell_width ): array {
+	private function extract_images_from_gallery_content( string $block_content, array $parsed_block, int $columns, int $layout_width ): array {
 		$gallery_images = array();
 		$inner_blocks   = $parsed_block['innerBlocks'] ?? array();
 
 		// The gallery can request a crop (aspect ratio) for all of its images. Individual images
-		// may override it with their own aspectRatio attribute.
-		$gallery_aspect_ratio = $parsed_block['attrs']['aspectRatio'] ?? null;
+		// may override it with their own aspectRatio attribute. Guard against malformed input so a
+		// non-string ratio can't throw a TypeError and abort rendering.
+		$gallery_attrs        = isset( $parsed_block['attrs'] ) && is_array( $parsed_block['attrs'] ) ? $parsed_block['attrs'] : array();
+		$gallery_aspect_ratio = isset( $gallery_attrs['aspectRatio'] ) && is_string( $gallery_attrs['aspectRatio'] ) ? $gallery_attrs['aspectRatio'] : null;
 
-		// Extract images from inner blocks data where the actual image HTML is stored.
+		// Collect the image blocks first so we know how many land in each rendered row and can size
+		// each crop to its actual cell (incomplete final rows are wider — see get_cell_width()).
+		$image_blocks = array();
 		foreach ( $inner_blocks as $block ) {
 			if ( 'core/image' === $block['blockName'] && isset( $block['innerHTML'] ) ) {
-				$aspect_ratio    = $block['attrs']['aspectRatio'] ?? $gallery_aspect_ratio;
-				$image_attrs     = $block['attrs'] ?? array();
-				$extracted_image = $this->extract_image_from_html( $block['innerHTML'], $aspect_ratio, $cell_width, $image_attrs );
-				if ( ! empty( $extracted_image ) ) {
-					$gallery_images[] = $extracted_image;
-				}
+				$image_blocks[] = $block;
+			}
+		}
+		$image_count = count( $image_blocks );
+
+		foreach ( $image_blocks as $index => $block ) {
+			$image_attrs  = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+			$aspect_ratio = isset( $image_attrs['aspectRatio'] ) && is_string( $image_attrs['aspectRatio'] ) ? $image_attrs['aspectRatio'] : $gallery_aspect_ratio;
+
+			$cell_width      = $this->get_cell_width( $index, $image_count, $columns, $layout_width );
+			$extracted_image = $this->extract_image_from_html( $block['innerHTML'], $aspect_ratio, $cell_width, $image_attrs );
+			if ( ! empty( $extracted_image ) ) {
+				$gallery_images[] = $extracted_image;
 			}
 		}
 
@@ -209,14 +227,19 @@ class Gallery extends Abstract_Block_Renderer {
 		 * @param int    $height       Target display height derived from the aspect ratio in px (0 if unknown).
 		 * @param array  $image_attrs  Parsed attributes of the core/image block (id, sizeSlug, ...).
 		 */
-		$cropped_url = (string) apply_filters( 'woocommerce_email_editor_gallery_cropped_image_url', $image_url, $aspect_ratio, $width, $height, $image_attrs );
+		$filtered_url = apply_filters( 'woocommerce_email_editor_gallery_cropped_image_url', $image_url, $aspect_ratio, $width, $height, $image_attrs );
+
+		// Extensions can return anything (arrays, WP_Error, objects). Only accept a string, and
+		// sanitize it before we compare or use it so an invalid value can't emit a warning, be
+		// misclassified as a server crop, or become an empty src.
+		$cropped_url = is_string( $filtered_url ) ? esc_url( $filtered_url ) : '';
 
 		$is_server_cropped = '' !== $image_url && '' !== $cropped_url && $cropped_url !== $image_url;
 
 		if ( $is_server_cropped ) {
 			// The file is already cropped to the requested ratio, so we can give it concrete
 			// dimensions. This renders the crop correctly even in clients without CSS crop support.
-			$html->set_attribute( 'src', esc_url( $cropped_url ) );
+			$html->set_attribute( 'src', $cropped_url );
 			if ( $width > 0 && $height > 0 ) {
 				$html->set_attribute( 'width', esc_attr( (string) $width ) );
 				$html->set_attribute( 'height', esc_attr( (string) $height ) );
