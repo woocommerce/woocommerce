@@ -490,6 +490,16 @@
 			"isIgnored": true
 		},
 		{
+			"label": "settings-ui pins dataviews ahead of the WordPress bundle for the non-collapsible DataForm card layout; the pin is bundled into the settings-ui asset only",
+			"dependencies": [
+				"@wordpress/dataviews"
+			],
+			"packages": [
+				"@woocommerce/settings-ui"
+			],
+			"isIgnored": true
+		},
+		{
 			"label": "@wordpress/* dependencies that WooCommerce bundles instead of externalizing to WordPress",
 			"dependencyTypes": [
 				"prod",
