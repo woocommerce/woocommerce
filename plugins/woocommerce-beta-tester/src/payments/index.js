@@ -9,19 +9,16 @@ import apiFetch from '@wordpress/api-fetch';
 const metaKey = '_wcpay_mode';
 
 const Payments = () => {
-	const { orders = [], isRequesting } = useSelect( ( select ) => {
-		const { getOrders, hasFinishedResolution } = select( ordersStore );
+	const { orders = [] } = useSelect( ( select ) => {
+		const { getOrders } = select( ordersStore );
 
 		const query = {
 			page: 1,
 			per_page: 10,
 		};
-		const fetchedOrders = getOrders( query, null );
-		const requesting = hasFinishedResolution( 'getOrders', [ query ] );
 
 		return {
-			orders: fetchedOrders,
-			isRequesting: requesting,
+			orders: getOrders( query, null ),
 		};
 	} );
 
@@ -138,15 +135,9 @@ const Payments = () => {
 						</td>
 					</tr>
 				</thead>
-				<tbody>
-					{ ! isRequesting &&
-						orders?.length &&
-						renderOrders( orders ) }
-				</tbody>
+				<tbody>{ orders?.length > 0 && renderOrders( orders ) }</tbody>
 			</table>
-			{ ! isRequesting && orders?.length === 0 && (
-				<p>No orders found.</p>
-			) }
+			{ orders?.length === 0 && <p>No orders found.</p> }
 		</>
 	);
 };

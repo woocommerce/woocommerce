@@ -66,6 +66,7 @@
 				"changes": [
 					".eslintrc",
 					".eslintignore",
+					"eslint.config.mjs",
 					"tsconfig.json",
 					"src/**/*.{js,jsx,ts,tsx}"
 				]
