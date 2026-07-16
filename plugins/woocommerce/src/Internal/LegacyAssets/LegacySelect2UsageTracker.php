@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\LegacyAssets;
 
+use Automattic\Woocommerce_Analytics\WC_Analytics_Tracking;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WP_Scripts;
 use WC_Site_Tracking;
@@ -38,9 +39,10 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 	 * @since 11.0.0
 	 */
 	public function register() {
+		add_action( 'wp_print_footer_scripts', array( $this, 'handle_wp_print_footer_scripts' ), PHP_INT_MAX );
+
 		if ( WC_Site_Tracking::is_tracking_enabled() ) {
 			add_action( 'admin_print_footer_scripts', array( $this, 'handle_admin_print_footer_scripts' ), PHP_INT_MAX );
-			add_action( 'wp_print_footer_scripts', array( $this, 'handle_wp_print_footer_scripts' ), PHP_INT_MAX );
 		}
 	}
 
@@ -63,6 +65,10 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function handle_wp_print_footer_scripts(): void {
+		if ( ! $this->is_frontend_tracking_available() ) {
+			return;
+		}
+
 		$this->track_usage( self::CONTEXT_FRONTEND );
 	}
 
@@ -87,6 +93,12 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 		}
 
 		$this->mark_recently_checked( $event );
+
+		if ( self::CONTEXT_FRONTEND === $context ) {
+			$this->record_frontend_event( self::EVENT_NAME, $event );
+			return;
+		}
+
 		$this->record_event( self::EVENT_NAME, $event );
 	}
 
@@ -180,6 +192,34 @@ class LegacySelect2UsageTracker implements RegisterHooksInterface {
 		}
 
 		\WC_Tracks::record_event( $event_name, $properties );
+	}
+
+	/**
+	 * Add a storefront event to the WooCommerce Analytics client queue.
+	 *
+	 * @param string                $event_name Event name.
+	 * @param array<string, string> $properties Event properties.
+	 * @return void
+	 *
+	 * @since 11.0.0
+	 */
+	protected function record_frontend_event( string $event_name, array $properties ): void {
+		if ( ! class_exists( WC_Analytics_Tracking::class ) ) {
+			return;
+		}
+
+		WC_Analytics_Tracking::add_event_to_queue( $event_name, $properties );
+	}
+
+	/**
+	 * Whether the WooCommerce Analytics storefront tracker is initialized.
+	 *
+	 * @return bool
+	 *
+	 * @since 11.0.0
+	 */
+	protected function is_frontend_tracking_available(): bool {
+		return did_action( 'woocommerce_analytics_init' ) && class_exists( WC_Analytics_Tracking::class );
 	}
 
 	/**

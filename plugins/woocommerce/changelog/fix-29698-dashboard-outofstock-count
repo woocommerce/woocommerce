@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the dashboard status widget out-of-stock count for unmanaged products.
