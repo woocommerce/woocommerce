@@ -333,29 +333,10 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				),
 
 				array(
-					'title'    => __( 'Order withdrawal', 'woocommerce' ),
-					'desc'     => __( 'Endpoint for the order withdrawal page.', 'woocommerce' ),
-					'id'       => 'woocommerce_myaccount_order_withdrawal_endpoint',
-					'type'     => 'text',
-					'default'  => 'order-withdrawal',
-					'desc_tip' => true,
-				),
-
-				array(
 					'type' => 'sectionend',
 					'id'   => 'account_endpoint_options',
 				),
 			);
-
-		// Remove the order withdrawal endpoint if the feature is not enabled.
-		if ( ! wc_get_container()->get( FeaturesController::class )->feature_is_enabled( 'order_withdrawal' ) && is_array( $settings ) ) {
-			$settings = array_filter(
-				$settings,
-				function ( $setting ) {
-					return 'woocommerce_myaccount_order_withdrawal_endpoint' !== ( $setting['id'] ?? '' );
-				}
-			);
-		}
 
 		$settings = apply_filters( 'woocommerce_settings_pages', $settings );
 

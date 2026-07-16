@@ -169,7 +169,6 @@ class FeaturesController {
 		add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'display_email_improvements_feedback_notice' ), 10, 2 );
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'flag_abandoned_cart_recovery_enabled_notice' ), 10, 2 );
-		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'maybe_flush_rewrite_rules_for_order_withdrawal' ), 10, 1 );
 		add_action( 'woocommerce_settings_advanced', array( $this, 'maybe_render_abandoned_cart_recovery_enabled_notice' ), 1 );
 		add_filter( 'woocommerce_settings-advanced', array( $this, 'add_point_of_sale_setting_for_rest_api' ), 10, 1 ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	}
@@ -2152,19 +2151,6 @@ class FeaturesController {
 	public function flag_abandoned_cart_recovery_enabled_notice( $feature_id, $is_enabled ): void {
 		if ( 'abandoned_cart_recovery' === $feature_id && $is_enabled ) {
 			set_transient( 'wc_abandoned_cart_recovery_enabled_notice', 'yes', MINUTE_IN_SECONDS );
-		}
-	}
-
-	/**
-	 * Queue a rewrite rules flush when the order withdrawal endpoint is toggled.
-	 *
-	 * @param string $feature_id Feature being toggled.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 */
-	public function maybe_flush_rewrite_rules_for_order_withdrawal( $feature_id ): void {
-		if ( 'order_withdrawal' === $feature_id ) {
-			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
 	}
 

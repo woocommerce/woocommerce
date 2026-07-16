@@ -7,7 +7,6 @@
  */
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
@@ -105,10 +104,6 @@ class WC_Query {
 			'set-default-payment-method' => get_option( 'woocommerce_myaccount_set_default_payment_method_endpoint', 'set-default-payment-method' ),
 		);
 
-		if ( wc_get_container()->get( FeaturesController::class )->feature_is_enabled( 'order_withdrawal' ) ) {
-			$query_vars['order-withdrawal'] = get_option( 'woocommerce_myaccount_order_withdrawal_endpoint', 'order-withdrawal' );
-		}
-
 		$this->query_vars = $query_vars;
 	}
 
@@ -144,9 +139,6 @@ class WC_Query {
 				$order = wc_get_order( $wp->query_vars['view-order'] );
 				/* translators: %s: order number */
 				$title = ( $order ) ? sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ) : '';
-				break;
-			case 'order-withdrawal':
-				$title = __( 'Order withdrawal', 'woocommerce' );
 				break;
 			case 'downloads':
 				$title = __( 'Downloads', 'woocommerce' );
