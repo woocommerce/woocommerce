@@ -131,6 +131,9 @@ test.describe( `${ blockData.name } Block `, () => {
 		page,
 	} ) => {
 		await admin.createNewPost();
+		await expect(
+			editor.canvas.getByLabel( /Add default block|Empty block/ )
+		).toBeVisible();
 		await insertProductsQuery( editor, { inherit: false } );
 		await editor.publishAndVisitPost();
 

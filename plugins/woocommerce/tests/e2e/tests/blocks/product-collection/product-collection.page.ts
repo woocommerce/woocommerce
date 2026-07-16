@@ -374,7 +374,7 @@ class ProductCollectionPage {
 	}
 
 	async insertProductCollection() {
-		await this.editor.insertBlock( { name: this.BLOCK_SLUG } );
+		await this.editor.insertBlockUsingGlobalInserter( this.BLOCK_NAME );
 	}
 
 	async goToTemplateAndInsertCollection(
