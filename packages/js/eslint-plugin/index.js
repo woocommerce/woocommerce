@@ -8,10 +8,11 @@
  * spread from `@wordpress/eslint-plugin` are already deduped upstream; this
  * reconciles them against the layer we add on top.
  *
- * Unlike the upstream helper this one is pure. Our config array spreads objects
- * owned by `@wordpress/eslint-plugin` and `typescript-eslint`, and rewriting
- * their `plugins` in place would mutate those shared module singletons for every
- * other consumer in the process.
+ * Unlike `dedupePlugins` in `@wordpress/eslint-plugin`'s own index.js, which
+ * this mirrors, ours is pure: that one rewrites each config's `plugins` in
+ * place. Our config array spreads objects owned by `@wordpress/eslint-plugin`
+ * and `typescript-eslint`, so mutating them would corrupt those shared module
+ * singletons for every other consumer in the process.
  *
  * @param {Array} configs Array of flat config objects.
  * @return {Array} New config objects whose duplicate plugin keys share a single
