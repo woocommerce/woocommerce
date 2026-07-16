@@ -116,6 +116,49 @@ describe( 'Config', () => {
 			} );
 		} );
 
+		it( 'should parse lint config with onlyForDependencies', () => {
+			const parsed = parseCIConfig( {
+				name: 'foo',
+				config: {
+					ci: {
+						lint: {
+							changes: '/src/**/*.{js,jsx,ts,tsx}',
+							command: 'foo',
+							onlyForDependencies: [ 'bar' ],
+						},
+					},
+				},
+			} );
+
+			expect( parsed ).toMatchObject( {
+				jobs: [
+					{
+						type: JobType.Lint,
+						command: 'foo',
+						onlyForDependencies: [ 'bar' ],
+					},
+				],
+			} );
+		} );
+
+		it( 'should validate lint onlyForDependencies is an array of strings', () => {
+			const expectation = () => {
+				parseCIConfig( {
+					name: 'foo',
+					config: {
+						ci: {
+							lint: {
+								changes: '/src/**/*.{js,jsx,ts,tsx}',
+								command: 'foo',
+								onlyForDependencies: 'bar',
+							},
+						},
+					},
+				} );
+			};
+			expect( expectation ).toThrow();
+		} );
+
 		it( 'should parse test config', () => {
 			const parsed = parseCIConfig( {
 				name: 'foo',

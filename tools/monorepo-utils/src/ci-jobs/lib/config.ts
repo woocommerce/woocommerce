@@ -147,6 +147,17 @@ export interface LintJobConfig extends BaseJobConfig {
 	 * The type of the job.
 	 */
 	type: JobType.Lint;
+
+	/**
+	 * A list of dependencies that, when changed, should trigger this lint job.
+	 *
+	 * Unlike test jobs, lint jobs do not run on arbitrary dependency changes by
+	 * default. Listing dependencies here opts the job into the dependency
+	 * cascade for those specific dependencies only — useful when a workspace
+	 * dependency (for example `@woocommerce/eslint-plugin`) can change whether
+	 * the project's source passes linting.
+	 */
+	onlyForDependencies?: string[];
 }
 
 /**
@@ -220,9 +231,27 @@ function parseBaseJobConfig( raw: any ): BaseJobConfig {
  */
 function parseLintJobConfig( raw: any ): LintJobConfig {
 	const baseJob = parseBaseJobConfig( raw );
+
+	if ( raw.onlyForDependencies ) {
+		if ( ! Array.isArray( raw.onlyForDependencies ) ) {
+			throw new ConfigError(
+				'onlyForDependencies configuration must be an array of strings.'
+			);
+		}
+
+		for ( const entry of raw.onlyForDependencies ) {
+			if ( typeof entry !== 'string' ) {
+				throw new ConfigError(
+					'onlyForDependencies configuration must be an array of strings.'
+				);
+			}
+		}
+	}
+
 	return {
 		...baseJob,
 		type: JobType.Lint,
+		onlyForDependencies: raw.onlyForDependencies,
 	};
 }
 

@@ -353,6 +353,22 @@ async function createJobsForProject(
 
 		switch ( jobConfig.type ) {
 			case JobType.Lint: {
+				// Unlike test jobs, lint jobs opt into the dependency cascade
+				// explicitly: they only run for a dependency change when that
+				// dependency is listed in onlyForDependencies. This avoids
+				// fanning every lint job out across the whole dependency graph
+				// while still letting a job re-lint when a dependency that can
+				// affect its result (e.g. a shared ESLint config) changes.
+				if (
+					dependenciesWithChanges.length > 0 &&
+					jobConfig.onlyForDependencies &&
+					jobConfig.onlyForDependencies.some( ( dep ) =>
+						dependenciesWithChanges.includes( dep )
+					)
+				) {
+					projectChanges = true;
+				}
+
 				const created = createLintJob(
 					node.name,
 					node.path,

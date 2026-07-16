@@ -1010,6 +1010,108 @@ describe( 'Job Processing', () => {
 			} );
 		} );
 
+		it( 'should trigger lint job when a listed dependency is changed', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint',
+								events: [],
+								onlyForDependencies: [ 'test-a' ],
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: 'test-a',
+							path: 'test-a',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Lint,
+										changes: [ /test-a.js$/ ],
+										command: 'test-lint-a',
+										events: [],
+									},
+								],
+							},
+							dependencies: [],
+						},
+					],
+				},
+				{
+					'test-a': [ 'test-a.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 2 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				command: 'test-lint',
+			} );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test-a',
+				projectPath: 'test-a',
+				command: 'test-lint-a',
+			} );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should not trigger a dependent lint job without onlyForDependencies', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint',
+								events: [],
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: 'test-a',
+							path: 'test-a',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Lint,
+										changes: [ /test-a.js$/ ],
+										command: 'test-lint-a',
+										events: [],
+									},
+								],
+							},
+							dependencies: [],
+						},
+					],
+				},
+				{
+					'test-a': [ 'test-a.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 1 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test-a',
+				projectPath: 'test-a',
+				command: 'test-lint-a',
+			} );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
 		it( 'should trigger test job for single node and parse test environment config', async () => {
 			const testType = 'unit';
 			jest.mocked( parseTestEnvConfig ).mockResolvedValue( {
