@@ -307,4 +307,45 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		// Cleanup.
 		unset( $GLOBALS['pagenow'] );
 	}
+
+	/**
+	 * @testdox Order previews pass refunded totals to wc_price as negative values.
+	 */
+	public function test_order_preview_passes_refunded_total_to_wc_price_as_negative_value(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$item_id = $order->add_product( $product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'amount'        => 5,
+				'order_id'      => $order->get_id(),
+				'line_items'    => array(
+					$item_id => array(
+						'qty'          => 1,
+						'refund_total' => 5,
+						'refund_tax'   => array(),
+					),
+				),
+				'restock_items' => false,
+			)
+		);
+
+		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
+			unset( $formatted_price, $args, $unformatted_price );
+
+			return 0 > $original_price ? 'localized-negative-price' : $price_html;
+		};
+		add_filter( 'wc_price', $price_filter, 10, 5 );
+
+		$preview_html = WC_Admin_List_Table_Orders::get_order_preview_item_html( $order );
+
+		remove_filter( 'wc_price', $price_filter );
+		$order->delete( true );
+		$product->delete( true );
+
+		$this->assertStringContainsString( "<small class='refunded'>localized-negative-price</small>", $preview_html, 'The wc_price filter should receive a negative preview refund amount.' );
+	}
 }

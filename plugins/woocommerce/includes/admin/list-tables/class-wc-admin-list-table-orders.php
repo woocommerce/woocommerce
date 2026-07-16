@@ -330,7 +330,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 					case 'total':
 						$html .= wc_price( $item->get_total(), $price_args );
 						if ( $refund ) {
-							$html .= "<div><small class='refunded'>-" . wc_price( $refund['total'], $price_args ) . '</small></div><br/>';
+							$html .= "<div><small class='refunded'>" . wc_price( -1 * $refund['total'], $price_args ) . '</small></div><br/>';
 						}
 						break;
 					default:

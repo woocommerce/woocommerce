@@ -174,6 +174,37 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Coupon totals pass discount amounts to wc_price as negative values.
+	 */
+	public function test_wc_cart_totals_coupon_html_passes_negative_amount_to_wc_price(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$coupon  = WC_Helper_Coupon::create_coupon();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
+			unset( $formatted_price, $args, $unformatted_price );
+
+			return 0 > $original_price ? 'localized-negative-price' : $price_html;
+		};
+		add_filter( 'wc_price', $price_filter, 10, 5 );
+
+		ob_start();
+		wc_cart_totals_coupon_html( $coupon );
+		$coupon_html = ob_get_clean();
+
+		remove_filter( 'wc_price', $price_filter );
+		WC()->cart->empty_cart();
+		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+
+		$this->assertStringStartsWith( 'localized-negative-price ', $coupon_html, 'The wc_price filter should receive a negative coupon amount.' );
+	}
+
+	/**
 	 * Test get_cart_url method.
 	 *
 	 * @since 2.5.0
