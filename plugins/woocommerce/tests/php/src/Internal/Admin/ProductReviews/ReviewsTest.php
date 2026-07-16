@@ -109,7 +109,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 
 		$this->assertIsArray( $option );
 		$this->assertArrayHasKey( 'option', $option );
-		$this->assertSame( ReviewsListTable::PER_PAGE_USER_OPTION_KEY, $option['option'] );
+		$this->assertSame( Reviews::PER_PAGE_USER_OPTION_KEY, $option['option'] );
 		$this->assertArrayHasKey( 'default', $option );
 		$this->assertSame( 20, $option['default'] );
 	}
@@ -125,7 +125,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$reviews = wc_get_container()->get( Reviews::class );
 
 		// Saves the sanitized value for the reviews option.
-		$this->assertSame( 55, $reviews->set_reviews_per_page_option( false, ReviewsListTable::PER_PAGE_USER_OPTION_KEY, 55 ) );
+		$this->assertSame( 55, $reviews->set_reviews_per_page_option( false, Reviews::PER_PAGE_USER_OPTION_KEY, 55 ) );
 
 		// Leaves other options untouched (returns the incoming status).
 		$this->assertFalse( $reviews->set_reviews_per_page_option( false, 'some_other_per_page', 55 ) );

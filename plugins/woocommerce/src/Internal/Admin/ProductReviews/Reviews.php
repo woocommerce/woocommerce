@@ -20,6 +20,21 @@ class Reviews {
 	const MENU_SLUG = 'product-reviews';
 
 	/**
+	 * User option key that stores the number of reviews to display per page on the Product Reviews screen.
+	 *
+	 * This is defined here — rather than on {@see ReviewsListTable} — deliberately. `ReviewsListTable` extends the
+	 * admin-only `WP_List_Table` class, which is not loaded outside of admin screen requests (for example during the
+	 * PHPUnit bootstrap). Referencing a `ReviewsListTable` constant from this always-instantiated class' constructor
+	 * would autoload `ReviewsListTable` and fatal with "Class WP_List_Table not found". Keeping the key on this class
+	 * lets the constructor build the `set_screen_option_*` hook name without touching the list table.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @var string
+	 */
+	const PER_PAGE_USER_OPTION_KEY = 'edit_product_reviews_per_page';
+
+	/**
 	 * Reviews page hook name.
 	 *
 	 * @var string|null
@@ -48,7 +63,7 @@ class Reviews {
 		add_filter( 'parent_file', array( $this, 'edit_review_parent_file' ) );
 		add_action( 'admin_notices', array( $this, 'display_notices' ) );
 
-		add_filter( 'set_screen_option_' . ReviewsListTable::PER_PAGE_USER_OPTION_KEY, array( $this, 'set_reviews_per_page_option' ), 10, 3 );
+		add_filter( 'set_screen_option_' . self::PER_PAGE_USER_OPTION_KEY, array( $this, 'set_reviews_per_page_option' ), 10, 3 );
 	}
 
 	/**
@@ -567,7 +582,7 @@ class Reviews {
 	 * Registers the screen options for the Reviews page.
 	 *
 	 * This adds the "Number of reviews per page" control to the Screen Options tab. The value is stored in the
-	 * dedicated {@see ReviewsListTable::PER_PAGE_USER_OPTION_KEY} user option, which {@see ReviewsListTable::get_per_page()}
+	 * dedicated {@see Reviews::PER_PAGE_USER_OPTION_KEY} user option, which {@see ReviewsListTable::get_per_page()}
 	 * reads when preparing the list.
 	 *
 	 * @since 11.1.0
@@ -582,7 +597,7 @@ class Reviews {
 			array(
 				'label'   => __( 'Number of reviews per page:', 'woocommerce' ),
 				'default' => 20,
-				'option'  => ReviewsListTable::PER_PAGE_USER_OPTION_KEY,
+				'option'  => self::PER_PAGE_USER_OPTION_KEY,
 			)
 		);
 	}
@@ -600,7 +615,7 @@ class Reviews {
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function set_reviews_per_page_option( $screen_option, $option, $value ) {
-		return ReviewsListTable::PER_PAGE_USER_OPTION_KEY === $option ? absint( $value ) : $screen_option;
+		return self::PER_PAGE_USER_OPTION_KEY === $option ? absint( $value ) : $screen_option;
 	}
 
 	/**
