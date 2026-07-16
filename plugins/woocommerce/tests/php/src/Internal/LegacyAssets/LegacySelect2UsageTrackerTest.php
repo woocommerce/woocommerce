@@ -259,6 +259,28 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should register frontend analytics independently of the core Tracks opt-in.
+	 */
+	public function test_registers_frontend_analytics_independently_of_core_tracks(): void {
+		add_filter( 'woocommerce_apply_user_tracking', '__return_false' );
+
+		$this->sut->register();
+
+		$this->assertSame(
+			PHP_INT_MAX,
+			has_action( 'wp_print_footer_scripts', array( $this->sut, 'handle_wp_print_footer_scripts' ) ),
+			'Frontend analytics should be registered when core Tracks is disabled.'
+		);
+		$this->assertFalse(
+			has_action( 'admin_print_footer_scripts', array( $this->sut, 'handle_admin_print_footer_scripts' ) ),
+			'Admin tracking should remain disabled when core Tracks is disabled.'
+		);
+
+		remove_action( 'wp_print_footer_scripts', array( $this->sut, 'handle_wp_print_footer_scripts' ), PHP_INT_MAX );
+		remove_filter( 'woocommerce_apply_user_tracking', '__return_false' );
+	}
+
+	/**
 	 * @testdox Should record each detected usage event only once per week.
 	 */
 	public function test_records_each_detected_usage_event_only_once_per_week(): void {
@@ -284,11 +306,11 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 			public int $usage_event_calls = 0;
 
 			/**
-			 * Recorded Tracks events.
+			 * Recorded frontend analytics events.
 			 *
 			 * @var array<int, array{name: string, properties: array<string, string>}>
 			 */
-			public array $recorded_events = array();
+			public array $recorded_frontend_events = array();
 
 			/**
 			 * Get a legacy Select2 usage event for the current script registry.
@@ -305,17 +327,26 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 			}
 
 			/**
-			 * Record a Tracks event.
+			 * Add a storefront event to the WooCommerce Analytics client queue.
 			 *
 			 * @param string                $event_name Event name.
 			 * @param array<string, string> $properties Event properties.
 			 * @return void
 			 */
-			protected function record_event( string $event_name, array $properties ): void {
-				$this->recorded_events[] = array(
+			protected function record_frontend_event( string $event_name, array $properties ): void {
+				$this->recorded_frontend_events[] = array(
 					'name'       => $event_name,
 					'properties' => $properties,
 				);
+			}
+
+			/**
+			 * Make frontend analytics available for this test double.
+			 *
+			 * @return bool
+			 */
+			protected function is_frontend_tracking_available(): bool {
+				return true;
 			}
 		};
 
@@ -342,7 +373,7 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 					'properties' => $event,
 				),
 			),
-			$sut->recorded_events,
+			$sut->recorded_frontend_events,
 			'Repeated detections of the same legacy Select2 usage event should be rate limited.'
 		);
 		$this->assertSame( 2, $sut->usage_event_calls, 'Each detection should scan the script registry before rate limiting the exact usage event.' );
