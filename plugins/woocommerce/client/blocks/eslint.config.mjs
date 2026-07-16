@@ -206,6 +206,13 @@ export default [
 	...woocommerce,
 	...storybook.configs[ 'flat/recommended' ],
 	{
+		/*
+		 * This plugin ships only eslintrc-style configs, whose `plugins` is an
+		 * array of names rather than a map, so `compatible` cannot be spread as a
+		 * flat config. Register the plugin and take its rules instead. Those rules
+		 * call no APIs ESLint 10 removed, so unlike `import` and `react` this one
+		 * needs no @eslint/compat fixup.
+		 */
 		plugins: {
 			'you-dont-need-lodash-underscore': youDontNeedLodashUnderscore,
 		},
