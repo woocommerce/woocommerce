@@ -9,9 +9,10 @@ import { Field, InputControl, SelectControl, Textarea } from '@wordpress/ui';
  * Internal dependencies
  */
 import { warn } from './diagnostics';
-import { sanitizeSettingsHtml } from './html';
+import { toSanitizedHtmlNode } from './html';
 import { NumberSpinControl } from './number-spin-control';
 import type { SettingsUIField, SettingsValue } from './types';
+import { toStringValue } from './values';
 
 // Internal renderer for fields the DataForm controls cannot express yet
 // (disabled state, custom input attributes). The DataForm adapter wraps
@@ -42,9 +43,6 @@ const textInputTypes: TextInputType[] = [
 	'url',
 	'tel',
 ];
-
-const toStringValue = ( value: SettingsValue ) =>
-	value === null || typeof value === 'undefined' ? '' : String( value );
 
 const isTextInputType = ( type: string ): type is TextInputType =>
 	textInputTypes.includes( type as TextInputType );
@@ -86,13 +84,7 @@ const getNumberInputAttributes = (
 };
 
 const getHelp = ( description?: string ) =>
-	description ? (
-		<span
-			dangerouslySetInnerHTML={ {
-				__html: sanitizeSettingsHtml( description ),
-			} }
-		/>
-	) : undefined;
+	description ? toSanitizedHtmlNode( description ) : undefined;
 
 export const NativeSettingsField = ( {
 	field,
