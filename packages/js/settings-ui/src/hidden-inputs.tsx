@@ -8,6 +8,7 @@ import { createElement, Fragment } from '@wordpress/element';
  */
 import { error } from './diagnostics';
 import type { SettingsUIField, SettingsValue } from './types';
+import { isCheckedValue, toStringValue } from './values';
 
 type HiddenInput = {
 	name: string;
@@ -40,10 +41,7 @@ export const getHiddenInputs = (
 		return [
 			{
 				name,
-				value:
-					value === true || value === 'yes' || value === '1'
-						? 'yes'
-						: 'no',
+				value: isCheckedValue( value ) ? 'yes' : 'no',
 			},
 		];
 	}
@@ -58,10 +56,7 @@ export const getHiddenInputs = (
 	return [
 		{
 			name,
-			value:
-				value === null || typeof value === 'undefined'
-					? ''
-					: String( value ),
+			value: toStringValue( value ),
 		},
 	];
 };

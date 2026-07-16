@@ -225,6 +225,11 @@ describe( 'dataform-adapter', () => {
 				true
 			);
 			expect( field.getValue?.( { item: { flag: '1' } } ) ).toBe( true );
+			// The checked vocabulary mirrors wc_string_to_bool().
+			expect( field.getValue?.( { item: { flag: 1 } } ) ).toBe( true );
+			expect( field.getValue?.( { item: { flag: 'true' } } ) ).toBe(
+				true
+			);
 			expect( field.getValue?.( { item: { flag: 'no' } } ) ).toBe(
 				false
 			);

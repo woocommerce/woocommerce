@@ -12,7 +12,7 @@ import { warn } from './diagnostics';
 import { toSanitizedHtmlNode } from './html';
 import { NumberSpinControl } from './number-spin-control';
 import type { SettingsUIField, SettingsValue } from './types';
-import { toStringValue } from './values';
+import { isCheckedValue, toStringValue } from './values';
 
 // Internal renderer for fields the DataForm controls cannot express yet
 // (disabled state, custom input attributes). The DataForm adapter wraps
@@ -97,7 +97,7 @@ export const NativeSettingsField = ( {
 				className="wc-settings-ui__control"
 				label={ field.label }
 				help={ getHelp( field.description ) }
-				checked={ value === true || value === 'yes' || value === '1' }
+				checked={ isCheckedValue( value ) }
 				disabled={ field.disabled }
 				onChange={ onChange }
 				__nextHasNoMarginBottom
