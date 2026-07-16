@@ -415,6 +415,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 			'HTTP/1.1 200 OK',
 			'Content-Disposition: attachment; filename="report.pdf"',
 		);
+		$this->setExpectedIncorrectUsage( 'WC_Download_Handler::resolve_filename_from_response_headers' );
 
 		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, null, true );
 
@@ -425,9 +426,29 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	 * @testdox resolve_filename_from_response_headers() should treat a non-scalar filename as empty instead of throwing a TypeError.
 	 */
 	public function test_resolve_filename_tolerates_non_scalar_filename(): void {
-		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( array( 'HTTP/1.1 200 OK' ), array( 'not-a-filename' ) );
+		$incorrect_usage = array();
+		$listener        = function ( $function_name, $message, $version ) use ( &$incorrect_usage ) {
+			$incorrect_usage = array(
+				'function_name' => $function_name,
+				'message'       => $message,
+				'version'       => $version,
+			);
+		};
+		add_action( 'doing_it_wrong_run', $listener, 10, 3 );
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Download_Handler::resolve_filename_from_response_headers' );
+
+		try {
+			$resolved = WC_Download_Handler::resolve_filename_from_response_headers( array( 'HTTP/1.1 200 OK' ), array( 'not-a-filename' ) );
+		} finally {
+			remove_action( 'doing_it_wrong_run', $listener, 10 );
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
 
 		$this->assertSame( '', $resolved, 'A non-scalar filename with no usable response headers should resolve to an empty string.' );
+		$this->assertSame( 'WC_Download_Handler::resolve_filename_from_response_headers', $incorrect_usage['function_name'] );
+		$this->assertStringContainsString( 'woocommerce_file_download_filename filter should return a string; array returned.', $incorrect_usage['message'] );
+		$this->assertSame( '11.1.0', $incorrect_usage['version'] );
 	}
 
 	/**
@@ -449,6 +470,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 				return 'Seasons-Catalog';
 			}
 		};
+		$this->setExpectedIncorrectUsage( 'WC_Download_Handler::resolve_filename_from_response_headers' );
 
 		$resolved = WC_Download_Handler::resolve_filename_from_response_headers( $headers, $filename, true );
 
@@ -479,6 +501,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_file_download_filename', $broken_filename_filter );
 		add_filter( 'upload_mimes', $header_stage_marker );
+		$this->setExpectedIncorrectUsage( 'WC_Download_Handler::resolve_filename_from_response_headers' );
 
 		$ob_level = ob_get_level();
 

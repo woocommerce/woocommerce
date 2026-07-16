@@ -563,7 +563,8 @@ class WC_Download_Handler {
 	 *                                 `woocommerce_file_download_filename` filter callback may produce any type.
 	 *                                 Anything renderable as a string (scalars, and objects declaring
 	 *                                 `__toString()`) is rendered, matching what string concatenation used to do
-	 *                                 with it; anything else (`null`, arrays) becomes '' instead of fataling.
+	 *                                 with it; anything else (`null`, arrays) becomes '' instead of fataling. A
+	 *                                 non-string value triggers an incorrect usage notice identifying its type.
 	 * @param bool  $preserve_filename When true, `$filename` is kept (it was customized deliberately, e.g. via the
 	 *                                 `woocommerce_file_download_filename` filter) and only completed with an
 	 *                                 extension derived from the response headers, instead of being replaced by
@@ -572,11 +573,24 @@ class WC_Download_Handler {
 	 * @return string
 	 */
 	public static function resolve_filename_from_response_headers( array $response_headers, $filename, bool $preserve_filename = false ): string {
-		// `is_scalar()` is false for objects, so `__toString()` implementations are admitted separately.
-		// `instanceof Stringable` cannot be used here: it is PHP 8.0+, and WooCommerce supports PHP 7.4.
-		$filename = is_scalar( $filename ) || ( is_object( $filename ) && method_exists( $filename, '__toString' ) )
-			? (string) $filename
-			: '';
+		if ( ! is_string( $filename ) ) {
+			$original_type = gettype( $filename );
+
+			// `is_scalar()` is false for objects, so callable `__toString()` implementations are admitted separately.
+			// `instanceof Stringable` cannot be used here: it is PHP 8.0+, and WooCommerce supports PHP 7.4.
+			$filename = is_scalar( $filename ) || ( is_object( $filename ) && is_callable( array( $filename, '__toString' ) ) )
+				? (string) $filename
+				: '';
+
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					'The woocommerce_file_download_filename filter should return a string; %s returned.',
+					$original_type
+				),
+				'11.1.0'
+			);
+		}
 
 		// An empty filename carries nothing to preserve, so let the remote-announced filename win.
 		$preserve_filename = $preserve_filename && '' !== $filename;
