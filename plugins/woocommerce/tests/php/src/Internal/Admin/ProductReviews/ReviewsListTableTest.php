@@ -1904,17 +1904,22 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			return 45;
 		};
 
-		// The dedicated `edit_product_reviews_per_page` filter is honored.
 		add_filter( 'edit_product_reviews_per_page', $dedicated );
-		$this->assertSame( 30, $method->invoke( $list_table ) );
-
-		// The legacy `edit_comments_per_page` filter is still applied for backward compatibility, and keeps
-		// precedence over the dedicated filter (it is applied last).
 		add_filter( 'edit_comments_per_page', $legacy );
-		$this->assertSame( 45, $method->invoke( $list_table ) );
 
-		remove_filter( 'edit_product_reviews_per_page', $dedicated );
-		remove_filter( 'edit_comments_per_page', $legacy );
+		try {
+			// The legacy `edit_comments_per_page` filter is still applied for backward compatibility, and keeps
+			// precedence over the dedicated filter (it is applied last).
+			$this->assertSame( 45, $method->invoke( $list_table ) );
+
+			// With only the dedicated `edit_product_reviews_per_page` filter in place, it is honored.
+			remove_filter( 'edit_comments_per_page', $legacy );
+			$this->assertSame( 30, $method->invoke( $list_table ) );
+		} finally {
+			// Remove the filters in `finally` so a failed assertion cannot leak them into subsequent tests.
+			remove_filter( 'edit_product_reviews_per_page', $dedicated );
+			remove_filter( 'edit_comments_per_page', $legacy );
+		}
 	}
 
 	/**

@@ -93,25 +93,37 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `add_screen_options` registers the "per page" screen option bound to the dedicated reviews user option.
+	 * @testdox `load_reviews_screen` registers the "per page" screen option bound to the dedicated reviews user option.
 	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::load_reviews_screen()
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::add_screen_options()
 	 *
 	 * @return void
 	 */
-	public function test_add_screen_options_registers_per_page_option(): void {
-		set_current_screen( 'product_page_product-reviews' );
+	public function test_load_reviews_screen_registers_per_page_option(): void {
+		global $current_screen;
 
-		$reviews = wc_get_container()->get( Reviews::class );
-		$reviews->add_screen_options();
+		$previous_screen = $current_screen;
 
-		$option = get_current_screen()->get_option( 'per_page' );
+		try {
+			set_current_screen( 'product_page_product-reviews' );
 
-		$this->assertIsArray( $option );
-		$this->assertArrayHasKey( 'option', $option );
-		$this->assertSame( Reviews::PER_PAGE_USER_OPTION_KEY, $option['option'] );
-		$this->assertArrayHasKey( 'default', $option );
-		$this->assertSame( 20, $option['default'] );
+			$reviews = wc_get_container()->get( Reviews::class );
+
+			// Exercise the production wiring: registration must happen through `load_reviews_screen()`, so that
+			// dropping the `add_screen_options()` call from it would fail this test.
+			$reviews->load_reviews_screen();
+
+			$option = get_current_screen()->get_option( 'per_page' );
+
+			$this->assertIsArray( $option );
+			$this->assertArrayHasKey( 'option', $option );
+			$this->assertSame( Reviews::PER_PAGE_USER_OPTION_KEY, $option['option'] );
+			$this->assertArrayHasKey( 'default', $option );
+			$this->assertSame( 20, $option['default'] );
+		} finally {
+			$current_screen = $previous_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
 	}
 
 	/**
