@@ -9,7 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
 const metaKey = '_wcpay_mode';
 
 const Payments = () => {
-	const { orders = [] } = useSelect( ( select ) => {
+	const { orders } = useSelect( ( select ) => {
 		const { getOrders } = select( ordersStore );
 
 		const query = {
