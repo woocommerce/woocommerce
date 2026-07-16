@@ -51088,12 +51088,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCartContents.php
 
 		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartContents.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartFooterBlock\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
