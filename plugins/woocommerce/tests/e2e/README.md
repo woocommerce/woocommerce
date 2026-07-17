@@ -68,6 +68,25 @@ run `pnpm playwright test --help`
 > default environment, but this may change. You can always find the setup by checking the `package.json` scripts section and the `playwright.config.js`.
 >
 
+## Fast E2E environment (run-env)
+
+`pnpm --filter=@woocommerce/plugin-woocommerce env:e2e` brings the Core E2E
+environment up through `tests/e2e/bin/run-env.mjs`: it allocates a free
+per-worktree port, decides whether to reuse or rebuild from a staleness hash,
+and **auto-resets the database and uploads to the seeded baseline on every up**.
+
+- Fast re-runs reuse the running containers and restore a DB+uploads snapshot
+  instead of re-running the ~10-step provisioning.
+- `--rebuild` forces a full re-provision and refreshes the baseline snapshot.
+- The chosen port is written to `tests/e2e/.env-state/runner.env` and loaded by
+  Playwright automatically, so `pnpm playwright test …` targets the right site.
+- Only the DB and `wp-content/uploads` are reset; other filesystem changes are not.
+- For interactive development (no auto-reset), use `pnpm env:dev` instead.
+- `pnpm wp-env:e2e …` (and `env:e2e:restart` / `env:e2e:destroy`) are raw wp-env
+  escape hatches that skip all of the above. Running one leaves the recorded
+  state stale, but the next `env:e2e` self-heals: it detects the divergence via
+  the missing sentinel and rebuilds automatically.
+
 ## Test environment
 
 The e2e test environment configuration can be found in the `.wp-env.e2e.json` file in the `plugins/woocommerce`

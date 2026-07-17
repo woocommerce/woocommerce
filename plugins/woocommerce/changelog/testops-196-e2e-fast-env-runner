@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a fast, per-worktree, auto-resetting E2E environment runner (tests/e2e/bin/run-env.mjs) wired to env:e2e:start.

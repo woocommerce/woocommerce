@@ -36,7 +36,7 @@
 		"env:e2e": "pnpm env:e2e:start",
 		"env:e2e:destroy": "pnpm wp-env:e2e destroy",
 		"env:e2e:restart": "pnpm wp-env:e2e destroy --force && pnpm wp-env:e2e start --update",
-		"env:e2e:start": "pnpm wp-env:e2e start --update",
+		"env:e2e:start": "node ./tests/e2e/bin/run-env.mjs",
 		"env:e2e:stop": "pnpm wp-env:e2e stop",
 		"env:performance-init": "./tests/performance/bin/init-environment.sh",
 		"env:perf": "pnpm env:e2e:start && pnpm env:performance-init",
