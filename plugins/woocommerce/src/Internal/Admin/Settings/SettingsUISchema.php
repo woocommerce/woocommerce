@@ -151,15 +151,27 @@ class SettingsUISchema {
 			return null;
 		}
 
-		$canonical_type = self::normalize_type( $type );
-		$field          = array(
+		$raw_value      = self::get_raw_field_value( $setting );
+		$canonical_type = self::normalize_type( $type, $setting, $raw_value );
+		$save_schema    = self::get_save_schema( $setting, $default_save_adapter );
+
+		if ( 'form_post' === ( $save_schema['adapter'] ?? null ) ) {
+			$save_schema['initialValue'] = self::get_initial_form_value( $raw_value, $canonical_type, $id );
+		}
+
+		$field = array(
 			'id'          => $id,
 			'label'       => self::get_field_label( $setting, $id, $type ),
 			'type'        => $canonical_type,
 			'description' => self::get_field_description( $setting, $type ),
-			'value'       => self::get_field_value( $setting, $canonical_type ),
-			'save'        => self::get_save_schema( $setting, $default_save_adapter ),
+			'value'       => self::normalize_value( $raw_value, $canonical_type, $id ),
+			'save'        => $save_schema,
 		);
+
+		$validation = self::get_validation_schema( $setting, $canonical_type );
+		if ( ! empty( $validation ) ) {
+			$field['validation'] = $validation;
+		}
 
 		foreach ( array( 'component', 'placeholder', 'disabled' ) as $key ) {
 			if ( array_key_exists( $key, $setting ) ) {
@@ -242,35 +254,46 @@ class SettingsUISchema {
 	 * Normalize legacy field type.
 	 *
 	 * @param string $type Legacy field type.
+	 * @param array  $setting Legacy field definition.
+	 * @param mixed  $value Raw field value.
 	 * @return string
 	 */
-	private static function normalize_type( string $type ): string {
+	private static function normalize_type( string $type, array $setting, $value ): string {
 		$type_map = array(
 			'multiselect'            => 'array',
 			'multi_select_countries' => 'array',
 			'single_select_country'  => 'select',
 			'single_select_page'     => 'select',
 		);
+		$type     = $type_map[ $type ] ?? $type;
 
-		return $type_map[ $type ] ?? $type;
+		if ( 'number' !== $type ) {
+			return $type;
+		}
+
+		$attributes = isset( $setting['custom_attributes'] ) && is_array( $setting['custom_attributes'] )
+			? $setting['custom_attributes']
+			: array();
+		$step       = self::to_finite_number( $attributes['step'] ?? null );
+		$min        = self::to_finite_number( $attributes['min'] ?? null );
+		$step_base  = null !== $min ? $min : self::to_finite_number( $value );
+
+		return 1 === $step && ( null === $step_base || is_int( $step_base ) ) ? 'integer' : $type;
 	}
 
 	/**
-	 * Get a field value.
+	 * Get the stored value before canonical normalization.
 	 *
-	 * @param array  $setting Legacy field definition.
-	 * @param string $type Canonical field type.
+	 * @param array $setting Legacy field definition.
 	 * @return mixed
 	 */
-	private static function get_field_value( array $setting, string $type ) {
+	private static function get_raw_field_value( array $setting ) {
 		if ( array_key_exists( 'value', $setting ) ) {
-			return self::normalize_value( $setting['value'], $type );
+			return $setting['value'];
 		}
 
 		$default = $setting['default'] ?? '';
-		$value   = \WC_Admin_Settings::get_option( (string) $setting['id'], $default );
-
-		return self::normalize_value( $value, $type );
+		return \WC_Admin_Settings::get_option( (string) $setting['id'], $default );
 	}
 
 	/**
@@ -278,17 +301,146 @@ class SettingsUISchema {
 	 *
 	 * @param mixed  $value Field value.
 	 * @param string $type Canonical type.
+	 * @param string $field_id Field id for diagnostics.
 	 * @return mixed
+	 * @throws \UnexpectedValueException When a built-in value cannot be normalized safely.
 	 */
-	private static function normalize_value( $value, string $type ) {
+	private static function normalize_value( $value, string $type, string $field_id ) {
 		switch ( $type ) {
 			case 'array':
-				return is_array( $value ) ? array_values( $value ) : array();
+				if ( ! is_array( $value ) ) {
+					return array();
+				}
+
+				return array_map(
+					static function ( $item ) use ( $field_id ): string {
+						if ( ! is_scalar( $item ) && null !== $item ) {
+							throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" contains a non-scalar array value.', esc_html( $field_id ) ) );
+						}
+
+						return (string) $item;
+					},
+					array_values( $value )
+				);
 			case 'checkbox':
 				return function_exists( 'wc_string_to_bool' ) ? wc_string_to_bool( $value ) : (bool) $value;
+			case 'integer':
+			case 'number':
+				return self::normalize_numeric_value( $value, $type, $field_id );
+			case 'datetime-local':
+				return self::normalize_datetime_value( $value, $field_id );
 			default:
 				return $value;
 		}
+	}
+
+	/**
+	 * Normalize a numeric value.
+	 *
+	 * @param mixed  $value Field value.
+	 * @param string $type Canonical number type.
+	 * @param string $field_id Field id for diagnostics.
+	 * @return int|float|null
+	 * @throws \UnexpectedValueException When the value is not a finite number of the requested type.
+	 */
+	private static function normalize_numeric_value( $value, string $type, string $field_id ) {
+		if ( null === $value || ( is_string( $value ) && '' === trim( $value ) ) ) {
+			return null;
+		}
+
+		$number = self::to_finite_number( $value );
+		if ( null === $number || ( 'integer' === $type && ! is_int( $number ) ) ) {
+			throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" does not contain a valid %s value.', esc_html( $field_id ), esc_html( $type ) ) );
+		}
+
+		return $number;
+	}
+
+	/**
+	 * Normalize a local datetime value to an ISO value.
+	 *
+	 * @param mixed  $value Field value.
+	 * @param string $field_id Field id for diagnostics.
+	 * @return string|null
+	 * @throws \UnexpectedValueException When the value is not a supported local datetime.
+	 */
+	private static function normalize_datetime_value( $value, string $field_id ): ?string {
+		if ( null === $value || '' === $value ) {
+			return null;
+		}
+
+		if ( ! is_string( $value ) ) {
+			throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" does not contain a valid local datetime.', esc_html( $field_id ) ) );
+		}
+
+		foreach ( array( 'Y-m-d\\TH:i:s', 'Y-m-d\\TH:i' ) as $format ) {
+			$date   = \DateTimeImmutable::createFromFormat( '!' . $format, $value, wp_timezone() );
+			$errors = \DateTimeImmutable::getLastErrors();
+			if ( $date && ( false === $errors || ( 0 === $errors['warning_count'] && 0 === $errors['error_count'] ) ) && $date->format( $format ) === $value ) {
+				return $date->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d\\TH:i:sP' );
+			}
+		}
+
+		throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" does not contain a valid local datetime.', esc_html( $field_id ) ) );
+	}
+
+	/**
+	 * Get the original value used when an unchanged field is submitted.
+	 *
+	 * @param mixed  $value Raw field value.
+	 * @param string $type Canonical type.
+	 * @param string $field_id Field id for diagnostics.
+	 * @return string|string[]
+	 */
+	private static function get_initial_form_value( $value, string $type, string $field_id ) {
+		if ( 'array' === $type ) {
+			$normalized = self::normalize_value( $value, $type, $field_id );
+			return is_array( $normalized ) ? $normalized : array();
+		}
+
+		return is_scalar( $value ) ? (string) $value : '';
+	}
+
+	/**
+	 * Get supported validation metadata from a legacy field.
+	 *
+	 * @param array  $setting Legacy field definition.
+	 * @param string $type Canonical field type.
+	 * @return array<string, int|float>
+	 */
+	private static function get_validation_schema( array $setting, string $type ): array {
+		if ( ! in_array( $type, array( 'integer', 'number' ), true ) || ! isset( $setting['custom_attributes'] ) || ! is_array( $setting['custom_attributes'] ) ) {
+			return array();
+		}
+
+		$validation = array();
+		foreach ( array( 'min', 'max' ) as $rule ) {
+			$value = self::to_finite_number( $setting['custom_attributes'][ $rule ] ?? null );
+			if ( null !== $value ) {
+				$validation[ $rule ] = $value;
+			}
+		}
+
+		return $validation;
+	}
+
+	/**
+	 * Convert a numeric value to a finite integer or float.
+	 *
+	 * @param mixed $value Candidate value.
+	 * @return int|float|null
+	 */
+	private static function to_finite_number( $value ) {
+		if ( ! is_int( $value ) && ! is_float( $value ) && ! ( is_string( $value ) && is_numeric( $value ) ) ) {
+			return null;
+		}
+
+		$number = (float) $value;
+		if ( ! is_finite( $number ) ) {
+			return null;
+		}
+
+		return floor( $number ) === $number && $number <= PHP_INT_MAX && $number >= PHP_INT_MIN ? (int) $number : $number;
 	}
 
 	/**
@@ -392,6 +544,201 @@ class SettingsUISchema {
 		}
 
 		return $attributes;
+	}
+
+	/**
+	 * Assert that a schema is safe to pass to the Settings UI.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $schema Canonical Settings UI schema.
+	 * @throws \UnexpectedValueException When the schema violates the canonical contract.
+	 */
+	public static function assert_valid( array $schema ): void {
+		if ( empty( $schema['id'] ) || ! is_string( $schema['id'] ) ) {
+			throw new \UnexpectedValueException( 'The Settings UI schema must have a non-empty string id.' );
+		}
+
+		if ( ! isset( $schema['groups'] ) || ! is_array( $schema['groups'] ) ) {
+			throw new \UnexpectedValueException( sprintf( 'Settings UI schema "%s" must contain a groups array.', esc_html( $schema['id'] ) ) );
+		}
+
+		$field_ids = array();
+		foreach ( $schema['groups'] as $group_key => $group ) {
+			if ( ! is_array( $group ) || ! isset( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
+				throw new \UnexpectedValueException( sprintf( 'Settings UI group "%s" must contain a fields array.', esc_html( (string) $group_key ) ) );
+			}
+
+			foreach ( $group['fields'] as $field ) {
+				self::assert_valid_field( $field, $field_ids );
+			}
+		}
+	}
+
+	/**
+	 * Assert that a field follows the canonical Settings UI contract.
+	 *
+	 * @param mixed    $field Field schema.
+	 * @param string[] $field_ids Previously validated field ids.
+	 * @throws \UnexpectedValueException When the field is invalid.
+	 */
+	private static function assert_valid_field( $field, array &$field_ids ): void {
+		if ( ! is_array( $field ) || empty( $field['id'] ) || ! is_string( $field['id'] ) ) {
+			throw new \UnexpectedValueException( 'Every Settings UI field must have a non-empty string id.' );
+		}
+
+		$field_id = $field['id'];
+		if ( in_array( $field_id, $field_ids, true ) ) {
+			throw new \UnexpectedValueException( sprintf( 'Settings UI field id "%s" is duplicated.', esc_html( $field_id ) ) );
+		}
+		$field_ids[] = $field_id;
+
+		if ( ! isset( $field['label'] ) || ! is_string( $field['label'] ) || empty( $field['type'] ) || ! is_string( $field['type'] ) ) {
+			throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" must have a string label and non-empty string type.', esc_html( $field_id ) ) );
+		}
+
+		$requires_value = in_array( $field['type'], array( 'checkbox', 'array', 'number', 'integer', 'datetime-local' ), true );
+		if ( $requires_value && ! array_key_exists( 'value', $field ) ) {
+			throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" must provide a canonical value.', esc_html( $field_id ) ) );
+		}
+
+		if ( array_key_exists( 'value', $field ) ) {
+			self::assert_valid_field_value( $field_id, $field['type'], $field['value'] );
+		}
+
+		if ( isset( $field['options'] ) ) {
+			self::assert_valid_options( $field_id, $field['options'] );
+		}
+
+		if ( isset( $field['validation'] ) ) {
+			self::assert_valid_validation( $field_id, $field['validation'] );
+		}
+
+		$initial_value = $field['save']['initialValue'] ?? null;
+		if ( null !== $initial_value && ! is_string( $initial_value ) && ! self::is_string_list( $initial_value ) ) {
+			throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" has an invalid form POST initial value.', esc_html( $field_id ) ) );
+		}
+	}
+
+	/**
+	 * Assert that a field value uses the canonical type.
+	 *
+	 * @param string $field_id Field id.
+	 * @param string $type Field type.
+	 * @param mixed  $value Field value.
+	 * @throws \UnexpectedValueException When the value is invalid.
+	 */
+	private static function assert_valid_field_value( string $field_id, string $type, $value ): void {
+		$is_valid = is_string( $value ) || is_int( $value ) || is_bool( $value ) || null === $value || self::is_finite_float( $value ) || self::is_string_list( $value );
+
+		switch ( $type ) {
+			case 'checkbox':
+				$is_valid = is_bool( $value );
+				break;
+			case 'array':
+				$is_valid = self::is_string_list( $value );
+				break;
+			case 'integer':
+				$is_valid = is_int( $value ) || null === $value;
+				break;
+			case 'number':
+				$is_valid = is_int( $value ) || self::is_finite_float( $value ) || null === $value;
+				break;
+			case 'datetime-local':
+				$is_valid = null === $value || self::is_iso_datetime( $value );
+				break;
+		}
+
+		if ( ! $is_valid ) {
+			throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" has a noncanonical value for type "%s".', esc_html( $field_id ), esc_html( $type ) ) );
+		}
+	}
+
+	/**
+	 * Assert that field options are string-valued label/value records.
+	 *
+	 * @param string $field_id Field id.
+	 * @param mixed  $options Field options.
+	 * @throws \UnexpectedValueException When options are invalid.
+	 */
+	private static function assert_valid_options( string $field_id, $options ): void {
+		if ( ! is_array( $options ) ) {
+			throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" options must be an array.', esc_html( $field_id ) ) );
+		}
+
+		foreach ( $options as $option ) {
+			if ( ! is_array( $option ) || ! isset( $option['label'], $option['value'] ) || ! is_string( $option['label'] ) || ! is_string( $option['value'] ) ) {
+				throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" options must have string labels and values.', esc_html( $field_id ) ) );
+			}
+		}
+	}
+
+	/**
+	 * Assert that supported validation rules are finite numbers.
+	 *
+	 * @param string $field_id Field id.
+	 * @param mixed  $validation Validation metadata.
+	 * @throws \UnexpectedValueException When validation metadata is invalid.
+	 */
+	private static function assert_valid_validation( string $field_id, $validation ): void {
+		if ( ! is_array( $validation ) ) {
+			throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" validation must be an array.', esc_html( $field_id ) ) );
+		}
+
+		foreach ( array( 'min', 'max' ) as $rule ) {
+			if ( isset( $validation[ $rule ] ) && ! is_int( $validation[ $rule ] ) && ! self::is_finite_float( $validation[ $rule ] ) ) {
+				throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" validation rule "%s" must be a finite number.', esc_html( $field_id ), esc_html( $rule ) ) );
+			}
+		}
+	}
+
+	/**
+	 * Whether a value is a list of strings.
+	 *
+	 * @param mixed $value Candidate value.
+	 * @return bool
+	 */
+	private static function is_string_list( $value ): bool {
+		if ( ! is_array( $value ) || ( ! empty( $value ) && array_keys( $value ) !== range( 0, count( $value ) - 1 ) ) ) {
+			return false;
+		}
+
+		foreach ( $value as $item ) {
+			if ( ! is_string( $item ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether a value is a finite float.
+	 *
+	 * @param mixed $value Candidate value.
+	 * @return bool
+	 */
+	private static function is_finite_float( $value ): bool {
+		return is_float( $value ) && is_finite( $value );
+	}
+
+	/**
+	 * Whether a value is an ISO datetime with an explicit timezone.
+	 *
+	 * @param mixed $value Candidate value.
+	 * @return bool
+	 */
+	private static function is_iso_datetime( $value ): bool {
+		if ( ! is_string( $value ) || ! preg_match( '/T.+(?:Z|[+-]\\d{2}:\\d{2})$/', $value ) ) {
+			return false;
+		}
+
+		try {
+			new \DateTimeImmutable( $value );
+			return true;
+		} catch ( \Exception $error ) {
+			return false;
+		}
 	}
 
 	/**

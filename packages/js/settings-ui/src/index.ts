@@ -13,6 +13,7 @@ export type {
 	SettingsEditControlProps,
 	SettingsFieldValidity,
 	SettingsUIField,
+	SettingsUIFieldValidation,
 	SettingsUIGroup,
 	SettingsUIGroupAction,
 	SettingsUIOption,

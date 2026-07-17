@@ -259,8 +259,9 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			array(
-				'adapter' => 'form_post',
-				'name'    => 'woocommerce_test[nested]',
+				'adapter'      => 'form_post',
+				'name'         => 'woocommerce_test[nested]',
+				'initialValue' => '',
 			),
 			$schema['groups']['default']['fields'][0]['save']
 		);
@@ -395,5 +396,255 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			$field['customAttributes']
 		);
 		$this->assertSame( 'Option A', $field['options'][0]['label'] );
+	}
+
+	/**
+	 * @testdox It emits canonical numeric values, integer types, and numeric validation.
+	 */
+	public function test_from_legacy_settings_normalizes_numeric_fields(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'test',
+			'',
+			'Test settings',
+			array(
+				array(
+					'id'                => 'woocommerce_test_integer',
+					'type'              => 'number',
+					'title'             => 'Integer field',
+					'value'             => '02',
+					'custom_attributes' => array(
+						'max'  => '10',
+						'step' => '1',
+					),
+				),
+				array(
+					'id'                => 'woocommerce_test_decimal',
+					'type'              => 'number',
+					'title'             => 'Decimal field',
+					'value'             => '2.5',
+					'custom_attributes' => array(
+						'min'  => '0.5',
+						'max'  => 5,
+						'step' => '0.5',
+					),
+				),
+				array(
+					'id'                => 'woocommerce_test_fractional_base',
+					'type'              => 'number',
+					'title'             => 'Fractional base field',
+					'value'             => '1.5',
+					'custom_attributes' => array( 'step' => '1' ),
+				),
+			)
+		);
+
+		$integer         = $schema['groups']['default']['fields'][0];
+		$decimal         = $schema['groups']['default']['fields'][1];
+		$fractional_base = $schema['groups']['default']['fields'][2];
+
+		$this->assertSame( 'integer', $integer['type'] );
+		$this->assertSame( 2, $integer['value'] );
+		$this->assertSame( array( 'max' => 10 ), $integer['validation'] );
+		$this->assertSame( '02', $integer['save']['initialValue'] );
+		$this->assertSame( 'number', $decimal['type'] );
+		$this->assertSame( 2.5, $decimal['value'] );
+		$this->assertSame(
+			array(
+				'min' => 0.5,
+				'max' => 5,
+			),
+			$decimal['validation']
+		);
+		$this->assertSame( '2.5', $decimal['save']['initialValue'] );
+		$this->assertSame( 'number', $fractional_base['type'] );
+		$this->assertSame( 1.5, $fractional_base['value'] );
+	}
+
+	/**
+	 * @testdox It represents empty numeric settings as null.
+	 */
+	public function test_from_legacy_settings_normalizes_empty_numeric_values(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'test',
+			'',
+			'Test settings',
+			array(
+				array(
+					'id'    => 'woocommerce_test_number',
+					'type'  => 'number',
+					'title' => 'Number field',
+					'value' => '',
+				),
+			)
+		);
+
+		$field = $schema['groups']['default']['fields'][0];
+
+		$this->assertNull( $field['value'] );
+		$this->assertSame( '', $field['save']['initialValue'] );
+	}
+
+	/**
+	 * @testdox It rejects invalid numeric settings.
+	 */
+	public function test_from_legacy_settings_rejects_invalid_numeric_values(): void {
+		$this->expectException( \UnexpectedValueException::class );
+		$this->expectExceptionMessage( 'woocommerce_test_number' );
+
+		SettingsUISchema::from_legacy_settings(
+			'test',
+			'',
+			'Test settings',
+			array(
+				array(
+					'id'    => 'woocommerce_test_number',
+					'type'  => 'number',
+					'title' => 'Number field',
+					'value' => 'not-a-number',
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox It converts local datetimes to ISO while retaining the original form value.
+	 */
+	public function test_from_legacy_settings_normalizes_local_datetime_values(): void {
+		$original_timezone = get_option( 'timezone_string' );
+		update_option( 'timezone_string', 'America/New_York' );
+
+		try {
+			$schema = SettingsUISchema::from_legacy_settings(
+				'test',
+				'',
+				'Test settings',
+				array(
+					array(
+						'id'    => 'woocommerce_test_datetime',
+						'type'  => 'datetime-local',
+						'title' => 'Datetime field',
+						'value' => '2026-07-17T13:30:45',
+					),
+				)
+			);
+		} finally {
+			update_option( 'timezone_string', $original_timezone );
+		}
+
+		$field = $schema['groups']['default']['fields'][0];
+
+		$this->assertSame( '2026-07-17T17:30:45+00:00', $field['value'] );
+		$this->assertSame( '2026-07-17T13:30:45', $field['save']['initialValue'] );
+	}
+
+	/**
+	 * @testdox It rejects invalid local datetime settings.
+	 */
+	public function test_from_legacy_settings_rejects_invalid_datetime_values(): void {
+		$this->expectException( \UnexpectedValueException::class );
+		$this->expectExceptionMessage( 'woocommerce_test_datetime' );
+
+		SettingsUISchema::from_legacy_settings(
+			'test',
+			'',
+			'Test settings',
+			array(
+				array(
+					'id'    => 'woocommerce_test_datetime',
+					'type'  => 'datetime-local',
+					'title' => 'Datetime field',
+					'value' => 'not-a-date',
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox It normalizes array members and their original form values to strings.
+	 */
+	public function test_from_legacy_settings_normalizes_array_values(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'test',
+			'',
+			'Test settings',
+			array(
+				array(
+					'id'    => 'woocommerce_test_array',
+					'type'  => 'multiselect',
+					'title' => 'Array field',
+					'value' => array( 'one', 2 ),
+				),
+			)
+		);
+
+		$field = $schema['groups']['default']['fields'][0];
+
+		$this->assertSame( array( 'one', '2' ), $field['value'] );
+		$this->assertSame( array( 'one', '2' ), $field['save']['initialValue'] );
+	}
+
+	/**
+	 * @testdox It rejects duplicate field IDs in canonical schemas.
+	 */
+	public function test_assert_valid_rejects_duplicate_field_ids(): void {
+		$this->expectException( \UnexpectedValueException::class );
+		$this->expectExceptionMessage( 'duplicate' );
+
+		SettingsUISchema::assert_valid(
+			array(
+				'id'     => 'test',
+				'groups' => array(
+					'first'  => array(
+						'id'     => 'first',
+						'fields' => array(
+							array(
+								'id'    => 'duplicate',
+								'label' => 'First',
+								'type'  => 'text',
+								'value' => 'one',
+							),
+						),
+					),
+					'second' => array(
+						'id'     => 'second',
+						'fields' => array(
+							array(
+								'id'    => 'duplicate',
+								'label' => 'Second',
+								'type'  => 'text',
+								'value' => 'two',
+							),
+						),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox It rejects noncanonical built-in field values.
+	 */
+	public function test_assert_valid_rejects_noncanonical_builtin_values(): void {
+		$this->expectException( \UnexpectedValueException::class );
+		$this->expectExceptionMessage( 'count' );
+
+		SettingsUISchema::assert_valid(
+			array(
+				'id'     => 'test',
+				'groups' => array(
+					'general' => array(
+						'id'     => 'general',
+						'fields' => array(
+							array(
+								'id'    => 'count',
+								'label' => 'Count',
+								'type'  => 'integer',
+								'value' => '2',
+							),
+						),
+					),
+				),
+			)
+		);
 	}
 }

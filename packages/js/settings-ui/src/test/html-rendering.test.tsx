@@ -19,7 +19,7 @@ jest.mock( '@wordpress/admin-ui', () => ( {
 /**
  * Internal dependencies
  */
-import { SettingsUIPage } from '../settings-ui-page';
+import { SettingsUIErrorBoundary, SettingsUIPage } from '../settings-ui-page';
 import { __resetRegistry, registerSettingsExtension } from '../registry';
 import { useSettingsUIContext } from '../settings-ui-context';
 import type { SettingsFieldContext, SettingsUISchema } from '../types';
@@ -91,6 +91,36 @@ const expectUnsafeMarkupRemoved = ( container: HTMLElement ) => {
 describe( 'settings HTML rendering', () => {
 	afterEach( () => {
 		__resetRegistry();
+		jest.restoreAllMocks();
+	} );
+
+	it( 'contains render errors and offers to reload Settings UI', () => {
+		const consoleError = jest
+			.spyOn( console, 'error' )
+			.mockImplementation( () => {} );
+		const BrokenSettingsPage = () => {
+			throw new Error( 'Render failed' );
+		};
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<BrokenSettingsPage />
+			</SettingsUIErrorBoundary>
+		);
+
+		expect( container.textContent ).toContain(
+			'This settings page could not be displayed.'
+		);
+		expect( container.textContent ).not.toContain( 'classic' );
+		expect(
+			container.querySelector< HTMLAnchorElement >( 'a' )?.href
+		).toBe( window.location.href );
+		expect( consoleError ).toHaveBeenCalledWith(
+			expect.stringContaining( 'Settings UI render failed.' ),
+			expect.anything()
+		);
+
+		act( () => root.unmount() );
+		container.remove();
 	} );
 
 	it( 'renders settings as centered sections and cards', () => {
@@ -222,7 +252,7 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
-	it( 'preserves local datetime values from the DataForm control', () => {
+	it( 'stores ISO datetime values and posts local values', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
 			title: 'Test page',
@@ -235,7 +265,12 @@ describe( 'settings HTML rendering', () => {
 							id: 'starts_at',
 							label: 'Starts at',
 							type: 'datetime-local',
-							value: '2026-07-17T13:30',
+							value: '2026-07-17T13:30:00+00:00',
+							save: {
+								adapter: 'form_post',
+								name: 'starts_at',
+								initialValue: '2026-07-17T13:30',
+							},
 						},
 					],
 				},

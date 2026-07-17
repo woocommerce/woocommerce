@@ -396,30 +396,48 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				assert( $settings_ui_page instanceof SettingsUIPageInterface );
 
 				if ( $context->has_schema_failed() ) {
-					$this->log_settings_ui_fallback(
-						$settings_ui_page,
-						$section,
-						__( 'Settings UI schema generation failed.', 'woocommerce' )
-					);
+					$this->log_settings_ui_fallback( $settings_ui_page, $section, $context->get_schema_failure_reason() );
 				} else {
 					$script_handles = $context->get_script_handles();
 
 					if ( $context->has_script_handles_failed() ) {
 						$this->log_settings_ui_fallback( $settings_ui_page, $section, $context->get_script_handles_failure_reason() );
 					} else {
-						foreach ( $script_handles as $script_handle ) {
-							wp_enqueue_script( $script_handle );
-						}
-
-						$GLOBALS['hide_save_button'] = true;
-
-						printf(
-							'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
-							esc_attr( 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $section ? 'default' : $section ) ),
-							esc_attr( $context->get_page_id() ),
-							esc_attr( $section )
+						$required_script_handles = array_values( array_unique( array_merge( array( 'wc-settings-ui' ), $script_handles ) ) );
+						$missing_script_handles  = array_values(
+							array_filter(
+								$required_script_handles,
+								static function ( string $script_handle ): bool {
+									return ! wp_script_is( $script_handle, 'registered' );
+								}
+							)
 						);
-						return;
+
+						if ( ! empty( $missing_script_handles ) ) {
+							$this->log_settings_ui_fallback(
+								$settings_ui_page,
+								$section,
+								sprintf(
+									/* translators: %s: comma-separated list of script handles. */
+									__( 'Required Settings UI scripts are not registered: %s', 'woocommerce' ),
+									implode( ', ', $missing_script_handles )
+								)
+							);
+						} else {
+							foreach ( $script_handles as $script_handle ) {
+								wp_enqueue_script( $script_handle );
+							}
+
+							$GLOBALS['hide_save_button'] = true;
+
+							printf(
+								'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
+								esc_attr( 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $section ? 'default' : $section ) ),
+								esc_attr( $context->get_page_id() ),
+								esc_attr( $section )
+							);
+							return;
+						}
 					}
 				}
 			}

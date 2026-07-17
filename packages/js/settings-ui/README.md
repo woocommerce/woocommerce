@@ -2,7 +2,7 @@
 
 React utilities for WooCommerce settings pages that opt in to the settings UI renderer.
 
-For the full integration guide, see [Settings UI](../../../docs/extensions/settings-and-config/settings-ui.md).
+For the full integration guide, see [Settings UI](../../../docs/extensions/settings-and-config/settings-ui.md). Existing consumers should also review [Migrate to canonical Settings UI values](../../../docs/extensions/settings-and-config/settings-ui-api-migration.md).
 
 ## Usage
 

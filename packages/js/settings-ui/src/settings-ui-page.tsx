@@ -29,16 +29,12 @@ import type { ComponentProps, ErrorInfo, ReactNode } from 'react';
 /**
  * Internal dependencies
  */
-import {
-	areValuesEqual,
-	createDataFormAdapter,
-	getGroupValidity,
-} from './dataform-adapter';
+import { createDataFormAdapter, getGroupValidity } from './dataform-adapter';
 import { HiddenInputs } from './hidden-inputs';
 import { error } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
 import { resolveRegionComponent, resolveSaveHandler } from './registry';
-import { preserveInitialRepresentation } from './values';
+import { areValuesEqual } from './values';
 import { SettingsUIPageContext } from './settings-ui-context';
 import type {
 	SettingsUIField,
@@ -338,10 +334,13 @@ export class SettingsUIErrorBoundary extends Component<
 				<Notice.Root intent="error">
 					<Notice.Description>
 						{ __(
-							'Something went wrong while rendering this settings page. Reload the page with the settings UI feature disabled to use the classic settings screen.',
+							'This settings page could not be displayed. Reload the page and try again.',
 							'woocommerce'
 						) }
 					</Notice.Description>
+					<Button variant="secondary" href={ window.location.href }>
+						{ __( 'Reload page', 'woocommerce' ) }
+					</Button>
 				</Notice.Root>
 			);
 		}
@@ -626,20 +625,15 @@ export const SettingsUIPage = ( {
 
 				Object.entries( nextValues ).forEach(
 					( [ fieldId, value ] ) => {
-						if ( typeof value !== 'undefined' ) {
-							mergedValues[ fieldId ] =
-								preserveInitialRepresentation(
-									value,
-									initialValues[ fieldId ]
-								);
-						}
+						mergedValues[ fieldId ] =
+							typeof value === 'undefined' ? null : value;
 					}
 				);
 
 				return mergedValues;
 			} );
 		},
-		[ initialValues ]
+		[]
 	);
 
 	const handleCustomSave = useCallback( async () => {

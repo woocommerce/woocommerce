@@ -20,6 +20,8 @@ It is designed for extension authors who want to migrate incrementally. PHP stil
 -   Saves use the existing WooCommerce settings form POST flow by default.
 -   The PHP API is available under `Automattic\WooCommerce\Admin\Settings` and is experimental.
 
+Existing consumers should review [Migrate to canonical Settings UI values](./settings-ui-api-migration.md) for changes to field values, custom callbacks, and native schemas.
+
 ## Build a settings UI integration
 
 A complete integration has the same pieces whether it is a full settings tab or a section inside an existing tab:
@@ -207,13 +209,13 @@ Fields before the first `title` marker are placed into a default group automatic
 Every field renders through a [dataviews DataForm](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/) control for its type. A few behaviours follow from the package's current capabilities:
 
 -   `time` has no dedicated DataForm control yet and renders as a text field; the value round-trips unchanged.
--   Numeric `min` and `max` attributes become DataForm validation rules. A number with an integer `min` and `step="1"` uses DataForm's integer type and control. Other step intervals are not applied because DataForm does not yet support configurable number-control steps; see [WordPress/gutenberg#78335](https://github.com/WordPress/gutenberg/issues/78335).
--   Other `custom_attributes`, including general HTML validation and `data-*` attributes, are not applied and log a console diagnostic. A migrated page should use a registered custom component and validator when DataForm's field contract cannot express its requirements.
+-   PHP converts numeric values to numbers or `null`. Numeric `min` and `max` attributes become explicit validation rules. A number with an integer step base and `step="1"` becomes an `integer` field. Other step intervals are not applied because DataForm does not yet support configurable number-control steps; see [WordPress/gutenberg#78335](https://github.com/WordPress/gutenberg/issues/78335).
+-   Other `custom_attributes`, including general HTML validation and `data-*` attributes, remain available as metadata but are not applied to built-in controls. A migrated page should use a registered custom component and validator when DataForm's field contract cannot express its requirements.
 -   `disabled` fields render as disabled DataForm controls, keep their saved value, and do not participate in form validity.
--   `datetime-local` uses DataForm's datetime control while preserving WooCommerce's local saved-value format.
+-   `datetime-local` uses ISO values in React. The form POST encoder converts changed values back to the WordPress local timezone and preserves the original local value while a field is unchanged.
 -   Unknown field types render as text fields and log a console diagnostic.
 
-DataForm validates the current value against the field type, options, and configured rules. This can expose stale values, such as a saved select option that is no longer available. Test existing saved values when opting a page into the Settings UI and either normalize them in the page schema or provide a custom component and validator. PHP sanitization and save filters remain authoritative after submission.
+DataForm validates the current canonical value against the field type, options, and configured rules. This can expose stale values, such as a saved select option that is no longer available. Test existing saved values when opting a page into the Settings UI and either normalize them in the page schema or provide a custom component and validator. PHP sanitization and save filters remain authoritative after submission.
 
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
 

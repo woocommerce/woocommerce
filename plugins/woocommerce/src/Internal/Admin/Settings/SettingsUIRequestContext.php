@@ -112,6 +112,13 @@ class SettingsUIRequestContext {
 	private bool $schema_failed = false;
 
 	/**
+	 * Developer-facing schema failure reason.
+	 *
+	 * @var string
+	 */
+	private string $schema_failure_reason = '';
+
+	/**
 	 * Constructor.
 	 *
 	 * @param \WC_Settings_Page $settings_page Settings page.
@@ -363,6 +370,23 @@ class SettingsUIRequestContext {
 	}
 
 	/**
+	 * Get the schema failure reason.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return string
+	 */
+	public function get_schema_failure_reason(): string {
+		if ( ! $this->schema_resolved ) {
+			$this->resolve_schema();
+		}
+
+		return '' !== $this->schema_failure_reason
+			? $this->schema_failure_reason
+			: __( 'Settings UI schema generation failed.', 'woocommerce' );
+	}
+
+	/**
 	 * Get the context cache key.
 	 *
 	 * @param \WC_Settings_Page $settings_page Settings page.
@@ -471,12 +495,20 @@ class SettingsUIRequestContext {
 		}
 
 		try {
-			$schema       = $this->settings_ui_page->get_schema( $this->section );
-			$schema       = $this->apply_section_navigation( $schema );
-			$schema       = $this->apply_shell_header_visibility( $schema );
-			$this->schema = $this->ensure_drill_down_breadcrumbs( $schema );
+			$schema = $this->settings_ui_page->get_schema( $this->section );
+			$schema = $this->apply_section_navigation( $schema );
+			$schema = $this->apply_shell_header_visibility( $schema );
+			$schema = $this->ensure_drill_down_breadcrumbs( $schema );
+			SettingsUISchema::assert_valid( $schema );
+
+			$this->schema = $schema;
 		} catch ( \Throwable $e ) {
-			$this->schema_failed = true;
+			$this->schema_failed         = true;
+			$this->schema_failure_reason = sprintf(
+				/* translators: %s: schema failure reason. */
+				__( 'Settings UI schema generation failed. Reason: %s', 'woocommerce' ),
+				$e->getMessage()
+			);
 
 			self::log_resolution_failure( 'Settings UI schema', $this->get_page_id(), $this->section, $e, __METHOD__ );
 		}

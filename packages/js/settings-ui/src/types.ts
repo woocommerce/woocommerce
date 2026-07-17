@@ -20,6 +20,8 @@ export type SettingsUISaveAdapter =
 export type SettingsUISaveSchema = {
 	adapter: SettingsUISaveAdapter;
 	name?: string;
+	/** Original form value used while the canonical field value is unchanged. */
+	initialValue?: string | string[];
 };
 
 export type SettingsUISaveStrategy =
@@ -33,6 +35,12 @@ export type SettingsUIVisibilityRule = {
 	value?: SettingsValue | SettingsValue[];
 };
 
+/** Serializable validation supported by built-in Settings UI fields. */
+export type SettingsUIFieldValidation = {
+	min?: number;
+	max?: number;
+};
+
 export type SettingsUIField = {
 	id: string;
 	label: string;
@@ -43,6 +51,7 @@ export type SettingsUIField = {
 	component?: string;
 	placeholder?: string;
 	disabled?: boolean;
+	validation?: SettingsUIFieldValidation;
 	customAttributes?: Record< string, string | number | boolean >;
 	visibility?: SettingsUIVisibilityRule;
 	save?: SettingsUISaveSchema;
