@@ -50860,12 +50860,6 @@ parameters:
 			path: src/Blocks/BlockTypes/FeaturedProduct.php
 
 		-
-			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_image_url expects int, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Blocks/BlockTypes/FeaturedProduct.php
-
-		-
 			message: '#^Parameter \#1 \$variation of function wc_get_formatted_variation expects array\|WC_Product_Variation, WC_Product given\.$#'
 			identifier: argument.type
 			count: 1

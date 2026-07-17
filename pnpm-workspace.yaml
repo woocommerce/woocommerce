@@ -76,7 +76,6 @@ packages:
     - 'plugins/woocommerce/client/admin'
     - 'plugins/woocommerce/client/blocks'
     - 'plugins/woocommerce/client/legacy'
-    - 'plugins/woocommerce/client/blocks/bin/eslint-plugin-woocommerce'
     - 'tools/monorepo-merge'
     - 'tools/code-analyzer'
     - 'tools/compare-perf'
