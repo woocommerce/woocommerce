@@ -9,7 +9,7 @@ import { createElement, Fragment } from '@wordpress/element';
  */
 import { error } from './diagnostics';
 import type { SettingsUIField, SettingsValue } from './types';
-import { areValuesEqual, isCheckedValue, toStringValue } from './values';
+import { areValuesEqual, toStringValue } from './values';
 
 type HiddenInput = {
 	name: string;
@@ -75,7 +75,7 @@ export const getHiddenInputs = (
 		return [
 			{
 				name,
-				value: isCheckedValue( value ) ? 'yes' : 'no',
+				value: value === true ? 'yes' : 'no',
 			},
 		];
 	}

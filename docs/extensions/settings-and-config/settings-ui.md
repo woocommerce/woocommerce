@@ -20,8 +20,6 @@ It is designed for extension authors who want to migrate incrementally. PHP stil
 -   Saves use the existing WooCommerce settings form POST flow by default.
 -   The PHP API is available under `Automattic\WooCommerce\Admin\Settings` and is experimental.
 
-Existing consumers should review [Migrate to canonical Settings UI values](./settings-ui-api-migration.md) for changes to field values, custom callbacks, and native schemas.
-
 ## Build a settings UI integration
 
 A complete integration has the same pieces whether it is a full settings tab or a section inside an existing tab:

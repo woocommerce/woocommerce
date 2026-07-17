@@ -464,21 +464,13 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	 * @testdox It represents empty numeric settings as null.
 	 */
 	public function test_from_legacy_settings_normalizes_empty_numeric_values(): void {
-		$schema = SettingsUISchema::from_legacy_settings(
-			'test',
-			'',
-			'Test settings',
+		$field = $this->transform_field(
 			array(
-				array(
-					'id'    => 'woocommerce_test_number',
-					'type'  => 'number',
-					'title' => 'Number field',
-					'value' => '',
-				),
+				'id'    => 'woocommerce_test_number',
+				'type'  => 'number',
+				'value' => '',
 			)
 		);
-
-		$field = $schema['groups']['default']['fields'][0];
 
 		$this->assertNull( $field['value'] );
 		$this->assertSame( '', $field['save']['initialValue'] );
@@ -491,17 +483,11 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		$this->expectException( \UnexpectedValueException::class );
 		$this->expectExceptionMessage( 'woocommerce_test_number' );
 
-		SettingsUISchema::from_legacy_settings(
-			'test',
-			'',
-			'Test settings',
+		$this->transform_field(
 			array(
-				array(
-					'id'    => 'woocommerce_test_number',
-					'type'  => 'number',
-					'title' => 'Number field',
-					'value' => 'not-a-number',
-				),
+				'id'    => 'woocommerce_test_number',
+				'type'  => 'number',
+				'value' => 'not-a-number',
 			)
 		);
 	}
@@ -514,24 +500,16 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		update_option( 'timezone_string', 'America/New_York' );
 
 		try {
-			$schema = SettingsUISchema::from_legacy_settings(
-				'test',
-				'',
-				'Test settings',
+			$field = $this->transform_field(
 				array(
-					array(
-						'id'    => 'woocommerce_test_datetime',
-						'type'  => 'datetime-local',
-						'title' => 'Datetime field',
-						'value' => '2026-07-17T13:30:45',
-					),
+					'id'    => 'woocommerce_test_datetime',
+					'type'  => 'datetime-local',
+					'value' => '2026-07-17T13:30:45',
 				)
 			);
 		} finally {
 			update_option( 'timezone_string', $original_timezone );
 		}
-
-		$field = $schema['groups']['default']['fields'][0];
 
 		$this->assertSame( '2026-07-17T17:30:45+00:00', $field['value'] );
 		$this->assertSame( '2026-07-17T13:30:45', $field['save']['initialValue'] );
@@ -544,17 +522,11 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		$this->expectException( \UnexpectedValueException::class );
 		$this->expectExceptionMessage( 'woocommerce_test_datetime' );
 
-		SettingsUISchema::from_legacy_settings(
-			'test',
-			'',
-			'Test settings',
+		$this->transform_field(
 			array(
-				array(
-					'id'    => 'woocommerce_test_datetime',
-					'type'  => 'datetime-local',
-					'title' => 'Datetime field',
-					'value' => 'not-a-date',
-				),
+				'id'    => 'woocommerce_test_datetime',
+				'type'  => 'datetime-local',
+				'value' => 'not-a-date',
 			)
 		);
 	}
@@ -563,21 +535,13 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	 * @testdox It normalizes array members and their original form values to strings.
 	 */
 	public function test_from_legacy_settings_normalizes_array_values(): void {
-		$schema = SettingsUISchema::from_legacy_settings(
-			'test',
-			'',
-			'Test settings',
+		$field = $this->transform_field(
 			array(
-				array(
-					'id'    => 'woocommerce_test_array',
-					'type'  => 'multiselect',
-					'title' => 'Array field',
-					'value' => array( 'one', 2 ),
-				),
+				'id'    => 'woocommerce_test_array',
+				'type'  => 'multiselect',
+				'value' => array( 'one', 2 ),
 			)
 		);
-
-		$field = $schema['groups']['default']['fields'][0];
 
 		$this->assertSame( array( 'one', '2' ), $field['value'] );
 		$this->assertSame( array( 'one', '2' ), $field['save']['initialValue'] );
@@ -591,32 +555,21 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		$this->expectExceptionMessage( 'duplicate' );
 
 		SettingsUISchema::assert_valid(
-			array(
-				'id'     => 'test',
-				'groups' => array(
-					'first'  => array(
-						'id'     => 'first',
-						'fields' => array(
-							array(
-								'id'    => 'duplicate',
-								'label' => 'First',
-								'type'  => 'text',
-								'value' => 'one',
-							),
-						),
+			$this->get_schema(
+				array(
+					array(
+						'id'    => 'duplicate',
+						'label' => 'First',
+						'type'  => 'text',
+						'value' => 'one',
 					),
-					'second' => array(
-						'id'     => 'second',
-						'fields' => array(
-							array(
-								'id'    => 'duplicate',
-								'label' => 'Second',
-								'type'  => 'text',
-								'value' => 'two',
-							),
-						),
+					array(
+						'id'    => 'duplicate',
+						'label' => 'Second',
+						'type'  => 'text',
+						'value' => 'two',
 					),
-				),
+				)
 			)
 		);
 	}
@@ -629,22 +582,46 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		$this->expectExceptionMessage( 'count' );
 
 		SettingsUISchema::assert_valid(
-			array(
-				'id'     => 'test',
-				'groups' => array(
-					'general' => array(
-						'id'     => 'general',
-						'fields' => array(
-							array(
-								'id'    => 'count',
-								'label' => 'Count',
-								'type'  => 'integer',
-								'value' => '2',
-							),
-						),
+			$this->get_schema(
+				array(
+					array(
+						'id'    => 'count',
+						'label' => 'Count',
+						'type'  => 'integer',
+						'value' => '2',
 					),
-				),
+				)
 			)
+		);
+	}
+
+	/**
+	 * Transform one legacy field.
+	 *
+	 * @param array $setting Legacy field definition.
+	 * @return array
+	 */
+	private function transform_field( array $setting ): array {
+		$setting += array( 'title' => 'Test field' );
+		$schema   = SettingsUISchema::from_legacy_settings( 'test', '', 'Test settings', array( $setting ) );
+		return $schema['groups']['default']['fields'][0];
+	}
+
+	/**
+	 * Build a minimal canonical schema.
+	 *
+	 * @param array $fields Field definitions.
+	 * @return array
+	 */
+	private function get_schema( array $fields ): array {
+		return array(
+			'id'     => 'test',
+			'groups' => array(
+				'general' => array(
+					'id'     => 'general',
+					'fields' => $fields,
+				),
+			),
 		);
 	}
 }

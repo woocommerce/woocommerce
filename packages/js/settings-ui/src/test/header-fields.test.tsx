@@ -3,7 +3,6 @@
  */
 import { createElement } from '@wordpress/element';
 import { act } from 'react';
-import { createRoot } from 'react-dom/client';
 import type { ReactNode } from 'react';
 
 // Jest stubs CSS modules, so the real Badge renders nothing that reveals its intent.
@@ -45,20 +44,9 @@ jest.mock( '@wordpress/admin-ui', () => ( {
 import { SettingsUIPage } from '../settings-ui-page';
 import { __resetRegistry } from '../registry';
 import type { SettingsUISchema } from '../types';
+import { renderElement } from './helpers/render-element';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-
-const renderElement = ( element: JSX.Element ) => {
-	const container = document.createElement( 'div' );
-	document.body.appendChild( container );
-	const root = createRoot( container );
-
-	act( () => {
-		root.render( element );
-	} );
-
-	return { container, root };
-};
 
 const baseSchema = (
 	shell: SettingsUISchema[ 'shell' ]

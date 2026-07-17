@@ -8,8 +8,6 @@ sidebar_position: 6
 
 > **Experimental.** The Settings UI is behind the default-off `settings-ui` feature flag and its APIs, including the component contract described here, are subject to change while the feature matures.
 
-Existing components should review [Migrate to canonical Settings UI values](./settings-ui-api-migration.md) before adopting the typed value contract.
-
 Use custom components when a WooCommerce settings field needs plugin-specific React UI that cannot be represented by a supported field type.
 
 For most fields, prefer the built-in renderer. Custom components are best for specialized selectors, previews, or validation flows.
