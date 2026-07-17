@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\SharedStores\CartStore;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -12,22 +11,6 @@ use WC_Unit_Test_Case;
  * Tests for the Product Template block type.
  */
 class ProductTemplateTest extends WC_Unit_Test_Case {
-
-	/**
-	 * Consent string required by the CartStore API.
-	 *
-	 * @var string
-	 */
-	protected $consent = 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
-
-	/**
-	 * Reset the CartStore's static state between tests so scope-stack state
-	 * does not bleed from one test into the next.
-	 */
-	public function tearDown(): void {
-		$this->reset_cart_store_static_state();
-		parent::tearDown();
-	}
 
 	/**
 	 * Renders a Product Collection inside a Query Loop post content block.
@@ -126,9 +109,9 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A loop item's <li> carries both the default woocommerce/products context and a hand-rolled woocommerce:: scope context, and the scope stack reflects the item's scope only while its inner blocks render.
+	 * @testdox A loop item's <li> carries both the default woocommerce/products context and an empty, hand-rolled woocommerce/cart draft-items context, a data-wp-init directive registering it with the cart store, and no scope context.
 	 */
-	public function test_loop_item_emits_scope_context_and_pushes_scope_during_inner_block_render(): void {
+	public function test_loop_item_emits_draft_items_context_and_register_or_restore_directive(): void {
 		$product = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -137,24 +120,11 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$page_scope_before   = CartStore::get_current_scope( $this->consent );
-		$inner_block_scope   = null;
-		$capture_inner_scope = function ( $block_content, $parsed_block ) use ( &$inner_block_scope ) {
-			if ( 'woocommerce/product-price' === ( $parsed_block['blockName'] ?? null ) ) {
-				$inner_block_scope = CartStore::get_current_scope( $this->consent );
-			}
-			return $block_content;
-		};
-		add_filter( 'render_block', $capture_inner_scope, 10, 2 );
-
 		try {
 			$markup = do_blocks( $this->get_product_collection_markup( $product->get_id() ) );
 		} finally {
-			remove_filter( 'render_block', $capture_inner_scope, 10 );
+			WC_Helper_Product::delete_product( $product->get_id() );
 		}
-
-		$page_scope_after = CartStore::get_current_scope( $this->consent );
-		$expected_scope   = 'collection/0/' . $product->get_id();
 
 		$expected_products_context = 'data-wp-context=\'woocommerce/products::' . wp_json_encode(
 			array(
@@ -163,45 +133,15 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 			),
 			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 		) . '\'';
-		$expected_scope_context    = 'data-wp-context---scope=\'woocommerce::' . wp_json_encode(
-			array( 'scope' => $expected_scope ),
+		$expected_draft_items_context = 'data-wp-context---draft-items=\'woocommerce/cart::' . wp_json_encode(
+			array( 'draftItems' => array() ),
 			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 		) . '\'';
 
 		$this->assertStringContainsString( $expected_products_context, $markup, 'The default woocommerce/products context should still be present, unaffected by the second context bag.' );
-		$this->assertStringContainsString( $expected_scope_context, $markup, 'A second, hand-rolled woocommerce:: scope context should be present.' );
+		$this->assertStringContainsString( $expected_draft_items_context, $markup, 'A second, hand-rolled woocommerce/cart empty draft-items context should be present.' );
+		$this->assertStringContainsString( 'data-wp-init="woocommerce/cart::actions.registerOrRestoreDraftCollection"', $markup, 'The loop item should carry the directive registering (or restoring) it with the cart store.' );
 		$this->assertStringContainsString( 'data-wp-key="product-item-' . $product->get_id() . '"', $markup, 'The existing data-wp-key directive should still be present.' );
-		$this->assertSame( $expected_scope, $inner_block_scope, 'get_current_scope() should return the loop item scope while its inner blocks render.' );
-		$this->assertSame( $page_scope_before, $page_scope_after, 'The page scope should be restored once the loop item has finished rendering.' );
-
-		$product->delete( true );
-	}
-
-	/**
-	 * @testdox Rendering content with no Product Collection or Single Product block leaves the page scope in effect, with no scope override pushed.
-	 */
-	public function test_rendering_without_a_scope_establisher_leaves_page_scope_in_effect(): void {
-		$page_scope_before = CartStore::get_current_scope( $this->consent );
-
-		do_blocks( '<!-- wp:paragraph --><p>No scope establisher here.</p><!-- /wp:paragraph -->' );
-
-		$page_scope_after = CartStore::get_current_scope( $this->consent );
-
-		$this->assertSame( $page_scope_before, $page_scope_after, 'The page scope should be unaffected when no scope-establishing container renders.' );
-	}
-
-	/**
-	 * Reset the CartStore's private static properties between tests.
-	 */
-	private function reset_cart_store_static_state(): void {
-		$reflection = new \ReflectionClass( CartStore::class );
-
-		$page_scope = $reflection->getProperty( 'page_scope' );
-		$page_scope->setAccessible( true );
-		$page_scope->setValue( null, null );
-
-		$scope_stack = $reflection->getProperty( 'scope_stack' );
-		$scope_stack->setAccessible( true );
-		$scope_stack->setValue( null, array() );
+		$this->assertStringNotContainsString( 'data-wp-context---scope', $markup, 'No scope context bag should be emitted.' );
 	}
 }
