@@ -207,9 +207,13 @@ Fields before the first `title` marker are placed into a default group automatic
 Every field renders through a [dataviews DataForm](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/) control for its type. A few behaviours follow from the package's current capabilities:
 
 -   `time` has no dedicated DataForm control yet and renders as a text field; the value round-trips unchanged.
--   Constraint attributes in `custom_attributes` (`min`, `max`, `step`, `pattern`, `minlength`, `maxlength`, `required`) become DataForm validation rules and block saving while a field is invalid. Attributes without a rule equivalent, such as `data-*`, are not applied and log a console diagnostic.
--   `disabled` fields render as disabled DataForm controls and keep their saved value.
+-   Numeric `min` and `max` attributes become DataForm validation rules. A number with an integer `min` and `step="1"` uses DataForm's integer type and control. Other step intervals are not applied because DataForm does not yet support configurable number-control steps; see [WordPress/gutenberg#78335](https://github.com/WordPress/gutenberg/issues/78335).
+-   Other `custom_attributes`, including general HTML validation and `data-*` attributes, are not applied and log a console diagnostic. A migrated page should use a registered custom component and validator when DataForm's field contract cannot express its requirements.
+-   `disabled` fields render as disabled DataForm controls, keep their saved value, and do not participate in form validity.
+-   `datetime-local` uses DataForm's datetime control while preserving WooCommerce's local saved-value format.
 -   Unknown field types render as text fields and log a console diagnostic.
+
+DataForm validates the current value against the field type, options, and configured rules. This can expose stale values, such as a saved select option that is no longer available. Test existing saved values when opting a page into the Settings UI and either normalize them in the page schema or provide a custom component and validator. PHP sanitization and save filters remain authoritative after submission.
 
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
 
@@ -337,7 +341,7 @@ $schema['shell']['badges']   = array(
 
 `subtitle` renders under the page title. Each badge renders as a pill next to the title; `intent` selects its color. Both are plain text and are escaped on render.
 
-`intent` is decorative styling only — it conveys meaning through color. The badge `label` must be self-descriptive so screen-reader and color-blind users get the same information (e.g. prefer `"Active"` or `"Beta"` over generic text). Unknown `intent` values fall back to `default`.
+`intent` is decorative styling only. It conveys meaning through color. The badge `label` must be self-descriptive so screen-reader and color-blind users get the same information (e.g. prefer `"Active"` or `"Beta"` over generic text). Unknown `intent` values fall back to `default`.
 
 ## Reference migration in WooCommerce core
 

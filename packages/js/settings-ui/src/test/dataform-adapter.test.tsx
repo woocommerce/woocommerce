@@ -131,32 +131,73 @@ describe( 'dataform-adapter', () => {
 			).toBe( true );
 		} );
 
-		it( 'maps constraint attributes to package validation rules', () => {
+		it( 'normalizes integer number fields and maps supported range rules', () => {
 			const settingsField: SettingsUIField = {
 				id: 'field',
 				label: 'Field',
 				type: 'number',
-				customAttributes: { min: 0, max: 10, step: 2 },
+				customAttributes: { min: 0, max: 10, step: 1 },
 			};
 			const field = buildDataFormField(
 				settingsField,
 				fieldOptions( settingsField )
 			);
 
+			expect( field.type ).toBe( 'integer' );
 			expect( field.Edit ).toBeUndefined();
-			expect( field.isValid?.min ).toBe( 0 );
-			expect( field.isValid?.max ).toBe( 10 );
+			expect( field.isValid ).toEqual( { min: 0, max: 10 } );
+		} );
 
-			const stepRule = field.isValid?.custom;
-			expect( typeof stepRule ).toBe( 'function' );
-
-			const normalizedField = {
-				getValue: ( { item }: { item: SettingsValues } ) => item.field,
-			} as never;
-			expect( stepRule?.( { field: 6 }, normalizedField ) ).toBeNull();
-			expect( stepRule?.( { field: 5 }, normalizedField ) ).toMatch(
-				'multiple of 2'
+		it( 'uses the package integer control for normalized number fields', () => {
+			const settingsField: SettingsUIField = {
+				id: 'field',
+				label: 'Field',
+				type: 'number',
+				customAttributes: { min: 0, step: 1 },
+			};
+			const adapter = createDataFormAdapter(
+				fieldOptions( settingsField, { field: '2' } )
 			);
+			const { container, cleanup } = render(
+				<DataForm
+					data={ { field: '2' } }
+					fields={ adapter.fields }
+					form={ { fields: [ 'field' ] } }
+					onChange={ () => {} }
+				/>
+			);
+
+			expect(
+				container.querySelector< HTMLInputElement >(
+					'input[type="number"]'
+				)?.step
+			).toBe( '1' );
+
+			cleanup();
+		} );
+
+		it( 'does not reimplement unsupported step validation', () => {
+			const warnSpy = jest
+				.spyOn( console, 'warn' )
+				.mockImplementation( () => {} );
+			const settingsField: SettingsUIField = {
+				id: 'field',
+				label: 'Field',
+				type: 'number',
+				customAttributes: { min: 0.5, step: 1 },
+			};
+			const field = buildDataFormField(
+				settingsField,
+				fieldOptions( settingsField )
+			);
+
+			expect( field.type ).toBe( 'number' );
+			expect( field.isValid ).toEqual( { min: 0.5 } );
+			expect( warnSpy ).toHaveBeenCalledWith(
+				expect.stringContaining( 'step' ),
+				expect.anything()
+			);
+			warnSpy.mockRestore();
 		} );
 
 		it( 'drops attributes without a rule equivalent and warns', () => {
@@ -375,6 +416,30 @@ describe( 'dataform-adapter', () => {
 			);
 		} );
 
+		it( 'preserves local datetime values on write and clear', () => {
+			const settingsField: SettingsUIField = {
+				id: 'starts_at',
+				label: 'Starts at',
+				type: 'datetime-local',
+			};
+			const field = buildDataFormField(
+				settingsField,
+				fieldOptions( settingsField, {
+					starts_at: '2026-07-17T13:30',
+				} )
+			);
+
+			expect(
+				field.setValue?.( {
+					item: {},
+					value: '2026-07-18T14:45:00.000Z',
+				} )
+			).toEqual( { starts_at: '2026-07-18T14:45' } );
+			expect(
+				field.setValue?.( { item: {}, value: undefined } )
+			).toEqual( { starts_at: '' } );
+		} );
+
 		it( 'preserves the initial number value representation on write', () => {
 			const settingsField: SettingsUIField = {
 				id: 'window',
@@ -479,6 +544,39 @@ describe( 'dataform-adapter', () => {
 	} );
 
 	describe( 'registered components', () => {
+		it( 'passes normalized values and settings context to registered validators', () => {
+			const validate = jest.fn( () => 'This value is invalid.' );
+			const CustomField = () => null;
+			registerSettingsExtension( {
+				scope: { page: 'test-page', section: '' },
+				fieldOverrides: {
+					store_name: { component: CustomField, validate },
+				},
+			} );
+			const settingsField: SettingsUIField = {
+				id: 'store_name',
+				label: 'Store name',
+				type: 'text',
+			};
+			const field = buildDataFormField(
+				settingsField,
+				fieldOptions( settingsField, { store_name: 'Initial' } )
+			);
+
+			expect(
+				field.isValid?.custom?.(
+					{ store_name: 'Current' },
+					field as never
+				)
+			).toBe( 'This value is invalid.' );
+			expect( validate ).toHaveBeenCalledWith( {
+				value: 'Current',
+				values: { store_name: 'Current' },
+				field: settingsField,
+				context: { page: 'test-page', section: '' },
+			} );
+		} );
+
 		it( 'renders registered components with the DataForm control contract', () => {
 			const received: Array< SettingsEditControlProps > = [];
 			const CustomField = ( props: SettingsEditControlProps ) => {
@@ -636,11 +734,18 @@ describe( 'dataform-adapter', () => {
 	} );
 
 	describe( 'validation', () => {
-		const requiredField: SettingsUIField = {
-			id: 'name',
-			label: 'Name',
-			type: 'text',
-		};
+		const InvalidField = () => null;
+		const validate = () => 'This value is invalid.';
+
+		beforeEach( () => {
+			registerSettingsExtension( {
+				scope: { page: 'test-page', section: '' },
+				fieldOverrides: {
+					dependent: { component: InvalidField, validate },
+					name: { component: InvalidField, validate },
+				},
+			} );
+		} );
 
 		it( 'excludes hidden fields from the validation form', () => {
 			const groups: SettingsUIGroup[] = [
@@ -660,15 +765,7 @@ describe( 'dataform-adapter', () => {
 					],
 				},
 			];
-			const adapter = createDataFormAdapter(
-				makeOptions(
-					groups,
-					{},
-					{
-						fieldRules: { dependent: { required: true } },
-					}
-				)
-			);
+			const adapter = createDataFormAdapter( makeOptions( groups ) );
 
 			const hiddenForm = adapter.getValidationForm( {
 				mode: 'simple',
@@ -685,11 +782,54 @@ describe( 'dataform-adapter', () => {
 			] );
 		} );
 
-		it( 'flows field rules into DataForm validity', async () => {
+		it( 'excludes disabled fields from DataForm validity', async () => {
+			const groups: SettingsUIGroup[] = [
+				{
+					id: 'general',
+					fields: [
+						{
+							id: 'name',
+							label: 'Name',
+							type: 'text',
+							disabled: true,
+						},
+					],
+				},
+			];
+			const adapter = createDataFormAdapter( makeOptions( groups ) );
+
+			const values = { name: '' };
+			expect( adapter.getValidationForm( values ).fields ).toEqual( [
+				{ id: 'general', children: [] },
+			] );
+
+			const results: boolean[] = [];
+			const Harness = () => {
+				const { isValid } = useFormValidity(
+					values,
+					adapter.fields,
+					adapter.getValidationForm( values )
+				);
+				results.push( isValid );
+				return null;
+			};
+
+			const { cleanup } = render( <Harness /> );
+			await act( async () => Promise.resolve() );
+
+			expect( results[ results.length - 1 ] ).toBe( true );
+			cleanup();
+		} );
+
+		it( 'flows registered component validation into DataForm validity', async () => {
+			const requiredField: SettingsUIField = {
+				id: 'name',
+				label: 'Name',
+				type: 'text',
+			};
 			const options = makeOptions(
 				[ { id: 'general', fields: [ requiredField ] } ],
-				{ name: '' },
-				{ fieldRules: { name: { required: true } } }
+				{ name: '' }
 			);
 			const adapter = createDataFormAdapter( options );
 
