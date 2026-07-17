@@ -17,6 +17,15 @@ const defaultDevDependencies = {
 	'@woocommerce/eslint-plugin': '^4.0.0',
 	'@wordpress/prettier-config': 'latest',
 	'@wordpress/scripts': 'latest',
+	/**
+	 * `@wordpress/prettier-config` peers `prettier: >=3`, which npm satisfies with
+	 * plain prettier and then dedupes over the wp-prettier alias that
+	 * `@wordpress/scripts` asks for. `eslint-plugin-prettier` resolves that hoisted
+	 * copy, so `prettier/prettier` reports WordPress style as errors. Declaring the
+	 * alias directly keeps wp-prettier at the top of the tree. Pinned exactly to
+	 * match `@woocommerce/eslint-plugin`, so both resolve to a single copy.
+	 */
+	prettier: 'npm:wp-prettier@3.0.3',
 };
 
 module.exports = {
