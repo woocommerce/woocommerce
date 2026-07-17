@@ -1849,7 +1849,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that wc_order_search() respects the filtered result limit.
+	 * @testdox wc_order_search() respects configured, filtered, unlimited, and invalid result limits.
 	 *
 	 * @since 11.1.0
 	 */
@@ -1864,8 +1864,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 			$order->save();
 		}
 
-		$limit_search_results = static function () {
-			return 2;
+		$search_limit         = 2;
+		$limit_search_results = static function () use ( &$search_limit ) {
+			return $search_limit;
 		};
 
 		$order_ids = array_map(
@@ -1882,6 +1883,12 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 			add_filter( 'woocommerce_order_search_limit', $limit_search_results );
 			$this->assertSame( array( $order_ids[2], $order_ids[1] ), wc_order_search( 'Jeroen' ) );
+
+			$search_limit = -1;
+			$this->assertSame( array( $order_ids[2], $order_ids[1], $order_ids[0] ), wc_order_search( 'Jeroen' ) );
+
+			$search_limit = -2;
+			$this->assertSame( array( $order_ids[2] ), wc_order_search( 'Jeroen' ) );
 		} finally {
 			remove_filter( 'woocommerce_order_search_limit', $limit_search_results );
 			update_option( 'posts_per_page', $posts_per_page );

@@ -1222,6 +1222,8 @@ WHERE
 	 * @return int[] Array of order IDs.
 	 */
 	public function search_orders( $term ) {
+		$default_limit = (int) get_option( 'posts_per_page' );
+
 		/**
 		 * Filters the maximum number of order IDs returned by an order search.
 		 *
@@ -1230,7 +1232,8 @@ WHERE
 		 * @param int    $limit Maximum number of order IDs to return. Use -1 for no limit.
 		 * @param string $term  Search term.
 		 */
-		$limit = (int) apply_filters( 'woocommerce_order_search_limit', (int) get_option( 'posts_per_page' ), $term );
+		$limit = (int) apply_filters( 'woocommerce_order_search_limit', $default_limit, $term );
+		$limit = -1 <= $limit ? $limit : $default_limit;
 
 		$order_ids = wc_get_orders(
 			array(
