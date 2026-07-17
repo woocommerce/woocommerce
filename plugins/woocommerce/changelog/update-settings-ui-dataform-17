@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Bundle the Settings UI dataviews 17 stack into its own script and stylesheet, loaded only on settings pages the Settings UI renders.
+Use canonical typed Settings UI schemas with DataForm 17 while preserving legacy form saves and classic fallback rendering.

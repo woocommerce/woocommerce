@@ -1,4 +1,4 @@
 Significance: major
 Type: update
 
-Render every Settings UI field through DataForm 17.2.0, remove the native field renderer, and support declarative validation for custom field components.
+Render Settings UI fields through DataForm 17.2.0 with canonical typed values, explicit validation, and legacy form POST compatibility.
