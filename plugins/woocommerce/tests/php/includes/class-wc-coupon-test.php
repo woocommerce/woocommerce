@@ -246,7 +246,7 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 		$coupon = new WC_Coupon();
 		$coupon->set_amount( $input );
 
-		$this->assertEquals( $expected, $coupon->get_amount() );
+		$this->assertSame( $expected, $coupon->get_amount() );
 	}
 
 	/**
