@@ -24,7 +24,10 @@ function collectCtrfReportPaths( directory ) {
 		const entryPath = path.join( directory, entry.name );
 		if ( entry.isDirectory() ) {
 			reportPaths.push( ...collectCtrfReportPaths( entryPath ) );
-		} else if ( /^ctrf-report-.*\.json$/.test( entry.name ) ) {
+		} else if (
+			entry.name.startsWith( 'ctrf-report-' ) &&
+			entry.name.endsWith( '.json' )
+		) {
 			reportPaths.push( entryPath );
 		}
 	}
