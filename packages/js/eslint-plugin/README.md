@@ -42,9 +42,14 @@ import woocommerce from '@woocommerce/eslint-plugin';
 export default [ ...woocommerce.configs.recommended ];
 ```
 
-Add your own configuration objects after it. Flat Config is last-wins, and it
-does not cascade, so every directory you lint needs a config file that reaches
-this one — there is no inheritance from a parent directory.
+Add your own configuration objects after it: Flat Config is last-wins, so later
+objects override earlier ones.
+
+A root `eslint.config.mjs` already covers every file beneath it — ESLint searches
+upward from each file for the nearest one, so most projects need only this. Add a
+config to a subdirectory only when that subtree needs a different one. Note that
+it replaces the ancestor rather than merging with it, so it has to spread
+`recommended` itself.
 
 ```js
 import woocommerce from '@woocommerce/eslint-plugin';
