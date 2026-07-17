@@ -8,6 +8,8 @@ sidebar_position: 6
 
 > **Experimental.** The Settings UI is behind the default-off `settings-ui` feature flag and its APIs, including the component contract described here, are subject to change while the feature matures.
 
+Existing components should review [Migrate to canonical Settings UI values](./settings-ui-api-migration.md) before adopting the typed value contract.
+
 Use custom components when a WooCommerce settings field needs plugin-specific React UI that cannot be represented by a supported field type.
 
 For most fields, prefer the built-in renderer. Custom components are best for specialized selectors, previews, or validation flows.
@@ -59,7 +61,7 @@ Registrations are scoped by settings page and, optionally, by section. This prev
 Custom components receive DataForm control props, re-exported as `SettingsEditControlProps`. The main props are:
 
 -   `data`: current settings values keyed by field id.
--   `field`: the normalized DataForm field. Use `field.getValue( { item: data } )` to read the control value and `field.setValue( { item: data, value } )` to build a change record that preserves the saved representation.
+-   `field`: the normalized DataForm field. Use `field.getValue( { item: data } )` to read the canonical control value and `field.setValue( { item: data, value } )` to build a canonical change record.
 -   `onChange`: accepts a partial record of field ids to new values, including multi-field updates.
 -   `validity`: the current DataForm validity for this field.
 
@@ -77,7 +79,7 @@ import { useSettingsUIContext } from '@woocommerce/settings-ui';
 const { schema, context, initialValues } = useSettingsUIContext();
 ```
 
-Call `onChange()` with a record of field ids to next values. The settings UI handles hidden input serialization for the field's save adapter.
+Call `onChange()` with a record of field ids to canonical values. The settings UI handles hidden input serialization for the field's save adapter. Cleared number and datetime values use `null`.
 
 ## Example component
 
@@ -154,7 +156,7 @@ registerSettingsExtension( {
 } );
 ```
 
-The callback receives the normalized control `value`, all current `values`, the original settings `field`, and the page `context`. Return `null` when valid or an error message when invalid. DataForm runs the callback and includes the result in whole-form validity, so an invalid custom field prevents saving. The same `{ component, validate }` form works for named components, field overrides, and type renderers; registrations without validation can continue passing the component directly.
+The callback receives the canonical control `value`, all current canonical `values`, the original settings `field`, and the page `context`. Return `null` when valid or an error message when invalid. DataForm runs the callback and includes the result in whole-form validity, so an invalid custom field prevents saving. The same `{ component, validate }` form works for named components, field overrides, and type renderers; registrations without validation can continue passing the component directly.
 
 DataForm passes the result to the custom component through `validity.custom`, but it cannot render the message automatically because it does not know the component's markup. The component must display and associate the message with its control. For example:
 

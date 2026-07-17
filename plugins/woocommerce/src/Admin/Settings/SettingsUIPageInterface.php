@@ -35,7 +35,13 @@ interface SettingsUIPageInterface {
 	 * drill-down pages default to header breadcrumbs instead. Top-level settings
 	 * pages render the classic section links and ignore this key.
 	 *
+	 * Field values must use the canonical Settings UI types. Number and integer
+	 * fields use PHP numbers or null, checkbox fields use booleans, arrays contain
+	 * strings, and datetime-local fields use timezone-qualified ISO strings or
+	 * null. The legacy settings adapter performs this conversion automatically.
+	 *
 	 * @since 10.9.0
+	 * @since 11.1.0 Field values use the canonical typed value contract.
 	 *
 	 * @param string $section Section id. Empty string means the default section.
 	 * @return array
@@ -45,7 +51,11 @@ interface SettingsUIPageInterface {
 	/**
 	 * Get script handles that must be loaded before the settings UI app mounts.
 	 *
+	 * Every returned handle must be registered before the settings page renders.
+	 * Missing registrations cause the page to use the classic settings renderer.
+	 *
 	 * @since 10.9.0
+	 * @since 11.1.0 Returned script handles must be registered before rendering.
 	 *
 	 * @param string $section Section id. Empty string means the default section.
 	 * @return string[]

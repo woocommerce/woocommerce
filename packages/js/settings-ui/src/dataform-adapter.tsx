@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { dateI18n, getDate } from '@wordpress/date';
 import { createElement } from '@wordpress/element';
 import type {
 	Field,
@@ -27,13 +26,12 @@ import type {
 	SettingsFieldContext,
 	SettingsUIField,
 	SettingsUIGroup,
-	SettingsUIOption,
 	SettingsUISchema,
 	SettingsValue,
 	SettingsValues,
 	SettingsVisibilityPredicate,
 } from './types';
-import { isCheckedValue, toStringValue } from './values';
+import { areValuesEqual, toStringValue } from './values';
 
 export type DataFormAdapterOptions = {
 	schema: SettingsUISchema;
@@ -60,83 +58,6 @@ type DataFormRenderSection =
 			group: SettingsUIGroup;
 	  };
 
-// Echo the initial checkbox representation back so the save flow
-// round-trips values unchanged.
-const toCheckboxValue = (
-	checked: boolean,
-	initialValue: SettingsValue | undefined
-): SettingsValue => {
-	if (
-		typeof initialValue !== 'undefined' &&
-		checked === isCheckedValue( initialValue )
-	) {
-		return initialValue;
-	}
-
-	if ( typeof initialValue === 'boolean' ) {
-		return checked;
-	}
-
-	if ( initialValue === 1 || initialValue === 0 ) {
-		return checked ? 1 : 0;
-	}
-
-	if ( initialValue === '1' || initialValue === '0' ) {
-		return checked ? '1' : '0';
-	}
-
-	return checked ? 'yes' : 'no';
-};
-
-// Legacy PHP settings deliver numeric values as strings, which the
-// package number control and the number type validation reject. Present
-// finite numbers to the package and let toNumberFieldValue restore the
-// saved representation on the way back.
-const toNumberControlValue = ( value: SettingsValue | undefined ) => {
-	if ( value === '' || value === null || typeof value === 'undefined' ) {
-		return undefined;
-	}
-
-	if ( typeof value === 'string' && value.trim() !== '' ) {
-		const parsed = Number( value );
-
-		if ( Number.isFinite( parsed ) ) {
-			return parsed;
-		}
-	}
-
-	return value;
-};
-
-const toNumberFieldValue = (
-	next: SettingsValue,
-	initialValue: SettingsValue | undefined
-): SettingsValue => {
-	// The native renderer already emits the legacy string vocabulary.
-	if ( typeof next === 'string' ) {
-		return next;
-	}
-
-	if ( typeof next === 'undefined' || next === null ) {
-		return '';
-	}
-
-	return typeof initialValue === 'number' ? next : String( next );
-};
-
-export const areValuesEqual = ( a: SettingsValue, b: SettingsValue ) => {
-	if ( Array.isArray( a ) || Array.isArray( b ) ) {
-		return (
-			Array.isArray( a ) &&
-			Array.isArray( b ) &&
-			a.length === b.length &&
-			a.every( ( value, index ) => value === b[ index ] )
-		);
-	}
-
-	return a === b;
-};
-
 const valueMatchesVisibilityRule = (
 	value: SettingsValue,
 	expected: SettingsValue | SettingsValue[] | undefined
@@ -145,37 +66,10 @@ const valueMatchesVisibilityRule = (
 		? expected
 		: [ expected ?? true ];
 
-	return expectedValues.some( ( expectedValue ) => {
-		// Boolean expectations match any checkbox vocabulary, so rules
-		// written against `true` work for `yes` and `1` values too.
-		if ( typeof expectedValue === 'boolean' ) {
-			return isCheckedValue( value ) === expectedValue;
-		}
-
-		return areValuesEqual( value, expectedValue );
-	} );
-};
-
-// PHP-supplied schemas can carry non-string option values at runtime, so
-// selections are matched by string representation and mapped back to the
-// original option value to preserve its type.
-const restoreOptionValue = (
-	next: SettingsValue,
-	options?: SettingsUIOption[]
-): SettingsValue => {
-	const nextString = toStringValue( next );
-	const option = ( options || [] ).find(
-		( candidate ) => toStringValue( candidate.value ) === nextString
+	return expectedValues.some( ( expectedValue ) =>
+		areValuesEqual( value, expectedValue )
 	);
-
-	return typeof option === 'undefined' ? next : option.value;
 };
-
-const toElements = ( options: SettingsUIOption[] ) =>
-	options.map( ( option ) => ( {
-		value: toStringValue( option.value ),
-		label: option.label,
-	} ) );
 
 // DataForm types descriptions as plain strings while the schema carries
 // sanitized HTML. The layouts render the description as a node, so a
@@ -191,74 +85,6 @@ const toDescriptionNode = ( description?: string ) => {
 	}
 
 	return toSanitizedHtmlNode( description ) as unknown as string;
-};
-
-const NUMERIC_RULE_TYPES = [ 'number', 'integer' ];
-
-const toRuleNumber = ( raw: unknown ) => {
-	const parsed = Number( raw );
-	return Number.isFinite( parsed ) ? parsed : undefined;
-};
-
-const getDataFormType = (
-	settingsField: SettingsUIField,
-	type: FieldTypeName | undefined
-): FieldTypeName | undefined => {
-	if ( type !== 'number' ) {
-		return type;
-	}
-
-	const attributes = settingsField.customAttributes || {};
-	const step = toRuleNumber( attributes.step );
-	const min = toRuleNumber( attributes.min );
-
-	// A unit step is integer-only when its HTML step base is also an integer.
-	return step === 1 && Number.isInteger( min ) ? 'integer' : type;
-};
-
-const toAttributeRules = (
-	settingsField: SettingsUIField,
-	type: FieldTypeName | undefined
-): Rules< SettingsValues > | undefined => {
-	const rules: Rules< SettingsValues > = {};
-	const dropped: string[] = [];
-
-	Object.entries( settingsField.customAttributes || {} ).forEach(
-		( [ name, raw ] ) => {
-			if (
-				( name === 'min' || name === 'max' ) &&
-				type &&
-				NUMERIC_RULE_TYPES.includes( type )
-			) {
-				const value = toRuleNumber( raw );
-				if ( typeof value !== 'undefined' ) {
-					rules[ name ] = value;
-					return;
-				}
-			}
-
-			if (
-				name === 'step' &&
-				type === 'integer' &&
-				toRuleNumber( raw ) === 1
-			) {
-				return;
-			}
-
-			dropped.push( name );
-		}
-	);
-
-	if ( dropped.length > 0 ) {
-		warn(
-			`Custom attributes [${ dropped.join( ', ' ) }] on field "${
-				settingsField.id
-			}" were not applied.`,
-			{ field: settingsField }
-		);
-	}
-
-	return Object.keys( rules ).length > 0 ? rules : undefined;
 };
 
 const createInfoRender = ( settingsField: SettingsUIField ) => {
@@ -278,10 +104,8 @@ type ValueGetter = NonNullable< Field< SettingsValues >[ 'getValue' ] >;
 type ValueSetter = NonNullable< Field< SettingsValues >[ 'setValue' ] >;
 
 /**
- * How one settings field type maps onto DataForm: the field type, an
- * explicit control where the package default is not the right one, and
- * value accessors that preserve the saved vocabulary. Types without an
- * entry warn and render through the package text control.
+ * How a canonical Settings UI field type maps onto DataForm. Types without
+ * an entry warn and render through the package text control.
  */
 type SettingsTypeDescriptor = {
 	type: FieldTypeName;
@@ -290,83 +114,20 @@ type SettingsTypeDescriptor = {
 	render?: (
 		settingsField: SettingsUIField
 	) => Field< SettingsValues >[ 'render' ];
-	getValue?: ( settingsField: SettingsUIField ) => ValueGetter;
-	setValue?: (
-		settingsField: SettingsUIField,
-		initialValues: SettingsValues
-	) => ValueSetter;
-};
-
-const optionValue: Pick< SettingsTypeDescriptor, 'getValue' | 'setValue' > = {
-	getValue:
-		( settingsField ) =>
-		( { item } ) =>
-			toStringValue( item[ settingsField.id ] ),
-	setValue:
-		( settingsField ) =>
-		( { value } ) => ( {
-			[ settingsField.id ]: restoreOptionValue(
-				value,
-				settingsField.options
-			),
-		} ),
 };
 
 const settingsTypeDescriptors: Record< string, SettingsTypeDescriptor > = {
-	checkbox: {
-		type: 'boolean',
-		getValue:
-			( settingsField ) =>
-			( { item } ) =>
-				isCheckedValue( item[ settingsField.id ] ),
-		setValue:
-			( settingsField, initialValues ) =>
-			( { value } ) => ( {
-				[ settingsField.id ]: toCheckboxValue(
-					Boolean( value ),
-					initialValues[ settingsField.id ]
-				),
-			} ),
-	},
+	checkbox: { type: 'boolean' },
 	// Radio and select need explicit controls: fields with elements
 	// default to the select control, so radio would lose its buttons and
 	// an options-less select would fall back to a text input.
-	radio: { type: 'text', Edit: 'radio', ...optionValue },
-	select: { type: 'text', Edit: 'select', ...optionValue },
+	radio: { type: 'text', Edit: 'radio' },
+	select: { type: 'text', Edit: 'select' },
 	textarea: { type: 'text', Edit: { control: 'textarea' } },
-	number: {
-		type: 'number',
-		getValue:
-			( settingsField ) =>
-			( { item } ) =>
-				toNumberControlValue( item[ settingsField.id ] ),
-		setValue:
-			( settingsField, initialValues ) =>
-			( { value } ) => ( {
-				[ settingsField.id ]: toNumberFieldValue(
-					value,
-					initialValues[ settingsField.id ]
-				),
-			} ),
-	},
+	number: { type: 'number' },
+	integer: { type: 'integer' },
 	tel: { type: 'telephone' },
-	array: {
-		type: 'array',
-		getValue:
-			( settingsField ) =>
-			( { item } ) => {
-				const value = item[ settingsField.id ];
-				return Array.isArray( value ) ? value : [];
-			},
-		setValue:
-			( settingsField ) =>
-			( { value } ) => ( {
-				[ settingsField.id ]: ( Array.isArray( value )
-					? value
-					: []
-				).map( String ),
-			} ),
-	},
+	array: { type: 'array' },
 	date: { type: 'date' },
 	email: { type: 'email' },
 	password: { type: 'password' },
@@ -375,17 +136,7 @@ const settingsTypeDescriptors: Record< string, SettingsTypeDescriptor > = {
 	// The package has no time-only control (documented gap), so time
 	// values edit as text and round-trip unchanged.
 	time: { type: 'text' },
-	'datetime-local': {
-		type: 'datetime',
-		setValue:
-			( settingsField ) =>
-			( { value } ) => ( {
-				[ settingsField.id ]:
-					typeof value === 'string' && value
-						? dateI18n( 'Y-m-d\\TH:i', getDate( value ) )
-						: '',
-			} ),
-	},
+	'datetime-local': { type: 'datetime' },
 	color: { type: 'color' },
 	// The regular layout skips fields whose normalized Edit control is
 	// null even when read-only, so info carries a control type the
@@ -402,7 +153,10 @@ const defaultGetValue =
 
 const defaultSetValue =
 	( settingsField: SettingsUIField ): ValueSetter =>
-	( { value } ) => ( { [ settingsField.id ]: value } );
+	( { value } ) => ( {
+		[ settingsField.id ]:
+			typeof value === 'undefined' ? null : ( value as SettingsValue ),
+	} );
 
 // Predicates fail open: a broken visibility callback renders the field
 // or group rather than hiding it.
@@ -465,8 +219,10 @@ export const buildDataFormField = (
 	options: DataFormAdapterOptions
 ): Field< SettingsValues > => {
 	const descriptor = settingsTypeDescriptors[ settingsField.type ];
-	const type = getDataFormType( settingsField, descriptor?.type );
-	const attributeRules = toAttributeRules( settingsField, type );
+	const type = descriptor?.type;
+	const validationRules = settingsField.validation as
+		| Rules< SettingsValues >
+		| undefined;
 	const validator = resolveFieldValidator( settingsField, options.context );
 	const customRule: Rules< SettingsValues >[ 'custom' ] | undefined =
 		validator
@@ -487,16 +243,13 @@ export const buildDataFormField = (
 		description: toDescriptionNode( settingsField.description ),
 		placeholder: settingsField.placeholder,
 		type,
-		getValue: ( descriptor?.getValue ?? defaultGetValue )( settingsField ),
-		setValue: ( descriptor?.setValue ?? defaultSetValue )(
-			settingsField,
-			options.initialValues
-		),
+		getValue: defaultGetValue( settingsField ),
+		setValue: defaultSetValue( settingsField ),
 		isVisible: createIsVisible( settingsField, options ),
 		isValid:
-			attributeRules || customRule
+			validationRules || customRule
 				? {
-						...attributeRules,
+						...validationRules,
 						...( customRule ? { custom: customRule } : {} ),
 				  }
 				: undefined,
@@ -507,7 +260,7 @@ export const buildDataFormField = (
 	}
 
 	if ( settingsField.options && settingsField.options.length > 0 ) {
-		field.elements = toElements( settingsField.options );
+		field.elements = settingsField.options;
 	}
 
 	if ( descriptor?.render ) {

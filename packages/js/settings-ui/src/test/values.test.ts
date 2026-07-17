@@ -1,11 +1,7 @@
 /**
  * Internal dependencies
  */
-import {
-	isCheckedValue,
-	preserveInitialRepresentation,
-	toStringValue,
-} from '../values';
+import { areValuesEqual, isCheckedValue, toStringValue } from '../values';
 
 describe( 'values', () => {
 	describe( 'toStringValue', () => {
@@ -36,31 +32,21 @@ describe( 'values', () => {
 		} );
 	} );
 
-	describe( 'preserveInitialRepresentation', () => {
-		it( 'restores non-string initials when a control emits their string form', () => {
-			expect( preserveInitialRepresentation( '10', 10 ) ).toBe( 10 );
-			expect( preserveInitialRepresentation( 'true', true ) ).toBe(
+	describe( 'areValuesEqual', () => {
+		it( 'compares scalar canonical values strictly', () => {
+			expect( areValuesEqual( 10, 10 ) ).toBe( true );
+			expect( areValuesEqual( '10', 10 ) ).toBe( false );
+			expect( areValuesEqual( null, null ) ).toBe( true );
+		} );
+
+		it( 'compares canonical string arrays by value and order', () => {
+			expect( areValuesEqual( [ 'GB', 'US' ], [ 'GB', 'US' ] ) ).toBe(
 				true
 			);
-			expect( preserveInitialRepresentation( '', null ) ).toBe( null );
-		} );
-
-		it( 'restores empty initials when a control emits an empty array', () => {
-			expect( preserveInitialRepresentation( [], '' ) ).toBe( '' );
-			expect( preserveInitialRepresentation( [], null ) ).toBe( null );
-		} );
-
-		it( 'keeps genuinely changed values as emitted', () => {
-			expect( preserveInitialRepresentation( '11', 10 ) ).toBe( '11' );
-			expect(
-				preserveInitialRepresentation( 'changed', 'initial' )
-			).toBe( 'changed' );
-			expect( preserveInitialRepresentation( [ 'GB' ], '' ) ).toEqual( [
-				'GB',
-			] );
-			expect( preserveInitialRepresentation( 'kept', undefined ) ).toBe(
-				'kept'
+			expect( areValuesEqual( [ 'US', 'GB' ], [ 'GB', 'US' ] ) ).toBe(
+				false
 			);
+			expect( areValuesEqual( [ 'GB' ], 'GB' ) ).toBe( false );
 		} );
 	} );
 } );

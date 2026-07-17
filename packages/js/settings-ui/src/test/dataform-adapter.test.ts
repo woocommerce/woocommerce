@@ -100,48 +100,17 @@ describe( 'dataform-adapter', () => {
 			).toBe( true );
 		} );
 
-		it( 'normalizes integer number fields and maps range rules', () => {
+		it( 'maps canonical integer fields and validation rules', () => {
 			const field = buildField(
 				makeField( {
-					type: 'number',
-					customAttributes: { min: 0, max: 10, step: 1 },
+					type: 'integer',
+					validation: { min: 0, max: 10 },
 				} )
 			);
 
 			expect( field.type ).toBe( 'integer' );
 			expect( field.isValid ).toEqual( { min: 0, max: 10 } );
 		} );
-
-		it.each( [
-			{
-				type: 'number',
-				attributes: { min: 0.5, step: 1 },
-				rules: { min: 0.5 },
-				dropped: 'step',
-			},
-			{
-				type: 'text',
-				attributes: { 'data-tracking': 'yes' },
-				rules: undefined,
-				dropped: 'data-tracking',
-			},
-		] )(
-			'drops unsupported $dropped attributes',
-			( { type, attributes, rules, dropped } ) => {
-				const warn = jest
-					.spyOn( console, 'warn' )
-					.mockImplementation( () => {} );
-				const field = buildField(
-					makeField( { type, customAttributes: attributes } )
-				);
-
-				expect( field.isValid ).toEqual( rules );
-				expect( warn ).toHaveBeenCalledWith(
-					expect.stringContaining( dropped ),
-					expect.anything()
-				);
-			}
-		);
 
 		it( 'falls back unknown field types to text with a diagnostic', () => {
 			const warn = jest
@@ -173,133 +142,62 @@ describe( 'dataform-adapter', () => {
 			expect( field.render ).toEqual( expect.any( Function ) );
 		} );
 
-		it( 'stringifies option values for DataForm elements', () => {
+		it( 'maps canonical options to DataForm elements', () => {
 			const field = buildField(
 				makeField( {
 					type: 'select',
 					options: [
-						{ value: 1 as unknown as string, label: 'One' },
+						{ value: 'one', label: 'One' },
 						{ value: 'two', label: 'Two' },
 					],
 				} )
 			);
 
 			expect( field.elements ).toEqual( [
-				{ value: '1', label: 'One' },
+				{ value: 'one', label: 'One' },
 				{ value: 'two', label: 'Two' },
 			] );
 		} );
 	} );
 
-	describe( 'saved-value compatibility', () => {
-		const checkbox = makeField( { id: 'flag', type: 'checkbox' } );
-
+	describe( 'canonical values', () => {
 		it.each( [
-			[ 'yes', true ],
-			[ '1', true ],
-			[ 'no', false ],
-		] )( 'presents checkbox value %p as %p', ( value, expected ) => {
-			expect(
-				buildField( checkbox ).getValue?.( { item: { flag: value } } )
-			).toBe( expected );
-		} );
-
-		it.each( [
-			[ 'no', true, 'yes' ],
-			[ false, true, true ],
-			[ '0', true, '1' ],
-		] as Array< [ SettingsValue, boolean, SettingsValue ] > )(
-			'preserves checkbox representation %p',
-			( initial, value, expected ) => {
+			[ makeField( { id: 'flag', type: 'checkbox' } ), true ],
+			[ makeField( { id: 'window', type: 'number' } ), 30 ],
+			[ makeField( { id: 'countries', type: 'array' } ), [ 'GB', 'US' ] ],
+			[
+				makeField( { id: 'starts_at', type: 'datetime-local' } ),
+				'2026-07-18T14:45:00.000Z',
+			],
+		] as Array< [ SettingsUIField, SettingsValue ] > )(
+			'presents canonical values without conversion',
+			( settingsField, value ) => {
 				expect(
-					buildField( checkbox, { flag: initial } ).setValue?.( {
-						item: {},
-						value,
+					buildField( settingsField ).getValue?.( {
+						item: { [ settingsField.id ]: value },
 					} )
-				).toEqual( { flag: expected } );
+				).toEqual( value );
 			}
 		);
 
-		it( 'restores option value types', () => {
-			const field = buildField(
-				makeField( {
-					id: 'unit',
-					type: 'select',
-					options: [
-						{ value: 5 as unknown as string, label: 'Five' },
-						{ value: 'ten', label: 'Ten' },
-					],
-				} )
-			);
-
-			expect( field.setValue?.( { item: {}, value: '5' } ) ).toEqual( {
-				unit: 5,
-			} );
-			expect( field.setValue?.( { item: {}, value: 'ten' } ) ).toEqual( {
-				unit: 'ten',
-			} );
-		} );
-
-		it( 'casts array values to strings', () => {
-			const field = buildField(
-				makeField( { id: 'countries', type: 'array' } )
-			);
-
-			expect(
-				field.setValue?.( { item: {}, value: [ 'GB', 5 ] } )
-			).toEqual( { countries: [ 'GB', '5' ] } );
-		} );
-
-		it.each( [
-			[ '30', 30 ],
-			[ 30, 30 ],
-			[ '', undefined ],
-			[ undefined, undefined ],
-			[ 'abc', 'abc' ],
-		] )( 'presents number value %p as %p', ( value, expected ) => {
+		it( 'writes canonical values without conversion', () => {
 			const field = buildField(
 				makeField( { id: 'window', type: 'number' } )
 			);
 
-			expect( field.getValue?.( { item: { window: value } } ) ).toBe(
-				expected
-			);
+			expect( field.setValue?.( { item: {}, value: 35 } ) ).toEqual( {
+				window: 35,
+			} );
 		} );
 
-		it.each( [
-			[ '30', 35, '35' ],
-			[ 30, 35, 35 ],
-			[ '30', undefined, '' ],
-		] as Array<
-			[ SettingsValue, SettingsValue | undefined, SettingsValue ]
-		> )(
-			'preserves number representation %p',
-			( initial, value, expected ) => {
-				const field = buildField(
-					makeField( { id: 'window', type: 'number' } ),
-					{ window: initial }
-				);
-
-				expect( field.setValue?.( { item: {}, value } ) ).toEqual( {
-					window: expected,
-				} );
-			}
-		);
-
-		it( 'preserves and clears local datetime values', () => {
+		it( 'normalizes a cleared DataForm value to null', () => {
 			const field = buildField(
 				makeField( { id: 'starts_at', type: 'datetime-local' } )
 			);
 
 			expect(
-				field.setValue?.( {
-					item: {},
-					value: '2026-07-18T14:45:00.000Z',
-				} )
-			).toEqual( { starts_at: '2026-07-18T14:45' } );
-			expect(
 				field.setValue?.( { item: {}, value: undefined } )
-			).toEqual( { starts_at: '' } );
+			).toEqual( { starts_at: null } );
 		} );
 	} );
 
@@ -319,11 +217,9 @@ describe( 'dataform-adapter', () => {
 		} );
 
 		it.each( [
-			[ 'yes', true ],
-			[ '1', true ],
 			[ true, true ],
-			[ 'no', false ],
-		] )( 'matches checkbox value %p', ( value, expected ) => {
+			[ false, false ],
+		] )( 'matches canonical checkbox value %p', ( value, expected ) => {
 			const field = buildField(
 				makeField( {
 					id: 'dependent',

@@ -55,6 +55,13 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	private $original_hide_save_button = null;
 
 	/**
+	 * Whether this test registered the Settings UI package script.
+	 *
+	 * @var bool
+	 */
+	private bool $registered_test_package_script = false;
+
+	/**
 	 * Set up test environment.
 	 */
 	public function setUp(): void {
@@ -72,6 +79,11 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->original_hide_save_button        = $this->original_hide_save_button_exists ? $GLOBALS['hide_save_button'] : null;
 		unset( $GLOBALS['hide_save_button'] );
 		SettingsUIRequestContext::reset();
+
+		if ( ! wp_script_is( 'wc-settings-ui', 'registered' ) ) {
+			wp_register_script( 'wc-settings-ui', 'https://example.com/wc-settings-ui.js', array(), '1.0.0', true );
+			$this->registered_test_package_script = true;
+		}
 	}
 
 	/**
@@ -93,6 +105,13 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
 		SettingsUIRequestContext::reset();
+
+		if ( $this->registered_test_package_script ) {
+			wp_deregister_script( 'wc-settings-ui' );
+			$this->registered_test_package_script = false;
+		}
+
+		wp_deregister_script( 'settings-ui-counting-handle' );
 
 		parent::tearDown();
 	}
@@ -137,6 +156,57 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render classic settings when the Settings UI package script is not registered.
+	 */
+	public function test_missing_settings_ui_package_script_uses_classic_output(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Settings_Page::output' );
+		wp_deregister_script( 'wc-settings-ui' );
+
+		global $current_section;
+		$current_section = '';
+		$page            = $this->get_settings_ui_test_page();
+
+		try {
+			ob_start();
+			$page->output();
+			$output = ob_get_clean();
+		} finally {
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertArrayNotHasKey( 'hide_save_button', $GLOBALS );
+	}
+
+	/**
+	 * @testdox Should render classic settings when an extension script is not registered.
+	 */
+	public function test_missing_settings_ui_extension_script_uses_classic_output(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Settings_Page::output' );
+
+		global $current_section;
+		$current_section = '';
+		$page            = $this->get_settings_ui_test_page_with_missing_script_handle();
+
+		try {
+			ob_start();
+			$page->output();
+			$output = ob_get_clean();
+		} finally {
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertArrayNotHasKey( 'hide_save_button', $GLOBALS );
+	}
+
+	/**
 	 * It emits developer feedback when settings UI rendering falls back to legacy output.
 	 */
 	public function test_settings_ui_fallback_emits_doing_it_wrong_notice(): void {
@@ -176,6 +246,31 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'settings_ui_flag_test', $settings_page_notices[0]['message'] );
 		$this->assertStringContainsString( 'advanced', $settings_page_notices[0]['message'] );
 		$this->assertStringContainsString( 'Unable to load extension script handles.', $settings_page_notices[0]['message'] );
+	}
+
+	/**
+	 * @testdox Should render classic settings when a native schema violates the canonical contract.
+	 */
+	public function test_invalid_canonical_schema_uses_classic_output(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Settings_Page::output' );
+
+		global $current_section;
+		$current_section = '';
+		$page            = $this->get_settings_ui_test_page_with_invalid_schema();
+
+		try {
+			ob_start();
+			$page->output();
+			$output = ob_get_clean();
+		} finally {
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertArrayNotHasKey( 'hide_save_button', $GLOBALS );
 	}
 
 	/**
@@ -230,6 +325,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$current_section = '';
 		$page            = $this->get_settings_ui_test_page_with_counting_script_handles();
 		$context         = SettingsUIRequestContext::for_settings_page( $page, '' );
+		wp_register_script( 'settings-ui-counting-handle', 'https://example.com/counting.js', array(), '1.0.0', true );
 
 		$this->assertSame( array( 'settings-ui-counting-handle' ), $context->get_script_handles() );
 
@@ -691,6 +787,111 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			 * @return array
 			 */
 			protected function get_settings_for_section_core( $section_id ) {
+				return array(
+					array(
+						'id'    => 'woocommerce_settings_ui_flag_test',
+						'type'  => 'text',
+						'title' => 'Settings UI flag test',
+					),
+				);
+			}
+		};
+	}
+
+	/**
+	 * Build a settings page whose Settings UI extension script is not registered.
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	private function get_settings_ui_test_page_with_missing_script_handle(): \WC_Settings_Page {
+		return new class() extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'settings_ui_flag_test';
+				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Get the settings UI page adapter.
+			 *
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
+				return new class( $this ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
+					/**
+					 * Get script handles.
+					 *
+					 * @param string $section_id Section id.
+					 * @return string[]
+					 */
+					public function get_script_handles( string $section_id ): array {
+						unset( $section_id );
+						return array( 'settings-ui-missing-handle' );
+					}
+				};
+			}
+
+			/**
+			 * Get settings for the default section.
+			 *
+			 * @return array
+			 */
+			protected function get_settings_for_default_section() {
+				return array(
+					array(
+						'id'    => 'woocommerce_settings_ui_flag_test',
+						'type'  => 'text',
+						'title' => 'Settings UI flag test',
+					),
+				);
+			}
+		};
+	}
+
+	/**
+	 * Build a settings page with a noncanonical field value.
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	private function get_settings_ui_test_page_with_invalid_schema(): \WC_Settings_Page {
+		return new class() extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'settings_ui_flag_test';
+				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Get the settings UI page adapter.
+			 *
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
+				return new class( $this ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
+					/**
+					 * Build an invalid schema.
+					 *
+					 * @param string $section_id Section id.
+					 * @return array
+					 */
+					public function get_schema( string $section_id ): array {
+						$schema = parent::get_schema( $section_id );
+						$schema['groups']['default']['fields'][0]['value'] = new \stdClass();
+						return $schema;
+					}
+				};
+			}
+
+			/**
+			 * Get settings for the default section.
+			 *
+			 * @return array
+			 */
+			protected function get_settings_for_default_section() {
 				return array(
 					array(
 						'id'    => 'woocommerce_settings_ui_flag_test',
