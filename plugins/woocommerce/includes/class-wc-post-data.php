@@ -357,7 +357,8 @@ class WC_Post_Data {
 			return;
 		}
 
-		$parent_ids = array_unique( array_filter( array( $previous_parent, $current_parent ) ) );
+		// Exclude 0, which represents the taxonomy root rather than a term to recount.
+		$parent_ids = array_filter( array( $previous_parent, $current_parent ) );
 		$taxonomy   = get_taxonomy( 'product_cat' );
 
 		if ( empty( $parent_ids ) || ! $taxonomy ) {
