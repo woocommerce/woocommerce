@@ -14,41 +14,15 @@ const test = base.extend( {} );
  * Locates the "Add to Cart with Options" renderings a test in this file
  * puts on the Single Product Template, in document order: the template's
  * own main form, optionally a second page-wide surface (e.g. a sticky bar,
- * rendered as a sibling in the template content — no scope declaration of
- * its own, so it shares the page's scope exactly like the main form), and a
- * Single Product block wrapping a further rendering of the same product (a
- * scope-overriding container).
+ * rendered as a sibling in the template content — it declares no collection
+ * boundary of its own, so it resolves the same page-wide draft collection as
+ * the main form), and a Single Product block wrapping a further rendering of
+ * the same product (a container that isolates its own draft collection).
  */
 const addToCartWithOptionsForms = ( page: import('@playwright/test').Page ) =>
 	page.locator( '[data-block-name="woocommerce/add-to-cart-with-options"]' );
 
-/**
- * Reads the `woocommerce/cart` store's scope-keyed draft ledger directly —
- * the same technique `cart-store/mutation-batcher.block_theme.spec.ts` uses
- * to assert the store's internals. Used below to confirm that quantity
- * *and* attribute edits land together in the shared `draftItems[pageScope]`
- * entry, while a Single Product block override keeps its own separate
- * scope bucket untouched.
- */
-const readCartScopeState = ( page: import('@playwright/test').Page ) =>
-	page.evaluate( async () => {
-		const { store } = await import( '@wordpress/interactivity' );
-		const unlockKey =
-			'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-		await import( '@woocommerce/stores/woocommerce/cart' );
-		const { state } = store( 'woocommerce/cart', {}, { lock: unlockKey } );
-		return {
-			pageScope: state.pageScope as string,
-			draftItems: JSON.parse(
-				JSON.stringify( state.draftItems )
-			) as Record<
-				string,
-				{ id: number; quantity: number; variation?: unknown[] }[]
-			>,
-		};
-	} );
-
-test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolates', () => {
+test.describe( 'Scoped drafts: synced page-wide surfaces; Single Product block stays isolated', () => {
 	test( 'a second page-wide surface picks up a quantity edit made on the main form; a Single Product block override never sees it', async ( {
 		page,
 		requestUtils,
@@ -61,11 +35,11 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 		// exactly as several pre-existing suites already do (e.g.
 		// `add-to-cart-form.block_theme.spec.ts`). This is the only way to
 		// place a *third*, container-free rendering of the product's own
-		// template alongside a scope-overriding Single Product block on
-		// one page: the template's ambient product context (established by
-		// WordPress for any singular product view, independent of which
-		// blocks are present) is what makes the first two renderings
-		// "page-wide" in the first place.
+		// template alongside an isolating Single Product block on one page:
+		// the template's ambient product context (established by WordPress
+		// for any singular product view, independent of which blocks are
+		// present) is what makes the first two renderings "page-wide" in
+		// the first place.
 		await requestUtils.createTemplate( 'wp_template', {
 			slug: 'single-product',
 			title: 'Custom Single Product',
@@ -103,10 +77,11 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 			await mainQuantity.fill( '3' );
 			await mainQuantity.blur();
 
-			// The second surface shares the page scope the main form just
-			// wrote to, so its own quantity input repaints to match — a
-			// shopper looking at the second surface sees the same value the
-			// main form was just set to, not a stale one.
+			// The second surface resolves the same page-wide draft
+			// collection the main form just wrote to, so its own quantity
+			// input repaints to match — a shopper looking at the second
+			// surface sees the same value the main form was just set to,
+			// not a stale one.
 			const secondSurfaceQuantity =
 				secondSurface.getByLabel( 'Product quantity' );
 			await expect( secondSurfaceQuantity ).toHaveValue( '3' );
@@ -131,11 +106,11 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 			).resolves.toEqual( [ 3 ] );
 		} );
 
-		await test.step( 'the scope-overriding Single Product block was never affected by the page-wide edit, and its own edit adds independently', async () => {
+		await test.step( 'the isolated Single Product block was never affected by the page-wide edit, and its own edit adds independently', async () => {
 			await page.goto( '/product/beanie/' );
 
 			// Still its own untouched default: the page-wide edit above
-			// never reached this container's own scope.
+			// never reached this container's own collection.
 			await expect(
 				overriddenForm.getByLabel( 'Product quantity' )
 			).toHaveValue( '1' );
@@ -161,31 +136,31 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 			// (override) = 8. The override's contribution landing
 			// correctly, on top of the earlier add, is exactly what proves
 			// its edit was never swallowed by (or overwritten by) the
-			// page-wide scope's draft.
+			// page-wide collection's draft.
 			await expect(
 				readCartLineQuantities( page, 'Beanie' )
 			).resolves.toEqual( [ 8 ] );
 		} );
 	} );
 
-	test( 'for a variable product, quantity and attribute edits land in the shared page scope; a second page-wide surface reflects them without reverting either form; a Single Product block override resolves its own scope', async ( {
+	test( 'for a variable product, quantity and attribute edits land in the shared page-wide collection; a second page-wide surface reflects them without reverting either form; a Single Product block override resolves its own collection', async ( {
 		page,
 		requestUtils,
 		frontendUtils,
 	} ) => {
 		const hoodieId = await getPostIdBySlug( 'hoodie' );
 
-		// A second page-wide surface (no scope declaration of its own, so it
-		// shares the page's scope exactly like the main form) sits alongside
-		// the main form and the Single Product block override, mirroring the
-		// simple-product case above. For a variable product this also
-		// exercises variation resolution: the second surface's own
-		// quantity- and attribute-selection watches re-run whenever the
-		// shared page-wide variation resolves, so this covers that a
-		// surface which never received its own edit displays the resolved
-		// selection and quantity without ever writing its own stale local
-		// state back over them, and that it can submit exactly what it
-		// displays.
+		// A second page-wide surface (no collection boundary of its own, so
+		// it resolves the page-wide collection exactly like the main form)
+		// sits alongside the main form and the Single Product block
+		// override, mirroring the simple-product case above. For a variable
+		// product this also exercises variation resolution: the second
+		// surface's own quantity- and attribute-selection watches re-run
+		// whenever the shared page-wide variation resolves, so this covers
+		// that a surface which never received its own edit displays the
+		// resolved selection and quantity without ever writing its own
+		// stale local state back over them, and that it can submit exactly
+		// what it displays.
 		await requestUtils.createTemplate( 'wp_template', {
 			slug: 'single-product',
 			title: 'Custom Single Product',
@@ -212,7 +187,7 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 		const secondSurface = forms.nth( 1 );
 		const overriddenForm = forms.nth( 2 );
 
-		await test.step( 'configuring the main form writes quantity and attributes into the shared page-scope draft; the second page-wide surface displays the edit and can submit it, without either form’s own values reverting; the override’s own scope stays untouched', async () => {
+		await test.step( 'configuring the main form writes quantity and attributes into the shared page-wide draft; the second page-wide surface displays the edit and can submit it, without either form’s own values reverting; the override’s own collection stays untouched', async () => {
 			const mainQuantity = mainForm.getByLabel( 'Product quantity' );
 			await mainQuantity.fill( '3' );
 			await mainQuantity.blur();
@@ -227,44 +202,41 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 				.click();
 
 			// The variation selector resolves the matching variation
-			// asynchronously (it watches the in-context product data), so
-			// poll until the shared page-scope draft reflects the fully
-			// resolved variation + quantity.
-			await expect
-				.poll( async () => {
-					const { pageScope, draftItems } = await readCartScopeState(
-						page
-					);
-					const pageWideDraft = draftItems[ pageScope ]?.find(
-						( draft ) =>
-							Array.isArray( draft.variation ) &&
-							draft.variation.length > 0
-					);
-					return pageWideDraft?.quantity;
-				} )
-				.toBe( 3 );
-
-			const { pageScope, draftItems } = await readCartScopeState( page );
-
-			// The container's own scope — `single-product/<id>/<n>`, as
-			// minted by `SingleProduct.php` — still only has its untouched
-			// server-seeded default: the main form's edit never reached it.
-			const overriddenScope = Object.keys( draftItems ).find(
-				( scope ) => scope !== pageScope
+			// asynchronously (it watches the in-context product data), and
+			// gates the main form's own Add to cart on that same resolved
+			// selection — so waiting for it to clear its disabled state is
+			// the shopper-visible sign that the shared page-wide draft now
+			// carries the fully resolved variation and quantity.
+			const mainAddToCartButton = mainForm.getByRole( 'button', {
+				name: 'Add to cart',
+			} );
+			await expect( mainAddToCartButton ).not.toHaveClass(
+				/\bdisabled\b/
 			);
-			expect( overriddenScope ).toBeDefined();
-			expect( draftItems[ overriddenScope as string ] ).toEqual( [
-				expect.objectContaining( {
-					id: Number( hoodieId ),
-					quantity: 1,
-					variation: [],
-				} ),
-			] );
+
+			// The container's own draft collection — established by the
+			// Single Product block, as emitted by `SingleProduct.php` —
+			// still only holds its untouched server-seeded default: the
+			// main form's edit never reached it, so the override's own
+			// inputs stay exactly as they started.
+			await expect(
+				overriddenForm.getByLabel( 'Product quantity' )
+			).toHaveValue( '1' );
+			await expect(
+				overriddenForm
+					.getByRole( 'radiogroup', { name: 'Color' } )
+					.getByRole( 'radio', { name: 'Blue', exact: true } )
+			).not.toBeChecked();
+			await expect(
+				overriddenForm
+					.getByRole( 'radiogroup', { name: 'Logo' } )
+					.getByRole( 'radio', { name: 'No', exact: true } )
+			).not.toBeChecked();
 
 			// The second surface never received its own edit, yet its
 			// quantity input and attribute chips display exactly what the
-			// main form just set — both surfaces read the same shared
-			// page-scope draft.
+			// main form just set — both surfaces resolve the same shared
+			// page-wide draft collection.
 			const secondSurfaceQuantity =
 				secondSurface.getByLabel( 'Product quantity' );
 			await expect( secondSurfaceQuantity ).toHaveValue( '3' );
@@ -336,7 +308,7 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; scope override isolate
 			await expect( blueRow ).toHaveCount( 1 );
 		} );
 
-		await test.step( 'the override resolves its own scope: configuring a different variation there adds an independent cart line', async () => {
+		await test.step( 'the override resolves its own collection: configuring a different variation there adds an independent cart line', async () => {
 			await page.goto( '/product/hoodie/' );
 
 			await overriddenForm
