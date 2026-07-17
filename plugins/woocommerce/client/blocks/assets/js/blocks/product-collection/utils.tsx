@@ -14,6 +14,7 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 import { isString, type ProductResponseItem } from '@woocommerce/types';
 import { getProduct } from '@woocommerce/editor-components/utils';
 import {
@@ -410,6 +411,7 @@ export const useSetPreviewState = ( {
 } ) => {
 	const { __unstableMarkNextChangeAsNotPersistent } =
 		useDispatch( blockEditorStore );
+	const isPreviewMode = usePreviewMode();
 
 	const setState = ( newPreviewState: PreviewState ) => {
 		__unstableMarkNextChangeAsNotPersistent();
@@ -434,12 +436,13 @@ export const useSetPreviewState = ( {
 			__unstableMarkNextChangeAsNotPersistent();
 			setAttributes( {
 				__privatePreviewState: {
-					isPreview: usesReferencePreviewMessage.length > 0,
+					isPreview: isPreviewMode,
 					previewMessage: usesReferencePreviewMessage,
 				},
 			} );
 		}
 	}, [
+		isPreviewMode,
 		setAttributes,
 		usesReferencePreviewMessage,
 		isUsingReferencePreviewMode,
@@ -474,21 +477,12 @@ export const useSetPreviewState = ( {
 	 * - Products by Attribute
 	 * - Products by Brand
 	 */
-	const termId =
-		location.type === LocationType.Archive
-			? location.sourceData?.termId
-			: null;
 	useEffect( () => {
 		if ( ! setPreviewState && ! isUsingReferencePreviewMode ) {
-			const isGenericArchiveTemplate =
-				location.type === LocationType.Archive && termId === null;
-
 			__unstableMarkNextChangeAsNotPersistent();
 			setAttributes( {
 				__privatePreviewState: {
-					isPreview: isGenericArchiveTemplate
-						? !! attributes?.query?.inherit
-						: false,
+					isPreview: isPreviewMode,
 					previewMessage: __(
 						'Actual products will vary depending on the page being viewed.',
 						'woocommerce'
@@ -497,10 +491,8 @@ export const useSetPreviewState = ( {
 			} );
 		}
 	}, [
-		attributes?.query?.inherit,
+		isPreviewMode,
 		usesReferencePreviewMessage,
-		termId,
-		location.type,
 		setAttributes,
 		setPreviewState,
 		isUsingReferencePreviewMode,

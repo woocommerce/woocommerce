@@ -14,6 +14,7 @@ export interface BlockAttributes {
 	displayStyle: string;
 	showFilterButton: boolean;
 	selectType: string;
+	/** @deprecated Use isPreviewMode from blockEditorStore via usePreviewMode hook instead. */
 	isPreview?: boolean;
 }
 

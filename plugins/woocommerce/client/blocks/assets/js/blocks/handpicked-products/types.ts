@@ -24,7 +24,8 @@ export interface Attributes {
 		| 'menu_order';
 	products: Array< number >;
 	alignButtons: boolean;
-	isPreview: boolean;
+	/** @deprecated Use usePreviewMode hook instead. */
+	isPreview?: boolean;
 }
 /**
  * Component to handle edit mode of "Hand-picked Products".

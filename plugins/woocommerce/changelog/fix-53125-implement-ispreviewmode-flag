@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Implement stabilized WordPress 6.7 isPreviewMode flag across WooCommerce blocks, replacing the custom isPreview attribute.

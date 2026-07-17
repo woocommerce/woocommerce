@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { usePrevious, useShallowEqual } from '@woocommerce/base-hooks';
+import { usePreviewMode, usePrevious, useShallowEqual } from '@woocommerce/base-hooks';
 import {
 	useCollection,
 	useQueryStateByKey,
@@ -94,8 +94,10 @@ const AttributeFilterBlock = ( {
 	const [ hasSetFilterDefaultsFromUrl, setHasSetFilterDefaultsFromUrl ] =
 		useState( false );
 
+	const isPreviewMode = usePreviewMode();
+
 	const attributeObject =
-		blockAttributes.isPreview && ! blockAttributes.attributeId
+		isPreviewMode && ! blockAttributes.attributeId
 			? previewAttributeObject
 			: getAttributeFromID( blockAttributes.attributeId );
 
@@ -116,7 +118,7 @@ const AttributeFilterBlock = ( {
 	const [ displayedOptions, setDisplayedOptions ] = useState<
 		DisplayOption[]
 	>(
-		blockAttributes.isPreview && ! blockAttributes.attributeId
+		isPreviewMode && ! blockAttributes.attributeId
 			? previewOptions
 			: []
 	);
@@ -492,8 +494,8 @@ const AttributeFilterBlock = ( {
 
 	const TagName =
 		`h${ blockAttributes.headingLevel }` as keyof JSX.IntrinsicElements;
-	const termsLoading = ! blockAttributes.isPreview && attributeTermsLoading;
-	const countsLoading = ! blockAttributes.isPreview && filteredCountsLoading;
+	const termsLoading = ! isPreviewMode && attributeTermsLoading;
+	const countsLoading = ! isPreviewMode && filteredCountsLoading;
 
 	const isLoading =
 		( termsLoading || countsLoading ) && displayedOptions.length === 0;

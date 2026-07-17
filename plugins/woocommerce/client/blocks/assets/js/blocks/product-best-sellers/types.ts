@@ -11,7 +11,8 @@ interface Attributes {
 	};
 	categories: Array< number >;
 	catOperator: string;
-	isPreview: boolean;
+	/** @deprecated Use usePreviewMode hook instead. */
+	isPreview?: boolean;
 	stockStatus: Array< string >;
 	editMode: boolean;
 	orderby:

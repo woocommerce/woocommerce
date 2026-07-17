@@ -25,7 +25,8 @@ export interface Attributes {
 		| 'menu_order';
 	rows: number;
 	alignButtons: boolean;
-	isPreview: boolean;
+	/** @deprecated Use usePreviewMode hook instead. */
+	isPreview?: boolean;
 	stockStatus: Array< string >;
 }
 
