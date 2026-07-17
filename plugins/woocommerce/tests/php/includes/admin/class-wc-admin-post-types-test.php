@@ -215,6 +215,44 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Quick Edit preserves expired sale dates when price fields are absent from the request.
+	 */
+	public function test_quick_edit_preserves_expired_sale_dates_when_price_fields_not_submitted(): void {
+		$format_price = function ( $value ) {
+			return '' === $value || null === $value ? $value : number_format( (float) $value, 2, '.', '' );
+		};
+		add_filter( 'woocommerce_product_get_regular_price', $format_price );
+		add_filter( 'woocommerce_product_get_sale_price', $format_price );
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$product->set_regular_price( '100' );
+		$product->set_sale_price( '80' );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - 3 * DAY_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) );
+		$product->save();
+
+		$_REQUEST = array(
+			'woocommerce_quick_edit'       => '1',
+			'woocommerce_quick_edit_nonce' => wp_create_nonce( 'woocommerce_quick_edit_nonce' ),
+			'_stock_status'                => 'instock',
+		);
+
+		$this->sut->bulk_and_quick_edit_save_post( $product->get_id(), get_post( $product->get_id() ) );
+
+		remove_filter( 'woocommerce_product_get_regular_price', $format_price );
+		remove_filter( 'woocommerce_product_get_sale_price', $format_price );
+
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertSame( '100', $updated_product->get_regular_price( 'edit' ), 'An absent regular price field should leave the stored regular price untouched.' );
+		$this->assertSame( '80', $updated_product->get_sale_price( 'edit' ), 'An absent sale price field should leave the stored sale price untouched.' );
+		$this->assertInstanceOf( WC_DateTime::class, $updated_product->get_date_on_sale_from( 'edit' ), 'Quick Edit should preserve the expired sale start date when no price fields were submitted.' );
+		$this->assertInstanceOf( WC_DateTime::class, $updated_product->get_date_on_sale_to( 'edit' ), 'Quick Edit should preserve the expired sale end date when no price fields were submitted.' );
+		$this->assertFalse( $updated_product->is_on_sale( 'edit' ), 'The expired sale should not be reactivated by a request without price fields.' );
+	}
+
+	/**
 	 * Provides valid price changes for active and future sale schedules.
 	 *
 	 * @return array<string, array{int, int, string, string}>

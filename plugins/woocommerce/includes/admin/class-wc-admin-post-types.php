@@ -467,9 +467,14 @@ class WC_Admin_Post_Types {
 				$product->set_sale_price( $new_sale_price );
 			}
 
-			$regular_price  = $product->get_regular_price( 'edit' );
-			$sale_price     = $product->get_sale_price( 'edit' );
-			$price_changed  = wc_format_decimal( $regular_price ) !== $old_regular_price || wc_format_decimal( $sale_price ) !== $old_sale_price;
+			$regular_price = $product->get_regular_price( 'edit' );
+			$sale_price    = $product->get_sale_price( 'edit' );
+
+			// Only a submitted field can be a changed field.
+			$regular_price_changed = isset( $request_data['_regular_price'] ) && wc_format_decimal( $regular_price ) !== $old_regular_price;
+			$sale_price_changed    = isset( $request_data['_sale_price'] ) && wc_format_decimal( $sale_price ) !== $old_sale_price;
+
+			$price_changed  = $regular_price_changed || $sale_price_changed;
 			$sale_date_to   = $product->get_date_on_sale_to( 'edit' );
 			$sale_has_ended = $sale_date_to && $sale_date_to->getTimestamp() < time();
 
