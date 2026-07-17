@@ -83,7 +83,7 @@ const restrictedImports = [
 			'omit',
 			'omitBy',
 			'once',
-			'orderby',
+			'orderBy',
 			'overEvery',
 			'partial',
 			'partialRight',
