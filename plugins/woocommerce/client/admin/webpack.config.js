@@ -12,12 +12,12 @@ const webpack = require( 'webpack' );
 /**
  * Internal dependencies
  */
-const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
-const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
 } = require( '@woocommerce/internal-build/style-build' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
+const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
+const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
@@ -87,6 +87,58 @@ const resolvePackageSourceEntry = ( name ) => {
 	}
 	return path.resolve( path.dirname( pkgJsonPath ), source );
 };
+
+// The settings-ui entry bundles the WPDS-generation dataviews stack:
+// dataviews 17.x needs @wordpress/components 37 APIs that the wp-admin
+// runtime copy does not have, so modules inside that graph resolve
+// components (and the packages whose instance identity must match it:
+// private-apis for the lock/unlock handshake, compose for its newer
+// hooks) to the settings-ui pinned copies instead of the wp.* externals.
+// Every other entry keeps the runtime externals untouched.
+const SETTINGS_UI_PKG_DIR = path.resolve(
+	__dirname,
+	`${ WC_ADMIN_PACKAGES_DIR }/settings-ui`
+);
+const SETTINGS_UI_GRAPH_ISSUER =
+	/[\/\\]packages[\/\\]js[\/\\]settings-ui[\/\\]|@wordpress\+(?:dataviews@17|ui@0\.18|components@37|theme@1|rich-text@7|compose@8)/;
+
+const resolveEsmEntryFrom = ( request, fromDir ) => {
+	const resolvedEntry = require.resolve( request, { paths: [ fromDir ] } );
+	const marker = path.join( 'node_modules', ...request.split( '/' ) );
+	const packageDir = resolvedEntry.slice(
+		0,
+		resolvedEntry.lastIndexOf( marker ) + marker.length
+	);
+	const pkg = require( path.join( packageDir, 'package.json' ) );
+	return path.join( packageDir, pkg.module || pkg.main );
+};
+
+const getSettingsUiModuleEntries = () => {
+	const componentsEntry = resolveEsmEntryFrom(
+		'@wordpress/components',
+		SETTINGS_UI_PKG_DIR
+	);
+	const componentsDir = path.dirname( componentsEntry );
+	return {
+		'@wordpress/components': componentsEntry,
+		'@wordpress/private-apis': resolveEsmEntryFrom(
+			'@wordpress/private-apis',
+			componentsDir
+		),
+		'@wordpress/compose': resolveEsmEntryFrom(
+			'@wordpress/compose',
+			componentsDir
+		),
+		// components' Autocomplete unlocks rich-text's private APIs at
+		// module scope, so rich-text must share the graph's private-apis
+		// instance rather than the externalized runtime copy.
+		'@wordpress/rich-text': resolveEsmEntryFrom(
+			'@wordpress/rich-text',
+			componentsDir
+		),
+	};
+};
+const settingsUiModuleEntries = getSettingsUiModuleEntries();
 
 // Packages opt into having admin bundle their stylesheet by exporting a
 // `src/style.scss` next to `src/index.ts`. The file isn't imported from
@@ -276,6 +328,40 @@ const jsConfig = {
 		// React Fast Refresh.
 		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
 
+		// Redirect the settings-ui graph's version-sensitive @wordpress
+		// requests to its pinned copies (see settingsUiModuleEntries).
+		// Absolute-path requests never match the dependency-extraction
+		// externals, so these modules bundle while other entries keep
+		// externalizing the same bare requests.
+		new webpack.NormalModuleReplacementPlugin(
+			/^@wordpress\/(?:components|private-apis|compose|rich-text)$/,
+			( resource ) => {
+				const issuer =
+					resource.contextInfo && resource.contextInfo.issuer;
+				if ( ! issuer || ! SETTINGS_UI_GRAPH_ISSUER.test( issuer ) ) {
+					if (
+						process.env.WC_NMRP_DEBUG &&
+						resource.request === '@wordpress/private-apis'
+					) {
+						// eslint-disable-next-line no-console
+						console.error( 'NMRP-MISS', issuer );
+					}
+					return;
+				}
+				const replacement = settingsUiModuleEntries[ resource.request ];
+				if ( ! replacement ) {
+					return;
+				}
+				resource.request = replacement;
+				// The externals check reads the dependency's request, not
+				// the resolveData one, so both must carry the replacement
+				// for the module to escape dependency extraction.
+				if ( resource.dependencies && resource.dependencies[ 0 ] ) {
+					resource.dependencies[ 0 ].request = replacement;
+				}
+			}
+		),
+
 		// We reuse this Webpack setup for Storybook, where we need to disable dependency extraction.
 		! process.env.STORYBOOK &&
 			new WooCommerceDependencyExtractionWebpackPlugin( {
@@ -315,6 +401,12 @@ const jsConfig = {
 					}
 
 					if ( request.startsWith( '@wordpress/ui' ) ) {
+						return null;
+					}
+
+					// No wp.styleRuntime global exists; @wordpress/ui and
+					// @wordpress/components import it and it must bundle.
+					if ( request.startsWith( '@wordpress/style-runtime' ) ) {
 						return null;
 					}
 
