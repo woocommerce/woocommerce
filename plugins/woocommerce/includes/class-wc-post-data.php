@@ -27,7 +27,7 @@ class WC_Post_Data {
 	/**
 	 * Previous parents of product categories being edited.
 	 *
-	 * @var array<int, int>
+	 * @var array<int, list<int>>
 	 */
 	private static $product_cat_previous_parents = array();
 
@@ -275,7 +275,7 @@ class WC_Post_Data {
 			return;
 		}
 
-		self::$product_cat_previous_parents[ (int) $term_id ] = (int) $product_cat->parent;
+		self::$product_cat_previous_parents[ (int) $term_id ][] = (int) $product_cat->parent;
 	}
 
 	/**
@@ -336,8 +336,15 @@ class WC_Post_Data {
 	 * @param int $term_id Edited product category ID.
 	 */
 	private static function recount_product_cat_parents( int $term_id ): void {
-		$previous_parent = self::$product_cat_previous_parents[ $term_id ] ?? null;
-		unset( self::$product_cat_previous_parents[ $term_id ] );
+		$previous_parents = self::$product_cat_previous_parents[ $term_id ] ?? array();
+		$previous_parent  = array_pop( $previous_parents );
+
+		if ( empty( $previous_parents ) ) {
+			unset( self::$product_cat_previous_parents[ $term_id ] );
+		} else {
+			self::$product_cat_previous_parents[ $term_id ] = $previous_parents;
+		}
+
 		$edited_product_cat = get_term( $term_id, 'product_cat' );
 
 		if ( null === $previous_parent || ! $edited_product_cat instanceof WP_Term ) {
