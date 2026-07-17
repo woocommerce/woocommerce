@@ -23,7 +23,7 @@ import { useLayoutContext } from '@woocommerce/admin-layout';
 /**
  * Internal dependencies
  */
-import { taskHeaders } from './components/task-headers';
+import { taskHeaders, DefaultTaskHeader } from './components/task-headers';
 import DismissModal from './components/dismiss-modal';
 import TaskListCompleted from './components/task-list-completed';
 import { ProgressHeader } from '~/task-lists/components/progress-header';
@@ -231,7 +231,11 @@ export const SetupTaskList = ( {
 	};
 
 	const showTaskHeader = ( task: TaskType ) => {
-		if ( taskHeaders[ task.id ] || hasTaskListHeaderSlotFills ) {
+		if (
+			taskHeaders[ task.id ] ||
+			hasTaskListHeaderSlotFills ||
+			task.imageUrl
+		) {
 			setHeaderData( {
 				task,
 				goToTask: () => goToTask( task ),
@@ -312,7 +316,8 @@ export const SetupTaskList = ( {
 							) : (
 								headerData?.task &&
 								createElement(
-									taskHeaders[ headerData.task.id ],
+									taskHeaders[ headerData.task.id ] ??
+										DefaultTaskHeader,
 									headerData
 								)
 							) }

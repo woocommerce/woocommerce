@@ -148,12 +148,7 @@
 					"name": "PHP: 8.5 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
-					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main",
-						"--testsuite=wc-phpunit-graphql-infra",
-						"--testsuite=wc-phpunit-graphql-api"
-					],
+					"shardingArguments": [],
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
@@ -181,8 +176,7 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main"
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main"
 					],
 					"onlyForDependencies": [],
 					"changes": [
@@ -212,8 +206,7 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main"
+						"--testsuite=wc-phpunit-legacy,wc-phpunit-main"
 					],
 					"onlyForDependencies": [],
 					"changes": [
@@ -266,7 +259,7 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/e2e/**",
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}",
 						".wp-env.e2e.json",
 						"woocommerce.php",
 						"uninstall.php"
@@ -304,7 +297,7 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/e2e/**",
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}",
 						".wp-env.e2e.json",
 						"woocommerce.php",
 						"uninstall.php"
@@ -331,7 +324,7 @@
 					"command": "test:e2e:gb-stable",
 					"shardingArguments": [],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -384,7 +377,7 @@
 					"command": "test:e2e:hpos-off",
 					"shardingArguments": [],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -414,7 +407,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -447,7 +440,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -480,7 +473,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -513,7 +506,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -547,7 +540,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -581,7 +574,7 @@
 						"--shard=2/2"
 					],
 					"changes": [
-						"tests/e2e/**"
+						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/e2e-utils-playwright"
@@ -677,12 +670,7 @@
 					"name": "PHP: 8.5 WP: latest (HPOS:off)",
 					"testType": "unit:php",
 					"command": "test:php:env:hpos-off",
-					"shardingArguments": [
-						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main",
-						"--testsuite=wc-phpunit-graphql-infra",
-						"--testsuite=wc-phpunit-graphql-api"
-					],
+					"shardingArguments": [],
 					"onlyForDependencies": [],
 					"changes": [
 						"client/admin/config/*.json",
