@@ -6,20 +6,21 @@ sidebar_position: 0
 
 # Settings APIs and admin pages
 
-Managing your settings, admin pages, custom attributes, and more is possible through the Settings APIs. The docs in this section cover what the Settings APIs and admin pages system offers in general. This guide goes further to map all of the various approaches you have available, some of the scenarios they cover, and the trade-offs of each approach.
+Managing your settings, admin pages, and more is possible through the Settings APIs. The docs in this section cover what the Settings APIs and admin pages system offers in general. This guide goes further to map all of the various approaches you have available, some of the scenarios they cover, and the trade-offs of each approach.
 
 There are also code examples for your reference before you commit to an implementation path. However, reading through the approach you're interested in will give you greater scope to understand and apply the principles of each.
 
 ## Approaches at a glance
 
-The Settings API and admin pages section has seven approaches, outlined in the table. The three core approaches (the Settings API, `WC_Integration`, and admin page registration) will cover most of your bases, while the remaining four are specific for navigation, email, and taxonomy visibility.
+The Settings API and admin pages section has six approaches, outlined in the table. The four core concepts (Settings API, settings pages, settings tab sections, and admin pages) cover most settings and admin placement decisions, while the remaining approaches cover specialized integrations and navigation shortcuts.
 
 | Approach | Use when | Requires |
 | :---- | :---- | :---- |
 | [Settings API](/docs/extensions/settings-and-config/settings-api/) | Adding settings fields to an existing WooCommerce page, such as a payment gateway or shipping method | PHP |
-| [`WC_Integration`](/docs/extensions/settings-and-config/implementing-settings/) | Your extension connects to a third-party service and needs a page under the Integrations tab | PHP |
-| [Add a section to a settings tab](/docs/extensions/settings-and-config/adding-a-section-to-a-settings-tab/) | Your settings belong under an existing WooCommerce tab rather than a new page | PHP |
-| [Admin page registration](/docs/extensions/settings-and-config/working-with-woocommerce-admin-pages/) | Your extension needs a standalone page outside WooCommerce's settings structure | PHP or JavaScript |
+| [Settings pages](/docs/extensions/settings-and-config/extend-wc-settings-page/) | Your extension needs a full tab under **WooCommerce > Settings** with one or more sections | PHP |
+| [Settings tab sections](/docs/extensions/settings-and-config/adding-a-section-to-a-settings-tab/) | Your settings belong under an existing WooCommerce tab rather than a new page | PHP |
+| [Admin pages](/docs/extensions/settings-and-config/working-with-woocommerce-admin-pages/) | Your extension needs a standalone page outside WooCommerce's settings structure | PHP or JavaScript |
+| [Integration settings](/docs/extensions/settings-and-config/implementing-settings/) | Your extension connects to a third-party service and needs a page under the Integrations tab | PHP |
 | [Store management links](/docs/extensions/settings-and-config/how-to-add-your-own-store-management-links/) | Surfacing quick-access links on the WooCommerce home screen | JavaScript |
 
 ## Settings API
@@ -60,46 +61,52 @@ class My_Extension_Settings extends WC_Settings_API {
 }
 ```
 
-## WC_Integration
+## Settings pages
 
-`WC_Integration` extends `WC_Settings_API` and creates a settings page under **WooCommerce > Settings > Integrations**. It also handles data saving and sanitization for you. You should use it when your extension connects to an external service and a dedicated page under the **Integrations** tab is the right home for its settings.
+Use `WC_Settings_Page` when your extension needs a full tab under **WooCommerce > Settings**. A settings page class registers the tab, renders one or more sections, defines fields with WooCommerce's settings array format, and lets WooCommerce handle saving through the existing settings form.
 
-The main trade-off is placement: if your settings belong under an existing WooCommerce tab or on a standalone page, this is not the path. `WC_Integration` is great for fields such as API keys or toggle switches because you get saving and sanitization without writing that logic yourself.
+The main trade-off is navigation weight. If your extension only needs a few settings that clearly belong under an existing WooCommerce settings tab, add a section to that tab instead of creating a new top-level tab. If the extension needs an interface outside WooCommerce settings entirely, use admin page registration.
 
 ```php
-class My_Integration extends WC_Integration {
+final class My_Plugin_Settings_Page extends WC_Settings_Page {
 	public function __construct() {
-		$this->id                 = 'my-integration';
-		$this->method_title       = __( 'My Integration', 'my-integration' );
-		$this->method_description = __( 'Connect to My Service.', 'my-integration' );
-		$this->init_form_fields();
-		$this->init_settings();
-		add_action(
-			'woocommerce_update_options_integration_' . $this->id,
-			array( $this, 'process_admin_options' )
-		);
+		$this->id    = 'my_plugin';
+		$this->label = __( 'My plugin', 'my-plugin' );
+
+		parent::__construct();
 	}
 
-	public function init_form_fields() {
-		$this->form_fields = array(
-			'api_key' => array(
-				'title' => __( 'API Key', 'my-integration' ),
-				'type'  => 'text',
+	protected function get_settings_for_default_section() {
+		return array(
+			array(
+				'title' => __( 'My plugin settings', 'my-plugin' ),
+				'type'  => 'title',
+				'id'    => 'my_plugin_options',
+			),
+			array(
+				'title'   => __( 'Enable feature', 'my-plugin' ),
+				'id'      => 'my_plugin_enabled',
+				'type'    => 'checkbox',
+				'default' => 'no',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'my_plugin_options',
 			),
 		);
 	}
 }
 
 add_filter(
-	'woocommerce_integrations',
-	function( $integrations ) {
-		$integrations[] = 'My_Integration';
-		return $integrations;
+	'woocommerce_get_settings_pages',
+	function( $settings_pages ) {
+		$settings_pages[] = new My_Plugin_Settings_Page();
+		return $settings_pages;
 	}
 );
 ```
 
-## Adding a section to a settings tab
+## Settings tab sections
 
 Rather than creating a whole new page, you can add a section beneath an existing WooCommerce settings tab using two filters:
 
@@ -188,6 +195,45 @@ addFilter( 'woocommerce_admin_pages_list', 'my-extension', ( pages ) => {
 } );
 ```
 
+## Integration settings
+
+`WC_Integration` extends `WC_Settings_API` and creates a settings page under **WooCommerce > Settings > Integrations**. It also handles data saving and sanitization for you. You should use it when your extension connects to an external service and a dedicated page under the **Integrations** tab is the right home for its settings.
+
+The main trade-off is placement: if your settings belong under an existing WooCommerce tab or on a standalone page, this is not the path. `WC_Integration` is great for fields such as API keys or toggle switches because you get saving and sanitization without writing that logic yourself.
+
+```php
+class My_Integration extends WC_Integration {
+	public function __construct() {
+		$this->id                 = 'my-integration';
+		$this->method_title       = __( 'My Integration', 'my-integration' );
+		$this->method_description = __( 'Connect to My Service.', 'my-integration' );
+		$this->init_form_fields();
+		$this->init_settings();
+		add_action(
+			'woocommerce_update_options_integration_' . $this->id,
+			array( $this, 'process_admin_options' )
+		);
+	}
+
+	public function init_form_fields() {
+		$this->form_fields = array(
+			'api_key' => array(
+				'title' => __( 'API Key', 'my-integration' ),
+				'type'  => 'text',
+			),
+		);
+	}
+}
+
+add_filter(
+	'woocommerce_integrations',
+	function( $integrations ) {
+		$integrations[] = 'My_Integration';
+		return $integrations;
+	}
+);
+```
+
 ## Store management links
 
 The WooCommerce home screen includes a store management dashboard that displays quick-access links and statistics for merchants. You can add your own link there using the `woocommerce_admin_homescreen_quicklinks` JavaScript filter.
@@ -217,82 +263,13 @@ addFilter( 'woocommerce_admin_homescreen_quicklinks', 'my-extension', ( quickLin
 } );
 ```
 
-## Custom attributes in menus
-
-Product attributes in WooCommerce register as custom taxonomies, but are excluded from WordPress navigation menus by default. You opt a specific attribute into menu visibility using the `woocommerce_attribute_show_in_nav_menus` filter. Attribute slugs carry a `pa_` prefix, so an attribute named size becomes `pa_size`.
-
-Once the attribute appears in **Appearance > Menus**, taxonomy archive pages for that attribute use default blog styling. To display products on those archive pages, you copy `woocommerce/templates/taxonomy-product_cat.php` into your theme and rename the file to match the attribute slug (for example, `taxonomy-pa_size.php`).
-
-The implementation is a filter and a template file, but together they enable attribute-based product browsing through typical WordPress navigation.
-
-```php
-add_filter(
-	'woocommerce_attribute_show_in_nav_menus',
-	function( $register, $name ) {
-		if ( 'pa_size' === $name ) {
-			$register = true;
-		}
-		return $register;
-	},
-	1,
-	2
-);
-```
-
-## Email editor integration
-
-The WooCommerce Email Editor lets merchants edit transactional emails using the WordPress Site Editor. Third-party extensions must explicitly opt their emails into Site Editor support as it's not used automatically, even once the editor is enabled.
-
-:::note
-
-The WooCommerce Email Editor is in alpha. To enable it, go to **WooCommerce > Settings > Advanced > Features** and turn on **Block Email Editor (alpha)**.
-
-:::
-
-The integration involves five steps:
-
-1. Extend `WC_Email` and implement the required methods.
-2. Register your email class with the `woocommerce_email_classes` filter.
-3. Opt in to Site Editor support through the `woocommerce_transactional_emails_for_block_editor` filter.
-4. Create a Block template in your plugin's `templates/emails/block/` directory.
-5. Set up triggers by hooking into the appropriate WordPress or WooCommerce actions.
-
-The opt-in step is what determines whether your email uses the Site Editor. Without it, your email appears in the email list but the Site Editor does not apply to it. Block templates use personalization tags: for example, `<!--[woocommerce/customer-first-name]-->` to insert dynamic content at send time.
-
-:::tip
-
-When developing and testing, delete the transient `wc_email_editor_initial_templates_generated` to force template regeneration.
-
-:::
-
-```php
-// Opt in to block editor support.
-add_filter(
-	'woocommerce_transactional_emails_for_block_editor',
-	function( $emails ) {
-		$emails[] = 'your_plugin_custom_email';
-		return $emails;
-	}
-);
-
-// Register the email class.
-add_filter(
-	'woocommerce_email_classes',
-	function( $email_classes ) {
-		$email_classes['YourPlugin_Custom_Email'] = new YourPlugin_Custom_Email();
-		return $email_classes;
-	}
-);
-```
-
 ## Next steps
 
 With the trade-offs and code examples for each approach as a reference, you can work through the full documentation for the one your extension needs.
 
 1. [Settings API](/docs/extensions/settings-and-config/settings-api/). Core reference for the `WC_Settings_API` class.
-2. [Implementing settings with `WC_Integration`](/docs/extensions/settings-and-config/implementing-settings/). How to use the `WC_Integration` class for third-party service connections.
+2. [Adding a settings page](/docs/extensions/settings-and-config/extend-wc-settings-page/). Creating a full tab under **WooCommerce > Settings**.
 3. [Adding a section to a settings tab](/docs/extensions/settings-and-config/adding-a-section-to-a-settings-tab/). Adding a section beneath an existing WooCommerce tab.
 4. [Working with WooCommerce admin pages](/docs/extensions/settings-and-config/working-with-woocommerce-admin-pages/). Registering PHP and React admin pages.
-5. [Adding store management links](/docs/extensions/settings-and-config/how-to-add-your-own-store-management-links/). Navigation shortcuts on the WooCommerce home screen.
-6. [Custom attributes in menus](/docs/features/products/using-custom-attributes-in-menus/). Exposing attribute taxonomies in WordPress navigation menus.
-7. [Email editor integration](/docs/extensions/settings-and-config/email-editor-integration/). Registering custom emails with the block Email Editor (alpha).
+5. [Implementing settings with `WC_Integration`](/docs/extensions/settings-and-config/implementing-settings/). How to use the `WC_Integration` class for third-party service connections.
+6. [Adding store management links](/docs/extensions/settings-and-config/how-to-add-your-own-store-management-links/). Navigation shortcuts on the WooCommerce home screen.
