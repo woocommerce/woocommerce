@@ -31,7 +31,7 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_get_customer_payment_tokens_limit' );
 		remove_all_filters( 'woocommerce_get_payment_tokens_unscoped_limit' );
-		remove_all_filters( 'woocommerce_get_payment_tokens_page_size' );
+		remove_all_filters( 'woocommerce_get_payment_tokens_per_page' );
 		remove_all_filters( 'pre_option_posts_per_page' );
 		update_option( 'posts_per_page', 10 );
 		parent::tearDown();
@@ -172,12 +172,12 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Data store get_tokens should respect the woocommerce_get_payment_tokens_page_size filter.
+	 * @testdox Data store get_tokens should respect the woocommerce_get_payment_tokens_per_page filter.
 	 */
-	public function test_data_store_get_tokens_page_size_filter_is_respected(): void {
+	public function test_data_store_get_tokens_per_page_filter_is_respected(): void {
 		$received = null;
 		add_filter(
-			'woocommerce_get_payment_tokens_page_size',
+			'woocommerce_get_payment_tokens_per_page',
 			function ( $page_size ) use ( &$received ) {
 				$received = $page_size;
 				return 2;
@@ -255,7 +255,7 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_data_store_get_tokens_ignores_an_unusable_page_size( $filtered_value ): void {
 		add_filter(
-			'woocommerce_get_payment_tokens_page_size',
+			'woocommerce_get_payment_tokens_per_page',
 			function () use ( $filtered_value ) {
 				return $filtered_value;
 			}
@@ -318,11 +318,99 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Filter return values sanitize_row_count() accepts, with the row count each is read as.
+	 *
+	 * Validation goes through `filter_var( ..., FILTER_VALIDATE_INT )`, which accepts more than
+	 * the int type: an integral float and a plain integer string are read as the integer they
+	 * spell. Pinning the accept side keeps a later tightening (say, to `is_int()`) from breaking
+	 * working callbacks while the reject-side tests stay green.
+	 *
+	 * The expected count is 7 so a wrong fallback cannot hide: `LIMIT 0, 7` is not a substring of
+	 * `LIMIT 0, 100` or `LIMIT 0, 500`, which the defaults would emit.
+	 *
+	 * @return array<string, array{0: mixed, 1: int}>
+	 */
+	public function usable_row_count_provider(): array {
+		return array(
+			'integer'        => array( 7, 7 ),
+			'integer string' => array( '7', 7 ),
+			'integral float' => array( 7.0, 7 ),
+		);
+	}
+
+	/**
+	 * @testdox Data store get_tokens should accept a page size filter value that reads as a positive integer.
+	 *
+	 * @dataProvider usable_row_count_provider
+	 *
+	 * @param mixed $filtered_value Value returned by the page size filter.
+	 * @param int   $expected       Row count the value should be read as.
+	 */
+	public function test_data_store_get_tokens_accepts_a_usable_page_size( $filtered_value, int $expected ): void {
+		add_filter(
+			'woocommerce_get_payment_tokens_per_page',
+			function () use ( $filtered_value ) {
+				return $filtered_value;
+			}
+		);
+
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		$query = $this->capture_token_query(
+			function () use ( $data_store ) {
+				$data_store->get_tokens(
+					array(
+						'user_id' => $this->user_id,
+						'page'    => 1,
+					)
+				);
+			}
+		);
+
+		$this->assertStringContainsString(
+			'LIMIT 0, ' . $expected,
+			$query,
+			'A page size filter_var() reads as a positive integer should be used, not replaced by the default'
+		);
+	}
+
+	/**
+	 * @testdox Data store get_tokens should accept an unscoped ceiling filter value that reads as a positive integer.
+	 *
+	 * @dataProvider usable_row_count_provider
+	 *
+	 * @param mixed $filtered_value Value returned by the unscoped limit filter.
+	 * @param int   $expected       Row count the value should be read as.
+	 */
+	public function test_data_store_get_tokens_accepts_a_usable_unscoped_ceiling( $filtered_value, int $expected ): void {
+		add_filter(
+			'woocommerce_get_payment_tokens_unscoped_limit',
+			function () use ( $filtered_value ) {
+				return $filtered_value;
+			}
+		);
+
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		$query = $this->capture_token_query(
+			function () use ( $data_store ) {
+				$data_store->get_tokens( array() );
+			}
+		);
+
+		$this->assertStringContainsString(
+			'LIMIT 0, ' . $expected,
+			$query,
+			'A ceiling filter_var() reads as a positive integer should be used, not replaced by the default'
+		);
+	}
+
+	/**
 	 * @testdox Data store get_tokens should size an unscoped query passing page by the page size, not the unscoped ceiling.
 	 */
 	public function test_data_store_get_tokens_unscoped_query_with_page_uses_the_page_size(): void {
 		add_filter(
-			'woocommerce_get_payment_tokens_page_size',
+			'woocommerce_get_payment_tokens_per_page',
 			function () {
 				return 2;
 			}
