@@ -1,10 +1,9 @@
 /**
  * External dependencies
  */
+import { dateI18n, getDate } from '@wordpress/date';
 import { createElement } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
 import type {
-	DataFormControlProps,
 	Field,
 	FieldTypeName,
 	Form,
@@ -12,7 +11,6 @@ import type {
 	FormValidity,
 	Rules,
 } from '@wordpress/dataviews';
-import type { ComponentType } from 'react';
 
 /**
  * Internal dependencies
@@ -21,6 +19,7 @@ import { warn } from './diagnostics';
 import { toSanitizedHtmlNode } from './html';
 import {
 	resolveFieldComponent,
+	resolveFieldValidator,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
 } from './registry';
@@ -40,11 +39,6 @@ export type DataFormAdapterOptions = {
 	schema: SettingsUISchema;
 	context: SettingsFieldContext;
 	initialValues: SettingsValues;
-	/**
-	 * Validation rules per field id. Internal until the public
-	 * validation surface is agreed.
-	 */
-	fieldRules?: Record< string, Rules< SettingsValues > >;
 };
 
 /**
@@ -199,103 +193,67 @@ const toDescriptionNode = ( description?: string ) => {
 	return toSanitizedHtmlNode( description ) as unknown as string;
 };
 
-// Numeric range types take number rules; date types take strings.
 const NUMERIC_RULE_TYPES = [ 'number', 'integer' ];
-const DATE_RULE_TYPES = [ 'date', 'datetime' ];
 
-const toRuleNumber = ( raw: string ) => {
+const toRuleNumber = ( raw: unknown ) => {
 	const parsed = Number( raw );
 	return Number.isFinite( parsed ) ? parsed : undefined;
 };
 
-// Constraint attributes become DataForm validation rules so they gate
-// saving through useFormValidity like every other rule. Attributes with
-// no rule equivalent are dropped with a diagnostic; passthrough is a
-// documented package gap.
+const getDataFormType = (
+	settingsField: SettingsUIField,
+	type: FieldTypeName | undefined
+): FieldTypeName | undefined => {
+	if ( type !== 'number' ) {
+		return type;
+	}
+
+	const attributes = settingsField.customAttributes || {};
+	const step = toRuleNumber( attributes.step );
+	const min = toRuleNumber( attributes.min );
+
+	// A unit step is integer-only when its HTML step base is also an integer.
+	return step === 1 && Number.isInteger( min ) ? 'integer' : type;
+};
+
 const toAttributeRules = (
 	settingsField: SettingsUIField,
 	type: FieldTypeName | undefined
 ): Rules< SettingsValues > | undefined => {
-	const attributes = settingsField.customAttributes || {};
 	const rules: Rules< SettingsValues > = {};
 	const dropped: string[] = [];
 
-	Object.entries( attributes ).forEach( ( [ name, raw ] ) => {
-		const value = String( raw );
-
-		switch ( name ) {
-			case 'min':
-			case 'max':
-				if ( type && NUMERIC_RULE_TYPES.includes( type ) ) {
-					const parsed = toRuleNumber( value );
-					if ( typeof parsed !== 'undefined' ) {
-						rules[ name ] = parsed;
-						return;
-					}
-				} else if ( type && DATE_RULE_TYPES.includes( type ) ) {
+	Object.entries( settingsField.customAttributes || {} ).forEach(
+		( [ name, raw ] ) => {
+			if (
+				( name === 'min' || name === 'max' ) &&
+				type &&
+				NUMERIC_RULE_TYPES.includes( type )
+			) {
+				const value = toRuleNumber( raw );
+				if ( typeof value !== 'undefined' ) {
 					rules[ name ] = value;
 					return;
 				}
-				dropped.push( name );
-				return;
-			case 'step': {
-				const step = toRuleNumber( value );
-				if (
-					type &&
-					NUMERIC_RULE_TYPES.includes( type ) &&
-					step &&
-					step > 0
-				) {
-					const min = toRuleNumber( String( attributes.min ?? '' ) );
-					rules.custom = ( item, field ) => {
-						const current = field.getValue( { item } );
-						if (
-							typeof current !== 'number' ||
-							! Number.isFinite( current )
-						) {
-							return null;
-						}
-						const offset = current - ( min ?? 0 );
-						return Math.abs(
-							offset / step - Math.round( offset / step )
-						) < 1e-9
-							? null
-							: sprintf(
-									/* translators: %s: the allowed interval between values. */
-									__(
-										'Value must be a multiple of %s.',
-										'woocommerce'
-									),
-									String( step )
-							  );
-					};
-					return;
-				}
-				dropped.push( name );
+			}
+
+			if (
+				name === 'step' &&
+				type === 'integer' &&
+				toRuleNumber( raw ) === 1
+			) {
 				return;
 			}
-			case 'pattern':
-				rules.pattern = value;
-				return;
-			case 'maxlength':
-				rules.maxLength = toRuleNumber( value );
-				return;
-			case 'minlength':
-				rules.minLength = toRuleNumber( value );
-				return;
-			case 'required':
-				rules.required = true;
-				return;
-			default:
-				dropped.push( name );
+
+			dropped.push( name );
 		}
-	} );
+	);
 
 	if ( dropped.length > 0 ) {
 		warn(
 			`Custom attributes [${ dropped.join( ', ' ) }] on field "${
 				settingsField.id
-			}" have no DataForm equivalent and were not applied.`,
+			}" were not applied.`,
 			{ field: settingsField }
 		);
 	}
@@ -313,26 +271,6 @@ const createInfoRender = ( settingsField: SettingsUIField ) => {
 					: null }
 			</div>
 		);
-	};
-};
-
-// Registered components are DataForm Edit controls. Resolution happens
-// on every render so late registrations behave the same as before.
-const createRegisteredEdit = (
-	settingsField: SettingsUIField,
-	context: SettingsFieldContext,
-	Fallback?: ComponentType< DataFormControlProps< SettingsValues > >
-) => {
-	return function RegisteredFieldEdit(
-		props: DataFormControlProps< SettingsValues >
-	) {
-		const Registered = resolveFieldComponent( settingsField, context );
-
-		if ( Registered ) {
-			return <Registered { ...props } />;
-		}
-
-		return Fallback ? <Fallback { ...props } /> : null;
 	};
 };
 
@@ -437,7 +375,17 @@ const settingsTypeDescriptors: Record< string, SettingsTypeDescriptor > = {
 	// The package has no time-only control (documented gap), so time
 	// values edit as text and round-trip unchanged.
 	time: { type: 'text' },
-	'datetime-local': { type: 'datetime' },
+	'datetime-local': {
+		type: 'datetime',
+		setValue:
+			( settingsField ) =>
+			( { value } ) => ( {
+				[ settingsField.id ]:
+					typeof value === 'string' && value
+						? dateI18n( 'Y-m-d\\TH:i', getDate( value ) )
+						: '',
+			} ),
+	},
 	color: { type: 'color' },
 	// The regular layout skips fields whose normalized Edit control is
 	// null even when read-only, so info carries a control type the
@@ -517,15 +465,28 @@ export const buildDataFormField = (
 	options: DataFormAdapterOptions
 ): Field< SettingsValues > => {
 	const descriptor = settingsTypeDescriptors[ settingsField.type ];
-	const attributeRules = toAttributeRules( settingsField, descriptor?.type );
-	const fieldRules = options.fieldRules?.[ settingsField.id ];
+	const type = getDataFormType( settingsField, descriptor?.type );
+	const attributeRules = toAttributeRules( settingsField, type );
+	const validator = resolveFieldValidator( settingsField, options.context );
+	const customRule: Rules< SettingsValues >[ 'custom' ] | undefined =
+		validator
+			? ( item, field ) =>
+					validator( {
+						value: field.getValue( { item } ) as
+							| SettingsValue
+							| undefined,
+						values: item,
+						field: settingsField,
+						context: options.context,
+					} )
+			: undefined;
 
 	const field: Field< SettingsValues > = {
 		id: settingsField.id,
 		label: settingsField.label,
 		description: toDescriptionNode( settingsField.description ),
 		placeholder: settingsField.placeholder,
-		type: descriptor?.type,
+		type,
 		getValue: ( descriptor?.getValue ?? defaultGetValue )( settingsField ),
 		setValue: ( descriptor?.setValue ?? defaultSetValue )(
 			settingsField,
@@ -533,8 +494,11 @@ export const buildDataFormField = (
 		),
 		isVisible: createIsVisible( settingsField, options ),
 		isValid:
-			attributeRules || fieldRules
-				? { ...attributeRules, ...fieldRules }
+			attributeRules || customRule
+				? {
+						...attributeRules,
+						...( customRule ? { custom: customRule } : {} ),
+				  }
 				: undefined,
 	};
 
@@ -567,16 +531,13 @@ export const buildDataFormField = (
 		defaultEdit = descriptor.Edit;
 	}
 
-	const registeredAtBuild = Boolean(
-		resolveFieldComponent( settingsField, options.context )
+	const registeredComponent = resolveFieldComponent(
+		settingsField,
+		options.context
 	);
 
-	if ( registeredAtBuild || typeof defaultEdit === 'function' ) {
-		field.Edit = createRegisteredEdit(
-			settingsField,
-			options.context,
-			typeof defaultEdit === 'function' ? defaultEdit : undefined
-		);
+	if ( registeredComponent ) {
+		field.Edit = registeredComponent;
 	} else if ( typeof defaultEdit !== 'undefined' ) {
 		// String and config controls resolve inside DataForm; fields left
 		// without an Edit use the package default for their type.
@@ -729,6 +690,7 @@ export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 		fields: getVisibleGroups( values ).map( ( group ) => ( {
 			id: group.id,
 			children: group.fields
+				.filter( ( field ) => ! field.disabled )
 				.filter( ( field ) => isFieldVisible( field.id, values ) )
 				.map( ( field ) => field.id ),
 		} ) ),

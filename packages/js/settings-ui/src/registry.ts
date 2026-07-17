@@ -6,7 +6,10 @@ import type {
 	SettingsUIField,
 	SettingsExtensionRegistration,
 	SettingsFieldComponent,
+	SettingsFieldComponentDefinition,
+	SettingsFieldComponentRegistration,
 	SettingsFieldContext,
+	SettingsFieldValidator,
 	SettingsRegionComponent,
 	SettingsSaveHandler,
 	SettingsVisibilityPredicate,
@@ -178,42 +181,75 @@ export const __resetRegistry = () => {
 	registrations.splice( 0 );
 };
 
-export const resolveFieldComponent = (
+const normalizeFieldComponentDefinition = (
+	definition: SettingsFieldComponentDefinition | undefined
+): SettingsFieldComponentRegistration | undefined => {
+	if ( typeof definition === 'function' ) {
+		return { component: definition };
+	}
+
+	if (
+		definition &&
+		typeof definition.component === 'function' &&
+		( typeof definition.validate === 'undefined' ||
+			typeof definition.validate === 'function' )
+	) {
+		return definition;
+	}
+
+	return undefined;
+};
+
+const resolveFieldComponentRegistration = (
 	field: SettingsUIField,
-	context: SettingsFieldContext
-): SettingsFieldComponent | undefined => {
+	context: SettingsFieldContext,
+	warnWhenMissing: boolean
+): SettingsFieldComponentRegistration | undefined => {
 	const componentName = field.component;
 	const component = componentName
-		? findInMatchingRegistrations(
-				context,
-				( registration ) => registration.components?.[ componentName ]
+		? normalizeFieldComponentDefinition(
+				findInMatchingRegistrations(
+					context,
+					( registration ) =>
+						registration.components?.[ componentName ]
+				)
 		  )
 		: undefined;
-
-	const resolvedComponent =
-		component ??
+	const fieldOverride = normalizeFieldComponentDefinition(
 		findInMatchingRegistrations(
 			context,
 			( registration ) => registration.fieldOverrides?.[ field.id ]
-		) ??
+		)
+	);
+	const typeRenderer = normalizeFieldComponentDefinition(
 		findInMatchingRegistrations(
 			context,
 			( registration ) => registration.typeRenderers?.[ field.type ]
-		);
+		)
+	);
+	const resolved = component ?? fieldOverride ?? typeRenderer;
 
-	if ( resolvedComponent ) {
-		return resolvedComponent;
-	}
-
-	if ( field.component ) {
+	if ( ! resolved && field.component && warnWhenMissing ) {
 		warn( `Component "${ field.component }" is not registered.`, {
 			field,
 			context,
 		} );
 	}
 
-	return undefined;
+	return resolved;
 };
+
+export const resolveFieldComponent = (
+	field: SettingsUIField,
+	context: SettingsFieldContext
+): SettingsFieldComponent | undefined =>
+	resolveFieldComponentRegistration( field, context, true )?.component;
+
+export const resolveFieldValidator = (
+	field: SettingsUIField,
+	context: SettingsFieldContext
+): SettingsFieldValidator | undefined =>
+	resolveFieldComponentRegistration( field, context, false )?.validate;
 
 export const resolveFieldVisibilityPredicate = (
 	fieldId: string,

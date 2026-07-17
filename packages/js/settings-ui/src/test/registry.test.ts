@@ -5,6 +5,7 @@ import {
 	__resetRegistry,
 	registerSettingsExtension,
 	resolveFieldComponent,
+	resolveFieldValidator,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
 	resolveRegionComponent,
@@ -44,6 +45,29 @@ describe( 'settings extension registry', () => {
 				{ page: 'registry-test', section: 'advanced' }
 			)
 		).toBe( component );
+	} );
+
+	it( 'resolves validators registered with field components', () => {
+		const component: SettingsFieldComponent = () => null;
+		const validate = () => 'This value is invalid.';
+
+		registerSettingsExtension( {
+			scope: { page: 'registry-test' },
+			components: {
+				'test/component': { component, validate },
+			},
+		} );
+
+		const field = {
+			id: 'field',
+			label: 'Field',
+			type: 'text',
+			component: 'test/component',
+		};
+		const context = { page: 'registry-test' };
+
+		expect( resolveFieldComponent( field, context ) ).toBe( component );
+		expect( resolveFieldValidator( field, context ) ).toBe( validate );
 	} );
 
 	it( 'resolves field components by documented precedence before registration recency', () => {

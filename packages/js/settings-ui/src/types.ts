@@ -144,6 +144,30 @@ export type SettingsFieldComponent = (
 	props: SettingsEditControlProps
 ) => JSX.Element | null;
 
+/** Values and settings metadata passed to a custom field validator. */
+export type SettingsFieldValidatorArgs = {
+	value: SettingsValue | undefined;
+	values: SettingsValues;
+	field: SettingsUIField;
+	context: SettingsFieldContext;
+};
+
+/** A synchronous custom field validator that returns an error message or null. */
+export type SettingsFieldValidator = (
+	args: SettingsFieldValidatorArgs
+) => string | null;
+
+/** A custom field component and its optional DataForm validator. */
+export type SettingsFieldComponentRegistration = {
+	component: SettingsFieldComponent;
+	validate?: SettingsFieldValidator;
+};
+
+/** A direct field component or a component registration with validation. */
+export type SettingsFieldComponentDefinition =
+	| SettingsFieldComponent
+	| SettingsFieldComponentRegistration;
+
 /**
  * Page-level state exposed to registered components through the
  * `useSettingsUIContext` hook.
@@ -201,9 +225,9 @@ export type SettingsExtensionScope = {
 
 export type SettingsExtensionRegistration = {
 	scope: SettingsExtensionScope;
-	components?: Record< string, SettingsFieldComponent >;
-	fieldOverrides?: Record< string, SettingsFieldComponent >;
-	typeRenderers?: Record< string, SettingsFieldComponent >;
+	components?: Record< string, SettingsFieldComponentDefinition >;
+	fieldOverrides?: Record< string, SettingsFieldComponentDefinition >;
+	typeRenderers?: Record< string, SettingsFieldComponentDefinition >;
 	fieldVisibility?: Record< string, SettingsVisibilityPredicate >;
 	groupVisibility?: Record< string, SettingsVisibilityPredicate >;
 	saveHandlers?: Record< string, SettingsSaveHandler >;

@@ -56,22 +56,17 @@ Registrations are scoped by settings page and, optionally, by section. This prev
 
 ## Component props
 
-Custom components receive the DataForm control props, re-exported as `SettingsEditControlProps`:
+Custom components receive DataForm control props, re-exported as `SettingsEditControlProps`. The main props are:
+
+-   `data`: current settings values keyed by field id.
+-   `field`: the normalized DataForm field. Use `field.getValue( { item: data } )` to read the control value and `field.setValue( { item: data, value } )` to build a change record that preserves the saved representation.
+-   `onChange`: accepts a partial record of field ids to new values, including multi-field updates.
+-   `validity`: the current DataForm validity for this field.
+
+Import the type rather than reproducing DataForm's complete prop shape:
 
 ```ts
-type SettingsEditControlProps = {
-	// The current settings values, keyed by field id.
-	data: Record< string, string | number | boolean | string[] | null >;
-	// The normalized DataForm field. Use field.getValue( { item: data } )
-	// to read the current value and field.setValue( { item, value } ) to
-	// build a change record that preserves the saved value format.
-	field: NormalizedField;
-	// Takes a partial record of field ids to new values. Multi-field
-	// writes are a single call.
-	onChange: ( edits: Record< string, unknown > ) => void;
-	hideLabelFromVision?: boolean;
-	validity?: SettingsFieldValidity;
-};
+import type { SettingsEditControlProps } from '@woocommerce/settings-ui';
 ```
 
 Page-level state is available through the `useSettingsUIContext()` hook:
@@ -133,6 +128,55 @@ export const PaymentMethodPicker = ( {
 	);
 };
 ```
+
+## Add custom validation
+
+DataForm validates built-in controls from their field type, options, and configured rules. A custom component can register a synchronous validator alongside its renderer:
+
+```ts
+import { __ } from '@wordpress/i18n';
+import { registerSettingsExtension } from '@woocommerce/settings-ui';
+
+registerSettingsExtension( {
+	scope: {
+		page: 'my_plugin',
+		section: 'payments',
+	},
+	components: {
+		'my-plugin/payment-method-picker': {
+			component: PaymentMethodPicker,
+			validate: ( { value } ) =>
+				Array.isArray( value ) && value.length > 0
+					? null
+					: __( 'Select at least one payment method.', 'my-plugin' ),
+		},
+	},
+} );
+```
+
+The callback receives the normalized control `value`, all current `values`, the original settings `field`, and the page `context`. Return `null` when valid or an error message when invalid. DataForm runs the callback and includes the result in whole-form validity, so an invalid custom field prevents saving. The same `{ component, validate }` form works for named components, field overrides, and type renderers; registrations without validation can continue passing the component directly.
+
+DataForm passes the result to the custom component through `validity.custom`, but it cannot render the message automatically because it does not know the component's markup. The component must display and associate the message with its control. For example:
+
+```tsx
+const error =
+	validity?.custom?.type === 'invalid'
+		? validity.custom.message
+		: undefined;
+const errorId = `${ field.id }-validation-error`;
+
+return (
+	<fieldset
+		aria-describedby={ error ? errorId : undefined }
+		aria-invalid={ Boolean( error ) }
+	>
+		{ /* Custom controls. */ }
+		{ error ? <p id={ errorId }>{ error }</p> : null }
+	</fieldset>
+);
+```
+
+Validators are synchronous and should be pure. Remote validation belongs in the custom save flow, with PHP validation and sanitization remaining authoritative.
 
 ## Field-specific overrides
 

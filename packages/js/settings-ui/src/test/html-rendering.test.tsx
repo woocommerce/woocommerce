@@ -222,6 +222,49 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it( 'preserves local datetime values from the DataForm control', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'starts_at',
+							label: 'Starts at',
+							type: 'datetime-local',
+							value: '2026-07-17T13:30',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+		const input = container.querySelector< HTMLInputElement >(
+			'input[type="datetime-local"]'
+		);
+		const hiddenInput = container.querySelector< HTMLInputElement >(
+			'input[type="hidden"][name="starts_at"]'
+		);
+
+		expect( input ).not.toBeNull();
+		expect( hiddenInput ).not.toBeNull();
+
+		act( () => changeTextInput( input!, '2026-07-18T14:45' ) );
+		expect( hiddenInput?.value ).toBe( '2026-07-18T14:45' );
+
+		act( () => changeTextInput( input!, '' ) );
+		expect( hiddenInput?.value ).toBe( '' );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
 	it( 'hides fields with unmet native visibility rules', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
