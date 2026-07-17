@@ -827,6 +827,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * wc_format_content(), which fires the woocommerce_short_description filter. Eager block registration is
 	 * skipped on AJAX requests, so Bootstrap registers WooCommerce block types on demand there — otherwise a
 	 * block in a variation description would render empty. See Bootstrap::maybe_register_blocks_from_content.
+	 *
+	 * @testdox The get_variation AJAX endpoint registers WooCommerce block types on demand for a variation description block.
 	 */
 	public function test_get_variation_registers_block_types_on_demand_for_description(): void {
 		$registry = WP_Block_Type_Registry::get_instance();
@@ -879,6 +881,15 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		} finally {
 			foreach ( $posted_keys as $key ) {
 				unset( $_POST[ $key ] );
+			}
+
+			// Delete the created posts so they do not leak into later tests. Guarded because
+			// create_variation_product() could throw before either is assigned.
+			if ( isset( $variation ) ) {
+				$variation->delete( true );
+			}
+			if ( isset( $product ) ) {
+				$product->delete( true );
 			}
 
 			foreach ( array_keys( $registry->get_all_registered() ) as $name ) {

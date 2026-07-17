@@ -148,10 +148,8 @@ class Bootstrap {
 
 		// Load assets unless this is a request specifically for the store API.
 		if ( ! $is_store_api_request ) {
-			// Skip eager block/pattern/asset registration on non-rendering requests. Block types are still
-			// registered on demand for descriptions that contain a block (see the woocommerce_short_description
-			// hook above), so this only skips the patterns and asset wiring those requests do not need.
-			// See BlockRegistrationContext.
+			// Skip eager block/pattern/asset registration on non-rendering requests; the block types needed for
+			// a description block are still registered on demand (see the hook above). See BlockRegistrationContext.
 			if ( ( new BlockRegistrationContext() )->should_register() ) {
 				$this->container->get( BlockPatterns::class );
 				$this->container->get( BlockTypesController::class );
@@ -170,10 +168,12 @@ class Bootstrap {
 	}
 
 	/**
-	 * Register WooCommerce block types on demand so blocks in a rendered description are not empty.
+	 * Register WooCommerce block types on demand so a block in a rendered description is not empty.
 	 *
-	 * Callback for the woocommerce_short_description filter; see the add_filter call in init() for the rationale.
-	 * Returns the content unchanged and runs only for its registration side effect.
+	 * Callback for the woocommerce_short_description filter (see the add_filter call in init()). Registers the
+	 * block set once per request, and only when the content contains a WooCommerce block that is not registered
+	 * yet — the registry check runs before the content scan so later fires short-circuit. Returns the content
+	 * unchanged.
 	 *
 	 * @since 11.1.0
 	 *
@@ -181,11 +181,7 @@ class Bootstrap {
 	 * @return string The unchanged content.
 	 */
 	public function maybe_register_blocks_from_content( $content ) {
-		// Only register when the description actually contains a WooCommerce block, and only when block types are
-		// not registered yet. register_blocks() instantiates every block class and wires hooks, so this keeps it
-		// to at most once per request even though woocommerce_short_description can fire many times (e.g. one Store
-		// API cart response per item).
-		if ( is_string( $content ) && false !== strpos( $content, '<!-- wp:woocommerce/' ) && ! $this->woocommerce_blocks_registered() ) {
+		if ( is_string( $content ) && ! $this->woocommerce_blocks_registered() && false !== strpos( $content, '<!-- wp:woocommerce/' ) ) {
 			$this->container->get( BlockTypesController::class )->register_blocks();
 		}
 
@@ -193,12 +189,10 @@ class Bootstrap {
 	}
 
 	/**
-	 * Whether WooCommerce block types are already present in the block registry.
+	 * Whether WooCommerce block types are already registered this request.
 	 *
-	 * The registry is the single, request-wide record of what is registered, so it is the reliable signal for
-	 * "have block types been registered this request?" — regardless of how many BlockTypesController instances
-	 * exist. woocommerce/product-price is registered unconditionally by register_blocks(), so its presence is a
-	 * cheap O(1) proxy for the whole set. Used to keep on-demand registration to at most once per request.
+	 * The woocommerce/product-price block is registered unconditionally by register_blocks(), so its presence in
+	 * the registry is a reliable proxy for whether the whole set has been registered.
 	 *
 	 * @return bool True if WooCommerce block types are registered.
 	 */
