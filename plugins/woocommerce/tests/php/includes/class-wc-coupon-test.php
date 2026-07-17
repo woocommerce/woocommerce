@@ -256,14 +256,14 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 	 */
 	public function data_provider_for_amount_leading_zeros() {
 		return array(
-			'leading zeros like 050'      => array( '050', 50.0 ),
-			'just zero'                   => array( '0', 0.0 ),
-			'decimal with leading zero'   => array( '0.50', 0.5 ),
-			'multiple leading zeros'      => array( '00.50', 0.5 ),
-			'normal number without zeros' => array( '20', 20.0 ),
-			'over 100 for non-percent'    => array( 150, 150.0 ),
-			'empty string becomes zero'   => array( '', 0.0 ),
-			'string 0.0'                  => array( '0.0', 0.0 ),
+			'leading zeros like 050'      => array( '050', '50' ),
+			'just zero'                   => array( '0', '0' ),
+			'decimal with leading zero'   => array( '0.50', '0.50' ),
+			'multiple leading zeros'      => array( '00.50', '0.50' ),
+			'normal number without zeros' => array( '20', '20' ),
+			'over 100 for non-percent'    => array( 150, '150' ),
+			'empty string becomes zero'   => array( '', 0 ),
+			'string 0.0'                  => array( '0.0', '0.0' ),
 		);
 	}
 
