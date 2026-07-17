@@ -23,7 +23,7 @@ import strings from './strings';
  *
  */
 function ExitSurveyModal( {}: {
-	// eslint-disable-next-line @typescript-eslint/ban-types
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type, @typescript-eslint/no-empty-object-type
 	setExitSurveyModalOpen: Function;
 } ): JSX.Element | null {
 	const incentive = getAdminSetting( 'wcpayWelcomePageIncentive' );

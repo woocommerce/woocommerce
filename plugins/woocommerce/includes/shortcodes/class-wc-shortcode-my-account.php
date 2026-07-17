@@ -8,6 +8,8 @@
  * @version 2.0.0
  */
 
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -49,7 +51,12 @@ class WC_Shortcode_My_Account {
 
 		// Show login form if not logged in.
 		if ( ! is_user_logged_in() ) {
-			wc_get_template( 'myaccount/form-login.php' );
+			if ( wc_get_container()->get( OrderWithdrawalController::class )->is_endpoint_request() ) {
+				// Order withdrawal is an EU regulation requirement which needs to be accessible without logging in.
+				wc_get_container()->get( OrderWithdrawalController::class )->render_view();
+			} else {
+				wc_get_template( 'myaccount/form-login.php' );
+			}
 			return;
 		}
 

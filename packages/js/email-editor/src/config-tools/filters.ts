@@ -22,7 +22,7 @@ function makeKey( hookName: string, namespace: string ): string {
  */
 export function addFilterForEmail<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	TCallback extends ( ...args: any[] ) => any
+	TCallback extends ( ...args: any[] ) => any,
 >(
 	hookName: string,
 	namespace: string,
@@ -39,7 +39,7 @@ export function addFilterForEmail<
  */
 export function addActionForEmail<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	TCallback extends ( ...args: any[] ) => any
+	TCallback extends ( ...args: any[] ) => any,
 >(
 	hookName: string,
 	namespace: string,
