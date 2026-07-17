@@ -5,8 +5,6 @@
  * @package WooCommerce\Tests\Post_Data.
  */
 
-declare( strict_types = 1 );
-
 /**
  * Class WC_Post_Data_Test
  */
