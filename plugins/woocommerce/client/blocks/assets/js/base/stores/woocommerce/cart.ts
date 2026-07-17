@@ -264,6 +264,21 @@ export type Store = {
 		 */
 		seedDraftIfAbsent: () => void;
 		/**
+		 * Registers a Product Collection card's draft collection into the
+		 * module-private draft-lifecycle ledger, or restores it from the
+		 * ledger on a subsequent visit, so an edited draft survives an
+		 * enhanced-pagination unmount/remount round trip.
+		 *
+		 * Not part of the store's documented surface — it exists only so
+		 * the server-rendered `data-wp-init` directive on a Product
+		 * Collection loop item can resolve it by name
+		 * (`data-wp-init="woocommerce/cart::actions.registerOrRestoreDraftCollection"`).
+		 * Extensions should not call it directly; it derives its own card
+		 * identity from context and is a no-op wherever that identity
+		 * cannot be derived.
+		 */
+		registerOrRestoreDraftCollection: () => void;
+		/**
 		 * Posts the in-context product's resolved collection's draft(s) to
 		 * the cart, or an explicit payload verbatim.
 		 *
@@ -411,6 +426,110 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 type CartContext = { draftItems?: DraftItem[] };
 
 /**
+ * The `woocommerce/product-collection` collection-root context relevant to
+ * draft-lifecycle identity derivation: the query id, readable from context
+ * (rather than derived from a DOM ref, which is unattached at first render)
+ * so a card's identity is available at the very first post-remount render.
+ */
+type ProductCollectionContext = { queryId?: string | number };
+
+/**
+ * The `woocommerce/products` context relevant to draft-lifecycle identity
+ * derivation: the in-context product's id.
+ */
+type ProductsCardContext = { productId?: number };
+
+/**
+ * Module-private ledger of live draft collections for Product Collection
+ * cards, keyed by `"<queryId>/<productId>"` (see {@link deriveCardIdentity}).
+ *
+ * Holds each card's **context-proxy** collection reference — never a raw
+ * array copy, since the runtime's reactivity lives on the proxy, not the
+ * underlying object — so that once a card registers, every subsequent
+ * write to its collection, whether through an action or a direct mutation
+ * anywhere in the subtree, is observed through this same shared reference
+ * with no interception.
+ *
+ * A module variable: never exported, never a member of the store object.
+ * Unreachable by any consumer, even one holding lock consent — the object a
+ * `store('woocommerce/cart', {}, { lock })` caller receives has no
+ * property exposing it. Backs {@link registerOrRestoreDraftCollection} (the
+ * register/restore side, run from a `data-wp-init` on the loop item) and
+ * the render-time bridge in {@link resolveDraftItems} (the
+ * first-post-remount-paint side).
+ */
+const draftCollectionLedger = new Map< string, DraftItem[] >();
+
+/**
+ * Derives a Product Collection card's identity for the draft-lifecycle
+ * ledger: `"<queryId>/<productId>"`, combining `queryId` from the inherited
+ * `woocommerce/product-collection` collection-root context with `productId`
+ * from the `woocommerce/products` context. `(queryId, productId)` is unique
+ * per card and stable across an enhanced-pagination round trip.
+ *
+ * Never throws: returns `undefined` when either piece is missing — most
+ * commonly because the card has no `woocommerce/product-collection`
+ * ancestor context, i.e. it is not a Product Collection card — or when
+ * `getContext` cannot run at all (no directive on the call stack). A card
+ * with no derivable identity simply never touches the ledger: its
+ * `context.draftItems` collection still isolates the subtree, but does not
+ * survive an unmount/remount.
+ *
+ * @return The card's ledger key, or `undefined` when it cannot be derived.
+ */
+function deriveCardIdentity(): string | undefined {
+	try {
+		const queryId = getContext< ProductCollectionContext >(
+			'woocommerce/product-collection'
+		)?.queryId;
+		const productId = getContext< ProductsCardContext >(
+			'woocommerce/products'
+		)?.productId;
+		if ( queryId === undefined || productId === undefined ) {
+			return undefined;
+		}
+		return `${ queryId }/${ productId }`;
+	} catch {
+		return undefined;
+	}
+}
+
+/**
+ * The render-time bridge for a Product Collection card that has just
+ * remounted: when the card's identity resolves to a ledger entry that
+ * diverges from the context's own collection, returns the ledger's
+ * collection so getter-driven bindings paint correctly on the very first
+ * post-remount render — before the register-or-restore init (which runs
+ * post-commit, one effect-cycle later) has reconciled `context.draftItems`.
+ *
+ * Once the init reconciles the bag (assigns the ledger's collection into
+ * `context.draftItems`), the two references are equal and this returns
+ * `undefined`, so {@link resolveDraftItems} falls through to the context
+ * collection directly — the two paths agree from then on.
+ *
+ * @param contextCollection The context's own `draftItems` collection, as
+ *                           just read by the caller (a reactive read).
+ * @return The ledger's collection, when one exists and diverges from
+ *         `contextCollection`; otherwise `undefined`.
+ */
+function restoredLedgerCollection(
+	contextCollection: DraftItem[]
+): DraftItem[] | undefined {
+	const identity = deriveCardIdentity();
+	if ( identity === undefined ) {
+		return undefined;
+	}
+	const ledgerCollection = draftCollectionLedger.get( identity );
+	if (
+		ledgerCollection === undefined ||
+		ledgerCollection === contextCollection
+	) {
+		return undefined;
+	}
+	return ledgerCollection;
+}
+
+/**
  * Resolves the draft collection nearest to the calling surface: the
  * current context's own `draftItems`, when a container established one,
  * else the page-wide `state.draftItems`.
@@ -424,16 +543,73 @@ type CartContext = { draftItems?: DraftItem[] };
  * available", so it degrades to `state.draftItems`, exactly as an
  * in-directive call whose context sets no `draftItems` would.
  *
+ * On a Product Collection card, additionally applies the draft-lifecycle
+ * render-time bridge (see {@link restoredLedgerCollection}): when the card
+ * has just remounted and its ledger entry has not yet been reconciled into
+ * `context.draftItems`, the ledger's collection is returned instead, so
+ * every getter-driven binding paints correctly at first post-remount
+ * render. This reads `context.draftItems` itself first (a reactive read),
+ * so the register-or-restore init's later reconciliation of the bag
+ * re-triggers resolution.
+ *
  * @return The resolved draft collection.
  */
 function resolveDraftItems(): DraftItem[] {
 	try {
+		const contextCollection =
+			getContext< CartContext >( 'woocommerce/cart' )?.draftItems;
+		if ( contextCollection === undefined ) {
+			return state.draftItems;
+		}
 		return (
-			getContext< CartContext >( 'woocommerce/cart' )?.draftItems ??
-			state.draftItems
+			restoredLedgerCollection( contextCollection ) ?? contextCollection
 		);
 	} catch {
 		return state.draftItems;
+	}
+}
+
+/**
+ * Registers a Product Collection card's draft collection into the
+ * module-private draft-lifecycle ledger, or restores it from the ledger on
+ * a subsequent visit — making an edited draft survive an
+ * enhanced-pagination unmount/remount round trip.
+ *
+ * Derives the card's identity via {@link deriveCardIdentity}; a card whose
+ * identity cannot be derived, or whose context establishes no active
+ * `draftItems` collection, never touches the ledger and this is a no-op —
+ * isolation via context still holds, only remount-survival is unavailable.
+ *
+ * With a derivable identity and an active collection: a ledger hit assigns
+ * the ledger's held collection into `context.draftItems` (restore) —
+ * reactive per the runtime's proxy set trap, rebinding the same cached
+ * proxy on repeat visits; a ledger miss stores the context collection's own
+ * reference into the ledger (register). Because the ledger and context then
+ * share one object, every subsequent write to the collection — an action or
+ * a direct mutation, anywhere in the subtree — keeps the ledger current
+ * with no interception.
+ *
+ * Bound to a `data-wp-init` directive on the Product Collection loop item;
+ * not part of the store's documented surface — it exists only so that
+ * directive string can resolve it by name.
+ */
+function registerOrRestoreDraftCollection(): void {
+	const identity = deriveCardIdentity();
+	if ( identity === undefined ) {
+		return;
+	}
+
+	const context = getContext< CartContext >( 'woocommerce/cart' );
+	const contextCollection = context?.draftItems;
+	if ( contextCollection === undefined ) {
+		return;
+	}
+
+	const ledgerCollection = draftCollectionLedger.get( identity );
+	if ( ledgerCollection !== undefined ) {
+		context.draftItems = ledgerCollection;
+	} else {
+		draftCollectionLedger.set( identity, contextCollection );
 	}
 }
 
@@ -1618,6 +1794,8 @@ const { actions } = store< Store >(
 
 				actions.upsertDraftItem( seed );
 			},
+
+			registerOrRestoreDraftCollection,
 
 			*addItem( payload?: DraftItem ): AsyncAction< void > {
 				if ( payload ) {

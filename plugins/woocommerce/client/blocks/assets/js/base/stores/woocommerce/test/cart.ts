@@ -42,10 +42,27 @@ const mockProductsState: Partial< ProductsStoreState > = {
 let mockCartContext: { draftItems?: DraftItem[] } | undefined;
 
 /**
- * When `true`, the mocked `getContext` throws instead of returning
- * {@link mockCartContext}, reproducing the real Interactivity runtime's
- * behavior when called with no directive currently executing on the call
- * stack (i.e. outside of a directive's execution).
+ * The value `getContext( 'woocommerce/product-collection' )` should return
+ * for the draft-lifecycle identity derivation, controlled per test.
+ * `undefined` (or an object with no `queryId`) simulates a card with no
+ * Product Collection ancestor context, so identity cannot be derived.
+ */
+let mockProductCollectionContext:
+	| { queryId?: string | number }
+	| undefined;
+
+/**
+ * The value `getContext( 'woocommerce/products' )` should return for the
+ * draft-lifecycle identity derivation, controlled per test. `undefined` (or
+ * an object with no `productId`) simulates a card with no product context.
+ */
+let mockProductsContext: { productId?: number } | undefined;
+
+/**
+ * When `true`, the mocked `getContext` throws regardless of namespace,
+ * reproducing the real Interactivity runtime's behavior when called with no
+ * directive currently executing on the call stack (i.e. outside of a
+ * directive's execution).
  */
 let mockCartContextThrows = false;
 
@@ -60,11 +77,17 @@ jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		getConfig: jest.fn(),
-		getContext: jest.fn( () => {
+		getContext: jest.fn( ( namespace?: string ) => {
 			if ( mockCartContextThrows ) {
 				throw new Error(
 					'Cannot call `getContext()` when there is no scope.'
 				);
+			}
+			if ( namespace === 'woocommerce/product-collection' ) {
+				return mockProductCollectionContext;
+			}
+			if ( namespace === 'woocommerce/products' ) {
+				return mockProductsContext;
 			}
 			return mockCartContext;
 		} ),
@@ -427,6 +450,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		jest.clearAllMocks();
 		delete ( mockState as Partial< Store[ 'state' ] > ).cart;
 		mockCartContext = undefined;
+		mockProductCollectionContext = undefined;
+		mockProductsContext = undefined;
 		mockCartContextThrows = false;
 		mockServerContext = undefined;
 		delete mockProductsState.productInContext;
@@ -1321,6 +1346,278 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( mockState.draftItems ).toEqual( [
 				{ id: 42, quantity: 1 },
 			] );
+		} );
+	} );
+
+	describe( 'draft-lifecycle ledger (registerOrRestoreDraftCollection)', () => {
+		/**
+		 * Activates the context a Product Collection loop item exposes to
+		 * the draft-lifecycle identity derivation: a
+		 * `woocommerce/product-collection` ancestor bag carrying `queryId`,
+		 * and a `woocommerce/products` bag carrying `productId`.
+		 *
+		 * @param queryId   The collection-root `queryId` to expose.
+		 * @param productId The card's `productId` to expose.
+		 */
+		function setCardIdentityContext(
+			queryId: string | number,
+			productId: number
+		): void {
+			mockProductCollectionContext = { queryId };
+			mockProductsContext = { productId };
+		}
+
+		it( 'does not export the module-scope draft-lifecycle ledger', () => {
+			let cartModule: Record< string, unknown > = {};
+			jest.isolateModules( () => {
+				cartModule = require( '../cart' );
+			} );
+
+			expect( Object.keys( cartModule ) ).toEqual( [] );
+		} );
+
+		it( 'keeps the ledger unreachable through the registered store actions object', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			setCardIdentityContext( 'query-1', 42 );
+			mockCartContext = { draftItems: [] };
+
+			actions.registerOrRestoreDraftCollection();
+
+			expect(
+				Object.values(
+					actions as unknown as Record< string, unknown >
+				).some( ( value ) => value instanceof Map )
+			).toBe( false );
+		} );
+
+		it( 'registers a fresh card collection into the ledger without altering it', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			setCardIdentityContext( 'query-1', 42 );
+			const freshCollection: DraftItem[] = [];
+			mockCartContext = { draftItems: freshCollection };
+
+			actions.registerOrRestoreDraftCollection();
+
+			expect( mockCartContext.draftItems ).toBe( freshCollection );
+		} );
+
+		it( 'restores the ledger collection into a remounted card of the same identity', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			setCardIdentityContext( 'query-1', 42 );
+			const firstMountCollection: DraftItem[] = [];
+			mockCartContext = { draftItems: firstMountCollection };
+			actions.registerOrRestoreDraftCollection();
+
+			// The shopper edits the draft before the card unmounts.
+			firstMountCollection.push( { id: 42, quantity: 4 } );
+
+			// The card remounts: the runtime re-seeds a fresh context ref
+			// from server HTML — a brand new, still-empty array.
+			const remountCollection: DraftItem[] = [];
+			mockCartContext = { draftItems: remountCollection };
+
+			actions.registerOrRestoreDraftCollection();
+
+			expect( mockCartContext.draftItems ).toBe(
+				firstMountCollection
+			);
+			expect( mockCartContext.draftItems ).not.toBe(
+				remountCollection
+			);
+			expect( mockCartContext.draftItems ).toEqual( [
+				{ id: 42, quantity: 4 },
+			] );
+		} );
+
+		it( 'rebinds the same ledger collection across repeat visits', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			setCardIdentityContext( 'query-1', 42 );
+			const firstMountCollection: DraftItem[] = [];
+			mockCartContext = { draftItems: firstMountCollection };
+			actions.registerOrRestoreDraftCollection();
+
+			mockCartContext = { draftItems: [] };
+			actions.registerOrRestoreDraftCollection();
+			const restoredAfterFirstRemount = mockCartContext.draftItems;
+
+			mockCartContext = { draftItems: [] };
+			actions.registerOrRestoreDraftCollection();
+
+			expect( mockCartContext.draftItems ).toBe(
+				firstMountCollection
+			);
+			expect( mockCartContext.draftItems ).toBe(
+				restoredAfterFirstRemount
+			);
+		} );
+
+		it( 'observes an action write to the restored collection through the same reference the ledger holds', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			setCardIdentityContext( 'query-1', 42 );
+			const firstMountCollection: DraftItem[] = [];
+			mockCartContext = { draftItems: firstMountCollection };
+			actions.registerOrRestoreDraftCollection();
+
+			// A write through the public action after registering.
+			actions.upsertDraftItem( { id: 42, quantity: 2 } );
+
+			// Remount and restore: the write must have reached the ledger.
+			mockCartContext = { draftItems: [] };
+			actions.registerOrRestoreDraftCollection();
+
+			expect( mockCartContext.draftItems ).toEqual( [
+				{ id: 42, quantity: 2 },
+			] );
+		} );
+
+		it( 'observes a direct mutation of the restored collection through the same reference the ledger holds', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			setCardIdentityContext( 'query-1', 42 );
+			const firstMountCollection: DraftItem[] = [
+				{ id: 42, quantity: 1 },
+			];
+			mockCartContext = { draftItems: firstMountCollection };
+			actions.registerOrRestoreDraftCollection();
+
+			// A direct mutation, bypassing every action.
+			firstMountCollection[ 0 ].quantity = 9;
+
+			mockCartContext = { draftItems: [] };
+			actions.registerOrRestoreDraftCollection();
+
+			expect( mockCartContext.draftItems ).toEqual( [
+				{ id: 42, quantity: 9 },
+			] );
+		} );
+
+		it( 'does not touch the ledger and does not throw for a card with no derivable identity', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			// No `woocommerce/product-collection` ancestor context:
+			// identity cannot be derived.
+			mockProductCollectionContext = undefined;
+			mockProductsContext = { productId: 42 };
+			const collection: DraftItem[] = [];
+			mockCartContext = { draftItems: collection };
+
+			expect( () =>
+				actions.registerOrRestoreDraftCollection()
+			).not.toThrow();
+
+			// The context collection is untouched — the ledger never fired.
+			expect( mockCartContext.draftItems ).toBe( collection );
+
+			// Isolation via context still works: writes still land in this
+			// collection.
+			actions.upsertDraftItem( { id: 42, quantity: 1 } );
+			expect( collection ).toEqual( [ { id: 42, quantity: 1 } ] );
+		} );
+
+		it( 'does not touch the ledger when a queryId is present but productId is missing', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockProductCollectionContext = { queryId: 'query-1' };
+			mockProductsContext = undefined;
+			const collection: DraftItem[] = [];
+			mockCartContext = { draftItems: collection };
+
+			expect( () =>
+				actions.registerOrRestoreDraftCollection()
+			).not.toThrow();
+			expect( mockCartContext.draftItems ).toBe( collection );
+		} );
+
+		it( 'does not throw when called outside a directive', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockCartContextThrows = true;
+
+			expect( () =>
+				actions.registerOrRestoreDraftCollection()
+			).not.toThrow();
+		} );
+	} );
+
+	describe( 'draft-lifecycle render-time bridge (resolveDraftItems)', () => {
+		/**
+		 * Activates the context a Product Collection loop item exposes to
+		 * the draft-lifecycle identity derivation. See
+		 * {@link setCardIdentityContext} above.
+		 *
+		 * @param queryId   The collection-root `queryId` to expose.
+		 * @param productId The card's `productId` to expose.
+		 */
+		function setCardIdentityContext(
+			queryId: string | number,
+			productId: number
+		): void {
+			mockProductCollectionContext = { queryId };
+			mockProductsContext = { productId };
+		}
+
+		it( 'prefers the ledger collection at render time before the register-or-restore init reconciles the bag', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			setCardIdentityContext( 'query-1', 42 );
+			const firstMountCollection: DraftItem[] = [];
+			mockCartContext = { draftItems: firstMountCollection };
+			actions.registerOrRestoreDraftCollection();
+			firstMountCollection.push( { id: 42, quantity: 4 } );
+
+			// The card remounts: a fresh, still-empty context collection,
+			// and the register-or-restore init has NOT run yet — simulating
+			// the one committed pre-restore render.
+			const remountCollection: DraftItem[] = [];
+			mockCartContext = { draftItems: remountCollection };
+
+			expect( mockState.findItem( { id: 42 } ).draft ).toEqual( {
+				id: 42,
+				quantity: 4,
+			} );
+			// The raw context bag itself is still the fresh, unreconciled
+			// array — the bridge served the ledger without touching it.
+			expect( mockCartContext.draftItems ).toBe( remountCollection );
+		} );
+
+		it( 'converges to the context array once the init reconciles the bag', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			setCardIdentityContext( 'query-1', 42 );
+			const firstMountCollection: DraftItem[] = [];
+			mockCartContext = { draftItems: firstMountCollection };
+			actions.registerOrRestoreDraftCollection();
+			firstMountCollection.push( { id: 42, quantity: 4 } );
+
+			mockCartContext = { draftItems: [] };
+			// Reconcile via the register-or-restore init.
+			actions.registerOrRestoreDraftCollection();
+
+			expect( mockState.findItem( { id: 42 } ).draft ).toEqual( {
+				id: 42,
+				quantity: 4,
+			} );
+			expect( mockCartContext.draftItems ).toBe(
+				firstMountCollection
+			);
+		} );
+
+		it( 'resolves the plain context collection when no ledger entry exists for the derivable identity', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			setCardIdentityContext( 'query-unregistered', 99 );
+			const collection: DraftItem[] = [ { id: 99, quantity: 1 } ];
+			mockCartContext = { draftItems: collection };
+
+			expect( mockState.findItem( { id: 99 } ).draft ).toEqual( {
+				id: 99,
+				quantity: 1,
+			} );
 		} );
 	} );
 
