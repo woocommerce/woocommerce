@@ -440,12 +440,36 @@ class WC_Admin_Attributes {
 									 */
 									$max_terms_to_display = apply_filters( 'woocommerce_max_terms_displayed_in_attributes_page', 100 );
 									foreach ( $attribute_taxonomies as $tax ) :
+										$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
+										$actions  = array(
+											'edit'   => '<a href="' . esc_url( add_query_arg( 'edit', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ) ) . '">' . esc_html__( 'Edit', 'woocommerce' ) . '</a>',
+											'delete' => '<a class="delete" href="' . esc_url( wp_nonce_url( add_query_arg( 'delete', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ) . '">' . esc_html__( 'Delete', 'woocommerce' ) . '</a>',
+										);
+
+										/**
+										 * Filters the row actions for a global product attribute taxonomy on the Products > Attributes screen.
+										 *
+										 * The action values are HTML links. Default actions are escaped before this filter runs, and callbacks
+										 * should return safe, escaped HTML.
+										 *
+										 * @param array<string,string> $actions  Action link HTML keyed by action name.
+										 * @param object               $tax      Attribute taxonomy object.
+										 * @param string               $taxonomy Full taxonomy name, including the `pa_` prefix.
+										 *
+										 * @since 11.1.0
+										 */
+										$actions     = (array) apply_filters( 'woocommerce_attribute_taxonomy_row_actions', $actions, $tax, $taxonomy );
+										$row_actions = array();
+
+										foreach ( $actions as $action => $link ) {
+											$row_actions[] = '<span class="' . esc_attr( $action ) . '">' . $link . '</span>';
+										}
 										?>
 										<tr>
 												<td>
-													<strong><a href="edit-tags.php?taxonomy=<?php echo esc_attr( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a></strong>
+													<strong><a href="edit-tags.php?taxonomy=<?php echo esc_attr( $taxonomy ); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a></strong>
 
-													<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg( 'edit', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ) ); ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'delete', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a></span></div>
+													<?php echo '<div class="row-actions">' . implode( ' | ', $row_actions ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Row action values are link HTML. Default values are escaped above; filtered callbacks should return safe HTML. ?>
 												</td>
 												<td><?php echo esc_html( $tax->attribute_name ); ?></td>
 												<?php if ( wc_has_custom_attribute_types() ) : ?>
@@ -471,8 +495,6 @@ class WC_Admin_Attributes {
 												</td>
 												<td class="attribute-terms">
 													<?php
-													$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
-
 													if ( taxonomy_exists( $taxonomy ) ) {
 														$total_count = (int) get_terms(
 															array(
@@ -509,7 +531,7 @@ class WC_Admin_Attributes {
 															echo '<span class="na">&ndash;</span><br />';
 													}//end if
 													?>
-													<br /><a href="edit-tags.php?taxonomy=<?php echo esc_attr( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="configure-terms"><?php esc_html_e( 'Configure terms', 'woocommerce' ); ?></a>
+													<br /><a href="edit-tags.php?taxonomy=<?php echo esc_attr( $taxonomy ); ?>&amp;post_type=product" class="configure-terms"><?php esc_html_e( 'Configure terms', 'woocommerce' ); ?></a>
 												</td>
 											</tr>
 											<?php

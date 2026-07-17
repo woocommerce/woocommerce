@@ -28,6 +28,13 @@ class SettingsUIRequestContext {
 	private const DEFAULT_SECTION_KEY = 'default';
 
 	/**
+	 * Settings tabs whose sections render as drill-down pages.
+	 *
+	 * @var string[]
+	 */
+	private const DRILL_DOWN_TABS = array( 'checkout' );
+
+	/**
 	 * Context instances keyed by settings page object and section.
 	 *
 	 * @var array<string, SettingsUIRequestContext>
@@ -258,6 +265,23 @@ class SettingsUIRequestContext {
 	}
 
 	/**
+	 * Whether this context renders a drill-down page.
+	 *
+	 * A drill-down page is a section of a settings tab whose sections are
+	 * presented as standalone pages, following the Payments pattern: the shell
+	 * header (title, breadcrumbs, top save button) replaces the top-level
+	 * settings tabs. Pages registered at the top level of settings are not
+	 * drill-downs: they hide the header and keep the tabs.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return bool
+	 */
+	public function is_drill_down(): bool {
+		return '' !== $this->section && in_array( $this->settings_page->get_id(), self::DRILL_DOWN_TABS, true );
+	}
+
+	/**
 	 * Whether this context can render through the Settings UI.
 	 *
 	 * True when the settings UI feature is enabled and a Settings UI page resolved
@@ -447,7 +471,10 @@ class SettingsUIRequestContext {
 		}
 
 		try {
-			$this->schema = $this->ensure_section_navigation( $this->settings_ui_page->get_schema( $this->section ) );
+			$schema       = $this->settings_ui_page->get_schema( $this->section );
+			$schema       = $this->apply_section_navigation( $schema );
+			$schema       = $this->apply_shell_header_visibility( $schema );
+			$this->schema = $this->ensure_drill_down_breadcrumbs( $schema );
 		} catch ( \Throwable $e ) {
 			$this->schema_failed = true;
 
@@ -483,24 +510,75 @@ class SettingsUIRequestContext {
 	}
 
 	/**
-	 * Ensure a resolved settings UI schema carries section navigation for the shell.
+	 * Set the shell section navigation from the page registration.
 	 *
-	 * Schemas that omit `shell.sectionNavigation` get the default sibling-section
-	 * navigation for the settings page, matching the legacy settings adapter.
-	 * Setting the key — including to an empty array — keeps the provided value,
-	 * so pages with custom or no navigation stay untouched.
+	 * Top-level pages never carry section navigation: the classic section
+	 * links render with the settings header instead. Drill-down pages keep
+	 * schema-provided navigation and default to none, since the header
+	 * breadcrumbs replace it.
 	 *
 	 * @param array $schema Resolved settings UI schema.
 	 * @return array
 	 */
-	private function ensure_section_navigation( array $schema ): array {
-		if ( ! isset( $schema['shell'] ) ) {
+	private function apply_section_navigation( array $schema ): array {
+		if ( ! isset( $schema['shell'] ) || ! is_array( $schema['shell'] ) ) {
 			$schema['shell'] = array();
 		}
 
-		if ( is_array( $schema['shell'] ) && ! isset( $schema['shell']['sectionNavigation'] ) ) {
-			$schema['shell']['sectionNavigation'] = SettingsSectionNavigation::build_default( $this->settings_page, $this->section );
+		if ( ! $this->is_drill_down() || ! isset( $schema['shell']['sectionNavigation'] ) ) {
+			$schema['shell']['sectionNavigation'] = array();
 		}
+
+		return $schema;
+	}
+
+	/**
+	 * Set the shell header visibility from the page registration.
+	 *
+	 * The header is reserved for drill-down pages. Pages registered at the top
+	 * level of settings always hide it, regardless of what their schema asks
+	 * for.
+	 *
+	 * @param array $schema Resolved settings UI schema.
+	 * @return array
+	 */
+	private function apply_shell_header_visibility( array $schema ): array {
+		if ( ! isset( $schema['shell'] ) || ! is_array( $schema['shell'] ) ) {
+			$schema['shell'] = array();
+		}
+
+		$schema['shell']['header'] = $this->is_drill_down() ? 'visible' : 'hidden';
+
+		return $schema;
+	}
+
+	/**
+	 * Ensure a drill-down schema carries breadcrumbs back to its parent tab.
+	 *
+	 * Schemas that omit `shell.breadcrumbs` get a single crumb linking to the
+	 * parent settings tab, since the header breadcrumbs replace the top-level
+	 * settings tabs on drill-down pages.
+	 *
+	 * @param array $schema Resolved settings UI schema.
+	 * @return array
+	 */
+	private function ensure_drill_down_breadcrumbs( array $schema ): array {
+		if ( ! $this->is_drill_down() || isset( $schema['shell']['breadcrumbs'] ) ) {
+			return $schema;
+		}
+
+		$schema['shell']['breadcrumbs'] = array(
+			array(
+				'label' => wp_strip_all_tags( html_entity_decode( $this->settings_page->get_label(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ),
+				'href'  => add_query_arg(
+					array(
+						'page' => 'wc-settings',
+						'tab'  => sanitize_title( $this->settings_page->get_id() ),
+					),
+					admin_url( 'admin.php' )
+				),
+			),
+		);
 
 		return $schema;
 	}

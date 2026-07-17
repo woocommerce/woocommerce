@@ -22,7 +22,6 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstaller;
 use Automattic\WooCommerce\Admin\ReportExporter;
 use Automattic\WooCommerce\Admin\ReportsSync;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Admin\CategoryLookup;
 use Automattic\WooCommerce\Internal\Admin\Events;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\Onboarding;
@@ -174,7 +173,7 @@ class FeaturePlugin {
 
 		Onboarding::init();
 
-		if ( FeaturesUtil::feature_is_enabled( 'analytics' ) ) {
+		if ( $this->is_analytics_enabled_during_bootstrap() ) {
 			// Initialize Reports syncing.
 			ReportsSync::init();
 			CategoryLookup::instance()->init();
@@ -192,6 +191,19 @@ class FeaturePlugin {
 		new SellingOnlineCourses();
 		new MagentoMigration();
 		new ScheduledUpdatesPromotion();
+	}
+
+	/**
+	 * Check whether Analytics should be initialized during plugin bootstrap.
+	 *
+	 * Feature definitions contain translated presentation strings and are not safe to build before init.
+	 *
+	 * @return bool
+	 */
+	private function is_analytics_enabled_during_bootstrap(): bool {
+		// Keep this fallback aligned with `enabled_by_default` for Analytics in FeaturesController.
+		return ! Features::is_analytics_disabled_by_legacy_filters()
+			&& 'yes' === get_option( Analytics::TOGGLE_OPTION_NAME, 'yes' );
 	}
 
 	/**
