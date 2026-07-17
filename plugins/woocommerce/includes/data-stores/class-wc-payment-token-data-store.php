@@ -42,7 +42,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * A `page` arg signals pagination intent, and paginating consumers typically loop until a
 	 * short or empty page: leaving such a query unlimited would return the full set on every
 	 * page and never terminate the loop. Pass an explicit `limit` to control the page size, or
-	 * filter it via `woocommerce_get_payment_tokens_page_size`.
+	 * filter it via `woocommerce_get_payment_tokens_per_page`.
 	 *
 	 * @since 11.1.0
 	 * @var int
@@ -315,21 +315,21 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 			 *
 			 * @since 11.1.0
 			 *
-			 * @param int   $page_size Maximum number of tokens per page. Defaults to 100. A value
-			 *                         below 1 is ignored, as an empty page would stop a paginating
-			 *                         consumer before it read anything, and `-1` does not mean
-			 *                         unlimited here: pass an explicit `limit` to opt out.
-			 * @param array $args      The arguments passed to `get_tokens()`.
+			 * @param int   $per_page Maximum number of tokens per page. Defaults to 100. A value
+			 *                        below 1 is ignored, as an empty page would stop a paginating
+			 *                        consumer before it read anything, and `-1` does not mean
+			 *                        unlimited here: pass an explicit `limit` to opt out.
+			 * @param array $args     The arguments passed to `get_tokens()`.
 			 */
-			$page_size = apply_filters( 'woocommerce_get_payment_tokens_page_size', self::DEFAULT_PAGE_SIZE, $args );
-			$limit     = self::sanitize_row_count( $page_size, self::DEFAULT_PAGE_SIZE );
+			$per_page = apply_filters( 'woocommerce_get_payment_tokens_per_page', self::DEFAULT_PAGE_SIZE, $args );
+			$limit    = self::sanitize_row_count( $per_page, self::DEFAULT_PAGE_SIZE );
 		} elseif ( ! $args['token_id'] && ! $args['user_id'] ) {
 			/**
 			 * Controls the fallback maximum number of tokens returned by an unscoped query, i.e. one
 			 * passing neither `user_id`/`token_id` nor an explicit `limit` or `page`. Such a query
 			 * matches on the unindexed `gateway_id`/`type` columns and would otherwise read every
 			 * token in the store. Pass an explicit `limit`, or a `page` (sized by
-			 * `woocommerce_get_payment_tokens_page_size`), to opt out of this ceiling.
+			 * `woocommerce_get_payment_tokens_per_page`), to opt out of this ceiling.
 			 *
 			 * Queries scoped to a `user_id` or `token_id` are unaffected and remain unlimited.
 			 *
