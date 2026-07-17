@@ -36,7 +36,7 @@ export type ItemData = {
 			/** Variation attribute name. Mutually exclusive with `key`. */
 			name: string;
 	  }
- );
+);
 
 /**
  * Normalized, entity-decoded representation of an `ItemData` entry, ready
