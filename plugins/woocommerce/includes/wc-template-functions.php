@@ -1457,6 +1457,16 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 			return;
 		}
 
+		$attributes = array(
+			'data-product_id'  => $product->get_id(),
+			'data-product_sku' => $product->get_sku(),
+			'aria-label'       => $product->add_to_cart_description(),
+		);
+
+		if ( $product->get_permalink() !== $product->add_to_cart_url() ) {
+			$attributes['rel'] = 'nofollow';
+		}
+
 		$defaults = array(
 			'quantity'              => 1,
 			'class'                 => implode(
@@ -1472,12 +1482,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 				)
 			),
 			'aria-describedby_text' => $product->add_to_cart_aria_describedby(),
-			'attributes'            => array(
-				'data-product_id'  => $product->get_id(),
-				'data-product_sku' => $product->get_sku(),
-				'aria-label'       => $product->add_to_cart_description(),
-				'rel'              => 'nofollow',
-			),
+			'attributes'            => $attributes,
 		);
 
 		if ( is_a( $product, 'WC_Product_Simple' ) ) {
