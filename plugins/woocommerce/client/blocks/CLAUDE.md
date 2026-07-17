@@ -143,10 +143,10 @@ For private stores:
 `assets/js/base/stores/woocommerce/` holds three reactive stores, each registered under its full namespace:
 
 - `woocommerce/products` — server-populated product and variation data
-- `woocommerce/cart` — the read-only cart mirror plus scope-keyed draft cart items that back purchase UI; uses mutation batching for performance
+- `woocommerce/cart` — the read-only cart mirror plus context-held draft collections that back purchase UI; uses mutation batching for performance
 - `woocommerce/shopper-lists` — wishlist and saved-for-later state
 
-The cart store registers as `woocommerce/cart` (it moved off the retired root `woocommerce` store registration) and organizes shopper input as draft cart items keyed by scope, where scope is established through context by the surfaces that wrap purchase UI. See the store [README](assets/js/base/stores/woocommerce/README.md) for the full store surface and the [scoped draft items proposal](assets/js/base/stores/woocommerce/scoped-draft-items-proposal.md) for the design rationale.
+The cart store registers as `woocommerce/cart` (it moved off the retired root `woocommerce` store registration) and organizes shopper input as context-held draft collections: a page-wide `state.draftItems` collection plus per-container `context.draftItems` collections established through context by the surfaces that wrap purchase UI. See the store [README](assets/js/base/stores/woocommerce/README.md) for the full store surface and the [draft collections proposal](assets/js/base/stores/woocommerce/draft-collections-proposal.md) for the design rationale.
 
 ### IntegrationRegistry (Extension API)
 
