@@ -22,7 +22,11 @@ jest.mock( '@wordpress/admin-ui', () => ( {
 import { SettingsUIErrorBoundary, SettingsUIPage } from '../settings-ui-page';
 import { __resetRegistry, registerSettingsExtension } from '../registry';
 import { useSettingsUIContext } from '../settings-ui-context';
-import type { SettingsFieldContext, SettingsUISchema } from '../types';
+import type {
+	SettingsEditControlProps,
+	SettingsFieldContext,
+	SettingsUISchema,
+} from '../types';
 import { renderElement } from './helpers/render-element';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -143,6 +147,24 @@ describe( 'settings HTML rendering', () => {
 						},
 					],
 				},
+				advanced: {
+					id: 'advanced',
+					title: 'Advanced settings',
+					actions: [
+						{
+							id: 'manage',
+							label: 'Manage',
+							href: 'https://example.com',
+						},
+					],
+					fields: [
+						{
+							id: 'advanced_field',
+							label: 'Advanced field',
+							type: 'text',
+						},
+					],
+				},
 			},
 		};
 
@@ -160,7 +182,8 @@ describe( 'settings HTML rendering', () => {
 		).toBe( 'Configure the basics.' );
 		expect(
 			container.querySelector( '.wc-settings-ui__section-card' )
-		).toBeNull();
+		).not.toBeNull();
+		expect( container.textContent ).toContain( 'Manage' );
 		expect( container.querySelector( '.wc-settings-ui__row' ) ).toBeNull();
 		expect(
 			container.querySelector( '.wc-settings-ui__group-panel' )
@@ -221,6 +244,56 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it( 'normalizes cleared custom-control values to null', () => {
+		const ClearControl = ( { onChange }: SettingsEditControlProps ) => (
+			<button onClick={ () => onChange( { count: undefined } ) }>
+				Clear
+			</button>
+		);
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			fieldOverrides: { count: ClearControl },
+		} );
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'count',
+							label: 'Count',
+							type: 'number',
+							value: 2,
+							save: {
+								adapter: 'form_post',
+								initialValue: '2',
+							},
+						},
+					],
+				},
+			},
+		};
+		const { container, cleanup } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+		const hiddenInput = container.querySelector< HTMLInputElement >(
+			'input[type="hidden"][name="count"]'
+		);
+
+		expect( hiddenInput?.value ).toBe( '2' );
+		act(
+			() =>
+				container
+					.querySelector< HTMLButtonElement >( 'button' )
+					?.click()
+		);
+		expect( hiddenInput?.value ).toBe( '' );
+
+		cleanup();
+	} );
+
 	it( 'sanitizes native field descriptions before rendering', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
@@ -247,54 +320,6 @@ describe( 'settings HTML rendering', () => {
 		);
 
 		expectUnsafeMarkupRemoved( container );
-
-		act( () => root.unmount() );
-		container.remove();
-	} );
-
-	it( 'stores ISO datetime values and posts local values', () => {
-		const schema: SettingsUISchema = {
-			id: 'test-page',
-			title: 'Test page',
-			save: { adapter: 'form_post' },
-			groups: {
-				general: {
-					id: 'general',
-					fields: [
-						{
-							id: 'starts_at',
-							label: 'Starts at',
-							type: 'datetime-local',
-							value: '2026-07-17T13:30:00+00:00',
-							save: {
-								adapter: 'form_post',
-								name: 'starts_at',
-								initialValue: '2026-07-17T13:30',
-							},
-						},
-					],
-				},
-			},
-		};
-
-		const { container, root } = renderElement(
-			<SettingsUIPage schema={ schema } />
-		);
-		const input = container.querySelector< HTMLInputElement >(
-			'input[type="datetime-local"]'
-		);
-		const hiddenInput = container.querySelector< HTMLInputElement >(
-			'input[type="hidden"][name="starts_at"]'
-		);
-
-		expect( input ).not.toBeNull();
-		expect( hiddenInput ).not.toBeNull();
-
-		act( () => changeTextInput( input!, '2026-07-18T14:45' ) );
-		expect( hiddenInput?.value ).toBe( '2026-07-18T14:45' );
-
-		act( () => changeTextInput( input!, '' ) );
-		expect( hiddenInput?.value ).toBe( '' );
 
 		act( () => root.unmount() );
 		container.remove();

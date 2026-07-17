@@ -339,13 +339,6 @@ const jsConfig = {
 				const issuer =
 					resource.contextInfo && resource.contextInfo.issuer;
 				if ( ! issuer || ! SETTINGS_UI_GRAPH_ISSUER.test( issuer ) ) {
-					if (
-						process.env.WC_NMRP_DEBUG &&
-						resource.request === '@wordpress/private-apis'
-					) {
-						// eslint-disable-next-line no-console
-						console.error( 'NMRP-MISS', issuer );
-					}
 					return;
 				}
 				const replacement = settingsUiModuleEntries[ resource.request ];

@@ -8,7 +8,6 @@ import type {
 	SettingsUIField,
 	SettingsUIGroup,
 	SettingsUISchema,
-	SettingsValue,
 	SettingsValues,
 } from '../types';
 
@@ -49,19 +48,6 @@ const buildField = (
 		makeOptions( [ { id: 'general', fields: [ field ] } ], initialValues )
 	);
 
-const getDataFormSection = (
-	groups: SettingsUIGroup[],
-	values: SettingsValues = {}
-) => {
-	const sections = createDataFormAdapter(
-		makeOptions( groups )
-	).getRenderSections( values );
-
-	expect( sections ).toHaveLength( 1 );
-	expect( sections[ 0 ].type ).toBe( 'dataform' );
-	return sections[ 0 ];
-};
-
 describe( 'dataform-adapter', () => {
 	afterEach( () => {
 		__resetRegistry();
@@ -92,12 +78,14 @@ describe( 'dataform-adapter', () => {
 			expect( field.Edit ).toEqual( expected.Edit );
 		} );
 
-		it( 'maps disabled fields to isDisabled', () => {
-			const field = buildField( makeField( { disabled: true } ) );
+		it( 'maps disabled fields and canonical options', () => {
+			const options = [ { value: 'one', label: 'One' } ];
+			const field = buildField(
+				makeField( { disabled: true, options } )
+			);
 
-			expect(
-				field.isDisabled?.( { item: {}, field: field as never } )
-			).toBe( true );
+			expect( field.isDisabled ).toBe( true );
+			expect( field.elements ).toBe( options );
 		} );
 
 		it( 'maps canonical integer fields and validation rules', () => {
@@ -140,64 +128,6 @@ describe( 'dataform-adapter', () => {
 
 			expect( field.readOnly ).toBe( true );
 			expect( field.render ).toEqual( expect.any( Function ) );
-		} );
-
-		it( 'maps canonical options to DataForm elements', () => {
-			const field = buildField(
-				makeField( {
-					type: 'select',
-					options: [
-						{ value: 'one', label: 'One' },
-						{ value: 'two', label: 'Two' },
-					],
-				} )
-			);
-
-			expect( field.elements ).toEqual( [
-				{ value: 'one', label: 'One' },
-				{ value: 'two', label: 'Two' },
-			] );
-		} );
-	} );
-
-	describe( 'canonical values', () => {
-		it.each( [
-			[ makeField( { id: 'flag', type: 'checkbox' } ), true ],
-			[ makeField( { id: 'window', type: 'number' } ), 30 ],
-			[ makeField( { id: 'countries', type: 'array' } ), [ 'GB', 'US' ] ],
-			[
-				makeField( { id: 'starts_at', type: 'datetime-local' } ),
-				'2026-07-18T14:45:00.000Z',
-			],
-		] as Array< [ SettingsUIField, SettingsValue ] > )(
-			'presents canonical values without conversion',
-			( settingsField, value ) => {
-				expect(
-					buildField( settingsField ).getValue?.( {
-						item: { [ settingsField.id ]: value },
-					} )
-				).toEqual( value );
-			}
-		);
-
-		it( 'writes canonical values without conversion', () => {
-			const field = buildField(
-				makeField( { id: 'window', type: 'number' } )
-			);
-
-			expect( field.setValue?.( { item: {}, value: 35 } ) ).toEqual( {
-				window: 35,
-			} );
-		} );
-
-		it( 'normalizes a cleared DataForm value to null', () => {
-			const field = buildField(
-				makeField( { id: 'starts_at', type: 'datetime-local' } )
-			);
-
-			expect(
-				field.setValue?.( { item: {}, value: undefined } )
-			).toEqual( { starts_at: null } );
 		} );
 	} );
 
@@ -256,7 +186,9 @@ describe( 'dataform-adapter', () => {
 				},
 			} );
 
-			expect( field.isVisible?.( {} ) ).toBe( true );
+			expect( buildField( settingsField ).isVisible?.( {} ) ).toBe(
+				true
+			);
 		} );
 	} );
 
@@ -273,7 +205,10 @@ describe( 'dataform-adapter', () => {
 		const field = buildField( settingsField, { store_name: 'Initial' } );
 
 		expect(
-			field.isValid?.custom?.( { store_name: 'Current' }, field as never )
+			field.isValid?.custom?.( { store_name: 'Current' }, {
+				...field,
+				getValue: ( { item } ) => item.store_name,
+			} as never )
 		).toBe( 'This value is invalid.' );
 		expect( validate ).toHaveBeenCalledWith( {
 			value: 'Current',
@@ -283,70 +218,12 @@ describe( 'dataform-adapter', () => {
 		} );
 	} );
 
-	describe( 'form construction', () => {
-		const plainGroup: SettingsUIGroup = {
-			id: 'plain-a',
-			title: 'Plain A',
-			fields: [ makeField( { id: 'a' } ) ],
-		};
-		const plainGroupB: SettingsUIGroup = {
-			id: 'plain-b',
-			title: 'Plain B',
-			fields: [ makeField( { id: 'b' } ) ],
-		};
-
-		it( 'batches groups into combined form fields', () => {
-			const describedGroup: SettingsUIGroup = {
-				id: 'described',
-				title: 'Described',
-				description: 'Rich <strong>text</strong>',
-				fields: [ makeField( { id: 'c' } ) ],
-			};
-			const section = getDataFormSection( [
-				plainGroup,
-				describedGroup,
-				plainGroupB,
-			] );
-
-			expect( section.form.fields ).toEqual( [
-				expect.objectContaining( { id: 'plain-a', children: [ 'a' ] } ),
-				expect.objectContaining( {
-					id: 'described',
-					children: [ 'c' ],
-					description: expect.any( Object ),
-				} ),
-				expect.objectContaining( { id: 'plain-b', children: [ 'b' ] } ),
-			] );
-		} );
-
-		it( 'uses shell cards for groups with actions', () => {
-			const actionsGroup: SettingsUIGroup = {
-				id: 'with-actions',
-				title: 'With actions',
-				actions: [
-					{
-						id: 'manage',
-						label: 'Manage',
-						href: 'https://example.com',
-					},
-				],
-				fields: [ makeField( { id: 'd' } ) ],
-			};
-			const sections = createDataFormAdapter(
-				makeOptions( [ plainGroup, actionsGroup, plainGroupB ] )
-			).getRenderSections( {} );
-
-			expect( sections.map( ( section ) => section.type ) ).toEqual( [
-				'dataform',
-				'fallback',
-				'dataform',
-			] );
-			expect(
-				sections[ 1 ].type === 'fallback' && sections[ 1 ].group.id
-			).toBe( 'with-actions' );
-		} );
-
+	describe( 'visible groups and validation', () => {
 		it( 'omits groups whose fields are hidden', () => {
+			const visibleGroup: SettingsUIGroup = {
+				id: 'visible',
+				fields: [ makeField( { id: 'visible-field' } ) ],
+			};
 			const hiddenGroup: SettingsUIGroup = {
 				id: 'hidden',
 				fields: [
@@ -356,11 +233,13 @@ describe( 'dataform-adapter', () => {
 					} ),
 				],
 			};
-			const section = getDataFormSection( [ plainGroup, hiddenGroup ], {
-				mode: 'other',
-			} );
+			const adapter = createDataFormAdapter(
+				makeOptions( [ visibleGroup, hiddenGroup ] )
+			);
 
-			expect( section.form.fields ).toHaveLength( 1 );
+			expect( adapter.getVisibleGroups( { mode: 'other' } ) ).toEqual( [
+				visibleGroup,
+			] );
 		} );
 
 		it( 'omits hidden and disabled fields from the validation form', () => {

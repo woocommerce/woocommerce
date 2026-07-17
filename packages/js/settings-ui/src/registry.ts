@@ -206,28 +206,25 @@ const resolveFieldComponentRegistration = (
 	warnWhenMissing: boolean
 ): SettingsFieldComponentRegistration | undefined => {
 	const componentName = field.component;
-	const component = componentName
-		? normalizeFieldComponentDefinition(
-				findInMatchingRegistrations(
+	const resolved = [
+		componentName
+			? findInMatchingRegistrations(
 					context,
 					( registration ) =>
 						registration.components?.[ componentName ]
-				)
-		  )
-		: undefined;
-	const fieldOverride = normalizeFieldComponentDefinition(
+			  )
+			: undefined,
 		findInMatchingRegistrations(
 			context,
 			( registration ) => registration.fieldOverrides?.[ field.id ]
-		)
-	);
-	const typeRenderer = normalizeFieldComponentDefinition(
+		),
 		findInMatchingRegistrations(
 			context,
 			( registration ) => registration.typeRenderers?.[ field.type ]
-		)
-	);
-	const resolved = component ?? fieldOverride ?? typeRenderer;
+		),
+	]
+		.map( normalizeFieldComponentDefinition )
+		.find( ( definition ) => definition );
 
 	if ( ! resolved && field.component && warnWhenMissing ) {
 		warn( `Component "${ field.component }" is not registered.`, {

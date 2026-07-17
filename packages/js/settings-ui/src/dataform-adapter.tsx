@@ -2,14 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import type {
-	Field,
-	FieldTypeName,
-	Form,
-	FormField,
-	FormValidity,
-	Rules,
-} from '@wordpress/dataviews';
+import type { Field, FieldTypeName, Form, Rules } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
@@ -39,25 +32,6 @@ export type DataFormAdapterOptions = {
 	initialValues: SettingsValues;
 };
 
-/**
- * A render section is either a run of consecutive groups rendered as one
- * DataForm with card-layout combined fields (the package-recommended
- * shape), or a single group that falls back to the shell-owned card
- * because the package card header has no slot for header actions.
- */
-type DataFormRenderSection =
-	| {
-			type: 'dataform';
-			key: string;
-			form: Form;
-	  }
-	| {
-			type: 'fallback';
-			key: string;
-			form: Form;
-			group: SettingsUIGroup;
-	  };
-
 const valueMatchesVisibilityRule = (
 	value: SettingsValue,
 	expected: SettingsValue | SettingsValue[] | undefined
@@ -71,21 +45,10 @@ const valueMatchesVisibilityRule = (
 	);
 };
 
-// DataForm types descriptions as plain strings while the schema carries
-// sanitized HTML. The layouts render the description as a node, so a
-// sanitized element keeps links and formatting working despite the
-// declared string type.
-const toDescriptionNode = ( description?: string ) => {
-	if ( ! description ) {
-		return undefined;
-	}
-
-	if ( ! /<[^>]+>/.test( description ) ) {
-		return description;
-	}
-
-	return toSanitizedHtmlNode( description ) as unknown as string;
-};
+const toDescriptionNode = ( description?: string ) =>
+	description && /<[^>]+>/.test( description )
+		? toSanitizedHtmlNode( description )
+		: description;
 
 const createInfoRender = ( settingsField: SettingsUIField ) => {
 	return function InfoField() {
@@ -99,9 +62,6 @@ const createInfoRender = ( settingsField: SettingsUIField ) => {
 		);
 	};
 };
-
-type ValueGetter = NonNullable< Field< SettingsValues >[ 'getValue' ] >;
-type ValueSetter = NonNullable< Field< SettingsValues >[ 'setValue' ] >;
 
 /**
  * How a canonical Settings UI field type maps onto DataForm. Types without
@@ -144,20 +104,6 @@ const settingsTypeDescriptors: Record< string, SettingsTypeDescriptor > = {
 	info: { type: 'text', render: createInfoRender },
 };
 
-const defaultGetValue =
-	( settingsField: SettingsUIField ): ValueGetter =>
-	( { item } ) => {
-		const value = item[ settingsField.id ];
-		return typeof value === 'undefined' ? '' : value;
-	};
-
-const defaultSetValue =
-	( settingsField: SettingsUIField ): ValueSetter =>
-	( { value } ) => ( {
-		[ settingsField.id ]:
-			typeof value === 'undefined' ? null : ( value as SettingsValue ),
-	} );
-
 // Predicates fail open: a broken visibility callback renders the field
 // or group rather than hiding it.
 const runVisibilityPredicate = (
@@ -186,32 +132,31 @@ const runVisibilityPredicate = (
 const createIsVisible = (
 	settingsField: SettingsUIField,
 	options: DataFormAdapterOptions
-) => {
-	return ( item: SettingsValues ) => {
-		const predicate = resolveFieldVisibilityPredicate(
-			settingsField.id,
-			options.context
-		);
+): Field< SettingsValues >[ 'isVisible' ] => {
+	const predicate = resolveFieldVisibilityPredicate(
+		settingsField.id,
+		options.context
+	);
 
-		if ( predicate ) {
-			return runVisibilityPredicate(
+	if ( predicate ) {
+		return ( item ) =>
+			runVisibilityPredicate(
 				predicate,
 				'field',
 				settingsField.id,
 				item,
 				options
 			);
-		}
+	}
 
-		if ( settingsField.visibility ) {
-			return valueMatchesVisibilityRule(
-				item[ settingsField.visibility.controller ],
-				settingsField.visibility.value
-			);
-		}
-
-		return true;
-	};
+	const visibility = settingsField.visibility;
+	return visibility
+		? ( item ) =>
+				valueMatchesVisibilityRule(
+					item[ visibility.controller ],
+					visibility.value
+				)
+		: undefined;
 };
 
 export const buildDataFormField = (
@@ -243,8 +188,8 @@ export const buildDataFormField = (
 		description: toDescriptionNode( settingsField.description ),
 		placeholder: settingsField.placeholder,
 		type,
-		getValue: defaultGetValue( settingsField ),
-		setValue: defaultSetValue( settingsField ),
+		elements: settingsField.options,
+		isDisabled: settingsField.disabled,
 		isVisible: createIsVisible( settingsField, options ),
 		isValid:
 			validationRules || customRule
@@ -255,12 +200,13 @@ export const buildDataFormField = (
 				: undefined,
 	};
 
-	if ( settingsField.disabled ) {
-		field.isDisabled = () => true;
-	}
-
-	if ( settingsField.options && settingsField.options.length > 0 ) {
-		field.elements = settingsField.options;
+	const registeredComponent = resolveFieldComponent(
+		settingsField,
+		options.context
+	);
+	if ( registeredComponent ) {
+		field.Edit = registeredComponent;
+		return field;
 	}
 
 	if ( descriptor?.render ) {
@@ -269,55 +215,19 @@ export const buildDataFormField = (
 		return field;
 	}
 
-	let defaultEdit: Field< SettingsValues >[ 'Edit' ] | undefined;
-
 	if ( ! descriptor ) {
 		warn( `Field type "${ settingsField.type }" is not supported.`, {
 			field: settingsField,
 		} );
 		field.type = 'text';
-		// Unknown types can carry non-scalar values; present a string so
-		// the package text control renders something meaningful.
 		field.getValue = ( { item } ) =>
 			toStringValue( item[ settingsField.id ] );
 	} else {
-		defaultEdit = descriptor.Edit;
-	}
-
-	const registeredComponent = resolveFieldComponent(
-		settingsField,
-		options.context
-	);
-
-	if ( registeredComponent ) {
-		field.Edit = registeredComponent;
-	} else if ( typeof defaultEdit !== 'undefined' ) {
-		// String and config controls resolve inside DataForm; fields left
-		// without an Edit use the package default for their type.
-		field.Edit = defaultEdit;
+		field.Edit = descriptor.Edit;
 	}
 
 	return field;
 };
-
-// The card layout renders the combined field's description at the top of
-// the card body, so group descriptions go through the package.
-const getCardFormField = ( group: SettingsUIGroup ): FormField => ( {
-	id: group.id,
-	label: group.title,
-	description: toDescriptionNode( group.description ),
-	layout: {
-		type: 'card',
-		withHeader: Boolean( group.title ),
-		isCollapsible: false,
-	},
-	children: group.fields.map( ( field ) => field.id ),
-} );
-
-export const getGroupValidity = (
-	validity: FormValidity,
-	groupId: string
-): FormValidity => validity?.[ groupId ]?.children;
 
 export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 	const { schema } = options;
@@ -327,41 +237,33 @@ export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 	const fieldsById = new Map(
 		fields.map( ( field ) => [ field.id, field ] )
 	);
-
 	const isFieldVisible = ( fieldId: string, values: SettingsValues ) =>
 		fieldsById.get( fieldId )?.isVisible?.( values ) !== false;
-
-	const isGroupVisible = (
-		group: SettingsUIGroup,
-		values: SettingsValues
-	) => {
-		const predicate = resolveGroupVisibilityPredicate(
+	const groupPredicates = new Map(
+		Object.values( schema.groups ).map( ( group ) => [
 			group.id,
-			options.context
-		);
+			resolveGroupVisibilityPredicate( group.id, options.context ),
+		] )
+	);
 
-		return predicate
-			? runVisibilityPredicate(
-					predicate,
-					'group',
-					group.id,
-					values,
-					options
-			  )
-			: true;
-	};
-
-	// The page derives the render sections and the validation form from
-	// the same values object in one render pass, so a one-entry cache
-	// halves the visibility evaluation per change.
-	let lastVisibleGroupsValues: SettingsValues | undefined;
-	let lastVisibleGroups: SettingsUIGroup[] = [];
-
+	let lastValues: SettingsValues | undefined;
+	let visibleGroups: SettingsUIGroup[] = [];
 	const getVisibleGroups = ( values: SettingsValues ) => {
-		if ( values !== lastVisibleGroupsValues ) {
-			lastVisibleGroupsValues = values;
-			lastVisibleGroups = Object.values( schema.groups )
-				.filter( ( group ) => isGroupVisible( group, values ) )
+		if ( values !== lastValues ) {
+			lastValues = values;
+			visibleGroups = Object.values( schema.groups )
+				.filter( ( group ) => {
+					const predicate = groupPredicates.get( group.id );
+					return predicate
+						? runVisibilityPredicate(
+								predicate,
+								'group',
+								group.id,
+								values,
+								options
+						  )
+						: true;
+				} )
 				.filter( ( group ) =>
 					group.fields.some( ( field ) =>
 						isFieldVisible( field.id, values )
@@ -369,75 +271,10 @@ export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 				);
 		}
 
-		return lastVisibleGroups;
+		return visibleGroups;
 	};
 
-	let lastSectionsKey: string | undefined;
-	let lastSections: DataFormRenderSection[] = [];
-
-	const getRenderSections = (
-		values: SettingsValues
-	): DataFormRenderSection[] => {
-		// Sections depend only on which groups are visible, so keep their
-		// identity stable across value changes. Stable form objects let
-		// DataForm's own normalization memos survive keystrokes.
-		const visibleGroups = getVisibleGroups( values );
-		const sectionsKey = visibleGroups
-			.map( ( group ) => group.id )
-			.join( '\n' );
-
-		if ( sectionsKey === lastSectionsKey ) {
-			return lastSections;
-		}
-
-		const sections: DataFormRenderSection[] = [];
-		let pendingCardFields: FormField[] = [];
-		let segmentIndex = 0;
-
-		const flushDataForm = () => {
-			if ( pendingCardFields.length === 0 ) {
-				return;
-			}
-
-			sections.push( {
-				type: 'dataform',
-				key: `dataform-${ segmentIndex }`,
-				form: {
-					layout: { type: 'card' },
-					fields: pendingCardFields,
-				},
-			} );
-			pendingCardFields = [];
-			segmentIndex += 1;
-		};
-
-		visibleGroups.forEach( ( group ) => {
-			if ( ! group.actions?.length ) {
-				pendingCardFields.push( getCardFormField( group ) );
-				return;
-			}
-
-			flushDataForm();
-			sections.push( {
-				type: 'fallback',
-				key: `fallback-${ group.id }`,
-				group,
-				form: {
-					layout: { type: 'regular' },
-					fields: group.fields.map( ( field ) => field.id ),
-				},
-			} );
-		} );
-		flushDataForm();
-
-		lastSectionsKey = sectionsKey;
-		lastSections = sections;
-
-		return sections;
-	};
-
-	// Only visible fields validate, so a hidden required field can never
-	// block saving.
+	// Only visible, enabled fields validate.
 	const getValidationForm = ( values: SettingsValues ): Form => ( {
 		layout: { type: 'regular' },
 		fields: getVisibleGroups( values ).map( ( group ) => ( {
@@ -449,9 +286,5 @@ export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 		} ) ),
 	} );
 
-	return {
-		fields,
-		getRenderSections,
-		getValidationForm,
-	};
+	return { fields, getVisibleGroups, getValidationForm };
 };

@@ -15,6 +15,7 @@ import {
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { DataForm, useFormValidity } from '@wordpress/dataviews';
+import type { Form } from '@wordpress/dataviews';
 import {
 	Badge,
 	Button as UIButton,
@@ -29,10 +30,10 @@ import type { ComponentProps, ErrorInfo, ReactNode } from 'react';
 /**
  * Internal dependencies
  */
-import { createDataFormAdapter, getGroupValidity } from './dataform-adapter';
+import { createDataFormAdapter } from './dataform-adapter';
 import { HiddenInputs } from './hidden-inputs';
 import { error } from './diagnostics';
-import { sanitizeSettingsHtml } from './html';
+import { sanitizeSettingsHtml, toSanitizedHtmlNode } from './html';
 import { resolveRegionComponent, resolveSaveHandler } from './registry';
 import { areValuesEqual } from './values';
 import { SettingsUIPageContext } from './settings-ui-context';
@@ -300,6 +301,36 @@ const GroupHeader = ( { group }: { group: SettingsUIGroup } ) => {
 	);
 };
 
+const getGroupForm = ( group: SettingsUIGroup ): Form => {
+	if ( group.actions?.length ) {
+		return {
+			layout: { type: 'regular' },
+			fields: group.fields.map( ( field ) => field.id ),
+		};
+	}
+
+	return {
+		layout: { type: 'card' },
+		fields: [
+			{
+				id: group.id,
+				label: group.title,
+				description: group.description
+					? ( toSanitizedHtmlNode(
+							group.description
+					  ) as unknown as string )
+					: undefined,
+				layout: {
+					type: 'card',
+					withHeader: Boolean( group.title ),
+					isCollapsible: false,
+				},
+				children: group.fields.map( ( field ) => field.id ),
+			},
+		],
+	};
+};
+
 const getAllFields = ( schema: SettingsUISchema ): SettingsUIField[] =>
 	Object.values( schema.groups ).flatMap( ( group ) => group.fields );
 
@@ -561,9 +592,19 @@ export const SettingsUIPage = ( {
 		() => createDataFormAdapter( pageContextValue ),
 		[ pageContextValue ]
 	);
-	const dataFormSections = useMemo(
-		() => dataFormAdapter.getRenderSections( values ),
+	const visibleGroups = useMemo(
+		() => dataFormAdapter.getVisibleGroups( values ),
 		[ dataFormAdapter, values ]
+	);
+	const groupForms = useMemo(
+		() =>
+			new Map(
+				Object.values( schema.groups ).map( ( group ) => [
+					group.id,
+					getGroupForm( group ),
+				] )
+			),
+		[ schema.groups ]
 	);
 	const validationForm = useMemo(
 		() => dataFormAdapter.getValidationForm( values ),
@@ -852,14 +893,19 @@ export const SettingsUIPage = ( {
 					</Notice.Root>
 				) : null }
 				<Stack className="wc-settings-ui" direction="column" gap="xl">
-					{ dataFormSections.map( ( renderSection ) => {
-						if ( renderSection.type === 'dataform' ) {
+					{ visibleGroups.map( ( group ) => {
+						const form = groupForms.get( group.id );
+						if ( ! form ) {
+							return null;
+						}
+
+						if ( ! group.actions?.length ) {
 							return (
 								<DataForm
 									data={ values }
 									fields={ dataFormAdapter.fields }
-									form={ renderSection.form }
-									key={ renderSection.key }
+									form={ form }
+									key={ group.id }
 									onChange={ setValues }
 									validity={ validity }
 								/>
@@ -869,22 +915,19 @@ export const SettingsUIPage = ( {
 						return (
 							<section
 								className="wc-settings-ui__section"
-								key={ renderSection.key }
+								key={ group.id }
 							>
 								<Card.Root className="wc-settings-ui__section-card">
-									<GroupHeader
-										group={ renderSection.group }
-									/>
+									<GroupHeader group={ group } />
 									<Card.Content className="wc-settings-ui__section-fields">
 										<DataForm
 											data={ values }
 											fields={ dataFormAdapter.fields }
-											form={ renderSection.form }
+											form={ form }
 											onChange={ setValues }
-											validity={ getGroupValidity(
-												validity,
-												renderSection.group.id
-											) }
+											validity={
+												validity?.[ group.id ]?.children
+											}
 										/>
 									</Card.Content>
 								</Card.Root>
