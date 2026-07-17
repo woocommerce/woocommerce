@@ -25,11 +25,15 @@ function createReportDirectory() {
 	return mkdtempSync( path.join( tmpdir(), 'wc-blocks-duration-report-' ) );
 }
 
-function writeCtrfReport( directory, name, tests ) {
+function writeCtrfReportDocument( directory, name, report ) {
 	writeFileSync(
 		path.join( directory, `ctrf-report-${ name }.json` ),
-		JSON.stringify( { results: { tests } } )
+		JSON.stringify( report )
 	);
+}
+
+function writeCtrfReport( directory, name, tests ) {
+	writeCtrfReportDocument( directory, name, { results: { tests } } );
 }
 
 describe( 'readRunDurations', () => {
@@ -91,6 +95,36 @@ describe( 'readRunDurations', () => {
 			assert.throws(
 				() => readRunDurations( directory ),
 				/No passed Blocks timings found/
+			);
+		} finally {
+			rmSync( directory, { recursive: true, force: true } );
+		}
+	} );
+
+	test( 'rejects a non-array CTRF tests collection', () => {
+		const directory = createReportDirectory();
+		writeCtrfReportDocument( directory, 'invalid-collection', {
+			results: { tests: {} },
+		} );
+
+		try {
+			assert.throws(
+				() => readRunDurations( directory ),
+				/Invalid CTRF report .*ctrf-report-invalid-collection\.json: results\.tests must be an array/
+			);
+		} finally {
+			rmSync( directory, { recursive: true, force: true } );
+		}
+	} );
+
+	test( 'rejects non-object CTRF test entries', () => {
+		const directory = createReportDirectory();
+		writeCtrfReport( directory, 'invalid-entry', [ null ] );
+
+		try {
+			assert.throws(
+				() => readRunDurations( directory ),
+				/Invalid CTRF report .*ctrf-report-invalid-entry\.json: results\.tests entries must be objects/
 			);
 		} finally {
 			rmSync( directory, { recursive: true, force: true } );

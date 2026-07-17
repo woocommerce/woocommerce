@@ -46,7 +46,22 @@ function readRunDurations( directory ) {
 	const durations = new Map();
 	for ( const reportPath of collectCtrfReportPaths( directory ) ) {
 		const report = JSON.parse( readFileSync( reportPath, 'utf8' ) );
-		for ( const testResult of report?.results?.tests ?? [] ) {
+		const testResults = report?.results?.tests;
+		if ( testResults !== undefined && ! Array.isArray( testResults ) ) {
+			throw new Error(
+				`Invalid CTRF report ${ reportPath }: results.tests must be an array`
+			);
+		}
+		for ( const testResult of testResults ?? [] ) {
+			if (
+				! testResult ||
+				typeof testResult !== 'object' ||
+				Array.isArray( testResult )
+			) {
+				throw new Error(
+					`Invalid CTRF report ${ reportPath }: results.tests entries must be objects`
+				);
+			}
 			if (
 				testResult.status !== 'passed' ||
 				typeof testResult.filePath !== 'string' ||

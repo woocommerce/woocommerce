@@ -113,26 +113,66 @@ function validateDurationManifest( manifest ) {
 	}
 }
 
+function optionalInventoryArray( value, label ) {
+	if ( value === undefined || value === null ) {
+		return [];
+	}
+	if ( ! Array.isArray( value ) ) {
+		throw new Error(
+			`Invalid Playwright inventory: ${ label } must be an array`
+		);
+	}
+	return value;
+}
+
+function validateInventoryObject( value, label ) {
+	if ( ! value || typeof value !== 'object' || Array.isArray( value ) ) {
+		throw new Error(
+			`Invalid Playwright inventory: ${ label } entries must be objects`
+		);
+	}
+}
+
 function collectProjectFiles( report, projectName ) {
 	const files = new Set();
 
-	function visitSuites( suites ) {
-		for ( const suite of suites ?? [] ) {
-			for ( const spec of suite.specs ?? [] ) {
+	function visitSuites( suites, label ) {
+		for ( const suite of optionalInventoryArray( suites, label ) ) {
+			validateInventoryObject( suite, 'suite' );
+			for ( const spec of optionalInventoryArray(
+				suite.specs,
+				'suite.specs'
+			) ) {
+				validateInventoryObject( spec, 'spec' );
+				const tests = optionalInventoryArray(
+					spec.tests,
+					'spec.tests'
+				);
+				for ( const playwrightTest of tests ) {
+					validateInventoryObject( playwrightTest, 'test' );
+				}
 				if (
-					spec.tests?.some(
+					tests.some(
 						( playwrightTest ) =>
 							playwrightTest.projectName === projectName
 					)
 				) {
+					if (
+						typeof spec.file !== 'string' ||
+						spec.file.length === 0
+					) {
+						throw new Error(
+							'Invalid Playwright inventory: Matching spec.file must be a non-empty string'
+						);
+					}
 					files.add( spec.file.replaceAll( '\\', '/' ) );
 				}
 			}
-			visitSuites( suite.suites );
+			visitSuites( suite.suites, 'suite.suites' );
 		}
 	}
 
-	visitSuites( report?.suites );
+	visitSuites( report?.suites, 'suites' );
 	return [ ...files ].sort( compareFilePaths );
 }
 

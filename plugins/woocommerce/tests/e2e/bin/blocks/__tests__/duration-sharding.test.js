@@ -253,6 +253,60 @@ describe( 'Playwright project inventory', () => {
 		] );
 	} );
 
+	test( 'rejects non-array Playwright inventory collections', () => {
+		for ( const [ malformedReport, expectedMessage ] of [
+			[ { suites: {} }, /suites must be an array/ ],
+			[ { suites: [ { specs: {} } ] }, /suite\.specs must be an array/ ],
+			[
+				{ suites: [ { specs: [ { tests: {} } ] } ] },
+				/spec\.tests must be an array/,
+			],
+		] ) {
+			assert.throws(
+				() => collectProjectFiles( malformedReport, 'blocks-chromium' ),
+				expectedMessage
+			);
+		}
+	} );
+
+	test( 'rejects non-object Playwright inventory entries', () => {
+		for ( const [ malformedReport, expectedMessage ] of [
+			[ { suites: [ null ] }, /suite entries must be objects/ ],
+			[
+				{ suites: [ { specs: [ null ] } ] },
+				/spec entries must be objects/,
+			],
+			[
+				{ suites: [ { specs: [ { tests: [ null ] } ] } ] },
+				/test entries must be objects/,
+			],
+		] ) {
+			assert.throws(
+				() => collectProjectFiles( malformedReport, 'blocks-chromium' ),
+				expectedMessage
+			);
+		}
+	} );
+
+	test( 'rejects matching Playwright specs without a file path', () => {
+		const malformedReport = {
+			suites: [
+				{
+					specs: [
+						{
+							tests: [ { projectName: 'blocks-chromium' } ],
+						},
+					],
+				},
+			],
+		};
+
+		assert.throws(
+			() => collectProjectFiles( malformedReport, 'blocks-chromium' ),
+			/Matching spec\.file must be a non-empty string/
+		);
+	} );
+
 	test( 'renders project-qualified file-only test-list entries', () => {
 		assert.equal(
 			buildProjectTestList( 'blocks-chromium', [
