@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the IPv6-capable ipify endpoint for external IP lookups.
