@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseArgs, isCi, sanitizeEnv, ALLOWED_WP_ENV_VARS, readWcVersion, computeHash } from './run-env.mjs';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { parseArgs, isCi, sanitizeEnv, ALLOWED_WP_ENV_VARS, readWcVersion, computeHash, readState, writeState, decide, MAX_AGE_MS } from './run-env.mjs';
 
 test( 'parseArgs extracts --rebuild and passes the rest through', () => {
 	assert.deepEqual( parseArgs( [ '--rebuild', '--debug' ] ), {
@@ -68,4 +71,29 @@ test( 'computeHash is stable and sensitive to each input', () => {
 		computeHash( { ...base, allowlistEnv: { WP_ENV_PHP_VERSION: '8.2' } } ),
 		h
 	);
+} );
+
+test( 'writeState/readState round-trips', () => {
+	const dir = mkdtempSync( join( tmpdir(), 'runenv-' ) );
+	try {
+		assert.equal( readState( dir ), null );
+		writeState( dir, { hash: 'abc', port: 9001, snapshotCreatedAt: 5 } );
+		assert.deepEqual( readState( dir ), {
+			hash: 'abc',
+			port: 9001,
+			snapshotCreatedAt: 5,
+		} );
+	} finally {
+		rmSync( dir, { recursive: true, force: true } );
+	}
+} );
+
+test( 'decide picks rebuild vs fresh', () => {
+	const state = { hash: 'h', port: 9001, snapshotCreatedAt: 1000 };
+	const p = { state, currentHash: 'h', nowMs: 1000, maxAgeMs: MAX_AGE_MS, forceRebuild: false };
+	assert.equal( decide( p ), 'fresh' );
+	assert.equal( decide( { ...p, forceRebuild: true } ), 'rebuild' );
+	assert.equal( decide( { ...p, state: null } ), 'rebuild' );
+	assert.equal( decide( { ...p, currentHash: 'other' } ), 'rebuild' );
+	assert.equal( decide( { ...p, nowMs: 1000 + MAX_AGE_MS + 1 } ), 'rebuild' );
 } );

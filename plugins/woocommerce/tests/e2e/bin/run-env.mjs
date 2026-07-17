@@ -5,7 +5,9 @@
  * staleness hash, and a snapshot-based auto-reset. See TESTOPS-196.
  */
 import { createHash } from 'node:crypto';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
 export function parseArgs( argv ) {
 	const rebuild = argv.includes( '--rebuild' );
@@ -63,6 +65,32 @@ export function computeHash( {
 		wcVersion,
 	} );
 	return createHash( 'md5' ).update( canonical ).digest( 'hex' );
+}
+
+export const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+export function readState( stateDir ) {
+	try {
+		return JSON.parse( readFileSync( join( stateDir, 'instance.json' ), 'utf8' ) );
+	} catch {
+		return null;
+	}
+}
+
+export function writeState( stateDir, state ) {
+	mkdirSync( stateDir, { recursive: true } );
+	writeFileSync(
+		join( stateDir, 'instance.json' ),
+		JSON.stringify( state, null, 2 ) + '\n'
+	);
+}
+
+export function decide( { state, currentHash, nowMs, maxAgeMs, forceRebuild } ) {
+	if ( forceRebuild ) return 'rebuild';
+	if ( ! state ) return 'rebuild';
+	if ( state.hash !== currentHash ) return 'rebuild';
+	if ( nowMs - state.snapshotCreatedAt > maxAgeMs ) return 'rebuild';
+	return 'fresh';
 }
 
 async function main() {
