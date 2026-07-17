@@ -283,9 +283,7 @@ class CartShippingRateSchema extends AbstractSchema {
 
 	/**
 	 * Returns the recorded origin ('auto'|'manual') of the package's chosen shipping
-	 * rate, or null when no rate is chosen. Reads the session directly (side-effect
-	 * free) rather than wc_get_chosen_shipping_method_for_package(), which can write
-	 * a new default into the session as it resolves.
+	 * rate, or null when no rate is chosen.
 	 *
 	 * Unrecorded origins report 'manual' (ShippingMethodOriginTracker's BC default),
 	 * so clients consuming this field treat pre-tracking sessions as deliberate
@@ -295,18 +293,13 @@ class CartShippingRateSchema extends AbstractSchema {
 	 * @return string|null
 	 */
 	protected function get_selected_rate_origin( $package ) {
-		if ( ! is_callable( array( WC()->session, 'get' ) ) ) {
+		$package_id = $package['package_id'] ?? null;
+
+		if ( null === $package_id ) {
 			return null;
 		}
 
-		$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
-		$package_id     = $package['package_id'] ?? null;
-
-		if ( null === $package_id || empty( $chosen_methods[ $package_id ] ) ) {
-			return null;
-		}
-
-		return wc_get_container()->get( ShippingMethodOriginTracker::class )->get_origin( $package_id );
+		return wc_get_container()->get( ShippingMethodOriginTracker::class )->get_origin_for_chosen_rate( $package_id );
 	}
 
 	/**

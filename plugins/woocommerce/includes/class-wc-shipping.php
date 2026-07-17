@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Shipping\ShippingMethodOriginTracker;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -466,7 +467,7 @@ class WC_Shipping {
 	 */
 	public function reset_shipping() {
 		unset( WC()->session->chosen_shipping_methods );
-		unset( WC()->session->chosen_shipping_method_origins );
+		unset( WC()->session->{ShippingMethodOriginTracker::SESSION_KEY} );
 		$this->packages = array();
 	}
 

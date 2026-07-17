@@ -79,6 +79,41 @@ class ShippingMethodOriginTracker {
 	}
 
 	/**
+	 * Records a 'manual' origin for a rate the customer explicitly selected, unless the
+	 * selection is a repeat of the package's currently chosen rate.
+	 *
+	 * Selection UIs re-assert the current choice without a customer decision — the block
+	 * checkout's pickup-options block re-posts it on mount, and the classic checkout
+	 * re-posts it on every order-review refresh (page load, address field edits). Recording
+	 * such a repeat as 'manual' would launder an auto-defaulted Local Pickup and defeat the
+	 * unstick (and the selected_rate_origin field gateways consume), so only a change of
+	 * rate counts; repeats keep the current origin.
+	 *
+	 * Call this BEFORE writing the new rate to `chosen_shipping_methods` — the repeat check
+	 * compares against the rate currently in the session.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param int|string $key     Package key.
+	 * @param string     $rate_id The rate_id the customer selected.
+	 * @return void
+	 */
+	public function record_manual_selection( $key, $rate_id ) {
+		if ( ! is_callable( array( WC()->session, 'get' ) ) ) {
+			return;
+		}
+
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+		$current_rate   = isset( $chosen_methods[ $key ] ) && is_string( $chosen_methods[ $key ] ) ? $chosen_methods[ $key ] : '';
+
+		if ( (string) $rate_id === $current_rate ) {
+			return;
+		}
+
+		$this->set_origin( $key, self::ORIGIN_MANUAL, $rate_id );
+	}
+
+	/**
 	 * Returns the recorded origin ('auto' or 'manual') of the chosen shipping method
 	 * for a package.
 	 *
@@ -118,5 +153,32 @@ class ShippingMethodOriginTracker {
 		}
 
 		return self::ORIGIN_AUTO === $entry['origin'] ? self::ORIGIN_AUTO : self::ORIGIN_MANUAL;
+	}
+
+	/**
+	 * Returns the origin of the package's currently chosen shipping rate, or null when
+	 * no rate is chosen for the package (or no session is available).
+	 *
+	 * Reads the session directly and is side-effect free, unlike
+	 * `wc_get_chosen_shipping_method_for_package()`, which can write a new default into
+	 * the session as it resolves.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param int|string $key Package key.
+	 * @return string|null 'auto', 'manual', or null when no rate is chosen.
+	 */
+	public function get_origin_for_chosen_rate( $key ) {
+		if ( ! is_callable( array( WC()->session, 'get' ) ) ) {
+			return null;
+		}
+
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+
+		if ( empty( $chosen_methods[ $key ] ) ) {
+			return null;
+		}
+
+		return $this->get_origin( $key );
 	}
 }

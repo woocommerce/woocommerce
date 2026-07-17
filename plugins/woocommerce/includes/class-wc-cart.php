@@ -2106,8 +2106,8 @@ class WC_Cart extends WC_Legacy_Cart {
 			$origin_tracker          = wc_get_container()->get( ShippingMethodOriginTracker::class );
 
 			foreach ( $packages as $i => $package ) {
+				$origin_tracker->record_manual_selection( $i, 'free_shipping' );
 				$chosen_shipping_methods[ $i ] = 'free_shipping';
-				$origin_tracker->set_origin( $i, 'manual', 'free_shipping' );
 			}
 
 			WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );

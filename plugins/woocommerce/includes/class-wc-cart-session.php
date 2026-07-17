@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Shipping\ShippingMethodOriginTracker;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -322,7 +323,7 @@ final class WC_Cart_Session {
 		$wc_session->set( 'shipping_method_counts', null );
 		$wc_session->set( 'previous_shipping_methods', null );
 		$wc_session->set( 'chosen_shipping_methods', null );
-		$wc_session->set( 'chosen_shipping_method_origins', null );
+		$wc_session->set( ShippingMethodOriginTracker::SESSION_KEY, null );
 		$this->remove_shipping_for_package_from_session();
 	}
 
@@ -423,7 +424,7 @@ final class WC_Cart_Session {
 			$wc_session->set( 'shipping_method_counts', null );
 			$wc_session->set( 'previous_shipping_methods', null );
 			$wc_session->set( 'chosen_shipping_methods', null );
-			$wc_session->set( 'chosen_shipping_method_origins', null );
+			$wc_session->set( ShippingMethodOriginTracker::SESSION_KEY, null );
 			$this->remove_shipping_for_package_from_session();
 		}
 		if ( empty( $cart ) ) {

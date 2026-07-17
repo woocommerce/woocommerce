@@ -348,12 +348,8 @@ class WC_AJAX {
 
 	/**
 	 * Merges posted shipping methods into the chosen-methods array, recording a 'manual'
-	 * shipping-method origin only when the posted method differs from the current choice.
-	 *
-	 * The checkout page re-posts the currently selected method on every order-review refresh
-	 * (page load, address field edits), so a repeat of the existing choice is not a customer
-	 * decision. Only a change of method counts as a 'manual' origin; repeats keep the current
-	 * origin so an auto-defaulted Local Pickup stays eligible for unsticking.
+	 * shipping-method origin for each posted method. Repeats of the current choice are
+	 * ignored by the tracker (see ShippingMethodOriginTracker::record_manual_selection()).
 	 *
 	 * @param mixed $posted_shipping_methods Cleaned `shipping_method` request value.
 	 * @param mixed $chosen_shipping_methods Current chosen methods from the session.
@@ -370,13 +366,8 @@ class WC_AJAX {
 			if ( ! is_string( $value ) ) {
 				continue;
 			}
-			$previous_method = isset( $chosen_shipping_methods[ $i ] ) && is_string( $chosen_shipping_methods[ $i ] ) ? $chosen_shipping_methods[ $i ] : '';
-
+			$origin_tracker->record_manual_selection( $i, $value );
 			$chosen_shipping_methods[ $i ] = $value;
-
-			if ( $value !== $previous_method ) {
-				$origin_tracker->set_origin( $i, 'manual', $value );
-			}
 		}
 
 		return $chosen_shipping_methods;

@@ -15,25 +15,10 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
  * Cart Select Shipping Rate Controller Tests.
  *
  * These tests pin the route's `package_id` normalization, which the shipping-method
- * origin guard in `CartController::select_shipping_rate()` silently depends on.
- *
- * The block checkout's pickup-options block does NOT send `package_id: 0` — it sends
- * `package_id: null`. A real batch request from the block looks like:
- *
- *     {"path":"/wc/store/v1/cart/select-shipping-rate","method":"POST",
- *      "data":{"package_id":null,"rate_id":"local_pickup:3"}}
- *
- * `CartSelectShippingRate::get_route_post_response()` normalizes that null by iterating
- * `CartController::get_shipping_packages()` and calling `select_shipping_rate()` with the
- * real integer package id. That normalization is what lets the origin guard compare the
- * incoming rate against the correct `chosen_shipping_methods` session key.
- *
- * If the normalization were ever dropped, `null` would reach `select_shipping_rate()`, PHP
- * would coerce it to `''` as an array key, and the route would read and write a phantom
- * package instead of package 0: the guard would never see the current choice, and the real
- * package's chosen rate would never be updated — re-breaking the Local Pickup unstick. Every
- * unit test of `select_shipping_rate()` passes an explicit integer, so none of them would
- * notice. These route-level tests do.
+ * origin guard in `CartController::select_shipping_rate()` silently depends on: the
+ * pickup-options block posts `package_id: null`, and the route must resolve it to the
+ * real package id before the guard compares the incoming rate against the session —
+ * otherwise the guard reads and writes a phantom `''` key instead of the real package.
  */
 class CartSelectShippingRate extends ControllerTestCase {
 
@@ -185,11 +170,8 @@ class CartSelectShippingRate extends ControllerTestCase {
 	}
 
 	/**
-	 * Re-asserting the already-chosen pickup rate without a `package_id` must be a no-op for the
-	 * recorded origin. That only holds if the route normalized the missing (null) `package_id` to
-	 * the real package id — otherwise `select_shipping_rate()` reads and writes the coerced ''
-	 * key, the differs-guard never matches, and the auto-defaulted pickup gets laundered into a
-	 * customer decision on every block checkout page load.
+	 * Re-asserting the already-chosen pickup rate without a `package_id` must write to the
+	 * real package and be a no-op for the recorded origin (see the class docblock).
 	 *
 	 * @testdox Selecting the same rate without a package_id writes to the real package and preserves the auto origin.
 	 */

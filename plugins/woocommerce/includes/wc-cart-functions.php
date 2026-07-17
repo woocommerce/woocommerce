@@ -488,10 +488,10 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 		// Only record the choice as auto-defaulted when the auto-defaulter actually assigned a method
 		// the customer didn't pick. If it kept the customer's existing manual choice (sticky pickup),
 		// preserve that 'manual' origin — otherwise the next re-evaluation would treat it as auto and
-		// could un-stick a deliberately chosen Local Pickup. The origin lookup only runs when the
-		// method was preserved (it's irrelevant — and immediately overwritten — otherwise).
-		if ( $chosen_method !== $previous_chosen_method || 'manual' !== wc_get_container()->get( ShippingMethodOriginTracker::class )->get_origin( $key ) ) {
-			wc_get_container()->get( ShippingMethodOriginTracker::class )->set_origin( $key, 'auto', $chosen_method );
+		// could un-stick a deliberately chosen Local Pickup.
+		$origin_tracker = wc_get_container()->get( ShippingMethodOriginTracker::class );
+		if ( $chosen_method !== $previous_chosen_method || ShippingMethodOriginTracker::ORIGIN_MANUAL !== $origin_tracker->get_origin( $key ) ) {
+			$origin_tracker->set_origin( $key, ShippingMethodOriginTracker::ORIGIN_AUTO, $chosen_method );
 		}
 
 		/**
@@ -579,7 +579,7 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	// Only consult the recorded origin when it can actually influence the outcome: a pickup rate is
 	// currently chosen and a non-pickup rate exists to switch to.
 	$unstick_auto_default_pickup = $chosen_method_exists && $is_local_pickup_chosen && $has_non_pickup_alternative
-		&& 'auto' === wc_get_container()->get( ShippingMethodOriginTracker::class )->get_origin( $key );
+		&& ShippingMethodOriginTracker::ORIGIN_AUTO === wc_get_container()->get( ShippingMethodOriginTracker::class )->get_origin( $key );
 
 	// Default to local pickup if it's chosen already — unless the previous pickup choice came from the auto-defaulter
 	// AND a real shipping rate is now available, in which case we prefer the shipping rate.
