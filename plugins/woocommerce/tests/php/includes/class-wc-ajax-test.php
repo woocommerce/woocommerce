@@ -823,6 +823,76 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * The ?wc-ajax=get_variation endpoint renders the matched variation's description through
+	 * wc_format_content(), which fires the woocommerce_short_description filter. Eager block registration is
+	 * skipped on AJAX requests, so Bootstrap registers WooCommerce block types on demand there — otherwise a
+	 * block in a variation description would render empty. See Bootstrap::maybe_register_blocks_from_content.
+	 */
+	public function test_get_variation_registers_block_types_on_demand_for_description(): void {
+		$registry = WP_Block_Type_Registry::get_instance();
+
+		// Snapshot and unregister WooCommerce blocks so this test mirrors a request whose eager registration
+		// was skipped; on-demand registration should then re-register them when the description is rendered.
+		$snapshot = array();
+		foreach ( $registry->get_all_registered() as $name => $block_type ) {
+			if ( 0 === strpos( $name, 'woocommerce/' ) ) {
+				$snapshot[ $name ] = $block_type;
+				$registry->unregister( $name );
+			}
+		}
+
+		// A foundational block register_blocks() always registers (not gated behind a theme/feature flag).
+		$sample = 'woocommerce/product-price';
+		$this->assertNotEmpty( $snapshot, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
+
+		$posted_keys = array();
+
+		try {
+			$product   = WC_Helper_Product::create_variation_product();
+			$children  = $product->get_children();
+			$variation = wc_get_product( $children[0] );
+			$variation->set_description( '<!-- wp:woocommerce/product-price /-->' );
+			$variation->save();
+
+			$_POST['product_id'] = $product->get_id();
+			$posted_keys[]       = 'product_id';
+			foreach ( $variation->get_attributes() as $attribute_name => $attribute_value ) {
+				$key           = 'attribute_' . $attribute_name;
+				$_POST[ $key ] = $attribute_value;
+				$posted_keys[] = $key;
+			}
+
+			$this->assertFalse( $registry->is_registered( $sample ), 'Blocks should start unregistered for this test.' );
+
+			$response = $this->do_ajax( 'woocommerce_get_variation' );
+
+			$this->assertIsArray( $response, 'The get_variation endpoint should return the matched variation.' );
+			$this->assertSame(
+				$variation->get_id(),
+				$response['variation_id'],
+				'The endpoint should match the variation carrying the block description.'
+			);
+			$this->assertTrue(
+				$registry->is_registered( $sample ),
+				'Hitting ?wc-ajax=get_variation should register block types on demand so a variation description block renders.'
+			);
+		} finally {
+			foreach ( $posted_keys as $key ) {
+				unset( $_POST[ $key ] );
+			}
+
+			foreach ( array_keys( $registry->get_all_registered() ) as $name ) {
+				if ( 0 === strpos( (string) $name, 'woocommerce/' ) ) {
+					$registry->unregister( $name );
+				}
+			}
+			foreach ( $snapshot as $block_type ) {
+				$registry->register( $block_type );
+			}
+		}
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.

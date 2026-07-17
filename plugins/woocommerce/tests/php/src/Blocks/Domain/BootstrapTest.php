@@ -3,8 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\Domain;
 
-use Automattic\WooCommerce\Blocks\BlockTypesController;
-use Automattic\WooCommerce\Blocks\Package;
 use WC_Unit_Test_Case;
 use WP_Block_Type_Registry;
 
@@ -19,6 +17,14 @@ use WP_Block_Type_Registry;
 class BootstrapTest extends WC_Unit_Test_Case {
 
 	/**
+	 * A foundational WooCommerce block that register_blocks() always registers (it is not gated behind a theme
+	 * or feature flag), so it is a stable subject for the on-demand registration assertions.
+	 *
+	 * @var string
+	 */
+	private const SAMPLE_BLOCK = 'woocommerce/product-price';
+
+	/**
 	 * Snapshot of the WooCommerce block types registered before each test, restored afterwards so the shared
 	 * global registry is not left in a modified state for other tests.
 	 *
@@ -27,8 +33,8 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	private array $registered_woo_blocks = array();
 
 	/**
-	 * Unregister the WooCommerce blocks and clear the registration guard so each test starts from a state that
-	 * mirrors a fresh request whose eager registration was skipped.
+	 * Snapshot and unregister the WooCommerce blocks so each test starts from a state that mirrors a fresh
+	 * request whose eager block registration was skipped.
 	 */
 	public function setUp(): void {
 		parent::setUp();
@@ -40,8 +46,6 @@ class BootstrapTest extends WC_Unit_Test_Case {
 				$registry->unregister( $name );
 			}
 		}
-
-		$this->set_blocks_registered_flag( false );
 	}
 
 	/**
@@ -57,22 +61,9 @@ class BootstrapTest extends WC_Unit_Test_Case {
 		foreach ( $this->registered_woo_blocks as $block_type ) {
 			$registry->register( $block_type );
 		}
-		$this->set_blocks_registered_flag( true );
 		$this->registered_woo_blocks = array();
 
 		parent::tearDown();
-	}
-
-	/**
-	 * Set the shared BlockTypesController registration guard.
-	 *
-	 * @param bool $registered Whether block types should be treated as already registered.
-	 */
-	private function set_blocks_registered_flag( bool $registered ): void {
-		$controller = Package::container()->get( BlockTypesController::class );
-		$property   = new \ReflectionProperty( $controller, 'blocks_registered' );
-		$property->setAccessible( true );
-		$property->setValue( $controller, $registered );
 	}
 
 	/**
@@ -103,19 +94,16 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	public function test_short_description_filter_registers_missing_block_types(): void {
 		$registry = WP_Block_Type_Registry::get_instance();
 
-		$sample = array_key_first( $this->registered_woo_blocks );
-		$this->assertNotNull( $sample, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
-		$this->assertFalse( $registry->is_registered( $sample ), 'WooCommerce blocks should start unregistered for this test.' );
+		$this->assertNotEmpty( $this->registered_woo_blocks, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
+		$this->assertFalse( $registry->is_registered( self::SAMPLE_BLOCK ), 'WooCommerce blocks should start unregistered for this test.' );
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing an existing core filter to exercise its callbacks, not declaring a new hook.
 		apply_filters( 'woocommerce_short_description', 'Intro <!-- wp:woocommerce/product-price /--> outro' );
 
-		foreach ( array_keys( $this->registered_woo_blocks ) as $name ) {
-			$this->assertTrue(
-				$registry->is_registered( $name ),
-				sprintf( '%s should be registered on demand when a description containing a block is rendered.', $name )
-			);
-		}
+		$this->assertTrue(
+			$registry->is_registered( self::SAMPLE_BLOCK ),
+			'Block types should be registered on demand when a description containing a block is rendered.'
+		);
 	}
 
 	/**
@@ -124,15 +112,14 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	public function test_short_description_filter_skips_registration_for_plain_content(): void {
 		$registry = WP_Block_Type_Registry::get_instance();
 
-		$sample = array_key_first( $this->registered_woo_blocks );
-		$this->assertNotNull( $sample, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
-		$this->assertFalse( $registry->is_registered( $sample ), 'WooCommerce blocks should start unregistered for this test.' );
+		$this->assertNotEmpty( $this->registered_woo_blocks, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
+		$this->assertFalse( $registry->is_registered( self::SAMPLE_BLOCK ), 'WooCommerce blocks should start unregistered for this test.' );
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing an existing core filter to exercise its callbacks, not declaring a new hook.
 		apply_filters( 'woocommerce_short_description', 'Just plain text with no blocks, or only a core <!-- wp:paragraph -->.' );
 
 		$this->assertFalse(
-			$registry->is_registered( $sample ),
+			$registry->is_registered( self::SAMPLE_BLOCK ),
 			'A description without WooCommerce block markup should stay on the fast path and register nothing.'
 		);
 	}
@@ -142,21 +129,19 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	 */
 	public function test_products_rest_request_registers_block_types_on_demand(): void {
 		$registry = WP_Block_Type_Registry::get_instance();
-		$sample   = array_key_first( $this->registered_woo_blocks );
-		$this->assertNotNull( $sample, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
 
 		$product = new \WC_Product_Simple();
 		$product->set_short_description( '<!-- wp:woocommerce/product-price /-->' );
 		$product->save();
 
-		$this->assertFalse( $registry->is_registered( $sample ), 'Blocks should start unregistered for this test.' );
+		$this->assertFalse( $registry->is_registered( self::SAMPLE_BLOCK ), 'Blocks should start unregistered for this test.' );
 
 		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
 		$response = rest_do_request( new \WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
 
 		$this->assertSame( 200, $response->get_status(), 'The products REST request should succeed.' );
 		$this->assertTrue(
-			$registry->is_registered( $sample ),
+			$registry->is_registered( self::SAMPLE_BLOCK ),
 			'Fetching a product through the REST API should register block types on demand so description blocks render.'
 		);
 
@@ -168,8 +153,6 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	 */
 	public function test_store_api_cart_request_registers_block_types_on_demand(): void {
 		$registry = WP_Block_Type_Registry::get_instance();
-		$sample   = array_key_first( $this->registered_woo_blocks );
-		$this->assertNotNull( $sample, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
 
 		$product = new \WC_Product_Simple();
 		$product->set_regular_price( '10' );
@@ -179,13 +162,13 @@ class BootstrapTest extends WC_Unit_Test_Case {
 		$cart_item_key = wc()->cart->add_to_cart( $product->get_id() );
 		$this->assertNotEmpty( $cart_item_key, 'The product should be added to the cart so the item renders in the response.' );
 
-		$this->assertFalse( $registry->is_registered( $sample ), 'Blocks should start unregistered for this test.' );
+		$this->assertFalse( $registry->is_registered( self::SAMPLE_BLOCK ), 'Blocks should start unregistered for this test.' );
 
 		$response = rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
 
 		$this->assertSame( 200, $response->get_status(), 'The Store API cart request should succeed.' );
 		$this->assertTrue(
-			$registry->is_registered( $sample ),
+			$registry->is_registered( self::SAMPLE_BLOCK ),
 			'Fetching the cart through the Store API should register block types on demand so description blocks render.'
 		);
 
@@ -194,24 +177,25 @@ class BootstrapTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Calling register_blocks() again after registration is a no-op and does not re-register block types.
+	 * @testdox Filtering a description does not re-register block types when they are already registered.
 	 */
-	public function test_register_blocks_is_idempotent(): void {
-		$registry   = WP_Block_Type_Registry::get_instance();
-		$controller = Package::container()->get( BlockTypesController::class );
+	public function test_short_description_filter_skips_registration_when_blocks_already_registered(): void {
+		$registry = WP_Block_Type_Registry::get_instance();
 
-		$controller->register_blocks();
-		$sample = array_key_first( $this->registered_woo_blocks );
-		$this->assertNotNull( $sample, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
-		$this->assertTrue( $registry->is_registered( $sample ), 'The first call should register block types.' );
+		// Restore the blocks so the request looks like a normal one whose eager registration already ran.
+		foreach ( $this->registered_woo_blocks as $block_type ) {
+			$registry->register( $block_type );
+		}
+		$this->assertTrue( $registry->is_registered( self::SAMPLE_BLOCK ), 'Blocks should be registered before the filter runs.' );
 
-		// A second call must not attempt to register already-registered block types (which would trigger a
-		// doing_it_wrong failure); the guard makes it a no-op.
-		$controller->register_blocks();
+		// Firing the filter must not call register_blocks() again — doing so would re-register already-registered
+		// block types and trigger a doing_it_wrong failure, which WC_Unit_Test_Case turns into a test failure.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing an existing core filter to exercise its callbacks, not declaring a new hook.
+		apply_filters( 'woocommerce_short_description', 'Intro <!-- wp:woocommerce/product-price /--> outro' );
 
 		$this->assertTrue(
-			$registry->is_registered( $sample ),
-			'Block types should remain registered after a repeat register_blocks() call.'
+			$registry->is_registered( self::SAMPLE_BLOCK ),
+			'Block types should remain registered and must not be re-registered on demand.'
 		);
 	}
 }
