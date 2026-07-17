@@ -450,8 +450,10 @@ class WC_Admin_Post_Types {
 		$product->set_featured( isset( $request_data['_featured'] ) );
 
 		if ( $product->is_type( ProductType::SIMPLE ) || $product->is_type( ProductType::EXTERNAL ) ) {
-			$old_regular_price = $product->get_regular_price( 'edit' );
-			$old_sale_price    = $product->get_sale_price( 'edit' );
+			// The Quick Edit form is prefilled with view-context (filtered) prices, so detecting
+			// an actual edit requires comparing the submission against those same values.
+			$old_regular_price = wc_format_decimal( $product->get_regular_price() );
+			$old_sale_price    = wc_format_decimal( $product->get_sale_price() );
 
 			if ( isset( $request_data['_regular_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
@@ -467,7 +469,7 @@ class WC_Admin_Post_Types {
 
 			$regular_price  = $product->get_regular_price( 'edit' );
 			$sale_price     = $product->get_sale_price( 'edit' );
-			$price_changed  = $regular_price !== $old_regular_price || $sale_price !== $old_sale_price;
+			$price_changed  = wc_format_decimal( $regular_price ) !== $old_regular_price || wc_format_decimal( $sale_price ) !== $old_sale_price;
 			$sale_date_to   = $product->get_date_on_sale_to( 'edit' );
 			$sale_has_ended = $sale_date_to && $sale_date_to->getTimestamp() < time();
 
