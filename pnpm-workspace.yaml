@@ -80,6 +80,7 @@ packages:
     - 'tools/monorepo-merge'
     - 'tools/code-analyzer'
     - 'tools/compare-perf'
+    - 'tools/eslint-config'
     - 'tools/package-release'
     - 'tools/cherry-pick'
     - 'tools/release-posts'
