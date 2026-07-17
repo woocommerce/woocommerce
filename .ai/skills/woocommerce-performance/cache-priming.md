@@ -77,7 +77,7 @@ if ( ! empty( $variation_ids ) ) {
 
 **Form B — objects already loaded:**
 
-Use when `WC_Product_Variation` objects are already in memory (their postmeta is warm from phase 1). Use the object API with `'edit'` context — this skips `woocommerce_product_get_*` filters and returns raw stored values at zero extra DB cost. `get_image_id( 'edit' )` returns a scalar, so wrap it in `array()`; `get_gallery_image_ids( 'edit' )` returns an array directly.
+Use when `WC_Product_Variation` objects are already in memory (their postmeta is warm from phase 1). Use the object API in the same context the render path uses — typically the default `'view'` context. `get_image_id()` returns a scalar, so wrap it in `array()`; `get_gallery_image_ids()` returns an array directly.
 
 ```php
 if ( ! empty( $variation_ids ) ) {
@@ -92,8 +92,8 @@ if ( ! empty( $variations ) ) {
     // Phase 2: collect attachment IDs from loaded objects and prime them in one batch.
     $attachment_ids = array();
     foreach ( $variations as $variation ) {
-        $attachment_ids[] = array( $variation->get_image_id( 'edit' ) );
-        $attachment_ids[] = $variation->get_gallery_image_ids( 'edit' );
+        $attachment_ids[] = array( $variation->get_image_id() );
+        $attachment_ids[] = $variation->get_gallery_image_ids();
     }
     $attachment_ids = array_map( 'intval', array_unique( array_filter( array_merge( ...$attachment_ids ) ) ) );
     if ( ! empty( $attachment_ids ) ) {
