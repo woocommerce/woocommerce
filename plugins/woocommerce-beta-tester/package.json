@@ -59,7 +59,34 @@
 		}
 	},
 	"config": {
-		"build_step": "pnpm run build:zip"
+		"build_step": "pnpm run build:zip",
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": [
+					".eslintrc",
+					".eslintignore",
+					"eslint.config.mjs",
+					"tsconfig.json",
+					"src/**/*.{js,jsx,ts,tsx}"
+				]
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}",
+						"typing/**/*.ts"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
+		}
 	},
 	"scripts": {
 		"build": "pnpm build:project",
@@ -73,6 +100,7 @@
 		"check-licenses": "wp-scripts check-licenses",
 		"format:js": "wp-scripts format-js",
 		"postinstall": "XDEBUG_MODE=off composer install --quiet",
+		"lint": "wp-scripts lint-js src",
 		"lint:css": "wp-scripts lint-style",
 		"lint:css:fix": "wp-scripts lint-style --fix",
 		"lint:js": "wp-scripts lint-js",
@@ -85,7 +113,7 @@
 		"packages-update": "wp-scripts packages-update",
 		"start": "wp-scripts start",
 		"test:e2e": "wp-scripts test-e2e",
-		"test:unit": "wp-scripts test-unit-js",
+		"test:js": "wp-scripts test-unit-js --passWithNoTests",
 		"uglify": "rm -f $npm_package_assets_js_min && for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done"
 	},
 	"engines": {

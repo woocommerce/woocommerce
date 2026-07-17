@@ -13,9 +13,9 @@ if [ ! -z ${CI+y} ]; then
     # environments we use the script as it is. Inside the container the command is
     # executed from the /var/www/html path as pwd.
     echo -e '--> Dispatching script execution into cli\n'
-    # Source from the e2e-test-helpers directory mount; a single-file mount of this
+    # Source from the e2e-test-bin directory mount; a single-file mount of this
     # script can surface as an empty file under Docker gRPC FUSE.
-    $WP_ENV_CMD run --debug cli cp wp-content/plugins/e2e-test-helpers/test-env-setup.sh test-env-setup-ci.sh
+    $WP_ENV_CMD run --debug cli cp wp-content/plugins/e2e-test-bin/test-env-setup.sh test-env-setup-ci.sh
     $WP_ENV_CMD run --debug cli env -u CI WP_CLI_PREFIX= bash test-env-setup-ci.sh
     exit $?
 fi
@@ -42,17 +42,6 @@ $WP_CLI_PREFIX bash -c 'printf "apache_modules:\n  - mod_rewrite\n" > /var/www/h
 
 echo -e 'Update URL structure \n'
 $WP_CLI_PREFIX wp rewrite structure '/%postname%/' --hard
-
-echo -e 'Activate Filter Setter utility plugin \n'
-$WP_CLI_PREFIX wp plugin activate e2e-test-helpers/filter-setter.php
-
-# This plugin allows you to process queued scheduled actions immediately.
-# It's used in the analytics e2e tests so that order numbers are shown in Analytics.
-echo -e 'Activate Process Waiting Actions utility plugin \n'
-$WP_CLI_PREFIX wp plugin activate e2e-test-helpers/process-waiting-actions.php
-
-echo -e 'Activate Test Helper APIs utility plugin \n'
-$WP_CLI_PREFIX wp plugin activate e2e-test-helpers/test-helper-apis.php
 
 echo -e 'Add Customer user \n'
 if ! $WP_CLI_PREFIX wp user get customer --field=ID >/dev/null 2>&1; then
