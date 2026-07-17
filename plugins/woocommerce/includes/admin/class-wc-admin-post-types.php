@@ -499,7 +499,12 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-			$stock_amount = 'yes' === $manage_stock && isset( $request_data['_stock'] ) && is_numeric( wp_unslash( $request_data['_stock'] ) ) ? wc_stock_amount( wp_unslash( $request_data['_stock'] ) ) : '';
+			if ( 'yes' === $manage_stock && isset( $request_data['_stock'] ) ) {
+				$stock_value  = wp_unslash( $request_data['_stock'] );
+				$stock_amount = is_numeric( $stock_value ) ? wc_stock_amount( $stock_value ) : 0;
+			} else {
+				$stock_amount = '';
+			}
 			$product->set_stock_quantity( $stock_amount );
 		}
 
