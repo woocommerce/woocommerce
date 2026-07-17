@@ -11,10 +11,6 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 
 /**
  * ProductButtonMock used to test ProductButton block functions.
- *
- * Exposes the private `get_cart_item_quantities_by_product_id()` method as a
- * public `call_get_cart_item_quantities_by_product_id()` accessor for unit
- * testing without needing a full block rendering context.
  */
 class ProductButtonMock extends ProductButton {
 
@@ -30,14 +26,14 @@ class ProductButtonMock extends ProductButton {
 	}
 
 	/**
-	 * Public wrapper for the private get_cart_item_quantities_by_product_id method.
+	 * Get the standalone cart item quantity for a product ID.
 	 *
-	 * @param int $product_id The parent product ID whose plain cart lines are summed.
-	 * @return int The total quantity across plain (non-meta-differentiated) cart lines.
+	 * @param int $product_id The product ID.
+	 * @return int The standalone cart item quantity.
 	 */
-	public function call_get_cart_item_quantities_by_product_id( int $product_id ): int {
+	public function call_get_cart_item_quantity_by_product_id( int $product_id ): int {
 		$reflection = new \ReflectionClass( ProductButton::class );
-		$method     = $reflection->getMethod( 'get_cart_item_quantities_by_product_id' );
+		$method     = $reflection->getMethod( 'get_cart_item_quantity_by_product_id' );
 		$method->setAccessible( true );
 
 		return (int) $method->invoke( $this, $product_id );

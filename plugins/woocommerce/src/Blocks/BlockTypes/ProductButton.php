@@ -8,7 +8,6 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\StoreApi\Utilities\CartItemUtils;
 
 /**
  * ProductButton class.
@@ -101,7 +100,7 @@ class ProductButton extends AbstractBlock {
 
 		BlocksSharedState::load_cart_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
-		$number_of_items_in_cart  = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
+		$number_of_items_in_cart  = $this->get_cart_item_quantity_by_product_id( $product->get_id() );
 		$is_product_purchasable   = $this->is_product_purchasable( $product );
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
 		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
@@ -322,60 +321,21 @@ class ProductButton extends AbstractBlock {
 	}
 
 	/**
-	 * Get the total quantity of standalone (non-meta-differentiated) cart lines for a given parent product ID.
+	 * Get the standalone cart item quantity for a product ID.
 	 *
-	 * Iterates {@see WC_Cart::get_cart_contents()} and sums the `quantity` of every
-	 * line that (a) belongs to the given parent product ID and (b) is a
-	 * standalone line as determined by the shared
-	 * {@see CartItemUtils::is_standalone_line()} predicate.
-	 *
-	 * Meta-differentiated lines — those whose cart key was generated with non-empty
-	 * `cart_item_data` (e.g. bundle components, subscription switches) — are
-	 * intentionally excluded so that the server-rendered seed count is consistent
-	 * with the client-side "Add to cart" / "%d in cart" logic in the Interactivity
-	 * API store.
-	 *
-	 * The seed is parent-scoped: it sums standalone lines of the parent product ID
-	 * regardless of variation. The hydrated client value (variation-aware, from the
-	 * Store API) is the reactive source of truth that corrects any parent-vs-variation
-	 * difference after hydration.
-	 *
-	 * Variation lines are counted, not skipped: a variation line in `WC()->cart` stores
-	 * `product_id` = the parent product id and `variation_id` = the variation id (core
-	 * normalises the variation's post id to the parent at add-to-cart time). Because
-	 * this method is always invoked with the parent id, the `product_id` filter matches
-	 * every in-cart variation line of that parent — variation-level stock management is
-	 * orthogonal to line identity and does not cause a miss. The seed count may therefore
-	 * be parent-wide (all standalone variation lines of the same parent summed together)
-	 * before the hydrated client narrows to the selected variation's id; that
-	 * parent-vs-variation reconciliation is a deliberate, accepted granularity bound
-	 * documented above.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @param int $product_id The parent product ID whose standalone cart lines are summed.
-	 * @return int The total quantity across standalone cart lines for this product,
-	 *             or 0 when the cart is unavailable or contains no matching lines.
+	 * @param int $product_id The product ID.
+	 * @return int The standalone cart item quantity.
 	 */
-	private function get_cart_item_quantities_by_product_id( $product_id ) {
+	private function get_cart_item_quantity_by_product_id( $product_id ) {
 		// @phpstan-ignore isset.property (WC()->cart is declared non-null but can be null before WC fully initialises)
 		if ( ! isset( WC()->cart ) ) {
 			return 0;
 		}
 
-		$quantity = 0;
+		$cart_item_key = WC()->cart->generate_cart_id( $product_id );
+		$cart_item     = WC()->cart->get_cart_item( $cart_item_key );
 
-		foreach ( WC()->cart->get_cart_contents() as $cart_item ) {
-			if ( (int) ( $cart_item['product_id'] ?? 0 ) !== (int) $product_id ) {
-				continue;
-			}
-			if ( ! CartItemUtils::is_standalone_line( $cart_item ) ) {
-				continue;
-			}
-			$quantity += (int) ( $cart_item['quantity'] ?? 0 );
-		}
-
-		return $quantity;
+		return (int) ( $cart_item['quantity'] ?? 0 );
 	}
 
 	/**

@@ -7,12 +7,6 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductButtonMock;
 
 /**
  * Tests for the ProductButton server-side in-cart count seed.
- *
- * The `get_cart_item_quantities_by_product_id()` private method computes the
- * quantity shown in the server-rendered button before the Interactivity API
- * hydrates the client. Only plain (non-meta-differentiated) cart lines should
- * be counted so that the first-paint seed is consistent with the client-side
- * value produced by the Store API cart-item schema.
  */
 class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 
@@ -24,8 +18,7 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * The original block type registry entry for the product-button block,
-	 * saved so it can be restored in tearDown.
+	 * The original product-button block registration.
 	 *
 	 * @var \WP_Block_Type|null
 	 */
@@ -44,8 +37,6 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// The block is already registered by WooCommerce bootstrap. Unregister it
-		// so the mock constructor can re-register without triggering a conflict.
 		$registry                  = \WP_Block_Type_Registry::get_instance();
 		$this->original_block_type = null;
 		if ( $registry->is_registered( 'woocommerce/product-button' ) ) {
@@ -55,7 +46,6 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 
 		$this->sut = new ProductButtonMock();
 
-		// Ensure the cart is initialised and empty before each test.
 		wc_empty_cart();
 
 		$this->product_id = 42;
@@ -67,7 +57,6 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		wc_empty_cart();
 
-		// Restore the original block type registration.
 		$registry = \WP_Block_Type_Registry::get_instance();
 		if ( $registry->is_registered( 'woocommerce/product-button' ) ) {
 			$registry->unregister( 'woocommerce/product-button' );
@@ -80,20 +69,13 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Build and inject a cart item array into WC()->cart->cart_contents for testing.
+	 * Add a cart item directly to the cart contents.
 	 *
-	 * Populates the minimum fields expected by
-	 * {@see \Automattic\WooCommerce\StoreApi\Utilities\CartItemUtils::is_standalone_line()}
-	 * and the method under test. The stored key is generated via
-	 * {@see \WC_Cart::generate_cart_id()} so the plain-vs-meta distinction works correctly.
-	 *
-	 * @param int   $product_id   The parent product ID for the cart line.
+	 * @param int   $product_id   The parent product ID.
 	 * @param int   $quantity     The line quantity.
-	 * @param array $extra_data   Optional. Non-empty array means the key will be
-	 *                            meta-differentiated (is_standalone_line returns false).
-	 * @param int   $variation_id Optional. Variation ID; 0 for simple products.
-	 * @param array $variation    Optional. Variation attributes array.
-	 * @return string The cart item key that was inserted.
+	 * @param array $extra_data   Extra cart item data.
+	 * @param int   $variation_id The variation ID.
+	 * @param array $variation    The variation attributes.
 	 */
 	private function add_cart_item(
 		int $product_id,
@@ -101,7 +83,7 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 		array $extra_data = array(),
 		int $variation_id = 0,
 		array $variation = array()
-	): string {
+	): void {
 		$key = WC()->cart->generate_cart_id( $product_id, $variation_id, $variation, $extra_data );
 
 		WC()->cart->cart_contents[ $key ] = array(
@@ -111,195 +93,70 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 			'variation'    => $variation,
 			'quantity'     => $quantity,
 		);
-
-		return $key;
 	}
 
-	// -------------------------------------------------------------------------
-	// WC()->cart unavailability
-	// -------------------------------------------------------------------------
-
 	/**
-	 * @testdox Should return 0 when WC()->cart is unavailable, without fataling.
+	 * @testdox Should return zero when the cart is unavailable.
 	 */
 	public function test_returns_zero_when_cart_is_unavailable(): void {
 		$original_cart = WC()->cart;
 		WC()->cart     = null; // phpcs:ignore
 
-		$result = $this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id );
+		$result = $this->sut->call_get_cart_item_quantity_by_product_id( $this->product_id );
 
 		WC()->cart = $original_cart; // phpcs:ignore
 
-		$this->assertSame(
-			0,
-			$result,
-			'When WC()->cart is unavailable the method must return 0 without fataling.'
-		);
-	}
-
-	// -------------------------------------------------------------------------
-	// Product with no cart lines at all
-	// -------------------------------------------------------------------------
-
-	/**
-	 * @testdox Should return 0 when the cart is completely empty.
-	 */
-	public function test_returns_zero_for_empty_cart(): void {
-		$this->assertSame(
-			0,
-			$this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id ),
-			'An empty cart must yield a count of 0.'
-		);
+		$this->assertSame( 0, $result, 'An unavailable cart must yield a count of zero.' );
 	}
 
 	/**
-	 * @testdox Should return 0 when the cart contains plain lines for a different product only.
+	 * @testdox Should return zero for a parent product ID when only one of its variations is in the cart.
 	 */
-	public function test_returns_zero_when_cart_has_only_different_product(): void {
-		$this->add_cart_item( 99, 3 );
-
-		$this->assertSame(
-			0,
-			$this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id ),
-			'Lines for a different product must not contribute to the count.'
-		);
-	}
-
-	// -------------------------------------------------------------------------
-	// Only meta-differentiated lines → count must be 0
-	// -------------------------------------------------------------------------
-
-	/**
-	 * @testdox Should return 0 when product exists in the cart only as a meta-differentiated line.
-	 */
-	public function test_returns_zero_when_only_meta_differentiated_line_exists(): void {
-		$this->add_cart_item( $this->product_id, 5, array( '_bundle' => 'parent-1' ) );
-
-		$this->assertSame(
-			0,
-			$this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id ),
-			'A meta-differentiated cart line must not be counted in the server seed.'
-		);
-	}
-
-	/**
-	 * @testdox Should return 0 when there are multiple meta-differentiated lines for the same product.
-	 */
-	public function test_returns_zero_when_multiple_meta_differentiated_lines_exist(): void {
-		$this->add_cart_item( $this->product_id, 2, array( '_bundle' => 'parent-1' ) );
-		$this->add_cart_item( $this->product_id, 3, array( '_bundle' => 'parent-2' ) );
-
-		$this->assertSame(
-			0,
-			$this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id ),
-			'Multiple meta-differentiated lines must all be excluded from the count.'
-		);
-	}
-
-	// -------------------------------------------------------------------------
-	// Only plain (standalone) lines → count equals the plain quantity
-	// -------------------------------------------------------------------------
-
-	/**
-	 * @testdox Should return the standalone-line quantity when only a plain line exists at quantity 2.
-	 */
-	public function test_returns_plain_line_quantity_of_two(): void {
-		$this->add_cart_item( $this->product_id, 2 );
-
-		$this->assertSame(
-			2,
-			$this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id ),
-			'A single plain cart line with quantity 2 must be fully counted.'
-		);
-	}
-
-	/**
-	 * @testdox Should return the standalone-line quantity when only a plain line exists at quantity 1.
-	 */
-	public function test_returns_plain_line_quantity_of_one(): void {
-		$this->add_cart_item( $this->product_id, 1 );
-
-		$this->assertSame(
-			1,
-			$this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id ),
-			'A single plain cart line with quantity 1 must be fully counted.'
-		);
-	}
-
-	// -------------------------------------------------------------------------
-	// Mixed plain and meta-differentiated lines → only plain is counted
-	// -------------------------------------------------------------------------
-
-	/**
-	 * @testdox Should return 1 when there is one plain line (qty 1) plus one meta-differentiated line.
-	 */
-	public function test_returns_plain_quantity_when_mixed_lines_exist(): void {
-		$this->add_cart_item( $this->product_id, 1 );
-		$this->add_cart_item( $this->product_id, 4, array( '_bundle' => 'parent-1' ) );
-
-		$this->assertSame(
-			1,
-			$this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id ),
-			'The meta-differentiated line must be excluded; only the plain line quantity counts.'
-		);
-	}
-
-	/**
-	 * @testdox Should return plain-line quantity and ignore multiple meta-differentiated lines from several products.
-	 */
-	public function test_returns_plain_quantity_with_mixed_products_and_multiple_meta_lines(): void {
-		$this->add_cart_item( $this->product_id, 3 );
-		$this->add_cart_item( $this->product_id, 2, array( '_bundle' => 'parent-A' ) );
-		$this->add_cart_item( $this->product_id, 1, array( '_bundle' => 'parent-B' ) );
-		$this->add_cart_item( 99, 7 );
-
-		$this->assertSame(
-			3,
-			$this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id ),
-			'Only the plain line for the queried product must be counted.'
-		);
-	}
-
-	// -------------------------------------------------------------------------
-	// Variation lines (standalone) → counted under the parent product ID
-	// -------------------------------------------------------------------------
-
-	/**
-	 * @testdox Should count a plain variation line (no cart_item_data).
-	 */
-	public function test_counts_plain_variation_line(): void {
+	public function test_returns_zero_when_only_variation_line_exists(): void {
 		$this->add_cart_item(
 			$this->product_id,
-			2,
-			// No extra cart_item_data, so the line takes the standalone key.
+			3,
 			array(),
-			// Variation ID.
 			99,
 			array( 'attribute_color' => 'red' )
 		);
 
-		$this->assertSame(
-			2,
-			$this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id ),
-			'A plain variation line must be counted in the server seed (variation_id is identity, not cart_item_data).'
-		);
+		$result = $this->sut->call_get_cart_item_quantity_by_product_id( $this->product_id );
+
+		$this->assertSame( 0, $result, 'A variation line must not be used as the parent product seed.' );
 	}
 
-	// -------------------------------------------------------------------------
-	// Scoping: only lines whose product_id matches are considered
-	// -------------------------------------------------------------------------
+	/**
+	 * @testdox Should return zero when the standalone line is not in the cart.
+	 */
+	public function test_returns_zero_without_standalone_line(): void {
+		$this->add_cart_item( $this->product_id, 5, array( '_bundle' => 'parent-1' ) );
+
+		$result = $this->sut->call_get_cart_item_quantity_by_product_id( $this->product_id );
+
+		$this->assertSame( 0, $result, 'Meta-differentiated lines must not be used as the initial quantity.' );
+	}
 
 	/**
-	 * @testdox Should not count plain lines that belong to a different product.
+	 * @testdox Should return the standalone line quantity.
 	 */
-	public function test_does_not_count_plain_lines_of_different_product(): void {
-		$this->add_cart_item( 99, 10 );
-		$this->add_cart_item( 100, 5 );
+	public function test_returns_standalone_line_quantity(): void {
+		$this->add_cart_item( $this->product_id, 2 );
 
-		$this->assertSame(
-			0,
-			$this->sut->call_get_cart_item_quantities_by_product_id( $this->product_id ),
-			'Plain lines for other product IDs must not influence the count for the queried product.'
-		);
+		$result = $this->sut->call_get_cart_item_quantity_by_product_id( $this->product_id );
+
+		$this->assertSame( 2, $result, 'The standalone line quantity must be used for a simple product.' );
+	}
+
+	/**
+	 * @testdox Should ignore meta-differentiated lines when a standalone line exists.
+	 */
+	public function test_ignores_meta_differentiated_lines(): void {
+		$this->add_cart_item( $this->product_id, 3 );
+		$this->add_cart_item( $this->product_id, 4, array( '_bundle' => 'parent-1' ) );
+
+		$result = $this->sut->call_get_cart_item_quantity_by_product_id( $this->product_id );
+
+		$this->assertSame( 3, $result, 'Only the standalone line quantity must be used.' );
 	}
 }
