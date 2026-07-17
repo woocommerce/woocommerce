@@ -374,7 +374,7 @@ class WC_Post_Data {
 			$data['post_title'] = 'AUTO-DRAFT';
 		} elseif ( 'shop_coupon' === $data['post_type'] ) {
 			// Coupons should never allow unfiltered HTML.
-			$data['post_title'] = wp_filter_kses( $data['post_title'] );
+			$data['post_title'] = wc_sanitize_coupon_code( $data['post_title'] );
 		}
 
 		return $data;

@@ -145,6 +145,27 @@ class WC_Meta_Box_Coupon_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox save() preserves the coupon code when it contains an ampersand.
+	 */
+	public function test_save_preserves_ampersand_in_coupon_code(): void {
+		$coupon_code = 'Coupon&Test';
+		$post_id     = $this->create_coupon_post( $coupon_code );
+		$post        = $this->get_coupon_post( $post_id );
+
+		// Verify the post title was saved with the raw ampersand.
+		$this->assertStringContainsString( '&', $post->post_title, 'Expected the post title to contain a raw ampersand.' );
+		$this->assertStringNotContainsString( '&amp;', $post->post_title, 'Expected the post title not to contain HTML-encoded ampersand.' );
+
+		$this->set_coupon_post_data();
+
+		WC_Meta_Box_Coupon_Data::save( $post_id, $post );
+
+		$coupon = new WC_Coupon( $post_id );
+
+		$this->assertSame( $coupon_code, $coupon->get_code(), 'Expected the coupon code to preserve the raw ampersand.' );
+	}
+
+	/**
 	 * Create a coupon post for metabox save tests.
 	 *
 	 * @param string $coupon_code Coupon code.
