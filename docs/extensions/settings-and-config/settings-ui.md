@@ -6,9 +6,11 @@ sidebar_position: 5
 
 # Settings UI
 
-The settings UI is an opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow.
+> **Experimental.** The Settings UI is behind the default-off `settings-ui` feature flag and its APIs, both PHP and JavaScript, are subject to change while the feature matures. Build against it to give feedback, not for production releases.
 
-It is designed for extension authors who want to migrate incrementally. PHP still owns page registration, settings schema, permissions, script dependencies, and persistence. React owns field rendering and client-side interaction.
+The settings UI is an opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow. Fields render through [DataForm](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/) from `@wordpress/dataviews`, the WordPress primitive for generated forms.
+
+It is designed for extension authors who want to migrate incrementally. PHP still owns page registration, settings schema, permissions, script dependencies, and persistence. DataForm owns field rendering, visibility, and validity, and React components handle client-side interaction.
 
 ## Status
 
@@ -16,7 +18,7 @@ It is designed for extension authors who want to migrate incrementally. PHP stil
 -   With the flag disabled, settings pages keep the legacy PHP renderer.
 -   With the flag enabled, a settings page still has to opt in explicitly.
 -   Saves use the existing WooCommerce settings form POST flow by default.
--   The public PHP API is available under `Automattic\WooCommerce\Admin\Settings`.
+-   The PHP API is available under `Automattic\WooCommerce\Admin\Settings` and is experimental.
 
 ## Build a settings UI integration
 
@@ -194,9 +196,20 @@ The legacy adapter converts the existing `get_settings()` array into a canonical
 -   `multi_select_countries`
 -   `single_select_country`
 -   `single_select_page`
+-   `date`
+-   `time`
+-   `datetime-local`
+-   `color`
 -   `info`
 
 Fields before the first `title` marker are placed into a default group automatically.
+
+Every field renders through a [dataviews DataForm](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/) control for its type. A few behaviours follow from the package's current capabilities:
+
+-   `time` has no dedicated DataForm control yet and renders as a text field; the value round-trips unchanged.
+-   Constraint attributes in `custom_attributes` (`min`, `max`, `step`, `pattern`, `minlength`, `maxlength`, `required`) become DataForm validation rules and block saving while a field is invalid. Attributes without a rule equivalent, such as `data-*`, are not applied and log a console diagnostic.
+-   `disabled` fields render as disabled DataForm controls and keep their saved value.
+-   Unknown field types render as text fields and log a console diagnostic.
 
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
 
