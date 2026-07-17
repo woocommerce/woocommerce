@@ -455,7 +455,7 @@
           onTouchStart,
           onTouchMove,
           onTouchEnd,
-          touchListenerOptions = { capture: true, passive: false },
+          touchListenerOptions = { capture: false, passive: false },
           scrolling = false,
           localX = 0,
           localY = 0,
