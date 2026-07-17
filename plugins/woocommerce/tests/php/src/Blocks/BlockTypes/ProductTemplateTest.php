@@ -126,7 +126,7 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
 
-		$expected_products_context = 'data-wp-context=\'woocommerce/products::' . wp_json_encode(
+		$expected_products_context    = 'data-wp-context=\'woocommerce/products::' . wp_json_encode(
 			array(
 				'productId'   => $product->get_id(),
 				'variationId' => null,
