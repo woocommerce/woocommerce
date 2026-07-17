@@ -167,6 +167,33 @@ describe( 'settings UI shell header fields', () => {
 		container.remove();
 	} );
 
+	it( 'falls back to the default intent for Object.prototype key intent values', () => {
+		const { container, root } = renderElement(
+			<SettingsUIPage
+				schema={ baseSchema( {
+					header: 'visible',
+					title: 'Test page',
+					// 'constructor' exists on Object.prototype, so an `in`
+					// check would wrongly resolve it to a function.
+					badges: [
+						{
+							label: 'Mystery',
+							intent: 'constructor' as never,
+						},
+					],
+				} ) }
+				page="test_page"
+			/>
+		);
+
+		const badge = container.querySelector( '[data-testid="shell-badge"]' );
+		expect( badge ).not.toBeNull();
+		expect( badge?.getAttribute( 'data-intent' ) ).toBe( 'draft' );
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
 	it( 'omits subtitle and badges when not provided', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage

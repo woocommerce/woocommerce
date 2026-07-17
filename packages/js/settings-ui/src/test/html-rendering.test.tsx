@@ -21,24 +21,14 @@ jest.mock( '@wordpress/admin-ui', () => ( {
  */
 import { SettingsUIPage } from '../settings-ui-page';
 import { __resetRegistry, registerSettingsExtension } from '../registry';
-import type { SettingsUISchema } from '../types';
+import { useSettingsUIContext } from '../settings-ui-context';
+import type { SettingsFieldContext, SettingsUISchema } from '../types';
+import { renderElement } from './helpers/render-element';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 const unsafeDescription =
 	'<strong>Safe</strong><script>alert("x")</script><img src=x onerror=alert(1)><a href="javascript:alert(1)" onclick="alert(1)">Link</a><iframe src="https://example.com"></iframe>';
-
-const renderElement = ( element: JSX.Element ) => {
-	const container = document.createElement( 'div' );
-	document.body.appendChild( container );
-	const root = createRoot( container );
-
-	act( () => {
-		root.render( element );
-	} );
-
-	return { container, root };
-};
 
 const renderElementInMainForm = ( element: JSX.Element ) => {
 	const form = document.createElement( 'form' );
@@ -131,14 +121,16 @@ describe( 'settings HTML rendering', () => {
 		);
 
 		expect(
-			container.querySelector( '.wc-settings-ui__section' )
+			container.querySelector( '.dataforms-layouts-card__field' )
 		).not.toBeNull();
+		expect(
+			container.querySelector(
+				'.dataforms-layouts-card__field-description'
+			)?.textContent
+		).toBe( 'Configure the basics.' );
 		expect(
 			container.querySelector( '.wc-settings-ui__section-card' )
-		).not.toBeNull();
-		expect(
-			container.querySelector( '.wc-settings-ui__section-fields' )
-		).not.toBeNull();
+		).toBeNull();
 		expect( container.querySelector( '.wc-settings-ui__row' ) ).toBeNull();
 		expect(
 			container.querySelector( '.wc-settings-ui__group-panel' )
@@ -157,9 +149,11 @@ describe( 'settings HTML rendering', () => {
 	} );
 
 	it( 'normalizes the default schema section to default-section scope', () => {
-		const DefaultSectionField = jest.fn( () => (
-			<div>Default section field</div>
-		) );
+		const seenContexts: SettingsFieldContext[] = [];
+		const DefaultSectionField = jest.fn( () => {
+			seenContexts.push( useSettingsUIContext().context );
+			return <div>Default section field</div>;
+		} );
 		registerSettingsExtension( {
 			scope: { page: 'test-page', section: '' },
 			fieldOverrides: {
@@ -191,9 +185,7 @@ describe( 'settings HTML rendering', () => {
 		);
 
 		expect( container.textContent ).toContain( 'Default section field' );
-		expect( DefaultSectionField.mock.calls[ 0 ][ 0 ].context.section ).toBe(
-			''
-		);
+		expect( seenContexts[ 0 ].section ).toBe( '' );
 
 		act( () => root.unmount() );
 		container.remove();
@@ -305,7 +297,9 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector( 'input[type="text"]' );
+		const input = container.querySelector(
+			'input.components-input-control__input'
+		);
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);
@@ -383,7 +377,9 @@ describe( 'settings HTML rendering', () => {
 		form.insertBefore( sectionLinks, container );
 
 		try {
-			const input = container.querySelector( 'input[type="text"]' );
+			const input = container.querySelector(
+				'input.components-input-control__input'
+			);
 			const link = sectionLinks.querySelector( 'a' );
 
 			expect( input ).toBeInstanceOf( HTMLInputElement );
@@ -451,7 +447,9 @@ describe( 'settings HTML rendering', () => {
 		);
 
 		try {
-			const input = container.querySelector( 'input[type="text"]' );
+			const input = container.querySelector(
+				'input.components-input-control__input'
+			);
 			const link = container.querySelector(
 				'a[href="https://example.com/next"]'
 			);
@@ -549,7 +547,9 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector( 'input[type="text"]' );
+		const input = container.querySelector(
+			'input.components-input-control__input'
+		);
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);

@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Render every Settings UI field through the dataviews DataForm package pinned at 17.2.0, remove the native field renderer, and align the experimental component contract with DataForm edit controls.
