@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseArgs, isCi, sanitizeEnv, ALLOWED_WP_ENV_VARS } from './run-env.mjs';
+import { parseArgs, isCi, sanitizeEnv, ALLOWED_WP_ENV_VARS, readWcVersion, computeHash } from './run-env.mjs';
 
 test( 'parseArgs extracts --rebuild and passes the rest through', () => {
 	assert.deepEqual( parseArgs( [ '--rebuild', '--debug' ] ), {
@@ -42,4 +42,30 @@ test( 'sanitizeEnv strips non-allowlisted WP_ENV_* vars', () => {
 		'WP_ENV_PHP_VERSION',
 		'WP_ENV_PORT',
 	] );
+} );
+
+test( 'readWcVersion parses the plugin header', () => {
+	assert.equal(
+		readWcVersion( ' * Plugin Name: WooCommerce\n * Version: 11.1.0-dev\n' ),
+		'11.1.0-dev'
+	);
+} );
+
+test( 'computeHash is stable and sensitive to each input', () => {
+	const base = {
+		configText: '{"port":8086}',
+		overrideText: '',
+		setupScriptText: 'echo provision',
+		allowlistEnv: { WP_ENV_PHP_VERSION: '8.1' },
+		wcVersion: '11.1.0-dev',
+	};
+	const h = computeHash( base );
+	assert.match( h, /^[0-9a-f]{32}$/ );
+	assert.equal( computeHash( base ), h ); // stable
+	assert.notEqual( computeHash( { ...base, wcVersion: '11.2.0-dev' } ), h );
+	assert.notEqual( computeHash( { ...base, setupScriptText: 'echo other' } ), h );
+	assert.notEqual(
+		computeHash( { ...base, allowlistEnv: { WP_ENV_PHP_VERSION: '8.2' } } ),
+		h
+	);
 } );

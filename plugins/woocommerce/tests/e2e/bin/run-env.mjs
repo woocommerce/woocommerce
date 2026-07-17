@@ -4,6 +4,7 @@
  * Wraps `wp-env --config .wp-env.e2e.json` with per-worktree ports, a
  * staleness hash, and a snapshot-based auto-reset. See TESTOPS-196.
  */
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 export function parseArgs( argv ) {
@@ -31,6 +32,37 @@ export function sanitizeEnv( env ) {
 		out[ key ] = value;
 	}
 	return out;
+}
+
+export function readWcVersion( pluginPhpText ) {
+	const match = pluginPhpText.match( /^\s*\*?\s*Version:\s*(\S+)/m );
+	if ( ! match ) {
+		throw new Error( 'Could not read Version header from woocommerce.php' );
+	}
+	return match[ 1 ];
+}
+
+export function computeHash( {
+	configText,
+	overrideText,
+	setupScriptText,
+	allowlistEnv,
+	wcVersion,
+} ) {
+	const allow = {};
+	for ( const key of ALLOWED_WP_ENV_VARS ) {
+		if ( allowlistEnv[ key ] !== undefined ) {
+			allow[ key ] = allowlistEnv[ key ];
+		}
+	}
+	const canonical = JSON.stringify( {
+		configText,
+		overrideText,
+		setupScriptText,
+		allow,
+		wcVersion,
+	} );
+	return createHash( 'md5' ).update( canonical ).digest( 'hex' );
 }
 
 async function main() {
