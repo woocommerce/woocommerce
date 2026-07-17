@@ -26,7 +26,7 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		add_filter( 'woocommerce_get_query_vars', array( $this, 'add_query_var' ), 10, 1 );
 		add_filter( 'woocommerce_endpoint_' . self::ENDPOINT_KEY . '_title', array( $this, 'get_endpoint_title' ), 10, 1 );
 		add_filter( 'woocommerce_settings_pages', array( $this, 'add_endpoint_setting' ), 10, 1 );
-		add_action( 'woocommerce_account_' . self::ENDPOINT_KEY . '_endpoint', array( $this, 'render_endpoint' ) );
+		add_action( 'woocommerce_account_' . self::ENDPOINT_KEY . '_endpoint', array( $this, 'render_view' ) );
 	}
 
 	/**
