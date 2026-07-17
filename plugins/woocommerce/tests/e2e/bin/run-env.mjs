@@ -216,7 +216,17 @@ export async function rebuild( { env, hash, port, stateDir } ) {
 	const attachmentCount = Number(
 		( await wpCli( `wp post list --post_type=attachment --format=count`, { env } ) ).trim()
 	);
-	if ( themeCount < 3 || attachmentCount < 3 || attachmentCount > 5 ) {
+	// `themeCount` is piped through `wc -l` so it degrades to 0 (which trips the
+	// check) if the wp-cli call misbehaves; the raw `--format=count` output for
+	// attachments has no such floor, so guard against a non-numeric parse (a
+	// stray notice on stdout → NaN) explicitly — NaN comparisons are all false
+	// and would otherwise let a silently-failed reset slip through.
+	if (
+		themeCount < 3 ||
+		! Number.isFinite( attachmentCount ) ||
+		attachmentCount < 3 ||
+		attachmentCount > 5
+	) {
 		throw new Error(
 			`Provisioning sanity check failed: themes=${ themeCount } (need >=3), ` +
 				`attachments=${ attachmentCount } (expected ~4: 3 seeded images + WC placeholder)`
