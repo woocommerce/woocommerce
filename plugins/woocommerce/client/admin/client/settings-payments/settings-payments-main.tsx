@@ -365,9 +365,10 @@ export const SettingsPaymentsMain = () => {
 					setInstallingPlugin( null );
 
 					// Wait for the state update and fetch the latest providers.
-					const updatedProviders = await resolveSelect(
-						paymentSettingsStore
-					).getPaymentProviders( businessCountry );
+					const updatedProviders =
+						await resolveSelect(
+							paymentSettingsStore
+						).getPaymentProviders( businessCountry );
 
 					// Find the matching provider in the updated list.
 					const updatedPaymentsEntity = updatedProviders.find(

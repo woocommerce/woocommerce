@@ -10,77 +10,16 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		background-color: var(--wpds-color-background-surface-neutral);
 	}
 
+	.woocommerce-layout__header {
+		background-color: var(--wpds-color-background-surface-neutral-strong);
+	}
+
 	#mainform {
 		padding: 0 48px 48px;
 	}
 
 	#mainform > .submit {
 		display: none;
-	}
-
-	#mainform .subsubsub:not(.list-table-filters) {
-		background: var(--wpds-color-background-surface-neutral-strong);
-		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
-		box-sizing: border-box;
-		color: transparent;
-		display: flex;
-		float: none;
-		gap: 0;
-		margin: 0 -48px 48px;
-		overflow-x: auto;
-		padding: 0 48px;
-		width: auto;
-
-		li {
-			color: transparent;
-			margin: 0;
-			padding: 0;
-		}
-
-		li a,
-		li:first-child a,
-		li:last-child a {
-			align-items: center;
-			color: var(--wpds-color-foreground-interactive-neutral);
-			display: inline-flex;
-			font-size: var(--wpds-typography-font-size-md);
-			font-weight: var(--wpds-typography-font-weight-medium);
-			height: 48px;
-			line-height: var(--wpds-typography-line-height-sm);
-			margin: 0;
-			padding: 0 var(--wpds-dimension-padding-lg);
-			position: relative;
-			text-decoration: none;
-			white-space: nowrap;
-
-			&:focus,
-			&:hover,
-			&:active {
-				box-shadow: none;
-				color: var(--wpds-color-foreground-interactive-brand);
-				outline: none;
-			}
-
-			&.current {
-				color: var(--wpds-color-foreground-interactive-neutral);
-				font-weight: var(--wpds-typography-font-weight-medium);
-
-				&::after {
-					background: var(--wpds-color-stroke-interactive-brand);
-					border-radius: 999px;
-					bottom: 0;
-					content: "";
-					height: 2px;
-					left: 0;
-					position: absolute;
-					right: 0;
-				}
-			}
-		}
-
-		+ br.clear {
-			display: none;
-		}
 	}
 
 	.wc-settings-ui-shell {
@@ -91,36 +30,58 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		height: auto;
 		line-height: var(--wpds-typography-line-height-sm);
 		margin: 0 -48px;
-	}
 
-	.wc-settings-ui-shell > :first-child {
-		padding-left: 48px;
-		padding-right: 48px;
-		position: static;
-	}
-
-	.wc-settings-ui-shell {
-		&:has(.wc-settings-ui-shell__navigation) > :first-child {
+		&:has(.wc-settings-ui-shell__navigation) .wc-settings-ui-shell__header {
 			border-bottom: 0;
 		}
 	}
 
-	.wc-settings-ui-shell__breadcrumbs {
-		color: var(--wpds-color-foreground-content-neutral-weak);
-		font-size: var(--wpds-typography-font-size-sm);
-		line-height: var(--wpds-typography-line-height-xs);
-		margin: 0 0 8px;
+	.wc-settings-ui-shell__header {
+		background: var(--wpds-color-background-surface-neutral-strong);
+		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+		padding: 24px 48px;
 	}
 
+	.wc-settings-ui-shell__title {
+		font-size: 16px;
+		font-weight: var(--wpds-typography-font-weight-medium);
+		line-height: var(--wpds-typography-line-height-md);
+		margin: 0;
+	}
+
+	.wc-settings-ui-shell__header-row > .wc-settings-ui-shell__badge {
+		margin-inline-start: var(--wpds-dimension-gap-sm, 8px);
+	}
+
+	.wc-settings-ui-shell__header-actions {
+		flex: 0 0 auto;
+		margin-inline-start: auto;
+	}
+
+	.wc-settings-ui-shell__subtitle {
+		color: var(--wpds-color-foreground-content-neutral-weak);
+	}
+
+	// Carries #mainform so the margins beat extension styles targeting bare
+	// `nav` elements inside the settings form (WooPayments ships one).
+	#mainform .wc-settings-ui-shell__breadcrumbs {
+		font-size: 16px;
+		line-height: var(--wpds-typography-line-height-md);
+		margin: 0;
+	}
+
+	// The page title always follows the breadcrumbs, so every crumb gets a
+	// trailing separator.
 	.wc-settings-ui-shell__breadcrumb {
-		&:not(:last-child)::after {
+		&::after {
+			color: var(--wpds-color-foreground-content-neutral-weak);
 			content: "/";
-			margin: 0 8px;
+			margin: 0 var(--wpds-dimension-gap-sm, 8px);
 		}
 
 		a {
-			color: var(--wpds-color-foreground-interactive-neutral-weak);
-			text-decoration: none;
+			color: var(--wpds-color-foreground-content-neutral);
+			text-decoration: underline;
 
 			&:focus,
 			&:hover {
@@ -143,10 +104,6 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		overflow-x: auto;
 		padding: 0 48px;
 		width: 100%;
-	}
-
-	.wc-settings-ui-shell__tabs--secondary {
-		border-bottom: 0;
 	}
 
 	.wc-settings-ui-shell__tab {
@@ -317,19 +274,12 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			padding: 0 24px 32px;
 		}
 
-		#mainform .subsubsub:not(.list-table-filters) {
-			margin-left: -24px;
-			margin-right: -24px;
-			padding-left: 24px;
-			padding-right: 24px;
-		}
-
 		.wc-settings-ui-shell {
 			margin-left: -24px;
 			margin-right: -24px;
 		}
 
-		.wc-settings-ui-shell > :first-child {
+		.wc-settings-ui-shell__header {
 			padding-left: 24px;
 			padding-right: 24px;
 		}
