@@ -262,7 +262,7 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 			'multiple leading zeros'      => array( '00.50', '0.50' ),
 			'normal number without zeros' => array( '20', '20' ),
 			'over 100 for non-percent'    => array( 150, '150' ),
-			'empty string becomes zero'   => array( '', 0 ),
+			'empty string becomes zero'   => array( '', '0' ),
 			'string 0.0'                  => array( '0.0', '0.0' ),
 		);
 	}
