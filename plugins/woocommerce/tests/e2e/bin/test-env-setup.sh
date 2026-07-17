@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 # Command prefix for running wp-cli against the single-container E2E environment
 # (started via `wp-env --config .wp-env.e2e.json`, whose container is `cli`).
 # The CI fast-path below re-runs this script inside the container with the prefix
@@ -29,6 +31,7 @@ $WP_CLI_PREFIX wp plugin activate woocommerce
 
 echo -e 'Install twentytwenty, twentytwentytwo and storefront themes \n'
 $WP_CLI_PREFIX wp theme install storefront twentytwenty twentytwentytwo &
+theme_install_pid=$!
 
 echo -e 'Activate default theme \n'
 $WP_CLI_PREFIX wp theme activate twentytwentythree
@@ -65,6 +68,9 @@ if [ $ENABLE_TRACKING == 1 ]; then
 	echo -e 'Enable tracking\n'
 	$WP_CLI_PREFIX wp option update woocommerce_allow_tracking 'yes'
 fi
+
+echo -e 'Wait for theme install to finish \n'
+wait "$theme_install_pid"
 
 echo -e 'Upload test images \n'
 $WP_CLI_PREFIX wp media import './test-data/images/image-01.png' './test-data/images/image-02.png' './test-data/images/image-03.png'
