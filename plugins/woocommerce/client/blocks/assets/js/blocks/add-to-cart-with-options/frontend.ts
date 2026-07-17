@@ -211,9 +211,10 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					};
 				}
 
-				// Mirror the edit into the current scope's cart draft for
-				// the id the shopper actually edited, so other surfaces
-				// sharing the scope react and `addItem()` posts the right
+				// Mirror the edit into the nearest `context.draftItems`,
+				// falling back to the page-wide `state.draftItems`, for the
+				// id the shopper actually edited, so other surfaces sharing
+				// that collection react and `addItem()` posts the right
 				// quantity. Sibling variation ids keep their own draft (if
 				// any) untouched here — they get their own draft, carrying
 				// this same locally-tracked quantity, once the shopper

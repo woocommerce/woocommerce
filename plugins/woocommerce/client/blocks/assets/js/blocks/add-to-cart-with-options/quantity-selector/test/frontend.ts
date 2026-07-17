@@ -39,10 +39,11 @@ let mockAddToCartWithOptionsState: Partial<
 
 // The `woocommerce/cart` store's state this module reads (`itemInContext`).
 // Setting `itemInContext.draft` simulates a draft already present in the
-// current scope — whether seeded, written by this same surface, or written
-// by another surface sharing the scope; setting it to an empty envelope
-// simulates no draft for the in-context product (including one belonging to
-// a different scope, which `itemInContext` would never surface here).
+// resolved collection — whether seeded, written by this same surface, or
+// written by another surface sharing that collection; setting it to an
+// empty envelope simulates no draft for the in-context product (including
+// one belonging to a different collection, which `itemInContext` would
+// never surface here).
 let mockCartState: { itemInContext: Envelope };
 
 jest.mock(
@@ -140,7 +141,7 @@ describe( 'Quantity selector frontend store', () => {
 	} );
 
 	describe( 'inputQuantity', () => {
-		it( "displays another surface's draft update for the same scope, not this instance's stale local quantity", () => {
+		it( "displays another surface's draft update for the same resolved collection, not this instance's stale local quantity", () => {
 			mockProductsState.productInContext = makeProduct();
 			mockAddToCartWithOptionsState.quantity = { 42: 1 };
 			mockCartState.itemInContext = {
@@ -152,10 +153,10 @@ describe( 'Quantity selector frontend store', () => {
 			expect( state.inputQuantity ).toBe( 3 );
 		} );
 
-		it( 'falls back to the local quantity when the scope holds no draft for the product (including a draft belonging to a different scope)', () => {
+		it( 'falls back to the local quantity when the resolved collection holds no draft for the product (including a draft belonging to a different collection)', () => {
 			mockProductsState.productInContext = makeProduct();
 			mockAddToCartWithOptionsState.quantity = { 42: 1 };
-			mockCartState.itemInContext = {}; // No draft resolved for this scope.
+			mockCartState.itemInContext = {}; // No draft resolved for this collection.
 
 			const { state } = loadStore();
 
@@ -211,7 +212,7 @@ describe( 'Quantity selector frontend store', () => {
 			expect( state.allowsDecrease ).toBe( true );
 		} );
 
-		it( 'falls back to the local quantity to gate the stepper buttons when the scope holds no draft', () => {
+		it( 'falls back to the local quantity to gate the stepper buttons when the resolved collection holds no draft', () => {
 			mockProductsState.productInContext = makeProduct();
 			mockAddToCartWithOptionsState.quantity = { 42: 1 };
 			mockCartState.itemInContext = {};

@@ -237,13 +237,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return [];
 				}
 
-				// Prefer the current scope's cart draft for the in-context
-				// product/variation: the value every surface sharing the
-				// scope writes to and reads from, so an attribute picked on
-				// one surface is reflected on every other. Falls back to
-				// this instance's own locally-tracked selection when the
-				// scope holds no draft yet, or the draft carries no
-				// `variation` (e.g. a simple product's draft).
+				// Prefer the resolved collection's cart draft for the
+				// in-context product/variation: the nearest
+				// `context.draftItems`, falling back to the page-wide
+				// `state.draftItems`, which every surface sharing that
+				// collection writes to and reads from, so an attribute
+				// picked on one surface is reflected on every other. Falls
+				// back to this instance's own locally-tracked selection when
+				// the resolved collection holds no draft yet, or the draft
+				// carries no `variation` (e.g. a simple product's draft).
 				const draftVariation = cartState.itemInContext.draft?.variation;
 				if ( draftVariation ) {
 					return draftVariation;
@@ -553,12 +555,13 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				// Read through the same draft-backed source
 				// `state.selectedAttributes` gives the display (attribute
 				// chips, `selectableItems`): a surface whose chips render
-				// the scope's resolved selection as checked must validate —
-				// and therefore gate its own Add to cart — against that
-				// same selection, not this instance's local context, which
-				// a sibling surface never editing its own chips would
-				// otherwise validate against forever, dead-ending its
-				// submit even though it displays a complete configuration.
+				// the resolved collection's selection as checked must
+				// validate — and therefore gate its own Add to cart —
+				// against that same selection, not this instance's local
+				// context, which a sibling surface never editing its own
+				// chips would otherwise validate against forever,
+				// dead-ending its submit even though it displays a complete
+				// configuration.
 				const { selectedAttributes } = state;
 				const result = productsState.findProduct( {
 					id: product.id,
@@ -621,13 +624,14 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { minimum, maximum } = variation.add_to_cart;
 
-				// Clamp the shared scope draft's own quantity — the same
-				// value `resolveDisplayQuantity` prefers for every surface's
-				// display — rather than this surface's local `quantity`
-				// map. `data-wp-watch` reruns this callback on every
-				// surface sharing the page whenever the globally-resolved
-				// variation changes, whether or not the shopper is using
-				// that particular surface; a surface that never received a
+				// Clamp the resolved collection's draft's own quantity — the
+				// same value `resolveDisplayQuantity` prefers for every
+				// surface's display — rather than this surface's local
+				// `quantity` map. `data-wp-watch` reruns this callback on
+				// every surface sharing that collection whenever the
+				// globally-resolved variation changes, whether or not the
+				// shopper is using that particular surface; a surface that
+				// never received a
 				// quantity edit of its own carries a stale local default in
 				// its own map, and "correcting" the draft back to that
 				// default the instant another surface resolves a variation
