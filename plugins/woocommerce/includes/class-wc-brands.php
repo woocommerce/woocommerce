@@ -562,8 +562,8 @@ class WC_Brands {
 			return '';
 		}
 
-		$args['width']  = $this->normalize_product_brand_shortcode_dimension( $args['width'] );
-		$args['height'] = $this->normalize_product_brand_shortcode_dimension( $args['height'] );
+		$args['width']  = self::normalize_product_brand_shortcode_dimension( $args['width'] );
+		$args['height'] = self::normalize_product_brand_shortcode_dimension( $args['height'] );
 
 		if ( '' !== $args['width'] || '' !== $args['height'] ) {
 			$args['width']  = '' !== $args['width'] ? $args['width'] : 'auto';
@@ -598,7 +598,7 @@ class WC_Brands {
 	 * @param mixed $dimension Shortcode dimension value.
 	 * @return string Normalized dimension.
 	 */
-	private function normalize_product_brand_shortcode_dimension( $dimension ) {
+	private static function normalize_product_brand_shortcode_dimension( $dimension ) {
 		$dimension = is_scalar( $dimension ) ? trim( (string) $dimension ) : '';
 
 		return is_numeric( $dimension ) ? $dimension . 'px' : $dimension;
