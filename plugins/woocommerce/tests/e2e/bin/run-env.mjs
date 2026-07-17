@@ -16,6 +16,23 @@ export function isCi( env ) {
 	return typeof env.CI === 'string' && env.CI.length > 0;
 }
 
+export const ALLOWED_WP_ENV_VARS = [
+	'WP_ENV_CORE',
+	'WP_ENV_PHP_VERSION',
+	'WP_ENV_PORT',
+];
+
+export function sanitizeEnv( env ) {
+	const out = {};
+	for ( const [ key, value ] of Object.entries( env ) ) {
+		if ( key.startsWith( 'WP_ENV_' ) && ! ALLOWED_WP_ENV_VARS.includes( key ) ) {
+			continue;
+		}
+		out[ key ] = value;
+	}
+	return out;
+}
+
 async function main() {
 	// Filled in by later tasks.
 }
