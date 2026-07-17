@@ -591,7 +591,8 @@ function wc_get_price_decimals() {
  *     @type bool   $in_span            Whether to enclose the formatted price in an HTML <span> element.
  *                                      Defaults to true.
  *     @type bool|null $is_negative      Whether to display the price as negative. When omitted or set to null,
- *                                      the sign is determined from the price.
+ *                                      the sign is determined from the price. The displayed sign is also
+ *                                      reflected in the unformatted price passed to the `wc_price` filter.
  * }
  * @return string
  */
@@ -618,9 +619,9 @@ function wc_price( $price, $args = array() ) {
 	// Convert to float to avoid issues on PHP 8.
 	$price = (float) $price;
 
-	$unformatted_price = $price;
 	$negative          = $price < 0;
 	$is_negative       = isset( $args['is_negative'] ) ? (bool) $args['is_negative'] : $negative;
+	$unformatted_price = $is_negative ? -abs( $price ) : abs( $price );
 
 	/**
 	 * Filter raw price.
@@ -665,7 +666,8 @@ function wc_price( $price, $args = array() ) {
 	 * @param string       $return            Price HTML markup.
 	 * @param string       $price             Formatted price.
 	 * @param array        $args              Pass on the args.
-	 * @param float        $unformatted_price Price as float to allow plugins custom formatting. Since 3.2.0.
+	 * @param float        $unformatted_price Price as float to allow plugins custom formatting. Carries the
+	 *                                        displayed sign, which may be forced via the `is_negative` arg. Since 3.2.0.
 	 * @param float|string $original_price    Original price as float, or empty string. Since 5.0.0.
 	 */
 	return apply_filters( 'wc_price', $return, $price, $args, $unformatted_price, $original_price );

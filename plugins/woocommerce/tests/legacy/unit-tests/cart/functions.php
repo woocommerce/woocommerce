@@ -201,7 +201,7 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 		WC_Helper_Product::delete_product( $product->get_id() );
 
-		$this->assertStringStartsWith( 'localized-negative-price:1:1 ', $coupon_html, 'The wc_price filter should receive the positive coupon amount and explicit negative display intent.' );
+		$this->assertStringStartsWith( 'localized-negative-price:1:-1 ', $coupon_html, 'The wc_price filter should receive the signed coupon amount and explicit negative display intent.' );
 	}
 
 	/**
@@ -232,7 +232,7 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 		WC_Helper_Product::delete_product( $product->get_id() );
 
-		$this->assertStringStartsWith( 'localized-negative-price:0:0 ', $coupon_html, 'Zero-value coupons should pass explicit negative display intent without changing the numeric filter values.' );
+		$this->assertStringStartsWith( 'localized-negative-price:0:-0 ', $coupon_html, 'Zero-value coupons should pass explicit negative display intent with a sign-carrying zero unformatted price.' );
 	}
 
 	/**

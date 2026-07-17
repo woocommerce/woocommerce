@@ -69,8 +69,8 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( $loaded, 'The order items output should be valid enough for DOM parsing.' );
 
 		$xpath          = new DOMXPath( $document );
-		$discount_nodes = $xpath->query( "//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'localized-negative-price:10:10']" );
-		$refund_nodes   = $xpath->query( "//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'localized-negative-price:25:25']" );
+		$discount_nodes = $xpath->query( "//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'localized-negative-price:10:-10']" );
+		$refund_nodes   = $xpath->query( "//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'localized-negative-price:25:-25']" );
 
 		$this->assertNotFalse( $discount_nodes, 'The discount price XPath query should be valid.' );
 		$this->assertNotFalse( $refund_nodes, 'The refund price XPath query should be valid.' );
@@ -112,7 +112,7 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( $loaded, 'The order items output should be valid enough for DOM parsing.' );
 
 		$xpath      = new DOMXPath( $document );
-		$zero_nodes = $xpath->query( "//div[contains(concat(' ', normalize-space(@class), ' '), ' wc-order-refund-items ')]//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'localized-negative-price:0:0']" );
+		$zero_nodes = $xpath->query( "//div[contains(concat(' ', normalize-space(@class), ' '), ' wc-order-refund-items ')]//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'localized-negative-price:0:-0']" );
 
 		$this->assertNotFalse( $zero_nodes, 'The zero refunded total XPath query should be valid.' );
 		$this->assertSame( 1, $zero_nodes->length, 'The refund form should pass explicit negative display intent without changing the zero-valued filter arguments.' );

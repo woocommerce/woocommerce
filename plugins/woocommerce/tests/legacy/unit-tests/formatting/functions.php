@@ -681,11 +681,41 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		$this->assertSame( array( 12.34, 12.34 ), $filtered_values['raw'], 'The raw price filter should receive the positive price.' );
 		$this->assertSame( array( '12.34', 12.34, 12.34 ), $filtered_values['formatted'], 'The formatted price filter should receive the positive price.' );
-		$this->assertSame( array( true, 12.34, 12.34 ), $filtered_values['price'], 'The wc_price filter should receive the positive price and explicit negative display intent.' );
+		$this->assertSame( array( true, -12.34, 12.34 ), $filtered_values['price'], 'The wc_price filter should receive the displayed (negative) price and explicit negative display intent.' );
 		$this->assertStringContainsString( '<bdi>-', $price_html, 'A positive price should render as negative when explicitly requested.' );
 		$this->assertStringContainsString( '<bdi>-', wc_price( 0, array( 'is_negative' => true ) ), 'A zero price should render as negative when explicitly requested.' );
 		$this->assertStringNotContainsString( '<bdi>-', wc_price( -12.34, array( 'is_negative' => false ) ), 'An explicitly unsigned price should not render as negative.' );
 		$this->assertStringContainsString( '<bdi>-', wc_price( -12.34, array( 'is_negative' => null ) ), 'A null display intent should derive the sign from the price.' );
+	}
+
+	/**
+	 * @testdox wc_price passes the displayed sign to the wc_price filter so markup rebuilders keep it.
+	 */
+	public function test_wc_price_filter_receives_unformatted_price_with_displayed_sign(): void {
+		$captured_unformatted_prices = array();
+
+		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price ) use ( &$captured_unformatted_prices ) {
+			unset( $formatted_price, $args );
+
+			$captured_unformatted_prices[] = $unformatted_price;
+
+			return $price_html;
+		};
+
+		add_filter( 'wc_price', $price_filter, 10, 4 );
+
+		wc_price( 12.34 );
+		wc_price( -12.34 );
+		wc_price( 12.34, array( 'is_negative' => true ) );
+		wc_price( -12.34, array( 'is_negative' => false ) );
+
+		remove_filter( 'wc_price', $price_filter );
+
+		$this->assertSame(
+			array( 12.34, -12.34, -12.34, 12.34 ),
+			$captured_unformatted_prices,
+			'The unformatted price passed to the wc_price filter should carry the displayed sign.'
+		);
 	}
 
 	/**

@@ -309,7 +309,7 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Order previews pass positive refund totals and explicit negative display intent to wc_price.
+	 * @testdox Order previews pass signed refund totals and explicit negative display intent to wc_price.
 	 */
 	public function test_order_preview_passes_explicit_negative_display_intent_to_wc_price(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -355,10 +355,10 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( $loaded, 'The order preview output should be valid enough for DOM parsing.' );
 
 		$xpath          = new DOMXPath( $document );
-		$refunded_nodes = $xpath->query( "//small[contains(concat(' ', normalize-space(@class), ' '), ' refunded ') and normalize-space(.) = 'localized-negative-price:5:5']" );
+		$refunded_nodes = $xpath->query( "//small[contains(concat(' ', normalize-space(@class), ' '), ' refunded ') and normalize-space(.) = 'localized-negative-price:5:-5']" );
 
 		$this->assertNotFalse( $refunded_nodes, 'The refunded price XPath query should be valid.' );
-		$this->assertSame( 1, $refunded_nodes->length, 'The preview should pass the positive refund amount and explicit negative display intent to the wc_price filter.' );
+		$this->assertSame( 1, $refunded_nodes->length, 'The preview should pass the signed refund amount and explicit negative display intent to the wc_price filter.' );
 	}
 
 	/**
@@ -408,9 +408,9 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( $loaded, 'The order preview output should be valid enough for DOM parsing.' );
 
 		$xpath          = new DOMXPath( $document );
-		$refunded_nodes = $xpath->query( "//small[contains(concat(' ', normalize-space(@class), ' '), ' refunded ') and normalize-space(.) = 'localized-negative-price:0:0']" );
+		$refunded_nodes = $xpath->query( "//small[contains(concat(' ', normalize-space(@class), ' '), ' refunded ') and normalize-space(.) = 'localized-negative-price:0:-0']" );
 
 		$this->assertNotFalse( $refunded_nodes, 'The zero refund XPath query should be valid.' );
-		$this->assertSame( 1, $refunded_nodes->length, 'The preview should pass explicit negative display intent without changing the zero-valued filter arguments.' );
+		$this->assertSame( 1, $refunded_nodes->length, 'The preview should pass explicit negative display intent with a sign-carrying zero unformatted price.' );
 	}
 }
