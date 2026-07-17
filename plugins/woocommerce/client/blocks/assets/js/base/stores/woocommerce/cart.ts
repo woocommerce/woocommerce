@@ -48,17 +48,7 @@ export type WooCommerceConfig = {
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
 
 /**
- * An opaque scope identifier.
- *
- * Scopes are deterministic, namespaced strings minted by the surfaces that
- * establish them (the page itself, a Product Collection loop item, a Single
- * Product block, an extension). The only guaranteed property is that equal
- * strings denote the same scope; no other structure is assumed by the store.
- */
-export type Scope = string;
-
-/**
- * A single scope's draft cart item.
+ * A single draft collection's draft cart item.
  *
  * A draft is exactly a Store API `cart/add-item` request payload — no
  * mapping layer. Extension props (e.g. `'my-plugin/gift-note'`) ride at the
@@ -69,10 +59,10 @@ export type Scope = string;
  */
 export type DraftItem = {
 	/**
-	 * The product or variation id being drafted. This is also the per-scope
-	 * uniqueness key: `upsertDraftItem` merges into the draft whose `id`
-	 * matches and appends otherwise, so a scope holds at most one draft per
-	 * `id`.
+	 * The product or variation id being drafted. This is also the
+	 * per-collection uniqueness key: `upsertDraftItem` merges into the
+	 * resolved collection's draft whose `id` matches and appends otherwise,
+	 * so a collection holds at most one draft per `id`.
 	 */
 	id: number;
 	/** The quantity to add. */
@@ -105,9 +95,9 @@ export type ClientCartItem = Omit<
 /**
  * The read-only envelope returned by `findItem`/`itemInContext`.
  *
- * Pairing between a scope's draft and a cart line never guesses: `cartItem`
- * is populated only when the pairing ladder resolves to exactly one
- * candidate line — a context-known line `key`, or an unambiguous
+ * Pairing between a resolved collection's draft and a cart line never
+ * guesses: `cartItem` is populated only when the pairing ladder resolves to
+ * exactly one candidate line — a context-known line `key`, or an unambiguous
  * product/variation identity plus namespaced extension-prop match. Any
  * remaining ambiguity (including "this product is in the cart, but not as a
  * single identifiable line") leaves `cartItem` `undefined`; the server owns
@@ -122,7 +112,7 @@ export type Envelope = {
 	 * candidate line matches and none can be told apart.
 	 */
 	cartItem?: CartItem | OptimisticCartItem | undefined;
-	/** The resolved scope's draft for the product, when one exists. */
+	/** The resolved collection's draft for the product, when one exists. */
 	draft?: DraftItem | undefined;
 };
 
@@ -140,47 +130,27 @@ export type Store = {
 			totals: CartResponseTotals;
 		};
 		/**
-		 * Draft cart items awaiting `addItem`, keyed by scope.
+		 * The page-wide draft collection: cart items awaiting `addItem`.
 		 *
-		 * Each scope holds an array of drafts, at most one per product `id`.
-		 * Drafts live alongside — never inside — the read-only `cart`
-		 * mirror above, and are written exclusively through
-		 * `upsertDraftItem`/`removeDraftItem`.
+		 * At most one draft per product `id`. A container block (a Product
+		 * Collection loop item, a Single Product block, or any other
+		 * extension surface that wraps or repeats purchase UI) isolates its
+		 * own subtree by initializing a `draftItems` array in its
+		 * `woocommerce/cart` context instead of writing here; every read and
+		 * write resolves the nearest such collection, falling back to this
+		 * page-wide one (see the module-private `resolveDraftItems`). Drafts
+		 * live alongside — never inside — the read-only `cart` mirror above,
+		 * and are written exclusively through
+		 * `upsertDraftItem`/`removeDraftItem`, or by direct mutation of an
+		 * already-resolved draft object.
 		 */
-		draftItems: Record< Scope, DraftItem[] >;
+		draftItems: DraftItem[];
 		/**
-		 * The page-wide scope, established once per request.
-		 *
-		 * Server-seeded via `wp_interactivity_state( 'woocommerce/cart', … )`
-		 * by the server-side scope service, so every surface that is not
-		 * inside a scope-overriding container (a Product Collection loop
-		 * item, a Single Product block) shares this scope and stays in sync.
-		 *
-		 * Deliberately never given a client-side initial value: the store
-		 * definition's state deep-merges over the server-provided state
-		 * during registration, so a client default would overwrite the
-		 * server-seeded scope. On a page where the server seeds no cart
-		 * state this stays `undefined` and `currentScope` degrades to an
-		 * (invalid) empty scope.
-		 */
-		pageScope?: Scope;
-		/**
-		 * The scope to read from or write to when a consumer passes none.
-		 *
-		 * Resolves the `scope` carried in the shared `woocommerce` context
-		 * namespace — set by a scope-overriding container for its subtree —
-		 * when present, else falls back to `pageScope`. This getter is the
-		 * single place that implements `context.scope ?? pageScope`; no
-		 * other code, client or server, should re-implement that
-		 * conditional. Reading the shared context outside of a directive's
-		 * execution (no active Interactivity scope) degrades to `pageScope`
-		 * rather than throwing.
-		 */
-		currentScope: Scope;
-		/**
-		 * Finds a scoped item by id/key, or by an extension-supplied
-		 * predicate, returning the read-only envelope pairing its draft with
-		 * its cart line.
+		 * Finds an item by id/key, or by an extension-supplied predicate,
+		 * returning the read-only envelope pairing its draft with its cart
+		 * line. The draft is read from the resolved draft collection — the
+		 * nearest `context.draftItems`, falling back to the page-wide
+		 * `state.draftItems` (see the module-private `resolveDraftItems`).
 		 *
 		 * Implements the pairing ladder: an explicit `key` pairs exactly
 		 * (no further checks); otherwise product/variation identity plus a
@@ -193,8 +163,6 @@ export type Store = {
 		 * entirely, for extensions with their own notion of line identity.
 		 *
 		 * @param args        Lookup arguments.
-		 * @param args.scope  The scope to read the draft from. Defaults to
-		 *                    `currentScope`.
 		 * @param args.id     The product/variation id to pair by identity.
 		 * @param args.key    A known cart-line key; pairs exactly when
 		 *                    given, regardless of `id`/`filter`.
@@ -204,17 +172,16 @@ export type Store = {
 		 * @return The envelope: `{ cartItem?, draft? }`.
 		 */
 		findItem: ( args?: {
-			scope?: Scope;
 			id?: DraftItem[ 'id' ];
 			key?: CartItem[ 'key' ];
 			filter?: ( item: CartItem | OptimisticCartItem ) => boolean;
 		} ) => Envelope;
 		/**
-		 * The envelope for the in-context product: its `currentScope`
-		 * draft paired with its cart line, resolved via the products
-		 * store's `productInContext`. `undefined` product in context
-		 * (nothing rendered) yields an empty envelope. See `findItem` for
-		 * the pairing ladder.
+		 * The envelope for the in-context product: its resolved
+		 * collection's draft paired with its cart line, resolved via the
+		 * products store's `productInContext`. `undefined` product in
+		 * context (nothing rendered) yields an empty envelope. See
+		 * `findItem` for the pairing ladder.
 		 */
 		itemInContext: Envelope;
 		/**
@@ -223,100 +190,96 @@ export type Store = {
 		 * A grouped product aggregates its children's own in-cart
 		 * quantities (each resolved independently, by id); a variable
 		 * product resolves through its currently selected variation (the
-		 * scope's draft selection, same resolution as `itemInContext`); a
-		 * simple product is its own paired line's quantity. `0` when
-		 * nothing pairs, or no product is in context.
+		 * resolved collection's draft selection, same resolution as
+		 * `itemInContext`); a simple product is its own paired line's
+		 * quantity. `0` when nothing pairs, or no product is in context.
 		 */
 		inCartQuantity: number;
 	};
 	actions: {
 		/**
-		 * Creates or updates a draft cart item in a scope's bucket.
+		 * Creates or updates a draft cart item in the resolved draft
+		 * collection — the nearest `context.draftItems`, falling back to
+		 * the page-wide `state.draftItems` (see the module-private
+		 * `resolveDraftItems`).
 		 *
-		 * Resolves the target scope from `options.scope`, defaulting to
-		 * `currentScope` when omitted, then merges `partial` into the
-		 * scope's draft whose `id` matches — `id` resolves from
-		 * `options.id` when given, else from `partial.id` — appending a new
-		 * draft otherwise. The scope's bucket is created on first write.
+		 * Merges `partial` into the resolved collection's draft whose `id`
+		 * matches — `id` resolves from `options.id` when given, else from
+		 * `partial.id` — appending a new draft otherwise.
 		 *
-		 * Rejects (leaving state unchanged) when: the resolved scope is not
-		 * a valid, non-empty scope string; no numeric target `id` can be
-		 * resolved; `partial.id` disagrees with an already-resolved target
-		 * `id`, i.e. an attempt to change an existing draft's identity in
-		 * place (remove the draft and add a new one instead); or a brand
-		 * new draft is being created without a numeric `quantity`. Every
-		 * rejection is a dev-build console warning and a silent no-op in
-		 * production.
+		 * Rejects (leaving state unchanged) when: no numeric target `id`
+		 * can be resolved; `partial.id` disagrees with an
+		 * already-resolved target `id`, i.e. an attempt to change an
+		 * existing draft's identity in place (remove the draft and add a
+		 * new one instead); or a brand new draft is being created without
+		 * a numeric `quantity`. Every rejection is a dev-build console
+		 * warning and a silent no-op in production.
 		 *
-		 * @param partial       The draft fields to create or merge.
-		 * @param options       Targeting options.
-		 * @param options.scope The scope to write into. Defaults to
-		 *                      `currentScope` when omitted.
-		 * @param options.id    An explicit id identifying which existing
-		 *                      draft to update, when it differs from
-		 *                      `partial.id` (e.g. `partial` omits `id`).
+		 * @param partial    The draft fields to create or merge.
+		 * @param options    Targeting options.
+		 * @param options.id An explicit id identifying which existing
+		 *                   draft to update, when it differs from
+		 *                   `partial.id` (e.g. `partial` omits `id`).
 		 */
 		upsertDraftItem: (
 			partial: Partial< DraftItem >,
-			options?: { scope?: Scope; id?: DraftItem[ 'id' ] }
+			options?: { id?: DraftItem[ 'id' ] }
 		) => void;
 		/**
-		 * Removes a scope's draft for the given product, pruning the
-		 * scope's bucket once it becomes empty.
+		 * Removes a draft for the given product from the resolved draft
+		 * collection — the nearest `context.draftItems`, falling back to
+		 * the page-wide `state.draftItems` (see the module-private
+		 * `resolveDraftItems`).
 		 *
-		 * Resolves the target scope from `options.scope`, defaulting to
-		 * `currentScope` when omitted. Rejects (leaving state unchanged)
-		 * when the resolved scope is not a valid, non-empty scope string,
-		 * or no numeric `id` is given; a request naming a product/scope
-		 * with no matching draft is a silent no-op. Every rejection is a
+		 * Rejects (leaving state unchanged) when no numeric `id` is given;
+		 * a request naming a product with no matching draft in the
+		 * resolved collection is a silent no-op. Every rejection is a
 		 * dev-build console warning and a silent no-op in production.
 		 *
-		 * @param options       Targeting options.
-		 * @param options.id    The product id whose draft to remove.
-		 * @param options.scope The scope to remove it from. Defaults to
-		 *                      `currentScope` when omitted.
+		 * @param options    Targeting options.
+		 * @param options.id The product id whose draft to remove.
 		 */
-		removeDraftItem: ( options?: {
-			id?: DraftItem[ 'id' ];
-			scope?: Scope;
-		} ) => void;
+		removeDraftItem: ( options?: { id?: DraftItem[ 'id' ] } ) => void;
 		/**
-		 * Seeds `draftItems[currentScope]` from the server-rendered
-		 * `draftSeed`, when no draft for that product already exists there.
+		 * Seeds the resolved draft collection from the server-rendered
+		 * `draftSeed`, when no draft for that product already exists
+		 * there.
 		 *
 		 * Reads `getServerContext< { draftSeed?: DraftItem } >(
 		 * 'woocommerce/cart' )?.draftSeed` — the **server-rendered** context,
 		 * immune to the reactive proxy's client-side edits, unlike reading
-		 * `state` — then resolves `currentScope` and copies the seed into
-		 * that scope's bucket only when the scope holds no draft for the
-		 * seed's product `id`. A no-op when no seed is present (a surface
-		 * that emits none, or a directive execution context that resolves
-		 * none) or when a draft for that product id already exists in the
-		 * resolved scope — so a router-region re-render's seed read can
-		 * never clobber a shopper's in-progress edits.
+		 * `state` — then copies the seed into the resolved collection (the
+		 * nearest `context.draftItems`, falling back to the page-wide
+		 * `state.draftItems`) only when that collection holds no draft for
+		 * the seed's product `id`. A no-op when no seed is present (a
+		 * surface that emits none, or a directive execution context that
+		 * resolves none) or when a draft for that product id already
+		 * exists in the resolved collection — so a router-region
+		 * re-render's seed read can never clobber a shopper's in-progress
+		 * edits.
 		 *
 		 * Intended to be called from a `data-wp-init` on the purchase
-		 * surface whose subtree context resolves both `currentScope` and the
-		 * server-rendered `draftSeed`.
+		 * surface whose subtree context resolves both the target
+		 * collection and the server-rendered `draftSeed`.
 		 */
 		seedDraftIfAbsent: () => void;
 		/**
-		 * Posts the in-context product's current-scope draft(s) to the cart,
-		 * or an explicit payload verbatim.
+		 * Posts the in-context product's resolved collection's draft(s) to
+		 * the cart, or an explicit payload verbatim.
 		 *
 		 * With no argument, resolves the in-context product (via
-		 * `woocommerce/products`) and posts `currentScope`'s draft(s) for
-		 * it: a simple/variable product's own single draft
+		 * `woocommerce/products`) and posts the resolved collection's
+		 * draft(s) for it: a simple/variable product's own single draft
 		 * (`itemInContext.draft`), or, for a grouped product, every child's
 		 * draft (children resolved one-directionally through the products
 		 * store) whose `quantity` is greater than `0`. Multiple children's
 		 * drafts are posted as one auto-batched request set through the
 		 * mutation queue rather than one request per child. Never posts
-		 * another scope's or another product's draft, and sends nothing
-		 * when the resolution yields no draft.
+		 * another collection's or another product's draft, and sends
+		 * nothing when the resolution yields no draft.
 		 *
 		 * With an explicit `payload`, posts it verbatim — extension props
-		 * at its root included — bypassing scope/product resolution
+		 * at its root included — bypassing collection/product resolution
 		 * entirely; this is the path an extension composing its own
 		 * `cart/add-item` payload (e.g. a bundle) uses.
 		 *
@@ -434,61 +397,72 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 } );
 
 /**
- * Returns `true` when `scope` is a valid, non-empty scope identifier.
+ * The shape of the `woocommerce/cart` context namespace relevant to draft
+ * collection resolution.
  *
- * Scopes are opaque strings (see {@link Scope}); the only requirement is a
- * non-empty string. `upsertDraftItem`/`removeDraftItem` reject anything
- * else as a malformed-scope invariant violation.
- *
- * @param scope The candidate scope value.
- * @return `true` when `scope` is a non-empty string.
+ * A container block (a Product Collection loop item, a Single Product
+ * block, or any other extension surface that wraps or repeats purchase UI)
+ * isolates its subtree by initializing `draftItems: []` here; nested
+ * surfaces then resolve that collection instead of the page-wide
+ * `state.draftItems`. Other `woocommerce/cart` context keys — `draftSeed`,
+ * a mini-cart row's `id`/`key` — live in the same namespace but do not
+ * establish a collection boundary.
  */
-function isValidScope( scope: unknown ): scope is Scope {
-	return typeof scope === 'string' && scope.length > 0;
+type CartContext = { draftItems?: DraftItem[] };
+
+/**
+ * Resolves the draft collection nearest to the calling surface: the
+ * current context's own `draftItems`, when a container established one,
+ * else the page-wide `state.draftItems`.
+ *
+ * This is the single place that implements `context.draftItems ??
+ * state.draftItems`; no other code, client or server, should re-implement
+ * that fallback. `getContext()` throws when called with no directive
+ * currently executing on the call stack (e.g. from code that runs outside
+ * any directive-driven element); this resolver must never propagate that
+ * failure — an out-of-directive call simply means "no context collection
+ * available", so it degrades to `state.draftItems`, exactly as an
+ * in-directive call whose context sets no `draftItems` would.
+ *
+ * @return The resolved draft collection.
+ */
+function resolveDraftItems(): DraftItem[] {
+	try {
+		return (
+			getContext< CartContext >( 'woocommerce/cart' )?.draftItems ??
+			state.draftItems
+		);
+	} catch {
+		return state.draftItems;
+	}
 }
 
 /**
- * The shape of the shared `woocommerce` context namespace relevant to scope
- * and item-pairing resolution.
+ * Finds a draft for the given product/variation id within a specific draft
+ * collection.
  *
- * Scope-overriding containers (a Product Collection loop item, a Single
- * Product block) emit `scope` via `data-wp-context='woocommerce::{ "scope":
- * "…" }'` on their wrapper element; consumers nested inside inherit it. A
- * surface that already renders one specific, known cart line (e.g. a future
- * line-item wrapper) may additionally emit `key`, letting `itemInContext`
- * pair exactly via the pairing ladder's first rung instead of falling back
- * to product/variation identity matching.
+ * @param collection The draft collection to search.
+ * @param id         The draft's product/variation id, or `undefined`
+ *                   (nothing to find).
+ * @return The matching draft, or `undefined` when none is found.
  */
-type SharedContext = { scope?: Scope; key?: CartItem[ 'key' ] };
-
-/**
- * Reads the shared `woocommerce` context namespace, degrading to `undefined`
- * instead of throwing when read outside of a directive's execution.
- *
- * `getContext()` throws when called with no active Interactivity scope on
- * the call stack (e.g. from code that runs outside any directive-driven
- * element). `currentScope` must never propagate that failure — an
- * out-of-directive read simply means "no context override available", so it
- * falls back to `state.pageScope` exactly as an in-directive read with no
- * `scope` key would.
- *
- * @return The shared context, or `undefined` when none is available.
- */
-function readSharedContext(): SharedContext | undefined {
-	try {
-		return getContext< SharedContext >( 'woocommerce' );
-	} catch {
+function findDraftInCollection(
+	collection: DraftItem[],
+	id: DraftItem[ 'id' ] | undefined
+): DraftItem | undefined {
+	if ( id === undefined ) {
 		return undefined;
 	}
+	return collection.find( ( draft ) => draft.id === id );
 }
 
 /**
  * Reports a draft-write invariant violation.
  *
- * Per the write-policy design, invariant violations (a malformed scope, an
- * upsert that would change an existing draft's `id`, a new draft missing a
- * required field) never throw and never partially apply — the calling
- * action returns before touching `state.draftItems`. In a development build
+ * Per the write-policy design, invariant violations (an upsert that would
+ * change an existing draft's `id`, a new draft missing a required field)
+ * never throw and never partially apply — the calling action returns
+ * before touching the resolved draft collection. In a development build
  * this surfaces as a `console.warn` for the implementer; production builds
  * stay silent (`process.env.NODE_ENV` is inlined by the bundler, so this
  * check compiles away entirely there).
@@ -695,26 +669,6 @@ function draftExtensionsMatchLine(
 				!! namespaceData && fastDeepEqual( namespaceData[ key ], value )
 			);
 		}
-	);
-}
-
-/**
- * Finds a scope's draft for the given product/variation id.
- *
- * @param scope The scope to look in.
- * @param id    The draft's product/variation id, or `undefined` (nothing to
- *              find).
- * @return The matching draft, or `undefined` when none is found.
- */
-function findDraftInScope(
-	scope: Scope,
-	id: DraftItem[ 'id' ] | undefined
-): DraftItem | undefined {
-	if ( id === undefined ) {
-		return undefined;
-	}
-	return ( state.draftItems[ scope ] as DraftItem[] | undefined )?.find(
-		( draft ) => draft.id === id
 	);
 }
 
@@ -968,7 +922,7 @@ function* postDraftItems(
 	try {
 		// Per-item capture for the keyless-add exactness test (see
 		// `computeKeylessAddSuppressKeys`). Drafts are unique per product id
-		// by construction (at most one draft per id per scope; grouped
+		// by construction (at most one draft per id per collection; grouped
 		// children are distinct ids), so no per-token accumulation is needed.
 		const productCaptures = items.map( ( item ) => {
 			const preExistingKeys: string[] = [];
@@ -1485,25 +1439,18 @@ const { actions } = store< Store >(
 	'woocommerce/cart',
 	{
 		state: {
-			draftItems: {},
-			// `pageScope` is intentionally absent here: it is server-seeded,
-			// and a client-side initial value would overwrite the seeded
-			// scope when this definition deep-merges over the server state
-			// during store registration.
-			get currentScope(): Scope {
-				return readSharedContext()?.scope ?? state.pageScope ?? '';
-			},
+			draftItems: [],
 			findItem( {
-				scope = state.currentScope,
 				id,
 				key,
 				filter,
 			}: {
-				scope?: Scope;
 				id?: DraftItem[ 'id' ];
 				key?: CartItem[ 'key' ];
 				filter?: ( item: CartItem | OptimisticCartItem ) => boolean;
 			} = {} ): Envelope {
+				const draftItems = resolveDraftItems();
+
 				// Rung 1: a context-known line key pairs exactly, no further
 				// identity/extension checks — the caller already knows
 				// precisely which line this is.
@@ -1513,7 +1460,10 @@ const { actions } = store< Store >(
 					);
 					return {
 						cartItem,
-						draft: findDraftInScope( scope, id ?? cartItem?.id ),
+						draft: findDraftInCollection(
+							draftItems,
+							id ?? cartItem?.id
+						),
 					};
 				}
 
@@ -1524,7 +1474,7 @@ const { actions } = store< Store >(
 					return {
 						cartItem:
 							matches.length === 1 ? matches[ 0 ] : undefined,
-						draft: findDraftInScope( scope, id ),
+						draft: findDraftInCollection( draftItems, id ),
 					};
 				}
 
@@ -1541,7 +1491,7 @@ const { actions } = store< Store >(
 				// candidate line's `extensions[<namespace>]`. Ambiguity —
 				// zero or more than one line surviving both checks — never
 				// guesses: `cartItem` stays `undefined`.
-				const draft = findDraftInScope( scope, id );
+				const draft = findDraftInCollection( draftItems, id );
 				const identityMatches = state.cart.items.filter( ( item ) =>
 					lineMatchesProduct( item, id, draft?.variation )
 				);
@@ -1566,12 +1516,7 @@ const { actions } = store< Store >(
 					};
 				}
 
-				const contextKey = readSharedContext()?.key;
-				return state.findItem(
-					contextKey !== undefined
-						? { id: product.id, key: contextKey }
-						: { id: product.id }
-				);
+				return state.findItem( { id: product.id } );
 			},
 			get inCartQuantity(): number {
 				const product = productsState.productInContext;
@@ -1595,20 +1540,8 @@ const { actions } = store< Store >(
 		actions: {
 			upsertDraftItem(
 				partial: Partial< DraftItem >,
-				{
-					scope = state.currentScope,
-					id,
-				}: { scope?: Scope; id?: DraftItem[ 'id' ] } = {}
+				{ id }: { id?: DraftItem[ 'id' ] } = {}
 			) {
-				if ( ! isValidScope( scope ) ) {
-					warnDraftInvariant(
-						`upsertDraftItem: a valid "scope" is required, received ${ JSON.stringify(
-							scope
-						) }.`
-					);
-					return;
-				}
-
 				// The id used to look up an existing draft: an explicit
 				// `id` names "the draft I mean to update" independently of
 				// `partial.id`. When both are given they are compared below
@@ -1622,10 +1555,8 @@ const { actions } = store< Store >(
 					return;
 				}
 
-				const bucket = state.draftItems[ scope ] as
-					| DraftItem[]
-					| undefined;
-				const existing = bucket?.find(
+				const collection = resolveDraftItems();
+				const existing = collection.find(
 					( draft ) => draft.id === targetId
 				);
 
@@ -1651,25 +1582,10 @@ const { actions } = store< Store >(
 				}
 
 				const draft = { ...partial, id: targetId } as DraftItem;
-				if ( bucket ) {
-					bucket.push( draft );
-				} else {
-					state.draftItems[ scope ] = [ draft ];
-				}
+				collection.push( draft );
 			},
 
-			removeDraftItem( {
-				id,
-				scope = state.currentScope,
-			}: { id?: DraftItem[ 'id' ]; scope?: Scope } = {} ) {
-				if ( ! isValidScope( scope ) ) {
-					warnDraftInvariant(
-						`removeDraftItem: a valid "scope" is required, received ${ JSON.stringify(
-							scope
-						) }.`
-					);
-					return;
-				}
+			removeDraftItem( { id }: { id?: DraftItem[ 'id' ] } = {} ) {
 				if ( typeof id !== 'number' ) {
 					warnDraftInvariant(
 						'removeDraftItem: a numeric "id" is required.'
@@ -1677,19 +1593,15 @@ const { actions } = store< Store >(
 					return;
 				}
 
-				const bucket = state.draftItems[ scope ] as
-					| DraftItem[]
-					| undefined;
-				const index =
-					bucket?.findIndex( ( draft ) => draft.id === id ) ?? -1;
-				if ( ! bucket || index === -1 ) {
+				const collection = resolveDraftItems();
+				const index = collection.findIndex(
+					( draft ) => draft.id === id
+				);
+				if ( index === -1 ) {
 					return;
 				}
 
-				bucket.splice( index, 1 );
-				if ( bucket.length === 0 ) {
-					delete state.draftItems[ scope ];
-				}
+				collection.splice( index, 1 );
 			},
 
 			seedDraftIfAbsent() {
@@ -1700,12 +1612,11 @@ const { actions } = store< Store >(
 					return;
 				}
 
-				const scope = state.currentScope;
-				if ( findDraftInScope( scope, seed.id ) ) {
+				if ( findDraftInCollection( resolveDraftItems(), seed.id ) ) {
 					return;
 				}
 
-				actions.upsertDraftItem( seed, { scope } );
+				actions.upsertDraftItem( seed );
 			},
 
 			*addItem( payload?: DraftItem ): AsyncAction< void > {

@@ -45,10 +45,10 @@ let mockUpsertDraftItem: jest.Mock;
 
 // The `woocommerce/cart` store's state this module reads (`itemInContext`).
 // Setting `itemInContext.draft` simulates a draft already present in the
-// current scope — whether written by this same surface or by another
-// surface sharing the scope; an empty envelope simulates no draft for the
-// in-context product (including one belonging to a different scope, which
-// `itemInContext` would never surface here).
+// resolved collection — whether written by this same surface or by another
+// surface sharing that collection; an empty envelope simulates no draft for
+// the in-context product (including one belonging to a different
+// collection, which `itemInContext` would never surface here).
 let mockCartState: { itemInContext: Envelope };
 
 // The element `getElement()` returns for the currently-executing directive.
@@ -376,7 +376,7 @@ describe( 'Variation selector frontend store', () => {
 			expect( mockAddError ).not.toHaveBeenCalled();
 		} );
 
-		it( 'adds a missing-attributes error when neither the local selection nor the scope draft resolves a variation', () => {
+		it( 'adds a missing-attributes error when neither the local selection nor the resolved collection draft resolves a variation', () => {
 			mockContext.selectedAttributes = [];
 			mockCartState.itemInContext = {};
 			mockProductsState.baseProductInContext = {
@@ -399,12 +399,13 @@ describe( 'Variation selector frontend store', () => {
 			);
 		} );
 
-		it( "validates the scope's draft-resolved attribute selection rather than this instance's stale local context, so a sibling surface displaying a complete configuration can also submit it", () => {
+		it( "validates the resolved collection's draft-resolved attribute selection rather than this instance's stale local context, so a sibling surface displaying a complete configuration can also submit it", () => {
 			// This surface's own chips were never touched by the shopper
 			// (local selection stays empty), but another surface sharing
-			// the scope already fully resolved a variation; `selectableItems`
-			// displays that draft selection as checked (`state.selectedAttributes`
-			// is draft-backed), so validation must resolve the same variation.
+			// that collection already fully resolved a variation;
+			// `selectableItems` displays that draft selection as checked
+			// (`state.selectedAttributes` is draft-backed), so validation
+			// must resolve the same variation.
 			mockContext.selectedAttributes = [];
 			mockCartState.itemInContext = {
 				draft: {
@@ -562,7 +563,7 @@ describe( 'Variation selector frontend store', () => {
 	} );
 
 	describe( 'state.selectedAttributes', () => {
-		it( "displays another surface's draft update for the same scope, not this instance's stale local selection", () => {
+		it( "displays another surface's draft update for the same resolved collection, not this instance's stale local selection", () => {
 			mockContext.selectedAttributes = [
 				{ attribute: 'Color', value: 'blue' },
 			];
@@ -581,7 +582,7 @@ describe( 'Variation selector frontend store', () => {
 			] );
 		} );
 
-		it( 'falls back to the local selection when the scope holds no draft variation (including one belonging to a different scope)', () => {
+		it( 'falls back to the local selection when the resolved collection holds no draft variation (including one belonging to a different collection)', () => {
 			mockContext.selectedAttributes = [
 				{ attribute: 'Color', value: 'blue' },
 			];

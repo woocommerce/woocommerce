@@ -187,7 +187,7 @@ describe( 'Add to Cart + Options frontend store', () => {
 	} );
 
 	describe( 'setQuantity', () => {
-		it( 'upserts the current-scope draft with the new quantity for a simple product', () => {
+		it( 'upserts the resolved collection draft with the new quantity for a simple product', () => {
 			mockContext.quantity = { 42: 1 };
 			mockProductsState.baseProductInContext = {
 				id: 42,
