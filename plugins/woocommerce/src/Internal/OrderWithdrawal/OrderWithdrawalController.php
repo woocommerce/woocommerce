@@ -42,7 +42,9 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	public function is_endpoint_request(): bool {
 		global $wp;
 
-		return $this->is_enabled() && isset( $wp->query_vars[ self::ENDPOINT_KEY ] );
+		return $this->is_enabled()
+			&& isset( $wp->query_vars[ self::ENDPOINT_KEY ] )
+			&& self::ENDPOINT_KEY === WC()->query->get_current_endpoint();
 	}
 
 	/**
