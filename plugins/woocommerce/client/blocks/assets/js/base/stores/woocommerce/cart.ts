@@ -508,7 +508,7 @@ function deriveCardIdentity(): string | undefined {
  * collection directly — the two paths agree from then on.
  *
  * @param contextCollection The context's own `draftItems` collection, as
- *                           just read by the caller (a reactive read).
+ *                          just read by the caller (a reactive read).
  * @return The ledger's collection, when one exists and diverges from
  *         `contextCollection`; otherwise `undefined`.
  */

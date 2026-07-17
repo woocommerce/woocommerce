@@ -47,9 +47,7 @@ let mockCartContext: { draftItems?: DraftItem[] } | undefined;
  * `undefined` (or an object with no `queryId`) simulates a card with no
  * Product Collection ancestor context, so identity cannot be derived.
  */
-let mockProductCollectionContext:
-	| { queryId?: string | number }
-	| undefined;
+let mockProductCollectionContext: { queryId?: string | number } | undefined;
 
 /**
  * The value `getContext( 'woocommerce/products' )` should return for the
@@ -1421,12 +1419,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			actions.registerOrRestoreDraftCollection();
 
-			expect( mockCartContext.draftItems ).toBe(
-				firstMountCollection
-			);
-			expect( mockCartContext.draftItems ).not.toBe(
-				remountCollection
-			);
+			expect( mockCartContext.draftItems ).toBe( firstMountCollection );
+			expect( mockCartContext.draftItems ).not.toBe( remountCollection );
 			expect( mockCartContext.draftItems ).toEqual( [
 				{ id: 42, quantity: 4 },
 			] );
@@ -1447,9 +1441,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			mockCartContext = { draftItems: [] };
 			actions.registerOrRestoreDraftCollection();
 
-			expect( mockCartContext.draftItems ).toBe(
-				firstMountCollection
-			);
+			expect( mockCartContext.draftItems ).toBe( firstMountCollection );
 			expect( mockCartContext.draftItems ).toBe(
 				restoredAfterFirstRemount
 			);
@@ -1602,9 +1594,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				id: 42,
 				quantity: 4,
 			} );
-			expect( mockCartContext.draftItems ).toBe(
-				firstMountCollection
-			);
+			expect( mockCartContext.draftItems ).toBe( firstMountCollection );
 		} );
 
 		it( 'resolves the plain context collection when no ledger entry exists for the derivable identity', async () => {
