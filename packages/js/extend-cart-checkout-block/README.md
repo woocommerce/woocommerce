@@ -22,7 +22,7 @@ Add some items to your cart and visit the Checkout block, notice there is additi
 
 ### Linting
 
-You can lint the project according to the [WordPress coding standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/javascript/) by running `npm run lint:js`. The configuration is ultimately read from the [WooCommerce recommended eslint config](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/eslint-plugin/configs/recommended.js). To modify the rules edit the `.estintrc.js` file.
+You can lint the project according to the [WordPress coding standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/javascript/) by running `npm run lint:js`. The configuration is ultimately read from the [WooCommerce recommended eslint config](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/eslint-plugin/configs/recommended.js). To modify the rules edit the `eslint.config.mjs` file.
 
 ### Installing `wp-env` (optional)
 

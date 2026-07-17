@@ -270,9 +270,8 @@ export async function watchComposerPackages(
 	const ignoredPackages = new Set( options.ignoredPackages ?? [] );
 
 	const startWatching = async (): Promise< void > => {
-		const packageInstallPaths = await fetchPackageInstallPaths(
-			projectDir
-		);
+		const packageInstallPaths =
+			await fetchPackageInstallPaths( projectDir );
 		const packages = await resolvePackages(
 			composerJsonPath,
 			ignoredPackages,
@@ -341,9 +340,8 @@ export async function watchComposerPackages(
 				return;
 			}
 			composerInstallRunning = false;
-			const projectInstallPaths = await fetchPackageInstallPaths(
-				projectDir
-			);
+			const projectInstallPaths =
+				await fetchPackageInstallPaths( projectDir );
 			const next = await resolvePackages(
 				composerJsonPath,
 				ignoredPackages,

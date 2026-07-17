@@ -5,19 +5,27 @@ const defaultDependencies = [
 	'@wordpress/i18n',
 	'@woocommerce/components',
 ];
-const defaultDevDependencies = [
-	'@woocommerce/dependency-extraction-webpack-plugin',
-	'@woocommerce/eslint-plugin',
-	'@wordpress/prettier-config',
-	'@wordpress/scripts',
-];
+/**
+ * `npmDevDependencies` cannot carry a version: create-block resolves each entry
+ * with npm-package-arg and writes `saveSpec || 'latest'`, and `saveSpec` is null
+ * for registry specs. Pins therefore have to go through `customPackageJSON`,
+ * which is spread over the generated `devDependencies`.
+ */
+const defaultDevDependencies = {
+	'@woocommerce/dependency-extraction-webpack-plugin': 'latest',
+	/* v4 is the first Flat Config release; the scaffolded eslint.config.mjs requires it. */
+	'@woocommerce/eslint-plugin': '^4.0.0',
+	'@wordpress/prettier-config': 'latest',
+	'@wordpress/scripts': 'latest',
+};
 
 module.exports = {
 	pluginTemplatesPath: join( __dirname, 'variants', 'default' ),
 	blockTemplatesPath: join( __dirname, 'variants', 'default', 'src' ),
 	defaultValues: {
 		npmDependencies: defaultDependencies,
-		npmDevDependencies: defaultDevDependencies,
+		npmDevDependencies: Object.keys( defaultDevDependencies ),
+		customPackageJSON: { devDependencies: defaultDevDependencies },
 		namespace: 'extension',
 		license: 'GPL-3.0+',
 		customScripts: {

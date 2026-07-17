@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal TypeError when force-downloading a remote file while a woocommerce_file_download_filename filter callback returns a non-string value.
