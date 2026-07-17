@@ -187,7 +187,7 @@ class Utils {
 		if ( $product instanceof \WC_Product ) {
 			// The initial `add-item` payload for this quantity selector's
 			// product, seeded as a `woocommerce/cart` context bag so the client
-			// can copy it into `draftItems[currentScope]` on first render
+			// can copy it into the resolved draft collection on first render
 			// (initialize-if-absent). `quantity` matches `$input_quantity` — the
 			// value actually bound to the rendered input above — not the
 			// product's raw minimum, so the seed never disagrees with the
@@ -217,7 +217,7 @@ class Utils {
 			// parser would keep the first and silently drop the second. The
 			// three-hyphen `data-wp-context---draft-seed` form is the supported
 			// way to add a second context bag on one element (see
-			// ProductTemplate.php/SingleProduct.php's `data-wp-context---scope`).
+			// ProductTemplate.php/SingleProduct.php's `data-wp-context---draft-items`).
 			$context_attribute .= ' data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
 				array( 'draftSeed' => $draft_seed ),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP

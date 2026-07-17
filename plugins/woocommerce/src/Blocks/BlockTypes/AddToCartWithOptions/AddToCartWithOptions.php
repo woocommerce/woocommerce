@@ -347,7 +347,7 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			// The initial `add-item` payload for this surface's product, seeded
 			// as a `woocommerce/cart` context bag so the client can copy it into
-			// `draftItems[currentScope]` on first render (initialize-if-absent).
+			// the resolved draft collection on first render (initialize-if-absent).
 			// Grouped products seed nothing here: there is no single product id
 			// to add at this level, only children, which seed individually via
 			// their own quantity-selector surface.
@@ -571,7 +571,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				// element — the HTML parser would keep the first and silently drop
 				// the second. The three-hyphen `data-wp-context---draft-seed` form is
 				// the supported way to add a second context bag on one element (see
-				// ProductTemplate.php/SingleProduct.php's `data-wp-context---scope`).
+				// ProductTemplate.php/SingleProduct.php's `data-wp-context---draft-items`).
 				$context_directive .= ' data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
 					array( 'draftSeed' => $draft_seed ),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
