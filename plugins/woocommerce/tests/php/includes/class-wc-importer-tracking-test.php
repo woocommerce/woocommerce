@@ -34,7 +34,7 @@ class WC_Importer_Tracking_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_import_complete() {
 		$_REQUEST['step']  = 'done';
-		$_REQUEST['nonce'] = wp_create_nonce( 'woocommerce-csv-importer' );
+		$_REQUEST['nonce'] = 'nonce';
 		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		do_action( 'product_page_product_importer' );
 		$this->assertRecordedTracksEvent( 'wcadmin_product_import_complete' );
