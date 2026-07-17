@@ -97,7 +97,7 @@ export async function createTemplateFromFile(
 
 	const compiledTemplate = Handlebars.compile( fileContent );
 
-	return <TemplateCompiler>{
+	return < TemplateCompiler >{
 		compile: async ( data = {} ) => {
 			const content = compiledTemplate( data );
 

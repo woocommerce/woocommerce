@@ -19,6 +19,15 @@ jobs:
       pull-requests: write
 
     steps:
+      - name: 'Checkout'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # Fork PRs need the explicit ref. Without it, under pull_request_target checkout
+          # defaults its commit to github.sha, which for a merged fork PR is the merge commit
+          # that actions/checkout refuses to check out due to its "pwn request" guard.
+          ref: ${{ github.event.pull_request.base.ref }}
+          persist-credentials: false
+
       - name: 'Analyze Pull Request'
         id: analyze
         uses: anthropics/claude-code-action@e90deca47693f9457b72f2b53c17d7c445a87342 # v1.0.171
@@ -159,12 +168,16 @@ jobs:
 
       - name: 'Setup Linear'
         if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
-        run: npm install @linear/sdk@71.0.0
+        # Install outside the workspace: the checkout put the monorepo root package.json there,
+        # whose workspace:* deps make a bare `npm install` abort (npm has no workspace: support).
+        run: npm install --prefix "${{ runner.temp }}/linear" @linear/sdk@71.0.0
 
       - name: 'Create Linear Issue'
         if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
+          # Resolve @linear/sdk from the isolated dir it was installed into in 'Setup Linear'.
+          NODE_PATH: ${{ runner.temp }}/linear/node_modules
           STRUCTURED_OUTPUT: ${{ steps.analyze.outputs.structured_output }}
           LINEAR_API_KEY: ${{ secrets.LINEAR_OAUTH_TOKEN }}
           LINEAR_TEAM_ID: ${{ secrets.LINEAR_DOCS_TEAM_ID }}
