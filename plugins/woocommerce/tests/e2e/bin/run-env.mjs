@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { createServer as createNetServer } from 'node:net';
 import { get as httpGet } from 'node:http';
+import { spawn } from 'node:child_process';
 
 export function parseArgs( argv ) {
 	const rebuild = argv.includes( '--rebuild' );
@@ -127,6 +128,71 @@ export function isOurInstance( baseUrl, expectedHash ) {
 			resolve( false );
 		} );
 	} );
+}
+
+const E2E_CONFIG = '.wp-env.e2e.json';
+const SNAP_DIR = '/var/www/html/.e2e-snapshot';
+
+function run( cmd, args, { env, capture = false } ) {
+	return new Promise( ( resolve, reject ) => {
+		const child = spawn( cmd, args, {
+			env,
+			stdio: capture ? [ 'inherit', 'pipe', 'inherit' ] : 'inherit',
+		} );
+		let out = '';
+		if ( capture ) child.stdout.on( 'data', ( c ) => ( out += c ) );
+		child.on( 'error', reject );
+		child.on( 'close', ( code ) =>
+			code === 0
+				? resolve( out )
+				: reject( new Error( `${ cmd } ${ args.join( ' ' ) } exited ${ code }` ) )
+		);
+	} );
+}
+
+export function wpEnv( args, { env } ) {
+	return run( 'pnpm', [ 'exec', 'wp-env', '--config', E2E_CONFIG, ...args ], { env } );
+}
+
+export function wpCli( shScript, { env, capture = true } ) {
+	return run(
+		'pnpm',
+		[ 'exec', 'wp-env', '--config', E2E_CONFIG, 'run', 'cli', 'sh', '-c', shScript ],
+		{ env, capture }
+	);
+}
+
+export function captureSnapshot( { env } ) {
+	return wpCli(
+		`mkdir -p ${ SNAP_DIR } && ` +
+			`wp db export ${ SNAP_DIR }/db.sql && ` +
+			`tar -C /var/www/html/wp-content -cf ${ SNAP_DIR }/uploads.tar uploads`,
+		{ env, capture: false }
+	);
+}
+
+export function restoreSnapshot( { env } ) {
+	return wpCli(
+		`wp db reset --yes && wp db import ${ SNAP_DIR }/db.sql && ` +
+			`rm -rf /var/www/html/wp-content/uploads && ` +
+			`tar -C /var/www/html/wp-content -xf ${ SNAP_DIR }/uploads.tar`,
+		{ env, capture: false }
+	);
+}
+
+export function writeSentinel( hash, { env } ) {
+	return wpCli( `mkdir -p ${ SNAP_DIR } && printf '%s' '${ hash }' > ${ SNAP_DIR }/sentinel`, {
+		env,
+		capture: false,
+	} );
+}
+
+export async function readSentinel( { env } ) {
+	return ( await wpCli( `cat ${ SNAP_DIR }/sentinel 2>/dev/null || true`, { env } ) ).trim();
+}
+
+export async function wpCoreVersion( { env } ) {
+	return ( await wpCli( `wp core version`, { env } ) ).trim();
 }
 
 async function main() {
