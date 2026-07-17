@@ -643,17 +643,17 @@ function wc_change_term_count( $term, $taxonomy ) {
 		return $term;
 	}
 
-	static $valid_taxonomies = null;
-	if ( null === $valid_taxonomies ) {
-		/**
-		 * Filter which product taxonomies should have their term counts overridden to take catalog visibility into account.
-		 *
-		 * @since 11.1.0
-		 *
-		 * @param array $valid_taxonomies List of taxonomy slugs.
-		 */
-		$valid_taxonomies = apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag', 'product_brand' ) );
-	}
+	/**
+	 * Filter which product taxonomies should have their term counts overridden to take catalog visibility into account.
+	 *
+	 * Evaluated on every call (not cached) so context changes such as switch_to_blog() are reflected,
+	 * mirroring the plural wc_change_term_counts() which does not cache either.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $valid_taxonomies List of taxonomy slugs.
+	 */
+	$valid_taxonomies = (array) apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag', 'product_brand' ) );
 
 	if ( ! in_array( $taxonomy, $valid_taxonomies, true ) ) {
 		return $term;

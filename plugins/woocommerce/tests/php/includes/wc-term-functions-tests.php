@@ -120,6 +120,33 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The woocommerce_change_term_counts filter is evaluated on every get_term() call, not cached.
+	 *
+	 * Ensures context-dependent filter results (such as a callback that varies by blog via switch_to_blog())
+	 * are reflected, mirroring the plural wc_change_term_counts() which does not cache the filter result.
+	 */
+	public function test_change_term_counts_filter_not_cached(): void {
+		$parent_id = $this->terms['parent']['term_id'];
+
+		// Default: product_cat is in the allowlist, so the parent count is rolled up with children (3).
+		$this->assertSame( 3, get_term( $parent_id, 'product_cat' )->count );
+
+		// Filter product_cat out of the allowlist on a later call: the change must take effect immediately.
+		$remove_product_cat = static function ( $taxonomies ) {
+			return array_values( array_diff( $taxonomies, array( 'product_cat' ) ) );
+		};
+		add_filter( 'woocommerce_change_term_counts', $remove_product_cat );
+
+		// With product_cat excluded, get_term() returns the raw WP count (1, the product assigned directly to parent).
+		$this->assertSame( 1, get_term( $parent_id, 'product_cat' )->count );
+
+		remove_filter( 'woocommerce_change_term_counts', $remove_product_cat );
+
+		// After removing the filter, the override applies again on the next call.
+		$this->assertSame( 3, get_term( $parent_id, 'product_cat' )->count );
+	}
+
+	/**
 	 * @testdox Term product counts when a product is hidden from the catalog.
 	 */
 	public function test_product_visibility(): void {
