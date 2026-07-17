@@ -77,6 +77,7 @@
 		"test:e2e:core-parallel": "pnpm test:e2e:default --project=core-parallel",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
+		"test:env-runner": "node --test tests/e2e/bin/run-env.test.mjs",
 		"test:e2e:blocks": "pnpm playwright test --config=tests/e2e/playwright.config.ts --project=blocks-chromium",
 		"test:e2e:blocks:performance": "pnpm playwright test --config=tests/e2e/playwright.performance.config.ts --project=blocks-performance",
 		"test:e2e:email-update-propagation:pr": "pnpm test:e2e:default --project=core-serial --project=core-parallel --grep @pr tests/email-editor/update-propagation",

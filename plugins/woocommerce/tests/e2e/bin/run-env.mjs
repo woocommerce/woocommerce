@@ -7,7 +7,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname, resolve as resolvePath } from 'node:path';
 import { createServer as createNetServer } from 'node:net';
 import { get as httpGet } from 'node:http';
 import { spawn } from 'node:child_process';
@@ -22,10 +22,18 @@ export function isCi( env ) {
 	return typeof env.CI === 'string' && env.CI.length > 0;
 }
 
+// wp-env vars that are allowed to reach wp-env (everything else `WP_ENV_*` is
+// stripped so a stray var can't flip wp-env's own config checksum out from under
+// our staleness hash). `WP_ENV_HOME` is included because it relocates the whole
+// instance directory rather than feeding the config checksum: stripping it would
+// desync run-env from the sibling `env:e2e:stop`/`:destroy` scripts (which honor
+// it), leaving containers that can't be stopped. It is folded into our hash by
+// `computeHash`, so changing it correctly forces a rebuild.
 export const ALLOWED_WP_ENV_VARS = [
 	'WP_ENV_CORE',
 	'WP_ENV_PHP_VERSION',
 	'WP_ENV_PORT',
+	'WP_ENV_HOME',
 ];
 
 export function sanitizeEnv( env ) {
@@ -92,6 +100,10 @@ export function decide( { state, currentHash, nowMs, maxAgeMs, forceRebuild } ) 
 	if ( forceRebuild ) return 'rebuild';
 	if ( ! state ) return 'rebuild';
 	if ( state.hash !== currentHash ) return 'rebuild';
+	// A corrupt/old state file with a missing or non-numeric snapshotCreatedAt
+	// makes the age comparison NaN (always false); treat it as stale rather than
+	// silently reusing an unknowable-age snapshot.
+	if ( ! Number.isFinite( state.snapshotCreatedAt ) ) return 'rebuild';
 	if ( nowMs - state.snapshotCreatedAt > maxAgeMs ) return 'rebuild';
 	return 'fresh';
 }
@@ -181,10 +193,25 @@ export function restoreSnapshot( { env } ) {
 }
 
 export function writeSentinel( hash, { env } ) {
-	return wpCli( `mkdir -p ${ SNAP_DIR } && printf '%s' '${ hash }' > ${ SNAP_DIR }/sentinel`, {
-		env,
-		capture: false,
-	} );
+	// `hash` is interpolated into the shell command below; every caller passes a
+	// computeHash() digest, so assert that invariant locally rather than trusting
+	// the contract across files.
+	if ( ! /^[0-9a-f]{32}$/.test( hash ) ) {
+		throw new Error( `writeSentinel: refusing to write non-md5 hash "${ hash }"` );
+	}
+	// SNAP_DIR lives under the web root so the sentinel is HTTP-fetchable (that is
+	// how isOurInstance() checks port ownership). The DB dump and uploads archive
+	// captured alongside it must NOT be served, so drop an .htaccess that denies
+	// the directory and re-allows only `sentinel`. It is written before
+	// captureSnapshot() runs and lives on the same wiped mount, so the exposure
+	// window never opens and the snapshot==sentinel divergence coupling is intact.
+	const htaccess = 'Require all denied\\n<Files sentinel>\\nRequire all granted\\n</Files>\\n';
+	return wpCli(
+		`mkdir -p ${ SNAP_DIR } && ` +
+			`printf '%s' '${ hash }' > ${ SNAP_DIR }/sentinel && ` +
+			`printf '${ htaccess }' > ${ SNAP_DIR }/.htaccess`,
+		{ env, capture: false }
+	);
 }
 
 export async function readSentinel( { env } ) {
@@ -196,7 +223,14 @@ export async function wpCoreVersion( { env } ) {
 }
 
 export function formatRunnerEnv( port ) {
-	return `BASE_URL=http://localhost:${ port }\n`;
+	// BASE_URL is what playwright.config.ts and most specs read. WP_ENV_TESTS_PORT
+	// is also emitted because a few specs build permalink literals directly from
+	// it (e.g. `http://localhost:${WP_ENV_TESTS_PORT || '8086'}/...`) and would
+	// otherwise hard-code 8086 and never match under a random per-worktree port.
+	return (
+		`BASE_URL=http://localhost:${ port }\n` +
+		`WP_ENV_TESTS_PORT=${ port }\n`
+	);
 }
 
 export function writeRunnerEnv( stateDir, port ) {
@@ -261,7 +295,7 @@ export async function fresh( { env, hash, wpVersion } ) {
 }
 
 async function main() {
-	const pluginRoot = resolve( dirname( fileURLToPath( import.meta.url ) ), '..', '..', '..' );
+	const pluginRoot = resolvePath( dirname( fileURLToPath( import.meta.url ) ), '..', '..', '..' );
 	process.chdir( pluginRoot );
 
 	const { rebuild: rebuildFlag, passthrough } = parseArgs( process.argv.slice( 2 ) );
@@ -273,8 +307,19 @@ async function main() {
 		return;
 	}
 
+	// Only `--rebuild` is meaningful in dev mode; anything else (e.g. a stray
+	// `--debug` that only CI mode forwards) is silently inert, so say so.
+	if ( passthrough.length > 0 ) {
+		console.warn(
+			`run-env: ignoring argument(s) not used in dev mode: ${ passthrough.join( ' ' ) }`
+		);
+	}
+
 	const stateDir = 'tests/e2e/.env-state';
 	const state = readState( stateDir );
+	// The optional override file may be absent; the primary config must exist —
+	// fail fast with a clear error instead of hashing '' and failing deeper in
+	// wp-env with a worse message.
 	const readOr = ( p ) => {
 		try {
 			return readFileSync( p, 'utf8' );
@@ -296,7 +341,7 @@ async function main() {
 
 	const env = sanitizeEnv( { ...process.env, WP_ENV_PORT: String( port ) } );
 	const hash = computeHash( {
-		configText: readOr( '.wp-env.e2e.json' ),
+		configText: readFileSync( '.wp-env.e2e.json', 'utf8' ),
 		overrideText: readOr( '.wp-env.e2e.override.json' ),
 		setupScriptText: readOr( 'tests/e2e/bin/test-env-setup.sh' ),
 		allowlistEnv: env,

@@ -3,7 +3,22 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { parseArgs, isCi, sanitizeEnv, ALLOWED_WP_ENV_VARS, readWcVersion, computeHash, readState, writeState, decide, MAX_AGE_MS } from './run-env.mjs';
+import { createServer } from 'node:http';
+import {
+	parseArgs,
+	isCi,
+	sanitizeEnv,
+	ALLOWED_WP_ENV_VARS,
+	readWcVersion,
+	computeHash,
+	readState,
+	writeState,
+	decide,
+	MAX_AGE_MS,
+	probeFreePort,
+	isPortFree,
+	formatRunnerEnv,
+} from './run-env.mjs';
 
 test( 'parseArgs extracts --rebuild and passes the rest through', () => {
 	assert.deepEqual( parseArgs( [ '--rebuild', '--debug' ] ), {
@@ -29,21 +44,24 @@ test( 'sanitizeEnv strips non-allowlisted WP_ENV_* vars', () => {
 		WP_ENV_CORE: 'https://wordpress.org/wordpress-latest.zip',
 		WP_ENV_PHP_VERSION: '8.1',
 		WP_ENV_PORT: '9001',
-		WP_ENV_TESTS_PORT: '9002',
 		WP_ENV_HOME: '/tmp/x',
+		WP_ENV_TESTS_PORT: '9002',
 		WP_ENV_LIFECYCLE_SCRIPT_AFTER_START: 'echo hi',
 	} );
 	assert.equal( out.PATH, '/usr/bin' );
 	assert.equal( out.WP_ENV_CORE, 'https://wordpress.org/wordpress-latest.zip' );
 	assert.equal( out.WP_ENV_PHP_VERSION, '8.1' );
 	assert.equal( out.WP_ENV_PORT, '9001' );
+	// WP_ENV_HOME is allowlisted (relocates the instance dir; kept so sibling
+	// stop/destroy scripts target the same instance).
+	assert.equal( out.WP_ENV_HOME, '/tmp/x' );
 	assert.equal( 'WP_ENV_TESTS_PORT' in out, false );
-	assert.equal( 'WP_ENV_HOME' in out, false );
 	assert.equal( 'WP_ENV_LIFECYCLE_SCRIPT_AFTER_START' in out, false );
 	assert.deepEqual( ALLOWED_WP_ENV_VARS, [
 		'WP_ENV_CORE',
 		'WP_ENV_PHP_VERSION',
 		'WP_ENV_PORT',
+		'WP_ENV_HOME',
 	] );
 } );
 
@@ -95,11 +113,15 @@ test( 'decide picks rebuild vs fresh', () => {
 	assert.equal( decide( { ...p, forceRebuild: true } ), 'rebuild' );
 	assert.equal( decide( { ...p, state: null } ), 'rebuild' );
 	assert.equal( decide( { ...p, currentHash: 'other' } ), 'rebuild' );
+	// Boundary: exactly at max age stays fresh; one ms past rebuilds.
+	assert.equal( decide( { ...p, nowMs: 1000 + MAX_AGE_MS } ), 'fresh' );
 	assert.equal( decide( { ...p, nowMs: 1000 + MAX_AGE_MS + 1 } ), 'rebuild' );
+	// Corrupt state: a non-numeric snapshotCreatedAt must not slip through as fresh.
+	assert.equal(
+		decide( { ...p, state: { hash: 'h', port: 9001 } } ),
+		'rebuild'
+	);
 } );
-
-import { createServer } from 'node:http';
-import { probeFreePort, isPortFree } from './run-env.mjs';
 
 test( 'probeFreePort returns a usable port and isPortFree reflects binding', async () => {
 	const port = await probeFreePort();
@@ -115,8 +137,9 @@ test( 'probeFreePort returns a usable port and isPortFree reflects binding', asy
 	}
 } );
 
-import { formatRunnerEnv } from './run-env.mjs';
-
-test( 'formatRunnerEnv emits a BASE_URL line', () => {
-	assert.equal( formatRunnerEnv( 9001 ), 'BASE_URL=http://localhost:9001\n' );
+test( 'formatRunnerEnv emits BASE_URL and WP_ENV_TESTS_PORT lines', () => {
+	assert.equal(
+		formatRunnerEnv( 9001 ),
+		'BASE_URL=http://localhost:9001\nWP_ENV_TESTS_PORT=9001\n'
+	);
 } );
