@@ -14,7 +14,8 @@ import { test as base, expect, getPostIdBySlug } from '@woocommerce/e2e-utils';
  * fixture itself.
  *
  * Each `[wc_bundle_demo]` shortcode renders two child "slots" (`slot-1`,
- * `slot-2`), each establishing its own `wc-bundle-demo/<slot>` sub-scope, plus
+ * `slot-2`), each declaring its own empty `woocommerce/cart` draft-items
+ * collection (the same container primitive core blocks use), plus
  * an "Add bundle to cart" button that composes both slots' current drafts
  * into one `cart/add-item` payload for the bundle product, carrying a
  * `wc-bundle-demo/children` prop. The flows below configure the two slots
@@ -95,8 +96,8 @@ test.describe( 'Scoped drafts: bundle-demo extension adds as one unit', () => {
 			await slotBQuantity.dispatchEvent( 'change' );
 
 			// The plain form's own draft (a Single Product block's own
-			// scope) is untouched by either slot's edit (each slot's own
-			// `wc-bundle-demo/<slot>` sub-scope).
+			// draft-items collection) is untouched by either slot's edit
+			// (each slot resolves its own collection).
 			await expect( plainFormQuantity ).toHaveValue( '4' );
 			// Slot A's own edit is untouched by slot B's.
 			await expect( slotAQuantity ).toHaveValue( '2' );
@@ -205,7 +206,7 @@ test.describe( 'Scoped drafts: bundle-demo extension adds as one unit', () => {
 			await plainFormQuantity.fill( '7' );
 			await plainFormQuantity.blur();
 
-			// Each slot's own `wc-bundle-demo/<slot>` sub-scope keeps its
+			// Each slot's own resolved draft-items collection keeps its
 			// draft — picking the same product in the other slot, or in
 			// the unrelated plain form, never overwrote it.
 			await expect( slotAQuantity ).toHaveValue( '2' );
@@ -266,6 +267,108 @@ test.describe( 'Scoped drafts: bundle-demo extension adds as one unit', () => {
 			} );
 
 			expect( cart.items ).toHaveLength( 2 );
+		} );
+	} );
+
+	test( 'a direct mutation of a slot’s draft repaints its own bound display with no action call, and the add-to-cart payload honors the directly-written quantity', async ( {
+		page,
+		requestUtils,
+	} ) => {
+		const beltId = await getPostIdBySlug( 'belt' );
+		const beanieId = await getPostIdBySlug( 'beanie' );
+		const tshirtId = await getPostIdBySlug( 't-shirt' );
+
+		const post = await requestUtils.rest( {
+			method: 'POST',
+			path: '/wp/v2/posts',
+			data: {
+				status: 'publish',
+				title: 'Bundle demo: direct mutation',
+				content: `[wc_bundle_demo bundle="${ beltId }" child_a="${ beanieId }" child_b="${ tshirtId }"]`,
+			},
+		} );
+
+		await page.goto( `/?p=${ post.id }` );
+
+		const slots = page.locator( '.wc-bundle-demo__slot' );
+		await expect( slots ).toHaveCount( 2 );
+		const slotAQuantity = slots.nth( 0 ).locator( 'input[type="number"]' );
+		const slotADisplay = slots
+			.nth( 0 )
+			.locator( '.wc-bundle-demo__slot-quantity' );
+		const slotBDisplay = slots
+			.nth( 1 )
+			.locator( '.wc-bundle-demo__slot-quantity' );
+
+		// The fixture's quantity input has no action-bound submit step of its
+		// own — every edit after the initial seed is a direct mutation of the
+		// resolved draft (`draft.quantity = value`), never an action call.
+		// Recording every `wc/store/v1/batch` request from here on lets the
+		// assertions below prove that editing a slot's quantity fires none —
+		// only the explicit "Add bundle to cart" click does.
+		const batchRequestUrls: string[] = [];
+		page.on( 'request', ( request ) => {
+			if ( request.url().includes( '/wc/store/v1/batch' ) ) {
+				batchRequestUrls.push( request.url() );
+			}
+		} );
+
+		await test.step( 'both slots seed their bound display from the markup’s default quantity', async () => {
+			await expect( slotADisplay ).toHaveText( '1' );
+			await expect( slotBDisplay ).toHaveText( '1' );
+		} );
+
+		await test.step( 'directly mutating slot A’s draft repaints only slot A’s own bound display, with no batch request fired', async () => {
+			await slotAQuantity.fill( '5' );
+			await slotAQuantity.dispatchEvent( 'change' );
+
+			// Re-render observed through the getter-bound `<span>` — proof
+			// the write reached the resolved draft — with no action call in
+			// between: no request was posted to reach this repaint.
+			await expect( slotADisplay ).toHaveText( '5' );
+			expect( batchRequestUrls ).toHaveLength( 0 );
+
+			// Mutating slot A's draft directly never alters slot B's own
+			// resolved collection.
+			await expect( slotBDisplay ).toHaveText( '1' );
+		} );
+
+		await test.step( 'adding the bundle posts a single request carrying the directly-written quantity', async () => {
+			const bundleBatchPromise = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
+			await page
+				.getByRole( 'button', { name: 'Add bundle to cart' } )
+				.click();
+			await bundleBatchPromise;
+
+			// Exactly one batch request across the whole test: the direct
+			// mutation above triggered none, and this click triggered
+			// exactly one — the only action call in the flow.
+			expect( batchRequestUrls ).toHaveLength( 1 );
+
+			const cartResponse = await page.request.get(
+				'/wp-json/wc/store/v1/cart'
+			);
+			const cart: { items: CartItem[] } = await cartResponse.json();
+
+			const bundleLine = cart.items.find(
+				( item ) => item.id === Number( beltId )
+			);
+			// Posting reads each slot's resolved collection at call time, so
+			// the payload carries slot A's directly-written quantity (5),
+			// not its stale seeded value (1).
+			expect( bundleLine ).toMatchObject( {
+				quantity: 1,
+				extensions: {
+					'wc-bundle-demo': {
+						children: [
+							{ id: Number( beanieId ), quantity: 5 },
+							{ id: Number( tshirtId ), quantity: 1 },
+						],
+					},
+				},
+			} );
 		} );
 	} );
 } );
