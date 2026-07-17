@@ -211,6 +211,11 @@ function wc_clear_cart_after_payment() {
 		return;
 	}
 
+	// If the order is different from the cart, don't clear the cart. This can happen if the user has multiple tabs open and completes a different order than the one in the cart.
+	if ( $should_clear_cart_after_payment && $order instanceof WC_Order && ! WC()->cart->is_empty() ) {
+		$should_clear_cart_after_payment = $order->has_cart_hash( WC()->cart->get_cart_hash() );
+	}
+
 	/**
 	 * Determine whether the cart should be cleared after payment.
 	 *
@@ -218,11 +223,6 @@ function wc_clear_cart_after_payment() {
 	 * @param bool $should_clear_cart_after_payment Whether the cart should be cleared after payment.
 	 */
 	$should_clear_cart_after_payment = apply_filters( 'woocommerce_should_clear_cart_after_payment', $should_clear_cart_after_payment );
-
-	// If the order is different from the cart, don't clear the cart. This can happen if the user has multiple tabs open and completes a different order than the one in the cart.
-	if ( $should_clear_cart_after_payment && $order instanceof WC_Order && ! WC()->cart->is_empty() ) {
-		$should_clear_cart_after_payment = $order->has_cart_hash( WC()->cart->get_cart_hash() );
-	}
 
 	if ( $should_clear_cart_after_payment ) {
 		WC()->cart->empty_cart();

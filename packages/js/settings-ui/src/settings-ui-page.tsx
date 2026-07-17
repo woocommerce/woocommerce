@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Page } from '@wordpress/admin-ui';
+import { NavigableRegion } from '@wordpress/admin-ui';
 import { Button } from '@wordpress/components';
 import {
 	Component,
@@ -430,23 +430,18 @@ const ShellHeader = ( {
 	context,
 	values,
 	initialValues,
-	isDirty,
-	isSaving,
-	saveStrategy,
-	onSave,
+	actions,
 	children,
 }: {
 	schema: SettingsUISchema;
 	context: SettingsFieldContext;
 	values: SettingsValues;
 	initialValues: SettingsValues;
-	isDirty: boolean;
-	isSaving: boolean;
-	saveStrategy: SettingsUISaveStrategy;
-	onSave: () => void | Promise< boolean >;
+	actions?: ReactNode;
 	children: ReactNode;
 } ) => {
 	const shell = schema.shell || {};
+	const showHeader = shell.header === 'visible';
 	const title = shell.title || schema.title;
 	const NavigationComponent = shell.navigationComponent
 		? resolveRegionComponent( shell.navigationComponent, context )
@@ -456,9 +451,6 @@ const ShellHeader = ( {
 			( shell.sectionNavigation && shell.sectionNavigation.length > 0 ) ||
 			NavigationComponent
 	);
-	const showSaveButton = saveStrategy.adapter !== 'none';
-	const saveButtonType =
-		saveStrategy.adapter === 'form_post' ? 'submit' : 'button';
 
 	const breadcrumbs =
 		shell.breadcrumbs && shell.breadcrumbs.length > 0 ? (
@@ -484,6 +476,7 @@ const ShellHeader = ( {
 	const badges = shell.badges?.length
 		? shell.badges.map( ( badge, index ) => (
 				<Badge
+					className="wc-settings-ui-shell__badge"
 					intent={ getBadgeIntent( badge.intent ) }
 					key={ `${ badge.label }-${ index }` }
 				>
@@ -492,32 +485,49 @@ const ShellHeader = ( {
 		  ) )
 		: undefined;
 
-	const saveButtonLabel = __( 'Save', 'woocommerce' );
-
-	const actions = showSaveButton ? (
-		<Button
-			className="woocommerce-save-button"
-			variant="primary"
-			type={ saveButtonType }
-			name="save"
-			value={ saveButtonLabel }
-			disabled={ ! isDirty || isSaving }
-			isBusy={ isSaving }
-			onClick={ onSave }
-		>
-			{ saveButtonLabel }
-		</Button>
-	) : undefined;
-
 	return (
-		<Page
+		<NavigableRegion
 			className="wc-settings-ui-shell"
-			title={ title }
-			subTitle={ shell.subtitle }
-			breadcrumbs={ breadcrumbs }
-			badges={ badges }
-			actions={ actions }
+			ariaLabel={ title || __( 'Settings', 'woocommerce' ) }
 		>
+			{ showHeader ? (
+				<Stack
+					className="wc-settings-ui-shell__header"
+					direction="column"
+					gap="sm"
+					render={ <header /> }
+				>
+					<Stack
+						className="wc-settings-ui-shell__header-row"
+						direction="row"
+						align="center"
+					>
+						{ breadcrumbs }
+						<h2 className="wc-settings-ui-shell__title">
+							{ title }
+						</h2>
+						{ badges }
+						{ actions ? (
+							<Stack
+								className="wc-settings-ui-shell__header-actions"
+								direction="row"
+								gap="sm"
+							>
+								{ actions }
+							</Stack>
+						) : null }
+					</Stack>
+					{ shell.subtitle ? (
+						<Text
+							className="wc-settings-ui-shell__subtitle"
+							variant="body-md"
+							render={ <p /> }
+						>
+							{ shell.subtitle }
+						</Text>
+					) : null }
+				</Stack>
+			) : null }
 			{ hasNavigation ? (
 				<div className="wc-settings-ui-shell__navigation">
 					{ shell.navigation && shell.navigation.length > 0 ? (
@@ -543,7 +553,7 @@ const ShellHeader = ( {
 					{ shell.sectionNavigation &&
 					shell.sectionNavigation.length > 0 ? (
 						<nav
-							className="wc-settings-ui-shell__tabs wc-settings-ui-shell__tabs--secondary"
+							className="wc-settings-ui-shell__tabs"
 							aria-label={ __(
 								'Settings sections',
 								'woocommerce'
@@ -575,7 +585,7 @@ const ShellHeader = ( {
 				</div>
 			) : null }
 			{ children }
-		</Page>
+		</NavigableRegion>
 	);
 };
 
@@ -778,7 +788,10 @@ export const SettingsUIPage = ( {
 
 			if (
 				! ( target instanceof Element ) ||
-				! target.closest( '.wc-settings-ui-shell' ) ||
+				// The classic section links render outside the shell on top-level pages.
+				! target.closest(
+					'.wc-settings-ui-shell, #mainform .subsubsub'
+				) ||
 				! shouldPromptForNavigation( event )
 			) {
 				return;
@@ -874,20 +887,37 @@ export const SettingsUIPage = ( {
 	const formPostFields =
 		saveStrategy.adapter === 'form_post' ? getAllFields( schema ) : [];
 
+	const showHeader = schema.shell?.header === 'visible';
+	const saveButtonLabel = __( 'Save', 'woocommerce' );
+	const saveButton =
+		saveStrategy.adapter !== 'none' ? (
+			<Button
+				className="woocommerce-save-button"
+				variant="primary"
+				type={
+					saveStrategy.adapter === 'form_post' ? 'submit' : 'button'
+				}
+				name="save"
+				value={ saveButtonLabel }
+				disabled={ ! isDirty || isSaving }
+				isBusy={ isSaving }
+				onClick={ () =>
+					saveStrategy.adapter === 'form_post'
+						? submitSettingsForm()
+						: handleCustomSave()
+				}
+			>
+				{ saveButtonLabel }
+			</Button>
+		) : undefined;
+
 	return (
 		<ShellHeader
 			schema={ schema }
 			context={ context }
 			values={ values }
 			initialValues={ initialValues }
-			isDirty={ isDirty }
-			isSaving={ isSaving }
-			saveStrategy={ saveStrategy }
-			onSave={
-				saveStrategy.adapter === 'form_post'
-					? submitSettingsForm
-					: handleCustomSave
-			}
+			actions={ saveButton }
 		>
 			{ pendingNavigation ? (
 				<UnsavedChangesModal
@@ -960,6 +990,11 @@ export const SettingsUIPage = ( {
 						</Card.Root>
 					</section>
 				) ) }
+				{ ! showHeader && saveButton ? (
+					<div className="wc-settings-ui__footer-actions">
+						{ saveButton }
+					</div>
+				) : null }
 			</Stack>
 			{ formPostFields.length > 0 ? (
 				<div className="wc-settings-ui__hidden-inputs">

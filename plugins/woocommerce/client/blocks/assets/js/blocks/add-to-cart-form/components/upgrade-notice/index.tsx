@@ -62,9 +62,8 @@ export const UpgradeNotice = ( {
 	);
 
 	const handleClick = async () => {
-		const upgraded = await upgradeToBlockifiedAddToCartWithOptions(
-			blockClientId
-		);
+		const upgraded =
+			await upgradeToBlockifiedAddToCartWithOptions( blockClientId );
 		if ( upgraded ) {
 			recordEvent( 'blocks_add_to_cart_with_options_migration', {
 				transform_to: 'blockified',
