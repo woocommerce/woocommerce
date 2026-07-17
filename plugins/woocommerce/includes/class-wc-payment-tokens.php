@@ -38,10 +38,13 @@ class WC_Payment_Tokens {
 	 *     @type string $gateway_id Gateway ID.
 	 *     @type string $type       Token type.
 	 *     @type int    $limit      Maximum number of tokens to return; an explicit 0 returns no tokens.
-	 *                              When omitted, a query passing `page` paginates by a default page size
-	 *                              (filterable via `woocommerce_get_payment_tokens_page_size`), queries
-	 *                              scoped to a `token_id` or `user_id` are unlimited, and unscoped
-	 *                              queries fall back to a ceiling filterable via
+	 *                              The value is read through `absint()`, so `-1` does not mean
+	 *                              unlimited here: it caps the query at a single row. Omit the arg
+	 *                              instead. When omitted, a query passing `page` paginates by a
+	 *                              default page size (filterable via
+	 *                              `woocommerce_get_payment_tokens_per_page`), queries scoped to a
+	 *                              `token_id` or `user_id` are unlimited, and unscoped queries fall
+	 *                              back to a ceiling filterable via
 	 *                              `woocommerce_get_payment_tokens_unscoped_limit`.
 	 *     @type int    $page       Page of results to return. Default 1.
 	 * }
@@ -78,8 +81,7 @@ class WC_Payment_Tokens {
 	 * Returns an array of payment token objects associated with the passed customer ID.
 	 *
 	 * @since 2.6.0
-	 * @since 11.1.0 A `woocommerce_get_customer_payment_tokens_limit` callback returning `null`
-	 *               falls back to the default limit instead of leaving the query unbounded.
+	 * @since 11.1.0 The default limit changed from the value of the `posts_per_page` option to 100.
 	 * @param  int    $customer_id Customer ID.
 	 * @param  string $gateway_id  Optional Gateway ID for getting tokens for a specific gateway.
 	 * @return WC_Payment_Token[]  Array of token objects.
@@ -93,9 +95,7 @@ class WC_Payment_Tokens {
 		 * Controls the maximum number of Payment Methods that will be listed via the My Account page.
 		 *
 		 * @since 7.2.0
-		 * @since 11.1.0 The default changed from the value of the `posts_per_page` option to 100,
-		 *               and a callback returning `null` falls back to that default instead of
-		 *               leaving the query unbounded.
+		 * @since 11.1.0 The default changed from the value of the `posts_per_page` option to 100.
 		 *
 		 * @param int $limit Maximum number of tokens to return. Defaults to 100. Returning `null`
 		 *                   falls back to the default; any other value is read through `absint()`,
