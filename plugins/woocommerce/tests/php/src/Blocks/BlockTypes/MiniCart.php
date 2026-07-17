@@ -195,6 +195,23 @@ class MiniCart extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Checks the drawer container is inert when closed so its focusable
+	 * descendants (Close button, Start shopping link) are not keyboard
+	 * reachable while aria-hidden is true.
+	 *
+	 * @return void
+	 */
+	public function test_mini_cart_drawer_is_inert_when_closed(): void {
+		ob_start();
+		$this->mock->render_mini_cart_overlay();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'wc-block-mini-cart__drawer', $output );
+		$this->assertStringContainsString( 'data-wp-bind--aria-hidden="!state.isOpen"', $output );
+		$this->assertStringContainsString( 'data-wp-bind--inert="!state.isOpen"', $output );
+	}
+
+	/**
 	 * Checks that process_template_contents returns exactly the same string if
 	 * a template without wrapper divs is used.
 	 *
