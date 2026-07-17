@@ -1,6 +1,7 @@
 ---
 post_title: CSS styling for themes
 sidebar_label: CSS styling for themes
+sidebar_position: 5
 ---
 
 # CSS styling for themes
