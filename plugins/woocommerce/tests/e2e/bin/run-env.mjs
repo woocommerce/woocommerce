@@ -205,11 +205,13 @@ export function writeSentinel( hash, { env } ) {
 	// the directory and re-allows only `sentinel`. It is written before
 	// captureSnapshot() runs and lives on the same wiped mount, so the exposure
 	// window never opens and the snapshot==sentinel divergence coupling is intact.
+	// `%b` (not a bare format string) interprets the `\n` escapes while leaving
+	// any future `%` in the content inert — no printf format-injection footgun.
 	const htaccess = 'Require all denied\\n<Files sentinel>\\nRequire all granted\\n</Files>\\n';
 	return wpCli(
 		`mkdir -p ${ SNAP_DIR } && ` +
 			`printf '%s' '${ hash }' > ${ SNAP_DIR }/sentinel && ` +
-			`printf '${ htaccess }' > ${ SNAP_DIR }/.htaccess`,
+			`printf '%b' '${ htaccess }' > ${ SNAP_DIR }/.htaccess`,
 		{ env, capture: false }
 	);
 }
