@@ -282,4 +282,332 @@ test.describe( 'Mutation Batcher', () => {
 		expect( batchRequests ).toHaveLength( 1 );
 		expect( batchRequests[ 0 ] ).toBe( 3 );
 	} );
+
+	test.describe( 'cross-cutting side effects fire once per cycle', () => {
+		// Cross-cutting effects (the `wc-blocks_store_sync_required` sync
+		// event and the legacy `wc-blocks_added_to_cart` event) are wired to
+		// the batcher's per-cycle settlement hook, not to each individual
+		// request. These tests lock that contract in: no matter how many
+		// mutations land in one microtick/cycle, each effect fires at most
+		// once for that cycle.
+
+		test( 'N concurrent successful adds fire each effect exactly once', async ( {
+			page,
+		} ) => {
+			// This project reuses one authenticated user's persistent cart
+			// across every test in the file (not a fresh guest cart per
+			// test), so start from a known-clean cart in a preliminary
+			// evaluate call, *before* the batch-request route is installed —
+			// otherwise the cleanup's own request(s) would pollute the count
+			// below.
+			await page.evaluate( async () => {
+				const { store } = await import( '@wordpress/interactivity' );
+				const unlockKey =
+					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+				await import( '@woocommerce/stores/woocommerce/cart' );
+				const { actions, state } = store(
+					'woocommerce',
+					{},
+					{ lock: unlockKey }
+				);
+
+				await actions.refreshCartItems();
+				const existingKeys = state.cart.items.map(
+					( item: { key: string } ) => item.key
+				);
+				for ( const key of existingKeys ) {
+					await actions.removeCartItem( key );
+				}
+			} );
+
+			const batchRequests: number[] = [];
+
+			await page.route( '**/wc/store/v1/batch**', async ( route ) => {
+				const body = route.request().postDataJSON();
+				batchRequests.push( body?.requests?.length || 0 );
+				await route.continue();
+			} );
+
+			const result = await page.evaluate( async () => {
+				const { store } = await import( '@wordpress/interactivity' );
+				const unlockKey =
+					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+				await import( '@woocommerce/stores/woocommerce/cart' );
+				const { actions, state } = store(
+					'woocommerce',
+					{},
+					{ lock: unlockKey }
+				);
+
+				// Register listeners before the gesture.
+				let syncEvents = 0;
+				window.addEventListener(
+					'wc-blocks_store_sync_required',
+					( event ) => {
+						if (
+							( event as CustomEvent ).detail?.type ===
+							'from_iAPI'
+						) {
+							syncEvents++;
+						}
+					}
+				);
+				let addedToCartEvents = 0;
+				document.body.addEventListener(
+					'wc-blocks_added_to_cart',
+					() => {
+						addedToCartEvents++;
+					}
+				);
+
+				// Three concurrent adds for three distinct products, no
+				// await between them — one microtick, one cycle.
+				const p1 = actions.addCartItem( { id: 15, quantityToAdd: 1 } );
+				const p2 = actions.addCartItem( { id: 16, quantityToAdd: 1 } );
+				const p3 = actions.addCartItem( { id: 17, quantityToAdd: 1 } );
+				await Promise.all( [ p1, p2, p3 ] );
+
+				return {
+					syncEvents,
+					addedToCartEvents,
+					cartProductIds: state.cart.items.map(
+						( item: { id: number } ) => item.id
+					),
+				};
+			} );
+
+			// One batch request carrying all three mutations.
+			expect( batchRequests ).toHaveLength( 1 );
+			expect( batchRequests[ 0 ] ).toBe( 3 );
+
+			// Exactly one of each cross-cutting effect for the whole cycle.
+			expect( result.syncEvents ).toBe( 1 );
+			expect( result.addedToCartEvents ).toBe( 1 );
+
+			// All three products landed in the cart.
+			expect( result.cartProductIds ).toContain( 15 );
+			expect( result.cartProductIds ).toContain( 16 );
+			expect( result.cartProductIds ).toContain( 17 );
+		} );
+
+		test( 'a concurrent remove-only cycle fires one sync event and no legacy event', async ( {
+			page,
+		} ) => {
+			const batchRequests: number[] = [];
+
+			await page.route( '**/wc/store/v1/batch**', async ( route ) => {
+				const body = route.request().postDataJSON();
+				batchRequests.push( body?.requests?.length || 0 );
+				await route.continue();
+			} );
+
+			// Seed a clean cart with several server-keyed lines before the
+			// gesture under test, outside the batch-request count below.
+			const seededKeys = await page.evaluate( async () => {
+				const { store } = await import( '@wordpress/interactivity' );
+				const unlockKey =
+					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+				await import( '@woocommerce/stores/woocommerce/cart' );
+				const { actions, state } = store(
+					'woocommerce',
+					{},
+					{ lock: unlockKey }
+				);
+
+				await actions.refreshCartItems();
+				const existingKeys = state.cart.items.map(
+					( item: { key: string } ) => item.key
+				);
+				for ( const key of existingKeys ) {
+					await actions.removeCartItem( key );
+				}
+
+				await actions.addCartItem( { id: 15, quantityToAdd: 1 } );
+				await actions.addCartItem( { id: 16, quantityToAdd: 1 } );
+				await actions.addCartItem( { id: 17, quantityToAdd: 1 } );
+
+				return state.cart.items.map(
+					( item: { key: string } ) => item.key
+				);
+			} );
+
+			// Only count the batch request produced by the gesture below.
+			batchRequests.length = 0;
+
+			const result = await page.evaluate( async ( keys ) => {
+				const { store } = await import( '@wordpress/interactivity' );
+				const unlockKey =
+					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+				await import( '@woocommerce/stores/woocommerce/cart' );
+				const { actions, state } = store(
+					'woocommerce',
+					{},
+					{ lock: unlockKey }
+				);
+
+				// Register listeners before the gesture.
+				let syncEvents = 0;
+				window.addEventListener(
+					'wc-blocks_store_sync_required',
+					( event ) => {
+						if (
+							( event as CustomEvent ).detail?.type ===
+							'from_iAPI'
+						) {
+							syncEvents++;
+						}
+					}
+				);
+				let addedToCartEvents = 0;
+				document.body.addEventListener(
+					'wc-blocks_added_to_cart',
+					() => {
+						addedToCartEvents++;
+					}
+				);
+
+				// Remove every seeded line concurrently — one microtick,
+				// one cycle, no adds at all.
+				const removals = keys.map( ( key: string ) =>
+					actions.removeCartItem( key )
+				);
+				await Promise.all( removals );
+
+				return {
+					syncEvents,
+					addedToCartEvents,
+					cartProductIds: state.cart.items.map(
+						( item: { id: number } ) => item.id
+					),
+				};
+			}, seededKeys );
+
+			// One batch request carrying every removal.
+			expect( batchRequests ).toHaveLength( 1 );
+			expect( batchRequests[ 0 ] ).toBe( seededKeys.length );
+
+			// One sync event, but the remove-only cycle never triggers the
+			// legacy added-to-cart event.
+			expect( result.syncEvents ).toBe( 1 );
+			expect( result.addedToCartEvents ).toBe( 0 );
+
+			// The targeted lines are gone from the cart.
+			expect( result.cartProductIds ).not.toContain( 15 );
+			expect( result.cartProductIds ).not.toContain( 16 );
+			expect( result.cartProductIds ).not.toContain( 17 );
+		} );
+
+		test( 'a mixed successful/failed add cycle fires each effect once and preserves the failed item', async ( {
+			page,
+		} ) => {
+			// This project reuses one authenticated user's persistent cart
+			// across every test in the file (not a fresh guest cart per
+			// test), so start from a known-clean cart in a preliminary
+			// evaluate call, *before* the batch-request route is installed —
+			// otherwise the cleanup's own request(s) would pollute the count
+			// below.
+			await page.evaluate( async () => {
+				const { store } = await import( '@wordpress/interactivity' );
+				const unlockKey =
+					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+				await import( '@woocommerce/stores/woocommerce/cart' );
+				const { actions, state } = store(
+					'woocommerce',
+					{},
+					{ lock: unlockKey }
+				);
+
+				await actions.refreshCartItems();
+				const existingKeys = state.cart.items.map(
+					( item: { key: string } ) => item.key
+				);
+				for ( const key of existingKeys ) {
+					await actions.removeCartItem( key );
+				}
+			} );
+
+			const batchRequests: number[] = [];
+
+			await page.route( '**/wc/store/v1/batch**', async ( route ) => {
+				const body = route.request().postDataJSON();
+				batchRequests.push( body?.requests?.length || 0 );
+				await route.continue();
+			} );
+
+			const result = await page.evaluate( async () => {
+				const { store } = await import( '@wordpress/interactivity' );
+				const unlockKey =
+					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+				await import( '@woocommerce/stores/woocommerce/cart' );
+				const { actions, state } = store(
+					'woocommerce',
+					{},
+					{ lock: unlockKey }
+				);
+
+				// Register listeners before the gesture.
+				let syncEvents = 0;
+				window.addEventListener(
+					'wc-blocks_store_sync_required',
+					( event ) => {
+						if (
+							( event as CustomEvent ).detail?.type ===
+							'from_iAPI'
+						) {
+							syncEvents++;
+						}
+					}
+				);
+				let addedToCartEvents = 0;
+				document.body.addEventListener(
+					'wc-blocks_added_to_cart',
+					() => {
+						addedToCartEvents++;
+					}
+				);
+
+				// Two valid adds and one invalid product id, no await
+				// between them — one microtick, one cycle.
+				const p1 = actions.addCartItem( { id: 15, quantityToAdd: 1 } );
+				const p2 = actions.addCartItem( {
+					id: 999999,
+					quantityToAdd: 1,
+				} ); // Invalid.
+				const p3 = actions.addCartItem( { id: 16, quantityToAdd: 1 } );
+
+				// addCartItem catches errors internally, so all three
+				// promises resolve rather than reject; Promise.allSettled
+				// just waits for all three to settle.
+				await Promise.allSettled( [ p1, p2, p3 ] );
+
+				return {
+					syncEvents,
+					addedToCartEvents,
+					cartProductIds: state.cart.items.map(
+						( item: { id: number } ) => item.id
+					),
+				};
+			} );
+
+			// One batch request carrying all three mutations.
+			expect( batchRequests ).toHaveLength( 1 );
+			expect( batchRequests[ 0 ] ).toBe( 3 );
+
+			// Exactly one of each cross-cutting effect for the whole cycle,
+			// since at least one add succeeded.
+			expect( result.syncEvents ).toBe( 1 );
+			expect( result.addedToCartEvents ).toBe( 1 );
+
+			// The valid products landed in the cart, the invalid one did not.
+			expect( result.cartProductIds ).toContain( 15 );
+			expect( result.cartProductIds ).toContain( 16 );
+			expect( result.cartProductIds ).not.toContain( 999999 );
+		} );
+	} );
 } );
