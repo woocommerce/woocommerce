@@ -1222,10 +1222,25 @@ WHERE
 	 * @return int[] Array of order IDs.
 	 */
 	public function search_orders( $term ) {
+		/**
+		 * Filters the maximum number of order IDs returned by an order search.
+		 *
+		 * @since 11.1.0
+		 *
+		 * @param int    $limit Maximum number of order IDs to return. Use -1 for no limit.
+		 * @param string $term  Search term.
+		 */
+		$limit = (int) apply_filters( 'woocommerce_order_search_limit', (int) get_option( 'posts_per_page' ), $term );
+
 		$order_ids = wc_get_orders(
 			array(
-				's'      => $term,
-				'return' => 'ids',
+				's'       => $term,
+				'limit'   => $limit,
+				'orderby' => array(
+					'date' => 'DESC',
+					'ID'   => 'DESC',
+				),
+				'return'  => 'ids',
 			)
 		);
 
@@ -1240,7 +1255,9 @@ WHERE
 		 * @param int[]  $order_ids Search results as an array of order IDs.
 		 * @param string $term      The search term.
 		 */
-		return array_map( 'intval', (array) apply_filters( 'woocommerce_cot_shop_order_search_results', $order_ids, $term ) );
+		$order_ids = array_map( 'intval', (array) apply_filters( 'woocommerce_cot_shop_order_search_results', $order_ids, $term ) );
+
+		return -1 < $limit ? array_slice( $order_ids, 0, $limit ) : $order_ids;
 	}
 
 	/**

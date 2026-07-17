@@ -1849,6 +1849,46 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that wc_order_search() respects the filtered result limit.
+	 *
+	 * @since 11.1.0
+	 */
+	public function test_wc_order_search_limit() {
+		$orders = array(
+			$this->create_order(),
+			$this->create_order(),
+			$this->create_order(),
+		);
+		foreach ( $orders as $index => $order ) {
+			$order->set_date_created( sprintf( '2025-01-%02d 00:00:00', $index + 1 ) );
+			$order->save();
+		}
+
+		$limit_search_results = static function () {
+			return 2;
+		};
+
+		$order_ids = array_map(
+			static function ( $order ) {
+				return $order->get_id();
+			},
+			$orders
+		);
+
+		$posts_per_page = get_option( 'posts_per_page' );
+		try {
+			update_option( 'posts_per_page', 1 );
+			$this->assertSame( array( $order_ids[2] ), wc_order_search( 'Jeroen' ) );
+
+			add_filter( 'woocommerce_order_search_limit', $limit_search_results );
+			$this->assertSame( array( $order_ids[2], $order_ids[1] ), wc_order_search( 'Jeroen' ) );
+		} finally {
+			remove_filter( 'woocommerce_order_search_limit', $limit_search_results );
+			update_option( 'posts_per_page', $posts_per_page );
+		}
+	}
+
+	/**
 	 * Checks if hold coupons are released when increasing usage count.
 	 *
 	 * @throws Exception When unable to create an order.

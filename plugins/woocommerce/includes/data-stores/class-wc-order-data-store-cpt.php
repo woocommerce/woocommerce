@@ -578,6 +578,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		global $wpdb;
 
 		/**
+		 * Filters the maximum number of order IDs returned by an order search.
+		 *
+		 * @since 11.1.0
+		 *
+		 * @param int    $limit Maximum number of order IDs to return. Use -1 for no limit.
+		 * @param string $term  Search term.
+		 */
+		$limit       = (int) apply_filters( 'woocommerce_order_search_limit', (int) get_option( 'posts_per_page' ), $term );
+		$query_limit = -1 < $limit ? $limit : PHP_INT_MAX;
+
+		/**
 		 * Searches on meta data can be slow - this lets you choose what fields to search.
 		 * 3.0.0 added _billing_address and _shipping_address meta which contains all address data to make this faster.
 		 * This however won't work on older orders unless updated, so search a few others (expand this using the filter if needed).
@@ -604,33 +615,68 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		if ( ! empty( $search_fields ) ) {
-			$order_ids = array_unique(
+			$search_fields_placeholder = implode( ', ', array_fill( 0, count( $search_fields ), '%s' ) );
+			$order_ids                 = array_unique(
 				array_merge(
 					$order_ids,
 					$wpdb->get_col(
+						// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Search fields use generated placeholders.
 						$wpdb->prepare(
-							"SELECT DISTINCT p1.post_id FROM {$wpdb->postmeta} p1 WHERE p1.meta_value LIKE %s AND p1.meta_key IN ('" . implode( "','", array_map( 'esc_sql', $search_fields ) ) . "')", // @codingStandardsIgnoreLine
-							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
+							"SELECT DISTINCT p1.post_id, p.post_date_gmt
+							FROM {$wpdb->postmeta} p1
+							INNER JOIN {$wpdb->posts} p ON p1.post_id = p.ID
+							WHERE p1.meta_value LIKE %s
+							AND p1.meta_key IN ($search_fields_placeholder)
+							ORDER BY p.post_date_gmt DESC, p1.post_id DESC
+							LIMIT %d",
+							...array_merge(
+								array( '%' . $wpdb->esc_like( wc_clean( $term ) ) . '%' ),
+								$search_fields,
+								array( $query_limit )
+							)
 						)
+						// phpcs:enable
 					),
 					$wpdb->get_col(
 						$wpdb->prepare(
-							"SELECT order_id
+							"SELECT DISTINCT order_items.order_id, p.post_date_gmt
 							FROM {$wpdb->prefix}woocommerce_order_items as order_items
-							WHERE order_item_name LIKE %s",
-							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
+							INNER JOIN {$wpdb->posts} p ON order_items.order_id = p.ID
+							WHERE order_item_name LIKE %s
+							ORDER BY p.post_date_gmt DESC, order_items.order_id DESC
+							LIMIT %d",
+							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%',
+							$query_limit
 						)
 					),
 					$wpdb->get_col(
 						$wpdb->prepare(
-							"SELECT DISTINCT os.order_id FROM {$wpdb->prefix}wc_order_stats os
+							"SELECT DISTINCT os.order_id, p.post_date_gmt FROM {$wpdb->prefix}wc_order_stats os
 							INNER JOIN {$wpdb->prefix}wc_customer_lookup cl ON os.customer_id = cl.customer_id
 							INNER JOIN {$wpdb->usermeta} um ON cl.user_id = um.user_id
+							INNER JOIN {$wpdb->posts} p ON os.order_id = p.ID
 							WHERE (um.meta_key = 'billing_phone' OR um.meta_key = 'shipping_phone')
-							AND um.meta_value = %s",
-							wc_clean( $term )
+							AND um.meta_value = %s
+							ORDER BY p.post_date_gmt DESC, os.order_id DESC
+							LIMIT %d",
+							wc_clean( $term ),
+							$query_limit
 						)
 					)
+				)
+			);
+		}
+
+		if ( 0 < $limit && ! empty( $order_ids ) ) {
+			$order_ids = (array) wc_get_orders(
+				array(
+					'limit'    => $limit,
+					'orderby'  => array(
+						'date' => 'DESC',
+						'ID'   => 'DESC',
+					),
+					'post__in' => array_map( 'absint', $order_ids ),
+					'return'   => 'ids',
 				)
 			);
 		}
@@ -645,6 +691,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 * @return array
 		 */
 		$order_ids = apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term, $search_fields );
+
+		if ( -1 < $limit ) {
+			$order_ids = array_slice( $order_ids, 0, $limit );
+		}
 
 		return array_map( 'absint', $order_ids );
 	}
