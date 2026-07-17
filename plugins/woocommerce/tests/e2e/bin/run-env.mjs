@@ -7,7 +7,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { join } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import { createServer as createNetServer } from 'node:net';
 import { get as httpGet } from 'node:http';
 import { spawn } from 'node:child_process';
@@ -261,7 +261,69 @@ export async function fresh( { env, hash, wpVersion } ) {
 }
 
 async function main() {
-	// Filled in by later tasks.
+	const pluginRoot = resolve( dirname( fileURLToPath( import.meta.url ) ), '..', '..', '..' );
+	process.chdir( pluginRoot );
+
+	const { rebuild: rebuildFlag, passthrough } = parseArgs( process.argv.slice( 2 ) );
+
+	// CI: lean provision-once pass-through; preserve today's behavior exactly.
+	if ( isCi( process.env ) ) {
+		const env = sanitizeEnv( { ...process.env } );
+		await wpEnv( [ 'start', '--update', ...passthrough ], { env } );
+		return;
+	}
+
+	const stateDir = 'tests/e2e/.env-state';
+	const state = readState( stateDir );
+	const readOr = ( p ) => {
+		try {
+			return readFileSync( p, 'utf8' );
+		} catch {
+			return '';
+		}
+	};
+	const wcVersion = readWcVersion( readFileSync( 'woocommerce.php', 'utf8' ) );
+
+	let port = state?.port ?? ( await probeFreePort() );
+	let foreignPort = false;
+	if ( state?.port && ! ( await isPortFree( port ) ) ) {
+		const ours = await isOurInstance( `http://localhost:${ port }`, state.hash );
+		if ( ! ours ) {
+			port = await probeFreePort();
+			foreignPort = true;
+		}
+	}
+
+	const env = sanitizeEnv( { ...process.env, WP_ENV_PORT: String( port ) } );
+	const hash = computeHash( {
+		configText: readOr( '.wp-env.e2e.json' ),
+		overrideText: readOr( '.wp-env.e2e.override.json' ),
+		setupScriptText: readOr( 'tests/e2e/bin/test-env-setup.sh' ),
+		allowlistEnv: env,
+		wcVersion,
+	} );
+
+	writeRunnerEnv( stateDir, port );
+
+	const action = decide( {
+		state,
+		currentHash: hash,
+		nowMs: Date.now(),
+		maxAgeMs: MAX_AGE_MS,
+		forceRebuild: rebuildFlag || foreignPort,
+	} );
+
+	if ( action === 'fresh' ) {
+		const result = await fresh( { env, hash, wpVersion: state.wpVersion } );
+		if ( result === 'restored' ) {
+			console.log( `E2E env ready (reused) on http://localhost:${ port }` );
+			return;
+		}
+		console.log( 'Env diverged from snapshot; rebuilding…' );
+	}
+
+	await rebuild( { env, hash, port, stateDir } );
+	console.log( `E2E env ready (rebuilt) on http://localhost:${ port }` );
 }
 
 // Run main() only when executed directly, not when imported by tests.
