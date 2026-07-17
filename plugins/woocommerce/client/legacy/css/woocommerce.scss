@@ -182,10 +182,6 @@ p.demo_store,
 				position: relative;
 			}
 
-			&.woocommerce-product-gallery .flex-viewport {
-				touch-action: pan-y pinch-zoom;
-			}
-
 			.woocommerce-product-gallery__wrapper {
 				transition: all cubic-bezier(0.795, -0.035, 0, 1) 0.5s;
 				margin: 0;
