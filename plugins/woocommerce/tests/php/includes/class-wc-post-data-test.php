@@ -5,10 +5,119 @@
  * @package WooCommerce\Tests\Post_Data.
  */
 
+declare( strict_types = 1 );
+
 /**
  * Class WC_Post_Data_Test
  */
 class WC_Post_Data_Test extends \WC_Unit_Test_Case {
+
+	/**
+	 * @testdox Reparenting a product category subtree recounts the affected hierarchy branches.
+	 */
+	public function test_reparenting_product_category_subtree_recounts_affected_hierarchy_branches(): void {
+		$old_grandparent = wp_insert_term( 'Old grandparent', 'product_cat' );
+		$new_grandparent = wp_insert_term( 'New grandparent', 'product_cat' );
+		$old_parent      = wp_insert_term(
+			'Old parent',
+			'product_cat',
+			array(
+				'parent' => $old_grandparent['term_id'],
+			)
+		);
+		$new_parent      = wp_insert_term(
+			'New parent',
+			'product_cat',
+			array(
+				'parent' => $new_grandparent['term_id'],
+			)
+		);
+		$moved_category  = wp_insert_term(
+			'Moved category',
+			'product_cat',
+			array(
+				'parent' => $old_parent['term_id'],
+			)
+		);
+		$leaf_category   = wp_insert_term(
+			'Leaf category',
+			'product_cat',
+			array(
+				'parent' => $moved_category['term_id'],
+			)
+		);
+		$product         = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'category_ids' => array( $leaf_category['term_id'] ),
+			)
+		);
+		wc_recount_all_terms( false );
+
+		$this->assertSame( 1, (int) get_term_meta( $old_grandparent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $old_parent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $moved_category['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $leaf_category['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 0, (int) get_term_meta( $new_grandparent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 0, (int) get_term_meta( $new_parent['term_id'], 'product_count_product_cat', true ) );
+
+		$clear_term_cache = static function ( $term_id, $_tt_id, $taxonomy ) use ( $moved_category ) {
+			if ( (int) $moved_category['term_id'] === (int) $term_id && 'product_cat' === $taxonomy ) {
+				clean_term_cache( $term_id, $taxonomy );
+			}
+		};
+		add_action( 'edit_term', $clear_term_cache, 9, 3 );
+
+		wp_update_term(
+			$moved_category['term_id'],
+			'product_cat',
+			array(
+				'parent' => $new_parent['term_id'],
+			)
+		);
+		remove_action( 'edit_term', $clear_term_cache, 9 );
+
+		$this->assertSame( 0, (int) get_term_meta( $old_grandparent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 0, (int) get_term_meta( $old_parent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $moved_category['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $leaf_category['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $new_grandparent['term_id'], 'product_count_product_cat', true ) );
+		$this->assertSame( 1, (int) get_term_meta( $new_parent['term_id'], 'product_count_product_cat', true ) );
+
+		$product->delete( true );
+		wp_delete_term( $leaf_category['term_id'], 'product_cat' );
+		wp_delete_term( $moved_category['term_id'], 'product_cat' );
+		wp_delete_term( $old_parent['term_id'], 'product_cat' );
+		wp_delete_term( $new_parent['term_id'], 'product_cat' );
+		wp_delete_term( $old_grandparent['term_id'], 'product_cat' );
+		wp_delete_term( $new_grandparent['term_id'], 'product_cat' );
+	}
+
+	/**
+	 * @testdox Editing a product category without changing its parent does not recount products.
+	 */
+	public function test_editing_product_category_without_reparenting_does_not_recount_products(): void {
+		$category         = wp_insert_term( 'Category', 'product_cat' );
+		$recount_attempts = 0;
+		$track_recounts   = function ( $should_recount ) use ( &$recount_attempts ) {
+			++$recount_attempts;
+			return $should_recount;
+		};
+		add_filter( 'woocommerce_product_recount_terms', $track_recounts );
+
+		wp_update_term(
+			$category['term_id'],
+			'product_cat',
+			array(
+				'name' => 'Renamed category',
+			)
+		);
+
+		remove_filter( 'woocommerce_product_recount_terms', $track_recounts );
+
+		$this->assertSame( 0, $recount_attempts );
+		wp_delete_term( $category['term_id'], 'product_cat' );
+	}
 
 	/**
 	 * @testdox coupon code should be always sanitized.
