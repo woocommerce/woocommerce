@@ -46,7 +46,7 @@ class WC_Importer_Tracking {
 	 */
 	public function track_product_importer_start() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( ! isset( $_REQUEST['file'] ) || ! isset( $_REQUEST['_wpnonce'] ) ) {
+		if ( ! isset( $_REQUEST['file'] ) || ! isset( $_REQUEST['_wpnonce'] ) || !wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-csv-importer' ) ) {
 			return;
 		}
 
@@ -66,7 +66,7 @@ class WC_Importer_Tracking {
 	 */
 	public function track_product_importer_complete() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( ! isset( $_REQUEST['nonce'] ) ) {
+		if ( ! isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'woocommerce-csv-importer' ) ) {
 			return;
 		}
 
