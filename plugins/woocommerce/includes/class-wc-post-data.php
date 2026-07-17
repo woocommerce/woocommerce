@@ -44,6 +44,8 @@ class WC_Post_Data {
 	 * @return void
 	 */
 	public static function init() {
+		static $edit_terms_callback = null;
+
 		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_products_last_modified' ), 10, 2 );
 		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_db_block_templates_cache' ), 10, 2 );
 		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
@@ -56,7 +58,29 @@ class WC_Post_Data {
 		add_action( 'woocommerce_product_set_visibility', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_type_changed', array( __CLASS__, 'product_type_changed' ), 10, 3 );
 
-		add_action( 'edit_terms', array( __CLASS__, 'edit_terms' ), 10, 2 );
+		// Keep the callback inline to avoid expanding the public contract of this legacy, non-final class.
+		if ( null === $edit_terms_callback ) {
+			$edit_terms_callback = static function ( $term_id, $taxonomy ) {
+				if ( 'product_cat' !== $taxonomy ) {
+					return;
+				}
+
+				$product_cat = get_term( $term_id, $taxonomy );
+
+				if ( ! $product_cat instanceof WP_Term ) {
+					return;
+				}
+
+				self::$product_cat_previous_parents[ (int) $term_id ][] = (int) $product_cat->parent;
+			};
+		}
+
+		add_action(
+			'edit_terms',
+			$edit_terms_callback,
+			10,
+			2
+		);
 		add_action( 'edit_term', array( __CLASS__, 'edit_term' ), 10, 3 );
 		add_action( 'edited_term', array( __CLASS__, 'edited_term' ), 10, 3 );
 		add_filter( 'update_order_item_metadata', array( __CLASS__, 'update_order_item_metadata' ), 10, 5 );
@@ -252,30 +276,6 @@ class WC_Post_Data {
 			$data_store = WC_Data_Store::load( 'product-variable' );
 			$data_store->delete_variations( $product->get_id(), true );
 		}
-	}
-
-	/**
-	 * Store the previous parent when a product category is edited.
-	 *
-	 * @internal
-	 *
-	 * @param int    $term_id  Term ID.
-	 * @param string $taxonomy Taxonomy slug.
-	 *
-	 * @return void
-	 */
-	public static function edit_terms( $term_id, $taxonomy ) {
-		if ( 'product_cat' !== $taxonomy ) {
-			return;
-		}
-
-		$product_cat = get_term( $term_id, $taxonomy );
-
-		if ( ! $product_cat instanceof WP_Term ) {
-			return;
-		}
-
-		self::$product_cat_previous_parents[ (int) $term_id ][] = (int) $product_cat->parent;
 	}
 
 	/**
