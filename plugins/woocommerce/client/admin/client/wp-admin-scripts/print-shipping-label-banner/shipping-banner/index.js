@@ -42,6 +42,8 @@ export class ShippingBanner extends Component {
 			wcsSetupError: false,
 			isShippingLabelButtonBusy: false,
 			isWcsModalOpen: false,
+			isPluginInstalledAndActivated: false,
+			infoMessage: null,
 		};
 	}
 
@@ -72,8 +74,20 @@ export class ShippingBanner extends Component {
 	};
 
 	createShippingLabelClicked = () => {
+		if ( this.state.isPluginInstalledAndActivated ) {
+			window.location.reload( true );
+			return;
+		}
+
 		const { activePlugins } = this.props;
-		this.setState( { isShippingLabelButtonBusy: true } );
+		this.setState( {
+			isShippingLabelButtonBusy: true,
+			infoMessage: __(
+				'Installing and activating WooCommerce Shipping in the background...',
+				'woocommerce'
+			),
+			wcsSetupError: false,
+		} );
 		this.trackElementClicked( 'shipping_banner_create_label' );
 		if ( ! activePlugins.includes( wcShippingPluginSlug ) ) {
 			this.installAndActivatePlugins( wcShippingPluginSlug );
@@ -88,50 +102,61 @@ export class ShippingBanner extends Component {
 			installPlugins,
 			activatePlugins,
 			isRequesting,
-			activePlugins,
-			isWcstCompatible,
-			isIncompatibleWCShippingInstalled,
 		} = this.props;
 		if ( isRequesting ) {
 			return false;
 		}
-		const install = await installPlugins( [ pluginSlug ] );
-		if ( install.success !== true ) {
+
+		try {
+			const install = await installPlugins( [ pluginSlug ] );
+			if ( install && install.success !== true ) {
+				this.setState( {
+					setupErrorReason: setupErrorTypes.INSTALL,
+					wcsSetupError: true,
+					isShippingLabelButtonBusy: false,
+					infoMessage: null,
+				} );
+				return;
+			}
+		} catch ( error ) {
 			this.setState( {
 				setupErrorReason: setupErrorTypes.INSTALL,
 				wcsSetupError: true,
+				isShippingLabelButtonBusy: false,
+				infoMessage: null,
 			} );
 			return;
 		}
 
-		const activation = await activatePlugins( [ pluginSlug ] );
-		if ( activation.success !== true ) {
+		try {
+			const activation = await activatePlugins( [ pluginSlug ] );
+			if ( activation && activation.success !== true ) {
+				this.setState( {
+					setupErrorReason: setupErrorTypes.ACTIVATE,
+					wcsSetupError: true,
+					isShippingLabelButtonBusy: false,
+					infoMessage: null,
+				} );
+				return;
+			}
+		} catch ( error ) {
 			this.setState( {
 				setupErrorReason: setupErrorTypes.ACTIVATE,
 				wcsSetupError: true,
+				isShippingLabelButtonBusy: false,
+				infoMessage: null,
 			} );
 			return;
 		}
 
-		/**
-		 * If a incompatible version of the WooCommerce Shipping plugin is installed, the necessary endpoints
-		 * are not available, so we need to reload the page to ensure to make the plugin usable.
-		 */
-		if ( isIncompatibleWCShippingInstalled ) {
-			window.location.reload( true );
-			return;
-		}
-
-		if (
-			! activePlugins.includes( wcShippingPluginSlug ) &&
-			isWcstCompatible
-		) {
-			this.acceptTosAndGetWCSAssets();
-		} else {
-			this.setState( {
-				showShippingBanner: false,
-			} );
-		}
+		this.setState( {
+			isPluginInstalledAndActivated: true,
+			isShippingLabelButtonBusy: false,
+			infoMessage: __(
+				'WooCommerce Shipping is installed and activated. Please reload the page to get started.',
+				'woocommerce'
+			),
+		} );
 	}
 
 	woocommerceServiceLinkClicked = () => {
@@ -169,7 +194,11 @@ export class ShippingBanner extends Component {
 			.then( () => getWcsAssets() )
 			.then( ( wcsAssets ) => this.loadWcsAssets( wcsAssets ) )
 			.catch( () => {
-				this.setState( { wcsSetupError: true } );
+				this.setState( {
+					wcsSetupError: true,
+					isShippingLabelButtonBusy: false,
+					infoMessage: null,
+				} );
 			} );
 	};
 
@@ -255,7 +284,7 @@ export class ShippingBanner extends Component {
 			.querySelectorAll( 'link[href*="/woocommerce-services/"]' )
 			.forEach( ( node ) => node.remove?.() );
 
-		Promise.all( [
+		return Promise.all( [
 			new Promise( ( resolve, reject ) => {
 				const script = document.createElement( 'script' );
 				script.src = jsPath;
@@ -406,6 +435,11 @@ export class ShippingBanner extends Component {
 		}
 
 		const { actionButtonLabel, headline } = this.props;
+		const { isPluginInstalledAndActivated, infoMessage } = this.state;
+		const buttonLabel = isPluginInstalledAndActivated
+			? __( 'Reload page', 'woocommerce' )
+			: actionButtonLabel;
+
 		return (
 			<div>
 				<div className="wc-admin-shipping-banner-container">
@@ -451,6 +485,7 @@ export class ShippingBanner extends Component {
 						<SetupNotice
 							isSetupError={ this.isSetupError() }
 							errorReason={ this.state.setupErrorReason }
+							infoMessage={ infoMessage }
 						/>
 					</div>
 					<Button
@@ -459,7 +494,7 @@ export class ShippingBanner extends Component {
 						isBusy={ isShippingLabelButtonBusy }
 						onClick={ this.createShippingLabelClicked }
 					>
-						{ actionButtonLabel }
+						{ buttonLabel }
 					</Button>
 
 					<button
