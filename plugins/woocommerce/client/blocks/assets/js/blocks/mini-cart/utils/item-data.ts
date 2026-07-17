@@ -50,8 +50,6 @@ export type CartItemDataAttr = {
 	name: string;
 	/** BEM-style modifier class derived from `name`, e.g. `wc-block-components-product-details__color`. */
 	className: string;
-	/** True when the entry should render nothing: malformed, empty, or explicitly hidden. */
-	hidden: boolean;
 };
 
 /**
@@ -154,8 +152,7 @@ export function isLastVisibleEntry(
  * @param {ItemData | undefined} entry Entry to build from, or `undefined`.
  * @return {CartItemDataAttr} The normalized entry. A malformed or empty
  *                            entry produces empty `name`/`value`,
- *                            `className: 'wc-block-components-product-details__'`,
- *                            and `hidden: true`.
+ *                            and `className: 'wc-block-components-product-details__'`.
  */
 export function buildCartItemDataAttr(
 	entry: ItemData | undefined
@@ -174,6 +171,5 @@ export function buildCartItemDataAttr(
 			.replace( /<[^>]*>/g, '' )
 			.replace( /[\s_&]+/g, '-' )
 			.toLowerCase() }`,
-		hidden: ! isItemDataEntryVisible( entry ),
 	};
 }

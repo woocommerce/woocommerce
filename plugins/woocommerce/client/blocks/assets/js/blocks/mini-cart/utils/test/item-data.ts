@@ -289,18 +289,16 @@ describe( 'buildCartItemDataAttr tests', () => {
 		expect( buildCartItemDataAttr( malformed() ) ).not.toBeNull();
 	} );
 
-	test( 'malformed/empty entry produces empty name/value and hidden: true', () => {
+	test( 'malformed/empty entry produces empty normalized values', () => {
 		expect( buildCartItemDataAttr( undefined ) ).toEqual( {
 			name: '',
 			value: '',
 			className: 'wc-block-components-product-details__',
-			hidden: true,
 		} );
 		expect( buildCartItemDataAttr( malformed() ) ).toEqual( {
 			name: '',
 			value: '',
 			className: 'wc-block-components-product-details__',
-			hidden: true,
 		} );
 	} );
 
@@ -314,7 +312,6 @@ describe( 'buildCartItemDataAttr tests', () => {
 			name: 'Gift Message:',
 			value: 'Happy Birthday!',
 			className: 'wc-block-components-product-details__gift-message',
-			hidden: false,
 		} );
 	} );
 
@@ -329,7 +326,6 @@ describe( 'buildCartItemDataAttr tests', () => {
 			name: 'Engraving:',
 			value: '<em>Best Wishes</em>',
 			className: 'wc-block-components-product-details__engraving',
-			hidden: false,
 		} );
 	} );
 
@@ -343,7 +339,6 @@ describe( 'buildCartItemDataAttr tests', () => {
 			name: 'Size:',
 			value: '1 < 2',
 			className: 'wc-block-components-product-details__size',
-			hidden: false,
 		} );
 	} );
 
@@ -357,7 +352,6 @@ describe( 'buildCartItemDataAttr tests', () => {
 			name: 'Note:',
 			value: '<b>important</b>',
 			className: 'wc-block-components-product-details__note',
-			hidden: false,
 		} );
 	} );
 
@@ -372,7 +366,6 @@ describe( 'buildCartItemDataAttr tests', () => {
 			name: 'Shade:',
 			value: 'Red & Blue',
 			className: 'wc-block-components-product-details__shade',
-			hidden: false,
 		} );
 	} );
 
@@ -387,11 +380,10 @@ describe( 'buildCartItemDataAttr tests', () => {
 			value: 'x',
 			className:
 				'wc-block-components-product-details__gift-message-type-foo-bar-baz',
-			hidden: false,
 		} );
 	} );
 
-	test( 'explicitly-hidden well-formed entry sets hidden: true', () => {
+	test( 'explicitly-hidden well-formed entry is normalized without visibility state', () => {
 		expect(
 			buildCartItemDataAttr( {
 				key: 'Color',
@@ -402,7 +394,6 @@ describe( 'buildCartItemDataAttr tests', () => {
 			name: 'Color:',
 			value: 'Red',
 			className: 'wc-block-components-product-details__color',
-			hidden: true,
 		} );
 	} );
 } );
