@@ -12,6 +12,10 @@ import { adminFile as BLOCKS_ADMIN_STATE } from './utils/blocks/constants';
 // __dirname is not natively available in ESM, but Playwright's config loader shims it.
 dotenv.config( { path: __dirname + '/.env' } );
 
+// Per-worktree BASE_URL written by tests/e2e/bin/run-env.mjs. dotenv does not
+// override already-set vars, so an explicit BASE_URL / CI value still wins.
+dotenv.config( { path: __dirname + '/.env-state/runner.env' } );
+
 if ( ! process.env.BASE_URL ) {
 	process.env.BASE_URL =
 		'http://localhost:' + ( process.env.WP_ENV_TESTS_PORT || '8086' );

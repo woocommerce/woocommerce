@@ -114,3 +114,9 @@ test( 'probeFreePort returns a usable port and isPortFree reflects binding', asy
 		await new Promise( ( res ) => server.close( res ) );
 	}
 } );
+
+import { formatRunnerEnv } from './run-env.mjs';
+
+test( 'formatRunnerEnv emits a BASE_URL line', () => {
+	assert.equal( formatRunnerEnv( 9001 ), 'BASE_URL=http://localhost:9001\n' );
+} );

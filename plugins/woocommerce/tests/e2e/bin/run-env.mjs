@@ -195,6 +195,15 @@ export async function wpCoreVersion( { env } ) {
 	return ( await wpCli( `wp core version`, { env } ) ).trim();
 }
 
+export function formatRunnerEnv( port ) {
+	return `BASE_URL=http://localhost:${ port }\n`;
+}
+
+export function writeRunnerEnv( stateDir, port ) {
+	mkdirSync( stateDir, { recursive: true } );
+	writeFileSync( join( stateDir, 'runner.env' ), formatRunnerEnv( port ) );
+}
+
 export async function rebuild( { env, hash, port, stateDir } ) {
 	// start writes docker files / extracts WP and self-heals on wp-env's own
 	// checksum change; clean alone would hard-exit on a first-ever run.
