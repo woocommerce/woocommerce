@@ -6,7 +6,6 @@ import { test as base, expect, guestFile } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import config from '../../../../../client/admin/config/core.json';
 import AddToCartWithOptionsPage from '../add-to-cart-with-options/add-to-cart-with-options.page';
 import {
 	CART_LINE_IDENTITY_PLUGIN,
@@ -242,9 +241,9 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 		// across both implementations. Use .first() to avoid strict-mode
 		// failures when the badge locator matches multiple elements on the page
 		// (e.g. the button appears in both the header and the mini-cart widget).
-		const miniCartBadge = config.features[ 'experimental-iapi-mini-cart' ]
-			? page.getByLabel( 'Number of items in the cart: 2' ).first()
-			: page.getByLabel( '2 items in cart' ).first();
+		const miniCartBadge = page
+			.getByLabel( /^(?:Number of items in the cart: 2|2 items in cart)/ )
+			.first();
 
 		await expect( miniCartBadge ).toBeVisible();
 	} );
