@@ -181,12 +181,29 @@ class Bootstrap {
 	 * @return string The unchanged content.
 	 */
 	public function maybe_register_blocks_from_content( $content ) {
-		// Only register when the description actually contains a WooCommerce block.
-		if ( is_string( $content ) && false !== strpos( $content, '<!-- wp:woocommerce/' ) ) {
+		// Only register when the description actually contains a WooCommerce block, and only when block types are
+		// not registered yet. register_blocks() instantiates every block class and wires hooks, so this keeps it
+		// to at most once per request even though woocommerce_short_description can fire many times (e.g. one Store
+		// API cart response per item).
+		if ( is_string( $content ) && false !== strpos( $content, '<!-- wp:woocommerce/' ) && ! $this->woocommerce_blocks_registered() ) {
 			$this->container->get( BlockTypesController::class )->register_blocks();
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Whether WooCommerce block types are already present in the block registry.
+	 *
+	 * The registry is the single, request-wide record of what is registered, so it is the reliable signal for
+	 * "have block types been registered this request?" — regardless of how many BlockTypesController instances
+	 * exist. woocommerce/product-price is registered unconditionally by register_blocks(), so its presence is a
+	 * cheap O(1) proxy for the whole set. Used to keep on-demand registration to at most once per request.
+	 *
+	 * @return bool True if WooCommerce block types are registered.
+	 */
+	private function woocommerce_blocks_registered() {
+		return \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/product-price' );
 	}
 
 	/**

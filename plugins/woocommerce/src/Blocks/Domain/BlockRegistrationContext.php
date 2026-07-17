@@ -52,7 +52,7 @@ class BlockRegistrationContext {
 	 */
 	private function is_rendering_request(): bool {
 		// The Store API returns data, not rendered pages; description blocks are registered on demand instead
-		// (see the woocommerce_short_description hook in Bootstrap). Guards any direct caller of this public method.
+		// (see the woocommerce_short_description hook in Bootstrap).
 		if ( wc()->is_store_api_request() ) {
 			return false;
 		}
