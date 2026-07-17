@@ -8,6 +8,8 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
+import { createServer as createNetServer } from 'node:net';
+import { get as httpGet } from 'node:http';
 
 export function parseArgs( argv ) {
 	const rebuild = argv.includes( '--rebuild' );
@@ -91,6 +93,40 @@ export function decide( { state, currentHash, nowMs, maxAgeMs, forceRebuild } ) 
 	if ( state.hash !== currentHash ) return 'rebuild';
 	if ( nowMs - state.snapshotCreatedAt > maxAgeMs ) return 'rebuild';
 	return 'fresh';
+}
+
+export function probeFreePort() {
+	return new Promise( ( resolve, reject ) => {
+		const srv = createNetServer();
+		srv.on( 'error', reject );
+		srv.listen( 0, () => {
+			const { port } = srv.address();
+			srv.close( () => resolve( port ) );
+		} );
+	} );
+}
+
+export function isPortFree( port ) {
+	return new Promise( ( resolve ) => {
+		const srv = createNetServer();
+		srv.once( 'error', () => resolve( false ) );
+		srv.listen( port, () => srv.close( () => resolve( true ) ) );
+	} );
+}
+
+export function isOurInstance( baseUrl, expectedHash ) {
+	return new Promise( ( resolve ) => {
+		const req = httpGet( `${ baseUrl }/.e2e-snapshot/sentinel`, ( res ) => {
+			let body = '';
+			res.on( 'data', ( c ) => ( body += c ) );
+			res.on( 'end', () => resolve( body.trim() === expectedHash ) );
+		} );
+		req.on( 'error', () => resolve( false ) );
+		req.setTimeout( 3000, () => {
+			req.destroy();
+			resolve( false );
+		} );
+	} );
 }
 
 async function main() {

@@ -97,3 +97,20 @@ test( 'decide picks rebuild vs fresh', () => {
 	assert.equal( decide( { ...p, currentHash: 'other' } ), 'rebuild' );
 	assert.equal( decide( { ...p, nowMs: 1000 + MAX_AGE_MS + 1 } ), 'rebuild' );
 } );
+
+import { createServer } from 'node:http';
+import { probeFreePort, isPortFree } from './run-env.mjs';
+
+test( 'probeFreePort returns a usable port and isPortFree reflects binding', async () => {
+	const port = await probeFreePort();
+	assert.ok( port > 0 && port < 65536 );
+	assert.equal( await isPortFree( port ), true );
+
+	const server = createServer( () => {} );
+	await new Promise( ( res ) => server.listen( port, res ) );
+	try {
+		assert.equal( await isPortFree( port ), false );
+	} finally {
+		await new Promise( ( res ) => server.close( res ) );
+	}
+} );
