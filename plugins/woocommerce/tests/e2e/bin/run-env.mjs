@@ -195,6 +195,39 @@ export async function wpCoreVersion( { env } ) {
 	return ( await wpCli( `wp core version`, { env } ) ).trim();
 }
 
+export async function rebuild( { env, hash, port, stateDir } ) {
+	// start writes docker files / extracts WP and self-heals on wp-env's own
+	// checksum change; clean alone would hard-exit on a first-ever run.
+	await wpEnv( [ 'start', '--scripts=false' ], { env } );
+	const wpVersion = await wpCoreVersion( { env } );
+	// clean resets the DB then re-provisions via the afterClean lifecycle hook.
+	await wpEnv( [ 'clean', 'development' ], { env } );
+
+	// Post-clean sanity check: clean swallows reset failures (docker/index.js:
+	// 516-521), so confirm BOTH re-provisioning (themes on disk) AND that the DB
+	// reset happened before freezing the baseline. The freshly-provisioned
+	// baseline holds the 3 seeded images plus WooCommerce's own placeholder
+	// attachment (= 4). A silently-failed reset re-runs the unconditional
+	// `wp media import` on top of the stale DB, doubling the images (>=7), so a
+	// 3..5 window confirms provisioning ran without gross accumulation.
+	const themeCount = Number(
+		( await wpCli( `wp theme list --field=name | wc -l`, { env } ) ).trim()
+	);
+	const attachmentCount = Number(
+		( await wpCli( `wp post list --post_type=attachment --format=count`, { env } ) ).trim()
+	);
+	if ( themeCount < 3 || attachmentCount < 3 || attachmentCount > 5 ) {
+		throw new Error(
+			`Provisioning sanity check failed: themes=${ themeCount } (need >=3), ` +
+				`attachments=${ attachmentCount } (expected ~4: 3 seeded images + WC placeholder)`
+		);
+	}
+
+	await writeSentinel( hash, { env } );
+	await captureSnapshot( { env } );
+	writeState( stateDir, { hash, port, wpVersion, snapshotCreatedAt: Date.now() } );
+}
+
 async function main() {
 	// Filled in by later tasks.
 }
