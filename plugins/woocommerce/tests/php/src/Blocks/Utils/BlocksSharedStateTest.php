@@ -125,6 +125,17 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox load_cart_state() does not seed a pageScope into the woocommerce/cart state.
+	 */
+	public function test_cart_state_seeds_no_page_scope(): void {
+		BlocksSharedState::load_cart_state( $this->consent );
+
+		$cart_state = wp_interactivity_state( 'woocommerce/cart' );
+
+		$this->assertArrayNotHasKey( 'pageScope', $cart_state );
+	}
+
+	/**
 	 * @testdox load_cart_state() does not seed any cart state under the bare woocommerce namespace.
 	 */
 	public function test_bare_namespace_carries_no_cart_state(): void {
