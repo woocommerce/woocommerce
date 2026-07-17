@@ -238,6 +238,19 @@ export async function rebuild( { env, hash, port, stateDir } ) {
 	writeState( stateDir, { hash, port, wpVersion, snapshotCreatedAt: Date.now() } );
 }
 
+export async function fresh( { env, hash, wpVersion } ) {
+	await wpEnv( [ 'start', '--scripts=false' ], { env } );
+
+	const sentinel = await readSentinel( { env } );
+	const liveWp = await wpCoreVersion( { env } );
+	if ( sentinel !== hash || liveWp !== wpVersion ) {
+		return 'diverged';
+	}
+
+	await restoreSnapshot( { env } );
+	return 'restored';
+}
+
 async function main() {
 	// Filled in by later tasks.
 }
