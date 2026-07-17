@@ -91,7 +91,7 @@ class BootstrapTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertContains(
-			'register_block_types_for_description_rendering',
+			'maybe_register_blocks_from_content',
 			$method_names,
 			'Bootstrap should hook on-demand block registration at priority 8, before do_blocks at priority 9.'
 		);
@@ -160,6 +160,36 @@ class BootstrapTest extends WC_Unit_Test_Case {
 			'Fetching a product through the REST API should register block types on demand so description blocks render.'
 		);
 
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Fetching the cart through the Store API registers block types on demand for an item's description.
+	 */
+	public function test_store_api_cart_request_registers_block_types_on_demand(): void {
+		$registry = WP_Block_Type_Registry::get_instance();
+		$sample   = array_key_first( $this->registered_woo_blocks );
+		$this->assertNotNull( $sample, 'The test bootstrap should have registered WooCommerce blocks to snapshot.' );
+
+		$product = new \WC_Product_Simple();
+		$product->set_regular_price( '10' );
+		$product->set_short_description( '<!-- wp:woocommerce/product-price /-->' );
+		$product->save();
+
+		$cart_item_key = wc()->cart->add_to_cart( $product->get_id() );
+		$this->assertNotEmpty( $cart_item_key, 'The product should be added to the cart so the item renders in the response.' );
+
+		$this->assertFalse( $registry->is_registered( $sample ), 'Blocks should start unregistered for this test.' );
+
+		$response = rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+
+		$this->assertSame( 200, $response->get_status(), 'The Store API cart request should succeed.' );
+		$this->assertTrue(
+			$registry->is_registered( $sample ),
+			'Fetching the cart through the Store API should register block types on demand so description blocks render.'
+		);
+
+		wc()->cart->empty_cart();
 		$product->delete( true );
 	}
 

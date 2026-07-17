@@ -51,10 +51,8 @@ class BlockRegistrationContext {
 	 * @return bool True unless the request is a known non-rendering context.
 	 */
 	private function is_rendering_request(): bool {
-		// The Store API returns data, not rendered pages, so it needs no eager block/pattern/asset registration.
-		// Dynamic blocks in product/cart/order descriptions are registered on demand instead — see the
-		// woocommerce_short_description hook in Bootstrap. Bootstrap's own caller already excludes the Store API
-		// before reaching here, but should_register() is public, so this branch still guards any direct caller.
+		// The Store API returns data, not rendered pages; description blocks are registered on demand instead
+		// (see the woocommerce_short_description hook in Bootstrap). Guards any direct caller of this public method.
 		if ( wc()->is_store_api_request() ) {
 			return false;
 		}

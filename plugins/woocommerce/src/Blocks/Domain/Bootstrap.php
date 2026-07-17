@@ -143,12 +143,8 @@ class Bootstrap {
 			$this->container->get( is_admin() ? CheckoutFieldsAdmin::class : CheckoutFieldsFrontend::class )->init();
 		}
 
-		// Register block types on demand right before do_blocks() renders a product/variation description. The
-		// eager registration below is skipped for the Store API and everything BlockRegistrationContext
-		// blacklists (products REST, cron, AJAX, ...), yet those contexts still run descriptions through
-		// do_blocks on this filter, so a dynamic block in a description would render empty there. Priority 8 runs
-		// before do_blocks (9); register_blocks() is idempotent, so this is a cheap no-op otherwise.
-		add_filter( 'woocommerce_short_description', array( $this, 'register_block_types_for_description_rendering' ), 8 );
+		// Register block types on demand (priority 8, before do_blocks at 9) so blocks in a description are not empty.
+		add_filter( 'woocommerce_short_description', array( $this, 'maybe_register_blocks_from_content' ), 8 );
 
 		// Load assets unless this is a request specifically for the store API.
 		if ( ! $is_store_api_request ) {
@@ -179,15 +175,14 @@ class Bootstrap {
 	 * Callback for the woocommerce_short_description filter; see the add_filter call in init() for the rationale.
 	 * Returns the content unchanged and runs only for its registration side effect.
 	 *
-	 * @since 11.0.0
+	 * @since 11.1.0
 	 *
 	 * @param string $content The description content passed through the filter.
 	 * @return string The unchanged content.
 	 */
-	public function register_block_types_for_description_rendering( $content ) {
-		// Only register when the description actually contains a WooCommerce block — registration is costly
-		// (~4ms, see issue #65926) and wasted on the plain descriptions that make up most of these requests.
-		if ( is_string( $content ) && false !== strpos( $content, 'wp:woocommerce/' ) ) {
+	public function maybe_register_blocks_from_content( $content ) {
+		// Only register when the description actually contains a WooCommerce block.
+		if ( is_string( $content ) && false !== strpos( $content, '<!-- wp:woocommerce/' ) ) {
 			$this->container->get( BlockTypesController::class )->register_blocks();
 		}
 
