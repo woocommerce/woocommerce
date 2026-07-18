@@ -10,7 +10,6 @@ import type {
 	SettingsFieldComponentRegistration,
 	SettingsFieldContext,
 	SettingsFieldValidator,
-	SettingsRegionComponent,
 	SettingsSaveHandler,
 	SettingsVisibilityPredicate,
 } from './types';
@@ -24,10 +23,7 @@ const registrationMapKeys = [
 	'fieldVisibility',
 	'groupVisibility',
 	'saveHandlers',
-	'regions',
 ] as const;
-
-type RegistrationMapKey = ( typeof registrationMapKeys )[ number ];
 
 const isPlainRecord = ( value: unknown ): value is Record< string, unknown > =>
 	typeof value === 'object' && value !== null && ! Array.isArray( value );
@@ -98,51 +94,6 @@ const findInMatchingRegistrations = < T >(
 	return undefined;
 };
 
-const getScopeKey = ( scope: SettingsExtensionRegistration[ 'scope' ] ) =>
-	`${ scope.page }::${
-		hasSectionScope( scope ) ? scope.section || 'default' : '*'
-	}`;
-
-const hasDuplicateScopeAndKeys = (
-	registration: SettingsExtensionRegistration,
-	key: RegistrationMapKey
-) => {
-	const entries = registration[ key ];
-	if ( ! entries ) {
-		return;
-	}
-
-	const incomingKeys = Object.keys( entries );
-	if ( incomingKeys.length === 0 ) {
-		return;
-	}
-
-	const scopeKey = getScopeKey( registration.scope );
-	for ( const existing of registrations ) {
-		if ( getScopeKey( existing.scope ) !== scopeKey ) {
-			continue;
-		}
-
-		const existingEntries = existing[ key ];
-		if ( ! existingEntries ) {
-			continue;
-		}
-
-		if (
-			incomingKeys.some( ( entryKey ) =>
-				Object.prototype.hasOwnProperty.call(
-					existingEntries,
-					entryKey
-				)
-			)
-		) {
-			return true;
-		}
-	}
-
-	return false;
-};
-
 export const registerSettingsExtension = (
 	registration: SettingsExtensionRegistration
 ) => {
@@ -151,27 +102,6 @@ export const registerSettingsExtension = (
 			registration,
 		} );
 		return;
-	}
-
-	const hasDuplicateKeys = registrationMapKeys.some( ( key ) =>
-		hasDuplicateScopeAndKeys( registration, key )
-	);
-
-	if ( hasDuplicateKeys ) {
-		warn(
-			`Registration already exists for scope "${ getScopeKey(
-				registration.scope
-			) }". Replacing the existing registration.`,
-			{ registration }
-		);
-		for ( let i = registrations.length - 1; i >= 0; i-- ) {
-			if (
-				getScopeKey( registrations[ i ].scope ) ===
-				getScopeKey( registration.scope )
-			) {
-				registrations.splice( i, 1 );
-			}
-		}
 	}
 
 	registrations.push( registration );
@@ -282,29 +212,3 @@ export const resolveSaveHandler = (
 	warn( `Save handler "${ handler }" is not registered.`, { context } );
 	return undefined;
 };
-
-export const resolveRegionComponent = (
-	component: string,
-	context: SettingsFieldContext
-): SettingsRegionComponent | undefined => {
-	const region = findInMatchingRegistrations(
-		context,
-		( registration ) => registration.regions?.[ component ]
-	);
-
-	if ( region ) {
-		return region;
-	}
-
-	warn( `Region component "${ component }" is not registered.`, {
-		context,
-	} );
-	return undefined;
-};
-
-if ( typeof window !== 'undefined' ) {
-	window.wcSettingsUI = {
-		...( window.wcSettingsUI || {} ),
-		registerSettingsExtension,
-	};
-}

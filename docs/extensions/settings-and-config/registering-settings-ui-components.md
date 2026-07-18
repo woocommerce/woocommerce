@@ -54,6 +54,8 @@ registerSettingsExtension( {
 
 Registrations are scoped by settings page and, optionally, by section. This prevents one plugin from accidentally replacing another plugin's field behavior. Omit `section` for a page-wide registration, use `section: ''` for the default section only, or pass a section id such as `section: 'payments'` for one named section.
 
+Multiple registrations can share a scope. Their entries are combined, and the most recently registered value wins when the same key appears more than once.
+
 ## Component props
 
 Custom components receive DataForm control props, re-exported as `SettingsEditControlProps`. The main props are:

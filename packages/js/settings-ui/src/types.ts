@@ -116,7 +116,6 @@ export type SettingsUIShell = {
 	badges?: SettingsUIShellBadge[];
 	navigation?: SettingsUIShellNavigationItem[];
 	sectionNavigation?: SettingsUIShellNavigationItem[];
-	navigationComponent?: string;
 };
 
 export type SettingsUISchema = {
@@ -216,17 +215,6 @@ export type SettingsSaveHandler = (
 	args: SettingsSaveHandlerArgs
 ) => Promise< SettingsSaveResult > | SettingsSaveResult;
 
-export type SettingsRegionComponentProps = {
-	values: SettingsValues;
-	initialValues: SettingsValues;
-	context: SettingsFieldContext;
-	schema: SettingsUISchema;
-};
-
-export type SettingsRegionComponent = (
-	props: SettingsRegionComponentProps
-) => JSX.Element | null;
-
 export type SettingsExtensionScope = {
 	page: string;
 	section?: string;
@@ -240,17 +228,4 @@ export type SettingsExtensionRegistration = {
 	fieldVisibility?: Record< string, SettingsVisibilityPredicate >;
 	groupVisibility?: Record< string, SettingsVisibilityPredicate >;
 	saveHandlers?: Record< string, SettingsSaveHandler >;
-	regions?: Record< string, SettingsRegionComponent >;
 };
-
-export type SettingsUIRegistry = {
-	registerSettingsExtension: (
-		registration: SettingsExtensionRegistration
-	) => void;
-};
-
-declare global {
-	interface Window {
-		wcSettingsUI?: SettingsUIRegistry;
-	}
-}

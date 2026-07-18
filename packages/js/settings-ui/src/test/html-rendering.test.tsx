@@ -366,6 +366,64 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it( 'submits form-post save buttons once through the native form', () => {
+		const requestSubmit = jest
+			.spyOn( HTMLFormElement.prototype, 'requestSubmit' )
+			.mockImplementation( () => undefined );
+		const handleSubmit = jest.fn( ( event: Event ) => {
+			event.preventDefault();
+		} );
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							value: 'Initial value',
+						},
+					],
+				},
+			},
+		};
+		const { container, form, root } = renderElementInMainForm(
+			<SettingsUIPage schema={ schema } />
+		);
+		form.addEventListener( 'submit', handleSubmit );
+
+		try {
+			const input = container.querySelector(
+				'input.components-input-control__input'
+			);
+			const saveButton = container.querySelector(
+				'.woocommerce-save-button'
+			);
+
+			expect( input ).toBeInstanceOf( HTMLInputElement );
+			expect( saveButton ).toBeInstanceOf( HTMLButtonElement );
+
+			act( () => {
+				changeTextInput( input as HTMLInputElement, 'Changed value' );
+			} );
+			act( () => {
+				( saveButton as HTMLButtonElement ).click();
+			} );
+
+			expect( requestSubmit ).not.toHaveBeenCalled();
+			expect( handleSubmit ).toHaveBeenCalledTimes( 1 );
+		} finally {
+			form.removeEventListener( 'submit', handleSubmit );
+			act( () => root.unmount() );
+			form.remove();
+		}
+	} );
+
 	it( 'prompts before navigating away with unsaved changes', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',

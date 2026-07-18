@@ -34,7 +34,7 @@ import { createDataFormAdapter } from './dataform-adapter';
 import { HiddenInputs } from './hidden-inputs';
 import { error } from './diagnostics';
 import { sanitizeSettingsHtml, toSanitizedHtmlNode } from './html';
-import { resolveRegionComponent, resolveSaveHandler } from './registry';
+import { resolveSaveHandler } from './registry';
 import { areValuesEqual } from './values';
 import { SettingsUIPageContext } from './settings-ui-context';
 import type {
@@ -137,7 +137,7 @@ const setFormPostRedirectInput = ( form: HTMLFormElement, href: string ) => {
 	redirectInput.value = href;
 };
 
-const shouldPromptForNavigation = ( event: MouseEvent ) => {
+const getNavigationHref = ( event: MouseEvent ) => {
 	if (
 		event.defaultPrevented ||
 		event.button !== 0 ||
@@ -146,38 +146,28 @@ const shouldPromptForNavigation = ( event: MouseEvent ) => {
 		event.shiftKey ||
 		event.altKey
 	) {
-		return false;
+		return undefined;
 	}
 
 	const target = event.target;
-
-	if ( ! ( target instanceof Element ) ) {
-		return false;
-	}
-
-	const link = target.closest( 'a[href]' );
-
-	if ( ! ( link instanceof HTMLAnchorElement ) ) {
-		return false;
-	}
-
-	if ( link.target && link.target !== '_self' ) {
-		return false;
-	}
-
-	return Boolean( link.href ) && link.href !== window.location.href;
-};
-
-const getNavigationHref = ( event: MouseEvent ) => {
-	const target = event.target;
-
-	if ( ! ( target instanceof Element ) ) {
+	if (
+		! ( target instanceof Element ) ||
+		! target.closest( '.wc-settings-ui-shell, #mainform .subsubsub' )
+	) {
 		return undefined;
 	}
 
 	const link = target.closest( 'a[href]' );
+	if (
+		! ( link instanceof HTMLAnchorElement ) ||
+		( link.target && link.target !== '_self' ) ||
+		! link.href ||
+		link.href === window.location.href
+	) {
+		return undefined;
+	}
 
-	return link instanceof HTMLAnchorElement ? link.href : undefined;
+	return link.href;
 };
 
 const UnsavedChangesModal = ( {
@@ -382,29 +372,19 @@ export class SettingsUIErrorBoundary extends Component<
 
 const ShellHeader = ( {
 	schema,
-	context,
-	values,
-	initialValues,
 	actions,
 	children,
 }: {
 	schema: SettingsUISchema;
-	context: SettingsFieldContext;
-	values: SettingsValues;
-	initialValues: SettingsValues;
 	actions?: ReactNode;
 	children: ReactNode;
 } ) => {
 	const shell = schema.shell || {};
 	const showHeader = shell.header === 'visible';
 	const title = shell.title || schema.title;
-	const NavigationComponent = shell.navigationComponent
-		? resolveRegionComponent( shell.navigationComponent, context )
-		: undefined;
 	const hasNavigation = Boolean(
 		( shell.navigation && shell.navigation.length > 0 ) ||
-			( shell.sectionNavigation && shell.sectionNavigation.length > 0 ) ||
-			NavigationComponent
+			( shell.sectionNavigation && shell.sectionNavigation.length > 0 )
 	);
 
 	const breadcrumbs =
@@ -528,14 +508,6 @@ const ShellHeader = ( {
 								</a>
 							) ) }
 						</nav>
-					) : null }
-					{ NavigationComponent ? (
-						<NavigationComponent
-							values={ values }
-							initialValues={ initialValues }
-							context={ context }
-							schema={ schema }
-						/>
 					) : null }
 				</div>
 			) : null }
@@ -765,19 +737,6 @@ export const SettingsUIPage = ( {
 		}
 
 		const handleNavigationClick = ( event: MouseEvent ) => {
-			const target = event.target;
-
-			if (
-				! ( target instanceof Element ) ||
-				// The classic section links render outside the shell on top-level pages.
-				! target.closest(
-					'.wc-settings-ui-shell, #mainform .subsubsub'
-				) ||
-				! shouldPromptForNavigation( event )
-			) {
-				return;
-			}
-
 			const href = getNavigationHref( event );
 
 			if ( ! href ) {
@@ -851,10 +810,10 @@ export const SettingsUIPage = ( {
 				value={ saveButtonLabel }
 				disabled={ ! isDirty || isSaving || ! isValid }
 				isBusy={ isSaving }
-				onClick={ () =>
+				onClick={
 					saveStrategy.adapter === 'form_post'
-						? submitSettingsForm()
-						: handleCustomSave()
+						? allowNavigation
+						: handleCustomSave
 				}
 			>
 				{ saveButtonLabel }
@@ -863,13 +822,7 @@ export const SettingsUIPage = ( {
 
 	return (
 		<SettingsUIPageContext.Provider value={ pageContextValue }>
-			<ShellHeader
-				schema={ schema }
-				context={ context }
-				values={ values }
-				initialValues={ initialValues }
-				actions={ saveButton }
-			>
+			<ShellHeader schema={ schema } actions={ saveButton }>
 				{ pendingNavigation ? (
 					<UnsavedChangesModal
 						isSaving={ isSaving }

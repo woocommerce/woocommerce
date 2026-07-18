@@ -8,13 +8,11 @@ import {
 	resolveFieldValidator,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
-	resolveRegionComponent,
 	resolveSaveHandler,
 } from '../registry';
 import type {
 	SettingsExtensionRegistration,
 	SettingsFieldComponent,
-	SettingsRegionComponent,
 	SettingsSaveHandler,
 	SettingsVisibilityPredicate,
 } from '../types';
@@ -112,6 +110,45 @@ describe( 'settings extension registry', () => {
 				{ page: 'registry-precedence' }
 			)
 		).toBe( fieldOverride );
+	} );
+
+	it( 'composes registrations in the same scope while newer keys take precedence', () => {
+		const originalComponent: SettingsFieldComponent = () => null;
+		const replacementComponent: SettingsFieldComponent = () => null;
+		const saveHandler: SettingsSaveHandler = () => undefined;
+
+		registerSettingsExtension( {
+			scope: { page: 'registry-composition' },
+			components: {
+				'test/component': originalComponent,
+			},
+			saveHandlers: {
+				'test/save': saveHandler,
+			},
+		} );
+		registerSettingsExtension( {
+			scope: { page: 'registry-composition' },
+			components: {
+				'test/component': replacementComponent,
+			},
+		} );
+
+		expect(
+			resolveFieldComponent(
+				{
+					id: 'field',
+					label: 'Field',
+					type: 'text',
+					component: 'test/component',
+				},
+				{ page: 'registry-composition' }
+			)
+		).toBe( replacementComponent );
+		expect(
+			resolveSaveHandler( 'test/save', {
+				page: 'registry-composition',
+			} )
+		).toBe( saveHandler );
 	} );
 
 	it( 'ignores malformed registration payloads', () => {
@@ -296,29 +333,20 @@ describe( 'settings extension registry', () => {
 		).toBeUndefined();
 	} );
 
-	it( 'resolves save handlers and region components by scope', () => {
+	it( 'resolves save handlers by scope', () => {
 		const saveHandler: SettingsSaveHandler = () => undefined;
-		const region: SettingsRegionComponent = () => null;
 
 		registerSettingsExtension( {
-			scope: { page: 'registry-save-region' },
+			scope: { page: 'registry-save' },
 			saveHandlers: {
 				'save/handler': saveHandler,
-			},
-			regions: {
-				'region/component': region,
 			},
 		} );
 
 		expect(
 			resolveSaveHandler( 'save/handler', {
-				page: 'registry-save-region',
+				page: 'registry-save',
 			} )
 		).toBe( saveHandler );
-		expect(
-			resolveRegionComponent( 'region/component', {
-				page: 'registry-save-region',
-			} )
-		).toBe( region );
 	} );
 } );
