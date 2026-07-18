@@ -915,7 +915,49 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		} elseif ( $product->child_is_on_backorder() ) {
 			$product->set_stock_status( ProductStockStatus::ON_BACKORDER );
 		} else {
-			$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+			$stock_status                = ProductStockStatus::OUT_OF_STOCK;
+			$core_stock_statuses         = array(
+				ProductStockStatus::IN_STOCK     => true,
+				ProductStockStatus::OUT_OF_STOCK => true,
+				ProductStockStatus::ON_BACKORDER => true,
+			);
+			$custom_stock_status_options = array_diff_key( wc_get_product_stock_status_options(), $core_stock_statuses );
+
+			if ( $custom_stock_status_options ) {
+				$children = array_values( array_unique( array_filter( array_map( 'absint', (array) $product->get_children() ) ) ) );
+
+				if ( $children ) {
+					global $wpdb;
+
+					$format                  = array_fill( 0, count( $children ), '%d' );
+					$query_in                = '(' . implode( ',', $format ) . ')';
+					$expected_children_count = count( $children );
+					$query_args              = array_merge( $children, array( $expected_children_count, $expected_children_count ) );
+
+					// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+					if ( get_option( 'woocommerce_product_lookup_table_is_generating' ) ) {
+						$query = "SELECT MIN( BINARY meta_value ) FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND post_id IN {$query_in} HAVING COUNT( DISTINCT BINARY meta_value ) = 1 AND COUNT( meta_value ) = COUNT( * ) AND COUNT( DISTINCT post_id ) = %d AND COUNT( * ) = %d";
+					} else {
+						$query = "SELECT MIN( BINARY stock_status ) FROM {$wpdb->wc_product_meta_lookup} WHERE product_id IN {$query_in} HAVING COUNT( DISTINCT BINARY stock_status ) = 1 AND COUNT( stock_status ) = COUNT( * ) AND COUNT( DISTINCT product_id ) = %d AND COUNT( * ) = %d";
+					}
+
+					$children_stock_status = $wpdb->get_var( $wpdb->prepare( $query, $query_args ) );
+					// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+					if ( is_string( $children_stock_status ) && array_key_exists( $children_stock_status, $custom_stock_status_options ) ) {
+						$stock_status = $children_stock_status;
+					}
+				}
+			}
+
+			if ( ProductStockStatus::OUT_OF_STOCK !== $stock_status && ! array_key_exists( $stock_status, wc_get_product_stock_status_options() ) ) {
+				$stock_status = ProductStockStatus::OUT_OF_STOCK;
+			}
+
+			$product->set_stock_status( $stock_status );
+			if ( ProductStockStatus::OUT_OF_STOCK !== $stock_status && $stock_status !== $product->get_stock_status( 'edit' ) ) {
+				$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+			}
 		}
 	}
 
