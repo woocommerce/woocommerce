@@ -37,7 +37,6 @@
 	"dependencies": {
 		"@woocommerce/sanitize": "workspace:*",
 		"@wordpress/admin-ui": "catalog:wp-bundled",
-		"@wordpress/a11y": "catalog:wp-min",
 		"@wordpress/components": "37.0.0",
 		"@wordpress/date": "catalog:wp-min",
 		"@wordpress/dataviews": "17.2.0",
@@ -105,7 +104,7 @@
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": [
-						"jest.config.json",
+						"jest.config.js",
 						"tsconfig.json",
 						"src/**/*.{js,jsx,ts,tsx}"
 					],

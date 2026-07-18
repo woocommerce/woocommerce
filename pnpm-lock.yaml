@@ -2433,9 +2433,6 @@ importers:
       '@woocommerce/sanitize':
         specifier: workspace:*
         version: link:../sanitize
-      '@wordpress/a11y':
-        specifier: catalog:wp-min
-        version: 4.33.1
       '@wordpress/admin-ui':
         specifier: catalog:wp-bundled
         version: 2.4.1(@date-fns/tz@1.4.1)(@emotion/is-prop-valid@1.4.0)(@types/react@18.3.28)(date-fns@4.1.0)(postcss@8.5.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
