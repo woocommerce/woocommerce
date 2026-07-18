@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use saved payment tokens' native display names in Checkout without exposing account actions.
