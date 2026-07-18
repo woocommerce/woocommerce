@@ -10,6 +10,15 @@ import tracksActions, { resetShippingPartnerImpressionFlag } from '../tracks';
 import type { CoreProfilerStateMachineContext } from '../../index';
 import type { PluginInstallError } from '../../services/installAndActivatePlugins';
 
+jest.mock( '../../pages/BusinessInfo', () => ( {
+	POSSIBLY_DEFAULT_STORE_NAMES: [
+		undefined,
+		'woocommerce',
+		'Site Title',
+		'',
+	],
+} ) );
+
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
