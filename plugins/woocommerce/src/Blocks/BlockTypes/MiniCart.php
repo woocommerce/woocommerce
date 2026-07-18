@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
+use Automattic\WooCommerce\Blocks\Utils\BlockIconUtils;
 use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
@@ -313,7 +314,7 @@ class MiniCart extends AbstractBlock {
 			$icon_color               = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
 			$product_count_color      = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
 			$styles                   = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
-			$icon                     = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
+			$icon                     = BlockIconUtils::get_cart_icon( $attributes['miniCartIcon'] ?? '', $icon_color, $this->get_full_block_name(), $attributes );
 			$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
 			$wrapper_classes          = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
 			$wrapper_styles           = $classes_styles['styles'];
@@ -617,7 +618,7 @@ class MiniCart extends AbstractBlock {
 		$icon_color          = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
 		$product_count_color = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
 		$styles              = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
-		$icon                = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
+		$icon                = BlockIconUtils::get_cart_icon( $attributes['miniCartIcon'] ?? '', $icon_color, $this->get_full_block_name(), $attributes );
 
 		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
 
