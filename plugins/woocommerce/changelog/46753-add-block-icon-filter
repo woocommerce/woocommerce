@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a safe PHP filter for replacing decorative Mini-Cart, Cart Link, and Customer Account block icons.
