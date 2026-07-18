@@ -35,7 +35,7 @@ export interface SavedPaymentMethod {
 	expires: string;
 	is_default: boolean;
 	tokenId: number;
-	actions: ObjectType;
+	display_name?: string;
 }
 export type SavedPaymentMethods =
 	| Record< string, SavedPaymentMethod[] >

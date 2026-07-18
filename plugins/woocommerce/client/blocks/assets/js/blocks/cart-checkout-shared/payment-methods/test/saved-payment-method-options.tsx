@@ -39,6 +39,7 @@ mockedUseSelect.mockImplementation(
 								{
 									tokenId: 1,
 									expires: '1/2099',
+									display_name: 'Primary Visa ending in 1234',
 									method: {
 										brand: 'Visa',
 										gateway:
@@ -77,6 +78,42 @@ mockedUseSelect.mockImplementation(
 									},
 								},
 							],
+							wallet: [
+								{
+									tokenId: 5,
+									expires: '',
+									display_name:
+										'Evergreen wallet ending in 2468',
+									method: {
+										brand: '',
+										gateway:
+											'can-pay-true-test-payment-method',
+										last4: '',
+									},
+								},
+								{
+									tokenId: 6,
+									expires: '',
+									display_name: '   ',
+									method: {
+										brand: '',
+										gateway:
+											'can-pay-true-test-payment-method',
+										last4: '',
+									},
+								},
+								{
+									tokenId: 7,
+									expires: '',
+									display_name: 2468 as unknown as string,
+									method: {
+										brand: '',
+										gateway:
+											'can-pay-true-test-payment-method',
+										last4: '',
+									},
+								},
+							],
 						};
 					},
 				};
@@ -108,8 +145,15 @@ describe( 'SavedPaymentMethodOptions', () => {
 
 		// First saved token for can-pay-true-test-payment-method.
 		expect(
-			screen.getByText( 'Visa ending in 1234 (expires 1/2099)' )
+			screen.getByRole( 'radio', {
+				name: 'Primary Visa ending in 1234',
+			} )
 		).toBeInTheDocument();
+		expect(
+			screen.queryByRole( 'radio', {
+				name: 'Visa ending in 1234 (expires 1/2099)',
+			} )
+		).not.toBeInTheDocument();
 
 		// Second saved token for can-pay-true-test-payment-method.
 		expect(
@@ -127,6 +171,18 @@ describe( 'SavedPaymentMethodOptions', () => {
 				'Cartes Bancaires ending in 1001 (expires 1/2099)'
 			)
 		).toBeInTheDocument();
+
+		// Generic saved tokens use a valid native name and otherwise fall back.
+		expect(
+			screen.getByRole( 'radio', {
+				name: 'Evergreen wallet ending in 2468',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getAllByRole( 'radio', {
+				name: 'Saved token for can-pay-true-test-payment-method',
+			} )
+		).toHaveLength( 2 );
 	} );
 	it( "does not show saved methods when the method's canPay function returns false", () => {
 		registerPaymentMethod( {

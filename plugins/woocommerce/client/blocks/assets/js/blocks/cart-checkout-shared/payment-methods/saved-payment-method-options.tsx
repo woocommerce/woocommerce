@@ -116,11 +116,17 @@ const SavedPaymentMethodOptions = () => {
 				}
 				const isCC = type === 'cc' || type === 'echeck';
 				const paymentMethodSlug = paymentMethod.method.gateway;
+				const displayName =
+					typeof paymentMethod.display_name === 'string'
+						? paymentMethod.display_name.trim()
+						: '';
 				return {
 					name: `wc-saved-payment-method-token-${ paymentMethodSlug }`,
-					label: isCC
-						? getCcOrEcheckLabel( paymentMethod )
-						: getDefaultLabel( paymentMethod ),
+					label:
+						displayName ||
+						( isCC
+							? getCcOrEcheckLabel( paymentMethod )
+							: getDefaultLabel( paymentMethod ) ),
 					value: paymentMethod.tokenId.toString(),
 					onChange: ( token: string ) => {
 						const savedTokenKey = `wc-${ paymentMethodSlug }-payment-token`;

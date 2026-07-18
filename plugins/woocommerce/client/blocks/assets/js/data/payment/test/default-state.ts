@@ -147,12 +147,7 @@ describe( 'defaultPaymentState', () => {
 							tokenId: 123,
 							is_default: true,
 							expires: '10/99',
-							actions: {
-								default: {
-									name: 'Delete',
-									url: 'https://example.com',
-								},
-							},
+							display_name: 'Saved card ending in 1234',
 						},
 					],
 				};
@@ -179,12 +174,7 @@ describe( 'defaultPaymentState', () => {
 							tokenId: 123,
 							is_default: true,
 							expires: '10/99',
-							actions: {
-								default: {
-									name: 'Delete',
-									url: 'https://example.com',
-								},
-							},
+							display_name: 'Saved card ending in 1234',
 						},
 					],
 				};
@@ -217,12 +207,7 @@ describe( 'defaultPaymentState', () => {
 							tokenId: 123,
 							is_default: true,
 							expires: '10/99',
-							actions: {
-								default: {
-									name: 'Delete',
-									url: 'https://example.com',
-								},
-							},
+							display_name: 'Saved card ending in 1234',
 						},
 					],
 				};
