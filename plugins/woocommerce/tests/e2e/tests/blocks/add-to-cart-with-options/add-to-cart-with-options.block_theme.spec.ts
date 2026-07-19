@@ -1507,33 +1507,164 @@ test.describe( 'Add to Cart + Options Block', () => {
 			},
 		];
 
-		test.beforeEach( async () => {
-			const cliOutput = await wpCLI(
-				`wc product create --user=1 --slug="${ productSlug }" --name="${ productName }" --type="variable" --attributes='${ JSON.stringify(
-					productAttributes
-				) }'`
-			);
-			const match: RegExpMatchArray | null = cliOutput.stdout.match(
-				/Success:\s+Created\s+product\s+(\d+)\.\n?$/
-			);
-			const productId: string | null = match ? match[ 1 ] : null;
-			if ( ! productId ) {
+		test.beforeEach( async ( { requestUtils } ) => {
+			const productResponse = await requestUtils.rest< unknown >( {
+				method: 'POST',
+				path: 'wc/v3/products',
+				data: {
+					name: productName,
+					slug: productSlug,
+					type: 'variable',
+					status: 'publish',
+					attributes: productAttributes,
+				},
+			} );
+
+			if ( typeof productResponse !== 'object' || ! productResponse ) {
 				throw new Error(
-					`No productId found, cliOutput: ${ JSON.stringify(
-						cliOutput,
+					`Unexpected parent product response: ${ JSON.stringify(
+						productResponse,
 						null,
 						2
 					) }`
 				);
 			}
 
-			for ( const productVariation of productVariations ) {
-				await wpCLI(
-					`wc product_variation create --user=1 "${ productId }" --regular_price="${ productPrice }" --attributes='${ JSON.stringify(
-						productVariation.attributes
-					) }'`
+			const product = productResponse as Record< string, unknown >;
+			const productId = product.id;
+			const createdProductAttributes = product.attributes;
+			if (
+				typeof productId !== 'number' ||
+				! Number.isInteger( productId ) ||
+				productId <= 0 ||
+				! Array.isArray( createdProductAttributes ) ||
+				! createdProductAttributes.every(
+					( attribute ) =>
+						typeof attribute === 'object' && attribute !== null
+				)
+			) {
+				throw new Error(
+					`Unexpected parent product response: ${ JSON.stringify(
+						productResponse,
+						null,
+						2
+					) }`
 				);
 			}
+
+			expect( product ).toMatchObject( {
+				name: productName,
+				slug: productSlug,
+				type: 'variable',
+				status: 'publish',
+			} );
+			expect(
+				createdProductAttributes.map(
+					( { name, options, variation, visible } ) => ( {
+						name,
+						options,
+						variation,
+						visible,
+					} )
+				)
+			).toEqual( productAttributes );
+
+			const variationBatchResponse = await requestUtils.rest< unknown >( {
+				method: 'POST',
+				path: `wc/v3/products/${ productId }/variations/batch`,
+				data: {
+					create: productVariations.map( ( variation ) => ( {
+						...variation,
+						status: 'publish',
+						regular_price: productPrice,
+					} ) ),
+				},
+			} );
+
+			if (
+				typeof variationBatchResponse !== 'object' ||
+				! variationBatchResponse
+			) {
+				throw new Error(
+					`Unexpected variation-batch response: ${ JSON.stringify(
+						variationBatchResponse,
+						null,
+						2
+					) }`
+				);
+			}
+
+			const variationBatch = variationBatchResponse as Record<
+				string,
+				unknown
+			>;
+			const createdVariations = variationBatch.create;
+			if (
+				! Array.isArray( createdVariations ) ||
+				! createdVariations.every( ( variation ) => {
+					if ( typeof variation !== 'object' || ! variation ) {
+						return false;
+					}
+
+					const createdVariation = variation as Record<
+						string,
+						unknown
+					>;
+					return (
+						typeof createdVariation.id === 'number' &&
+						Number.isInteger( createdVariation.id ) &&
+						createdVariation.id > 0 &&
+						createdVariation.status === 'publish' &&
+						createdVariation.regular_price === productPrice &&
+						Array.isArray( createdVariation.attributes ) &&
+						createdVariation.attributes.every(
+							( attribute ) =>
+								typeof attribute === 'object' &&
+								attribute !== null
+						)
+					);
+				} )
+			) {
+				throw new Error(
+					`Unexpected variation-batch response: ${ JSON.stringify(
+						variationBatchResponse,
+						null,
+						2
+					) }`
+				);
+			}
+
+			const successfulVariations = createdVariations as {
+				id: number;
+				attributes: {
+					name: string;
+					option: string;
+				}[];
+			}[];
+			expect( successfulVariations ).toHaveLength(
+				productVariations.length
+			);
+			const variationIds = successfulVariations.map( ( { id } ) => id );
+			expect( new Set( variationIds ).size ).toBe(
+				productVariations.length
+			);
+
+			const actualAttributeCombinations = successfulVariations
+				.map( ( { attributes } ) =>
+					JSON.stringify(
+						attributes.map( ( { name, option } ) => ( {
+							name,
+							option,
+						} ) )
+					)
+				)
+				.sort();
+			const expectedAttributeCombinations = productVariations
+				.map( ( { attributes } ) => JSON.stringify( attributes ) )
+				.sort();
+			expect( actualAttributeCombinations ).toEqual(
+				expectedAttributeCombinations
+			);
 		} );
 
 		for ( const optionStyle of [ 'chips', 'dropdown' ] as (
