@@ -100,7 +100,7 @@ const SETTINGS_UI_PKG_DIR = path.resolve(
 	`${ WC_ADMIN_PACKAGES_DIR }/settings-ui`
 );
 const SETTINGS_UI_GRAPH_ISSUER =
-	/[\/\\]packages[\/\\]js[\/\\]settings-ui[\/\\]|@wordpress\+(?:dataviews@17|ui@0\.18|components@37|theme@1|rich-text@7|compose@8)/;
+	/[\/\\]packages[\/\\]js[\/\\]settings-ui[\/\\]|@wordpress\+(?:dataviews@17\.|ui@0\.18\.|components@37\.|theme@1\.|rich-text@7\.|compose@8\.)/;
 
 const resolveEsmEntryFrom = ( request, fromDir ) => {
 	const resolvedEntry = require.resolve( request, { paths: [ fromDir ] } );
@@ -139,6 +139,32 @@ const getSettingsUiModuleEntries = () => {
 	};
 };
 const settingsUiModuleEntries = getSettingsUiModuleEntries();
+
+// The issuer regex must match the pinned copies' on-disk paths, or their
+// @wordpress imports silently externalize to the older wp.* runtime
+// copies and break at runtime. Pin bumps and pnpm layout changes both
+// desync it, so fail the build here instead.
+const assertSettingsUiIssuerMatches = () => {
+	const uiDir = path.dirname(
+		resolveEsmEntryFrom( '@wordpress/ui', SETTINGS_UI_PKG_DIR )
+	);
+	const issuerModules = [
+		resolveEsmEntryFrom( '@wordpress/dataviews', SETTINGS_UI_PKG_DIR ),
+		uiDir,
+		resolveEsmEntryFrom( '@wordpress/theme', uiDir ),
+		settingsUiModuleEntries[ '@wordpress/components' ],
+		settingsUiModuleEntries[ '@wordpress/compose' ],
+		settingsUiModuleEntries[ '@wordpress/rich-text' ],
+	];
+	issuerModules.forEach( ( modulePath ) => {
+		if ( ! SETTINGS_UI_GRAPH_ISSUER.test( modulePath ) ) {
+			throw new Error(
+				`SETTINGS_UI_GRAPH_ISSUER does not match "${ modulePath }". Update the regex to cover the pinned settings-ui packages.`
+			);
+		}
+	} );
+};
+assertSettingsUiIssuerMatches();
 
 // Packages opt into having admin bundle their stylesheet by exporting a
 // `src/style.scss` next to `src/index.ts`. The file isn't imported from
