@@ -26,7 +26,7 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 
 			return (string) ob_get_clean();
 		} finally {
-			if ( ob_get_level() > $buffer_level ) {
+			while ( ob_get_level() > $buffer_level ) {
 				ob_end_clean();
 			}
 			$product = $previous_product;
