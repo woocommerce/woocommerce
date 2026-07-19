@@ -516,6 +516,30 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It keeps local datetimes inside a DST gap as the shifted instant.
+	 */
+	public function test_from_legacy_settings_accepts_dst_gap_datetime_values(): void {
+		$original_timezone = get_option( 'timezone_string' );
+		update_option( 'timezone_string', 'America/New_York' );
+
+		try {
+			$field = $this->transform_field(
+				array(
+					'id'    => 'woocommerce_test_datetime',
+					'type'  => 'datetime-local',
+					'value' => '2026-03-08T02:30',
+				)
+			);
+		} finally {
+			update_option( 'timezone_string', $original_timezone );
+		}
+
+		// 02:30 does not exist on this date in New York; PHP parses it as 03:30 EDT.
+		$this->assertSame( '2026-03-08T07:30:00+00:00', $field['value'] );
+		$this->assertSame( '2026-03-08T02:30', $field['save']['initialValue'] );
+	}
+
+	/**
 	 * @testdox It rejects invalid local datetime settings.
 	 */
 	public function test_from_legacy_settings_rejects_invalid_datetime_values(): void {

@@ -374,10 +374,13 @@ class SettingsUISchema {
 			throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" does not contain a valid local datetime.', esc_html( $field_id ) ) );
 		}
 
+		// Parse warnings reject malformed values. Wall-clock times inside a
+		// DST gap parse to the shifted instant and are kept: rejecting them
+		// would fall the whole page back to the legacy renderer.
 		foreach ( array( 'Y-m-d\\TH:i:s', 'Y-m-d\\TH:i' ) as $format ) {
 			$date   = \DateTimeImmutable::createFromFormat( '!' . $format, $value, wp_timezone() );
 			$errors = \DateTimeImmutable::getLastErrors();
-			if ( $date && ( false === $errors || ( 0 === $errors['warning_count'] && 0 === $errors['error_count'] ) ) && $date->format( $format ) === $value ) {
+			if ( $date && ( false === $errors || ( 0 === $errors['warning_count'] && 0 === $errors['error_count'] ) ) ) {
 				return $date->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d\\TH:i:sP' );
 			}
 		}
