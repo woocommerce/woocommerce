@@ -201,7 +201,10 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 			} );
 	} );
 
-	test( 'should show all products', async ( { frontendUtils } ) => {
+	test( 'should show all products and then only products that match the filter', async ( {
+		page,
+		frontendUtils,
+	} ) => {
 		const allProductsBlock = await frontendUtils.getBlockByName(
 			'woocommerce/all-products'
 		);
@@ -216,28 +219,6 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		const products = allProductsBlock.getByRole( 'listitem' );
 
 		await expect( products ).toHaveCount( 9 );
-	} );
-
-	test( 'should show only products that match the filter', async ( {
-		page,
-		frontendUtils,
-	} ) => {
-		// The price filter input is initially enabled, but it becomes disabled
-		// for the time it takes to fetch the data. To avoid setting the filter
-		// value before the input is properly initialized, we wait for the input
-		// to be disabled first. This is a safeguard to avoid flakiness which
-		// should be addressed in the code, but All Products block will be
-		// deprecated in the future, so we are not going to optimize it.
-		await page
-			.getByRole( 'textbox', {
-				name: 'Filter products by maximum price',
-				disabled: true,
-			} )
-			.waitFor( { timeout: 3000 } )
-			.catch( () => {
-				// Do not throw in case Playwright doesn't make it in time for the
-				// initial (pre-request) render.
-			} );
 
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
@@ -247,19 +228,12 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		await maxPriceInput.fill( '$5' );
 		await maxPriceInput.press( 'Tab' );
 
-		const allProductsBlock = await frontendUtils.getBlockByName(
-			'woocommerce/all-products'
-		);
-
-		const img = allProductsBlock.locator( 'img' ).first();
 		await expect( img ).not.toHaveAttribute(
 			'src',
 			blockData.placeholderUrl
 		);
 
-		const allProducts = allProductsBlock.getByRole( 'listitem' );
-
-		await expect( allProducts ).toHaveCount( 1 );
+		await expect( products ).toHaveCount( 1 );
 		expect( page.url() ).toContain(
 			blockData.urlSearchParamWhenFilterIsApplied
 		);
@@ -290,7 +264,10 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await page.goto( '/shop' );
 	} );
 
-	test( 'should show all products', async ( { frontendUtils } ) => {
+	test( 'should show all products and then only products that match the filter', async ( {
+		page,
+		frontendUtils,
+	} ) => {
 		const legacyTemplate = await frontendUtils.getBlockByName(
 			'woocommerce/legacy-template'
 		);
@@ -300,12 +277,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			.locator( '.product' );
 
 		await expect( products ).toHaveCount( 16 );
-	} );
 
-	test( 'should show only products that match the filter', async ( {
-		page,
-		frontendUtils,
-	} ) => {
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
@@ -317,31 +289,12 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
-		const legacyTemplate = await frontendUtils.getBlockByName(
-			'woocommerce/legacy-template'
-		);
-
-		const products = legacyTemplate
-			.getByRole( 'list' )
-			.locator( '.product' );
-
 		await expect( products ).toHaveCount( 1 );
 	} );
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test( 'should show all products', async ( { page, templateCompiler } ) => {
-		await templateCompiler.compile();
-
-		await page.goto( '/shop' );
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
-
-		await expect( products ).toHaveCount( 16 );
-	} );
-
-	test( 'should show only products that match the filter', async ( {
+	test( 'should show all products and then only products that match the filter', async ( {
 		page,
 		frontendUtils,
 		templateCompiler,
@@ -349,6 +302,12 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await templateCompiler.compile();
 
 		await page.goto( '/shop' );
+		const products = page
+			.locator( '.wp-block-woocommerce-product-template' )
+			.getByRole( 'listitem' );
+
+		await expect( products ).toHaveCount( 16 );
+
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
@@ -359,10 +318,6 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await expect( page ).toHaveURL(
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
-
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
 
 		await expect( products ).toHaveCount( 1 );
 	} );
