@@ -447,7 +447,7 @@ class PushTokensDataStore {
 	 * @param int $user_id The ID of the user whose tokens should be removed.
 	 * @return void
 	 *
-	 * @since 11.1.0
+	 * @since 11.0.0
 	 */
 	public function delete_tokens_for_user( int $user_id ): void {
 		if ( $user_id <= 0 ) {

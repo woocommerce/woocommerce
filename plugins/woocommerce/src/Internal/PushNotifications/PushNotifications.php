@@ -103,7 +103,7 @@ class PushNotifications {
 	 * @param int $user_id The ID of the deleted user.
 	 * @return void
 	 *
-	 * @since 11.1.0
+	 * @since 11.0.0
 	 */
 	public function revoke_tokens_on_user_deletion( $user_id ): void {
 		wc_get_container()->get( PushTokensDataStore::class )->delete_tokens_for_user( (int) $user_id );
@@ -120,7 +120,7 @@ class PushNotifications {
 	 * @param int $user_id The ID of the user whose roles changed.
 	 * @return void
 	 *
-	 * @since 11.1.0
+	 * @since 11.0.0
 	 */
 	public function maybe_revoke_tokens_on_role_change( $user_id ): void {
 		$user = get_userdata( (int) $user_id );
