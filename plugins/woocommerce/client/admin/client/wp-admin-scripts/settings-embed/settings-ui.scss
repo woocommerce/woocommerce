@@ -190,7 +190,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui__validation-error {
-		color: #cc1818;
+		color: var(--wpds-color-foreground-content-error);
 		font-size: 12px;
 		line-height: 16px;
 		margin: 4px 0 0;
