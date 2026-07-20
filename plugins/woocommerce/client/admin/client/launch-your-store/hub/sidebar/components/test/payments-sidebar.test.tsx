@@ -217,7 +217,7 @@ const mockProps = {
 	context: {
 		externalUrl: null,
 		mainContentMachineRef: {} as never, // Mock ref
-		testOrderCount: 0,
+		hasTestOrders: false,
 		tasklist: {
 			tasks: [],
 		},

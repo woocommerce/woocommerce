@@ -80,6 +80,18 @@ class LaunchYourStore {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/woopayments/test-orders/has',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( $this, 'has_woopay_test_orders' ),
+					'permission_callback' => array( $this, 'must_be_shop_manager_or_admin' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/woopayments/test-orders/count',
 			array(
 				array(
@@ -151,27 +163,66 @@ class LaunchYourStore {
 	}
 
 	/**
-	 * Count the test orders created during Woo Payments test mode.
+	 * Get the query arguments for WooPayments test orders.
 	 *
-	 * @return \WP_REST_Response
+	 * @param array $args Additional query arguments.
+	 *
+	 * @return array
 	 */
-	public function get_woopay_test_orders_count() {
-		$return = function ( $count ) {
-			return new \WP_REST_Response( array( 'count' => $count ) );
-		};
-
-		$orders = wc_get_orders(
+	private function get_woopay_test_orders_query_args( array $args = array() ) {
+		return array_merge(
 			array(
 				// phpcs:ignore
 				'meta_key'   => '_wcpay_mode',
 				// phpcs:ignore
 				'meta_value' => 'test',
 				'return'     => 'ids',
-				'limit'      => 1,
+			),
+			$args
+		);
+	}
+
+	/**
+	 * Check whether WooPayments test orders exist.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function has_woopay_test_orders() {
+		$orders = wc_get_orders(
+			$this->get_woopay_test_orders_query_args(
+				array(
+					'limit' => 1,
+				)
 			)
 		);
 
-		return $return( count( $orders ) );
+		return new \WP_REST_Response(
+			array(
+				'has_orders' => ! empty( $orders ),
+			)
+		);
+	}
+
+	/**
+	 * Count the test orders created during Woo Payments test mode.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_woopay_test_orders_count() {
+		$query = wc_get_orders(
+			$this->get_woopay_test_orders_query_args(
+				array(
+					'paginate' => true,
+					'limit'    => 1,
+				)
+			)
+		);
+
+		return new \WP_REST_Response(
+			array(
+				'count' => is_object( $query ) && isset( $query->total ) ? (int) $query->total : 0,
+			)
+		);
 	}
 
 	/**
@@ -184,17 +235,28 @@ class LaunchYourStore {
 			return new \WP_REST_Response( null, $status );
 		};
 
-		$orders = wc_get_orders(
+		$query_args = $this->get_woopay_test_orders_query_args(
 			array(
-				// phpcs:ignore
-				'meta_key'   => '_wcpay_mode',
-				// phpcs:ignore
-				'meta_value' => 'test',
+				'limit'   => 100,
+				'orderby' => 'ID',
+				'order'   => 'ASC',
 			)
 		);
 
-		foreach ( $orders as $order ) {
-			$order->delete();
+		$processed_ids = array();
+		$order_ids     = wc_get_orders( $query_args );
+
+		while ( ! empty( $order_ids ) ) {
+			foreach ( $order_ids as $order_id ) {
+				$order = wc_get_order( $order_id );
+				if ( $order ) {
+					$order->delete( true );
+				}
+				$processed_ids[] = $order_id;
+			}
+
+			$query_args['exclude'] = $processed_ids;
+			$order_ids             = wc_get_orders( $query_args );
 		}
 
 		return $return();
