@@ -225,9 +225,9 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Deleting a user removes their push tokens when the feature is enabled.
+	 * @testdox Deleting a user removes their push tokens even when content is reassigned.
 	 */
-	public function test_deleting_a_user_removes_their_push_tokens() {
+	public function test_deleting_a_user_removes_their_push_tokens_when_content_is_reassigned() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 
 		$this->jetpack_connection_manager_mock
@@ -238,10 +238,13 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$push_notifications = new PushNotifications();
 		$push_notifications->on_init();
 
-		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		$token    = $this->create_push_token_for_user( $admin_id );
+		$admin_id    = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$reassign_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$token       = $this->create_push_token_for_user( $admin_id );
 
-		wp_delete_user( $admin_id );
+		// With reassignment, delete_with_user does not apply: without the
+		// delete_user hook the token would transfer to the reassignee.
+		wp_delete_user( $admin_id, $reassign_id );
 
 		$this->assertNull( get_post( $token->get_id() ) );
 	}

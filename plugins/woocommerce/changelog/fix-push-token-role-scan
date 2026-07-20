@@ -1,4 +1,4 @@
 Significance: patch
 Type: performance
 
-Push notifications: stop enumerating role members when fetching push tokens. get_tokens_for_roles() ran a WP_User_Query role__in lookup (a wp_usermeta capabilities scan across all users, ~60s on very large sites) on every notification send; it now queries the small push token CPT directly and verifies each token owner's role individually. Push tokens are also removed when their owner is deleted or loses an eligible role, and orphaned tokens are cleaned up when encountered.
+Push notifications: stop enumerating role members when fetching push tokens. get_tokens_for_roles() ran a WP_User_Query role__in lookup (a wp_usermeta capabilities scan across all users, ~60s on very large sites) on every notification send; it now queries the small push token CPT directly and verifies each token owner's role individually. Push tokens are also removed when their owner loses an eligible role or is deleted with content reassignment (previously the tokens transferred to the reassignee), and orphaned tokens are cleaned up when encountered.

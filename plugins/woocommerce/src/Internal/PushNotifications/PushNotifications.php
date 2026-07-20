@@ -91,16 +91,23 @@ class PushNotifications {
 		wc_get_container()->get( NotificationProcessor::class )->register();
 		wc_get_container()->get( NotificationRetryHandler::class )->register();
 
-		add_action( 'deleted_user', array( $this, 'revoke_tokens_on_user_deletion' ) );
+		add_action( 'delete_user', array( $this, 'revoke_tokens_on_user_deletion' ) );
 		add_action( 'set_user_role', array( $this, 'maybe_revoke_tokens_on_role_change' ) );
 		add_action( 'remove_user_role', array( $this, 'maybe_revoke_tokens_on_role_change' ) );
 	}
 
 	/**
-	 * Deletes all push tokens owned by a user that is being deleted.
+	 * Deletes all push tokens owned by a user that is about to be deleted.
+	 *
+	 * The push token post type is registered with delete_with_user, which
+	 * covers deletions without content reassignment. This hook runs before
+	 * the deletion so tokens are removed even when the user's content is
+	 * being reassigned; otherwise the tokens would transfer to the
+	 * reassignee and the deleted user's devices would keep receiving
+	 * notifications.
 	 *
 	 * @internal
-	 * @param int $user_id The ID of the deleted user.
+	 * @param int $user_id The ID of the user being deleted.
 	 * @return void
 	 *
 	 * @since 11.0.0
