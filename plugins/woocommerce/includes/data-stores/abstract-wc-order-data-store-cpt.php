@@ -976,9 +976,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	protected function get_refund_orders_join_clause( int $order_id ): string {
 		global $wpdb;
-		$posts = $wpdb->posts;
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-		return $wpdb->prepare( "{$posts} AS refunds ON ( refunds.post_type = %s AND refunds.post_parent = %d )", 'shop_order_refund', $order_id );
+		return $wpdb->prepare( "{$wpdb->posts} AS refunds ON ( refunds.post_type = %s AND refunds.post_parent = %d )", 'shop_order_refund', $order_id );
 	}
 
 	/**
@@ -994,9 +993,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function get_refund_orders_batch_join_clause( array $order_ids ): string {
 		global $wpdb;
 		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
-		$posts   = $wpdb->posts;
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; trusted table name.
-		return $wpdb->prepare( "{$posts} AS refunds ON ( refunds.post_type = %s AND refunds.post_parent IN ( $id_list ) )", 'shop_order_refund' );
+		return $wpdb->prepare( "{$wpdb->posts} AS refunds ON ( refunds.post_type = %s AND refunds.post_parent IN ( $id_list ) )", 'shop_order_refund' );
 	}
 
 	/**
@@ -1024,14 +1022,12 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		global $wpdb;
 
 		$id_list  = implode( ', ', array_map( 'absint', $order_ids ) );
-		$postmeta = $wpdb->postmeta;
-		$posts    = $wpdb->posts;
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; trusted table names.
 		$refund_totals = $wpdb->get_results(
 			"SELECT posts.post_parent AS order_id, SUM( postmeta.meta_value ) AS total
-				FROM {$postmeta} AS postmeta
-				INNER JOIN {$posts} AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent IN ( $id_list ) )
+				FROM {$wpdb->postmeta} AS postmeta
+				INNER JOIN {$wpdb->posts} AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent IN ( $id_list ) )
 				WHERE postmeta.meta_key = '_refund_amount'
 				AND postmeta.post_id = posts.ID
 				GROUP BY posts.post_parent"
