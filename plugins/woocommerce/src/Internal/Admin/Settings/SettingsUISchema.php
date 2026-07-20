@@ -548,6 +548,130 @@ class SettingsUISchema {
 	}
 
 	/**
+	 * Canonicalize explicitly supported field values from legacy schema providers.
+	 *
+	 * Malformed or ambiguous values remain unchanged so assert_valid() can reject
+	 * them instead of guessing at the provider's intent.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $schema Settings UI schema.
+	 * @return array Schema with supported legacy values canonicalized.
+	 */
+	public static function canonicalize_legacy_values( array $schema ): array {
+		if ( ! isset( $schema['groups'] ) || ! is_array( $schema['groups'] ) ) {
+			return $schema;
+		}
+
+		$converted_fields = array();
+
+		foreach ( $schema['groups'] as &$group ) {
+			if ( ! is_array( $group ) || ! isset( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
+				continue;
+			}
+
+			foreach ( $group['fields'] as &$field ) {
+				if (
+					! is_array( $field ) ||
+					! isset( $field['id'], $field['type'] ) ||
+					! is_string( $field['id'] ) ||
+					! is_string( $field['type'] ) ||
+					! array_key_exists( 'value', $field )
+				) {
+					continue;
+				}
+
+				list( $value, $converted ) = self::canonicalize_legacy_field_value( $field['value'], $field['type'], $field['id'] );
+				if ( ! $converted ) {
+					continue;
+				}
+
+				$field['value']     = $value;
+				$converted_fields[] = sprintf( '%1$s (%2$s)', $field['id'], $field['type'] );
+			}
+			unset( $field );
+		}
+		unset( $group );
+
+		if ( ! empty( $converted_fields ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: comma-separated field ids and types. */
+					esc_html__( 'A Settings UI schema provider supplied legacy field values that WooCommerce converted for compatibility: %s. Update the provider to return canonical values.', 'woocommerce' ),
+					esc_html( implode( ', ', array_unique( $converted_fields ) ) )
+				),
+				'11.1.0'
+			);
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Canonicalize one supported legacy field value.
+	 *
+	 * @param mixed  $value Field value.
+	 * @param string $type Field type.
+	 * @param string $field_id Field id for diagnostics.
+	 * @return array{0: mixed, 1: bool} Canonical value and whether it changed.
+	 */
+	private static function canonicalize_legacy_field_value( $value, string $type, string $field_id ): array {
+		switch ( $type ) {
+			case 'checkbox':
+				if ( is_bool( $value ) ) {
+					return array( $value, false );
+				}
+
+				$is_legacy_integer = is_int( $value ) && in_array( $value, array( 0, 1 ), true );
+				$is_legacy_string  = is_string( $value ) && in_array( strtolower( $value ), array( '', 'yes', 'no', 'true', 'false', '1', '0' ), true );
+				if ( ! $is_legacy_integer && ! $is_legacy_string ) {
+					return array( $value, false );
+				}
+
+				$canonical = function_exists( 'wc_string_to_bool' )
+					? wc_string_to_bool( $value )
+					: 1 === $value || in_array( strtolower( (string) $value ), array( 'yes', 'true', '1' ), true );
+				return array( $canonical, true );
+			case 'array':
+				if ( ! is_array( $value ) || self::is_string_list( $value ) ) {
+					return array( $value, false );
+				}
+
+				foreach ( $value as $item ) {
+					if ( ! is_scalar( $item ) ) {
+						return array( $value, false );
+					}
+				}
+
+				return array( array_map( 'strval', array_values( $value ) ), true );
+			case 'integer':
+			case 'number':
+				if ( ! is_string( $value ) || ! is_numeric( $value ) ) {
+					return array( $value, false );
+				}
+
+				try {
+					return array( self::normalize_numeric_value( $value, $type, $field_id ), true );
+				} catch ( \UnexpectedValueException $error ) {
+					return array( $value, false );
+				}
+			case 'datetime-local':
+				if ( self::is_iso_datetime( $value ) || ! is_string( $value ) || ! preg_match( '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?$/', $value ) ) {
+					return array( $value, false );
+				}
+
+				try {
+					return array( self::normalize_datetime_value( $value, $field_id ), true );
+				} catch ( \UnexpectedValueException $error ) {
+					return array( $value, false );
+				}
+			default:
+				return array( $value, false );
+		}
+	}
+
+	/**
 	 * Assert that a schema is safe to pass to the Settings UI.
 	 *
 	 * @since 11.1.0

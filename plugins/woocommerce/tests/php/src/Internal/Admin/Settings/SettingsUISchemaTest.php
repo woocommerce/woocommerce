@@ -572,6 +572,226 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It preserves already canonical field values during legacy compatibility normalization.
+	 */
+	public function test_canonicalize_legacy_values_preserves_canonical_values(): void {
+		$schema = $this->get_schema(
+			array(
+				array(
+					'id'    => 'enabled',
+					'label' => 'Enabled',
+					'type'  => 'checkbox',
+					'value' => true,
+				),
+				array(
+					'id'    => 'choices',
+					'label' => 'Choices',
+					'type'  => 'array',
+					'value' => array( 'one', 'two' ),
+				),
+				array(
+					'id'    => 'count',
+					'label' => 'Count',
+					'type'  => 'integer',
+					'value' => 2,
+				),
+				array(
+					'id'    => 'amount',
+					'label' => 'Amount',
+					'type'  => 'number',
+					'value' => 2.5,
+				),
+				array(
+					'id'    => 'starts_at',
+					'label' => 'Starts at',
+					'type'  => 'datetime-local',
+					'value' => '2026-07-17T17:30:45+00:00',
+				),
+			)
+		);
+
+		$this->assertSame( $schema, SettingsUISchema::canonicalize_legacy_values( $schema ) );
+	}
+
+	/**
+	 * @testdox It canonicalizes explicitly supported legacy field values with one developer notice per schema.
+	 */
+	public function test_canonicalize_legacy_values_converts_supported_values_with_one_notice(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_legacy_values' );
+
+		$notices  = array();
+		$listener = static function ( $function_name, $message ) use ( &$notices ): void {
+			if ( SettingsUISchema::class . '::canonicalize_legacy_values' === $function_name ) {
+				$notices[] = $message;
+			}
+		};
+		add_action( 'doing_it_wrong_run', $listener, 10, 2 );
+
+		$original_timezone = get_option( 'timezone_string' );
+		update_option( 'timezone_string', 'America/New_York' );
+
+		try {
+			$schema = SettingsUISchema::canonicalize_legacy_values(
+				$this->get_schema(
+					array(
+						array(
+							'id'    => 'yes',
+							'label' => 'Yes',
+							'type'  => 'checkbox',
+							'value' => 'yes',
+						),
+						array(
+							'id'    => 'no',
+							'label' => 'No',
+							'type'  => 'checkbox',
+							'value' => 'no',
+						),
+						array(
+							'id'    => 'true',
+							'label' => 'True',
+							'type'  => 'checkbox',
+							'value' => 'true',
+						),
+						array(
+							'id'    => 'false',
+							'label' => 'False',
+							'type'  => 'checkbox',
+							'value' => 'false',
+						),
+						array(
+							'id'    => 'one_string',
+							'label' => 'One string',
+							'type'  => 'checkbox',
+							'value' => '1',
+						),
+						array(
+							'id'    => 'zero_string',
+							'label' => 'Zero string',
+							'type'  => 'checkbox',
+							'value' => '0',
+						),
+						array(
+							'id'    => 'one_integer',
+							'label' => 'One integer',
+							'type'  => 'checkbox',
+							'value' => 1,
+						),
+						array(
+							'id'    => 'zero_integer',
+							'label' => 'Zero integer',
+							'type'  => 'checkbox',
+							'value' => 0,
+						),
+						array(
+							'id'    => 'empty',
+							'label' => 'Empty',
+							'type'  => 'checkbox',
+							'value' => '',
+						),
+						array(
+							'id'    => 'choices',
+							'label' => 'Choices',
+							'type'  => 'array',
+							'value' => array( 'one', 2, true, 2.5 ),
+						),
+						array(
+							'id'    => 'count',
+							'label' => 'Count',
+							'type'  => 'integer',
+							'value' => '2',
+						),
+						array(
+							'id'    => 'amount',
+							'label' => 'Amount',
+							'type'  => 'number',
+							'value' => '2.5',
+						),
+						array(
+							'id'    => 'starts_at',
+							'label' => 'Starts at',
+							'type'  => 'datetime-local',
+							'value' => '2026-07-17T13:30:45',
+						),
+					)
+				)
+			);
+		} finally {
+			update_option( 'timezone_string', $original_timezone );
+			remove_action( 'doing_it_wrong_run', $listener, 10 );
+		}
+
+		$fields = array_column( $schema['groups']['general']['fields'], null, 'id' );
+		$this->assertTrue( $fields['yes']['value'] );
+		$this->assertFalse( $fields['no']['value'] );
+		$this->assertTrue( $fields['true']['value'] );
+		$this->assertFalse( $fields['false']['value'] );
+		$this->assertTrue( $fields['one_string']['value'] );
+		$this->assertFalse( $fields['zero_string']['value'] );
+		$this->assertTrue( $fields['one_integer']['value'] );
+		$this->assertFalse( $fields['zero_integer']['value'] );
+		$this->assertFalse( $fields['empty']['value'] );
+		$this->assertSame( array( 'one', '2', '1', '2.5' ), $fields['choices']['value'] );
+		$this->assertSame( 2, $fields['count']['value'] );
+		$this->assertSame( 2.5, $fields['amount']['value'] );
+		$this->assertSame( '2026-07-17T17:30:45+00:00', $fields['starts_at']['value'] );
+		$this->assertCount( 1, $notices );
+		$this->assertStringContainsString( 'count (integer)', $notices[0] );
+		$this->assertStringContainsString( 'starts_at (datetime-local)', $notices[0] );
+	}
+
+	/**
+	 * @testdox It leaves malformed and ambiguous legacy values for strict schema validation to reject.
+	 */
+	public function test_canonicalize_legacy_values_preserves_invalid_values(): void {
+		$schema = $this->get_schema(
+			array(
+				array(
+					'id'    => 'enabled',
+					'label' => 'Enabled',
+					'type'  => 'checkbox',
+					'value' => 'maybe',
+				),
+				array(
+					'id'    => 'scalar_choices',
+					'label' => 'Scalar choices',
+					'type'  => 'array',
+					'value' => 'one',
+				),
+				array(
+					'id'    => 'invalid_choices',
+					'label' => 'Invalid choices',
+					'type'  => 'array',
+					'value' => array( 'one', new \stdClass() ),
+				),
+				array(
+					'id'    => 'count',
+					'label' => 'Count',
+					'type'  => 'integer',
+					'value' => '2.5',
+				),
+				array(
+					'id'    => 'amount',
+					'label' => 'Amount',
+					'type'  => 'number',
+					'value' => 'many',
+				),
+				array(
+					'id'    => 'starts_at',
+					'label' => 'Starts at',
+					'type'  => 'datetime-local',
+					'value' => 'tomorrow',
+				),
+			)
+		);
+
+		$canonicalized = SettingsUISchema::canonicalize_legacy_values( $schema );
+		$this->assertSame( $schema, $canonicalized );
+
+		$this->expectException( \UnexpectedValueException::class );
+		SettingsUISchema::assert_valid( $canonicalized );
+	}
+
+	/**
 	 * @testdox It rejects duplicate field IDs in canonical schemas.
 	 */
 	public function test_assert_valid_rejects_duplicate_field_ids(): void {
