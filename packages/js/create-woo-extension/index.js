@@ -26,10 +26,11 @@ const defaultDevDependencies = {
 
 /*
  * Stopgap: `i18n-calypso@7.4.1` (via `@woocommerce/components`) ships a Yarn-only
- * `patch:` spec that breaks `npm install`. Pin to 7.4.0 until fixed upstream.
+ * `patch:` spec that breaks `npm install`. Pin to the latest clean release until
+ * the upstream range stops resolving to 7.4.1.
  */
 const overrides = {
-	'i18n-calypso': '7.4.0',
+	'i18n-calypso': '8.1.0',
 };
 
 module.exports = {
