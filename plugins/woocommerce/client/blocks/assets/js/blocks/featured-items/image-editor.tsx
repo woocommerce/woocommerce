@@ -64,7 +64,7 @@ function useClientWidth(
 ) {
 	const [ clientWidth, setClientWidth ]: [
 		number | undefined,
-		Dispatch< SetStateAction< number | undefined > >
+		Dispatch< SetStateAction< number | undefined > >,
 	] = useState();
 
 	const calculateClientWidth = useCallback( () => {

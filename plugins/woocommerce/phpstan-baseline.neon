@@ -13861,12 +13861,6 @@ parameters:
 			path: includes/class-wc-product-variable.php
 
 		-
-			message: '#^Method WC_Product_Variable\:\:get_available_variations\(\) should return array\<array\|WC_Product_Variation\> but returns list\<array\|bool\|WC_Product\>\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-product-variable.php
-
-		-
 			message: '#^Method WC_Product_Variable\:\:set_children\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51084,12 +51078,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @return has invalid value \(array\|string;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 152 on line 6$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartContents.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartContents.php
 

@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\WooCommerce\Internal\VariationGallery\Package;
+
 /**
  * Tests for WC_Product_Variable.
  */
@@ -8,7 +10,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	 * Reset variation gallery feature-flag option leaked by individual tests.
 	 */
 	public function tearDown(): void {
-		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+		delete_option( Package::ENABLE_OPTION_NAME );
 		parent::tearDown();
 	}
 
@@ -172,10 +174,33 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'get_available_variations' with 'array' return includes image and gallery data for variations that have images set.
+	 */
+	public function test_get_available_variations_array_includes_image_data_when_variation_has_images(): void {
+		update_option( Package::ENABLE_OPTION_NAME, 'yes' );
+
+		$image_id   = $this->create_image_attachment( 'Variation Image', 'variation-image.jpg' );
+		$gallery_id = $this->create_image_attachment( 'Variation Gallery Image', 'variation-gallery.jpg' );
+
+		$product   = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+		$variation->set_image_id( $image_id );
+		$variation->set_gallery_image_ids( array( $gallery_id ) );
+		$variation->save();
+
+		$variations = $product->get_available_variations( 'array' );
+
+		$this->assertSame( $image_id, $variations[0]['image_id'] );
+		$this->assertSame( array( $gallery_id ), $variations[0]['gallery_image_ids'] );
+
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox 'get_available_variation' exposes typed variation gallery image IDs.
 	 */
 	public function test_get_available_variation_includes_gallery_image_ids() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+		update_option( Package::ENABLE_OPTION_NAME, 'yes' );
 
 		$product   = WC_Helper_Product::create_variation_product();
 		$variation = wc_get_product( $product->get_children()[0] );
@@ -222,7 +247,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	 * @testdox 'get_available_variation' omits multi-image gallery data when the variation gallery feature flag is disabled.
 	 */
 	public function test_get_available_variation_returns_single_image_shape_when_feature_flag_disabled() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'no' );
+		update_option( Package::ENABLE_OPTION_NAME, 'no' );
 
 		$product   = WC_Helper_Product::create_variation_product();
 		$variation = wc_get_product( $product->get_children()[0] );
@@ -267,7 +292,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	 * @testdox 'get_available_variation' falls back to the variation's own gallery when the variation featured image is stale.
 	 */
 	public function test_get_available_variation_falls_back_to_variation_gallery_when_featured_is_stale() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+		update_option( Package::ENABLE_OPTION_NAME, 'yes' );
 
 		$product              = WC_Helper_Product::create_variation_product();
 		$variation            = wc_get_product( $product->get_children()[0] );
@@ -300,7 +325,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	 * @testdox 'get_available_variation' falls back to the parent featured image when both the variation featured image and gallery are absent.
 	 */
 	public function test_get_available_variation_falls_back_to_parent_featured_when_variation_has_no_images() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+		update_option( Package::ENABLE_OPTION_NAME, 'yes' );
 
 		$product            = WC_Helper_Product::create_variation_product();
 		$variation          = wc_get_product( $product->get_children()[0] );

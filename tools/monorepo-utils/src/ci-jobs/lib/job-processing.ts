@@ -13,6 +13,14 @@ import { ProjectNode } from './project-graph';
 import { TestEnvVars, parseTestEnvConfig } from './test-environment';
 
 /**
+ * Projects whose contents define every consumer's effective ESLint rule set.
+ */
+const SHARED_ESLINT_PROJECTS = [
+	'@woocommerce/eslint-plugin',
+	'@woocommerce/eslint-config',
+];
+
+/**
  * A linting job.
  */
 interface LintJob {
@@ -353,12 +361,22 @@ async function createJobsForProject(
 
 		switch ( jobConfig.type ) {
 			case JobType.Lint: {
-				// Unlike test jobs, lint jobs opt into the dependency cascade
-				// explicitly: they only run for a dependency change when that
-				// dependency is listed in alsoForDependencies. This avoids
-				// fanning every lint job out across the whole dependency graph
-				// while still letting a job re-lint when a dependency that can
-				// affect its result (e.g. a shared ESLint config) changes.
+				// Changing the shared ESLint config changes every consumer's
+				// effective rule set while touching none of their own files, so
+				// their lint jobs would not otherwise be triggered.
+				if (
+					dependenciesWithChanges.some( ( dependency ) =>
+						SHARED_ESLINT_PROJECTS.includes( dependency )
+					)
+				) {
+					projectChanges = true;
+				}
+
+				// Beyond the shared ESLint config handled above, lint jobs do
+				// not cascade on dependency changes by default. A job can opt
+				// specific dependencies into the cascade via alsoForDependencies
+				// — useful when another dependency can change whether the
+				// project's source passes linting.
 				if (
 					dependenciesWithChanges.length > 0 &&
 					jobConfig.alsoForDependencies?.some( ( dep ) =>

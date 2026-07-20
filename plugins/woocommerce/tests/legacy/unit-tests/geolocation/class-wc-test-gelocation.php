@@ -88,6 +88,16 @@ class WC_Tests_Geolocation extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The default ipify IP-lookup endpoint should support IPv6.
+	 */
+	public function test_ipify_ip_lookup_api_uses_ipv6_capable_endpoint() {
+		$apis = $this->get_private_static( 'ip_lookup_apis' );
+
+		$this->assertArrayHasKey( 'ipify', $apis );
+		$this->assertSame( 'https://api64.ipify.org', $apis['ipify'] );
+	}
+
+	/**
 	 * @testdox Geolocating via the API should parse the country code and only request HTTPS endpoints.
 	 */
 	public function test_geolocate_via_api_uses_https_and_parses_country() {
