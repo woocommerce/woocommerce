@@ -563,11 +563,10 @@ class WC_Session_Handler extends WC_Session {
 		if ( $this->_dirty && $this->has_session() ) {
 			global $wpdb;
 
-			$table = $this->_table;
 			$wpdb->query(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-					"INSERT INTO {$table} (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d)
+					"INSERT INTO {$this->_table} (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d)
  					ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)",
 					$this->get_customer_id(),
 					maybe_serialize( $this->_data ),
@@ -639,12 +638,11 @@ class WC_Session_Handler extends WC_Session {
 		// Batch size of 100 and sleep time of 10ms = max 100 SQL queries and 10K entries deletion per second.
 		$batch_size            = 100;
 		$deleted_entries_total = 0;
-		$table                 = $this->_table;
 		do {
 			$deleted_entries_count = (int) $wpdb->query(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-					"DELETE FROM {$table} WHERE session_expiry < %d ORDER BY session_expiry LIMIT %d",
+					"DELETE FROM {$this->_table} WHERE session_expiry < %d ORDER BY session_expiry LIMIT %d",
 					time(),
 					$batch_size
 				)
@@ -676,9 +674,8 @@ class WC_Session_Handler extends WC_Session {
 		$value = wp_cache_get( $this->get_cache_prefix() . $customer_id, WC_SESSION_CACHE_GROUP );
 
 		if ( false === $value ) {
-			$table = $this->_table;
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-			$value = $wpdb->get_var( $wpdb->prepare( "SELECT session_value FROM {$table} WHERE session_key = %s", $customer_id ) );
+			$value = $wpdb->get_var( $wpdb->prepare( "SELECT session_value FROM {$this->_table} WHERE session_key = %s", $customer_id ) );
 
 			if ( is_null( $value ) ) {
 				$value = $default_value;
@@ -767,8 +764,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return bool
 	 */
 	private function session_exists( $customer_id ) {
-		$table = $this->_table;
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-		return $customer_id && null !== $GLOBALS['wpdb']->get_var( $GLOBALS['wpdb']->prepare( "SELECT session_key FROM {$table} WHERE session_key = %s", $customer_id ) );
+		return $customer_id && null !== $GLOBALS['wpdb']->get_var( $GLOBALS['wpdb']->prepare( "SELECT session_key FROM {$this->_table} WHERE session_key = %s", $customer_id ) );
 	}
 }

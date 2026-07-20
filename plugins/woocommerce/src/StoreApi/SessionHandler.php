@@ -125,11 +125,10 @@ final class SessionHandler extends WC_Session {
 			return $default_value;
 		}
 
-		$table = $this->table;
 		$value = $wpdb->get_var(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-				"SELECT session_value FROM {$table} WHERE session_key = %s",
+				"SELECT session_value FROM {$this->table} WHERE session_key = %s",
 				$customer_id
 			)
 		);
@@ -185,11 +184,10 @@ final class SessionHandler extends WC_Session {
 		if ( $this->_dirty ) {
 			global $wpdb;
 
-			$table = $this->table;
 			$wpdb->query(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-					"INSERT INTO {$table} (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)",
+					"INSERT INTO {$this->table} (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)",
 					$this->get_customer_id(),
 					maybe_serialize( $this->_data ),
 					$this->session_expiration
