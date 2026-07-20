@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.0.0-beta.2 2026-XX-XX =
+= 11.0.0-beta.2 2026-07-20 =
 
 **WooCommerce**
 
@@ -311,6 +311,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Variation bulk action "Set scheduled sale dates": block submission when the sale end date is earlier than the sale start date, and clear sale dates submitted as blank instead of storing 1970-01-01. [#66013](https://github.com/woocommerce/woocommerce/pull/66013)
 * Fix - Warn when additional checkout fields are registered before the woocommerce_init action, which can load translations too early. [#66172](https://github.com/woocommerce/woocommerce/pull/66172)
 * Fix - Warn when an order status key is too long and can't be stored. [#66164](https://github.com/woocommerce/woocommerce/pull/66164)
+* Fix - Improve lost connection detection on WooCommerce admin screens [#66676](https://github.com/woocommerce/woocommerce/pull/66676)
+* Fix - Restore 64px product thumbnails in the Mini Cart. [#66747](https://github.com/woocommerce/woocommerce/pull/66747)
 * Add - Add a "Send checkout recovery email" action to the order actions dropdown so merchants can manually send the Checkout Recovery email for pending or checkout-draft orders past the 1-hour abandonment threshold. [#65136](https://github.com/woocommerce/woocommerce/pull/65136)
 * Add - Add a contextual Marketplace recommendation card to the WooCommerce Orders screen, shown to eligible stores based on locally-evaluated promotion rules. [#65970](https://github.com/woocommerce/woocommerce/pull/65970)
 * Add - Add a native Settings UI page provider path for registered settings sections. [#65975](https://github.com/woocommerce/woocommerce/pull/65975)
@@ -362,6 +364,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update the Action Scheduler package to version 4.0.0. [#65790](https://github.com/woocommerce/woocommerce/pull/65790)
 * Update - Update the WordPress package catalog to WordPress 6.9 package versions. [#65481](https://github.com/woocommerce/woocommerce/pull/65481)
 * Update - Use the standard WordPress UI Notice for payment method eligibility notices in WooPayments onboarding. [#66016](https://github.com/woocommerce/woocommerce/pull/66016)
+* Update - Settings UI: hide the shell header for pages registered at the top level of settings, which keep the classic section links and a save button at the bottom of the page. Payments drill-down pages show the header with breadcrumbs in place of the top-level settings tabs. [#66662](https://github.com/woocommerce/woocommerce/pull/66662)
 * Dev - Add delivery-agnostic ProductShapeMapperInterface to the ProductFeed framework, deprecating ProductMapperInterface in its favor. [#65720](https://github.com/woocommerce/woocommerce/pull/65720)
 * Dev - Add internal helper methods on Refunds\DataUtils to support the upcoming refund preview endpoint. [#65334](https://github.com/woocommerce/woocommerce/pull/65334)
 * Dev - Add to Cart + Options: add extra e2e tests to cover skipped unit tests [#66118](https://github.com/woocommerce/woocommerce/pull/66118)
@@ -394,6 +397,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Use idempotent checkout address helpers in checkout e2e tests. [#65548](https://github.com/woocommerce/woocommerce/pull/65548)
 * Dev - Use the public postcode-validator API instead of reaching into the package's internal CJS regex map. [#65382](https://github.com/woocommerce/woocommerce/pull/65382)
 * Dev - Warn when deprecated AssetDataRegistry key check arguments are explicitly provided. [#66036](https://github.com/woocommerce/woocommerce/pull/66036)
+* Dev - De-flake blocks e2e tests. [#66584](https://github.com/woocommerce/woocommerce/pull/66584)
 * Tweak - Add aria-label to payment methods list for improved screen reader accessibility [#65201](https://github.com/woocommerce/woocommerce/pull/65201)
 * Tweak - Add proper ARIA roles and scope attributes to cart table headers for screen reader accessibility (WCAG 1.3.1) [#65364](https://github.com/woocommerce/woocommerce/pull/65364)
 * Tweak - Align the Data status box with the Date range filter at mid-range viewports, drop the trailing colons on both labels, use a consistent "M j at H:i" date format, and pick up WP component defaults for the Update now button and bar typography. [#64846](https://github.com/woocommerce/woocommerce/pull/64846)
