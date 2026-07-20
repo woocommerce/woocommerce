@@ -11,6 +11,11 @@ use Automattic\Woocommerce_Analytics;
 use WorDBless\BaseTestCase;
 
 /**
+ * WooCommerce test double.
+ */
+class WooCommerce_Test_Double {}
+
+/**
  * Tests for the Woocommerce_Analytics class.
  *
  * Focuses on testing the MU-plugin auto-update mechanism.

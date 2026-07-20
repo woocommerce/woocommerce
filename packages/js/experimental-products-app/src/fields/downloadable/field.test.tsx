@@ -72,7 +72,7 @@ describe( 'downloadable field', () => {
 			downloadable: true,
 			downloads: [],
 			...overrides,
-		} as ProductEntityRecord );
+		} ) as ProductEntityRecord;
 
 	const renderEdit = ( data: ProductEntityRecord, onChange = jest.fn() ) => {
 		if ( ! fieldExtensions.Edit ) {

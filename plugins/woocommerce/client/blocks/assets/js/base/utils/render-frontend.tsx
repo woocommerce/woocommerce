@@ -13,19 +13,19 @@ const selectorsToSkipOnLoad = [ '.wp-block-woocommerce-cart' ];
 
 type BlockProps<
 	TProps extends Record< string, unknown >,
-	TAttribute extends Record< string, unknown >
+	TAttribute extends Record< string, unknown >,
 > = TProps & {
 	attributes?: TAttribute;
 };
 
 type BlockType<
 	TProps extends Record< string, unknown >,
-	TAttribute extends Record< string, unknown >
+	TAttribute extends Record< string, unknown >,
 > = ( props: BlockProps< TProps, TAttribute > ) => JSX.Element | null;
 
 export type GetPropsFn<
 	TProps extends Record< string, unknown >,
-	TAttributes extends Record< string, unknown >
+	TAttributes extends Record< string, unknown >,
 > = ( el: HTMLElement, i: number ) => BlockProps< TProps, TAttributes >;
 
 export type ReactRootWithContainer = {
@@ -35,7 +35,7 @@ export type ReactRootWithContainer = {
 
 interface RenderBlockParams<
 	TProps extends Record< string, unknown >,
-	TAttributes extends Record< string, unknown >
+	TAttributes extends Record< string, unknown >,
 > {
 	// React component to use as a replacement.
 	Block: BlockType< TProps, TAttributes > | null;
@@ -54,7 +54,7 @@ interface RenderBlockParams<
  */
 export const renderBlock = <
 	TProps extends Record< string, unknown >,
-	TAttributes extends Record< string, unknown >
+	TAttributes extends Record< string, unknown >,
 >( {
 	Block,
 	container,
@@ -108,7 +108,7 @@ export const renderBlock = <
 
 interface RenderBlockInContainersParams<
 	TProps extends Record< string, unknown >,
-	TAttributes extends Record< string, unknown >
+	TAttributes extends Record< string, unknown >,
 > {
 	// React component to use as a replacement.
 	Block: BlockType< TProps, TAttributes > | null;
@@ -128,11 +128,11 @@ interface RenderBlockInContainersParams<
  */
 const renderBlockInContainers = <
 	TProps extends Record< string, unknown >,
-	TAttributes extends Record< string, unknown >
+	TAttributes extends Record< string, unknown >,
 >( {
 	Block,
 	containers,
-	getProps = () => ( {} as BlockProps< TProps, TAttributes > ),
+	getProps = () => ( {} ) as BlockProps< TProps, TAttributes >,
 	getErrorBoundaryProps = () => ( {} ),
 }: RenderBlockInContainersParams<
 	TProps,
@@ -180,7 +180,7 @@ const isElementInsideWrappers = (
 
 interface RenderBlockOutsideWrappersParams<
 	TProps extends Record< string, unknown >,
-	TAttributes extends Record< string, unknown >
+	TAttributes extends Record< string, unknown >,
 > extends RenderFrontendParams< TProps, TAttributes > {
 	// All elements matched by the selector which are inside the wrapper will be ignored.
 	wrappers?: HTMLElement[];
@@ -192,7 +192,7 @@ interface RenderBlockOutsideWrappersParams<
  */
 const renderBlockOutsideWrappers = <
 	TProps extends Record< string, unknown >,
-	TAttributes extends Record< string, unknown >
+	TAttributes extends Record< string, unknown >,
 >( {
 	Block,
 	getProps,
@@ -230,7 +230,7 @@ const renderBlockOutsideWrappers = <
 
 interface RenderBlockInsideWrapperParams<
 	TProps extends Record< string, unknown >,
-	TAttributes extends Record< string, unknown >
+	TAttributes extends Record< string, unknown >,
 > extends RenderFrontendParams< TProps, TAttributes > {
 	// Wrapper element to query the selector inside.
 	wrapper: HTMLElement;
@@ -242,7 +242,7 @@ interface RenderBlockInsideWrapperParams<
  */
 const renderBlockInsideWrapper = <
 	TProps extends Record< string, unknown >,
-	TAttributes extends Record< string, unknown >
+	TAttributes extends Record< string, unknown >,
 >( {
 	Block,
 	getProps,
@@ -275,7 +275,7 @@ export interface RenderFrontendOptions {
 
 interface RenderFrontendParams<
 	TProps extends Record< string, unknown >,
-	TAttributes extends Record< string, unknown >
+	TAttributes extends Record< string, unknown >,
 > {
 	// React component to use as a replacement.
 	Block: BlockType< TProps, TAttributes > | null;
@@ -300,7 +300,7 @@ interface RenderFrontendParams<
  */
 export const renderFrontend = <
 	TProps extends Record< string, unknown >,
-	TAttributes extends Record< string, unknown >
+	TAttributes extends Record< string, unknown >,
 >(
 	props:
 		| RenderBlockOutsideWrappersParams< TProps, TAttributes >

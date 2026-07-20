@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent product brand shortcode images from rendering empty or unitless inline dimensions.

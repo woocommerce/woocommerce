@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use WooCommerce Analytics to report legacy Select2 usage on storefront pages.

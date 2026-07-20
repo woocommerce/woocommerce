@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 export type SelectableItem< T = unknown > = (
 	| { label: string; ariaLabel?: string }
 	| { label: ReactNode; ariaLabel: string }
- ) & {
+) & {
 	id: string;
 	value: string;
 	selected?: boolean;

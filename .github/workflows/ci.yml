@@ -634,6 +634,24 @@ jobs:
 
             pnpm --parallel --workspace-concurrency=10 --stream $filter changelog validate
 
+      - name: 'Validate - single-line messages'
+        run: |
+            # Changelog entry messages must be a single line. Multi-line messages break the
+            # line-based sorting and rendering done by the "Release: Compile changelog" workflow.
+            fail=0
+            while IFS= read -r file; do
+              if ! awk '
+                !body && /^Significance:/ { sig=1 }
+                !body && /^[[:space:]]*$/ { body=1; next }
+                body { if (NF) c++ }
+                END { exit (sig && c>1) }
+              ' "$file"; then
+                echo "::error file=${file}::Changelog message must be a single line so it can be sorted and rendered correctly during release. Move any extra detail into the 'Comment:' header."
+                fail=1
+              fi
+            done < <(git ls-files -- '*/changelog/*' ':!:*/changelog/*.md' ':!:*/changelog/*.txt' ':!:*/changelog/.*')
+            exit $fail
+
   validate-markdown:
     name: 'Validate markdown'
     if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'trunk' && needs.identify-jobs-to-run.outputs.needs-markdown-validation == 'true' }}

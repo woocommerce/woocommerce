@@ -4,40 +4,31 @@
 import { test, expect } from '@woocommerce/e2e-utils';
 
 test.describe( 'Product Gallery Thumbnails block', () => {
-	test.beforeEach(
-		async ( { admin, editor, requestUtils, wpCoreVersion } ) => {
-			const template = await requestUtils.createTemplate( 'wp_template', {
-				slug: 'single-product',
-				title: 'Custom Single Product',
-				content: 'placeholder',
-			} );
+	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug: 'single-product',
+			title: 'Custom Single Product',
+			content: 'placeholder',
+		} );
 
-			await admin.visitSiteEditor( {
-				postId: template.id,
-				postType: 'wp_template',
-				canvas: 'edit',
-			} );
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
 
-			// TODO: WP 7.0 compat - Custom HTML block content is inside an iframe
-			// since WP 7.0. Simplify when WP 7.0 is the minimum supported version.
-			const placeholderLocator =
-				wpCoreVersion >= 7
-					? editor.canvas
-							.frameLocator( 'iframe' )
-							.getByText( 'placeholder' )
-					: editor.canvas.getByText( 'placeholder' );
+		await expect(
+			editor.getCustomHtmlBlockContentLocator( 'placeholder' )
+		).toBeVisible();
 
-			await expect( placeholderLocator ).toBeVisible();
+		await editor.insertBlock( {
+			name: 'woocommerce/product-gallery',
+		} );
 
-			await editor.insertBlock( {
-				name: 'woocommerce/product-gallery',
-			} );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-		}
-	);
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+	} );
 
 	test( 'renders as expected', async ( { page, editor } ) => {
 		await test.step( 'in editor', async () => {

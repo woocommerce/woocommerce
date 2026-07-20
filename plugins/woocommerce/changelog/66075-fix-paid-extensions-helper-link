@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Fix the broken paid extensions link in the WooCommerce notice on the Updates screen so it opens Extensions › My Subscriptions instead of an access-denied page.

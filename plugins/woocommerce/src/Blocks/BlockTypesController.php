@@ -62,7 +62,6 @@ final class BlockTypesController {
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
-		add_filter( 'allowed_block_types_all', array( $this, 'filter_allowed_block_types' ), 10, 2 );
 		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
 		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
 		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 1 );
@@ -360,80 +359,6 @@ final class BlockTypesController {
 	}
 
 	/**
-	 * Filter WooCommerce block availability by editor context.
-	 *
-	 * Blocks remain registered on the server for compatibility, but some WooCommerce
-	 * blocks are hidden from specific editor inserters.
-	 *
-	 * @param bool|string[]            $allowed_block_types Array of block type slugs, or boolean to enable/disable all.
-	 * @param \WP_Block_Editor_Context $block_editor_context The current block editor context.
-	 * @return bool|string[] Filtered list of allowed block types, or boolean to enable/disable all.
-	 */
-	public function filter_allowed_block_types( $allowed_block_types, $block_editor_context ) {
-		if ( false === $allowed_block_types ) {
-			return false;
-		}
-
-		$editor_name = $block_editor_context->name;
-
-		if ( 'core/edit-site' === $editor_name ) {
-			return $allowed_block_types;
-		}
-
-		if ( 'core/edit-post' === $editor_name ) {
-			return $this->remove_allowed_block_types(
-				$allowed_block_types,
-				$this->get_post_editor_hidden_block_types()
-			);
-		}
-
-		if ( in_array( $editor_name, array( 'core/edit-widgets', 'core/customize-widgets' ), true ) ) {
-			$registered_block_types             = $this->get_registered_block_types();
-			$registered_woocommerce_block_types = array_filter(
-				$registered_block_types,
-				static function ( $block_type ) {
-					return 0 === strpos( $block_type, 'woocommerce/' );
-				}
-			);
-
-			return $this->remove_allowed_block_types(
-				$allowed_block_types,
-				array_diff( $registered_woocommerce_block_types, $this->get_widget_area_block_types() )
-			);
-		}
-
-		return $allowed_block_types;
-	}
-
-	/**
-	 * Remove block types from the current allowed block list.
-	 *
-	 * @param bool|string[] $allowed_block_types Array of block type slugs, or true to allow all registered block types.
-	 * @param string[]      $block_types_to_remove Block type slugs to remove.
-	 * @return string[] Filtered block type slugs.
-	 */
-	private function remove_allowed_block_types( $allowed_block_types, array $block_types_to_remove ) {
-		$allowed_block_types = true === $allowed_block_types ? $this->get_registered_block_types() : (array) $allowed_block_types;
-		$allowed_block_types = array_filter( $allowed_block_types, 'is_string' );
-
-		return array_values(
-			array_diff(
-				$allowed_block_types,
-				$block_types_to_remove
-			)
-		);
-	}
-
-	/**
-	 * Get all registered block type slugs.
-	 *
-	 * @return string[] Registered block type slugs.
-	 */
-	private function get_registered_block_types() {
-		return array_keys( \WP_Block_Type_Registry::get_instance()->get_all_registered() );
-	}
-
-	/**
 	 * Delete product transients when a product is deleted.
 	 *
 	 * @deprecated since 10.6.0
@@ -441,93 +366,6 @@ final class BlockTypesController {
 	 */
 	public function delete_product_transients() {
 		wc_deprecated_function( __METHOD__, '10.6.0' );
-	}
-
-	/**
-	 * Get list of WooCommerce block types allowed in Widget Areas. New blocks won't be
-	 * exposed in the Widget Area unless specifically added here.
-	 *
-	 * @return string[] Array of block type slugs.
-	 */
-	protected function get_widget_area_block_types() {
-		return array(
-			'woocommerce/all-reviews',
-			'woocommerce/breadcrumbs',
-			'woocommerce/cart-link',
-			'woocommerce/catalog-sorting',
-			'woocommerce/classic-shortcode',
-			'woocommerce/customer-account',
-			'woocommerce/dropdown',
-			'woocommerce/featured-category',
-			'woocommerce/featured-product',
-			'woocommerce/mini-cart',
-			'woocommerce/product-categories',
-			'woocommerce/product-results-count',
-			'woocommerce/product-search',
-			'woocommerce/reviews-by-category',
-			'woocommerce/reviews-by-product',
-			'woocommerce/product-filters',
-			'woocommerce/product-filter-status',
-			'woocommerce/product-filter-price',
-			'woocommerce/product-filter-price-slider',
-			'woocommerce/product-filter-attribute',
-			'woocommerce/product-filter-rating',
-			'woocommerce/product-filter-active',
-			'woocommerce/product-filter-removable-chips',
-			'woocommerce/product-filter-clear-button',
-			'woocommerce/product-filter-checkbox-list',
-			'woocommerce/product-filter-chips',
-			'woocommerce/product-filter-taxonomy',
-
-			// Keep hidden legacy filter blocks for backward compatibility.
-			'woocommerce/active-filters',
-			'woocommerce/attribute-filter',
-			'woocommerce/filter-wrapper',
-			'woocommerce/price-filter',
-			'woocommerce/rating-filter',
-			'woocommerce/stock-filter',
-			// End: legacy filter blocks.
-
-			// Below product grids are hidden from inserter however they could have been used in widgets.
-			// Keep them for backward compatibility.
-			'woocommerce/handpicked-products',
-			'woocommerce/product-best-sellers',
-			'woocommerce/product-new',
-			'woocommerce/product-on-sale',
-			'woocommerce/product-top-rated',
-			'woocommerce/products-by-attribute',
-			'woocommerce/product-category',
-			'woocommerce/product-tag',
-			// End: legacy product grids blocks.
-		);
-	}
-
-	/**
-	 * Get list of WooCommerce block types hidden from post editors.
-	 *
-	 * @return string[] Array of block type slugs.
-	 */
-	protected function get_post_editor_hidden_block_types() {
-		return array(
-			'woocommerce/breadcrumbs',
-			'woocommerce/catalog-sorting',
-			'woocommerce/legacy-template',
-			'woocommerce/product-results-count',
-			'woocommerce/product-reviews',
-			'woocommerce/order-confirmation-status',
-			'woocommerce/order-confirmation-summary',
-			'woocommerce/order-confirmation-totals',
-			'woocommerce/order-confirmation-totals-wrapper',
-			'woocommerce/order-confirmation-downloads',
-			'woocommerce/order-confirmation-downloads-wrapper',
-			'woocommerce/order-confirmation-billing-address',
-			'woocommerce/order-confirmation-shipping-address',
-			'woocommerce/order-confirmation-billing-wrapper',
-			'woocommerce/order-confirmation-shipping-wrapper',
-			'woocommerce/order-confirmation-additional-information',
-			'woocommerce/order-confirmation-additional-fields-wrapper',
-			'woocommerce/order-confirmation-additional-fields',
-		);
 	}
 
 	/**
