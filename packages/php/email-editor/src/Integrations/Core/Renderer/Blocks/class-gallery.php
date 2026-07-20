@@ -28,8 +28,14 @@ class Gallery extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		// The number of columns and the available layout width determine how wide each cropped image
+		// is displayed. We pass that per-image width to the crop so an image CDN can serve an
+		// appropriately sized (and cropped) file.
+		$columns      = $this->get_columns_from_attributes( $parsed_block['attrs'] ?? array() );
+		$layout_width = (int) Styles_Helper::parse_value( $rendering_context->get_layout_width_without_padding() );
+
 		// Extract images directly from the block content (more efficient than re-rendering).
-		$gallery_images = $this->extract_images_from_gallery_content( $block_content, $parsed_block );
+		$gallery_images = $this->extract_images_from_gallery_content( $block_content, $parsed_block, $columns, $layout_width );
 
 		// If we don't have any images, return empty.
 		if ( empty( $gallery_images ) ) {
@@ -41,23 +47,68 @@ class Gallery extends Abstract_Block_Renderer {
 	}
 
 	/**
+	 * Estimate the rendered width (in px) of the gallery cell that holds a given image.
+	 *
+	 * The gallery packs images into rows of `$columns`. A complete row splits the layout width
+	 * evenly, but an incomplete final row is distributed across only its remaining images — a lone
+	 * trailing image spans the full width (see {@see build_gallery_row_table()}). Sizing the crop to
+	 * the actual cell keeps an image CDN from serving an undersized file for such images.
+	 *
+	 * @param int $index Zero-based index of the image among the rendered images.
+	 * @param int $image_count Total number of rendered images.
+	 * @param int $columns Number of gallery columns.
+	 * @param int $layout_width Available layout width in px.
+	 * @return int Cell width in px (at least 1).
+	 */
+	private function get_cell_width( int $index, int $image_count, int $columns, int $layout_width ): int {
+		$columns       = max( 1, $columns );
+		$row_start     = intdiv( $index, $columns ) * $columns;
+		$images_in_row = max( 1, min( $columns, $image_count - $row_start ) );
+
+		return (int) max( 1, floor( $layout_width / $images_in_row ) );
+	}
+
+	/**
 	 * Extract all images from gallery content with their links and captions.
 	 *
 	 * @param string $block_content The rendered gallery block HTML.
 	 * @param array  $parsed_block The parsed block data.
+	 * @param int    $columns Number of gallery columns.
+	 * @param int    $layout_width Available layout width in px.
 	 * @return array Array of sanitized image HTML strings.
 	 */
-	private function extract_images_from_gallery_content( string $block_content, array $parsed_block ): array {
+	private function extract_images_from_gallery_content( string $block_content, array $parsed_block, int $columns, int $layout_width ): array {
 		$gallery_images = array();
 		$inner_blocks   = $parsed_block['innerBlocks'] ?? array();
 
-		// Extract images from inner blocks data where the actual image HTML is stored.
+		// The gallery can request a crop (aspect ratio) for all of its images. Individual images
+		// may override it with their own aspectRatio attribute. Guard against malformed input so a
+		// non-string ratio can't throw a TypeError and abort rendering.
+		$gallery_attrs        = isset( $parsed_block['attrs'] ) && is_array( $parsed_block['attrs'] ) ? $parsed_block['attrs'] : array();
+		$gallery_aspect_ratio = isset( $gallery_attrs['aspectRatio'] ) && is_string( $gallery_attrs['aspectRatio'] ) ? $gallery_attrs['aspectRatio'] : null;
+
+		// Collect the image blocks first so we know how many land in each rendered row and can size
+		// each crop to its actual cell (incomplete final rows are wider — see get_cell_width()).
+		$image_blocks = array();
 		foreach ( $inner_blocks as $block ) {
 			if ( 'core/image' === $block['blockName'] && isset( $block['innerHTML'] ) ) {
-				$extracted_image = $this->extract_image_from_html( $block['innerHTML'] );
-				if ( ! empty( $extracted_image ) ) {
-					$gallery_images[] = $extracted_image;
-				}
+				$image_blocks[] = $block;
+			}
+		}
+		$image_count = count( $image_blocks );
+
+		foreach ( $image_blocks as $index => $block ) {
+			$image_attrs = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+
+			// Use the per-image override only when it is a valid ratio; a malformed override falls
+			// back to the gallery ratio instead of silently disabling the crop for that image.
+			$image_ratio  = isset( $image_attrs['aspectRatio'] ) && is_string( $image_attrs['aspectRatio'] ) ? $image_attrs['aspectRatio'] : null;
+			$aspect_ratio = ( null !== $image_ratio && null !== $this->parse_aspect_ratio( $image_ratio ) ) ? $image_ratio : $gallery_aspect_ratio;
+
+			$cell_width      = $this->get_cell_width( $index, $image_count, $columns, $layout_width );
+			$extracted_image = $this->extract_image_from_html( $block['innerHTML'], $aspect_ratio, $cell_width, $image_attrs );
+			if ( ! empty( $extracted_image ) ) {
+				$gallery_images[] = $extracted_image;
 			}
 		}
 
@@ -68,10 +119,13 @@ class Gallery extends Abstract_Block_Renderer {
 	 * Extract and sanitize image with optional link and caption from HTML content.
 	 * This is the unified method that handles all image extraction scenarios.
 	 *
-	 * @param string $html_content HTML content containing the image.
+	 * @param string      $html_content HTML content containing the image.
+	 * @param string|null $aspect_ratio Optional aspect ratio (e.g. "1" or "4/3") to crop the image to.
+	 * @param int         $cell_width Estimated display width of the gallery cell in px.
+	 * @param array       $image_attrs Parsed attributes of the core/image block (id, sizeSlug, ...).
 	 * @return string Sanitized image HTML with proper link and caption handling.
 	 */
-	private function extract_image_from_html( string $html_content ): string {
+	private function extract_image_from_html( string $html_content, ?string $aspect_ratio = null, int $cell_width = 0, array $image_attrs = array() ): string {
 		$result = '';
 
 		// First, try to find a linked image (most common case).
@@ -79,20 +133,20 @@ class Gallery extends Abstract_Block_Renderer {
 			// Validate and sanitize the link URL.
 			$sanitized_url = esc_url( $link_matches[2] );
 			if ( ! empty( $sanitized_url ) ) {
-				$sanitized_img = Html_Processing_Helper::sanitize_image_html( $link_matches[3] );
+				$sanitized_img = $this->apply_aspect_ratio_crop( Html_Processing_Helper::sanitize_image_html( $link_matches[3] ), $aspect_ratio, $cell_width, $image_attrs );
 				if ( '' !== $sanitized_img ) {
 					$result .= '<a href="' . $sanitized_url . '">' . $sanitized_img . '</a>';
 				}
 			} else {
 				// If URL is invalid, extract just the image without link.
-				$sanitized_img = Html_Processing_Helper::sanitize_image_html( $link_matches[3] );
+				$sanitized_img = $this->apply_aspect_ratio_crop( Html_Processing_Helper::sanitize_image_html( $link_matches[3] ), $aspect_ratio, $cell_width, $image_attrs );
 				if ( '' !== $sanitized_img ) {
 					$result .= $sanitized_img;
 				}
 			}
 		} elseif ( preg_match( '/<img[^>]*>/', $html_content, $img_matches ) ) {
 			// Image is not linked - just extract the img element with sanitization.
-			$sanitized_img = Html_Processing_Helper::sanitize_image_html( $img_matches[0] );
+			$sanitized_img = $this->apply_aspect_ratio_crop( Html_Processing_Helper::sanitize_image_html( $img_matches[0] ), $aspect_ratio, $cell_width, $image_attrs );
 			if ( '' !== $sanitized_img ) {
 				$result .= $sanitized_img;
 			}
@@ -115,6 +169,132 @@ class Gallery extends Abstract_Block_Renderer {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Apply an aspect-ratio crop to a sanitized <img> tag.
+	 *
+	 * Email clients can't crop client-side reliably (`object-fit`/`aspect-ratio` are unsupported in
+	 * Gmail), so the only way to truly honor the crop everywhere is to serve an already-cropped image
+	 * file. This method exposes the {@see 'woocommerce_email_editor_gallery_cropped_image_url'} filter
+	 * so integrations (e.g. Jetpack/Photon on WordPress.com) can rewrite the image URL to a
+	 * server-cropped version. When that happens, the image is given concrete `width`/`height`
+	 * dimensions so it renders correctly even in clients without CSS crop support.
+	 *
+	 * When no integration crops the URL (e.g. self-hosted sites with no image CDN), the method falls
+	 * back to inline `aspect-ratio` + `object-fit: cover` CSS. Clients that support it (Apple Mail,
+	 * iOS Mail, modern webmail) render the crop; the rest fall back to the natural aspect ratio,
+	 * matching the previous behavior with no regression.
+	 *
+	 * @param string      $img_html Sanitized <img> HTML.
+	 * @param string|null $aspect_ratio Aspect ratio to apply (e.g. "1" or "4/3").
+	 * @param int         $cell_width Estimated display width of the gallery cell in px.
+	 * @param array       $image_attrs Parsed attributes of the core/image block (id, sizeSlug, ...).
+	 * @return string Image HTML with the crop applied, or the input unchanged when no valid ratio.
+	 */
+	private function apply_aspect_ratio_crop( string $img_html, ?string $aspect_ratio, int $cell_width = 0, array $image_attrs = array() ): string {
+		if ( null === $aspect_ratio || '' === $img_html ) {
+			return $img_html;
+		}
+
+		// Only accept simple numeric ratios such as "1", "1.5" or "4/3" to avoid injecting anything unexpected.
+		$aspect_ratio = trim( $aspect_ratio );
+		$ratio_value  = $this->parse_aspect_ratio( $aspect_ratio );
+		if ( null === $ratio_value ) {
+			return $img_html;
+		}
+
+		$html = new \WP_HTML_Tag_Processor( $img_html );
+		if ( ! $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
+			return $img_html;
+		}
+
+		// Derive the target display dimensions from the cell width and the requested ratio. Clamp the
+		// height to at least 1px so a very wide ratio can't round down to a 0-height (unusable) crop.
+		$width  = $cell_width > 0 ? $cell_width : 0;
+		$height = $width > 0 ? max( 1, (int) round( $width / $ratio_value ) ) : 0;
+
+		// get_attribute() can return a string, null (absent), or bool true (valueless attribute);
+		// coerce anything that isn't a real URL string to an empty string.
+		$src_attribute = $html->get_attribute( 'src' );
+		$image_url     = is_string( $src_attribute ) ? $src_attribute : '';
+
+		/**
+		 * Filters the URL of an image inside an email gallery so integrations can serve a
+		 * server-side-cropped file that honors the block's aspect ratio.
+		 *
+		 * Email can't crop client-side reliably, so returning an already-cropped URL (e.g. an image
+		 * CDN URL with resize/crop parameters) is the only way to honor the crop in every client.
+		 * Return the URL unchanged to leave the image uncropped (the renderer then falls back to
+		 * best-effort CSS cropping).
+		 *
+		 * @param string $image_url    The original image URL.
+		 * @param string $aspect_ratio The requested aspect ratio (e.g. "1", "4/3").
+		 * @param int    $width        Target display width of the image in px (0 if unknown).
+		 * @param int    $height       Target display height derived from the aspect ratio in px (0 if unknown).
+		 * @param array  $image_attrs  Parsed attributes of the core/image block (id, sizeSlug, ...).
+		 */
+		$filtered_url = apply_filters( 'woocommerce_email_editor_gallery_cropped_image_url', $image_url, $aspect_ratio, $width, $height, $image_attrs );
+
+		// Extensions can return anything (arrays, WP_Error, objects). A crop happened only when an
+		// integration returned a *different*, non-empty string. Compare the raw filter result against
+		// the original src here, BEFORE escaping: get_attribute() returns the entity-decoded src (raw
+		// "&"), while esc_url() re-encodes "&" to "&#038;", so comparing an escaped URL against the
+		// decoded original would misclassify any image whose src has a multi-param query string (e.g.
+		// "?w=600&h=600", common with image CDNs) as server-cropped.
+		$is_server_cropped = is_string( $filtered_url ) && '' !== $image_url && '' !== $filtered_url && $filtered_url !== $image_url;
+
+		// Escape for output only after the decision. If esc_url() reduces a hostile/invalid crop URL
+		// to an empty string, fall through to the CSS branch rather than emit an empty src.
+		$cropped_url = $is_server_cropped ? esc_url( (string) $filtered_url ) : '';
+
+		// These crop styles are appended after Html_Processing_Helper::sanitize_image_html() has run
+		// (its style allowlist would otherwise strip object-fit), so they intentionally bypass that
+		// sanitizer. Only the regex-validated $aspect_ratio may be interpolated here — every other
+		// token is a literal. Do not add dynamic values to $crop_styles without validating them.
+		if ( '' !== $cropped_url ) {
+			// The file is already cropped to the requested ratio, so we can give it concrete
+			// dimensions. This renders the crop correctly even in clients without CSS crop support.
+			$html->set_attribute( 'src', $cropped_url );
+			if ( $width > 0 && $height > 0 ) {
+				$html->set_attribute( 'width', esc_attr( (string) $width ) );
+				$html->set_attribute( 'height', esc_attr( (string) $height ) );
+			}
+			$crop_styles = sprintf( 'aspect-ratio: %s; object-fit: cover; width: 100%%; height: auto; max-width: 100%%; display: block;', $aspect_ratio );
+		} else {
+			// No server-side crop available: fall back to best-effort CSS cropping. We avoid concrete
+			// dimensions here so the natural image isn't distorted in clients that ignore object-fit.
+			$crop_styles = sprintf( 'aspect-ratio: %s; object-fit: cover; width: 100%%; height: auto; display: block;', $aspect_ratio );
+		}
+
+		/** @var string $existing_style */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
+		$existing_style = $html->get_attribute( 'style' ) ?? '';
+		$existing_style = '' !== $existing_style ? ( rtrim( $existing_style, ';' ) . '; ' ) : '';
+		$html->set_attribute( 'style', esc_attr( $existing_style . $crop_styles ) );
+
+		return $html->get_updated_html();
+	}
+
+	/**
+	 * Parse an aspect ratio attribute value (e.g. "1", "1.5", "4/3") into a numeric width/height ratio.
+	 *
+	 * @param string $aspect_ratio Aspect ratio value.
+	 * @return float|null The ratio (width divided by height), or null when the value is invalid.
+	 */
+	private function parse_aspect_ratio( string $aspect_ratio ): ?float {
+		// Only accept simple numeric ratios to avoid injecting anything unexpected into the markup.
+		if ( ! preg_match( '/^(\d+(?:\.\d+)?)(?:\s*\/\s*(\d+(?:\.\d+)?))?$/', trim( $aspect_ratio ), $matches ) ) {
+			return null;
+		}
+
+		$numerator   = (float) $matches[1];
+		$denominator = isset( $matches[2] ) ? (float) $matches[2] : 1.0;
+
+		if ( $numerator <= 0 || $denominator <= 0 ) {
+			return null;
+		}
+
+		return $numerator / $denominator;
 	}
 
 	/**

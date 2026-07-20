@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Improve lost connection detection on WooCommerce admin screens

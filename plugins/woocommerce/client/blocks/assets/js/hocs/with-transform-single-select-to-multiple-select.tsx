@@ -16,7 +16,7 @@ export interface WithMaybeSelectedOption {
  * HOC that transforms a single select to a multiple select.
  */
 const withTransformSingleSelectToMultipleSelect = <
-	T extends Record< string, unknown >
+	T extends Record< string, unknown >,
 >(
 	OriginalComponent: FunctionComponent< T & WithMaybeSelectedOption >
 ) => {
