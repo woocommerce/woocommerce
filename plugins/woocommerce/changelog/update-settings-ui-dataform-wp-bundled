@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Use canonical Settings UI schemas with the WordPress-bundled DataForm while preserving legacy saves and fallback rendering.
+Use canonical Settings UI schemas with the WordPress-bundled DataForm while preserving the WooCommerce 10.9 extension contract, legacy saves, and fallback rendering.

@@ -1,4 +1,4 @@
 Significance: major
 Type: update
 
-Render Settings UI fields through the WordPress-bundled DataForm with stable extension control and validation contracts.
+Render Settings UI fields through the WordPress-bundled DataForm with stable control and validation contracts while preserving deprecated WooCommerce 10.9 integrations.

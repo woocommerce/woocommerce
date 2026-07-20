@@ -58,6 +58,29 @@ Registrations are scoped by settings page and, optionally, by section. This prev
 
 Multiple registrations can share a scope. Their entries are combined, and the most recently registered value wins when the same key appears more than once.
 
+## Migrate WooCommerce 10.9 registrations
+
+WooCommerce 10.9 accepted a bare component function. Current registrations use an object with a `component` property in `components`, `fieldOverrides`, and `typeRenderers`. The registration shape selects the contract, so no API version property is needed.
+
+| WooCommerce 10.9 contract | Current contract |
+| --- | --- |
+| Bare component function | `{ component: MyComponent }` |
+| `values` | `data` |
+| `value` | `field.getValue( { item: data } )` |
+| `onChange( value )` | `onChange( { [ field.id ]: value } )` |
+| `setValue( id, value )` | `onChange( { [ id ]: value } )` |
+| `setValues( values )` | `onChange( values )` |
+| `field.options` | `field.elements` |
+| `field.disabled` | `disabled` |
+| `initialValues` and `context` | `useSettingsUIContext()` |
+| `NativeSettingsField` for built-in controls | A supported field type, or a custom component when the field needs plugin-specific UI |
+| `regions` with `shell.navigationComponent` | `shell.navigation` or `shell.sectionNavigation` schema arrays |
+| `window.wcSettingsUI.registerSettingsExtension()` | Import `registerSettingsExtension()` from `@woocommerce/settings-ui` |
+
+Bare component functions still receive the complete 10.9 prop contract through a deprecated compatibility bridge. WooCommerce logs one migration warning per registration scope. Unlike 10.9, a disabled legacy field renders its read-only value without mounting the component. This prevents a legacy component without the modern `disabled` prop from remaining interactive. Component effects and other mount behavior do not run in this state.
+
+The 10.9 `NativeSettingsField`, region API, registry resolvers, hidden-input helpers, public types, and `window.wcSettingsUI` global remain functional during the compatibility period. They are deprecated and will be removed when the Settings UI leaves its experimental feature flag. New integrations should not use them.
+
 ## Component props
 
 Custom components receive the WooCommerce-owned `SettingsEditControlProps` contract:

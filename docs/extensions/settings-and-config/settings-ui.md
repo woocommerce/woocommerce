@@ -204,6 +204,19 @@ The legacy adapter converts the existing `get_settings()` array into a canonical
 
 Fields before the first `title` marker are placed into a default group automatically.
 
+### Legacy values from native schema providers
+
+A native `SettingsUIPageInterface` provider should return canonical field values. During the experimental compatibility period, WooCommerce converts these explicit legacy forms before validating the schema:
+
+- Checkbox values `yes`, `no`, `true`, `false`, `1`, `0`, and the legacy empty string become booleans.
+- Arrays containing only scalar values become lists of strings.
+- Numeric strings become integers or floats.
+- Local `datetime-local` strings become timezone-qualified ISO values using the store timezone.
+
+Already canonical values pass through unchanged. WooCommerce leaves malformed or ambiguous values unchanged so strict schema validation can reject them and use the classic renderer. When conversion occurs, WooCommerce emits one developer notice that lists the affected field IDs and types. `LegacySettingsPageAdapter` already returns canonical values and does not need this compatibility conversion.
+
+Integral numeric field values and numeric `min` and `max` bounds must stay within JavaScript's inclusive safe range of `-9007199254740991` to `9007199254740991`. Values outside this range fail schema validation before conversion can round them.
+
 Every field renders inside a [dataviews DataForm](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/) layout. The current WordPress-bundled DataForm supplies checkbox, number, integer, radio, array, and color controls. WooCommerce supplies DataForm edit controls built from the bundled WordPress UI package for text, email, URL, password, telephone, time, date, datetime, textarea, and select fields.
 
 A few behaviours follow from this mixed control set:
@@ -216,6 +229,8 @@ A few behaviours follow from this mixed control set:
 -   Rich descriptions render as sanitized details on Woo UI controls. Package controls receive the same description as plain text.
 -   Unknown field types render through the Woo text control and log a console diagnostic.
 -   Cards with headings use the bundled DataForm card behaviour and can be collapsed.
+
+Field-level disabled package controls, configurable numeric steps, and non-collapsible cards are current DataForm gaps. WooCommerce keeps a small read-only fallback for disabled package controls. It keeps the 10.9 number spinner only for deprecated `NativeSettingsField` compatibility, and does not add a separate card workaround. These temporary paths can be removed when the supported DataForm runtime covers the behavior or when the experimental compatibility period ends.
 
 DataForm validates the current canonical value against the field type and options. WooCommerce then applies numeric ranges and registered validators across the complete current values object. This can expose stale values, such as a saved select option that is no longer available. Test existing saved values when opting a page into the Settings UI and either normalize them in the page schema or provide a custom component and validator. PHP sanitization and save filters remain authoritative after submission.
 

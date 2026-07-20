@@ -39,3 +39,23 @@ array(
 ```
 
 Use native fields when possible and register custom components only for fields that need plugin-specific UI.
+
+## WooCommerce 10.9 compatibility
+
+WooCommerce 10.9 bare component registrations still work through a deprecated bridge. Migrate them to object form:
+
+```ts
+// WooCommerce 10.9.
+components: { 'my-plugin/payment-method-picker': PaymentMethodPicker }
+
+// Current contract.
+components: {
+	'my-plugin/payment-method-picker': {
+		component: PaymentMethodPicker,
+	},
+}
+```
+
+The registration shape selects the component prop contract. Bare functions receive the 10.9 props, while `{ component }` registrations receive `SettingsEditControlProps`.
+
+The deprecated `NativeSettingsField`, region API, resolver exports, hidden-input helpers, types, and `window.wcSettingsUI` global remain functional until the Settings UI leaves its experimental feature flag. Use package imports, schema navigation arrays, supported field types, and the modern component contract for new integrations.
