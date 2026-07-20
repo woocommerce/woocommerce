@@ -189,6 +189,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 				?>
 				<?php echo $additional_details_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php endif; ?>
+			<span class="woocommerce-order-withdrawal-content__note"><?php esc_html_e( 'No reason needed. If you selected specific items, list them here.', 'woocommerce' ); ?></span>
 
 			<p class="woocommerce-order-withdrawal-content__actions">
 				<?php wp_nonce_field( $nonce_action, $nonce_field ); ?>
