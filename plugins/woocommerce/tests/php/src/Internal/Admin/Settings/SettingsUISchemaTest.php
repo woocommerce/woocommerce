@@ -493,6 +493,111 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It accepts positive and negative JavaScript safe integer boundaries from legacy settings.
+	 */
+	public function test_from_legacy_settings_accepts_safe_integer_boundaries(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'test',
+			'',
+			'Test settings',
+			array(
+				array(
+					'id'                => 'maximum_safe_integer',
+					'type'              => 'number',
+					'title'             => 'Maximum safe integer',
+					'value'             => '9007199254740991',
+					'custom_attributes' => array(
+						'min'  => '-9007199254740991',
+						'max'  => '9007199254740991',
+						'step' => 1,
+					),
+				),
+				array(
+					'id'                => 'minimum_safe_integer',
+					'type'              => 'number',
+					'title'             => 'Minimum safe integer',
+					'value'             => '-9007199254740991',
+					'custom_attributes' => array( 'step' => 1 ),
+				),
+			)
+		);
+
+		$fields = $schema['groups']['default']['fields'];
+		$this->assertSame( 9007199254740991, $fields[0]['value'] );
+		$this->assertSame(
+			array(
+				'min' => -9007199254740991,
+				'max' => 9007199254740991,
+			),
+			$fields[0]['validation']
+		);
+		$this->assertSame( -9007199254740991, $fields[1]['value'] );
+	}
+
+	/**
+	 * @testdox It rejects legacy integer strings outside JavaScript's safe range before rounding.
+	 * @dataProvider unsafe_integer_string_provider
+	 *
+	 * @param string $value Unsafe integer string.
+	 */
+	public function test_from_legacy_settings_rejects_unsafe_integer_strings( string $value ): void {
+		$this->expectException( \UnexpectedValueException::class );
+
+		$this->transform_field(
+			array(
+				'id'                => 'woocommerce_test_integer',
+				'type'              => 'number',
+				'value'             => $value,
+				'custom_attributes' => array( 'step' => 1 ),
+			)
+		);
+	}
+
+	/**
+	 * Provide unsafe integer strings.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function unsafe_integer_string_provider(): array {
+		return array(
+			'positive value' => array( '9007199254740993' ),
+			'negative value' => array( '-9007199254740993' ),
+		);
+	}
+
+	/**
+	 * @testdox It rejects legacy validation bounds outside JavaScript's safe integer range before rounding.
+	 * @dataProvider unsafe_legacy_validation_bound_provider
+	 *
+	 * @param string $rule Validation rule.
+	 * @param string $value Unsafe validation bound.
+	 */
+	public function test_from_legacy_settings_rejects_unsafe_validation_bounds( string $rule, string $value ): void {
+		$this->expectException( \UnexpectedValueException::class );
+
+		$this->transform_field(
+			array(
+				'id'                => 'woocommerce_test_number',
+				'type'              => 'number',
+				'value'             => '1',
+				'custom_attributes' => array( $rule => $value ),
+			)
+		);
+	}
+
+	/**
+	 * Provide unsafe legacy numeric validation bounds.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function unsafe_legacy_validation_bound_provider(): array {
+		return array(
+			'positive maximum' => array( 'max', '9007199254740993' ),
+			'negative minimum' => array( 'min', '-9007199254740993' ),
+		);
+	}
+
+	/**
 	 * @testdox It converts local datetimes to ISO while retaining the original form value.
 	 */
 	public function test_from_legacy_settings_normalizes_local_datetime_values(): void {
@@ -776,6 +881,12 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 					'value' => 'many',
 				),
 				array(
+					'id'    => 'unsafe_count',
+					'label' => 'Unsafe count',
+					'type'  => 'integer',
+					'value' => '9007199254740993',
+				),
+				array(
 					'id'    => 'starts_at',
 					'label' => 'Starts at',
 					'type'  => 'datetime-local',
@@ -789,6 +900,103 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 
 		$this->expectException( \UnexpectedValueException::class );
 		SettingsUISchema::assert_valid( $canonicalized );
+	}
+
+	/**
+	 * @testdox It accepts canonical numeric values and bounds at JavaScript's safe integer boundaries.
+	 */
+	public function test_assert_valid_accepts_safe_integer_boundaries(): void {
+		$schema = $this->get_schema(
+			array(
+				array(
+					'id'         => 'safe_range',
+					'label'      => 'Safe range',
+					'type'       => 'integer',
+					'value'      => 9007199254740991,
+					'validation' => array(
+						'min' => -9007199254740991,
+						'max' => 9007199254740991,
+					),
+				),
+			)
+		);
+
+		SettingsUISchema::assert_valid( $schema );
+		$this->assertSame( 9007199254740991, $schema['groups']['general']['fields'][0]['value'] );
+	}
+
+	/**
+	 * @testdox It rejects provider numeric values outside JavaScript's safe integer range.
+	 * @dataProvider unsafe_canonical_number_provider
+	 *
+	 * @param int|float $value Unsafe canonical number.
+	 */
+	public function test_assert_valid_rejects_unsafe_canonical_numbers( $value ): void {
+		$this->expectException( \UnexpectedValueException::class );
+
+		SettingsUISchema::assert_valid(
+			$this->get_schema(
+				array(
+					array(
+						'id'    => 'unsafe_count',
+						'label' => 'Unsafe count',
+						'type'  => 'number',
+						'value' => $value,
+					),
+				)
+			)
+		);
+	}
+
+	/**
+	 * Provide unsafe canonical numbers.
+	 *
+	 * @return array<string, array{int|float}>
+	 */
+	public function unsafe_canonical_number_provider(): array {
+		return array(
+			'positive integer' => array( 9007199254740992 ),
+			'negative integer' => array( -9007199254740992 ),
+			'positive float'   => array( 9007199254740992.0 ),
+			'negative float'   => array( -9007199254740992.0 ),
+		);
+	}
+
+	/**
+	 * @testdox It rejects validation bounds outside JavaScript's safe integer range.
+	 * @dataProvider unsafe_validation_bound_provider
+	 *
+	 * @param string    $rule Validation rule.
+	 * @param int|float $value Unsafe validation bound.
+	 */
+	public function test_assert_valid_rejects_unsafe_validation_bounds( string $rule, $value ): void {
+		$this->expectException( \UnexpectedValueException::class );
+
+		SettingsUISchema::assert_valid(
+			$this->get_schema(
+				array(
+					array(
+						'id'         => 'unsafe_bound',
+						'label'      => 'Unsafe bound',
+						'type'       => 'number',
+						'value'      => 0,
+						'validation' => array( $rule => $value ),
+					),
+				)
+			)
+		);
+	}
+
+	/**
+	 * Provide unsafe numeric validation bounds.
+	 *
+	 * @return array<string, array{string, int|float}>
+	 */
+	public function unsafe_validation_bound_provider(): array {
+		return array(
+			'positive maximum' => array( 'max', 9007199254740992 ),
+			'negative minimum' => array( 'min', -9007199254740992 ),
+		);
 	}
 
 	/**

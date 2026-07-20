@@ -24,6 +24,13 @@ class SettingsUISchema {
 	private const DEFAULT_GROUP_ID = 'default';
 
 	/**
+	 * Largest integer JavaScript can represent without losing precision.
+	 *
+	 * @var int
+	 */
+	private const MAX_SAFE_INTEGER = 9007199254740991;
+
+	/**
 	 * Build a schema from a legacy WC settings array.
 	 *
 	 * @since 10.9.0
@@ -408,6 +415,7 @@ class SettingsUISchema {
 	 * @param array  $setting Legacy field definition.
 	 * @param string $type Canonical field type.
 	 * @return array<string, int|float>
+	 * @throws \UnexpectedValueException When a numeric bound is outside JavaScript's safe integer range.
 	 */
 	private static function get_validation_schema( array $setting, string $type ): array {
 		if ( ! in_array( $type, array( 'integer', 'number' ), true ) || ! isset( $setting['custom_attributes'] ) || ! is_array( $setting['custom_attributes'] ) ) {
@@ -416,9 +424,22 @@ class SettingsUISchema {
 
 		$validation = array();
 		foreach ( array( 'min', 'max' ) as $rule ) {
-			$value = self::to_finite_number( $setting['custom_attributes'][ $rule ] ?? null );
+			$raw_value = $setting['custom_attributes'][ $rule ] ?? null;
+			$value     = self::to_finite_number( $raw_value );
 			if ( null !== $value ) {
 				$validation[ $rule ] = $value;
+				continue;
+			}
+
+			$is_numeric = is_int( $raw_value ) || is_float( $raw_value ) || ( is_string( $raw_value ) && is_numeric( $raw_value ) );
+			if ( $is_numeric ) {
+				throw new \UnexpectedValueException(
+					sprintf(
+						'Settings UI field "%1$s" validation rule "%2$s" is outside the JavaScript-safe numeric range.',
+						esc_html( (string) ( $setting['id'] ?? '' ) ),
+						esc_html( $rule )
+					)
+				);
 			}
 		}
 
@@ -436,12 +457,57 @@ class SettingsUISchema {
 			return null;
 		}
 
+		// Check plain integer strings before casting to float. Casting first can
+		// round an unsafe value into a different integer that appears valid.
+		if ( is_string( $value ) && self::is_unsafe_integer_string( $value ) ) {
+			return null;
+		}
+
 		$number = (float) $value;
-		if ( ! is_finite( $number ) ) {
+		if ( ! is_finite( $number ) || ! self::is_safe_integral_number( $number ) ) {
 			return null;
 		}
 
 		return floor( $number ) === $number && $number <= PHP_INT_MAX && $number >= PHP_INT_MIN ? (int) $number : $number;
+	}
+
+	/**
+	 * Whether an integer string is outside JavaScript's safe range.
+	 *
+	 * @param string $value Numeric string.
+	 * @return bool
+	 */
+	private static function is_unsafe_integer_string( string $value ): bool {
+		if ( ! preg_match( '/^[+-]?(\d+)$/D', trim( $value ), $matches ) ) {
+			return false;
+		}
+
+		$digits  = ltrim( $matches[1], '0' );
+		$digits  = '' === $digits ? '0' : $digits;
+		$maximum = (string) self::MAX_SAFE_INTEGER;
+
+		return strlen( $digits ) > strlen( $maximum ) || ( strlen( $digits ) === strlen( $maximum ) && strcmp( $digits, $maximum ) > 0 );
+	}
+
+	/**
+	 * Whether a number can cross the JavaScript boundary without integer precision loss.
+	 *
+	 * Non-integral finite numbers are allowed. Integral values must stay inside
+	 * JavaScript's inclusive safe integer range.
+	 *
+	 * @param int|float $value Numeric value.
+	 * @return bool
+	 */
+	private static function is_safe_integral_number( $value ): bool {
+		if ( is_float( $value ) && ! is_finite( $value ) ) {
+			return false;
+		}
+
+		if ( is_float( $value ) && floor( $value ) !== $value ) {
+			return true;
+		}
+
+		return $value <= self::MAX_SAFE_INTEGER && $value >= -self::MAX_SAFE_INTEGER;
 	}
 
 	/**
@@ -747,9 +813,11 @@ class SettingsUISchema {
 				throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" validation must be an array.', esc_html( $field_id ) ) );
 			}
 			foreach ( array( 'min', 'max' ) as $rule ) {
-				$value = $field['validation'][ $rule ] ?? null;
-				if ( null !== $value && ! is_int( $value ) && ! ( is_float( $value ) && is_finite( $value ) ) ) {
-					throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" validation rule "%s" must be a finite number.', esc_html( $field_id ), esc_html( $rule ) ) );
+				$value         = $field['validation'][ $rule ] ?? null;
+				$is_number     = is_int( $value ) || ( is_float( $value ) && is_finite( $value ) );
+				$is_safe_value = $is_number && self::is_safe_integral_number( $value );
+				if ( null !== $value && ! $is_safe_value ) {
+					throw new \UnexpectedValueException( sprintf( 'Settings UI field "%s" validation rule "%s" must be a finite JavaScript-safe number.', esc_html( $field_id ), esc_html( $rule ) ) );
 				}
 			}
 		}
@@ -769,7 +837,8 @@ class SettingsUISchema {
 	 * @throws \UnexpectedValueException When the value is invalid.
 	 */
 	private static function assert_valid_field_value( string $field_id, string $type, $value ): void {
-		$is_valid = is_string( $value ) || is_int( $value ) || is_bool( $value ) || null === $value || ( is_float( $value ) && is_finite( $value ) ) || self::is_string_list( $value );
+		$is_number = is_int( $value ) || ( is_float( $value ) && is_finite( $value ) );
+		$is_valid  = is_string( $value ) || is_bool( $value ) || null === $value || self::is_string_list( $value ) || ( $is_number && self::is_safe_integral_number( $value ) );
 
 		switch ( $type ) {
 			case 'checkbox':
@@ -779,10 +848,10 @@ class SettingsUISchema {
 				$is_valid = self::is_string_list( $value );
 				break;
 			case 'integer':
-				$is_valid = is_int( $value ) || null === $value;
+				$is_valid = ( is_int( $value ) && self::is_safe_integral_number( $value ) ) || null === $value;
 				break;
 			case 'number':
-				$is_valid = is_int( $value ) || ( is_float( $value ) && is_finite( $value ) ) || null === $value;
+				$is_valid = ( $is_number && self::is_safe_integral_number( $value ) ) || null === $value;
 				break;
 			case 'datetime-local':
 				$is_valid = null === $value || self::is_iso_datetime( $value );

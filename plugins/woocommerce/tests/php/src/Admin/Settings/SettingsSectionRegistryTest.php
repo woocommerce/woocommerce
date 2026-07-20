@@ -211,6 +211,33 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject unsafe integer strings from a native Settings UI page provider without rounding.
+	 */
+	public function test_rejects_unsafe_integers_from_native_settings_ui_page(): void {
+		$page = $this->get_parent_page();
+		SettingsSectionRegistry::get_instance()->register(
+			$this->get_registered_section_with_native_settings_ui_page(
+				null,
+				null,
+				array(
+					array(
+						'id'    => 'acme_count',
+						'label' => 'Count',
+						'type'  => 'integer',
+						'value' => '9007199254740993',
+					),
+				)
+			)
+		);
+
+		$context = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' );
+
+		$this->assertNull( $context->get_schema() );
+		$this->assertTrue( $context->has_schema_failed() );
+		$this->assertStringContainsString( 'noncanonical value', $context->get_schema_failure_reason() );
+	}
+
+	/**
 	 * @testdox Should invoke the native Settings UI page provider once per cached request context.
 	 */
 	public function test_invokes_native_settings_ui_page_provider_once_per_request_context(): void {
