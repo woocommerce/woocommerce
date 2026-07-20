@@ -13,6 +13,14 @@ import { ProjectNode } from './project-graph';
 import { TestEnvVars, parseTestEnvConfig } from './test-environment';
 
 /**
+ * Projects whose contents define every consumer's effective ESLint rule set.
+ */
+const SHARED_ESLINT_PROJECTS = [
+	'@woocommerce/eslint-plugin',
+	'@woocommerce/eslint-config',
+];
+
+/**
  * A linting job.
  */
 interface LintJob {
@@ -353,6 +361,17 @@ async function createJobsForProject(
 
 		switch ( jobConfig.type ) {
 			case JobType.Lint: {
+				// Changing the shared ESLint config changes every consumer's
+				// effective rule set while touching none of their own files, so
+				// their lint jobs would not otherwise be triggered.
+				if (
+					dependenciesWithChanges.some( ( dependency ) =>
+						SHARED_ESLINT_PROJECTS.includes( dependency )
+					)
+				) {
+					projectChanges = true;
+				}
+
 				const created = createLintJob(
 					node.name,
 					node.path,

@@ -6,7 +6,7 @@ import { getSetting } from '@woocommerce/settings';
 export const useIncompatibleExtensionNotice = (): [
 	{ [ k: string ]: string } | null,
 	string[],
-	number
+	number,
 ] => {
 	interface GlobalIncompatibleExtensions {
 		id: string;
