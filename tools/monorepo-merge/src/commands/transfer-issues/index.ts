@@ -167,9 +167,9 @@ export default class TransferIssues extends Command {
 				continue;
 			}
 
-			this.resetProjectFields( authenticatedGraphQL, issue );
+			await this.resetProjectFields( authenticatedGraphQL, issue );
 
-			this.addLabelsToIssue(
+			await this.addLabelsToIssue(
 				authenticatedGraphQL,
 				issue.newID,
 				labelsToAdd
