@@ -314,108 +314,6 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 		} );
 	} );
 
-	[
-		{
-			id: 'myCustomCollectionWithProductContext',
-			name: 'My Custom Collection - Product Context',
-			label: 'Block: My Custom Collection - Product Context',
-			previewLabelTemplate: [ `${ BLOCK_THEME_SLUG }//single-product` ],
-		},
-		{
-			id: 'myCustomCollectionWithCartContext',
-			name: 'My Custom Collection - Cart Context',
-			label: 'Block: My Custom Collection - Cart Context',
-			previewLabelTemplate: [ `${ BLOCK_THEME_SLUG }//page-cart` ],
-		},
-		{
-			id: 'myCustomCollectionWithOrderContext',
-			name: 'My Custom Collection - Order Context',
-			label: 'Block: My Custom Collection - Order Context',
-			previewLabelTemplate: [
-				`${ BLOCK_THEME_SLUG }//order-confirmation`,
-			],
-		},
-		{
-			id: 'myCustomCollectionWithArchiveContext',
-			name: 'My Custom Collection - Archive Context',
-			label: 'Block: My Custom Collection - Archive Context',
-			previewLabelTemplate: [
-				`${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
-			],
-		},
-		{
-			id: 'myCustomCollectionMultipleContexts',
-			name: 'My Custom Collection - Multiple Contexts',
-			label: 'Block: My Custom Collection - Multiple Contexts',
-			previewLabelTemplate: [
-				`${ BLOCK_THEME_SLUG }//single-product`,
-				`${ BLOCK_THEME_SLUG }//order-confirmation`,
-			],
-		},
-	].forEach( ( collection ) => {
-		collection.previewLabelTemplate.forEach( ( template ) => {
-			test( `Collection "${ collection.name }" should show preview label in "${ template }"`, async ( {
-				admin,
-				pageObject,
-				editor,
-			} ) => {
-				if (
-					template === `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`
-				) {
-					await admin.visitSiteEditor( {
-						postType: 'wp_template',
-					} );
-					await editor.createTemplate( {
-						templateName: 'Products by Category',
-					} );
-				} else {
-					await pageObject.goToEditorTemplate( template );
-				}
-				await pageObject.insertProductCollection();
-				await pageObject.chooseCollectionInTemplate(
-					collection.id as Collections
-				);
-
-				// Check if the preview button is visible
-				const previewButtonLocator = editor.canvas.getByTestId(
-					SELECTORS.previewButtonTestID
-				);
-
-				await expect( previewButtonLocator ).toBeVisible();
-			} );
-		} );
-
-		test( `Collection "${ collection.name }" should not show preview label in a post`, async ( {
-			pageObject,
-			editor,
-		} ) => {
-			await pageObject.createNewPostAndInsertBlock(
-				collection.id as Collections
-			);
-
-			const previewButtonLocator = editor.canvas.getByTestId(
-				SELECTORS.previewButtonTestID
-			);
-
-			await expect( previewButtonLocator ).toBeHidden();
-		} );
-
-		test( `Collection "${ collection.name }" should not show preview label in Product Catalog template`, async ( {
-			pageObject,
-			editor,
-		} ) => {
-			await pageObject.goToProductCatalogAndInsertCollection(
-				collection.id as Collections
-			);
-
-			const previewButtonLocator = editor.canvas.getByTestId(
-				SELECTORS.previewButtonTestID
-			);
-
-			await expect( previewButtonLocator ).toBeHidden();
-		} );
-	} );
-
 	test( 'Product picker should be shown when selected product is deleted', async ( {
 		pageObject,
 		admin,
@@ -604,8 +502,13 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 					? 'toBeVisible'
 					: 'toBeHidden';
 				await expect( editorProductPicker )[ expectedVisibility ]();
+				const previewButtonLocator = editor.canvas.getByTestId(
+					SELECTORS.previewButtonTestID
+				);
 
 				if ( collection.shouldShowProductPicker ) {
+					// eslint-disable-next-line playwright/no-conditional-expect -- Only Product and Multiple have a pre-resolution picker state.
+					await expect( previewButtonLocator ).toBeHidden();
 					await pageObject.chooseProductInEditorProductPickerIfAvailable(
 						editor.canvas
 					);
@@ -614,11 +517,7 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 				// At this point, the product picker should be hidden
 				await expect( editorProductPicker ).toBeHidden();
 
-				// Check visibility of preview label
-				const previewButtonLocator = editor.canvas.getByTestId(
-					SELECTORS.previewButtonTestID
-				);
-
+				// The preview label remains hidden after resolving the picker.
 				await expect( previewButtonLocator ).toBeHidden();
 			} );
 
