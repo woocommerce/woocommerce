@@ -321,10 +321,7 @@ class WC_Helper_Subscriptions_API {
 		}
 
 		if ( 'plugin' === $subscription['product_type'] ) {
-			// manage_woocommerce (checked by get_permission() above) doesn't
-			// imply activate_plugins; a Shop Manager could otherwise
-			// reactivate a payment or shipping extension an Administrator
-			// deliberately left inactive.
+			// manage_woocommerce (checked by get_permission() above) doesn't imply activate_plugins.
 			if ( ! current_user_can( 'activate_plugins' ) ) {
 				wp_send_json_error(
 					array(
