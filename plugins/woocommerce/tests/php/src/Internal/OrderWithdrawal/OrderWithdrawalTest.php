@@ -186,6 +186,30 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should require the fields needed to identify the customer and order.
+	 */
+	public function test_process_current_request_requires_customer_and_order_fields(): void {
+		$required_fields = array(
+			OrderWithdrawalFormProcessor::FIELD_FIRST_NAME,
+			OrderWithdrawalFormProcessor::FIELD_LAST_NAME,
+			OrderWithdrawalFormProcessor::FIELD_EMAIL,
+			OrderWithdrawalFormProcessor::FIELD_EMAIL_CONFIRMATION,
+			OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER,
+			OrderWithdrawalFormProcessor::FIELD_WITHDRAWAL_TYPE,
+		);
+		$field_overrides = array_fill_keys( $required_fields, '' );
+
+		$this->prepare_post_request( OrderWithdrawalFormProcessor::ACTION_REVIEW, $field_overrides );
+
+		$state      = $this->sut->process_current_request();
+		$notice_ids = wp_list_pluck( wp_list_pluck( wc_get_notices( 'error' ), 'data' ), 'id' );
+
+		$this->assertSame( 'form', $state->screen, 'Submissions missing required fields should stay on the form screen.' );
+		$this->assertSame( $required_fields, array_keys( $state->errors ), 'The required customer and order fields should all fail validation.' );
+		$this->assertSame( array_map( array( OrderWithdrawalFormProcessor::class, 'get_field_name' ), $required_fields ), $notice_ids, 'Each required-field error should add a notice tied to that field.' );
+	}
+
+	/**
 	 * @testdox Should reject POST requests that fail nonce verification.
 	 */
 	public function test_process_current_request_rejects_invalid_nonce(): void {
