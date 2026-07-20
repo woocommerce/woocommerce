@@ -485,9 +485,9 @@ if ( wc_tax_enabled() ) {
 								placeholder="<?php echo esc_attr_x( 'Search', 'tax rate search input placeholder', 'woocommerce' ); ?>"
 							/>
 							<button type="submit" class="button"><?php esc_html_e( 'Search tax rates', 'woocommerce' ); ?></button>
+							<span class="description wc-tax-rate-search-summary" data-wc-tax-rate-search-summary hidden></span>
 						</p>
 						<br class="clear" />
-						<p class="description wc-tax-rate-search-summary" data-wc-tax-rate-search-summary hidden></p>
 						<table class="widefat striped wc-tax-rate-results" data-wc-tax-rate-results data-per_page="10">
 							<thead>
 								<tr>

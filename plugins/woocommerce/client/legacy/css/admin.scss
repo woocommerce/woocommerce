@@ -8235,6 +8235,23 @@ table.bar_chart {
 	.wc-backbone-modal-main {
 		padding-bottom: calc( 2.5em + 40px );
 
+		.search-box {
+			float: none;
+			justify-content: flex-start;
+			width: 100%;
+		}
+
+		.wc-tax-rate-search-summary:not([hidden]) {
+			display: block;
+			flex-basis: 100%;
+			margin: 8px 0 0;
+			text-align: start;
+		}
+
+		.wc-tax-rate-search-summary .button-link {
+			margin-inline-start: 8px;
+		}
+
 		footer {
 			padding: 1.25em 2em;
 		}
