@@ -36,6 +36,7 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_stats" ); // phpcs:ignore WordPress.DB
 		delete_option( Analytics::REFUND_DOUBLE_COUNT_OPTION );
 		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+		remove_all_filters( 'woocommerce_analytics_refund_double_count_batch_size' );
 		as_unschedule_all_actions( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK );
 		as_unschedule_all_actions( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK );
 		parent::tearDown();
@@ -77,10 +78,22 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 			Analytics::REFUND_DOUBLE_COUNT_OPTION,
 			array(
 				'running_count' => $count,
-				'cursor'        => 0,
 				'complete'      => true,
 			),
 			false
+		);
+	}
+
+	/**
+	 * Force the scan/fix batch size down to one so tests can exercise the
+	 * multi-batch path with a handful of rows.
+	 */
+	private function use_batch_size_one(): void {
+		add_filter(
+			'woocommerce_analytics_refund_double_count_batch_size',
+			function () {
+				return 1;
+			}
 		);
 	}
 
@@ -93,9 +106,9 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	private function insert_double_counted_order( int $parent_id ): void {
 		$this->insert_stat(
 			array(
-				'order_id'     => $parent_id,
-				'net_total'    => 80,
-				'tax_total'    => 10,
+				'order_id'       => $parent_id,
+				'net_total'      => 80,
+				'tax_total'      => 10,
 				'shipping_total' => 10,
 			)
 		);
@@ -110,10 +123,10 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		// Buggy full refund: recorded -1x the whole parent total, ignoring the partial.
 		$this->insert_stat(
 			array(
-				'order_id'     => $parent_id + 100001,
-				'parent_id'    => $parent_id,
-				'net_total'    => -80,
-				'tax_total'    => -10,
+				'order_id'       => $parent_id + 100001,
+				'parent_id'      => $parent_id,
+				'net_total'      => -80,
+				'tax_total'      => -10,
 				'shipping_total' => -10,
 			)
 		);
@@ -128,7 +141,7 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		$this->sut->process_refund_double_count_scan_batch( 0 );
 
 		$state = Analytics::get_refund_double_count_state();
-		$this->assertTrue( $state['complete'], 'Scan should complete in a single window' );
+		$this->assertTrue( $state['complete'], 'Scan should complete in a single batch' );
 		$this->assertSame( 1, $state['count'], 'The over-refunded order should be counted' );
 	}
 
@@ -138,18 +151,18 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	public function test_scan_ignores_single_full_refund(): void {
 		$this->insert_stat(
 			array(
-				'order_id'     => 2000,
-				'net_total'    => 80,
-				'tax_total'    => 10,
+				'order_id'       => 2000,
+				'net_total'      => 80,
+				'tax_total'      => 10,
 				'shipping_total' => 10,
 			)
 		);
 		$this->insert_stat(
 			array(
-				'order_id'     => 2001,
-				'parent_id'    => 2000,
-				'net_total'    => -80,
-				'tax_total'    => -10,
+				'order_id'       => 2001,
+				'parent_id'      => 2000,
+				'net_total'      => -80,
+				'tax_total'      => -10,
 				'shipping_total' => -10,
 			)
 		);
@@ -165,9 +178,9 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	public function test_scan_ignores_partials_under_total(): void {
 		$this->insert_stat(
 			array(
-				'order_id'     => 3000,
-				'net_total'    => 80,
-				'tax_total'    => 10,
+				'order_id'       => 3000,
+				'net_total'      => 80,
+				'tax_total'      => 10,
 				'shipping_total' => 10,
 			)
 		);
@@ -192,22 +205,29 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Scan accumulates affected orders across multiple parent_id windows.
+	 * @testdox Scan accumulates affected orders across multiple keyset batches.
 	 */
-	public function test_scan_windows_and_accumulates(): void {
+	public function test_scan_batches_and_accumulates(): void {
 		$this->insert_double_counted_order( 1000 );
-		$this->insert_double_counted_order( 600000 );
+		$this->insert_double_counted_order( 2000 );
+		$this->use_batch_size_one();
 
 		$this->sut->process_refund_double_count_scan_batch( 0 );
 		$mid_state = Analytics::get_refund_double_count_state();
-		$this->assertFalse( $mid_state['complete'], 'Scan should not complete while orders remain past the window' );
-		$this->assertSame( 1, $mid_state['count'], 'Only the first window order is counted so far' );
-		$this->assertSame( Analytics::REFUND_DOUBLE_COUNT_WINDOW, $mid_state['cursor'], 'Cursor advances by one window' );
+		$this->assertFalse( $mid_state['complete'], 'Scan should not complete while batches come back full' );
+		$this->assertSame( 1, $mid_state['count'], 'Only the first batch order is counted so far' );
+		$this->assertNotFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 1000 ), 'wc-admin-data' ),
+			'The next batch should be scheduled from the last processed parent_id'
+		);
 
-		$this->sut->process_refund_double_count_scan_batch( $mid_state['cursor'] );
+		$this->sut->process_refund_double_count_scan_batch( 1000 );
+		$this->assertSame( 2, Analytics::get_refund_double_count_state()['count'], 'The second batch order is accumulated' );
+
+		$this->sut->process_refund_double_count_scan_batch( 2000 );
 		$final_state = Analytics::get_refund_double_count_state();
-		$this->assertTrue( $final_state['complete'], 'Scan should complete after the last window' );
-		$this->assertSame( 2, $final_state['count'], 'Both windowed orders should be counted' );
+		$this->assertTrue( $final_state['complete'], 'Scan should complete once a batch comes back short' );
+		$this->assertSame( 2, $final_state['count'], 'Both batched orders should be counted' );
 	}
 
 	/**
@@ -239,14 +259,42 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Regenerate with skip-existing unchecked clears the stored scan state.
+	 * @testdox Fix batch advances the cursor past every selected parent and self-schedules while batches come back full.
+	 */
+	public function test_fix_batch_pages_with_keyset_cursor(): void {
+		$this->insert_double_counted_order( 1000 );
+		$this->insert_double_counted_order( 2000 );
+		$this->set_complete_scan_state( 2 );
+		$this->use_batch_size_one();
+
+		$this->sut->process_refund_double_count_fix_batch( 0 );
+		$this->assertNotFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK, array( 1000 ), 'wc-admin-data' ),
+			'The next fix batch should be scheduled from the last selected parent_id'
+		);
+		$this->assertSame( 2, Analytics::get_refund_double_count_state()['count'], 'The stored count only resets on the final batch' );
+
+		$this->sut->process_refund_double_count_fix_batch( 1000 );
+		$this->assertNotFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK, array( 2000 ), 'wc-admin-data' ),
+			'A full batch keeps advancing the cursor'
+		);
+
+		$this->sut->process_refund_double_count_fix_batch( 2000 );
+		$state = Analytics::get_refund_double_count_state();
+		$this->assertTrue( $state['complete'], 'Fix keeps the scan marked complete' );
+		$this->assertSame( 0, $state['count'], 'A short batch ends the sweep and self-heals the count' );
+	}
+
+	/**
+	 * @testdox Full-history regenerate with skip-existing unchecked clears the stored scan state.
 	 */
 	public function test_regenerate_clears_state_when_not_skipping(): void {
 		$this->set_complete_scan_state( 5 );
 
 		$this->sut->maybe_clear_refund_double_count_on_regenerate( false, false );
 
-		$this->assertFalse( get_option( Analytics::REFUND_DOUBLE_COUNT_OPTION ), 'A reprocessing re-import clears the stale count' );
+		$this->assertFalse( get_option( Analytics::REFUND_DOUBLE_COUNT_OPTION ), 'A full-history reprocessing re-import clears the stale count' );
 	}
 
 	/**
@@ -258,5 +306,16 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		$this->sut->maybe_clear_refund_double_count_on_regenerate( false, true );
 
 		$this->assertSame( 5, Analytics::get_refund_double_count_state()['count'], 'A skip-existing import leaves affected orders untouched, so the count stays' );
+	}
+
+	/**
+	 * @testdox Windowed regenerate keeps the stored scan state even when not skipping existing rows.
+	 */
+	public function test_regenerate_keeps_state_on_windowed_import(): void {
+		$this->set_complete_scan_state( 5 );
+
+		$this->sut->maybe_clear_refund_double_count_on_regenerate( 30, false );
+
+		$this->assertSame( 5, Analytics::get_refund_double_count_state()['count'], 'A windowed import never reprocesses affected orders older than the window, so the count stays' );
 	}
 }

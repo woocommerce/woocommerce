@@ -126,6 +126,12 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 
 		$refund_double_count = Analytics::get_refund_double_count_state();
 
+		// The in-progress flag only matters once the scan has found something to fix,
+		// so skip the Action Scheduler store query for every other store forever.
+		$refund_fix_in_progress = $refund_double_count['complete'] && $refund_double_count['count'] > 0
+			? Analytics::is_refund_double_count_fix_in_progress()
+			: false;
+
 		$response = array(
 			'mode'                                => $mode,
 			'last_processed_date'                 => null,
@@ -135,7 +141,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 			'failed_overflow_count'               => $failed_imports['overflow'],
 			'refund_double_count'                 => $refund_double_count['count'],
 			'refund_double_count_scan_complete'   => $refund_double_count['complete'],
-			'refund_double_count_fix_in_progress' => Analytics::is_refund_double_count_fix_in_progress(),
+			'refund_double_count_fix_in_progress' => $refund_fix_in_progress,
 		);
 
 		// For scheduled mode, populate additional fields.
@@ -299,8 +305,9 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	 * Schedule the re-import of orders whose refunds are double-counted in Analytics
 	 * (the historical rows written by the bug fixed in PR #66320).
 	 *
-	 * Refuses when the detection scan has not finished, or when a fix batch is already
-	 * pending or running, so repeated requests cannot pile up overlapping work.
+	 * Refuses when the detection scan has not finished, when it found nothing to fix,
+	 * or when a fix batch is already pending or running, so repeated requests cannot
+	 * pile up overlapping work.
 	 *
 	 * @param  \WP_REST_Request<array<string, mixed>> $request Full details about the request.
 	 * @return \WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
@@ -316,6 +323,16 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 			);
 		}
 
+		if ( $state['count'] < 1 ) {
+			return new WP_Error(
+				'woocommerce_rest_analytics_refund_nothing_to_fix',
+				__( 'There are no orders with double-counted refunds to fix.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Known benign race: two rapid requests can both pass this check and each
+		// schedule a sweep. The sweeps are idempotent, so no locking is needed.
 		if ( Analytics::is_refund_double_count_fix_in_progress() ) {
 			return new WP_Error(
 				'woocommerce_rest_analytics_refund_fix_in_progress',
