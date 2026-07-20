@@ -37,6 +37,16 @@ const blockData: BlockData = {
 	},
 };
 
+const testsFailingOnWordPress71 = new Set( [
+	'renders without crashing and can only be inserted once',
+	'Merchant can see T&S and Privacy Policy links with checkbox',
+	'can enable dark mode inputs',
+	'Company input visibility and optional and required can be toggled',
+	'Apartment input visibility and optional and required can be toggled',
+	'Phone input visibility and optional and required can be toggled',
+	'Return to cart link is visible and can be toggled',
+] );
+
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	checkoutPageObject: async ( { page }, use ) => {
 		const pageObject = new CheckoutPage( {
@@ -50,7 +60,14 @@ test.describe( 'Merchant → Checkout', () => {
 	// `as string` is safe here because we know the variable is a string, it is defined above.
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test.beforeEach( async ( { admin, editor } ) => {
+	test.beforeEach( async ( { admin, editor, wpCoreVersion }, testInfo ) => {
+		test.skip(
+			wpCoreVersion === 7.1 &&
+				testsFailingOnWordPress71.has( testInfo.title ),
+			'Currently broken with WordPress 7.1 beta 1 and requires upstream patch. ' +
+				'See: https://github.com/WordPress/gutenberg/pull/80026#issuecomment-5003222851'
+		);
+
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
