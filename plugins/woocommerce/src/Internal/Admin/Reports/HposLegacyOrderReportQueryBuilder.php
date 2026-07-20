@@ -18,6 +18,8 @@ defined( 'ABSPATH' ) || exit;
  * `{$wpdb->posts}` / `{$wpdb->postmeta}`.
  *
  * @internal
+ *
+ * @since 11.0.0
  */
 class HposLegacyOrderReportQueryBuilder {
 
@@ -38,6 +40,8 @@ class HposLegacyOrderReportQueryBuilder {
 	/**
 	 * Build the SQL clauses for an HPOS-backed legacy order report query.
 	 *
+	 * @since 11.0.0
+	 *
 	 * @param array $args       Parsed report arguments.
 	 * @param int   $start_date Start date as a Unix timestamp.
 	 * @param int   $end_date   End date as a Unix timestamp.
@@ -45,6 +49,11 @@ class HposLegacyOrderReportQueryBuilder {
 	 * @return array<string,string> SQL clauses keyed by select/from/join/where/group_by/order_by/limit.
 	 */
 	public function build_query( array $args, int $start_date, int $end_date ): array {
+		// The class is resolved from the DI container as a shared instance: reset the
+		// per-build caches so option-derived state can't leak between queries.
+		$this->report_schema = null;
+		$this->column_map    = null;
+
 		$data                = $args['data'] ?? array();
 		$where               = $args['where'] ?? array();
 		$where_meta          = $args['where_meta'] ?? array();
@@ -616,21 +625,33 @@ class HposLegacyOrderReportQueryBuilder {
 	/**
 	 * Translate legacy `posts.<col>` (and bare `ID` / `post_date`) references in an arbitrary SQL fragment.
 	 *
+	 * Matches are bounded by `\b` so tokens embedded in longer identifiers
+	 * (e.g. `product_ID`, `posts.post_date_gmt`) are left untouched.
+	 *
 	 * @param string $fragment Caller-supplied SQL fragment.
 	 *
 	 * @return string Translated fragment safe to drop into an HPOS query.
 	 */
 	private function translate_legacy_sql_fragment( string $fragment ): string {
-		$map          = $this->legacy_to_hpos_column_map();
-		$replacements = array();
-		foreach ( $map as $bare => $hpos ) {
-			$replacements[ "posts.{$bare}" ] = $hpos;
-		}
-		// Bare matches that are safe to translate without the `posts.` prefix.
-		$replacements['post_date'] = $map['post_date'];
-		$replacements['ID']        = $map['ID'];
+		$map = $this->legacy_to_hpos_column_map();
 
-		return strtr( $fragment, $replacements );
+		// Qualified `posts.<col>` references first, then the bare tokens legacy
+		// callers use unqualified. Callbacks avoid `$`/`\` replacement-string pitfalls.
+		$fragment = (string) preg_replace_callback(
+			'/\bposts\.(ID|post_date|post_parent|post_status|post_type)\b/',
+			static function ( $matches ) use ( $map ) {
+				return $map[ $matches[1] ];
+			},
+			$fragment
+		);
+
+		return (string) preg_replace_callback(
+			'/\b(ID|post_date)\b/',
+			static function ( $matches ) use ( $map ) {
+				return $map[ $matches[1] ];
+			},
+			$fragment
+		);
 	}
 
 	/**
