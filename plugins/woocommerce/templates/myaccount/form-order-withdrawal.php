@@ -49,8 +49,6 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 <div class="woocommerce-order-withdrawal-content">
 	<?php wc_print_notices(); ?>
 
-	<h2><?php esc_html_e( 'Withdraw from contract', 'woocommerce' ); ?></h2>
-
 	<?php if ( 'confirmation' === $screen ) : ?>
 		<p><strong><?php esc_html_e( 'Your withdrawal details are ready.', 'woocommerce' ); ?></strong></p>
 		<p class="woocommerce-order-withdrawal-content__note">

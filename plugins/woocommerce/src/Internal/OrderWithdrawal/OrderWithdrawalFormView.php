@@ -167,11 +167,10 @@ final class OrderWithdrawalFormView {
 				'required' => true,
 			),
 			OrderWithdrawalFormProcessor::FIELD_ADDITIONAL_DETAILS => array(
-				'label'       => __( 'Additional details', 'woocommerce' ),
-				'type'        => 'textarea',
-				'class'       => array( 'woocommerce-form-row', 'woocommerce-form-row--wide', 'form-row-wide' ),
-				'description' => __( 'No reason needed. If you selected specific items, list them here.', 'woocommerce' ),
-				'required'    => false,
+				'label'    => __( 'Additional details', 'woocommerce' ),
+				'type'     => 'textarea',
+				'class'    => array( 'woocommerce-form-row', 'woocommerce-form-row--wide', 'form-row-wide' ),
+				'required' => false,
 			),
 		);
 	}
