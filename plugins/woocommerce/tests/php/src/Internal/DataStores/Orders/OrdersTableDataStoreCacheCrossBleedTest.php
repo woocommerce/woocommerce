@@ -790,7 +790,7 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 			$meta_data[]         = $virtual;
 			return $meta_data;
 		};
-		add_filter( 'woocommerce_data_store_wp_order_read_meta', $read_meta_filter );
+		add_filter( 'woocommerce_data_store_wp_post_read_meta', $read_meta_filter );
 
 		// Make sure the legacy meta cache starts empty so the first read is a cache miss.
 		$cache_key = $order->get_meta_cache_key();
@@ -818,7 +818,7 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 		$this->assertSame( 'virtual_value', $order->get_meta( '_virtual_meta' ), 'The injected virtual meta should still resolve after a cache hit.' );
 		$this->assertSame( 'custom_value', $order->get_meta( 'custom_meta_key' ), 'The real database meta should be unaffected.' );
 
-		remove_filter( 'woocommerce_data_store_wp_order_read_meta', $read_meta_filter );
+		remove_filter( 'woocommerce_data_store_wp_post_read_meta', $read_meta_filter );
 		remove_all_filters( 'woocommerce_logging_class' );
 	}
 

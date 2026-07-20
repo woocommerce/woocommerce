@@ -1498,10 +1498,11 @@ WHERE
 		 * boundary (those always have a meta_id), this guard also runs against the post-filter output
 		 * that WC_Data::read_meta_data() caches and re-validates on a cache hit. That output can
 		 * legitimately include virtual rows injected by extensions via the
-		 * woocommerce_data_store_wp_order_read_meta filter, which carry meta_key and meta_value but
-		 * no meta_id (init_meta_data() reads such a row's id as 0). Requiring meta_id would
-		 * reclassify those legitimate rows as corrupt and churn the cache - purging it and re-logging
-		 * on every read - so we only treat a missing meta_key or meta_value as corruption. Drop
+		 * woocommerce_data_store_wp_post_read_meta filter (orders use the 'post' meta type), which
+		 * carry meta_key and meta_value but no meta_id (init_meta_data() reads such a row's id as 0).
+		 * Requiring meta_id would reclassify those legitimate rows as corrupt and churn the cache -
+		 * purging it and re-logging on every read - so we only treat a missing meta_key or meta_value
+		 * as corruption. Drop
 		 * anything that is not a usable meta row so the order still loads, and when corruption is
 		 * detected invalidate the cached entries so the next read self-heals from the database.
 		 */
