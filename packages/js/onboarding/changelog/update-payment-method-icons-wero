@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update WooPaymentsMethodsLogos to strokeless design-library card assets framed by a single CSS ring, so every badge and the overflow count chip render at the same size, and rebrand iDEAL to iDEAL | Wero.
