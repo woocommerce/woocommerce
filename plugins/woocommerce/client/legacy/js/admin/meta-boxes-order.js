@@ -1206,7 +1206,8 @@ jQuery( function ( $ ) {
 			},
 
 			init_tax_rate_modal: function( modal ) {
-				var load_tax_rates = function( page, is_search ) {
+				var pagination = modal.find( '[data-wc-tax-rate-pagination]' ),
+					load_tax_rates = function( page, is_search ) {
 					wc_meta_boxes_order_items.backbone.search_tax_rates( modal, page, is_search );
 				};
 
@@ -1232,17 +1233,17 @@ jQuery( function ( $ ) {
 				} );
 
 				modal.on( 'click', '.prev-page', function() {
-					var current_page = parseInt( modal.find( '[data-wc-tax-rate-pagination]' ).data( 'page' ), 10 ) || 1;
+					var current_page = parseInt( pagination.data( 'page' ), 10 ) || 1;
 					load_tax_rates( Math.max( 1, current_page - 1 ) );
 				} );
 
 				modal.on( 'click', '.next-page', function() {
-					var current_page = parseInt( modal.find( '[data-wc-tax-rate-pagination]' ).data( 'page' ), 10 ) || 1;
+					var current_page = parseInt( pagination.data( 'page' ), 10 ) || 1;
 					load_tax_rates( current_page + 1 );
 				} );
 
 				modal.on( 'click', '.last-page', function() {
-					var total_pages = parseInt( modal.find( '[data-wc-tax-rate-pagination]' ).data( 'total-pages' ), 10 ) || 1;
+					var total_pages = parseInt( pagination.data( 'total-pages' ), 10 ) || 1;
 					load_tax_rates( total_pages );
 				} );
 
@@ -1253,7 +1254,7 @@ jQuery( function ( $ ) {
 
 					event.preventDefault();
 
-					var total_pages = parseInt( modal.find( '[data-wc-tax-rate-pagination]' ).data( 'total-pages' ), 10 ) || 1,
+					var total_pages = parseInt( pagination.data( 'total-pages' ), 10 ) || 1,
 						page        = parseInt( $( this ).val(), 10 ) || 1;
 
 					load_tax_rates( Math.min( Math.max( 1, page ), total_pages ) );
