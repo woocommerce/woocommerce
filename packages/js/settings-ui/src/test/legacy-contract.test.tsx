@@ -124,6 +124,75 @@ describe( 'legacy settings component contract', () => {
 		cleanup();
 	} );
 
+	it( 'canonicalizes legacy callback values before updating DataForm', () => {
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		const received: SettingsFieldComponentProps[] = [];
+		const LegacyComponent = ( props: SettingsFieldComponentProps ) => {
+			received.push( props );
+			return <div>Legacy numeric component</div>;
+		};
+		const numericSchema: SettingsUISchema = {
+			id: 'test-page',
+			section: 'default',
+			save: { adapter: 'none' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'count',
+							label: 'Count',
+							type: 'number',
+							value: 2.5,
+						},
+						{
+							id: 'enabled',
+							label: 'Enabled',
+							type: 'checkbox',
+							value: false,
+						},
+						{
+							id: 'starts_at',
+							label: 'Starts at',
+							type: 'datetime-local',
+							value: '2026-07-17T13:30:45+00:00',
+						},
+					],
+				},
+			},
+		};
+		registerSettingsExtension( {
+			scope: { page: 'test-page', section: '' },
+			fieldOverrides: { count: LegacyComponent },
+		} );
+
+		const { cleanup } = renderElement(
+			<SettingsUIPage schema={ numericSchema } />
+		);
+		const initialProps = received[ 0 ];
+
+		act( () => initialProps.onChange( '3.5' ) );
+		expect( received.at( -1 )?.value ).toBe( 3.5 );
+
+		act( () => initialProps.setValue( 'enabled', 'yes' ) );
+		expect( received.at( -1 )?.values.enabled ).toBe( true );
+
+		act( () =>
+			initialProps.setValues( {
+				count: '4',
+				enabled: '0',
+				starts_at: '',
+			} )
+		);
+		expect( received.at( -1 )?.values ).toEqual( {
+			count: 4,
+			enabled: false,
+			starts_at: null,
+		} );
+
+		cleanup();
+	} );
+
 	it.each( [
 		[ 'text', 'value', undefined ],
 		[ 'checkbox', true, undefined ],
