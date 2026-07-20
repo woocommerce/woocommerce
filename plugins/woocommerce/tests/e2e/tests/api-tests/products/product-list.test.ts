@@ -215,12 +215,10 @@ test.describe( 'Products API tests: List All Products', () => {
 				'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. ' +
 				'Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 
-			const { source_url: downloadFile } = await getMediaBySlug(
-				'image-01'
-			);
-			const { source_url: downloadFile2 } = await getMediaBySlug(
-				'image-02'
-			);
+			const { source_url: downloadFile } =
+				await getMediaBySlug( 'image-01' );
+			const { source_url: downloadFile2 } =
+				await getMediaBySlug( 'image-02' );
 
 			//const { body: simpleProducts } = await createProducts( [
 			const simpleProducts = await request.post(
@@ -2100,12 +2098,10 @@ test.describe( 'Products API tests: List All Products', () => {
 				attributes,
 				tags
 			);
-			const externalProducts = await createSampleExternalProducts(
-				categories
-			);
-			const groupedProducts = await createSampleGroupedProduct(
-				categories
-			);
+			const externalProducts =
+				await createSampleExternalProducts( categories );
+			const groupedProducts =
+				await createSampleGroupedProduct( categories );
 			const variableProducts = await createSampleVariableProducts(
 				categories,
 				attributes
@@ -2113,9 +2109,8 @@ test.describe( 'Products API tests: List All Products', () => {
 			const hierarchicalProducts =
 				await createSampleHierarchicalProducts();
 
-			const reviewIds = await createSampleProductReviews(
-				simpleProducts
-			);
+			const reviewIds =
+				await createSampleProductReviews( simpleProducts );
 			const orders = await createSampleProductOrders( simpleProducts );
 
 			return {

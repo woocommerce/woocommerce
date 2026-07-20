@@ -12,7 +12,12 @@ import { store as noticesStore } from '@wordpress/notices';
  * when a user tries to open a preview in a new tab.
  */
 export const PreviewSaveGuard = () => {
-	const selector = '.editor-preview-dropdown__button-external';
+	// WP 7.1 dropped the `.editor-preview-dropdown__button-external` class. The
+	// "Preview in new tab" entry is now a plain menu item anchor whose window
+	// target is `wp-preview-<postId>`. Match both so the guard keeps catching
+	// the preview action across supported WordPress versions.
+	const selector =
+		'.editor-preview-dropdown__button-external, a[role="menuitem"][target^="wp-preview-"]';
 
 	/**
 	 * Handles click/keydown events to check for unsaved changes before previewing.
