@@ -191,7 +191,10 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 			return;
 		}
 
-		wc_get_template( 'myaccount/form-order-withdrawal.php', $this->get_template_args() );
+		$template_args                            = $this->get_template_args();
+		$template_args['show_account_navigation'] = is_user_logged_in() && ! doing_action( 'woocommerce_account_content' );
+
+		wc_get_template( 'myaccount/form-order-withdrawal.php', $template_args );
 	}
 
 	/**
