@@ -8,8 +8,6 @@ sidebar_position: 4
 
 Two explicit decision points anchor every release cycle. Both live as checklists in the release tracking sub-issues, so each release leaves a written trail of what was checked, what was decided, and by whom. This page explains what each point is for; the checklists themselves are in the sub-issues the [Release: Assignment workflow](/docs/contribution/releases/workflows) creates.
 
-Historically these calls happened informally - whoever noticed a problem raised it, and the release lead decided alone or in an ad hoc Slack thread. That works until the people who used to notice move on. Writing the calls down makes the process survive rotations and reorgs, and gives every future release lead the same starting point.
-
 ## Release roles
 
 Each cycle has two named owners, listed on the parent tracking issue:
@@ -26,7 +24,7 @@ The RC is the last point where finding a problem is cheap: nothing has shipped, 
 The checklist covers four areas:
 
 * **Compatibility evidence.** The QIT compatibility regression sweep runs automatically against each prerelease and reports which extension versions the release would break. Introduced issues need a verdict, not just a look.
-* **Open findings.** Bug reports, testing threads, and monitoring alerts against the release each get a linked issue and a verdict: release-blocking, fix in a point release, or not a bug. A finding without a verdict is an unmade decision.
+* **Open findings.** Bug reports, testing threads, and monitoring alerts against the release each get a linked issue and a verdict: release-blocking, fix in a point release, or not a bug.
 * **Rollback path.** Who reverts, how, and what revert means for this version - answered before it's needed, not during an incident.
 * **Comms.** Changelog in shape, and a known-issues list when verdicts left something open.
 
@@ -34,7 +32,7 @@ The checklist covers four areas:
 
 A deliberate decision to ship, made while there is still time to not ship. The release lead and the Product DRI confirm the readiness verdicts still hold and nothing blocking has appeared since RC, then record the decision on the release sub-issue: **go**, **no-go**, or **go with conditions** - with names.
 
-Recording a "go" that later proves wrong is not a failure of the process - it is the input the next retro uses to improve these checklists. Silent shipping teaches nothing.
+Recorded decisions are the input for release retrospectives and future updates to these checklists.
 
 ## For urgent point releases
 
