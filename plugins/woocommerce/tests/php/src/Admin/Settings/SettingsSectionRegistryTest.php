@@ -50,6 +50,13 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	private $original_current_tab = null;
 
 	/**
+	 * Script handles registered by the test.
+	 *
+	 * @var string[]
+	 */
+	private array $registered_test_script_handles = array();
+
+	/**
 	 * Set up test environment.
 	 */
 	public function setUp(): void {
@@ -66,6 +73,15 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 
 		SettingsSectionRegistry::get_instance()->unregister_all();
 		SettingsUIRequestContext::reset();
+
+		foreach ( array( 'wc-settings-ui', 'acme-payments-settings-ui', 'acme-native-settings-ui' ) as $script_handle ) {
+			if ( wp_script_is( $script_handle, 'registered' ) ) {
+				continue;
+			}
+
+			wp_register_script( $script_handle, 'https://example.com/' . $script_handle . '.js', array(), '1.0.0', true );
+			$this->registered_test_script_handles[] = $script_handle;
+		}
 	}
 
 	/**
@@ -81,6 +97,11 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		SettingsSectionRegistry::get_instance()->unregister_all();
 		SettingsUIRequestContext::reset();
+
+		foreach ( $this->registered_test_script_handles as $script_handle ) {
+			wp_deregister_script( $script_handle );
+		}
+		$this->registered_test_script_handles = array();
 
 		parent::tearDown();
 	}
