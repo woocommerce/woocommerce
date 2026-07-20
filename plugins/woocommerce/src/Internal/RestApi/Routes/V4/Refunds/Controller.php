@@ -420,15 +420,15 @@ class Controller extends AbstractController {
 			// amount, so mixing the two forms across line items is well-defined.
 			$line_item_data   = $this->data_utils->convert_line_items_to_internal_format( $line_items, $order );
 			$calculated_total = ! empty( $line_items ) ? $this->data_utils->calculate_refund_amount( $line_items ) : 0;
-			$refund_amount    = ! empty( $request['amount'] ) ? $request['amount'] : $calculated_total;
+			$refund_amount    = ! empty( $request['total'] ) ? $request['total'] : $calculated_total;
 
 			if ( 0 > $refund_amount || ! $refund_amount ) {
 				return $this->get_route_error_response( 'invalid_refund_amount', __( 'Refund total must be greater than zero.', 'woocommerce' ) );
 			}
 
-			// Prevent under-refunding: amount cannot be less than calculated line items total.
+			// Prevent under-refunding: total cannot be less than calculated line items total.
 			// Over-refunding is allowed for goodwill/compensation scenarios.
-			if ( ! empty( $request['amount'] ) && $calculated_total > 0 && NumberUtil::round( (float) $refund_amount, wc_get_price_decimals() ) < NumberUtil::round( $calculated_total, wc_get_price_decimals() ) ) {
+			if ( ! empty( $request['total'] ) && $calculated_total > 0 && NumberUtil::round( (float) $refund_amount, wc_get_price_decimals() ) < NumberUtil::round( $calculated_total, wc_get_price_decimals() ) ) {
 				return $this->get_route_error_response(
 					'invalid_refund_amount',
 					sprintf(
