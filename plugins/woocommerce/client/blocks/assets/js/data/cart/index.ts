@@ -70,7 +70,7 @@ window.addEventListener( 'load', () => {
 		! isEditor() // Don't finish resolution in editor,but only for real carts
 	) {
 		// Prevent the API request from being made.
-		wpDispatch( store ).finishResolution( 'getCartData' );
+		void wpDispatch( store ).finishResolution( 'getCartData' );
 	}
 } );
 
