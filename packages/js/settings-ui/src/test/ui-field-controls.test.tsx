@@ -204,7 +204,7 @@ describe( 'catalogue UI field controls', () => {
 		};
 		registerSettingsExtension( {
 			scope: { page: 'test-page', section: '' },
-			fieldOverrides: { field: Registered },
+			fieldOverrides: { field: { component: Registered } },
 		} );
 		const schema: SettingsUISchema = {
 			id: 'test-page',
@@ -224,12 +224,18 @@ describe( 'catalogue UI field controls', () => {
 		);
 
 		expect( container.querySelector( 'button' ) ).toBeDisabled();
-		expect( received[ 0 ] ).toMatchObject( {
-			data: { field: 'value' },
-			disabled: true,
-			hideLabelFromVision: false,
-			validity: undefined,
-		} );
+		expect( Object.keys( received[ 0 ] ).sort() ).toEqual( [
+			'data',
+			'disabled',
+			'field',
+			'hideLabelFromVision',
+			'onChange',
+			'validity',
+		] );
+		expect( received[ 0 ].data ).toEqual( { field: 'value' } );
+		expect( received[ 0 ].disabled ).toBe( true );
+		expect( received[ 0 ].hideLabelFromVision ).toBe( false );
+		expect( received[ 0 ].validity ).toBeUndefined();
 		expect( Object.keys( received[ 0 ].field ).sort() ).toEqual( [
 			'description',
 			'elements',
@@ -278,7 +284,7 @@ describe( 'catalogue UI field controls', () => {
 		const Custom = () => null;
 		registerSettingsExtension( {
 			scope: { page: 'test-page', section: '' },
-			fieldOverrides: { field: Custom },
+			fieldOverrides: { field: { component: Custom } },
 		} );
 		const settingsField = makeSettingsField( { disabled: true } );
 		const field = buildDataFormField( settingsField, {

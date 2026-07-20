@@ -1,10 +1,17 @@
 /**
+ * External dependencies
+ */
+import type { DataFormControlProps } from '@wordpress/dataviews';
+import type { ReactElement } from 'react';
+
+/**
  * Internal dependencies
  */
 import { buildDataFormField, createDataFormAdapter } from '../dataform-adapter';
 import type { DataFormAdapterOptions } from '../dataform-adapter';
 import { __resetRegistry, registerSettingsExtension } from '../registry';
 import type {
+	SettingsEditControlProps,
 	SettingsUIField,
 	SettingsUIGroup,
 	SettingsUISchema,
@@ -218,6 +225,46 @@ describe( 'dataform-adapter', () => {
 			expect( buildField( settingsField ).isVisible?.( {} ) ).toBe(
 				true
 			);
+		} );
+	} );
+
+	it( 'wraps DataForm callbacks at the modern contract boundary', () => {
+		const CustomField = () => null;
+		registerSettingsExtension( {
+			scope: { page: 'test-page', section: '' },
+			fieldOverrides: {
+				count: { component: CustomField },
+			},
+		} );
+		const field = buildField(
+			makeField( { id: 'count', type: 'number' } ),
+			{ count: 1 }
+		);
+		const dataFormGetValue = jest.fn( ( { item } ) => item.count );
+		const dataFormOnChange = jest.fn();
+		const Edit = field.Edit as (
+			props: DataFormControlProps< SettingsValues >
+		) => ReactElement< SettingsEditControlProps >;
+		const element = Edit( {
+			data: { count: 1 },
+			field: {
+				id: 'count',
+				label: 'Count',
+				getValue: dataFormGetValue,
+			},
+			onChange: dataFormOnChange,
+		} as DataFormControlProps< SettingsValues > );
+
+		expect( element.props.onChange ).not.toBe( dataFormOnChange );
+		expect( element.props.field.getValue ).not.toBe( dataFormGetValue );
+
+		element.props.onChange( { count: 2 } );
+		expect( dataFormOnChange ).toHaveBeenCalledWith( { count: 2 } );
+		expect( element.props.field.getValue( { item: { count: 3 } } ) ).toBe(
+			3
+		);
+		expect( dataFormGetValue ).toHaveBeenCalledWith( {
+			item: { count: 3 },
 		} );
 	} );
 

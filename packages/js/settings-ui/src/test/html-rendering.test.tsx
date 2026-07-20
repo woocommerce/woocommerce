@@ -218,7 +218,7 @@ describe( 'settings HTML rendering', () => {
 		registerSettingsExtension( {
 			scope: { page: 'test-page', section: '' },
 			fieldOverrides: {
-				test_field: DefaultSectionField,
+				test_field: { component: DefaultSectionField },
 			},
 		} );
 
@@ -260,7 +260,7 @@ describe( 'settings HTML rendering', () => {
 		);
 		registerSettingsExtension( {
 			scope: { page: 'test-page' },
-			fieldOverrides: { count: ClearControl },
+			fieldOverrides: { count: { component: ClearControl } },
 		} );
 		const schema: SettingsUISchema = {
 			id: 'test-page',
@@ -785,7 +785,9 @@ describe( 'settings HTML rendering', () => {
 		);
 		registerSettingsExtension( {
 			scope: { page: 'test-page', section: '' },
-			fieldOverrides: { count: InvalidNumberControl },
+			fieldOverrides: {
+				count: { component: InvalidNumberControl },
+			},
 		} );
 		const schema: SettingsUISchema = {
 			id: 'test-page',

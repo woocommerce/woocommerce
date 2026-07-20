@@ -249,7 +249,9 @@ registerSettingsExtension( {
 		page: 'my_plugin',
 	},
 	components: {
-		'my-plugin/payment-method-picker': PaymentMethodPicker,
+		'my-plugin/payment-method-picker': {
+			component: PaymentMethodPicker,
+		},
 	},
 } );
 ```

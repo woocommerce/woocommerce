@@ -176,9 +176,9 @@ const createRegisteredEdit = (
 					description: field.description,
 					placeholder: field.placeholder,
 					elements: field.elements,
-					getValue: field.getValue,
+					getValue: ( { item } ) => field.getValue( { item } ),
 				} }
-				onChange={ onChange }
+				onChange={ ( values ) => onChange( values ) }
 				hideLabelFromVision={ Boolean( hideLabelFromVision ) }
 				disabled={ Boolean( settingsField.disabled ) }
 				validity={ flattenDataFormValidity( validity ) }

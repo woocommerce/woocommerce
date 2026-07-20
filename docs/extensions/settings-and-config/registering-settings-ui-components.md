@@ -47,7 +47,9 @@ registerSettingsExtension( {
 		section: 'payments',
 	},
 	components: {
-		'my-plugin/payment-method-picker': PaymentMethodPicker,
+		'my-plugin/payment-method-picker': {
+			component: PaymentMethodPicker,
+		},
 	},
 } );
 ```
@@ -173,7 +175,7 @@ return (
 );
 ```
 
-The same `{ component, validate }` form works for named components, field overrides, and type renderers. Registrations without validation can continue passing the component directly. Validators are synchronous and should be pure. Remote validation belongs in the custom save flow, with PHP validation and sanitization remaining authoritative.
+The same `{ component, validate }` form works for named components, field overrides, and type renderers. The object form identifies components using the modern control contract. Validators are synchronous and should be pure. Remote validation belongs in the custom save flow, with PHP validation and sanitization remaining authoritative.
 
 ## Field-specific overrides
 
@@ -185,7 +187,9 @@ registerSettingsExtension( {
 		page: 'my_plugin',
 	},
 	fieldOverrides: {
-		my_plugin_payment_methods: PaymentMethodPicker,
+		my_plugin_payment_methods: {
+			component: PaymentMethodPicker,
+		},
 	},
 } );
 ```
@@ -202,7 +206,9 @@ registerSettingsExtension( {
 		page: 'my_plugin',
 	},
 	typeRenderers: {
-		my_plugin_color: ColorField,
+		my_plugin_color: {
+			component: ColorField,
+		},
 	},
 } );
 ```

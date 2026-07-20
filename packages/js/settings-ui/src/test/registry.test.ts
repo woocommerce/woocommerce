@@ -28,7 +28,7 @@ describe( 'settings extension registry', () => {
 		registerSettingsExtension( {
 			scope: { page: 'registry-test', section: 'advanced' },
 			components: {
-				'test/component': component,
+				'test/component': { component },
 			},
 		} );
 
@@ -76,16 +76,16 @@ describe( 'settings extension registry', () => {
 		registerSettingsExtension( {
 			scope: { page: 'registry-precedence' },
 			components: {
-				'test/component': component,
+				'test/component': { component },
 			},
 			fieldOverrides: {
-				field: fieldOverride,
+				field: { component: fieldOverride },
 			},
 		} );
 		registerSettingsExtension( {
 			scope: { page: 'registry-precedence' },
 			typeRenderers: {
-				text: typeRenderer,
+				text: { component: typeRenderer },
 			},
 		} );
 
@@ -120,7 +120,7 @@ describe( 'settings extension registry', () => {
 		registerSettingsExtension( {
 			scope: { page: 'registry-composition' },
 			components: {
-				'test/component': originalComponent,
+				'test/component': { component: originalComponent },
 			},
 			saveHandlers: {
 				'test/save': saveHandler,
@@ -129,7 +129,7 @@ describe( 'settings extension registry', () => {
 		registerSettingsExtension( {
 			scope: { page: 'registry-composition' },
 			components: {
-				'test/component': replacementComponent,
+				'test/component': { component: replacementComponent },
 			},
 		} );
 
@@ -189,7 +189,7 @@ describe( 'settings extension registry', () => {
 		registerSettingsExtension( {
 			scope: { page: 'registry-test-other' },
 			typeRenderers: {
-				text: component,
+				text: { component },
 			},
 		} );
 
@@ -213,19 +213,19 @@ describe( 'settings extension registry', () => {
 		registerSettingsExtension( {
 			scope: { page: 'registry-section-scope' },
 			components: {
-				'page-wide': pageWideComponent,
+				'page-wide': { component: pageWideComponent },
 			},
 		} );
 		registerSettingsExtension( {
 			scope: { page: 'registry-section-scope', section: '' },
 			fieldOverrides: {
-				default_field: defaultSectionComponent,
+				default_field: { component: defaultSectionComponent },
 			},
 		} );
 		registerSettingsExtension( {
 			scope: { page: 'registry-section-scope', section: 'advanced' },
 			components: {
-				'named-section': namedSectionComponent,
+				'named-section': { component: namedSectionComponent },
 			},
 		} );
 
