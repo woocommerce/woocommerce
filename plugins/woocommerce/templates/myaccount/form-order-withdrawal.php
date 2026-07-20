@@ -121,12 +121,20 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 				if ( '' === $field_name ) {
 					continue;
 				}
-				?>
-				<?php woocommerce_form_field( $field_name, $field, $data[ $field_key ] ?? '' ); ?>
 
-				<?php if ( isset( $form_errors[ $field_key ] ) ) : ?>
-					<span id="<?php echo esc_attr( $field_name . '_error' ); ?>" class="woocommerce-order-withdrawal-content__field-error"><?php echo esc_html( $form_errors[ $field_key ] ); ?></span>
-				<?php endif; ?>
+				$field['return'] = true;
+				$field_html      = woocommerce_form_field( $field_name, $field, $data[ $field_key ] ?? '' );
+
+				if ( isset( $form_errors[ $field_key ] ) ) {
+					$field_error_html = sprintf(
+						'<span id="%1$s" class="woocommerce-order-withdrawal-content__field-error">%2$s</span>',
+						esc_attr( $field_name . '_error' ),
+						esc_html( $form_errors[ $field_key ] )
+					);
+					$field_html       = str_replace( '</p>', $field_error_html . '</p>', $field_html );
+				}
+				?>
+				<?php echo $field_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
 				<?php if ( 'last_name' === $field_key ) : ?>
 					<div class="clear"></div>
@@ -167,11 +175,21 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 			<?php endif; ?>
 
 			<?php if ( ! empty( $additional_details['name'] ) ) : ?>
-				<?php woocommerce_form_field( (string) $additional_details['name'], $additional_details, $data['additional_details'] ?? '' ); ?>
+				<?php
+				$additional_details_name      = (string) $additional_details['name'];
+				$additional_details['return'] = true;
+				$additional_details_html      = woocommerce_form_field( $additional_details_name, $additional_details, $data['additional_details'] ?? '' );
 
-				<?php if ( isset( $form_errors['additional_details'] ) ) : ?>
-					<span id="<?php echo esc_attr( (string) $additional_details['name'] . '_error' ); ?>" class="woocommerce-order-withdrawal-content__field-error"><?php echo esc_html( $form_errors['additional_details'] ); ?></span>
-				<?php endif; ?>
+				if ( isset( $form_errors['additional_details'] ) ) {
+					$additional_details_error_html = sprintf(
+						'<span id="%1$s" class="woocommerce-order-withdrawal-content__field-error">%2$s</span>',
+						esc_attr( $additional_details_name . '_error' ),
+						esc_html( $form_errors['additional_details'] )
+					);
+					$additional_details_html       = str_replace( '</p>', $additional_details_error_html . '</p>', $additional_details_html );
+				}
+				?>
+				<?php echo $additional_details_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php endif; ?>
 
 			<p class="woocommerce-order-withdrawal-content__actions">
