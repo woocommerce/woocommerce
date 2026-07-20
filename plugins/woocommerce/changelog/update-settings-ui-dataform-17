@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Use canonical typed Settings UI schemas with DataForm 17 while preserving legacy form saves and classic fallback rendering.

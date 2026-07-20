@@ -1,4 +1,4 @@
 Significance: major
 Type: update
 
-Render Settings UI fields through DataForm 17.2.0 with canonical typed values, explicit validation, and legacy form POST compatibility.
+Render Settings UI fields through the WordPress-bundled DataForm with stable extension control and validation contracts.
