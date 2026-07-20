@@ -25,11 +25,8 @@ const defaultDevDependencies = {
 };
 
 /*
- * Stopgap: `@woocommerce/components` pulls `i18n-calypso@7.4.1` (via tour-kit),
- * which was published with a Yarn-only `patch:` spec that npm cannot parse, so
- * `npm install` fails before lint is ever reached. 7.4.0 is the newest release
- * without the bad spec; 8.x is out of the consumer's `^7.4.0` range. Remove once
- * the upstream `@automattic/components` range no longer resolves to 7.4.1.
+ * Stopgap: `i18n-calypso@7.4.1` (via `@woocommerce/components`) ships a Yarn-only
+ * `patch:` spec that breaks `npm install`. Pin to 7.4.0 until fixed upstream.
  */
 const overrides = {
 	'i18n-calypso': '7.4.0',
