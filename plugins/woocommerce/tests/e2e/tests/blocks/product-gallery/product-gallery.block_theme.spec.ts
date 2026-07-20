@@ -86,7 +86,7 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( 'with thumbnails', () => {
-		test( 'should have as first thumbnail, the same image that it is visible in the product block', async ( {
+		test( 'should match the initial thumbnail and change image when another thumbnail is clicked', async ( {
 			page,
 			editor,
 			pageObject,
@@ -100,55 +100,36 @@ test.describe( `${ blockData.name }`, () => {
 			await page.goto( blockData.productPage );
 
 			const viewerImageId = await pageObject.getViewerImageId();
-
-			const firstImageThumbnailId = await getThumbnailImageIdByNth(
-				0,
-				await pageObject.getThumbnailsBlock( {
-					page: 'frontend',
-				} )
-			);
-
-			expect( viewerImageId ).toBe( firstImageThumbnailId );
-		} );
-
-		test( 'should change the image when the user click on a thumbnail image', async ( {
-			page,
-			editor,
-			pageObject,
-		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
+			const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
+				page: 'frontend',
 			} );
 
-			await page.goto( blockData.productPage );
+			await test.step( 'should have as first thumbnail, the same image that it is visible in the product block', async () => {
+				const firstImageThumbnailId = await getThumbnailImageIdByNth(
+					0,
+					thumbnailsBlock
+				);
 
-			const viewerImageId = await pageObject.getViewerImageId();
+				expect( viewerImageId ).toBe( firstImageThumbnailId );
+			} );
 
-			const secondImageThumbnailId = await getThumbnailImageIdByNth(
-				1,
-				await pageObject.getThumbnailsBlock( {
-					page: 'frontend',
-				} )
-			);
+			await test.step( 'should change the image when the user click on a thumbnail image', async () => {
+				const secondImageThumbnailId = await getThumbnailImageIdByNth(
+					1,
+					thumbnailsBlock
+				);
 
-			expect( viewerImageId ).not.toBe( secondImageThumbnailId );
+				expect( viewerImageId ).not.toBe( secondImageThumbnailId );
 
-			await (
-				await pageObject.getThumbnailsBlock( {
-					page: 'frontend',
-				} )
-			)
-				.locator( 'img' )
-				.nth( 1 )
-				.click();
+				await thumbnailsBlock.locator( 'img' ).nth( 1 ).click();
 
-			await expect( async () => {
-				const newViewerImageId = await pageObject.getViewerImageId();
+				await expect( async () => {
+					const newViewerImageId =
+						await pageObject.getViewerImageId();
 
-				expect( newViewerImageId ).toBe( secondImageThumbnailId );
-			} ).toPass( { timeout: 1_000 } );
+					expect( newViewerImageId ).toBe( secondImageThumbnailId );
+				} ).toPass( { timeout: 1_000 } );
+			} );
 		} );
 	} );
 
@@ -248,38 +229,39 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( 'open pop-up when clicked option', () => {
-		test( 'should be enabled by default', async ( {
-			pageObject,
-			editor,
-		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-			await editor.openDocumentSettingsSidebar();
-			const fullScreenOption = pageObject.getFullScreenOnClickSetting();
-
-			await expect( fullScreenOption ).toBeChecked();
-		} );
-
-		test( 'should open dialog on the frontend', async ( {
+		test( 'should be enabled by default and open dialog on the frontend', async ( {
 			pageObject,
 			page,
 			editor,
 		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
+			await test.step( 'should be enabled by default', async () => {
+				await pageObject.addProductGalleryBlock( {
+					cleanContent: true,
+				} );
+				await editor.openDocumentSettingsSidebar();
+				const fullScreenOption =
+					pageObject.getFullScreenOnClickSetting();
+
+				await expect( fullScreenOption ).toBeChecked();
 			} );
 
-			await page.goto( blockData.productPage );
+			await test.step( 'should open dialog on the frontend', async () => {
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 
-			const viewerBlock = await pageObject.getViewerBlock( {
-				page: 'frontend',
+				await page.goto( blockData.productPage );
+
+				const viewerBlock = await pageObject.getViewerBlock( {
+					page: 'frontend',
+				} );
+
+				await expect( page.locator( 'dialog' ) ).toBeHidden();
+
+				await viewerBlock.click();
+
+				await expect( page.locator( 'dialog' ) ).toBeVisible();
 			} );
-
-			await expect( page.locator( 'dialog' ) ).toBeHidden();
-
-			await viewerBlock.click();
-
-			await expect( page.locator( 'dialog' ) ).toBeVisible();
 		} );
 
 		test( 'should not open dialog when the setting is disable on the frontend', async ( {
@@ -309,59 +291,59 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( 'block availability', () => {
-		test( 'should be available on the Single Product Template', async ( {
-			page,
-			editor,
-		} ) => {
-			await editor.openGlobalBlockInserter();
-			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
-			const productGalleryBlockOption = page
-				.getByRole( 'listbox', { name: 'WooCommerce' } )
-				.getByRole( 'option', { name: blockData.title } );
-
-			await expect( productGalleryBlockOption ).toBeVisible();
-		} );
-
-		test( 'should be hidden on the post editor globally', async ( {
+		test( 'should expose Product Gallery only in supported Single Product contexts', async ( {
 			admin,
 			page,
 			editor,
 		} ) => {
-			await admin.createNewPost();
-			await editor.openGlobalBlockInserter();
-			const productGalleryBlockOption = page
-				.getByRole( 'listbox', { name: 'WooCommerce' } )
-				.getByRole( 'option', { name: blockData.title } );
+			await test.step( 'should be available on the Single Product Template', async () => {
+				await editor.openGlobalBlockInserter();
+				await page.getByRole( 'tab', { name: 'Blocks' } ).click();
+				const productGalleryBlockOption = page
+					.getByRole( 'listbox', { name: 'WooCommerce' } )
+					.getByRole( 'option', { name: blockData.title } );
 
-			await expect( productGalleryBlockOption ).toBeHidden();
-		} );
+				await expect( productGalleryBlockOption ).toBeVisible();
+			} );
 
-		test( 'on the post editor, block should be in Single Product by default and is visible in inserter', async ( {
-			admin,
-			editor,
-		} ) => {
-			await admin.createNewPost();
-			await editor.insertBlockUsingGlobalInserter( 'Product' );
-			await editor.canvas.getByText( 'Album' ).click();
-			await editor.canvas.getByText( 'Done' ).click();
-			// Block should be in Single Product by default.
-			await expect(
-				await editor.getBlockByName( blockData.name )
-			).toHaveCount( 1 );
-			const singleProductBlock = await editor.getBlockByName(
-				'woocommerce/single-product'
-			);
-			const singleProductClientId =
-				( await singleProductBlock.getAttribute( 'data-block' ) ) ?? '';
-			await editor.insertBlock(
-				{ name: blockData.name },
-				{ clientId: singleProductClientId }
-			);
+			await editor.closeGlobalBlockInserter();
 
-			// Block should be visible in inserter and hence can be inserted in Single Product block.
-			await expect(
-				await editor.getBlockByName( blockData.name )
-			).toHaveCount( 2 );
+			await test.step( 'should be hidden on the post editor globally', async () => {
+				await admin.createNewPost();
+				await editor.openGlobalBlockInserter();
+				const productGalleryBlockOption = page
+					.getByRole( 'listbox', { name: 'WooCommerce' } )
+					.getByRole( 'option', { name: blockData.title } );
+
+				await expect( productGalleryBlockOption ).toBeHidden();
+			} );
+
+			await editor.closeGlobalBlockInserter();
+
+			await test.step( 'on the post editor, block should be in Single Product by default and is visible in inserter', async () => {
+				await editor.insertBlockUsingGlobalInserter( 'Product' );
+				await editor.canvas.getByText( 'Album' ).click();
+				await editor.canvas.getByText( 'Done' ).click();
+				// Block should be in Single Product by default.
+				await expect(
+					await editor.getBlockByName( blockData.name )
+				).toHaveCount( 1 );
+				const singleProductBlock = await editor.getBlockByName(
+					'woocommerce/single-product'
+				);
+				const singleProductClientId =
+					( await singleProductBlock.getAttribute( 'data-block' ) ) ??
+					'';
+				await editor.insertBlock(
+					{ name: blockData.name },
+					{ clientId: singleProductClientId }
+				);
+
+				// Block should be visible in inserter and hence can be inserted in Single Product block.
+				await expect(
+					await editor.getBlockByName( blockData.name )
+				).toHaveCount( 2 );
+			} );
 		} );
 	} );
 
