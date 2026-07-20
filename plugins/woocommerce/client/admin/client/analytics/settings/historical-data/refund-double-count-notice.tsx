@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 
@@ -10,36 +10,12 @@ import { useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import ImportWarningNotice from './import-warning-notice';
-
-interface RefundDoubleCountStatus {
-	refund_double_count: number;
-	refund_double_count_scan_complete: boolean;
-	refund_double_count_fix_in_progress: boolean;
-}
+import getErrorMessage from './get-error-message';
+import { useImportStatus } from './use-import-status';
 
 interface FixResponse {
 	success: boolean;
 	message: string;
-}
-
-/**
- * Extract a user-facing message from a caught request error.
- *
- * `@wordpress/api-fetch` rejects with the parsed REST error object
- * (`{ code, message }`), which is a plain object — not an `Error` instance —
- * so narrow on the `message` property instead of the constructor.
- */
-function getErrorMessage( err: unknown, fallback: string ): string {
-	if (
-		typeof err === 'object' &&
-		err !== null &&
-		'message' in err &&
-		typeof err.message === 'string' &&
-		err.message !== ''
-	) {
-		return err.message;
-	}
-	return fallback;
 }
 
 /**
@@ -52,26 +28,9 @@ function getErrorMessage( err: unknown, fallback: string ): string {
  * the notice is an auxiliary affordance.
  */
 function RefundDoubleCountNotice() {
-	const [ status, setStatus ] = useState< RefundDoubleCountStatus | null >(
-		null
-	);
+	const { status, refetch } = useImportStatus();
 	const [ isFixing, setIsFixing ] = useState( false );
 	const { createNotice } = useDispatch( 'core/notices' );
-
-	const fetchStatus = useCallback( async () => {
-		try {
-			const data = await apiFetch< RefundDoubleCountStatus >( {
-				path: '/wc-analytics/imports/status',
-			} );
-			setStatus( data );
-		} catch ( err ) {
-			// Fail silently — the notice is an auxiliary affordance.
-		}
-	}, [] );
-
-	useEffect( () => {
-		fetchStatus();
-	}, [ fetchStatus ] );
 
 	const scanComplete = status?.refund_double_count_scan_complete ?? false;
 	const count = status?.refund_double_count ?? 0;
@@ -89,7 +48,7 @@ function RefundDoubleCountNotice() {
 				method: 'POST',
 			} );
 			createNotice( 'success', response.message );
-			await fetchStatus();
+			await refetch();
 		} catch ( err ) {
 			createNotice(
 				'error',
