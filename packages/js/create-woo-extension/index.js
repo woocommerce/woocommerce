@@ -24,13 +24,27 @@ const defaultDevDependencies = {
 	prettier: 'npm:wp-prettier@3.0.3',
 };
 
+/*
+ * Stopgap: `@woocommerce/components` pulls `i18n-calypso@7.4.1` (via tour-kit),
+ * which was published with a Yarn-only `patch:` spec that npm cannot parse, so
+ * `npm install` fails before lint is ever reached. 7.4.0 is the newest release
+ * without the bad spec; 8.x is out of the consumer's `^7.4.0` range. Remove once
+ * the upstream `@automattic/components` range no longer resolves to 7.4.1.
+ */
+const overrides = {
+	'i18n-calypso': '7.4.0',
+};
+
 module.exports = {
 	pluginTemplatesPath: join( __dirname, 'variants', 'default' ),
 	blockTemplatesPath: join( __dirname, 'variants', 'default', 'src' ),
 	defaultValues: {
 		npmDependencies: defaultDependencies,
 		npmDevDependencies: Object.keys( defaultDevDependencies ),
-		customPackageJSON: { devDependencies: defaultDevDependencies },
+		customPackageJSON: {
+			devDependencies: defaultDevDependencies,
+			overrides,
+		},
 		namespace: 'extension',
 		license: 'GPL-3.0+',
 		customScripts: {
