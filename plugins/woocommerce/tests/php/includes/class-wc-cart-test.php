@@ -906,6 +906,130 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should clear the cart after payment when the order cart hash matches.
+	 */
+	public function test_clear_cart_after_payment_clears_cart_when_order_cart_hash_matches(): void {
+		global $wp;
+
+		$previous_query_vars = $wp->query_vars;
+		$previous_order_key  = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserving request state for test cleanup.
+		$order               = null;
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_cart_hash( WC()->cart->get_cart_hash() );
+			$order->save();
+
+			$wp->query_vars['order-received'] = $order->get_id();
+			$_GET['key']                      = $order->get_order_key();
+
+			wc_clear_cart_after_payment();
+
+			$this->assertTrue( WC()->cart->is_empty(), 'Cart should be emptied when the paid order matches the current cart hash.' );
+		} finally {
+			$wp->query_vars = $previous_query_vars;
+
+			if ( null === $previous_order_key ) {
+				unset( $_GET['key'] );
+			} else {
+				$_GET['key'] = $previous_order_key;
+			}
+
+			if ( $order instanceof WC_Order ) {
+				WC_Helper_Order::delete_order( $order->get_id() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should not clear the cart after payment when the order cart hash differs.
+	 */
+	public function test_clear_cart_after_payment_keeps_cart_when_order_cart_hash_differs(): void {
+		global $wp;
+
+		$previous_query_vars = $wp->query_vars;
+		$previous_order_key  = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserving request state for test cleanup.
+		$order               = null;
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_cart_hash( 'different-cart-hash' );
+			$order->save();
+
+			$wp->query_vars['order-received'] = $order->get_id();
+			$_GET['key']                      = $order->get_order_key();
+
+			wc_clear_cart_after_payment();
+
+			$this->assertFalse( WC()->cart->is_empty(), 'Cart should not be emptied when the paid order does not match the current cart hash.' );
+		} finally {
+			$wp->query_vars = $previous_query_vars;
+
+			if ( null === $previous_order_key ) {
+				unset( $_GET['key'] );
+			} else {
+				$_GET['key'] = $previous_order_key;
+			}
+
+			if ( $order instanceof WC_Order ) {
+				WC_Helper_Order::delete_order( $order->get_id() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should allow woocommerce_should_clear_cart_after_payment to override the final clear cart value.
+	 */
+	public function test_clear_cart_after_payment_filter_can_override_final_value(): void {
+		global $wp;
+
+		$previous_query_vars = $wp->query_vars;
+		$previous_order_key  = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserving request state for test cleanup.
+		$order               = null;
+		$filter              = function ( $should_clear_cart_after_payment ) {
+			$this->assertFalse( $should_clear_cart_after_payment, 'The filter should receive the final value after the cart hash check.' );
+			return true;
+		};
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_cart_hash( 'different-cart-hash' );
+			$order->save();
+
+			$wp->query_vars['order-received'] = $order->get_id();
+			$_GET['key']                      = $order->get_order_key();
+
+			add_filter( 'woocommerce_should_clear_cart_after_payment', $filter );
+
+			wc_clear_cart_after_payment();
+
+			$this->assertTrue( WC()->cart->is_empty(), 'Cart should be emptied when the filter overrides the final value.' );
+		} finally {
+			remove_filter( 'woocommerce_should_clear_cart_after_payment', $filter );
+			$wp->query_vars = $previous_query_vars;
+
+			if ( null === $previous_order_key ) {
+				unset( $_GET['key'] );
+			} else {
+				$_GET['key'] = $previous_order_key;
+			}
+
+			if ( $order instanceof WC_Order ) {
+				WC_Helper_Order::delete_order( $order->get_id() );
+			}
+		}
+	}
+
+	/**
 	 * @testdox should clear shipping data from session when the cart is empty
 	 */
 	public function test_setting_session_should_clear_shipping_data_when_cart_is_empty() {

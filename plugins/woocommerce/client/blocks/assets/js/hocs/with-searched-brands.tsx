@@ -21,7 +21,7 @@ export interface WithSearchedBrandsProps {
  * A higher order component that enhances the provided component with brands from a search query.
  */
 const withSearchedBrands = <
-	T extends Record< string, unknown > & WithSearchedBrandsProps
+	T extends Record< string, unknown > & WithSearchedBrandsProps,
 >(
 	OriginalComponent: React.ComponentType< T & WithInjectedSearchedBrands >
 ) => {
