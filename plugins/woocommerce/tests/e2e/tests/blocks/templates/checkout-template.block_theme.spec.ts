@@ -10,7 +10,14 @@ test.describe( 'Test the checkout template', () => {
 	test( 'Template can be opened in the site editor', async ( {
 		admin,
 		editor,
+		wpCoreVersion,
 	} ) => {
+		test.skip(
+			wpCoreVersion === 7.1,
+			'Currently broken with WordPress 7.1 beta 1 and requires upstream patch. ' +
+				'See: https://github.com/WordPress/gutenberg/pull/80026#issuecomment-5003222851'
+		);
+
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
