@@ -318,20 +318,10 @@ class PushTokensDataStore {
 	 * flat array (cached per-request). When $page and $per_page are
 	 * provided, returns a paginated result with total counts.
 	 *
-	 * Tokens are queried directly and each token owner's role is verified
-	 * individually. Enumerating role members up front (for example via
-	 * WP_User_Query's role__in) examines the capabilities meta row of every
-	 * user on the site, which does not scale on sites with very large user
-	 * tables.
-	 *
-	 * Tokens whose owner no longer exists are deleted when encountered.
-	 * Tokens whose owner exists but no longer holds an eligible role are
-	 * excluded from the results (role-loss revocation is handled by
-	 * {@see PushNotifications::maybe_revoke_tokens_on_role_change()}).
-	 *
-	 * Note: when pagination is used, the returned totals count all stored
-	 * tokens at query time, including any excluded or deleted by the owner
-	 * checks above.
+	 * The eligible-user lookup is restricted to users that actually own
+	 * push tokens, so the role check runs against a handful of IDs instead
+	 * of scanning every user's capabilities meta, which does not scale on
+	 * sites with very large user tables.
 	 *
 	 * @param string[] $roles    The roles to query tokens for.
 	 * @param int|null $page     Optional page number (1-based).
@@ -360,9 +350,36 @@ class PushTokensDataStore {
 			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
+		global $wpdb;
+
+		// Exactly this SQL to leverage the wp_posts type_status_date index.
+		// The low cardinality of push token posts guarantees performance on
+		// any store size, and restricting the user query to these IDs keeps
+		// the role check from scanning every user's capabilities meta.
+		$users_with_tokens = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
+				PushToken::POST_TYPE
+			)
+		);
+
+		$user_ids = empty( $users_with_tokens ) ? array() : get_users(
+			array(
+				'role__in' => $roles,
+				'fields'   => 'ID',
+				'include'  => array_map( 'intval', $users_with_tokens ),
+			)
+		);
+
+		if ( empty( $user_ids ) ) {
+			$this->tokens_by_roles_cache[ $cache_key ] = $empty_result;
+			return $this->tokens_by_roles_cache[ $cache_key ];
+		}
+
 		$query_args = array(
 			'post_type'      => PushToken::POST_TYPE,
 			'post_status'    => 'private',
+			'author__in'     => $user_ids,
 			'posts_per_page' => $paginate ? $per_page : -1,
 			'fields'         => 'ids',
 		);
@@ -388,31 +405,11 @@ class PushTokensDataStore {
 			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
-		_prime_post_caches( $post_ids, false, false );
-		update_meta_cache( 'post', $post_ids );
+		_prime_post_caches( $post_ids, false, true );
 
-		$tokens          = array();
-		$owner_exists    = array();
-		$eligible_owners = array();
+		$tokens = array();
 
 		foreach ( $post_ids as $post_id ) {
-			$owner_id = (int) get_post_field( 'post_author', $post_id );
-
-			if ( ! isset( $owner_exists[ $owner_id ] ) ) {
-				$owner                        = get_userdata( $owner_id );
-				$owner_exists[ $owner_id ]    = false !== $owner;
-				$eligible_owners[ $owner_id ] = (bool) ( $owner && array_intersect( $roles, (array) $owner->roles ) );
-			}
-
-			if ( ! $owner_exists[ $owner_id ] ) {
-				wp_delete_post( (int) $post_id, true );
-				continue;
-			}
-
-			if ( ! $eligible_owners[ $owner_id ] ) {
-				continue;
-			}
-
 			try {
 				$tokens[] = $this->read( (int) $post_id );
 			} catch ( WC_Data_Exception $e ) {
@@ -436,39 +433,6 @@ class PushTokensDataStore {
 
 		$this->tokens_by_roles_cache[ $cache_key ] = $result;
 		return $result;
-	}
-
-	/**
-	 * Deletes all push tokens owned by the given user.
-	 *
-	 * Used when a user is deleted or loses eligibility for push
-	 * notifications. Also invalidates the per-request role query cache.
-	 *
-	 * @param int $user_id The ID of the user whose tokens should be removed.
-	 * @return void
-	 *
-	 * @since 11.0.0
-	 */
-	public function delete_tokens_for_user( int $user_id ): void {
-		if ( $user_id <= 0 ) {
-			return;
-		}
-
-		$query = new WP_Query(
-			array(
-				'post_type'      => PushToken::POST_TYPE,
-				'post_status'    => 'private',
-				'author'         => $user_id,
-				'posts_per_page' => -1,
-				'fields'         => 'ids',
-			)
-		);
-
-		foreach ( $query->posts as $post_id ) {
-			wp_delete_post( (int) $post_id, true );
-		}
-
-		$this->tokens_by_roles_cache = array();
 	}
 
 	/**

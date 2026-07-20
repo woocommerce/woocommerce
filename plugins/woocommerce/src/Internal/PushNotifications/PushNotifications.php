@@ -10,7 +10,6 @@ use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\NotificationPreferencesRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
-use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
@@ -90,53 +89,6 @@ class PushNotifications {
 
 		wc_get_container()->get( NotificationProcessor::class )->register();
 		wc_get_container()->get( NotificationRetryHandler::class )->register();
-
-		add_action( 'delete_user', array( $this, 'revoke_tokens_on_user_deletion' ) );
-		add_action( 'set_user_role', array( $this, 'maybe_revoke_tokens_on_role_change' ) );
-		add_action( 'remove_user_role', array( $this, 'maybe_revoke_tokens_on_role_change' ) );
-	}
-
-	/**
-	 * Deletes all push tokens owned by a user that is about to be deleted.
-	 *
-	 * The push token post type is registered with delete_with_user, which
-	 * covers deletions without content reassignment. This hook runs before
-	 * the deletion so tokens are removed even when the user's content is
-	 * being reassigned; otherwise the tokens would transfer to the
-	 * reassignee and the deleted user's devices would keep receiving
-	 * notifications.
-	 *
-	 * @internal
-	 * @param int $user_id The ID of the user being deleted.
-	 * @return void
-	 *
-	 * @since 11.0.0
-	 */
-	public function revoke_tokens_on_user_deletion( $user_id ): void {
-		wc_get_container()->get( PushTokensDataStore::class )->delete_tokens_for_user( (int) $user_id );
-	}
-
-	/**
-	 * Deletes a user's push tokens when a role change leaves them without
-	 * any role that is eligible for push notifications.
-	 *
-	 * Runs on both set_user_role and remove_user_role, which fire after the
-	 * user's role list has been updated.
-	 *
-	 * @internal
-	 * @param int $user_id The ID of the user whose roles changed.
-	 * @return void
-	 *
-	 * @since 11.0.0
-	 */
-	public function maybe_revoke_tokens_on_role_change( $user_id ): void {
-		$user = get_userdata( (int) $user_id );
-
-		if ( $user && array_intersect( self::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED, (array) $user->roles ) ) {
-			return;
-		}
-
-		wc_get_container()->get( PushTokensDataStore::class )->delete_tokens_for_user( (int) $user_id );
 	}
 
 	/**

@@ -854,44 +854,19 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should delete orphaned tokens whose owner no longer exists.
+	 * @testdox Should exclude tokens whose owner no longer exists.
 	 */
-	public function test_get_tokens_for_roles_deletes_orphaned_tokens(): void {
+	public function test_get_tokens_for_roles_excludes_tokens_of_deleted_users(): void {
 		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		$data_store = new PushTokensDataStore();
 
-		$token = $this->create_push_token_for_user( $data_store, $admin_id );
+		$this->create_push_token_for_user( $data_store, $admin_id );
 
 		wp_delete_user( $admin_id );
 
 		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
 
 		$this->assertSame( array(), $tokens );
-		$this->assertNull( get_post( $token->get_id() ) );
-	}
-
-	/**
-	 * @testdox Should delete all tokens of the given user and no others.
-	 */
-	public function test_delete_tokens_for_user_removes_only_that_users_tokens(): void {
-		$admin_one  = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		$admin_two  = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		$data_store = new PushTokensDataStore();
-
-		$token_one   = $this->create_push_token_for_user( $data_store, $admin_one );
-		$token_two   = $this->create_push_token_for_user( $data_store, $admin_one );
-		$token_other = $this->create_push_token_for_user( $data_store, $admin_two );
-
-		$data_store->delete_tokens_for_user( $admin_one );
-
-		$this->assertNull( get_post( $token_one->get_id() ) );
-		$this->assertNull( get_post( $token_two->get_id() ) );
-		$this->assertNotNull( get_post( $token_other->get_id() ) );
-
-		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
-
-		$this->assertCount( 1, $tokens );
-		$this->assertSame( $admin_two, $tokens[0]->get_user_id() );
 	}
 
 	/**
@@ -917,26 +892,29 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not enumerate role members via a user query.
+	 * @testdox Should only run user queries restricted to token owners.
 	 */
-	public function test_get_tokens_for_roles_does_not_query_users_by_role(): void {
+	public function test_get_tokens_for_roles_only_queries_users_owning_tokens(): void {
 		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		$data_store = new PushTokensDataStore();
 
 		$this->create_push_token_for_user( $data_store, $admin_id );
 
-		$user_queries = 0;
-		$counter      = function () use ( &$user_queries ) {
-			$user_queries++;
+		$includes = array();
+		$capture  = function ( $query ) use ( &$includes ) {
+			$includes[] = $query->query_vars['include'];
 		};
-		add_action( 'pre_get_users', $counter );
+		add_action( 'pre_get_users', $capture );
 
 		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
 
-		remove_action( 'pre_get_users', $counter );
+		remove_action( 'pre_get_users', $capture );
 
 		$this->assertCount( 1, $tokens );
-		$this->assertSame( 0, $user_queries, 'get_tokens_for_roles() must not run a WP_User_Query: enumerating role members scans the capabilities meta of every user and does not scale on large sites.' );
+		$this->assertNotEmpty( $includes, 'The role lookup should run through WP_User_Query.' );
+		foreach ( $includes as $include ) {
+			$this->assertNotEmpty( $include, 'User queries on this path must be restricted to token owners: an unrestricted role__in query scans the capabilities meta of every user and does not scale on large sites.' );
+		}
 	}
 
 	/**
