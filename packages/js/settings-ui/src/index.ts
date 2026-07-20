@@ -2,6 +2,7 @@ export { SettingsUIErrorBoundary, SettingsUIPage } from './settings-ui-page';
 export { registerSettingsExtension } from './registry';
 export { useSettingsUIContext } from './settings-ui-context';
 export type {
+	SettingsEditControl,
 	SettingsEditControlField,
 	SettingsEditControlProps,
 	SettingsFieldValidity,
@@ -22,6 +23,7 @@ export type {
 	SettingsExtensionScope,
 	SettingsFieldComponent,
 	SettingsFieldComponentDefinition,
+	SettingsFieldComponentProps,
 	SettingsFieldComponentRegistration,
 	SettingsFieldContext,
 	SettingsFieldValidator,

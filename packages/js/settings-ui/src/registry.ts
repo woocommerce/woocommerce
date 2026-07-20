@@ -1,7 +1,8 @@
 /**
  * Internal dependencies
  */
-import { warn } from './diagnostics';
+import { __resetWarnings, warn } from './diagnostics';
+import { createLegacyEditControl } from './legacy-contract';
 import type {
 	SettingsUIField,
 	SettingsExtensionRegistration,
@@ -16,14 +17,23 @@ import type {
 
 const registrations: SettingsExtensionRegistration[] = [];
 
-const registrationMapKeys = [
+const fieldComponentMapKeys = [
 	'components',
 	'fieldOverrides',
 	'typeRenderers',
+] as const;
+
+const registrationMapKeys = [
+	...fieldComponentMapKeys,
 	'fieldVisibility',
 	'groupVisibility',
 	'saveHandlers',
 ] as const;
+
+export type ResolvedEditControlRegistration =
+	SettingsFieldComponentRegistration & {
+		isLegacy: boolean;
+	};
 
 const isPlainRecord = ( value: unknown ): value is Record< string, unknown > =>
 	typeof value === 'object' && value !== null && ! Array.isArray( value );
@@ -60,6 +70,11 @@ const isValidRegistration = (
 const hasSectionScope = ( scope: SettingsExtensionRegistration[ 'scope' ] ) =>
 	typeof scope.section !== 'undefined';
 
+const getScopeKey = ( scope: SettingsExtensionRegistration[ 'scope' ] ) =>
+	`${ scope.page }::${
+		hasSectionScope( scope ) ? scope.section || 'default' : '*'
+	}`;
+
 const scopeMatches = (
 	registration: SettingsExtensionRegistration,
 	context: SettingsFieldContext
@@ -94,6 +109,15 @@ const findInMatchingRegistrations = < T >(
 	return undefined;
 };
 
+const hasLegacyFieldComponents = (
+	registration: SettingsExtensionRegistration
+) =>
+	fieldComponentMapKeys.some( ( key ) =>
+		Object.values( registration[ key ] || {} ).some(
+			( definition ) => typeof definition === 'function'
+		)
+	);
+
 export const registerSettingsExtension = (
 	registration: SettingsExtensionRegistration
 ) => {
@@ -104,39 +128,30 @@ export const registerSettingsExtension = (
 		return;
 	}
 
+	if ( hasLegacyFieldComponents( registration ) ) {
+		const scopeKey = getScopeKey( registration.scope );
+		warn(
+			`Legacy settings field components were registered for scope "${ scopeKey }". See the Settings UI component migration guide. This bridge will be removed when Settings UI leaves its experimental feature flag.`,
+			{ registration },
+			`legacy-components:${ scopeKey }`
+		);
+	}
+
 	registrations.push( registration );
 };
 
 export const __resetRegistry = () => {
 	registrations.splice( 0 );
+	__resetWarnings();
 };
 
-const normalizeFieldComponentDefinition = (
-	definition: SettingsFieldComponentDefinition | undefined
-): SettingsFieldComponentRegistration | undefined => {
-	if ( typeof definition === 'function' ) {
-		return { component: definition };
-	}
-
-	if (
-		definition &&
-		typeof definition.component === 'function' &&
-		( typeof definition.validate === 'undefined' ||
-			typeof definition.validate === 'function' )
-	) {
-		return definition;
-	}
-
-	return undefined;
-};
-
-const resolveFieldComponentRegistration = (
+const resolveFieldComponentDefinition = (
 	field: SettingsUIField,
 	context: SettingsFieldContext,
 	warnWhenMissing: boolean
-): SettingsFieldComponentRegistration | undefined => {
+): SettingsFieldComponentDefinition | undefined => {
 	const componentName = field.component;
-	const resolved = [
+	const definition = [
 		componentName
 			? findInMatchingRegistrations(
 					context,
@@ -152,31 +167,59 @@ const resolveFieldComponentRegistration = (
 			context,
 			( registration ) => registration.typeRenderers?.[ field.type ]
 		),
-	]
-		.map( normalizeFieldComponentDefinition )
-		.find( ( definition ) => definition );
+	].find( ( candidate ) => typeof candidate !== 'undefined' );
 
-	if ( ! resolved && field.component && warnWhenMissing ) {
+	if ( ! definition && field.component && warnWhenMissing ) {
 		warn( `Component "${ field.component }" is not registered.`, {
 			field,
 			context,
 		} );
 	}
 
-	return resolved;
+	return definition;
 };
 
+/** Resolve a component using the contract shipped with WooCommerce 10.9. */
 export const resolveFieldComponent = (
 	field: SettingsUIField,
 	context: SettingsFieldContext
-): SettingsFieldComponent | undefined =>
-	resolveFieldComponentRegistration( field, context, true )?.component;
+): SettingsFieldComponent | undefined => {
+	const definition = resolveFieldComponentDefinition( field, context, true );
+	return typeof definition === 'function' ? definition : undefined;
+};
+
+export const resolveEditControlRegistration = (
+	field: SettingsUIField,
+	context: SettingsFieldContext
+): ResolvedEditControlRegistration | undefined => {
+	const definition = resolveFieldComponentDefinition( field, context, true );
+
+	if ( typeof definition === 'function' ) {
+		return {
+			component: createLegacyEditControl( definition, field ),
+			isLegacy: true,
+		};
+	}
+
+	if (
+		definition &&
+		typeof definition.component === 'function' &&
+		( typeof definition.validate === 'undefined' ||
+			typeof definition.validate === 'function' )
+	) {
+		return { ...definition, isLegacy: false };
+	}
+
+	return undefined;
+};
 
 export const resolveFieldValidator = (
 	field: SettingsUIField,
 	context: SettingsFieldContext
-): SettingsFieldValidator | undefined =>
-	resolveFieldComponentRegistration( field, context, false )?.validate;
+): SettingsFieldValidator | undefined => {
+	const definition = resolveFieldComponentDefinition( field, context, false );
+	return typeof definition === 'object' ? definition.validate : undefined;
+};
 
 export const resolveFieldVisibilityPredicate = (
 	fieldId: string,

@@ -158,8 +158,34 @@ export type SettingsEditControlProps = {
 	validity?: SettingsFieldValidity;
 };
 
-export type SettingsFieldComponent = (
+export type SettingsEditControl = (
 	props: SettingsEditControlProps
+) => JSX.Element | null;
+
+/**
+ * The field component props shipped with WooCommerce 10.9.
+ *
+ * @deprecated Migrate the component to SettingsEditControlProps. This bridge
+ * will be removed when Settings UI leaves its experimental feature flag.
+ */
+export type SettingsFieldComponentProps = {
+	field: SettingsUIField;
+	value: SettingsValue;
+	onChange: ( value: SettingsValue ) => void;
+	values: SettingsValues;
+	initialValues: SettingsValues;
+	setValue: ( fieldId: string, value: SettingsValue ) => void;
+	setValues: ( values: Partial< SettingsValues > ) => void;
+	context: SettingsFieldContext;
+};
+
+/**
+ * A field component using the contract shipped with WooCommerce 10.9.
+ *
+ * @deprecated Register a SettingsEditControl through an object definition.
+ */
+export type SettingsFieldComponent = (
+	props: SettingsFieldComponentProps
 ) => JSX.Element | null;
 
 /** Values and settings metadata passed to a custom field validator. */
@@ -177,7 +203,7 @@ export type SettingsFieldValidator = (
 
 /** A custom field component and its optional DataForm validator. */
 export type SettingsFieldComponentRegistration = {
-	component: SettingsFieldComponent;
+	component: SettingsEditControl;
 	validate?: SettingsFieldValidator;
 };
 

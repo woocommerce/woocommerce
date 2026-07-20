@@ -4,36 +4,44 @@
 import {
 	__resetRegistry,
 	registerSettingsExtension,
-	resolveFieldComponent,
+	resolveEditControlRegistration,
+	resolveFieldComponent as resolveLegacyFieldComponent,
 	resolveFieldValidator,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
 	resolveSaveHandler,
 } from '../registry';
 import type {
+	SettingsEditControl,
 	SettingsExtensionRegistration,
 	SettingsFieldComponent,
 	SettingsSaveHandler,
 	SettingsVisibilityPredicate,
 } from '../types';
 
+const resolveFieldComponent = (
+	...args: Parameters< typeof resolveEditControlRegistration >
+) => resolveEditControlRegistration( ...args )?.component;
+
 describe( 'settings extension registry', () => {
 	afterEach( () => {
 		__resetRegistry();
+		jest.restoreAllMocks();
 	} );
 
-	it( 'resolves named field components within the matching scope', () => {
+	it( 'resolves legacy field components through the public resolver', () => {
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
 		const component: SettingsFieldComponent = () => null;
 
 		registerSettingsExtension( {
 			scope: { page: 'registry-test', section: 'advanced' },
 			components: {
-				'test/component': { component },
+				'test/component': component,
 			},
 		} );
 
 		expect(
-			resolveFieldComponent(
+			resolveLegacyFieldComponent(
 				{
 					id: 'field',
 					label: 'Field',
@@ -46,7 +54,7 @@ describe( 'settings extension registry', () => {
 	} );
 
 	it( 'resolves validators registered with field components', () => {
-		const component: SettingsFieldComponent = () => null;
+		const component: SettingsEditControl = () => null;
 		const validate = () => 'This value is invalid.';
 
 		registerSettingsExtension( {
@@ -69,9 +77,9 @@ describe( 'settings extension registry', () => {
 	} );
 
 	it( 'resolves field components by documented precedence before registration recency', () => {
-		const component: SettingsFieldComponent = () => null;
-		const fieldOverride: SettingsFieldComponent = () => null;
-		const typeRenderer: SettingsFieldComponent = () => null;
+		const component: SettingsEditControl = () => null;
+		const fieldOverride: SettingsEditControl = () => null;
+		const typeRenderer: SettingsEditControl = () => null;
 
 		registerSettingsExtension( {
 			scope: { page: 'registry-precedence' },
@@ -113,8 +121,8 @@ describe( 'settings extension registry', () => {
 	} );
 
 	it( 'composes registrations in the same scope while newer keys take precedence', () => {
-		const originalComponent: SettingsFieldComponent = () => null;
-		const replacementComponent: SettingsFieldComponent = () => null;
+		const originalComponent: SettingsEditControl = () => null;
+		const replacementComponent: SettingsEditControl = () => null;
 		const saveHandler: SettingsSaveHandler = () => undefined;
 
 		registerSettingsExtension( {
@@ -184,7 +192,7 @@ describe( 'settings extension registry', () => {
 	} );
 
 	it( 'ignores registrations outside the current page scope', () => {
-		const component: SettingsFieldComponent = () => null;
+		const component: SettingsEditControl = () => null;
 
 		registerSettingsExtension( {
 			scope: { page: 'registry-test-other' },
@@ -206,9 +214,9 @@ describe( 'settings extension registry', () => {
 	} );
 
 	it( 'distinguishes page-wide, default-section, and named-section scopes', () => {
-		const pageWideComponent: SettingsFieldComponent = () => null;
-		const defaultSectionComponent: SettingsFieldComponent = () => null;
-		const namedSectionComponent: SettingsFieldComponent = () => null;
+		const pageWideComponent: SettingsEditControl = () => null;
+		const defaultSectionComponent: SettingsEditControl = () => null;
+		const namedSectionComponent: SettingsEditControl = () => null;
 
 		registerSettingsExtension( {
 			scope: { page: 'registry-section-scope' },

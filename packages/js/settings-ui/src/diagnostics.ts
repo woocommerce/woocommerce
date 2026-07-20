@@ -14,9 +14,23 @@ const isDevelopment = () => {
 	return process.env.NODE_ENV !== 'production';
 };
 
-export const warn = ( message: string, context?: unknown ) => {
+const warningKeys = new Set< string >();
+
+export const warn = (
+	message: string,
+	context?: unknown,
+	dedupeKey?: string
+) => {
 	if ( ! isDevelopment() ) {
 		return;
+	}
+
+	if ( dedupeKey && warningKeys.has( dedupeKey ) ) {
+		return;
+	}
+
+	if ( dedupeKey ) {
+		warningKeys.add( dedupeKey );
 	}
 
 	if ( context ) {
@@ -28,6 +42,8 @@ export const warn = ( message: string, context?: unknown ) => {
 	// eslint-disable-next-line no-console
 	console.warn( `[WooCommerce settings UI] ${ message }` );
 };
+
+export const __resetWarnings = () => warningKeys.clear();
 
 export const error = ( message: string, context?: unknown ) => {
 	if ( context ) {

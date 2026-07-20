@@ -15,7 +15,7 @@ import type {
 import { warn } from './diagnostics';
 import { toSanitizedHtmlNode, toSanitizedText } from './html';
 import {
-	resolveFieldComponent,
+	resolveEditControlRegistration,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
 } from './registry';
@@ -25,7 +25,7 @@ import {
 } from './ui-field-controls';
 import type { UIFieldControl } from './ui-field-controls';
 import type {
-	SettingsFieldComponent,
+	SettingsEditControl,
 	SettingsFieldContext,
 	SettingsUIField,
 	SettingsUIGroup,
@@ -158,7 +158,7 @@ const createIsVisible = (
 
 const createRegisteredEdit = (
 	settingsField: SettingsUIField,
-	Registered: SettingsFieldComponent
+	Registered: SettingsEditControl
 ) => {
 	return function RegisteredFieldEdit( {
 		data,
@@ -192,7 +192,7 @@ export const buildDataFormField = (
 	options: DataFormAdapterOptions
 ): Field< SettingsValues > => {
 	const descriptor = settingsTypeDescriptors[ settingsField.type ];
-	const registeredComponent = resolveFieldComponent(
+	const registeredComponent = resolveEditControlRegistration(
 		settingsField,
 		options.context
 	);
@@ -211,7 +211,7 @@ export const buildDataFormField = (
 		// converts them to the stable Woo-owned extension contract.
 		field.Edit = createRegisteredEdit(
 			settingsField,
-			registeredComponent
+			registeredComponent.component
 		) as Field< SettingsValues >[ 'Edit' ];
 		return field;
 	}
