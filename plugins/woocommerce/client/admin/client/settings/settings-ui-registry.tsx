@@ -1,3 +1,5 @@
+/* global HTMLElement, JSX */
+
 /**
  * External dependencies
  */
