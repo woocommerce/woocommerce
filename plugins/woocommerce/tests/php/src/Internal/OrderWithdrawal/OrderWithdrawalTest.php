@@ -82,8 +82,8 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 		$this->sut                         = new OrderWithdrawalFormProcessor();
 		$this->original_post               = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$this->had_request_method          = isset( $_SERVER['REQUEST_METHOD'] );
-		$this->original_request_method     = $this->had_request_method ? (string) $_SERVER['REQUEST_METHOD'] : null;
+		$this->had_request_method          = filter_has_var( INPUT_SERVER, 'REQUEST_METHOD' );
+		$this->original_request_method     = $this->had_request_method ? filter_input( INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) : null;
 		$this->original_session            = WC()->session;
 		$this->original_feature_option     = get_option( self::FEATURE_OPTION, self::MISSING_OPTION_MARK );
 		$this->original_endpoint_option    = get_option( self::ENDPOINT_OPTION, self::MISSING_OPTION_MARK );
