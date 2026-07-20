@@ -32,15 +32,8 @@ import grabpay from '../../images/payment-methods/grabpay.svg';
 
 interface PaymentMethod {
 	name: string;
-	/** URL of the logo asset. */
+	/** URL of the logo asset — a full-bleed 64×40 design-library card. */
 	src: string;
-	/**
-	 * CSS background painted on the element behind the logo. Some marks ship
-	 * with a non-transparent backdrop; since the logo is rendered through an
-	 * <img> (and letterboxed to the fixed box), the backdrop has to live on
-	 * the element rather than inside the asset so it fills the whole box.
-	 */
-	background?: string;
 }
 
 /**
@@ -49,24 +42,19 @@ interface PaymentMethod {
 const PaymentMethods: PaymentMethod[] = [
 	{ name: 'visa', src: visa },
 	{ name: 'mastercard', src: mastercard },
-	{ name: 'amex', src: amex, background: '#006FCF' },
+	{ name: 'amex', src: amex },
 	{ name: 'discover', src: discover },
-	{ name: 'woopay', src: woopay, background: '#873EFF' },
+	{ name: 'woopay', src: woopay },
 	{ name: 'applepay', src: applepay },
 	{ name: 'googlepay', src: googlepay },
-	{ name: 'afterpay', src: afterpay, background: '#B2FCE4' },
+	{ name: 'afterpay', src: afterpay },
 	{ name: 'affirm', src: affirm },
-	{ name: 'klarna', src: klarna, background: '#FFB3C7' },
-	{
-		name: 'cartebancaire',
-		src: cartebancaire,
-		background:
-			'linear-gradient(30deg, #2E2E79 0%, #2581C4 25%, #E6D6DB 50%, #E3756A 75%, #C90C0F 100%)',
-	},
+	{ name: 'klarna', src: klarna },
+	{ name: 'cartebancaire', src: cartebancaire },
 	{ name: 'unionpay', src: unionpay },
 	{ name: 'diners', src: diners },
-	{ name: 'eftpos', src: eftpos, background: 'rgba(31, 0, 56, 1)' },
-	{ name: 'jcb', src: jcb, background: 'rgba(14, 76, 150, 1)' },
+	{ name: 'eftpos', src: eftpos },
+	{ name: 'jcb', src: jcb },
 	{ name: 'bancontact', src: bancontact },
 	{ name: 'becs', src: becs },
 	{ name: 'eps', src: eps },
@@ -82,10 +70,8 @@ const renderLogo = ( pm: PaymentMethod ) => (
 		key={ pm.name }
 		src={ pm.src }
 		alt=""
-		width={ pm.background ? 40 : 38 }
-		height={ pm.background ? 26 : 24 }
-		className={ pm.background ? 'has-background' : undefined }
-		style={ pm.background ? { background: pm.background } : undefined }
+		width={ 38 }
+		height={ 24 }
 		loading="lazy"
 	/>
 );
