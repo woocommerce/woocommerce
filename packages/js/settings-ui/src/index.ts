@@ -1,5 +1,14 @@
 export { SettingsUIErrorBoundary, SettingsUIPage } from './settings-ui-page';
-export { registerSettingsExtension } from './registry';
+export { NativeSettingsField } from './native-fields';
+export { HiddenInputs, getHiddenInputs } from './hidden-inputs';
+export {
+	registerSettingsExtension,
+	resolveFieldComponent,
+	resolveFieldVisibilityPredicate,
+	resolveGroupVisibilityPredicate,
+	resolveRegionComponent,
+	resolveSaveHandler,
+} from './registry';
 export { useSettingsUIContext } from './settings-ui-context';
 export type {
 	SettingsEditControl,
@@ -12,6 +21,7 @@ export type {
 	SettingsUIGroupAction,
 	SettingsUIOption,
 	SettingsUIPageContextValue,
+	SettingsUIRegistry,
 	SettingsUISaveSchema,
 	SettingsUISaveStrategy,
 	SettingsUISchema,
@@ -28,6 +38,8 @@ export type {
 	SettingsFieldContext,
 	SettingsFieldValidator,
 	SettingsFieldValidatorArgs,
+	SettingsRegionComponent,
+	SettingsRegionComponentProps,
 	SettingsSaveHandler,
 	SettingsSaveHandlerArgs,
 	SettingsSaveResult,

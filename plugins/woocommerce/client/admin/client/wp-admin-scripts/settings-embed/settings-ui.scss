@@ -189,6 +189,70 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 	}
 
+	// Compatibility styles for NativeSettingsField. Remove these with the
+	// legacy renderer when Settings UI leaves its experimental flag.
+	.wc-settings-ui__control.components-base-control {
+		margin-bottom: 0;
+		width: 100%;
+	}
+
+	.wc-settings-ui__control {
+		.components-base-control__field {
+			margin-bottom: 0;
+		}
+
+		.components-base-control__help {
+			color: #757575;
+			font-size: 13px;
+			line-height: 20px;
+			margin-top: 8px;
+		}
+	}
+
+	.wc-settings-ui__number-control {
+		position: relative;
+	}
+
+	.wc-settings-ui__number-control-input {
+		appearance: textfield;
+		border: 1px solid #949494;
+		border-radius: 2px;
+		box-shadow: 0 0 0 transparent;
+		box-sizing: border-box;
+		font-family: inherit;
+		font-size: 16px;
+		line-height: normal;
+		margin: 0;
+		min-height: 40px;
+		padding: 6px 64px 6px 12px;
+		transition: box-shadow 0.1s linear;
+		width: 100%;
+
+		@media (min-width: 600px) {
+			font-size: 13px;
+		}
+
+		&:focus {
+			border-color: var(--wp-admin-theme-color);
+			box-shadow: 0 0 0 0.5px var(--wp-admin-theme-color);
+			outline: 2px solid transparent;
+		}
+
+		&::-webkit-inner-spin-button,
+		&::-webkit-outer-spin-button {
+			appearance: none;
+			margin: 0;
+		}
+	}
+
+	.wc-settings-ui__number-control-spin-buttons {
+		display: flex;
+		position: absolute;
+		right: 6px;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
 	.wc-settings-ui__validation-error {
 		color: var(--wpds-color-foreground-content-error);
 		font-size: 12px;

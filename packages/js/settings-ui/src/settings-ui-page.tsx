@@ -41,7 +41,11 @@ import { createDataFormAdapter } from './dataform-adapter';
 import { HiddenInputs } from './hidden-inputs';
 import { error } from './diagnostics';
 import { sanitizeSettingsHtml, toSanitizedHtmlNode } from './html';
-import { resolveFieldValidator, resolveSaveHandler } from './registry';
+import {
+	resolveFieldValidator,
+	resolveRegionComponent,
+	resolveSaveHandler,
+} from './registry';
 import { areValuesEqual } from './values';
 import { SettingsUIPageContext } from './settings-ui-context';
 import type {
@@ -607,10 +611,12 @@ export class SettingsUIErrorBoundary extends Component<
 const ShellHeader = ( {
 	schema,
 	actions,
+	legacyNavigation,
 	children,
 }: {
 	schema: SettingsUISchema;
 	actions?: ReactNode;
+	legacyNavigation?: ReactNode;
 	children: ReactNode;
 } ) => {
 	const shell = schema.shell || {};
@@ -618,7 +624,8 @@ const ShellHeader = ( {
 	const title = shell.title || schema.title;
 	const hasNavigation = Boolean(
 		( shell.navigation && shell.navigation.length > 0 ) ||
-			( shell.sectionNavigation && shell.sectionNavigation.length > 0 )
+			( shell.sectionNavigation && shell.sectionNavigation.length > 0 ) ||
+			legacyNavigation
 	);
 
 	const breadcrumbs =
@@ -743,6 +750,7 @@ const ShellHeader = ( {
 							) ) }
 						</nav>
 					) : null }
+					{ legacyNavigation }
 				</div>
 			) : null }
 			{ children }
@@ -793,6 +801,16 @@ export const SettingsUIPage = ( {
 	const pageContextValue = useMemo(
 		() => ( { schema, context, initialValues } ),
 		[ context, initialValues, schema ]
+	);
+	const LegacyNavigationComponent = useMemo(
+		() =>
+			schema.shell?.navigationComponent
+				? resolveRegionComponent(
+						schema.shell.navigationComponent,
+						context
+				  )
+				: undefined,
+		[ context, schema.shell?.navigationComponent ]
 	);
 	const dataFormAdapter = useMemo(
 		() => createDataFormAdapter( pageContextValue ),
@@ -1082,7 +1100,20 @@ export const SettingsUIPage = ( {
 
 	return (
 		<SettingsUIPageContext.Provider value={ pageContextValue }>
-			<ShellHeader schema={ schema } actions={ saveButton }>
+			<ShellHeader
+				schema={ schema }
+				actions={ saveButton }
+				legacyNavigation={
+					LegacyNavigationComponent ? (
+						<LegacyNavigationComponent
+							values={ values }
+							initialValues={ initialValues }
+							context={ context }
+							schema={ schema }
+						/>
+					) : undefined
+				}
+			>
 				{ pendingNavigation ? (
 					<UnsavedChangesModal
 						isSaving={ isSaving }

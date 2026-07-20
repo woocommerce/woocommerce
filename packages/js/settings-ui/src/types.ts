@@ -113,6 +113,8 @@ export type SettingsUIShell = {
 	badges?: SettingsUIShellBadge[];
 	navigation?: SettingsUIShellNavigationItem[];
 	sectionNavigation?: SettingsUIShellNavigationItem[];
+	/** @deprecated Use schema navigation arrays instead. */
+	navigationComponent?: string;
 };
 
 export type SettingsUISchema = {
@@ -251,6 +253,19 @@ export type SettingsSaveHandler = (
 	args: SettingsSaveHandlerArgs
 ) => Promise< SettingsSaveResult > | SettingsSaveResult;
 
+/** @deprecated Region components will be removed with the legacy bridge. */
+export type SettingsRegionComponentProps = {
+	values: SettingsValues;
+	initialValues: SettingsValues;
+	context: SettingsFieldContext;
+	schema: SettingsUISchema;
+};
+
+/** @deprecated Use schema navigation arrays instead. */
+export type SettingsRegionComponent = (
+	props: SettingsRegionComponentProps
+) => JSX.Element | null;
+
 export type SettingsExtensionScope = {
 	page: string;
 	section?: string;
@@ -264,4 +279,19 @@ export type SettingsExtensionRegistration = {
 	fieldVisibility?: Record< string, SettingsVisibilityPredicate >;
 	groupVisibility?: Record< string, SettingsVisibilityPredicate >;
 	saveHandlers?: Record< string, SettingsSaveHandler >;
+	/** @deprecated Region registration will be removed with the legacy bridge. */
+	regions?: Record< string, SettingsRegionComponent >;
 };
+
+/** @deprecated Import registerSettingsExtension from the package instead. */
+export type SettingsUIRegistry = {
+	registerSettingsExtension: (
+		registration: SettingsExtensionRegistration
+	) => void;
+};
+
+declare global {
+	interface Window {
+		wcSettingsUI?: SettingsUIRegistry;
+	}
+}

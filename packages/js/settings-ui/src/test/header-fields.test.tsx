@@ -42,8 +42,8 @@ jest.mock( '@wordpress/admin-ui', () => ( {
  * Internal dependencies
  */
 import { SettingsUIPage } from '../settings-ui-page';
-import { __resetRegistry } from '../registry';
-import type { SettingsUISchema } from '../types';
+import { __resetRegistry, registerSettingsExtension } from '../registry';
+import type { SettingsRegionComponentProps, SettingsUISchema } from '../types';
 import { renderElement } from './helpers/render-element';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -75,6 +75,7 @@ const baseSchema = (
 describe( 'settings UI shell header fields', () => {
 	afterEach( () => {
 		__resetRegistry();
+		jest.restoreAllMocks();
 		// Safety net for failures between render and the inline `container.remove()`.
 		document.body.innerHTML = '';
 	} );
@@ -180,6 +181,65 @@ describe( 'settings UI shell header fields', () => {
 
 		act( () => root.unmount() );
 		container.remove();
+	} );
+
+	it( 'renders a legacy region after the default navigation', () => {
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		const received: SettingsRegionComponentProps[] = [];
+		const LegacyNavigation = ( props: SettingsRegionComponentProps ) => {
+			received.push( props );
+			return <div>Legacy navigation</div>;
+		};
+		registerSettingsExtension( {
+			scope: { page: 'test_page' },
+			regions: { 'legacy/navigation': LegacyNavigation },
+		} );
+		const schema = baseSchema( {
+			navigation: [
+				{
+					id: 'general',
+					label: 'General navigation',
+					href: '#general',
+				},
+			],
+			navigationComponent: 'legacy/navigation',
+		} );
+		const { container, cleanup } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+		const navigation = container.querySelector(
+			'.wc-settings-ui-shell__navigation'
+		);
+
+		expect( navigation?.textContent ).toContain( 'General navigation' );
+		expect( navigation?.textContent ).toContain( 'Legacy navigation' );
+		expect( received[ 0 ] ).toEqual( {
+			values: { field_a: '' },
+			initialValues: { field_a: '' },
+			context: { page: 'test_page', section: undefined },
+			schema,
+		} );
+		cleanup();
+	} );
+
+	it( 'renders the navigation container for a legacy-region-only shell', () => {
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		registerSettingsExtension( {
+			scope: { page: 'test_page' },
+			regions: { 'legacy/navigation': () => <div>Legacy only</div> },
+		} );
+		const { container, cleanup } = renderElement(
+			<SettingsUIPage
+				schema={ baseSchema( {
+					navigationComponent: 'legacy/navigation',
+				} ) }
+			/>
+		);
+
+		expect(
+			container.querySelector( '.wc-settings-ui-shell__navigation' )
+		).toHaveTextContent( 'Legacy only' );
+		cleanup();
 	} );
 
 	it( 'omits subtitle and badges when not provided', () => {

@@ -11,6 +11,7 @@ import type {
 	SettingsFieldComponentRegistration,
 	SettingsFieldContext,
 	SettingsFieldValidator,
+	SettingsRegionComponent,
 	SettingsSaveHandler,
 	SettingsVisibilityPredicate,
 } from './types';
@@ -28,6 +29,7 @@ const registrationMapKeys = [
 	'fieldVisibility',
 	'groupVisibility',
 	'saveHandlers',
+	'regions',
 ] as const;
 
 export type ResolvedEditControlRegistration =
@@ -128,12 +130,20 @@ export const registerSettingsExtension = (
 		return;
 	}
 
+	const scopeKey = getScopeKey( registration.scope );
 	if ( hasLegacyFieldComponents( registration ) ) {
-		const scopeKey = getScopeKey( registration.scope );
 		warn(
 			`Legacy settings field components were registered for scope "${ scopeKey }". See the Settings UI component migration guide. This bridge will be removed when Settings UI leaves its experimental feature flag.`,
 			{ registration },
 			`legacy-components:${ scopeKey }`
+		);
+	}
+
+	if ( registration.regions ) {
+		warn(
+			`Legacy settings regions were registered for scope "${ scopeKey }". Use schema navigation arrays instead. Region support will be removed when Settings UI leaves its experimental feature flag.`,
+			{ registration },
+			`legacy-regions:${ scopeKey }`
 		);
 	}
 
@@ -255,3 +265,28 @@ export const resolveSaveHandler = (
 	warn( `Save handler "${ handler }" is not registered.`, { context } );
 	return undefined;
 };
+
+/** Resolve a region component registered through the WooCommerce 10.9 API. */
+export const resolveRegionComponent = (
+	component: string,
+	context: SettingsFieldContext
+): SettingsRegionComponent | undefined => {
+	const region = findInMatchingRegistrations(
+		context,
+		( registration ) => registration.regions?.[ component ]
+	);
+
+	if ( region ) {
+		return region;
+	}
+
+	warn( `Region component "${ component }" is not registered.`, { context } );
+	return undefined;
+};
+
+if ( typeof window !== 'undefined' ) {
+	window.wcSettingsUI = {
+		...( window.wcSettingsUI || {} ),
+		registerSettingsExtension,
+	};
+}

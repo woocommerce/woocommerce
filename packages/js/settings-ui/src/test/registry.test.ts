@@ -9,13 +9,16 @@ import {
 	resolveFieldValidator,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
+	resolveRegionComponent,
 	resolveSaveHandler,
 } from '../registry';
 import type {
 	SettingsEditControl,
 	SettingsExtensionRegistration,
 	SettingsFieldComponent,
+	SettingsRegionComponent,
 	SettingsSaveHandler,
+	SettingsUIRegistry,
 	SettingsVisibilityPredicate,
 } from '../types';
 
@@ -339,6 +342,55 @@ describe( 'settings extension registry', () => {
 				section: 'other',
 			} )
 		).toBeUndefined();
+	} );
+
+	it( 'resolves legacy regions in the current scope', () => {
+		const warn = jest
+			.spyOn( console, 'warn' )
+			.mockImplementation( () => undefined );
+		const region: SettingsRegionComponent = () => null;
+
+		registerSettingsExtension( {
+			scope: { page: 'wc-settings', section: 'shipping' },
+			regions: { 'legacy/navigation': region },
+		} );
+
+		expect(
+			resolveRegionComponent( 'legacy/navigation', {
+				page: 'wc-settings',
+				section: 'shipping',
+			} )
+		).toBe( region );
+		expect( warn ).toHaveBeenCalledWith(
+			expect.stringContaining( 'Legacy settings regions' ),
+			expect.objectContaining( { registration: expect.any( Object ) } )
+		);
+	} );
+
+	it( 'exposes the registry global without replacing existing properties', () => {
+		const originalRegistry = window.wcSettingsUI;
+		const existingRegistry = {
+			existing: 'preserved',
+		} as unknown as SettingsUIRegistry;
+		window.wcSettingsUI = existingRegistry;
+		let isolatedRegister: typeof registerSettingsExtension | undefined;
+
+		try {
+			jest.isolateModules( () => {
+				const isolatedRegistry =
+					jest.requireActual< typeof import('../registry') >(
+						'../registry'
+					);
+				isolatedRegister = isolatedRegistry.registerSettingsExtension;
+			} );
+
+			expect( window.wcSettingsUI ).toEqual( {
+				existing: 'preserved',
+				registerSettingsExtension: isolatedRegister,
+			} );
+		} finally {
+			window.wcSettingsUI = originalRegistry;
+		}
 	} );
 
 	it( 'resolves save handlers by scope', () => {

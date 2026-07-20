@@ -49,6 +49,13 @@ export const toLocalDatetime = ( value: SettingsValue ) => {
 export const fromLocalDatetime = ( value: string ) =>
 	value ? getDate( value ).toISOString() : null;
 
+const toFormDatetime = ( value: SettingsValue ) =>
+	typeof value === 'string' &&
+	value !== '' &&
+	! /(?:Z|[+-]\d{2}:\d{2})$/.test( value )
+		? value
+		: toLocalDatetime( value );
+
 export const getHiddenInputs = (
 	field: SettingsUIField,
 	value: SettingsValue
@@ -79,7 +86,10 @@ export const getHiddenInputs = (
 		return [
 			{
 				name,
-				value: value === true ? 'yes' : 'no',
+				value:
+					value === true || value === 'yes' || value === '1'
+						? 'yes'
+						: 'no',
 			},
 		];
 	}
@@ -96,7 +106,7 @@ export const getHiddenInputs = (
 			name,
 			value:
 				field.type === 'datetime-local'
-					? toLocalDatetime( value )
+					? toFormDatetime( value )
 					: toStringValue( value ),
 		},
 	];

@@ -45,6 +45,32 @@ describe( 'getHiddenInputs', () => {
 		] );
 	} );
 
+	it( 'preserves the 10.9 checkbox and datetime call contract', () => {
+		const checkbox = makeField( {
+			id: 'legacy_enabled',
+			type: 'checkbox',
+			save: { adapter: 'form_post', name: 'legacy_enabled' },
+		} );
+		const datetime = makeField( {
+			id: 'legacy_starts_at',
+			type: 'datetime-local',
+			save: { adapter: 'form_post', name: 'legacy_starts_at' },
+		} );
+
+		expect( getHiddenInputs( checkbox, 'yes' ) ).toEqual( [
+			{ name: 'legacy_enabled', value: 'yes' },
+		] );
+		expect( getHiddenInputs( checkbox, '1' ) ).toEqual( [
+			{ name: 'legacy_enabled', value: 'yes' },
+		] );
+		expect( getHiddenInputs( checkbox, 'no' ) ).toEqual( [
+			{ name: 'legacy_enabled', value: 'no' },
+		] );
+		expect( getHiddenInputs( datetime, '2026-07-17T13:30:45' ) ).toEqual( [
+			{ name: 'legacy_starts_at', value: '2026-07-17T13:30:45' },
+		] );
+	} );
+
 	it( 'serializes changed checkbox values for legacy form posts', () => {
 		const field = makeField( {
 			id: 'enabled',
