@@ -20,22 +20,31 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	private const ENDPOINT_OPTION = 'woocommerce_myaccount_order_withdrawal_endpoint';
 
 	/**
-	 * Form handler.
+	 * Form processor.
 	 *
-	 * @var OrderWithdrawalFormHandler
+	 * @var OrderWithdrawalFormProcessor
 	 */
-	private OrderWithdrawalFormHandler $form_handler;
+	private OrderWithdrawalFormProcessor $form_processor;
+
+	/**
+	 * Form view.
+	 *
+	 * @var OrderWithdrawalFormView
+	 */
+	private OrderWithdrawalFormView $form_view;
 
 	/**
 	 * Initialize dependencies.
 	 *
-	 * @param OrderWithdrawalFormHandler $form_handler Form handler.
+	 * @param OrderWithdrawalFormProcessor $form_processor Form processor.
+	 * @param OrderWithdrawalFormView      $form_view Form view.
 	 * @internal
 	 *
 	 * @since 11.1.0
 	 */
-	final public function init( OrderWithdrawalFormHandler $form_handler ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules.
-		$this->form_handler = $form_handler;
+	final public function init( OrderWithdrawalFormProcessor $form_processor, OrderWithdrawalFormView $form_view ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules.
+		$this->form_processor = $form_processor;
+		$this->form_view      = $form_view;
 	}
 
 	/**
@@ -191,26 +200,10 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	 * @return array<string,mixed>
 	 */
 	private function get_template_args(): array {
-		$view_data = $this->form_handler->get_view_data();
-		$data      = $view_data['data'];
-		$errors    = $view_data['errors'];
-
-		return array(
-			'screen'                  => $view_data['screen'],
-			'data'                    => $data,
-			'errors'                  => $errors,
-			'fields'                  => $this->form_handler->get_prepared_form_fields( $errors ),
-			'withdrawal_type_options' => $this->form_handler->get_withdrawal_type_options(),
-			'hidden_fields'           => $this->form_handler->get_hidden_fields( $data ),
-			'review_rows'             => $this->form_handler->get_review_rows( $data ),
-			'nonce_action'            => OrderWithdrawalFormHandler::NONCE_ACTION,
-			'nonce_field'             => OrderWithdrawalFormHandler::NONCE_FIELD,
-			'action_field'            => OrderWithdrawalFormHandler::ACTION_FIELD,
-			'action_review'           => OrderWithdrawalFormHandler::ACTION_REVIEW,
-			'action_confirm'          => OrderWithdrawalFormHandler::ACTION_CONFIRM,
-			'action_edit'             => OrderWithdrawalFormHandler::ACTION_EDIT,
-			'form_action_url'         => $this->get_form_action_url(),
-			'shop_url'                => $this->get_shop_url(),
+		return $this->form_view->get_template_args(
+			$this->form_processor->process_current_request(),
+			$this->get_form_action_url(),
+			$this->get_shop_url()
 		);
 	}
 
