@@ -204,16 +204,20 @@ The legacy adapter converts the existing `get_settings()` array into a canonical
 
 Fields before the first `title` marker are placed into a default group automatically.
 
-Every field renders through a [dataviews DataForm](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/) control for its type. A few behaviours follow from the package's current capabilities:
+Every field renders inside a [dataviews DataForm](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/) layout. The current WordPress-bundled DataForm supplies checkbox, number, integer, radio, array, and color controls. WooCommerce supplies DataForm edit controls built from the bundled WordPress UI package for text, email, URL, password, telephone, time, date, datetime, textarea, and select fields.
 
--   `time` has no dedicated DataForm control yet and renders as a text field; the value round-trips unchanged.
--   PHP converts numeric values to numbers or `null`. Numeric `min` and `max` attributes become explicit validation rules. A number with an integer step base and `step="1"` becomes an `integer` field. Other step intervals are not applied because DataForm does not yet support configurable number-control steps; see [WordPress/gutenberg#78335](https://github.com/WordPress/gutenberg/issues/78335).
--   Other `custom_attributes`, including general HTML validation and `data-*` attributes, remain available as metadata but are not applied to built-in controls. A migrated page should use a registered custom component and validator when DataForm's field contract cannot express its requirements.
--   `disabled` fields render as disabled DataForm controls, keep their saved value, and do not participate in form validity.
--   `datetime-local` uses ISO values in React. The form POST encoder converts changed values back to the WordPress local timezone and preserves the original local value while a field is unchanged.
--   Unknown field types render as text fields and log a console diagnostic.
+A few behaviours follow from this mixed control set:
 
-DataForm validates the current canonical value against the field type, options, and configured rules. This can expose stale values, such as a saved select option that is no longer available. Test existing saved values when opting a page into the Settings UI and either normalize them in the page schema or provide a custom component and validator. PHP sanitization and save filters remain authoritative after submission.
+-   `time` uses a native time input and its string value round trips unchanged.
+-   PHP converts numeric values to numbers or `null`. Numeric `min` and `max` attributes are evaluated by WooCommerce and merged with DataForm validity. A number with an integer step base and `step="1"` becomes an `integer` field. Other step intervals are not applied because DataForm does not yet support configurable number-control steps; see [WordPress/gutenberg#78335](https://github.com/WordPress/gutenberg/issues/78335).
+-   Other `custom_attributes`, including general HTML validation and `data-*` attributes, remain available as metadata but are not applied to built-in controls. A migrated page should use a registered custom component and validator when the field contract cannot express its requirements.
+-   Disabled Woo UI controls use their native disabled state. Disabled fields using package controls render as read-only values because the bundled DataForm does not yet have field-level disabled support. Registered controls receive `disabled: true` and must apply it to their interactive elements. All disabled fields keep their saved value and do not participate in form validity.
+-   `datetime-local` uses canonical UTC ISO values in React and a store-local wall time in the native input. The form POST encoder converts changed values back to the WordPress local timezone and preserves the original local value while a field is unchanged. The browser timezone does not change this conversion.
+-   Rich descriptions render as sanitized details on Woo UI controls. Package controls receive the same description as plain text.
+-   Unknown field types render through the Woo text control and log a console diagnostic.
+-   Cards with headings use the bundled DataForm card behaviour and can be collapsed.
+
+DataForm validates the current canonical value against the field type and options. WooCommerce then applies numeric ranges and registered validators across the complete current values object. This can expose stale values, such as a saved select option that is no longer available. Test existing saved values when opting a page into the Settings UI and either normalize them in the page schema or provide a custom component and validator. PHP sanitization and save filters remain authoritative after submission.
 
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
 

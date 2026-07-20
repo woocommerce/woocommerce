@@ -12,7 +12,7 @@ Use custom components when a WooCommerce settings field needs plugin-specific Re
 
 For most fields, prefer the built-in renderer. Custom components are best for specialized selectors, previews, or validation flows.
 
-Registered components are [DataForm](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/) edit controls: the same component contract used by WordPress DataForm everywhere else in the admin. A component written for the Settings UI works as a DataForm control and the other way round.
+Registered components mount inside [DataForm](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/) through a WooCommerce-owned control contract. This keeps extension props stable when WooCommerce updates the DataForm version used internally.
 
 ## PHP field metadata
 
@@ -58,14 +58,16 @@ Multiple registrations can share a scope. Their entries are combined, and the mo
 
 ## Component props
 
-Custom components receive DataForm control props, re-exported as `SettingsEditControlProps`. The main props are:
+Custom components receive the WooCommerce-owned `SettingsEditControlProps` contract:
 
--   `data`: current settings values keyed by field id.
--   `field`: the normalized DataForm field. Use `field.getValue( { item: data } )` to read the canonical control value and `field.setValue( { item: data, value } )` to build a canonical change record.
--   `onChange`: accepts a partial record of field ids to new values, including multi-field updates.
--   `validity`: the current DataForm validity for this field.
+-   `data`: current canonical settings values keyed by field id.
+-   `field`: stable field metadata containing `id`, `label`, `description`, `placeholder`, `elements`, and `getValue()`.
+-   `onChange`: accepts a partial record of field ids to canonical values, including multi-field updates.
+-   `hideLabelFromVision`: whether the field label should remain available to assistive technology but be visually hidden.
+-   `disabled`: whether the component must prevent changes. Registered components are responsible for applying this state to every interactive control they render.
+-   `validity`: the winning validation result as `{ state, message? }`, where `state` is `valid`, `invalid`, or `validating`.
 
-Import the type rather than reproducing DataForm's complete prop shape:
+Import the type rather than reproducing the prop shape:
 
 ```ts
 import type { SettingsEditControlProps } from '@woocommerce/settings-ui';
@@ -79,7 +81,7 @@ import { useSettingsUIContext } from '@woocommerce/settings-ui';
 const { schema, context, initialValues } = useSettingsUIContext();
 ```
 
-Call `onChange()` with a record of field ids to canonical values. The settings UI handles hidden input serialization for the field's save adapter. Cleared number and datetime values use `null`.
+Read the current value with `field.getValue( { item: data } )`. Call `onChange()` directly with a record of field ids to canonical values. The settings UI handles hidden input serialization for the field's save adapter. Cleared number and datetime values use `null`.
 
 ## Example component
 
@@ -90,37 +92,29 @@ export const PaymentMethodPicker = ( {
 	data,
 	field,
 	onChange,
+	disabled,
 }: SettingsEditControlProps ) => {
 	const value = field.getValue( { item: data } );
 	const selectedValues = Array.isArray( value ) ? value : [];
 
 	return (
-		<fieldset>
+		<fieldset disabled={ disabled }>
 			<legend>{ field.label }</legend>
 			{ field.elements?.map( ( option ) => {
 				const checked = selectedValues.includes( option.value );
+				const nextValues = checked
+					? selectedValues.filter( ( item ) => item !== option.value )
+					: [ ...selectedValues, option.value ];
 
 				return (
 					<label key={ option.value }>
 						<input
 							type="checkbox"
 							checked={ checked }
-							onChange={ () => {
-								onChange(
-									field.setValue( {
-										item: data,
-										value: checked
-											? selectedValues.filter(
-													( item ) =>
-														item !== option.value
-											  )
-											: [
-													...selectedValues,
-													option.value,
-											  ],
-									} )
-								);
-							} }
+							disabled={ disabled }
+							onChange={ () =>
+								onChange( { [ field.id ]: nextValues } )
+							}
 						/>
 						{ option.label }
 					</label>
@@ -156,21 +150,22 @@ registerSettingsExtension( {
 } );
 ```
 
-The callback receives the canonical control `value`, all current canonical `values`, the original settings `field`, and the page `context`. Return `null` when valid or an error message when invalid. DataForm runs the callback and includes the result in whole-form validity, so an invalid custom field prevents saving. The same `{ component, validate }` form works for named components, field overrides, and type renderers; registrations without validation can continue passing the component directly.
+The callback receives the canonical control `value`, all current canonical `values`, the original settings `field`, and the page `context`. Return `null` when valid or an error message when invalid. WooCommerce reruns the callback whenever settings values change, including when the validator depends on a field in another group. An invalid result prevents saving.
 
-DataForm passes the result to the custom component through `validity.custom`, but it cannot render the message automatically because it does not know the component's markup. The component must display and associate the message with its control. For example:
+Package validation runs first, including DataForm's required, option, number, and integer checks. WooCommerce applies numeric minimum and maximum rules next, followed by the registered validator. The first failing layer supplies the result passed to the component.
+
+The component receives that result through the Woo-owned `validity` prop. It must display and associate an invalid message with its control because WooCommerce does not know the component's markup. For example:
 
 ```tsx
 const error =
-	validity?.custom?.type === 'invalid'
-		? validity.custom.message
-		: undefined;
+	validity?.state === 'invalid' ? validity.message : undefined;
 const errorId = `${ field.id }-validation-error`;
 
 return (
 	<fieldset
 		aria-describedby={ error ? errorId : undefined }
-		aria-invalid={ Boolean( error ) }
+		aria-invalid={ validity?.state === 'invalid' }
+		disabled={ disabled }
 	>
 		{ /* Custom controls. */ }
 		{ error ? <p id={ errorId }>{ error }</p> : null }
@@ -178,7 +173,7 @@ return (
 );
 ```
 
-Validators are synchronous and should be pure. Remote validation belongs in the custom save flow, with PHP validation and sanitization remaining authoritative.
+The same `{ component, validate }` form works for named components, field overrides, and type renderers. Registrations without validation can continue passing the component directly. Validators are synchronous and should be pure. Remote validation belongs in the custom save flow, with PHP validation and sanitization remaining authoritative.
 
 ## Field-specific overrides
 

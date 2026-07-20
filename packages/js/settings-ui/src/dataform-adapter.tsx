@@ -2,20 +2,30 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import type { Field, FieldTypeName, Form, Rules } from '@wordpress/dataviews';
+import type {
+	DataFormControlProps,
+	Field,
+	FieldType,
+	Form,
+} from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
  */
 import { warn } from './diagnostics';
-import { toSanitizedHtmlNode } from './html';
+import { toSanitizedHtmlNode, toSanitizedText } from './html';
 import {
 	resolveFieldComponent,
-	resolveFieldValidator,
 	resolveFieldVisibilityPredicate,
 	resolveGroupVisibilityPredicate,
 } from './registry';
+import {
+	createUIFieldEdit,
+	flattenDataFormValidity,
+} from './ui-field-controls';
+import type { UIFieldControl } from './ui-field-controls';
 import type {
+	SettingsFieldComponent,
 	SettingsFieldContext,
 	SettingsUIField,
 	SettingsUIGroup,
@@ -45,11 +55,6 @@ const valueMatchesVisibilityRule = (
 	);
 };
 
-const toDescriptionNode = ( description?: string ) =>
-	description && /<[^>]+>/.test( description )
-		? toSanitizedHtmlNode( description )
-		: description;
-
 const createInfoRender = ( settingsField: SettingsUIField ) => {
 	return function InfoField() {
 		return (
@@ -63,14 +68,11 @@ const createInfoRender = ( settingsField: SettingsUIField ) => {
 	};
 };
 
-/**
- * How a canonical Settings UI field type maps onto DataForm. Types without
- * an entry warn and render through the package text control.
- */
+/** How a canonical Settings UI field type maps onto DataForm. */
 type SettingsTypeDescriptor = {
-	type: FieldTypeName;
+	type: FieldType;
 	Edit?: Field< SettingsValues >[ 'Edit' ];
-	// Renders a read-only block instead of an edit control.
+	uiControl?: UIFieldControl;
 	render?: (
 		settingsField: SettingsUIField
 	) => Field< SettingsValues >[ 'render' ];
@@ -78,29 +80,24 @@ type SettingsTypeDescriptor = {
 
 const settingsTypeDescriptors: Record< string, SettingsTypeDescriptor > = {
 	checkbox: { type: 'boolean' },
-	// Radio and select need explicit controls: fields with elements
-	// default to the select control, so radio would lose its buttons and
-	// an options-less select would fall back to a text input.
 	radio: { type: 'text', Edit: 'radio' },
-	select: { type: 'text', Edit: 'select' },
-	textarea: { type: 'text', Edit: { control: 'textarea' } },
+	select: { type: 'text', uiControl: 'select' },
+	textarea: { type: 'text', uiControl: 'textarea' },
 	number: { type: 'number' },
 	integer: { type: 'integer' },
-	tel: { type: 'telephone' },
+	tel: { type: 'telephone', uiControl: 'tel' },
 	array: { type: 'array' },
-	date: { type: 'date' },
-	email: { type: 'email' },
-	password: { type: 'password' },
-	text: { type: 'text' },
-	url: { type: 'url' },
-	// The package has no time-only control (documented gap), so time
-	// values edit as text and round-trip unchanged.
-	time: { type: 'text' },
-	'datetime-local': { type: 'datetime' },
+	date: { type: 'date', uiControl: 'date' },
+	email: { type: 'email', uiControl: 'email' },
+	password: { type: 'password', uiControl: 'password' },
+	text: { type: 'text', uiControl: 'text' },
+	url: { type: 'url', uiControl: 'url' },
+	time: { type: 'text', uiControl: 'time' },
+	'datetime-local': {
+		type: 'datetime',
+		uiControl: 'datetime-local',
+	},
 	color: { type: 'color' },
-	// The regular layout skips fields whose normalized Edit control is
-	// null even when read-only, so info carries a control type the
-	// read-only path never mounts.
 	info: { type: 'text', render: createInfoRender },
 };
 
@@ -159,53 +156,63 @@ const createIsVisible = (
 		: undefined;
 };
 
+const createRegisteredEdit = (
+	settingsField: SettingsUIField,
+	Registered: SettingsFieldComponent
+) => {
+	return function RegisteredFieldEdit( {
+		data,
+		field,
+		onChange,
+		hideLabelFromVision,
+		validity,
+	}: DataFormControlProps< SettingsValues > ) {
+		return (
+			<Registered
+				data={ data }
+				field={ {
+					id: field.id,
+					label: field.label,
+					description: field.description,
+					placeholder: field.placeholder,
+					elements: field.elements,
+					getValue: field.getValue,
+				} }
+				onChange={ onChange }
+				hideLabelFromVision={ Boolean( hideLabelFromVision ) }
+				disabled={ Boolean( settingsField.disabled ) }
+				validity={ flattenDataFormValidity( validity ) }
+			/>
+		);
+	};
+};
+
 export const buildDataFormField = (
 	settingsField: SettingsUIField,
 	options: DataFormAdapterOptions
 ): Field< SettingsValues > => {
 	const descriptor = settingsTypeDescriptors[ settingsField.type ];
-	const type = descriptor?.type;
-	const validationRules = settingsField.validation as
-		| Rules< SettingsValues >
-		| undefined;
-	const validator = resolveFieldValidator( settingsField, options.context );
-	const customRule: Rules< SettingsValues >[ 'custom' ] | undefined =
-		validator
-			? ( item, field ) =>
-					validator( {
-						value: field.getValue( { item } ) as
-							| SettingsValue
-							| undefined,
-						values: item,
-						field: settingsField,
-						context: options.context,
-					} )
-			: undefined;
-
-	const field: Field< SettingsValues > = {
-		id: settingsField.id,
-		label: settingsField.label,
-		description: toDescriptionNode( settingsField.description ),
-		placeholder: settingsField.placeholder,
-		type,
-		elements: settingsField.options,
-		isDisabled: settingsField.disabled,
-		isVisible: createIsVisible( settingsField, options ),
-		isValid:
-			validationRules || customRule
-				? {
-						...validationRules,
-						...( customRule ? { custom: customRule } : {} ),
-				  }
-				: undefined,
-	};
-
 	const registeredComponent = resolveFieldComponent(
 		settingsField,
 		options.context
 	);
+	const field: Field< SettingsValues > = {
+		id: settingsField.id,
+		label: settingsField.label,
+		description: toSanitizedText( settingsField.description ),
+		placeholder: settingsField.placeholder,
+		type: descriptor?.type || 'text',
+		elements: settingsField.options,
+		isVisible: createIsVisible( settingsField, options ),
+	};
+
 	if ( registeredComponent ) {
-		field.Edit = registeredComponent;
+		// DataForm sees its own control props at this boundary. The wrapper
+		// converts them to the stable Woo-owned extension contract.
+		field.Edit = createRegisteredEdit(
+			settingsField,
+			registeredComponent
+		) as Field< SettingsValues >[ 'Edit' ];
 		return field;
 	}
 
@@ -219,11 +226,23 @@ export const buildDataFormField = (
 		warn( `Field type "${ settingsField.type }" is not supported.`, {
 			field: settingsField,
 		} );
-		field.type = 'text';
 		field.getValue = ( { item } ) =>
 			toStringValue( item[ settingsField.id ] );
-	} else {
-		field.Edit = descriptor.Edit;
+		field.Edit = createUIFieldEdit( settingsField, 'text' );
+		return field;
+	}
+
+	if ( descriptor.uiControl ) {
+		field.Edit = createUIFieldEdit( settingsField, descriptor.uiControl );
+		return field;
+	}
+
+	field.Edit = descriptor.Edit;
+
+	// Delete this read-only bridge when the WordPress runtime DataForm supports
+	// field-level disabled state. Registered controls instead receive `disabled`.
+	if ( settingsField.disabled ) {
+		field.readOnly = true;
 	}
 
 	return field;
@@ -274,17 +293,31 @@ export const createDataFormAdapter = ( options: DataFormAdapterOptions ) => {
 		return visibleGroups;
 	};
 
-	// Only visible, enabled fields validate.
+	const getValidationFields = ( values: SettingsValues ) =>
+		getVisibleGroups( values ).flatMap( ( group ) =>
+			group.fields
+				.filter( ( field ) => ! field.disabled )
+				.filter( ( field ) => isFieldVisible( field.id, values ) )
+		);
+
 	const getValidationForm = ( values: SettingsValues ): Form => ( {
 		layout: { type: 'regular' },
 		fields: getVisibleGroups( values ).map( ( group ) => ( {
 			id: group.id,
-			children: group.fields
-				.filter( ( field ) => ! field.disabled )
-				.filter( ( field ) => isFieldVisible( field.id, values ) )
+			children: getValidationFields( values )
+				.filter( ( field ) =>
+					group.fields.some(
+						( candidate ) => candidate.id === field.id
+					)
+				)
 				.map( ( field ) => field.id ),
 		} ) ),
 	} );
 
-	return { fields, getVisibleGroups, getValidationForm };
+	return {
+		fields,
+		getVisibleGroups,
+		getValidationFields,
+		getValidationForm,
+	};
 };

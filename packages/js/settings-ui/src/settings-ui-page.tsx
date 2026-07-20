@@ -1,3 +1,5 @@
+/* global BeforeUnloadEvent, Element, HTMLAnchorElement, HTMLButtonElement, HTMLFormElement, HTMLInputElement, MouseEvent */
+
 /**
  * External dependencies
  */
@@ -13,9 +15,14 @@ import {
 	useRef,
 	useState,
 } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { DataForm, useFormValidity } from '@wordpress/dataviews';
-import type { Form } from '@wordpress/dataviews';
+import type {
+	FieldValidity,
+	Form,
+	FormField,
+	FormValidity,
+} from '@wordpress/dataviews';
 import {
 	Badge,
 	Button as UIButton,
@@ -34,7 +41,7 @@ import { createDataFormAdapter } from './dataform-adapter';
 import { HiddenInputs } from './hidden-inputs';
 import { error } from './diagnostics';
 import { sanitizeSettingsHtml, toSanitizedHtmlNode } from './html';
-import { resolveSaveHandler } from './registry';
+import { resolveFieldValidator, resolveSaveHandler } from './registry';
 import { areValuesEqual } from './values';
 import { SettingsUIPageContext } from './settings-ui-context';
 import type {
@@ -313,7 +320,6 @@ const getGroupForm = ( group: SettingsUIGroup ): Form => {
 				layout: {
 					type: 'card',
 					withHeader: Boolean( group.title ),
-					isCollapsible: false,
 				},
 				children: group.fields.map( ( field ) => field.id ),
 			},
@@ -323,6 +329,234 @@ const getGroupForm = ( group: SettingsUIGroup ): Form => {
 
 const getAllFields = ( schema: SettingsUISchema ): SettingsUIField[] =>
 	Object.values( schema.groups ).flatMap( ( group ) => group.fields );
+
+const validationRuleNames = [ 'required', 'elements', 'custom' ] as const;
+
+const getFormFieldId = ( field: FormField | string ) =>
+	typeof field === 'string' ? field : field.id;
+
+const isCombinedFormField = ( field: FormField | string ) =>
+	typeof field === 'object' && 'children' in field;
+
+const getFormFieldChildren = ( field: FormField | string ) =>
+	isCombinedFormField( field ) && typeof field !== 'string'
+		? field.children
+		: [];
+
+const compactValidity = (
+	validity: Record< string, FieldValidity >
+): FormValidity =>
+	Object.keys( validity ).length > 0 ? validity : undefined;
+
+/** Remove stale DataForm validity for fields no longer in the validation form. */
+export const filterDataFormValidity = (
+	validity: FormValidity,
+	form: Form
+): FormValidity => {
+	if ( ! validity ) {
+		return undefined;
+	}
+
+	const filtered: Record< string, FieldValidity > = {};
+	( form.fields || [] ).forEach( ( formField ) => {
+		const fieldId = getFormFieldId( formField );
+		const source = validity[ fieldId ];
+		if ( ! source ) {
+			return;
+		}
+
+		if ( ! isCombinedFormField( formField ) ) {
+			filtered[ fieldId ] = source;
+			return;
+		}
+
+		const formChildren = getFormFieldChildren( formField );
+		const children: Record< string, FieldValidity > = {};
+		formChildren.forEach( ( child ) => {
+			const childId = getFormFieldId( child );
+			if ( source.children?.[ childId ] ) {
+				children[ childId ] = source.children[ childId ];
+			}
+		} );
+
+		const { children: ignoredChildren, ...ownValidity } = source;
+		if (
+			Object.keys( ownValidity ).length > 0 ||
+			Object.keys( children ).length > 0
+		) {
+			filtered[ fieldId ] = {
+				...ownValidity,
+				...( Object.keys( children ).length > 0 ? { children } : {} ),
+			};
+		}
+	} );
+
+	return compactValidity( filtered );
+};
+
+const addFieldValidity = (
+	validity: Record< string, FieldValidity >,
+	fieldId: string,
+	parentId: string | undefined,
+	fieldValidity: FieldValidity
+) => {
+	if ( ! parentId ) {
+		validity[ fieldId ] = fieldValidity;
+		return;
+	}
+
+	validity[ parentId ] = {
+		...validity[ parentId ],
+		children: {
+			...validity[ parentId ]?.children,
+			[ fieldId ]: fieldValidity,
+		},
+	};
+};
+
+/** Evaluate Woo-owned validation for every current visible, enabled field. */
+export const evaluateWooValidity = (
+	fields: SettingsUIField[],
+	values: SettingsValues,
+	context: SettingsFieldContext,
+	form: Form
+): FormValidity => {
+	const fieldToParent = new Map< string, string >();
+	( form.fields || [] ).forEach( ( formField ) => {
+		const parentId = getFormFieldId( formField );
+		getFormFieldChildren( formField ).forEach( ( child ) => {
+			fieldToParent.set( getFormFieldId( child ), parentId );
+		} );
+	} );
+
+	const validity: Record< string, FieldValidity > = {};
+	fields.forEach( ( field ) => {
+		const value = values[ field.id ];
+		let rangeMessage: string | undefined;
+		if ( typeof value === 'number' && Number.isFinite( value ) ) {
+			if (
+				typeof field.validation?.min === 'number' &&
+				value < field.validation.min
+			) {
+				rangeMessage = sprintf(
+					/* translators: %s: Minimum allowed numeric value. */
+					__( 'Value must be at least %s.', 'woocommerce' ),
+					String( field.validation.min )
+				);
+			} else if (
+				typeof field.validation?.max === 'number' &&
+				value > field.validation.max
+			) {
+				rangeMessage = sprintf(
+					/* translators: %s: Maximum allowed numeric value. */
+					__( 'Value must be at most %s.', 'woocommerce' ),
+					String( field.validation.max )
+				);
+			}
+		}
+
+		let validatorMessage: string | undefined;
+		const validator = resolveFieldValidator( field, context );
+		if ( validator ) {
+			try {
+				validatorMessage =
+					validator( { value, values, field, context } ) || undefined;
+			} catch ( validatorError ) {
+				validatorMessage =
+					validatorError instanceof Error && validatorError.message
+						? validatorError.message
+						: __( 'Unable to validate this field.', 'woocommerce' );
+			}
+		}
+
+		const message = rangeMessage || validatorMessage;
+		if ( message ) {
+			addFieldValidity(
+				validity,
+				field.id,
+				fieldToParent.get( field.id ),
+				{ custom: { type: 'invalid', message } }
+			);
+		}
+	} );
+
+	return compactValidity( validity );
+};
+
+const hasBlockingOwnRule = ( validity?: FieldValidity ) =>
+	validationRuleNames.some( ( rule ) => {
+		const result = validity?.[ rule ];
+		return result && result.type !== 'valid';
+	} );
+
+const mergeFieldValidity = (
+	packageValidity?: FieldValidity,
+	wooValidity?: FieldValidity
+): FieldValidity | undefined => {
+	const result: FieldValidity = { ...packageValidity };
+	if ( ! hasBlockingOwnRule( packageValidity ) && wooValidity?.custom ) {
+		result.custom = wooValidity.custom;
+	}
+
+	const childIds = new Set( [
+		...Object.keys( packageValidity?.children || {} ),
+		...Object.keys( wooValidity?.children || {} ),
+	] );
+	if ( childIds.size > 0 ) {
+		const children: Record< string, FieldValidity > = {};
+		childIds.forEach( ( childId ) => {
+			const child = mergeFieldValidity(
+				packageValidity?.children?.[ childId ],
+				wooValidity?.children?.[ childId ]
+			);
+			if ( child ) {
+				children[ childId ] = child;
+			}
+		} );
+		if ( Object.keys( children ).length > 0 ) {
+			result.children = children;
+		}
+	}
+
+	return Object.keys( result ).length > 0 ? result : undefined;
+};
+
+/** Merge package validity first, followed by Woo range and extension rules. */
+export const mergeFormValidity = (
+	packageValidity: FormValidity,
+	wooValidity: FormValidity
+): FormValidity => {
+	const fieldIds = new Set( [
+		...Object.keys( packageValidity || {} ),
+		...Object.keys( wooValidity || {} ),
+	] );
+	const merged: Record< string, FieldValidity > = {};
+	fieldIds.forEach( ( fieldId ) => {
+		const validity = mergeFieldValidity(
+			packageValidity?.[ fieldId ],
+			wooValidity?.[ fieldId ]
+		);
+		if ( validity ) {
+			merged[ fieldId ] = validity;
+		}
+	} );
+
+	return compactValidity( merged );
+};
+
+export const isFormValidityValid = ( validity: FormValidity ): boolean => {
+	if ( ! validity ) {
+		return true;
+	}
+
+	return Object.values( validity ).every( ( fieldValidity ) => {
+		const ownRulesValid = validationRuleNames.every( ( rule ) => {
+			const result = fieldValidity[ rule ];
+			return ! result || result.type === 'valid';
+		} );
+		return ownRulesValid && isFormValidityValid( fieldValidity.children );
+	} );
+};
 
 type ErrorBoundaryProps = {
 	children: ReactNode;
@@ -578,14 +812,40 @@ export const SettingsUIPage = ( {
 			),
 		[ schema.groups ]
 	);
+	const validationFields = useMemo(
+		() => dataFormAdapter.getValidationFields( values ),
+		[ dataFormAdapter, values ]
+	);
 	const validationForm = useMemo(
 		() => dataFormAdapter.getValidationForm( values ),
 		[ dataFormAdapter, values ]
 	);
-	const { validity, isValid } = useFormValidity(
+	const { validity: packageValidity } = useFormValidity(
 		values,
 		dataFormAdapter.fields,
 		validationForm
+	);
+	const filteredPackageValidity = useMemo(
+		() => filterDataFormValidity( packageValidity, validationForm ),
+		[ packageValidity, validationForm ]
+	);
+	const wooValidity = useMemo(
+		() =>
+			evaluateWooValidity(
+				validationFields,
+				values,
+				context,
+				validationForm
+			),
+		[ context, validationFields, validationForm, values ]
+	);
+	const validity = useMemo(
+		() => mergeFormValidity( filteredPackageValidity, wooValidity ),
+		[ filteredPackageValidity, wooValidity ]
+	);
+	const isValid = useMemo(
+		() => isFormValidityValid( validity ),
+		[ validity ]
 	);
 
 	useEffect( () => {

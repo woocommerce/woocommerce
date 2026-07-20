@@ -37,12 +37,12 @@
 	"dependencies": {
 		"@woocommerce/sanitize": "workspace:*",
 		"@wordpress/admin-ui": "catalog:wp-bundled",
-		"@wordpress/components": "37.0.0",
+		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/date": "catalog:wp-min",
-		"@wordpress/dataviews": "17.2.0",
+		"@wordpress/dataviews": "catalog:wp-bundled",
 		"@wordpress/element": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
-		"@wordpress/ui": "0.18.0"
+		"@wordpress/ui": "catalog:wp-bundled"
 	},
 	"devDependencies": {
 		"@babel/core": "7.25.7",
@@ -88,7 +88,7 @@
 		"lint:lang:js": "eslint src",
 		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build:publish:project",
-		"test:js": "jest --config ./jest.config.js --passWithNoTests",
+		"test:js": "jest --config ./jest.config.json --passWithNoTests",
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
 		"watch:build:project:esm": "node build.mjs --watch"
@@ -104,7 +104,7 @@
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": [
-						"jest.config.js",
+						"jest.config.json",
 						"tsconfig.json",
 						"src/**/*.{js,jsx,ts,tsx}"
 					],

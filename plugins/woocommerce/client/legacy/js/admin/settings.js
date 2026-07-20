@@ -105,7 +105,6 @@
 		// Edit prompt
 		function editPrompt () {
 			var changed = false;
-			let $prevent_change_elements = $( '.wp-list-table .check-column, .wc-settings-prevent-change-event' );
 
 			$( 'input, textarea, select, checkbox' ).on( 'change input', function (
 				event
@@ -114,8 +113,9 @@
 				// - WP List Table checkboxes that only (un)select rows
 				// - Changing email type in email preview
 				if (
-					$prevent_change_elements.length &&
-					$prevent_change_elements.has( event.target ).length
+					$( event.target ).closest(
+						'.wp-list-table .check-column, .wc-settings-prevent-change-event'
+					).length
 				) {
 					return;
 				}
@@ -158,6 +158,13 @@
 		const form = document.querySelector( '#mainform' );
 		const observer = new MutationObserver( ( mutationsList ) => {
 			for ( const mutation of mutationsList ) {
+				if (
+					mutation.target instanceof Element &&
+					mutation.target.closest( '.wc-settings-prevent-change-event' )
+				) {
+					continue;
+				}
+
 				if ( mutation.type === 'childList' ) {
 					if ( nodeListContainsFormElements( mutation.addedNodes ) ) {
 						editPrompt();

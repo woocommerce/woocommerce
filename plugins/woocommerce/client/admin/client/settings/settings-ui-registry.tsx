@@ -69,6 +69,10 @@ export const registerSettingsUIScreens = () => {
 				return;
 			}
 
+			// The React form owns dirty state and validation. Keep the legacy
+			// settings change observer from mutating its Save button.
+			element.classList.add( 'wc-settings-prevent-change-event' );
+
 			createRoot( element ).render(
 				createElement(
 					SettingsUIErrorBoundary,

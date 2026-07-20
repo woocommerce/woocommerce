@@ -1,3 +1,5 @@
+/* global HTMLAnchorElement, HTMLButtonElement, HTMLFormElement, HTMLInputElement, HTMLElement, JSX, MouseEvent */
+
 /**
  * External dependencies
  */
@@ -43,6 +45,8 @@ const renderElementInMainForm = ( element: JSX.Element ) => {
 	form.appendChild( container );
 	const root = createRoot( container );
 
+	// React's createRoot API requires the initial render to be wrapped in act.
+	// eslint-disable-next-line testing-library/no-unnecessary-act
 	act( () => {
 		root.render( element );
 	} );
@@ -83,7 +87,11 @@ const getUnsavedChangesActionButton = ( label: string ): HTMLButtonElement => {
 };
 
 const expectUnsafeMarkupRemoved = ( container: HTMLElement ) => {
-	expect( container.querySelector( 'strong' )?.textContent ).toBe( 'Safe' );
+	expect(
+		Array.from( container.querySelectorAll( 'strong' ) ).some(
+			( element ) => element.textContent === 'Safe'
+		)
+	).toBe( true );
 	expect( container.querySelector( 'script' ) ).toBeNull();
 	expect( container.querySelector( 'img' ) ).toBeNull();
 	expect( container.querySelector( 'iframe' ) ).toBeNull();
@@ -294,6 +302,8 @@ describe( 'settings HTML rendering', () => {
 		cleanup();
 	} );
 
+	// Assertions are collected by the shared sanitization helper.
+	// eslint-disable-next-line jest/expect-expect
 	it( 'sanitizes native field descriptions before rendering', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
@@ -399,7 +409,7 @@ describe( 'settings HTML rendering', () => {
 
 		try {
 			const input = container.querySelector(
-				'input.components-input-control__input'
+				'input:not([type="hidden"])'
 			);
 			const saveButton = container.querySelector(
 				'.woocommerce-save-button'
@@ -458,9 +468,7 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector(
-			'input.components-input-control__input'
-		);
+		const input = container.querySelector( 'input:not([type="hidden"])' );
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);
@@ -539,7 +547,7 @@ describe( 'settings HTML rendering', () => {
 
 		try {
 			const input = container.querySelector(
-				'input.components-input-control__input'
+				'input:not([type="hidden"])'
 			);
 			const link = sectionLinks.querySelector( 'a' );
 
@@ -609,7 +617,7 @@ describe( 'settings HTML rendering', () => {
 
 		try {
 			const input = container.querySelector(
-				'input.components-input-control__input'
+				'input:not([type="hidden"])'
 			);
 			const link = container.querySelector(
 				'a[href="https://example.com/next"]'
@@ -708,9 +716,7 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector(
-			'input.components-input-control__input'
-		);
+		const input = container.querySelector( 'input:not([type="hidden"])' );
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);
@@ -763,6 +769,219 @@ describe( 'settings HTML rendering', () => {
 
 		act( () => root.unmount() );
 		container.remove();
+	} );
+
+	it( 'blocks saving when a registered numeric control writes a non-number', async () => {
+		const InvalidNumberControl = ( {
+			onChange,
+			validity,
+		}: SettingsEditControlProps ) => (
+			<>
+				<button onClick={ () => onChange( { count: 'not-a-number' } ) }>
+					Write invalid number
+				</button>
+				{ validity?.message }
+			</>
+		);
+		registerSettingsExtension( {
+			scope: { page: 'test-page', section: '' },
+			fieldOverrides: { count: InvalidNumberControl },
+		} );
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'count',
+							label: 'Count',
+							type: 'number',
+							value: 2,
+						},
+					],
+				},
+			},
+		};
+		const { container, cleanup } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		await act( async () => {
+			Array.from( container.querySelectorAll( 'button' ) )
+				.find(
+					( button ) =>
+						button.textContent?.includes( 'Write invalid number' )
+				)
+				?.click();
+		} );
+
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeDisabled();
+		expect( container.textContent ).toContain( 'Value must be a number.' );
+		cleanup();
+	} );
+
+	it( 'reruns cross-group validators when their dependency changes', async () => {
+		registerSettingsExtension( {
+			scope: { page: 'test-page', section: '' },
+			fieldOverrides: {
+				dependent: {
+					component: ( { validity } ) => (
+						<span>
+							{ validity?.message || 'Dependent control' }
+						</span>
+					),
+					validate: ( { values } ) =>
+						values.controller === 'blocked' ? 'Blocked.' : null,
+				},
+			},
+		} );
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				first: {
+					id: 'first',
+					fields: [
+						{
+							id: 'dependent',
+							label: 'Dependent',
+							type: 'text',
+							value: 'ok',
+						},
+					],
+				},
+				second: {
+					id: 'second',
+					fields: [
+						{
+							id: 'controller',
+							label: 'Controller',
+							type: 'text',
+							value: 'allowed',
+						},
+					],
+				},
+			},
+		};
+		const { container, cleanup } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+		const controller =
+			container.querySelector< HTMLInputElement >( '#controller' );
+
+		await act( async () => {
+			changeTextInput( controller as HTMLInputElement, 'blocked' );
+		} );
+
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeDisabled();
+		expect( container.textContent ).toContain( 'Blocked.' );
+		cleanup();
+	} );
+
+	it( 'drops invalidity when a dependent field becomes hidden', async () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'controller',
+							label: 'Controller',
+							type: 'checkbox',
+							value: true,
+						},
+						{
+							id: 'dependent',
+							label: 'Dependent',
+							type: 'number',
+							value: 1,
+							validation: { min: 2 },
+							visibility: {
+								controller: 'controller',
+								value: true,
+							},
+						},
+						{
+							id: 'other',
+							label: 'Other',
+							type: 'text',
+							value: 'initial',
+						},
+					],
+				},
+			},
+		};
+		const { container, cleanup } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeDisabled();
+		await act( async () => {
+			container
+				.querySelector< HTMLInputElement >( 'input[type="checkbox"]' )
+				?.click();
+		} );
+		await act( async () => {
+			changeTextInput(
+				container.querySelector< HTMLInputElement >(
+					'#other'
+				) as HTMLInputElement,
+				'changed'
+			);
+		} );
+
+		expect( container.textContent ).not.toContain( 'Dependent' );
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeEnabled();
+		cleanup();
+	} );
+
+	it( 'keeps disabled values byte-identical in hidden form inputs', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'count',
+							label: 'Count',
+							type: 'number',
+							value: 2,
+							disabled: true,
+							save: {
+								adapter: 'form_post',
+								name: 'count',
+								initialValue: '02',
+							},
+						},
+					],
+				},
+			},
+		};
+		const { container, cleanup } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		expect(
+			container.querySelector( 'input[type="hidden"][name="count"]' )
+		).toHaveValue( '02' );
+		expect( container.querySelector( 'input[type="number"]' ) ).toBeNull();
+		cleanup();
 	} );
 
 	it( 'sanitizes info fields and group descriptions before rendering', () => {

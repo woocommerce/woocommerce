@@ -58,37 +58,55 @@ describe( 'dataform-adapter', () => {
 		it.each( [
 			{ settingsType: 'checkbox', type: 'boolean', Edit: undefined },
 			{ settingsType: 'radio', type: 'text', Edit: 'radio' },
-			{ settingsType: 'select', type: 'text', Edit: 'select' },
 			{ settingsType: 'number', type: 'number', Edit: undefined },
-			{ settingsType: 'tel', type: 'telephone', Edit: undefined },
-			{ settingsType: 'text', type: 'text', Edit: undefined },
-			{ settingsType: 'email', type: 'email', Edit: undefined },
-			{
-				settingsType: 'textarea',
-				type: 'text',
-				Edit: { control: 'textarea' },
-			},
+			{ settingsType: 'integer', type: 'integer', Edit: undefined },
 			{ settingsType: 'array', type: 'array', Edit: undefined },
-		] )( 'maps $settingsType to $type', ( expected ) => {
-			const field = buildField(
-				makeField( { type: expected.settingsType } )
-			);
+			{ settingsType: 'color', type: 'color', Edit: undefined },
+		] )(
+			'keeps $settingsType on the package $type control',
+			( expected ) => {
+				const field = buildField(
+					makeField( { type: expected.settingsType } )
+				);
 
-			expect( field.type ).toBe( expected.type );
-			expect( field.Edit ).toEqual( expected.Edit );
-		} );
+				expect( field.type ).toBe( expected.type );
+				expect( field.Edit ).toEqual( expected.Edit );
+			}
+		);
 
-		it( 'maps disabled fields and canonical options', () => {
+		it.each( [
+			[ 'select', 'text' ],
+			[ 'tel', 'telephone' ],
+			[ 'text', 'text' ],
+			[ 'email', 'email' ],
+			[ 'url', 'url' ],
+			[ 'password', 'password' ],
+			[ 'time', 'text' ],
+			[ 'date', 'date' ],
+			[ 'datetime-local', 'datetime' ],
+			[ 'textarea', 'text' ],
+		] )(
+			'maps %s to a Woo UI override with type %s',
+			( settingsType, type ) => {
+				const field = buildField( makeField( { type: settingsType } ) );
+
+				expect( field.type ).toBe( type );
+				expect( field.Edit ).toEqual( expect.any( Function ) );
+			}
+		);
+
+		it( 'renders disabled package controls read-only without changing options', () => {
 			const options = [ { value: 'one', label: 'One' } ];
 			const field = buildField(
-				makeField( { disabled: true, options } )
+				makeField( { type: 'number', disabled: true, options } )
 			);
 
-			expect( field.isDisabled ).toBe( true );
+			expect( field.readOnly ).toBe( true );
 			expect( field.elements ).toBe( options );
+			expect( 'isDisabled' in field ).toBe( false );
 		} );
 
-		it( 'maps canonical integer fields and validation rules', () => {
+		it( 'leaves numeric DataForm custom validation untouched', () => {
 			const field = buildField(
 				makeField( {
 					type: 'integer',
@@ -97,7 +115,7 @@ describe( 'dataform-adapter', () => {
 			);
 
 			expect( field.type ).toBe( 'integer' );
-			expect( field.isValid ).toEqual( { min: 0, max: 10 } );
+			expect( field.isValid ).toBeUndefined();
 		} );
 
 		it( 'falls back unknown field types to text with a diagnostic', () => {
@@ -116,6 +134,17 @@ describe( 'dataform-adapter', () => {
 				expect.stringContaining( 'image_width' ),
 				expect.anything()
 			);
+		} );
+
+		it( 'converts package control descriptions to plain text', () => {
+			const field = buildField(
+				makeField( {
+					type: 'number',
+					description: '<strong>Useful</strong> <em>details</em>',
+				} )
+			);
+
+			expect( field.description ).toBe( 'Useful details' );
 		} );
 
 		it( 'maps info fields to a read-only render function', () => {
@@ -192,30 +221,24 @@ describe( 'dataform-adapter', () => {
 		} );
 	} );
 
-	it( 'adapts registered validator arguments', () => {
-		const validate = jest.fn( () => 'This value is invalid.' );
+	it( 'keeps registered validators out of the DataForm custom rule', () => {
 		const CustomField = () => null;
 		registerSettingsExtension( {
 			scope: { page: 'test-page', section: '' },
 			fieldOverrides: {
-				store_name: { component: CustomField, validate },
+				count: {
+					component: CustomField,
+					validate: () => 'This value is invalid.',
+				},
 			},
 		} );
-		const settingsField = makeField( { id: 'store_name' } );
-		const field = buildField( settingsField, { store_name: 'Initial' } );
+		const field = buildField(
+			makeField( { id: 'count', type: 'number' } ),
+			{ count: 1 }
+		);
 
-		expect(
-			field.isValid?.custom?.( { store_name: 'Current' }, {
-				...field,
-				getValue: ( { item } ) => item.store_name,
-			} as never )
-		).toBe( 'This value is invalid.' );
-		expect( validate ).toHaveBeenCalledWith( {
-			value: 'Current',
-			values: { store_name: 'Current' },
-			field: settingsField,
-			context: { page: 'test-page', section: '' },
-		} );
+		expect( field.Edit ).toEqual( expect.any( Function ) );
+		expect( field.isValid ).toBeUndefined();
 	} );
 
 	describe( 'visible groups and validation', () => {

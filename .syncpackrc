@@ -490,18 +490,6 @@
 			"isIgnored": true
 		},
 		{
-			"label": "settings-ui pins the WPDS-generation dataviews ahead of the WordPress bundle, with the components and ui versions it requires; the pins are bundled into the settings-ui asset only",
-			"dependencies": [
-				"@wordpress/dataviews",
-				"@wordpress/components",
-				"@wordpress/ui"
-			],
-			"packages": [
-				"@woocommerce/settings-ui"
-			],
-			"isIgnored": true
-		},
-		{
 			"label": "@wordpress/* dependencies that WooCommerce bundles instead of externalizing to WordPress",
 			"dependencyTypes": [
 				"prod",

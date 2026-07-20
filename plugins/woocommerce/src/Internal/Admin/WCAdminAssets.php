@@ -251,16 +251,8 @@ class WCAdminAssets {
 		wp_enqueue_style( 'wc-onboarding' );
 
 		if ( PageController::is_settings_page() ) {
-			$settings_ui_dependencies = $this->get_settings_ui_script_dependencies();
-			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $settings_ui_dependencies );
+			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $this->get_settings_ui_script_dependencies() );
 			$this->register_style( 'settings-embed', 'style', array( 'wp-components' ) );
-
-			// The settings-ui package bundles its own dataviews stack, so its
-			// control styles ship as a separate sheet loaded after the embed
-			// styles, and only where the Settings UI shell renders.
-			if ( ! empty( $settings_ui_dependencies ) ) {
-				$this->enqueue_settings_ui_style();
-			}
 		}
 
 		// Preload our assets.
@@ -461,26 +453,6 @@ class WCAdminAssets {
 		);
 
 		return array_values( array_unique( $dependencies ) );
-	}
-
-	/**
-	 * Enqueues the settings-ui package stylesheet after the embed styles.
-	 */
-	private function enqueue_settings_ui_style(): void {
-		try {
-			$style_assets_filename = self::get_script_asset_filename( 'settings-ui', 'style' );
-			$style_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_CSS_FOLDER . 'settings-ui/' . $style_assets_filename;
-		} catch ( \Throwable $e ) {
-			return;
-		}
-
-		wp_enqueue_style(
-			'wc-settings-ui',
-			self::get_url( 'settings-ui/style', 'css' ),
-			array( 'wc-admin-style' ),
-			self::get_file_version( 'css', $style_assets['version'] ),
-		);
-		wp_style_add_data( 'wc-settings-ui', 'rtl', 'replace' );
 	}
 
 	/**

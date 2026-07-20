@@ -1,7 +1,4 @@
-/**
- * External dependencies
- */
-import type { DataFormControlProps, FieldValidity } from '@wordpress/dataviews';
+/* global JSX */
 
 export type SettingsValue = string | number | boolean | string[] | null;
 
@@ -132,21 +129,34 @@ export type SettingsFieldContext = {
 	section?: string;
 };
 
-/**
- * The props a registered settings field component receives. This is the
- * DataForm control contract from @wordpress/dataviews, re-exported under
- * a Woo name so extensions do not import dataviews types directly and
- * upgrades are absorbed at this alias.
- *
- * `data` holds the current values, `field` is the normalized DataForm
- * field (use `field.getValue( { item: data } )` for the current value),
- * and `onChange` takes a partial record of field ids to new values, so
- * multi-field writes are a single call. Page-level context is available
- * through the `useSettingsUIContext` hook.
- */
-export type SettingsEditControlProps = DataFormControlProps< SettingsValues >;
+/** The stable validity state passed to registered settings controls. */
+export type SettingsFieldValidity = {
+	state: 'valid' | 'invalid' | 'validating';
+	message?: string;
+};
 
-export type SettingsFieldValidity = FieldValidity;
+/** The stable field metadata passed to registered settings controls. */
+export type SettingsEditControlField = {
+	id: string;
+	label: string;
+	description?: string;
+	placeholder?: string;
+	elements?: SettingsUIOption[];
+	getValue: ( args: { item: SettingsValues } ) => SettingsValue | undefined;
+};
+
+/**
+ * The props a registered settings field component receives. This contract is
+ * owned by WooCommerce so DataForm generation changes stay inside the adapter.
+ */
+export type SettingsEditControlProps = {
+	data: SettingsValues;
+	field: SettingsEditControlField;
+	onChange: ( values: Partial< SettingsValues > ) => void;
+	hideLabelFromVision: boolean;
+	disabled: boolean;
+	validity?: SettingsFieldValidity;
+};
 
 export type SettingsFieldComponent = (
 	props: SettingsEditControlProps

@@ -35,7 +35,7 @@ const getInitialInputs = (
 		? getArrayInputs( name, initialValue )
 		: [ { name, value: initialValue } ];
 
-const toLocalDatetime = ( value: SettingsValue ) => {
+export const toLocalDatetime = ( value: SettingsValue ) => {
 	if ( typeof value !== 'string' || ! value ) {
 		return '';
 	}
@@ -44,6 +44,10 @@ const toLocalDatetime = ( value: SettingsValue ) => {
 	const seconds = dateI18n( 's', date );
 	return dateI18n( seconds === '00' ? 'Y-m-d\\TH:i' : 'Y-m-d\\TH:i:s', date );
 };
+
+// Delete this input conversion with the Woo datetime Edit override.
+export const fromLocalDatetime = ( value: string ) =>
+	value ? getDate( value ).toISOString() : null;
 
 export const getHiddenInputs = (
 	field: SettingsUIField,

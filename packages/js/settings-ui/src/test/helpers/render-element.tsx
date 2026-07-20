@@ -1,3 +1,5 @@
+/* global JSX */
+
 /**
  * External dependencies
  */
@@ -12,6 +14,8 @@ export const renderElement = ( element: JSX.Element ) => {
 	document.body.appendChild( container );
 	const root = createRoot( container );
 
+	// React's createRoot API requires the initial render to be wrapped in act.
+	// eslint-disable-next-line testing-library/no-unnecessary-act
 	act( () => {
 		root.render( element );
 	} );

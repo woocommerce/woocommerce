@@ -1,7 +1,16 @@
 /**
+ * External dependencies
+ */
+import { getSettings, setSettings } from '@wordpress/date';
+
+/**
  * Internal dependencies
  */
-import { getHiddenInputs } from '../hidden-inputs';
+import {
+	fromLocalDatetime,
+	getHiddenInputs,
+	toLocalDatetime,
+} from '../hidden-inputs';
 import type { SettingsUIField } from '../types';
 
 const makeField = (
@@ -98,6 +107,29 @@ describe( 'getHiddenInputs', () => {
 		expect( getHiddenInputs( field, null ) ).toEqual( [
 			{ name: 'starts_at', value: '' },
 		] );
+	} );
+
+	it( 'converts datetime controls through the store timezone', () => {
+		const originalSettings = getSettings();
+		setSettings( {
+			...originalSettings,
+			timezone: {
+				...originalSettings.timezone,
+				string: 'America/New_York',
+			},
+		} );
+
+		try {
+			expect( toLocalDatetime( '2026-07-17T17:30:00.000Z' ) ).toBe(
+				'2026-07-17T13:30'
+			);
+			expect( fromLocalDatetime( '2026-07-17T13:30' ) ).toBe(
+				'2026-07-17T17:30:00.000Z'
+			);
+			expect( fromLocalDatetime( '' ) ).toBeNull();
+		} finally {
+			setSettings( originalSettings );
+		}
 	} );
 
 	it( 'does not serialize fields using the none adapter', () => {
