@@ -417,6 +417,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_selection_too_long_n'       => _x( 'You can only select %qty% items', 'enhanced select', 'woocommerce' ),
 					'i18n_load_more'                  => _x( 'Loading more results&hellip;', 'enhanced select', 'woocommerce' ),
 					'i18n_searching'                  => _x( 'Searching&hellip;', 'enhanced select', 'woocommerce' ),
+					'i18n_loading_tax_rates'          => _x( 'Loading tax rates…', 'order tax rate search status', 'woocommerce' ),
+					/* translators: %s: tax rate search term. */
+					'i18n_tax_rate_search_results'    => _x( 'Showing results for “%s”', 'order tax rate search results summary', 'woocommerce' ),
+					'i18n_clear_tax_rate_search'      => _x( 'Clear search', 'order tax rate search results action', 'woocommerce' ),
 					'i18n_no_tax_rates'               => _x( 'No tax rates have been set up yet.', 'order tax rate empty state', 'woocommerce' ),
 					'i18n_no_tax_rates_help'          => _x( 'Set up tax rates or enable automated tax calculation before adding tax to this order.', 'order tax rate empty state', 'woocommerce' ),
 					'i18n_tax_settings'               => _x( 'Go to tax settings', 'order tax rate empty state action', 'woocommerce' ),

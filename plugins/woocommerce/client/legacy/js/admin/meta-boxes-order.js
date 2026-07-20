@@ -1206,13 +1206,25 @@ jQuery( function ( $ ) {
 			},
 
 			init_tax_rate_modal: function( modal ) {
-				var load_tax_rates = function( page ) {
-					wc_meta_boxes_order_items.backbone.search_tax_rates( modal, page );
+				var load_tax_rates = function( page, is_search ) {
+					wc_meta_boxes_order_items.backbone.search_tax_rates( modal, page, is_search );
 				};
 
 				modal.on( 'submit', 'form', function( event ) {
 					event.preventDefault();
-					load_tax_rates( 1 );
+					load_tax_rates( 1, true );
+				} );
+
+				modal.on( 'input search', '[data-wc-tax-rate-search]', function() {
+					if ( ! ( $( this ).val() || '' ).trim().length ) {
+						load_tax_rates( 1, false );
+					}
+				} );
+
+				modal.on( 'click', '[data-wc-tax-rate-clear-search]', function( event ) {
+					event.preventDefault();
+					modal.find( '[data-wc-tax-rate-search]' ).val( '' );
+					load_tax_rates( 1, false );
 				} );
 
 				modal.on( 'click', '.first-page', function() {
@@ -1250,19 +1262,20 @@ jQuery( function ( $ ) {
 				load_tax_rates( 1 );
 			},
 
-			search_tax_rates: function( modal, page ) {
+			search_tax_rates: function( modal, page, is_search ) {
 				var table      = modal.find( '[data-wc-tax-rate-results]' ),
 					table_body = table.find( 'tbody' ),
 					pagination = modal.find( '[data-wc-tax-rate-pagination]' ),
-					term       = modal.find( '[data-wc-tax-rate-search]' ).val(),
+					term       = ( modal.find( '[data-wc-tax-rate-search]' ).val() || '' ).trim(),
 					per_page   = parseInt( table.data( 'per_page' ), 10 ) || 10,
-					request_id = Date.now() + '-' + Math.random();
+					request_id = Date.now() + '-' + Math.random(),
+					status     = is_search && term.length ? wc_enhanced_select_params.i18n_searching : wc_enhanced_select_params.i18n_loading_tax_rates;
 
 				modal.data( 'wc-tax-rate-request-id', request_id );
 
-				table_body.html( wc_meta_boxes_order_items.backbone.tax_rate_status_row( wc_enhanced_select_params.i18n_searching ) );
+				table_body.html( wc_meta_boxes_order_items.backbone.tax_rate_status_row( status ) );
 				pagination.find( '.button, .current-page' ).prop( 'disabled', true );
-				wc_meta_boxes_order_items.backbone.announce_tax_rate_status( wc_enhanced_select_params.i18n_searching );
+				wc_meta_boxes_order_items.backbone.announce_tax_rate_status( status );
 
 				$.ajax( {
 					url:      woocommerce_admin_meta_boxes.ajax_url,
@@ -1280,7 +1293,7 @@ jQuery( function ( $ ) {
 							return;
 						}
 
-						wc_meta_boxes_order_items.backbone.render_tax_rate_results( modal, response );
+						wc_meta_boxes_order_items.backbone.render_tax_rate_results( modal, response, term );
 					},
 					error: function() {
 						if ( request_id !== modal.data( 'wc-tax-rate-request-id' ) ) {
@@ -1364,7 +1377,32 @@ jQuery( function ( $ ) {
 				);
 			},
 
-			render_tax_rate_results: function( modal, response ) {
+			update_tax_rate_search_summary: function( modal, search_term ) {
+				var summary = modal.find( '[data-wc-tax-rate-search-summary]' );
+
+				summary.empty();
+
+				if ( ! search_term.length ) {
+					summary.prop( 'hidden', true );
+					return;
+				}
+
+				summary
+					.prop( 'hidden', false )
+					.append(
+						$( '<span></span>' ).text(
+							wc_enhanced_select_params.i18n_tax_rate_search_results.replace( '%s', search_term )
+						),
+						' ',
+						$( '<button></button>', {
+							type:  'button',
+							class: 'button-link',
+							'data-wc-tax-rate-clear-search': true
+						} ).text( wc_enhanced_select_params.i18n_clear_tax_rate_search )
+					);
+			},
+
+			render_tax_rate_results: function( modal, response, search_term ) {
 				var table_body   = modal.find( '[data-wc-tax-rate-results] tbody' ),
 					pagination   = modal.find( '[data-wc-tax-rate-pagination]' ),
 					count        = pagination.find( '.displaying-num' ),
@@ -1373,10 +1411,12 @@ jQuery( function ( $ ) {
 					total        = parseInt( meta.total, 10 ) || 0,
 					total_pages  = parseInt( meta.total_pages, 10 ) || 1,
 					current_page = parseInt( meta.page, 10 ) || 1,
-					search_term  = ( modal.find( '[data-wc-tax-rate-search]' ).val() || '' ).trim(),
 					announcement = '';
 
+				search_term = ( search_term || '' ).trim();
+
 				table_body.empty();
+				wc_meta_boxes_order_items.backbone.update_tax_rate_search_summary( modal, search_term );
 
 				if ( ! results.length ) {
 					if ( ! search_term.length && 0 === total ) {
