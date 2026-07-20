@@ -8,6 +8,7 @@ import type { ReactNode } from 'react';
 /**
  * Internal dependencies
  */
+import { buildDataFormField } from '../dataform-adapter';
 import { registerSettingsExtension, __resetRegistry } from '../registry';
 import { SettingsUIPage } from '../settings-ui-page';
 import type { SettingsFieldComponentProps, SettingsUISchema } from '../types';
@@ -122,6 +123,66 @@ describe( 'legacy settings component contract', () => {
 
 		cleanup();
 	} );
+
+	it.each( [
+		[ 'text', 'value', undefined ],
+		[ 'checkbox', true, undefined ],
+		[ 'number', 2, undefined ],
+		[ 'array', [ 'one' ], [ { label: 'One', value: 'one' } ] ],
+		[ 'select', 'one', [ { label: 'One', value: 'one' } ] ],
+	] )(
+		'renders disabled legacy %s controls through the read-only path',
+		( type, value, options ) => {
+			const warn = jest
+				.spyOn( console, 'warn' )
+				.mockImplementation( () => undefined );
+			const LegacyComponent = jest.fn( () => null );
+			const settingsField = {
+				id: 'legacy',
+				label: 'Legacy field',
+				type,
+				value,
+				options,
+				disabled: true,
+			};
+			registerSettingsExtension( {
+				scope: { page: 'test-page', section: '' },
+				fieldOverrides: { legacy: LegacyComponent },
+			} );
+
+			const field = buildDataFormField( settingsField, {
+				schema: {
+					id: 'test-page',
+					groups: {
+						general: { id: 'general', fields: [ settingsField ] },
+					},
+				},
+				context: { page: 'test-page', section: '' },
+				initialValues: { legacy: value },
+			} );
+
+			expect( field.readOnly ).toBe( true );
+			expect( field.Edit ).toBeUndefined();
+			expect( LegacyComponent ).not.toHaveBeenCalled();
+			expect( warn ).toHaveBeenCalledTimes( 2 );
+			expect( warn ).toHaveBeenLastCalledWith(
+				expect.stringContaining( 'legacy' ),
+				expect.any( Object )
+			);
+
+			buildDataFormField( settingsField, {
+				schema: {
+					id: 'test-page',
+					groups: {
+						general: { id: 'general', fields: [ settingsField ] },
+					},
+				},
+				context: { page: 'test-page', section: '' },
+				initialValues: { legacy: value },
+			} );
+			expect( warn ).toHaveBeenCalledTimes( 2 );
+		}
+	);
 
 	it( 'warns once for legacy registrations in the same scope', () => {
 		const warn = jest

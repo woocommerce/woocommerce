@@ -206,6 +206,19 @@ export const buildDataFormField = (
 		isVisible: createIsVisible( settingsField, options ),
 	};
 
+	if ( registeredComponent?.isLegacy && settingsField.disabled ) {
+		const scopeKey = `${ options.context.page }::${
+			options.context.section || 'default'
+		}`;
+		warn(
+			`Legacy component for disabled field "${ settingsField.id }" in scope "${ scopeKey }" was not mounted. The field is read-only until the component migrates to the modern disabled contract.`,
+			{ field: settingsField, context: options.context },
+			`disabled-legacy-component:${ scopeKey }:${ settingsField.id }`
+		);
+		field.readOnly = true;
+		return field;
+	}
+
 	if ( registeredComponent ) {
 		// DataForm sees its own control props at this boundary. The wrapper
 		// converts them to the stable Woo-owned extension contract.
