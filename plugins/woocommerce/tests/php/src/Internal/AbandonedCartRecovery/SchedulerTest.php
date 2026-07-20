@@ -334,6 +334,109 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox handle_new_order() honors the woocommerce_abandoned_cart_recovery_eligible_statuses filter: an order created in a widened status (e.g. failed) is scheduled, matching the send/manual paths.
+	 */
+	public function test_handle_new_order_schedules_for_filter_widened_status(): void {
+		$widen = static function ( $statuses ) {
+			$statuses[] = OrderStatus::FAILED;
+			return $statuses;
+		};
+
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::FAILED );
+		$order->save();
+
+		add_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
+		try {
+			$this->sut->handle_new_order( $order->get_id() );
+		} finally {
+			remove_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
+		}
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty(
+			$fresh->get_meta( Scheduler::SCHEDULED_META_KEY ),
+			'A status added via the eligible-statuses filter must be scheduled like the default abandoned statuses.'
+		);
+		$this->assertNotFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox handle_status_changed() keeps the send queued when the order moves between statuses inside the filter-widened eligible set (e.g. pending → failed with `failed` added).
+	 */
+	public function test_handle_status_changed_keeps_schedule_within_widened_set(): void {
+		$order = $this->schedule_for_pending_order();
+
+		$widen = static function ( $statuses ) {
+			$statuses[] = OrderStatus::FAILED;
+			return $statuses;
+		};
+
+		add_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
+		try {
+			$this->sut->handle_status_changed( $order->get_id(), OrderStatus::PENDING, OrderStatus::FAILED );
+		} finally {
+			remove_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
+		}
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty(
+			$fresh->get_meta( Scheduler::SCHEDULED_META_KEY ),
+			'A transition inside the widened eligible set must not cancel the queued send.'
+		);
+		$this->assertNotFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox handle_status_changed() still cancels when the order exits the filter-widened eligible set (e.g. failed → processing with `failed` added).
+	 */
+	public function test_handle_status_changed_cancels_on_exit_from_widened_set(): void {
+		$order = $this->schedule_for_pending_order();
+
+		$widen = static function ( $statuses ) {
+			$statuses[] = OrderStatus::FAILED;
+			return $statuses;
+		};
+
+		add_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
+		try {
+			$this->sut->handle_status_changed( $order->get_id(), OrderStatus::FAILED, OrderStatus::PROCESSING );
+		} finally {
+			remove_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
+		}
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertSame( '', $fresh->get_meta( Scheduler::SCHEDULED_META_KEY ) );
+		$this->assertFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox handle_scheduled_send() is a no-op when the merchant disabled automation after the send was queued — the in-flight action must honor the current setting.
+	 */
+	public function test_handle_scheduled_send_skips_when_automation_disabled(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
+		$order->save();
+
+		$this->email->update_option( 'automated', 'no' );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		$this->sut->handle_scheduled_send( $order->get_id() );
+
+		$this->assertSame( $before, count( $mailer->mock_sent ), 'A queued send must not dispatch once automation is toggled off.' );
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertSame(
+			'',
+			$fresh->get_meta( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT ),
+			'A skipped send must not record the sent_at meta.'
+		);
+	}
+
+	/**
 	 * @testdox handle_status_changed() cancels the pending send when the order transitions out of the abandoned set (e.g. pending → processing).
 	 */
 	public function test_handle_status_changed_cancels_on_exit_from_abandoned_set(): void {
