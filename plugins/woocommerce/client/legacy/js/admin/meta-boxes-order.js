@@ -1275,7 +1275,9 @@ jQuery( function ( $ ) {
 					term       = ( modal.find( '[data-wc-tax-rate-search]' ).val() || '' ).trim(),
 					per_page   = parseInt( table.data( 'per_page' ), 10 ) || 10,
 					request_id = Date.now() + '-' + Math.random(),
-					status     = is_search && term.length ? wc_enhanced_select_params.i18n_searching : wc_enhanced_select_params.i18n_loading_tax_rates;
+					status     = is_search && term.length
+						? wc_enhanced_select_params.i18n_searching
+						: wc_enhanced_select_params.i18n_loading_tax_rates;
 
 				modal.data( 'wc-tax-rate-request-id', request_id );
 
