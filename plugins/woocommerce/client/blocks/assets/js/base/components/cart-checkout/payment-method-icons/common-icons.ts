@@ -45,7 +45,7 @@ export const commonIcons: PaymentMethodIcon[] = [
 	},
 	{
 		id: 'ideal',
-		alt: 'iDeal',
+		alt: 'iDEAL | Wero',
 		src: WC_BLOCKS_IMAGE_URL + 'payment-methods/ideal.svg',
 	},
 	{
