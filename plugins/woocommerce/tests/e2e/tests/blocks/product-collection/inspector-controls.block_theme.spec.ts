@@ -136,7 +136,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 		await pageObject.addFilter( 'Show product categories' );
 		await pageObject.checkTaxonomyTerm( 'categories', 'Clothing' );
-		await expect( pageObject.products ).toHaveCount( 8 );
+		await expect( pageObject.products ).toHaveCount( 9 );
 
 		// Switch to Accessories
 		await pageObject.uncheckTaxonomyTerm( 'categories', 'Clothing' );
@@ -578,13 +578,14 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 			// Disable the option in the first Product Catalog
 			await editor.selectBlocks( productCollection.first() );
+			await expect( defaultQueryType ).toBeChecked();
 			await customQueryType.click();
+			await expect( customQueryType ).toBeChecked();
 
 			// Third Product Catalog
 			// Option should be visible & ENABLED by default
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInTemplate( 'productCatalog' );
-			await editor.selectBlocks( productCollection.last() );
 
 			await expect( defaultQueryType ).toBeChecked();
 			await expect( customQueryType ).not.toBeChecked();

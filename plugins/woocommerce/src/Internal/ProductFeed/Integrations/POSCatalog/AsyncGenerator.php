@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 
 use ActionScheduler_AsyncRequest_QueueRunner;
 use ActionScheduler_Store;
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedLockException;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductWalker;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ResumableFeedInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\WalkerProgress;
@@ -213,10 +214,6 @@ class AsyncGenerator {
 			return;
 		}
 
-		$status['state']      = self::STATE_IN_PROGRESS;
-		$status['updated_at'] = time();
-		update_option( $option_key, $status );
-
 		$feed = null;
 		try {
 			$this->raise_resource_limits();
@@ -228,10 +225,17 @@ class AsyncGenerator {
 				$status['page']            = 1;
 				$status['processed']       = 0;
 				$status['entries_written'] = 0;
-				update_option( $option_key, $status );
 			} else {
 				$feed->open( (string) $status['file_name'], (int) ( $status['entries_written'] ?? 0 ) );
 			}
+
+			// Only now that the feed lock is held (acquired by open()) do we claim the job as in-progress
+			// and refresh the heartbeat. Doing it earlier would rewrite the status — and bump updated_at —
+			// even for a run that immediately steps aside on FeedLockException, contradicting that path's
+			// "leave the status untouched" intent and refreshing the heartbeat of a job it never wrote.
+			$status['state']      = self::STATE_IN_PROGRESS;
+			$status['updated_at'] = time();
+			update_option( $option_key, $status );
 
 			$walker = ProductWalker::from_integration( $this->integration, $feed );
 			$walker->set_batch_size( $this->get_batch_size() );
@@ -283,6 +287,17 @@ class AsyncGenerator {
 				update_option( $option_key, $status );
 				$this->schedule_generation_action( $option_key );
 			}
+		} catch ( FeedLockException $e ) {
+			// Another process already holds the feed file lock and is actively writing it, so this run
+			// is a redundant duplicate (e.g. Action Scheduler re-ran a slow chunk while the original was
+			// still in flight). Step aside and leave the status untouched: the lock holder is making
+			// progress, so marking the job failed here would report a failure for a healthy generation
+			// and let the next poll discard the partial file the holder is still writing. Release only
+			// this run's own handle (which never acquired the lock, so closing it cannot free the holder's).
+			if ( $feed instanceof ResumableFeedInterface ) {
+				$feed->flush();
+			}
+			return;
 		} catch ( \Throwable $e ) {
 			wc_get_logger()->error(
 				'Feed generation failed',

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow customers to save account details when an unchanged display name is already an email address.

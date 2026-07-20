@@ -8,8 +8,9 @@
  * @package WooCommerce\Classes\Products
  */
 
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 defined( 'ABSPATH' ) || exit;
@@ -326,9 +327,9 @@ class WC_Product_Variable extends WC_Product {
 	 * @phpstan-return ($return is 'array' ? array[] : WC_Product_Variation[])
 	 */
 	public function get_available_variations( $return = 'array' ) {
+		$variations              = array();
 		$variation_ids           = $this->get_children();
 		$hide_out_of_stock_items = ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
-		$available_variations    = array();
 
 		if ( ! empty( $variation_ids ) ) {
 			// Prime caches to reduce future queries.
@@ -336,7 +337,6 @@ class WC_Product_Variable extends WC_Product {
 		}
 
 		foreach ( $variation_ids as $variation_id ) {
-
 			$variation = wc_get_product( $variation_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
@@ -357,18 +357,19 @@ class WC_Product_Variable extends WC_Product {
 				continue;
 			}
 
-			if ( 'array' === $return ) {
-				$available_variations[] = $this->get_available_variation( $variation );
-			} else {
-				$available_variations[] = $variation;
-			}
+			$variations[] = $variation;
 		}
 
-		if ( 'array' === $return ) {
-			$available_variations = array_values( array_filter( $available_variations ) );
+		if ( 'array' === $return && ! empty( $variations ) ) {
+			wc_get_container()->get( ProductUtil::class )->prime_image_caches( $variations );
+			$variations_data = array_values( array_filter( array_map( fn ( $variation ) => $this->get_available_variation( $variation ), $variations ) ) );
+
+			/** @var array[] $variations_data */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+			return $variations_data;
 		}
 
-		return $available_variations;
+		/** @var WC_Product_Variation[] $variations */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		return $variations;
 	}
 
 	/**

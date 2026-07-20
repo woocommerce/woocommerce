@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Move restricted-coupon validation-rule coverage from e2e to PHPUnit; reduce restricted-coupon cart/checkout e2e to wiring + order-placement tests; fix the excluded-coupon test that never applied its coupon.

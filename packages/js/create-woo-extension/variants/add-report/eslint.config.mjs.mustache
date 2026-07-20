@@ -1,0 +1,10 @@
+import woocommerce from '@woocommerce/eslint-plugin';
+
+export default [
+	...woocommerce.configs.recommended,
+	{
+		rules: {
+			'react/react-in-jsx-scope': 'off',
+		},
+	},
+];
