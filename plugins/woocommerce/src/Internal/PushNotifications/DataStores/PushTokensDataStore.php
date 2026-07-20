@@ -324,9 +324,14 @@ class PushTokensDataStore {
 	 * user on the site, which does not scale on sites with very large user
 	 * tables.
 	 *
+	 * Tokens whose owner no longer exists are deleted when encountered.
+	 * Tokens whose owner exists but no longer holds an eligible role are
+	 * excluded from the results (role-loss revocation is handled by
+	 * {@see PushNotifications::maybe_revoke_tokens_on_role_change()}).
+	 *
 	 * Note: when pagination is used, the returned totals count all stored
-	 * tokens, including any whose owner no longer holds an eligible role.
-	 * Such tokens are excluded from the returned token objects.
+	 * tokens at query time, including any excluded or deleted by the owner
+	 * checks above.
 	 *
 	 * @param string[] $roles    The roles to query tokens for.
 	 * @param int|null $page     Optional page number (1-based).
@@ -387,14 +392,21 @@ class PushTokensDataStore {
 		update_meta_cache( 'post', $post_ids );
 
 		$tokens          = array();
+		$owner_exists    = array();
 		$eligible_owners = array();
 
 		foreach ( $post_ids as $post_id ) {
 			$owner_id = (int) get_post_field( 'post_author', $post_id );
 
-			if ( ! isset( $eligible_owners[ $owner_id ] ) ) {
+			if ( ! isset( $owner_exists[ $owner_id ] ) ) {
 				$owner                        = get_userdata( $owner_id );
+				$owner_exists[ $owner_id ]    = false !== $owner;
 				$eligible_owners[ $owner_id ] = (bool) ( $owner && array_intersect( $roles, (array) $owner->roles ) );
+			}
+
+			if ( ! $owner_exists[ $owner_id ] ) {
+				wp_delete_post( (int) $post_id, true );
+				continue;
 			}
 
 			if ( ! $eligible_owners[ $owner_id ] ) {
@@ -424,6 +436,39 @@ class PushTokensDataStore {
 
 		$this->tokens_by_roles_cache[ $cache_key ] = $result;
 		return $result;
+	}
+
+	/**
+	 * Deletes all push tokens owned by the given user.
+	 *
+	 * Used when a user is deleted or loses eligibility for push
+	 * notifications. Also invalidates the per-request role query cache.
+	 *
+	 * @param int $user_id The ID of the user whose tokens should be removed.
+	 * @return void
+	 *
+	 * @since 11.1.0
+	 */
+	public function delete_tokens_for_user( int $user_id ): void {
+		if ( $user_id <= 0 ) {
+			return;
+		}
+
+		$query = new WP_Query(
+			array(
+				'post_type'      => PushToken::POST_TYPE,
+				'post_status'    => 'private',
+				'author'         => $user_id,
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			)
+		);
+
+		foreach ( $query->posts as $post_id ) {
+			wp_delete_post( (int) $post_id, true );
+		}
+
+		$this->tokens_by_roles_cache = array();
 	}
 
 	/**

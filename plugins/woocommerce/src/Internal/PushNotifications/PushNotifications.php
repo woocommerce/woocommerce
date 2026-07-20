@@ -10,6 +10,7 @@ use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\NotificationPreferencesRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
@@ -89,6 +90,46 @@ class PushNotifications {
 
 		wc_get_container()->get( NotificationProcessor::class )->register();
 		wc_get_container()->get( NotificationRetryHandler::class )->register();
+
+		add_action( 'deleted_user', array( $this, 'revoke_tokens_on_user_deletion' ) );
+		add_action( 'set_user_role', array( $this, 'maybe_revoke_tokens_on_role_change' ) );
+		add_action( 'remove_user_role', array( $this, 'maybe_revoke_tokens_on_role_change' ) );
+	}
+
+	/**
+	 * Deletes all push tokens owned by a user that is being deleted.
+	 *
+	 * @internal
+	 * @param int $user_id The ID of the deleted user.
+	 * @return void
+	 *
+	 * @since 11.1.0
+	 */
+	public function revoke_tokens_on_user_deletion( $user_id ): void {
+		wc_get_container()->get( PushTokensDataStore::class )->delete_tokens_for_user( (int) $user_id );
+	}
+
+	/**
+	 * Deletes a user's push tokens when a role change leaves them without
+	 * any role that is eligible for push notifications.
+	 *
+	 * Runs on both set_user_role and remove_user_role, which fire after the
+	 * user's role list has been updated.
+	 *
+	 * @internal
+	 * @param int $user_id The ID of the user whose roles changed.
+	 * @return void
+	 *
+	 * @since 11.1.0
+	 */
+	public function maybe_revoke_tokens_on_role_change( $user_id ): void {
+		$user = get_userdata( (int) $user_id );
+
+		if ( $user && array_intersect( self::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED, (array) $user->roles ) ) {
+			return;
+		}
+
+		wc_get_container()->get( PushTokensDataStore::class )->delete_tokens_for_user( (int) $user_id );
 	}
 
 	/**

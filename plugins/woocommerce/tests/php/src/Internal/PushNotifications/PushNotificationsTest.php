@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -220,6 +221,78 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$this->assertFalse(
 			post_type_exists( PushToken::POST_TYPE ),
 			'Push token post type should not be registered when disabled'
+		);
+	}
+
+	/**
+	 * @testdox Deleting a user removes their push tokens when the feature is enabled.
+	 */
+	public function test_deleting_a_user_removes_their_push_tokens() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
+		$this->jetpack_connection_manager_mock
+			->expects( $this->once() )
+			->method( 'is_connected' )
+			->willReturn( true );
+
+		$push_notifications = new PushNotifications();
+		$push_notifications->on_init();
+
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$token    = $this->create_push_token_for_user( $admin_id );
+
+		wp_delete_user( $admin_id );
+
+		$this->assertNull( get_post( $token->get_id() ) );
+	}
+
+	/**
+	 * @testdox Role change handler revokes tokens when no eligible role remains.
+	 */
+	public function test_role_change_handler_revokes_tokens_when_no_eligible_role_remains() {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$token    = $this->create_push_token_for_user( $admin_id );
+
+		$user = get_userdata( $admin_id );
+		$user->set_role( 'customer' );
+
+		( new PushNotifications() )->maybe_revoke_tokens_on_role_change( $admin_id );
+
+		$this->assertNull( get_post( $token->get_id() ) );
+	}
+
+	/**
+	 * @testdox Role change handler keeps tokens while an eligible role remains.
+	 */
+	public function test_role_change_handler_keeps_tokens_when_eligible_role_remains() {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$token    = $this->create_push_token_for_user( $admin_id );
+
+		$user = get_userdata( $admin_id );
+		$user->set_role( 'shop_manager' );
+
+		( new PushNotifications() )->maybe_revoke_tokens_on_role_change( $admin_id );
+
+		$this->assertNotNull( get_post( $token->get_id() ) );
+	}
+
+	/**
+	 * Creates a push token owned by the given user.
+	 *
+	 * @param int $user_id The owner user ID.
+	 * @return \Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken The created push token.
+	 */
+	private function create_push_token_for_user( int $user_id ) {
+		return ( new PushTokensDataStore() )->create(
+			array(
+				'user_id'       => $user_id,
+				'token'         => 'test_token_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'test-device-uuid-' . wp_rand(),
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
 		);
 	}
 

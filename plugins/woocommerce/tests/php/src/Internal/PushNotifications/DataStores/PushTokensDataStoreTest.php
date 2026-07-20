@@ -854,19 +854,44 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should exclude tokens whose owner no longer exists.
+	 * @testdox Should delete orphaned tokens whose owner no longer exists.
 	 */
-	public function test_get_tokens_for_roles_excludes_tokens_of_deleted_users(): void {
+	public function test_get_tokens_for_roles_deletes_orphaned_tokens(): void {
 		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		$data_store = new PushTokensDataStore();
 
-		$this->create_push_token_for_user( $data_store, $admin_id );
+		$token = $this->create_push_token_for_user( $data_store, $admin_id );
 
 		wp_delete_user( $admin_id );
 
 		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
 
 		$this->assertSame( array(), $tokens );
+		$this->assertNull( get_post( $token->get_id() ) );
+	}
+
+	/**
+	 * @testdox Should delete all tokens of the given user and no others.
+	 */
+	public function test_delete_tokens_for_user_removes_only_that_users_tokens(): void {
+		$admin_one  = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$admin_two  = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$token_one   = $this->create_push_token_for_user( $data_store, $admin_one );
+		$token_two   = $this->create_push_token_for_user( $data_store, $admin_one );
+		$token_other = $this->create_push_token_for_user( $data_store, $admin_two );
+
+		$data_store->delete_tokens_for_user( $admin_one );
+
+		$this->assertNull( get_post( $token_one->get_id() ) );
+		$this->assertNull( get_post( $token_two->get_id() ) );
+		$this->assertNotNull( get_post( $token_other->get_id() ) );
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertCount( 1, $tokens );
+		$this->assertSame( $admin_two, $tokens[0]->get_user_id() );
 	}
 
 	/**
