@@ -311,6 +311,10 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @param string $expected The expected UTF-8 value.
 	 */
 	public function test_adjust_character_encoding_converts_to_utf8( string $encoding, string $value, string $expected ) {
+		if ( ! function_exists( 'mb_convert_encoding' ) ) {
+			$this->markTestSkipped( 'The mbstring extension is required for this test.' );
+		}
+
 		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv', array( 'character_encoding' => $encoding ) );
 
 		$method = new ReflectionMethod( WC_Product_CSV_Importer::class, 'adjust_character_encoding' );
