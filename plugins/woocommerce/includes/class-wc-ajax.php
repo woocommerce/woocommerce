@@ -2458,7 +2458,8 @@ class WC_AJAX {
 				$line_items[ $item_id ]['refund_total'] = wc_format_decimal( $total );
 			}
 			foreach ( $line_item_tax_totals as $item_id => $tax_totals ) {
-				$line_items[ $item_id ]['refund_tax'] = array_filter( array_map( 'wc_format_decimal', $tax_totals ) );
+				// Use is_numeric so a 0% tax amount ('0') is preserved. A callback-less array_filter would drop it as falsy, losing the 0-rate tax line (0% is a valid rate, not "no tax"). See #27118.
+				$line_items[ $item_id ]['refund_tax'] = array_filter( array_map( 'wc_format_decimal', $tax_totals ), 'is_numeric' );
 			}
 
 			// Create the refund object.

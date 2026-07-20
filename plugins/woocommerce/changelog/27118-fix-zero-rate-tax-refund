@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve 0% tax lines when refunding order line items, so zero-rated tax entries are recorded on the refund order instead of being dropped.

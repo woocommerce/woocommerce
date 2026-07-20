@@ -43,5 +43,5 @@ export const useEndpointDismiss = (
 		} );
 	};
 
-	return { isDismissed, onDismiss };
+	return { isDismissed, hasResolved: true, onDismiss };
 };

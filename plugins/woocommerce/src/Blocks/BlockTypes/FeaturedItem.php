@@ -204,6 +204,22 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	abstract protected function get_item_image( $item, $size = 'full' );
 
 	/**
+	 * Returns the featured item image attachment ID.
+	 *
+	 * Note: Ideally, this method would be declared as abstract.
+	 * However, it remains a concrete method returning 0 to preserve legacy
+	 * compatibility with existing child classes that may not implement it.
+	 * See:
+	 * https://github.com/woocommerce/woocommerce/pull/66466#discussion_r3559124282
+	 *
+	 * @param \WP_Term|\WC_Product $item Item object.
+	 * @return int
+	 */
+	protected function get_item_image_id( $item ) {
+		return 0;
+	}
+
+	/**
 	 * Renders the featured item attributes.
 	 *
 	 * @param \WP_Term|\WC_Product $item       Item object.
@@ -231,8 +247,6 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 
 		$attributes['height'] = $attributes['height'] ?? wc_get_theme_support( 'featured_block::default_height', 500 );
 
-		$image_url = esc_url( $this->get_image_url( $attributes, $item ) );
-
 		$styles  = $this->get_styles( $attributes );
 		$classes = $this->get_classes( $attributes );
 
@@ -241,9 +255,9 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 		$output .= $this->render_overlay( $attributes );
 
 		if ( ! $attributes['isRepeated'] && ! $attributes['hasParallax'] ) {
-			$output .= $this->render_image( $attributes, $item, $image_url );
+			$output .= $this->render_image( $attributes, $item );
 		} else {
-			$output .= $this->render_bg_image( $attributes, $image_url );
+			$output .= $this->render_bg_image( $attributes, $item );
 		}
 
 		if ( isset( $aria_label ) && ! empty( $aria_label ) ) {
@@ -269,6 +283,21 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	}
 
 	/**
+	 * Returns the image size slug for the featured item image.
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 * @return string
+	 */
+	private function get_image_size( $attributes ) {
+		$image_size = 'large';
+		if ( 'none' !== $attributes['align'] || $attributes['height'] > 800 ) {
+			$image_size = 'full';
+		}
+
+		return $image_size;
+	}
+
+	/**
 	 * Returns the url the item's image
 	 *
 	 * @param array                $attributes Block attributes. Default empty array.
@@ -277,10 +306,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	 * @return string
 	 */
 	private function get_image_url( $attributes, $item ) {
-		$image_size = 'large';
-		if ( 'none' !== $attributes['align'] || $attributes['height'] > 800 ) {
-			$image_size = 'full';
-		}
+		$image_size = $this->get_image_size( $attributes );
 
 		if ( $attributes['mediaId'] ) {
 			return wp_get_attachment_image_url( $attributes['mediaId'], $image_size );
@@ -292,13 +318,14 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	/**
 	 * Renders the featured image as a div background.
 	 *
-	 * @param array  $attributes Block attributes. Default empty array.
-	 * @param string $image_url  Item image url.
+	 * @param array                $attributes Block attributes. Default empty array.
+	 * @param \WC_Product|\WP_Term $item       Item object.
 	 *
 	 * @return string
 	 */
-	private function render_bg_image( $attributes, $image_url ) {
-		$styles = $this->get_bg_styles( $attributes, $image_url );
+	private function render_bg_image( $attributes, $item ) {
+		$image_url = $this->get_image_url( $attributes, $item );
+		$styles    = $this->get_bg_styles( $attributes, $image_url );
 
 		$classes = [ "wc-block-{$this->block_name}__background-image" ];
 
@@ -350,12 +377,11 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	 *
 	 * @param array                $attributes Block attributes. Default empty array.
 	 * @param \WC_Product|\WP_Term $item       Item object.
-	 * @param string               $image_url  Item image url.
 	 *
 	 * @return string
 	 */
-	private function render_image( $attributes, $item, string $image_url ) {
-		$style   = sprintf( 'object-fit: %s;', esc_attr( $attributes['imageFit'] ) );
+	private function render_image( $attributes, $item ) {
+		$style   = sprintf( 'object-fit: %s;', $attributes['imageFit'] );
 		$img_alt = $attributes['alt'] ?: $this->get_item_title( $item );
 
 		if ( $this->hasFocalPoint( $attributes ) ) {
@@ -365,6 +391,34 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 				$attributes['focalPoint']['y'] * 100
 			);
 		}
+
+		$image_size = $this->get_image_size( $attributes );
+
+		// When imageFit is not "cover", the image uses object-fit: none, so it is
+		// not scaled to the block — it renders at its natural pixel size. Before
+		// this block used responsive images, a single large URL was always loaded,
+		// which was typically bigger than the block and got clipped by overflow:
+		// hidden, making the block look filled. wp_get_attachment_image() picks a
+		// smaller srcset candidate on narrow viewports by default, leaving empty
+		// space around the image. Override sizes so the browser still selects the
+		// full image width and the previous appearance is preserved.
+		if ( 'cover' === $attributes['imageFit'] ) {
+			$image_id = empty( $attributes['mediaId'] ) ?
+				$this->get_item_image_id( $item ) :
+				absint( $attributes['mediaId'] );
+
+			if ( $image_id ) {
+				$attr = array(
+					'alt'   => $img_alt,
+					'class' => "wc-block-{$this->block_name}__background-image",
+					'style' => $style,
+				);
+
+				return wp_get_attachment_image( $image_id, $image_size, false, $attr );
+			}
+		}
+
+		$image_url = $this->get_item_image( $item, $image_size );
 
 		if ( ! empty( $image_url ) ) {
 			return sprintf(
