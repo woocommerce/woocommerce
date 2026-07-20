@@ -28,6 +28,57 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	},
 } );
 
+type TemplateSlug =
+	| 'taxonomy-product_cat'
+	| 'taxonomy-product_tag'
+	| 'archive-product'
+	| 'product-search-results';
+
+function assertTemplateResponse(
+	templateResponse: unknown,
+	slug: TemplateSlug,
+	templateContent: string
+): asserts templateResponse is {
+	wp_id: number;
+	id: string;
+	slug: TemplateSlug;
+	type: 'wp_template';
+	status: 'publish';
+	content: { raw: string };
+} {
+	if (
+		typeof templateResponse !== 'object' ||
+		templateResponse === null ||
+		Array.isArray( templateResponse ) ||
+		! ( 'wp_id' in templateResponse ) ||
+		typeof templateResponse.wp_id !== 'number' ||
+		! Number.isInteger( templateResponse.wp_id ) ||
+		templateResponse.wp_id <= 0 ||
+		! ( 'id' in templateResponse ) ||
+		templateResponse.id !== `${ BLOCK_THEME_SLUG }//${ slug }` ||
+		! ( 'slug' in templateResponse ) ||
+		templateResponse.slug !== slug ||
+		! ( 'type' in templateResponse ) ||
+		templateResponse.type !== 'wp_template' ||
+		! ( 'status' in templateResponse ) ||
+		templateResponse.status !== 'publish' ||
+		! ( 'content' in templateResponse ) ||
+		typeof templateResponse.content !== 'object' ||
+		templateResponse.content === null ||
+		Array.isArray( templateResponse.content ) ||
+		! ( 'raw' in templateResponse.content ) ||
+		templateResponse.content.raw !== templateContent
+	) {
+		throw new Error(
+			`Unexpected POST /wp/v2/templates response for ${ slug }: ${ JSON.stringify(
+				templateResponse,
+				null,
+				2
+			) }`
+		);
+	}
+}
+
 test.describe( 'Product Collection', () => {
 	test( 'Renders product collection block correctly with 9 items', async ( {
 		pageObject,
@@ -771,7 +822,7 @@ test.describe( 'Product Collection', () => {
 			legacyBlockName: 'woocommerce/legacy-template',
 			expectedProductsCount: 3,
 		},
-	];
+	] as const;
 
 	templates.forEach(
 		( {
@@ -796,30 +847,60 @@ test.describe( 'Product Collection', () => {
 					const productCollectionProductNames =
 						await pageObject.getProductNames();
 
-					const template = await requestUtils.createTemplate(
-						'wp_template',
-						{
+					const createRestTemplate = async () => {
+						const templateContent = `placeholder\n\n<!-- wp:woocommerce/legacy-template {"template":"${ slug }"} /-->`;
+						const templateResponse: unknown =
+							await requestUtils.createTemplate( 'wp_template', {
+								slug,
+								title: 'classic template test',
+								content: templateContent,
+							} );
+
+						assertTemplateResponse(
+							templateResponse,
 							slug,
-							title: 'classic template test',
-							content: 'placeholder',
-						}
-					);
+							templateContent
+						);
+					};
+					const createEditorTemplate = async () => {
+						const template = await requestUtils.createTemplate(
+							'wp_template',
+							{
+								slug,
+								title: 'classic template test',
+								content: 'placeholder',
+							}
+						);
 
-					await admin.visitSiteEditor( {
-						postId: template.id,
-						postType: 'wp_template',
-						canvas: 'edit',
-					} );
+						await admin.visitSiteEditor( {
+							postId: template.id,
+							postType: 'wp_template',
+							canvas: 'edit',
+						} );
 
-					await expect(
-						editor.getCustomHtmlBlockContentLocator( 'placeholder' )
-					).toBeVisible();
+						await expect(
+							editor.getCustomHtmlBlockContentLocator(
+								'placeholder'
+							)
+						).toBeVisible();
 
-					await editor.insertBlock( { name: legacyBlockName } );
+						await editor.insertBlock( { name: legacyBlockName } );
 
-					await editor.saveSiteEditorEntities( {
-						isOnlyCurrentEntityDirty: true,
-					} );
+						await editor.saveSiteEditorEntities( {
+							isOnlyCurrentEntityDirty: true,
+						} );
+					};
+					const createTemplateBySlug: Record<
+						TemplateSlug,
+						() => Promise< void >
+					> = {
+						'taxonomy-product_cat': createRestTemplate,
+						'taxonomy-product_tag': createEditorTemplate,
+						'archive-product': createRestTemplate,
+						'product-search-results': createRestTemplate,
+					};
+
+					await createTemplateBySlug[ slug ]();
 
 					await page.goto( frontendPage );
 
