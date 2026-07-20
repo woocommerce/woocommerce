@@ -1208,8 +1208,9 @@ jQuery( function ( $ ) {
 			init_tax_rate_modal: function( modal ) {
 				var pagination = modal.find( '[data-wc-tax-rate-pagination]' ),
 					load_tax_rates = function( page, is_search ) {
-					wc_meta_boxes_order_items.backbone.search_tax_rates( modal, page, is_search );
-				};
+						wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
+						wc_meta_boxes_order_items.backbone.search_tax_rates( modal, page, is_search );
+					};
 
 				modal.on( 'submit', 'form', function( event ) {
 					event.preventDefault();
@@ -1258,6 +1259,10 @@ jQuery( function ( $ ) {
 						page        = parseInt( $( this ).val(), 10 ) || 1;
 
 					load_tax_rates( Math.min( Math.max( 1, page ), total_pages ) );
+				} );
+
+				modal.on( 'change', 'input[name="add_order_tax"]', function() {
+					wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
 				} );
 
 				load_tax_rates( 1 );
@@ -1319,6 +1324,19 @@ jQuery( function ( $ ) {
 				pagination.find( '.total-pages' ).text( 1 );
 				pagination.find( '.current-page' ).val( 1 ).prop( 'disabled', false );
 				pagination.find( '.first-page, .prev-page, .next-page, .last-page' ).prop( 'disabled', true );
+			},
+
+			update_tax_rate_add_button: function( modal ) {
+				modal.find( '#btn-ok' ).prop(
+					'disabled',
+					! modal.find( 'input[name="add_order_tax"]:checked' ).length
+				);
+			},
+
+			update_tax_rate_empty_state_controls: function( modal, is_empty_state ) {
+				modal.find( '[data-wc-tax-rate-search-box]' ).prop( 'hidden', is_empty_state );
+				modal.find( '[data-wc-tax-rate-pagination-container]' ).prop( 'hidden', is_empty_state );
+				wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
 			},
 
 			announce_tax_rate_status: function( message ) {
@@ -1412,15 +1430,18 @@ jQuery( function ( $ ) {
 					total        = parseInt( meta.total, 10 ) || 0,
 					total_pages  = parseInt( meta.total_pages, 10 ) || 1,
 					current_page = parseInt( meta.page, 10 ) || 1,
+					is_empty_state = false,
 					announcement = '';
 
 				search_term = ( search_term || '' ).trim();
+				is_empty_state = ! search_term.length && 0 === total && ! results.length;
 
 				table_body.empty();
 				wc_meta_boxes_order_items.backbone.update_tax_rate_search_summary( modal, search_term );
+				wc_meta_boxes_order_items.backbone.update_tax_rate_empty_state_controls( modal, is_empty_state );
 
 				if ( ! results.length ) {
-					if ( ! search_term.length && 0 === total ) {
+					if ( is_empty_state ) {
 						table_body.append( wc_meta_boxes_order_items.backbone.tax_rate_empty_state_row() );
 						announcement = wc_enhanced_select_params.i18n_no_tax_rates + ' ' +
 							wc_enhanced_select_params.i18n_no_tax_rates_help;

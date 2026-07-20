@@ -471,7 +471,7 @@ if ( wc_tax_enabled() ) {
 				</header>
 				<article>
 					<form action="" method="post">
-						<p class="search-box">
+						<p class="search-box" data-wc-tax-rate-search-box>
 							<label class="screen-reader-text" for="add_order_tax_search"><?php esc_html_e( 'Search tax rates:', 'woocommerce' ); ?></label>
 							<span class="screen-reader-text" id="add_order_tax_search_description">
 								<?php echo esc_html_x( 'Search by name, code, class, rate, or ID.', 'tax rate search input help', 'woocommerce' ); ?>
@@ -507,7 +507,7 @@ if ( wc_tax_enabled() ) {
 								</tr>
 							</tbody>
 						</table>
-						<div class="tablenav bottom">
+						<div class="tablenav bottom" data-wc-tax-rate-pagination-container>
 							<div class="tablenav-pages" data-wc-tax-rate-pagination data-page="1" data-total-pages="1">
 								<span class="displaying-num"></span>
 								<span class="pagination-links">
@@ -550,7 +550,7 @@ if ( wc_tax_enabled() ) {
 				</article>
 				<footer>
 					<div class="wc-backbone-modal-buttons">
-						<button id="btn-ok" class="button button-primary button-large"><?php esc_html_e( 'Add', 'woocommerce' ); ?></button>
+						<button id="btn-ok" class="button button-primary button-large" disabled><?php esc_html_e( 'Add', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
 			</section>

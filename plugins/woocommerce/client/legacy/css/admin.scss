@@ -8241,6 +8241,11 @@ table.bar_chart {
 			width: 100%;
 		}
 
+		[data-wc-tax-rate-search-box][hidden],
+		[data-wc-tax-rate-pagination-container][hidden] {
+			display: none;
+		}
+
 		.wc-tax-rate-search-summary:not([hidden]) {
 			display: block;
 			flex-basis: 100%;
