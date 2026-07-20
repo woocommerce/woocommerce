@@ -8,6 +8,7 @@ import { test as base, expect, guestFile } from '@woocommerce/e2e-utils';
  */
 import AddToCartWithOptionsPage from '../add-to-cart-with-options/add-to-cart-with-options.page';
 import {
+	CART_LINE_IDENTITY_FLAG,
 	CART_LINE_IDENTITY_PLUGIN,
 	PRODUCT_X,
 	productButton,
@@ -211,6 +212,130 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 		// Post-click, WITHOUT a reload: the button should reactively update to
 		// "1 in cart", and the still-present meta line must NOT inflate the count.
 		await expect( btn ).toHaveText( '1 in cart' );
+	} );
+
+	// -------------------------------------------------------------------------
+	// Optimistic-prediction contract for a UI add that resolves as a
+	// non-standalone line. The client cannot know whether a server-side hook
+	// (e.g. `woocommerce_add_cart_item_data`) will meta-differentiate an add
+	// until the Store API response returns, so the keyless matcher counts the
+	// pending optimistic line as standalone — the correct prediction for every
+	// plain add, and the price of instant feedback. When the server marks the
+	// resulting line non-standalone, reconciliation settles the count back.
+	// This test pins down both halves of that contract: the transient
+	// optimistic bump (designed behavior, not a bug) and the settled state.
+	// -------------------------------------------------------------------------
+	test( 'a UI-added non-standalone line optimistically bumps the standalone count, then reconciles back to "Add to cart"', async ( {
+		page,
+		frontendUtils,
+	} ) => {
+		await frontendUtils.goToShop();
+
+		const btn = productButton( page, PRODUCT_X.id );
+		await expect( btn ).toHaveText( 'Add to cart' );
+
+		// Add a separate test control that uses the same private cart-store action
+		// an extension UI would use. The standalone ProductButton remains visible
+		// solely as the count observer; it is not the control being clicked.
+		const triggerTestId = 'add-non-standalone-product';
+		await page.evaluate(
+			( { productId, testId } ) => {
+				const productButtonElement =
+					document.querySelector< HTMLButtonElement >(
+						`li.post-${ productId } .wc-block-components-product-button__button`
+					);
+
+				if ( ! productButtonElement ) {
+					throw new Error( 'ProductButton not found.' );
+				}
+
+				const trigger = document.createElement( 'button' );
+				trigger.type = 'button';
+				trigger.dataset.testid = testId;
+				trigger.textContent = 'Add product as non-standalone';
+				trigger.addEventListener( 'click', async () => {
+					const { store } = await import(
+						'@wordpress/interactivity'
+					);
+					const unlockKey =
+						'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+					// eslint-disable-next-line import/no-unresolved -- resolved by the Blocks E2E bundle.
+					await import( '@woocommerce/stores/woocommerce/cart' );
+					const { actions } = store(
+						'woocommerce',
+						{},
+						{ lock: unlockKey }
+					);
+
+					await actions.addCartItem( {
+						id: productId,
+						quantityToAdd: 1,
+					} );
+				} );
+				const productList = productButtonElement.closest( 'ul' );
+				if ( ! productList ) {
+					throw new Error( 'Product list not found.' );
+				}
+				productList.insertAdjacentElement( 'beforebegin', trigger );
+			},
+			{ productId: PRODUCT_X.id, testId: triggerTestId }
+		);
+
+		// Hold the batch response after marking the outer request. The helper
+		// reads this request flag and adds cart-item data on the server, so the
+		// returned line is non-standalone even though the add originated in a
+		// separate extension-like interface. Holding the response keeps the
+		// optimistic window open indefinitely: the assertions below observe the
+		// optimistic state without racing the server, which is what makes this
+		// test deterministic.
+		let releaseBatch!: () => void;
+		const batchGate = new Promise< void >( ( resolve ) => {
+			releaseBatch = resolve;
+		} );
+		await page.route( '**/wc/store/v1/batch**', async ( route ) => {
+			const markedUrl = new URL( route.request().url() );
+			markedUrl.searchParams.set(
+				CART_LINE_IDENTITY_FLAG,
+				'ui-meta-line'
+			);
+			await batchGate;
+			await route.continue( { url: markedUrl.toString() } );
+		} );
+
+		const batchRequest = page.waitForRequest(
+			'**/wp-json/wc/store/v1/batch**'
+		);
+		const batchResponse = page.waitForResponse(
+			'**/wp-json/wc/store/v1/batch**'
+		);
+
+		try {
+			await page.getByTestId( triggerTestId ).click();
+			await batchRequest;
+
+			// While the response is gated, the button shows the optimistic
+			// prediction: the pending add counts toward the standalone line.
+			// `toHaveText` auto-retries — no fixed waits, no animation
+			// bookkeeping — and the gate guarantees the optimistic state
+			// cannot be reconciled away while the retries run.
+			await expect( btn ).toHaveText( '1 in cart' );
+		} finally {
+			releaseBatch();
+		}
+
+		const response = await batchResponse;
+		const responseBody = await response.json();
+		const returnedLine = responseBody.responses?.[ 0 ]?.body?.items?.find(
+			( item: { id: number } ) => item.id === PRODUCT_X.id
+		);
+
+		// Confirm the helper produced the intended server outcome (the marker
+		// made the returned line non-standalone), then verify reconciliation:
+		// the committed server cart excludes the meta line from the keyless
+		// match, so the button settles back to "Add to cart".
+		expect( returnedLine?.is_standalone_line ).toBe( false );
+		await expect( btn ).toHaveText( 'Add to cart' );
 	} );
 
 	// -------------------------------------------------------------------------
