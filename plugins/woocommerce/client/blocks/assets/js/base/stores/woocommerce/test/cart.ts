@@ -1353,6 +1353,30 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( result ).toBeUndefined();
 		} );
 
+		it( 'still matches a server line that lacks the is_standalone_line field (degrades to counted, never excluded)', async () => {
+			// Exclusion requires positive server evidence: only an explicit
+			// `is_standalone_line: false` excludes a line. A server-confirmed
+			// line without the field — an older server during deploy skew, or
+			// an extension that rebuilds Store API item payloads — must degrade
+			// to the pre-field behavior (matched/counted), never to exclusion.
+			// A falsy guard would exclude such lines forever: every add would
+			// blip optimistically and reconcile back to "Add to cart", with the
+			// count never reflecting the server-confirmed line.
+			const legacyLine = makeKeyedLine( {
+				key: 'legacy-key',
+				id: 42,
+				quantity: 2,
+			} );
+			delete ( legacyLine as Partial< CartItem > ).is_standalone_line;
+			await loadCartStore();
+			seedCart( [ legacyLine ] );
+
+			const result = mockState.findItemInCart( { id: 42 } );
+
+			expect( result ).toBe( legacyLine );
+			expect( result?.key ).toBe( 'legacy-key' );
+		} );
+
 		it( 'returns only the standalone line when the cart has both a standalone and a meta line for the same product', async () => {
 			// When a product has two lines — one standalone (is_standalone_line:
 			// true) and one meta (is_standalone_line: false) — the keyless matcher

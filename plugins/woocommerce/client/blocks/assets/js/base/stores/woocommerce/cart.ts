@@ -429,14 +429,20 @@ const { actions } = store< Store >(
 					if ( key ) {
 						return key === cartItem.key;
 					}
-					// `isCartItem` narrows to server-confirmed lines; for optimistic
-					// lines the guard short-circuits the `&&` before `is_standalone_line`
-					// is read, so rapid-click compounding on standalone lines is
-					// preserved. Keyed lookups short-circuit on the `key` check
-					// above and never reach this guard.
+					// Exclusion requires positive server evidence: only an
+					// explicit `is_standalone_line: false` excludes a line.
+					// `isCartItem` narrows to server-confirmed lines; for
+					// optimistic lines the guard short-circuits the `&&` before
+					// `is_standalone_line` is read, so rapid-click compounding
+					// on standalone lines is preserved. The strict `=== false`
+					// (never a falsy check) makes a server line *missing* the
+					// field — deploy skew, or an extension rebuilding item
+					// payloads — degrade to the pre-field behavior (counted),
+					// never to permanent exclusion. Keyed lookups short-circuit
+					// on the `key` check above and never reach this guard.
 					if (
 						isCartItem( cartItem ) &&
-						! cartItem.is_standalone_line
+						cartItem.is_standalone_line === false
 					) {
 						return false;
 					}
