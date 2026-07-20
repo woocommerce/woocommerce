@@ -854,6 +854,88 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should exclude tokens whose owner no longer exists.
+	 */
+	public function test_get_tokens_for_roles_excludes_tokens_of_deleted_users(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $admin_id );
+
+		wp_delete_user( $admin_id );
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array(), $tokens );
+	}
+
+	/**
+	 * @testdox Should paginate tokens and report totals.
+	 */
+	public function test_get_tokens_for_roles_supports_pagination(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$this->create_push_token_for_user( $data_store, $admin_id );
+		}
+
+		$page_one = $data_store->get_tokens_for_roles( array( 'administrator' ), 1, 2 );
+
+		$this->assertCount( 2, $page_one['tokens'] );
+		$this->assertSame( 3, $page_one['total'] );
+		$this->assertSame( 2, $page_one['total_pages'] );
+
+		$page_two = $data_store->get_tokens_for_roles( array( 'administrator' ), 2, 2 );
+
+		$this->assertCount( 1, $page_two['tokens'] );
+	}
+
+	/**
+	 * @testdox Should not enumerate role members via a user query.
+	 */
+	public function test_get_tokens_for_roles_does_not_query_users_by_role(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $admin_id );
+
+		$user_queries = 0;
+		$counter      = function () use ( &$user_queries ) {
+			$user_queries++;
+		};
+		add_action( 'pre_get_users', $counter );
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		remove_action( 'pre_get_users', $counter );
+
+		$this->assertCount( 1, $tokens );
+		$this->assertSame( 0, $user_queries, 'get_tokens_for_roles() must not run a WP_User_Query: enumerating role members scans the capabilities meta of every user and does not scale on large sites.' );
+	}
+
+	/**
+	 * Creates a push token owned by the given user.
+	 *
+	 * @param PushTokensDataStore $data_store The data store instance.
+	 * @param int                 $user_id    The owner user ID.
+	 * @return PushToken The created push token object.
+	 */
+	private function create_push_token_for_user( PushTokensDataStore $data_store, int $user_id ): PushToken {
+		return $data_store->create(
+			array(
+				'user_id'       => $user_id,
+				'token'         => 'test_token_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'test-device-uuid-' . wp_rand(),
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+	}
+
+	/**
 	 * Creates a test push token and saves it to the database.
 	 *
 	 * @return PushToken The created push token object.

@@ -318,6 +318,16 @@ class PushTokensDataStore {
 	 * flat array (cached per-request). When $page and $per_page are
 	 * provided, returns a paginated result with total counts.
 	 *
+	 * Tokens are queried directly and each token owner's role is verified
+	 * individually. Enumerating role members up front (for example via
+	 * WP_User_Query's role__in) examines the capabilities meta row of every
+	 * user on the site, which does not scale on sites with very large user
+	 * tables.
+	 *
+	 * Note: when pagination is used, the returned totals count all stored
+	 * tokens, including any whose owner no longer holds an eligible role.
+	 * Such tokens are excluded from the returned token objects.
+	 *
 	 * @param string[] $roles    The roles to query tokens for.
 	 * @param int|null $page     Optional page number (1-based).
 	 * @param int|null $per_page Optional number of tokens per page.
@@ -345,22 +355,9 @@ class PushTokensDataStore {
 			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
-		$user_ids = get_users(
-			array(
-				'role__in' => $roles,
-				'fields'   => 'ID',
-			)
-		);
-
-		if ( empty( $user_ids ) ) {
-			$this->tokens_by_roles_cache[ $cache_key ] = $empty_result;
-			return $this->tokens_by_roles_cache[ $cache_key ];
-		}
-
 		$query_args = array(
 			'post_type'      => PushToken::POST_TYPE,
 			'post_status'    => 'private',
-			'author__in'     => $user_ids,
 			'posts_per_page' => $paginate ? $per_page : -1,
 			'fields'         => 'ids',
 		);
@@ -386,11 +383,24 @@ class PushTokensDataStore {
 			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
+		_prime_post_caches( $post_ids, false, false );
 		update_meta_cache( 'post', $post_ids );
 
-		$tokens = array();
+		$tokens          = array();
+		$eligible_owners = array();
 
 		foreach ( $post_ids as $post_id ) {
+			$owner_id = (int) get_post_field( 'post_author', $post_id );
+
+			if ( ! isset( $eligible_owners[ $owner_id ] ) ) {
+				$owner                        = get_userdata( $owner_id );
+				$eligible_owners[ $owner_id ] = (bool) ( $owner && array_intersect( $roles, (array) $owner->roles ) );
+			}
+
+			if ( ! $eligible_owners[ $owner_id ] ) {
+				continue;
+			}
+
 			try {
 				$tokens[] = $this->read( (int) $post_id );
 			} catch ( WC_Data_Exception $e ) {
