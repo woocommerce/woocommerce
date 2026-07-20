@@ -50,21 +50,21 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 	<?php wc_print_notices(); ?>
 
 	<?php if ( 'confirmation' === $screen ) : ?>
-		<p><strong><?php esc_html_e( 'Your withdrawal details are ready.', 'woocommerce' ); ?></strong></p>
+		<p><strong><?php esc_html_e( 'Your withdrawal has been submitted.', 'woocommerce' ); ?></strong></p>
 		<p class="woocommerce-order-withdrawal-content__note">
 			<?php
 			printf(
 				/* translators: %s: Email address. */
-				esc_html__( 'Nothing has been sent yet. In a future version, we\'ll email an acknowledgment to %s with your details and the date and time of submission.', 'woocommerce' ),
+				esc_html__( 'We\'ve emailed an acknowledgment to %s with your details and the date and time of submission. Keep it as proof of your withdrawal.', 'woocommerce' ),
 				esc_html( $data['email'] ?? '' )
 			);
 			?>
 		</p>
-		<p class="woocommerce-order-withdrawal-content__note"><?php esc_html_e( 'We are still preparing the submission flow for this form.', 'woocommerce' ); ?></p>
+		<p class="woocommerce-order-withdrawal-content__note"><?php esc_html_e( 'We\'ll review your request and contact you about next steps, including any refund due.', 'woocommerce' ); ?></p>
 		<p><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Back to the shop', 'woocommerce' ); ?></a></p>
 	<?php elseif ( 'review' === $screen ) : ?>
 		<p class="woocommerce-order-withdrawal-content__intro"><?php esc_html_e( 'Check your details before confirming.', 'woocommerce' ); ?></p>
-		<p class="woocommerce-order-withdrawal-content__note"><?php esc_html_e( 'Nothing has been sent yet. Confirming only completes this prototype flow.', 'woocommerce' ); ?></p>
+		<p class="woocommerce-order-withdrawal-content__note"><?php esc_html_e( 'Nothing has been sent yet. Your withdrawal is submitted when you select "Confirm withdrawal".', 'woocommerce' ); ?></p>
 
 		<ol class="woocommerce-order-withdrawal-content__steps" aria-label="<?php esc_attr_e( 'Order withdrawal progress', 'woocommerce' ); ?>">
 			<li class="woocommerce-order-withdrawal-content__step"><?php esc_html_e( 'Your details', 'woocommerce' ); ?></li>
@@ -84,7 +84,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 			<?php
 			printf(
 				/* translators: %s: Email address. */
-				esc_html__( 'Nothing will be sent in this version. In a future version, we\'ll email an acknowledgment to %s with these details and the date and time of submission.', 'woocommerce' ),
+				esc_html__( 'After you confirm, we\'ll email an acknowledgment to %s with these details and the date and time of submission. Keep it as proof of your withdrawal.', 'woocommerce' ),
 				esc_html( $data['email'] ?? '' )
 			);
 			?>
