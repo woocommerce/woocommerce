@@ -265,11 +265,10 @@ class LookupDataStore {
 
 		$in_stock = $product->is_in_stock();
 
-		$lookup_table = $this->lookup_table_name;
 		$wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-				"UPDATE {$lookup_table} SET in_stock = %d WHERE product_id = %d",
+				"UPDATE {$this->lookup_table_name} SET in_stock = %d WHERE product_id = %d",
 				$in_stock ? 1 : 0,
 				$product->get_id()
 			)
@@ -360,17 +359,16 @@ class LookupDataStore {
 		global $wpdb;
 
 		// Single query handled with `index_merge` strategy, while separate with `range` (better performing) on available indexes.
-		$lookup_table = $this->lookup_table_name;
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$lookup_table} WHERE product_or_parent_id = %d",
+				"DELETE FROM {$this->lookup_table_name} WHERE product_or_parent_id = %d",
 				$product_id
 			)
 		);
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$lookup_table} WHERE product_id = %d",
+				"DELETE FROM {$this->lookup_table_name} WHERE product_id = %d",
 				$product_id
 			)
 		);
@@ -618,11 +616,10 @@ class LookupDataStore {
 	private function insert_lookup_table_data( int $product_id, int $product_or_parent_id, string $taxonomy, int $term_id, bool $is_variation_attribute, bool $has_stock ) {
 		global $wpdb;
 
-		$lookup_table = $this->lookup_table_name;
 		$wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-				"INSERT INTO {$lookup_table} (
+				"INSERT INTO {$this->lookup_table_name} (
 					  product_id,
 					  product_or_parent_id,
 					  taxonomy,
@@ -850,11 +847,10 @@ class LookupDataStore {
 	private function create_data_for_product_cpt_core( int $product_id ) {
 		global $wpdb;
 
-		$lookup_table = $this->lookup_table_name;
 		$wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-				"DELETE FROM {$lookup_table} WHERE product_or_parent_id = %d",
+				"DELETE FROM {$this->lookup_table_name} WHERE product_or_parent_id = %d",
 				$product_id
 			)
 		);
