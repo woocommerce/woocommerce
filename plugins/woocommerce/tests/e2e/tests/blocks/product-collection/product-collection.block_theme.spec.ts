@@ -905,21 +905,24 @@ test.describe( 'Product Collection', () => {
 
 			await admin.visitSiteEditor( { path: '/wp_template' } );
 
-			await page
-				.getByRole( 'button', {
-					name:
-						wpCoreVersion >= 6.8
-							? 'Add Template'
-							: 'Add New Template',
-				} )
-				.click();
-
 			// We need to wait for Product categories to load. Otherwise clicking
 			// on Products by Category might direct the user to the generic
 			// template.
-			await admin.page.waitForResponse( ( response ) => {
-				return response.url().includes( 'wp-json/wp/v2/product_cat' );
-			} );
+			await Promise.all( [
+				admin.page.waitForResponse( ( response ) => {
+					return response
+						.url()
+						.includes( 'wp-json/wp/v2/product_cat' );
+				} ),
+				page
+					.getByRole( 'button', {
+						name:
+							wpCoreVersion >= 6.8
+								? 'Add Template'
+								: 'Add New Template',
+					} )
+					.click(),
+			] );
 
 			await page
 				.getByRole( 'button', { name: 'Products by Category' } )
@@ -958,20 +961,23 @@ test.describe( 'Product Collection', () => {
 
 			await admin.visitSiteEditor( { path: '/wp_template' } );
 
-			await page
-				.getByRole( 'button', {
-					name:
-						wpCoreVersion >= 6.8
-							? 'Add Template'
-							: 'Add New Template',
-				} )
-				.click();
-
 			// We need to wait for Product tags to load. Otherwise clicking
 			// on Products by Tag might direct the user to the generic template.
-			await admin.page.waitForResponse( ( response ) => {
-				return response.url().includes( 'wp-json/wp/v2/product_tag' );
-			} );
+			await Promise.all( [
+				admin.page.waitForResponse( ( response ) => {
+					return response
+						.url()
+						.includes( 'wp-json/wp/v2/product_tag' );
+				} ),
+				page
+					.getByRole( 'button', {
+						name:
+							wpCoreVersion >= 6.8
+								? 'Add Template'
+								: 'Add New Template',
+					} )
+					.click(),
+			] );
 
 			await page
 				.getByRole( 'button', { name: 'Products by Tag' } )
