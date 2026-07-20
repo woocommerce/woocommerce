@@ -1,3 +1,7 @@
+/*
+ * @jest-environment-options {"url": "http://woo.local/"}
+ */
+
 /**
  * External dependencies
  */
@@ -26,12 +30,12 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 } ) );
 
 const setWindowUrl = ( { url }: { url: string } ) => {
-	Object.defineProperty( window, 'location', {
-		value: {
-			href: url,
-		},
-		writable: true,
-	} );
+	/*
+	 * jsdom makes `window.location` non-configurable, so navigate via the
+	 * History API instead of replacing the object. Same-origin only (see the
+	 * `@jest-environment-options` url above).
+	 */
+	window.history.replaceState( {}, '', url );
 };
 
 const acceptErrorWithDuplicatedKeys = () => {
