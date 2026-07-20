@@ -2323,23 +2323,29 @@ p.demo_store,
  * Order withdrawal form
  */
 .woocommerce-order-withdrawal-content {
-	// max-width: 33rem;
-	// margin: 0 auto;
-
 	&__intro {
 		margin-bottom: 0.5em;
 	}
 
 	&__note,
-	&__field-description {
+	&__field-description,
+	.description {
 		color: $subtext;
 		font-size: 0.875em;
 		line-height: 1.4;
 	}
 
-	&__field-description {
+	&__field-description,
+	.description {
 		display: block;
 		margin-top: 0.25em;
+	}
+
+	&__field-error {
+		color: var(--wc-red);
+		display: block;
+		font-size: 0.875em;
+		margin: -0.25em 0 0.75em;
 	}
 
 	&__steps {
@@ -2428,7 +2434,7 @@ p.demo_store,
 		margin-top: 2em;
 	}
 
-	&__button--secondary {
+	&__button--secondary.button {
 		background: transparent;
 		border: 1px solid currentColor;
 		color: inherit;
