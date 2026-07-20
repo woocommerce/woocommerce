@@ -32,7 +32,6 @@ $action_confirm          = isset( $action_confirm ) ? (string) $action_confirm :
 $action_edit             = isset( $action_edit ) ? (string) $action_edit : '';
 $form_action_url         = isset( $form_action_url ) ? (string) $form_action_url : '';
 $shop_url                = isset( $shop_url ) ? (string) $shop_url : wc_get_page_permalink( 'shop' );
-$show_account_navigation = isset( $show_account_navigation ) ? (bool) $show_account_navigation : false;
 $form_field_keys         = array( 'first_name', 'last_name', 'email', 'email_confirmation', 'order_number' );
 $withdrawal_type_field   = $fields['withdrawal_type'] ?? array();
 $additional_details      = $fields['additional_details'] ?? array();
@@ -46,18 +45,6 @@ if ( $theme_button_class ) {
 $button_class           = implode( ' ', $button_classes );
 $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'woocommerce-order-withdrawal-content__button--secondary' ) ) );
 ?>
-
-<?php if ( $show_account_navigation ) : ?>
-	<?php
-	/**
-	 * My Account navigation.
-	 *
-	 * @since 2.6.0
-	 */
-	do_action( 'woocommerce_account_navigation' );
-	?>
-	<div class="woocommerce-MyAccount-content">
-<?php endif; ?>
 
 <div class="woocommerce-order-withdrawal-content">
 	<?php wc_print_notices(); ?>
@@ -211,7 +198,3 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 		</form>
 	<?php endif; ?>
 </div>
-
-<?php if ( $show_account_navigation ) : ?>
-	</div>
-<?php endif; ?>
