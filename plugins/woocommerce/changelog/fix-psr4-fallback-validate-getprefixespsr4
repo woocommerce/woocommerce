@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the PSR-4 upgrade fallback fataling when a foreign Composer ClassLoader returns a non-array from getPrefixesPsr4() or a non-string from findFile(); validate both shapes so it degrades to no fallback instead.

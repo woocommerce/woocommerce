@@ -35,25 +35,24 @@ const mockTotalsItem = jest.fn();
 // Mock LoadingMask component
 jest.mock(
 	'@woocommerce/base-components/loading-mask',
-	() => ( props: LoadingMaskProps ) =>
-		(
+	() => ( props: LoadingMaskProps ) => (
+		<div
+			className="wc-block-components-loading-mask"
+			data-testid={ props.isLoading ? 'loading-mask' : 'not-loading' }
+		>
+			{ props.isLoading && (
+				<span className="screen-reader-text">
+					{ props.screenReaderLabel }
+				</span>
+			) }
 			<div
-				className="wc-block-components-loading-mask"
-				data-testid={ props.isLoading ? 'loading-mask' : 'not-loading' }
+				className="wc-block-components-loading-mask__children"
+				aria-hidden={ props.isLoading ? 'true' : 'false' }
 			>
-				{ props.isLoading && (
-					<span className="screen-reader-text">
-						{ props.screenReaderLabel }
-					</span>
-				) }
-				<div
-					className="wc-block-components-loading-mask__children"
-					aria-hidden={ props.isLoading ? 'true' : 'false' }
-				>
-					{ props.children }
-				</div>
+				{ props.children }
 			</div>
-		)
+		</div>
+	)
 );
 
 jest.mock( '@woocommerce/blocks-components', () => ( {

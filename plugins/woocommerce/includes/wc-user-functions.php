@@ -1061,8 +1061,11 @@ function wc_delete_user_data( $user_id ) {
 		)
 	);
 
-	// Clean up payment tokens.
-	$payment_tokens = WC_Payment_Tokens::get_customer_tokens( $user_id );
+	// Clean up payment tokens. Query without a limit so every token is removed, not just the
+	// customer-facing subset capped by `get_customer_tokens()`. Deliberately bypasses the
+	// `woocommerce_get_customer_payment_tokens` filter too: cleanup must not be narrowed by a
+	// display-oriented filter, and this matches the personal data eraser, which also omits it.
+	$payment_tokens = WC_Payment_Tokens::get_tokens( array( 'user_id' => $user_id ) );
 
 	foreach ( $payment_tokens as $payment_token ) {
 		$payment_token->delete();

@@ -88,9 +88,10 @@
 	"devDependencies": {
 		"@babel/core": "7.25.7",
 		"@types/lodash": "^4.14.202",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
-		"eslint": "^8.55.0",
+		"eslint": "^10.0.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"redux": "^4.2.1",
