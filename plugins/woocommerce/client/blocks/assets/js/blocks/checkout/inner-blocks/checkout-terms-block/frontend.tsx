@@ -4,7 +4,10 @@
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useState, useEffect } from '@wordpress/element';
-import { CheckboxControl } from '@woocommerce/blocks-components';
+import {
+	CheckboxControl,
+	ValidationInputError,
+} from '@woocommerce/blocks-components';
 import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { withInstanceId } from '@wordpress/compose';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -36,11 +39,15 @@ const FrontendBlock = ( {
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( validationStore );
 
-	const error = useSelect(
+	const { error, validationErrorHtmlId } = useSelect(
 		( select ) => {
-			return select( validationStore ).getValidationError(
-				validationErrorId
-			);
+			const store = select( validationStore );
+
+			return {
+				error: store.getValidationError( validationErrorId ),
+				validationErrorHtmlId:
+					store.getValidationErrorId( validationErrorId ),
+			};
 		},
 		[ validationErrorId ]
 	);
@@ -90,20 +97,31 @@ const FrontendBlock = ( {
 				) }
 			>
 				{ checkbox ? (
-					<CheckboxControl
-						id="terms-and-conditions"
-						checked={ checked }
-						onChange={ () => setChecked( ( value ) => ! value ) }
-						hasError={ hasError }
-						disabled={ isDisabled }
-					>
-						<span
-							className="wc-block-components-checkbox__label"
-							dangerouslySetInnerHTML={ {
-								__html: text || termsCheckboxDefaultText,
-							} }
+					<>
+						<CheckboxControl
+							id="terms-and-conditions"
+							checked={ checked }
+							onChange={ () =>
+								setChecked( ( value ) => ! value )
+							}
+							hasError={ hasError }
+							aria-describedby={
+								hasError ? validationErrorHtmlId : undefined
+							}
+							disabled={ isDisabled }
+						>
+							<span
+								className="wc-block-components-checkbox__label"
+								dangerouslySetInnerHTML={ {
+									__html: text || termsCheckboxDefaultText,
+								} }
+							/>
+						</CheckboxControl>
+						<ValidationInputError
+							propertyName={ validationErrorId }
+							elementId={ validationErrorId }
 						/>
-					</CheckboxControl>
+					</>
 				) : (
 					<span
 						className="wc-block-components-checkbox__label"

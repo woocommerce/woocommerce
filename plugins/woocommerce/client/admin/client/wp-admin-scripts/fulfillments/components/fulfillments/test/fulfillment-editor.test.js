@@ -20,15 +20,11 @@ jest.mock( '@wordpress/components', () => ( {
 jest.mock(
 	'../../action-buttons/edit-fulfillment-button',
 	() =>
-		( { onClick } ) =>
-			(
-				<button
-					data-testid="edit-fulfillment-button"
-					onClick={ onClick }
-				>
-					Edit
-				</button>
-			)
+		( { onClick } ) => (
+			<button data-testid="edit-fulfillment-button" onClick={ onClick }>
+				Edit
+			</button>
+		)
 );
 jest.mock( '../../action-buttons/fulfill-items-button', () => () => (
 	<button data-testid="fulfill-items-button">Fulfill items</button>
