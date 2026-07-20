@@ -294,10 +294,19 @@ class WC_Helper_Subscriptions_API {
 		$product_key  = $request->get_param( 'product_key' );
 		$subscription = WC_Helper::get_subscription( $product_key );
 
-		if ( ! $subscription ) {
+		if ( ! is_array( $subscription ) ) {
 			wp_send_json_error(
 				array(
 					'message' => __( 'We couldn\'t find a subscription for this product.', 'woocommerce' ),
+				),
+				400
+			);
+		}
+
+		if ( ! in_array( $subscription['product_type'], array( 'plugin', 'theme' ), true ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'This product type is not supported.', 'woocommerce' ),
 				),
 				400
 			);

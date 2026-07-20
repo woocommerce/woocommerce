@@ -134,4 +134,32 @@ class WC_Helper_Subscriptions_API_Test extends \WC_Unit_Test_Case {
 		$this->assertTrue( $response['success'] );
 		$this->assertTrue( is_plugin_active( self::INACTIVE_PLUGIN_SLUG . '/' . self::INACTIVE_PLUGIN_SLUG . '.php' ) );
 	}
+
+	/**
+	 * @testdox A subscription with an unsupported product type cannot be activated, even by an Administrator.
+	 */
+	public function test_unsupported_product_type_is_rejected(): void {
+		$product_key = 'test-activate-key';
+		set_transient(
+			'_woocommerce_helper_subscriptions',
+			array(
+				array(
+					'product_id'   => 999002,
+					'product_key'  => $product_key,
+					'product_type' => 'unknown',
+					'zip_slug'     => self::INACTIVE_PLUGIN_SLUG,
+				),
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$response = $this->dispatch_activate( $product_key );
+
+		$this->assertFalse( $response['success'] );
+		$this->assertIsArray( $response['data'] );
+		$this->assertStringContainsString( 'not supported', $response['data']['message'] );
+	}
 }
