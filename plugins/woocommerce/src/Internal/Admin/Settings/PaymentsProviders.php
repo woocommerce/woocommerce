@@ -484,7 +484,7 @@ class PaymentsProviders {
 		// Normalize the country code to uppercase.
 		$country_code = strtoupper( $country_code );
 
-		$cache_key              = $payment_gateway->id . '__' . $country_code;
+		$cache_key              = get_current_user_id() . '__' . $payment_gateway->id . '__' . $country_code;
 		$cached_gateway_details = wp_cache_get( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
 		if ( is_array( $cached_gateway_details ) && isset( $cached_gateway_details[ $cache_key ] ) && is_array( $cached_gateway_details[ $cache_key ] ) ) {
 			$details = $cached_gateway_details[ $cache_key ];
@@ -1271,6 +1271,8 @@ class PaymentsProviders {
 	 * @return void
 	 */
 	public function reset_memo(): void {
+		wc_deprecated_function( __METHOD__, '11.1.0', 'clear_cache' );
+
 		$this->clear_cache();
 	}
 

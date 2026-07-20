@@ -1011,6 +1011,57 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Gateway details are cached separately for each user.
+	 */
+	public function test_get_payment_gateway_details_cache_per_user(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'fake-gateway-id',
+			array(
+				'plugin_slug' => 'fake-plugin-slug',
+				'plugin_file' => 'fake-plugin-slug/fake-plugin-file',
+			),
+		);
+
+		$provider = $this->createMock( PaymentGateway::class );
+		$provider
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_details' )
+			->willReturnCallback(
+				function ( $gateway, $order ) {
+					return array(
+						'id'     => $gateway->id,
+						'_order' => $order,
+						'title'  => (string) get_current_user_id(),
+						'plugin' => array(
+							'slug' => 'fake-plugin-slug',
+						),
+					);
+				}
+			);
+		$this->set_payment_gateway_provider_instance( 'fake-gateway-id', $provider );
+
+		$this->mock_extension_suggestions
+			->expects( $this->exactly( 2 ) )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		$first_user_details        = $this->sut->get_payment_gateway_details( $fake_gateway, 1, 'US' );
+		$first_user_cached_details = $this->sut->get_payment_gateway_details( $fake_gateway, 2, 'US' );
+
+		$second_user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $second_user_id );
+		$second_user_details        = $this->sut->get_payment_gateway_details( $fake_gateway, 3, 'US' );
+		$second_user_cached_details = $this->sut->get_payment_gateway_details( $fake_gateway, 4, 'US' );
+
+		$this->assertSame( (string) $this->store_admin_id, $first_user_details['title'] );
+		$this->assertSame( (string) $this->store_admin_id, $first_user_cached_details['title'] );
+		$this->assertSame( (string) $second_user_id, $second_user_details['title'] );
+		$this->assertSame( (string) $second_user_id, $second_user_cached_details['title'] );
+		$this->assertSame( 2, $first_user_cached_details['_order'] );
+		$this->assertSame( 4, $second_user_cached_details['_order'] );
+	}
+
+	/**
 	 * @testdox Gateway details are cached per country and recomputed after the cache is cleared.
 	 */
 	public function test_get_payment_gateway_details_cache_per_country_and_clear(): void {
@@ -1052,6 +1103,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$first_de = $this->sut->get_payment_gateway_details( $fake_gateway, 2, 'DE' );
 		$this->sut->clear_cache();
 		$second_us = $this->sut->get_payment_gateway_details( $fake_gateway, 3, 'US' );
+		$this->setExpectedDeprecated( PaymentsProviders::class . '::reset_memo' );
 		$this->sut->reset_memo();
 		$third_us = $this->sut->get_payment_gateway_details( $fake_gateway, 4, 'US' );
 
