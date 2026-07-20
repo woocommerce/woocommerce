@@ -59,6 +59,14 @@ class Scheduler {
 	public const SCHEDULED_META_KEY = '_abandoned_cart_recovery_scheduled_at';
 
 	/**
+	 * Order-creation origins (`created_via`) eligible for an automated send:
+	 * the classic checkout and the block (Store API) checkout.
+	 *
+	 * @var string[]
+	 */
+	private const ELIGIBLE_CREATED_VIA = array( 'checkout', 'store-api' );
+
+	/**
 	 * Register hooks and filters.
 	 *
 	 * Auto-called by the WC dependency container after instantiation.
@@ -78,9 +86,10 @@ class Scheduler {
 	/**
 	 * Schedule the automated send when an order is created in an eligible status.
 	 *
-	 * No-op when the order is not eligible, when the email is disabled or
-	 * suppressed, when the merchant has opted out of automated sends, or when
-	 * this order already has a pending or completed send.
+	 * No-op when the order is not eligible, when it was not created by a
+	 * customer checkout flow, when the email is disabled or suppressed, when
+	 * the merchant has opted out of automated sends, or when this order
+	 * already has a pending or completed send.
 	 *
 	 * @internal
 	 *
@@ -97,6 +106,12 @@ class Scheduler {
 		}
 
 		if ( ! in_array( $order->get_status(), $this->get_eligible_statuses( $order ), true ) ) {
+			return;
+		}
+
+		// Only nudge customers who abandoned a checkout — pending orders can
+		// also originate from admin invoices, the REST API, or renewals.
+		if ( ! in_array( $order->get_created_via(), self::ELIGIBLE_CREATED_VIA, true ) ) {
 			return;
 		}
 

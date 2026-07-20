@@ -117,6 +117,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_scheduled_send_dispatches_to_email(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
@@ -141,6 +142,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_scheduled_send_records_order_note_on_success(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
@@ -189,6 +191,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_action_dispatch_reaches_handle_scheduled_send(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
@@ -216,6 +219,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_new_order_schedules_for_pending_order(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
@@ -237,6 +241,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_new_order_skips_non_abandoned_status(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PROCESSING );
 		$order->save();
 
@@ -254,6 +259,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$this->email->update_option( 'automated', 'no' );
 
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
@@ -271,6 +277,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$this->email->enabled = 'no';
 
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
@@ -285,6 +292,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_new_order_skips_when_suppressed(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
@@ -304,6 +312,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_new_order_is_idempotent(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
@@ -323,6 +332,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_new_order_skips_when_already_sent(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->update_meta_data( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT, (string) time() );
 		$order->save();
@@ -331,6 +341,54 @@ class SchedulerTest extends WC_Unit_Test_Case {
 
 		$fresh = wc_get_order( $order->get_id() );
 		$this->assertSame( '', $fresh->get_meta( Scheduler::SCHEDULED_META_KEY ) );
+	}
+
+	/**
+	 * @testdox handle_new_order() is a no-op for pending orders not created by a customer checkout (admin invoices, REST API, renewals) — only abandoned checkouts get the automated nudge.
+	 * @dataProvider provider_non_checkout_origins
+	 *
+	 * @param string $created_via Order-creation origin to test.
+	 */
+	public function test_handle_new_order_skips_non_checkout_origin( string $created_via ): void {
+		$order = OrderHelper::create_order();
+		$order->set_created_via( $created_via );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+
+		$this->sut->handle_new_order( $order->get_id() );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertSame( '', $fresh->get_meta( Scheduler::SCHEDULED_META_KEY ) );
+		$this->assertFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+	}
+
+	/**
+	 * Non-checkout order-creation origins.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_non_checkout_origins(): array {
+		return array(
+			'admin invoice'        => array( 'admin' ),
+			'REST API'             => array( 'rest-api' ),
+			'subscription renewal' => array( 'subscription' ),
+		);
+	}
+
+	/**
+	 * @testdox handle_new_order() schedules for a store-api (block checkout) order, so both checkout flows are covered by default.
+	 */
+	public function test_handle_new_order_schedules_for_store_api_origin(): void {
+		$order = OrderHelper::create_order();
+		$order->set_created_via( 'store-api' );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+
+		$this->sut->handle_new_order( $order->get_id() );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty( $fresh->get_meta( Scheduler::SCHEDULED_META_KEY ) );
+		$this->assertNotFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
 	}
 
 	/**
@@ -343,6 +401,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		};
 
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::FAILED );
 		$order->save();
 
@@ -415,6 +474,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_scheduled_send_skips_when_automation_disabled(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
@@ -485,6 +545,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	private function schedule_for_pending_order(): WC_Order {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
