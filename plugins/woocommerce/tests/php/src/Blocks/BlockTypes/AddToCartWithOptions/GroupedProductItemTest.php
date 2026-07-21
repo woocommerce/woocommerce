@@ -146,6 +146,67 @@ class GroupedProductItemTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Registers a `render_block_context` filter at priority 1 that supplies a
+	 * `draftKey`, mirroring the priority-1 filter that `ProductTemplate::render()`
+	 * and `SingleProduct::update_context()` register to declare a container's
+	 * draft key for their descendants.
+	 *
+	 * @param string $draft_key Draft key to place on the context.
+	 * @return callable The registered filter callback, so it can be removed later.
+	 */
+	private function force_outer_draft_key_context( string $draft_key ): callable {
+		$filter = static function ( $context ) use ( $draft_key ) {
+			$context['draftKey'] = $draft_key;
+			return $context;
+		};
+
+		add_filter( 'render_block_context', $filter, 1 );
+
+		return $filter;
+	}
+
+	/**
+	 * @testdox A grouped child row's quantity selector files its draft seed under the outer container's draft key, reached through the row's WP_Block re-instantiation.
+	 */
+	public function test_grouped_child_seed_files_under_container_draft_key(): void {
+		global $product;
+		$previous_product = $product;
+
+		$child = new WC_Product_Simple();
+		$child->set_regular_price( 10 );
+		$child->set_name( 'Grouped child' );
+		$child_id = $child->save();
+
+		$grouped = new WC_Product_Grouped();
+		$grouped->set_children( array( $child_id ) );
+		$grouped_id = $grouped->save();
+
+		$product = $grouped;
+
+		$draft_key = 'collection/0/' . $grouped_id;
+		$filter    = $this->force_outer_draft_key_context( $draft_key );
+
+		try {
+			do_blocks( $this->get_row_markup() );
+		} finally {
+			remove_filter( 'render_block_context', $filter, 1 );
+			$product = $previous_product;
+		}
+
+		$state = wp_interactivity_state( 'woocommerce/cart' );
+
+		$this->assertArrayHasKey( $draft_key, $state['draftSeeds'] ?? array(), 'The grouped child files its seed under the outer container\'s draft key.' );
+		$this->assertSame(
+			array(
+				'id'       => $child_id,
+				'quantity' => 0,
+			),
+			$state['draftSeeds'][ $draft_key ][ $child_id ],
+			'The grouped child seed carries quantity 0, matching its allowZero-adjusted bound value.'
+		);
+	}
+
+	/**
 	 * @testdox A grouped child row's inner blocks resolve the row's own child product when no outer render_block_context filter is present.
 	 */
 	public function test_row_context_resolves_child_product_without_an_outer_filter(): void {

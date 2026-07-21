@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Enums\ProductType;
+use WP_Block;
 
 /**
  * Block type for quantity selector in add to cart with options.
@@ -125,7 +126,9 @@ class QuantitySelector extends AbstractBlock {
 			$input_attributes['data-wp-watch']          = 'woocommerce/add-to-cart-with-options::callbacks.watchQuantityConstraints';
 		}
 
-		$form = AddToCartWithOptionsUtils::make_quantity_input_interactive( $product_html, $wrapper_attributes, $input_attributes );
+		$draft_key = $block->context['draftKey'] ?? 'woocommerce/global';
+
+		$form = AddToCartWithOptionsUtils::make_quantity_input_interactive( $product_html, $wrapper_attributes, $input_attributes, array(), false, $draft_key );
 
 		$product = $previous_product;
 

@@ -520,11 +520,40 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests that a simple product's Add to Cart + Options form emits its
-	 * initial `add-item` payload as a `woocommerce/cart` draft-seed context,
-	 * plus the `data-wp-init` trigger that copies it into `draftItems` on the
-	 * client, so the client can seed the correct values without them ever
-	 * appearing in server state.
+	 * Registers a `render_block_context` filter at priority 1 that supplies
+	 * `postId` (and, when given, `draftKey`) directly on the block context,
+	 * mirroring the priority-1 filter that `ProductTemplate::render()` and
+	 * `SingleProduct::update_context()` register for their descendants —
+	 * without needing to wrap the test markup in either container block.
+	 *
+	 * @param int         $product_id Product ID to place on the context.
+	 * @param string|null $draft_key  Draft key to place on the context, or null to leave it unset.
+	 * @return callable The registered filter callback, so it can be removed later.
+	 */
+	private function force_product_and_draft_key_context( int $product_id, ?string $draft_key = null ): callable {
+		$filter = static function ( $context ) use ( $product_id, $draft_key ) {
+			$context['postId']   = $product_id;
+			$context['postType'] = 'product';
+
+			if ( null !== $draft_key ) {
+				$context['draftKey'] = $draft_key;
+			}
+
+			return $context;
+		};
+
+		add_filter( 'render_block_context', $filter, 1 );
+
+		return $filter;
+	}
+
+	/**
+	 * Tests that a simple product's Add to Cart + Options form files its
+	 * initial `add-item` payload into the `woocommerce/cart` state's
+	 * `draftSeeds` collection, under the reserved global collection key when
+	 * rendered outside any keyed purchase-surface container, so the client
+	 * can seed the correct values without them ever appearing in a context
+	 * bag.
 	 *
 	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::render
 	 */
@@ -534,26 +563,70 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$product->set_regular_price( 10 );
 		$product_id = $product->save();
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+		$filter = $this->force_product_and_draft_key_context( $product_id );
 
-		$expected_draft_seed = 'data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
+		try {
+			$markup = do_blocks( '<!-- wp:woocommerce/add-to-cart-with-options /-->' );
+		} finally {
+			remove_filter( 'render_block_context', $filter, 1 );
+		}
+
+		$state        = wp_interactivity_state( 'woocommerce/cart' );
+		$global_seeds = $state['draftSeeds']['woocommerce/global'] ?? array();
+
+		$this->assertArrayHasKey( $product_id, $global_seeds, 'A form rendered outside any keyed container files its seed under the reserved global collection key.' );
+		$this->assertSame(
 			array(
-				'draftSeed' => array(
-					'id'       => $product_id,
-					'quantity' => 1,
-				),
+				'id'       => $product_id,
+				'quantity' => 1,
 			),
-			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-		) . '\'';
+			$global_seeds[ $product_id ],
+			'The filed seed carries the product id and minimum purchase quantity.'
+		);
 
-		$this->assertStringContainsString( $expected_draft_seed, $markup, 'The form emits a woocommerce/cart draft-seed context carrying the product id and minimum quantity.' );
-		$this->assertStringContainsString( 'data-wp-init--seed-draft="woocommerce/cart::actions.seedDraftIfAbsent"', $markup, 'The form triggers seedDraftIfAbsent on init.' );
+		$this->assertStringNotContainsString( 'data-wp-context---draft-seed', $markup, 'The form no longer emits a draft-seed context bag.' );
+		$this->assertStringNotContainsString( 'data-wp-init--seed-draft', $markup, 'The form no longer emits the seedDraftIfAbsent init trigger.' );
 	}
 
 	/**
-	 * Tests that a Grouped product's own form does not seed a draft for the
-	 * grouped (unpurchasable) parent id, while each purchasable child's own
-	 * quantity selector seeds its own draft, with the allowZero-adjusted
+	 * Tests that a surface rendered inside a keyed purchase-surface container
+	 * (e.g. a Product Collection card or a Single Product block instance)
+	 * files its seed under that container's draft key rather than the
+	 * reserved global collection key.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::render
+	 */
+	public function test_draft_seed_files_under_container_draft_key() {
+		global $product;
+		$product = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+		$draft_key  = 'collection/0/' . $product_id;
+
+		$filter = $this->force_product_and_draft_key_context( $product_id, $draft_key );
+
+		try {
+			do_blocks( '<!-- wp:woocommerce/add-to-cart-with-options /-->' );
+		} finally {
+			remove_filter( 'render_block_context', $filter, 1 );
+		}
+
+		$state = wp_interactivity_state( 'woocommerce/cart' );
+
+		$this->assertArrayHasKey( $draft_key, $state['draftSeeds'] ?? array(), 'A surface inside a keyed container files its seed under that container\'s draft key.' );
+		$this->assertSame(
+			array(
+				'id'       => $product_id,
+				'quantity' => 1,
+			),
+			$state['draftSeeds'][ $draft_key ][ $product_id ]
+		);
+	}
+
+	/**
+	 * Tests that a Grouped product's own form does not file a draft seed for
+	 * the grouped (unpurchasable) parent id, while each purchasable child's
+	 * own quantity selector files its own seed, with the allowZero-adjusted
 	 * quantity (0) matching the value actually bound to its input.
 	 *
 	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::render
@@ -567,25 +640,32 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$grouped_product->set_children( array( $simple_product_id ) );
 		$grouped_product_id = $grouped_product->save();
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $grouped_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+		$filter = $this->force_product_and_draft_key_context( $grouped_product_id );
 
-		$grouped_parent_draft_seed = '"draftSeed":{"id":' . $grouped_product_id . ',';
-		$this->assertStringNotContainsString( $grouped_parent_draft_seed, $markup, 'The grouped product parent does not emit its own draft seed; only its children do.' );
+		try {
+			do_blocks( '<!-- wp:woocommerce/add-to-cart-with-options /-->' );
+		} finally {
+			remove_filter( 'render_block_context', $filter, 1 );
+		}
 
-		$expected_child_draft_seed = 'data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
+		$state        = wp_interactivity_state( 'woocommerce/cart' );
+		$global_seeds = $state['draftSeeds']['woocommerce/global'] ?? array();
+
+		$this->assertArrayNotHasKey( $grouped_product_id, $global_seeds, 'The grouped product parent does not file its own draft seed; only its children do.' );
+
+		$this->assertArrayHasKey( $simple_product_id, $global_seeds, 'The grouped child quantity selector files its own draft seed.' );
+		$this->assertSame(
 			array(
-				'draftSeed' => array(
-					'id'       => $simple_product_id,
-					'quantity' => 0,
-				),
+				'id'       => $simple_product_id,
+				'quantity' => 0,
 			),
-			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-		) . '\'';
-		$this->assertStringContainsString( $expected_child_draft_seed, $markup, 'The grouped child quantity selector emits its own draft seed with quantity 0 (an optional item), matching the value bound to its input.' );
+			$global_seeds[ $simple_product_id ],
+			'The grouped child seed carries quantity 0 (an optional item), matching the value bound to its input.'
+		);
 	}
 
 	/**
-	 * Tests that a Variable product's form seeds a draft carrying no
+	 * Tests that a Variable product's form files a draft seed carrying no
 	 * `variation` key until a default attribute selection exists, matching
 	 * the parent-level `selectedAttributes` context, which also starts empty.
 	 *
@@ -616,19 +696,25 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		\WC_Product_Variable::sync( $product_id );
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+		$filter = $this->force_product_and_draft_key_context( $product_id );
 
-		$expected_draft_seed = 'data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
+		try {
+			do_blocks( '<!-- wp:woocommerce/add-to-cart-with-options /-->' );
+		} finally {
+			remove_filter( 'render_block_context', $filter, 1 );
+		}
+
+		$state        = wp_interactivity_state( 'woocommerce/cart' );
+		$global_seeds = $state['draftSeeds']['woocommerce/global'] ?? array();
+
+		$this->assertSame(
 			array(
-				'draftSeed' => array(
-					'id'       => $product_id,
-					'quantity' => $product->get_min_purchase_quantity(),
-				),
+				'id'       => $product_id,
+				'quantity' => $product->get_min_purchase_quantity(),
 			),
-			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-		) . '\'';
-
-		$this->assertStringContainsString( $expected_draft_seed, $markup, 'The variable product form seeds a draft with the parent id and default quantity, carrying no "variation" key until an attribute is selected.' );
+			$global_seeds[ $product_id ],
+			'The variable product form files a seed with the parent id and default quantity, carrying no "variation" key until an attribute is selected.'
+		);
 	}
 
 	/**
@@ -640,11 +726,12 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	 * AddToWishlistButtonTests::invoke_render() /
 	 * SavedForLaterTests::test_render_seeds_hidden_empty_state_for_new_shopper()).
 	 *
-	 * @param string $quantity_html Quantity input HTML.
-	 * @param array  $context       Optional context for the quantity input.
+	 * @param string      $quantity_html Quantity input HTML.
+	 * @param array       $context       Optional context for the quantity input.
+	 * @param string|null $draft_key     Optional `woocommerce/cart` collection key to file the seed under.
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
-	private function invoke_make_quantity_input_interactive( $quantity_html, $context = array() ) {
+	private function invoke_make_quantity_input_interactive( $quantity_html, $context = array(), $draft_key = null ) {
 		$previous_block_to_render            = \WP_Block_Supports::$block_to_render;
 		\WP_Block_Supports::$block_to_render = array(
 			'blockName' => 'woocommerce/add-to-cart-with-options-quantity-selector',
@@ -652,16 +739,18 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		);
 
 		try {
-			return Utils::make_quantity_input_interactive( $quantity_html, array(), array(), $context );
+			return null === $draft_key
+				? Utils::make_quantity_input_interactive( $quantity_html, array(), array(), $context )
+				: Utils::make_quantity_input_interactive( $quantity_html, array(), array(), $context, false, $draft_key );
 		} finally {
 			\WP_Block_Supports::$block_to_render = $previous_block_to_render;
 		}
 	}
 
 	/**
-	 * Tests that `make_quantity_input_interactive` emits a `woocommerce/cart`
-	 * draft-seed context and its `seedDraftIfAbsent` init trigger for the
-	 * global product in scope.
+	 * Tests that `make_quantity_input_interactive` files a `woocommerce/cart`
+	 * draft seed for the global product in scope under the reserved global
+	 * collection key when no draft key is given.
 	 *
 	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::make_quantity_input_interactive
 	 */
@@ -676,26 +765,60 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$result = $this->invoke_make_quantity_input_interactive( $quantity_html );
 
-		$expected_draft_seed = 'data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
-			array(
-				'draftSeed' => array(
-					'id'       => $product_id,
-					'quantity' => 1,
-				),
-			),
-			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-		) . '\'';
+		$state        = wp_interactivity_state( 'woocommerce/cart' );
+		$global_seeds = $state['draftSeeds']['woocommerce/global'] ?? array();
 
-		$this->assertStringContainsString( $expected_draft_seed, $result, 'The quantity selector emits a woocommerce/cart draft-seed context carrying the product id and quantity.' );
-		$this->assertStringContainsString( 'data-wp-init--seed-draft="woocommerce/cart::actions.seedDraftIfAbsent"', $result, 'The quantity selector triggers seedDraftIfAbsent on init.' );
-		$this->assertStringNotContainsString( '"variation"', $result, 'The draft seed for a simple product carries no "variation" key.' );
+		$this->assertArrayHasKey( $product_id, $global_seeds, 'The quantity selector files a draft seed for the product in scope under the global collection key.' );
+		$this->assertSame(
+			array(
+				'id'       => $product_id,
+				'quantity' => 1,
+			),
+			$global_seeds[ $product_id ],
+			'The filed seed carries the product id and quantity.'
+		);
+
+		$this->assertStringNotContainsString( 'data-wp-context---draft-seed', $result, 'The quantity selector no longer emits a draft-seed context bag.' );
+		$this->assertStringNotContainsString( 'data-wp-init--seed-draft', $result, 'The quantity selector no longer emits the seedDraftIfAbsent init trigger.' );
+
+		$product = $previous_product;
+	}
+
+	/**
+	 * Tests that `make_quantity_input_interactive` files its draft seed under
+	 * an explicitly-given collection key rather than the reserved global key.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::make_quantity_input_interactive
+	 */
+	public function test_make_quantity_input_interactive_emits_draft_seed_under_given_key() {
+		global $product;
+		$previous_product = $product;
+		$product          = new \WC_Product_Simple();
+		$product->set_regular_price( 10 );
+		$product_id = $product->save();
+		$draft_key  = 'collection/0/' . $product_id;
+
+		$quantity_html = '<div class="quantity"><input type="number" name="quantity" value="1" /></div>';
+
+		$this->invoke_make_quantity_input_interactive( $quantity_html, array(), $draft_key );
+
+		$state = wp_interactivity_state( 'woocommerce/cart' );
+
+		$this->assertArrayHasKey( $draft_key, $state['draftSeeds'] ?? array(), 'The quantity selector files its draft seed under the given collection key.' );
+		$this->assertSame(
+			array(
+				'id'       => $product_id,
+				'quantity' => 1,
+			),
+			$state['draftSeeds'][ $draft_key ][ $product_id ]
+		);
 
 		$product = $previous_product;
 	}
 
 	/**
 	 * Tests that `make_quantity_input_interactive` includes the variation's
-	 * selected attributes in its draft-seed context when the global product in
+	 * selected attributes in its draft seed when the global product in
 	 * scope is a variation directly (e.g. a Single Product block referencing a
 	 * variation id). This mirrors the `selectedAttributes` carried by the
 	 * form-level draft seed for variations, so the client-side cart-line
@@ -730,25 +853,25 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$quantity_html = '<div class="quantity"><input type="number" name="quantity" value="1" /></div>';
 
-		$result = $this->invoke_make_quantity_input_interactive( $quantity_html );
+		$this->invoke_make_quantity_input_interactive( $quantity_html );
 
-		$expected_draft_seed = 'data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
+		$state        = wp_interactivity_state( 'woocommerce/cart' );
+		$global_seeds = $state['draftSeeds']['woocommerce/global'] ?? array();
+
+		$this->assertSame(
 			array(
-				'draftSeed' => array(
-					'id'        => $variation->get_id(),
-					'quantity'  => 1,
-					'variation' => array(
-						array(
-							'attribute' => 'attribute_pa_color',
-							'value'     => 'red-slug',
-						),
+				'id'        => $variation->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'attribute_pa_color',
+						'value'     => 'red-slug',
 					),
 				),
 			),
-			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-		) . '\'';
-
-		$this->assertStringContainsString( $expected_draft_seed, $result, 'The quantity selector draft seed for a directly-referenced variation carries its variation attributes, matching the form-level selectedAttributes context.' );
+			$global_seeds[ $variation->get_id() ],
+			'The draft seed for a directly-referenced variation carries its variation attributes, matching the form-level selectedAttributes context.'
+		);
 
 		$product = $previous_product;
 	}
@@ -769,26 +892,26 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$quantity_html = '<div class="quantity"><input type="number" name="quantity" value="1" /></div>';
 
-		$result = $this->invoke_make_quantity_input_interactive( $quantity_html, array( 'allowZero' => true ) );
+		$this->invoke_make_quantity_input_interactive( $quantity_html, array( 'allowZero' => true ) );
 
-		$expected_draft_seed = 'data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
+		$state        = wp_interactivity_state( 'woocommerce/cart' );
+		$global_seeds = $state['draftSeeds']['woocommerce/global'] ?? array();
+
+		$this->assertSame(
 			array(
-				'draftSeed' => array(
-					'id'       => $product_id,
-					'quantity' => 0,
-				),
+				'id'       => $product_id,
+				'quantity' => 0,
 			),
-			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-		) . '\'';
-
-		$this->assertStringContainsString( $expected_draft_seed, $result, 'The draft seed quantity matches the allowZero-adjusted bound value (0), not the product minimum.' );
+			$global_seeds[ $product_id ],
+			'The draft seed quantity matches the allowZero-adjusted bound value (0), not the product minimum.'
+		);
 
 		$product = $previous_product;
 	}
 
 	/**
-	 * Tests that no draft-seed context is emitted when there is no product in
-	 * scope, since there is nothing to seed.
+	 * Tests that no draft seed is filed when there is no product in scope,
+	 * since there is nothing to seed.
 	 *
 	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::make_quantity_input_interactive
 	 */
@@ -797,10 +920,15 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$previous_product = $product;
 		$product          = null;
 
+		$state_before = wp_interactivity_state( 'woocommerce/cart' );
+
 		$quantity_html = '<div class="quantity"><input type="number" name="quantity" value="1" /></div>';
 		$result        = $this->invoke_make_quantity_input_interactive( $quantity_html );
 
-		$this->assertStringNotContainsString( 'draft-seed', $result, 'No draft seed is emitted when there is no product in scope.' );
+		$state_after = wp_interactivity_state( 'woocommerce/cart' );
+
+		$this->assertSame( $state_before, $state_after, 'No draft seed is filed when there is no product in scope.' );
+		$this->assertStringNotContainsString( 'draft-seed', $result, 'No draft-seed context bag is emitted when there is no product in scope.' );
 
 		$product = $previous_product;
 	}

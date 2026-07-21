@@ -110,10 +110,14 @@ class Utils {
 	 *                                    the one provided by the inherited context (e.g. child items in grouped products).
 	 *                                    Setting this unnecessarily shadows the parent context and prevents
 	 *                                    variationId updates from propagating.
+	 * @param string $draft_key The `woocommerce/cart` collection key this quantity selector's
+	 *                          initial draft seed is filed under. Defaults to the reserved
+	 *                          global collection key for quantity selectors rendered outside
+	 *                          any keyed purchase-surface container.
 	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
-	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array(), $set_product_context = false ) {
+	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array(), $set_product_context = false, $draft_key = 'woocommerce/global' ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 		global $product;
 
@@ -186,14 +190,12 @@ class Utils {
 
 		if ( $product instanceof \WC_Product ) {
 			// The initial `add-item` payload for this quantity selector's
-			// product, seeded as a `woocommerce/cart` context bag so the client
-			// can copy it into the resolved draft collection on first render
-			// (initialize-if-absent). `quantity` matches `$input_quantity` — the
-			// value actually bound to the rendered input above — not the
-			// product's raw minimum, so the seed never disagrees with the
-			// initial HTML.
-			$wrapper_attributes['data-wp-init--seed-draft'] = 'woocommerce/cart::actions.seedDraftIfAbsent';
-
+			// product, filed under its collection key in the `woocommerce/cart`
+			// state so the client can copy it into the resolved draft collection
+			// on first render (initialize-if-absent). `quantity` matches
+			// `$input_quantity` — the value actually bound to the rendered input
+			// above — not the product's raw minimum, so the seed never disagrees
+			// with the initial HTML.
 			$draft_seed = array(
 				'id'       => $product->get_id(),
 				'quantity' => $input_quantity,
@@ -210,18 +212,16 @@ class Utils {
 				$draft_seed['variation'] = self::format_variation_attributes( $product );
 			}
 
-			// Hand-rolled second context bag: `wp_interactivity_data_wp_context()`
-			// always emits an attribute literally named `data-wp-context`, so it
-			// cannot carry the `woocommerce/cart` draft seed alongside the
-			// namespace-default context above on the same element — the HTML
-			// parser would keep the first and silently drop the second. The
-			// three-hyphen `data-wp-context---draft-seed` form is the supported
-			// way to add a second context bag on one element (see
-			// ProductTemplate.php/SingleProduct.php's `data-wp-context---draft-items`).
-			$context_attribute .= ' data-wp-context---draft-seed=\'woocommerce/cart::' . wp_json_encode(
-				array( 'draftSeed' => $draft_seed ),
-				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-			) . '\'';
+			wp_interactivity_state(
+				'woocommerce/cart',
+				array(
+					'draftSeeds' => array(
+						$draft_key => array(
+							$product->get_id() => $draft_seed,
+						),
+					),
+				)
+			);
 		}
 
 		return sprintf(

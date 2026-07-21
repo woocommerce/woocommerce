@@ -9,7 +9,7 @@
 			"default": true
 		}
 	},
-	"usesContext": [ "postId" ],
+	"usesContext": [ "postId", "draftKey" ],
 	"providesContext": {
 		"woocommerce/isDescendantOfAddToCartWithOptions": "isDescendantOfAddToCartWithOptions"
 	},
