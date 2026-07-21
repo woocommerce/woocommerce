@@ -900,7 +900,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 
 		$user_queries = 0;
 		$count        = function () use ( &$user_queries ) {
-			$user_queries++;
+			++$user_queries;
 		};
 		add_action( 'pre_get_users', $count );
 
