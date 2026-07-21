@@ -45,80 +45,87 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 	} );
 
-	test( 'should display the correct inspector layout controls', async ( {
+	test( 'should display and apply Chips layout controls', async ( {
 		editor,
 		pageObject,
 	} ) => {
-		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+		await test.step( 'should display the correct inspector layout controls', async () => {
+			await pageObject.addProductFiltersBlock( {
+				cleanContent: true,
+			} );
 
-		const activeBlock = editor.canvas.getByLabel(
-			blockData.selectors.editor.label
-		);
+			const activeBlock = editor.canvas.getByLabel(
+				blockData.selectors.editor.label
+			);
 
-		await expect( activeBlock ).toBeVisible();
+			await expect( activeBlock ).toBeVisible();
 
-		await activeBlock.click();
+			await activeBlock.click();
 
-		const chipsBlock = editor.canvas.getByLabel(
-			blockData.selectors.editor.innerBlocks.chips.label
-		);
+			const chipsBlock = editor.canvas.getByLabel(
+				blockData.selectors.editor.innerBlocks.chips.label
+			);
 
-		await expect( chipsBlock ).toBeVisible();
-		await editor.selectBlocks( chipsBlock );
+			await expect( chipsBlock ).toBeVisible();
+			await editor.selectBlocks( chipsBlock );
 
-		await editor.openDocumentSettingsSidebar();
+			await editor.openDocumentSettingsSidebar();
 
-		await expect( editor.page.getByText( 'Justification' ) ).toBeVisible();
-		await expect( editor.page.getByText( 'Orientation' ) ).toBeVisible();
-	} );
+			await expect(
+				editor.page.getByText( 'Justification' )
+			).toBeVisible();
+			await expect(
+				editor.page.getByText( 'Orientation' )
+			).toBeVisible();
+		} );
 
-	test( 'should add correct layout CSS class when modifying layout settings', async ( {
-		editor,
-		pageObject,
-	} ) => {
-		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+		await test.step( 'should add correct layout CSS class when modifying layout settings', async () => {
+			const activeBlock = editor.canvas.getByLabel(
+				blockData.selectors.editor.label
+			);
 
-		const activeBlock = editor.canvas.getByLabel(
-			blockData.selectors.editor.label
-		);
+			await expect( activeBlock ).toBeVisible();
 
-		await expect( activeBlock ).toBeVisible();
+			await activeBlock.click();
 
-		await activeBlock.click();
+			const chipsBlock = editor.canvas.getByLabel(
+				blockData.selectors.editor.innerBlocks.chips.label
+			);
 
-		const chipsBlock = editor.canvas.getByLabel(
-			blockData.selectors.editor.innerBlocks.chips.label
-		);
+			await expect( chipsBlock ).toBeVisible();
+			await editor.selectBlocks( chipsBlock );
 
-		await expect( chipsBlock ).toBeVisible();
-		await editor.selectBlocks( chipsBlock );
+			await editor.openDocumentSettingsSidebar();
 
-		await editor.openDocumentSettingsSidebar();
+			await editor.page.getByLabel( 'Space between items' ).click();
+			await expect( chipsBlock ).toHaveClass(
+				/is-content-justification-space-between/
+			);
 
-		await editor.page.getByLabel( 'Space between items' ).click();
-		await expect( chipsBlock ).toHaveClass(
-			/is-content-justification-space-between/
-		);
+			await editor.page.getByLabel( 'Justify items right' ).click();
+			await expect( chipsBlock ).toHaveClass(
+				/is-content-justification-right/
+			);
 
-		await editor.page.getByLabel( 'Justify items right' ).click();
-		await expect( chipsBlock ).toHaveClass(
-			/is-content-justification-right/
-		);
+			await editor.page.getByLabel( 'Justify items center' ).click();
+			await expect( chipsBlock ).toHaveClass(
+				/is-content-justification-center/
+			);
 
-		await editor.page.getByLabel( 'Justify items center' ).click();
-		await expect( chipsBlock ).toHaveClass(
-			/is-content-justification-center/
-		);
+			await editor.page.getByLabel( 'Justify items left' ).click();
+			await expect( chipsBlock ).toHaveClass(
+				/is-content-justification-left/
+			);
 
-		await editor.page.getByLabel( 'Justify items left' ).click();
-		await expect( chipsBlock ).toHaveClass(
-			/is-content-justification-left/
-		);
+			await editor.page
+				.getByRole( 'button', { name: 'Horizontal' } )
+				.click();
+			await expect( chipsBlock ).toHaveClass( /is-horizontal/ );
 
-		await editor.page.getByRole( 'button', { name: 'Horizontal' } ).click();
-		await expect( chipsBlock ).toHaveClass( /is-horizontal/ );
-
-		await editor.page.getByRole( 'button', { name: 'Vertical' } ).click();
-		await expect( chipsBlock ).toHaveClass( /is-vertical/ );
+			await editor.page
+				.getByRole( 'button', { name: 'Vertical' } )
+				.click();
+			await expect( chipsBlock ).toHaveClass( /is-vertical/ );
+		} );
 	} );
 } );
