@@ -363,6 +363,9 @@ class PushTokensDataStore {
 			)
 		);
 
+		// An empty include list must short-circuit here: WP_User_Query
+		// ignores an empty include argument and would fall back to the
+		// unrestricted role scan this method exists to avoid.
 		$user_ids = empty( $users_with_tokens ) ? array() : get_users(
 			array(
 				'role__in' => $roles,

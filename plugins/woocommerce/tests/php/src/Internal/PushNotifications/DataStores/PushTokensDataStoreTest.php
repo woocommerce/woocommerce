@@ -892,6 +892,27 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not run any user query when no tokens exist.
+	 */
+	public function test_get_tokens_for_roles_skips_user_query_when_no_tokens_exist(): void {
+		$this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$user_queries = 0;
+		$count        = function () use ( &$user_queries ) {
+			$user_queries++;
+		};
+		add_action( 'pre_get_users', $count );
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		remove_action( 'pre_get_users', $count );
+
+		$this->assertSame( array(), $tokens );
+		$this->assertSame( 0, $user_queries, 'With no stored tokens there is nothing to look up: an empty include must short-circuit before get_users(), because WP_User_Query ignores an empty include argument and would fall back to the unrestricted role scan.' );
+	}
+
+	/**
 	 * @testdox Should only run user queries restricted to token owners.
 	 */
 	public function test_get_tokens_for_roles_only_queries_users_owning_tokens(): void {
