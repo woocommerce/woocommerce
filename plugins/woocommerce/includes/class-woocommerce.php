@@ -620,8 +620,13 @@ final class WooCommerce {
 			return false;
 		}
 
+		// Pretty permalinks: the REST prefix is part of the path, e.g. /wp-json/wc/v3/products.
+		// Plain permalinks: the route is passed as a query parameter instead, e.g. ?rest_route=/wc/v3/products
+		// (also used by Jetpack-signed REST requests regardless of the permalink structure).
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 		$rest_prefix         = trailingslashit( rest_get_url_prefix() );
-		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ) || ! empty( $_GET['rest_route'] );
+		// phpcs:enable
 
 		/**
 		 * Whether this is a REST API request.
