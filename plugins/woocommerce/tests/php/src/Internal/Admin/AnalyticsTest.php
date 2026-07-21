@@ -497,14 +497,18 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Full-history regenerate with skip-existing unchecked clears the stored scan state.
+	 * @testdox Full-history regenerate with skip-existing unchecked resets the scan state for re-verification.
 	 */
-	public function test_regenerate_clears_state_when_not_skipping(): void {
+	public function test_regenerate_resets_state_when_not_skipping(): void {
 		$this->set_complete_scan_state( 5 );
 
-		$this->sut->maybe_clear_refund_double_count_on_regenerate( false, false );
+		$this->sut->maybe_reset_refund_double_count_on_regenerate( false, false );
 
-		$this->assertFalse( get_option( Analytics::REFUND_DOUBLE_COUNT_OPTION ), 'A full-history reprocessing re-import clears the stale count' );
+		$state = Analytics::get_refund_double_count_state();
+		$this->assertNotFalse( get_option( Analytics::REFUND_DOUBLE_COUNT_OPTION ), 'The state must survive so a verification scan can run after the import' );
+		$this->assertFalse( $state['complete'], 'The stale result is discarded: the notice hides until the post-import scan completes' );
+		$this->assertSame( 0, $state['count'], 'The stale count is discarded' );
+		$this->assertSame( 0, $state['attempts'], 'A fresh scan cycle gets a fresh retry budget' );
 	}
 
 	/**
@@ -513,7 +517,7 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	public function test_regenerate_keeps_state_when_skipping(): void {
 		$this->set_complete_scan_state( 5 );
 
-		$this->sut->maybe_clear_refund_double_count_on_regenerate( false, true );
+		$this->sut->maybe_reset_refund_double_count_on_regenerate( false, true );
 
 		$this->assertSame( 5, Analytics::get_refund_double_count_state()['count'], 'A skip-existing import leaves affected orders untouched, so the count stays' );
 	}
@@ -524,7 +528,7 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	public function test_regenerate_keeps_state_on_windowed_import(): void {
 		$this->set_complete_scan_state( 5 );
 
-		$this->sut->maybe_clear_refund_double_count_on_regenerate( 30, false );
+		$this->sut->maybe_reset_refund_double_count_on_regenerate( 30, false );
 
 		$this->assertSame( 5, Analytics::get_refund_double_count_state()['count'], 'A windowed import never reprocesses affected orders older than the window, so the count stays' );
 	}

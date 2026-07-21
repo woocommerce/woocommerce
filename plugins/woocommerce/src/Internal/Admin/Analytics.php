@@ -133,8 +133,8 @@ class Analytics {
 		add_action( self::REFUND_DOUBLE_COUNT_FIX_HOOK, array( $this, 'process_refund_double_count_fix_batch' ) );
 
 		// A re-import that reprocesses existing rows (skip-existing unchecked) repairs the
-		// double-counted rows, so clear the stale scan count when that import starts.
-		add_action( 'woocommerce_analytics_regenerate_init', array( $this, 'maybe_clear_refund_double_count_on_regenerate' ), 10, 2 );
+		// double-counted rows, so reset the scan state for re-verification once it finishes.
+		add_action( 'woocommerce_analytics_regenerate_init', array( $this, 'maybe_reset_refund_double_count_on_regenerate' ), 10, 2 );
 
 		if ( $this->should_show_refund_fix_tool() ) {
 			add_filter( 'woocommerce_debug_tools', array( $this, 'register_full_refund_fix_data_tool' ) );
@@ -774,9 +774,15 @@ class Analytics {
 	}
 
 	/**
-	 * Clear the refund double-count scan state when a full-history re-import
+	 * Reset the refund double-count scan state when a full-history re-import
 	 * reprocesses existing rows (skip-existing unchecked), since that repairs
 	 * every affected row.
+	 *
+	 * The state is reset to incomplete — not deleted — with a fresh retry
+	 * budget: the notice hides while the import runs, and once it finishes the
+	 * next settings visit reschedules a verification scan against the repaired
+	 * table. An import that stalls or partially fails therefore resurfaces the
+	 * notice instead of hiding the remaining bad rows forever.
 	 *
 	 * A skip-existing-checked import leaves the affected orders untouched, and a
 	 * windowed import ($days !== false) never reprocesses affected orders older
@@ -789,9 +795,17 @@ class Analytics {
 	 * @param bool     $skip_existing Whether the import skips already-imported records.
 	 * @return void
 	 */
-	public function maybe_clear_refund_double_count_on_regenerate( $days, $skip_existing ): void {
+	public function maybe_reset_refund_double_count_on_regenerate( $days, $skip_existing ): void {
 		if ( ! $skip_existing && false === $days ) {
-			delete_option( self::REFUND_DOUBLE_COUNT_OPTION );
+			update_option(
+				self::REFUND_DOUBLE_COUNT_OPTION,
+				array(
+					'running_count' => 0,
+					'complete'      => false,
+					'scan_attempts' => 0,
+				),
+				false
+			);
 		}
 	}
 
