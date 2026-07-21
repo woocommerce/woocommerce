@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add is_canonical_line readonly boolean to the Store API cart-item response so clients can tell whether a line is the canonical line for its product — the single line a configuration-free add would merge into — without exposing raw cart_item_data. True for the canonical line; false when the line was differentiated by extra cart-item data (e.g. bundle children, bookings, add-ons). Extensions that manage their own differentiated lines can set the flag for those lines via the new woocommerce_store_api_cart_item_is_canonical_line filter.
