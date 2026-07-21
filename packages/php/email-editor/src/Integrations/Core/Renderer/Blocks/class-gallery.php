@@ -132,21 +132,18 @@ class Gallery extends Abstract_Block_Renderer {
 		if ( preg_match( '/<a[^>]*href=(["\'])(.*?)\1[^>]*>(\s*<img[^>]*>)\s*<\/a>/s', $html_content, $link_matches ) ) {
 			// Validate and sanitize the link URL.
 			$sanitized_url = esc_url( $link_matches[2] );
-			if ( ! empty( $sanitized_url ) ) {
-				$sanitized_img = $this->apply_aspect_ratio_crop( Html_Processing_Helper::sanitize_image_html( $link_matches[3] ), $aspect_ratio, $cell_width, $image_attrs );
-				if ( '' !== $sanitized_img ) {
+			$sanitized_img = $this->prepare_image_html( $link_matches[3], $aspect_ratio, $cell_width, $image_attrs );
+			if ( '' !== $sanitized_img ) {
+				if ( ! empty( $sanitized_url ) ) {
 					$result .= '<a href="' . $sanitized_url . '">' . $sanitized_img . '</a>';
-				}
-			} else {
-				// If URL is invalid, extract just the image without link.
-				$sanitized_img = $this->apply_aspect_ratio_crop( Html_Processing_Helper::sanitize_image_html( $link_matches[3] ), $aspect_ratio, $cell_width, $image_attrs );
-				if ( '' !== $sanitized_img ) {
+				} else {
+					// If the URL is invalid, extract just the image without the link.
 					$result .= $sanitized_img;
 				}
 			}
 		} elseif ( preg_match( '/<img[^>]*>/', $html_content, $img_matches ) ) {
 			// Image is not linked - just extract the img element with sanitization.
-			$sanitized_img = $this->apply_aspect_ratio_crop( Html_Processing_Helper::sanitize_image_html( $img_matches[0] ), $aspect_ratio, $cell_width, $image_attrs );
+			$sanitized_img = $this->prepare_image_html( $img_matches[0], $aspect_ratio, $cell_width, $image_attrs );
 			if ( '' !== $sanitized_img ) {
 				$result .= $sanitized_img;
 			}
@@ -169,6 +166,85 @@ class Gallery extends Abstract_Block_Renderer {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Sanitize a raw gallery <img>, apply the optional aspect-ratio crop, then normalize it for
+	 * email rendering.
+	 *
+	 * This is the single entry point every extraction path uses so image hardening (dropping the
+	 * web-only class and reining in an oversized raw width) is applied consistently, whether the
+	 * image is linked, unlinked, or cropped.
+	 *
+	 * @param string      $raw_img_html Raw <img> HTML extracted from the block content.
+	 * @param string|null $aspect_ratio Optional aspect ratio (e.g. "1" or "4/3") to crop the image to.
+	 * @param int         $cell_width Estimated display width of the gallery cell in px.
+	 * @param array       $image_attrs Parsed attributes of the core/image block (id, sizeSlug, ...).
+	 * @return string Prepared <img> HTML, or empty string when the image is invalid.
+	 */
+	private function prepare_image_html( string $raw_img_html, ?string $aspect_ratio, int $cell_width, array $image_attrs ): string {
+		$sanitized = Html_Processing_Helper::sanitize_image_html( $raw_img_html );
+		$sanitized = $this->apply_aspect_ratio_crop( $sanitized, $aspect_ratio, $cell_width, $image_attrs );
+		return $this->normalize_image_for_email( $sanitized, $cell_width );
+	}
+
+	/**
+	 * Normalize a gallery <img> for email: drop the web-only class and rein in an oversized raw width.
+	 *
+	 * The block editor stores the intrinsic `width`/`height` of the original file (e.g. `width="2560"`).
+	 * Outlook honors that raw width literally — blowing a thumbnail-sized cell wide open. The
+	 * core/image renderer avoids this with add_image_dimensions(); the gallery path (which sizes to a
+	 * per-cell width rather than the block width) needs the equivalent tailored to its cell model. We
+	 * clamp the width down to the cell it renders in, but only when the stored width exceeds it,
+	 * scaling any height to keep the aspect ratio. An image with no explicit width is left responsive
+	 * (no attribute added), and a width already at or below the cell width is untouched — so the
+	 * concrete dimensions the aspect-ratio crop sets for a server-cropped file, and the deliberately
+	 * dimensionless CSS-crop fallback, are both preserved.
+	 *
+	 * The other web-only attributes core emits (`srcset`, `sizes`, `loading`, `decoding`) are already
+	 * stripped upstream by {@see Html_Processing_Helper::sanitize_image_html()}, whose allowlist keeps
+	 * only src/alt/width/height/class/style; the `class` is the one web-only attribute it preserves, so
+	 * that is all we remove here (matching the core/image renderer, which also drops it).
+	 *
+	 * @param string $img_html Sanitized <img> HTML.
+	 * @param int    $cell_width Estimated display width of the gallery cell in px.
+	 * @return string The normalized <img> HTML.
+	 */
+	private function normalize_image_for_email( string $img_html, int $cell_width ): string {
+		if ( '' === $img_html ) {
+			return $img_html;
+		}
+
+		$html = new \WP_HTML_Tag_Processor( $img_html );
+		if ( ! $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
+			return $img_html;
+		}
+
+		// Drop the web-only class the sanitizer preserves (harmless in email, and the core/image
+		// renderer strips it too). remove_attribute() is a no-op when the attribute is absent.
+		$html->remove_attribute( 'class' );
+
+		// Rein in a raw width wider than the cell it renders in (e.g. a 2560px original in a 20%-wide
+		// cell). We only shrink an explicit, oversized width — never add one to an otherwise responsive
+		// image, and never touch a width already sized to (or below) the cell — so the aspect-ratio
+		// crop's concrete server-crop dimensions are left intact.
+		if ( $cell_width > 0 ) {
+			$raw_width = $html->get_attribute( 'width' );
+			$width     = is_string( $raw_width ) && is_numeric( $raw_width ) ? (int) $raw_width : 0;
+
+			if ( $width > $cell_width ) {
+				$raw_height = $html->get_attribute( 'height' );
+				$height     = is_string( $raw_height ) && is_numeric( $raw_height ) ? (int) $raw_height : 0;
+				if ( $height > 0 ) {
+					// Scale the height by the same factor so the image keeps its aspect ratio.
+					$scaled_height = max( 1, (int) round( $height * ( $cell_width / $width ) ) );
+					$html->set_attribute( 'height', esc_attr( (string) $scaled_height ) );
+				}
+				$html->set_attribute( 'width', esc_attr( (string) $cell_width ) );
+			}
+		}
+
+		return $html->get_updated_html();
 	}
 
 	/**
@@ -262,8 +338,10 @@ class Gallery extends Abstract_Block_Renderer {
 			}
 			$crop_styles = sprintf( 'aspect-ratio: %s; object-fit: cover; width: 100%%; height: auto; max-width: 100%%; display: block;', $aspect_ratio );
 		} else {
-			// No server-side crop available: fall back to best-effort CSS cropping. We avoid concrete
-			// dimensions here so the natural image isn't distorted in clients that ignore object-fit.
+			// No server-side crop available: fall back to best-effort CSS cropping. We don't stamp
+			// crop dimensions here so the natural image isn't distorted in clients that ignore
+			// object-fit. normalize_image_for_email() may still clamp an oversized width downstream,
+			// but it scales the height with it, preserving the natural ratio rather than the crop.
 			$crop_styles = sprintf( 'aspect-ratio: %s; object-fit: cover; width: 100%%; height: auto; display: block;', $aspect_ratio );
 		}
 
