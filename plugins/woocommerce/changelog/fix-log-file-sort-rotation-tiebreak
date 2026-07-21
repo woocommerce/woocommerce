@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Sort log files deterministically by rotation number so batched log deletion pages reliably on PHP 7.4.
