@@ -30,10 +30,10 @@ The checklist covers four areas:
 
 ## Go/no-go (24-48 hours before stable)
 
-A deliberate decision to ship, made while there is still time to not ship. The release lead and the Product DRI confirm the readiness verdicts still hold and nothing blocking has appeared since RC, then record the decision on the release sub-issue: **go**, **no-go**, or **go with conditions** - with names.
+A deliberate decision to ship, made while there is still time to not ship. The release lead and the Product DRI confirm the readiness verdicts still hold and nothing blocking has appeared since the readiness review, then record the decision on the release sub-issue: **go**, **no-go**, or **go with conditions** - with names.
 
 Recorded decisions are the input for release retrospectives and future updates to these checklists.
 
-## For urgent point releases
+## For point releases
 
-An unscheduled point release shipping an urgent fix compresses both points into one: a quick go/no-go with the Product DRI in `#woo-core-releases`, recorded on the release sub-issue. The criteria for whether an issue warrants a point release at all are in [Release Monitoring](/docs/contribution/releases/monitoring).
+Point releases have no RC, so both decision points fold into the go/no-go on the release sub-issue: the release lead and the Product DRI run the readiness criteria above over the changes being shipped, then record the decision. An unscheduled point release shipping an urgent fix compresses this further: a quick go/no-go with the Product DRI in `#woo-core-releases`, recorded on the release sub-issue. The criteria for whether an issue warrants a point release at all are in [Release Monitoring](/docs/contribution/releases/monitoring).
