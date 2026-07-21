@@ -359,6 +359,17 @@ class Controller extends AbstractController {
 			return $this->get_route_error_by_code( self::RESOURCE_EXISTS );
 		}
 
+		// The refund amount field was renamed from 'amount' to 'total'. Reject the old
+		// name explicitly: unknown params are silently dropped by the REST layer, so a
+		// request sending 'amount' as a cap would otherwise fall back to the full
+		// line-item total and refund more than the client intended.
+		if ( null !== $request->get_param( 'amount' ) ) {
+			return $this->get_route_error_response(
+				'unsupported_amount_field',
+				__( 'The amount field is not supported. Use total instead.', 'woocommerce' )
+			);
+		}
+
 		$order = wc_get_order( $request['order_id'] );
 
 		// wc_get_order can return a WC_Order_Refund for refund IDs — reject those

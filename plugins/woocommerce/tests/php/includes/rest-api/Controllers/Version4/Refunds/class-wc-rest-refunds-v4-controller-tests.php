@@ -1223,6 +1223,44 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the legacy amount field is rejected explicitly.
+	 *
+	 * The field was renamed to total. Without this guard the REST layer would
+	 * silently drop the unknown amount param and the controller would fall back
+	 * to the full line-item total, refunding more than the client requested
+	 * (e.g. amount: 50 with line items totaling 110 would create a 110.00 refund).
+	 */
+	public function test_refunds_create_rejects_legacy_amount_field(): void {
+		$order      = $this->create_test_order();
+		$line_items = $order->get_items( 'line_item' );
+		$line_item  = reset( $line_items );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 5.00,
+				'line_items' => array(
+					array(
+						'line_item_id' => $line_item->get_id(),
+						'quantity'     => 1,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status(), 'Legacy amount field must be rejected, not silently ignored' );
+		$response_data = $response->get_data();
+		$this->assertEquals( 'unsupported_amount_field', $response_data['code'] );
+		$this->assertStringContainsString( 'total', $response_data['message'] );
+
+		// No refund may have been created.
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( 0, $order->get_refunds(), 'Rejected request must not create a refund' );
+	}
+
+	/**
 	 * Test refund creation with API refund and restock options.
 	 */
 	public function test_refunds_create_with_api_options(): void {
