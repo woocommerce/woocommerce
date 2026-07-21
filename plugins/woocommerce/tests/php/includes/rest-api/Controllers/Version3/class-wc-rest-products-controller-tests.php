@@ -1946,6 +1946,50 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should sanitize external product button text for users without unfiltered HTML capability.
+	 */
+	public function test_update_external_product_sanitizes_button_text_without_unfiltered_html(): void {
+		$shop_manager = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		wp_set_current_user( $shop_manager );
+
+		$product = WC_Helper_Product::create_external_product();
+		$this->update_product_via_post_request(
+			$product,
+			array(
+				'button_text' => '<strong>Buy now</strong><img src=x onerror=alert(document.cookie)>',
+			)
+		);
+
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertStringContainsString( '<strong>Buy now</strong>', $updated_product->get_button_text(), 'Safe HTML should be retained.' );
+		$this->assertStringNotContainsString( 'onerror', $updated_product->get_button_text(), 'Event handler attributes should be removed.' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should preserve external product button text for users with unfiltered HTML capability.
+	 */
+	public function test_update_external_product_preserves_button_text_with_unfiltered_html(): void {
+		$product     = WC_Helper_Product::create_external_product();
+		$button_text = '<strong>Buy now</strong><img src=x onerror=alert(document.cookie)>';
+
+		$this->update_product_via_post_request(
+			$product,
+			array(
+				'button_text' => $button_text,
+			)
+		);
+
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertSame( $button_text, $updated_product->get_button_text(), 'Unfiltered HTML should be retained for authorized users.' );
+
+		$product->delete( true );
+	}
+
+	/**
 	 * Test that batch create operations update term counts correctly.
 	 *
 	 * Verifies that when creating products via batch operations, the term counts
