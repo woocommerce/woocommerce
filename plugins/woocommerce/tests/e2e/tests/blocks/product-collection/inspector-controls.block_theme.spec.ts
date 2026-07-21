@@ -432,42 +432,44 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			}
 		} );
 
-		[
-			{
-				slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
-				title: 'Products by Category',
-			},
-			{
-				slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
-				title: 'Products by Tag',
-			},
-			{
-				slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_brand`,
-				title: 'Products by Brand',
-			},
-		].forEach( ( template ) => {
-			test( `should be visible in archive template: ${ template.slug }`, async ( {
-				admin,
-				pageObject,
-				editor,
-			} ) => {
-				await admin.visitSiteEditor( {
-					postType: 'wp_template',
-				} );
-				await editor.createTemplate( {
-					templateName: template.title,
-				} );
-				await pageObject.insertProductCollection();
-				await pageObject.chooseCollectionInTemplate();
-				await pageObject.focusProductCollection();
-				await editor.openDocumentSettingsSidebar();
+		test( 'should be visible in created archive templates', async ( {
+			admin,
+			pageObject,
+			editor,
+		} ) => {
+			for ( const template of [
+				{
+					slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
+					title: 'Products by Category',
+				},
+				{
+					slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
+					title: 'Products by Tag',
+				},
+				{
+					slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_brand`,
+					title: 'Products by Brand',
+				},
+			] ) {
+				await test.step( `should be visible in archive template: ${ template.slug }`, async () => {
+					await admin.visitSiteEditor( {
+						postType: 'wp_template',
+					} );
+					await editor.createTemplate( {
+						templateName: template.title,
+					} );
+					await pageObject.insertProductCollection();
+					await pageObject.chooseCollectionInTemplate();
+					await pageObject.focusProductCollection();
+					await editor.openDocumentSettingsSidebar();
 
-				await expect(
-					pageObject
-						.locateSidebarSettings()
-						.getByLabel( SELECTORS.usePageContextControl )
-				).toBeVisible();
-			} );
+					await expect(
+						pageObject
+							.locateSidebarSettings()
+							.getByLabel( SELECTORS.usePageContextControl )
+					).toBeVisible();
+				} );
+			}
 		} );
 
 		test( 'should be visible in non-archive templates', async ( {
