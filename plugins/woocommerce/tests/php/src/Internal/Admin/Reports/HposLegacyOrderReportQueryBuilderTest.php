@@ -303,6 +303,59 @@ class HposLegacyOrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should compare plain post_date where predicates against the GMT column so the date index stays usable.
+	 */
+	public function test_build_query_where_post_date_predicate_compares_gmt_column(): void {
+		OrderHelper::toggle_cot_feature_and_usage( true );
+		update_option( 'timezone_string', 'Europe/Berlin' );
+
+		$builder = new HposLegacyOrderReportQueryBuilder();
+
+		// Sparkline shape: no filter_range, `post_date >` is the only date bound.
+		$sparkline_args = array(
+			'data'         => array(
+				'_order_total' => array(
+					'type'     => 'meta',
+					'function' => 'SUM',
+					'name'     => 'sparkline_value',
+				),
+				'post_date'    => array(
+					'type'     => 'post_data',
+					'function' => '',
+					'name'     => 'post_date',
+				),
+			),
+			'where'        => array(
+				array(
+					'key'      => 'post_date',
+					'value'    => '2026-07-14',
+					'operator' => '>',
+				),
+			),
+			'group_by'     => 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)',
+			'filter_range' => false,
+			'order_types'  => array( 'shop_order' ),
+		);
+
+		$query = $builder->build_query( $sparkline_args, 0, 0 );
+
+		// Berlin is UTC+2 on that date, so local midnight maps back two hours.
+		$this->assertStringContainsString( "orders.date_created_gmt > '2026-07-13 22:00:00'", $query['where'] );
+		$this->assertStringNotContainsString( 'CONVERT_TZ', $query['where'] );
+		$this->assertStringNotContainsString( 'DATE_ADD', $query['where'] );
+		// Row bucketing still converts per row.
+		$this->assertStringContainsString( 'CONVERT_TZ', $query['group_by'] );
+
+		// Values that are not plain date/datetime strings keep the translated per-row expression.
+		$sparkline_args['where'][0]['value'] = 'abc';
+
+		$query = $builder->build_query( $sparkline_args, 0, 0 );
+
+		$this->assertStringContainsString( 'CONVERT_TZ', $query['where'] );
+		$this->assertStringContainsString( "> 'abc'", $query['where'] );
+	}
+
+	/**
 	 * @testdox Should skip where predicates with an empty IN list instead of emitting broken SQL.
 	 */
 	public function test_build_query_skips_empty_in_predicates(): void {

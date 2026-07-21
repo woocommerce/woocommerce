@@ -440,7 +440,30 @@ class HposLegacyOrderReportQueryBuilder {
 	 * @return string GMT datetime in `Y-m-d H:i:s` format.
 	 */
 	private function local_timestamp_to_gmt( int $local_ts ): string {
-		$local = new \DateTimeImmutable( gmdate( 'Y-m-d H:i:s', $local_ts ), wp_timezone() );
+		return (string) $this->local_datetime_to_gmt( gmdate( 'Y-m-d H:i:s', $local_ts ) );
+	}
+
+	/**
+	 * Convert a site-local date or datetime string into the equivalent GMT datetime string.
+	 *
+	 * Only plain `Y-m-d`, `Y-m-d H:i` and `Y-m-d H:i:s` values are converted; anything else
+	 * (including relative formats) returns null so callers can fall back to per-row SQL
+	 * conversion instead of guessing at the caller's intent.
+	 *
+	 * @param string $local_datetime Local date or datetime string.
+	 *
+	 * @return string|null GMT datetime in `Y-m-d H:i:s` format, or null when not convertible.
+	 */
+	private function local_datetime_to_gmt( string $local_datetime ): ?string {
+		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}(:\d{2})?)?$/', $local_datetime ) ) {
+			return null;
+		}
+
+		try {
+			$local = new \DateTimeImmutable( $local_datetime, wp_timezone() );
+		} catch ( \Exception $e ) {
+			return null;
+		}
 
 		return $local->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
 	}
@@ -514,10 +537,50 @@ class HposLegacyOrderReportQueryBuilder {
 			if ( '' === $where_value ) {
 				continue;
 			}
-			$clause .= ' AND ' . $this->translate_legacy_sql_fragment( $value['key'] ) . " {$where_value}";
+
+			$predicate = $this->build_gmt_date_predicate( $value );
+			if ( null === $predicate ) {
+				$predicate = $this->translate_legacy_sql_fragment( $value['key'] ) . " {$where_value}";
+			}
+
+			$clause .= ' AND ' . $predicate;
 		}
 
 		return $clause;
+	}
+
+	/**
+	 * Build a sargable predicate on `orders.date_created_gmt` for a plain `post_date` where row.
+	 *
+	 * Translating `post_date` wraps the column in the per-row local-time expression, which
+	 * stops MySQL from using the date index. For the common shape — a bare `post_date` key,
+	 * a scalar comparison operator and a date/datetime value (e.g. the sales sparkline's
+	 * only date bound, `post_date > 'Y-m-d'`) — the boundary is converted to UTC in PHP
+	 * instead and compared against the raw GMT column, matching what
+	 * {@see self::build_filter_range_where_clause()} does for `filter_range` bounds.
+	 *
+	 * @param array $value A `where` row.
+	 *
+	 * @return string|null Predicate SQL, or null when the row is not a plain post_date comparison.
+	 */
+	private function build_gmt_date_predicate( array $value ): ?string {
+		$key = trim( (string) ( $value['key'] ?? '' ) );
+		if ( 'post_date' !== $key && 'posts.post_date' !== $key ) {
+			return null;
+		}
+
+		$rhs = $value['value'] ?? '';
+		if ( ! in_array( $value['operator'], array( '=', '!=', '<', '<=', '>', '>=' ), true ) || ! is_string( $rhs ) ) {
+			return null;
+		}
+
+		$gmt = $this->local_datetime_to_gmt( $rhs );
+		if ( null === $gmt ) {
+			return null;
+		}
+
+		global $wpdb;
+		return "orders.date_created_gmt {$value['operator']} " . $wpdb->prepare( '%s', $gmt );
 	}
 
 	/**
