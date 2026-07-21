@@ -149,23 +149,27 @@ export interface CartItem {
 	show_backorder_badge: boolean;
 	sold_individually: boolean;
 	/**
-	 * True when this cart line is the standalone (non-differentiated) line for
-	 * its product. The key can be re-derived from product + variation alone;
-	 * no extra cart-item data was required to produce it.
+	 * True when this cart line is the canonical line for its product — the
+	 * single line a configuration-free add of the product (or product +
+	 * variation) would be merged into. At most one such line can exist per
+	 * product + variation.
 	 *
 	 * False when the line's identity was differentiated by extra cart-item
 	 * data supplied via the `woocommerce_add_cart_item_data` filter or the
 	 * `$cart_item_data` argument to `WC_Cart::add_to_cart()` (e.g. bundle
 	 * children, bookings, add-on/custom-text configurations).
 	 *
-	 * A plain variation reads as standalone (`true`) because variation
-	 * attributes are first-class identity, not `cart_item_data`.
+	 * A plain variation reads `true` because variation attributes are
+	 * first-class identity, not `cart_item_data`.
 	 *
 	 * This is a boolean reflection only — the `CartItem` does not carry the
 	 * raw `cart_item_data` payload, nor does it mirror a schema `cart_item`
 	 * object.
+	 *
+	 * An extension can override the server-computed default via the
+	 * `woocommerce_store_api_cart_item_is_canonical_line` filter.
 	 */
-	is_standalone_line: boolean;
+	is_canonical_line: boolean;
 	permalink: string;
 	images: Array< CartImageItem >;
 	variation: Array< CartVariationItem >;

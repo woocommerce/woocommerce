@@ -9,7 +9,7 @@ import type { CartItem } from '@woocommerce/types';
 import type { OptimisticCartItem } from '../../../base/stores/woocommerce/cart';
 
 /**
- * Verifies that `CartItem` declares `is_standalone_line` as a required boolean
+ * Verifies that `CartItem` declares `is_canonical_line` as a required boolean
  * property, and that `OptimisticCartItem` does not declare the field.
  *
  * These tests act as a type-level regression net: because the file is compiled
@@ -41,7 +41,7 @@ const minimalCartItem: CartItem = {
 	backorders_allowed: false,
 	show_backorder_badge: false,
 	sold_individually: false,
-	is_standalone_line: true,
+	is_canonical_line: true,
 	permalink: 'https://example.com/test',
 	images: [],
 	variation: [],
@@ -83,7 +83,7 @@ const minimalCartItem: CartItem = {
 
 /**
  * Minimum valid skeleton for `OptimisticCartItem`. This type must NOT include
- * `is_standalone_line`; the field is deliberately absent so that optimistic
+ * `is_canonical_line`; the field is deliberately absent so that optimistic
  * lines are excluded from the `isCartItem()` guard check in the cart store's
  * keyless matcher — `isCartItem` short-circuits before the field is read.
  */
@@ -93,49 +93,49 @@ const minimalOptimisticCartItem: OptimisticCartItem = {
 };
 
 describe( 'CartItem TypeScript interface', () => {
-	describe( 'is_standalone_line field on CartItem', () => {
-		it( 'accepts is_standalone_line: true for a plain standalone line', () => {
+	describe( 'is_canonical_line field on CartItem', () => {
+		it( 'accepts is_canonical_line: true for a plain standalone line', () => {
 			const item: CartItem = {
 				...minimalCartItem,
-				is_standalone_line: true,
+				is_canonical_line: true,
 			};
-			expect( item.is_standalone_line ).toBe( true );
+			expect( item.is_canonical_line ).toBe( true );
 		} );
 
-		it( 'accepts is_standalone_line: false for a meta-differentiated line', () => {
+		it( 'accepts is_canonical_line: false for a meta-differentiated line', () => {
 			const item: CartItem = {
 				...minimalCartItem,
-				is_standalone_line: false,
+				is_canonical_line: false,
 			};
-			expect( item.is_standalone_line ).toBe( false );
+			expect( item.is_canonical_line ).toBe( false );
 		} );
 
-		it( 'exposes is_standalone_line as a boolean property on CartItem', () => {
-			expect( typeof minimalCartItem.is_standalone_line ).toBe(
+		it( 'exposes is_canonical_line as a boolean property on CartItem', () => {
+			expect( typeof minimalCartItem.is_canonical_line ).toBe(
 				'boolean'
 			);
 		} );
 	} );
 
-	describe( 'OptimisticCartItem does not declare is_standalone_line', () => {
-		it( 'does not carry is_standalone_line (field is absent)', () => {
+	describe( 'OptimisticCartItem does not declare is_canonical_line', () => {
+		it( 'does not carry is_canonical_line (field is absent)', () => {
 			// Verify the property is not present on the OptimisticCartItem object.
 			// This is both a runtime check and a compile-time guard: if the field
 			// were added to the type declaration, this test would remain green —
 			// but the TypeScript interface check enforces it is not required.
-			expect( 'is_standalone_line' in minimalOptimisticCartItem ).toBe(
+			expect( 'is_canonical_line' in minimalOptimisticCartItem ).toBe(
 				false
 			);
 		} );
 
-		it( 'accessing a missing is_standalone_line yields undefined (falsy-safe)', () => {
+		it( 'accessing a missing is_canonical_line yields undefined (falsy-safe)', () => {
 			// Simulates the isCartItem() guard short-circuit in the keyless matcher:
 			// casting the optimistic item through the union type and reading
-			// is_standalone_line must yield undefined (falsy), not throw.
+			// is_canonical_line must yield undefined (falsy), not throw.
 			const asUnion = minimalOptimisticCartItem as
 				| OptimisticCartItem
 				| CartItem;
-			const value = ( asUnion as CartItem ).is_standalone_line;
+			const value = ( asUnion as CartItem ).is_canonical_line;
 			// `undefined` is falsy — the guard is applied before the field is read.
 			expect( value ).toBeFalsy();
 		} );
