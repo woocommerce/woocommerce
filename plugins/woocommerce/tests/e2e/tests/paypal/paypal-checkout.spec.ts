@@ -157,8 +157,12 @@ test.describe(
 			// Keep the test self-contained: capture the navigation request to
 			// PayPal (which carries the cart redirect URL) and abort it so the
 			// browser never actually leaves for PayPal's servers.
-			await page.route( /paypal\.com/, ( route ) => route.abort() );
-			const paypalRequestPromise = page.waitForRequest( /paypal\.com/ );
+			const isPayPalUrl = ( url: URL ) =>
+				url.hostname.includes( 'paypal.com' );
+			await page.route( isPayPalUrl, ( route ) => route.abort() );
+			const paypalRequestPromise = page.waitForRequest( ( request ) =>
+				isPayPalUrl( new URL( request.url() ) )
+			);
 
 			await page
 				.getByRole( 'button', { name: 'Proceed to PayPal' } )
