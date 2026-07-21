@@ -372,6 +372,11 @@ class Email_Editor {
 			return $template;
 		}
 
+		// Anyone can see a published email. For other statuses the user must be able to read the post.
+		if ( ! is_post_publicly_viewable( $post ) && ! current_user_can( 'read_post', $post->ID ) ) {
+			return $template;
+		}
+
 		add_filter(
 			'woocommerce_email_editor_preview_post_template_html',
 			function () use ( $post ) {
