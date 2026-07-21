@@ -450,8 +450,10 @@ class WC_Admin_Post_Types {
 		$product->set_featured( isset( $request_data['_featured'] ) );
 
 		if ( $product->is_type( ProductType::SIMPLE ) || $product->is_type( ProductType::EXTERNAL ) ) {
-			$old_regular_price = $product->get_regular_price( 'edit' );
-			$old_sale_price    = $product->get_sale_price( 'edit' );
+			// The Quick Edit form is prefilled with view-context (filtered) prices, so detecting
+			// an actual edit requires comparing the submission against those same values.
+			$old_regular_price = $this->normalize_price_for_comparison( $product->get_regular_price() );
+			$old_sale_price    = $this->normalize_price_for_comparison( $product->get_sale_price() );
 
 			if ( isset( $request_data['_regular_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
@@ -467,9 +469,16 @@ class WC_Admin_Post_Types {
 
 			$regular_price = $product->get_regular_price( 'edit' );
 			$sale_price    = $product->get_sale_price( 'edit' );
-			$price_changed = $regular_price !== $old_regular_price || $sale_price !== $old_sale_price;
 
-			if ( $price_changed && ( '' === $sale_price || $sale_price >= $regular_price ) ) {
+			// Only a submitted field can be a changed field.
+			$regular_price_changed = isset( $request_data['_regular_price'] ) && $this->normalize_price_for_comparison( $regular_price ) !== $old_regular_price;
+			$sale_price_changed    = isset( $request_data['_sale_price'] ) && $this->normalize_price_for_comparison( $sale_price ) !== $old_sale_price;
+
+			$price_changed  = $regular_price_changed || $sale_price_changed;
+			$sale_date_to   = $product->get_date_on_sale_to( 'edit' );
+			$sale_has_ended = $sale_date_to && $sale_date_to->getTimestamp() < time();
+
+			if ( $price_changed && ( '' === $sale_price || $sale_price >= $regular_price || $sale_has_ended ) ) {
 				$product->set_date_on_sale_to( '' );
 				$product->set_date_on_sale_from( '' );
 			}
@@ -513,6 +522,20 @@ class WC_Admin_Post_Types {
 		$product->save();
 
 		do_action( 'woocommerce_product_quick_edit_save', $product );
+	}
+
+	/**
+	 * Normalize a price value for change detection during Quick Edit.
+	 *
+	 * View-context prices pass through the woocommerce_product_get_regular_price and
+	 * woocommerce_product_get_sale_price filters, which may return non-scalar values
+	 * or differently formatted numbers.
+	 *
+	 * @param mixed $price Raw price value.
+	 * @return string Normalized price string.
+	 */
+	private function normalize_price_for_comparison( $price ): string {
+		return wc_format_decimal( is_scalar( $price ) ? (string) $price : '', false, true );
 	}
 
 	/**
