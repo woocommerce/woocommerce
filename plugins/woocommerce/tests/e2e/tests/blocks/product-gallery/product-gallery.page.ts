@@ -88,7 +88,7 @@ export class ProductGalleryPage {
 		if ( page === 'frontend' ) {
 			return (
 				await this.frontendUtils.getBlockByName( blockName )
-			 ).filter( {
+			).filter( {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
@@ -145,9 +145,8 @@ export class ProductGalleryPage {
 			);
 
 			if ( isInContainerViewport ) {
-				const dataImageId = await imgHandle.getAttribute(
-					'data-image-id'
-				);
+				const dataImageId =
+					await imgHandle.getAttribute( 'data-image-id' );
 				return dataImageId ?? null;
 			}
 		}
@@ -159,7 +158,7 @@ export class ProductGalleryPage {
 		if ( page === 'frontend' ) {
 			return (
 				await this.frontendUtils.getBlockByName( blockName )
-			 ).filter( {
+			).filter( {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
@@ -176,7 +175,7 @@ export class ProductGalleryPage {
 		if ( page === 'frontend' ) {
 			return (
 				await this.frontendUtils.getBlockByName( blockName )
-			 ).filter( {
+			).filter( {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
@@ -204,7 +203,7 @@ export class ProductGalleryPage {
 		if ( page === 'frontend' ) {
 			return (
 				await this.frontendUtils.getBlockByName( blockName )
-			 ).filter( {
+			).filter( {
 				has: this.page.locator( ':visible' ),
 			} );
 		}
@@ -220,7 +219,7 @@ export class ProductGalleryPage {
 		if ( page === 'frontend' ) {
 			return (
 				await this.frontendUtils.getBlockByName( blockName )
-			 ).filter( {
+			).filter( {
 				has: this.page.locator( ':visible' ),
 			} );
 		}

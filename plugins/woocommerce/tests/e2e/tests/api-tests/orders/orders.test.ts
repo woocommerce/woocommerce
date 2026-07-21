@@ -235,12 +235,10 @@ test.describe.serial( 'Orders API tests', () => {
 				'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. ' +
 				'Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 
-			const { source_url: downloadFile } = await getMediaBySlug(
-				'image-01'
-			);
-			const { source_url: downloadFile2 } = await getMediaBySlug(
-				'image-02'
-			);
+			const { source_url: downloadFile } =
+				await getMediaBySlug( 'image-01' );
+			const { source_url: downloadFile2 } =
+				await getMediaBySlug( 'image-02' );
 
 			const simpleProducts = await request.post(
 				'./wp-json/wc/v3/products/batch',
@@ -2121,13 +2119,11 @@ test.describe.serial( 'Orders API tests', () => {
 				productTags
 			);
 
-			const externalProducts = await createSampleExternalProducts(
-				categories
-			);
+			const externalProducts =
+				await createSampleExternalProducts( categories );
 
-			const groupedProducts = await createSampleGroupedProduct(
-				categories
-			);
+			const groupedProducts =
+				await createSampleGroupedProduct( categories );
 
 			const variableProducts = await createSampleVariableProducts(
 				categories,
@@ -2137,9 +2133,8 @@ test.describe.serial( 'Orders API tests', () => {
 			const hierarchicalProducts =
 				await createSampleHierarchicalProducts();
 
-			const reviewIds = await createSampleProductReviews(
-				simpleProducts
-			);
+			const reviewIds =
+				await createSampleProductReviews( simpleProducts );
 
 			const orders = await createSampleProductOrders( simpleProducts );
 

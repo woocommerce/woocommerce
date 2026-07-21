@@ -10,7 +10,7 @@
 	"types": "dist/index.d.ts",
 	"scripts": {
 		"analyzer": "node -r ts-node/register ./src/commands/analyzer/index.ts",
-		"lint": "eslint . --ext .ts",
+		"lint": "eslint .",
 		"test": "pnpm test:js",
 		"test:js": "jest"
 	},
@@ -27,8 +27,9 @@
 	"devDependencies": {
 		"@types/jest": "29.5.x",
 		"@types/node": "^24.1.0",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.55.0",
+		"eslint": "^10.0.0",
 		"jest": "29.5.x",
 		"ts-jest": "29.1.x",
 		"ts-node": "^10.9.2",

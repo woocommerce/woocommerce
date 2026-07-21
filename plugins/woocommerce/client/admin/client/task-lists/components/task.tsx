@@ -40,9 +40,8 @@ export const Task = ( { query, task }: TaskProps ) => {
 			return;
 		}
 
-		const setupTaskList = await resolveSelect(
-			onboardingStore
-		).getTaskList( 'setup' );
+		const setupTaskList =
+			await resolveSelect( onboardingStore ).getTaskList( 'setup' );
 		if ( ! setupTaskList ) {
 			return;
 		}

@@ -546,9 +546,8 @@ const getPlugins = fromPromise( async () => {
 	dispatch( onboardingStore ).invalidateResolutionForStoreSelector(
 		'getFreeExtensions'
 	);
-	const extensionsBundles = await resolveSelect(
-		onboardingStore
-	).getFreeExtensions();
+	const extensionsBundles =
+		await resolveSelect( onboardingStore ).getFreeExtensions();
 	return (
 		extensionsBundles.find(
 			( bundle ) => bundle.key === 'obw/core-profiler'
