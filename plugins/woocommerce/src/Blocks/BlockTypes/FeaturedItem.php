@@ -418,7 +418,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 			}
 		}
 
-		$image_url = $this->get_item_image( $item, $image_size );
+		$image_url = $this->get_image_url( $attributes, $item );
 
 		if ( ! empty( $image_url ) ) {
 			return sprintf(

@@ -145,7 +145,7 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered_0_col = $this->gallery_renderer->render( '', $parsed_gallery_0_col, $this->rendering_context );
 		$this->assertStringContainsString( 'image1.jpg', $rendered_0_col );
 
-		// Test 10 columns (should be limited to 5).
+		// Test 10 columns (should be limited to 8).
 		$parsed_gallery_10_col                     = $this->parsed_gallery;
 		$parsed_gallery_10_col['attrs']['columns'] = 10;
 
@@ -587,5 +587,100 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertSame( $widths[1], $widths[2], 'Images in the same full row share a width.' );
 		$this->assertGreaterThan( $widths[0], $widths[3], 'A lone trailing image is sized to the full row width.' );
 		$this->assertGreaterThanOrEqual( 2 * $widths[0], $widths[3], 'The full-width cell is substantially wider than a one-third cell.' );
+	}
+
+	/**
+	 * Build a parsed gallery block with a given number of images and a columns attribute.
+	 *
+	 * @param int $image_count Number of core/image inner blocks to generate.
+	 * @param int $columns     Value for the gallery's columns attribute.
+	 * @return array Parsed gallery block.
+	 */
+	private function build_gallery_with_images( int $image_count, int $columns ): array {
+		$inner_blocks = array();
+		for ( $i = 1; $i <= $image_count; $i++ ) {
+			$image_html     = sprintf(
+				'<figure class="wp-block-image size-large"><img src="https://example.com/image%1$d.jpg" alt="Image %1$d" class="wp-image-%1$d"/></figure>',
+				$i
+			);
+			$inner_blocks[] = array(
+				'blockName'    => 'core/image',
+				'attrs'        => array(
+					'id'              => $i,
+					'sizeSlug'        => 'large',
+					'linkDestination' => 'none',
+				),
+				'innerBlocks'  => array(),
+				'innerHTML'    => $image_html,
+				'innerContent' => array( 0 => $image_html ),
+			);
+		}
+
+		return array(
+			'blockName'   => 'core/gallery',
+			'attrs'       => array(
+				'columns' => $columns,
+				'linkTo'  => 'none',
+			),
+			'innerHTML'   => sprintf( '<figure class="wp-block-gallery has-nested-images columns-%d is-cropped"></figure>', $columns ),
+			'innerBlocks' => $inner_blocks,
+		);
+	}
+
+	/**
+	 * A 6-column gallery must render 6 images per row, not silently clamp to 5.
+	 *
+	 * Regression test: clamping 6 columns down to 5 chunked a 12-image gallery into 5 + 5 + 2 rows,
+	 * and the trailing pair then ballooned to 50% each (100 / images-in-row). Honoring 6 columns
+	 * renders two even rows of six (100 / 6 = 16.67% per cell) with no widened partial row.
+	 */
+	public function testItRendersSixColumnsWithoutClampingToFive(): void {
+		$parsed_gallery = $this->build_gallery_with_images( 12, 6 );
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		$this->assertStringContainsString( 'width: 16.67%', $rendered, 'Six-column cells are one-sixth wide.' );
+		$this->assertStringNotContainsString( 'width: 20.00%', $rendered, 'Columns must not be clamped to five.' );
+		$this->assertStringNotContainsString( 'width: 50.00%', $rendered, 'There is no partial row to balloon.' );
+		$this->assertStringContainsString( 'image12.jpg', $rendered, 'All twelve images are rendered.' );
+	}
+
+	/**
+	 * The renderer supports up to 8 columns, matching the core gallery block's maximum.
+	 */
+	public function testItSupportsUpToEightColumns(): void {
+		$parsed_gallery = $this->build_gallery_with_images( 8, 8 );
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		$this->assertStringContainsString( 'width: 12.50%', $rendered, 'Eight-column cells are one-eighth wide.' );
+		$this->assertStringContainsString( 'image8.jpg', $rendered, 'All eight images are rendered.' );
+	}
+
+	/**
+	 * Columns beyond 8 are clamped to 8 (the block's own maximum), not rendered at a smaller width.
+	 */
+	public function testItClampsColumnsToEight(): void {
+		$parsed_gallery = $this->build_gallery_with_images( 16, 10 );
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		$this->assertStringContainsString( 'width: 12.50%', $rendered, 'Cells are sized for eight columns.' );
+		$this->assertStringNotContainsString( 'width: 10.00%', $rendered, 'Columns must be clamped to eight, not ten.' );
+		$this->assertStringContainsString( 'image16.jpg', $rendered, 'All sixteen images are rendered.' );
+	}
+
+	/**
+	 * A genuine partial last row stretches its images to fill the width, matching the core gallery
+	 * block (whose flex items grow to fill the final row). Ten images in an 8-column gallery render
+	 * as a full row of eight (12.50% each) plus a trailing pair that stretches to 50% each.
+	 */
+	public function testItStretchesPartialLastRowLikeTheBlock(): void {
+		$parsed_gallery = $this->build_gallery_with_images( 10, 8 );
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		$this->assertStringContainsString( 'width: 12.50%', $rendered, 'The full row uses the column width.' );
+		$this->assertStringContainsString( 'width: 50.00%', $rendered, 'The trailing pair stretches to fill the row, as in the block.' );
 	}
 }
