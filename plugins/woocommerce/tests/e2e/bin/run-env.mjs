@@ -13,9 +13,10 @@ import { get as httpGet } from 'node:http';
 import { spawn } from 'node:child_process';
 
 export function parseArgs( argv ) {
-	const rebuild = argv.includes( '--rebuild' );
-	const passthrough = argv.filter( ( a ) => a !== '--rebuild' );
-	return { rebuild, passthrough };
+	return {
+		rebuild: argv.includes( '--rebuild' ),
+		passthrough: argv.filter( ( a ) => a !== '--rebuild' ),
+	};
 }
 
 export function isCi( env ) {
@@ -39,7 +40,10 @@ export const ALLOWED_WP_ENV_VARS = [
 export function sanitizeEnv( env ) {
 	const out = {};
 	for ( const [ key, value ] of Object.entries( env ) ) {
-		if ( key.startsWith( 'WP_ENV_' ) && ! ALLOWED_WP_ENV_VARS.includes( key ) ) {
+		if (
+			key.startsWith( 'WP_ENV_' ) &&
+			! ALLOWED_WP_ENV_VARS.includes( key )
+		) {
 			continue;
 		}
 		out[ key ] = value;
@@ -82,7 +86,9 @@ export const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function readState( stateDir ) {
 	try {
-		return JSON.parse( readFileSync( join( stateDir, 'instance.json' ), 'utf8' ) );
+		return JSON.parse(
+			readFileSync( join( stateDir, 'instance.json' ), 'utf8' )
+		);
 	} catch {
 		return null;
 	}
@@ -96,15 +102,31 @@ export function writeState( stateDir, state ) {
 	);
 }
 
-export function decide( { state, currentHash, nowMs, maxAgeMs, forceRebuild } ) {
-	if ( forceRebuild ) return 'rebuild';
-	if ( ! state ) return 'rebuild';
-	if ( state.hash !== currentHash ) return 'rebuild';
+export function decide( {
+	state,
+	currentHash,
+	nowMs,
+	maxAgeMs,
+	forceRebuild,
+} ) {
+	if ( forceRebuild ) {
+		return 'rebuild';
+	}
+	if ( ! state ) {
+		return 'rebuild';
+	}
+	if ( state.hash !== currentHash ) {
+		return 'rebuild';
+	}
 	// A corrupt/old state file with a missing or non-numeric snapshotCreatedAt
 	// makes the age comparison NaN (always false); treat it as stale rather than
 	// silently reusing an unknowable-age snapshot.
-	if ( ! Number.isFinite( state.snapshotCreatedAt ) ) return 'rebuild';
-	if ( nowMs - state.snapshotCreatedAt > maxAgeMs ) return 'rebuild';
+	if ( ! Number.isFinite( state.snapshotCreatedAt ) ) {
+		return 'rebuild';
+	}
+	if ( nowMs - state.snapshotCreatedAt > maxAgeMs ) {
+		return 'rebuild';
+	}
 	return 'fresh';
 }
 
@@ -152,24 +174,42 @@ function run( cmd, args, { env, capture = false } ) {
 			stdio: capture ? [ 'inherit', 'pipe', 'inherit' ] : 'inherit',
 		} );
 		let out = '';
-		if ( capture ) child.stdout.on( 'data', ( c ) => ( out += c ) );
+		if ( capture ) {
+			child.stdout.on( 'data', ( c ) => ( out += c ) );
+		}
 		child.on( 'error', reject );
 		child.on( 'close', ( code ) =>
 			code === 0
 				? resolve( out )
-				: reject( new Error( `${ cmd } ${ args.join( ' ' ) } exited ${ code }` ) )
+				: reject(
+						new Error(
+							`${ cmd } ${ args.join( ' ' ) } exited ${ code }`
+						)
+				  )
 		);
 	} );
 }
 
 export function wpEnv( args, { env } ) {
-	return run( 'pnpm', [ 'exec', 'wp-env', '--config', E2E_CONFIG, ...args ], { env } );
+	return run( 'pnpm', [ 'exec', 'wp-env', '--config', E2E_CONFIG, ...args ], {
+		env,
+	} );
 }
 
 export function wpCli( shScript, { env, capture = true } ) {
 	return run(
 		'pnpm',
-		[ 'exec', 'wp-env', '--config', E2E_CONFIG, 'run', 'cli', 'sh', '-c', shScript ],
+		[
+			'exec',
+			'wp-env',
+			'--config',
+			E2E_CONFIG,
+			'run',
+			'cli',
+			'sh',
+			'-c',
+			shScript,
+		],
 		{ env, capture }
 	);
 }
@@ -197,7 +237,9 @@ export function writeSentinel( hash, { env } ) {
 	// computeHash() digest, so assert that invariant locally rather than trusting
 	// the contract across files.
 	if ( ! /^[0-9a-f]{32}$/.test( hash ) ) {
-		throw new Error( `writeSentinel: refusing to write non-md5 hash "${ hash }"` );
+		throw new Error(
+			`writeSentinel: refusing to write non-md5 hash "${ hash }"`
+		);
 	}
 	// SNAP_DIR lives under the web root so the sentinel is HTTP-fetchable (that is
 	// how isOurInstance() checks port ownership). The DB dump and uploads archive
@@ -207,7 +249,8 @@ export function writeSentinel( hash, { env } ) {
 	// window never opens and the snapshot==sentinel divergence coupling is intact.
 	// `%b` (not a bare format string) interprets the `\n` escapes while leaving
 	// any future `%` in the content inert — no printf format-injection footgun.
-	const htaccess = 'Require all denied\\n<Files sentinel>\\nRequire all granted\\n</Files>\\n';
+	const htaccess =
+		'Require all denied\\n<Files sentinel>\\nRequire all granted\\n</Files>\\n';
 	return wpCli(
 		`mkdir -p ${ SNAP_DIR } && ` +
 			`printf '%s' '${ hash }' > ${ SNAP_DIR }/sentinel && ` +
@@ -217,7 +260,9 @@ export function writeSentinel( hash, { env } ) {
 }
 
 export async function readSentinel( { env } ) {
-	return ( await wpCli( `cat ${ SNAP_DIR }/sentinel 2>/dev/null || true`, { env } ) ).trim();
+	return (
+		await wpCli( `cat ${ SNAP_DIR }/sentinel 2>/dev/null || true`, { env } )
+	).trim();
 }
 
 export async function wpCoreVersion( { env } ) {
@@ -259,7 +304,11 @@ export async function rebuild( { env, hash, port, stateDir } ) {
 		( await wpCli( `wp theme list --field=name | wc -l`, { env } ) ).trim()
 	);
 	const attachmentCount = Number(
-		( await wpCli( `wp post list --post_type=attachment --format=count`, { env } ) ).trim()
+		(
+			await wpCli( `wp post list --post_type=attachment --format=count`, {
+				env,
+			} )
+		).trim()
 	);
 	// `themeCount` is piped through `wc -l` so it degrades to 0 (which trips the
 	// check) if the wp-cli call misbehaves; the raw `--format=count` output for
@@ -280,7 +329,12 @@ export async function rebuild( { env, hash, port, stateDir } ) {
 
 	await writeSentinel( hash, { env } );
 	await captureSnapshot( { env } );
-	writeState( stateDir, { hash, port, wpVersion, snapshotCreatedAt: Date.now() } );
+	writeState( stateDir, {
+		hash,
+		port,
+		wpVersion,
+		snapshotCreatedAt: Date.now(),
+	} );
 }
 
 export async function fresh( { env, hash, wpVersion } ) {
@@ -297,10 +351,17 @@ export async function fresh( { env, hash, wpVersion } ) {
 }
 
 async function main() {
-	const pluginRoot = resolvePath( dirname( fileURLToPath( import.meta.url ) ), '..', '..', '..' );
+	const pluginRoot = resolvePath(
+		dirname( fileURLToPath( import.meta.url ) ),
+		'..',
+		'..',
+		'..'
+	);
 	process.chdir( pluginRoot );
 
-	const { rebuild: rebuildFlag, passthrough } = parseArgs( process.argv.slice( 2 ) );
+	const { rebuild: rebuildFlag, passthrough } = parseArgs(
+		process.argv.slice( 2 )
+	);
 
 	// CI: lean provision-once pass-through; preserve today's behavior exactly.
 	if ( isCi( process.env ) ) {
@@ -313,7 +374,9 @@ async function main() {
 	// `--debug` that only CI mode forwards) is silently inert, so say so.
 	if ( passthrough.length > 0 ) {
 		console.warn(
-			`run-env: ignoring argument(s) not used in dev mode: ${ passthrough.join( ' ' ) }`
+			`run-env: ignoring argument(s) not used in dev mode: ${ passthrough.join(
+				' '
+			) }`
 		);
 	}
 
@@ -329,12 +392,17 @@ async function main() {
 			return '';
 		}
 	};
-	const wcVersion = readWcVersion( readFileSync( 'woocommerce.php', 'utf8' ) );
+	const wcVersion = readWcVersion(
+		readFileSync( 'woocommerce.php', 'utf8' )
+	);
 
 	let port = state?.port ?? ( await probeFreePort() );
 	let foreignPort = false;
 	if ( state?.port && ! ( await isPortFree( port ) ) ) {
-		const ours = await isOurInstance( `http://localhost:${ port }`, state.hash );
+		const ours = await isOurInstance(
+			`http://localhost:${ port }`,
+			state.hash
+		);
 		if ( ! ours ) {
 			port = await probeFreePort();
 			foreignPort = true;
@@ -363,7 +431,9 @@ async function main() {
 	if ( action === 'fresh' ) {
 		const result = await fresh( { env, hash, wpVersion: state.wpVersion } );
 		if ( result === 'restored' ) {
-			console.log( `E2E env ready (reused) on http://localhost:${ port }` );
+			console.log(
+				`E2E env ready (reused) on http://localhost:${ port }`
+			);
 			return;
 		}
 		console.log( 'Env diverged from snapshot; rebuilding…' );

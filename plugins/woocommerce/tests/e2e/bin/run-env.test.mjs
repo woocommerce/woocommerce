@@ -49,7 +49,10 @@ test( 'sanitizeEnv strips non-allowlisted WP_ENV_* vars', () => {
 		WP_ENV_LIFECYCLE_SCRIPT_AFTER_START: 'echo hi',
 	} );
 	assert.equal( out.PATH, '/usr/bin' );
-	assert.equal( out.WP_ENV_CORE, 'https://wordpress.org/wordpress-latest.zip' );
+	assert.equal(
+		out.WP_ENV_CORE,
+		'https://wordpress.org/wordpress-latest.zip'
+	);
 	assert.equal( out.WP_ENV_PHP_VERSION, '8.1' );
 	assert.equal( out.WP_ENV_PORT, '9001' );
 	// WP_ENV_HOME is allowlisted (relocates the instance dir; kept so sibling
@@ -67,7 +70,9 @@ test( 'sanitizeEnv strips non-allowlisted WP_ENV_* vars', () => {
 
 test( 'readWcVersion parses the plugin header', () => {
 	assert.equal(
-		readWcVersion( ' * Plugin Name: WooCommerce\n * Version: 11.1.0-dev\n' ),
+		readWcVersion(
+			' * Plugin Name: WooCommerce\n * Version: 11.1.0-dev\n'
+		),
 		'11.1.0-dev'
 	);
 } );
@@ -84,7 +89,10 @@ test( 'computeHash is stable and sensitive to each input', () => {
 	assert.match( h, /^[0-9a-f]{32}$/ );
 	assert.equal( computeHash( base ), h ); // stable
 	assert.notEqual( computeHash( { ...base, wcVersion: '11.2.0-dev' } ), h );
-	assert.notEqual( computeHash( { ...base, setupScriptText: 'echo other' } ), h );
+	assert.notEqual(
+		computeHash( { ...base, setupScriptText: 'echo other' } ),
+		h
+	);
 	assert.notEqual(
 		computeHash( { ...base, allowlistEnv: { WP_ENV_PHP_VERSION: '8.2' } } ),
 		h
@@ -108,7 +116,13 @@ test( 'writeState/readState round-trips', () => {
 
 test( 'decide picks rebuild vs fresh', () => {
 	const state = { hash: 'h', port: 9001, snapshotCreatedAt: 1000 };
-	const p = { state, currentHash: 'h', nowMs: 1000, maxAgeMs: MAX_AGE_MS, forceRebuild: false };
+	const p = {
+		state,
+		currentHash: 'h',
+		nowMs: 1000,
+		maxAgeMs: MAX_AGE_MS,
+		forceRebuild: false,
+	};
 	assert.equal( decide( p ), 'fresh' );
 	assert.equal( decide( { ...p, forceRebuild: true } ), 'rebuild' );
 	assert.equal( decide( { ...p, state: null } ), 'rebuild' );
