@@ -95,13 +95,19 @@ class ProductTemplate extends AbstractBlock {
 			$product_id     = (int) get_the_ID();
 			$post_type      = get_post_type();
 
+			// `queryId` is a static parsed block attribute, unchanged by pagination,
+			// so this key is stable across successive renders of the same card.
+			$query_id  = $block->context['queryId'] ?? '0';
+			$draft_key = 'collection/' . $query_id . '/' . $product_id;
+
 			// Set the block name to one that does not correspond to an existing registered block.
 			// This ensures that for the inner instances of the Post Template block, we do not render any block supports.
 			$block_instance['blockName'] = 'core/null';
 
-			$filter_block_context = static function ( $context ) use ( $product_id, $post_type ) {
+			$filter_block_context = static function ( $context ) use ( $product_id, $post_type, $draft_key ) {
 				$context['postType'] = $post_type;
 				$context['postId']   = $product_id;
+				$context['draftKey'] = $draft_key;
 				return $context;
 			};
 
@@ -134,25 +140,24 @@ class ProductTemplate extends AbstractBlock {
 
 			// Hand-rolled second context bag: `wp_interactivity_data_wp_context()` always
 			// emits an attribute literally named `data-wp-context`, so it cannot carry the
-			// draft-items collection alongside `$product_context_directive` on the same
-			// element — the HTML parser would keep the first and silently drop the second.
-			// The three-hyphen `data-wp-context---draft-items` form is the supported way to
-			// add a second context bag on one element (see Wishlist.php/SavedForLater.php's
+			// draft key alongside `$product_context_directive` on the same element — the
+			// HTML parser would keep the first and silently drop the second. The
+			// three-hyphen `data-wp-context---draft-key` form is the supported way to add
+			// a second context bag on one element (see Wishlist.php/SavedForLater.php's
 			// `data-wp-context---notices`). JSON_HEX_APOS is required because
 			// $li_directives below uses single-quoted attribute values. This loop item
-			// declares an empty `woocommerce/cart` collection boundary; the `data-wp-init`
-			// directive below registers it with (or restores it from) the cart store's
-			// draft-lifecycle ledger.
-			$draft_items_context_directive = 'data-wp-context---draft-items=\'woocommerce/cart::' . wp_json_encode(
-				array( 'draftItems' => array() ),
+			// declares the card's server-minted `woocommerce/cart` draft key so descendant
+			// purchase surfaces (reached via the sibling `render_block_context` filter
+			// above) can file their seeds under it.
+			$draft_key_context_directive = 'data-wp-context---draft-key=\'woocommerce/cart::' . wp_json_encode(
+				array( 'draftKey' => $draft_key ),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			) . '\'';
 
 			$li_directives = '
 				data-wp-interactive="woocommerce/product-collection"
 				' . $product_context_directive . '
-				' . $draft_items_context_directive . '
-				data-wp-init="woocommerce/cart::actions.registerOrRestoreDraftCollection"
+				' . $draft_key_context_directive . '
 				data-wp-key="product-item-' . $product_id . '"
 			';
 
