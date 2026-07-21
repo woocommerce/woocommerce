@@ -42,6 +42,16 @@ class WC_Product_Variable extends WC_Product {
 	protected $variation_attributes = null;
 
 	/**
+	 * Variations prices.
+	 *
+	 * @var array<string,array<string,array<int,float>>>
+	 */
+	private array $variation_prices = array(
+		'for_display:0' => array(),
+		'for_display:1' => array(),
+	);
+
+	/**
 	 * Get internal type.
 	 *
 	 * @return string
@@ -99,13 +109,16 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array Array of RAW prices, regular prices, and sale prices with keys set to variation ID.
 	 */
 	public function get_variation_prices( $for_display = false ) {
+		/** @var array<string,array<int,float>> $prices */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$prices = $this->data_store->read_price_data( $this, $for_display );
 
-		foreach ( $prices as $price_key => $variation_prices ) {
-			$prices[ $price_key ] = $this->sort_variation_prices( $variation_prices );
+		// Performance note: loose != compares key/value pairs regardless of order, so a re-sort is only triggered when prices actually change.
+		$cache_key = $for_display ? 'for_display:1' : 'for_display:0';
+		if ( $this->variation_prices[ $cache_key ] != $prices ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
+			$this->variation_prices[ $cache_key ] = array_map( fn( $variation_prices ) => $this->sort_variation_prices( $variation_prices ), $prices );
 		}
 
-		return $prices;
+		return $this->variation_prices[ $cache_key ];
 	}
 
 	/**

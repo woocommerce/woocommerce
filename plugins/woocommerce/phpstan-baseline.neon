@@ -17955,7 +17955,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$str of function md5 expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 3
+			count: 1
 			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
 
 		-
