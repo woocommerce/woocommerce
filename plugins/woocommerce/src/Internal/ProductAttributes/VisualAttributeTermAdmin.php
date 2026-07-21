@@ -326,6 +326,10 @@ class VisualAttributeTermAdmin implements RegisterHooksInterface {
 			return;
 		}
 
+		if ( ! is_string( $screen->id ) ) {
+			return;
+		}
+
 		$is_attribute_term_screen = 0 === strpos( $screen->id, 'edit-pa_' );
 		$taxonomy                 = $this->get_current_taxonomy();
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent visual attribute admin asset enqueueing from throwing a TypeError when an integration provides a malformed admin screen ID.

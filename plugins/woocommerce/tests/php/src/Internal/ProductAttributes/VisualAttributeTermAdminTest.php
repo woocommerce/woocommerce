@@ -234,4 +234,22 @@ class VisualAttributeTermAdminTest extends WC_Unit_Test_Case {
 			wc_delete_attribute( $attribute_id );
 		}
 	}
+
+	/**
+	 * @testdox Should ignore malformed admin screen IDs when enqueueing visual attribute assets.
+	 */
+	public function test_enqueue_visual_attribute_script_ignores_non_string_screen_id(): void {
+		global $current_screen;
+
+		$original_screen = $current_screen ?? null;
+		$current_screen  = (object) array( 'id' => 35202 ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		try {
+			( new VisualAttributeTermAdmin() )->enqueue_visual_attribute_script();
+
+			$this->assertTrue( true, 'Malformed screen IDs should be ignored without throwing a TypeError.' );
+		} finally {
+			$current_screen = $original_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
 }
