@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -38,6 +38,28 @@ async function addProductToCart( page: Page, productId: number ) {
 	).toContainText( '1' );
 }
 
+/**
+ * Deletes the pending order created by the PayPal redirect. The order id is
+ * carried in the PayPal request's `custom` parameter.
+ *
+ * @param {ApiClient} restApi   The REST API client (the `restApi` fixture).
+ * @param {string}    paypalUrl The captured PayPal redirect URL.
+ */
+async function deleteOrderFromPayPalUrl(
+	restApi: ApiClient,
+	paypalUrl: string
+) {
+	const custom = JSON.parse(
+		new URL( paypalUrl ).searchParams.get( 'custom' ) ?? '{}'
+	);
+
+	if ( custom.order_id ) {
+		await restApi.delete( `${ WC_API_PATH }/orders/${ custom.order_id }`, {
+			force: true,
+		} );
+	}
+}
+
 const test = paypalTest.extend< {
 	product: { id: number; name: string; price: string };
 } >( {
@@ -54,6 +76,10 @@ const test = paypalTest.extend< {
 			true
 		);
 
+		const originalEmail = (
+			await wpCLI( 'wp option pluck woocommerce_paypal_settings email' )
+		).stdout.trim();
+
 		await wpCLI(
 			`wp option patch update woocommerce_paypal_settings email '${ PAYPAL_TEST_EMAIL }'`
 		);
@@ -61,6 +87,10 @@ const test = paypalTest.extend< {
 		await page.context().clearCookies();
 		await use( page );
 
+		// Restore the receiver email and gateway state changed above.
+		await wpCLI(
+			`wp option patch update woocommerce_paypal_settings email '${ originalEmail }'`
+		);
 		await setGatewayEnabled( restApi, 'paypal', paypalWasEnabled );
 	},
 
@@ -74,9 +104,12 @@ const test = paypalTest.extend< {
 
 		await use( product );
 
-		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
-			force: true,
-		} );
+		// Guard against deleting an unexpected resource if creation failed.
+		if ( typeof product?.id === 'number' && product.id > 0 ) {
+			await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+				force: true,
+			} );
+		}
 	},
 } );
 
@@ -122,6 +155,7 @@ test.describe(
 		test( 'Guest checkout with PayPal Standard redirects to PayPal', async ( {
 			page,
 			product,
+			restApi,
 		} ) => {
 			await addProductToCart( page, product.id );
 			await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
@@ -169,6 +203,9 @@ test.describe(
 				.click();
 
 			const paypalUrl = ( await paypalRequestPromise ).url();
+
+			// Clean up the pending order this checkout created.
+			await deleteOrderFromPayPalUrl( restApi, paypalUrl );
 
 			expect( paypalUrl ).toContain( 'paypal.com' );
 			expect( paypalUrl ).toContain( 'cmd=_cart' );
