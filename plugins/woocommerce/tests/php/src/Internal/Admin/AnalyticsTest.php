@@ -205,7 +205,7 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Scan accumulates affected orders across multiple keyset batches.
+	 * @testdox Scan accumulates affected orders across multiple full-LIMIT batches within one window.
 	 */
 	public function test_scan_batches_and_accumulates(): void {
 		$this->insert_double_counted_order( 1000 );
@@ -218,7 +218,7 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $mid_state['count'], 'Only the first batch order is counted so far' );
 		$this->assertNotFalse(
 			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 1000 ), 'wc-admin-data' ),
-			'The next batch should be scheduled from the last processed parent_id'
+			'A full batch should schedule the next one from the last processed parent_id, staying inside the window'
 		);
 
 		$this->sut->process_refund_double_count_scan_batch( 1000 );
@@ -226,8 +226,30 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 
 		$this->sut->process_refund_double_count_scan_batch( 2000 );
 		$final_state = Analytics::get_refund_double_count_state();
-		$this->assertTrue( $final_state['complete'], 'Scan should complete once a batch comes back short' );
+		$this->assertTrue( $final_state['complete'], 'Scan should complete once the last window comes back short' );
 		$this->assertSame( 2, $final_state['count'], 'Both batched orders should be counted' );
+	}
+
+	/**
+	 * @testdox Scan advances window by window and only completes past the highest order_id.
+	 */
+	public function test_scan_advances_across_windows(): void {
+		$this->insert_double_counted_order( 1000 );
+		$this->insert_double_counted_order( 600000 );
+
+		$this->sut->process_refund_double_count_scan_batch( 0 );
+		$mid_state = Analytics::get_refund_double_count_state();
+		$this->assertFalse( $mid_state['complete'], 'A short batch must not end the scan while rows exist past the window' );
+		$this->assertSame( 1, $mid_state['count'], 'Only the first window order is counted so far' );
+		$this->assertNotFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( Analytics::REFUND_DOUBLE_COUNT_WINDOW ), 'wc-admin-data' ),
+			'An exhausted window should schedule the next batch from the window boundary'
+		);
+
+		$this->sut->process_refund_double_count_scan_batch( Analytics::REFUND_DOUBLE_COUNT_WINDOW );
+		$final_state = Analytics::get_refund_double_count_state();
+		$this->assertTrue( $final_state['complete'], 'Scan completes once the window covering the highest order_id is swept' );
+		$this->assertSame( 2, $final_state['count'], 'Orders from both windows should be counted' );
 	}
 
 	/**
@@ -283,7 +305,28 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		$this->sut->process_refund_double_count_fix_batch( 2000 );
 		$state = Analytics::get_refund_double_count_state();
 		$this->assertTrue( $state['complete'], 'Fix keeps the scan marked complete' );
-		$this->assertSame( 0, $state['count'], 'A short batch ends the sweep and self-heals the count' );
+		$this->assertSame( 0, $state['count'], 'A short batch in the last window ends the sweep and self-heals the count' );
+	}
+
+	/**
+	 * @testdox Fix batch advances window by window and only self-heals past the highest order_id.
+	 */
+	public function test_fix_batch_advances_across_windows(): void {
+		$this->insert_double_counted_order( 1000 );
+		$this->insert_double_counted_order( 600000 );
+		$this->set_complete_scan_state( 2 );
+
+		$this->sut->process_refund_double_count_fix_batch( 0 );
+		$this->assertNotFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK, array( Analytics::REFUND_DOUBLE_COUNT_WINDOW ), 'wc-admin-data' ),
+			'An exhausted window should schedule the next fix batch from the window boundary'
+		);
+		$this->assertSame( 2, Analytics::get_refund_double_count_state()['count'], 'The stored count only resets once the sweep reaches the last window' );
+
+		$this->sut->process_refund_double_count_fix_batch( Analytics::REFUND_DOUBLE_COUNT_WINDOW );
+		$state = Analytics::get_refund_double_count_state();
+		$this->assertTrue( $state['complete'], 'Fix keeps the scan marked complete' );
+		$this->assertSame( 0, $state['count'], 'The sweep self-heals once the window covering the highest order_id is done' );
 	}
 
 	/**
