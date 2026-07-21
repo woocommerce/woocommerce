@@ -68,24 +68,35 @@ run `pnpm playwright test --help`
 > default environment, but this may change. You can always find the setup by checking the `package.json` scripts section and the `playwright.config.js`.
 >
 
-## Fast E2E environment (run-env)
+## Fast E2E environment
 
-`pnpm --filter=@woocommerce/plugin-woocommerce env:e2e` brings the Core E2E
-environment up through `tests/e2e/bin/run-env.mjs`: it allocates a free
-per-worktree port, decides whether to reuse or rebuild from a staleness hash,
-and **auto-resets the database and uploads to the seeded baseline on every up**.
+`pnpm --filter=@woocommerce/plugin-woocommerce env:e2e` is plain `wp-env start`.
+The provisioning hook (`tests/e2e/bin/test-env-setup.sh`) captures the seeded
+store the first time it runs and restores it on every later start, so bringing
+the environment up is fast and **the database and uploads are reset to the
+seeded baseline every time**.
 
-- Fast re-runs reuse the running containers and restore a DB+uploads snapshot
-  instead of re-running the ~10-step provisioning.
-- `--rebuild` forces a full re-provision and refreshes the baseline snapshot.
-- The chosen port is written to `tests/e2e/.env-state/runner.env` and loaded by
-  Playwright automatically, so `pnpm playwright test …` targets the right site.
+- The first start provisions and captures a baseline; later starts restore it in
+  a single container call instead of re-running the ~10-step provisioning.
+- `pnpm env:e2e:rebuild` forces a fresh provision and recaptures the baseline.
+  Editing `test-env-setup.sh` does the same automatically, and so does any change
+  wp-env itself notices (WordPress core, plugin zips, PHP version, ports): its
+  self-heal wipes the web root, taking the baseline with it.
 - Only the DB and `wp-content/uploads` are reset; other filesystem changes are not.
 - For interactive development (no auto-reset), use `pnpm env:dev` instead.
-- `pnpm wp-env:e2e …` (and `env:e2e:restart` / `env:e2e:destroy`) are raw wp-env
-  escape hatches that skip all of the above. Running one leaves the recorded
-  state stale, but the next `env:e2e` self-heals: it detects the divergence via
-  the missing sentinel and rebuilds automatically.
+
+To run several worktrees at once, give each one its own port — wp-env keys its
+instance directory off the config file path, so the environments are already
+isolated from each other:
+
+```sh
+export WP_ENV_PORT=8186 WP_ENV_TESTS_PORT=8186
+pnpm --filter=@woocommerce/plugin-woocommerce env:e2e
+```
+
+Playwright derives `BASE_URL` from `WP_ENV_TESTS_PORT`, so the suite follows the
+port automatically. Changing the port makes wp-env reconfigure the environment,
+which re-provisions it once.
 
 ## Test environment
 

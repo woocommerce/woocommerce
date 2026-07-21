@@ -25,7 +25,8 @@
 	},
 	"lifecycleScripts": {
 		"afterStart": "./tests/e2e/bin/test-env-setup.sh",
-		"afterClean": "./tests/e2e/bin/test-env-setup.sh"
+		"afterClean": "./tests/e2e/bin/test-env-setup.sh",
+		"afterReset": "./tests/e2e/bin/test-env-setup.sh"
 	},
 	"mappings": {
 		"wp-content/plugins/e2e-test-bin": "./tests/e2e/bin",

@@ -1,5 +1,4 @@
 /.state
-/.env-state
 /test-results
 /envs/_default
 /envs/_local*
