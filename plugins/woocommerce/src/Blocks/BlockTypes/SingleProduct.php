@@ -35,6 +35,27 @@ class SingleProduct extends AbstractBlock {
 	protected $single_product_inner_blocks_names = [];
 
 	/**
+	 * The draft key minted for the currently-rendering Single Product block
+	 * instance (`single-product/<productId>/<n>`), computed in
+	 * `update_context()` and injected into the block context so inner
+	 * purchase surfaces (and this block's own `render()`) can read it.
+	 *
+	 * @var string
+	 */
+	protected $draft_key = '';
+
+	/**
+	 * Per-request count of how many Single Product block instances have been
+	 * rendered so far for each product id, keyed by product id. Used to mint
+	 * the `<n>` occurrence counter in the draft key so that two Single
+	 * Product blocks of the same product on one page get distinct,
+	 * reproducible draft keys.
+	 *
+	 * @var array<int, int>
+	 */
+	protected static $occurrence_counts = array();
+
+	/**
 	 * Initialize the block and Hook into the `render_block_context` filter
 	 * to update the context with the correct data.
 	 *
@@ -88,11 +109,35 @@ class SingleProduct extends AbstractBlock {
 				$this->single_product_inner_blocks_names = array_reverse(
 					$this->extract_single_product_inner_block_names( $block )
 				);
+
+				$this->draft_key = $this->mint_draft_key( $this->product_id );
 		}
 
 		$this->replace_post_for_single_product_inner_block( $block, $context );
 
 		return $context;
+	}
+
+	/**
+	 * Mint this Single Product block instance's draft key.
+	 *
+	 * Combines the product id with a per-request, per-product document-order
+	 * occurrence counter so that two Single Product blocks of the same
+	 * product on one page get distinct, reproducible keys. Called from
+	 * `update_context()`, which runs before this block's inner blocks
+	 * render, so the minted key is available for injection into their
+	 * context via `replace_post_for_single_product_inner_block()`.
+	 *
+	 * @param int $product_id The product ID.
+	 * @return string The minted draft key, `single-product/<productId>/<n>`.
+	 */
+	private function mint_draft_key( $product_id ) {
+		if ( ! isset( self::$occurrence_counts[ $product_id ] ) ) {
+			self::$occurrence_counts[ $product_id ] = 0;
+		}
+		++self::$occurrence_counts[ $product_id ];
+
+		return 'single-product/' . $product_id . '/' . self::$occurrence_counts[ $product_id ];
 	}
 
 	/**
@@ -168,6 +213,7 @@ class SingleProduct extends AbstractBlock {
 
 				$context['postId']        = $this->product_id;
 				$context['singleProduct'] = true;
+				$context['draftKey']      = $this->draft_key;
 			}
 		}
 	}
@@ -207,15 +253,19 @@ class SingleProduct extends AbstractBlock {
 
 			// Hand-rolled second context bag: `wp_interactivity_data_wp_context()` always
 			// emits an attribute literally named `data-wp-context`, so it cannot carry the
-			// draft-items collection alongside the `woocommerce/products` context above on
+			// draft key alongside the `woocommerce/products` context above on
 			// the same element — the HTML parser would keep the first and silently drop the
-			// second. The three-hyphen `data-wp-context---draft-items` form is the
+			// second. The three-hyphen `data-wp-context---draft-key` form is the
 			// supported way to add a second context bag on one element (see
 			// Wishlist.php/SavedForLater.php's `data-wp-context---notices`). This block
-			// declares an empty `woocommerce/cart` collection boundary.
+			// declares its server-minted `woocommerce/cart` draft key so descendant
+			// purchase surfaces can file their seeds under it. Read from `$this->draft_key`
+			// (minted in `update_context()`) rather than `$block->context['draftKey']`,
+			// since this block's `usesContext` doesn't declare `draftKey` — only its
+			// injection into descendant context, via the same filter, needs to.
 			$html->set_attribute(
-				'data-wp-context---draft-items',
-				'woocommerce/cart::' . wp_json_encode( array( 'draftItems' => array() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
+				'data-wp-context---draft-key',
+				'woocommerce/cart::' . wp_json_encode( array( 'draftKey' => $this->draft_key ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
 			);
 		}
 
