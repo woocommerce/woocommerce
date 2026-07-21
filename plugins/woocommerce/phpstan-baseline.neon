@@ -50134,12 +50134,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/GroupedProductSelector.php
 
 		-
-			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\Utils\:\:get_product_from_context\(\) expects WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/QuantitySelector.php
-
-		-
 			message: '#^Parameter \#1 \$html_content of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\Utils\:\:has_visible_quantity_input\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -50154,12 +50148,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$quantity_html of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\Utils\:\:make_quantity_input_interactive\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/QuantitySelector.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\QuantitySelector\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/QuantitySelector.php
 
