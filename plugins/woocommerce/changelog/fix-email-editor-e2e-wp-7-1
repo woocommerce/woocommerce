@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix email editor E2E tests on WordPress 7.1: update the preview "open in new tab" tracking selector to the new menu item and use a single-line block edit so the Save button enables.

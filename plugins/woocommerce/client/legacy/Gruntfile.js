@@ -17,15 +17,6 @@ module.exports = function ( grunt ) {
 			php: 'includes',
 		},
 
-		// JavaScript linting with ESLint.
-		eslint: {
-			src: [
-				'<%= dirs.js %>/admin/*.js',
-				'!<%= dirs.js %>/admin/*.min.js',
-				'<%= dirs.js %>/frontend/*.js',
-				'!<%= dirs.js %>/frontend/*.min.js',
-			],
-		},
 
 		// Sass linting with Stylelint.
 		stylelint: {
@@ -242,7 +233,6 @@ module.exports = function ( grunt ) {
 	grunt.loadNpmTasks( 'grunt-rtlcss' );
 	grunt.loadNpmTasks( 'grunt-postcss' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
-	grunt.loadNpmTasks( 'gruntify-eslint' );
 	grunt.loadNpmTasks( 'grunt-contrib-uglify-es' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );

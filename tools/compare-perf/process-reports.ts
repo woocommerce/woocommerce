@@ -13,8 +13,8 @@ const {
 	readJSONFile,
 	logAtIndent,
 	sanitizeBranchName,
-	median
-} = require( './utils' ) ;
+} = require( './utils' );
+const { median, formatMetricValue } = require( './metric-utils' );
 
 const formats = {
 	success: bold.green,
@@ -104,7 +104,10 @@ async function processPerformanceReports(
 		) ) {
 			for ( const [ metric, value ] of Object.entries( metrics ) ) {
 				invertedResult[ metric ] = invertedResult[ metric ] || {};
-				invertedResult[ metric ][ branch ] = `${ value } ms`;
+				invertedResult[ metric ][ branch ] = formatMetricValue(
+					metric,
+					value
+				);
 			}
 		}
 

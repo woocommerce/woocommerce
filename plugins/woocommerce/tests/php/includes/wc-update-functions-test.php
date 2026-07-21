@@ -338,4 +338,21 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		wc_update_1100_enable_point_of_sale_feature();
 		$this->assertSame( 'yes', get_option( 'woocommerce_feature_point_of_sale_enabled' ) );
 	}
+
+	/**
+	 * @testdox Migration registers and deletes the cached dashboard out-of-stock count.
+	 */
+	public function test_wc_update_1110_delete_dashboard_outofstock_count_transient(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$db_updates = WC_Install::get_db_update_callbacks();
+		$this->assertArrayHasKey( '11.1.0', $db_updates );
+		$this->assertContains( 'wc_update_1110_delete_dashboard_outofstock_count_transient', $db_updates['11.1.0'] );
+
+		set_transient( 'wc_outofstock_count', 3, DAY_IN_SECONDS );
+		$this->assertSame( 3, get_transient( 'wc_outofstock_count' ) );
+
+		wc_update_1110_delete_dashboard_outofstock_count_transient();
+		$this->assertFalse( get_transient( 'wc_outofstock_count' ) );
+	}
 }
