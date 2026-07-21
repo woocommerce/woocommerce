@@ -19,26 +19,37 @@ import {
  * End-to-end tests for "In-cart count reflects only the standalone line".
  *
  * Background: the ProductButton block (and the Add to Cart with Options
- * button) must show the count for the *standalone* line — the line the
- * block would add ( { product_id, variation_id, no extra item data } ) —
- * and must exclude cart lines that are differentiated by item metadata
- * (bundle children, bookings, add-on or recipient lines). Before this fix
- * the count was derived from the product id alone, so a product that
- * existed in the cart only as a bundle child wrongly showed "1 in cart"
- * instead of "Add to cart".
+ * button) must show the count for the *canonical* line — the single line a
+ * configuration-free add of the product (or product + variation) would be
+ * merged into — and must exclude cart lines that are differentiated by
+ * extra cart-item data (bundle children, bookings, add-on or recipient
+ * lines). Before this fix the count was derived from the product id alone,
+ * so a product that existed in the cart only as a bundle child wrongly
+ * showed "1 in cart" instead of "Add to cart".
  *
  * The fix is realised in four coordinated places:
- *  - A shared PHP "plain line" predicate helper (`CartItemUtils::is_standalone_line`)
- *  - An additive readonly `is_standalone_line` boolean on the Store API cart-item
- *  - A meta-exclusion guard in the iAPI cart store's keyless `findItemInCart` branch
- *  - `ProductButton.php`'s server seed, rewritten to sum only plain lines
+ *  - A shared PHP cart-key-identity default helper (`CartItemUtils`) that
+ *    computes whether a line's stored cart key matches the key a
+ *    configuration-free add of that product (or product + variation) would
+ *    produce
+ *  - An additive readonly `is_canonical_line` boolean on the Store API
+ *    cart-item response, resolved from that default through the
+ *    `woocommerce_store_api_cart_item_is_canonical_line` filter, which lets
+ *    an extension flag its own lines (e.g. a bundle stamping its container
+ *    line) as canonical or not regardless of cart-key identity
+ *  - A meta-exclusion guard in the iAPI cart store's keyless `findItemInCart`
+ *    branch that excludes a line only on strict `is_canonical_line === false`
+ *  - `ProductButton.php`'s server seed, which computes its count
+ *    independently via `WC_Cart::generate_cart_id()` (not via
+ *    `CartItemUtils`), looking up the cart line at that key directly
  *
  * The "meta-differentiated line" precondition is simulated by the
  * cart-line-identity helper plugin (`woocommerce-blocks-test-cart-line-identity`),
  * which attaches a unique `cart_item_data` marker to a flagged add-to-cart
- * request so core's `generate_cart_id` mints a distinct cart line for the
- * same product id — a stand-in for a bundle child / booking / add-on /
- * recipient line, since those extensions are not installed in e2e.
+ * request so core's `generate_cart_id` mints a distinct, non-canonical cart
+ * line for the same product id — a stand-in for a bundle child / booking /
+ * add-on / recipient line, since those extensions are not installed in e2e
+ * and no in-repo callback attaches to the filter above.
  *
  * Most tests run as a guest so each gets an isolated empty cart via a fresh
  * guest session cookie. The variation-aware test (via Add to Cart with
@@ -334,7 +345,7 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 		// made the returned line non-standalone), then verify reconciliation:
 		// the committed server cart excludes the meta line from the keyless
 		// match, so the button settles back to "Add to cart".
-		expect( returnedLine?.is_standalone_line ).toBe( false );
+		expect( returnedLine?.is_canonical_line ).toBe( false );
 		await expect( btn ).toHaveText( 'Add to cart' );
 	} );
 
