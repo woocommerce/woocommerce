@@ -290,6 +290,128 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a completed order with a deterministic total and paid date.
+	 *
+	 * @param int    $customer_id Customer ID.
+	 * @param string $date_paid   Paid date in site time.
+	 * @param float  $total       Order total.
+	 */
+	private function create_paid_order( $customer_id, $date_paid, $total ) {
+		$order = WC_Helper_Order::create_order( $customer_id, null, array( 'status' => OrderStatus::COMPLETED ) );
+		$order->set_date_paid( $date_paid );
+		$order->set_total( $total );
+		$order->save();
+	}
+
+	/**
+	 * Assert timeframe totals bypass, but do not replace, the all-time cache.
+	 *
+	 * @param string $cot_enabled Whether custom order tables are enabled.
+	 */
+	private function assert_total_spent_timeframe( $cot_enabled ) {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $cot_enabled );
+		$original_timezone = get_option( 'timezone_string' );
+		update_option( 'timezone_string', 'America/New_York' );
+
+		try {
+			$customer = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
+			$this->create_paid_order( $customer->get_id(), '2024-01-10 12:00:00', 10 );
+			$this->create_paid_order( $customer->get_id(), '2024-02-10 12:00:00', 20 );
+			$this->create_paid_order( $customer->get_id(), '2024-03-10 12:00:00', 30 );
+
+			$sut = new WC_Customer_Data_Store();
+
+			$this->assertEquals( '60.00', $sut->get_total_spent( $customer ) );
+			$this->assertEquals(
+				'20.00',
+				$sut->get_total_spent(
+					$customer,
+					array(
+						'after'  => new DateTimeImmutable( '2024-01-31 23:59:59', wp_timezone() ),
+						'before' => new DateTimeImmutable( '2024-03-01 00:00:00', wp_timezone() ),
+					)
+				)
+			);
+			$filtered_spent = null;
+			$filtered_args  = null;
+			$filter         = static function ( $spent, $filtered_customer, $args ) use ( &$filtered_spent, &$filtered_args ) {
+				$filtered_spent = $spent;
+				$filtered_args  = $args;
+				return $spent;
+			};
+			add_filter( 'woocommerce_customer_get_total_spent', $filter, 10, 3 );
+
+			try {
+				$this->assertEquals(
+					'20.00',
+					wc_get_customer_total_spent(
+						$customer->get_id(),
+						array(
+							'after'  => '2024-01-31 23:59:59',
+							'before' => '2024-03-01 00:00:00',
+						)
+					)
+				);
+			} finally {
+				remove_filter( 'woocommerce_customer_get_total_spent', $filter, 10 );
+			}
+
+			$this->assertEquals( 20.0, (float) $filtered_spent );
+			$this->assertEquals(
+				array(
+					'after'  => '2024-01-31 23:59:59',
+					'before' => '2024-03-01 00:00:00',
+				),
+				$filtered_args
+			);
+			$this->assertEquals(
+				'30.00',
+				$sut->get_total_spent(
+					$customer,
+					array( 'after' => '2024-02-28 23:59:59' )
+				)
+			);
+			$this->assertEquals(
+				'10.00',
+				$sut->get_total_spent(
+					$customer,
+					array(
+						'before' => ( new DateTimeImmutable( '2024-02-01 00:00:00', wp_timezone() ) )->getTimestamp(),
+					)
+				)
+			);
+			$this->assertEquals( '60.00', $sut->get_total_spent( $customer ) );
+		} finally {
+			update_option( 'timezone_string', $original_timezone );
+		}
+	}
+
+	/**
+	 * @testdox 'get_total_spent' filters by paid date when the posts table is used for storing orders.
+	 */
+	public function test_get_total_spent_with_timeframe_not_using_cot() {
+		$this->assert_total_spent_timeframe( 'no' );
+	}
+
+	/**
+	 * @testdox 'get_total_spent' filters by paid date when the custom orders table is used for storing orders.
+	 */
+	public function test_get_total_spent_with_timeframe_using_cot() {
+		$this->assert_total_spent_timeframe( 'yes' );
+	}
+
+	/**
+	 * @testdox 'get_total_spent' rejects invalid paid-date filters.
+	 */
+	public function test_get_total_spent_rejects_invalid_timeframe_date() {
+		$customer = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
+		$sut      = new WC_Customer_Data_Store();
+
+		$this->expectException( InvalidArgumentException::class );
+		$sut->get_total_spent( $customer, array( 'after' => 'not-a-date' ) );
+	}
+
+	/**
 	 * @testdox 'get_total_spent' works when the posts table is used for storing orders.
 	 */
 	public function test_get_total_spent_not_using_cot() {

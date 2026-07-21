@@ -213,9 +213,10 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 *
 	 * @since 3.0.0
 	 * @param WC_Customer $customer Customer object.
+	 * @param array       $args Optional arguments.
 	 * @return float
 	 */
-	public function get_total_spent( &$customer ) {
+	public function get_total_spent( &$customer, $args = array() ) {
 		return 0;
 	}
 

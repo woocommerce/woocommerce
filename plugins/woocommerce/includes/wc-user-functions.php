@@ -871,12 +871,17 @@ function wc_get_customer_available_downloads( $customer_id ) {
 /**
  * Get total spent by customer.
  *
- * @param  int $user_id User ID.
+ * @since 11.1.0 Added the `$args` parameter.
+ *
+ * @param  int   $user_id User ID.
+ * @param  array $args    Optional arguments. Supports exclusive `before` and `after` paid-date filters as
+ *                        date strings, Unix timestamps, or DateTimeInterface objects.
  * @return string
+ * @throws InvalidArgumentException When a paid-date filter cannot be parsed.
  */
-function wc_get_customer_total_spent( $user_id ) {
+function wc_get_customer_total_spent( $user_id, $args = array() ) {
 	$customer = new WC_Customer( $user_id );
-	return $customer->get_total_spent();
+	return $customer->get_total_spent( $args );
 }
 
 /**

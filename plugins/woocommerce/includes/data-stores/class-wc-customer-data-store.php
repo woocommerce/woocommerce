@@ -486,28 +486,149 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	}
 
 	/**
-	 * Return how much money this customer has spent.
+	 * Convert a paid-date filter value to a timestamp.
 	 *
-	 * @since 3.0.0
-	 * @param WC_Customer $customer Customer object.
-	 * @return float
+	 * @param DateTimeInterface|int|string $date Date filter value.
+	 * @return int
+	 * @throws InvalidArgumentException When the date cannot be parsed.
 	 */
-	public function get_total_spent( &$customer ) {
-		$customer_id = $customer->get_id();
+	private function get_total_spent_timestamp( $date ) {
+		if ( $date instanceof DateTimeInterface ) {
+			return $date->getTimestamp();
+		}
+
+		if ( is_numeric( $date ) ) {
+			return (int) $date;
+		}
+
+		if ( ! is_string( $date ) || false === wc_string_to_timestamp( $date ) ) {
+			throw new InvalidArgumentException( 'Invalid total spent date filter.' );
+		}
+
+		return wc_string_to_datetime( $date )->getTimestamp();
+	}
+
+	/**
+	 * Build the total-spent query for a paid-date timeframe.
+	 *
+	 * @param int    $customer_id Customer ID.
+	 * @param string $statuses_sql Prepared list of paid order statuses.
+	 * @param array  $args Paid-date filters.
+	 * @return string
+	 */
+	private function get_total_spent_timeframe_query( $customer_id, $statuses_sql, $args ) {
+		global $wpdb;
+
+		$after_timestamp   = $this->has_total_spent_date_filter( $args['after'] ) ? $this->get_total_spent_timestamp( $args['after'] ) : null;
+		$before_timestamp  = $this->has_total_spent_date_filter( $args['before'] ) ? $this->get_total_spent_timestamp( $args['before'] ) : null;
+		$is_cot_in_use     = $this->is_cot_in_use();
+		$date_placeholder  = $is_cot_in_use ? '%s' : '%d';
+		$format_date_value = static function ( $timestamp ) use ( $is_cot_in_use ) {
+			return $is_cot_in_use ? gmdate( 'Y-m-d H:i:s', $timestamp ) : $timestamp;
+		};
+
+		if ( $is_cot_in_use ) {
+			$sql         = "SELECT SUM( orders.total_amount )
+				FROM %i AS orders
+				INNER JOIN %i AS operational_data ON orders.id = operational_data.order_id
+				WHERE orders.customer_id = %d
+				AND orders.status IN $statuses_sql";
+			$query_args  = array(
+				OrdersTableDataStore::get_orders_table_name(),
+				OrdersTableDataStore::get_operational_data_table_name(),
+				$customer_id,
+			);
+			$date_column = 'operational_data.date_paid_gmt';
+		} else {
+			$sql         = "SELECT SUM( order_total.meta_value )
+				FROM {$wpdb->posts} AS orders
+				INNER JOIN {$wpdb->postmeta} AS customer_meta
+					ON orders.ID = customer_meta.post_id AND customer_meta.meta_key = '_customer_user'
+				INNER JOIN {$wpdb->postmeta} AS order_total
+					ON orders.ID = order_total.post_id AND order_total.meta_key = '_order_total'
+				INNER JOIN {$wpdb->postmeta} AS date_paid
+					ON orders.ID = date_paid.post_id AND date_paid.meta_key = '_date_paid'
+				WHERE customer_meta.meta_value = %d
+				AND orders.post_type = 'shop_order'
+				AND orders.post_status IN $statuses_sql";
+			$query_args  = array( $customer_id );
+			$date_column = 'CAST( date_paid.meta_value AS UNSIGNED )';
+		}
+
+		if ( null !== $after_timestamp ) {
+			$sql         .= " AND $date_column > $date_placeholder";
+			$query_args[] = $format_date_value( $after_timestamp );
+		}
+
+		if ( null !== $before_timestamp ) {
+			$sql         .= " AND $date_column < $date_placeholder";
+			$query_args[] = $format_date_value( $before_timestamp );
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return $wpdb->prepare( $sql, $query_args );
+	}
+
+	/**
+	 * Check whether a paid-date filter has a value.
+	 *
+	 * @param mixed $date Date filter value.
+	 * @return bool
+	 */
+	private function has_total_spent_date_filter( $date ) {
+		return null !== $date && '' !== $date;
+	}
+
+	/**
+	 * Filter the total spent value for a customer.
+	 *
+	 * @param mixed       $money_spent The cached or calculated money spent value.
+	 * @param WC_Customer $customer Customer object.
+	 * @param array       $args Optional paid-date filters.
+	 * @return mixed
+	 */
+	private function filter_total_spent( $money_spent, $customer, $args ) {
 		/**
 		 * Filters total spent value for a given customer.
 		 *
 		 * @since 3.1.0
+		 * @since 11.1.0 Added the `$args` parameter. Timeframe calls receive the calculated value instead of the
+		 *               all-time cached value.
 		 *
-		 * @param mixed       $money_spent The cached money spent value (from user meta).
+		 * @param mixed       $money_spent The cached or calculated money spent value.
 		 * @param WC_Customer $customer    The customer to get the total spent for.
+		 * @param array       $args        Optional paid-date filters.
 		 * @return mixed      The actual value to use.
 		 */
-		$spent = apply_filters(
-			'woocommerce_customer_get_total_spent',
-			Users::get_site_user_meta( $customer_id, 'wc_money_spent', true ),
-			$customer
+		return apply_filters( 'woocommerce_customer_get_total_spent', $money_spent, $customer, $args );
+	}
+
+	/**
+	 * Return how much money this customer has spent.
+	 *
+	 * @since 3.0.0
+	 * @since 11.1.0 Added the `$args` parameter.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @param array       $args Optional arguments. Supports exclusive `before` and `after` paid-date filters as
+	 *                          date strings, Unix timestamps, or DateTimeInterface objects.
+	 * @return float
+	 * @throws InvalidArgumentException When a paid-date filter cannot be parsed.
+	 */
+	public function get_total_spent( &$customer, $args = array() ) {
+		$customer_id   = $customer->get_id();
+		$args          = wp_parse_args(
+			$args,
+			array(
+				'after'  => '',
+				'before' => '',
+			)
 		);
+		$has_timeframe = $this->has_total_spent_date_filter( $args['after'] ) || $this->has_total_spent_date_filter( $args['before'] );
+
+		$spent = $has_timeframe
+			? ''
+			: $this->filter_total_spent( Users::get_site_user_meta( $customer_id, 'wc_money_spent', true ), $customer, $args );
 
 		if ( '' === $spent ) {
 			global $wpdb;
@@ -516,7 +637,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			$statuses_sql = "( 'wc-" . implode( "','wc-", $statuses ) . "' )";
 
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			if ( $this->is_cot_in_use() ) {
+			if ( $has_timeframe ) {
+				$sql = $this->get_total_spent_timeframe_query( $customer_id, $statuses_sql, $args );
+			} elseif ( $this->is_cot_in_use() ) {
 				$sql = $wpdb->prepare(
 					"SELECT SUM(total_amount) FROM %i WHERE customer_id = %d AND status IN $statuses_sql",
 					OrdersTableDataStore::get_orders_table_name(),
@@ -556,11 +679,14 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			 *
 			 * @since 3.1.0
 			 *
+			 * @since 11.1.0 Added the `$args` parameter.
+			 *
 			 * @param string      $sql      The SQL query to use.
 			 * @param WC_Customer $customer The customer to get the total spent for.
+			 * @param array       $args     Optional paid-date filters.
 			 * @return string     The actual SQL query to use.
 			 */
-			$sql = apply_filters( 'woocommerce_customer_get_total_spent_query', $sql, $customer );
+			$sql = apply_filters( 'woocommerce_customer_get_total_spent_query', $sql, $customer, $args );
 
 			$spent = $wpdb->get_var( $sql );
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -568,7 +694,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			if ( ! $spent ) {
 				$spent = 0;
 			}
-			Users::update_site_user_meta( $customer_id, 'wc_money_spent', $spent );
+			if ( $has_timeframe ) {
+				$spent = $this->filter_total_spent( $spent, $customer, $args );
+			} else {
+				Users::update_site_user_meta( $customer_id, 'wc_money_spent', $spent );
+			}
 		}
 
 		return wc_format_decimal( $spent, 2 );
