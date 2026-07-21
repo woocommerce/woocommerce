@@ -79,6 +79,7 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->clear_scheduled_actions();
 		as_unschedule_all_actions( Analytics::REFUND_DOUBLE_COUNT_FIX_HOOK );
+		as_unschedule_all_actions( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK );
 		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
@@ -474,6 +475,45 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 0, $data['refund_double_count'] );
 		$this->assertFalse( $data['refund_double_count_scan_complete'] );
 		$this->assertFalse( $data['refund_double_count_fix_in_progress'] );
+	}
+
+	/**
+	 * @testdox Status endpoint reschedules an incomplete refund double-count scan.
+	 */
+	public function test_status_self_heals_incomplete_refund_scan(): void {
+		wp_set_current_user( $this->admin_user );
+		update_option(
+			Analytics::REFUND_DOUBLE_COUNT_OPTION,
+			array(
+				'running_count' => 0,
+				'complete'      => false,
+			),
+			false
+		);
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/status' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertNotFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
+			'Polling the status endpoint should reschedule a scan that never completed'
+		);
+	}
+
+	/**
+	 * @testdox Status endpoint does not schedule a scan when no scan is owed.
+	 */
+	public function test_status_does_not_self_heal_without_state(): void {
+		wp_set_current_user( $this->admin_user );
+
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/status' );
+		$this->server->dispatch( $request );
+
+		$this->assertFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
+			'Fresh installs without the state option must not schedule a scan'
+		);
 	}
 
 	/**

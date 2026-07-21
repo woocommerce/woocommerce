@@ -85,6 +85,25 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Persist an incomplete scan state, optionally with attempt tracking fields.
+	 *
+	 * @param array $extra Extra state keys (scan_attempts, last_scan_attempt).
+	 */
+	private function set_incomplete_scan_state( array $extra = array() ): void {
+		update_option(
+			Analytics::REFUND_DOUBLE_COUNT_OPTION,
+			array_merge(
+				array(
+					'running_count' => 0,
+					'complete'      => false,
+				),
+				$extra
+			),
+			false
+		);
+	}
+
+	/**
 	 * Force the scan/fix batch size down to one so tests can exercise the
 	 * multi-batch path with a handful of rows.
 	 */
@@ -327,6 +346,154 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		$state = Analytics::get_refund_double_count_state();
 		$this->assertTrue( $state['complete'], 'Fix keeps the scan marked complete' );
 		$this->assertSame( 0, $state['count'], 'The sweep self-heals once the window covering the highest order_id is done' );
+	}
+
+	/**
+	 * @testdox Self-heal reschedules an incomplete scan and counts the attempt.
+	 */
+	public function test_self_heal_reschedules_incomplete_scan(): void {
+		$this->set_incomplete_scan_state();
+
+		Analytics::maybe_reschedule_refund_double_count_scan();
+
+		$this->assertNotFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
+			'An incomplete scan with no pending action should be rescheduled from zero'
+		);
+		$state = Analytics::get_refund_double_count_state();
+		$this->assertSame( 1, $state['attempts'], 'The reschedule should be recorded as an attempt' );
+		$this->assertGreaterThan( 0, $state['last_attempt'], 'The attempt timestamp should be recorded' );
+	}
+
+	/**
+	 * @testdox Self-heal does nothing when the state option does not exist.
+	 */
+	public function test_self_heal_noops_without_state_option(): void {
+		Analytics::maybe_reschedule_refund_double_count_scan();
+
+		$this->assertFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
+			'Stores that never owed a scan (fresh installs) must not schedule one'
+		);
+	}
+
+	/**
+	 * @testdox Self-heal does nothing once the scan is complete.
+	 */
+	public function test_self_heal_noops_when_complete(): void {
+		$this->set_complete_scan_state( 3 );
+
+		Analytics::maybe_reschedule_refund_double_count_scan();
+
+		$this->assertFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
+			'A completed scan must not be rescheduled'
+		);
+	}
+
+	/**
+	 * @testdox Self-heal does nothing while a scan action is already pending.
+	 */
+	public function test_self_heal_noops_when_scan_pending(): void {
+		$this->set_incomplete_scan_state();
+		as_schedule_single_action( time() + 3600, Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 500000 ), 'wc-admin-data' );
+
+		Analytics::maybe_reschedule_refund_double_count_scan();
+
+		$this->assertFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
+			'A pending scan action must not be duplicated'
+		);
+		$this->assertSame( 0, Analytics::get_refund_double_count_state()['attempts'], 'No attempt is consumed when a scan is already queued' );
+	}
+
+	/**
+	 * @testdox Self-heal does nothing while a historical import is running.
+	 */
+	public function test_self_heal_noops_while_importing(): void {
+		$this->set_incomplete_scan_state();
+		as_schedule_single_action( time() + 3600, 'wc-admin_import_batch_init_orders', array(), 'wc-admin-data' );
+
+		try {
+			Analytics::maybe_reschedule_refund_double_count_scan();
+
+			$this->assertFalse(
+				as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
+				'Scanning while an import rewrites wc_order_stats would count a moving target'
+			);
+		} finally {
+			as_unschedule_all_actions( 'wc-admin_import_batch_init_orders' );
+		}
+	}
+
+	/**
+	 * @testdox Self-heal waits out the cooldown between attempts.
+	 */
+	public function test_self_heal_respects_cooldown(): void {
+		$this->set_incomplete_scan_state(
+			array(
+				'scan_attempts'     => 1,
+				'last_scan_attempt' => time(),
+			)
+		);
+
+		Analytics::maybe_reschedule_refund_double_count_scan();
+		$this->assertFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
+			'A recent attempt must not be retried before the cooldown elapses'
+		);
+
+		$this->set_incomplete_scan_state(
+			array(
+				'scan_attempts'     => 1,
+				'last_scan_attempt' => time() - ( 2 * HOUR_IN_SECONDS ),
+			)
+		);
+
+		Analytics::maybe_reschedule_refund_double_count_scan();
+		$this->assertNotFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
+			'A stale attempt should be retried once the cooldown has elapsed'
+		);
+		$this->assertSame( 2, Analytics::get_refund_double_count_state()['attempts'], 'The retry should increment the attempt counter' );
+	}
+
+	/**
+	 * @testdox Self-heal stops retrying once the attempt cap is reached.
+	 */
+	public function test_self_heal_caps_attempts(): void {
+		$this->set_incomplete_scan_state(
+			array(
+				'scan_attempts'     => Analytics::REFUND_DOUBLE_COUNT_MAX_SCAN_ATTEMPTS,
+				'last_scan_attempt' => time() - ( 2 * HOUR_IN_SECONDS ),
+			)
+		);
+
+		Analytics::maybe_reschedule_refund_double_count_scan();
+
+		$this->assertFalse(
+			as_next_scheduled_action( Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data' ),
+			'The scan must not be retried past the attempt cap'
+		);
+	}
+
+	/**
+	 * @testdox Scan progress writes preserve the attempt tracking fields.
+	 */
+	public function test_scan_progress_preserves_attempt_tracking(): void {
+		$this->insert_double_counted_order( 1000 );
+		$this->insert_double_counted_order( 2000 );
+		$this->set_incomplete_scan_state(
+			array(
+				'scan_attempts'     => 2,
+				'last_scan_attempt' => time() - HOUR_IN_SECONDS,
+			)
+		);
+		$this->use_batch_size_one();
+
+		$this->sut->process_refund_double_count_scan_batch( 0 );
+
+		$this->assertSame( 2, Analytics::get_refund_double_count_state()['attempts'], 'A mid-scan progress write must not reset the retry budget' );
 	}
 
 	/**
