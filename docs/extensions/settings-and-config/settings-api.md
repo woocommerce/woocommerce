@@ -1,5 +1,7 @@
 ---
 post_title: Settings API
+sidebar_label: Settings API
+sidebar_position: 1
 ---
 
 # Settings API

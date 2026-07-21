@@ -2320,6 +2320,138 @@ p.demo_store,
 }
 
 /**
+ * Order withdrawal form
+ */
+.woocommerce-order-withdrawal-content {
+	&__intro {
+		margin-bottom: 0.5em;
+	}
+
+	&__note,
+	&__field-description,
+	.description {
+		color: $subtext;
+		font-size: 0.875em;
+		line-height: 1.4;
+	}
+
+	&__field-description,
+	.description {
+		display: block;
+		margin-top: 0.25em;
+	}
+
+	&__field-error {
+		color: var(--wc-red);
+		display: block;
+		font-size: 0.875em;
+		margin: -0.25em 0 0.75em;
+	}
+
+	&__steps {
+		display: flex;
+		gap: 1em;
+		list-style: none;
+		margin: 2em 0;
+		padding: 0;
+		color: $subtext;
+		font-size: 0.875em;
+	}
+
+	&__step {
+		&:not(:last-child)::after {
+			content: "";
+			display: inline-block;
+			width: 0.25em;
+			height: 0.25em;
+			margin-left: 1em;
+			border-radius: 50%;
+			background: currentColor;
+			vertical-align: middle;
+		}
+
+		&--current {
+			color: inherit;
+			font-weight: 700;
+		}
+	}
+
+	&__radio-field {
+		clear: both;
+		border: 0;
+		margin: 0 0 6px;
+		padding: 3px;
+
+		legend {
+			line-height: 2;
+			padding: 0;
+		}
+
+		&.woocommerce-invalid legend {
+			color: var(--wc-red);
+		}
+	}
+
+	&__radio-label {
+		display: block;
+		line-height: 1.7;
+		margin: 0;
+	}
+
+	&__review {
+		margin: 2em 0;
+	}
+
+	&__review-row {
+		padding: 0.75em 0 0.8em;
+
+		&:not(:last-child) {
+			border-bottom: 1px solid $secondary;
+		}
+
+		dt,
+		dd {
+			margin: 0;
+			line-height: 1.4;
+		}
+
+		dt {
+			color: $subtext;
+			font-size: 0.875em;
+			margin-bottom: 0.25em;
+		}
+
+		dd {
+			font-size: 1em;
+		}
+	}
+
+	&__actions {
+		display: flex;
+		gap: 1em;
+		align-items: center;
+		flex-wrap: wrap;
+		margin-top: 2em;
+	}
+
+	&__button--secondary.button {
+		background: transparent;
+		border: 1px solid currentColor;
+		color: inherit;
+
+		&:hover,
+		&:focus {
+			background: transparent;
+			color: inherit;
+		}
+	}
+
+	.required {
+		visibility: visible;
+	}
+}
+
+/**
  * Password strength meter
  */
 .woocommerce-password-strength {

@@ -145,7 +145,7 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered_0_col = $this->gallery_renderer->render( '', $parsed_gallery_0_col, $this->rendering_context );
 		$this->assertStringContainsString( 'image1.jpg', $rendered_0_col );
 
-		// Test 10 columns (should be limited to 5).
+		// Test 10 columns (should be limited to 8).
 		$parsed_gallery_10_col                     = $this->parsed_gallery;
 		$parsed_gallery_10_col['attrs']['columns'] = 10;
 
@@ -587,5 +587,282 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertSame( $widths[1], $widths[2], 'Images in the same full row share a width.' );
 		$this->assertGreaterThan( $widths[0], $widths[3], 'A lone trailing image is sized to the full row width.' );
 		$this->assertGreaterThanOrEqual( 2 * $widths[0], $widths[3], 'The full-width cell is substantially wider than a one-third cell.' );
+	}
+
+	/**
+	 * Build a parsed gallery block with a given number of images and a columns attribute.
+	 *
+	 * @param int $image_count Number of core/image inner blocks to generate.
+	 * @param int $columns     Value for the gallery's columns attribute.
+	 * @return array Parsed gallery block.
+	 */
+	private function build_gallery_with_images( int $image_count, int $columns ): array {
+		$inner_blocks = array();
+		for ( $i = 1; $i <= $image_count; $i++ ) {
+			$image_html     = sprintf(
+				'<figure class="wp-block-image size-large"><img src="https://example.com/image%1$d.jpg" alt="Image %1$d" class="wp-image-%1$d"/></figure>',
+				$i
+			);
+			$inner_blocks[] = array(
+				'blockName'    => 'core/image',
+				'attrs'        => array(
+					'id'              => $i,
+					'sizeSlug'        => 'large',
+					'linkDestination' => 'none',
+				),
+				'innerBlocks'  => array(),
+				'innerHTML'    => $image_html,
+				'innerContent' => array( 0 => $image_html ),
+			);
+		}
+
+		return array(
+			'blockName'   => 'core/gallery',
+			'attrs'       => array(
+				'columns' => $columns,
+				'linkTo'  => 'none',
+			),
+			'innerHTML'   => sprintf( '<figure class="wp-block-gallery has-nested-images columns-%d is-cropped"></figure>', $columns ),
+			'innerBlocks' => $inner_blocks,
+		);
+	}
+
+	/**
+	 * A 6-column gallery must render 6 images per row, not silently clamp to 5.
+	 *
+	 * Regression test: clamping 6 columns down to 5 chunked a 12-image gallery into 5 + 5 + 2 rows,
+	 * and the trailing pair then ballooned to 50% each (100 / images-in-row). Honoring 6 columns
+	 * renders two even rows of six (100 / 6 = 16.67% per cell) with no widened partial row.
+	 */
+	public function testItRendersSixColumnsWithoutClampingToFive(): void {
+		$parsed_gallery = $this->build_gallery_with_images( 12, 6 );
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		$this->assertStringContainsString( 'width: 16.67%', $rendered, 'Six-column cells are one-sixth wide.' );
+		$this->assertStringNotContainsString( 'width: 20.00%', $rendered, 'Columns must not be clamped to five.' );
+		$this->assertStringNotContainsString( 'width: 50.00%', $rendered, 'There is no partial row to balloon.' );
+		$this->assertStringContainsString( 'image12.jpg', $rendered, 'All twelve images are rendered.' );
+	}
+
+	/**
+	 * The renderer supports up to 8 columns, matching the core gallery block's maximum.
+	 */
+	public function testItSupportsUpToEightColumns(): void {
+		$parsed_gallery = $this->build_gallery_with_images( 8, 8 );
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		$this->assertStringContainsString( 'width: 12.50%', $rendered, 'Eight-column cells are one-eighth wide.' );
+		$this->assertStringContainsString( 'image8.jpg', $rendered, 'All eight images are rendered.' );
+	}
+
+	/**
+	 * Columns beyond 8 are clamped to 8 (the block's own maximum), not rendered at a smaller width.
+	 */
+	public function testItClampsColumnsToEight(): void {
+		$parsed_gallery = $this->build_gallery_with_images( 16, 10 );
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		$this->assertStringContainsString( 'width: 12.50%', $rendered, 'Cells are sized for eight columns.' );
+		$this->assertStringNotContainsString( 'width: 10.00%', $rendered, 'Columns must be clamped to eight, not ten.' );
+		$this->assertStringContainsString( 'image16.jpg', $rendered, 'All sixteen images are rendered.' );
+	}
+
+	/**
+	 * A genuine partial last row stretches its images to fill the width, matching the core gallery
+	 * block (whose flex items grow to fill the final row). Ten images in an 8-column gallery render
+	 * as a full row of eight (12.50% each) plus a trailing pair that stretches to 50% each.
+	 */
+	public function testItStretchesPartialLastRowLikeTheBlock(): void {
+		$parsed_gallery = $this->build_gallery_with_images( 10, 8 );
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		$this->assertStringContainsString( 'width: 12.50%', $rendered, 'The full row uses the column width.' );
+		$this->assertStringContainsString( 'width: 50.00%', $rendered, 'The trailing pair stretches to fill the row, as in the block.' );
+	}
+
+	/**
+	 * An oversized raw image width (the intrinsic size the editor stores, e.g. width="2560") is
+	 * clamped down to the cell it renders in, so Outlook — which honors the width attribute literally
+	 * — doesn't blow the layout open. The height scales with it to preserve the aspect ratio.
+	 */
+	public function testItClampsAnOversizedRawImageWidthToTheCell(): void {
+		$parsed_gallery                     = $this->parsed_gallery;
+		$parsed_gallery['attrs']['columns'] = 1;
+		$parsed_gallery['innerBlocks']      = array(
+			array(
+				'blockName'   => 'core/image',
+				'attrs'       => array(
+					'id'              => 1,
+					'sizeSlug'        => 'large',
+					'linkDestination' => 'none',
+				),
+				'innerBlocks' => array(),
+				'innerHTML'   => '<figure class="wp-block-image size-large"><img src="https://example.com/image1.jpg" alt="Image 1" width="2560" height="1440"/></figure>',
+			),
+		);
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		// The raw, oversized width must not survive as an attribute.
+		$this->assertStringNotContainsString( 'width="2560"', $rendered, 'The oversized raw width is not emitted.' );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'img' ) ), 'The gallery image is rendered.' );
+		$img_width  = (int) $html->get_attribute( 'width' );
+		$img_height = (int) $html->get_attribute( 'height' );
+		$this->assertGreaterThan( 0, $img_width, 'The image keeps a concrete width.' );
+		$this->assertLessThan( 2560, $img_width, 'The width is clamped below the original.' );
+		$this->assertGreaterThan( 0, $img_height, 'The height is kept.' );
+		// The 16:9 aspect ratio of the original is preserved after clamping.
+		$this->assertEqualsWithDelta( 2560 / 1440, $img_width / $img_height, 0.05, 'Clamping preserves the aspect ratio.' );
+	}
+
+	/**
+	 * A width that already fits its cell is left untouched — clamping only shrinks oversized images,
+	 * it never rewrites images that are already correctly sized.
+	 */
+	public function testItLeavesAWidthThatFitsTheCellUnchanged(): void {
+		$parsed_gallery                     = $this->parsed_gallery;
+		$parsed_gallery['attrs']['columns'] = 1;
+		$parsed_gallery['innerBlocks']      = array(
+			array(
+				'blockName'   => 'core/image',
+				'attrs'       => array(
+					'id'              => 1,
+					'sizeSlug'        => 'large',
+					'linkDestination' => 'none',
+				),
+				'innerBlocks' => array(),
+				'innerHTML'   => '<figure class="wp-block-image size-large"><img src="https://example.com/image1.jpg" alt="Image 1" width="100" height="50"/></figure>',
+			),
+		);
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		$this->assertStringContainsString( 'width="100"', $rendered, 'A small width is preserved.' );
+		$this->assertStringContainsString( 'height="50"', $rendered, 'Its height is preserved too.' );
+	}
+
+	/**
+	 * The rendered gallery image carries none of the web-only <img> attributes core emits for the
+	 * front end: srcset/sizes/loading/decoding are dropped by the sanitizer's allowlist, and the
+	 * class is removed by the renderer (matching core/image). This guards the combined output
+	 * contract regardless of where each attribute is stripped.
+	 */
+	public function testItStripsWebOnlyImageAttributes(): void {
+		$parsed_gallery                                = $this->parsed_gallery;
+		$parsed_gallery['innerBlocks'][0]['innerHTML'] = '<figure class="wp-block-image size-large"><img src="https://example.com/image1.jpg" alt="Image 1" class="wp-image-1" srcset="https://example.com/image1-300.jpg 300w, https://example.com/image1-1024.jpg 1024w" sizes="(max-width: 660px) 100vw, 660px" loading="lazy" decoding="async"/></figure>';
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		$this->assertStringNotContainsString( 'srcset', $rendered, 'srcset is stripped.' );
+		$this->assertStringNotContainsString( 'sizes=', $rendered, 'sizes is stripped.' );
+		$this->assertStringNotContainsString( 'loading=', $rendered, 'loading is stripped.' );
+		$this->assertStringNotContainsString( 'decoding', $rendered, 'decoding is stripped.' );
+		$this->assertStringNotContainsString( 'wp-image-1', $rendered, 'The web-only class is stripped.' );
+		// The image itself still renders.
+		$this->assertStringContainsString( 'image1.jpg', $rendered, 'The image is still rendered.' );
+	}
+
+	/**
+	 * Real editor markup carries a class and an oversized intrinsic width on the same <img>. Removing
+	 * the class and clamping the width happen on one WP_HTML_Tag_Processor pass, so this verifies the
+	 * two edits don't interfere: the class is gone, the width is clamped, and the height still scales.
+	 */
+	public function testItStripsClassAndClampsWidthOnTheSameImage(): void {
+		$parsed_gallery                     = $this->parsed_gallery;
+		$parsed_gallery['attrs']['columns'] = 1;
+		$parsed_gallery['innerBlocks']      = array(
+			array(
+				'blockName'   => 'core/image',
+				'attrs'       => array(
+					'id'              => 1,
+					'sizeSlug'        => 'large',
+					'linkDestination' => 'none',
+				),
+				'innerBlocks' => array(),
+				'innerHTML'   => '<figure class="wp-block-image size-large"><img src="https://example.com/image1.jpg" alt="Image 1" class="wp-image-1" width="2560" height="1440"/></figure>',
+			),
+		);
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		$this->assertStringNotContainsString( 'wp-image-1', $rendered, 'The class is stripped.' );
+		$this->assertStringNotContainsString( 'width="2560"', $rendered, 'The oversized width is clamped.' );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'img' ) ), 'The gallery image is rendered.' );
+		$this->assertNull( $html->get_attribute( 'class' ), 'The image has no class attribute.' );
+		$img_width  = (int) $html->get_attribute( 'width' );
+		$img_height = (int) $html->get_attribute( 'height' );
+		$this->assertGreaterThan( 0, $img_width, 'The image keeps a concrete width.' );
+		$this->assertLessThan( 2560, $img_width, 'The width is clamped below the original.' );
+		$this->assertGreaterThan( 0, $img_height, 'The height is kept.' );
+		// The 16:9 aspect ratio of the original survives the combined edits.
+		$this->assertEqualsWithDelta( 2560 / 1440, $img_width / $img_height, 0.05, 'The aspect ratio is preserved.' );
+	}
+
+	/**
+	 * Clamping an oversized width must not corrupt a multi-parameter src (one containing an
+	 * ampersand, common with image CDNs). The width attribute is reined in while the src is untouched.
+	 */
+	public function testItClampsOversizedWidthWithoutCorruptingAMultiParamSrc(): void {
+		$parsed_gallery                     = $this->parsed_gallery;
+		$parsed_gallery['attrs']['columns'] = 1;
+		$parsed_gallery['innerBlocks']      = array(
+			array(
+				'blockName'   => 'core/image',
+				'attrs'       => array(
+					'id'              => 1,
+					'sizeSlug'        => 'large',
+					'linkDestination' => 'none',
+				),
+				'innerBlocks' => array(),
+				'innerHTML'   => '<figure class="wp-block-image size-large"><img src="https://example.com/image1.jpg?w=2560&h=1440" alt="Image 1" width="2560" height="1440"/></figure>',
+			),
+		);
+
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		// The oversized width attribute is clamped...
+		$this->assertStringNotContainsString( 'width="2560"', $rendered, 'The oversized width attribute is clamped.' );
+		// ...but the multi-parameter src (with its ampersand) is left intact.
+		$this->assertStringContainsString( 'w=2560', $rendered, 'The src width query parameter survives.' );
+		$this->assertStringContainsString( 'h=1440', $rendered, 'The src height query parameter survives.' );
+	}
+
+	/**
+	 * The clamp applies even when an aspect-ratio crop is in play: a CSS-cropped image still carries
+	 * its oversized raw width attribute, which must be reined in for Outlook without disturbing the
+	 * crop styling for clients that support it.
+	 */
+	public function testItClampsOversizedWidthEvenWhenCropped(): void {
+		$parsed_gallery                         = $this->parsed_gallery;
+		$parsed_gallery['attrs']['columns']     = 1;
+		$parsed_gallery['attrs']['aspectRatio'] = '1';
+		$parsed_gallery['innerBlocks']          = array(
+			array(
+				'blockName'   => 'core/image',
+				'attrs'       => array(
+					'id'              => 1,
+					'sizeSlug'        => 'large',
+					'linkDestination' => 'none',
+				),
+				'innerBlocks' => array(),
+				'innerHTML'   => '<figure class="wp-block-image size-large"><img src="https://example.com/image1.jpg" alt="Image 1" width="2560" height="1440"/></figure>',
+			),
+		);
+
+		// No server-crop integration is attached, so the image falls back to CSS cropping.
+		$rendered = $this->gallery_renderer->render( '', $parsed_gallery, $this->rendering_context );
+
+		// CSS crop is still applied for capable clients...
+		$this->assertStringContainsString( 'object-fit: cover', $rendered, 'The CSS crop is preserved.' );
+		// ...and the oversized raw width no longer blows out Outlook.
+		$this->assertStringNotContainsString( 'width="2560"', $rendered, 'The oversized raw width is clamped even when cropped.' );
 	}
 }

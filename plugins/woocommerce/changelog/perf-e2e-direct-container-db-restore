@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Resolve the Blocks E2E CLI container once per worker so per-test database restores can bypass repeated npm and wp-env startup.
