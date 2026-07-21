@@ -755,32 +755,30 @@ test.describe( 'Product Collection', () => {
 			} );
 		} );
 
-		test( 'Product Collection should be visible after Refresh in a Post', async ( {
+		test( 'Post collections should be visible after Refresh', async ( {
 			page,
 			pageObject,
 			editor,
 		} ) => {
-			await pageObject.createNewPostAndInsertBlock();
-			await expect( pageObject.productTemplate ).toBeVisible();
+			await test.step( 'Product Collection should be visible after Refresh in a Post', async () => {
+				await pageObject.createNewPostAndInsertBlock();
+				await expect( pageObject.productTemplate ).toBeVisible();
 
-			// Refresh the post and verify the block is still visible
-			await editor.publishPost();
-			await page.reload();
-			await expect( pageObject.productTemplate ).toBeVisible();
-		} );
+				// Refresh the post and verify the block is still visible
+				await editor.publishPost();
+				await page.reload();
+				await expect( pageObject.productTemplate ).toBeVisible();
+			} );
 
-		test( 'On Sale Products collection should be visible after Refresh in a Post', async ( {
-			page,
-			pageObject,
-			editor,
-		} ) => {
-			await pageObject.createNewPostAndInsertBlock( 'onSale' );
-			await expect( pageObject.productTemplate ).toBeVisible();
+			await test.step( 'On Sale Products collection should be visible after Refresh in a Post', async () => {
+				await pageObject.createNewPostAndInsertBlock( 'onSale' );
+				await expect( pageObject.productTemplate ).toBeVisible();
 
-			// Refresh the post and verify "On Sale Products" collection is still visible
-			await editor.saveDraft();
-			await page.reload();
-			await expect( pageObject.productTemplate ).toBeVisible();
+				// Refresh the post and verify "On Sale Products" collection is still visible
+				await editor.saveDraft();
+				await page.reload();
+				await expect( pageObject.productTemplate ).toBeVisible();
+			} );
 		} );
 	} );
 
