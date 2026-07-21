@@ -386,7 +386,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			await expect( input ).toHaveValue( '10' );
 		} );
 
-		test( 'should trigger input change event when plus stepper button is clicked', async ( {
+		test( 'should dispatch change events only for valid stepper quantity changes', async ( {
 			admin,
 			editor,
 			blockUtils,
@@ -401,106 +401,81 @@ test.describe( `${ blockData.name } Block`, () => {
 
 			await blockUtils.enableStepperMode();
 			await editor.publishAndVisitPost();
+			const cleanUrl = page.url();
 
-			const plusButton = page.getByLabel( `Increase quantity` );
+			await test.step( 'should trigger input change event when plus stepper button is clicked', async () => {
+				const plusButton = page.getByLabel( `Increase quantity` );
 
-			await blockUtils.addChangeEventListenerToQuantityInput();
+				await blockUtils.addChangeEventListenerToQuantityInput();
 
-			await plusButton.click();
+				await plusButton.click();
 
-			const eventFired = await page.evaluate( () => window.eventFired );
+				const eventFired = await page.evaluate(
+					() => window.eventFired
+				);
 
-			expect( eventFired ).toBe( true );
-		} );
-
-		test( 'should not trigger input change event when plus stepper button is clicked and the value exceeds the maximum limit', async ( {
-			admin,
-			editor,
-			blockUtils,
-			page,
-		} ) => {
-			await admin.createNewPost();
-			await editor.insertBlock( { name: 'woocommerce/single-product' } );
-
-			const productName = 'Hoodie with Logo';
-
-			await blockUtils.configureSingleProductBlock( productName );
-
-			await blockUtils.enableStepperMode();
-			await editor.publishAndVisitPost();
-			await blockUtils.setMinMaxAndStep( {
-				min: 1,
-				max: 4,
-				step: 1,
+				expect( eventFired ).toBe( true );
 			} );
 
-			const plusButton = page.getByLabel( `Increase quantity` );
+			await test.step( 'should not trigger input change event when plus stepper button is clicked and the value exceeds the maximum limit', async () => {
+				await page.goto( cleanUrl );
 
-			for ( let i = 0; i < 5; i++ ) {
+				await blockUtils.setMinMaxAndStep( {
+					min: 1,
+					max: 4,
+					step: 1,
+				} );
+
+				const plusButton = page.getByLabel( `Increase quantity` );
+
+				for ( let i = 0; i < 5; i++ ) {
+					await plusButton.click();
+				}
+
+				await blockUtils.addChangeEventListenerToQuantityInput();
+
 				await plusButton.click();
-			}
 
-			await blockUtils.addChangeEventListenerToQuantityInput();
+				const eventFired = await page.evaluate(
+					() => window.eventFired
+				);
 
-			await plusButton.click();
+				expect( eventFired ).toBeUndefined();
+			} );
 
-			const eventFired = await page.evaluate( () => window.eventFired );
+			await test.step( 'should trigger input change event when minus stepper button is clicked', async () => {
+				await page.goto( cleanUrl );
 
-			expect( eventFired ).toBeUndefined();
-		} );
-		test( 'should trigger input change event when minus stepper button is clicked', async ( {
-			admin,
-			editor,
-			blockUtils,
-			page,
-		} ) => {
-			await admin.createNewPost();
-			await editor.insertBlock( { name: 'woocommerce/single-product' } );
+				const plusButton = page.getByLabel( `Increase quantity` );
+				await plusButton.click();
+				const minusButton = page.getByLabel( `Reduce quantity` );
 
-			const productName = 'Hoodie with Logo';
+				await blockUtils.addChangeEventListenerToQuantityInput();
 
-			await blockUtils.configureSingleProductBlock( productName );
+				await minusButton.click();
 
-			await blockUtils.enableStepperMode();
-			await editor.publishAndVisitPost();
+				const eventFired = await page.evaluate(
+					() => window.eventFired
+				);
 
-			const plusButton = page.getByLabel( `Increase quantity` );
-			await plusButton.click();
-			const minusButton = page.getByLabel( `Reduce quantity` );
+				expect( eventFired ).toBe( true );
+			} );
 
-			await blockUtils.addChangeEventListenerToQuantityInput();
+			await test.step( 'should not trigger input change event when minus stepper button is clicked and the value goes below the minimum limit', async () => {
+				await page.goto( cleanUrl );
 
-			await minusButton.click();
+				const minusButton = page.getByLabel( `Reduce quantity` );
 
-			const eventFired = await page.evaluate( () => window.eventFired );
+				await blockUtils.addChangeEventListenerToQuantityInput();
 
-			expect( eventFired ).toBe( true );
-		} );
-		test( 'should not trigger input change event when minus stepper button is clicked and the value goes below the minimum limit', async ( {
-			admin,
-			editor,
-			blockUtils,
-			page,
-		} ) => {
-			await admin.createNewPost();
-			await editor.insertBlock( { name: 'woocommerce/single-product' } );
+				await minusButton.click();
 
-			const productName = 'Hoodie with Logo';
+				const eventFired = await page.evaluate(
+					() => window.eventFired
+				);
 
-			await blockUtils.configureSingleProductBlock( productName );
-
-			await blockUtils.enableStepperMode();
-			await editor.publishAndVisitPost();
-
-			const minusButton = page.getByLabel( `Reduce quantity` );
-
-			await blockUtils.addChangeEventListenerToQuantityInput();
-
-			await minusButton.click();
-
-			const eventFired = await page.evaluate( () => window.eventFired );
-
-			expect( eventFired ).toBeUndefined();
+				expect( eventFired ).toBeUndefined();
+			} );
 		} );
 	} );
 
