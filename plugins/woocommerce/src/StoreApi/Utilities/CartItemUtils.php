@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 /**
  * Cart item utility functions for the Store API.
  *
- * @since 11.0.0
+ * @since 11.1.0
  */
 class CartItemUtils {
 
@@ -38,7 +38,7 @@ class CartItemUtils {
 	 * }
 	 * ```
 	 *
-	 * @since 11.0.0
+	 * @since 11.1.0
 	 *
 	 * @param array $cart_item A cart-line array as stored in `WC()->cart->cart_contents`.
 	 *                         Expected keys: 'key' (string), 'product_id' (int),
