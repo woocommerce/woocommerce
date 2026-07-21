@@ -191,11 +191,13 @@ class Utils {
 		if ( $product instanceof \WC_Product ) {
 			// The initial `add-item` payload for this quantity selector's
 			// product, filed under its collection key in the `woocommerce/cart`
-			// state so the client can copy it into the resolved draft collection
-			// on first render (initialize-if-absent). `quantity` matches
-			// `$input_quantity` — the value actually bound to the rendered input
-			// above — not the product's raw minimum, so the seed never disagrees
-			// with the initial HTML.
+			// state. The client consults it only via `getServerState()`, never
+			// applying it into a draft collection: `upsertDraftItem` composes
+			// a new draft from it on the shopper's first write, and `addItem`
+			// falls back to it when posting an untouched surface. `quantity`
+			// matches `$input_quantity` — the value actually bound to the
+			// rendered input above — not the product's raw minimum, so the
+			// seed never disagrees with the initial HTML.
 			$draft_seed = array(
 				'id'       => $product->get_id(),
 				'quantity' => $input_quantity,

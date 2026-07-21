@@ -347,11 +347,14 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			// The initial `add-item` payload for this surface's product, filed
-			// under its collection key in the `woocommerce/cart` state so the
-			// client can copy it into the resolved draft collection on first
-			// render (initialize-if-absent). Grouped products seed nothing here:
-			// there is no single product id to add at this level, only children,
-			// which seed individually via their own quantity-selector surface.
+			// under its collection key in the `woocommerce/cart` state. The
+			// client consults it only via `getServerState()`, never applying
+			// it into a draft collection: `upsertDraftItem` composes a new
+			// draft from it on the shopper's first write, and `addItem` falls
+			// back to it when posting an untouched surface. Grouped products
+			// seed nothing here: there is no single product id to add at this
+			// level, only children, which seed individually via their own
+			// quantity-selector surface.
 			if ( ProductType::GROUPED !== $product_type ) {
 				$draft_seed = array(
 					'id'       => $product_id,
