@@ -1021,7 +1021,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function get_batch_refund_totals( array $order_ids ): array {
 		global $wpdb;
 
-		$id_list  = implode( ', ', array_map( 'absint', $order_ids ) );
+		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above; trusted table names.
 		$refund_totals = $wpdb->get_results(
