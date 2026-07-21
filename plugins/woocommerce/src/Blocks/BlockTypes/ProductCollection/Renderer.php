@@ -148,9 +148,6 @@ class Renderer {
 				'isDisabledNext'          => false,
 				'ariaLabelPrevious'       => __( 'Previous products', 'woocommerce' ),
 				'ariaLabelNext'           => __( 'Next products', 'woocommerce' ),
-				// Same value as the `wc-product-collection-<queryId>` router region suffix,
-				// exposed here so it is readable from context at first render.
-				'queryId'                 => $this->parsed_block['attrs']['queryId'] ?? '0',
 			);
 
 			if ( $collection ) {

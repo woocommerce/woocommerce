@@ -40,9 +40,22 @@ class RendererTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include queryId matching the block's query id in the emitted context bag.
+	 * Read the `data-wp-router-region` attribute from the rendered collection-root markup.
+	 *
+	 * @param string $block_content The rendered block markup.
+	 * @return string|null The router-region attribute value, or null when absent.
 	 */
-	public function test_context_bag_includes_query_id(): void {
+	private function get_router_region_from_markup( $block_content ) {
+		$p = new \WP_HTML_Tag_Processor( $block_content );
+		$p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) );
+
+		return $p->get_attribute( 'data-wp-router-region' );
+	}
+
+	/**
+	 * @testdox Should not include a queryId key in the emitted context bag.
+	 */
+	public function test_context_bag_does_not_include_query_id(): void {
 		$this->sut->set_parsed_block(
 			array(
 				'attrs' => array( 'queryId' => 7 ),
@@ -61,12 +74,11 @@ class RendererTest extends WC_Unit_Test_Case {
 
 		$context = $this->get_context_from_markup( $block_content );
 
-		$this->assertArrayHasKey( 'queryId', $context );
-		$this->assertSame( 7, $context['queryId'] );
+		$this->assertArrayNotHasKey( 'queryId', $context );
 	}
 
 	/**
-	 * @testdox Should keep all previously present context bag keys unchanged when queryId is added.
+	 * @testdox Should keep all previously present context bag keys unchanged.
 	 */
 	public function test_context_bag_keeps_existing_keys(): void {
 		$this->sut->set_parsed_block(
@@ -105,9 +117,38 @@ class RendererTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fall back to '0' for queryId when the parsed block attribute is missing.
+	 * @testdox Should keep the router-region attribute keyed by the block's query id.
 	 */
-	public function test_context_bag_query_id_defaults_to_zero(): void {
+	public function test_router_region_attribute_keeps_query_id(): void {
+		$this->sut->set_parsed_block(
+			array(
+				'attrs' => array( 'queryId' => 7 ),
+			)
+		);
+
+		$block_content = $this->sut->enhance_product_collection_with_interactivity(
+			'<div class="wp-block-woocommerce-product-collection"></div>',
+			array(
+				'attrs' => array(
+					'queryId' => 7,
+					'query'   => array( 'isProductCollectionBlock' => true ),
+				),
+			)
+		);
+
+		$this->assertSame( 'wc-product-collection-7', $this->get_router_region_from_markup( $block_content ) );
+	}
+
+	/**
+	 * @testdox Should fall back to '0' for the router-region attribute when the parsed block attribute is missing.
+	 */
+	public function test_router_region_attribute_defaults_to_zero(): void {
+		$this->sut->set_parsed_block(
+			array(
+				'attrs' => array(),
+			)
+		);
+
 		$block_content = $this->sut->enhance_product_collection_with_interactivity(
 			'<div class="wp-block-woocommerce-product-collection"></div>',
 			array(
@@ -117,9 +158,6 @@ class RendererTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$context = $this->get_context_from_markup( $block_content );
-
-		$this->assertArrayHasKey( 'queryId', $context );
-		$this->assertSame( '0', $context['queryId'] );
+		$this->assertSame( 'wc-product-collection-0', $this->get_router_region_from_markup( $block_content ) );
 	}
 }
