@@ -129,78 +129,80 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await page.goto( '/shop' );
 	} );
 
-	test( 'should show all products', async ( { frontendUtils, page } ) => {
-		const legacyTemplate = await frontendUtils.getBlockByName(
-			'woocommerce/legacy-template'
-		);
-
-		const products = legacyTemplate
-			.getByRole( 'list' )
-			.locator( '.product' );
-
-		await expect( products ).toHaveCount( 16 );
-
-		await expect(
-			page.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
-		).toBeVisible();
-	} );
-
-	test( 'should show only products that match the filter', async ( {
+	test( 'should show all products and then only products that match the filter', async ( {
 		frontendUtils,
 		page,
 	} ) => {
-		await page
-			.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
-			.click();
+		await test.step( 'should show all products', async () => {
+			const legacyTemplate = await frontendUtils.getBlockByName(
+				'woocommerce/legacy-template'
+			);
 
-		const legacyTemplate = await frontendUtils.getBlockByName(
-			'woocommerce/legacy-template'
-		);
+			const products = legacyTemplate
+				.getByRole( 'list' )
+				.locator( '.product' );
 
-		const products = legacyTemplate
-			.getByRole( 'list' )
-			.locator( '.product' );
+			await expect( products ).toHaveCount( 16 );
 
-		await expect( page ).toHaveURL(
-			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
-		);
+			await expect(
+				page.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
+			).toBeVisible();
+		} );
 
-		await expect( products ).toHaveCount( 1 );
+		await test.step( 'should show only products that match the filter', async () => {
+			await page
+				.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
+				.click();
+
+			await expect( page ).toHaveURL(
+				new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
+			);
+
+			const legacyTemplate = await frontendUtils.getBlockByName(
+				'woocommerce/legacy-template'
+			);
+
+			const products = legacyTemplate
+				.getByRole( 'list' )
+				.locator( '.product' );
+
+			await expect( products ).toHaveCount( 1 );
+		} );
 	} );
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test( 'should show all products', async ( { page, templateCompiler } ) => {
-		await templateCompiler.compile();
-
-		await page.goto( '/shop' );
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
-
-		await expect( products ).toHaveCount( 16 );
-	} );
-
-	test( 'should show only products that match the filter', async ( {
+	test( 'should show all products and then only products that match the filter', async ( {
 		page,
 		templateCompiler,
 	} ) => {
 		await templateCompiler.compile();
 
 		await page.goto( '/shop' );
-		await page
-			.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
-			.click();
 
-		await expect( page ).toHaveURL(
-			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
-		);
+		await test.step( 'should show all products', async () => {
+			const products = page
+				.locator( '.wp-block-woocommerce-product-template' )
+				.getByRole( 'listitem' );
 
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
+			await expect( products ).toHaveCount( 16 );
+		} );
 
-		await expect( products ).toHaveCount( 1 );
+		await test.step( 'should show only products that match the filter', async () => {
+			await page
+				.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
+				.click();
+
+			await expect( page ).toHaveURL(
+				new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
+			);
+
+			const products = page
+				.locator( '.wp-block-woocommerce-product-template' )
+				.getByRole( 'listitem' );
+
+			await expect( products ).toHaveCount( 1 );
+		} );
 	} );
 
 	test( 'should refresh the page only if the user clicks on button', async ( {
