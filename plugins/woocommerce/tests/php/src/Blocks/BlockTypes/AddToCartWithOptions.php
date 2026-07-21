@@ -471,6 +471,27 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that the stepper buttons render in visual DOM order (− input +),
+	 * so keyboard focus and screen-reader reading order are logical.
+	 */
+	public function test_stepper_buttons_render_in_visual_dom_order() {
+		$simple_product = new \WC_Product_Simple();
+		$simple_product->set_regular_price( 10 );
+		$simple_product->set_manage_stock( true );
+		$simple_product->set_stock_quantity( 10 );
+		$product_id = $simple_product->save();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		// The minus button must precede the quantity input, which must precede the plus button.
+		$this->assertMatchesRegularExpression(
+			'/quantity-selector__button--minus.*id="quantity_.*quantity-selector__button--plus/s',
+			$markup,
+			'Stepper buttons should render in − input + DOM order.'
+		);
+	}
+
+	/**
 	 * Tests that the quantity selector and its steppers are hidden when
 	 * a filter sets min and max quantity to the same value for a product.
 	 */

@@ -445,13 +445,16 @@ class Gallery extends Abstract_Block_Renderer {
 	 * Get the columns value from block attributes.
 	 *
 	 * @param array $block_attrs Block attributes.
-	 * @return int Number of columns (1-5).
+	 * @return int Number of columns (1-8).
 	 */
 	private function get_columns_from_attributes( array $block_attrs ): int {
 		$columns = $block_attrs['columns'] ?? 3;
 
-		// Ensure the columns are within reasonable bounds.
-		$columns = max( 1, min( 5, (int) $columns ) );
+		// Clamp to the same 1-8 range the core gallery block allows, so the email doesn't
+		// silently render fewer columns than the author chose. A lower cap forced wide galleries
+		// into extra partial rows whose images then stretched to a size the author never set
+		// (e.g. a 6-column gallery clamped to 5 rendered 5 + 5 + 2, ballooning the trailing pair).
+		$columns = max( 1, min( 8, (int) $columns ) );
 
 		return $columns;
 	}
