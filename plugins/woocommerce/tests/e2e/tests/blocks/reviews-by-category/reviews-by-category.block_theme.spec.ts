@@ -53,43 +53,49 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		).toBeVisible();
 	} );
 
-	test( 'sorts by most recent review by default and can sort by highest rating', async ( {
+	test( 'should sort reviews by most recent, highest, and lowest ratings', async ( {
 		page,
 		frontendUtils,
 		editor,
 	} ) => {
-		await editor.publishAndVisitPost();
+		const cleanUrl =
+			await test.step( 'sorts by most recent review by default and can sort by highest rating', async () => {
+				await editor.publishAndVisitPost();
+				const publishedPostUrl = page.url();
 
-		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
+				const block = await frontendUtils.getBlockByName( BLOCK_NAME );
 
-		const reviews = block.locator(
-			'.wc-block-components-review-list-item__text'
-		);
+				const reviews = block.locator(
+					'.wc-block-components-review-list-item__text'
+				);
 
-		await expect( reviews.first() ).toHaveText( latestReview.review );
+				await expect( reviews.first() ).toHaveText(
+					latestReview.review
+				);
 
-		const select = page.getByLabel( 'Order by' );
-		await select.selectOption( 'Highest rating' );
+				const select = page.getByLabel( 'Order by' );
+				await select.selectOption( 'Highest rating' );
 
-		await expect( reviews.first() ).toHaveText( highestRating.review );
-	} );
+				await expect( reviews.first() ).toHaveText(
+					highestRating.review
+				);
 
-	test( 'can sort by lowest rating', async ( {
-		page,
-		frontendUtils,
-		editor,
-	} ) => {
-		await editor.publishAndVisitPost();
+				return publishedPostUrl;
+			} );
 
-		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
+		await test.step( 'can sort by lowest rating', async () => {
+			await page.goto( cleanUrl );
 
-		const reviews = block.locator(
-			'.wc-block-components-review-list-item__text'
-		);
+			const block = await frontendUtils.getBlockByName( BLOCK_NAME );
 
-		const select = page.getByLabel( 'Order by' );
-		await select.selectOption( 'Lowest rating' );
+			const reviews = block.locator(
+				'.wc-block-components-review-list-item__text'
+			);
 
-		await expect( reviews.first() ).toHaveText( lowestRating.review );
+			const select = page.getByLabel( 'Order by' );
+			await select.selectOption( 'Lowest rating' );
+
+			await expect( reviews.first() ).toHaveText( lowestRating.review );
+		} );
 	} );
 } );
