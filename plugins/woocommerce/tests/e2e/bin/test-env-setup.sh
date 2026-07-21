@@ -59,11 +59,6 @@ fi
 echo -e 'Update Blog Name \n'
 $WP_CLI_PREFIX wp option update blogname 'WooCommerce Core E2E Test Suite'
 
-echo -e 'Preparing Test Files \n'
-# Absent when WooCommerce is installed from the built plugin zip (CI), which
-# ships no tests/ directory. Only the source-mapped dev env provides it.
-$WP_CLI_PREFIX bash -c 'sample_csv=/var/www/html/wp-content/plugins/woocommerce/tests/legacy/unit-tests/importer/sample.csv; if [ -f "$sample_csv" ]; then sudo cp "$sample_csv" /var/www/sample.csv; else echo "Skipping sample.csv: not present in this install"; fi'
-
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
 if [ $ENABLE_TRACKING == 1 ]; then
