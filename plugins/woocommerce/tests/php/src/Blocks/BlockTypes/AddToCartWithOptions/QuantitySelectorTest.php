@@ -58,7 +58,7 @@ class QuantitySelectorTest extends WC_Unit_Test_Case {
 				$registry->unregister( 'woocommerce/add-to-cart-with-options-quantity-selector' );
 			}
 
-			self::$quantity_selector = new AddToCartWithOptionsQuantitySelectorMock();
+			self::$quantity_selector   = new AddToCartWithOptionsQuantitySelectorMock();
 			self::$is_block_registered = true;
 		}
 	}
@@ -94,7 +94,7 @@ class QuantitySelectorTest extends WC_Unit_Test_Case {
 	 * @return string Rendered markup.
 	 */
 	private function invoke_render( stdClass $block ): string {
-		$previous_block_to_render            = WP_Block_Supports::$block_to_render;
+		$previous_block_to_render           = WP_Block_Supports::$block_to_render;
 		WP_Block_Supports::$block_to_render = array(
 			'blockName' => 'woocommerce/add-to-cart-with-options-quantity-selector',
 			'attrs'     => array(),
