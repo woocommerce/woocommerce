@@ -166,44 +166,44 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 		);
 	} );
 
-	test( 'Products can be filtered based on tags.', async ( {
+	test( 'Products can be filtered based on tags and brands.', async ( {
 		pageObject,
 	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
+		await test.step( 'Products can be filtered based on tags.', async () => {
+			await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show product tags' );
-		await pageObject.checkTaxonomyTerm( 'tags', 'Recommended' );
-		await expect( pageObject.productTitles ).toHaveText( [
-			'Beanie',
-			'Hoodie',
-		] );
+			await pageObject.addFilter( 'Show product tags' );
+			await pageObject.checkTaxonomyTerm( 'tags', 'Recommended' );
+			await expect( pageObject.productTitles ).toHaveText( [
+				'Beanie',
+				'Hoodie',
+			] );
 
-		await pageObject.publishAndGoToFrontend();
-		await expect( pageObject.productTitles ).toHaveText( [
-			'Beanie',
-			'Hoodie',
-		] );
-	} );
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.productTitles ).toHaveText( [
+				'Beanie',
+				'Hoodie',
+			] );
+		} );
 
-	test( 'Products can be filtered based on brands.', async ( {
-		pageObject,
-	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
+		await test.step( 'Products can be filtered based on brands.', async () => {
+			await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show Brands' );
-		await pageObject.checkTaxonomyTerm( 'brands', 'WooCommerce' );
-		await expect( pageObject.productTitles ).toHaveText( [
-			'Album',
-			'Beanie',
-			'Hoodie',
-		] );
+			await pageObject.addFilter( 'Show Brands' );
+			await pageObject.checkTaxonomyTerm( 'brands', 'WooCommerce' );
+			await expect( pageObject.productTitles ).toHaveText( [
+				'Album',
+				'Beanie',
+				'Hoodie',
+			] );
 
-		await pageObject.publishAndGoToFrontend();
-		await expect( pageObject.productTitles ).toHaveText( [
-			'Album',
-			'Beanie',
-			'Hoodie',
-		] );
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.productTitles ).toHaveText( [
+				'Album',
+				'Beanie',
+				'Hoodie',
+			] );
+		} );
 	} );
 
 	test( 'Products can be filtered based on product attributes like color, size etc.', async ( {
