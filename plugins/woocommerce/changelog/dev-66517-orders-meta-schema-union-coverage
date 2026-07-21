@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Add REST orders schema test coverage for tax line item meta, and document the orders meta schema correction shipped in 11.1.0. Meta value fields now advertise a standard type union (null, object, string, number, boolean, integer, array) instead of the non-standard 'mixed', line item display_value advertises the same union instead of 'string', and line item display_key and display_value are now marked readonly. Order writes persist only meta key, value, and id, so no previously valid request is rejected and no response data changes.
+Add test coverage for the orders REST tax line item meta schema type union.
