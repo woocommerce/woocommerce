@@ -88,6 +88,27 @@ function wc_edit_address_i18n( $id, $flip = false ) {
 }
 
 /**
+ * Get the My Account > Edit address page title.
+ *
+ * @since 11.1.0
+ * @param string $address_type Type of address; 'billing' or 'shipping'.
+ * @return string
+ */
+function wc_get_account_edit_address_title( $address_type = 'billing' ) {
+	$title = ( 'billing' === $address_type ) ? esc_html__( 'Billing address', 'woocommerce' ) : esc_html__( 'Shipping address', 'woocommerce' );
+
+	/**
+	 * Filters the My Account > Edit address page title.
+	 *
+	 * @since 8.1.0
+	 *
+	 * @param string $title        Page title.
+	 * @param string $address_type Type of address; 'billing' or 'shipping'.
+	 */
+	return apply_filters( 'woocommerce_my_account_edit_address_title', $title, $address_type );
+}
+
+/**
  * Get My Account menu items.
  *
  * @since 2.6.0
