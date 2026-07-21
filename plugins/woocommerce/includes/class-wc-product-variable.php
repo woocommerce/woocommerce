@@ -114,7 +114,7 @@ class WC_Product_Variable extends WC_Product {
 
 		// Performance note: loose != compares key/value pairs regardless of order, so a re-sort is only triggered when prices actually change.
 		$cache_key = $for_display ? 'for_display:1' : 'for_display:0';
-		if ( $this->variation_prices[ $cache_key ] != $prices ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
+		if ( $this->variation_prices[ $cache_key ] != $prices && is_array( $prices ) ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
 			$this->variation_prices[ $cache_key ] = array_map( fn( $variation_prices ) => $this->sort_variation_prices( $variation_prices ), $prices );
 		}
 
