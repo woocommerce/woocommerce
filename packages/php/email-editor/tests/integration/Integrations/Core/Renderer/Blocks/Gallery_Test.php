@@ -117,19 +117,26 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItDoesNotFloatWrapperTableWithAlignAttribute(): void {
 		$rendered = $this->gallery_renderer->render( '', $this->parsed_gallery, $this->rendering_context );
 
-		// Isolate the gallery wrapper table's opening tag.
-		$this->assertSame(
-			1,
-			preg_match( '/<table[^>]*class="email-block-gallery[^"]*"[^>]*>/', $rendered, $matches ),
+		// Locate the gallery wrapper table by its class. Parsing the tag with WP_HTML_Tag_Processor is
+		// more robust than matching the raw HTML string, and matches the convention used elsewhere here.
+		$processor = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue(
+			$processor->next_tag(
+				array(
+					'tag_name'   => 'table',
+					'class_name' => 'email-block-gallery',
+				)
+			),
 			'Expected a gallery wrapper table with the email-block-gallery class.'
 		);
-		$wrapper_tag = $matches[0];
 
-		// No float-triggering align attribute on the wrapper table.
-		$this->assertStringNotContainsString( 'align=', $wrapper_tag );
+		// No float-triggering align attribute on the wrapper table ( get_attribute() is null when absent ).
+		$this->assertNull( $processor->get_attribute( 'align' ) );
 
-		// Alignment is preserved via CSS instead, keeping the block in normal flow.
-		$this->assertStringContainsString( 'text-align', $wrapper_tag );
+		// Alignment is preserved via the text-align CSS declaration instead, keeping the block in normal flow.
+		$style = $processor->get_attribute( 'style' );
+		$this->assertIsString( $style );
+		$this->assertStringContainsString( 'text-align', $style );
 	}
 
 	/**
