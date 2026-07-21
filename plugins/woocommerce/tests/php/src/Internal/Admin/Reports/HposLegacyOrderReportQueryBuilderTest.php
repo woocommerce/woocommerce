@@ -303,6 +303,57 @@ class HposLegacyOrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should build a DST-transition-aware CASE fallback for named timezones when CONVERT_TZ is unavailable.
+	 */
+	public function test_build_query_timezone_fallback_is_dst_transition_aware(): void {
+		OrderHelper::toggle_cot_feature_and_usage( true );
+		update_option( 'timezone_string', 'Europe/Berlin' );
+		// A stale cached offset must not leak into the fallback.
+		update_option( 'gmt_offset', 0 );
+
+		$builder = new HposLegacyOrderReportQueryBuilder();
+
+		$base_args = array(
+			'data'         => array(
+				'post_date' => array(
+					'type'     => 'post_data',
+					'function' => null,
+					'name'     => 'post_date',
+				),
+			),
+			'group_by'     => 'YEAR(posts.post_date)',
+			'filter_range' => true,
+			'order_types'  => array( 'shop_order' ),
+		);
+
+		// Range spanning the 2026-03-29 01:00 UTC spring transition: rows are shifted by
+		// the offset in effect when they were created (UTC+1 before, UTC+2 after).
+		$query = $builder->build_query(
+			$base_args,
+			strtotime( '2026-03-15 00:00:00' ),
+			strtotime( '2026-04-15 00:00:00' )
+		);
+		$this->assertStringContainsString(
+			"CASE WHEN orders.date_created_gmt < '2026-03-29 01:00:00' " .
+			'THEN DATE_ADD(orders.date_created_gmt, INTERVAL 3600 SECOND) ' .
+			'ELSE DATE_ADD(orders.date_created_gmt, INTERVAL 7200 SECOND) END',
+			$query['group_by']
+		);
+
+		// No transition inside the range: a single shift with the range's offset (winter,
+		// UTC+1), not the current gmt_offset option (set to 0 above).
+		$query = $builder->build_query(
+			$base_args,
+			strtotime( '2026-01-01 00:00:00' ),
+			strtotime( '2026-01-31 00:00:00' )
+		);
+		$this->assertStringContainsString( 'IFNULL(CONVERT_TZ', $query['group_by'] );
+		$this->assertStringContainsString( 'DATE_ADD(orders.date_created_gmt, INTERVAL 3600 SECOND)', $query['group_by'] );
+		$this->assertStringNotContainsString( 'CASE', $query['group_by'] );
+		$this->assertStringNotContainsString( 'INTERVAL 0 SECOND', $query['group_by'] );
+	}
+
+	/**
 	 * @testdox Should build joins required by typed where rows even without a matching data entry, like the CPT path.
 	 */
 	public function test_build_query_builds_joins_from_where_rows(): void {

@@ -38,6 +38,14 @@ class HposLegacyOrderReportQueryBuilder {
 	private $column_map = null;
 
 	/**
+	 * Report date window for the current build as `[start, end)` Unix timestamps,
+	 * or null when the caller passed no meaningful range.
+	 *
+	 * @var array{0:int,1:int}|null
+	 */
+	private $report_range = null;
+
+	/**
 	 * Build the SQL clauses for an HPOS-backed legacy order report query.
 	 *
 	 * @since 11.0.0
@@ -53,6 +61,9 @@ class HposLegacyOrderReportQueryBuilder {
 		// per-build caches so option-derived state can't leak between queries.
 		$this->report_schema = null;
 		$this->column_map    = null;
+		$this->report_range  = ( $start_date > 0 && $end_date > 0 )
+			? array( $start_date, (int) strtotime( '+1 DAY', $end_date ) )
+			: null;
 
 		$data                = $args['data'] ?? array();
 		$where               = $args['where'] ?? array();
@@ -760,23 +771,62 @@ class HposLegacyOrderReportQueryBuilder {
 	 * For sites configured with a named timezone (e.g. `Europe/Berlin`) the conversion is done
 	 * per row with `CONVERT_TZ()` so DST is honoured and rows near midnight bucket into the
 	 * correct day/month. `CONVERT_TZ()` returns NULL when the server's timezone tables are not
-	 * loaded, so it falls back to a fixed-offset shift. Sites using a manual UTC offset have no
-	 * DST, so the fixed-offset shift is exact and is used directly.
+	 * loaded, so it falls back to {@see self::build_transition_fallback_expr()}. Sites using a
+	 * manual UTC offset have no DST, so a fixed-offset shift is exact and is used directly.
 	 *
 	 * @return string SQL fragment that produces a local DATETIME.
 	 */
 	private function hpos_local_date_expr(): string {
-		$schema       = $this->get_report_schema();
-		$fixed_offset = "DATE_ADD(orders.date_created_gmt, INTERVAL {$schema['gmt_offset']} SECOND)";
-
 		$timezone_string = get_option( 'timezone_string' );
 		if ( '' === $timezone_string ) {
-			return $fixed_offset;
+			$schema = $this->get_report_schema();
+			return "DATE_ADD(orders.date_created_gmt, INTERVAL {$schema['gmt_offset']} SECOND)";
 		}
 
 		global $wpdb;
 		$convert = $wpdb->prepare( 'CONVERT_TZ(orders.date_created_gmt, %s, %s)', '+00:00', $timezone_string );
 
-		return "IFNULL({$convert}, {$fixed_offset})";
+		return "IFNULL({$convert}, {$this->build_transition_fallback_expr()})";
+	}
+
+	/**
+	 * Build the fallback used when `CONVERT_TZ()` can't resolve the named timezone
+	 * (MySQL timezone tables not loaded).
+	 *
+	 * A single shift by the current `gmt_offset` would be wrong for rows created in a
+	 * different DST period, so the site timezone's DST transitions inside the report
+	 * window are baked into a CASE expression and each row is shifted by the offset in
+	 * effect when it was created. Without a caller-supplied range (e.g. the sparklines)
+	 * the window covers the last year, which spans any window such callers use.
+	 *
+	 * @return string SQL fragment that produces a local DATETIME.
+	 */
+	private function build_transition_fallback_expr(): string {
+		list( $window_start, $window_end ) = $this->report_range ?? array( time() - YEAR_IN_SECONDS, time() + DAY_IN_SECONDS );
+
+		$transitions = wp_timezone()->getTransitions( $window_start, $window_end );
+		if ( ! is_array( $transitions ) || array() === $transitions ) {
+			$schema = $this->get_report_schema();
+			return "DATE_ADD(orders.date_created_gmt, INTERVAL {$schema['gmt_offset']} SECOND)";
+		}
+
+		// The first entry describes the offset already in effect at the window start;
+		// each later entry is a transition inside the window.
+		$case  = '';
+		$count = count( $transitions );
+		for ( $i = 0; $i < $count - 1; $i++ ) {
+			$boundary = gmdate( 'Y-m-d H:i:s', $transitions[ $i + 1 ]['ts'] );
+			$offset   = (int) $transitions[ $i ]['offset'];
+			$case    .= "WHEN orders.date_created_gmt < '{$boundary}' THEN DATE_ADD(orders.date_created_gmt, INTERVAL {$offset} SECOND) ";
+		}
+
+		$last_offset = (int) $transitions[ $count - 1 ]['offset'];
+		$last_shift  = "DATE_ADD(orders.date_created_gmt, INTERVAL {$last_offset} SECOND)";
+
+		if ( '' === $case ) {
+			return $last_shift;
+		}
+
+		return "CASE {$case}ELSE {$last_shift} END";
 	}
 }
