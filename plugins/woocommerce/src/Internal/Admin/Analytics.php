@@ -33,7 +33,8 @@ class Analytics {
 	const FULL_REFUND_FIX_DATA_TOOL_ID = 'fix_woocommerce_analytics_full_refund_data';
 
 	/**
-	 * Option holding the refund double-count scan state: running_count, complete.
+	 * Option holding the refund double-count scan state: running_count, complete,
+	 * scan_attempts, last_scan_attempt.
 	 *
 	 * @since 11.1.0
 	 */
@@ -59,6 +60,17 @@ class Analytics {
 	 * @since 11.1.0
 	 */
 	const REFUND_DOUBLE_COUNT_BATCH_SIZE = 10000;
+
+	/**
+	 * Size of the parent_id range aggregated per refund double-count batch.
+	 *
+	 * Bounds the GROUP BY temp table: wc_order_stats has no index starting with
+	 * parent_id, so an unbounded query would re-aggregate every row past the
+	 * cursor on each batch.
+	 *
+	 * @since 11.1.0
+	 */
+	const REFUND_DOUBLE_COUNT_WINDOW = 500000;
 
 	/**
 	 * Class instance.
@@ -474,41 +486,78 @@ class Analytics {
 	 * partial-then-full double-count.
 	 *
 	 * The +0.01 tolerance guards against floating-point noise; COUNT(*) > 1 keeps
-	 * single full refunds out (they cannot double-count). Keyset pagination
-	 * (parent_id > cursor, ordered, LIMIT) keeps every batch bounded regardless
-	 * of how densely affected orders cluster.
+	 * single full refunds out (they cannot double-count). The window upper bound
+	 * caps how many rows each batch aggregates (wc_order_stats has no index
+	 * starting with parent_id, so LIMIT alone cannot bound the GROUP BY work),
+	 * while the LIMIT caps how many affected parents a single batch processes.
+	 * All of a parent's refund rows share one parent_id, so no group ever
+	 * straddles a window boundary.
 	 *
 	 * @since 11.1.0
 	 *
 	 * @param int $after_parent_id Exclusive lower bound on parent_id; 0 for the first batch.
+	 * @param int $window_end      Inclusive upper bound on parent_id for this batch.
 	 * @return string Prepared SQL selecting the next batch of affected parent_id values in ascending order.
 	 */
-	private function get_refund_double_count_parents_sql( int $after_parent_id ): string {
+	private function get_refund_double_count_parents_sql( int $after_parent_id, int $window_end ): string {
 		global $wpdb;
 
 		return $wpdb->prepare(
 			"SELECT r.parent_id
 			FROM {$wpdb->prefix}wc_order_stats AS r
 			INNER JOIN {$wpdb->prefix}wc_order_stats AS o ON o.order_id = r.parent_id
-			WHERE r.parent_id > %d
+			WHERE r.parent_id > %d AND r.parent_id <= %d
 			GROUP BY r.parent_id, o.net_total, o.tax_total, o.shipping_total
 			HAVING COUNT(*) > 1
 				AND ABS( SUM( r.net_total + r.tax_total + r.shipping_total ) ) > ( o.net_total + o.tax_total + o.shipping_total ) + 0.01
 			ORDER BY r.parent_id ASC
 			LIMIT %d",
 			$after_parent_id,
+			$window_end,
 			self::get_refund_double_count_batch_size()
 		);
 	}
 
 	/**
+	 * End of the parent_id window containing the given cursor: the next multiple
+	 * of the window size strictly above it. Works both for boundary cursors left
+	 * by an exhausted window and mid-window cursors left by a full-LIMIT batch.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param int $cursor Exclusive lower bound on parent_id for the current batch.
+	 * @return int Inclusive upper bound on parent_id for the current batch.
+	 */
+	private static function get_refund_double_count_window_end( int $cursor ): int {
+		return ( intdiv( $cursor, self::REFUND_DOUBLE_COUNT_WINDOW ) + 1 ) * self::REFUND_DOUBLE_COUNT_WINDOW;
+	}
+
+	/**
+	 * Highest order_id present in the order stats table (0 when empty).
+	 *
+	 * Used to detect when the last parent_id window has been swept; a MAX() on
+	 * the primary key is O(1).
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return int
+	 */
+	private static function get_max_order_stats_id(): int {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return intval( $wpdb->get_var( "SELECT MAX(order_id) FROM {$wpdb->prefix}wc_order_stats" ) );
+	}
+
+	/**
 	 * Process one batch of the refund double-count detection scan.
 	 *
-	 * Counts up to the batch size of affected parents past the cursor,
-	 * accumulates the running total in a single option, and self-schedules from
-	 * the last processed parent_id until a batch comes back short (table
-	 * exhausted). Only stores a count — never an ID list — so the notice read
-	 * stays O(1).
+	 * Counts affected parents in the current parent_id window (capped at the
+	 * batch size), accumulates the running total in a single option, and
+	 * self-schedules — from the last processed parent_id while a window still
+	 * has full batches, otherwise from the next window boundary — until the
+	 * last window past MAX(order_id) is swept. Only stores a count — never an
+	 * ID list — so the notice read stays O(1).
 	 *
 	 * @since 11.1.0
 	 *
@@ -531,8 +580,10 @@ class Analytics {
 		$state         = self::get_refund_double_count_state();
 		$running_count = ( $cursor > 0 ) ? $state['count'] : 0;
 
+		$window_end = self::get_refund_double_count_window_end( $cursor );
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
-		$parent_ids = $wpdb->get_col( $this->get_refund_double_count_parents_sql( $cursor ) );
+		$parent_ids = $wpdb->get_col( $this->get_refund_double_count_parents_sql( $cursor, $window_end ) );
 
 		if ( $wpdb->last_error ) {
 			throw new \Exception( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -540,9 +591,15 @@ class Analytics {
 
 		$running_count += count( $parent_ids );
 
-		if ( count( $parent_ids ) < self::get_refund_double_count_batch_size() ) {
+		if ( count( $parent_ids ) >= self::get_refund_double_count_batch_size() ) {
+			// Full batch: more affected parents may remain in this window.
+			$next_cursor = intval( end( $parent_ids ) );
+		} elseif ( $window_end >= self::get_max_order_stats_id() ) {
+			// Window exhausted and no rows can exist past it: scan complete.
 			$this->finish_refund_double_count_scan( $running_count );
 			return;
+		} else {
+			$next_cursor = $window_end;
 		}
 
 		update_option(
@@ -554,7 +611,7 @@ class Analytics {
 			false
 		);
 
-		self::schedule_batch( self::REFUND_DOUBLE_COUNT_SCAN_HOOK, intval( end( $parent_ids ) ), 5 );
+		self::schedule_batch( self::REFUND_DOUBLE_COUNT_SCAN_HOOK, $next_cursor, 5 );
 	}
 
 	/**
@@ -580,11 +637,13 @@ class Analytics {
 	 * Process one batch of the refund double-count fix.
 	 *
 	 * Re-imports each affected parent order (which re-syncs the parent and every
-	 * refund row with the corrected #66320 logic) and self-schedules from the
-	 * last selected parent_id until a batch comes back short. The cursor always
-	 * advances past every selected ID — never re-queried from the start — so a
-	 * row that somehow fails to repair cannot loop the sweep forever. On the
-	 * final batch the stored count is reset to zero so the notice self-heals.
+	 * refund row with the corrected #66320 logic) and self-schedules — from the
+	 * last selected parent_id while a window still has full batches, otherwise
+	 * from the next window boundary — until the last window past MAX(order_id)
+	 * is swept. The cursor always advances past every selected ID — never
+	 * re-queried from the start — so a row that somehow fails to repair cannot
+	 * loop the sweep forever. On the final batch the stored count is reset to
+	 * zero so the notice self-heals.
 	 *
 	 * @since 11.1.0
 	 *
@@ -597,8 +656,10 @@ class Analytics {
 
 		global $wpdb;
 
+		$window_end = self::get_refund_double_count_window_end( $cursor );
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
-		$parent_ids = $wpdb->get_col( $this->get_refund_double_count_parents_sql( $cursor ) );
+		$parent_ids = $wpdb->get_col( $this->get_refund_double_count_parents_sql( $cursor, $window_end ) );
 
 		if ( $wpdb->last_error ) {
 			throw new \Exception( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -608,13 +669,18 @@ class Analytics {
 			OrdersScheduler::import( intval( $parent_id ) );
 		}
 
-		if ( count( $parent_ids ) < self::get_refund_double_count_batch_size() ) {
+		if ( count( $parent_ids ) >= self::get_refund_double_count_batch_size() ) {
+			// Full batch: more affected parents may remain in this window.
+			$next_cursor = intval( end( $parent_ids ) );
+		} elseif ( $window_end >= self::get_max_order_stats_id() ) {
 			// The whole table has been swept; the affected rows are now correct.
 			$this->finish_refund_double_count_scan( 0 );
 			return;
+		} else {
+			$next_cursor = $window_end;
 		}
 
-		self::schedule_batch( self::REFUND_DOUBLE_COUNT_FIX_HOOK, intval( end( $parent_ids ) ), 5 );
+		self::schedule_batch( self::REFUND_DOUBLE_COUNT_FIX_HOOK, $next_cursor, 5 );
 	}
 
 	/**
