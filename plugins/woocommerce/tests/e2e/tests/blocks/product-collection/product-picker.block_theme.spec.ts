@@ -47,119 +47,133 @@ test.describe( 'Product Collection: Product Picker', () => {
 		);
 	} );
 
-	CUSTOM_COLLECTIONS.forEach( ( collection ) => {
-		test( `For collection "${ collection.name }" - manually selected product reference should be available on Frontend in a post`, async ( {
-			pageObject,
-			admin,
-			page,
-			editor,
-		} ) => {
-			await admin.createNewPost();
-			await pageObject.insertProductCollection();
-			await pageObject.chooseCollectionInPost(
-				collection.id as Collections
-			);
+	test( 'supports manually selected product references across custom collections', async ( {
+		pageObject,
+		admin,
+		page,
+		editor,
+	} ) => {
+		for ( const collection of CUSTOM_COLLECTIONS ) {
+			await test.step( `For collection "${ collection.name }" - manually selected product reference should be available on Frontend in a post`, async () => {
+				await admin.createNewPost();
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInPost(
+					collection.id as Collections
+				);
 
-			// Verify that product picker is shown in Editor
-			const editorProductPicker = editor.canvas.locator(
-				SELECTORS.productPicker
-			);
-			await expect( editorProductPicker ).toBeVisible();
+				// Verify that product picker is shown in Editor
+				const editorProductPicker = editor.canvas.locator(
+					SELECTORS.productPicker
+				);
+				await expect( editorProductPicker ).toBeVisible();
 
-			// Once a product is selected, the product picker should be hidden
-			await pageObject.chooseProductInEditorProductPickerIfAvailable(
-				editor.canvas
-			);
-			await expect( editorProductPicker ).toBeHidden();
+				// Once a product is selected, the product picker should be hidden
+				await pageObject.chooseProductInEditorProductPickerIfAvailable(
+					editor.canvas
+				);
+				await expect( editorProductPicker ).toBeHidden();
 
-			// On Frontend, verify that product reference is a number
-			await pageObject.publishAndGoToFrontend();
-			const collectionWithProductContext = page.locator(
-				`[data-collection="${ collection.collection }"]`
-			);
-			const queryAttribute = JSON.parse(
-				( await collectionWithProductContext.getAttribute(
-					'data-query'
-				) ) || '{}'
-			);
-			expect( typeof queryAttribute?.productReference ).toBe( 'number' );
-		} );
-
-		test( `For collection "${ collection.name }" - changing product using inspector control`, async ( {
-			pageObject,
-			admin,
-			page,
-			editor,
-		} ) => {
-			await admin.createNewPost();
-			await pageObject.insertProductCollection();
-			await pageObject.chooseCollectionInPost(
-				collection.id as Collections
-			);
-
-			// Verify that product picker is shown in Editor
-			const editorProductPicker = editor.canvas.locator(
-				SELECTORS.productPicker
-			);
-			await expect( editorProductPicker ).toBeVisible();
-
-			// Once a product is selected, the product picker should be hidden
-			await pageObject.chooseProductInEditorProductPickerIfAvailable(
-				editor.canvas
-			);
-			await expect( editorProductPicker ).toBeHidden();
-
-			// Verify that Album is selected
-			await expect(
-				admin.page.locator( SELECTORS.linkedProductControl.button )
-			).toContainText( 'Album' );
-
-			// Change product using inspector control to Beanie
-			await admin.page
-				.locator( SELECTORS.linkedProductControl.button )
-				.click();
-			await admin.page
-				.locator( SELECTORS.linkedProductControl.popoverContent )
-				.getByLabel( 'Beanie', { exact: true } )
-				.click();
-			await expect(
-				admin.page.locator( SELECTORS.linkedProductControl.button )
-			).toContainText( 'Beanie' );
-
-			// On Frontend, verify that product reference is a number
-			await pageObject.publishAndGoToFrontend();
-			const collectionWithProductContext = page.locator(
-				`[data-collection="${ collection.collection }"]`
-			);
-			const queryAttribute = JSON.parse(
-				( await collectionWithProductContext.getAttribute(
-					'data-query'
-				) ) || '{}'
-			);
-			expect( typeof queryAttribute?.productReference ).toBe( 'number' );
-		} );
-
-		test( `For collection "${ collection.name }" - "From current product" is chosen by default`, async ( {
-			pageObject,
-			admin,
-			editor,
-		} ) => {
-			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_SLUG }//single-product`,
-				postType: 'wp_template',
-				canvas: 'edit',
+				// On Frontend, verify that product reference is a number
+				await pageObject.publishAndGoToFrontend();
+				const collectionWithProductContext = page.locator(
+					`[data-collection="${ collection.collection }"]`
+				);
+				const queryAttribute = JSON.parse(
+					( await collectionWithProductContext.getAttribute(
+						'data-query'
+					) ) || '{}'
+				);
+				expect( typeof queryAttribute?.productReference ).toBe(
+					'number'
+				);
 			} );
-			await editor.canvas.locator( 'body' ).click();
-			await pageObject.insertProductCollection();
-			await pageObject.chooseCollectionInTemplate(
-				collection.id as Collections
-			);
+		}
+	} );
 
-			const productToShowControl = admin.page.getByText(
-				'From the current product'
-			);
-			await expect( productToShowControl ).toBeChecked();
-		} );
+	test( 'supports changing products through inspector controls across custom collections', async ( {
+		pageObject,
+		admin,
+		page,
+		editor,
+	} ) => {
+		for ( const collection of CUSTOM_COLLECTIONS ) {
+			await test.step( `For collection "${ collection.name }" - changing product using inspector control`, async () => {
+				await admin.createNewPost();
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInPost(
+					collection.id as Collections
+				);
+
+				// Verify that product picker is shown in Editor
+				const editorProductPicker = editor.canvas.locator(
+					SELECTORS.productPicker
+				);
+				await expect( editorProductPicker ).toBeVisible();
+
+				// Once a product is selected, the product picker should be hidden
+				await pageObject.chooseProductInEditorProductPickerIfAvailable(
+					editor.canvas
+				);
+				await expect( editorProductPicker ).toBeHidden();
+
+				// Verify that Album is selected
+				await expect(
+					admin.page.locator( SELECTORS.linkedProductControl.button )
+				).toContainText( 'Album' );
+
+				// Change product using inspector control to Beanie
+				await admin.page
+					.locator( SELECTORS.linkedProductControl.button )
+					.click();
+				await admin.page
+					.locator( SELECTORS.linkedProductControl.popoverContent )
+					.getByLabel( 'Beanie', { exact: true } )
+					.click();
+				await expect(
+					admin.page.locator( SELECTORS.linkedProductControl.button )
+				).toContainText( 'Beanie' );
+
+				// On Frontend, verify that product reference is a number
+				await pageObject.publishAndGoToFrontend();
+				const collectionWithProductContext = page.locator(
+					`[data-collection="${ collection.collection }"]`
+				);
+				const queryAttribute = JSON.parse(
+					( await collectionWithProductContext.getAttribute(
+						'data-query'
+					) ) || '{}'
+				);
+				expect( typeof queryAttribute?.productReference ).toBe(
+					'number'
+				);
+			} );
+		}
+	} );
+
+	test( 'defaults custom collections to the current product in Single Product templates', async ( {
+		pageObject,
+		admin,
+		editor,
+	} ) => {
+		for ( const collection of CUSTOM_COLLECTIONS ) {
+			await test.step( `For collection "${ collection.name }" - "From current product" is chosen by default`, async () => {
+				await admin.visitSiteEditor( {
+					postId: `${ BLOCK_THEME_SLUG }//single-product`,
+					postType: 'wp_template',
+					canvas: 'edit',
+				} );
+				await editor.canvas.locator( 'body' ).click();
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInTemplate(
+					collection.id as Collections
+				);
+
+				const productToShowControl = admin.page.getByText(
+					'From the current product'
+				);
+				await expect( productToShowControl ).toBeChecked();
+			} );
+		}
 	} );
 
 	test( `For collection "Block: My Custom Collection - Cart Context" - "From products in the cart" is chosen by default in Cart Template`, async ( {
