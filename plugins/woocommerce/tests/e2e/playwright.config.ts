@@ -20,19 +20,24 @@ dotenv.config( { path: __dirname + '/.env' } );
 const MANAGES_LOCAL_ENV = ! process.env.BASE_URL;
 
 if ( MANAGES_LOCAL_ENV ) {
-	if ( ! process.env.WP_ENV_TESTS_PORT ) {
-		// Synchronous on purpose: Playwright loads this config synchronously, and
-		// the port has to be known before `webServer.url` below is evaluated.
-		const port = execFileSync(
-			process.execPath,
-			[ path.join( __dirname, 'bin', 'find-port.mjs' ) ],
-			{ encoding: 'utf8' }
-		).trim();
-		process.env.WP_ENV_PORT = port;
-		process.env.WP_ENV_TESTS_PORT = port;
-	}
+	// Synchronous on purpose: Playwright loads this config synchronously, and the
+	// port has to be known before `webServer.url` below is evaluated. The same
+	// script backs `env:e2e:start`, so starting the environment by hand and
+	// starting it from here agree on the port — they must, because wp-env folds
+	// the port into its config checksum and would otherwise re-provision.
+	const port = execFileSync(
+		process.execPath,
+		[ path.join( __dirname, 'bin', 'find-port.mjs' ) ],
+		{ encoding: 'utf8' }
+	).trim();
 
-	process.env.BASE_URL = 'http://localhost:' + process.env.WP_ENV_TESTS_PORT;
+	process.env.WP_ENV_PORT = port;
+	// Read by the blocks utils, the product-collection spec, and the metrics and
+	// performance suites to build URLs. wp-env has no tests environment here
+	// (`testsEnvironment: false`), but it still folds this into its checksum, so
+	// `env:e2e:start` sets it to the same value.
+	process.env.WP_ENV_TESTS_PORT = port;
+	process.env.BASE_URL = 'http://localhost:' + port;
 }
 
 // The blocks setup project uses @wordpress/e2e-test-utils-playwright, which derives
@@ -226,10 +231,6 @@ export default defineConfig( {
 				reuseExistingServer: true,
 				timeout: 15 * 60 * 1000,
 				stdout: 'pipe',
-				env: {
-					WP_ENV_PORT: process.env.WP_ENV_PORT ?? '',
-					WP_ENV_TESTS_PORT: process.env.WP_ENV_TESTS_PORT ?? '',
-				},
 		  }
 		: undefined,
 	testDir: `${ TESTS_ROOT_PATH }/tests`,

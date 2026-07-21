@@ -111,10 +111,18 @@ because it has to stay *stable*: wp-env folds it into its own config checksum,
 so starting on a different port would reconfigure the environment and force a
 re-provision every run.
 
+Both `pnpm env:e2e` and the Playwright config resolve the port through that same
+script, so starting the environment by hand and letting the test run start it
+agree on where it lives.
+
+Under `CI` the configured port in `.wp-env.e2e.json` is used instead: each job
+has a runner to itself, and the k6 and metrics suites read the port in a separate
+process that would not see a derived one.
+
 Override it when a port is taken by something else:
 
 ```sh
-export WP_ENV_PORT=8186 WP_ENV_TESTS_PORT=8186
+export WP_ENV_PORT=8186
 ```
 
 Setting `BASE_URL` (directly or in `tests/e2e/.env`) points the suite at a site

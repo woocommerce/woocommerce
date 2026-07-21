@@ -35,9 +35,9 @@
 		"env:down": "pnpm env:dev:stop",
 		"env:e2e": "pnpm env:e2e:start",
 		"env:e2e:destroy": "pnpm wp-env:e2e destroy",
-		"env:e2e:restart": "pnpm wp-env:e2e destroy --force && pnpm wp-env:e2e start --update",
-		"env:e2e:rebuild": "WC_E2E_REPROVISION=1 pnpm wp-env:e2e start",
-		"env:e2e:start": "pnpm wp-env:e2e start",
+		"env:e2e:restart": "pnpm wp-env:e2e destroy --force && pnpm env:e2e:start",
+		"env:e2e:rebuild": "WC_E2E_REPROVISION=1 pnpm env:e2e:start",
+		"env:e2e:start": "PORT=$(node ./tests/e2e/bin/find-port.mjs) && WP_ENV_PORT=$PORT WP_ENV_TESTS_PORT=$PORT pnpm wp-env:e2e start",
 		"env:e2e:stop": "pnpm wp-env:e2e stop",
 		"env:performance-init": "./tests/performance/bin/init-environment.sh",
 		"env:perf": "pnpm env:e2e:start && pnpm env:performance-init",
@@ -235,7 +235,7 @@
 					"optional": true,
 					"changes": [],
 					"testEnv": {
-						"start": "env:e2e --update --debug"
+						"start": "env:e2e --debug"
 					},
 					"events": [
 						"nightly-checks",
@@ -266,7 +266,7 @@
 						"uninstall.php"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug"
+						"start": "env:e2e --debug"
 					},
 					"events": [
 						"pull_request",
@@ -304,7 +304,7 @@
 						"uninstall.php"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug"
+						"start": "env:e2e --debug"
 					},
 					"events": [
 						"pull_request",
@@ -337,7 +337,7 @@
 						"core-e2e-gutenberg"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug"
+						"start": "env:e2e --debug"
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-stable-e2e-report",
@@ -363,7 +363,7 @@
 						"core-e2e-gutenberg"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug"
+						"start": "env:e2e --debug"
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-nightly-e2e-report",
@@ -390,7 +390,7 @@
 						"core-e2e-hpos-disabled"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug"
+						"start": "env:e2e --debug"
 					},
 					"report": {
 						"resultsBlobName": "core-e2e-reports-hpos-disabled",
@@ -414,7 +414,7 @@
 						"@woocommerce/e2e-utils-playwright"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug",
+						"start": "env:e2e --debug",
 						"config": {
 							"phpVersion": "8.5"
 						}
@@ -447,7 +447,7 @@
 						"@woocommerce/e2e-utils-playwright"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug",
+						"start": "env:e2e --debug",
 						"config": {
 							"phpVersion": "8.5"
 						}
@@ -480,7 +480,7 @@
 						"@woocommerce/e2e-utils-playwright"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug",
+						"start": "env:e2e --debug",
 						"config": {
 							"wpVersion": "latest-1"
 						}
@@ -513,7 +513,7 @@
 						"@woocommerce/e2e-utils-playwright"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug",
+						"start": "env:e2e --debug",
 						"config": {
 							"wpVersion": "latest-1"
 						}
@@ -547,7 +547,7 @@
 						"@woocommerce/e2e-utils-playwright"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug",
+						"start": "env:e2e --debug",
 						"config": {
 							"wpVersion": "prerelease"
 						}
@@ -581,7 +581,7 @@
 						"@woocommerce/e2e-utils-playwright"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug",
+						"start": "env:e2e --debug",
 						"config": {
 							"wpVersion": "prerelease"
 						}
@@ -620,7 +620,7 @@
 					],
 					"onlyForDependencies": [],
 					"testEnv": {
-						"start": "env:e2e --update --debug"
+						"start": "env:e2e --debug"
 					},
 					"events": [
 						"pull_request",
@@ -659,7 +659,7 @@
 						"core-api-hpos-disabled"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug"
+						"start": "env:e2e --debug"
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-hpos-disabled",
@@ -720,7 +720,7 @@
 						"core-api-object-cache"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug"
+						"start": "env:e2e --debug"
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-object-cache",
@@ -980,7 +980,7 @@
 						"core-e2e"
 					],
 					"testEnv": {
-						"start": "env:e2e --update --debug"
+						"start": "env:e2e --debug"
 					},
 					"report": {
 						"resultsBlobName": "core-e2e-report",

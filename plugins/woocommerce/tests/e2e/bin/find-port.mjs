@@ -11,8 +11,9 @@
  * Set WP_ENV_PORT to override.
  */
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { createServer } from 'node:net';
-import { dirname, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const PORT_BASE = 8100;
@@ -32,11 +33,27 @@ export function isPortFree( port ) {
 	} );
 }
 
-export function resolvePort( env, path ) {
+export function configuredPort( pluginRoot ) {
+	const config = JSON.parse(
+		readFileSync( join( pluginRoot, '.wp-env.e2e.json' ), 'utf8' )
+	);
+	return config.port;
+}
+
+export function resolvePort( env, pluginRoot ) {
 	const override = Number( env.WP_ENV_PORT );
-	return Number.isInteger( override ) && override > 0
-		? override
-		: portForPath( path );
+	if ( Number.isInteger( override ) && override > 0 ) {
+		return override;
+	}
+
+	// Every CI job gets its own runner, so there is nothing to avoid colliding
+	// with, and the suites that read the port from a *separate* process — k6 and
+	// the metrics run — would not see a derived one. Stick to the configured port.
+	if ( env.CI ) {
+		return configuredPort( pluginRoot );
+	}
+
+	return portForPath( pluginRoot );
 }
 
 /* istanbul ignore next -- entry point */
