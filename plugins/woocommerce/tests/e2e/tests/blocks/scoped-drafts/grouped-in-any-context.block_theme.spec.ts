@@ -74,7 +74,15 @@ test.describe( 'Scoped drafts: grouped product form works in any context', () =>
 			const batchPromise = page.waitForResponse(
 				'**/wc/store/v1/batch**'
 			);
-			await addToCartButton.click();
+			// This Single Product Template's gallery column overflows its
+			// own width and overlaps the left edge of this button — an
+			// unrelated, pre-existing rendering quirk of the classic
+			// product-gallery markup this fixture's template renders, not
+			// something the button's own purchase-surface markup controls.
+			// Clicking the button's un-occluded right portion (rather than
+			// its default center point) avoids that overlap while still
+			// exercising a genuine click on the real button.
+			await addToCartButton.click( { position: { x: 100, y: 20 } } );
 
 			await expect(
 				page.getByRole( 'button', {
