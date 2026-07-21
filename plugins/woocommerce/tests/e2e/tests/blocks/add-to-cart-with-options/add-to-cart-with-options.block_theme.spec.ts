@@ -9,6 +9,36 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
 import config from '../../../../../client/admin/config/core.json';
+import {
+	capProductStock,
+	cartLineRows,
+	createStockManagedProduct,
+	readCartLineQuantities,
+} from '../cart-store/utils';
+
+/**
+ * Creates a grouped product referencing the given child product ids via
+ * WP-CLI, mirroring the `grouped_products` REST field (the same shape used
+ * to build a grouped product in `product/product-grouped.spec.ts`). An
+ * explicit slug keeps the resulting product URL deterministic, so the caller
+ * doesn't need a follow-up lookup before navigating to it.
+ *
+ * @param slug            The product slug to assign (used to navigate to it
+ *                        afterwards).
+ * @param name            The product name.
+ * @param childProductIds The child product ids to group.
+ */
+const createGroupedProduct = async (
+	slug: string,
+	name: string,
+	childProductIds: number[]
+): Promise< void > => {
+	await wpCLI(
+		`wc product create --user=1 --slug="${ slug }" --name="${ name }" --type="grouped" --grouped_products='${ JSON.stringify(
+			childProductIds
+		) }'`
+	);
+};
 
 const test = base.extend< {
 	pageObject: AddToCartWithOptionsPage;
@@ -831,6 +861,329 @@ test.describe( 'Add to Cart + Options Block', () => {
 				)
 			).toBeVisible();
 		} );
+	} );
+
+	// -------------------------------------------------------------------------
+	// Grouped add — network- and DOM-observable batch/notice behavior.
+	//
+	// A grouped add fires one `addCartItem` per selected child concurrently;
+	// the cart store's mutation batcher coalesces those into a single
+	// `POST /wc/store/v1/batch`. These tests assert the network-observable
+	// outcomes of that batch (the resync `GET /wc/store/v1/cart`, fired once
+	// only when at least one child succeeds) alongside the DOM (cart contents,
+	// error notices), for all three outcomes: all children succeed, some are
+	// rejected, and every child is rejected.
+	//
+	// Route counters are armed after navigating (and, for the two flows
+	// below that need it, after setting quantities and capping stock — none
+	// of which make network requests of their own) so only the "Add to
+	// cart" click's own traffic is counted; by this point the cart store's
+	// module-load refresh GET has already been sent.
+	//
+	// The all-success case drives the shared `logo-collection` sample
+	// product, exactly like the existing grouped tests above — it lowers no
+	// stock and mutates no fixture. The partial- and all-rejected cases each
+	// force a server-side rejection by capping a child's stock below its
+	// already-set quantity, so they build their own dedicated, freshly
+	// created grouped product instead, leaving `logo-collection` and its
+	// shared children (Beanie, T-Shirt, …) untouched — the reconciliation
+	// test above stays valid by construction.
+	// -------------------------------------------------------------------------
+
+	test( 'sends exactly one batch request and one resync GET when every grouped child succeeds', async ( {
+		page,
+		pageObject,
+		editor,
+		frontendUtils,
+	} ) => {
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/logo-collection' );
+
+		const addToCartButton = page
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.first();
+
+		const increaseBeanie = page
+			.locator(
+				'[data-block-name="woocommerce/add-to-cart-with-options"]'
+			)
+			.getByLabel( 'Increase quantity of Beanie' );
+		const increaseTShirt = page
+			.locator(
+				'[data-block-name="woocommerce/add-to-cart-with-options"]'
+			)
+			.getByLabel( 'Increase quantity of T-Shirt' );
+
+		await increaseBeanie.click();
+		await increaseTShirt.click();
+
+		const batchRequestBodies: { requests?: { path: string }[] }[] = [];
+		await page.route( '**/wc/store/v1/batch**', async ( route ) => {
+			batchRequestBodies.push( route.request().postDataJSON() ?? {} );
+			await route.continue();
+		} );
+
+		const cartGetRequests: string[] = [];
+		await page.route( '**/wc/store/v1/cart**', async ( route ) => {
+			if ( route.request().method() === 'GET' ) {
+				cartGetRequests.push( route.request().url() );
+			}
+			await route.continue();
+		} );
+
+		// The resync GET is fired asynchronously (via a window event a
+		// separate store listens for), so wait for it explicitly rather
+		// than inferring it happened from the mini-cart badge alone.
+		const resyncGet = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/wc/store/v1/cart' ) &&
+				response.request().method() === 'GET'
+		);
+
+		await addToCartButton.click();
+
+		await expect(
+			page.getByRole( 'button', {
+				name: 'Added to cart',
+				exact: true,
+			} )
+		).toBeVisible();
+
+		// A single batch POST, carrying one add-item sub-request per
+		// selected child.
+		expect( batchRequestBodies ).toHaveLength( 1 );
+		const addItemRequests = (
+			batchRequestBodies[ 0 ].requests ?? []
+		).filter(
+			( request ) => request.path === '/wc/store/v1/cart/add-item'
+		);
+		expect( addItemRequests ).toHaveLength( 2 );
+
+		// Exactly one resync GET — fired once because at least one (here,
+		// every) child succeeded.
+		await resyncGet;
+		expect( cartGetRequests ).toHaveLength( 1 );
+
+		// Nothing was auto-adjusted by the server, so no
+		// quantity-was-changed notice is shown.
+		await expect( page.getByText( /was changed to \d+/ ) ).toBeHidden();
+
+		// Every selected child landed in the cart at its chosen quantity.
+		await frontendUtils.goToCart();
+		expect( await readCartLineQuantities( page, 'Beanie' ) ).toEqual( [
+			1,
+		] );
+		expect( await readCartLineQuantities( page, 'T-Shirt' ) ).toEqual( [
+			1,
+		] );
+	} );
+
+	test( "keeps the accepted child and surfaces the rejected child's raw error when a grouped add partially fails", async ( {
+		page,
+		pageObject,
+		editor,
+		frontendUtils,
+	} ) => {
+		// A dedicated, freshly created grouped product, so capping stock
+		// below a requested quantity never touches `logo-collection` or its
+		// shared children.
+		const acceptedChildId = await createStockManagedProduct(
+			'Once Per Batch Accepted Child'
+		);
+		const rejectedChildId = await createStockManagedProduct(
+			'Once Per Batch Rejected Child'
+		);
+		const groupedSlug = 'once-per-batch-partial-rejection';
+		await createGroupedProduct(
+			groupedSlug,
+			'Once Per Batch Partial Rejection',
+			[ acceptedChildId, rejectedChildId ]
+		);
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( `/product/${ groupedSlug }` );
+
+		// Set both children's quantities before the stock cap below forces
+		// one child's rejection at add-to-cart time.
+		const acceptedQuantityInput = page.getByRole( 'spinbutton', {
+			name: 'Once Per Batch Accepted Child',
+		} );
+		await acceptedQuantityInput.fill( '2' );
+		await acceptedQuantityInput.blur();
+
+		const rejectedQuantityInput = page.getByRole( 'spinbutton', {
+			name: 'Once Per Batch Rejected Child',
+		} );
+		await rejectedQuantityInput.fill( '3' );
+		await rejectedQuantityInput.blur();
+
+		// Cap the target child's stock below the quantity just set, so its
+		// add-item sub-request is rejected without a partial quantity
+		// landing and without affecting the accepted child's ample stock.
+		await capProductStock( rejectedChildId, 1 );
+
+		const cartGetRequests: string[] = [];
+		await page.route( '**/wc/store/v1/cart**', async ( route ) => {
+			if ( route.request().method() === 'GET' ) {
+				cartGetRequests.push( route.request().url() );
+			}
+			await route.continue();
+		} );
+
+		const resyncGet = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/wc/store/v1/cart' ) &&
+				response.request().method() === 'GET'
+		);
+
+		const addToCartButton = page
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.first();
+		await addToCartButton.click();
+
+		// The rejected child's own raw server message — not a substituted,
+		// friendlier one — is shown as an error notice.
+		await expect(
+			page.getByText(
+				'You cannot add that amount of "Once Per Batch Rejected Child" to the cart because there is not enough stock (1 remaining).'
+			)
+		).toBeVisible();
+
+		// The accepted child still landed — optimistic updates are not
+		// rolled back because of the other child's rejection.
+		await expect(
+			page.getByRole( 'button', {
+				name: 'Added to cart',
+				exact: true,
+			} )
+		).toBeVisible();
+
+		// Exactly one resync GET — fired once because at least one child
+		// succeeded.
+		await resyncGet;
+		expect( cartGetRequests ).toHaveLength( 1 );
+
+		await frontendUtils.goToCart();
+		expect(
+			await readCartLineQuantities(
+				page,
+				'Once Per Batch Accepted Child'
+			)
+		).toEqual( [ 2 ] );
+		await expect(
+			cartLineRows( page, 'Once Per Batch Rejected Child' )
+		).toHaveCount( 0 );
+	} );
+
+	test( 'adds nothing and issues no resync GET when every child in a grouped add is rejected', async ( {
+		page,
+		pageObject,
+		editor,
+		frontendUtils,
+	} ) => {
+		// A dedicated, freshly created grouped product, so capping stock
+		// below a requested quantity never touches `logo-collection` or its
+		// shared children.
+		const childAId = await createStockManagedProduct(
+			'Once Per Batch Rejected Child A'
+		);
+		const childBId = await createStockManagedProduct(
+			'Once Per Batch Rejected Child B'
+		);
+		const groupedSlug = 'once-per-batch-all-rejected';
+		await createGroupedProduct(
+			groupedSlug,
+			'Once Per Batch All Rejected',
+			[ childAId, childBId ]
+		);
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( `/product/${ groupedSlug }` );
+
+		// Set every child's quantity before the stock caps below force
+		// every add-item sub-request to be rejected.
+		const childAQuantityInput = page.getByRole( 'spinbutton', {
+			name: 'Once Per Batch Rejected Child A',
+		} );
+		await childAQuantityInput.fill( '3' );
+		await childAQuantityInput.blur();
+
+		const childBQuantityInput = page.getByRole( 'spinbutton', {
+			name: 'Once Per Batch Rejected Child B',
+		} );
+		await childBQuantityInput.fill( '4' );
+		await childBQuantityInput.blur();
+
+		// Distinct children (and thus distinct raw server messages, since
+		// the message embeds the product name) so `addNotice`'s
+		// byte-identical-text dedupe doesn't collapse the two notices.
+		await capProductStock( childAId, 1 );
+		await capProductStock( childBId, 1 );
+
+		const cartGetRequests: string[] = [];
+		await page.route( '**/wc/store/v1/cart**', async ( route ) => {
+			if ( route.request().method() === 'GET' ) {
+				cartGetRequests.push( route.request().url() );
+			}
+			await route.continue();
+		} );
+
+		const addToCartButton = page
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.first();
+		await addToCartButton.click();
+
+		// Each rejected child surfaces its own, distinct raw server
+		// message.
+		await expect(
+			page.getByText(
+				'You cannot add that amount of "Once Per Batch Rejected Child A" to the cart because there is not enough stock (1 remaining).'
+			)
+		).toBeVisible();
+		await expect(
+			page.getByText(
+				'You cannot add that amount of "Once Per Batch Rejected Child B" to the cart because there is not enough stock (1 remaining).'
+			)
+		).toBeVisible();
+
+		// Nothing was added, so the button never flips to "Added to cart".
+		await expect(
+			page.getByRole( 'button', {
+				name: 'Added to cart',
+				exact: true,
+			} )
+		).toBeHidden();
+
+		// Zero resync GETs — none of the once-per-batch effects fire when
+		// every child is rejected. Checked before navigating to the cart
+		// below, since that full-page navigation would itself trigger a
+		// fresh module-load refresh GET that would otherwise pollute this
+		// count.
+		expect( cartGetRequests ).toHaveLength( 0 );
+
+		// The cart returns to its pre-add (empty) state.
+		await frontendUtils.goToCart();
+		await expect(
+			cartLineRows( page, 'Once Per Batch Rejected Child A' )
+		).toHaveCount( 0 );
+		await expect(
+			cartLineRows( page, 'Once Per Batch Rejected Child B' )
+		).toHaveCount( 0 );
 	} );
 
 	test( "doesn't allow selecting invalid variations in chips mode", async ( {

@@ -3,11 +3,14 @@
  */
 import type { Cart, CartItem } from '@woocommerce/types';
 import type { Notice } from '@woocommerce/stores/store-notices';
+import { getConfig } from '@wordpress/interactivity';
+import { speak } from '@wordpress/a11y';
 
 /**
  * Internal dependencies
  */
-import type { Store, OptimisticCartItem } from '../cart';
+import type { Store, OptimisticCartItem, AddCartItemResult } from '../cart';
+import { triggerAddedToCartEvent } from '../legacy-events';
 
 type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
 
@@ -20,7 +23,11 @@ const mockState = {
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
-		getConfig: jest.fn(),
+		// Defaults to an empty config so the `addCartItem` a11y-announcement
+		// block (`const { messages } = getConfig(...)`) destructures safely
+		// when a test doesn't care about the screen-reader announcement.
+		// Tests that do care override this once via `mockReturnValueOnce`.
+		getConfig: jest.fn( () => ( {} ) ),
 		store: jest.fn( ( _name, definition ) => {
 			// The cart store calls `store()` twice: once to read `state` and
 			// once to register `actions`. Merge the definition's `state`
@@ -45,6 +52,10 @@ jest.mock(
 
 jest.mock( '../legacy-events', () => ( {
 	triggerAddedToCartEvent: jest.fn(),
+} ) );
+
+jest.mock( '@wordpress/a11y', () => ( {
+	speak: jest.fn(),
 } ) );
 
 /**
@@ -74,10 +85,12 @@ type CapturedRequest = {
  * catch re-throws here so `await runAction(...)` still rejects.
  *
  * @param action The async action return value cast to a generator.
- * @return A promise that resolves once the generator has finished.
+ * @return A promise that resolves to the generator's final return value (e.g.
+ *         `addCartItem`'s `AddCartItemResult`) once it has finished. Actions
+ *         with no explicit `return` resolve `undefined`.
  */
-async function runAction( action: unknown ): Promise< void > {
-	const iterator = action as Generator< unknown, unknown, unknown >;
+async function runAction< T = void >( action: unknown ): Promise< T > {
+	const iterator = action as Generator< unknown, T, unknown >;
 	let next = iterator.next();
 	while ( ! next.done ) {
 		try {
@@ -89,6 +102,7 @@ async function runAction( action: unknown ): Promise< void > {
 			next = iterator.throw( error );
 		}
 	}
+	return next.value;
 }
 
 /**
@@ -587,13 +601,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
 
 			await expect(
-				runAction(
+				runAction< AddCartItemResult >(
 					actions.addCartItem( {
 						id: 42,
 						quantityToAdd: 1,
 					} )
 				)
-			).resolves.toBeUndefined();
+			).resolves.toEqual( { success: true } );
 
 			expect( captured ).toHaveLength( 1 );
 			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
@@ -607,14 +621,14 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			] );
 
 			await expect(
-				runAction(
+				runAction< AddCartItemResult >(
 					actions.addCartItem( {
 						id: 42,
 						key: 'server-key-abc',
 						quantity: 5,
 					} )
 				)
-			).resolves.toBeUndefined();
+			).resolves.toEqual( { success: true } );
 		} );
 
 		it( 'still throws when both quantity and quantityToAdd are passed together', async () => {
@@ -634,177 +648,26 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
-	describe( 'batchAddCartItems endpoint selection', () => {
-		it( 'issues add-item (never update-item) for a keyless batch item that matches a keyed line by product id', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-					},
-				] )
-			);
-
-			expect( captured ).toHaveLength( 1 );
-			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
-			expect( captured[ 0 ].path ).not.toContain( 'update-item' );
-		} );
-
-		it( 'posts the requested delta (not the matched line absolute quantity) for a keyless batch item against a keyed line', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-					},
-				] )
-			);
-
-			expect( captured[ 0 ].body.quantity ).toBe( 1 );
-			expect( captured[ 0 ].body.quantity ).not.toBe( 4 );
-		} );
-
-		it( 'never includes the matched line key in the request body for a keyless batch item', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
-			] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-					},
-				] )
-			);
-
-			expect( captured[ 0 ].body.key ).toBeUndefined();
-		} );
-
-		it( 'issues update-item with the absolute quantity for a batch item that supplies an explicit key', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
-			] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						key: 'server-key-abc',
-						quantity: 5,
-					},
-				] )
-			);
-
-			expect( captured[ 0 ].path ).toBe(
-				'/wc/store/v1/cart/update-item'
-			);
-			expect( captured[ 0 ].body.quantity ).toBe( 5 );
-			expect( captured[ 0 ].body.key ).toBe( 'server-key-abc' );
-		} );
-
-		it( 'derives the keyless add-item delta identically to the single-item addCartItem path', async () => {
-			// Same seeded keyed line and same keyless request through both
-			// paths must produce the same endpoint and posted quantity.
-			const singleCaptured = mockBatchFetch();
-			const singleActions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-			await runAction(
-				singleActions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-				} )
-			);
-
-			const batchCaptured = mockBatchFetch();
-			const batchActions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-			await runAction(
-				batchActions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-					},
-				] )
-			);
-
-			expect( batchCaptured ).toHaveLength( 1 );
-			expect( singleCaptured ).toHaveLength( 1 );
-			expect( batchCaptured[ 0 ].path ).toBe( singleCaptured[ 0 ].path );
-			expect( batchCaptured[ 0 ].body.quantity ).toBe(
-				singleCaptured[ 0 ].body.quantity
-			);
-			expect( batchCaptured[ 0 ].body.key ).toBe(
-				singleCaptured[ 0 ].body.key
-			);
-		} );
-
-		it( 'optimistically bumps a matched keyed line in place on a keyless batch re-add (no duplicate line)', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-					},
-				] )
-			);
-
-			expect( mockState.cart.items ).toHaveLength( 1 );
-			expect( mockState.cart.items[ 0 ].quantity ).toBe( 4 );
-		} );
-
-		it( 'optimistically pushes a new line when no line matches a keyless batch item', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 99,
-						quantityToAdd: 2,
-					},
-				] )
-			);
-
-			expect( mockState.cart.items ).toHaveLength( 2 );
-			const added = mockState.cart.items.find(
-				( item ) => item.id === 99
-			);
-			expect( added ).toBeDefined();
-			expect( added?.quantity ).toBe( 2 );
-		} );
-	} );
-
-	describe( 'notice-diff suppression for keyless meta-only adds', () => {
+	describe( 'no spurious quantity-changed notice on exact keyless adds', () => {
 		// The quantity-changed info notice template the auto-UPDATE branch emits.
 		const QUANTITY_CHANGED = 'was changed to';
 
 		it( 'emits no quantity-changed notice for a keyless add resolved server-side as a new standalone line', async () => {
-			// The product is present only as a single keyed meta line (qty 3,
-			// is_standalone_line: false). findItemInCart excludes meta lines on a
-			// keyless lookup, so it returns undefined — the optimistic update pushes
-			// a brand-new plain line instead of bumping the meta line. The server
-			// keeps the meta line at qty 3 and adds a separate standalone line
-			// (qty 1). lineMatchesProduct is meta-inclusive, so the pre-add total
-			// captures the meta line's qty 3; expectedTotal = 3+1 = 4. The server
-			// total (3+1=4) equals expectedTotal (4) → no spurious notice fires.
+			// The cart holds only a meta line (qty 3, is_standalone_line: false).
+			// findItemInCart excludes meta lines on a keyless lookup, so no
+			// existing line matches and the optimistic update pushes a
+			// brand-new keyless line (no key) rather than bumping the meta
+			// line. The post-optimistic snapshot is therefore [meta line qty 3
+			// (key server-key-abc), new line qty 1 (no key)].
+			//
+			// The server keeps the meta line unchanged at qty 3 and adds its
+			// own new line under a server-assigned key (server-key-new, qty
+			// 1). Diffing by key: the meta line's key and quantity match
+			// exactly between the two carts, so it does not notify. The
+			// server's new line has a key that never appears in the
+			// post-optimistic snapshot (the client's pushed line carried no
+			// key), so there is nothing to diff it against and it is skipped
+			// too. The diff is empty — no notice fires.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -844,16 +707,18 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 
 		it( 'emits no quantity-changed notice when only the first of two meta lines for the same product is bumped optimistically', async () => {
-			// The product is present as two distinct keyed meta lines (qty 3 and
-			// qty 2, both is_standalone_line: false). findItemInCart excludes both
-			// meta lines on a keyless lookup, so it returns undefined — the
-			// optimistic update pushes a brand-new plain line instead of bumping
-			// either meta line. The server keeps both meta lines at their pre-add
-			// quantities (3 and 2) and adds a separate standalone line (qty 1).
-			// lineMatchesProduct is meta-inclusive, so the pre-add total captures
-			// both meta lines: preAddTotal = 3+2 = 5, deltaTotal = 1,
-			// expectedTotal = 6. The server total (3+2+1=6) equals expectedTotal
-			// (6) → no spurious notice fires for any of the three lines.
+			// The cart holds two meta lines (qty 3 and qty 2, both
+			// is_standalone_line: false). findItemInCart excludes both on a
+			// keyless lookup, so the optimistic update pushes a brand-new
+			// keyless line (no key) rather than bumping either meta line. The
+			// post-optimistic snapshot is [meta line 1 qty 3, meta line 2 qty
+			// 2, new line qty 1 (no key)].
+			//
+			// The server keeps both meta lines unchanged and adds its own new
+			// line under a server-assigned key. Diffing by key: both meta
+			// lines match exactly, and the server's new line has no
+			// counterpart key in the post-optimistic snapshot to diff
+			// against. No notice fires for any of the three lines.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -972,64 +837,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( true );
 		} );
 
-		it( 'suppresses the notice for a keyless batch add resolved server-side as a new standalone line', async () => {
-			// Same meta-only scenario through the batch path: the cart has only a
-			// single meta line (qty 3, is_standalone_line: false). findItemInCart
-			// excludes it, so the optimistic update pushes a brand-new plain line.
-			// The server keeps the meta line at 3 and adds a standalone line (qty 1).
-			// lineMatchesProduct is meta-inclusive → preAddTotal = 3, deltaTotal = 1,
-			// expectedTotal = 4; serverTotal = 3+1 = 4 → suppress, no spurious
-			// notice.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-abc',
-						id: 42,
-						quantity: 3,
-						is_standalone_line: false,
-					} ),
-					makeKeyedLine( {
-						key: 'server-key-new',
-						id: 42,
-						quantity: 1,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( {
-					key: 'server-key-abc',
-					id: 42,
-					quantity: 3,
-					is_standalone_line: false,
-				} ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-					},
-				] )
-			);
-
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
-		} );
-
-		it( 'suppresses the quantity-changed notice for a keyless re-add when the server returns the line at pre-add + delta', async () => {
-			// Pre-add: matched line at qty 3. Keyless add delta: +1.
-			// Expected total: 3 + 1 = 4. Server returns the line at 4.
-			// Since serverTotal (4) === expectedTotal (4), the add was exact →
-			// no "quantity changed" notice must fire.
-			// This also indirectly guards the by-value pre-add capture: if
-			// preAddTotal were captured after the optimistic bump (reading 4
-			// instead of 3), expectedTotal would be 4+1=5 ≠ server 4, which
-			// would keep the key un-suppressed and fire the notice, failing
-			// this assertion.
+		it( 'emits no quantity-changed notice for a keyless re-add when the server returns the line at pre-add + delta', async () => {
+			// The matched line (key server-key-abc) starts at qty 3. A
+			// keyless add with delta +1 bumps it in place, so the
+			// post-optimistic snapshot has that same key at qty 4. The server
+			// confirms the line at qty 4 too — an exact add. Diffing by key
+			// finds the same key at the same quantity on both sides, so no
+			// notice fires.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -1052,96 +866,23 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				} )
 			);
 
-			// Server total (4) === expected total (3+1=4) → suppress.
-			// No "quantity changed" notice must fire.
 			expect(
 				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
 			).toBe( false );
 		} );
 
-		it( 'suppresses the quantity-changed notice for a keyless batch re-add when the server total matches pre-add + sum of deltas', async () => {
-			// Pre-add: matched line at qty 3. Batch deltas: +1 and +1.
-			// A real /batch endpoint compounds server-side: each add-item
-			// sub-request runs sequentially against one WC_Cart session, so the
-			// server accumulates both deltas and lands at 5, not 4.
-			// Expected total: 3 + (1+1) = 5. Server returns the line at 5.
-			// Since serverTotal (5) === expectedTotal (5), suppress → no notice.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-abc',
-						id: 42,
-						quantity: 5,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1 },
-					{ id: 42, quantityToAdd: 1 },
-				] )
-			);
-
-			// Server total (5) === expected total (3+1+1=5) → suppress.
-			// No "quantity changed" notice must fire.
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
-		} );
-
-		it( 'still emits the quantity-changed notice for a keyless batch re-add when the server total diverges from expected', async () => {
-			// Same setup: pre-add qty 3, batch (+1,+1), expectedTotal = 5.
-			// Server returns 6 (a genuine concurrent change or cap artefact).
-			// Since serverTotal (6) !== expectedTotal (5), do not suppress →
-			// the notice must fire reporting the server quantity 6.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-abc',
-						id: 42,
-						quantity: 6,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1 },
-					{ id: 42, quantityToAdd: 1 },
-				] )
-			);
-
-			expect(
-				notices.some(
-					( n ) =>
-						n.notice.includes( QUANTITY_CHANGED ) &&
-						n.notice.includes( '6' )
-				)
-			).toBe( true );
-		} );
-
-		it( 'suppresses the notice for a keyless add when the client bumps a meta line but the server grows the standalone line', async () => {
-			// Product 42 occupies two lines: a meta-differentiated line (server-key-
-			// meta, qty 1, is_standalone_line: false) and a plain standalone line
-			// (server-key-standalone, qty 1). findItemInCart excludes the meta line
-			// on a keyless lookup and returns the standalone line directly, so the
-			// optimistic update bumps the standalone line from 1 to 2. The server
-			// also grows the standalone line to 2 and keeps the meta line at 1.
-			// lineMatchesProduct is meta-inclusive → preAddTotal = 1+1 = 2,
-			// deltaTotal = 1, expectedTotal = 3. Server total: meta(1)+standalone(2)
-			// = 3 === expected → suppress for both pre-existing keys. No "quantity
-			// changed" notice must fire.
+		it( 'emits no quantity-changed notice for a keyless add when the client bumps a meta line but the server grows the standalone line', async () => {
+			// Product 42 occupies two lines: a meta-differentiated line
+			// (server-key-meta, qty 1, is_standalone_line: false) and a plain
+			// standalone line (server-key-standalone, qty 1). findItemInCart
+			// excludes the meta line on a keyless lookup and returns the
+			// standalone line directly, so the optimistic update bumps the
+			// standalone line in place from 1 to 2. Post-optimistic snapshot:
+			// meta line unchanged at 1, standalone line at 2.
+			//
+			// The server also grows the standalone line to 2 and keeps the
+			// meta line at 1 — an exact add. Diffing by key finds both lines
+			// at the same quantity on both sides, so no notice fires.
 			mockBatchFetchReturning(
 				makeServerCart( [
 					makeKeyedLine( {
@@ -1182,69 +923,19 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				} )
 			);
 
-			// Server total (1+2=3) === expected total (1+1+1=3) → suppress.
 			expect(
 				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
 			).toBe( false );
 		} );
 
-		it( 'suppresses the notice for a keyless batch add when the client bumps a meta line but the server grows the standalone line, through the batch path', async () => {
-			// Same meta-line/standalone-line scenario through the batch path.
-			// Product 42 occupies two lines: meta first (qty 1, is_standalone_line:
-			// false) then standalone (qty 1). findItemInCart excludes the meta line
-			// and returns the standalone line, so the batch item bumps the standalone
-			// line optimistically. The server also grows the standalone line to 2 and
-			// keeps the meta line at 1. lineMatchesProduct is meta-inclusive →
-			// preAddTotal = 1+1 = 2, deltaTotal = 1, expectedTotal = 3. Server total:
-			// meta(1)+standalone(2)=3 === expected → suppress.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-meta',
-						id: 42,
-						quantity: 1,
-						name: 'Test Product',
-						is_standalone_line: false,
-					} ),
-					makeKeyedLine( {
-						key: 'server-key-standalone',
-						id: 42,
-						quantity: 2,
-						name: 'Test Product',
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( {
-					key: 'server-key-meta',
-					id: 42,
-					quantity: 1,
-					is_standalone_line: false,
-				} ),
-				makeKeyedLine( {
-					key: 'server-key-standalone',
-					id: 42,
-					quantity: 1,
-				} ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.batchAddCartItems( [ { id: 42, quantityToAdd: 1 } ] )
-			);
-
-			// Server total (1+2=3) === expected total (1+1+1=3) → suppress.
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
-		} );
-
-		it( 'suppresses the quantity-changed notice for a keyless variation re-add when the server returns the line at pre-add + delta', async () => {
-			// A variation line (type: variation, id: 42, variation: [Color:Red])
-			// is matched by id+variation. Keyless add delta: +1. Pre-add qty: 2.
-			// Expected total: 2+1=3. Server returns the variation line at 3.
-			// Since serverTotal (3) === expectedTotal (3) → suppress.
+		it( 'emits no quantity-changed notice for a keyless variation re-add when the server returns the line at pre-add + delta', async () => {
+			// A variation line (type: variation, id: 42, variation:
+			// [Color:Red]) is matched by id+variation. It starts at qty 2; a
+			// keyless add with delta +1 bumps it in place, so the
+			// post-optimistic snapshot has that same key at qty 3. The server
+			// confirms the variation line at qty 3 too. Diffing by key finds
+			// the same key at the same quantity on both sides, so no notice
+			// fires.
 			const colorRedVariation = [
 				{ attribute: 'Color', value: 'Red' },
 			] as CartItem[ 'variation' ];
@@ -1283,7 +974,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				} )
 			);
 
-			// Server total (3) === expected total (2+1=3) → suppress.
 			expect(
 				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
 			).toBe( false );
@@ -1542,72 +1232,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			expect( result ).toBe( optimisticLine );
 		} );
-
-		it( 'lineMatchesProduct still includes meta lines when summing the pre-add total (meta-inclusive, unchanged)', async () => {
-			// lineMatchesProduct is intentionally meta-inclusive. It sums ALL
-			// lines of a product — including meta lines — for the pre-add total
-			// and the keyless-add suppress-keys baseline. This diverges from
-			// findItemInCart on purpose.
-			//
-			// Verification: the cart holds a meta line (qty 2) and a standalone
-			// line (qty 1) for product 42. A keyless add (+1) computes its
-			// suppress-key baseline using lineMatchesProduct, which counts both
-			// lines → preAddTotal = 3, deltaTotal = 1, expectedTotal = 4.
-			// The server returns the standalone line at 2 and the meta line
-			// unchanged at 2 → serverTotal = 4. Because serverTotal (4) ===
-			// expectedTotal (4), the pre-existing keys are suppressed and no
-			// spurious "quantity changed" notice fires.
-			//
-			// If lineMatchesProduct had been changed to skip meta lines it would
-			// compute preAddTotal = 1 (standalone only), expectedTotal = 2, and
-			// compare against serverTotal = 4 → mismatch → notice fires, failing
-			// the assertion below.
-			const QUANTITY_CHANGED = 'was changed to';
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'standalone-key',
-						id: 42,
-						quantity: 2,
-					} ),
-					makeKeyedLine( {
-						key: 'meta-key',
-						id: 42,
-						quantity: 2,
-						is_standalone_line: false,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( {
-					key: 'standalone-key',
-					id: 42,
-					quantity: 1,
-					is_standalone_line: true,
-				} ),
-				makeKeyedLine( {
-					key: 'meta-key',
-					id: 42,
-					quantity: 2,
-					is_standalone_line: false,
-				} ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-				} )
-			);
-
-			// Server total (2+2=4) === expected total (3+1=4) → suppress.
-			// No "quantity changed" notice must fire.
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
-		} );
 	} );
 
 	describe( 'genuine add-path cap surfaces as an error notice (not an auto-update notice)', () => {
@@ -1678,6 +1302,306 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			expect( mockState.cart.items ).toHaveLength( 1 );
 			expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
+		} );
+	} );
+
+	describe( 'addCartItem post-add side effect suppression', () => {
+		describe.each( [
+			[ 'option absent', undefined ],
+			[ 'option explicitly false', false ],
+		] )( '%s', ( _label, suppressPostAddSideEffects ) => {
+			const options =
+				suppressPostAddSideEffects === undefined
+					? undefined
+					: { suppressPostAddSideEffects };
+
+			it( 'fires the screen-reader announcement, the legacy added-to-cart event, and the sync event on a successful add', async () => {
+				( getConfig as jest.Mock ).mockReturnValueOnce( {
+					messages: { addedToCartText: 'Added to your cart.' },
+				} );
+				mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+				const syncEvents: CustomEvent[] = [];
+				const onSync = ( e: Event ) =>
+					syncEvents.push( e as CustomEvent );
+				window.addEventListener(
+					'wc-blocks_store_sync_required',
+					onSync
+				);
+
+				await runAction(
+					actions.addCartItem( { id: 42, quantityToAdd: 1 }, options )
+				);
+
+				window.removeEventListener(
+					'wc-blocks_store_sync_required',
+					onSync
+				);
+
+				expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
+					preserveCartData: true,
+				} );
+				expect( syncEvents ).toHaveLength( 1 );
+				expect( speak as jest.Mock ).toHaveBeenCalledWith(
+					'Added to your cart.',
+					'polite'
+				);
+			} );
+
+			it( 'shows its own error notice on server rejection', async () => {
+				mockBatchFetchFailing( {
+					failForPath: '/wc/store/v1/cart/add-item',
+					status: 400,
+					code: 'woocommerce_rest_cart_product_no_stock',
+					message: 'You cannot add that amount to the cart.',
+				} );
+				const actions = await loadCartStore();
+				seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+				const errors = spyOnShowNoticeError();
+
+				await runAction(
+					actions.addCartItem( { id: 42, quantityToAdd: 1 }, options )
+				);
+
+				expect( errors ).toHaveLength( 1 );
+			} );
+		} );
+
+		it( 'suppresses the screen-reader announcement, the legacy added-to-cart event, and the sync event on a successful add when suppressPostAddSideEffects is true', async () => {
+			( getConfig as jest.Mock ).mockReturnValueOnce( {
+				messages: { addedToCartText: 'Added to your cart.' },
+			} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			const syncEvents: CustomEvent[] = [];
+			const onSync = ( e: Event ) => syncEvents.push( e as CustomEvent );
+			window.addEventListener( 'wc-blocks_store_sync_required', onSync );
+
+			await runAction(
+				actions.addCartItem(
+					{ id: 42, quantityToAdd: 1 },
+					{ suppressPostAddSideEffects: true }
+				)
+			);
+
+			window.removeEventListener(
+				'wc-blocks_store_sync_required',
+				onSync
+			);
+
+			expect( triggerAddedToCartEvent ).not.toHaveBeenCalled();
+			expect( syncEvents ).toHaveLength( 0 );
+			expect( speak as jest.Mock ).not.toHaveBeenCalled();
+		} );
+
+		it( 'suppresses its own error notice on server rejection when suppressPostAddSideEffects is true', async () => {
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+				status: 400,
+			} );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			const errors = spyOnShowNoticeError();
+
+			await runAction(
+				actions.addCartItem(
+					{ id: 42, quantityToAdd: 1 },
+					{ suppressPostAddSideEffects: true }
+				)
+			);
+
+			expect( errors ).toHaveLength( 0 );
+		} );
+
+		it( 'still applies the optimistic render and commits the server-reconciled cart when suppressPostAddSideEffects is true', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await runAction(
+				actions.addCartItem(
+					{ id: 42, quantityToAdd: 1 },
+					{ suppressPostAddSideEffects: true }
+				)
+			);
+
+			expect( mockState.cart.items ).toHaveLength( 1 );
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 4 );
+		} );
+
+		it( 'still emits the showCartUpdatesNotices-gated auto-update notice when suppressPostAddSideEffects is true', async () => {
+			// A genuine concurrent server change (quantity 7, diverging from
+			// the +1 requested delta landing on 4) must still surface through
+			// the showCartUpdatesNotices-gated notice block even though the
+			// per-item side effects are suppressed.
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( {
+						key: 'server-key-abc',
+						id: 42,
+						quantity: 7,
+					} ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( {
+					key: 'server-key-abc',
+					id: 42,
+					quantity: 3,
+				} ),
+			] );
+			const notices = spyOnUpdateNotices();
+
+			await runAction(
+				actions.addCartItem(
+					{ id: 42, quantityToAdd: 1 },
+					{ suppressPostAddSideEffects: true }
+				)
+			);
+
+			expect(
+				notices.some(
+					( n ) =>
+						n.notice.includes( 'was changed to' ) &&
+						n.notice.includes( '7' )
+				)
+			).toBe( true );
+		} );
+	} );
+
+	describe( 'addCartItem resolved result value', () => {
+		it( 'resolves { success: true } when the server accepts the item', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await expect(
+				runAction< AddCartItemResult >(
+					actions.addCartItem( { id: 42, quantityToAdd: 1 } )
+				)
+			).resolves.toEqual( { success: true } );
+		} );
+
+		it( 'resolves { success: false, error } carrying the server message and code when the server rejects the item, without throwing', async () => {
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+				status: 400,
+				code: 'woocommerce_rest_cart_product_no_stock',
+				message: 'You cannot add that amount to the cart.',
+			} );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			const result = await runAction< AddCartItemResult >(
+				actions.addCartItem( { id: 42, quantityToAdd: 1 } )
+			);
+
+			expect( result.success ).toBe( false );
+			// Narrowed via the assertion above rather than an `if`, so this
+			// stays a single unconditional set of expectations.
+			const { error } = result as AddCartItemResult & {
+				success: false;
+			};
+			expect( error.message ).toBe(
+				'You cannot add that amount to the cart.'
+			);
+			expect( ( error as Error & { code?: string } ).code ).toBe(
+				'woocommerce_rest_cart_product_no_stock'
+			);
+		} );
+
+		it( 'never rejects on a server rejection — the promise always fulfills', async () => {
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+				status: 400,
+			} );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			await expect(
+				runAction< AddCartItemResult >(
+					actions.addCartItem( { id: 42, quantityToAdd: 1 } )
+				)
+			).resolves.toEqual( expect.objectContaining( { success: false } ) );
+		} );
+	} );
+
+	describe( 'emitSyncEvent runtime export', () => {
+		// The cart store is imported lazily (not statically at the top of the
+		// file) so its module-level `store()` calls run after the shared
+		// `mockState` is initialized, mirroring `loadCartStore`. The runtime
+		// `emitSyncEvent` export is captured once the module has evaluated.
+		let emitSyncEvent: typeof import('../cart')[ 'emitSyncEvent' ];
+
+		beforeAll( async () => {
+			( { emitSyncEvent } = await import( '../cart' ) );
+		} );
+
+		it( 'is importable at runtime as a function', () => {
+			expect( typeof emitSyncEvent ).toBe( 'function' );
+		} );
+
+		it( 'dispatches a wc-blocks_store_sync_required CustomEvent on window carrying { type: from_iAPI, quantityChanges }', () => {
+			const quantityChanges = { productsPendingAdd: [ 42 ] };
+			const received: CustomEvent[] = [];
+			const onSync = ( event: Event ) =>
+				received.push( event as CustomEvent );
+			window.addEventListener( 'wc-blocks_store_sync_required', onSync );
+
+			emitSyncEvent( { quantityChanges } );
+
+			window.removeEventListener(
+				'wc-blocks_store_sync_required',
+				onSync
+			);
+
+			expect( received ).toHaveLength( 1 );
+			expect( received[ 0 ] ).toBeInstanceOf( CustomEvent );
+			expect( received[ 0 ].type ).toBe(
+				'wc-blocks_store_sync_required'
+			);
+			expect( received[ 0 ].detail ).toEqual( {
+				type: 'from_iAPI',
+				quantityChanges,
+			} );
+		} );
+
+		it( 'preserves the full quantityChanges payload, including all selected child ids', () => {
+			const quantityChanges = {
+				productsPendingAdd: [ 10, 20, 30 ],
+				cartItemsPendingQuantity: [ 'key-a', 'key-b' ],
+				cartItemsPendingDelete: [ 'key-c' ],
+			};
+			const received: CustomEvent[] = [];
+			const onSync = ( event: Event ) =>
+				received.push( event as CustomEvent );
+			window.addEventListener( 'wc-blocks_store_sync_required', onSync );
+
+			emitSyncEvent( { quantityChanges } );
+
+			window.removeEventListener(
+				'wc-blocks_store_sync_required',
+				onSync
+			);
+
+			expect( received ).toHaveLength( 1 );
+			expect( received[ 0 ].detail.quantityChanges ).toEqual(
+				quantityChanges
+			);
+		} );
+	} );
+
+	describe( 'batchAddCartItems removal', () => {
+		it( 'no longer exposes batchAddCartItems on the registered actions', async () => {
+			const actions = await loadCartStore();
+
+			expect(
+				( actions as unknown as Record< string, unknown > )
+					.batchAddCartItems
+			).toBeUndefined();
 		} );
 	} );
 } );

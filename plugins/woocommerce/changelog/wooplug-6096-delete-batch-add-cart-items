@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Remove the redundant `batchAddCartItems` action from the private iAPI `woocommerce` cart store, along with its dead batch-only machinery. The grouped-product add-to-cart flow now fires one concurrent `addCartItem` call per selected child instead, which the store's existing mutation batcher coalesces into the same single `POST /wc/store/v1/batch` request; the consumer now orchestrates the once-per-batch effects (screen-reader announcement, cart resync, legacy added-to-cart event) and the per-child error notices that the removed action used to handle internally. No merchant-facing or user-visible behavior change.

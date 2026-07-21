@@ -10,6 +10,8 @@ import AddToCartWithOptionsPage from '../add-to-cart-with-options/add-to-cart-wi
 import {
 	CART_LINE_IDENTITY_PLUGIN,
 	PRODUCT_X,
+	PRODUCT_Y,
+	capProductStock,
 	cartLineRows,
 	productButton,
 	readCartLineQuantities,
@@ -315,11 +317,19 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 	} );
 
 	test.describe( 'known-line quantity change (Mini-Cart stepper)', () => {
-		test( 'Stepper updates the exact line with no spurious notice and no extra line', async ( {
+		test( 'Exact keyed update via the stepper — no notice banner, exact line updated, no extra line', async ( {
 			page,
 			frontendUtils,
 			miniCartUtils,
 		} ) => {
+			// The Mini-Cart stepper is the default-on, notice-bearing
+			// consumer of the keyed `update-item` path (registered by
+			// default via `experimental-iapi-mini-cart`). Every step below
+			// requests an absolute quantity the server commits exactly (the
+			// product is in stock and unconstrained), so the post-optimistic
+			// cart always equals the server-committed cart: an empty diff,
+			// and therefore no "quantity was changed to" notice — by
+			// construction, not by any suppression.
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( PRODUCT_X.name );
 			await miniCartUtils.openMiniCart();
@@ -327,9 +337,14 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			const quantity = page.getByLabel(
 				`Quantity of ${ PRODUCT_X.name } in your cart.`
 			);
+			const noticeBanners = page.locator(
+				'.wc-block-components-notice-banner'
+			);
 			await expect( quantity ).toHaveValue( '1' );
+			await expect( noticeBanners ).toHaveCount( 0 );
 
-			// Increment via the stepper (keyed update-item path).
+			// Increment via the stepper (keyed update-item path, exact
+			// absolute target of 2).
 			const batchIncrease = page.waitForResponse(
 				'**/wp-json/wc/store/v1/batch**'
 			);
@@ -341,7 +356,13 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			await batchIncrease;
 			await expect( quantity ).toHaveValue( '2' );
 
-			// Decrement back.
+			// No notice banner appears for this exact keyed update — checked
+			// immediately after the response, not only at the end, so a
+			// notice that appeared and was later dismissed would still be
+			// caught.
+			await expect( noticeBanners ).toHaveCount( 0 );
+
+			// Decrement back (exact absolute target of 1).
 			const batchReduce = page.waitForResponse(
 				'**/wp-json/wc/store/v1/batch**'
 			);
@@ -353,16 +374,126 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			await batchReduce;
 			await expect( quantity ).toHaveValue( '1' );
 
-			// No spurious notice from the stepper change itself.
-			await expect(
-				page.locator( '.wc-block-components-notice-banner' )
-			).toHaveCount( 0 );
+			// No notice banner appears for the decrement either.
+			await expect( noticeBanners ).toHaveCount( 0 );
 
-			// No extra line was created: exactly one line for the product.
+			// The stepper updated the exact known line: no extra line was
+			// created, and the persisted quantity matches the last exact
+			// keyed update.
 			await frontendUtils.goToCart();
 			expect(
 				await readCartLineQuantities( page, PRODUCT_X.name )
 			).toEqual( [ 1 ] );
+		} );
+	} );
+
+	test.describe( 'genuine server cap on the stepper (best-effort)', () => {
+		// Guest isolation, same rationale as the describe blocks above.
+		test.use( { storageState: guestFile } );
+
+		test( 'normalize_cart cross-line clamp fires a "was changed to N" notice with the capped quantity', async ( {
+			page,
+			frontendUtils,
+			miniCartUtils,
+		} ) => {
+			// This is best-effort, real-server confirmation of "a genuine
+			// server-side cap still shows the auto-update notice". It is
+			// *not* the authoritative coverage for that guarantee — the
+			// store-level divergence tests in `base/stores/woocommerce/test/cart.ts`
+			// ("still emits the quantity-changed notice for a keyed
+			// mini-cart stepper change returned at its pre-stepper
+			// quantity", "still emits the quantity-changed notice when a
+			// keyless-add-bumped line diverges from its captured baseline",
+			// and neighbouring tests in that file) are, and this test does
+			// not need to pass for that guarantee to be proven.
+			//
+			// The keyed `update-item` endpoint the stepper calls above
+			// *rejects* an over-limit request outright (HTTP 400 — see
+			// "Genuine rejection" above) rather than committing a capped
+			// quantity, so stepping past a product's own stock can never
+			// itself produce a "was changed to N" notice. The only
+			// real-server mechanism that can produce a genuine
+			// 200-committed cap on this notice-bearing flow is the server's
+			// `normalize_cart` step, which runs at the start of *every*
+			// cart request (including a plain GET) and silently clamps any
+			// line whose quantity now exceeds its stock. Adding two
+			// products, capping one ("A") below its cart quantity, then
+			// stepping the other ("B") makes the stepping request's own
+			// `normalize_cart` pass clamp A and report it in that same
+			// response.
+			//
+			// This is timing-sensitive: because normalize_cart also runs on
+			// a plain GET, an intervening cart refresh between the stock cap
+			// and the stepper click — e.g. the Mini-Cart's own
+			// wc-blocks_added_to_cart-triggered refresh, if still in flight
+			// from an earlier add — would silently adopt the clamp into
+			// local state with no diff and therefore no notice, since
+			// `refreshCartItems` overwrites `state.cart` unconditionally.
+			// The mitigation below is to let any such refresh from the
+			// preceding adds fully settle before capping stock, then cap
+			// stock and click the stepper back-to-back with no other
+			// cart-touching action in between.
+			await frontendUtils.goToShop();
+
+			// Product A (Beanie) reaches quantity 2; product B (Cap) reaches
+			// quantity 1. Each add also triggers the Mini-Cart's
+			// wc-blocks_added_to_cart-driven refresh in the background.
+			await frontendUtils.addToCart( PRODUCT_X.name );
+			await frontendUtils.addToCart( PRODUCT_X.name );
+			await frontendUtils.addToCart( PRODUCT_Y.name );
+
+			await miniCartUtils.openMiniCart();
+
+			const quantityA = page.getByLabel(
+				`Quantity of ${ PRODUCT_X.name } in your cart.`
+			);
+			const quantityB = page.getByLabel(
+				`Quantity of ${ PRODUCT_Y.name } in your cart.`
+			);
+			await expect( quantityA ).toHaveValue( '2' );
+			await expect( quantityB ).toHaveValue( '1' );
+
+			// Let any refresh triggered by the adds above fully settle
+			// before capping stock, so it cannot race the stepper click
+			// below and silently absorb the clamp. A fixed delay (rather
+			// than waiting for network idle, which this project's lint
+			// rules disallow as flaky) is generous for a same-host round
+			// trip to the refresh endpoint; the same `setTimeout`-based
+			// delay pattern is used elsewhere in this directory's suite
+			// (see the delayed `page.route` handlers in
+			// `mutation-batcher.block_theme.spec.ts`).
+			await new Promise( ( resolve ) => setTimeout( resolve, 1000 ) );
+
+			// Cap product A's stock below its cart quantity (2) via WP-CLI.
+			// This runs outside the browser and issues no Store API
+			// request, so it cannot itself trigger a refresh.
+			await capProductStock( PRODUCT_X.id, 1 );
+
+			// Promptly step product B's quantity, with nothing else
+			// cart-touching in between: this request's own normalize_cart
+			// pass is what discovers and reports product A's clamp.
+			const batchResponse = page.waitForResponse(
+				'**/wp-json/wc/store/v1/batch**'
+			);
+			await page
+				.getByRole( 'button', {
+					name: `Increase quantity of ${ PRODUCT_Y.name }`,
+				} )
+				.click();
+			await batchResponse;
+
+			// Best-effort assertion: when the clamp lands within this
+			// request (the intended scenario), product A's line reflects
+			// its server-capped quantity and a "was changed to" notice
+			// fires for it.
+			await expect( quantityA ).toHaveValue( '1' );
+			await expect(
+				page
+					.locator( '.wc-block-components-notice-banner__content' )
+					.filter( {
+						hasText: `The quantity of "${ PRODUCT_X.name }" was changed to 1.`,
+					} )
+			).toBeVisible();
 		} );
 	} );
 } );
