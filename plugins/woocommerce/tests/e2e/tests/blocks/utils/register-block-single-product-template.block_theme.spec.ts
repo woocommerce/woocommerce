@@ -31,37 +31,72 @@ const insertInSingleProductTemplate = async (
 };
 
 test.describe( 'registerProductBlockType registers', () => {
-	test( 'block available on posts, e.g. Product Price', async ( {
+	test( 'blocks are registered according to product context', async ( {
 		admin,
 		editor,
 	} ) => {
-		const blockName = 'woocommerce/product-price';
+		const productPriceBlockName = 'woocommerce/product-price';
+		const productImageGalleryBlockName =
+			'woocommerce/product-image-gallery';
 
-		await test.step( 'Unavailable in post globally', async () => {
+		await test.step( 'block available on posts, e.g. Product Price > Unavailable in post globally', async () => {
 			await admin.createNewPost();
-			await editor.insertBlock( { name: blockName } );
+			await editor.insertBlock( { name: productPriceBlockName } );
 			await expect(
-				await editor.getBlockByName( blockName )
+				await editor.getBlockByName( productPriceBlockName )
 			).toHaveCount( 0 );
 		} );
 
-		await test.step( 'Available in post within Single Product block', async () => {
-			const singleProductClientId =
-				await insertSingleProductBlock( editor );
+		const singleProductClientId = await insertSingleProductBlock( editor );
+
+		await test.step( 'block available on posts, e.g. Product Price > Available in post within Single Product block', async () => {
 			// One from the global inserter, one from the single product block
 			await editor.insertBlock(
-				{ name: blockName },
+				{ name: productPriceBlockName },
 				{ clientId: singleProductClientId }
 			);
 			await expect(
-				await editor.getBlockByName( blockName )
+				await editor.getBlockByName( productPriceBlockName )
 			).toHaveCount( 2 );
 		} );
 
-		await test.step( 'Available in Single Product template globally', async () => {
-			await insertInSingleProductTemplate( blockName, editor, admin );
+		await test.step( 'block unavailable on posts, e.g. Product Image Gallery > Unavailable in post, also within Single Product block', async () => {
+			const singleProductBlock = await editor.getBlockByName(
+				'woocommerce/single-product'
+			);
+			await editor.selectBlocks( singleProductBlock );
+
+			await editor.canvas
+				.getByRole( 'button', { name: 'Add block' } )
+				.click();
+
+			await editor.page
+				.getByRole( 'searchbox', { name: 'Search' } )
+				.fill( productImageGalleryBlockName );
+
 			await expect(
-				await editor.getBlockByName( blockName )
+				editor.page.getByText( 'Product Image Gallery' )
+			).toBeHidden();
+		} );
+
+		await test.step( 'block available on posts, e.g. Product Price > Available in Single Product template globally', async () => {
+			await insertInSingleProductTemplate(
+				productPriceBlockName,
+				editor,
+				admin
+			);
+			await expect(
+				await editor.getBlockByName( productPriceBlockName )
+			).toHaveCount( 1 );
+		} );
+
+		await test.step( 'block unavailable on posts, e.g. Product Image Gallery > Available in Single Product template globally', async () => {
+			await editor.setContent( '' );
+			await editor.insertBlock( {
+				name: productImageGalleryBlockName,
+			} );
+			await expect(
+				await editor.getBlockByName( productImageGalleryBlockName )
 			).toHaveCount( 1 );
 		} );
 	} );
@@ -161,36 +196,5 @@ test.describe( 'registerProductBlockType registers', () => {
 			);
 			await expect( block.first() ).toBeAttached();
 		}
-	} );
-
-	test( 'block unavailable on posts, e.g. Product Image Gallery', async ( {
-		admin,
-		editor,
-	} ) => {
-		const blockName = 'woocommerce/product-image-gallery';
-
-		await test.step( 'Unavailable in post, also within Single Product block', async () => {
-			await admin.createNewPost();
-			await insertSingleProductBlock( editor );
-
-			await editor.canvas
-				.getByRole( 'button', { name: 'Add block' } )
-				.click();
-
-			await editor.page
-				.getByRole( 'searchbox', { name: 'Search' } )
-				.fill( blockName );
-
-			await expect(
-				editor.page.getByText( 'Product Image Gallery' )
-			).toBeHidden();
-		} );
-
-		await test.step( 'Available in Single Product template globally', async () => {
-			await insertInSingleProductTemplate( blockName, editor, admin );
-			await expect(
-				await editor.getBlockByName( blockName )
-			).toHaveCount( 1 );
-		} );
 	} );
 } );
