@@ -84,6 +84,9 @@ seeded baseline every time**.
   self-heal wipes the web root, taking the baseline with it.
 - Only the DB and `wp-content/uploads` are reset; other filesystem changes are not.
 - For interactive development (no auto-reset), use `pnpm env:dev` instead.
+- wp-env counts `--debug` as part of its configuration, so alternating between
+  `pnpm env:e2e` and `pnpm env:e2e --debug` re-provisions each time you switch.
+  Pick one for a given environment and stick with it.
 
 To run several worktrees at once, give each one its own port — wp-env keys its
 instance directory off the config file path, so the environments are already
