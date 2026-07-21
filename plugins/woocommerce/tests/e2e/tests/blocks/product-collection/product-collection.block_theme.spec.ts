@@ -718,20 +718,41 @@ test.describe( 'Product Collection', () => {
 
 	// Tests for regressions of https://github.com/woocommerce/woocommerce/pull/47994
 	test.describe( 'Product Collection should be visible after Refresh', () => {
-		test( 'Product Collection should be visible after Refresh in a Template', async ( {
+		test( 'Template collections should be visible after Refresh', async ( {
 			page,
 			editor,
 			pageObject,
 		} ) => {
-			await pageObject.goToEditorTemplate();
-			const productTemplate = editor.canvas.getByLabel(
-				BLOCK_LABELS.productTemplate
-			);
-			await expect( productTemplate ).toBeVisible();
+			await test.step( 'Product Collection should be visible after Refresh in a Template', async () => {
+				await pageObject.goToEditorTemplate();
+				const productTemplate = editor.canvas.getByLabel(
+					BLOCK_LABELS.productTemplate
+				);
+				await expect( productTemplate ).toBeVisible();
 
-			// Refresh the template and verify the block is still visible
-			await page.reload();
-			await expect( productTemplate ).toBeVisible();
+				// Refresh the template and verify the block is still visible
+				await page.reload();
+				await expect( productTemplate ).toBeVisible();
+			} );
+
+			await test.step( 'On Sale Products collection should be visible after Refresh', async () => {
+				await pageObject.goToEditorTemplate();
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInTemplate( 'onSale' );
+
+				const productTemplate = editor.canvas.getByLabel(
+					BLOCK_LABELS.productTemplate
+				);
+
+				await expect( productTemplate ).toHaveCount( 2 );
+
+				// Refresh the template and verify "On Sale Products" collection is still visible
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
+				await page.reload();
+				await expect( productTemplate ).toHaveCount( 2 );
+			} );
 		} );
 
 		test( 'Product Collection should be visible after Refresh in a Post', async ( {
@@ -746,29 +767,6 @@ test.describe( 'Product Collection', () => {
 			await editor.publishPost();
 			await page.reload();
 			await expect( pageObject.productTemplate ).toBeVisible();
-		} );
-
-		test( 'On Sale Products collection should be visible after Refresh', async ( {
-			page,
-			pageObject,
-			editor,
-		} ) => {
-			await pageObject.goToEditorTemplate();
-			await pageObject.insertProductCollection();
-			await pageObject.chooseCollectionInTemplate( 'onSale' );
-
-			const productTemplate = editor.canvas.getByLabel(
-				BLOCK_LABELS.productTemplate
-			);
-
-			await expect( productTemplate ).toHaveCount( 2 );
-
-			// Refresh the template and verify "On Sale Products" collection is still visible
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-			await page.reload();
-			await expect( productTemplate ).toHaveCount( 2 );
 		} );
 
 		test( 'On Sale Products collection should be visible after Refresh in a Post', async ( {
