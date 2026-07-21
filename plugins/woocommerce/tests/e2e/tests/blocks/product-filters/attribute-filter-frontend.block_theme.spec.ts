@@ -44,118 +44,110 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 			} );
 		} );
 
-		test( 'clear button is not shown on initial page load', async ( {
+		test( 'supports the default attribute-filter frontend journey', async ( {
 			page,
 		} ) => {
-			await page.goto( '/shop' );
+			await test.step( 'clear button is not shown on initial page load', async () => {
+				await page.goto( '/shop' );
 
-			const button = page.getByRole( 'button', {
-				name: 'Clear filters',
+				const button = page.getByRole( 'button', {
+					name: 'Clear filters',
+				} );
+
+				await expect( button ).toBeHidden();
 			} );
 
-			await expect( button ).toBeHidden();
-		} );
+			await test.step( 'renders a checkbox list with the available attribute filters', async () => {
+				await page.goto( '/shop' );
 
-		test( 'renders a checkbox list with the available attribute filters', async ( {
-			page,
-		} ) => {
-			await page.goto( '/shop' );
+				const listItems = page
+					.getByRole( 'heading', {
+						name: 'Attribute',
+					} )
+					.locator( '..' )
+					.locator( '..' )
+					.locator( 'label' );
 
-			const listItems = page
-				.getByRole( 'heading', {
-					name: 'Attribute',
-				} )
-				.locator( '..' )
-				.locator( '..' )
-				.locator( 'label' );
+				await expect( listItems ).toHaveCount( 5 );
 
-			await expect( listItems ).toHaveCount( 5 );
-
-			for ( let i = 0; i < COLOR_ATTRIBUTE_VALUES.length; i++ ) {
-				await expect( listItems.nth( i ) ).toHaveText(
-					COLOR_ATTRIBUTE_VALUES[ i ]
-				);
-			}
-		} );
-
-		test( 'filters the list of products by selecting an attribute', async ( {
-			page,
-		} ) => {
-			await page.goto( '/shop' );
-
-			const grayCheckbox = page.getByText( 'Gray' );
-			await grayCheckbox.click();
-
-			// wait for navigation
-			await page.waitForURL( /.*filter_color=gray.*/ );
-
-			const products = page.locator( '.wc-block-product' );
-
-			await expect( products ).toHaveCount( 2 );
-		} );
-
-		test( 'clear button appears after a filter is applied', async ( {
-			page,
-		} ) => {
-			await page.goto( '/shop' );
-
-			const grayCheckbox = page.getByText( 'Gray' );
-			await grayCheckbox.click();
-
-			// wait for navigation
-			await page.waitForURL( /.*filter_color=gray.*/ );
-
-			const button = page.getByRole( 'button', {
-				name: 'Clear filters',
+				for ( let i = 0; i < COLOR_ATTRIBUTE_VALUES.length; i++ ) {
+					await expect( listItems.nth( i ) ).toHaveText(
+						COLOR_ATTRIBUTE_VALUES[ i ]
+					);
+				}
 			} );
 
-			await expect( button ).toBeVisible();
-		} );
+			await test.step( 'filters the list of products by selecting an attribute', async () => {
+				await page.goto( '/shop' );
 
-		test( 'clear button hides after deselecting all filters', async ( {
-			page,
-		} ) => {
-			await page.goto( '/shop' );
+				const grayCheckbox = page.getByText( 'Gray' );
+				await grayCheckbox.click();
 
-			const grayCheckbox = page.getByText( 'Gray' );
-			await grayCheckbox.click();
+				// wait for navigation
+				await page.waitForURL( /.*filter_color=gray.*/ );
 
-			// wait for navigation
-			await page.waitForURL( /.*filter_color=gray.*/ );
+				const products = page.locator( '.wc-block-product' );
 
-			await grayCheckbox.click();
-
-			const button = page.getByRole( 'button', {
-				name: 'Clear filters',
+				await expect( products ).toHaveCount( 2 );
 			} );
 
-			await expect( button ).toBeHidden();
-		} );
+			await test.step( 'clear button appears after a filter is applied', async () => {
+				await page.goto( '/shop' );
 
-		test( 'filters are cleared after clear button is clicked', async ( {
-			page,
-		} ) => {
-			await page.goto( '/shop' );
+				const grayCheckbox = page.getByText( 'Gray' );
+				await grayCheckbox.click();
 
-			const grayCheckbox = page.getByText( 'Gray' );
-			await grayCheckbox.click();
+				// wait for navigation
+				await page.waitForURL( /.*filter_color=gray.*/ );
 
-			// wait for navigation
-			await page.waitForURL( /.*filter_color=gray.*/ );
+				const button = page.getByRole( 'button', {
+					name: 'Clear filters',
+				} );
 
-			const button = page.getByRole( 'button', {
-				name: 'Clear filters',
+				await expect( button ).toBeVisible();
 			} );
 
-			await button.click();
+			await test.step( 'clear button hides after deselecting all filters', async () => {
+				await page.goto( '/shop' );
 
-			for ( const color of COLOR_ATTRIBUTE_VALUES ) {
-				const element = page.locator(
-					`input[value="${ color.toLowerCase() }"]`
-				);
+				const grayCheckbox = page.getByText( 'Gray' );
+				await grayCheckbox.click();
 
-				await expect( element ).not.toBeChecked();
-			}
+				// wait for navigation
+				await page.waitForURL( /.*filter_color=gray.*/ );
+
+				await grayCheckbox.click();
+
+				const button = page.getByRole( 'button', {
+					name: 'Clear filters',
+				} );
+
+				await expect( button ).toBeHidden();
+			} );
+
+			await test.step( 'filters are cleared after clear button is clicked', async () => {
+				await page.goto( '/shop' );
+
+				const grayCheckbox = page.getByText( 'Gray' );
+				await grayCheckbox.click();
+
+				// wait for navigation
+				await page.waitForURL( /.*filter_color=gray.*/ );
+
+				const button = page.getByRole( 'button', {
+					name: 'Clear filters',
+				} );
+
+				await button.click();
+
+				for ( const color of COLOR_ATTRIBUTE_VALUES ) {
+					const element = page.locator(
+						`input[value="${ color.toLowerCase() }"]`
+					);
+
+					await expect( element ).not.toBeChecked();
+				}
+			} );
 		} );
 	} );
 
