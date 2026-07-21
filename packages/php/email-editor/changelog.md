@@ -2,11 +2,19 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.14.1](https://github.com/woocommerce/email-editor/releases/tag/2.14.1) - 2026-07-16 
+
+-   Patch - Fix email gallery aspect-ratio crop misclassifying images whose src contains a query-string ampersand (e.g. CDN URLs) as server-cropped, which stamped distorting fixed dimensions on uncropped images. The renderer now detects a server crop by comparing the filter result to the original URL before escaping. [#66739]
+-   Patch - Honor the gallery block aspect ratio (crop) when rendering emails. Cropped images now fall back to CSS cropping and expose the `woocommerce_email_editor_gallery_cropped_image_url` filter so integrations can serve server-side-cropped images that render the crop in every email client. [#66570]
+-   Patch - Improve email editor layout rendering for better parity with the editor: include padding and borders in inner (e.g. image) width calculations so bordered columns no longer overflow, nest a padded group's root and container padding instead of stacking them on each block, and stop using the global vertical block spacing as a horizontal gap between columns. [#66165]
+-   Patch - Preserve percentage widths for email editor columns in previews and rendered emails. [#65868]
+-   Patch - Update Composer dev dependencies. [#65999]
+
 ## [2.14.0](https://github.com/woocommerce/email-editor/releases/tag/2.14.0) - 2026-06-15 
 
 -   Patch - Block email editor: render every child block of a quote, render the citation only once, and stop emitting a quote-within-a-quote. [#64746]
--   Minor - Add support for Vimeo, TikTok, and Dailymotion embeds in the Email Editor package. [#65502]
 -   Patch - Email Editor: fix media-text RTL renderer test assertion. [#65215]
+-   Minor - Add support for Vimeo, TikTok, and Dailymotion embeds in the Email Editor package. [#65502]
 
 ## [2.13.0](https://github.com/woocommerce/email-editor/releases/tag/2.13.0) - 2026-05-04 
 
