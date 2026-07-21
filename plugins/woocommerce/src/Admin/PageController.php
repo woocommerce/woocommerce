@@ -504,7 +504,8 @@ class PageController {
 				$options['title'],
 				$options['capability'],
 				$options['path'],
-				array( __CLASS__, 'page_wrapper' )
+				array( __CLASS__, 'page_wrapper' ),
+				$options['position']
 			);
 		}
 

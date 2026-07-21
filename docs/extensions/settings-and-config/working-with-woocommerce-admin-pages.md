@@ -60,7 +60,7 @@ To register a React-powered page, use the [`wc_admin_register_page()`](https://w
 -   `path` (**required**) - This is the page's path (relative to `#wc-admin`). It is used for identifying this page and for linking breadcrumb pieces when this page is a parent.
 -   `capability` (_optional_) - User capability needed to access this page. The default value is `manage_options`.
 -   `icon` (_optional_) - Use this to apply a Dashicons helper class or base64-encoded SVG. Include the entire dashicon class name, ie `dashicons-*`. Note that this won't be included in WooCommerce Admin Navigation.
--   `position` (_optional_) - Menu item position for parent pages. See: [`add_menu_page()`](https://developer.wordpress.org/reference/functions/add_menu_page/).
+-   `position` (_optional_) - Menu item position. See: [`add_menu_page()`](https://developer.wordpress.org/reference/functions/add_menu_page/) and [`add_submenu_page()`](https://developer.wordpress.org/reference/functions/add_submenu_page/).
 
 Registering a React-powered page is similar to connecting a PHP page, but with some key differences. Registering pages will automatically create WordPress menu items for them, with the appropriate hierarchy based on the value of `parent`.
 

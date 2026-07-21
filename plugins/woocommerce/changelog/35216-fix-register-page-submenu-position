@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Honour the position argument of wc_admin_register_page() for sub pages, so extensions can control where their React-powered pages appear within a parent submenu. Previously position was only passed to add_menu_page() for top level pages and silently ignored for sub pages.
