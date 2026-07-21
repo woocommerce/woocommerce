@@ -283,6 +283,7 @@ jQuery( function ( $ ) {
 				.on( 'click', 'button.calculate-action', this.recalculate )
 				.on( 'click', 'a.edit-order-item', this.edit_item )
 				.on( 'click', 'a.delete-order-item', this.delete_item )
+				.on( 'change', 'select.shipping_method', this.shipping_method_changed )
 
 				// Refunds
 				.on( 'click', '.delete_refund', this.refunds.delete_refund )
@@ -374,6 +375,27 @@ jQuery( function ( $ ) {
 		reloaded_items: function() {
 			wc_meta_boxes_order.init_tiptip();
 			wc_meta_boxes_order_items.stupidtable.init();
+		},
+
+		shipping_method_changed: function() {
+			var $select       = $( this );
+			var $name         = $select.closest( 'tr.shipping' ).find( 'input.shipping_method_name' );
+			var title         = $select.find( 'option:selected' ).text();
+			var previousTitle = $select.data( 'selected-title' ) || $select.find( 'option' ).filter( function() {
+				return this.defaultSelected;
+			} ).text();
+			var currentTitle  = $name.val();
+			var defaultTitle  = $name.data( 'default-shipping-title' );
+
+			$select.data( 'selected-title', title );
+
+			if ( currentTitle && currentTitle !== defaultTitle && currentTitle !== previousTitle ) {
+				return;
+			}
+
+			if ( $select.val() && 'other' !== $select.val() ) {
+				$name.val( title ).trigger( 'change' );
+			}
 		},
 
 		// When the qty is changed, increase or decrease costs
