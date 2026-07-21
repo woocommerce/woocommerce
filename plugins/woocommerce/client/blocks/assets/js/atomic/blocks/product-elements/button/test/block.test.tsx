@@ -18,26 +18,14 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 	useStoreEvents: jest.fn(),
 } ) );
 
-jest.mock( '@woocommerce/base-hooks', () => ( {
-	useStyleProps: jest.fn().mockReturnValue( { className: '', style: {} } ),
-} ) );
+jest.mock( '@woocommerce/base-hooks', () => ( {} ) );
 
 jest.mock( '@woocommerce/block-settings', () => ( {
 	CART_URL: '/cart/',
-	isExperimentalWcRestApiV4Enabled: jest.fn().mockReturnValue( false ),
-} ) );
-
-jest.mock( '@woocommerce/settings', () => ( {
-	getSetting: jest.fn().mockReturnValue( { cartRedirectAfterAdd: false } ),
-} ) );
-
-jest.mock( '@woocommerce/shared-context', () => ( {
-	useInnerBlockLayoutContext: jest.fn().mockReturnValue( {} ),
-	useProductDataContext: jest.fn().mockReturnValue( {} ),
 } ) );
 
 jest.mock( '@woocommerce/shared-hocs', () => ( {
-	withProductDataContext: jest.fn( ( component ) => component ),
+	withProductDataContext: ( component ) => component,
 } ) );
 
 const product: AddToCartButtonAttributes[ 'product' ] = {
