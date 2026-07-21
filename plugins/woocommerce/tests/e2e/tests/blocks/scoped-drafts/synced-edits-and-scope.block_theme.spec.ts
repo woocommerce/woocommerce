@@ -219,9 +219,9 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; Single Product block s
 			// The container's own draft collection — addressed by the
 			// minted `single-product/<productId>/<n>` key the Single
 			// Product block declares, as emitted by `SingleProduct.php` —
-			// still only holds its untouched server-seeded default: the
-			// main form's edit never reached it, so the override's own
-			// inputs stay exactly as they started.
+			// never received the main form's edit. Untouched, it holds no
+			// draft at all, so the override's own inputs still display
+			// their server-rendered defaults, exactly as they started.
 			await expect(
 				overriddenForm.getByLabel( 'Product quantity' )
 			).toHaveValue( '1' );
