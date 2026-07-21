@@ -17,6 +17,11 @@ const defaultDevDependencies = {
 	'@woocommerce/eslint-plugin': '^4.0.0',
 	'@wordpress/prettier-config': 'latest',
 	'@wordpress/scripts': 'latest',
+	/*
+	 * Without this, `@wordpress/prettier-config`'s `prettier: >=3` peer hoists plain
+	 * prettier over wp-prettier. Pinned to match `@woocommerce/eslint-plugin`.
+	 */
+	prettier: 'npm:wp-prettier@3.0.3',
 };
 
 module.exports = {
