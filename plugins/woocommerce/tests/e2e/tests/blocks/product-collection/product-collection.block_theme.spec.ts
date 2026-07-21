@@ -676,43 +676,49 @@ test.describe( 'Product Collection', () => {
 			},
 		];
 
-		genericArchiveTemplates.forEach( ( { name, path, needsCreation } ) => {
-			test( `${ name } template`, async ( {
-				admin,
-				editor,
-				pageObject,
-			} ) => {
-				if ( needsCreation ) {
-					await admin.visitSiteEditor( {
-						postType: 'wp_template',
-					} );
-					await editor.createTemplate( {
-						templateName: name,
-					} );
-				} else {
-					await pageObject.goToEditorTemplate( path );
-				}
-				await pageObject.focusProductCollection();
+		test( 'preserves preview visibility across generic archive templates', async ( {
+			admin,
+			editor,
+			pageObject,
+		} ) => {
+			for ( const {
+				name,
+				path,
+				needsCreation,
+			} of genericArchiveTemplates ) {
+				await test.step( `${ name } template`, async () => {
+					if ( needsCreation ) {
+						await admin.visitSiteEditor( {
+							postType: 'wp_template',
+						} );
+						await editor.createTemplate( {
+							templateName: name,
+						} );
+					} else {
+						await pageObject.goToEditorTemplate( path );
+					}
+					await pageObject.focusProductCollection();
 
-				const previewButtonLocator = editor.canvas.getByTestId(
-					SELECTORS.previewButtonTestID
-				);
+					const previewButtonLocator = editor.canvas.getByTestId(
+						SELECTORS.previewButtonTestID
+					);
 
-				// The preview button should be visible
-				await expect( previewButtonLocator ).toBeVisible();
+					// The preview button should be visible
+					await expect( previewButtonLocator ).toBeVisible();
 
-				// The preview button should be hidden when the block is not selected.
-				// Changing focus.
-				const otherBlockSelector = editor.canvas.getByLabel(
-					'Block: Archive Title'
-				);
-				await editor.selectBlocks( otherBlockSelector );
-				await expect( previewButtonLocator ).toBeHidden();
+					// The preview button should be hidden when the block is not selected.
+					// Changing focus.
+					const otherBlockSelector = editor.canvas.getByLabel(
+						'Block: Archive Title'
+					);
+					await editor.selectBlocks( otherBlockSelector );
+					await expect( previewButtonLocator ).toBeHidden();
 
-				// Preview button should be visible again when the block is selected.
-				await pageObject.focusProductCollection();
-				await expect( previewButtonLocator ).toBeVisible();
-			} );
+					// Preview button should be visible again when the block is selected.
+					await pageObject.focusProductCollection();
+					await expect( previewButtonLocator ).toBeVisible();
+				} );
+			}
 		} );
 	} );
 
