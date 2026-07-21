@@ -483,13 +483,11 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				// using that particular one). A surface with no attribute
 				// selection of its own, that never had one, must not
 				// clobber another surface's already-resolved shared
-				// selection with its own "nothing selected" default — the
-				// same initialize-if-absent discipline `seedDraftIfAbsent`
-				// follows for the draft itself. A surface that *did* make a
-				// real selection at some point keeps writing from then on,
-				// including clearing it back to empty — that is a genuine
-				// edit on this surface, not a bystander's stale
-				// re-evaluation.
+				// selection with its own "nothing selected" default. A
+				// surface that *did* make a real selection at some point
+				// keeps writing from then on, including clearing it back
+				// to empty — that is a genuine edit on this surface, not
+				// a bystander's stale re-evaluation.
 				if (
 					selectedAttributes.length === 0 &&
 					! context.hasSelectedAttribute &&
