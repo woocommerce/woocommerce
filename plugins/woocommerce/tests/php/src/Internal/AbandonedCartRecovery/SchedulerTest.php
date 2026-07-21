@@ -497,6 +497,29 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A store-api order is scheduled through the real production wiring when it exits checkout-draft: the data store re-fires woocommerce_new_order on the draft → pending transition.
+	 */
+	public function test_store_api_draft_to_pending_transition_schedules_via_hooks(): void {
+		$order = OrderHelper::create_order();
+		$order->set_created_via( 'store-api' );
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+
+		// Register the production hooks; setUp() only wires ACTION_HOOK.
+		$this->sut->init();
+
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty(
+			$fresh->get_meta( Scheduler::SCHEDULED_META_KEY ),
+			'The checkout-draft → pending transition must schedule the send via the re-fired woocommerce_new_order hook.'
+		);
+		$this->assertNotFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+	}
+
+	/**
 	 * @testdox handle_status_changed() cancels the pending send when the order transitions out of the abandoned set (e.g. pending → processing).
 	 */
 	public function test_handle_status_changed_cancels_on_exit_from_abandoned_set(): void {
