@@ -1624,7 +1624,23 @@ const { actions } = store< Store >(
 				// Lazily materializes the collection on its first write —
 				// nothing server-seeds `state.draftItems`, so a not-yet-
 				// written key holds no collection until this point.
-				( state.draftItems[ draftKey ] ??= [] ).push( draft );
+				//
+				// Assigns the fully-formed array (existing entries plus the
+				// new draft) in one atomic write, rather than
+				// `(state.draftItems[draftKey] ??= []).push(draft)`: the
+				// reactive state proxy notifies bindings synchronously on the
+				// *assignment* that materializes the collection, and a
+				// binding reading the collection at that exact moment (e.g. a
+				// `data-wp-text` on the same element the edit originated
+				// from) observes the collection before a subsequent `.push`
+				// — a direct array mutation the proxy does not intercept —
+				// ever lands, permanently caching that pre-push (empty) read.
+				// A single assignment carrying the complete contents has
+				// nothing left to race.
+				state.draftItems[ draftKey ] = [
+					...( state.draftItems[ draftKey ] ?? [] ),
+					draft,
+				];
 			},
 
 			*addItem( payload?: DraftItem ): AsyncAction< void > {
