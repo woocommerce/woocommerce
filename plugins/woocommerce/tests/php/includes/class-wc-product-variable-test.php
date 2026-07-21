@@ -348,6 +348,67 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_variation_prices sorts on first call, skips re-sorting on repeat calls, and treats float and string prices as equal via loose comparison.
+	 */
+	public function test_get_variation_prices_skips_sort_on_repeated_call_and_with_equivalent_types(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$sut     = new class( $product->get_id() ) extends WC_Product_Variable {
+			public int $sort_count = 0; // phpcs:ignore Squiz.Commenting.VariableComment.Missing
+
+			protected function sort_variation_prices( $prices ) { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				++$this->sort_count;
+				return parent::sort_variation_prices( $prices );
+			}
+		};
+
+		// Ensure the store-level cache is not interfering the test.
+		$invalidate_cache = static fn ( array $hash ) => array( ...$hash, wp_rand() );
+		add_filter( 'woocommerce_get_variation_prices_hash', $invalidate_cache );
+
+		try {
+			// First call: price data will be initially populated, including sorting. 3 is a number of sort calls on initial cache population.
+			$sut->get_variation_prices();
+			$this->assertSame( 3, $sut->sort_count );
+
+			// Second call: price data is unchanged and cache update being skipped. 3 is a number of sort calls, not changed since initial cache population.
+			$sut->get_variation_prices();
+			$this->assertSame( 3, $sut->sort_count );
+
+			// Modify price data type, while keeping the price same.
+			foreach ( $product->get_children() as $child_id ) {
+				foreach ( array( '_price', '_regular_price' ) as $meta_key ) {
+					$value = get_post_meta( $child_id, $meta_key, true );
+					if ( '' !== $value ) {
+						update_post_meta( $child_id, $meta_key, number_format( (float) $value, 2, '.', '' ) );
+					}
+				}
+			}
+
+			// Third call: price data is unchanged (data type is) and cache update being skipped. 3 is a number of sort calls, not changed since initial cache population.
+			$sut->get_variation_prices();
+			$this->assertSame( 3, $sut->sort_count );
+
+			// Modify price.
+			foreach ( $product->get_children() as $child_id ) {
+				foreach ( array( '_price', '_regular_price' ) as $meta_key ) {
+					$value = get_post_meta( $child_id, $meta_key, true );
+					if ( '' !== $value ) {
+						update_post_meta( $child_id, $meta_key, (float) $value + 0.01 );
+					}
+				}
+			}
+
+			// Fourth call: price data change detected — cache being updated. 6 is a number of sort calls: 3 on initial cache population + 3 on cache refresh.
+			$sut->get_variation_prices();
+			$this->assertSame( 6, $sut->sort_count );
+		} finally {
+			remove_filter( 'woocommerce_get_variation_prices_hash', $invalidate_cache );
+		}
+
+		$product->delete( true );
+	}
+
+	/**
 	 * Create a real image attachment that passes `wp_attachment_is_image()`.
 	 *
 	 * @param string $title         Post title.
