@@ -152,8 +152,9 @@ class Utils {
 		// The quantity actually bound to the rendered input: the product's
 		// minimum purchase quantity, or `0` when this surface allows an empty
 		// starting quantity (an optional grouped-product child). Computed
-		// unconditionally so it can also seed the draft-seed context below,
-		// even on the (unexpected) chance the number input isn't found.
+		// unconditionally so it can also feed the draft seed filed into
+		// `woocommerce/cart` state below, even on the (unexpected) chance the
+		// number input isn't found.
 		$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
 		$input_quantity   = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
 
