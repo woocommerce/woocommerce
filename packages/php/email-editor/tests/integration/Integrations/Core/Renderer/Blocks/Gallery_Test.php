@@ -12,6 +12,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Gallery;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 
 /**
  * Integration test for Gallery class
@@ -340,8 +341,9 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( '<a href="https://example.com/image1.jpg">', $rendered_with_links );
 		$this->assertStringContainsString( '<a href="https://example.com/?attachment_id=2">', $rendered_with_links );
 
-		// Verify that images without links don't get wrapped in anchor tags.
-		$this->assertStringContainsString( '<img src="https://example.com/image3.jpg"', $rendered_with_links );
+		// Verify that images without links don't get wrapped in anchor tags. The <img> now carries a
+		// stamped width attribute, so match on the src rather than the exact tag opening.
+		$this->assertStringContainsString( 'src="https://example.com/image3.jpg"', $rendered_with_links );
 		$this->assertStringNotContainsString( '<a href="https://example.com/image3.jpg">', $rendered_with_links );
 	}
 
@@ -776,6 +778,47 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 
 		$this->assertStringContainsString( 'width="100"', $rendered, 'A small width is preserved.' );
 		$this->assertStringContainsString( 'height="50"', $rendered, 'Its height is preserved too.' );
+	}
+
+	/**
+	 * A gallery image with no explicit width (the common case for editor markup that sizes images with
+	 * CSS) is stamped with its cell's content width. Without the attribute, Gmail desktop and Outlook
+	 * fall back to the image's intrinsic size and stretch the whole email past its content width
+	 * (NL-737); the stamped width constrains it, exactly as the core/image renderer does for standalone
+	 * images.
+	 */
+	public function testItStampsCellWidthOnImagesWithoutAnExplicitWidth(): void {
+		// The default fixture is a 2-column gallery of three width-less images: images 1 and 2 share the
+		// first row, image 3 is alone in the (full-width) second row.
+		$rendered = $this->gallery_renderer->render( '', $this->parsed_gallery, $this->rendering_context );
+
+		$layout_width = (int) Styles_Helper::parse_value( $this->rendering_context->get_layout_width_without_padding() );
+		$cell_padding = 8; // Must match Gallery::CELL_PADDING.
+
+		$widths = array();
+		$html   = new \WP_HTML_Tag_Processor( $rendered );
+		while ( $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
+			$width = $html->get_attribute( 'width' );
+			$this->assertIsString( $width, 'Every gallery image gets an explicit width so Gmail/Outlook constrain it.' );
+			$widths[] = (int) $width;
+		}
+
+		$this->assertCount( 3, $widths, 'All three images are present.' );
+
+		// First-row images each take half the layout, minus the cell padding on both sides.
+		$expected_half = (int) floor( $layout_width / 2 ) - ( 2 * $cell_padding );
+		$this->assertSame( $expected_half, $widths[0], 'A shared-row image is sized to half the content width minus padding.' );
+		$this->assertSame( $widths[0], $widths[1], 'Images sharing a row share a width.' );
+
+		// The lone trailing image spans the full row: the whole content width minus its padding.
+		$expected_full = $layout_width - ( 2 * $cell_padding );
+		$this->assertSame( $expected_full, $widths[2], 'A lone trailing image spans the full content width.' );
+
+		// The regression stretched images past the content width; every stamped width must stay within it.
+		foreach ( $widths as $width ) {
+			$this->assertGreaterThan( 0, $width, 'A stamped width is positive.' );
+			$this->assertLessThanOrEqual( $layout_width, $width, 'A stamped width never exceeds the content width.' );
+		}
 	}
 
 	/**

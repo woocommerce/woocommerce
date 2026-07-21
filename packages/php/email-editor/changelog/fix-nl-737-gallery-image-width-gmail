@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Give email gallery images an explicit width attribute sized to their cell. Without it, Gmail desktop and Outlook fell back to each image's intrinsic size and stretched the whole newsletter past its content width. Standalone images were already constrained this way; galleries now match.

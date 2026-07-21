@@ -20,6 +20,17 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper
  */
 class Gallery extends Abstract_Block_Renderer {
 	/**
+	 * Padding (in px) applied to each side of a gallery cell.
+	 *
+	 * Shared between the cell markup (see {@see build_gallery_row_table()}) and the image width
+	 * stamped in {@see normalize_image_for_email()} so an image's fixed width plus its cell padding
+	 * exactly fills the cell instead of overflowing it.
+	 *
+	 * @var int
+	 */
+	private const CELL_PADDING = 8;
+
+	/**
 	 * Renders the gallery block content using a table-based layout.
 	 *
 	 * @param string            $block_content Block content.
@@ -189,17 +200,29 @@ class Gallery extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Normalize a gallery <img> for email: drop the web-only class and rein in an oversized raw width.
+	 * Normalize a gallery <img> for email: drop the web-only class and give it a fixed width sized to
+	 * its cell.
 	 *
 	 * The block editor stores the intrinsic `width`/`height` of the original file (e.g. `width="2560"`).
-	 * Outlook honors that raw width literally — blowing a thumbnail-sized cell wide open. The
-	 * core/image renderer avoids this with add_image_dimensions(); the gallery path (which sizes to a
-	 * per-cell width rather than the block width) needs the equivalent tailored to its cell model. We
-	 * clamp the width down to the cell it renders in, but only when the stored width exceeds it,
-	 * scaling any height to keep the aspect ratio. An image with no explicit width is left responsive
-	 * (no attribute added), and a width already at or below the cell width is untouched — so the
-	 * concrete dimensions the aspect-ratio crop sets for a server-cropped file, and the deliberately
-	 * dimensionless CSS-crop fallback, are both preserved.
+	 * Outlook honors that raw width literally — blowing a thumbnail-sized cell wide open. Gmail desktop
+	 * has the opposite failure mode: an <img> with *no* width attribute falls back to the image's
+	 * intrinsic size (it ignores `table-layout: fixed` / percentage cell widths), stretching the whole
+	 * email past its content width (NL-737). The core/image renderer sidesteps both by stamping a
+	 * concrete `width` via add_image_dimensions(); the gallery path (which sizes to a per-cell width
+	 * rather than the block width) needs the equivalent tailored to its cell model:
+	 *
+	 * - An oversized explicit width is clamped down to the cell, scaling any height to keep the aspect
+	 *   ratio.
+	 * - A missing width is stamped with the cell's content width so Gmail/Outlook constrain the image
+	 *   instead of using its intrinsic size. The image keeps its `max-width: 100%` so it still shrinks
+	 *   on mobile.
+	 * - A width already at or below the cell width is left untouched.
+	 *
+	 * CSS-cropped images (an aspect-ratio crop with no server-side rewrite) are the one exception to the
+	 * stamp: they intentionally stay dimensionless so `object-fit`/`aspect-ratio` can crop them without
+	 * distortion in clients that ignore those properties. They're detected by the `object-fit` the crop
+	 * adds, so the concrete dimensions a server-cropped file receives are still preserved (that path
+	 * sets an explicit width, which the missing-width branch never touches).
 	 *
 	 * The other web-only attributes core emits (`srcset`, `sizes`, `loading`, `decoding`) are already
 	 * stripped upstream by {@see Html_Processing_Helper::sanitize_image_html()}, whose allowlist keeps
@@ -224,27 +247,48 @@ class Gallery extends Abstract_Block_Renderer {
 		// renderer strips it too). remove_attribute() is a no-op when the attribute is absent.
 		$html->remove_attribute( 'class' );
 
-		// Rein in a raw width wider than the cell it renders in (e.g. a 2560px original in a 20%-wide
-		// cell). We only shrink an explicit, oversized width — never add one to an otherwise responsive
-		// image, and never touch a width already sized to (or below) the cell — so the aspect-ratio
-		// crop's concrete server-crop dimensions are left intact.
 		if ( $cell_width > 0 ) {
 			$raw_width = $html->get_attribute( 'width' );
 			$width     = is_string( $raw_width ) && is_numeric( $raw_width ) ? (int) $raw_width : 0;
 
 			if ( $width > $cell_width ) {
+				// Rein in a raw width wider than the cell it renders in (e.g. a 2560px original in a
+				// 20%-wide cell) so Outlook — which honors the width attribute literally — doesn't blow
+				// the cell open. Scale any height by the same factor to keep the aspect ratio.
 				$raw_height = $html->get_attribute( 'height' );
 				$height     = is_string( $raw_height ) && is_numeric( $raw_height ) ? (int) $raw_height : 0;
 				if ( $height > 0 ) {
-					// Scale the height by the same factor so the image keeps its aspect ratio.
 					$scaled_height = max( 1, (int) round( $height * ( $cell_width / $width ) ) );
 					$html->set_attribute( 'height', esc_attr( (string) $scaled_height ) );
 				}
 				$html->set_attribute( 'width', esc_attr( (string) $cell_width ) );
+			} elseif ( 0 === $width && ! $this->image_uses_css_crop( $html ) ) {
+				// No explicit width: Gmail desktop and Outlook would fall back to the image's intrinsic
+				// size and stretch the email past its content width (NL-737). Stamp the cell's content
+				// width (cell minus its padding on both sides) so those clients constrain it, while the
+				// image's max-width:100% keeps it responsive on mobile. CSS-cropped images are skipped —
+				// they need to stay dimensionless so object-fit can crop without distortion.
+				$display_width = max( 1, $cell_width - ( 2 * self::CELL_PADDING ) );
+				$html->set_attribute( 'width', esc_attr( (string) $display_width ) );
 			}
 		}
 
 		return $html->get_updated_html();
+	}
+
+	/**
+	 * Whether the image is relying on CSS cropping (an aspect-ratio crop with no server-side rewrite).
+	 *
+	 * {@see apply_aspect_ratio_crop()} adds `object-fit: cover` to every cropped image, and only to
+	 * cropped images, so its presence marks the CSS-crop fallback that must stay dimensionless to avoid
+	 * distortion. The processor is passed by reference and left positioned on the same <img> tag.
+	 *
+	 * @param \WP_HTML_Tag_Processor $html Processor positioned on the <img> tag.
+	 * @return bool True when the image uses CSS cropping and must not receive a stamped width.
+	 */
+	private function image_uses_css_crop( \WP_HTML_Tag_Processor $html ): bool {
+		$style = $html->get_attribute( 'style' );
+		return is_string( $style ) && false !== stripos( $style, 'object-fit' );
 	}
 
 	/**
@@ -467,7 +511,7 @@ class Gallery extends Abstract_Block_Renderer {
 	private function build_gallery_table( array $gallery_images, int $columns ): string {
 		$content_parts = array();
 		$image_count   = count( $gallery_images );
-		$cell_padding  = 8; // 0.5em equivalent (approximately 8px)
+		$cell_padding  = self::CELL_PADDING; // 0.5em equivalent (approximately 8px)
 
 		// Process images in chunks based on columns to create rows.
 		for ( $i = 0; $i < $image_count; $i += $columns ) {
