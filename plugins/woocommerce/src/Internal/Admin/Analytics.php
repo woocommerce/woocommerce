@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
+use Automattic\WooCommerce\Admin\ReportsSync;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -71,6 +72,14 @@ class Analytics {
 	 * @since 11.1.0
 	 */
 	const REFUND_DOUBLE_COUNT_WINDOW = 500000;
+
+	/**
+	 * Maximum number of times the refund double-count scan is scheduled,
+	 * counting the initial DB-upgrade schedule and every self-heal reschedule.
+	 *
+	 * @since 11.1.0
+	 */
+	const REFUND_DOUBLE_COUNT_MAX_SCAN_ATTEMPTS = 5;
 
 	/**
 	 * Class instance.
@@ -382,16 +391,93 @@ class Analytics {
 	 *
 	 * @since 11.1.0
 	 *
-	 * @return array{count:int, complete:bool}
+	 * @return array{count:int, complete:bool, attempts:int, last_attempt:int}
 	 */
 	public static function get_refund_double_count_state(): array {
 		$state = get_option( self::REFUND_DOUBLE_COUNT_OPTION );
 		$state = is_array( $state ) ? $state : array();
 
 		return array(
-			'count'    => isset( $state['running_count'] ) ? (int) $state['running_count'] : 0,
-			'complete' => ! empty( $state['complete'] ),
+			'count'        => isset( $state['running_count'] ) ? (int) $state['running_count'] : 0,
+			'complete'     => ! empty( $state['complete'] ),
+			'attempts'     => isset( $state['scan_attempts'] ) ? (int) $state['scan_attempts'] : 0,
+			'last_attempt' => isset( $state['last_scan_attempt'] ) ? (int) $state['last_scan_attempt'] : 0,
 		);
+	}
+
+	/**
+	 * Merge changes into the stored refund double-count state, preserving the
+	 * scan attempt tracking fields across progress writes.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $changes State keys to overwrite.
+	 * @return void
+	 */
+	private static function update_refund_double_count_state( array $changes ): void {
+		$state = get_option( self::REFUND_DOUBLE_COUNT_OPTION );
+		$state = is_array( $state ) ? $state : array();
+
+		update_option( self::REFUND_DOUBLE_COUNT_OPTION, array_merge( $state, $changes ), false );
+	}
+
+	/**
+	 * Reschedule the refund double-count scan when it never ran or died before
+	 * completing, so a failed schedule or batch cannot silently suppress the
+	 * merchant notice forever.
+	 *
+	 * Called from the imports/status REST endpoint (polled whenever the
+	 * analytics settings page loads), so healing is lazy — no cron. Gated to at
+	 * most REFUND_DOUBLE_COUNT_MAX_SCAN_ATTEMPTS total scheduling attempts, at
+	 * least an hour apart, and skipped while a scan is already queued or a
+	 * historical import is rewriting the very rows the scan reads. Only stores
+	 * that owe a scan have the state option at all (the 11.1.0 upgrade creates
+	 * it), so fresh installs never schedule one.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return void
+	 */
+	public static function maybe_reschedule_refund_double_count_scan(): void {
+		if ( false === get_option( self::REFUND_DOUBLE_COUNT_OPTION ) ) {
+			return;
+		}
+
+		$state = self::get_refund_double_count_state();
+
+		if ( $state['complete'] ) {
+			return;
+		}
+
+		if ( $state['attempts'] >= self::REFUND_DOUBLE_COUNT_MAX_SCAN_ATTEMPTS ) {
+			return;
+		}
+
+		if ( time() - $state['last_attempt'] < HOUR_IN_SECONDS ) {
+			return;
+		}
+
+		if ( self::is_batch_pending_or_running( self::REFUND_DOUBLE_COUNT_SCAN_HOOK ) ) {
+			return;
+		}
+
+		if ( ReportsSync::is_importing() ) {
+			return;
+		}
+
+		// Record the attempt before scheduling so a crash between the two
+		// writes cannot grant unaccounted retries.
+		self::update_refund_double_count_state(
+			array(
+				'scan_attempts'     => $state['attempts'] + 1,
+				'last_scan_attempt' => time(),
+			)
+		);
+
+		// The settings page polls imports/status from more than one component,
+		// so two concurrent requests can both pass the pending check; the
+		// unique flag makes Action Scheduler drop the duplicate.
+		as_schedule_single_action( time(), self::REFUND_DOUBLE_COUNT_SCAN_HOOK, array( 0 ), 'wc-admin-data', true );
 	}
 
 	/**
@@ -586,6 +672,10 @@ class Analytics {
 		$parent_ids = $wpdb->get_col( $this->get_refund_double_count_parents_sql( $cursor, $window_end ) );
 
 		if ( $wpdb->last_error ) {
+			wc_get_logger()->error(
+				sprintf( 'Refund double-count scan batch failed at cursor %d: %s', $cursor, $wpdb->last_error ),
+				array( 'source' => 'wc-analytics-order-import' )
+			);
 			throw new \Exception( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
@@ -602,13 +692,11 @@ class Analytics {
 			$next_cursor = $window_end;
 		}
 
-		update_option(
-			self::REFUND_DOUBLE_COUNT_OPTION,
+		self::update_refund_double_count_state(
 			array(
 				'running_count' => $running_count,
 				'complete'      => false,
-			),
-			false
+			)
 		);
 
 		self::schedule_batch( self::REFUND_DOUBLE_COUNT_SCAN_HOOK, $next_cursor, 5 );
@@ -623,13 +711,11 @@ class Analytics {
 	 * @return void
 	 */
 	private function finish_refund_double_count_scan( int $count ): void {
-		update_option(
-			self::REFUND_DOUBLE_COUNT_OPTION,
+		self::update_refund_double_count_state(
 			array(
 				'running_count' => $count,
 				'complete'      => true,
-			),
-			false
+			)
 		);
 	}
 
@@ -662,6 +748,10 @@ class Analytics {
 		$parent_ids = $wpdb->get_col( $this->get_refund_double_count_parents_sql( $cursor, $window_end ) );
 
 		if ( $wpdb->last_error ) {
+			wc_get_logger()->error(
+				sprintf( 'Refund double-count fix batch failed at cursor %d: %s', $cursor, $wpdb->last_error ),
+				array( 'source' => 'wc-analytics-order-import' )
+			);
 			throw new \Exception( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 

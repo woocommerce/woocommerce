@@ -3611,6 +3611,21 @@ function wc_update_1110_schedule_refund_double_count_scan(): void {
 		return;
 	}
 
+	// Persist the incomplete state before scheduling: the option's existence is
+	// the durable "a scan is owed" marker that lets the imports/status endpoint
+	// reschedule the scan if this schedule call fails or a batch dies. This
+	// schedule counts as the first of the capped scan attempts.
+	update_option(
+		\Automattic\WooCommerce\Internal\Admin\Analytics::REFUND_DOUBLE_COUNT_OPTION,
+		array(
+			'running_count'     => 0,
+			'complete'          => false,
+			'scan_attempts'     => 1,
+			'last_scan_attempt' => time(),
+		),
+		false
+	);
+
 	WC()->queue()->schedule_single(
 		time(),
 		\Automattic\WooCommerce\Internal\Admin\Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK,

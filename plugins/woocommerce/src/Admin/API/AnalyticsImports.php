@@ -124,6 +124,11 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 
 		$failed_imports = OrdersScheduler::get_failed_order_imports();
 
+		// Lazy self-heal: if the one-time double-count scan never ran or died
+		// before completing, reschedule it now — this endpoint is polled on
+		// every analytics settings page load, so no cron is needed.
+		Analytics::maybe_reschedule_refund_double_count_scan();
+
 		$refund_double_count = Analytics::get_refund_double_count_state();
 
 		// The in-progress flag only matters once the scan has found something to fix,
