@@ -21,7 +21,7 @@ SNAPSHOT_DIR='/var/www/html/.e2e-snapshot'
 # changed provisioning recipe; every other input that matters (WordPress core,
 # plugin zips, PHP version, ports) already moves wp-env's own checksum, which
 # wipes the mount and therefore the snapshot.
-MOUNTED_SCRIPT='/var/www/html/wp-content/plugins/e2e-test-bin/test-env-setup.sh'
+MOUNTED_SCRIPT='/var/www/html/wp-content/plugins/e2e-test-bin/env-provision.sh'
 
 if [ ! -z ${CI+y} ]; then
     # In CI we execute the setup in a single container call, while in dev
@@ -30,8 +30,8 @@ if [ ! -z ${CI+y} ]; then
     echo -e '--> Dispatching script execution into cli\n'
     # Source from the e2e-test-bin directory mount; a single-file mount of this
     # script can surface as an empty file under Docker gRPC FUSE.
-    $WP_ENV_CMD run --debug cli cp wp-content/plugins/e2e-test-bin/test-env-setup.sh test-env-setup-ci.sh
-    $WP_ENV_CMD run --debug cli env -u CI WP_CLI_PREFIX= "WC_E2E_REPROVISION=${WC_E2E_REPROVISION-}" bash test-env-setup-ci.sh
+    $WP_ENV_CMD run --debug cli cp wp-content/plugins/e2e-test-bin/env-provision.sh env-provision-ci.sh
+    $WP_ENV_CMD run --debug cli env -u CI WP_CLI_PREFIX= "WC_E2E_REPROVISION=${WC_E2E_REPROVISION-}" bash env-provision-ci.sh
     exit $?
 fi
 

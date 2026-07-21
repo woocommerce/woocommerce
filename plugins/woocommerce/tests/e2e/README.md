@@ -71,7 +71,7 @@ run `pnpm playwright test --help`
 ## Fast E2E environment
 
 `pnpm --filter=@woocommerce/plugin-woocommerce env:e2e` is plain `wp-env start`.
-The provisioning hook (`tests/e2e/bin/test-env-setup.sh`) captures the seeded
+The provisioning hook (`tests/e2e/bin/env-provision.sh`) captures the seeded
 store the first time it runs and restores it on every later start, so bringing
 the environment up is fast and **the database and uploads are reset to the
 seeded baseline every time**.
@@ -79,7 +79,7 @@ seeded baseline every time**.
 - The first start provisions and captures a baseline; later starts restore it in
   a single container call instead of re-running the ~10-step provisioning.
 - `pnpm env:e2e:rebuild` forces a fresh provision and recaptures the baseline.
-  Editing `test-env-setup.sh` does the same automatically, and so does any change
+  Editing `env-provision.sh` does the same automatically, and so does any change
   wp-env itself notices (WordPress core, plugin zips, PHP version, ports): its
   self-heal wipes the web root, taking the baseline with it.
 - Only the DB and `wp-content/uploads` are reset; other filesystem changes are not.
@@ -88,18 +88,38 @@ seeded baseline every time**.
   `pnpm env:e2e` and `pnpm env:e2e --debug` re-provisions each time you switch.
   Pick one for a given environment and stick with it.
 
-To run several worktrees at once, give each one its own port — wp-env keys its
-instance directory off the config file path, so the environments are already
-isolated from each other:
+### Starting the environment from the test run
+
+The Playwright config declares the environment as its `webServer`, so running the
+suite starts it when it is not already up — no separate step:
+
+```sh
+pnpm playwright test --config=tests/e2e/playwright.config.ts --project=core-parallel
+```
+
+When the environment *is* already running, Playwright reuses it and does not
+re-run the start command, which means the store is **not** reset for that run.
+Run `pnpm env:e2e` first when you want a clean store.
+
+### Ports
+
+Each checkout gets its own port, derived from its path by
+`tests/e2e/bin/find-port.mjs`, so several worktrees can run at once — wp-env
+keys its instance directory off the config file path, so the environments are
+already isolated from one another. The port is derived rather than probed
+because it has to stay *stable*: wp-env folds it into its own config checksum,
+so starting on a different port would reconfigure the environment and force a
+re-provision every run.
+
+Override it when a port is taken by something else:
 
 ```sh
 export WP_ENV_PORT=8186 WP_ENV_TESTS_PORT=8186
-pnpm --filter=@woocommerce/plugin-woocommerce env:e2e
 ```
 
-Playwright derives `BASE_URL` from `WP_ENV_TESTS_PORT`, so the suite follows the
-port automatically. Changing the port makes wp-env reconfigure the environment,
-which re-provisions it once.
+Setting `BASE_URL` (directly or in `tests/e2e/.env`) points the suite at a site
+it does not manage — an external host, or a wp-env you started yourself — and
+disables both the port derivation and the automatic start.
 
 ## Test environment
 

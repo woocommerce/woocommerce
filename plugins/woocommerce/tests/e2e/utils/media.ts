@@ -28,7 +28,7 @@ const cache = new Map< string, { id: number; source_url: string } >();
  * Resolve a media library item by its slug.
  *
  * The `image-01/02/03` images are imported into the media library during site
- * setup (see `bin/test-env-setup.sh`). Returns the attachment so callers can use
+ * setup (see `bin/env-provision.sh`). Returns the attachment so callers can use
  * its `id` (e.g. product images) or `source_url` (e.g. downloadable files, which
  * must live within the approved uploads directory) instead of relying on an
  * external URL.

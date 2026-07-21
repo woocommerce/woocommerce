@@ -3,6 +3,8 @@
  */
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
+import { execFileSync } from 'node:child_process';
+import path from 'node:path';
 
 /**
  * Internal dependencies
@@ -12,12 +14,25 @@ import { adminFile as BLOCKS_ADMIN_STATE } from './utils/blocks/constants';
 // __dirname is not natively available in ESM, but Playwright's config loader shims it.
 dotenv.config( { path: __dirname + '/.env' } );
 
-if ( ! process.env.BASE_URL ) {
-	process.env.BASE_URL =
-		'http://localhost:' + ( process.env.WP_ENV_TESTS_PORT || '8086' );
-	console.log(
-		'BASE_URL is not set. Using default: ' + process.env.BASE_URL
-	);
+// A BASE_URL supplied by the environment or a .env file points at a site we do
+// not manage (Pressable, WPCOM, a manually started wp-env). Only when nothing
+// is set do we take charge of the local environment and start it ourselves.
+const MANAGES_LOCAL_ENV = ! process.env.BASE_URL;
+
+if ( MANAGES_LOCAL_ENV ) {
+	if ( ! process.env.WP_ENV_TESTS_PORT ) {
+		// Synchronous on purpose: Playwright loads this config synchronously, and
+		// the port has to be known before `webServer.url` below is evaluated.
+		const port = execFileSync(
+			process.execPath,
+			[ path.join( __dirname, 'bin', 'find-port.mjs' ) ],
+			{ encoding: 'utf8' }
+		).trim();
+		process.env.WP_ENV_PORT = port;
+		process.env.WP_ENV_TESTS_PORT = port;
+	}
+
+	process.env.BASE_URL = 'http://localhost:' + process.env.WP_ENV_TESTS_PORT;
 }
 
 // The blocks setup project uses @wordpress/e2e-test-utils-playwright, which derives
@@ -199,6 +214,24 @@ export default defineConfig( {
 	timeout: 120 * 1000,
 	expect: { timeout: CI ? 20 * 1000 : 10 * 1000 },
 	outputDir: TESTS_RESULTS_PATH,
+	// Bring the local E2E environment up if it is not already running, so the
+	// suite is a single command. Starting it also resets the store to the seeded
+	// baseline; when the environment is already up Playwright reuses it as-is,
+	// so run `pnpm env:e2e` yourself to force that reset between runs.
+	webServer: MANAGES_LOCAL_ENV
+		? {
+				command: 'pnpm env:e2e',
+				url: BASE_URL,
+				cwd: path.resolve( TESTS_ROOT_PATH, '..', '..' ),
+				reuseExistingServer: true,
+				timeout: 15 * 60 * 1000,
+				stdout: 'pipe',
+				env: {
+					WP_ENV_PORT: process.env.WP_ENV_PORT ?? '',
+					WP_ENV_TESTS_PORT: process.env.WP_ENV_TESTS_PORT ?? '',
+				},
+		  }
+		: undefined,
 	testDir: `${ TESTS_ROOT_PATH }/tests`,
 	retries: CI ? 1 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,

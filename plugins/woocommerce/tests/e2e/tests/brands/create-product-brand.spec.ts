@@ -61,9 +61,9 @@ test( 'Merchant can add brands', async ( { page } ) => {
 			.fill( brand.description );
 		await page.getByRole( 'button', { name: 'Upload/Add image' } ).click();
 		await page.getByRole( 'tab', { name: 'Media Library' } ).click();
-		// `.first()` guards against duplicate fixture media sharing a title — the
-		// `wp media import` in test-env-setup.sh is not idempotent, so re-running it
-		// can leave several attachments named e.g. `image-01`.
+		// `.first()` guards against duplicate fixture media sharing a title. Env
+		// provisioning drops and re-imports these attachments rather than stacking
+		// them, but an environment seeded before that can still carry duplicates.
 		await page
 			.getByRole( 'checkbox', { name: brand.thumbnailFileName } )
 			.first()

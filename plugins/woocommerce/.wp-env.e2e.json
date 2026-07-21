@@ -24,9 +24,9 @@
 		"ALTERNATE_WP_CRON": false
 	},
 	"lifecycleScripts": {
-		"afterStart": "./tests/e2e/bin/test-env-setup.sh",
-		"afterClean": "./tests/e2e/bin/test-env-setup.sh",
-		"afterReset": "./tests/e2e/bin/test-env-setup.sh"
+		"afterStart": "./tests/e2e/bin/env-provision.sh",
+		"afterClean": "./tests/e2e/bin/env-provision.sh",
+		"afterReset": "./tests/e2e/bin/env-provision.sh"
 	},
 	"mappings": {
 		"wp-content/plugins/e2e-test-bin": "./tests/e2e/bin",
