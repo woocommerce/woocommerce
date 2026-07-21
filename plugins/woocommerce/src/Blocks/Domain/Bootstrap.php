@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
+use Automattic\WooCommerce\Blocks\CoreBreadcrumbsCompatibility;
 use Automattic\WooCommerce\Blocks\DependencyDetection;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
@@ -149,6 +150,7 @@ class Bootstrap {
 			if ( ( new BlockRegistrationContext() )->should_register() ) {
 				$this->container->get( BlockPatterns::class );
 				$this->container->get( BlockTypesController::class );
+				$this->container->get( CoreBreadcrumbsCompatibility::class )->init();
 			}
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( Notices::class )->init();
@@ -243,6 +245,12 @@ class Bootstrap {
 				$asset_api           = $container->get( AssetApi::class );
 				$asset_data_registry = $container->get( AssetDataRegistry::class );
 				return new BlockTypesController( $asset_api, $asset_data_registry );
+			}
+		);
+		$this->container->register(
+			CoreBreadcrumbsCompatibility::class,
+			function () {
+				return new CoreBreadcrumbsCompatibility();
 			}
 		);
 		$this->container->register(
