@@ -128,9 +128,8 @@ class BlocksSharedState {
 			wp_interactivity_state(
 				self::$cart_namespace,
 				array(
-					'cart'     => self::$blocks_shared_cart_state,
-					'noticeId' => '',
-					'restUrl'  => get_rest_url(),
+					'cart'    => self::$blocks_shared_cart_state,
+					'restUrl' => get_rest_url(),
 				)
 			);
 		}
