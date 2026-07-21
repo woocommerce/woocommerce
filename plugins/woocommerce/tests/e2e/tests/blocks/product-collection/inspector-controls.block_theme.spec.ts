@@ -407,27 +407,29 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			).toBeVisible();
 		} );
 
-		[
-			`${ BLOCK_THEME_SLUG }//archive-product`,
-			`${ BLOCK_THEME_SLUG }//taxonomy-product_attribute`,
-			`${ BLOCK_THEME_SLUG }//product-search-results`,
-		].forEach( ( slug ) => {
-			test( `should be visible in archive template: ${ slug }`, async ( {
-				pageObject,
-				editor,
-			} ) => {
-				await pageObject.goToEditorTemplate( slug );
-				await pageObject.insertProductCollection();
-				await pageObject.chooseCollectionInTemplate();
-				await pageObject.focusProductCollection();
-				await editor.openDocumentSettingsSidebar();
+		test( 'should be visible in existing archive templates', async ( {
+			pageObject,
+			editor,
+		} ) => {
+			for ( const slug of [
+				`${ BLOCK_THEME_SLUG }//archive-product`,
+				`${ BLOCK_THEME_SLUG }//taxonomy-product_attribute`,
+				`${ BLOCK_THEME_SLUG }//product-search-results`,
+			] ) {
+				await test.step( `should be visible in archive template: ${ slug }`, async () => {
+					await pageObject.goToEditorTemplate( slug );
+					await pageObject.insertProductCollection();
+					await pageObject.chooseCollectionInTemplate();
+					await pageObject.focusProductCollection();
+					await editor.openDocumentSettingsSidebar();
 
-				await expect(
-					pageObject
-						.locateSidebarSettings()
-						.getByLabel( SELECTORS.usePageContextControl )
-				).toBeVisible();
-			} );
+					await expect(
+						pageObject
+							.locateSidebarSettings()
+							.getByLabel( SELECTORS.usePageContextControl )
+					).toBeVisible();
+				} );
+			}
 		} );
 
 		[
