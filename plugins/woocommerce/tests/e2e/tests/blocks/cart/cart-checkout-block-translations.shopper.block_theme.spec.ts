@@ -20,6 +20,10 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	},
 } );
 
+const simplePhysicalProductAddToCartLabel = new RegExp(
+	`^Toevoegen aan winkelwagen: “${ SIMPLE_PHYSICAL_PRODUCT_NAME }[“”]$`
+);
+
 test.describe( 'Shopper → Translations', () => {
 	test.beforeEach( async () => {
 		await wpCLI( `site switch-language ${ translations.locale }` );
@@ -31,7 +35,10 @@ test.describe( 'Shopper → Translations', () => {
 	} ) => {
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.addToCart(
+			SIMPLE_PHYSICAL_PRODUCT_NAME,
+			simplePhysicalProductAddToCartLabel
+		);
 		await frontendUtils.goToCart();
 
 		const totalsHeader = page
@@ -68,7 +75,10 @@ test.describe( 'Shopper → Translations', () => {
 	} ) => {
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.addToCart(
+			SIMPLE_PHYSICAL_PRODUCT_NAME,
+			simplePhysicalProductAddToCartLabel
+		);
 		await frontendUtils.goToCheckout();
 
 		await expect(
