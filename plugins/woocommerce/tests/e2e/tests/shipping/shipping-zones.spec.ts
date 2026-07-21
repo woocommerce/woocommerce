@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { faker } from '@faker-js/faker';
-import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -12,6 +12,16 @@ import { expect, test as baseTest } from '../../fixtures/fixtures';
 
 function rand() {
 	return faker.string.alphanumeric( 5 );
+}
+
+async function deleteZoneById( restApi: ApiClient, zoneId?: number ) {
+	if ( zoneId === undefined ) {
+		return;
+	}
+
+	await restApi.delete( `${ WC_API_PATH }/shipping/zones/${ zoneId }`, {
+		force: true,
+	} );
 }
 
 const test = baseTest.extend( {
@@ -116,6 +126,7 @@ test( 'saves an unsaved shipping zone when adding a method', async ( {
 	restApi,
 } ) => {
 	const zoneName = `Unsaved zone ${ rand() }`;
+	let createdZoneId: number | undefined;
 
 	try {
 		await page.goto(
@@ -140,7 +151,15 @@ test( 'saves an unsaved shipping zone when adding a method', async ( {
 			.getByRole( 'button', { name: 'Add shipping method' } )
 			.click();
 		await page.getByText( 'Flat rate' ).click();
+		const addMethodResponsePromise = page.waitForResponse( ( response ) => {
+			return response
+				.url()
+				.includes( 'action=woocommerce_shipping_zone_add_method' );
+		} );
 		await page.getByRole( 'button', { name: 'Continue' } ).click();
+		const addMethodResponse = await addMethodResponsePromise;
+		const addMethodResponseBody = await addMethodResponse.json();
+		createdZoneId = addMethodResponseBody.data.zone_id;
 
 		const dialogMessages: string[] = [];
 		page.on( 'dialog', async ( dialog ) => {
@@ -169,18 +188,6 @@ test( 'saves an unsaved shipping zone when adding a method', async ( {
 		).toBeVisible();
 		expect( dialogMessages ).toEqual( [] );
 	} finally {
-		const response = await restApi.get( `${ WC_API_PATH }/shipping/zones` );
-		const zones = response.data.filter( ( zoneData ) => {
-			return zoneData.name === zoneName;
-		} );
-
-		for ( const createdZone of zones ) {
-			await restApi.delete(
-				`${ WC_API_PATH }/shipping/zones/${ createdZone.id }`,
-				{
-					force: true,
-				}
-			);
-		}
+		await deleteZoneById( restApi, createdZoneId );
 	}
 } );
