@@ -42,8 +42,10 @@
 		"typography": {
 			"fontSize": true,
 			"__experimentalSkipSerialization": true
-		},
-		"__experimentalSelector": ".wc-block-components-product-rating-counter"
+		}
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-product-rating-counter.wc-block-components-product-rating-counter, .wp-block-woocommerce-product-rating-counter .wc-block-components-product-rating-counter"
 	},
 	"usesContext": [ "query", "queryId", "postId" ],
 	"keywords": [ "WooCommerce" ],
