@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix robots.txt `Disallow` rules pointing at the wrong location on installs that relocate `wp-content` or the uploads directory.

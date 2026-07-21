@@ -1,0 +1,37 @@
+{
+	"name": "@woocommerce/eslint-config",
+	"version": "0.0.1",
+	"description": "The WooCommerce monorepo's internal ESLint Flat Config layer.",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"private": true,
+	"engines": {
+		"node": "^24.15.0"
+	},
+	"main": "index.js",
+	"files": [
+		"index.js"
+	],
+	"scripts": {
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:lang:js": "eslint ./index.js",
+		"lint:fix:lang:js": "eslint ./index.js --fix"
+	},
+	"dependencies": {
+		"@woocommerce/eslint-plugin": "workspace:*"
+	},
+	"devDependencies": {
+		"eslint": "^10.0.0"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": [
+					"index.js"
+				]
+			}
+		}
+	}
+}
