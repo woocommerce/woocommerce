@@ -66,7 +66,7 @@ if ( $item_totals ) {
 		if ( $email_improvements_enabled ) {
 			// The shipping method name is already shown in the row header, so avoid duplicating it in the value cell.
 			if ( 'shipping' === ( $total['type'] ?? '' ) && isset( $total['meta'] ) && $total['value'] === $total['meta'] ) {
-				$total['value'] = __( 'Free', 'woocommerce' );
+				$total['value'] = __( 'Free!', 'woocommerce' );
 			}
 			$label = $total['label'];
 			if ( isset( $total['meta'] ) ) {
