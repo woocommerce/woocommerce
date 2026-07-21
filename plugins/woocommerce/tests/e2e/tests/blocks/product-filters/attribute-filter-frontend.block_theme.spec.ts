@@ -149,13 +149,13 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 
 			await button.click();
 
-			COLOR_ATTRIBUTE_VALUES.map( async ( color ) => {
+			for ( const color of COLOR_ATTRIBUTE_VALUES ) {
 				const element = page.locator(
 					`input[value="${ color.toLowerCase() }"]`
 				);
 
 				await expect( element ).not.toBeChecked();
-			} );
+			}
 		} );
 	} );
 
