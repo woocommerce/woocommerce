@@ -33,18 +33,9 @@
 					this.changes = changes;
 					this.trigger( 'change:methods' );
 				},
-				save: function( options ) {
+				save: function() {
 					// Special handling for an empty 'zone_locations' array, which jQuery filters out during $.post().
 					var changes = _.clone( this.changes );
-					this.saveOptions = options || {};
-
-					// Adding a method can persist all changes while leaving the save button enabled.
-					if ( ! _.size( changes ) ) {
-						this.trigger( 'saved:methods', this.saveOptions );
-						this.saveOptions = {};
-						return;
-					}
-
 					if ( _.has( changes, 'zone_locations' ) && _.isEmpty( changes.zone_locations ) ) {
 						changes.zone_locations = [''];
 					}
@@ -76,8 +67,7 @@
 							shippingMethod.set( 'methods', response.data.methods );
 							shippingMethod.trigger( 'change:methods' );
 							shippingMethod.changes = {};
-							shippingMethod.trigger( 'saved:methods', shippingMethod.saveOptions || {} );
-							shippingMethod.saveOptions = {};
+							shippingMethod.trigger( 'saved:methods' );
 
 							// Overrides the onbeforeunload callback added by settings.js.
 							window.onbeforeunload = null;
@@ -276,14 +266,9 @@
 					$save_button.prop( 'disabled', false );
 					$save_button.removeClass( 'is-busy' );
 				},
-				clearUnloadConfirmation: function( options ) {
+				clearUnloadConfirmation: function() {
 					this.needsUnloadConfirm = false;
-					if ( options && options.keepSaveButtonEnabled ) {
-						$save_button.prop( 'disabled', false );
-						$save_button.removeClass( 'is-busy' );
-					} else {
-						$save_button.attr( 'disabled', 'disabled' );
-					}
+					$save_button.attr( 'disabled', 'disabled' );
 				},
 				unloadConfirmation: function( event ) {
 					if ( event.data.view.needsUnloadConfirm ) {
@@ -401,8 +386,6 @@
 				},
 				onConfigureShippingMethodSubmitted: function( event, target, posted_data ) {
 					if ( 'wc-modal-shipping-method-settings' === target ) {
-						var isNewMethod = $( '#btn-ok' ).data( 'status' ) === 'new';
-
 						shippingMethodView.block();
 
 						// Save method settings via ajax call
@@ -424,9 +407,7 @@
 
 									// Method was saved. Re-render.
 									if ( _.size( shippingMethodView.model.changes ) ) {
-										shippingMethodView.model.save({
-											keepSaveButtonEnabled: isNewMethod
-										});
+										shippingMethodView.model.save();
 									} else {
 										shippingMethodView.model.onSaveResponse( response, textStatus );
 									}
@@ -668,14 +649,8 @@
 
 								shippingMethodView.highlightOnFocus( '.wc-shipping-modal-price' );
 							} else {
-								if ( _.size( shippingMethodView.model.changes ) ) {
-									shippingMethodView.model.save({
-										keepSaveButtonEnabled: true
-									});
-								} else {
-									shippingMethodView.model.trigger( 'change:methods' );
-									shippingMethodView.model.trigger( 'saved:methods' );
-								}
+								shippingMethodView.model.trigger( 'change:methods' );
+								shippingMethodView.model.trigger( 'saved:methods' );
 							}
 
 							$( document.body ).trigger( 'init_tooltips' );

@@ -111,7 +111,7 @@ test( 'can delete the shipping zone method', async ( { page, zone } ) => {
 	);
 } );
 
-test( 'keeps save changes enabled after adding a method to an unsaved shipping zone', async ( {
+test( 'saves an unsaved shipping zone when adding a method', async ( {
 	page,
 	restApi,
 } ) => {
@@ -141,25 +141,24 @@ test( 'keeps save changes enabled after adding a method to an unsaved shipping z
 			.click();
 		await page.getByText( 'Flat rate' ).click();
 		await page.getByRole( 'button', { name: 'Continue' } ).click();
-		await page.getByRole( 'button', { name: 'Create and save' } ).click();
+
+		const dialogMessages: string[] = [];
+		page.on( 'dialog', async ( dialog ) => {
+			dialogMessages.push( dialog.message() );
+			await dialog.accept();
+		} );
+
+		await page
+			.getByRole( 'button', { name: 'Save zone and method' } )
+			.click();
 
 		await expect(
 			page.locator( '.wc-shipping-zone-method-title', {
 				hasText: 'Flat rate',
 			} )
 		).toBeVisible();
-		await expect( page.locator( '#submit' ) ).toBeEnabled();
-
-		const dialogMessages: string[] = [];
-		page.on( 'dialog', async ( dialog ) => {
-			dialogMessages.push( dialog.message() );
-			await dialog.dismiss();
-		} );
-
-		await page.locator( '#submit' ).click();
 		await expect( page.locator( '#submit' ) ).toBeDisabled();
 		await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
-		expect( dialogMessages ).toEqual( [] );
 
 		await page.reload();
 		await expect( page.getByLabel( 'Zone name' ) ).toHaveValue( zoneName );
@@ -168,6 +167,7 @@ test( 'keeps save changes enabled after adding a method to an unsaved shipping z
 				hasText: 'Flat rate',
 			} )
 		).toBeVisible();
+		expect( dialogMessages ).toEqual( [] );
 	} finally {
 		const response = await restApi.get( `${ WC_API_PATH }/shipping/zones` );
 		const zones = response.data.filter( ( zoneData ) => {
