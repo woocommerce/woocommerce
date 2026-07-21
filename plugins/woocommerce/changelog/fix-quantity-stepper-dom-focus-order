@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reorder the cart, mini-cart, and add-to-cart quantity steppers so the decrease button precedes the quantity input in the DOM, matching the visual order for a logical keyboard focus and screen-reader reading sequence.

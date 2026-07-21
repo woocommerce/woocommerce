@@ -6,38 +6,34 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { ReactNode } from 'react';
 
-// Surface the header props the real admin-ui Page would render so the shell
-// header wiring (subtitle, badges) can be asserted.
+// Jest stubs CSS modules, so the real Badge renders nothing that reveals its intent.
+jest.mock( '@wordpress/ui', () => ( {
+	...jest.requireActual( '@wordpress/ui' ),
+	Badge: ( {
+		intent,
+		children,
+	}: {
+		intent?: string;
+		children: ReactNode;
+	} ) => (
+		<span data-testid="shell-badge" data-intent={ intent }>
+			{ children }
+		</span>
+	),
+} ) );
+
+// Mirror the real admin-ui NavigableRegion, which wraps the shell in a labeled region.
 jest.mock( '@wordpress/admin-ui', () => ( {
-	Page: ( {
-		title,
-		subTitle,
-		breadcrumbs,
-		badges,
-		actions,
+	NavigableRegion: ( {
 		children,
 		className,
+		ariaLabel,
 	}: {
-		title?: ReactNode;
-		subTitle?: ReactNode;
-		breadcrumbs?: ReactNode;
-		badges?: ReactNode;
-		actions?: ReactNode;
 		children: ReactNode;
 		className?: string;
+		ariaLabel?: string;
 	} ) => (
-		<div className={ className }>
-			<header>
-				{ title }
-				{ breadcrumbs }
-				{ badges }
-				{ subTitle && (
-					<p className="admin-ui-page__header-subtitle">
-						{ subTitle }
-					</p>
-				) }
-				{ actions }
-			</header>
+		<div className={ className } role="region" aria-label={ ariaLabel }>
 			{ children }
 		</div>
 	),
@@ -99,6 +95,7 @@ describe( 'settings UI shell header fields', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage
 				schema={ baseSchema( {
+					header: 'visible',
 					title: 'Test page',
 					subtitle: 'Manage your test settings.',
 				} ) }
@@ -106,20 +103,20 @@ describe( 'settings UI shell header fields', () => {
 			/>
 		);
 
-		// Anchor on the forwarded text, not the mock's structural class —
-		// this would catch a `subtitle` → `subTitle` mapping bug regardless of how the mock renders.
-		expect( container.textContent ).toContain(
-			'Manage your test settings.'
+		const subtitle = container.querySelector(
+			'.wc-settings-ui-shell__subtitle'
 		);
+		expect( subtitle?.textContent ).toBe( 'Manage your test settings.' );
 
 		act( () => root.unmount() );
 		container.remove();
 	} );
 
-	it( 'renders badges with their intent class', () => {
+	it( 'maps schema intents to Badge intents', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage
 				schema={ baseSchema( {
+					header: 'visible',
 					title: 'Test page',
 					badges: [
 						{ label: 'Active', intent: 'success' },
@@ -131,21 +128,13 @@ describe( 'settings UI shell header fields', () => {
 		);
 
 		const badges = container.querySelectorAll(
-			'.wc-settings-ui-shell__badge'
+			'[data-testid="shell-badge"]'
 		);
 		expect( badges ).toHaveLength( 2 );
 		expect( badges[ 0 ].textContent ).toBe( 'Active' );
-		expect(
-			badges[ 0 ].classList.contains(
-				'wc-settings-ui-shell__badge--success'
-			)
-		).toBe( true );
+		expect( badges[ 0 ].getAttribute( 'data-intent' ) ).toBe( 'stable' );
 		// Defaults to the neutral intent when none is provided.
-		expect(
-			badges[ 1 ].classList.contains(
-				'wc-settings-ui-shell__badge--default'
-			)
-		).toBe( true );
+		expect( badges[ 1 ].getAttribute( 'data-intent' ) ).toBe( 'draft' );
 
 		act( () => root.unmount() );
 		container.remove();
@@ -155,6 +144,7 @@ describe( 'settings UI shell header fields', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage
 				schema={ baseSchema( {
+					header: 'visible',
 					title: 'Test page',
 					// Simulate an extension passing an unrecognized intent string at runtime
 					// (TS unions are erased; PHP-supplied schemas can carry arbitrary strings).
@@ -169,14 +159,9 @@ describe( 'settings UI shell header fields', () => {
 			/>
 		);
 
-		const badge = container.querySelector( '.wc-settings-ui-shell__badge' );
+		const badge = container.querySelector( '[data-testid="shell-badge"]' );
 		expect( badge ).not.toBeNull();
-		expect(
-			badge?.classList.contains( 'wc-settings-ui-shell__badge--default' )
-		).toBe( true );
-		expect(
-			badge?.classList.contains( 'wc-settings-ui-shell__badge--magic' )
-		).toBe( false );
+		expect( badge?.getAttribute( 'data-intent' ) ).toBe( 'draft' );
 
 		act( () => root.unmount() );
 		container.remove();
@@ -185,16 +170,19 @@ describe( 'settings UI shell header fields', () => {
 	it( 'omits subtitle and badges when not provided', () => {
 		const { container, root } = renderElement(
 			<SettingsUIPage
-				schema={ baseSchema( { title: 'Test page' } ) }
+				schema={ baseSchema( {
+					header: 'visible',
+					title: 'Test page',
+				} ) }
 				page="test_page"
 			/>
 		);
 
 		expect(
-			container.querySelector( '.admin-ui-page__header-subtitle' )
+			container.querySelector( '.wc-settings-ui-shell__subtitle' )
 		).toBeNull();
 		expect(
-			container.querySelector( '.wc-settings-ui-shell__badge' )
+			container.querySelector( '[data-testid="shell-badge"]' )
 		).toBeNull();
 
 		act( () => root.unmount() );

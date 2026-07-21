@@ -29,32 +29,32 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$term_tag_1 = get_term_by( 'id', $test_tag_1['term_id'], 'product_tag' );
 		$term_tag_2 = get_term_by( 'id', $test_tag_2['term_id'], 'product_tag' );
 
-		$product = WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product( false );
 		$product->set_tag_ids( array( $test_tag_1['term_id'] ) );
 		$product->set_category_ids( array( $test_cat_1['term_id'] ) );
 		$product->set_sku( 'GET TEST SKU SIMPLE' );
 		$product->save();
 
-		$product_2 = WC_Helper_Product::create_simple_product();
+		$product_2 = WC_Helper_Product::create_simple_product( false );
 		$product_2->set_category_ids( array( $test_cat_1['term_id'] ) );
 		$product_2->save();
 
-		$external = WC_Helper_Product::create_simple_product();
+		$external = WC_Helper_Product::create_simple_product( false );
 		$external->set_category_ids( array( $test_cat_1['term_id'] ) );
 		$external->set_sku( 'GET TEST SKU EXTERNAL' );
 		$external->save();
 
-		$external_2 = WC_Helper_Product::create_simple_product();
+		$external_2 = WC_Helper_Product::create_simple_product( false );
 		$external_2->set_tag_ids( array( $test_tag_2['term_id'] ) );
 		$external_2->save();
 
 		$grouped = WC_Helper_Product::create_grouped_product();
 
-		$variation = WC_Helper_Product::create_variation_product();
+		$variation = new WC_Product_Variable();
 		$variation->set_tag_ids( array( $test_tag_1['term_id'] ) );
-		$variation->save();
+		$variation = WC_Helper_Product::create_variation_product( $variation );
 
-		$draft = WC_Helper_Product::create_simple_product();
+		$draft = WC_Helper_Product::create_simple_product( false );
 		$draft->set_status( ProductStatus::DRAFT );
 		$draft->save();
 
@@ -1013,6 +1013,72 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// Test custom class attribute is honoured.
 		$attr = array( 'class' => 'custom-class' );
 		$this->assertStringContainsString( 'class="custom-class"', wc_placeholder_img( 'woocommerce_thumbnail', $attr ) );
+	}
+
+	/**
+	 * @testdox Should use the filtered placeholder source for an attachment placeholder.
+	 */
+	public function test_wc_placeholder_img_uses_filtered_src_for_attachment_placeholder() {
+		$option_name                = 'woocommerce_placeholder_image';
+		$original_placeholder_image = get_option( $option_name, false );
+		$placeholder_image_id       = self::factory()->attachment->create(
+			array(
+				'file'           => 'placeholder.png',
+				'guid'           => 'https://example.com/wp-content/uploads/placeholder.png',
+				'post_mime_type' => 'image/png',
+			)
+		);
+		$placeholder_src            = 'https://example.com/custom-placeholder.png';
+		$filter                     = function () use ( $placeholder_src ) {
+			return $placeholder_src;
+		};
+		$passthrough_filter         = function ( $src ) {
+			return $src;
+		};
+
+		wp_update_attachment_metadata(
+			$placeholder_image_id,
+			array(
+				'width'  => 186,
+				'height' => 144,
+				'file'   => 'placeholder.png',
+			)
+		);
+		update_option( $option_name, $placeholder_image_id );
+		add_filter( 'woocommerce_placeholder_img_src', $filter );
+
+		try {
+			$image_html = wc_placeholder_img();
+
+			$this->assertStringContainsString( 'src="' . $placeholder_src . '"', $image_html );
+			$this->assertStringNotContainsString( 'srcset=', $image_html );
+
+			remove_filter( 'woocommerce_placeholder_img_src', $filter );
+			add_filter( 'woocommerce_placeholder_img_src', $passthrough_filter );
+
+			$this->assertSame(
+				wp_get_attachment_image(
+					$placeholder_image_id,
+					'woocommerce_thumbnail',
+					false,
+					array(
+						'class' => 'woocommerce-placeholder wp-post-image',
+						'alt'   => __( 'Placeholder', 'woocommerce' ),
+					)
+				),
+				wc_placeholder_img()
+			);
+		} finally {
+			remove_filter( 'woocommerce_placeholder_img_src', $filter );
+			remove_filter( 'woocommerce_placeholder_img_src', $passthrough_filter );
+			wp_delete_attachment( $placeholder_image_id, true );
+
+			if ( false === $original_placeholder_image ) {
+				delete_option( $option_name );
+			} else {
+				update_option( $option_name, $original_placeholder_image );
+			}
+		}
 	}
 
 	/**

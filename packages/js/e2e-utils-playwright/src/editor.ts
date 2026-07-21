@@ -55,17 +55,19 @@ export const disableWelcomeModal = async ( {
 	// Further info: https://github.com/woocommerce/woocommerce/pull/45856/
 	await page.waitForLoadState( 'domcontentloaded' );
 
-	const isWelcomeGuideActive = await page.evaluate( () =>
-		( window as unknown as WindowWithWp ).wp?.data
-			?.select( 'core/edit-post' )
-			?.isFeatureActive( 'welcomeGuide' )
+	const isWelcomeGuideActive = await page.evaluate(
+		() =>
+			( window as unknown as WindowWithWp ).wp?.data
+				?.select( 'core/edit-post' )
+				?.isFeatureActive( 'welcomeGuide' )
 	);
 
 	if ( isWelcomeGuideActive ) {
-		await page.evaluate( () =>
-			( window as unknown as WindowWithWp ).wp?.data
-				?.dispatch( 'core/edit-post' )
-				?.toggleFeature( 'welcomeGuide' )
+		await page.evaluate(
+			() =>
+				( window as unknown as WindowWithWp ).wp?.data
+					?.dispatch( 'core/edit-post' )
+					?.toggleFeature( 'welcomeGuide' )
 		);
 	}
 };
