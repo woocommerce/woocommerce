@@ -165,7 +165,7 @@ The Cart Item object of the filters above has the following keys:
 -   _catalog_visibility_ `string` - The catalog visibility.
 -   _decsription_ `string` - The cart item description.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
--   _is_standalone_line_ `boolean` - indicating whether this cart line is the standalone (non-differentiated) line for its product; true for a plain standalone line, false when differentiated by extra cart-item data.
+-   _is_canonical_line_ `boolean` - true when this cart line is the canonical line for its product (the single line a configuration-free add of the product, or product + variation, would be merged into); false when the line's identity was differentiated by extra cart-item data (e.g. a bundle container/child, booking, or add-on configuration).
 -   _id_ `number` - The item ID.
 -   _images_ `array` - The item images array.
 -   _item_data_ `array` - The item data array.
