@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep the shipping zone Save changes button enabled after adding a method to an unsaved zone.
