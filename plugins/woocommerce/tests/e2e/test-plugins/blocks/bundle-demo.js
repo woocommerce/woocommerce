@@ -1,33 +1,37 @@
 /**
  * `wc-bundle-demo`: a minimal fixture Interactivity API store proving a
  * bundle-style Store API extension built entirely on the public
- * `woocommerce/cart` store surface — draft collections, direct mutation, and
- * `addItem( payload )` — plus today's Store API extension points, with no
- * WooCommerce core changes.
+ * `woocommerce/cart` store surface — declared draft keys, direct mutation,
+ * and `addItem( payload )` — plus today's Store API extension points, with
+ * no WooCommerce core changes.
  *
  * Each child slot (`slot-1`/`slot-2`, rendered by the companion
- * `bundle-demo.php`) is a real container: it declares its own empty
- * `woocommerce/cart` draft-items collection (see that file's
- * `data-wp-context---draft-items` markup), the same primitive core blocks
- * use to isolate purchase UI. Picking the same product in both slots
- * therefore produces two independent drafts rather than one draft
- * overwriting the other, because each slot resolves its own collection
- * rather than sharing the page-wide one.
+ * `bundle-demo.php`) declares its own literal, namespaced `woocommerce/cart`
+ * draft key (`wc-bundle-demo/slot-1` / `wc-bundle-demo/slot-2`, see that
+ * file's `data-wp-context---draft-key` markup) — the same primitive core
+ * blocks use to isolate purchase UI, addressed directly from markup with no
+ * registry of any kind. Picking the same product in both slots therefore
+ * produces two independent drafts rather than one draft overwriting the
+ * other, because each slot resolves its own collection rather than sharing
+ * the page-wide one.
  *
- * A slot-level `data-wp-init` resolves the slot's collection (reading its
- * own `woocommerce/cart` context), seeds its one draft via the store's
- * public `upsertDraftItem` (a creation convenience — this is the only place
- * this fixture calls it), and registers the collection's live reference in
- * this module's own registry, keyed by slot id. Every later edit of a
- * slot's quantity is a **direct mutation** of that resolved draft object
- * (`draft.quantity = value`), never an action call; each slot renders a
- * binding onto the same draft so a direct write's re-render is directly
- * observable. The "Add bundle to cart" button composes both slots' current
- * drafts from this module's registry — reading the registry's live
- * collections at click time, so any direct write is honored — into one
+ * A slot's quantity input has no init. Its `data-wp-on--change` resolves
+ * the slot's declared key (reading its own `woocommerce/cart` context) and,
+ * on the *first* edit — the slot's collection does not exist yet, nothing
+ * seeds it up front — creates its one draft via the store's public
+ * `upsertDraftItem` (a creation convenience — this is the only place this
+ * fixture calls it); every edit after that is a **direct mutation** of the
+ * already-resolved draft object (`draft.quantity = value`), never an action
+ * call. Each slot renders a binding onto the same draft so either write's
+ * re-render is directly observable. The "Add bundle to cart" button
+ * composes both slots' current drafts by reading `state.draftItems`
+ * directly at the two declared keys — under its existing lock consent, so
+ * no cross-collection store read needs any extra plumbing — into one
  * `cart/add-item` payload for the bundle product, carrying a
  * `wc-bundle-demo/children` prop at the payload root, and posts it verbatim
- * via the store's public `addItem( payload )`.
+ * via the store's public `addItem( payload )`. A slot never edited has no
+ * collection at all, so it contributes nothing to the composed payload —
+ * the safe, expected outcome for an untouched slot.
  *
  * This is a plain, unbundled ES module (no build step): `@wordpress/interactivity`
  * and `@woocommerce/stores/woocommerce/cart` are both script modules that
@@ -59,81 +63,63 @@ const NAMESPACE = 'wc-bundle-demo';
 /** The `cart/add-item` payload prop carrying the bundle's child drafts. */
 const CHILDREN_PROP = `${ NAMESPACE }/children`;
 
+/**
+ * The quantity input's rendered default (`bundle-demo.php`'s
+ * `render_slot()` hardcodes `value="1"` for both slots) — the value
+ * `state.slotQuantityText` falls back to before a slot's first edit, when
+ * its collection does not exist yet.
+ */
+const RENDERED_DEFAULT_QUANTITY = 1;
+
+/**
+ * The two slots' own declared, literal, namespaced draft keys
+ * (`bundle-demo.php`'s `render_slot()`) — an extension addressing its own
+ * collections by keys it declared, with zero core changes.
+ */
+const SLOT_DRAFT_KEYS = [ 'wc-bundle-demo/slot-1', 'wc-bundle-demo/slot-2' ];
+
 const cart = store( 'woocommerce/cart', {}, { lock: universalLock } );
 
 /**
- * Module-scope registry of each slot's resolved draft-items collection,
- * keyed by slot id (`slot-1`/`slot-2`, from the `wc-bundle-demo` context).
+ * Resolves the current element's own declared `woocommerce/cart` draft key
+ * — the slot's isolation boundary established by its own context bag
+ * (`bundle-demo.php`'s `data-wp-context---draft-key`).
  *
- * Holds each slot's live collection reference — populated once by
- * {@link registerSlotCollection} — so the "Add bundle to cart" button
- * (outside any slot's own `woocommerce/cart` context) can compose both
- * slots' current drafts without a cross-collection store read. Because the
- * stored reference is the same live array a slot's direct writes mutate,
- * reading it here at compose time always reflects the latest edit.
+ * @return {string|undefined} The slot's declared draft key, or `undefined`
+ *                              outside a slot.
  */
-const slotCollections = new Map();
-
-/**
- * Resolves the current element's own `woocommerce/cart` collection — the
- * slot's isolated draft-items array established by its container context
- * bag (`bundle-demo.php`'s `data-wp-context---draft-items`).
- *
- * @return {Object[]|undefined} The slot's resolved collection, or
- *                               `undefined` outside a slot.
- */
-function resolveSlotCollection() {
-	return getContext( 'woocommerce/cart' )?.draftItems;
+function resolveSlotDraftKey() {
+	return getContext( 'woocommerce/cart' )?.draftKey;
 }
 
 /**
- * Resolves the slot's one draft (a slot's collection holds at most one, its
- * own child's).
+ * Resolves the slot's one draft, read directly off the store's public
+ * `state.draftItems` at the slot's own declared key (a slot's collection
+ * holds at most one draft, its own child's).
+ *
+ * `undefined` both outside a slot and before the slot's first edit — a
+ * slot's collection is created lazily, on its first `upsertDraftItem`
+ * write (see {@link onSlotQuantityChange}); nothing seeds it up front.
  *
  * @return {Object|undefined} The slot's draft, or `undefined` when none is
  *                             resolved yet.
  */
 function resolveSlotDraft() {
-	return resolveSlotCollection()?.[ 0 ];
+	const draftKey = resolveSlotDraftKey();
+	return draftKey ? cart.state.draftItems[ draftKey ]?.[ 0 ] : undefined;
 }
 
 /**
- * Registers the slot's resolved collection into the module-scope registry
- * and seeds its one draft from the quantity input's current value.
+ * Writes a shopper's quantity edit to the slot's declared collection.
  *
- * Bound to the quantity input's `data-wp-init`. A slot's collection starts
- * empty (its own container bag), so this seed is always a creation, never
- * an edit — the sole `upsertDraftItem` call in this fixture. Every
- * subsequent shopper edit is a direct mutation instead (see
- * {@link onSlotQuantityChange}).
- */
-function registerSlotCollection() {
-	const { slotId, childId } = getContext();
-	const collection = resolveSlotCollection();
-
-	if ( ! collection ) {
-		return;
-	}
-
-	slotCollections.set( slotId, collection );
-
-	const { ref } = getElement();
-	const quantity = Number( ref.value );
-
-	if ( ! Number.isFinite( quantity ) || quantity < 0 ) {
-		return;
-	}
-
-	cart.actions.upsertDraftItem( { id: childId, quantity } );
-}
-
-/**
- * Writes a shopper's quantity edit as a direct mutation of the slot's
- * already-resolved draft — no action call.
- *
- * Bound to the quantity input's `data-wp-on--change`. The slot's `<span>`
- * binding (`state.slotQuantityText`) reads the same draft, so this write's
- * re-render is observable without any action having run.
+ * Bound to the quantity input's `data-wp-on--change`. A slot's collection
+ * does not exist until its first edit — nothing seeds it up front — so the
+ * *first* call creates the slot's one draft via the store's public
+ * `upsertDraftItem` (a creation convenience, addressed by the slot's own
+ * declared key), and every call after that is a **direct mutation** of the
+ * already-resolved draft object, never an action call. The slot's `<span>`
+ * binding (`state.slotQuantityText`) reads the same draft, so either
+ * write's re-render is observable.
  */
 function onSlotQuantityChange() {
 	const { ref } = getElement();
@@ -145,14 +131,19 @@ function onSlotQuantityChange() {
 
 	const draft = resolveSlotDraft();
 
-	if ( ! draft ) {
+	if ( draft ) {
+		// Direct mutation of the resolved draft object — reactive per the
+		// store's live envelope, honored by `addBundleToCart`'s compose
+		// below, deliberately not routed through `upsertDraftItem`.
+		draft.quantity = quantity;
 		return;
 	}
 
-	// Direct mutation of the resolved draft object — reactive per the
-	// store's live envelope, honored by `addBundleToCart`'s compose below,
-	// deliberately not routed through `upsertDraftItem`.
-	draft.quantity = quantity;
+	// First edit for this slot: create its one draft via the store's
+	// public creation convenience, addressed by the slot's own declared
+	// context (`childId`), not by any registry.
+	const { childId } = getContext();
+	cart.actions.upsertDraftItem( { id: childId, quantity } );
 }
 
 store(
@@ -163,12 +154,17 @@ store(
 			 * The current element's slot's draft quantity, as text.
 			 *
 			 * A getter, re-evaluated on every render; reads the same
-			 * resolved draft {@link onSlotQuantityChange} mutates directly,
-			 * so a direct write's re-render is observable through this
-			 * binding with no action call involved.
+			 * resolved draft {@link onSlotQuantityChange} writes — by
+			 * creation or direct mutation — so either write's re-render is
+			 * observable through this binding with no action call
+			 * involved. Falls back to the quantity input's rendered
+			 * default when the slot has no draft yet (its collection is
+			 * created lazily, on its first edit).
 			 */
 			get slotQuantityText() {
-				return String( resolveSlotDraft()?.quantity ?? 0 );
+				return String(
+					resolveSlotDraft()?.quantity ?? RENDERED_DEFAULT_QUANTITY
+				);
 			},
 		},
 		actions: {
@@ -178,18 +174,19 @@ store(
 			 * Composes both slots' current drafts into one `add-item`
 			 * payload for the bundle product and posts it verbatim.
 			 *
-			 * Reads each slot's draft off this module's own registry —
-			 * populated by {@link registerSlotCollection} — rather than any
-			 * cross-collection store read; because the registry holds live
-			 * collection references, this reflects direct writes made after
-			 * registration.
+			 * Reads each slot's collection directly off the store's public
+			 * `state.draftItems`, at the two literal keys the slots
+			 * themselves declare — no registry, no cross-collection
+			 * plumbing beyond the lock consent this fixture already holds.
+			 * A slot never edited has no collection yet (`?? []`), so it
+			 * contributes nothing to the composed payload.
 			 */
 			*addBundleToCart() {
 				const { bundleProductId } = getContext();
 
-				const children = [ ...slotCollections.values() ]
-					.map( ( collection ) => collection[ 0 ] )
-					.filter( ( draft ) => draft && draft.quantity > 0 );
+				const children = SLOT_DRAFT_KEYS.flatMap(
+					( key ) => cart.state.draftItems[ key ] ?? []
+				).filter( ( draft ) => draft.quantity > 0 );
 
 				yield cart.actions.addItem( {
 					id: bundleProductId,
@@ -197,9 +194,6 @@ store(
 					[ CHILDREN_PROP ]: children,
 				} );
 			},
-		},
-		callbacks: {
-			registerSlotCollection,
 		},
 	},
 	{ lock: universalLock }

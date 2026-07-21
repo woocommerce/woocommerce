@@ -25,22 +25,24 @@
  *
  * The `[wc_bundle_demo bundle="<id>" child_a="<id>" child_b="<id>"]`
  * shortcode renders two "slot" elements — one per child product — plus an
- * "Add bundle to cart" button. Each slot is a real container: it declares its
- * own empty `woocommerce/cart` draft-items collection (the standard
- * container primitive core blocks use), so picking the same product in both
- * slots produces two independent drafts rather than one overwriting the
- * other — the collection boundary is exactly what makes that safe. A
- * slot-level init seeds the slot's draft once (the store's public
- * `upsertDraftItem`, a creation convenience) and registers the slot's
- * resolved collection in the demo's own module-scope registry, keyed by slot
- * id; every later edit of the slot's quantity is a direct mutation of that
- * resolved draft object, not an action call, and the slot renders a binding
- * that reads the draft so the write's re-render is observable. The button
- * composes both slots' current drafts from the demo's own registry into one
- * `cart/add-item` payload for the bundle product — carrying a
- * `wc-bundle-demo/children` prop at the payload root — and posts it verbatim
- * via the store's public `addItem( payload )`; because the compose reads the
- * registry's live collections at click time, it honors any direct writes.
+ * "Add bundle to cart" button. Each slot declares its own literal,
+ * namespaced `woocommerce/cart` draft key (`wc-bundle-demo/slot-1` /
+ * `wc-bundle-demo/slot-2`) — the same container primitive core blocks use,
+ * addressed directly from markup with no registry of any kind — so picking
+ * the same product in both slots produces two independent drafts rather
+ * than one overwriting the other. A slot's quantity input has no init: its
+ * first edit creates the slot's one draft via the store's public
+ * `upsertDraftItem` (a creation convenience), and every edit after that is a
+ * direct mutation of the already-resolved draft object, not an action call;
+ * the slot renders a binding that reads the draft so either write's
+ * re-render is observable. The button composes both slots' current drafts
+ * by reading `state.draftItems` at its two declared keys directly — under
+ * its existing lock consent — into one `cart/add-item` payload for the
+ * bundle product, carrying a `wc-bundle-demo/children` prop at the payload
+ * root, and posts it verbatim via the store's public `addItem( payload )`;
+ * because the compose reads the live collections at click time, it honors
+ * any direct writes, and a slot never edited composes nothing (its
+ * collection was never created).
  *
  * Server-side, `add_children_to_cart_item_data()` reads that prop off the
  * add-item request and folds it into the cart line's `cart_item_data` (so
@@ -171,31 +173,32 @@ class WC_Bundle_Demo_Fixture {
 	}
 
 	/**
-	 * Renders one child slot: a real `woocommerce/cart` container plus a
+	 * Renders one child slot: a declared `woocommerce/cart` draft key plus a
 	 * quantity input.
 	 *
 	 * The slot element carries two context bags on one element — its own
-	 * `wc-bundle-demo` context (`childId`, `slotId`) and an empty
-	 * `woocommerce/cart` draft-items collection that isolates this slot's
-	 * draft from the other slot and from any other purchase surface on the
-	 * page. A second default `data-wp-context` would silently collide with
-	 * the first (the HTML parser keeps only one `data-wp-context` attribute
-	 * per element), so the collection bag is hand-rolled as the
-	 * three-hyphen `data-wp-context---draft-items` form — the same
-	 * mechanism `ProductTemplate.php` / `SingleProduct.php` use to declare
-	 * their own collection boundary alongside their own default context,
-	 * and that `Wishlist.php` / `SavedForLater.php` already ship for a
-	 * second namespace (`data-wp-context---notices`).
+	 * `wc-bundle-demo` context (`childId`, `slotId`) and its own literal,
+	 * namespaced `woocommerce/cart` draft key (`wc-bundle-demo/slot-1` /
+	 * `wc-bundle-demo/slot-2`) that isolates this slot's draft from the
+	 * other slot and from any other purchase surface on the page. A second
+	 * default `data-wp-context` would silently collide with the first (the
+	 * HTML parser keeps only one `data-wp-context` attribute per element),
+	 * so the key bag is hand-rolled as the three-hyphen
+	 * `data-wp-context---draft-key` form — the same mechanism
+	 * `ProductTemplate.php` / `SingleProduct.php` use to declare their own
+	 * server-minted key alongside their own default context, and that
+	 * `Wishlist.php` / `SavedForLater.php` already ship for a second
+	 * namespace (`data-wp-context---notices`).
 	 *
-	 * The quantity input's `data-wp-init` resolves this collection, seeds
-	 * its one draft, and registers the collection in the demo's own
-	 * module-scope registry (keyed by `slotId`); its `data-wp-on--change`
-	 * thereafter writes every edit as a direct mutation of that resolved
-	 * draft, not an action call. The `<span>` renders a binding onto the
-	 * same draft so a direct write's re-render is observable.
+	 * The quantity input has no init: its `data-wp-on--change` creates the
+	 * slot's one draft on its first edit (the store's public
+	 * `upsertDraftItem`, addressed by the slot's declared key) and directly
+	 * mutates the already-resolved draft on every edit after that. The
+	 * `<span>` renders a binding onto the same draft so either write's
+	 * re-render is observable.
 	 *
 	 * @param string $slot     The slot identifier (`slot-1`/`slot-2`), also
-	 *                         used as the demo's own registry key.
+	 *                         the suffix of the slot's own declared draft key.
 	 * @param int    $child_id The child product id this slot drafts.
 	 * @return string The rendered slot markup, or an empty string when
 	 *                `$child_id` does not resolve to a product.
@@ -218,22 +221,24 @@ class WC_Bundle_Demo_Fixture {
 		// Hand-rolled second context bag: JSON_HEX_APOS is required because
 		// this markup uses single-quoted attribute values (see the
 		// docblock above for why a second default `data-wp-context` cannot
-		// be used instead). This declares an empty `woocommerce/cart`
-		// collection boundary, exactly as ProductTemplate.php /
-		// SingleProduct.php do for their own containers.
-		$draft_items_context_directive = 'data-wp-context---draft-items=\'woocommerce/cart::' . wp_json_encode(
-			array( 'draftItems' => array() ),
+		// be used instead). This declares the slot's own literal,
+		// namespaced `woocommerce/cart` draft key, exactly as
+		// ProductTemplate.php / SingleProduct.php declare their own
+		// server-minted key for their own containers — the extension gets
+		// the primitive from markup alone, with zero core changes.
+		$draft_key_context_directive = 'data-wp-context---draft-key=\'woocommerce/cart::' . wp_json_encode(
+			array( 'draftKey' => self::EXTENSION_NAMESPACE . '/' . $slot ),
 			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 		) . '\'';
 
 		return sprintf(
 			'<div class="wc-bundle-demo__slot" %1$s %2$s>' .
 			'<label>%3$s</label>' .
-			'<input type="number" min="0" step="1" value="1" data-wp-init="callbacks.registerSlotCollection" data-wp-on--change="actions.onSlotQuantityChange" />' .
+			'<input type="number" min="0" step="1" value="1" data-wp-on--change="actions.onSlotQuantityChange" />' .
 			'<span class="wc-bundle-demo__slot-quantity" data-wp-text="state.slotQuantityText"></span>' .
 			'</div>',
 			$slot_context_directive,
-			$draft_items_context_directive,
+			$draft_key_context_directive,
 			esc_html( $product->get_name() )
 		);
 	}
