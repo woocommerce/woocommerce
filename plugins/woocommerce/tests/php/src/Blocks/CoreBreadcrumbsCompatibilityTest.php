@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks;
 
+use Automattic\WooCommerce\Blocks\BlockTypesController;
 use Automattic\WooCommerce\Blocks\CoreBreadcrumbsCompatibility;
 use Automattic\WooCommerce\Blocks\Domain\Bootstrap;
 use Automattic\WooCommerce\Blocks\Domain\Package as BlocksPackage;
@@ -171,7 +172,7 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should register Core Breadcrumbs compatibility filters through the Blocks bootstrap.
+	 * @testdox Should preserve Core Breadcrumbs callback identity through the Blocks bootstrap.
 	 */
 	public function test_blocks_bootstrap_registers_core_breadcrumbs_filters(): void {
 		$container = new Container();
@@ -183,14 +184,17 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		);
 
 		new Bootstrap( $container );
-		$compatibility = $container->get( CoreBreadcrumbsCompatibility::class );
+		$controller = $container->get( BlockTypesController::class );
 
 		try {
-			$this->assertSame( 10, has_filter( 'block_core_breadcrumbs_post_type_settings', array( $compatibility, 'set_product_breadcrumbs_preferred_taxonomy' ) ), 'Bootstrap should register the product breadcrumb settings filter.' );
-			$this->assertSame( 10, has_filter( 'block_core_breadcrumbs_items', array( $compatibility, 'apply_woocommerce_breadcrumb_filters' ) ), 'Bootstrap should register the breadcrumb items filter.' );
+			$this->assertSame( 10, has_filter( 'block_core_breadcrumbs_post_type_settings', array( $controller, 'set_product_breadcrumbs_preferred_taxonomy' ) ), 'Bootstrap should retain the product breadcrumb settings callback identity.' );
+			$this->assertSame( 10, has_filter( 'block_core_breadcrumbs_items', array( $controller, 'apply_woocommerce_breadcrumb_filters' ) ), 'Bootstrap should retain the breadcrumb items callback identity.' );
+			$this->assertSame( array( 'taxonomy' => 'product_cat' ), $controller->set_product_breadcrumbs_preferred_taxonomy( array(), 'product' ), 'The released product breadcrumb settings method should remain callable.' );
+			$this->assertSame( array(), $controller->apply_woocommerce_breadcrumb_filters( array() ), 'The released breadcrumb items method should remain callable.' );
+			$this->assertTrue( remove_filter( 'block_core_breadcrumbs_items', array( $controller, 'apply_woocommerce_breadcrumb_filters' ), 10 ), 'Existing code should be able to remove the released callback.' );
 		} finally {
-			remove_filter( 'block_core_breadcrumbs_post_type_settings', array( $compatibility, 'set_product_breadcrumbs_preferred_taxonomy' ), 10 );
-			remove_filter( 'block_core_breadcrumbs_items', array( $compatibility, 'apply_woocommerce_breadcrumb_filters' ), 10 );
+			remove_filter( 'block_core_breadcrumbs_post_type_settings', array( $controller, 'set_product_breadcrumbs_preferred_taxonomy' ), 10 );
+			remove_filter( 'block_core_breadcrumbs_items', array( $controller, 'apply_woocommerce_breadcrumb_filters' ), 10 );
 		}
 	}
 
