@@ -27,50 +27,50 @@ test.describe( `${ blockData.name } frontend`, () => {
 		hasTouch: true,
 	} );
 
-	test( 'should not switch to the next image when the user cursor is focused on the rating with keyboard', async ( {
+	test( 'does not switch images during keyboard interaction outside the gallery', async ( {
 		page,
 	} ) => {
-		await page.goto( blockData.productPage );
+		await test.step( 'should not switch to the next image when the user cursor is focused on the rating with keyboard', async () => {
+			await page.goto( blockData.productPage );
 
-		const activeImageSrc = await page
-			.locator( '.flex-active' )
-			.getAttribute( 'src' );
+			const activeImageSrc = await page
+				.locator( '.flex-active' )
+				.getAttribute( 'src' );
 
-		await page.getByRole( 'tab', { name: 'Reviews' } ).click();
+			await page.getByRole( 'tab', { name: 'Reviews' } ).click();
 
-		const rating = page.locator( '.star-3' );
-		await rating.click();
-		await rating.focus();
+			const rating = page.locator( '.star-3' );
+			await rating.click();
+			await rating.focus();
 
-		await page.keyboard.press( 'ArrowRight' );
+			await page.keyboard.press( 'ArrowRight' );
 
-		const newActiveImage = page.locator( '.flex-active' );
+			const newActiveImage = page.locator( '.flex-active' );
 
-		await expect( newActiveImage ).toHaveAttribute(
-			'src',
-			activeImageSrc as string
-		);
-	} );
+			await expect( newActiveImage ).toHaveAttribute(
+				'src',
+				activeImageSrc as string
+			);
+		} );
 
-	test( 'should not switch to the next image when the user cursor is focused on the tabs with keyboard', async ( {
-		page,
-	} ) => {
-		await page.goto( blockData.productPage );
+		await test.step( 'should not switch to the next image when the user cursor is focused on the tabs with keyboard', async () => {
+			await page.goto( blockData.productPage );
 
-		const activeImageSrc = await page
-			.locator( '.flex-active' )
-			.getAttribute( 'src' );
+			const activeImageSrc = await page
+				.locator( '.flex-active' )
+				.getAttribute( 'src' );
 
-		await page.getByRole( 'tab', { name: 'Reviews' } ).focus();
+			await page.getByRole( 'tab', { name: 'Reviews' } ).focus();
 
-		await page.keyboard.press( 'ArrowRight' );
+			await page.keyboard.press( 'ArrowRight' );
 
-		const newActiveImage = page.locator( '.flex-active' );
+			const newActiveImage = page.locator( '.flex-active' );
 
-		await expect( newActiveImage ).toHaveAttribute(
-			'src',
-			activeImageSrc as string
-		);
+			await expect( newActiveImage ).toHaveAttribute(
+				'src',
+				activeImageSrc as string
+			);
+		} );
 	} );
 
 	test( 'should switch to the next image when the user cursor is focused on tabs with touch event', async ( {
