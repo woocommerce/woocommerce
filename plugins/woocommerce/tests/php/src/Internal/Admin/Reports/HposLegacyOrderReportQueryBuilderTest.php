@@ -303,6 +303,41 @@ class HposLegacyOrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should build joins required by typed where rows even without a matching data entry, like the CPT path.
+	 */
+	public function test_build_query_builds_joins_from_where_rows(): void {
+		OrderHelper::toggle_cot_feature_and_usage( true );
+
+		$query = ( new HposLegacyOrderReportQueryBuilder() )->build_query(
+			array(
+				'data'         => array(
+					'ID' => array(
+						'type'     => 'post_data',
+						'function' => 'COUNT',
+						'name'     => 'total_orders',
+					),
+				),
+				'where'        => array(
+					array(
+						'type'     => 'order_item',
+						'key'      => 'order_items.order_item_type',
+						'value'    => 'coupon',
+						'operator' => '=',
+					),
+				),
+				'filter_range' => false,
+				'order_types'  => array( 'shop_order' ),
+			),
+			0,
+			0
+		);
+
+		$this->assertStringContainsString( 'woocommerce_order_items AS order_items ON orders.id = order_items.order_id', $query['join'] );
+		$this->assertStringContainsString( "AND order_items.order_item_type = 'coupon'", $query['where'] );
+		$this->assertStringNotContainsString( 'order_items', $query['select'] );
+	}
+
+	/**
 	 * @testdox Should compare plain post_date where predicates against the GMT column so the date index stays usable.
 	 */
 	public function test_build_query_where_post_date_predicate_compares_gmt_column(): void {

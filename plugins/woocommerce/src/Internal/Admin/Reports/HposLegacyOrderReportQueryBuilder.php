@@ -77,6 +77,16 @@ class HposLegacyOrderReportQueryBuilder {
 			$joins    = array_merge( $joins, $part['joins'] );
 		}
 
+		// The CPT path builds joins from `( $data + $where )`, so a `where` row carrying a
+		// `type` gets its join even without a matching `data` entry (rows shadowed by a
+		// `data` key are skipped, matching the array-union semantics). Such rows only ever
+		// contribute joins, never SELECT columns.
+		foreach ( $where as $raw_key => $value ) {
+			if ( is_array( $value ) && ! array_key_exists( $raw_key, $data ) ) {
+				$joins = array_merge( $joins, $this->resolve_type_joins( $raw_key, $value ) );
+			}
+		}
+
 		if ( ! empty( $where_meta ) ) {
 			foreach ( $where_meta as $value ) {
 				if ( is_array( $value ) ) {
@@ -166,6 +176,33 @@ class HposLegacyOrderReportQueryBuilder {
 			'select' => "{$expr} as {$value['name']}",
 			'joins'  => $joins,
 		);
+	}
+
+	/**
+	 * Resolve the JOINs required by a `data` or `where` row's `type`, without any SELECT part.
+	 *
+	 * @param string|int $raw_key Key of the row in its original array (a numeric index for `where` rows).
+	 * @param array      $value   The row.
+	 *
+	 * @return array<string,string> JOINs keyed by alias.
+	 */
+	private function resolve_type_joins( $raw_key, array $value ): array {
+		$raw_key   = (string) $raw_key;
+		$key       = sanitize_key( $raw_key );
+		$join_type = $value['join_type'] ?? 'INNER';
+
+		switch ( $value['type'] ?? '' ) {
+			case 'meta':
+				return $this->resolve_meta_select( $raw_key, $key, $join_type )[1];
+			case 'parent_meta':
+				return $this->resolve_parent_meta_select( $raw_key, $key, $join_type )[1];
+			case 'order_item_meta':
+				return $this->build_order_item_meta_joins( $key, $raw_key, $value['order_item_type'] ?? '', $join_type );
+			case 'order_item':
+				return $this->build_order_items_join( $join_type );
+		}
+
+		return array();
 	}
 
 	/**
