@@ -67,62 +67,55 @@ const templates = {
 };
 
 test.describe( `${ blockData.name } Block `, () => {
-	test( 'when Inherits Query From Template other options are hidden, show up otherwise', async ( {
-		admin,
-		editor,
-		page,
-	} ) => {
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-		await editor.setContent( '' );
-		await insertProductsQuery( editor );
-		const block = await editor.getBlockByName( blockData.name );
-		await editor.selectBlocks( block );
-		await editor.openDocumentSettingsSidebar();
-		const advancedFilterOption = page.getByLabel(
-			'Advanced Filters options'
-		);
-		const inheritQueryFromTemplateOption = page.getByLabel(
-			'Inherit query from template'
-		);
-
-		await expect( advancedFilterOption ).toBeHidden();
-		await expect( inheritQueryFromTemplateOption ).toBeVisible();
-
-		await inheritQueryFromTemplateOption.click();
-
-		await expect( advancedFilterOption ).toBeVisible();
-		await expect( inheritQueryFromTemplateOption ).toBeVisible();
-	} );
-
-	test( 'product button should add product to the cart when inheriting query from template', async ( {
+	test( 'supports Products Archive query controls and inherited add-to-cart behavior', async ( {
 		admin,
 		editor,
 		page,
 		frontendUtils,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-		await editor.setContent( '' );
-		await insertProductsQuery( editor );
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-		await frontendUtils.goToShop();
+		await test.step( 'when Inherits Query From Template other options are hidden, show up otherwise', async () => {
+			await admin.visitSiteEditor( {
+				postId: `${ BLOCK_THEME_SLUG }//archive-product`,
+				postType: 'wp_template',
+				canvas: 'edit',
+			} );
+			await editor.setContent( '' );
+			await insertProductsQuery( editor );
+			const block = await editor.getBlockByName( blockData.name );
+			await editor.selectBlocks( block );
+			await editor.openDocumentSettingsSidebar();
+			const advancedFilterOption = page.getByLabel(
+				'Advanced Filters options'
+			);
+			const inheritQueryFromTemplateOption = page.getByLabel(
+				'Inherit query from template'
+			);
 
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart: “Single”',
+			await expect( advancedFilterOption ).toBeHidden();
+			await expect( inheritQueryFromTemplateOption ).toBeVisible();
+
+			await inheritQueryFromTemplateOption.click();
+
+			await expect( advancedFilterOption ).toBeVisible();
+			await expect( inheritQueryFromTemplateOption ).toBeVisible();
 		} );
-		await addToCartButton.click();
-		await expect( addToCartButton ).toHaveText( '1 in cart' );
-		const cartLink = page.getByRole( 'link', { name: 'View cart' } );
-		await expect( cartLink ).toBeVisible();
+
+		await test.step( 'product button should add product to the cart when inheriting query from template', async () => {
+			await editor.setContent( '' );
+			await insertProductsQuery( editor );
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+			await frontendUtils.goToShop();
+
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart: “Single”',
+			} );
+			await addToCartButton.click();
+			await expect( addToCartButton ).toHaveText( '1 in cart' );
+			const cartLink = page.getByRole( 'link', { name: 'View cart' } );
+			await expect( cartLink ).toBeVisible();
+		} );
 	} );
 
 	test( 'product button should add product to the cart when not inheriting query from template', async ( {
