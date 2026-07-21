@@ -110,7 +110,7 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox load_cart_state() seeds cart, noticeId, and restUrl under the woocommerce/cart namespace.
+	 * @testdox load_cart_state() seeds cart and restUrl under the woocommerce/cart namespace.
 	 */
 	public function test_cart_state_is_seeded_under_cart_namespace(): void {
 		BlocksSharedState::load_cart_state( $this->consent );
@@ -118,9 +118,7 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 		$cart_state = wp_interactivity_state( 'woocommerce/cart' );
 
 		$this->assertArrayHasKey( 'cart', $cart_state );
-		$this->assertArrayHasKey( 'noticeId', $cart_state );
 		$this->assertArrayHasKey( 'restUrl', $cart_state );
-		$this->assertSame( '', $cart_state['noticeId'] );
 		$this->assertSame( get_rest_url(), $cart_state['restUrl'] );
 	}
 
@@ -133,6 +131,17 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 		$cart_state = wp_interactivity_state( 'woocommerce/cart' );
 
 		$this->assertArrayNotHasKey( 'pageScope', $cart_state );
+	}
+
+	/**
+	 * @testdox load_cart_state() does not seed a noticeId into the woocommerce/cart state.
+	 */
+	public function test_cart_state_seeds_no_notice_id(): void {
+		BlocksSharedState::load_cart_state( $this->consent );
+
+		$cart_state = wp_interactivity_state( 'woocommerce/cart' );
+
+		$this->assertArrayNotHasKey( 'noticeId', $cart_state );
 	}
 
 	/**
