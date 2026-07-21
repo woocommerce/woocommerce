@@ -14,10 +14,12 @@ const test = base.extend( {} );
  * Locates the "Add to Cart with Options" renderings a test in this file
  * puts on the Single Product Template, in document order: the template's
  * own main form, optionally a second page-wide surface (e.g. a sticky bar,
- * rendered as a sibling in the template content — it declares no collection
- * boundary of its own, so it resolves the same page-wide draft collection as
- * the main form), and a Single Product block wrapping a further rendering of
- * the same product (a container that isolates its own draft collection).
+ * rendered as a sibling in the template content — it declares no draft key
+ * of its own, so it resolves the same page-wide (global-key) draft
+ * collection as the main form), and a Single Product block wrapping a
+ * further rendering of the same product (a container that declares its own
+ * minted `single-product/<productId>/<n>` key, isolating its own draft
+ * collection).
  */
 const addToCartWithOptionsForms = ( page: import('@playwright/test').Page ) =>
 	page.locator( '[data-block-name="woocommerce/add-to-cart-with-options"]' );
@@ -150,8 +152,8 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; Single Product block s
 	} ) => {
 		const hoodieId = await getPostIdBySlug( 'hoodie' );
 
-		// A second page-wide surface (no collection boundary of its own, so
-		// it resolves the page-wide collection exactly like the main form)
+		// A second page-wide surface (no draft key of its own, so it
+		// resolves the same global-key collection exactly like the main form)
 		// sits alongside the main form and the Single Product block
 		// override, mirroring the simple-product case above. For a variable
 		// product this also exercises variation resolution: the second
@@ -214,8 +216,9 @@ test.describe( 'Scoped drafts: synced page-wide surfaces; Single Product block s
 				/\bdisabled\b/
 			);
 
-			// The container's own draft collection — established by the
-			// Single Product block, as emitted by `SingleProduct.php` —
+			// The container's own draft collection — addressed by the
+			// minted `single-product/<productId>/<n>` key the Single
+			// Product block declares, as emitted by `SingleProduct.php` —
 			// still only holds its untouched server-seeded default: the
 			// main form's edit never reached it, so the override's own
 			// inputs stay exactly as they started.

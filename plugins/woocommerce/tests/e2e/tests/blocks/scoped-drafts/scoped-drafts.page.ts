@@ -17,7 +17,7 @@ import AddToCartWithOptionsPage from '../add-to-cart-with-options/add-to-cart-wi
  * of the product's variations) rendered on one page, so a test can prove
  * that each surface's draft state — the child quantities a shopper is
  * editing, or the variation attributes they've selected — is isolated to
- * its own draft-items collection and never leaks into a sibling surface.
+ * its own keyed draft collection and never leaks into a sibling surface.
  */
 class ScopedDraftsPage {
 	private page: Page;
@@ -53,11 +53,12 @@ class ScopedDraftsPage {
 	 * or template before visiting the frontend.
 	 *
 	 * Every call adds a new, independent block instance. Each "Single
-	 * Product" block instance declares its own empty `woocommerce/cart`
-	 * draft-items collection in context (see `SingleProduct.php`), so two
-	 * calls for the same product remain fully isolated from one another —
-	 * the isolation comes from the context tree the block's own markup
-	 * establishes, not from any minted identifier.
+	 * Product" block instance mints its own `single-product/<productId>/<n>`
+	 * draft key and declares it in a `woocommerce/cart` context bag (see
+	 * `SingleProduct.php`), so two calls for the same product remain fully
+	 * isolated from one another — the isolation comes from that minted key
+	 * (the `<n>` occurrence counter distinguishing same-product instances),
+	 * not from the context tree the block's markup happens to establish.
 	 *
 	 * @param product    The product's slug.
 	 * @param variation  Optional variation slug to preselect.

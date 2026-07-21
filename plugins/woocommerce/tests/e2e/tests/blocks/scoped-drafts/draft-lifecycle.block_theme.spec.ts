@@ -74,19 +74,18 @@ test.describe( 'Scoped drafts: draft lifecycle across navigation and reload', ()
 		} );
 
 		await test.step( 'the remounted card displays the persisted draft value, and adding to cart posts that same value', async () => {
-			// The returned card is a freshly mounted instance of the same
-			// container's collection boundary; its quantity input reads
-			// through the resolved draft, so it shows the edited value
-			// rather than the block's own freshly re-initialized default —
-			// a shopper looking at the card after paginating back sees
-			// exactly what they last set. This is the shopper-visible
-			// confirmation that the first post-remount paint is correct
-			// through the real feature wiring: the loop item's server-
-			// emitted `data-wp-init` register-or-restore directive, the
-			// collection-root's `queryId` context, and the resolver's
-			// render-time bridge over the module-private ledger all have to
-			// cooperate for this value to appear on the very first paint
-			// after remount, not one effect-cycle later.
+			// The returned card is a freshly mounted instance rendering the
+			// same `collection/<queryId>/<productId>` draft key; its
+			// quantity input reads through the resolver-selected draft, so
+			// it shows the edited value rather than the block's own freshly
+			// re-initialized default — a shopper looking at the card after
+			// paginating back sees exactly what they last set. This is the
+			// shopper-visible confirmation that the first post-remount
+			// paint is correct: because the key is stable across the
+			// remount (same queryId, same product id) and the collection it
+			// addresses lives in surviving global state, the getter-driven
+			// binding repaints with the persisted draft on the very first
+			// paint after remount, not one effect-cycle later.
 			const quantity =
 				collectionForm( page ).getByLabel( 'Product quantity' );
 			await expect( quantity ).toHaveValue( '4' );
@@ -102,6 +101,27 @@ test.describe( 'Scoped drafts: draft lifecycle across navigation and reload', ()
 			);
 			await addToCartButton.click();
 			await batchPromise;
+
+			// Post-add persistence (Flow 4 / AC4): posting never mutates the
+			// draft, and the draft lives in surviving global state under the
+			// card's key, so the surface still shows the edited quantity
+			// immediately after a successful add — with no hard reload.
+			await expect( quantity ).toHaveValue( '4' );
+
+			// The same holds after a further enhanced-pagination
+			// away-and-back round trip: the add did not disturb the
+			// surviving collection the card's key resolves.
+			await page.getByRole( 'link', { name: 'Next Page' } ).click();
+			await expect(
+				page.getByRole( 'heading', { name: 'Beanie' } )
+			).toBeVisible();
+
+			await page.getByRole( 'link', { name: 'Previous Page' } ).click();
+			await expect(
+				page.getByRole( 'heading', { name: 'Album' } )
+			).toBeVisible();
+
+			await expect( quantity ).toHaveValue( '4' );
 
 			await page.goto( '/cart/' );
 			await expect(
@@ -211,18 +231,20 @@ test.describe( 'Scoped drafts: draft lifecycle across navigation and reload', ()
 		} );
 
 		await test.step( 'the remounted quantity input shows the server-seeded default, matching base behavior', async () => {
-			// The machinery guarantees only that whatever ends up in the
-			// restored collection paints correctly on first post-remount
-			// render; it does not by itself guarantee that a parent-id
-			// quantity draft is still what this input resolves against once
-			// the card remounts with no variation selected. Empirically
-			// confirmed on the real feature wiring (a browser probe of this
-			// exact round trip): the remounted input reads 1, the server-
-			// seeded default — base parity, matching what a shopper saw
-			// before this change. Variable-card draft survival therefore has
-			// no shopper-visible observable here; the simple-product test
-			// above is what carries the shopper-visible confirmation that an
-			// edited value survives the round trip.
+			// The keyed collection this card's card key resolves does
+			// survive the remount, but which draft it displays still goes
+			// through the variation-aware pairing (`itemInContext`), which
+			// reads against the *resolved* product in context (parent vs.
+			// matched variation) — and the remount discards the resolved
+			// variation, so the input resolves against the parent product
+			// id again. Empirically confirmed on the real feature wiring (a
+			// browser probe of this exact round trip): the remounted input
+			// reads 1, the server-seeded default — base parity, matching
+			// what a shopper saw before this change. Variable-card
+			// *quantity* draft survival therefore has no shopper-visible
+			// observable here; the simple-product test above is what
+			// carries the shopper-visible confirmation that an edited value
+			// survives a remount round trip via the keyed collection.
 			await expect( quantity ).toHaveValue( '1' );
 		} );
 	} );
