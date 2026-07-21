@@ -50,6 +50,13 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	private $original_product_has_archive;
 
 	/**
+	 * Original WooCommerce query object.
+	 *
+	 * @var \WC_Query
+	 */
+	private \WC_Query $original_woocommerce_query;
+
+	/**
 	 * Original request query vars.
 	 *
 	 * @var array
@@ -88,6 +95,7 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		$this->original_myaccount_page_id       = get_option( 'woocommerce_myaccount_page_id' );
 		$this->original_woocommerce_permalinks  = get_option( 'woocommerce_permalinks' );
 		$this->original_product_has_archive     = $product_post_type ? $product_post_type->has_archive : null;
+		$this->original_woocommerce_query       = WC()->query;
 		$this->original_wp_query_vars           = $wp instanceof \WP && is_array( $wp->query_vars ) ? $wp->query_vars : array();
 		$this->shop_page_id                     = self::factory()->post->create(
 			array(
@@ -141,6 +149,8 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		if ( $wp instanceof \WP ) {
 			$wp->query_vars = $this->original_wp_query_vars;
 		}
+
+		WC()->query = $this->original_woocommerce_query;
 
 		if ( taxonomy_exists( 'pa_test_color' ) ) {
 			unregister_taxonomy( 'pa_test_color' );
@@ -781,10 +791,16 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	 * @param string $endpoint Endpoint name.
 	 */
 	private function set_account_endpoint_request( string $endpoint ): void {
-		global $wp;
+		global $wp, $wp_query;
+
+		WC()->query = new \WC_Query();
 
 		if ( ! $wp instanceof \WP ) {
 			$wp = new \WP(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		if ( ! $wp_query instanceof \WP_Query ) {
+			$wp_query = new \WP_Query(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
 		if ( ! is_array( $wp->query_vars ) ) {
