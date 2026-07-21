@@ -4,7 +4,7 @@
 import {
 	getConfig,
 	getContext,
-	getServerContext,
+	getServerState,
 	store,
 } from '@wordpress/interactivity';
 import type { AsyncAction, TypeYield } from '@wordpress/interactivity';
@@ -46,6 +46,20 @@ export type WooCommerceConfig = {
 };
 
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
+
+/**
+ * An opaque address for a `state.draftItems` collection.
+ *
+ * The only contract a `DraftKey` carries is string equality: two reads (or
+ * a read and a write) using the same key resolve the same collection, and
+ * nothing else is promised — no parseable format, no stability guarantee
+ * beyond a single browsing session. A container block mints and declares its
+ * own key in context; an extension may declare a namespaced key of its own
+ * with zero core changes. See {@link GLOBAL_DRAFT_KEY} for the reserved
+ * session-global key every surface falls back to when no container declares
+ * one.
+ */
+export type DraftKey = string;
 
 /**
  * A single draft collection's draft cart item.
@@ -120,9 +134,6 @@ type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 export type Store = {
 	state: {
-		errorMessages?: {
-			[ key: string ]: string;
-		};
 		restUrl: string;
 		nonce: string;
 		cart: Omit< Cart, 'items' > & {
@@ -130,27 +141,31 @@ export type Store = {
 			totals: CartResponseTotals;
 		};
 		/**
-		 * The page-wide draft collection: cart items awaiting `addItem`.
+		 * The global draft home: every draft collection, keyed by an opaque
+		 * {@link DraftKey}.
 		 *
-		 * At most one draft per product `id`. A container block (a Product
-		 * Collection loop item, a Single Product block, or any other
-		 * extension surface that wraps or repeats purchase UI) isolates its
-		 * own subtree by initializing a `draftItems` array in its
-		 * `woocommerce/cart` context instead of writing here; every read and
-		 * write resolves the nearest such collection, falling back to this
-		 * page-wide one (see the module-private `resolveDraftItems`). Drafts
-		 * live alongside — never inside — the read-only `cart` mirror above,
-		 * and are written exclusively through
-		 * `upsertDraftItem`/`removeDraftItem`, or by direct mutation of an
+		 * At most one draft per product `id` within any one collection. A
+		 * container block (a Product Collection loop item, a Single Product
+		 * block, or any other extension surface that wraps or repeats
+		 * purchase UI) declares its own server-minted key in its
+		 * `woocommerce/cart` context; a surface wrapped in no container
+		 * resolves the reserved {@link GLOBAL_DRAFT_KEY} collection. Every
+		 * read and write resolves the nearest declared key (see the
+		 * module-private `resolveDraftKey`/`resolveCollection`). A
+		 * collection is created lazily, on its first shopper write — the
+		 * server never seeds this map. Drafts live alongside — never
+		 * inside — the read-only `cart` mirror above, and are written
+		 * exclusively through `upsertDraftItem`, or by direct mutation of an
 		 * already-resolved draft object.
 		 */
-		draftItems: DraftItem[];
+		draftItems: Record< DraftKey, DraftItem[] >;
 		/**
 		 * Finds an item by id/key, or by an extension-supplied predicate,
 		 * returning the read-only envelope pairing its draft with its cart
 		 * line. The draft is read from the resolved draft collection — the
-		 * nearest `context.draftItems`, falling back to the page-wide
-		 * `state.draftItems` (see the module-private `resolveDraftItems`).
+		 * nearest declared `context.draftKey`, falling back to
+		 * {@link GLOBAL_DRAFT_KEY} (see the module-private
+		 * `resolveDraftKey`/`resolveCollection`).
 		 *
 		 * Implements the pairing ladder: an explicit `key` pairs exactly
 		 * (no further checks); otherwise product/variation identity plus a
@@ -199,21 +214,27 @@ export type Store = {
 	actions: {
 		/**
 		 * Creates or updates a draft cart item in the resolved draft
-		 * collection — the nearest `context.draftItems`, falling back to
-		 * the page-wide `state.draftItems` (see the module-private
-		 * `resolveDraftItems`).
+		 * collection — the nearest declared `context.draftKey`, falling
+		 * back to {@link GLOBAL_DRAFT_KEY} (see the module-private
+		 * `resolveDraftKey`/`resolveCollection`).
 		 *
 		 * Merges `partial` into the resolved collection's draft whose `id`
 		 * matches — `id` resolves from `options.id` when given, else from
-		 * `partial.id` — appending a new draft otherwise.
+		 * `partial.id` — appending a new draft otherwise. Creating a new
+		 * draft composes it from `getServerState()`'s
+		 * `draftSeeds[key][id]` (when one is filed for the resolved key
+		 * and id) merged under `partial`, so an untouched field falls back
+		 * to its server-rendered default; the resolved collection is
+		 * created lazily, on this first write, when it does not exist yet.
 		 *
 		 * Rejects (leaving state unchanged) when: no numeric target `id`
 		 * can be resolved; `partial.id` disagrees with an
 		 * already-resolved target `id`, i.e. an attempt to change an
 		 * existing draft's identity in place (remove the draft and add a
 		 * new one instead); or a brand new draft is being created without
-		 * a numeric `quantity`. Every rejection is a dev-build console
-		 * warning and a silent no-op in production.
+		 * a numeric `quantity` (from either `partial` or the seed). Every
+		 * rejection is a dev-build console warning and a silent no-op in
+		 * production.
 		 *
 		 * @param partial    The draft fields to create or merge.
 		 * @param options    Targeting options.
@@ -225,59 +246,6 @@ export type Store = {
 			partial: Partial< DraftItem >,
 			options?: { id?: DraftItem[ 'id' ] }
 		) => void;
-		/**
-		 * Removes a draft for the given product from the resolved draft
-		 * collection — the nearest `context.draftItems`, falling back to
-		 * the page-wide `state.draftItems` (see the module-private
-		 * `resolveDraftItems`).
-		 *
-		 * Rejects (leaving state unchanged) when no numeric `id` is given;
-		 * a request naming a product with no matching draft in the
-		 * resolved collection is a silent no-op. Every rejection is a
-		 * dev-build console warning and a silent no-op in production.
-		 *
-		 * @param options    Targeting options.
-		 * @param options.id The product id whose draft to remove.
-		 */
-		removeDraftItem: ( options?: { id?: DraftItem[ 'id' ] } ) => void;
-		/**
-		 * Seeds the resolved draft collection from the server-rendered
-		 * `draftSeed`, when no draft for that product already exists
-		 * there.
-		 *
-		 * Reads `getServerContext< { draftSeed?: DraftItem } >(
-		 * 'woocommerce/cart' )?.draftSeed` — the **server-rendered** context,
-		 * immune to the reactive proxy's client-side edits, unlike reading
-		 * `state` — then copies the seed into the resolved collection (the
-		 * nearest `context.draftItems`, falling back to the page-wide
-		 * `state.draftItems`) only when that collection holds no draft for
-		 * the seed's product `id`. A no-op when no seed is present (a
-		 * surface that emits none, or a directive execution context that
-		 * resolves none) or when a draft for that product id already
-		 * exists in the resolved collection — so a router-region
-		 * re-render's seed read can never clobber a shopper's in-progress
-		 * edits.
-		 *
-		 * Intended to be called from a `data-wp-init` on the purchase
-		 * surface whose subtree context resolves both the target
-		 * collection and the server-rendered `draftSeed`.
-		 */
-		seedDraftIfAbsent: () => void;
-		/**
-		 * Registers a Product Collection card's draft collection into the
-		 * module-private draft-lifecycle ledger, or restores it from the
-		 * ledger on a subsequent visit, so an edited draft survives an
-		 * enhanced-pagination unmount/remount round trip.
-		 *
-		 * Not part of the store's documented surface — it exists only so
-		 * the server-rendered `data-wp-init` directive on a Product
-		 * Collection loop item can resolve it by name
-		 * (`data-wp-init="woocommerce/cart::actions.registerOrRestoreDraftCollection"`).
-		 * Extensions should not call it directly; it derives its own card
-		 * identity from context and is a no-op wherever that identity
-		 * cannot be derived.
-		 */
-		registerOrRestoreDraftCollection: () => void;
 		/**
 		 * Posts the in-context product's resolved collection's draft(s) to
 		 * the cart, or an explicit payload verbatim.
@@ -343,7 +311,6 @@ export type Store = {
 			args: ClientCartItem,
 			options?: CartUpdateOptions
 		) => Promise< void >;
-		waitForIdle: () => Promise< void >;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => Promise< void >;
 		updateNotices: (
 			notices: Notice[],
@@ -417,200 +384,80 @@ const generateInfoNotice = ( message: string ): Notice => ( {
  *
  * A container block (a Product Collection loop item, a Single Product
  * block, or any other extension surface that wraps or repeats purchase UI)
- * isolates its subtree by initializing `draftItems: []` here; nested
- * surfaces then resolve that collection instead of the page-wide
- * `state.draftItems`. Other `woocommerce/cart` context keys — `draftSeed`,
+ * declares its own server-minted `draftKey` here, isolating its subtree's
+ * drafts into that key's collection; nested surfaces inherit the same bag
+ * and resolve the same collection. Other `woocommerce/cart` context keys —
  * a mini-cart row's `id`/`key` — live in the same namespace but do not
  * establish a collection boundary.
  */
-type CartContext = { draftItems?: DraftItem[] };
+type CartContext = { draftKey?: DraftKey };
 
 /**
- * The `woocommerce/product-collection` collection-root context relevant to
- * draft-lifecycle identity derivation: the query id, readable from context
- * (rather than derived from a DOM ref, which is unattached at first render)
- * so a card's identity is available at the very first post-remount render.
+ * The reserved key for the session-global draft collection: every purchase
+ * surface wrapped in no container resolves this collection.
+ *
+ * No container ever declares this literal as its own key — containers
+ * always mint one of their own — so it is the fixed fallback both this
+ * resolver and the server's seed-filing PHP agree on.
  */
-type ProductCollectionContext = { queryId?: string | number };
+const GLOBAL_DRAFT_KEY: DraftKey = 'woocommerce/global';
 
 /**
- * The `woocommerce/products` context relevant to draft-lifecycle identity
- * derivation: the in-context product's id.
+ * The `woocommerce/cart` server-rendered state shape relevant to seed
+ * lookup: each purchase surface's initial-draft default, filed per
+ * collection key and per product/variation id.
+ *
+ * Read only through `getServerState()` — the runtime's intact, per-page,
+ * navigation-fresh copy — never through `state.draftSeeds`, which the
+ * router's non-destructive client-side merge accumulates across
+ * navigations and which this module never consults.
  */
-type ProductsCardContext = { productId?: number };
+type CartServerState = {
+	draftSeeds?: Record< DraftKey, Record< DraftItem[ 'id' ], DraftItem > >;
+};
 
 /**
- * Module-private ledger of live draft collections for Product Collection
- * cards, keyed by `"<queryId>/<productId>"` (see {@link deriveCardIdentity}).
+ * Resolves the draft key nearest to the calling surface: the current
+ * context's own declared `draftKey`, when a container established one,
+ * else {@link GLOBAL_DRAFT_KEY}.
  *
- * Holds each card's **context-proxy** collection reference — never a raw
- * array copy, since the runtime's reactivity lives on the proxy, not the
- * underlying object — so that once a card registers, every subsequent
- * write to its collection, whether through an action or a direct mutation
- * anywhere in the subtree, is observed through this same shared reference
- * with no interception.
- *
- * A module variable: never exported, never a member of the store object.
- * Unreachable by any consumer, even one holding lock consent — the object a
- * `store('woocommerce/cart', {}, { lock })` caller receives has no
- * property exposing it. Backs {@link registerOrRestoreDraftCollection} (the
- * register/restore side, run from a `data-wp-init` on the loop item) and
- * the render-time bridge in {@link resolveDraftItems} (the
- * first-post-remount-paint side).
- */
-const draftCollectionLedger = new Map< string, DraftItem[] >();
-
-/**
- * Derives a Product Collection card's identity for the draft-lifecycle
- * ledger: `"<queryId>/<productId>"`, combining `queryId` from the inherited
- * `woocommerce/product-collection` collection-root context with `productId`
- * from the `woocommerce/products` context. `(queryId, productId)` is unique
- * per card and stable across an enhanced-pagination round trip.
- *
- * Never throws: returns `undefined` when either piece is missing — most
- * commonly because the card has no `woocommerce/product-collection`
- * ancestor context, i.e. it is not a Product Collection card — or when
- * `getContext` cannot run at all (no directive on the call stack). A card
- * with no derivable identity simply never touches the ledger: its
- * `context.draftItems` collection still isolates the subtree, but does not
- * survive an unmount/remount.
- *
- * @return The card's ledger key, or `undefined` when it cannot be derived.
- */
-function deriveCardIdentity(): string | undefined {
-	try {
-		const queryId = getContext< ProductCollectionContext >(
-			'woocommerce/product-collection'
-		)?.queryId;
-		const productId = getContext< ProductsCardContext >(
-			'woocommerce/products'
-		)?.productId;
-		if ( queryId === undefined || productId === undefined ) {
-			return undefined;
-		}
-		return `${ queryId }/${ productId }`;
-	} catch {
-		return undefined;
-	}
-}
-
-/**
- * The render-time bridge for a Product Collection card that has just
- * remounted: when the card's identity resolves to a ledger entry that
- * diverges from the context's own collection, returns the ledger's
- * collection so getter-driven bindings paint correctly on the very first
- * post-remount render — before the register-or-restore init (which runs
- * post-commit, one effect-cycle later) has reconciled `context.draftItems`.
- *
- * Once the init reconciles the bag (assigns the ledger's collection into
- * `context.draftItems`), the two references are equal and this returns
- * `undefined`, so {@link resolveDraftItems} falls through to the context
- * collection directly — the two paths agree from then on.
- *
- * @param contextCollection The context's own `draftItems` collection, as
- *                          just read by the caller (a reactive read).
- * @return The ledger's collection, when one exists and diverges from
- *         `contextCollection`; otherwise `undefined`.
- */
-function restoredLedgerCollection(
-	contextCollection: DraftItem[]
-): DraftItem[] | undefined {
-	const identity = deriveCardIdentity();
-	if ( identity === undefined ) {
-		return undefined;
-	}
-	const ledgerCollection = draftCollectionLedger.get( identity );
-	if (
-		ledgerCollection === undefined ||
-		ledgerCollection === contextCollection
-	) {
-		return undefined;
-	}
-	return ledgerCollection;
-}
-
-/**
- * Resolves the draft collection nearest to the calling surface: the
- * current context's own `draftItems`, when a container established one,
- * else the page-wide `state.draftItems`.
- *
- * This is the single place that implements `context.draftItems ??
- * state.draftItems`; no other code, client or server, should re-implement
+ * This is the single place that implements `context.draftKey ??
+ * GLOBAL_DRAFT_KEY`; no other code, client or server, should re-implement
  * that fallback. `getContext()` throws when called with no directive
  * currently executing on the call stack (e.g. from code that runs outside
  * any directive-driven element); this resolver must never propagate that
- * failure — an out-of-directive call simply means "no context collection
- * available", so it degrades to `state.draftItems`, exactly as an
- * in-directive call whose context sets no `draftItems` would.
+ * failure — an out-of-directive call simply means "no declared key
+ * available", so it degrades to `GLOBAL_DRAFT_KEY`, exactly as an
+ * in-directive call whose context sets no `draftKey` would.
  *
- * On a Product Collection card, additionally applies the draft-lifecycle
- * render-time bridge (see {@link restoredLedgerCollection}): when the card
- * has just remounted and its ledger entry has not yet been reconciled into
- * `context.draftItems`, the ledger's collection is returned instead, so
- * every getter-driven binding paints correctly at first post-remount
- * render. This reads `context.draftItems` itself first (a reactive read),
- * so the register-or-restore init's later reconciliation of the bag
- * re-triggers resolution.
- *
- * @return The resolved draft collection.
+ * @return The resolved draft key.
  */
-function resolveDraftItems(): DraftItem[] {
+function resolveDraftKey(): DraftKey {
 	try {
-		const contextCollection =
-			getContext< CartContext >( 'woocommerce/cart' )?.draftItems;
-		if ( contextCollection === undefined ) {
-			return state.draftItems;
-		}
 		return (
-			restoredLedgerCollection( contextCollection ) ?? contextCollection
+			getContext< CartContext >( 'woocommerce/cart' )?.draftKey ??
+			GLOBAL_DRAFT_KEY
 		);
 	} catch {
-		return state.draftItems;
+		return GLOBAL_DRAFT_KEY;
 	}
 }
 
 /**
- * Registers a Product Collection card's draft collection into the
- * module-private draft-lifecycle ledger, or restores it from the ledger on
- * a subsequent visit — making an edited draft survive an
- * enhanced-pagination unmount/remount round trip.
+ * Reads the draft collection filed under `key`, tolerating a
+ * not-yet-created collection as empty rather than dereferencing it.
  *
- * Derives the card's identity via {@link deriveCardIdentity}; a card whose
- * identity cannot be derived, or whose context establishes no active
- * `draftItems` collection, never touches the ledger and this is a no-op —
- * isolation via context still holds, only remount-survival is unavailable.
+ * Never creates a collection — only a write (`upsertDraftItem`) does that,
+ * lazily, on its first use of a key. A read against a key with no
+ * collection yet simply finds nothing, indistinguishable from an
+ * existing-but-empty collection.
  *
- * With a derivable identity and an active collection: a ledger hit assigns
- * the ledger's held collection into `context.draftItems` (restore) —
- * reactive per the runtime's proxy set trap, rebinding the same cached
- * proxy on repeat visits; a ledger miss stores the context collection's own
- * reference into the ledger (register). Because the ledger and context then
- * share one object, every subsequent write to the collection — an action or
- * a direct mutation, anywhere in the subtree — keeps the ledger current
- * with no interception.
- *
- * Bound to a `data-wp-init` directive on the Product Collection loop item;
- * not part of the store's documented surface — it exists only so that
- * directive string can resolve it by name.
+ * @param key The resolved draft key.
+ * @return The collection filed under `key`, or `undefined` when none has
+ *         been created yet.
  */
-function registerOrRestoreDraftCollection(): void {
-	const identity = deriveCardIdentity();
-	if ( identity === undefined ) {
-		return;
-	}
-
-	const context = getContext< CartContext >( 'woocommerce/cart' );
-	const contextCollection = context?.draftItems;
-	if ( contextCollection === undefined ) {
-		return;
-	}
-
-	const ledgerCollection = draftCollectionLedger.get( identity );
-	if ( ledgerCollection !== undefined ) {
-		context.draftItems = ledgerCollection;
-	} else {
-		draftCollectionLedger.set( identity, contextCollection );
-	}
+function resolveCollection( key: DraftKey ): DraftItem[] | undefined {
+	return state.draftItems[ key ];
 }
 
 /**
@@ -1615,7 +1462,7 @@ const { actions } = store< Store >(
 	'woocommerce/cart',
 	{
 		state: {
-			draftItems: [],
+			draftItems: {},
 			findItem( {
 				id,
 				key,
@@ -1625,7 +1472,7 @@ const { actions } = store< Store >(
 				key?: CartItem[ 'key' ];
 				filter?: ( item: CartItem | OptimisticCartItem ) => boolean;
 			} = {} ): Envelope {
-				const draftItems = resolveDraftItems();
+				const collection = resolveCollection( resolveDraftKey() ) ?? [];
 
 				// Rung 1: a context-known line key pairs exactly, no further
 				// identity/extension checks — the caller already knows
@@ -1637,7 +1484,7 @@ const { actions } = store< Store >(
 					return {
 						cartItem,
 						draft: findDraftInCollection(
-							draftItems,
+							collection,
 							id ?? cartItem?.id
 						),
 					};
@@ -1650,7 +1497,7 @@ const { actions } = store< Store >(
 					return {
 						cartItem:
 							matches.length === 1 ? matches[ 0 ] : undefined,
-						draft: findDraftInCollection( draftItems, id ),
+						draft: findDraftInCollection( collection, id ),
 					};
 				}
 
@@ -1667,7 +1514,7 @@ const { actions } = store< Store >(
 				// candidate line's `extensions[<namespace>]`. Ambiguity —
 				// zero or more than one line surviving both checks — never
 				// guesses: `cartItem` stays `undefined`.
-				const draft = findDraftInCollection( draftItems, id );
+				const draft = findDraftInCollection( collection, id );
 				const identityMatches = state.cart.items.filter( ( item ) =>
 					lineMatchesProduct( item, id, draft?.variation )
 				);
@@ -1731,8 +1578,9 @@ const { actions } = store< Store >(
 					return;
 				}
 
-				const collection = resolveDraftItems();
-				const existing = collection.find(
+				const draftKey = resolveDraftKey();
+				const collection = resolveCollection( draftKey );
+				const existing = collection?.find(
 					( draft ) => draft.id === targetId
 				);
 
@@ -1750,52 +1598,34 @@ const { actions } = store< Store >(
 					return;
 				}
 
-				if ( typeof partial.quantity !== 'number' ) {
+				// Creation composes the new draft from the surface's
+				// server-filed seed (when one exists for this key/id),
+				// merged under the shopper's own partial — so an untouched
+				// field falls back to its server-rendered default. Read
+				// through `getServerState()` only: the runtime's intact,
+				// per-page, navigation-fresh copy, immune to the client
+				// merge that `state.draftSeeds` would otherwise expose.
+				const seed =
+					getServerState< CartServerState >( 'woocommerce/cart' )
+						?.draftSeeds?.[ draftKey ]?.[ targetId ];
+				const draft = {
+					...seed,
+					...partial,
+					id: targetId,
+				} as DraftItem;
+
+				if ( typeof draft.quantity !== 'number' ) {
 					warnDraftInvariant(
 						'upsertDraftItem: a new draft requires a numeric "quantity".'
 					);
 					return;
 				}
 
-				const draft = { ...partial, id: targetId } as DraftItem;
-				collection.push( draft );
+				// Lazily materializes the collection on its first write —
+				// nothing server-seeds `state.draftItems`, so a not-yet-
+				// written key holds no collection until this point.
+				( state.draftItems[ draftKey ] ??= [] ).push( draft );
 			},
-
-			removeDraftItem( { id }: { id?: DraftItem[ 'id' ] } = {} ) {
-				if ( typeof id !== 'number' ) {
-					warnDraftInvariant(
-						'removeDraftItem: a numeric "id" is required.'
-					);
-					return;
-				}
-
-				const collection = resolveDraftItems();
-				const index = collection.findIndex(
-					( draft ) => draft.id === id
-				);
-				if ( index === -1 ) {
-					return;
-				}
-
-				collection.splice( index, 1 );
-			},
-
-			seedDraftIfAbsent() {
-				const seed = getServerContext< { draftSeed?: DraftItem } >(
-					'woocommerce/cart'
-				)?.draftSeed;
-				if ( ! seed ) {
-					return;
-				}
-
-				if ( findDraftInCollection( resolveDraftItems(), seed.id ) ) {
-					return;
-				}
-
-				actions.upsertDraftItem( seed );
-			},
-
-			registerOrRestoreDraftCollection,
 
 			*addItem( payload?: DraftItem ): AsyncAction< void > {
 				if ( payload ) {
@@ -1822,11 +1652,19 @@ const { actions } = store< Store >(
 					return;
 				}
 
+				// The in-context draft, falling back to the surface's
+				// server-filed seed so an untouched form still posts its
+				// default (seeds are never applied into collections, so an
+				// untouched surface never materializes a draft).
 				const { draft } = state.itemInContext;
-				if ( ! draft ) {
+				const seed =
+					getServerState< CartServerState >( 'woocommerce/cart' )
+						?.draftSeeds?.[ resolveDraftKey() ]?.[ product.id ];
+				const itemToPost = draft ?? seed;
+				if ( ! itemToPost ) {
 					return;
 				}
-				yield* postDraftItems( [ draft ], actions );
+				yield* postDraftItems( [ itemToPost ], actions );
 			},
 
 			*updateItem( {
@@ -1868,12 +1706,6 @@ const { actions } = store< Store >(
 				yield* addCartItemGenerator( args, actions, options );
 			},
 
-			*waitForIdle(): AsyncAction< void > {
-				if ( cartQueue ) {
-					yield cartQueue.waitForIdle();
-				}
-			},
-
 			*showNoticeError(
 				error: Error | ApiErrorResponse
 			): AsyncAction< void > {
@@ -1888,14 +1720,11 @@ const { actions } = store< Store >(
 					}
 				);
 
-				const { code, message } = error as ApiErrorResponse;
-
-				const userFriendlyMessage =
-					state.errorMessages?.[ code ] || message;
+				const { message } = error as ApiErrorResponse;
 
 				// Todo: Check what should happen if the notice is already displayed.
 				noticeActions.addNotice( {
-					notice: userFriendlyMessage,
+					notice: message,
 					type: 'error',
 					dismissible: true,
 				} );
