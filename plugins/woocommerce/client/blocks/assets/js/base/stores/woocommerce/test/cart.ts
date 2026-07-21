@@ -7,10 +7,17 @@ import type { Notice } from '@woocommerce/stores/store-notices';
 /**
  * Internal dependencies
  */
-import type { Store, OptimisticCartItem, DraftItem } from '../cart';
+import type { Store, OptimisticCartItem, DraftItem, DraftKey } from '../cart';
 import type { ProductsStoreState } from '../products';
 
 type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
+
+/**
+ * The store's reserved session-global draft key, mirrored here as a literal
+ * — the module never exports its own `GLOBAL_DRAFT_KEY` constant, so tests
+ * name the collection the same way the server-side emitters do.
+ */
+const GLOBAL_DRAFT_KEY: DraftKey = 'woocommerce/global';
 
 let mockRegisteredStore: MockStore | null = null;
 const mockState = {
@@ -33,28 +40,13 @@ const mockProductsState: Partial< ProductsStoreState > = {
 
 /**
  * The value `getContext( 'woocommerce/cart' )` should return for the draft
- * collection resolver, controlled per test. `undefined` (or an object with
- * no `draftItems`) simulates a surface with no container of its own, so the
- * resolver falls back to the page-wide `mockState.draftItems`; an object
- * carrying its own `draftItems` array simulates a container that has
- * isolated its subtree.
+ * key resolver, controlled per test. `undefined` (or an object with no
+ * `draftKey`) simulates a surface with no container of its own, so the
+ * resolver degrades to {@link GLOBAL_DRAFT_KEY}; an object carrying its own
+ * `draftKey` simulates a container that has declared one, isolating its
+ * subtree's drafts into that key's collection.
  */
-let mockCartContext: { draftItems?: DraftItem[] } | undefined;
-
-/**
- * The value `getContext( 'woocommerce/product-collection' )` should return
- * for the draft-lifecycle identity derivation, controlled per test.
- * `undefined` (or an object with no `queryId`) simulates a card with no
- * Product Collection ancestor context, so identity cannot be derived.
- */
-let mockProductCollectionContext: { queryId?: string | number } | undefined;
-
-/**
- * The value `getContext( 'woocommerce/products' )` should return for the
- * draft-lifecycle identity derivation, controlled per test. `undefined` (or
- * an object with no `productId`) simulates a card with no product context.
- */
-let mockProductsContext: { productId?: number } | undefined;
+let mockCartContext: { draftKey?: DraftKey } | undefined;
 
 /**
  * When `true`, the mocked `getContext` throws regardless of namespace,
@@ -65,31 +57,29 @@ let mockProductsContext: { productId?: number } | undefined;
 let mockCartContextThrows = false;
 
 /**
- * The value `getServerContext( 'woocommerce/cart' )` should return, controlled
- * per test. `undefined` simulates a surface that emits no `draftSeed` (or
- * emits no `woocommerce/cart` context bag at all).
+ * The value `getServerState( 'woocommerce/cart' )` should return, controlled
+ * per test. `undefined` simulates a page carrying no `draftSeeds` payload at
+ * all (the real runtime's `getServerState()` never actually returns
+ * `undefined` — it defaults to `{}` — but the resolver's own `?.` chaining
+ * tolerates either).
  */
-let mockServerContext: { draftSeed?: DraftItem } | undefined;
+let mockServerState:
+	| { draftSeeds?: Record< DraftKey, Record< number, DraftItem > > }
+	| undefined;
 
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		getConfig: jest.fn(),
-		getContext: jest.fn( ( namespace?: string ) => {
+		getContext: jest.fn( () => {
 			if ( mockCartContextThrows ) {
 				throw new Error(
 					'Cannot call `getContext()` when there is no scope.'
 				);
 			}
-			if ( namespace === 'woocommerce/product-collection' ) {
-				return mockProductCollectionContext;
-			}
-			if ( namespace === 'woocommerce/products' ) {
-				return mockProductsContext;
-			}
 			return mockCartContext;
 		} ),
-		getServerContext: jest.fn( () => mockServerContext ),
+		getServerState: jest.fn( () => mockServerState ),
 		store: jest.fn( ( name: string, definition ) => {
 			// The cart store consults `woocommerce/products` one-directionally;
 			// keep its mock state independent of the cart's own so seeding one
@@ -143,9 +133,9 @@ const { triggerAddedToCartEvent } = jest.requireMock( '../legacy-events' ) as {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { getServerContext: mockGetServerContext } = jest.requireMock(
+const { getServerState: mockGetServerState } = jest.requireMock(
 	'@wordpress/interactivity'
-) as { getServerContext: jest.Mock };
+) as { getServerState: jest.Mock };
 
 /**
  * Captured representation of a single mutation sent through the batch endpoint.
@@ -448,10 +438,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		jest.clearAllMocks();
 		delete ( mockState as Partial< Store[ 'state' ] > ).cart;
 		mockCartContext = undefined;
-		mockProductCollectionContext = undefined;
-		mockProductsContext = undefined;
 		mockCartContextThrows = false;
-		mockServerContext = undefined;
+		mockServerState = undefined;
 		delete mockProductsState.productInContext;
 		mockProductsState.products = {};
 		mockProductsState.productVariations = {};
@@ -1144,7 +1132,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
-	describe( 'draftItems / upsertDraftItem / removeDraftItem', () => {
+	describe( 'draftItems / upsertDraftItem', () => {
 		/**
 		 * Builds a minimal draft payload.
 		 *
@@ -1155,20 +1143,38 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			return { id: 42, quantity: 1, ...overrides } as DraftItem;
 		}
 
-		it( 'starts as an empty array', async () => {
+		it( 'starts as an empty keyed map — nothing server-seeds it', async () => {
 			mockBatchFetch();
 			await loadCartStore();
 
-			expect( mockState.draftItems ).toEqual( [] );
+			expect( mockState.draftItems ).toEqual( {} );
 		} );
 
-		it( 'appends a new draft to the page-wide collection', async () => {
+		it( 'creates the session-global collection lazily, on its first write, and the write is immediately visible to a getter-driven read', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
+
+			actions.upsertDraftItem( makeDraft() );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				makeDraft(),
+			] );
+			expect( mockState.findItem( { id: 42 } ).draft ).toEqual(
+				makeDraft()
+			);
+		} );
+
+		it( 'appends a new draft to the session-global collection', async () => {
 			mockBatchFetch();
 			const actions = await loadCartStore();
 
 			actions.upsertDraftItem( makeDraft() );
 
-			expect( mockState.draftItems ).toEqual( [ makeDraft() ] );
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				makeDraft(),
+			] );
 		} );
 
 		it( 'merges a second upsertDraftItem for the same product id instead of duplicating it', async () => {
@@ -1178,30 +1184,29 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			actions.upsertDraftItem( makeDraft( { quantity: 2 } ) );
 			actions.upsertDraftItem( makeDraft( { quantity: 5 } ) );
 
-			expect( mockState.draftItems ).toEqual( [
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
 				makeDraft( { quantity: 5 } ),
 			] );
 		} );
 
-		it( 'keeps drafts for the same product id independent across the page-wide collection and a container collection', async () => {
+		it( 'keeps drafts for the same product id independent across the session-global collection and a keyed container collection', async () => {
 			mockBatchFetch();
 			const actions = await loadCartStore();
 
-			// No container context active: writes land in the page-wide
-			// collection.
+			// No container context active: writes land in the
+			// session-global collection.
 			actions.upsertDraftItem( makeDraft( { quantity: 1 } ) );
 
-			// A container establishes its own collection by exposing
-			// `draftItems` in its `woocommerce/cart` context; writes made
+			// A container establishes its own collection by declaring a
+			// `draftKey` in its `woocommerce/cart` context; writes made
 			// while that context is active land there instead.
-			const containerCollection: DraftItem[] = [];
-			mockCartContext = { draftItems: containerCollection };
+			mockCartContext = { draftKey: 'collection/q1/42' };
 			actions.upsertDraftItem( makeDraft( { quantity: 9 } ) );
 
-			expect( mockState.draftItems ).toEqual( [
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
 				makeDraft( { quantity: 1 } ),
 			] );
-			expect( containerCollection ).toEqual( [
+			expect( mockState.draftItems[ 'collection/q1/42' ] ).toEqual( [
 				makeDraft( { quantity: 9 } ),
 			] );
 		} );
@@ -1214,45 +1219,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				makeDraft( { 'my-plugin/gift-note': 'Happy birthday!' } )
 			);
 
-			expect( mockState.draftItems[ 0 ] ).toEqual(
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ][ 0 ] ).toEqual(
 				expect.objectContaining( {
 					id: 42,
 					quantity: 1,
 					'my-plugin/gift-note': 'Happy birthday!',
 				} )
 			);
-		} );
-
-		it( 'removes the matching draft, leaving the collection empty', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			actions.upsertDraftItem( makeDraft() );
-
-			actions.removeDraftItem( { id: 42 } );
-
-			expect( mockState.draftItems ).toEqual( [] );
-		} );
-
-		it( 'leaves other drafts in the collection in place after a removal', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			actions.upsertDraftItem( makeDraft( { id: 42 } ) );
-			actions.upsertDraftItem( makeDraft( { id: 43 } ) );
-
-			actions.removeDraftItem( { id: 42 } );
-
-			expect( mockState.draftItems ).toEqual( [
-				makeDraft( { id: 43 } ),
-			] );
-		} );
-
-		it( 'no-ops removeDraftItem when the collection has no matching draft', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-
-			actions.removeDraftItem( { id: 42 } );
-
-			expect( mockState.draftItems ).toEqual( [] );
 		} );
 
 		it( 'rejects an upsert that would change an existing draft id, applying no state change', async () => {
@@ -1264,7 +1237,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			// disagrees with it, which is an in-place rename attempt.
 			actions.upsertDraftItem( { id: 99, quantity: 5 }, { id: 42 } );
 
-			expect( mockState.draftItems ).toEqual( [ makeDraft() ] );
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				makeDraft(),
+			] );
 			expect( console ).toHaveWarned();
 		} );
 
@@ -1274,7 +1249,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			actions.upsertDraftItem( { id: 42 } );
 
-			expect( mockState.draftItems ).toEqual( [] );
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
 			expect( console ).toHaveWarned();
 		} );
 
@@ -1284,7 +1259,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			actions.upsertDraftItem( { quantity: 1 } );
 
-			expect( mockState.draftItems ).toEqual( [] );
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
 			expect( console ).toHaveWarned();
 		} );
 
@@ -1300,39 +1275,44 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			// ...and mutating the cart mirror never mutates the draft.
 			mockState.cart.items[ 0 ].quantity = 10;
-			expect( mockState.draftItems[ 0 ].quantity ).toBe( 7 );
+			expect(
+				mockState.draftItems[ GLOBAL_DRAFT_KEY ][ 0 ].quantity
+			).toBe( 7 );
 		} );
 	} );
 
-	describe( 'draft collection resolution (resolveDraftItems)', () => {
-		it( 'upsertDraftItem writes to the nearest container collection when one is active', async () => {
+	describe( 'draft key resolution (resolveDraftKey / resolveCollection)', () => {
+		it( 'writes to the nearest declared container key when one is active', async () => {
 			mockBatchFetch();
 			const actions = await loadCartStore();
-			const containerCollection: DraftItem[] = [];
-			mockCartContext = { draftItems: containerCollection };
+			mockCartContext = { draftKey: 'collection/q1/42' };
 
 			actions.upsertDraftItem( { id: 42, quantity: 1 } );
 
-			expect( mockState.draftItems ).toEqual( [] );
-			expect( containerCollection ).toEqual( [
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
+			expect( mockState.draftItems[ 'collection/q1/42' ] ).toEqual( [
 				{ id: 42, quantity: 1 },
 			] );
 		} );
 
-		it( 'removeDraftItem removes from the nearest container collection when one is active', async () => {
+		it( "reads back the container key's own collection, not the session-global one, when a container is active", async () => {
 			mockBatchFetch();
 			const actions = await loadCartStore();
-			const containerCollection: DraftItem[] = [
-				{ id: 42, quantity: 1 },
-			];
-			mockCartContext = { draftItems: containerCollection };
+			mockCartContext = { draftKey: 'collection/q1/42' };
+			actions.upsertDraftItem( { id: 42, quantity: 1 } );
 
-			actions.removeDraftItem( { id: 42 } );
+			expect( mockState.findItem( { id: 42 } ).draft ).toEqual( {
+				id: 42,
+				quantity: 1,
+			} );
 
-			expect( containerCollection ).toEqual( [] );
+			// Outside that container's context, the session-global
+			// collection carries no matching draft.
+			mockCartContext = undefined;
+			expect( mockState.findItem( { id: 42 } ).draft ).toBeUndefined();
 		} );
 
-		it( 'degrades to the page-wide collection, without throwing, when read outside a directive', async () => {
+		it( 'degrades to the session-global key, without throwing, when read outside a directive', async () => {
 			mockBatchFetch();
 			const actions = await loadCartStore();
 			mockCartContextThrows = true;
@@ -1341,363 +1321,179 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.upsertDraftItem( { id: 42, quantity: 1 } )
 			).not.toThrow();
 
-			expect( mockState.draftItems ).toEqual( [
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
 				{ id: 42, quantity: 1 },
 			] );
 		} );
+
+		it( 'treats a not-yet-created collection as empty on read, rather than throwing', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			mockCartContext = { draftKey: 'collection/q1/never-written' };
+
+			expect( () => mockState.findItem( { id: 42 } ) ).not.toThrow();
+			expect( mockState.findItem( { id: 42 } ).draft ).toBeUndefined();
+		} );
 	} );
 
-	describe( 'draft-lifecycle ledger (registerOrRestoreDraftCollection)', () => {
-		/**
-		 * Activates the context a Product Collection loop item exposes to
-		 * the draft-lifecycle identity derivation: a
-		 * `woocommerce/product-collection` ancestor bag carrying `queryId`,
-		 * and a `woocommerce/products` bag carrying `productId`.
-		 *
-		 * @param queryId   The collection-root `queryId` to expose.
-		 * @param productId The card's `productId` to expose.
-		 */
-		function setCardIdentityContext(
-			queryId: string | number,
-			productId: number
-		): void {
-			mockProductCollectionContext = { queryId };
-			mockProductsContext = { productId };
-		}
+	describe( 'seed composition — creation-time-only consultation of getServerState()', () => {
+		it( "composes a new draft from the server-filed seed, merged under the shopper's partial", async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockServerState = {
+				draftSeeds: {
+					[ GLOBAL_DRAFT_KEY ]: {
+						42: {
+							id: 42,
+							quantity: 3,
+							variation: [ { attribute: 'Color', value: 'red' } ],
+						} as DraftItem,
+					},
+				},
+			};
 
-		it( 'does not export the module-scope draft-lifecycle ledger', () => {
+			// The shopper's edit only sets quantity; the untouched
+			// `variation` field falls back to the seed's own.
+			actions.upsertDraftItem( { id: 42, quantity: 5 } );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				{
+					id: 42,
+					quantity: 5,
+					variation: [ { attribute: 'Color', value: 'red' } ],
+				},
+			] );
+		} );
+
+		it( 'creates a draft straight from the seed when the partial supplies no overriding fields', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockServerState = {
+				draftSeeds: {
+					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42, quantity: 3 } },
+				},
+			};
+
+			actions.upsertDraftItem( { id: 42 } );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				{ id: 42, quantity: 3 },
+			] );
+		} );
+
+		it( 'reads the seed via getServerState( "woocommerce/cart" )', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockServerState = {
+				draftSeeds: {
+					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42, quantity: 1 } },
+				},
+			};
+
+			actions.upsertDraftItem( { id: 42 } );
+
+			expect( mockGetServerState ).toHaveBeenCalledWith(
+				'woocommerce/cart'
+			);
+		} );
+
+		it( 'never lets a re-delivered seed replace or inject properties into an already-materialized draft', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockServerState = {
+				draftSeeds: {
+					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42, quantity: 3 } },
+				},
+			};
+
+			// First materialization consults the seed.
+			actions.upsertDraftItem( { id: 42, quantity: 1 } );
+
+			// The surface's seed is re-delivered with a different quantity
+			// and an extra property — e.g. a region re-render or a
+			// client-side navigation re-filing the same key/id.
+			mockServerState = {
+				draftSeeds: {
+					[ GLOBAL_DRAFT_KEY ]: {
+						42: {
+							id: 42,
+							quantity: 9,
+							'my-plugin/injected': 'unwanted',
+						} as DraftItem,
+					},
+				},
+			};
+
+			// A genuine, unrelated edit — never a re-seed; an existing
+			// draft's merge path never touches `getServerState()` again.
+			actions.upsertDraftItem(
+				{ 'my-plugin/color': 'blue' },
+				{ id: 42 }
+			);
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				{ id: 42, quantity: 1, 'my-plugin/color': 'blue' },
+			] );
+		} );
+
+		it( 'rejects creating a new draft when neither the partial nor the seed supplies a numeric quantity', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockServerState = {
+				draftSeeds: {
+					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42 } as DraftItem },
+				},
+			};
+
+			actions.upsertDraftItem( { id: 42 } );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
+			expect( console ).toHaveWarned();
+		} );
+
+		it( "composes from the seed filed under a keyed container's own collection, not the session-global one", async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockCartContext = { draftKey: 'collection/q1/42' };
+			mockServerState = {
+				draftSeeds: {
+					'collection/q1/42': { 42: { id: 42, quantity: 4 } },
+					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42, quantity: 99 } },
+				},
+			};
+
+			actions.upsertDraftItem( { id: 42 } );
+
+			expect( mockState.draftItems[ 'collection/q1/42' ] ).toEqual( [
+				{ id: 42, quantity: 4 },
+			] );
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
+		} );
+	} );
+
+	describe( 'retired draft-lifecycle machinery', () => {
+		it( 'no longer exposes removeDraftItem, seedDraftIfAbsent, registerOrRestoreDraftCollection, or waitForIdle', async () => {
+			const actions = await loadCartStore();
+			const untypedActions = actions as unknown as Record<
+				string,
+				unknown
+			>;
+
+			expect( untypedActions.removeDraftItem ).toBeUndefined();
+			expect( untypedActions.seedDraftIfAbsent ).toBeUndefined();
+			expect(
+				untypedActions.registerOrRestoreDraftCollection
+			).toBeUndefined();
+			expect( untypedActions.waitForIdle ).toBeUndefined();
+		} );
+
+		it( 'does not export the module-private ledger, identity derivation, or render-time bridge — the module has no runtime exports at all', () => {
 			let cartModule: Record< string, unknown > = {};
 			jest.isolateModules( () => {
 				cartModule = require( '../cart' );
 			} );
 
 			expect( Object.keys( cartModule ) ).toEqual( [] );
-		} );
-
-		it( 'keeps the ledger unreachable through the registered store actions object', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			setCardIdentityContext( 'query-1', 42 );
-			mockCartContext = { draftItems: [] };
-
-			actions.registerOrRestoreDraftCollection();
-
-			expect(
-				Object.values(
-					actions as unknown as Record< string, unknown >
-				).some( ( value ) => value instanceof Map )
-			).toBe( false );
-		} );
-
-		it( 'registers a fresh card collection into the ledger without altering it', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			setCardIdentityContext( 'query-1', 42 );
-			const freshCollection: DraftItem[] = [];
-			mockCartContext = { draftItems: freshCollection };
-
-			actions.registerOrRestoreDraftCollection();
-
-			expect( mockCartContext.draftItems ).toBe( freshCollection );
-		} );
-
-		it( 'restores the ledger collection into a remounted card of the same identity', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			setCardIdentityContext( 'query-1', 42 );
-			const firstMountCollection: DraftItem[] = [];
-			mockCartContext = { draftItems: firstMountCollection };
-			actions.registerOrRestoreDraftCollection();
-
-			// The shopper edits the draft before the card unmounts.
-			firstMountCollection.push( { id: 42, quantity: 4 } );
-
-			// The card remounts: the runtime re-seeds a fresh context ref
-			// from server HTML — a brand new, still-empty array.
-			const remountCollection: DraftItem[] = [];
-			mockCartContext = { draftItems: remountCollection };
-
-			actions.registerOrRestoreDraftCollection();
-
-			expect( mockCartContext.draftItems ).toBe( firstMountCollection );
-			expect( mockCartContext.draftItems ).not.toBe( remountCollection );
-			expect( mockCartContext.draftItems ).toEqual( [
-				{ id: 42, quantity: 4 },
-			] );
-		} );
-
-		it( 'rebinds the same ledger collection across repeat visits', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			setCardIdentityContext( 'query-1', 42 );
-			const firstMountCollection: DraftItem[] = [];
-			mockCartContext = { draftItems: firstMountCollection };
-			actions.registerOrRestoreDraftCollection();
-
-			mockCartContext = { draftItems: [] };
-			actions.registerOrRestoreDraftCollection();
-			const restoredAfterFirstRemount = mockCartContext.draftItems;
-
-			mockCartContext = { draftItems: [] };
-			actions.registerOrRestoreDraftCollection();
-
-			expect( mockCartContext.draftItems ).toBe( firstMountCollection );
-			expect( mockCartContext.draftItems ).toBe(
-				restoredAfterFirstRemount
-			);
-		} );
-
-		it( 'observes an action write to the restored collection through the same reference the ledger holds', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			setCardIdentityContext( 'query-1', 42 );
-			const firstMountCollection: DraftItem[] = [];
-			mockCartContext = { draftItems: firstMountCollection };
-			actions.registerOrRestoreDraftCollection();
-
-			// A write through the public action after registering.
-			actions.upsertDraftItem( { id: 42, quantity: 2 } );
-
-			// Remount and restore: the write must have reached the ledger.
-			mockCartContext = { draftItems: [] };
-			actions.registerOrRestoreDraftCollection();
-
-			expect( mockCartContext.draftItems ).toEqual( [
-				{ id: 42, quantity: 2 },
-			] );
-		} );
-
-		it( 'observes a direct mutation of the restored collection through the same reference the ledger holds', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			setCardIdentityContext( 'query-1', 42 );
-			const firstMountCollection: DraftItem[] = [
-				{ id: 42, quantity: 1 },
-			];
-			mockCartContext = { draftItems: firstMountCollection };
-			actions.registerOrRestoreDraftCollection();
-
-			// A direct mutation, bypassing every action.
-			firstMountCollection[ 0 ].quantity = 9;
-
-			mockCartContext = { draftItems: [] };
-			actions.registerOrRestoreDraftCollection();
-
-			expect( mockCartContext.draftItems ).toEqual( [
-				{ id: 42, quantity: 9 },
-			] );
-		} );
-
-		it( 'does not touch the ledger and does not throw for a card with no derivable identity', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			// No `woocommerce/product-collection` ancestor context:
-			// identity cannot be derived.
-			mockProductCollectionContext = undefined;
-			mockProductsContext = { productId: 42 };
-			const collection: DraftItem[] = [];
-			mockCartContext = { draftItems: collection };
-
-			expect( () =>
-				actions.registerOrRestoreDraftCollection()
-			).not.toThrow();
-
-			// The context collection is untouched — the ledger never fired.
-			expect( mockCartContext.draftItems ).toBe( collection );
-
-			// Isolation via context still works: writes still land in this
-			// collection.
-			actions.upsertDraftItem( { id: 42, quantity: 1 } );
-			expect( collection ).toEqual( [ { id: 42, quantity: 1 } ] );
-		} );
-
-		it( 'does not touch the ledger when a queryId is present but productId is missing', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			mockProductCollectionContext = { queryId: 'query-1' };
-			mockProductsContext = undefined;
-			const collection: DraftItem[] = [];
-			mockCartContext = { draftItems: collection };
-
-			expect( () =>
-				actions.registerOrRestoreDraftCollection()
-			).not.toThrow();
-			expect( mockCartContext.draftItems ).toBe( collection );
-		} );
-
-		it( 'does not throw when called outside a directive', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			mockCartContextThrows = true;
-
-			expect( () =>
-				actions.registerOrRestoreDraftCollection()
-			).not.toThrow();
-		} );
-	} );
-
-	describe( 'draft-lifecycle render-time bridge (resolveDraftItems)', () => {
-		/**
-		 * Activates the context a Product Collection loop item exposes to
-		 * the draft-lifecycle identity derivation. See
-		 * {@link setCardIdentityContext} above.
-		 *
-		 * @param queryId   The collection-root `queryId` to expose.
-		 * @param productId The card's `productId` to expose.
-		 */
-		function setCardIdentityContext(
-			queryId: string | number,
-			productId: number
-		): void {
-			mockProductCollectionContext = { queryId };
-			mockProductsContext = { productId };
-		}
-
-		it( 'prefers the ledger collection at render time before the register-or-restore init reconciles the bag', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			setCardIdentityContext( 'query-1', 42 );
-			const firstMountCollection: DraftItem[] = [];
-			mockCartContext = { draftItems: firstMountCollection };
-			actions.registerOrRestoreDraftCollection();
-			firstMountCollection.push( { id: 42, quantity: 4 } );
-
-			// The card remounts: a fresh, still-empty context collection,
-			// and the register-or-restore init has NOT run yet — simulating
-			// the one committed pre-restore render.
-			const remountCollection: DraftItem[] = [];
-			mockCartContext = { draftItems: remountCollection };
-
-			expect( mockState.findItem( { id: 42 } ).draft ).toEqual( {
-				id: 42,
-				quantity: 4,
-			} );
-			// The raw context bag itself is still the fresh, unreconciled
-			// array — the bridge served the ledger without touching it.
-			expect( mockCartContext.draftItems ).toBe( remountCollection );
-		} );
-
-		it( 'converges to the context array once the init reconciles the bag', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			setCardIdentityContext( 'query-1', 42 );
-			const firstMountCollection: DraftItem[] = [];
-			mockCartContext = { draftItems: firstMountCollection };
-			actions.registerOrRestoreDraftCollection();
-			firstMountCollection.push( { id: 42, quantity: 4 } );
-
-			mockCartContext = { draftItems: [] };
-			// Reconcile via the register-or-restore init.
-			actions.registerOrRestoreDraftCollection();
-
-			expect( mockState.findItem( { id: 42 } ).draft ).toEqual( {
-				id: 42,
-				quantity: 4,
-			} );
-			expect( mockCartContext.draftItems ).toBe( firstMountCollection );
-		} );
-
-		it( 'resolves the plain context collection when no ledger entry exists for the derivable identity', async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			setCardIdentityContext( 'query-unregistered', 99 );
-			const collection: DraftItem[] = [ { id: 99, quantity: 1 } ];
-			mockCartContext = { draftItems: collection };
-
-			expect( mockState.findItem( { id: 99 } ).draft ).toEqual( {
-				id: 99,
-				quantity: 1,
-			} );
-		} );
-	} );
-
-	describe( 'seedDraftIfAbsent', () => {
-		it( 'copies the server-seeded draftSeed into the page-wide collection when it holds no draft for that product', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			mockServerContext = { draftSeed: { id: 42, quantity: 3 } };
-
-			actions.seedDraftIfAbsent();
-
-			expect( mockState.draftItems ).toEqual( [
-				{ id: 42, quantity: 3 },
-			] );
-		} );
-
-		it( 'seeds the nearest container collection (a context override), not always the page-wide one', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			const containerCollection: DraftItem[] = [];
-			mockCartContext = { draftItems: containerCollection };
-			mockServerContext = { draftSeed: { id: 42, quantity: 2 } };
-
-			actions.seedDraftIfAbsent();
-
-			expect( mockState.draftItems ).toEqual( [] );
-			expect( containerCollection ).toEqual( [
-				{ id: 42, quantity: 2 },
-			] );
-		} );
-
-		it( 'copies the variation and namespaced extension props from the seed verbatim', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			mockServerContext = {
-				draftSeed: {
-					id: 42,
-					quantity: 1,
-					variation: [ { attribute: 'Color', value: 'red' } ],
-					'my-plugin/gift-note': 'Happy birthday!',
-				} as DraftItem,
-			};
-
-			actions.seedDraftIfAbsent();
-
-			expect( mockState.draftItems ).toEqual( [
-				{
-					id: 42,
-					quantity: 1,
-					variation: [ { attribute: 'Color', value: 'red' } ],
-					'my-plugin/gift-note': 'Happy birthday!',
-				},
-			] );
-		} );
-
-		it( 'never overwrites an already-edited live draft for the same product id (re-render never clobbers)', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			// The shopper already edited this collection's draft before the
-			// region re-rendered and re-ran the init.
-			actions.upsertDraftItem( { id: 42, quantity: 9 } );
-			mockServerContext = { draftSeed: { id: 42, quantity: 1 } };
-
-			actions.seedDraftIfAbsent();
-
-			expect( mockState.draftItems ).toEqual( [
-				{ id: 42, quantity: 9 },
-			] );
-		} );
-
-		it( 'is a no-op, leaving draftItems untouched, when the server context carries no draftSeed', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			mockServerContext = undefined;
-
-			actions.seedDraftIfAbsent();
-
-			expect( mockState.draftItems ).toEqual( [] );
-		} );
-
-		it( 'reads the seed via getServerContext( "woocommerce/cart" )', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			mockServerContext = { draftSeed: { id: 42, quantity: 1 } };
-
-			actions.seedDraftIfAbsent();
-
-			expect( mockGetServerContext ).toHaveBeenCalledWith(
-				'woocommerce/cart'
-			);
 		} );
 	} );
 
@@ -1852,7 +1648,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( byFilter.cartItem ).toEqual( line );
 		} );
 
-		it( 'findItem resolves the draft from the page-wide collection when no container context is active', async () => {
+		it( 'findItem resolves the draft from the session-global collection when no container context is active', async () => {
 			mockBatchFetch();
 			const actions = await loadCartStore();
 			actions.upsertDraftItem( { id: 42, quantity: 2 } );
@@ -1863,10 +1659,10 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			} );
 		} );
 
-		it( 'findItem resolves the draft from the nearest container collection, not the page-wide one, when a container is active', async () => {
+		it( 'findItem resolves the draft from the nearest container collection, not the session-global one, when a container is active', async () => {
 			mockBatchFetch();
 			const actions = await loadCartStore();
-			mockCartContext = { draftItems: [] };
+			mockCartContext = { draftKey: 'collection/q1/42' };
 			actions.upsertDraftItem( { id: 42, quantity: 5 } );
 
 			expect( mockState.findItem( { id: 42 } ).draft ).toEqual( {
@@ -1874,8 +1670,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				quantity: 5,
 			} );
 
-			// Outside that container's context, the page-wide collection
-			// carries no matching draft.
+			// Outside that container's context, the session-global
+			// collection carries no matching draft.
 			mockCartContext = undefined;
 			expect( mockState.findItem( { id: 42 } ).draft ).toBeUndefined();
 		} );
@@ -1982,17 +1778,17 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				seedCart( [] );
 				seedProductInContext( { id: 42, type: 'simple' } );
 
-				// The page-wide draft for the in-context product: must post.
+				// The session-global draft for the in-context product: must
+				// post.
 				actions.upsertDraftItem( { id: 42, quantity: 2 } );
 				// A different product in the same collection: must not post.
 				actions.upsertDraftItem( { id: 99, quantity: 5 } );
-				// The same product in a different (container) collection:
-				// must not post.
-				const containerCollection: DraftItem[] = [];
-				mockCartContext = { draftItems: containerCollection };
+				// The same product in a different (keyed container)
+				// collection: must not post.
+				mockCartContext = { draftKey: 'collection/q1/42' };
 				actions.upsertDraftItem( { id: 42, quantity: 9 } );
-				// `addItem()` below runs from the page-wide surface, with no
-				// container context active.
+				// `addItem()` below runs from the session-global surface,
+				// with no container context active.
 				mockCartContext = undefined;
 
 				await runAction( actions.addItem() );
@@ -2004,7 +1800,44 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				expect( captured[ 0 ].body ).toEqual( { id: 42, quantity: 2 } );
 			} );
 
-			it( 'sends nothing when the in-context product has no draft in the resolved collection', async () => {
+			it( 'posts only the in-context product (B) when the same collection also holds another product (A)', async () => {
+				// The product-scoped negative guarantee (req 9 / AC6): a
+				// single collection accumulating drafts for more than one
+				// product — as a session-global collection does across
+				// pages — must never leak an unrelated draft into an add.
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [] );
+				actions.upsertDraftItem( { id: 1, quantity: 4 } ); // Product A.
+				actions.upsertDraftItem( { id: 2, quantity: 7 } ); // Product B.
+				seedProductInContext( { id: 2, type: 'simple' } );
+
+				await runAction( actions.addItem() );
+
+				expect( captured ).toHaveLength( 1 );
+				expect( captured[ 0 ].body ).toEqual( { id: 2, quantity: 7 } );
+			} );
+
+			it( "posts the surface's server-filed seed when the in-context product has no materialized draft yet", async () => {
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [] );
+				seedProductInContext( { id: 42, type: 'simple' } );
+				mockServerState = {
+					draftSeeds: {
+						[ GLOBAL_DRAFT_KEY ]: {
+							42: { id: 42, quantity: 1 },
+						},
+					},
+				};
+
+				await runAction( actions.addItem() );
+
+				expect( captured ).toHaveLength( 1 );
+				expect( captured[ 0 ].body ).toEqual( { id: 42, quantity: 1 } );
+			} );
+
+			it( 'sends nothing when the in-context product has no draft in the resolved collection and no seed is filed', async () => {
 				const captured = mockBatchFetch();
 				const actions = await loadCartStore();
 				seedCart( [] );
@@ -2044,10 +1877,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.upsertDraftItem( { id: 2, quantity: 0 } );
 				// id 3 has no draft at all: must be excluded.
 				actions.upsertDraftItem( { id: 4, quantity: 3 } );
-				// Same child id, different (container) collection: must not
-				// be posted instead.
-				const containerCollection: DraftItem[] = [];
-				mockCartContext = { draftItems: containerCollection };
+				// Same child id, different (keyed container) collection:
+				// must not be posted instead.
+				mockCartContext = { draftKey: 'collection/q1/200' };
 				actions.upsertDraftItem( { id: 1, quantity: 99 } );
 				mockCartContext = undefined;
 
@@ -2084,6 +1916,29 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					grouped_products: [ 1, 2 ],
 				} );
 				actions.upsertDraftItem( { id: 1, quantity: 0 } );
+
+				await runAction( actions.addItem() );
+
+				expect( captured ).toHaveLength( 0 );
+			} );
+
+			it( 'sends nothing for an untouched grouped product even when every child has a server-filed seed (grouped never consults seeds)', async () => {
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [] );
+				seedProductInContext( {
+					id: 200,
+					type: 'grouped',
+					grouped_products: [ 1, 2 ],
+				} );
+				mockServerState = {
+					draftSeeds: {
+						[ GLOBAL_DRAFT_KEY ]: {
+							1: { id: 1, quantity: 1 },
+							2: { id: 2, quantity: 1 },
+						},
+					},
+				};
 
 				await runAction( actions.addItem() );
 
@@ -2321,6 +2176,15 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( untypedActions.removeCartItem ).toBeUndefined();
 			expect( untypedActions.refreshCartItems ).toBeUndefined();
 			expect( untypedState?.findItemInCart ).toBeUndefined();
+		} );
+
+		it( 'no longer declares state.errorMessages', async () => {
+			await loadCartStore();
+			const untypedState = mockRegisteredStore?.state as
+				| Record< string, unknown >
+				| undefined;
+
+			expect( untypedState?.errorMessages ).toBeUndefined();
 		} );
 
 		it( 'trims isInCart from the envelope: findItem/itemInContext expose only cartItem/draft, even when a product shares identity with more than one ambiguous line', async () => {
