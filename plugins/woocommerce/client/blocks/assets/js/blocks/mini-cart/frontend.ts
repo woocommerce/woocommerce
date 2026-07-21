@@ -26,6 +26,13 @@ import {
 } from '../../../../packages/prices/utils/currency';
 import { CartItem, Currency } from '../../types';
 import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
+import {
+	getEntryFieldRaw,
+	isItemDataEntryVisible,
+	isLastVisibleEntry,
+	buildCartItemDataAttr,
+} from './utils/item-data';
+import type { ItemData, CartItemDataAttr } from './utils/item-data';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -132,21 +139,6 @@ type MiniCartContext = {
 
 type CartItemContext = {
 	cartItem: CartItem;
-};
-
-type ItemData = {
-	raw_attribute?: string | undefined;
-	value?: string | undefined;
-	display?: string;
-	attribute?: string;
-	hidden?: boolean | string | number;
-} & ( { key: string; name?: never } | { key?: never; name: string } );
-
-type CartItemDataAttr = {
-	value: string;
-	name: string;
-	className: string;
-	hidden: boolean;
 };
 
 type DataProperty = 'item_data' | 'variation';
@@ -423,33 +415,29 @@ store< MiniCart >(
 );
 
 /**
- * Returns the raw API value for an item_data field. Used by both innerHTML
- * callbacks and the cartItemDataAttr getter.
+ * Resolves the item_data or variation entry for the current wp-each
+ * iteration, falling back to the cart item's first entry when no
+ * per-iteration context is set.
  */
-function getItemDataRaw( field: 'name' | 'value' ): string {
+function resolveDataItemAttr(): ItemData | undefined {
 	const { itemData, dataProperty } = getContext< {
 		itemData: ItemData;
 		dataProperty: DataProperty;
 	} >();
 
-	const dataItemAttr =
+	return (
+		itemData ||
 		// eslint-disable-next-line @typescript-eslint/no-use-before-define
-		itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
+		cartItemState.cartItem[ dataProperty ]?.[ 0 ]
+	);
+}
 
-	if ( ! dataItemAttr ) {
-		return '';
-	}
-
-	if ( field === 'name' ) {
-		return (
-			dataItemAttr.key ||
-			dataItemAttr.attribute ||
-			dataItemAttr.name ||
-			''
-		);
-	}
-
-	return dataItemAttr.display || dataItemAttr.value || '';
+/**
+ * Returns the raw API value for an item_data field. Used by both innerHTML
+ * callbacks and the cartItemDataAttr getter.
+ */
+function getItemDataRaw( field: 'name' | 'value' ): string {
+	return getEntryFieldRaw( resolveDataItemAttr(), field );
 }
 
 const { state: cartItemState } = store(
@@ -791,48 +779,12 @@ const { state: cartItemState } = store(
 					: true;
 			},
 
-			get cartItemDataAttr(): CartItemDataAttr | null {
-				const rawName = getItemDataRaw( 'name' );
-				const rawValue = getItemDataRaw( 'value' );
-
-				if ( ! rawName && ! rawValue ) {
-					return null;
-				}
-
-				const nameTxt = document.createElement( 'textarea' );
-				nameTxt.innerHTML = rawName;
-				const valueTxt = document.createElement( 'textarea' );
-				valueTxt.innerHTML = rawValue;
-
-				const { itemData, dataProperty } = getContext< {
-					itemData: ItemData;
-					dataProperty: DataProperty;
-				} >();
-				const dataItemAttr =
-					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
-				const hiddenValue = dataItemAttr?.hidden;
-
-				return {
-					name: nameTxt.value ? nameTxt.value + ':' : '',
-					value: valueTxt.value,
-					className: `wc-block-components-product-details__${ nameTxt.value
-						.replace( /([a-z])([A-Z])/g, '$1-$2' )
-						.replace( /<[^>]*>/g, '' )
-						.replace( /[\s_&]+/g, '-' )
-						.toLowerCase() }`,
-					hidden:
-						hiddenValue === true ||
-						hiddenValue === 'true' ||
-						hiddenValue === '1' ||
-						hiddenValue === 1,
-				};
+			get cartItemDataAttr(): CartItemDataAttr {
+				return buildCartItemDataAttr( resolveDataItemAttr() );
 			},
 
 			get cartItemDataAttrHidden(): boolean {
-				return (
-					cartItemState.cartItemDataAttr === null ||
-					!! cartItemState.cartItemDataAttr?.hidden
-				);
+				return ! isItemDataEntryVisible( resolveDataItemAttr() );
 			},
 
 			// Used to index cart item data attributes for wp-each-key.
@@ -878,29 +830,15 @@ const { state: cartItemState } = store(
 					dataProperty: DataProperty;
 				} >();
 
-				const items = cartItemState.cartItem[ dataProperty ];
-				if ( ! items || items.length === 0 ) {
-					return true;
-				}
+				// The cart item's `item_data`/`variation` array elements are
+				// structurally compatible with `ItemData` for every field
+				// these pure helpers read (name/value/hidden sources), even
+				// though the two array types aren't nominally identical.
+				const items = cartItemState.cartItem[
+					dataProperty
+				] as ItemData[];
 
-				// Filter out hidden items
-				const visibleItems = items.filter(
-					( item: ItemData ) =>
-						! (
-							item.hidden === true ||
-							item.hidden === 'true' ||
-							item.hidden === '1' ||
-							// eslint-disable-next-line @typescript-eslint/no-explicit-any
-							( item.hidden as any ) === 1
-						)
-				);
-
-				if ( visibleItems.length === 0 ) {
-					return true;
-				}
-
-				const lastItem = visibleItems[ visibleItems.length - 1 ];
-				return itemData === lastItem;
+				return isLastVisibleEntry( items, itemData );
 			},
 		},
 

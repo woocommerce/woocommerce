@@ -32,8 +32,9 @@
 	},
 	"devDependencies": {
 		"@babel/core": "7.25.7",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.55.0",
+		"eslint": "^10.0.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"rimraf": "5.0.5",
