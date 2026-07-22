@@ -389,104 +389,106 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} );
 
 	test.describe( '"Query Type" control', () => {
-		test( 'should be visible on posts', async ( { pageObject } ) => {
-			await pageObject.createNewPostAndInsertBlock();
-
-			await expect(
-				pageObject
-					.locateSidebarSettings()
-					.getByLabel( SELECTORS.usePageContextControl )
-			).toBeVisible();
-		} );
-
-		test( 'should be visible in existing archive templates', async ( {
-			pageObject,
-			editor,
-		} ) => {
-			for ( const slug of [
-				`${ BLOCK_THEME_SLUG }//archive-product`,
-				`${ BLOCK_THEME_SLUG }//taxonomy-product_attribute`,
-				`${ BLOCK_THEME_SLUG }//product-search-results`,
-			] ) {
-				await test.step( `should be visible in archive template: ${ slug }`, async () => {
-					await pageObject.goToEditorTemplate( slug );
-					await pageObject.insertProductCollection();
-					await pageObject.chooseCollectionInTemplate();
-					await pageObject.focusProductCollection();
-					await editor.openDocumentSettingsSidebar();
-
-					await expect(
-						pageObject
-							.locateSidebarSettings()
-							.getByLabel( SELECTORS.usePageContextControl )
-					).toBeVisible();
-				} );
-			}
-		} );
-
-		test( 'should be visible in created archive templates', async ( {
+		test( 'Shows Query Type control across post and template contexts', async ( {
 			admin,
 			pageObject,
 			editor,
 		} ) => {
-			for ( const template of [
-				{
-					slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
-					title: 'Products by Category',
-				},
-				{
-					slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
-					title: 'Products by Tag',
-				},
-				{
-					slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_brand`,
-					title: 'Products by Brand',
-				},
-			] ) {
-				await test.step( `should be visible in archive template: ${ template.slug }`, async () => {
-					await admin.visitSiteEditor( {
-						postType: 'wp_template',
+			await test.step( 'should be visible on posts', async () => {
+				await pageObject.createNewPostAndInsertBlock();
+
+				await expect(
+					pageObject
+						.locateSidebarSettings()
+						.getByLabel( SELECTORS.usePageContextControl )
+				).toBeVisible();
+			} );
+
+			await test.step( 'should be visible in existing archive templates', async () => {
+				for ( const slug of [
+					`${ BLOCK_THEME_SLUG }//archive-product`,
+					`${ BLOCK_THEME_SLUG }//taxonomy-product_attribute`,
+					`${ BLOCK_THEME_SLUG }//product-search-results`,
+				] ) {
+					// Preserve the per-template diagnostic under the former test-title step.
+					// eslint-disable-next-line playwright/no-nested-step
+					await test.step( `should be visible in archive template: ${ slug }`, async () => {
+						await pageObject.goToEditorTemplate( slug );
+						await pageObject.insertProductCollection();
+						await pageObject.chooseCollectionInTemplate();
+						await pageObject.focusProductCollection();
+						await editor.openDocumentSettingsSidebar();
+
+						await expect(
+							pageObject
+								.locateSidebarSettings()
+								.getByLabel( SELECTORS.usePageContextControl )
+						).toBeVisible();
 					} );
-					await editor.createTemplate( {
-						templateName: template.title,
+				}
+			} );
+
+			await test.step( 'should be visible in created archive templates', async () => {
+				for ( const template of [
+					{
+						slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
+						title: 'Products by Category',
+					},
+					{
+						slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
+						title: 'Products by Tag',
+					},
+					{
+						slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_brand`,
+						title: 'Products by Brand',
+					},
+				] ) {
+					// Preserve the per-template diagnostic under the former test-title step.
+					// eslint-disable-next-line playwright/no-nested-step
+					await test.step( `should be visible in archive template: ${ template.slug }`, async () => {
+						await admin.visitSiteEditor( {
+							postType: 'wp_template',
+						} );
+						await editor.createTemplate( {
+							templateName: template.title,
+						} );
+						await pageObject.insertProductCollection();
+						await pageObject.chooseCollectionInTemplate();
+						await pageObject.focusProductCollection();
+						await editor.openDocumentSettingsSidebar();
+
+						await expect(
+							pageObject
+								.locateSidebarSettings()
+								.getByLabel( SELECTORS.usePageContextControl )
+						).toBeVisible();
 					} );
-					await pageObject.insertProductCollection();
-					await pageObject.chooseCollectionInTemplate();
-					await pageObject.focusProductCollection();
-					await editor.openDocumentSettingsSidebar();
+				}
+			} );
 
-					await expect(
-						pageObject
-							.locateSidebarSettings()
-							.getByLabel( SELECTORS.usePageContextControl )
-					).toBeVisible();
-				} );
-			}
-		} );
+			await test.step( 'should be visible in non-archive templates', async () => {
+				for ( const slug of [
+					`${ BLOCK_THEME_SLUG }//single-product`,
+					`${ BLOCK_THEME_SLUG }//home`,
+					`${ BLOCK_THEME_SLUG }//index`,
+				] ) {
+					// Preserve the per-template diagnostic under the former test-title step.
+					// eslint-disable-next-line playwright/no-nested-step
+					await test.step( `should be visible in non-archive template: ${ slug }`, async () => {
+						await pageObject.goToEditorTemplate( slug );
+						await pageObject.insertProductCollection();
+						await pageObject.chooseCollectionInTemplate();
+						await pageObject.focusProductCollection();
+						await editor.openDocumentSettingsSidebar();
 
-		test( 'should be visible in non-archive templates', async ( {
-			pageObject,
-			editor,
-		} ) => {
-			for ( const slug of [
-				`${ BLOCK_THEME_SLUG }//single-product`,
-				`${ BLOCK_THEME_SLUG }//home`,
-				`${ BLOCK_THEME_SLUG }//index`,
-			] ) {
-				await test.step( `should be visible in non-archive template: ${ slug }`, async () => {
-					await pageObject.goToEditorTemplate( slug );
-					await pageObject.insertProductCollection();
-					await pageObject.chooseCollectionInTemplate();
-					await pageObject.focusProductCollection();
-					await editor.openDocumentSettingsSidebar();
-
-					await expect(
-						pageObject
-							.locateSidebarSettings()
-							.getByLabel( SELECTORS.usePageContextControl )
-					).toBeVisible();
-				} );
-			}
+						await expect(
+							pageObject
+								.locateSidebarSettings()
+								.getByLabel( SELECTORS.usePageContextControl )
+						).toBeVisible();
+					} );
+				}
+			} );
 		} );
 
 		test( 'Handles Query Type template state and filtering contexts', async ( {
