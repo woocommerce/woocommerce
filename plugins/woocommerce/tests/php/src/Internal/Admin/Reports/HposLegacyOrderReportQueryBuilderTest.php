@@ -351,6 +351,18 @@ class HposLegacyOrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'DATE_ADD(orders.date_created_gmt, INTERVAL 3600 SECOND)', $query['group_by'] );
 		$this->assertStringNotContainsString( 'CASE', $query['group_by'] );
 		$this->assertStringNotContainsString( 'INTERVAL 0 SECOND', $query['group_by'] );
+
+		// With filter_range off the passed dates only describe the report page's selection,
+		// not the rows the query fetches (e.g. sparklines always read recent orders), so the
+		// fallback must use the trailing-year window: for Berlin that always spans both DST
+		// transitions and yields a CASE, never the winter-pinned single shift above.
+		$base_args['filter_range'] = false;
+		$query                     = $builder->build_query(
+			$base_args,
+			strtotime( '2026-01-01 00:00:00' ),
+			strtotime( '2026-01-31 00:00:00' )
+		);
+		$this->assertStringContainsString( 'CASE WHEN orders.date_created_gmt', $query['group_by'] );
 	}
 
 	/**

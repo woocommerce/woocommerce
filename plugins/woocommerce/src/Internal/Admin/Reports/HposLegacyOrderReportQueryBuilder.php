@@ -39,7 +39,7 @@ class HposLegacyOrderReportQueryBuilder {
 
 	/**
 	 * Report date window for the current build as `[start, end)` Unix timestamps,
-	 * or null when the caller passed no meaningful range.
+	 * or null when the query is not bounded by a caller-supplied range.
 	 *
 	 * @var array{0:int,1:int}|null
 	 */
@@ -61,7 +61,11 @@ class HposLegacyOrderReportQueryBuilder {
 		// per-build caches so option-derived state can't leak between queries.
 		$this->report_schema = null;
 		$this->column_map    = null;
-		$this->report_range  = ( $start_date > 0 && $end_date > 0 )
+		// Only trust the range when the query is actually bounded by it: queries with
+		// filter_range off (e.g. the sparklines) may still carry the report page's
+		// selected dates, which can describe a different DST period than the rows
+		// they fetch.
+		$this->report_range = ( ! empty( $args['filter_range'] ) && $start_date > 0 && $end_date > 0 )
 			? array( $start_date, (int) strtotime( '+1 DAY', $end_date ) )
 			: null;
 
