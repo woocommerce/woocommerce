@@ -71,92 +71,110 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 } );
 
 test.describe( `${ blockData.name } Block - editor side`, () => {
-	test.beforeEach( async ( { admin, editor } ) => {
-		await admin.createNewPost();
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'price-filter',
-				heading: 'Filter By Price',
-			},
+	test( 'supports title, display style, and filter button controls', async ( {
+		admin,
+		page,
+		editor,
+	} ) => {
+		await test.step( "should allow changing the block's title", async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'price-filter',
+					heading: 'Filter By Price',
+				},
+			} );
+			await editor.openDocumentSettingsSidebar();
+
+			const textSelector =
+				'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
+
+			const title = 'New Title';
+
+			await editor.canvas.locator( textSelector ).fill( title );
+
+			await expect( editor.canvas.locator( textSelector ) ).toHaveText(
+				title
+			);
 		} );
-		await editor.openDocumentSettingsSidebar();
-	} );
 
-	test( "should allow changing the block's title", async ( { editor } ) => {
-		const textSelector =
-			'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
+		await test.step( 'should allow changing the display style', async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'price-filter',
+					heading: 'Filter By Price',
+				},
+			} );
+			await editor.openDocumentSettingsSidebar();
 
-		const title = 'New Title';
+			const priceFilterControls = await editor.getBlockByName(
+				'woocommerce/price-filter'
+			);
+			await editor.selectBlocks( priceFilterControls );
 
-		await editor.canvas.locator( textSelector ).fill( title );
+			await expect(
+				priceFilterControls.getByRole( 'textbox', {
+					name: 'Filter products by minimum',
+				} )
+			).toBeVisible();
 
-		await expect( editor.canvas.locator( textSelector ) ).toHaveText(
-			title
-		);
-	} );
+			await expect(
+				priceFilterControls.getByRole( 'textbox', {
+					name: 'Filter products by maximum',
+				} )
+			).toBeVisible();
 
-	test( 'should allow changing the display style', async ( {
-		page,
-		editor,
-	} ) => {
-		const priceFilterControls = await editor.getBlockByName(
-			'woocommerce/price-filter'
-		);
-		await editor.selectBlocks( priceFilterControls );
+			await page
+				.getByLabel( 'Price Range Selector' )
+				.getByText( 'Text' )
+				.click();
 
-		await expect(
-			priceFilterControls.getByRole( 'textbox', {
-				name: 'Filter products by minimum',
-			} )
-		).toBeVisible();
+			await expect(
+				priceFilterControls.getByRole( 'textbox', {
+					name: 'Filter products by minimum',
+				} )
+			).toBeHidden();
 
-		await expect(
-			priceFilterControls.getByRole( 'textbox', {
-				name: 'Filter products by maximum',
-			} )
-		).toBeVisible();
+			await expect(
+				priceFilterControls.getByRole( 'textbox', {
+					name: 'Filter products by maximum',
+				} )
+			).toBeHidden();
+		} );
 
-		await page
-			.getByLabel( 'Price Range Selector' )
-			.getByText( 'Text' )
-			.click();
+		await test.step( 'should allow toggling the visibility of the filter button', async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'price-filter',
+					heading: 'Filter By Price',
+				},
+			} );
+			await editor.openDocumentSettingsSidebar();
 
-		await expect(
-			priceFilterControls.getByRole( 'textbox', {
-				name: 'Filter products by minimum',
-			} )
-		).toBeHidden();
+			const priceFilterControls = await editor.getBlockByName(
+				blockData.slug
+			);
+			await editor.selectBlocks( priceFilterControls );
 
-		await expect(
-			priceFilterControls.getByRole( 'textbox', {
-				name: 'Filter products by maximum',
-			} )
-		).toBeHidden();
-	} );
+			await expect(
+				priceFilterControls.getByRole( 'button', {
+					name: 'Apply',
+				} )
+			).toBeHidden();
 
-	test( 'should allow toggling the visibility of the filter button', async ( {
-		page,
-		editor,
-	} ) => {
-		const priceFilterControls = await editor.getBlockByName(
-			blockData.slug
-		);
-		await editor.selectBlocks( priceFilterControls );
+			await page.getByText( "Show 'Apply filters' button" ).click();
 
-		await expect(
-			priceFilterControls.getByRole( 'button', {
-				name: 'Apply',
-			} )
-		).toBeHidden();
-
-		await page.getByText( "Show 'Apply filters' button" ).click();
-
-		await expect(
-			priceFilterControls.getByRole( 'button', {
-				name: 'Apply',
-			} )
-		).toBeVisible();
+			await expect(
+				priceFilterControls.getByRole( 'button', {
+					name: 'Apply',
+				} )
+			).toBeVisible();
+		} );
 	} );
 } );
 
