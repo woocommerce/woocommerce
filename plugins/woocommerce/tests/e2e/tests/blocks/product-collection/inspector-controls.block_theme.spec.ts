@@ -114,63 +114,59 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 		} );
 	} );
 
-	test( 'Products can be filtered based on keyword.', async ( {
+	test( 'Products can be filtered based on keyword, category, tags, and brands.', async ( {
 		pageObject,
 	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
+		await test.step( 'Products can be filtered based on keyword.', async () => {
+			await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Keyword' );
+			await pageObject.addFilter( 'Keyword' );
 
-		await pageObject.setKeyword( 'Album' );
-		await expect( pageObject.productTitles ).toHaveText( [ 'Album' ] );
+			await pageObject.setKeyword( 'Album' );
+			await expect( pageObject.productTitles ).toHaveText( [ 'Album' ] );
 
-		await pageObject.setKeyword( 'Cap' );
-		await expect( pageObject.productTitles ).toHaveText( [ 'Cap' ] );
+			await pageObject.setKeyword( 'Cap' );
+			await expect( pageObject.productTitles ).toHaveText( [ 'Cap' ] );
 
-		await pageObject.publishAndGoToFrontend();
-		await expect( pageObject.productTitles ).toHaveText( [ 'Cap' ] );
-	} );
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.productTitles ).toHaveText( [ 'Cap' ] );
+		} );
 
-	test( 'Products can be filtered based on category.', async ( {
-		pageObject,
-	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
+		await test.step( 'Products can be filtered based on category.', async () => {
+			await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show product categories' );
-		await pageObject.checkTaxonomyTerm( 'categories', 'Clothing' );
-		await expect( pageObject.products ).toHaveCount( 9 );
+			await pageObject.addFilter( 'Show product categories' );
+			await pageObject.checkTaxonomyTerm( 'categories', 'Clothing' );
+			await expect( pageObject.products ).toHaveCount( 9 );
 
-		// Switch to Accessories
-		await pageObject.uncheckTaxonomyTerm( 'categories', 'Clothing' );
-		await pageObject.checkTaxonomyTerm( 'categories', 'Accessories' );
-		const accessoriesProductNames = [
-			'Beanie',
-			'Beanie with Logo',
-			'Belt',
-			'Cap',
-			'Sunglasses',
-		];
-		await expect( pageObject.productTitles ).toHaveText(
-			accessoriesProductNames
-		);
+			// Switch to Accessories
+			await pageObject.uncheckTaxonomyTerm( 'categories', 'Clothing' );
+			await pageObject.checkTaxonomyTerm( 'categories', 'Accessories' );
+			const accessoriesProductNames = [
+				'Beanie',
+				'Beanie with Logo',
+				'Belt',
+				'Cap',
+				'Sunglasses',
+			];
+			await expect( pageObject.productTitles ).toHaveText(
+				accessoriesProductNames
+			);
 
-		await pageObject.publishAndGoToFrontend();
+			await pageObject.publishAndGoToFrontend();
 
-		const frontendAccessoriesProductNames = [
-			'Beanie',
-			'Beanie with Logo',
-			'Belt',
-			'Cap',
-			'Protected: Sunglasses',
-		];
-		await expect( pageObject.productTitles ).toHaveText(
-			frontendAccessoriesProductNames
-		);
-	} );
+			const frontendAccessoriesProductNames = [
+				'Beanie',
+				'Beanie with Logo',
+				'Belt',
+				'Cap',
+				'Protected: Sunglasses',
+			];
+			await expect( pageObject.productTitles ).toHaveText(
+				frontendAccessoriesProductNames
+			);
+		} );
 
-	test( 'Products can be filtered based on tags and brands.', async ( {
-		pageObject,
-	} ) => {
 		await test.step( 'Products can be filtered based on tags.', async () => {
 			await pageObject.createNewPostAndInsertBlock();
 
