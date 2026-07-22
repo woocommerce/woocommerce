@@ -176,48 +176,46 @@ test.describe( 'Product Collection: Product Picker', () => {
 		}
 	} );
 
-	test( `For collection "Block: My Custom Collection - Cart Context" - "From products in the cart" is chosen by default in Cart Template`, async ( {
+	test( 'defaults contextual collections in Cart and Order Confirmation templates', async ( {
 		pageObject,
 		admin,
 		editor,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//page-cart`,
-			postType: 'wp_template',
-			canvas: 'edit',
+		await test.step( `For collection "Block: My Custom Collection - Cart Context" - "From products in the cart" is chosen by default in Cart Template`, async () => {
+			await admin.visitSiteEditor( {
+				postId: `${ BLOCK_THEME_SLUG }//page-cart`,
+				postType: 'wp_template',
+				canvas: 'edit',
+			} );
+			await editor.canvas.locator( 'body' ).click();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInTemplate(
+				'myCustomCollectionWithCartContext'
+			);
+
+			const fromProductsInCartRadioButton = admin.page.getByText(
+				'From products in the cart'
+			);
+			await expect( fromProductsInCartRadioButton ).toBeChecked();
 		} );
-		await editor.canvas.locator( 'body' ).click();
-		await pageObject.insertProductCollection();
-		await pageObject.chooseCollectionInTemplate(
-			'myCustomCollectionWithCartContext'
-		);
 
-		const fromProductsInCartRadioButton = admin.page.getByText(
-			'From products in the cart'
-		);
-		await expect( fromProductsInCartRadioButton ).toBeChecked();
-	} );
+		await test.step( `For collection "Block: My Custom Collection - Order Context" - "From products in the order" is chosen by default in Order Confirmation Template`, async () => {
+			await admin.visitSiteEditor( {
+				postId: `${ BLOCK_THEME_SLUG }//order-confirmation`,
+				postType: 'wp_template',
+				canvas: 'edit',
+			} );
+			await editor.canvas.locator( 'body' ).click();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInTemplate(
+				'myCustomCollectionWithOrderContext'
+			);
 
-	test( `For collection "Block: My Custom Collection - Order Context" - "From products in the order" is chosen by default in Order Confirmation Template`, async ( {
-		pageObject,
-		admin,
-		editor,
-	} ) => {
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//order-confirmation`,
-			postType: 'wp_template',
-			canvas: 'edit',
+			const fromProductsInOrderRadioButton = admin.page.getByText(
+				'From products in the order'
+			);
+			await expect( fromProductsInOrderRadioButton ).toBeChecked();
 		} );
-		await editor.canvas.locator( 'body' ).click();
-		await pageObject.insertProductCollection();
-		await pageObject.chooseCollectionInTemplate(
-			'myCustomCollectionWithOrderContext'
-		);
-
-		const fromProductsInOrderRadioButton = admin.page.getByText(
-			'From products in the order'
-		);
-		await expect( fromProductsInOrderRadioButton ).toBeChecked();
 	} );
 
 	test( 'Product picker should work as expected while changing collection using "Choose collection" button from Toolbar', async ( {
