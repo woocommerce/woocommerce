@@ -358,38 +358,58 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section_with_native_settings_ui_page() );
 
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-
-		global $current_section, $current_tab;
-		$current_tab     = 'checkout';
-		$current_section = 'acme_payments';
-		$_GET['page']    = 'wc-settings';
-		$_GET['tab']     = 'checkout';
-		$_GET['section'] = 'acme_payments';
-		// PHP builds $_REQUEST once at request start, so runtime $_GET changes need mirroring.
-		$_REQUEST['section'] = 'acme_payments';
-
-		$page                   = $this->get_parent_page();
-		$original_settings      = $this->replace_wc_admin_settings_pages( array( $page ) );
-		$tabs                   = array( 'checkout' => 'Payments' );
-		$original_sections_hook = $this->replace_hook_callbacks( 'woocommerce_sections_checkout' );
-		$original_settings_hook = $this->replace_hook_callbacks( 'woocommerce_settings_checkout' );
-
-		add_action( 'woocommerce_sections_checkout', array( $page, 'output_sections' ) );
-		add_action( 'woocommerce_settings_checkout', array( $page, 'output' ) );
-
-		try {
-			ob_start();
-			include WC_ABSPATH . 'includes/admin/views/html-admin-settings.php';
-			$output = ob_get_clean();
-		} finally {
-			$this->restore_hook_callbacks( 'woocommerce_sections_checkout', $original_sections_hook );
-			$this->restore_hook_callbacks( 'woocommerce_settings_checkout', $original_settings_hook );
-			$this->replace_wc_admin_settings_pages( $original_settings );
-		}
+		$output = $this->render_settings_view_for_checkout_section( 'acme_payments' );
 
 		$this->assertStringContainsString( 'data-wc-settings-page="acme_native"', $output );
 		$this->assertStringNotContainsString( 'class="subsubsub"', $output );
+	}
+
+	/**
+	 * @testdox Should hide the top-level tabs for drill-down Settings UI pages.
+	 */
+	public function test_hides_top_level_tabs_for_drill_down_settings_ui_pages(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section_with_native_settings_ui_page() );
+
+		$output = $this->render_settings_view_for_checkout_section( 'acme_payments' );
+
+		$this->assertStringContainsString( 'data-wc-settings-page="acme_native"', $output );
+		$this->assertStringNotContainsString( 'nav-tab-wrapper', $output, 'Drill-down pages replace the top-level tabs with the shell header' );
+	}
+
+	/**
+	 * @testdox Should keep the classic navigation when drill-down schema resolution falls back to legacy rendering.
+	 */
+	public function test_keeps_navigation_when_drill_down_schema_resolution_fails(): void {
+		$this->setExpectedIncorrectUsage( 'WC_Settings_Page::output' );
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		SettingsSectionRegistry::get_instance()->register(
+			$this->get_registered_section_with_native_settings_ui_page( null, null, new \RuntimeException( 'Unable to build settings UI schema.' ) )
+		);
+
+		$output = $this->render_settings_view_for_checkout_section( 'acme_payments' );
+
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertStringContainsString( 'name="registered_acme_payments_setting"', $output, 'Legacy fields should render when schema resolution fails' );
+		$this->assertStringContainsString( 'nav-tab-wrapper', $output, 'Top-level tabs should stay when rendering falls back to legacy output' );
+		$this->assertStringContainsString( 'class="subsubsub"', $output, 'Classic section links should stay when rendering falls back to legacy output' );
+	}
+
+	/**
+	 * @testdox Should keep the classic navigation when drill-down script handle resolution falls back to legacy rendering.
+	 */
+	public function test_keeps_navigation_when_drill_down_script_handle_resolution_fails(): void {
+		$this->setExpectedIncorrectUsage( 'WC_Settings_Page::output' );
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		SettingsSectionRegistry::get_instance()->register(
+			$this->get_registered_section_with_native_settings_ui_page( null, null, null, new \RuntimeException( 'Unable to load extension script handles.' ) )
+		);
+
+		$output = $this->render_settings_view_for_checkout_section( 'acme_payments' );
+
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertStringContainsString( 'nav-tab-wrapper', $output, 'Top-level tabs should stay when rendering falls back to legacy output' );
+		$this->assertStringContainsString( 'class="subsubsub"', $output, 'Classic section links should stay when rendering falls back to legacy output' );
 	}
 
 	/**
@@ -425,6 +445,44 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $result );
 		$this->assertNull( SettingsSectionRegistry::get_instance()->get_registered( 'checkout', 'bacs' ) );
+	}
+
+	/**
+	 * Render the admin settings view for a checkout section as an administrator.
+	 *
+	 * @param string $section Section id.
+	 * @return string
+	 */
+	private function render_settings_view_for_checkout_section( string $section ): string {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		global $current_section, $current_tab;
+		$current_tab     = 'checkout';
+		$current_section = $section;
+		$_GET['page']    = 'wc-settings';
+		$_GET['tab']     = 'checkout';
+		$_GET['section'] = $section;
+		// PHP builds $_REQUEST once at request start, so runtime $_GET changes need mirroring.
+		$_REQUEST['section'] = $section;
+
+		$page                   = $this->get_parent_page();
+		$original_settings      = $this->replace_wc_admin_settings_pages( array( $page ) );
+		$tabs                   = array( 'checkout' => 'Payments' );
+		$original_sections_hook = $this->replace_hook_callbacks( 'woocommerce_sections_checkout' );
+		$original_settings_hook = $this->replace_hook_callbacks( 'woocommerce_settings_checkout' );
+
+		add_action( 'woocommerce_sections_checkout', array( $page, 'output_sections' ) );
+		add_action( 'woocommerce_settings_checkout', array( $page, 'output' ) );
+
+		try {
+			ob_start();
+			include WC_ABSPATH . 'includes/admin/views/html-admin-settings.php';
+			return (string) ob_get_clean();
+		} finally {
+			$this->restore_hook_callbacks( 'woocommerce_sections_checkout', $original_sections_hook );
+			$this->restore_hook_callbacks( 'woocommerce_settings_checkout', $original_settings_hook );
+			$this->replace_wc_admin_settings_pages( $original_settings );
+		}
 	}
 
 	/**
@@ -562,12 +620,14 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	/**
 	 * Build a registered section that provides a native Settings UI page.
 	 *
-	 * @param callable|null $on_settings_ui_page_call Callback invoked every time the Settings UI page provider runs.
-	 * @param array|null    $shell Schema shell for the native page. Null uses the fixture default with custom section navigation.
+	 * @param callable|null   $on_settings_ui_page_call Callback invoked every time the Settings UI page provider runs.
+	 * @param array|null      $shell Schema shell for the native page, or null for the fixture default.
+	 * @param \Throwable|null $schema_failure Throwable the native page schema provider should throw, if any.
+	 * @param \Throwable|null $script_handles_failure Throwable the native page script handle provider should throw, if any.
 	 * @return SettingsSectionInterface
 	 */
-	private function get_registered_section_with_native_settings_ui_page( ?callable $on_settings_ui_page_call = null, ?array $shell = null ): SettingsSectionInterface {
-		return new class( $on_settings_ui_page_call, $shell ) extends SettingsSection {
+	private function get_registered_section_with_native_settings_ui_page( ?callable $on_settings_ui_page_call = null, ?array $shell = null, ?\Throwable $schema_failure = null, ?\Throwable $script_handles_failure = null ): SettingsSectionInterface {
+		return new class( $on_settings_ui_page_call, $shell, $schema_failure, $script_handles_failure ) extends SettingsSection {
 			/**
 			 * Callback invoked every time the Settings UI page provider runs.
 			 *
@@ -583,14 +643,32 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 			private ?array $shell;
 
 			/**
+			 * Throwable the native page schema provider should throw, if any.
+			 *
+			 * @var \Throwable|null
+			 */
+			private ?\Throwable $schema_failure;
+
+			/**
+			 * Throwable the native page script handle provider should throw, if any.
+			 *
+			 * @var \Throwable|null
+			 */
+			private ?\Throwable $script_handles_failure;
+
+			/**
 			 * Constructor.
 			 *
-			 * @param callable|null $on_settings_ui_page_call Callback invoked every time the Settings UI page provider runs.
-			 * @param array|null    $shell Schema shell for the native page, or null for the fixture default.
+			 * @param callable|null   $on_settings_ui_page_call Callback invoked every time the Settings UI page provider runs.
+			 * @param array|null      $shell Schema shell for the native page, or null for the fixture default.
+			 * @param \Throwable|null $schema_failure Throwable the native page schema provider should throw, if any.
+			 * @param \Throwable|null $script_handles_failure Throwable the native page script handle provider should throw, if any.
 			 */
-			public function __construct( ?callable $on_settings_ui_page_call, ?array $shell ) {
+			public function __construct( ?callable $on_settings_ui_page_call, ?array $shell, ?\Throwable $schema_failure, ?\Throwable $script_handles_failure ) {
 				$this->on_settings_ui_page_call = $on_settings_ui_page_call;
 				$this->shell                    = $shell;
+				$this->schema_failure           = $schema_failure;
+				$this->script_handles_failure   = $script_handles_failure;
 			}
 
 			/**
@@ -647,7 +725,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 					( $this->on_settings_ui_page_call )();
 				}
 
-				return new class( $this->shell ) implements SettingsUIPageInterface {
+				return new class( $this->shell, $this->schema_failure, $this->script_handles_failure ) implements SettingsUIPageInterface {
 					/**
 					 * Schema shell, or null for the fixture default.
 					 *
@@ -656,12 +734,30 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 					private ?array $shell;
 
 					/**
+					 * Throwable the schema provider should throw, if any.
+					 *
+					 * @var \Throwable|null
+					 */
+					private ?\Throwable $schema_failure;
+
+					/**
+					 * Throwable the script handle provider should throw, if any.
+					 *
+					 * @var \Throwable|null
+					 */
+					private ?\Throwable $script_handles_failure;
+
+					/**
 					 * Constructor.
 					 *
-					 * @param array|null $shell Schema shell, or null for the fixture default.
+					 * @param array|null      $shell Schema shell, or null for the fixture default.
+					 * @param \Throwable|null $schema_failure Throwable the schema provider should throw, if any.
+					 * @param \Throwable|null $script_handles_failure Throwable the script handle provider should throw, if any.
 					 */
-					public function __construct( ?array $shell ) {
-						$this->shell = $shell;
+					public function __construct( ?array $shell, ?\Throwable $schema_failure, ?\Throwable $script_handles_failure ) {
+						$this->shell                  = $shell;
+						$this->schema_failure         = $schema_failure;
+						$this->script_handles_failure = $script_handles_failure;
 					}
 
 					/**
@@ -680,6 +776,10 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 					 * @return array
 					 */
 					public function get_schema( string $section ): array {
+						if ( $this->schema_failure ) {
+							throw $this->schema_failure;
+						}
+
 						return array(
 							'id'      => 'acme_native',
 							'title'   => 'Acme native settings',
@@ -716,6 +816,10 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 					 * @return string[]
 					 */
 					public function get_script_handles( string $section ): array {
+						if ( $this->script_handles_failure ) {
+							throw $this->script_handles_failure;
+						}
+
 						return array( 'acme-native-settings-ui' );
 					}
 

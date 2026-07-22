@@ -50,15 +50,22 @@ try {
 }
 
 // Drill-down pages replace the top-level settings tabs with their own header.
+// When schema or script resolution fails, output falls back to the legacy
+// renderer without the shell header, so the classic navigation must stay.
+$settings_ui_drill_down = $settings_ui_context
+	&& $settings_ui_context->is_drill_down()
+	&& ! $settings_ui_context->has_schema_failed()
+	&& ! $settings_ui_context->has_script_handles_failed();
+
 $hide_nav = ( 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true ) )
-	|| ( $settings_ui_context && $settings_ui_context->is_drill_down() );
+	|| $settings_ui_drill_down;
 
 $settings_ui_settings_page = $settings_ui_context ? $settings_ui_context->get_settings_page() : null;
 $is_settings_ui_page       = null !== $settings_ui_settings_page;
 
 // Drill-down pages replace the section links with header breadcrumbs. Top-level
 // pages keep the classic section links.
-if ( $settings_ui_settings_page instanceof WC_Settings_Page && $settings_ui_context->is_drill_down() ) {
+if ( $settings_ui_settings_page instanceof WC_Settings_Page && $settings_ui_drill_down ) {
 	remove_action( 'woocommerce_sections_' . $current_tab, array( $settings_ui_settings_page, 'output_sections' ) );
 }
 
