@@ -62,10 +62,6 @@ echo -e 'Provisioning a fresh baseline \n'
 echo -e 'Activate WooCommerce \n'
 $WP_CLI_PREFIX wp plugin activate woocommerce
 
-echo -e 'Install twentytwenty, twentytwentytwo and storefront themes \n'
-$WP_CLI_PREFIX wp theme install storefront twentytwenty twentytwentytwo &
-theme_install_pid=$!
-
 echo -e 'Activate default theme \n'
 $WP_CLI_PREFIX wp theme activate twentytwentythree
 
@@ -98,9 +94,6 @@ if [ $ENABLE_TRACKING == 1 ]; then
 	echo -e 'Enable tracking\n'
 	$WP_CLI_PREFIX wp option update woocommerce_allow_tracking 'yes'
 fi
-
-echo -e 'Wait for theme install to finish \n'
-wait "$theme_install_pid"
 
 # Re-imported from scratch rather than skipped when present: this hook runs on
 # every start, and the database outlives the web root (wp-env's self-heal wipes

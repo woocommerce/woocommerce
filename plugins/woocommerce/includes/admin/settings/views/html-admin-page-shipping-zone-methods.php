@@ -160,7 +160,7 @@ do_action( 'woocommerce_shipping_zone_after_methods_table', $zone );
 						<div class="wc-backbone-modal-buttons">
 							<button id="btn-back" class="button button-large wc-backbone-modal-back-{{ data.status === 'new' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Back', 'woocommerce' ); ?></button>
 							<button id="btn-ok" data-status='{{ data.status }}' class="button button-primary button-large">
-								<div class="wc-backbone-modal-action-{{ data.status === 'new' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Create and save', 'woocommerce' ); ?></div>
+								<div class="wc-backbone-modal-action-{{ data.status === 'new' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Save zone and method', 'woocommerce' ); ?></div>
 								<div class="wc-backbone-modal-action-{{ data.status === 'existing' ? 'active' : 'inactive' }}"><?php esc_html_e( 'Save', 'woocommerce' ); ?></div>
 							</button>
 						</div>

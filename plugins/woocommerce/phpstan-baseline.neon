@@ -3283,12 +3283,6 @@ parameters:
 			path: includes/admin/class-wc-admin-webhooks.php
 
 		-
-			message: '#^Binary operation "\." between ''plugin\-install\.php…'' and array\|string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/admin/class-wc-admin.php
-
-		-
 			message: '#^Method WC_Admin\:\:admin_redirects\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -17885,18 +17879,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/data-stores/class-wc-product-grouped-data-store-cpt.php
-
-		-
-			message: '#^Call to an undefined method WC_Product\:\:child_is_in_stock\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
-
-		-
-			message: '#^Call to an undefined method WC_Product\:\:child_is_on_backorder\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
 
 		-
 			message: '#^Call to an undefined method WC_Product\:\:get_visible_children\(\)\.$#'
@@ -56437,12 +56419,6 @@ parameters:
 			message: '#^Parameter \#2 \$mode of class RecursiveIteratorIterator constructor expects 0\|1\|2, 16 given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Internal/Admin/Logging/FileV2/FileController.php
-
-		-
-			message: '#^Right side of \|\| is always true\.$#'
-			identifier: booleanOr.rightAlwaysTrue
-			count: 8
 			path: src/Internal/Admin/Logging/FileV2/FileController.php
 
 		-
