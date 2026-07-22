@@ -25,11 +25,11 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Post_Data {
 	/**
-	 * Previous parents of product categories being edited.
+	 * Product category parent IDs to recount after term edits.
 	 *
-	 * @var array<int, list<int>>
+	 * @var array<int, list<list<int>>>
 	 */
-	private static $product_cat_previous_parents = array();
+	private static $product_cat_parent_recount_ids = array();
 
 	/**
 	 * Editing term.
@@ -44,7 +44,7 @@ class WC_Post_Data {
 	 * @return void
 	 */
 	public static function init() {
-		static $edit_terms_callback = null;
+		static $edit_term_taxonomy_callback = null;
 
 		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_products_last_modified' ), 10, 2 );
 		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_db_block_templates_cache' ), 10, 2 );
@@ -59,25 +59,25 @@ class WC_Post_Data {
 		add_action( 'woocommerce_product_type_changed', array( __CLASS__, 'product_type_changed' ), 10, 3 );
 
 		// Keep the callback inline to avoid expanding the public contract of this legacy, non-final class.
-		if ( null === $edit_terms_callback ) {
-			$edit_terms_callback = static function ( $term_id, $taxonomy ) {
+		if ( null === $edit_term_taxonomy_callback ) {
+			$edit_term_taxonomy_callback = static function ( $tt_id, $taxonomy ) {
 				if ( 'product_cat' !== $taxonomy ) {
 					return;
 				}
 
-				$product_cat = get_term( $term_id, $taxonomy );
+				$product_cat = get_term_by( 'term_taxonomy_id', $tt_id, $taxonomy );
 
 				if ( ! $product_cat instanceof WP_Term ) {
 					return;
 				}
 
-				self::$product_cat_previous_parents[ (int) $term_id ][] = (int) $product_cat->parent;
+				self::$product_cat_parent_recount_ids[ (int) $tt_id ][] = array( (int) $product_cat->parent );
 			};
 		}
 
 		add_action(
-			'edit_terms',
-			$edit_terms_callback,
+			'edit_term_taxonomy',
+			$edit_term_taxonomy_callback,
 			10,
 			2
 		);
@@ -306,7 +306,7 @@ class WC_Post_Data {
 	 */
 	public static function edited_term( $term_id, $tt_id, $taxonomy ) {
 		if ( 'product_cat' === $taxonomy ) {
-			self::recount_product_cat_parents( $term_id );
+			self::recount_product_cat_parents( $term_id, $tt_id );
 		}
 
 		if ( ! is_null( self::$editing_term ) && strpos( $taxonomy, 'pa_' ) === 0 ) {
@@ -334,39 +334,66 @@ class WC_Post_Data {
 	 * Recount products for parent categories affected by a hierarchy change.
 	 *
 	 * @param int $term_id Edited product category ID.
+	 * @param int $tt_id   Edited product category taxonomy ID.
 	 */
-	private static function recount_product_cat_parents( int $term_id ): void {
-		$previous_parents = self::$product_cat_previous_parents[ $term_id ] ?? array();
-		$previous_parent  = array_pop( $previous_parents );
+	private static function recount_product_cat_parents( int $term_id, int $tt_id ): void {
+		global $wpdb;
 
-		if ( empty( $previous_parents ) ) {
-			unset( self::$product_cat_previous_parents[ $term_id ] );
-		} else {
-			self::$product_cat_previous_parents[ $term_id ] = $previous_parents;
-		}
+		$parent_id_stack = self::$product_cat_parent_recount_ids[ $tt_id ] ?? array();
+		$parent_ids      = array_pop( $parent_id_stack );
 
-		$edited_product_cat = get_term( $term_id, 'product_cat' );
-
-		if ( null === $previous_parent || ! $edited_product_cat instanceof WP_Term ) {
+		if ( null === $parent_ids ) {
 			return;
 		}
 
-		$current_parent = (int) $edited_product_cat->parent;
+		// The term ID passed to this method can be changed by term_id_filter, but the taxonomy ID is stable.
+		$term_data = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT term_id, parent FROM {$wpdb->term_taxonomy} WHERE term_taxonomy_id = %d AND taxonomy = %s",
+				$tt_id,
+				'product_cat'
+			)
+		);
 
-		if ( $previous_parent === $current_parent ) {
+		if ( null === $term_data ) {
+			if ( empty( $parent_id_stack ) ) {
+				unset( self::$product_cat_parent_recount_ids[ $tt_id ] );
+			} else {
+				self::$product_cat_parent_recount_ids[ $tt_id ] = $parent_id_stack;
+			}
+
+			return;
+		}
+
+		if ( (int) $term_data->term_id !== $term_id ) {
+			clean_term_cache( (int) $term_data->term_id, 'product_cat' );
+		}
+
+		$parent_ids[] = (int) $term_data->parent;
+
+		if ( empty( $parent_id_stack ) ) {
+			unset( self::$product_cat_parent_recount_ids[ $tt_id ] );
+		} else {
+			$parent_frame_index                             = array_key_last( $parent_id_stack );
+			$parent_id_stack[ $parent_frame_index ]         = array_merge( $parent_id_stack[ $parent_frame_index ], $parent_ids );
+			self::$product_cat_parent_recount_ids[ $tt_id ] = $parent_id_stack;
+		}
+
+		$parent_ids = array_unique( $parent_ids );
+
+		if ( count( $parent_ids ) < 2 ) {
 			return;
 		}
 
 		// Exclude 0, which represents the taxonomy root rather than a term to recount.
-		$parent_ids = array_filter( array( $previous_parent, $current_parent ) );
+		$parent_ids = array_filter( $parent_ids );
 		$taxonomy   = get_taxonomy( 'product_cat' );
 
-		if ( empty( $parent_ids ) || ! $taxonomy ) {
-			return;
-		}
-
 		$terms = array_fill_keys( $parent_ids, 0 );
-		_wc_term_recount( $terms, $taxonomy, false, false );
+
+		if ( $taxonomy ) {
+			_wc_term_recount( $terms, $taxonomy, false, false );
+		}
 	}
 
 	/**
