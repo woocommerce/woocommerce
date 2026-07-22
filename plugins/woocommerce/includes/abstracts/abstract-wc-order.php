@@ -98,7 +98,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * replacement items. Superseded by $bulk_delete_all_items_pending, which removes
 	 * every item type.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @var array<string>
 	 */
 	protected $item_types_to_bulk_delete = array();
@@ -109,7 +109,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set by remove_order_items() when called with no type (so every item type
 	 * should be removed). Processed and reset in save_items().
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @var bool
 	 */
 	protected $bulk_delete_all_items_pending = false;
@@ -958,7 +958,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				__METHOD__,
 				/* translators: %s: PHP type that was passed instead of a string. */
 				sprintf( esc_html__( 'remove_order_items() expects a string item type or null; received %s.', 'woocommerce' ), esc_html( gettype( $type ) ) ),
-				'10.9.0'
+				'11.0.0'
 			);
 			return;
 		}
@@ -1024,7 +1024,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * woocommerce_order_type_to_group filter so extension-registered types are
 	 * included.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @return array<string, string>
 	 */
 	protected function get_item_types_to_group() {
