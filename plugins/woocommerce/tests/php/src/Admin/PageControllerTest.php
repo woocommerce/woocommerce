@@ -14,6 +14,13 @@ use WC_Unit_Test_Case;
  */
 class PageControllerTest extends WC_Unit_Test_Case {
 	/**
+	 * Admin menu globals mutated by register_page() via add_menu_page()/add_submenu_page().
+	 *
+	 * @var string[]
+	 */
+	private const MENU_FIXTURE_GLOBALS = array( 'menu', 'submenu', 'admin_page_hooks', '_registered_pages', '_parent_pages' );
+
+	/**
 	 * PageController instance.
 	 *
 	 * @var PageController
@@ -56,18 +63,12 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	private $redirected_to = '';
 
 	/**
-	 * Backup of $GLOBALS['menu'], set when a menu fixture is registered.
+	 * Snapshot of the state mutated by the menu fixture, set when one is registered.
+	 * Holds the admin menu globals (MENU_FIXTURE_GLOBALS) and the PageController pages collection.
 	 *
 	 * @var array|null
 	 */
-	private $menu_backup = null;
-
-	/**
-	 * Backup of $GLOBALS['submenu'], set when a menu fixture is registered.
-	 *
-	 * @var array|null
-	 */
-	private $submenu_backup = null;
+	private $menu_fixture_backup = null;
 
 	/**
 	 * Set things up before each test case.
@@ -118,13 +119,22 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			$GLOBALS['current_screen'] = $this->current_screen_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
-		// Restore the admin menu globals if a menu fixture was registered.
-		if ( null !== $this->menu_backup ) {
-			$GLOBALS['menu']    = $this->menu_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			$GLOBALS['submenu'] = $this->submenu_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		// Restore the state mutated by the menu fixture, if one was registered.
+		if ( null !== $this->menu_fixture_backup ) {
+			foreach ( self::MENU_FIXTURE_GLOBALS as $global_name ) {
+				if ( array_key_exists( $global_name, $this->menu_fixture_backup['globals'] ) ) {
+					$GLOBALS[ $global_name ] = $this->menu_fixture_backup['globals'][ $global_name ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the pre-fixture values.
+				} else {
+					unset( $GLOBALS[ $global_name ] );
+				}
+			}
 
-			$this->menu_backup    = null;
-			$this->submenu_backup = null;
+			// Restore the private pages collection of the PageController singleton.
+			$pages_property = new \ReflectionProperty( PageController::class, 'pages' );
+			$pages_property->setAccessible( true );
+			$pages_property->setValue( $this->sut, $this->menu_fixture_backup['pages'] );
+
+			$this->menu_fixture_backup = null;
 		}
 
 		parent::tearDown();
@@ -628,8 +638,9 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Registers a top level page plus the given sub pages, and returns the parent menu slug.
 	 *
-	 * The global admin menu is emptied first so that assertions only see the fixture, and restored
-	 * in tear down.
+	 * The global admin menu is emptied first so that assertions only see the fixture. All the state
+	 * mutated by the registration (the admin menu globals and the PageController pages collection)
+	 * is snapshotted here and restored in tear down.
 	 *
 	 * @param array $sub_pages List of option arrays passed to register_page(), each with at least an `id`.
 	 *
@@ -638,8 +649,17 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	private function register_menu_fixture( array $sub_pages ): string {
 		global $menu, $submenu;
 
-		$this->menu_backup    = $menu ?? array();
-		$this->submenu_backup = $submenu ?? array();
+		$backup_globals = array();
+		foreach ( self::MENU_FIXTURE_GLOBALS as $global_name ) {
+			if ( isset( $GLOBALS[ $global_name ] ) ) {
+				$backup_globals[ $global_name ] = $GLOBALS[ $global_name ];
+			}
+		}
+
+		$this->menu_fixture_backup = array(
+			'globals' => $backup_globals,
+			'pages'   => $this->sut->get_pages(),
+		);
 
 		$menu    = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$submenu = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
