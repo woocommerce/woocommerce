@@ -236,77 +236,73 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 	} );
 
 	test.describe( 'My Custom Collection with Advanced Preview', () => {
-		test( 'Clicking "My Custom Collection with Advanced Preview" should insert block and show 9 products', async ( {
-			pageObject,
-		} ) => {
-			await pageObject.createNewPostAndInsertBlock(
-				'myCustomCollectionWithAdvancedPreview'
-			);
-
-			await expect( pageObject.products ).toHaveCount( 9 );
-			await expect( pageObject.productImages ).toHaveCount( 9 );
-			await expect( pageObject.productTitles ).toHaveCount( 9 );
-			await expect( pageObject.productPrices ).toHaveCount( 9 );
-			await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
-
-			await pageObject.publishAndGoToFrontend();
-			await expect( pageObject.products ).toHaveCount( 9 );
-		} );
-
-		test( 'Clicking "My Custom Collection with Advanced Preview" should show preview and then replace it by the actual content', async ( {
+		test( 'renders My Custom Collection with Advanced Preview across contexts', async ( {
 			pageObject,
 			editor,
 			page,
 		} ) => {
-			await pageObject.createNewPostAndInsertBlock(
-				'myCustomCollectionWithAdvancedPreview'
-			);
-			const previewButtonLocator = editor.canvas.getByTestId(
-				SELECTORS.previewButtonTestID
-			);
+			await test.step( 'Clicking "My Custom Collection with Advanced Preview" should insert block and show 9 products', async () => {
+				await pageObject.createNewPostAndInsertBlock(
+					'myCustomCollectionWithAdvancedPreview'
+				);
 
-			// The preview button should be visible
-			await expect( previewButtonLocator ).toBeVisible();
+				await expect( pageObject.products ).toHaveCount( 9 );
+				await expect( pageObject.productImages ).toHaveCount( 9 );
+				await expect( pageObject.productTitles ).toHaveCount( 9 );
+				await expect( pageObject.productPrices ).toHaveCount( 9 );
+				await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 
-			await page.evaluate( () => {
-				window.__removePreview();
+				await pageObject.publishAndGoToFrontend();
+				await expect( pageObject.products ).toHaveCount( 9 );
 			} );
 
-			// The preview button should be hidden
-			await expect( previewButtonLocator ).toBeHidden();
-		} );
+			await test.step( 'Clicking "My Custom Collection with Advanced Preview" should show preview and then replace it by the actual content', async () => {
+				await pageObject.createNewPostAndInsertBlock(
+					'myCustomCollectionWithAdvancedPreview'
+				);
+				const previewButtonLocator = editor.canvas.getByTestId(
+					SELECTORS.previewButtonTestID
+				);
 
-		test( 'Should display properly in Product Catalog template', async ( {
-			pageObject,
-			editor,
-			page,
-		} ) => {
-			await pageObject.goToProductCatalogAndInsertCollection(
-				'myCustomCollectionWithAdvancedPreview'
-			);
+				// The preview button should be visible
+				await expect( previewButtonLocator ).toBeVisible();
 
-			const block = editor.canvas.getByLabel(
-				MY_REGISTERED_COLLECTIONS.myCustomCollectionWithAdvancedPreview
-					.label
-			);
+				await page.evaluate( () => {
+					window.__removePreview();
+				} );
 
-			const previewButtonLocator = editor.canvas.getByTestId(
-				SELECTORS.previewButtonTestID
-			);
-
-			await expect( previewButtonLocator ).toBeVisible();
-
-			// Check if products are visible
-			const products = block
-				.getByLabel( BLOCK_LABELS.productImage )
-				.locator( 'visible=true' );
-			await expect( products ).toHaveCount( 9 );
-
-			await page.evaluate( () => {
-				window.__removePreview();
+				// The preview button should be hidden
+				await expect( previewButtonLocator ).toBeHidden();
 			} );
 
-			await expect( previewButtonLocator ).toBeHidden();
+			await test.step( 'Should display properly in Product Catalog template', async () => {
+				await pageObject.goToProductCatalogAndInsertCollection(
+					'myCustomCollectionWithAdvancedPreview'
+				);
+
+				const block = editor.canvas.getByLabel(
+					MY_REGISTERED_COLLECTIONS
+						.myCustomCollectionWithAdvancedPreview.label
+				);
+
+				const previewButtonLocator = editor.canvas.getByTestId(
+					SELECTORS.previewButtonTestID
+				);
+
+				await expect( previewButtonLocator ).toBeVisible();
+
+				// Check if products are visible
+				const products = block
+					.getByLabel( BLOCK_LABELS.productImage )
+					.locator( 'visible=true' );
+				await expect( products ).toHaveCount( 9 );
+
+				await page.evaluate( () => {
+					window.__removePreview();
+				} );
+
+				await expect( previewButtonLocator ).toBeHidden();
+			} );
 		} );
 	} );
 
