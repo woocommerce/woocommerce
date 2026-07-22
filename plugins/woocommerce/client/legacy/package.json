@@ -23,7 +23,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "^24.1.0",
-		"@wordpress/scripts": "^30.23.0",
+		"@wordpress/scripts": "32.6.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"autoprefixer": "9.8.6",
 		"browserslist": "4.19.3",
@@ -44,7 +44,6 @@
 		"grunt-rtlcss": "2.0.2",
 		"grunt-sass": "3.1.0",
 		"grunt-stylelint": "0.16.0",
-		"jest-environment-jsdom": "29.5.x",
 		"jest-fixed-jsdom": "^0.0.10",
 		"sass": "^1.69.5",
 		"stylelint": "^14.16.1"
