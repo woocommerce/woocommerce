@@ -51,7 +51,7 @@ import { validateState } from './validate-state';
  * Checkout form.
  */
 const Form = <
-	T extends AddressFormValues | ContactFormValues | OrderFormValues
+	T extends AddressFormValues | ContactFormValues | OrderFormValues,
 >( {
 	id = '',
 	fields,

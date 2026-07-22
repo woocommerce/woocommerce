@@ -1,7 +1,7 @@
 ---
 post_title: Registering settings UI components
-sidebar_label: Settings UI components
-sidebar_position: 6
+sidebar_label: Register settings UI components
+sidebar_position: 8
 ---
 
 # Registering settings UI components

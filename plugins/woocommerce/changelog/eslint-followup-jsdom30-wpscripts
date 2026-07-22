@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Bump client/legacy to @wordpress/scripts 32.6.0 (evicting ESLint 8) and remove the jest-environment-jsdom pin in Blocks and legacy so tests run on the current jsdom; no production behaviour change.
+
+

@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Performance: Prime caches for variations images.
