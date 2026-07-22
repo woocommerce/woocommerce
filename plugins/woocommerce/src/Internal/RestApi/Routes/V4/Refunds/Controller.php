@@ -393,7 +393,7 @@ class Controller extends AbstractController {
 		// on quantity < 1, but fill_missing_refund_totals pre-checks that condition,
 		// so this branch is defensive against a future invariant break only.
 		try {
-			$line_items = $this->data_utils->fill_missing_refund_totals( $request['line_items'] ?? array(), $order, $refund_data );
+			$line_items = $this->data_utils->fill_missing_refund_totals_with_refund_data( $request['line_items'] ?? array(), $order, $refund_data );
 		} catch ( \InvalidArgumentException $e ) {
 			wc_get_logger()->error(
 				sprintf(
@@ -418,7 +418,7 @@ class Controller extends AbstractController {
 
 		try {
 			// Validate request line_items before proceeding against the order being refunded.
-			$validation_error = $this->data_utils->validate_line_items( $line_items, $order, $refund_data );
+			$validation_error = $this->data_utils->validate_line_items_with_refund_data( $line_items, $order, $refund_data );
 
 			if ( is_wp_error( $validation_error ) ) {
 				// Preserve any status carried on the WP_Error so create and preview
@@ -558,7 +558,7 @@ class Controller extends AbstractController {
 		// nothing in between mutates the order's refunds.
 		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
 
-		$validation_error = $this->data_utils->validate_preview_line_items( $line_items, $order, $refund_data );
+		$validation_error = $this->data_utils->validate_preview_line_items_with_refund_data( $line_items, $order, $refund_data );
 
 		if ( is_wp_error( $validation_error ) ) {
 			$error_data = $validation_error->get_error_data();
@@ -567,7 +567,7 @@ class Controller extends AbstractController {
 		}
 
 		try {
-			$preview = $this->data_utils->build_refund_preview( $order, $line_items, $refund_data );
+			$preview = $this->data_utils->build_refund_preview_with_refund_data( $order, $line_items, $refund_data );
 		} catch ( \InvalidArgumentException $e ) {
 			// validate_preview_line_items above should have caught any bad input.
 			// If build_refund_preview still throws InvalidArgumentException, treat

@@ -641,19 +641,21 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$stub = new class() extends \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils {
 			/**
 			 * Validation is forced to pass so the controller reaches the build step.
+			 * Overrides the snapshot-aware entry point, which is what the controller calls.
 			 *
 			 * @param array      $line_items  Ignored.
 			 * @param \WC_Order  $order       Ignored.
 			 * @param array|null $refund_data Ignored.
 			 * @return bool
 			 */
-			public function validate_preview_line_items( array $line_items, \WC_Order $order, ?array $refund_data = null ) {
+			public function validate_preview_line_items_with_refund_data( array $line_items, \WC_Order $order, ?array $refund_data = null ) {
 				return true;
 			}
 			// Stub always throws; the : array return type is never reached.
 			// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
 			/**
 			 * Always throws to exercise the controller's InvalidArgumentException catch arm.
+			 * Overrides the snapshot-aware entry point, which is what the controller calls.
 			 *
 			 * @param \WC_Order  $order       Ignored.
 			 * @param array      $line_items  Ignored.
@@ -661,7 +663,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 			 * @return array
 			 * @throws \InvalidArgumentException Always.
 			 */
-			public function build_refund_preview( \WC_Order $order, array $line_items, ?array $refund_data = null ): array {
+			public function build_refund_preview_with_refund_data( \WC_Order $order, array $line_items, ?array $refund_data = null ): array {
 				throw new \InvalidArgumentException( 'simulated invariant violation' );
 			}
 			// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn

@@ -2311,6 +2311,38 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Subclasses overriding the original public method signatures stay loadable — the snapshot threading is additive.
+	 *
+	 * The refund-history snapshot is passed through new *_with_refund_data entry
+	 * points instead of new parameters on the existing methods, because a parent
+	 * gaining an optional parameter fatals any subclass still declaring the old
+	 * signature. Declaring such a subclass here pins that guarantee.
+	 */
+	public function test_original_public_method_signatures_remain_overridable(): void {
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found -- pass-through overrides ARE the fixture: they pin the parent signatures.
+		$subclass = new class() extends DataUtils {
+			public function validate_line_items( $line_items, WC_Order $order ) {
+				return parent::validate_line_items( $line_items, $order );
+			}
+
+			public function fill_missing_refund_totals( array $line_items, WC_Order $order ): array {
+				return parent::fill_missing_refund_totals( $line_items, $order );
+			}
+
+			public function build_refund_preview( WC_Order $order, array $line_items ): array {
+				return parent::build_refund_preview( $order, $line_items );
+			}
+
+			public function validate_preview_line_items( array $line_items, WC_Order $order ) {
+				return parent::validate_preview_line_items( $line_items, $order );
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+
+		$this->assertInstanceOf( DataUtils::class, $subclass );
+	}
+
+	/**
 	 * @testdox Preview accepts an explicit negative refund_total on a discount-fee line (matches create).
 	 */
 	public function test_validate_preview_line_items_negative_fee_explicit_refund_total_passes(): void {
