@@ -165,10 +165,14 @@ class ProductButton extends AbstractBlock {
 		);
 
 		if ( 'a' === $html_element ) {
-			$attributes = array(
-				'href' => esc_url( $product->add_to_cart_url() ),
-				'rel'  => 'nofollow',
+			$add_to_cart_url = $product->add_to_cart_url();
+			$attributes      = array(
+				'href' => esc_url( $add_to_cart_url ),
 			);
+
+			if ( $product->get_permalink() !== $add_to_cart_url ) {
+				$attributes['rel'] = 'nofollow';
+			}
 
 			if ( $product->is_type( ProductType::EXTERNAL ) ) {
 				$attributes['target'] = '_blank';
