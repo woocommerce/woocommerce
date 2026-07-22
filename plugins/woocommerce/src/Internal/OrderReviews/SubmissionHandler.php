@@ -330,6 +330,24 @@ class SubmissionHandler {
 			return false;
 		}
 
+		// Pre-10.9.0 reviews have no VARIATION_META_KEY row; treat that as 0.
+		$variation_clause = 0 === $variation_id
+			? array(
+				'relation' => 'OR',
+				array(
+					'key'   => ItemEligibility::VARIATION_META_KEY,
+					'value' => '0',
+				),
+				array(
+					'key'     => ItemEligibility::VARIATION_META_KEY,
+					'compare' => 'NOT EXISTS',
+				),
+			)
+			: array(
+				'key'   => ItemEligibility::VARIATION_META_KEY,
+				'value' => (string) $variation_id,
+			);
+
 		$comments = get_comments(
 			array(
 				'post_id'      => $product_id,
@@ -343,10 +361,7 @@ class SubmissionHandler {
 						'key'   => ItemEligibility::ORDER_META_KEY,
 						'value' => (string) $order->get_id(),
 					),
-					array(
-						'key'   => ItemEligibility::VARIATION_META_KEY,
-						'value' => (string) $variation_id,
-					),
+					$variation_clause,
 				),
 			)
 		);
