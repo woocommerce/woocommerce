@@ -208,9 +208,11 @@ class Utils {
 			// pointing at a variation id) is the only surface that renders this
 			// quantity selector without an enclosing `selectedAttributes`
 			// context, so the seed must carry its own `variation` attributes
-			// here — otherwise this bag would shadow the (attribute-carrying)
-			// outer form-level seed with an incomplete one, and the client's
-			// cart-line pairing ladder could never match the resulting line.
+			// here: this filing and the form-level one both accumulate into
+			// the same `draftSeeds[$draft_key][id]` entry in `woocommerce/cart`
+			// state, and an untouched direct-variation surface needs this
+			// filing's `{ attribute, value }` pairs so the client's cart-line
+			// pairing ladder can match the resulting line.
 			if ( $product->is_type( ProductType::VARIATION ) ) {
 				$draft_seed['variation'] = self::format_variation_attributes( $product );
 			}
