@@ -4,8 +4,11 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Logging;
 
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
+use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Utilities\LoggingUtil;
 use WC_Logger;
 
 /**
@@ -16,12 +19,12 @@ use WC_Logger;
 class OrderLogsCleanupHelper {
 
 	/**
-	 * Maximum number of log files to delete per run.
+	 * Number of log files to delete per batch.
 	 */
-	public const MAX_FILES_PER_RUN = 100;
+	public const MAX_FILES_PER_RUN = 1000;
 
 	/**
-	 * Maximum number of orders to clean up per run.
+	 * Number of orders to clean up per batch.
 	 */
 	public const MAX_ORDERS_PER_RUN = 100;
 
@@ -96,42 +99,70 @@ class OrderLogsCleanupHelper {
 			return;
 		}
 
-		// Dangling orders have `_debug_log_source` meta but no `_debug_log_source_pending_deletion`.
-		$dangling_orders = $this->get_dangling_orders( $max_age );
-		$this->clear_logs_and_delete_meta( $dangling_orders );
-
-		// Old log files are those that are older than the given max age.
+		// Old files are deleted in bulk first, so that the per-order log clearing below
+		// doesn't scan a directory still full of them.
 		$this->cleanup_old_log_files( $max_age );
+
+		$this->cleanup_dangling_orders( $max_age );
 	}
 
 	/**
-	 * Delete place-order-debug-* log files from the filesystem.
+	 * Clean up orders with dangling debug log meta, in batches, until none remain.
+	 *
+	 * Dangling orders have `_debug_log_source` meta but no `_debug_log_source_pending_deletion`.
+	 *
+	 * @param int $max_age Maximum age in seconds before an order's debug log meta is eligible for cleanup.
+	 */
+	private function cleanup_dangling_orders( int $max_age ): void {
+		do {
+			$dangling_orders = $this->get_dangling_orders( $max_age );
+			$fetched_count   = count( $dangling_orders );
+
+			if ( 0 === $fetched_count ) {
+				break;
+			}
+
+			$deleted_meta_rows = $this->clear_logs_and_delete_meta( $dangling_orders );
+		} while ( $deleted_meta_rows > 0 && self::MAX_ORDERS_PER_RUN === $fetched_count );
+	}
+
+	/**
+	 * Delete place-order-debug-* log files from the filesystem, in batches, until none remain.
 	 *
 	 * @param int $max_age Maximum age in seconds before a file is eligible for deletion.
 	 */
 	private function cleanup_old_log_files( int $max_age ): void {
-		if ( \Automattic\WooCommerce\Utilities\LoggingUtil::get_default_handler() !== \Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2::class ) {
+		if ( LoggingUtil::get_default_handler() !== LogHandlerFileV2::class ) {
 			return;
 		}
 
-		$file_controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController::class );
-		$files           = $file_controller->get_files(
-			array(
-				'source'      => 'place-order-debug',
-				'date_filter' => 'modified',
-				'date_start'  => 1,
-				'date_end'    => time() - $max_age,
-				'per_page'    => self::MAX_FILES_PER_RUN,
-			)
-		);
+		$file_controller = wc_get_container()->get( FileController::class );
+		$date_end        = time() - $max_age;
 
-		if ( ! is_array( $files ) ) {
-			return;
-		}
+		do {
+			$files = $file_controller->get_files(
+				array(
+					'source'      => 'place-order-debug',
+					'date_filter' => 'modified',
+					'date_start'  => 1,
+					'date_end'    => $date_end,
+					'per_page'    => self::MAX_FILES_PER_RUN,
+				)
+			);
 
-		foreach ( $files as $file ) {
-			$file->delete();
-		}
+			if ( ! is_array( $files ) ) {
+				return;
+			}
+
+			$fetched_count = count( $files );
+			$deleted_count = 0;
+
+			foreach ( $files as $file ) {
+				if ( $file->delete() ) {
+					++$deleted_count;
+				}
+			}
+		} while ( $deleted_count > 0 && self::MAX_FILES_PER_RUN === $fetched_count );
 	}
 
 	/**
@@ -142,11 +173,11 @@ class OrderLogsCleanupHelper {
 	 *
 	 * @param array $items Associative array of order ID => log source name.
 	 *
-	 * @return void
+	 * @return int Number of meta table rows that were deleted.
 	 */
-	public function clear_logs_and_delete_meta( array $items ): void {
+	public function clear_logs_and_delete_meta( array $items ): int {
 		if ( empty( $items ) ) {
-			return;
+			return 0;
 		}
 
 		$logger = wc_get_logger();
@@ -157,7 +188,7 @@ class OrderLogsCleanupHelper {
 		}
 
 		$order_ids = array_keys( $items );
-		$this->delete_debug_log_meta_entries( $order_ids );
+		return $this->delete_debug_log_meta_entries( $order_ids );
 	}
 
 	/**
@@ -212,8 +243,10 @@ class OrderLogsCleanupHelper {
 	 * from the authoritative table and the backup table (when data sync is enabled).
 	 *
 	 * @param array $order_ids Array of order IDs to delete meta for.
+	 *
+	 * @return int Number of meta table rows that were deleted.
 	 */
-	private function delete_debug_log_meta_entries( array $order_ids ): void {
+	private function delete_debug_log_meta_entries( array $order_ids ): int {
 		global $wpdb;
 
 		$tables = array(
@@ -232,9 +265,11 @@ class OrderLogsCleanupHelper {
 
 		$id_placeholders = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
 
+		$deleted = 0;
+
 		foreach ( $tables as $table_config ) {
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-			$wpdb->query(
+			$result = $wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$table_config['table']}
 					 WHERE {$table_config['id_column']} IN ({$id_placeholders})
@@ -243,6 +278,12 @@ class OrderLogsCleanupHelper {
 				)
 			);
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+			if ( is_int( $result ) ) {
+				$deleted += $result;
+			}
 		}
+
+		return $deleted;
 	}
 }

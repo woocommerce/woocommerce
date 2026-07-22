@@ -115,22 +115,16 @@ class FileController {
 			$time = time();
 		}
 
-		$file_id = File::generate_file_id( $source, null, $time );
-		$file    = $this->get_file_by_id( $file_id );
+		$path = Settings::get_log_directory() . $this->generate_filename( $source, $time );
+		$file = new File( $path );
 
-		if ( $file instanceof File && $file->get_file_size() >= $this->get_file_size_limit() ) {
-			$rotated = $this->rotate_file( $file->get_file_id() );
-
-			if ( $rotated ) {
-				$file = null;
-			} else {
+		$size = $file->get_file_size();
+		if ( false !== $size && $size >= $this->get_file_size_limit() ) {
+			if ( ! $this->rotate_file( $file ) ) {
 				return false;
 			}
-		}
 
-		if ( ! $file instanceof File ) {
-			$new_path = Settings::get_log_directory() . $this->generate_filename( $source, $time );
-			$file     = new File( $new_path );
+			$file = new File( $path );
 		}
 
 		return $file->write( $text );
@@ -154,16 +148,12 @@ class FileController {
 	/**
 	 * Get all the rotations of a file and increment them, so that they overwrite the previous file with that rotation.
 	 *
-	 * @param string $file_id A file ID (file basename without the hash).
+	 * @param File $file The un-rotated ("current") iteration of the file to rotate.
 	 *
 	 * @return bool True if the file and all its rotations were successfully rotated.
 	 */
-	private function rotate_file( $file_id ): bool {
-		$rotations = $this->get_file_rotations( $file_id );
-
-		if ( is_wp_error( $rotations ) || ! isset( $rotations['current'] ) ) {
-			return false;
-		}
+	private function rotate_file( File $file ): bool {
+		$rotations = $this->get_rotation_siblings( $file );
 
 		$max_rotation_marker = self::MAX_FILE_ROTATIONS - 1;
 
@@ -177,7 +167,7 @@ class FileController {
 				$results[] = $rotations[ $i ]->rotate();
 			}
 		}
-		$results[] = $rotations['current']->rotate();
+		$results[] = $file->rotate();
 
 		return ! in_array( false, $results, true );
 	}
@@ -403,23 +393,38 @@ class FileController {
 			return $file;
 		}
 
-		$current   = array();
-		$rotations = array();
-
-		$source  = $file->get_source();
-		$created = 0;
-		if ( $file->has_standard_filename() ) {
-			$created = $file->get_created_timestamp();
-		}
+		$current = array();
 
 		if ( is_null( $file->get_rotation() ) ) {
 			$current['current'] = $file;
 		} else {
-			$current_file_id = File::generate_file_id( $source, null, $created );
+			$created = 0;
+			if ( $file->has_standard_filename() ) {
+				$created = $file->get_created_timestamp();
+			}
+
+			$current_file_id = File::generate_file_id( $file->get_source(), null, $created );
 			$result          = $this->get_file_by_id( $current_file_id );
 			if ( ! is_wp_error( $result ) ) {
 				$current['current'] = $result;
 			}
+		}
+
+		return array_merge( $current, $this->get_rotation_siblings( $file ) );
+	}
+
+	/**
+	 * Get File instances for the existing rotations of a file.
+	 *
+	 * @param File $file Any iteration of a file, from which the source and creation date are taken.
+	 *
+	 * @return File[] An associative array where the rotation integer of the file is the key, sorted by rotation.
+	 */
+	private function get_rotation_siblings( File $file ): array {
+		$source  = $file->get_source();
+		$created = 0;
+		if ( $file->has_standard_filename() ) {
+			$created = $file->get_created_timestamp();
 		}
 
 		$rotations_pattern = sprintf(
@@ -435,6 +440,8 @@ class FileController {
 		$rotation_pattern = Settings::get_log_directory() . $source . $rotations_pattern . $created_pattern . '*.log';
 		$rotation_paths   = glob( $rotation_pattern );
 		$rotation_files   = $this->convert_paths_to_objects( $rotation_paths );
+
+		$rotations = array();
 		foreach ( $rotation_files as $rotation_file ) {
 			if ( $rotation_file->is_readable() ) {
 				$rotations[ $rotation_file->get_rotation() ] = $rotation_file;
@@ -443,7 +450,7 @@ class FileController {
 
 		ksort( $rotations );
 
-		return array_merge( $current, $rotations );
+		return $rotations;
 	}
 
 	/**

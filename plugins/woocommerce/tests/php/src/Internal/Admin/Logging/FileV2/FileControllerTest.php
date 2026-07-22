@@ -99,13 +99,14 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	 * @testdox The write_to_file method should append content to an existing file of the correct source that isn't rotated.
 	 */
 	public function test_write_to_file_existing() {
-		$time = time();
-		$hash = wp_hash( 'cheddar' );
+		$time    = time();
+		$file_id = File::generate_file_id( 'unit-testing', null, $time );
+		$hash    = File::generate_hash( $file_id );
 
 		$existing_files = array(
-			'target' => 'unit-testing-' . gmdate( 'Y-m-d', $time ) . '-' . $hash . '.log',
-			'other1' => 'unit-testing.0-' . gmdate( 'Y-m-d', $time ) . '-' . $hash . '.log',
-			'other2' => 'unit-testing-' . gmdate( 'Y-m-d', strtotime( '-2 days' ) ) . '-' . $hash . '.log',
+			'target' => $file_id . '-' . $hash . '.log',
+			'other1' => 'unit-testing.0-' . gmdate( 'Y-m-d', $time ) . '-' . wp_hash( 'cheddar' ) . '.log',
+			'other2' => 'unit-testing-' . gmdate( 'Y-m-d', strtotime( '-2 days' ) ) . '-' . wp_hash( 'cheddar' ) . '.log',
 		);
 		foreach ( $existing_files as $filename ) {
 			$path     = Settings::get_log_directory() . $filename;
@@ -135,8 +136,9 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	 * @testdox The write_to_file method should rotate a file that has reached the size limit and then write the content to a fresh file.
 	 */
 	public function test_write_to_file_needs_rotation() {
-		$time = time();
-		$path = Settings::get_log_directory() . 'unit-testing-' . gmdate( 'Y-m-d', $time ) . '-' . wp_hash( 'cheddar' ) . '.log';
+		$time    = time();
+		$file_id = File::generate_file_id( 'unit-testing', null, $time );
+		$path    = Settings::get_log_directory() . $file_id . '-' . File::generate_hash( $file_id ) . '.log';
 
 		$resource         = fopen( $path, 'a' );
 		$existing_content = random_bytes( 200 ) . "\n";
@@ -180,6 +182,30 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		}
 
 		remove_filter( 'woocommerce_log_file_size_limit', $filter_callback );
+	}
+
+	/**
+	 * @testdox The write_to_file method should leave a file with a stale hash suffix alone and write to a new file with the current hash.
+	 */
+	public function test_write_to_file_hash_mismatch_creates_new_file() {
+		$time       = time();
+		$file_id    = File::generate_file_id( 'unit-testing', null, $time );
+		$stale_path = Settings::get_log_directory() . $file_id . '-' . wp_hash( 'cheddar' ) . '.log';
+
+		file_put_contents( $stale_path, "stale\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+
+		$result = $this->sut->write_to_file( 'unit-testing', 'test', $time );
+		$this->assertTrue( $result );
+
+		$paths = glob( Settings::get_log_directory() . '*.log' );
+		$this->assertCount( 2, $paths, 'A new file with the current hash should be created next to the stale one' );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$this->assertEquals( "stale\n", file_get_contents( $stale_path ), 'The stale file should not receive new entries' );
+
+		$current_path = Settings::get_log_directory() . $file_id . '-' . File::generate_hash( $file_id ) . '.log';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$this->assertEquals( "test\n", file_get_contents( $current_path ), 'The new entry should be written to a file with the current hash' );
 	}
 
 	/**

@@ -475,6 +475,8 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 
 		// Backdate the "old" file's modification time to 4 days ago.
 		touch( $old_files[0]->get_path(), time() - 4 * DAY_IN_SECONDS ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+		// Drop the stale stat cache entry from before the touch.
+		clearstatcache();
 
 		$recent_files = $file_controller->get_files( array( 'source' => 'place-order-debug-recent' ) );
 		$this->assertCount( 1, $recent_files );
@@ -536,6 +538,147 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox cleanup() keeps deleting old log files in batches until none remain, even when there are more than one batch's worth.
+	 */
+	public function test_cleanup_drains_old_log_files_beyond_one_batch(): void {
+		$file_controller = wc_get_container()->get( FileController::class );
+		$log_directory   = Settings::get_log_directory();
+
+		$file_count = OrderLogsCleanupHelper::MAX_FILES_PER_RUN + 5;
+		$date       = gmdate( 'Y-m-d', strtotime( '-4 days' ) );
+		$old_time   = time() - 4 * DAY_IN_SECONDS;
+
+		// Create the files directly; going through the logger would be much slower.
+		for ( $i = 0; $i < $file_count; $i++ ) {
+			$path = $log_directory . "place-order-debug-{$i}-{$date}-" . md5( (string) $i ) . '.log';
+			file_put_contents( $path, 'entry' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			touch( $path, $old_time ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+		}
+		// Drop the stale stat cache entry from before the touch.
+		clearstatcache();
+
+		$this->assertEquals( $file_count, $file_controller->get_files( array( 'source' => 'place-order-debug' ), true ) );
+
+		$this->sut_cleanup_helper->cleanup();
+
+		$this->assertEquals(
+			0,
+			$file_controller->get_files( array( 'source' => 'place-order-debug' ), true ),
+			'All old files should be deleted, not just the first batch'
+		);
+	}
+
+	/**
+	 * @testdox cleanup() keeps deleting dangling order meta in batches until none remain, even when there are more than one batch's worth.
+	 */
+	public function test_cleanup_drains_dangling_orders_beyond_one_batch(): void {
+		$this->setup_hpos_and_reset_container( true );
+
+		$order_count = OrderLogsCleanupHelper::MAX_ORDERS_PER_RUN + 5;
+
+		for ( $i = 0; $i < $order_count; $i++ ) {
+			$order = wc_create_order();
+			$order->set_date_created( strtotime( '-5 days' ) );
+			$order->add_meta_data( '_debug_log_source', 'place-order-debug-drain-' . $i, true );
+			$order->save();
+		}
+
+		$this->assertEquals( $order_count, $this->count_debug_log_source_meta_entries() );
+
+		$this->sut_cleanup_helper->cleanup();
+
+		$this->assertEquals(
+			0,
+			$this->count_debug_log_source_meta_entries(),
+			'All dangling order meta should be deleted, not just the first batch'
+		);
+	}
+
+	/**
+	 * Count the `_debug_log_source` meta entries in the HPOS orders meta table.
+	 *
+	 * @return int
+	 */
+	private function count_debug_log_source_meta_entries(): int {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.SlowDBQuery
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				'_debug_log_source'
+			)
+		);
+		// phpcs:enable WordPress.DB.SlowDBQuery
+	}
+
+	/**
+	 * @testdox cleanup() removes both the meta and the log file of a dangling order when the FileV2 handler is the default.
+	 */
+	public function test_cleanup_removes_dangling_order_meta_and_file_with_file_v2_handler(): void {
+		$handler         = new LogHandlerFileV2();
+		$file_controller = wc_get_container()->get( FileController::class );
+
+		$order = OrderHelper::create_order();
+		$order->set_date_created( strtotime( '-5 days' ) );
+		$order->add_meta_data( '_debug_log_source', 'place-order-debug-dangling', true );
+		$order->save();
+
+		$handler->handle( time(), 'debug', 'a step', array( 'source' => 'place-order-debug-dangling' ) );
+		$files = $file_controller->get_files( array( 'source' => 'place-order-debug-dangling' ) );
+		$this->assertCount( 1, $files );
+		touch( $files[0]->get_path(), time() - 4 * DAY_IN_SECONDS ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+		// Drop the stale stat cache entry from before the touch.
+		clearstatcache();
+
+		$this->sut_cleanup_helper->cleanup();
+
+		$order_reloaded = wc_get_order( $order->get_id() );
+		$this->assertEmpty( $order_reloaded->get_meta( '_debug_log_source' ) );
+		$this->assertCount(
+			0,
+			$file_controller->get_files( array( 'source' => 'place-order-debug-dangling' ) ),
+			'The dangling order\'s log file should be deleted by the file sweep'
+		);
+	}
+
+	/**
+	 * @testdox cleanup() deletes dangling order meta but does not sweep log files when the default handler is not FileV2.
+	 */
+	public function test_cleanup_skips_file_sweep_when_handler_is_not_file_v2(): void {
+		$handler         = new LogHandlerFileV2();
+		$file_controller = wc_get_container()->get( FileController::class );
+
+		$order = OrderHelper::create_order();
+		$order->set_date_created( strtotime( '-5 days' ) );
+		$order->add_meta_data( '_debug_log_source', 'place-order-debug-dbhandler', true );
+		$order->save();
+
+		$handler->handle( time(), 'debug', 'a step', array( 'source' => 'place-order-debug-dbhandler' ) );
+		$files = $file_controller->get_files( array( 'source' => 'place-order-debug-dbhandler' ) );
+		$this->assertCount( 1, $files );
+		touch( $files[0]->get_path(), time() - 4 * DAY_IN_SECONDS ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+		// Drop the stale stat cache entry from before the touch.
+		clearstatcache();
+
+		update_option( 'woocommerce_logs_default_handler', \WC_Log_Handler_DB::class );
+
+		try {
+			$this->sut_cleanup_helper->cleanup();
+		} finally {
+			delete_option( 'woocommerce_logs_default_handler' );
+		}
+
+		$order_reloaded = wc_get_order( $order->get_id() );
+		$this->assertEmpty( $order_reloaded->get_meta( '_debug_log_source' ), 'Dangling meta should still be cleaned up' );
+		$this->assertCount(
+			1,
+			$file_controller->get_files( array( 'source' => 'place-order-debug-dbhandler' ) ),
+			'The file sweep should not run when the FileV2 handler is not the default'
+		);
+	}
+
+	/**
 	 * Initialize HPOS and reset the DI container resolutions
 	 * (resetting the container is needed because the tested class checks for HPOS activation
 	 * only once when the DI container first retrieves it).
@@ -557,12 +700,14 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 		$files           = $file_controller->get_files(
 			array(
 				'source'   => 'place-order-debug',
-				'per_page' => 1000,
+				'per_page' => PHP_INT_MAX,
 			)
 		);
 
 		if ( is_array( $files ) && ! empty( $files ) ) {
-			$file_controller->delete_files( array_map( fn( $file ) => $file->get_file_id(), $files ) );
+			foreach ( $files as $file ) {
+				$file->delete();
+			}
 		}
 	}
 }
