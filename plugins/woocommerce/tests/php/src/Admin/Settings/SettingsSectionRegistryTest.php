@@ -879,11 +879,17 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		add_action( 'woocommerce_sections_checkout', array( $page, 'output_sections' ) );
 		add_action( 'woocommerce_settings_checkout', array( $page, 'output' ) );
 
+		$buffer_level = ob_get_level();
+		ob_start();
+
 		try {
-			ob_start();
 			include WC_ABSPATH . 'includes/admin/views/html-admin-settings.php';
 			return ob_get_clean();
 		} finally {
+			// Drain buffers left open when rendering throws.
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
 			$this->restore_hook_callbacks( 'woocommerce_sections_checkout', $original_sections_hook );
 			$this->restore_hook_callbacks( 'woocommerce_settings_checkout', $original_settings_hook );
 			$this->replace_wc_admin_settings_pages( $original_settings );
