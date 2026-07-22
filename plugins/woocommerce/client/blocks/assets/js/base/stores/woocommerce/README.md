@@ -5,7 +5,7 @@ This folder contains the Interactivity API (iAPI) stores that WooCommerce blocks
 Stores in this folder:
 
 -   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format.
--   [`woocommerce/cart`](#woocommercecart-store) — the read-only cart mirror plus context-held draft collections that back purchase UI (add-to-cart forms, buttons, the mini-cart), with mutation batching for performance.
+-   [`woocommerce/cart`](#woocommercecart-store) — the read-only cart mirror plus a keyed global home for the draft cart items that back purchase UI (add-to-cart forms, buttons, the mini-cart), addressed by server-defined draft keys, with mutation batching for performance.
 -   `woocommerce/shopper-lists` — wishlist and saved-for-later state for the shopper-lists blocks (unchanged; no dedicated section here).
 
 ---
@@ -240,20 +240,20 @@ For variable products, `findProduct` returns `null` when no variation matches th
 
 A locked, private iAPI store that holds two things: a **read-only mirror of the server cart** (`state.cart`, the Store API `/cart` response with optimistic edits applied) and the **draft cart items** that back purchase UI — the quantities, variation selections, and extension data a shopper is configuring before they add to cart.
 
-Shopper input is modeled as **draft cart items** held in **draft collections**. A draft is literally a Store API `cart/add-item` request payload — there is no mapping layer between what a form collects and what gets posted. A collection is how the store keeps the same product's input independent across the many places a purchase form can appear on one page (a product template's main form, a sticky add-to-cart bar, a grouped child, a Product Collection card, a bundle slot). `state.draftItems` is the page-wide collection; a container block isolates its own subtree by initializing a `draftItems` array in its `woocommerce/cart` context. Surfaces that resolve the same collection share drafts and stay in sync; surfaces under different collections are fully independent.
+Shopper input is modeled as **draft cart items** that live in **global state, addressed by server-defined draft keys**. A draft is literally a Store API `cart/add-item` request payload — there is no mapping layer between what a form collects and what gets posted. `state.draftItems` is a keyed map of draft collections (`Record<DraftKey, DraftItem[]>`); each collection keeps the same product's input independent across the many places a purchase form can appear (a product template's main form, a sticky add-to-cart bar, a grouped child, a Product Collection card, a bundle slot). A container block isolates its own subtree by declaring an opaque, server-minted `draftKey` in its `woocommerce/cart` context; a surface wrapped in no container resolves the one reserved session-global collection. Surfaces that resolve the same key share drafts and stay in sync; surfaces under different keys are fully independent.
 
 **Source files:**
 
 -   JS: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/cart.ts`
--   Collection containers (each declares an empty `woocommerce/cart` collection): `plugins/woocommerce/src/Blocks/BlockTypes/ProductTemplate.php` (Product Collection loop items), `plugins/woocommerce/src/Blocks/BlockTypes/SingleProduct.php` (Single Product block)
--   Collection-root context (`queryId`): `plugins/woocommerce/src/Blocks/BlockTypes/ProductCollection/Renderer.php`
--   Draft seeding: `plugins/woocommerce/src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php`
+-   Container blocks (each mints and declares a `woocommerce/cart` draft key): `plugins/woocommerce/src/Blocks/BlockTypes/ProductTemplate.php` (Product Collection loop items), `plugins/woocommerce/src/Blocks/BlockTypes/SingleProduct.php` (Single Product block)
+-   Product Collection root (`queryId` on block context + router region, read by `ProductTemplate.php` to mint keys): `plugins/woocommerce/src/Blocks/BlockTypes/ProductCollection/Renderer.php`
+-   Draft-seed filing: `plugins/woocommerce/src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php`, `.../AddToCartWithOptions/Utils.php`, `.../AddToCartWithOptions/GroupedProductItemSelector.php`
 -   Cart-state seeding: `plugins/woocommerce/src/Blocks/Utils/BlocksSharedState.php`
 -   Behavioral tests: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/test/cart.ts`
 
 ### When to use it
 
-Use this store when an interactive block needs to record shopper purchase input before an add-to-cart (a quantity, a variation selection, a namespaced extension field), read the live/optimistic cart, or add, update, or remove cart lines. Because reads and writes resolve through the in-context draft collection and product, the same block code works whether it is rendered as a single product's main form, a Product Collection card, a mini-cart row, or a page-wide sticky bar.
+Use this store when an interactive block needs to record shopper purchase input before an add-to-cart (a quantity, a variation selection, a namespaced extension field), read the live/optimistic cart, or add, update, or remove cart lines. Because every read and write resolves the draft collection for the nearest declared key and the product in context, the same block code works whether it is rendered as a single product's main form, a Product Collection card, a mini-cart row, or a page-wide sticky bar.
 
 ### Architecture at a glance
 
@@ -263,15 +263,18 @@ Two planes of state:
   state.cart          read-only mirror of the Store API /cart response
                       (with optimistic edits); the server owns line identity.
 
-  state.draftItems    the page-wide draft collection: DraftItem[], at most one
-                      draft per product id. A DraftItem IS a cart/add-item
-                      payload. Lives alongside — never inside — state.cart.
+  state.draftItems    the keyed draft home: Record<DraftKey, DraftItem[]>.
+                      One collection per key, at most one draft per product id
+                      within it. A DraftItem IS a cart/add-item payload. Lives
+                      alongside — never inside — state.cart, and is written only
+                      by the shopper (never server-seeded).
 
-Collection resolution (one internal place — resolveDraftItems):
+Key resolution (one internal place — resolveDraftKey / resolveCollection):
 
-  context.draftItems  a container's own collection, when it initialized one.
-  state.draftItems    the page-wide collection, the fallback.
-  resolved  = context.draftItems ?? state.draftItems
+  context.draftKey    a container's declared key, inherited by its subtree.
+  GLOBAL_DRAFT_KEY    'woocommerce/global', the reserved fallback key.
+  key         = context.draftKey ?? GLOBAL_DRAFT_KEY
+  collection  = state.draftItems[key]      (undefined until first write)
 
 Reads (never guess a line):        Writes:
 
@@ -279,48 +282,55 @@ Reads (never guess a line):        Writes:
   state.findItem(…)     ├─▶ Envelope   itemInContext.draft.quantity = 3
   state.inCartQuantity ─┘  { cartItem?, draft? }   (reactive, honored by addItem)
                                      actions.upsertDraftItem( partial, { id? } )
-                                     actions.removeDraftItem( { id? } )
                                      actions.addItem( payload? )  ── posts drafts
                                      actions.updateItem / removeItem / refresh
 ```
 
 ### The draft-collection model
 
-`state.draftItems` is a flat `DraftItem[]` — the page-wide collection. A `DraftItem` is exactly a `cart/add-item` payload:
+`state.draftItems` is a keyed map of draft collections. A `DraftItem` is exactly a `cart/add-item` payload; a `DraftKey` is an opaque address for one collection:
 
 ```ts
+type DraftKey = string; // an opaque address for one collection (see below)
+
 type DraftItem = {
     id: number; // product or variation id; also the per-collection uniqueness key
     quantity: number;
     variation?: SelectedAttributes[]; // for a variation draft
     [ extensionProp: string ]: unknown; // namespaced, e.g. 'my-plugin/gift-note'
 };
+
+state.draftItems: Record< DraftKey, DraftItem[] >;
 ```
 
 Extension props ride at the payload root, namespaced (a key containing a `/`), exactly as the Store API accepts them — there is no separate wrapper for them. This is the read model's mirror image of `CartItem.extensions`, which reflects the server's response once a line exists.
 
-A collection holds **at most one draft per product `id`**: `upsertDraftItem` merges into the draft whose `id` matches and appends otherwise. When a surface genuinely needs two independent drafts of the same product (two bundle slots offering the same child), it initializes **two collections** rather than reaching for a second addressing concept — one draft per product per collection is the invariant, and the collection is the only isolation boundary.
+**Keys are opaque.** A `DraftKey` is a plain string whose only contract is equality: the same key resolves the same collection, and nothing else is promised — no parseable format, no stability beyond a single browsing session. Core mints two formats (see [The container primitive](#the-container-primitive)), but a consumer never parses or constructs one; it only ever declares a key it was handed (or, for an extension, one it chose) and lets the store resolve it. Because a surface's key is identical across successive server renders of that surface, its drafts re-attach after region remounts and client-side navigations.
 
-Drafts are **client-only reactive state the server never mirrors into `state.cart`**. This is what makes client-side (router-region) navigation draft-safe: the cart mirror reconciles with the server, while a shopper's in-progress draft edits live in a plane the server never overwrites.
+**One collection per key; at most one draft per product `id` within it.** `upsertDraftItem` merges into the draft whose `id` matches and appends otherwise. When a surface genuinely needs two independent drafts of the same product (two bundle slots offering the same child), its containers declare **two keys** rather than reaching for a second addressing concept — one draft per product per collection is the invariant, and the key is the only isolation boundary.
+
+**The server never seeds `state.draftItems`.** Collections are created lazily, on a shopper's first write to a key; the map starts empty on a fresh page load. Drafts are client-only reactive state the server never mirrors into `state.cart`. This is what makes client-side (router-region) navigation draft-safe: the cart mirror reconciles with the server, while a shopper's in-progress draft edits live in a plane the server never overwrites — keyed so they re-attach wherever their surface re-renders.
 
 ### The container primitive
 
-A container isolates its subtree by initializing an empty draft collection in its `woocommerce/cart` context — plain markup, with no id to mint and no service to call:
+A container isolates its subtree by declaring an opaque, server-minted draft key in its `woocommerce/cart` context — a single `draftKey`:
 
 ```html
-data-wp-context---draft-items='woocommerce/cart::{"draftItems":[]}'
+data-wp-context---draft-key='woocommerce/cart::{"draftKey":"<key>"}'
 ```
 
-Any surface nested inside that container then resolves that collection; a surface with no such ancestor resolves the page-wide `state.draftItems`. The `draftItems` key is what creates the boundary — other `woocommerce/cart` context keys (`draftSeed`, a mini-cart row's `id`/`key`) do **not**.
+Any surface nested inside that container then resolves that key's collection; a surface with no such ancestor resolves the reserved session-global collection under `GLOBAL_DRAFT_KEY` (`'woocommerce/global'`). The `draftKey` key is what creates the boundary — other `woocommerce/cart` context keys (a mini-cart row's `id`/`key`) do **not**.
 
-The two core containers WooCommerce ships are:
+The two core containers WooCommerce ships mint their key server-side:
 
--   `ProductTemplate.php` — emits the empty-collection bag on each Product Collection loop item (`<li>`), isolating every card in the grid.
--   `SingleProduct.php` — emits the same bag on the Single Product block wrapper, isolating that block from the page-wide surfaces.
+-   `ProductTemplate.php` — emits a `draftKey` bag on each Product Collection loop item (`<li>`), minting `collection/<queryId>/<productId>`, isolating every card in the grid. (`queryId` is a static block attribute unchanged by pagination, so the card's key is stable across successive renders.)
+-   `SingleProduct.php` — emits a `draftKey` bag on the Single Product block wrapper, minting `single-product/<productId>/<n>`, where `<n>` is a per-request, per-product document-order occurrence counter. The counter is what keeps two Single Product blocks for the same product on one page mutually isolated.
+
+An extension gets the same primitive from markup alone: it declares a namespaced key of its own (e.g. `data-wp-context---draft-key='woocommerce/cart::{"draftKey":"my-plugin/slot-1"}'`) on its container element, with zero core changes. Key formats are internal and unpromised; the only contract is equality.
 
 The three-hyphen attribute name is required because `wp_interactivity_data_wp_context()` always emits an attribute literally named `data-wp-context`; an element that already carries a default context bag (here, the `woocommerce/products` product context) cannot carry a second one under the same attribute name — the HTML parser would keep the first and silently drop the second. `data-wp-context---<suffix>` is the supported way to add a second, namespaced context bag on one element (the same pattern the shopper-lists blocks use for `data-wp-context---notices`).
 
-**Resolution lives in one place.** A module-private `resolveDraftItems()` in `cart.ts` implements `context.draftItems ?? state.draftItems` (nearest context wins by the runtime's own inheritance; a call from outside any directive degrades to `state.draftItems` rather than throwing). Every getter and action routes through it. **No consumer ever writes that fallback conditional** — you read a resolved draft through the envelope (below), and a container's own subtree code may read the collection it initialized straight from its `woocommerce/cart` context.
+**Resolution lives in one place.** A module-private `resolveDraftKey()` in `cart.ts` implements `context.draftKey ?? GLOBAL_DRAFT_KEY` (the nearest declared key wins by the runtime's own context inheritance; a call from outside any directive degrades to `GLOBAL_DRAFT_KEY` rather than throwing), and a companion `resolveCollection( key )` returns `state.draftItems[ key ]` (tolerating a not-yet-created collection as empty). Every getter and action routes through them. **No consumer ever reads or writes a key, or writes that fallback conditional** — you read a resolved draft through the envelope (below) and write it back, and the store does the addressing.
 
 ### Reading: the in-context envelope
 
@@ -336,7 +346,7 @@ type Envelope = {
 There is no `isInCart` (or any other) member — no consumer needed the "in the cart, but no single identifiable line" tri-state, so the envelope carries only `cartItem` and `draft`.
 
 -   `state.itemInContext` — the envelope for the product the surrounding markup implies, resolved through the `woocommerce/products` store's `productInContext`. The resolved collection's draft is paired with its cart line. When no product is in context (nothing rendered), it returns an empty envelope.
--   `state.findItem( { id?, key?, filter? } )` — the explicit primitive behind `itemInContext`, for looking up a specific draft/line pair. It resolves the draft from the nearest collection, same as `itemInContext`.
+-   `state.findItem( { id?, key?, filter? } )` — the explicit primitive behind `itemInContext`, for looking up a specific draft/line pair. It resolves the draft from the nearest declared key's collection, same as `itemInContext`.
 -   `state.inCartQuantity` — the in-context product's in-cart quantity. A grouped product aggregates its children's own in-cart quantities (each resolved independently, by id); a variable product resolves through its currently selected variation (the same resolution as `itemInContext`); a simple product is its own paired line's quantity. It is `0` when nothing pairs or no product is in context.
 
 **Pairing never guesses.** `cartItem` is populated only when the pairing ladder resolves to exactly one candidate line:
@@ -348,13 +358,10 @@ Any remaining ambiguity — zero lines, or more than one line that cannot be tol
 
 ### Writing: drafts
 
-Draft state is written **directly, or through the two conveniences** — whichever is clearer at the call site:
+Draft state is written **directly, or through the creation/merge convenience** — whichever is clearer at the call site:
 
--   **Direct mutation is first-class.** The `draft` an envelope hands back is the live reactive object from the resolved collection, not a copy. Mutating it — `itemInContext.draft.quantity = 3`, or `findItem( { id } ).draft` — is supported, notifies every surface that resolves the same collection, and is honored by `addItem` posting (which reads the collection at call time). The same is true of the resolved collection itself; a container's own subtree code may mutate the collection it initialized.
--   `actions.upsertDraftItem( partial, { id? }? )` — the creation/merge convenience. It resolves the nearest draft collection, then merges `partial` into the draft whose `id` matches — `id` resolved from `options.id` when given, else `partial.id` — appending a new draft otherwise. It **rejects, leaving state unchanged**, when: no numeric target `id` can be resolved; `partial.id` disagrees with an already-resolved target `id` (an in-place identity change — remove the draft and add a new one instead); or a brand-new draft is created without a numeric `quantity`. Each rejection is a dev-build `console.warn` and a silent no-op in production.
--   `actions.removeDraftItem( { id? }? )` — removes the resolved collection's draft for the given product. It rejects (state unchanged) on a non-numeric `id`; naming a product with no matching draft in the resolved collection is a silent no-op.
-
-> This revision keeps `upsertDraftItem` / `removeDraftItem` as conveniences, but the surface no longer treats drafts as read-only or writes as "actions only": the write policy leaves room for a planned future revision that drops `upsertDraftItem` in favor of editing `itemInContext.draft` directly.
+-   **Direct mutation is first-class.** The `draft` an envelope hands back is the live reactive object from the resolved collection, not a copy. Mutating it — `itemInContext.draft.quantity = 3`, or `findItem( { id } ).draft` — is supported, notifies every surface that resolves the same key, and is honored by `addItem` posting (which reads the collection at call time).
+-   `actions.upsertDraftItem( partial, { id? }? )` — the creation/merge convenience. It resolves the nearest key's draft collection, then merges `partial` into the draft whose `id` matches — `id` resolved from `options.id` when given, else `partial.id` — appending a new draft otherwise. **Creation composes the new draft from the surface's server-filed seed** (`{ ...seed, ...partial }`, read via `getServerState()`; see [The server half](#the-server-half)), so an untouched field falls back to its server-rendered default, and the collection is materialized lazily on this first write. It **rejects, leaving state unchanged**, when: no numeric target `id` can be resolved; `partial.id` disagrees with an already-resolved target `id` (an in-place identity change — remove the draft and add a new one instead); or a brand-new draft is created without a numeric `quantity` (from either `partial` or the seed). Each rejection is a dev-build `console.warn` and a silent no-op in production.
 
 **Bystander discipline.** Because watch and init callbacks re-run on every surface that resolves a shared collection, only a genuine shopper edit — or a clamp of the shared value itself — may write to a draft. A sibling surface that the shopper never touched must not write its stale local default back over the shared draft (for example, a never-selected variation surface must not overwrite "nothing selected" onto a variation another surface resolved). When building a new surface that shares a collection, gate every draft write behind an actual user action.
 
@@ -362,8 +369,14 @@ Draft state is written **directly, or through the two conveniences** — whichev
 
 `actions.addItem( payload? )` is polymorphic:
 
--   **`addItem()`** (no argument) resolves the in-context product via `woocommerce/products` and posts the resolved collection's draft(s) for it: a simple or variable product's own single draft (`itemInContext.draft`), or, for a grouped product, every child's draft (children resolved one-directionally through the products store) whose `quantity` is greater than `0`. Multiple children are posted as one auto-batched request set, not one request per child. It never posts another collection's or another product's draft, and sends nothing when the resolution yields no draft.
--   **`addItem( payload )`** posts the payload verbatim — extension props at its root included — bypassing collection and product resolution entirely. This is the path an extension composing its own `cart/add-item` payload (a bundle carrying `wc-bundle-demo/children`, say) uses.
+-   **`addItem()`** (no argument) resolves the in-context product via `woocommerce/products` and posts the resolved collection's draft(s) for it:
+    -   a simple or variable product posts its own single draft (`itemInContext.draft`), **falling back to the surface's server-filed seed** (`draft ?? seed`) so an untouched form still posts its default;
+    -   a grouped product posts every declared child's draft (children resolved one-directionally through the products store) whose `quantity` is greater than `0` — untouched children never post, because seeds are not consulted on this rung.
+
+    Multiple children are posted as one auto-batched request set, not one request per child.
+-   **`addItem( payload )`** posts the payload verbatim — extension props at its root included — bypassing key and product resolution entirely. This is the path an extension composing its own `cart/add-item` payload (a bundle carrying `wc-bundle-demo/children`, say) uses.
+
+**Product-scoped posting is a guarantee, not a side effect.** `addItem` posts only the in-context product's draft (simple/variable), the grouped parent's declared children with `quantity > 0`, or an explicit payload — it **never iterates a collection**. This matters now that a session-global collection accumulates drafts from every page a shopper visited: an add from one surface can never leak an unrelated product's draft that happens to share the same key. When the resolution yields no draft (and no seed), `addItem` sends nothing.
 
 Every posted item optimistically bumps a matching existing cart line's quantity in place (unless `sold_individually`) or is pushed as a new line, commits or rolls back through the mutation queue, and fires the legacy added-to-cart event once per call on success. A cycle whose requests all fail rolls the cart back to its pre-cycle snapshot and surfaces a `woocommerce/store-notices` notice.
 
@@ -378,52 +391,59 @@ The store also exposes the retained cart-line actions:
 
 ### The server half
 
-Server-side rendering declares collection boundaries and seeds initial drafts, so every visible value is correct in the initial HTML before hydration. **Nothing on the server addresses a draft**: the context tree in the delivered markup is the whole story.
+Server-side rendering mints each collection's key and files each surface's initial draft as server state, so every visible value is correct in the initial HTML before hydration. **Nothing on the server writes a draft**: containers declare keys, purchase surfaces file seeds, and the client resolves and materializes drafts from there.
 
 #### Container boundaries
 
-`ProductTemplate.php` (Product Collection loop items) and `SingleProduct.php` (Single Product block) each emit the empty-collection bag documented under [The container primitive](#the-container-primitive). That is the entire server-side isolation mechanism: an empty `data-wp-context---draft-items` bag, no minting, no push/pop, no registration.
+`ProductTemplate.php` (Product Collection loop items) and `SingleProduct.php` (Single Product block) each mint a key and emit the `data-wp-context---draft-key` bag documented under [The container primitive](#the-container-primitive). Each also **injects the same `draftKey` into its existing `render_block_context` filter**, so descendant purchase surfaces render with the container's key in their block context and can file their seeds under it. That is the entire server-side isolation mechanism: a `draftKey` context bag plus block-context propagation — no push/pop, no registration.
 
-`ProductCollection/Renderer.php` adds a `queryId` to the collection root's own `woocommerce/product-collection` context bag (the same value already exposed in that element's `data-wp-router-region` attribute). This is product-collection domain data, not a cart concept; the cart store's internal draft-lifecycle machinery reads it to keep a card's edited draft alive across an enhanced-pagination remount (see [Draft lifecycle](#draft-lifecycle)).
+`ProductCollection/Renderer.php` contributes **nothing** to the cart store. `queryId` lives only on the Product Collection block's own context (via `providesContext`) and on the collection root's `data-wp-router-region` attribute; `ProductTemplate.php` reads it from block context to mint each card's key. The cart store never sees `queryId`.
 
-#### Initialize-if-absent draft seeding
+#### Draft seeding
 
-A purchase surface seeds its initial draft as a context bag consumed by an init directive. `AddToCartWithOptions/Utils.php` emits the initial `cart/add-item` payload as a `woocommerce/cart` draft-seed bag and wires the init:
+Each purchase surface files its initial `cart/add-item` payload as server state, under its collection's key. The form-level emitter (`AddToCartWithOptions.php`) and the shared quantity-stepper emitter (`Utils::make_quantity_input_interactive()`, reached by the quantity-selector and grouped-product child-row blocks) each call:
 
-```html
-data-wp-context---draft-seed='woocommerce/cart::{"draftSeed":{"id":123,"quantity":1}}'
-data-wp-init--seed-draft='woocommerce/cart::actions.seedDraftIfAbsent'
+```php
+wp_interactivity_state( 'woocommerce/cart', array(
+    'draftSeeds' => array(
+        $draft_key => array(
+            $product_id => $seed_payload, // an initial cart/add-item payload
+        ),
+    ),
+) );
 ```
 
-`actions.seedDraftIfAbsent()` reads the **server-rendered** context — `getServerContext< { draftSeed?: DraftItem } >( 'woocommerce/cart' )?.draftSeed`, immune to the reactive proxy's client-side edits — resolves the nearest draft collection, and copies the seed into it **only when that collection holds no draft for the seed's product `id`**. This initialize-if-absent rule is what lets a router-region re-render's seed read run harmlessly: it can never clobber a shopper's in-progress edit, because a present draft is left untouched.
+`$draft_key` is read from the surface's block context (`$block->context['draftKey'] ?? 'woocommerce/global'`) — the key its container injected, or the reserved global key when no container wraps it. The three seed-emitting blocks (`add-to-cart-with-options` and its quantity-selector and grouped-product child-row selectors) declare `draftKey` in their `usesContext` so the injected key actually reaches their render context. Seeds accumulate across surfaces into one `draftSeeds` payload and print once.
+
+On the client, seeds are read **only through `getServerState( 'woocommerce/cart' )?.draftSeeds`** — the runtime's intact, per-page, navigation-fresh copy — and consulted at exactly two points: `upsertDraftItem` composes a new draft from the seed on the shopper's first write, and `addItem` falls back to the seed for an untouched simple/variable surface. A seed is **never applied into a collection**, so a re-delivered seed (on a region re-render or client-side navigation) can never replace or inject into an edited draft — the two live in different places. The runtime also auto-merges the incoming server state into a `state.draftSeeds` copy, but that client-side copy is **inert**: the store never reads it (it would accumulate stale entries across navigations); `getServerState()` is the only seed source.
+
+Grouped-product child rows seed at quantity `0` (each is optional), so an untouched grouped form posts none of them; a grouped parent seeds nothing at the form level (it has no single id to add). A directly-referenced variation carries its own `{ attribute, value }` pairs in its seed, so an untouched direct-variation surface posts a line the cart-line pairing ladder can match.
 
 #### Cart-state seeding
 
-`BlocksSharedState::load_cart_state()` seeds the read-only cart mirror (`state.cart`), the REST URL, and the notice id into `woocommerce/cart` state. It seeds **no page-wide addressing state** — the collection tree is established entirely by container markup, and the page-wide `state.draftItems` starts empty on the client.
+`BlocksSharedState::load_cart_state()` seeds the read-only cart mirror (`state.cart`) and the REST URL (`state.restUrl`) into `woocommerce/cart` state. It seeds **no draft addressing** — no keys, no seeds, and no notice id — so the client's `state.draftItems` starts empty on a fresh load; every collection is established by a shopper write against a container-declared or global key.
 
 ### Draft lifecycle
 
-Drafts live for the length of a page session by design:
+Drafts live for the length of a browsing session by design — a property of where they live, not of any per-surface machinery:
 
--   They **survive client-side (router-region) navigation**, including a Product Collection enhanced-pagination away-and-back round trip: the page-wide collection lives in client-only module state the server never overwrites, and an edited card's draft is preserved across the card's unmount/remount.
--   They **reset on a full page reload** — module state and context both reinitialize.
+-   They **survive region remounts.** A quantity edited on a Product Collection card persists across an enhanced-pagination away-and-back round trip: the card re-renders with the same server-minted key, global state was never touched, and render-time getter evaluation repaints the surviving draft on the first post-remount frame.
+-   They **survive cross-page client-side navigation.** A draft edited on a purchase surface survives a genuine client-side (router-region) navigation to another page and back, for the lifetime of the continuous session. Store modules persist across the navigation; the incoming page's server state merges non-destructively and never carries drafts; a returning surface re-declares its same key and its drafts re-attach. Surfaces wrapped in no container share the one global collection across pages, so product A's unwrapped form on page B shows the edit made on page A.
+-   They **reset on a hard reload.** All client state reinitializes; `state.draftItems` starts empty and seeds re-derive fresh. Drafts are client-side only — there is no persistence layer.
 
-The machinery that makes a remounted Product Collection card's draft survive is **internal to the store and unreachable by any consumer, even one holding lock consent**. It is three cooperating pieces, none of which is a member of the store surface:
+There is **no lifecycle machinery** behind this — no ledger, no restore protocol, no per-surface reconstruction. Survival is what the model yields on its own: global state that outlives region swaps and navigations, plus render-stable keys that re-address the same collection wherever a surface re-renders. Post-navigation display on every surface is exactly this generic yield. In particular, a **remounted variable-product card presents unconfigured attributes** with whatever quantity the surviving draft holds: attribute-selection UI state lives in products-namespace context that the remount discards, and no variation is re-resolved (that would be display-reconstruction machinery the model deliberately omits). Display and posting stay in agreement.
 
--   a **module-private ledger** (a plain module variable, never a store member) that holds each collection card's live collection, keyed by an internally derived `(queryId, productId)` identity;
--   a **register-or-restore init** the loop item's server markup resolves by name (`data-wp-init="woocommerce/cart::actions.registerOrRestoreDraftCollection"`), which registers a card's collection on first render and restores it from the ledger on a remount;
--   a **render-time bridge** inside the resolver, so the first post-remount paint already shows the restored draft.
-
-`registerOrRestoreDraftCollection` appears on `actions` **only** so the server-emitted directive string can resolve it; it is not part of the documented surface, derives its own card identity from context, and is a no-op wherever that identity cannot be derived. Extensions should not call it.
+> **History.** An earlier iteration of this store stored drafts in context-held collections and kept a remounted Product Collection card's draft alive with Product-Collection-specific machinery: a module-private ledger keyed by a derived card identity, a register-or-restore init directive on every card, a render-time bridge in the resolver, a per-card `data-wp-init`, `seedDraftIfAbsent` with its `data-wp-context---draft-seed` bags, and the empty-collection `data-wp-context---draft-items` bags. That entire apparatus — and the `removeDraftItem` action alongside it — was deleted with no successor when drafts moved into keyed global state. None of it exists in the shipped store; it is recorded here only so readers migrating from that model know it is gone.
 
 #### Residuals worth knowing
 
 These are accepted, shipped behaviors of the current validation-grade surface:
 
--   **Extension containers inside router regions get isolation but not remount survival.** The remount-survival machinery is wired only for Product Collection loop items — the surface the lifecycle guarantee names. An extension's own container inside a collection (or a Single Product block nested inside a collection card) isolates its subtree correctly, but its draft is not preserved across an enhanced-pagination remount; such a surface owns its own persistence.
--   **Duplicate-id drafts are possible via direct `push`.** Now that direct mutation is first-class, appending a second draft with an existing `id` straight onto a collection bypasses the one-draft-per-`id` invariant (lookups then resolve first-match). This is bounded — no shipped consumer appends directly; creation flows through `upsertDraftItem`, which maintains the invariant — and is a documented residual until a future revision designs direct creation.
--   **A raw `context.draftItems` reader can see one pre-reconciliation frame after a card remount.** Core getter-driven surfaces are bridged and paint correctly on the first post-remount render; only an extension binding that reads `context.draftItems` raw can observe a single stale frame, for one effect-cycle on one navigation edge.
--   **A remounted variable-product card presents its server-seeded default.** A variable product's variation selection lives in client context the remount discards, so a remounted card resolves against — and displays — its server-seeded default rather than the prior selection. Display and action stay in agreement.
+-   **The extension seed contract.** Declaring only the `draftKey` context bag gives an extension correct **client-side** addressing — its subtree resolves its collection, direct mutation and `upsertDraftItem` work, and the extension can read `state.draftItems[ <its own key> ]`. But **wrapping a core seed-emitting surface additionally requires propagating the key through `render_block_context`** so that surface files its seed under the extension's key. Without that, an untouched wrapped surface has no seed under the resolved key and posts nothing — a safe no-data outcome, never wrong data.
+-   **Cross-page Single Product instance collisions.** Two Single Product blocks for the same product on two different pages each mint `single-product/<productId>/1`, so under client-side navigation they share one collection. Within any single page, isolation is fully preserved (the occurrence counter distinguishes the instances); the collision is observable only across a client-side page navigation.
+-   **Same-`(key, id)` seed filing is last-write-wins.** When one product is filed twice under one key (e.g. standalone and as a grouped child, both unwrapped on one page), the later filing wins — the same order-dependent ambiguity the single shared collection already carried.
+-   **Hand-authored collections without a `queryId`** all mint under `collection/0/<productId>` and can therefore share drafts per product across two such collections. Enhanced pagination requires authored `queryId`s, so this affects only hand-rolled markup.
+-   **Duplicate-id drafts are possible via direct `push`.** Now that direct mutation is first-class, appending a second draft with an existing `id` straight onto a collection bypasses the one-draft-per-`id` invariant (lookups then resolve first-match). This is bounded — no shipped consumer appends directly; creation flows through `upsertDraftItem`, which maintains the invariant.
 
 ### Private and locked
 
@@ -450,14 +470,14 @@ const count = state.inCartQuantity;
 await actions.addItem();
 ```
 
-The store is **not a public API** while the draft-collection model is being validated. Its members can change or disappear without notice, and removing or changing state here is not a breaking change. Do not extend it from third-party code.
+The store is **not a public API** while the keyed draft model is being validated. Its members can change or disappear without notice, and removing or changing state here is not a breaking change. Do not extend it from third-party code.
 
-Unlike the products store, the cart store has **no consent-gated PHP surface** — its server side is plain container and seed markup, so `universalLock` (JS, for the store lock) is the only consent string it involves. Copy it from this README or the source files rather than retyping.
+Unlike the products store, the cart store has **no consent-gated PHP surface** — its server side is plain container-key and seed markup, so `universalLock` (JS, for the store lock) is the only consent string it involves. Copy it from this README or the source files rather than retyping.
 
 ### Patterns and pitfalls
 
--   **Read through the envelope; write the draft it hands you.** Bind display to `state.itemInContext` / `state.inCartQuantity`, and record input either by mutating the resolved draft directly (`itemInContext.draft.quantity = value`) or through `upsertDraftItem` / `removeDraftItem`. Never write a draft from a callback that a shopper did not trigger.
+-   **Read through the envelope; write the draft it hands you.** Bind display to `state.itemInContext` / `state.inCartQuantity`, and record input either by mutating the resolved draft directly (`itemInContext.draft.quantity = value`) or through `upsertDraftItem`. Never write a draft from a callback that a shopper did not trigger.
 -   **Handle `cartItem === undefined`.** The pairing ladder returns `undefined` whenever it cannot identify exactly one line. Treat that as "no known line", not "not in cart".
--   **Let containers own isolation.** A consumer block resolves the nearest collection automatically; it does not initialize `draftItems` itself. Initializing an empty collection in `woocommerce/cart` context is the job of the container that wraps or repeats purchase UI.
--   **Drafts survive client navigation, not a reload.** Draft edits persist across Interactivity-API region updates (such as collection pagination) but are discarded on a full page load. Persisting only for the session is by design, not a gap.
+-   **Let containers own isolation.** A consumer block resolves the nearest key automatically; it never reads, writes, or declares a key itself. Declaring a `draftKey` in `woocommerce/cart` context is the job of the container that wraps or repeats purchase UI — a core Product Collection card or Single Product block, or an extension's own container.
+-   **Drafts survive client navigation, not a reload.** Draft edits persist across Interactivity-API region updates (such as collection pagination) and cross-page client-side navigations, but are discarded on a hard reload. Persisting only for the session is by design, not a gap.
 -   **Do not extend this store from third-party code.** It is `lock: true` and private by design.
