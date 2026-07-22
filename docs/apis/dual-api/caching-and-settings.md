@@ -6,7 +6,7 @@ sidebar_position: 6
 
 # Settings and caching
 
-WooCommerce core's GraphQL endpoint is configured under **WooCommerce → Settings → Advanced → GraphQL**. The section appears only when the `dual_code_graphql_api` feature flag is on.
+WooCommerce core's GraphQL endpoint is configured under **WooCommerce → Settings → Advanced → GraphQL**. The section appears when some dual-API endpoint is active on the site: WooCommerce core's (the `dual_code_graphql_api` feature flag is on) or at least one registered by a plugin. The **Endpoint URL** setting, which only configures core's endpoint, is shown only when the feature flag is on.
 
 These settings are **site-wide, not per-endpoint**: every setting below except **Endpoint URL** applies to *every* dual-API endpoint on the site, including those registered by plugins. See [Scope: what applies where](#scope-what-applies-where).
 
@@ -29,7 +29,7 @@ The depth and complexity metrics are observable on a request by appending `?_deb
 
 The dual API has one set of switches and filters shared by every endpoint on the site, there is no per-plugin configuration surface. Concretely:
 
-- **The `dual_code_graphql_api` feature flag gates every dual-API endpoint.** When it's off, neither core's `/wc/graphql` nor any plugin endpoint is registered (`Main::register_graphql_endpoint()` is a no-op). PHP 8.1+ is required the same way.
+- **The `dual_code_graphql_api` feature flag gates WooCommerce core's endpoint only.** When it's off, core's `/wc/graphql` is not registered, but plugin endpoints (registered through `Main::register_graphql_endpoint()`) are unaffected: they only require the dual API infrastructure to be available. See [Gating your endpoint](./creating-a-dual-api-in-a-plugin.md#gating-your-endpoint).
 - **Every setting except Endpoint URL applies to all endpoints.** The GET toggle, max depth, max complexity, the three caching toggles, and the cache TTL are read from the shared infrastructure, so a plugin endpoint honours them exactly as core's does (for example, plugin endpoints reject GET when the GET toggle is off). **Endpoint URL is the exception**: it only configures core's `/wc/graphql`; a plugin chooses its own route at registration.
 - **The filters below are global.** A callback added to any of them affects *every* dual-API endpoint on the site, core and plugins alike. Each filter receives the `\WP_REST_Request`, so a callback that should apply to only one endpoint must branch on the request's route itself.
 
