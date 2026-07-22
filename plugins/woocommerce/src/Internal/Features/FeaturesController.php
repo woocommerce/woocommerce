@@ -637,7 +637,7 @@ class FeaturesController {
 			'dual_code_graphql_api'              => array(
 				'name'                         => __( 'Dual Code & GraphQL API', 'woocommerce' ),
 				'description'                  => __(
-					'Experimental code-first API for WooCommerce with automatic GraphQL endpoint generation. Requires PHP 8.1 or later.',
+					'Enable the WooCommerce core GraphQL endpoint of the experimental code-first dual API. Endpoints registered by plugins are not affected by this flag. Requires PHP 8.1 or later.',
 					'woocommerce'
 				),
 				'enabled_by_default'           => false,
