@@ -141,7 +141,15 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$section = is_string( $current_section ) ? $current_section : '';
 			$context = $this->get_settings_ui_request_context( $section );
 
-			if ( ! $context || ! $context->is_rendering_enabled() ) {
+			try {
+				if ( ! $context || ! $context->is_rendering_enabled() ) {
+					return $classes;
+				}
+
+				$is_rendering_drill_down = $context->is_drill_down()
+					&& ! $context->has_schema_failed()
+					&& ! $context->has_script_handles_failed();
+			} catch ( \Throwable $e ) {
 				return $classes;
 			}
 
@@ -153,9 +161,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			}
 
 			if (
-				$context->is_drill_down()
-				&& ! $context->has_schema_failed()
-				&& ! $context->has_script_handles_failed()
+				$is_rendering_drill_down
 				&& ! in_array( 'woocommerce-settings-ui-drill-down', $body_classes, true )
 			) {
 				$classes .= ' woocommerce-settings-ui-drill-down';
