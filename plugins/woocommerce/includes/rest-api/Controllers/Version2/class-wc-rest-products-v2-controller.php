@@ -1416,7 +1416,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			}
 
 			if ( isset( $request['button_text'] ) ) {
-				$product->set_button_text( $this->sanitize_button_text( $request['button_text'] ) );
+				$product->set_button_text( sanitize_text_field( $request['button_text'] ) );
 			}
 		}
 
@@ -1529,17 +1529,6 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		return $product;
-	}
-
-	/**
-	 * Sanitize an external product's button text.
-	 *
-	 * @since 11.0.1
-	 * @param string $button_text Button text.
-	 * @return string Sanitized button text.
-	 */
-	protected function sanitize_button_text( $button_text ) {
-		return sanitize_text_field( $button_text );
 	}
 
 	/**
