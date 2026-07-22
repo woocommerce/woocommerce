@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Replace deprecated jQuery .focus() shorthand with .trigger( 'focus' ) across multiple checkout, cart, and account JS files.
+Replace deprecated jQuery .focus() shorthand with .trigger( 'focus' ) / .on( 'focus' ) across legacy JS files.
