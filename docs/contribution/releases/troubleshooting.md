@@ -10,7 +10,7 @@ This page provides guidance for troubleshooting and recovering from issues that 
 
 :::tip
 
-Not sure a situation needs escalation, want a second opinion before making a call, or can't find the answer below? Tag `@woo-core-release` in `#woo-core-releases`. It's the point of contact for release-process questions in general, not just the scenarios covered here.
+`@woo-core-release` in `#woo-core-releases` is the point of contact for release-process questions in general, not just the scenarios below. Use it for escalations, second opinions, or anything this doc doesn't answer.
 
 :::
 
