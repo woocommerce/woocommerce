@@ -55,7 +55,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				);
 
 				// Maintain data integrity: WordPress 4.9 changed sanitization functions, and we update the values here so variations function correctly.
-				// As per 2026, we are refactoring the updates into product-level: BC-focused (not all-in on-spot migration), optimized for performance.
+				// Since 10.6.0, we are refactoring the updates into product-level: BC-focused (not all-in on-spot migration), optimized for performance.
 				// Use-case: `_product_attributes` has data populated on WordPress pre-4.8 and containing symbols affected by the breaking changes.
 				if ( $meta_value['is_variation'] && strstr( $meta_value['name'], '/' ) && sanitize_title( $meta_value['name'] ) !== $meta_attribute_key ) {
 					global $wpdb;
@@ -87,6 +87,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					if ( ! taxonomy_exists( $meta_value['name'] ) ) {
 						continue;
 					}
+					// Performance note: at this stage, the product factory has already primed the caches, so wc_get_object_terms does not present a concern.
 					$id      = wc_attribute_taxonomy_id_by_name( $meta_value['name'] );
 					$options = wc_get_object_terms( $product_id, $meta_value['name'], 'term_id' );
 				} else {
@@ -235,44 +236,46 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function read_variation_attributes( &$product ) {
 		global $wpdb;
 
-		$variation_attributes = array();
-		$attributes           = $product->get_attributes();
-		$child_ids            = $product->get_children();
-		$cache_key            = WC_Cache_Helper::get_cache_prefix( 'product_' . $product->get_id() ) . 'product_variation_attributes_' . $product->get_id();
-		$cache_group          = 'products';
-		$cached_data          = wp_cache_get( $cache_key, $cache_group );
+		$product_id  = $product->get_id();
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_' . $product_id;
+		$cached_data = wp_cache_get( $cache_key, 'products' );
 
 		if ( false !== $cached_data ) {
 			return $cached_data;
 		}
 
-		if ( ! empty( $attributes ) ) {
-			foreach ( $attributes as $attribute ) {
-				if ( empty( $attribute['is_variation'] ) ) {
-					continue;
-				}
+		$variation_attributes = array();
+		$attributes           = $product->get_attributes();
 
-				// Get possible values for this attribute, for only visible variations.
-				if ( ! empty( $child_ids ) ) {
-					$format     = array_fill( 0, count( $child_ids ), '%d' );
-					$query_in   = '(' . implode( ',', $format ) . ')';
-					$query_args = array( 'attribute_name' => wc_variation_attribute_name( $attribute['name'] ) ) + $child_ids;
-					$values     = array_unique(
-						$wpdb->get_col(
-							$wpdb->prepare(
-								// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-								"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN {$query_in}", // @codingStandardsIgnoreLine.
-								$query_args
-							)
-						)
-					);
-				} else {
-					$values = array();
+		if ( ! empty( $attributes ) ) {
+			$child_ids  = $product->get_children();
+			$attributes = array_values( array_filter( $attributes, static fn ( $attribute ) => ! empty( $attribute['is_variation'] ) ) );
+
+			$attributes_values = array();
+			if ( ! empty( $child_ids ) && ! empty( $attributes ) ) {
+				// Performance note: for optimal performance, retrieve attribute values using a single SQL query.
+				$attributes_placeholders = implode( ', ', array_fill( 0, count( $attributes ), '%s' ) );
+				$children_placeholders   = implode( ', ', array_fill( 0, count( $child_ids ), '%d' ) );
+				$prefetch                = $wpdb->get_results(
+					$wpdb->prepare(
+						// Performance: DISTINCT + CAST(meta_value AS BINARY(200)) is feasible but forces a temp table — keep array_unique.
+						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+						"SELECT meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id IN ( {$children_placeholders} ) AND meta_key IN ( {$attributes_placeholders} )",
+						...$child_ids,
+						...array_map( static fn( $attribute ) => wc_variation_attribute_name( $attribute['name'] ), $attributes )
+					)
+				);
+				foreach ( $prefetch as $row ) {
+					$attributes_values[ $row->meta_key ][] = $row->meta_value;
 				}
+			}
+
+			foreach ( $attributes as $attribute ) {
+				$values = $attributes_values[ wc_variation_attribute_name( $attribute['name'] ) ] ?? array();
 
 				// Empty value indicates that all options for given attribute are available.
-				if ( in_array( null, $values, true ) || in_array( '', $values, true ) || empty( $values ) ) {
-					$values = $attribute['is_taxonomy'] ? wc_get_object_terms( $product->get_id(), $attribute['name'], 'slug' ) : wc_get_text_attributes( $attribute['value'] );
+				if ( empty( $values ) || in_array( null, $values, true ) || in_array( '', $values, true ) ) {
+					$values = $attribute['is_taxonomy'] ? wc_get_object_terms( $product_id, $attribute['name'], 'slug' ) : wc_get_text_attributes( $attribute['value'] );
 					// Get custom attributes (non taxonomy) as defined.
 				} elseif ( ! $attribute['is_taxonomy'] ) {
 					$text_attributes          = wc_get_text_attributes( $attribute['value'] );
@@ -280,7 +283,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					$values                   = array();
 
 					// Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
-					if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
+					if ( version_compare( get_post_meta( $product_id, '_product_version', true ), '2.4.0', '<' ) ) {
 						$assigned_text_attributes = array_map( 'sanitize_title', $assigned_text_attributes );
 						foreach ( $text_attributes as $text_attribute ) {
 							if ( in_array( sanitize_title( $text_attribute ), $assigned_text_attributes, true ) ) {
@@ -299,7 +302,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 		}
 
-		wp_cache_set( $cache_key, $variation_attributes, $cache_group );
+		wp_cache_set( $cache_key, $variation_attributes, 'products' );
 
 		return $variation_attributes;
 	}
@@ -700,16 +703,21 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	public function child_has_weight( $product ) {
 		global $wpdb;
-		$children = $product->get_visible_children();
-		if ( ! $children ) {
-			return false;
+
+		$has_weight = false;
+		$child_ids  = $product->get_visible_children();
+		if ( ! empty( $child_ids ) ) {
+			$placeholders = implode( ', ', array_fill( 0, count( $child_ids ), '%d' ) );
+			$has_weight   = (bool) $wpdb->get_var(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+					"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN ( {$placeholders} ) LIMIT 1",
+					$child_ids
+				)
+			);
 		}
 
-		$format   = array_fill( 0, count( $children ), '%d' );
-		$query_in = '(' . implode( ',', $format ) . ')';
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		return null !== $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN {$query_in}", $children ) );
+		return $has_weight;
 	}
 
 	/**
@@ -722,16 +730,21 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 */
 	public function child_has_dimensions( $product ) {
 		global $wpdb;
-		$children = $product->get_visible_children();
-		if ( ! $children ) {
-			return false;
+
+		$has_dimensions = false;
+		$child_ids      = $product->get_visible_children();
+		if ( ! empty( $child_ids ) ) {
+			$placeholders   = implode( ', ', array_fill( 0, count( $child_ids ), '%d' ) );
+			$has_dimensions = (bool) $wpdb->get_var(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+					"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key IN ( '_length', '_width', '_height' ) AND meta_value > 0 AND post_id IN ( {$placeholders} ) LIMIT 1",
+					$child_ids
+				)
+			);
 		}
 
-		$format   = array_fill( 0, count( $children ), '%d' );
-		$query_in = '(' . implode( ',', $format ) . ')';
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		return null !== $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND meta_value > 0 AND post_id IN {$query_in}", $children ) );
+		return $has_dimensions;
 	}
 
 	/**
@@ -758,30 +771,20 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function child_has_stock_status( $product, $status ) {
 		global $wpdb;
 
-		$children = $product->get_children();
-
-		if ( $children ) {
-			$format     = array_fill( 0, count( $children ), '%d' );
-			$query_in   = '(' . implode( ',', $format ) . ')';
-			$query_args = array( 'stock_status' => $status ) + $children;
-			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$has_matches = false;
+		$child_ids   = $product->get_children();
+		if ( ! empty( $child_ids ) ) {
+			$placeholders = implode( ', ', array_fill( 0, count( $child_ids ), '%d' ) );
 			if ( get_option( 'woocommerce_product_lookup_table_is_generating' ) ) {
-				$query = "SELECT COUNT( post_id ) FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN {$query_in}";
+				$query = "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN ( {$placeholders} ) LIMIT 1";
 			} else {
-				$query = "SELECT COUNT( product_id ) FROM {$wpdb->wc_product_meta_lookup} WHERE stock_status = %s AND product_id IN {$query_in}";
+				$query = "SELECT product_id FROM {$wpdb->wc_product_meta_lookup} WHERE stock_status = %s AND product_id IN ( {$placeholders} ) LIMIT 1";
 			}
-			$children_with_status = $wpdb->get_var(
-				$wpdb->prepare(
-					$query,
-					$query_args
-				)
-			);
-			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
-		} else {
-			$children_with_status = 0;
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$has_matches = (bool) $wpdb->get_var( $wpdb->prepare( $query, $status, ...$child_ids ) );
 		}
 
-		return (bool) $children_with_status;
+		return $has_matches;
 	}
 
 	/**
@@ -831,32 +834,51 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		global $wpdb;
 
 		if ( $product->get_manage_stock() ) {
-			$children    = $product->get_children();
-			$changed     = false;
-			$invalidator = wc_get_container()->get( ProductVersionStringInvalidator::class );
+			$child_ids = $product->get_children();
+			if ( ! empty( $child_ids ) ) {
+				$status       = $product->get_stock_status();
+				$placeholders = implode( ', ', array_fill( 0, count( $child_ids ), '%d' ) );
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+				$children_to_sync     = $wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT post_id
+						FROM {$wpdb->postmeta}
+						WHERE meta_key = '_stock_status'
+							AND meta_value != %s
+							AND post_id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN ( {$placeholders} ) )",
+						$status,
+						...$child_ids
+					)
+				);
+				$children_to_backfill = $wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT post_id
+						FROM {$wpdb->postmeta}
+						WHERE meta_key = '_manage_stock'
+							AND meta_value != 'yes'
+							AND post_id IN ( {$placeholders} )
+							AND post_id NOT IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value IS NOT NULL AND post_id IN ( {$placeholders} ) )",
+						...$child_ids,
+						...$child_ids
+					)
+				);
+				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
-			if ( $children ) {
-				$status   = $product->get_stock_status();
-				$format   = array_fill( 0, count( $children ), '%d' );
-				$query_in = '(' . implode( ',', $format ) . ')';
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-				$managed_children = array_unique( $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN {$query_in}", $children ) ) );
-				foreach ( $managed_children as $managed_child ) {
-					if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {
-						$this->update_lookup_table( $managed_child, 'wc_product_meta_lookup' );
-						$changed = true;
+				$children_to_sync = array_unique( array_merge( $children_to_sync, $children_to_backfill ) );
+				if ( ! empty( $children_to_sync ) ) {
+					$invalidator = wc_get_container()->get( ProductVersionStringInvalidator::class );
 
-						$invalidator->invalidate( $managed_child );
+					foreach ( $children_to_sync as $child_id ) {
+						update_post_meta( $child_id, '_stock_status', $status );
+						$this->update_lookup_table( $child_id, 'wc_product_meta_lookup' );
+						$invalidator->invalidate( $child_id );
 					}
+
+					$children = $this->read_children( $product, true );
+					$product->set_children( $children['all'] );
+					$product->set_visible_children( $children['visible'] );
+					$invalidator->invalidate( $product->get_id() );
 				}
-			}
-
-			if ( $changed ) {
-				$children = $this->read_children( $product, true );
-				$product->set_children( $children['all'] );
-				$product->set_visible_children( $children['visible'] );
-
-				$invalidator->invalidate( $product->get_id() );
 			}
 		}
 	}
@@ -871,19 +893,25 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function sync_price( &$product ) {
 		global $wpdb;
 
-		$children = $product->get_visible_children();
-		if ( $children ) {
-			$format   = array_fill( 0, count( $children ), '%d' );
-			$query_in = '(' . implode( ',', $format ) . ')';
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-			$prices = array_unique( $wpdb->get_col( $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN {$query_in}", $children ) ) );
-		} else {
-			$prices = array();
+		$prices    = array();
+		$child_ids = $product->get_visible_children();
+		if ( ! empty( $child_ids ) ) {
+			$placeholders = implode( ', ', array_fill( 0, count( $child_ids ), '%d' ) );
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$prices = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT DISTINCT meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_price' AND post_id IN ( {$placeholders} )",
+					$child_ids
+				)
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		}
 
-		delete_post_meta( $product->get_id(), '_price' );
-		delete_post_meta( $product->get_id(), '_sale_price' );
-		delete_post_meta( $product->get_id(), '_regular_price' );
+		$product_id = $product->get_id();
+
+		delete_post_meta( $product_id, '_price' );
+		delete_post_meta( $product_id, '_sale_price' );
+		delete_post_meta( $product_id, '_regular_price' );
 
 		if ( $prices ) {
 			sort( $prices, SORT_NUMERIC );
@@ -892,11 +920,11 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				if ( is_null( $price ) || '' === $price ) {
 					continue;
 				}
-				add_post_meta( $product->get_id(), '_price', $price, false );
+				add_post_meta( $product_id, '_price', $price, false );
 			}
 		}
 
-		$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
+		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
 
 		/**
 		 * Fire an action for this direct update so it can be detected by other code.
@@ -904,18 +932,19 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 * @since 3.6
 		 * @param int $product_id Product ID that was updated directly.
 		 */
-		do_action( 'woocommerce_updated_product_price', $product->get_id() );
+		do_action( 'woocommerce_updated_product_price', $product_id );
 	}
 
 	/**
 	 * Sync variable product stock status with children.
 	 * Change does not persist unless saved by caller.
 	 *
-	 * @param WC_Product $product Product object.
+	 * @param WC_Product_Variable $product Product object.
 	 *
 	 * @since 3.0.0
 	 */
 	public function sync_stock_status( &$product ) {
+		// Performance note: direct DB fetch would be faster, but child_is_in_stock/child_is_on_backorder are overridable — keep delegation.
 		if ( $product->child_is_in_stock() ) {
 			$product->set_stock_status( ProductStockStatus::IN_STOCK );
 		} elseif ( $product->child_is_on_backorder() ) {
@@ -987,6 +1016,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		}
 
 		delete_transient( 'wc_product_children_' . $product_id );
+		delete_transient( 'wc_var_prices_' . $product_id );
 	}
 
 	/**
@@ -1014,6 +1044,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		}
 
 		delete_transient( 'wc_product_children_' . $product_id );
+		delete_transient( 'wc_var_prices_' . $product_id );
 	}
 
 	/**

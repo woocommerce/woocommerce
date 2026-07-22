@@ -17887,18 +17887,6 @@ parameters:
 			path: includes/data-stores/class-wc-product-grouped-data-store-cpt.php
 
 		-
-			message: '#^Call to an undefined method WC_Product\:\:child_is_in_stock\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
-
-		-
-			message: '#^Call to an undefined method WC_Product\:\:child_is_on_backorder\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
-
-		-
 			message: '#^Call to an undefined method WC_Product\:\:get_visible_children\(\)\.$#'
 			identifier: method.notFound
 			count: 4
