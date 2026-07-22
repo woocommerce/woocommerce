@@ -362,8 +362,11 @@ class Controller extends AbstractController {
 		// The refund amount field was renamed from 'amount' to 'total'. Reject the old
 		// name explicitly: unknown params are silently dropped by the REST layer, so a
 		// request sending 'amount' as a cap would otherwise fall back to the full
-		// line-item total and refund more than the client intended.
-		if ( null !== $request->get_param( 'amount' ) ) {
+		// line-item total and refund more than the client intended. has_param(), not a
+		// get_param() null check — get_param() returns null for both an absent field
+		// and an explicit {"amount": null}, and the explicit-null form must be rejected
+		// too rather than reaching the calculated-total fallback.
+		if ( $request->has_param( 'amount' ) ) {
 			return $this->get_route_error_response(
 				'unsupported_amount_field',
 				__( 'The amount field is not supported. Use total instead.', 'woocommerce' )
