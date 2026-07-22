@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  *
- * @since 11.0.0
+ * @since 11.1.0
  */
 class HposLegacyOrderReportQueryBuilder {
 
@@ -48,7 +48,7 @@ class HposLegacyOrderReportQueryBuilder {
 	/**
 	 * Build the SQL clauses for an HPOS-backed legacy order report query.
 	 *
-	 * @since 11.0.0
+	 * @since 11.1.0
 	 *
 	 * @param array $args       Parsed report arguments.
 	 * @param int   $start_date Start date as a Unix timestamp.
