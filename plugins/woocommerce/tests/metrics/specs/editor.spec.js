@@ -1,4 +1,4 @@
-/* eslint-disable jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */
+/* eslint-disable jest/expect-expect, jest/no-done-callback, array-callback-return, jest/no-identical-title */
 
 /**
  * WordPress dependencies
@@ -11,9 +11,8 @@ import { test, Metrics } from '@wordpress/e2e-test-utils-playwright';
 import { PerfUtils } from '../fixtures';
 import {
 	getTotalBlockingTime,
-	getWooEditorAssetMetrics,
 	median,
-	startWooEditorNetworkTransferMetrics,
+	startWooEditorAssetMetrics,
 } from '../utils';
 
 // See https://github.com/WordPress/gutenberg/issues/51383#issuecomment-1613460429
@@ -21,56 +20,56 @@ const BROWSER_IDLE_WAIT = 1000;
 
 const results = {};
 
-test.describe( 'Editor Performance', () => {
-	test.use( {
-		perfUtils: async ( { page }, use ) => {
-			await use( new PerfUtils( { page } ) );
+test.describe('Editor Performance', () => {
+	test.use({
+		perfUtils: async ({ page }, use) => {
+			await use(new PerfUtils({ page }));
 		},
-		metrics: async ( { page }, use ) => {
-			await use( new Metrics( { page } ) );
+		metrics: async ({ page }, use) => {
+			await use(new Metrics({ page }));
 		},
-	} );
+	});
 
-	test.afterAll( async ( {}, testInfo ) => {
+	test.afterAll(async ({ }, testInfo) => {
 		const medians = {};
-		Object.keys( results ).forEach( ( metric ) => {
-			medians[ metric ] = median( results[ metric ] );
-		} );
-		await testInfo.attach( 'results', {
-			body: JSON.stringify( { editor: medians }, null, 2 ),
+		Object.keys(results).forEach((metric) => {
+			medians[metric] = median(results[metric]);
+		});
+		await testInfo.attach('results', {
+			body: JSON.stringify({ editor: medians }, null, 2),
 			contentType: 'application/json',
-		} );
-	} );
+		});
+	});
 
-	test.describe( 'Loading', () => {
+	test.describe('Loading', () => {
 		let draftId = null;
 
-		test( 'Setup the test post', async ( { admin, perfUtils } ) => {
+		test('Setup the test post', async ({ admin, perfUtils }) => {
 			await admin.createNewPost();
 			await perfUtils.loadBlocksForLargePost();
 			draftId = await perfUtils.saveDraft();
-		} );
+		});
 
 		const samples = 2;
 		const throwaway = 1;
 		const iterations = samples + throwaway;
-		for ( let i = 1; i <= iterations; i++ ) {
-			test( `Run the test (${ i } of ${ iterations })`, async ( {
+		for (let i = 1; i <= iterations; i++) {
+			test(`Run the test (${i} of ${iterations})`, async ({
 				admin,
 				page,
 				perfUtils,
 				metrics,
-			} ) => {
-				const stopWooEditorNetworkTransferMetrics =
-					await startWooEditorNetworkTransferMetrics( page );
+			}) => {
+				const stopWooEditorAssetMetrics =
+					await startWooEditorAssetMetrics(page);
 
 				try {
 					// Open the test draft.
-					await admin.editPost( draftId );
+					await admin.editPost(draftId);
 					const canvas = await perfUtils.getCanvas();
 
 					// Wait for the first block.
-					await canvas.locator( '.wp-block' ).first().waitFor();
+					await canvas.locator('.wp-block').first().waitFor();
 
 					// Get the durations.
 					const loadingDurations =
@@ -90,17 +89,15 @@ test.describe( 'Editor Performance', () => {
 						BROWSER_IDLE_WAIT
 					);
 
-					// Measure WooCommerce editor asset sizes.
+					// Measure WooCommerce editor assets.
 					const wooEditorAssetMetrics =
-						await getWooEditorAssetMetrics( page );
-					const wooEditorNetworkTransferMetrics =
-						await stopWooEditorNetworkTransferMetrics();
+						await stopWooEditorAssetMetrics();
 
 					// Save the results.
-					if ( i > throwaway ) {
+					if (i > throwaway) {
 						results.totalBlockingTime =
 							results.totalBlockingTime || [];
-						results.totalBlockingTime.push( totalBlockingTime );
+						results.totalBlockingTime.push(totalBlockingTime);
 						results.cumulativeLayoutShift =
 							results.cumulativeLayoutShift || [];
 						results.cumulativeLayoutShift.push(
@@ -111,60 +108,52 @@ test.describe( 'Editor Performance', () => {
 						results.largestContentfulPaint.push(
 							largestContentfulPaint
 						);
-						Object.entries( loadingDurations ).forEach(
-							( [ metric, duration ] ) => {
+						Object.entries(loadingDurations).forEach(
+							([metric, duration]) => {
 								const metricKey =
 									metric === 'timeSinceResponseEnd'
 										? 'firstBlock'
 										: metric;
-								if ( ! results[ metricKey ] ) {
-									results[ metricKey ] = [];
+								if (!results[metricKey]) {
+									results[metricKey] = [];
 								}
-								results[ metricKey ].push( duration );
+								results[metricKey].push(duration);
 							}
 						);
-						Object.entries( wooEditorAssetMetrics ).forEach(
-							( [ metric, value ] ) => {
-								if ( ! results[ metric ] ) {
-									results[ metric ] = [];
+						Object.entries(wooEditorAssetMetrics).forEach(
+							([metric, value]) => {
+								if (!results[metric]) {
+									results[metric] = [];
 								}
-								results[ metric ].push( value );
+								results[metric].push(value);
 							}
 						);
-						Object.entries(
-							wooEditorNetworkTransferMetrics
-						).forEach( ( [ metric, value ] ) => {
-							if ( ! results[ metric ] ) {
-								results[ metric ] = [];
-							}
-							results[ metric ].push( value );
-						} );
 					}
 				} finally {
-					await stopWooEditorNetworkTransferMetrics();
+					await stopWooEditorAssetMetrics();
 				}
-			} );
+			});
 		}
-	} );
+	});
 
-	test.describe( 'Typing', () => {
+	test.describe('Typing', () => {
 		let draftId = null;
 
-		test( 'Setup the test post', async ( { admin, perfUtils, editor } ) => {
+		test('Setup the test post', async ({ admin, perfUtils, editor }) => {
 			await admin.createNewPost();
 			await perfUtils.loadBlocksForLargePost();
-			await editor.insertBlock( { name: 'core/paragraph' } );
+			await editor.insertBlock({ name: 'core/paragraph' });
 			draftId = await perfUtils.saveDraft();
-		} );
+		});
 
-		test( 'Run the test', async ( { admin, perfUtils, metrics } ) => {
-			await admin.editPost( draftId );
+		test('Run the test', async ({ admin, perfUtils, metrics }) => {
+			await admin.editPost(draftId);
 			await perfUtils.disableAutosave();
 			const canvas = await perfUtils.getCanvas();
 
-			const paragraph = canvas.getByRole( 'document', {
+			const paragraph = canvas.getByRole('document', {
 				name: /Empty block/i,
-			} );
+			});
 
 			// The first character typed triggers a longer time (isTyping change).
 			// It can impact the stability of the metric, so we exclude it. It
@@ -177,29 +166,29 @@ test.describe( 'Editor Performance', () => {
 			await metrics.startTracing();
 
 			// Type the testing sequence into the empty paragraph.
-			await paragraph.type( 'x'.repeat( iterations ), {
+			await paragraph.type('x'.repeat(iterations), {
 				delay: BROWSER_IDLE_WAIT,
 				// The extended timeout is needed because the typing is very slow
 				// and the `delay` value itself does not extend it.
 				timeout: iterations * BROWSER_IDLE_WAIT * 2, // 2x the total time to be safe.
-			} );
+			});
 
 			// Stop tracing.
 			await metrics.stopTracing();
 
 			// Get the durations.
-			const [ keyDownEvents, keyPressEvents, keyUpEvents ] =
+			const [keyDownEvents, keyPressEvents, keyUpEvents] =
 				metrics.getTypingEventDurations();
 
 			// Save the results.
 			results.type = [];
-			for ( let i = throwaway; i < iterations; i++ ) {
+			for (let i = throwaway; i < iterations; i++) {
 				results.type.push(
-					keyDownEvents[ i ] + keyPressEvents[ i ] + keyUpEvents[ i ]
+					keyDownEvents[i] + keyPressEvents[i] + keyUpEvents[i]
 				);
 			}
-		} );
-	} );
-} );
+		});
+	});
+});
 
-/* eslint-enable jest/expect-expect, jest/no-test-callback, array-callback-return, jest/no-identical-title */
+/* eslint-enable jest/expect-expect, jest/no-done-callback, array-callback-return, jest/no-identical-title */

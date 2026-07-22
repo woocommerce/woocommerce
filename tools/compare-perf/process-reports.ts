@@ -13,9 +13,8 @@ const {
 	readJSONFile,
 	logAtIndent,
 	sanitizeBranchName,
-	median,
-	formatMetricValue,
-} = require( './utils' ) ;
+} = require( './utils' );
+const { median, formatMetricValue } = require( './metric-utils' );
 
 const formats = {
 	success: bold.green,

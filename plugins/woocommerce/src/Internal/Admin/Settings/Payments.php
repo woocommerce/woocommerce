@@ -29,6 +29,9 @@ class Payments {
 	const FROM_ADDITIONAL_PAYMENTS_TASK = 'WCADMIN_ADDITIONAL_PAYMENT_TASK';
 	const FROM_PROVIDER_ONBOARDING      = 'PROVIDER_ONBOARDING';
 
+	private const PROVIDERS_REQUEST_CACHE_GROUP = 'woocommerce_payments_providers';
+	private const PROVIDERS_REQUEST_CACHE_KEY   = 'provider_lists';
+
 	/**
 	 * The payment providers service.
 	 *
@@ -54,6 +57,8 @@ class Payments {
 	final public function init( PaymentsProviders $payment_providers, ExtensionSuggestions $payment_extension_suggestions ): void {
 		$this->providers             = $payment_providers;
 		$this->extension_suggestions = $payment_extension_suggestions;
+
+		wp_cache_add_non_persistent_groups( array( self::PROVIDERS_REQUEST_CACHE_GROUP ) );
 	}
 
 	/**
@@ -76,6 +81,13 @@ class Payments {
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
 	public function get_payment_providers( string $location, bool $for_display = true, bool $remove_shells = false ): array {
+		$can_install_plugins   = current_user_can( 'install_plugins' );
+		$cache_key             = get_current_user_id() . '__' . ( $can_install_plugins ? '1' : '0' ) . '__' . strtoupper( $location ) . '__' . ( $for_display ? '1' : '0' ) . ( $remove_shells ? '1' : '0' );
+		$cached_provider_lists = wp_cache_get( self::PROVIDERS_REQUEST_CACHE_KEY, self::PROVIDERS_REQUEST_CACHE_GROUP );
+		if ( is_array( $cached_provider_lists ) && isset( $cached_provider_lists[ $cache_key ] ) && is_array( $cached_provider_lists[ $cache_key ] ) ) {
+			return $cached_provider_lists[ $cache_key ];
+		}
+
 		$payment_gateways = $this->providers->get_payment_gateways( $for_display );
 		if ( ! $for_display && $remove_shells ) {
 			$payment_gateways = $this->providers->remove_shell_payment_gateways( $payment_gateways, $location );
@@ -87,7 +99,7 @@ class Payments {
 
 		// Only include suggestions if the requesting user can install plugins.
 		$suggestions = array();
-		if ( current_user_can( 'install_plugins' ) ) {
+		if ( $can_install_plugins ) {
 			$suggestions = $this->providers->get_extension_suggestions( $location, self::SUGGESTIONS_CONTEXT );
 		}
 		// If we have preferred suggestions, add them to the providers list.
@@ -204,6 +216,12 @@ class Payments {
 			$this->process_payment_provider_states( $payment_providers );
 		}
 
+		if ( ! is_array( $cached_provider_lists ) ) {
+			$cached_provider_lists = array();
+		}
+		$cached_provider_lists[ $cache_key ] = $payment_providers;
+		wp_cache_set( self::PROVIDERS_REQUEST_CACHE_KEY, $cached_provider_lists, self::PROVIDERS_REQUEST_CACHE_GROUP );
+
 		return $payment_providers;
 	}
 
@@ -287,6 +305,9 @@ class Payments {
 		$result = $this->providers->update_payment_providers_order_map( $order_map );
 
 		if ( $result ) {
+			// The order map influences the providers list, so clear the cached data.
+			$this->clear_cache();
+
 			// Record an event that the payment providers order map was updated.
 			$this->record_event(
 				'payment_providers_order_map_updated',
@@ -313,6 +334,9 @@ class Payments {
 		$result = $this->providers->attach_extension_suggestion( $id );
 
 		if ( $result ) {
+			// The attachment influences the providers list, so clear the cached data.
+			$this->clear_cache();
+
 			// Record an event that the suggestion was attached.
 			$this->record_event(
 				'extension_suggestion_attached',
@@ -337,6 +361,9 @@ class Payments {
 		$result = $this->providers->hide_extension_suggestion( $id );
 
 		if ( $result ) {
+			// Hidden suggestions are excluded from the providers list, so clear the cached data.
+			$this->clear_cache();
+
 			// Record an event that the suggestion was hidden.
 			$this->record_event(
 				'extension_suggestion_hidden',
@@ -365,6 +392,11 @@ class Payments {
 	public function dismiss_extension_suggestion_incentive( string $suggestion_id, string $incentive_id, string $context = 'all', bool $do_not_track = false ): bool {
 		$result = $this->extension_suggestions->dismiss_incentive( $incentive_id, $suggestion_id, $context );
 
+		if ( $result ) {
+			// Incentives are embedded in the providers list details, so clear the cached data.
+			$this->clear_cache();
+		}
+
 		if ( ! $do_not_track && $result ) {
 			// Record an event that the incentive was dismissed.
 			$this->record_event(
@@ -378,6 +410,22 @@ class Payments {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Clear cached payment provider data.
+	 *
+	 * Call after changing provider ordering, suggestions, incentives, gateway registration,
+	 * settings, or account state during a request. Also useful for testing purposes.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function clear_cache(): void {
+		wp_cache_delete( self::PROVIDERS_REQUEST_CACHE_KEY, self::PROVIDERS_REQUEST_CACHE_GROUP );
+		$this->providers->clear_cache();
 	}
 
 	/**

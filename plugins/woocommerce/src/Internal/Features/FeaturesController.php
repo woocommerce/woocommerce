@@ -458,6 +458,14 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => false,
 			),
+			'order_withdrawal'                     => array(
+				'name'                         => __( 'Order withdrawal', 'woocommerce' ),
+				'description'                  => __( 'Enable the public order withdrawal endpoint for stakeholder testing.', 'woocommerce' ),
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'is_experimental'              => true,
+			),
 			'abandoned_cart_recovery'              => array(
 				'name'                         => __( 'Abandoned cart recovery', 'woocommerce' ),
 				'description'                  => __(
@@ -629,7 +637,7 @@ class FeaturesController {
 			'dual_code_graphql_api'                => array(
 				'name'                         => __( 'Dual Code & GraphQL API', 'woocommerce' ),
 				'description'                  => __(
-					'Experimental code-first API for WooCommerce with automatic GraphQL endpoint generation. Requires PHP 8.1 or later.',
+					'Enable the WooCommerce core GraphQL endpoint of the experimental code-first dual API. Endpoints registered by plugins are not affected by this flag. Requires PHP 8.1 or later.',
 					'woocommerce'
 				),
 				'enabled_by_default'           => false,

@@ -43,6 +43,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 		);
 		delete_option( Main::OPTION_ENDPOINT_URL );
 		$this->enable_or_disable_feature( false );
+		$this->set_plugin_endpoints_registered( false );
 		parent::tearDown();
 	}
 
@@ -56,6 +57,18 @@ class SettingsTest extends WC_Unit_Test_Case {
 			wc_get_container()->get( FeaturesController::class )->feature_enable_option_name( 'dual_code_graphql_api' ),
 			$enable ? 'yes' : 'no'
 		);
+	}
+
+	/**
+	 * Set the static plugin endpoint registration flag in Main, normally
+	 * set by Main::register_graphql_endpoint().
+	 *
+	 * @param bool $registered The value to set.
+	 */
+	private function set_plugin_endpoints_registered( bool $registered ): void {
+		$property = ( new \ReflectionClass( Main::class ) )->getProperty( 'plugin_endpoints_registered' );
+		$property->setAccessible( true );
+		$property->setValue( null, $registered );
 	}
 
 	/**
@@ -277,7 +290,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox add_section returns sections unchanged when the feature is disabled.
+	 * @testdox add_section returns sections unchanged when the feature is disabled and no plugin endpoints are registered.
 	 */
 	public function test_add_section_does_not_register_when_feature_is_off(): void {
 		$this->enable_or_disable_feature( false );
@@ -288,7 +301,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox add_settings returns settings unchanged when the feature is disabled.
+	 * @testdox add_settings returns settings unchanged when the feature is disabled and no plugin endpoints are registered.
 	 */
 	public function test_add_settings_does_not_register_when_feature_is_off(): void {
 		$this->enable_or_disable_feature( false );
@@ -296,6 +309,41 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$result = $this->sut->add_settings( array(), Settings::SECTION_ID );
 
 		$this->assertSame( array(), $result );
+	}
+
+	/**
+	 * @testdox add_section appends the graphql section when the feature is disabled but a plugin endpoint is registered.
+	 */
+	public function test_add_section_registers_when_feature_is_off_but_plugin_endpoints_exist(): void {
+		$this->enable_or_disable_feature( false );
+		$this->set_plugin_endpoints_registered( true );
+
+		$result = $this->sut->add_section( array( 'features' => 'Features' ) );
+
+		$this->assertArrayHasKey( Settings::SECTION_ID, $result );
+	}
+
+	/**
+	 * @testdox add_settings omits the endpoint URL field but keeps the shared fields when the feature is disabled but a plugin endpoint is registered.
+	 */
+	public function test_add_settings_omits_endpoint_url_when_feature_is_off_but_plugin_endpoints_exist(): void {
+		$this->enable_or_disable_feature( false );
+		$this->set_plugin_endpoints_registered( true );
+
+		$fields = $this->sut->add_settings( array(), Settings::SECTION_ID );
+		$by_id  = array_column( $fields, null, 'id' );
+
+		$this->assertArrayNotHasKey(
+			Main::OPTION_ENDPOINT_URL,
+			$by_id,
+			'The endpoint URL field only configures core\'s endpoint, so it should be hidden when the feature is off.'
+		);
+		$this->assertArrayHasKey(
+			Main::OPTION_GET_ENDPOINT_ENABLED,
+			$by_id,
+			'Shared settings apply to plugin endpoints too, so they should still be shown.'
+		);
+		$this->assertArrayHasKey( Main::OPTION_QUERY_CACHE_TTL, $by_id );
 	}
 
 	/**

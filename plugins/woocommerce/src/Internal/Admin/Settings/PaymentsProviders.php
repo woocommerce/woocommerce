@@ -81,6 +81,9 @@ class PaymentsProviders {
 	public const CATEGORY_CRYPTO           = 'crypto';
 	public const CATEGORY_PSP              = 'psp';
 
+	private const GATEWAY_DETAILS_REQUEST_CACHE_GROUP = 'woocommerce_payment_gateway_details';
+	private const GATEWAY_DETAILS_REQUEST_CACHE_KEY   = 'gateway_details';
+
 	/*
 	 * The provider link types.
 	 *
@@ -184,20 +187,20 @@ class PaymentsProviders {
 	private array $instances = array();
 
 	/**
-	 * The memoized payment gateways to avoid computing the list multiple times during a request.
+	 * The cached payment gateways, used to avoid computing the list multiple times during a request.
 	 *
 	 * @var array
 	 */
-	private array $payment_gateways_memo = array();
+	private array $payment_gateways_cache = array();
 
 	/**
-	 * The memoized payment gateways for display to avoid computing the list multiple times during a request.
+	 * The cached payment gateways for display, used to avoid computing the list multiple times during a request.
 	 *
 	 * This is especially important since it avoids triggering the legacy action multiple times during a request.
 	 *
 	 * @var array
 	 */
-	private array $payment_gateways_for_display_memo = array();
+	private array $payment_gateways_for_display_cache = array();
 
 	/**
 	 * The payment extension suggestions service.
@@ -224,6 +227,8 @@ class PaymentsProviders {
 	final public function init( ExtensionSuggestions $payment_extension_suggestions, LegacyProxy $proxy ): void {
 		$this->extension_suggestions = $payment_extension_suggestions;
 		$this->proxy                 = $proxy;
+
+		wp_cache_add_non_persistent_groups( array( self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP ) );
 	}
 
 	/**
@@ -247,8 +252,8 @@ class PaymentsProviders {
 
 		// If we are asked for a display gateways list, we need to fire legacy actions and filter out "shells".
 		if ( $for_display ) {
-			if ( isset( $this->payment_gateways_for_display_memo[ $country_code ] ) ) {
-				return $this->payment_gateways_for_display_memo[ $country_code ];
+			if ( isset( $this->payment_gateways_for_display_cache[ $country_code ] ) ) {
+				return $this->payment_gateways_for_display_cache[ $country_code ];
 			}
 
 			// We don't want to output anything from the action. So we buffer it and discard it.
@@ -273,14 +278,14 @@ class PaymentsProviders {
 			$payment_gateways = $this->remove_shell_payment_gateways( $payment_gateways, $country_code );
 
 			// Store the entire payment gateways list for display for later use.
-			$this->payment_gateways_for_display_memo[ $country_code ] = $payment_gateways;
+			$this->payment_gateways_for_display_cache[ $country_code ] = $payment_gateways;
 
 			return $payment_gateways;
 		}
 
 		// We were asked for the raw payment gateways list.
-		if ( isset( $this->payment_gateways_memo[ $country_code ] ) ) {
-			return $this->payment_gateways_memo[ $country_code ];
+		if ( isset( $this->payment_gateways_cache[ $country_code ] ) ) {
+			return $this->payment_gateways_cache[ $country_code ];
 		}
 
 		// Get all payment gateways, ordered by the user.
@@ -290,7 +295,7 @@ class PaymentsProviders {
 		$payment_gateways = $this->handle_non_standard_registration_for_payment_gateways( $payment_gateways );
 
 		// Store the entire payment gateways list for later use.
-		$this->payment_gateways_memo[ $country_code ] = $payment_gateways;
+		$this->payment_gateways_cache[ $country_code ] = $payment_gateways;
 
 		return $payment_gateways;
 	}
@@ -479,11 +484,27 @@ class PaymentsProviders {
 		// Normalize the country code to uppercase.
 		$country_code = strtoupper( $country_code );
 
-		return $this->enhance_payment_gateway_details(
-			$this->get_payment_gateway_base_details( $payment_gateway, $payment_gateway_order, $country_code ),
-			$payment_gateway,
-			$country_code
-		);
+		$cache_key              = get_current_user_id() . '__' . $payment_gateway->id . '__' . $country_code;
+		$cached_gateway_details = wp_cache_get( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
+		if ( is_array( $cached_gateway_details ) && isset( $cached_gateway_details[ $cache_key ] ) && is_array( $cached_gateway_details[ $cache_key ] ) ) {
+			$details = $cached_gateway_details[ $cache_key ];
+		} else {
+			$details = $this->enhance_payment_gateway_details(
+				$this->get_payment_gateway_base_details( $payment_gateway, 0, $country_code ),
+				$payment_gateway,
+				$country_code
+			);
+
+			if ( ! is_array( $cached_gateway_details ) ) {
+				$cached_gateway_details = array();
+			}
+			$cached_gateway_details[ $cache_key ] = $details;
+			wp_cache_set( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, $cached_gateway_details, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
+		}
+
+		$details['_order'] = $payment_gateway_order;
+
+		return $details;
 	}
 
 	/**
@@ -1225,14 +1246,34 @@ class PaymentsProviders {
 	}
 
 	/**
-	 * Reset the memoized data. Useful for testing purposes.
+	 * Clear cached payment gateway data.
+	 *
+	 * Call after changing gateway registration, settings, or account state during a request.
+	 * Also useful for testing purposes.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function clear_cache(): void {
+		$this->payment_gateways_cache             = array();
+		$this->payment_gateways_for_display_cache = array();
+		wp_cache_delete( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
+	}
+
+	/**
+	 * Reset cached payment gateway data.
+	 *
+	 * @deprecated 11.1.0 Use clear_cache() instead.
 	 *
 	 * @internal
 	 * @return void
 	 */
 	public function reset_memo(): void {
-		$this->payment_gateways_memo             = array();
-		$this->payment_gateways_for_display_memo = array();
+		wc_deprecated_function( __METHOD__, '11.1.0', 'clear_cache' );
+
+		$this->clear_cache();
 	}
 
 	/**

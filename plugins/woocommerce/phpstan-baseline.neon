@@ -11665,36 +11665,6 @@ parameters:
 			path: includes/class-wc-form-handler.php
 
 		-
-			message: '#^Cannot access property \$ID on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot access property \$first_name on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot access property \$last_name on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot access property \$user_email on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Cannot access property \$user_pass on WP_User\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
 			message: '#^Cannot call method get_billing_city\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 2
@@ -13887,12 +13857,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method object\:\:sync_variation_names\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-product-variable.php
-
-		-
-			message: '#^Method WC_Product_Variable\:\:get_available_variations\(\) should return array\<array\|WC_Product_Variation\> but returns list\<array\|bool\|WC_Product\>\.$#'
-			identifier: return.type
 			count: 1
 			path: includes/class-wc-product-variable.php
 
@@ -17923,18 +17887,6 @@ parameters:
 			path: includes/data-stores/class-wc-product-grouped-data-store-cpt.php
 
 		-
-			message: '#^Call to an undefined method WC_Product\:\:child_is_in_stock\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
-
-		-
-			message: '#^Call to an undefined method WC_Product\:\:child_is_on_backorder\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
-
-		-
 			message: '#^Call to an undefined method WC_Product\:\:get_visible_children\(\)\.$#'
 			identifier: method.notFound
 			count: 4
@@ -17991,7 +17943,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$str of function md5 expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 3
+			count: 1
 			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
 
 		-
@@ -50836,12 +50788,6 @@ parameters:
 			path: src/Blocks/BlockTypes/FeaturedProduct.php
 
 		-
-			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_image_url expects int, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Blocks/BlockTypes/FeaturedProduct.php
-
-		-
 			message: '#^Parameter \#1 \$variation of function wc_get_formatted_variation expects array\|WC_Product_Variation, WC_Product given\.$#'
 			identifier: argument.type
 			count: 1
@@ -51042,12 +50988,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @return has invalid value \(array;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 91 on line 4$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartContents.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartContents.php
 
@@ -56413,12 +56353,6 @@ parameters:
 			message: '#^Parameter \#2 \$mode of class RecursiveIteratorIterator constructor expects 0\|1\|2, 16 given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Internal/Admin/Logging/FileV2/FileController.php
-
-		-
-			message: '#^Right side of \|\| is always true\.$#'
-			identifier: booleanOr.rightAlwaysTrue
-			count: 8
 			path: src/Internal/Admin/Logging/FileV2/FileController.php
 
 		-

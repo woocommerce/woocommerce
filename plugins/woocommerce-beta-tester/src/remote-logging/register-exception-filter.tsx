@@ -27,7 +27,7 @@ const getSimulateErrorOptions = async () => {
 					option_value: string;
 					option_name: string;
 					option_id: number;
-				}
+				},
 			]
 		>( {
 			path,
