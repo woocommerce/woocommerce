@@ -42,12 +42,13 @@ const addToCartWithOptionsStore = store< AddToCartWithOptionsStore >(
 /**
  * Resolves the quantity to display for a product id.
  *
- * Prefers the resolved collection's cart draft for the id — the nearest
- * `context.draftItems`, falling back to the page-wide `state.draftItems`,
- * which every surface sharing that collection writes to and reads from, so
- * an edit made on one surface is reflected on every other — falling back to
- * this block instance's own locally-tracked quantity when the resolved
- * collection holds no draft for the id yet.
+ * Prefers the resolved collection's cart draft for the id — the collection
+ * keyed by the nearest declared `context.draftKey`, falling back to the
+ * store's reserved global key — which every surface resolving that same
+ * collection writes to and reads from, so an edit made on one surface is
+ * reflected on every other — falling back to this block instance's own
+ * locally-tracked quantity when the resolved collection holds no draft for
+ * the id yet.
  *
  * A transient `NaN` written to the local quantity (see `setQuantity` in the
  * parent `woocommerce/add-to-cart-with-options` store) forces the bound
