@@ -141,15 +141,22 @@ final class CallbackUtil {
 
 				if ( is_string( $function ) ) {
 					$parts[] = $priority . ':' . $function;
-				} elseif ( is_array( $function ) && 2 === count( $function ) && is_string( $function[1] ) ) {
+				} elseif ( is_array( $function ) && 2 === count( $function )
+					&& ( is_object( $function[0] ) || is_string( $function[0] ) )
+					&& is_string( $function[1] ) ) {
 					$target  = $function[0];
 					$parts[] = $priority . ':' .
-						( is_object( $target ) ? get_class( $target ) . '#' . spl_object_id( $target ) : (string) $target ) .
+						( is_object( $target ) ? get_class( $target ) . '#' . spl_object_id( $target ) : $target ) .
 						'::' . $function[1];
 				} elseif ( is_object( $function ) ) {
 					$parts[] = $priority . ':' . get_class( $function ) . '#' . spl_object_id( $function );
 				} else {
-					$parts[] = $priority . ':?';
+					/*
+					 * Any other shape: defer to the signature itself, so that the
+					 * fingerprint can never be coarser than the value it guards.
+					 * These shapes are rare, and the branches above never reach here.
+					 */
+					$parts[] = $priority . ':' . self::get_callback_signature( $function );
 				}
 			}
 		}

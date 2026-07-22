@@ -483,4 +483,28 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( CallbackUtil::get_hook_callback_signatures( $hook_name ) );
 	}
+
+	/**
+	 * @testdox `get_hook_callback_signatures` should distinguish callbacks that fall back to the serialized signature.
+	 */
+	public function test_get_hook_callback_signatures_detects_replaced_unsupported_callback() {
+		$hook_name = 'test_hook_memo_unsupported';
+
+		// Shapes that get_callback_signature() serializes rather than naming.
+		$first  = array( 'first_target', 'first_method', 'extra' );
+		$second = array( 'second_target', 'second_method', 'extra' );
+
+		add_action( $hook_name, $first, 10 );
+		$before = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		remove_action( $hook_name, $first, 10 );
+		add_action( $hook_name, $second, 10 );
+		$after = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		$this->assertEquals( CallbackUtil::get_callback_signature( $first ), $before[10][0] );
+		$this->assertEquals( CallbackUtil::get_callback_signature( $second ), $after[10][0] );
+		$this->assertNotEquals( $before[10][0], $after[10][0] );
+
+		remove_all_actions( $hook_name );
+	}
 }
