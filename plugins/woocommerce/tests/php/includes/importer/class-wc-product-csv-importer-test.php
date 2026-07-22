@@ -245,6 +245,134 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that new variations are not created for a trashed parent product when updating existing products.
+	 */
+	public function test_import_skips_new_variations_of_trashed_parents_26256() {
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import 26256 Tee' );
+		$product->set_sku( 'IMPORT-26256-PARENT' );
+		$product->save();
+		wp_trash_post( $product->get_id() );
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-26256-trashed-parent.csv';
+		file_put_contents( $csv_file, "Type,SKU,Name,Parent\nvariation,IMPORT-26256-L,Import 26256 Tee - L,IMPORT-26256-PARENT\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$args     = array(
+			'parse'           => true,
+			'update_existing' => true,
+			'mapping'         => array(
+				'Type'   => 'type',
+				'SKU'    => 'sku',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			),
+		);
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$data     = $importer->import();
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		$this->assertFalse( wc_get_product_id_by_sku( 'IMPORT-26256-L' ) > 0, 'Expected no variation to be created for a trashed parent' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that a variation row whose ID belongs to an existing post of another type is skipped when updating existing products.
+	 */
+	public function test_import_skips_new_variations_with_a_foreign_post_id_26256() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import 26256 Tee' );
+		$product->set_sku( 'IMPORT-26256-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$page_id = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Import 26256 Page',
+				'post_status' => 'publish',
+			)
+		);
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-26256-foreign-id.csv';
+		file_put_contents( $csv_file, "ID,Type,SKU,Name,Parent\n{$page_id},variation,IMPORT-26256-L,Import 26256 Tee - L,IMPORT-26256-PARENT\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$args     = array(
+			'parse'           => true,
+			'update_existing' => true,
+			'mapping'         => array(
+				'ID'     => 'id',
+				'Type'   => 'type',
+				'SKU'    => 'sku',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			),
+		);
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$data     = $importer->import();
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		$this->assertEquals( 'page', get_post( $page_id )->post_type, 'Expected the existing page to keep its post type' );
+
+		wp_delete_post( $page_id, true );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that the filter enabling variation creation cannot cause non-variation rows to be imported when updating existing products.
+	 */
+	public function test_import_filter_does_not_create_non_variation_rows_26256() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import 26256 Tee' );
+		$product->set_sku( 'IMPORT-26256-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		add_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_true' );
+
+		$csv_file = __DIR__ . '/import-adding-variations-26256-data.csv';
+		$args     = array(
+			'parse'           => true,
+			'update_existing' => true,
+			'mapping'         => array(
+				'Type'                 => 'type',
+				'SKU'                  => 'sku',
+				'Name'                 => 'name',
+				'Parent'               => 'parent_id',
+				'Attribute 1 name'     => 'attributes:name1',
+				'Attribute 1 value(s)' => 'attributes:value1',
+				'Attribute 1 global'   => 'attributes:taxonomy1',
+				'Regular price'        => 'regular_price',
+			),
+		);
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$data     = $importer->import();
+
+		remove_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_true' );
+
+		$this->assertCount( 1, $data['imported_variations'], 'Expected 1 imported variation, got ' . count( $data['imported_variations'] ) );
+		$this->assertEmpty( $data['imported'], 'Expected 0 imported products, got ' . count( $data['imported'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected the non-variation row to be skipped despite the filter' );
+
+		WC_Helper_Product::delete_product( $data['imported_variations'][0] );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that attributes with non-ASCII characters are correctly set to "Used for Variations" during import.
 	 */
 	public function test_variable_product_attributes_with_non_ascii_characters_set_to_used_for_variations() {

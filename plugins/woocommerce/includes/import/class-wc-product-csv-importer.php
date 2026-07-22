@@ -1151,6 +1151,35 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Whether a variation row that does not exist yet can be created under its parent product.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $parsed_data Parsed row data.
+	 * @return bool
+	 */
+	protected function can_create_variation( $parsed_data ) {
+		// Reusing the row's ID would convert an existing post of another type into a variation.
+		$id = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
+		if ( $id && get_post( $id ) ) {
+			return false;
+		}
+
+		if ( empty( $parsed_data['parent_id'] ) ) {
+			return false;
+		}
+
+		$parent = wc_get_product( $parsed_data['parent_id'] );
+
+		if ( ! $parent ) {
+			return false;
+		}
+
+		// A parent with the 'importing' status is a placeholder, meaning the parent does not exist either.
+		return ! in_array( $parent->get_status(), array( 'importing', ProductStatus::TRASH ), true );
+	}
+
+	/**
 	 * Process importer.
 	 *
 	 * Do not import products with IDs or SKUs that already exist if option
@@ -1215,22 +1244,21 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) ) && ! $id_exists && ! $sku_exists ) {
-				// A parent with the 'importing' status is a placeholder, meaning the parent does not exist either.
-				$parent = false;
-				if ( ProductType::VARIATION === ( $parsed_data['type'] ?? '' ) && ! empty( $parsed_data['parent_id'] ) ) {
-					$parent = wc_get_product( $parsed_data['parent_id'] );
-				}
-				$create_variation = $parent && 'importing' !== $parent->get_status();
+				$create_variation = false;
 
-				/**
-				 * Filters whether a new variation should be created for an existing variable product when updating existing products.
-				 *
-				 * @since 11.1.0
-				 *
-				 * @param bool  $create_variation Whether to create the new variation instead of skipping the row.
-				 * @param array $parsed_data      Parsed row data.
-				 */
-				$create_variation = apply_filters( 'woocommerce_product_import_create_variation_of_existing_product', $create_variation, $parsed_data );
+				if ( ProductType::VARIATION === ( $parsed_data['type'] ?? '' ) ) {
+					$create_variation = $this->can_create_variation( $parsed_data );
+
+					/**
+					 * Filters whether a new variation should be created for an existing variable product when updating existing products.
+					 *
+					 * @since 11.1.0
+					 *
+					 * @param bool  $create_variation Whether to create the new variation instead of skipping the row.
+					 * @param array $parsed_data      Parsed row data.
+					 */
+					$create_variation = apply_filters( 'woocommerce_product_import_create_variation_of_existing_product', $create_variation, $parsed_data );
+				}
 
 				if ( ! $create_variation ) {
 					$data['skipped'][] = new WP_Error(
