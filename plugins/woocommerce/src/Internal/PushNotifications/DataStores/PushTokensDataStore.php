@@ -352,10 +352,7 @@ class PushTokensDataStore {
 
 		global $wpdb;
 
-		// Exactly this SQL to leverage the wp_posts type_status_date index.
-		// The low cardinality of push token posts guarantees performance on
-		// any store size, and restricting the user query to these IDs keeps
-		// the role check from scanning every user's capabilities meta.
+		// Exactly this SQL to leverage the wp_posts type_status_author index; low token cardinality keeps it fast at any store size.
 		$users_with_tokens = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
@@ -363,14 +360,12 @@ class PushTokensDataStore {
 			)
 		);
 
-		// An empty include list must short-circuit here: WP_User_Query
-		// ignores an empty include argument and would fall back to the
-		// unrestricted role scan this method exists to avoid.
+		// An empty include must short-circuit: WP_User_Query would ignore it and scan all users by role.
 		$user_ids = empty( $users_with_tokens ) ? array() : get_users(
 			array(
 				'role__in' => $roles,
 				'fields'   => 'ID',
-				'include'  => array_map( 'intval', $users_with_tokens ),
+				'include'  => $users_with_tokens,
 			)
 		);
 
