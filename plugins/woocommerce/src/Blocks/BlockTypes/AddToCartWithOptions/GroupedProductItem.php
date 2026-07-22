@@ -23,13 +23,43 @@ class GroupedProductItem extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-grouped-product-item';
 
 	/**
-	 * Modifies the block context for product price blocks when inside the Grouped Product Selector block.
+	 * Product ID of the grouped-product child row currently being rendered.
+	 *
+	 * Stashed by `get_product_row()` before it renders a row, so that
+	 * `set_is_descendant_of_grouped_product_selector_context()` can re-assert
+	 * it (see that method's docblock). `null` while no row is being rendered.
+	 *
+	 * @var int|null
+	 */
+	private $current_row_product_id = null;
+
+	/**
+	 * Modifies the block context for blocks rendered inside a grouped
+	 * product's row.
+	 *
+	 * WordPress applies the `render_block_context` filter to every nested
+	 * inner block (see `WP_Block::render()`), running registered filters in
+	 * priority order. `get_product_row()` registers this callback at the
+	 * default priority (10) only for the duration of a single row's render,
+	 * so it always runs after any earlier-priority filter that is also
+	 * active for that render — notably `ProductTemplate::render()`'s
+	 * priority-1 filter, which unconditionally pins `postId`/`postType` to
+	 * the current Product Collection loop item for every block nested
+	 * inside it. Without re-asserting the row's own product id here, that
+	 * outer filter would win and every block in the row (title, price,
+	 * quantity selector, etc.) would resolve the loop's product instead of
+	 * this row's child product.
 	 *
 	 * @param array $context The block context.
 	 * @param array $block   The parsed block.
 	 * @return array Modified block context.
 	 */
 	public function set_is_descendant_of_grouped_product_selector_context( $context, $block ) {
+		if ( null !== $this->current_row_product_id ) {
+			$context['postId']   = $this->current_row_product_id;
+			$context['postType'] = 'product';
+		}
+
 		if (
 			'woocommerce/product-price' === $block['blockName'] ||
 			'woocommerce/product-stock-indicator' === $block['blockName']
@@ -58,6 +88,8 @@ class GroupedProductItem extends AbstractBlock {
 		$post    = get_post( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$product = wc_get_product( $product_id );
 
+		$this->current_row_product_id = (int) $product_id;
+
 		add_filter( 'render_block_context', array( $this, 'set_is_descendant_of_grouped_product_selector_context' ), 10, 2 );
 
 		// Create new block with custom context.
@@ -73,6 +105,8 @@ class GroupedProductItem extends AbstractBlock {
 		$block_content = $new_block->render( array( 'dynamic' => false ) );
 
 		remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_grouped_product_selector_context' ) );
+
+		$this->current_row_product_id = null;
 
 		$post    = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$product = $previous_product;

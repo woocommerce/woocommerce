@@ -192,7 +192,7 @@ const { state } = store< BlockStore >(
 						const addToCartContext = getContext< ATCWOContext >(
 							'woocommerce/add-to-cart-with-options'
 						);
-						const parent = productsState.mainProductInContext;
+						const parent = productsState.baseProductInContext;
 						const attrMap = new Map< string, string >();
 						parent?.attributes?.forEach(
 							( a: {

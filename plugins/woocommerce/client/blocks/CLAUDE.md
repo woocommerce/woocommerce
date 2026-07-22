@@ -139,8 +139,14 @@ For private stores:
 
 - Not intended for third-party extension
 - Removing/changing store state is NOT a breaking change
-- `assets/js/base/stores/woocommerce/` contains cart, product-data, products stores
-- Cart store uses mutation batching for performance
+
+`assets/js/base/stores/woocommerce/` holds three reactive stores, each registered under its full namespace:
+
+- `woocommerce/products` — server-populated product and variation data
+- `woocommerce/cart` — the read-only cart mirror plus a keyed global home for the draft cart items that back purchase UI, addressed by opaque server-defined draft keys; uses mutation batching for performance
+- `woocommerce/shopper-lists` — wishlist and saved-for-later state
+
+The cart store registers as `woocommerce/cart` (it moved off the retired root `woocommerce` store registration) and organizes shopper input in `state.draftItems`, a keyed map of draft collections addressed by opaque server-defined `draftKey`s: a container block declares its `draftKey` in `woocommerce/cart` context to isolate its subtree, while surfaces wrapped in no container resolve the reserved global key (`woocommerce/global`). See the store [README](assets/js/base/stores/woocommerce/README.md) for the full store surface and the [draft keys proposal](assets/js/base/stores/woocommerce/draft-keys-proposal.md) for the design rationale.
 
 ### IntegrationRegistry (Extension API)
 

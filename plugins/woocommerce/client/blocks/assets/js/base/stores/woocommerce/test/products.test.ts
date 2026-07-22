@@ -92,38 +92,38 @@ describe( 'woocommerce/products store – product context derived state', () => 
 		expect( mockStoreState.variationId ).toBe( 99 );
 	} );
 
-	describe( 'mainProductInContext', () => {
+	describe( 'baseProductInContext', () => {
 		it( 'returns the product when variationId is null', () => {
 			mockStoreState.productId = 42;
 			mockStoreState.variationId = null;
 
-			expect( mockStoreState.mainProductInContext ).toBe( mockProduct );
+			expect( mockStoreState.baseProductInContext ).toBe( mockProduct );
 		} );
 
 		it( 'returns the product even when variationId is set', () => {
 			mockStoreState.productId = 42;
 			mockStoreState.variationId = 99;
 
-			// product always returns the main product, never the variation.
-			expect( mockStoreState.mainProductInContext ).toBe( mockProduct );
+			// product always returns the base product, never the variation.
+			expect( mockStoreState.baseProductInContext ).toBe( mockProduct );
 		} );
 
 		it( 'returns null when product is not in the store', () => {
 			mockStoreState.productId = 999;
 			mockStoreState.variationId = null;
 
-			expect( mockStoreState.mainProductInContext ).toBeNull();
+			expect( mockStoreState.baseProductInContext ).toBeNull();
 		} );
 
 		it( 'returns null when productId is 0', () => {
-			expect( mockStoreState.mainProductInContext ).toBeNull();
+			expect( mockStoreState.baseProductInContext ).toBeNull();
 		} );
 
 		it( 'reads from block context when available', () => {
 			mockStoreState.productId = 1;
 			mockContext = { productId: 42 };
 
-			expect( mockStoreState.mainProductInContext ).toBe( mockProduct );
+			expect( mockStoreState.baseProductInContext ).toBe( mockProduct );
 		} );
 	} );
 
@@ -563,11 +563,11 @@ describe( 'woocommerce/products store – product context derived state', () => 
 	} );
 
 	describe( 'Product block path (context without variationId)', () => {
-		it( 'mainProductInContext reads productId from context', () => {
+		it( 'baseProductInContext reads productId from context', () => {
 			mockContext = { productId: 42 };
 			mockStoreState.variationId = null;
 
-			expect( mockStoreState.mainProductInContext ).toBe( mockProduct );
+			expect( mockStoreState.baseProductInContext ).toBe( mockProduct );
 		} );
 
 		it( 'productVariationInContext reads variationId from context when available', () => {

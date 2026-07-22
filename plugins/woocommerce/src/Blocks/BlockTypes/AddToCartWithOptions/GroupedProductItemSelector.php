@@ -36,10 +36,12 @@ class GroupedProductItemSelector extends AbstractBlock {
 	/**
 	 * Gets the quantity selector markup for a product.
 	 *
-	 * @param \WC_Product $product The product object.
+	 * @param \WC_Product $product   The product object.
+	 * @param string      $draft_key The `woocommerce/cart` collection key this child row's
+	 *                               initial draft seed is filed under.
 	 * @return string The HTML markup for the quantity selector.
 	 */
-	private function get_quantity_selector_markup( $product ) {
+	private function get_quantity_selector_markup( $product, $draft_key ) {
 		ob_start();
 
 		$min_value = $product->get_min_purchase_quantity();
@@ -89,7 +91,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 		// Add interactive data attribute for the stepper functionality.
 		// Pass $set_product_context = true because each grouped product child needs its own
 		// products context scope (the inherited context points to the grouped parent).
-		$quantity_html = AddToCartWithOptionsUtils::make_quantity_input_interactive( $quantity_html, array(), array(), $context, true );
+		$quantity_html = AddToCartWithOptionsUtils::make_quantity_input_interactive( $quantity_html, array(), array(), $context, true, $draft_key );
 
 		return $quantity_html;
 	}
@@ -166,8 +168,9 @@ class GroupedProductItemSelector extends AbstractBlock {
 		global $product;
 		$previous_product = $product;
 
-		$product = AddToCartWithOptionsUtils::get_product_from_context( $block, $previous_product );
-		$markup  = '';
+		$product   = AddToCartWithOptionsUtils::get_product_from_context( $block, $previous_product );
+		$markup    = '';
+		$draft_key = $block->context['draftKey'] ?? 'woocommerce/global';
 
 		if ( $product ) {
 			$is_interactive = false;
@@ -178,7 +181,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 				$markup         = $this->get_checkbox_markup( $product );
 			} else {
 				$is_interactive = true;
-				$markup         = $this->get_quantity_selector_markup( $product );
+				$markup         = $this->get_quantity_selector_markup( $product, $draft_key );
 			}
 
 			if ( $is_interactive ) {

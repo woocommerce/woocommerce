@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { getConfig, store } from '@wordpress/interactivity';
+import {
+	getConfig,
+	getContext,
+	getServerState,
+	store,
+} from '@wordpress/interactivity';
 import type { AsyncAction, TypeYield } from '@wordpress/interactivity';
 import type {
 	Cart,
@@ -15,10 +20,13 @@ import type {
 	Store as StoreNotices,
 	Notice,
 } from '@woocommerce/stores/store-notices';
+import fastDeepEqual from 'fast-deep-equal/es6';
 
 /**
  * Internal dependencies
  */
+import '@woocommerce/stores/woocommerce/products';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import { triggerAddedToCartEvent } from './legacy-events';
 import {
 	createMutationQueue,
@@ -26,7 +34,7 @@ import {
 	type MutationQueue,
 	type MutationResult,
 } from './mutation-batcher';
-import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
+import { attributeNamesMatch } from '../../utils/variations/attribute-matching';
 
 export type WooCommerceConfig = {
 	messages?: {
@@ -38,6 +46,46 @@ export type WooCommerceConfig = {
 };
 
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
+
+/**
+ * An opaque address for a `state.draftItems` collection.
+ *
+ * The only contract a `DraftKey` carries is string equality: two reads (or
+ * a read and a write) using the same key resolve the same collection, and
+ * nothing else is promised — no parseable format, no stability guarantee
+ * beyond a single browsing session. A container block mints and declares its
+ * own key in context; an extension may declare a namespaced key of its own
+ * with zero core changes. See {@link GLOBAL_DRAFT_KEY} for the reserved
+ * session-global key every surface falls back to when no container declares
+ * one.
+ */
+export type DraftKey = string;
+
+/**
+ * A single draft collection's draft cart item.
+ *
+ * A draft is exactly a Store API `cart/add-item` request payload — no
+ * mapping layer. Extension props (e.g. `'my-plugin/gift-note'`) ride at the
+ * payload root, namespaced, exactly as the Store API accepts them; there is
+ * no separate wrapper for them here (contrast with the read-only
+ * `CartItem.extensions`, which reflects the *server's* response shape once a
+ * line exists).
+ */
+export type DraftItem = {
+	/**
+	 * The product or variation id being drafted. This is also the
+	 * per-collection uniqueness key: `upsertDraftItem` merges into the
+	 * resolved collection's draft whose `id` matches and appends otherwise,
+	 * so a collection holds at most one draft per `id`.
+	 */
+	id: number;
+	/** The quantity to add. */
+	quantity: number;
+	/** Chosen attributes, for a variation draft. */
+	variation?: SelectedAttributes[];
+	/** Namespaced extension props riding at the payload root (e.g. `'my-plugin/gift-note'`). */
+	[ extensionProp: string ]: unknown;
+};
 
 export type OptimisticCartItem = {
 	key?: string | undefined;
@@ -58,38 +106,211 @@ export type ClientCartItem = Omit<
 	quantityToAdd?: number;
 };
 
+/**
+ * The read-only envelope returned by `findItem`/`itemInContext`.
+ *
+ * Pairing between a resolved collection's draft and a cart line never
+ * guesses: `cartItem` is populated only when the pairing ladder resolves to
+ * exactly one candidate line — a context-known line `key`, or an unambiguous
+ * product/variation identity plus namespaced extension-prop match. Any
+ * remaining ambiguity (including "this product is in the cart, but not as a
+ * single identifiable line") leaves `cartItem` `undefined`; the server owns
+ * cart-line identity, so the client never guesses at it. No consumer needs
+ * the "in the cart, but no single line can be paired" tri-state, so the
+ * envelope carries only `cartItem`/`draft`.
+ */
+export type Envelope = {
+	/**
+	 * The paired cart line, when the pairing ladder resolved to exactly one
+	 * candidate. `undefined` when no line matches, or more than one
+	 * candidate line matches and none can be told apart.
+	 */
+	cartItem?: CartItem | OptimisticCartItem | undefined;
+	/** The resolved collection's draft for the product, when one exists. */
+	draft?: DraftItem | undefined;
+};
+
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 export type Store = {
 	state: {
-		errorMessages?: {
-			[ key: string ]: string;
-		};
 		restUrl: string;
 		nonce: string;
-		findItemInCart: ( args: {
-			id: ClientCartItem[ 'id' ];
-			key?: ClientCartItem[ 'key' ];
-			variation?: ClientCartItem[ 'variation' ];
-		} ) => CartItem | OptimisticCartItem | undefined;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
 		};
+		/**
+		 * The global draft home: every draft collection, keyed by an opaque
+		 * {@link DraftKey}.
+		 *
+		 * At most one draft per product `id` within any one collection. A
+		 * container block (a Product Collection loop item, a Single Product
+		 * block, or any other extension surface that wraps or repeats
+		 * purchase UI) declares its own server-minted key in its
+		 * `woocommerce/cart` context; a surface wrapped in no container
+		 * resolves the reserved {@link GLOBAL_DRAFT_KEY} collection. Every
+		 * read and write resolves the nearest declared key (see the
+		 * module-private `resolveDraftKey`/`resolveCollection`). A
+		 * collection is created lazily, on its first shopper write — the
+		 * server never seeds this map. Drafts live alongside — never
+		 * inside — the read-only `cart` mirror above, and are written
+		 * exclusively through `upsertDraftItem`, or by direct mutation of an
+		 * already-resolved draft object.
+		 */
+		draftItems: Record< DraftKey, DraftItem[] >;
+		/**
+		 * Finds an item by id/key, or by an extension-supplied predicate,
+		 * returning the read-only envelope pairing its draft with its cart
+		 * line. The draft is read from the resolved draft collection — the
+		 * nearest declared `context.draftKey`, falling back to
+		 * {@link GLOBAL_DRAFT_KEY} (see the module-private
+		 * `resolveDraftKey`/`resolveCollection`).
+		 *
+		 * Implements the pairing ladder: an explicit `key` pairs exactly
+		 * (no further checks); otherwise product/variation identity plus a
+		 * namespaced extension-prop comparison against the candidate line's
+		 * `extensions[<namespace>]` must resolve to exactly one candidate
+		 * (using the resolved draft's own `variation`/extension props, when
+		 * one exists); any remaining ambiguity leaves `cartItem`
+		 * `undefined` — the server owns line identity, so this never
+		 * guesses. `filter` replaces the id-based identity matching
+		 * entirely, for extensions with their own notion of line identity.
+		 *
+		 * @param args        Lookup arguments.
+		 * @param args.id     The product/variation id to pair by identity.
+		 * @param args.key    A known cart-line key; pairs exactly when
+		 *                    given, regardless of `id`/`filter`.
+		 * @param args.filter An extension-supplied predicate narrowing
+		 *                    candidate lines directly, in place of
+		 *                    id-based identity matching.
+		 * @return The envelope: `{ cartItem?, draft? }`.
+		 */
+		findItem: ( args?: {
+			id?: DraftItem[ 'id' ];
+			key?: CartItem[ 'key' ];
+			filter?: ( item: CartItem | OptimisticCartItem ) => boolean;
+		} ) => Envelope;
+		/**
+		 * The envelope for the in-context product: its resolved
+		 * collection's draft paired with its cart line, resolved via the
+		 * products store's `productInContext`. `undefined` product in
+		 * context (nothing rendered) yields an empty envelope. See
+		 * `findItem` for the pairing ladder.
+		 */
+		itemInContext: Envelope;
+		/**
+		 * The in-context product's in-cart quantity.
+		 *
+		 * A grouped product aggregates its children's own in-cart
+		 * quantities (each resolved independently, by id); a variable
+		 * product resolves through its currently selected variation (the
+		 * resolved collection's draft selection, same resolution as
+		 * `itemInContext`); a simple product is its own paired line's
+		 * quantity. `0` when nothing pairs, or no product is in context.
+		 */
+		inCartQuantity: number;
 	};
 	actions: {
-		removeCartItem: ( key: string ) => Promise< void >;
+		/**
+		 * Creates or updates a draft cart item in the resolved draft
+		 * collection — the nearest declared `context.draftKey`, falling
+		 * back to {@link GLOBAL_DRAFT_KEY} (see the module-private
+		 * `resolveDraftKey`/`resolveCollection`).
+		 *
+		 * Merges `partial` into the resolved collection's draft whose `id`
+		 * matches — `id` resolves from `options.id` when given, else from
+		 * `partial.id` — appending a new draft otherwise. Creating a new
+		 * draft composes it from `getServerState()`'s
+		 * `draftSeeds[key][id]` (when one is filed for the resolved key
+		 * and id) merged under `partial`, so an untouched field falls back
+		 * to its server-rendered default; the resolved collection is
+		 * created lazily, on this first write, when it does not exist yet.
+		 *
+		 * Rejects (leaving state unchanged) when: no numeric target `id`
+		 * can be resolved; `partial.id` disagrees with an
+		 * already-resolved target `id`, i.e. an attempt to change an
+		 * existing draft's identity in place (remove the draft and add a
+		 * new one instead); or a brand new draft is being created without
+		 * a numeric `quantity` (from either `partial` or the seed). Every
+		 * rejection is a dev-build console warning and a silent no-op in
+		 * production.
+		 *
+		 * @param partial    The draft fields to create or merge.
+		 * @param options    Targeting options.
+		 * @param options.id An explicit id identifying which existing
+		 *                   draft to update, when it differs from
+		 *                   `partial.id` (e.g. `partial` omits `id`).
+		 */
+		upsertDraftItem: (
+			partial: Partial< DraftItem >,
+			options?: { id?: DraftItem[ 'id' ] }
+		) => void;
+		/**
+		 * Posts the in-context product's resolved collection's draft(s) to
+		 * the cart, or an explicit payload verbatim.
+		 *
+		 * With no argument, resolves the in-context product (via
+		 * `woocommerce/products`) and posts the resolved collection's
+		 * draft(s) for it: a simple/variable product's own single draft
+		 * (`itemInContext.draft`), or, for a grouped product, every child's
+		 * draft (children resolved one-directionally through the products
+		 * store) whose `quantity` is greater than `0`. Multiple children's
+		 * drafts are posted as one auto-batched request set through the
+		 * mutation queue rather than one request per child. Never posts
+		 * another collection's or another product's draft, and sends
+		 * nothing when the resolution yields no draft.
+		 *
+		 * With an explicit `payload`, posts it verbatim — extension props
+		 * at its root included — bypassing collection/product resolution
+		 * entirely; this is the path an extension composing its own
+		 * `cart/add-item` payload (e.g. a bundle) uses.
+		 *
+		 * Every posted item optimistically bumps a matching existing cart
+		 * line's quantity in place (unless `sold_individually`) or is
+		 * pushed as a new line, commits or rolls back through the mutation
+		 * queue exactly like `addCartItem`, and fires
+		 * `triggerAddedToCartEvent( { preserveCartData: true } )` once per
+		 * call on success. A cycle whose requests all fail rolls the cart
+		 * back to its pre-cycle snapshot and surfaces a
+		 * `woocommerce/store-notices` notice.
+		 *
+		 * @param payload An explicit draft-shaped payload to post verbatim,
+		 *                in place of resolving the in-context product's
+		 *                draft(s).
+		 */
+		addItem: ( payload?: DraftItem ) => Promise< void >;
+		/**
+		 * Sets a cart line's quantity to an absolute value via
+		 * `update-item`.
+		 *
+		 * The public name for the existing keyed path of `addCartItem`:
+		 * resolves the current line for `key` and reproduces its
+		 * optimistic-apply/commit-or-rollback and legacy-event behavior
+		 * exactly. A no-op when no line matches `key`.
+		 *
+		 * @param args          The keyed update.
+		 * @param args.key      The cart line's key.
+		 * @param args.quantity The absolute quantity to set.
+		 */
+		updateItem: ( args: {
+			key: string;
+			quantity: number;
+		} ) => Promise< void >;
+		/**
+		 * Removes a cart line by key.
+		 *
+		 * @param key The cart line's key.
+		 */
+		removeItem: ( key: string ) => Promise< void >;
+		/**
+		 * Re-fetches the server cart, bypassing the browser cache.
+		 */
+		refresh: () => Promise< void >;
 		addCartItem: (
 			args: ClientCartItem,
 			options?: CartUpdateOptions
 		) => Promise< void >;
-		batchAddCartItems: (
-			items: ClientCartItem[],
-			options?: CartUpdateOptions
-		) => Promise< void >;
-		// Todo: Check why if I switch to an async function here the types of the store stop working.
-		refreshCartItems: () => Promise< void >;
-		waitForIdle: () => Promise< void >;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => Promise< void >;
 		updateNotices: (
 			notices: Notice[],
@@ -97,6 +318,29 @@ export type Store = {
 		) => Promise< void >;
 	};
 };
+
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+/**
+ * The `woocommerce/products` store's state, consulted one-directionally
+ * (cart never becomes a dependency of products) to resolve the product in
+ * context for `itemInContext`/`inCartQuantity` and to back the pairing
+ * ladder's attribute matching (`matchesSelectedAttributes`).
+ */
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
+
+// Todo: export this store once the store is public.
+const { state } = store< Store >(
+	'woocommerce/cart',
+	{},
+	{ lock: universalLock }
+);
 
 type QuantityChanges = {
 	cartItemsPendingQuantity?: string[];
@@ -135,37 +379,191 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 } );
 
 /**
- * Computes the canonical product token for accumulating per-product totals
- * across a batch.
+ * The shape of the `woocommerce/cart` context namespace relevant to draft
+ * collection resolution.
  *
- * The token is stable: simple items produce `"<id>"` and variation items
- * produce `"<id>|<attr1>=<val1>&..."` with attributes sorted alphabetically
- * by name so insertion order differences do not produce different tokens.
- *
- * @param id        The product id.
- * @param variation The variation attributes, if any.
- * @return A canonical string token that uniquely identifies this product.
+ * A container block (a Product Collection loop item, a Single Product
+ * block, or any other extension surface that wraps or repeats purchase UI)
+ * declares its own server-minted `draftKey` here, isolating its subtree's
+ * drafts into that key's collection; nested surfaces inherit the same bag
+ * and resolve the same collection. Other `woocommerce/cart` context keys —
+ * a mini-cart row's `id`/`key` — live in the same namespace but do not
+ * establish a collection boundary.
  */
-function productToken(
-	id: number,
-	variation?: CartVariationItem[] | SelectedAttributes[]
-): string {
-	if ( ! variation || variation.length === 0 ) {
-		return String( id );
+type CartContext = { draftKey?: DraftKey };
+
+/**
+ * The reserved key for the session-global draft collection: every purchase
+ * surface wrapped in no container resolves this collection.
+ *
+ * No container ever declares this literal as its own key — containers
+ * always mint one of their own — so it is the fixed fallback both this
+ * resolver and the server's seed-filing PHP agree on.
+ */
+const GLOBAL_DRAFT_KEY: DraftKey = 'woocommerce/global';
+
+/**
+ * The `woocommerce/cart` server-rendered state shape relevant to seed
+ * lookup: each purchase surface's initial-draft default, filed per
+ * collection key and per product/variation id.
+ *
+ * Read only through `getServerState()` — the runtime's intact, per-page,
+ * navigation-fresh copy — never through `state.draftSeeds`, which the
+ * router's non-destructive client-side merge accumulates across
+ * navigations and which this module never consults.
+ */
+type CartServerState = {
+	draftSeeds?: Record< DraftKey, Record< DraftItem[ 'id' ], DraftItem > >;
+};
+
+/**
+ * Resolves the draft key nearest to the calling surface: the current
+ * context's own declared `draftKey`, when a container established one,
+ * else {@link GLOBAL_DRAFT_KEY}.
+ *
+ * This is the single place that implements `context.draftKey ??
+ * GLOBAL_DRAFT_KEY`; no other code, client or server, should re-implement
+ * that fallback. `getContext()` throws when called with no directive
+ * currently executing on the call stack (e.g. from code that runs outside
+ * any directive-driven element); this resolver must never propagate that
+ * failure — an out-of-directive call simply means "no declared key
+ * available", so it degrades to `GLOBAL_DRAFT_KEY`, exactly as an
+ * in-directive call whose context sets no `draftKey` would.
+ *
+ * @return The resolved draft key.
+ */
+function resolveDraftKey(): DraftKey {
+	try {
+		return (
+			getContext< CartContext >( 'woocommerce/cart' )?.draftKey ??
+			GLOBAL_DRAFT_KEY
+		);
+	} catch {
+		return GLOBAL_DRAFT_KEY;
 	}
-	const attrs = [ ...variation ]
-		.sort( ( a, b ) => a.attribute.localeCompare( b.attribute ) )
-		.map( ( v ) => `${ v.attribute }=${ v.value }` )
-		.join( '&' );
-	return `${ id }|${ attrs }`;
+}
+
+/**
+ * Reads the draft collection filed under `key`, tolerating a
+ * not-yet-created collection as empty rather than dereferencing it.
+ *
+ * Never creates a collection — only a write (`upsertDraftItem`) does that,
+ * lazily, on its first use of a key. A read against a key with no
+ * collection yet simply finds nothing, indistinguishable from an
+ * existing-but-empty collection.
+ *
+ * @param key The resolved draft key.
+ * @return The collection filed under `key`, or `undefined` when none has
+ *         been created yet.
+ */
+function resolveCollection( key: DraftKey ): DraftItem[] | undefined {
+	return state.draftItems[ key ];
+}
+
+/**
+ * Finds a draft for the given product/variation id within a specific draft
+ * collection.
+ *
+ * @param collection The draft collection to search.
+ * @param id         The draft's product/variation id, or `undefined`
+ *                   (nothing to find).
+ * @return The matching draft, or `undefined` when none is found.
+ */
+function findDraftInCollection(
+	collection: DraftItem[],
+	id: DraftItem[ 'id' ] | undefined
+): DraftItem | undefined {
+	if ( id === undefined ) {
+		return undefined;
+	}
+	return collection.find( ( draft ) => draft.id === id );
+}
+
+/**
+ * Reports a draft-write invariant violation.
+ *
+ * Per the write-policy design, invariant violations (an upsert that would
+ * change an existing draft's `id`, a new draft missing a required field)
+ * never throw and never partially apply — the calling action returns
+ * before touching the resolved draft collection. In a development build
+ * this surfaces as a `console.warn` for the implementer; production builds
+ * stay silent (`process.env.NODE_ENV` is inlined by the bundler, so this
+ * check compiles away entirely there).
+ *
+ * @param message A human-readable description of the violated invariant.
+ */
+function warnDraftInvariant( message: string ): void {
+	if ( process.env.NODE_ENV !== 'production' ) {
+		// eslint-disable-next-line no-console
+		console.warn( `[woocommerce/cart] ${ message }` );
+	}
+}
+
+/**
+ * Returns `true` when a variation cart line's recorded attribute values
+ * match a set of selected attributes.
+ *
+ * A module-private copy of the pairing algorithm in
+ * `base/utils/variations/does-cart-item-match-attributes.ts`, duplicated
+ * (rather than imported) so the cart store's own pairing ladder
+ * (`lineMatchesProduct`, `findItem`, `itemInContext`) consults
+ * `woocommerce/products` directly instead of through that util's import
+ * chain. The standalone util is left in place, unchanged — it still backs
+ * the shopper-lists blocks.
+ *
+ * Resolves each recorded attribute's term slug from the parent product's
+ * attribute list (`woocommerce/products` state, consulted one-directionally)
+ * to reconcile the Store API's label/slug mismatches, then requires every
+ * recorded attribute to match a selected one, case-insensitively and after
+ * normalizing WordPress's `attribute_`/`attribute_pa_` prefixes.
+ *
+ * @param cartItem           The cart line to test.
+ * @param selectedAttributes The attributes to match against.
+ * @return `true` when every recorded attribute matches a selected one.
+ */
+function matchesSelectedAttributes(
+	cartItem: OptimisticCartItem,
+	selectedAttributes: SelectedAttributes[]
+): boolean {
+	if (
+		! Array.isArray( cartItem.variation ) ||
+		! Array.isArray( selectedAttributes )
+	) {
+		return false;
+	}
+
+	if ( cartItem.variation.length !== selectedAttributes.length ) {
+		return false;
+	}
+
+	const parentProductId =
+		productsState.productVariations[ cartItem.id ]?.parent;
+	const productAttributes =
+		productsState.products[ parentProductId ]?.attributes ?? [];
+
+	return cartItem.variation.every( ( { attribute, value: termName } ) =>
+		selectedAttributes.some( ( selectedAttr ) => {
+			const terms = productAttributes.find( ( attr ) =>
+				attributeNamesMatch( attribute, attr.name )
+			)?.terms;
+			const termSlug =
+				terms?.find( ( term ) => term.name === termName )?.slug ||
+				termName;
+			return (
+				attributeNamesMatch( selectedAttr.attribute, attribute ) &&
+				selectedAttr.value.toLowerCase() === termSlug?.toLowerCase()
+			);
+		} )
+	);
 }
 
 /**
  * Returns `true` when the given cart line matches the product identified by
- * `id` and `variation`, using the same matching logic as `findItemInCart`.
+ * `id` and `variation`.
  *
  * Simple items match by `id` equality. Variation items additionally require
- * `variation.length` equality and `doesCartItemMatchAttributes`.
+ * `variation.length` equality and `matchesSelectedAttributes`. The private
+ * matcher backing `findItem`'s identity rung and {@link findCartLine}.
  *
  * @param item      The cart line to test.
  * @param id        The product id to match against.
@@ -186,9 +584,115 @@ function lineMatchesProduct(
 		) {
 			return false;
 		}
-		return doesCartItemMatchAttributes( item, variation );
+		return matchesSelectedAttributes( item, variation );
 	}
 	return id === item.id;
+}
+
+/**
+ * Finds a cart line by key, or by product/variation identity when no key is
+ * given.
+ *
+ * The private matcher behind `addCartItem`/`updateItem`'s keyed-or-keyless
+ * lookup and `addItem`'s per-draft lookup, internalizing the former public
+ * `findItemInCart` getter's exact behavior: an explicit `key` pairs exactly,
+ * otherwise {@link lineMatchesProduct} resolves identity.
+ *
+ * @param args           Lookup arguments.
+ * @param args.id        The product/variation id to match by identity.
+ * @param args.key       A known cart-line key; pairs exactly when given,
+ *                       regardless of `id`/`variation`.
+ * @param args.variation The variation attributes to match against, if any.
+ * @return The matching cart line, or `undefined` when none matches.
+ */
+function findCartLine( {
+	id,
+	key,
+	variation,
+}: {
+	id: ClientCartItem[ 'id' ];
+	key?: ClientCartItem[ 'key' ];
+	variation?: ClientCartItem[ 'variation' ];
+} ): CartItem | OptimisticCartItem | undefined {
+	if ( key ) {
+		return state.cart.items.find( ( cartItem ) => key === cartItem.key );
+	}
+	return state.cart.items.find( ( cartItem ) =>
+		lineMatchesProduct( cartItem, id, variation )
+	);
+}
+
+/**
+ * A single namespaced extension prop parsed off a draft's payload root, e.g.
+ * `{ 'my-plugin/gift-note': 'Hi' }` yields `{ namespace: 'my-plugin', key:
+ * 'gift-note', value: 'Hi' }`.
+ */
+type DraftExtensionProp = {
+	/** The plugin namespace the prop rides under (before the `/`). */
+	namespace: string;
+	/** The prop's own key, within its namespace (after the `/`). */
+	key: string;
+	/** The prop's value, as recorded on the draft. */
+	value: unknown;
+};
+
+/**
+ * Extracts a draft's namespaced extension props.
+ *
+ * Per {@link DraftItem}, extension props are payload-root keys carrying a
+ * `/` (e.g. `'my-plugin/gift-note'`); `id`, `quantity`, and `variation`
+ * never contain one, so a slash is what distinguishes an extension prop
+ * from a core draft field.
+ *
+ * @param draft The draft to inspect, or `undefined` when none was resolved.
+ * @return The draft's extension props, or an empty array when `draft` is
+ *         `undefined` or carries none.
+ */
+function draftExtensionProps(
+	draft: DraftItem | undefined
+): DraftExtensionProp[] {
+	if ( ! draft ) {
+		return [];
+	}
+	return Object.keys( draft )
+		.filter( ( propKey ) => propKey.includes( '/' ) )
+		.map( ( propKey ) => {
+			const slashIndex = propKey.indexOf( '/' );
+			return {
+				namespace: propKey.slice( 0, slashIndex ),
+				key: propKey.slice( slashIndex + 1 ),
+				value: draft[ propKey ],
+			};
+		} );
+}
+
+/**
+ * Returns `true` when every namespaced extension prop on `draft` deep-equals
+ * the corresponding value under the cart line's `extensions[<namespace>]`.
+ *
+ * A draft carrying no extension props always matches — the extension-prop
+ * comparison is an additional constraint on the pairing ladder only when the
+ * draft actually has one.
+ *
+ * @param draft The draft whose extension props to check, or `undefined`.
+ * @param item  The cart line to compare against.
+ * @return `true` when every extension prop matches, or `draft` has none.
+ */
+function draftExtensionsMatchLine(
+	draft: DraftItem | undefined,
+	item: OptimisticCartItem | CartItem
+): boolean {
+	const extensions = ( item as CartItem ).extensions;
+	return draftExtensionProps( draft ).every(
+		( { namespace, key, value } ) => {
+			const namespaceData = extensions?.[ namespace ] as
+				| Record< string, unknown >
+				| undefined;
+			return (
+				!! namespaceData && fastDeepEqual( namespaceData[ key ], value )
+			);
+		}
+	);
 }
 
 /**
@@ -197,7 +701,7 @@ function lineMatchesProduct(
  *
  * For each product entry in `products`, computes:
  *   - `serverTotal` = sum of the committed server cart's lines matching that
- *     product (using the same matcher as `findItemInCart`).
+ *     product (via `lineMatchesProduct`).
  *   - `expectedTotal` = pre-add total + sum of posted deltas.
  *
  * When `serverTotal === expectedTotal`, the add was exact for that product
@@ -267,7 +771,7 @@ function computeKeylessAddSuppressKeys(
  * mutation) still notify because they make the per-product totals diverge and
  * the keys are left out of the set.
  *
- * Keyed `update-item` changes and `removeCartItem` never populate
+ * Keyed `update-item` changes and `removeItem` never populate
  * `suppressKeys` (the parameter defaults to an empty set), so their notice
  * behavior is byte-for-byte unchanged.
  *
@@ -300,7 +804,7 @@ const getInfoNoticesFromCartUpdates = (
 	// Lines whose key appears in suppressKeys are skipped: the action proved that
 	// the product's add was exact (server total == expected total), so any
 	// quantity difference on those lines is an intentional add result, not a
-	// server-initiated change. Keyed update-item lines and removeCartItem lines
+	// server-initiated change. Keyed update-item lines and removeItem lines
 	// are never in suppressKeys, so their notice behavior is unchanged.
 	const autoUpdatedToNotify = newItems.filter( ( item ) => {
 		if ( ! isCartItem( item ) ) {
@@ -395,676 +899,827 @@ async function sendCartRequest(
 
 	return cartQueue.submit( options );
 }
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-// Todo: export this store once the store is public.
-const { state } = store< Store >( 'woocommerce', {}, { lock: universalLock } );
+/**
+ * Posts a list of draft-shaped items to the cart's `add-item` endpoint,
+ * auto-batched through the mutation queue when more than one is given.
+ *
+ * Each item is posted **verbatim** as the request body — no
+ * reconstruction — matching the write policy that a draft is exactly a
+ * Store API `cart/add-item` payload (extension props at its root
+ * included). Optimistically, an item bumps a matching existing cart line's
+ * quantity in place (unless the line is `sold_individually`) or is pushed
+ * as a new line when no line matches, mirroring `addCartItem`'s
+ * keyless-add behavior. `sendCartRequest` calls made synchronously in the
+ * same tick — as this function's `.map()` below does — are auto-batched
+ * into a single `wc/store/v1/batch` request by the mutation queue.
+ *
+ * On success, `triggerAddedToCartEvent` fires once for the whole call
+ * (not once per item), and info/error notices are derived from the cart
+ * diff. No request rejection ever throws out of this function — every
+ * request is awaited via `Promise.allSettled` — so a failure surfaces as
+ * an error notice; when every request in the cycle failed, the mutation
+ * queue has already rolled the cart back to its pre-cycle snapshot.
+ *
+ * A no-op (nothing sent) when `items` is empty.
+ *
+ * Accepts the store's `actions` as an explicit parameter (rather than
+ * closing over the module-level binding) purely so this declaration can
+ * sit above the `store()` call that produces it.
+ *
+ * @param items        The items to post, each an exact `cart/add-item` payload.
+ * @param storeActions The store's own actions, for dispatching notices.
+ */
+function* postDraftItems(
+	items: DraftItem[],
+	storeActions: Store[ 'actions' ]
+): AsyncAction< void > {
+	if ( items.length === 0 ) {
+		return;
+	}
+
+	const quantityChanges: QuantityChanges = {
+		productsPendingAdd: items.map( ( item ) => item.id ),
+	};
+
+	try {
+		// Per-item capture for the keyless-add exactness test (see
+		// `computeKeylessAddSuppressKeys`). Drafts are unique per product id
+		// by construction (at most one draft per id per collection; grouped
+		// children are distinct ids), so no per-token accumulation is needed.
+		const productCaptures = items.map( ( item ) => {
+			const preExistingKeys: string[] = [];
+			let preAddTotal = 0;
+			for ( const cartLine of state.cart.items ) {
+				if ( lineMatchesProduct( cartLine, item.id, item.variation ) ) {
+					preAddTotal += cartLine.quantity;
+					if ( cartLine.key ) {
+						preExistingKeys.push( cartLine.key );
+					}
+				}
+			}
+			return {
+				id: item.id,
+				variation: item.variation,
+				preAddTotal,
+				deltaTotal: item.quantity,
+				preExistingKeys,
+			};
+		} );
+
+		const requests = items.map( ( item, index ) => {
+			const existingItem = findCartLine( {
+				id: item.id,
+				variation: item.variation,
+			} );
+			const isLastItem = index === items.length - 1;
+
+			return sendCartRequest( state, {
+				path: '/wc/store/v1/cart/add-item',
+				method: 'POST',
+				body: item,
+				applyOptimistic: () => {
+					if ( existingItem ) {
+						const isSoldIndividually =
+							isCartItem( existingItem ) &&
+							existingItem.sold_individually;
+						if ( ! isSoldIndividually ) {
+							existingItem.quantity += item.quantity;
+						}
+					} else {
+						state.cart.items.push( {
+							...item,
+						} as unknown as OptimisticCartItem );
+					}
+				},
+				// Side effects run synchronously during reconciliation,
+				// before isProcessing clears. Only the last item's callback
+				// fires, to avoid firing the legacy event once per child.
+				...( isLastItem && {
+					onSettled: ( { success } ) => {
+						if ( success ) {
+							triggerAddedToCartEvent( {
+								preserveCartData: true,
+							} );
+							emitSyncEvent( { quantityChanges } );
+						}
+					},
+				} ),
+			} );
+		} );
+
+		// Capture cart state after optimistic updates for notice comparison.
+		const cartAfterOptimistic = JSON.parse( JSON.stringify( state.cart ) );
+
+		const results = ( yield Promise.allSettled(
+			requests
+		) ) as PromiseSettledResult< MutationResult< Cart > >[];
+
+		// Find the last successful result for the notice diff.
+		const lastSuccess = [ ...results ]
+			.reverse()
+			.find(
+				( r ): r is PromiseFulfilledResult< MutationResult< Cart > > =>
+					r.status === 'fulfilled' && r.value.success
+			);
+
+		if ( lastSuccess ) {
+			const cart = lastSuccess.value.data as Cart;
+			const suppressKeys = computeKeylessAddSuppressKeys(
+				productCaptures,
+				cart
+			);
+			const infoNotices = getInfoNoticesFromCartUpdates(
+				cartAfterOptimistic,
+				cart,
+				suppressKeys
+			);
+			const errorNotices = cart.errors.map( generateErrorNotice );
+			yield storeActions.updateNotices(
+				[ ...infoNotices, ...errorNotices ],
+				true
+			);
+		}
+
+		// Show error notices for failed items.
+		const errorNotices = results
+			.filter(
+				( r ): r is PromiseRejectedResult => r.status === 'rejected'
+			)
+			.map( ( r ) =>
+				generateErrorNotice( r.reason as ApiErrorResponse )
+			);
+		if ( errorNotices.length > 0 ) {
+			yield storeActions.updateNotices( errorNotices );
+		}
+	} catch ( error ) {
+		storeActions.showNoticeError( error as Error );
+	}
+}
+
+/**
+ * Removes a cart line by key.
+ *
+ * Backs the `removeItem` action, extracted to a standalone generator so its
+ * optimistic-apply, commit-or-rollback, and notice behavior lives in one
+ * place.
+ *
+ * Accepts the store's `actions` as an explicit parameter (rather than
+ * closing over the module-level binding) purely so this declaration can
+ * sit above the `store()` call that produces it.
+ *
+ * @param key          The cart line's key.
+ * @param storeActions The store's own actions, for dispatching notices.
+ */
+function* removeCartItemGenerator(
+	key: string,
+	storeActions: Store[ 'actions' ]
+): AsyncAction< void > {
+	// Track what changes we're making for the sync event.
+	const quantityChanges: QuantityChanges = {
+		cartItemsPendingDelete: [ key ],
+	};
+
+	// Capture cart state after optimistic updates for notice comparison.
+	let cartAfterOptimistic: typeof state.cart | null = null;
+
+	try {
+		const result = ( yield sendCartRequest( state, {
+			path: '/wc/store/v1/cart/remove-item',
+			method: 'POST',
+			body: { key },
+			applyOptimistic: () => {
+				state.cart.items = state.cart.items.filter(
+					( item ) => item.key !== key
+				);
+				// Capture state after optimistic update.
+				cartAfterOptimistic = JSON.parse(
+					JSON.stringify( state.cart )
+				);
+			},
+			// Side effects run synchronously during reconciliation,
+			// before isProcessing clears. This prevents `refresh` from
+			// running during these events.
+			onSettled: ( { success } ) => {
+				if ( success ) {
+					emitSyncEvent( { quantityChanges } );
+				}
+			},
+		} ) ) as TypeYield< typeof sendCartRequest >;
+
+		// Show notices from server response.
+		const cart = result.data as Cart;
+		if ( cart && cartAfterOptimistic ) {
+			const infoNotices = getInfoNoticesFromCartUpdates(
+				cartAfterOptimistic,
+				cart
+			);
+			const errorNotices = cart.errors.map( generateErrorNotice );
+			yield storeActions.updateNotices(
+				[ ...infoNotices, ...errorNotices ],
+				true
+			);
+		}
+	} catch ( error ) {
+		storeActions.showNoticeError( error as Error );
+	}
+}
+
+/**
+ * Adds or updates a cart line, choosing `add-item`/`update-item` from
+ * whether an explicit `key` is given.
+ *
+ * The shared implementation behind both `addCartItem` (retained
+ * permanently) and `updateItem`'s keyed path (the public name for this
+ * function's `key`-present branch), extracted so both actions reproduce
+ * the exact same endpoint selection, optimistic-apply,
+ * commit-or-rollback, and notice behavior via `yield*` delegation.
+ *
+ * Accepts the store's `actions` as an explicit parameter (rather than
+ * closing over the module-level binding) purely so this declaration can
+ * sit above the `store()` call that produces it.
+ *
+ * @param args                           The item to add or update.
+ * @param storeActions                   The store's own actions, for dispatching notices.
+ * @param options                        Notice-display options.
+ * @param options.showCartUpdatesNotices Whether to surface auto-update/removal notices.
+ */
+function* addCartItemGenerator(
+	args: ClientCartItem,
+	storeActions: Store[ 'actions' ],
+	options: CartUpdateOptions = {}
+): AsyncAction< void > {
+	const { id, key, quantity, quantityToAdd, variation } = args;
+	const { showCartUpdatesNotices = true } = options;
+	if ( quantity !== undefined && quantityToAdd !== undefined ) {
+		throw new Error(
+			'addCartItem: pass either quantity or quantityToAdd, not both.'
+		);
+	}
+
+	// Keyless-requires-delta invariant. A keyless add always issues
+	// `add-item`, whose quantity is a delta added to the existing
+	// line; rapid-click compounding relies on that — each click sends
+	// its own delta and the server sums them (N -> N+1 -> N+2). An
+	// absolute `quantity` on a keyless add would be misread as a delta
+	// and corrupt that compounding, so keyless callers must pass
+	// `quantityToAdd`. An absolute `quantity` is legitimate only when
+	// paired with an explicit `key`: that is the keyed-stepper path
+	// (mini-cart / cart-block quantity controls), which targets one
+	// known line via `update-item` and sets its quantity outright.
+	// Those keyed callers are intentionally exempt from this guard.
+	if (
+		key === undefined &&
+		quantity !== undefined &&
+		quantityToAdd === undefined
+	) {
+		throw new Error(
+			'addCartItem: a keyless add must pass quantityToAdd (a delta), not an absolute quantity.'
+		);
+	}
+
+	const a11yModulePromise = import( '@wordpress/a11y' );
+
+	// Find existing item
+	const existingItem = findCartLine( {
+		id,
+		key,
+		variation,
+	} );
+
+	// Determine the target quantity.
+	// If quantityToAdd is provided, calculate target based on current
+	// cart state (which includes optimistic updates from previous clicks).
+	// This ensures rapid clicks compound correctly.
+	let targetQuantity: number;
+	if ( typeof quantityToAdd === 'number' ) {
+		const currentQuantity = existingItem?.quantity ?? 0;
+		targetQuantity = currentQuantity + quantityToAdd;
+	} else if ( typeof quantity === 'number' ) {
+		targetQuantity = quantity;
+	} else {
+		// Neither provided - default to 1
+		targetQuantity = 1;
+	}
+
+	// Endpoint selection is a pure function of the caller-supplied
+	// `key`, never of a line matched by id/variation. A keyless add
+	// always issues `add-item` with a delta, even when an existing
+	// line (including a server-keyed one) matches by product id, so
+	// the server owns cart-line identity for adds. Only an explicit
+	// caller `key` targets a specific line via `update-item`.
+	const isUpdate = !! key;
+	const endpoint = isUpdate ? 'update-item' : 'add-item';
+
+	// Track what changes we're making for notice comparison.
+	const quantityChanges: QuantityChanges = isUpdate
+		? {
+				cartItemsPendingQuantity: existingItem?.key
+					? [ existingItem.key ]
+					: [],
+		  }
+		: { productsPendingAdd: [ id ] };
+
+	// Prepare the item to send.
+	let itemToSend: OptimisticCartItem;
+	if ( isUpdate && existingItem ) {
+		// Caller-keyed update: target the exact line by key and send
+		// the absolute target quantity to the update-item endpoint.
+		itemToSend = { ...existingItem, quantity: targetQuantity };
+	} else {
+		// Keyless add: build a fresh payload for the add-item
+		// endpoint and never copy the matched line's key. The amount
+		// sent is always a delta — add-item adds to the existing
+		// quantity rather than setting it — so a match (by
+		// id/variation, possibly carrying a server key) only tells us
+		// how much delta is already accounted for in the running
+		// optimistic total; with no match we post the full target
+		// quantity. The matched line is never sent as an absolute
+		// quantity: the posted amount is a function of the delta,
+		// not of the match.
+		const quantityToSend = existingItem
+			? targetQuantity - existingItem.quantity
+			: targetQuantity;
+
+		itemToSend = {
+			id,
+			quantity: quantityToSend,
+			...( variation && { variation } ),
+		} as OptimisticCartItem;
+	}
+
+	// Capture cart state after optimistic updates for notice comparison.
+	let cartAfterOptimistic: typeof state.cart | null = null;
+
+	// Per-product capture for the keyless-add exactness test.
+	// On the keyless path (!isUpdate), capture by value — before the
+	// optimistic bump mutates `existingItem.quantity` in place — the
+	// set of pre-existing matching line keys and their summed quantity.
+	// This is the single error-prone hotspot: `existingItem` is a live
+	// reference into `state.cart.items`; reading `.quantity` after the
+	// bump yields the post-bump value and silently corrupts the math.
+	// Stays empty on the keyed `update-item` path so the "your change
+	// was undone" notice keeps firing for steppers.
+	type ProductCapture = {
+		id: number;
+		variation?: CartVariationItem[] | SelectedAttributes[] | undefined;
+		preAddTotal: number;
+		deltaTotal: number;
+		preExistingKeys: string[];
+	};
+	const productCaptures: ProductCapture[] = [];
+	if ( ! isUpdate ) {
+		// Sum all pre-add quantities across every cart line matching
+		// this product (id + variation). A single product can occupy
+		// multiple lines (e.g. a meta line ordered before a standalone
+		// line). The per-product total lets us verify exactness even
+		// when the server grows a different line than the one the
+		// client bumped optimistically.
+		const preExistingKeys: string[] = [];
+		let preAddTotal = 0;
+		for ( const cartLine of state.cart.items ) {
+			if ( lineMatchesProduct( cartLine, id, variation ) ) {
+				preAddTotal += cartLine.quantity;
+				if ( cartLine.key ) {
+					preExistingKeys.push( cartLine.key );
+				}
+			}
+		}
+		// `itemToSend.quantity` is the posted delta (quantityToSend
+		// computed above). It is already computed before this capture
+		// block and does not depend on the optimistic state, so it is
+		// safe to read here.
+		productCaptures.push( {
+			id,
+			variation,
+			preAddTotal,
+			deltaTotal: itemToSend.quantity,
+			preExistingKeys,
+		} );
+	}
+
+	try {
+		const result = ( yield sendCartRequest( state, {
+			path: `/wc/store/v1/cart/${ endpoint }`,
+			method: 'POST',
+			body: itemToSend,
+			applyOptimistic: () => {
+				if ( existingItem ) {
+					// This in-place bump is render-only. It
+					// makes the common re-add flicker-free, but it must
+					// never feed back into endpoint selection or the
+					// posted amount — those are already fixed above as a
+					// pure function of key-presence and the delta. On a
+					// keyless add the match may bump a server-keyed line's
+					// rendered quantity (the accepted, self-correcting
+					// meta-only blip the server reconciles away); it must
+					// not flip the add into `update-item` or supply an
+					// absolute quantity. A future edit that lets this
+					// match drive the endpoint or the posted amount
+					// resurrects the original "cannot update bundle item"
+					// / wrong-line bug.
+					const isSoldIndividually =
+						isCartItem( existingItem ) &&
+						existingItem.sold_individually;
+					if ( ! isSoldIndividually ) {
+						existingItem.quantity = targetQuantity;
+					}
+				} else {
+					// No existing item: push new optimistic item.
+					state.cart.items.push( itemToSend );
+				}
+				// Capture state after optimistic update.
+				cartAfterOptimistic = JSON.parse(
+					JSON.stringify( state.cart )
+				);
+			},
+			// Side effects run synchronously during reconciliation,
+			// before isProcessing clears. This prevents `refresh` from
+			// running during these events.
+			onSettled: ( { success } ) => {
+				if ( success ) {
+					// Dispatch legacy event
+					triggerAddedToCartEvent( {
+						preserveCartData: true,
+					} );
+
+					// Dispatch sync event
+					emitSyncEvent( { quantityChanges } );
+				}
+			},
+		} ) ) as TypeYield< typeof sendCartRequest >;
+
+		// Success - handle side effects that don't trigger `refresh`
+		const cart = result.data as Cart;
+
+		// Show notices if enabled
+		if ( showCartUpdatesNotices && cart && cartAfterOptimistic ) {
+			// Compute the suppression set: for each added product,
+			// check whether the server total matches the pre-add total
+			// plus the posted delta. If so, the add was exact and the
+			// pre-existing line keys are suppressed in the notice diff.
+			const suppressKeys = computeKeylessAddSuppressKeys(
+				productCaptures,
+				cart
+			);
+			const infoNotices = getInfoNoticesFromCartUpdates(
+				cartAfterOptimistic,
+				cart,
+				suppressKeys
+			);
+			const errorNotices = cart.errors.map( generateErrorNotice );
+			yield storeActions.updateNotices(
+				[ ...infoNotices, ...errorNotices ],
+				true
+			);
+		}
+
+		// Announce to screen readers
+		const { messages } = getConfig( 'woocommerce' ) as WooCommerceConfig;
+		if ( messages?.addedToCartText ) {
+			const { speak } = ( yield a11yModulePromise ) as Awaited<
+				typeof a11yModulePromise
+			>;
+			speak( messages.addedToCartText, 'polite' );
+		}
+	} catch ( error ) {
+		// Show error notice
+		storeActions.showNoticeError( error as Error );
+	}
+}
+
+/**
+ * Re-fetches the server cart, bypassing the browser cache, retrying with
+ * exponential backoff on failure.
+ *
+ * Backs the `refresh` action, extracted to a standalone generator so its
+ * refresh/retry behavior lives in one place.
+ *
+ * Accepts the store's `actions` as an explicit parameter (rather than
+ * closing over the module-level binding) purely so this declaration can
+ * sit above the `store()` call that produces it; it is also the retry
+ * callback `setTimeout` invokes directly on failure.
+ *
+ * @param storeActions The store's own actions; `storeActions.refresh` is
+ *                     the retry callback on failure.
+ */
+function* refreshCartItemsGenerator(
+	storeActions: Store[ 'actions' ]
+): AsyncAction< void > {
+	// Skip if queue is processing - it will apply server state when done
+	if ( cartQueue?.getStatus().isProcessing ) {
+		return;
+	}
+
+	// Skips if there's a pending request.
+	if ( pendingRefresh ) return;
+
+	pendingRefresh = true;
+
+	try {
+		const res = ( yield fetch( `${ state.restUrl }wc/store/v1/cart`, {
+			method: 'GET',
+			cache: 'no-store',
+			headers: { 'Content-Type': 'application/json' },
+		} ) ) as TypeYield< typeof fetch >;
+
+		// Extract fresh nonce from response headers.
+		state.nonce = res.headers.get( 'Nonce' ) || state.nonce;
+
+		if ( resolveNonceReady ) {
+			resolveNonceReady();
+			resolveNonceReady = null;
+		}
+
+		const json = ( yield res.json() ) as Cart;
+
+		// Checks if the response contains an error.
+		if ( isApiErrorResponse( res, json ) ) throw generateError( json );
+
+		// If the batcher started a cycle while we were fetching,
+		// discard this response — the batcher will reconcile.
+		if ( cartQueue?.getStatus().isProcessing ) {
+			return;
+		}
+
+		// Updates the local cart.
+		state.cart = json;
+
+		// Resets the timeout.
+		refreshTimeout = 3000;
+	} catch ( error ) {
+		// Tries again after the timeout.
+		setTimeout( storeActions.refresh, refreshTimeout );
+
+		// Increases the timeout exponentially.
+		refreshTimeout *= 2;
+	} finally {
+		pendingRefresh = false;
+	}
+}
+
 const { actions } = store< Store >(
-	'woocommerce',
+	'woocommerce/cart',
 	{
 		state: {
-			findItemInCart( {
+			draftItems: {},
+			findItem( {
 				id,
 				key,
-				variation,
+				filter,
 			}: {
-				id: ClientCartItem[ 'id' ];
-				key?: ClientCartItem[ 'key' ];
-				variation?: ClientCartItem[ 'variation' ];
-			} ) {
-				return state.cart.items.find( ( cartItem ) => {
-					if ( key ) {
-						return key === cartItem.key;
-					}
-					if ( cartItem.type === 'variation' ) {
-						if (
-							id !== cartItem.id ||
-							! cartItem.variation ||
-							! variation ||
-							cartItem.variation.length !== variation.length
-						) {
-							return false;
-						}
-						return doesCartItemMatchAttributes(
-							cartItem,
-							variation
-						);
-					}
-					return id === cartItem.id;
-				} );
+				id?: DraftItem[ 'id' ];
+				key?: CartItem[ 'key' ];
+				filter?: ( item: CartItem | OptimisticCartItem ) => boolean;
+			} = {} ): Envelope {
+				const collection = resolveCollection( resolveDraftKey() ) ?? [];
+
+				// Rung 1: a context-known line key pairs exactly, no further
+				// identity/extension checks — the caller already knows
+				// precisely which line this is.
+				if ( key !== undefined ) {
+					const cartItem = state.cart.items.find(
+						( item ) => item.key === key
+					);
+					return {
+						cartItem,
+						draft: findDraftInCollection(
+							collection,
+							id ?? cartItem?.id
+						),
+					};
+				}
+
+				// `filter` replaces id-based identity matching entirely,
+				// for extensions with their own notion of line identity.
+				if ( filter ) {
+					const matches = state.cart.items.filter( filter );
+					return {
+						cartItem:
+							matches.length === 1 ? matches[ 0 ] : undefined,
+						draft: findDraftInCollection( collection, id ),
+					};
+				}
+
+				if ( id === undefined ) {
+					return {
+						cartItem: undefined,
+						draft: undefined,
+					};
+				}
+
+				// Rung 2: product/variation identity (using the resolved
+				// draft's own `variation`, when one exists) plus a
+				// namespaced extension-prop comparison against each
+				// candidate line's `extensions[<namespace>]`. Ambiguity —
+				// zero or more than one line surviving both checks — never
+				// guesses: `cartItem` stays `undefined`.
+				const draft = findDraftInCollection( collection, id );
+				const identityMatches = state.cart.items.filter( ( item ) =>
+					lineMatchesProduct( item, id, draft?.variation )
+				);
+				const pairedMatches = identityMatches.filter( ( item ) =>
+					draftExtensionsMatchLine( draft, item )
+				);
+
+				return {
+					cartItem:
+						pairedMatches.length === 1
+							? pairedMatches[ 0 ]
+							: undefined,
+					draft,
+				};
+			},
+			get itemInContext(): Envelope {
+				const product = productsState.productInContext;
+				if ( ! product ) {
+					return {
+						cartItem: undefined,
+						draft: undefined,
+					};
+				}
+
+				return state.findItem( { id: product.id } );
+			},
+			get inCartQuantity(): number {
+				const product = productsState.productInContext;
+				if ( ! product ) {
+					return 0;
+				}
+
+				if ( product.type === 'grouped' ) {
+					return product.grouped_products.reduce(
+						( total, childId ) =>
+							total +
+							( state.findItem( { id: childId } ).cartItem
+								?.quantity ?? 0 ),
+						0
+					);
+				}
+
+				return state.itemInContext.cartItem?.quantity ?? 0;
 			},
 		},
 		actions: {
-			*removeCartItem( key: string ): AsyncAction< void > {
-				// Track what changes we're making for the sync event.
-				const quantityChanges: QuantityChanges = {
-					cartItemsPendingDelete: [ key ],
-				};
-
-				// Capture cart state after optimistic updates for notice comparison.
-				let cartAfterOptimistic: typeof state.cart | null = null;
-
-				try {
-					const result = ( yield sendCartRequest( state, {
-						path: '/wc/store/v1/cart/remove-item',
-						method: 'POST',
-						body: { key },
-						applyOptimistic: () => {
-							state.cart.items = state.cart.items.filter(
-								( item ) => item.key !== key
-							);
-							// Capture state after optimistic update.
-							cartAfterOptimistic = JSON.parse(
-								JSON.stringify( state.cart )
-							);
-						},
-						// Side effects run synchronously during reconciliation,
-						// before isProcessing clears. This prevents
-						// refreshCartItems from running during these events.
-						onSettled: ( { success } ) => {
-							if ( success ) {
-								emitSyncEvent( { quantityChanges } );
-							}
-						},
-					} ) ) as TypeYield< typeof sendCartRequest >;
-
-					// Show notices from server response.
-					const cart = result.data as Cart;
-					if ( cart && cartAfterOptimistic ) {
-						const infoNotices = getInfoNoticesFromCartUpdates(
-							cartAfterOptimistic,
-							cart
-						);
-						const errorNotices =
-							cart.errors.map( generateErrorNotice );
-						yield actions.updateNotices(
-							[ ...infoNotices, ...errorNotices ],
-							true
-						);
-					}
-				} catch ( error ) {
-					actions.showNoticeError( error as Error );
-				}
-			},
-
-			*addCartItem(
-				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
-				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			): AsyncAction< void > {
-				if ( quantity !== undefined && quantityToAdd !== undefined ) {
-					throw new Error(
-						'addCartItem: pass either quantity or quantityToAdd, not both.'
+			upsertDraftItem(
+				partial: Partial< DraftItem >,
+				{ id }: { id?: DraftItem[ 'id' ] } = {}
+			) {
+				// The id used to look up an existing draft: an explicit
+				// `id` names "the draft I mean to update" independently of
+				// `partial.id`. When both are given they are compared below
+				// to catch an in-place rename attempt; when only one is
+				// given it doubles as both the lookup key and the value.
+				const targetId = id ?? partial.id;
+				if ( typeof targetId !== 'number' ) {
+					warnDraftInvariant(
+						'upsertDraftItem: a numeric "id" is required, via `partial.id` or `{ id }`.'
 					);
-				}
-
-				// Keyless-requires-delta invariant. A keyless add always issues
-				// `add-item`, whose quantity is a delta added to the existing
-				// line; rapid-click compounding relies on that — each click sends
-				// its own delta and the server sums them (N -> N+1 -> N+2). An
-				// absolute `quantity` on a keyless add would be misread as a delta
-				// and corrupt that compounding, so keyless callers must pass
-				// `quantityToAdd`. An absolute `quantity` is legitimate only when
-				// paired with an explicit `key`: that is the keyed-stepper path
-				// (mini-cart / cart-block quantity controls), which targets one
-				// known line via `update-item` and sets its quantity outright.
-				// Those keyed callers are intentionally exempt from this guard.
-				if (
-					key === undefined &&
-					quantity !== undefined &&
-					quantityToAdd === undefined
-				) {
-					throw new Error(
-						'addCartItem: a keyless add must pass quantityToAdd (a delta), not an absolute quantity.'
-					);
-				}
-
-				const a11yModulePromise = import( '@wordpress/a11y' );
-
-				// Find existing item
-				const existingItem = state.findItemInCart( {
-					id,
-					key,
-					variation,
-				} );
-
-				// Determine the target quantity.
-				// If quantityToAdd is provided, calculate target based on current
-				// cart state (which includes optimistic updates from previous clicks).
-				// This ensures rapid clicks compound correctly.
-				let targetQuantity: number;
-				if ( typeof quantityToAdd === 'number' ) {
-					const currentQuantity = existingItem?.quantity ?? 0;
-					targetQuantity = currentQuantity + quantityToAdd;
-				} else if ( typeof quantity === 'number' ) {
-					targetQuantity = quantity;
-				} else {
-					// Neither provided - default to 1
-					targetQuantity = 1;
-				}
-
-				// Endpoint selection is a pure function of the caller-supplied
-				// `key`, never of a line matched by id/variation. A keyless add
-				// always issues `add-item` with a delta, even when an existing
-				// line (including a server-keyed one) matches by product id, so
-				// the server owns cart-line identity for adds. Only an explicit
-				// caller `key` targets a specific line via `update-item`.
-				const isUpdate = !! key;
-				const endpoint = isUpdate ? 'update-item' : 'add-item';
-
-				// Track what changes we're making for notice comparison.
-				const quantityChanges: QuantityChanges = isUpdate
-					? {
-							cartItemsPendingQuantity: existingItem?.key
-								? [ existingItem.key ]
-								: [],
-					  }
-					: { productsPendingAdd: [ id ] };
-
-				// Prepare the item to send.
-				let itemToSend: OptimisticCartItem;
-				if ( isUpdate && existingItem ) {
-					// Caller-keyed update: target the exact line by key and send
-					// the absolute target quantity to the update-item endpoint.
-					itemToSend = { ...existingItem, quantity: targetQuantity };
-				} else {
-					// Keyless add: build a fresh payload for the add-item
-					// endpoint and never copy the matched line's key. The amount
-					// sent is always a delta — add-item adds to the existing
-					// quantity rather than setting it — so a match (by
-					// id/variation, possibly carrying a server key) only tells us
-					// how much delta is already accounted for in the running
-					// optimistic total; with no match we post the full target
-					// quantity. The matched line is never sent as an absolute
-					// quantity: the posted amount is a function of the delta,
-					// not of the match.
-					const quantityToSend = existingItem
-						? targetQuantity - existingItem.quantity
-						: targetQuantity;
-
-					itemToSend = {
-						id,
-						quantity: quantityToSend,
-						...( variation && { variation } ),
-					} as OptimisticCartItem;
-				}
-
-				// Capture cart state after optimistic updates for notice comparison.
-				let cartAfterOptimistic: typeof state.cart | null = null;
-
-				// Per-product capture for the keyless-add exactness test.
-				// On the keyless path (!isUpdate), capture by value — before the
-				// optimistic bump mutates `existingItem.quantity` in place — the
-				// set of pre-existing matching line keys and their summed quantity.
-				// This is the single error-prone hotspot: `existingItem` is a live
-				// reference into `state.cart.items`; reading `.quantity` after the
-				// bump yields the post-bump value and silently corrupts the math.
-				// Stays empty on the keyed `update-item` path so the "your change
-				// was undone" notice keeps firing for steppers.
-				type ProductCapture = {
-					id: number;
-					variation?:
-						| CartVariationItem[]
-						| SelectedAttributes[]
-						| undefined;
-					preAddTotal: number;
-					deltaTotal: number;
-					preExistingKeys: string[];
-				};
-				const productCaptures: ProductCapture[] = [];
-				if ( ! isUpdate ) {
-					// Sum all pre-add quantities across every cart line matching
-					// this product (id + variation). A single product can occupy
-					// multiple lines (e.g. a meta line ordered before a standalone
-					// line). The per-product total lets us verify exactness even
-					// when the server grows a different line than the one the
-					// client bumped optimistically.
-					const preExistingKeys: string[] = [];
-					let preAddTotal = 0;
-					for ( const cartLine of state.cart.items ) {
-						if ( lineMatchesProduct( cartLine, id, variation ) ) {
-							preAddTotal += cartLine.quantity;
-							if ( cartLine.key ) {
-								preExistingKeys.push( cartLine.key );
-							}
-						}
-					}
-					// `itemToSend.quantity` is the posted delta (quantityToSend
-					// computed above). It is already computed before this capture
-					// block and does not depend on the optimistic state, so it is
-					// safe to read here.
-					productCaptures.push( {
-						id,
-						variation,
-						preAddTotal,
-						deltaTotal: itemToSend.quantity,
-						preExistingKeys,
-					} );
-				}
-
-				try {
-					const result = ( yield sendCartRequest( state, {
-						path: `/wc/store/v1/cart/${ endpoint }`,
-						method: 'POST',
-						body: itemToSend,
-						applyOptimistic: () => {
-							if ( existingItem ) {
-								// This in-place bump is render-only. It
-								// makes the common re-add flicker-free, but it must
-								// never feed back into endpoint selection or the
-								// posted amount — those are already fixed above as a
-								// pure function of key-presence and the delta. On a
-								// keyless add the match may bump a server-keyed line's
-								// rendered quantity (the accepted, self-correcting
-								// meta-only blip the server reconciles away); it must
-								// not flip the add into `update-item` or supply an
-								// absolute quantity. A future edit that lets this
-								// match drive the endpoint or the posted amount
-								// resurrects the original "cannot update bundle item"
-								// / wrong-line bug.
-								const isSoldIndividually =
-									isCartItem( existingItem ) &&
-									existingItem.sold_individually;
-								if ( ! isSoldIndividually ) {
-									existingItem.quantity = targetQuantity;
-								}
-							} else {
-								// No existing item: push new optimistic item.
-								state.cart.items.push( itemToSend );
-							}
-							// Capture state after optimistic update.
-							cartAfterOptimistic = JSON.parse(
-								JSON.stringify( state.cart )
-							);
-						},
-						// Side effects run synchronously during reconciliation,
-						// before isProcessing clears. This prevents
-						// refreshCartItems from running during these events.
-						onSettled: ( { success } ) => {
-							if ( success ) {
-								// Dispatch legacy event
-								triggerAddedToCartEvent( {
-									preserveCartData: true,
-								} );
-
-								// Dispatch sync event
-								emitSyncEvent( { quantityChanges } );
-							}
-						},
-					} ) ) as TypeYield< typeof sendCartRequest >;
-
-					// Success - handle side effects that don't trigger refreshCartItems
-					const cart = result.data as Cart;
-
-					// Show notices if enabled
-					if (
-						showCartUpdatesNotices &&
-						cart &&
-						cartAfterOptimistic
-					) {
-						// Compute the suppression set: for each added product,
-						// check whether the server total matches the pre-add total
-						// plus the posted delta. If so, the add was exact and the
-						// pre-existing line keys are suppressed in the notice diff.
-						const suppressKeys = computeKeylessAddSuppressKeys(
-							productCaptures,
-							cart
-						);
-						const infoNotices = getInfoNoticesFromCartUpdates(
-							cartAfterOptimistic,
-							cart,
-							suppressKeys
-						);
-						const errorNotices =
-							cart.errors.map( generateErrorNotice );
-						yield actions.updateNotices(
-							[ ...infoNotices, ...errorNotices ],
-							true
-						);
-					}
-
-					// Announce to screen readers
-					const { messages } = getConfig(
-						'woocommerce'
-					) as WooCommerceConfig;
-					if ( messages?.addedToCartText ) {
-						const { speak } =
-							( yield a11yModulePromise ) as Awaited<
-								typeof a11yModulePromise
-							>;
-						speak( messages.addedToCartText, 'polite' );
-					}
-				} catch ( error ) {
-					// Show error notice
-					actions.showNoticeError( error as Error );
-				}
-			},
-
-			*batchAddCartItems(
-				items: ClientCartItem[],
-				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			): AsyncAction< void > {
-				const a11yModulePromise = import( '@wordpress/a11y' );
-				const quantityChanges: QuantityChanges = {};
-
-				try {
-					// Per-product capture for the keyless-add exactness test,
-					// accumulated across all keyless batch items. The map key is a
-					// canonical product token (productToken(id, variation)) so that
-					// multiple batch items for the same product accumulate into one
-					// entry. The capture runs synchronously in the .map() below,
-					// before applyOptimistic runs (applyOptimistic is gated behind
-					// `await isNonceReady` inside sendCartRequest, so every
-					// existingItem.quantity read during the .map() sees the same
-					// pre-add cart). Keyed `update-item` items never contribute to
-					// this map, so the "your change was undone" notice keeps firing.
-					type BatchProductCapture = {
-						id: number;
-						variation?:
-							| CartVariationItem[]
-							| SelectedAttributes[]
-							| undefined;
-						preAddTotal: number;
-						deltaTotal: number;
-						preExistingKeys: string[];
-					};
-					const batchProductCaptures = new Map<
-						string,
-						BatchProductCapture
-					>();
-					const promises = items.map( ( item, index ) => {
-						const existingItem = state.findItemInCart( {
-							id: item.id,
-							key: item.key,
-							variation: item.variation,
-						} );
-
-						let quantity: number;
-						if ( typeof item.quantityToAdd === 'number' ) {
-							const currentQuantity = existingItem?.quantity ?? 0;
-							quantity = currentQuantity + item.quantityToAdd;
-						} else {
-							quantity = item.quantity ?? 1;
-						}
-						// Endpoint selection is a pure function of the
-						// caller-supplied `key`, never of a line matched by
-						// id/variation. This mirrors the single-item
-						// `addCartItem` path: a keyless batch item always
-						// issues `add-item` with a delta, even when an existing
-						// line (including a server-keyed one) matches by product
-						// id, so the server owns cart-line identity for adds.
-						// Only an explicit caller `key` targets a specific line
-						// via `update-item`.
-						const isUpdate = !! item.key;
-						const endpoint = isUpdate ? 'update-item' : 'add-item';
-
-						let itemToSend: OptimisticCartItem;
-						if ( isUpdate && existingItem ) {
-							// Caller-keyed update: target the exact line by key
-							// and send the absolute target quantity to the
-							// update-item endpoint.
-							itemToSend = {
-								key: existingItem.key,
-								id: existingItem.id,
-								quantity,
-							} as OptimisticCartItem;
-							quantityChanges.cartItemsPendingQuantity = [
-								...( quantityChanges.cartItemsPendingQuantity ??
-									[] ),
-								existingItem.key as string,
-							];
-						} else {
-							// Keyless add: build a fresh payload for the add-item
-							// endpoint and never copy the matched line's key. As in
-							// addCartItem, the amount sent is always a delta —
-							// add-item adds to the existing quantity rather than
-							// setting it — so a match (by id/variation, possibly
-							// carrying a server key) only tells us how much delta is
-							// already accounted for; with no match we post the full
-							// target quantity. The matched line is never sent as an
-							// absolute quantity.
-							const quantityToSend = existingItem
-								? quantity - existingItem.quantity
-								: quantity;
-							itemToSend = {
-								id: item.id,
-								quantity: quantityToSend,
-								...( item.variation && {
-									variation: item.variation,
-								} ),
-							} as OptimisticCartItem;
-							quantityChanges.productsPendingAdd = [
-								...( quantityChanges.productsPendingAdd ?? [] ),
-								item.id,
-							];
-
-							// Accumulate the per-product capture for the exactness
-							// test. On the first encounter of each product token,
-							// sum all pre-add quantities across every matching line
-							// and collect their keys — both captured as primitives
-							// here, before applyOptimistic mutates the cart. On
-							// subsequent encounters of the same product, add only
-							// the posted delta to the running deltaTotal.
-							const token = productToken(
-								item.id,
-								item.variation
-							);
-							if ( ! batchProductCaptures.has( token ) ) {
-								const preExistingKeys: string[] = [];
-								let preAddTotal = 0;
-								for ( const cartLine of state.cart.items ) {
-									if (
-										lineMatchesProduct(
-											cartLine,
-											item.id,
-											item.variation
-										)
-									) {
-										preAddTotal += cartLine.quantity;
-										if ( cartLine.key ) {
-											preExistingKeys.push(
-												cartLine.key
-											);
-										}
-									}
-								}
-								batchProductCaptures.set( token, {
-									id: item.id,
-									variation: item.variation,
-									preAddTotal,
-									deltaTotal: quantityToSend,
-									preExistingKeys,
-								} );
-							} else {
-								// Same product seen again in this batch — add delta.
-								const capture =
-									batchProductCaptures.get( token );
-								if ( capture ) {
-									capture.deltaTotal += quantityToSend;
-								}
-							}
-						}
-
-						const isLastItem = index === items.length - 1;
-
-						return sendCartRequest( state, {
-							path: `/wc/store/v1/cart/${ endpoint }`,
-							method: 'POST',
-							body: itemToSend,
-							applyOptimistic: () => {
-								if ( existingItem ) {
-									// As in addCartItem, this in-place
-									// bump is render-only and must never feed back into
-									// endpoint selection or the posted amount, which are
-									// already fixed above as a pure function of
-									// key-presence and the delta. Bumping a server-keyed
-									// line's rendered quantity on a keyless add is the
-									// accepted meta-only blip the server reconciles; it
-									// must not flip the add into `update-item` or post an
-									// absolute quantity. Letting this match drive the
-									// endpoint or amount reintroduces the bug.
-									existingItem.quantity = quantity;
-								} else {
-									state.cart.items.push( itemToSend );
-								}
-							},
-							// Only fire events on the last item to avoid
-							// duplicate notifications mid-batch.
-							// Fire events when ANY item in the batch
-							// succeeded (data is set from the last
-							// successful server state). Only the last
-							// item's callback fires to avoid duplicates.
-							...( isLastItem && {
-								onSettled: ( { data } ) => {
-									if ( data ) {
-										triggerAddedToCartEvent( {
-											preserveCartData: true,
-										} );
-										emitSyncEvent( {
-											quantityChanges,
-										} );
-									}
-								},
-							} ),
-						} );
-					} );
-
-					// Capture cart state after optimistic updates for notices.
-					const cartAfterOptimistic = JSON.parse(
-						JSON.stringify( state.cart )
-					);
-
-					const results = ( yield Promise.allSettled(
-						promises
-					) ) as PromiseSettledResult< MutationResult< Cart > >[];
-
-					// Find the last successful result for notices/a11y.
-					const lastSuccess = [ ...results ]
-						.reverse()
-						.find(
-							(
-								r
-							): r is PromiseFulfilledResult<
-								MutationResult< Cart >
-							> => r.status === 'fulfilled' && r.value.success
-						);
-
-					if ( lastSuccess ) {
-						const cart = lastSuccess.value.data as Cart;
-
-						if ( showCartUpdatesNotices ) {
-							// Compute the suppression set from the accumulated
-							// per-product captures. For each product, if the server
-							// total equals preAddTotal + sum of posted deltas, the
-							// add was exact and the pre-existing keys are suppressed.
-							const suppressKeys = computeKeylessAddSuppressKeys(
-								[ ...batchProductCaptures.values() ],
-								cart
-							);
-							const infoNotices = getInfoNoticesFromCartUpdates(
-								cartAfterOptimistic,
-								cart,
-								suppressKeys
-							);
-							const errorNotices =
-								cart.errors.map( generateErrorNotice );
-							yield actions.updateNotices(
-								[ ...infoNotices, ...errorNotices ],
-								true
-							);
-						}
-
-						const { messages } = getConfig(
-							'woocommerce'
-						) as WooCommerceConfig;
-						if ( messages?.addedToCartText ) {
-							const { speak } =
-								( yield a11yModulePromise ) as Awaited<
-									typeof a11yModulePromise
-								>;
-							speak( messages.addedToCartText, 'polite' );
-						}
-					}
-
-					// Show error notices for failed items.
-					const errorNotices = results
-						.filter(
-							( r ): r is PromiseRejectedResult =>
-								r.status === 'rejected'
-						)
-						.map( ( r ) =>
-							generateErrorNotice( r.reason as ApiErrorResponse )
-						);
-					if ( errorNotices.length > 0 ) {
-						yield actions.updateNotices( errorNotices );
-					}
-				} catch ( error ) {
-					actions.showNoticeError( error as Error );
-				}
-			},
-
-			*refreshCartItems(): AsyncAction< void > {
-				// Skip if queue is processing - it will apply server state when done
-				if ( cartQueue?.getStatus().isProcessing ) {
 					return;
 				}
 
-				// Skips if there's a pending request.
-				if ( pendingRefresh ) return;
+				const draftKey = resolveDraftKey();
+				const collection = resolveCollection( draftKey );
+				const existing = collection?.find(
+					( draft ) => draft.id === targetId
+				);
 
-				pendingRefresh = true;
-
-				try {
-					const res = ( yield fetch(
-						`${ state.restUrl }wc/store/v1/cart`,
-						{
-							method: 'GET',
-							cache: 'no-store',
-							headers: { 'Content-Type': 'application/json' },
-						}
-					) ) as TypeYield< typeof fetch >;
-
-					// Extract fresh nonce from response headers.
-					state.nonce = res.headers.get( 'Nonce' ) || state.nonce;
-
-					if ( resolveNonceReady ) {
-						resolveNonceReady();
-						resolveNonceReady = null;
-					}
-
-					const json = ( yield res.json() ) as Cart;
-
-					// Checks if the response contains an error.
-					if ( isApiErrorResponse( res, json ) )
-						throw generateError( json );
-
-					// If the batcher started a cycle while we were fetching,
-					// discard this response — the batcher will reconcile.
-					if ( cartQueue?.getStatus().isProcessing ) {
+				if ( existing ) {
+					if (
+						partial.id !== undefined &&
+						partial.id !== existing.id
+					) {
+						warnDraftInvariant(
+							`upsertDraftItem: cannot change draft id ${ existing.id } to ${ partial.id }; remove the draft and add a new one instead.`
+						);
 						return;
 					}
-
-					// Updates the local cart.
-					state.cart = json;
-
-					// Resets the timeout.
-					refreshTimeout = 3000;
-				} catch ( error ) {
-					// Tries again after the timeout.
-					setTimeout( actions.refreshCartItems, refreshTimeout );
-
-					// Increases the timeout exponentially.
-					refreshTimeout *= 2;
-				} finally {
-					pendingRefresh = false;
+					Object.assign( existing, partial, { id: existing.id } );
+					return;
 				}
+
+				// Creation composes the new draft from the surface's
+				// server-filed seed (when one exists for this key/id),
+				// merged under the shopper's own partial — so an untouched
+				// field falls back to its server-rendered default. Read
+				// through `getServerState()` only: the runtime's intact,
+				// per-page, navigation-fresh copy, immune to the client
+				// merge that `state.draftSeeds` would otherwise expose.
+				const seed =
+					getServerState< CartServerState >( 'woocommerce/cart' )
+						?.draftSeeds?.[ draftKey ]?.[ targetId ];
+				const draft = {
+					...seed,
+					...partial,
+					id: targetId,
+				} as DraftItem;
+
+				if ( typeof draft.quantity !== 'number' ) {
+					warnDraftInvariant(
+						'upsertDraftItem: a new draft requires a numeric "quantity".'
+					);
+					return;
+				}
+
+				// Lazily materializes the collection on its first write —
+				// nothing server-seeds `state.draftItems`, so a not-yet-
+				// written key holds no collection until this point.
+				//
+				// Assigns the fully-formed array (existing entries plus the
+				// new draft) in one atomic write, rather than
+				// `(state.draftItems[draftKey] ??= []).push(draft)`: the
+				// reactive state proxy notifies bindings synchronously on the
+				// *assignment* that materializes the collection, and a
+				// binding reading the collection at that exact moment (e.g. a
+				// `data-wp-text` on the same element the edit originated
+				// from) observes the collection before a subsequent `.push`
+				// — a direct array mutation the proxy does not intercept —
+				// ever lands, permanently caching that pre-push (empty) read.
+				// A single assignment carrying the complete contents has
+				// nothing left to race.
+				state.draftItems[ draftKey ] = [
+					...( state.draftItems[ draftKey ] ?? [] ),
+					draft,
+				];
 			},
 
-			*waitForIdle(): AsyncAction< void > {
-				if ( cartQueue ) {
-					yield cartQueue.waitForIdle();
+			*addItem( payload?: DraftItem ): AsyncAction< void > {
+				if ( payload ) {
+					yield* postDraftItems( [ payload ], actions );
+					return;
 				}
+
+				const product = productsState.productInContext;
+				if ( ! product ) {
+					return;
+				}
+
+				if ( product.type === 'grouped' ) {
+					const drafts = product.grouped_products
+						.map(
+							( childId ) =>
+								state.findItem( { id: childId } ).draft
+						)
+						.filter(
+							( draft ): draft is DraftItem =>
+								!! draft && draft.quantity > 0
+						);
+					yield* postDraftItems( drafts, actions );
+					return;
+				}
+
+				// The in-context draft, falling back to the surface's
+				// server-filed seed so an untouched form still posts its
+				// default (seeds are never applied into collections, so an
+				// untouched surface never materializes a draft).
+				const { draft } = state.itemInContext;
+				const seed =
+					getServerState< CartServerState >( 'woocommerce/cart' )
+						?.draftSeeds?.[ resolveDraftKey() ]?.[ product.id ];
+				const itemToPost = draft ?? seed;
+				if ( ! itemToPost ) {
+					return;
+				}
+				yield* postDraftItems( [ itemToPost ], actions );
+			},
+
+			*updateItem( {
+				key,
+				quantity,
+			}: {
+				key: string;
+				quantity: number;
+			} ): AsyncAction< void > {
+				const cartItem = state.cart.items.find(
+					( item ) => item.key === key
+				);
+				if ( ! cartItem ) {
+					return;
+				}
+				yield* addCartItemGenerator(
+					{
+						id: cartItem.id,
+						key,
+						quantity,
+						type: cartItem.type,
+					},
+					actions
+				);
+			},
+
+			*removeItem( key: string ): AsyncAction< void > {
+				yield* removeCartItemGenerator( key, actions );
+			},
+
+			*refresh(): AsyncAction< void > {
+				yield* refreshCartItemsGenerator( actions );
+			},
+
+			*addCartItem(
+				args: ClientCartItem,
+				options?: CartUpdateOptions
+			): AsyncAction< void > {
+				yield* addCartItemGenerator( args, actions, options );
 			},
 
 			*showNoticeError(
@@ -1081,14 +1736,11 @@ const { actions } = store< Store >(
 					}
 				);
 
-				const { code, message } = error as ApiErrorResponse;
-
-				const userFriendlyMessage =
-					state.errorMessages?.[ code ] || message;
+				const { message } = error as ApiErrorResponse;
 
 				// Todo: Check what should happen if the notice is already displayed.
 				noticeActions.addNotice( {
-					notice: userFriendlyMessage,
+					notice: message,
 					type: 'error',
 					dismissible: true,
 				} );
@@ -1133,7 +1785,7 @@ const { actions } = store< Store >(
 );
 
 // Trigger initial cart refresh.
-actions.refreshCartItems();
+actions.refresh();
 
 window.addEventListener(
 	'wc-blocks_store_sync_required',
@@ -1143,7 +1795,7 @@ window.addEventListener(
 			id: number;
 		} >;
 		if ( customEvent.detail.type === 'from_@wordpress/data' ) {
-			actions.refreshCartItems();
+			actions.refresh();
 		}
 	}
 );

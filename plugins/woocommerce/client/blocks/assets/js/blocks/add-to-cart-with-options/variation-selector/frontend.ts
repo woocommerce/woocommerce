@@ -7,7 +7,11 @@ import {
 	getConfig,
 	getElement,
 } from '@wordpress/interactivity';
-import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce/cart';
+import type {
+	SelectedAttributes,
+	Store as WooCommerce,
+} from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { ProductResponseItem } from '@woocommerce/types';
@@ -41,6 +45,15 @@ type Context = AddToCartWithOptionsStoreContext & {
 	variationAttributeOptions: VariationOptionItem[];
 	autoselect: boolean;
 	disabledAttributesAction?: 'disable' | 'hide';
+	/**
+	 * Whether this surface has ever had a non-empty attribute selection of
+	 * its own. Set by `callbacks.setSelectedVariationId` the first time it
+	 * observes `selectedAttributes.length > 0`, and never unset — it marks
+	 * this surface as "the one configuring the product" for the rest of its
+	 * lifetime, even if the shopper later clears the selection back to
+	 * empty. Absent (falsy) until then.
+	 */
+	hasSelectedAttribute?: boolean;
 };
 
 type ToggleContext = Context & {
@@ -52,6 +65,14 @@ const universalLock =
 
 const { state: productsState } = store< ProductsStore >(
 	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
+
+// Todo: Use the module exports instead of `store()` once the woocommerce
+// store is public.
+const { state: cartState, actions: wooActions } = store< WooCommerce >(
+	'woocommerce/cart',
 	{},
 	{ lock: universalLock }
 );
@@ -86,7 +107,7 @@ const isAttributeValueValid = ( {
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
 
-	const { mainProductInContext: product } = productsState;
+	const { baseProductInContext: product } = productsState;
 
 	if ( ! product?.variations?.length ) {
 		return false;
@@ -215,6 +236,22 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( ! context ) {
 					return [];
 				}
+
+				// Prefer the resolved collection's cart draft for the
+				// in-context product/variation: the collection keyed by the
+				// nearest declared `context.draftKey`, falling back to the
+				// store's reserved global key, which every surface resolving
+				// that same collection writes to and reads from, so an
+				// attribute picked on one surface is reflected on every
+				// other. Falls back to this instance's own locally-tracked
+				// selection when the resolved collection holds no draft yet,
+				// or the draft carries no `variation` (e.g. a simple
+				// product's draft).
+				const draftVariation = cartState.itemInContext.draft?.variation;
+				if ( draftVariation ) {
+					return draftVariation;
+				}
+
 				return context.selectedAttributes || [];
 			},
 			get selectableItems(): readonly SelectableItem< {
@@ -353,7 +390,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { selectedAttributes } = state;
 
-				const { mainProductInContext: product } = productsState;
+				const { baseProductInContext: product } = productsState;
 				if ( ! product ) {
 					return;
 				}
@@ -424,13 +461,46 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				} );
 			},
 			setSelectedVariationId: () => {
-				const { mainProductInContext: product } = productsState;
+				const { baseProductInContext: product } = productsState;
 
 				if ( ! product?.variations?.length ) {
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
+				const context = getContext< Context >();
+				const { selectedAttributes, quantity } = context;
+				const productContext = getContext< {
+					variationId?: number | null;
+				} >( 'woocommerce/products' );
+				const currentVariationId = productContext
+					? productContext.variationId
+					: productsState.variationId;
+
+				// `data-wp-watch` reruns this callback whenever any
+				// reactive value it reads changes — not only this
+				// surface's own `selectedAttributes` (e.g. variation data
+				// completing an async load re-triggers it on every mounted
+				// surface sharing the page, whether or not the shopper is
+				// using that particular one). A surface with no attribute
+				// selection of its own, that never had one, must not
+				// clobber another surface's already-resolved shared
+				// selection with its own "nothing selected" default. A
+				// surface that *did* make a real selection at some point
+				// keeps writing from then on, including clearing it back
+				// to empty — that is a genuine edit on this surface, not
+				// a bystander's stale re-evaluation.
+				if (
+					selectedAttributes.length === 0 &&
+					! context.hasSelectedAttribute &&
+					currentVariationId !== null &&
+					currentVariationId !== undefined
+				) {
+					return;
+				}
+				if ( selectedAttributes.length > 0 ) {
+					context.hasSelectedAttribute = true;
+				}
+
 				const result = productsState.findProduct( {
 					id: product.id,
 					selectedAttributes,
@@ -441,26 +511,57 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					result && result.id !== product.id ? result : null;
 
 				const variationId = matchedVariation?.id ?? null;
-				const productContext = getContext< {
-					variationId?: number | null;
-				} >( 'woocommerce/products' );
 
 				// If there is context, update the context. Otherwise, update the state directly.
 				( productContext
 					? productContext
 					: productsState
 				).variationId = variationId;
+
+				// Mirror the attribute selection into the resolved
+				// product/variation's cart draft — the id `itemInContext`
+				// will resolve at submit time. `quantity` rides along so a
+				// variation drafted for the first time here always has one
+				// (an id-only new draft is rejected). This surface's own
+				// locally-tracked quantity for the resolved id (see the
+				// quantity selector's `idsToUpdate` sync) is only guaranteed
+				// to match what the shopper actually sees when this is the
+				// surface being edited — a sibling surface sharing the page
+				// that never itself received a quantity edit carries a
+				// stale local default here instead. That is not a problem
+				// for this initial upsert (a brand new draft has no
+				// competing value to protect); `watchQuantityConstraints`
+				// is the one that must not let a bystander's stale local
+				// value overwrite a draft another surface already resolved.
+				const currentProductId = variationId ?? product.id;
+				wooActions.upsertDraftItem(
+					{
+						quantity: quantity[ currentProductId ],
+						variation: selectedAttributes,
+					},
+					{ id: currentProductId }
+				);
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
-				const { mainProductInContext: product } = productsState;
+				const { baseProductInContext: product } = productsState;
 
 				if ( ! product?.variations?.length ) {
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
+				// Read through the same draft-backed source
+				// `state.selectedAttributes` gives the display (attribute
+				// chips, `selectableItems`): a surface whose chips render
+				// the resolved collection's selection as checked must
+				// validate — and therefore gate its own Add to cart —
+				// against that same selection, not this instance's local
+				// context, which a sibling surface never editing its own
+				// chips would otherwise validate against forever,
+				// dead-ending its submit even though it displays a complete
+				// configuration.
+				const { selectedAttributes } = state;
 				const result = productsState.findProduct( {
 					id: product.id,
 					selectedAttributes,
@@ -522,8 +623,28 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { minimum, maximum } = variation.add_to_cart;
 
+				// Clamp the resolved collection's draft's own quantity — the
+				// same value `resolveDisplayQuantity` prefers for every
+				// surface's display — rather than this surface's local
+				// `quantity` map. `data-wp-watch` reruns this callback on
+				// every surface sharing that collection whenever the
+				// globally-resolved variation changes, whether or not the
+				// shopper is using that particular surface; a surface that
+				// never received a
+				// quantity edit of its own carries a stale local default in
+				// its own map, and "correcting" the draft back to that
+				// default the instant another surface resolves a variation
+				// would destroy the editing surface's genuine quantity —
+				// the same bystander-clobber class `setSelectedVariationId`
+				// guards against. Falls back to the local value only when
+				// no draft exists yet for the resolved variation (nothing
+				// else to clamp).
 				const { quantity } = getContext< Context >();
-				const currentValue = quantity[ variation.id ];
+				const draftQuantity = cartState.itemInContext.draft?.quantity;
+				const currentValue =
+					typeof draftQuantity === 'number'
+						? draftQuantity
+						: quantity[ variation.id ];
 
 				let newValue = currentValue;
 				if ( currentValue < minimum ) {

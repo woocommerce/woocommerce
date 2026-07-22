@@ -169,7 +169,7 @@ const getFocusableElements = ( container: HTMLElement | null ) =>
 		: [];
 
 const { state: woocommerceState, actions } = store< WooCommerce >(
-	'woocommerce',
+	'woocommerce/cart',
 	{},
 	{ lock: universalLock }
 );
@@ -447,16 +447,18 @@ const { state: cartItemState } = store(
 			// As a workaround for a bug in context of wp-each we use state to
 			// find the cart item. Where we need reactivity for the wp-each, use
 			// state.cartItem to get the cart item.
+			//
+			// Looked up via the row's own `woocommerce/cart` context — set by
+			// the `data-wp-each--cart-item` directive that iterates
+			// `state.cart.items` directly — through `findItem`'s envelope,
+			// rather than the retired `findItemInCart`.
 			get cartItem() {
 				const {
-					cartItem: { id, key, variation },
-				} = getContext< CartItemContext >( 'woocommerce' );
+					cartItem: { id, key },
+				} = getContext< CartItemContext >( 'woocommerce/cart' );
 
-				const cartItem = ( woocommerceState.findItemInCart( {
-					id,
-					key,
-					variation,
-				} ) || {} ) as CartItem;
+				const cartItem = ( woocommerceState.findItem( { id, key } )
+					.cartItem || {} ) as CartItem;
 
 				cartItem.variation = cartItem.variation || [];
 				cartItem.item_data = cartItem.item_data || [];
@@ -868,59 +870,54 @@ const { state: cartItemState } = store(
 				cartItemState.cartItem.quantity = finalQuantity;
 			},
 
+			/**
+			 * Sets the line's quantity to the value the shopper typed or
+			 * stepped to, via the public `updateItem` action.
+			 *
+			 * Targets the line by its known `key` — the mini-cart never
+			 * drafts an edit, it acts directly on an existing cart line —
+			 * so `updateItem` resolves the line and its type/variation from
+			 * the committed cart itself; nothing here needs to be
+			 * reconstructed or renamed.
+			 */
 			*changeQuantity(): Generator< unknown, void > {
-				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute: rawAttribute, ...rest } ) => ( {
-						...rest,
-						attribute: rawAttribute,
-					} )
-				);
-				yield actions.addCartItem( {
-					id: cartItemState.cartItem.id,
+				yield actions.updateItem( {
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity,
-					variation,
-					type: cartItemState.cartItem.type,
 				} );
 			},
 
+			/**
+			 * Removes the line from the cart via the public `removeItem`
+			 * action.
+			 */
 			*removeItemFromCart(): Generator< unknown, void > {
-				yield actions.removeCartItem( cartItemState.cartItem.key );
+				yield actions.removeItem( cartItemState.cartItem.key );
 			},
 
+			/**
+			 * Steps the line's quantity up by one `multiple_of` unit, via
+			 * `updateItem`.
+			 */
 			*incrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
-				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute: rawAttribute, ...rest } ) => ( {
-						...rest,
-						attribute: rawAttribute,
-					} )
-				);
-				yield actions.addCartItem( {
-					id: cartItemState.cartItem.id,
+				yield actions.updateItem( {
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
-					variation,
-					type: cartItemState.cartItem.type,
 				} );
 			},
 
+			/**
+			 * Steps the line's quantity down by one `multiple_of` unit, via
+			 * `updateItem`.
+			 */
 			*decrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
-				const variation = cartItemState.cartItem.variation.map(
-					( { raw_attribute: rawAttribute, ...rest } ) => ( {
-						...rest,
-						attribute: rawAttribute,
-					} )
-				);
-				yield actions.addCartItem( {
-					id: cartItemState.cartItem.id,
+				yield actions.updateItem( {
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
-					variation,
-					type: cartItemState.cartItem.type,
 				} );
 			},
 

@@ -24,11 +24,18 @@ class BlocksSharedState {
 	private static string $consent_statement = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 
 	/**
-	 * The namespace for interactivity config and state.
+	 * The namespace for interactivity config and non-cart shared state.
 	 *
 	 * @var string
 	 */
 	private static string $settings_namespace = 'woocommerce';
+
+	/**
+	 * The namespace for the cart reactive store's state.
+	 *
+	 * @var string
+	 */
+	private static string $cart_namespace = 'woocommerce/cart';
 
 	/**
 	 * Whether the core config has been registered.
@@ -119,11 +126,10 @@ class BlocksSharedState {
 			);
 
 			wp_interactivity_state(
-				self::$settings_namespace,
+				self::$cart_namespace,
 				array(
-					'cart'     => self::$blocks_shared_cart_state,
-					'noticeId' => '',
-					'restUrl'  => get_rest_url(),
+					'cart'    => self::$blocks_shared_cart_state,
+					'restUrl' => get_rest_url(),
 				)
 			);
 		}

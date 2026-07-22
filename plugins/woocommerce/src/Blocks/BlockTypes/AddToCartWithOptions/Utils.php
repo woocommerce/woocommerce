@@ -112,10 +112,14 @@ class Utils {
 	 *                                    the one provided by the inherited context (e.g. child items in grouped products).
 	 *                                    Setting this unnecessarily shadows the parent context and prevents
 	 *                                    variationId updates from propagating.
+	 * @param string $draft_key The `woocommerce/cart` collection key this quantity selector's
+	 *                          initial draft seed is filed under. Defaults to the reserved
+	 *                          global collection key for quantity selectors rendered outside
+	 *                          any keyed purchase-surface container.
 	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
-	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array(), $set_product_context = false ) {
+	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array(), $set_product_context = false, $draft_key = 'woocommerce/global' ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 		global $product;
 
@@ -147,14 +151,20 @@ class Utils {
 			}
 		}
 
+		// The quantity actually bound to the rendered input: the product's
+		// minimum purchase quantity, or `0` when this surface allows an empty
+		// starting quantity (an optional grouped-product child). Computed
+		// unconditionally so it can also feed the draft seed filed into
+		// `woocommerce/cart` state below, even on the (unexpected) chance the
+		// number input isn't found.
+		$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
+		$input_quantity   = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
+
 		if (
 			$processor->next_tag( 'input' ) &&
 			$processor->get_attribute( 'type' ) === 'number' &&
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
-			$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
-			$input_quantity   = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
-
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options-quantity-selector',
 				array(
@@ -181,11 +191,84 @@ class Utils {
 
 		$context_attribute = wp_interactivity_data_wp_context( $context );
 
+		if ( $product instanceof \WC_Product ) {
+			// The initial `add-item` payload for this quantity selector's
+			// product, filed under its collection key in the `woocommerce/cart`
+			// state. The client consults it only via `getServerState()`, never
+			// applying it into a draft collection: `upsertDraftItem` composes
+			// a new draft from it on the shopper's first write, and `addItem`
+			// falls back to it when posting an untouched surface. `quantity`
+			// matches `$input_quantity` — the value actually bound to the
+			// rendered input above — not the product's raw minimum, so the
+			// seed never disagrees with the initial HTML.
+			$draft_seed = array(
+				'id'       => $product->get_id(),
+				'quantity' => $input_quantity,
+			);
+
+			// A directly-referenced variation (e.g. a Single Product block
+			// pointing at a variation id) is the only surface that renders this
+			// quantity selector without an enclosing `selectedAttributes`
+			// context, so the seed must carry its own `variation` attributes
+			// here: this filing and the form-level one both accumulate into
+			// the same `draftSeeds[$draft_key][id]` entry in `woocommerce/cart`
+			// state, and an untouched direct-variation surface needs this
+			// filing's `{ attribute, value }` pairs so the client's cart-line
+			// pairing ladder can match the resulting line.
+			if ( $product->is_type( ProductType::VARIATION ) ) {
+				$draft_seed['variation'] = self::format_variation_attributes( $product );
+			}
+
+			wp_interactivity_state(
+				'woocommerce/cart',
+				array(
+					'draftSeeds' => array(
+						$draft_key => array(
+							$product->get_id() => $draft_seed,
+						),
+					),
+				)
+			);
+		}
+
 		return sprintf(
 			'<div %1$s %2$s>%3$s</div>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			$context_attribute,
 			$quantity_html
+		);
+	}
+
+	/**
+	 * Format a variation product's selected attributes as `{ attribute, value }`
+	 * pairs.
+	 *
+	 * Shared by every surface that needs to describe a variation's selected
+	 * attributes with the same shape: the `selectedAttributes` context set for
+	 * `ProductType::VARIATION` products, and the `variation` field of any
+	 * `woocommerce/cart` draft seed for a variation-type product. Keeping a
+	 * single implementation ensures those seeds always carry a shape the
+	 * client's cart-line pairing ladder (`lineMatchesProduct`) can match.
+	 *
+	 * @param \WC_Product $product The variation product.
+	 * @return array List of `{ attribute, value }` pairs, one per variation attribute. Empty if $product is not a variation.
+	 */
+	public static function format_variation_attributes( $product ) {
+		if ( ! $product instanceof \WC_Product_Variation ) {
+			return array();
+		}
+
+		$variation_attributes = $product->get_variation_attributes();
+
+		return array_map(
+			function ( $attribute, $value ) {
+				return array(
+					'attribute' => $attribute,
+					'value'     => $value,
+				);
+			},
+			array_keys( $variation_attributes ),
+			$variation_attributes
 		);
 	}
 

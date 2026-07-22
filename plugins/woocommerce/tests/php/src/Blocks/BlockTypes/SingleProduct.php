@@ -4,12 +4,23 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\SingleProduct as SingleProductBlockType;
 use WC_Helper_Product;
 
 /**
  * Tests for the SingleProduct block type.
  */
 class SingleProduct extends \WP_UnitTestCase {
+
+	/**
+	 * Reset static occurrence-counter state between tests so it does not
+	 * bleed from one test into the next.
+	 */
+	public function tearDown(): void {
+		$this->reset_single_product_occurrence_counts();
+		parent::tearDown();
+	}
+
 	/**
 	 * Creates a simple product with a featured image and gallery images.
 	 *
@@ -146,5 +157,183 @@ class SingleProduct extends \WP_UnitTestCase {
 		} finally {
 			$this->delete_product_with_gallery_attachments( $data );
 		}
+	}
+
+	/**
+	 * Builds minimal Single Product block markup wrapping a single inner block.
+	 *
+	 * @param int $product_id Product ID.
+	 * @return string Single Product block markup.
+	 */
+	private function get_minimal_single_product_markup( $product_id ) {
+		return sprintf(
+			'<!-- wp:woocommerce/single-product {"productId":%1$d} -->
+<div class="wp-block-woocommerce-single-product woocommerce">
+<!-- wp:woocommerce/product-price {"isDescendentOfSingleProductBlock":true} /-->
+</div>
+<!-- /wp:woocommerce/single-product -->',
+			$product_id
+		);
+	}
+
+	/**
+	 * @testdox The wrapper carries both the default woocommerce/products context and a hand-rolled woocommerce/cart draft-key context shaped single-product/<productId>/<n>, and no draft-items or scope context.
+	 */
+	public function test_wrapper_emits_draft_key_context_and_no_retired_bags() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		try {
+			$markup = do_blocks( $this->get_minimal_single_product_markup( $product->get_id() ) );
+
+			// `set_attribute()` always serializes double-quoted, entity-escaped
+			// attributes, so parse and decode via the same Tag Processor API
+			// rather than matching a raw string, per the resilient-assertion
+			// convention (targeted, decoded reads over brittle string matches).
+			$tags = new \WP_HTML_Tag_Processor( $markup );
+			$this->assertTrue( $tags->next_tag( array( 'tag_name' => 'div' ) ), 'The wrapper div should be present.' );
+
+			$this->assertSame(
+				'woocommerce/products::' . wp_json_encode(
+					array(
+						'productId'   => $product->get_id(),
+						'variationId' => null,
+					)
+				),
+				$tags->get_attribute( 'data-wp-context' ),
+				'The default woocommerce/products context should still be present, unaffected by the second context bag.'
+			);
+			$this->assertSame(
+				'woocommerce/cart::' . wp_json_encode( array( 'draftKey' => 'single-product/' . $product->get_id() . '/1' ) ),
+				$tags->get_attribute( 'data-wp-context---draft-key' ),
+				'A second, hand-rolled woocommerce/cart draft-key context should be present, carrying the minted key.'
+			);
+			$this->assertNull( $tags->get_attribute( 'data-wp-context---draft-items' ), 'The retired draft-items bag should no longer be emitted.' );
+			$this->assertNull( $tags->get_attribute( 'data-wp-context---scope' ), 'No scope context bag should be emitted.' );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
+	}
+
+	/**
+	 * @testdox Two Single Product blocks of the same product on one page get distinct, reproducible draft keys, and a fresh render reproduces the same sequence, confirming the occurrence counter resets per request.
+	 */
+	public function test_two_instances_of_same_product_get_distinct_reproducible_draft_keys() {
+		$product       = WC_Helper_Product::create_simple_product();
+		$markup_of_two = $this->get_minimal_single_product_markup( $product->get_id() ) . $this->get_minimal_single_product_markup( $product->get_id() );
+
+		try {
+			$first_render = do_blocks( $markup_of_two );
+
+			// Simulate a fresh render of the same page structure (e.g. a
+			// router-region re-render), which is a new PHP request in production.
+			$this->reset_single_product_occurrence_counts();
+
+			$second_render = do_blocks( $markup_of_two );
+		} finally {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
+
+		$expected_keys = array(
+			'single-product/' . $product->get_id() . '/1',
+			'single-product/' . $product->get_id() . '/2',
+		);
+
+		$this->assertSame( $expected_keys, $this->extract_draft_key_contexts( $first_render ), 'The first render should mint occurrences 1 and 2, in document order.' );
+		$this->assertSame( $expected_keys, $this->extract_draft_key_contexts( $second_render ), 'A fresh render of the same page structure should reproduce the same occurrence sequence.' );
+	}
+
+	/**
+	 * @testdox Two Single Product blocks for different products on one page get distinct draft keys, discriminated by product id.
+	 */
+	public function test_two_instances_of_different_products_get_distinct_draft_keys() {
+		$first_product  = WC_Helper_Product::create_simple_product();
+		$second_product = WC_Helper_Product::create_simple_product();
+		$markup         = $this->get_minimal_single_product_markup( $first_product->get_id() ) . $this->get_minimal_single_product_markup( $second_product->get_id() );
+
+		try {
+			$rendered_markup = do_blocks( $markup );
+		} finally {
+			WC_Helper_Product::delete_product( $first_product->get_id() );
+			WC_Helper_Product::delete_product( $second_product->get_id() );
+		}
+
+		$expected_keys = array(
+			'single-product/' . $first_product->get_id() . '/1',
+			'single-product/' . $second_product->get_id() . '/1',
+		);
+
+		$this->assertSame( $expected_keys, $this->extract_draft_key_contexts( $rendered_markup ), "Each block's draft key should discriminate by product id, each independently minting occurrence 1." );
+	}
+
+	/**
+	 * @testdox The minted draft key is present in the inner-block render context, reaching descendant blocks through the persistent update_context filter.
+	 */
+	public function test_minted_draft_key_is_available_in_inner_block_render_context() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$captured_contexts = array();
+		$capture_filter    = static function ( $context ) use ( &$captured_contexts ) {
+			$captured_contexts[] = $context;
+			return $context;
+		};
+
+		// Registered at a later priority than SingleProduct's own priority-10
+		// filter, so it observes the context after `draftKey` has been merged in.
+		add_filter( 'render_block_context', $capture_filter, 11 );
+
+		try {
+			do_blocks( $this->get_minimal_single_product_markup( $product->get_id() ) );
+		} finally {
+			remove_filter( 'render_block_context', $capture_filter, 11 );
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
+
+		$expected_key = 'single-product/' . $product->get_id() . '/1';
+		$matches      = array_filter(
+			$captured_contexts,
+			static function ( $context ) use ( $expected_key ) {
+				return isset( $context['draftKey'] ) && $expected_key === $context['draftKey'];
+			}
+		);
+
+		$this->assertNotEmpty( $matches, 'The minted draft key should be present in the inner-block render context.' );
+	}
+
+	/**
+	 * Extracts every wrapper div's decoded `data-wp-context---draft-key`
+	 * `draftKey` value from a rendered markup string, in document order.
+	 *
+	 * @param string $markup Rendered HTML.
+	 * @return array<int, string|null> The decoded draft keys, in document order.
+	 */
+	private function extract_draft_key_contexts( $markup ) {
+		$tags       = new \WP_HTML_Tag_Processor( $markup );
+		$draft_keys = array();
+
+		while ( $tags->next_tag( array( 'tag_name' => 'div' ) ) ) {
+			$draft_key_context = $tags->get_attribute( 'data-wp-context---draft-key' );
+
+			if ( null === $draft_key_context ) {
+				continue;
+			}
+
+			$decoded      = json_decode( substr( $draft_key_context, strlen( 'woocommerce/cart::' ) ), true );
+			$draft_keys[] = $decoded['draftKey'] ?? null;
+		}
+
+		return $draft_keys;
+	}
+
+	/**
+	 * Resets the SingleProduct block type's per-product occurrence counters
+	 * between tests (and to simulate a fresh render of the same page
+	 * structure within a single test).
+	 */
+	private function reset_single_product_occurrence_counts(): void {
+		$reflection = new \ReflectionClass( SingleProductBlockType::class );
+
+		$occurrence_counts = $reflection->getProperty( 'occurrence_counts' );
+		$occurrence_counts->setAccessible( true );
+		$occurrence_counts->setValue( null, array() );
 	}
 }

@@ -7,6 +7,7 @@ import {
 	getConfig,
 	withSyncEvent,
 } from '@wordpress/interactivity';
+import '@woocommerce/stores/woocommerce/cart';
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,
@@ -59,6 +60,14 @@ const universalLock =
 
 const { state: productsState } = store< ProductsStore >(
 	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
+
+// Todo: Use the module exports instead of `store()` once the woocommerce
+// store is public.
+const { actions: wooActions } = store< WooCommerce >(
+	'woocommerce/cart',
 	{},
 	{ lock: universalLock }
 );
@@ -167,7 +176,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				const inputElement = quantitySelectorContext?.inputElement;
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
-				const { mainProductInContext: productFromStore } =
+				const { baseProductInContext: productFromStore } =
 					productsState;
 				const variationIds =
 					productFromStore?.variations?.map( ( v ) => v.id ) ?? [];
@@ -201,6 +210,20 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 						[ productId ]: value,
 					};
 				}
+
+				// Mirror the edit into the resolved draft collection — keyed
+				// by the nearest declared `context.draftKey`, falling back to
+				// the store's reserved global key — for the id the shopper
+				// actually edited, so other surfaces resolving that same
+				// collection react and `addItem()` posts the right quantity.
+				// Sibling variation ids keep their own draft (if any)
+				// untouched here — they get their own draft, carrying this
+				// same locally-tracked quantity, once the shopper actually
+				// switches to them (see the variation selector).
+				wooActions.upsertDraftItem(
+					{ quantity: value },
+					{ id: productId }
+				);
 
 				const parentProduct = productsState.findProduct( {
 					id: productsState.productId,
@@ -280,40 +303,18 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					return;
 				}
 
-				// Todo: Use the module exports instead of `store()` once the
-				// woocommerce store is public.
-				yield import( '@woocommerce/stores/woocommerce/cart' );
-
 				const product = productsState.productInContext;
 
 				if ( ! product ) {
 					return;
 				}
 
-				if ( product.type === 'grouped' ) {
-					yield actions.batchAddToCart();
-					return;
-				}
-
-				const { quantity, selectedAttributes } =
-					getContext< Context >();
-
-				const { actions: wooActions } = store< WooCommerce >(
-					'woocommerce',
-					{},
-					{ lock: universalLock }
-				);
-				yield wooActions.addCartItem(
-					{
-						id: product.id,
-						quantityToAdd: quantity[ product.id ],
-						variation: selectedAttributes,
-						type: product.type,
-					},
-					{
-						showCartUpdatesNotices: false,
-					}
-				);
+				// `addItem()` resolves what to post itself: the in-context
+				// product's single draft for a simple/variable product, or
+				// every grouped child's draft (auto-batched) for a grouped
+				// product — reading `baseProductInContext`/`itemInContext`
+				// via the products/cart stores, never this action.
+				yield wooActions.addItem();
 			} ),
 		},
 	},

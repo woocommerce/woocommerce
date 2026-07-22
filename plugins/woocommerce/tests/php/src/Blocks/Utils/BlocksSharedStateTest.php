@@ -35,8 +35,9 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Reset the static flags and interactivity config so load_store_config()
-	 * and load_cart_state() can run again with a clean slate.
+	 * Reset the static flags and interactivity config/state so
+	 * load_store_config() and load_cart_state() can run again with a clean
+	 * slate.
 	 */
 	private function reset_shared_state(): void {
 		$reflection = new \ReflectionClass( BlocksSharedState::class );
@@ -57,6 +58,12 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 		$data = $config_data->getValue( $interactivity );
 		unset( $data['woocommerce'] );
 		$config_data->setValue( $interactivity, $data );
+
+		$state_data = $interactivity_ref->getProperty( 'state_data' );
+		$state_data->setAccessible( true );
+		$data = $state_data->getValue( $interactivity );
+		unset( $data['woocommerce'], $data['woocommerce/cart'] );
+		$state_data->setValue( $interactivity, $data );
 	}
 
 	/**
@@ -100,5 +107,64 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'nonOptimisticProperties', $config );
 		$this->assertSame( array(), $config['nonOptimisticProperties'] );
+	}
+
+	/**
+	 * @testdox load_cart_state() seeds cart and restUrl under the woocommerce/cart namespace.
+	 */
+	public function test_cart_state_is_seeded_under_cart_namespace(): void {
+		BlocksSharedState::load_cart_state( $this->consent );
+
+		$cart_state = wp_interactivity_state( 'woocommerce/cart' );
+
+		$this->assertArrayHasKey( 'cart', $cart_state );
+		$this->assertArrayHasKey( 'restUrl', $cart_state );
+		$this->assertSame( get_rest_url(), $cart_state['restUrl'] );
+	}
+
+	/**
+	 * @testdox load_cart_state() does not seed a pageScope into the woocommerce/cart state.
+	 */
+	public function test_cart_state_seeds_no_page_scope(): void {
+		BlocksSharedState::load_cart_state( $this->consent );
+
+		$cart_state = wp_interactivity_state( 'woocommerce/cart' );
+
+		$this->assertArrayNotHasKey( 'pageScope', $cart_state );
+	}
+
+	/**
+	 * @testdox load_cart_state() does not seed a noticeId into the woocommerce/cart state.
+	 */
+	public function test_cart_state_seeds_no_notice_id(): void {
+		BlocksSharedState::load_cart_state( $this->consent );
+
+		$cart_state = wp_interactivity_state( 'woocommerce/cart' );
+
+		$this->assertArrayNotHasKey( 'noticeId', $cart_state );
+	}
+
+	/**
+	 * @testdox load_cart_state() does not seed any cart state under the bare woocommerce namespace.
+	 */
+	public function test_bare_namespace_carries_no_cart_state(): void {
+		BlocksSharedState::load_cart_state( $this->consent );
+
+		$bare_state = wp_interactivity_state( 'woocommerce' );
+
+		$this->assertArrayNotHasKey( 'cart', $bare_state );
+		$this->assertArrayNotHasKey( 'noticeId', $bare_state );
+		$this->assertArrayNotHasKey( 'restUrl', $bare_state );
+	}
+
+	/**
+	 * @testdox load_cart_state() still seeds nonOptimisticProperties config under the shared woocommerce namespace.
+	 */
+	public function test_non_optimistic_properties_config_stays_under_shared_namespace(): void {
+		BlocksSharedState::load_cart_state( $this->consent );
+
+		$config = wp_interactivity_config( 'woocommerce' );
+
+		$this->assertArrayHasKey( 'nonOptimisticProperties', $config );
 	}
 }

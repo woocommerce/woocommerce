@@ -192,6 +192,7 @@ class AddToCartWithOptions extends AbstractBlock {
 		global $product;
 
 		$product_id = ( is_object( $block ) && property_exists( $block, 'context' ) && is_array( $block->context ) && array_key_exists( 'postId', $block->context ) ) ? $block->context['postId'] : null;
+		$draft_key  = $block->context['draftKey'] ?? 'woocommerce/global';
 
 		if ( ! isset( $product_id ) ) {
 			return '';
@@ -316,19 +317,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					$context['quantity'][ $variation_id ] = $default_quantity;
 				}
 			} elseif ( $product->is_type( ProductType::VARIATION ) ) {
-				$variation_attributes = $product->get_variation_attributes();
-				$formatted_attributes = array_map(
-					function ( $key, $value ) {
-						return [
-							'attribute' => $key,
-							'value'     => $value,
-						];
-					},
-					array_keys( $variation_attributes ),
-					$variation_attributes
-				);
-
-				$context['selectedAttributes'] = $formatted_attributes;
+				$context['selectedAttributes'] = Utils::format_variation_attributes( $product );
 			} elseif ( $product->is_type( ProductType::GROUPED ) ) {
 				// Load purchasable child products into the shared store with full REST API data.
 				$child_products = wc_interactivity_api_load_purchasable_child_products(
@@ -355,6 +344,37 @@ class AddToCartWithOptions extends AbstractBlock {
 						$context['quantity'][ $child_product_id ] = 0;
 					}
 				}
+			}
+
+			// The initial `add-item` payload for this surface's product, filed
+			// under its collection key in the `woocommerce/cart` state. The
+			// client consults it only via `getServerState()`, never applying
+			// it into a draft collection: `upsertDraftItem` composes a new
+			// draft from it on the shopper's first write, and `addItem` falls
+			// back to it when posting an untouched surface. Grouped products
+			// seed nothing here: there is no single product id to add at this
+			// level, only children, which seed individually via their own
+			// quantity-selector surface.
+			if ( ProductType::GROUPED !== $product_type ) {
+				$draft_seed = array(
+					'id'       => $product_id,
+					'quantity' => $default_quantity,
+				);
+
+				if ( ! empty( $context['selectedAttributes'] ) ) {
+					$draft_seed['variation'] = $context['selectedAttributes'];
+				}
+
+				wp_interactivity_state(
+					'woocommerce/cart',
+					array(
+						'draftSeeds' => array(
+							$draft_key => array(
+								$product_id => $draft_seed,
+							),
+						),
+					)
+				);
 			}
 
 			$hooks_before = '';
@@ -547,7 +567,8 @@ class AddToCartWithOptions extends AbstractBlock {
 				'data-wp-interactive'       => 'woocommerce/add-to-cart-with-options',
 				'data-wp-class--is-invalid' => '!state.isFormValid',
 			);
-			$context_directive  = wp_interactivity_data_wp_context( $context );
+
+			$context_directive = wp_interactivity_data_wp_context( $context );
 
 			$cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add' );
 			$form_attributes         = '';

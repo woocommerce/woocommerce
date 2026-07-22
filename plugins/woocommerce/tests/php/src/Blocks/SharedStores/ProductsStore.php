@@ -301,10 +301,10 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertTrue( $flag->getValue(), 'getters_registered should remain true.' );
 
 		$state = wp_interactivity_state( $this->store_namespace );
-		$this->assertArrayHasKey( 'mainProductInContext', $state );
+		$this->assertArrayHasKey( 'baseProductInContext', $state );
 		$this->assertArrayHasKey( 'productVariationInContext', $state );
 		$this->assertArrayHasKey( 'productInContext', $state );
-		$this->assertInstanceOf( \Closure::class, $state['mainProductInContext'] );
+		$this->assertInstanceOf( \Closure::class, $state['baseProductInContext'] );
 		$this->assertInstanceOf( \Closure::class, $state['productVariationInContext'] );
 		$this->assertInstanceOf( \Closure::class, $state['productInContext'] );
 
@@ -312,7 +312,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox state.mainProductInContext resolves to the hydrated product matching state.productId.
+	 * @testdox state.baseProductInContext resolves to the hydrated product matching state.productId.
 	 */
 	public function test_product_getter_reads_from_state(): void {
 		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
@@ -327,7 +327,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		);
 
 		$state   = wp_interactivity_state( $this->store_namespace );
-		$closure = $state['mainProductInContext'];
+		$closure = $state['baseProductInContext'];
 		$this->assertInstanceOf( \Closure::class, $closure );
 
 		$resolved = $closure();

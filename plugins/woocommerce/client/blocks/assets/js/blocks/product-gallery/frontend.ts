@@ -673,7 +673,7 @@ const productGallery = {
 
 			lastSeenVariationId.set( context.productId, variationId );
 
-			const product = productsState.mainProductInContext;
+			const product = productsState.baseProductInContext;
 			if ( ! product ) {
 				return;
 			}

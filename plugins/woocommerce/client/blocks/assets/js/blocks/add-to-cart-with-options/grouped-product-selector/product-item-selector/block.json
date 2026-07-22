@@ -4,7 +4,7 @@
 	"description": "Add a way of selecting a child product within the Grouped Product block. Depending on the type of product and its properties, this might be a button, a checkbox, or a link.",
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
-	"usesContext": [ "postId" ],
+	"usesContext": [ "postId", "draftKey" ],
 	"ancestor": [ "woocommerce/add-to-cart-with-options-grouped-product-item" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,

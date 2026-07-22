@@ -1,15 +1,23 @@
 /**
  * External dependencies
  */
-import type { Cart, CartItem } from '@woocommerce/types';
+import type { Cart, CartItem, ProductResponseItem } from '@woocommerce/types';
 import type { Notice } from '@woocommerce/stores/store-notices';
 
 /**
  * Internal dependencies
  */
-import type { Store, OptimisticCartItem } from '../cart';
+import type { Store, OptimisticCartItem, DraftItem, DraftKey } from '../cart';
+import type { ProductsStoreState } from '../products';
 
 type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
+
+/**
+ * The store's reserved session-global draft key, mirrored here as a literal
+ * — the module never exports its own `GLOBAL_DRAFT_KEY` constant, so tests
+ * name the collection the same way the server-side emitters do.
+ */
+const GLOBAL_DRAFT_KEY: DraftKey = 'woocommerce/global';
 
 let mockRegisteredStore: MockStore | null = null;
 const mockState = {
@@ -17,16 +25,79 @@ const mockState = {
 	nonce: 'test-nonce-123',
 } as Store[ 'state' ];
 
+/**
+ * Mock state for the `woocommerce/products` store that the cart store
+ * consults one-directionally (never the reverse) to resolve the in-context
+ * product and to back its pairing ladder's attribute matching. Tests set
+ * `mockProductsState.productInContext` (and `products`/`productVariations`
+ * when attribute matching is under test) directly rather than exercising the
+ * real `woocommerce/products` getters — those have their own test file.
+ */
+const mockProductsState: Partial< ProductsStoreState > = {
+	products: {},
+	productVariations: {},
+};
+
+/**
+ * The value `getContext( 'woocommerce/cart' )` should return for the draft
+ * key resolver, controlled per test. `undefined` (or an object with no
+ * `draftKey`) simulates a surface with no container of its own, so the
+ * resolver degrades to {@link GLOBAL_DRAFT_KEY}; an object carrying its own
+ * `draftKey` simulates a container that has declared one, isolating its
+ * subtree's drafts into that key's collection.
+ */
+let mockCartContext: { draftKey?: DraftKey } | undefined;
+
+/**
+ * When `true`, the mocked `getContext` throws regardless of namespace,
+ * reproducing the real Interactivity runtime's behavior when called with no
+ * directive currently executing on the call stack (i.e. outside of a
+ * directive's execution).
+ */
+let mockCartContextThrows = false;
+
+/**
+ * The value `getServerState( 'woocommerce/cart' )` should return, controlled
+ * per test. `undefined` simulates a page carrying no `draftSeeds` payload at
+ * all (the real runtime's `getServerState()` never actually returns
+ * `undefined` — it defaults to `{}` — but the resolver's own `?.` chaining
+ * tolerates either).
+ */
+let mockServerState:
+	| { draftSeeds?: Record< DraftKey, Record< number, DraftItem > > }
+	| undefined;
+
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		getConfig: jest.fn(),
-		store: jest.fn( ( _name, definition ) => {
+		getContext: jest.fn( () => {
+			if ( mockCartContextThrows ) {
+				throw new Error(
+					'Cannot call `getContext()` when there is no scope.'
+				);
+			}
+			return mockCartContext;
+		} ),
+		getServerState: jest.fn( () => mockServerState ),
+		store: jest.fn( ( name: string, definition ) => {
+			// The cart store consults `woocommerce/products` one-directionally;
+			// keep its mock state independent of the cart's own so seeding one
+			// never bleeds into the other.
+			if ( name === 'woocommerce/products' ) {
+				if ( definition?.state ) {
+					Object.defineProperties(
+						mockProductsState,
+						Object.getOwnPropertyDescriptors( definition.state )
+					);
+				}
+				return { state: mockProductsState };
+			}
 			// The cart store calls `store()` twice: once to read `state` and
 			// once to register `actions`. Merge the definition's `state`
-			// descriptors (e.g. the `findItemInCart` selector) onto the shared
-			// mock state so the real selector runs against seeded cart lines,
-			// and carry the action generators through both calls.
+			// descriptors (e.g. the `findItem` getter) onto the shared mock
+			// state so the real getter runs against seeded cart lines, and
+			// carry the action generators through both calls.
 			if ( definition?.state ) {
 				Object.defineProperties(
 					mockState,
@@ -43,9 +114,28 @@ jest.mock(
 	{ virtual: true }
 );
 
+// The cart store's side-effecting import of `woocommerce/products` is
+// replaced with an empty virtual module: the mocked `store()` above already
+// handles the `'woocommerce/products'` registration call the cart store
+// makes directly, so the real products store module never needs to load
+// here.
+jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ), {
+	virtual: true,
+} );
+
 jest.mock( '../legacy-events', () => ( {
 	triggerAddedToCartEvent: jest.fn(),
 } ) );
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { triggerAddedToCartEvent } = jest.requireMock( '../legacy-events' ) as {
+	triggerAddedToCartEvent: jest.Mock;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { getServerState: mockGetServerState } = jest.requireMock(
+	'@wordpress/interactivity'
+) as { getServerState: jest.Mock };
 
 /**
  * Captured representation of a single mutation sent through the batch endpoint.
@@ -143,7 +233,7 @@ function mockBatchFetch(): CapturedRequest[] {
  *
  * The module is re-required in isolation so each test starts from a clean
  * mutation queue and a fresh module-level nonce-ready promise. The initial
- * `refreshCartItems()` is then driven to completion so that the singleton
+ * `refresh()` is then driven to completion so that the singleton
  * nonce-ready promise resolves and queued mutations are allowed to flush; tests
  * seed `state.cart` afterwards via {@link seedCart}.
  *
@@ -153,7 +243,7 @@ async function loadCartStore(): Promise< Store[ 'actions' ] > {
 	jest.isolateModules( () => require( '../cart' ) );
 	const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
 	// Drive the refresh so the module-level nonce-ready promise resolves.
-	await runAction( actions.refreshCartItems() );
+	await runAction( actions.refresh() );
 	return actions;
 }
 
@@ -347,32 +437,12 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 	afterEach( () => {
 		jest.clearAllMocks();
 		delete ( mockState as Partial< Store[ 'state' ] > ).cart;
-	} );
-
-	it( 'refreshCartItems passes cache: no-store to fetch to prevent browser caching', () => {
-		const mockFetch = jest
-			.fn()
-			.mockResolvedValue(
-				new Response(
-					JSON.stringify( { items: [], totals: {}, errors: [] } )
-				)
-			);
-		global.fetch = mockFetch;
-
-		jest.isolateModules( () => require( '../cart' ) );
-
-		const iterator = mockRegisteredStore?.actions.refreshCartItems();
-
-		// Async actions are typed as void for consumers, but are actually generators internally.
-		( iterator as unknown as Iterator< void > ).next();
-
-		expect( mockFetch ).toHaveBeenCalledWith(
-			'https://example.com/wp-json/wc/store/v1/cart',
-			expect.objectContaining( {
-				method: 'GET',
-				cache: 'no-store',
-			} )
-		);
+		mockCartContext = undefined;
+		mockCartContextThrows = false;
+		mockServerState = undefined;
+		delete mockProductsState.productInContext;
+		mockProductsState.products = {};
+		mockProductsState.productVariations = {};
 	} );
 
 	describe( 'addCartItem endpoint selection', () => {
@@ -641,172 +711,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
-	describe( 'batchAddCartItems endpoint selection', () => {
-		it( 'issues add-item (never update-item) for a keyless batch item that matches a keyed line by product id', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( captured ).toHaveLength( 1 );
-			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
-			expect( captured[ 0 ].path ).not.toContain( 'update-item' );
-		} );
-
-		it( 'posts the requested delta (not the matched line absolute quantity) for a keyless batch item against a keyed line', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( captured[ 0 ].body.quantity ).toBe( 1 );
-			expect( captured[ 0 ].body.quantity ).not.toBe( 4 );
-		} );
-
-		it( 'never includes the matched line key in the request body for a keyless batch item', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
-			] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( captured[ 0 ].body.key ).toBeUndefined();
-		} );
-
-		it( 'issues update-item with the absolute quantity for a batch item that supplies an explicit key', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
-			] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						key: 'server-key-abc',
-						quantity: 5,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( captured[ 0 ].path ).toBe(
-				'/wc/store/v1/cart/update-item'
-			);
-			expect( captured[ 0 ].body.quantity ).toBe( 5 );
-			expect( captured[ 0 ].body.key ).toBe( 'server-key-abc' );
-		} );
-
-		it( 'derives the keyless add-item delta identically to the single-item addCartItem path', async () => {
-			// Same seeded keyed line and same keyless request through both
-			// paths must produce the same endpoint and posted quantity.
-			const singleCaptured = mockBatchFetch();
-			const singleActions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-			await runAction(
-				singleActions.addCartItem( {
-					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
-				} )
-			);
-
-			const batchCaptured = mockBatchFetch();
-			const batchActions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-			await runAction(
-				batchActions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( batchCaptured ).toHaveLength( 1 );
-			expect( singleCaptured ).toHaveLength( 1 );
-			expect( batchCaptured[ 0 ].path ).toBe( singleCaptured[ 0 ].path );
-			expect( batchCaptured[ 0 ].body.quantity ).toBe(
-				singleCaptured[ 0 ].body.quantity
-			);
-			expect( batchCaptured[ 0 ].body.key ).toBe(
-				singleCaptured[ 0 ].body.key
-			);
-		} );
-
-		it( 'optimistically bumps a matched keyed line in place on a keyless batch re-add (no duplicate line)', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( mockState.cart.items ).toHaveLength( 1 );
-			expect( mockState.cart.items[ 0 ].quantity ).toBe( 4 );
-		} );
-
-		it( 'optimistically pushes a new line when no line matches a keyless batch item', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 99,
-						quantityToAdd: 2,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect( mockState.cart.items ).toHaveLength( 2 );
-			const added = mockState.cart.items.find(
-				( item ) => item.id === 99
-			);
-			expect( added ).toBeDefined();
-			expect( added?.quantity ).toBe( 2 );
-		} );
-	} );
-
 	describe( 'notice-diff suppression for keyless meta-only adds', () => {
 		// The quantity-changed info notice template the auto-UPDATE branch emits.
 		const QUANTITY_CHANGED = 'was changed to';
@@ -967,46 +871,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( true );
 		} );
 
-		it( 'suppresses the notice for a keyless batch add resolved server-side as a new standalone line', async () => {
-			// Same meta-only scenario through the batch path: the matched keyed
-			// line is bumped optimistically to 4, the server keeps it at 3 and
-			// adds a standalone line. The batch must capture the baseline (3) and
-			// suppress the spurious notice.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-abc',
-						id: 42,
-						quantity: 3,
-					} ),
-					makeKeyedLine( {
-						key: 'server-key-new',
-						id: 42,
-						quantity: 1,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					},
-				] )
-			);
-
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
-		} );
-
 		it( 'suppresses the quantity-changed notice for a keyless re-add when the server returns the line at pre-add + delta', async () => {
 			// Pre-add: matched line at qty 3. Keyless add delta: +1.
 			// Expected total: 3 + 1 = 4. Server returns the line at 4.
@@ -1047,84 +911,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( false );
 		} );
 
-		it( 'suppresses the quantity-changed notice for a keyless batch re-add when the server total matches pre-add + sum of deltas', async () => {
-			// Pre-add: matched line at qty 3. Batch deltas: +1 and +1.
-			// A real /batch endpoint compounds server-side: each add-item
-			// sub-request runs sequentially against one WC_Cart session, so the
-			// server accumulates both deltas and lands at 5, not 4.
-			// Expected total: 3 + (1+1) = 5. Server returns the line at 5.
-			// Since serverTotal (5) === expectedTotal (5), suppress → no notice.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-abc',
-						id: 42,
-						quantity: 5,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-				] )
-			);
-
-			// Server total (5) === expected total (3+1+1=5) → suppress.
-			// No "quantity changed" notice must fire.
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
-		} );
-
-		it( 'still emits the quantity-changed notice for a keyless batch re-add when the server total diverges from expected', async () => {
-			// Same setup: pre-add qty 3, batch (+1,+1), expectedTotal = 5.
-			// Server returns 6 (a genuine concurrent change or cap artefact).
-			// Since serverTotal (6) !== expectedTotal (5), do not suppress →
-			// the notice must fire reporting the server quantity 6.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-abc',
-						id: 42,
-						quantity: 6,
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { key: 'server-key-abc', id: 42, quantity: 3 } ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-				] )
-			);
-
-			expect(
-				notices.some(
-					( n ) =>
-						n.notice.includes( QUANTITY_CHANGED ) &&
-						n.notice.includes( '6' )
-				)
-			).toBe( true );
-		} );
-
 		it( 'suppresses the notice for a keyless add when the client bumps a meta line but the server grows the standalone line', async () => {
 			// Product 42 occupies two lines: a meta-differentiated line ordered
 			// first (server-key-meta, qty 1) and a plain standalone line second
-			// (server-key-standalone, qty 1). findItemInCart matches the meta line
-			// first, so addCartItem bumps it optimistically. The server, however,
-			// grows the standalone line instead and leaves the meta line unchanged.
+			// (server-key-standalone, qty 1). The identity matcher matches the
+			// meta line first, so addCartItem bumps it optimistically. The
+			// server, however, grows the standalone line instead and leaves
+			// the meta line unchanged.
 			// Pre-add total: 1+1=2. Delta: +1. Expected total: 3.
 			// Server returns meta(1) + standalone(2) = 3 === expected → suppress
 			// for both pre-existing keys. No "quantity changed" notice must fire.
@@ -1165,56 +958,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					quantityToAdd: 1,
 					type: 'simple',
 				} )
-			);
-
-			// Server total (1+2=3) === expected total (1+1+1=3) → suppress.
-			expect(
-				notices.some( ( n ) => n.notice.includes( QUANTITY_CHANGED ) )
-			).toBe( false );
-		} );
-
-		it( 'suppresses the notice for a keyless batch add when the client bumps a meta line but the server grows the standalone line, through the batch path', async () => {
-			// Same meta-line/standalone-line scenario through the batch path.
-			// Product 42 occupies two
-			// lines: meta first (qty 1) then standalone (qty 1). The batch item
-			// bumps the meta line optimistically; the server grows the standalone
-			// line. Pre-add total: 1+1=2. Delta: +1. Expected total: 3.
-			// Server returns meta(1)+standalone(2)=3 === expected → suppress.
-			mockBatchFetchReturning(
-				makeServerCart( [
-					makeKeyedLine( {
-						key: 'server-key-meta',
-						id: 42,
-						quantity: 1,
-						name: 'Test Product',
-					} ),
-					makeKeyedLine( {
-						key: 'server-key-standalone',
-						id: 42,
-						quantity: 2,
-						name: 'Test Product',
-					} ),
-				] )
-			);
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( {
-					key: 'server-key-meta',
-					id: 42,
-					quantity: 1,
-				} ),
-				makeKeyedLine( {
-					key: 'server-key-standalone',
-					id: 42,
-					quantity: 1,
-				} ),
-			] );
-			const notices = spyOnUpdateNotices();
-
-			await runAction(
-				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-				] )
 			);
 
 			// Server total (1+2=3) === expected total (1+1+1=3) → suppress.
@@ -1273,8 +1016,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			).toBe( false );
 		} );
 
-		it( 'leaves removeCartItem notice behavior unchanged (auto-DELETE still fires)', async () => {
-			// removeCartItem must not pass the new baseline; the auto-DELETE
+		it( 'leaves removeItem notice behavior unchanged (auto-DELETE still fires)', async () => {
+			// removeItem must not pass the new baseline; the auto-DELETE
 			// branch is untouched. Removing one of two lines while the server
 			// reports the OTHER line auto-removed must still emit a removal
 			// notice for that server-removed line.
@@ -1305,7 +1048,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			] );
 			const notices = spyOnUpdateNotices();
 
-			await runAction( actions.removeCartItem( 'server-key-keep' ) );
+			await runAction( actions.removeItem( 'server-key-keep' ) );
 
 			// The server-removed line (server-key-gone) was present in the
 			// post-optimistic snapshot and absent from the server cart, so the
@@ -1386,6 +1129,1106 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			expect( mockState.cart.items ).toHaveLength( 1 );
 			expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
+		} );
+	} );
+
+	describe( 'draftItems / upsertDraftItem', () => {
+		/**
+		 * Builds a minimal draft payload.
+		 *
+		 * @param overrides Partial draft fields to override the defaults.
+		 * @return A draft carrying only `id` and `quantity` unless overridden.
+		 */
+		function makeDraft( overrides: Partial< DraftItem > = {} ): DraftItem {
+			return { id: 42, quantity: 1, ...overrides } as DraftItem;
+		}
+
+		it( 'starts as an empty keyed map — nothing server-seeds it', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+
+			expect( mockState.draftItems ).toEqual( {} );
+		} );
+
+		it( 'creates the session-global collection lazily, on its first write, and the write is immediately visible to a getter-driven read', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
+
+			actions.upsertDraftItem( makeDraft() );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				makeDraft(),
+			] );
+			expect( mockState.findItem( { id: 42 } ).draft ).toEqual(
+				makeDraft()
+			);
+		} );
+
+		it( 'appends a new draft to the session-global collection', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			actions.upsertDraftItem( makeDraft() );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				makeDraft(),
+			] );
+		} );
+
+		it( 'merges a second upsertDraftItem for the same product id instead of duplicating it', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			actions.upsertDraftItem( makeDraft( { quantity: 2 } ) );
+			actions.upsertDraftItem( makeDraft( { quantity: 5 } ) );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				makeDraft( { quantity: 5 } ),
+			] );
+		} );
+
+		it( 'keeps drafts for the same product id independent across the session-global collection and a keyed container collection', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			// No container context active: writes land in the
+			// session-global collection.
+			actions.upsertDraftItem( makeDraft( { quantity: 1 } ) );
+
+			// A container establishes its own collection by declaring a
+			// `draftKey` in its `woocommerce/cart` context; writes made
+			// while that context is active land there instead.
+			mockCartContext = { draftKey: 'collection/q1/42' };
+			actions.upsertDraftItem( makeDraft( { quantity: 9 } ) );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				makeDraft( { quantity: 1 } ),
+			] );
+			expect( mockState.draftItems[ 'collection/q1/42' ] ).toEqual( [
+				makeDraft( { quantity: 9 } ),
+			] );
+		} );
+
+		it( 'stores namespaced extension props at the draft payload root', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			actions.upsertDraftItem(
+				makeDraft( { 'my-plugin/gift-note': 'Happy birthday!' } )
+			);
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ][ 0 ] ).toEqual(
+				expect.objectContaining( {
+					id: 42,
+					quantity: 1,
+					'my-plugin/gift-note': 'Happy birthday!',
+				} )
+			);
+		} );
+
+		it( 'rejects an upsert that would change an existing draft id, applying no state change', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			actions.upsertDraftItem( makeDraft() );
+
+			// `id: 42` names the draft to target; the payload's own `id: 99`
+			// disagrees with it, which is an in-place rename attempt.
+			actions.upsertDraftItem( { id: 99, quantity: 5 }, { id: 42 } );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				makeDraft(),
+			] );
+			expect( console ).toHaveWarned();
+		} );
+
+		it( 'rejects creating a new draft without a numeric quantity, applying no state change', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			actions.upsertDraftItem( { id: 42 } );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
+			expect( console ).toHaveWarned();
+		} );
+
+		it( 'rejects an upsert missing both a payload id and an explicit target id', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+
+			actions.upsertDraftItem( { quantity: 1 } );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
+			expect( console ).toHaveWarned();
+		} );
+
+		it( 'keeps drafts independent from the cart mirror in both directions', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			actions.upsertDraftItem( makeDraft( { quantity: 7 } ) );
+
+			// Mutating the draft never mutates the cart mirror...
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
+
+			// ...and mutating the cart mirror never mutates the draft.
+			mockState.cart.items[ 0 ].quantity = 10;
+			expect(
+				mockState.draftItems[ GLOBAL_DRAFT_KEY ][ 0 ].quantity
+			).toBe( 7 );
+		} );
+	} );
+
+	describe( 'draft key resolution (resolveDraftKey / resolveCollection)', () => {
+		it( 'writes to the nearest declared container key when one is active', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockCartContext = { draftKey: 'collection/q1/42' };
+
+			actions.upsertDraftItem( { id: 42, quantity: 1 } );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
+			expect( mockState.draftItems[ 'collection/q1/42' ] ).toEqual( [
+				{ id: 42, quantity: 1 },
+			] );
+		} );
+
+		it( "reads back the container key's own collection, not the session-global one, when a container is active", async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockCartContext = { draftKey: 'collection/q1/42' };
+			actions.upsertDraftItem( { id: 42, quantity: 1 } );
+
+			expect( mockState.findItem( { id: 42 } ).draft ).toEqual( {
+				id: 42,
+				quantity: 1,
+			} );
+
+			// Outside that container's context, the session-global
+			// collection carries no matching draft.
+			mockCartContext = undefined;
+			expect( mockState.findItem( { id: 42 } ).draft ).toBeUndefined();
+		} );
+
+		it( 'degrades to the session-global key, without throwing, when read outside a directive', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockCartContextThrows = true;
+
+			expect( () =>
+				actions.upsertDraftItem( { id: 42, quantity: 1 } )
+			).not.toThrow();
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				{ id: 42, quantity: 1 },
+			] );
+		} );
+
+		it( 'treats a not-yet-created collection as empty on read, rather than throwing', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			mockCartContext = { draftKey: 'collection/q1/never-written' };
+
+			expect( () => mockState.findItem( { id: 42 } ) ).not.toThrow();
+			expect( mockState.findItem( { id: 42 } ).draft ).toBeUndefined();
+		} );
+	} );
+
+	describe( 'seed composition — creation-time-only consultation of getServerState()', () => {
+		it( "composes a new draft from the server-filed seed, merged under the shopper's partial", async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockServerState = {
+				draftSeeds: {
+					[ GLOBAL_DRAFT_KEY ]: {
+						42: {
+							id: 42,
+							quantity: 3,
+							variation: [ { attribute: 'Color', value: 'red' } ],
+						} as DraftItem,
+					},
+				},
+			};
+
+			// The shopper's edit only sets quantity; the untouched
+			// `variation` field falls back to the seed's own.
+			actions.upsertDraftItem( { id: 42, quantity: 5 } );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				{
+					id: 42,
+					quantity: 5,
+					variation: [ { attribute: 'Color', value: 'red' } ],
+				},
+			] );
+		} );
+
+		it( 'creates a draft straight from the seed when the partial supplies no overriding fields', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockServerState = {
+				draftSeeds: {
+					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42, quantity: 3 } },
+				},
+			};
+
+			actions.upsertDraftItem( { id: 42 } );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				{ id: 42, quantity: 3 },
+			] );
+		} );
+
+		it( 'reads the seed via getServerState( "woocommerce/cart" )', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockServerState = {
+				draftSeeds: {
+					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42, quantity: 1 } },
+				},
+			};
+
+			actions.upsertDraftItem( { id: 42 } );
+
+			expect( mockGetServerState ).toHaveBeenCalledWith(
+				'woocommerce/cart'
+			);
+		} );
+
+		it( 'never lets a re-delivered seed replace or inject properties into an already-materialized draft', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockServerState = {
+				draftSeeds: {
+					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42, quantity: 3 } },
+				},
+			};
+
+			// First materialization consults the seed.
+			actions.upsertDraftItem( { id: 42, quantity: 1 } );
+
+			// The surface's seed is re-delivered with a different quantity
+			// and an extra property — e.g. a region re-render or a
+			// client-side navigation re-filing the same key/id.
+			mockServerState = {
+				draftSeeds: {
+					[ GLOBAL_DRAFT_KEY ]: {
+						42: {
+							id: 42,
+							quantity: 9,
+							'my-plugin/injected': 'unwanted',
+						} as DraftItem,
+					},
+				},
+			};
+
+			// A genuine, unrelated edit — never a re-seed; an existing
+			// draft's merge path never touches `getServerState()` again.
+			actions.upsertDraftItem(
+				{ 'my-plugin/color': 'blue' },
+				{ id: 42 }
+			);
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+				{ id: 42, quantity: 1, 'my-plugin/color': 'blue' },
+			] );
+		} );
+
+		it( 'rejects creating a new draft when neither the partial nor the seed supplies a numeric quantity', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockServerState = {
+				draftSeeds: {
+					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42 } as DraftItem },
+				},
+			};
+
+			actions.upsertDraftItem( { id: 42 } );
+
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
+			expect( console ).toHaveWarned();
+		} );
+
+		it( "composes from the seed filed under a keyed container's own collection, not the session-global one", async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockCartContext = { draftKey: 'collection/q1/42' };
+			mockServerState = {
+				draftSeeds: {
+					'collection/q1/42': { 42: { id: 42, quantity: 4 } },
+					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42, quantity: 99 } },
+				},
+			};
+
+			actions.upsertDraftItem( { id: 42 } );
+
+			expect( mockState.draftItems[ 'collection/q1/42' ] ).toEqual( [
+				{ id: 42, quantity: 4 },
+			] );
+			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
+		} );
+	} );
+
+	describe( 'retired draft-lifecycle machinery', () => {
+		it( 'no longer exposes removeDraftItem, seedDraftIfAbsent, registerOrRestoreDraftCollection, or waitForIdle', async () => {
+			const actions = await loadCartStore();
+			const untypedActions = actions as unknown as Record<
+				string,
+				unknown
+			>;
+
+			expect( untypedActions.removeDraftItem ).toBeUndefined();
+			expect( untypedActions.seedDraftIfAbsent ).toBeUndefined();
+			expect(
+				untypedActions.registerOrRestoreDraftCollection
+			).toBeUndefined();
+			expect( untypedActions.waitForIdle ).toBeUndefined();
+		} );
+
+		it( 'does not export the module-private ledger, identity derivation, or render-time bridge — the module has no runtime exports at all', () => {
+			let cartModule: Record< string, unknown > = {};
+			jest.isolateModules( () => {
+				cartModule = require( '../cart' );
+			} );
+
+			expect( Object.keys( cartModule ) ).toEqual( [] );
+		} );
+	} );
+
+	describe( 'findItem / itemInContext / inCartQuantity', () => {
+		/**
+		 * Seeds `mockProductsState.productInContext` with a minimal product.
+		 *
+		 * @param overrides Partial product fields to override the defaults.
+		 * @return The product object assigned to `productInContext`.
+		 */
+		function seedProductInContext(
+			overrides: Partial< ProductResponseItem > = {}
+		) {
+			const product = {
+				id: 42,
+				type: 'simple',
+				grouped_products: [],
+				...overrides,
+			} as ProductResponseItem;
+			mockProductsState.productInContext = product;
+			return product;
+		}
+
+		/**
+		 * Builds a minimal server-confirmed cart line, optionally carrying
+		 * namespaced extension data under `extensions[namespace]`.
+		 *
+		 * @param overrides Partial cart-line fields to override the defaults.
+		 * @return A cart line suitable for seeding `state.cart.items`.
+		 */
+		function makeLine( overrides: Partial< CartItem > = {} ): CartItem {
+			return makeKeyedLine( { extensions: {}, ...overrides } );
+		}
+
+		it( 'itemInContext has no cartItem/draft when no product is in context', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			seedCart( [] );
+
+			expect( mockState.itemInContext ).toEqual( {
+				cartItem: undefined,
+				draft: undefined,
+			} );
+		} );
+
+		it( 'itemInContext has no cartItem when the in-context product is not in the cart', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			seedCart( [ makeLine( { id: 99 } ) ] );
+			seedProductInContext( { id: 42 } );
+
+			expect( mockState.itemInContext.cartItem ).toBeUndefined();
+		} );
+
+		it( 'itemInContext pairs via product identity when exactly one line matches', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			const line = makeLine( { id: 42 } );
+			seedCart( [ line, makeLine( { id: 99 } ) ] );
+			seedProductInContext( { id: 42 } );
+
+			expect( mockState.itemInContext ).toEqual( {
+				cartItem: line,
+				draft: undefined,
+			} );
+		} );
+
+		it( 'itemInContext includes the resolved collection draft for the in-context product alongside the paired line', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			const line = makeLine( { id: 42 } );
+			seedCart( [ line ] );
+			seedProductInContext( { id: 42 } );
+			actions.upsertDraftItem( { id: 42, quantity: 3 } );
+
+			expect( mockState.itemInContext ).toEqual( {
+				cartItem: line,
+				draft: { id: 42, quantity: 3 },
+			} );
+		} );
+
+		it( 'itemInContext disambiguates same-id lines via a namespaced extension-prop match against the draft', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			const giftA = makeLine( {
+				id: 42,
+				key: 'line-a',
+				extensions: { 'my-plugin': { giftNote: 'A' } },
+			} );
+			const giftB = makeLine( {
+				id: 42,
+				key: 'line-b',
+				extensions: { 'my-plugin': { giftNote: 'B' } },
+			} );
+			seedCart( [ giftA, giftB ] );
+			seedProductInContext( { id: 42 } );
+			actions.upsertDraftItem( {
+				id: 42,
+				quantity: 1,
+				'my-plugin/giftNote': 'B',
+			} );
+
+			expect( mockState.itemInContext.cartItem ).toEqual( giftB );
+		} );
+
+		it( 'itemInContext never guesses: ambiguous identity/extension matches leave cartItem undefined', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			// Same id, same (empty) extensions — nothing distinguishes them.
+			seedCart( [
+				makeLine( { id: 42, key: 'line-a' } ),
+				makeLine( { id: 42, key: 'line-b' } ),
+			] );
+			seedProductInContext( { id: 42 } );
+
+			expect( mockState.itemInContext.cartItem ).toBeUndefined();
+		} );
+
+		it( 'itemInContext leaves cartItem undefined when the draft extension prop matches no line, though the product is in the cart', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeLine( {
+					id: 42,
+					extensions: { 'my-plugin': { giftNote: 'A' } },
+				} ),
+			] );
+			seedProductInContext( { id: 42 } );
+			actions.upsertDraftItem( {
+				id: 42,
+				quantity: 1,
+				'my-plugin/giftNote': 'C',
+			} );
+
+			expect( mockState.itemInContext.cartItem ).toBeUndefined();
+		} );
+
+		it( 'findItem returns the same envelope for an explicit id, key, or filter', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			const line = makeLine( { id: 42, key: 'the-key' } );
+			seedCart( [ line ] );
+
+			const byId = mockState.findItem( { id: 42 } );
+			const byKey = mockState.findItem( { key: 'the-key' } );
+			const byFilter = mockState.findItem( {
+				filter: ( item ) => item.id === 42,
+			} );
+
+			expect( byId.cartItem ).toEqual( line );
+			expect( byKey.cartItem ).toEqual( line );
+			expect( byFilter.cartItem ).toEqual( line );
+		} );
+
+		it( 'findItem resolves the draft from the session-global collection when no container context is active', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			actions.upsertDraftItem( { id: 42, quantity: 2 } );
+
+			expect( mockState.findItem( { id: 42 } ).draft ).toEqual( {
+				id: 42,
+				quantity: 2,
+			} );
+		} );
+
+		it( 'findItem resolves the draft from the nearest container collection, not the session-global one, when a container is active', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			mockCartContext = { draftKey: 'collection/q1/42' };
+			actions.upsertDraftItem( { id: 42, quantity: 5 } );
+
+			expect( mockState.findItem( { id: 42 } ).draft ).toEqual( {
+				id: 42,
+				quantity: 5,
+			} );
+
+			// Outside that container's context, the session-global
+			// collection carries no matching draft.
+			mockCartContext = undefined;
+			expect( mockState.findItem( { id: 42 } ).draft ).toBeUndefined();
+		} );
+
+		it( 'inCartQuantity is 0 when no product is in context', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			seedCart( [] );
+
+			expect( mockState.inCartQuantity ).toBe( 0 );
+		} );
+
+		it( 'inCartQuantity returns the paired line quantity for a simple in-context product', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			seedCart( [ makeLine( { id: 42, quantity: 4 } ) ] );
+			seedProductInContext( { id: 42, type: 'simple' } );
+
+			expect( mockState.inCartQuantity ).toBe( 4 );
+		} );
+
+		it( 'inCartQuantity aggregates children in-cart quantities for a grouped in-context product', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			seedCart( [
+				makeLine( { id: 1, quantity: 2 } ),
+				makeLine( { id: 2, quantity: 5 } ),
+				// id 3 has no line — contributes 0.
+			] );
+			seedProductInContext( {
+				id: 99,
+				type: 'grouped',
+				grouped_products: [ 1, 2, 3 ],
+			} );
+
+			expect( mockState.inCartQuantity ).toBe( 7 );
+		} );
+
+		it( 'inCartQuantity resolves the correct per-variation quantity for a variable in-context product', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			const greenLine = makeLine( {
+				id: 55,
+				type: 'variation',
+				quantity: 3,
+				variation: [
+					{
+						attribute: 'Color',
+						value: 'green',
+						raw_attribute: 'attribute_pa_color',
+					},
+				],
+			} );
+			const blueLine = makeLine( {
+				id: 56,
+				type: 'variation',
+				quantity: 9,
+				variation: [
+					{
+						attribute: 'Color',
+						value: 'blue',
+						raw_attribute: 'attribute_pa_color',
+					},
+				],
+			} );
+			seedCart( [ greenLine, blueLine ] );
+			seedProductInContext( { id: 55, type: 'variation' } );
+			// The resolved collection's draft selection names which variation
+			// is "selected".
+			actions.upsertDraftItem( {
+				id: 55,
+				quantity: 1,
+				variation: [ { attribute: 'Color', value: 'green' } ],
+			} );
+
+			expect( mockState.inCartQuantity ).toBe( 3 );
+		} );
+	} );
+
+	describe( 'addItem / updateItem / removeItem / refresh', () => {
+		/**
+		 * Seeds `mockProductsState.productInContext` with a minimal product.
+		 *
+		 * @param overrides Partial product fields to override the defaults.
+		 * @return The product object assigned to `productInContext`.
+		 */
+		function seedProductInContext(
+			overrides: Partial< ProductResponseItem > = {}
+		) {
+			const product = {
+				id: 42,
+				type: 'simple',
+				grouped_products: [],
+				...overrides,
+			} as ProductResponseItem;
+			mockProductsState.productInContext = product;
+			return product;
+		}
+
+		describe( 'addItem', () => {
+			it( 'posts only the resolved collection draft of the in-context simple/variable product, never another collection or product', async () => {
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [] );
+				seedProductInContext( { id: 42, type: 'simple' } );
+
+				// The session-global draft for the in-context product: must
+				// post.
+				actions.upsertDraftItem( { id: 42, quantity: 2 } );
+				// A different product in the same collection: must not post.
+				actions.upsertDraftItem( { id: 99, quantity: 5 } );
+				// The same product in a different (keyed container)
+				// collection: must not post.
+				mockCartContext = { draftKey: 'collection/q1/42' };
+				actions.upsertDraftItem( { id: 42, quantity: 9 } );
+				// `addItem()` below runs from the session-global surface,
+				// with no container context active.
+				mockCartContext = undefined;
+
+				await runAction( actions.addItem() );
+
+				expect( captured ).toHaveLength( 1 );
+				expect( captured[ 0 ].path ).toBe(
+					'/wc/store/v1/cart/add-item'
+				);
+				expect( captured[ 0 ].body ).toEqual( { id: 42, quantity: 2 } );
+			} );
+
+			it( 'posts only the in-context product (B) when the same collection also holds another product (A)', async () => {
+				// The product-scoped negative guarantee (req 9 / AC6): a
+				// single collection accumulating drafts for more than one
+				// product — as a session-global collection does across
+				// pages — must never leak an unrelated draft into an add.
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [] );
+				actions.upsertDraftItem( { id: 1, quantity: 4 } ); // Product A.
+				actions.upsertDraftItem( { id: 2, quantity: 7 } ); // Product B.
+				seedProductInContext( { id: 2, type: 'simple' } );
+
+				await runAction( actions.addItem() );
+
+				expect( captured ).toHaveLength( 1 );
+				expect( captured[ 0 ].body ).toEqual( { id: 2, quantity: 7 } );
+			} );
+
+			it( "posts the surface's server-filed seed when the in-context product has no materialized draft yet", async () => {
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [] );
+				seedProductInContext( { id: 42, type: 'simple' } );
+				mockServerState = {
+					draftSeeds: {
+						[ GLOBAL_DRAFT_KEY ]: {
+							42: { id: 42, quantity: 1 },
+						},
+					},
+				};
+
+				await runAction( actions.addItem() );
+
+				expect( captured ).toHaveLength( 1 );
+				expect( captured[ 0 ].body ).toEqual( { id: 42, quantity: 1 } );
+			} );
+
+			it( 'sends nothing when the in-context product has no draft in the resolved collection and no seed is filed', async () => {
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [] );
+				seedProductInContext( { id: 42, type: 'simple' } );
+
+				await runAction( actions.addItem() );
+
+				expect( captured ).toHaveLength( 0 );
+			} );
+
+			it( 'sends nothing when no product is in context', async () => {
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [] );
+
+				await runAction( actions.addItem() );
+
+				expect( captured ).toHaveLength( 0 );
+			} );
+
+			it( 'posts one batched request set of a grouped product children drafts whose quantity is greater than 0', async () => {
+				const captured = mockBatchFetch();
+				const fetchSpy = global.fetch as jest.Mock;
+				const actions = await loadCartStore();
+				// The initial refresh already issued one GET; reset the count so
+				// only the batch call made by this test is measured below.
+				fetchSpy.mockClear();
+				seedCart( [] );
+				seedProductInContext( {
+					id: 200,
+					type: 'grouped',
+					grouped_products: [ 1, 2, 3, 4 ],
+				} );
+
+				actions.upsertDraftItem( { id: 1, quantity: 2 } );
+				// Quantity 0: must be excluded.
+				actions.upsertDraftItem( { id: 2, quantity: 0 } );
+				// id 3 has no draft at all: must be excluded.
+				actions.upsertDraftItem( { id: 4, quantity: 3 } );
+				// Same child id, different (keyed container) collection:
+				// must not be posted instead.
+				mockCartContext = { draftKey: 'collection/q1/200' };
+				actions.upsertDraftItem( { id: 1, quantity: 99 } );
+				mockCartContext = undefined;
+
+				await runAction( actions.addItem() );
+
+				expect( captured ).toHaveLength( 2 );
+				expect(
+					captured.every(
+						( r ) => r.path === '/wc/store/v1/cart/add-item'
+					)
+				).toBe( true );
+				expect( captured ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							body: { id: 1, quantity: 2 },
+						} ),
+						expect.objectContaining( {
+							body: { id: 4, quantity: 3 },
+						} ),
+					] )
+				);
+				// A single auto-batched POST for both children (one call to the
+				// batch endpoint), not one call per child.
+				expect( fetchSpy ).toHaveBeenCalledTimes( 1 );
+			} );
+
+			it( 'sends nothing for a grouped product whose children all have a zero or absent draft quantity', async () => {
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [] );
+				seedProductInContext( {
+					id: 200,
+					type: 'grouped',
+					grouped_products: [ 1, 2 ],
+				} );
+				actions.upsertDraftItem( { id: 1, quantity: 0 } );
+
+				await runAction( actions.addItem() );
+
+				expect( captured ).toHaveLength( 0 );
+			} );
+
+			it( 'sends nothing for an untouched grouped product even when every child has a server-filed seed (grouped never consults seeds)', async () => {
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [] );
+				seedProductInContext( {
+					id: 200,
+					type: 'grouped',
+					grouped_products: [ 1, 2 ],
+				} );
+				mockServerState = {
+					draftSeeds: {
+						[ GLOBAL_DRAFT_KEY ]: {
+							1: { id: 1, quantity: 1 },
+							2: { id: 2, quantity: 1 },
+						},
+					},
+				};
+
+				await runAction( actions.addItem() );
+
+				expect( captured ).toHaveLength( 0 );
+			} );
+
+			it( 'posts an explicit payload verbatim, extension props included, bypassing collection/product resolution', async () => {
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [] );
+				// No product in context and no drafts anywhere: the explicit
+				// payload path must not depend on either.
+
+				await runAction(
+					actions.addItem( {
+						id: 7,
+						quantity: 1,
+						'my-plugin/gift-note': 'Hi',
+					} )
+				);
+
+				expect( captured ).toHaveLength( 1 );
+				expect( captured[ 0 ].body ).toEqual( {
+					id: 7,
+					quantity: 1,
+					'my-plugin/gift-note': 'Hi',
+				} );
+			} );
+
+			it( 'fires the legacy added-to-cart event once on success', async () => {
+				mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [] );
+				seedProductInContext( { id: 42, type: 'simple' } );
+				actions.upsertDraftItem( { id: 42, quantity: 1 } );
+
+				await runAction( actions.addItem() );
+
+				expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
+				expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
+					preserveCartData: true,
+				} );
+			} );
+
+			it( 'rolls a failed batch back to the pre-cycle cart snapshot and dispatches a store notice', async () => {
+				mockBatchFetchFailing( {
+					failForPath: '/wc/store/v1/cart/add-item',
+					status: 400,
+				} );
+				const actions = await loadCartStore();
+				seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+				seedProductInContext( { id: 42, type: 'simple' } );
+				actions.upsertDraftItem( { id: 42, quantity: 1 } );
+				const notices = spyOnUpdateNotices();
+
+				await runAction( actions.addItem() );
+
+				expect( mockState.cart.items ).toHaveLength( 1 );
+				expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
+				expect( notices.length ).toBeGreaterThan( 0 );
+			} );
+		} );
+
+		describe( 'updateItem', () => {
+			it( 'reproduces the keyed absolute-quantity update-item behavior of addCartItem', async () => {
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [
+					makeKeyedLine( {
+						id: 42,
+						key: 'server-key-abc',
+						quantity: 3,
+					} ),
+				] );
+
+				await runAction(
+					actions.updateItem( {
+						key: 'server-key-abc',
+						quantity: 5,
+					} )
+				);
+
+				expect( captured ).toHaveLength( 1 );
+				expect( captured[ 0 ].path ).toBe(
+					'/wc/store/v1/cart/update-item'
+				);
+				expect( captured[ 0 ].body.quantity ).toBe( 5 );
+				expect( captured[ 0 ].body.key ).toBe( 'server-key-abc' );
+			} );
+
+			it( 'optimistically applies the absolute quantity before commit', async () => {
+				mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [
+					makeKeyedLine( {
+						id: 42,
+						key: 'server-key-abc',
+						quantity: 3,
+					} ),
+				] );
+
+				await runAction(
+					actions.updateItem( {
+						key: 'server-key-abc',
+						quantity: 5,
+					} )
+				);
+
+				expect( mockState.cart.items[ 0 ].quantity ).toBe( 5 );
+			} );
+
+			it( 'fires the legacy added-to-cart event on success, matching addCartItem', async () => {
+				mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [
+					makeKeyedLine( {
+						id: 42,
+						key: 'server-key-abc',
+						quantity: 3,
+					} ),
+				] );
+
+				await runAction(
+					actions.updateItem( {
+						key: 'server-key-abc',
+						quantity: 5,
+					} )
+				);
+
+				expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
+					preserveCartData: true,
+				} );
+			} );
+
+			it( 'no-ops when no cart line matches the given key', async () => {
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [ makeKeyedLine( { id: 42, key: 'other-key' } ) ] );
+
+				await runAction(
+					actions.updateItem( {
+						key: 'unknown-key',
+						quantity: 5,
+					} )
+				);
+
+				expect( captured ).toHaveLength( 0 );
+			} );
+		} );
+
+		describe( 'removeItem', () => {
+			it( 'reproduces the existing removeCartItem line-removal behavior', async () => {
+				const captured = mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [
+					makeKeyedLine( { id: 42, key: 'keep-key' } ),
+					makeKeyedLine( { id: 43, key: 'remove-key' } ),
+				] );
+
+				await runAction( actions.removeItem( 'remove-key' ) );
+
+				expect( captured ).toHaveLength( 1 );
+				expect( captured[ 0 ].path ).toBe(
+					'/wc/store/v1/cart/remove-item'
+				);
+				expect( captured[ 0 ].body ).toEqual( { key: 'remove-key' } );
+			} );
+
+			it( 'optimistically removes the line before commit', async () => {
+				mockBatchFetch();
+				const actions = await loadCartStore();
+				seedCart( [
+					makeKeyedLine( { id: 42, key: 'keep-key' } ),
+					makeKeyedLine( { id: 43, key: 'remove-key' } ),
+				] );
+
+				await runAction( actions.removeItem( 'remove-key' ) );
+
+				expect(
+					mockState.cart.items.some(
+						( item ) => item.key === 'remove-key'
+					)
+				).toBe( false );
+				expect(
+					mockState.cart.items.some(
+						( item ) => item.key === 'keep-key'
+					)
+				).toBe( true );
+			} );
+		} );
+
+		describe( 'refresh', () => {
+			it( 'reproduces the existing refreshCartItems cache-busting refresh behavior', () => {
+				const mockFetch = jest.fn().mockResolvedValue(
+					new Response(
+						JSON.stringify( {
+							items: [],
+							totals: {},
+							errors: [],
+						} )
+					)
+				);
+				global.fetch = mockFetch;
+
+				jest.isolateModules( () => require( '../cart' ) );
+				const iterator = mockRegisteredStore?.actions.refresh();
+
+				// Async actions are typed as void for consumers, but are
+				// actually generators internally.
+				( iterator as unknown as Iterator< void > ).next();
+
+				expect( mockFetch ).toHaveBeenCalledWith(
+					'https://example.com/wp-json/wc/store/v1/cart',
+					expect.objectContaining( {
+						method: 'GET',
+						cache: 'no-store',
+					} )
+				);
+			} );
+		} );
+	} );
+
+	describe( 'retired surface', () => {
+		it( 'no longer exposes batchAddCartItems, findItemInCart, removeCartItem, or refreshCartItems', async () => {
+			const actions = await loadCartStore();
+			const untypedActions = actions as unknown as Record<
+				string,
+				unknown
+			>;
+			const untypedState = mockRegisteredStore?.state as
+				| Record< string, unknown >
+				| undefined;
+
+			expect( untypedActions.batchAddCartItems ).toBeUndefined();
+			expect( untypedActions.removeCartItem ).toBeUndefined();
+			expect( untypedActions.refreshCartItems ).toBeUndefined();
+			expect( untypedState?.findItemInCart ).toBeUndefined();
+		} );
+
+		it( 'no longer declares state.errorMessages', async () => {
+			await loadCartStore();
+			const untypedState = mockRegisteredStore?.state as
+				| Record< string, unknown >
+				| undefined;
+
+			expect( untypedState?.errorMessages ).toBeUndefined();
+		} );
+
+		it( 'trims isInCart from the envelope: findItem/itemInContext expose only cartItem/draft, even when a product shares identity with more than one ambiguous line', async () => {
+			mockBatchFetch();
+			await loadCartStore();
+			// Same id, same (empty) extensions — nothing distinguishes them,
+			// so the pairing ladder is maximally ambiguous. This is the exact
+			// case the tri-state used to flag; the envelope still must not
+			// carry `isInCart`.
+			seedCart( [
+				makeKeyedLine( { id: 42, key: 'line-a', extensions: {} } ),
+				makeKeyedLine( { id: 42, key: 'line-b', extensions: {} } ),
+			] );
+
+			const envelope = mockState.findItem( { id: 42 } );
+
+			expect( envelope ).toEqual( {
+				cartItem: undefined,
+				draft: undefined,
+			} );
+			expect( Object.keys( envelope ) ).not.toContain( 'isInCart' );
+		} );
+
+		it( 'still resolves an existing keyed line for addCartItem via the internalized private matcher', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { id: 42, key: 'server-key-abc', quantity: 3 } ),
+			] );
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					key: 'server-key-abc',
+					quantity: 5,
+					type: 'simple',
+				} )
+			);
+
+			expect( captured ).toHaveLength( 1 );
+			expect( captured[ 0 ].path ).toBe(
+				'/wc/store/v1/cart/update-item'
+			);
+			expect( captured[ 0 ].body.quantity ).toBe( 5 );
 		} );
 	} );
 } );

@@ -107,7 +107,7 @@ const { state: shopperListsState, actions: shopperListsActions } =
 	);
 
 const { state: cartState, actions: cartActions } = store< WooCommerce >(
-	'woocommerce',
+	'woocommerce/cart',
 	{},
 	{ lock: universalLock }
 );
