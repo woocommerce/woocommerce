@@ -208,124 +208,118 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 		} );
 	} );
 
-	test( 'Products can be filtered based on product attributes like color, size etc.', async ( {
+	test( 'Applies product attribute, stock, featured, created-date, and price controls', async ( {
 		pageObject,
 	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
+		await test.step( 'Products can be filtered based on product attributes like color, size etc.', async () => {
+			await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show Product Attributes' );
-		await pageObject.setProductAttribute( 'Color', 'Green' );
+			await pageObject.addFilter( 'Show Product Attributes' );
+			await pageObject.setProductAttribute( 'Color', 'Green' );
 
-		await expect( pageObject.products ).toHaveCount( 3 );
+			await expect( pageObject.products ).toHaveCount( 3 );
 
-		await pageObject.setProductAttribute( 'Size', 'Large' );
+			await pageObject.setProductAttribute( 'Size', 'Large' );
 
-		await expect( pageObject.products ).toHaveCount( 1 );
+			await expect( pageObject.products ).toHaveCount( 1 );
 
-		await pageObject.publishAndGoToFrontend();
+			await pageObject.publishAndGoToFrontend();
 
-		await expect( pageObject.products ).toHaveCount( 1 );
-	} );
-
-	test( 'Products can be filtered based on stock status (in stock, out of stock, or backorder).', async ( {
-		pageObject,
-	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
-
-		await pageObject.setFilterComboboxValue( 'Stock status', [
-			'Out of stock',
-		] );
-
-		await expect( pageObject.productTitles ).toHaveText( [
-			'T-Shirt with Logo',
-		] );
-
-		await pageObject.publishAndGoToFrontend();
-
-		await expect( pageObject.productTitles ).toHaveText( [
-			'T-Shirt with Logo',
-		] );
-	} );
-
-	test( 'Products can be filtered based on featured status.', async ( {
-		pageObject,
-	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
-
-		await expect( pageObject.products ).toHaveCount( 9 );
-
-		await pageObject.addFilter( 'Featured' );
-		await pageObject.setShowOnlyFeaturedProducts( {
-			featured: true,
+			await expect( pageObject.products ).toHaveCount( 1 );
 		} );
 
-		// In test data we have only 4 featured products.
-		await expect( pageObject.products ).toHaveCount( 4 );
+		await test.step( 'Products can be filtered based on stock status (in stock, out of stock, or backorder).', async () => {
+			await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.publishAndGoToFrontend();
+			await pageObject.setFilterComboboxValue( 'Stock status', [
+				'Out of stock',
+			] );
 
-		await expect( pageObject.products ).toHaveCount( 4 );
-	} );
+			await expect( pageObject.productTitles ).toHaveText( [
+				'T-Shirt with Logo',
+			] );
 
-	test( 'Products can be filtered based on created date.', async ( {
-		pageObject,
-	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
+			await pageObject.publishAndGoToFrontend();
 
-		await expect( pageObject.products ).toHaveCount( 9 );
-
-		await pageObject.addFilter( 'Created' );
-		await pageObject.setCreatedFilter( {
-			operator: 'within',
-			range: 'last3months',
+			await expect( pageObject.productTitles ).toHaveText( [
+				'T-Shirt with Logo',
+			] );
 		} );
 
-		// Products are created with the fixed publish date back in 2019
-		// so there's no products published in last 3 months.
-		await expect( pageObject.products ).toHaveCount( 0 );
+		await test.step( 'Products can be filtered based on featured status.', async () => {
+			await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.setCreatedFilter( {
-			operator: 'before',
-			range: 'last3months',
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.addFilter( 'Featured' );
+			await pageObject.setShowOnlyFeaturedProducts( {
+				featured: true,
+			} );
+
+			// In test data we have only 4 featured products.
+			await expect( pageObject.products ).toHaveCount( 4 );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
-		await expect( pageObject.products ).toHaveCount( 9 );
+		await test.step( 'Products can be filtered based on created date.', async () => {
+			await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.products ).toHaveCount( 9 );
 
-		await expect( pageObject.products ).toHaveCount( 9 );
-	} );
+			await pageObject.addFilter( 'Created' );
+			await pageObject.setCreatedFilter( {
+				operator: 'within',
+				range: 'last3months',
+			} );
 
-	test( 'Products can be filtered based on price range.', async ( {
-		pageObject,
-	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
+			// Products are created with the fixed publish date back in 2019
+			// so there's no products published in last 3 months.
+			await expect( pageObject.products ).toHaveCount( 0 );
 
-		await expect( pageObject.products ).toHaveCount( 9 );
+			await pageObject.setCreatedFilter( {
+				operator: 'before',
+				range: 'last3months',
+			} );
 
-		await pageObject.addFilter( 'Price Range' );
-		await pageObject.setPriceRange( {
-			min: '25',
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 9 );
 		} );
 
-		await expect( pageObject.products ).toHaveCount( 7 );
+		await test.step( 'Products can be filtered based on price range.', async () => {
+			await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.setPriceRange( {
-			min: '15.28',
-			max: '17.21',
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.addFilter( 'Price Range' );
+			await pageObject.setPriceRange( {
+				min: '25',
+			} );
+
+			await expect( pageObject.products ).toHaveCount( 7 );
+
+			await pageObject.setPriceRange( {
+				min: '15.28',
+				max: '17.21',
+			} );
+
+			await expect( pageObject.products ).toHaveCount( 2 );
+
+			await pageObject.setPriceRange( {
+				max: '17.29',
+			} );
+
+			await expect( pageObject.products ).toHaveCount( 5 );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 5 );
 		} );
-
-		await expect( pageObject.products ).toHaveCount( 2 );
-
-		await pageObject.setPriceRange( {
-			max: '17.29',
-		} );
-
-		await expect( pageObject.products ).toHaveCount( 5 );
-
-		await pageObject.publishAndGoToFrontend();
-
-		await expect( pageObject.products ).toHaveCount( 5 );
 	} );
 
 	// See https://github.com/woocommerce/woocommerce/pull/49917
