@@ -533,6 +533,226 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Registered page route patterns match supported current requests.
+	 *
+	 * @dataProvider data_provider_test_registered_page_route_pattern_matches_current_request
+	 *
+	 * @param string $registered_path Registered route pattern.
+	 * @param string $request_uri      Current request URI.
+	 */
+	public function test_registered_page_route_pattern_matches_current_request( string $registered_path, string $request_uri ): void {
+		$this->assert_registered_page_for_request(
+			'route-pattern-page',
+			$request_uri,
+			array(
+				array(
+					'id'   => 'route-pattern-page',
+					'path' => $registered_path,
+				),
+			)
+		);
+	}
+
+	/**
+	 * Data provider for supported route pattern matches.
+	 *
+	 * @return array[]
+	 */
+	public static function data_provider_test_registered_page_route_pattern_matches_current_request(): array {
+		return array(
+			'path parameter'               => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'case-insensitive static path' => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2FROUTE-PARAMS%2Fsample' ),
+			'trailing slash in pattern'    => array( '/route-params/:itemName/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'repeated request slashes'     => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2F%2F' ),
+			'wildcard base path'           => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard' ),
+			'wildcard base trailing slash' => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2F' ),
+			'wildcard descendant path'     => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme%2Falpha' ),
+		);
+	}
+
+	/**
+	 * @testdox Registered page route patterns reject unsupported or unrelated current requests.
+	 *
+	 * @dataProvider data_provider_test_registered_page_route_pattern_does_not_match_current_request
+	 *
+	 * @param string $registered_path Registered route pattern.
+	 * @param string $request_uri      Current request URI.
+	 */
+	public function test_registered_page_route_pattern_does_not_match_current_request( string $registered_path, string $request_uri ): void {
+		$result = $this->get_registered_page_result_for_request(
+			$request_uri,
+			array(
+				array(
+					'id'   => 'route-pattern-page',
+					'path' => $registered_path,
+				),
+			)
+		);
+
+		$this->assertFalse( $result['current_page'] );
+		$this->assertFalse( $result['is_registered_page'] );
+	}
+
+	/**
+	 * Data provider for unsupported or unrelated route pattern requests.
+	 *
+	 * @return array[]
+	 */
+	public static function data_provider_test_registered_page_route_pattern_does_not_match_current_request(): array {
+		return array(
+			'parameter with extra segment' => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2Fdetails' ),
+			'partial parameter segment'    => array( '/route-patterns/:itemId/prefix-:suffix', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fprefix-value' ),
+			'non-terminal wildcard'        => array( '/route-patterns/:itemId/*/details', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fone%2Fdetails' ),
+			'different page root'          => array( '/route-params/:itemName', '/wp-admin/admin.php?page=other-page-root&path=%2Froute-params%2Fsample' ),
+		);
+	}
+
+	/**
+	 * @testdox Exact registered pages win over earlier route patterns.
+	 *
+	 * @dataProvider data_provider_test_registered_page_exact_path_takes_precedence_over_route_pattern
+	 *
+	 * @param string $request_uri Current request URI.
+	 */
+	public function test_registered_page_exact_path_takes_precedence_over_route_pattern( string $request_uri ): void {
+		$this->assert_registered_page_for_request(
+			'route-exact-page',
+			$request_uri,
+			array(
+				array(
+					'id'   => 'route-param-page',
+					'path' => '/route-patterns/:itemId',
+				),
+				array(
+					'id'   => 'route-exact-page',
+					'path' => '/route-patterns/settings',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Data provider for static route precedence requests.
+	 *
+	 * @return array[]
+	 */
+	public static function data_provider_test_registered_page_exact_path_takes_precedence_over_route_pattern(): array {
+		return array(
+			'exact request'            => array( '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2Fsettings' ),
+			'case-normalized request'  => array( '/wp-admin/admin.php?page=wc-admin&path=%2FROUTE-PATTERNS%2Fsettings' ),
+			'slash-normalized request' => array( '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2Fsettings%2F%2F' ),
+		);
+	}
+
+	/**
+	 * @testdox More specific registered route patterns win over wildcard patterns.
+	 */
+	public function test_registered_page_specific_route_pattern_takes_precedence_over_wildcard(): void {
+		$this->assert_registered_page_for_request(
+			'route-details-page',
+			'/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails',
+			array(
+				array(
+					'id'   => 'route-wildcard-page',
+					'path' => '/route-patterns/*',
+				),
+				array(
+					'id'   => 'route-details-page',
+					'path' => '/route-patterns/:itemId/details',
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Equal specificity registered route patterns use registration order.
+	 */
+	public function test_registered_page_equal_specificity_route_patterns_use_registration_order(): void {
+		$this->assert_registered_page_for_request(
+			'route-earlier-param-page',
+			'/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123',
+			array(
+				array(
+					'id'   => 'route-earlier-param-page',
+					'path' => '/route-patterns/:earlierId',
+				),
+				array(
+					'id'   => 'route-later-param-page',
+					'path' => '/route-patterns/:laterId',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Gets the PageController result for a simulated admin request.
+	 *
+	 * @param string $request_uri Request URI.
+	 * @param array  $pages       Pages to register.
+	 * @return array{current_page: array|bool, is_registered_page: bool}
+	 */
+	private function get_registered_page_result_for_request( string $request_uri, array $pages ): array {
+		$reflection            = new \ReflectionClass( $this->sut );
+		$pages_property        = $reflection->getProperty( 'pages' );
+		$current_page_property = $reflection->getProperty( 'current_page' );
+		$pages_property->setAccessible( true );
+		$current_page_property->setAccessible( true );
+
+		$original_pages        = $pages_property->getValue( $this->sut );
+		$original_current_page = $current_page_property->getValue( $this->sut );
+		$original_request_uri  = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request URI.
+		$registered_pages      = array();
+
+		foreach ( $pages as $page ) {
+			$registered_pages[ $page['id'] ] = array(
+				'id'      => $page['id'],
+				'path'    => PageController::PAGE_ROOT . '&path=' . $page['path'],
+				'js_page' => true,
+			);
+		}
+
+		try {
+			$pages_property->setValue( $this->sut, $registered_pages );
+			$current_page_property->setValue( $this->sut, null );
+			$_SERVER['REQUEST_URI'] = $request_uri;
+
+			$this->sut->determine_current_page();
+			return array(
+				'current_page'       => $this->sut->get_current_page(),
+				'is_registered_page' => wc_admin_is_registered_page(),
+			);
+		} finally {
+			$pages_property->setValue( $this->sut, $original_pages );
+			$current_page_property->setValue( $this->sut, $original_current_page );
+
+			if ( null === $original_request_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $original_request_uri;
+			}
+		}
+	}
+
+	/**
+	 * Asserts that a simulated request matches the expected registered page.
+	 *
+	 * @param string $expected_page_id Expected page ID.
+	 * @param string $request_uri      Request URI.
+	 * @param array  $pages            Pages to register.
+	 */
+	private function assert_registered_page_for_request( string $expected_page_id, string $request_uri, array $pages ): void {
+		$result       = $this->get_registered_page_result_for_request( $request_uri, $pages );
+		$current_page = $result['current_page'];
+
+		$this->assertTrue( $result['is_registered_page'], 'A matching page should be reported through wc_admin_is_registered_page().' );
+		$this->assertIsArray( $current_page, 'A matching registered page should be detected.' );
+		if ( ! is_array( $current_page ) ) {
+			return;
+		}
+		$this->assertSame( $expected_page_id, $current_page['id'] );
+	}
+
+	/**
 	 * Returns an object mocking what we need from \WP_Screen.
 	 *
 	 * @return object

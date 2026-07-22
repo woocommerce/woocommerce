@@ -58,12 +58,14 @@ To register a React-powered page, use the [`wc_admin_register_page()`](https://w
 -   `id` (**required**) - This identifies the page with the controller.
 -   `parent` (_optional_) - This denotes the page as a child of `parent` (using the parent's ID) and is used for generating breadcrumbs.
 -   `title` (**required**) - This corresponds to the page's title and is used to build breadcrumbs. You can supply a String or an Array of breadcrumb pieces here.
--   `path` (**required**) - This is the page's path (relative to `#wc-admin`). It is used for identifying this page and for linking breadcrumb pieces when this page is a parent.
+-   `path` (**required**) - This is the page's path (relative to `#wc-admin`). It is used for identifying this page and for linking breadcrumb pieces when this page is a parent. Supports static paths, `:paramName` path segments, and terminal `/*` wildcards for recognizing matching React routes.
 -   `capability` (_optional_) - User capability needed to access this page. The default value is `manage_options`.
 -   `icon` (_optional_) - Use this to apply a Dashicons helper class or base64-encoded SVG. Include the entire dashicon class name, ie `dashicons-*`. Note that this won't be included in WooCommerce Admin Navigation.
 -   `position` (_optional_) - Menu item position for parent pages. See: [`add_menu_page()`](https://developer.wordpress.org/reference/functions/add_menu_page/).
 
 Registering a React-powered page is similar to connecting a PHP page, but with some key differences. Registering pages will automatically create WordPress menu items for them, with the appropriate hierarchy based on the value of `parent`.
+
+Parameterized paths recognize direct loads for matching React routes registered with `woocommerce_admin_pages_list`. They do not generate concrete WordPress menu URLs; use static paths for menu items that merchants should click directly.
 
 ### Example: Adding a new WooCommerce Admin page
 
