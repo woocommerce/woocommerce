@@ -353,6 +353,37 @@ function emitSyncEvent( {
 }
 
 /**
+ * Mirrors IAPI cart fetches into the @wordpress/data cart store so a single
+ * GET /cart hydrates both and the Redux resolver short-circuits. Reads the
+ * global `wp.data` because this script module can't import it directly.
+ */
+const pushCartToReduxStore = ( cart: Cart ): void => {
+	const data = (
+		window as unknown as {
+			wp?: {
+				data?: {
+					dispatch: ( key: string ) => {
+						receiveCart?: ( cart: Cart ) => void;
+						finishResolution?: (
+							name: string,
+							args: unknown[]
+						) => void;
+					};
+				};
+			};
+		}
+	 ).wp?.data;
+	if ( ! data ) {
+		return;
+	}
+	try {
+		const cartDispatch = data.dispatch( 'wc/store/cart' );
+		cartDispatch.receiveCart?.( cart );
+		cartDispatch.finishResolution?.( 'getCartData', [] );
+	} catch {}
+};
+
+/**
  * Cart request queue singleton
  *
  * Lazily initialized on first use since state isn't available at module load.
@@ -383,6 +414,7 @@ async function sendCartRequest(
 			},
 			commit: ( serverState ) => {
 				stateRef.cart = serverState;
+				pushCartToReduxStore( serverState );
 			},
 			fetchHandler: async ( ...args ) => {
 				const response = await fetch( ...args );
@@ -401,6 +433,7 @@ const universalLock =
 
 // Todo: export this store once the store is public.
 const { state } = store< Store >( 'woocommerce', {}, { lock: universalLock } );
+
 const { actions } = store< Store >(
 	'woocommerce',
 	{
@@ -1011,7 +1044,9 @@ const { actions } = store< Store >(
 				}
 
 				// Skips if there's a pending request.
-				if ( pendingRefresh ) return;
+				if ( pendingRefresh ) {
+					return;
+				}
 
 				pendingRefresh = true;
 
@@ -1036,8 +1071,9 @@ const { actions } = store< Store >(
 					const json = ( yield res.json() ) as Cart;
 
 					// Checks if the response contains an error.
-					if ( isApiErrorResponse( res, json ) )
+					if ( isApiErrorResponse( res, json ) ) {
 						throw generateError( json );
+					}
 
 					// If the batcher started a cycle while we were fetching,
 					// discard this response — the batcher will reconcile.
@@ -1047,6 +1083,8 @@ const { actions } = store< Store >(
 
 					// Updates the local cart.
 					state.cart = json;
+
+					pushCartToReduxStore( json );
 
 					// Resets the timeout.
 					refreshTimeout = 3000;

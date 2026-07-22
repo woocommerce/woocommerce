@@ -12,7 +12,9 @@ Returns data required for the checkout. This includes a draft order (created fro
 GET /wc/store/v1/checkout
 ```
 
-There are no parameters required for this endpoint.
+| Attribute                     | Type | Required | Description                                                                                                                                                                             |
+| :---------------------------- | :--- | :------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `__experimental_calc_totals`  | bool |    No    | When set to `true`, the cart totals are recalculated and the response includes an `__experimentalCart` field with the current cart payload. Useful when hydrating the checkout client-side on CDN-cached pages. |
 
 ```sh
 curl --header "Nonce: 12345" --request GET https://example-store.com/wp-json/wc/store/v1/checkout
@@ -56,9 +58,12 @@ curl --header "Nonce: 12345" --request GET https://example-store.com/wp-json/wc/
     "payment_status": "",
     "payment_details": [],
     "redirect_url": ""
-  }
+  },
+  "__experimentalCart": { ... }
 }
 ```
+
+The `__experimentalCart` field is only present when the request is made with `__experimental_calc_totals=true`; otherwise it is omitted. It mirrors the [Cart API](cart.md) response so the client can hydrate both checkout and cart state from a single request (used by CDN-cached checkout pages).
 
 ## Update checkout data
 

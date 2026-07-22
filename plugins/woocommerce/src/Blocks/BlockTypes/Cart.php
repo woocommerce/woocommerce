@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
@@ -290,9 +291,12 @@ class Cart extends AbstractBlock {
 			}
 		}
 
-		// Hydrate the following data depending on admin or frontend context.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
-			$this->asset_data_registry->hydrate_api_request( '/wc/store/v1/cart' );
+			$should_hydrate = BlocksSharedState::should_hydrate( $this->get_full_block_name() );
+
+			if ( $should_hydrate ) {
+				$this->asset_data_registry->hydrate_api_request( '/wc/store/v1/cart' );
+			}
 		}
 
 		/**

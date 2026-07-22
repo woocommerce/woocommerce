@@ -320,20 +320,29 @@ class MiniCart extends AbstractBlock {
 			// Pre-render the template part so nested blocks enqueue their assets before the overlay is printed in wp_footer.
 			$template_part_contents           = $this->get_template_part_contents( false );
 			$template_part_contents           = do_blocks( $this->process_template_contents( $template_part_contents ) );
-			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 			$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === TaxDisplayMode::INCLUSIVE;
-			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
-			$badge_is_visible                 = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
-			$formatted_subtotal               = '';
-			$html                             = new \WP_HTML_Tag_Processor( wc_price( $cart->get_displayed_subtotal() ) );
 			$on_cart_click_behaviour          = isset( $attributes['onCartClickBehaviour'] ) ? $attributes['onCartClickBehaviour'] : 'open_drawer';
 
-			if ( $html->next_tag( 'bdi' ) ) {
-				while ( $html->next_token() ) {
-					if ( '#text' === $html->get_token_name() ) {
-						$formatted_subtotal .= $html->get_modifiable_text();
+			$should_hydrate = BlocksSharedState::should_hydrate( $this->get_full_block_name() );
+
+			if ( $should_hydrate ) {
+				$cart_item_count    = $cart->get_cart_contents_count();
+				$badge_is_visible   = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
+				$should_show_tax    = $cart->get_cart_contents_tax() > 0;
+				$formatted_subtotal = '';
+				$html               = new \WP_HTML_Tag_Processor( wc_price( $cart->get_displayed_subtotal() ) );
+				if ( $html->next_tag( 'bdi' ) ) {
+					while ( $html->next_token() ) {
+						if ( '#text' === $html->get_token_name() ) {
+							$formatted_subtotal .= $html->get_modifiable_text();
+						}
 					}
 				}
+			} else {
+				$cart_item_count    = 0;
+				$badge_is_visible   = ( 'always' === $product_count_visibility );
+				$should_show_tax    = false;
+				$formatted_subtotal = '';
 			}
 
 			// The following translation is a temporary workaround. It will be
@@ -350,7 +359,7 @@ class MiniCart extends AbstractBlock {
 				array(
 					'isOpen'             => false,
 					'totalItemsInCart'   => $cart_item_count,
-					'shouldShowTaxLabel' => $cart->get_cart_contents_tax() > 0,
+					'shouldShowTaxLabel' => $should_show_tax,
 					'badgeIsVisible'     => $badge_is_visible,
 					'formattedSubtotal'  => $formatted_subtotal,
 					'drawerOverlayClass' => 'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden',

@@ -18,6 +18,7 @@ import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { checkoutStore, validationStore } from '@woocommerce/block-data';
 import type { CheckoutResponse } from '@woocommerce/types';
+import { CheckoutSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout';
 
 /**
  * Internal dependencies
@@ -36,6 +37,9 @@ const preloadedCheckoutData = getSetting< Partial< CheckoutResponse > >(
 	{}
 );
 const hasCheckoutError = !! preloadedCheckoutData.code;
+// When the page is server-hydrated the checkout payload is preloaded;
+// otherwise it is empty and fetched on the client.
+const isCheckoutHydrated = Object.keys( preloadedCheckoutData ).length > 0;
 
 const MustLoginPrompt = () => {
 	return (
@@ -55,15 +59,33 @@ const Checkout = ( {
 	attributes: Attributes;
 	children: React.ReactChildren;
 } ): JSX.Element => {
-	const { customerId } = useSelect( ( select ) => {
+	const { customerId, checkoutIsResolving } = useSelect( ( select ) => {
 		const store = select( checkoutStore );
+		const coreDataStore = select( 'core/data' );
+		const hasStarted = coreDataStore.hasStartedResolution(
+			'wc/store/checkout',
+			'getCheckoutData',
+			[]
+		);
+		const hasFinished = coreDataStore.hasFinishedResolution(
+			'wc/store/checkout',
+			'getCheckoutData',
+			[]
+		);
 		return {
 			customerId: store.getCustomerId(),
+			checkoutIsResolving: hasStarted && ! hasFinished,
 		};
 	} );
 	const { cartItems, cartIsLoading } = useStoreCart();
 
 	const { showFormStepNumbers } = attributes;
+
+	// Only gate rendering on a non-hydrated page, where the checkout payload
+	// is still being fetched. Hydrated pages render immediately.
+	if ( ! isCheckoutHydrated && ( cartIsLoading || checkoutIsResolving ) ) {
+		return <CheckoutSkeleton />;
+	}
 
 	if ( ! cartIsLoading && cartItems.length === 0 ) {
 		return <EmptyCart />;

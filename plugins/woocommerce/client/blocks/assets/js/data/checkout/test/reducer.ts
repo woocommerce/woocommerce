@@ -1,10 +1,28 @@
 /**
+ * External dependencies
+ */
+import type { CheckoutResponseSuccess } from '@woocommerce/types';
+
+/**
  * Internal dependencies
  */
 import reducer from '../reducers';
 import { defaultState } from '../default-state';
 import { STATUS } from '../constants';
 import * as actions from '../actions';
+
+const makeCheckoutData = (
+	overrides: Partial< CheckoutResponseSuccess > = {}
+): CheckoutResponseSuccess =>
+	( {
+		order_id: 0,
+		customer_id: 0,
+		customer_note: '',
+		billing_address: {},
+		shipping_address: {},
+		additional_fields: {},
+		...overrides,
+	} ) as unknown as CheckoutResponseSuccess;
 
 describe( 'Checkout Store Reducer', () => {
 	it( 'should return the initial state', () => {
@@ -575,6 +593,112 @@ describe( 'Checkout Store Reducer', () => {
 					)
 				)
 			).toEqual( expectedState );
+		} );
+	} );
+
+	describe( 'should handle RECEIVE_CHECKOUT_DATA', () => {
+		it( 'should populate identifiers from the payload', () => {
+			const state = reducer(
+				defaultState,
+				actions.receiveCheckoutData(
+					makeCheckoutData( {
+						order_id: 42,
+						customer_id: 7,
+						customer_note: 'Leave at door',
+					} )
+				)
+			);
+
+			expect( state.orderId ).toBe( 42 );
+			expect( state.customerId ).toBe( 7 );
+			expect( state.orderNotes ).toBe( 'Leave at door' );
+		} );
+
+		it( 'should not clobber existing identifiers with empty values', () => {
+			const initialState = {
+				...defaultState,
+				orderId: 99,
+				customerId: 5,
+				orderNotes: 'Existing note',
+			};
+
+			const state = reducer(
+				initialState,
+				actions.receiveCheckoutData( makeCheckoutData() )
+			);
+
+			expect( state.orderId ).toBe( 99 );
+			expect( state.customerId ).toBe( 5 );
+			expect( state.orderNotes ).toBe( 'Existing note' );
+		} );
+
+		it( 'should not enter edit mode when addresses are absent', () => {
+			const state = reducer(
+				defaultState,
+				actions.receiveCheckoutData( makeCheckoutData() )
+			);
+
+			expect( state.editingBillingAddress ).toBe(
+				defaultState.editingBillingAddress
+			);
+			expect( state.editingShippingAddress ).toBe(
+				defaultState.editingShippingAddress
+			);
+			expect( state.useShippingAsBilling ).toBe(
+				defaultState.useShippingAsBilling
+			);
+		} );
+
+		it( 'should leave edit mode when a complete address is present', () => {
+			const initialState = {
+				...defaultState,
+				editingBillingAddress: true,
+				editingShippingAddress: true,
+			};
+
+			const address = {
+				first_name: 'Jane',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+			};
+
+			const state = reducer(
+				initialState,
+				actions.receiveCheckoutData(
+					makeCheckoutData( {
+						billing_address:
+							address as CheckoutResponseSuccess[ 'billing_address' ],
+						shipping_address:
+							address as CheckoutResponseSuccess[ 'shipping_address' ],
+					} )
+				)
+			);
+
+			expect( state.editingBillingAddress ).toBe( false );
+			expect( state.editingShippingAddress ).toBe( false );
+			expect( state.useShippingAsBilling ).toBe( true );
+		} );
+
+		it( 'should not throw and should preserve useShippingAsBilling when addresses are undefined', () => {
+			const initialState = {
+				...defaultState,
+				useShippingAsBilling: false,
+			};
+
+			const payload = makeCheckoutData();
+			// Simulate a payload missing address objects entirely.
+			delete ( payload as Record< string, unknown > ).billing_address;
+			delete ( payload as Record< string, unknown > ).shipping_address;
+
+			let state;
+			expect( () => {
+				state = reducer(
+					initialState,
+					actions.receiveCheckoutData( payload )
+				);
+			} ).not.toThrow();
+
+			expect( state ).toMatchObject( { useShippingAsBilling: false } );
 		} );
 	} );
 } );

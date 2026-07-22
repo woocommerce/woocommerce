@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Blocks\Utils;
 use InvalidArgumentException;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
+use Automattic\WooCommerce\Utilities\HydrationUtil;
 
 /**
  * Manages the registration of interactivity config and state that is commonly shared by WooCommerce blocks.
@@ -52,6 +53,22 @@ class BlocksSharedState {
 	private static function prevent_cache(): void {
 		\WC_Cache_Helper::set_nocache_constants();
 		nocache_headers();
+	}
+
+	/**
+	 * Whether WooCommerce should hydrate server-rendered output with per-user data.
+	 *
+	 * Thin wrapper around the neutral {@see HydrationUtil::should_hydrate()} so block
+	 * render callbacks keep a Blocks-layer entry point while the decision and the
+	 * `woocommerce_should_hydrate` filter live in core.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param string $store_namespace Optional. Block or IAPI store namespace making the decision.
+	 * @return bool
+	 */
+	public static function should_hydrate( string $store_namespace = '' ): bool {
+		return HydrationUtil::should_hydrate( $store_namespace );
 	}
 
 	/**
@@ -102,14 +119,17 @@ class BlocksSharedState {
 		if ( null === self::$blocks_shared_cart_state ) {
 			$cart_exists       = isset( WC()->cart );
 			$cart_has_contents = $cart_exists && ! WC()->cart->is_empty();
-			if ( $cart_exists ) {
+
+			$should_hydrate = self::should_hydrate( self::$settings_namespace );
+
+			if ( $cart_exists && $should_hydrate ) {
 				$cart_response                  = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/cart' );
 				self::$blocks_shared_cart_state = $cart_response['body'] ?? array();
 			} else {
-				self::$blocks_shared_cart_state = array();
+				self::$blocks_shared_cart_state = self::get_empty_cart_schema();
 			}
 
-			if ( $cart_has_contents ) {
+			if ( $cart_has_contents && $should_hydrate ) {
 				self::prevent_cache();
 			}
 
@@ -127,6 +147,104 @@ class BlocksSharedState {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Build an empty cart payload matching the Store API cart response schema.
+	 *
+	 * @return array
+	 */
+	private static function get_empty_cart_schema(): array {
+		$currency = self::get_currency_data()['currency'];
+
+		// Mirror the prefix/suffix logic in the Store API CurrencyFormatter so the
+		// empty payload matches a live cart response for every symbol position.
+		$symbol          = $currency['symbol'];
+		$currency_prefix = '';
+		$currency_suffix = '';
+		switch ( $currency['symbolPosition'] ) {
+			case 'left_space':
+				$currency_prefix = $symbol . ' ';
+				break;
+			case 'right':
+				$currency_suffix = $symbol;
+				break;
+			case 'right_space':
+				$currency_suffix = ' ' . $symbol;
+				break;
+			case 'left':
+			default:
+				$currency_prefix = $symbol;
+				break;
+		}
+
+		$empty_totals = array(
+			'total_items'                 => '0',
+			'total_items_tax'             => '0',
+			'total_fees'                  => '0',
+			'total_fees_tax'              => '0',
+			'total_discount'              => '0',
+			'total_discount_tax'          => '0',
+			'total_shipping'              => '0',
+			'total_shipping_tax'          => '0',
+			'total_price'                 => '0',
+			'total_tax'                   => '0',
+			'tax_lines'                   => array(),
+			'currency_code'               => $currency['code'],
+			'currency_symbol'             => $currency['symbol'],
+			'currency_minor_unit'         => $currency['precision'],
+			'currency_decimal_separator'  => $currency['decimalSeparator'],
+			'currency_thousand_separator' => $currency['thousandSeparator'],
+			'currency_prefix'             => $currency_prefix,
+			'currency_suffix'             => $currency_suffix,
+		);
+
+		// Match AbstractAddressSchema: empty-string fields rather than an empty object.
+		$empty_shipping_address = array(
+			'first_name' => '',
+			'last_name'  => '',
+			'company'    => '',
+			'address_1'  => '',
+			'address_2'  => '',
+			'city'       => '',
+			'state'      => '',
+			'postcode'   => '',
+			'country'    => '',
+			'phone'      => '',
+		);
+		$empty_billing_address  = array(
+			'first_name' => '',
+			'last_name'  => '',
+			'company'    => '',
+			'address_1'  => '',
+			'address_2'  => '',
+			'city'       => '',
+			'state'      => '',
+			'postcode'   => '',
+			'country'    => '',
+			'email'      => '',
+			'phone'      => '',
+		);
+
+		return array(
+			'items'                   => array(),
+			'coupons'                 => array(),
+			'fees'                    => array(),
+			'totals'                  => (object) $empty_totals,
+			'shipping_address'        => (object) $empty_shipping_address,
+			'billing_address'         => (object) $empty_billing_address,
+			'needs_payment'           => false,
+			'needs_shipping'          => false,
+			'payment_requirements'    => array(),
+			'has_calculated_shipping' => false,
+			'shipping_rates'          => array(),
+			'items_count'             => 0,
+			'items_weight'            => 0,
+			'cross_sells'             => array(),
+			'errors'                  => array(),
+			'payment_methods'         => array(),
+			'extensions'              => (object) array(),
+		);
 	}
 
 	/**

@@ -209,13 +209,18 @@ class Checkout extends AbstractCartRoute {
 		if ( $this->order ) {
 			$this->create_or_update_draft_order( $request );
 
-			return $this->prepare_item_for_response(
-				(object) [
-					'order'          => $this->order,
-					'payment_result' => new PaymentResult(),
-				],
-				$request
-			);
+			$response = [
+				'order'          => $this->order,
+				'payment_result' => new PaymentResult(),
+			];
+
+			// Clients opt-in to fresh totals and a cart payload via this param, mirroring the PUT flow.
+			if ( $request->get_param( '__experimental_calc_totals' ) ) {
+				$this->cart_controller->calculate_totals();
+				$response['cart'] = $this->cart_controller->get_cart_instance();
+			}
+
+			return $this->prepare_item_for_response( (object) $response, $request );
 		}
 
 		return $this->build_draft_route_response( $request );

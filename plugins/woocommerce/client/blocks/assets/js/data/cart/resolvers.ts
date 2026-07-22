@@ -2,13 +2,14 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import { select } from '@wordpress/data';
 import { CartResponse } from '@woocommerce/types';
 import { previewCart } from '@woocommerce/resource-previews';
 
 /**
  * Internal dependencies
  */
-import { CART_API_ERROR } from './constants';
+import { CART_API_ERROR, STORE_KEY } from './constants';
 import type { CartDispatchFromMap, CartResolveSelectFromMap } from './index';
 import { setTriggerStoreSyncEvent } from './utils';
 import { isEditor } from '../utils';
@@ -21,6 +22,11 @@ export const getCartData =
 	async ( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
 		if ( isEditor() ) {
 			dispatch.receiveCart( previewCart );
+			return;
+		}
+
+		// Skip when IAPI already pushed cart data into this store.
+		if ( select( STORE_KEY ).getCartData().items.length > 0 ) {
 			return;
 		}
 
