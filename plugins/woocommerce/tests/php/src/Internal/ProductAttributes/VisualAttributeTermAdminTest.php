@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\ProductAttributes;
 
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use WC_Unit_Test_Case;
 
 /**
@@ -232,6 +233,48 @@ class VisualAttributeTermAdminTest extends WC_Unit_Test_Case {
 		} finally {
 			unregister_taxonomy( $taxonomy );
 			wc_delete_attribute( $attribute_id );
+		}
+	}
+
+	/**
+	 * @testdox Should not throw a TypeError when the current screen has a non-string id.
+	 *
+	 * Reproduces issue #66528: Visual Composer calls do_action('admin_enqueue_scripts', NULL),
+	 * which triggers enqueue_visual_attribute_script() in a context where get_current_screen()
+	 * may return a screen object whose id is an integer (post ID) rather than a string,
+	 * causing strpos(): Argument #1 ($haystack) must be of type string.
+	 */
+	public function test_does_not_fatal_on_non_string_screen_id(): void {
+		// We need the wc-visual attribute type available, same setup as other tests.
+		switch_theme( 'twentytwentyfour' );
+		delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
+		wc_get_container()
+			->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class )
+			->change_feature_enable( 'wc-visual-attribute', true );
+
+		$instance = wc_get_container()->get( VisualAttributeTermAdmin::class );
+
+		// Simulate the scenario where get_current_screen() returns a screen with an integer id
+		// (e.g. a post ID), as happens when third-party code triggers admin_enqueue_scripts
+		// from outside the normal admin context.
+		$screen = \WP_Screen::get( 'test-screen' );
+		// Non-string, integer id like in the reported error.
+		$screen->id = 35202; // phpcs:ignore Generic.Formatting.MultipleStatementAlignment.IncorrectWarning
+
+		$original_screen           = isset( $GLOBALS['current_screen'] ) ? $GLOBALS['current_screen'] : null;
+		$GLOBALS['current_screen'] = $screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		try {
+			// This should not throw a TypeError even though $screen->id is an integer.
+			$instance->enqueue_visual_attribute_script();
+			// If we reach here, the method handled the non-string id gracefully.
+			$this->assertTrue( true );
+		} catch ( \TypeError $e ) {
+			$this->fail( 'TypeError thrown: ' . $e->getMessage() );
+		} finally {
+			$GLOBALS['current_screen'] = $original_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
+			switch_theme( $this->original_theme );
 		}
 	}
 }

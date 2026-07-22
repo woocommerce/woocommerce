@@ -3,6 +3,16 @@
 body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	background-color: var(--wpds-color-background-surface-neutral);
 
+	&.woocommerce-settings-ui-drill-down {
+		#wpbody {
+			margin-top: 0;
+		}
+
+		.woocommerce-layout__header {
+			display: none;
+		}
+	}
+
 	#mainform,
 	#wpcontent,
 	#wpbody-content,

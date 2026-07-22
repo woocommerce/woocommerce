@@ -116,7 +116,9 @@ describe( 'withProduct Component', () => {
 			mockUtils.getProduct.mockImplementation( () =>
 				Promise.reject( error )
 			);
-			mockBaseUtils.formatError.mockImplementation( () => formattedError );
+			mockBaseUtils.formatError.mockImplementation(
+				() => formattedError
+			);
 			await renderComponent();
 		} );
 

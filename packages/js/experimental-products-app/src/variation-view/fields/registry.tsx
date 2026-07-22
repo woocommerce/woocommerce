@@ -101,7 +101,7 @@ const VARIATION_ONLY_FIELDS: Array< {
 ];
 
 const sharedFields: VariationEditField[] = SHARED_FIELDS.map(
-	( { id, extensions } ) => ( { id, ...extensions } as VariationEditField )
+	( { id, extensions } ) => ( { id, ...extensions } ) as VariationEditField
 );
 
 const shippingFields: VariationEditField[] = SHIPPING_FIELDS.map(
@@ -110,7 +110,7 @@ const shippingFields: VariationEditField[] = SHIPPING_FIELDS.map(
 );
 
 const variationOnlyFields: VariationEditField[] = VARIATION_ONLY_FIELDS.map(
-	( { id, extensions } ) => ( { id, ...extensions } as VariationEditField )
+	( { id, extensions } ) => ( { id, ...extensions } ) as VariationEditField
 );
 
 // The full field list used by the variation edit drawer.

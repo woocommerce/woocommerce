@@ -251,14 +251,17 @@ export const combineRequestMethods = (
 export const combinePaymentMethodsState = (
 	paymentMethodsState: Record< string, boolean >
 ) => {
-	return Object.keys( paymentMethodsState ).reduce( ( acc, key ) => {
-		if ( key === 'apple_pay' || key === 'google_pay' ) {
-			acc.apple_google = paymentMethodsState[ key ];
-		} else {
-			acc[ key ] = paymentMethodsState[ key ];
-		}
-		return acc;
-	}, {} as Record< string, boolean > );
+	return Object.keys( paymentMethodsState ).reduce(
+		( acc, key ) => {
+			if ( key === 'apple_pay' || key === 'google_pay' ) {
+				acc.apple_google = paymentMethodsState[ key ];
+			} else {
+				acc[ key ] = paymentMethodsState[ key ];
+			}
+			return acc;
+		},
+		{} as Record< string, boolean >
+	);
 };
 
 /**
