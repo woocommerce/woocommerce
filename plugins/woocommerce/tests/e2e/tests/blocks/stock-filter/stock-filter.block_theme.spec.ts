@@ -25,90 +25,110 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 } );
 
 test.describe( `${ blockData.name } Block`, () => {
-	test.beforeEach( async ( { admin, editor } ) => {
-		await admin.createNewPost();
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'stock-filter',
-				heading: 'Filter By Price',
-			},
+	test( 'supports title, display style, and filter button controls', async ( {
+		admin,
+		page,
+		editor,
+	} ) => {
+		await test.step( "should allow changing the block's title", async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'stock-filter',
+					heading: 'Filter By Price',
+				},
+			} );
+
+			await editor.openDocumentSettingsSidebar();
+
+			const textSelector =
+				'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
+
+			const title = 'New Title';
+
+			await editor.canvas.locator( textSelector ).fill( title );
+
+			await expect( editor.canvas.locator( textSelector ) ).toHaveText(
+				title
+			);
 		} );
 
-		await editor.openDocumentSettingsSidebar();
-	} );
+		await test.step( 'should allow changing the display style', async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'stock-filter',
+					heading: 'Filter By Price',
+				},
+			} );
 
-	test( "should allow changing the block's title", async ( { editor } ) => {
-		const textSelector =
-			'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
+			await editor.openDocumentSettingsSidebar();
 
-		const title = 'New Title';
+			const stockFilter = await editor.getBlockByName( blockData.slug );
+			await editor.selectBlocks( stockFilter );
 
-		await editor.canvas.locator( textSelector ).fill( title );
+			await expect(
+				stockFilter.getByRole( 'checkbox', {
+					name: 'In Stock',
+				} )
+			).toBeVisible();
 
-		await expect( editor.canvas.locator( textSelector ) ).toHaveText(
-			title
-		);
-	} );
+			await expect(
+				stockFilter.getByRole( 'checkbox', {
+					name: 'Out of Stock',
+				} )
+			).toBeVisible();
 
-	test( 'should allow changing the display style', async ( {
-		page,
-		editor,
-	} ) => {
-		const stockFilter = await editor.getBlockByName( blockData.slug );
-		await editor.selectBlocks( stockFilter );
+			await page.getByLabel( 'DropDown' ).click();
 
-		await expect(
-			stockFilter.getByRole( 'checkbox', {
-				name: 'In Stock',
-			} )
-		).toBeVisible();
+			await expect(
+				stockFilter.getByRole( 'checkbox', {
+					name: 'In Stock',
+				} )
+			).toBeHidden();
 
-		await expect(
-			stockFilter.getByRole( 'checkbox', {
-				name: 'Out of Stock',
-			} )
-		).toBeVisible();
+			await expect(
+				stockFilter.getByRole( 'checkbox', {
+					name: 'Out of Stock',
+				} )
+			).toBeHidden();
 
-		await page.getByLabel( 'DropDown' ).click();
+			await expect( editor.canvas.getByRole( 'combobox' ) ).toBeVisible();
+		} );
 
-		await expect(
-			stockFilter.getByRole( 'checkbox', {
-				name: 'In Stock',
-			} )
-		).toBeHidden();
+		await test.step( 'should allow toggling the visibility of the filter button', async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'stock-filter',
+					heading: 'Filter By Price',
+				},
+			} );
 
-		await expect(
-			stockFilter.getByRole( 'checkbox', {
-				name: 'Out of Stock',
-			} )
-		).toBeHidden();
+			await editor.openDocumentSettingsSidebar();
 
-		await expect( editor.canvas.getByRole( 'combobox' ) ).toBeVisible();
-	} );
+			const priceFilterControls = await editor.getBlockByName(
+				blockData.slug
+			);
+			await editor.selectBlocks( priceFilterControls );
 
-	test( 'should allow toggling the visibility of the filter button', async ( {
-		page,
-		editor,
-	} ) => {
-		const priceFilterControls = await editor.getBlockByName(
-			blockData.slug
-		);
-		await editor.selectBlocks( priceFilterControls );
+			await expect(
+				priceFilterControls.getByRole( 'button', {
+					name: 'Apply',
+				} )
+			).toBeHidden();
 
-		await expect(
-			priceFilterControls.getByRole( 'button', {
-				name: 'Apply',
-			} )
-		).toBeHidden();
+			await page.getByText( "Show 'Apply filters' button" ).click();
 
-		await page.getByText( "Show 'Apply filters' button" ).click();
-
-		await expect(
-			priceFilterControls.getByRole( 'button', {
-				name: 'Apply',
-			} )
-		).toBeVisible();
+			await expect(
+				priceFilterControls.getByRole( 'button', {
+					name: 'Apply',
+				} )
+			).toBeVisible();
+		} );
 	} );
 } );
 
