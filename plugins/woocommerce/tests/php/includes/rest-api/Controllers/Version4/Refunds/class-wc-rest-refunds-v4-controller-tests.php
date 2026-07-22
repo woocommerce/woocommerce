@@ -1223,7 +1223,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the legacy amount field is rejected explicitly.
+	 * @testdox The legacy amount field is rejected explicitly with unsupported_amount_field instead of being silently dropped.
 	 *
 	 * The field was renamed to total. Without this guard the REST layer would
 	 * silently drop the unknown amount param and the controller would fall back
@@ -1258,6 +1258,44 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// No refund may have been created.
 		$order = wc_get_order( $order->get_id() );
 		$this->assertCount( 0, $order->get_refunds(), 'Rejected request must not create a refund' );
+	}
+
+	/**
+	 * @testdox An explicitly supplied zero total is rejected instead of falling back to the calculated amount.
+	 *
+	 * The total schema default previously made an explicit 0 indistinguishable
+	 * from an omitted total: empty( 0 ) routed the request onto the calculated
+	 * line-item amount and skipped the under-refund check, so a request meaning
+	 * "refund nothing" refunded the full computed amount. String forms such as
+	 * "0.00" are truthy and slipped past the old check the same way.
+	 */
+	public function test_refunds_create_rejects_explicit_zero_total(): void {
+		$order      = $this->create_test_order();
+		$line_items = $order->get_items( 'line_item' );
+		$line_item  = reset( $line_items );
+
+		foreach ( array( 0, '0.00' ) as $zero_total ) {
+			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+			$request->set_body_params(
+				array(
+					'order_id'   => $order->get_id(),
+					'total'      => $zero_total,
+					'line_items' => array(
+						array(
+							'line_item_id' => $line_item->get_id(),
+							'quantity'     => 1,
+						),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 400, $response->get_status(), 'An explicit zero total must be rejected, not treated as omitted' );
+			$this->assertEquals( 'invalid_refund_amount', $response->get_data()['code'] );
+		}
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( 0, $order->get_refunds(), 'Rejected requests must not create a refund' );
 	}
 
 	/**
