@@ -421,7 +421,7 @@ test.describe(
 			).toBeVisible();
 		} );
 
-		test( 'can add a product using the keyboard without a rogue search box', async ( {
+		test( 'can add a product without an extra click or rogue search box', async ( {
 			page,
 			simpleProduct,
 		} ) => {
@@ -435,6 +435,15 @@ test.describe(
 
 			const modal = page.locator( '.wc-backbone-modal-content' );
 			await expect( modal ).toBeVisible();
+
+			const productSearch = page.locator(
+				'span > .select2-search__field'
+			);
+			await expect( productSearch ).toBeFocused();
+
+			// Close the automatically opened search so the existing keyboard
+			// regression still exercises opening the control with Enter.
+			await page.keyboard.press( 'Escape' );
 
 			// Focus the (closed) product-search control and press Enter.
 			// Before the fix this submitted the modal, closing it and
@@ -453,9 +462,7 @@ test.describe(
 			// dropdown; type the query, wait for the result, then press Enter to
 			// choose it with the keyboard (results are loaded first, so this is
 			// not the premature-Enter path).
-			await page
-				.locator( 'span > .select2-search__field' )
-				.fill( simpleProduct.name );
+			await productSearch.fill( simpleProduct.name );
 			await page
 				.getByRole( 'option', { name: simpleProduct.name } )
 				.first()
