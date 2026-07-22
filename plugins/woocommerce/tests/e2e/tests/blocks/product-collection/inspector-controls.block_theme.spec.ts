@@ -20,96 +20,98 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 } );
 
 test.describe( 'Product Collection: Inspector Controls', () => {
-	test( 'Reflects the correct number of columns according to sidebar settings', async ( {
+	test( 'Applies columns, ordering, on-sale, and handpicked controls', async ( {
 		pageObject,
 	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
+		await test.step( 'Reflects the correct number of columns according to sidebar settings', async () => {
+			await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.setNumberOfColumns( 2 );
-		await expect( pageObject.productTemplate ).toHaveClass( /columns-2/ );
+			await pageObject.setNumberOfColumns( 2 );
+			await expect( pageObject.productTemplate ).toHaveClass(
+				/columns-2/
+			);
 
-		await pageObject.setNumberOfColumns( 4 );
-		await expect( pageObject.productTemplate ).toHaveClass( /columns-4/ );
+			await pageObject.setNumberOfColumns( 4 );
+			await expect( pageObject.productTemplate ).toHaveClass(
+				/columns-4/
+			);
 
-		await pageObject.publishAndGoToFrontend();
+			await pageObject.publishAndGoToFrontend();
 
-		await expect( pageObject.productTemplate ).toHaveClass( /columns-4/ );
-	} );
-
-	test( 'Order By - sort products by title in descending order correctly', async ( {
-		pageObject,
-	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
-
-		const sortedTitles = [
-			'WordPress Pennant',
-			'V-Neck T-Shirt',
-			'T-Shirt with Logo',
-			'T-Shirt',
-			/Sunglasses/, // In the frontend it's "Protected: Sunglasses"
-			'Single',
-			'Polo',
-			'Long Sleeve Tee',
-			'Logo Collection',
-		];
-
-		await pageObject.setOrderBy( 'title/desc' );
-		await expect( pageObject.productTitles ).toHaveText( sortedTitles );
-
-		await pageObject.publishAndGoToFrontend();
-		await expect( pageObject.productTitles ).toHaveText( sortedTitles );
-	} );
-
-	test( 'Products can be filtered based on "on sale" status', async ( {
-		pageObject,
-	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
-
-		let allProducts = pageObject.products;
-		let saleProducts = pageObject.products.filter( {
-			hasText: 'Product on sale',
+			await expect( pageObject.productTemplate ).toHaveClass(
+				/columns-4/
+			);
 		} );
 
-		await expect( allProducts ).toHaveCount( 9 );
-		await expect( saleProducts ).toHaveCount( 6 );
+		await test.step( 'Order By - sort products by title in descending order correctly', async () => {
+			await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.setShowOnlyProductsOnSale( {
-			onSale: true,
+			const sortedTitles = [
+				'WordPress Pennant',
+				'V-Neck T-Shirt',
+				'T-Shirt with Logo',
+				'T-Shirt',
+				/Sunglasses/, // In the frontend it's "Protected: Sunglasses"
+				'Single',
+				'Polo',
+				'Long Sleeve Tee',
+				'Logo Collection',
+			];
+
+			await pageObject.setOrderBy( 'title/desc' );
+			await expect( pageObject.productTitles ).toHaveText( sortedTitles );
+
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.productTitles ).toHaveText( sortedTitles );
 		} );
 
-		await expect( allProducts ).toHaveCount( 6 );
-		await expect( saleProducts ).toHaveCount( 6 );
+		await test.step( 'Products can be filtered based on "on sale" status', async () => {
+			await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.publishAndGoToFrontend();
-		await pageObject.refreshLocators( 'frontend' );
-		allProducts = pageObject.products;
-		saleProducts = pageObject.products.filter( {
-			hasText: 'Product on sale',
+			let allProducts = pageObject.products;
+			let saleProducts = pageObject.products.filter( {
+				hasText: 'Product on sale',
+			} );
+
+			await expect( allProducts ).toHaveCount( 9 );
+			await expect( saleProducts ).toHaveCount( 6 );
+
+			await pageObject.setShowOnlyProductsOnSale( {
+				onSale: true,
+			} );
+
+			await expect( allProducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
+
+			await pageObject.publishAndGoToFrontend();
+			await pageObject.refreshLocators( 'frontend' );
+			allProducts = pageObject.products;
+			saleProducts = pageObject.products.filter( {
+				hasText: 'Product on sale',
+			} );
+
+			await expect( allProducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
 		} );
 
-		await expect( allProducts ).toHaveCount( 6 );
-		await expect( saleProducts ).toHaveCount( 6 );
-	} );
+		await test.step( 'Products can be filtered based on selection in handpicked products option', async () => {
+			await pageObject.createNewPostAndInsertBlock();
 
-	test( 'Products can be filtered based on selection in handpicked products option', async ( {
-		pageObject,
-	} ) => {
-		await pageObject.createNewPostAndInsertBlock();
+			await pageObject.addFilter( 'Show Hand-picked' );
 
-		await pageObject.addFilter( 'Show Hand-picked' );
+			const filterName = 'Hand-picked';
+			await pageObject.setFilterComboboxValue( filterName, [ 'Album' ] );
+			await expect( pageObject.products ).toHaveCount( 1 );
 
-		const filterName = 'Hand-picked';
-		await pageObject.setFilterComboboxValue( filterName, [ 'Album' ] );
-		await expect( pageObject.products ).toHaveCount( 1 );
+			const productNames = [ 'Album', 'Cap' ];
+			await pageObject.setFilterComboboxValue( filterName, productNames );
+			await expect( pageObject.products ).toHaveCount( 2 );
+			await expect( pageObject.productTitles ).toHaveText( productNames );
 
-		const productNames = [ 'Album', 'Cap' ];
-		await pageObject.setFilterComboboxValue( filterName, productNames );
-		await expect( pageObject.products ).toHaveCount( 2 );
-		await expect( pageObject.productTitles ).toHaveText( productNames );
-
-		await pageObject.publishAndGoToFrontend();
-		await expect( pageObject.products ).toHaveCount( 2 );
-		await expect( pageObject.productTitles ).toHaveText( productNames );
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.products ).toHaveCount( 2 );
+			await expect( pageObject.productTitles ).toHaveText( productNames );
+		} );
 	} );
 
 	test( 'Products can be filtered based on keyword.', async ( {
