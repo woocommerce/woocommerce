@@ -965,120 +965,133 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Editor: In taxonomies templates', () => {
-		test( 'Products by specific category template displays products from this category', async ( {
+		test( 'Products by specific category and tag templates display matching products', async ( {
 			admin,
 			page,
 			editor,
 			wpCoreVersion,
 		} ) => {
-			await wpCLI(
-				'option update woocommerce_default_catalog_orderby price'
-			);
+			await test.step( 'Products by specific category template displays products from this category', async () => {
+				await wpCLI(
+					'option update woocommerce_default_catalog_orderby price'
+				);
 
-			const expectedProducts = [
-				'Hoodie',
-				'Hoodie with Logo',
-				'Hoodie with Zipper',
-			];
+				const expectedProducts = [
+					'Hoodie',
+					'Hoodie with Logo',
+					'Hoodie with Zipper',
+				];
 
-			await admin.visitSiteEditor( { path: '/wp_template' } );
+				await admin.visitSiteEditor( {
+					path: '/wp_template',
+				} );
 
-			// We need to wait for Product categories to load. Otherwise clicking
-			// on Products by Category might direct the user to the generic
-			// template.
-			await Promise.all( [
-				admin.page.waitForResponse( ( response ) => {
-					return response
-						.url()
-						.includes( 'wp-json/wp/v2/product_cat' );
-				} ),
-				page
+				// We need to wait for Product categories to load. Otherwise clicking
+				// on Products by Category might direct the user to the generic
+				// template.
+				await Promise.all( [
+					admin.page.waitForResponse( ( response ) => {
+						return response
+							.url()
+							.includes( 'wp-json/wp/v2/product_cat' );
+					} ),
+					page
+						.getByRole( 'button', {
+							name:
+								wpCoreVersion >= 6.8
+									? 'Add Template'
+									: 'Add New Template',
+						} )
+						.click(),
+				] );
+
+				await page
 					.getByRole( 'button', {
-						name:
-							wpCoreVersion >= 6.8
-								? 'Add Template'
-								: 'Add New Template',
+						name: 'Products by Category',
 					} )
-					.click(),
-			] );
-
-			await page
-				.getByRole( 'button', { name: 'Products by Category' } )
-				.click();
-			await page
-				.getByRole( 'button', { name: 'For a specific item' } )
-				.click();
-			await page
-				.getByRole( 'option', {
-					name: `Hoodies`,
-				} )
-				.click();
-			await page
-				.getByRole( 'option', { name: 'Fallback content' } )
-				.click();
-
-			const products = editor.canvas.getByLabel( 'Block: Title' );
-
-			await expect( products ).toHaveText( expectedProducts );
-
-			await wpCLI(
-				'option update woocommerce_default_catalog_orderby menu_order'
-			);
-		} );
-		test( 'Products by specific tag template displays products from this tag', async ( {
-			admin,
-			page,
-			editor,
-			wpCoreVersion,
-		} ) => {
-			await wpCLI(
-				'option update woocommerce_default_catalog_orderby price'
-			);
-
-			const expectedProducts = [ 'Beanie', 'Hoodie' ];
-
-			await admin.visitSiteEditor( { path: '/wp_template' } );
-
-			// We need to wait for Product tags to load. Otherwise clicking
-			// on Products by Tag might direct the user to the generic template.
-			await Promise.all( [
-				admin.page.waitForResponse( ( response ) => {
-					return response
-						.url()
-						.includes( 'wp-json/wp/v2/product_tag' );
-				} ),
-				page
+					.click();
+				await page
 					.getByRole( 'button', {
-						name:
-							wpCoreVersion >= 6.8
-								? 'Add Template'
-								: 'Add New Template',
+						name: 'For a specific item',
 					} )
-					.click(),
-			] );
+					.click();
+				await page
+					.getByRole( 'option', {
+						name: `Hoodies`,
+					} )
+					.click();
+				await page
+					.getByRole( 'option', {
+						name: 'Fallback content',
+					} )
+					.click();
 
-			await page
-				.getByRole( 'button', { name: 'Products by Tag' } )
-				.click();
-			await page
-				.getByRole( 'button', { name: 'For a specific item' } )
-				.click();
-			await page
-				.getByRole( 'option', {
-					name: `Recommended`,
-				} )
-				.click();
-			await page
-				.getByRole( 'option', { name: 'Fallback content' } )
-				.click();
+				const products = editor.canvas.getByLabel( 'Block: Title' );
 
-			const products = editor.canvas.getByLabel( 'Block: Title' );
+				await expect( products ).toHaveText( expectedProducts );
 
-			await expect( products ).toHaveText( expectedProducts );
+				await wpCLI(
+					'option update woocommerce_default_catalog_orderby menu_order'
+				);
+			} );
+			await test.step( 'Products by specific tag template displays products from this tag', async () => {
+				await wpCLI(
+					'option update woocommerce_default_catalog_orderby price'
+				);
 
-			await wpCLI(
-				'option update woocommerce_default_catalog_orderby menu_order'
-			);
+				const expectedProducts = [ 'Beanie', 'Hoodie' ];
+
+				await admin.visitSiteEditor( {
+					path: '/wp_template',
+				} );
+
+				// We need to wait for Product tags to load. Otherwise clicking
+				// on Products by Tag might direct the user to the generic template.
+				await Promise.all( [
+					admin.page.waitForResponse( ( response ) => {
+						return response
+							.url()
+							.includes( 'wp-json/wp/v2/product_tag' );
+					} ),
+					page
+						.getByRole( 'button', {
+							name:
+								wpCoreVersion >= 6.8
+									? 'Add Template'
+									: 'Add New Template',
+						} )
+						.click(),
+				] );
+
+				await page
+					.getByRole( 'button', {
+						name: 'Products by Tag',
+					} )
+					.click();
+				await page
+					.getByRole( 'button', {
+						name: 'For a specific item',
+					} )
+					.click();
+				await page
+					.getByRole( 'option', {
+						name: `Recommended`,
+					} )
+					.click();
+				await page
+					.getByRole( 'option', {
+						name: 'Fallback content',
+					} )
+					.click();
+
+				const products = editor.canvas.getByLabel( 'Block: Title' );
+
+				await expect( products ).toHaveText( expectedProducts );
+
+				await wpCLI(
+					'option update woocommerce_default_catalog_orderby menu_order'
+				);
+			} );
 		} );
 	} );
 } );
