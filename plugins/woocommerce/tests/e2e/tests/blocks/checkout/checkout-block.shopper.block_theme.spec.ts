@@ -264,7 +264,19 @@ test.describe( 'Shopper → Local pickup', () => {
 
 		// Go to checkout.
 		await frontendUtils.goToShop();
+		const addToCartResponse = page.waitForResponse( ( response ) => {
+			return (
+				response.request().method() === 'POST' &&
+				response.url().includes( '/wp-json/wc/store/v1/batch' ) &&
+				response
+					.request()
+					.postData()
+					?.includes( '/wc/store/v1/cart/add-item' ) === true &&
+				response.ok()
+			);
+		} );
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await addToCartResponse;
 		await frontendUtils.goToCheckout();
 
 		await expect(
