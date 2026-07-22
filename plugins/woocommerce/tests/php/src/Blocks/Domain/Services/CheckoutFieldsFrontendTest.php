@@ -358,4 +358,57 @@ class CheckoutFieldsFrontendTest extends TestCase {
 
 		__internal_woocommerce_blocks_deregister_checkout_field( 'mynamespace/optional_field' );
 	}
+
+	/**
+	 * @testDox Additional address field values with show_in_order_confirmation set to false are hidden when rendering order details.
+	 */
+	public function test_render_order_address_fields_hides_field_when_show_in_order_confirmation_is_false() {
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'                         => 'mynamespace/billing_confirmation_field',
+				'label'                      => 'Hidden on confirmation',
+				'location'                   => 'address',
+				'show_in_order_confirmation' => false,
+			)
+		);
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_created_via( 'store-api' );
+		$this->controller->persist_field_for_order( 'mynamespace/billing_confirmation_field', 'secret value', $order, 'billing', false );
+		$order->save();
+
+		ob_start();
+		$this->sut->render_order_address_fields( 'billing', $order );
+		$content = ob_get_clean();
+
+		$this->assertStringNotContainsString( 'secret value', $content );
+
+		__internal_woocommerce_blocks_deregister_checkout_field( 'mynamespace/billing_confirmation_field' );
+	}
+
+	/**
+	 * @testDox Additional address field values with show_in_order_confirmation set to true (the default) are shown when rendering order details.
+	 */
+	public function test_render_order_address_fields_shows_field_when_show_in_order_confirmation_is_true() {
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'mynamespace/billing_confirmation_field',
+				'label'    => 'Shown on confirmation',
+				'location' => 'address',
+			)
+		);
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_created_via( 'store-api' );
+		$this->controller->persist_field_for_order( 'mynamespace/billing_confirmation_field', 'visible value', $order, 'billing', false );
+		$order->save();
+
+		ob_start();
+		$this->sut->render_order_address_fields( 'billing', $order );
+		$content = ob_get_clean();
+
+		$this->assertStringContainsString( 'visible value', $content );
+
+		__internal_woocommerce_blocks_deregister_checkout_field( 'mynamespace/billing_confirmation_field' );
+	}
 }

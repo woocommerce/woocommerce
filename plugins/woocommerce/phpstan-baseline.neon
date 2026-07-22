@@ -53500,12 +53500,6 @@ parameters:
 			path: src/Blocks/Domain/Package.php
 
 		-
-			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/Domain/Services/CheckoutFields.php
-
-		-
 			message: '#^Instanceof between WC_Data and WC_Data will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
 			count: 1
@@ -53550,18 +53544,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFields\:\:sync_order_additional_fields_with_customer\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Domain/Services/CheckoutFields.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(CheckoutFields \$this    The CheckoutFields instance\.\)\: Unexpected token "\$this", expected variable at offset 732 on line 14$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/Domain/Services/CheckoutFields.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(bool                    Whether the field should be shown\.\)\: Unexpected token "Whether", expected variable at offset 333 on line 10$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: src/Blocks/Domain/Services/CheckoutFields.php
 
