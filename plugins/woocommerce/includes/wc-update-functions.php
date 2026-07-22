@@ -3593,3 +3593,43 @@ function wc_update_1100_enable_point_of_sale_feature() {
 function wc_update_1110_delete_dashboard_outofstock_count_transient() {
 	delete_transient( ProductUtil::OUTOFSTOCK_COUNT_TRANSIENT );
 }
+
+/**
+ * Schedule the one-time refund double-count detection scan.
+ *
+ * Repairs the historical Analytics rows written by the bug fixed in PR #66320,
+ * where a partial refund followed by a full refund double-counted the partial
+ * amount in the Returns metric. Only new-data stores are affected; old-data
+ * stores are repaired by their own migration re-import.
+ *
+ * @since 11.1.0
+ */
+function wc_update_1110_schedule_refund_double_count_scan(): void {
+	// Only new-data stores carry the #66320 double-count. Old-data stores are handled
+	// by the existing full-refund fix tool's re-import, so there is nothing to scan.
+	if ( ! \Automattic\WooCommerce\Utilities\OrderUtil::uses_new_full_refund_data() ) {
+		return;
+	}
+
+	// Persist the incomplete state before scheduling: the option's existence is
+	// the durable "a scan is owed" marker that lets the imports/status endpoint
+	// reschedule the scan if this schedule call fails or a batch dies. This
+	// schedule counts as the first of the capped scan attempts.
+	update_option(
+		\Automattic\WooCommerce\Internal\Admin\Analytics::REFUND_DOUBLE_COUNT_OPTION,
+		array(
+			'running_count'     => 0,
+			'complete'          => false,
+			'scan_attempts'     => 1,
+			'last_scan_attempt' => time(),
+		),
+		false
+	);
+
+	WC()->queue()->schedule_single(
+		time(),
+		\Automattic\WooCommerce\Internal\Admin\Analytics::REFUND_DOUBLE_COUNT_SCAN_HOOK,
+		array( 0 ),
+		'wc-admin-data'
+	);
+}
