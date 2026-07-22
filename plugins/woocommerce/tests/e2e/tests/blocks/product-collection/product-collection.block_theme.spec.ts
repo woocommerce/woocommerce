@@ -536,64 +536,59 @@ test.describe( 'Product Collection', () => {
 			expect( type ).toBe( 'product' );
 			expect( productId ).toBeTruthy();
 		} );
-		test( 'as category in Products by Category template', async ( {
+		test( 'as category and tag in generic archive templates', async ( {
 			admin,
 			editor,
 			pageObject,
 			page,
 		} ) => {
-			await admin.visitSiteEditor( {
-				postType: 'wp_template',
+			await test.step( 'as category in Products by Category template', async () => {
+				await admin.visitSiteEditor( {
+					postType: 'wp_template',
+				} );
+				await editor.createTemplate( {
+					templateName: 'Products by Category',
+				} );
+				await editor.insertBlockUsingGlobalInserter(
+					pageObject.BLOCK_NAME
+				);
+
+				const locationRequestPromise =
+					page.waitForRequest( filterRequest );
+				await pageObject.chooseCollectionInTemplate( 'featured' );
+				const locationRequest = await locationRequestPromise;
+				const { type, taxonomy, termId } =
+					getLocationDetailsFromRequest( locationRequest, 'archive' );
+
+				expect( type ).toBe( 'archive' );
+				expect( taxonomy ).toBe( 'product_cat' );
+				// Field is sent as a null but browser converts it to empty string
+				expect( termId ).toBe( '' );
 			} );
-			await editor.createTemplate( {
-				templateName: 'Products by Category',
+
+			await test.step( 'as tag in Products by Tag template', async () => {
+				await admin.visitSiteEditor( {
+					postType: 'wp_template',
+				} );
+				await editor.createTemplate( {
+					templateName: 'Products by Tag',
+				} );
+				await editor.insertBlockUsingGlobalInserter(
+					pageObject.BLOCK_NAME
+				);
+
+				const locationRequestPromise =
+					page.waitForRequest( filterRequest );
+				await pageObject.chooseCollectionInTemplate( 'featured' );
+				const locationRequest = await locationRequestPromise;
+				const { type, taxonomy, termId } =
+					getLocationDetailsFromRequest( locationRequest, 'archive' );
+
+				expect( type ).toBe( 'archive' );
+				expect( taxonomy ).toBe( 'product_tag' );
+				// Field is sent as a null but browser converts it to empty string
+				expect( termId ).toBe( '' );
 			} );
-			await editor.insertBlockUsingGlobalInserter(
-				pageObject.BLOCK_NAME
-			);
-
-			const locationRequestPromise = page.waitForRequest( filterRequest );
-			await pageObject.chooseCollectionInTemplate( 'featured' );
-			const locationRequest = await locationRequestPromise;
-			const { type, taxonomy, termId } = getLocationDetailsFromRequest(
-				locationRequest,
-				'archive'
-			);
-
-			expect( type ).toBe( 'archive' );
-			expect( taxonomy ).toBe( 'product_cat' );
-			// Field is sent as a null but browser converts it to empty string
-			expect( termId ).toBe( '' );
-		} );
-
-		test( 'as tag in Products by Tag template', async ( {
-			admin,
-			editor,
-			pageObject,
-			page,
-		} ) => {
-			await admin.visitSiteEditor( {
-				postType: 'wp_template',
-			} );
-			await editor.createTemplate( {
-				templateName: 'Products by Tag',
-			} );
-			await editor.insertBlockUsingGlobalInserter(
-				pageObject.BLOCK_NAME
-			);
-
-			const locationRequestPromise = page.waitForRequest( filterRequest );
-			await pageObject.chooseCollectionInTemplate( 'featured' );
-			const locationRequest = await locationRequestPromise;
-			const { type, taxonomy, termId } = getLocationDetailsFromRequest(
-				locationRequest,
-				'archive'
-			);
-
-			expect( type ).toBe( 'archive' );
-			expect( taxonomy ).toBe( 'product_tag' );
-			// Field is sent as a null but browser converts it to empty string
-			expect( termId ).toBe( '' );
 		} );
 
 		test( 'as site in post', async ( {
