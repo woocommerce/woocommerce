@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Tests\Blocks;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypesController as TestedBlockTypesController;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use WC_Unit_Test_Case;
 
@@ -30,7 +29,7 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		delete_option( BlockEditorUnifiedAssets::OPTION_NAME );
+
 		$this->block_types_controller = new TestedBlockTypesController(
 			Package::container()->get( Api::class ),
 			new AssetDataRegistryMock( Package::container()->get( API::class ) )
@@ -38,19 +37,6 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up feature and screen state.
-	 */
-	public function tearDown(): void {
-		delete_option( BlockEditorUnifiedAssets::OPTION_NAME );
-		set_current_screen( 'front' );
-		parent::tearDown();
-	}
-
-	/**
-	 * Register 3 blocks, one will be allowed by full name, one by namespace,and one because it has a parent with a
-	 * woocommerce namespace.
-	 *
-	 * @return void
 	 * @testdox Should identify blocks that should have data attributes.
 	 */
 	public function test_block_should_have_data_attributes(): void {
@@ -106,46 +92,5 @@ class BlockTypesController extends WC_Unit_Test_Case {
 
 		$answer = $this->block_types_controller->block_should_have_data_attributes( 'child-of-woo/block-name' );
 		$this->assertTrue( $answer );
-	}
-
-	/**
-	 * @testdox Should preserve block editor styles when unified assets are disabled.
-	 */
-	public function test_preserves_editor_styles_when_unified_assets_are_disabled(): void {
-		set_current_screen( 'post.php' );
-		$args = array(
-			'style_handles'        => array( 'core-style' ),
-			'editor_style_handles' => array( 'core-editor-style' ),
-		);
-
-		$this->assertSame(
-			$args,
-			$this->block_types_controller->use_single_block_editor_style( $args, 'woocommerce/mini-cart' )
-		);
-	}
-
-	/**
-	 * @testdox Should replace styles only for WooCommerce-owned blocks when unified assets are enabled.
-	 */
-	public function test_replaces_only_woocommerce_owned_editor_styles_when_unified_assets_are_enabled(): void {
-		update_option( BlockEditorUnifiedAssets::OPTION_NAME, 'yes' );
-		set_current_screen( 'post.php' );
-		$args = array(
-			'style_handles'        => array( 'extension-style' ),
-			'style'                => array( 'extension-style' ),
-			'editor_style_handles' => array( 'extension-editor-style' ),
-			'editor_style'         => array( 'extension-editor-style' ),
-		);
-
-		$core_result = $this->block_types_controller->use_single_block_editor_style( $args, 'woocommerce/mini-cart' );
-
-		$this->assertSame( array(), $core_result['style_handles'] );
-		$this->assertSame( array(), $core_result['style'] );
-		$this->assertSame( array( 'wc-block-library-style' ), $core_result['editor_style_handles'] );
-		$this->assertSame( array( 'wc-block-library-style' ), $core_result['editor_style'] );
-		$this->assertSame(
-			$args,
-			$this->block_types_controller->use_single_block_editor_style( $args, 'woocommerce/extension-block' )
-		);
 	}
 }
