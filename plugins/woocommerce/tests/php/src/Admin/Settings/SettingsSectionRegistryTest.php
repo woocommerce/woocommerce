@@ -358,35 +358,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section_with_native_settings_ui_page() );
 
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-
-		global $current_section, $current_tab;
-		$current_tab     = 'checkout';
-		$current_section = 'acme_payments';
-		$_GET['page']    = 'wc-settings';
-		$_GET['tab']     = 'checkout';
-		$_GET['section'] = 'acme_payments';
-		// PHP builds $_REQUEST once at request start, so runtime $_GET changes need mirroring.
-		$_REQUEST['section'] = 'acme_payments';
-
-		$page                   = $this->get_parent_page();
-		$original_settings      = $this->replace_wc_admin_settings_pages( array( $page ) );
-		$tabs                   = array( 'checkout' => 'Payments' );
-		$original_sections_hook = $this->replace_hook_callbacks( 'woocommerce_sections_checkout' );
-		$original_settings_hook = $this->replace_hook_callbacks( 'woocommerce_settings_checkout' );
-
-		add_action( 'woocommerce_sections_checkout', array( $page, 'output_sections' ) );
-		add_action( 'woocommerce_settings_checkout', array( $page, 'output' ) );
-
-		try {
-			ob_start();
-			include WC_ABSPATH . 'includes/admin/views/html-admin-settings.php';
-			$output = ob_get_clean();
-		} finally {
-			$this->restore_hook_callbacks( 'woocommerce_sections_checkout', $original_sections_hook );
-			$this->restore_hook_callbacks( 'woocommerce_settings_checkout', $original_settings_hook );
-			$this->replace_wc_admin_settings_pages( $original_settings );
-		}
+		$output = $this->render_settings_view_for_checkout_section( 'acme_payments' );
 
 		$this->assertStringContainsString( 'data-wc-settings-page="acme_native"', $output );
 		$this->assertStringNotContainsString( 'class="subsubsub"', $output );
@@ -404,37 +376,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section_with_native_settings_ui_page( null, null, $failure_stage ) );
 		$this->setExpectedIncorrectUsage( 'WC_Settings_Page::output' );
 
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-
-		global $current_section, $current_tab;
-		$current_tab         = 'checkout';
-		$current_section     = 'acme_payments';
-		$_GET['page']        = 'wc-settings';
-		$_GET['tab']         = 'checkout';
-		$_GET['section']     = 'acme_payments';
-		$_REQUEST['section'] = 'acme_payments';
-
-		$page                   = $this->get_parent_page();
-		$original_settings      = $this->replace_wc_admin_settings_pages( array( $page ) );
-		$tabs                   = array(
-			'general'  => 'General',
-			'checkout' => 'Payments',
-		);
-		$original_sections_hook = $this->replace_hook_callbacks( 'woocommerce_sections_checkout' );
-		$original_settings_hook = $this->replace_hook_callbacks( 'woocommerce_settings_checkout' );
-
-		add_action( 'woocommerce_sections_checkout', array( $page, 'output_sections' ) );
-		add_action( 'woocommerce_settings_checkout', array( $page, 'output' ) );
-
-		try {
-			ob_start();
-			include WC_ABSPATH . 'includes/admin/views/html-admin-settings.php';
-			$output = ob_get_clean();
-		} finally {
-			$this->restore_hook_callbacks( 'woocommerce_sections_checkout', $original_sections_hook );
-			$this->restore_hook_callbacks( 'woocommerce_settings_checkout', $original_settings_hook );
-			$this->replace_wc_admin_settings_pages( $original_settings );
-		}
+		$output = $this->render_settings_view_for_checkout_section( 'acme_payments' );
 
 		$this->assertStringContainsString( 'woo-nav-tab-wrapper', $output, 'The top-level settings tabs should remain available.' );
 		$this->assertStringContainsString( 'class="subsubsub"', $output, 'The classic section links should remain available.' );
@@ -892,6 +834,47 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 				return 'form_post';
 			}
 		};
+	}
+
+	/**
+	 * Render the full settings view for a checkout section as an administrator.
+	 *
+	 * @param string $section Section id.
+	 * @return string Rendered settings view output.
+	 */
+	private function render_settings_view_for_checkout_section( string $section ): string {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		global $current_section, $current_tab;
+		$current_tab     = 'checkout';
+		$current_section = $section;
+		$_GET['page']    = 'wc-settings';
+		$_GET['tab']     = 'checkout';
+		$_GET['section'] = $section;
+		// PHP builds $_REQUEST once at request start, so runtime $_GET changes need mirroring.
+		$_REQUEST['section'] = $section;
+
+		$page                   = $this->get_parent_page();
+		$original_settings      = $this->replace_wc_admin_settings_pages( array( $page ) );
+		$tabs                   = array(
+			'general'  => 'General',
+			'checkout' => 'Payments',
+		);
+		$original_sections_hook = $this->replace_hook_callbacks( 'woocommerce_sections_checkout' );
+		$original_settings_hook = $this->replace_hook_callbacks( 'woocommerce_settings_checkout' );
+
+		add_action( 'woocommerce_sections_checkout', array( $page, 'output_sections' ) );
+		add_action( 'woocommerce_settings_checkout', array( $page, 'output' ) );
+
+		try {
+			ob_start();
+			include WC_ABSPATH . 'includes/admin/views/html-admin-settings.php';
+			return ob_get_clean();
+		} finally {
+			$this->restore_hook_callbacks( 'woocommerce_sections_checkout', $original_sections_hook );
+			$this->restore_hook_callbacks( 'woocommerce_settings_checkout', $original_settings_hook );
+			$this->replace_wc_admin_settings_pages( $original_settings );
+		}
 	}
 
 	/**
