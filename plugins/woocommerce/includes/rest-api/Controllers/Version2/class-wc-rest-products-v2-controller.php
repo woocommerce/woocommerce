@@ -1532,14 +1532,14 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
-	 * Sanitize an external product's button text for the current user.
+	 * Sanitize an external product's button text.
 	 *
 	 * @since 11.0.1
 	 * @param string $button_text Button text.
 	 * @return string Sanitized button text.
 	 */
 	protected function sanitize_button_text( $button_text ) {
-		return current_user_can( 'unfiltered_html' ) ? $button_text : wp_kses_post( $button_text );
+		return sanitize_text_field( $button_text );
 	}
 
 	/**

@@ -1354,8 +1354,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			}
 
 			if ( isset( $request['button_text'] ) ) {
-				$button_text = current_user_can( 'unfiltered_html' ) ? $request['button_text'] : wp_kses_post( $request['button_text'] );
-				$product->set_button_text( $button_text );
+				$product->set_button_text( sanitize_text_field( $request['button_text'] ) );
 			}
 		}
 

@@ -1962,29 +1962,27 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 
 		$updated_product = wc_get_product( $product->get_id() );
 
-		$this->assertStringContainsString( 'Buy now', $updated_product->get_button_text(), 'Button text should be retained.' );
-		$this->assertStringNotContainsString( '<style>', $updated_product->get_button_text(), 'Disallowed HTML should be removed.' );
+		$this->assertSame( 'Buy now', $updated_product->get_button_text(), 'HTML should be removed from the button text.' );
 
 		$product->delete( true );
 	}
 
 	/**
-	 * @testdox Should preserve external product button text for users with unfiltered HTML capability.
+	 * @testdox Should sanitize external product button text for users with unfiltered HTML capability.
 	 */
-	public function test_update_external_product_preserves_button_text_with_unfiltered_html(): void {
-		$product     = WC_Helper_Product::create_external_product();
-		$button_text = 'Buy now<style>.hidden { display: none; }</style>';
+	public function test_update_external_product_sanitizes_button_text_with_unfiltered_html(): void {
+		$product = WC_Helper_Product::create_external_product();
 
 		$this->update_product_via_post_request(
 			$product,
 			array(
-				'button_text' => $button_text,
+				'button_text' => 'Buy now<style>.hidden { display: none; }</style>',
 			)
 		);
 
 		$updated_product = wc_get_product( $product->get_id() );
 
-		$this->assertSame( $button_text, $updated_product->get_button_text(), 'Unfiltered HTML should be retained for authorized users.' );
+		$this->assertSame( 'Buy now', $updated_product->get_button_text(), 'HTML should be removed from the button text.' );
 
 		$product->delete( true );
 	}
