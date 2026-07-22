@@ -1673,7 +1673,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Preview rejects a product quantity refund that exceeds the remaining line amount after a prior amount-only refund, matching create.
+	 * @testdox Preview caps a product quantity refund to the remaining line amount after a prior amount-only refund, matching what create stores.
 	 */
 	public function test_preview_product_quantity_after_amount_refund_matches_create(): void {
 		$order   = $this->create_order_with_product( 100.00, 2 );
@@ -1701,10 +1701,11 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 			),
 		);
 
-		// Preview must not return 200 while create rejects the same auto-filled $200 over-refund.
+		// The unit-derived $200 exceeds the $50 remaining; the quantity form caps to the
+		// remainder, and preview must show the same amount create stores.
 		$preview_response = $this->do_preview_request( $order->get_id(), $line_items );
-		$this->assertEquals( 422, $preview_response->get_status() );
-		$this->assertEquals( 'refund_total_exceeds_remaining', $preview_response->get_data()['code'] );
+		$this->assertEquals( 200, $preview_response->get_status() );
+		$this->assertEqualsWithDelta( 50.00, (float) $preview_response->get_data()['total'], 0.001, 'Preview caps the quantity refund to the 50.00 remaining on the line' );
 
 		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
 		$create_request->set_body_params(
@@ -1714,8 +1715,76 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$create_response = $this->server->dispatch( $create_request );
-		$this->assertEquals( 422, $create_response->get_status() );
-		$this->assertEquals( 'refund_total_exceeds_remaining', $create_response->get_data()['code'] );
+		$this->assertEquals( 201, $create_response->get_status() );
+		$this->assertEqualsWithDelta( 50.00, (float) $create_response->get_data()['total'], 0.001, 'Create stores the same capped amount the preview showed' );
+	}
+
+	/**
+	 * @testdox Preview of the final quantity chunk on a sub-cent-skewed line shows the capped remainder create will store.
+	 *
+	 * 6 × 12.97375 stores a 77.8425 line. Refunding 2 units rounds up to 25.95,
+	 * so the remaining 4 units compute to 51.90 — a cent above the 51.89 actually
+	 * remaining. Preview must return the capped 51.89 (not 422, and not an amount
+	 * create would then disagree with).
+	 */
+	public function test_preview_final_quantity_chunk_on_subcent_skewed_line_shows_remainder(): void {
+		$order   = $this->create_order_with_product( 12.97375, 6 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$preview_response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 2,
+				),
+			)
+		);
+		$this->assertEquals( 200, $preview_response->get_status() );
+		$this->assertEqualsWithDelta( 25.95, (float) $preview_response->get_data()['total'], 0.001, 'Qty-2 preview rounds 2 × 12.97375 up to 25.95' );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_id,
+						'quantity'     => 2,
+					),
+				),
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 201, $create_response->get_status() );
+
+		$preview_response = $this->do_preview_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item_id,
+					'quantity'     => 4,
+				),
+			)
+		);
+		$this->assertEquals( 200, $preview_response->get_status(), 'Previewing the remaining units must not be rejected' );
+		$this->assertEqualsWithDelta( 51.89, (float) $preview_response->get_data()['total'], 0.001, 'Preview caps the unit-derived 51.90 to the 51.89 remaining' );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$create_request->set_body_params(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_id,
+						'quantity'     => 4,
+					),
+				),
+			)
+		);
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertEquals( 201, $create_response->get_status(), 'Refunding the remaining units must succeed' );
+		$this->assertEqualsWithDelta( 51.89, (float) $create_response->get_data()['total'], 0.001, 'Create stores the same capped remainder the preview showed' );
 	}
 
 	/**

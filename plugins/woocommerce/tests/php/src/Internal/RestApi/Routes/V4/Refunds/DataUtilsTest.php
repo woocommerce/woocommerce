@@ -1548,14 +1548,13 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return refund_total_exceeds_remaining when a partially-refunded shipping line cannot fit a full preview at its original total.
+	 * @testdox Should cap a quantity preview of a partially-refunded shipping line to its remaining amount.
 	 *
 	 * Order has a $10 shipping line + a $50 product line so the order is still
-	 * refundable after a $5 partial shipping refund. Previewing the shipping
-	 * line at qty=1 would refund the full $10 — exceeds the $5 remaining on
-	 * that line — so validation must reject with `refund_total_exceeds_remaining`.
-	 * Without the per-line cap, validate would pass and `build_refund_preview`
-	 * would return an oversized total.
+	 * refundable after a $5 partial shipping refund. A shipping line carries a
+	 * single refundable unit, so previewing it at qty=1 refunds the remainder:
+	 * validation passes and the capped computation returns the $5 remaining,
+	 * not the original $10 total.
 	 */
 	public function test_validate_preview_line_items_shipping_partial_remaining(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -1615,8 +1614,15 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 			$order
 		);
 
-		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertEquals( 'refund_total_exceeds_remaining', $result->get_error_code() );
+		$this->assertTrue( $result );
+
+		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
+		$this->assertEqualsWithDelta(
+			5.00,
+			$this->data_utils->compute_quantity_refund_total( $shipping, 1, $refund_data ),
+			0.001,
+			'The shipping line refunds its $5 remainder, not the original $10 total'
+		);
 
 		$product->delete( true );
 		$order->delete( true );
@@ -1848,11 +1854,12 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Preview caps a product quantity refund against the remaining line amount, not just units (matches create).
+	 * @testdox Preview accepts a product quantity refund after a prior amount-only refund and caps it to the remaining line amount (matches create).
 	 *
-	 * Regression guard: an amount-only prior refund leaves all units "available" by
-	 * count, so the units-only check passed, but create auto-fills refund_total and
-	 * rejects the over-refund. Preview must reject it too.
+	 * An amount-only prior refund leaves all units "available" by count while
+	 * consuming line dollars. The quantity form derives its amount server-side,
+	 * capped to the remaining line amount, so validation passes and both preview
+	 * and create resolve the same capped value — never an over-refund.
 	 */
 	public function test_validate_preview_line_items_product_quantity_respects_prior_amount_refund(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -1901,8 +1908,233 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 			$order
 		);
 
-		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertEquals( 'refund_total_exceeds_remaining', $result->get_error_code() );
+		$this->assertTrue( $result );
+
+		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
+		$this->assertEqualsWithDelta(
+			50.00,
+			$this->data_utils->compute_quantity_refund_total( $item, 2, $refund_data ),
+			0.001,
+			'Both units consume the line, so the refund caps to the $50 remaining after the prior $150 amount-only refund'
+		);
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox compute_quantity_refund_total clamps a partial quantity to the remaining amount when prior refunds consumed line dollars without units.
+	 */
+	public function test_compute_quantity_refund_total_clamps_partial_quantity_to_remaining(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 200.00,
+				'total'    => 200.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 200.00 );
+		$order->save();
+
+		// Amount-only refund of $150: no units consumed, $50 of line amount left.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 150.00,
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => 0,
+						'refund_total' => 150.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
+
+		$this->assertEqualsWithDelta(
+			50.00,
+			$this->data_utils->compute_quantity_refund_total( $item, 1, $refund_data ),
+			0.001,
+			'One of two units derives $100, clamped to the $50 remaining on the line'
+		);
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox compute_quantity_refund_total refunds the exact remainder when the quantity consumes the line's remaining units.
+	 */
+	public function test_compute_quantity_refund_total_full_consumption_returns_remainder(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 12.97375 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 6,
+				'subtotal' => 77.8425,
+				'total'    => 77.8425,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 77.8425 );
+		$order->save();
+
+		// Prior qty-2 refund at the unit-derived (rounded-up) 25.95.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 25.95,
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => 2,
+						'refund_total' => 25.95,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
+
+		$this->assertEqualsWithDelta(
+			51.89,
+			$this->data_utils->compute_quantity_refund_total( $item, 4, $refund_data ),
+			0.001,
+			'The remaining 4 units refund the 51.89 remainder, not the unit-derived 51.90'
+		);
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox compute_quantity_refund_total returns the unclamped amount for a fully-refunded line so validators reject it with the right error.
+	 */
+	public function test_compute_quantity_refund_total_fully_refunded_line_returns_unclamped(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 50.00 );
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 50.00,
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => 50.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
+
+		$this->assertEqualsWithDelta(
+			50.00,
+			$this->data_utils->compute_quantity_refund_total( $item, 1, $refund_data ),
+			0.001,
+			'Nothing remains: the unclamped unit-derived amount comes back so validation rejects with line_item_already_refunded, not a zero-refund error'
+		);
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox compute_quantity_refund_total preserves the line sign when capping a partially-refunded discount fee.
+	 */
+	public function test_compute_quantity_refund_total_negative_fee_keeps_sign(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'  => 'Discount',
+				'total' => -10.00,
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+		$order->set_total( 40.00 );
+		$order->save();
+
+		// Prior mixed refund: $10 of the product line and -$4 of the discount, net $6.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 6.00,
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => 0,
+						'refund_total' => 10.00,
+						'refund_tax'   => array(),
+					),
+					$fee->get_id()  => array(
+						'qty'          => 1,
+						'refund_total' => -4.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
+
+		$this->assertEqualsWithDelta(
+			-6.00,
+			$this->data_utils->compute_quantity_refund_total( $fee, 1, $refund_data ),
+			0.001,
+			'The discount fee refunds its -$6 remainder, keeping the negative sign'
+		);
 
 		$product->delete( true );
 		$order->delete( true );
