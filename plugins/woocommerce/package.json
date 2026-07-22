@@ -803,15 +803,18 @@
 						"src/Blocks/**/*.php",
 						"templates/**/*.php",
 						"templates/**/*.html",
-						"tests/e2e/bin/blocks/**",
+						"sample-data/sample_products.xml",
+						"tests/e2e/bin/**",
 						"tests/e2e/fixtures/blocks-setup.ts",
 						"tests/e2e/playwright.config.ts",
 						"tests/e2e/content-templates/blocks/**",
 						"tests/e2e/test-data/blocks/**",
-						"tests/e2e/test-plugins/blocks/**",
+						"tests/e2e/test-data/images/**",
+						"tests/e2e/test-plugins/**",
 						"tests/e2e/tests/blocks/**",
 						"tests/e2e/themes/blocks/**",
-						"tests/e2e/utils/blocks/**"
+						"tests/e2e/utils/blocks/**",
+						".wp-env.e2e.json"
 					],
 					"onlyForDependencies": [
 						"@woocommerce/block-library"
@@ -853,15 +856,18 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"tests/e2e/bin/blocks/**",
+						"sample-data/sample_products.xml",
+						"tests/e2e/bin/**",
 						"tests/e2e/fixtures/blocks-setup.ts",
 						"tests/e2e/playwright.config.ts",
 						"tests/e2e/content-templates/blocks/**",
 						"tests/e2e/test-data/blocks/**",
-						"tests/e2e/test-plugins/blocks/**",
+						"tests/e2e/test-data/images/**",
+						"tests/e2e/test-plugins/**",
 						"tests/e2e/tests/blocks/**",
 						"tests/e2e/themes/blocks/**",
-						"tests/e2e/utils/blocks/**"
+						"tests/e2e/utils/blocks/**",
+						".wp-env.e2e.json"
 					],
 					"onlyForDependencies": [],
 					"testEnv": {
@@ -901,15 +907,18 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"tests/e2e/bin/blocks/**",
+						"sample-data/sample_products.xml",
+						"tests/e2e/bin/**",
 						"tests/e2e/fixtures/blocks-setup.ts",
 						"tests/e2e/playwright.config.ts",
 						"tests/e2e/content-templates/blocks/**",
 						"tests/e2e/test-data/blocks/**",
-						"tests/e2e/test-plugins/blocks/**",
+						"tests/e2e/test-data/images/**",
+						"tests/e2e/test-plugins/**",
 						"tests/e2e/tests/blocks/**",
 						"tests/e2e/themes/blocks/**",
-						"tests/e2e/utils/blocks/**"
+						"tests/e2e/utils/blocks/**",
+						".wp-env.e2e.json"
 					],
 					"onlyForDependencies": [],
 					"testEnv": {
