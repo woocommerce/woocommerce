@@ -637,11 +637,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 * Filters whether to use the legacy callback serialization algorithm.
 		 *
 		 * By default, WooCommerce will use the legacy algorithm to get the callback signatures
-		 * for variation price hash calculation. This algorithm serializes the entire callback
-		 * array as it comes from $wp_filter, which means that for callbacks that are class methods
-		 * the entire object will be serialized, including the current values of the class variables.
-		 * This implies that a change in these variables will change the price hash,
-		 * even if they do not affect the price calculation.
+		 * for variation price hash calculation. That algorithm includes the callback array as it
+		 * comes from $wp_filter in the hashed data, which is then JSON encoded. For callbacks that
+		 * are class methods, JSON encoding captures the object's PUBLIC property values only;
+		 * private and protected properties are not captured. Note that dynamically created
+		 * properties are public, and that a class implementing JsonSerializable controls what is
+		 * captured through its jsonSerialize() method. A change in any captured value will change
+		 * the price hash, even if it does not affect the price calculation.
 		 *
 		 * This filter allows using CallbackUtil instead, which generates a more stable signature
 		 * that does not depend on the internal state of objects, but only on the method names and

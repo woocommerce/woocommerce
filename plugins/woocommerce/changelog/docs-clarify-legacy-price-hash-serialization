@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Correct the woocommerce_use_legacy_get_variations_price_hash docblock: the legacy algorithm JSON encodes the callback array, so it captures only public object properties, not private or protected ones as previously documented.
