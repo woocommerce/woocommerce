@@ -10,6 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
 
@@ -113,9 +114,7 @@ function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
 	}
 
 	$data_store = WC_Data_Store::load( 'coupon' );
-	// Coupon code allows spaces, which doesn't work well with some cache engines (e.g. memcached).
-	$hashed_code = md5( wc_strtolower( $code ) );
-	$cache_key   = WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code;
+	$cache_key  = wc_get_container()->get( CouponCodeLookupInvalidator::class )->get_cache_key( $code );
 
 	$ids = wp_cache_get( $cache_key, 'coupons' );
 
