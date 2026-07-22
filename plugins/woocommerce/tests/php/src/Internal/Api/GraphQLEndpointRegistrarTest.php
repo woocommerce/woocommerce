@@ -108,9 +108,9 @@ class GraphQLEndpointRegistrarTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox handle_rest_api_init skips registration when the feature is disabled.
+	 * @testdox handle_rest_api_init registers the route even when the feature is disabled.
 	 */
-	public function test_handle_rest_api_init_skips_registration_when_feature_is_off(): void {
+	public function test_handle_rest_api_init_registers_route_when_feature_is_off(): void {
 		$this->enable_or_disable_feature( false );
 
 		$registrar = new GraphQLEndpointRegistrar(
@@ -123,6 +123,10 @@ class GraphQLEndpointRegistrarTest extends WC_REST_Unit_Test_Case {
 		$registrar->handle_rest_api_init();
 
 		$routes = rest_get_server()->get_routes();
-		$this->assertArrayNotHasKey( '/wc-test/disabled-feature-route', $routes );
+		$this->assertArrayHasKey(
+			'/wc-test/disabled-feature-route',
+			$routes,
+			'Plugin endpoints should be registered regardless of the feature flag state.'
+		);
 	}
 }

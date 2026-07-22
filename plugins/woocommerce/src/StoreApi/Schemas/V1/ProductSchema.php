@@ -7,6 +7,7 @@ use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
 use Automattic\WooCommerce\Blocks\Utils\ProductAvailabilityUtils;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\StockDisplayFormat;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
@@ -693,7 +694,7 @@ class ProductSchema extends AbstractSchema {
 		$stock_format    = get_option( 'woocommerce_stock_format' );
 
 		// Don't show the low stock badge if the settings doesn't allow it.
-		if ( 'no_amount' === $stock_format ) {
+		if ( StockDisplayFormat::NEVER === $stock_format ) {
 			return null;
 		}
 

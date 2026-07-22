@@ -49,14 +49,15 @@ class WC_Shortcode_My_Account {
 			return;
 		}
 
+		if ( wc_get_container()->get( OrderWithdrawalController::class )->is_endpoint_request() ) {
+			// Order withdrawal is an EU regulation requirement which needs standalone access.
+			wc_get_container()->get( OrderWithdrawalController::class )->render_view();
+			return;
+		}
+
 		// Show login form if not logged in.
 		if ( ! is_user_logged_in() ) {
-			if ( wc_get_container()->get( OrderWithdrawalController::class )->is_endpoint_request() ) {
-				// Order withdrawal is an EU regulation requirement which needs to be accessible without logging in.
-				wc_get_container()->get( OrderWithdrawalController::class )->render_view();
-			} else {
-				wc_get_template( 'myaccount/form-login.php' );
-			}
+			wc_get_template( 'myaccount/form-login.php' );
 			return;
 		}
 

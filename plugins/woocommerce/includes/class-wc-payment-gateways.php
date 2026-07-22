@@ -190,6 +190,24 @@ class WC_Payment_Gateways {
 	 * @since 8.5.0
 	 */
 	private function payment_gateway_settings_option_changed( $gateway, $value, $option, $old_value = null ) {
+		if ( ! is_array( $value ) || ( null !== $old_value && ! is_array( $old_value ) ) ) {
+			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+
+			if ( ! is_array( $value ) ) {
+				$logger->warning(
+					sprintf( 'Payment gateway transition handling skipped because the new value for "%s" is not an array.', $option ),
+					array( 'source' => 'payment-gateways' )
+				);
+				return;
+			}
+
+			$logger->warning(
+				sprintf( 'Previous payment gateway settings for "%s" were not an array; treating the gateway as disabled.', $option ),
+				array( 'source' => 'payment-gateways' )
+			);
+			$old_value = array( 'enabled' => 'no' );
+		}
+
 		if ( $this->was_gateway_enabled( $value, $old_value ) ) {
 			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
 			$logger->info( sprintf( 'Payment gateway enabled: "%s"', $gateway->get_method_title() ) );
