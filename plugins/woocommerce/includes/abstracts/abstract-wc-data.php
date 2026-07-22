@@ -921,11 +921,62 @@ abstract class WC_Data {
 	/**
 	 * Merge changes with data and clear.
 	 *
+	 * Numeric-keyed (list) properties are replaced wholesale so removed
+	 * elements are dropped. Associative properties (e.g. order/customer
+	 * addresses, which are patched field-by-field) are still merged deeply
+	 * so unchanged keys are retained.
+	 *
 	 * @since 3.0.0
 	 */
 	public function apply_changes() {
-		$this->data    = array_replace_recursive( $this->data, $this->changes ); // @codingStandardsIgnoreLine
+		$this->data    = $this->merge_array_changes( $this->data, $this->changes );
 		$this->changes = array();
+	}
+
+	/**
+	 * Recursively merge $changes into $data.
+	 *
+	 * Recurse only when both the existing and incoming values are associative
+	 * arrays. Lists, scalars, and mismatched shapes are replaced wholesale,
+	 * which lets shorter replacement arrays drop stale keys.
+	 *
+	 * @since 3.0.0
+	 * @param array $data    Current data.
+	 * @param array $changes Pending changes.
+	 * @return array
+	 */
+	private function merge_array_changes( array $data, array $changes ) {
+		foreach ( $changes as $key => $value ) {
+			if ( ! array_key_exists( $key, $data ) ) {
+				$data[ $key ] = $value;
+				continue;
+			}
+
+			if ( is_array( $value ) && is_array( $data[ $key ] ) && ! $this->is_list_array( $value ) && ! $this->is_list_array( $data[ $key ] ) ) {
+				$data[ $key ] = $this->merge_array_changes( $data[ $key ], $value );
+			} else {
+				$data[ $key ] = $value;
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Whether an array is a numeric, zero-indexed list.
+	 *
+	 * Uses the native PHP 8.1 function when available, with a 7.4-safe fallback.
+	 *
+	 * @since 3.0.0
+	 * @param array $arr Array to check.
+	 * @return bool
+	 */
+	private function is_list_array( array $arr ) {
+		if ( function_exists( 'array_is_list' ) ) {
+			return array_is_list( $arr );
+		}
+
+		return array() === $arr || array_keys( $arr ) === range( 0, count( $arr ) - 1 );
 	}
 
 	/**
