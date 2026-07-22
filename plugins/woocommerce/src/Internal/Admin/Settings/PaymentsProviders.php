@@ -84,6 +84,9 @@ class PaymentsProviders {
 	private const GATEWAY_DETAILS_REQUEST_CACHE_GROUP = 'woocommerce_payment_gateway_details';
 	private const GATEWAY_DETAILS_REQUEST_CACHE_KEY   = 'gateway_details';
 
+	public const PROVIDER_LISTS_REQUEST_CACHE_GROUP = 'woocommerce_payments_providers';
+	public const PROVIDER_LISTS_REQUEST_CACHE_KEY   = 'provider_lists';
+
 	/*
 	 * The provider link types.
 	 *
@@ -1246,7 +1249,8 @@ class PaymentsProviders {
 	}
 
 	/**
-	 * Clear cached payment gateway data.
+	 * Clear cached payment gateway data, including the provider lists the
+	 * Payments service derives from it.
 	 *
 	 * Call after changing gateway registration, settings, or account state during a request.
 	 * Also useful for testing purposes.
@@ -1260,6 +1264,7 @@ class PaymentsProviders {
 		$this->payment_gateways_cache             = array();
 		$this->payment_gateways_for_display_cache = array();
 		wp_cache_delete( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
+		wp_cache_delete( self::PROVIDER_LISTS_REQUEST_CACHE_KEY, self::PROVIDER_LISTS_REQUEST_CACHE_GROUP );
 	}
 
 	/**
