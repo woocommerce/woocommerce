@@ -70,6 +70,11 @@ final class CallbackUtil {
 	 * Closure signatures are based on their file location and line numbers,
 	 * providing consistent hashes across requests for the same closure code.
 	 *
+	 * Results are memoized per hook for the lifetime of the request and are
+	 * recomputed only when the set of registered callbacks changes, so that
+	 * repeated calls do not repeat the reflection work that closures and
+	 * invokable objects require.
+	 *
 	 * @param string $hook_name The name of the hook to inspect.
 	 * @return array<int, array<string>> Array of priority => array( signatures ),  empty if hook has no callbacks.
 	 *
@@ -78,20 +83,78 @@ final class CallbackUtil {
 	public static function get_hook_callback_signatures( string $hook_name ): array {
 		global $wp_filter;
 
+		static $cache = array();
+
 		if ( ! isset( $wp_filter[ $hook_name ] ) ) {
+			unset( $cache[ $hook_name ] );
 			return array();
+		}
+
+		$callbacks_by_priority = $wp_filter[ $hook_name ]->callbacks;
+		$fingerprint           = self::get_callbacks_fingerprint( $callbacks_by_priority );
+
+		if ( isset( $cache[ $hook_name ] ) && $cache[ $hook_name ]['fingerprint'] === $fingerprint ) {
+			return $cache[ $hook_name ]['signatures'];
 		}
 
 		$result = array();
 
-		foreach ( $wp_filter[ $hook_name ]->callbacks as $priority => $priority_callbacks ) {
+		foreach ( $callbacks_by_priority as $priority => $priority_callbacks ) {
 			$result[ $priority ] = array_map(
 				fn( $callback_data ) => self::get_callback_signature( $callback_data['function'] ),
 				array_values( $priority_callbacks )
 			);
 		}
 
+		$cache[ $hook_name ] = array(
+			'fingerprint' => $fingerprint,
+			'signatures'  => $result,
+			/*
+			 * Retaining the callables keeps their object ids from being reused by a
+			 * later object while this entry is live, which would otherwise let a
+			 * removed-then-replaced callback produce an identical fingerprint.
+			 */
+			'callbacks'   => $callbacks_by_priority,
+		);
+
 		return $result;
+	}
+
+	/**
+	 * Build a cheap identity fingerprint for a hook's registered callables.
+	 *
+	 * Deliberately avoids reflection: it captures only priority, class name and
+	 * object id, which is enough to detect that the registered set has changed
+	 * without paying the cost of resolving each signature.
+	 *
+	 * @param array $callbacks_by_priority The `callbacks` property of a WP_Hook instance.
+	 * @return string Fingerprint of the registered callables.
+	 *
+	 * @since 11.1.0
+	 */
+	private static function get_callbacks_fingerprint( array $callbacks_by_priority ): string {
+		$parts = array();
+
+		foreach ( $callbacks_by_priority as $priority => $priority_callbacks ) {
+			foreach ( $priority_callbacks as $callback_data ) {
+				$function = $callback_data['function'];
+
+				if ( is_string( $function ) ) {
+					$parts[] = $priority . ':' . $function;
+				} elseif ( is_array( $function ) && 2 === count( $function ) && is_string( $function[1] ) ) {
+					$target  = $function[0];
+					$parts[] = $priority . ':' .
+						( is_object( $target ) ? get_class( $target ) . '#' . spl_object_id( $target ) : (string) $target ) .
+						'::' . $function[1];
+				} elseif ( is_object( $function ) ) {
+					$parts[] = $priority . ':' . get_class( $function ) . '#' . spl_object_id( $function );
+				} else {
+					$parts[] = $priority . ':?';
+				}
+			}
+		}
+
+		return implode( '|', $parts );
 	}
 
 	/**

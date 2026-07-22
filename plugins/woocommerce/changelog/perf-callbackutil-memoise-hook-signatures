@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Memoize CallbackUtil::get_hook_callback_signatures() per request so that repeated calls do not repeat the reflection work that closure and invokable callbacks require. Signatures are recomputed only when the set of callbacks registered on the hook changes.
