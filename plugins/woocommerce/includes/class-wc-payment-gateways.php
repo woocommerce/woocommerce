@@ -190,6 +190,10 @@ class WC_Payment_Gateways {
 	 * @since 8.5.0
 	 */
 	private function payment_gateway_settings_option_changed( $gateway, $value, $option, $old_value = null ) {
+		if ( ! is_array( $value ) || ( null !== $old_value && ! is_array( $old_value ) ) ) {
+			return;
+		}
+
 		if ( $this->was_gateway_enabled( $value, $old_value ) ) {
 			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
 			$logger->info( sprintf( 'Payment gateway enabled: "%s"', $gateway->get_method_title() ) );

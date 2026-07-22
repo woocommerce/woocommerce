@@ -38,6 +38,31 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Gateway settings updates do not throw for non-array values.
+	 */
+	public function test_gateway_settings_updates_do_not_throw_for_non_array_values(): void {
+		$option_name    = 'woocommerce_cod_settings';
+		$valid_settings = array( 'enabled' => 'no' );
+
+		delete_option( $option_name );
+		add_option( $option_name, $valid_settings );
+
+		$this->assertTrue(
+			update_option( $option_name, '{"enabled":"yes"}' ),
+			'Gateway settings should update to a non-array value.'
+		);
+		$this->assertTrue(
+			update_option( $option_name, $valid_settings ),
+			'Gateway settings should update from a non-array value.'
+		);
+		$this->assertSame(
+			$valid_settings,
+			get_option( $option_name ),
+			'Valid gateway settings should be stored after a malformed value.'
+		);
+	}
+
+	/**
 	 * @testdox Enabling a gateway fires the notification action and logs the event.
 	 */
 	public function test_wc_payment_gateway_enabled_notification(): void {
