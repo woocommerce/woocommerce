@@ -507,4 +507,61 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 
 		remove_all_actions( $hook_name );
 	}
+
+	/**
+	 * @testdox `get_hook_callback_signatures` should distinguish two different closures registered at the same priority.
+	 */
+	public function test_get_hook_callback_signatures_detects_replaced_closure_at_same_priority() {
+		$hook_name = 'test_hook_memo_closure_swap';
+
+		$first_closure = function () {
+			return 1;
+		};
+		add_action( $hook_name, $first_closure, 10 );
+		$before = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		remove_action( $hook_name, $first_closure, 10 );
+
+		$second_closure = function () {
+			return 2;
+		};
+		add_action( $hook_name, $second_closure, 10 );
+		$after = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		$this->assertStringStartsWith( 'Closure@', $before[10][0] );
+		$this->assertStringStartsWith( 'Closure@', $after[10][0] );
+		$this->assertNotEquals( $before[10][0], $after[10][0] );
+
+		remove_all_actions( $hook_name );
+	}
+
+	/**
+	 * @testdox `get_hook_callback_signatures` should return one signature per closure sharing a priority.
+	 */
+	public function test_get_hook_callback_signatures_with_two_closures_at_same_priority() {
+		$hook_name = 'test_hook_memo_two_closures';
+
+		add_action(
+			$hook_name,
+			function () {
+				return 1;
+			},
+			10
+		);
+		add_action(
+			$hook_name,
+			function () {
+				return 2;
+			},
+			10
+		);
+
+		$signatures = CallbackUtil::get_hook_callback_signatures( $hook_name );
+
+		$this->assertCount( 2, $signatures[10] );
+		$this->assertNotEquals( $signatures[10][0], $signatures[10][1] );
+		$this->assertEquals( $signatures, CallbackUtil::get_hook_callback_signatures( $hook_name ) );
+
+		remove_all_actions( $hook_name );
+	}
 }

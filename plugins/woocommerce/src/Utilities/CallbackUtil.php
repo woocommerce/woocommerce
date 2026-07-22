@@ -129,8 +129,6 @@ final class CallbackUtil {
 	 *
 	 * @param array $callbacks_by_priority The `callbacks` property of a WP_Hook instance.
 	 * @return string Fingerprint of the registered callables.
-	 *
-	 * @since 11.1.0
 	 */
 	private static function get_callbacks_fingerprint( array $callbacks_by_priority ): string {
 		$parts = array();
