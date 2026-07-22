@@ -238,14 +238,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				// Prefer the resolved collection's cart draft for the
-				// in-context product/variation: the nearest
-				// `context.draftItems`, falling back to the page-wide
-				// `state.draftItems`, which every surface sharing that
-				// collection writes to and reads from, so an attribute
-				// picked on one surface is reflected on every other. Falls
-				// back to this instance's own locally-tracked selection when
-				// the resolved collection holds no draft yet, or the draft
-				// carries no `variation` (e.g. a simple product's draft).
+				// in-context product/variation: the collection keyed by the
+				// nearest declared `context.draftKey`, falling back to the
+				// store's reserved global key, which every surface resolving
+				// that same collection writes to and reads from, so an
+				// attribute picked on one surface is reflected on every
+				// other. Falls back to this instance's own locally-tracked
+				// selection when the resolved collection holds no draft yet,
+				// or the draft carries no `variation` (e.g. a simple
+				// product's draft).
 				const draftVariation = cartState.itemInContext.draft?.variation;
 				if ( draftVariation ) {
 					return draftVariation;

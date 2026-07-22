@@ -211,14 +211,15 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					};
 				}
 
-				// Mirror the edit into the nearest `context.draftItems`,
-				// falling back to the page-wide `state.draftItems`, for the
-				// id the shopper actually edited, so other surfaces sharing
-				// that collection react and `addItem()` posts the right
-				// quantity. Sibling variation ids keep their own draft (if
-				// any) untouched here — they get their own draft, carrying
-				// this same locally-tracked quantity, once the shopper
-				// actually switches to them (see the variation selector).
+				// Mirror the edit into the resolved draft collection — keyed
+				// by the nearest declared `context.draftKey`, falling back to
+				// the store's reserved global key — for the id the shopper
+				// actually edited, so other surfaces resolving that same
+				// collection react and `addItem()` posts the right quantity.
+				// Sibling variation ids keep their own draft (if any)
+				// untouched here — they get their own draft, carrying this
+				// same locally-tracked quantity, once the shopper actually
+				// switches to them (see the variation selector).
 				wooActions.upsertDraftItem(
 					{ quantity: value },
 					{ id: productId }
