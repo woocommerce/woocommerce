@@ -1616,10 +1616,18 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $result );
 
-		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
+		$filled = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $shipping->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
 		$this->assertEqualsWithDelta(
 			5.00,
-			$this->data_utils->compute_quantity_refund_total( $shipping, 1, $refund_data ),
+			$filled[0]['refund_total'],
 			0.001,
 			'The shipping line refunds its $5 remainder, not the original $10 total'
 		);
@@ -1910,10 +1918,18 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $result );
 
-		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
+		$filled = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 2,
+				),
+			),
+			$order
+		);
 		$this->assertEqualsWithDelta(
 			50.00,
-			$this->data_utils->compute_quantity_refund_total( $item, 2, $refund_data ),
+			$filled[0]['refund_total'],
 			0.001,
 			'Both units consume the line, so the refund caps to the $50 remaining after the prior $150 amount-only refund'
 		);
@@ -1923,9 +1939,9 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox compute_quantity_refund_total clamps a partial quantity to the remaining amount when prior refunds consumed line dollars without units.
+	 * @testdox fill_missing_refund_totals clamps a partial quantity to the remaining amount when prior refunds consumed line dollars without units.
 	 */
-	public function test_compute_quantity_refund_total_clamps_partial_quantity_to_remaining(): void {
+	public function test_fill_missing_refund_totals_clamps_partial_quantity_to_remaining(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 100.00 );
 		$product->save();
@@ -1960,11 +1976,19 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
+		$filled = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
 
 		$this->assertEqualsWithDelta(
 			50.00,
-			$this->data_utils->compute_quantity_refund_total( $item, 1, $refund_data ),
+			$filled[0]['refund_total'],
 			0.001,
 			'One of two units derives $100, clamped to the $50 remaining on the line'
 		);
@@ -1974,9 +1998,9 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox compute_quantity_refund_total refunds the exact remainder when the quantity consumes the line's remaining units.
+	 * @testdox fill_missing_refund_totals refunds the exact remainder when the quantity consumes the line's remaining units after quantity-derived refunds.
 	 */
-	public function test_compute_quantity_refund_total_full_consumption_returns_remainder(): void {
+	public function test_fill_missing_refund_totals_full_consumption_returns_remainder(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 12.97375 );
 		$product->save();
@@ -2011,11 +2035,19 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
+		$filled = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 4,
+				),
+			),
+			$order
+		);
 
 		$this->assertEqualsWithDelta(
 			51.89,
-			$this->data_utils->compute_quantity_refund_total( $item, 4, $refund_data ),
+			$filled[0]['refund_total'],
 			0.001,
 			'The remaining 4 units refund the 51.89 remainder, not the unit-derived 51.90'
 		);
@@ -2025,9 +2057,9 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox compute_quantity_refund_total returns the unclamped amount for a fully-refunded line so validators reject it with the right error.
+	 * @testdox fill_missing_refund_totals returns the unclamped amount for a fully-refunded line so validators reject it with the right error.
 	 */
-	public function test_compute_quantity_refund_total_fully_refunded_line_returns_unclamped(): void {
+	public function test_fill_missing_refund_totals_fully_refunded_line_returns_unclamped(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 50.00 );
 		$product->save();
@@ -2061,11 +2093,19 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
+		$filled = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
 
 		$this->assertEqualsWithDelta(
 			50.00,
-			$this->data_utils->compute_quantity_refund_total( $item, 1, $refund_data ),
+			$filled[0]['refund_total'],
 			0.001,
 			'Nothing remains: the unclamped unit-derived amount comes back so validation rejects with line_item_already_refunded, not a zero-refund error'
 		);
@@ -2075,9 +2115,9 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox compute_quantity_refund_total preserves the line sign when capping a partially-refunded discount fee.
+	 * @testdox fill_missing_refund_totals preserves the line sign when capping a partially-refunded discount fee.
 	 */
-	public function test_compute_quantity_refund_total_negative_fee_keeps_sign(): void {
+	public function test_fill_missing_refund_totals_negative_fee_keeps_sign(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 50.00 );
 		$product->save();
@@ -2127,13 +2167,143 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
+		$filled = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $fee->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
 
 		$this->assertEqualsWithDelta(
 			-6.00,
-			$this->data_utils->compute_quantity_refund_total( $fee, 1, $refund_data ),
+			$filled[0]['refund_total'],
 			0.001,
 			'The discount fee refunds its -$6 remainder, keeping the negative sign'
+		);
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox fill_missing_refund_totals tops up the final unit to the exact remainder when every prior refund matches its quantity-derived amount.
+	 */
+	public function test_fill_missing_refund_totals_tops_up_final_unit_after_consistent_refunds(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 5.005 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 10.01,
+				'total'    => 10.01,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 10.01 );
+		$order->save();
+
+		// A 10.01 line over 2 units derives 5.00 per unit (5.005 rounds down), so a
+		// prior quantity refund stored exactly that value. The shortfall against the
+		// line is pure rounding drift.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 5.00,
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => 5.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$filled = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
+
+		$this->assertEqualsWithDelta(
+			5.01,
+			$filled[0]['refund_total'],
+			0.001,
+			'The final unit absorbs the drift and refunds the 5.01 remainder, closing the 10.01 line exactly'
+		);
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox fill_missing_refund_totals does not pay out a deliberately withheld residue when refunding the final unit.
+	 */
+	public function test_fill_missing_refund_totals_final_unit_keeps_unit_amount_after_offschedule_refund(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 200.00,
+				'total'    => 200.00,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 200.00 );
+		$order->save();
+
+		// A two-unit, $200 line ($100/unit): one unit was deliberately under-refunded
+		// at $50, an off-schedule amount. The withheld $50 must not be silently paid
+		// out by the final unit's quantity refund.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 50.00,
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => 50.00,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$filled = $this->data_utils->fill_missing_refund_totals(
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			$order
+		);
+
+		$this->assertEqualsWithDelta(
+			100.00,
+			$filled[0]['refund_total'],
+			0.001,
+			'The final unit refunds its $100 value, not the $150 line remainder'
 		);
 
 		$product->delete( true );

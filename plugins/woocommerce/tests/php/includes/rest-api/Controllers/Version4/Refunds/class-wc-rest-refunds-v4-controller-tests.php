@@ -3839,6 +3839,63 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The final-unit quantity refund does not absorb an amount deliberately withheld by a prior explicit refund, and the residue stays refundable explicitly.
+	 *
+	 * A two-unit, $200 line ($100/unit): one unit is deliberately under-refunded
+	 * at an explicit $50, leaving a withheld $50 on that unit. Refunding the last
+	 * unit through the quantity form must pay the unit's $100 value — not the
+	 * $150 line remainder, which would silently reverse the earlier decision.
+	 * The withheld $50 then remains refundable through the explicit amount form,
+	 * proving the residue is usable rather than merely visible.
+	 */
+	public function test_refunds_create_final_unit_does_not_absorb_withheld_amount(): void {
+		list( $order, $item ) = $this->create_order_with_exact_line( 2, 200.00, 200.00, 200.00 );
+
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 50.00,
+				),
+			)
+		);
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEqualsWithDelta( 50.00, (float) $response->get_data()['total'], 0.001, 'One unit is under-refunded at an explicit 50.00' );
+		$this->created_refunds[] = $response->get_data()['id'];
+
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			)
+		);
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEqualsWithDelta( 100.00, (float) $response->get_data()['total'], 0.001, 'The final unit refunds its 100.00 value, not the 150.00 line remainder' );
+		$this->created_refunds[] = $response->get_data()['id'];
+
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 50.00,
+				),
+			)
+		);
+		$this->assertEquals( 201, $response->get_status(), 'The withheld 50.00 must remain refundable through the explicit amount form' );
+		$this->assertEqualsWithDelta( 50.00, (float) $response->get_data()['total'], 0.001 );
+		$this->created_refunds[] = $response->get_data()['id'];
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEqualsWithDelta( 0.0, (float) $order->get_remaining_refund_amount(), 0.001, 'Explicitly refunding the residue closes the order' );
+	}
+
+	/**
 	 * @testdox Auto-compute follows the store's zero-decimal price setting and the final unit refund absorbs the rounding remainder.
 	 */
 	public function test_refunds_create_auto_compute_zero_decimal_currency(): void {

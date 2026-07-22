@@ -168,11 +168,12 @@ class DataUtils {
 	/**
 	 * Validate line items (schema format) before conversion to internal format.
 	 *
-	 * @param array    $line_items The line items to validate.
-	 * @param WC_Order $order The order object.
+	 * @param array      $line_items The line items to validate.
+	 * @param WC_Order   $order The order object.
+	 * @param array|null $refund_data Optional refund-history snapshot from {@see compute_refunded_quantities_and_totals()}, shape array{qtys: array<int, int>, totals: array<int, float>, tax_totals: array<int, array<int, float>>, line_refunds: array<int, list<array{qty: int, gross: float}>>}. Computed from $order when omitted; pass the request-level snapshot to avoid re-scanning refunds.
 	 * @return boolean|WP_Error
 	 */
-	public function validate_line_items( $line_items, WC_Order $order ) {
+	public function validate_line_items( $line_items, WC_Order $order, ?array $refund_data = null ) {
 		// Reject non-refundable order statuses up front, mirroring the preview path
 		// so create and preview agree on which orders accept refunds.
 		if ( ! in_array( $order->get_status(), self::REFUNDABLE_STATUSES, true ) ) {
@@ -197,7 +198,7 @@ class DataUtils {
 
 		// Precompute refunded quantities/totals once so the over-refund check
 		// below caps against remaining refundable quantity, not the original.
-		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
+		$refund_data = $refund_data ?? $this->compute_refunded_quantities_and_totals( $order );
 
 		$seen_ids = array();
 		foreach ( $line_items as $line_item ) {
@@ -660,13 +661,19 @@ class DataUtils {
 	 * the amount for me", so rather than rejecting its own arithmetic the server caps
 	 * the result:
 	 *
-	 * - A quantity that consumes the line's remaining refundable units (every
-	 *   shipping/fee line counts here — they carry a single unit) refunds exactly the
-	 *   remaining amount, closing the line at currency precision with no stranded or
-	 *   overshot cents.
-	 * - A smaller quantity keeps the unit-derived amount but is clamped to the
-	 *   remaining amount, so rounding drift can never push it over the remaining-amount
-	 *   cap the validators enforce.
+	 * - The unit-derived amount is always clamped down to the remaining amount, so
+	 *   rounding drift can never push it over the remaining-amount cap the validators
+	 *   enforce. Shipping and fee lines carry a single unit whose derived amount is the
+	 *   full line total, so partially-refunded ones always resolve to their remainder
+	 *   through this clamp.
+	 * - A product quantity that consumes the line's remaining refundable units is
+	 *   topped up to the exact remaining amount — closing the line at currency
+	 *   precision with no stranded cents — but only when every prior refund on the
+	 *   line matches its own quantity-derived amount, i.e. the shortfall is provably
+	 *   accumulated rounding drift. An off-schedule prior refund (an explicit partial
+	 *   amount, or a dollar-only refund with no units) means the residue was
+	 *   deliberately withheld, and the quantity form must never silently pay it back
+	 *   out; the residue stays refundable through an explicit refund_total.
 	 *
 	 * When no refundable amount remains, the unclamped amount is returned as-is:
 	 * clamping to zero would trip the zero-refund guard with a misleading error, while
@@ -676,12 +683,12 @@ class DataUtils {
 	 *
 	 * @param WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item        The order item.
 	 * @param int                                                            $quantity    The quantity to refund (>= 1).
-	 * @param array                                                          $refund_data Refund data from {@see compute_refunded_quantities_and_totals()}.
+	 * @param array                                                          $refund_data Refund-history snapshot from {@see compute_refunded_quantities_and_totals()} (see its return shape).
 	 * @return float The tax-inclusive refund total, carrying the line's sign.
 	 *
-	 * @since 11.0.0
+	 * @since 11.1.0
 	 */
-	public function compute_quantity_refund_total( $item, int $quantity, array $refund_data ): float {
+	private function compute_quantity_refund_total( $item, int $quantity, array $refund_data ): float {
 		$computed          = $this->compute_line_item_refund_total( $item, $quantity );
 		$price_decimals    = wc_get_price_decimals();
 		$signed_line_total = (float) $item->get_total() + (float) $item->get_total_tax();
@@ -692,19 +699,55 @@ class DataUtils {
 			return $computed;
 		}
 
-		$sign = $signed_line_total < 0 ? -1.0 : 1.0;
+		$sign         = $signed_line_total < 0 ? -1.0 : 1.0;
+		$abs_computed = abs( $computed );
 
-		$consumes_remaining_units = true;
-		if ( $item instanceof WC_Order_Item_Product ) {
-			$remaining_qty            = $item->get_quantity() + ( $refund_data['qtys'][ $item->get_id() ] ?? 0 );
-			$consumes_remaining_units = $quantity >= $remaining_qty;
-		}
-
-		if ( $consumes_remaining_units || abs( $computed ) > $remaining_total ) {
+		if ( $abs_computed > $remaining_total ) {
 			return $sign * $remaining_total;
 		}
 
+		if ( $item instanceof WC_Order_Item_Product && $abs_computed < $remaining_total ) {
+			$remaining_qty = $item->get_quantity() + ( $refund_data['qtys'][ $item->get_id() ] ?? 0 );
+			if (
+				$quantity >= $remaining_qty &&
+				$this->line_refund_history_matches_quantities( $item, $refund_data['line_refunds'][ $item->get_id() ] ?? array() )
+			) {
+				return $sign * $remaining_total;
+			}
+		}
+
 		return $computed;
+	}
+
+	/**
+	 * Whether every prior refund line for a product matches its quantity-derived amount.
+	 *
+	 * True means the difference between the line's refunded total and the sum of
+	 * unit-price amounts is pure rounding drift, so the final-chunk top-up in
+	 * {@see compute_quantity_refund_total()} can safely reconcile it. Gross values are
+	 * compared as formatted decimals at currency precision — never raw float
+	 * equality. A refund line with no units (qty 0, the dollar-only form) is
+	 * off-schedule by definition.
+	 *
+	 * @param WC_Order_Item_Product $item         The original order line.
+	 * @param array                 $line_refunds Prior refund lines as list<array{qty: int, gross: float}> (positive magnitudes).
+	 * @return bool
+	 */
+	private function line_refund_history_matches_quantities( WC_Order_Item_Product $item, array $line_refunds ): bool {
+		$price_decimals = wc_get_price_decimals();
+
+		foreach ( $line_refunds as $refund_line ) {
+			if ( $refund_line['qty'] <= 0 ) {
+				return false;
+			}
+
+			$expected = abs( $this->compute_line_item_refund_total( $item, $refund_line['qty'] ) );
+			if ( wc_format_decimal( $refund_line['gross'], $price_decimals ) !== wc_format_decimal( $expected, $price_decimals ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -748,23 +791,20 @@ class DataUtils {
 	 * the existing converter (convert_line_items_to_internal_format extracts tax
 	 * from a tax-inclusive refund_total).
 	 *
-	 * @param array    $line_items Line items from the request (schema format).
-	 *                             Each item: array{line_item_id?: int, quantity?: int,
-	 *                             refund_total?: float|int|null, refund_tax?: array<int, mixed>}.
-	 * @param WC_Order $order      The order being refunded.
+	 * @param array      $line_items Line items from the request (schema format).
+	 *                               Each item: array{line_item_id?: int, quantity?: int,
+	 *                               refund_total?: float|int|null, refund_tax?: array<int, mixed>}.
+	 * @param WC_Order   $order      The order being refunded.
+	 * @param array|null $refund_data Optional refund-history snapshot from {@see compute_refunded_quantities_and_totals()}, shape array{qtys: array<int, int>, totals: array<int, float>, tax_totals: array<int, array<int, float>>, line_refunds: array<int, list<array{qty: int, gross: float}>>}. Loaded lazily when omitted; pass the request-level snapshot to avoid re-scanning refunds.
 	 * @return array The line items with refund_total populated where possible (same shape as input).
 	 *
 	 * @since 10.9.0
 	 */
-	public function fill_missing_refund_totals( array $line_items, WC_Order $order ): array {
+	public function fill_missing_refund_totals( array $line_items, WC_Order $order, ?array $refund_data = null ): array {
 		// Round caller-supplied amounts up front so explicit values are stored at the
 		// same precision the preview validated and showed. Computed values below are
 		// already rounded by compute_quantity_refund_total().
 		$line_items = $this->normalize_refund_totals( $line_items );
-
-		// Loaded lazily: only requests with at least one auto-computed line pay for
-		// the refund-history scan the remaining-amount cap needs.
-		$refund_data = null;
 
 		foreach ( $line_items as $key => $line_item ) {
 			// Treat a missing key and an explicit `null` value the same — both mean
@@ -828,16 +868,17 @@ class DataUtils {
 	 * capped to the line's remaining refundable amount — the same computation the
 	 * create flow stores, so the previewed amounts always match the created refund.
 	 *
-	 * @param WC_Order $order      The order being previewed for refund.
-	 * @param array    $line_items Line items. Each: array{line_item_id: int, quantity?: int, refund_total?: float}.
+	 * @param WC_Order   $order      The order being previewed for refund.
+	 * @param array      $line_items Line items. Each: array{line_item_id: int, quantity?: int, refund_total?: float}.
+	 * @param array|null $refund_data Optional refund-history snapshot from {@see compute_refunded_quantities_and_totals()}, shape array{qtys: array<int, int>, totals: array<int, float>, tax_totals: array<int, array<int, float>>, line_refunds: array<int, list<array{qty: int, gross: float}>>}. Computed from $order when omitted; pass the request-level snapshot to avoid re-scanning refunds.
 	 * @return array The structured preview response.
 	 * @throws \InvalidArgumentException When a line_item_id does not resolve to an item on the order.
 	 *
 	 * @since 10.9.0
 	 */
-	public function build_refund_preview( WC_Order $order, array $line_items ): array {
+	public function build_refund_preview( WC_Order $order, array $line_items, ?array $refund_data = null ): array {
 		$price_decimals = wc_get_price_decimals();
-		$refund_data    = $this->compute_refunded_quantities_and_totals( $order );
+		$refund_data    = $refund_data ?? $this->compute_refunded_quantities_and_totals( $order );
 		$sections       = array(
 			'products' => array(
 				'items'    => array(),
@@ -945,13 +986,14 @@ class DataUtils {
 	/**
 	 * Validate line items for a preview request.
 	 *
-	 * @param array    $line_items The line items to validate.
-	 * @param WC_Order $order      The order object.
+	 * @param array      $line_items The line items to validate.
+	 * @param WC_Order   $order      The order object.
+	 * @param array|null $refund_data Optional refund-history snapshot from {@see compute_refunded_quantities_and_totals()}, shape array{qtys: array<int, int>, totals: array<int, float>, tax_totals: array<int, array<int, float>>, line_refunds: array<int, list<array{qty: int, gross: float}>>}. Computed from $order when omitted; pass the request-level snapshot to avoid re-scanning refunds.
 	 * @return true|WP_Error True on success, WP_Error on failure.
 	 *
 	 * @since 10.9.0
 	 */
-	public function validate_preview_line_items( array $line_items, WC_Order $order ) {
+	public function validate_preview_line_items( array $line_items, WC_Order $order, ?array $refund_data = null ) {
 		if ( empty( $line_items ) ) {
 			return new WP_Error(
 				'missing_line_items',
@@ -976,7 +1018,7 @@ class DataUtils {
 			);
 		}
 
-		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
+		$refund_data = $refund_data ?? $this->compute_refunded_quantities_and_totals( $order );
 
 		$seen_ids = array();
 		foreach ( $line_items as $line_item ) {
@@ -1171,13 +1213,18 @@ class DataUtils {
 	 * avoiding repeated get_refunds() calls during serialization. Fee and shipping totals are
 	 * tax-inclusive so they can be compared directly against {@see compute_line_item_refund_total()}.
 	 *
+	 * line_refunds records each product refund line individually — quantity and tax-inclusive
+	 * gross, both as positive magnitudes — so the quantity-form top-up can verify that prior
+	 * refunds match their quantity-derived amounts before reconciling rounding drift.
+	 *
 	 * @param WC_Order $order Order instance.
-	 * @return array{qtys: array<int, int>, totals: array<int, float>, tax_totals: array<int, array<int, float>>}
+	 * @return array{qtys: array<int, int>, totals: array<int, float>, tax_totals: array<int, array<int, float>>, line_refunds: array<int, list<array{qty: int, gross: float}>>}
 	 */
 	public function compute_refunded_quantities_and_totals( WC_Order $order ): array {
-		$qtys       = array();
-		$totals     = array();
-		$tax_totals = array();
+		$qtys         = array();
+		$totals       = array();
+		$tax_totals   = array();
+		$line_refunds = array();
 
 		// Accumulate the already-refunded tax per original item, keyed by tax rate
 		// id, as a positive amount. Refund line items store taxes as negatives, so
@@ -1197,9 +1244,13 @@ class DataUtils {
 			 */
 			$refunded_line_items = $refund->get_items( 'line_item' );
 			foreach ( $refunded_line_items as $refunded_item ) {
-				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
-				$qtys[ $original_id ]   = ( $qtys[ $original_id ] ?? 0 ) + $refunded_item->get_quantity();
-				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + ( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ) * -1;
+				$original_id                    = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
+				$qtys[ $original_id ]           = ( $qtys[ $original_id ] ?? 0 ) + $refunded_item->get_quantity();
+				$totals[ $original_id ]         = ( $totals[ $original_id ] ?? 0.0 ) + ( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ) * -1;
+				$line_refunds[ $original_id ][] = array(
+					'qty'   => absint( $refunded_item->get_quantity() ),
+					'gross' => abs( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ),
+				);
 				$add_refunded_taxes( $refunded_item, $original_id );
 			}
 			/**
@@ -1227,9 +1278,10 @@ class DataUtils {
 		}
 
 		return array(
-			'qtys'       => $qtys,
-			'totals'     => $totals,
-			'tax_totals' => $tax_totals,
+			'qtys'         => $qtys,
+			'totals'       => $totals,
+			'tax_totals'   => $tax_totals,
+			'line_refunds' => $line_refunds,
 		);
 	}
 }

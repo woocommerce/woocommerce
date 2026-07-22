@@ -642,11 +642,12 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 			/**
 			 * Validation is forced to pass so the controller reaches the build step.
 			 *
-			 * @param array     $line_items Ignored.
-			 * @param \WC_Order $order      Ignored.
+			 * @param array      $line_items  Ignored.
+			 * @param \WC_Order  $order       Ignored.
+			 * @param array|null $refund_data Ignored.
 			 * @return bool
 			 */
-			public function validate_preview_line_items( array $line_items, \WC_Order $order ) {
+			public function validate_preview_line_items( array $line_items, \WC_Order $order, ?array $refund_data = null ) {
 				return true;
 			}
 			// Stub always throws; the : array return type is never reached.
@@ -654,12 +655,13 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 			/**
 			 * Always throws to exercise the controller's InvalidArgumentException catch arm.
 			 *
-			 * @param \WC_Order $order      Ignored.
-			 * @param array     $line_items Ignored.
+			 * @param \WC_Order  $order       Ignored.
+			 * @param array      $line_items  Ignored.
+			 * @param array|null $refund_data Ignored.
 			 * @return array
 			 * @throws \InvalidArgumentException Always.
 			 */
-			public function build_refund_preview( \WC_Order $order, array $line_items ): array {
+			public function build_refund_preview( \WC_Order $order, array $line_items, ?array $refund_data = null ): array {
 				throw new \InvalidArgumentException( 'simulated invariant violation' );
 			}
 			// phpcs:enable Squiz.Commenting.FunctionComment.InvalidNoReturn
