@@ -145,15 +145,18 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				return $classes;
 			}
 
-			if ( ! str_contains( $classes, 'woocommerce-settings-ui-page' ) ) {
-				$classes .= ' woocommerce-settings-ui-page';
+			$body_classes = explode( ' ', $classes );
+
+			if ( ! in_array( 'woocommerce-settings-ui-page', $body_classes, true ) ) {
+				$classes       .= ' woocommerce-settings-ui-page';
+				$body_classes[] = 'woocommerce-settings-ui-page';
 			}
 
 			if (
 				$context->is_drill_down()
 				&& ! $context->has_schema_failed()
 				&& ! $context->has_script_handles_failed()
-				&& ! str_contains( $classes, 'woocommerce-settings-ui-drill-down' )
+				&& ! in_array( 'woocommerce-settings-ui-drill-down', $body_classes, true )
 			) {
 				$classes .= ' woocommerce-settings-ui-drill-down';
 			}
