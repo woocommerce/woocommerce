@@ -3295,9 +3295,9 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// the REST server dispatches against. $this->endpoint in setUp is a
 		// separate instance and mutating it would not affect dispatch.
 		$throwing_utils = $this->getMockBuilder( DataUtils::class )
-			->onlyMethods( array( 'fill_missing_refund_totals_with_refund_data' ) )
+			->onlyMethods( array( 'fill_missing_refund_totals' ) )
 			->getMock();
-		$throwing_utils->method( 'fill_missing_refund_totals_with_refund_data' )
+		$throwing_utils->method( 'fill_missing_refund_totals' )
 			->willThrowException( new \InvalidArgumentException( 'simulated invariant violation' ) );
 
 		$container       = wc_get_container();

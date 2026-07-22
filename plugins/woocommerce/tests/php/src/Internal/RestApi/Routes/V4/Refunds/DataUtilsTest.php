@@ -2311,12 +2311,14 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Subclasses overriding the original public method signatures stay loadable — the snapshot threading is additive.
+	 * @testdox Subclasses overriding the public method signatures stay loadable and keep intercepting the controller flow.
 	 *
-	 * The refund-history snapshot is passed through new *_with_refund_data entry
-	 * points instead of new parameters on the existing methods, because a parent
-	 * gaining an optional parameter fatals any subclass still declaring the old
-	 * signature. Declaring such a subclass here pins that guarantee.
+	 * The controller dispatches through these exact methods, so subclass
+	 * overrides keep affecting REST behavior, and each method loads its own
+	 * refund-history snapshot rather than receiving it as a parameter — a
+	 * parent gaining an optional parameter would fatal any subclass still
+	 * declaring the old signature. Declaring such a subclass here pins both
+	 * guarantees.
 	 */
 	public function test_original_public_method_signatures_remain_overridable(): void {
 		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found -- pass-through overrides ARE the fixture: they pin the parent signatures.

@@ -173,24 +173,6 @@ class DataUtils {
 	 * @return boolean|WP_Error
 	 */
 	public function validate_line_items( $line_items, WC_Order $order ) {
-		return $this->validate_line_items_with_refund_data( $line_items, $order );
-	}
-
-	/**
-	 * Validate line items (schema format) with a caller-supplied refund-history snapshot.
-	 *
-	 * Additive entry point: {@see validate_line_items()} keeps its original signature
-	 * (subclass overrides of it stay compatible) and delegates here. Callers holding a
-	 * request-level snapshot pass it to avoid a second refund-collection scan.
-	 *
-	 * @param array      $line_items The line items to validate.
-	 * @param WC_Order   $order The order object.
-	 * @param array|null $refund_data Optional refund-history snapshot from {@see compute_refunded_quantities_and_totals()}, shape array{qtys: array<int, int>, totals: array<int, float>, tax_totals: array<int, array<int, float>>, line_refunds: array<int, list<array{qty: int, gross: float}>>}. Computed from $order when omitted.
-	 * @return boolean|WP_Error
-	 *
-	 * @since 11.1.0
-	 */
-	public function validate_line_items_with_refund_data( $line_items, WC_Order $order, ?array $refund_data = null ) {
 		// Reject non-refundable order statuses up front, mirroring the preview path
 		// so create and preview agree on which orders accept refunds.
 		if ( ! in_array( $order->get_status(), self::REFUNDABLE_STATUSES, true ) ) {
@@ -215,7 +197,10 @@ class DataUtils {
 
 		// Precompute refunded quantities/totals once so the over-refund check
 		// below caps against remaining refundable quantity, not the original.
-		$refund_data = $refund_data ?? $this->compute_refunded_quantities_and_totals( $order );
+		// Loaded here rather than passed in: the controller dispatches through this
+		// method so subclass overrides keep working, and WC_Order::get_refunds()
+		// serves repeat loads within the request from the object cache.
+		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
 
 		$seen_ids = array();
 		foreach ( $line_items as $line_item ) {
@@ -817,28 +802,14 @@ class DataUtils {
 	 * @since 10.9.0
 	 */
 	public function fill_missing_refund_totals( array $line_items, WC_Order $order ): array {
-		return $this->fill_missing_refund_totals_with_refund_data( $line_items, $order );
-	}
-
-	/**
-	 * Fill in missing refund_total values with a caller-supplied refund-history snapshot.
-	 *
-	 * Additive entry point: {@see fill_missing_refund_totals()} keeps its original
-	 * signature (subclass overrides of it stay compatible) and delegates here. Callers
-	 * holding a request-level snapshot pass it to avoid a second refund-collection scan.
-	 *
-	 * @param array      $line_items Line items from the request (schema format), as in {@see fill_missing_refund_totals()}.
-	 * @param WC_Order   $order      The order being refunded.
-	 * @param array|null $refund_data Optional refund-history snapshot from {@see compute_refunded_quantities_and_totals()}, shape array{qtys: array<int, int>, totals: array<int, float>, tax_totals: array<int, array<int, float>>, line_refunds: array<int, list<array{qty: int, gross: float}>>}. Loaded lazily when omitted.
-	 * @return array The line items with refund_total populated where possible (same shape as input).
-	 *
-	 * @since 11.1.0
-	 */
-	public function fill_missing_refund_totals_with_refund_data( array $line_items, WC_Order $order, ?array $refund_data = null ): array {
 		// Round caller-supplied amounts up front so explicit values are stored at the
 		// same precision the preview validated and showed. Computed values below are
 		// already rounded by compute_quantity_refund_total().
 		$line_items = $this->normalize_refund_totals( $line_items );
+
+		// Loaded lazily: only requests with at least one auto-computed line pay for
+		// the refund-history scan the remaining-amount cap needs.
+		$refund_data = null;
 
 		foreach ( $line_items as $key => $line_item ) {
 			// Treat a missing key and an explicit `null` value the same — both mean
@@ -910,27 +881,8 @@ class DataUtils {
 	 * @since 10.9.0
 	 */
 	public function build_refund_preview( WC_Order $order, array $line_items ): array {
-		return $this->build_refund_preview_with_refund_data( $order, $line_items );
-	}
-
-	/**
-	 * Build a refund preview with a caller-supplied refund-history snapshot.
-	 *
-	 * Additive entry point: {@see build_refund_preview()} keeps its original signature
-	 * (subclass overrides of it stay compatible) and delegates here. Callers holding a
-	 * request-level snapshot pass it to avoid a second refund-collection scan.
-	 *
-	 * @param WC_Order   $order      The order being previewed for refund.
-	 * @param array      $line_items Line items. Each: array{line_item_id: int, quantity?: int, refund_total?: float}.
-	 * @param array|null $refund_data Optional refund-history snapshot from {@see compute_refunded_quantities_and_totals()}, shape array{qtys: array<int, int>, totals: array<int, float>, tax_totals: array<int, array<int, float>>, line_refunds: array<int, list<array{qty: int, gross: float}>>}. Computed from $order when omitted.
-	 * @return array The structured preview response.
-	 * @throws \InvalidArgumentException When a line_item_id does not resolve to an item on the order.
-	 *
-	 * @since 11.1.0
-	 */
-	public function build_refund_preview_with_refund_data( WC_Order $order, array $line_items, ?array $refund_data = null ): array {
 		$price_decimals = wc_get_price_decimals();
-		$refund_data    = $refund_data ?? $this->compute_refunded_quantities_and_totals( $order );
+		$refund_data    = $this->compute_refunded_quantities_and_totals( $order );
 		$sections       = array(
 			'products' => array(
 				'items'    => array(),
@@ -1045,24 +997,6 @@ class DataUtils {
 	 * @since 10.9.0
 	 */
 	public function validate_preview_line_items( array $line_items, WC_Order $order ) {
-		return $this->validate_preview_line_items_with_refund_data( $line_items, $order );
-	}
-
-	/**
-	 * Validate preview line items with a caller-supplied refund-history snapshot.
-	 *
-	 * Additive entry point: {@see validate_preview_line_items()} keeps its original
-	 * signature (subclass overrides of it stay compatible) and delegates here. Callers
-	 * holding a request-level snapshot pass it to avoid a second refund-collection scan.
-	 *
-	 * @param array      $line_items The line items to validate.
-	 * @param WC_Order   $order      The order object.
-	 * @param array|null $refund_data Optional refund-history snapshot from {@see compute_refunded_quantities_and_totals()}, shape array{qtys: array<int, int>, totals: array<int, float>, tax_totals: array<int, array<int, float>>, line_refunds: array<int, list<array{qty: int, gross: float}>>}. Computed from $order when omitted.
-	 * @return true|WP_Error True on success, WP_Error on failure.
-	 *
-	 * @since 11.1.0
-	 */
-	public function validate_preview_line_items_with_refund_data( array $line_items, WC_Order $order, ?array $refund_data = null ) {
 		if ( empty( $line_items ) ) {
 			return new WP_Error(
 				'missing_line_items',
@@ -1087,7 +1021,7 @@ class DataUtils {
 			);
 		}
 
-		$refund_data = $refund_data ?? $this->compute_refunded_quantities_and_totals( $order );
+		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
 
 		$seen_ids = array();
 		foreach ( $line_items as $line_item ) {
