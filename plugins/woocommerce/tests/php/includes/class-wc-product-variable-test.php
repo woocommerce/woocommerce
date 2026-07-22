@@ -414,7 +414,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @param mixed $malformed_value The malformed value for returning via woocommerce_get_variation_prices_hash filter.
 	 */
-	public function test_get_variation_prices_tolerates_malformed_filter_output( mixed $malformed_value ): void {
+	public function test_get_variation_prices_tolerates_malformed_filter_output( $malformed_value ): void {
 		$product = WC_Helper_Product::create_variation_product();
 
 		// Bust the transient so read_price_data() always reaches the woocommerce_variation_prices filter.
