@@ -132,23 +132,31 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 			$prepared_args['parent'] = (int) $request['parent'];
 		}
 
+		if ( (bool) $request['hide_empty'] && in_array( $taxonomy, array( 'product_brand', 'product_cat' ), true ) ) {
+			// Query-time filtering keeps the paginated results and total term count consistent.
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			$prepared_args['meta_query'] = array(
+				'relation' => 'OR',
+				array(
+					'key'     => 'product_count_' . $taxonomy,
+					'compare' => 'NOT EXISTS',
+				),
+				array(
+					'key'     => 'product_count_' . $taxonomy,
+					'value'   => 0,
+					'compare' => '>',
+					'type'    => 'NUMERIC',
+				),
+			);
+		}
+
 		$term_query = new WP_Term_Query();
 		$objects    = $term_query->query( $prepared_args );
 		$return     = [];
 
 		foreach ( $objects as $object ) {
 			$data     = $this->prepare_item_for_response( $object, $request );
-			$response = $this->prepare_response_for_collection( $data );
-
-			if (
-				(bool) $request['hide_empty']
-				&& isset( $response['count'] )
-				&& 0 === (int) $response['count']
-			) {
-				continue;
-			}
-
-			$return[] = $response;
+			$return[] = $this->prepare_response_for_collection( $data );
 		}
 
 		$response = rest_ensure_response( $return );

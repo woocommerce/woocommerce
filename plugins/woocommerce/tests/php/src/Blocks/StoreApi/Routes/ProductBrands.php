@@ -148,6 +148,57 @@ class ProductBrands extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Should preserve a cached zero product count in a single brand response.
+	 */
+	public function test_get_item_preserves_cached_zero_count(): void {
+		update_term_meta( $this->product_brand['term_id'], 'product_count_product_brand', 0 );
+
+		$request  = new \WP_REST_Request( 'GET', '/wc/store/v1/products/brands/' . $this->product_brand['term_id'] );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
+		$this->assertSame( 0, $data['count'], 'The cached zero count should be preserved.' );
+	}
+
+	/**
+	 * @testdox Should paginate brands after excluding visibility-aware empty terms.
+	 */
+	public function test_hide_empty_pagination_excludes_cached_zero_counts(): void {
+		$fixtures            = new FixtureData();
+		$second_hidden_brand = $fixtures->get_product_brand(
+			array(
+				'name' => 'Another Hidden Brand',
+			)
+		);
+		$fixtures->get_simple_product(
+			array(
+				'name'          => 'Another Hidden Brand Product',
+				'regular_price' => 10,
+				'brand_ids'     => array( $second_hidden_brand['term_id'] ),
+			)
+		);
+
+		update_term_meta( $this->product_brand['term_id'], 'product_count_product_brand', 1 );
+		update_term_meta( $this->child_brand['term_id'], 'product_count_product_brand', 0 );
+		update_term_meta( $second_hidden_brand['term_id'], 'product_count_product_brand', 0 );
+		delete_transient( 'wc_term_counts' );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/brands' );
+		$request->set_param( 'hide_empty', true );
+		$request->set_param( 'per_page', 1 );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+		$headers  = $response->get_headers();
+
+		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
+		$this->assertCount( 1, $data, 'The page should contain one visible brand.' );
+		$this->assertSame( $this->product_brand['term_id'], $data[0]['id'], 'The brand with a zero cached count should be excluded.' );
+		$this->assertSame( 1, (int) $headers['X-WP-Total'], 'The total should exclude brands with a zero cached count.' );
+		$this->assertSame( 1, (int) $headers['X-WP-TotalPages'], 'The total pages should match the filtered total.' );
+	}
+
+	/**
 	 * Test getting reviews from a specific category.
 	 */
 	public function test_get_items_with_category_id_param() {
