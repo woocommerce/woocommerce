@@ -37,28 +37,38 @@ if ( ! $tab_exists ) {
 }
 
 // Resolve the Settings UI context for this request, falling back to legacy
-// rendering when the settings SDK classes are unavailable. The class can be
-// missing mid-update, when this file has been replaced on disk but the cached
-// autoloader has not refreshed yet.
-$settings_ui_context = null;
+// rendering when the settings SDK classes are unavailable or stale. The class
+// can be missing or outdated mid-update, when this file has been replaced on
+// disk but the cached autoloader has not refreshed yet.
+$settings_ui_context                 = null;
+$settings_ui_settings_page           = null;
+$is_rendering_settings_ui_drill_down = false;
 try {
 	if ( class_exists( SettingsUIRequestContext::class ) ) {
 		$settings_ui_context = SettingsUIRequestContext::get_current();
 	}
+
+	if ( $settings_ui_context ) {
+		$settings_ui_settings_page           = $settings_ui_context->get_settings_page();
+		$is_rendering_settings_ui_drill_down = $settings_ui_context->is_rendering_enabled()
+			&& $settings_ui_context->is_drill_down()
+			&& ! $settings_ui_context->has_schema_failed()
+			&& ! $settings_ui_context->has_script_handles_failed();
+	}
 } catch ( \Throwable $e ) {
-	$settings_ui_context = null;
+	$settings_ui_context                 = null;
+	$settings_ui_settings_page           = null;
+	$is_rendering_settings_ui_drill_down = false;
 }
 
-// Drill-down pages replace the top-level settings tabs with their own header.
+// Drill-down pages replace the top-level settings tabs with their own header when the shell can render.
 $hide_nav = ( 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true ) )
-	|| ( $settings_ui_context && $settings_ui_context->is_drill_down() );
+	|| $is_rendering_settings_ui_drill_down;
 
-$settings_ui_settings_page = $settings_ui_context ? $settings_ui_context->get_settings_page() : null;
-$is_settings_ui_page       = null !== $settings_ui_settings_page;
+$is_settings_ui_page = null !== $settings_ui_settings_page;
 
-// Drill-down pages replace the section links with header breadcrumbs. Top-level
-// pages keep the classic section links.
-if ( $settings_ui_settings_page instanceof WC_Settings_Page && $settings_ui_context->is_drill_down() ) {
+// Drill-down pages replace the section links with header breadcrumbs when the shell can render.
+if ( $settings_ui_settings_page instanceof WC_Settings_Page && $is_rendering_settings_ui_drill_down ) {
 	remove_action( 'woocommerce_sections_' . $current_tab, array( $settings_ui_settings_page, 'output_sections' ) );
 }
 
