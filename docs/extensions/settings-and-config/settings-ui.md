@@ -1,7 +1,7 @@
 ---
 post_title: Settings UI
 sidebar_label: Settings UI
-sidebar_position: 5
+sidebar_position: 7
 ---
 
 # Settings UI

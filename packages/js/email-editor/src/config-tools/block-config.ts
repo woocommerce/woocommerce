@@ -16,7 +16,7 @@ const originalBlockSettings = new Map<
 >();
 
 export function updateBlockSettings<
-	TAttributes extends Record< string, unknown > = Record< string, unknown >
+	TAttributes extends Record< string, unknown > = Record< string, unknown >,
 >(
 	name: string,
 	updater: (

@@ -23,14 +23,14 @@ This dual API, both the infrastructure and the proof of concept code API, has be
 
 ## Requirements
 
-- **PHP 8.1+.** The code API uses enums, named arguments, and PHP 8 attributes. On PHP 8.0 or older the GraphQL endpoint is not registered.
-- **The `dual_code_graphql_api` feature flag.** It is hidden (not shown on the Features settings page). Enable it with:
+- **PHP 8.1+.** The code API uses enums, named arguments, and PHP 8 attributes. On PHP 8.0 or older no GraphQL endpoint is registered.
+- **The `dual_code_graphql_api` feature flag, for WooCommerce core's own endpoint only.** It is hidden (not shown on the Features settings page). Enable it with:
 
     ```bash
     wp option update woocommerce_feature_dual_code_graphql_api_enabled yes
     ```
 
-When the flag is off, no GraphQL route is registered. This gates **every** dual-API endpoint, the one in WooCommerce core **and** any registered by plugins. Code that touches the code API classes directly should guard on `FeaturesUtil::feature_is_enabled( 'dual_code_graphql_api' )`. The settings and filters are likewise site-wide and shared across all dual-API endpoints (see [Settings and caching](./caching-and-settings.md#scope-what-applies-where)).
+The flag gates **only** WooCommerce core's `/wc/graphql` endpoint (and its proof-of-concept code API). Endpoints registered by plugins via `Main::register_graphql_endpoint()` don't require it: they are registered whenever the required infrastructure is available (see the requirements above), regardless of the flag state. A plugin that wants an on/off switch for its endpoint provides its own mechanism, or checks the flag itself (see [Gating your endpoint](./creating-a-dual-api-in-a-plugin.md#gating-your-endpoint)). Code that touches WooCommerce core's code API classes directly should still guard on `FeaturesUtil::feature_is_enabled( 'dual_code_graphql_api' )`. The settings and filters are site-wide and shared across all dual-API endpoints (see [Settings and caching](./caching-and-settings.md#scope-what-applies-where)).
 
 ## Which document do I need?
 

@@ -13861,12 +13861,6 @@ parameters:
 			path: includes/class-wc-product-variable.php
 
 		-
-			message: '#^Method WC_Product_Variable\:\:get_available_variations\(\) should return array\<array\|WC_Product_Variation\> but returns list\<array\|bool\|WC_Product\>\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-product-variable.php
-
-		-
 			message: '#^Method WC_Product_Variable\:\:set_children\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -17893,18 +17887,6 @@ parameters:
 			path: includes/data-stores/class-wc-product-grouped-data-store-cpt.php
 
 		-
-			message: '#^Call to an undefined method WC_Product\:\:child_is_in_stock\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
-
-		-
-			message: '#^Call to an undefined method WC_Product\:\:child_is_on_backorder\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
-
-		-
 			message: '#^Call to an undefined method WC_Product\:\:get_visible_children\(\)\.$#'
 			identifier: method.notFound
 			count: 4
@@ -17961,7 +17943,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$str of function md5 expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 3
+			count: 1
 			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
 
 		-
@@ -50866,12 +50848,6 @@ parameters:
 			path: src/Blocks/BlockTypes/FeaturedProduct.php
 
 		-
-			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_image_url expects int, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Blocks/BlockTypes/FeaturedProduct.php
-
-		-
 			message: '#^Parameter \#1 \$variation of function wc_get_formatted_variation expects array\|WC_Product_Variation, WC_Product given\.$#'
 			identifier: argument.type
 			count: 1
@@ -56449,12 +56425,6 @@ parameters:
 			message: '#^Parameter \#2 \$mode of class RecursiveIteratorIterator constructor expects 0\|1\|2, 16 given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Internal/Admin/Logging/FileV2/FileController.php
-
-		-
-			message: '#^Right side of \|\| is always true\.$#'
-			identifier: booleanOr.rightAlwaysTrue
-			count: 8
 			path: src/Internal/Admin/Logging/FileV2/FileController.php
 
 		-

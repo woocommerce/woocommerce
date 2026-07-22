@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+
 /**
  * Class WC_Product_Variable_Data_Store_CPT_Test
  */
@@ -88,6 +90,27 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		}
 
 		return $product;
+	}
+
+	/**
+	 * Cleans up global state that individual tests may leave behind.
+	 */
+	public function tearDown(): void {
+		delete_option( 'woocommerce_product_lookup_table_is_generating' );
+		parent::tearDown();
+	}
+
+	/**
+	 * Provides two cases: one where the product lookup table is available, and one where it is
+	 * still being generated and the code must fall back to postmeta queries.
+	 *
+	 * @return array[]
+	 */
+	public function provider_lookup_table_generating(): array {
+		return array(
+			'lookup table available'                      => array( false ),
+			'lookup table generating (postmeta fallback)' => array( true ),
+		);
 	}
 
 	/**
@@ -308,7 +331,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertFalse(
 			$this->invokeMethod( $data_store, 'validate_prices_data', array( $uninitialized_prices, $current_version ) ),
-			'Uninitialized prices data should pass validation as could be new product'
+			'Uninitialized prices data should fail validation to trigger a rebuild'
 		);
 	}
 
@@ -380,15 +403,15 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'Empty children data with version should fail validation as likely corrupt'
 		);
 
-		// Test empty children data without version (new product, should pass).
+		// Test empty children data without a stored version (no prior cache entry).
 		$empty_children_no_version = array(
 			'all'     => array(),
 			'visible' => array(),
 		);
 
 		$this->assertFalse(
-			$this->invokeMethod( $data_store, 'validate_children_data', array( $empty_children_no_version, $current_version ) ),
-			'Empty children data without version should fail validation as likely corrupt'
+			$this->invokeMethod( $data_store, 'validate_children_data', array( $empty_children_no_version, null ) ),
+			'Empty children data without a stored version should fail validation to trigger a rebuild'
 		);
 
 		// Test uninitialized children data.
@@ -749,6 +772,32 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_price_hash includes callback signatures via CallbackUtil when the legacy algorithm is disabled.
+	 */
+	public function test_get_price_hash_uses_callback_util_when_legacy_algorithm_is_disabled(): void {
+		add_filter( 'woocommerce_use_legacy_get_variations_price_hash', '__return_false' );
+
+		$product             = WC_Helper_Product::create_variation_product();
+		$extended_data_store = $this->get_data_store_with_public_get_price_hash();
+
+		$hash_without_callback = $extended_data_store->get_price_hash( $product, false );
+
+		$callback = static fn( $price ) => $price;
+		add_filter( 'woocommerce_variation_prices_price', $callback );
+
+		$hash_with_callback = $extended_data_store->get_price_hash( $product, false );
+
+		// Adding a price callback must change the hash, proving the CallbackUtil path
+		// is active and captures new hook registrations.
+		$this->assertNotSame( $hash_without_callback, $hash_with_callback );
+
+		remove_filter( 'woocommerce_variation_prices_price', $callback );
+		remove_filter( 'woocommerce_use_legacy_get_variations_price_hash', '__return_false' );
+
+		$product->delete();
+	}
+
+	/**
 	 * Get an instance of WC_Product_Variable_Data_Store_CPT whose get_price_hash method is public.
 	 *
 	 * @return WC_Product_Variable_Data_Store_CPT
@@ -798,7 +847,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'rate'     => 10,
 			'label'    => 'rate',
 			'shipping' => 'no',
-			'compund'  => 'no',
+			'compound' => 'no',
 		);
 	}
 
@@ -882,7 +931,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests `read_attributes` for handling metas migration due to sanitize_title BC breaks.
+	 * @testdox read_attributes migrates child variation meta keys affected by the sanitize_title BC break.
 	 */
 	public function test_read_attributes_addresses_bc_break_in_sanitize(): void {
 		$product    = $this->get_variation_product_fixture();
@@ -909,6 +958,138 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_size-size', true ) );
 			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_Size/Size', true ) );
 		}
+	}
+
+	/**
+	 * @testdox read_attributes skips the child meta migration DB query when the product has no children.
+	 */
+	public function test_read_attributes_handles_bc_break_migration_when_no_children(): void {
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Dummy Variable Product' );
+		$product->save();
+		$product_id = $product->get_id();
+
+		// Simulate a pre-BC-break attribute key containing a slash (is_variation required to trigger migration).
+		update_post_meta(
+			$product_id,
+			'_product_attributes',
+			array(
+				'Size/Size' => array(
+					'name'         => 'Size/Size',
+					'value'        => 'small | large',
+					'position'     => 0,
+					'is_visible'   => 1,
+					'is_variation' => 1,
+					'is_taxonomy'  => 0,
+				),
+			)
+		);
+
+		// Reload — no children to migrate; should load without a DB error.
+		$product = wc_get_product( $product_id );
+
+		$this->assertInstanceOf( WC_Product_Variable::class, $product );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox read_attributes forces update_attributes() even when no child meta rows need migrating.
+	 */
+	public function test_read_attributes_bc_migration_runs_force_update_when_no_old_rows_exist(): void {
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+
+		// Inject a slash-containing attribute key that triggers the BC migration condition.
+		// No child has an 'attribute_Size/Size' meta row, so $old_meta_rows will be empty.
+		update_post_meta(
+			$product_id,
+			'_product_attributes',
+			array(
+				'Size/Size' => array(
+					'name'         => 'Size/Size',
+					'value'        => 'small | large',
+					'position'     => 0,
+					'is_visible'   => 1,
+					'is_variation' => 1,
+					'is_taxonomy'  => 0,
+				),
+			)
+		);
+
+		// Reload — $force_update = true fires even though no rows were migrated, so
+		// update_attributes() must re-persist the attribute with the sanitised key.
+		$product = wc_get_product( $product_id );
+
+		// The attribute must survive intact.
+		$attributes = $product->get_attributes();
+		$this->assertCount( 1, $attributes );
+		$this->assertSame( 'Size/Size', array_values( $attributes )[0]->get_name() );
+
+		// update_attributes() must have re-written _product_attributes with the normalised key.
+		$stored = get_post_meta( $product_id, '_product_attributes', true );
+		$this->assertArrayHasKey( sanitize_title( 'Size/Size' ), $stored );
+		$this->assertArrayNotHasKey( 'Size/Size', $stored );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox read_attributes silently skips an attribute whose taxonomy is no longer registered.
+	 */
+	public function test_read_attributes_skips_unknown_taxonomy(): void {
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+
+		// Inject a stale taxonomy attribute that is no longer registered.
+		$stored                   = get_post_meta( $product_id, '_product_attributes', true );
+		$stored['pa_nonexistent'] = array(
+			'name'         => 'pa_nonexistent',
+			'value'        => '',
+			'position'     => 1,
+			'is_visible'   => 1,
+			'is_variation' => 0,
+			'is_taxonomy'  => 1,
+		);
+		update_post_meta( $product_id, '_product_attributes', $stored );
+
+		// Reload — the unknown taxonomy must not surface as an attribute.
+		$product         = wc_get_product( $product_id );
+		$attribute_names = array_map( static fn( $attribute ) => $attribute->get_name(), $product->get_attributes() );
+
+		$this->assertNotContains( 'pa_nonexistent', $attribute_names );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox read_attributes loads a text (non-taxonomy) attribute from the stored meta value string.
+	 */
+	public function test_read_attributes_returns_text_attribute(): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'Small', 'Medium', 'Large' ) );
+		$attribute->set_position( 0 );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Dummy Variable Product' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		// Reload from DB so read_attributes() runs the non-taxonomy branch.
+		$product    = wc_get_product( $product->get_id() );
+		$attributes = $product->get_attributes();
+
+		$this->assertCount( 1, $attributes );
+		$loaded = array_values( $attributes )[0];
+		$this->assertSame( 0, $loaded->get_id() );
+		$this->assertSame( 'Size', $loaded->get_name() );
+		$this->assertSame( array( 'Small', 'Medium', 'Large' ), $loaded->get_options() );
+
+		$product->delete();
 	}
 
 	/**
@@ -952,5 +1133,754 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 				'Variable product transient option names must not be added to notoptions when a persistent object cache is active.'
 			);
 		}
+	}
+
+	/**
+	 * @testdox read_variation_attributes fetches all variation attribute values from DB on cache miss.
+	 */
+	public function test_read_variation_attributes_fetches_on_cache_miss(): void {
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_' . $product_id;
+		wp_cache_delete( $cache_key, 'products' );
+
+		$attributes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product );
+
+		$this->assertSame(
+			array(
+				'pa_size'   => array( 'small', 'large', 'huge' ),
+				'pa_colour' => array(
+					0 => 'red',
+					2 => 'blue',
+				),
+				'pa_number' => array( '0', '1', '2' ),
+			),
+			$attributes
+		);
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox read_variation_attributes returns the cached result on a second call.
+	 */
+	public function test_read_variation_attributes_returns_cached_result(): void {
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_' . $product_id;
+		wp_cache_delete( $cache_key, 'products' );
+
+		$first  = $data_store->read_variation_attributes( $product );
+		$second = $data_store->read_variation_attributes( $product );
+
+		$this->assertSame( $first, $second );
+		$this->assertSame( $first, wp_cache_get( $cache_key, 'products' ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox read_variation_attributes returns an empty array when the product has no variation attributes.
+	 */
+	public function test_read_variation_attributes_returns_empty_for_no_attributes(): void {
+		$product = new WC_Product_Variable();
+		$product->save();
+
+		$this->assertSame( array(), ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox read_variation_attributes falls back to all taxonomy terms when the product has variation attributes but no children.
+	 */
+	public function test_read_variation_attributes_returns_all_terms_when_no_children(): void {
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( WC_Helper_Product::create_product_attribute_object( 'pattern', array( 'dots', 'stripes' ) ) ) );
+		$product->save();
+
+		$attributes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product );
+
+		$this->assertSame( array( 'dots', 'stripes' ), $attributes['pa_pattern'] );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox read_variation_attributes returns only the assigned values for a non-taxonomy text attribute.
+	 */
+	public function test_read_variation_attributes_returns_assigned_text_attribute_values(): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'Small', 'Large', 'XL' ) );
+		$attribute->set_variation( true );
+		$attribute->set_id( 0 );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+		$product_id = $product->get_id();
+
+		WC_Helper_Product::create_product_variation_object(
+			$product_id,
+			'DUMMY SKU TEXT ATTR',
+			10,
+			array( 'size' => 'Small' )
+		);
+
+		$product   = wc_get_product( $product_id );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_' . $product_id;
+		wp_cache_delete( $cache_key, 'products' );
+
+		$attributes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product );
+
+		$this->assertSame( array( 'Small' ), $attributes['Size'] );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox read_variation_attributes resolves text attribute values via slug matching on pre-2.4 products.
+	 */
+	public function test_read_variation_attributes_resolves_pre24_text_attribute_slugs(): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'Small', 'Large', 'XL' ) );
+		$attribute->set_variation( true );
+		$attribute->set_id( 0 );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+		$product_id = $product->get_id();
+
+		// Mark this as a pre-2.4 product so the slug-matching branch is taken.
+		update_post_meta( $product_id, '_product_version', '2.3.0' );
+
+		// Create a variation whose attribute is stored as the slug ('small'), not the display value ('Small').
+		WC_Helper_Product::create_product_variation_object(
+			$product_id,
+			'DUMMY SKU PRE24',
+			10,
+			array( 'size' => 'Small' )
+		);
+
+		$product      = wc_get_product( $product_id );
+		$child_ids    = $product->get_children();
+		$variation_id = current( $child_ids );
+
+		// Overwrite the stored value with the slug form to simulate pre-2.4 database state.
+		update_post_meta( $variation_id, 'attribute_size', 'small' );
+
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_' . $product_id;
+		wp_cache_delete( $cache_key, 'products' );
+
+		$attributes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product );
+
+		// The slug 'small' must be resolved back to the full display value 'Small'.
+		$this->assertSame( array( 'Small' ), $attributes['Size'] );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox child_has_weight returns true when at least one visible child has a weight set.
+	 */
+	public function test_child_has_weight_returns_true_when_child_has_weight(): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$child_ids = $product->get_visible_children();
+
+		update_post_meta( current( $child_ids ), '_weight', '1.5' );
+
+		$this->assertTrue( ( new WC_Product_Variable_Data_Store_CPT() )->child_has_weight( $product ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox child_has_weight returns false when no visible child has a weight set.
+	 */
+	public function test_child_has_weight_returns_false_when_no_child_has_weight(): void {
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		$product    = WC_Helper_Product::create_variation_product();
+		$child_ids  = $product->get_visible_children();
+
+		foreach ( $child_ids as $child_id ) {
+			update_post_meta( $child_id, '_weight', '1.5' );
+		}
+
+		$this->assertTrue( $data_store->child_has_weight( $product ) );
+
+		foreach ( $child_ids as $child_id ) {
+			delete_post_meta( $child_id, '_weight' );
+		}
+
+		$this->assertFalse( $data_store->child_has_weight( $product ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox child_has_weight returns false when the product has no visible children.
+	 */
+	public function test_child_has_weight_returns_false_for_no_children(): void {
+		$product = new WC_Product_Variable();
+		$product->save();
+
+		$this->assertFalse( ( new WC_Product_Variable_Data_Store_CPT() )->child_has_weight( $product ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox child_has_weight returns false when a child has weight set to zero.
+	 */
+	public function test_child_has_weight_returns_false_when_child_weight_is_zero(): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$child_ids = $product->get_visible_children();
+
+		update_post_meta( current( $child_ids ), '_weight', '0' );
+
+		$this->assertFalse( ( new WC_Product_Variable_Data_Store_CPT() )->child_has_weight( $product ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox child_has_dimensions returns true when at least one visible child has a dimension set.
+	 */
+	public function test_child_has_dimensions_returns_true_when_child_has_dimension(): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$child_ids = $product->get_visible_children();
+
+		update_post_meta( current( $child_ids ), '_length', '10' );
+
+		$this->assertTrue( ( new WC_Product_Variable_Data_Store_CPT() )->child_has_dimensions( $product ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox child_has_dimensions returns false when no visible child has any dimension set.
+	 */
+	public function test_child_has_dimensions_returns_false_when_no_child_has_dimensions(): void {
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		$product    = WC_Helper_Product::create_variation_product();
+		$child_ids  = $product->get_visible_children();
+
+		foreach ( $child_ids as $child_id ) {
+			update_post_meta( $child_id, '_length', '10' );
+		}
+
+		$this->assertTrue( $data_store->child_has_dimensions( $product ) );
+
+		foreach ( $child_ids as $child_id ) {
+			delete_post_meta( $child_id, '_length' );
+		}
+
+		$this->assertFalse( $data_store->child_has_dimensions( $product ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox child_has_dimensions returns false when the product has no visible children.
+	 */
+	public function test_child_has_dimensions_returns_false_for_no_children(): void {
+		$product = new WC_Product_Variable();
+		$product->save();
+
+		$this->assertFalse( ( new WC_Product_Variable_Data_Store_CPT() )->child_has_dimensions( $product ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox child_has_dimensions returns true when a child has only width set.
+	 */
+	public function test_child_has_dimensions_returns_true_when_child_has_width(): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$child_ids = $product->get_visible_children();
+
+		update_post_meta( current( $child_ids ), '_width', '5' );
+
+		$this->assertTrue( ( new WC_Product_Variable_Data_Store_CPT() )->child_has_dimensions( $product ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox child_has_dimensions returns false when a child has a dimension set to zero.
+	 */
+	public function test_child_has_dimensions_returns_false_when_dimension_is_zero(): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$child_ids = $product->get_visible_children();
+
+		update_post_meta( current( $child_ids ), '_length', '0' );
+
+		$this->assertFalse( ( new WC_Product_Variable_Data_Store_CPT() )->child_has_dimensions( $product ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @dataProvider provider_lookup_table_generating
+	 * @testdox child_has_stock_status returns true when at least one child has the given status.
+	 *
+	 * @param bool $lookup_table_generating Whether the lookup table is currently being generated.
+	 */
+	public function test_child_has_stock_status_returns_true_when_child_matches( bool $lookup_table_generating ): void {
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		$product    = WC_Helper_Product::create_variation_product();
+		$child_ids  = $product->get_children();
+
+		$variation = wc_get_product( current( $child_ids ) );
+		$variation->set_stock_status( ProductStockStatus::ON_BACKORDER );
+		$variation->save();
+
+		update_option( 'woocommerce_product_lookup_table_is_generating', $lookup_table_generating );
+
+		$this->assertTrue( $data_store->child_has_stock_status( $product, ProductStockStatus::ON_BACKORDER ) );
+		$this->assertFalse( $data_store->child_has_stock_status( $product, ProductStockStatus::OUT_OF_STOCK ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox child_has_stock_status returns false when the product has no children.
+	 */
+	public function test_child_has_stock_status_returns_false_when_no_children(): void {
+		$product = new WC_Product_Variable();
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->save();
+
+		$this->assertFalse( ( new WC_Product_Variable_Data_Store_CPT() )->child_has_stock_status( $product, ProductStockStatus::IN_STOCK ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_managed_variation_stock_status updates children that do not manage their own stock.
+	 */
+	public function test_sync_managed_variation_stock_status_updates_unmanaged_children(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$product->save();
+
+		$child_ids = $product->get_children();
+		foreach ( $child_ids as $child_id ) {
+			update_post_meta( $child_id, '_manage_stock', 'no' );
+			update_post_meta( $child_id, '_stock_status', ProductStockStatus::IN_STOCK );
+		}
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_managed_variation_stock_status( $product );
+
+		foreach ( $child_ids as $child_id ) {
+			$this->assertSame( ProductStockStatus::OUT_OF_STOCK, get_post_meta( $child_id, '_stock_status', true ) );
+		}
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_managed_variation_stock_status does not touch children that manage their own stock.
+	 */
+	public function test_sync_managed_variation_stock_status_skips_managed_children(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$product->save();
+
+		$child_ids = $product->get_children();
+		foreach ( $child_ids as $child_id ) {
+			update_post_meta( $child_id, '_manage_stock', 'yes' );
+			update_post_meta( $child_id, '_stock_status', ProductStockStatus::IN_STOCK );
+		}
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_managed_variation_stock_status( $product );
+
+		foreach ( $child_ids as $child_id ) {
+			$this->assertSame( ProductStockStatus::IN_STOCK, get_post_meta( $child_id, '_stock_status', true ) );
+		}
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_managed_variation_stock_status does nothing when the parent does not manage stock.
+	 */
+	public function test_sync_managed_variation_stock_status_skips_when_parent_does_not_manage_stock(): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$child_ids = $product->get_children();
+
+		// Save children as out of stock (updates lookup table) so WC computes the parent as out of stock.
+		foreach ( $child_ids as $child_id ) {
+			$variation = wc_get_product( $child_id );
+			$variation->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+			$variation->save();
+		}
+		$product->set_manage_stock( false );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$product->save();
+
+		// Now set children to in stock via raw postmeta — the method should ignore them since the parent does not manage stock.
+		foreach ( $child_ids as $child_id ) {
+			update_post_meta( $child_id, '_manage_stock', 'no' );
+			update_post_meta( $child_id, '_stock_status', ProductStockStatus::IN_STOCK );
+		}
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_managed_variation_stock_status( $product );
+
+		foreach ( $child_ids as $child_id ) {
+			$this->assertSame( ProductStockStatus::IN_STOCK, get_post_meta( $child_id, '_stock_status', true ) );
+		}
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_managed_variation_stock_status skips unmanaged children already at the correct status.
+	 */
+	public function test_sync_managed_variation_stock_status_skips_children_already_at_correct_status(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$product->save();
+
+		$child_ids = $product->get_children();
+		foreach ( $child_ids as $child_id ) {
+			update_post_meta( $child_id, '_manage_stock', 'no' );
+			update_post_meta( $child_id, '_stock_status', ProductStockStatus::OUT_OF_STOCK );
+		}
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_managed_variation_stock_status( $product );
+
+		foreach ( $child_ids as $child_id ) {
+			$this->assertSame( ProductStockStatus::OUT_OF_STOCK, get_post_meta( $child_id, '_stock_status', true ) );
+		}
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_managed_variation_stock_status updates only unmanaged children when the product has a mix of managed and unmanaged children.
+	 */
+	public function test_sync_managed_variation_stock_status_updates_only_unmanaged_in_mixed_children(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$product->save();
+
+		$child_ids   = $product->get_children();
+		$half        = intdiv( count( $child_ids ), 2 );
+		$managed_ids = array_slice( $child_ids, 0, $half );
+
+		foreach ( $child_ids as $child_id ) {
+			$is_managed = in_array( $child_id, $managed_ids, true );
+			update_post_meta( $child_id, '_manage_stock', $is_managed ? 'yes' : 'no' );
+			update_post_meta( $child_id, '_stock_status', ProductStockStatus::IN_STOCK );
+		}
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_managed_variation_stock_status( $product );
+
+		foreach ( $child_ids as $child_id ) {
+			$expected_status = in_array( $child_id, $managed_ids, true ) ? ProductStockStatus::IN_STOCK : ProductStockStatus::OUT_OF_STOCK;
+			$this->assertSame( $expected_status, get_post_meta( $child_id, '_stock_status', true ) );
+		}
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_managed_variation_stock_status backfills unmanaged children that have no _stock_status meta row or a NULL value.
+	 */
+	public function test_sync_managed_variation_stock_status_backfills_children_with_missing_status(): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$product->save();
+
+		$child_ids = $product->get_children();
+		foreach ( array_values( $child_ids ) as $i => $child_id ) {
+			update_post_meta( $child_id, '_manage_stock', 'no' );
+			if ( 1 === $i % 2 ) {
+				// Even index: simulate a NULL meta_value being stored.
+				$wpdb->update(
+					$wpdb->postmeta,
+					array( 'meta_value' => null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					array(
+						'post_id'  => $child_id,
+						'meta_key' => '_stock_status', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					),
+					array( '%s' ),
+					array( '%d', '%s' )
+				);
+			} else {
+				// Odd index: simulate a variation created outside WC's save pipeline — no _stock_status row.
+				$wpdb->delete(
+					$wpdb->postmeta,
+					array(
+						'post_id'  => $child_id,
+						'meta_key' => '_stock_status', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					)
+				);
+			}
+		}
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_managed_variation_stock_status( $product );
+
+		foreach ( $child_ids as $child_id ) {
+			$this->assertSame( ProductStockStatus::OUT_OF_STOCK, get_post_meta( $child_id, '_stock_status', true ) );
+		}
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_managed_variation_stock_status does nothing when the product has no children.
+	 */
+	public function test_sync_managed_variation_stock_status_does_nothing_when_no_children(): void {
+		$product = new WC_Product_Variable();
+		$product->set_manage_stock( true );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$product->save();
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_managed_variation_stock_status( $product );
+
+		$this->assertSame( array(), $product->get_children() );
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_price skips empty-string and SQL-NULL prices while still storing valid sibling prices from the same set.
+	 */
+	public function test_sync_price_stores_valid_prices_when_mixed_with_empty(): void {
+		global $wpdb;
+
+		$product   = WC_Helper_Product::create_variation_product();
+		$child_ids = $product->get_visible_children();
+
+		// First child: empty string — exercises the `'' === $price` branch.
+		$empty_string_child = $child_ids[0];
+		update_post_meta( $empty_string_child, '_price', '' );
+
+		// Second child: SQL NULL — exercises the `is_null( $price )` branch. Direct SQLs as update_post_meta( null ) saves empty string.
+		$null_child_id = $child_ids[1];
+		unset( $child_ids[0], $child_ids[1] );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_price'", $null_child_id ) );
+		$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) VALUES (%d, %s, NULL)", $null_child_id, '_price' ) );
+
+		// Remaining children: a known valid price.
+		foreach ( $child_ids as $child_id ) {
+			update_post_meta( $child_id, '_price', '12.00' );
+		}
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_price( $product );
+
+		// Only '12.00' must appear — neither the empty-string nor the NULL price must reach the parent.
+		$this->assertSame( array( '12.00' ), get_post_meta( $product->get_id(), '_price', false ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_price stores only distinct child prices on the parent.
+	 */
+	public function test_sync_price_stores_only_distinct_child_prices_on_parent(): void {
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		$product    = WC_Helper_Product::create_variation_product();
+		$child_ids  = $product->get_visible_children();
+
+		$data_store->sync_price( $product );
+
+		$this->assertSame(
+			array( 10.0, 15.0, 16.0, 17.0, 18.0, 19.0 ),
+			array_map( 'floatval', get_post_meta( $product->get_id(), '_price', false ) )
+		);
+
+		foreach ( $child_ids as $child_id ) {
+			update_post_meta( $child_id, '_price', '9.99' );
+		}
+
+		$data_store->sync_price( $product );
+
+		$this->assertSame( array( 9.99 ), array_map( 'floatval', get_post_meta( $product->get_id(), '_price', false ) ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_price removes all price meta when the product has no visible children.
+	 */
+	public function test_sync_price_clears_price_when_no_visible_children(): void {
+		$product = new WC_Product_Variable();
+		$product->save();
+
+		add_post_meta( $product->get_id(), '_price', '99' );
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_price( $product );
+
+		$this->assertSame( array(), get_post_meta( $product->get_id(), '_price', false ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_price skips children with an empty price and stores no price meta.
+	 */
+	public function test_sync_price_skips_empty_child_prices(): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$child_ids = $product->get_visible_children();
+
+		foreach ( $child_ids as $child_id ) {
+			update_post_meta( $child_id, '_price', '' );
+		}
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_price( $product );
+
+		$this->assertSame( array(), get_post_meta( $product->get_id(), '_price', false ) );
+
+		$product->delete();
+	}
+
+	/**
+	 * @dataProvider provider_lookup_table_generating
+	 * @testdox sync_stock_status sets instock when at least one child is in stock.
+	 *
+	 * @param bool $lookup_table_generating Whether the lookup table is currently being generated.
+	 */
+	public function test_sync_stock_status_sets_instock_when_any_child_in_stock( bool $lookup_table_generating ): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$child_ids = $product->get_children();
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+
+		foreach ( $child_ids as $child_id ) {
+			$variation = wc_get_product( $child_id );
+			$variation->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+			$variation->save();
+		}
+		$variation = wc_get_product( current( $child_ids ) );
+		$variation->set_stock_status( ProductStockStatus::IN_STOCK );
+		$variation->save();
+
+		update_option( 'woocommerce_product_lookup_table_is_generating', $lookup_table_generating );
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_stock_status( $product );
+
+		$this->assertSame( ProductStockStatus::IN_STOCK, $product->get_stock_status() );
+
+		$product->delete();
+	}
+
+	/**
+	 * @dataProvider provider_lookup_table_generating
+	 * @testdox sync_stock_status sets on_backorder when no child is in stock but at least one is on backorder.
+	 *
+	 * @param bool $lookup_table_generating Whether the lookup table is currently being generated.
+	 */
+	public function test_sync_stock_status_sets_on_backorder_when_backorder_exists_and_none_in_stock( bool $lookup_table_generating ): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$child_ids = $product->get_children();
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+
+		foreach ( $child_ids as $child_id ) {
+			$variation = wc_get_product( $child_id );
+			$variation->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+			$variation->save();
+		}
+		$variation = wc_get_product( current( $child_ids ) );
+		$variation->set_stock_status( ProductStockStatus::ON_BACKORDER );
+		$variation->save();
+
+		update_option( 'woocommerce_product_lookup_table_is_generating', $lookup_table_generating );
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_stock_status( $product );
+
+		$this->assertSame( ProductStockStatus::ON_BACKORDER, $product->get_stock_status() );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_stock_status sets outofstock when all children are out of stock.
+	 */
+	public function test_sync_stock_status_sets_outofstock_when_all_children_outofstock(): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+
+		foreach ( $product->get_children() as $child_id ) {
+			$variation = wc_get_product( $child_id );
+			$variation->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+			$variation->save();
+		}
+
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_stock_status( $product );
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_stock_status sets outofstock when the product has no children.
+	 */
+	public function test_sync_stock_status_sets_outofstock_when_no_children(): void {
+		$product = new WC_Product_Variable();
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->save();
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_stock_status( $product );
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+
+		$product->delete();
+	}
+
+	/**
+	 * @testdox sync_stock_status sets instock when children include both in-stock and on-backorder.
+	 */
+	public function test_sync_stock_status_instock_takes_priority_over_on_backorder(): void {
+		$product   = WC_Helper_Product::create_variation_product();
+		$child_ids = $product->get_children();
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
+
+		foreach ( $child_ids as $child_id ) {
+			$variation = wc_get_product( $child_id );
+			$variation->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+			$variation->save();
+		}
+
+		$variation = wc_get_product( current( $child_ids ) );
+		$variation->set_stock_status( ProductStockStatus::ON_BACKORDER );
+		$variation->save();
+
+		$variation = wc_get_product( next( $child_ids ) );
+		$variation->set_stock_status( ProductStockStatus::IN_STOCK );
+		$variation->save();
+
+		( new WC_Product_Variable_Data_Store_CPT() )->sync_stock_status( $product );
+
+		$this->assertSame( ProductStockStatus::IN_STOCK, $product->get_stock_status() );
+
+		$product->delete();
 	}
 }
