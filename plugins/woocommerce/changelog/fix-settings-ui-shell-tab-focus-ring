@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore a visible keyboard focus indicator on the Settings UI shell tabs.
