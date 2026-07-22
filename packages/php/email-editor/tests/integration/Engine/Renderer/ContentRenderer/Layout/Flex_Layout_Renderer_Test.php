@@ -300,6 +300,93 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * A row of auto-width buttons whose combined width exceeds the parent (e.g. a footer nav menu)
+	 * is rendered as wrapping inline-block items instead of a single non-wrapping row, so it can't
+	 * stretch the email past its content width in Gmail/Outlook (NL-737).
+	 */
+	public function testItWrapsAutoWidthButtonsThatOverflow(): void {
+		// Five auto-width items at a 25% estimate each = 125% of the parent, so they overflow.
+		$inner_blocks = array();
+		for ( $i = 1; $i <= 5; $i++ ) {
+			$inner_blocks[] = array(
+				'blockName' => 'dummy/block',
+				'innerHTML' => "Dummy $i",
+				'attrs'     => array(),
+			);
+		}
+		$parsed_block = array(
+			'innerBlocks' => $inner_blocks,
+			'email_attrs' => array( 'width' => '640px' ),
+		);
+
+		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
+
+		// Items are inline-block divs (which wrap in clients that support it) rather than table cells.
+		$this->assertStringContainsString( '<div class="layout-flex-item"', $output );
+		$this->assertStringContainsString( 'display:inline-block', $output );
+		$this->assertStringNotContainsString( '<td class="layout-flex-item"', $output );
+		// Outlook can't wrap a row, so a conditional <br> forces it to stack the buttons vertically.
+		$this->assertStringContainsString( '<!--[if mso | IE]><br><![endif]-->', $output );
+		// All buttons are still rendered.
+		for ( $i = 1; $i <= 5; $i++ ) {
+			$this->assertStringContainsString( "Dummy $i", $output );
+		}
+	}
+
+	/**
+	 * Auto-width buttons that fit within the parent width keep the default single-row layout — the
+	 * wrap path must not kick in for a small button group (e.g. Comment/Like).
+	 */
+	public function testItKeepsAutoWidthButtonsOnOneRowWhenTheyFit(): void {
+		// Two auto-width items at a 25% estimate each = 50% of the parent, so they fit.
+		$parsed_block = array(
+			'innerBlocks' => array(
+				array(
+					'blockName' => 'dummy/block',
+					'innerHTML' => 'Dummy 1',
+					'attrs'     => array(),
+				),
+				array(
+					'blockName' => 'dummy/block',
+					'innerHTML' => 'Dummy 2',
+					'attrs'     => array(),
+				),
+			),
+			'email_attrs' => array( 'width' => '640px' ),
+		);
+
+		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
+
+		$this->assertStringContainsString( '<td class="layout-flex-item"', $output );
+		$this->assertStringNotContainsString( '<div class="layout-flex-item"', $output );
+		$this->assertStringNotContainsString( '<!--[if mso | IE]><br><![endif]-->', $output );
+	}
+
+	/**
+	 * Without a parent width we can't tell whether the items overflow, so we conservatively keep the
+	 * single-row layout even for many auto-width items rather than wrapping unnecessarily.
+	 */
+	public function testItDoesNotWrapWhenParentWidthIsUnknown(): void {
+		$inner_blocks = array();
+		for ( $i = 1; $i <= 5; $i++ ) {
+			$inner_blocks[] = array(
+				'blockName' => 'dummy/block',
+				'innerHTML' => "Dummy $i",
+				'attrs'     => array(),
+			);
+		}
+		$parsed_block = array(
+			'innerBlocks' => $inner_blocks,
+			'email_attrs' => array(),
+		);
+
+		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
+
+		$this->assertStringContainsString( '<td class="layout-flex-item"', $output );
+		$this->assertStringNotContainsString( '<div class="layout-flex-item"', $output );
+	}
+
+	/**
 	 * Get flex items from the output.
 	 *
 	 * @param string $output Output.
