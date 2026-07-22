@@ -31,12 +31,19 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 
 const setWindowUrl = ( { url }: { url: string } ) => {
 	/*
-	 * jsdom makes `window.location` non-configurable, so navigate via the
-	 * History API instead of replacing the object. Same-origin only (see the
-	 * `@jest-environment-options` url above).
+	 * jsdom (>= 21) makes `window.location` non-configurable, so navigate via
+	 * the History API instead of replacing the object. Same-origin only (see
+	 * the `@jest-environment-options` url above).
 	 */
 	window.history.replaceState( {}, '', url );
 };
+
+// Captured before any test navigates, so each test starts from the env URL.
+const initialUrl = window.location.href;
+
+afterEach( () => {
+	window.history.replaceState( {}, '', initialUrl );
+} );
 
 const acceptErrorWithDuplicatedKeys = () => {
 	// React throws an error about the duplicated `key` in the render tree.

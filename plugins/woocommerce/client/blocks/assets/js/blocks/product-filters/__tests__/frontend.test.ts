@@ -12,7 +12,7 @@ const mockGetServerContext = jest.fn();
 const mockGetConfig = jest.fn();
 const mockReload = jest.fn();
 
-jest.mock( '../utils/navigation', () => ( {
+jest.mock( '../../../utils/navigation', () => ( {
 	reload: mockReload,
 } ) );
 
@@ -48,6 +48,9 @@ jest.mock(
 	{ virtual: true }
 );
 
+// Captured before any test navigates, so each test starts from the env URL.
+const initialUrl = window.location.href;
+
 describe( 'product filters interactivity store', () => {
 	beforeEach( () => {
 		jest.resetModules();
@@ -60,6 +63,10 @@ describe( 'product filters interactivity store', () => {
 		jest.isolateModules( () => {
 			require( '../frontend' );
 		} );
+	} );
+
+	afterEach( () => {
+		window.history.replaceState( {}, '', initialUrl );
 	} );
 
 	it( 'ignores invalid selectable item payloads', () => {

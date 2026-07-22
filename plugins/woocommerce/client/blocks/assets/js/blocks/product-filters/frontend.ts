@@ -15,7 +15,7 @@ import type {
 	ProductFiltersContext,
 } from './types';
 import { getClosestColor } from './utils/get-closest-color';
-import { reload } from './utils/navigation';
+import { reload } from '../../utils/navigation';
 import { PRODUCT_FILTERS_STORE_NAME } from './constants';
 
 const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
