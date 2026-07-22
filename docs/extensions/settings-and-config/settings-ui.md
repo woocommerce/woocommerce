@@ -1,7 +1,7 @@
 ---
 post_title: Settings UI
 sidebar_label: Settings UI
-sidebar_position: 5
+sidebar_position: 7
 ---
 
 # Settings UI
@@ -137,6 +137,45 @@ WooCommerce creates the settings UI adapter for registered sections internally. 
 
 Use a section id that does not conflict with an existing section on the same settings tab. For the `checkout` tab, ids that match existing payment gateway sections are reserved.
 
+### Provide a native Settings UI page for a registered section
+
+Sections with custom navigation, save handlers, or native Settings UI schemas can provide their own Settings UI page instead of using the legacy settings adapter.
+
+```php
+<?php
+use Automattic\WooCommerce\Admin\Settings\SettingsSection;
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
+
+final class My_Plugin_Settings_Section extends SettingsSection {
+	// Other settings section methods omitted for brevity.
+
+	public function get_settings_ui_page( WC_Settings_Page $parent_page ): ?SettingsUIPageInterface {
+		return new My_Plugin_Settings_UI_Page( $parent_page );
+	}
+}
+```
+
+When `get_settings_ui_page()` returns a `SettingsUIPageInterface`, WooCommerce uses it directly for the registered section. Returning `null` keeps the default behavior: WooCommerce converts the section's legacy `get_settings()` array into a Settings UI schema.
+
+### Section navigation on native pages
+
+The Settings UI shell renders sibling-section navigation from the `shell.sectionNavigation` schema key. How it applies depends on where the page is registered:
+
+-   **Top-level pages** never render shell section navigation. The classic section links render with the settings header instead, and any schema-provided value is cleared.
+-   **Drill-down pages** default to no section navigation, since the header breadcrumbs replace it. Setting a custom array renders it as tabs under the header; each entry needs `id`, `label`, `href`, and `active` keys.
+
+```php
+// Custom navigation entry shape.
+$schema['shell']['sectionNavigation'] = array(
+	array(
+		'id'     => 'my_section',
+		'label'  => __( 'My section', 'my-plugin' ),
+		'href'   => admin_url( 'admin.php?page=wc-settings&tab=checkout&section=my_section' ),
+		'active' => true,
+	),
+);
+```
+
 ## Native field migration
 
 The legacy adapter converts the existing `get_settings()` array into a canonical schema for React. It supports common settings fields:
@@ -266,7 +305,12 @@ Descriptions are sanitized with `wp_kses_post()`. Actions are structured data wi
 
 ## Page header
 
-A settings UI page that supplies its own schema (via `SettingsUIPageInterface::get_schema()`) can set header content through the `shell` key. Alongside `title` and `breadcrumbs`, the header supports a `subtitle` and `badges`:
+The shell header (the page title, badges, breadcrumbs, and the top save button) is reserved for drill-down pages. WooCommerce decides this from the page registration, so a page cannot change it through its schema:
+
+- Pages registered at the top level of settings, whether a `WC_Settings_Page` tab or a registered section, render without the header. The top-level settings tabs stay visible, pages with sections keep the classic section links, and the save button appears at the bottom of the page.
+- Sections of the Payments tab render as drill-down pages. The header replaces the top-level settings tabs, and its breadcrumbs default to a link back to the Payments tab when the schema does not provide any. The save button renders in the header.
+
+A settings UI page that supplies its own schema (via `SettingsUIPageInterface::get_schema()`) can set header content through the `shell` key for drill-down pages. Alongside `title` and `breadcrumbs`, the header supports a `subtitle` and `badges`:
 
 ```php
 $schema['shell']['subtitle'] = __( 'Manage your store payment settings.', 'my-plugin' );

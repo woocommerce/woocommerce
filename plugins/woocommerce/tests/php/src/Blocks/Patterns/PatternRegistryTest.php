@@ -58,46 +58,6 @@ class PatternRegistryTest extends \WP_UnitTestCase {
 		$this->pattern_registry->register_block_pattern( 'source', $pattern, [] );
 	}
 
-
-	/**
-	 * Test that a pattern should not be registered with a disabled feature flag.
-	 */
-	public function test_should_not_register_a_pattern_with_a_disabled_feature_flag() {
-		$pattern = [
-			'title'       => 'My Pattern',
-			'slug'        => 'my-pattern',
-			'featureFlag' => 'disabled-feature-flag',
-		];
-
-		$this->pattern_registry->register_block_pattern( 'source', $pattern, [] );
-
-		$this->assertFalse(
-			\WP_Block_Patterns_Registry::get_instance()->is_registered( $pattern['slug'] )
-		);
-	}
-
-	/**
-	 * Test that a pattern should be registered with an enabled feature flag.
-	 */
-	public function test_register_a_pattern_with_an_enabled_feature_flag() {
-		add_filter( 'woocommerce_admin_features', array( $this, 'enable_feature_flag' ) );
-
-		$pattern = [
-			'title'       => 'My Pattern',
-			'slug'        => 'my-pattern',
-			'content'     => 'My pattern content',
-			'featureFlag' => 'enabled-feature-flag',
-		];
-
-		$this->pattern_registry->register_block_pattern( 'source', $pattern, [] );
-
-		$this->assertTrue(
-			\WP_Block_Patterns_Registry::get_instance()->is_registered( $pattern['slug'] )
-		);
-
-		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_feature_flag' ) );
-	}
-
 	/**
 	 * Test that a pattern should not be registered without a title.
 	 */
@@ -176,6 +136,25 @@ class PatternRegistryTest extends \WP_UnitTestCase {
 			),
 			$cat2,
 		);
+	}
+
+	/**
+	 * Test HTML entities are decoded in pattern titles.
+	 */
+	public function test_html_entities_are_decoded_in_pattern_title() {
+		$pattern = [
+			'title'   => 'Featured Products: Fresh &amp; Tasty',
+			'slug'    => 'my-pattern',
+			'content' => '<!-- wp:group {"metadata":{"name":"Sweet Organic Lemons"}} -->
+<div class="wp-block-group"></div>
+<!-- /wp:group -->',
+		];
+
+		$this->pattern_registry->register_block_pattern( 'source', $pattern, [] );
+
+		$registered_pattern = \WP_Block_Patterns_Registry::get_instance()->get_registered( $pattern['slug'] );
+
+		$this->assertSame( 'Featured Products: Fresh & Tasty', $registered_pattern['title'] );
 	}
 
 	/**

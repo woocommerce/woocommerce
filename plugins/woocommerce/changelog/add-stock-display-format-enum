@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add StockDisplayFormat enum class for woocommerce_stock_format option values and adopt it in the Store API product schema.

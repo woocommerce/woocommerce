@@ -19,7 +19,7 @@
 	},
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
-		"@wordpress/env": "11.0.1-next.v.20260206T143.0"
+		"@wordpress/env": "11.9.0"
 	},
 	"config": {
 		"ci": {
@@ -58,7 +58,6 @@
 					"name": "PHPStan: PHP 7.4",
 					"testType": "static:analysis",
 					"command": "phpstan:php7",
-					"optional": true,
 					"changes": [
 						"**/*.php",
 						"**/*.neon",
@@ -73,7 +72,6 @@
 					"name": "PHPStan: PHP 8.4",
 					"testType": "static:analysis",
 					"command": "phpstan:php8",
-					"optional": true,
 					"changes": [
 						"**/*.php",
 						"**/*.neon",

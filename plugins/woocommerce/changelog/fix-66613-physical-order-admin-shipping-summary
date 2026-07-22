@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep shipping details visible in admin for physical Store API orders without a shipping method.

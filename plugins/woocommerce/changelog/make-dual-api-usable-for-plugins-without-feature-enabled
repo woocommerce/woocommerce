@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Dual API: endpoints registered by plugins no longer require the dual_code_graphql_api feature flag to be active.

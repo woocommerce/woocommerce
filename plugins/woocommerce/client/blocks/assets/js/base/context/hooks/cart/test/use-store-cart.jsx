@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import TestRenderer, { act } from 'react-test-renderer';
+import { renderHook } from '@testing-library/react';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 
@@ -21,7 +21,7 @@ jest.mock( '@woocommerce/block-data', () => ( {
 } ) );
 
 describe( 'useStoreCart', () => {
-	let registry, renderer;
+	let registry;
 
 	const mockCartItems = [ { key: '1', id: 1, name: 'Lorem Ipsum' } ];
 	const mockShippingAddress = {
@@ -78,23 +78,12 @@ describe( 'useStoreCart', () => {
 		hasPendingItemsOperations: false,
 	};
 
-	const getWrappedComponents = ( Component ) => (
-		<RegistryProvider value={ registry }>
-			<Component />
-		</RegistryProvider>
+	const wrapper = ( { children } ) => (
+		<RegistryProvider value={ registry }>{ children }</RegistryProvider>
 	);
 
-	const getTestComponent = ( options ) => () => {
-		const { receiveCart, receiveCartContents, ...results } =
-			useStoreCart( options );
-		return (
-			<div
-				data-results={ results }
-				data-receiveCart={ receiveCart }
-				data-receiveCartContents={ receiveCartContents }
-			/>
-		);
-	};
+	const renderStoreCartHook = ( options ) =>
+		renderHook( () => useStoreCart( options ), { wrapper } );
 
 	const setUpMocks = () => {
 		const mocks = {
@@ -120,7 +109,6 @@ describe( 'useStoreCart', () => {
 
 	beforeEach( () => {
 		registry = createRegistry();
-		renderer = null;
 		setUpMocks();
 	} );
 
@@ -136,20 +124,12 @@ describe( 'useStoreCart', () => {
 		} );
 
 		it( 'return default data when shouldSelect is false', () => {
-			const TestComponent = getTestComponent( {
+			const { result } = renderStoreCartHook( {
 				shouldSelect: false,
 			} );
 
-			act( () => {
-				renderer = TestRenderer.create(
-					getWrappedComponents( TestComponent )
-				);
-			} );
-
-			const props = renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
-			const results = props[ 'data-results' ];
-			const receiveCart = props[ 'data-receiveCart' ];
-			const receiveCartContents = props[ 'data-receiveCartContents' ];
+			const { receiveCart, receiveCartContents, ...results } =
+				result.current;
 
 			const {
 				receiveCart: defaultReceiveCart,
@@ -162,20 +142,12 @@ describe( 'useStoreCart', () => {
 		} );
 
 		it( 'return store data when shouldSelect is true', () => {
-			const TestComponent = getTestComponent( {
+			const { result } = renderStoreCartHook( {
 				shouldSelect: true,
 			} );
 
-			act( () => {
-				renderer = TestRenderer.create(
-					getWrappedComponents( TestComponent )
-				);
-			} );
-
-			const props = renderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
-			const results = props[ 'data-results' ];
-			const receiveCart = props[ 'data-receiveCart' ];
-			const receiveCartContents = props[ 'data-receiveCartContents' ];
+			const { receiveCart, receiveCartContents, ...results } =
+				result.current;
 
 			expect( results ).toEqual( mockStoreCartData );
 			expect( receiveCart ).toBeUndefined();

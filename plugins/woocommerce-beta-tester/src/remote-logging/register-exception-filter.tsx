@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @woocommerce/dependency-group */
 
 /**
  * External dependencies
@@ -28,7 +27,7 @@ const getSimulateErrorOptions = async () => {
 					option_value: string;
 					option_name: string;
 					option_id: number;
-				}
+				},
 			]
 		>( {
 			path,
