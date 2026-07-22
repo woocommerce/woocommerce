@@ -1534,7 +1534,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Sanitize an external product's button text for the current user.
 	 *
-	 * @since 11.1.0
+	 * @since 11.0.1
 	 * @param string $button_text Button text.
 	 * @return string Sanitized button text.
 	 */
