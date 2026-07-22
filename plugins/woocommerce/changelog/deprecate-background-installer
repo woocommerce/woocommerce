@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Deprecate WC_Install::background_installer() and WC_Install::theme_background_installer(), unused since the setup wizard that called them was deprecated in 4.6.0.
