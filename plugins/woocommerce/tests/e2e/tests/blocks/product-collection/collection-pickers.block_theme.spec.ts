@@ -203,67 +203,69 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 	}
 
 	test.describe( 'Collection switching', () => {
-		test( 'Switching from Hand-Picked to Products by Category shows taxonomy picker', async ( {
+		test( 'switches collections after Hand-Picked selection', async ( {
 			pageObject,
 			admin,
 			editor,
 		} ) => {
-			await admin.createNewPost();
-			await pageObject.insertProductCollection();
-			await pageObject.chooseCollectionInPost( 'handPicked' );
+			await test.step( 'Switching from Hand-Picked to Products by Category shows taxonomy picker', async () => {
+				await admin.createNewPost();
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInPost( 'handPicked' );
 
-			// Select a product and click Done
-			const productPicker = editor.canvas.locator(
-				SELECTORS.productPicker
-			);
-			await productPicker
-				.getByRole( 'checkbox', { name: 'Album (woo-album)' } )
-				.click();
-			await productPicker.locator( SELECTORS.pickerDoneButton ).click();
+				// Select a product and click Done
+				const productPicker = editor.canvas.locator(
+					SELECTORS.productPicker
+				);
+				await productPicker
+					.getByRole( 'checkbox', { name: 'Album (woo-album)' } )
+					.click();
+				await productPicker
+					.locator( SELECTORS.pickerDoneButton )
+					.click();
 
-			// Switch to Products by Category using toolbar
-			await pageObject.changeCollectionUsingToolbar(
-				'productsByCategory'
-			);
+				// Switch to Products by Category using toolbar
+				await pageObject.changeCollectionUsingToolbar(
+					'productsByCategory'
+				);
 
-			// Taxonomy picker should now be shown
-			const taxonomyPicker = editor.canvas.locator(
-				SELECTORS.taxonomyPicker
-			);
-			await expect( taxonomyPicker ).toBeVisible();
-		} );
+				// Taxonomy picker should now be shown
+				const taxonomyPicker = editor.canvas.locator(
+					SELECTORS.taxonomyPicker
+				);
+				await expect( taxonomyPicker ).toBeVisible();
+			} );
 
-		test( 'Switching to a non-picker collection displays products immediately', async ( {
-			pageObject,
-			admin,
-			editor,
-		} ) => {
-			await admin.createNewPost();
-			await pageObject.insertProductCollection();
-			await pageObject.chooseCollectionInPost( 'handPicked' );
+			await test.step( 'Switching to a non-picker collection displays products immediately', async () => {
+				await admin.createNewPost();
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInPost( 'handPicked' );
 
-			// Select a product and click Done
-			const productPicker = editor.canvas.locator(
-				SELECTORS.productPicker
-			);
-			await productPicker
-				.getByRole( 'checkbox', { name: 'Album (woo-album)' } )
-				.click();
-			await productPicker.locator( SELECTORS.pickerDoneButton ).click();
+				// Select a product and click Done
+				const productPicker = editor.canvas.locator(
+					SELECTORS.productPicker
+				);
+				await productPicker
+					.getByRole( 'checkbox', { name: 'Album (woo-album)' } )
+					.click();
+				await productPicker
+					.locator( SELECTORS.pickerDoneButton )
+					.click();
 
-			// Switch to Featured Products (no picker needed)
-			await pageObject.changeCollectionUsingToolbar( 'featured' );
+				// Switch to Featured Products (no picker needed)
+				await pageObject.changeCollectionUsingToolbar( 'featured' );
 
-			// No picker should be shown
-			await expect( productPicker ).toBeHidden();
-			const taxonomyPicker = editor.canvas.locator(
-				SELECTORS.taxonomyPicker
-			);
-			await expect( taxonomyPicker ).toBeHidden();
+				// No picker should be shown
+				await expect( productPicker ).toBeHidden();
+				const taxonomyPicker = editor.canvas.locator(
+					SELECTORS.taxonomyPicker
+				);
+				await expect( taxonomyPicker ).toBeHidden();
 
-			// Products should be displayed
-			await pageObject.refreshLocators( 'editor' );
-			await expect( pageObject.products ).toHaveCount( 4 );
+				// Products should be displayed
+				await pageObject.refreshLocators( 'editor' );
+				await expect( pageObject.products ).toHaveCount( 4 );
+			} );
 		} );
 	} );
 } );
