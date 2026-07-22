@@ -137,12 +137,15 @@ test.describe( 'Product Collection', () => {
 		).toBeVisible();
 	} );
 
-	test.describe( 'when no results are found', () => {
-		test.beforeEach( async ( { admin } ) => {
+	test( 'Handles Product Collection no-results rendering cases', async ( {
+		admin,
+		page,
+		editor,
+		pageObject,
+	} ) => {
+		await test.step( 'does not render', async () => {
 			await admin.createNewPost();
-		} );
 
-		test( 'does not render', async ( { page, editor, pageObject } ) => {
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'featured' );
 			await pageObject.addFilter( 'Price Range' );
@@ -172,10 +175,9 @@ test.describe( 'Product Collection', () => {
 
 		// This test ensures the runtime render state is correctly reset for
 		// each block.
-		test( 'does not prevent subsequent blocks from render', async ( {
-			page,
-			pageObject,
-		} ) => {
+		await test.step( 'does not prevent subsequent blocks from render', async () => {
+			await admin.createNewPost();
+
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'featured' );
 			await pageObject.addFilter( 'Price Range' );
@@ -198,11 +200,9 @@ test.describe( 'Product Collection', () => {
 			);
 		} );
 
-		test( 'renders if No Results block is present', async ( {
-			page,
-			editor,
-			pageObject,
-		} ) => {
+		await test.step( 'renders if No Results block is present', async () => {
+			await admin.createNewPost();
+
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'productCatalog' );
 			await pageObject.addFilter( 'Price Range' );
