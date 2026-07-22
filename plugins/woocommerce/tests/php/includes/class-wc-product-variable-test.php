@@ -410,8 +410,9 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox get_variation_prices returns a valid array structure when the woocommerce_variation_prices filter returns malformed data (null or false), restoring the pre-refactor foreach behaviour that tolerated non-array filter output.
-	 *
 	 * @dataProvider provider_malformed_variation_prices_filter_values
+	 *
+	 * @param mixed $malformed_value The malformed value for returning via woocommerce_get_variation_prices_hash filter.
 	 */
 	public function test_get_variation_prices_tolerates_malformed_filter_output( mixed $malformed_value ): void {
 		$product = WC_Helper_Product::create_variation_product();
