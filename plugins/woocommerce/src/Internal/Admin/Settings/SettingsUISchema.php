@@ -137,6 +137,117 @@ class SettingsUISchema {
 	}
 
 	/**
+	 * Canonicalize option values supplied by native Settings UI schema providers.
+	 *
+	 * Schemas built from legacy settings always carry string option values, but
+	 * native providers can supply any scalar. The client matches options against
+	 * the stored value with strict string comparison, so scalar option values
+	 * and the selected values they match are cast to strings here. Malformed
+	 * entries remain unchanged for the provider to fix.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $schema Settings UI schema.
+	 * @return array Schema with scalar option values canonicalized to strings.
+	 */
+	public static function canonicalize_option_values( array $schema ): array {
+		if ( ! isset( $schema['groups'] ) || ! is_array( $schema['groups'] ) ) {
+			return $schema;
+		}
+
+		$converted_fields = array();
+
+		foreach ( $schema['groups'] as &$group ) {
+			if ( ! is_array( $group ) || ! isset( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
+				continue;
+			}
+
+			foreach ( $group['fields'] as &$field ) {
+				if (
+					! is_array( $field ) ||
+					! isset( $field['id'], $field['options'] ) ||
+					! is_string( $field['id'] ) ||
+					! is_array( $field['options'] )
+				) {
+					continue;
+				}
+
+				$converted = false;
+
+				foreach ( $field['options'] as &$option ) {
+					if (
+						! is_array( $option ) ||
+						! array_key_exists( 'value', $option ) ||
+						is_string( $option['value'] ) ||
+						! is_scalar( $option['value'] )
+					) {
+						continue;
+					}
+
+					$option['value'] = (string) $option['value'];
+					$converted       = true;
+				}
+				unset( $option );
+
+				if ( array_key_exists( 'value', $field ) ) {
+					if ( is_scalar( $field['value'] ) && ! is_string( $field['value'] ) ) {
+						$field['value'] = (string) $field['value'];
+						$converted      = true;
+					} elseif ( is_array( $field['value'] ) ) {
+						$canonical_list = self::canonicalize_scalar_list( $field['value'] );
+						if ( null !== $canonical_list ) {
+							$field['value'] = $canonical_list;
+							$converted      = true;
+						}
+					}
+				}
+
+				if ( $converted ) {
+					$converted_fields[] = $field['id'];
+				}
+			}
+			unset( $field );
+		}
+		unset( $group );
+
+		if ( ! empty( $converted_fields ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: comma-separated field ids. */
+					esc_html__( 'A Settings UI schema provider supplied non-string option values that WooCommerce converted for compatibility: %s. Update the provider to supply string values.', 'woocommerce' ),
+					esc_html( implode( ', ', array_unique( $converted_fields ) ) )
+				),
+				'11.1.0'
+			);
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Canonicalize a list of scalar values to strings.
+	 *
+	 * @param array $values Candidate value list.
+	 * @return array|null String list, or null when unchanged or not a scalar list.
+	 */
+	private static function canonicalize_scalar_list( array $values ): ?array {
+		$needs_conversion = false;
+
+		foreach ( $values as $item ) {
+			if ( ! is_scalar( $item ) ) {
+				return null;
+			}
+
+			if ( ! is_string( $item ) ) {
+				$needs_conversion = true;
+			}
+		}
+
+		return $needs_conversion ? array_map( 'strval', array_values( $values ) ) : null;
+	}
+
+	/**
 	 * Transform a legacy field into the canonical schema.
 	 *
 	 * @param array       $setting Legacy field definition.
