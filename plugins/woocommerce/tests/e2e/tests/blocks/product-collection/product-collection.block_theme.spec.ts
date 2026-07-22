@@ -232,73 +232,81 @@ test.describe( 'Product Collection', () => {
 			'Add to cart', // woocommerce/product-button
 		];
 
-		test( 'In a post', async ( { page, editor, pageObject } ) => {
-			await pageObject.createNewPostAndInsertBlock();
-
-			await expect(
-				editor.canvas.locator( '[data-testid="product-image"]:visible' )
-			).toHaveCount( 9 );
-
-			await pageObject.insertProductElements();
-			await pageObject.publishAndGoToFrontend();
-
-			for ( const content of expectedProductContent ) {
-				await expect(
-					page.locator( '.wc-block-product-template' )
-				).toContainText( content );
-			}
-		} );
-
-		test( 'In a Product Archive (Product Catalog)', async ( {
+		test( 'In a post, Product Archive, and Home Page', async ( {
 			page,
 			editor,
 			pageObject,
 		} ) => {
-			await pageObject.goToEditorTemplate();
+			await test.step( 'In a post', async () => {
+				await pageObject.createNewPostAndInsertBlock();
 
-			await expect(
-				editor.canvas.locator( '[data-testid="product-image"]:visible' )
-			).toHaveCount( 16 );
-
-			await pageObject.insertProductElements();
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-			await pageObject.goToProductCatalogFrontend();
-
-			// Workaround for the issue with the product change not being
-			// reflected in the frontend yet.
-			try {
-				await page.getByText( 'woo-beanie' ).waitFor();
-			} catch ( _error ) {
-				await page.reload();
-			}
-
-			for ( const content of expectedProductContent ) {
 				await expect(
-					page.locator( '.wc-block-product-template' )
-				).toContainText( content );
-			}
-		} );
+					editor.canvas.locator(
+						'[data-testid="product-image"]:visible'
+					)
+				).toHaveCount( 9 );
 
-		test( 'On a Home Page', async ( { page, editor, pageObject } ) => {
-			await pageObject.goToHomePageAndInsertCollection();
+				await pageObject.insertProductElements();
+				await pageObject.publishAndGoToFrontend();
 
-			await expect(
-				editor.canvas.locator( '[data-testid="product-image"]:visible' )
-			).toHaveCount( 9 );
-
-			await pageObject.insertProductElements();
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
+				for ( const content of expectedProductContent ) {
+					await expect(
+						page.locator( '.wc-block-product-template' )
+					).toContainText( content );
+				}
 			} );
-			await pageObject.goToHomePageFrontend();
 
-			for ( const content of expectedProductContent ) {
+			await test.step( 'In a Product Archive (Product Catalog)', async () => {
+				await pageObject.goToEditorTemplate();
+
 				await expect(
-					page.locator( '.wc-block-product-template' )
-				).toContainText( content );
-			}
+					editor.canvas.locator(
+						'[data-testid="product-image"]:visible'
+					)
+				).toHaveCount( 16 );
+
+				await pageObject.insertProductElements();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
+				await pageObject.goToProductCatalogFrontend();
+
+				// Workaround for the issue with the product change not being
+				// reflected in the frontend yet.
+				try {
+					await page.getByText( 'woo-beanie' ).waitFor();
+				} catch ( _error ) {
+					await page.reload();
+				}
+
+				for ( const content of expectedProductContent ) {
+					await expect(
+						page.locator( '.wc-block-product-template' )
+					).toContainText( content );
+				}
+			} );
+
+			await test.step( 'On a Home Page', async () => {
+				await pageObject.goToHomePageAndInsertCollection();
+
+				await expect(
+					editor.canvas.locator(
+						'[data-testid="product-image"]:visible'
+					)
+				).toHaveCount( 9 );
+
+				await pageObject.insertProductElements();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
+				await pageObject.goToHomePageFrontend();
+
+				for ( const content of expectedProductContent ) {
+					await expect(
+						page.locator( '.wc-block-product-template' )
+					).toContainText( content );
+				}
+			} );
 		} );
 	} );
 
