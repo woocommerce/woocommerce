@@ -85,45 +85,49 @@ test.describe( 'Product Collection: Collections', () => {
 		await expect( pageObject.products ).toHaveCount( 5 );
 	} );
 
-	test( 'On Sale Products collection can be added and displays proper products', async ( {
+	test( 'On Sale and Featured Product collections can be added and display proper products', async ( {
 		pageObject,
 	} ) => {
-		await pageObject.createNewPostAndInsertBlock( 'onSale' );
+		await test.step( 'On Sale Products collection can be added and displays proper products', async () => {
+			await pageObject.createNewPostAndInsertBlock( 'onSale' );
 
-		const onSaleProducts = [
-			'Beanie',
-			'Beanie with Logo',
-			'Belt',
-			'Cap',
-			'Hoodie',
-		];
+			const onSaleProducts = [
+				'Beanie',
+				'Beanie with Logo',
+				'Belt',
+				'Cap',
+				'Hoodie',
+			];
 
-		await expect( pageObject.products ).toHaveCount( 5 );
-		await expect( pageObject.productTitles ).toHaveText( onSaleProducts );
+			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( pageObject.productTitles ).toHaveText(
+				onSaleProducts
+			);
 
-		await pageObject.publishAndGoToFrontend();
+			await pageObject.publishAndGoToFrontend();
 
-		await expect( pageObject.products ).toHaveCount( 5 );
-	} );
+			await expect( pageObject.products ).toHaveCount( 5 );
+		} );
 
-	test( 'Featured Products collection can be added and displays proper products', async ( {
-		pageObject,
-	} ) => {
-		await pageObject.createNewPostAndInsertBlock( 'featured' );
+		await test.step( 'Featured Products collection can be added and displays proper products', async () => {
+			await pageObject.createNewPostAndInsertBlock( 'featured' );
 
-		const featuredProducts = [
-			'Cap',
-			'Hoodie with Zipper',
-			'Sunglasses',
-			'V-Neck T-Shirt',
-		];
+			const featuredProducts = [
+				'Cap',
+				'Hoodie with Zipper',
+				'Sunglasses',
+				'V-Neck T-Shirt',
+			];
 
-		await expect( pageObject.products ).toHaveCount( 4 );
-		await expect( pageObject.productTitles ).toHaveText( featuredProducts );
+			await expect( pageObject.products ).toHaveCount( 4 );
+			await expect( pageObject.productTitles ).toHaveText(
+				featuredProducts
+			);
 
-		await pageObject.publishAndGoToFrontend();
+			await pageObject.publishAndGoToFrontend();
 
-		await expect( pageObject.products ).toHaveCount( 4 );
+			await expect( pageObject.products ).toHaveCount( 4 );
+		} );
 	} );
 
 	test( 'Product Catalog collection can be added in post and syncs query with template', async ( {
