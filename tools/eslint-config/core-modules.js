@@ -27,7 +27,6 @@ const coreModules = [
 	'@woocommerce/navigation',
 	'@woocommerce/number',
 	'@woocommerce/onboarding',
-	'@woocommerce/product-editor',
 	'@woocommerce/settings',
 	'@woocommerce/tracks',
 
