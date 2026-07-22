@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a woocommerce_order_step_logging_enabled filter that allows disabling per-order place-order-debug logging without raising the site-wide logging level threshold.

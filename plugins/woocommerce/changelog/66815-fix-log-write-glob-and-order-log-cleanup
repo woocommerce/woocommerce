@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Log writes no longer scan the whole wc-logs directory to locate their target file (the path is now constructed deterministically), and the daily place-order debug log cleanup now drains all eligible files and order meta in batches instead of stopping at 100 per day, so busy stores no longer accumulate log files faster than they are removed.
