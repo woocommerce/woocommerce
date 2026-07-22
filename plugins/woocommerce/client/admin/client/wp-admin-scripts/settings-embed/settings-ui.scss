@@ -127,6 +127,13 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			outline: none;
 		}
 
+		// WPDS focus ring, inset so the tab bar's overflow clipping keeps it visible.
+		&:focus-visible {
+			border-radius: var(--wpds-border-radius-sm);
+			outline: var(--wpds-border-width-focus, 2px) solid var(--wpds-color-stroke-focus);
+			outline-offset: calc(var(--wpds-border-width-focus, 2px) * -1);
+		}
+
 		&.is-active {
 			color: var(--wpds-color-foreground-interactive-neutral);
 
