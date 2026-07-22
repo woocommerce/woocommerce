@@ -68,12 +68,12 @@ For cache setups that want to go further, WooCommerce exposes the `woocommerce_s
 
 ```php
 /**
- * @param bool   $default   Whether the output should be hydrated with per-user data.
- *                          True when the request is personalized (logged-in user or non-empty cart).
- * @param string $namespace Block or IAPI store namespace making the decision (e.g. `woocommerce/mini-cart`).
- * @return bool             Return false to emit neutral output that is safe to store in a shared cache.
+ * @param bool   $default         Whether the output should be hydrated with per-user data.
+ *                                True when the request is personalized (logged-in user or non-empty cart).
+ * @param string $store_namespace Block or IAPI store namespace making the decision (e.g. `woocommerce/mini-cart`).
+ * @return bool                   Return false to emit neutral output that is safe to store in a shared cache.
  */
-apply_filters( 'woocommerce_should_hydrate', $default, $namespace );
+apply_filters( 'woocommerce_should_hydrate', $default, $store_namespace );
 ```
 
 There is no setting for this; the filter is the only opt-in surface, and it is intended for cache integrations (CDNs, page caches, hosts) that know the caching policy applied to the request. The default is request-aware and matches existing behavior: hydrate when the request is personalized anyway (logged-in user, or a session with a non-empty cart — requests a policy-following cache layer bypasses on the cart/session cookies), emit neutral output otherwise. With no filter registered, nothing changes.
@@ -94,30 +94,7 @@ add_filter(
 );
 ```
 
-Shoppers with a cart then receive the shared neutral page, and the Mini-Cart, Product Button, Cart, and Checkout blocks fetch their real data from the Store API on load. Logged-in traffic keeps full hydration because those requests are expected to bypass the cache.
-
-### Header-gating recipe
-
-A CDN that can add a request header on origin fetches can align the decision with its per-request policy — hydrate exactly when the response will not be stored, neutral exactly when it will:
-
-```php
-add_filter(
-	'woocommerce_should_hydrate',
-	function ( $default ) {
-		// Only let the CDN gate anonymous traffic; logged-in users keep full hydration.
-		if ( is_user_logged_in() ) {
-			return $default;
-		}
-
-		// CDN sets this header on the (cacheable) variant of the request.
-		if ( isset( $_SERVER['HTTP_X_WC_CACHE'] ) && 'cache' === $_SERVER['HTTP_X_WC_CACHE'] ) {
-			return false; // Emit anonymous, cacheable output.
-		}
-
-		return $default;
-	}
-);
-```
+Shoppers with a cart then receive the shared neutral page, and the Mini-Cart, Product Button, Cart, and Checkout blocks fetch their real data from the Store API on load. The Checkout block does this with a single `GET /wc/store/v1/checkout?__experimental_calc_totals=true` request, which returns both the checkout and cart payloads (see the [Checkout API documentation](/docs/apis/store-api/resources-endpoints/checkout)). Logged-in traffic keeps full hydration because those requests are expected to bypass the cache.
 
 ### Known limitation: server-only blocks that depend on the cart
 
