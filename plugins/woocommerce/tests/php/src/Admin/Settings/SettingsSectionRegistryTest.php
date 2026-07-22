@@ -365,6 +365,19 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should hide the top-level tabs for drill-down Settings UI pages.
+	 */
+	public function test_hides_top_level_tabs_for_drill_down_settings_ui_pages(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section_with_native_settings_ui_page() );
+
+		$output = $this->render_settings_view_for_checkout_section( 'acme_payments' );
+
+		$this->assertStringContainsString( 'data-wc-settings-page="acme_native"', $output );
+		$this->assertStringNotContainsString( 'nav-tab-wrapper', $output, 'Drill-down pages replace the top-level tabs with the shell header.' );
+	}
+
+	/**
 	 * @testdox Should preserve classic navigation when a registered drill-down falls back.
 	 *
 	 * @dataProvider settings_ui_failure_stages
