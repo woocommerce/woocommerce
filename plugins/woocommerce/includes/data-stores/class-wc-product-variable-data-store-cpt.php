@@ -551,10 +551,21 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			 * @param WC_Product $product      The variable product object.
 			 * @param bool       $for_display  Whether prices are being retrieved for display.
 			 */
-			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $product, $for_display );
+			$filtered = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $product, $for_display );
+			if ( $this->validate_price_data_entry( $filtered ) ) {
+				$this->prices_array[ $price_hash ] = $filtered;
+			} else {
+				$this->prices_array[ $price_hash ] = $transient_cached_prices_array[ $price_hash ];
+			}
+
 			if ( ! is_null( $opposite_price_hash ) && $opposite_price_hash !== $price_hash ) {
 				// phpcs:ignore WooCommerce.Commenting.CommentHooks
-				$this->prices_array[ $opposite_price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $opposite_price_hash ], $product, ! $for_display );
+				$filtered_opposite = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $opposite_price_hash ], $product, ! $for_display );
+				if ( $this->validate_price_data_entry( $filtered_opposite ) ) {
+					$this->prices_array[ $opposite_price_hash ] = $filtered_opposite;
+				} else {
+					$this->prices_array[ $opposite_price_hash ] = $transient_cached_prices_array[ $opposite_price_hash ];
+				}
 			}
 		}
 		return $this->prices_array[ $price_hash ];
@@ -1106,6 +1117,34 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		// If price is empty, we want to rebuild the data.
 		if ( $price_data_is_empty ) {
 			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validate the structure of a single price data entry.
+	 *
+	 * Ensures the entry matches the documented shape of the woocommerce_variation_prices filter
+	 * return value: an array with 'price', 'regular_price', and 'sale_price' keys, each
+	 * mapping to an array of variation_id => price pairs.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param mixed $entry The filter return value to validate.
+	 * @return bool True if the entry has the expected structure.
+	 */
+	protected function validate_price_data_entry( $entry ): bool {
+		if ( ! is_array( $entry ) ) {
+			return false;
+		}
+
+		$required_types = array( 'price', 'regular_price', 'sale_price' );
+
+		foreach ( $required_types as $type ) {
+			if ( ! isset( $entry[ $type ] ) || ! is_array( $entry[ $type ] ) ) {
+				return false;
+			}
 		}
 
 		return true;
