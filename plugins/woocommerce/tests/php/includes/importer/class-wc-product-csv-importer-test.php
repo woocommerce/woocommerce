@@ -153,6 +153,98 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test that new variations of an existing variable product are created when updating existing products.
+	 */
+	public function test_import_creates_new_variations_of_existing_products_26256() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import 26256 Tee' );
+		$product->set_sku( 'IMPORT-26256-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$csv_file = __DIR__ . '/import-adding-variations-26256-data.csv';
+		$args     = array(
+			'parse'           => true,
+			'update_existing' => true,
+			'mapping'         => array(
+				'Type'                 => 'type',
+				'SKU'                  => 'sku',
+				'Name'                 => 'name',
+				'Parent'               => 'parent_id',
+				'Attribute 1 name'     => 'attributes:name1',
+				'Attribute 1 value(s)' => 'attributes:value1',
+				'Attribute 1 global'   => 'attributes:taxonomy1',
+				'Regular price'        => 'regular_price',
+			),
+		);
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$data     = $importer->import();
+
+		$this->assertEquals( array( $product->get_id() ), $data['updated'], 'Expected the existing parent product to be updated' );
+		$this->assertCount( 1, $data['imported_variations'], 'Expected 1 imported variation, got ' . count( $data['imported_variations'] ) );
+		$this->assertEmpty( $data['failed'], 'Expected 0 failed products, got ' . count( $data['failed'] ) );
+		$this->assertCount( 1, $data['skipped'], 'Expected 1 skipped product, got ' . count( $data['skipped'] ) );
+		$this->assertEquals( 'No matching product exists to update.', $data['skipped'][0]->get_error_message() );
+
+		$variation = wc_get_product( $data['imported_variations'][0] );
+		$this->assertEquals( $product->get_id(), $variation->get_parent_id(), 'Expected the new variation to belong to the existing parent' );
+		$this->assertEquals( 'IMPORT-26256-L', $variation->get_sku() );
+		$this->assertEquals( array( 'size' => 'L' ), $variation->get_attributes() );
+
+		WC_Helper_Product::delete_product( $variation->get_id() );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Test that new variations are still skipped when updating existing products if the filter disables their creation.
+	 */
+	public function test_import_skips_new_variations_when_creation_is_disabled_via_filter_26256() {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'S', 'M' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Import 26256 Tee' );
+		$product->set_sku( 'IMPORT-26256-PARENT' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		add_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_false' );
+
+		$csv_file = __DIR__ . '/import-adding-variations-26256-data.csv';
+		$args     = array(
+			'parse'           => true,
+			'update_existing' => true,
+			'mapping'         => array(
+				'Type'                 => 'type',
+				'SKU'                  => 'sku',
+				'Name'                 => 'name',
+				'Parent'               => 'parent_id',
+				'Attribute 1 name'     => 'attributes:name1',
+				'Attribute 1 value(s)' => 'attributes:value1',
+				'Attribute 1 global'   => 'attributes:taxonomy1',
+				'Regular price'        => 'regular_price',
+			),
+		);
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$data     = $importer->import();
+
+		remove_filter( 'woocommerce_product_import_create_variation_of_existing_product', '__return_false' );
+
+		$this->assertEquals( array( $product->get_id() ), $data['updated'], 'Expected the existing parent product to be updated' );
+		$this->assertEmpty( $data['imported_variations'], 'Expected 0 imported variations, got ' . count( $data['imported_variations'] ) );
+		$this->assertCount( 2, $data['skipped'], 'Expected 2 skipped products, got ' . count( $data['skipped'] ) );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
 	 * @testdox Test that attributes with non-ASCII characters are correctly set to "Used for Variations" during import.
 	 */
 	public function test_variable_product_attributes_with_non_ascii_characters_set_to_used_for_variations() {

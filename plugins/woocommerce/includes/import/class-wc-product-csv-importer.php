@@ -1215,16 +1215,35 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) ) && ! $id_exists && ! $sku_exists ) {
-				$data['skipped'][] = new WP_Error(
-					'woocommerce_product_importer_error',
-					esc_html__( 'No matching product exists to update.', 'woocommerce' ),
-					array(
-						'id'  => $id,
-						'sku' => esc_attr( $sku ),
-						'row' => $this->get_row_id( $parsed_data ),
-					)
-				);
-				continue;
+				// A parent with the 'importing' status is a placeholder, meaning the parent does not exist either.
+				$parent = false;
+				if ( ProductType::VARIATION === ( $parsed_data['type'] ?? '' ) && ! empty( $parsed_data['parent_id'] ) ) {
+					$parent = wc_get_product( $parsed_data['parent_id'] );
+				}
+				$create_variation = $parent && 'importing' !== $parent->get_status();
+
+				/**
+				 * Filters whether a new variation should be created for an existing variable product when updating existing products.
+				 *
+				 * @since 11.1.0
+				 *
+				 * @param bool  $create_variation Whether to create the new variation instead of skipping the row.
+				 * @param array $parsed_data      Parsed row data.
+				 */
+				$create_variation = apply_filters( 'woocommerce_product_import_create_variation_of_existing_product', $create_variation, $parsed_data );
+
+				if ( ! $create_variation ) {
+					$data['skipped'][] = new WP_Error(
+						'woocommerce_product_importer_error',
+						esc_html__( 'No matching product exists to update.', 'woocommerce' ),
+						array(
+							'id'  => $id,
+							'sku' => esc_attr( $sku ),
+							'row' => $this->get_row_id( $parsed_data ),
+						)
+					);
+					continue;
+				}
 			}
 
 			$result = $this->process_item( $parsed_data );
