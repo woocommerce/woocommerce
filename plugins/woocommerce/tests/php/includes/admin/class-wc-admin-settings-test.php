@@ -291,9 +291,9 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should render radio settings without an invalid header label.
+	 * @testdox Should label radio settings from their visible title.
 	 */
-	public function test_output_fields_renders_radio_setting_without_invalid_header_label(): void {
+	public function test_output_fields_labels_radio_setting_from_visible_title(): void {
 		$options = array(
 			array(
 				'id'       => 'test_radio_setting',
@@ -328,12 +328,15 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 
 		$header      = '//th[contains(concat(" ", normalize-space(@class), " "), " titledesc ")]';
 		$radio_title = $header . '/span[contains(concat(" ", normalize-space(@class), " "), " wc-settings-radio-title ")]';
+		$title_text  = $radio_title . '/span[@id="test_radio_setting-title"]';
 		$radio       = '//td[contains(concat(" ", normalize-space(@class), " "), " forminp-radio ")]';
 
 		$this->assertSame( 0, $xpath->query( $header . '/label[@for="test_radio_setting"]' )->length );
-		$this->assertSame( 1, $xpath->query( $radio_title . '[contains(normalize-space(.), "Radio title")]' )->length );
+		$this->assertSame( 0, $xpath->query( $radio_title . '[@id]' )->length );
+		$this->assertSame( 1, $xpath->query( $title_text . '[normalize-space(.)="Radio title"]' )->length );
 		$this->assertSame( 1, $xpath->query( $radio_title . '/span[contains(concat(" ", normalize-space(@class), " "), " woocommerce-help-tip ")][@aria-label="Radio help"]' )->length );
-		$this->assertSame( 1, $xpath->query( $radio . '/fieldset/legend[contains(concat(" ", normalize-space(@class), " "), " screen-reader-text ")]/span[normalize-space(.)="Radio title"]' )->length );
+		$this->assertSame( 1, $xpath->query( $radio . '/fieldset[@aria-labelledby="test_radio_setting-title"]' )->length );
+		$this->assertSame( 0, $xpath->query( $radio . '/fieldset/legend' )->length );
 		$this->assertSame( 2, $xpath->query( $radio . '//input[@type="radio"]' )->length );
 	}
 
