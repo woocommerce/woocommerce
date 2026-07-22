@@ -8,61 +8,73 @@ const blockData = {
 };
 
 test.describe( `${ blockData.slug } Block`, () => {
-	test( 'can be inserted in Post Editor and it is visible on the frontend', async ( {
+	test( 'covers frontend rendering and category image editing', async ( {
 		editor,
 		admin,
 		frontendUtils,
 	} ) => {
-		await admin.createNewPost();
-		await editor.insertBlock( { name: blockData.slug } );
-		const blockLocator = await editor.getBlockByName( blockData.slug );
-		await blockLocator.getByText( 'Music' ).click();
-		await blockLocator.getByText( 'Done' ).click();
-		await editor.publishAndVisitPost();
-		const blockLocatorFrontend = await frontendUtils.getBlockByName(
-			blockData.slug
-		);
-		await expect( blockLocatorFrontend ).toBeVisible();
-		await expect( blockLocatorFrontend.getByText( 'Music' ) ).toBeVisible();
-		await expect(
-			blockLocatorFrontend.getByText( 'Shop now' )
-		).toBeVisible();
-	} );
-
-	test( 'image can be edited', async ( { editor, admin } ) => {
-		await test.step( 'Create a product category with an image', async () => {
-			// Get the id of the image associated to the Cap product (for example).
-			const productCliOutput = await wpCLI(
-				`post list --post_type=product --title=Cap --field=ID`
+		await test.step( 'can be inserted in Post Editor and it is visible on the frontend', async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( { name: blockData.slug } );
+			const blockLocator = await editor.getBlockByName( blockData.slug );
+			await blockLocator.getByText( 'Music' ).click();
+			await blockLocator.getByText( 'Done' ).click();
+			await editor.publishAndVisitPost();
+			const blockLocatorFrontend = await frontendUtils.getBlockByName(
+				blockData.slug
 			);
-			const productId = productCliOutput.stdout.match( /\d+/g )?.pop();
-			const mediaCliOutput = await wpCLI(
-				`post meta get ${ productId } _thumbnail_id`
-			);
-			const mediaId = mediaCliOutput.stdout.match( /\d+/g )?.pop();
-
-			// Create a product category with that image.
-			const categoryCliOutput = await wpCLI(
-				`wc product_cat create --name="Test Category" --slug="test-category" --image='{ "id": ${ mediaId } }' --user=1`
-			);
-			const categoryId = categoryCliOutput.stdout.match( /\d+/g )?.pop();
-			await wpCLI(
-				`wc product update ${ productId } --categories='[ { "id": ${ categoryId } } ]' --user=1`
-			);
+			await expect( blockLocatorFrontend ).toBeVisible();
+			await expect(
+				blockLocatorFrontend.getByText( 'Music' )
+			).toBeVisible();
+			await expect(
+				blockLocatorFrontend.getByText( 'Shop now' )
+			).toBeVisible();
 		} );
 
-		await admin.createNewPost();
-		await editor.insertBlock( { name: blockData.slug } );
-		const blockLocator = await editor.getBlockByName( blockData.slug );
-		await blockLocator.getByText( 'Test Category' ).click();
-		await blockLocator.getByText( 'Done' ).click();
-		await editor.clickBlockToolbarButton( 'Edit category image' );
-		await editor.clickBlockToolbarButton( 'Rotate' );
-		await editor.page
-			.getByRole( 'button', { name: 'Apply', exact: true } )
-			.click();
-		await expect(
-			editor.canvas.locator( 'img[alt="Test Category"][src*="-edited"]' )
-		).toBeVisible();
+		await test.step( 'image can be edited', async () => {
+			// Preserve the original nested setup diagnostic within the combined journey.
+			// eslint-disable-next-line playwright/no-nested-step
+			await test.step( 'Create a product category with an image', async () => {
+				// Get the id of the image associated to the Cap product (for example).
+				const productCliOutput = await wpCLI(
+					`post list --post_type=product --title=Cap --field=ID`
+				);
+				const productId = productCliOutput.stdout
+					.match( /\d+/g )
+					?.pop();
+				const mediaCliOutput = await wpCLI(
+					`post meta get ${ productId } _thumbnail_id`
+				);
+				const mediaId = mediaCliOutput.stdout.match( /\d+/g )?.pop();
+
+				// Create a product category with that image.
+				const categoryCliOutput = await wpCLI(
+					`wc product_cat create --name="Test Category" --slug="test-category" --image='{ "id": ${ mediaId } }' --user=1`
+				);
+				const categoryId = categoryCliOutput.stdout
+					.match( /\d+/g )
+					?.pop();
+				await wpCLI(
+					`wc product update ${ productId } --categories='[ { "id": ${ categoryId } } ]' --user=1`
+				);
+			} );
+
+			await admin.createNewPost();
+			await editor.insertBlock( { name: blockData.slug } );
+			const blockLocator = await editor.getBlockByName( blockData.slug );
+			await blockLocator.getByText( 'Test Category' ).click();
+			await blockLocator.getByText( 'Done' ).click();
+			await editor.clickBlockToolbarButton( 'Edit category image' );
+			await editor.clickBlockToolbarButton( 'Rotate' );
+			await editor.page
+				.getByRole( 'button', { name: 'Apply', exact: true } )
+				.click();
+			await expect(
+				editor.canvas.locator(
+					'img[alt="Test Category"][src*="-edited"]'
+				)
+			).toBeVisible();
+		} );
 	} );
 } );
