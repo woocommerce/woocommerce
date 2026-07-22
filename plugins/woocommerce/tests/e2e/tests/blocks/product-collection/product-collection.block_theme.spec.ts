@@ -821,104 +821,100 @@ test.describe( 'Product Collection', () => {
 		},
 	] as const;
 
-	templates.forEach(
-		( {
+	test( 'Product Collection block matches with classic template blocks', async ( {
+		pageObject,
+		requestUtils,
+		admin,
+		editor,
+		page,
+	} ) => {
+		for ( const {
 			templateTitle,
 			slug,
 			frontendPage,
 			legacyBlockName,
 			expectedProductsCount,
-		} ) => {
-			test.describe( `${ templateTitle } template`, () => {
-				test( 'Product Collection block matches with classic template block', async ( {
-					pageObject,
-					requestUtils,
-					admin,
-					editor,
-					page,
-				} ) => {
-					await pageObject.refreshLocators( 'frontend' );
+		} of templates ) {
+			await test.step( `${ templateTitle } template › Product Collection block matches with classic template block`, async () => {
+				await pageObject.refreshLocators( 'frontend' );
 
-					await page.goto( frontendPage );
+				await page.goto( frontendPage );
 
-					const productCollectionProductNames =
-						await pageObject.getProductNames();
+				const productCollectionProductNames =
+					await pageObject.getProductNames();
 
-					const createRestTemplate = async () => {
-						const templateContent = `placeholder\n\n<!-- wp:woocommerce/legacy-template {"template":"${ slug }"} /-->`;
-						const templateResponse: unknown =
-							await requestUtils.createTemplate( 'wp_template', {
-								slug,
-								title: 'classic template test',
-								content: templateContent,
-							} );
-
-						assertTemplateResponse(
-							templateResponse,
+				const createRestTemplate = async () => {
+					const templateContent = `placeholder\n\n<!-- wp:woocommerce/legacy-template {"template":"${ slug }"} /-->`;
+					const templateResponse: unknown =
+						await requestUtils.createTemplate( 'wp_template', {
 							slug,
-							templateContent
-						);
-					};
-					const createEditorTemplate = async () => {
-						const template = await requestUtils.createTemplate(
-							'wp_template',
-							{
-								slug,
-								title: 'classic template test',
-								content: 'placeholder',
-							}
-						);
-
-						await admin.visitSiteEditor( {
-							postId: template.id,
-							postType: 'wp_template',
-							canvas: 'edit',
+							title: 'classic template test',
+							content: templateContent,
 						} );
 
-						await expect(
-							editor.getCustomHtmlBlockContentLocator(
-								'placeholder'
-							)
-						).toBeVisible();
-
-						await editor.insertBlock( { name: legacyBlockName } );
-
-						await editor.saveSiteEditorEntities( {
-							isOnlyCurrentEntityDirty: true,
-						} );
-					};
-					const createTemplateBySlug: Record<
-						TemplateSlug,
-						() => Promise< void >
-					> = {
-						'taxonomy-product_cat': createRestTemplate,
-						'taxonomy-product_tag': createEditorTemplate,
-						'archive-product': createRestTemplate,
-						'product-search-results': createRestTemplate,
-					};
-
-					await createTemplateBySlug[ slug ]();
-
-					await page.goto( frontendPage );
-
-					const classicProducts = page.locator(
-						'.woocommerce-loop-product__title'
+					assertTemplateResponse(
+						templateResponse,
+						slug,
+						templateContent
+					);
+				};
+				const createEditorTemplate = async () => {
+					const template = await requestUtils.createTemplate(
+						'wp_template',
+						{
+							slug,
+							title: 'classic template test',
+							content: 'placeholder',
+						}
 					);
 
-					await expect( classicProducts ).toHaveCount(
-						expectedProductsCount
-					);
+					await admin.visitSiteEditor( {
+						postId: template.id,
+						postType: 'wp_template',
+						canvas: 'edit',
+					} );
 
-					const classicProductsNames =
-						await classicProducts.allTextContents();
+					await expect(
+						editor.getCustomHtmlBlockContentLocator( 'placeholder' )
+					).toBeVisible();
 
-					expect( classicProductsNames ).toEqual(
-						productCollectionProductNames
-					);
-				} );
+					await editor.insertBlock( { name: legacyBlockName } );
+
+					await editor.saveSiteEditorEntities( {
+						isOnlyCurrentEntityDirty: true,
+					} );
+				};
+				const createTemplateBySlug: Record<
+					TemplateSlug,
+					() => Promise< void >
+				> = {
+					'taxonomy-product_cat': createRestTemplate,
+					'taxonomy-product_tag': createEditorTemplate,
+					'archive-product': createRestTemplate,
+					'product-search-results': createRestTemplate,
+				};
+
+				await createTemplateBySlug[ slug ]();
+
+				await page.goto( frontendPage );
+
+				const classicProducts = page.locator(
+					'.woocommerce-loop-product__title'
+				);
+
+				await expect( classicProducts ).toHaveCount(
+					expectedProductsCount
+				);
+
+				const classicProductsNames =
+					await classicProducts.allTextContents();
+
+				expect( classicProductsNames ).toEqual(
+					productCollectionProductNames
+				);
 			} );
 		}
-	);
+	} );
 
 	test.describe( 'default query can be modified', () => {
 		test( 'default query can be modified', async ( {
