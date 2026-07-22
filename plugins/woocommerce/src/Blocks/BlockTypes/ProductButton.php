@@ -168,6 +168,7 @@ class ProductButton extends AbstractBlock {
 			$add_to_cart_url = $product->add_to_cart_url();
 			$attributes      = array(
 				'href' => esc_url( $add_to_cart_url ),
+				'rel'  => '',
 			);
 
 			if ( $product->get_permalink() !== $add_to_cart_url ) {
