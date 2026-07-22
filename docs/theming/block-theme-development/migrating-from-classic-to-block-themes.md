@@ -1,223 +1,130 @@
 ---
-post_title: Migrating from classic to block themes
+post_title: Migrating from classic to Block themes
 sidebar_label: Migrating from classic themes
-sidebar_position: 1
+sidebar_position: 6
 ---
 
-# Migrating from classic to block themes
+# Migrating from classic to Block themes
 
-If you have built WooCommerce themes using PHP templates, `style.css`
-overrides, and `functions.php` hooks, most of that knowledge carries over to
-block themes. The underlying store pages still exist, and WooCommerce still
-provides ways to override templates and apply styles.
+If you have built WooCommerce themes using PHP templates, style.css overrides, and functions.php hooks, the good news is that most of your knowledge carries over to Block themes. The underlying store pages still exist and WooCommerce has ways to override templates and apply styles.
 
-What changes is where that work happens. This guide maps common classic-theme
-patterns to their block-theme equivalents and links to detailed references for
-each area.
-
-:::info
-This guide assumes that you are familiar with classic WooCommerce theme
-development and basic block-theme concepts. If block themes are new to you,
-start with [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/).
-:::
+However, the difference is where that work happens. This page will map some classic patterns to its Block theme equivalent. It will also point you to documentation that covers it in greater detail.
 
 ## Requirements
 
-Before you begin, make sure you have:
+Before you begin, make sure you have the following in place:
 
-- A version of WordPress supported by the WooCommerce release you are
-  targeting. The current requirement is listed in the
-  [WooCommerce plugin readme](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/readme.txt).
-- A current, supported version of WooCommerce.
-- Familiarity with classic WooCommerce template overrides, action hooks, and
-  CSS customizations.
-- A block theme to work with.
-
-A code editor is useful when you need direct access to HTML templates and
-`theme.json`, but it is not required for every workflow. The optional
-[Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/)
-can export changes made in the Site Editor to theme files and create new themes
-or child themes from the current design.
+- **WordPress 5.9 or later.** Block theme support was introduced in WordPress 5.9.
+- **A current version of WooCommerce.** Block templates and global style support require a recent WooCommerce release.
+- **Familiarity with classic WooCommerce theme development.** This page assumes working knowledge of PHP templates, action hooks, and CSS overrides.
+- **A code editor capable of editing HTML and JSON files.** Block templates are HTML and theme styles are defined in theme.json.
+- **The Create Block Theme plugin (optional).** Required only if you are converting an existing classic theme to Blocks rather than building from scratch.
 
 ## Template overrides
 
-Classic and block themes both support template overrides, but the file format
-and location change:
+Classic and Block themes both support template overrides, but the file format and the folder location changes:
 
-- Classic themes copy PHP templates from WooCommerce into a `/woocommerce`
-  directory in the theme root, for example
-  `yourtheme/woocommerce/single-product.php`.
-- Block themes place HTML block templates in the theme's `/templates`
-  directory, for example `yourtheme/templates/single-product.html`.
+- **Classic themes** copy PHP files from the WooCommerce plugin into a /woocommerce directory in the theme root (e.g. yourtheme/woocommerce/single-product.php).
+- **Block themes** place HTML Block templates in a /templates folder in the theme root (e.g. yourtheme/templates/single-product.html).
 
-The filenames often map directly between the two systems, so
-`single-product.php` becomes `single-product.html`. The contents do not map
-directly: the HTML file is composed of WordPress and WooCommerce blocks rather
-than PHP markup and hooks.
+The file naming convention is consistent across both approaches, so single-product.php maps directly to single-product.html. However, the content is composed of WooCommerce and WordPress Blocks rather than PHP markup.
 
-For example, the classic override path is:
+To override the single product template in a classic theme, you copy and edit a PHP file:
 
 ```text
 wp-content/themes/yourtheme/woocommerce/single-product.php
 ```
 
-The equivalent block-theme override path is:
+In a Block theme, you create an HTML template in the equivalent location:
 
 ```text
 wp-content/themes/yourtheme/templates/single-product.html
 ```
 
-WooCommerce registers block templates for its core store views, including
-single products, product archives, taxonomies, Cart, Checkout, and Order
-Confirmation. A matching template in the active theme takes priority over the
-WooCommerce default, unless a merchant has saved a higher-priority
-customization in the Site Editor.
+WooCommerce provides HTML Block templates for all core store pages, including single product, product archive, cart, checkout, and taxonomy pages. Any template in your /templates folder with a matching file name takes priority over the WooCommerce default.
 
-See the [WooCommerce block template hierarchy](/docs/theming/block-theme-development/template-hierarchy/)
-for the complete template list, precedence rules, fallback chains, and
-template-part overrides.
+The [template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/) covers every available template and explains how the fallback order works.
 
 ## Declaring WooCommerce support
 
-Classic themes commonly declare WooCommerce support in `functions.php`:
+Classic themes that use template overrides declare WooCommerce support in functions.php. Block themes do not require any of these declarations:
 
-```php
-add_theme_support( 'woocommerce' );
-```
+- add_theme_support( 'woocommerce' ). WooCommerce support is implicit and template overrides work without it.
+- add_theme_support( 'wc-product-gallery-zoom' ) **and related gallery declarations**. The product gallery is handled through the Product Gallery Block and does not depend on functions.php declarations.
 
-WooCommerce recognizes a block theme through WordPress, so a block theme does
-not need this declaration for its WooCommerce block-template overrides to
-work.
-
-Classic themes may also enable gallery features with declarations such as:
-
-```php
-add_theme_support( 'wc-product-gallery-zoom' );
-add_theme_support( 'wc-product-gallery-lightbox' );
-add_theme_support( 'wc-product-gallery-slider' );
-```
-
-These declarations configure the classic product image gallery. The Product
-Gallery block manages its presentation through block settings instead. During
-a migration, keep the declarations until you have confirmed that no legacy
-template or Product Image Gallery block still depends on them.
+In a nutshell, you can remove any WooCommerce-related add_theme_support calls when building a Block theme from scratch.
 
 ## Styling
 
-Classic WooCommerce themes commonly style unprefixed selectors such as
-`.price`, `.button`, and `.star-rating` in `style.css`. In a block theme,
-`theme.json` and global styles are the primary styling layer.
+Classic WooCommerce themes apply styles in style.css, targeting unprefixed class names such as .price, .button, and .star-rating. Block themes use theme.json as the primary styling layer.
 
-Block-specific styles use the block's registered namespace under
-`styles.blocks`. This example changes the text color and font weight of the
-Product Price block:
+Defining styles happens at the Block level using the Block's registered namespace, while WooCommerce generates the required CSS from those definitions.
+
+Using theme.json for WooCommerce styles brings several advantages over CSS overrides:
+
+- **Reduced breakage risk.** Styles are defined against the Block namespace rather than internal class names, so markup changes in WooCommerce updates won't break your existing styles.
+- **Site Editor compatibility.** Site owners can override your styles in the Site Editor without touching code.
+- **Improved performance.** Only the CSS required for the Blocks on a given page is printed, which reduces the overall stylesheet payload.
+
+The following example sets the text color and font weight for the Product Price Block:
 
 ```json
-{
-	"$schema": "https://schemas.wp.org/trunk/theme.json",
-	"version": 3,
-	"styles": {
-		"blocks": {
-			"woocommerce/product-price": {
-				"color": {
-					"text": "#333333"
-				},
-				"typography": {
-					"fontWeight": "700"
-				}
-			}
-		}
-	}
+"styles": {
+  "blocks": {
+    "woocommerce/product-price": {
+      "color": {
+        "text": "#333333"
+      },
+      "typography": {
+        "fontWeight": "700"
+      }
+    }
+  }
 }
 ```
 
-Using global styles has several advantages:
-
-- Styles target registered block features instead of relying on internal
-  markup.
-- Merchants can customize supported settings in the Site Editor.
-- Theme defaults, style variations, and user customizations participate in the
-  same WordPress styling system.
-
-CSS remains useful when a block does not expose the setting you need. When you
-write CSS for WooCommerce blocks, prefer the `.wc-block-` and
-`.wc-block-components-` prefixes and avoid selectors that depend on internal
-markup or a particular nesting order.
-
-See [Global styles for WooCommerce](/docs/theming/block-theme-development/global-styles/)
-for `theme.json` examples and block style variations. The
-[CSS styling reference](/docs/theming/block-theme-development/css-styling/)
-covers class naming and other CSS considerations. For Cart and Checkout, also
-review [Cart and Checkout blocks theming](/docs/theming/block-theme-development/cart-and-checkout/).
+However, CSS will still be available where theme.json does not cover a specific scenario. When you do write CSS, target the prefixed .wc-block- and .wc-block-components- class names rather than the legacy unprefixed classes. The [CSS styling reference](https://developer.woocommerce.com/docs/theming/block-theme-development/css-styling/) covers the full class naming conventions, while there's also documentation on the recommended approach to [Cart and Checkout Block styling](https://developer.woocommerce.com/docs/theming/block-theme-development/cart-and-checkout/).
 
 ## Layout hooks
 
-Classic themes often replace the callbacks on
-`woocommerce_before_main_content` and `woocommerce_after_main_content` to wrap
-WooCommerce output in theme-specific markup:
+Classic themes use woocommerce_before_main_content and woocommerce_after_main_content in functions.php to wrap WooCommerce output in the markup a theme's layout requires:
 
 ```php
-remove_action(
-	'woocommerce_before_main_content',
-	'woocommerce_output_content_wrapper',
-	10
-);
-add_action(
-	'woocommerce_before_main_content',
-	'mytheme_wrapper_start',
-	10
-);
+remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10 );
+
+add_action( 'woocommerce_before_main_content', 'mytheme_wrapper_start', 10 );
 
 function mytheme_wrapper_start() {
-	echo '<section id="main">';
+    echo '<section id="main">';
 }
 ```
 
-WooCommerce includes compatibility handling for many classic hooks in its
-blockified product templates, so existing callbacks may continue to run.
-However, layout control in a block theme belongs in the template itself. Build
-the page structure with blocks in the Site Editor or in an HTML file under
-`/templates` instead of using wrapper hooks.
-
-Audit hook-based customizations individually during a migration. A callback
-that adds content may still be useful, while a callback that opens or closes a
-layout wrapper should usually be replaced by template markup.
+These hooks remain functional in Block themes. However, layout control in a Block theme belongs in the template itself through editing the relevant template in the Site Editor or placing an HTML override in your /templates folder. You can carry hook-based customizations forward during a migration, but moving layout concerns into the Block template is the more durable long-term approach.
 
 ## Migration process
 
-There is no one-to-one automated conversion from a classic WooCommerce theme
-to a block theme. A practical migration looks like this:
+If you are converting an existing classic theme, the [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/) can provide a starting point. It generates the file structure and base theme.json a Block theme requires, which you then populate with your overriding templates and style definitions.
 
-1. Create or choose a block-theme foundation.
-2. Rebuild the relevant PHP template overrides as HTML block templates.
-3. Move supported visual styles from CSS into `theme.json`.
-4. Retain targeted CSS for designs that global styles cannot express.
-5. Audit PHP hooks and move layout concerns into templates.
-6. Test product pages, product archives, Cart, Checkout, and saved Site Editor
-   customizations.
-
-The Create Block Theme plugin can help create the theme structure and export
-Site Editor changes to files. You still need to adapt WooCommerce PHP
-templates, hooks, and CSS intentionally.
+Once the base structure is in place, you can apply the WooCommerce-specific customizations covered in this section directly. The [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/) course on Learn WordPress is a great way to establish that foundational structure.
 
 ## Next steps
 
-Continue with the detailed guides in this section:
+The rest of this section covers each area of WooCommerce Block theme development in detail:
 
-1. [WooCommerce block template hierarchy](/docs/theming/block-theme-development/template-hierarchy/)
-   explains registered templates, fallback order, and override paths.
-2. [Global styles for WooCommerce](/docs/theming/block-theme-development/global-styles/)
-   covers WooCommerce blocks in `theme.json`, style variations, and Site Editor
-   workflows.
-3. [Cart and Checkout blocks theming](/docs/theming/block-theme-development/cart-and-checkout/)
-   covers styles and responsive behavior inside the Cart and Checkout blocks.
-4. [CSS styling for themes](/docs/theming/block-theme-development/css-styling/)
-   documents class naming, container queries, and CSS fallbacks.
+1. [Global styles for WooCommerce](/docs/theming/block-theme-development/global-styles/). Using theme.json to style WooCommerce Blocks.
+2. [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/). All WooCommerce Block templates and how to override them.
+3. Product page theming. Customizing the single product template.
+4. Shop and archive page theming. Customizing the product listing templates.
+5. [Cart and Checkout theming](https://developer.woocommerce.com/docs/theming/block-theme-development/cart-and-checkout/). Styling the Cart and Checkout Blocks, including buttons and the mobile submit container.
+6. [CSS styling](https://developer.woocommerce.com/docs/theming/block-theme-development/css-styling/). CSS approaches and class name conventions.
+7. [Theming for Woo Blocks](https://developer.woocommerce.com/docs/theming/block-theme-development/theming-woo-blocks/). An overview of core concepts, Block templates, template parts, and global styles.
 
 ## References
 
-- [Classic theme developer handbook](/docs/theming/theme-development/classic-theme-developer-handbook/)
-- [WooCommerce block reference](/docs/block-development/reference/block-references/)
-- [WordPress global settings and styles](https://developer.wordpress.org/themes/global-settings-and-styles/)
-- [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/)
-- [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/)
+- [Classic theme developer handbook](https://developer.woocommerce.com/docs/theming/theme-development/classic-theme-developer-handbook/). The full reference for classic WooCommerce theme development.
+- [CSS styling for themes](https://developer.woocommerce.com/docs/theming/block-theme-development/css-styling/). BEM class name conventions, container queries, and handling theme style conflicts.
+- [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/). All WooCommerce Block templates, fallback order, and override paths.
+- [WooCommerce block references](https://developer.woocommerce.com/docs/block-development/reference/block-references/). The full list of WooCommerce Block names for use in theme.json.
+- [Global settings and styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/). WordPress documentation on theme.json and the global styles system.
+- [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/). A tool for generating Block theme file structures from an existing classic theme.
+- [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/). A Learn WordPress course covering Block theme fundamentals.
