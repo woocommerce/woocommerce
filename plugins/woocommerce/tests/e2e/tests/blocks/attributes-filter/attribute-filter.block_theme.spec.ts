@@ -25,81 +25,117 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 } );
 
 test.describe( `${ blockData.name } Block`, () => {
-	test.beforeEach( async ( { admin, editor } ) => {
-		await admin.createNewPost();
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'attribute-filter',
-				heading: 'Filter By Attribute',
-			},
+	test( 'supports title, display style, and filter button controls', async ( {
+		admin,
+		page,
+		editor,
+	} ) => {
+		await test.step( "should allow changing the block's title", async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'attribute-filter',
+					heading: 'Filter By Attribute',
+				},
+			} );
+			const setupAttributeFilter = await editor.getBlockByName(
+				blockData.slug
+			);
+
+			await setupAttributeFilter.getByText( 'Size' ).click();
+			await setupAttributeFilter.getByText( 'Done' ).click();
+			await editor.openDocumentSettingsSidebar();
+
+			const textSelector =
+				'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
+
+			const title = 'New Title';
+
+			await editor.canvas.locator( textSelector ).fill( title );
+
+			await expect( editor.canvas.locator( textSelector ) ).toHaveText(
+				title
+			);
 		} );
-		const attributeFilter = await editor.getBlockByName( blockData.slug );
 
-		await attributeFilter.getByText( 'Size' ).click();
-		await attributeFilter.getByText( 'Done' ).click();
-		await editor.openDocumentSettingsSidebar();
-	} );
+		await test.step( 'should allow changing the display style', async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'attribute-filter',
+					heading: 'Filter By Attribute',
+				},
+			} );
+			const setupAttributeFilter = await editor.getBlockByName(
+				blockData.slug
+			);
 
-	test( "should allow changing the block's title", async ( { editor } ) => {
-		const textSelector =
-			'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
+			await setupAttributeFilter.getByText( 'Size' ).click();
+			await setupAttributeFilter.getByText( 'Done' ).click();
+			await editor.openDocumentSettingsSidebar();
 
-		const title = 'New Title';
+			const attributeFilter = await editor.getBlockByName(
+				blockData.slug
+			);
+			await editor.selectBlocks( attributeFilter );
 
-		await editor.canvas.locator( textSelector ).fill( title );
+			await expect(
+				editor.canvas.getByRole( 'checkbox', { name: 'Small' } )
+			).toBeVisible();
 
-		await expect( editor.canvas.locator( textSelector ) ).toHaveText(
-			title
-		);
-	} );
+			await page.getByLabel( 'DropDown' ).click();
 
-	test( 'should allow changing the display style', async ( {
-		page,
-		editor,
-	} ) => {
-		const attributeFilter = await editor.getBlockByName( blockData.slug );
-		await editor.selectBlocks( attributeFilter );
+			await expect(
+				attributeFilter.getByRole( 'checkbox', {
+					name: 'Small',
+				} )
+			).toBeHidden();
 
-		await expect(
-			editor.canvas.getByRole( 'checkbox', { name: 'Small' } )
-		).toBeVisible();
+			await expect(
+				editor.canvas.getByRole( 'checkbox', { name: 'Small' } )
+			).toBeHidden();
 
-		await page.getByLabel( 'DropDown' ).click();
+			await expect( editor.canvas.getByRole( 'combobox' ) ).toBeVisible();
+		} );
 
-		await expect(
-			attributeFilter.getByRole( 'checkbox', {
-				name: 'Small',
-			} )
-		).toBeHidden();
+		await test.step( 'should allow toggling the visibility of the filter button', async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'attribute-filter',
+					heading: 'Filter By Attribute',
+				},
+			} );
+			const setupAttributeFilter = await editor.getBlockByName(
+				blockData.slug
+			);
 
-		await expect(
-			editor.canvas.getByRole( 'checkbox', { name: 'Small' } )
-		).toBeHidden();
+			await setupAttributeFilter.getByText( 'Size' ).click();
+			await setupAttributeFilter.getByText( 'Done' ).click();
+			await editor.openDocumentSettingsSidebar();
 
-		await expect( editor.canvas.getByRole( 'combobox' ) ).toBeVisible();
-	} );
+			const attributeFilter = await editor.getBlockByName(
+				blockData.slug
+			);
+			await editor.selectBlocks( attributeFilter );
 
-	test( 'should allow toggling the visibility of the filter button', async ( {
-		page,
-		editor,
-	} ) => {
-		const attributeFilter = await editor.getBlockByName( blockData.slug );
-		await editor.selectBlocks( attributeFilter );
+			await expect(
+				attributeFilter.getByRole( 'button', {
+					name: 'Apply',
+				} )
+			).toBeHidden();
 
-		await expect(
-			attributeFilter.getByRole( 'button', {
-				name: 'Apply',
-			} )
-		).toBeHidden();
+			await page.getByText( "Show 'Apply filters' button" ).click();
 
-		await page.getByText( "Show 'Apply filters' button" ).click();
-
-		await expect(
-			attributeFilter.getByRole( 'button', {
-				name: 'Apply',
-			} )
-		).toBeVisible();
+			await expect(
+				attributeFilter.getByRole( 'button', {
+					name: 'Apply',
+				} )
+			).toBeVisible();
+		} );
 	} );
 } );
 
