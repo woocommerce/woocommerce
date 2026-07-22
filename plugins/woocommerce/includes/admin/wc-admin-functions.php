@@ -404,12 +404,13 @@ function wc_save_order_items( $order_id, $items ) {
 
 	// Shipping Rows.
 	if ( isset( $items['shipping_method_id'] ) ) {
-		$data_keys = array(
+		$data_keys        = array(
 			'shipping_method'       => null,
 			'shipping_method_title' => null,
 			'shipping_cost'         => 0,
 			'shipping_taxes'        => array(),
 		);
+		$shipping_methods = null;
 
 		foreach ( $items['shipping_method_id'] as $item_id ) {
 			$item = WC_Order_Factory::get_order_item( absint( $item_id ) );
@@ -422,6 +423,22 @@ function wc_save_order_items( $order_id, $items ) {
 
 			foreach ( $data_keys as $key => $default ) {
 				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
+			}
+
+			$item_data['shipping_method']       = is_string( $item_data['shipping_method'] ) ? $item_data['shipping_method'] : '';
+			$item_data['shipping_method_title'] = is_string( $item_data['shipping_method_title'] ) ? $item_data['shipping_method_title'] : '';
+
+			if (
+				! empty( $item_data['shipping_method'] ) &&
+				in_array( $item_data['shipping_method_title'], array( '', __( 'Shipping', 'woocommerce' ) ), true )
+			) {
+				if ( null === $shipping_methods ) {
+					$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
+				}
+
+				if ( isset( $shipping_methods[ $item_data['shipping_method'] ] ) ) {
+					$item_data['shipping_method_title'] = $shipping_methods[ $item_data['shipping_method'] ]->get_method_title();
+				}
 			}
 
 			$item->set_props(

@@ -326,9 +326,14 @@ function wc_set_customer_auth_cookie( $customer_id ) {
  * @return int
  */
 function wc_update_new_customer_past_orders( $customer_id ) {
+	$customer = get_user_by( 'id', absint( $customer_id ) );
+
+	if ( ! $customer ) {
+		return 0;
+	}
+
 	$linked          = 0;
 	$complete        = 0;
-	$customer        = get_user_by( 'id', absint( $customer_id ) );
 	$customer_orders = wc_get_orders(
 		array(
 			'limit'    => -1,
@@ -1056,8 +1061,11 @@ function wc_delete_user_data( $user_id ) {
 		)
 	);
 
-	// Clean up payment tokens.
-	$payment_tokens = WC_Payment_Tokens::get_customer_tokens( $user_id );
+	// Clean up payment tokens. Query without a limit so every token is removed, not just the
+	// customer-facing subset capped by `get_customer_tokens()`. Deliberately bypasses the
+	// `woocommerce_get_customer_payment_tokens` filter too: cleanup must not be narrowed by a
+	// display-oriented filter, and this matches the personal data eraser, which also omits it.
+	$payment_tokens = WC_Payment_Tokens::get_tokens( array( 'user_id' => $user_id ) );
 
 	foreach ( $payment_tokens as $payment_token ) {
 		$payment_token->delete();

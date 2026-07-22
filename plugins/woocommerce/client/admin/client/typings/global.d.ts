@@ -1,3 +1,66 @@
+type DeprecatedWcAdminFeatureFlags = {
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'activity-panels': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	analytics: boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'analytics-scheduled-import': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'experimental-iapi-mini-cart': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	coupons: boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'core-profiler': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'customize-store': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'customer-effort-score-tracks': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'import-products-task': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'experimental-fashion-sample-products': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'shipping-smart-defaults': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'shipping-setting-tour': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	homescreen: boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	marketing: boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'mobile-app-banner': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	onboarding: boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'onboarding-tasks': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'pattern-toolkit-full-composability': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'payment-gateway-suggestions': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'product-custom-fields': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	printful: boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'remote-inbox-notifications': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'remote-free-extensions': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'shipping-label-banner': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	subscriptions: boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'transient-notices': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'wc-pay-promotion': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'wc-pay-welcome-page': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'woo-mobile-welcome': boolean;
+	/** @deprecated Deprecated since WooCommerce 11.1. This WC Admin feature flag shim will be removed in a future version of WooCommerce. */
+	'launch-your-store': boolean;
+};
+
 declare global {
 	interface Window {
 		location: Location;
@@ -48,38 +111,15 @@ declare global {
 				siteVisibilitySettings: Record< string, string >;
 			};
 		};
-		wcAdminFeatures: {
-			'analytics-scheduled-import': boolean;
-			'activity-panels': boolean;
-			analytics: boolean;
-			coupons: boolean;
-			'customer-effort-score-tracks': boolean;
-			homescreen: boolean;
-			marketing: boolean;
+		wcAdminFeatures: DeprecatedWcAdminFeatureFlags & {
+			'product-data-views': boolean;
+			'experimental-blocks': boolean;
 			'minified-js': boolean;
-			'mobile-app-banner': boolean;
-			navigation: boolean;
-			onboarding: boolean;
-			'onboarding-tasks': boolean;
-			'payment-gateway-suggestions': boolean;
-			'pattern-toolkit-full-composability': boolean;
-			printful: boolean;
-			'product-custom-fields': boolean;
-			'remote-inbox-notifications': boolean;
-			'remote-free-extensions': boolean;
-			settings: boolean;
 			'settings-ui': boolean;
-			'shipping-label-banner': boolean;
-			subscriptions: boolean;
 			'store-alerts': boolean;
-			'transient-notices': boolean;
-			'wc-pay-promotion': boolean;
-			'wc-pay-welcome-page': boolean;
-			'woo-mobile-welcome': boolean;
-			'shipping-smart-defaults': boolean;
-			'shipping-setting-tour': boolean;
-			'launch-your-store': boolean;
-			blueprint: boolean;
+			'rest-api-v4': boolean;
+			'order-detail-redesign': boolean;
+			'product-variations-classic-redesign': boolean;
 		};
 		wp: {
 			updates?: {

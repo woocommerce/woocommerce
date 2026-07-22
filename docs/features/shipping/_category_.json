@@ -1,6 +1,11 @@
 {
-    "position": 2,
+    "position": 4,
     "label": "Shipping",
     "collapsible": true,
-    "collapsed": true
+    "collapsed": true,
+    "link": {
+        "type": "generated-index",
+        "title": "Shipping",
+        "slug": "/features/shipping"
     }
+}

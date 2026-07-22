@@ -16,7 +16,7 @@ export default function ActionsDropdownMenu( props: {
 } ) {
 	const controls = [
 		{
-			title: __( 'Manage in Plugins', 'woocommerce' ),
+			title: __< string >( 'Manage in Plugins', 'woocommerce' ),
 			onClick: () => {
 				window.location.href = ADMIN_URL + 'plugins.php';
 			},

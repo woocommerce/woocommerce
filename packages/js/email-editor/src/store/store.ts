@@ -27,7 +27,7 @@ const getConfig = () =>
 		resolvers: {},
 		reducer,
 		initialState: getInitialState(),
-	} as const );
+	} ) as const;
 
 export type EditorStoreConfig = ReturnType< typeof getConfig >;
 

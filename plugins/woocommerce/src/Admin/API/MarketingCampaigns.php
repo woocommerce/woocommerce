@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Admin\API;
 use Automattic\WooCommerce\Admin\Marketing\MarketingCampaign;
 use Automattic\WooCommerce\Admin\Marketing\MarketingChannels as MarketingChannelsService;
 use Automattic\WooCommerce\Admin\Marketing\Price;
+use Automattic\WooCommerce\Enums\CurrencyPosition;
 use WC_REST_Controller;
 use WP_Error;
 use WP_REST_Request;
@@ -161,12 +162,12 @@ class MarketingCampaigns extends WC_REST_Controller {
 		// Get $price_format to be passed to wc_price.
 		$currency_pos     = $currency_info['currency_pos'];
 		$currency_formats = array(
-			'left'        => '%1$s%2$s',
-			'right'       => '%2$s%1$s',
-			'left_space'  => '%1$s&nbsp;%2$s',
-			'right_space' => '%2$s&nbsp;%1$s',
+			CurrencyPosition::LEFT        => '%1$s%2$s',
+			CurrencyPosition::RIGHT       => '%2$s%1$s',
+			CurrencyPosition::LEFT_SPACE  => '%1$s&nbsp;%2$s',
+			CurrencyPosition::RIGHT_SPACE => '%2$s&nbsp;%1$s',
 		);
-		$price_format     = $currency_formats[ $currency_pos ] ?? $currency_formats['left'];
+		$price_format     = $currency_formats[ $currency_pos ] ?? $currency_formats[ CurrencyPosition::LEFT ];
 
 		$price_value     = wc_format_decimal( $price->get_value() );
 		$price_formatted = wc_price(

@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Internal\Admin\Settings;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use WC_Unit_Test_Case;
 
@@ -70,6 +71,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->original_hide_save_button_exists = array_key_exists( 'hide_save_button', $GLOBALS );
 		$this->original_hide_save_button        = $this->original_hide_save_button_exists ? $GLOBALS['hide_save_button'] : null;
 		unset( $GLOBALS['hide_save_button'] );
+		SettingsUIRequestContext::reset();
 	}
 
 	/**
@@ -90,6 +92,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
+		SettingsUIRequestContext::reset();
 
 		parent::tearDown();
 	}
@@ -195,16 +198,13 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		global $current_section;
 		$current_section = 'advanced';
-		$page            = $this->get_settings_ui_test_page_with_failing_script_handles();
+		$page            = $this->get_settings_ui_test_page_with_failing_schema();
 
 		try {
-			$GLOBALS['wc_settings_ui_schema_failed']['settings_ui_flag_test']['advanced'] = true;
-
 			ob_start();
 			$page->output();
 			$output = ob_get_clean();
 		} finally {
-			unset( $GLOBALS['wc_settings_ui_schema_failed']['settings_ui_flag_test']['advanced'] );
 			remove_action( 'doing_it_wrong_run', $action, 10 );
 			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 		}
@@ -221,19 +221,116 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It exposes section navigation metadata from legacy settings pages.
+	 * @testdox Should resolve Settings UI script handles once per context.
 	 */
-	public function test_legacy_adapter_adds_shell_navigation_metadata(): void {
+	public function test_settings_ui_script_handles_are_resolved_once_per_context(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section;
+		$current_section = '';
+		$page            = $this->get_settings_ui_test_page_with_counting_script_handles();
+		$context         = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		$this->assertSame( array( 'settings-ui-counting-handle' ), $context->get_script_handles() );
+
+		ob_start();
+		$page->output();
+		ob_get_clean();
+
+		$this->assertSame( 1, $this->get_script_handle_resolution_count( $page ), 'Script handles should be resolved once for a page and section context.' );
+	}
+
+	/**
+	 * @testdox Should clear shell section navigation for top-level pages, which keep the classic section links.
+	 */
+	public function test_request_context_clears_section_navigation_for_top_level_pages(): void {
 		$page    = $this->get_settings_ui_page_with_sections();
-		$adapter = new \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter( $page );
-		$schema  = $adapter->get_schema( '' );
+		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		$schema = $context->get_schema();
 
 		$this->assertSame( 'Settings UI flag test', $schema['shell']['title'] );
 		$this->assertArrayNotHasKey( 'breadcrumbs', $schema['shell'] );
 		$this->assertArrayNotHasKey( 'navigation', $schema['shell'] );
-		$this->assertSame( 'General', $schema['shell']['sectionNavigation'][0]['label'] );
-		$this->assertTrue( $schema['shell']['sectionNavigation'][0]['active'] );
-		$this->assertSame( 'inventory', $schema['shell']['sectionNavigation'][1]['id'] );
+		$this->assertSame( array(), $schema['shell']['sectionNavigation'] );
+	}
+
+	/**
+	 * @testdox Should hide the shell header for pages registered at the top level of settings.
+	 */
+	public function test_request_context_hides_shell_header_for_top_level_pages(): void {
+		$page    = $this->get_settings_ui_test_page();
+		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		$schema = $context->get_schema();
+
+		$this->assertSame( 'hidden', $schema['shell']['header'] );
+	}
+
+	/**
+	 * @testdox Should override a schema-provided shell header for top-level pages.
+	 */
+	public function test_request_context_overrides_a_schema_provided_shell_header(): void {
+		$page    = $this->get_settings_ui_test_page_with_visible_shell_header();
+		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		$schema = $context->get_schema();
+
+		$this->assertSame( 'hidden', $schema['shell']['header'], 'Top-level pages cannot opt into the shell header.' );
+	}
+
+	/**
+	 * @testdox Should show the shell header for payments drill-down pages.
+	 */
+	public function test_request_context_shows_shell_header_for_drill_down_pages(): void {
+		$page    = $this->get_settings_ui_test_page_for_drill_down();
+		$context = SettingsUIRequestContext::for_settings_page( $page, 'test_gateway' );
+
+		$schema = $context->get_schema();
+
+		$this->assertTrue( $context->is_drill_down() );
+		$this->assertSame( 'visible', $schema['shell']['header'] );
+		$this->assertSame( array(), $schema['shell']['sectionNavigation'], 'Drill-down pages default to no section navigation.' );
+	}
+
+	/**
+	 * @testdox Should default drill-down breadcrumbs to the parent settings tab.
+	 */
+	public function test_request_context_defaults_drill_down_breadcrumbs_to_the_parent_tab(): void {
+		$page    = $this->get_settings_ui_test_page_for_drill_down();
+		$context = SettingsUIRequestContext::for_settings_page( $page, 'test_gateway' );
+
+		$schema = $context->get_schema();
+
+		$this->assertCount( 1, $schema['shell']['breadcrumbs'] );
+		$this->assertSame( 'Payments drill-down test', $schema['shell']['breadcrumbs'][0]['label'] );
+		$this->assertStringContainsString( 'tab=checkout', $schema['shell']['breadcrumbs'][0]['href'] );
+	}
+
+	/**
+	 * @testdox Should keep schema-provided breadcrumbs on drill-down pages.
+	 */
+	public function test_request_context_keeps_schema_breadcrumbs_on_drill_down_pages(): void {
+		$breadcrumbs = array( array( 'label' => 'Custom crumb' ) );
+		$page        = $this->get_settings_ui_test_page_for_drill_down( $breadcrumbs );
+		$context     = SettingsUIRequestContext::for_settings_page( $page, 'test_gateway' );
+
+		$schema = $context->get_schema();
+
+		$this->assertSame( $breadcrumbs, $schema['shell']['breadcrumbs'] );
+	}
+
+	/**
+	 * @testdox Should treat the default payments section as a top-level page.
+	 */
+	public function test_request_context_hides_shell_header_for_default_payments_section(): void {
+		$page    = $this->get_settings_ui_test_page_for_drill_down();
+		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		$schema = $context->get_schema();
+
+		$this->assertFalse( $context->is_drill_down() );
+		$this->assertSame( 'hidden', $schema['shell']['header'] );
 	}
 
 	/**
@@ -265,6 +362,37 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * It does not resolve a current request context when the feature flag is disabled.
+	 */
+	public function test_current_request_context_is_null_when_feature_flag_is_disabled(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
+
+		$_GET['page'] = 'wc-settings';
+		$_GET['tab']  = 'products';
+
+		$this->assertNull( SettingsUIRequestContext::get_current() );
+	}
+
+	/**
+	 * It does not resolve a current request context without the manage_woocommerce capability.
+	 */
+	public function test_current_request_context_is_null_without_manage_woocommerce_capability(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		$_GET['page'] = 'wc-settings';
+		$_GET['tab']  = 'products';
+
+		$original_user_id = get_current_user_id();
+		wp_set_current_user( 0 );
+
+		try {
+			$this->assertNull( SettingsUIRequestContext::get_current() );
+		} finally {
+			wp_set_current_user( $original_user_id );
+		}
+	}
+
+	/**
 	 * It does not add the settings UI body class when the feature flag is disabled.
 	 */
 	public function test_settings_ui_body_class_is_not_added_when_feature_flag_is_disabled(): void {
@@ -280,7 +408,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It adds the settings UI body class when the feature flag is enabled.
+	 * @testdox Should add only the top-level Settings UI body class for top-level pages.
 	 */
 	public function test_settings_ui_body_class_is_added_when_feature_flag_is_enabled(): void {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
@@ -293,6 +421,78 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'existing-class', $classes );
 		$this->assertStringContainsString( 'woocommerce-settings-ui-page', $classes );
+		$this->assertStringNotContainsString( 'woocommerce-settings-ui-drill-down', $classes );
+	}
+
+	/**
+	 * @testdox Should add the drill-down body class for Settings UI drill-down pages.
+	 */
+	public function test_settings_ui_drill_down_body_class_is_added_for_drill_down_pages(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'test_gateway';
+		$current_tab     = 'checkout';
+		$page            = $this->get_settings_ui_test_page_for_drill_down();
+
+		$classes = $page->add_settings_ui_body_class( 'existing-class woocommerce-settings-ui-page' );
+
+		$this->assertStringContainsString( 'existing-class', $classes );
+		$this->assertSame( 1, substr_count( $classes, 'woocommerce-settings-ui-page' ) );
+		$this->assertSame( 1, substr_count( $classes, 'woocommerce-settings-ui-drill-down' ) );
+	}
+
+	/**
+	 * @testdox Should add the exact Settings UI body classes even when a similarly prefixed class is already present.
+	 */
+	public function test_settings_ui_body_classes_use_exact_token_matching_against_prefixed_classes(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'test_gateway';
+		$current_tab     = 'checkout';
+		$page            = $this->get_settings_ui_test_page_for_drill_down();
+
+		$classes      = $page->add_settings_ui_body_class( 'existing-class woocommerce-settings-ui-page-preview' );
+		$body_classes = explode( ' ', $classes );
+
+		$this->assertContains( 'woocommerce-settings-ui-page-preview', $body_classes );
+		$this->assertCount( 1, array_keys( $body_classes, 'woocommerce-settings-ui-page', true ) );
+		$this->assertCount( 1, array_keys( $body_classes, 'woocommerce-settings-ui-drill-down', true ) );
+	}
+
+	/**
+	 * @testdox Should not add the drill-down body class when schema generation falls back to legacy rendering.
+	 */
+	public function test_settings_ui_drill_down_body_class_is_not_added_when_schema_generation_fails(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'test_gateway';
+		$current_tab     = 'checkout';
+		$page            = $this->get_settings_ui_test_page_with_failing_schema( 'checkout' );
+
+		$classes = $page->add_settings_ui_body_class( 'existing-class' );
+
+		$this->assertStringContainsString( 'woocommerce-settings-ui-page', $classes );
+		$this->assertStringNotContainsString( 'woocommerce-settings-ui-drill-down', $classes );
+	}
+
+	/**
+	 * @testdox Should not add the drill-down body class when script handle resolution falls back to legacy rendering.
+	 */
+	public function test_settings_ui_drill_down_body_class_is_not_added_when_script_handle_resolution_fails(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'test_gateway';
+		$current_tab     = 'checkout';
+		$page            = $this->get_settings_ui_test_page_with_failing_script_handles( 'checkout' );
+
+		$classes = $page->add_settings_ui_body_class( 'existing-class' );
+
+		$this->assertStringContainsString( 'woocommerce-settings-ui-page', $classes );
+		$this->assertStringNotContainsString( 'woocommerce-settings-ui-drill-down', $classes );
 	}
 
 	/**
@@ -358,6 +558,150 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Build a settings page whose settings UI schema asks for a visible shell header.
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	private function get_settings_ui_test_page_with_visible_shell_header(): \WC_Settings_Page {
+		return new class() extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'settings_ui_flag_test';
+				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Get the settings UI page adapter.
+			 *
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
+				return new class( $this ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
+					/**
+					 * Get the schema for a section.
+					 *
+					 * @param string $section Section id.
+					 * @return array
+					 */
+					public function get_schema( string $section ): array {
+						$schema                    = parent::get_schema( $section );
+						$schema['shell']['header'] = 'visible';
+
+						return $schema;
+					}
+				};
+			}
+
+			/**
+			 * Get settings for the default section.
+			 *
+			 * @return array
+			 */
+			protected function get_settings_for_default_section() {
+				return array(
+					array(
+						'id'    => 'woocommerce_settings_ui_flag_test',
+						'type'  => 'text',
+						'title' => 'Settings UI flag test',
+					),
+				);
+			}
+		};
+	}
+
+	/**
+	 * Build a payments-tab settings page that opts into the settings UI renderer.
+	 *
+	 * @param array|null $breadcrumbs Optional schema-provided breadcrumbs.
+	 * @return \WC_Settings_Page
+	 */
+	private function get_settings_ui_test_page_for_drill_down( ?array $breadcrumbs = null ): \WC_Settings_Page {
+		return new class( $breadcrumbs ) extends \WC_Settings_Page {
+			/**
+			 * Schema-provided breadcrumbs, if any.
+			 *
+			 * @var array|null
+			 */
+			private ?array $breadcrumbs;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param array|null $breadcrumbs Optional schema-provided breadcrumbs.
+			 */
+			public function __construct( ?array $breadcrumbs ) {
+				$this->id          = 'checkout';
+				$this->label       = 'Payments drill-down test';
+				$this->breadcrumbs = $breadcrumbs;
+			}
+
+			/**
+			 * Get the settings UI page adapter.
+			 *
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
+				return new class( $this, $this->breadcrumbs ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
+					/**
+					 * Schema-provided breadcrumbs, if any.
+					 *
+					 * @var array|null
+					 */
+					private ?array $breadcrumbs;
+
+					/**
+					 * Constructor.
+					 *
+					 * @param \WC_Settings_Page $settings_page Settings page.
+					 * @param array|null        $breadcrumbs Optional schema-provided breadcrumbs.
+					 */
+					public function __construct( \WC_Settings_Page $settings_page, ?array $breadcrumbs ) {
+						parent::__construct( $settings_page );
+						$this->breadcrumbs = $breadcrumbs;
+					}
+
+					/**
+					 * Get the schema for a section.
+					 *
+					 * @param string $section Section id.
+					 * @return array
+					 */
+					public function get_schema( string $section ): array {
+						$schema = parent::get_schema( $section );
+
+						if ( null !== $this->breadcrumbs ) {
+							$schema['shell']['breadcrumbs'] = $this->breadcrumbs;
+						}
+
+						return $schema;
+					}
+				};
+			}
+
+			/**
+			 * Get settings for any section.
+			 *
+			 * @param string $section_id Section id.
+			 * @return array
+			 */
+			protected function get_settings_for_section_core( $section_id ) {
+				// Avoid parameter not used PHPCS errors.
+				unset( $section_id );
+
+				return array(
+					array(
+						'id'    => 'woocommerce_settings_ui_drill_down_test',
+						'type'  => 'text',
+						'title' => 'Drill-down test',
+					),
+				);
+			}
+		};
+	}
+
+	/**
 	 * Get captured doing-it-wrong notices emitted by the settings page output method.
 	 *
 	 * @param array $notices Captured doing-it-wrong notices.
@@ -377,15 +721,18 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	/**
 	 * Build a settings page whose settings UI adapter cannot provide script handles.
 	 *
+	 * @param string $page_id Page id.
 	 * @return \WC_Settings_Page
 	 */
-	private function get_settings_ui_test_page_with_failing_script_handles(): \WC_Settings_Page {
-		return new class() extends \WC_Settings_Page {
+	private function get_settings_ui_test_page_with_failing_script_handles( string $page_id = 'settings_ui_flag_test' ): \WC_Settings_Page {
+		return new class( $page_id ) extends \WC_Settings_Page {
 			/**
 			 * Constructor.
+			 *
+			 * @param string $page_id Page id.
 			 */
-			public function __construct() {
-				$this->id    = 'settings_ui_flag_test';
+			public function __construct( string $page_id ) {
+				$this->id    = $page_id;
 				$this->label = 'Settings UI flag test';
 			}
 
@@ -403,7 +750,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 					 * @return array
 					 */
 					public function get_script_handles( string $section_id ): array {
-						if ( 'advanced' === $section_id ) {
+						if ( '' !== $section_id ) {
 							throw new \RuntimeException( 'Unable to load extension script handles.' );
 						}
 
@@ -431,6 +778,153 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Build a settings page whose settings UI adapter cannot provide a schema.
+	 *
+	 * @param string $page_id Page id.
+	 * @return \WC_Settings_Page
+	 */
+	private function get_settings_ui_test_page_with_failing_schema( string $page_id = 'settings_ui_flag_test' ): \WC_Settings_Page {
+		return new class( $page_id ) extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 *
+			 * @param string $page_id Page id.
+			 */
+			public function __construct( string $page_id ) {
+				$this->id    = $page_id;
+				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Get the settings UI page adapter.
+			 *
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
+				return new class( $this ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
+					/**
+					 * Build the schema.
+					 *
+					 * @param string $section_id Section id.
+					 * @return array
+					 */
+					public function get_schema( string $section_id ): array {
+						if ( '' !== $section_id ) {
+							throw new \RuntimeException( 'Unable to build settings UI schema.' );
+						}
+
+						return parent::get_schema( $section_id );
+					}
+				};
+			}
+
+			/**
+			 * Get settings for a section.
+			 *
+			 * @param string $section_id Section id.
+			 * @return array
+			 */
+			protected function get_settings_for_section_core( $section_id ) {
+				return array(
+					array(
+						'id'    => 'woocommerce_settings_ui_flag_test',
+						'type'  => 'text',
+						'title' => 'Settings UI flag test',
+					),
+				);
+			}
+		};
+	}
+
+	/**
+	 * Get the script handle resolution count for a counting test page.
+	 *
+	 * @param \WC_Settings_Page $page Settings page.
+	 * @return int
+	 */
+	private function get_script_handle_resolution_count( \WC_Settings_Page $page ): int {
+		$method = new \ReflectionMethod( $page, 'get_script_handle_resolution_count' );
+		$method->setAccessible( true );
+
+		return (int) $method->invoke( $page );
+	}
+
+	/**
+	 * Build a settings page with counting script handles.
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	private function get_settings_ui_test_page_with_counting_script_handles(): \WC_Settings_Page {
+		return new class() extends \WC_Settings_Page {
+			/**
+			 * Script handle resolution count.
+			 *
+			 * @var int
+			 */
+			private int $script_handle_resolution_count = 0;
+
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'settings_ui_flag_test';
+				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Get the settings UI page adapter.
+			 *
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
+				return new class( $this ) extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
+					/**
+					 * Get script handles.
+					 *
+					 * @param string $section_id Section id.
+					 * @return array
+					 */
+					public function get_script_handles( string $section_id ): array {
+						$this->settings_page->increment_script_handle_resolution_count();
+						return array( 'settings-ui-counting-handle' );
+					}
+				};
+			}
+
+			/**
+			 * Increment the script handle resolution count.
+			 */
+			public function increment_script_handle_resolution_count(): void {
+				++$this->script_handle_resolution_count;
+			}
+
+			/**
+			 * Get the script handle resolution count.
+			 *
+			 * @return int
+			 */
+			public function get_script_handle_resolution_count(): int {
+				return $this->script_handle_resolution_count;
+			}
+
+			/**
+			 * Get settings for the default section.
+			 *
+			 * @return array
+			 */
+			protected function get_settings_for_default_section() {
+				return array(
+					array(
+						'id'    => 'woocommerce_settings_ui_flag_test',
+						'type'  => 'text',
+						'title' => 'Settings UI flag test',
+					),
+				);
+			}
+		};
+	}
+
+	/**
 	 * Build a settings page with multiple sections.
 	 *
 	 * @return \WC_Settings_Page
@@ -443,6 +937,15 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			public function __construct() {
 				$this->id    = 'settings_ui_flag_test';
 				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Get the settings UI page adapter.
+			 *
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
+				return new \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter( $this );
 			}
 
 			/**

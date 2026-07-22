@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+For image blocks without a set width, only detect the width for local uploads images and fall back to the max width for external images.
