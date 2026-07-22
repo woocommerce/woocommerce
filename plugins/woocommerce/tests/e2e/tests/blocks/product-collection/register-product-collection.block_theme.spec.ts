@@ -121,63 +121,61 @@ test.describe( 'Product Collection: Register Product Collection', () => {
 	} );
 
 	test.describe( 'My Custom Collection', () => {
-		test( 'Clicking "My Custom Collection" should insert block and show 5 products', async ( {
-			pageObject,
-		} ) => {
-			await pageObject.createNewPostAndInsertBlock(
-				'myCustomCollection'
-			);
-
-			await expect( pageObject.products ).toHaveCount( 5 );
-			await expect( pageObject.productImages ).toHaveCount( 5 );
-			await expect( pageObject.productTitles ).toHaveCount( 5 );
-			await expect( pageObject.productPrices ).toHaveCount( 5 );
-			await expect( pageObject.addToCartButtons ).toHaveCount( 5 );
-
-			await pageObject.publishAndGoToFrontend();
-			await expect( pageObject.products ).toHaveCount( 5 );
-		} );
-
-		test( 'Should display properly in Product Catalog template', async ( {
+		test( 'renders My Custom Collection across contexts', async ( {
 			pageObject,
 			editor,
-		} ) => {
-			await pageObject.goToProductCatalogAndInsertCollection(
-				'myCustomCollection'
-			);
-
-			const block = editor.canvas.getByLabel(
-				MY_REGISTERED_COLLECTIONS.myCustomCollection.label
-			);
-
-			const products = block
-				.getByLabel( BLOCK_LABELS.productImage )
-				.locator( 'visible=true' );
-			await expect( products ).toHaveCount( 5 );
-		} );
-
-		test( 'hideControls allows to hide filters', async ( {
-			pageObject,
 			page,
 		} ) => {
-			await pageObject.goToProductCatalogAndInsertCollection(
-				'myCustomCollection'
-			);
+			await test.step( 'Clicking "My Custom Collection" should insert block and show 5 products', async () => {
+				await pageObject.createNewPostAndInsertBlock(
+					'myCustomCollection'
+				);
 
-			const sidebarSettings = pageObject.locateSidebarSettings();
-			const onsaleControl = sidebarSettings.getByLabel(
-				SELECTORS.onSaleControlLabel
-			);
-			await expect( onsaleControl ).toBeHidden();
+				await expect( pageObject.products ).toHaveCount( 5 );
+				await expect( pageObject.productImages ).toHaveCount( 5 );
+				await expect( pageObject.productTitles ).toHaveCount( 5 );
+				await expect( pageObject.productPrices ).toHaveCount( 5 );
+				await expect( pageObject.addToCartButtons ).toHaveCount( 5 );
 
-			await page
-				.getByRole( 'button', { name: 'Filters options' } )
-				.click();
-			const keywordControl = page.getByRole( 'menuitemcheckbox', {
-				name: 'Keyword',
+				await pageObject.publishAndGoToFrontend();
+				await expect( pageObject.products ).toHaveCount( 5 );
 			} );
 
-			await expect( keywordControl ).toBeHidden();
+			await test.step( 'Should display properly in Product Catalog template', async () => {
+				await pageObject.goToProductCatalogAndInsertCollection(
+					'myCustomCollection'
+				);
+
+				const block = editor.canvas.getByLabel(
+					MY_REGISTERED_COLLECTIONS.myCustomCollection.label
+				);
+
+				const products = block
+					.getByLabel( BLOCK_LABELS.productImage )
+					.locator( 'visible=true' );
+				await expect( products ).toHaveCount( 5 );
+			} );
+
+			await test.step( 'hideControls allows to hide filters', async () => {
+				await pageObject.goToProductCatalogAndInsertCollection(
+					'myCustomCollection'
+				);
+
+				const sidebarSettings = pageObject.locateSidebarSettings();
+				const onsaleControl = sidebarSettings.getByLabel(
+					SELECTORS.onSaleControlLabel
+				);
+				await expect( onsaleControl ).toBeHidden();
+
+				await page
+					.getByRole( 'button', { name: 'Filters options' } )
+					.click();
+				const keywordControl = page.getByRole( 'menuitemcheckbox', {
+					name: 'Keyword',
+				} );
+
+				await expect( keywordControl ).toBeHidden();
+			} );
 		} );
 	} );
 
