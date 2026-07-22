@@ -123,37 +123,38 @@ test.describe( 'Shopper → Cart block', () => {
 		expect( hoodiePriceText ).toBe( '$50.00' );
 	} );
 
-	test( 'User can view empty cart message', async ( {
+	test( 'User can view an empty cart and remove a product from cart', async ( {
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.goToCart();
+		await test.step( 'User can view empty cart message', async () => {
+			await frontendUtils.goToCart();
 
-		// Verify cart is empty
-		await expect(
-			page.getByRole( 'heading', {
-				name: 'Your cart is currently empty!',
-			} )
-		).toBeVisible();
-	} );
+			// Verify cart is empty
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Your cart is currently empty!',
+				} )
+			).toBeVisible();
+		} );
 
-	test( 'User can remove a product from cart', async ( {
-		frontendUtils,
-		page,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-		await page
-			.getByLabel( `Remove ${ SIMPLE_PHYSICAL_PRODUCT_NAME } from cart` )
-			.click();
+		await test.step( 'User can remove a product from cart', async () => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await frontendUtils.goToCart();
+			await page
+				.getByLabel(
+					`Remove ${ SIMPLE_PHYSICAL_PRODUCT_NAME } from cart`
+				)
+				.click();
 
-		// Verify product is removed from the cart'
-		await expect(
-			page.getByRole( 'heading', {
-				name: 'Your cart is currently empty!',
-			} )
-		).toBeVisible();
+			// Verify product is removed from the cart'
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Your cart is currently empty!',
+				} )
+			).toBeVisible();
+		} );
 	} );
 
 	test( 'User can update product quantity', async ( {
