@@ -70,10 +70,8 @@ final class CallbackUtil {
 	 * Closure signatures are based on their file location and line numbers,
 	 * providing consistent hashes across requests for the same closure code.
 	 *
-	 * Results are memoized per hook for the lifetime of the request and are
-	 * recomputed only when the set of registered callbacks changes, so that
-	 * repeated calls do not repeat the reflection work that closures and
-	 * invokable objects require.
+	 * Memoized per hook for the request, recomputed only when the registered
+	 * callbacks change, so repeated calls skip the reflection closures need.
 	 *
 	 * @param string $hook_name The name of the hook to inspect.
 	 * @return array<int, array<string>> Array of priority => array( signatures ),  empty if hook has no callbacks.
@@ -92,12 +90,8 @@ final class CallbackUtil {
 
 		$callbacks_by_priority = $wp_filter[ $hook_name ]->callbacks;
 
-		/*
-		 * Comparing the callback arrays directly is enough to detect any change to
-		 * the registered set: PHP compares objects within them by identity, so a
-		 * replaced instance or closure is a mismatch, and holding the array also
-		 * keeps those object ids from being reused while the entry is live.
-		 */
+		// Objects inside compare by identity, so a replaced instance or closure is
+		// a mismatch; holding the array also stops their ids being reused.
 		if ( isset( $cache[ $hook_name ] ) && $cache[ $hook_name ]['callbacks'] === $callbacks_by_priority ) {
 			return $cache[ $hook_name ]['signatures'];
 		}
@@ -118,7 +112,6 @@ final class CallbackUtil {
 
 		return $result;
 	}
-
 
 	/**
 	 * Get a stable signature for a closure based on its file path and line numbers.
