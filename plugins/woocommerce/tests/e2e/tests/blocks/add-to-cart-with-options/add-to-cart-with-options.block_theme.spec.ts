@@ -179,27 +179,153 @@ test.describe( 'Add to Cart + Options Block', () => {
 		productGalleryPageObject,
 		editor,
 		wpCoreVersion,
+		requestUtils,
 	} ) => {
 		const variationDescription =
 			'This is the output of the variation description';
 		// Set a variable product as having 100 in stock and one of its variations as being out of stock.
 		// This way we can test that sibling blocks update with the variation data.
-		let cliOutput = await wpCLI(
-			`post list --post_type=product --field=ID --name="Hoodie" --format=ids`
+		type ProductResponse = {
+			id: number;
+			name: string;
+			slug: string;
+			type: string;
+			status: string;
+			manage_stock: boolean;
+			stock_quantity: number | null;
+			in_stock: boolean;
+		};
+		type VariationResponse = {
+			id: number;
+			manage_stock: boolean;
+			in_stock: boolean;
+			weight: string;
+			description: string;
+			attributes: Array< {
+				id: number;
+				name: string;
+				slug: string;
+				option: string;
+			} >;
+		};
+		const expectedVariationDescription = `<p>${ variationDescription }</p>\n`;
+		const hasTargetAttributes = ( variation: VariationResponse ) =>
+			Array.isArray( variation.attributes ) &&
+			variation.attributes.length === 2 &&
+			variation.attributes.some(
+				( attribute ) =>
+					attribute.id === 1 &&
+					attribute.name === 'Color' &&
+					attribute.slug === 'pa_color' &&
+					attribute.option === 'Blue'
+			) &&
+			variation.attributes.some(
+				( attribute ) =>
+					attribute.id === 0 &&
+					attribute.name === 'Logo' &&
+					attribute.slug === 'logo' &&
+					attribute.option === 'No'
+			);
+
+		const hoodieProducts = await requestUtils.rest< ProductResponse[] >( {
+			path: 'wc/v2/products?slug=hoodie',
+		} );
+		const hoodieProduct = Array.isArray( hoodieProducts )
+			? hoodieProducts[ 0 ]
+			: undefined;
+		if (
+			! Array.isArray( hoodieProducts ) ||
+			hoodieProducts.length !== 1 ||
+			! hoodieProduct ||
+			! Number.isInteger( hoodieProduct.id ) ||
+			hoodieProduct.id <= 0 ||
+			hoodieProduct.name !== 'Hoodie' ||
+			hoodieProduct.slug !== 'hoodie' ||
+			hoodieProduct.type !== 'variable' ||
+			hoodieProduct.status !== 'publish' ||
+			hoodieProduct.manage_stock !== false ||
+			hoodieProduct.stock_quantity !== null ||
+			hoodieProduct.in_stock !== true
+		) {
+			throw new Error(
+				`Failed to find the expected baseline Hoodie product through REST: ${ JSON.stringify(
+					hoodieProducts
+				) }`
+			);
+		}
+
+		const hoodieVariations = await requestUtils.rest< VariationResponse[] >(
+			{
+				path: `wc/v2/products/${ hoodieProduct.id }/variations?per_page=100`,
+			}
 		);
-		const hoodieProductId = cliOutput.stdout.match( /\d+/g )?.pop();
-		cliOutput = await wpCLI(
-			'post list --post_type=product_variation --field=ID --name="Hoodie - Blue, No" --format=ids'
-		);
-		const hoodieProductVariationId = cliOutput.stdout
-			.match( /\d+/g )
-			?.pop();
-		await wpCLI(
-			`wc product update ${ hoodieProductId } --manage_stock=true --stock_quantity=100 --user=1`
-		);
-		await wpCLI(
-			`wc product_variation update ${ hoodieProductId } ${ hoodieProductVariationId } --manage_stock=true --in_stock=false --weight=2 --description="${ variationDescription }" --user=1`
-		);
+		const matchingVariations = Array.isArray( hoodieVariations )
+			? hoodieVariations.filter( hasTargetAttributes )
+			: [];
+		const hoodieProductVariation = matchingVariations[ 0 ];
+		if (
+			! Array.isArray( hoodieVariations ) ||
+			matchingVariations.length !== 1 ||
+			! hoodieProductVariation ||
+			! Number.isInteger( hoodieProductVariation.id ) ||
+			hoodieProductVariation.id <= 0 ||
+			hoodieProductVariation.manage_stock !== false ||
+			hoodieProductVariation.in_stock !== true ||
+			Number( hoodieProductVariation.weight ) !== 1.5
+		) {
+			throw new Error(
+				`Failed to find the expected baseline Hoodie Blue/No variation through REST: ${ JSON.stringify(
+					hoodieVariations
+				) }`
+			);
+		}
+
+		const updatedProduct = await requestUtils.rest< ProductResponse >( {
+			method: 'POST',
+			path: `wc/v2/products/${ hoodieProduct.id }`,
+			data: { manage_stock: true, stock_quantity: 100 },
+		} );
+		if (
+			updatedProduct.id !== hoodieProduct.id ||
+			updatedProduct.name !== 'Hoodie' ||
+			updatedProduct.slug !== 'hoodie' ||
+			updatedProduct.type !== 'variable' ||
+			updatedProduct.status !== 'publish' ||
+			updatedProduct.manage_stock !== true ||
+			updatedProduct.stock_quantity !== 100 ||
+			updatedProduct.in_stock !== true
+		) {
+			throw new Error(
+				`Failed to update the expected Hoodie product through REST: ${ JSON.stringify(
+					updatedProduct
+				) }`
+			);
+		}
+
+		const updatedVariation = await requestUtils.rest< VariationResponse >( {
+			method: 'POST',
+			path: `wc/v2/products/${ hoodieProduct.id }/variations/${ hoodieProductVariation.id }`,
+			data: {
+				manage_stock: true,
+				in_stock: false,
+				weight: '2',
+				description: variationDescription,
+			},
+		} );
+		if (
+			updatedVariation.id !== hoodieProductVariation.id ||
+			! hasTargetAttributes( updatedVariation ) ||
+			updatedVariation.manage_stock !== true ||
+			updatedVariation.in_stock !== false ||
+			Number( updatedVariation.weight ) !== 2 ||
+			updatedVariation.description !== expectedVariationDescription
+		) {
+			throw new Error(
+				`Failed to update the expected Hoodie Blue/No variation through REST: ${ JSON.stringify(
+					updatedVariation
+				) }`
+			);
+		}
 
 		await pageObject.updateSingleProductTemplate();
 
