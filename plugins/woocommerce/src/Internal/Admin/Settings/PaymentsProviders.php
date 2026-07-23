@@ -231,7 +231,7 @@ class PaymentsProviders {
 		$this->extension_suggestions = $payment_extension_suggestions;
 		$this->proxy                 = $proxy;
 
-		wp_cache_add_non_persistent_groups( array( self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP ) );
+		wp_cache_add_non_persistent_groups( array( self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP, self::PROVIDER_LISTS_REQUEST_CACHE_GROUP ) );
 	}
 
 	/**
