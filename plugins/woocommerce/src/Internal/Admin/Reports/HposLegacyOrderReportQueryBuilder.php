@@ -237,6 +237,10 @@ class HposLegacyOrderReportQueryBuilder {
 		if ( isset( $schema['op_data_column'][ $raw_key ] ) ) {
 			return array( $schema['op_data_column'][ $raw_key ], $this->build_op_data_join() );
 		}
+		if ( isset( $schema['address_column'][ $raw_key ] ) ) {
+			list( $address_type, $column ) = $schema['address_column'][ $raw_key ];
+			return array( "address_{$address_type}.{$column}", $this->build_address_join( $address_type ) );
+		}
 
 		return array(
 			"meta_{$key}.meta_value",
@@ -264,10 +268,34 @@ class HposLegacyOrderReportQueryBuilder {
 			$joins  = array_merge( $this->build_parent_orders_join(), $this->build_parent_op_data_join() );
 			return array( "parent_op_data.{$column}", $joins );
 		}
+		if ( isset( $schema['address_column'][ $raw_key ] ) ) {
+			list( $address_type, $column ) = $schema['address_column'][ $raw_key ];
+			$joins                         = array_merge(
+				$this->build_parent_orders_join(),
+				$this->build_address_join( $address_type, 'parent_orders', 'parent_address' )
+			);
+			return array( "parent_address_{$address_type}.{$column}", $joins );
+		}
 
 		return array(
 			"parent_meta_{$key}.meta_value",
 			$this->build_parent_meta_join( $key, $raw_key, $join_type ),
+		);
+	}
+
+	/**
+	 * Build the JOIN onto `wc_order_addresses` for one address type.
+	 *
+	 * @param string $address_type 'billing' or 'shipping'.
+	 * @param string $order_alias  Orders-table alias to join from.
+	 * @param string $alias_prefix Prefix for the address-table alias.
+	 *
+	 * @return array<string,string> JOIN keyed by alias.
+	 */
+	private function build_address_join( string $address_type, string $order_alias = 'orders', string $alias_prefix = 'address' ): array {
+		$alias = "{$alias_prefix}_{$address_type}";
+		return array(
+			$alias => 'LEFT JOIN ' . OrdersTableDataStore::get_addresses_table_name() . " AS {$alias} ON ( {$order_alias}.id = {$alias}.order_id AND {$alias}.address_type = '{$address_type}' )",
 		);
 	}
 
@@ -296,6 +324,9 @@ class HposLegacyOrderReportQueryBuilder {
 		$schema = $this->get_report_schema();
 		if ( ! is_array( $meta_key ) && isset( $schema['where_meta_column'][ $meta_key ] ) ) {
 			return array();
+		}
+		if ( ! is_array( $meta_key ) && isset( $schema['address_column'][ $meta_key ] ) ) {
+			return $this->build_address_join( $schema['address_column'][ $meta_key ][0] );
 		}
 
 		$alias = "meta_{$key}";
@@ -561,6 +592,9 @@ class HposLegacyOrderReportQueryBuilder {
 				$clause .= " AND order_item_meta_{$key}.meta_value {$where_value} )";
 			} elseif ( ! is_array( $meta_key ) && isset( $schema['where_meta_column'][ $meta_key ] ) ) {
 				$clause .= ' ( ' . $schema['where_meta_column'][ $meta_key ] . " {$where_value} )";
+			} elseif ( ! is_array( $meta_key ) && isset( $schema['address_column'][ $meta_key ] ) ) {
+				list( $address_type, $column ) = $schema['address_column'][ $meta_key ];
+				$clause                       .= " ( address_{$address_type}.{$column} {$where_value} )";
 			} else {
 				if ( is_array( $meta_key ) ) {
 					$clause .= " ( meta_{$key}.meta_key   IN ('" . implode( "','", $meta_key ) . "')";
@@ -691,9 +725,34 @@ class HposLegacyOrderReportQueryBuilder {
 			'where_meta_column' => array(
 				'_customer_user' => 'orders.customer_id',
 			),
+			'address_column'    => $this->build_address_column_map(),
 		);
 
 		return $this->report_schema;
+	}
+
+	/**
+	 * Map legacy `_billing_*` / `_shipping_*` meta keys to `wc_order_addresses` columns.
+	 *
+	 * Under HPOS these fields live in the addresses table, not in order meta, so a
+	 * meta join would return no rows for them.
+	 *
+	 * @return array<string,array{0:string,1:string}> Meta key => [address_type, column].
+	 */
+	private function build_address_column_map(): array {
+		$fields = array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'email', 'phone' );
+		$map    = array();
+
+		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
+			foreach ( $fields as $field ) {
+				if ( 'shipping' === $address_type && 'email' === $field ) {
+					continue;
+				}
+				$map[ "_{$address_type}_{$field}" ] = array( $address_type, $field );
+			}
+		}
+
+		return $map;
 	}
 
 	/**

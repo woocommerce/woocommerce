@@ -303,6 +303,45 @@ class HposLegacyOrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should map billing/shipping meta keys to the HPOS addresses table for selects and where_meta predicates.
+	 */
+	public function test_build_query_maps_address_meta_to_hpos_address_table(): void {
+		OrderHelper::toggle_cot_feature_and_usage( true );
+
+		$query = ( new HposLegacyOrderReportQueryBuilder() )->build_query(
+			array(
+				'data'         => array(
+					'_billing_first_name' => array(
+						'type'     => 'meta',
+						'function' => null,
+						'name'     => 'customer_name',
+					),
+				),
+				'where_meta'   => array(
+					// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					array(
+						'meta_key'   => '_shipping_country',
+						'meta_value' => 'NL',
+						'operator'   => '=',
+					),
+					// phpcs:enable
+				),
+				'filter_range' => false,
+				'order_types'  => array( 'shop_order' ),
+			),
+			0,
+			0
+		);
+
+		$this->assertStringContainsString( 'address_billing.first_name as customer_name', $query['select'] );
+		$this->assertStringContainsString( "wc_order_addresses AS address_billing ON ( orders.id = address_billing.order_id AND address_billing.address_type = 'billing' )", $query['join'] );
+		$this->assertStringContainsString( "wc_order_addresses AS address_shipping ON ( orders.id = address_shipping.order_id AND address_shipping.address_type = 'shipping' )", $query['join'] );
+		$this->assertStringContainsString( "address_shipping.country = 'NL'", $query['where'] );
+		// Address fields must not fall back to order-meta joins (the meta rows don't exist under HPOS).
+		$this->assertStringNotContainsString( 'wc_orders_meta', $query['join'] );
+	}
+
+	/**
 	 * @testdox Should build a DST-transition-aware CASE fallback for named timezones when CONVERT_TZ is unavailable.
 	 */
 	public function test_build_query_timezone_fallback_is_dst_transition_aware(): void {
