@@ -359,26 +359,6 @@ class ProductQuery implements QueryClausesGenerator {
 		}
 
 		$objects = array_map( 'wc_get_product', $results['results'] );
-		$total   = $results['total'];
-		$pages   = $results['pages'];
-
-		// Explicit parent lookups (e.g. variation hydration) skip the catalog discovery guard in
-		// add_query_clauses(), so enforce per-product visibility here instead.
-		if ( ! empty( $request['parent'] ) ) {
-			$previous_count = count( $objects );
-			$objects        = array_values(
-				array_filter(
-					$objects,
-					static function ( $product ) {
-						return ( $product instanceof \WC_Product || $product instanceof \WC_Product_Variation ) && $product->is_viewable();
-					}
-				)
-			);
-			$filtered_out   = $previous_count - count( $objects );
-			$total          = (int) $results['total'] - $filtered_out;
-			$per_page       = $request['per_page'] ? (int) $request['per_page'] : -1;
-			$pages          = $per_page > 0 ? (int) ceil( $total / $per_page ) : 1;
-		}
 
 		// Batch-prime image attachment caches for the whole collection, rather than once per
 		// product when ProductSchema::get_images() runs during serialization.
@@ -386,8 +366,8 @@ class ProductQuery implements QueryClausesGenerator {
 
 		return array(
 			'objects' => $objects,
-			'total'   => $total,
-			'pages'   => $pages,
+			'total'   => $results['total'],
+			'pages'   => $results['pages'],
 		);
 	}
 
@@ -439,13 +419,9 @@ class ProductQuery implements QueryClausesGenerator {
 	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		global $wpdb;
 
-		// Catalog discovery queries (SKU, slug, search) can return variations, so exclude any whose
-		// parent product is not published. Explicit parent[] lookups rely on is_viewable() instead.
-		$is_explicit_parent_query = ! empty( $wp_query->get( 'post_parent__in' ) );
-
 		if (
 			in_array( 'product_variation', (array) $wp_query->get( 'post_type' ), true )
-			&& ! $is_explicit_parent_query
+			&& ( ! current_user_can( 'edit_products' ) || ! current_user_can( 'edit_others_products' ) )
 		) {
 			$args['where'] .= $wpdb->prepare(
 				" AND ( {$wpdb->posts}.post_type != 'product_variation' OR EXISTS (
