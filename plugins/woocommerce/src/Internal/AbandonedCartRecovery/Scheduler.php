@@ -83,7 +83,6 @@ class Scheduler {
 		// is unscheduled regardless of which status the order moves to.
 		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_status_changed' ), 10, 4 );
 		add_action( 'woocommerce_trash_order', array( $this, 'handle_cancellation' ), 10, 1 );
-		// `woocommerce_before_delete_order` passes the order; `woocommerce_trash_order` passes only the ID.
 		add_action( 'woocommerce_before_delete_order', array( $this, 'handle_cancellation' ), 10, 2 );
 		add_action( self::ACTION_HOOK, array( $this, 'handle_scheduled_send' ), 10, 1 );
 	}
