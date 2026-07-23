@@ -81,7 +81,7 @@ const buildVariation = (
 		categories: [],
 		tags: [],
 		...overrides,
-	} as ProductEntityRecord );
+	} ) as ProductEntityRecord;
 
 describe( 'variation_active field', () => {
 	it.each( [

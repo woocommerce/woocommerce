@@ -444,8 +444,15 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
  * @return string
  */
 function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
-	$dimensions        = wc_get_image_size( $size );
-	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
+	$dimensions           = wc_get_image_size( $size );
+	$placeholder_image    = get_option( 'woocommerce_placeholder_image', 0 );
+	$use_attachment_image = wp_attachment_is_image( $placeholder_image );
+	$image                = null;
+
+	if ( $use_attachment_image && has_filter( 'woocommerce_placeholder_img_src' ) ) {
+		$image                = wc_placeholder_img_src( $size );
+		$use_attachment_image = wp_get_attachment_image_url( $placeholder_image, $size ) === $image;
+	}
 
 	$default_attr = array(
 		'class' => 'woocommerce-placeholder wp-post-image',
@@ -454,7 +461,7 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 
 	$attr = wp_parse_args( $attr, $default_attr );
 
-	if ( wp_attachment_is_image( $placeholder_image ) ) {
+	if ( $use_attachment_image ) {
 		$image_html = wp_get_attachment_image(
 			$placeholder_image,
 			$size,
@@ -462,7 +469,8 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 			$attr
 		);
 	} else {
-		$image      = wc_placeholder_img_src( $size );
+		// A changed source cannot use the attachment's srcset, as the browser could select it instead.
+		$image      = $image ?? wc_placeholder_img_src( $size );
 		$hwstring   = image_hwstring( $dimensions['width'], $dimensions['height'] );
 		$attributes = array();
 
