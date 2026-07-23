@@ -252,6 +252,276 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that a tag embedded inside a larger URL is replaced in place.
+	 */
+	public function testPersonalizeContentWithEmbeddedHrefTag(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'email',
+				'user/email',
+				'Subscriber Info',
+				function () {
+					return 'john@example.com';
+				}
+			)
+		);
+
+		$this->assertSame(
+			'<a href="http://example.com?test=john@example.com">Click here</a>',
+			$this->personalizer->personalize_content( '<a href="http://example.com?test=[user/email]">Click here</a>' ),
+			'The token should be replaced within the surrounding URL'
+		);
+		$this->assertSame(
+			'<a href="http://example.com/?next=%2Fshop%2F&#038;e=john@example.com">Click here</a>',
+			$this->personalizer->personalize_content( '<a href="http://example.com/?next=%2Fshop%2F&e=[user/email]">Click here</a>' ),
+			'Percent-encoding elsewhere in the URL should be preserved'
+		);
+	}
+
+	/**
+	 * Test how the editor-forced protocol prefix is handled for whole-URL tags.
+	 */
+	public function testWholeUrlHrefTagPrefixHandling(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store URL',
+				'woocommerce/store-url',
+				'Store',
+				function () {
+					return 'https://example.com';
+				}
+			)
+		);
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store domain',
+				'woocommerce/store-domain',
+				'Store',
+				function () {
+					return 'example.com';
+				}
+			)
+		);
+
+		$this->assertSame(
+			'<a href="https://example.com?utm_source=email">Click here</a>',
+			$this->personalizer->personalize_content( '<a href="http://[woocommerce/store-url]?utm_source=email">Click here</a>' ),
+			'An appended suffix should be kept while the forced prefix is discarded'
+		);
+		$this->assertSame(
+			'<a href="https://example.com">Click here</a>',
+			$this->personalizer->personalize_content( '<a href="HTTP://[woocommerce/store-url]">Click here</a>' ),
+			'The forced prefix should be discarded case-insensitively'
+		);
+		// esc_url() prepends the scheme when the value lacks one.
+		$this->assertSame(
+			'<a href="http://example.com">Click here</a>',
+			$this->personalizer->personalize_content( '<a href="http://[woocommerce/store-domain]">Click here</a>' ),
+			'A schemeless value should still produce a usable link'
+		);
+	}
+
+	/**
+	 * Test that multiple different tags in one href are all replaced.
+	 */
+	public function testMultipleTagsInOneHref(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'email',
+				'user/email',
+				'Subscriber Info',
+				function () {
+					return 'john@example.com';
+				}
+			)
+		);
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'first_name',
+				'user/firstname',
+				'Subscriber Info',
+				function () {
+					return 'John';
+				}
+			)
+		);
+
+		$html_content = '<a href="http://example.com/?e=[user/email]&n=[user/firstname]">Click here</a>';
+		$this->assertSame(
+			'<a href="http://example.com/?e=john@example.com&#038;n=John">Click here</a>',
+			$this->personalizer->personalize_content( $html_content )
+		);
+	}
+
+	/**
+	 * Test that the same tag with different arguments produces per-occurrence values.
+	 */
+	public function testSameTagWithDifferentArgumentsInOneHref(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'echo_arg',
+				'test/echo',
+				'Test',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed -- The $context parameter is not used in this test.
+					return $args['value'] ?? '';
+				}
+			)
+		);
+
+		$html_content = '<a href="http://example.com/?a=[test/echo value=one]&b=[test/echo value=two]">Click here</a>';
+		$this->assertSame(
+			'<a href="http://example.com/?a=one&#038;b=two">Click here</a>',
+			$this->personalizer->personalize_content( $html_content )
+		);
+	}
+
+	/**
+	 * Test that an unreplaced leading bracket does not cost the URL its protocol.
+	 */
+	public function testUnregisteredLeadingBracketKeepsProtocol(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'coupon',
+				'test/coupon',
+				'Test',
+				function () {
+					return 'SAVE20';
+				}
+			)
+		);
+
+		$html_content = '<a href="http://[2024]/page?ref=[test/coupon]">Click here</a>';
+		$this->assertSame(
+			'<a href="http://[2024]/page?ref=SAVE20">Click here</a>',
+			$this->personalizer->personalize_content( $html_content )
+		);
+	}
+
+	/**
+	 * Test that a token appearing both plain and URL-encoded in one href is replaced in both places.
+	 */
+	public function testMixedPlainAndEncodedTokenOccurrences(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'coupon',
+				'test/coupon',
+				'Test',
+				function () {
+					return 'SAVE20';
+				}
+			)
+		);
+
+		$html_content = '<a href="http://example.com/?a=[test/coupon]&b=%5Btest/coupon%5D">Click here</a>';
+		$this->assertSame(
+			'<a href="http://example.com/?a=SAVE20&#038;b=SAVE20">Click here</a>',
+			$this->personalizer->personalize_content( $html_content )
+		);
+	}
+
+	/**
+	 * Test that a tag value containing another tag's token is not re-scanned for replacements.
+	 */
+	public function testTagValueContainingAnotherTokenStaysLiteral(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'name',
+				'test/name',
+				'Test',
+				function () {
+					return 'x[test/coupon]y';
+				}
+			)
+		);
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'coupon',
+				'test/coupon',
+				'Test',
+				function () {
+					return 'SAVE20';
+				}
+			)
+		);
+
+		$html_content = '<a href="http://example.com/?n=[test/name]&c=[test/coupon]">Click here</a>';
+		$this->assertSame(
+			'<a href="http://example.com/?n=x%5Btest/coupon%5Dy&#038;c=SAVE20">Click here</a>',
+			$this->personalizer->personalize_content( $html_content )
+		);
+	}
+
+	/**
+	 * Test that an unregistered URL-encoded bracket sequence does not cost the URL its encoding.
+	 */
+	public function testUnregisteredEncodedBracketKeepsSurroundingEncoding(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'coupon',
+				'test/coupon',
+				'Test',
+				function () {
+					return 'SAVE20';
+				}
+			)
+		);
+
+		// items%5B0%5D decodes to a token-shaped [0]; it must not force the decoded base.
+		$html_content = '<a href="https://shop.example/checkout?items%5B0%5D=2&note=a%26b&c=[test/coupon]">Click here</a>';
+		$this->assertSame(
+			'<a href="https://shop.example/checkout?items%5B0%5D=2&#038;note=a%26b&#038;c=SAVE20">Click here</a>',
+			$this->personalizer->personalize_content( $html_content )
+		);
+	}
+
+	/**
+	 * Test that a tag value of "0" is a valid replacement in links.
+	 */
+	public function testZeroStringTagValueIsReplacedInHref(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'items_count',
+				'test/count',
+				'Test',
+				function () {
+					return '0';
+				}
+			)
+		);
+
+		$html_content = '<a href="http://example.com/?count=[test/count]">Click here</a>';
+		$this->assertSame(
+			'<a href="http://example.com/?count=0">Click here</a>',
+			$this->personalizer->personalize_content( $html_content )
+		);
+	}
+
+	/**
+	 * Test that dollar signs and backslashes in tag values are inserted literally into links.
+	 */
+	public function testHrefTagValueWithRegexSpecialCharacters(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Tracking URL',
+				'test/tracking-url',
+				'Test',
+				function () {
+					return 'https://example.com/?q=$0&r=${1}';
+				}
+			)
+		);
+
+		// The data-link-href site goes through the regex-based replacement.
+		// Note: esc_url() strips the curly braces from `${1}`; the important part is that
+		// `$0` and `$1` are not interpreted as regex backreferences.
+		$html_content = '<a data-link-href="[test/tracking-url]" href="#">Click here</a>';
+		$this->assertSame(
+			'<a  href="https://example.com/?q=$0&#038;r=$1">Click here</a>',
+			$this->personalizer->personalize_content( $html_content )
+		);
+	}
+
+	/**
 	 * Test that the callback receives the rendering context passed to personalize_content.
 	 */
 	public function testCallbackReceivesRenderingContext(): void {

@@ -170,29 +170,73 @@ class Personalizer {
 					continue;
 				}
 
-				// Decode both URL encoding (%XX) and HTML entities (&#039;) to handle various encoding scenarios.
-				$decoded_href = html_entity_decode( urldecode( $href ), ENT_QUOTES, 'UTF-8' );
-				if ( ! preg_match( '/\[' . self::TAG_NAME_PATTERN . '(?:\s+[^\]]+)?\]/', $decoded_href, $matches ) ) {
-					continue;
-				}
-
-				$token = $this->parse_token( $matches[0] );
-				$tag   = $this->tags_registry->get_by_token( $token['token'] );
-
-				if ( ! $tag ) {
-					continue;
-				}
-
-				$value = $tag->execute_callback( $this->get_callback_context( self::RENDERING_CONTEXT_HREF ), $token['arguments'] );
-
-				if ( $value ) {
-					$content_processor->set_attribute( 'href', $value );
+				$personalized_href = $this->personalize_href_tokens( $href );
+				if ( null !== $personalized_href ) {
+					$content_processor->set_attribute( 'href', $personalized_href );
 				}
 			}
 		}
 
 		$content_processor->flush_updates();
 		return $content_processor->get_updated_html();
+	}
+
+	/**
+	 * Replace personalization tag tokens embedded in a link URL.
+	 *
+	 * @param string $href The href attribute value.
+	 * @return string|null The href with tokens replaced, or null when nothing was replaced.
+	 */
+	private function personalize_href_tokens( string $href ): ?string {
+		// Decode both URL encoding (%XX) and HTML entities (&#039;) to handle various encoding scenarios.
+		$decoded_href = html_entity_decode( urldecode( $href ), ENT_QUOTES, 'UTF-8' );
+		if ( ! preg_match_all( '/\[' . self::TAG_NAME_PATTERN . '(?:\s+[^\]]+)?\]/', $decoded_href, $matches ) ) {
+			return null;
+		}
+
+		// Resolve every replaceable token first.
+		$replacements = array();
+		foreach ( array_unique( $matches[0] ) as $token_string ) {
+			$token = $this->parse_token( $token_string );
+			$tag   = $this->tags_registry->get_by_token( $token['token'] );
+			if ( ! $tag ) {
+				continue;
+			}
+
+			$value = $tag->execute_callback( $this->get_callback_context( self::RENDERING_CONTEXT_HREF ), $token['arguments'] );
+			if ( '' !== $value ) {
+				$replacements[ $token_string ] = $value;
+			}
+		}
+
+		if ( ! $replacements ) {
+			return null;
+		}
+
+		// Prefer the original attribute value as the replacement base so legitimate
+		// percent-encoding in the surrounding URL is preserved; fall back to the decoded
+		// form when a replaced token occurrence exists only there (e.g. URL-encoded tokens).
+		// Only tokens that are actually replaced matter here — an unregistered bracket
+		// sequence that exists purely in the decoded form must not force the decoded base.
+		$base = $href;
+		foreach ( array_keys( $replacements ) as $token_string ) {
+			if ( substr_count( $href, $token_string ) !== substr_count( $decoded_href, $token_string ) ) {
+				$base = $decoded_href;
+				break;
+			}
+		}
+
+		// The editor forces a protocol prefix when a tag is used as the whole URL
+		// ("http://[tag]"). Strip it only when the token directly after it is being
+		// replaced, so the tag value is used as-is while any suffix (e.g. appended
+		// query parameters) is kept.
+		if ( preg_match( '#^https?://(\[' . self::TAG_NAME_PATTERN . '(?:\s+[^\]]+)?\])#i', $base, $prefix_match ) && isset( $replacements[ $prefix_match[1] ] ) ) {
+			$base = (string) preg_replace( '#^https?://#i', '', $base );
+		}
+
+		// Single-pass replacement — tag values are never re-scanned for other tokens,
+		// and a regex replacement would interpret `$` and `\` in them.
+		return strtr( $base, $replacements );
 	}
 
 	/**
@@ -270,6 +314,7 @@ class Personalizer {
 		// Create a regex pattern dynamically.
 		$pattern = '/\[' . $escaped_shortcode . '(?:\s+[^\]]+)?\]/';
 
-		return trim( (string) preg_replace( $pattern, $replacement, $content ) );
+		// Escape `$` and `\` so they are inserted literally instead of being interpreted as backreferences.
+		return trim( (string) preg_replace( $pattern, addcslashes( $replacement, '\\$' ), $content ) );
 	}
 }
