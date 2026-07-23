@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
+use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -232,6 +234,10 @@ class SettingsUISchema {
 	 * @return array|null String list, or null when unchanged or not a scalar list.
 	 */
 	private static function canonicalize_scalar_list( array $values ): ?array {
+		if ( ! ArrayUtil::array_is_list( $values ) ) {
+			return null;
+		}
+
 		$needs_conversion = false;
 
 		foreach ( $values as $item ) {
@@ -244,7 +250,7 @@ class SettingsUISchema {
 			}
 		}
 
-		return $needs_conversion ? array_map( 'strval', array_values( $values ) ) : null;
+		return $needs_conversion ? array_map( 'strval', $values ) : null;
 	}
 
 	/**

@@ -505,6 +505,27 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It leaves associative value arrays unchanged.
+	 */
+	public function test_canonicalize_option_values_leaves_associative_values_unchanged(): void {
+		$schema = $this->get_native_schema_with_field(
+			array(
+				'id'      => 'acme_tiers',
+				'type'    => 'array',
+				'value'   => array( 'tier' => 1 ),
+				'options' => array(
+					array(
+						'label' => 'One',
+						'value' => '1',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( $schema, SettingsUISchema::canonicalize_option_values( $schema ), 'Associative value arrays should pass through unreindexed for the provider to fix.' );
+	}
+
+	/**
 	 * Build a minimal native schema with one field.
 	 *
 	 * @param array $field Field definition.
