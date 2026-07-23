@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Store API nonce bootstrap timestamp config key so the nonce middleware can compare nonce freshness correctly on cached pages.
