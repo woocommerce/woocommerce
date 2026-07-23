@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Schedulers;
 
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Unit_Test_Case;
 
 /**
@@ -511,12 +512,15 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Trashing an order syncs the trash status to wp_wc_order_stats.
+	 * @testdox Trashing an order schedules an import that syncs the trash status to wp_wc_order_stats.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/44371
 	 */
-	public function test_trash_order_syncs_status_to_order_stats(): void {
+	public function test_trash_order_schedules_import_that_syncs_status_to_order_stats(): void {
 		global $wpdb;
+
+		// Immediate import mode: trash/untrash schedule a per-order import action.
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
 
 		// Create and import a completed order.
 		$order = \WC_Helper_Order::create_order();
@@ -537,6 +541,14 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		// Trash the order. Note: delete() sets the object's ID to 0, so we use $order_id.
 		$order->delete( false );
 
+		// The trash hook should have scheduled an import for this order.
+		$this->assertTrue(
+			as_has_scheduled_action( OrdersScheduler::get_action( 'import' ), array( $order_id ), OrdersScheduler::$group ),
+			'Trashing an order should schedule a wc-admin_import_orders action.'
+		);
+
+		\WC_Helper_Queue::run_all_pending( OrdersScheduler::$group );
+
 		// Verify the order stats row now has wc-trash status.
 		$status_after = $wpdb->get_var(
 			$wpdb->prepare(
@@ -548,20 +560,23 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Untrashing an order syncs the restored status to wp_wc_order_stats.
+	 * @testdox Untrashing an order schedules an import that restores the status in wp_wc_order_stats.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/44371
 	 */
-	public function test_untrash_order_syncs_status_to_order_stats(): void {
+	public function test_untrash_order_schedules_import_that_restores_status_in_order_stats(): void {
 		global $wpdb;
 
-		// Create, complete, import, then trash an order.
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		// Create, complete, import, then trash an order and sync the trash status.
 		$order = \WC_Helper_Order::create_order();
 		$order->set_status( 'completed' );
 		$order->save();
 		$order_id = $order->get_id();
 		OrdersScheduler::import( $order_id );
 		$order->delete( false );
+		\WC_Helper_Queue::run_all_pending( OrdersScheduler::$group );
 
 		// Verify the order is trashed in stats.
 		// Note: delete() sets the object's ID to 0, so we use $order_id.
@@ -577,11 +592,15 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		// WC_Data_Store proxies via __call, so method_exists() can't detect
 		// untrash_order; route by the authoritative storage mode instead.
 		$order = wc_get_order( $order_id );
-		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$order->get_data_store()->untrash_order( $order );
 		} else {
 			wp_untrash_post( $order_id );
 		}
+
+		// The untrash hook schedules an import, which runs only after the
+		// restored status has been persisted.
+		\WC_Helper_Queue::run_all_pending( OrdersScheduler::$group );
 
 		// Verify the order stats row is restored.
 		$status_restored = $wpdb->get_var(
@@ -594,40 +613,58 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox maybe_import_on_post_untrash is a no-op when HPOS is the authoritative store.
+	 * @testdox maybe_schedule_import_on_post_trash_change is a no-op when HPOS is the authoritative store.
 	 *
-	 * When HPOS is active the woocommerce_untrash_order callback already syncs
-	 * wp_wc_order_stats. The untrashed_post hook then fires for the same order,
-	 * so this handler must early-return to avoid a redundant import().
+	 * When HPOS is active the woocommerce_trash_order/woocommerce_untrash_order hooks
+	 * already schedule the import. The trashed_post/untrashed_post hooks then fire for
+	 * the same order, so this handler must early-return to avoid a redundant import.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/44371
 	 */
-	public function test_maybe_import_on_post_untrash_skips_when_hpos_active(): void {
-		global $wpdb;
-
-		if ( ! \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+	public function test_maybe_schedule_import_on_post_trash_change_skips_when_hpos_active(): void {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$this->markTestSkipped( 'Test requires HPOS to be the authoritative store.' );
 		}
 
-		// Create and import a completed order.
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		$order    = \WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+
+		// Creating the order schedules an import of its own; clear the queue so
+		// the assertion below isolates this handler.
+		\WC_Helper_Queue::cancel_all_pending();
+
+		OrdersScheduler::maybe_schedule_import_on_post_trash_change( $order_id );
+
+		$this->assertFalse(
+			as_has_scheduled_action( OrdersScheduler::get_action( 'import' ), array( $order_id ), OrdersScheduler::$group ),
+			'maybe_schedule_import_on_post_trash_change should not schedule an import when HPOS is the authoritative store.'
+		);
+	}
+
+	/**
+	 * @testdox process_pending_batch picks up trashed orders and syncs wc-trash to wp_wc_order_stats.
+	 *
+	 * In scheduled import mode no per-order action is created on trash; the batch
+	 * cursor query must include trashed orders so the transition is synced.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/44371
+	 */
+	public function test_process_pending_batch_picks_up_trashed_order(): void {
+		global $wpdb;
+
+		// Scheduled import mode is set in setUp().
 		$order = \WC_Helper_Order::create_order();
 		$order->set_status( 'completed' );
 		$order->save();
 		$order_id = $order->get_id();
 		OrdersScheduler::import( $order_id );
 
-		// Plant a sentinel value in wp_wc_order_stats. If maybe_import_on_post_untrash
-		// runs import() despite HPOS being active, the sentinel will be overwritten with
-		// the order's actual status.
-		$wpdb->update(
-			$wpdb->prefix . 'wc_order_stats',
-			array( 'status' => 'wc-sentinel' ),
-			array( 'order_id' => $order_id ),
-			array( '%s' ),
-			array( '%d' )
-		);
+		// Trash the order. Note: delete() sets the object's ID to 0, so we use $order_id.
+		$order->delete( false );
 
-		OrdersScheduler::maybe_import_on_post_untrash( $order_id );
+		OrdersScheduler::process_pending_batch( '2020-01-01 00:00:00', 0 );
 
 		$status_after = $wpdb->get_var(
 			$wpdb->prepare(
@@ -635,7 +672,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 				$order_id
 			)
 		);
-		$this->assertSame( 'wc-sentinel', $status_after, 'maybe_import_on_post_untrash should not call import() when HPOS is the authoritative store.' );
+		$this->assertSame( 'wc-trash', $status_after );
 	}
 
 	/**

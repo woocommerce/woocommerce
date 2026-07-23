@@ -131,20 +131,18 @@ class OrdersScheduler extends ImportScheduler {
 			add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
 			add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
 			add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
+
+			// Trash and untrash bypass woocommerce_update_order, so schedule imports for
+			// them here. In scheduled mode the batch cursor picks them up instead (the
+			// get_orders_since_* queries do not exclude trashed orders).
+			add_action( 'woocommerce_trash_order', array( __CLASS__, 'possibly_schedule_import' ) );
+			add_action( 'woocommerce_untrash_order', array( __CLASS__, 'possibly_schedule_import' ) );
+
+			// CPT-based stores are trashed/untrashed via wp_trash_post()/wp_untrash_post()
+			// in the admin UI, which never fire the woocommerce_(un)trash_order hooks.
+			add_action( 'trashed_post', array( __CLASS__, 'maybe_schedule_import_on_post_trash_change' ) );
+			add_action( 'untrashed_post', array( __CLASS__, 'maybe_schedule_import_on_post_trash_change' ) );
 		}
-
-		// Trash and untrash bypass woocommerce_update_order, so sync them directly
-		// regardless of import mode. The batch processor also excludes trash status,
-		// so these hooks are the only way to keep wp_wc_order_stats in sync.
-		add_action( 'woocommerce_trash_order', array( __CLASS__, 'import' ) );
-
-		// woocommerce_untrash_order fires before the status is restored in the DB,
-		// so we use $previous_status directly instead of re-importing from the DB.
-		add_action( 'woocommerce_untrash_order', array( __CLASS__, 'sync_on_order_untrash' ), 10, 2 );
-
-		// CPT-based stores fire untrashed_post instead of woocommerce_untrash_order.
-		// By the time untrashed_post fires, the status is already restored in the DB.
-		add_action( 'untrashed_post', array( __CLASS__, 'maybe_import_on_post_untrash' ) );
 
 		// Watch for changes to the scheduled import option.
 		add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );
@@ -436,59 +434,24 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
-	 * Sync order status to analytics when an order is untrashed via HPOS.
+	 * Schedule an analytics import when a CPT-based order is trashed or untrashed.
 	 *
-	 * The woocommerce_untrash_order hook fires before the status is restored in the DB,
-	 * so import() would read the stale 'trash' status. Instead, we directly
-	 * update wc_order_stats using the $previous_status argument.
-	 *
-	 * @internal
-	 * @param int    $order_id        Order ID.
-	 * @param string $previous_status The status the order had before being trashed (wc-prefixed).
-	 */
-	public static function sync_on_order_untrash( $order_id, $previous_status ): void {
-		global $wpdb;
-
-		// Ensure status is wc-prefixed for wc_order_stats consistency.
-		if ( 0 !== strpos( $previous_status, 'wc-' ) ) {
-			$previous_status = 'wc-' . $previous_status;
-		}
-
-		$wpdb->update(
-			$wpdb->prefix . 'wc_order_stats',
-			array( 'status' => $previous_status ),
-			array( 'order_id' => $order_id ),
-			array( '%s' ),
-			array( '%d' )
-		);
-
-		ReportsCache::invalidate();
-	}
-
-	/**
-	 * Sync order status to analytics when a CPT-based order is untrashed.
-	 *
-	 * CPT data stores don't fire woocommerce_untrash_order. They use
-	 * WordPress's untrashed_post hook, which fires after the status is already
-	 * restored in the DB, so import() reads the correct status.
-	 *
-	 * When HPOS is the authoritative store this hook is redundant: the
-	 * woocommerce_untrash_order callback above has already updated
-	 * wp_wc_order_stats. Skip in that case to avoid a second sync.
+	 * The admin UI trashes and restores CPT orders via wp_trash_post()/wp_untrash_post(),
+	 * which never fire the woocommerce_trash_order/woocommerce_untrash_order hooks. When
+	 * HPOS is the authoritative store those hooks fire directly, so this is skipped to
+	 * avoid a redundant import. Non-order posts fall out of the is_order() guard inside
+	 * possibly_schedule_import().
 	 *
 	 * @internal
+	 * @since 11.1.0
 	 * @param int $post_id Post ID.
 	 */
-	public static function maybe_import_on_post_untrash( $post_id ): void {
+	public static function maybe_schedule_import_on_post_trash_change( $post_id ): void {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			return;
 		}
 
-		if ( ! OrderUtil::is_order( $post_id, array( 'shop_order', 'shop_order_refund' ) ) ) {
-			return;
-		}
-
-		self::import( $post_id );
+		self::possibly_schedule_import( $post_id );
 	}
 
 	/**
@@ -753,7 +716,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				"SELECT id, date_updated_gmt
 				FROM {$orders_table}
 				WHERE type IN ('shop_order', 'shop_order_refund')
-				AND status NOT IN ('wc-auto-draft', 'auto-draft', 'trash')
+				AND status NOT IN ('wc-auto-draft', 'auto-draft')
 				AND (
 					date_updated_gmt > %s
 					OR (date_updated_gmt = %s AND id > %d)
@@ -789,7 +752,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				"SELECT ID as id, post_modified_gmt as date_updated_gmt
 				FROM {$wpdb->posts}
 				WHERE post_type IN ('shop_order', 'shop_order_refund')
-				AND post_status NOT IN ('wc-auto-draft', 'auto-draft', 'trash')
+				AND post_status NOT IN ('wc-auto-draft', 'auto-draft')
 				AND (
 					post_modified_gmt > %s
 					OR (post_modified_gmt = %s AND ID > %d)
