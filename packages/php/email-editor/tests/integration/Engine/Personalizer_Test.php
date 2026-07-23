@@ -318,6 +318,88 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that a text value type tag is escaped in the html rendering context only.
+	 */
+	public function testTextValueTypeIsEscapedInHtmlContext(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'shop_name',
+				'test/shop-name',
+				'Test',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $args parameter is not used in this test.
+					return $context['shop_name'] ?? '';
+				},
+				array(),
+				null,
+				array(),
+				Personalization_Tag::VALUE_TYPE_TEXT
+			)
+		);
+
+		$this->personalizer->set_context( array( 'shop_name' => "Tom & Jerry's <shop>" ) );
+		$content = 'Welcome to <!--[test/shop-name]-->';
+		$this->assertSame(
+			'Welcome to Tom &amp; Jerry&#039;s &lt;shop&gt;',
+			$this->personalizer->personalize_content( $content, Personalizer::RENDERING_CONTEXT_HTML )
+		);
+		$this->assertSame(
+			"Welcome to Tom & Jerry's <shop>",
+			$this->personalizer->personalize_content( $content, Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+	}
+
+	/**
+	 * Test that an already escaped value of a text value type tag is not double-encoded.
+	 */
+	public function testTextValueTypeIsNotDoubleEncoded(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'shop_name',
+				'test/shop-name',
+				'Test',
+				function () {
+					return 'Tom &amp; Jerry';
+				},
+				array(),
+				null,
+				array(),
+				Personalization_Tag::VALUE_TYPE_TEXT
+			)
+		);
+
+		$this->assertSame(
+			'<p>Tom &amp; Jerry</p>',
+			$this->personalizer->personalize_content( '<p><!--[test/shop-name]--></p>' )
+		);
+	}
+
+	/**
+	 * Test that an html value type tag (the default) is never touched by the Personalizer.
+	 */
+	public function testHtmlValueTypeIsNotEscaped(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'price',
+				'test/price',
+				'Test',
+				function () {
+					return '<span class="price">10 &euro;</span>';
+				}
+			)
+		);
+
+		$content = '<p><!--[test/price]--></p>';
+		$this->assertSame(
+			'<p><span class="price">10 &euro;</span></p>',
+			$this->personalizer->personalize_content( $content, Personalizer::RENDERING_CONTEXT_HTML )
+		);
+		$this->assertSame(
+			'<p><span class="price">10 &euro;</span></p>',
+			$this->personalizer->personalize_content( $content, Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+	}
+
+	/**
 	 * Test that the reserved rendering context key cannot be injected via set_context().
 	 */
 	public function testRenderingContextKeyIsReserved(): void {

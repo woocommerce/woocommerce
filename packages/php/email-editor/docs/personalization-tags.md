@@ -143,6 +143,31 @@ function ( $context ) {
 }
 ```
 
+### Value Type
+
+Most tags return plain text: names, order numbers, dates. Declare those with `Personalization_Tag::VALUE_TYPE_TEXT`. The callback then always returns the raw, unescaped value, and the Personalizer escapes it to fit the rendering context: `esc_html()` in HTML content, untouched in plain-text output and in link URLs (where `esc_url()` is applied when the attribute is written). Declaring a value type is the expected practice for new tags.
+
+```php
+$registry->register(
+    new Personalization_Tag(
+        'First Name',
+        'customer/first-name',
+        'Customer',
+        function ( $context ) {
+            return $context['customer_first_name'] ?? '';
+        },
+        array(),
+        null,
+        array(),
+        Personalization_Tag::VALUE_TYPE_TEXT
+    )
+);
+```
+
+Note: the `esc_html()` call does not double-encode existing entities, so a raw text value that itself contains an entity-shaped sequence (e.g. a literal `&amp;`) renders as the decoded character (`&`). Always return genuinely raw text.
+
+The default, `Personalization_Tag::VALUE_TYPE_HTML`, inserts the value untouched in every rendering context — including plain-text output; the callback owns escaping and any per-context differences (in the `text` rendering context it must return raw plain text without markup or entities).
+
 ## Core Components
 
 ### Personalization_Tags_Registry

@@ -10,6 +10,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine;
 
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\HTML_Tag_Processor;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 
 /**
@@ -135,6 +136,9 @@ class Personalizer {
 				}
 
 				$value = $tag->execute_callback( $this->get_callback_context( $rendering_context ), $token['arguments'] );
+				if ( self::RENDERING_CONTEXT_HTML === $rendering_context && Personalization_Tag::VALUE_TYPE_TEXT === $tag->get_value_type() ) {
+					$value = esc_html( $value );
+				}
 				$content_processor->replace_token( $value );
 
 			} elseif ( $content_processor->get_token_type() === '#tag' && $content_processor->get_tag() === 'TITLE' ) {
