@@ -7,6 +7,7 @@ import { globalIgnores } from 'eslint/config';
  * Internal dependencies
  */
 import woocommerce from '@woocommerce/eslint-config';
+import { coreModules } from '@woocommerce/eslint-config/core-modules.js';
 
 export default [
 	...woocommerce,
@@ -14,17 +15,9 @@ export default [
 	{
 		settings: {
 			'import/core-modules': [
-				'@woocommerce/components',
-				'@woocommerce/currency',
-				'@woocommerce/data',
-				'@woocommerce/date',
-				'@woocommerce/navigation',
+				...coreModules,
 				'@storybook/react',
 				'@automattic/tour-kit',
-				'@wordpress/blocks',
-				'@wordpress/components',
-				'@wordpress/element',
-				'@wordpress/media-utils',
 				'dompurify',
 				'downshift',
 				'moment',
