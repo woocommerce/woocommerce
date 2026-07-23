@@ -384,7 +384,7 @@ const getAllFields = ( schema: SettingsUISchema ): SettingsUIField[] =>
 
 type ErrorBoundaryProps = {
 	children: ReactNode;
-	onError?: () => void;
+	onError?: ( error: Error, errorInfo: ErrorInfo ) => void;
 };
 
 type ErrorBoundaryState = {
@@ -406,7 +406,7 @@ export class SettingsUIErrorBoundary extends Component<
 			error: caughtError,
 			errorInfo,
 		} );
-		this.props.onError?.();
+		this.props.onError?.( caughtError, errorInfo );
 	}
 
 	render() {

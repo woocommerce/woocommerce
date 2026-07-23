@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, createRoot } from '@wordpress/element';
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, ErrorInfo, ReactNode } from 'react';
 import type { SettingsUISchema } from '@woocommerce/settings-ui';
 
 /**
@@ -16,7 +16,7 @@ declare global {
 			settingsUi?: {
 				SettingsUIErrorBoundary: ComponentType< {
 					children: ReactNode;
-					onError?: () => void;
+					onError?: ( error: Error, errorInfo: ErrorInfo ) => void;
 				} >;
 				SettingsUIPage: ( props: {
 					schema: SettingsUISchema;
