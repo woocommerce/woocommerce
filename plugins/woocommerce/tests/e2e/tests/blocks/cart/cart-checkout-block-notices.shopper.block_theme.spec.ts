@@ -4,7 +4,6 @@
 import {
 	expect,
 	test as base,
-	wpCLI,
 	BLOCK_THEME_SLUG,
 	BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG,
 	BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG,
@@ -30,15 +29,63 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Notice Templates', () => {
-	test.beforeEach( async ( { frontendUtils } ) => {
-		const cliOutput = await wpCLI(
-			'post list --title="Cart Shortcode" --post_type=page --field=ID'
-		);
-		const cartShortcodeID = cliOutput.stdout.match( /\d+/g )?.pop();
+	test.beforeEach( async ( { frontendUtils, requestUtils } ) => {
+		const cartShortcodePages = await requestUtils.rest< unknown >( {
+			path: '/wp/v2/pages?slug=cart-shortcode&context=edit&_fields=id,title',
+		} );
+		if (
+			! Array.isArray( cartShortcodePages ) ||
+			cartShortcodePages.length !== 1
+		) {
+			throw new Error( 'Expected one Cart Shortcode page from REST' );
+		}
 
-		await wpCLI(
-			`option update woocommerce_cart_page_id ${ cartShortcodeID }`
-		);
+		const cartShortcodePage: unknown = cartShortcodePages[ 0 ];
+		if ( typeof cartShortcodePage !== 'object' || ! cartShortcodePage ) {
+			throw new Error( 'Expected one Cart Shortcode page from REST' );
+		}
+
+		const cartShortcodePageFields = cartShortcodePage as Record<
+			string,
+			unknown
+		>;
+		const cartShortcodePageID = cartShortcodePageFields.id;
+		const cartShortcodeTitle = cartShortcodePageFields.title;
+		if (
+			typeof cartShortcodePageID !== 'number' ||
+			! Number.isInteger( cartShortcodePageID ) ||
+			cartShortcodePageID <= 0 ||
+			typeof cartShortcodeTitle !== 'object' ||
+			! cartShortcodeTitle ||
+			( cartShortcodeTitle as Record< string, unknown > ).raw !==
+				'Cart Shortcode'
+		) {
+			throw new Error( 'Expected one Cart Shortcode page from REST' );
+		}
+
+		const cartShortcodeID = String( cartShortcodePageID );
+		const cartPageSettingResponse = await requestUtils.rest< unknown >( {
+			method: 'PUT',
+			path: 'wc/v3/settings/advanced/woocommerce_cart_page_id',
+			data: { value: cartShortcodeID },
+		} );
+		if (
+			typeof cartPageSettingResponse !== 'object' ||
+			! cartPageSettingResponse
+		) {
+			throw new Error( 'Cart page setting REST response did not match' );
+		}
+
+		const cartPageSetting = cartPageSettingResponse as Record<
+			string,
+			unknown
+		>;
+		if (
+			cartPageSetting.id !== 'woocommerce_cart_page_id' ||
+			cartPageSetting.value !== cartShortcodeID
+		) {
+			throw new Error( 'Cart page setting REST response did not match' );
+		}
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
