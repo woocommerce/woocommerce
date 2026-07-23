@@ -32,11 +32,6 @@ if ( MANAGES_LOCAL_ENV ) {
 	).trim();
 
 	process.env.WP_ENV_PORT = port;
-	// Read by the blocks utils, the product-collection spec, and the metrics and
-	// performance suites to build URLs. wp-env has no tests environment here
-	// (`testsEnvironment: false`), but it still folds this into its checksum, so
-	// `env:e2e:start` sets it to the same value.
-	process.env.WP_ENV_TESTS_PORT = port;
 	process.env.BASE_URL = 'http://localhost:' + port;
 }
 

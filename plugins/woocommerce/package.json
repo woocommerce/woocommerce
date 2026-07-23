@@ -37,7 +37,7 @@
 		"env:e2e:destroy": "pnpm wp-env:e2e destroy",
 		"env:e2e:restart": "pnpm wp-env:e2e destroy --force && pnpm env:e2e:start",
 		"env:e2e:rebuild": "WC_E2E_REPROVISION=1 pnpm env:e2e:start",
-		"env:e2e:start": "PORT=$(node ./tests/e2e/bin/find-port.mjs) && WP_ENV_PORT=$PORT WP_ENV_TESTS_PORT=$PORT pnpm wp-env:e2e start",
+		"env:e2e:start": "WP_ENV_PORT=$(node ./tests/e2e/bin/find-port.mjs) pnpm wp-env:e2e start",
 		"env:e2e:stop": "pnpm wp-env:e2e stop",
 		"env:performance-init": "./tests/performance/bin/init-environment.sh",
 		"env:perf": "pnpm env:e2e:start && pnpm env:performance-init",
