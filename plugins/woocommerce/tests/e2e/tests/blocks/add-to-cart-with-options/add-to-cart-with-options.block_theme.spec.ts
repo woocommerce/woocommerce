@@ -434,42 +434,186 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		requestUtils,
 	} ) => {
 		// Create a global attribute where the slug intentionally differs from the name.
-		const attrOutput = await wpCLI(
-			`wc product_attribute create --name="Taille" --slug="custom-waist" --user=1`
-		);
-		const attrId = attrOutput.stdout.match(
-			/product_attribute\s+(\d+)/
-		)?.[ 1 ];
+		const createdAttribute = await requestUtils.rest< {
+			id: number;
+			name: string;
+			slug: string;
+			type: string;
+			order_by: string;
+			has_archives: boolean;
+		} >( {
+			method: 'POST',
+			path: 'wc/v2/products/attributes',
+			data: {
+				name: 'Taille',
+				slug: 'custom-waist',
+			},
+		} );
+		if (
+			! Number.isInteger( createdAttribute.id ) ||
+			createdAttribute.id <= 0 ||
+			createdAttribute.name !== 'Taille' ||
+			createdAttribute.slug !== 'pa_custom-waist' ||
+			createdAttribute.type !== 'select' ||
+			createdAttribute.order_by !== 'menu_order' ||
+			createdAttribute.has_archives !== false
+		) {
+			throw new Error(
+				`Failed to create the expected global attribute through REST: ${ JSON.stringify(
+					createdAttribute
+				) }`
+			);
+		}
+		const attrId = createdAttribute.id;
 
 		// Create terms with custom slugs that also differ from the names.
-		await wpCLI(
-			`wc product_attribute_term create ${ attrId } --name="Petit" --slug="s-m" --user=1`
-		);
-		await wpCLI(
-			`wc product_attribute_term create ${ attrId } --name="Grand" --slug="m-l" --user=1`
-		);
+		const createdPetitTerm = await requestUtils.rest< {
+			id: number;
+			name: string;
+			slug: string;
+		} >( {
+			method: 'POST',
+			path: `wc/v2/products/attributes/${ attrId }/terms`,
+			data: {
+				name: 'Petit',
+				slug: 's-m',
+			},
+		} );
+		if (
+			! Number.isInteger( createdPetitTerm.id ) ||
+			createdPetitTerm.id <= 0 ||
+			createdPetitTerm.name !== 'Petit' ||
+			createdPetitTerm.slug !== 's-m'
+		) {
+			throw new Error(
+				`Failed to create the expected Petit term through REST: ${ JSON.stringify(
+					createdPetitTerm
+				) }`
+			);
+		}
+
+		const createdGrandTerm = await requestUtils.rest< {
+			id: number;
+			name: string;
+			slug: string;
+		} >( {
+			method: 'POST',
+			path: `wc/v2/products/attributes/${ attrId }/terms`,
+			data: {
+				name: 'Grand',
+				slug: 'm-l',
+			},
+		} );
+		if (
+			! Number.isInteger( createdGrandTerm.id ) ||
+			createdGrandTerm.id <= 0 ||
+			createdGrandTerm.id === createdPetitTerm.id ||
+			createdGrandTerm.name !== 'Grand' ||
+			createdGrandTerm.slug !== 'm-l'
+		) {
+			throw new Error(
+				`Failed to create the expected Grand term through REST: ${ JSON.stringify(
+					createdGrandTerm
+				) }`
+			);
+		}
 
 		// Create a variable product using the global attribute.
-		const prodOutput = await wpCLI(
-			`wc product create --user=1 --slug="custom-slug-variable" --name="Custom Slug Variable" --type="variable" --attributes='${ JSON.stringify(
-				[
+		const createdProduct = await requestUtils.rest< {
+			id: number;
+			name: string;
+			slug: string;
+			type: string;
+			status: string;
+			catalog_visibility: string;
+			attributes: Array< {
+				id: number;
+				name: string;
+				slug: string;
+				visible: boolean;
+				variation: boolean;
+				options: string[];
+			} >;
+		} >( {
+			method: 'POST',
+			path: 'wc/v2/products',
+			data: {
+				slug: 'custom-slug-variable',
+				name: 'Custom Slug Variable',
+				type: 'variable',
+				attributes: [
 					{
 						id: Number( attrId ),
 						visible: true,
 						variation: true,
 						options: [ 'Petit', 'Grand' ],
 					},
-				]
-			) }'`
-		);
-		const productId = prodOutput.stdout.match( /product\s+(\d+)/ )?.[ 1 ];
+				],
+			},
+		} );
+		const productAttribute = createdProduct.attributes?.[ 0 ];
+		if (
+			! Number.isInteger( createdProduct.id ) ||
+			createdProduct.id <= 0 ||
+			createdProduct.name !== 'Custom Slug Variable' ||
+			createdProduct.slug !== 'custom-slug-variable' ||
+			createdProduct.type !== 'variable' ||
+			createdProduct.status !== 'publish' ||
+			createdProduct.catalog_visibility !== 'visible' ||
+			createdProduct.attributes?.length !== 1 ||
+			productAttribute?.id !== attrId ||
+			productAttribute.name !== 'Taille' ||
+			productAttribute.slug !== 'pa_custom-waist' ||
+			productAttribute.visible !== true ||
+			productAttribute.variation !== true ||
+			productAttribute.options?.length !== 2 ||
+			[ ...productAttribute.options ].sort().join( ',' ) !== 'Grand,Petit'
+		) {
+			throw new Error(
+				`Failed to create the expected variable product through REST: ${ JSON.stringify(
+					createdProduct
+				) }`
+			);
+		}
+		const productId = createdProduct.id;
 
 		// Create a single "Any" variation (empty attributes = matches all terms).
-		await wpCLI(
-			`wc product_variation create "${ productId }" --user=1 --regular_price="19.99" --attributes='[]'`
-		);
+		const createdVariation = await requestUtils.rest< {
+			id: number;
+			price: string;
+			regular_price: string;
+			visible: boolean;
+			purchasable: boolean;
+			in_stock: boolean;
+			attributes: unknown[];
+		} >( {
+			method: 'POST',
+			path: `wc/v2/products/${ productId }/variations`,
+			data: {
+				regular_price: '19.99',
+				attributes: [],
+			},
+		} );
+		if (
+			! Number.isInteger( createdVariation.id ) ||
+			createdVariation.id <= 0 ||
+			Number( createdVariation.regular_price ) !== 19.99 ||
+			Number( createdVariation.price ) !== 19.99 ||
+			createdVariation.visible !== true ||
+			createdVariation.purchasable !== true ||
+			createdVariation.in_stock !== true ||
+			! Array.isArray( createdVariation.attributes ) ||
+			createdVariation.attributes.length !== 0
+		) {
+			throw new Error(
+				`Failed to create the expected Any variation through REST: ${ JSON.stringify(
+					createdVariation
+				) }`
+			);
+		}
 
 		await pageObject.updateSingleProductTemplate();
 
