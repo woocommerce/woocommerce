@@ -1,8 +1,15 @@
 /**
  * External dependencies
  */
-import { Locator } from '@playwright/test';
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import type { Locator } from '@playwright/test';
+import {
+	test as base,
+	expect,
+	BLOCK_THEME_SLUG,
+	type Admin,
+	type Editor,
+	type RequestUtils,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -14,6 +21,97 @@ const blockData = {
 	title: 'Product Gallery',
 	slug: 'single-product',
 	productPage: '/product/beanie/',
+};
+
+const PRODUCT_GALLERY_CONTENT = `<!-- wp:woocommerce/product-gallery -->
+<div class="wp-block-woocommerce-product-gallery wc-block-product-gallery"><!-- wp:woocommerce/product-gallery-thumbnails /-->
+
+<!-- wp:woocommerce/product-gallery-large-image -->
+<div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks"><!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false} -->
+<div class="is-loading"></div>
+<!-- /wp:woocommerce/product-image -->
+
+<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
+
+<!-- wp:woocommerce/product-gallery-large-image-next-previous -->
+<div class="wp-block-woocommerce-product-gallery-large-image-next-previous"></div>
+<!-- /wp:woocommerce/product-gallery-large-image-next-previous --></div>
+<!-- /wp:woocommerce/product-gallery-large-image --></div>
+<!-- /wp:woocommerce/product-gallery -->`;
+
+const PRODUCT_GALLERY_WITH_PLACEHOLDER_CONTENT = `placeholder
+
+${ PRODUCT_GALLERY_CONTENT }`;
+
+const isRecord = ( value: unknown ): value is Record< string, unknown > =>
+	typeof value === 'object' && value !== null && ! Array.isArray( value );
+
+const createSerializedProductGalleryTemplate = async (
+	requestUtils: RequestUtils,
+	content: string
+) => {
+	const expectedId = `${ BLOCK_THEME_SLUG }//${ blockData.slug }`;
+	const createdTemplate = await requestUtils.createTemplate( 'wp_template', {
+		slug: blockData.slug,
+		title: 'Custom Single Product',
+		content,
+	} );
+	const template = await requestUtils.rest< unknown >( {
+		method: 'GET',
+		path: `/wp/v2/templates/${ expectedId }?context=edit`,
+	} );
+
+	if (
+		createdTemplate.id !== expectedId ||
+		! Number.isInteger( createdTemplate.wp_id ) ||
+		createdTemplate.wp_id <= 0 ||
+		! isRecord( template ) ||
+		template.id !== createdTemplate.id ||
+		template.wp_id !== createdTemplate.wp_id ||
+		template.slug !== blockData.slug ||
+		template.type !== 'wp_template' ||
+		template.status !== 'publish' ||
+		template.source !== 'custom' ||
+		template.theme !== BLOCK_THEME_SLUG ||
+		! isRecord( template.title ) ||
+		template.title.raw !== 'Custom Single Product' ||
+		template.title.rendered !== 'Custom Single Product' ||
+		! isRecord( template.content ) ||
+		template.content.raw !== content ||
+		template.content.block_version !== 1
+	) {
+		throw new Error(
+			`Failed to create the exact serialized Product Gallery template: ${ JSON.stringify(
+				template
+			) }`
+		);
+	}
+};
+
+const openPlaceholderProductGalleryTemplate = async ( {
+	admin,
+	editor,
+	requestUtils,
+}: {
+	admin: Admin;
+	editor: Editor;
+	requestUtils: RequestUtils;
+} ) => {
+	const template = await requestUtils.createTemplate( 'wp_template', {
+		slug: blockData.slug,
+		title: 'Custom Single Product',
+		content: 'placeholder',
+	} );
+
+	await admin.visitSiteEditor( {
+		postId: template.id,
+		postType: 'wp_template',
+		canvas: 'edit',
+	} );
+
+	await expect(
+		editor.getCustomHtmlBlockContentLocator( 'placeholder' )
+	).toBeVisible();
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
@@ -67,35 +165,16 @@ const getThumbnailImageIdByNth = async (
 };
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
-		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug: blockData.slug,
-			title: 'Custom Single Product',
-			content: 'placeholder',
-		} );
-
-		await admin.visitSiteEditor( {
-			postId: template.id,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
-		await expect(
-			editor.getCustomHtmlBlockContentLocator( 'placeholder' )
-		).toBeVisible();
-	} );
-
 	test.describe( 'with thumbnails', () => {
 		test( 'should match the initial thumbnail and change image when another thumbnail is clicked', async ( {
 			page,
-			editor,
 			pageObject,
+			requestUtils,
 		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+			await createSerializedProductGalleryTemplate(
+				requestUtils,
+				PRODUCT_GALLERY_CONTENT
+			);
 
 			await page.goto( blockData.productPage );
 
@@ -136,14 +215,13 @@ test.describe( `${ blockData.name }`, () => {
 	test.describe( 'with previous and next buttons', () => {
 		test( 'should change the image when the user click on the previous or next button', async ( {
 			page,
-			editor,
 			pageObject,
+			requestUtils,
 		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+			await createSerializedProductGalleryTemplate(
+				requestUtils,
+				PRODUCT_GALLERY_CONTENT
+			);
 
 			await page.goto( blockData.productPage );
 
@@ -175,16 +253,15 @@ test.describe( `${ blockData.name }`, () => {
 	test.describe( 'within pop-up', () => {
 		test( 'should display the same selected image when the pop-up is opened', async ( {
 			page,
-			editor,
 			pageObject,
+			requestUtils,
 		} ) => {
 			await page.setViewportSize( { width: 800, height: 800 } );
 
-			await pageObject.addProductGalleryBlock( { cleanContent: false } );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+			await createSerializedProductGalleryTemplate(
+				requestUtils,
+				PRODUCT_GALLERY_WITH_PLACEHOLDER_CONTENT
+			);
 
 			await page.goto( blockData.productPage );
 
@@ -229,6 +306,8 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( 'open pop-up when clicked option', () => {
+		test.beforeEach( openPlaceholderProductGalleryTemplate );
+
 		test( 'should be enabled by default and open dialog on the frontend', async ( {
 			pageObject,
 			page,
@@ -291,6 +370,8 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( 'block availability', () => {
+		test.beforeEach( openPlaceholderProductGalleryTemplate );
+
 		test( 'should expose Product Gallery only in supported Single Product contexts', async ( {
 			admin,
 			page,
@@ -348,10 +429,17 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test( 'should persistently display the block when navigating back to the template without a page reload', async ( {
+		admin,
 		editor,
 		pageObject,
 		page,
+		requestUtils,
 	} ) => {
+		await openPlaceholderProductGalleryTemplate( {
+			admin,
+			editor,
+			requestUtils,
+		} );
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,
@@ -379,12 +467,12 @@ test.describe( `${ blockData.name }`, () => {
 	test( 'block has opinionated layout on mobile', async ( {
 		page,
 		pageObject,
-		editor,
+		requestUtils,
 	} ) => {
-		await pageObject.addProductGalleryBlock( { cleanContent: true } );
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
+		await createSerializedProductGalleryTemplate(
+			requestUtils,
+			PRODUCT_GALLERY_CONTENT
+		);
 
 		await page.goto( blockData.productPage );
 
