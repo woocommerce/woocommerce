@@ -96,7 +96,7 @@ export const ReportDateTour = ( {
 			},
 		],
 		closeHandler: () => {
-			updateOptions( {
+			void updateOptions( {
 				[ optionName ]: 'yes',
 			} );
 			setIsDismissed( true );

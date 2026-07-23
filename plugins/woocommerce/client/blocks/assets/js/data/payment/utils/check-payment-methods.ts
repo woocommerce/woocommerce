@@ -287,6 +287,6 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 		? __internalSetAvailableExpressPaymentMethods
 		: __internalSetAvailablePaymentMethods;
 
-	setCallback( availablePaymentMethods );
+	void setCallback( availablePaymentMethods );
 	return true;
 };

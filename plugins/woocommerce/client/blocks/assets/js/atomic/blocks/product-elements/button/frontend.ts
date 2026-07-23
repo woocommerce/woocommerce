@@ -182,7 +182,7 @@ const productButtonStore = {
 				{},
 				{ lock: universalLock }
 			);
-			actions.refreshCartItems();
+			void actions.refreshCartItems();
 		},
 		handleAnimationEnd( event: AnimationEvent ) {
 			const context = getContext< Context >();
