@@ -200,13 +200,14 @@ The main class representing individual tags.
 
 ```php
 new Personalization_Tag(
-    string $name,           // Display name in UI
-    string $token,          // Token used in content
-    string $category,       // Category for organization
-    callable $callback,     // Function to generate value
-    array $attributes = [], // Default attributes
-    ?string $value_to_insert = null // Custom insert value
-    array $post_types       // List of supported post types
+    string $name,                    // Display name in UI
+    string $token,                   // Token used in content
+    string $category,                // Category for organization
+    callable $callback,              // Function to generate value
+    array $attributes = [],          // Default attributes
+    ?string $value_to_insert = null, // Custom insert value
+    array $post_types = [],          // List of supported post types
+    string $value_type = Personalization_Tag::VALUE_TYPE_HTML // Type of value the callback returns (VALUE_TYPE_TEXT or VALUE_TYPE_HTML)
 );
 ```
 
@@ -220,6 +221,7 @@ new Personalization_Tag(
 -   `get_attributes()`: Get default attributes
 -   `get_value_to_insert()`: Get the value to insert in UI
 -   `get_post_types()`: Get the list of post types
+-   `get_value_type()`: Get the type of value the callback returns
 
 ### Personalizer
 
