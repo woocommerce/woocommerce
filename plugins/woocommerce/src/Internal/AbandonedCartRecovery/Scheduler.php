@@ -63,9 +63,8 @@ class Scheduler {
 	 * Order-creation origins (`created_via`) eligible for an automated send:
 	 * the classic checkout and the block (Store API) checkout.
 	 *
-	 * `store-api` matches no order yet — block checkout creates orders in
-	 * `checkout-draft`, which never clears the `pending`-only status gate. Kept
-	 * here for when checkout-draft scheduling lands; not dead code.
+	 * Store API orders are generally created in `checkout-draft`, which is not scheduled
+	 * yet. `store-api` is listed here for future block checkout support.
 	 *
 	 * @var string[]
 	 */
@@ -84,7 +83,8 @@ class Scheduler {
 		// is unscheduled regardless of which status the order moves to.
 		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_status_changed' ), 10, 4 );
 		add_action( 'woocommerce_trash_order', array( $this, 'handle_cancellation' ), 10, 1 );
-		add_action( 'woocommerce_before_delete_order', array( $this, 'handle_cancellation' ), 10, 1 );
+		// `woocommerce_before_delete_order` passes the order; `woocommerce_trash_order` passes only the ID.
+		add_action( 'woocommerce_before_delete_order', array( $this, 'handle_cancellation' ), 10, 2 );
 		add_action( self::ACTION_HOOK, array( $this, 'handle_scheduled_send' ), 10, 1 );
 	}
 
@@ -174,7 +174,7 @@ class Scheduler {
 			return;
 		}
 
-		$this->handle_cancellation( $order_id );
+		$this->handle_cancellation( $order_id, $order );
 	}
 
 	/**
@@ -187,15 +187,19 @@ class Scheduler {
 	 *
 	 * @internal
 	 *
-	 * @param int $order_id The affected order ID.
+	 * @param int           $order_id The affected order ID.
+	 * @param WC_Order|null $order    Order passed by the caller or hook; looked up when absent.
+	 *                                `woocommerce_trash_order` supplies only the ID.
 	 */
-	public function handle_cancellation( int $order_id ): void {
+	public function handle_cancellation( int $order_id, $order = null ): void {
 		// Always attempt to unschedule, even when the order or meta is missing,
 		// so an out-of-sync meta value cannot leave a stray scheduled send.
 		// `as_unschedule_action()` is a no-op when no matching action exists.
 		as_unschedule_action( self::ACTION_HOOK, array( $order_id ) );
 
-		$order = wc_get_order( $order_id );
+		if ( ! $order instanceof WC_Order ) {
+			$order = wc_get_order( $order_id );
+		}
 		if ( $order instanceof WC_Order && '' !== (string) $order->get_meta( self::SCHEDULED_META_KEY ) ) {
 			$order->delete_meta_data( self::SCHEDULED_META_KEY );
 			$order->save_meta_data();
