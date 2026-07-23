@@ -324,13 +324,7 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 	// `as string` is safe here because we know the variable is a string, it is defined above.
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test.beforeEach( async ( { admin, editor, page, wpCoreVersion } ) => {
-		test.skip(
-			wpCoreVersion === 7.1,
-			'Currently broken with WordPress 7.1 beta 1 and requires upstream patch. ' +
-				'See: https://github.com/WordPress/gutenberg/pull/80026#issuecomment-5003222851'
-		);
-
+	test.beforeEach( async ( { admin, editor, page } ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
@@ -636,18 +630,7 @@ test.describe( 'Shopper → Checkout Form Errors (guest user)', () => {
 test.describe( 'Billing Address Form', () => {
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test( 'Enable company field', async ( {
-		page,
-		admin,
-		editor,
-		wpCoreVersion,
-	} ) => {
-		test.skip(
-			wpCoreVersion === 7.1,
-			'Currently broken with WordPress 7.1 beta 1 and requires upstream patch. ' +
-				'See: https://github.com/WordPress/gutenberg/pull/80026#issuecomment-5003222851'
-		);
-
+	test( 'Enable company field', async ( { page, admin, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
