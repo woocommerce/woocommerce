@@ -232,10 +232,10 @@ class HposLegacyOrderReportQueryBuilder {
 	private function resolve_meta_select( $raw_key, $key, $join_type ) {
 		$schema = $this->get_report_schema();
 		if ( isset( $schema['order_column'][ $raw_key ] ) ) {
-			return array( $schema['order_column'][ $raw_key ], array() );
+			return array( $this->format_money_column( $schema['order_column'][ $raw_key ] ), array() );
 		}
 		if ( isset( $schema['op_data_column'][ $raw_key ] ) ) {
-			return array( $schema['op_data_column'][ $raw_key ], $this->build_op_data_join() );
+			return array( $this->format_money_column( $schema['op_data_column'][ $raw_key ] ), $this->build_op_data_join() );
 		}
 		if ( isset( $schema['address_column'][ $raw_key ] ) ) {
 			list( $address_type, $column ) = $schema['address_column'][ $raw_key ];
@@ -261,12 +261,12 @@ class HposLegacyOrderReportQueryBuilder {
 		$schema = $this->get_report_schema();
 		if ( isset( $schema['order_column'][ $raw_key ] ) ) {
 			$column = substr( $schema['order_column'][ $raw_key ], strlen( 'orders.' ) );
-			return array( "parent_orders.{$column}", $this->build_parent_orders_join() );
+			return array( $this->format_money_column( "parent_orders.{$column}" ), $this->build_parent_orders_join() );
 		}
 		if ( isset( $schema['op_data_column'][ $raw_key ] ) ) {
 			$column = substr( $schema['op_data_column'][ $raw_key ], strlen( 'op_data.' ) );
 			$joins  = array_merge( $this->build_parent_orders_join(), $this->build_parent_op_data_join() );
-			return array( "parent_op_data.{$column}", $joins );
+			return array( $this->format_money_column( "parent_op_data.{$column}" ), $joins );
 		}
 		if ( isset( $schema['address_column'][ $raw_key ] ) ) {
 			list( $address_type, $column ) = $schema['address_column'][ $raw_key ];
@@ -281,6 +281,22 @@ class HposLegacyOrderReportQueryBuilder {
 			"parent_meta_{$key}.meta_value",
 			$this->build_parent_meta_join( $key, $raw_key, $join_type ),
 		);
+	}
+
+	/**
+	 * Wrap a mapped money column so raw SELECTs match the legacy meta format.
+	 *
+	 * HPOS money columns are DECIMAL(26,8), so selecting one raw yields e.g.
+	 * '50.00000000' where the CPT meta stores '50.00'. Rounding to the store's
+	 * price decimals restores the legacy format; stored values are already
+	 * rounded to that precision, so aggregates are unaffected.
+	 *
+	 * @param string $column Qualified column reference.
+	 *
+	 * @return string SQL expression.
+	 */
+	private function format_money_column( string $column ): string {
+		return "ROUND({$column}, " . wc_get_price_decimals() . ')';
 	}
 
 	/**

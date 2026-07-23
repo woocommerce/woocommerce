@@ -288,7 +288,7 @@ class HposLegacyOrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 
 		$query = $builder->build_query( $args, 0, 0 );
 
-		$this->assertStringContainsString( 'parent_orders.total_amount as parent_total', $query['select'] );
+		$this->assertStringContainsString( 'ROUND(parent_orders.total_amount, 2) as parent_total', $query['select'] );
 		$this->assertStringContainsString( 'COUNT(DISTINCT orders.id) as total_refunds', $query['select'] );
 		$this->assertStringContainsString( 'AS parent_orders ON orders.parent_order_id = parent_orders.id', $query['join'] );
 		$this->assertStringContainsString( "orders.type 	IN ( 'shop_order_refund' )", $query['where'] );
