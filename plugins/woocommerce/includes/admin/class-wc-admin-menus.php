@@ -32,22 +32,6 @@ class WC_Admin_Menus {
 	const HIDE_CSS_CLASS = 'hide-if-js';
 
 	/**
-	 * Cached hidden meta box IDs from the first read of this request.
-	 *
-	 * The metaboxhidden_nav-menus option is read more than once per page load:
-	 * once before admin_head fires and again inside do_accordion_sections()
-	 * after admin_head-nav-menus.php has fired. Memoizing the computed list
-	 * keeps the value stable across those reads, so a box registered late
-	 * (e.g. the "WooCommerce endpoints" box) is not swept into the hidden list
-	 * on the second read. This mirrors how core persists the snapshot before
-	 * admin_head, and fixes the general case for third-party boxes too.
-	 *
-	 * @since 11.1.0
-	 * @var string[]|null
-	 */
-	private $last_computed_hidden_boxes = null;
-
-	/**
 	 * Hook in tabs.
 	 */
 	public function __construct() {
@@ -455,10 +439,12 @@ class WC_Admin_Menus {
 	 * taxonomy boxes, so WP's existing-user guard short-circuits and leaves
 	 * them visible.
 	 *
-	 * The hidden list is computed once per request and cached on the instance,
-	 * so every read of the option within the same page load returns the same
-	 * value. This keeps late-registered boxes out of the hidden list and restores
-	 * the snapshot timing core relied on before admin_head.
+	 * The computed list is persisted to user meta on that first read, mirroring
+	 * core's wp_initial_nav_menu_meta_boxes(). This keeps the snapshot stable
+	 * across the multiple reads in a single page load and, crucially, across
+	 * later requests: boxes registered by plugins installed after the first
+	 * visit stay visible, matching vanilla WordPress instead of defaulting to
+	 * hidden on every recompute.
 	 *
 	 * @since 11.1.0
 	 *
@@ -486,16 +472,15 @@ class WC_Admin_Menus {
 	public function filter_default_nav_menu_hidden_meta_boxes( $result, $option, $user ) {
 		global $wp_meta_boxes;
 
+		// Once a snapshot exists the option reads non-false, so this early return
+		// also makes the update_user_meta() call below idempotent: a re-entrant read
+		// bails here instead of persisting again.
 		if ( false !== $result ) {
 			return $result;
 		}
 
 		if ( ! $user || ! isset( $wp_meta_boxes['nav-menus'] ) || ! is_array( $wp_meta_boxes['nav-menus'] ) ) {
 			return $result;
-		}
-
-		if ( null !== $this->last_computed_hidden_boxes ) {
-			return $this->last_computed_hidden_boxes;
 		}
 
 		$visible = array(
@@ -523,7 +508,10 @@ class WC_Admin_Menus {
 			}
 		}
 
-		$this->last_computed_hidden_boxes = $hidden;
+		// Persist the snapshot, mirroring core's wp_initial_nav_menu_meta_boxes(),
+		// so later reads in this request and in future requests return this same
+		// list instead of recomputing it against a changed meta box registry.
+		update_user_meta( $user->ID, 'metaboxhidden_nav-menus', $hidden );
 
 		return $hidden;
 	}
