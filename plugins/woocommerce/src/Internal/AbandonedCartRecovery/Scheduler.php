@@ -187,8 +187,8 @@ class Scheduler {
 	 * @internal
 	 *
 	 * @param int           $order_id The affected order ID.
-	 * @param WC_Order|null $order    Order passed by the caller or hook; looked up when absent.
-	 *                                `woocommerce_trash_order` supplies only the ID.
+	 * @param WC_Order|null $order    Order passed by the caller or hook; looked up when absent, as
+	 *                                some hooks don't supply the order.
 	 */
 	public function handle_cancellation( int $order_id, $order = null ): void {
 		// Always attempt to unschedule, even when the order or meta is missing,
