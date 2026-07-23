@@ -48,7 +48,7 @@ export const createNotice = (
 		return;
 	}
 
-	dispatch( noticesStore ).createNotice( status, message, {
+	void dispatch( noticesStore ).createNotice( status, message, {
 		isDismissible: true,
 		...options,
 		context: noticeContext,
@@ -71,7 +71,7 @@ export const removeAllNotices = () => {
 
 	containers.forEach( ( container ) => {
 		getNotices( container ).forEach( ( notice ) => {
-			removeNotice( notice.id, container );
+			void removeNotice( notice.id, container );
 		} );
 	} );
 };
@@ -81,7 +81,7 @@ export const removeNoticesWithContext = ( context: string ) => {
 	const { getNotices } = select( noticesStore );
 
 	getNotices( context ).forEach( ( notice ) => {
-		removeNotice( notice.id, context );
+		void removeNotice( notice.id, context );
 	} );
 };
 
@@ -95,7 +95,7 @@ export const removeNoticesForField = ( id: string, context?: string ) => {
 	const { removeNotice } = dispatch( noticesStore );
 
 	if ( context ) {
-		removeNotice( id, context );
+		void removeNotice( id, context );
 		return;
 	}
 
@@ -109,7 +109,7 @@ export const removeNoticesForField = ( id: string, context?: string ) => {
 	containers.forEach( ( container ) => {
 		getNotices( container ).forEach( ( notice ) => {
 			if ( notice.id.startsWith( id ) ) {
-				removeNotice( notice.id, container );
+				void removeNotice( notice.id, container );
 			}
 		} );
 	} );

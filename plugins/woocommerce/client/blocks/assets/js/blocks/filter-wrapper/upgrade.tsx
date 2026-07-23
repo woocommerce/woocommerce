@@ -37,9 +37,9 @@ export const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
 		const newBlock = createBlock( 'woocommerce/product-filters' );
 
 		if ( blockParent.length ) {
-			replaceBlock( blockParent[ 0 ], newBlock );
+			void replaceBlock( blockParent[ 0 ], newBlock );
 		} else {
-			replaceBlock( clientId, newBlock );
+			void replaceBlock( clientId, newBlock );
 		}
 
 		const legacyFilterBlockWrapper = getBlocksByName(
@@ -49,13 +49,13 @@ export const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
 		// We want to remove all the legacy filter blocks on the page.
 		legacyFilterBlockWrapper.forEach( ( blockId: string ) => {
 			// We need to disable locked blocks first.
-			updateBlockAttributes( blockId, {
+			void updateBlockAttributes( blockId, {
 				lock: {
 					remove: false,
 				},
 			} );
 
-			removeBlock( blockId );
+			void removeBlock( blockId );
 		} );
 
 		// These are the v1 legacy filters without the wrapper block.
@@ -71,18 +71,18 @@ export const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
 
 			if ( block.length ) {
 				// We need to disable locked blocks first.
-				updateBlockAttributes( block[ 0 ], {
+				void updateBlockAttributes( block[ 0 ], {
 					lock: {
 						remove: false,
 					},
 				} );
 
-				removeBlock( block[ 0 ] );
+				void removeBlock( block[ 0 ] );
 			}
 		} );
 
 		// Make sure to put the focus on the newly added Product Filters block.
-		selectBlock( newBlock.clientId );
+		void selectBlock( newBlock.clientId );
 	};
 
 	return (
