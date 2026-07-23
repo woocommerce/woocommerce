@@ -2747,12 +2747,13 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 0, $refund_item->get_quantity(), 'qty=0 expected for legacy-no-quantity path.' );
 		$this->assertEquals( -30.00, (float) $refund_item->get_total(), 'Refund line item total should be -30.00.' );
 
-		// Step 2: the per-line remaining-amount cap gates subsequent refunds.
-		// Remaining refundable on the line = 100 - 30 = 70. A simplified-form request
-		// for the full 2 units would compute 100 (2 * $50), which exceeds the remaining
-		// 70, so validate_line_items rejects it with refund_total_exceeds_remaining — the
-		// same code (and 422 status) the preview endpoint applies, before the request
-		// ever reaches wc_create_refund.
+		// Step 2: the per-line remaining-amount cap gates subsequent explicit refunds.
+		// Remaining refundable on the line = 100 - 30 = 70. An explicit refund_total of
+		// 100 exceeds the remaining 70, so validate_line_items rejects it with
+		// refund_total_exceeds_remaining — the same code (and 422 status) the preview
+		// endpoint applies, before the request ever reaches wc_create_refund. Only
+		// explicit amounts are gated this way: the simplified quantity form derives its
+		// amount server-side, capped to the remaining 70.
 		$request2 = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
 		$request2->set_body_params(
 			array(
@@ -2760,7 +2761,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'line_items' => array(
 					array(
 						'line_item_id' => $item->get_id(),
-						'quantity'     => 2,
+						'refund_total' => 100.00,
 					),
 				),
 			)
@@ -3741,12 +3742,14 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Sequential single-unit auto-computed refunds that round above the remaining balance are rejected; an explicit refund_total recovers the remainder.
+	 * @testdox Sequential single-unit auto-computed refunds absorb rounding drift into the final chunk and consume the line exactly.
 	 *
 	 * A 3-quantity line totalling 11.00 has a repeating unit price (3.6667), so
 	 * each single-unit refund rounds up to 3.67. After two such refunds only 3.66
-	 * remains and the third auto-computed 3.67 is rejected by the remaining-amount
-	 * guard. A one-shot qty-3 refund rounds once and consumes the line exactly.
+	 * remains; the third quantity refund consumes the line's last unit, so the
+	 * server refunds exactly the 3.66 remainder instead of rejecting its own
+	 * 3.67 computation. A one-shot qty-3 refund rounds once and consumes the
+	 * line exactly.
 	 */
 	public function test_refunds_create_sequential_unit_refunds_with_repeating_unit_price(): void {
 		list( $one_shot_order, $one_shot_item ) = $this->create_order_with_exact_line( 3, 11.00, 11.00, 11.00 );
@@ -3784,8 +3787,69 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEqualsWithDelta( 3.66, (float) $order->get_remaining_refund_amount(), 0.001, 'Two 3.67 refunds leave 3.66 of the 11.00 line' );
 
 		$response = $this->dispatch_refund_request( $order->get_id(), $unit_refund );
-		$this->assertEquals( 422, $response->get_status(), 'Third auto-computed 3.67 exceeds the 3.66 remaining and must be rejected' );
-		$this->assertEquals( 'refund_total_exceeds_remaining', $response->get_data()['code'] );
+		$this->assertEquals( 201, $response->get_status(), 'The final unit refund must succeed at the remaining amount' );
+		$this->assertEqualsWithDelta( 3.66, (float) $response->get_data()['total'], 0.001, 'The last unit refunds the 3.66 remainder, not the unit-derived 3.67' );
+		$this->created_refunds[] = $response->get_data()['id'];
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEqualsWithDelta( 0.0, (float) $order->get_remaining_refund_amount(), 0.001, 'Three unit refunds consume the 11.00 line exactly' );
+	}
+
+	/**
+	 * @testdox Sequential quantity refunds close a line whose stored total carries sub-cent skew instead of rejecting the final chunk.
+	 *
+	 * A 6-quantity line stored at 77.8425 has unit price 12.97375, so refunding
+	 * 2 units rounds up to 25.95 and the remaining 4 units compute to 51.90 — a
+	 * cent above the 51.89 actually remaining. The final chunk consumes the
+	 * line's remaining units, so the server refunds exactly the remainder
+	 * instead of rejecting its own computation with refund_total_exceeds_remaining.
+	 * Mirrors a tax-inclusive store report where "refund the rest" was blocked.
+	 */
+	public function test_refunds_create_sequential_quantity_refunds_with_subcent_line_skew(): void {
+		list( $order, $item ) = $this->create_order_with_exact_line( 6, 77.8425, 77.8425, 77.8425 );
+
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 2,
+				),
+			)
+		);
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEqualsWithDelta( 25.95, (float) $response->get_data()['total'], 0.001, 'Qty-2 refund of the skewed line rounds 2 × 12.97375 up to 25.95' );
+		$this->created_refunds[] = $response->get_data()['id'];
+
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 4,
+				),
+			)
+		);
+		$this->assertEquals( 201, $response->get_status(), 'Refunding the remaining 4 units must succeed' );
+		$this->assertEqualsWithDelta( 51.89, (float) $response->get_data()['total'], 0.001, 'The final chunk refunds the 51.89 remainder, not the unit-derived 51.90' );
+		$this->created_refunds[] = $response->get_data()['id'];
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEqualsWithDelta( 0.0, (float) $order->get_remaining_refund_amount(), 0.005, 'The line closes at currency precision with no stranded cents' );
+	}
+
+	/**
+	 * @testdox The final-unit quantity refund does not absorb an amount deliberately withheld by a prior explicit refund, and the residue stays refundable explicitly.
+	 *
+	 * A two-unit, $200 line ($100/unit): one unit is deliberately under-refunded
+	 * at an explicit $50, leaving a withheld $50 on that unit. Refunding the last
+	 * unit through the quantity form must pay the unit's $100 value — not the
+	 * $150 line remainder, which would silently reverse the earlier decision.
+	 * The withheld $50 then remains refundable through the explicit amount form,
+	 * proving the residue is usable rather than merely visible.
+	 */
+	public function test_refunds_create_final_unit_does_not_absorb_withheld_amount(): void {
+		list( $order, $item ) = $this->create_order_with_exact_line( 2, 200.00, 200.00, 200.00 );
 
 		$response = $this->dispatch_refund_request(
 			$order->get_id(),
@@ -3793,16 +3857,46 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				array(
 					'line_item_id' => $item->get_id(),
 					'quantity'     => 1,
-					'refund_total' => 3.66,
+					'refund_total' => 50.00,
 				),
 			)
 		);
-		$this->assertEquals( 201, $response->get_status(), 'Explicit refund_total recovers the rounding remainder' );
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEqualsWithDelta( 50.00, (float) $response->get_data()['total'], 0.001, 'One unit is under-refunded at an explicit 50.00' );
 		$this->created_refunds[] = $response->get_data()['id'];
+
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			)
+		);
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEqualsWithDelta( 100.00, (float) $response->get_data()['total'], 0.001, 'The final unit refunds its 100.00 value, not the 150.00 line remainder' );
+		$this->created_refunds[] = $response->get_data()['id'];
+
+		$response = $this->dispatch_refund_request(
+			$order->get_id(),
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 50.00,
+				),
+			)
+		);
+		$this->assertEquals( 201, $response->get_status(), 'The withheld 50.00 must remain refundable through the explicit amount form' );
+		$this->assertEqualsWithDelta( 50.00, (float) $response->get_data()['total'], 0.001 );
+		$this->created_refunds[] = $response->get_data()['id'];
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEqualsWithDelta( 0.0, (float) $order->get_remaining_refund_amount(), 0.001, 'Explicitly refunding the residue closes the order' );
 	}
 
 	/**
-	 * @testdox Auto-compute follows the store's zero-decimal price setting and repeated unit refunds strand one currency unit.
+	 * @testdox Auto-compute follows the store's zero-decimal price setting and the final unit refund absorbs the rounding remainder.
 	 */
 	public function test_refunds_create_auto_compute_zero_decimal_currency(): void {
 		$original_decimals = get_option( 'woocommerce_price_num_decimals', '2' );
@@ -3845,26 +3939,15 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 					'quantity'     => 1,
 				),
 			);
-			for ( $i = 0; $i < 3; $i++ ) {
+			foreach ( array( 333.0, 333.0, 334.0 ) as $refund_number => $expected_total ) {
 				$response = $this->dispatch_refund_request( $order_b->get_id(), $unit_refund );
 				$this->assertEquals( 201, $response->get_status() );
-				$this->assertEqualsWithDelta( 333.0, (float) $response->get_data()['total'], 0.001, 'Each single-unit refund rounds 1000/3 down to 333' );
+				$this->assertEqualsWithDelta( $expected_total, (float) $response->get_data()['total'], 0.001, "Unit refund {$refund_number} of the 1000/3 line: the final unit absorbs the rounding remainder" );
 				$this->created_refunds[] = $response->get_data()['id'];
 			}
 
 			$order_b = wc_get_order( $order_b->get_id() );
-			$this->assertEqualsWithDelta( 1.0, (float) $order_b->get_remaining_refund_amount(), 0.001, 'Three 333 refunds strand 1 currency unit of the 1000 line' );
-
-			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
-			$request->set_body_params(
-				array(
-					'order_id' => $order_b->get_id(),
-					'total'    => 1,
-				)
-			);
-			$response = $this->server->dispatch( $request );
-			$this->assertEquals( 201, $response->get_status(), 'The stranded unit stays refundable via an order-level amount' );
-			$this->created_refunds[] = $response->get_data()['id'];
+			$this->assertEqualsWithDelta( 0.0, (float) $order_b->get_remaining_refund_amount(), 0.001, 'The final 334 refund consumes the 1000 line exactly — no stranded currency unit' );
 		} finally {
 			update_option( 'woocommerce_price_num_decimals', $original_decimals );
 		}
