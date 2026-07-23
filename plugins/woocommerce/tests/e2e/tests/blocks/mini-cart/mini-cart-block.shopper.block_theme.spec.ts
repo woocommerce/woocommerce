@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test as base, wpCLI } from '@woocommerce/e2e-utils';
+import { expect, test as base } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -28,29 +28,68 @@ test.describe( 'Shopper → Notices', () => {
 		page,
 		browser,
 		frontendUtils,
+		requestUtils,
 	} ) => {
 		const productName = 'Limited Stock Product';
 
 		// Create a product with only 1 in stock.
-		const result = await wpCLI(
-			`wc product create --name="${ productName }" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin --porcelain`
-		);
-		// Extract just the numeric ID from output (npm adds prefix lines to stdout).
-		const productId = result.stdout.match( /^\d+$/m )?.[ 0 ];
-		if ( ! productId ) {
+		const createdProduct = await requestUtils.rest< unknown >( {
+			method: 'POST',
+			path: 'wc/v2/products',
+			data: {
+				name: productName,
+				regular_price: '10',
+				manage_stock: true,
+				stock_quantity: 1,
+			},
+		} );
+		if (
+			typeof createdProduct !== 'object' ||
+			createdProduct === null ||
+			! ( 'id' in createdProduct ) ||
+			typeof createdProduct.id !== 'number' ||
+			! Number.isInteger( createdProduct.id ) ||
+			createdProduct.id <= 0
+		) {
 			throw new Error(
-				`Failed to extract product ID from wpCLI output: ${ result.stdout }`
+				`Failed to create a product through REST: ${ JSON.stringify(
+					createdProduct
+				) }`
 			);
 		}
+		const productId = createdProduct.id;
 
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( productName );
 
 		// Set product to out of stock while it's in cart.
-		await wpCLI(
-			`wc product update ${ productId } --stock_quantity=0 --in_stock=false --user=admin`
-		);
+		const updatedProduct = await requestUtils.rest< unknown >( {
+			method: 'POST',
+			path: `wc/v2/products/${ productId }`,
+			data: {
+				stock_quantity: 0,
+				in_stock: false,
+			},
+		} );
+		if (
+			typeof updatedProduct !== 'object' ||
+			updatedProduct === null ||
+			! ( 'id' in updatedProduct ) ||
+			updatedProduct.id !== productId ||
+			! ( 'manage_stock' in updatedProduct ) ||
+			updatedProduct.manage_stock !== true ||
+			! ( 'stock_quantity' in updatedProduct ) ||
+			updatedProduct.stock_quantity !== 0 ||
+			! ( 'in_stock' in updatedProduct ) ||
+			updatedProduct.in_stock !== false
+		) {
+			throw new Error(
+				`Failed to mark the product out of stock through REST: ${ JSON.stringify(
+					updatedProduct
+				) }`
+			);
+		}
 
 		// Get the current URL to revisit with JS disabled.
 		const currentUrl = page.url();
