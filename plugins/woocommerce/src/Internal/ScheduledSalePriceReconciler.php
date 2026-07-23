@@ -10,41 +10,17 @@ namespace Automattic\WooCommerce\Internal;
 use WC_Product;
 
 /**
- * Reconciles a product's displayed/charged price with its sale schedule at read time.
+ * Corrects a product's price at read time when a scheduled sale has started or ended
+ * but the stored `_price` has not been updated yet.
  *
- * Scheduled sales write the active price into the `price` prop at save time (see
- * `WC_Product_Data_Store_CPT::handle_updated_props()`) and at the per-product Action
- * Scheduler boundary events. `WC_Product::is_on_sale()`, by contrast, is a live date
- * check. Between a sale's start/end time elapsing and the next save or AS event, the
- * stored price can disagree with what the dates imply: the simple-product data store
- * reads a stale `_price` straight into the price prop, and own-cache extensions such as
- * Product Bundles read a stale cached base price. (Individual variations self-heal —
- * their data store re-derives the price from `is_on_sale()` on every read — but the
- * variable parent's cached aggregate does not; see the limitations below.) The result is
- * the wrong price shown and charged for up to one AS runner interval.
- *
- * The `woocommerce_product_get_price` filter registered here resolves the active price
- * from the raw sale/regular prices and the sale dates whenever the stored price still
- * equals one of them but disagrees with the dates, so display and cart/checkout use the
- * date-correct price without waiting for the AS event. It is display-layer only:
- * `get_prop()` applies the hook solely in 'view' context, and the filter writes nothing,
- * so admin/edit/CRUD/save flows — including the scheduled-sale AS handlers, which read
- * 'edit' context — and the stored `_price` meta are untouched.
- *
- * Hot-path aware: the common case (a product with no sale price, including variable and
- * grouped parents whose own sale price is empty) exits after a single prop read, before
- * any date or price-comparison work.
- *
- * Limitations: a deliberate custom `_price` that happens to equal the sale or regular
- * price while a sale is scheduled cannot be distinguished from a stale schedule price
- * and will be reconciled; a custom price unrelated to either is left untouched. A
- * variable parent's aggregate display — the "From" price, on-sale badge, and min/max
- * prices served from the `wc_var_prices_{id}` transient — is built from cached values
- * with no sale-window component in the cache key, so it can stay stale until the AS
- * event or a save bumps the product transient version. That gap is display-only: the
- * cart prices the variation itself, which self-heals at read. Prices already changed by
- * an earlier filter (deliberate overrides, but also ambient transforms such as currency
- * conversion) are intentionally not healed — see the guard in `reconcile_price()`.
+ * The Action Scheduler events that update `_price` at the sale boundaries can run
+ * late (up to one runner interval); until they do, the stored price disagrees with
+ * the sale dates and the wrong price is shown and charged. The
+ * `woocommerce_product_get_price` filter registered here returns the date-correct
+ * price for that window. It applies in 'view' context only and writes nothing, so
+ * 'edit'-context reads (saves, CRUD, the product edit form, the boundary events)
+ * and the stored `_price` are untouched.
+ * Cases intentionally not reconciled are documented in `reconcile_price()`.
  *
  * @internal Just for internal use.
  *
@@ -61,6 +37,16 @@ class ScheduledSalePriceReconciler implements RegisterHooksInterface {
 
 	/**
 	 * Reconcile the active price with the sale schedule when the stored price is stale.
+	 *
+	 * Intentionally not covered: a variable parent's aggregate display (the "From"
+	 * price, on-sale badge, and min/max prices). Those values are served from the
+	 * `wc_var_prices_{id}` transient without passing through this filter, and the
+	 * cache key has no sale-window component, so they can stay stale until the
+	 * boundary event or a save refreshes the cache. Covering them would mean changing
+	 * cache keys or invalidation, not a read-time filter — scoped out along with the
+	 * product lookup table. The gap is display-only: the cart prices the variation
+	 * itself, which re-derives its price from the sale dates on every read. Other
+	 * skipped cases are noted on the guards below.
 	 *
 	 * @internal
 	 *
@@ -112,7 +98,9 @@ class ScheduledSalePriceReconciler implements RegisterHooksInterface {
 		$now           = time();
 		$within_window = ! ( ( $date_from && $date_from->getTimestamp() > $now ) || ( $date_to && $date_to->getTimestamp() < $now ) );
 
-		// Reconcile only when the stored price is exactly the sale or regular price.
+		// Reconcile only when the stored price is exactly the sale or regular price. A
+		// deliberate custom `_price` that happens to equal one of them is indistinguishable
+		// from a stale value and gets reconciled; any other custom value falls through.
 		if ( ! $within_window && (float) $stored_price === (float) $sale_price ) {
 			return $regular_price;
 		}
