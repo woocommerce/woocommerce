@@ -122,11 +122,11 @@ const ValidatedCheckboxControl = forwardRef<
 					inputObject.checkValidity() &&
 					customValidationRef.current( inputObject )
 				) {
-					clearValidationError( errorIdString );
+					void clearValidationError( errorIdString );
 					return;
 				}
 
-				setValidationErrors( {
+				void setValidationErrors( {
 					[ errorIdString ]: {
 						message: getValidityMessageForInput(
 							label,
@@ -174,7 +174,7 @@ const ValidatedCheckboxControl = forwardRef<
 		// Remove validation errors when unmounted.
 		useEffect( () => {
 			return () => {
-				clearValidationError( errorIdString );
+				void clearValidationError( errorIdString );
 			};
 		}, [ clearValidationError, errorIdString ] );
 

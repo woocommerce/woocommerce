@@ -66,7 +66,7 @@ export default function UpdateButton( {
 			setError( error );
 		} else {
 			setCustomerNote( '' );
-			refreshOrderFulfillmentStatus( order.id );
+			void refreshOrderFulfillmentStatus( order.id );
 			setIsEditing( false );
 		}
 		setIsExecuting( false );

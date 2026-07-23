@@ -109,11 +109,11 @@ const ShippingSelector = ( {
 		useDispatch( validationStore );
 	useEffect( () => {
 		if ( checked === 'shipping' && ! hasShippingPrices ) {
-			setValidationErrors( {
+			void setValidationErrors( {
 				'shipping-rates-error': SHIPPING_RATE_ERROR,
 			} );
 		} else {
-			clearValidationError( 'shipping-rates-error' );
+			void clearValidationError( 'shipping-rates-error' );
 		}
 		return () => clearValidationError( 'shipping-rates-error' );
 	}, [
