@@ -75,8 +75,8 @@ const CreateAccountUI = (): React.ReactElement | null => {
 					) }
 					checked={ shouldCreateAccount }
 					onChange={ ( value ) => {
-						__internalSetShouldCreateAccount( value );
-						__internalSetCustomerPassword( '' );
+						void __internalSetShouldCreateAccount( value );
+						void __internalSetCustomerPassword( '' );
 					} }
 				/>
 			) }
@@ -104,7 +104,7 @@ const Block = (): JSX.Element => {
 	const onChangeForm = ( newAddress: ContactFormValues ) => {
 		const { email, ...additionalValues } = newAddress;
 		onChangeEmail( email );
-		setAdditionalFields( additionalValues );
+		void setAdditionalFields( additionalValues );
 	};
 	const contactFormValues = {
 		email: billingAddress.email,

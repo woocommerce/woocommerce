@@ -620,7 +620,7 @@ export const useGetProduct = ( productId: number | undefined ) => {
 			}
 		};
 
-		fetchProduct();
+		void fetchProduct();
 	}, [ productId ] );
 
 	return { product, isLoading };
