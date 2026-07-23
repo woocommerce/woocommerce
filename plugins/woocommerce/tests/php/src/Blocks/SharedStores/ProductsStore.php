@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\SharedStores;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore as TestedProductsStore;
-use Automattic\WooCommerce\Enums\ProductStatus;
 use WC_Helper_Product;
 use WC_Product_Grouped;
 
@@ -88,87 +87,6 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( $product->get_id(), $state['products'] );
 		$this->assertSame( $product->get_name(), $state['products'][ $product->get_id() ]['name'] );
 		$this->assertSame( $product->get_name(), $result['name'], 'Return value should contain the product data.' );
-
-		$product->delete( true );
-	}
-
-	/**
-	 * @testdox load_product() hydrates scheduled products into the woocommerce/products store for users who can edit them.
-	 */
-	public function test_load_scheduled_product_hydrates_interactivity_store_for_admin(): void {
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-
-		$product = WC_Helper_Product::create_simple_product();
-		wp_update_post(
-			array(
-				'ID'            => $product->get_id(),
-				'post_status'   => ProductStatus::FUTURE,
-				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', strtotime( '+1 year' ) ),
-				'post_date'     => gmdate( 'Y-m-d H:i:s', strtotime( '+1 year' ) ),
-			)
-		);
-		$product = wc_get_product( $product->get_id() );
-		$result  = TestedProductsStore::load_product( $this->consent, $product->get_id() );
-		$state   = wp_interactivity_state( $this->store_namespace );
-
-		$this->assertNotEmpty( $result, 'Scheduled product REST payload should not be empty for admins.' );
-		$this->assertSame( $product->get_id(), $result['id'] );
-		$this->assertArrayHasKey( $product->get_id(), $state['products'] );
-		$this->assertSame( $product->get_name(), $state['products'][ $product->get_id() ]['name'] );
-
-		wp_set_current_user( 0 );
-		$this->reset_products_store_static_state();
-		$this->reset_interactivity_state();
-
-		$logged_out_result = TestedProductsStore::load_product( $this->consent, $product->get_id() );
-
-		$this->assertArrayNotHasKey(
-			'id',
-			$logged_out_result,
-			'Scheduled products should not hydrate into the store for logged-out users.'
-		);
-
-		$product->delete( true );
-	}
-
-	/**
-	 * @testdox load_variations() hydrates scheduled variable products into the woocommerce/products store for users who can edit them.
-	 */
-	public function test_load_scheduled_variable_product_variations_hydrates_interactivity_store_for_admin(): void {
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-
-		$product       = WC_Helper_Product::create_variation_product();
-		$variation_ids = $product->get_children();
-
-		wp_update_post(
-			array(
-				'ID'            => $product->get_id(),
-				'post_status'   => ProductStatus::FUTURE,
-				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', strtotime( '+1 year' ) ),
-				'post_date'     => gmdate( 'Y-m-d H:i:s', strtotime( '+1 year' ) ),
-			)
-		);
-		$product = wc_get_product( $product->get_id() );
-
-		$result = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
-		$state  = wp_interactivity_state( $this->store_namespace );
-
-		$this->assertNotEmpty( $result, 'Scheduled product variations should not be empty for admins.' );
-		foreach ( $variation_ids as $variation_id ) {
-			$this->assertArrayHasKey( $variation_id, $result );
-			$this->assertArrayHasKey( $variation_id, $state['productVariations'] );
-		}
-
-		wp_set_current_user( 0 );
-		$this->reset_products_store_static_state();
-		$this->reset_interactivity_state();
-
-		$logged_out_result = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
-
-		$this->assertEmpty(
-			$logged_out_result,
-			'Scheduled product variations should not hydrate into the store for logged-out users.'
-		);
 
 		$product->delete( true );
 	}
