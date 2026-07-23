@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Orders\Stats;
 
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
@@ -195,5 +196,89 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		$this->assertEqualsWithDelta( -40.00, $refunded_net, 0.02 );
 
 		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * @testdox Deleting a refund removes its analytics rows while keeping the parent order's rows.
+	 *
+	 * Regression test for HPOS refund deletion leaving orphaned analytics rows:
+	 * OrdersTableRefundDataStore::delete() fired no hooks, so the refund's
+	 * wc_order_stats and wc_order_product_lookup rows survived the deletion and
+	 * permanently skewed Revenue, Orders and Products reports.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/48955
+	 */
+	public function test_deleting_refund_removes_analytics_rows(): void {
+		global $wpdb;
+
+		$order = WC_Helper_Order::create_order();
+		$order->update_status( 'completed' );
+		$order_id = $order->get_id();
+
+		$items  = array_values( $order->get_items() );
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order_id,
+				'amount'     => 10,
+				'line_items' => array(
+					$items[0]->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => 10,
+					),
+				),
+			)
+		);
+		$this->assertNotInstanceOf( WP_Error::class, $refund );
+		$refund_id = $refund->get_id();
+
+		// Import both records, as the woocommerce_update_order and
+		// woocommerce_refund_created flows would.
+		OrdersScheduler::import( $order_id );
+		OrdersScheduler::import( $refund_id );
+
+		$stats_rows  = static function ( $id ) use ( $wpdb ) {
+			return (int) $wpdb->get_var(
+				$wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $id )
+			);
+		};
+		$lookup_rows = static function ( $id ) use ( $wpdb ) {
+			return (int) $wpdb->get_var(
+				$wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_product_lookup WHERE order_id = %d", $id )
+			);
+		};
+
+		$this->assertSame( 1, $stats_rows( $order_id ), 'Parent order should have a stats row after import.' );
+		$this->assertSame( 1, $stats_rows( $refund_id ), 'Refund should have a stats row after import.' );
+		$this->assertGreaterThan( 0, $lookup_rows( $refund_id ), 'Refund should have product lookup rows after import.' );
+
+		// Delete the refund the way the admin UI and REST API do.
+		$refund->delete( true );
+
+		$this->assertSame( 0, $stats_rows( $refund_id ), 'Deleting a refund should remove its stats row.' );
+		$this->assertSame( 0, $lookup_rows( $refund_id ), 'Deleting a refund should remove its product lookup rows.' );
+		$this->assertSame( 1, $stats_rows( $order_id ), 'Deleting a refund should keep the parent order stats row.' );
+
+		WC_Helper_Order::delete_order( $order_id );
+	}
+
+	/**
+	 * @testdox delete_refund is a no-op when no stats row exists for the refund.
+	 *
+	 * On the CPT and HPOS-with-sync paths the delete_post hook has already
+	 * cleaned up by the time woocommerce_delete_order_refund fires, so the
+	 * handler must not fire the delete-stats cascade a second time.
+	 */
+	public function test_delete_refund_is_noop_when_no_stats_row_exists(): void {
+		$fired    = 0;
+		$callback = function () use ( &$fired ) {
+			++$fired;
+		};
+		add_action( 'woocommerce_analytics_delete_order_stats', $callback );
+
+		OrdersStatsDataStore::delete_refund( 987654321 );
+
+		remove_action( 'woocommerce_analytics_delete_order_stats', $callback );
+
+		$this->assertSame( 0, $fired, 'delete_refund should not fire the delete-stats cascade when no row exists.' );
 	}
 }

@@ -146,6 +146,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function init() {
 		add_action( 'woocommerce_before_delete_order', array( __CLASS__, 'delete_order' ) );
 		add_action( 'delete_post', array( __CLASS__, 'delete_order' ) );
+		add_action( 'woocommerce_delete_order_refund', array( __CLASS__, 'delete_refund' ) );
 	}
 
 	/**
@@ -683,6 +684,46 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 * @since 4.0.0
 		 */
 		do_action( 'woocommerce_analytics_delete_order_stats', $order_id, $customer_id );
+
+		ReportsCache::invalidate();
+	}
+
+	/**
+	 * Deletes the refund stats when a refund is deleted.
+	 *
+	 * The woocommerce_delete_order_refund hook fires after the refund has been
+	 * deleted, so delete_order() cannot be reused here: its OrderUtil::is_order()
+	 * guard and wc_get_order() call both require the record to still exist. The
+	 * customer ID is read from the stats row itself instead, and the cleanup is
+	 * skipped entirely when no row exists (e.g. the CPT delete_post path already
+	 * removed it, or the refund was never imported).
+	 *
+	 * @internal
+	 * @since 11.1.0
+	 * @param int $refund_id Refund ID.
+	 */
+	public static function delete_refund( $refund_id ): void {
+		global $wpdb;
+		$refund_id  = (int) $refund_id;
+		$table_name = self::get_db_table_name();
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT customer_id FROM {$table_name} WHERE order_id = %d", $refund_id ) );
+		if ( null === $row ) {
+			return;
+		}
+
+		$wpdb->delete( $table_name, array( 'order_id' => $refund_id ) );
+
+		/**
+		 * Fires when orders stats are deleted.
+		 *
+		 * @param int $order_id Order ID.
+		 * @param int $customer_id Customer ID.
+		 *
+		 * @since 4.0.0
+		 */
+		do_action( 'woocommerce_analytics_delete_order_stats', $refund_id, absint( $row->customer_id ) );
 
 		ReportsCache::invalidate();
 	}
