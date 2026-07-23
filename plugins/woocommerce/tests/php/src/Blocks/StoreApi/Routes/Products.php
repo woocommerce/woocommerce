@@ -675,6 +675,7 @@ class Products extends ControllerTestCase {
 			'private'    => array( ProductStatus::PRIVATE ),
 			'trash'      => array( ProductStatus::TRASH ),
 			'auto-draft' => array( ProductStatus::AUTO_DRAFT ),
+			'future'     => array( ProductStatus::FUTURE ),
 		);
 	}
 
@@ -692,7 +693,37 @@ class Products extends ControllerTestCase {
 			'private'    => array( ProductStatus::PRIVATE ),
 			'trash'      => array( ProductStatus::TRASH ),
 			'auto-draft' => array( ProductStatus::AUTO_DRAFT ),
+			'future'     => array( ProductStatus::FUTURE ),
 		);
+	}
+
+	/**
+	 * Create a simple product with a non-published status.
+	 *
+	 * WordPress rewrites `future` back to `publish` when post_date is in the past,
+	 * so a future date is required to actually schedule the product.
+	 *
+	 * @param string $status Target status.
+	 * @return \WC_Product
+	 */
+	private function get_non_published_simple_product( $status ) {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Non Published Product',
+				'regular_price' => 10,
+			)
+		);
+
+		if ( ProductStatus::FUTURE === $status ) {
+			// Keep date_created in sync so product->save() does not overwrite the scheduled date.
+			$product->set_date_created( strtotime( '+1 year' ) );
+		}
+
+		$product->set_status( $status );
+		$product->save();
+
+		return $product;
 	}
 
 	/**
@@ -702,15 +733,7 @@ class Products extends ControllerTestCase {
 	 * @param string $status The product status to test.
 	 */
 	public function test_non_published_product_by_id_returns_404( $status ) {
-		$fixtures = new FixtureData();
-		$product  = $fixtures->get_simple_product(
-			array(
-				'name'          => 'Non Published Product',
-				'regular_price' => 10,
-			)
-		);
-		$product->set_status( $status );
-		$product->save();
+		$product = $this->get_non_published_simple_product( $status );
 
 		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
 
@@ -724,15 +747,7 @@ class Products extends ControllerTestCase {
 	 * @param string $status The product status to test.
 	 */
 	public function test_non_published_product_by_id_visible_to_admin( $status ) {
-		$fixtures = new FixtureData();
-		$product  = $fixtures->get_simple_product(
-			array(
-				'name'          => 'Non Published Product For Admin',
-				'regular_price' => 10,
-			)
-		);
-		$product->set_status( $status );
-		$product->save();
+		$product = $this->get_non_published_simple_product( $status );
 
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
@@ -748,15 +763,7 @@ class Products extends ControllerTestCase {
 	 * @param string $status The product status to test.
 	 */
 	public function test_non_published_products_excluded_from_collection( $status ) {
-		$fixtures = new FixtureData();
-		$product  = $fixtures->get_simple_product(
-			array(
-				'name'          => 'Non Published Product In Collection',
-				'regular_price' => 10,
-			)
-		);
-		$product->set_status( $status );
-		$product->save();
+		$product = $this->get_non_published_simple_product( $status );
 
 		$response    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
 		$data        = $response->get_data();
@@ -778,15 +785,7 @@ class Products extends ControllerTestCase {
 	 * @param string $status The product status to test.
 	 */
 	public function test_non_published_products_excluded_from_collection_for_admin( $status ) {
-		$fixtures = new FixtureData();
-		$product  = $fixtures->get_simple_product(
-			array(
-				'name'          => 'Non Published Product In Admin Collection',
-				'regular_price' => 10,
-			)
-		);
-		$product->set_status( $status );
-		$product->save();
+		$product = $this->get_non_published_simple_product( $status );
 
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$response    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
@@ -809,15 +808,7 @@ class Products extends ControllerTestCase {
 	 * @param string $status The product status to test.
 	 */
 	public function test_non_published_product_by_slug_returns_404( $status ) {
-		$fixtures = new FixtureData();
-		$product  = $fixtures->get_simple_product(
-			array(
-				'name'          => 'Non Published Product By Slug',
-				'regular_price' => 10,
-			)
-		);
-		$product->set_status( $status );
-		$product->save();
+		$product = $this->get_non_published_simple_product( $status );
 
 		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_slug() ) );
 
@@ -831,15 +822,7 @@ class Products extends ControllerTestCase {
 	 * @param string $status The product status to test.
 	 */
 	public function test_non_published_product_by_slug_visible_to_admin( $status ) {
-		$fixtures = new FixtureData();
-		$product  = $fixtures->get_simple_product(
-			array(
-				'name'          => 'Non Published Product By Slug For Admin',
-				'regular_price' => 10,
-			)
-		);
-		$product->set_status( $status );
-		$product->save();
+		$product = $this->get_non_published_simple_product( $status );
 
 		$slug = get_post_field( 'post_name', $product->get_id() );
 		$this->assertNotEmpty( $slug, "Expected a post_name for $status products so the slug route is exercised." );
