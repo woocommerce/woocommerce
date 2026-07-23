@@ -57,7 +57,7 @@ const CurrencySuffixSlot = () => {
 
 const fieldDefinition = {
 	label: __( 'Price', 'woocommerce' ),
-	enableSorting: true,
+	enableSorting: false,
 	filterBy: {
 		operators: [ 'is', 'between', 'greaterThanOrEqual', 'lessThanOrEqual' ],
 	},
@@ -100,7 +100,7 @@ export const fieldExtensions: Partial< Field< PriceFilterData > > = {
 		// since partially saved products may send empty or NaN-like values here.
 		if ( item.on_sale && Number.isFinite( regularPrice ) ) {
 			return (
-				<Stack direction="row">
+				<Stack direction="row" gap="xs">
 					<s>{ formatCurrency( regularPrice, currency.code ) }</s>
 					<span>{ formatCurrency( price, currency.code ) }</span>
 				</Stack>
@@ -123,7 +123,7 @@ export const fieldExtensions: Partial< Field< PriceFilterData > > = {
 				onChange( {
 					price: [ parseFloat( newValue || '' ), max ] as [
 						number | string,
-						number | string
+						number | string,
 					],
 				} );
 			},
@@ -135,7 +135,7 @@ export const fieldExtensions: Partial< Field< PriceFilterData > > = {
 				onChange( {
 					price: [ min, parseFloat( newValue || '' ) ] as [
 						number | string,
-						number | string
+						number | string,
 					],
 				} );
 			},
@@ -144,7 +144,7 @@ export const fieldExtensions: Partial< Field< PriceFilterData > > = {
 
 		if ( operator === 'between' ) {
 			return (
-				<Stack direction="row">
+				<Stack direction="row" gap="sm">
 					<InputControl
 						label={ __( 'From', 'woocommerce' ) }
 						type="number"
@@ -175,7 +175,8 @@ export const fieldExtensions: Partial< Field< PriceFilterData > > = {
 
 		return (
 			<InputControl
-				label={ hideLabelFromVision ? '' : field.label }
+				label={ field.label }
+				hideLabelFromVision={ hideLabelFromVision }
 				type="number"
 				step={ step }
 				value={ singleValue }

@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use Automattic\WooCommerce\Internal\Utilities\OrderItemMetaUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -362,9 +363,16 @@ function wc_save_order_items( $order_id, $items ) {
 			}
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				$reserved_meta_keys = OrderItemMetaUtil::get_reserved_keys( $item );
+
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_key   = substr( wp_unslash( $meta_key ), 0, 255 );
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
+
+					// Skip reserved keys, which cannot be added or edited as custom meta.
+					if ( in_array( $meta_key, $reserved_meta_keys, true ) ) {
+						continue;
+					}
 
 					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {
@@ -396,12 +404,13 @@ function wc_save_order_items( $order_id, $items ) {
 
 	// Shipping Rows.
 	if ( isset( $items['shipping_method_id'] ) ) {
-		$data_keys = array(
+		$data_keys        = array(
 			'shipping_method'       => null,
 			'shipping_method_title' => null,
 			'shipping_cost'         => 0,
 			'shipping_taxes'        => array(),
 		);
+		$shipping_methods = null;
 
 		foreach ( $items['shipping_method_id'] as $item_id ) {
 			$item = WC_Order_Factory::get_order_item( absint( $item_id ) );
@@ -416,6 +425,22 @@ function wc_save_order_items( $order_id, $items ) {
 				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
 			}
 
+			$item_data['shipping_method']       = is_string( $item_data['shipping_method'] ) ? $item_data['shipping_method'] : '';
+			$item_data['shipping_method_title'] = is_string( $item_data['shipping_method_title'] ) ? $item_data['shipping_method_title'] : '';
+
+			if (
+				! empty( $item_data['shipping_method'] ) &&
+				'' === $item_data['shipping_method_title']
+			) {
+				if ( null === $shipping_methods ) {
+					$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
+				}
+
+				if ( isset( $shipping_methods[ $item_data['shipping_method'] ] ) ) {
+					$item_data['shipping_method_title'] = $shipping_methods[ $item_data['shipping_method'] ]->get_method_title();
+				}
+			}
+
 			$item->set_props(
 				array(
 					'method_id'    => $item_data['shipping_method'],
@@ -428,8 +453,15 @@ function wc_save_order_items( $order_id, $items ) {
 			);
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				$reserved_meta_keys = OrderItemMetaUtil::get_reserved_keys( $item );
+
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
+
+					// Skip reserved keys, which cannot be added or edited as custom meta.
+					if ( in_array( $meta_key, $reserved_meta_keys, true ) ) {
+						continue;
+					}
 
 					if ( '' === $meta_key && '' === $meta_value ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {

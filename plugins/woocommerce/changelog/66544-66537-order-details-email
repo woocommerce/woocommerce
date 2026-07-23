@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add class to payment link on the customer order details and update the template title to "Customer order details email"

@@ -13,17 +13,12 @@ import './launch-your-store';
 
 const possiblyImportProductTask = async () => {
 	if ( isImportProduct() ) {
-		import( './import-products' );
+		void import( './import-products' );
 	} else {
-		import( './products' );
+		void import( './products' );
 	}
 };
 
-possiblyImportProductTask();
+void possiblyImportProductTask();
 
-if (
-	window.wcAdminFeatures &&
-	window.wcAdminFeatures[ 'shipping-smart-defaults' ]
-) {
-	import( './experimental-shipping-recommendation' );
-}
+void import( './shipping-recommendation' );

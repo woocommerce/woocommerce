@@ -88,7 +88,7 @@ class WC_Unit_Tests_Bootstrap {
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
-		$this->maybe_announce_skipped_graphql_infra_tests();
+		$this->maybe_announce_skipped_graphql_tests();
 
 		// Ensure theme install tests use direct filesystem method.
 		if ( ! defined( 'FS_METHOD' ) ) {
@@ -180,24 +180,42 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Echo a "Not running GraphQL infrastructure tests" message when the
-	 * current invocation does not include the `wc-phpunit-graphql-infra` suite,
-	 * mirroring the "Not running ajax tests" line printed by WP's own bootstrap
-	 * for the `ajax`, `ms-files` and `external-http` groups.
+	 * Echo a "Not running GraphQL …" message when an explicit `--testsuite`
+	 * filter is given that omits `wc-phpunit-graphql`, mirroring the "Not
+	 * running ajax tests" line printed by WP's own bootstrap for the `ajax`,
+	 * `ms-files` and `external-http` groups.
 	 *
-	 * The GraphQL infrastructure tests live in their own suite because they
-	 * require PHP 8.1+ and are excluded from the default suite.
+	 * The GraphQL suite is kept separate because it requires PHP 8.1+, so
+	 * PHP 7.4 / 8.0 CI jobs point `--testsuite` at the legacy + main suites
+	 * only. A default run (no `--testsuite` filter) runs the full suite list,
+	 * which includes the GraphQL suite, so there is nothing to announce. The
+	 * `--testsuite` value may be a comma-joined suite list, hence the substring
+	 * match rather than an exact comparison.
 	 */
-	private function maybe_announce_skipped_graphql_infra_tests() {
+	private function maybe_announce_skipped_graphql_tests() {
 		$argv = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
+
+		$has_testsuite_filter = false;
+		$running_graphql      = false;
 		foreach ( $argv as $arg ) {
-			if ( 'wc-phpunit-graphql-infra' === $arg || 'wc-phpunit-full' === $arg
-				|| '--testsuite=wc-phpunit-graphql-infra' === $arg || '--testsuite=wc-phpunit-full' === $arg ) {
-				return;
+			if ( ! is_string( $arg ) ) {
+				continue;
+			}
+			if ( false !== strpos( $arg, '--testsuite' ) ) {
+				$has_testsuite_filter = true;
+			}
+			if ( false !== strpos( $arg, 'wc-phpunit-graphql' ) ) {
+				$running_graphql = true;
 			}
 		}
 
-		echo 'Not running GraphQL infrastructure tests. To execute these, use --testsuite=wc-phpunit-graphql-infra or wc-phpunit-full.' . PHP_EOL;
+		// Without an explicit --testsuite filter the default suite list runs,
+		// which already includes the GraphQL suite: nothing is skipped.
+		if ( ! $has_testsuite_filter || $running_graphql ) {
+			return;
+		}
+
+		echo 'Not running GraphQL tests. To execute these, add wc-phpunit-graphql to --testsuite (a default run without --testsuite includes it).' . PHP_EOL;
 	}
 
 	/**
@@ -271,6 +289,13 @@ class WC_Unit_Tests_Bootstrap {
 
 		WC_Install::install();
 
+		// Run the test suite with product object caching enabled (the new-install default).
+		// This ensures tests exercise the cache-on path and fail loudly if any code bypasses
+		// the product CRUD/cache interfaces (e.g. raw SQL or direct postmeta writes without
+		// invalidation). install_wc() runs on `setup_theme`, before `init`, so the option is
+		// set in time for ProductCacheController::on_init() to register its invalidation hooks.
+		update_option( 'woocommerce_feature_product_instance_caching_enabled', 'yes' );
+
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
 			$GLOBALS['wp_roles']->reinit();
@@ -301,7 +326,6 @@ class WC_Unit_Tests_Bootstrap {
 		// test cases.
 		require_once $this->tests_dir . '/includes/wp-http-testcase.php';
 		require_once $this->tests_dir . '/framework/class-wc-unit-test-case.php';
-		require_once $this->tests_dir . '/framework/class-wc-api-unit-test-case.php';
 		require_once $this->tests_dir . '/framework/class-wc-rest-unit-test-case.php';
 
 		// Helpers.

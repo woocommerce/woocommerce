@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\InputTypes
 
 use Automattic\WooCommerce\Api\Attributes\ArrayOf;
 use Automattic\WooCommerce\Api\Attributes\Description;
+use Automattic\WooCommerce\Api\Attributes\RequiredCapability;
 use Automattic\WooCommerce\Api\Attributes\ScalarType;
 use Automattic\WooCommerce\Api\InputTypes\TracksProvidedFields;
 use Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Enums\Color;
@@ -22,6 +23,7 @@ class CreateWidgetInput {
 	public string $label;
 
 	#[Description( 'Optional weight in grams' )]
+	#[RequiredCapability( 'manage_woocommerce' )]
 	public ?int $weight = null;
 
 	#[Description( 'The widget color' )]

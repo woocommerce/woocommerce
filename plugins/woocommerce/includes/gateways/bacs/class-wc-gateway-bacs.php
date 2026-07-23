@@ -410,8 +410,10 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			$order->payment_complete();
 		}
 
-		// Remove cart.
-		WC()->cart->empty_cart();
+		// Remove cart if it still matches the order being processed.
+		if ( $order instanceof WC_Order && WC()->cart && $order->has_cart_hash( WC()->cart->get_cart_hash() ) ) {
+			WC()->cart->empty_cart();
+		}
 
 		// Return thankyou redirect.
 		return array(

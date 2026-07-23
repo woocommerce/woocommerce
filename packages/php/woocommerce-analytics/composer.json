@@ -3,6 +3,7 @@
 	"description": "Enhanced analytics for WooCommerce users.",
 	"type": "jetpack-library",
 	"license": "GPL-2.0-or-later",
+	"version": "0.16.6",
 	"require": {
 		"php": ">=7.2",
 		"automattic/jetpack-assets": "^4.3",
@@ -14,7 +15,8 @@
 	"require-dev": {
 		"yoast/phpunit-polyfills": "^4.0.0",
 		"automattic/wordbless": "^0.5",
-		"woocommerce/woocommerce-sniffs": "1.0.0"
+		"woocommerce/woocommerce-sniffs": "1.0.0",
+		"automattic/jetpack-changelogger": "3.3.0"
 	},
 	"autoload": {
 		"classmap": [
@@ -47,6 +49,9 @@
 		]
 	},
 	"config": {
+		"platform": {
+			"php": "7.4"
+		},
 		"allow-plugins": {
 			"roots/wordpress-core-installer": true,
 			"dealerdirect/phpcodesniffer-composer-installer": true
@@ -56,5 +61,10 @@
 	"prefer-stable": true,
 	"suggest": {
 		"automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
+	},
+	"extra": {
+		"changelogger": {
+			"changelog": "CHANGELOG.md"
+		}
 	}
 }

@@ -31,8 +31,6 @@
 		line-height: 1;
 		margin: 0;
 		min-width: 40px;
-		order: 2;
-		padding: 0.4em 0;
 		text-align: center;
 		vertical-align: middle;
 
@@ -75,16 +73,18 @@
 
 	> .wc-block-components-quantity-selector__button--minus {
 		border-radius: $universal-border-radius 0 0 $universal-border-radius;
-		order: 1;
 	}
 
 	> .wc-block-components-quantity-selector__button--plus {
 		border-radius: 0 $universal-border-radius $universal-border-radius 0;
-		order: 3;
 	}
 	&[hidden] {
 		display: none;
 	}
+}
+
+:where(.wc-block-components-quantity-selector .wc-block-components-quantity-selector__input) {
+	padding: 0.4em 0;
 }
 
 .theme-twentyseventeen {

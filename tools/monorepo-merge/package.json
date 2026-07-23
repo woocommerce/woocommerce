@@ -18,7 +18,7 @@
 	],
 	"scripts": {
 		"build": "shx rm -rf dist && tsc --project tsconfig.json",
-		"lint": "eslint . --ext .ts",
+		"lint": "eslint .",
 		"prepack": "pnpm build && oclif manifest",
 		"postpack": "shx rm -f oclif.manifest.json",
 		"posttest": "pnpm lint"
@@ -32,15 +32,15 @@
 	"devDependencies": {
 		"@octokit/request-error": "^3.0.3",
 		"@types/node": "^24.1.0",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.55.0",
+		"eslint": "^10.0.0",
 		"jscodeshift": "^0.13.1",
 		"oclif": "^2.7.0",
 		"shx": "^0.3.4",
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2",
-		"typescript": "5.7.x",
-		"wireit": "0.14.12"
+		"typescript": "5.7.x"
 	},
 	"oclif": {
 		"bin": "monorepo-merge",

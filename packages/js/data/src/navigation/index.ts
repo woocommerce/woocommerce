@@ -11,7 +11,7 @@ import deprecated from '@wordpress/deprecated';
 import { STORE_NAME } from './constants';
 import * as selectors from './selectors';
 import * as actions from './actions';
-import reducer, { State } from './reducer';
+import reducer, { type State } from './reducer';
 import * as resolvers from './resolvers';
 import initDispatchers, { INTERNAL_CALL } from './dispatchers';
 import {
@@ -63,7 +63,7 @@ export const store = createReduxStore( STORE_NAME, {
 
 register( store );
 
-initDispatchers();
+void initDispatchers();
 
 export const NAVIGATION_STORE_NAME = STORE_NAME;
 

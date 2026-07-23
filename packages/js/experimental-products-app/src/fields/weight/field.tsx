@@ -11,6 +11,7 @@ import type { Field } from '@wordpress/dataviews';
  */
 
 import type { ProductEntityRecord, SettingsEntityRecord } from '../types';
+import { isDimensionVisible } from '../components/dimension';
 
 const fieldDefinition = {
 	type: 'text',
@@ -23,6 +24,7 @@ const fieldDefinition = {
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
 	label: __( 'Weight', 'woocommerce' ),
+	isVisible: isDimensionVisible,
 	Edit: ( { data, onChange, field } ) => {
 		const {
 			record: storeProductsSettings,
@@ -43,6 +45,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		return (
 			<InputControl
 				label={ field.label }
+				placeholder={ field.placeholder }
 				value={ data.weight }
 				onChange={ ( event ) =>
 					onChange( { weight: event.target.value } )

@@ -393,24 +393,3 @@ jest.mock( 'client-zip', () => ( {
 jest.mock( '../../../assets/js/data/utils/is-editor', () => ( {
 	isEditor: jest.fn().mockReturnValue( false ),
 } ) );
-
-/**
- * `@wordpress/editor` (wp-6.8) registers a `withPatternOverrideControls`
- * filter as a side-effect of being imported. The filter destructures
- * `PARTIAL_SYNCING_SUPPORTED_BLOCKS` from `unlock( patternsPrivateApis )`,
- * which returns `undefined` in the test environment because pnpm's package
- * isolation gives `@wordpress/editor` and `@wordpress/patterns` separate
- * `@wordpress/private-apis` lock/unlock scopes (the `lock` target identity
- * doesn't match). The filter then crashes with `"Cannot read properties of
- * undefined (reading '<block-name>')"` inside any `BlockEdit` render.
- *
- * Mock the hook module to a no-op — block tests don't exercise pattern
- * overrides. Both the `build-module` and `build` paths are mocked because
- * jest config remaps `build-module` → `build` via `moduleNameMapper`.
- */
-jest.mock( '@wordpress/editor/build-module/hooks/pattern-overrides', () => ( {
-	__esModule: true,
-} ) );
-jest.mock( '@wordpress/editor/build/hooks/pattern-overrides', () => ( {
-	__esModule: true,
-} ) );

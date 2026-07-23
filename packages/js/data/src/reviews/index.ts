@@ -11,7 +11,7 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import * as resolvers from './resolvers';
 import controls from '../controls';
-import reducer, { State } from './reducer';
+import reducer, { type State } from './reducer';
 
 export * from './types';
 export type { State };

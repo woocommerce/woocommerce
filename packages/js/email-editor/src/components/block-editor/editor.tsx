@@ -7,7 +7,6 @@ import { SlotFillProvider, ProgressBar } from '@wordpress/components';
 import { store as coreStore, Post } from '@wordpress/core-data';
 import { CommandMenu, store as commandsStore } from '@wordpress/commands';
 import { PluginArea } from '@wordpress/plugins';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	AutosaveMonitor as _AutosaveMonitor,
 	LocalAutosaveMonitor,
@@ -47,6 +46,7 @@ import { PublishSave } from '../../hacks/publish-save';
 import { EditorNotices } from '../notices';
 import { BlockCompatibilityWarnings } from '../sidebar';
 import { BackButtonContent } from '../header/back-button-content';
+import { TemplateCanvasAffordance } from '../template-canvas-affordance';
 import { recordEventOnce } from '../../events';
 
 export function InnerEditor( {
@@ -124,7 +124,7 @@ export function InnerEditor( {
 
 	const { removeEditorPanel } = useDispatch( editorStore );
 	useEffect( () => {
-		removeEditorPanel( 'post-status' );
+		void removeEditorPanel( 'post-status' );
 	}, [ removeEditorPanel ] );
 
 	const [ styles ] = useEmailCss();
@@ -191,6 +191,7 @@ export function InnerEditor( {
 					<EditorKeyboardShortcutsRegister />
 					<PostLockedModal />
 					<TemplateSelection />
+					<TemplateCanvasAffordance />
 					<StylesSidebar />
 					<SendPreview />
 					<PreviewSaveGuard />

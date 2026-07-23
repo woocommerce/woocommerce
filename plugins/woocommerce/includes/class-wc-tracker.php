@@ -11,14 +11,16 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\MigratorTracker;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\Utilities\{ FeaturesUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Utilities\{ FeaturesUtil, OrderUtil, PluginUtil };
 
 defined( 'ABSPATH' ) || exit;
 
@@ -488,9 +490,8 @@ class WC_Tracker {
 	 * @return array
 	 */
 	public static function get_product_counts() {
-		$product_count          = array();
-		$product_count_data     = wp_count_posts( 'product' );
-		$product_count['total'] = $product_count_data->publish;
+		$product_count_data = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
+		$product_count      = array( 'total' => $product_count_data[ ProductStatus::PUBLISH ] ?? 0 );
 
 		$product_statuses = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
 		foreach ( $product_statuses as $product_status ) {
@@ -1062,7 +1063,7 @@ class WC_Tracker {
 			'base_state'                            => WC()->countries->get_base_state(),
 			'base_postcode'                         => WC()->countries->get_base_postcode(),
 			'selling_locations'                     => WC()->countries->get_allowed_countries(),
-			'api_enabled'                           => get_option( 'woocommerce_api_enabled', 'no' ),
+			'api_enabled'                           => WC()->legacy_rest_api_is_available() ? 'yes' : 'no',
 			'weight_unit'                           => get_option( 'woocommerce_weight_unit' ),
 			'dimension_unit'                        => get_option( 'woocommerce_dimension_unit' ),
 			'download_method'                       => get_option( 'woocommerce_file_download_method' ),
@@ -1593,7 +1594,7 @@ class WC_Tracker {
 	 * Check if any core emails are being overridden by a template override.
 	 *
 	 * @param array $template_overrides Template overrides.
-	 * @return array Array with count of core email overrides and the templates that are overriden.
+	 * @return array Array with count of core email overrides and the templates that are overridden.
 	 */
 	public static function get_core_email_overrides( $template_overrides ): array {
 		$email_template_overrides = EmailImprovements::get_core_email_overrides( $template_overrides );

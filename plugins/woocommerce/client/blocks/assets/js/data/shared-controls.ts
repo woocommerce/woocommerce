@@ -123,13 +123,16 @@ export const apiFetchWithHeadersControl = ( options: APIFetchOptions ) =>
 	( {
 		type: 'API_FETCH_WITH_HEADERS',
 		options,
-	} as const );
+	} ) as const;
 
 // List of paths which should not be batched.
 const preventBatching = [
 	'/wc/store/v1/checkout',
 	'/wc/store/v1/checkout?__experimental_calc_totals=true',
 	'/wc/store/v1/cart/update-item',
+	// Shopper-lists routes don't declare allow_batch yet. Drop these once
+	// the routes opt into batching server-side.
+	'/wc/store/v1/shopper-lists/saved-for-later/items',
 ];
 
 /**

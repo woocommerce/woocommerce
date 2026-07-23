@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypes\Cart;
 use Automattic\WooCommerce\Blocks\BlockTypes\Checkout;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents;
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
  * BlockTypesController class.
@@ -368,71 +369,11 @@ final class BlockTypesController {
 	}
 
 	/**
-	 * Get list of block types allowed in Widget Areas. New blocks won't be
-	 * exposed in the Widget Area unless specifically added here.
-	 *
-	 * @return array Array of block types.
-	 */
-	protected function get_widget_area_block_types() {
-		return array(
-			'AllReviews',
-			'Breadcrumbs',
-			'CartLink',
-			'CatalogSorting',
-			'ClassicShortcode',
-			'CustomerAccount',
-			'FeaturedCategory',
-			'FeaturedProduct',
-			'MiniCart',
-			'ProductCategories',
-			'ProductResultsCount',
-			'ProductSearch',
-			'ReviewsByCategory',
-			'ReviewsByProduct',
-			'ProductFilters',
-			'ProductFilterStatus',
-			'ProductFilterPrice',
-			'ProductFilterPriceSlider',
-			'ProductFilterAttribute',
-			'ProductFilterRating',
-			'ProductFilterActive',
-			'ProductFilterRemovableChips',
-			'ProductFilterClearButton',
-			'ProductFilterCheckboxList',
-			'ProductFilterChips',
-			'ProductFilterTaxonomy',
-
-			// Keep hidden legacy filter blocks for backward compatibility.
-			'ActiveFilters',
-			'AttributeFilter',
-			'FilterWrapper',
-			'PriceFilter',
-			'RatingFilter',
-			'StockFilter',
-			// End: legacy filter blocks.
-
-			// Below product grids are hidden from inserter however they could have been used in widgets.
-			// Keep them for backward compatibility.
-			'HandpickedProducts',
-			'ProductBestSellers',
-			'ProductNew',
-			'ProductOnSale',
-			'ProductTopRated',
-			'ProductsByAttribute',
-			'ProductCategory',
-			'ProductTag',
-			// End: legacy product grids blocks.
-		);
-	}
-
-	/**
 	 * Get list of block types.
 	 *
 	 * @return array
 	 */
 	protected function get_block_types() {
-		global $pagenow;
-
 		$block_types = array(
 			'ActiveFilters',
 			'AddToCartForm',
@@ -449,6 +390,7 @@ final class BlockTypesController {
 			'ComingSoon',
 			'CouponCode',
 			'CustomerAccount',
+			'Dropdown',
 			'EmailContent',
 			'FeaturedCategory',
 			'FeaturedProduct',
@@ -553,6 +495,15 @@ final class BlockTypesController {
 			MiniCartContents::get_mini_cart_block_types()
 		);
 
+		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'saved-for-later' ) ) {
+			$block_types[] = 'SavedForLater';
+		}
+
+		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( 'wishlist' ) ) {
+			$block_types[] = 'Wishlist';
+			$block_types[] = 'AddToWishlistButton';
+		}
+
 		if ( wp_is_block_theme() ) {
 			$block_types[] = 'AddToCartWithOptions\AddToCartWithOptions';
 			$block_types[] = 'AddToCartWithOptions\QuantitySelector';
@@ -560,50 +511,10 @@ final class BlockTypesController {
 			$block_types[] = 'AddToCartWithOptions\VariationSelector';
 			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttribute';
 			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeName';
-			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeOptions';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductSelector';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItem';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemSelector';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemLabel';
-		}
-
-		/**
-		 * This enables specific blocks in Widget Areas using an opt-in approach.
-		 */
-		if ( in_array( $pagenow, array( 'widgets.php', 'themes.php', 'customize.php' ), true ) && ( empty( $_GET['page'] ) || 'gutenberg-edit-site' !== $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			$block_types = array_intersect(
-				$block_types,
-				$this->get_widget_area_block_types()
-			);
-		}
-
-		/**
-		 * This disables specific blocks in Post and Page editor by not registering them.
-		 */
-		if ( in_array( $pagenow, array( 'post.php', 'post-new.php' ), true ) ) {
-			$block_types = array_diff(
-				$block_types,
-				array(
-					'Breadcrumbs',
-					'CatalogSorting',
-					'ClassicTemplate',
-					'ProductResultsCount',
-					'ProductReviews',
-					'OrderConfirmation\Status',
-					'OrderConfirmation\Summary',
-					'OrderConfirmation\Totals',
-					'OrderConfirmation\TotalsWrapper',
-					'OrderConfirmation\Downloads',
-					'OrderConfirmation\DownloadsWrapper',
-					'OrderConfirmation\BillingAddress',
-					'OrderConfirmation\ShippingAddress',
-					'OrderConfirmation\BillingWrapper',
-					'OrderConfirmation\ShippingWrapper',
-					'OrderConfirmation\AdditionalInformation',
-					'OrderConfirmation\AdditionalFieldsWrapper',
-					'OrderConfirmation\AdditionalFields',
-				)
-			);
 		}
 
 		/**
@@ -674,112 +585,28 @@ final class BlockTypesController {
 	}
 
 	/**
-	 * Set the preferred taxonomy and term for the breadcrumbs block on the product post type.
+	 * Set the preferred taxonomy and term for product breadcrumbs.
 	 *
-	 * This method mimics the behavior of WC_Breadcrumb::add_crumbs_single() to ensure
-	 * consistent breadcrumb term selection between WooCommerce's legacy breadcrumbs
-	 * and the Core breadcrumbs block.
+	 * @internal
 	 *
 	 * @param array  $settings The settings for the breadcrumbs block.
 	 * @param string $post_type The post type.
 	 * @param int    $post_id The current post ID.
 	 * @return array The settings for the breadcrumbs block.
-	 *
-	 * @internal
 	 */
 	public function set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type, $post_id = 0 ) {
-		if ( ! is_array( $settings ) || 'product' !== $post_type ) {
-			return $settings;
-		}
-
-		$settings['taxonomy'] = 'product_cat';
-
-		// If we have a post ID, determine the specific term using WooCommerce's logic.
-		if ( ! empty( $post_id ) ) {
-			$terms = wc_get_product_terms(
-				$post_id,
-				'product_cat',
-				/**
-				 * Filters the arguments used to fetch product terms for breadcrumbs.
-				 *
-				 * @since 9.5.0
-				 *
-				 * @param array $args Array of arguments for `wc_get_product_terms()`.
-				 */
-				apply_filters(
-					'woocommerce_breadcrumb_product_terms_args',
-					array(
-						'orderby' => 'parent',
-						'order'   => 'DESC',
-					)
-				)
-			);
-
-			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
-				/**
-				 * Filters the main term used in product breadcrumbs.
-				 *
-				 * @since 9.5.0
-				 *
-				 * @param \WP_Term   $main_term The main term to be used in breadcrumbs.
-				 * @param \WP_Term[] $terms     Array of all product category terms.
-				 */
-				$main_term = apply_filters( 'woocommerce_breadcrumb_main_term', $terms[0], $terms );
-
-				if ( $main_term instanceof \WP_Term ) {
-					$settings['term'] = $main_term->slug;
-				}
-			}
-		}
-
-		return $settings;
+		return Package::container()->get( CoreBreadcrumbsCompatibility::class )->set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type, $post_id );
 	}
 
 	/**
-	 * Apply WooCommerce breadcrumb filters to Core breadcrumbs block items.
+	 * Apply WooCommerce compatibility behavior to Core breadcrumb items.
 	 *
-	 * This bridges the Core breadcrumbs block with WooCommerce's legacy breadcrumb filters,
-	 * ensuring backward compatibility for sites that have customized breadcrumbs using
-	 * the `woocommerce_get_breadcrumb` filter.
+	 * @internal
 	 *
 	 * @param array $items Array of breadcrumb items from Core.
 	 * @return array Modified breadcrumb items.
-	 *
-	 * @internal
 	 */
 	public function apply_woocommerce_breadcrumb_filters( $items ) {
-		// Convert Core format to WooCommerce format.
-		// Core: array( 'url' => '...', 'label' => '...' )
-		// Woo: array( 'label', 'url' ).
-		$wc_crumbs = array_map(
-			function ( $item ) {
-				return array(
-					$item['label'] ?? '',
-					$item['url'] ?? '',
-				);
-			},
-			$items
-		);
-
-		/**
-		 * Filters the breadcrumb trail array.
-		 *
-		 * @since 2.3.0
-		 *
-		 * @param array         $crumbs The breadcrumb trail.
-		 * @param \WC_Breadcrumb|null $breadcrumb The breadcrumb object (null when called from Core block).
-		 */
-		$wc_crumbs = apply_filters( 'woocommerce_get_breadcrumb', $wc_crumbs, null );
-
-		// Convert back to Core format.
-		return array_map(
-			function ( $crumb ) {
-				return array(
-					'label' => $crumb[0] ?? '',
-					'url'   => $crumb[1] ?? '',
-				);
-			},
-			$wc_crumbs
-		);
+		return Package::container()->get( CoreBreadcrumbsCompatibility::class )->apply_woocommerce_breadcrumb_filters( $items );
 	}
 }
