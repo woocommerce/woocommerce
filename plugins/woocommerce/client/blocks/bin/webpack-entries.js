@@ -354,9 +354,7 @@ const entries = {
 	},
 	core: {
 		wcBlocksRegistry: './assets/js/blocks-registry/index.js',
-		blocksCheckout: './packages/checkout/index.js',
 		blocksCheckoutEvents: './assets/js/events/index.ts',
-		blocksComponents: './packages/components/index.ts',
 		wcSettings: './assets/js/settings/shared/index.ts',
 		wcBlocksData: './assets/js/data/index.ts',
 		wcBlocksMiddleware: './assets/js/middleware/index.js',
@@ -400,6 +398,8 @@ const entries = {
 	},
 	cartAndCheckoutFrontend: {
 		...cartAndCheckoutFrontendEntries,
+		blocksCheckout: './packages/checkout/index.js',
+		blocksComponents: './packages/components/index.ts',
 	},
 };
 
