@@ -157,7 +157,7 @@ class Scheduler {
 			return;
 		}
 
-		$eligible_statuses = $this->get_eligible_statuses( $order instanceof WC_Order ? $order : null );
+		$eligible_statuses = $this->get_eligible_statuses( $order );
 
 		$was_eligible = in_array( $old_status, $eligible_statuses, true );
 		$is_eligible  = in_array( $new_status, $eligible_statuses, true );
