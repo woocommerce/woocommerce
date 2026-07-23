@@ -252,6 +252,101 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that the callback receives the rendering context passed to personalize_content.
+	 */
+	public function testCallbackReceivesRenderingContext(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'context_echo',
+				'test/context',
+				'Test',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $args parameter is not used in this test.
+					return $context[ Personalizer::RENDERING_CONTEXT_KEY ];
+				}
+			)
+		);
+
+		$content = '<p><!--[test/context]--></p>';
+		$this->assertSame( '<p>html</p>', $this->personalizer->personalize_content( $content ) );
+		$this->assertSame( '<p>text</p>', $this->personalizer->personalize_content( $content, Personalizer::RENDERING_CONTEXT_TEXT ) );
+		// Unknown rendering context falls back to html.
+		$this->assertSame( '<p>html</p>', $this->personalizer->personalize_content( $content, 'bogus' ) );
+	}
+
+	/**
+	 * Test that the title tag content is personalized in the text rendering context.
+	 */
+	public function testTitleReceivesTextRenderingContext(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'context_echo',
+				'test/context',
+				'Test',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $args parameter is not used in this test.
+					return $context[ Personalizer::RENDERING_CONTEXT_KEY ];
+				}
+			)
+		);
+
+		$content = '<html><head><title><!--[test/context]--></title></head><body><p><!--[test/context]--></p></body></html>';
+		$this->assertSame(
+			'<html><head><title>text</title></head><body><p>html</p></body></html>',
+			$this->personalizer->personalize_content( $content )
+		);
+	}
+
+	/**
+	 * Test that both href replacement sites pass the href rendering context to the callback.
+	 */
+	public function testHrefReceivesHrefRenderingContext(): void {
+		$captured = array();
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store URL',
+				'woocommerce/store-url',
+				'Store',
+				function ( $context, $args ) use ( &$captured ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $args parameter is not used in this test.
+					$captured[] = $context[ Personalizer::RENDERING_CONTEXT_KEY ];
+					return 'https://example.com';
+				}
+			)
+		);
+
+		$html_content = '<a data-link-href="[woocommerce/store-url]" href="#">First</a><a href="http://[woocommerce/store-url]">Second</a>';
+		$this->personalizer->personalize_content( $html_content );
+		$this->assertSame( array( Personalizer::RENDERING_CONTEXT_HREF, Personalizer::RENDERING_CONTEXT_HREF ), $captured );
+	}
+
+	/**
+	 * Test that the reserved rendering context key cannot be injected via set_context().
+	 */
+	public function testRenderingContextKeyIsReserved(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'context_echo',
+				'test/context',
+				'Test',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- The $args parameter is not used in this test.
+					return $context[ Personalizer::RENDERING_CONTEXT_KEY ] . '|' . ( $context[5] ?? 'missing' );
+				}
+			)
+		);
+
+		/**
+		 * The reserved key is overwritten while the rest of the context — including the
+		 * integer key, which is deliberately outside the documented contract — survives.
+		 *
+		 * @var array<string, mixed> $context
+		 */
+		$context = array(
+			Personalizer::RENDERING_CONTEXT_KEY => 'bogus',
+			5                                   => 'five',
+		);
+		$this->personalizer->set_context( $context );
+		$this->assertSame( '<p>html|five</p>', $this->personalizer->personalize_content( '<p><!--[test/context]--></p>' ) );
+	}
+
+	/**
 	 * Test parsing tokens with various formats.
 	 */
 	public function testParsingPersonalizationTagAttributes(): void {

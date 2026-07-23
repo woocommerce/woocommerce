@@ -9,6 +9,7 @@
 -   [Editor UI](#editor-ui)
 -   [Format](#format)
 -   [Context](#context)
+-   [Rendering Context and Escaping](#rendering-context-and-escaping)
 -   [Core Components](#core-components)
 -   [Creating Custom Tags](#creating-custom-tags)
 -   [Usage with Renderer](#usage-with-renderer)
@@ -99,7 +100,7 @@ This would render as: "Hello John, your order #12345 was placed on January 15, 2
 
 ## Context
 
-Rendering context is a simple associative array passed to the Personalizer. It is the integrator's responsibility to build the context and set it to the Personalizer.
+The personalization context is a simple associative array passed to the Personalizer. It is the integrator's responsibility to build the context and set it to the Personalizer.
 The context is then passed to the `Personalization_Tag` callback function and can be used to derive the value.
 Note: This is still an early concept, and we may add actions/filters, as well as default context data.
 
@@ -111,6 +112,35 @@ $context = [
     'wc_email'        => $email_object,     // WooCommerce email object
     // ... additional context data
 ];
+```
+
+One key is reserved: `rendering_context` — see [Rendering Context and Escaping](#rendering-context-and-escaping).
+
+## Rendering Context and Escaping
+
+Email content is rendered into different destinations, and the correct value (and its escaping) differs per destination. The caller of `personalize_content()` declares the rendering context of the whole content: `Personalizer::RENDERING_CONTEXT_HTML` (default) for HTML bodies, or `Personalizer::RENDERING_CONTEXT_TEXT` for plain-text content such as the email subject, preheader, or a plain-text body.
+
+The Personalizer passes the context of each replacement to the tag callback under the reserved `rendering_context` key (`Personalizer::RENDERING_CONTEXT_KEY`) of the context array. Any value stored under this key via `set_context()` is overwritten.
+
+| Rendering context | Where the value lands | What the callback must return |
+| --- | --- | --- |
+| `Personalizer::RENDERING_CONTEXT_HTML` | HTML body content | An HTML fragment. Escape any dynamic data yourself (e.g. `esc_html()`) — unless the tag declares `VALUE_TYPE_TEXT`, in which case return raw text and the Personalizer escapes it (see [Value Type](#value-type)). |
+| `Personalizer::RENDERING_CONTEXT_TEXT` | Plain-text output (subject, preheader, plain-text body, `<title>`) | Raw plain text. No HTML markup, no entities, no escaping. |
+| `Personalizer::RENDERING_CONTEXT_HREF` | A link URL (`href`) | A raw, unescaped URL — do not pre-escape; URL escaping is applied when the attribute is written. |
+
+If the value is a URL *component* rather than a whole URL (e.g. an email address embedded in a query string), `rawurlencode()` it in the callback — the Personalizer cannot tell the difference.
+
+Inspecting the rendering context is optional — a callback that ignores it simply returns the same value for every destination. A tag that serves different content per destination can switch on the key:
+
+```php
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
+
+function ( $context ) {
+    if ( Personalizer::RENDERING_CONTEXT_TEXT === ( $context[ Personalizer::RENDERING_CONTEXT_KEY ] ?? '' ) ) {
+        return 'Save 20% with code SAVE20';
+    }
+    return '<strong>Save 20%</strong> with code SAVE20';
+}
 ```
 
 ## Core Components
@@ -199,7 +229,7 @@ Main engine for replacing tags with values in email content.
 
 -   `set_context(array $context)`: Set the personalization context
 -   `get_context()`: Get the current context
--   `personalize_content(string $content)`: Process and personalize content
+-   `personalize_content(string $content, string $rendering_context = Personalizer::RENDERING_CONTEXT_HTML)`: Process and personalize content; pass `Personalizer::RENDERING_CONTEXT_TEXT` for plain-text content such as subjects or plain-text bodies
 
 **Example Usage:**
 
@@ -324,7 +354,7 @@ $personalized_html = $personalizer->personalize_content( $rendered_email['html']
 
 // The personalized HTML is now ready for sending
 $email_html = $personalized_html;
-$email_text = $rendered_email['text']; // Note: text version would need separate personalization if needed
+$email_text = $personalizer->personalize_content( $rendered_email['text'], Personalizer::RENDERING_CONTEXT_TEXT );
 ```
 
 This workflow first renders the email template with blocks, then applies personalization tags to the rendered HTML content, creating a fully personalized email ready for delivery.

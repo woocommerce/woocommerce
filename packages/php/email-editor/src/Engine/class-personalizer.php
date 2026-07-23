@@ -24,6 +24,29 @@ class Personalizer {
 	private const TAG_NAME_PATTERN = '[a-zA-Z0-9\-\/]+';
 
 	/**
+	 * Rendering context for HTML content. Tag values are rendered into HTML markup.
+	 */
+	public const RENDERING_CONTEXT_HTML = 'html';
+
+	/**
+	 * Rendering context for plain-text content (e.g., email subject, preheader, plain-text body).
+	 * Tag values must be raw text without HTML entities or markup.
+	 */
+	public const RENDERING_CONTEXT_TEXT = 'text';
+
+	/**
+	 * Rendering context for link destinations. Tag callbacks must return a raw, unescaped URL
+	 * (or URL component); URL escaping is applied when the attribute is written.
+	 */
+	public const RENDERING_CONTEXT_HREF = 'href';
+
+	/**
+	 * Reserved key under which the current rendering context is exposed in the context array
+	 * passed to tag callbacks. Any value set via set_context() under this key is overwritten.
+	 */
+	public const RENDERING_CONTEXT_KEY = 'rendering_context';
+
+	/**
 	 * Personalization tags registry.
 	 *
 	 * @var Personalization_Tags_Registry
@@ -92,9 +115,15 @@ class Personalizer {
 	 * Personalize the content by replacing the personalization tags with their values.
 	 *
 	 * @param string $content The content to personalize.
+	 * @param string $rendering_context The rendering context of the content — one of the RENDERING_CONTEXT_HTML
+	 *                                  or RENDERING_CONTEXT_TEXT constants. Unknown values fall back to RENDERING_CONTEXT_HTML.
 	 * @return string The personalized content.
 	 */
-	public function personalize_content( string $content ): string {
+	public function personalize_content( string $content, string $rendering_context = self::RENDERING_CONTEXT_HTML ): string {
+		if ( ! in_array( $rendering_context, array( self::RENDERING_CONTEXT_HTML, self::RENDERING_CONTEXT_TEXT ), true ) ) {
+			$rendering_context = self::RENDERING_CONTEXT_HTML;
+		}
+
 		$content_processor = new HTML_Tag_Processor( $content );
 		while ( $content_processor->next_token() ) {
 			if ( $content_processor->get_token_type() === '#comment' ) {
@@ -105,13 +134,14 @@ class Personalizer {
 					continue;
 				}
 
-				$value = $tag->execute_callback( $this->context, $token['arguments'] );
+				$value = $tag->execute_callback( $this->get_callback_context( $rendering_context ), $token['arguments'] );
 				$content_processor->replace_token( $value );
 
 			} elseif ( $content_processor->get_token_type() === '#tag' && $content_processor->get_tag() === 'TITLE' ) {
 				// The title tag contains the subject of the email which should be personalized. HTML_Tag_Processor does parse the header tags.
+				// The title content is effectively plain text, so it is personalized in the text rendering context.
 				$modifiable_text = $content_processor->get_modifiable_text();
-				$title           = $this->personalize_content( $modifiable_text );
+				$title           = $this->personalize_content( $modifiable_text, self::RENDERING_CONTEXT_TEXT );
 				$content_processor->set_modifiable_text( $title );
 
 			} elseif ( $content_processor->get_token_type() === '#tag' && $content_processor->get_tag() === 'A' && $content_processor->get_attribute( 'data-link-href' ) ) {
@@ -123,7 +153,7 @@ class Personalizer {
 					continue;
 				}
 
-				$value = $tag->execute_callback( $this->context, $token['arguments'] );
+				$value = $tag->execute_callback( $this->get_callback_context( self::RENDERING_CONTEXT_HREF ), $token['arguments'] );
 				$value = $this->replace_link_href( $href, $tag->get_token(), $value );
 				if ( $value ) {
 					$content_processor->set_attribute( 'href', $value );
@@ -149,7 +179,7 @@ class Personalizer {
 					continue;
 				}
 
-				$value = $tag->execute_callback( $this->context, $token['arguments'] );
+				$value = $tag->execute_callback( $this->get_callback_context( self::RENDERING_CONTEXT_HREF ), $token['arguments'] );
 
 				if ( $value ) {
 					$content_processor->set_attribute( 'href', $value );
@@ -159,6 +189,18 @@ class Personalizer {
 
 		$content_processor->flush_updates();
 		return $content_processor->get_updated_html();
+	}
+
+	/**
+	 * Build the context array passed to a tag callback, exposing the rendering context
+	 * of the current replacement site under the reserved key.
+	 *
+	 * @param string $rendering_context One of the RENDERING_CONTEXT_* constants.
+	 * @return array<string, mixed> The callback context.
+	 */
+	private function get_callback_context( string $rendering_context ): array {
+		// array_replace() (unlike array_merge()) preserves integer keys in the consumer's context.
+		return array_replace( $this->context, array( self::RENDERING_CONTEXT_KEY => $rendering_context ) );
 	}
 
 	/**
