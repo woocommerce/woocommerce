@@ -126,7 +126,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 				updatedContent = toHTMLString( { value: richTextValue } );
 			}
 
-			updateBlockAttributes( selectedBlockId, {
+			void updateBlockAttributes( selectedBlockId, {
 				[ blockContentKey ]: updatedContent,
 			} );
 		},
@@ -160,7 +160,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 							`<!--[${ originalTag }]-->`,
 							`<!--[${ updatedTag }]-->`
 						);
-						updateBlockAttributes( selectedBlockId, {
+						void updateBlockAttributes( selectedBlockId, {
 							[ blockContentKey ]: updatedContent,
 						} );
 					} }
@@ -184,7 +184,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 								return `<a${ beforeAttrs }data-link-href="${ newTag }"${ afterAttrs }>${ newText }</a>`;
 							}
 						);
-						updateBlockAttributes( selectedBlockId, {
+						void updateBlockAttributes( selectedBlockId, {
 							content: updatedContent,
 						} );
 					} }

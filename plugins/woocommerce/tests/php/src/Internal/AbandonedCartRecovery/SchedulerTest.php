@@ -117,6 +117,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_scheduled_send_dispatches_to_email(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
@@ -141,6 +142,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_scheduled_send_records_order_note_on_success(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
@@ -189,6 +191,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_action_dispatch_reaches_handle_scheduled_send(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
@@ -216,6 +219,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_new_order_schedules_for_pending_order(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
@@ -237,6 +241,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_new_order_skips_non_abandoned_status(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PROCESSING );
 		$order->save();
 
@@ -254,6 +259,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$this->email->update_option( 'automated', 'no' );
 
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
@@ -271,6 +277,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$this->email->enabled = 'no';
 
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
@@ -285,6 +292,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_new_order_skips_when_suppressed(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
@@ -304,6 +312,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_new_order_is_idempotent(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
@@ -323,6 +332,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_new_order_skips_when_already_sent(): void {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->update_meta_data( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT, (string) time() );
 		$order->save();
@@ -331,6 +341,182 @@ class SchedulerTest extends WC_Unit_Test_Case {
 
 		$fresh = wc_get_order( $order->get_id() );
 		$this->assertSame( '', $fresh->get_meta( Scheduler::SCHEDULED_META_KEY ) );
+	}
+
+	/**
+	 * @testdox handle_new_order() is a no-op for pending orders not created by a customer checkout (admin invoices, REST API, renewals) — only abandoned checkouts get the automated nudge.
+	 * @dataProvider provider_non_checkout_origins
+	 *
+	 * @param string $created_via Order-creation origin to test.
+	 */
+	public function test_handle_new_order_skips_non_checkout_origin( string $created_via ): void {
+		$order = OrderHelper::create_order();
+		$order->set_created_via( $created_via );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+
+		$this->sut->handle_new_order( $order->get_id() );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertSame( '', $fresh->get_meta( Scheduler::SCHEDULED_META_KEY ) );
+		$this->assertFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+	}
+
+	/**
+	 * Non-checkout order-creation origins.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_non_checkout_origins(): array {
+		return array(
+			'admin invoice'        => array( 'admin' ),
+			'REST API'             => array( 'rest-api' ),
+			'subscription renewal' => array( 'subscription' ),
+		);
+	}
+
+	/**
+	 * @testdox handle_new_order() schedules for a store-api (block checkout) order, so both checkout flows are covered by default.
+	 */
+	public function test_handle_new_order_schedules_for_store_api_origin(): void {
+		$order = OrderHelper::create_order();
+		$order->set_created_via( 'store-api' );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+
+		$this->sut->handle_new_order( $order->get_id() );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty( $fresh->get_meta( Scheduler::SCHEDULED_META_KEY ) );
+		$this->assertNotFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox handle_new_order() honors the woocommerce_abandoned_cart_recovery_eligible_statuses filter: an order created in a widened status (e.g. failed) is scheduled, matching the send/manual paths.
+	 */
+	public function test_handle_new_order_schedules_for_filter_widened_status(): void {
+		$widen = static function ( $statuses ) {
+			$statuses[] = OrderStatus::FAILED;
+			return $statuses;
+		};
+
+		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
+		$order->set_status( OrderStatus::FAILED );
+		$order->save();
+
+		add_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
+		try {
+			$this->sut->handle_new_order( $order->get_id() );
+		} finally {
+			remove_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
+		}
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty(
+			$fresh->get_meta( Scheduler::SCHEDULED_META_KEY ),
+			'A status added via the eligible-statuses filter must be scheduled like the default abandoned statuses.'
+		);
+		$this->assertNotFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox handle_status_changed() keeps the send queued when the order moves between statuses inside the filter-widened eligible set (e.g. pending → failed with `failed` added).
+	 */
+	public function test_handle_status_changed_keeps_schedule_within_widened_set(): void {
+		$order = $this->schedule_for_pending_order();
+
+		$widen = static function ( $statuses ) {
+			$statuses[] = OrderStatus::FAILED;
+			return $statuses;
+		};
+
+		add_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
+		try {
+			$this->sut->handle_status_changed( $order->get_id(), OrderStatus::PENDING, OrderStatus::FAILED );
+		} finally {
+			remove_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
+		}
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty(
+			$fresh->get_meta( Scheduler::SCHEDULED_META_KEY ),
+			'A transition inside the widened eligible set must not cancel the queued send.'
+		);
+		$this->assertNotFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox handle_status_changed() still cancels when the order exits the filter-widened eligible set (e.g. failed → processing with `failed` added).
+	 */
+	public function test_handle_status_changed_cancels_on_exit_from_widened_set(): void {
+		$order = $this->schedule_for_pending_order();
+
+		$widen = static function ( $statuses ) {
+			$statuses[] = OrderStatus::FAILED;
+			return $statuses;
+		};
+
+		add_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
+		try {
+			$this->sut->handle_status_changed( $order->get_id(), OrderStatus::FAILED, OrderStatus::PROCESSING );
+		} finally {
+			remove_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
+		}
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertSame( '', $fresh->get_meta( Scheduler::SCHEDULED_META_KEY ) );
+		$this->assertFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox handle_scheduled_send() is a no-op when the merchant disabled automation after the send was queued — the in-flight action must honor the current setting.
+	 */
+	public function test_handle_scheduled_send_skips_when_automation_disabled(): void {
+		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->set_date_created( time() - WC_Email_Customer_Abandoned_Cart_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
+		$order->save();
+
+		$this->email->update_option( 'automated', 'no' );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		$this->sut->handle_scheduled_send( $order->get_id() );
+
+		$this->assertSame( $before, count( $mailer->mock_sent ), 'A queued send must not dispatch once automation is toggled off.' );
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertSame(
+			'',
+			$fresh->get_meta( WC_Email_Customer_Abandoned_Cart_Recovery::META_KEY_SENT_AT ),
+			'A skipped send must not record the sent_at meta.'
+		);
+	}
+
+	/**
+	 * @testdox A store-api order is scheduled through the real production wiring when it exits checkout-draft: the data store re-fires woocommerce_new_order on the draft → pending transition.
+	 */
+	public function test_store_api_draft_to_pending_transition_schedules_via_hooks(): void {
+		$order = OrderHelper::create_order();
+		$order->set_created_via( 'store-api' );
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+
+		// Register the production hooks; setUp() only wires ACTION_HOOK.
+		$this->sut->init();
+
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty(
+			$fresh->get_meta( Scheduler::SCHEDULED_META_KEY ),
+			'The checkout-draft → pending transition must schedule the send via the re-fired woocommerce_new_order hook.'
+		);
+		$this->assertNotFalse( as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
 	}
 
 	/**
@@ -382,6 +568,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	private function schedule_for_pending_order(): WC_Order {
 		$order = OrderHelper::create_order();
+		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
