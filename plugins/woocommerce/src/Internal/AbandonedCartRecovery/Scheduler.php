@@ -247,16 +247,11 @@ class Scheduler {
 	/**
 	 * Order statuses that can be scheduled for an automated send.
 	 *
-	 * Scoped to `pending`, which is where classic checkout leaves an abandoned
-	 * order at creation time — the point this scheduler hooks into. The
-	 * send-time gate in
-	 * `WC_Email_Customer_Abandoned_Cart_Recovery::is_order_eligible_for_recovery()`
-	 * is intentionally wider and also accepts `checkout-draft`, so manual sends
-	 * cover block checkout as well. The two defaults converge when
-	 * checkout-draft scheduling is added.
-	 *
-	 * Both call sites fire the same filter, so a callback that appends to or
-	 * replaces the incoming array behaves consistently across them.
+	 * Default logic applies only to orders in `pending`, which is where classic checkout leaves an 
+	 * abandoned order at creation time.
+	 * At email send time, the logic in 
+	 * {@see WC_Email_Customer_Abandoned_Cart_Recovery::is_order_eligible_for_recovery()}
+	 * also accepts `checkout-draft` to cover block checkout as well.
 	 *
 	 * @param WC_Order|null $order Order being inspected, or null if it could not be loaded.
 	 * @return string[]
