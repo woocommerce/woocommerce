@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect, wpCLI } from '@woocommerce/e2e-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	slug: 'woocommerce/featured-category',
@@ -12,6 +12,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 		editor,
 		admin,
 		frontendUtils,
+		requestUtils,
 	} ) => {
 		await test.step( 'can be inserted in Post Editor and it is visible on the frontend', async () => {
 			await admin.createNewPost();
@@ -36,28 +37,122 @@ test.describe( `${ blockData.slug } Block`, () => {
 			// Preserve the original nested setup diagnostic within the combined journey.
 			// eslint-disable-next-line playwright/no-nested-step
 			await test.step( 'Create a product category with an image', async () => {
-				// Get the id of the image associated to the Cap product (for example).
-				const productCliOutput = await wpCLI(
-					`post list --post_type=product --title=Cap --field=ID`
-				);
-				const productId = productCliOutput.stdout
-					.match( /\d+/g )
-					?.pop();
-				const mediaCliOutput = await wpCLI(
-					`post meta get ${ productId } _thumbnail_id`
-				);
-				const mediaId = mediaCliOutput.stdout.match( /\d+/g )?.pop();
+				type ProductResponse = {
+					id: number;
+					name: string;
+					slug: string;
+					type: string;
+					status: string;
+					catalog_visibility: string;
+					sku: string;
+					purchasable: boolean;
+					in_stock: boolean;
+					categories: Array< {
+						id: number;
+						name: string;
+						slug: string;
+					} >;
+					images: Array< { id: number } >;
+				};
+				type ProductCategoryResponse = {
+					id: number;
+					name: string;
+					slug: string;
+					image: { id: number } | null;
+				};
+				const hasExpectedCapIdentity = ( product: ProductResponse ) =>
+					Number.isInteger( product.id ) &&
+					product.id > 0 &&
+					product.name === 'Cap' &&
+					product.slug === 'cap' &&
+					product.type === 'simple' &&
+					product.status === 'publish' &&
+					product.catalog_visibility === 'visible' &&
+					product.sku === 'woo-cap' &&
+					product.purchasable === true &&
+					product.in_stock === true &&
+					Array.isArray( product.images ) &&
+					product.images.length > 0 &&
+					Number.isInteger( product.images[ 0 ].id ) &&
+					product.images[ 0 ].id > 0;
 
-				// Create a product category with that image.
-				const categoryCliOutput = await wpCLI(
-					`wc product_cat create --name="Test Category" --slug="test-category" --image='{ "id": ${ mediaId } }' --user=1`
-				);
-				const categoryId = categoryCliOutput.stdout
-					.match( /\d+/g )
-					?.pop();
-				await wpCLI(
-					`wc product update ${ productId } --categories='[ { "id": ${ categoryId } } ]' --user=1`
-				);
+				const capProducts = await requestUtils.rest<
+					ProductResponse[]
+				>( {
+					path: 'wc/v2/products?slug=cap',
+				} );
+				const capProduct = Array.isArray( capProducts )
+					? capProducts[ 0 ]
+					: undefined;
+				if (
+					! Array.isArray( capProducts ) ||
+					capProducts.length !== 1 ||
+					! capProduct ||
+					! hasExpectedCapIdentity( capProduct ) ||
+					! Array.isArray( capProduct.categories ) ||
+					capProduct.categories.length !== 1 ||
+					capProduct.categories[ 0 ].id !== 14 ||
+					capProduct.categories[ 0 ].name !== 'Accessories' ||
+					capProduct.categories[ 0 ].slug !== 'accessories'
+				) {
+					throw new Error(
+						`Failed to find the expected baseline Cap product through REST: ${ JSON.stringify(
+							capProducts
+						) }`
+					);
+				}
+				const mediaId = capProduct.images[ 0 ].id;
+
+				const createdCategory =
+					await requestUtils.rest< ProductCategoryResponse >( {
+						method: 'POST',
+						path: 'wc/v2/products/categories',
+						data: {
+							name: 'Test Category',
+							slug: 'test-category',
+							image: { id: mediaId },
+						},
+					} );
+				if (
+					! Number.isInteger( createdCategory.id ) ||
+					createdCategory.id <= 0 ||
+					createdCategory.name !== 'Test Category' ||
+					createdCategory.slug !== 'test-category' ||
+					createdCategory.image?.id !== mediaId
+				) {
+					throw new Error(
+						`Failed to create the expected Test Category through REST: ${ JSON.stringify(
+							createdCategory
+						) }`
+					);
+				}
+
+				const updatedCapProduct =
+					await requestUtils.rest< ProductResponse >( {
+						method: 'POST',
+						path: `wc/v2/products/${ capProduct.id }`,
+						data: {
+							categories: [ { id: createdCategory.id } ],
+						},
+					} );
+				if (
+					updatedCapProduct.id !== capProduct.id ||
+					! hasExpectedCapIdentity( updatedCapProduct ) ||
+					updatedCapProduct.images[ 0 ].id !== mediaId ||
+					! Array.isArray( updatedCapProduct.categories ) ||
+					updatedCapProduct.categories.length !== 1 ||
+					updatedCapProduct.categories[ 0 ].id !==
+						createdCategory.id ||
+					updatedCapProduct.categories[ 0 ].name !==
+						'Test Category' ||
+					updatedCapProduct.categories[ 0 ].slug !== 'test-category'
+				) {
+					throw new Error(
+						`Failed to assign the expected Test Category through REST: ${ JSON.stringify(
+							updatedCapProduct
+						) }`
+					);
+				}
 			} );
 
 			await admin.createNewPost();
