@@ -296,6 +296,8 @@ class SettingsUISchema {
 	 * canonicalizing a value never changes which option or visibility rule it
 	 * matches. PHP casts diverge from String() for booleans: (string) true is
 	 * '1' and (string) false is '', while String() gives 'true' and 'false'.
+	 * Floats convert through wc_float_to_string() because a plain cast is
+	 * locale-sensitive before PHP 8.0 and String() never emits a comma.
 	 *
 	 * @param bool|int|float|string $value Scalar value.
 	 * @return string
@@ -303,6 +305,10 @@ class SettingsUISchema {
 	private static function to_canonical_string( $value ): string {
 		if ( is_bool( $value ) ) {
 			return $value ? 'true' : 'false';
+		}
+
+		if ( is_float( $value ) ) {
+			return wc_float_to_string( $value );
 		}
 
 		return (string) $value;

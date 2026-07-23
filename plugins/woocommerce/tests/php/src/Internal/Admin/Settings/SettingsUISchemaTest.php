@@ -473,7 +473,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox It canonicalizes float option values with the PHP string cast.
+	 * @testdox It canonicalizes float option values locale-independently.
 	 */
 	public function test_canonicalize_option_values_stringifies_float_values(): void {
 		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_option_values' );
@@ -501,7 +501,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		$field = $schema['groups']['main']['fields'][0];
 
 		$this->assertSame( '1.5', $field['value'] );
-		$this->assertSame( array( '0.5', '1.5' ), array_column( $field['options'], 'value' ), 'Float option values should use the PHP string cast, matching stored values.' );
+		$this->assertSame( array( '0.5', '1.5' ), array_column( $field['options'], 'value' ), 'Float option values should convert with a dot decimal separator in any locale, matching the client String() coercion.' );
 	}
 
 	/**
