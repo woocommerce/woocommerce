@@ -31,7 +31,7 @@ const config = defineConfig( {
 		new URL( './config/global-setup.ts', 'file:' + __filename ).href
 	),
 	use: {
-		baseURL: process.env.WP_BASE_URL || 'http://localhost:8086',
+		baseURL: process.env.WP_BASE_URL,
 		headless: true,
 		viewport: {
 			width: 960,
