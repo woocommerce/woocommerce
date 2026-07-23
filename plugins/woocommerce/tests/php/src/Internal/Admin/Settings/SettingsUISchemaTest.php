@@ -632,6 +632,38 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It leaves visibility value lists containing a non-scalar member unchanged.
+	 */
+	public function test_canonicalize_option_values_leaves_visibility_value_lists_with_non_scalar_members_unchanged(): void {
+		$schema = $this->get_native_schema_with_fields(
+			array(
+				array(
+					'id'      => 'acme_tier',
+					'type'    => 'select',
+					'value'   => '1',
+					'options' => array(
+						array(
+							'label' => 'One',
+							'value' => '1',
+						),
+					),
+				),
+				array(
+					'id'         => 'acme_tier_notes',
+					'type'       => 'text',
+					'value'      => '',
+					'visibility' => array(
+						'controller' => 'acme_tier',
+						'value'      => array( 1, array( 'not-scalar' ) ),
+					),
+				),
+			)
+		);
+
+		$this->assertSame( $schema, SettingsUISchema::canonicalize_option_values( $schema ), 'Visibility value lists with a non-scalar member should pass through whole, scalar members included, for the provider to fix.' );
+	}
+
+	/**
 	 * @testdox It leaves visibility values unchanged when the controller has no options.
 	 */
 	public function test_canonicalize_option_values_leaves_visibility_values_for_non_option_controllers(): void {
