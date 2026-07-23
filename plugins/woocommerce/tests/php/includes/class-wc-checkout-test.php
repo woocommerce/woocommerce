@@ -186,12 +186,14 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox 'get_posted_data' respects the selected shipping address.
 	 *
-	 * @testWith [false]
-	 *           [true]
+	 * @testWith [null, false]
+	 *           ["0", false]
+	 *           ["1", true]
 	 *
-	 * @param bool $ship_to_different_address Whether a separate shipping address was selected.
+	 * @param string|null $posted_value              Raw posted 'ship_to_different_address' value, or null to omit the field.
+	 * @param bool        $ship_to_different_address Whether a separate shipping address is expected to be selected.
 	 */
-	public function test_get_posted_data_respects_shipping_address_selection( $ship_to_different_address ) {
+	public function test_get_posted_data_respects_shipping_address_selection( $posted_value, $ship_to_different_address ) {
 		add_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
 
 		$posted_data = array(
@@ -215,8 +217,8 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			'shipping_country'                   => 'CA',
 			'shipping_state'                     => 'BC',
 		);
-		if ( $ship_to_different_address ) {
-			$posted_data['ship_to_different_address'] = '1';
+		if ( null !== $posted_value ) {
+			$posted_data['ship_to_different_address'] = $posted_value;
 		}
 
 		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
