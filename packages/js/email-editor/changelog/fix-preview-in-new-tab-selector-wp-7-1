@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the "Preview in new tab" unsaved-changes guard and its telemetry event on WordPress 7.1, which dropped the editor-preview-dropdown__button-external class the code matched on.

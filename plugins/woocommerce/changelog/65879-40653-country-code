@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix tax country code autocomplete to not be based on full country name

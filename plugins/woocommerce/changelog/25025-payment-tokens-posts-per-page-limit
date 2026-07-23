@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Saved payment methods are no longer capped by the posts_per_page option: customer token queries now default to a dedicated limit of 100 (filterable via woocommerce_get_customer_payment_tokens_limit), and the payment token data store no longer applies a LIMIT to queries scoped to a user_id or token_id unless one is explicitly requested, so the personal data eraser and user deletion clean up all tokens. Unscoped data store queries (no user_id, token_id or limit) match on unindexed columns and read the whole table, so they fall back to a ceiling of 500 rows, filterable via woocommerce_get_payment_tokens_unscoped_limit; pass an explicit limit to opt out.

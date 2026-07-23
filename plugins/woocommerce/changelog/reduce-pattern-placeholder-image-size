@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Resize and recompress pattern placeholder images to match their largest rendered size, cutting about 2.7 MB from the plugin package.

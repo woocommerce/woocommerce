@@ -39,6 +39,27 @@ class RegisteredSettingsSectionAdapter extends LegacySettingsPageAdapter {
 	}
 
 	/**
+	 * Build the canonical settings schema for the registered section.
+	 *
+	 * The page is scoped to the registered section, so it is titled with the
+	 * section label rather than the parent settings page label.
+	 *
+	 * @param string $section Unused. This adapter wraps a single registered section.
+	 * @return array
+	 *
+	 * @since 11.1.0
+	 */
+	public function get_schema( string $section ): array {
+		$schema = parent::get_schema( $section );
+
+		$label                    = html_entity_decode( $this->section->get_label(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 );
+		$schema['title']          = $label;
+		$schema['shell']['title'] = $label;
+
+		return $schema;
+	}
+
+	/**
 	 * Get script handles that must be loaded before the settings UI app mounts.
 	 *
 	 * @param string $section Unused. This adapter wraps a single registered section.

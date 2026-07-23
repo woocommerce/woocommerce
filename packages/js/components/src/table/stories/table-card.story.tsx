@@ -81,7 +81,8 @@ const TableCardExample = () => {
 					query: {
 						[ param ]: value,
 					},
-				} ) }
+				} )
+			}
 			query={ query }
 			rowsPerPage={ 7 }
 			totalRows={ 10 }
@@ -129,7 +130,8 @@ const TableCardWithActionsExample = () => {
 					query: {
 						[ param ]: value,
 					},
-				} ) }
+				} )
+			}
 			query={ query }
 			rowsPerPage={ 7 }
 			totalRows={ 10 }
@@ -169,7 +171,8 @@ const TableCardWithTablePrefaceExample = () => {
 					query: {
 						[ param ]: value,
 					},
-				} ) }
+				} )
+			}
 			query={ query }
 			rowsPerPage={ 7 }
 			totalRows={ 10 }
@@ -195,7 +198,8 @@ const TableCardWideExample = () => {
 					query: {
 						[ param ]: value,
 					},
-				} ) }
+				} )
+			}
 			query={ query }
 			rowsPerPage={ 7 }
 			totalRows={ 10 }

@@ -1,5 +1,35 @@
 // eslint-disable-next-line max-len
-/*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting, woocommerce_admin_meta_boxes_order, wcSetClipboard, wcClearClipboard, wc_enhanced_select_params */
+/*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting, woocommerce_admin_meta_boxes_order, wcSetClipboard, wcClearClipboard, wc_enhanced_select_params, module */
+
+/**
+ * Get the shipping method title to use after a method selection changes.
+ *
+ * @param {Object} args               Shipping title data.
+ * @param {string} args.currentTitle  Current shipping title.
+ * @param {string} args.defaultTitle  Default shipping title.
+ * @param {string} args.previousTitle Previously selected method title.
+ * @param {string} args.methodValue   Selected shipping method value.
+ * @param {string} args.methodTitle   Selected shipping method title.
+ * @return {string} The shipping title to use.
+ */
+function getShippingMethodTitle( args ) {
+	if (
+		args.currentTitle
+		&& args.currentTitle !== args.defaultTitle
+		&& args.currentTitle !== args.previousTitle
+	) {
+		return args.currentTitle;
+	}
+
+	return args.methodValue && 'other' !== args.methodValue
+		? args.methodTitle
+		: args.defaultTitle;
+}
+
+if ( typeof module !== 'undefined' && module.exports ) {
+	module.exports = { getShippingMethodTitle };
+}
+
 jQuery( function ( $ ) {
 
 	// Stand-in wcTracks.recordEvent in case tracks is not available (for any reason).
@@ -283,6 +313,7 @@ jQuery( function ( $ ) {
 				.on( 'click', 'button.calculate-action', this.recalculate )
 				.on( 'click', 'a.edit-order-item', this.edit_item )
 				.on( 'click', 'a.delete-order-item', this.delete_item )
+				.on( 'change', 'select.shipping_method', this.shipping_method_changed )
 
 				// Refunds
 				.on( 'click', '.delete_refund', this.refunds.delete_refund )
@@ -374,6 +405,30 @@ jQuery( function ( $ ) {
 		reloaded_items: function() {
 			wc_meta_boxes_order.init_tiptip();
 			wc_meta_boxes_order_items.stupidtable.init();
+		},
+
+		shipping_method_changed: function() {
+			var $select       = $( this );
+			var $name         = $select.closest( 'tr.shipping' ).find( 'input.shipping_method_name' );
+			var title         = $select.find( 'option:selected' ).text();
+			var previousTitle = $select.data( 'selected-title' ) || $select.find( 'option' ).filter( function() {
+				return this.defaultSelected;
+			} ).text();
+			var currentTitle  = $name.val();
+			var defaultTitle  = $name.data( 'default-shipping-title' );
+			var nextTitle     = getShippingMethodTitle( {
+				currentTitle: currentTitle,
+				defaultTitle: defaultTitle,
+				previousTitle: previousTitle,
+				methodValue: $select.val(),
+				methodTitle: title
+			} );
+
+			$select.data( 'selected-title', title );
+
+			if ( currentTitle !== nextTitle ) {
+				$name.val( nextTitle ).trigger( 'change' );
+			}
 		},
 
 		// When the qty is changed, increase or decrease costs
