@@ -124,7 +124,7 @@ class BlocksSharedState {
 
 			if ( $cart_exists && $should_hydrate ) {
 				$cart_response                  = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/cart' );
-				self::$blocks_shared_cart_state = $cart_response['body'] ?? array();
+				self::$blocks_shared_cart_state = $cart_response['body'] ?? self::get_empty_cart_schema();
 			} else {
 				self::$blocks_shared_cart_state = self::get_empty_cart_schema();
 			}

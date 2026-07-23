@@ -79,7 +79,12 @@ class Checkout extends AbstractCartRoute {
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
 				'args'                => [
-					'context' => $this->get_context_param( [ 'default' => 'view' ] ),
+					'context'                    => $this->get_context_param( [ 'default' => 'view' ] ),
+					'__experimental_calc_totals' => [
+						'description' => __( 'When true, the cart totals are recalculated and the response includes the current cart payload.', 'woocommerce' ),
+						'type'        => 'boolean',
+						'default'     => false,
+					],
 				],
 			],
 			[
@@ -215,7 +220,7 @@ class Checkout extends AbstractCartRoute {
 			];
 
 			// Clients opt-in to fresh totals and a cart payload via this param, mirroring the PUT flow.
-			if ( $request->get_param( '__experimental_calc_totals' ) ) {
+			if ( true === $request->get_param( '__experimental_calc_totals' ) ) {
 				$this->cart_controller->calculate_totals();
 				$response['cart'] = $this->cart_controller->get_cart_instance();
 			}

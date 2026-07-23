@@ -61,19 +61,13 @@ const Checkout = ( {
 } ): JSX.Element => {
 	const { customerId, checkoutIsResolving } = useSelect( ( select ) => {
 		const store = select( checkoutStore );
-		const coreDataStore = select( 'core/data' );
-		const hasStarted = coreDataStore.hasStartedResolution(
-			'wc/store/checkout',
-			'getCheckoutData',
-			[]
-		);
-		const hasFinished = coreDataStore.hasFinishedResolution(
-			'wc/store/checkout',
-			'getCheckoutData',
-			[]
-		);
+		// Selecting getCheckoutData triggers its resolver, which fetches the
+		// checkout payload on non-hydrated pages.
+		const checkoutData = store.getCheckoutData();
+		const hasStarted = store.hasStartedResolution( 'getCheckoutData' );
+		const hasFinished = store.hasFinishedResolution( 'getCheckoutData' );
 		return {
-			customerId: store.getCustomerId(),
+			customerId: checkoutData.customerId,
 			checkoutIsResolving: hasStarted && ! hasFinished,
 		};
 	} );

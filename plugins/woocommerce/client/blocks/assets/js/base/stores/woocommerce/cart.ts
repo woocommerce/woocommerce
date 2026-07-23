@@ -364,10 +364,7 @@ const pushCartToReduxStore = ( cart: Cart ): void => {
 				data?: {
 					dispatch: ( key: string ) => {
 						receiveCart?: ( cart: Cart ) => void;
-						finishResolution?: (
-							name: string,
-							args: unknown[]
-						) => void;
+						finishResolution?: ( name: string ) => void;
 					};
 				};
 			};
@@ -379,7 +376,7 @@ const pushCartToReduxStore = ( cart: Cart ): void => {
 	try {
 		const cartDispatch = data.dispatch( 'wc/store/cart' );
 		cartDispatch.receiveCart?.( cart );
-		cartDispatch.finishResolution?.( 'getCartData', [] );
+		cartDispatch.finishResolution?.( 'getCartData' );
 		( window as { wcIapiCartHydrated?: boolean } ).wcIapiCartHydrated =
 			true;
 	} catch {}
