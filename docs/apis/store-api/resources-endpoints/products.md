@@ -6,7 +6,9 @@ The store products API provides public product data so it can be rendered on the
 
 ### Draft and non-published products
 
-Only published products are accessible via the Store API. Requesting a draft, pending, or other non-published product by ID or slug returns a `404` error. Non-published products are also excluded from the collection endpoint.
+Draft and non-published products are only available to users who have permission to edit them, like shop managers or administrators.
+
+Product variations are only available when the current user has the `edit_products` and `edit_others_products` capabilities.
 
 ### Password-protected products
 
