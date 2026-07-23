@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use WC_Helper_Product;
@@ -25,11 +27,51 @@ class QueryBuilder extends \WP_UnitTestCase {
 	private $block_instance;
 
 	/**
+	 * Color attribute fixture.
+	 *
+	 * @var array
+	 */
+	private $color_attribute;
+
+	/**
+	 * Original attribute lookup setting.
+	 *
+	 * @var mixed
+	 */
+	private $attribute_lookup_enabled;
+
+	/**
 	 * Initiate the mock object.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
-		$this->block_instance = new ProductCollectionMock();
+
+		$this->attribute_lookup_enabled = get_option( 'woocommerce_attribute_lookup_enabled', null );
+		$this->color_attribute          = FixtureData::get_product_attribute( 'color', array( 'red', 'yellow', 'black' ) );
+		$this->block_instance           = new ProductCollectionMock();
+
+		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		global $wpdb;
+
+		foreach ( array( 'min_price', 'max_price', 'filter_stock_status', 'filter_color', 'query_type_color', 'categories', 'tags', 'brands' ) as $query_var ) {
+			set_query_var( $query_var, '' );
+		}
+
+		$wpdb->delete( $wpdb->prefix . 'wc_product_attributes_lookup', array( 'taxonomy' => 'pa_color' ), array( '%s' ) );
+
+		if ( null === $this->attribute_lookup_enabled ) {
+			delete_option( 'woocommerce_attribute_lookup_enabled' );
+		} else {
+			update_option( 'woocommerce_attribute_lookup_enabled', $this->attribute_lookup_enabled );
+		}
+
+		parent::tearDown();
 	}
 
 	/**
@@ -254,19 +296,8 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		$this->assertContainsEquals(
-			array(
-				array(
-					'key'     => '_price',
-					'value'   => 100,
-					'compare' => '<=',
-					'type'    => 'numeric',
-				),
-				array(),
-				'relation' => 'AND',
-			),
-			$merged_query['meta_query']
-		);
+		$this->assertSame( '100', $merged_query['max_price'] );
+		$this->assertEmpty( $merged_query['meta_query'] );
 		set_query_var( 'max_price', '' );
 	}
 
@@ -278,19 +309,8 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		$this->assertContainsEquals(
-			array(
-				array(),
-				array(
-					'key'     => '_price',
-					'value'   => 20,
-					'compare' => '>=',
-					'type'    => 'numeric',
-				),
-				'relation' => 'AND',
-			),
-			$merged_query['meta_query']
-		);
+		$this->assertSame( '20', $merged_query['min_price'] );
+		$this->assertEmpty( $merged_query['meta_query'] );
 		set_query_var( 'min_price', '' );
 	}
 
@@ -303,24 +323,9 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		$this->assertContainsEquals(
-			array(
-				array(
-					'key'     => '_price',
-					'value'   => 100,
-					'compare' => '<=',
-					'type'    => 'numeric',
-				),
-				array(
-					'key'     => '_price',
-					'value'   => 20,
-					'compare' => '>=',
-					'type'    => 'numeric',
-				),
-				'relation' => 'AND',
-			),
-			$merged_query['meta_query']
-		);
+		$this->assertSame( '100', $merged_query['max_price'] );
+		$this->assertSame( '20', $merged_query['min_price'] );
+		$this->assertEmpty( $merged_query['meta_query'] );
 
 		set_query_var( 'max_price', '' );
 		set_query_var( 'min_price', '' );
@@ -334,14 +339,8 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		$this->assertContainsEquals(
-			array(
-				'operator' => 'IN',
-				'key'      => '_stock_status',
-				'value'    => array( ProductStockStatus::IN_STOCK ),
-			),
-			$merged_query['meta_query']
-		);
+		$this->assertSame( ProductStockStatus::IN_STOCK, $merged_query['filter_stock_status'] );
+		$this->assertEmpty( $merged_query['meta_query'] );
 
 		set_query_var( 'filter_stock_status', '' );
 	}
@@ -395,72 +394,154 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test merging filter by stock status queries.
+	 * @testdox Should pass custom attribute filter mappings to QueryClauses.
 	 */
 	public function test_merging_filter_by_attribute_queries() {
-		// Mock the attribute data.
 		$this->block_instance->set_attributes_filter_query_args(
 			array(
-				array(
+				'color' => array(
 					'filter'     => 'filter_color',
-					'query_type' => 'query_type_color',
-				),
-				array(
-					'filter'     => 'filter_size',
-					'query_type' => 'query_type_size',
+					'query_type' => 'custom_query_type_color',
 				),
 			)
 		);
 
-		set_query_var( 'filter_color', 'blue' );
-		set_query_var( 'query_type_color', 'or' );
-		set_query_var( 'filter_size', 'xl,xxl' );
-		set_query_var( 'query_type_size', 'and' );
+		set_query_var( 'filter_color', 'red-slug,black-slug' );
+		set_query_var( 'custom_query_type_color', 'and' );
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance );
-		$tax_queries  = $merged_query['tax_query'];
 
-		$and_query = array();
-		foreach ( $tax_queries as $tax_query ) {
-			if ( isset( $tax_query['relation'] ) && 'AND' === $tax_query['relation'] ) {
-				$and_query = $tax_query;
-			}
-		}
+		$this->assertSame( 'red-slug,black-slug', $merged_query['filter_color'] );
+		$this->assertSame( 'and', $merged_query['query_type_color'] );
+		$this->assertSame( true, $merged_query['isProductCollection'] );
 
-		// Check if the AND query is an array.
-		$this->assertIsArray( $and_query );
+		set_query_var( 'filter_color', '' );
+		set_query_var( 'custom_query_type_color', '' );
+	}
 
-		$attribute_queries = array();
-		foreach ( $and_query as $and_query_item ) {
-			if ( is_array( $and_query_item ) ) {
-				$attribute_queries = $and_query_item;
-			}
-		}
+	/**
+	 * @testdox Should filter variable products by attributes used by real variations in custom collections.
+	 */
+	public function test_attribute_filter_uses_variation_lookup_data_for_custom_collections(): void {
+		$fixture_data   = new FixtureData();
+		$product        = $fixture_data->get_variable_product(
+			array(
+				'name'         => 'Red and black product',
+				'stock_status' => ProductStockStatus::IN_STOCK,
+			),
+			array( $this->color_attribute )
+		);
+		$yellow_product = $fixture_data->get_variable_product(
+			array(
+				'name'         => 'Yellow product',
+				'stock_status' => ProductStockStatus::IN_STOCK,
+			),
+			array( $this->color_attribute )
+		);
 
-		$this->assertContainsEquals(
+		$fixture_data->get_variation_product(
+			$product->get_id(),
+			array( 'pa_color' => 'red-slug' ),
+			array( 'stock_status' => ProductStockStatus::IN_STOCK )
+		);
+		$fixture_data->get_variation_product(
+			$product->get_id(),
+			array( 'pa_color' => 'black-slug' ),
+			array( 'stock_status' => ProductStockStatus::IN_STOCK )
+		);
+		$fixture_data->get_variation_product(
+			$yellow_product->get_id(),
+			array( 'pa_color' => 'yellow-slug' ),
+			array( 'stock_status' => ProductStockStatus::IN_STOCK )
+		);
+
+		\WC_Product_Variable::sync( $product );
+		\WC_Product_Variable::sync( $yellow_product );
+
+		$lookup_data_store = wc_get_container()->get( LookupDataStore::class );
+		$lookup_data_store->create_data_for_product( $product );
+		$lookup_data_store->create_data_for_product( $yellow_product );
+
+		$parsed_block                                 = Utils::get_base_parsed_block();
+		$parsed_block['attrs']['query']['inherit']    = false;
+		$parsed_block['attrs']['query']['filterable'] = true;
+		$parsed_block['attrs']['query']['orderBy']    = 'title';
+		$parsed_block['attrs']['query']['order']      = 'asc';
+
+		set_query_var( 'filter_color', 'yellow-slug' );
+		set_query_var( 'query_type_color', 'or' );
+		$yellow_query_args = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+		$yellow_query      = new WP_Query( array_merge( $yellow_query_args, array( 'fields' => 'ids' ) ) );
+
+		$this->assertTrue( $yellow_query_args['isProductCollection'], 'Custom Product Collection queries should be marked for shared filtering.' );
+		$this->assertNotContains( $product->get_id(), array_map( 'absint', $yellow_query->posts ), 'A parent-only yellow term must not match.' );
+		$this->assertContains( $yellow_product->get_id(), array_map( 'absint', $yellow_query->posts ), 'A real yellow variation should match.' );
+
+		set_query_var( 'filter_color', 'red-slug' );
+		$red_query = new WP_Query(
+			array_merge(
+				Utils::initialize_merged_query( $this->block_instance, $parsed_block ),
+				array( 'fields' => 'ids' )
+			)
+		);
+
+		$this->assertContains( $product->get_id(), array_map( 'absint', $red_query->posts ), 'A real red variation should match.' );
+
+		set_query_var( 'filter_color', 'red-slug,yellow-slug' );
+		set_query_var( 'query_type_color', '' );
+		$default_or_query_args = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+		$default_or_query      = new WP_Query( array_merge( $default_or_query_args, array( 'fields' => 'ids' ) ) );
+
+		$this->assertSame( 'or', $default_or_query_args['query_type_color'], 'Missing attribute query types should retain Product Collection OR behavior.' );
+		$this->assertContains( $product->get_id(), array_map( 'absint', $default_or_query->posts ), 'The default OR query should match the red variation.' );
+		$this->assertContains( $yellow_product->get_id(), array_map( 'absint', $default_or_query->posts ), 'The default OR query should match the yellow variation.' );
+	}
+
+	/**
+	 * @testdox Should retain taxonomy filtering when the attribute lookup table is disabled.
+	 */
+	public function test_attribute_filter_falls_back_to_taxonomy_query(): void {
+		update_option( 'woocommerce_attribute_lookup_enabled', 'no' );
+		set_query_var( 'filter_color', 'yellow-slug' );
+
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
+
+		$this->assertArrayNotHasKey( 'filter_color', $merged_query );
+		$this->assertSame(
 			array(
 				'taxonomy' => 'pa_color',
 				'field'    => 'slug',
-				'terms'    => array( 'blue' ),
+				'terms'    => array( 'yellow-slug' ),
 				'operator' => 'IN',
 			),
-			$attribute_queries
+			$this->find_tax_query_by_taxonomy( $merged_query['tax_query'], 'pa_color' )
 		);
+	}
 
-		$this->assertContainsEquals(
-			array(
-				'taxonomy' => 'pa_size',
-				'field'    => 'slug',
-				'terms'    => array( 'xl', 'xxl' ),
-				'operator' => 'AND',
-			),
-			$attribute_queries
-		);
+	/**
+	 * Find a taxonomy clause in a nested tax query.
+	 *
+	 * @param array  $queries  Tax query clauses.
+	 * @param string $taxonomy Taxonomy name.
+	 * @return array
+	 */
+	private function find_tax_query_by_taxonomy( array $queries, string $taxonomy ): array {
+		foreach ( $queries as $query ) {
+			if ( ! is_array( $query ) ) {
+				continue;
+			}
 
-		set_query_var( 'filter_color', '' );
-		set_query_var( 'query_type_color', '' );
-		set_query_var( 'filter_size', '' );
-		set_query_var( 'query_type_size', '' );
+			if ( ( $query['taxonomy'] ?? null ) === $taxonomy ) {
+				return $query;
+			}
+
+			$found_query = $this->find_tax_query_by_taxonomy( $query, $taxonomy );
+			if ( ! empty( $found_query ) ) {
+				return $found_query;
+			}
+		}
+
+		return array();
 	}
 
 	/**
@@ -473,33 +554,10 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		$this->assertContainsEquals(
-			array(
-				'operator' => 'IN',
-				'key'      => '_stock_status',
-				'value'    => array( ProductStockStatus::IN_STOCK ),
-			),
-			$merged_query['meta_query']
-		);
-
-		$this->assertContainsEquals(
-			array(
-				array(
-					'key'     => '_price',
-					'value'   => 100,
-					'compare' => '<=',
-					'type'    => 'numeric',
-				),
-				array(
-					'key'     => '_price',
-					'value'   => 20,
-					'compare' => '>=',
-					'type'    => 'numeric',
-				),
-				'relation' => 'AND',
-			),
-			$merged_query['meta_query']
-		);
+		$this->assertSame( '100', $merged_query['max_price'] );
+		$this->assertSame( '20', $merged_query['min_price'] );
+		$this->assertSame( ProductStockStatus::IN_STOCK, $merged_query['filter_stock_status'] );
+		$this->assertEmpty( $merged_query['meta_query'] );
 
 		set_query_var( 'max_price', '' );
 		set_query_var( 'min_price', '' );
@@ -1125,175 +1183,57 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test merging filter queries by Category Slug (e.g. ?categories=accessories).
+	 * @testdox Should use shared taxonomy clauses to include products from child categories.
 	 */
-	public function test_merging_filter_by_category_slug() {
-		// Set the URL query variables.
-		set_query_var( 'categories', 'accessories' );
-
-		// Execute the query builder.
-		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
-		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
-
-		// Assertions.
-		$this->assertContainsEquals(
+	public function test_category_filter_includes_products_from_child_categories(): void {
+		$parent_category = wp_insert_term( 'Clothing', 'product_cat', array( 'slug' => 'clothing' ) );
+		$child_category  = wp_insert_term(
+			'T-shirts',
+			'product_cat',
 			array(
-				'taxonomy' => 'product_cat',
-				'field'    => 'slug',
-				'terms'    => array( 'accessories' ),
-				'operator' => 'IN',
-			),
-			$filter_clauses,
-			'Should contain correct product_cat tax query using slug.'
+				'parent' => $parent_category['term_id'],
+				'slug'   => 't-shirts',
+			)
+		);
+		$product         = ( new FixtureData() )->get_simple_product(
+			array(
+				'name'         => 'Child category product',
+				'category_ids' => array( $child_category['term_id'] ),
+			)
 		);
 
-		// Clean up.
-		set_query_var( 'categories', '' );
+		set_query_var( 'categories', 'clothing' );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
+		$query        = new WP_Query( array_merge( $merged_query, array( 'fields' => 'ids' ) ) );
+
+		$this->assertTrue( $merged_query['isProductCollection'], 'Default Product Collection queries should be marked for shared filtering.' );
+		$this->assertContains( $product->get_id(), array_map( 'absint', $query->posts ), 'A parent category filter should include products assigned to child categories.' );
 	}
 
 	/**
-	 * Test merging filter queries specifically for Tags.
-	 * Scenario: ?tags=tag-new (Slug)
-	 */
-	public function test_merging_filter_by_tags() {
-		// Set the URL query variables.
-		set_query_var( 'tags', 'tag-new' );
-
-		// Execute the query builder.
-		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
-		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
-
-		// Assertions.
-		$this->assertContainsEquals(
-			array(
-				'taxonomy' => 'product_tag',
-				'field'    => 'slug',
-				'terms'    => array( 'tag-new' ),
-				'operator' => 'IN',
-			),
-			$filter_clauses,
-			'Should contain correct product_tag tax query with IN operator.'
-		);
-
-		// Clean up.
-		set_query_var( 'tags', '' );
-	}
-
-	/**
-	 * Test merging filter queries for Categories, Tags, and Brands simultaneously.
-	 * Scenario: ?categories=accessories&tags=tag-new&brands=nike
+	 * @testdox Should pass all taxonomy filter variables to QueryClauses.
 	 */
 	public function test_merging_filter_by_all_taxonomies_together() {
-		// Set the URL query variables.
 		set_query_var( 'categories', 'accessories' );
 		set_query_var( 'tags', 'tag-new' );
 		set_query_var( 'brands', 'nike' );
 
-		// Execute the query builder.
-		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
-		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		// Assertions.
-		// Verify Category.
-		$this->assertContainsEquals(
-			array(
-				'taxonomy' => 'product_cat',
-				'field'    => 'slug',
-				'terms'    => array( 'accessories' ),
-				'operator' => 'IN',
-			),
-			$filter_clauses,
-			'Should contain correct product_cat tax query.'
-		);
-
-		// Verify Tag.
-		$this->assertContainsEquals(
-			array(
-				'taxonomy' => 'product_tag',
-				'field'    => 'slug',
-				'terms'    => array( 'tag-new' ),
-				'operator' => 'IN',
-			),
-			$filter_clauses,
-			'Should contain correct product_tag tax query.'
-		);
-
-		// Verify Brand.
-		$this->assertContainsEquals(
-			array(
-				'taxonomy' => 'product_brand',
-				'field'    => 'slug',
-				'terms'    => array( 'nike' ),
-				'operator' => 'IN',
-			),
-			$filter_clauses,
-			'Should contain correct product_brand tax query.'
-		);
-
-		// Clean up global state.
-		set_query_var( 'categories', '' );
-		set_query_var( 'tags', '' );
-		set_query_var( 'brands', '' );
+		$this->assertSame( 'accessories', $merged_query['categories'] );
+		$this->assertSame( 'tag-new', $merged_query['tags'] );
+		$this->assertSame( 'nike', $merged_query['brands'] );
 	}
 
 	/**
-	 * Test that the strictly string-based filter logic works and SAFELY ignores arrays.
-	 * Matches logic: if ( ! is_string($param_value) ) continue;
+	 * @testdox Should ignore non-scalar Product Filter query variables.
 	 */
 	public function test_filter_strict_string_handling() {
-		// Scenario: Array Input (Should be IGNORED).
-		// ?categories[]=hats.
 		set_query_var( 'categories', array( 'hats' ) );
 
-		// Execute.
-		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
-		$tax_queries    = $merged_query['tax_query'] ?? array();
-		$filter_clauses = $this->extract_filter_clauses( $tax_queries );
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		// Assertion: The array input should have been ignored.
-		$this->assertNotContainsEquals(
-			array(
-				'taxonomy' => 'product_cat',
-				'field'    => 'slug',
-				'terms'    => array( 'hats' ),
-				'operator' => 'IN',
-			),
-			$filter_clauses,
-			'Should not contain product_cat tax query because array input should be ignored.'
-		);
-
-		// Clean up.
-		set_query_var( 'categories', '' );
-	}
-
-	/**
-	 * Helper to extract filter clauses from the tax_query array.
-	 *
-	 * @param array $tax_queries The tax_query array from the merged query.
-	 * @return array The extracted filter clauses.
-	 */
-	private function extract_filter_clauses( array $tax_queries ) {
-
-		$and_query = array();
-
-		// Find the 'AND' relation group where filters are stored.
-		foreach ( $tax_queries as $tax_query ) {
-			if ( isset( $tax_query['relation'] ) && 'AND' === $tax_query['relation'] ) {
-				$and_query = $tax_query;
-				break;
-			}
-		}
-
-		$clauses = array();
-		if ( ! empty( $and_query ) ) {
-			foreach ( $and_query as $item ) {
-				if ( is_array( $item ) ) {
-					$clauses[] = $item;
-				}
-			}
-		}
-
-		return $clauses;
+		$this->assertArrayNotHasKey( 'categories', $merged_query );
 	}
 
 	/**

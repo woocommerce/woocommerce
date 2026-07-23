@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AttributeFilter;
-use Automattic\WooCommerce\Blocks\BlockTypes\PriceFilter;
 use Automattic\WooCommerce\Blocks\BlockTypes\RatingFilter;
-use Automattic\WooCommerce\Blocks\BlockTypes\StockFilter;
+use Automattic\WooCommerce\Internal\ProductFilters\Params;
+use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use WP_Query;
 use WC_Tax;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -52,6 +52,14 @@ class QueryBuilder {
 	public function __construct() {
 		$this->valid_query_vars = $this->get_valid_query_vars();
 		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
+		add_filter(
+			'posts_clauses',
+			function ( $clauses, $query ) {
+				return $this->apply_product_filter_query_clauses( $clauses, $query );
+			},
+			10,
+			2
+		);
 	}
 
 	/**
@@ -291,7 +299,7 @@ class QueryBuilder {
 			$collection_query = array();
 		}
 
-		return $this->merge_queries(
+		$final_query = $this->merge_queries(
 			$common_query_values,
 			$orderby_query,
 			$on_sale_query,
@@ -303,6 +311,15 @@ class QueryBuilder {
 			$handpicked_query,
 			$collection_query
 		);
+
+		$final_query['isProductCollection'] = true;
+
+		if ( ! $is_exclude_applied_filters ) {
+			$applied_filter_query_vars = $this->get_applied_filter_query_vars();
+			$final_query               = array_merge( $final_query, $applied_filter_query_vars );
+		}
+
+		return $final_query;
 	}
 
 	/**
@@ -458,50 +475,54 @@ class QueryBuilder {
 	}
 
 	/**
-	 * Return a query that filters products by price.
+	 * Return a query that filters products by rating.
 	 *
 	 * @return array
 	 */
-	private function get_filter_by_price_query() {
-		$min_price = get_query_var( PriceFilter::MIN_PRICE_QUERY_VAR );
-		$max_price = get_query_var( PriceFilter::MAX_PRICE_QUERY_VAR );
-
-		$max_price_query = empty( $max_price ) ? array() : array(
-			'key'     => '_price',
-			'value'   => $max_price,
-			'compare' => '<=',
-			'type'    => 'numeric',
-		);
-
-		$min_price_query = empty( $min_price ) ? array() : array(
-			'key'     => '_price',
-			'value'   => $min_price,
-			'compare' => '>=',
-			'type'    => 'numeric',
-		);
-
-		if ( empty( $min_price_query ) && empty( $max_price_query ) ) {
+	private function get_filter_by_rating_query() {
+		$filter_rating_values = get_query_var( RatingFilter::RATING_QUERY_VAR );
+		if ( empty( $filter_rating_values ) ) {
 			return array();
 		}
 
+		$parsed_filter_rating_values = explode( ',', $filter_rating_values );
+		$product_visibility_terms    = wc_get_product_visibility_term_ids();
+
+		if ( empty( $parsed_filter_rating_values ) || empty( $product_visibility_terms ) ) {
+			return array();
+		}
+
+		$rating_terms = array_map(
+			function ( $rating ) use ( $product_visibility_terms ) {
+				return $product_visibility_terms[ 'rated-' . $rating ];
+			},
+			$parsed_filter_rating_values
+		);
+
 		return array(
-			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			'meta_query' => array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery
+			'tax_query' => array(
 				array(
-					'relation' => 'AND',
-					$max_price_query,
-					$min_price_query,
+					'field'         => 'term_taxonomy_id',
+					'taxonomy'      => 'product_visibility',
+					'terms'         => $rating_terms,
+					'operator'      => 'IN',
+					'rating_filter' => true,
 				),
 			),
 		);
 	}
 
 	/**
-	 * Return a query that filters products by attributes.
+	 * Return an attribute taxonomy query when the lookup table is disabled.
 	 *
 	 * @return array
 	 */
 	private function get_filter_by_attributes_query() {
+		if ( 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' ) ) {
+			return array();
+		}
+
 		$attributes_filter_query_args = $this->get_filter_by_attributes_query_vars();
 
 		$queries = array_reduce(
@@ -548,21 +569,9 @@ class QueryBuilder {
 	}
 
 	/**
-	 * Get all the query args related to the filter by attributes block.
+	 * Get the query variables for all registered product attributes.
 	 *
 	 * @return array
-	 * [color] => Array
-	 *   (
-	 *        [filter] => filter_color
-	 *        [query_type] => query_type_color
-	 *    )
-	 *
-	 * [size] => Array
-	 *    (
-	 *        [filter] => filter_size
-	 *        [query_type] => query_type_size
-	 *    )
-	 * )
 	 */
 	private function get_filter_by_attributes_query_vars() {
 		if ( ! empty( $this->attributes_filter_query_args ) ) {
@@ -582,141 +591,6 @@ class QueryBuilder {
 		);
 
 		return $this->attributes_filter_query_args;
-	}
-
-	/**
-	 * Return a query that filters products by stock status.
-	 *
-	 * @return array
-	 */
-	private function get_filter_by_stock_status_query() {
-		$filter_stock_status_values = get_query_var( StockFilter::STOCK_STATUS_QUERY_VAR );
-
-		if ( empty( $filter_stock_status_values ) ) {
-			return array();
-		}
-
-		$filtered_stock_status_values = array_filter(
-			explode( ',', $filter_stock_status_values ),
-			function ( $stock_status ) {
-				return in_array( $stock_status, StockFilter::get_stock_status_query_var_values(), true );
-			}
-		);
-
-		if ( empty( $filtered_stock_status_values ) ) {
-			return array();
-		}
-
-		return array(
-			// Ignoring the warning of not using meta queries.
-			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			'meta_query' => array(
-				array(
-					'key'      => '_stock_status',
-					'value'    => $filtered_stock_status_values,
-					'operator' => 'IN',
-				),
-			),
-		);
-	}
-
-	/**
-	 * Return a query that filters products by rating.
-	 *
-	 * @return array
-	 */
-	private function get_filter_by_rating_query() {
-		$filter_rating_values = get_query_var( RatingFilter::RATING_QUERY_VAR );
-		if ( empty( $filter_rating_values ) ) {
-			return array();
-		}
-
-		$parsed_filter_rating_values = explode( ',', $filter_rating_values );
-		$product_visibility_terms    = wc_get_product_visibility_term_ids();
-
-		if ( empty( $parsed_filter_rating_values ) || empty( $product_visibility_terms ) ) {
-			return array();
-		}
-
-		$rating_terms = array_map(
-			function ( $rating ) use ( $product_visibility_terms ) {
-				return $product_visibility_terms[ 'rated-' . $rating ];
-			},
-			$parsed_filter_rating_values
-		);
-
-		return array(
-			// phpcs:ignore WordPress.DB.SlowDBQuery
-			'tax_query' => array(
-				array(
-					'field'         => 'term_taxonomy_id',
-					'taxonomy'      => 'product_visibility',
-					'terms'         => $rating_terms,
-					'operator'      => 'IN',
-					'rating_filter' => true,
-				),
-			),
-		);
-	}
-
-	/**
-	 * Return a query that filters products by taxonomy terms.
-	 *
-	 * @since 10.6.0
-	 *
-	 * @return array
-	 */
-	private function get_filter_by_taxonomy_query() {
-
-		$container       = wc_get_container();
-		$params_handler  = $container->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class );
-		$taxonomy_params = $params_handler->get_param( 'taxonomy' );
-
-		if ( empty( $taxonomy_params ) ) {
-			return array();
-		}
-
-		$tax_queries = array();
-
-		foreach ( $taxonomy_params as $taxonomy_slug => $param_key ) {
-			$param_value = get_query_var( $param_key );
-
-			// Adding is_string check to avoid invalid query parameters for the taxonomy.
-			if ( ! is_string( $param_value ) || empty( $param_value ) ) {
-				continue;
-			}
-
-			// Define $term_values by exploding the string.
-			$term_values = explode( ',', $param_value );
-
-			// Sanitize and filter (removes empty strings).
-			$term_slugs = array_values( array_filter( array_map( 'sanitize_title', $term_values ) ) );
-
-			if ( empty( $term_slugs ) ) {
-				continue;
-			}
-
-			$tax_queries[] = array(
-				'taxonomy' => $taxonomy_slug,
-				'field'    => 'slug',
-				'terms'    => $term_slugs,
-				'operator' => 'IN',
-			);
-		}
-
-		if ( empty( $tax_queries ) ) {
-			return array();
-		}
-
-		return array(
-			// phpcs:ignore WordPress.DB.SlowDBQuery
-			'tax_query' => array(
-				array(
-					'relation' => 'AND',
-					...$tax_queries,
-				),
-			),
-		);
 	}
 
 	/**
@@ -791,12 +665,71 @@ class QueryBuilder {
 	 */
 	private function get_queries_by_applied_filters() {
 		return array(
-			'price_filter'        => $this->get_filter_by_price_query(),
-			'attributes_filter'   => $this->get_filter_by_attributes_query(),
-			'stock_status_filter' => $this->get_filter_by_stock_status_query(),
-			'rating_filter'       => $this->get_filter_by_rating_query(),
-			'taxonomy_filter'     => $this->get_filter_by_taxonomy_query(),
+			'attributes_filter' => $this->get_filter_by_attributes_query(),
+			'rating_filter'     => $this->get_filter_by_rating_query(),
 		);
+	}
+
+	/**
+	 * Get the active Product Filter URL query variables.
+	 *
+	 * @return array
+	 */
+	private function get_applied_filter_query_vars(): array {
+		$params                          = wc_get_container()->get( Params::class );
+		$filter_query_vars               = array();
+		$registered_attribute_params     = $params->get_param( 'attribute' );
+		$registered_query_type_params    = array_map(
+			function ( $attribute_name ) {
+				return AttributeFilter::QUERY_TYPE_QUERY_VAR_PREFIX . $attribute_name;
+			},
+			array_keys( $registered_attribute_params )
+		);
+		$registered_attribute_param_keys = array_merge( array_values( $registered_attribute_params ), $registered_query_type_params );
+		$use_attribute_lookup            = 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' );
+
+		foreach ( $params->get_param_keys() as $param_key ) {
+			if ( in_array( $param_key, $registered_attribute_param_keys, true ) ) {
+				continue;
+			}
+
+			$value = get_query_var( $param_key );
+
+			if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+				continue;
+			}
+
+			$value = (string) $value;
+			if ( '' !== $value ) {
+				$filter_query_vars[ $param_key ] = $value;
+			}
+		}
+
+		if ( $use_attribute_lookup ) {
+			foreach ( $this->get_filter_by_attributes_query_vars() as $query_args ) {
+				$filter_param     = $query_args['filter'];
+				$filter_value     = get_query_var( $filter_param );
+				$query_type_value = get_query_var( $query_args['query_type'] );
+
+				if ( ! is_string( $filter_value ) && ! is_numeric( $filter_value ) ) {
+					continue;
+				}
+
+				$filter_value = (string) $filter_value;
+				if ( '' === $filter_value ) {
+					continue;
+				}
+
+				$attribute_name                         = str_replace( AttributeFilter::FILTER_QUERY_VAR_PREFIX, '', $filter_param );
+				$query_type_param                       = AttributeFilter::QUERY_TYPE_QUERY_VAR_PREFIX . $attribute_name;
+				$filter_query_vars[ $filter_param ]     = $filter_value;
+				$filter_query_vars[ $query_type_param ] = is_string( $query_type_value ) && '' !== $query_type_value
+					? $query_type_value
+					: 'or';
+			}
+		}
+
+		return $filter_query_vars;
 	}
 
 	/**
@@ -927,6 +860,21 @@ class QueryBuilder {
 		}
 
 		return $clauses;
+	}
+
+	/**
+	 * Apply Product Filter clauses to Product Collection queries.
+	 *
+	 * @param array    $clauses The query clauses.
+	 * @param WP_Query $query   The WP_Query instance.
+	 * @return array
+	 */
+	private function apply_product_filter_query_clauses( $clauses, $query ) {
+		if ( ! ( $query->query_vars['isProductCollection'] ?? false ) ) {
+			return $clauses;
+		}
+
+		return wc_get_container()->get( QueryClauses::class )->add_query_clauses( $clauses, $query );
 	}
 
 	/**
