@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
+use Automattic\WooCommerce\Blocks\CoreBreadcrumbsCompatibility;
 use Automattic\WooCommerce\Blocks\DependencyDetection;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
@@ -145,10 +146,11 @@ class Bootstrap {
 
 		// Load assets unless this is a request specifically for the store API.
 		if ( ! $is_store_api_request ) {
-			// Template related functionality. These won't be loaded for store API requests, but may be loaded for
-			// regular rest requests to maintain compatibility with the store editor.
-			$this->container->get( BlockPatterns::class );
-			$this->container->get( BlockTypesController::class );
+			// Skip block/pattern registration on non-rendering requests. See BlockRegistrationContext.
+			if ( ( new BlockRegistrationContext() )->should_register() ) {
+				$this->container->get( BlockPatterns::class );
+				$this->container->get( BlockTypesController::class );
+			}
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( Notices::class )->init();
 
@@ -242,6 +244,12 @@ class Bootstrap {
 				$asset_api           = $container->get( AssetApi::class );
 				$asset_data_registry = $container->get( AssetDataRegistry::class );
 				return new BlockTypesController( $asset_api, $asset_data_registry );
+			}
+		);
+		$this->container->register(
+			CoreBreadcrumbsCompatibility::class,
+			function () {
+				return new CoreBreadcrumbsCompatibility();
 			}
 		);
 		$this->container->register(

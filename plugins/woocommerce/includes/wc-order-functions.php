@@ -606,9 +606,16 @@ function wc_create_refund( $args = array() ) {
 
 				$qty          = isset( $args['line_items'][ $item_id ]['qty'] ) ? $args['line_items'][ $item_id ]['qty'] : 0;
 				$refund_total = $args['line_items'][ $item_id ]['refund_total'];
-				$refund_tax   = isset( $args['line_items'][ $item_id ]['refund_tax'] ) ? array_filter( (array) $args['line_items'][ $item_id ]['refund_tax'] ) : array();
 
-				if ( empty( $qty ) && empty( $refund_total ) && empty( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
+				// Keep every numeric tax entry, including a 0% amount that a callback-less array_filter would drop as falsy. 0% is a valid rate, not "no tax". See #27118.
+				$refund_tax = isset( $args['line_items'][ $item_id ]['refund_tax'] ) ? array_map( 'floatval', array_filter( (array) $args['line_items'][ $item_id ]['refund_tax'], 'is_numeric' ) ) : array();
+
+				// The admin refund form posts a 0 total and 0 tax amounts for every untouched row, so an
+				// all-zero refund_tax alone must not create a refund line item (a genuine 0% tax line
+				// still survives, because its item is refunded via qty or refund_total).
+				$refund_tax_sum = array_sum( array_map( 'abs', $refund_tax ) );
+
+				if ( empty( $qty ) && empty( $refund_total ) && empty( $refund_tax_sum ) ) {
 					continue;
 				}
 
@@ -907,7 +914,10 @@ function wc_order_fully_refunded( $order_id ) {
 	$order      = wc_get_order( $order_id );
 	$max_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
 
-	if ( ! $max_refund ) {
+	// Numeric comparison, not truthiness: when prior refunds sum a float epsilon
+	// above the order total, the difference formats to '-0' — a truthy string that
+	// is numerically zero — which would otherwise create a ghost 0.00 refund below.
+	if ( (float) $max_refund <= 0 ) {
 		return;
 	}
 

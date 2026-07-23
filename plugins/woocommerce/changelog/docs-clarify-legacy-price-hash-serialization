@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Correct the woocommerce_use_legacy_get_variations_price_hash docblock: the legacy hash is JSON-encoded, so only a callback object's public properties affect it.

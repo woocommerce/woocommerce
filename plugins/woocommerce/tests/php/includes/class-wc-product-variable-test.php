@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\WooCommerce\Internal\VariationGallery\Package;
+
 /**
  * Tests for WC_Product_Variable.
  */
@@ -8,7 +10,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	 * Reset variation gallery feature-flag option leaked by individual tests.
 	 */
 	public function tearDown(): void {
-		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+		delete_option( Package::ENABLE_OPTION_NAME );
 		parent::tearDown();
 	}
 
@@ -172,10 +174,33 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'get_available_variations' with 'array' return includes image and gallery data for variations that have images set.
+	 */
+	public function test_get_available_variations_array_includes_image_data_when_variation_has_images(): void {
+		update_option( Package::ENABLE_OPTION_NAME, 'yes' );
+
+		$image_id   = $this->create_image_attachment( 'Variation Image', 'variation-image.jpg' );
+		$gallery_id = $this->create_image_attachment( 'Variation Gallery Image', 'variation-gallery.jpg' );
+
+		$product   = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+		$variation->set_image_id( $image_id );
+		$variation->set_gallery_image_ids( array( $gallery_id ) );
+		$variation->save();
+
+		$variations = $product->get_available_variations( 'array' );
+
+		$this->assertSame( $image_id, $variations[0]['image_id'] );
+		$this->assertSame( array( $gallery_id ), $variations[0]['gallery_image_ids'] );
+
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox 'get_available_variation' exposes typed variation gallery image IDs.
 	 */
 	public function test_get_available_variation_includes_gallery_image_ids() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+		update_option( Package::ENABLE_OPTION_NAME, 'yes' );
 
 		$product   = WC_Helper_Product::create_variation_product();
 		$variation = wc_get_product( $product->get_children()[0] );
@@ -222,7 +247,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	 * @testdox 'get_available_variation' omits multi-image gallery data when the variation gallery feature flag is disabled.
 	 */
 	public function test_get_available_variation_returns_single_image_shape_when_feature_flag_disabled() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'no' );
+		update_option( Package::ENABLE_OPTION_NAME, 'no' );
 
 		$product   = WC_Helper_Product::create_variation_product();
 		$variation = wc_get_product( $product->get_children()[0] );
@@ -267,7 +292,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	 * @testdox 'get_available_variation' falls back to the variation's own gallery when the variation featured image is stale.
 	 */
 	public function test_get_available_variation_falls_back_to_variation_gallery_when_featured_is_stale() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+		update_option( Package::ENABLE_OPTION_NAME, 'yes' );
 
 		$product              = WC_Helper_Product::create_variation_product();
 		$variation            = wc_get_product( $product->get_children()[0] );
@@ -300,7 +325,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	 * @testdox 'get_available_variation' falls back to the parent featured image when both the variation featured image and gallery are absent.
 	 */
 	public function test_get_available_variation_falls_back_to_parent_featured_when_variation_has_no_images() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+		update_option( Package::ENABLE_OPTION_NAME, 'yes' );
 
 		$product            = WC_Helper_Product::create_variation_product();
 		$variation          = wc_get_product( $product->get_children()[0] );
@@ -320,6 +345,106 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $parent_featured_id, $available_variation['image_id'] );
 		$this->assertSame( '', $available_variation['gallery_images_html'] );
+	}
+
+	/**
+	 * @testdox get_variation_prices sorts on first call, skips re-sorting on repeat calls, and treats float and string prices as equal via loose comparison.
+	 */
+	public function test_get_variation_prices_skips_sort_on_repeated_call_and_with_equivalent_types(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$sut     = new class( $product->get_id() ) extends WC_Product_Variable {
+			public int $sort_count = 0; // phpcs:ignore Squiz.Commenting.VariableComment.Missing
+
+			protected function sort_variation_prices( $prices ) { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				++$this->sort_count;
+				return parent::sort_variation_prices( $prices );
+			}
+		};
+
+		// Ensure the store-level cache is not interfering the test.
+		$invalidate_cache = static fn ( array $hash ) => array( ...$hash, wp_rand() );
+		add_filter( 'woocommerce_get_variation_prices_hash', $invalidate_cache );
+
+		try {
+			// First call: price data will be initially populated, including sorting. 3 is a number of sort calls on initial cache population.
+			$sut->get_variation_prices();
+			$this->assertSame( 3, $sut->sort_count );
+
+			// Second call: price data is unchanged and cache update being skipped. 3 is a number of sort calls, not changed since initial cache population.
+			$sut->get_variation_prices();
+			$this->assertSame( 3, $sut->sort_count );
+
+			// Modify price data type, while keeping the price same.
+			foreach ( $product->get_children() as $child_id ) {
+				foreach ( array( '_price', '_regular_price' ) as $meta_key ) {
+					$value = get_post_meta( $child_id, $meta_key, true );
+					if ( '' !== $value ) {
+						update_post_meta( $child_id, $meta_key, number_format( (float) $value, 2, '.', '' ) );
+					}
+				}
+			}
+
+			// Third call: price data is unchanged (data type is) and cache update being skipped. 3 is a number of sort calls, not changed since initial cache population.
+			$sut->get_variation_prices();
+			$this->assertSame( 3, $sut->sort_count );
+
+			// Modify price.
+			foreach ( $product->get_children() as $child_id ) {
+				foreach ( array( '_price', '_regular_price' ) as $meta_key ) {
+					$value = get_post_meta( $child_id, $meta_key, true );
+					if ( '' !== $value ) {
+						update_post_meta( $child_id, $meta_key, (float) $value + 0.01 );
+					}
+				}
+			}
+
+			// Fourth call: price data change detected — cache being updated. 6 is a number of sort calls: 3 on initial cache population + 3 on cache refresh.
+			$sut->get_variation_prices();
+			$this->assertSame( 6, $sut->sort_count );
+		} finally {
+			remove_filter( 'woocommerce_get_variation_prices_hash', $invalidate_cache );
+		}
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox get_variation_prices returns a valid array structure when the woocommerce_variation_prices filter returns malformed data (null or false), restoring the pre-refactor foreach behaviour that tolerated non-array filter output.
+	 * @dataProvider provider_malformed_variation_prices_filter_values
+	 *
+	 * @param mixed $malformed_value The malformed value for returning via woocommerce_get_variation_prices_hash filter.
+	 */
+	public function test_get_variation_prices_tolerates_malformed_filter_output( $malformed_value ): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		// Bust the transient so read_price_data() always reaches the woocommerce_variation_prices filter.
+		$invalidate_cache = static fn( array $hash ) => array( ...$hash, wp_rand() );
+		add_filter( 'woocommerce_get_variation_prices_hash', $invalidate_cache );
+
+		$bad_filter = static fn() => $malformed_value;
+		add_filter( 'woocommerce_variation_prices', $bad_filter );
+
+		try {
+			$prices = $product->get_variation_prices();
+			$this->assertSame( $malformed_value, $prices );
+		} finally {
+			remove_filter( 'woocommerce_variation_prices', $bad_filter );
+			remove_filter( 'woocommerce_get_variation_prices_hash', $invalidate_cache );
+		}
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @return array<string,array>
+	 */
+	public function provider_malformed_variation_prices_filter_values(): array {
+		return array(
+			'null'   => array( null ),
+			'false'  => array( false ),
+			'string' => array( 'bad_return' ),
+			'object' => array( new stdClass() ),
+		);
 	}
 
 	/**

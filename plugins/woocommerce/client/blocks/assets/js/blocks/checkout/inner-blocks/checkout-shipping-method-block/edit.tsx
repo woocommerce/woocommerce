@@ -198,9 +198,9 @@ export const Edit = ( {
 
 	const changeView = ( method: string ) => {
 		if ( method === 'pickup' ) {
-			setPrefersCollection( true );
+			void setPrefersCollection( true );
 		} else {
-			setPrefersCollection( false );
+			void setPrefersCollection( false );
 		}
 	};
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Tighten authorization checks on the Stripe extension install redirect.
