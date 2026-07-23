@@ -680,6 +680,23 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * Statuses that keep a usable post_name after save (for slug-route coverage).
+	 *
+	 * Pending is omitted: WordPress does not persist post_name for pending posts,
+	 * so the slug route cannot resolve them.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function provider_non_published_statuses_with_slugs() {
+		return array(
+			'draft'      => array( ProductStatus::DRAFT ),
+			'private'    => array( ProductStatus::PRIVATE ),
+			'trash'      => array( ProductStatus::TRASH ),
+			'auto-draft' => array( ProductStatus::AUTO_DRAFT ),
+		);
+	}
+
+	/**
 	 * @testdox Non-published products should not be returned when queried by ID ($status).
 	 * @dataProvider provider_non_published_statuses
 	 *
@@ -699,6 +716,30 @@ class Products extends ControllerTestCase {
 		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
 
 		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Non-published products should be returned by ID to users who can edit them ($status).
+	 * @dataProvider provider_non_published_statuses
+	 *
+	 * @param string $status The product status to test.
+	 */
+	public function test_non_published_product_by_id_visible_to_admin( $status ) {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Non Published Product For Admin',
+				'regular_price' => 10,
+			)
+		);
+		$product->set_status( $status );
+		$product->save();
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( $product->get_id(), $response->get_data()['id'] );
 	}
 
 	/**
@@ -732,8 +773,39 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Non-published products should not be returned when queried by slug ($status).
+	 * @testdox Non-published products should not be included in the collection for admins ($status).
 	 * @dataProvider provider_non_published_statuses
+	 *
+	 * @param string $status The product status to test.
+	 */
+	public function test_non_published_products_excluded_from_collection_for_admin( $status ) {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Non Published Product In Admin Collection',
+				'regular_price' => 10,
+			)
+		);
+		$product->set_status( $status );
+		$product->save();
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$response    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
+		$data        = $response->get_data();
+		$product_ids = array_map(
+			function ( $product ) {
+				return $product['id'];
+			},
+			$data
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNotContains( $product->get_id(), $product_ids );
+	}
+
+	/**
+	 * @testdox Non-published products should not be returned when queried by slug ($status).
+	 * @dataProvider provider_non_published_statuses_with_slugs
 	 *
 	 * @param string $status The product status to test.
 	 */
@@ -751,6 +823,33 @@ class Products extends ControllerTestCase {
 		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_slug() ) );
 
 		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Non-published products should be returned by slug to users who can edit them ($status).
+	 * @dataProvider provider_non_published_statuses_with_slugs
+	 *
+	 * @param string $status The product status to test.
+	 */
+	public function test_non_published_product_by_slug_visible_to_admin( $status ) {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Non Published Product By Slug For Admin',
+				'regular_price' => 10,
+			)
+		);
+		$product->set_status( $status );
+		$product->save();
+
+		$slug = get_post_field( 'post_name', $product->get_id() );
+		$this->assertNotEmpty( $slug, "Expected a post_name for $status products so the slug route is exercised." );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $slug ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( $product->get_id(), $response->get_data()['id'] );
 	}
 
 	/**
