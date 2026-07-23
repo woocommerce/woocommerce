@@ -144,8 +144,9 @@ class SettingsUISchema {
 	 * Schemas built from legacy settings always carry string option values, but
 	 * native providers can supply any scalar. The client matches options against
 	 * the stored value with strict string comparison, so scalar option values
-	 * and the selected values they match are cast to strings here. Malformed
-	 * entries remain unchanged for the provider to fix.
+	 * and the selected values they match are cast here to the string the
+	 * client's own String() coercion produces. Malformed entries remain
+	 * unchanged for the provider to fix.
 	 *
 	 * @since 11.1.0
 	 *
@@ -186,14 +187,14 @@ class SettingsUISchema {
 						continue;
 					}
 
-					$option['value'] = (string) $option['value'];
+					$option['value'] = self::to_canonical_string( $option['value'] );
 					$converted       = true;
 				}
 				unset( $option );
 
 				if ( array_key_exists( 'value', $field ) ) {
 					if ( is_scalar( $field['value'] ) && ! is_string( $field['value'] ) ) {
-						$field['value'] = (string) $field['value'];
+						$field['value'] = self::to_canonical_string( $field['value'] );
 						$converted      = true;
 					} elseif ( is_array( $field['value'] ) ) {
 						$canonical_list = self::canonicalize_scalar_list( $field['value'] );
@@ -250,7 +251,24 @@ class SettingsUISchema {
 			}
 		}
 
-		return $needs_conversion ? array_map( 'strval', $values ) : null;
+		return $needs_conversion ? array_map( array( __CLASS__, 'to_canonical_string' ), $values ) : null;
+	}
+
+	/**
+	 * Cast a scalar to the string the client's String() coercion produces, so
+	 * canonicalizing a value never changes which option or visibility rule it
+	 * matches. PHP casts diverge from String() for booleans: (string) true is
+	 * '1' and (string) false is '', while String() gives 'true' and 'false'.
+	 *
+	 * @param bool|int|float|string $value Scalar value.
+	 * @return string
+	 */
+	private static function to_canonical_string( $value ): string {
+		if ( is_bool( $value ) ) {
+			return $value ? 'true' : 'false';
+		}
+
+		return (string) $value;
 	}
 
 	/**

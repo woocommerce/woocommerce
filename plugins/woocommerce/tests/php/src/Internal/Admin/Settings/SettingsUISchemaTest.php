@@ -426,7 +426,50 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		$field = $schema['groups']['main']['fields'][0];
 
 		$this->assertSame( '1', $field['value'] );
-		$this->assertSame( array( '1', '1' ), array_column( $field['options'], 'value' ), 'Boolean option values should use the PHP string cast, matching stored values.' );
+		$this->assertSame( array( '1', 'true' ), array_column( $field['options'], 'value' ), 'Boolean option values should convert like the client String() coercion, not the PHP string cast.' );
+	}
+
+	/**
+	 * @testdox It canonicalizes boolean values to the strings the client String() coercion produced before conversion.
+	 */
+	public function test_canonicalize_option_values_matches_client_coercion_for_booleans(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_option_values' );
+
+		$string_options = array(
+			array(
+				'label' => 'On',
+				'value' => 'true',
+			),
+			array(
+				'label' => 'Off',
+				'value' => 'false',
+			),
+		);
+
+		$schema = SettingsUISchema::canonicalize_option_values(
+			$this->get_native_schema_with_fields(
+				array(
+					array(
+						'id'      => 'acme_enabled',
+						'type'    => 'select',
+						'value'   => true,
+						'options' => $string_options,
+					),
+					array(
+						'id'      => 'acme_disabled',
+						'type'    => 'select',
+						'value'   => false,
+						'options' => $string_options,
+					),
+				)
+			)
+		);
+
+		$fields = $schema['groups']['main']['fields'];
+
+		$this->assertSame( 'true', $fields[0]['value'], 'A true value must keep matching the string option the client matched before canonicalization.' );
+		$this->assertSame( 'false', $fields[1]['value'], 'A false value must not collapse to the empty no-selection string.' );
+		$this->assertSame( array( 'true', 'false' ), array_column( $fields[0]['options'], 'value' ), 'String option values should pass through unchanged.' );
 	}
 
 	/**
@@ -564,13 +607,23 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	 * @return array
 	 */
 	private function get_native_schema_with_field( array $field ): array {
+		return $this->get_native_schema_with_fields( array( $field ) );
+	}
+
+	/**
+	 * Build a minimal native schema with the given fields.
+	 *
+	 * @param array $fields Field definitions.
+	 * @return array
+	 */
+	private function get_native_schema_with_fields( array $fields ): array {
 		return array(
 			'id'     => 'acme',
 			'title'  => 'Acme',
 			'groups' => array(
 				'main' => array(
 					'id'     => 'main',
-					'fields' => array( $field ),
+					'fields' => $fields,
 				),
 			),
 		);
