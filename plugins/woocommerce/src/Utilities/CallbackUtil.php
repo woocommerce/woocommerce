@@ -71,7 +71,8 @@ final class CallbackUtil {
 	 * providing consistent hashes across requests for the same closure code.
 	 *
 	 * Memoized per hook for the request, recomputed only when the registered
-	 * callbacks change, so repeated calls skip the reflection closures need.
+	 * callbacks change, so repeated calls skip the reflection work that closure
+	 * and invokable callbacks require.
 	 *
 	 * @param string $hook_name The name of the hook to inspect.
 	 * @return array<int, array<string>> Array of priority => array( signatures ),  empty if hook has no callbacks.

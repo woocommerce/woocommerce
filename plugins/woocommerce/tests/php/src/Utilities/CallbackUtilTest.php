@@ -522,12 +522,9 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 
 		remove_action( $hook_name, $first_closure, 10 );
 
-		/*
-		 * Free the first closure so PHP can recycle its object id for the
-		 * replacement. That is the case the retained-callbacks reference in
-		 * get_hook_callback_signatures() guards against: without it, the two
-		 * closures fingerprint identically and the stale signature is returned.
-		 */
+		// Drop our own reference too, so the replacement is free to reuse the
+		// slot. Guards any future implementation that keys the memo on derived
+		// ids rather than on the callbacks array itself.
 		unset( $first_closure );
 
 		$second_closure = function () {
