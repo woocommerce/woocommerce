@@ -331,6 +331,7 @@ jobs:
           PLUGIN_SLUG: '' # required by test:plugincheck; nightly installs under the canonical 'woocommerce' folder
           PLAYWRIGHT_JUNIT_SUITE_NAME: 'WooCommerce Core'
           PLAYWRIGHT_JUNIT_SUITE_ID: 'woocommerce-core'
+          DEBUG: 'pw:webserver'
         run: |
           lastRunFile="${{ runner.temp }}/last-run-info/.last-run.json"
           lastRunFileDest="$ARTIFACTS_PATH/.last-run.json"
