@@ -408,7 +408,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It adds the settings UI body class when the feature flag is enabled.
+	 * @testdox Should add only the top-level Settings UI body class for top-level pages.
 	 */
 	public function test_settings_ui_body_class_is_added_when_feature_flag_is_enabled(): void {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
@@ -421,6 +421,78 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'existing-class', $classes );
 		$this->assertStringContainsString( 'woocommerce-settings-ui-page', $classes );
+		$this->assertStringNotContainsString( 'woocommerce-settings-ui-drill-down', $classes );
+	}
+
+	/**
+	 * @testdox Should add the drill-down body class for Settings UI drill-down pages.
+	 */
+	public function test_settings_ui_drill_down_body_class_is_added_for_drill_down_pages(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'test_gateway';
+		$current_tab     = 'checkout';
+		$page            = $this->get_settings_ui_test_page_for_drill_down();
+
+		$classes = $page->add_settings_ui_body_class( 'existing-class woocommerce-settings-ui-page' );
+
+		$this->assertStringContainsString( 'existing-class', $classes );
+		$this->assertSame( 1, substr_count( $classes, 'woocommerce-settings-ui-page' ) );
+		$this->assertSame( 1, substr_count( $classes, 'woocommerce-settings-ui-drill-down' ) );
+	}
+
+	/**
+	 * @testdox Should add the exact Settings UI body classes even when a similarly prefixed class is already present.
+	 */
+	public function test_settings_ui_body_classes_use_exact_token_matching_against_prefixed_classes(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'test_gateway';
+		$current_tab     = 'checkout';
+		$page            = $this->get_settings_ui_test_page_for_drill_down();
+
+		$classes      = $page->add_settings_ui_body_class( 'existing-class woocommerce-settings-ui-page-preview' );
+		$body_classes = explode( ' ', $classes );
+
+		$this->assertContains( 'woocommerce-settings-ui-page-preview', $body_classes );
+		$this->assertCount( 1, array_keys( $body_classes, 'woocommerce-settings-ui-page', true ) );
+		$this->assertCount( 1, array_keys( $body_classes, 'woocommerce-settings-ui-drill-down', true ) );
+	}
+
+	/**
+	 * @testdox Should not add the drill-down body class when schema generation falls back to legacy rendering.
+	 */
+	public function test_settings_ui_drill_down_body_class_is_not_added_when_schema_generation_fails(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'test_gateway';
+		$current_tab     = 'checkout';
+		$page            = $this->get_settings_ui_test_page_with_failing_schema( 'checkout' );
+
+		$classes = $page->add_settings_ui_body_class( 'existing-class' );
+
+		$this->assertStringContainsString( 'woocommerce-settings-ui-page', $classes );
+		$this->assertStringNotContainsString( 'woocommerce-settings-ui-drill-down', $classes );
+	}
+
+	/**
+	 * @testdox Should not add the drill-down body class when script handle resolution falls back to legacy rendering.
+	 */
+	public function test_settings_ui_drill_down_body_class_is_not_added_when_script_handle_resolution_fails(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'test_gateway';
+		$current_tab     = 'checkout';
+		$page            = $this->get_settings_ui_test_page_with_failing_script_handles( 'checkout' );
+
+		$classes = $page->add_settings_ui_body_class( 'existing-class' );
+
+		$this->assertStringContainsString( 'woocommerce-settings-ui-page', $classes );
+		$this->assertStringNotContainsString( 'woocommerce-settings-ui-drill-down', $classes );
 	}
 
 	/**
@@ -649,15 +721,18 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	/**
 	 * Build a settings page whose settings UI adapter cannot provide script handles.
 	 *
+	 * @param string $page_id Page id.
 	 * @return \WC_Settings_Page
 	 */
-	private function get_settings_ui_test_page_with_failing_script_handles(): \WC_Settings_Page {
-		return new class() extends \WC_Settings_Page {
+	private function get_settings_ui_test_page_with_failing_script_handles( string $page_id = 'settings_ui_flag_test' ): \WC_Settings_Page {
+		return new class( $page_id ) extends \WC_Settings_Page {
 			/**
 			 * Constructor.
+			 *
+			 * @param string $page_id Page id.
 			 */
-			public function __construct() {
-				$this->id    = 'settings_ui_flag_test';
+			public function __construct( string $page_id ) {
+				$this->id    = $page_id;
 				$this->label = 'Settings UI flag test';
 			}
 
@@ -675,7 +750,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 					 * @return array
 					 */
 					public function get_script_handles( string $section_id ): array {
-						if ( 'advanced' === $section_id ) {
+						if ( '' !== $section_id ) {
 							throw new \RuntimeException( 'Unable to load extension script handles.' );
 						}
 
@@ -705,15 +780,18 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	/**
 	 * Build a settings page whose settings UI adapter cannot provide a schema.
 	 *
+	 * @param string $page_id Page id.
 	 * @return \WC_Settings_Page
 	 */
-	private function get_settings_ui_test_page_with_failing_schema(): \WC_Settings_Page {
-		return new class() extends \WC_Settings_Page {
+	private function get_settings_ui_test_page_with_failing_schema( string $page_id = 'settings_ui_flag_test' ): \WC_Settings_Page {
+		return new class( $page_id ) extends \WC_Settings_Page {
 			/**
 			 * Constructor.
+			 *
+			 * @param string $page_id Page id.
 			 */
-			public function __construct() {
-				$this->id    = 'settings_ui_flag_test';
+			public function __construct( string $page_id ) {
+				$this->id    = $page_id;
 				$this->label = 'Settings UI flag test';
 			}
 
@@ -731,7 +809,7 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 					 * @return array
 					 */
 					public function get_schema( string $section_id ): array {
-						if ( 'advanced' === $section_id ) {
+						if ( '' !== $section_id ) {
 							throw new \RuntimeException( 'Unable to build settings UI schema.' );
 						}
 

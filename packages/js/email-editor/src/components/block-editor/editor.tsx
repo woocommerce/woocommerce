@@ -124,7 +124,7 @@ export function InnerEditor( {
 
 	const { removeEditorPanel } = useDispatch( editorStore );
 	useEffect( () => {
-		removeEditorPanel( 'post-status' );
+		void removeEditorPanel( 'post-status' );
 	}, [ removeEditorPanel ] );
 
 	const [ styles ] = useEmailCss();

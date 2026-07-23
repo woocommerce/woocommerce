@@ -30,7 +30,7 @@ export const useRemoveSavingFailedNotices = () => {
 						typeof notice.content === 'string' &&
 						savingFailedRegex.test( notice.content )
 					) {
-						dispatch( noticesStore ).removeNotice( notice.id );
+						void dispatch( noticesStore ).removeNotice( notice.id );
 					}
 				} );
 		} );

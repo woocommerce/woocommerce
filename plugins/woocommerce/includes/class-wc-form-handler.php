@@ -1131,21 +1131,17 @@ class WC_Form_Handler {
 					throw new Exception( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . __( 'Username is required.', 'woocommerce' ) );
 				}
 
-				// On multisite, ensure user exists on current site, if not add them before allowing login.
-				if ( is_multisite() ) {
-					$user_data = get_user_by( is_email( $creds['user_login'] ) ? 'email' : 'login', $creds['user_login'] );
-
-					if ( $user_data && ! is_user_member_of_blog( $user_data->ID, get_current_blog_id() ) ) {
-						add_user_to_blog( get_current_blog_id(), $user_data->ID, 'customer' );
-					}
-				}
-
 				// Perform the login.
 				$user = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), is_ssl() );
 
 				if ( is_wp_error( $user ) ) {
 					throw new Exception( $user->get_error_message() );
 				} else {
+
+					// On multisite, ensure user exists on current site, if not add them.
+					if ( is_multisite() && ! is_user_member_of_blog( $user->ID, get_current_blog_id() ) ) {
+						add_user_to_blog( get_current_blog_id(), $user->ID, 'customer' );
+					}
 
 					if ( ! empty( $_POST['redirect'] ) ) {
 						$redirect = wp_unslash( $_POST['redirect'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

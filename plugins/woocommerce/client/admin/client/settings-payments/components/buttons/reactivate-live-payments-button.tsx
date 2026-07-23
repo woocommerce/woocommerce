@@ -78,7 +78,9 @@ export const ReactivateLivePaymentsButton = ( {
 				// Note: Switching from test to live payments is tracked on the backend (the `provider_live_payments_enabled` event).
 
 				// Force the providers to be refreshed.
-				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
+				void invalidateResolutionForStoreSelector(
+					'getPaymentProviders'
+				);
 
 				setIsUpdating( false );
 			} )
