@@ -75,6 +75,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 *
 		 * Covers block checkout as well as classic. The automated scheduler is
 		 * scoped to `pending`.
+		 *
 		 * @see \Automattic\WooCommerce\Internal\AbandonedCartRecovery\Scheduler::get_eligible_statuses()
 		 *
 		 * @var string[]
