@@ -162,12 +162,6 @@ test.describe( 'Merchant → Checkout', () => {
 		admin,
 		editor,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-		await editor.openDocumentSettingsSidebar();
 		await editor.selectBlocks(
 			blockSelectorInEditor +
 				'  [data-type="woocommerce/checkout-terms-block"]'
