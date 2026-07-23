@@ -22,8 +22,8 @@ use WC_Order;
  * eligible-status set or is trashed/deleted, so a customer who completes
  * checkout before the delay elapses never receives the nudge. Eligibility runs
  * through the same `woocommerce_abandoned_cart_recovery_eligible_statuses`
- * filter the send/manual paths use, with a default scoped to `pending` — see
- * `get_eligible_statuses()`.
+ * filter the send/manual paths use, with a default scoped to `pending` —
+ * {@see get_eligible_statuses()}.
  *
  * Per-order idempotency is enforced two ways: a scheduled-at meta key blocks
  * re-scheduling for the same order, and the trigger-time send gate refuses to
