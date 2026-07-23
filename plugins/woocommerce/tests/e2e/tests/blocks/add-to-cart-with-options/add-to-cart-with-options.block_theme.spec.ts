@@ -814,15 +814,73 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		requestUtils,
 	} ) => {
 		// Make Hoodie with Logo to be sold individually.
-		const cliOutput = await wpCLI(
-			`post list --post_type=product --field=ID --name="Hoodie with Logo" --format=ids`
-		);
-		const hoodieWithLogoProductId = cliOutput.stdout.match( /\d+/g )?.pop();
-		await wpCLI(
-			`wc product update ${ hoodieWithLogoProductId } --sold_individually=true --user=1`
-		);
+		type ProductResponse = {
+			id: number;
+			name: string;
+			slug: string;
+			type: string;
+			status: string;
+			catalog_visibility: string;
+			sku: string;
+			purchasable: boolean;
+			in_stock: boolean;
+			sold_individually: boolean;
+		};
+		const hoodieProducts = await requestUtils.rest< ProductResponse[] >( {
+			path: 'wc/v2/products?slug=hoodie-with-logo',
+		} );
+		const hoodieWithLogoProduct = Array.isArray( hoodieProducts )
+			? hoodieProducts[ 0 ]
+			: undefined;
+		if (
+			! Array.isArray( hoodieProducts ) ||
+			hoodieProducts.length !== 1 ||
+			! hoodieWithLogoProduct ||
+			! Number.isInteger( hoodieWithLogoProduct.id ) ||
+			hoodieWithLogoProduct.id <= 0 ||
+			hoodieWithLogoProduct.name !== 'Hoodie with Logo' ||
+			hoodieWithLogoProduct.slug !== 'hoodie-with-logo' ||
+			hoodieWithLogoProduct.type !== 'simple' ||
+			hoodieWithLogoProduct.status !== 'publish' ||
+			hoodieWithLogoProduct.catalog_visibility !== 'visible' ||
+			hoodieWithLogoProduct.sku !== 'woo-hoodie-with-logo' ||
+			hoodieWithLogoProduct.purchasable !== true ||
+			hoodieWithLogoProduct.in_stock !== true ||
+			hoodieWithLogoProduct.sold_individually !== false
+		) {
+			throw new Error(
+				`Failed to find the expected baseline Hoodie with Logo product through REST: ${ JSON.stringify(
+					hoodieProducts
+				) }`
+			);
+		}
+
+		const updatedProduct = await requestUtils.rest< ProductResponse >( {
+			method: 'POST',
+			path: `wc/v2/products/${ hoodieWithLogoProduct.id }`,
+			data: { sold_individually: true },
+		} );
+		if (
+			updatedProduct.id !== hoodieWithLogoProduct.id ||
+			updatedProduct.name !== 'Hoodie with Logo' ||
+			updatedProduct.slug !== 'hoodie-with-logo' ||
+			updatedProduct.type !== 'simple' ||
+			updatedProduct.status !== 'publish' ||
+			updatedProduct.catalog_visibility !== 'visible' ||
+			updatedProduct.sku !== 'woo-hoodie-with-logo' ||
+			updatedProduct.purchasable !== true ||
+			updatedProduct.in_stock !== true ||
+			updatedProduct.sold_individually !== true
+		) {
+			throw new Error(
+				`Failed to update the expected Hoodie with Logo product through REST: ${ JSON.stringify(
+					updatedProduct
+				) }`
+			);
+		}
 
 		await pageObject.updateSingleProductTemplate();
 
