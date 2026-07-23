@@ -430,6 +430,38 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It canonicalizes float option values with the PHP string cast.
+	 */
+	public function test_canonicalize_option_values_stringifies_float_values(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_option_values' );
+
+		$schema = SettingsUISchema::canonicalize_option_values(
+			$this->get_native_schema_with_field(
+				array(
+					'id'      => 'acme_rate',
+					'type'    => 'select',
+					'value'   => 1.5,
+					'options' => array(
+						array(
+							'label' => 'Half',
+							'value' => 0.5,
+						),
+						array(
+							'label' => 'One and a half',
+							'value' => 1.5,
+						),
+					),
+				)
+			)
+		);
+
+		$field = $schema['groups']['main']['fields'][0];
+
+		$this->assertSame( '1.5', $field['value'] );
+		$this->assertSame( array( '0.5', '1.5' ), array_column( $field['options'], 'value' ), 'Float option values should use the PHP string cast, matching stored values.' );
+	}
+
+	/**
 	 * @testdox It canonicalizes scalar members of a multiselect value list.
 	 */
 	public function test_canonicalize_option_values_stringifies_value_lists(): void {
