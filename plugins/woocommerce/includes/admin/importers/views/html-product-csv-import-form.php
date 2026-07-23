@@ -98,7 +98,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						} else {
 							?>
 							<div class="notice notice-warning inline">
-								<p><?php esc_html_e( 'Requires the mbstring PHP extension, which is not available on your server. Files will be treated as UTF-8, so characters in other encodings may be removed.', 'woocommerce' ); ?></p>
+								<p><?php esc_html_e( 'Your server does not support the mbstring PHP extension, so the file will be treated as UTF-8. Characters in other encodings may be removed.', 'woocommerce' ); ?></p>
 							</div>
 							<?php
 						}
