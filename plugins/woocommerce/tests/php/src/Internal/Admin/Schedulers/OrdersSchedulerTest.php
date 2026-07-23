@@ -574,10 +574,11 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'wc-trash', $status_trashed );
 
 		// Untrash the order — reload since delete() cleared the in-memory ID.
-		$order       = wc_get_order( $order_id );
-		$order_store = \WC_Data_Store::load( 'order' );
-		if ( method_exists( $order_store, 'untrash_order' ) ) {
-			$order_store->untrash_order( $order );
+		// WC_Data_Store proxies via __call, so method_exists() can't detect
+		// untrash_order; route by the authoritative storage mode instead.
+		$order = wc_get_order( $order_id );
+		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order->get_data_store()->untrash_order( $order );
 		} else {
 			wp_untrash_post( $order_id );
 		}
