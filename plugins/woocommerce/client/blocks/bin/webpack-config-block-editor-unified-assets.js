@@ -3,7 +3,6 @@
  */
 const path = require( 'path' );
 const { omit } = require( 'lodash' );
-const glob = require( 'glob' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
 
 /**
@@ -110,26 +109,20 @@ const getUnifiedEditorPackageAliases = () => ( {
 	),
 } );
 
-const addEditorBundleResourceQuery = ( filePath ) =>
-	`${ filePath }?editor-bundle`;
-
+/**
+ * Reuse the established styling entry graph so the unified bundle includes
+ * transitive and nonstandard SCSS imports as the legacy per-block build does.
+ *
+ * @param {string[]} exclude Entry names to exclude.
+ * @return {Object} Unified styling entries.
+ */
 const getUnifiedEditorStyleEntries = ( exclude = [] ) =>
 	omit(
 		{
 			'wc-block-library-style-source': [
-				'./assets/css/style.scss',
-				'./assets/css/editor.scss',
-				...glob.sync( './assets/js/**/{style,editor}.scss', {
-					dotRelative: true,
-				} ),
-				...glob.sync( './packages/**/style.scss', {
-					dotRelative: true,
-					ignore: './packages/**/stories/**',
-				} ),
-			].map( addEditorBundleResourceQuery ),
-			'interactivity-editor-styles': Object.values( editorStyleEntries )
-				.flat()
-				.map( addEditorBundleResourceQuery ),
+				...Object.values( getEntryConfig( 'styling', exclude ) ).flat(),
+				...Object.values( editorStyleEntries ).flat(),
+			],
 		},
 		exclude
 	);
@@ -237,21 +230,13 @@ const getUnifiedStylingConfig = ( options = {} ) => {
 			splitChunks: {
 				...stylingConfig.optimization.splitChunks,
 				cacheGroups: {
-					...stylingConfig.optimization.splitChunks.cacheGroups,
+					// JavaScript is traversed only to discover stylesheet imports.
+					// Do not emit the inherited JavaScript split chunks.
+					default: false,
+					defaultVendors: false,
 					editorStyle: {
 						test: ( module = {} ) => {
-							if ( ! module.type.includes( 'css' ) ) {
-								return false;
-							}
-
-							const moduleIdentifier =
-								typeof module.identifier === 'function'
-									? module.identifier()
-									: '';
-
-							return moduleIdentifier.includes(
-								'?editor-bundle'
-							);
+							return module.type.includes( 'css' );
 						},
 						name: UNIFIED_EDITOR_STYLE_HANDLE,
 						chunks: 'all',
