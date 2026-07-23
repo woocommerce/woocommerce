@@ -346,6 +346,7 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 
 		// The row wraps (inline-block divs) rather than staying a single non-wrapping table row.
 		$this->assertStringContainsString( '<div class="layout-flex-item"', $output );
+		$this->assertStringContainsString( 'display:inline-block', $output );
 		$this->assertStringNotContainsString( '<td class="layout-flex-item"', $output );
 		// The explicit-width button keeps its computed width in the wrapped layout.
 		$this->assertStringContainsString( 'width:312px', $output );
