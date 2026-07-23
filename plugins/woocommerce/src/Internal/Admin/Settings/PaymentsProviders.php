@@ -1264,6 +1264,7 @@ class PaymentsProviders {
 		$this->payment_gateways_cache             = array();
 		$this->payment_gateways_for_display_cache = array();
 		wp_cache_delete( self::GATEWAY_DETAILS_REQUEST_CACHE_KEY, self::GATEWAY_DETAILS_REQUEST_CACHE_GROUP );
+		// The Payments service owns and also clears this cache; deleting it here keeps direct callers of this service from reading stale provider lists.
 		wp_cache_delete( self::PROVIDER_LISTS_REQUEST_CACHE_KEY, self::PROVIDER_LISTS_REQUEST_CACHE_GROUP );
 	}
 
