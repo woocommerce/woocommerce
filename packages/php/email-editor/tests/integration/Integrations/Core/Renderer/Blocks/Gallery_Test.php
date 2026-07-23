@@ -109,6 +109,37 @@ class Gallery_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * The gallery wrapper table must not carry an `align="left"`/`align="right"` attribute: those
+	 * render as `float` in email clients, pulling the gallery out of normal flow so the following
+	 * block (e.g. a heading) fails to clear it and loses its vertical gap. Horizontal alignment must
+	 * instead come from the `text-align` CSS declaration, which keeps the gallery in normal flow.
+	 */
+	public function testItDoesNotFloatWrapperTableWithAlignAttribute(): void {
+		$rendered = $this->gallery_renderer->render( '', $this->parsed_gallery, $this->rendering_context );
+
+		// Locate the gallery wrapper table by its class. Parsing the tag with WP_HTML_Tag_Processor is
+		// more robust than matching the raw HTML string, and matches the convention used elsewhere here.
+		$processor = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue(
+			$processor->next_tag(
+				array(
+					'tag_name'   => 'table',
+					'class_name' => 'email-block-gallery',
+				)
+			),
+			'Expected a gallery wrapper table with the email-block-gallery class.'
+		);
+
+		// No float-triggering align attribute on the wrapper table ( get_attribute() is null when absent ).
+		$this->assertNull( $processor->get_attribute( 'align' ) );
+
+		// Alignment is preserved via the text-align CSS declaration instead, keeping the block in normal flow.
+		$style = $processor->get_attribute( 'style' );
+		$this->assertIsString( $style );
+		$this->assertStringContainsString( 'text-align', $style );
+	}
+
+	/**
 	 * Test it handles different column counts
 	 */
 	public function testItHandlesDifferentColumnCounts(): void {

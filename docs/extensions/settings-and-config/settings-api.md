@@ -86,16 +86,16 @@ This will output your settings in the correct format.
 
 ## Saving your settings
 
-To have your settings save, add your class's `process_admin_options` method to the appropriate `_update_options_` hook. For example, payment gateways should use the payment gateway hook:
+To have your settings save, add your class's `process_admin_options` method to the appropriate `_update_options_` hook. The hook includes the gateway or shipping method ID. For example, payment gateways should use:
 
 ```php
-add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'process_admin_options' ) );
+add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 ```
 
-Other types of plugins have similar hooks:
+Shipping methods use:
 
 ```php
-add_action( 'woocommerce_update_options_shipping_methods', array( $this, 'process_admin_options' ) );
+add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
 ```
 
 ## Loading your settings

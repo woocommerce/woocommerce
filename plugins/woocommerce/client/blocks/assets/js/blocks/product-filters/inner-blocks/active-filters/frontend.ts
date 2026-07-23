@@ -46,7 +46,7 @@ const activeFiltersStore = {
 		removeAll: () => {
 			const context = getContext< ProductFiltersContext >();
 			context.activeFilters = [];
-			actions.navigate();
+			void actions.navigate();
 		},
 		remove: () => {
 			const { item } = getContext< RemovableItemContext >();
@@ -54,7 +54,7 @@ const activeFiltersStore = {
 				( filter ) =>
 					filter.value === item.value && filter.type === item.type
 			);
-			actions.navigate();
+			void actions.navigate();
 		},
 	},
 };

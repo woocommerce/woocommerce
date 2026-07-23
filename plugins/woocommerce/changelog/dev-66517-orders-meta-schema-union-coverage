@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add test coverage for the orders REST tax line item meta schema type union.
