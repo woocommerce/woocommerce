@@ -15,7 +15,7 @@ Each cycle has two named owners, listed on the parent tracking issue:
 * **Release lead** (engineering) - runs the release process end to end: builds, publishes, monitors, and executes the run-books.
 * **Product DRI** - the product-side counterpart. Joins the readiness review at RC and the go/no-go before stable, and owns the product read on open findings: what blocks the release, what waits for a point release, and what ships with a known-issues note.
 
-The release lead is assigned by rotation via the [Release: Assignment workflow](/docs/contribution/releases/workflows). The Product DRI is confirmed per cycle on the tracking issue.
+The release lead is assigned by rotation via the [Release: Assignment workflow](/docs/contribution/releases/workflows). The Product DRI is confirmed per cycle on the tracking issue: the release lead asks `@woo-core-release` in `#woo-core-releases`, and the group confirms the product-side owner for the release.
 
 ## Readiness review (at RC)
 
