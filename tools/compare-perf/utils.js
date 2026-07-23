@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-const fs = require('fs');
-const childProcess = require('child_process');
-const path = require('path');
-const chalk = require('chalk');
+const fs = require( 'fs' );
+const childProcess = require( 'child_process' );
+const path = require( 'path' );
+const chalk = require( 'chalk' );
 
 /**
  * Utility to run a child script
@@ -13,8 +13,8 @@ const chalk = require('chalk');
  * @param {string=} cwd    Working directory.
  * @param {Env=}    env    Additional environment variables to pass to the script.
  */
-function runShellScript(script, cwd, env = {}) {
-	return new Promise((resolve, reject) => {
+function runShellScript( script, cwd, env = {} ) {
+	return new Promise( ( resolve, reject ) => {
 		childProcess.exec(
 			script,
 			{
@@ -27,17 +27,17 @@ function runShellScript(script, cwd, env = {}) {
 					...env,
 				},
 			},
-			function (error, stdout, stderr) {
-				if (error) {
-					console.log(stdout); // Sometimes the error message is thrown via stdout.
-					console.log(stderr);
-					reject(error);
+			function ( error, stdout, stderr ) {
+				if ( error ) {
+					console.log( stdout ); // Sometimes the error message is thrown via stdout.
+					console.log( stderr );
+					reject( error );
 				} else {
-					resolve(true);
+					resolve( true );
 				}
 			}
 		);
-	});
+	} );
 }
 
 /**
@@ -45,9 +45,9 @@ function runShellScript(script, cwd, env = {}) {
  *
  * @param {string} fileName
  */
-function readJSONFile(fileName) {
-	const data = fs.readFileSync(fileName, 'utf8');
-	return JSON.parse(data);
+function readJSONFile( fileName ) {
+	const data = fs.readFileSync( fileName, 'utf8' );
+	return JSON.parse( data );
 }
 
 /**
@@ -62,19 +62,19 @@ async function askForConfirmation(
 	isDefault = true,
 	abortMessage = 'Aborting.'
 ) {
-	const inquirer = require('inquirer');
-	const { isReady } = await inquirer.prompt([
+	const inquirer = require( 'inquirer' );
+	const { isReady } = await inquirer.prompt( [
 		{
 			type: 'confirm',
 			name: 'isReady',
 			default: isDefault,
 			message,
 		},
-	]);
+	] );
 
-	if (!isReady) {
-		chalk.log(chalk.bold.red('\n' + abortMessage));
-		process.exit(1);
+	if ( ! isReady ) {
+		chalk.log( chalk.bold.red( '\n' + abortMessage ) );
+		process.exit( 1 );
 	}
 }
 
@@ -85,16 +85,16 @@ async function askForConfirmation(
  *
  * @return {string[]} An array of file paths.
  */
-function getFilesFromDir(dir) {
-	if (!fs.existsSync(dir)) {
-		console.log('Directory does not exist: ', dir);
+function getFilesFromDir( dir ) {
+	if ( ! fs.existsSync( dir ) ) {
+		console.log( 'Directory does not exist: ', dir );
 		return [];
 	}
 
 	return fs
-		.readdirSync(dir, { withFileTypes: true })
-		.filter((dirent) => dirent.isFile())
-		.map((dirent) => path.join(dir, dirent.name));
+		.readdirSync( dir, { withFileTypes: true } )
+		.filter( ( dirent ) => dirent.isFile() )
+		.map( ( dirent ) => path.join( dir, dirent.name ) );
 }
 
 /**
@@ -104,11 +104,11 @@ function getFilesFromDir(dir) {
  * @param {any}    msg    Message to log.
  * @param {...any} args   Rest of the arguments to pass to console.log.
  */
-function logAtIndent(indent, msg, ...args) {
+function logAtIndent( indent, msg, ...args ) {
 	const prefix = indent === 0 ? '▶ ' : '> ';
 	const newline = indent === 0 ? '\n' : '';
 	return console.log(
-		newline + '    '.repeat(indent) + prefix + msg,
+		newline + '    '.repeat( indent ) + prefix + msg,
 		...args
 	);
 }
@@ -120,8 +120,8 @@ function logAtIndent(indent, msg, ...args) {
  *
  * @return {string} Sanitized branch name.
  */
-function sanitizeBranchName(branch) {
-	return branch.replace(/[^a-zA-Z0-9-]/g, '-');
+function sanitizeBranchName( branch ) {
+	return branch.replace( /[^a-zA-Z0-9-]/g, '-' );
 }
 
 module.exports = {
