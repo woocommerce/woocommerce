@@ -513,9 +513,13 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value     = $value['value'];
 						$disabled_values  = $value['disabled'] ?? array();
 						$show_desc_at_end = $value['desc_at_end'] ?? false;
-						// Only build a title ID when the field has an ID, so that multiple ID-less radio
-						// fields on the same page do not share a single "-title" ID and cross-label each other.
-						$radio_title_id = '' !== $value['id'] ? $value['id'] . '-title' : '';
+						// Only build a title ID when the field has a usable string ID, so that multiple
+						// ID-less radio fields on the same page do not share a single "-title" ID and
+						// cross-label each other. Extensions can pass a non-string id (e.g. false, an
+						// array, or an object); normalize it first so false and empty values collapse to
+						// no ID rather than a shared "-title", and non-scalars never reach string concat.
+						$normalized_id  = is_scalar( $value['id'] ) ? (string) $value['id'] : '';
+						$radio_title_id = '' !== $normalized_id ? $normalized_id . '-title' : '';
 
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
