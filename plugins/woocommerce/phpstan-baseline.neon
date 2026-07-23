@@ -47656,12 +47656,6 @@ parameters:
 			path: src/Admin/PageController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\PageController\:\:get_current_page\(\) should return array\|bool but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/PageController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\PageController\:\:get_current_screen_id\(\) should return string but returns bool\|string\.$#'
 			identifier: return.type
 			count: 2
@@ -47730,12 +47724,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\PageController\:\:remove_app_entry_page_menu_item\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/PageController.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Admin\\PageController\:\:\$current_page \(string\) does not accept false\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/Admin/PageController.php
 
