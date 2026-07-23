@@ -32,6 +32,22 @@ class WC_Admin_Menus {
 	const HIDE_CSS_CLASS = 'hide-if-js';
 
 	/**
+	 * Cached hidden meta box IDs from the first read of this request.
+	 *
+	 * The metaboxhidden_nav-menus option is read more than once per page load:
+	 * once before admin_head fires and again inside do_accordion_sections()
+	 * after admin_head-nav-menus.php has fired. Memoizing the computed list
+	 * keeps the value stable across those reads, so a box registered late
+	 * (e.g. the "WooCommerce endpoints" box) is not swept into the hidden list
+	 * on the second read. This mirrors how core persists the snapshot before
+	 * admin_head, and fixes the general case for third-party boxes too.
+	 *
+	 * @since 11.1.0
+	 * @var string[]|null
+	 */
+	private $last_computed_hidden_boxes = null;
+
+	/**
 	 * Hook in tabs.
 	 */
 	public function __construct() {
@@ -439,12 +455,12 @@ class WC_Admin_Menus {
 	 * taxonomy boxes, so WP's existing-user guard short-circuits and leaves
 	 * them visible.
 	 *
-	 * The hidden list is recomputed on each Menus page visit until the user
-	 * saves a preference, because we are bypassing the core path that would
-	 * normally persist it. This is intentional and the cost is negligible
-	 * since it only runs on this admin screen.
+	 * The hidden list is computed once per request and cached on the instance,
+	 * so every read of the option within the same page load returns the same
+	 * value. This keeps late-registered boxes out of the hidden list and restores
+	 * the snapshot timing core relied on before admin_head.
 	 *
-	 * @since 11.0.0
+	 * @since 11.1.0
 	 *
 	 * @return void
 	 */
@@ -457,9 +473,10 @@ class WC_Admin_Menus {
 	 *
 	 * Only applies when the user has no saved preference for the nav-menus
 	 * screen. Returns a list of every registered nav-menus meta box except the
-	 * four core visible boxes and the three WC taxonomy boxes.
+	 * four core visible boxes, the "WooCommerce endpoints" box, and the WC
+	 * taxonomy boxes. Product Brands is visible only when its taxonomy exists.
 	 *
-	 * @since 11.0.0
+	 * @since 11.1.0
 	 *
 	 * @param mixed   $result Value for the user's option, or false if not set.
 	 * @param string  $option Name of the option being retrieved.
@@ -477,6 +494,10 @@ class WC_Admin_Menus {
 			return $result;
 		}
 
+		if ( null !== $this->last_computed_hidden_boxes ) {
+			return $this->last_computed_hidden_boxes;
+		}
+
 		$visible = array(
 			'add-post-type-page',
 			'add-post-type-post',
@@ -484,6 +505,7 @@ class WC_Admin_Menus {
 			'add-category',
 			'add-product_cat',
 			'add-product_tag',
+			'woocommerce_endpoints_nav_link',
 		);
 
 		if ( taxonomy_exists( 'product_brand' ) ) {
@@ -500,6 +522,8 @@ class WC_Admin_Menus {
 				}
 			}
 		}
+
+		$this->last_computed_hidden_boxes = $hidden;
 
 		return $hidden;
 	}

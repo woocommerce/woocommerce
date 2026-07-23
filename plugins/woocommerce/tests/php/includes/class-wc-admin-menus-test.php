@@ -128,6 +128,7 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 		$this->assertNotContains( 'add-product_cat', $hidden );
 		$this->assertNotContains( 'add-product_tag', $hidden );
 		$this->assertNotContains( 'add-product_brand', $hidden );
+		$this->assertNotContains( 'woocommerce_endpoints_nav_link', $hidden );
 	}
 
 	/**
@@ -190,5 +191,37 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 		$this->assertContains( 'add-product_brand', $hidden );
 		$this->assertNotContains( 'add-product_cat', $hidden );
 		$this->assertNotContains( 'add-product_tag', $hidden );
+	}
+
+	/**
+	 * A box registered after admin_head-nav-menus.php fires (the "WooCommerce
+	 * endpoints" box) must stay visible. The option is read twice on the same
+	 * page load: once before admin_head and again inside do_accordion_sections()
+	 * after admin_head-nav-menus.php. Memoization keeps the hidden list stable
+	 * across both reads so the late-registered box is not swept into it.
+	 */
+	public function test_filter_keeps_endpoints_box_visible_after_late_registration() {
+		$GLOBALS['wp_meta_boxes'] = $this->get_nav_meta_boxes();  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$user_id                  = $this->factory->user->create();
+
+		$menus = new WC_Admin_Menus();
+		$menus->register_default_nav_menu_meta_boxes_filter();
+
+		// First read happens before admin_head-nav-menus.php, so the endpoints box is not yet registered.
+		$hidden_before = get_user_option( 'metaboxhidden_nav-menus', $user_id );
+
+		// Simulate admin_head-nav-menus.php registering the WooCommerce endpoints box.
+		$GLOBALS['wp_meta_boxes']['nav-menus']['side']['low']['woocommerce_endpoints_nav_link'] = array( // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			'id'    => 'woocommerce_endpoints_nav_link',
+			'title' => 'WooCommerce endpoints',
+		);
+
+		// Second read happens inside do_accordion_sections(), after the box was registered.
+		$hidden_after = get_user_option( 'metaboxhidden_nav-menus', $user_id );
+
+		$this->assertIsArray( $hidden_before );
+		$this->assertIsArray( $hidden_after );
+		$this->assertSame( $hidden_before, $hidden_after );
+		$this->assertNotContains( 'woocommerce_endpoints_nav_link', $hidden_after );
 	}
 }
