@@ -20,16 +20,19 @@ const lowestRating = [ ...allReviews ].sort(
 
 const BLOCK_NAME = 'woocommerce/reviews-by-category';
 
-test.describe( `${ BLOCK_NAME } Block`, () => {
-	test.beforeEach( async ( { admin, editor } ) => {
-		await admin.createNewPost();
-		await editor.insertBlock( { name: BLOCK_NAME } );
-	} );
+const DEFAULT_BLOCK_CONTENT = `<!-- wp:woocommerce/reviews-by-category -->
+<div class="wp-block-woocommerce-reviews-by-category wc-block-reviews-by-category has-image has-name has-date has-rating has-content has-product-name" data-image-type="reviewer" data-orderby="most-recent" data-reviews-on-page-load="10" data-reviews-on-load-more="10" data-show-load-more="true" data-show-orderby="true" data-category-ids=""></div>
+<!-- /wp:woocommerce/reviews-by-category -->`;
 
+test.describe( `${ BLOCK_NAME } Block`, () => {
 	test( 'block can be inserted and it successfully renders a review in the editor and the frontend', async ( {
+		admin,
 		page,
 		editor,
 	} ) => {
+		await admin.createNewPost();
+		await editor.insertBlock( { name: BLOCK_NAME } );
+
 		const blockLocator = await editor.getBlockByName( BLOCK_NAME );
 		const categoryCheckbox = blockLocator.getByRole( 'checkbox', {
 			name: 'Clothing',
@@ -56,11 +59,79 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 	test( 'should sort reviews by most recent, highest, and lowest ratings', async ( {
 		page,
 		frontendUtils,
-		editor,
+		requestUtils,
 	} ) => {
 		const cleanUrl =
 			await test.step( 'sorts by most recent review by default and can sort by highest rating', async () => {
-				await editor.publishAndVisitPost();
+				type PostResponse = {
+					id: number;
+					type: string;
+					status: string;
+					slug: string;
+					link: string;
+					title: { raw: string };
+					content: { raw: string; rendered: string };
+					generated_slug: string;
+				};
+				const post = await requestUtils.rest< PostResponse >( {
+					method: 'POST',
+					path: 'wp/v2/posts?context=edit',
+					data: {
+						status: 'publish',
+						content: DEFAULT_BLOCK_CONTENT,
+					},
+				} );
+				const configuredBaseUrl = process.env.BASE_URL;
+				if ( ! configuredBaseUrl ) {
+					throw new Error(
+						'BASE_URL must be configured for this test'
+					);
+				}
+				const expectedQueryPostUrl = new URL(
+					`?p=${ post.id }`,
+					configuredBaseUrl
+				);
+				const expectedCanonicalPostUrl = new URL(
+					`/${ post.slug }/`,
+					configuredBaseUrl
+				);
+				let postUrl: URL;
+				try {
+					postUrl = new URL( post.link );
+				} catch {
+					throw new Error(
+						`REST created a post with an invalid link: ${ JSON.stringify(
+							post
+						) }`
+					);
+				}
+				if (
+					! Number.isInteger( post.id ) ||
+					post.id <= 0 ||
+					post.type !== 'post' ||
+					post.status !== 'publish' ||
+					post.slug !== post.generated_slug ||
+					! new RegExp( `^${ post.id }(?:-\\d+)?$` ).test(
+						post.slug
+					) ||
+					post.title.raw !== '' ||
+					post.content.raw !== DEFAULT_BLOCK_CONTENT ||
+					! post.content.rendered.includes(
+						'data-block-name="woocommerce/reviews-by-category"'
+					) ||
+					! post.content.rendered.includes(
+						'class="wp-block-woocommerce-reviews-by-category wc-block-reviews-by-category has-image has-name has-date has-rating has-content has-product-name"'
+					) ||
+					postUrl.href !== expectedCanonicalPostUrl.href
+				) {
+					throw new Error(
+						`REST did not create the expected Reviews by Category post: ${ JSON.stringify(
+							post
+						) }`
+					);
+				}
+
+				await page.goto( expectedQueryPostUrl.href );
 				const publishedPostUrl = page.url();
 
 				const block = await frontendUtils.getBlockByName( BLOCK_NAME );
