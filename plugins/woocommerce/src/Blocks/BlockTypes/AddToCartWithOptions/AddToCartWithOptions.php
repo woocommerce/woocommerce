@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 
 /**
  * AddToCartWithOptions class.
@@ -103,7 +104,21 @@ class AddToCartWithOptions extends AbstractBlock {
 		if ( is_admin() ) {
 			$this->asset_data_registry->add( 'productTypes', wc_get_product_types() );
 			$this->asset_data_registry->add( 'addToCartWithOptionsTemplatePartIds', $this->get_template_part_ids() );
+			$this->asset_data_registry->add( 'wishlistFeatureEnabled', $this->is_wishlist_enabled() );
 		}
+	}
+
+	/**
+	 * Whether the wishlist feature is enabled.
+	 *
+	 * Gates the render-time injection of the Add to Wishlist Button block (and
+	 * its editor preview), so the button only appears while the (experimental,
+	 * feature-flagged) wishlist feature is on.
+	 *
+	 * @return bool True if the wishlist feature flag is enabled, false otherwise.
+	 */
+	private function is_wishlist_enabled(): bool {
+		return wc_get_container()->get( ShopperListsController::class )->is_enabled( 'wishlist' );
 	}
 
 	/**
@@ -509,6 +524,15 @@ class AddToCartWithOptions extends AbstractBlock {
 				do_action( 'woocommerce_after_add_to_cart_form' );
 
 				$hooks_after = ob_get_clean();
+			}
+
+			// Add to Wishlist Button: when the wishlist feature is enabled,
+			// inject the button as the last child of the template part so it
+			// renders inside the form's iAPI scope (where it can read the
+			// selected variation/attributes). The markup is injected at render
+			// time only, never persisted to the shipped template parts.
+			if ( $this->is_wishlist_enabled() ) {
+				$template_part_contents .= "\n<!-- wp:woocommerce/add-to-wishlist-button /-->";
 			}
 
 			// Because we are printing the template part using do_blocks, context from the outside is lost.

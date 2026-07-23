@@ -1,12 +1,13 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use WP_Block;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
-use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
-use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
+use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
+use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use WP_Block;
 
 /**
  * AbstractBlock class.
@@ -183,11 +184,15 @@ abstract class AbstractBlock {
 	 * @param string[] $chunks Array of chunk names.
 	 */
 	protected function register_chunk_translations( $chunks ) {
+		$script_handle = $this->get_block_type_script( 'handle' );
+		if ( ! is_string( $script_handle ) || '' === $script_handle ) {
+			return;
+		}
 		foreach ( $chunks as $chunk ) {
 			$handle = 'wc-blocks-' . $chunk . '-chunk';
 			$this->asset_api->register_script( $handle, $this->asset_api->get_block_asset_build_path( $chunk ), [], true );
 			wp_add_inline_script(
-				$this->get_block_type_script( 'handle' ),
+				$script_handle,
 				wp_scripts()->print_translations( $handle, false ),
 				'before'
 			);
@@ -443,8 +448,8 @@ abstract class AbstractBlock {
 				'wordCountType' => _x( 'words', 'Word count type. Do not translate!', 'woocommerce' ),
 			];
 			if ( is_admin() && ! WC()->is_rest_api_request() ) {
-				$product_counts     = wp_count_posts( 'product' );
-				$published_products = isset( $product_counts->publish ) ? $product_counts->publish : 0;
+				$product_counts     = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
+				$published_products = $product_counts[ ProductStatus::PUBLISH ] ?? 0;
 				$wc_blocks_config   = array_merge(
 					$wc_blocks_config,
 					[

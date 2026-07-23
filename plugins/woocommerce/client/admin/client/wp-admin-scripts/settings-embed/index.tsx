@@ -6,6 +6,7 @@
  * External dependencies
  */
 import { createRoot } from '@wordpress/element';
+import '@wordpress/theme/design-tokens.css';
 
 /**
  * Internal dependencies
@@ -78,9 +79,8 @@ const registerSlotFills = () => {
 	registerPaymentsSettingsBannerFill();
 
 	const features = window.wcAdminFeatures;
-	if ( features?.[ 'launch-your-store' ] === true ) {
-		registerSiteVisibilitySlotFill();
-	}
+
+	registerSiteVisibilitySlotFill();
 
 	if ( isFeatureEnabled( 'blueprint' ) ) {
 		registerBlueprintSlotfill();

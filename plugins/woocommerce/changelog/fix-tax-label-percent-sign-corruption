@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix tax rate labels containing percent signs (e.g. "%15 KDV" in Turkish locale) being corrupted when stored on order items.

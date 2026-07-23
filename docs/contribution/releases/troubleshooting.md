@@ -8,6 +8,11 @@ sidebar_position: 7
 
 This page provides guidance for troubleshooting and recovering from issues that may arise during the WooCommerce release process. It covers common scenarios, recommended actions, and best practices to help ensure releases are handled smoothly and any problems are resolved efficiently.
 
+:::tip
+
+`@woo-core-release` in `#woo-core-releases` is the point of contact for release-process questions in general, not just the scenarios below. Use it for escalations, second opinions, or anything this doc doesn't answer.
+
+:::
 
 ## Scenarios / FAQ
 
@@ -25,7 +30,7 @@ During the release process, you may encounter CI test failures on release-relate
 
 1. **Identify the cause**: Check if the failing tests pass on trunk. If they do, the fix likely needs to be backported.
 2. **Backport test fixes**: If possible, [backport](/docs/contribution/releases/backporting) the relevant test fixes from trunk to the release branch, then re-run the CI workflow.
-3. **Handle complex cases**: If backporting isn't possible due to dependencies or the cause isn't clear, document what you've found and ask for help in the release Slack channel. The "Heart of Gold - Flux" team can assist with resolving CI issues that block release work.
+3. **Handle complex cases**: If backporting isn't possible due to dependencies or the cause isn't clear, document what you've found and ask for help in the release Slack channel.
 
 ### Something looks wrong in the final release ZIP. Can I start over?
 

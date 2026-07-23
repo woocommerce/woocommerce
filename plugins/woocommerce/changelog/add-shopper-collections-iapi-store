@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Wire the Shopper Collection (Saved-for-later) block to the shopper-lists Store API via a private iAPI store, with server-side rendering of saved items, optimistic remove, and Move-to-cart for simple products.

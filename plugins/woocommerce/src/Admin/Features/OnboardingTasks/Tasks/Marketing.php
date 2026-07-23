@@ -2,7 +2,6 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
 /**
@@ -57,6 +56,24 @@ class Marketing extends Task {
 	}
 
 	/**
+	 * Contextual image URL.
+	 *
+	 * @return string
+	 */
+	public function get_image_url() {
+		return WC()->plugin_url() . '/assets/images/task_list/sales-illustration.svg';
+	}
+
+	/**
+	 * Alt text for the contextual image.
+	 *
+	 * @return string
+	 */
+	public function get_image_alt() {
+		return __( 'Marketing illustration', 'woocommerce' );
+	}
+
+	/**
 	 * Title.
 	 *
 	 * @return string
@@ -92,7 +109,7 @@ class Marketing extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		return Features::is_enabled( 'remote-free-extensions' );
+		return true;
 	}
 
 	/**

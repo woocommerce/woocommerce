@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/date",
-	"version": "4.3.0",
+	"version": "5.0.0",
 	"description": "WooCommerce date utilities.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -41,8 +41,8 @@
 		"@types/d3-time-format": "^2.3.4",
 		"@wordpress/date": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
+		"date-fns-tz": "^3.2.0",
 		"moment": "^2.29.4",
-		"moment-timezone": "^0.5.43",
 		"qs": "^6.11.2"
 	},
 	"devDependencies": {
@@ -51,11 +51,12 @@
 		"@types/lodash": "^4.14.202",
 		"@types/node": "^24.1.0",
 		"@types/qs": "^6.9.10",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"d3-time-format": "^2.3.0",
-		"eslint": "^8.55.0",
+		"eslint": "^10.0.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",

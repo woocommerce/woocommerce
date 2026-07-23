@@ -55,17 +55,19 @@ export const disableWelcomeModal = async ( {
 	// Further info: https://github.com/woocommerce/woocommerce/pull/45856/
 	await page.waitForLoadState( 'domcontentloaded' );
 
-	const isWelcomeGuideActive = await page.evaluate( () =>
-		( window as unknown as WindowWithWp ).wp?.data
-			?.select( 'core/edit-post' )
-			?.isFeatureActive( 'welcomeGuide' )
+	const isWelcomeGuideActive = await page.evaluate(
+		() =>
+			( window as unknown as WindowWithWp ).wp?.data
+				?.select( 'core/edit-post' )
+				?.isFeatureActive( 'welcomeGuide' )
 	);
 
 	if ( isWelcomeGuideActive ) {
-		await page.evaluate( () =>
-			( window as unknown as WindowWithWp ).wp?.data
-				?.dispatch( 'core/edit-post' )
-				?.toggleFeature( 'welcomeGuide' )
+		await page.evaluate(
+			() =>
+				( window as unknown as WindowWithWp ).wp?.data
+					?.dispatch( 'core/edit-post' )
+					?.toggleFeature( 'welcomeGuide' )
 		);
 	}
 };
@@ -99,6 +101,13 @@ export const openEditorSettings = async ( {
  */
 export const getCanvas = async ( page: Page ): Promise< EditorCanvas > => {
 	const iframeLocator = page.locator( 'iframe[name="editor-canvas"]' );
+	await iframeLocator.waitFor( { state: 'attached' } ).catch( ( error ) => {
+		console.warn(
+			'The editor canvas iframe was not found. Falling back to the page context.',
+			error
+		);
+	} );
+
 	if ( ( await iframeLocator.count() ) > 0 ) {
 		return iframeLocator.contentFrame();
 	}

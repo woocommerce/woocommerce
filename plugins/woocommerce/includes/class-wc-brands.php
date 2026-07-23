@@ -78,9 +78,6 @@ class WC_Brands {
 		add_action( 'woocommerce_product_set_stock_status', array( $this, 'recount_after_stock_change' ) );
 		add_action( 'woocommerce_update_options_products_inventory', array( $this, 'recount_all_brands' ) );
 
-		// Product Editor compatibility.
-		add_action( 'woocommerce_layout_template_after_instantiation', array( $this, 'wc_brands_on_block_template_register' ), 10, 3 );
-
 		// Block theme integration.
 		add_filter( 'hooked_block_types', array( $this, 'hook_product_brand_block' ), 10, 4 );
 		add_filter( 'hooked_block_core/post-terms', array( $this, 'configure_product_brand_block' ), 10, 5 );
@@ -565,6 +562,14 @@ class WC_Brands {
 			return '';
 		}
 
+		$args['width']  = self::normalize_product_brand_shortcode_dimension( $args['width'] );
+		$args['height'] = self::normalize_product_brand_shortcode_dimension( $args['height'] );
+
+		if ( '' !== $args['width'] || '' !== $args['height'] ) {
+			$args['width']  = '' !== $args['width'] ? $args['width'] : 'auto';
+			$args['height'] = '' !== $args['height'] ? $args['height'] : 'auto';
+		}
+
 		ob_start();
 
 		foreach ( $brands as $brand ) {
@@ -576,11 +581,6 @@ class WC_Brands {
 			$args['thumbnail'] = $thumbnail;
 			$args['term']      = get_term_by( 'id', $brand, 'product_brand' );
 
-			if ( $args['width'] || $args['height'] ) {
-				$args['width']  = ! empty( $args['width'] ) ? $args['width'] : 'auto';
-				$args['height'] = ! empty( $args['height'] ) ? $args['height'] : 'auto';
-			}
-
 			wc_get_template(
 				'shortcodes/single-brand.php',
 				$args,
@@ -590,6 +590,18 @@ class WC_Brands {
 		}
 
 		return ob_get_clean();
+	}
+
+	/**
+	 * Normalize a product brand shortcode image dimension.
+	 *
+	 * @param mixed $dimension Shortcode dimension value.
+	 * @return string Normalized dimension.
+	 */
+	private static function normalize_product_brand_shortcode_dimension( $dimension ) {
+		$dimension = is_scalar( $dimension ) ? trim( (string) $dimension ) : '';
+
+		return is_numeric( $dimension ) ? $dimension . 'px' : $dimension;
 	}
 
 	/**
@@ -734,7 +746,7 @@ class WC_Brands {
 			'widgets/brand-thumbnails.php',
 			array(
 				'brands'        => $brands,
-				'columns'       => is_numeric( $args['columns'] ) ? intval( $args['columns'] ) : 4,
+				'columns'       => is_numeric( $args['columns'] ) ? max( 1, absint( $args['columns'] ) ) : 4,
 				'fluid_columns' => wp_validate_boolean( $args['fluid_columns'] ),
 			),
 			'woocommerce',
@@ -793,7 +805,7 @@ class WC_Brands {
 			'widgets/brand-thumbnails-description.php',
 			array(
 				'brands'  => $brands,
-				'columns' => $args['columns'],
+				'columns' => is_numeric( $args['columns'] ) ? max( 1, absint( $args['columns'] ) ) : 1,
 			),
 			'woocommerce',
 			WC()->plugin_path() . '/templates/brands/'
@@ -1096,35 +1108,6 @@ class WC_Brands {
 	function reset_layered_nav_counts_on_status_change( $new_status, $old_status, $post ) {
 		if ( $post->post_type === 'product' && $old_status !== $new_status ) {
 			$this->invalidate_wc_layered_nav_counts_cache();
-		}
-	}
-
-	/**
-	 * Add a new block to the template.
-	 *
-	 * @param string                 $template_id Template ID.
-	 * @param string                 $template_area Template area.
-	 * @param BlockTemplateInterface $template Template instance.
-	 */
-	public function wc_brands_on_block_template_register( $template_id, $template_area, $template ) {
-
-		if ( 'simple-product' === $template->get_id() ) {
-			$section = $template->get_section_by_id( 'product-catalog-section' );
-			if ( $section !== null ) {
-				$section->add_block(
-					array(
-						'id'         => 'woocommerce-brands-select',
-						'blockName'  => 'woocommerce/product-taxonomy-field',
-						'order'      => 15,
-						'attributes' => array(
-							'label'       => __( 'Brands', 'woocommerce-brands' ),
-							'createTitle' => __( 'Create new brand', 'woocommerce-brands' ),
-							'slug'        => 'product_brand',
-							'property'    => 'brands',
-						),
-					)
-				);
-			}
 		}
 	}
 

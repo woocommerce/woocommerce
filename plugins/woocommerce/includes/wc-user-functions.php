@@ -326,9 +326,14 @@ function wc_set_customer_auth_cookie( $customer_id ) {
  * @return int
  */
 function wc_update_new_customer_past_orders( $customer_id ) {
+	$customer = get_user_by( 'id', absint( $customer_id ) );
+
+	if ( ! $customer ) {
+		return 0;
+	}
+
 	$linked          = 0;
 	$complete        = 0;
-	$customer        = get_user_by( 'id', absint( $customer_id ) );
 	$customer_orders = wc_get_orders(
 		array(
 			'limit'    => -1,
@@ -439,7 +444,8 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		$cache_version = WC_Cache_Helper::get_transient_version( 'orders' );
 	}
 
-	$aggregation_version = 'v3'; // Update the version when modifying the aggregation implementation to ensure the cache is repopulated.
+	// Update the version when modifying the aggregation implementation to ensure the cache is repopulated.
+	$aggregation_version = 'v3';
 	$cache_group         = 'orders';
 	$cache_key           = 'wc_customer_bought_product_' . md5( $customer_email . '-' . $user_id . '-' . $use_lookup_tables . '-' . $aggregation_version );
 	$cache_value         = wp_cache_get( $cache_key, $cache_group );
@@ -737,9 +743,12 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 					$caps[] = 'do_not_allow';
 				} elseif ( wc_current_user_has_role( 'shop_manager' ) ) {
 					// Shop managers can only edit customer info.
-					$userdata                    = get_userdata( $args[0] );
+					$userdata = get_userdata( $args[0] );
+					if ( ! $userdata instanceof WP_User ) {
+						break;
+					}
 					$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-					if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
+					if ( ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
 						$caps[] = 'do_not_allow';
 					}
 				}
@@ -1052,8 +1061,11 @@ function wc_delete_user_data( $user_id ) {
 		)
 	);
 
-	// Clean up payment tokens.
-	$payment_tokens = WC_Payment_Tokens::get_customer_tokens( $user_id );
+	// Clean up payment tokens. Query without a limit so every token is removed, not just the
+	// customer-facing subset capped by `get_customer_tokens()`. Deliberately bypasses the
+	// `woocommerce_get_customer_payment_tokens` filter too: cleanup must not be narrowed by a
+	// display-oriented filter, and this matches the personal data eraser, which also omits it.
+	$payment_tokens = WC_Payment_Tokens::get_tokens( array( 'user_id' => $user_id ) );
 
 	foreach ( $payment_tokens as $payment_token ) {
 		$payment_token->delete();

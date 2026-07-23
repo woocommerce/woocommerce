@@ -21,6 +21,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersSta
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
 
 defined( 'ABSPATH' ) || exit;
@@ -335,6 +336,15 @@ class WC_Install {
 		'10.9.0'   => array(
 			'wc_update_1090_remove_task_list_reminder_bar_hidden_option',
 		),
+		'10.9.2'   => array(
+			'wc_update_10902_remove_deprecated_push_notifications_option',
+		),
+		'11.0.0'   => array(
+			'wc_update_1100_enable_point_of_sale_feature',
+		),
+		'11.1.0'   => array(
+			'wc_update_1110_delete_dashboard_outofstock_count_transient',
+		),
 	);
 
 	/**
@@ -373,7 +383,6 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'maybe_enable_hpos' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'add_coming_soon_option' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements_for_newly_installed' ), 20 );
-		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_abandoned_cart_recovery_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_analytics_scheduled_import' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_product_instance_caching_for_newly_installed' ), 20 );
@@ -747,18 +756,16 @@ class WC_Install {
 	}
 
 	/**
-	 * Check if all the base tables are present.
+	 * Get the names of any missing WooCommerce base tables.
 	 *
-	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
-	 * @param bool $execute       Whether to execute get_schema queries as well.
+	 * Unlike verify_base_tables(), this method has no side effects: it only inspects
+	 * the database and reports which required tables are missing.
 	 *
-	 * @return array List of queries.
+	 * @since 11.0.0
+	 *
+	 * @return string[] List of missing table names.
 	 */
-	public static function verify_base_tables( $modify_notice = true, $execute = false ) {
-		if ( $execute ) {
-			self::create_tables();
-		}
-
+	public static function get_missing_base_tables(): array {
 		$schema = self::get_schema();
 
 		$hpos_settings = filter_var_array(
@@ -777,14 +784,27 @@ class WC_Install {
 				->get_database_schema();
 		}
 
-		$missing_tables = wc_get_container()
+		return wc_get_container()
 			->get( DatabaseUtil::class )
 			->get_missing_tables( $schema );
+	}
+
+	/**
+	 * Check if all the base tables are present, updating the stored schema status accordingly.
+	 *
+	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
+	 * @param bool $execute       Whether to execute get_schema queries as well.
+	 *
+	 * @return string[] List of missing table names.
+	 */
+	public static function verify_base_tables( $modify_notice = true, $execute = false ) {
+		if ( $execute ) {
+			self::create_tables();
+		}
+
+		$missing_tables = self::get_missing_base_tables();
 
 		if ( 0 < count( $missing_tables ) ) {
-			if ( $modify_notice ) {
-				WC_Admin_Notices::add_notice( 'base_tables_missing' );
-			}
 			update_option( 'woocommerce_schema_missing_tables', $missing_tables );
 		} else {
 			if ( $modify_notice ) {
@@ -829,17 +849,31 @@ class WC_Install {
 	/**
 	 * Is this a brand new WC install?
 	 *
-	 * A brand new install has no version yet. Also treat empty installs as 'new'.
+	 * A brand-new installation has no version yet. Also treat empty installations as 'new'.
 	 *
-	 * @since  3.2.0
+	 * @since 11.0.0 returns false early for stores that are already live or have completed onboarding.
+	 * @since 3.2.0
+	 *
 	 * @return boolean
 	 */
 	public static function is_new_install() {
-		return is_null( get_option( 'woocommerce_version', null ) )
-			|| (
-				-1 === wc_get_page_id( 'shop' )
-				&& 0 === array_sum( (array) wp_count_posts( 'product' ) )
-			);
+		// Performance note: woocommerce_version is absent before the very first install routine completes.
+		if ( false === get_option( 'woocommerce_version' ) ) {
+			return true;
+		}
+
+		// Performance note: verify if the store is live. This option is auto-loaded, and verification is essentially free.
+		if ( 'no' === get_option( 'woocommerce_coming_soon', 'yes' ) ) {
+			return false;
+		}
+
+		// Performance note: verify if onboarding is complete. This option is auto-loaded, and verification is essentially free.
+		if ( in_array( 'setup', (array) get_option( 'woocommerce_task_list_completed_lists', array() ), true ) ) {
+			return false;
+		}
+
+		// Performance note: this is the original fallback. The store setup is incomplete, and even with a cold cache, we do not anticipate performance issues.
+		return -1 === wc_get_page_id( 'shop' ) && 0 === array_sum( wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' ) );
 	}
 
 	/**
@@ -1283,20 +1317,6 @@ class WC_Install {
 		update_option( 'woocommerce_email_improvements_first_enabled_at', gmdate( 'Y-m-d H:i:s' ) );
 		update_option( 'woocommerce_email_improvements_last_enabled_at', gmdate( 'Y-m-d H:i:s' ) );
 		update_option( 'woocommerce_email_improvements_enabled_count', 1 );
-	}
-
-	/**
-	 * Enable the abandoned cart recovery feature by default for new shops.
-	 *
-	 * Existing stores receiving this as a plugin update remain default-off and
-	 * must opt in via WooCommerce → Settings → Advanced → Features.
-	 *
-	 * @since 10.9.0
-	 *
-	 * @return void
-	 */
-	public static function enable_abandoned_cart_recovery_for_newly_installed() {
-		wc_get_container()->get( FeaturesController::class )->change_feature_enable( 'abandoned_cart_recovery', true );
 	}
 
 	/**
@@ -2216,6 +2236,28 @@ $email_unsubscribes_table_schema;
 	}
 
 	/**
+	 * Get the list of Action Scheduler database tables.
+	 *
+	 * These are intentionally kept out of get_tables(): Action Scheduler is a shared library that
+	 * may be bundled by other active plugins, so its tables are only dropped during a full uninstall
+	 * when the site owner explicitly opts in by setting the WC_REMOVE_ACTION_SCHEDULER constant.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return string[] Action Scheduler table names.
+	 */
+	public static function get_action_scheduler_tables() {
+		global $wpdb;
+
+		return array(
+			"{$wpdb->prefix}actionscheduler_actions",
+			"{$wpdb->prefix}actionscheduler_claims",
+			"{$wpdb->prefix}actionscheduler_groups",
+			"{$wpdb->prefix}actionscheduler_logs",
+		);
+	}
+
+	/**
 	 * Create roles and capabilities.
 	 *
 	 * @return void
@@ -2481,6 +2523,35 @@ $email_unsubscribes_table_schema;
 	}
 
 	/**
+	 * Delete the placeholder image created by create_placeholder_image().
+	 *
+	 * Removes the attachment post, its metadata and the underlying file, but only when the stored
+	 * woocommerce_placeholder_image option still points at WooCommerce's own generated placeholder.
+	 * A custom image set by the merchant through the "Placeholder image" setting is left untouched to
+	 * avoid deleting merchant-owned media. The option itself is removed along with the rest of the
+	 * woocommerce_ options during uninstall.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return void
+	 */
+	public static function delete_placeholder_image() {
+		$placeholder_image = absint( get_option( 'woocommerce_placeholder_image', 0 ) );
+
+		if ( ! $placeholder_image ) {
+			return;
+		}
+
+		// Only delete WooCommerce's own generated placeholder, never a custom image the merchant may have set.
+		$attached_file = (string) get_post_meta( $placeholder_image, '_wp_attached_file', true );
+		if ( 'woocommerce-placeholder.webp' !== wp_basename( $attached_file ) ) {
+			return;
+		}
+
+		wp_delete_attachment( $placeholder_image, true );
+	}
+
+	/**
 	 * Show action links on the plugin screen.
 	 *
 	 * @param mixed $links Plugin Action links.
@@ -2573,10 +2644,13 @@ $email_unsubscribes_table_schema;
 	 *
 	 * @throws Exception If unable to proceed with plugin installation.
 	 * @since  2.6.0
+	 * @deprecated 11.1.0 No longer used.
 	 *
 	 * @return void
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
+		wc_deprecated_function( 'WC_Install::background_installer', '11.1.0' );
+
 		// Explicitly clear the event.
 		$args = func_get_args();
 
@@ -2678,7 +2752,12 @@ $email_unsubscribes_table_schema;
 							__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
 							$e->getMessage(),
-							esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_slug ) )
+							esc_url(
+								wp_nonce_url(
+									admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_slug ),
+									'wc-install-plugin-redirect_' . $plugin_slug
+								)
+							)
 						)
 					);
 				}
@@ -2736,10 +2815,13 @@ $email_unsubscribes_table_schema;
 	 *
 	 * @throws Exception If unable to proceed with theme installation.
 	 * @since  3.1.0
+	 * @deprecated 11.1.0 No longer used.
 	 *
 	 * @return void
 	 */
 	public static function theme_background_installer( $theme_slug ) {
+		wc_deprecated_function( 'WC_Install::theme_background_installer', '11.1.0' );
+
 		// Explicitly clear the event.
 		$args = func_get_args();
 

@@ -177,6 +177,7 @@ function wc_clear_cart_after_payment() {
 
 	$should_clear_cart_after_payment = false;
 	$after_payment                   = false;
+	$order                           = null;
 
 	// If the order has been received, clear the cart.
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
@@ -208,6 +209,11 @@ function wc_clear_cart_after_payment() {
 	// If it doesn't look like a payment happened, bail early.
 	if ( ! $after_payment ) {
 		return;
+	}
+
+	// If the order is different from the cart, don't clear the cart. This can happen if the user has multiple tabs open and completes a different order than the one in the cart.
+	if ( $should_clear_cart_after_payment && $order instanceof WC_Order && ! WC()->cart->is_empty() ) {
+		$should_clear_cart_after_payment = $order->has_cart_hash( WC()->cart->get_cart_hash() );
 	}
 
 	/**

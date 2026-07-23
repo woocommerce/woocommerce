@@ -25,6 +25,15 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Clean up after each test.
+	 */
+	public function tearDown(): void {
+		remove_all_filters( 'wc_get_price_decimal_separator' );
+
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox variations need to set the status back to published if parent product is a draft
 	 */
 	public function test_expand_data_with_draft_variable() {
@@ -62,6 +71,28 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( ProductStatus::DRAFT, $variable['status'] );
 		$this->assertEquals( ProductStatus::PUBLISH, $variation['status'] );
+	}
+
+	/**
+	 * @testdox published value of 2 maps to the pending review status on import.
+	 */
+	public function test_expand_data_maps_published_to_pending() {
+		$csv_file = __DIR__ . '/sample.csv';
+
+		$reflected_importer = new ReflectionClass( WC_Product_CSV_Importer::class );
+		$expand_data        = $reflected_importer->getMethod( 'expand_data' );
+		$expand_data->setAccessible( true );
+
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+		$parsed   = $expand_data->invoke(
+			$importer,
+			array(
+				'type'      => array( ProductType::SIMPLE ),
+				'published' => 2,
+			)
+		);
+
+		$this->assertEquals( ProductStatus::PENDING, $parsed['status'] );
 	}
 
 	/**
@@ -223,5 +254,98 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $product->get_id() );
 		wc_delete_attribute( $color_attr_id );
 		wc_delete_attribute( $size_attr_id );
+	}
+
+	/**
+	 * @testdox parse_float_field should respect the store's decimal separator setting (issue #38116).
+	 * @dataProvider provider_parse_float_field_decimal_separator
+	 *
+	 * @param string $decimal_sep The store's decimal separator setting.
+	 * @param string $value       The raw CSV value to parse.
+	 * @param float  $expected    The expected parsed float.
+	 */
+	public function test_parse_float_field_respects_decimal_separator( string $decimal_sep, string $value, float $expected ) {
+		add_filter( 'wc_get_price_decimal_separator', fn() => $decimal_sep );
+
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+		$result   = $importer->parse_float_field( $value );
+
+		$this->assertSame( $expected, $result, "Expected '{$value}' to parse to {$expected} with '{$decimal_sep}' as the decimal separator." );
+	}
+
+	/**
+	 * Data provider for test_parse_float_field_respects_decimal_separator.
+	 *
+	 * @return array
+	 */
+	public function provider_parse_float_field_decimal_separator(): array {
+		return array(
+			'comma separator, comma value'   => array( ',', '1,5', 1.5 ),
+			'comma separator, sub-one value' => array( ',', '0,5', 0.5 ),
+			'period separator, period value' => array( '.', '1.5', 1.5 ),
+			'comma separator, integer value' => array( ',', '10', 10.0 ),
+
+			// With a period separator the comma is treated as a grouping separator and
+			// stripped, mirroring how price fields (which also use wc_format_decimal) behave.
+			// A comma-decimal CSV therefore requires the store's separator to be set to comma.
+			'period separator, comma value'  => array( '.', '0,5', 5.0 ),
+			'period separator, comma+int'    => array( '.', '1,5', 15.0 ),
+		);
+	}
+
+	/**
+	 * @testdox Attribute names with special characters should match existing global attributes on import instead of creating duplicates (issue #28172).
+	 */
+	public function test_import_matches_existing_attribute_with_special_characters_in_name_28172() {
+		// Set admin user to allow term creation.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'ARC Flash > Gloves > CE Category',
+				'slug' => 'arc-glove-ce',
+			)
+		);
+		$taxonomy     = wc_attribute_taxonomy_name_by_id( $attribute_id );
+		register_taxonomy( $taxonomy, 'product' );
+		wp_insert_term( 'Meeny', $taxonomy );
+
+		$csv_file = __DIR__ . '/import-attribute-special-chars-28172-data.csv';
+		$args     = array(
+			'parse'   => true,
+			'mapping' => array(
+				'Name'                 => 'name',
+				'Type'                 => 'type',
+				'Attribute 1 name'     => 'attributes:name1',
+				'Attribute 1 value(s)' => 'attributes:value1',
+				'Attribute 1 visible'  => 'attributes:visible1',
+				'Attribute 1 global'   => 'attributes:taxonomy1',
+			),
+		);
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+
+		$parsed = $importer->get_parsed_data();
+		$this->assertSame( 'ARC Flash > Gloves > CE Category', $parsed[0]['raw_attributes'][0]['name'], 'The attribute name should not be HTML-encoded during parsing' );
+
+		$data = $importer->import();
+		$this->assertCount( 1, $data['imported'], 'Expected 1 imported product' );
+		$this->assertEmpty( $data['failed'], 'Expected 0 failed products' );
+
+		$this->assertSame( 0, wc_attribute_taxonomy_id_by_name( 'arc-flash-gloves-ce-category' ), 'A duplicate attribute should not be created' );
+
+		$product = wc_get_product( $data['imported'][0] );
+		$this->assertArrayHasKey( 'pa_arc-glove-ce', $product->get_attributes(), 'The product should use the existing attribute' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wc_delete_attribute( $attribute_id );
+	}
+
+	/**
+	 * @testdox parse_float_field should return an empty string unchanged.
+	 */
+	public function test_parse_float_field_returns_empty_string_unchanged() {
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+
+		$this->assertSame( '', $importer->parse_float_field( '' ), 'Empty values should be returned unchanged.' );
 	}
 }

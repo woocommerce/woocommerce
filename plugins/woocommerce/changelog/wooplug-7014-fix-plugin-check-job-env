@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Point the nightly/release 'Checks from plugin-check plugin' CI job at the full E2E wp-env config, which provisions the plugin-check plugin, so `wp plugin check` no longer fails as an unregistered subcommand after the wp-env test config split.
