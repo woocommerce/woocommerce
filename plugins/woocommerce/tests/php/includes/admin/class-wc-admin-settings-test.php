@@ -341,6 +341,57 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not emit a shared "-title" ID for radio settings that have no ID.
+	 */
+	public function test_output_fields_does_not_cross_label_id_less_radio_settings(): void {
+		$options = array(
+			array(
+				'title'   => 'First radio',
+				'type'    => 'radio',
+				'value'   => 'a',
+				'options' => array( 'a' => 'First option' ),
+			),
+			array(
+				'title'   => 'Second radio',
+				'type'    => 'radio',
+				'value'   => 'b',
+				'options' => array( 'b' => 'Second option' ),
+			),
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $options );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<table>' . $output . '</table>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The radio setting output should be valid enough for DOM parsing.' );
+
+		$xpath = new DOMXPath( $document );
+
+		$radio_title = '//th[contains(concat(" ", normalize-space(@class), " "), " titledesc ")]/span[contains(concat(" ", normalize-space(@class), " "), " wc-settings-radio-title ")]';
+		$fieldset    = '//td[contains(concat(" ", normalize-space(@class), " "), " forminp-radio ")]/fieldset';
+
+		// Both rows render, but neither emits the shared "-title" ID or an aria-labelledby pointing at it.
+		$this->assertSame( 2, $xpath->query( $radio_title )->length );
+		$this->assertSame( 2, $xpath->query( $fieldset )->length );
+		$this->assertSame( 0, $xpath->query( $radio_title . '/span[@id="-title"]' )->length );
+		$this->assertSame( 0, $xpath->query( $radio_title . '/span[@id]' )->length );
+		$this->assertSame( 0, $xpath->query( $fieldset . '[@aria-labelledby]' )->length );
+		// Visible titles are still rendered for both groups.
+		$this->assertSame( 1, $xpath->query( $radio_title . '/span[normalize-space(.)="First radio"]' )->length );
+		$this->assertSame( 1, $xpath->query( $radio_title . '/span[normalize-space(.)="Second radio"]' )->length );
+	}
+
+	/**
 	 * Prepare globals used by WC_Admin_Settings::save().
 	 *
 	 * @param string|null $redirect_to Requested redirect target, or null to omit the Settings UI redirect field.
