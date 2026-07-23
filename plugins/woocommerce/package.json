@@ -915,6 +915,7 @@
 						}
 					},
 					"events": [
+						"pull_request",
 						"nightly-checks"
 					],
 					"report": {
