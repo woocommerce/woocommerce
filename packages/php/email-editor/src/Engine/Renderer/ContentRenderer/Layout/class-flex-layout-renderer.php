@@ -92,7 +92,7 @@ class Flex_Layout_Renderer {
 	 * Outlook-only <br> before each item after the first forces it to stack the buttons vertically
 	 * — no overflow, at the cost of a vertical list rather than a grid. Fixes NL-737.
 	 *
-	 * @param array             $inner_blocks Inner blocks (all auto-width in this path).
+	 * @param array             $inner_blocks Inner blocks (at least one is auto-width in this path).
 	 * @param string            $styles Wrapper styles (already includes margin-top and text-align).
 	 * @param string            $justify Resolved horizontal alignment (left/center/right).
 	 * @param string            $flex_gap Gap between items (e.g. "16px").
@@ -145,11 +145,11 @@ class Flex_Layout_Renderer {
 		if ( ! isset( $parsed_block['email_attrs']['width'] ) ) {
 			return array( $parsed_block['innerBlocks'] ?? array(), false );
 		}
-		$blocks_count       = count( $parsed_block['innerBlocks'] );
-		$total_used_width   = 0; // Total width assuming items without set width would consume proportional width.
-		$parent_width       = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] );
-		$inner_blocks       = $parsed_block['innerBlocks'] ?? array();
-		$has_explicit_width = false;
+		$blocks_count     = count( $parsed_block['innerBlocks'] );
+		$total_used_width = 0; // Total width assuming items without set width would consume proportional width.
+		$parent_width     = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] );
+		$inner_blocks     = $parsed_block['innerBlocks'] ?? array();
+		$has_auto_width   = false;
 
 		foreach ( $inner_blocks as $key => $block ) {
 			$block_width_percent = ( $block['attrs']['width'] ?? 0 ) ? intval( $block['attrs']['width'] ) : 0;
@@ -158,10 +158,10 @@ class Flex_Layout_Renderer {
 			$total_used_width += $block_width ? $block_width : floor( $parent_width * ( 25 / 100 ) );
 
 			if ( ! $block_width ) {
+				$has_auto_width                                      = true;
 				$inner_blocks[ $key ]['email_attrs']['layout_width'] = null; // Will be rendered as auto.
 				continue;
 			}
-			$has_explicit_width                                  = true;
 			$inner_blocks[ $key ]['email_attrs']['layout_width'] = $this->get_width_without_gap( $block_width, $flex_gap, $block_width_percent ) . 'px';
 		}
 
@@ -172,10 +172,12 @@ class Flex_Layout_Renderer {
 			return array( $inner_blocks, false );
 		}
 
-		// Auto-width items (e.g. a nav menu of buttons) can't be shrunk to fit — the only way to
-		// keep them inside the content width is to wrap. Explicitly-sized items are instead scaled
-		// down proportionally so they still fit on one row, preserving the existing behavior.
-		if ( ! $has_explicit_width ) {
+		// Auto-width items (e.g. a nav menu of buttons) can't be shrunk to fit, so an overflowing row
+		// that contains any of them can only be kept inside the content width by wrapping — the
+		// explicitly-sized items in the same row keep their width and flow alongside. A row made up
+		// entirely of explicit-width items is instead scaled down proportionally so it still fits on
+		// one row, preserving the existing behavior.
+		if ( $has_auto_width ) {
 			return array( $inner_blocks, true );
 		}
 

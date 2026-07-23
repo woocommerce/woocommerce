@@ -279,24 +279,6 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$flex_items                  = $this->getFlexItemsFromOutput( $output );
 		$this->assertStringContainsString( 'width:312px;', $flex_items[0] );
 		$this->assertStringContainsString( 'width:312px;', $flex_items[1] );
-
-		// 100% and auto
-		$parsed_block['innerBlocks'] = array(
-			array(
-				'blockName' => 'dummy/block',
-				'innerHTML' => 'Dummy 1',
-				'attrs'     => array( 'width' => '100' ),
-			),
-			array(
-				'blockName' => 'dummy/block',
-				'innerHTML' => 'Dummy 2',
-				'attrs'     => array(),
-			),
-		);
-		$output                      = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
-		$flex_items                  = $this->getFlexItemsFromOutput( $output );
-		$this->assertStringContainsString( 'width:508px;', $flex_items[0] );
-		$this->assertStringNotContainsString( 'width:', $flex_items[1] );
 	}
 
 	/**
@@ -329,6 +311,48 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( '<!--[if mso | IE]><br><![endif]-->', $output );
 		// All buttons are still rendered.
 		for ( $i = 1; $i <= 5; $i++ ) {
+			$this->assertStringContainsString( "Dummy $i", $output );
+		}
+	}
+
+	/**
+	 * A row that mixes an explicit-width button with auto-width buttons and overflows also wraps:
+	 * the auto-width items can't be shrunk to fit, so setting a width on a single button in the row
+	 * must not defeat the wrapping (NL-737). The explicit-width item keeps its width in the wrap.
+	 */
+	public function testItWrapsAMixedRowWithAnAutoWidthItemThatOverflows(): void {
+		// One 50% item (312px) + three auto items (25% estimate each) = ~125% of the parent, so the
+		// row overflows even though one button has an explicit width.
+		$inner_blocks = array(
+			array(
+				'blockName' => 'dummy/block',
+				'innerHTML' => 'Dummy 1',
+				'attrs'     => array( 'width' => '50' ),
+			),
+		);
+		for ( $i = 2; $i <= 4; $i++ ) {
+			$inner_blocks[] = array(
+				'blockName' => 'dummy/block',
+				'innerHTML' => "Dummy $i",
+				'attrs'     => array(),
+			);
+		}
+		$parsed_block = array(
+			'innerBlocks' => $inner_blocks,
+			'email_attrs' => array( 'width' => '640px' ),
+		);
+
+		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
+
+		// The row wraps (inline-block divs) rather than staying a single non-wrapping table row.
+		$this->assertStringContainsString( '<div class="layout-flex-item"', $output );
+		$this->assertStringNotContainsString( '<td class="layout-flex-item"', $output );
+		// The explicit-width button keeps its computed width in the wrapped layout.
+		$this->assertStringContainsString( 'width:312px', $output );
+		// Outlook still stacks the buttons vertically via the conditional <br>.
+		$this->assertStringContainsString( '<!--[if mso | IE]><br><![endif]-->', $output );
+		// All buttons are still rendered.
+		for ( $i = 1; $i <= 4; $i++ ) {
 			$this->assertStringContainsString( "Dummy $i", $output );
 		}
 	}
