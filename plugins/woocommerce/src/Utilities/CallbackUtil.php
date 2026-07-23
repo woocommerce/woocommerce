@@ -91,9 +91,14 @@ final class CallbackUtil {
 		}
 
 		$callbacks_by_priority = $wp_filter[ $hook_name ]->callbacks;
-		$fingerprint           = self::get_callbacks_fingerprint( $callbacks_by_priority );
 
-		if ( isset( $cache[ $hook_name ] ) && $cache[ $hook_name ]['fingerprint'] === $fingerprint ) {
+		/*
+		 * Comparing the callback arrays directly is enough to detect any change to
+		 * the registered set: PHP compares objects within them by identity, so a
+		 * replaced instance or closure is a mismatch, and holding the array also
+		 * keeps those object ids from being reused while the entry is live.
+		 */
+		if ( isset( $cache[ $hook_name ] ) && $cache[ $hook_name ]['callbacks'] === $callbacks_by_priority ) {
 			return $cache[ $hook_name ]['signatures'];
 		}
 
@@ -107,60 +112,13 @@ final class CallbackUtil {
 		}
 
 		$cache[ $hook_name ] = array(
-			'fingerprint' => $fingerprint,
-			'signatures'  => $result,
-			/*
-			 * Retaining the callables keeps their object ids from being reused by a
-			 * later object while this entry is live, which would otherwise let a
-			 * removed-then-replaced callback produce an identical fingerprint.
-			 */
-			'callbacks'   => $callbacks_by_priority,
+			'callbacks'  => $callbacks_by_priority,
+			'signatures' => $result,
 		);
 
 		return $result;
 	}
 
-	/**
-	 * Build a cheap identity fingerprint for a hook's registered callables.
-	 *
-	 * Deliberately avoids reflection: it captures only priority, class name and
-	 * object id, which is enough to detect that the registered set has changed
-	 * without paying the cost of resolving each signature.
-	 *
-	 * @param array $callbacks_by_priority The `callbacks` property of a WP_Hook instance.
-	 * @return string Fingerprint of the registered callables.
-	 */
-	private static function get_callbacks_fingerprint( array $callbacks_by_priority ): string {
-		$parts = array();
-
-		foreach ( $callbacks_by_priority as $priority => $priority_callbacks ) {
-			foreach ( $priority_callbacks as $callback_data ) {
-				$function = $callback_data['function'];
-
-				if ( is_string( $function ) ) {
-					$parts[] = $priority . ':' . $function;
-				} elseif ( is_array( $function ) && 2 === count( $function )
-					&& ( is_object( $function[0] ) || is_string( $function[0] ) )
-					&& is_string( $function[1] ) ) {
-					$target  = $function[0];
-					$parts[] = $priority . ':' .
-						( is_object( $target ) ? get_class( $target ) . '#' . spl_object_id( $target ) : $target ) .
-						'::' . $function[1];
-				} elseif ( is_object( $function ) ) {
-					$parts[] = $priority . ':' . get_class( $function ) . '#' . spl_object_id( $function );
-				} else {
-					/*
-					 * Any other shape: defer to the signature itself, so that the
-					 * fingerprint can never be coarser than the value it guards.
-					 * These shapes are rare, and the branches above never reach here.
-					 */
-					$parts[] = $priority . ':' . self::get_callback_signature( $function );
-				}
-			}
-		}
-
-		return implode( '|', $parts );
-	}
 
 	/**
 	 * Get a stable signature for a closure based on its file path and line numbers.
