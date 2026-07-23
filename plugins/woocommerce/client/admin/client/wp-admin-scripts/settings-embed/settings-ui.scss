@@ -3,7 +3,11 @@
 body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	background-color: var(--wpds-color-background-surface-neutral);
 
-	&.woocommerce-settings-ui-drill-down:has(.wc-settings-ui-shell__header) {
+	// Hide immediately on the server-rendered class so the common (successful)
+	// path never flashes the legacy header while the React shell loads. JS adds
+	// `woocommerce-settings-ui-render-failed` as soon as a mount failure is
+	// detected, restoring the legacy header instead of leaving the page blank.
+	&.woocommerce-settings-ui-drill-down:not(.woocommerce-settings-ui-render-failed) {
 		#wpbody {
 			margin-top: 0;
 		}

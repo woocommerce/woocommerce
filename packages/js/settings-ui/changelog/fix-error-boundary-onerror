@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add an optional onError callback to SettingsUIErrorBoundary so consumers can react to a caught render failure.

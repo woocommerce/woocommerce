@@ -16,6 +16,7 @@ declare global {
 			settingsUi?: {
 				SettingsUIErrorBoundary: ComponentType< {
 					children: ReactNode;
+					onError?: () => void;
 				} >;
 				SettingsUIPage: ( props: {
 					schema: SettingsUISchema;
@@ -27,6 +28,35 @@ declare global {
 	}
 }
 
+// The legacy header is hidden immediately (see settings-ui.scss) on the
+// assumption the React shell will mount successfully, so every detectable
+// failure must add this class back to restore it instead of leaving the
+// page without any header.
+const RENDER_FAILED_CLASS = 'woocommerce-settings-ui-render-failed';
+const DRILL_DOWN_CLASS = 'woocommerce-settings-ui-drill-down';
+
+// Catch-all for failures nothing else in this module can observe directly,
+// e.g. the whole settings-ui bundle silently failing to execute (blocked by
+// a browser extension, CSP, a corrupted cached asset). Long enough to cover
+// a slow connection or cold cache without false-positiving on a normal load.
+const RENDER_WATCHDOG_MS = 4000;
+
+export const markSettingsUIRenderFailed = () => {
+	document.body.classList.add( RENDER_FAILED_CLASS );
+};
+
+const scheduleSettingsUIRenderWatchdog = () => {
+	if ( ! document.body.classList.contains( DRILL_DOWN_CLASS ) ) {
+		return;
+	}
+
+	setTimeout( () => {
+		if ( ! document.querySelector( '.wc-settings-ui-shell__header' ) ) {
+			markSettingsUIRenderFailed();
+		}
+	}, RENDER_WATCHDOG_MS );
+};
+
 const getSchema = (
 	page: string,
 	section: string
@@ -37,6 +67,8 @@ const getSchema = (
 };
 
 export const registerSettingsUIScreens = () => {
+	scheduleSettingsUIRenderWatchdog();
+
 	const SettingsUIErrorBoundary =
 		window.wc?.settingsUi?.SettingsUIErrorBoundary;
 	const SettingsUIPage = window.wc?.settingsUi?.SettingsUIPage;
@@ -49,6 +81,7 @@ export const registerSettingsUIScreens = () => {
 			console.warn(
 				'[WooCommerce settings UI] The wc-settings-ui script is missing.'
 			);
+			markSettingsUIRenderFailed();
 		}
 		return;
 	}
@@ -66,19 +99,28 @@ export const registerSettingsUIScreens = () => {
 					'[WooCommerce settings UI] Settings payload is missing.',
 					{ page, section }
 				);
+				markSettingsUIRenderFailed();
 				return;
 			}
 
-			createRoot( element ).render(
-				createElement(
-					SettingsUIErrorBoundary,
-					null,
-					createElement( SettingsUIPage, {
-						schema,
-						page,
-						section,
+			try {
+				createRoot( element ).render(
+					createElement( SettingsUIErrorBoundary, {
+						onError: markSettingsUIRenderFailed,
+						children: createElement( SettingsUIPage, {
+							schema,
+							page,
+							section,
+						} ),
 					} )
-				)
-			);
+				);
+			} catch ( mountError: unknown ) {
+				// eslint-disable-next-line no-console
+				console.warn(
+					'[WooCommerce settings UI] Mounting the settings page failed.',
+					mountError
+				);
+				markSettingsUIRenderFailed();
+			}
 		} );
 };

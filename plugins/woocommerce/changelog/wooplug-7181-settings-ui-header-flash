@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the legacy admin header from flashing before the Settings UI drill-down header mounts, while still restoring it if the React shell fails to render.
