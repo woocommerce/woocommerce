@@ -472,6 +472,7 @@ class SettingsUIRequestContext {
 
 		try {
 			$schema       = $this->settings_ui_page->get_schema( $this->section );
+			$schema       = SettingsUISchema::canonicalize_option_values( $schema );
 			$schema       = $this->apply_section_navigation( $schema );
 			$schema       = $this->apply_shell_header_visibility( $schema );
 			$this->schema = $this->ensure_drill_down_breadcrumbs( $schema );
