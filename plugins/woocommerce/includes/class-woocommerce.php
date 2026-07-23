@@ -612,7 +612,12 @@ final class WooCommerce {
 	 *
 	 * Legacy REST requests should still run some extra code for backwards compatibility.
 	 *
-	 * @todo: replace this function once core WP function is available: https://core.trac.wordpress.org/ticket/42061.
+	 * This method cannot be replaced with core's wp_is_serving_rest_request(): that function reads the
+	 * REST_REQUEST constant, which is only defined once rest_api_loaded() runs on parse_request — long
+	 * after this method is first called during plugin bootstrap (e.g. to decide whether to load the
+	 * frontend includes). Sniffing the request URI is the only signal available that early. Code that
+	 * runs after parse_request should prefer wp_is_serving_rest_request(), or wp_is_rest_endpoint(),
+	 * which also covers internal REST requests dispatched during a regular page load.
 	 *
 	 * @return bool
 	 */
@@ -621,8 +626,13 @@ final class WooCommerce {
 			return false;
 		}
 
+		// Pretty permalinks: the REST prefix is part of the path, e.g. /wp-json/wc/v3/products.
+		// Plain permalinks: the route is passed as a query parameter instead, e.g. ?rest_route=/wc/v3/products
+		// (also used by Jetpack-signed REST requests regardless of the permalink structure).
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 		$rest_prefix         = trailingslashit( rest_get_url_prefix() );
-		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ) || ! empty( $_GET['rest_route'] );
+		// phpcs:enable
 
 		/**
 		 * Whether this is a REST API request.
