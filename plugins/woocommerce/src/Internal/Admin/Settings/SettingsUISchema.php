@@ -217,7 +217,7 @@ class SettingsUISchema {
 				__METHOD__,
 				sprintf(
 					/* translators: %s: comma-separated field ids. */
-					esc_html__( 'A Settings UI schema provider supplied non-string option values that WooCommerce converted for compatibility: %s. Update the provider to supply string values.', 'woocommerce' ),
+					esc_html__( 'A Settings UI schema provider supplied non-string option or field values that WooCommerce converted for compatibility: %s. Update the provider to supply string values.', 'woocommerce' ),
 					esc_html( implode( ', ', array_unique( $converted_fields ) ) )
 				),
 				'11.1.0'
