@@ -73,7 +73,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 			}
 		};
 
-		fetchPaymentsTask();
+		void fetchPaymentsTask();
 
 		// Cleanup function to prevent state updates after unmount.
 		return () => {
