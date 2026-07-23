@@ -25,8 +25,13 @@ export const getCartData =
 			return;
 		}
 
-		// Skip when IAPI already pushed cart data into this store.
-		if ( select( STORE_KEY ).getCartData().items.length > 0 ) {
+		// Skip when the IAPI cart store already pushed cart data into this
+		// store — a single GET /cart hydrates both.
+		if (
+			( window as { wcIapiCartHydrated?: boolean } )
+				.wcIapiCartHydrated &&
+			select( STORE_KEY ).getCartData().items.length > 0
+		) {
 			return;
 		}
 
@@ -43,6 +48,14 @@ export const getCartData =
 		) {
 			// @ts-expect-error setCartHash exists but is not typed
 			apiFetch.setCartHash( response?.headers );
+		}
+
+		if (
+			// @ts-expect-error setNonce is monkey patched in middleware/store-api-nonce
+			typeof apiFetch.setNonce === 'function'
+		) {
+			// @ts-expect-error setNonce is monkey patched in middleware/store-api-nonce
+			apiFetch.setNonce( response?.headers );
 		}
 
 		try {

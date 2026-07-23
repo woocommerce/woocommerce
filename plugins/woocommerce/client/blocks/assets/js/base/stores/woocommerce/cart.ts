@@ -380,6 +380,30 @@ const pushCartToReduxStore = ( cart: Cart ): void => {
 		const cartDispatch = data.dispatch( 'wc/store/cart' );
 		cartDispatch.receiveCart?.( cart );
 		cartDispatch.finishResolution?.( 'getCartData', [] );
+		( window as { wcIapiCartHydrated?: boolean } ).wcIapiCartHydrated =
+			true;
+	} catch {}
+};
+
+/**
+ * Mirrors the fresh Store API nonce from IAPI fetch responses into the
+ * apiFetch nonce middleware used by the React cart/checkout blocks, so
+ * mutations don't start from a stale nonce when the IAPI fetch is the only
+ * request on page load. `setNonce` is monkey-patched onto apiFetch by
+ * middleware/store-api-nonce.
+ */
+const pushNonceToApiFetchMiddleware = ( headers: Headers ): void => {
+	const apiFetch = (
+		window as unknown as {
+			wp?: {
+				apiFetch?: {
+					setNonce?: ( headers: Headers ) => void;
+				};
+			};
+		}
+	 ).wp?.apiFetch;
+	try {
+		apiFetch?.setNonce?.( headers );
 	} catch {}
 };
 
@@ -420,6 +444,7 @@ async function sendCartRequest(
 				const response = await fetch( ...args );
 				stateRef.nonce =
 					response.headers.get( 'Nonce' ) || stateRef.nonce;
+				pushNonceToApiFetchMiddleware( response.headers );
 				return response;
 			},
 		} );
@@ -1062,6 +1087,7 @@ const { actions } = store< Store >(
 
 					// Extract fresh nonce from response headers.
 					state.nonce = res.headers.get( 'Nonce' ) || state.nonce;
+					pushNonceToApiFetchMiddleware( res.headers );
 
 					if ( resolveNonceReady ) {
 						resolveNonceReady();
