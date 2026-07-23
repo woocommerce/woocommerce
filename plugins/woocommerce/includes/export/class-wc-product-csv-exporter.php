@@ -225,17 +225,14 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 		$products = wc_get_products( $args );
 
-		$this->total_rows  = $products->total;
-		$this->row_data    = array();
-		$variable_products = array();
+		$this->total_rows   = $products->total;
+		$this->row_data     = array();
+		$variable_products  = array();
+		$include_variations = ! isset( $args['type'] ) || in_array( ProductType::VARIATION, (array) $args['type'], true );
 
 		foreach ( $products->products as $product ) {
 			// Check if the product is variable and if either the include or category filter is active.
 			// This is to ensure that product variations are only included if they are being selectively exported or if they are part of a category.
-			// However, skip auto-including variations when a specific type filter is set that does not include variation.
-			$export_types = isset( $args['type'] ) ? (array) $args['type'] : array();
-			$include_variations = empty( $export_types ) || in_array( ProductType::VARIATION, $export_types, true );
-
 			if ( $include_variations &&
 				( ! empty( $args['include'] ) || ! empty( $args['category'] ) ) &&
 				$product->is_type( ProductType::VARIABLE ) &&
