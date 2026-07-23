@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	getConfig,
-	getContext,
-	getServerState,
-	store,
-} from '@wordpress/interactivity';
+import { getConfig, store } from '@wordpress/interactivity';
 import type { AsyncAction, TypeYield } from '@wordpress/interactivity';
 import type {
 	Cart,
@@ -35,6 +30,13 @@ import {
 	type MutationResult,
 } from './mutation-batcher';
 import { attributeNamesMatch } from '../../utils/variations/attribute-matching';
+import {
+	findDraftInCollection,
+	getDraftSeed,
+	resolveCollection,
+	resolveDraftKey,
+	warnDraftInvariant,
+} from './draft-internals';
 
 export type WooCommerceConfig = {
 	messages?: {
@@ -55,9 +57,9 @@ export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
  * nothing else is promised — no parseable format, no stability guarantee
  * beyond a single browsing session. A container block mints and declares its
  * own key in context; an extension may declare a namespaced key of its own
- * with zero core changes. See {@link GLOBAL_DRAFT_KEY} for the reserved
- * session-global key every surface falls back to when no container declares
- * one.
+ * with zero core changes. See the reserved session-global key
+ * (`GLOBAL_DRAFT_KEY` in `draft-internals.ts`) every surface falls back to
+ * when no container declares one.
  */
 export type DraftKey = string;
 
@@ -79,8 +81,16 @@ export type DraftItem = {
 	 * so a collection holds at most one draft per `id`.
 	 */
 	id: number;
-	/** The quantity to add. */
-	quantity: number;
+	/**
+	 * The quantity to add. Optional: a quantity-less draft is still a valid
+	 * `cart/add-item` payload — the server defaults an omitted quantity to
+	 * the product's own minimum purchase quantity (`add_to_cart.minimum`)
+	 * and rejects non-positive values. A materializing write that composes
+	 * a draft with no numeric quantity still materializes it (with a
+	 * dev-build warning); nothing client-side synthesizes a quantity on its
+	 * behalf.
+	 */
+	quantity?: number;
 	/** Chosen attributes, for a variation draft. */
 	variation?: SelectedAttributes[];
 	/** Namespaced extension props riding at the payload root (e.g. `'my-plugin/gift-note'`). */
@@ -149,22 +159,23 @@ export type Store = {
 		 * block, or any other extension surface that wraps or repeats
 		 * purchase UI) declares its own server-minted key in its
 		 * `woocommerce/cart` context; a surface wrapped in no container
-		 * resolves the reserved {@link GLOBAL_DRAFT_KEY} collection. Every
-		 * read and write resolves the nearest declared key (see the
-		 * module-private `resolveDraftKey`/`resolveCollection`). A
-		 * collection is created lazily, on its first shopper write — the
-		 * server never seeds this map. Drafts live alongside — never
-		 * inside — the read-only `cart` mirror above, and are written
-		 * exclusively through `upsertDraftItem`, or by direct mutation of an
-		 * already-resolved draft object.
+		 * resolves the reserved global draft key (`GLOBAL_DRAFT_KEY` in
+		 * `draft-internals.ts`) collection. Every read and write resolves
+		 * the nearest declared key (see `draft-internals.ts`'s
+		 * `resolveDraftKey`/`resolveCollection`). A collection is created
+		 * lazily, on its first shopper write — the server never seeds this
+		 * map. Drafts live alongside — never inside — the read-only `cart`
+		 * mirror above, and are written exclusively through
+		 * `upsertDraftItem`, or by direct mutation of an already-resolved
+		 * draft object.
 		 */
 		draftItems: Record< DraftKey, DraftItem[] >;
 		/**
 		 * Finds an item by id/key, or by an extension-supplied predicate,
 		 * returning the read-only envelope pairing its draft with its cart
 		 * line. The draft is read from the resolved draft collection — the
-		 * nearest declared `context.draftKey`, falling back to
-		 * {@link GLOBAL_DRAFT_KEY} (see the module-private
+		 * nearest declared `context.draftKey`, falling back to the reserved
+		 * global draft key (see `draft-internals.ts`'s
 		 * `resolveDraftKey`/`resolveCollection`).
 		 *
 		 * Implements the pairing ladder: an explicit `key` pairs exactly
@@ -215,13 +226,13 @@ export type Store = {
 		/**
 		 * Creates or updates a draft cart item in the resolved draft
 		 * collection — the nearest declared `context.draftKey`, falling
-		 * back to {@link GLOBAL_DRAFT_KEY} (see the module-private
+		 * back to the reserved global draft key (see `draft-internals.ts`'s
 		 * `resolveDraftKey`/`resolveCollection`).
 		 *
 		 * Merges `partial` into the resolved collection's draft whose `id`
 		 * matches — `id` resolves from `options.id` when given, else from
 		 * `partial.id` — appending a new draft otherwise. Creating a new
-		 * draft composes it from `getServerState()`'s
+		 * draft composes it from the surface's server-filed
 		 * `draftSeeds[key][id]` (when one is filed for the resolved key
 		 * and id) merged under `partial`, so an untouched field falls back
 		 * to its server-rendered default; the resolved collection is
@@ -377,127 +388,6 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 	type: 'notice',
 	dismissible: true,
 } );
-
-/**
- * The shape of the `woocommerce/cart` context namespace relevant to draft
- * collection resolution.
- *
- * A container block (a Product Collection loop item, a Single Product
- * block, or any other extension surface that wraps or repeats purchase UI)
- * declares its own server-minted `draftKey` here, isolating its subtree's
- * drafts into that key's collection; nested surfaces inherit the same bag
- * and resolve the same collection. Other `woocommerce/cart` context keys —
- * a mini-cart row's `id`/`key` — live in the same namespace but do not
- * establish a collection boundary.
- */
-type CartContext = { draftKey?: DraftKey };
-
-/**
- * The reserved key for the session-global draft collection: every purchase
- * surface wrapped in no container resolves this collection.
- *
- * No container ever declares this literal as its own key — containers
- * always mint one of their own — so it is the fixed fallback both this
- * resolver and the server's seed-filing PHP agree on.
- */
-const GLOBAL_DRAFT_KEY: DraftKey = 'woocommerce/global';
-
-/**
- * The `woocommerce/cart` server-rendered state shape relevant to seed
- * lookup: each purchase surface's initial-draft default, filed per
- * collection key and per product/variation id.
- *
- * Read only through `getServerState()` — the runtime's intact, per-page,
- * navigation-fresh copy — never through `state.draftSeeds`, which the
- * router's non-destructive client-side merge accumulates across
- * navigations and which this module never consults.
- */
-type CartServerState = {
-	draftSeeds?: Record< DraftKey, Record< DraftItem[ 'id' ], DraftItem > >;
-};
-
-/**
- * Resolves the draft key nearest to the calling surface: the current
- * context's own declared `draftKey`, when a container established one,
- * else {@link GLOBAL_DRAFT_KEY}.
- *
- * This is the single place that implements `context.draftKey ??
- * GLOBAL_DRAFT_KEY`; no other code, client or server, should re-implement
- * that fallback. `getContext()` throws when called with no directive
- * currently executing on the call stack (e.g. from code that runs outside
- * any directive-driven element); this resolver must never propagate that
- * failure — an out-of-directive call simply means "no declared key
- * available", so it degrades to `GLOBAL_DRAFT_KEY`, exactly as an
- * in-directive call whose context sets no `draftKey` would.
- *
- * @return The resolved draft key.
- */
-function resolveDraftKey(): DraftKey {
-	try {
-		return (
-			getContext< CartContext >( 'woocommerce/cart' )?.draftKey ??
-			GLOBAL_DRAFT_KEY
-		);
-	} catch {
-		return GLOBAL_DRAFT_KEY;
-	}
-}
-
-/**
- * Reads the draft collection filed under `key`, tolerating a
- * not-yet-created collection as empty rather than dereferencing it.
- *
- * Never creates a collection — only a write (`upsertDraftItem`) does that,
- * lazily, on its first use of a key. A read against a key with no
- * collection yet simply finds nothing, indistinguishable from an
- * existing-but-empty collection.
- *
- * @param key The resolved draft key.
- * @return The collection filed under `key`, or `undefined` when none has
- *         been created yet.
- */
-function resolveCollection( key: DraftKey ): DraftItem[] | undefined {
-	return state.draftItems[ key ];
-}
-
-/**
- * Finds a draft for the given product/variation id within a specific draft
- * collection.
- *
- * @param collection The draft collection to search.
- * @param id         The draft's product/variation id, or `undefined`
- *                   (nothing to find).
- * @return The matching draft, or `undefined` when none is found.
- */
-function findDraftInCollection(
-	collection: DraftItem[],
-	id: DraftItem[ 'id' ] | undefined
-): DraftItem | undefined {
-	if ( id === undefined ) {
-		return undefined;
-	}
-	return collection.find( ( draft ) => draft.id === id );
-}
-
-/**
- * Reports a draft-write invariant violation.
- *
- * Per the write-policy design, invariant violations (an upsert that would
- * change an existing draft's `id`, a new draft missing a required field)
- * never throw and never partially apply — the calling action returns
- * before touching the resolved draft collection. In a development build
- * this surfaces as a `console.warn` for the implementer; production builds
- * stay silent (`process.env.NODE_ENV` is inlined by the bundler, so this
- * check compiles away entirely there).
- *
- * @param message A human-readable description of the violated invariant.
- */
-function warnDraftInvariant( message: string ): void {
-	if ( process.env.NODE_ENV !== 'production' ) {
-		// eslint-disable-next-line no-console
-		console.warn( `[woocommerce/cart] ${ message }` );
-	}
-}
 
 /**
  * Returns `true` when a variation cart line's recorded attribute values
@@ -962,7 +852,12 @@ function* postDraftItems(
 				id: item.id,
 				variation: item.variation,
 				preAddTotal,
-				deltaTotal: item.quantity,
+				// A quantity-less draft is a valid payload (the server
+				// defaults it to the product minimum); the optimistic
+				// exactness check has no way to know that default ahead of
+				// the response, so it contributes nothing here rather than
+				// guessing.
+				deltaTotal: item.quantity ?? 0,
 				preExistingKeys,
 			};
 		} );
@@ -984,7 +879,9 @@ function* postDraftItems(
 							isCartItem( existingItem ) &&
 							existingItem.sold_individually;
 						if ( ! isSoldIndividually ) {
-							existingItem.quantity += item.quantity;
+							// See the capture above: a quantity-less draft
+							// contributes nothing to the optimistic bump.
+							existingItem.quantity += item.quantity ?? 0;
 						}
 					} else {
 						state.cart.items.push( {
@@ -1601,13 +1498,8 @@ const { actions } = store< Store >(
 				// Creation composes the new draft from the surface's
 				// server-filed seed (when one exists for this key/id),
 				// merged under the shopper's own partial — so an untouched
-				// field falls back to its server-rendered default. Read
-				// through `getServerState()` only: the runtime's intact,
-				// per-page, navigation-fresh copy, immune to the client
-				// merge that `state.draftSeeds` would otherwise expose.
-				const seed =
-					getServerState< CartServerState >( 'woocommerce/cart' )
-						?.draftSeeds?.[ draftKey ]?.[ targetId ];
+				// field falls back to its server-rendered default.
+				const seed = getDraftSeed( draftKey, targetId );
 				const draft = {
 					...seed,
 					...partial,
@@ -1662,7 +1554,9 @@ const { actions } = store< Store >(
 						)
 						.filter(
 							( draft ): draft is DraftItem =>
-								!! draft && draft.quantity > 0
+								!! draft &&
+								typeof draft.quantity === 'number' &&
+								draft.quantity > 0
 						);
 					yield* postDraftItems( drafts, actions );
 					return;
@@ -1673,9 +1567,7 @@ const { actions } = store< Store >(
 				// default (seeds are never applied into collections, so an
 				// untouched surface never materializes a draft).
 				const { draft } = state.itemInContext;
-				const seed =
-					getServerState< CartServerState >( 'woocommerce/cart' )
-						?.draftSeeds?.[ resolveDraftKey() ]?.[ product.id ];
+				const seed = getDraftSeed( resolveDraftKey(), product.id );
 				const itemToPost = draft ?? seed;
 				if ( ! itemToPost ) {
 					return;
