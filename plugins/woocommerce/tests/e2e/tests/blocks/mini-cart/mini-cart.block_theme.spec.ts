@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect, BlockData, wpCLI } from '@woocommerce/e2e-utils';
+import { test, expect, BlockData } from '@woocommerce/e2e-utils';
 import type { Page } from '@playwright/test';
 
 /**
@@ -983,31 +983,111 @@ test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		requestUtils,
 	} ) => {
 		// Create a variable product with an attribute value containing an
 		// ampersand, which the API returns as "&amp;". The data-wp-text
 		// path (textContent) relies on the textarea entity-decode step to
 		// display "Red & Blue" instead of literal "Red &amp; Blue".
-		const cliOutput = await wpCLI(
-			`wc product create --user=1 --name="Test Variable" --type="variable" --attributes='${ JSON.stringify(
-				[
+		const createdProduct = await requestUtils.rest< {
+			id: number;
+			name: string;
+			slug: string;
+			type: string;
+			status: string;
+			catalog_visibility: string;
+			attributes: Array< {
+				id: number;
+				name: string;
+				slug: string;
+				visible: boolean;
+				variation: boolean;
+				options: string[];
+			} >;
+		} >( {
+			method: 'POST',
+			path: 'wc/v2/products',
+			data: {
+				name: 'Test Variable',
+				type: 'variable',
+				attributes: [
 					{
 						name: 'Shade',
 						options: [ 'Red & Blue' ],
 						variation: true,
 						visible: true,
 					},
-				]
-			) }'`
-		);
-		const productId = cliOutput.stdout.match(
-			/Created product (\d+)/
-		)?.[ 1 ];
-		await wpCLI(
-			`wc product_variation create --user=1 "${ productId }" --regular_price="10" --attributes='${ JSON.stringify(
-				[ { name: 'Shade', option: 'Red & Blue' } ]
-			) }'`
-		);
+				],
+			},
+		} );
+		const productAttribute = createdProduct.attributes?.[ 0 ];
+		if (
+			! Number.isInteger( createdProduct.id ) ||
+			createdProduct.id <= 0 ||
+			createdProduct.name !== 'Test Variable' ||
+			createdProduct.slug !== 'test-variable' ||
+			createdProduct.type !== 'variable' ||
+			createdProduct.status !== 'publish' ||
+			createdProduct.catalog_visibility !== 'visible' ||
+			createdProduct.attributes?.length !== 1 ||
+			productAttribute?.id !== 0 ||
+			productAttribute.name !== 'Shade' ||
+			productAttribute.slug !== 'Shade' ||
+			productAttribute.visible !== true ||
+			productAttribute.variation !== true ||
+			productAttribute.options?.length !== 1 ||
+			productAttribute.options[ 0 ] !== 'Red & Blue'
+		) {
+			throw new Error(
+				`Failed to create the expected variable product through REST: ${ JSON.stringify(
+					createdProduct
+				) }`
+			);
+		}
+		const productId = createdProduct.id;
+
+		const createdVariation = await requestUtils.rest< {
+			id: number;
+			price: string;
+			regular_price: string;
+			visible: boolean;
+			purchasable: boolean;
+			in_stock: boolean;
+			attributes: Array< {
+				id: number;
+				name: string;
+				slug: string;
+				option: string;
+			} >;
+		} >( {
+			method: 'POST',
+			path: `wc/v2/products/${ productId }/variations`,
+			data: {
+				regular_price: '10',
+				attributes: [ { name: 'Shade', option: 'Red & Blue' } ],
+			},
+		} );
+		const variationAttribute = createdVariation.attributes?.[ 0 ];
+		if (
+			! Number.isInteger( createdVariation.id ) ||
+			createdVariation.id <= 0 ||
+			Number( createdVariation.regular_price ) !== 10 ||
+			Number( createdVariation.price ) !== 10 ||
+			createdVariation.visible !== true ||
+			createdVariation.purchasable !== true ||
+			createdVariation.in_stock !== true ||
+			createdVariation.attributes?.length !== 1 ||
+			variationAttribute?.id !== 0 ||
+			variationAttribute.name !== 'Shade' ||
+			variationAttribute.slug !== 'shade' ||
+			variationAttribute.option !== 'Red & Blue'
+		) {
+			throw new Error(
+				`Failed to create the expected product variation through REST: ${ JSON.stringify(
+					createdVariation
+				) }`
+			);
+		}
 
 		// Navigate to the product page and add the variation to cart.
 		await page.goto( `/product/test-variable/` );
