@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Abandoned cart recovery: remove a redundant order lookup on every order status transition.

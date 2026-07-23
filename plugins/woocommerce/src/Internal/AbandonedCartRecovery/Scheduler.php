@@ -62,6 +62,10 @@ class Scheduler {
 	 * Order-creation origins (`created_via`) eligible for an automated send:
 	 * the classic checkout and the block (Store API) checkout.
 	 *
+	 * `store-api` matches no order yet — block checkout creates orders in
+	 * `checkout-draft`, which never clears the `pending`-only status gate. Kept
+	 * here for when checkout-draft scheduling lands; not dead code.
+	 *
 	 * @var string[]
 	 */
 	private const ELIGIBLE_CREATED_VIA = array( 'checkout', 'store-api' );
@@ -77,7 +81,7 @@ class Scheduler {
 		add_action( 'woocommerce_new_order', array( $this, 'handle_new_order' ), 10, 2 );
 		// Catch every transition out of the eligible set so the pending send
 		// is unscheduled regardless of which status the order moves to.
-		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_status_changed' ), 10, 3 );
+		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_status_changed' ), 10, 4 );
 		add_action( 'woocommerce_trash_order', array( $this, 'handle_cancellation' ), 10, 1 );
 		add_action( 'woocommerce_before_delete_order', array( $this, 'handle_cancellation' ), 10, 1 );
 		add_action( self::ACTION_HOOK, array( $this, 'handle_scheduled_send' ), 10, 1 );
@@ -147,12 +151,15 @@ class Scheduler {
 	 *
 	 * @internal
 	 *
-	 * @param int    $order_id   Order ID.
-	 * @param string $old_status Previous status (sans `wc-` prefix).
-	 * @param string $new_status New status (sans `wc-` prefix).
+	 * @param int           $order_id   Order ID.
+	 * @param string        $old_status Previous status (sans `wc-` prefix).
+	 * @param string        $new_status New status (sans `wc-` prefix).
+	 * @param WC_Order|null $order      Order passed by the hook; looked up when absent.
 	 */
-	public function handle_status_changed( int $order_id, string $old_status, string $new_status ): void {
-		$order = wc_get_order( $order_id );
+	public function handle_status_changed( int $order_id, string $old_status, string $new_status, $order = null ): void {
+		if ( ! $order instanceof WC_Order ) {
+			$order = wc_get_order( $order_id );
+		}
 		if ( ! $order instanceof WC_Order ) {
 			return;
 		}
