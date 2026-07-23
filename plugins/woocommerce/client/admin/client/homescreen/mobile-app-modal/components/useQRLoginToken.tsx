@@ -316,7 +316,7 @@ export const useQRLoginToken = ( {
 		clearPollTimer();
 		// First tick fires immediately so a fast-scanning merchant gets the
 		// confirmation panel without waiting a full interval.
-		pollStatus();
+		void pollStatus();
 		pollTimerRef.current = setInterval(
 			pollStatus,
 			STATUS_POLL_INTERVAL_MS

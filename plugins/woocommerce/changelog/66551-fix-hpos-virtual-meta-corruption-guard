@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the HPOS order meta corruption guard from treating extension-injected virtual meta rows (a meta_key and meta_value but no meta_id) as corrupt, which purged the meta cache and logged a warning on every read.

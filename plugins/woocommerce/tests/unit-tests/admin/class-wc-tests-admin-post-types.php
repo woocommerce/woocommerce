@@ -151,4 +151,38 @@ class WC_Tests_Admin_Post_Types extends WC_Unit_Test_Case {
 		$actual  = $product->{"get_{$type_of_price}_price"}();
 		$this->assertEquals( $expected_new_price, $actual );
 	}
+
+	/**
+	 * @test
+	 * @testdox The downloadable product permissions meta box is hidden by default on the order edit screen.
+	 */
+	public function hidden_meta_boxes_hides_order_downloads_on_order_screen() {
+		$sut    = new WC_Admin_Post_Types();
+		$screen = (object) array(
+			'id'        => wc_get_page_screen_id( 'shop-order' ),
+			'post_type' => 'shop_order',
+			'base'      => 'post',
+		);
+
+		$hidden = $sut->hidden_meta_boxes( array(), $screen );
+
+		$this->assertContains( 'woocommerce-order-downloads', $hidden );
+	}
+
+	/**
+	 * @test
+	 * @testdox The order downloads hide-by-default rule does not leak to unrelated screens.
+	 */
+	public function hidden_meta_boxes_leaves_other_screens_untouched() {
+		$sut    = new WC_Admin_Post_Types();
+		$screen = (object) array(
+			'id'        => 'dashboard',
+			'post_type' => '',
+			'base'      => 'dashboard',
+		);
+
+		$hidden = $sut->hidden_meta_boxes( array(), $screen );
+
+		$this->assertNotContains( 'woocommerce-order-downloads', $hidden );
+	}
 }

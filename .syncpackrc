@@ -81,7 +81,26 @@
 			"dependencies": [
 				"@typescript-eslint/**"
 			],
-			"pinVersion": "^5.62.0",
+			"pinVersion": "^8.63.0",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"label": "typescript-eslint meta-package (flat config); keep aligned with @typescript-eslint/*",
+			"dependencies": [
+				"typescript-eslint"
+			],
+			"pinVersion": "^8.63.0",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
+				"eslint-plugin-testing-library"
+			],
+			"pinVersion": "^7.16.2",
 			"packages": [
 				"**"
 			]
@@ -119,7 +138,6 @@
 			"dependencies": [
 				"react",
 				"react-dom",
-				"react-test-renderer",
 				"@types/react-dom",
 				"@types/react"
 			],
@@ -174,13 +192,18 @@
 			"pinVersion": "^0.0.10"
 		},
 		{
+			"label": "ESLint dev target. Peer deps are excluded so @woocommerce/eslint-plugin can peer the wider `^9 || ^10` range.",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"eslint"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^8.55.0"
+			"pinVersion": "^10.0.0"
 		},
 		{
 			"dependencies": [
@@ -383,7 +406,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "2.17.0"
+			"pinVersion": "4.49.0"
 		},
 		{
 			"dependencies": [
@@ -392,7 +415,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "14.7.0"
+			"pinVersion": "25.6.0"
 		},
 		{
 			"dependencies": [
@@ -455,13 +478,11 @@
 		{
 			"label": "experimental-products-app uses custom WordPress package versions",
 			"dependencies": [
-				"@wordpress/admin-ui",
 				"@wordpress/base-styles",
 				"@wordpress/dataviews",
 				"@wordpress/icons",
 				"@wordpress/router",
-				"@wordpress/theme",
-				"@wordpress/ui"
+				"@wordpress/theme"
 			],
 			"packages": [
 				"@woocommerce/experimental-products-app"
@@ -482,6 +503,7 @@
 				"@wordpress/icons",
 				"@wordpress/interface",
 				"@wordpress/style-runtime",
+				"@wordpress/theme",
 				"@wordpress/ui",
 				"@wordpress/undo-manager",
 				"@wordpress/views"

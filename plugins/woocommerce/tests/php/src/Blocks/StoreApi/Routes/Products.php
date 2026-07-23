@@ -15,38 +15,75 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
  * Products Controller Tests.
  */
 class Products extends ControllerTestCase {
+	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
 
 	/**
-	 * Setup test product data. Called before every test.
+	 * All product IDs owned by the class, including grouped children.
+	 *
+	 * @var int[]
+	 */
+	private static $owned_product_ids = array();
+
+	/**
+	 * Create immutable catalog rows shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$products = self::with_direct_product_attribute_lookup_updates(
+			static function () {
+				$fixtures = new FixtureData();
+
+				return array(
+					$fixtures->get_simple_product(
+						array(
+							'name'          => 'Test Product 1',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
+							'regular_price' => 10,
+							'weight'        => '2.5',
+							'length'        => '10',
+							'width'         => '5',
+							'height'        => '3',
+						)
+					),
+					$fixtures->get_simple_product(
+						array(
+							'name'          => 'Test Product 2',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
+							'regular_price' => 10,
+						)
+					),
+					$fixtures->get_grouped_product( array() ),
+				);
+			}
+		);
+
+		self::$product_ids       = array_map(
+			static fn( $product ) => $product->get_id(),
+			$products
+		);
+		self::$owned_product_ids = array_merge( self::$product_ids, $products[2]->get_children() );
+	}
+
+	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_class_fixture_products( self::$owned_product_ids );
+	}
+
+	/**
+	 * Reload shared test product data before every test.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
 
-		$fixtures = new FixtureData();
-
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'              => 'Test Product 1',
-					'stock_status'      => ProductStockStatus::IN_STOCK,
-					'regular_price'     => 10,
-					'weight'            => '2.5',
-					'length'            => '10',
-					'width'             => '5',
-					'height'            => '3',
-					'image_id'          => $fixtures->sideload_image(),
-					'gallery_image_ids' => array(),
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'image_id'      => $fixtures->sideload_image(),
-				)
-			),
-			$fixtures->get_grouped_product( array() ),
+		$this->products = array_map(
+			'wc_get_product',
+			self::$product_ids
 		);
 	}
 
@@ -54,6 +91,11 @@ class Products extends ControllerTestCase {
 	 * Test getting item.
 	 */
 	public function test_get_item() {
+		$fixtures = new FixtureData();
+		$image_id = $fixtures->create_image_attachment( $this->products[0]->get_id() );
+		$this->products[0]->set_image_id( $image_id );
+		$this->products[0]->save();
+
 		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $this->products[0]->get_id() ) );
 		$data     = $response->get_data();
 
@@ -84,6 +126,10 @@ class Products extends ControllerTestCase {
 		$this->assertCount( 1, $data['images'] );
 		$this->assertIsObject( $data['images'][0] );
 		$this->assertEquals( $this->products[0]->get_image_id(), $data['images'][0]->id );
+		$this->assertNotEmpty( wp_parse_url( $data['images'][0]->src, PHP_URL_HOST ) );
+		$this->assertNotEmpty( wp_parse_url( $data['images'][0]->thumbnail, PHP_URL_HOST ) );
+
+		wp_delete_attachment( $image_id, true );
 	}
 
 	/**
@@ -113,11 +159,21 @@ class Products extends ControllerTestCase {
 	 * Test getting items.
 	 */
 	public function test_get_items() {
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
-		$data     = $response->get_data();
+		$product_ids = array_merge(
+			array_map(
+				function ( $product ) {
+					return $product->get_id();
+				},
+				$this->products
+			),
+			$this->products[2]->get_children()
+		);
+		$request     = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$response    = rest_get_server()->dispatch( $request );
+		$data        = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 6, count( $data ) );
+		$this->assertEqualsCanonicalizing( $product_ids, array_column( $data, 'id' ) );
 		$this->assertArrayHasKey( 'id', $data[0] );
 		$this->assertArrayHasKey( 'name', $data[0] );
 		$this->assertArrayHasKey( 'variation', $data[0] );
@@ -231,14 +287,23 @@ class Products extends ControllerTestCase {
 	 * Test schema matches responses.
 	 */
 	public function test_get_item_schema() {
+		// Give the product an image so the nested image schema is validated too.
+		$fixtures = new FixtureData();
+		$image_id = $fixtures->create_image_attachment( $this->products[0]->get_id() );
+		$this->products[0]->set_image_id( $image_id );
+		$this->products[0]->save();
+
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'products' );
 		$schema     = $controller->get_item_schema();
 		$response   = $controller->prepare_item_for_response( $this->products[0], new \WP_REST_Request() );
 		$validate   = new ValidateSchema( $schema );
 
+		$this->assertNotEmpty( $response->get_data()['images'], 'The product response must include an image so its schema is exercised.' );
 		$diff = $validate->get_diff_from_object( $response->get_data() );
 		$this->assertEmpty( $diff, print_r( $diff, true ) ); // @phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+
+		wp_delete_attachment( $image_id, true );
 	}
 
 	/**
@@ -262,7 +327,7 @@ class Products extends ControllerTestCase {
 		$this->assertIsArray( $data['images'] );
 		$this->assertCount( 0, $data['images'] );
 
-		$image_id = $fixtures->sideload_image();
+		$image_id = $fixtures->create_image_attachment();
 		$product  = $fixtures->get_simple_product(
 			array(
 				'name'              => 'Test Product 1',
@@ -286,7 +351,7 @@ class Products extends ControllerTestCase {
 	 */
 	public function test_product_category_image_return_types() {
 		$fixtures = new FixtureData();
-		$image_id = $fixtures->sideload_image();
+		$image_id = $fixtures->create_image_attachment();
 		$term     = wp_insert_term( 'Test Category', 'product_cat' );
 
 		update_term_meta( $term['term_id'], 'thumbnail_id', $image_id );

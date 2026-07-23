@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove nofollow from product permalink links in product buttons.
