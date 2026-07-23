@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-utils';
+import { expect, test } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -10,18 +10,6 @@ import {
 	REGULAR_PRICED_PRODUCT_NAME,
 	SIMPLE_PHYSICAL_PRODUCT_NAME,
 } from '../checkout/constants';
-import ProductCollectionPage from '../product-collection/product-collection.page';
-
-const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
-	productCollectionPage: async ( { page, admin, editor }, use ) => {
-		const pageObject = new ProductCollectionPage( {
-			page,
-			admin,
-			editor,
-		} );
-		await use( pageObject );
-	},
-} );
 
 test.describe( 'Shopper → Notices', () => {
 	test( 'Shopper sees SSR error notice in mini cart when product goes out of stock', async ( {
@@ -124,7 +112,7 @@ test.describe( 'Shopper → Notices', () => {
 		page,
 		editor,
 		admin,
-		productCollectionPage,
+		frontendUtils,
 	} ) => {
 		const checkMiniCartTitle = async ( itemCount: number ) => {
 			try {
@@ -170,10 +158,7 @@ test.describe( 'Shopper → Notices', () => {
 		await editor.page
 			.getByRole( 'button', { name: 'Save', exact: true } )
 			.click();
-		await productCollectionPage.createNewPostAndInsertBlock(
-			'productCatalog'
-		);
-		await productCollectionPage.publishAndGoToFrontend();
+		await frontendUtils.goToShop();
 		await page
 			.getByLabel( `Add to cart: “${ SIMPLE_PHYSICAL_PRODUCT_NAME }”` )
 			.click();
