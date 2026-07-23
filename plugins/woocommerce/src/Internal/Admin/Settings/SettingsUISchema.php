@@ -143,10 +143,10 @@ class SettingsUISchema {
 	 *
 	 * Schemas built from legacy settings always carry string option values, but
 	 * native providers can supply any scalar. The client matches options against
-	 * the stored value with strict string comparison, so scalar option values
-	 * and the selected values they match are cast here to the string the
-	 * client's own String() coercion produces. Malformed entries remain
-	 * unchanged for the provider to fix.
+	 * the stored value with strict string comparison, so scalar option values,
+	 * the selected values they match, and visibility values compared against
+	 * them are cast here to the string the client's own String() coercion
+	 * produces. Malformed entries remain unchanged for the provider to fix.
 	 *
 	 * @since 11.1.0
 	 *
@@ -159,6 +159,7 @@ class SettingsUISchema {
 		}
 
 		$converted_fields = array();
+		$option_field_ids = array();
 
 		foreach ( $schema['groups'] as &$group ) {
 			if ( ! is_array( $group ) || ! isset( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
@@ -175,7 +176,8 @@ class SettingsUISchema {
 					continue;
 				}
 
-				$converted = false;
+				$option_field_ids[] = $field['id'];
+				$converted          = false;
 
 				foreach ( $field['options'] as &$option ) {
 					if (
@@ -213,12 +215,47 @@ class SettingsUISchema {
 		}
 		unset( $group );
 
+		foreach ( $schema['groups'] as &$group ) {
+			if ( ! is_array( $group ) || ! isset( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
+				continue;
+			}
+
+			foreach ( $group['fields'] as &$field ) {
+				if (
+					! is_array( $field ) ||
+					! isset( $field['id'], $field['visibility'] ) ||
+					! is_string( $field['id'] ) ||
+					! is_array( $field['visibility'] ) ||
+					! isset( $field['visibility']['controller'] ) ||
+					! in_array( $field['visibility']['controller'], $option_field_ids, true ) ||
+					! array_key_exists( 'value', $field['visibility'] )
+				) {
+					continue;
+				}
+
+				$rule_value = $field['visibility']['value'];
+
+				if ( is_scalar( $rule_value ) && ! is_string( $rule_value ) ) {
+					$field['visibility']['value'] = self::to_canonical_string( $rule_value );
+					$converted_fields[]           = $field['id'];
+				} elseif ( is_array( $rule_value ) ) {
+					$canonical_list = self::canonicalize_scalar_list( $rule_value );
+					if ( null !== $canonical_list ) {
+						$field['visibility']['value'] = $canonical_list;
+						$converted_fields[]           = $field['id'];
+					}
+				}
+			}
+			unset( $field );
+		}
+		unset( $group );
+
 		if ( ! empty( $converted_fields ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
 					/* translators: %s: comma-separated field ids. */
-					esc_html__( 'A Settings UI schema provider supplied non-string option or field values that WooCommerce converted for compatibility: %s. Update the provider to supply string values.', 'woocommerce' ),
+					esc_html__( 'A Settings UI schema provider supplied non-string option, field, or visibility values that WooCommerce converted for compatibility: %s. Update the provider to supply string values.', 'woocommerce' ),
 					esc_html( implode( ', ', array_unique( $converted_fields ) ) )
 				),
 				'11.1.0'

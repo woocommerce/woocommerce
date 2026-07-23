@@ -580,6 +580,84 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It canonicalizes visibility values compared against an options field.
+	 */
+	public function test_canonicalize_option_values_stringifies_visibility_values_for_option_controllers(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_option_values' );
+
+		$schema = SettingsUISchema::canonicalize_option_values(
+			$this->get_native_schema_with_fields(
+				array(
+					array(
+						'id'      => 'acme_tier',
+						'type'    => 'select',
+						'value'   => 1,
+						'options' => array(
+							array(
+								'label' => 'One',
+								'value' => 1,
+							),
+							array(
+								'label' => 'Two',
+								'value' => 2,
+							),
+						),
+					),
+					array(
+						'id'         => 'acme_tier_notes',
+						'type'       => 'text',
+						'value'      => '',
+						'visibility' => array(
+							'controller' => 'acme_tier',
+							'value'      => 1,
+						),
+					),
+					array(
+						'id'         => 'acme_tier_badge',
+						'type'       => 'text',
+						'value'      => '',
+						'visibility' => array(
+							'controller' => 'acme_tier',
+							'value'      => array( 1, true ),
+						),
+					),
+				)
+			)
+		);
+
+		$fields = $schema['groups']['main']['fields'];
+
+		$this->assertSame( '1', $fields[1]['visibility']['value'], 'Scalar visibility values must convert with the controller value they are compared against.' );
+		$this->assertSame( array( '1', 'true' ), $fields[2]['visibility']['value'], 'Visibility value lists must convert with the controller value they are compared against.' );
+	}
+
+	/**
+	 * @testdox It leaves visibility values unchanged when the controller has no options.
+	 */
+	public function test_canonicalize_option_values_leaves_visibility_values_for_non_option_controllers(): void {
+		$schema = $this->get_native_schema_with_fields(
+			array(
+				array(
+					'id'    => 'acme_enabled',
+					'type'  => 'checkbox',
+					'value' => true,
+				),
+				array(
+					'id'         => 'acme_enabled_notes',
+					'type'       => 'text',
+					'value'      => '',
+					'visibility' => array(
+						'controller' => 'acme_enabled',
+						'value'      => true,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( $schema, SettingsUISchema::canonicalize_option_values( $schema ), 'Checkbox controllers compare boolean values, so their visibility rules should pass through unchanged.' );
+	}
+
+	/**
 	 * @testdox It leaves associative value arrays unchanged.
 	 */
 	public function test_canonicalize_option_values_leaves_associative_values_unchanged(): void {
