@@ -46,8 +46,9 @@ A **Blockified set** lives in `plugins/woocommerce/templates/templates/blockifie
 
 WooCommerce only registers its standard Block templates when `wp_is_block_theme()` returns true. Blockified templates are the default for Block themes unless the store's `wc_blocks_use_blockified_product_grid_block_as_template` option explicitly retains the compatibility set. Every template in this documentation refers to the Blockified set unless stated otherwise.
 
-> [!TIP]
-> If a template looks different to what you expect, open it through the Site Editor's **Code editor** view. A single woocommerce/legacy-template Block at the top of the file means you're looking at the classic compatibility version, not the Blockified one.
+:::tip
+If a template looks different to what you expect, open it through the Site Editor's **Code editor** view. A single woocommerce/legacy-template Block at the top of the file means you're looking at the classic compatibility version, not the Blockified one.
+:::
 
 ## The core store templates
 
@@ -95,8 +96,9 @@ As a result, a theme overriding `archive-product.html` gets the design applied a
 
 **Products by Brand** became part of WooCommerce core in 9.4 and was enabled by default starting in 9.6. Older stores can therefore differ depending on their WooCommerce version and whether the Brands feature was enabled.
 
-> [!NOTE]
-> The **Coming soon** template's file is `coming-soon.html`, not `page-coming-soon.html`. The "Page:" wording belongs to the template's title in the Site Editor, not its filename. WooCommerce registers the template even when Launch Your Store is inactive; store visibility determines when the template is used.
+:::info
+The **Coming soon** template's file is `coming-soon.html`, not `page-coming-soon.html`. The "Page:" wording belongs to the template's title in the Site Editor, not its filename. WooCommerce registers the template even when Launch Your Store is inactive; store visibility determines when the template is used.
+:::
 
 ## Cart, checkout, and order confirmation
 
@@ -118,8 +120,9 @@ Both `page-cart.html` and `page-checkout.html` have a similar structure. The Car
 
 The Checkout template uses the same wrapper with `{"page":"checkout"}`, but it omits the Post Title Block. In both templates, `core/post-content` renders the Cart or Checkout Block assigned to that page.
 
-> [!NOTE]
-> If you override either template, keep the Cart or Checkout Block inside the content rendered by core/post-content rather than hardcoding woocommerce/cart or woocommerce/checkout directly into the template. Bypassing the assigned page content this way desyncs the page editor from the frontend. Some WooCommerce functionality that checks for the presence of those Blocks on the assigned page could break.
+:::info
+If you override either template, keep the Cart or Checkout Block inside the content rendered by core/post-content rather than hardcoding woocommerce/cart or woocommerce/checkout directly into the template. Bypassing the assigned page content this way desyncs the page editor from the frontend. Some WooCommerce functionality that checks for the presence of those Blocks on the assigned page could break.
+:::
 
 Styling the Cart and Checkout Blocks (including the mobile checkout button and associated CSS containers) is covered in [Cart and Checkout blocks theming](https://developer.woocommerce.com/docs/theming/block-theme-development/cart-and-checkout/).
 
@@ -141,8 +144,9 @@ WooCommerce supplies six template-part files:
 
 The four add-to-cart-with-options parts sit inside its own template part area, separate from the standard header and footer areas, and back the Add to Cart and Options Block. This lets a theme or merchant give each product type its own layout, such as a stepper for a simple product's quantity field, instead of one form that adapts its own contents internally.
 
-> [!NOTE]
-> The Add to Cart and Options Block was introduced in WooCommerce 10.0 and is still in Beta at the time of writing. As such, treat the underlying template parts as subject to change.
+:::info
+The Add to Cart and Options Block was introduced in WooCommerce 10.0 and is still in Beta at the time of writing. As such, treat the underlying template parts as subject to change.
+:::
 
 A theme overrides any template part similarly to a template: by adding a matching file to its own `/parts` folder. WordPress also recognizes the older `/block-template-parts` folder name for backward compatibility, but new themes should use `/parts`.
 
@@ -186,8 +190,9 @@ Seeing both fallback chains side-by-side makes the specificity easier to follow 
 
 In a nutshell, build overrides with this fallback chain in mind rather than against it. A theme that wants one consistent design across every taxonomy archive only needs to touch archive-product.html; a theme that wants Products by Category to diverge from Products by Tag only needs to add the one file that should differ. The rest can inherit the parent.
 
-> [!NOTE]
-> Merchants can customize any of these templates from the Site Editor regardless of what a theme provides. These customizations save to the database rather than a file and take priority over both the theme's file and WooCommerce's default. As such, document any custom template you ship with enough context so that merchants understand what it's built around.
+:::info
+Merchants can customize any of these templates from the Site Editor regardless of what a theme provides. These customizations save to the database rather than a file and take priority over both the theme's file and WooCommerce's default. As such, document any custom template you ship with enough context so that merchants understand what it's built around.
+:::
 
 ## Checking your work
 

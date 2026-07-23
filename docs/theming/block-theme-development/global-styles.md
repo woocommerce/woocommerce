@@ -219,8 +219,9 @@ The pill style itself is registered by the active theme rather than by WordPress
 }
 ```
 
-> [!NOTE]
-> A 'Block style variation' covered here changes a Block's visual appearance and is selectable from the Block toolbar's **Styles** panel. A 'Block variation' is used to offer different preset configurations of the same Block's attributes.
+:::info
+A 'Block style variation' covered here changes a Block's visual appearance and is selectable from the Block toolbar's **Styles** panel. A 'Block variation' is used to offer different preset configurations of the same Block's attributes.
+:::
 
 The latter is behind the switch between Categories, Tags, and Brands on the Post Terms Block. The two use cases overlap here, which is part of why it's an easy pair of concepts to mix up.
 
@@ -242,8 +243,9 @@ function theme_register_button_styles() {
 add_action( 'init', 'theme_register_button_styles' );
 ```
 
-> [!NOTE]
-> Remember to switch out the placeholder in the array for your own text domain.
+:::info
+Remember to switch out the placeholder in the array for your own text domain.
+:::
 
 Once registered, the new **Rounded** option appears in the Block's style picker. Style it through `styles.blocks.woocommerce/product-button.variations`, using the registered `rounded` slug rather than its display label:
 
@@ -287,13 +289,15 @@ Global style variations are a separate, theme-wide mechanism unrelated to indivi
 
 A full global style variation appears as a selectable preset in the Site Editor's **Styles** panel, labeled with its `title` property. The `/styles` directory can also contain Block, color, and typography variation partials, so not every JSON file there represents a complete theme-wide preset.
 
-> [!TIP]
-> You can name your file anything you like, but it's a good idea to stick to the convention used by the other files in the `/styles` folder. Pin `$schema` to the oldest WordPress version your theme supports when you need validation against that version rather than trunk.
+:::tip
+You can name your file anything you like, but it's a good idea to stick to the convention used by the other files in the `/styles` folder. Pin `$schema` to the oldest WordPress version your theme supports when you need validation against that version rather than trunk.
+:::
 
 Once you select one, WordPress copies the configuration into the database as an active customization, so a later update to the theme file won't reach stores that have already made a selection.
 
-> [!TIP]
-> When shipping a theme update, changing a `/styles` file after stores have adopted it updates the option for new selections only, not for stores already using it. Your theme changelogs should therefore call out style variation changes explicitly.
+:::tip
+When shipping a theme update, changing a `/styles` file after stores have adopted it updates the option for new selections only, not for stores already using it. Your theme changelogs should therefore call out style variation changes explicitly.
+:::
 
 A style variation file can include any part of `theme.json`, not just color. For instance, a single file might set a full color palette, adjust the default spacing scale, and swap the heading font family together. This gives you a single, clean choice rather than several separate settings to coordinate.
 
@@ -305,8 +309,9 @@ Many color, typography, and spacing controls described so far are also available
 
 An individual product Block exposes only the controls it supports in its Block settings sidebar. The exact controls therefore differ between Product Price, Product Title, Product Summary, Product Collection, and other Blocks.
 
-> [!NOTE]
-> Changes made this way are saved as user global-style customizations and take priority over the theme's `theme.json` values.
+:::info
+Changes made this way are saved as user global-style customizations and take priority over the theme's `theme.json` values.
+:::
 
 This makes the Site Editor a way to prototype before committing anything to code. Because every change appears immediately against real product data, it's a faster way to judge whether a font size or color choice actually reads well on a product card than repeatedly editing `theme.json` and reloading the page.
 
