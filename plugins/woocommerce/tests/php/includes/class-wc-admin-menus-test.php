@@ -52,6 +52,11 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 			// array arg but WP_Taxonomy only exposes a 'cap' object, so casting the object back
 			// would silently drop the real capabilities.
 			$GLOBALS['wp_taxonomies']['product_brand'] = $this->brand_taxonomy_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+			// unregister_taxonomy() also called remove_rewrite_rules() and remove_hooks(),
+			// which mutate $wp_rewrite and $wp_filter. Undo both to fully restore state.
+			$this->brand_taxonomy_backup->add_rewrite_rules();
+			$this->brand_taxonomy_backup->add_hooks();
 		}
 		$GLOBALS['wp_meta_boxes'] = $this->wp_meta_boxes_backup;  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		wp_set_current_user( $this->current_user_backup );
