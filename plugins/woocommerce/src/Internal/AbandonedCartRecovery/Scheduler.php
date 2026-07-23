@@ -105,13 +105,13 @@ class Scheduler {
 			return;
 		}
 
-		if ( ! in_array( $order->get_status(), $this->get_eligible_statuses( $order ), true ) ) {
-			return;
-		}
-
 		// Only nudge customers who abandoned a checkout — pending orders can
 		// also originate from admin invoices, the REST API, or renewals.
 		if ( ! in_array( $order->get_created_via(), self::ELIGIBLE_CREATED_VIA, true ) ) {
+			return;
+		}
+
+		if ( ! in_array( $order->get_status(), $this->get_eligible_statuses( $order ), true ) ) {
 			return;
 		}
 
@@ -152,7 +152,11 @@ class Scheduler {
 	 * @param string $new_status New status (sans `wc-` prefix).
 	 */
 	public function handle_status_changed( int $order_id, string $old_status, string $new_status ): void {
-		$order             = wc_get_order( $order_id );
+		$order = wc_get_order( $order_id );
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
+
 		$eligible_statuses = $this->get_eligible_statuses( $order instanceof WC_Order ? $order : null );
 
 		$was_eligible = in_array( $old_status, $eligible_statuses, true );
