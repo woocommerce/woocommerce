@@ -45,13 +45,33 @@ export const markSettingsUIRenderFailed = () => {
 	document.body.classList.add( RENDER_FAILED_CLASS );
 };
 
+const isShellHeaderPresent = () =>
+	!! document.querySelector( '.wc-settings-ui-shell__header' );
+
+// The watchdog can only observe a snapshot at RENDER_WATCHDOG_MS, but React 18
+// concurrent rendering may still be mounting past that point on a slow
+// connection or cold cache. A MutationObserver keeps watching afterwards so a
+// late-but-successful mount clears the failure class instead of leaving it
+// (and the restored legacy header) stuck alongside the React header.
 const scheduleSettingsUIRenderWatchdog = () => {
 	if ( ! document.body.classList.contains( DRILL_DOWN_CLASS ) ) {
 		return;
 	}
 
+	const observer = new MutationObserver( () => {
+		if ( isShellHeaderPresent() ) {
+			observer.disconnect();
+			document.body.classList.remove( RENDER_FAILED_CLASS );
+		}
+	} );
+	observer.observe( document.body, { childList: true, subtree: true } );
+
 	setTimeout( () => {
-		if ( ! document.querySelector( '.wc-settings-ui-shell__header' ) ) {
+		if ( ! isShellHeaderPresent() ) {
+			// eslint-disable-next-line no-console
+			console.warn(
+				'[WooCommerce settings UI] The settings page did not render within the expected time.'
+			);
 			markSettingsUIRenderFailed();
 		}
 	}, RENDER_WATCHDOG_MS );
