@@ -162,14 +162,23 @@ test.describe( 'Shopper → Notices', () => {
 } );
 
 test.describe( 'Shopper → Tax', () => {
-	test.beforeEach( async () => {
-		await wpCLI( 'option set woocommerce_prices_include_tax no' );
-		await wpCLI( 'option set woocommerce_tax_display_cart incl' );
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/tax/woocommerce_prices_include_tax',
+			data: { value: 'no' },
+		} );
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/tax/woocommerce_tax_display_cart',
+			data: { value: 'incl' },
+		} );
 	} );
 
 	test( 'User can see tax label and price including tax', async ( {
 		frontendUtils,
 		page,
+		requestUtils,
 	} ) => {
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
@@ -188,8 +197,16 @@ test.describe( 'Shopper → Tax', () => {
 
 		await expect( miniCartLocator ).toContainText( '(incl. tax)' );
 
-		await wpCLI( 'option set woocommerce_prices_include_tax yes' );
-		await wpCLI( 'option set woocommerce_tax_display_cart excl' );
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/tax/woocommerce_prices_include_tax',
+			data: { value: 'yes' },
+		} );
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/tax/woocommerce_tax_display_cart',
+			data: { value: 'excl' },
+		} );
 		await page.reload();
 
 		await expect( miniCartLocator ).toContainText( '(ex. tax)' );
