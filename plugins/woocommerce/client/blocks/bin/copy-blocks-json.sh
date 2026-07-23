@@ -38,15 +38,19 @@ find plugins/woocommerce/client/blocks/assets/js -name "block.json" | while read
     done
 
     # Check if it's a parent block by looking for "parent" field, but treat as regular if generic
-	if grep -q '"parent":' "$file" && [ "$is_generic_block" = false ]; then
-		# It's an inner block
-		target_path="$TARGET_DIR/inner-blocks/$block_name/block.json"
-		mkdir -p "$TARGET_DIR/inner-blocks/$block_name"
-		cp "$file" "$target_path"
-	else
-		# It's a regular block
-		target_path="$TARGET_DIR/$block_name/block.json"
-		mkdir -p "$TARGET_DIR/$block_name"
-		cp "$file" "$target_path"
-	fi
+    if grep -q '"parent":' "$file" && [ "$is_generic_block" = false ]; then
+        # It's an inner block
+        target_path="$TARGET_DIR/inner-blocks/$block_name/block.json"
+        mkdir -p "$TARGET_DIR/inner-blocks/$block_name"
+        if [ ! -f "$target_path" ]; then
+            cp "$file" "$target_path"
+        fi
+    else
+        # It's a regular block
+        target_path="$TARGET_DIR/$block_name/block.json"
+        mkdir -p "$TARGET_DIR/$block_name"
+        if [ ! -f "$target_path" ]; then
+            cp "$file" "$target_path"
+        fi
+    fi
 done

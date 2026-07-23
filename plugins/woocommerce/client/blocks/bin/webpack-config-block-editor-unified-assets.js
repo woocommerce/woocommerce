@@ -223,10 +223,7 @@ const getUnifiedMainConfig = ( options = {} ) => {
  * @param {Object} options Build options.
  */
 const getUnifiedStylingConfig = ( options = {} ) => {
-	const stylingConfig = getStylingConfig( {
-		...options,
-		configName: 'Unified styles',
-	} );
+	const stylingConfig = getStylingConfig( options );
 
 	return {
 		...stylingConfig,

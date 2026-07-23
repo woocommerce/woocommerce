@@ -345,6 +345,7 @@ const entries = {
 
 		// Shared blocks code
 		'wc-blocks': './assets/js/index.js',
+
 		// Blocks
 		'product-image-gallery':
 			'./assets/js/atomic/blocks/product-elements/product-image-gallery/index.ts',
@@ -367,10 +368,10 @@ const entries = {
 		wcEntities: './assets/js/entities/index.ts',
 	},
 	main: {
-		// Shared blocks code.
+		// Shared blocks code
 		'wc-blocks': './assets/js/index.js',
 
-		// Blocks.
+		// Blocks
 		...getBlockEntries( 'index.{t,j}s{,x}', {
 			...blocks,
 			...genericBlocks,
@@ -399,8 +400,6 @@ const entries = {
 	},
 	cartAndCheckoutFrontend: {
 		...cartAndCheckoutFrontendEntries,
-		blocksCheckout: './packages/checkout/index.js',
-		blocksComponents: './packages/components/index.ts',
 	},
 };
 

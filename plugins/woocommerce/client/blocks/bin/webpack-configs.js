@@ -160,8 +160,8 @@ const getCoreConfig = ( options = {} ) => {
  */
 const getMainConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
-	const resolve = getResolve( { alias, resolvePlugins } );
 
+	const resolve = getResolve( { alias, resolvePlugins } );
 	return {
 		entry: getEntryConfig( 'main', options.exclude || [] ),
 		output: {
@@ -535,14 +535,13 @@ const getExtensionsConfig = ( options = {} ) => {
 };
 
 /**
- * Build config for scripts used exclusively in the Site Editor.
+ * Build config for scripts to be used exclusively within the Site Editor context.
  *
  * @param {Object} options Build options.
  */
 const getSiteEditorConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
 	const resolve = getResolve( { alias, resolvePlugins } );
-
 	return {
 		entry: getEntryConfig( 'editor', options.exclude || [] ),
 		output: {
@@ -622,7 +621,7 @@ const getSiteEditorConfig = ( options = {} ) => {
  * @param {Object} options Build options.
  */
 const getStylingConfig = ( options = {} ) => {
-	const { alias, configName = 'Styles', resolvePlugins = [] } = options;
+	const { alias, resolvePlugins = [] } = options;
 
 	const resolve = getResolve( { alias, resolvePlugins } );
 	return {
@@ -649,9 +648,7 @@ const getStylingConfig = ( options = {} ) => {
 							const moduleIssuer =
 								moduleGraph.getIssuer( module );
 							if ( ! moduleIssuer ) {
-								return module.resource?.endsWith(
-									'editor.scss'
-								);
+								return false;
 							}
 
 							return (
@@ -757,10 +754,8 @@ const getStylingConfig = ( options = {} ) => {
 			],
 		},
 		plugins: [
-			...getSharedPlugins( {
-				bundleAnalyzerReportTitle: configName,
-			} ),
-			new ProgressBarPlugin( getProgressBarPluginConfig( configName ) ),
+			...getSharedPlugins( { bundleAnalyzerReportTitle: 'Styles' } ),
+			new ProgressBarPlugin( getProgressBarPluginConfig( 'Styles' ) ),
 			new MiniCssExtractPlugin( {
 				filename: '[name].css',
 			} ),
@@ -795,7 +790,18 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 			// translations which we must avoid.
 			// @see https://github.com/Automattic/jetpack/pull/20926
 			chunkFilename: '[name]-frontend.js?ver=[contenthash]',
-			filename: '[name]-frontend.js',
+			filename: ( pathData ) => {
+				// blocksCheckout and blocksComponents were moved from core bundle,
+				// retain their filenames to avoid breaking translations.
+				if (
+					pathData.chunk.name === 'blocksCheckout' ||
+					pathData.chunk.name === 'blocksComponents'
+				) {
+					return `${ paramCase( pathData.chunk.name ) }.js`;
+				}
+
+				return `[name]-frontend.js`;
+			},
 			uniqueName: 'webpackWcBlocksCartCheckoutFrontendJsonp',
 			library: [ 'wc', '[name]' ],
 		},

@@ -3,18 +3,18 @@
  */
 const path = require( 'path' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
-const wpScriptsConfig = require( '@wordpress/scripts/config/webpack.config' );
-const moduleConfig = Array.isArray( wpScriptsConfig )
-	? wpScriptsConfig[ 1 ]
-	: wpScriptsConfig;
-
-/**
- * Internal dependencies
- */
+const [
+	,
+	moduleConfig,
+] = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
 const {
 	WebpackRTLPlugin,
 } = require( '@woocommerce/internal-build/style-build' );
+
+/**
+ * Internal dependencies
+ */
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const { getResolve } = require( './webpack-helpers' );
 const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
