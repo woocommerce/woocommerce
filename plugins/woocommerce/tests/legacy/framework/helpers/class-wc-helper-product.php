@@ -383,14 +383,17 @@ class WC_Helper_Product {
 		);
 
 		foreach ( $terms as $term ) {
+			// Reuse pre-existing terms: deleting and re-creating them would strip the
+			// term from every product/variation that already references it.
 			$result = term_exists( $term, $attribute->slug );
-			if ( $result ) {
-				// Delete pre-existing term data to guarantee clean testing environment.
-				wp_delete_term( $result['term_id'], $attribute->slug );
+
+			if ( ! $result ) {
+				$result = wp_insert_term( $term, $attribute->slug );
 			}
 
-			$result               = wp_insert_term( $term, $attribute->slug );
-			$return['term_ids'][] = $result['term_id'];
+			// Cast to int: term_exists() returns term_id as a string, and non-int
+			// values are treated as term names further down the line.
+			$return['term_ids'][] = (int) $result['term_id'];
 		}
 
 		return $return;
