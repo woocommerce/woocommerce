@@ -365,17 +365,19 @@ class ProductQuery implements QueryClausesGenerator {
 		// Explicit parent lookups (e.g. variation hydration) skip the catalog discovery guard in
 		// add_query_clauses(), so enforce per-product visibility here instead.
 		if ( ! empty( $request['parent'] ) ) {
-			$objects  = array_values(
+			$previous_count = count( $objects );
+			$objects        = array_values(
 				array_filter(
 					$objects,
 					static function ( $product ) {
-						return $product instanceof \WC_Product && $product->is_viewable();
+						return ( $product instanceof \WC_Product || $product instanceof \WC_Product_Variation ) && $product->is_viewable();
 					}
 				)
 			);
-			$total    = count( $objects );
-			$per_page = $request['per_page'] ? (int) $request['per_page'] : -1;
-			$pages    = $per_page > 0 ? (int) ceil( $total / $per_page ) : 1;
+			$filtered_out   = $previous_count - count( $objects );
+			$total          = (int) $results['total'] - $filtered_out;
+			$per_page       = $request['per_page'] ? (int) $request['per_page'] : -1;
+			$pages          = $per_page > 0 ? (int) ceil( $total / $per_page ) : 1;
 		}
 
 		// Batch-prime image attachment caches for the whole collection, rather than once per
