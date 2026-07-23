@@ -1191,7 +1191,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( addToCartButton ).toHaveText( '1 in cart' );
 	} );
 
-	test( "allows adding simple products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
+	test( 'redirects simple, variable, and grouped products to cart when enabled', async ( {
 		page,
 		pageObject,
 		editor,
@@ -1204,89 +1204,81 @@ test.describe( 'Add to Cart + Options Block', () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/product/t-shirt' );
+		await test.step( "allows adding simple products to cart when the 'Redirect to cart after successful addition' setting is enabled", async () => {
+			await page.goto( '/product/t-shirt' );
 
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart',
+			} );
+
+			await addToCartButton.click();
+
+			await expect(
+				page.getByLabel( 'Quantity of T-Shirt in your cart.' )
+			).toHaveValue( '1' );
 		} );
 
-		await addToCartButton.click();
+		await test.step( "allows adding variable products to cart when the 'Redirect to cart after successful addition' setting is enabled", async () => {
+			await page.getByLabel( 'Remove T-Shirt from cart' ).click();
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Your cart is currently empty!',
+				} )
+			).toBeVisible();
 
-		await expect(
-			page.getByLabel( 'Quantity of T-Shirt in your cart.' )
-		).toHaveValue( '1' );
-	} );
+			// We intentionally test the V-Neck T-Shirt because it has variations
+			// using 'any' as a variation attribute.
+			await page.goto( '/product/v-neck-t-shirt/' );
 
-	test( "allows adding variable products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
-		page,
-		pageObject,
-		editor,
-	} ) => {
-		await wpCLI( `option set woocommerce_cart_redirect_after_add yes` );
+			const addToCartBlock = page.locator(
+				'.wp-block-add-to-cart-with-options'
+			);
+			const colorBlueOption = addToCartBlock
+				.getByRole( 'radiogroup', { name: 'Color' } )
+				.getByRole( 'radio', { name: 'Blue', exact: true } );
+			const sizeLargeOption = addToCartBlock
+				.getByRole( 'radiogroup', { name: 'Size' } )
+				.getByRole( 'radio', { name: 'Large', exact: true } );
 
-		await pageObject.updateSingleProductTemplate();
+			await colorBlueOption.click();
+			await sizeLargeOption.click();
 
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart',
+			} );
+
+			await addToCartButton.click();
+
+			await expect(
+				page.getByLabel( 'Quantity of V-Neck T-Shirt in your cart.' )
+			).toHaveValue( '1' );
 		} );
 
-		// We intentionally test the V-Neck T-Shirt because it has variations
-		// using 'any' as a variation attribute.
-		await page.goto( '/product/v-neck-t-shirt/' );
+		await test.step( "allows adding grouped products to cart when the 'Redirect to cart after successful addition' setting is enabled", async () => {
+			await page.getByLabel( 'Remove V-Neck T-Shirt from cart' ).click();
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Your cart is currently empty!',
+				} )
+			).toBeVisible();
 
-		const addToCartBlock = page.locator(
-			'.wp-block-add-to-cart-with-options'
-		);
-		const colorBlueOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'radio', { name: 'Blue', exact: true } );
-		const sizeLargeOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Size' } )
-			.getByRole( 'radio', { name: 'Large', exact: true } );
+			await page.goto( '/product/logo-collection' );
 
-		await colorBlueOption.click();
-		await sizeLargeOption.click();
+			const increaseQuantityButton = page.getByLabel(
+				'Increase quantity of T-Shirt'
+			);
+			await increaseQuantityButton.click();
 
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart',
+			} );
+
+			await addToCartButton.click();
+
+			await expect(
+				page.getByLabel( 'Quantity of T-Shirt in your cart.' )
+			).toHaveValue( '1' );
 		} );
-
-		await addToCartButton.click();
-
-		await expect(
-			page.getByLabel( 'Quantity of V-Neck T-Shirt in your cart.' )
-		).toHaveValue( '1' );
-	} );
-
-	test( "allows adding grouped products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
-		page,
-		pageObject,
-		editor,
-	} ) => {
-		await wpCLI( `option set woocommerce_cart_redirect_after_add yes` );
-
-		await pageObject.updateSingleProductTemplate();
-
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-
-		await page.goto( '/product/logo-collection' );
-
-		const increaseQuantityButton = page.getByLabel(
-			'Increase quantity of T-Shirt'
-		);
-		await increaseQuantityButton.click();
-
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
-		} );
-
-		await addToCartButton.click();
-
-		await expect(
-			page.getByLabel( 'Quantity of T-Shirt in your cart.' )
-		).toHaveValue( '1' );
 	} );
 
 	test( 'allows adding simple products to cart when inside the Product block', async ( {
