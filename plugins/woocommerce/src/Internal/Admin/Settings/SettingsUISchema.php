@@ -148,7 +148,7 @@ class SettingsUISchema {
 	 * them are cast here to the string the client's own String() coercion
 	 * produces. Malformed entries remain unchanged for the provider to fix.
 	 *
-	 * @since 11.1.0
+	 * @since 11.0.0
 	 *
 	 * @param array $schema Settings UI schema.
 	 * @return array Schema with scalar option values canonicalized to strings.
@@ -258,7 +258,7 @@ class SettingsUISchema {
 					esc_html__( 'A Settings UI schema provider supplied non-string option, field, or visibility values that WooCommerce converted for compatibility: %s. Update the provider to supply string values.', 'woocommerce' ),
 					esc_html( implode( ', ', array_unique( $converted_fields ) ) )
 				),
-				'11.1.0'
+				'11.0.0'
 			);
 		}
 
