@@ -902,7 +902,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals(
 			wc_format_decimal( $preview_total_with_tax, wc_get_price_decimals() ),
-			$create_data['amount'],
+			$create_data['total'],
 			'Preview total + tax must match create refund amount exactly'
 		);
 	}
@@ -1505,7 +1505,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		);
 		$create_response = $this->server->dispatch( $create_request );
 		$this->assertEquals( 201, $create_response->get_status() );
-		$this->assertEquals( '33.34', $create_response->get_data()['amount'], 'Create amount must round identically to the preview.' );
+		$this->assertEquals( '33.34', $create_response->get_data()['total'], 'Create amount must round identically to the preview.' );
 	}
 
 	/**
@@ -1762,7 +1762,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		);
 		$create_response = $this->server->dispatch( $create_request );
 		$this->assertEquals( 201, $create_response->get_status(), 'Create accepts the same mixed request.' );
-		$this->assertEquals( '40.00', $create_response->get_data()['amount'], 'Create amount must match the preview total.' );
+		$this->assertEquals( '40.00', $create_response->get_data()['total'], 'Create amount must match the preview total.' );
 	}
 
 	/**

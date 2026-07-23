@@ -214,7 +214,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	private function create_test_refund( WC_Order $order, array $refund_data = array() ): WC_Order_Refund {
 		$default_data = array(
-			'amount'     => 5.00,
+			'total'      => 5.00,
 			'reason'     => 'Test refund',
 			'line_items' => array(),
 		);
@@ -304,7 +304,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order       = $this->create_test_order();
 		$refund_data = array(
 			'order_id'   => $order->get_id(),
-			'amount'     => 5.00,
+			'total'      => 5.00,
 			'reason'     => 'Customer requested refund',
 			'line_items' => array(),
 		);
@@ -322,7 +322,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertIsArray( $response_data );
 		$this->assertArrayHasKey( 'id', $response_data );
 		$this->assertEquals( $order->get_id(), $response_data['order_id'] );
-		$this->assertEquals( '5.00', $response_data['amount'] );
+		$this->assertEquals( '5.00', $response_data['total'] );
 		$this->assertEquals( 'Customer requested refund', $response_data['reason'] );
 
 		// Track for cleanup.
@@ -452,7 +452,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$refund_data = array(
 			'order_id'   => $order->get_id(),
-			'amount'     => 5.00,
+			'total'      => 5.00,
 			'reason'     => 'Partial refund for damaged item',
 			'line_items' => array(
 				array(
@@ -473,7 +473,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertIsArray( $response_data );
 		$this->assertArrayHasKey( 'id', $response_data );
 		$this->assertEquals( $order->get_id(), $response_data['order_id'] );
-		$this->assertEquals( '5.00', $response_data['amount'] );
+		$this->assertEquals( '5.00', $response_data['total'] );
 		$this->assertArrayHasKey( 'line_items', $response_data );
 		$this->assertCount( 1, $response_data['line_items'] );
 
@@ -571,7 +571,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Create refund with just refund_total (should extract and split tax automatically).
 		$refund_data = array(
 			'order_id'   => $order->get_id(),
-			'amount'     => 128.00,
+			'total'      => 128.00,
 			'reason'     => 'Testing automatic tax extraction with multiple rates',
 			'line_items' => array(
 				array(
@@ -595,7 +595,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order->get_id(), $response_data['order_id'] );
 
 		// Total refund amount should include extracted taxes.
-		$this->assertEquals( '128.00', $response_data['amount'], 'Refund amount should include both taxes' );
+		$this->assertEquals( '128.00', $response_data['total'], 'Refund amount should include both taxes' );
 
 		// Verify taxes were extracted and split proportionally on the refund line item.
 		$refund           = wc_get_order( $response_data['id'] );
@@ -720,7 +720,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Create refund with just refund_total (should extract compound taxes automatically).
 		$refund_data = array(
 			'order_id'   => $order->get_id(),
-			'amount'     => 115.50,
+			'total'      => 115.50,
 			'reason'     => 'Testing automatic compound tax extraction',
 			'line_items' => array(
 				array(
@@ -744,7 +744,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order->get_id(), $response_data['order_id'] );
 
 		// Total refund amount should include extracted compound taxes.
-		$this->assertEquals( '115.50', $response_data['amount'], 'Refund amount should include compound taxes' );
+		$this->assertEquals( '115.50', $response_data['total'], 'Refund amount should include compound taxes' );
 
 		// Verify compound taxes were extracted and recorded on the refund line item.
 		$refund           = wc_get_order( $response_data['id'] );
@@ -895,7 +895,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order->get_id(), $response_data['order_id'] );
 
 		// Total refund amount should include the explicit taxes.
-		$this->assertEquals( '38.40', $response_data['amount'], 'Refund amount should include explicit taxes' );
+		$this->assertEquals( '38.40', $response_data['total'], 'Refund amount should include explicit taxes' );
 
 		// Verify explicit taxes were recorded on the refund line item.
 		$refund           = wc_get_order( $response_data['id'] );
@@ -993,7 +993,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response->get_status(), 'Tax-only explicit refunds should be accepted.' );
 		$response_data = $response->get_data();
-		$this->assertEquals( '10.00', $response_data['amount'], 'Refund amount should include the explicit tax.' );
+		$this->assertEquals( '10.00', $response_data['total'], 'Refund amount should include the explicit tax.' );
 
 		$refund           = wc_get_order( $response_data['id'] );
 		$refund_items     = $refund->get_items( 'line_item' );
@@ -1067,7 +1067,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Try to create refund with refund_total exceeding line item total (should fail).
 		$refund_data = array(
 			'order_id'   => $order->get_id(),
-			'amount'     => 500.00,
+			'total'      => 500.00,
 			'reason'     => 'Should fail - exceeding total',
 			'line_items' => array(
 				array(
@@ -1193,7 +1193,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Line items: 110.00, but amount: 50.00 (under-refunding).
 		$refund_data = array(
 			'order_id'   => $order->get_id(),
-			'amount'     => 50.00,
+			'total'      => 50.00,
 			'reason'     => 'Should fail - under-refunding',
 			'line_items' => array(
 				array(
@@ -1223,13 +1223,93 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The legacy amount field is rejected explicitly with unsupported_amount_field instead of being silently dropped.
+	 *
+	 * The field was renamed to total. Without this guard the REST layer would
+	 * silently drop the unknown amount param and the controller would fall back
+	 * to the full line-item total, refunding more than the client requested
+	 * (e.g. amount: 50 with line items totaling 110 would create a 110.00 refund).
+	 * An explicit null must be rejected the same way: get_param() cannot tell
+	 * {"amount": null} apart from an absent field, so the guard uses has_param().
+	 */
+	public function test_refunds_create_rejects_legacy_amount_field(): void {
+		$order      = $this->create_test_order();
+		$line_items = $order->get_items( 'line_item' );
+		$line_item  = reset( $line_items );
+
+		foreach ( array( 5.00, null ) as $legacy_amount ) {
+			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+			$request->set_body_params(
+				array(
+					'order_id'   => $order->get_id(),
+					'amount'     => $legacy_amount,
+					'line_items' => array(
+						array(
+							'line_item_id' => $line_item->get_id(),
+							'quantity'     => 1,
+						),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 400, $response->get_status(), 'Legacy amount field must be rejected, not silently ignored' );
+			$response_data = $response->get_data();
+			$this->assertEquals( 'unsupported_amount_field', $response_data['code'] );
+			$this->assertStringContainsString( 'total', $response_data['message'] );
+		}
+
+		// No refund may have been created.
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( 0, $order->get_refunds(), 'Rejected requests must not create a refund' );
+	}
+
+	/**
+	 * @testdox An explicitly supplied zero total is rejected instead of falling back to the calculated amount.
+	 *
+	 * The total schema default previously made an explicit 0 indistinguishable
+	 * from an omitted total: empty( 0 ) routed the request onto the calculated
+	 * line-item amount and skipped the under-refund check, so a request meaning
+	 * "refund nothing" refunded the full computed amount. String forms such as
+	 * "0.00" are truthy and slipped past the old check the same way.
+	 */
+	public function test_refunds_create_rejects_explicit_zero_total(): void {
+		$order      = $this->create_test_order();
+		$line_items = $order->get_items( 'line_item' );
+		$line_item  = reset( $line_items );
+
+		foreach ( array( 0, '0.00' ) as $zero_total ) {
+			$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+			$request->set_body_params(
+				array(
+					'order_id'   => $order->get_id(),
+					'total'      => $zero_total,
+					'line_items' => array(
+						array(
+							'line_item_id' => $line_item->get_id(),
+							'quantity'     => 1,
+						),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 400, $response->get_status(), 'An explicit zero total must be rejected, not treated as omitted' );
+			$this->assertEquals( 'invalid_refund_amount', $response->get_data()['code'] );
+		}
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( 0, $order->get_refunds(), 'Rejected requests must not create a refund' );
+	}
+
+	/**
 	 * Test refund creation with API refund and restock options.
 	 */
 	public function test_refunds_create_with_api_options(): void {
 		$order       = $this->create_test_order();
 		$refund_data = array(
 			'order_id'    => $order->get_id(),
-			'amount'      => 5.00,
+			'total'       => 5.00,
 			'reason'      => 'API refund test',
 			'api_refund'  => false,
 			'api_restock' => true,
@@ -1249,7 +1329,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertIsArray( $response_data );
 		$this->assertArrayHasKey( 'id', $response_data );
 		$this->assertEquals( $order->get_id(), $response_data['order_id'] );
-		$this->assertEquals( '5.00', $response_data['amount'] );
+		$this->assertEquals( '5.00', $response_data['total'] );
 		$this->assertEquals( 'API refund test', $response_data['reason'] );
 
 		// Track for cleanup.
@@ -1391,7 +1471,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// The v4 API should extract taxes from the inclusive amount and get the correct base.
 		$refund_data = array(
 			'order_id'   => $order->get_id(),
-			'amount'     => 55.26,
+			'total'      => 55.26,
 			'reason'     => 'Testing rounding precision with multiple tax rates',
 			'line_items' => array(
 				array(
@@ -1416,7 +1496,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order->get_id(), $response_data['order_id'] );
 
 		// Total refund amount should be 55.26.
-		$this->assertEquals( '55.26', $response_data['amount'], 'Refund amount should be 55.26' );
+		$this->assertEquals( '55.26', $response_data['total'], 'Refund amount should be 55.26' );
 
 		// Get the actual refund object to check line item details.
 		$refund           = wc_get_order( $response_data['id'] );
@@ -1794,7 +1874,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'order_id'   => $order->get_id(),
-				'amount'     => 15.00,
+				'total'      => 15.00,
 				'line_items' => array(
 					array(
 						'line_item_id' => $item->get_id(),
@@ -1848,7 +1928,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( '10.00', $data['amount'], 'Auto-computed amount should be unit price × quantity' );
+		$this->assertEquals( '10.00', $data['total'], 'Auto-computed amount should be unit price × quantity' );
 
 		$this->created_refunds[] = $data['id'];
 		$product->delete( true );
@@ -1937,7 +2017,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 			$this->assertEquals( 201, $response->get_status() );
 			$data = $response->get_data();
-			$this->assertEquals( '110.00', $data['amount'], 'Auto-computed amount should include tax ($100 + 10% = $110)' );
+			$this->assertEquals( '110.00', $data['total'], 'Auto-computed amount should include tax ($100 + 10% = $110)' );
 
 			// Verify the per-line refund_tax was extracted (not 0).
 			$this->assertNotEmpty( $data['line_items'] );
@@ -1992,7 +2072,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 		$response_a = $this->server->dispatch( $request_a );
 		$this->assertEquals( 201, $response_a->get_status() );
-		$amount_a                = $response_a->get_data()['amount'];
+		$amount_a                = $response_a->get_data()['total'];
 		$this->created_refunds[] = $response_a->get_data()['id'];
 
 		// Order B: same shape but with explicit refund_total computed by the client.
@@ -2023,7 +2103,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 		$response_b = $this->server->dispatch( $request_b );
 		$this->assertEquals( 201, $response_b->get_status() );
-		$amount_b                = $response_b->get_data()['amount'];
+		$amount_b                = $response_b->get_data()['total'];
 		$this->created_refunds[] = $response_b->get_data()['id'];
 
 		$this->assertEquals( $amount_b, $amount_a, 'Simplified form should produce the same amount as the explicit form.' );
@@ -2131,11 +2211,11 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			);
 
 			$this->assertEquals(
-				$data_explicit['amount'],
-				$data_simplified['amount'],
+				$data_explicit['total'],
+				$data_simplified['total'],
 				'Tax-inclusive store: simplified and explicit forms must produce the same amount.'
 			);
-			$this->assertEquals( '110.00', $data_simplified['amount'] );
+			$this->assertEquals( '110.00', $data_simplified['total'] );
 
 			// The per-line refund_total / refund_tax must round-trip identically too.
 			$this->assertEquals(
@@ -2220,7 +2300,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( '25.00', $data['amount'], 'Total = 10 (auto) + 15 (explicit) = 25' );
+		$this->assertEquals( '25.00', $data['total'], 'Total = 10 (auto) + 15 (explicit) = 25' );
 
 		$this->created_refunds[] = $data['id'];
 		$product_a->delete( true );
@@ -2316,7 +2396,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( '50.00', $data['amount'], 'Total = 10 (auto) + 15 (explicit) + 25 (legacy) = 50' );
+		$this->assertEquals( '50.00', $data['total'], 'Total = 10 (auto) + 15 (explicit) + 25 (legacy) = 50' );
 		$this->created_refunds[] = $data['id'];
 
 		// Verify all three lines are attached and carry the expected qty.
@@ -2434,7 +2514,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( '7.50', $data['amount'], 'Auto-computed fee refund should equal the full fee total' );
+		$this->assertEquals( '7.50', $data['total'], 'Auto-computed fee refund should equal the full fee total' );
 
 		$this->created_refunds[] = $data['id'];
 		$product->delete( true );
@@ -2591,7 +2671,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$data = $response->get_data();
 			// Tax-inclusive store: refund amount must still be $110 ($100 + $10 tax),
 			// confirming the auto-compute round-trip works under prices_include_tax=yes.
-			$this->assertEquals( '110.00', $data['amount'], 'Tax-inclusive store: auto-computed amount must equal the tax-inclusive line total.' );
+			$this->assertEquals( '110.00', $data['total'], 'Tax-inclusive store: auto-computed amount must equal the tax-inclusive line total.' );
 
 			$this->assertNotEmpty( $data['line_items'] );
 			$line_item_response = $data['line_items'][0];
@@ -2655,7 +2735,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertEquals( '30.00', $data['amount'] );
+		$this->assertEquals( '30.00', $data['total'] );
 		$this->created_refunds[] = $data['id'];
 
 		// The line item must be attached to the refund record (B regression guard).
@@ -2709,7 +2789,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 201, $response3->get_status(), 'Follow-up refund within remaining dollars must succeed.' );
 		$data3 = $response3->get_data();
-		$this->assertEquals( '40.00', $data3['amount'] );
+		$this->assertEquals( '40.00', $data3['total'] );
 		$this->created_refunds[] = $data3['id'];
 
 		// And after $30 + $40 = $70 refunded, total refunded equals 70, remaining = 30.
@@ -2872,7 +2952,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$data                    = $response->get_data();
 			$this->created_refunds[] = $data['id'];
 
-			$this->assertEquals( '110.00', $data['amount'] );
+			$this->assertEquals( '110.00', $data['total'] );
 			$this->assertNotEmpty( $data['line_items'] );
 			$this->assertEquals( '100.00', $data['line_items'][0]['refund_total'], 'Per-line refund_total should be tax-exclusive after extraction.' );
 			$this->assertNotEmpty( $data['line_items'][0]['refund_tax'], 'refund_tax must be extracted on the tax-inclusive legacy path.' );
@@ -3494,7 +3574,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals(
 			$preview['total'],
-			$create_data['amount'],
+			$create_data['total'],
 			'Create amount must match build_refund_preview total exactly.'
 		);
 
@@ -3681,7 +3761,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( 201, $response->get_status() );
-		$this->assertEqualsWithDelta( 11.00, (float) $response->get_data()['amount'], 0.001, 'One-shot qty-3 refund should equal the full line total' );
+		$this->assertEqualsWithDelta( 11.00, (float) $response->get_data()['total'], 0.001, 'One-shot qty-3 refund should equal the full line total' );
 		$this->created_refunds[] = $response->get_data()['id'];
 
 		list( $order, $item ) = $this->create_order_with_exact_line( 3, 11.00, 11.00, 11.00 );
@@ -3696,7 +3776,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		foreach ( array( 1, 2 ) as $refund_number ) {
 			$response = $this->dispatch_refund_request( $order->get_id(), $unit_refund );
 			$this->assertEquals( 201, $response->get_status(), "Single-unit refund {$refund_number} should succeed" );
-			$this->assertEqualsWithDelta( 3.67, (float) $response->get_data()['amount'], 0.001, 'Each single-unit refund rounds 11.00/3 up to 3.67' );
+			$this->assertEqualsWithDelta( 3.67, (float) $response->get_data()['total'], 0.001, 'Each single-unit refund rounds 11.00/3 up to 3.67' );
 			$this->created_refunds[] = $response->get_data()['id'];
 		}
 
@@ -3741,7 +3821,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				)
 			);
 			$this->assertEquals( 201, $response->get_status() );
-			$this->assertEqualsWithDelta( 667.0, (float) $response->get_data()['amount'], 0.001, 'Qty-2 refund of a 1000/3 line rounds to 667 at zero decimals' );
+			$this->assertEqualsWithDelta( 667.0, (float) $response->get_data()['total'], 0.001, 'Qty-2 refund of a 1000/3 line rounds to 667 at zero decimals' );
 			$this->created_refunds[] = $response->get_data()['id'];
 
 			$response = $this->dispatch_refund_request(
@@ -3754,7 +3834,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				)
 			);
 			$this->assertEquals( 201, $response->get_status() );
-			$this->assertEqualsWithDelta( 333.0, (float) $response->get_data()['amount'], 0.001, '667 + 333 consumes the 1000 line exactly' );
+			$this->assertEqualsWithDelta( 333.0, (float) $response->get_data()['total'], 0.001, '667 + 333 consumes the 1000 line exactly' );
 			$this->created_refunds[] = $response->get_data()['id'];
 
 			list( $order_b, $item_b ) = $this->create_order_with_exact_line( 3, 1000.00, 1000.00, 1000.00 );
@@ -3768,7 +3848,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			for ( $i = 0; $i < 3; $i++ ) {
 				$response = $this->dispatch_refund_request( $order_b->get_id(), $unit_refund );
 				$this->assertEquals( 201, $response->get_status() );
-				$this->assertEqualsWithDelta( 333.0, (float) $response->get_data()['amount'], 0.001, 'Each single-unit refund rounds 1000/3 down to 333' );
+				$this->assertEqualsWithDelta( 333.0, (float) $response->get_data()['total'], 0.001, 'Each single-unit refund rounds 1000/3 down to 333' );
 				$this->created_refunds[] = $response->get_data()['id'];
 			}
 
@@ -3779,7 +3859,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$request->set_body_params(
 				array(
 					'order_id' => $order_b->get_id(),
-					'amount'   => 1,
+					'total'    => 1,
 				)
 			);
 			$response = $this->server->dispatch( $request );
@@ -3827,7 +3907,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				)
 			);
 			$this->assertEquals( 201, $response->get_status() );
-			$this->assertEqualsWithDelta( 32.63, (float) $response->get_data()['amount'], 0.001, 'Full-quantity refund must equal line total + line tax exactly' );
+			$this->assertEqualsWithDelta( 32.63, (float) $response->get_data()['total'], 0.001, 'Full-quantity refund must equal line total + line tax exactly' );
 			$this->created_refunds[] = $response->get_data()['id'];
 
 			list( $order, $item ) = $this->create_order_with_exact_line( 3, 29.97, 29.97, 32.63, array( $tax_rate_id => 2.66 ) );
@@ -3843,7 +3923,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			);
 			$this->assertEquals( 201, $response->get_status() );
 			$data = $response->get_data();
-			$this->assertEqualsWithDelta( 21.75, (float) $data['amount'], 0.001, 'Qty-2 refund of the 32.63 line rounds 21.7533 to 21.75' );
+			$this->assertEqualsWithDelta( 21.75, (float) $data['total'], 0.001, 'Qty-2 refund of the 32.63 line rounds 21.7533 to 21.75' );
 			$this->created_refunds[] = $data['id'];
 
 			$line    = $data['line_items'][0];
@@ -3863,7 +3943,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				)
 			);
 			$this->assertEquals( 201, $response->get_status() );
-			$this->assertEqualsWithDelta( 10.88, (float) $response->get_data()['amount'], 0.001, '21.75 + 10.88 consumes the 32.63 line exactly' );
+			$this->assertEqualsWithDelta( 10.88, (float) $response->get_data()['total'], 0.001, '21.75 + 10.88 consumes the 32.63 line exactly' );
 			$this->created_refunds[] = $response->get_data()['id'];
 
 			$order = wc_get_order( $order->get_id() );
@@ -3911,7 +3991,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				)
 			);
 			$this->assertEquals( 201, $response->get_status() );
-			$this->assertEqualsWithDelta( 49.95, (float) $response->get_data()['amount'], 0.001, 'Full-quantity refund must equal 5 × the displayed 9.99 price' );
+			$this->assertEqualsWithDelta( 49.95, (float) $response->get_data()['total'], 0.001, 'Full-quantity refund must equal 5 × the displayed 9.99 price' );
 			$this->created_refunds[] = $response->get_data()['id'];
 
 			list( $order_b, $item_b ) = $this->create_order_with_exact_line( 5, 40.61, 40.61, 49.95, array( $tax_rate_id => 9.34 ) );
@@ -3926,7 +4006,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				)
 			);
 			$this->assertEquals( 201, $response->get_status() );
-			$this->assertEqualsWithDelta( 19.98, (float) $response->get_data()['amount'], 0.001, 'Qty-2 refund must equal 2 × the displayed 9.99 price' );
+			$this->assertEqualsWithDelta( 19.98, (float) $response->get_data()['total'], 0.001, 'Qty-2 refund must equal 2 × the displayed 9.99 price' );
 			$this->created_refunds[] = $response->get_data()['id'];
 		} finally {
 			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
@@ -3996,8 +4076,8 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$response = $this->dispatch_refund_request( $order->get_id(), $line_items );
 			$this->assertEquals( 201, $response->get_status() );
 			$data = $response->get_data();
-			$this->assertEqualsWithDelta( 112.35, (float) $data['amount'], 0.001, 'Qty-2 refund of the 168.53 line rounds 112.3533 to 112.35' );
-			$this->assertEquals( $preview['total'], $data['amount'], 'Create amount must match build_refund_preview total exactly' );
+			$this->assertEqualsWithDelta( 112.35, (float) $data['total'], 0.001, 'Qty-2 refund of the 168.53 line rounds 112.3533 to 112.35' );
+			$this->assertEquals( $preview['total'], $data['total'], 'Create amount must match build_refund_preview total exactly' );
 			$this->created_refunds[] = $data['id'];
 
 			$line    = $data['line_items'][0];
@@ -4029,7 +4109,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( 201, $response->get_status() );
-		$this->assertEqualsWithDelta( 18.00, (float) $response->get_data()['amount'], 0.001, 'Qty-2 refund must use the discounted 9.00 unit price, not the 10.00 subtotal price' );
+		$this->assertEqualsWithDelta( 18.00, (float) $response->get_data()['total'], 0.001, 'Qty-2 refund must use the discounted 9.00 unit price, not the 10.00 subtotal price' );
 		$this->created_refunds[] = $response->get_data()['id'];
 	}
 
@@ -4108,7 +4188,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( 201, $response->get_status() );
-		$this->assertEqualsWithDelta( 12.50, (float) $response->get_data()['amount'], 0.001, 'Quantity 1 refunds each non-product line at its full total, exactly once' );
+		$this->assertEqualsWithDelta( 12.50, (float) $response->get_data()['total'], 0.001, 'Quantity 1 refunds each non-product line at its full total, exactly once' );
 		$this->created_refunds[] = $response->get_data()['id'];
 
 		$product->delete( true );
@@ -4124,7 +4204,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'order_id'  => $order->get_id(),
-				'amount'    => 1.00,
+				'total'     => 1.00,
 				'meta_data' => $this->get_incomplete_meta_data_input(),
 			)
 		);
@@ -4207,7 +4287,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$data                    = $response->get_data();
 		$this->created_refunds[] = $data['id'];
 
-		$this->assertEquals( '55.00', $data['amount'], 'Refund amount must equal the tax-inclusive partial total.' );
+		$this->assertEquals( '55.00', $data['total'], 'Refund amount must equal the tax-inclusive partial total.' );
 
 		$refund           = wc_get_order( $data['id'] );
 		$refund_items     = $refund->get_items( 'line_item' );
@@ -4291,7 +4371,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$data                    = $response->get_data();
 		$this->created_refunds[] = $data['id'];
 
-		$this->assertEquals( '16.50', $data['amount'], 'Refund amount must follow refund_total, not the full quantity total.' );
+		$this->assertEquals( '16.50', $data['total'], 'Refund amount must follow refund_total, not the full quantity total.' );
 
 		$refund           = wc_get_order( $data['id'] );
 		$refund_items     = $refund->get_items( 'line_item' );
@@ -4394,7 +4474,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 			$this->assertEquals( -499.0, (float) $refund_line_item->get_total(), 'Net subtotal rounds to a whole number at zero decimals.' );
 			$this->assertEquals( -50.0, (float) $refund_taxes['total'][ $tax_rate_id ], 'Tax rounds to a whole number at zero decimals.' );
-			$this->assertEquals( 549.0, (float) $data['amount'], 'Net + tax must reconstitute the requested amount.' );
+			$this->assertEquals( 549.0, (float) $data['total'], 'Net + tax must reconstitute the requested amount.' );
 
 			$product->delete( true );
 		} finally {
@@ -4479,7 +4559,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( -0.43, (float) $refund_taxes['total'][ $tax_rate_id ], 'Tax rounds to the nearest cent.' );
 		$this->assertEquals( -2.90, (float) $refund_line_item->get_total(), 'Net subtotal absorbs the rounding remainder.' );
-		$this->assertEquals( '3.33', $data['amount'], 'Net + tax must reconstitute the requested amount to the cent.' );
+		$this->assertEquals( '3.33', $data['total'], 'Net + tax must reconstitute the requested amount to the cent.' );
 
 		$product->delete( true );
 	}
@@ -4614,7 +4694,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$data                    = $response->get_data();
 			$this->created_refunds[] = $data['id'];
 
-			$this->assertEquals( '55.00', $data['amount'], 'Tax-inclusive store: amount equals the requested tax-inclusive partial.' );
+			$this->assertEquals( '55.00', $data['total'], 'Tax-inclusive store: amount equals the requested tax-inclusive partial.' );
 
 			$refund           = wc_get_order( $data['id'] );
 			$refund_items     = $refund->get_items( 'line_item' );
@@ -4711,7 +4791,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$preview_item = $preview['breakdown']['products']['items'][0];
 
 		// Grand-total parity.
-		$this->assertEquals( $preview['total'], $data['amount'], 'Create amount must match the preview total.' );
+		$this->assertEquals( $preview['total'], $data['total'], 'Create amount must match the preview total.' );
 
 		// Per-line split parity: stored refund values are negative, the preview is positive.
 		$refund           = wc_get_order( $data['id'] );
