@@ -1005,6 +1005,12 @@ const { actions } = store< Store >(
 			},
 
 			*refreshCartItems(): AsyncAction< void > {
+				// Skip when the server did not provide the interactivity
+				// state this store needs (e.g. cart/checkout pages).
+				if ( ! state.restUrl ) {
+					return;
+				}
+
 				// Skip if queue is processing - it will apply server state when done
 				if ( cartQueue?.getStatus().isProcessing ) {
 					return;
