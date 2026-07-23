@@ -5351,7 +5351,8 @@ img.help_tip {
 			padding-right: 24px;
 		}
 
-		th label {
+		th label,
+		th .wc-settings-radio-title {
 			position: relative;
 			display: block;
 
@@ -5564,7 +5565,8 @@ img.help_tip {
 				}
 			}
 
-			th label {
+			th label,
+			th .wc-settings-radio-title {
 				img.help_tip,
 				.woocommerce-help-tip {
 					margin: -7px -24px 0 0;

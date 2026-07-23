@@ -124,12 +124,15 @@ const SavedPaymentMethodOptions = () => {
 					value: paymentMethod.tokenId.toString(),
 					onChange: ( token: string ) => {
 						const savedTokenKey = `wc-${ paymentMethodSlug }-payment-token`;
-						__internalSetActivePaymentMethod( paymentMethodSlug, {
-							token,
-							payment_method: paymentMethodSlug,
-							[ savedTokenKey ]: token.toString(),
-							isSavedToken: true,
-						} );
+						void __internalSetActivePaymentMethod(
+							paymentMethodSlug,
+							{
+								token,
+								payment_method: paymentMethodSlug,
+								[ savedTokenKey ]: token.toString(),
+								isSavedToken: true,
+							}
+						);
 						removeNotice(
 							'wc-payment-error',
 							noticeContexts.PAYMENTS

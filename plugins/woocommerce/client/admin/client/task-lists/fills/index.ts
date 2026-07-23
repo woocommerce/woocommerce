@@ -13,12 +13,12 @@ import './launch-your-store';
 
 const possiblyImportProductTask = async () => {
 	if ( isImportProduct() ) {
-		import( './import-products' );
+		void import( './import-products' );
 	} else {
-		import( './products' );
+		void import( './products' );
 	}
 };
 
-possiblyImportProductTask();
+void possiblyImportProductTask();
 
-import( './shipping-recommendation' );
+void import( './shipping-recommendation' );

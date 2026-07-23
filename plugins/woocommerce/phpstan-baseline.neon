@@ -3283,12 +3283,6 @@ parameters:
 			path: includes/admin/class-wc-admin-webhooks.php
 
 		-
-			message: '#^Binary operation "\." between ''plugin\-install\.php…'' and array\|string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/admin/class-wc-admin.php
-
-		-
 			message: '#^Method WC_Admin\:\:admin_redirects\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

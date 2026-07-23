@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve the legacy admin header when a Settings UI drill-down fails to render.
