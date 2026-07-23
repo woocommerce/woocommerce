@@ -67,8 +67,8 @@ export const geolocate =
 				method: 'GET',
 			} );
 			const result: GeolocationResponse = await response.json();
-			dispatch.geolocationSuccess( result );
+			void dispatch.geolocationSuccess( result );
 		} catch ( error ) {
-			dispatch.geolocationError( error );
+			void dispatch.geolocationError( error );
 		}
 	};

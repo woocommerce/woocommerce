@@ -163,7 +163,7 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 			}
 		};
 
-		initializeStripe();
+		void initializeStripe();
 	}, [ kycSessionUrl, onboardingData, onboardingSource ] );
 
 	return { stripeConnectInstance, initializationError, loading };

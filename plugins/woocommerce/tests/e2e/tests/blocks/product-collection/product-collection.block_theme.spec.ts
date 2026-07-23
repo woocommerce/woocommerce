@@ -6,6 +6,7 @@ import {
 	test as base,
 	expect,
 	wpCLI,
+	BASE_URL,
 	BLOCK_THEME_SLUG,
 } from '@woocommerce/e2e-utils';
 
@@ -455,9 +456,7 @@ test.describe( 'Product Collection', () => {
 
 			await page
 				.getByRole( 'option', {
-					name: `Cap http://localhost:${
-						process.env.WP_ENV_TESTS_PORT || '8086'
-					}/product/cap/`,
+					name: `Cap ${ BASE_URL }/product/cap/`,
 				} )
 				.click();
 			await page
@@ -788,7 +787,6 @@ test.describe( 'Product Collection', () => {
 					admin,
 					editor,
 					page,
-					wpCoreVersion,
 				} ) => {
 					await pageObject.refreshLocators( 'frontend' );
 
@@ -812,15 +810,9 @@ test.describe( 'Product Collection', () => {
 						canvas: 'edit',
 					} );
 
-					// TODO: WP 7.0 compat - Custom HTML block content is inside an iframe
-					// since WP 7.0. Simplify when WP 7.0 is the minimum supported version.
-					const placeholderLocator =
-						wpCoreVersion >= 7
-							? editor.canvas
-									.frameLocator( 'iframe' )
-									.getByText( 'placeholder' )
-							: editor.canvas.getByText( 'placeholder' );
-					await expect( placeholderLocator ).toBeVisible();
+					await expect(
+						editor.getCustomHtmlBlockContentLocator( 'placeholder' )
+					).toBeVisible();
 
 					await editor.insertBlock( { name: legacyBlockName } );
 

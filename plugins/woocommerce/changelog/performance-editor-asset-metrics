@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add editor asset count and network transfer size performance metrics.

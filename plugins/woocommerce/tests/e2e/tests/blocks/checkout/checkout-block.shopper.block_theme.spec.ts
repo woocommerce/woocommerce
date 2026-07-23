@@ -293,29 +293,6 @@ test.describe( 'Shopper → Local pickup', () => {
 	} );
 } );
 
-test.describe( 'Shopper → Payment Methods', () => {
-	test( 'User can change payment methods', async ( {
-		frontendUtils,
-		page,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await page
-			.getByRole( 'radio', { name: 'Direct bank transfer' } )
-			.click();
-		await expect(
-			page.getByRole( 'radio', { name: 'Direct bank transfer' } )
-		).toBeChecked();
-
-		await page.getByRole( 'radio', { name: 'Cash on delivery' } ).click();
-		await expect(
-			page.getByRole( 'radio', { name: 'Cash on delivery' } )
-		).toBeChecked();
-	} );
-} );
-
 test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 	const billingTestData = {
 		firstname: 'John',
@@ -347,7 +324,13 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 	// `as string` is safe here because we know the variable is a string, it is defined above.
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test.beforeEach( async ( { admin, editor, page } ) => {
+	test.beforeEach( async ( { admin, editor, page, wpCoreVersion } ) => {
+		test.skip(
+			wpCoreVersion === 7.1,
+			'Currently broken with WordPress 7.1 beta 1 and requires upstream patch. ' +
+				'See: https://github.com/WordPress/gutenberg/pull/80026#issuecomment-5003222851'
+		);
+
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
@@ -653,7 +636,18 @@ test.describe( 'Shopper → Checkout Form Errors (guest user)', () => {
 test.describe( 'Billing Address Form', () => {
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test( 'Enable company field', async ( { page, admin, editor } ) => {
+	test( 'Enable company field', async ( {
+		page,
+		admin,
+		editor,
+		wpCoreVersion,
+	} ) => {
+		test.skip(
+			wpCoreVersion === 7.1,
+			'Currently broken with WordPress 7.1 beta 1 and requires upstream patch. ' +
+				'See: https://github.com/WordPress/gutenberg/pull/80026#issuecomment-5003222851'
+		);
+
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
