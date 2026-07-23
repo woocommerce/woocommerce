@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Admin\Settings\SettingsSectionInterface;
 use Automattic\WooCommerce\Admin\Settings\SettingsSectionRegistry;
 use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUISchema;
 use WC_Unit_Test_Case;
 
 /**
@@ -157,6 +158,48 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'native_tab', $schema['section'] );
 		$this->assertArrayHasKey( 'native_group', $schema['groups'] );
 		$this->assertArrayNotHasKey( 'registered_acme_payments_setting', $schema['groups'] );
+	}
+
+	/**
+	 * @testdox Should canonicalize option values from a native Settings UI page provider.
+	 */
+	public function test_canonicalizes_option_values_from_native_settings_ui_page(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_option_values' );
+
+		$page = $this->get_parent_page();
+		SettingsSectionRegistry::get_instance()->register(
+			$this->get_registered_section_with_native_settings_ui_page(
+				null,
+				null,
+				null,
+				array(
+					array(
+						'id'      => 'acme_tier',
+						'label'   => 'Tier',
+						'type'    => 'select',
+						'value'   => 1,
+						'options' => array(
+							array(
+								'label' => 'One',
+								'value' => 1,
+							),
+							array(
+								'label' => 'Two',
+								'value' => 2,
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$context = SettingsUIRequestContext::for_settings_page( $page, 'acme_payments' );
+		$schema  = $context->get_schema();
+
+		$this->assertFalse( $context->has_schema_failed() );
+		$field = $schema['groups']['native_group']['fields'][0];
+		$this->assertSame( '1', $field['value'], 'The selected value should follow its options to string form.' );
+		$this->assertSame( array( '1', '2' ), array_column( $field['options'], 'value' ), 'Scalar option values should canonicalize to strings.' );
 	}
 
 	/**
@@ -582,10 +625,11 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 	 * @param callable|null $on_settings_ui_page_call Callback invoked every time the Settings UI page provider runs.
 	 * @param array|null    $shell Schema shell for the native page. Null uses the fixture default with custom section navigation.
 	 * @param string|null   $failure_stage Settings UI resolution stage that should fail.
+	 * @param array|null    $fields Schema fields for the native page. Null uses an empty field list.
 	 * @return SettingsSectionInterface
 	 */
-	private function get_registered_section_with_native_settings_ui_page( ?callable $on_settings_ui_page_call = null, ?array $shell = null, ?string $failure_stage = null ): SettingsSectionInterface {
-		return new class( $on_settings_ui_page_call, $shell, $failure_stage ) extends SettingsSection {
+	private function get_registered_section_with_native_settings_ui_page( ?callable $on_settings_ui_page_call = null, ?array $shell = null, ?string $failure_stage = null, ?array $fields = null ): SettingsSectionInterface {
+		return new class( $on_settings_ui_page_call, $shell, $failure_stage, $fields ) extends SettingsSection {
 			/**
 			 * Callback invoked every time the Settings UI page provider runs.
 			 *
@@ -608,16 +652,25 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 			private ?string $failure_stage;
 
 			/**
+			 * Schema fields for the native page, or null for an empty field list.
+			 *
+			 * @var array|null
+			 */
+			private ?array $fields;
+
+			/**
 			 * Constructor.
 			 *
 			 * @param callable|null $on_settings_ui_page_call Callback invoked every time the Settings UI page provider runs.
 			 * @param array|null    $shell Schema shell for the native page, or null for the fixture default.
 			 * @param string|null   $failure_stage Settings UI resolution stage that should fail.
+			 * @param array|null    $fields Schema fields for the native page, or null for an empty field list.
 			 */
-			public function __construct( ?callable $on_settings_ui_page_call, ?array $shell, ?string $failure_stage ) {
+			public function __construct( ?callable $on_settings_ui_page_call, ?array $shell, ?string $failure_stage, ?array $fields ) {
 				$this->on_settings_ui_page_call = $on_settings_ui_page_call;
 				$this->shell                    = $shell;
 				$this->failure_stage            = $failure_stage;
+				$this->fields                   = $fields;
 			}
 
 			/**
@@ -674,7 +727,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 					( $this->on_settings_ui_page_call )();
 				}
 
-				return new class( $this->shell, $this->failure_stage ) implements SettingsUIPageInterface {
+				return new class( $this->shell, $this->failure_stage, $this->fields ) implements SettingsUIPageInterface {
 					/**
 					 * Schema shell, or null for the fixture default.
 					 *
@@ -690,14 +743,23 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 					private ?string $failure_stage;
 
 					/**
+					 * Schema fields, or null for an empty field list.
+					 *
+					 * @var array|null
+					 */
+					private ?array $fields;
+
+					/**
 					 * Constructor.
 					 *
 					 * @param array|null  $shell Schema shell, or null for the fixture default.
 					 * @param string|null $failure_stage Settings UI resolution stage that should fail.
+					 * @param array|null  $fields Schema fields, or null for an empty field list.
 					 */
-					public function __construct( ?array $shell, ?string $failure_stage ) {
+					public function __construct( ?array $shell, ?string $failure_stage, ?array $fields ) {
 						$this->shell         = $shell;
 						$this->failure_stage = $failure_stage;
+						$this->fields        = $fields;
 					}
 
 					/**
@@ -739,7 +801,7 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 								'native_group' => array(
 									'id'     => 'native_group',
 									'title'  => 'Native group',
-									'fields' => array(),
+									'fields' => $this->fields ?? array(),
 								),
 							),
 							'save'    => array(
