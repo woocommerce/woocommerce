@@ -66,7 +66,7 @@ export default function MySubscriptions(): React.JSX.Element {
 			notice_id: 'woo-connect-notice',
 			dismiss_notice_nonce: wccomSettings?.dismissNoticeNonce || '',
 		};
-		apiFetch( {
+		void apiFetch( {
 			path: `/wc-admin/notice/dismiss`,
 			method: 'POST',
 			data,
@@ -88,7 +88,7 @@ export default function MySubscriptions(): React.JSX.Element {
 				notice_id: 'woo-disconnect-notice',
 				dismiss_notice_nonce: wccomSettings?.dismissNoticeNonce || '',
 			};
-			apiFetch( {
+			void apiFetch( {
 				path: `/wc-admin/notice/dismiss`,
 				method: 'POST',
 				data,

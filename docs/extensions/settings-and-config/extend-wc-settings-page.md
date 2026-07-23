@@ -1,6 +1,6 @@
 ---
 post_title: How to add a settings page
-sidebar_label: Add a settings page
+sidebar_label: Settings pages
 sidebar_position: 2
 ---
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Render email galleries with the same number of columns the block author chose (up to 8) instead of clamping to 5. Clamping wide galleries forced extra partial rows whose trailing images stretched to a size the author never set.

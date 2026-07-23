@@ -1,6 +1,8 @@
 const { join } = require( 'path' );
 
 const defaultDependencies = [
+	'@wordpress/components',
+	'@wordpress/element',
 	'@wordpress/hooks',
 	'@wordpress/i18n',
 	'@woocommerce/components',

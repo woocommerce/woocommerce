@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Align the Core Breadcrumbs block output with WooCommerce Store Breadcrumbs on shop, product, account, archive, and custom taxonomy pages.
