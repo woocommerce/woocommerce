@@ -20,9 +20,10 @@ use WC_Order;
  * after `WC_Email_Customer_Abandoned_Cart_Recovery::AUTO_SEND_DELAY_SECONDS`.
  * The pending action is cancelled when the order transitions out of the
  * eligible-status set or is trashed/deleted, so a customer who completes
- * checkout before the delay elapses never receives the nudge. Eligibility
- * comes from the same `woocommerce_abandoned_cart_recovery_eligible_statuses`
- * filter the send/manual paths use.
+ * checkout before the delay elapses never receives the nudge. Eligibility runs
+ * through the same `woocommerce_abandoned_cart_recovery_eligible_statuses`
+ * filter the send/manual paths use, with a default scoped to `pending` — see
+ * `get_eligible_statuses()`.
  *
  * Per-order idempotency is enforced two ways: a scheduled-at meta key blocks
  * re-scheduling for the same order, and the trigger-time send gate refuses to
@@ -241,8 +242,18 @@ class Scheduler {
 	}
 
 	/**
-	 * Order statuses eligible for a recovery send, shared with the send-time
-	 * gate in `WC_Email_Customer_Abandoned_Cart_Recovery::is_order_eligible_for_recovery()`.
+	 * Order statuses that can be scheduled for an automated send.
+	 *
+	 * Scoped to `pending`, which is where classic checkout leaves an abandoned
+	 * order at creation time — the point this scheduler hooks into. The
+	 * send-time gate in
+	 * `WC_Email_Customer_Abandoned_Cart_Recovery::is_order_eligible_for_recovery()`
+	 * is intentionally wider and also accepts `checkout-draft`, so manual sends
+	 * cover block checkout as well. The two defaults converge when
+	 * checkout-draft scheduling is added.
+	 *
+	 * Both call sites fire the same filter, so a callback that appends to or
+	 * replaces the incoming array behaves consistently across them.
 	 *
 	 * @param WC_Order|null $order Order being inspected, or null if it could not be loaded.
 	 * @return string[]

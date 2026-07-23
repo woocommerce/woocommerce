@@ -73,6 +73,10 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		 *                     the customer is mid-flow. May have no billing email yet,
 		 *                     in which case `trigger()` no-ops.
 		 *
+		 * Covers block checkout as well as classic. The automated scheduler is
+		 * scoped to `pending` — see
+		 * `Internal\AbandonedCartRecovery\Scheduler::get_eligible_statuses()`.
+		 *
 		 * @var string[]
 		 */
 		private const ABANDONED_STATUSES = array(
