@@ -221,15 +221,11 @@ class SettingsUISchema {
 			}
 
 			foreach ( $group['fields'] as &$field ) {
-				if (
-					! is_array( $field ) ||
-					! isset( $field['id'], $field['visibility'] ) ||
-					! is_string( $field['id'] ) ||
-					! is_array( $field['visibility'] ) ||
-					! isset( $field['visibility']['controller'] ) ||
-					! in_array( $field['visibility']['controller'], $option_field_ids, true ) ||
-					! array_key_exists( 'value', $field['visibility'] )
-				) {
+				if ( ! is_array( $field ) || ! isset( $field['id'] ) || ! is_string( $field['id'] ) ) {
+					continue;
+				}
+
+				if ( ! self::is_canonicalizable_visibility_rule( $field['visibility'] ?? null, $option_field_ids ) ) {
 					continue;
 				}
 
@@ -289,6 +285,19 @@ class SettingsUISchema {
 		}
 
 		return $needs_conversion ? array_map( array( __CLASS__, 'to_canonical_string' ), $values ) : null;
+	}
+
+	/**
+	 * Whether a visibility rule carries a value compared against an options field.
+	 *
+	 * @param mixed $rule Candidate visibility rule.
+	 * @param array $option_field_ids Ids of fields carrying an options array.
+	 * @return bool
+	 */
+	private static function is_canonicalizable_visibility_rule( $rule, array $option_field_ids ): bool {
+		return is_array( $rule )
+			&& array_key_exists( 'value', $rule )
+			&& in_array( $rule['controller'] ?? null, $option_field_ids, true );
 	}
 
 	/**
