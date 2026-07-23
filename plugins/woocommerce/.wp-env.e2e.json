@@ -13,7 +13,11 @@
 		"https://downloads.wordpress.org/plugin/wordpress-importer.0.8.zip",
 		"https://downloads.wordpress.org/plugin/plugin-check.zip"
 	],
-	"themes": [],
+	"themes": [
+		"https://downloads.wordpress.org/theme/storefront.zip",
+		"https://downloads.wordpress.org/theme/twentytwenty.zip",
+		"https://downloads.wordpress.org/theme/twentytwentytwo.zip"
+	],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG": false,

@@ -266,7 +266,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					)
 				);
 				foreach ( $prefetch as $row ) {
-					$attributes_values[ $row->meta_key ][] = $row->meta_value;
+					// Defensive: normalize non-canonical meta_key casing (e.g. attribute_pa_Size → attribute_pa_size).
+					// sanitize_title over wc_variation_attribute_name as the latter adds 'attribute_' prefix.
+					$attributes_values[ sanitize_title( $row->meta_key ) ][] = $row->meta_value;
 				}
 			}
 
