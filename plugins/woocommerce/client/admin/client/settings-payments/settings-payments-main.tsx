@@ -157,7 +157,7 @@ export const SettingsPaymentsMain = () => {
 	const dismissIncentive = useCallback(
 		( dismissHref: string, context: string, doNotTrack = false ) => {
 			// The dismissHref is the full URL to dismiss the incentive.
-			apiFetch( {
+			void apiFetch( {
 				url: dismissHref,
 				method: 'POST',
 				data: {
@@ -170,7 +170,7 @@ export const SettingsPaymentsMain = () => {
 	);
 
 	const acceptIncentive = useCallback( ( id: string ) => {
-		apiFetch( {
+		void apiFetch( {
 			path: `/wc-analytics/admin/notes/experimental-activate-promo/${ id }`,
 			method: 'POST',
 		} );
@@ -195,7 +195,7 @@ export const SettingsPaymentsMain = () => {
 			orderMap[ provider.id ] = updatedOrderValues[ index ];
 		} );
 
-		updateProviderOrdering( orderMap );
+		void updateProviderOrdering( orderMap );
 
 		// Set the sorted providers to the state to give a real-time update
 		setSortedProviders( sorted );
@@ -317,7 +317,7 @@ export const SettingsPaymentsMain = () => {
 
 			if ( paymentsEntity?.onboarding?._links?.preload?.href ) {
 				// We are not interested in the response; we just want to trigger the preload.
-				apiFetch( {
+				void apiFetch( {
 					url: paymentsEntity?.onboarding?._links?.preload.href,
 					method: 'POST',
 					data: {
@@ -342,11 +342,11 @@ export const SettingsPaymentsMain = () => {
 			installAndActivatePlugins( [ paymentsEntity.plugin.slug ] )
 				.then( async ( response ) => {
 					if ( attachUrl ) {
-						attachPaymentExtensionSuggestion( attachUrl );
+						void attachPaymentExtensionSuggestion( attachUrl );
 					}
 
 					createNoticesFromResponse( response );
-					invalidateResolutionForStoreSelector(
+					void invalidateResolutionForStoreSelector(
 						'getPaymentProviders'
 					);
 

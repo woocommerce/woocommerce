@@ -150,7 +150,7 @@ const syncPrefersCollectionFromSelectedShippingRates = (
 		.map( ( rate ) => rate.method_id );
 
 	if ( selectedMethodIds?.length ) {
-		registry
+		void registry
 			.dispatch( checkoutStore )
 			.setPrefersCollection( hasCollectableRate( selectedMethodIds ) );
 	}

@@ -513,14 +513,21 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value     = $value['value'];
 						$disabled_values  = $value['disabled'] ?? array();
 						$show_desc_at_end = $value['desc_at_end'] ?? false;
+						$radio_title_id   = $value['id'] . '-title';
 
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+								<span class="wc-settings-radio-title">
+									<span id="<?php echo esc_attr( $radio_title_id ); ?>"><?php echo esc_html( $value['title'] ); ?></span>
+									<?php
+									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built by self::get_field_description(), which passes the tip through wc_help_tip(); that helper sanitizes the tip text and escapes the aria-label.
+									echo $tooltip_html;
+									?>
+								</span>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
-								<fieldset>
+								<fieldset aria-labelledby="<?php echo esc_attr( $radio_title_id ); ?>">
 									<?php
 									if ( ! $show_desc_at_end ) {
 										echo wp_kses_post( $description );

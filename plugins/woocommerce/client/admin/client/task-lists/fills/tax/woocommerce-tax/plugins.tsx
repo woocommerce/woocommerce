@@ -75,7 +75,7 @@ export const Plugins = ( {
 					recordEvent( 'tasklist_tax_install_extensions', {
 						install_extensions: true,
 					} );
-					updateOptions( {
+					void updateOptions( {
 						woocommerce_setup_jetpack_opted_in: true,
 					} );
 					nextStep();
