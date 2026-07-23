@@ -795,6 +795,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$stock_status = wc_clean( wp_unslash( $_GET['stock_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			if ( ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
+				// Only published variations qualify their parent for this discoverability filter.
+				// Other statuses retain normal aggregate-parent behavior.
 				$args['where'] .= $wpdb->prepare(
 					" AND {$wpdb->posts}.ID IN (
 						SELECT stock_status_products.product_id
