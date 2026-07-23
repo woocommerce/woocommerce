@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Explicitly activate Storefront in the performance env init script instead of relying on `theme install --activate`, which skips activation when the theme is pre-provisioned.
+

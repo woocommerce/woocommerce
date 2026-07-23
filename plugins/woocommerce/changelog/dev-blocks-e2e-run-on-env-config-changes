@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Run blocks e2e CI jobs when .wp-env.e2e.json or shared e2e bin setup scripts change.
+
