@@ -245,25 +245,17 @@ class Scheduler {
 	}
 
 	/**
-	 * Order statuses that can be scheduled for an automated send.
-	 *
-	 * Default logic applies only to orders in `pending`, which is where classic checkout leaves an 
-	 * abandoned order at creation time.
-	 * At email send time, the logic in 
-	 * {@see WC_Email_Customer_Abandoned_Cart_Recovery::is_order_eligible_for_recovery()}
-	 * also accepts `checkout-draft` to cover block checkout as well.
+	 * Order statuses that can be scheduled for an automated send. Defaults to `pending`, which is
+	 * where classic checkout leaves an abandoned order at creation time.
 	 *
 	 * @param WC_Order|null $order Order being inspected, or null if it could not be loaded.
 	 * @return string[]
 	 */
 	private function get_eligible_statuses( ?WC_Order $order ): array {
 		/**
-		 * Filter the order statuses that are eligible to receive the abandoned cart recovery email.
+		 * This filter is documented in includes/emails/class-wc-email-customer-abandoned-cart-recovery.php
 		 *
 		 * @since 11.0.0
-		 *
-		 * @param string[]      $eligible_statuses Default: `pending`.
-		 * @param WC_Order|null $order             Order being inspected, or null if it could not be loaded.
 		 */
 		return (array) apply_filters(
 			'woocommerce_abandoned_cart_recovery_eligible_statuses',

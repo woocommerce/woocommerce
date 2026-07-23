@@ -265,14 +265,21 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			/**
 			 * Filter the order statuses that are eligible to receive the abandoned cart recovery email.
 			 *
-			 * Defaults to the abandoned-checkout statuses (`pending`, `checkout-draft`). Partner
-			 * integrations or merchants who want recovery to fire for other states (e.g. `failed`)
-			 * can widen the list here.
+			 * The filter is applied at two points in the order lifecycle, which pass different
+			 * defaults because they cover different statuses:
+			 *
+			 * - At send time (here), the default is `pending` and `checkout-draft`, covering
+			 *   abandonment from both the classic and the block checkout, used in manual email trigger path
+			 *   from the order edit page.
+			 * - When the automated send is scheduled, the default is `pending` only.
+			 *   Store API orders are generally created in `checkout-draft`, which is not supported
+			 *   yet for automatic scheduled email.
+			 *   {@see \Automattic\WooCommerce\Internal\AbandonedCartRecovery\Scheduler::get_eligible_statuses()}
 			 *
 			 * @since 11.0.0
 			 *
-			 * @param string[] $eligible_statuses Default: ABANDONED_STATUSES.
-			 * @param WC_Order $order             Order being inspected.
+			 * @param string[]      $eligible_statuses Default: ABANDONED_STATUSES at manual send time, `pending` when scheduling.
+			 * @param WC_Order|null $order             Order being inspected, or null if it could not be loaded.
 			 */
 			$eligible_statuses = (array) apply_filters(
 				'woocommerce_abandoned_cart_recovery_eligible_statuses',
