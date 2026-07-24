@@ -155,6 +155,30 @@ jobs:
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
+      - name: 'Install cs2pr'
+        if: ${{ failure() && matrix.projectName == '@woocommerce/plugin-woocommerce' && github.event.pull_request.draft == false }}
+        uses: 'shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240' # 2.37.2
+        with:
+          php-version: '7.4'
+          coverage: 'none'
+          tools: 'cs2pr'
+
+      - name: 'Lint: PHP checkstyle annotations'
+        if: ${{ failure() && matrix.projectName == '@woocommerce/plugin-woocommerce' && github.event.pull_request.draft == false }}
+        working-directory: 'plugins/woocommerce'
+        # Re-runs the same PHP diff the 'Lint' step above already checked, only to get
+        # its output in checkstyle format for cs2pr. The pass/fail verdict already
+        # happened in 'Lint' -- this step can only add inline annotations, never change it.
+        run: |
+          baseBranch="origin/trunk"
+          changedFiles=$(git diff $(git merge-base HEAD "$baseBranch") --relative --name-only --diff-filter=d -- '*.php')
+          if [[ -z "$changedFiles" ]]; then
+            echo 'No changed PHP files detected; skipping checkstyle annotations.'
+            exit 0
+          fi
+          composer exec phpcs-changed -- --git --git-base "$baseBranch" --report=checkstyle $changedFiles > checkstyle.xml || true
+          cs2pr checkstyle.xml
+
   woocommerce-plugin-build-artifact:
     name: "Build WooCommerce plugin artifact${{ needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' && ' (optional)' || '' }}"
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
