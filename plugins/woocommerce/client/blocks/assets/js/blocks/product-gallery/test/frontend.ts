@@ -36,7 +36,8 @@ function mockGetEntry( name: string ): MockStoreEntry {
 }
 
 // The `woocommerce/products` store's state consulted by
-// `listenToProductDataChanges`: `variationId` drives change detection, and
+// `listenToProductDataChanges`: `productVariationInContext` (the derived
+// getter, not the raw `variationId`) drives change detection, and
 // `baseProductInContext` — the getter this store renamed from
 // `mainProductInContext` — resolves the parent product whose configured
 // image set gets applied.
@@ -153,7 +154,7 @@ describe( 'Product Gallery frontend store', () => {
 
 	describe( 'callbacks.listenToProductDataChanges', () => {
 		it( 'is a no-op on the initial render, before any variation is selected', () => {
-			mockProductsState.variationId = null;
+			mockProductsState.productVariationInContext = null;
 
 			const entries = loadModule();
 			const { callbacks } = entries.get(
@@ -174,14 +175,16 @@ describe( 'Product Gallery frontend store', () => {
 				callbacks.listenToProductDataChanges as () => void;
 
 			// Initial render: no variation selected yet.
-			mockProductsState.variationId = null;
+			mockProductsState.productVariationInContext = null;
 			listenToProductDataChanges();
 
 			// A variation gets selected. `baseProductInContext` — the getter
 			// renamed from `mainProductInContext` — is what resolves the
 			// parent product whose configured image set is applied; if it
 			// resolved nothing, no image update would occur.
-			mockProductsState.variationId = 55;
+			mockProductsState.productVariationInContext = {
+				id: 55,
+			} as ProductsStoreState[ 'productVariationInContext' ];
 			mockProductsState.baseProductInContext = {
 				id: 123,
 			} as ProductsStoreState[ 'baseProductInContext' ];
@@ -199,23 +202,25 @@ describe( 'Product Gallery frontend store', () => {
 			const listenToProductDataChanges =
 				callbacks.listenToProductDataChanges as () => void;
 
-			mockProductsState.variationId = null;
+			mockProductsState.productVariationInContext = null;
 			listenToProductDataChanges();
 
-			mockProductsState.variationId = 55;
+			mockProductsState.productVariationInContext = {
+				id: 55,
+			} as ProductsStoreState[ 'productVariationInContext' ];
 			mockProductsState.baseProductInContext = {
 				id: 123,
 			} as ProductsStoreState[ 'baseProductInContext' ];
 			listenToProductDataChanges();
 
-			mockProductsState.variationId = null;
+			mockProductsState.productVariationInContext = null;
 			listenToProductDataChanges();
 
 			expect( mockContext.imageData ).toEqual( [ 1, 2, 3 ] );
 		} );
 
 		it( 'does nothing when baseProductInContext resolves no product', () => {
-			mockProductsState.variationId = null;
+			mockProductsState.productVariationInContext = null;
 
 			const entries = loadModule();
 			const { callbacks } = entries.get(
@@ -226,7 +231,9 @@ describe( 'Product Gallery frontend store', () => {
 
 			listenToProductDataChanges();
 
-			mockProductsState.variationId = 55;
+			mockProductsState.productVariationInContext = {
+				id: 55,
+			} as ProductsStoreState[ 'productVariationInContext' ];
 			mockProductsState.baseProductInContext = null;
 			listenToProductDataChanges();
 
