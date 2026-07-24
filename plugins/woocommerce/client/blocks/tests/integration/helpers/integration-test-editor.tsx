@@ -26,7 +26,7 @@ import {
  */
 import { waitForStoreResolvers } from './wait-for-store-resolvers';
 import { unlock } from '../../utils/lock-unlock';
-import { registerProductEntity } from '../../../assets/js/entities/register-entities';
+import { registerProductEntity } from '../../../assets/js/entity-registration/register-entities';
 
 const { ExperimentalBlockCanvas: BlockCanvas } = unlock(
 	blockEditorPrivateApis
