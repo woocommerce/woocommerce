@@ -344,12 +344,7 @@ class WC_Meta_Box_Product_Data {
 			$attributes = array_values(
 				array_filter(
 					$attributes,
-					function ( $attribute ) use ( $blocked_attribute_names ) {
-						if ( ! $attribute instanceof WC_Product_Attribute ) {
-							return true;
-						}
-						return ! in_array( $attribute->get_name(), $blocked_attribute_names, true );
-					}
+					fn( $attribute ) => ! $attribute instanceof WC_Product_Attribute || ! in_array( $attribute->get_name(), $blocked_attribute_names, true )
 				)
 			);
 			WC_Admin_Meta_Boxes::add_error(

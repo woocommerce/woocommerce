@@ -319,9 +319,9 @@ function wc_get_attribute_type_label( $type ) {
  *
  * Custom (per-product) attributes are not taxonomies, so the WordPress reserved terms don't
  * apply to them. Pass 'custom' as the attribute type to check against the WooCommerce-specific
- * structural keys (such as 'variation') instead: those collide with cart and order item array
- * keys when a custom attribute of the same name is stored as order item meta, which can corrupt
- * the variation data read back via ArrayAccess.
+ * 'variation' structural key instead: it collides with the cart and order item array key of the
+ * same name when a custom attribute called 'variation' is stored as order item meta, so reading
+ * $item['variation'] via ArrayAccess returns the attribute value instead of the variation data.
  *
  * @since  2.4.0
  * @since  11.1.0 Added the `$attribute_type` parameter.
@@ -331,8 +331,7 @@ function wc_get_attribute_type_label( $type ) {
  */
 function wc_check_if_attribute_name_is_reserved( $attribute_name, $attribute_type = 'global' ) {
 	if ( 'custom' === $attribute_type ) {
-		// WooCommerce structural keys that collide with cart/order item array keys.
-		return in_array( $attribute_name, array( 'variation', 'variation_id', 'variation_data' ), true );
+		return 'variation' === $attribute_name;
 	}
 
 	// Forbidden attribute names.

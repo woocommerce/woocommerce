@@ -306,22 +306,20 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox wc_check_if_attribute_name_is_reserved() flags WordPress reserved terms for global attributes only.
+	 * @testdox wc_check_if_attribute_name_is_reserved() flags WordPress reserved terms for global attributes and the 'variation' structural key for custom attributes.
+	 *
+	 * @testWith ["type", true, false]
+	 *           ["color", false, false]
+	 *           ["variation", false, true]
+	 *           ["variation_id", false, false]
+	 *           ["variation_data", false, false]
+	 *
+	 * @param string $name            Attribute slug to check.
+	 * @param bool   $reserved_global Whether the name is reserved for global attributes.
+	 * @param bool   $reserved_custom Whether the name is reserved for custom attributes.
 	 */
-	public function test_wc_check_if_attribute_name_is_reserved_flags_wordpress_terms() {
-		$this->assertTrue( wc_check_if_attribute_name_is_reserved( 'type' ), '"type" should be reserved for global attributes.' );
-		$this->assertFalse( wc_check_if_attribute_name_is_reserved( 'type', 'custom' ), '"type" is a WordPress reserved term but is allowed as a custom attribute, which is not a taxonomy.' );
-		$this->assertFalse( wc_check_if_attribute_name_is_reserved( 'color' ), '"color" should be allowed for global attributes.' );
-		$this->assertFalse( wc_check_if_attribute_name_is_reserved( 'color', 'custom' ), '"color" should be allowed for custom attributes.' );
-	}
-
-	/**
-	 * @testdox wc_check_if_attribute_name_is_reserved() flags WooCommerce structural keys only for custom attributes.
-	 */
-	public function test_wc_check_if_attribute_name_is_reserved_flags_structural_keys_for_custom_only() {
-		foreach ( array( 'variation', 'variation_id', 'variation_data' ) as $name ) {
-			$this->assertFalse( wc_check_if_attribute_name_is_reserved( $name ), "\"$name\" should be allowed as a global attribute." );
-			$this->assertTrue( wc_check_if_attribute_name_is_reserved( $name, 'custom' ), "\"$name\" should be reserved as a custom attribute." );
-		}
+	public function test_wc_check_if_attribute_name_is_reserved( string $name, bool $reserved_global, bool $reserved_custom ) {
+		$this->assertSame( $reserved_global, wc_check_if_attribute_name_is_reserved( $name ), "\"$name\" global reservation mismatch." );
+		$this->assertSame( $reserved_custom, wc_check_if_attribute_name_is_reserved( $name, 'custom' ), "\"$name\" custom reservation mismatch." );
 	}
 }

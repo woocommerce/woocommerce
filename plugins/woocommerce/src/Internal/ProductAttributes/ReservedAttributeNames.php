@@ -22,13 +22,11 @@ use WC_Product_Attribute;
 class ReservedAttributeNames {
 
 	/**
-	 * Get the names of the custom (non-taxonomy) product attributes that use a reserved name
-	 * and so should be blocked when saving a product.
+	 * Get the names of the custom product attributes that use a reserved name
+	 * (should be blocked when saving a product).
 	 *
-	 * Names that are already stored on the product are grandfathered (not returned) so that
-	 * existing products which already have a colliding attribute remain editable. When such a
-	 * grandfathered collision is seen, a one-line breadcrumb is logged under the
-	 * `attribute-collision` source so support can spot legacy stores that still carry one.
+	 * Names already stored on the product aren't returned so existing products with an
+	 * already colliding attribute remain editable. Collisions are logged.
 	 *
 	 * See {@see wc_check_if_attribute_name_is_reserved()} for the list of reserved names.
 	 *
@@ -59,7 +57,7 @@ class ReservedAttributeNames {
 
 			if ( in_array( $slug, $existing_names, true ) ) {
 				// Grandfathered: the product already has this reserved attribute, so it is kept.
-				self::log_grandfathered_collision( $current_product, $attribute->get_name() );
+				self::log_collision( $current_product, $attribute->get_name() );
 			} else {
 				$blocked[] = $attribute->get_name();
 			}
@@ -69,14 +67,13 @@ class ReservedAttributeNames {
 	}
 
 	/**
-	 * Log a one-line breadcrumb for a grandfathered reserved-name collision, under the
-	 * `attribute-collision` source, so support can find legacy stores that still carry one.
+	 * Write a log entry for a reserved-name collision found.
 	 *
-	 * @param WC_Product|null $product        The product being saved (never null in practice, since a name can only be grandfathered against an existing product).
+	 * @param WC_Product|null $product        The product being saved.
 	 * @param string          $attribute_name The colliding attribute name.
 	 */
-	private static function log_grandfathered_collision( ?WC_Product $product, string $attribute_name ): void {
-		$product_id = $product instanceof WC_Product ? $product->get_id() : 0;
+	private static function log_collision( WC_Product $product, string $attribute_name ): void {
+		$product_id = $product->get_id();
 
 		wc_get_logger()->warning(
 			sprintf(

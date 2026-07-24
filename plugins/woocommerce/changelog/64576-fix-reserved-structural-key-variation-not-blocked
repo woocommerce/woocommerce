@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Block custom (per-product) attribute names that use a reserved structural key such as "variation" when saving a product (admin and REST), grandfathering products that already use such a name, and log a breadcrumb under the "attribute-collision" source when a colliding attribute is detected at runtime.
+Block custom attribute names using the key "variation" when saving a product, grandfathering products that already use it.
