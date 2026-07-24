@@ -4147,8 +4147,24 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => 'https://www.helcim.com/pricing/',
+					),
+					array(
 						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/helcim-commerce-for-woocommerce/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://legal.helcim.com/terms-of-service/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/helcim-commerce-for-woocommerce/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=helcim-commerce-for-woocommerce',
 					),
 				),
 			),
