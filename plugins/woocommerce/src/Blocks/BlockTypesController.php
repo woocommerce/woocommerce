@@ -63,7 +63,7 @@ final class BlockTypesController {
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
-		add_filter( 'register_block_type_args', array( $this, 'use_single_block_editor_style' ), 10, 2 );
+		add_filter( 'block_type_metadata_settings', array( $this, 'use_single_block_editor_style' ), 10, 2 );
 		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
 		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
 		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 1 );
@@ -595,25 +595,52 @@ final class BlockTypesController {
 	 *
 	 * @internal
 	 *
-	 * @param array  $args       Block metadata.
-	 * @param string $block_name Block name.
+	 * @param array $settings Block settings.
+	 * @param array $metadata Block metadata.
 	 *
-	 * @return array Block metadata.
+	 * @return array Block settings.
 	 */
-	public function use_single_block_editor_style( $args, $block_name ) {
+	public function use_single_block_editor_style( $settings, $metadata ) {
 		if (
 			! BlockEditorUnifiedAssets::is_enabled() ||
 			! is_admin() ||
-		false === str_starts_with( $block_name, 'woocommerce/' ) ) {
-			return $args;
+			! $this->is_woocommerce_block_metadata( $metadata ) ) {
+			return $settings;
 		}
 
-		$args['style_handles']        = array();
-		$args['style']                = array();
-		$args['editor_style_handles'] = array( 'wc-block-library-style' );
-		$args['editor_style']         = array( 'wc-block-library-style' );
+		$settings['style_handles']        = array();
+		$settings['style']                = array();
+		$settings['editor_style_handles'] = array( 'wc-block-library-style' );
+		$settings['editor_style']         = array( 'wc-block-library-style' );
 
-		return $args;
+		return $settings;
+	}
+
+	/**
+	 * Check whether block metadata belongs to a block bundled with WooCommerce.
+	 *
+	 * @param array $metadata Block metadata.
+	 *
+	 * @return bool Whether the metadata file is in the WooCommerce blocks directory.
+	 */
+	private function is_woocommerce_block_metadata( $metadata ) {
+		static $blocks_path = null;
+
+		if ( null === $blocks_path ) {
+			$resolved_path = realpath( WC_ABSPATH . 'assets/client/blocks' );
+			$blocks_path   = false === $resolved_path
+				? ''
+				: trailingslashit( wp_normalize_path( $resolved_path ) );
+		}
+
+		if ( '' === $blocks_path || empty( $metadata['file'] ) ) {
+			return false;
+		}
+
+		return str_starts_with(
+			wp_normalize_path( $metadata['file'] ),
+			$blocks_path
+		);
 	}
 
 	/**
