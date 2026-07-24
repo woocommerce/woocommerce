@@ -313,6 +313,47 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		for ( $i = 1; $i <= 5; $i++ ) {
 			$this->assertStringContainsString( "Dummy $i", $output );
 		}
+		// For start-aligned (and centered) rows the gap pads the end side of all items but the last,
+		// so every wrapped line starts flush at the aligned edge.
+		$item_styles = $this->getWrapItemStylesFromOutput( $output );
+		$this->assertCount( 5, $item_styles );
+		foreach ( array_slice( $item_styles, 0, 4 ) as $style ) {
+			$this->assertStringContainsString( 'padding-right', $style );
+		}
+		$this->assertStringNotContainsString( 'padding-right', $item_styles[4] );
+		$this->assertStringNotContainsString( 'padding-left', $output );
+	}
+
+	/**
+	 * When a wrapped row is end-aligned (right in LTR), the gap must pad the start side of every
+	 * item after the first instead — end-side padding would push each wrapped line away from the
+	 * flush right edge and misalign the lines against each other.
+	 */
+	public function testItPadsTheStartSideWhenWrappedButtonsAlignToTheEndSide(): void {
+		$inner_blocks = array();
+		for ( $i = 1; $i <= 5; $i++ ) {
+			$inner_blocks[] = array(
+				'blockName' => 'dummy/block',
+				'innerHTML' => "Dummy $i",
+				'attrs'     => array(),
+			);
+		}
+		$parsed_block = array(
+			'innerBlocks' => $inner_blocks,
+			'attrs'       => array( 'layout' => array( 'justifyContent' => 'right' ) ),
+			'email_attrs' => array( 'width' => '640px' ),
+		);
+
+		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
+
+		$this->assertStringContainsString( '<div class="layout-flex-item"', $output );
+		$item_styles = $this->getWrapItemStylesFromOutput( $output );
+		$this->assertCount( 5, $item_styles );
+		$this->assertStringNotContainsString( 'padding-left', $item_styles[0] );
+		foreach ( array_slice( $item_styles, 1 ) as $style ) {
+			$this->assertStringContainsString( 'padding-left', $style );
+		}
+		$this->assertStringNotContainsString( 'padding-right', $output );
 	}
 
 	/**
@@ -409,6 +450,18 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 
 		$this->assertStringContainsString( '<td class="layout-flex-item"', $output );
 		$this->assertStringNotContainsString( '<div class="layout-flex-item"', $output );
+	}
+
+	/**
+	 * Get the style attribute of each item in a wrapping layout output.
+	 *
+	 * @param string $output Output.
+	 * @return string[]
+	 */
+	private function getWrapItemStylesFromOutput( string $output ): array {
+		$matches = array();
+		preg_match_all( '/<div class="layout-flex-item" style="([^"]*)"/', $output, $matches );
+		return $matches[1];
 	}
 
 	/**

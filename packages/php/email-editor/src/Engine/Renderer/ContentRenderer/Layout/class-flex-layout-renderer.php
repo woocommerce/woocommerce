@@ -108,6 +108,13 @@ class Flex_Layout_Renderer {
 			esc_attr( $justify )
 		);
 
+		// The gap padding must sit on the side away from the aligned (flush) edge, otherwise wrapped
+		// lines carry an edge pad and misalign against each other. When items align to the end side
+		// of the line flow (e.g. right in LTR), pad the start side of every item after the first;
+		// otherwise (start-aligned or centered) pad the end side of every item before the last.
+		$align_to_flow_end = $justify === $rendering_context->get_end_side();
+		$last_key          = count( $inner_blocks ) - 1;
+
 		foreach ( $inner_blocks as $key => $block ) {
 			$item_styles = array(
 				'display'        => 'inline-block',
@@ -118,8 +125,12 @@ class Flex_Layout_Renderer {
 			if ( $block['email_attrs']['layout_width'] ?? null ) {
 				$item_styles['width'] = $block['email_attrs']['layout_width'];
 			}
-			if ( $key > 0 ) {
+			if ( $align_to_flow_end && $key > 0 ) {
 				$item_styles[ 'padding-' . $rendering_context->get_start_side() ] = $flex_gap;
+			} elseif ( ! $align_to_flow_end && $key < $last_key ) {
+				$item_styles[ 'padding-' . $rendering_context->get_end_side() ] = $flex_gap;
+			}
+			if ( $key > 0 ) {
 				// Force a line break before every item after the first in Outlook, which can't wrap an inline row.
 				$output_html .= '<!--[if mso | IE]><br><![endif]-->';
 			}
