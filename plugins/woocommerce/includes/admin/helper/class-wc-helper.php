@@ -160,6 +160,7 @@ class WC_Helper {
 	protected static function includes() {
 		include_once __DIR__ . '/class-wc-helper-options.php';
 		include_once __DIR__ . '/class-wc-helper-api.php';
+		include_once __DIR__ . '/class-wc-helper-api-backoff.php';
 		include_once __DIR__ . '/class-wc-woo-update-manager-plugin.php';
 		include_once __DIR__ . '/class-wc-woo-helper-connection.php';
 		include_once __DIR__ . '/class-wc-helper-updater.php';
@@ -1142,6 +1143,10 @@ class WC_Helper {
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
 		self::flush_product_usage_notice_rules_cache();
+
+		// A manual refresh resets any rate-limit backoff so the subsequent
+		// Helper API calls (e.g. update-check) are made fresh rather than skipped.
+		WC_Helper_API_Backoff::clear_all();
 	}
 
 	/**
