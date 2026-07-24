@@ -15,11 +15,11 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { server } from '@woocommerce/test-utils/msw';
+import { allSettings } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import { allSettings } from '@woocommerce/settings';
 import Block from '../block';
 import { Attributes } from '../types';
 

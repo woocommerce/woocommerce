@@ -3,11 +3,11 @@
  */
 import type { HTMLElementEvent } from '@woocommerce/types';
 import * as iAPI from '@wordpress/interactivity';
+import type { RangeInputParentStore } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import type { RangeInputParentStore } from '@woocommerce/types';
 import type { ProductFiltersContext } from '../../types';
 import type { ProductFiltersStore } from '../../frontend';
 import { formatPrice, getCurrency } from '../../utils/price-currency';

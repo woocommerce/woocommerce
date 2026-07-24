@@ -18,11 +18,11 @@ import { isBoolean } from '@woocommerce/types';
 import { useState, useMemo, useEffect } from '@wordpress/element';
 import { withSpokenMessages } from '@wordpress/components';
 import type { BlockEditProps } from '@wordpress/blocks';
+import type { SelectableItemsContext } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import type { SelectableItemsContext } from '@woocommerce/types';
 import { previewOptions } from './preview';
 import { getActiveFilters } from './utils';
 import { Inspector } from './components/inspector';

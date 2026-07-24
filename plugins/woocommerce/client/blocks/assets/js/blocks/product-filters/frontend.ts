@@ -2,11 +2,11 @@
  * External dependencies
  */
 import * as iAPI from '@wordpress/interactivity';
+import type { SelectableItemsParentStore } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import type { SelectableItemsParentStore } from '@woocommerce/types';
 import { decodeHtmlEntities } from '../../utils/html-entities';
 import type {
 	ActiveFilterItem,

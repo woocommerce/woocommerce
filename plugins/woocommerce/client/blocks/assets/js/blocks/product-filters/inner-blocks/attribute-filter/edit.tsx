@@ -19,11 +19,11 @@ import { withSpokenMessages } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
+import type { SelectableItemsContext } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import type { SelectableItemsContext } from '@woocommerce/types';
 import { Inspector } from './inspector';
 import { attributeOptionsPreview } from './constants';
 import './style.scss';

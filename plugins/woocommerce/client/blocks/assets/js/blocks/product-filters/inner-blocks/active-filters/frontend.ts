@@ -2,14 +2,15 @@
  * External dependencies
  */
 import { store, getContext, getConfig } from '@wordpress/interactivity';
-
-/**
- * Internal dependencies
- */
 import type {
 	RemovableItem,
 	RemovableItemsParentStore,
 } from '@woocommerce/types';
+
+/**
+ * Internal dependencies
+ */
+
 import type { ProductFiltersContext } from '../../types';
 import type { ProductFiltersStore } from '../../frontend';
 import { PRODUCT_FILTERS_STORE_NAME } from '../../constants';

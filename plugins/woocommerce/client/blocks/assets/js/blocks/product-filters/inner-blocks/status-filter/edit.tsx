@@ -10,11 +10,11 @@ import { useCollectionData } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { getSetting } from '@woocommerce/settings';
+import type { SelectableItemsContext } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import type { SelectableItemsContext } from '@woocommerce/types';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Inspector } from './inspector';
 import type { EditProps } from './types';

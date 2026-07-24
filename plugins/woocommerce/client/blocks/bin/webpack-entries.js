@@ -340,7 +340,7 @@ const entries = {
 	styling: {
 		// Packages styles
 		'packages-style': glob.sync(
-			'./packages/public-api/{blocks-checkout,blocks-components,price-format}/**/index.{t,j}s',
+			'./packages/public-api/{price-format,blocks-components,blocks-checkout}/**/index.{t,j}s',
 			{
 				dotRelative: true,
 			}

@@ -3,9 +3,6 @@
  */
 import type { BlockEditProps } from '@wordpress/blocks';
 
-/**
- * Internal dependencies
- */
 import type { RangeInputBlockContext } from '@woocommerce/types';
 
 type Color = {

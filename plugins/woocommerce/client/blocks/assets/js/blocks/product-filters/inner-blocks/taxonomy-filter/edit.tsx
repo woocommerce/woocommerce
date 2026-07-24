@@ -13,11 +13,11 @@ import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { useCollectionData } from '@woocommerce/base-context/hooks';
 import { objectHasProp } from '@woocommerce/types';
+import type { SelectableItemsContext } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import type { SelectableItemsContext } from '@woocommerce/types';
 import { TaxonomyFilterInspectorControls } from './inspector';
 import { termOptionsPreview } from './constants';
 import { EditProps } from './types';

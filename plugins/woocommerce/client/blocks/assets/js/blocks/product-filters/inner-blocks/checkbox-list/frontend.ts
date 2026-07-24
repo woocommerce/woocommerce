@@ -2,14 +2,14 @@
  * External dependencies
  */
 import { store, getContext } from '@wordpress/interactivity';
-
-/**
- * Internal dependencies
- */
 import type {
 	SelectableItem,
 	SelectableItemsParentStore,
 } from '@woocommerce/types';
+
+/**
+ * Internal dependencies
+ */
 import {
 	getVisualAttributeTermStyleString,
 	isVisualAttributeTermEmpty,
