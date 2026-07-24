@@ -729,4 +729,30 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$this->assertSame( $parent->get_id(), $item->get_product_id(), 'product_id should point at the variation\'s parent when switching from a simple product.' );
 		$this->assertSame( $variation->get_id(), $item->get_variation_id(), 'variation_id should be set to the variation ID when switching from a simple product.' );
 	}
+
+	/**
+	 * @testdox Should leave stale variation attribute meta in place when set_product() switches to a simple product (documents the tradeoff tracked in #66733).
+	 */
+	public function test_set_product_leaves_stale_variation_attribute_meta_when_switching_to_simple_product(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array( 'color' => 'blue' )
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Precondition: set_variation() writes the variation attribute as display meta with the attribute_ prefix stripped.' );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame( $this->product->get_id(), $item->get_product()->get_id(), 'get_product() should resolve to the simple product once variation_id is cleared.' );
+		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Accepted behavior: the stale "color" attribute meta survives the switch because clearing it blindly could delete a merchant\'s own custom meta. Removing it is tracked in #66733.' );
+	}
 }
