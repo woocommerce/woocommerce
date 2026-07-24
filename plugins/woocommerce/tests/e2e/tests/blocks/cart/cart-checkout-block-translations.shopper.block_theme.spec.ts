@@ -20,10 +20,6 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	},
 } );
 
-const simplePhysicalProductAddToCartLabel = new RegExp(
-	`^Toevoegen aan winkelwagen: “${ SIMPLE_PHYSICAL_PRODUCT_NAME }[“”]$`
-);
-
 test.describe( 'Shopper → Translations', () => {
 	test.beforeEach( async () => {
 		await wpCLI( `site switch-language ${ translations.locale }` );
@@ -36,10 +32,15 @@ test.describe( 'Shopper → Translations', () => {
 		await test.step( 'User can view translated Cart block', async () => {
 			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
-			await frontendUtils.addToCart(
-				SIMPLE_PHYSICAL_PRODUCT_NAME,
-				simplePhysicalProductAddToCartLabel
-			);
+			const { waitForCartRequests } = frontendUtils.trackCartRequests();
+			const product = page.locator( 'li.product' ).filter( {
+				has: page.getByRole( 'link', {
+					name: SIMPLE_PHYSICAL_PRODUCT_NAME,
+					exact: true,
+				} ),
+			} );
+			await product.locator( '.add_to_cart_button' ).click();
+			await waitForCartRequests();
 			await frontendUtils.goToCart();
 
 			const totalsHeader = page

@@ -66,7 +66,7 @@ export class FrontendUtils {
 	/**
 	 * Start tracking cart-related requests and return a function to wait for completion
 	 */
-	private trackCartRequests( timeout = 5000 ) {
+	trackCartRequests( timeout = 5000 ) {
 		// key: request url, value: count of pending requests with this url
 		const pendingRequests = new Map< string, number >();
 
@@ -119,7 +119,7 @@ export class FrontendUtils {
 		};
 	}
 
-	async addToCart( itemName = '', accessibleName?: string | RegExp ) {
+	async addToCart( itemName = '' ) {
 		// Start tracking cart requests before the action
 		const { waitForCartRequests } = this.trackCartRequests();
 
@@ -127,7 +127,7 @@ export class FrontendUtils {
 			// We can't use `getByRole()` here because the Add to Cart button
 			// might be a button (in blocks) or a link (in the legacy template).
 			await this.page
-				.getByLabel( accessibleName ?? `Add to cart: “${ itemName }”` )
+				.getByLabel( `Add to cart: “${ itemName }”` )
 				.click();
 		} else {
 			await this.page.click( 'text=Add to cart' );
