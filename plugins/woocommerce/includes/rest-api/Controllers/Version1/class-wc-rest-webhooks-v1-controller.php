@@ -252,6 +252,8 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 
 		if ( empty( $request['offset'] ) ) {
 			$args['offset'] = 1 < $request['page'] ? ( $request['page'] - 1 ) * $args['limit'] : 0;
+		} else {
+			$args['offset'] = $request['offset'];
 		}
 
 		/**

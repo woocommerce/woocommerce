@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Webhooks REST API silently ignoring the `offset` query parameter and always returning the first page of results.
