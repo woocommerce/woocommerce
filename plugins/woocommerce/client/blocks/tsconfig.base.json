@@ -124,6 +124,9 @@
 			"@woocommerce/stores/store-notices": [
 				"assets/js/base/stores/store-notices"
 			],
+			"@woocommerce/stores/woocommerce": [
+				"assets/js/base/stores/woocommerce/index"
+			],
 			"@woocommerce/stores/woocommerce/cart": [
 				"assets/js/base/stores/woocommerce/cart"
 			],

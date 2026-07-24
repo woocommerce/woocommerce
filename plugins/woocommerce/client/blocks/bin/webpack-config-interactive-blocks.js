@@ -43,6 +43,8 @@ const entries = {
 	'woocommerce/add-to-cart-with-options-quantity-selector':
 		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
 	// Other
+	'@woocommerce/stores/woocommerce':
+		'./assets/js/base/stores/woocommerce/index.ts',
 	'@woocommerce/stores/woocommerce/cart':
 		'./assets/js/base/stores/woocommerce/cart.ts',
 	'@woocommerce/stores/store-notices':

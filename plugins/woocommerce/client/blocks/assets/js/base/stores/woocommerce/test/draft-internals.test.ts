@@ -6,18 +6,31 @@ import type { ProductResponseItem } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import type { DraftItem, DraftKey, SelectedAttributes } from '../cart';
-import type { ProductsStoreState } from '../products';
-import { attributeNamesMatch } from '../../../utils/variations/attribute-matching';
-
-type MockCartState = { draftItems: Record< DraftKey, DraftItem[] > };
-
-let mockCartState: MockCartState;
-let mockProductsState: Partial< ProductsStoreState >;
+import type { DraftItem, DraftKey } from '../cart';
 
 /**
- * The value `getContext( 'woocommerce/cart' )` should return for the draft
- * key resolver, controlled per test. `undefined` (or an object with no
+ * The shared `woocommerce` namespace state this file's `store()` mock
+ * always resolves — a single stable object per test (never replaced
+ * wholesale), matching the real Interactivity runtime returning the same
+ * persistent store object across repeated `store()` calls. `draft-internals
+ * .ts` calls `store('woocommerce', …)` for both its cart-side reads
+ * (`draftItems`) and its products-side reads (the nested
+ * `products.items`/`products.variations` maps) after the unification, so
+ * this file no longer needs two separate mock branches.
+ */
+type MockWooCommerceState = {
+	draftItems: Record< DraftKey, DraftItem[] >;
+	products: {
+		items: Record< number, ProductResponseItem >;
+		variations: Record< number, ProductResponseItem >;
+	};
+};
+
+let mockState: MockWooCommerceState;
+
+/**
+ * The value `getContext( 'woocommerce' )` should return for the draft key
+ * resolver, controlled per test. `undefined` (or an object with no
  * `draftKey`) simulates a surface with no container of its own, so the
  * resolver degrades to {@link GLOBAL_DRAFT_KEY}.
  */
@@ -31,60 +44,13 @@ let mockCartContext: { draftKey?: DraftKey } | undefined;
 let mockCartContextThrows = false;
 
 /**
- * The value `getServerState( 'woocommerce/cart' )` should return, controlled
- * per test. `undefined` simulates a page carrying no `draftSeeds` payload at
+ * The value `getServerState( 'woocommerce' )` should return, controlled per
+ * test. `undefined` simulates a page carrying no `draftSeeds` payload at
  * all.
  */
 let mockServerState:
 	| { draftSeeds?: Record< DraftKey, Record< number, DraftItem > > }
 	| undefined;
-
-/**
- * A faithful re-implementation of `woocommerce/products`' real `findProduct`
- * getter (see `../products.ts`), used as the mocked store's own
- * implementation so `draft-internals.ts`'s family-resolution helpers (which
- * call `findProduct` for their attrs rung) exercise the same matching
- * semantics the real store provides, rather than a stubbed-out shortcut.
- */
-function findProductImpl( {
-	id,
-	selectedAttributes,
-}: {
-	id: number;
-	selectedAttributes?: SelectedAttributes[] | null;
-} ): ProductResponseItem | null {
-	const variation = mockProductsState.productVariations?.[ id ];
-	if ( variation ) {
-		return variation;
-	}
-
-	const product = mockProductsState.products?.[ id ];
-	if ( ! product ) {
-		return null;
-	}
-
-	if ( product.type !== 'variable' || ! selectedAttributes?.length ) {
-		return product;
-	}
-
-	const matched = product.variations?.find( ( variationEntry ) =>
-		variationEntry.attributes.every( ( attr ) => {
-			const selected = selectedAttributes.find( ( sel ) =>
-				attributeNamesMatch( attr.name, sel.attribute )
-			);
-			if ( attr.value === null ) {
-				return selected !== undefined && selected.value !== null;
-			}
-			return selected?.value === attr.value;
-		} )
-	);
-
-	if ( ! matched ) {
-		return null;
-	}
-
-	return mockProductsState.productVariations?.[ matched.id ] ?? null;
-}
 
 jest.mock(
 	'@wordpress/interactivity',
@@ -98,12 +64,7 @@ jest.mock(
 			return mockCartContext;
 		} ),
 		getServerState: jest.fn( () => mockServerState ),
-		store: jest.fn( ( namespace: string ) => {
-			if ( namespace === 'woocommerce/products' ) {
-				return { state: mockProductsState };
-			}
-			return { state: mockCartState };
-		} ),
+		store: jest.fn( () => ( { state: mockState } ) ),
 	} ),
 	{ virtual: true }
 );
@@ -172,11 +133,9 @@ let warnSpy: jest.SpyInstance;
 let originalNodeEnv: string | undefined;
 
 beforeEach( () => {
-	mockCartState = { draftItems: {} };
-	mockProductsState = {
-		products: {},
-		productVariations: {},
-		findProduct: jest.fn( findProductImpl ),
+	mockState = {
+		draftItems: {},
+		products: { items: {}, variations: {} },
 	};
 	mockCartContext = undefined;
 	mockCartContextThrows = false;
@@ -215,7 +174,7 @@ describe( 'resolveCollection', () => {
 
 	it( 'returns the collection filed under key', () => {
 		const draft = { id: 1, quantity: 2 } as DraftItem;
-		mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] = [ draft ];
+		mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [ draft ];
 		expect( resolveCollection( GLOBAL_DRAFT_KEY ) ).toEqual( [ draft ] );
 	} );
 } );
@@ -302,11 +261,11 @@ describe( 'getFamilyDraftSeed', () => {
 
 describe( 'resolveEffectiveSeed', () => {
 	beforeEach( () => {
-		mockProductsState.products = {
+		mockState.products.items = {
 			10: baseVariableProduct,
 			30: simpleProduct,
 		};
-		mockProductsState.productVariations = {
+		mockState.products.variations = {
 			20: variation20,
 			21: variation21,
 		};
@@ -387,8 +346,8 @@ describe( 'findFamilyDraft', () => {
 
 describe( 'resolveLiveDraft', () => {
 	beforeEach( () => {
-		mockProductsState.products = { 10: baseVariableProduct };
-		mockProductsState.productVariations = {
+		mockState.products.items = { 10: baseVariableProduct };
+		mockState.products.variations = {
 			20: variation20,
 			21: variation21,
 		};
@@ -396,13 +355,13 @@ describe( 'resolveLiveDraft', () => {
 
 	it( 'resolves the exact-id draft first', () => {
 		const draft = { id: 20, quantity: 1 } as DraftItem;
-		mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] = [ draft ];
+		mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [ draft ];
 		expect( resolveLiveDraft( GLOBAL_DRAFT_KEY, 20 ) ).toBe( draft );
 	} );
 
 	it( 'falls back to the family draft when no exact-id draft exists', () => {
 		const draft = { id: 10, quantity: 1 } as DraftItem;
-		mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] = [ draft ];
+		mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [ draft ];
 		expect( resolveLiveDraft( GLOBAL_DRAFT_KEY, 20 ) ).toBe( draft );
 	} );
 
@@ -413,8 +372,8 @@ describe( 'resolveLiveDraft', () => {
 
 describe( 'resolveFamilyVariation', () => {
 	beforeEach( () => {
-		mockProductsState.products = { 10: baseVariableProduct };
-		mockProductsState.productVariations = {
+		mockState.products.items = { 10: baseVariableProduct };
+		mockState.products.variations = {
 			20: variation20,
 			21: variation21,
 		};
@@ -591,11 +550,11 @@ describe( 'effectiveVariationAttributes', () => {
 
 describe( 'writeDraft', () => {
 	beforeEach( () => {
-		mockProductsState.products = {
+		mockState.products.items = {
 			10: baseVariableProduct,
 			30: simpleProduct,
 		};
-		mockProductsState.productVariations = {
+		mockState.products.variations = {
 			20: variation20,
 			21: variation21,
 		};
@@ -613,41 +572,41 @@ describe( 'writeDraft', () => {
 				},
 			},
 		};
-		expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
+		expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
 
 		writeDraft( 30, 'quantity', 5 );
 
-		expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+		expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
 			{ id: 30, quantity: 5, 'my-plugin/note': 'hello' },
 		] );
 	} );
 
 	it( 'merges into an existing live draft instead of duplicating', () => {
-		mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+		mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [
 			{ id: 30, quantity: 1 } as DraftItem,
 		];
 
 		writeDraft( 30, 'quantity', 7 );
 
-		expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+		expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
 			{ id: 30, quantity: 7 },
 		] );
 	} );
 
 	it( 'merges a write targeting a family id onto the existing family draft rather than creating a second one', () => {
-		mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+		mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [
 			{ id: 10, quantity: 2 } as DraftItem,
 		];
 
 		writeDraft( 20, 'quantity', 9 );
 
-		expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+		expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
 			{ id: 10, quantity: 9 },
 		] );
 	} );
 
 	it( 're-files the draft under the matched variation id on a variation write, carrying quantity and extension props across unchanged', () => {
-		mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+		mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [
 			{ id: 10, quantity: 3, 'my-plugin/note': 'hi' } as DraftItem,
 		];
 
@@ -656,7 +615,7 @@ describe( 'writeDraft', () => {
 			{ attribute: 'Logo', value: 'yes' },
 		] );
 
-		expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+		expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
 			{
 				id: 21,
 				quantity: 3,
@@ -670,7 +629,7 @@ describe( 'writeDraft', () => {
 	} );
 
 	it( 're-files the draft under the base parent id when the written attributes match no variation', () => {
-		mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+		mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [
 			{ id: 21, quantity: 3 } as DraftItem,
 		];
 
@@ -678,7 +637,7 @@ describe( 'writeDraft', () => {
 			{ attribute: 'Color', value: 'green' },
 		] );
 
-		expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+		expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
 			{
 				id: 10,
 				quantity: 3,
@@ -698,7 +657,7 @@ describe( 'writeDraft', () => {
 
 		writeDraft( 20, 'my-plugin/note', 'hi' );
 
-		expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+		expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
 			{ id: 20, quantity: 4, 'my-plugin/note': 'hi' },
 		] );
 	} );
@@ -709,7 +668,7 @@ describe( 'writeDraft', () => {
 		writeDraft( 40, 'my-plugin/note', 'hi' );
 
 		expect( warnSpy ).toHaveBeenCalled();
-		expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+		expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
 			{ id: 40, 'my-plugin/note': 'hi' },
 		] );
 	} );
@@ -723,14 +682,14 @@ describe( 'writeDraft', () => {
 	} );
 
 	it( "rejects a write that would change an existing draft's id in place (dev warn, state unchanged)", () => {
-		mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+		mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [
 			{ id: 30, quantity: 1 } as DraftItem,
 		];
 
 		writeDraft( 30, 'id', 999 );
 
 		expect( warnSpy ).toHaveBeenCalled();
-		expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+		expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
 			{ id: 30, quantity: 1 },
 		] );
 	} );
@@ -740,7 +699,7 @@ describe( 'writeDraft', () => {
 			{ attribute: 'Color', value: 'blue' },
 		] );
 
-		expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
+		expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
 			{ id: 999, variation: [ { attribute: 'Color', value: 'blue' } ] },
 		] );
 	} );
@@ -750,9 +709,9 @@ describe( 'writeDraft', () => {
 
 		writeDraft( 30, 'quantity', 2 );
 
-		expect( mockCartState.draftItems[ 'single-product/42' ] ).toEqual( [
+		expect( mockState.draftItems[ 'single-product/42' ] ).toEqual( [
 			{ id: 30, quantity: 2 },
 		] );
-		expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
+		expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
 	} );
 } );

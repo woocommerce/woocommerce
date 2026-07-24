@@ -1,28 +1,29 @@
 /**
- * Draft internals — shared resolution and write plumbing for `woocommerce/cart`
- * and `woocommerce/products`.
+ * Draft internals — shared resolution and write plumbing for the unified
+ * `woocommerce` store's root module and its `woocommerce/cart` machinery
+ * module.
  *
- * A folder-internal module (not a public export surface of either store): it
+ * A folder-internal module (not a public export surface of either module): it
  * hosts draft-key/collection resolution, family-aware seed lookup,
  * family-resolution helpers, the setter's attribute-derivation helper, the
  * one draft write routine (materialize / merge / id-migration / invariant
  * warnings), the effective-payload helpers (effective attributes for
  * pairing; effective-seed resolution for posting), and the draft-view proxy
- * factory (with its per-`(key, id)` cache) both stores call.
+ * factory (with its per-`(key, id)` cache) both modules call.
  *
- * Reaches each store's state by namespace — `store( 'woocommerce/cart', {},
- * { lock: universalLock } )`, `store( 'woocommerce/products', {}, { lock:
- * universalLock } )` — rather than importing `./cart`/`./products` as
- * values, so this module never becomes a load-order dependency of either
- * store: `products.ts` importing this module (as a consumer will) never
- * drags `cart.ts`'s fetch/queue machinery onto a products-only page, and no
- * cycle exists in any load order. Every function below re-resolves state
- * fresh on each call rather than caching a destructured reference at module
- * scope: when this module's own top-level code runs before a store's
- * `store()` call that registers its real getters/actions, `store()` still
- * returns that same shared namespace object, but a value read out of it
- * before registration would freeze on the empty stub — reading inside a
- * function, on demand, always observes the fully-registered state.
+ * Reaches the shared `woocommerce` namespace's state by namespace —
+ * `store( 'woocommerce', {}, { lock: universalLock } )` — rather than
+ * importing the root module or `./cart` as values, so this module never
+ * becomes a load-order dependency of either: the root module importing this
+ * module (as it does) never drags `cart.ts`'s fetch/queue machinery onto a
+ * display-only page, and no cycle exists in any load order. Every function
+ * below re-resolves state fresh on each call rather than caching a
+ * destructured reference at module scope: when this module's own top-level
+ * code runs before a `store()` call that registers the namespace's real
+ * getters/actions, `store()` still returns that same shared namespace
+ * object, but a value read out of it before registration would freeze on
+ * the empty stub — reading inside a function, on demand, always observes
+ * the fully-registered state.
  */
 
 /**
@@ -40,7 +41,7 @@ import type {
 	SelectedAttributes,
 	Store as CartStore,
 } from './cart';
-import type { ProductsStore } from './products';
+import { resolveProduct } from './product-resolution';
 
 // Stores are locked to prevent 3PD usage until the API is stable. Both
 // `store()` calls below use the same literal every other store file in this
@@ -59,7 +60,7 @@ const universalLock =
 export const GLOBAL_DRAFT_KEY: DraftKey = 'woocommerce/global';
 
 /**
- * The shape of the `woocommerce/cart` context namespace relevant to draft
+ * The shape of the shared `woocommerce` context namespace relevant to draft
  * collection resolution.
  *
  * A container block (a Product Collection loop item, a Single Product
@@ -71,9 +72,9 @@ export const GLOBAL_DRAFT_KEY: DraftKey = 'woocommerce/global';
 type CartContext = { draftKey?: DraftKey };
 
 /**
- * The `woocommerce/cart` server-rendered state shape relevant to seed
- * lookup: each purchase surface's initial-draft default, filed per
- * collection key and per product/variation id.
+ * The `woocommerce` server-rendered state shape relevant to seed lookup:
+ * each purchase surface's initial-draft default, filed per collection key
+ * and per product/variation id.
  *
  * Read only through `getServerState()` — the runtime's intact, per-page,
  * navigation-fresh copy — never through `state.draftSeeds`, which the
@@ -85,29 +86,46 @@ type CartServerState = {
 };
 
 /**
- * Returns the shared `woocommerce/cart` namespace state, read fresh on every
- * call (see the module doc comment for why this is never cached at module
- * scope).
+ * Returns the shared `woocommerce` namespace state, read fresh on every call
+ * (see the module doc comment for why this is never cached at module scope).
  *
- * @return The `woocommerce/cart` store's shared state object.
+ * Typed against `CartStore['state']` (the cart module's own state shape)
+ * purely for the `draftItems` field this function's callers need; the
+ * broader shape carries fields (`cart`, `nonce`, …) this module never reads.
+ *
+ * @return The shared `woocommerce` namespace's state object.
  */
 function getCartState(): CartStore[ 'state' ] {
-	return store< CartStore >( 'woocommerce/cart', {}, { lock: universalLock } )
+	return store< CartStore >( 'woocommerce', {}, { lock: universalLock } )
 		.state;
 }
 
 /**
- * Returns the shared `woocommerce/products` namespace state, read fresh on
- * every call (see the module doc comment for why this is never cached at
- * module scope). On a products-only page that never loads `products.ts`,
- * `store()` still returns the empty stub every namespace starts as — every
- * consumer below degrades to an empty/undefined read rather than throwing.
- *
- * @return The `woocommerce/products` store's shared state object.
+ * The nested product/variation maps this module reads off the shared
+ * `woocommerce` namespace — the root module's own `state.products` shape
+ * (`items` by product id, `variations` by variation id). Optional at every
+ * level: on a display-only page that never loads the root module, `store()`
+ * still returns the empty stub every namespace starts as, and every reader
+ * below degrades to an empty/undefined read rather than throwing.
  */
-function getProductsState(): ProductsStore[ 'state' ] {
-	return store< ProductsStore >(
-		'woocommerce/products',
+type ProductsState = {
+	products?: {
+		items?: Record< number, ProductResponseItem >;
+		variations?: Record< number, ProductResponseItem >;
+	};
+};
+
+/**
+ * Returns the shared `woocommerce` namespace state, read fresh on every call
+ * (see the module doc comment for why this is never cached at module
+ * scope), narrowed to the nested product/variation maps this module's
+ * family-resolution helpers read.
+ *
+ * @return The shared `woocommerce` namespace's product/variation maps.
+ */
+function getProductsState(): ProductsState {
+	return store< { state: ProductsState } >(
+		'woocommerce',
 		{},
 		{ lock: universalLock }
 	).state;
@@ -118,9 +136,10 @@ function getProductsState(): ProductsStore[ 'state' ] {
  *
  * A module-local copy of the normalize-and-compare helper in
  * `base/utils/variations/attribute-matching.ts` (also duplicated, rather
- * than imported, by `woocommerce/products` itself), kept local so this
- * module's own value import list stays limited to `@wordpress/interactivity`.
- * Strips WordPress's `attribute_`/`attribute_pa_` prefixes and normalizes
+ * than imported, by `products.ts` itself), kept local so this module's own
+ * value import list stays limited to `@wordpress/interactivity` and the
+ * folder-internal `resolveProduct` primitive. Strips WordPress's
+ * `attribute_`/`attribute_pa_` prefixes and normalizes
  * hyphens/case so a Store API label (`"Color"`) matches a PHP context slug
  * (`"attribute_pa_color"`).
  *
@@ -170,7 +189,7 @@ function isConcreteValue( value: string | null | undefined ): value is string {
 export function resolveDraftKey(): DraftKey {
 	try {
 		return (
-			getContext< CartContext >( 'woocommerce/cart' )?.draftKey ??
+			getContext< CartContext >( 'woocommerce' )?.draftKey ??
 			GLOBAL_DRAFT_KEY
 		);
 	} catch {
@@ -229,7 +248,7 @@ export function findDraftInCollection(
 export function warnDraftInvariant( message: string ): void {
 	if ( process.env.NODE_ENV !== 'production' ) {
 		// eslint-disable-next-line no-console
-		console.warn( `[woocommerce/cart] ${ message }` );
+		console.warn( `[woocommerce] ${ message }` );
 	}
 }
 
@@ -248,8 +267,9 @@ export function getDraftSeed(
 	key: DraftKey,
 	id: DraftItem[ 'id' ]
 ): DraftItem | undefined {
-	return getServerState< CartServerState >( 'woocommerce/cart' )
-		?.draftSeeds?.[ key ]?.[ id ];
+	return getServerState< CartServerState >( 'woocommerce' )?.draftSeeds?.[
+		key
+	]?.[ id ];
 }
 
 /**
@@ -257,26 +277,31 @@ export function getDraftSeed(
  * to.
  *
  * `id` may already name the base product, or one of its variations — either
- * way, the return is always the top-level `woocommerce/products` product
- * entry, never a variation. Degrades to `null` when `id` names a product the
- * `woocommerce/products` store has no record of (e.g. `products.ts` never
- * loaded, or the id belongs to no known product) — a simple product, a
- * grouped child, or an extension surface with no loaded product data all
- * resolve `null` here, and every caller below degrades to non-family
- * behavior in that case.
+ * way, the return is always the top-level product entry from
+ * `state.products.items`, never a variation. Degrades to `null` when `id`
+ * names a product the `woocommerce` namespace has no record of (e.g. the
+ * root module never loaded, or the id belongs to no known product) — a
+ * simple product, a grouped child, or an extension surface with no loaded
+ * product data all resolve `null` here, and every caller below degrades to
+ * non-family behavior in that case.
+ *
+ * Exported for the root module's own envelope resolution (`index.ts`), which
+ * needs the identical base-product lookup for its `baseProduct` member and
+ * pairing-ladder support — never for public `findItem`, which stays a
+ * composed getter this internal path must not route through.
  *
  * @param id The product or variation id to resolve.
  * @return The base product, or `null` when it cannot be resolved.
  */
-function resolveBaseProduct(
+export function resolveBaseProduct(
 	id: DraftItem[ 'id' ]
 ): ProductResponseItem | null {
 	const productsState = getProductsState();
-	const variation = productsState.productVariations?.[ id ];
+	const variation = productsState.products?.variations?.[ id ];
 	if ( variation ) {
-		return productsState.products?.[ variation.parent ] ?? null;
+		return productsState.products?.items?.[ variation.parent ] ?? null;
 	}
-	return productsState.products?.[ id ] ?? null;
+	return productsState.products?.items?.[ id ] ?? null;
 }
 
 /**
@@ -408,11 +433,13 @@ export function resolveLiveDraft(
  * Matches a base product's variation against a set of selected attributes,
  * accepting only an actual variation — never the base product itself.
  *
- * `findProduct` falls back to returning the base product unchanged when the
- * product is not variable, or `selectedAttributes` is empty; that fallback
- * is never a valid family-resolution result here, so it is filtered out —
- * an unresolvable or empty selection yields `null`, never an invented
- * fallback to the parent.
+ * Delegates to the {@link resolveProduct} primitive (never public
+ * `findItem` — this internal draft→variation path must stay acyclic).
+ * `resolveProduct` falls back to returning the base product unchanged when
+ * the product is not variable, or `selectedAttributes` is empty; that
+ * fallback is never a valid family-resolution result here, so it is
+ * filtered out — an unresolvable or empty selection yields `null`, never an
+ * invented fallback to the parent.
  *
  * @param base  The family's base product.
  * @param attrs The selected attributes to match, if any.
@@ -425,10 +452,12 @@ function matchFamilyVariation(
 	if ( ! attrs || attrs.length === 0 ) {
 		return null;
 	}
-	const result = getProductsState().findProduct( {
-		id: base.id,
-		selectedAttributes: attrs,
-	} );
+	const productsState = getProductsState();
+	const result = resolveProduct(
+		productsState.products?.items ?? {},
+		productsState.products?.variations ?? {},
+		{ id: base.id, selectedAttributes: attrs }
+	);
 	return result && result.id !== base.id ? result : null;
 }
 
@@ -437,13 +466,14 @@ function matchFamilyVariation(
  * the design specifies:
  *
  * 1. A non-empty `variation` matches against the base product's variations
- *    (via `findProduct`); no match yields `null` — no invented fallback.
+ *    (via {@link resolveProduct}); no match yields `null` — no invented
+ *    fallback.
  * 2. No attributes, but `draft.id` already names a variation (**the
  *    id-direct rung** — load-bearing: it is how quantity-first and
  *    setter-selected surfaces resolve for display; it reads the full
  *    variation object for price/stock/image and never depends on
  *    `variation.attributes`, which the real serializer leaves empty): the
- *    populated `productVariations` entry, directly.
+ *    populated `state.products.variations` entry, directly.
  * 3. `draft.id` names the base product itself, with empty/no attributes:
  *    `null` — an unconfigured family draft resolves to nothing.
  *
@@ -466,7 +496,7 @@ export function resolveFamilyVariation(
 	}
 
 	if ( draft.id !== base.id ) {
-		return getProductsState().productVariations?.[ draft.id ] ?? null;
+		return getProductsState().products?.variations?.[ draft.id ] ?? null;
 	}
 
 	return null;
