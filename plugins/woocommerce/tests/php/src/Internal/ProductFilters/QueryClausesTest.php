@@ -37,6 +37,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	 * @testdox Test the product query with post clauses containing price clauses.
 	 *
 	 * @testWith [{"min_price": 20}]
+	 *           [{"min_price": 20.5}]
 	 *           [{"max_price": 50}]
 	 *           [{"min_price": 20,"max_price": 50}]
 	 *

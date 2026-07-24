@@ -167,7 +167,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		$args['join']     = $this->append_product_sorting_table_join( $args['join'] );
 
 		if ( isset( $price_range['min_price'] ) ) {
-			$min_price_filter = intval( $price_range['min_price'] );
+			$min_price_filter = (float) wc_format_decimal( $price_range['min_price'] );
 
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price_filter, 'max_price', '>=' );
@@ -177,7 +177,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		}
 
 		if ( isset( $price_range['max_price'] ) ) {
-			$max_price_filter = intval( $price_range['max_price'] );
+			$max_price_filter = (float) wc_format_decimal( $price_range['max_price'] );
 
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price_filter, 'min_price', '<=' );

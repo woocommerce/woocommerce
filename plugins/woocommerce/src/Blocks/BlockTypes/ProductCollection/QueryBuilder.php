@@ -514,27 +514,27 @@ class QueryBuilder {
 	}
 
 	/**
-	 * Return an attribute taxonomy query when the lookup table is disabled.
+	 * Return attribute taxonomy queries that need the legacy filtering path.
 	 *
 	 * @return array
 	 */
 	private function get_filter_by_attributes_query() {
-		if ( 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' ) ) {
-			return array();
-		}
-
 		$attributes_filter_query_args = $this->get_filter_by_attributes_query_vars();
+		$use_attribute_lookup         = 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' );
 
 		$queries = array_reduce(
 			$attributes_filter_query_args,
-			function ( $acc, $query_args ) {
+			function ( $acc, $query_args ) use ( $use_attribute_lookup ) {
 				$attribute_name       = $query_args['filter'];
 				$attribute_query_type = $query_args['query_type'];
 
 				$attribute_value = get_query_var( $attribute_name );
 				$attribute_query = get_query_var( $attribute_query_type );
 
-				if ( empty( $attribute_value ) ) {
+				$is_canonical_filter = 0 === strpos( $attribute_name, AttributeFilter::FILTER_QUERY_VAR_PREFIX );
+				$is_and_filter       = 'and' === $attribute_query;
+
+				if ( empty( $attribute_value ) || ( $use_attribute_lookup && $is_canonical_filter && ! $is_and_filter ) ) {
 					return $acc;
 				}
 
@@ -720,10 +720,14 @@ class QueryBuilder {
 					continue;
 				}
 
+				if ( 0 !== strpos( $filter_param, AttributeFilter::FILTER_QUERY_VAR_PREFIX ) || 'and' === $query_type_value ) {
+					continue;
+				}
+
 				$attribute_name                         = str_replace( AttributeFilter::FILTER_QUERY_VAR_PREFIX, '', $filter_param );
 				$query_type_param                       = AttributeFilter::QUERY_TYPE_QUERY_VAR_PREFIX . $attribute_name;
 				$filter_query_vars[ $filter_param ]     = $filter_value;
-				$filter_query_vars[ $query_type_param ] = is_string( $query_type_value ) && '' !== $query_type_value
+				$filter_query_vars[ $query_type_param ] = is_string( $query_type_value ) && in_array( $query_type_value, array( 'and', 'or' ), true )
 					? $query_type_value
 					: 'or';
 			}

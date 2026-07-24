@@ -59,7 +59,21 @@ class QueryBuilder extends \WP_UnitTestCase {
 	public function tearDown(): void {
 		global $wpdb;
 
-		foreach ( array( 'min_price', 'max_price', 'filter_stock_status', 'filter_color', 'query_type_color', 'categories', 'tags', 'brands' ) as $query_var ) {
+		$query_vars = array(
+			'min_price',
+			'max_price',
+			'filter_stock_status',
+			'filter_color',
+			'query_type_color',
+			'custom_query_type_color',
+			'pa_color',
+			'custom_color_mode',
+			'categories',
+			'tags',
+			'brands',
+		);
+
+		foreach ( $query_vars as $query_var ) {
 			set_query_var( $query_var, '' );
 		}
 
@@ -394,9 +408,9 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should pass custom attribute filter mappings to QueryClauses.
+	 * @testdox Should retain legacy attribute filtering for AND queries.
 	 */
-	public function test_merging_filter_by_attribute_queries() {
+	public function test_attribute_and_filter_uses_taxonomy_query(): void {
 		$this->block_instance->set_attributes_filter_query_args(
 			array(
 				'color' => array(
@@ -411,12 +425,69 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance );
 
-		$this->assertSame( 'red-slug,black-slug', $merged_query['filter_color'] );
-		$this->assertSame( 'and', $merged_query['query_type_color'] );
+		$this->assertArrayNotHasKey( 'filter_color', $merged_query );
+		$this->assertSame(
+			array(
+				'taxonomy' => 'pa_color',
+				'field'    => 'slug',
+				'terms'    => array( 'red-slug', 'black-slug' ),
+				'operator' => 'AND',
+			),
+			$this->find_tax_query_by_taxonomy( $merged_query['tax_query'], 'pa_color' )
+		);
 		$this->assertSame( true, $merged_query['isProductCollection'] );
+	}
 
-		set_query_var( 'filter_color', '' );
-		set_query_var( 'custom_query_type_color', '' );
+	/**
+	 * @testdox Should map custom attribute query-type variables to shared clauses.
+	 */
+	public function test_custom_attribute_query_type_mapping_uses_shared_clauses(): void {
+		$this->block_instance->set_attributes_filter_query_args(
+			array(
+				'color' => array(
+					'filter'     => 'filter_color',
+					'query_type' => 'custom_query_type_color',
+				),
+			)
+		);
+
+		set_query_var( 'filter_color', 'red-slug,black-slug' );
+		set_query_var( 'custom_query_type_color', 'or' );
+
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
+
+		$this->assertSame( 'red-slug,black-slug', $merged_query['filter_color'] );
+		$this->assertSame( 'or', $merged_query['query_type_color'] );
+	}
+
+	/**
+	 * @testdox Should preserve noncanonical public attribute filter mappings.
+	 */
+	public function test_noncanonical_attribute_mapping_uses_taxonomy_query(): void {
+		$this->block_instance->set_attributes_filter_query_args(
+			array(
+				'color' => array(
+					'filter'     => 'pa_color',
+					'query_type' => 'custom_color_mode',
+				),
+			)
+		);
+
+		set_query_var( 'pa_color', 'red-slug' );
+		set_query_var( 'custom_color_mode', 'or' );
+
+		$merged_query = Utils::initialize_merged_query( $this->block_instance );
+
+		$this->assertArrayNotHasKey( 'filter_color', $merged_query );
+		$this->assertSame(
+			array(
+				'taxonomy' => 'pa_color',
+				'field'    => 'slug',
+				'terms'    => array( 'red-slug' ),
+				'operator' => 'IN',
+			),
+			$this->find_tax_query_by_taxonomy( $merged_query['tax_query'], 'pa_color' )
+		);
 	}
 
 	/**
