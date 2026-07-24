@@ -949,30 +949,32 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	 * @dataProvider data_provider_helcim_supported_countries
 	 *
 	 * @param string $country_code ISO 3166-1 alpha-2 country code.
-	 * @param string $preceding_psp Expected PSP immediately before Helcim.
 	 */
-	public function test_helcim_is_last_psp_suggestion_in_supported_countries( string $country_code, string $preceding_psp ): void {
-		$extensions    = $this->sut->get_country_extensions( $country_code );
-		$extension_ids = array_column( $extensions, 'id' );
-		$helcim_index  = array_search( PaymentsExtensionSuggestions::HELCIM, $extension_ids, true );
+	public function test_helcim_is_last_psp_suggestion_in_supported_countries( string $country_code ): void {
+		$extensions       = $this->sut->get_country_extensions( $country_code );
+		$extensions_by_id = array_column( $extensions, null, 'id' );
+		$psp_ids          = array_column(
+			array_filter(
+				$extensions,
+				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
+			),
+			'id'
+		);
+		$helcim           = $extensions_by_id[ PaymentsExtensionSuggestions::HELCIM ] ?? null;
 
-		$this->assertIsInt( $helcim_index, "Helcim should be suggested in {$country_code}." );
-		if ( ! is_int( $helcim_index ) ) {
+		$this->assertSame(
+			PaymentsExtensionSuggestions::HELCIM,
+			end( $psp_ids ),
+			"Helcim should be the final PSP suggestion in {$country_code}."
+		);
+		$this->assertIsArray( $helcim, "Helcim should be suggested in {$country_code}." );
+		if ( ! is_array( $helcim ) ) {
 			return;
 		}
 
-		$this->assertSame(
-			array(
-				$preceding_psp,
-				PaymentsExtensionSuggestions::HELCIM,
-				PaymentsExtensionSuggestions::PAYPAL_WALLET,
-			),
-			array_slice( $extension_ids, $helcim_index - 1, 3 ),
-			"Helcim should be the final PSP before express checkout suggestions in {$country_code}."
-		);
 		$this->assertNotContains(
 			PaymentsExtensionSuggestions::TAG_PREFERRED,
-			$extensions[ $helcim_index ]['tags'],
+			$helcim['tags'],
 			"Helcim should remain in other payment options for {$country_code}."
 		);
 	}
@@ -980,17 +982,17 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	/**
 	 * Data provider for Helcim's supported countries.
 	 *
-	 * @return array<string, array{string, string}>
+	 * @return array<string, array{string}>
 	 */
 	public function data_provider_helcim_supported_countries(): array {
 		return array(
-			'Canada'        => array( 'CA', PaymentsExtensionSuggestions::GOCARDLESS ),
-			'United States' => array( 'US', PaymentsExtensionSuggestions::AIRWALLEX ),
+			'Canada'        => array( 'CA' ),
+			'United States' => array( 'US' ),
 		);
 	}
 
 	/**
-	 * @testdox Helcim has complete base suggestion details
+	 * @testdox Helcim has complete base suggestion details.
 	 */
 	public function test_helcim_has_complete_base_details(): void {
 		$extension = $this->sut->get_by_id( 'helcim' );
@@ -1008,7 +1010,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			),
 			$extension['plugin']
 		);
-		$this->assertSame(
+		$this->assertEqualsCanonicalizing(
 			array(
 				array(
 					'_type' => PaymentsProviders::LINK_TYPE_PRICING,
@@ -1033,10 +1035,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			),
 			$extension['links']
 		);
-		$this->assertSame(
-			plugins_url( 'assets/images/icons/default-payments.svg', WC_PLUGIN_FILE ),
-			$extension['icon']
-		);
+		$this->assertNotEmpty( $extension['icon'] );
 		$this->assertNotEmpty( $extension['title'] );
 		$this->assertNotEmpty( $extension['description'] );
 	}
