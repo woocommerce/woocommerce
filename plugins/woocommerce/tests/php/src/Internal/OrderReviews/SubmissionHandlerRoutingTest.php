@@ -118,8 +118,11 @@ class SubmissionHandlerRoutingTest extends WC_Unit_Test_Case {
 		} catch ( WPAjaxDieContinueException $e ) {
 			// Expected: wp_send_json_* always calls wp_die().
 			unset( $e );
+		} finally {
+			// Clean the buffer even if a non-WPAjax exception escaped, so the test
+			// process does not leak a stray buffer to subsequent tests.
+			$body = (string) ob_get_clean();
 		}
-		$body = (string) ob_get_clean();
 
 		$decoded  = json_decode( $body, true );
 		$response = array(
