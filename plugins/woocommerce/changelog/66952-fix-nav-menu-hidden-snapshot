@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Persist the default nav-menu hidden meta box snapshot on a user's first visit to Appearance > Menus, so meta boxes registered by plugins installed after that visit stay visible by default instead of being hidden on every recompute.
