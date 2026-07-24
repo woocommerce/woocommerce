@@ -141,7 +141,7 @@ test.describe( 'Scoped drafts: draft lifecycle across navigation and reload', ()
 		} );
 	} );
 
-	test( 'a variable product’s card presents as unconfigured after an enhanced-pagination round trip, matching base behavior', async ( {
+	test( 'a variable product’s card re-presents its recorded attribute selection after an enhanced-pagination round trip, because the surviving draft re-derives the variation', async ( {
 		page,
 		requestUtils,
 	} ) => {
@@ -181,14 +181,14 @@ test.describe( 'Scoped drafts: draft lifecycle across navigation and reload', ()
 		const quantity = form.getByLabel( 'Product quantity' );
 		await quantity.fill( '3' );
 		await quantity.blur();
-		await form
+		const colorBlueOption = form
 			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'radio', { name: 'Blue', exact: true } )
-			.click();
-		await form
+			.getByRole( 'radio', { name: 'Blue', exact: true } );
+		const logoNoOption = form
 			.getByRole( 'radiogroup', { name: 'Logo' } )
-			.getByRole( 'radio', { name: 'No', exact: true } )
-			.click();
+			.getByRole( 'radio', { name: 'No', exact: true } );
+		await colorBlueOption.click();
+		await logoNoOption.click();
 
 		// The variation selector resolves the matching variation
 		// asynchronously; wait for the shopper-visible sign that resolution
@@ -198,6 +198,16 @@ test.describe( 'Scoped drafts: draft lifecycle across navigation and reload', ()
 			name: 'Add to cart',
 		} );
 		await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+
+		// The hidden `variation_id` input (AddToCartWithOptions.php) binds
+		// `woocommerce/products::state.productVariationInContext.id` — the
+		// resolved Blue+No variation. Capture it before navigating away so
+		// the post-round-trip step below can confirm the remounted card
+		// re-resolves this exact same variation, without pinning this
+		// fixture's specific variation id as a hardcoded expectation.
+		const variationIdInput = form.locator( 'input[name="variation_id"]' );
+		const resolvedVariationId = await variationIdInput.inputValue();
+		expect( resolvedVariationId ).toMatch( /^\d+$/ );
 
 		await page.getByRole( 'link', { name: 'Next Page' } ).click();
 		await expect(
@@ -209,43 +219,56 @@ test.describe( 'Scoped drafts: draft lifecycle across navigation and reload', ()
 			page.getByRole( 'heading', { name: 'Hoodie' } )
 		).toBeVisible();
 
-		await test.step( 'the remounted card presents as unconfigured for attributes, exactly like base behavior', async () => {
-			// Variation *attribute* selection lives in the card's own
-			// client-side context (the resolved `variationId`, the
-			// selector's `selectedAttributes`), which the enhanced-
-			// pagination remount discards — the fresh server render carries
-			// no resolved variation, so the remounted card presents as
-			// unconfigured and its Add to cart stays blocked by the usual
-			// missing-attributes validation until the shopper reselects.
-			await expect(
-				form
-					.getByRole( 'radiogroup', { name: 'Color' } )
-					.getByRole( 'radio', { name: 'Blue', exact: true } )
-			).not.toBeChecked();
-			await expect(
-				form
-					.getByRole( 'radiogroup', { name: 'Logo' } )
-					.getByRole( 'radio', { name: 'No', exact: true } )
-			).not.toBeChecked();
-			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
+		await test.step( 'the remounted card re-presents the recorded attribute selection, because the draft is canonical and survives the remount (spec requirement 11 carve-out)', async () => {
+			// The enhanced-pagination remount discards the card's own
+			// client-side context (the selector's local
+			// `context.selectedAttributes`, the nearest `variationId`
+			// pointer) exactly as before. But
+			// `state.selectedAttributes` (variation-selector/frontend.ts)
+			// reads the resolved collection's draft ahead of that local
+			// context — judged by emptiness, never truthiness — and the
+			// family draft this surface wrote earlier survives in the
+			// collection's surviving global state, still filed under the
+			// migrated Blue+No variation id with its `variation` attribute
+			// set intact (`writeDraft`'s id-migration in
+			// draft-internals.ts). The draft-first read therefore resolves
+			// that same non-empty selection on the very first paint after
+			// remount: the chips re-present as checked instead of
+			// resetting, superseding the earlier presents-as-unconfigured
+			// expectation for this case.
+			await expect( colorBlueOption ).toBeChecked();
+			await expect( logoNoOption ).toBeChecked();
+
+			// `productVariationInContext` (products.ts) resolves the same
+			// surviving family draft directly — via `resolveFamilyVariation`
+			// matching the draft's recorded attributes back to the Blue+No
+			// variation — independently of the remount-discarded
+			// `variationId` context/state pointer. `validateVariation`
+			// (a `data-wp-watch` callback) reads that same draft-first
+			// selection, resolves it to the same in-stock variation, and
+			// records no error, so Add to cart never re-blocks.
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+
+			// The hidden input's binding source is the very getter above,
+			// so it re-presents the same resolved variation id as before
+			// the round trip.
+			await expect( variationIdInput ).toHaveValue( resolvedVariationId );
 		} );
 
-		await test.step( 'the remounted quantity input shows the server-seeded default, matching base behavior', async () => {
-			// The keyed collection this card's card key resolves does
-			// survive the remount, but which draft it displays still goes
-			// through the variation-aware pairing (`itemInContext`), which
-			// reads against the *resolved* product in context (parent vs.
-			// matched variation) — and the remount discards the resolved
-			// variation, so the input resolves against the parent product
-			// id again. Empirically confirmed on the real feature wiring (a
-			// browser probe of this exact round trip): the remounted input
-			// reads 1, the server-seeded default — base parity, matching
-			// what a shopper saw before this change. Variable-card
-			// *quantity* draft survival therefore has no shopper-visible
-			// observable here; the simple-product test above is what
-			// carries the shopper-visible confirmation that an edited value
-			// survives a remount round trip via the keyed collection.
-			await expect( quantity ).toHaveValue( '1' );
+		await test.step( 'the remounted quantity input shows the surviving draft’s own quantity, not the server-seeded default', async () => {
+			// `resolveDisplayQuantity` (quantity-selector/frontend.ts)
+			// prefers the resolved collection's draft quantity over this
+			// instance's own local map. `itemInContext` (cart.ts) resolves
+			// through `productInContext.id`, which the family-draft-based
+			// `productVariationInContext` above already re-derives to the
+			// Blue+No variation id — the very id the surviving draft is
+			// filed under — so it addresses that exact same draft, quantity
+			// included. The remounted input therefore shows the shopper's
+			// own edited quantity, not the parent's server-seeded default of
+			// 1: draft survival now extends to the variable card exactly as
+			// it already does for the simple-product case above (spec
+			// requirement 11's region-remount-survival carve-out).
+			await expect( quantity ).toHaveValue( '3' );
 		} );
 	} );
 } );
