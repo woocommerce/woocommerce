@@ -1133,4 +1133,113 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( $line_item_meta['display_value']['readonly'] );
 		$this->assertTrue( $line_item_meta['display_key']['readonly'] );
 	}
+
+	/**
+	 * Builds a variable product with a single variation carrying a real "color" attribute.
+	 *
+	 * @return array Two-element array: the WC_Product_Variable parent and its WC_Product_Variation.
+	 */
+	private function create_variable_product_with_color_variation(): array {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'REST Switch Parent' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'color' );
+		$attribute->set_options( array( 'blue', 'green' ) );
+		$attribute->set_variation( true );
+		$parent->set_attributes( array( $attribute ) );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'REST-VAR-' . wp_generate_uuid4(),
+			10,
+			array( 'color' => 'blue' )
+		);
+
+		return array( $parent, $variation );
+	}
+
+	/**
+	 * Creates an order carrying the given variation as its single line item.
+	 *
+	 * @param WC_Product_Variation $variation Variation to add as a line item.
+	 * @return array Two-element array: the saved WC_Order and the line item ID.
+	 */
+	private function create_order_with_variation_line_item( $variation ): array {
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+		$item->set_quantity( 1 );
+		$item->set_total( 10 );
+		$order->add_item( $item );
+		$order->save();
+
+		return array( $order, $item->get_id() );
+	}
+
+	/**
+	 * @testdox PUT /orders that switches a variation line item to a simple product clears variation_id over the REST round trip.
+	 */
+	public function test_update_line_item_to_simple_product_clears_variation_id(): void {
+		$fixture                 = $this->create_variable_product_with_color_variation();
+		$variation               = $fixture[1];
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+		$simple                  = WC_Helper_Product::create_simple_product();
+
+		$this->assertSame( $variation->get_id(), (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'Precondition: the line item stored the variation ID.' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'line_items' => array(
+						array(
+							'id'         => $item_id,
+							'product_id' => $simple->get_id(),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'variation_id should be reset to 0 after switching to a simple product over REST.' );
+		$this->assertSame( 0, (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The persisted _variation_id meta should be 0.' );
+		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the simple product, not the old variation.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with a product_id-only payload targeting the variable parent demotes the item and clears variation_id.
+	 */
+	public function test_update_line_item_to_variable_parent_clears_variation_id(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'line_items' => array(
+						array(
+							'id'         => $item_id,
+							'product_id' => $parent->get_id(),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'A product_id-only payload targeting the variable parent succeeds with no error.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'Omitting variation_id demotes the item to its parent and clears variation_id.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the variable parent.' );
+	}
 }
