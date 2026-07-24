@@ -250,7 +250,13 @@ final class OrderWithdrawalFormProcessor {
 			$matched_order = $this->get_matching_order( $data );
 
 			if ( $matched_order instanceof WC_Order ) {
-				$this->add_order_withdrawal_note( $matched_order, $data );
+				try {
+					if ( ! $this->add_order_withdrawal_note( $matched_order, $data ) ) {
+						$this->log_order_note_error( $matched_order );
+					}
+				} catch ( Throwable $e ) {
+					$this->log_order_note_error( $matched_order, $e );
+				}
 			}
 
 			$this->send_order_withdrawal_emails( $data, $matched_order );
@@ -331,9 +337,8 @@ final class OrderWithdrawalFormProcessor {
 	 *
 	 * @param WC_Order             $order Matched order.
 	 * @param array<string,string> $data  Form data.
-	 * @throws RuntimeException When the note cannot be added.
 	 */
-	private function add_order_withdrawal_note( WC_Order $order, array $data ): void {
+	private function add_order_withdrawal_note( WC_Order $order, array $data ): bool {
 		$note = sprintf(
 			/* translators: 1: customer name, 2: customer email address. */
 			__( 'Order withdrawal requested by %1$s (%2$s).', 'woocommerce' ),
@@ -349,11 +354,7 @@ final class OrderWithdrawalFormProcessor {
 			);
 		}
 
-		$note_id = $order->add_order_note( $note, 0, false, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
-
-		if ( ! $note_id ) {
-			throw new RuntimeException( 'Could not add order withdrawal note.' );
-		}
+		return (bool) $order->add_order_note( $note, 0, false, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 	}
 
 	/**
@@ -548,6 +549,25 @@ final class OrderWithdrawalFormProcessor {
 	private function log_submission_error( Throwable $e ): void {
 		wc_get_logger()->warning(
 			sprintf( 'Order withdrawal submission failed: %s', $e->getMessage() ),
+			array( 'source' => self::LOGGER_SOURCE )
+		);
+	}
+
+	/**
+	 * Log an order note failure without failing the submission.
+	 *
+	 * @param WC_Order       $order Matched order.
+	 * @param Throwable|null $e     Order note error.
+	 */
+	private function log_order_note_error( WC_Order $order, ?Throwable $e = null ): void {
+		$message = sprintf( 'Order withdrawal note could not be added to order %d.', $order->get_id() );
+
+		if ( $e instanceof Throwable ) {
+			$message .= sprintf( ' Error: %s', $e->getMessage() );
+		}
+
+		wc_get_logger()->warning(
+			$message,
 			array( 'source' => self::LOGGER_SOURCE )
 		);
 	}

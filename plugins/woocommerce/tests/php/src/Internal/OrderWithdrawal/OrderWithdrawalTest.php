@@ -199,6 +199,40 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should submit and send emails when adding the matched order note fails.
+	 */
+	public function test_process_current_request_treats_order_note_failure_as_best_effort(): void {
+		$order           = $this->create_order_for_form_data();
+		$capture         = $this->capture_wp_mail();
+		$fail_order_note = static function ( $commentdata ) {
+			if ( is_array( $commentdata ) && 'order_note' === ( $commentdata['comment_type'] ?? '' ) ) {
+				throw new \RuntimeException( 'Order note insert failed.' );
+			}
+
+			return $commentdata;
+		};
+
+		add_filter( 'preprocess_comment', $fail_order_note, 10, 1 );
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state = $this->sut->process_current_request();
+
+			$this->assertSame( 'confirmation', $state->screen, 'Order note failures should not block submission.' );
+			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should still be sent.' );
+			$this->assert_mail_sent_to( 'jane@example.test', $capture['captures'] );
+			$this->assert_mail_sent_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+		} finally {
+			remove_filter( 'preprocess_comment', $fail_order_note, 10 );
+			$capture['remove']();
+		}
+	}
+
+	/**
 	 * @testdox Should send emails without adding a note when no exact order match is found.
 	 */
 	public function test_process_current_request_sends_emails_without_note_when_order_does_not_match(): void {
