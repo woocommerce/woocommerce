@@ -34,8 +34,14 @@ let mockQuantitySelectorContext: { inputElement?: HTMLInputElement | null };
 // rather than exercising the real `woocommerce/products` getters.
 let mockProductsState: Partial< ProductsStoreState >;
 
+// The `woocommerce/cart` store's `findItem`, controlled per test. Returns
+// an envelope whose `draft` is a fresh, settable plain object per call —
+// mirroring the shape of the real draft view (an object `setQuantity` can
+// write `.quantity` onto) without exercising its family/id-migration
+// resolution, which is covered by the cart store's own tests.
+let mockFindItem: jest.Mock;
+
 // The `woocommerce/cart` store's action spies, controlled per test.
-let mockUpsertDraftItem: jest.Mock;
 let mockAddItem: jest.Mock;
 let mockAddCartItem: jest.Mock;
 let mockBatchAddCartItems: jest.Mock;
@@ -66,8 +72,10 @@ jest.mock(
 				}
 				if ( name === 'woocommerce/cart' ) {
 					return {
+						state: {
+							findItem: mockFindItem,
+						},
 						actions: {
-							upsertDraftItem: mockUpsertDraftItem,
 							addItem: mockAddItem,
 							addCartItem: mockAddCartItem,
 							batchAddCartItems: mockBatchAddCartItems,
@@ -174,7 +182,9 @@ describe( 'Add to Cart + Options frontend store', () => {
 		};
 		mockQuantitySelectorContext = {};
 		mockProductsState = {};
-		mockUpsertDraftItem = jest.fn();
+		mockFindItem = jest.fn( ( args?: { id?: number } ) => ( {
+			draft: { id: args?.id },
+		} ) );
 		mockAddItem = jest.fn( () => Promise.resolve() );
 		mockAddCartItem = jest.fn( () => Promise.resolve() );
 		mockBatchAddCartItems = jest.fn( () => Promise.resolve() );
@@ -187,7 +197,7 @@ describe( 'Add to Cart + Options frontend store', () => {
 	} );
 
 	describe( 'setQuantity', () => {
-		it( 'upserts the resolved collection draft with the new quantity for a simple product', () => {
+		it( 'writes exactly one draft write via findItem({ id }).draft.quantity for a simple product', () => {
 			mockContext.quantity = { 42: 1 };
 			mockProductsState.baseProductInContext = {
 				id: 42,
@@ -199,11 +209,10 @@ describe( 'Add to Cart + Options frontend store', () => {
 			const { actions } = loadStore();
 			actions.setQuantity( 42, 3 );
 
-			expect( mockUpsertDraftItem ).toHaveBeenCalledTimes( 1 );
-			expect( mockUpsertDraftItem ).toHaveBeenCalledWith(
-				{ quantity: 3 },
-				{ id: 42 }
-			);
+			expect( mockFindItem ).toHaveBeenCalledTimes( 1 );
+			expect( mockFindItem ).toHaveBeenCalledWith( { id: 42 } );
+			const { draft } = mockFindItem.mock.results[ 0 ].value;
+			expect( draft.quantity ).toBe( 3 );
 		} );
 
 		it( 'drafts only the edited id, not sibling variation ids, for a variable product', () => {
@@ -217,24 +226,22 @@ describe( 'Add to Cart + Options frontend store', () => {
 			const { actions } = loadStore();
 			actions.setQuantity( 2, 5 );
 
-			// Existing behavior preserved: local context quantity stays in
-			// sync across every sibling variation id, so the quantity
-			// persists when the shopper switches variations. The base
-			// product's own id (1) is untouched — it was never part of the
-			// sibling-variation sync (unchanged pre-existing behavior).
-			expect( mockContext.quantity ).toEqual( { 1: 1, 2: 5, 3: 5 } );
+			// The per-variation local fan-out is gone: the local context
+			// write now only ever targets the id the shopper actually
+			// edited. Siblings (1, 3) keep whatever local value they
+			// already had — the shared family draft (not this local map)
+			// is what carries the quantity across a variation switch.
+			expect( mockContext.quantity ).toEqual( { 1: 1, 2: 5, 3: 1 } );
 
-			// The cart draft, however, is only ever written for the id the
-			// shopper actually edited — the id currently resolved as
-			// `productInContext` — not every sibling variation.
-			expect( mockUpsertDraftItem ).toHaveBeenCalledTimes( 1 );
-			expect( mockUpsertDraftItem ).toHaveBeenCalledWith(
-				{ quantity: 5 },
-				{ id: 2 }
-			);
+			// The draft write, too, is only ever made for the id the
+			// shopper actually edited — never every sibling variation.
+			expect( mockFindItem ).toHaveBeenCalledTimes( 1 );
+			expect( mockFindItem ).toHaveBeenCalledWith( { id: 2 } );
+			const { draft } = mockFindItem.mock.results[ 0 ].value;
+			expect( draft.quantity ).toBe( 5 );
 		} );
 
-		it( 'upserts the draft for a grouped product child row', () => {
+		it( 'writes the draft for a grouped product child row', () => {
 			// A grouped-product child row resolves `productInContext` to the
 			// child (its own nested `woocommerce/products` context), and the
 			// parent lookup used for validation resolves to the grouped
@@ -256,10 +263,9 @@ describe( 'Add to Cart + Options frontend store', () => {
 			actions.validateGroupedProductQuantity = jest.fn();
 			actions.setQuantity( 20, 2 );
 
-			expect( mockUpsertDraftItem ).toHaveBeenCalledWith(
-				{ quantity: 2 },
-				{ id: 20 }
-			);
+			expect( mockFindItem ).toHaveBeenCalledWith( { id: 20 } );
+			const { draft } = mockFindItem.mock.results[ 0 ].value;
+			expect( draft.quantity ).toBe( 2 );
 			expect( actions.validateGroupedProductQuantity ).toHaveBeenCalled();
 		} );
 	} );

@@ -66,7 +66,7 @@ const { state: productsState } = store< ProductsStore >(
 
 // Todo: Use the module exports instead of `store()` once the woocommerce
 // store is public.
-const { actions: wooActions } = store< WooCommerce >(
+const { state: wooState, actions: wooActions } = store< WooCommerce >(
 	'woocommerce/cart',
 	{},
 	{ lock: universalLock }
@@ -176,54 +176,39 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				const inputElement = quantitySelectorContext?.inputElement;
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
-				const { baseProductInContext: productFromStore } =
-					productsState;
-				const variationIds =
-					productFromStore?.variations?.map( ( v ) => v.id ) ?? [];
-
-				if ( variationIds.length > 0 ) {
-					// Set the quantity for all variations, so when switching
-					// variations the quantity persists.
-					const idsToUpdate = [ productId, ...variationIds ];
-
-					idsToUpdate.forEach( ( id ) => {
-						if ( isValueNaN ) {
-							// Modify the value first before setting the real
-							// value to ensure that a signal update happens.
-							context.quantity[ Number( id ) ] = NaN;
-						}
-
-						context.quantity[ Number( id ) ] = value;
-					} );
-				} else {
-					if ( isValueNaN ) {
-						// Modify the value first before setting the real value
-						// to ensure that a signal update happens.
-						context.quantity = {
-							...context.quantity,
-							[ productId ]: NaN,
-						};
-					}
-
+				// The single local write, for this instance's own id: an
+				// initial/fallback display value, read ahead of the shared
+				// draft only until the draft write below resolves one (see
+				// `resolveDisplayQuantity` in the quantity selector). No
+				// per-variation fan-out here — the family draft's id
+				// migration (see the variation selector) is what carries
+				// this quantity across a subsequent variation switch.
+				if ( isValueNaN ) {
+					// Modify the value first before setting the real value
+					// to ensure that a signal update happens.
 					context.quantity = {
 						...context.quantity,
-						[ productId ]: value,
+						[ productId ]: NaN,
 					};
 				}
 
-				// Mirror the edit into the resolved draft collection — keyed
-				// by the nearest declared `context.draftKey`, falling back to
-				// the store's reserved global key — for the id the shopper
-				// actually edited, so other surfaces resolving that same
-				// collection react and `addItem()` posts the right quantity.
-				// Sibling variation ids keep their own draft (if any)
-				// untouched here — they get their own draft, carrying this
-				// same locally-tracked quantity, once the shopper actually
-				// switches to them (see the variation selector).
-				wooActions.upsertDraftItem(
-					{ quantity: value },
-					{ id: productId }
-				);
+				context.quantity = {
+					...context.quantity,
+					[ productId ]: value,
+				};
+
+				// Record the edit as the resolved collection's single draft
+				// write, for the id the shopper actually edited (explicit
+				// id covers grouped children and variation ids alike). The
+				// draft view resolves the family-aware live draft nearest
+				// that id, so this write lands on the same shared draft a
+				// sibling variation's write would, and the draft's id
+				// migration (see the variation selector) is what carries it
+				// across a subsequent variation switch.
+				const { draft } = wooState.findItem( { id: productId } );
+				if ( draft ) {
+					draft.quantity = value;
+				}
 
 				const parentProduct = productsState.findProduct( {
 					id: productsState.productId,
