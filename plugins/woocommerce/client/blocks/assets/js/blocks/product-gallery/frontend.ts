@@ -653,11 +653,12 @@ const productGallery = {
 		/**
 		 * Sync the gallery to the blockified Add to Cart + Options block's
 		 * variation state. Bound via `data-wp-watch`, so it re-runs whenever
-		 * `productsState.variationId` changes.
+		 * `productsState.productVariationInContext` changes.
 		 */
 		listenToProductDataChanges: () => {
 			const context = getContext();
-			const variationId = productsState.variationId;
+			const variationId =
+				productsState.productVariationInContext?.id ?? null;
 			const prevVariationId = lastSeenVariationId.get(
 				context.productId
 			);
