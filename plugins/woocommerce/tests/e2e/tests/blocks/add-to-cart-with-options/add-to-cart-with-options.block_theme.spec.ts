@@ -401,6 +401,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const sizeLargeOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Size' } )
 			.getByRole( 'radio', { name: 'Large', exact: true } );
+		const sizeMediumOption = addToCartBlock
+			.getByRole( 'radiogroup', { name: 'Size' } )
+			.getByRole( 'radio', { name: 'Medium', exact: true } );
 
 		await colorBlueOption.click();
 		await sizeLargeOption.click();
@@ -428,6 +431,172 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await addToCartButton.click();
 
 		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+
+		await test.step( 'two adds that specify different concrete values for the "any" attribute land as two distinct lines under the same (Blue) variation id', async () => {
+			// Back to Blue + Large — the line added first. Its own badge
+			// reflects its own quantity, unaffected by the Red + Large line
+			// just added above.
+			await colorBlueOption.click();
+			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+
+			// Blue + Medium has no line of its own yet: same (Blue)
+			// variation id as the Blue + Large line above, disambiguated
+			// only by the concrete value given for the "any" Size
+			// attribute.
+			await sizeMediumOption.click();
+			await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+
+			await addToCartButton.click();
+			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+
+			// Switching Size back to Large reflects the *other* line's own
+			// quantity again — proof the two adds landed as two distinct
+			// lines under the same variation id rather than one
+			// overwriting the other.
+			await sizeLargeOption.click();
+			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+		} );
+
+		await test.step( 'leaving the "any" attribute unspecified pairs to nothing, even though lines already exist for this variation id', async () => {
+			// Deselecting Size (clicking the already-checked chip again)
+			// leaves Color (Blue) specified but Size unspecified. The
+			// effective payload is incomplete, so this surface pairs to
+			// neither of the Blue lines added above — the badge disappears
+			// rather than guessing which one, or summing both.
+			await sizeLargeOption.click();
+			await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+
+			// The block's own upstream validation gates Add to cart on a
+			// complete selection before any request is made, so the
+			// server's 400 for an incomplete "any" attribute (mirrored by
+			// the pairing logic above) is never actually reachable from
+			// this surface — it is pre-empted client-side, same as an
+			// unselected required attribute always has been.
+			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
+		} );
+	} );
+
+	test( 'resolves a variable product’s server-configured default attribute on load with no click, posts the resolved variation id on a quantity-first add, and pairs the resulting line back to the surface — including on a later, untouched load', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		const productSlug = 'default-attribute-variable-product';
+
+		// A variable product whose default attribute is configured
+		// server-side (`get_variation_default_attribute`), so the surface
+		// renders with a fully-resolved variation selected post-hydration,
+		// before any shopper click.
+		const productOutput = await wpCLI(
+			`wc product create --user=1 --slug="${ productSlug }" --name="Default Attribute Variable Product" --type="variable" --attributes='${ JSON.stringify(
+				[
+					{
+						name: 'Color',
+						options: [ 'Blue', 'Red' ],
+						variation: true,
+						visible: true,
+					},
+				]
+			) }' --default_attributes='${ JSON.stringify( [
+				{ name: 'Color', option: 'Blue' },
+			] ) }'`
+		);
+		const productId =
+			productOutput.stdout.match( /product\s+(\d+)/ )?.[ 1 ];
+		if ( ! productId ) {
+			throw new Error(
+				`No productId found, cliOutput: ${ JSON.stringify(
+					productOutput
+				) }`
+			);
+		}
+
+		const blueVariationOutput = await wpCLI(
+			`wc product_variation create "${ productId }" --user=1 --regular_price="20.00" --attributes='${ JSON.stringify(
+				[ { name: 'Color', option: 'Blue' } ]
+			) }'`
+		);
+		const blueVariationId = blueVariationOutput.stdout
+			.match( /\d+/g )
+			?.pop();
+
+		await wpCLI(
+			`wc product_variation create "${ productId }" --user=1 --regular_price="25.00" --attributes='${ JSON.stringify(
+				[ { name: 'Color', option: 'Red' } ]
+			) }'`
+		);
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		const addToCartBlock = page.locator(
+			'.wp-block-add-to-cart-with-options'
+		);
+		const colorBlueOption = addToCartBlock
+			.getByRole( 'radiogroup', { name: 'Color' } )
+			.getByRole( 'radio', { name: 'Blue', exact: true } );
+		// We use the Add to Cart + Options class to make sure we don't
+		// select the Add to Cart button from the Related Products block.
+		const addToCartButton = addToCartBlock.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+		const productPrice = page
+			.locator( '.wp-block-woocommerce-product-price' )
+			.first();
+
+		await test.step( 'the server default resolves on load with no shopper click', async () => {
+			await page.goto( `/product/${ productSlug }/` );
+
+			await expect( colorBlueOption ).toBeChecked();
+			await expect(
+				page.locator( 'input[name="variation_id"]' )
+			).toHaveValue( String( blueVariationId ) );
+			// A resolved variation shows its own price, not the base
+			// product's price range.
+			await expect( productPrice ).toHaveText( '$20.00' );
+			await expect( addToCartButton ).toBeVisible();
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+		} );
+
+		await test.step( 'a quantity-first add — the attribute chips are never touched — posts the resolved variation id, not the variable parent, and succeeds', async () => {
+			await page.getByLabel( 'Product quantity' ).fill( '3' );
+			await page.getByLabel( 'Product quantity' ).blur();
+
+			const batchResponsePromise = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
+			await addToCartButton.click();
+			const batchResponse = await batchResponsePromise;
+
+			// A post of the variable parent (empty attributes) would 400;
+			// the resolved variation id succeeds.
+			expect( batchResponse.status() ).toBeLessThan( 300 );
+
+			const cartResponse = await page.request.get(
+				'/wp-json/wc/store/v1/cart'
+			);
+			const cart: { items: { id: number; quantity: number }[] } =
+				await cartResponse.json();
+			const line = cart.items.find(
+				( item ) => item.id === Number( blueVariationId )
+			);
+			expect( line ).toMatchObject( { quantity: 3 } );
+		} );
+
+		await test.step( 'the resulting line pairs back to the surface once the response lands', async () => {
+			await expect( page.getByText( '3 in cart' ) ).toBeVisible();
+		} );
+
+		await test.step( 'a later, untouched load of the same surface pairs to the pre-existing line with zero interaction', async () => {
+			// Drafts reset on a hard reload; the server cart line persists.
+			await page.reload();
+
+			await expect( colorBlueOption ).toBeChecked();
+			await expect( page.getByText( '3 in cart' ) ).toBeVisible();
+		} );
 	} );
 
 	test( 'allows adding variable products with custom attribute slugs', async ( {
