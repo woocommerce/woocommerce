@@ -1,6 +1,19 @@
 name: 'CI'
 on:
   pull_request:
+    # Keep this list the inverse of the `paths` list in ci-skip.yml: every PR must trigger
+    # exactly one of the two workflows so the 'Evaluate Project Job Statuses' required
+    # status check is always reported.
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!**/changelog/**'
+      - '!.cursor/**'
+      - '!**/*.md'
+      - '!**/changelog.txt'
+      - '!.gitignore'
+      - '!.coderabbit.yml'
+      - '!CODEOWNERS'
   push:
     paths:
       - '**'

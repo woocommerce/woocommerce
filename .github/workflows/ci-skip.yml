@@ -1,0 +1,70 @@
+name: 'CI'
+on:
+  pull_request:
+    # Keep this list the inverse of the negations in ci.yml's `pull_request` paths filter:
+    # every PR must trigger exactly one of the two workflows so the
+    # 'Evaluate Project Job Statuses' required status check is always reported.
+    paths:
+      - 'docs/**'
+      - '**/changelog/**'
+      - '.cursor/**'
+      - '**/*.md'
+      - '**/changelog.txt'
+      - '.gitignore'
+      - '.coderabbit.yml'
+      - 'CODEOWNERS'
+
+concurrency:
+  # Must not share a group with ci.yml: on PRs touching both code and docs paths the two
+  # workflows run side by side and would cancel each other.
+  group: ci-skip-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate-project-jobs:
+    # ci.yml does not trigger for PRs that only touch docs, changelogs, and other non-code
+    # files, but its 'Evaluate Project Job Statuses' job is a required status check — a PR
+    # that never reports it cannot merge. This job reports the same check name for those
+    # skipped PRs, and runs the markdown validation that ci.yml's validate-markdown job
+    # would otherwise have provided.
+    name: 'Evaluate Project Job Statuses'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: 'actions/checkout@v4'
+
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: target-changes
+        with:
+          list-files: shell
+          filters: |
+            needs-markdown-linting:
+              - added|modified: '!(.github/**|.linear/**)/**/*.md'
+              - added|modified: '*.md'
+            needs-docs-build-validation:
+              - 'docs/**/*.md'
+
+      - name: 'Setup - node'
+        if: ${{ github.event.pull_request.base.ref == 'trunk' && (steps.target-changes.outputs.needs-markdown-linting == 'true' || steps.target-changes.outputs.needs-docs-build-validation == 'true') }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: 'Setup - pnpm'
+        if: ${{ github.event.pull_request.base.ref == 'trunk' && (steps.target-changes.outputs.needs-markdown-linting == 'true' || steps.target-changes.outputs.needs-docs-build-validation == 'true') }}
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+
+      - name: 'Validate - lint md-files'
+        if: ${{ github.event.pull_request.base.ref == 'trunk' && steps.target-changes.outputs.needs-markdown-linting == 'true' }}
+        shell: bash
+        run: pnpm dlx markdownlint-cli -- ${{ steps.target-changes.outputs.needs-markdown-linting_files }}
+
+      - name: 'Validate - lint docs-files'
+        if: ${{ always() && github.event.pull_request.base.ref == 'trunk' && steps.target-changes.outputs.needs-docs-build-validation == 'true' }}
+        shell: bash
+        working-directory: docs/_docu-tools
+        run: |
+          pnpm install --ignore-workspace
+          pnpm run lint:markdown
