@@ -155,8 +155,10 @@ jobs:
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
+      # Inline annotations are aimed at community contributors, who are least likely to be
+      # set up to run our linters locally. Members get the plain 'Lint' failure as before.
       - name: 'Install cs2pr'
-        if: ${{ failure() && matrix.projectName == '@woocommerce/plugin-woocommerce' && github.event.pull_request.draft == false }}
+        if: ${{ failure() && matrix.projectName == '@woocommerce/plugin-woocommerce' && github.event.pull_request.draft == false && github.event.pull_request.head.repo.fork }}
         uses: 'shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240' # 2.37.2
         with:
           php-version: '7.4'
@@ -164,7 +166,7 @@ jobs:
           tools: 'cs2pr'
 
       - name: 'Lint: PHP checkstyle annotations'
-        if: ${{ failure() && matrix.projectName == '@woocommerce/plugin-woocommerce' && github.event.pull_request.draft == false }}
+        if: ${{ failure() && matrix.projectName == '@woocommerce/plugin-woocommerce' && github.event.pull_request.draft == false && github.event.pull_request.head.repo.fork }}
         working-directory: 'plugins/woocommerce'
         # Re-runs the same PHP diff the 'Lint' step above already checked, only to get
         # its output in checkstyle format for cs2pr. The pass/fail verdict already
@@ -177,6 +179,9 @@ jobs:
             exit 0
           fi
           composer exec phpcs-changed -- --git --git-base "$baseBranch" --report=checkstyle $changedFiles > checkstyle.xml || true
+          # phpcs reports paths relative to this working directory, but GitHub resolves
+          # annotation paths from the repo root -- without this they never attach to the diff.
+          sed -i 's|<file name="|<file name="plugins/woocommerce/|g' checkstyle.xml
           cs2pr checkstyle.xml
 
   woocommerce-plugin-build-artifact:
