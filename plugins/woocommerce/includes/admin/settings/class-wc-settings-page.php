@@ -141,9 +141,6 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$section = is_string( $current_section ) ? $current_section : '';
 			$context = $this->get_settings_ui_request_context( $section );
 
-<<<<<<< HEAD
-			if ( ! $context || ! $context->is_rendering_enabled() ) {
-=======
 			try {
 				if ( ! $context || ! $context->is_rendering_enabled() ) {
 					return $classes;
@@ -154,10 +151,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				if ( $context->has_schema_failed() || $context->has_script_handles_failed() ) {
 					return $classes;
 				}
-
-				$is_rendering_drill_down = $context->is_drill_down();
 			} catch ( \Throwable $e ) {
->>>>>>> 9082fd51cc (Fix hidden Save button on Settings UI fallback pages (#66958))
 				return $classes;
 			}
 

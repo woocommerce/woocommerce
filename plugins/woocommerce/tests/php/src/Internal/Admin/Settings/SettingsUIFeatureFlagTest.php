@@ -421,95 +421,38 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'existing-class', $classes );
 		$this->assertStringContainsString( 'woocommerce-settings-ui-page', $classes );
-<<<<<<< HEAD
-=======
-		$this->assertStringNotContainsString( 'woocommerce-settings-ui-drill-down', $classes );
 	}
 
 	/**
-	 * @testdox Should add the drill-down body class for Settings UI drill-down pages.
+	 * @testdox Should not add the Settings UI body class when schema generation falls back to legacy rendering.
 	 */
-	public function test_settings_ui_drill_down_body_class_is_added_for_drill_down_pages(): void {
+	public function test_settings_ui_body_class_is_not_added_when_schema_generation_fails(): void {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 
 		global $current_section, $current_tab;
-		$current_section = 'test_gateway';
-		$current_tab     = 'checkout';
-		$page            = $this->get_settings_ui_test_page_for_drill_down();
-
-		$classes = $page->add_settings_ui_body_class( 'existing-class woocommerce-settings-ui-page' );
-
-		$this->assertStringContainsString( 'existing-class', $classes );
-		$this->assertSame( 1, substr_count( $classes, 'woocommerce-settings-ui-page' ) );
-		$this->assertSame( 1, substr_count( $classes, 'woocommerce-settings-ui-drill-down' ) );
-	}
-
-	/**
-	 * @testdox Should add the exact Settings UI body classes even when a similarly prefixed class is already present.
-	 */
-	public function test_settings_ui_body_classes_use_exact_token_matching_against_prefixed_classes(): void {
-		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
-
-		global $current_section, $current_tab;
-		$current_section = 'test_gateway';
-		$current_tab     = 'checkout';
-		$page            = $this->get_settings_ui_test_page_for_drill_down();
-
-		$classes      = $page->add_settings_ui_body_class( 'existing-class woocommerce-settings-ui-page-preview' );
-		$body_classes = explode( ' ', $classes );
-
-		$this->assertContains( 'woocommerce-settings-ui-page-preview', $body_classes );
-		$this->assertCount( 1, array_keys( $body_classes, 'woocommerce-settings-ui-page', true ) );
-		$this->assertCount( 1, array_keys( $body_classes, 'woocommerce-settings-ui-drill-down', true ) );
-	}
-
-	/**
-	 * @testdox Should not add the Settings UI body classes when schema generation falls back to legacy rendering.
-	 */
-	public function test_settings_ui_body_classes_are_not_added_when_schema_generation_fails(): void {
-		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
-
-		global $current_section, $current_tab;
-		$current_section = 'test_gateway';
-		$current_tab     = 'checkout';
-		$page            = $this->get_settings_ui_test_page_with_failing_schema( 'checkout' );
-
-		$classes = $page->add_settings_ui_body_class( 'existing-class' );
-
-		$this->assertSame( 'existing-class', $classes, 'The fallback page should keep the classic body classes so the legacy Save button stays visible' );
-	}
-
-	/**
-	 * @testdox Should not add the Settings UI body classes when script handle resolution falls back to legacy rendering.
-	 */
-	public function test_settings_ui_body_classes_are_not_added_when_script_handle_resolution_fails(): void {
-		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
-
-		global $current_section, $current_tab;
-		$current_section = 'test_gateway';
-		$current_tab     = 'checkout';
-		$page            = $this->get_settings_ui_test_page_with_failing_script_handles( 'checkout' );
-
-		$classes = $page->add_settings_ui_body_class( 'existing-class' );
-
-		$this->assertSame( 'existing-class', $classes, 'The fallback page should keep the classic body classes so the legacy Save button stays visible' );
-	}
-
-	/**
-	 * @testdox Should not add the Settings UI body class when a top-level page falls back to legacy rendering.
-	 */
-	public function test_settings_ui_body_class_is_not_added_when_a_top_level_page_falls_back(): void {
-		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
-
-		global $current_section, $current_tab;
-		$current_section = 'failing_section';
+		$current_section = 'advanced';
 		$current_tab     = 'settings_ui_flag_test';
 		$page            = $this->get_settings_ui_test_page_with_failing_schema();
 
 		$classes = $page->add_settings_ui_body_class( 'existing-class' );
 
 		$this->assertSame( 'existing-class', $classes, 'The fallback page should keep the classic body classes so the legacy Save button stays visible' );
->>>>>>> 9082fd51cc (Fix hidden Save button on Settings UI fallback pages (#66958))
+	}
+
+	/**
+	 * @testdox Should not add the Settings UI body class when script handle resolution falls back to legacy rendering.
+	 */
+	public function test_settings_ui_body_class_is_not_added_when_script_handle_resolution_fails(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'advanced';
+		$current_tab     = 'settings_ui_flag_test';
+		$page            = $this->get_settings_ui_test_page_with_failing_script_handles();
+
+		$classes = $page->add_settings_ui_body_class( 'existing-class' );
+
+		$this->assertSame( 'existing-class', $classes, 'The fallback page should keep the classic body classes so the legacy Save button stays visible' );
 	}
 
 	/**
