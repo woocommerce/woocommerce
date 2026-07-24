@@ -1963,6 +1963,197 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			expect( mockState.inCartQuantity ).toBe( 3 );
 		} );
+
+		describe( 'effective-attribute pairing (id-direct, untouched-seed, "any" disambiguation)', () => {
+			/**
+			 * Seeds a minimal variable family: a base product (id 10) with
+			 * one variation (id 20) fixing `Color: blue`.
+			 */
+			function seedBlueVariationFamily() {
+				mockProductsState.products = {
+					10: {
+						id: 10,
+						type: 'variable',
+						variations: [
+							{
+								id: 20,
+								attributes: [
+									{ name: 'Color', value: 'blue' },
+								],
+							},
+						],
+					} as unknown as ProductResponseItem,
+				};
+				mockProductsState.productVariations = {
+					20: { id: 20, parent: 10 } as ProductResponseItem,
+				};
+			}
+
+			it( 'pairs a materialized id-direct draft ({id: variationId, variation: []}) to its server cart line via effective attributes', async () => {
+				mockBatchFetch();
+				await loadCartStore();
+				seedBlueVariationFamily();
+				const line = makeLine( {
+					id: 20,
+					type: 'variation',
+					quantity: 4,
+					variation: [
+						{
+							attribute: 'Color',
+							value: 'blue',
+							raw_attribute: 'attribute_pa_color',
+						},
+					],
+				} );
+				seedCart( [ line ] );
+				seedProductInContext( { id: 20, type: 'variation' } );
+				// An id-direct draft: materialized under the variation id,
+				// with nothing specified (e.g. from a quantity-first edit).
+				mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+					{ id: 20, quantity: 1, variation: [] } as DraftItem,
+				];
+
+				expect( mockState.itemInContext.cartItem ).toEqual( line );
+				expect( mockState.inCartQuantity ).toBe( 4 );
+			} );
+
+			it( 'pairs an untouched default-attribute surface (a parent-filed seed, variation: []) to a pre-existing cart line for the resolved variation, with no write', async () => {
+				mockBatchFetch();
+				await loadCartStore();
+				seedBlueVariationFamily();
+				const line = makeLine( {
+					id: 20,
+					type: 'variation',
+					quantity: 2,
+					variation: [
+						{
+							attribute: 'Color',
+							value: 'blue',
+							raw_attribute: 'attribute_pa_color',
+						},
+					],
+				} );
+				seedCart( [ line ] );
+				seedProductInContext( { id: 20, type: 'variation' } );
+				// No live draft anywhere — only the surface's server-filed
+				// seed, filed under the parent id (the default-attribute
+				// PHP emission shape).
+				mockServerState = {
+					draftSeeds: {
+						[ GLOBAL_DRAFT_KEY ]: {
+							10: { id: 10, quantity: 1 },
+						},
+					},
+				};
+
+				expect( mockState.itemInContext.cartItem ).toEqual( line );
+				expect( mockState.inCartQuantity ).toBe( 2 );
+				expect(
+					mockState.draftItems[ GLOBAL_DRAFT_KEY ]
+				).toBeUndefined();
+			} );
+
+			it( 'an unspecified "any" effective payload pairs to nothing — no invented match', async () => {
+				mockBatchFetch();
+				await loadCartStore();
+				mockProductsState.products = {
+					30: {
+						id: 30,
+						type: 'variable',
+						variations: [
+							{
+								id: 40,
+								attributes: [ { name: 'Color', value: null } ],
+							},
+						],
+					} as unknown as ProductResponseItem,
+				};
+				mockProductsState.productVariations = {
+					40: { id: 40, parent: 30 } as ProductResponseItem,
+				};
+				const redLine = makeLine( {
+					id: 40,
+					type: 'variation',
+					quantity: 2,
+					variation: [
+						{
+							attribute: 'Color',
+							value: 'red',
+							raw_attribute: 'attribute_pa_color',
+						},
+					],
+				} );
+				seedCart( [ redLine ] );
+				seedProductInContext( { id: 40, type: 'variation' } );
+				// Nothing specified for the "any" attribute.
+				mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+					{ id: 40, quantity: 1, variation: [] } as DraftItem,
+				];
+
+				expect( mockState.itemInContext.cartItem ).toBeUndefined();
+				expect( mockState.inCartQuantity ).toBe( 0 );
+			} );
+
+			it( 'a specified "any" value pairs to the matching line, disambiguating multiple same-id lines by value', async () => {
+				mockBatchFetch();
+				await loadCartStore();
+				mockProductsState.products = {
+					30: {
+						id: 30,
+						type: 'variable',
+						variations: [
+							{
+								id: 40,
+								attributes: [ { name: 'Color', value: null } ],
+							},
+						],
+					} as unknown as ProductResponseItem,
+				};
+				mockProductsState.productVariations = {
+					40: { id: 40, parent: 30 } as ProductResponseItem,
+				};
+				const redLine = makeLine( {
+					key: 'red-key',
+					id: 40,
+					type: 'variation',
+					quantity: 2,
+					variation: [
+						{
+							attribute: 'Color',
+							value: 'red',
+							raw_attribute: 'attribute_pa_color',
+						},
+					],
+				} );
+				const blueLine = makeLine( {
+					key: 'blue-key',
+					id: 40,
+					type: 'variation',
+					quantity: 5,
+					variation: [
+						{
+							attribute: 'Color',
+							value: 'blue',
+							raw_attribute: 'attribute_pa_color',
+						},
+					],
+				} );
+				seedCart( [ redLine, blueLine ] );
+				seedProductInContext( { id: 40, type: 'variation' } );
+				// The "any" attribute specified as "blue" — disambiguates
+				// among the two same-id lines.
+				mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+					{
+						id: 40,
+						quantity: 1,
+						variation: [ { attribute: 'Color', value: 'blue' } ],
+					} as DraftItem,
+				];
+
+				expect( mockState.itemInContext.cartItem ).toEqual( blueLine );
+				expect( mockState.inCartQuantity ).toBe( 5 );
+			} );
+		} );
 	} );
 
 	describe( 'addItem / updateItem / removeItem / refresh', () => {
@@ -2226,6 +2417,227 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				expect( mockState.cart.items ).toHaveLength( 1 );
 				expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
 				expect( notices.length ).toBeGreaterThan( 0 );
+			} );
+
+			describe( 'effective-payload posting (id-direct pairing, the untouched-add no-op fix, "any" incompleteness)', () => {
+				/**
+				 * Seeds a minimal variable family: a base product (id 10)
+				 * with one variation (id 20) fixing `Color: blue`.
+				 */
+				function seedBlueVariationFamily() {
+					mockProductsState.products = {
+						10: {
+							id: 10,
+							type: 'variable',
+							variations: [
+								{
+									id: 20,
+									attributes: [
+										{ name: 'Color', value: 'blue' },
+									],
+								},
+							],
+						} as unknown as ProductResponseItem,
+					};
+					mockProductsState.productVariations = {
+						20: { id: 20, parent: 10 } as ProductResponseItem,
+					};
+				}
+
+				it( 'posts the effective seed — {id: variationId, quantity} — for a resolved-variation untouched surface with no live draft (no silent no-op)', async () => {
+					const captured = mockBatchFetch();
+					const actions = await loadCartStore();
+					seedBlueVariationFamily();
+					seedCart( [] );
+					seedProductInContext( { id: 20, type: 'variation' } );
+					// Only a parent-filed seed exists — the default-attribute
+					// PHP emission shape — no live draft anywhere.
+					mockServerState = {
+						draftSeeds: {
+							[ GLOBAL_DRAFT_KEY ]: {
+								10: { id: 10, quantity: 1 },
+							},
+						},
+					};
+
+					await runAction( actions.addItem() );
+
+					expect( captured ).toHaveLength( 1 );
+					expect( captured[ 0 ].body ).toEqual( {
+						id: 20,
+						quantity: 1,
+					} );
+				} );
+
+				it( 'behaves exactly as today for an unresolved variable-parent surface — identity no-change, posting the parent-filed seed at the parent id', async () => {
+					const captured = mockBatchFetch();
+					const actions = await loadCartStore();
+					seedBlueVariationFamily();
+					seedCart( [] );
+					seedProductInContext( { id: 10, type: 'variable' } );
+					mockServerState = {
+						draftSeeds: {
+							[ GLOBAL_DRAFT_KEY ]: {
+								10: { id: 10, quantity: 1 },
+							},
+						},
+					};
+
+					await runAction( actions.addItem() );
+
+					expect( captured ).toHaveLength( 1 );
+					expect( captured[ 0 ].body ).toEqual( {
+						id: 10,
+						quantity: 1,
+					} );
+				} );
+
+				it( 'posts the raw id-direct draft verbatim — the effective attributes normalize comparisons only, never the POST body', async () => {
+					const captured = mockBatchFetch();
+					const actions = await loadCartStore();
+					seedBlueVariationFamily();
+					seedCart( [] );
+					seedProductInContext( { id: 20, type: 'variation' } );
+					mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+						{ id: 20, quantity: 1, variation: [] } as DraftItem,
+					];
+
+					await runAction( actions.addItem() );
+
+					expect( captured ).toHaveLength( 1 );
+					expect( captured[ 0 ].body ).toEqual( {
+						id: 20,
+						quantity: 1,
+						variation: [],
+					} );
+				} );
+
+				it( 'bumps a pre-existing committed variation line on an id-direct-draft add, rather than pushing a duplicate optimistic line (the optimistic findCartLine lookup consults effective attributes)', async () => {
+					mockBatchFetch();
+					const actions = await loadCartStore();
+					seedBlueVariationFamily();
+					// A line already committed server-side — e.g. from an
+					// earlier add, surviving a hard reload that resets the
+					// client-side draft to id-direct.
+					seedCart( [
+						{
+							...makeKeyedLine( {
+								key: 'server-key-var',
+								id: 20,
+								quantity: 2,
+							} ),
+							type: 'variation',
+							variation: [
+								{
+									attribute: 'Color',
+									value: 'blue',
+									raw_attribute: 'attribute_pa_color',
+								},
+							],
+						} as CartItem,
+					] );
+					seedProductInContext( { id: 20, type: 'variation' } );
+					// A second add's id-direct draft: nothing specified.
+					mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+						{ id: 20, quantity: 1, variation: [] } as DraftItem,
+					];
+
+					await runAction( actions.addItem() );
+
+					expect( mockState.cart.items ).toHaveLength( 1 );
+					expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
+					expect( mockState.cart.items[ 0 ].key ).toBe(
+						'server-key-var'
+					);
+				} );
+
+				it( 'suppresses the quantity-changed notice for an id-direct addItem() when the server returns the resolved-variation line at pre-add + delta', async () => {
+					seedBlueVariationFamily();
+					const colorBlueVariation = [
+						{
+							attribute: 'Color',
+							value: 'blue',
+							raw_attribute: 'attribute_pa_color',
+						},
+					] as CartItem[ 'variation' ];
+					mockBatchFetchReturning(
+						makeServerCart( [
+							{
+								...makeKeyedLine( {
+									key: 'server-key-var',
+									id: 20,
+									quantity: 3,
+								} ),
+								type: 'variation',
+								variation: colorBlueVariation,
+							} as CartItem,
+						] )
+					);
+					const actions = await loadCartStore();
+					seedCart( [
+						{
+							...makeKeyedLine( {
+								key: 'server-key-var',
+								id: 20,
+								quantity: 2,
+							} ),
+							type: 'variation',
+							variation: colorBlueVariation,
+						} as CartItem,
+					] );
+					seedProductInContext( { id: 20, type: 'variation' } );
+					mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+						{ id: 20, quantity: 1, variation: [] } as DraftItem,
+					];
+					const notices = spyOnUpdateNotices();
+
+					await runAction( actions.addItem() );
+
+					expect(
+						notices.some( ( n ) =>
+							n.notice.includes( 'was changed to' )
+						)
+					).toBe( false );
+				} );
+
+				it( 'still posts when the effective attributes are incomplete (an unspecified "any" attribute), surfacing the resulting server 400 through the existing notice path', async () => {
+					const captured = mockBatchFetchFailing( {
+						failForPath: '/wc/store/v1/cart/add-item',
+						status: 400,
+						code: 'woocommerce_rest_missing_variation_data',
+						message: 'Missing variation data.',
+					} );
+					const actions = await loadCartStore();
+					mockProductsState.products = {
+						30: {
+							id: 30,
+							type: 'variable',
+							variations: [
+								{
+									id: 40,
+									attributes: [
+										{ name: 'Color', value: null },
+									],
+								},
+							],
+						} as unknown as ProductResponseItem,
+					};
+					mockProductsState.productVariations = {
+						40: { id: 40, parent: 30 } as ProductResponseItem,
+					};
+					seedCart( [] );
+					seedProductInContext( { id: 40, type: 'variation' } );
+					// Nothing specified for the "any" attribute.
+					mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+						{ id: 40, quantity: 1, variation: [] } as DraftItem,
+					];
+					const notices = spyOnUpdateNotices();
+
+					await runAction( actions.addItem() );
+
+					expect( captured ).toHaveLength( 1 );
+					expect( notices.length ).toBeGreaterThan( 0 );
+				} );
 			} );
 		} );
 
