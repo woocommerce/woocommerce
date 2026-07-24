@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Clamp an oversized raw image width in email galleries down to the cell it renders in (scaling height to keep the aspect ratio), so wide originals no longer blow out the layout in Outlook, and drop the web-only class the sanitizer preserves.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Wrap overflowing button/navigation rows in emails instead of stretching the layout. When auto-width buttons don't fit on one line, they now wrap (Gmail, Apple Mail, webmail) or stack vertically (Outlook) rather than pushing the email past its content width.
