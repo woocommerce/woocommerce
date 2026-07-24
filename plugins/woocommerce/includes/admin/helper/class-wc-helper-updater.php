@@ -21,6 +21,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Helper_Updater {
 
 	/**
+	 * Backoff request type key for the update-check endpoint.
+	 *
+	 * @var string
+	 */
+	const BACKOFF_REQUEST_TYPE = 'update-check';
+
+	/**
 	 * Loads the class, runs on init.
 	 */
 	public static function load() {
@@ -660,6 +667,18 @@ class WC_Helper_Updater {
 			return $data['products'];
 		}
 
+		// If a previous update-check was rate limited (HTTP 429), honor the
+		// server's reset window and skip the remote call until it passes. This
+		// backoff is independent of the payload hash above, so a changed payload
+		// (or a flushed cache) can't slip past it — but clicking the Marketplace
+		// "Refresh" button bypasses and clears it. Return the last cached
+		// products, if any, rather than an empty set.
+		if ( WC_Helper_API_Backoff::is_rate_limited( self::BACKOFF_REQUEST_TYPE ) ) {
+			return ( is_array( $data ) && isset( $data['products'] ) && is_array( $data['products'] ) )
+				? $data['products']
+				: array();
+		}
+
 		$data = array(
 			'hash'     => $hash,
 			'updated'  => time(),
@@ -696,10 +715,20 @@ class WC_Helper_Updater {
 			);
 		}
 
-		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
+		$response_code = (int) wp_remote_retrieve_response_code( $request );
+		if ( 200 !== $response_code ) {
 			$data['errors'][] = 'http-error';
+
+			// Respect server-side rate limiting: on a 429, record the reset
+			// window so we hold off on further update-check calls until then.
+			if ( 429 === $response_code ) {
+				WC_Helper_API_Backoff::record_from_response( self::BACKOFF_REQUEST_TYPE, $request );
+			}
 		} else {
 			$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
+
+			// A successful response clears any prior rate-limit backoff.
+			WC_Helper_API_Backoff::clear( self::BACKOFF_REQUEST_TYPE );
 		}
 
 		set_transient( $cache_key, $data, 12 * HOUR_IN_SECONDS );
