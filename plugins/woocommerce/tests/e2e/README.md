@@ -133,11 +133,21 @@ If you need to create a new pre-defined environment, you can follow these steps:
 
 - create a new folder in the `tests/e2e/envs` directory with the name of the environment.
   Example: `tests/e2e/envs/my-new-env`
-- create an `env-setup.sh` file in the new folder. This file should contain any setup steps for the environment. This
-  will run before any test execution.
 - create a `playwright.config.ts` file in the new folder. This file should contain the configuration for the
   environment.
   It's recommended that the config extends the default configuration and only updates the necessary values.
+- if the environment needs extra plugins installed, add them to a wp-env config variant instead of installing
+  them after startup. Symlink `.wp-env.e2e.my-new-env.json` to `.wp-env.e2e.json` and add a paired
+  `.wp-env.e2e.my-new-env.override.json` whose `plugins` array repeats the base list with the extra plugin
+  zip(s) appended (wp-env replaces arrays on merge, so the override must carry the full list). Start it with
+  `pnpm wp-env --config .wp-env.e2e.my-new-env.json start --update`. wp-env installs and activates the plugins
+  before the `afterStart` lifecycle script, so they land inside the captured baseline and survive every reset.
+  See `.wp-env.e2e.gutenberg-stable.*` for a working example.
+
+  > [!NOTE]
+  > A static "latest" plugin zip is only re-downloaded when wp-env re-provisions. CI always provisions fresh,
+  > so nightly builds stay honest; locally the zip is cached until you `destroy` the env or start it with
+  > `--update`.
 
 > [!NOTE]
 > If you previously created a custom environment with a `playwright.config.js` file, it will still work — the test runner falls back to `.js` when no `.ts` config is found. However, new environments should use `.ts`.

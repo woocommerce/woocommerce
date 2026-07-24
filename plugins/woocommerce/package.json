@@ -117,6 +117,9 @@
 		"watch:build:project:packages": "node ./bin/watch-packages.mjs",
 		"wp-env": "wp-env",
 		"wp-env:e2e": "wp-env --config .wp-env.e2e.json",
+		"wp-env:e2e:gb-stable": "wp-env --config .wp-env.e2e.gutenberg-stable.json",
+		"wp-env:e2e:gb-nightly": "wp-env --config .wp-env.e2e.gutenberg-nightly.json",
+		"wp-env:e2e:object-cache": "wp-env --config .wp-env.e2e.default-object-cache.json",
 		"wp-env:test": "wp-env --config .wp-env.test.json"
 	},
 	"lint-staged": {
@@ -336,7 +339,7 @@
 						"core-e2e-gutenberg"
 					],
 					"testEnv": {
-						"start": "env:e2e --debug"
+						"start": "wp-env:e2e:gb-stable start --update --debug"
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-stable-e2e-report",
@@ -362,7 +365,7 @@
 						"core-e2e-gutenberg"
 					],
 					"testEnv": {
-						"start": "env:e2e --debug"
+						"start": "wp-env:e2e:gb-nightly start --update --debug"
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-nightly-e2e-report",
@@ -719,7 +722,7 @@
 						"core-api-object-cache"
 					],
 					"testEnv": {
-						"start": "env:e2e --debug"
+						"start": "wp-env:e2e:object-cache start --update --debug"
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-object-cache",
