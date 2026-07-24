@@ -395,12 +395,7 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	 * @testdox Should treat a non-string radio setting ID as no ID rather than a shared or malformed "-title".
 	 */
 	public function test_output_fields_normalizes_non_string_radio_ids(): void {
-		// An extension can pass a non-string id explicitly. output_fields() only defaults a
-		// *missing* id to '', so false, arrays, and objects reach the radio branch as-is: false
-		// would concatenate to a shared "-title" (the very collision this guards against), and
-		// arrays/objects would trigger an "Array/Object to string conversion" on concatenation.
-		// An explicit string field_name keeps the rest of the row rendering out of the way, so
-		// the assertions below exercise only the title-ID normalization.
+		// Explicit field names isolate title-ID normalization from input naming.
 		$options = array(
 			array(
 				'title'   => 'String zero ID radio',
