@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the Save button when an experimental Settings UI page falls back to the legacy renderer.
