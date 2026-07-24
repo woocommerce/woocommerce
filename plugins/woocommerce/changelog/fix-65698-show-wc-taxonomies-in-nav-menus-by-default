@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure Product Categories, Product Tags, and Brands menu meta boxes are visible by default on the Appearance > Menus screen.

@@ -273,7 +273,7 @@ class SettingsUIRequestContext {
 	 * settings tabs. Pages registered at the top level of settings are not
 	 * drill-downs: they hide the header and keep the tabs.
 	 *
-	 * @since 11.1.0
+	 * @since 11.0.0
 	 *
 	 * @return bool
 	 */
@@ -472,6 +472,7 @@ class SettingsUIRequestContext {
 
 		try {
 			$schema       = $this->settings_ui_page->get_schema( $this->section );
+			$schema       = SettingsUISchema::canonicalize_option_values( $schema );
 			$schema       = $this->apply_section_navigation( $schema );
 			$schema       = $this->apply_shell_header_visibility( $schema );
 			$this->schema = $this->ensure_drill_down_breadcrumbs( $schema );

@@ -180,6 +180,40 @@ describe( 'StoreNoticesContainer', () => {
 		);
 	} );
 
+	it( 'Sanitizes HTML in a single dismissible notice before rendering', async () => {
+		// The notice-creation pipeline (e.g. notify-errors.ts) decodes entities
+		// before storing the message, so live HTML can reach the notice content.
+		// The single-notice render branch must sanitize it via RawHTML rather than
+		// injecting it as-is. See XSS regression.
+		dispatch( noticesStore ).createErrorNotice(
+			'PWNXSS <img src=x onerror="window.__xss=1">',
+			{
+				id: 'custom-xss-test-error',
+				context: 'test-context',
+			}
+		);
+		const { container } = render(
+			<StoreNoticesContainer context="test-context" />
+		);
+		// The disallowed <img> must be stripped, so no image element is injected.
+		expect( container.querySelector( 'img' ) ).toBeNull();
+		expect( container.innerHTML ).not.toContain( 'onerror' );
+		// The harmless text is still shown (visible + spoken message).
+		expect( screen.getAllByText( /PWNXSS/i ).length ).toBeGreaterThan( 0 );
+		// Clean up notices.
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'custom-xss-test-error',
+				'test-context'
+			)
+		);
+		await waitFor( () => {
+			return (
+				select( noticesStore ).getNotices( 'test-context' ).length === 0
+			);
+		} );
+	} );
+
 	it( 'Combine same notices from several contexts', async () => {
 		dispatch( noticesStore ).createErrorNotice( 'Custom generic error', {
 			id: 'custom-subcontext-test-error',

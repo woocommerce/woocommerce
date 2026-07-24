@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Introduce --wc-separator-color CSS custom property for theme-aware border colors. Migrate $universal-border-light, the login/register form borders, and the mini-cart footer border to use this token.

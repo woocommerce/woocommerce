@@ -99,6 +99,22 @@ const RELAXED_TEST_RULES = {
 };
 
 /*
+ * The project service parse-errors on any linted file its tsconfig omits, so keep
+ * the type-aware block off the files packages exclude from their tsconfigs.
+ */
+const TYPE_AWARE_IGNORES = [
+	'**/test/**',
+	'**/tests/**',
+	'**/__tests__/**',
+	'**/__mocks__/**',
+	'**/*.test.[jt]s?(x)',
+	'**/stories/**',
+	'**/*.stories.[jt]s?(x)',
+	'**/typings/**',
+	'**/*.d.ts',
+];
+
+/*
  * The monorepo's own ESLint Flat Config layer.
  *
  * `@woocommerce/eslint-plugin` is public and consumed by third-party extensions,
@@ -119,5 +135,17 @@ module.exports = [
 	{
 		files: TEST_FILES,
 		rules: RELAXED_TEST_RULES,
+	},
+	{
+		files: [ '**/*.ts', '**/*.tsx' ],
+		ignores: TYPE_AWARE_IGNORES,
+		languageOptions: {
+			parserOptions: {
+				projectService: true,
+			},
+		},
+		rules: {
+			'@typescript-eslint/no-floating-promises': 'error',
+		},
 	},
 ];

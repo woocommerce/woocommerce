@@ -104,9 +104,18 @@ test.describe( 'WooCommerce Email Editor Tracking Selectors', () => {
 		await editorLocator
 			.locator( '.editor-preview-dropdown__toggle' )
 			.click();
-		// Check open in new tab selector
+		// Check open in new tab selector.
+		// Mirrors the selector the email editor telemetry and preview save
+		// guard rely on (packages/js/email-editor). WP 7.1 dropped the
+		// `.editor-preview-dropdown__button-external` class; the entry is now a
+		// menu item anchor with target="wp-preview-<postId>". Assert the same
+		// selector so this canary stays faithful to what the product code
+		// matches. Drop the old class once WP 7.1 is the minimum supported
+		// version.
 		await expect(
-			page.locator( '.editor-preview-dropdown__button-external' )
+			page.locator(
+				'.editor-preview-dropdown__button-external, a[role="menuitem"][target^="wp-preview-"]'
+			)
 		).toBeVisible();
 		// Close preview dropdown
 		await editorLocator

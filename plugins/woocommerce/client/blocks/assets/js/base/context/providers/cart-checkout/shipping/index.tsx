@@ -75,9 +75,9 @@ export const ShippingDataProvider = ( {
 	// increment/decrement checkout calculating counts when shipping is loading.
 	useEffect( () => {
 		if ( isLoadingRates ) {
-			__internalStartCalculation();
+			void __internalStartCalculation();
 		} else {
-			__internalFinishCalculation();
+			void __internalFinishCalculation();
 		}
 	}, [
 		isLoadingRates,
@@ -88,9 +88,9 @@ export const ShippingDataProvider = ( {
 	// increment/decrement checkout calculating counts when shipping rates are being selected.
 	useEffect( () => {
 		if ( isSelectingRate ) {
-			__internalStartCalculation();
+			void __internalStartCalculation();
 		} else {
-			__internalFinishCalculation();
+			void __internalFinishCalculation();
 		}
 	}, [
 		__internalStartCalculation,
@@ -128,7 +128,7 @@ export const ShippingDataProvider = ( {
 			! isLoadingRates &&
 			( shippingRates.length === 0 || currentErrorStatus.hasError )
 		) {
-			emitEvent(
+			void emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATES_FAIL,
 				{
@@ -150,7 +150,7 @@ export const ShippingDataProvider = ( {
 			shippingRates.length > 0 &&
 			! currentErrorStatus.hasError
 		) {
-			emitEvent(
+			void emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATES_SUCCESS,
 				shippingRates
@@ -164,7 +164,7 @@ export const ShippingDataProvider = ( {
 			return;
 		}
 		if ( currentErrorStatus.hasError ) {
-			emitEvent(
+			void emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATE_SELECT_FAIL,
 				{
@@ -173,7 +173,7 @@ export const ShippingDataProvider = ( {
 				}
 			);
 		} else {
-			emitEvent(
+			void emitEvent(
 				currentObservers.current,
 				EMIT_TYPES.SHIPPING_RATE_SELECT_SUCCESS,
 				selectedRates.current

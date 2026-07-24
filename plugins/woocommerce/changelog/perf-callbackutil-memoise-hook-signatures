@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Memoize CallbackUtil::get_hook_callback_signatures() per request, so repeated calls skip the reflection work that closure and invokable callbacks require.

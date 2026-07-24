@@ -32,6 +32,22 @@ class WC_Admin_Menus {
 	const HIDE_CSS_CLASS = 'hide-if-js';
 
 	/**
+	 * Cached hidden meta box IDs from the first read of this request.
+	 *
+	 * The metaboxhidden_nav-menus option is read more than once per page load:
+	 * once before admin_head fires and again inside do_accordion_sections()
+	 * after admin_head-nav-menus.php has fired. Memoizing the computed list
+	 * keeps the value stable across those reads, so a box registered late
+	 * (e.g. the "WooCommerce endpoints" box) is not swept into the hidden list
+	 * on the second read. This mirrors how core persists the snapshot before
+	 * admin_head, and fixes the general case for third-party boxes too.
+	 *
+	 * @since 11.1.0
+	 * @var string[]|null
+	 */
+	private $last_computed_hidden_boxes = null;
+
+	/**
 	 * Hook in tabs.
 	 */
 	public function __construct() {
@@ -65,6 +81,9 @@ class WC_Admin_Menus {
 
 		// Add endpoints custom URLs in Appearance > Menus > Pages.
 		add_action( 'admin_head-nav-menus.php', array( $this, 'add_nav_menu_meta_boxes' ) );
+
+		// Ensure WC taxonomy meta boxes are visible by default on the first visit to Appearance > Menus.
+		add_action( 'load-nav-menus.php', array( $this, 'register_default_nav_menu_meta_boxes_filter' ), 9 );
 
 		// Admin bar menus.
 		if ( apply_filters( 'woocommerce_show_admin_bar_visit_store', true ) ) {
@@ -424,6 +443,89 @@ class WC_Admin_Menus {
 	 */
 	public function add_nav_menu_meta_boxes() {
 		add_meta_box( 'woocommerce_endpoints_nav_link', __( 'WooCommerce endpoints', 'woocommerce' ), array( $this, 'nav_menu_links' ), 'nav-menus', 'side', 'low' );
+	}
+
+	/**
+	 * Ensure the Product Categories, Product Tags, and Brands meta boxes
+	 * are visible by default on the Appearance > Menus screen.
+	 *
+	 * WordPress's wp_initial_nav_menu_meta_boxes() hides every box except page,
+	 * post, custom-links, and category on a user's first visit. We intercept
+	 * the empty user option and return a hidden list that excludes the WC
+	 * taxonomy boxes, so WP's existing-user guard short-circuits and leaves
+	 * them visible.
+	 *
+	 * The hidden list is computed once per request and cached on the instance,
+	 * so every read of the option within the same page load returns the same
+	 * value. This keeps late-registered boxes out of the hidden list and restores
+	 * the snapshot timing core relied on before admin_head.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @return void
+	 */
+	public function register_default_nav_menu_meta_boxes_filter() {
+		add_filter( 'get_user_option_metaboxhidden_nav-menus', array( $this, 'filter_default_nav_menu_hidden_meta_boxes' ), 10, 3 );
+	}
+
+	/**
+	 * Filter the default hidden meta boxes for the Appearance > Menus screen.
+	 *
+	 * Only applies when the user has no saved preference for the nav-menus
+	 * screen. Returns a list of every registered nav-menus meta box except the
+	 * four core visible boxes, the "WooCommerce endpoints" box, and the WC
+	 * taxonomy boxes. Product Brands is visible only when its taxonomy exists.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param mixed   $result Value for the user's option, or false if not set.
+	 * @param string  $option Name of the option being retrieved.
+	 * @param WP_User $user   WP_User object of the user whose option is being retrieved.
+	 * @return mixed The filtered option value.
+	 */
+	public function filter_default_nav_menu_hidden_meta_boxes( $result, $option, $user ) {
+		global $wp_meta_boxes;
+
+		if ( false !== $result ) {
+			return $result;
+		}
+
+		if ( ! $user || ! isset( $wp_meta_boxes['nav-menus'] ) || ! is_array( $wp_meta_boxes['nav-menus'] ) ) {
+			return $result;
+		}
+
+		if ( null !== $this->last_computed_hidden_boxes ) {
+			return $this->last_computed_hidden_boxes;
+		}
+
+		$visible = array(
+			'add-post-type-page',
+			'add-post-type-post',
+			'add-custom-links',
+			'add-category',
+			'add-product_cat',
+			'add-product_tag',
+			'woocommerce_endpoints_nav_link',
+		);
+
+		if ( taxonomy_exists( 'product_brand' ) ) {
+			$visible[] = 'add-product_brand';
+		}
+
+		$hidden = array();
+		foreach ( $wp_meta_boxes['nav-menus'] as $priorities ) {
+			foreach ( (array) $priorities as $priority => $boxes ) {
+				foreach ( (array) $boxes as $box ) {
+					if ( isset( $box['id'] ) && ! in_array( $box['id'], $visible, true ) ) {
+						$hidden[] = $box['id'];
+					}
+				}
+			}
+		}
+
+		$this->last_computed_hidden_boxes = $hidden;
+
+		return $hidden;
 	}
 
 	/**

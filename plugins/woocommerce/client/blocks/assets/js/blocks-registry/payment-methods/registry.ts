@@ -125,7 +125,7 @@ export const __experimentalDeRegisterPaymentMethod = (
 	}: DispatchReturn< PaymentStoreDescriptor > = dispatch(
 		PAYMENT_STORE_KEY
 	) as ActionCreatorsOf< ConfigOf< PaymentStoreDescriptor > >;
-	__internalRemoveAvailablePaymentMethod( paymentMethodName );
+	void __internalRemoveAvailablePaymentMethod( paymentMethodName );
 };
 
 export const __experimentalDeRegisterExpressPaymentMethod = (
@@ -135,7 +135,7 @@ export const __experimentalDeRegisterExpressPaymentMethod = (
 	const { __internalRemoveAvailableExpressPaymentMethod } = dispatch(
 		PAYMENT_STORE_KEY
 	) as ActionCreatorsOf< ConfigOf< PaymentStoreDescriptor > >;
-	__internalRemoveAvailableExpressPaymentMethod( paymentMethodName );
+	void __internalRemoveAvailableExpressPaymentMethod( paymentMethodName );
 };
 
 export const getPaymentMethods = (): PaymentMethods => {

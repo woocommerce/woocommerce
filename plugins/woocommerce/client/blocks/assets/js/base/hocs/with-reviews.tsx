@@ -142,7 +142,7 @@ const withReviews = (
 
 			const onReviewsReplaced =
 				this.props.onReviewsReplaced ?? ( () => undefined );
-			this.updateListOfReviews().then( onReviewsReplaced );
+			void this.updateListOfReviews().then( onReviewsReplaced );
 		}
 
 		appendReviews() {
@@ -161,7 +161,7 @@ const withReviews = (
 				return;
 			}
 
-			this.updateListOfReviews( reviews ).then( onReviewsAppended );
+			void this.updateListOfReviews( reviews ).then( onReviewsAppended );
 		}
 
 		updateListOfReviews( oldReviews: Review[] = [] ) {
