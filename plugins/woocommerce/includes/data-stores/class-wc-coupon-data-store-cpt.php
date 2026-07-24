@@ -55,14 +55,6 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	);
 
 	/**
-	 * The coupon properties written by the most recently completed update_post_meta() call.
-	 *
-	 * @since 4.1.0
-	 * @var array
-	 */
-	protected $updated_props = array();
-
-	/**
 	 * Method to create a new coupon in the database.
 	 *
 	 * @since 3.0.0
@@ -318,8 +310,6 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			}
 		}
 
-		$this->updated_props = $updated_props;
-
 		/**
 		 * Fires after a coupon's properties have been updated.
 		 *
@@ -329,14 +319,6 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		 * @since 3.0.0
 		 */
 		do_action( 'woocommerce_coupon_object_updated_props', $coupon, $updated_props );
-
-		/*
-		 * Not a redundant repeat of the assignment above: a listener may have triggered a
-		 * nested save, which leaves its own props in $this->updated_props. PHP unwinds LIFO,
-		 * so this write — the outermost call's — is the last one to run, which is what makes
-		 * the property hold the most recently completed call's props.
-		 */
-		$this->updated_props = $updated_props;
 	}
 
 	/**
