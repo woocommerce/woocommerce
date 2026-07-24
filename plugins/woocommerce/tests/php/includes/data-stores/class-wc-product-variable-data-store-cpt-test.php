@@ -893,6 +893,85 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should emit a deprecation warning when woocommerce_variation_prices filter returns malformed data
+	 */
+	public function test_read_price_data_emits_incorrect_usage_when_filter_returns_malformed_data() {
+		$product    = $this->get_variation_product_fixture();
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+
+		// Clear any existing transient so prices are generated and the filter is invoked.
+		delete_transient( 'wc_var_prices_' . $product->get_id() );
+
+		// Return an array missing the required 'price' key.
+		$filter_callback = function () {
+			return array(
+				'regular_price' => array(),
+				'sale_price'    => array(),
+			);
+		};
+		add_filter( 'woocommerce_variation_prices', $filter_callback );
+
+		$this->setExpectedIncorrectUsage( 'WC_Product_Variable_Data_Store_CPT::read_price_data' );
+
+		$prices = $data_store->read_price_data( $product, false );
+
+		remove_filter( 'woocommerce_variation_prices', $filter_callback );
+
+		// The malformed data is used as-is during the deprecation cycle, so the basic structure should still be present.
+		$this->assertArrayHasKey( 'price', $prices, 'Price key should be present in the returned data' );
+		$this->assertArrayHasKey( 'regular_price', $prices, 'Regular price key should be present in the returned data' );
+		$this->assertArrayHasKey( 'sale_price', $prices, 'Sale price key should be present in the returned data' );
+	}
+
+	/**
+	 * @testdox Should emit a deprecation warning when woocommerce_variation_prices filter returns a non-array
+	 */
+	public function test_read_price_data_emits_incorrect_usage_when_filter_returns_non_array() {
+		$product    = $this->get_variation_product_fixture();
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+
+		// Clear any existing transient so prices are generated and the filter is invoked.
+		delete_transient( 'wc_var_prices_' . $product->get_id() );
+
+		// Return a scalar value instead of an array.
+		add_filter( 'woocommerce_variation_prices', '__return_null' );
+
+		$this->setExpectedIncorrectUsage( 'WC_Product_Variable_Data_Store_CPT::read_price_data' );
+
+		$prices = $data_store->read_price_data( $product, false );
+
+		remove_filter( 'woocommerce_variation_prices', '__return_null' );
+
+		// The malformed data is used as-is during the deprecation cycle.
+		$this->assertArrayHasKey( 'price', $prices, 'Price key should be present in the returned data' );
+		$this->assertArrayHasKey( 'regular_price', $prices, 'Regular price key should be present in the returned data' );
+		$this->assertArrayHasKey( 'sale_price', $prices, 'Sale price key should be present in the returned data' );
+	}
+
+	/**
+	 * @testdox Should not emit a deprecation warning when woocommerce_variation_prices filter returns valid data
+	 */
+	public function test_read_price_data_no_incorrect_usage_when_filter_returns_valid_data() {
+		$product    = $this->get_variation_product_fixture();
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+
+		// Clear any existing transient so prices are generated and the filter is invoked.
+		delete_transient( 'wc_var_prices_' . $product->get_id() );
+
+		// Return the original data unchanged — this should NOT trigger the warning.
+		add_filter( 'woocommerce_variation_prices', '__return_empty_array' );
+
+		// Note: we do NOT call setExpectedIncorrectUsage here because we expect no warning.
+		$prices = $data_store->read_price_data( $product, false );
+
+		remove_filter( 'woocommerce_variation_prices', '__return_empty_array' );
+
+		$this->assertArrayHasKey( 'price', $prices, 'Price key should be present in the returned data' );
+		$this->assertArrayHasKey( 'regular_price', $prices, 'Regular price key should be present in the returned data' );
+		$this->assertArrayHasKey( 'sale_price', $prices, 'Sale price key should be present in the returned data' );
+	}
+
+	/**
 	 * @testdox Test read_children method works even when validation fails
 	 */
 	public function test_read_children_with_validation_failure() {
