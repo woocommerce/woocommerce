@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a throwaway class with deliberate PHPStan errors to verify CI annotations. Do not merge.
