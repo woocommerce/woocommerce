@@ -52,6 +52,10 @@ Using the [WooCommerce Testing Instructions Guide](https://developer.woocommerce
 <!-- Mention any analysis performed, such as assessing potential impacts on environment attributes and other plugins, performance profiling, or LLM/AI-based analysis. -->
 <!-- Within the testing details you provide, please ensure that no sensitive information (such as API keys, passwords, user data, etc.) is included in this public pull request. -->
 
+### Use of AI Tools
+
+<!-- You're free to use AI tooling to help with this contribution, but you must disclose what tooling you used and to what extent the PR was AI-authored. You're responsible for reviewing and understanding everything AI generated before submitting it. See the WordPress AI Guidelines: https://make.wordpress.org/ai/handbook/ai-guidelines/ -->
+
 ### Milestone
 
 <!-- DO NOT remove or modify this section (other than to check the box). -->
