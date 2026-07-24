@@ -260,6 +260,10 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		} else {
 			$this->set_product_id( $product->get_id() );
 			$this->set_variation_id( 0 );
+			// Any variation attribute meta written by a previous set_variation() call is left in
+			// place on purpose: it is stored with the `attribute_` prefix stripped, so a key like
+			// `color` is indistinguishable from a merchant's own custom meta and clearing it here
+			// risks deleting real data. Removing that stale display meta is tracked in #66733.
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
