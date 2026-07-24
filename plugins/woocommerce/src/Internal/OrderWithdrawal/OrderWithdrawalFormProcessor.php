@@ -432,6 +432,8 @@ final class OrderWithdrawalFormProcessor {
 		$body .= $this->get_email_details_html( $data, $submitted_at );
 
 		if ( $matched_order instanceof WC_Order ) {
+			$order_url = $matched_order->get_edit_order_url();
+
 			$body .= sprintf(
 				'<p>%s</p>',
 				sprintf(
@@ -440,6 +442,14 @@ final class OrderWithdrawalFormProcessor {
 					$matched_order->get_id()
 				)
 			);
+
+			if ( '' !== $order_url ) {
+				$body .= sprintf(
+					'<p><a href="%1$s">%2$s</a></p>',
+					esc_url( $order_url ),
+					esc_html__( 'View matched order', 'woocommerce' )
+				);
+			}
 		}
 
 		return wc_mail(

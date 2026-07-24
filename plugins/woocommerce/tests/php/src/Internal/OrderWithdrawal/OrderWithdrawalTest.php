@@ -191,6 +191,9 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
 			$this->assert_mail_sent_to( 'jane@example.test', $capture['captures'] );
 			$this->assert_mail_sent_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+			$merchant_email = $this->get_captured_mail_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+			$this->assertStringContainsString( str_replace( '&', '&amp;', $order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should link to the matched order.' );
+			$this->assertStringContainsString( 'View matched order', (string) $merchant_email['message'], 'The merchant email should include clear link text for the matched order.' );
 			$this->assertTrue( $this->order_has_note_containing( $order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The matched order should receive a withdrawal note.' );
 			$this->assertTrue( $this->order_has_note_containing( $order, 'Items requested for withdrawal: Line item 1' ), 'Specific-item details should be included in the order note.' );
 		} finally {
@@ -476,6 +479,26 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertContains( $recipient, $recipients, sprintf( 'Expected an email to be sent to %s.', $recipient ) );
+	}
+
+	/**
+	 * Get a captured email sent to a recipient.
+	 *
+	 * @param string                         $recipient Recipient email.
+	 * @param array<int,array<string,mixed>> $captures   Captured email arguments.
+	 * @return array<string,mixed>
+	 */
+	private function get_captured_mail_to( string $recipient, array $captures ): array {
+		foreach ( $captures as $mail ) {
+			$to         = $mail['to'] ?? '';
+			$recipients = is_array( $to ) ? $to : array( (string) $to );
+
+			if ( in_array( $recipient, $recipients, true ) ) {
+				return $mail;
+			}
+		}
+
+		$this->fail( sprintf( 'Expected an email to be sent to %s.', $recipient ) );
 	}
 
 	/**
