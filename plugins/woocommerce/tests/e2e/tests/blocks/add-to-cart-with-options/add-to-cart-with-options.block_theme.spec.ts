@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { Page } from '@playwright/test';
 import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
@@ -33,6 +34,17 @@ const test = base.extend< {
 		await use( pageObject );
 	},
 } );
+
+const waitForCartIdle = async ( page: Page ) => {
+	await page.evaluate( async () => {
+		const { store } = await import( '@wordpress/interactivity' );
+		const unlockKey =
+			'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+		await import( '@woocommerce/stores/woocommerce/cart' );
+		const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
+		await actions.waitForIdle();
+	} );
+};
 
 test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding 3rd-party product types to cart when using PHP templates', async ( {
@@ -857,6 +869,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await increaseTShirtQuantityButton.click();
 
 			await addToCartButton.click();
+			await waitForCartIdle( page );
 
 			await expect(
 				page.getByRole( 'button', {
@@ -917,12 +930,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
-			// Set up waitForResponse BEFORE the click to avoid race condition
-			// where page.reload() executes before the cart is updated.
-			const batchPromise = page.waitForResponse(
-				'**/wc/store/v1/batch**'
-			);
 			await addToCartButton.click();
+			await waitForCartIdle( page );
 
 			await expect(
 				page.getByRole( 'button', {
@@ -930,8 +939,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 					exact: true,
 				} )
 			).toBeVisible();
-
-			await batchPromise;
 
 			await expect(
 				page.getByLabel( 'Number of items in the cart: 3' )
@@ -1049,18 +1056,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await test.step( 'verify cart state persists after reload', async () => {
 			// Reloading while a batch request is still in flight aborts it,
 			// losing the re-add server-side.
-			await page.evaluate( async () => {
-				const { store } = await import( '@wordpress/interactivity' );
-				const unlockKey =
-					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-				await import( '@woocommerce/stores/woocommerce/cart' );
-				const { actions } = store(
-					'woocommerce',
-					{},
-					{ lock: unlockKey }
-				);
-				await actions.waitForIdle();
-			} );
+			await waitForCartIdle( page );
 
 			await page.reload();
 
