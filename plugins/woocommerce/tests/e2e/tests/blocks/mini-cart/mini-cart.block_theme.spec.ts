@@ -1104,9 +1104,20 @@ test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 		await expect( page.locator( 'input.variation_id' ) ).toHaveValue(
 			/^[1-9][0-9]*$/
 		);
-		await page
-			.getByRole( 'button', { name: 'Add to cart', exact: true } )
-			.click();
+		const variationAddToCart = page.locator(
+			'.woocommerce-variation-add-to-cart'
+		);
+		await expect( variationAddToCart ).not.toHaveClass(
+			/\b(?:woocommerce-variation-add-to-cart-disabled|wc-variation-selection-needed)\b/
+		);
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+			exact: true,
+		} );
+		await expect( addToCartButton ).not.toHaveClass(
+			/\b(?:disabled|wc-variation-selection-needed)\b/
+		);
+		await addToCartButton.click();
 
 		// Wait for a definitive "added to cart" confirmation before navigating
 		// to the shop. The single-product Add to cart is a form submission; if
