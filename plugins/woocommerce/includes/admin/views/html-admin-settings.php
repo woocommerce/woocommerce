@@ -124,7 +124,13 @@ if ( isset( $_GET['zone_id'] ) && is_string( $_GET['zone_id'] ) ) {
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 $is_shipping_zone_screen = '' !== $shipping_zone_id;
-if ( 'shipping' === $current_tab && '' === $current_section && ! $is_shipping_zone_screen && current_user_can( 'install_plugins' ) ) {
+if (
+	'shipping' === $current_tab
+	&& (
+		'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' )
+		|| ( '' === $current_section && ! $is_shipping_zone_screen && current_user_can( 'install_plugins' ) )
+	)
+) {
 	unset( $marketplace_links['shipping'] );
 }
 

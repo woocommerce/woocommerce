@@ -99,6 +99,24 @@ class WC_Admin_Settings_View_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not render the shipping marketplace link when marketplace suggestions are disabled.
+	 */
+	public function test_shipping_marketplace_link_is_not_rendered_when_marketplace_suggestions_are_disabled(): void {
+		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
+
+		$output = $this->render_settings_view( 'shipping', 'options' );
+
+		$this->assertStringNotContainsString(
+			'data-settings-tab="shipping"',
+			$output
+		);
+		$this->assertStringNotContainsString(
+			'shipping-delivery-and-fulfillment',
+			$output
+		);
+	}
+
+	/**
 	 * @testdox Should render the shipping marketplace link on Shipping zone screens.
 	 */
 	public function test_shipping_marketplace_link_is_rendered_on_shipping_zone_screens(): void {
