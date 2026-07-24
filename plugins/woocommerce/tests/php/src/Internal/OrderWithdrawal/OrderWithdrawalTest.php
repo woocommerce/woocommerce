@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\OrderWithdrawal;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormState;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormView;
+use WC_Order;
 use WC_Unit_Test_Case;
 
 /**
@@ -75,6 +76,13 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	private $original_flush_queue_option;
 
 	/**
+	 * Created order IDs.
+	 *
+	 * @var int[]
+	 */
+	private array $created_order_ids = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -117,6 +125,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$this->restore_option( self::ENDPOINT_OPTION, $this->original_endpoint_option );
 		$this->restore_option( self::FLUSH_QUEUE_OPTION, $this->original_flush_queue_option );
 		wc_clear_notices();
+		$this->delete_created_orders();
 		WC()->session = $this->original_session;
 
 		parent::tearDown();
@@ -159,9 +168,88 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 */
 	public function provide_valid_submission_actions(): array {
 		return array(
-			'review action'  => array( OrderWithdrawalFormProcessor::ACTION_REVIEW, 'review' ),
-			'confirm action' => array( OrderWithdrawalFormProcessor::ACTION_CONFIRM, 'confirmation' ),
+			'review action' => array( OrderWithdrawalFormProcessor::ACTION_REVIEW, 'review' ),
 		);
+	}
+
+	/**
+	 * @testdox Should add an order note and send emails when a confirmed submission matches an order exactly.
+	 */
+	public function test_process_current_request_adds_note_and_sends_emails_for_exact_order_match(): void {
+		$order   = $this->create_order_for_form_data();
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state = $this->sut->process_current_request();
+
+			$this->assertSame( 'confirmation', $state->screen, 'Matched confirm submissions should reach the confirmation screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
+			$this->assert_mail_sent_to( 'jane@example.test', $capture['captures'] );
+			$this->assert_mail_sent_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+			$this->assertTrue( $this->order_has_note_containing( $order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The matched order should receive a withdrawal note.' );
+			$this->assertTrue( $this->order_has_note_containing( $order, 'Items requested for withdrawal: Line item 1' ), 'Specific-item details should be included in the order note.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should send emails without adding a note when no exact order match is found.
+	 */
+	public function test_process_current_request_sends_emails_without_note_when_order_does_not_match(): void {
+		$order   = $this->create_order_for_form_data(
+			array(
+				OrderWithdrawalFormProcessor::FIELD_EMAIL => 'different@example.test',
+				OrderWithdrawalFormProcessor::FIELD_EMAIL_CONFIRMATION => 'different@example.test',
+			)
+		);
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state = $this->sut->process_current_request();
+
+			$this->assertSame( 'confirmation', $state->screen, 'Unmatched confirm submissions should still reach the confirmation screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent even without a match.' );
+			$this->assert_mail_sent_to( 'jane@example.test', $capture['captures'] );
+			$this->assert_mail_sent_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+			$this->assertFalse( $this->order_has_note_containing( $order, 'Order withdrawal requested' ), 'An order note should not be added when the identifying data does not all match.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should keep the user on review with an error notice when notification emails fail.
+	 */
+	public function test_process_current_request_surfaces_error_when_emails_fail(): void {
+		$capture = $this->capture_wp_mail( false );
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '999999999' )
+			);
+
+			$state         = $this->sut->process_current_request();
+			$error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'review', $state->screen, 'Email failures should keep the submitted details on the review screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The processor should attempt both notification emails before surfacing the failure.' );
+			$this->assertNotEmpty( $error_notices, 'Email failures should add an error notice.' );
+			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $error_notices[0]['notice'], 'The error notice should tell the user the submission did not complete.' );
+		} finally {
+			$capture['remove']();
+		}
 	}
 
 	/**
@@ -281,6 +369,112 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			OrderWithdrawalFormProcessor::FIELD_WITHDRAWAL_TYPE => OrderWithdrawalFormProcessor::WITHDRAWAL_TYPE_SPECIFIC,
 			OrderWithdrawalFormProcessor::FIELD_ADDITIONAL_DETAILS => 'Line item 1',
 		);
+	}
+
+	/**
+	 * Create an order from the default valid form data.
+	 *
+	 * @param array<string,string> $field_overrides Field value overrides keyed by unprefixed field key.
+	 */
+	private function create_order_for_form_data( array $field_overrides = array() ): WC_Order {
+		$data  = array_merge( $this->get_valid_form_data(), $field_overrides );
+		$order = wc_create_order();
+
+		if ( ! $order instanceof WC_Order ) {
+			$this->fail( 'Expected wc_create_order() to create a WC_Order instance.' );
+		}
+
+		$order->set_billing_first_name( $data[ OrderWithdrawalFormProcessor::FIELD_FIRST_NAME ] );
+		$order->set_billing_last_name( $data[ OrderWithdrawalFormProcessor::FIELD_LAST_NAME ] );
+		$order->set_billing_email( $data[ OrderWithdrawalFormProcessor::FIELD_EMAIL ] );
+		$order->save();
+
+		$this->created_order_ids[] = $order->get_id();
+
+		return $order;
+	}
+
+	/**
+	 * Capture wp_mail() calls without sending real email.
+	 *
+	 * @param bool $send_result Value returned to wp_mail().
+	 * @return array{captures: array<int,array<string,mixed>>, remove: callable}
+	 */
+	private function capture_wp_mail( bool $send_result = true ): array {
+		$captures = array();
+
+		$capture = static function ( $short_circuit, $atts ) use ( &$captures, $send_result ) {
+			unset( $short_circuit );
+			$captures[] = is_array( $atts ) ? $atts : array();
+
+			return $send_result;
+		};
+
+		add_filter( 'pre_wp_mail', $capture, 10, 2 );
+
+		$remove = static function () use ( $capture ) {
+			remove_filter( 'pre_wp_mail', $capture, 10 );
+		};
+
+		return array(
+			'captures' => &$captures,
+			'remove'   => $remove,
+		);
+	}
+
+	/**
+	 * Assert an email was sent to a recipient.
+	 *
+	 * @param string                         $recipient Recipient email.
+	 * @param array<int,array<string,mixed>> $captures   Captured email arguments.
+	 */
+	private function assert_mail_sent_to( string $recipient, array $captures ): void {
+		$recipients = array();
+
+		foreach ( $captures as $mail ) {
+			$to = $mail['to'] ?? '';
+
+			if ( is_array( $to ) ) {
+				$recipients = array_merge( $recipients, $to );
+			} else {
+				$recipients[] = (string) $to;
+			}
+		}
+
+		$this->assertContains( $recipient, $recipients, sprintf( 'Expected an email to be sent to %s.', $recipient ) );
+	}
+
+	/**
+	 * Whether an order has a note containing specific text.
+	 *
+	 * @param WC_Order $order  Order.
+	 * @param string   $needle Note content to search for.
+	 */
+	private function order_has_note_containing( WC_Order $order, string $needle ): bool {
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+
+		foreach ( $notes as $note ) {
+			if ( false !== strpos( (string) $note->content, $needle ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Delete orders created during a test.
+	 */
+	private function delete_created_orders(): void {
+		foreach ( $this->created_order_ids as $order_id ) {
+			$order = wc_get_order( $order_id );
+
+			if ( $order instanceof WC_Order ) {
+				$order->delete( true );
+			}
+		}
+
+		$this->created_order_ids = array();
 	}
 
 	/**

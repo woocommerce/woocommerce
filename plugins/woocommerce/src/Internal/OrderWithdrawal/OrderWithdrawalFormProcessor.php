@@ -3,6 +3,11 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use RuntimeException;
+use Throwable;
+use WC_Order;
+
 /**
  * Processes order withdrawal form requests.
  *
@@ -27,6 +32,8 @@ final class OrderWithdrawalFormProcessor {
 	public const FIELD_ADDITIONAL_DETAILS = 'additional_details';
 	public const WITHDRAWAL_TYPE_FULL     = 'full_order';
 	public const WITHDRAWAL_TYPE_SPECIFIC = 'specific_items_only';
+
+	private const LOGGER_SOURCE = 'order-withdrawal';
 
 	/**
 	 * Process the current order withdrawal request.
@@ -61,7 +68,15 @@ final class OrderWithdrawalFormProcessor {
 			return new OrderWithdrawalFormState( $screen, $data, $errors );
 		}
 
-		$screen = self::ACTION_CONFIRM === $action ? 'confirmation' : 'review';
+		if ( self::ACTION_CONFIRM === $action ) {
+			if ( ! $this->submit_order_withdrawal( $data ) ) {
+				return new OrderWithdrawalFormState( 'review', $data, $errors );
+			}
+
+			$screen = 'confirmation';
+		} else {
+			$screen = 'review';
+		}
 
 		return new OrderWithdrawalFormState( $screen, $data, $errors );
 	}
@@ -223,5 +238,317 @@ final class OrderWithdrawalFormProcessor {
 		foreach ( $errors as $field_key => $message ) {
 			wc_add_notice( $message, 'error', array( 'id' => self::get_field_name( $field_key ) ) );
 		}
+	}
+
+	/**
+	 * Submit a validated order withdrawal request.
+	 *
+	 * @param array<string,string> $data Form data.
+	 */
+	private function submit_order_withdrawal( array $data ): bool {
+		try {
+			$matched_order = $this->get_matching_order( $data );
+
+			if ( $matched_order instanceof WC_Order ) {
+				$this->add_order_withdrawal_note( $matched_order, $data );
+			}
+
+			$this->send_order_withdrawal_emails( $data, $matched_order );
+			return true;
+		} catch ( Throwable $e ) {
+			$this->log_submission_error( $e );
+			wc_add_notice( __( 'We could not submit your withdrawal request. Please try again or contact us if the problem continues.', 'woocommerce' ), 'error' );
+
+			return false;
+		}
+	}
+
+	/**
+	 * Get an order only when every submitted order-identifying field matches.
+	 *
+	 * @param array<string,string> $data Form data.
+	 */
+	private function get_matching_order( array $data ): ?WC_Order {
+		$order_number = $this->normalize_order_number( $data[ self::FIELD_ORDER_NUMBER ] );
+
+		if ( '' === $order_number || ! ctype_digit( $order_number ) ) {
+			return null;
+		}
+
+		$order = wc_get_order( absint( $order_number ) );
+
+		if ( ! $order instanceof WC_Order ) {
+			return null;
+		}
+
+		if ( ! $this->order_matches_form_data( $order, $data ) ) {
+			return null;
+		}
+
+		return $order;
+	}
+
+	/**
+	 * Whether a candidate order exactly matches the submitted identifying data.
+	 *
+	 * @param WC_Order             $order Candidate order.
+	 * @param array<string,string> $data  Form data.
+	 */
+	private function order_matches_form_data( WC_Order $order, array $data ): bool {
+		return $this->normalize_order_number( (string) $order->get_order_number() ) === $this->normalize_order_number( $data[ self::FIELD_ORDER_NUMBER ] )
+			&& $this->text_values_match( $order->get_billing_first_name( 'edit' ), $data[ self::FIELD_FIRST_NAME ] )
+			&& $this->text_values_match( $order->get_billing_last_name( 'edit' ), $data[ self::FIELD_LAST_NAME ] )
+			&& $this->text_values_match( $order->get_billing_email( 'edit' ), $data[ self::FIELD_EMAIL ] );
+	}
+
+	/**
+	 * Normalize a submitted order number for lookup and comparison.
+	 *
+	 * @param string $order_number Order number.
+	 */
+	private function normalize_order_number( string $order_number ): string {
+		$order_number = trim( $order_number );
+
+		if ( 0 === strpos( $order_number, '#' ) ) {
+			$order_number = trim( substr( $order_number, 1 ) );
+		}
+
+		return $order_number;
+	}
+
+	/**
+	 * Compare submitted text values for identity while ignoring casing and surrounding spaces.
+	 *
+	 * @param string $stored_value    Stored order value.
+	 * @param string $submitted_value Submitted form value.
+	 */
+	private function text_values_match( string $stored_value, string $submitted_value ): bool {
+		return 0 === strcasecmp( trim( $stored_value ), trim( $submitted_value ) );
+	}
+
+	/**
+	 * Add the withdrawal request note to a matched order.
+	 *
+	 * @param WC_Order             $order Matched order.
+	 * @param array<string,string> $data  Form data.
+	 * @throws RuntimeException When the note cannot be added.
+	 */
+	private function add_order_withdrawal_note( WC_Order $order, array $data ): void {
+		$note = sprintf(
+			/* translators: 1: customer name, 2: customer email address. */
+			__( 'Order withdrawal requested by %1$s (%2$s).', 'woocommerce' ),
+			$this->get_customer_name( $data ),
+			$data[ self::FIELD_EMAIL ]
+		);
+
+		if ( self::WITHDRAWAL_TYPE_SPECIFIC === $data[ self::FIELD_WITHDRAWAL_TYPE ] ) {
+			$note .= "\n\n" . sprintf(
+				/* translators: %s: items the customer listed for partial withdrawal. */
+				__( 'Items requested for withdrawal: %s', 'woocommerce' ),
+				$data[ self::FIELD_ADDITIONAL_DETAILS ]
+			);
+		}
+
+		$note_id = $order->add_order_note( $note, 0, false, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
+
+		if ( ! $note_id ) {
+			throw new RuntimeException( 'Could not add order withdrawal note.' );
+		}
+	}
+
+	/**
+	 * Send customer and merchant order withdrawal emails.
+	 *
+	 * @param array<string,string> $data          Form data.
+	 * @param WC_Order|null        $matched_order Matched order, if found.
+	 * @throws RuntimeException When either email cannot be sent.
+	 */
+	private function send_order_withdrawal_emails( array $data, ?WC_Order $matched_order ): void {
+		$submitted_at  = time();
+		$customer_sent = $this->send_customer_order_withdrawal_email( $data, $submitted_at );
+		$merchant_sent = $this->send_merchant_order_withdrawal_email( $data, $matched_order, $submitted_at );
+
+		if ( ! $customer_sent || ! $merchant_sent ) {
+			throw new RuntimeException(
+				sprintf(
+					'Order withdrawal notification email failed. Customer email sent: %s. Merchant email sent: %s.',
+					$customer_sent ? 'yes' : 'no',
+					$merchant_sent ? 'yes' : 'no'
+				)
+			);
+		}
+	}
+
+	/**
+	 * Send the customer order withdrawal acknowledgement email.
+	 *
+	 * @param array<string,string> $data         Form data.
+	 * @param int                  $submitted_at Unix timestamp for the submission.
+	 */
+	private function send_customer_order_withdrawal_email( array $data, int $submitted_at ): bool {
+		$subject = __( 'We received your withdrawal request', 'woocommerce' );
+		$heading = __( 'We received your withdrawal request', 'woocommerce' );
+		$body    = '<p>' . esc_html__( 'We have received your request to withdraw from the order below.', 'woocommerce' ) . '</p>';
+		$body   .= $this->get_email_details_html( $data, $submitted_at );
+		$body   .= '<p>' . esc_html__( 'We will review your request and contact you about next steps, including any refund due.', 'woocommerce' ) . '</p>';
+
+		return wc_mail(
+			$data[ self::FIELD_EMAIL ],
+			$subject,
+			$this->wrap_email_message( $heading, $body )
+		);
+	}
+
+	/**
+	 * Send the merchant order withdrawal notification email.
+	 *
+	 * @param array<string,string> $data          Form data.
+	 * @param WC_Order|null        $matched_order Matched order, if found.
+	 * @param int                  $submitted_at  Unix timestamp for the submission.
+	 * @throws RuntimeException When no merchant recipient is configured.
+	 */
+	private function send_merchant_order_withdrawal_email( array $data, ?WC_Order $matched_order, int $submitted_at ): bool {
+		$recipient = sanitize_email( (string) get_option( 'admin_email' ) );
+
+		if ( '' === $recipient || ! is_email( $recipient ) ) {
+			throw new RuntimeException( 'No valid merchant email recipient is configured for order withdrawal notifications.' );
+		}
+
+		$subject = sprintf(
+			/* translators: %s: order number. */
+			__( 'Order withdrawal request for order %s', 'woocommerce' ),
+			$data[ self::FIELD_ORDER_NUMBER ]
+		);
+		$heading = __( 'Order withdrawal request received', 'woocommerce' );
+		$body    = '<p>' . esc_html__( 'A customer submitted an order withdrawal request.', 'woocommerce' ) . '</p>';
+
+		if ( $matched_order instanceof WC_Order ) {
+			$body .= '<p>' . esc_html__( 'WooCommerce matched this request to an order and added an order note.', 'woocommerce' ) . '</p>';
+		} else {
+			$body .= '<p>' . esc_html__( 'WooCommerce could not match this request to an order automatically, so no order note was added.', 'woocommerce' ) . '</p>';
+		}
+
+		$body .= $this->get_email_details_html( $data, $submitted_at );
+
+		if ( $matched_order instanceof WC_Order ) {
+			$body .= sprintf(
+				'<p>%s</p>',
+				sprintf(
+					/* translators: %d: order ID. */
+					esc_html__( 'Matched order ID: %d', 'woocommerce' ),
+					$matched_order->get_id()
+				)
+			);
+		}
+
+		return wc_mail(
+			$recipient,
+			$subject,
+			$this->wrap_email_message( $heading, $body ),
+			$this->get_merchant_email_headers( $data )
+		);
+	}
+
+	/**
+	 * Get merchant email headers.
+	 *
+	 * @param array<string,string> $data Form data.
+	 * @return string
+	 */
+	private function get_merchant_email_headers( array $data ): string {
+		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+		$name    = $this->get_customer_name( $data );
+		$email   = $data[ self::FIELD_EMAIL ];
+
+		if ( '' !== $name && is_email( $email ) ) {
+			$headers[] = sprintf( 'Reply-To: %1$s <%2$s>', $name, $email );
+		}
+
+		return implode( "\r\n", $headers );
+	}
+
+	/**
+	 * Wrap an email body in the WooCommerce email template.
+	 *
+	 * @param string $heading Email heading.
+	 * @param string $body    Email body.
+	 */
+	private function wrap_email_message( string $heading, string $body ): string {
+		return WC()->mailer()->wrap_message( $heading, $body );
+	}
+
+	/**
+	 * Get the email details list.
+	 *
+	 * @param array<string,string> $data         Form data.
+	 * @param int                  $submitted_at Unix timestamp for the submission.
+	 */
+	private function get_email_details_html( array $data, int $submitted_at ): string {
+		$date_format        = (string) get_option( 'date_format' );
+		$time_format        = (string) get_option( 'time_format' );
+		$additional_details = '' === $data[ self::FIELD_ADDITIONAL_DETAILS ] ? __( 'None provided', 'woocommerce' ) : $data[ self::FIELD_ADDITIONAL_DETAILS ];
+		$submitted_at_text  = wp_date( trim( $date_format . ' ' . $time_format ), $submitted_at );
+
+		if ( false === $submitted_at_text ) {
+			$submitted_at_text = '';
+		}
+
+		$rows = array(
+			__( 'Submitted', 'woocommerce' )          => $submitted_at_text,
+			__( 'Name', 'woocommerce' )               => $this->get_customer_name( $data ),
+			__( 'Email address', 'woocommerce' )      => $data[ self::FIELD_EMAIL ],
+			__( 'Order number', 'woocommerce' )       => $data[ self::FIELD_ORDER_NUMBER ],
+			__( 'Withdrawing', 'woocommerce' )        => $this->get_withdrawal_type_label( $data[ self::FIELD_WITHDRAWAL_TYPE ] ),
+			__( 'Additional details', 'woocommerce' ) => $additional_details,
+		);
+
+		$html = '<ul>';
+
+		foreach ( $rows as $label => $value ) {
+			$html .= sprintf(
+				'<li><strong>%1$s:</strong> %2$s</li>',
+				esc_html( $label ),
+				nl2br( esc_html( $value ) )
+			);
+		}
+
+		$html .= '</ul>';
+
+		return $html;
+	}
+
+	/**
+	 * Get the customer's full name for display.
+	 *
+	 * @param array<string,string> $data Form data.
+	 */
+	private function get_customer_name( array $data ): string {
+		return trim( $data[ self::FIELD_FIRST_NAME ] . ' ' . $data[ self::FIELD_LAST_NAME ] );
+	}
+
+	/**
+	 * Get the label for a withdrawal type value.
+	 *
+	 * @param string $withdrawal_type Withdrawal type value.
+	 */
+	private function get_withdrawal_type_label( string $withdrawal_type ): string {
+		$options = array(
+			self::WITHDRAWAL_TYPE_FULL     => __( 'The full order', 'woocommerce' ),
+			self::WITHDRAWAL_TYPE_SPECIFIC => __( 'Specific items only', 'woocommerce' ),
+		);
+
+		return $options[ $withdrawal_type ] ?? '';
+	}
+
+	/**
+	 * Log a submission failure.
+	 *
+	 * @param Throwable $e Submission error.
+	 */
+	private function log_submission_error( Throwable $e ): void {
+		wc_get_logger()->warning(
+			sprintf( 'Order withdrawal submission failed: %s', $e->getMessage() ),
+			array( 'source' => self::LOGGER_SOURCE )
+		);
 	}
 }
