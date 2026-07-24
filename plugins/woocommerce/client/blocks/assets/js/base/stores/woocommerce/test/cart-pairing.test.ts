@@ -7,26 +7,29 @@ import type { CartItem, ProductResponseItem } from '@woocommerce/types';
  * Internal dependencies
  */
 import type { DraftItem, OptimisticCartItem } from '../cart';
-import type { ProductsStoreState } from '../products';
 
 /**
- * The `woocommerce/products` namespace's own state, held stable across the
- * repeated `store()` calls this module makes (once at `cart-pairing.ts`'s
- * own module scope). Tests mutate its `products`/`productVariations`
- * properties directly, in `beforeEach`, rather than reassigning this
- * container — `cart-pairing.ts` destructures `state` from `store()` once,
- * at import time, so only a mutation of the already-captured object is ever
- * visible to it.
+ * The shared `woocommerce` namespace's nested product/variation maps, held
+ * stable across the repeated `store()` calls this module makes (once at
+ * `cart-pairing.ts`'s own module scope). Tests mutate `products.items`/
+ * `products.variations` directly, in `beforeEach`, rather than reassigning
+ * this container — `cart-pairing.ts` re-resolves `state` fresh on every
+ * call, so only a mutation of the already-captured object is ever visible
+ * to it.
  */
-const mockProductsState: Partial< ProductsStoreState > = {
-	products: {},
-	productVariations: {},
+const mockState: {
+	products: {
+		items: Record< number, ProductResponseItem >;
+		variations: Record< number, ProductResponseItem >;
+	};
+} = {
+	products: { items: {}, variations: {} },
 };
 
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
-		store: jest.fn( () => ( { state: mockProductsState } ) ),
+		store: jest.fn( () => ( { state: mockState } ) ),
 	} ),
 	{ virtual: true }
 );
@@ -41,8 +44,7 @@ import {
 } from '../cart-pairing';
 
 beforeEach( () => {
-	mockProductsState.products = {};
-	mockProductsState.productVariations = {};
+	mockState.products = { items: {}, variations: {} };
 } );
 
 /**
@@ -74,7 +76,7 @@ describe( 'resolveBaseProduct', () => {
 
 	it( 'returns the product itself when id names a top-level product', () => {
 		const product = { id: 10, type: 'simple' } as ProductResponseItem;
-		mockProductsState.products = { 10: product };
+		mockState.products.items = { 10: product };
 
 		expect( resolveBaseProduct( 10 ) ).toBe( product );
 	} );
@@ -84,8 +86,8 @@ describe( 'resolveBaseProduct', () => {
 			id: 10,
 			type: 'variable',
 		} as ProductResponseItem;
-		mockProductsState.products = { 10: baseProduct };
-		mockProductsState.productVariations = {
+		mockState.products.items = { 10: baseProduct };
+		mockState.products.variations = {
 			20: { id: 20, parent: 10 } as ProductResponseItem,
 		};
 
@@ -93,7 +95,7 @@ describe( 'resolveBaseProduct', () => {
 	} );
 
 	it( 'returns null when the variation is known but its parent is not', () => {
-		mockProductsState.productVariations = {
+		mockState.products.variations = {
 			20: { id: 20, parent: 999 } as ProductResponseItem,
 		};
 
@@ -163,7 +165,7 @@ describe( 'matchesSelectedAttributes', () => {
 	} );
 
 	it( 'resolves the recorded term name to its slug via the parent product before comparing', () => {
-		mockProductsState.products = {
+		mockState.products.items = {
 			10: {
 				id: 10,
 				type: 'variable',
@@ -178,7 +180,7 @@ describe( 'matchesSelectedAttributes', () => {
 				],
 			} as unknown as ProductResponseItem,
 		};
-		mockProductsState.productVariations = {
+		mockState.products.variations = {
 			20: { id: 20, parent: 10 } as ProductResponseItem,
 		};
 		// The recorded value is the term's display name ("Blue"); the

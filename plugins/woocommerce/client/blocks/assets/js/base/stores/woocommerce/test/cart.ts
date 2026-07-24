@@ -8,7 +8,6 @@ import type { Notice } from '@woocommerce/stores/store-notices';
  * Internal dependencies
  */
 import type { Store, OptimisticCartItem, DraftItem, DraftKey } from '../cart';
-import type { ProductsStoreState } from '../products';
 
 type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
 
@@ -19,43 +18,34 @@ type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
  */
 const GLOBAL_DRAFT_KEY: DraftKey = 'woocommerce/global';
 
-let mockRegisteredStore: MockStore | null = null;
-const mockState = {
-	restUrl: 'https://example.com/wp-json/',
-	nonce: 'test-nonce-123',
-} as Store[ 'state' ];
-
 /**
- * Mock state for the `woocommerce/products` store that `cart-pairing.ts`
- * still consults directly (unmigrated by this task) to resolve the base
- * product for its pairing ladder's attribute matching. Tests set
- * `products`/`productVariations` directly when attribute matching is under
- * test, rather than exercising the real `woocommerce/products` getters —
- * those have their own test file.
+ * The shared `woocommerce` namespace's mock state. `cart.ts` and its
+ * folder-internal helpers (`cart-pairing.ts`, `draft-internals.ts`) all
+ * resolve the same `store( 'woocommerce', … )` call after the unification,
+ * so this file needs exactly one mock branch — never a separate
+ * `woocommerce/products` container to keep independent of the cart's own.
+ * `draftItems`/`products` are seeded here directly (rather than via the
+ * mocked `store()` merge) because `cart.ts` itself no longer registers
+ * either as a default — that default now lives on the root module, which
+ * this isolated test never loads.
  */
-const mockProductsState: Partial< ProductsStoreState > = {
-	products: {},
-	productVariations: {},
-};
-
-/**
- * The nested product/variation shape `draft-internals.ts` reads off the
- * unified `woocommerce` namespace (this file's default mock branch,
- * `mockState`) after its migration — distinct from {@link mockProductsState}
- * above, which backs `cart-pairing.ts`'s own, still-separate
- * `woocommerce/products` read. A test seeding a variable family for a
- * `resolveEffectiveSeed`/`writeDraft` code path seeds this shape too.
- */
-type MockNestedProductsState = {
+type MockWooCommerceState = Store[ 'state' ] & {
+	draftItems: Record< DraftKey, DraftItem[] >;
 	products: {
 		items: Record< number, ProductResponseItem >;
 		variations: Record< number, ProductResponseItem >;
 	};
 };
 
+let mockRegisteredStore: MockStore | null = null;
+const mockState = {
+	draftItems: {},
+	products: { items: {}, variations: {} },
+} as unknown as MockWooCommerceState;
+
 /**
- * The value `getContext( 'woocommerce/cart' )` should return for the draft
- * key resolver, controlled per test. `undefined` (or an object with no
+ * The value `getContext( 'woocommerce' )` should return for the draft key
+ * resolver, controlled per test. `undefined` (or an object with no
  * `draftKey`) simulates a surface with no container of its own, so the
  * resolver degrades to {@link GLOBAL_DRAFT_KEY}; an object carrying its own
  * `draftKey` simulates a container that has declared one, isolating its
@@ -72,7 +62,7 @@ let mockCartContext: { draftKey?: DraftKey } | undefined;
 let mockCartContextThrows = false;
 
 /**
- * The value `getServerState( 'woocommerce/cart' )` should return, controlled
+ * The value `getServerState( 'woocommerce' )` should return, controlled
  * per test. `undefined` simulates a page carrying no `draftSeeds` payload at
  * all (the real runtime's `getServerState()` never actually returns
  * `undefined` — it defaults to `{}` — but the resolver's own `?.` chaining
@@ -85,7 +75,9 @@ let mockServerState:
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
-		getConfig: jest.fn(),
+		getConfig: jest.fn( () => ( {
+			restUrl: 'https://example.com/wp-json/',
+		} ) ),
 		getContext: jest.fn( () => {
 			if ( mockCartContextThrows ) {
 				throw new Error(
@@ -95,24 +87,12 @@ jest.mock(
 			return mockCartContext;
 		} ),
 		getServerState: jest.fn( () => mockServerState ),
-		store: jest.fn( ( name: string, definition ) => {
-			// The cart store consults `woocommerce/products` one-directionally;
-			// keep its mock state independent of the cart's own so seeding one
-			// never bleeds into the other.
-			if ( name === 'woocommerce/products' ) {
-				if ( definition?.state ) {
-					Object.defineProperties(
-						mockProductsState,
-						Object.getOwnPropertyDescriptors( definition.state )
-					);
-				}
-				return { state: mockProductsState };
-			}
+		store: jest.fn( ( _name: string, definition ) => {
 			// The cart store calls `store()` twice: once to read `state` and
 			// once to register `actions`. Merge the definition's `state`
-			// descriptors (e.g. the `findItem` getter) onto the shared mock
-			// state so the real getter runs against seeded cart lines, and
-			// carry the action generators through both calls.
+			// descriptors onto the shared mock state so a real getter runs
+			// against seeded cart lines, and carry the action generators
+			// through both calls.
 			if ( definition?.state ) {
 				Object.defineProperties(
 					mockState,
@@ -129,15 +109,6 @@ jest.mock(
 	{ virtual: true }
 );
 
-// The cart store's side-effecting import of `woocommerce/products` is
-// replaced with an empty virtual module: the mocked `store()` above already
-// handles the `'woocommerce/products'` registration call the cart store
-// makes directly, so the real products store module never needs to load
-// here.
-jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ), {
-	virtual: true,
-} );
-
 jest.mock( '../legacy-events', () => ( {
 	triggerAddedToCartEvent: jest.fn(),
 } ) );
@@ -146,11 +117,6 @@ jest.mock( '../legacy-events', () => ( {
 const { triggerAddedToCartEvent } = jest.requireMock( '../legacy-events' ) as {
 	triggerAddedToCartEvent: jest.Mock;
 };
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { getServerState: mockGetServerState } = jest.requireMock(
-	'@wordpress/interactivity'
-) as { getServerState: jest.Mock };
 
 /**
  * Captured representation of a single mutation sent through the batch endpoint.
@@ -448,37 +414,16 @@ function makeKeyedLine( overrides: Partial< CartItem > = {} ): CartItem {
 	} as CartItem;
 }
 
-/**
- * Narrows an envelope's `draft` to a defined `DraftItem`, for tests that
- * address an id known to resolve — an explicit `id` given to `findItem`, or
- * a product in context for `itemInContext`. The view contract guarantees
- * `draft` is present whenever an id resolves (see the `Envelope.draft`
- * JSDoc in `cart.ts`); this helper states that guarantee at the call site
- * without a forbidden non-null assertion, and fails loudly were it ever
- * violated.
- *
- * @param draft The envelope's `draft`, expected to be defined.
- * @return The defined draft view.
- */
-function assertDraft( draft: DraftItem | undefined ): DraftItem {
-	if ( ! draft ) {
-		throw new Error( 'Expected the draft view to be defined.' );
-	}
-	return draft;
-}
-
 describe( 'WooCommerce Cart Interactivity API Store', () => {
 	afterEach( () => {
 		jest.clearAllMocks();
 		delete ( mockState as Partial< Store[ 'state' ] > ).cart;
-		delete ( mockState as unknown as Partial< MockNestedProductsState > )
-			.products;
+		delete ( mockState as Partial< Store[ 'state' ] > ).itemInContext;
+		mockState.draftItems = {};
+		mockState.products = { items: {}, variations: {} };
 		mockCartContext = undefined;
 		mockCartContextThrows = false;
 		mockServerState = undefined;
-		delete mockProductsState.productInContext;
-		mockProductsState.products = {};
-		mockProductsState.productVariations = {};
 	} );
 
 	describe( 'addCartItem endpoint selection', () => {
@@ -1168,210 +1113,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
-	describe( 'draft key resolution (resolveDraftKey / resolveCollection)', () => {
-		it( 'writes to the nearest declared container key when one is active', async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			mockCartContext = { draftKey: 'collection/q1/42' };
-
-			assertDraft( mockState.findItem( { id: 42 } ).draft ).quantity = 1;
-
-			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
-			expect( mockState.draftItems[ 'collection/q1/42' ] ).toEqual( [
-				{ id: 42, quantity: 1 },
-			] );
-		} );
-
-		it( "reads back the container key's own collection, not the session-global one, when a container is active", async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			mockCartContext = { draftKey: 'collection/q1/42' };
-			assertDraft( mockState.findItem( { id: 42 } ).draft ).quantity = 1;
-
-			expect( mockState.findItem( { id: 42 } ).draft ).toEqual( {
-				id: 42,
-				quantity: 1,
-			} );
-
-			// Outside that container's context, the session-global
-			// collection carries no matching draft — the view still
-			// resolves (present whenever an id resolves), but reads empty.
-			mockCartContext = undefined;
-			const globalDraft = assertDraft(
-				mockState.findItem( { id: 42 } ).draft
-			);
-			expect( globalDraft.quantity ).toBeUndefined();
-			expect( globalDraft.variation ).toEqual( [] );
-		} );
-
-		it( 'degrades to the session-global key, without throwing, when read outside a directive', async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			mockCartContextThrows = true;
-
-			expect( () => {
-				assertDraft(
-					mockState.findItem( { id: 42 } ).draft
-				).quantity = 1;
-			} ).not.toThrow();
-
-			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
-				{ id: 42, quantity: 1 },
-			] );
-		} );
-
-		it( 'treats a not-yet-created collection as empty on read, rather than throwing', async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			mockCartContext = { draftKey: 'collection/q1/never-written' };
-
-			expect( () => mockState.findItem( { id: 42 } ) ).not.toThrow();
-			const draft = assertDraft( mockState.findItem( { id: 42 } ).draft );
-			expect( draft.quantity ).toBeUndefined();
-			expect( draft.variation ).toEqual( [] );
-		} );
-	} );
-
-	describe( 'seed composition — creation-time-only consultation of getServerState()', () => {
-		it( "composes a new draft from the server-filed seed, merged under the shopper's edit", async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			mockServerState = {
-				draftSeeds: {
-					[ GLOBAL_DRAFT_KEY ]: {
-						42: {
-							id: 42,
-							quantity: 3,
-							variation: [ { attribute: 'Color', value: 'red' } ],
-						} as DraftItem,
-					},
-				},
-			};
-
-			// The shopper's edit only sets quantity; the untouched
-			// `variation` field falls back to the seed's own.
-			assertDraft( mockState.findItem( { id: 42 } ).draft ).quantity = 5;
-
-			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
-				{
-					id: 42,
-					quantity: 5,
-					variation: [ { attribute: 'Color', value: 'red' } ],
-				},
-			] );
-		} );
-
-		it( 'materializes straight from the seed when the write touches an unrelated field', async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			mockServerState = {
-				draftSeeds: {
-					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42, quantity: 3 } },
-				},
-			};
-
-			assertDraft( mockState.findItem( { id: 42 } ).draft )[
-				'my-plugin/note'
-			] = 'hi';
-
-			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
-				{ id: 42, quantity: 3, 'my-plugin/note': 'hi' },
-			] );
-		} );
-
-		it( 'reads the seed via getServerState( "woocommerce" )', async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			mockServerState = {
-				draftSeeds: {
-					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42, quantity: 1 } },
-				},
-			};
-
-			assertDraft( mockState.findItem( { id: 42 } ).draft ).quantity = 1;
-
-			expect( mockGetServerState ).toHaveBeenCalledWith( 'woocommerce' );
-		} );
-
-		it( 'never lets a re-delivered seed replace or inject properties into an already-materialized draft', async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			mockServerState = {
-				draftSeeds: {
-					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42, quantity: 3 } },
-				},
-			};
-
-			// First materialization consults the seed.
-			assertDraft( mockState.findItem( { id: 42 } ).draft ).quantity = 1;
-
-			// The surface's seed is re-delivered with a different quantity
-			// and an extra property — e.g. a region re-render or a
-			// client-side navigation re-filing the same key/id.
-			mockServerState = {
-				draftSeeds: {
-					[ GLOBAL_DRAFT_KEY ]: {
-						42: {
-							id: 42,
-							quantity: 9,
-							'my-plugin/injected': 'unwanted',
-						} as DraftItem,
-					},
-				},
-			};
-
-			// A genuine, unrelated edit — never a re-seed; an existing
-			// draft's merge path never touches `getServerState()` again.
-			assertDraft( mockState.findItem( { id: 42 } ).draft )[
-				'my-plugin/color'
-			] = 'blue';
-
-			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
-				{ id: 42, quantity: 1, 'my-plugin/color': 'blue' },
-			] );
-		} );
-
-		it( 'still materializes when neither the write nor the seed supplies a numeric quantity, with a dev-build warning', async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			mockServerState = {
-				draftSeeds: {
-					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42 } as DraftItem },
-				},
-			};
-
-			assertDraft( mockState.findItem( { id: 42 } ).draft )[
-				'my-plugin/note'
-			] = 'hi';
-
-			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual( [
-				{ id: 42, 'my-plugin/note': 'hi' },
-			] );
-			expect( console ).toHaveWarned();
-		} );
-
-		it( "composes from the seed filed under a keyed container's own collection, not the session-global one", async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			mockCartContext = { draftKey: 'collection/q1/42' };
-			mockServerState = {
-				draftSeeds: {
-					'collection/q1/42': { 42: { id: 42, quantity: 4 } },
-					[ GLOBAL_DRAFT_KEY ]: { 42: { id: 42, quantity: 99 } },
-				},
-			};
-
-			assertDraft( mockState.findItem( { id: 42 } ).draft )[
-				'my-plugin/note'
-			] = 'hi';
-
-			expect( mockState.draftItems[ 'collection/q1/42' ] ).toEqual( [
-				{ id: 42, quantity: 4, 'my-plugin/note': 'hi' },
-			] );
-			expect( mockState.draftItems[ GLOBAL_DRAFT_KEY ] ).toBeUndefined();
-		} );
-	} );
-
 	describe( 'retired draft-lifecycle machinery', () => {
 		it( 'no longer exposes upsertDraftItem, removeDraftItem, seedDraftIfAbsent, registerOrRestoreDraftCollection, or waitForIdle — no action writes state.draftItems', async () => {
 			const actions = await loadCartStore();
@@ -1399,120 +1140,15 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
-	describe( 'findItem / itemInContext / inCartQuantity', () => {
-		/**
-		 * Seeds `mockProductsState.productInContext` with a minimal product.
-		 *
-		 * @param overrides Partial product fields to override the defaults.
-		 * @return The product object assigned to `productInContext`.
-		 */
-		function seedProductInContext(
-			overrides: Partial< ProductResponseItem > = {}
-		) {
-			const product = {
-				id: 42,
-				type: 'simple',
-				grouped_products: [],
-				...overrides,
-			} as ProductResponseItem;
-			mockProductsState.productInContext = product;
-			return product;
-		}
-
-		/**
-		 * Builds a minimal server-confirmed cart line, optionally carrying
-		 * namespaced extension data under `extensions[namespace]`.
-		 *
-		 * @param overrides Partial cart-line fields to override the defaults.
-		 * @return A cart line suitable for seeding `state.cart.items`.
-		 */
-		function makeLine( overrides: Partial< CartItem > = {} ): CartItem {
-			return makeKeyedLine( { extensions: {}, ...overrides } );
-		}
-
-		it( 'inCartQuantity is 0 when no product is in context', async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			seedCart( [] );
-
-			expect( mockState.inCartQuantity ).toBe( 0 );
-		} );
-
-		it( 'inCartQuantity returns the paired line quantity for a simple in-context product', async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			seedCart( [ makeLine( { id: 42, quantity: 4 } ) ] );
-			seedProductInContext( { id: 42, type: 'simple' } );
-
-			expect( mockState.inCartQuantity ).toBe( 4 );
-		} );
-
-		it( 'inCartQuantity aggregates children in-cart quantities for a grouped in-context product', async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			seedCart( [
-				makeLine( { id: 1, quantity: 2 } ),
-				makeLine( { id: 2, quantity: 5 } ),
-				// id 3 has no line — contributes 0.
-			] );
-			seedProductInContext( {
-				id: 99,
-				type: 'grouped',
-				grouped_products: [ 1, 2, 3 ],
-			} );
-
-			expect( mockState.inCartQuantity ).toBe( 7 );
-		} );
-
-		it( 'inCartQuantity resolves the correct per-variation quantity for a variable in-context product', async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			const greenLine = makeLine( {
-				id: 55,
-				type: 'variation',
-				quantity: 3,
-				variation: [
-					{
-						attribute: 'Color',
-						value: 'green',
-						raw_attribute: 'attribute_pa_color',
-					},
-				],
-			} );
-			const blueLine = makeLine( {
-				id: 56,
-				type: 'variation',
-				quantity: 9,
-				variation: [
-					{
-						attribute: 'Color',
-						value: 'blue',
-						raw_attribute: 'attribute_pa_color',
-					},
-				],
-			} );
-			seedCart( [ greenLine, blueLine ] );
-			seedProductInContext( { id: 55, type: 'variation' } );
-			// The resolved collection's draft selection names which variation
-			// is "selected".
-			mockState.draftItems[ GLOBAL_DRAFT_KEY ] = [
-				{
-					id: 55,
-					quantity: 1,
-					variation: [ { attribute: 'Color', value: 'green' } ],
-				} as DraftItem,
-			];
-
-			expect( mockState.inCartQuantity ).toBe( 3 );
-		} );
-	} );
-
 	describe( 'addItem / updateItem / removeItem / refresh', () => {
 		/**
-		 * Seeds `mockProductsState.productInContext` with a minimal product.
+		 * Seeds `mockState.itemInContext.product` with a minimal product —
+		 * the root module's registration this isolated test never loads, so
+		 * `addItem`'s no-payload resolution reads a plain seeded value here
+		 * rather than a real getter.
 		 *
 		 * @param overrides Partial product fields to override the defaults.
-		 * @return The product object assigned to `productInContext`.
+		 * @return The product object assigned to `itemInContext.product`.
 		 */
 		function seedProductInContext(
 			overrides: Partial< ProductResponseItem > = {}
@@ -1523,7 +1159,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				grouped_products: [],
 				...overrides,
 			} as ProductResponseItem;
-			mockProductsState.productInContext = product;
+			mockState.itemInContext = { product };
 			return product;
 		}
 
@@ -1775,14 +1411,12 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				 * Seeds a minimal variable family: a base product (id 10)
 				 * with one variation (id 20) fixing `Color: blue`.
 				 *
-				 * Seeds both the flat `woocommerce/products` mock branch
-				 * (`cart-pairing.ts`'s own, not-yet-migrated
-				 * `resolveBaseProduct`, backing the optimistic
-				 * `findCartLine` lookup below) and the unified nested
-				 * `woocommerce` shape (`draft-internals.ts`'s migrated
-				 * `resolveBaseProduct`, backing `resolveEffectiveSeed`'s
-				 * family fallback) — the same family data, read by two
-				 * still-separate consumers this task does not unify.
+				 * Both `cart-pairing.ts`'s `resolveBaseProduct` (backing the
+				 * optimistic `findCartLine` lookup below) and
+				 * `draft-internals.ts`'s own `resolveBaseProduct` (backing
+				 * `resolveEffectiveSeed`'s family fallback) read the same
+				 * unified `woocommerce` nested shape after the retargeting,
+				 * so a single seed now backs both.
 				 */
 				function seedBlueVariationFamily() {
 					const baseProduct = {
@@ -1802,12 +1436,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						parent: 10,
 					} as ProductResponseItem;
 
-					mockProductsState.products = { 10: baseProduct };
-					mockProductsState.productVariations = { 20: variation };
-
-					(
-						mockState as unknown as MockNestedProductsState
-					 ).products = {
+					mockState.products = {
 						items: { 10: baseProduct },
 						variations: { 20: variation },
 					};
@@ -1977,22 +1606,24 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						message: 'Missing variation data.',
 					} );
 					const actions = await loadCartStore();
-					mockProductsState.products = {
-						30: {
-							id: 30,
-							type: 'variable',
-							variations: [
-								{
-									id: 40,
-									attributes: [
-										{ name: 'Color', value: null },
-									],
-								},
-							],
-						} as unknown as ProductResponseItem,
-					};
-					mockProductsState.productVariations = {
-						40: { id: 40, parent: 30 } as ProductResponseItem,
+					mockState.products = {
+						items: {
+							30: {
+								id: 30,
+								type: 'variable',
+								variations: [
+									{
+										id: 40,
+										attributes: [
+											{ name: 'Color', value: null },
+										],
+									},
+								],
+							} as unknown as ProductResponseItem,
+						},
+						variations: {
+							40: { id: 40, parent: 30 } as ProductResponseItem,
+						},
 					};
 					seedCart( [] );
 					seedProductInContext( { id: 40, type: 'variation' } );
@@ -2186,6 +1817,27 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( untypedState?.findItemInCart ).toBeUndefined();
 		} );
 
+		it( 'registers no state.findItem, state.itemInContext getter, or state.inCartQuantity getter — the root module owns them', async () => {
+			await loadCartStore();
+			const untypedState = mockRegisteredStore?.state as
+				| Record< string, unknown >
+				| undefined;
+
+			// The mocked `store()` only ever merges `definition.state`'s own
+			// descriptors onto the shared mock; cart.ts's real registration
+			// call no longer passes a `state` key at all, so none of these
+			// getters are ever merged in — proving the module's own
+			// registration carries none of them, not merely that the test's
+			// own seed happens to omit them.
+			expect( untypedState?.findItem ).toBeUndefined();
+			expect(
+				Object.getOwnPropertyDescriptor( mockState, 'itemInContext' )
+			).toBeUndefined();
+			expect(
+				Object.getOwnPropertyDescriptor( mockState, 'inCartQuantity' )
+			).toBeUndefined();
+		} );
+
 		it( 'no longer declares state.errorMessages', async () => {
 			await loadCartStore();
 			const untypedState = mockRegisteredStore?.state as
@@ -2193,30 +1845,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				| undefined;
 
 			expect( untypedState?.errorMessages ).toBeUndefined();
-		} );
-
-		it( 'trims isInCart from the envelope: findItem/itemInContext expose only cartItem/draft, even when a product shares identity with more than one ambiguous line', async () => {
-			mockBatchFetch();
-			await loadCartStore();
-			// Same id, same (empty) extensions — nothing distinguishes them,
-			// so the pairing ladder is maximally ambiguous. This is the exact
-			// case the tri-state used to flag; the envelope still must not
-			// carry `isInCart`.
-			seedCart( [
-				makeKeyedLine( { id: 42, key: 'line-a', extensions: {} } ),
-				makeKeyedLine( { id: 42, key: 'line-b', extensions: {} } ),
-			] );
-
-			const envelope = mockState.findItem( { id: 42 } );
-
-			// An explicit `id` was given, so `draft` is the always-present
-			// view (empty here — no seed, no live draft); the point under
-			// test is the envelope's shape, not the draft's contents.
-			expect( envelope.cartItem ).toBeUndefined();
-			expect( Object.keys( envelope ) ).toEqual(
-				expect.arrayContaining( [ 'cartItem', 'draft' ] )
-			);
-			expect( Object.keys( envelope ) ).not.toContain( 'isInCart' );
 		} );
 
 		it( 'still resolves an existing keyed line for addCartItem via the internalized private matcher', async () => {

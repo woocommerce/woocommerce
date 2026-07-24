@@ -10,18 +10,19 @@
  * addresses cart lines can pair against them without either one
  * value-importing the other.
  *
- * Reaches the `woocommerce/products` namespace by `store( 'woocommerce/
- * products', {}, { lock: universalLock } )`, read fresh on every call
- * (see {@link getProductsState} and `draft-internals.ts`'s own established
- * precedent for this folder's internal helper modules) rather than caching
- * a destructured reference at module scope, and rather than importing
- * `./products` as a value — so this module never becomes a load-order
- * dependency of either store and never value-imports `cart.ts` or
- * `products.ts`. `findCartLine` takes the candidate cart lines as an
- * explicit `items` argument instead of reading a namespace's `cart.items`
- * internally, so every caller (this folder's cart module today; any future
- * caller addressing a differently-shaped cart) owns that read and decides
- * how to guard it.
+ * Reaches the shared `woocommerce` namespace's nested `products.items`/
+ * `products.variations` maps by `store( 'woocommerce', {}, { lock:
+ * universalLock } )`, read fresh on every call (see {@link
+ * getProductsState} and `draft-internals.ts`'s own established precedent
+ * for this folder's internal helper modules) rather than caching a
+ * destructured reference at module scope, and rather than value-importing
+ * `./index` — so this module never becomes a load-order dependency of the
+ * root module and never value-imports `cart.ts` or `./index`.
+ * `findCartLine` takes the candidate cart lines as an explicit `items`
+ * argument instead of reading a namespace's `cart.items` internally, so
+ * every caller (this folder's cart module today; any future caller
+ * addressing a differently-shaped cart) owns that read and decides how to
+ * guard it.
  */
 
 /**
@@ -39,7 +40,6 @@ import fastDeepEqual from 'fast-deep-equal/es6';
  * Internal dependencies
  */
 import type { DraftItem, OptimisticCartItem, SelectedAttributes } from './cart';
-import type { ProductsStore } from './products';
 import { attributeNamesMatch } from '../../utils/variations/attribute-matching';
 
 // Stores are locked to prevent 3PD usage until the API is stable. The same
@@ -49,21 +49,35 @@ const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 /**
- * Returns the shared `woocommerce/products` namespace state, read fresh on
- * every call rather than cached at module scope — this module's `store()`
- * call always resolves the same shared namespace object `cart.ts` and
- * `draft-internals.ts` independently bind, so this never value-imports
- * `cart.ts` or `products.ts`; reading fresh on every call (in place of a
- * module-scope destructure) mirrors `draft-internals.ts`'s own established
- * precedent for this folder's internal helper modules, and sidesteps any
- * dependency on this module's own load order relative to either store's
- * registration.
- *
- * @return The `woocommerce/products` store's shared state object.
+ * The nested product/variation maps this module reads off the shared
+ * `woocommerce` namespace — the root module's own `state.products` shape
+ * (`items` by product id, `variations` by variation id). Optional at every
+ * level: on a page that never loads the root module, `store()` still
+ * returns the empty stub every namespace starts as, and every reader below
+ * degrades to a `null`/empty resolution rather than throwing.
  */
-function getProductsState(): ProductsStore[ 'state' ] {
-	return store< ProductsStore >(
-		'woocommerce/products',
+type ProductsState = {
+	products?: {
+		items?: Record< number, ProductResponseItem >;
+		variations?: Record< number, ProductResponseItem >;
+	};
+};
+
+/**
+ * Returns the shared `woocommerce` namespace state, read fresh on every
+ * call rather than cached at module scope — this module's `store()` call
+ * always resolves the same shared namespace object `cart.ts` and
+ * `draft-internals.ts` independently bind, so this never value-imports
+ * either of them; reading fresh on every call (in place of a module-scope
+ * destructure) mirrors `draft-internals.ts`'s own established precedent
+ * for this folder's internal helper modules, and sidesteps any dependency
+ * on this module's own load order relative to any store's registration.
+ *
+ * @return The shared `woocommerce` namespace's product/variation maps.
+ */
+function getProductsState(): ProductsState {
+	return store< { state: ProductsState } >(
+		'woocommerce',
 		{},
 		{ lock: universalLock }
 	).state;
@@ -71,14 +85,15 @@ function getProductsState(): ProductsStore[ 'state' ] {
 
 /**
  * Resolves the base (parent) product a given product/variation id belongs
- * to, consulting the `woocommerce/products` namespace directly.
+ * to, consulting the shared `woocommerce` namespace's nested product maps
+ * directly.
  *
  * Needed to resolve the `base` argument `effectiveVariationAttributes`
  * (see `draft-internals.ts`) takes at `findItem`'s pairing rung and
  * `postDraftItems`' per-item capture. `id` may already name the base
  * product, or one of its variations; either way the return is always the
  * top-level product entry, never a variation. Degrades to `null` when `id`
- * names a product `woocommerce/products` has no record of (a simple
+ * names a product the `woocommerce` namespace has no record of (a simple
  * product, or an id the store never loaded) — every caller then treats the
  * lookup as "no family data", per `effectiveVariationAttributes`'s own
  * degrade.
@@ -88,11 +103,11 @@ function getProductsState(): ProductsStore[ 'state' ] {
  */
 export function resolveBaseProduct( id: number ): ProductResponseItem | null {
 	const productsState = getProductsState();
-	const variation = productsState.productVariations[ id ];
+	const variation = productsState.products?.variations?.[ id ];
 	if ( variation ) {
-		return productsState.products[ variation.parent ] ?? null;
+		return productsState.products?.items?.[ variation.parent ] ?? null;
 	}
-	return productsState.products[ id ] ?? null;
+	return productsState.products?.items?.[ id ] ?? null;
 }
 
 /**
@@ -101,16 +116,17 @@ export function resolveBaseProduct( id: number ): ProductResponseItem | null {
  *
  * A module-private copy of the pairing algorithm in
  * `base/utils/variations/does-cart-item-match-attributes.ts`, duplicated
- * (rather than imported) so this ladder consults `woocommerce/products`
- * directly instead of through that util's import chain. The standalone
- * util is left in place, unchanged — it still backs the shopper-lists
- * blocks.
+ * (rather than imported) so this ladder consults the shared `woocommerce`
+ * namespace directly instead of through that util's import chain. The
+ * standalone util is left in place, unchanged — it still backs the
+ * shopper-lists blocks.
  *
  * Resolves each recorded attribute's term slug from the parent product's
- * attribute list (`woocommerce/products` state, consulted one-directionally)
- * to reconcile the Store API's label/slug mismatches, then requires every
- * recorded attribute to match a selected one, case-insensitively and after
- * normalizing WordPress's `attribute_`/`attribute_pa_` prefixes.
+ * attribute list (the shared `woocommerce` namespace's `products` state,
+ * consulted one-directionally) to reconcile the Store API's label/slug
+ * mismatches, then requires every recorded attribute to match a selected
+ * one, case-insensitively and after normalizing WordPress's
+ * `attribute_`/`attribute_pa_` prefixes.
  *
  * @param cartItem           The cart line to test.
  * @param selectedAttributes The attributes to match against.
@@ -133,9 +149,12 @@ export function matchesSelectedAttributes(
 
 	const productsState = getProductsState();
 	const parentProductId =
-		productsState.productVariations[ cartItem.id ]?.parent;
-	const productAttributes =
-		productsState.products[ parentProductId ]?.attributes ?? [];
+		productsState.products?.variations?.[ cartItem.id ]?.parent;
+	const parentProduct =
+		parentProductId !== undefined
+			? productsState.products?.items?.[ parentProductId ]
+			: undefined;
+	const productAttributes = parentProduct?.attributes ?? [];
 
 	return cartItem.variation.every( ( { attribute, value: termName } ) =>
 		selectedAttributes.some( ( selectedAttr ) => {

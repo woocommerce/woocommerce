@@ -10,6 +10,7 @@ import type {
 	ApiErrorResponse,
 	CartResponseTotals,
 	Currency,
+	ProductResponseItem,
 } from '@woocommerce/types';
 import type {
 	Store as StoreNotices,
@@ -19,8 +20,6 @@ import type {
 /**
  * Internal dependencies
  */
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import { triggerAddedToCartEvent } from './legacy-events';
 import {
 	createMutationQueue,
@@ -29,7 +28,6 @@ import {
 	type MutationResult,
 } from './mutation-batcher';
 import {
-	draftExtensionsMatchLine,
 	findCartLine,
 	lineMatchesProduct,
 	resolveBaseProduct,
@@ -39,7 +37,6 @@ import {
 	findDraftInCollection,
 	resolveCollection,
 	resolveDraftKey,
-	resolveDraftView,
 	resolveEffectiveSeed,
 } from './draft-internals';
 
@@ -50,6 +47,14 @@ export type WooCommerceConfig = {
 	placeholderImgSrc?: string;
 	currency?: Currency;
 	nonOptimisticProperties?: string[];
+	/**
+	 * The Store API base URL cart requests post against, e.g.
+	 * `https://example.com/wp-json/`. Server-supplied config, read fresh on
+	 * every request that needs it rather than cached at module scope —
+	 * there is no client-side mutation path for it, but reading it this way
+	 * matches every other per-request config/state read in this module.
+	 */
+	restUrl?: string;
 };
 
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
@@ -77,9 +82,9 @@ export type DraftKey = string;
  * no separate wrapper for them here (contrast with the read-only
  * `CartItem.extensions`, which reflects the *server's* response shape once a
  * line exists). There is no draft-writing action: every draft is read and
- * written exclusively through the live draft view `findItem`/`itemInContext`
- * expose as `Envelope.draft` (see `draft-internals.ts`'s
- * `resolveDraftView`/`writeDraft`).
+ * written exclusively through the live draft view the root module's
+ * `findItem`/`itemInContext` expose as `Envelope.draftItem` (see
+ * `draft-internals.ts`'s `resolveDraftView`/`writeDraft`).
  */
 export type DraftItem = {
 	/**
@@ -137,148 +142,64 @@ export type ClientCartItem = Omit<
 	quantityToAdd?: number;
 };
 
-/**
- * The read-only envelope returned by `findItem`/`itemInContext`.
- *
- * Pairing between a resolved collection's draft and a cart line never
- * guesses: `cartItem` is populated only when the pairing ladder resolves to
- * exactly one candidate line — a context-known line `key`, or an unambiguous
- * product/variation identity plus namespaced extension-prop match. Any
- * remaining ambiguity (including "this product is in the cart, but not as a
- * single identifiable line") leaves `cartItem` `undefined`; the server owns
- * cart-line identity, so the client never guesses at it. No consumer needs
- * the "in the cart, but no single line can be paired" tri-state, so the
- * envelope carries only `cartItem`/`draft`.
- */
-export type Envelope = {
-	/**
-	 * The paired cart line, when the pairing ladder resolved to exactly one
-	 * candidate. `undefined` when no line matches, or more than one
-	 * candidate line matches and none can be told apart.
-	 */
-	cartItem?: CartItem | OptimisticCartItem | undefined;
-	/**
-	 * The resolved collection's live, family-aware draft view for the
-	 * product (see `draft-internals.ts`'s `resolveDraftView`): present
-	 * whenever an id resolves (an explicit `id`/`key`/`filter` match, or a
-	 * product in context), `undefined` only when no id is given and no
-	 * product is in context. Reading it returns the live draft's values
-	 * when one exists, else the surface's server-filed seed values — a
-	 * read never materializes anything. Writing through it records
-	 * shopper/caller input: it merges onto the live draft, or composes and
-	 * materializes a new one from the seed on an untouched surface;
-	 * writing `variation` re-files the same draft under whichever id its
-	 * attributes resolve to.
-	 */
-	draft?: DraftItem | undefined;
-};
-
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 export type Store = {
 	state: {
-		restUrl: string;
-		nonce: string;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
 		};
 		/**
-		 * The global draft home: every draft collection, keyed by an opaque
-		 * {@link DraftKey}.
-		 *
-		 * At most one draft per product `id` within any one collection. A
-		 * container block (a Product Collection loop item, a Single Product
-		 * block, or any other extension surface that wraps or repeats
-		 * purchase UI) declares its own server-minted key in its
-		 * `woocommerce/cart` context; a surface wrapped in no container
-		 * resolves the reserved global draft key (`GLOBAL_DRAFT_KEY` in
-		 * `draft-internals.ts`) collection. Every read and write resolves
-		 * the nearest declared key (see `draft-internals.ts`'s
-		 * `resolveDraftKey`/`resolveCollection`). A collection is created
-		 * lazily, on its first shopper write, made through the draft view
-		 * `findItem`/`itemInContext` expose as `Envelope.draft` — the
-		 * server never seeds this map, and no action writes it directly.
-		 * Drafts live alongside — never inside — the read-only `cart`
-		 * mirror above.
+		 * The global draft home — registered by the root module (`./index`),
+		 * not this one; declared here so `draft-internals.ts`'s own
+		 * `getCartState()` (typed against this module's `Store['state']`
+		 * purely for this field) keeps resolving. This module never reads or
+		 * writes `state.draftItems` directly — every draft access here goes
+		 * through the `draft-internals.ts` helpers, which read/write the
+		 * shared `woocommerce` namespace's copy of this same field.
 		 */
 		draftItems: Record< DraftKey, DraftItem[] >;
 		/**
-		 * Finds an item by id/key, or by an extension-supplied predicate,
-		 * returning the read-only envelope pairing its live draft view with
-		 * its cart line. The draft view is resolved against the nearest
-		 * declared `context.draftKey`, falling back to the reserved global
-		 * draft key (see `draft-internals.ts`'s
-		 * `resolveDraftKey`/`resolveDraftView`).
-		 *
-		 * Implements the pairing ladder: an explicit `key` pairs exactly
-		 * (no further checks); otherwise product/variation identity plus a
-		 * namespaced extension-prop comparison against the candidate line's
-		 * `extensions[<namespace>]` must resolve to exactly one candidate
-		 * (using the resolved draft view's own *effective* `variation` —
-		 * its specified selection completed from the variation's own meta,
-		 * see `draft-internals.ts`'s `effectiveVariationAttributes` — plus
-		 * its extension props); an incomplete effective payload (an
-		 * unspecified "any" attribute) pairs to nothing, and any remaining
-		 * ambiguity leaves `cartItem`
-		 * `undefined` — the server owns line identity, so this never
-		 * guesses. `filter` replaces the id-based identity matching
-		 * entirely, for extensions with their own notion of line identity.
-		 *
-		 * @param args        Lookup arguments.
-		 * @param args.id     The product/variation id to pair by identity.
-		 * @param args.key    A known cart-line key; pairs exactly when
-		 *                    given, regardless of `id`/`filter`.
-		 * @param args.filter An extension-supplied predicate narrowing
-		 *                    candidate lines directly, in place of
-		 *                    id-based identity matching.
-		 * @return The envelope: `{ cartItem?, draft? }`.
+		 * The in-context envelope's `product` member — registered by the
+		 * root module (`./index`), not this one; declared here, optional,
+		 * only so this module's own no-payload `addItem` resolution can be
+		 * typed against the shared `woocommerce` state this module
+		 * retargets to. Mirrors the root module's own optional `cart` field
+		 * (declared there for the identical reason, in reverse): a partial,
+		 * typed view into a sibling module's registration on the same
+		 * namespace, guarded rather than assumed present. Absent only on a
+		 * page that has loaded this module without ever loading the root
+		 * module — never true in practice, since every surface that can
+		 * call `addItem` has already loaded the root module for its own
+		 * envelope reads.
 		 */
-		findItem: ( args?: {
-			id?: DraftItem[ 'id' ];
-			key?: CartItem[ 'key' ];
-			filter?: ( item: CartItem | OptimisticCartItem ) => boolean;
-		} ) => Envelope;
-		/**
-		 * The envelope for the in-context product: its resolved
-		 * collection's live draft view paired with its cart line, resolved
-		 * via the products store's `productInContext`. `undefined` product
-		 * in context (nothing rendered) yields an empty envelope. See
-		 * `findItem` for the pairing ladder.
-		 */
-		itemInContext: Envelope;
-		/**
-		 * The in-context product's in-cart quantity.
-		 *
-		 * A grouped product aggregates its children's own in-cart
-		 * quantities (each resolved independently, by id); a variable
-		 * product resolves through its currently selected variation (the
-		 * resolved collection's draft selection, same resolution as
-		 * `itemInContext`); a simple product is its own paired line's
-		 * quantity. `0` when nothing pairs, or no product is in context.
-		 */
-		inCartQuantity: number;
+		itemInContext?: {
+			/** The in-context product, per the root module's own contract. */
+			product: ProductResponseItem | null;
+		};
 	};
 	actions: {
 		/**
 		 * Posts the in-context product's resolved collection's draft(s) to
 		 * the cart, or an explicit payload verbatim.
 		 *
-		 * With no argument, resolves the in-context product (via
-		 * `woocommerce/products`) and posts the resolved collection's
-		 * draft(s) for it: a simple/variable product's own live draft, or —
-		 * on an untouched surface with no live draft — its *effective* seed
-		 * (the family seed re-addressed to the in-context id; see
-		 * `draft-internals.ts`'s `resolveEffectiveSeed`), so a
-		 * resolved-variation surface with no live draft still posts a
-		 * minimal `{ id, quantity }` rather than silently no-opping; or, for
-		 * a grouped product, every child's draft (children resolved
-		 * one-directionally through the products store) whose `quantity`
-		 * is greater than `0`. Multiple children's drafts are posted as one
-		 * auto-batched request set through the mutation queue rather than
-		 * one request per child. Never posts another collection's or
-		 * another product's draft, and sends nothing when the resolution
-		 * yields no draft and no seed.
+		 * With no argument, resolves the in-context product (via the
+		 * shared `woocommerce` namespace's own `state.itemInContext`,
+		 * registered by the root module) and posts the resolved
+		 * collection's draft(s) for it: a simple/variable product's own
+		 * live draft, or — on an untouched surface with no live draft —
+		 * its *effective* seed (the family seed re-addressed to the
+		 * in-context id; see `draft-internals.ts`'s
+		 * `resolveEffectiveSeed`), so a resolved-variation surface with no
+		 * live draft still posts a minimal `{ id, quantity }` rather than
+		 * silently no-opping; or, for a grouped product, every child's
+		 * draft (addressed directly by id, from the in-context product's
+		 * own `grouped_products`) whose `quantity` is greater than `0`.
+		 * Multiple children's drafts are posted as one auto-batched request
+		 * set through the mutation queue rather than one request per child.
+		 * Never posts another collection's or another product's draft, and
+		 * sends nothing when the resolution yields no draft and no seed.
 		 *
 		 * With an explicit `payload`, posts it verbatim — extension props
 		 * at its root included — bypassing collection/product resolution
@@ -342,26 +263,14 @@ export type Store = {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-/**
- * The `woocommerce/products` store's state, consulted one-directionally
- * (cart never becomes a dependency of products) to resolve the product in
- * context for `itemInContext`/`inCartQuantity`. The pairing ladder's own
- * attribute matching (`matchesSelectedAttributes`, `resolveBaseProduct`)
- * reads this same namespace independently, fresh per call, from within
- * `cart-pairing.ts`.
- */
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
-	{},
-	{ lock: universalLock }
-);
-
+// Opens the shared `woocommerce` namespace to bind `state` before any
+// function below references it. The mirror lifecycle, generators, and
+// actions registered by this module all read/write this one object; the
+// root module's own envelope (`state.itemInContext`) registers separately,
+// into the same namespace, so this module never value-imports it to resolve
+// the in-context product `addItem` needs.
 // Todo: export this store once the store is public.
-const { state } = store< Store >(
-	'woocommerce/cart',
-	{},
-	{ lock: universalLock }
-);
+const { state } = store< Store >( 'woocommerce', {}, { lock: universalLock } );
 
 type QuantityChanges = {
 	cartItemsPendingQuantity?: string[];
@@ -549,6 +458,27 @@ const isNonceReady = new Promise< void >( ( resolve ) => {
 	resolveNonceReady = resolve;
 } );
 
+/**
+ * The cart's own nonce, refreshed from each response's `Nonce` header.
+ *
+ * Module-local rather than a `state` field: nothing outside this module
+ * ever reads or writes it, and a `state` field would put it in every
+ * consumer-visible snapshot (a `JSON.stringify( state.cart )` capture, a
+ * dev-tools state dump) it never belonged in. Reads are gated behind
+ * {@link isNonceReady}, exactly as the retired `state.nonce` read was.
+ */
+let nonce = '';
+
+/**
+ * Reads the Store API base URL cart requests post against, from the shared
+ * `woocommerce` config.
+ *
+ * @return The configured REST URL, or `''` when none is configured.
+ */
+function getRestUrl(): string {
+	return ( getConfig( 'woocommerce' ) as WooCommerceConfig )?.restUrl ?? '';
+}
+
 function emitSyncEvent( {
 	quantityChanges,
 }: {
@@ -585,9 +515,9 @@ async function sendCartRequest(
 	// Lazily initialize queue on first use.
 	if ( ! cartQueue ) {
 		cartQueue = createMutationQueue< Cart >( {
-			endpoint: `${ stateRef.restUrl }wc/store/v1/batch`,
+			endpoint: `${ getRestUrl() }wc/store/v1/batch`,
 			getHeaders: () => ( {
-				Nonce: stateRef.nonce,
+				Nonce: nonce,
 			} ),
 			takeSnapshot: () => JSON.parse( JSON.stringify( stateRef.cart ) ),
 			rollback: ( snapshot ) => {
@@ -598,8 +528,7 @@ async function sendCartRequest(
 			},
 			fetchHandler: async ( ...args ) => {
 				const response = await fetch( ...args );
-				stateRef.nonce =
-					response.headers.get( 'Nonce' ) || stateRef.nonce;
+				nonce = response.headers.get( 'Nonce' ) || nonce;
 				return response;
 			},
 		} );
@@ -1160,14 +1089,14 @@ function* refreshCartItemsGenerator(
 	pendingRefresh = true;
 
 	try {
-		const res = ( yield fetch( `${ state.restUrl }wc/store/v1/cart`, {
+		const res = ( yield fetch( `${ getRestUrl() }wc/store/v1/cart`, {
 			method: 'GET',
 			cache: 'no-store',
 			headers: { 'Content-Type': 'application/json' },
 		} ) ) as TypeYield< typeof fetch >;
 
 		// Extract fresh nonce from response headers.
-		state.nonce = res.headers.get( 'Nonce' ) || state.nonce;
+		nonce = res.headers.get( 'Nonce' ) || nonce;
 
 		if ( resolveNonceReady ) {
 			resolveNonceReady();
@@ -1202,127 +1131,8 @@ function* refreshCartItemsGenerator(
 }
 
 const { actions } = store< Store >(
-	'woocommerce/cart',
+	'woocommerce',
 	{
-		state: {
-			draftItems: {},
-			findItem( {
-				id,
-				key,
-				filter,
-			}: {
-				id?: DraftItem[ 'id' ];
-				key?: CartItem[ 'key' ];
-				filter?: ( item: CartItem | OptimisticCartItem ) => boolean;
-			} = {} ): Envelope {
-				const draftKey = resolveDraftKey();
-
-				// Rung 1: a context-known line key pairs exactly, no further
-				// identity/extension checks — the caller already knows
-				// precisely which line this is.
-				if ( key !== undefined ) {
-					const cartItem = state.cart.items.find(
-						( item ) => item.key === key
-					);
-					const targetId = id ?? cartItem?.id;
-					return {
-						cartItem,
-						draft:
-							targetId !== undefined
-								? resolveDraftView( draftKey, targetId )
-								: undefined,
-					};
-				}
-
-				// `filter` replaces id-based identity matching entirely,
-				// for extensions with their own notion of line identity.
-				if ( filter ) {
-					const matches = state.cart.items.filter( filter );
-					return {
-						cartItem:
-							matches.length === 1 ? matches[ 0 ] : undefined,
-						draft:
-							id !== undefined
-								? resolveDraftView( draftKey, id )
-								: undefined,
-					};
-				}
-
-				if ( id === undefined ) {
-					return {
-						cartItem: undefined,
-						draft: undefined,
-					};
-				}
-
-				// Rung 2: product/variation identity via the *effective*
-				// attributes — the draft view's specified `variation`
-				// (always a real array), completed from the variation's own
-				// meta (see `effectiveVariationAttributes`) — plus a
-				// namespaced extension-prop comparison against each
-				// candidate line's `extensions[<namespace>]`. An incomplete
-				// effective payload (an unspecified "any" attribute) pairs
-				// to nothing: no candidate survives. Ambiguity — zero or
-				// more than one line surviving both checks — never guesses:
-				// `cartItem` stays `undefined`.
-				const draft = resolveDraftView( draftKey, id );
-				const effectiveAttributes = effectiveVariationAttributes(
-					resolveBaseProduct( id ),
-					id,
-					draft.variation
-				);
-				const identityMatches =
-					effectiveAttributes === undefined
-						? []
-						: state.cart.items.filter( ( item ) =>
-								lineMatchesProduct(
-									item,
-									id,
-									effectiveAttributes
-								)
-						  );
-				const pairedMatches = identityMatches.filter( ( item ) =>
-					draftExtensionsMatchLine( draft, item )
-				);
-
-				return {
-					cartItem:
-						pairedMatches.length === 1
-							? pairedMatches[ 0 ]
-							: undefined,
-					draft,
-				};
-			},
-			get itemInContext(): Envelope {
-				const product = productsState.productInContext;
-				if ( ! product ) {
-					return {
-						cartItem: undefined,
-						draft: undefined,
-					};
-				}
-
-				return state.findItem( { id: product.id } );
-			},
-			get inCartQuantity(): number {
-				const product = productsState.productInContext;
-				if ( ! product ) {
-					return 0;
-				}
-
-				if ( product.type === 'grouped' ) {
-					return product.grouped_products.reduce(
-						( total, childId ) =>
-							total +
-							( state.findItem( { id: childId } ).cartItem
-								?.quantity ?? 0 ),
-						0
-					);
-				}
-
-				return state.itemInContext.cartItem?.quantity ?? 0;
-			},
-		},
 		actions: {
 			*addItem( payload?: DraftItem ): AsyncAction< void > {
 				if ( payload ) {
@@ -1330,7 +1140,7 @@ const { actions } = store< Store >(
 					return;
 				}
 
-				const product = productsState.productInContext;
+				const product = state.itemInContext?.product;
 				if ( ! product ) {
 					return;
 				}
