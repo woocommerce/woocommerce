@@ -178,6 +178,27 @@ class WC_Shortcode_My_Account {
 	}
 
 	/**
+	 * Get the My Account > Edit address page title.
+	 *
+	 * @since 11.1.0
+	 * @param string $address_type Type of address; 'billing' or 'shipping'.
+	 * @return string
+	 */
+	public static function get_edit_address_title( $address_type = 'billing' ) {
+		$title = ( 'billing' === $address_type ) ? esc_html__( 'Billing address', 'woocommerce' ) : esc_html__( 'Shipping address', 'woocommerce' );
+
+		/**
+		 * Filters the My Account > Edit address page title.
+		 *
+		 * @since 8.1.0
+		 *
+		 * @param string $title        Page title.
+		 * @param string $address_type Type of address; 'billing' or 'shipping'.
+		 */
+		return apply_filters( 'woocommerce_my_account_edit_address_title', $title, $address_type );
+	}
+
+	/**
 	 * Edit address page.
 	 *
 	 * @param string $load_address Type of address; 'billing' or 'shipping'.

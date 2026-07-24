@@ -25,7 +25,7 @@ do_action( 'woocommerce_before_edit_account_address_form' ); ?>
 
 	<form method="post" novalidate>
 
-		<h2><?php echo wc_get_account_edit_address_title( $load_address ); ?></h2><?php // @codingStandardsIgnoreLine ?>
+		<h2><?php echo WC_Shortcode_My_Account::get_edit_address_title( $load_address ); ?></h2><?php // @codingStandardsIgnoreLine ?>
 
 		<div class="woocommerce-address-fields">
 			<?php do_action( "woocommerce_before_edit_address_form_{$load_address}" ); ?>

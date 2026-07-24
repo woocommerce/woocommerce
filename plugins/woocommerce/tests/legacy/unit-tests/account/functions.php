@@ -67,21 +67,21 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_account_edit_address_title().
+	 * Test WC_Shortcode_My_Account::get_edit_address_title().
 	 *
 	 * @since 11.1.0
 	 */
-	public function test_wc_get_account_edit_address_title() {
-		$this->assertEquals( 'Billing address', wc_get_account_edit_address_title( 'billing' ) );
-		$this->assertEquals( 'Shipping address', wc_get_account_edit_address_title( 'shipping' ) );
+	public function test_get_account_edit_address_title() {
+		$this->assertEquals( 'Billing address', WC_Shortcode_My_Account::get_edit_address_title( 'billing' ) );
+		$this->assertEquals( 'Shipping address', WC_Shortcode_My_Account::get_edit_address_title( 'shipping' ) );
 	}
 
 	/**
-	 * Test wc_get_account_edit_address_title() preserves the existing title filter.
+	 * Test WC_Shortcode_My_Account::get_edit_address_title() preserves the existing title filter.
 	 *
 	 * @since 11.1.0
 	 */
-	public function test_wc_get_account_edit_address_title_filter() {
+	public function test_get_account_edit_address_title_filter() {
 		$filter = function ( $title, $address_type ) {
 			$this->assertEquals( 'Shipping address', $title );
 			$this->assertEquals( 'shipping', $address_type );
@@ -92,7 +92,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_my_account_edit_address_title', $filter, 10, 2 );
 
 		try {
-			$this->assertEquals( 'Delivery address', wc_get_account_edit_address_title( 'shipping' ) );
+			$this->assertEquals( 'Delivery address', WC_Shortcode_My_Account::get_edit_address_title( 'shipping' ) );
 		} finally {
 			remove_filter( 'woocommerce_my_account_edit_address_title', $filter, 10 );
 		}

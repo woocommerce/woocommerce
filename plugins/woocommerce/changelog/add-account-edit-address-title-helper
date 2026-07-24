@@ -1,4 +1,4 @@
 Significance: patch
 Type: add
 
-Add a reusable helper for retrieving the My Account edit-address title.
+Add a reusable class method for retrieving the My Account edit-address title.
