@@ -6,11 +6,13 @@ sidebar_position: 7
 
 # Settings UI
 
-The settings UI is an opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow.
+The settings UI is an experimental, opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow.
 
 It is designed for extension authors who want to migrate incrementally. PHP still owns page registration, settings schema, permissions, script dependencies, and persistence. React owns field rendering and client-side interaction.
 
 ## Status
+
+> **The settings UI is experimental.** Until it is marked as stable, the PHP API under `Automattic\WooCommerce\Admin\Settings`, the schema format, and the `@woocommerce/settings-ui` package can change in backwards-incompatible ways in any release. Expect to update integrations between WooCommerce versions.
 
 -   The settings UI is behind the `settings-ui` feature flag.
 -   With the flag disabled, settings pages keep the legacy PHP renderer.

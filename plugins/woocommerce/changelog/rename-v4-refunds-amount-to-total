@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Rename the amount field to total in the wc/v4/refunds creation endpoint request and response so it matches the refund preview endpoint. The v4 REST API is behind the rest-api-v4 feature flag.

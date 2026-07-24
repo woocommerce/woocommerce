@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
+use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -134,6 +136,191 @@ class SettingsUISchema {
 			),
 			'groups'  => $groups,
 		);
+	}
+
+	/**
+	 * Canonicalize option values supplied by native Settings UI schema providers.
+	 *
+	 * Schemas built from legacy settings always carry string option values, but
+	 * native providers can supply any scalar. The client matches options against
+	 * the stored value with strict string comparison, so scalar option values,
+	 * the selected values they match, and visibility values compared against
+	 * them are cast here to the string the client's own String() coercion
+	 * produces. Malformed entries remain unchanged for the provider to fix.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param array $schema Settings UI schema.
+	 * @return array Schema with scalar option values canonicalized to strings.
+	 */
+	public static function canonicalize_option_values( array $schema ): array {
+		if ( ! isset( $schema['groups'] ) || ! is_array( $schema['groups'] ) ) {
+			return $schema;
+		}
+
+		$converted_fields = array();
+		$option_field_ids = array();
+
+		foreach ( $schema['groups'] as &$group ) {
+			if ( ! is_array( $group ) || ! isset( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
+				continue;
+			}
+
+			foreach ( $group['fields'] as &$field ) {
+				if (
+					! is_array( $field ) ||
+					! isset( $field['id'], $field['options'] ) ||
+					! is_string( $field['id'] ) ||
+					! is_array( $field['options'] )
+				) {
+					continue;
+				}
+
+				$option_field_ids[] = $field['id'];
+				$converted          = false;
+
+				foreach ( $field['options'] as &$option ) {
+					if (
+						! is_array( $option ) ||
+						! array_key_exists( 'value', $option ) ||
+						is_string( $option['value'] ) ||
+						! is_scalar( $option['value'] )
+					) {
+						continue;
+					}
+
+					$option['value'] = self::to_canonical_string( $option['value'] );
+					$converted       = true;
+				}
+				unset( $option );
+
+				if ( array_key_exists( 'value', $field ) ) {
+					if ( is_scalar( $field['value'] ) && ! is_string( $field['value'] ) ) {
+						$field['value'] = self::to_canonical_string( $field['value'] );
+						$converted      = true;
+					} elseif ( is_array( $field['value'] ) ) {
+						$canonical_list = self::canonicalize_scalar_list( $field['value'] );
+						if ( null !== $canonical_list ) {
+							$field['value'] = $canonical_list;
+							$converted      = true;
+						}
+					}
+				}
+
+				if ( $converted ) {
+					$converted_fields[] = $field['id'];
+				}
+			}
+			unset( $field );
+		}
+		unset( $group );
+
+		foreach ( $schema['groups'] as &$group ) {
+			if ( ! is_array( $group ) || ! isset( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
+				continue;
+			}
+
+			foreach ( $group['fields'] as &$field ) {
+				if ( ! is_array( $field ) || ! isset( $field['id'] ) || ! is_string( $field['id'] ) ) {
+					continue;
+				}
+
+				if ( ! self::is_canonicalizable_visibility_rule( $field['visibility'] ?? null, $option_field_ids ) ) {
+					continue;
+				}
+
+				$rule_value = $field['visibility']['value'];
+
+				if ( is_scalar( $rule_value ) && ! is_string( $rule_value ) ) {
+					$field['visibility']['value'] = self::to_canonical_string( $rule_value );
+					$converted_fields[]           = $field['id'];
+				} elseif ( is_array( $rule_value ) ) {
+					$canonical_list = self::canonicalize_scalar_list( $rule_value );
+					if ( null !== $canonical_list ) {
+						$field['visibility']['value'] = $canonical_list;
+						$converted_fields[]           = $field['id'];
+					}
+				}
+			}
+			unset( $field );
+		}
+		unset( $group );
+
+		if ( ! empty( $converted_fields ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: comma-separated field ids. */
+					esc_html__( 'A Settings UI schema provider supplied non-string option, field, or visibility values that WooCommerce converted for compatibility: %s. Update the provider to supply string values.', 'woocommerce' ),
+					esc_html( implode( ', ', array_unique( $converted_fields ) ) )
+				),
+				'11.0.0'
+			);
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Canonicalize a list of scalar values to strings.
+	 *
+	 * @param array $values Candidate value list.
+	 * @return array|null String list, or null when unchanged or not a scalar list.
+	 */
+	private static function canonicalize_scalar_list( array $values ): ?array {
+		if ( ! ArrayUtil::array_is_list( $values ) ) {
+			return null;
+		}
+
+		$needs_conversion = false;
+
+		foreach ( $values as $item ) {
+			if ( ! is_scalar( $item ) ) {
+				return null;
+			}
+
+			if ( ! is_string( $item ) ) {
+				$needs_conversion = true;
+			}
+		}
+
+		return $needs_conversion ? array_map( array( __CLASS__, 'to_canonical_string' ), $values ) : null;
+	}
+
+	/**
+	 * Whether a visibility rule carries a value compared against an options field.
+	 *
+	 * @param mixed $rule Candidate visibility rule.
+	 * @param array $option_field_ids Ids of fields carrying an options array.
+	 * @return bool
+	 */
+	private static function is_canonicalizable_visibility_rule( $rule, array $option_field_ids ): bool {
+		return is_array( $rule )
+			&& array_key_exists( 'value', $rule )
+			&& in_array( $rule['controller'] ?? null, $option_field_ids, true );
+	}
+
+	/**
+	 * Cast a scalar to the string the client's String() coercion produces, so
+	 * canonicalizing a value never changes which option or visibility rule it
+	 * matches. PHP casts diverge from String() for booleans: (string) true is
+	 * '1' and (string) false is '', while String() gives 'true' and 'false'.
+	 * Floats convert through wc_float_to_string() because a plain cast is
+	 * locale-sensitive before PHP 8.0 and String() never emits a comma.
+	 *
+	 * @param bool|int|float|string $value Scalar value.
+	 * @return string
+	 */
+	private static function to_canonical_string( $value ): string {
+		if ( is_bool( $value ) ) {
+			return $value ? 'true' : 'false';
+		}
+
+		if ( is_float( $value ) ) {
+			return wc_float_to_string( $value );
+		}
+
+		return (string) $value;
 	}
 
 	/**
