@@ -695,7 +695,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		if (
 			! Number.isInteger( createdVariation.id ) ||
 			createdVariation.id <= 0 ||
-			createdVariation.regular_price !== '19.99' ||
+			Number( createdVariation.regular_price ) !== 19.99 ||
 			createdVariation.attributes.length !== 0
 		) {
 			throw new Error(
