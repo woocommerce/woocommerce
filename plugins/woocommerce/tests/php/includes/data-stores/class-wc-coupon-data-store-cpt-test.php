@@ -186,9 +186,10 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$coupon = $this->create_settled_coupon();
 		$this->capture_updated_props();
 
-		// The expected payloads below depend on update_post_meta() writing coupon_amount
-		// before individual_use, which is the order they appear in its $meta_key_to_props
-		// map. Reordering that map changes which write re-enters, and these payloads with it.
+		// The nested save re-enters mid-write, when individual_use's meta row is written, so
+		// both payloads land in $captured_payloads. The fix guarantees each payload holds only
+		// its own save's props; their order tracks the $meta_key_to_props map, which the fix
+		// does not guarantee, so the assertion below compares canonicalized (order-independent).
 		$nested_save_done  = false;
 		$metadata_listener = function ( $meta_id, $object_id, $meta_key ) use ( $coupon, &$nested_save_done ) {
 			unset( $meta_id );
@@ -212,7 +213,7 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			remove_action( 'updated_post_meta', $metadata_listener, 10 );
 		}
 
-		$this->assertSame(
+		$this->assertEqualsCanonicalizing(
 			array( array( 'usage_limit' ), array( 'amount', 'individual_use' ) ),
 			$this->captured_payloads,
 			'A nested metadata-hook save must not erase or contaminate the outer save\'s props.'
