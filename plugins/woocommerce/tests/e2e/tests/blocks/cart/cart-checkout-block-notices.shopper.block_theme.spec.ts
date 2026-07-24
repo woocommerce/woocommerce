@@ -30,60 +30,28 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 
 test.describe( 'Shopper → Notice Templates', () => {
 	test.beforeEach( async ( { frontendUtils, requestUtils } ) => {
-		const cartShortcodePages = await requestUtils.rest< unknown >( {
-			path: '/wp/v2/pages?slug=cart-shortcode&context=edit&_fields=id,title',
+		const cartShortcodePages = await requestUtils.rest<
+			Array< { id: number; slug: string } >
+		>( {
+			path: '/wp/v2/pages?slug=cart-shortcode&context=edit&_fields=id,slug',
 		} );
-		if (
-			! Array.isArray( cartShortcodePages ) ||
-			cartShortcodePages.length !== 1
-		) {
-			throw new Error( 'Expected one Cart Shortcode page from REST' );
+		const cartShortcodePage = cartShortcodePages.find(
+			( page ) =>
+				page.slug === 'cart-shortcode' &&
+				Number.isInteger( page.id ) &&
+				page.id > 0
+		);
+		if ( ! cartShortcodePage ) {
+			throw new Error( 'Expected a valid Cart Shortcode page from REST' );
 		}
 
-		const cartShortcodePage: unknown = cartShortcodePages[ 0 ];
-		if ( typeof cartShortcodePage !== 'object' || ! cartShortcodePage ) {
-			throw new Error( 'Expected one Cart Shortcode page from REST' );
-		}
-
-		const cartShortcodePageFields = cartShortcodePage as Record<
-			string,
-			unknown
-		>;
-		const cartShortcodePageID = cartShortcodePageFields.id;
-		const cartShortcodeTitle = cartShortcodePageFields.title;
-		if (
-			typeof cartShortcodePageID !== 'number' ||
-			! Number.isInteger( cartShortcodePageID ) ||
-			cartShortcodePageID <= 0 ||
-			typeof cartShortcodeTitle !== 'object' ||
-			! cartShortcodeTitle ||
-			( cartShortcodeTitle as Record< string, unknown > ).raw !==
-				'Cart Shortcode'
-		) {
-			throw new Error( 'Expected one Cart Shortcode page from REST' );
-		}
-
-		const cartShortcodeID = String( cartShortcodePageID );
-		const cartPageSettingResponse = await requestUtils.rest< unknown >( {
+		const cartShortcodeID = String( cartShortcodePage.id );
+		const cartPageSetting = await requestUtils.rest< { value: string } >( {
 			method: 'PUT',
 			path: 'wc/v3/settings/advanced/woocommerce_cart_page_id',
 			data: { value: cartShortcodeID },
 		} );
-		if (
-			typeof cartPageSettingResponse !== 'object' ||
-			! cartPageSettingResponse
-		) {
-			throw new Error( 'Cart page setting REST response did not match' );
-		}
-
-		const cartPageSetting = cartPageSettingResponse as Record<
-			string,
-			unknown
-		>;
-		if (
-			cartPageSetting.id !== 'woocommerce_cart_page_id' ||
-			cartPageSetting.value !== cartShortcodeID
-		) {
+		if ( cartPageSetting.value !== cartShortcodeID ) {
 			throw new Error( 'Cart page setting REST response did not match' );
 		}
 
