@@ -717,6 +717,12 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox maybe_create_host_page() preserves an intentionally empty Shop page setting.
 	 */
 	public function test_maybe_create_host_page_preserves_empty_shop_page_option(): void {
+		// Snapshot the Shop page option before staging: option values survive the
+		// per-test DB-transaction rollback (see setUp()), so the `finally` block
+		// must restore the pre-test value rather than leave it deleted for later
+		// tests in the same PHPUnit process.
+		$original_shop_page_id = get_option( 'woocommerce_shop_page_id' );
+
 		$this->reset_review_order_pages();
 		$this->reset_shop_pages();
 
@@ -769,6 +775,13 @@ class EndpointTest extends WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_create_pages', $restore_shop_page, 200 );
 			$this->reset_review_order_pages();
 			$this->reset_shop_pages();
+
+			// Restore the pre-test Shop page option. `reset_shop_pages()` deletes
+			// it for a clean slate; put back whatever was there before so the
+			// suite's shared option state is unchanged by this test.
+			if ( false !== $original_shop_page_id ) {
+				update_option( 'woocommerce_shop_page_id', $original_shop_page_id );
+			}
 		}
 	}
 
