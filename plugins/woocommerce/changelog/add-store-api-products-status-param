@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a `status` query parameter to the Store API `/products` collection so privileged users can include draft, scheduled, and other non-published products (used by Add to Cart + Options).
