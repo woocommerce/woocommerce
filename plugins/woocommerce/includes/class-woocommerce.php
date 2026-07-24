@@ -710,6 +710,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-abstract-order-data-store-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-coupon-data-store-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-customer-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-customer-data-store-timeframe-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-customer-download-data-store-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-customer-download-log-data-store-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-object-data-store-interface.php';

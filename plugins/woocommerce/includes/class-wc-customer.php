@@ -413,15 +413,10 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Return how much money this customer has spent.
 	 *
-	 * @since 11.1.0 Added the `$args` parameter.
-	 *
-	 * @param array $args Optional arguments. Supports exclusive `before` and `after` paid-date filters as
-	 *                    date strings, Unix timestamps, or DateTimeInterface objects.
 	 * @return float
-	 * @throws InvalidArgumentException When a paid-date filter cannot be parsed.
 	 */
-	public function get_total_spent( $args = array() ) {
-		return $this->data_store->get_total_spent( $this, $args );
+	public function get_total_spent() {
+		return $this->data_store->get_total_spent( $this );
 	}
 
 	/*
