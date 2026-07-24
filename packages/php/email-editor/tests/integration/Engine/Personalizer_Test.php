@@ -506,18 +506,24 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 				'test/tracking-url',
 				'Test',
 				function () {
-					return 'https://example.com/?q=$0&r=${1}';
+					return 'https://example.com/?q=$0&r=${1}&b=a\\1b';
 				}
 			)
 		);
 
 		// The data-link-href site goes through the regex-based replacement.
-		// Note: esc_url() strips the curly braces from `${1}`; the important part is that
-		// `$0` and `$1` are not interpreted as regex backreferences.
-		$html_content = '<a data-link-href="[test/tracking-url]" href="#">Click here</a>';
+		// Note: esc_url() strips the curly braces from `${1}` and the backslash from `\1`;
+		// the important part is that `$0`, `$1`, and `\1` are not interpreted as regex backreferences.
 		$this->assertSame(
-			'<a  href="https://example.com/?q=$0&#038;r=$1">Click here</a>',
-			$this->personalizer->personalize_content( $html_content )
+			'<a  href="https://example.com/?q=$0&#038;r=$1&#038;b=a1b">Click here</a>',
+			$this->personalizer->personalize_content( '<a data-link-href="[test/tracking-url]" href="#">Click here</a>' ),
+			'The data-link-href site should insert regex metacharacters literally'
+		);
+		// The plain-href site uses exact string replacement.
+		$this->assertSame(
+			'<a href="https://r.example/go?to=https://example.com/?q=$0&#038;r=$1&#038;b=a1b&#038;p=1">Click here</a>',
+			$this->personalizer->personalize_content( '<a href="https://r.example/go?to=[test/tracking-url]&p=1">Click here</a>' ),
+			'The plain-href site should insert regex metacharacters literally'
 		);
 	}
 
@@ -658,6 +664,17 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 			)
 		);
 
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'tracking_pixel',
+				'test/tracking-pixel',
+				'Test',
+				function () {
+					return '<img src="https://track.example/open?id=42&amp;c=1" width="1" height="1" alt="" />';
+				}
+			)
+		);
+
 		$content = '<p><!--[test/price]--></p>';
 		$this->assertSame(
 			'<p><span class="price">10 &euro;</span></p>',
@@ -666,6 +683,11 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertSame(
 			'<p><span class="price">10 &euro;</span></p>',
 			$this->personalizer->personalize_content( $content, Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+		// A tag emitting raw markup, such as a tracking pixel, is inserted verbatim.
+		$this->assertSame(
+			'<div><img src="https://track.example/open?id=42&amp;c=1" width="1" height="1" alt="" /></div>',
+			$this->personalizer->personalize_content( '<div><!--[test/tracking-pixel]--></div>' )
 		);
 	}
 
