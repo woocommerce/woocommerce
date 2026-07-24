@@ -32,7 +32,7 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should delete the coupon code lookup cache when a coupon is unpublished outside the CRUD.
+	 * @testdox Should invalidate the coupon code lookup cache when a coupon is unpublished outside the CRUD.
 	 * @dataProvider unpublished_coupon_status_data
 	 *
 	 * @param string $new_status The status the coupon is updated to.
@@ -51,7 +51,7 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertFalse( wp_cache_get( $this->sut->get_cache_key( $code ), 'coupons' ), "The coupon code lookup cache should be deleted when the coupon transitions to {$new_status}" );
+		$this->assertFalse( wp_cache_get( $this->sut->get_cache_key( $code ), 'coupons' ), "The coupon code lookup cache should be invalidated when the coupon transitions to {$new_status}" );
 		$this->assertSame( 0, wc_get_coupon_id_by_code( $code ), "A {$new_status} coupon should not be resolvable by code" );
 
 		$coupon->delete( true );
@@ -72,7 +72,7 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should delete the coupon code lookup cache when a coupon is deleted outside the CRUD.
+	 * @testdox Should invalidate the coupon code lookup cache when a coupon is deleted outside the CRUD.
 	 */
 	public function test_deleting_a_coupon_outside_the_crud_busts_the_lookup_cache(): void {
 		$code   = 'cache-bust-delete';
@@ -83,7 +83,7 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 
 		wp_delete_post( $coupon->get_id(), true );
 
-		$this->assertFalse( wp_cache_get( $this->sut->get_cache_key( $code ), 'coupons' ), 'The coupon code lookup cache should be deleted when the coupon post is deleted' );
+		$this->assertFalse( wp_cache_get( $this->sut->get_cache_key( $code ), 'coupons' ), 'The coupon code lookup cache should be invalidated when the coupon post is deleted' );
 		$this->assertSame( 0, wc_get_coupon_id_by_code( $code ), 'A deleted coupon should not be resolvable by code' );
 	}
 
@@ -95,7 +95,8 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon( $code );
 
 		wc_get_coupon_id_by_code( $code );
-		$this->assertNotFalse( wp_cache_get( $this->sut->get_cache_key( $code ), 'coupons' ), 'The coupon code lookup cache should be primed while the coupon is published' );
+		$cache_key = $this->sut->get_cache_key( $code );
+		$this->assertNotFalse( wp_cache_get( $cache_key, 'coupons' ), 'The coupon code lookup cache should be primed while the coupon is published' );
 
 		wp_update_post(
 			array(
@@ -104,10 +105,63 @@ class CouponCodeLookupInvalidatorTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertNotFalse( wp_cache_get( $this->sut->get_cache_key( $code ), 'coupons' ), 'The coupon code lookup cache should be kept when the coupon stays published' );
+		$this->assertSame( $cache_key, $this->sut->get_cache_key( $code ), 'The lookup namespace should not rotate when the coupon stays published' );
+		$this->assertNotFalse( wp_cache_get( $cache_key, 'coupons' ), 'The coupon code lookup cache should be kept when the coupon stays published' );
 		$this->assertSame( $coupon->get_id(), wc_get_coupon_id_by_code( $code ), 'A published coupon should remain resolvable by code' );
 
 		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox A late lookup write under the old namespace is stranded, and unrelated coupon meta survives.
+	 */
+	public function test_lookup_namespace_rotation_strands_stale_writes_and_preserves_unrelated_coupon_meta(): void {
+		$code   = 'race-code';
+		$coupon = WC_Helper_Coupon::create_coupon( $code );
+
+		// A second, unrelated published coupon whose meta cache must survive the invalidation.
+		$unrelated_coupon = WC_Helper_Coupon::create_coupon( 'unrelated-code' );
+		$unrelated_coupon->read_meta_data( true );
+		$unrelated_meta_key = $unrelated_coupon->get_meta_cache_key();
+
+		wc_get_coupon_id_by_code( $code );
+		$old_lookup_key = $this->sut->get_cache_key( $code );
+		$this->assertNotFalse( wp_cache_get( $old_lookup_key, 'coupons' ), 'The coupon code lookup cache should be primed while the coupon is published' );
+		$this->assertNotFalse( wp_cache_get( $unrelated_meta_key, 'coupons' ), 'The unrelated coupon meta cache should be primed' );
+
+		// Unpublishing outside the CRUD rotates the lookup namespace.
+		wp_update_post(
+			array(
+				'ID'          => $coupon->get_id(),
+				'post_status' => 'draft',
+			)
+		);
+
+		// Simulate an in-flight lookup completing and writing the stale id back under the old namespace.
+		wp_cache_set( $old_lookup_key, array( $coupon->get_id() ), 'coupons' );
+
+		$this->assertNotSame( $old_lookup_key, $this->sut->get_cache_key( $code ), 'The lookup key prefix should rotate after the coupon is unpublished' );
+		$this->assertSame( 0, wc_get_coupon_id_by_code( $code ), 'A late write under the old lookup namespace must not resurrect an unpublished coupon' );
+		$this->assertNotFalse( wp_cache_get( $unrelated_meta_key, 'coupons' ), 'Rotating the lookup namespace must not flush unrelated coupon meta' );
+
+		$coupon->delete( true );
+		$unrelated_coupon->delete( true );
+	}
+
+	/**
+	 * @testdox Rotating the lookup namespace invalidates every representation of a code, not just one physical key.
+	 */
+	public function test_lookup_namespace_rotation_covers_all_code_representations(): void {
+		// The public lookup function hashes raw caller input, while invalidation from a post title
+		// sees the sanitized form, so the same logical code can be primed under different keys.
+		$raw_key_before       = $this->sut->get_cache_key( 'probe&test' );
+		$sanitized_key_before = $this->sut->get_cache_key( 'probe&amp;test' );
+		$this->assertNotSame( $raw_key_before, $sanitized_key_before, 'Different code representations should hash to different keys' );
+
+		$this->sut->invalidate_lookup_namespace();
+
+		$this->assertNotSame( $raw_key_before, $this->sut->get_cache_key( 'probe&test' ), 'The raw-alias lookup key should be unreachable after rotation' );
+		$this->assertNotSame( $sanitized_key_before, $this->sut->get_cache_key( 'probe&amp;test' ), 'The sanitized-alias lookup key should be unreachable after rotation' );
 	}
 
 	/**

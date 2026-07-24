@@ -5,21 +5,30 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Caches;
 
 /**
- * Invalidation handler for the coupon code to coupon ids lookup cache.
+ * Invalidation handler for the coupon code to coupon id lookup cache.
  *
- * The wc_get_coupon_id_by_code() function caches the ids of the published coupons matching a given
- * code in the 'coupons' object cache group. The entry must not exist when a coupon is
- * not published, otherwise the coupon remains applicable from the stale entry on sites
- * with a persistent object cache.
- *
- * The WC_Coupon CRUD invalidates the entry when a coupon is saved as unpublished or
- * force-deleted, but changes that bypass the CRUD (bulk edit, WP-CLI, direct
- * wp_update_post() or wp_delete_post() calls) only fire WordPress hooks. This class
- * listens to those hooks to keep the cache consistent.
+ * The wc_get_coupon_id_by_code() function caches the ids of the published coupons matching a
+ * given code. The entries live in the 'coupons' object cache group, but their keys are built
+ * with a dedicated 'coupon_code_lookups' prefix namespace so they can be invalidated on their
+ * own, without flushing the meta cache shared by every WC_Coupon in the same group.
  *
  * @since 11.1.0
  */
 class CouponCodeLookupInvalidator {
+
+	/**
+	 * The object cache group the lookup entries are stored in.
+	 *
+	 * @var string
+	 */
+	private const CACHE_GROUP = 'coupons';
+
+	/**
+	 * The dedicated prefix namespace used to build (and rotate) the lookup keys.
+	 *
+	 * @var string
+	 */
+	private const LOOKUP_CACHE_NAMESPACE = 'coupon_code_lookups';
 
 	/**
 	 * Register the WordPress hooks that cover coupon changes made outside the WC_Coupon CRUD.
@@ -36,7 +45,7 @@ class CouponCodeLookupInvalidator {
 	/**
 	 * Get the object cache key holding the ids of the published coupons with the given code.
 	 *
-	 * The key must be used with the 'coupons' cache group.
+	 * The key must be used with the CACHE_GROUP cache group.
 	 *
 	 * @param string $code Coupon code.
 	 * @return string The cache key.
@@ -44,7 +53,7 @@ class CouponCodeLookupInvalidator {
 	public function get_cache_key( string $code ): string {
 		// Coupon code allows spaces, which doesn't work well with some cache engines (e.g. memcached), hence the hashing.
 		$hashed_code = md5( wc_strtolower( $code ) );
-		return \WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code;
+		return \WC_Cache_Helper::get_cache_prefix( self::LOOKUP_CACHE_NAMESPACE ) . 'coupon_id_from_code_' . $hashed_code;
 	}
 
 	/**
@@ -58,11 +67,27 @@ class CouponCodeLookupInvalidator {
 			return;
 		}
 
-		wp_cache_delete( $this->get_cache_key( $code ), 'coupons' );
+		wp_cache_delete( $this->get_cache_key( $code ), self::CACHE_GROUP );
 	}
 
 	/**
-	 * Invalidate the lookup cache when a coupon transitions to a non-published status.
+	 * Invalidate every code to coupon id lookup entry at once.
+	 *
+	 * Rotates the lookup prefix namespace, which strands all previously cached lookup keys
+	 * (regardless of the code representation they were primed under) while leaving the meta
+	 * cache of every WC_Coupon in the same object cache group untouched.
+	 *
+	 * @return void
+	 */
+	public function invalidate_lookup_namespace(): void {
+		\WC_Cache_Helper::invalidate_cache_group( self::LOOKUP_CACHE_NAMESPACE );
+	}
+
+	/**
+	 * Rotate the lookup namespace when a coupon crosses the publish boundary.
+	 *
+	 * Only transitions into or out of `publish` can change which ids a code resolves to, so
+	 * other status changes (e.g. draft to pending) are ignored to avoid needless cache churn.
 	 *
 	 * @internal
 	 *
@@ -72,13 +97,17 @@ class CouponCodeLookupInvalidator {
 	 * @return void
 	 */
 	public function handle_transition_post_status( $new_status, $old_status, $post ): void {
-		if ( 'shop_coupon' === $post->post_type && 'publish' !== $new_status ) {
-			$this->invalidate( wc_format_coupon_code( $post->post_title ) );
+		if (
+			'shop_coupon' === $post->post_type
+			&& $new_status !== $old_status
+			&& ( 'publish' === $new_status || 'publish' === $old_status )
+		) {
+			$this->invalidate_lookup_namespace();
 		}
 	}
 
 	/**
-	 * Invalidate the lookup cache when a coupon post is deleted.
+	 * Rotate the lookup namespace when a coupon post is deleted.
 	 *
 	 * @internal
 	 *
@@ -88,7 +117,7 @@ class CouponCodeLookupInvalidator {
 	 */
 	public function handle_deleted_post( $post_id, $post ): void {
 		if ( $post instanceof \WP_Post && 'shop_coupon' === $post->post_type ) {
-			$this->invalidate( wc_format_coupon_code( $post->post_title ) );
+			$this->invalidate_lookup_namespace();
 		}
 	}
 }
