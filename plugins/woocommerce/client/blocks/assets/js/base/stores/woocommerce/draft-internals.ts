@@ -6,8 +6,9 @@
  * hosts draft-key/collection resolution, family-aware seed lookup,
  * family-resolution helpers, the setter's attribute-derivation helper, the
  * one draft write routine (materialize / merge / id-migration / invariant
- * warnings), and the effective-payload helpers (effective attributes for
- * pairing; effective-seed resolution for posting) both stores call.
+ * warnings), the effective-payload helpers (effective attributes for
+ * pairing; effective-seed resolution for posting), and the draft-view proxy
+ * factory (with its per-`(key, id)` cache) both stores call.
  *
  * Reaches each store's state by namespace — `store( 'woocommerce/cart', {},
  * { lock: universalLock } )`, `store( 'woocommerce/products', {}, { lock:
@@ -727,4 +728,200 @@ export function writeDraft(
 	}
 
 	getCartState().draftItems[ key ] = [ ...collection, draft ];
+}
+
+/**
+ * Resolves the underlying plain object a draft view's reads answer from: the
+ * live draft nearest `id` (see {@link resolveLiveDraft}) when one exists,
+ * else the family-aware seed view (`draftSeeds[key][id] ?? draftSeeds[key][
+ * parentId]`, fresh via `getServerState()` — see {@link getFamilyDraftSeed}),
+ * or the direct seed lookup for a non-family id.
+ *
+ * Backs both the view's enumeration (`ownKeys`/`getOwnPropertyDescriptor`,
+ * so `Object.keys()` sees exactly the source's own keys — never inventing an
+ * enumerable `variation` the source does not itself carry, which would leak
+ * into a raw draft posted verbatim) and {@link readDraftViewProp}'s general
+ * (non-`id`, non-`variation`) property reads.
+ *
+ * @param key The resolved draft key the view was created for.
+ * @param id  The product/variation id the view was created for.
+ * @return The live draft, the seed, or `undefined` when neither exists.
+ */
+function resolveDraftViewSource(
+	key: DraftKey,
+	id: DraftItem[ 'id' ]
+): DraftItem | undefined {
+	const live = resolveLiveDraft( key, id );
+	if ( live ) {
+		return live;
+	}
+	const base = resolveBaseProduct( id );
+	return base
+		? getFamilyDraftSeed( key, id, base.id )
+		: getDraftSeed( key, id );
+}
+
+/**
+ * Resolves the value a draft view should answer for a single property read,
+ * without materializing anything.
+ *
+ * `id` is special-cased: it always answers the *addressed* id, never a
+ * family-fallback seed's own `id` field (a seed filed under a variable
+ * family's parent carries the parent's id, not the variation id the view
+ * was addressed for) — except when a live family draft exists, whose own
+ * (possibly since-migrated) `id` is the answer, per the general "live draft
+ * wins" rule. `variation` is also special-cased: it always answers a real
+ * array, `[]` rather than `undefined` when neither the live draft nor the
+ * seed specifies one (see the `DraftItem.variation` contract). Every other
+ * property answers the live draft's value when one exists, else the seed's.
+ *
+ * @param key  The resolved draft key the view was created for.
+ * @param id   The product/variation id the view was created for.
+ * @param prop The property being read.
+ * @return The value the view should answer for `prop`.
+ */
+function readDraftViewProp(
+	key: DraftKey,
+	id: DraftItem[ 'id' ],
+	prop: string
+): unknown {
+	if ( prop === 'id' ) {
+		return resolveLiveDraft( key, id )?.id ?? id;
+	}
+	const source = resolveDraftViewSource( key, id );
+	if ( prop === 'variation' ) {
+		return source?.variation ?? [];
+	}
+	return source?.[ prop ];
+}
+
+/**
+ * Builds the draft view `Proxy` for a single `(key, id)` pair.
+ *
+ * The view's target is an empty, extensible plain object — every trap below
+ * computes its answer independently of the target's own (nonexistent)
+ * properties, so the target itself never accumulates state; the `Proxy`
+ * exotic object is what callers hold and read/write through.
+ *
+ * - `get`/`has`/`ownKeys`/`getOwnPropertyDescriptor` are pure reads (see
+ *   {@link readDraftViewProp}/{@link resolveDraftViewSource}): they never
+ *   materialize a draft, and they subscribe to whatever reactive state they
+ *   read the same way any other getter-driven read does.
+ * - `set` forwards every write to {@link writeDraft} — the module's single
+ *   write routine — passing `id` (fixed at creation) and the written
+ *   `prop`/`value` through unchanged; `writeDraft` itself decides
+ *   merge-vs-materialize and handles a `variation` write's id migration and
+ *   a rejected `id` write.
+ * - `deleteProperty` forwards to the live draft, when one exists (nothing
+ *   to delete from a not-yet-materialized seed view).
+ *
+ * @param key The resolved draft key this view is scoped to.
+ * @param id  The product/variation id this view is scoped to.
+ * @return The draft view `Proxy`.
+ */
+function createDraftView( key: DraftKey, id: DraftItem[ 'id' ] ): DraftItem {
+	return new Proxy( {} as DraftItem, {
+		get( _target, prop ) {
+			return typeof prop === 'string'
+				? readDraftViewProp( key, id, prop )
+				: undefined;
+		},
+		set( _target, prop, value ) {
+			if ( typeof prop !== 'string' ) {
+				return false;
+			}
+			writeDraft( id, prop, value );
+			return true;
+		},
+		has( _target, prop ) {
+			if ( typeof prop !== 'string' ) {
+				return false;
+			}
+			if ( prop === 'id' || prop === 'variation' ) {
+				return true;
+			}
+			return Object.prototype.hasOwnProperty.call(
+				resolveDraftViewSource( key, id ) ?? {},
+				prop
+			);
+		},
+		ownKeys() {
+			return Object.keys( resolveDraftViewSource( key, id ) ?? {} );
+		},
+		getOwnPropertyDescriptor( _target, prop ) {
+			if (
+				typeof prop !== 'string' ||
+				! Object.prototype.hasOwnProperty.call(
+					resolveDraftViewSource( key, id ) ?? {},
+					prop
+				)
+			) {
+				return undefined;
+			}
+			return {
+				value: readDraftViewProp( key, id, prop ),
+				writable: true,
+				enumerable: true,
+				configurable: true,
+			};
+		},
+		deleteProperty( _target, prop ) {
+			if ( typeof prop === 'string' ) {
+				const live = resolveLiveDraft( key, id );
+				if ( live ) {
+					delete live[ prop ];
+				}
+			}
+			return true;
+		},
+	} );
+}
+
+/**
+ * The module-private per-`(key, id)` draft-view cache: a `DraftKey`-keyed
+ * map of id-keyed maps, each holding the single `Proxy` instance already
+ * built for that pair. Ensures repeated resolution of the same `(key, id)` —
+ * across separate `findItem`/`itemInContext` calls, or across an id
+ * migration a held view keeps addressing — returns the identical view
+ * object rather than a fresh one each time.
+ */
+const draftViewCache = new Map<
+	DraftKey,
+	Map< DraftItem[ 'id' ], DraftItem >
+>();
+
+/**
+ * Resolves the draft view for `(key, id)` — the live, family-aware `Proxy`
+ * that `findItem`/`itemInContext` expose as `Envelope.draft` whenever an id
+ * resolves. Reads answer the live draft's values, or the surface's seed
+ * values pre-materialization, and never materialize anything; writes
+ * forward to {@link writeDraft}. See {@link createDraftView} for the full
+ * trap behavior.
+ *
+ * Cached per `(key, id)` in {@link draftViewCache}: a second resolution of
+ * the same pair returns the exact same `Proxy` instance, so a view held
+ * across a `variation` write's id migration keeps addressing the
+ * now-migrated draft (family-aware resolution, not exact-id-only) rather
+ * than going stale.
+ *
+ * @param key The resolved draft key to scope the view to.
+ * @param id  The product/variation id to scope the view to.
+ * @return The draft view for `(key, id)`.
+ */
+export function resolveDraftView(
+	key: DraftKey,
+	id: DraftItem[ 'id' ]
+): DraftItem {
+	let byId = draftViewCache.get( key );
+	if ( ! byId ) {
+		byId = new Map();
+		draftViewCache.set( key, byId );
+	}
+
+	let view = byId.get( id );
+	if ( ! view ) {
+		view = createDraftView( key, id );
+		byId.set( id, view );
+	}
+	return view;
 }
