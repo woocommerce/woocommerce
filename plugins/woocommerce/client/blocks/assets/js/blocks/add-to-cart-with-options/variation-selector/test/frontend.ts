@@ -19,7 +19,7 @@ type Context = AddToCartWithOptionsStoreContext & {
 
 type MockStore = {
 	state: Record< string, unknown >;
-	actions: Record< string, unknown >;
+	actions: Record< string, ( ...args: unknown[] ) => void >;
 	callbacks: Record< string, ( ...args: unknown[] ) => void >;
 };
 
@@ -40,15 +40,14 @@ let mockProductsContext: { variationId?: number | null } | undefined;
 // The `woocommerce/products` store's state, consulted one-directionally.
 let mockProductsState: Partial< ProductsStoreState >;
 
-// The `woocommerce/cart` store's `upsertDraftItem` spy, controlled per test.
-let mockUpsertDraftItem: jest.Mock;
-
-// The `woocommerce/cart` store's state this module reads (`itemInContext`).
-// Setting `itemInContext.draft` simulates a draft already present in the
-// resolved collection — whether written by this same surface or by another
-// surface sharing that collection; an empty envelope simulates no draft for
-// the in-context product (including one belonging to a different
-// collection, which `itemInContext` would never surface here).
+// The `woocommerce/cart` store's state this module reads and writes through
+// (`itemInContext.draft`, the draft view). Setting `itemInContext.draft`
+// simulates a draft view already resolved for the in-context product/
+// variation — whether it answers a live draft's values, another surface's
+// values, or a not-yet-materialized seed; an absent `draft` simulates no
+// product in context. Because this file's tests never exercise the real
+// draft view, `draft` is a directly-settable plain object standing in for
+// it.
 let mockCartState: { itemInContext: Envelope };
 
 // The element `getElement()` returns for the currently-executing directive.
@@ -85,10 +84,7 @@ jest.mock(
 					return { state: mockProductsState };
 				}
 				if ( name === 'woocommerce/cart' ) {
-					return {
-						state: mockCartState,
-						actions: { upsertDraftItem: mockUpsertDraftItem },
-					};
+					return { state: mockCartState };
 				}
 				mockRegisteredStore = {
 					state: definition?.state ?? {},
@@ -129,6 +125,33 @@ function loadStore(): MockStore {
 	return mockRegisteredStore;
 }
 
+/**
+ * Builds a draft-view stand-in whose `variation` property is backed by a
+ * spy setter, so a test can assert exactly how many times — and with what
+ * value — a callback wrote `variation` through it.
+ *
+ * @param initial The draft's other, non-`variation` starting properties.
+ * @return The draft object and the setter spy watching its `variation`
+ *         property.
+ */
+function createVariationWriteSpy(
+	initial: Partial< Envelope[ 'draft' ] > = {}
+) {
+	const setter = jest.fn();
+	let current: unknown;
+	const draft = { id: 1, ...initial } as NonNullable< Envelope[ 'draft' ] >;
+	Object.defineProperty( draft, 'variation', {
+		enumerable: true,
+		configurable: true,
+		get: () => current,
+		set: ( value: unknown ) => {
+			current = value;
+			setter( value );
+		},
+	} );
+	return { draft, setter };
+}
+
 describe( 'Variation selector frontend store', () => {
 	beforeEach( () => {
 		mockContext = {
@@ -144,7 +167,6 @@ describe( 'Variation selector frontend store', () => {
 		};
 		mockProductsContext = undefined;
 		mockProductsState = {};
-		mockUpsertDraftItem = jest.fn();
 		mockCartState = { itemInContext: {} };
 		mockElementRef = null;
 		mockSetQuantity = jest.fn();
@@ -156,46 +178,179 @@ describe( 'Variation selector frontend store', () => {
 		jest.clearAllMocks();
 	} );
 
-	describe( 'callbacks.setSelectedVariationId', () => {
+	it( 'no longer exposes the deleted reflection callback, guard action, or context member', () => {
+		const { actions, callbacks } = loadStore();
+
+		expect( callbacks.setSelectedVariationId ).toBeUndefined();
+		expect( actions.removeAttribute ).toBeUndefined();
+		expect( callbacks.resolveVariationId ).toBeInstanceOf( Function );
+	} );
+
+	describe( 'actions.toggle', () => {
+		it( 'does nothing, and writes no draft, when the item is hidden or disabled', () => {
+			const { draft, setter } = createVariationWriteSpy();
+			mockCartState.itemInContext = { draft };
+			mockContext.selectedAttributes = [];
+
+			const { actions } = loadStore();
+			actions.toggle( { id: 'blue', value: 'blue', hidden: true } );
+			actions.toggle( { id: 'blue', value: 'blue', disabled: true } );
+
+			expect( setter ).not.toHaveBeenCalled();
+			expect( mockContext.selectedAttributes ).toEqual( [] );
+		} );
+
+		it( "records exactly one write to the resolved draft, sourced from this surface's local selection, when selecting a new value", () => {
+			const { draft, setter } = createVariationWriteSpy();
+			mockCartState.itemInContext = { draft };
+			mockContext.name = 'Color';
+			mockContext.selectedAttributes = [];
+			mockContext.autoselect = false;
+
+			const { actions } = loadStore();
+			actions.toggle( { id: 'blue', value: 'blue', label: 'Blue' } );
+
+			expect( setter ).toHaveBeenCalledTimes( 1 );
+			expect( setter ).toHaveBeenCalledWith( [
+				{ attribute: 'Color', value: 'blue' },
+			] );
+			expect( mockContext.selectedValue ).toBe( 'blue' );
+		} );
+
+		it( 'records exactly one write, replacing the shared selection wholesale, when deselecting the currently selected value', () => {
+			const { draft, setter } = createVariationWriteSpy( {
+				id: 2,
+				quantity: 1,
+			} );
+			// The resolved collection already carries this exact selection —
+			// `state.selectedAttributes` (draft-first) reports it as
+			// currently selected — while this surface's own local context
+			// mirrors the same selection, the state a genuine prior write
+			// would have left it in.
+			draft.variation = [ { attribute: 'Color', value: 'blue' } ];
+			setter.mockClear();
+			mockCartState.itemInContext = { draft };
+			mockContext.name = 'Color';
+			mockContext.selectedAttributes = [
+				{ attribute: 'Color', value: 'blue' },
+			];
+
+			const { actions } = loadStore();
+			actions.toggle( { id: 'blue', value: 'blue', label: 'Blue' } );
+
+			expect( setter ).toHaveBeenCalledTimes( 1 );
+			expect( setter ).toHaveBeenCalledWith( [] );
+			expect( mockContext.selectedValue ).toBe( '' );
+		} );
+
+		it( "includes the autoselectAttributes cascade's additional attribute in the single write", () => {
+			const { draft, setter } = createVariationWriteSpy();
+			mockCartState.itemInContext = { draft };
+			mockContext.name = 'Color';
+			mockContext.selectedAttributes = [];
+			mockContext.autoselect = true;
+			mockProductsState.baseProductInContext = {
+				id: 1,
+				variations: [
+					{
+						id: 2,
+						attributes: [
+							{ name: 'Color', value: 'blue' },
+							{ name: 'Size', value: 'M' },
+						],
+					},
+				],
+			} as unknown as ProductResponseItem;
+
+			const { actions } = loadStore();
+			actions.toggle( { id: 'blue', value: 'blue', label: 'Blue' } );
+
+			// Only one write happens, and it carries both the direct
+			// selection and the cascade's autoselected "Size", proving the
+			// write runs after both have landed on the local context.
+			expect( setter ).toHaveBeenCalledTimes( 1 );
+			expect( setter ).toHaveBeenCalledWith( [
+				{ attribute: 'Color', value: 'blue' },
+				{ attribute: 'Size', value: 'M' },
+			] );
+		} );
+
+		it( 'writes no draft when no product is in context', () => {
+			mockCartState.itemInContext = {};
+			mockContext.name = 'Color';
+			mockContext.selectedAttributes = [];
+
+			const { actions } = loadStore();
+			expect( () =>
+				actions.toggle( { id: 'blue', value: 'blue', label: 'Blue' } )
+			).not.toThrow();
+			expect( mockContext.selectedAttributes ).toEqual( [
+				{ attribute: 'Color', value: 'blue' },
+			] );
+		} );
+	} );
+
+	describe( 'callbacks.setDefaultSelectedAttribute', () => {
+		it( 'writes no draft while resolving the configured default locally', () => {
+			const { draft, setter } = createVariationWriteSpy();
+			mockCartState.itemInContext = { draft };
+			mockContext.name = 'Color';
+			mockContext.selectedValue = 'blue';
+			mockContext.autoselect = false;
+
+			const { callbacks } = loadStore();
+			callbacks.setDefaultSelectedAttribute();
+
+			expect( mockContext.selectedAttributes ).toEqual( [
+				{ attribute: 'Color', value: 'blue' },
+			] );
+			expect( setter ).not.toHaveBeenCalled();
+		} );
+
+		it( 'does nothing when the context declares no attribute name', () => {
+			mockContext.name = '';
+
+			const { callbacks } = loadStore();
+			expect( () =>
+				callbacks.setDefaultSelectedAttribute()
+			).not.toThrow();
+			expect( mockContext.selectedAttributes ).toEqual( [] );
+		} );
+	} );
+
+	describe( 'callbacks.resolveVariationId', () => {
 		it( 'does nothing when the base product has no variations', () => {
 			mockProductsState.baseProductInContext = {
 				id: 1,
 			} as ProductResponseItem;
+			mockProductsState.findProduct = jest.fn();
 
 			const { callbacks } = loadStore();
-			callbacks.setSelectedVariationId();
+			callbacks.resolveVariationId();
 
-			expect( mockUpsertDraftItem ).not.toHaveBeenCalled();
+			expect( mockProductsState.findProduct ).not.toHaveBeenCalled();
+			expect( mockProductsState.variationId ).toBeUndefined();
 		} );
 
-		it( 'upserts the resolved variation draft with quantity + variation when attributes fully match', () => {
+		it( "resolves this surface's local selection into the global variationId when no shared draft exists yet", () => {
 			mockContext.selectedAttributes = [
 				{ attribute: 'Color', value: 'blue' },
 			];
-			mockContext.quantity = { 1: 1, 2: 1, 3: 1 };
 			mockProductsState.baseProductInContext = {
 				id: 1,
 				variations: [ { id: 2 }, { id: 3 } ],
 			} as ProductResponseItem;
 			mockProductsState.findProduct = jest.fn(
-				() =>
-					( {
-						id: 2,
-					} as ProductResponseItem )
+				() => ( { id: 2 } as ProductResponseItem )
 			);
 
 			const { callbacks } = loadStore();
-			callbacks.setSelectedVariationId();
+			callbacks.resolveVariationId();
 
-			expect( mockUpsertDraftItem ).toHaveBeenCalledWith(
-				{
-					quantity: 1,
-					variation: [ { attribute: 'Color', value: 'blue' } ],
-				},
-				{ id: 2 }
-			);
-			// The resolved variation id is written directly onto the
-			// products store state, since no per-element context overrides.
+			expect( mockProductsState.findProduct ).toHaveBeenCalledWith( {
+				id: 1,
+				selectedAttributes: mockContext.selectedAttributes,
+			} );
 			expect( mockProductsState.variationId ).toBe( 2 );
 		} );
 
@@ -203,129 +358,7 @@ describe( 'Variation selector frontend store', () => {
 			mockContext.selectedAttributes = [
 				{ attribute: 'Color', value: 'blue' },
 			];
-			mockContext.quantity = { 1: 1, 2: 1 };
 			mockProductsContext = { variationId: null };
-			mockProductsState.baseProductInContext = {
-				id: 1,
-				variations: [ { id: 2 } ],
-			} as ProductResponseItem;
-			mockProductsState.findProduct = jest.fn(
-				() =>
-					( {
-						id: 2,
-					} as ProductResponseItem )
-			);
-
-			const { callbacks } = loadStore();
-			callbacks.setSelectedVariationId();
-
-			expect( mockProductsContext.variationId ).toBe( 2 );
-			expect( mockUpsertDraftItem ).toHaveBeenCalledWith(
-				{ quantity: 1, variation: mockContext.selectedAttributes },
-				{ id: 2 }
-			);
-		} );
-
-		it( 'upserts the base product draft when attributes do not fully resolve a variation', () => {
-			mockContext.selectedAttributes = [
-				{ attribute: 'Color', value: 'blue' },
-			];
-			mockContext.quantity = { 1: 1, 2: 1 };
-			mockProductsState.baseProductInContext = {
-				id: 1,
-				variations: [ { id: 2 } ],
-			} as ProductResponseItem;
-			// findProduct returns the parent itself when no variation matches.
-			mockProductsState.findProduct = jest.fn(
-				() =>
-					( {
-						id: 1,
-					} as ProductResponseItem )
-			);
-
-			const { callbacks } = loadStore();
-			callbacks.setSelectedVariationId();
-
-			expect( mockProductsState.variationId ).toBeNull();
-			expect( mockUpsertDraftItem ).toHaveBeenCalledWith(
-				{ quantity: 1, variation: mockContext.selectedAttributes },
-				{ id: 1 }
-			);
-		} );
-
-		it( 'still seeds the unconfigured draft when nothing has resolved a variation yet', () => {
-			// No attribute selection of its own, and nothing else has
-			// resolved a variation yet (the fresh-page-load case): the
-			// initial write establishing the "nothing selected" baseline
-			// must still happen, exactly as today.
-			mockContext.selectedAttributes = [];
-			mockContext.quantity = { 1: 1, 2: 1 };
-			mockProductsState.variationId = null;
-			mockProductsState.baseProductInContext = {
-				id: 1,
-				variations: [ { id: 2 } ],
-			} as ProductResponseItem;
-			mockProductsState.findProduct = jest.fn(
-				() => ( { id: 1 } as ProductResponseItem )
-			);
-
-			const { callbacks } = loadStore();
-			callbacks.setSelectedVariationId();
-
-			expect( mockProductsState.variationId ).toBeNull();
-			expect( mockUpsertDraftItem ).toHaveBeenCalledWith(
-				{ quantity: 1, variation: [] },
-				{ id: 1 }
-			);
-		} );
-
-		it( "does not clobber another surface's already-resolved global variation when this surface has no attribute selection of its own", () => {
-			// Simulates a second, never-configured page-wide surface whose
-			// watch re-runs (e.g. triggered by unrelated variation data
-			// finishing an async load) after another surface has already
-			// resolved a variation into the shared global pointer.
-			mockContext.selectedAttributes = [];
-			mockContext.quantity = { 1: 1, 2: 1 };
-			mockProductsState.variationId = 2;
-			mockProductsState.baseProductInContext = {
-				id: 1,
-				variations: [ { id: 2 } ],
-			} as ProductResponseItem;
-			mockProductsState.findProduct = jest.fn(
-				() => ( { id: 1 } as ProductResponseItem )
-			);
-
-			const { callbacks } = loadStore();
-			callbacks.setSelectedVariationId();
-
-			expect( mockUpsertDraftItem ).not.toHaveBeenCalled();
-			expect( mockProductsState.variationId ).toBe( 2 );
-		} );
-
-		it( "does not clobber another surface's already-resolved per-element variation when this surface has no attribute selection of its own", () => {
-			mockContext.selectedAttributes = [];
-			mockContext.quantity = { 1: 1, 2: 1 };
-			mockProductsContext = { variationId: 2 };
-			mockProductsState.baseProductInContext = {
-				id: 1,
-				variations: [ { id: 2 } ],
-			} as ProductResponseItem;
-			mockProductsState.findProduct = jest.fn(
-				() => ( { id: 1 } as ProductResponseItem )
-			);
-
-			const { callbacks } = loadStore();
-			callbacks.setSelectedVariationId();
-
-			expect( mockUpsertDraftItem ).not.toHaveBeenCalled();
-			expect( mockProductsContext.variationId ).toBe( 2 );
-		} );
-
-		it( 'keeps writing after a real selection made on this surface is cleared back to empty', () => {
-			mockContext.selectedAttributes = [
-				{ attribute: 'Color', value: 'blue' },
-			];
-			mockContext.quantity = { 1: 1, 2: 1 };
 			mockProductsState.baseProductInContext = {
 				id: 1,
 				variations: [ { id: 2 } ],
@@ -335,29 +368,132 @@ describe( 'Variation selector frontend store', () => {
 			);
 
 			const { callbacks } = loadStore();
-			// A real selection made on this surface resolves and writes,
-			// exactly as today.
-			callbacks.setSelectedVariationId();
+			callbacks.resolveVariationId();
+
+			expect( mockProductsContext.variationId ).toBe( 2 );
+			expect( mockProductsState.variationId ).toBeUndefined();
+		} );
+
+		it( 'resolves to null when the attributes do not fully resolve a variation', () => {
+			mockContext.selectedAttributes = [
+				{ attribute: 'Color', value: 'blue' },
+			];
+			mockProductsState.baseProductInContext = {
+				id: 1,
+				variations: [ { id: 2 } ],
+			} as ProductResponseItem;
+			// findProduct returns the parent itself when no variation matches.
+			mockProductsState.findProduct = jest.fn(
+				() => ( { id: 1 } as ProductResponseItem )
+			);
+
+			const { callbacks } = loadStore();
+			callbacks.resolveVariationId();
+
+			expect( mockProductsState.variationId ).toBeNull();
+		} );
+
+		it( "reads the shared draft-first selection rather than this surface's own empty local one, once another surface's edit has resolved a family draft", () => {
+			// This surface's own local selection was never touched
+			// (`context.selectedAttributes` stays empty), but the resolved
+			// collection already carries a real selection made on another
+			// surface. `state.selectedAttributes` is draft-first, so this
+			// resolver — like every other surface sharing the collection —
+			// maps that same shared selection, with no bystander guard
+			// needed to protect it.
+			mockContext.selectedAttributes = [];
+			mockCartState.itemInContext = {
+				draft: {
+					id: 2,
+					quantity: 1,
+					variation: [ { attribute: 'Color', value: 'blue' } ],
+				},
+			};
+			mockProductsState.baseProductInContext = {
+				id: 1,
+				variations: [ { id: 2 } ],
+			} as ProductResponseItem;
+			mockProductsState.findProduct = jest.fn(
+				() => ( { id: 2 } as ProductResponseItem )
+			);
+
+			const { callbacks } = loadStore();
+			callbacks.resolveVariationId();
+
+			expect( mockProductsState.findProduct ).toHaveBeenCalledWith( {
+				id: 1,
+				selectedAttributes: [ { attribute: 'Color', value: 'blue' } ],
+			} );
+			expect( mockProductsState.variationId ).toBe( 2 );
+		} );
+
+		it( 'is idempotent: repeated calls against an unchanged shared selection resolve the same variationId', () => {
+			mockContext.selectedAttributes = [
+				{ attribute: 'Color', value: 'blue' },
+			];
+			mockProductsState.baseProductInContext = {
+				id: 1,
+				variations: [ { id: 2 } ],
+			} as ProductResponseItem;
+			mockProductsState.findProduct = jest.fn(
+				() => ( { id: 2 } as ProductResponseItem )
+			);
+
+			const { callbacks } = loadStore();
+			callbacks.resolveVariationId();
 			expect( mockProductsState.variationId ).toBe( 2 );
 
-			// The shopper then clears the selection back to empty, on the
-			// same surface: this is a genuine, local edit, not another
-			// surface's stale re-evaluation, so it must still write through
-			// and reset the shared pointer/draft, unlike the never-selected
-			// bystander case above.
+			callbacks.resolveVariationId();
+			expect( mockProductsState.variationId ).toBe( 2 );
+		} );
+
+		it( 'resolves to null once the selection is cleared back to empty, with no memory of a prior real selection', () => {
+			mockContext.selectedAttributes = [
+				{ attribute: 'Color', value: 'blue' },
+			];
+			mockProductsState.baseProductInContext = {
+				id: 1,
+				variations: [ { id: 2 } ],
+			} as ProductResponseItem;
+			mockProductsState.findProduct = jest.fn(
+				() => ( { id: 2 } as ProductResponseItem )
+			);
+
+			const { callbacks } = loadStore();
+			callbacks.resolveVariationId();
+			expect( mockProductsState.variationId ).toBe( 2 );
+
 			mockContext.selectedAttributes = [];
 			mockProductsState.findProduct = jest.fn(
 				() => ( { id: 1 } as ProductResponseItem )
 			);
-			mockUpsertDraftItem.mockClear();
 
-			callbacks.setSelectedVariationId();
+			callbacks.resolveVariationId();
 
 			expect( mockProductsState.variationId ).toBeNull();
-			expect( mockUpsertDraftItem ).toHaveBeenCalledWith(
-				{ quantity: 1, variation: [] },
-				{ id: 1 }
+		} );
+
+		it( 'writes no draft, even when the resolved collection already carries one', () => {
+			const { draft, setter } = createVariationWriteSpy( {
+				id: 2,
+				quantity: 1,
+			} );
+			mockCartState.itemInContext = { draft };
+			mockContext.selectedAttributes = [
+				{ attribute: 'Color', value: 'blue' },
+			];
+			mockProductsState.baseProductInContext = {
+				id: 1,
+				variations: [ { id: 2 } ],
+			} as ProductResponseItem;
+			mockProductsState.findProduct = jest.fn(
+				() => ( { id: 2 } as ProductResponseItem )
 			);
+
+			const { callbacks } = loadStore();
+			callbacks.resolveVariationId();
+
+			expect( setter ).not.toHaveBeenCalled();
 		} );
 	} );
 
@@ -491,13 +627,25 @@ describe( 'Variation selector frontend store', () => {
 			expect( mockSetQuantity ).not.toHaveBeenCalled();
 		} );
 
-		it( "does not clobber another surface's shared draft quantity with this surface's own stale local default", () => {
+		it( 'does nothing when the draft view answers no numeric quantity yet, never falling back to a local quantity map', () => {
+			mockElementRef = createQuantityInput( 5 );
+			mockProductsState.productVariationInContext = {
+				id: 25,
+				add_to_cart: { minimum: 1, maximum: 3 },
+			} as ProductResponseItem;
+			mockCartState.itemInContext = {};
+
+			const { callbacks } = loadStore();
+			callbacks.watchQuantityConstraints();
+
+			expect( mockSetQuantity ).not.toHaveBeenCalled();
+		} );
+
+		it( "reads the shared draft's own quantity, never this surface's local quantity map", () => {
 			// The shopper set quantity 3 on another surface, which resolved
-			// the variation and upserted its draft; this surface's own
-			// quantity input renders that shared draft's value (the same
-			// source `resolveDisplayQuantity` prefers for every surface),
-			// but its own local `quantity` context still holds the
-			// never-touched default of 1.
+			// the variation and wrote its draft; this surface's own local
+			// `quantity` context still holds the never-touched default of
+			// 1, which must play no part in the clamp decision.
 			mockElementRef = createQuantityInput( 3 );
 			mockProductsState.productVariationInContext = {
 				id: 25,
@@ -520,7 +668,6 @@ describe( 'Variation selector frontend store', () => {
 				id: 25,
 				add_to_cart: { minimum: 1, maximum: 3 },
 			} as ProductResponseItem;
-			mockContext.quantity = { 25: 5 };
 			mockCartState.itemInContext = {
 				draft: { id: 25, quantity: 5 },
 			};
@@ -531,19 +678,23 @@ describe( 'Variation selector frontend store', () => {
 			expect( mockSetQuantity ).toHaveBeenCalledWith( 25, 3 );
 		} );
 
-		it( 'falls back to the local quantity, clamped, when no draft exists yet for the resolved variation', () => {
-			mockElementRef = createQuantityInput( 5 );
+		it( "clamps an untouched surface's seeded quantity, through the draft view, to the resolved variation's minimum", () => {
+			// An untouched surface's draft view answers its seed's quantity
+			// (0, below this variation's minimum) pre-materialization;
+			// `setQuantity` is the write that goes on to materialize it.
+			mockElementRef = createQuantityInput( 0 );
 			mockProductsState.productVariationInContext = {
 				id: 25,
-				add_to_cart: { minimum: 1, maximum: 3 },
+				add_to_cart: { minimum: 1, maximum: 10 },
 			} as ProductResponseItem;
-			mockContext.quantity = { 25: 5 };
-			mockCartState.itemInContext = {};
+			mockCartState.itemInContext = {
+				draft: { id: 25, quantity: 0 },
+			};
 
 			const { callbacks } = loadStore();
 			callbacks.watchQuantityConstraints();
 
-			expect( mockSetQuantity ).toHaveBeenCalledWith( 25, 3 );
+			expect( mockSetQuantity ).toHaveBeenCalledWith( 25, 1 );
 		} );
 
 		it( 'does nothing when the resolved value already matches both the input and the constraint bounds', () => {
@@ -552,8 +703,9 @@ describe( 'Variation selector frontend store', () => {
 				id: 25,
 				add_to_cart: { minimum: 1, maximum: 3 },
 			} as ProductResponseItem;
-			mockContext.quantity = { 25: 2 };
-			mockCartState.itemInContext = {};
+			mockCartState.itemInContext = {
+				draft: { id: 25, quantity: 2 },
+			};
 
 			const { callbacks } = loadStore();
 			callbacks.watchQuantityConstraints();
@@ -601,6 +753,25 @@ describe( 'Variation selector frontend store', () => {
 			];
 			mockCartState.itemInContext = {
 				draft: { id: 1, quantity: 1 },
+			};
+
+			const { state } = loadStore();
+
+			expect( state.selectedAttributes ).toEqual( [
+				{ attribute: 'Color', value: 'blue' },
+			] );
+		} );
+
+		it( "falls back to the local selection — never an empty array — when the resolved draft's `variation` is present but empty", () => {
+			// The draft view always answers `variation` as a real array:
+			// an unconfigured draft reads as `[]`, which is truthy. Judging
+			// emptiness by length (not truthiness) is what stops this empty
+			// array from permanently shadowing this surface's own default.
+			mockContext.selectedAttributes = [
+				{ attribute: 'Color', value: 'blue' },
+			];
+			mockCartState.itemInContext = {
+				draft: { id: 1, quantity: 1, variation: [] },
 			};
 
 			const { state } = loadStore();
