@@ -130,9 +130,6 @@
 			"@woocommerce/stores/woocommerce/cart": [
 				"assets/js/base/stores/woocommerce/cart"
 			],
-			"@woocommerce/stores/woocommerce/products": [
-				"assets/js/base/stores/woocommerce/products"
-			],
 			"@woocommerce/stores/woocommerce/shopper-lists": [
 				"assets/js/base/stores/woocommerce/shopper-lists"
 			],

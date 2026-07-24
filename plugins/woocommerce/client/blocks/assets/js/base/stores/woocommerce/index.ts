@@ -44,10 +44,6 @@ import {
 } from './draft-internals';
 import { resolveProduct } from './product-resolution';
 
-// The transitional aliases below keep resolving for consumer type imports
-// until each consumer's own task migrates it (`products.ts` dissolves in a
-// later task, once every consumer has re-pointed).
-export type { ProductsStore, ProductsStoreState } from './products';
 export type { DraftItem, SelectedAttributes } from './cart';
 
 /**
