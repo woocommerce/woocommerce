@@ -80,7 +80,15 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$private_variation = wc_get_product( $variable_with_private_out_of_stock_child->get_children()[0] );
+		$private_variation = null;
+		foreach ( $variable_with_private_out_of_stock_child->get_children() as $child_id ) {
+			$child = wc_get_product( $child_id );
+			if ( ProductStockStatus::OUT_OF_STOCK === $child->get_stock_status() ) {
+				$private_variation = $child;
+				break;
+			}
+		}
+		$this->assertInstanceOf( WC_Product_Variation::class, $private_variation );
 		$private_variation->set_status( 'private' );
 		$private_variation->save();
 		WC_Product_Variable::sync( $variable_with_private_out_of_stock_child );
