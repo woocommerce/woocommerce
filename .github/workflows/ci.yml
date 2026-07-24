@@ -182,7 +182,10 @@ jobs:
           # phpcs reports paths relative to this working directory, but GitHub resolves
           # annotation paths from the repo root -- without this they never attach to the diff.
           sed -i 's|<file name="|<file name="plugins/woocommerce/|g' checkstyle.xml
-          cs2pr checkstyle.xml
+          # cs2pr exits non-zero whenever the report contains errors. The job has already
+          # failed at 'Lint' by this point, so that adds nothing except a second red step
+          # and a stray "exit code 1" annotation pointing at this workflow file.
+          cs2pr checkstyle.xml || true
 
   woocommerce-plugin-build-artifact:
     name: "Build WooCommerce plugin artifact${{ needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' && ' (optional)' || '' }}"
