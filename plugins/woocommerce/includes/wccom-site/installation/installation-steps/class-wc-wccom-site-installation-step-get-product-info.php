@@ -103,6 +103,13 @@ class WC_WCCOM_Site_Installation_Step_Get_Product_Info implements WC_WCCOM_Site_
 	 * @throws Installer_Error Installer Error.
 	 */
 	protected function get_wccom_download_url( $product_id ) {
+		// An install/update is an explicit user action that force-refreshes the
+		// subscription and update data below. Clear any Helper API rate-limit
+		// backoff first so those calls are made fresh rather than skipped — a
+		// suppressed response would otherwise surface as a misleading
+		// "missing subscription" or "missing package" install failure.
+		WC_Helper_API_Backoff::clear_all();
+
 		WC_Helper::_flush_subscriptions_cache();
 
 		if ( ! WC_Helper::has_product_subscription( $product_id ) ) {
