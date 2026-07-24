@@ -396,6 +396,40 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Special column formatting callbacks are only applied to columns whose name starts with the special prefix.
+	 */
+	public function test_get_formatting_callback_matches_special_columns_by_prefix() {
+		$importer = new WC_Product_CSV_Importer( $this->csv_file, array( 'lines' => 1 ) );
+
+		$mapped_keys = array(
+			// Canonical special columns.
+			'attributes:value1'    => array( $importer, 'parse_comma_field' ),
+			'attributes:visible1'  => array( $importer, 'parse_bool_field' ),
+			'attributes:taxonomy1' => array( $importer, 'parse_bool_field' ),
+			'downloads:url1'       => array( $importer, 'parse_download_file_field' ),
+			'meta:_my_field'       => 'wp_kses_post',
+			// Columns that merely contain a special name must fall back to wc_clean.
+			'metamask'             => 'wc_clean',
+			'hellometa:'           => 'wc_clean',
+			'product_metadata'     => 'wc_clean',
+			'my attributes:value'  => 'wc_clean',
+			'a downloads:url1'     => 'wc_clean',
+			// Special columns handled elsewhere still get the default callback.
+			'attributes:name1'     => 'wc_clean',
+			'attributes:default1'  => 'wc_clean',
+			'downloads:name1'      => 'wc_clean',
+		);
+
+		$reflected_keys = new ReflectionProperty( $importer, 'mapped_keys' );
+		$reflected_keys->setAccessible( true );
+		$reflected_keys->setValue( $importer, array_keys( $mapped_keys ) );
+
+		$callbacks = $this->invoke_protected( $importer, 'get_formatting_callback', array() );
+
+		$this->assertEquals( array_values( $mapped_keys ), $callbacks );
+	}
+
+	/**
 	 * Test get_raw_data.
 	 * @since 3.1.0
 	 */
