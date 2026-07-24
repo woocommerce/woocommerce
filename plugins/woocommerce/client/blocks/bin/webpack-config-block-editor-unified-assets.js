@@ -9,7 +9,10 @@ const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
  * Internal dependencies
  */
 const { getEntryConfig } = require( './webpack-entries' );
-const { editorStyleEntries } = require( './webpack-interactivity-entries' );
+const {
+	editorStyleEntries,
+	styleEntries,
+} = require( './webpack-interactivity-entries' );
 const {
 	NODE_ENV,
 	getProgressBarPluginConfig,
@@ -121,6 +124,9 @@ const getUnifiedEditorStyleEntries = ( exclude = [] ) =>
 		{
 			'wc-block-library-style-source': [
 				...Object.values( getEntryConfig( 'styling', exclude ) ).flat(),
+				// Interactivity styles are emitted by a separate frontend build,
+				// so they are excluded from the standard styling entry graph.
+				...Object.values( styleEntries ).flat(),
 				...Object.values( editorStyleEntries ).flat(),
 			],
 		},
