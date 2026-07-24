@@ -801,13 +801,23 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 					" AND {$wpdb->posts}.ID IN (
 						SELECT stock_status_products.product_id
 						FROM (
-							SELECT DISTINCT COALESCE( stock_status_variations.post_parent, stock_status_lookup.product_id ) AS product_id
+							SELECT DISTINCT CAST(
+								CASE
+									WHEN stock_status_posts.post_type = 'product_variation' THEN stock_status_posts.post_parent
+									ELSE stock_status_lookup.product_id
+								END AS UNSIGNED
+							) AS product_id
 							FROM {$wpdb->wc_product_meta_lookup} stock_status_lookup
-							LEFT JOIN {$wpdb->posts} stock_status_variations
-								ON stock_status_variations.ID = stock_status_lookup.product_id
-								AND stock_status_variations.post_type = 'product_variation'
-								AND stock_status_variations.post_status = 'publish'
+							INNER JOIN {$wpdb->posts} stock_status_posts
+								ON stock_status_posts.ID = stock_status_lookup.product_id
 							WHERE stock_status_lookup.stock_status = %s
+								AND (
+									stock_status_posts.post_type = 'product'
+									OR (
+										stock_status_posts.post_type = 'product_variation'
+										AND stock_status_posts.post_status = 'publish'
+									)
+								)
 						) stock_status_products
 					) ",
 					$stock_status
