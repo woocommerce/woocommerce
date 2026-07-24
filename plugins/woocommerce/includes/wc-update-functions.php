@@ -27,6 +27,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
@@ -2259,6 +2260,8 @@ function wc_update_450_sanitize_coupons_code() {
 		return false;
 	}
 
+	$codes_changed = false;
+
 	foreach ( $coupons as $key => $data ) {
 		$coupon_id = intval( $data['ID'] );
 		$code      = trim( wp_filter_kses( $data['post_title'] ) );
@@ -2280,10 +2283,15 @@ function wc_update_450_sanitize_coupons_code() {
 				)
 			);
 
-			// Clean cache.
+			// Clean post cache.
 			clean_post_cache( $coupon_id );
-			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $data['post_title'], 'coupons' );
+			$codes_changed = true;
 		}
+	}
+
+	// Clean coupon code lookup cache.
+	if ( $codes_changed ) {
+		wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate_lookup_namespace();
 	}
 
 	// Start the run again.
