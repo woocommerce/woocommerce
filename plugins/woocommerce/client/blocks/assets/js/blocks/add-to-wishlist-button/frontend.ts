@@ -7,9 +7,9 @@ import {
 	store,
 	type AsyncAction,
 } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
 import '@woocommerce/stores/woocommerce/shopper-lists';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import type { WooCommerce } from '@woocommerce/stores/woocommerce';
 import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import type {
 	RawShopperListItem,
@@ -62,8 +62,8 @@ type BlockStore = {
 	};
 };
 
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+const { state: wooCommerceState } = store< WooCommerce >(
+	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
@@ -80,14 +80,14 @@ const { state } = store< BlockStore >(
 	{
 		state: {
 			// For variable products, the effective product is the selected
-			// variation — resolved through the products store's
-			// `productInContext` derived getter, which already encapsulates
-			// "variation if one is selected, otherwise the parent." Returns
-			// 0 when the current resolution is still the variable parent
-			// (i.e. the shopper hasn't picked attributes yet), which
-			// `isDisabled` reads as "not yet selectable."
+			// variation — resolved through the unified store's
+			// `itemInContext.product` envelope member, which already
+			// encapsulates "variation if one is selected, otherwise the
+			// parent." Returns 0 when the current resolution is still the
+			// variable parent (i.e. the shopper hasn't picked attributes
+			// yet), which `isDisabled` reads as "not yet selectable."
 			get effectiveProductId(): number {
-				const product = productsState.productInContext;
+				const product = wooCommerceState.itemInContext.product;
 				if ( ! product ) {
 					return 0;
 				}
@@ -192,7 +192,8 @@ const { state } = store< BlockStore >(
 						const addToCartContext = getContext< ATCWOContext >(
 							'woocommerce/add-to-cart-with-options'
 						);
-						const parent = productsState.baseProductInContext;
+						const parent =
+							wooCommerceState.itemInContext.baseProduct;
 						const attrMap = new Map< string, string >();
 						parent?.attributes?.forEach(
 							( a: {

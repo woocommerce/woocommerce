@@ -27,7 +27,7 @@ function mockGetEntry( name: string ): MockStoreEntry {
 	return entry;
 }
 
-// The row's own `woocommerce/cart` context — set by the
+// The row's own `woocommerce` context — set by the
 // `data-wp-each--cart-item` directive that iterates `state.cart.items`
 // directly (see `MiniCartProductsTableBlock::render()`).
 let mockCartItemContext: { cartItem: { id: number; key?: string } };
@@ -37,7 +37,7 @@ let mockCartItemContext: { cartItem: { id: number; key?: string } };
 // namespace `findItemInCart` never reads.
 let mockGetContextCalls: Array< string | undefined >;
 
-// The `woocommerce/cart` store's state consulted by the products-table
+// The unified `woocommerce` store's state consulted by the products-table
 // block: `findItem` is the proposed envelope lookup; `findItemInCart` is
 // kept as a spy purely to prove the row no longer calls it.
 let mockWooState: {
@@ -45,8 +45,8 @@ let mockWooState: {
 	findItemInCart: jest.Mock;
 };
 
-// The `woocommerce/cart` store's action spies. `updateItem`/`removeItem` are
-// the proposed actions; `addCartItem`/`removeCartItem` are kept as spies
+// The unified `woocommerce` store's action spies. `updateItem`/`removeItem`
+// are the proposed actions; `addCartItem`/`removeCartItem` are kept as spies
 // purely to prove the mini-cart no longer calls them.
 let mockUpdateItem: jest.Mock;
 let mockRemoveItem: jest.Mock;
@@ -59,7 +59,7 @@ jest.mock(
 		getConfig: jest.fn( () => ( {} ) ),
 		getContext: jest.fn( ( namespace?: string ) => {
 			mockGetContextCalls.push( namespace );
-			if ( namespace === 'woocommerce/cart' ) {
+			if ( namespace === 'woocommerce' ) {
 				return mockCartItemContext;
 			}
 			return {};
@@ -70,7 +70,7 @@ jest.mock(
 		withSyncEvent: ( fn: ( ...args: unknown[] ) => unknown ) => fn,
 		store: jest.fn(
 			( name: string, definition?: Record< string, unknown > ) => {
-				if ( name === 'woocommerce/cart' ) {
+				if ( name === 'woocommerce' ) {
 					return {
 						state: mockWooState,
 						actions: {
@@ -102,7 +102,7 @@ jest.mock(
 );
 
 // Side-effect-only imports `frontend.ts` makes for module ordering; the
-// mocked `store()` above handles the `woocommerce/cart` registration
+// mocked `store()` above handles the unified `woocommerce` registration
 // directly, so the real implementations must never load.
 jest.mock( '@woocommerce/stores/woocommerce/cart', () => ( {} ), {
 	virtual: true,
@@ -205,7 +205,7 @@ describe( 'Mini-Cart frontend store', () => {
 			expect( cartItem.quantity ).toBe( 2 );
 		} );
 
-		it( 'reads the row identity from its own woocommerce/cart context', () => {
+		it( 'reads the row identity from its own woocommerce context', () => {
 			mockCartItemContext = { cartItem: { id: 7, key: 'other-key' } };
 
 			const entries = loadModule();
@@ -215,7 +215,7 @@ describe( 'Mini-Cart frontend store', () => {
 
 			void state.cartItem;
 
-			expect( mockGetContextCalls ).toContain( 'woocommerce/cart' );
+			expect( mockGetContextCalls ).toContain( 'woocommerce' );
 			expect( mockWooState.findItem ).toHaveBeenCalledWith( {
 				id: 7,
 				key: 'other-key',

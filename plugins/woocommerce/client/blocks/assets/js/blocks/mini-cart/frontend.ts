@@ -177,7 +177,7 @@ const getFocusableElements = ( container: HTMLElement | null ) =>
 		: [];
 
 const { state: woocommerceState, actions } = store< WooCommerce >(
-	'woocommerce/cart',
+	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
@@ -460,14 +460,14 @@ const { state: cartItemState } = store(
 			// find the cart item. Where we need reactivity for the wp-each, use
 			// state.cartItem to get the cart item.
 			//
-			// Looked up via the row's own `woocommerce/cart` context — set by
+			// Looked up via the row's own `woocommerce` context — set by
 			// the `data-wp-each--cart-item` directive that iterates
 			// `state.cart.items` directly — through `findItem`'s envelope,
 			// rather than the retired `findItemInCart`.
 			get cartItem() {
 				const {
 					cartItem: { id, key },
-				} = getContext< CartItemContext >( 'woocommerce/cart' );
+				} = getContext< CartItemContext >( 'woocommerce' );
 
 				const cartItem = ( woocommerceState.findItem( { id, key } )
 					.cartItem || {} ) as CartItem;
