@@ -1220,7 +1220,7 @@ p.demo_store,
 	form.login,
 	form.checkout_coupon,
 	form.register {
-		border: 1px solid darken($secondary, 10%);
+		border: 1px solid var(--wc-separator-color, color-mix(in srgb, currentColor 20%, transparent));
 		padding: 20px;
 		margin: 2em 0;
 		text-align: left;

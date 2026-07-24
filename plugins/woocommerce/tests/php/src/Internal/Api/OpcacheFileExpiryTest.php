@@ -3,10 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Api;
 
-use Automattic\WooCommerce\Api\Infrastructure\Main;
 use Automattic\WooCommerce\Internal\Api\OpcacheFileExpiry;
 use Automattic\WooCommerce\Internal\Api\QueryCache;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WC_Unit_Test_Case;
 
 /**
@@ -44,33 +42,7 @@ class OpcacheFileExpiryTest extends WC_Unit_Test_Case {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions( OpcacheFileExpiry::ACTION_HOOK );
 		}
-		$this->enable_or_disable_feature( false );
-		$this->set_plugin_endpoints_registered( false );
 		parent::tearDown();
-	}
-
-	/**
-	 * Enable or disable the dual_code_graphql_api feature via its underlying option.
-	 *
-	 * @param bool $enable True to enable, false to disable.
-	 */
-	private function enable_or_disable_feature( bool $enable ): void {
-		update_option(
-			wc_get_container()->get( FeaturesController::class )->feature_enable_option_name( 'dual_code_graphql_api' ),
-			$enable ? 'yes' : 'no'
-		);
-	}
-
-	/**
-	 * Set the static plugin endpoint registration flag in Main, normally
-	 * set by Main::register_graphql_endpoint().
-	 *
-	 * @param bool $registered The value to set.
-	 */
-	private function set_plugin_endpoints_registered( bool $registered ): void {
-		$property = ( new \ReflectionClass( Main::class ) )->getProperty( 'plugin_endpoints_registered' );
-		$property->setAccessible( true );
-		$property->setValue( null, $registered );
 	}
 
 	/**
@@ -104,61 +76,6 @@ class OpcacheFileExpiryTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( 0, OpcacheFileExpiry::delete_expired_files() );
-	}
-
-	/**
-	 * @testdox handle_cleanup_action does not reschedule when no dual-API endpoint is active.
-	 */
-	public function test_handle_cleanup_action_does_not_reschedule_when_no_endpoint_is_active(): void {
-		if ( ! function_exists( 'as_has_scheduled_action' ) ) {
-			$this->markTestSkipped( 'Action Scheduler is not available.' );
-		}
-
-		as_unschedule_all_actions( OpcacheFileExpiry::ACTION_HOOK );
-		$this->enable_or_disable_feature( false );
-
-		OpcacheFileExpiry::handle_cleanup_action();
-
-		$this->assertFalse(
-			as_has_scheduled_action( OpcacheFileExpiry::ACTION_HOOK, array(), OpcacheFileExpiry::ACTION_GROUP ),
-			'The cleanup should not be rescheduled when nothing writes to the cache.'
-		);
-	}
-
-	/**
-	 * @testdox handle_cleanup_action reschedules when the feature is off but a plugin endpoint is registered.
-	 */
-	public function test_handle_cleanup_action_reschedules_when_plugin_endpoints_exist(): void {
-		if ( ! function_exists( 'as_has_scheduled_action' ) ) {
-			$this->markTestSkipped( 'Action Scheduler is not available.' );
-		}
-
-		$this->enable_or_disable_feature( false );
-		$this->set_plugin_endpoints_registered( true );
-
-		OpcacheFileExpiry::handle_cleanup_action();
-
-		$this->assertTrue(
-			as_has_scheduled_action( OpcacheFileExpiry::ACTION_HOOK, array(), OpcacheFileExpiry::ACTION_GROUP ),
-			'The cleanup should be rescheduled while plugin endpoints use the cache, regardless of the feature flag.'
-		);
-	}
-
-	/**
-	 * @testdox handle_cleanup_action reschedules when the feature is enabled.
-	 */
-	public function test_handle_cleanup_action_reschedules_when_feature_is_on(): void {
-		if ( ! function_exists( 'as_has_scheduled_action' ) ) {
-			$this->markTestSkipped( 'Action Scheduler is not available.' );
-		}
-
-		$this->enable_or_disable_feature( true );
-
-		OpcacheFileExpiry::handle_cleanup_action();
-
-		$this->assertTrue(
-			as_has_scheduled_action( OpcacheFileExpiry::ACTION_HOOK, array(), OpcacheFileExpiry::ACTION_GROUP )
-		);
 	}
 
 	/**

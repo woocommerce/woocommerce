@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Convert boolean Settings UI schema values the way the client does and canonicalize visibility values alongside their controller field.
