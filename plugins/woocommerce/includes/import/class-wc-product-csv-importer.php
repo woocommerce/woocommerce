@@ -109,46 +109,48 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		$handle = fopen( $this->file, 'r' ); // @codingStandardsIgnoreLine.
 
-		if ( false !== $handle ) {
-			$this->raw_keys = array_map( 'trim', fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) ); // @codingStandardsIgnoreLine
+		if ( false === $handle ) {
+			wp_die( esc_html__( 'Unable to open the CSV file, please try again with a new file.', 'woocommerce' ) );
+		}
 
-			if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
-				$this->raw_keys = array_map( array( $this, 'adjust_character_encoding' ), $this->raw_keys );
-			}
+		$this->raw_keys = array_map( 'trim', fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) ); // @codingStandardsIgnoreLine
 
-			// Remove line breaks in keys, to avoid mismatch mapping of keys.
-			$this->raw_keys = wc_clean( wp_unslash( $this->raw_keys ) );
+		if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
+			$this->raw_keys = array_map( array( $this, 'adjust_character_encoding' ), $this->raw_keys );
+		}
 
-			// Remove BOM signature from the first item.
-			if ( isset( $this->raw_keys[0] ) ) {
-				$this->raw_keys[0] = $this->remove_utf8_bom( $this->raw_keys[0] );
-			}
+		// Remove line breaks in keys, to avoid mismatch mapping of keys.
+		$this->raw_keys = wc_clean( wp_unslash( $this->raw_keys ) );
 
-			if ( 0 !== $this->params['start_pos'] ) {
-				fseek( $handle, (int) $this->params['start_pos'] );
-			}
+		// Remove BOM signature from the first item.
+		if ( isset( $this->raw_keys[0] ) ) {
+			$this->raw_keys[0] = $this->remove_utf8_bom( $this->raw_keys[0] );
+		}
 
-			while ( 1 ) {
-				$row = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ); // @codingStandardsIgnoreLine
+		if ( 0 !== $this->params['start_pos'] ) {
+			fseek( $handle, (int) $this->params['start_pos'] );
+		}
 
-				if ( false !== $row ) {
-					if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
-						$row = array_map( array( $this, 'adjust_character_encoding' ), $row );
-					}
+		while ( 1 ) {
+			$row = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ); // @codingStandardsIgnoreLine
 
-					$this->raw_data[]                                 = $row;
-					$this->file_positions[ count( $this->raw_data ) ] = ftell( $handle );
+			if ( false !== $row ) {
+				if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
+					$row = array_map( array( $this, 'adjust_character_encoding' ), $row );
+				}
 
-					if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === --$this->params['lines'] ) {
-						break;
-					}
-				} else {
+				$this->raw_data[]                                 = $row;
+				$this->file_positions[ count( $this->raw_data ) ] = ftell( $handle );
+
+				if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === --$this->params['lines'] ) {
 					break;
 				}
+			} else {
+				break;
 			}
-
-			$this->file_position = ftell( $handle );
 		}
+
+		$this->file_position = ftell( $handle );
 
 		if ( ! empty( $this->params['mapping'] ) ) {
 			$this->set_mapped_keys();
