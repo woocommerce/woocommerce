@@ -1118,6 +1118,24 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox clear_cache removes provider lists cached by the Payments service.
+	 */
+	public function test_clear_cache_removes_cached_provider_lists(): void {
+		wp_cache_set(
+			PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_KEY,
+			array( 'US_display' => array( array( 'id' => 'stale-provider' ) ) ),
+			PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_GROUP
+		);
+
+		$this->sut->clear_cache();
+
+		$this->assertFalse(
+			wp_cache_get( PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_KEY, PaymentsProviders::PROVIDER_LISTS_REQUEST_CACHE_GROUP ),
+			'Provider lists derived from gateway data must not survive a providers cache clear.'
+		);
+	}
+
+	/**
 	 * Test that get_payment_gateway_details does not override gateway details with those from the suggestion
 	 * when they exist.
 	 */
