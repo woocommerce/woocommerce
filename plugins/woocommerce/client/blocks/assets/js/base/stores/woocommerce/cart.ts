@@ -10,13 +10,11 @@ import type {
 	ApiErrorResponse,
 	CartResponseTotals,
 	Currency,
-	ProductResponseItem,
 } from '@woocommerce/types';
 import type {
 	Store as StoreNotices,
 	Notice,
 } from '@woocommerce/stores/store-notices';
-import fastDeepEqual from 'fast-deep-equal/es6';
 
 /**
  * Internal dependencies
@@ -30,7 +28,12 @@ import {
 	type MutationQueue,
 	type MutationResult,
 } from './mutation-batcher';
-import { attributeNamesMatch } from '../../utils/variations/attribute-matching';
+import {
+	draftExtensionsMatchLine,
+	findCartLine,
+	lineMatchesProduct,
+	resolveBaseProduct,
+} from './cart-pairing';
 import {
 	effectiveVariationAttributes,
 	findDraftInCollection,
@@ -342,8 +345,10 @@ const universalLock =
 /**
  * The `woocommerce/products` store's state, consulted one-directionally
  * (cart never becomes a dependency of products) to resolve the product in
- * context for `itemInContext`/`inCartQuantity` and to back the pairing
- * ladder's attribute matching (`matchesSelectedAttributes`).
+ * context for `itemInContext`/`inCartQuantity`. The pairing ladder's own
+ * attribute matching (`matchesSelectedAttributes`, `resolveBaseProduct`)
+ * reads this same namespace independently, fresh per call, from within
+ * `cart-pairing.ts`.
  */
 const { state: productsState } = store< ProductsStore >(
 	'woocommerce/products',
@@ -393,229 +398,6 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 	type: 'notice',
 	dismissible: true,
 } );
-
-/**
- * Resolves the base (parent) product a given product/variation id belongs
- * to, consulting the cart store's own one-directional `productsState`
- * binding directly.
- *
- * A module-private mirror of `draft-internals.ts`'s own (unexported)
- * `resolveBaseProduct` — needed here to resolve the `base` argument
- * {@link effectiveVariationAttributes} takes at `findItem`'s pairing rung
- * and `postDraftItems`' per-item capture. `id` may already name the base
- * product, or one of its variations; either way the return is always the
- * top-level product entry, never a variation. Degrades to `null` when `id`
- * names a product `woocommerce/products` has no record of (a simple
- * product, or an id the store never loaded) — every caller below then
- * treats the lookup as "no family data", per
- * {@link effectiveVariationAttributes}'s own degrade.
- *
- * @param id The product or variation id to resolve.
- * @return The base product, or `null` when it cannot be resolved.
- */
-function resolveBaseProduct( id: number ): ProductResponseItem | null {
-	const variation = productsState.productVariations[ id ];
-	if ( variation ) {
-		return productsState.products[ variation.parent ] ?? null;
-	}
-	return productsState.products[ id ] ?? null;
-}
-
-/**
- * Returns `true` when a variation cart line's recorded attribute values
- * match a set of selected attributes.
- *
- * A module-private copy of the pairing algorithm in
- * `base/utils/variations/does-cart-item-match-attributes.ts`, duplicated
- * (rather than imported) so the cart store's own pairing ladder
- * (`lineMatchesProduct`, `findItem`, `itemInContext`) consults
- * `woocommerce/products` directly instead of through that util's import
- * chain. The standalone util is left in place, unchanged — it still backs
- * the shopper-lists blocks.
- *
- * Resolves each recorded attribute's term slug from the parent product's
- * attribute list (`woocommerce/products` state, consulted one-directionally)
- * to reconcile the Store API's label/slug mismatches, then requires every
- * recorded attribute to match a selected one, case-insensitively and after
- * normalizing WordPress's `attribute_`/`attribute_pa_` prefixes.
- *
- * @param cartItem           The cart line to test.
- * @param selectedAttributes The attributes to match against.
- * @return `true` when every recorded attribute matches a selected one.
- */
-function matchesSelectedAttributes(
-	cartItem: OptimisticCartItem,
-	selectedAttributes: SelectedAttributes[]
-): boolean {
-	if (
-		! Array.isArray( cartItem.variation ) ||
-		! Array.isArray( selectedAttributes )
-	) {
-		return false;
-	}
-
-	if ( cartItem.variation.length !== selectedAttributes.length ) {
-		return false;
-	}
-
-	const parentProductId =
-		productsState.productVariations[ cartItem.id ]?.parent;
-	const productAttributes =
-		productsState.products[ parentProductId ]?.attributes ?? [];
-
-	return cartItem.variation.every( ( { attribute, value: termName } ) =>
-		selectedAttributes.some( ( selectedAttr ) => {
-			const terms = productAttributes.find( ( attr ) =>
-				attributeNamesMatch( attribute, attr.name )
-			)?.terms;
-			const termSlug =
-				terms?.find( ( term ) => term.name === termName )?.slug ||
-				termName;
-			return (
-				attributeNamesMatch( selectedAttr.attribute, attribute ) &&
-				selectedAttr.value.toLowerCase() === termSlug?.toLowerCase()
-			);
-		} )
-	);
-}
-
-/**
- * Returns `true` when the given cart line matches the product identified by
- * `id` and `variation`.
- *
- * Simple items match by `id` equality. Variation items additionally require
- * `variation.length` equality and `matchesSelectedAttributes`. The private
- * matcher backing `findItem`'s identity rung and {@link findCartLine}.
- *
- * @param item      The cart line to test.
- * @param id        The product id to match against.
- * @param variation The variation attributes to match against, if any.
- * @return `true` when the line belongs to the specified product.
- */
-function lineMatchesProduct(
-	item: OptimisticCartItem | CartItem,
-	id: number,
-	variation?: CartVariationItem[] | SelectedAttributes[]
-): boolean {
-	if ( item.type === 'variation' ) {
-		if (
-			id !== item.id ||
-			! item.variation ||
-			! variation ||
-			item.variation.length !== variation.length
-		) {
-			return false;
-		}
-		return matchesSelectedAttributes( item, variation );
-	}
-	return id === item.id;
-}
-
-/**
- * Finds a cart line by key, or by product/variation identity when no key is
- * given.
- *
- * The private matcher behind `addCartItem`/`updateItem`'s keyed-or-keyless
- * lookup and `addItem`'s per-draft lookup, internalizing the former public
- * `findItemInCart` getter's exact behavior: an explicit `key` pairs exactly,
- * otherwise {@link lineMatchesProduct} resolves identity.
- *
- * @param args           Lookup arguments.
- * @param args.id        The product/variation id to match by identity.
- * @param args.key       A known cart-line key; pairs exactly when given,
- *                       regardless of `id`/`variation`.
- * @param args.variation The variation attributes to match against, if any.
- * @return The matching cart line, or `undefined` when none matches.
- */
-function findCartLine( {
-	id,
-	key,
-	variation,
-}: {
-	id: ClientCartItem[ 'id' ];
-	key?: ClientCartItem[ 'key' ];
-	variation?: ClientCartItem[ 'variation' ];
-} ): CartItem | OptimisticCartItem | undefined {
-	if ( key ) {
-		return state.cart.items.find( ( cartItem ) => key === cartItem.key );
-	}
-	return state.cart.items.find( ( cartItem ) =>
-		lineMatchesProduct( cartItem, id, variation )
-	);
-}
-
-/**
- * A single namespaced extension prop parsed off a draft's payload root, e.g.
- * `{ 'my-plugin/gift-note': 'Hi' }` yields `{ namespace: 'my-plugin', key:
- * 'gift-note', value: 'Hi' }`.
- */
-type DraftExtensionProp = {
-	/** The plugin namespace the prop rides under (before the `/`). */
-	namespace: string;
-	/** The prop's own key, within its namespace (after the `/`). */
-	key: string;
-	/** The prop's value, as recorded on the draft. */
-	value: unknown;
-};
-
-/**
- * Extracts a draft's namespaced extension props.
- *
- * Per {@link DraftItem}, extension props are payload-root keys carrying a
- * `/` (e.g. `'my-plugin/gift-note'`); `id`, `quantity`, and `variation`
- * never contain one, so a slash is what distinguishes an extension prop
- * from a core draft field.
- *
- * @param draft The draft to inspect, or `undefined` when none was resolved.
- * @return The draft's extension props, or an empty array when `draft` is
- *         `undefined` or carries none.
- */
-function draftExtensionProps(
-	draft: DraftItem | undefined
-): DraftExtensionProp[] {
-	if ( ! draft ) {
-		return [];
-	}
-	return Object.keys( draft )
-		.filter( ( propKey ) => propKey.includes( '/' ) )
-		.map( ( propKey ) => {
-			const slashIndex = propKey.indexOf( '/' );
-			return {
-				namespace: propKey.slice( 0, slashIndex ),
-				key: propKey.slice( slashIndex + 1 ),
-				value: draft[ propKey ],
-			};
-		} );
-}
-
-/**
- * Returns `true` when every namespaced extension prop on `draft` deep-equals
- * the corresponding value under the cart line's `extensions[<namespace>]`.
- *
- * A draft carrying no extension props always matches — the extension-prop
- * comparison is an additional constraint on the pairing ladder only when the
- * draft actually has one.
- *
- * @param draft The draft whose extension props to check, or `undefined`.
- * @param item  The cart line to compare against.
- * @return `true` when every extension prop matches, or `draft` has none.
- */
-function draftExtensionsMatchLine(
-	draft: DraftItem | undefined,
-	item: OptimisticCartItem | CartItem
-): boolean {
-	const extensions = ( item as CartItem ).extensions;
-	return draftExtensionProps( draft ).every(
-		( { namespace, key, value } ) => {
-			const namespaceData = extensions?.[ namespace ] as
-				| Record< string, unknown >
-				| undefined;
-			return (
-				!! namespaceData && fastDeepEqual( namespaceData[ key ], value )
-			);
-		}
-	);
-}
 
 /**
  * Builds a `Set` of pre-existing cart-line keys to suppress from the
@@ -927,7 +709,7 @@ function* postDraftItems(
 		} );
 
 		const requests = items.map( ( item, index ) => {
-			const existingItem = findCartLine( {
+			const existingItem = findCartLine( state.cart.items, {
 				id: item.id,
 				variation: effectiveAttributesByItem[ index ],
 			} );
@@ -1142,7 +924,7 @@ function* addCartItemGenerator(
 	const a11yModulePromise = import( '@wordpress/a11y' );
 
 	// Find existing item
-	const existingItem = findCartLine( {
+	const existingItem = findCartLine( state.cart.items, {
 		id,
 		key,
 		variation,

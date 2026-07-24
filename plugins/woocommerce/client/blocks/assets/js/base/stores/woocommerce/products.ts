@@ -20,6 +20,7 @@ import {
 	warnDraftInvariant,
 	writeDraft,
 } from './draft-internals';
+import { resolveProduct } from './product-resolution';
 
 /**
  * Per-element selection for the current product/variation.
@@ -225,52 +226,10 @@ const { state: productsState } = store< ProductsStore >(
 				id: number;
 				selectedAttributes?: SelectedAttributes[] | null;
 			} ): ProductResponseItem | null {
-				const variation = productsState.productVariations[ id ];
-				if ( variation ) {
-					return variation;
-				}
-
-				const product = productsState.products[ id ];
-
-				if ( ! product ) {
-					return null;
-				}
-
-				if (
-					product.type !== 'variable' ||
-					! selectedAttributes?.length
-				) {
-					return product;
-				}
-
-				const matchedVariation = product.variations?.find( ( v ) =>
-					v.attributes.every( ( attr ) => {
-						const selectedAttr = selectedAttributes.find(
-							( selected ) =>
-								attributeNamesMatch(
-									attr.name,
-									selected.attribute
-								)
-						);
-
-						if ( attr.value === null ) {
-							return (
-								selectedAttr !== undefined &&
-								selectedAttr.value !== null
-							);
-						}
-
-						return selectedAttr?.value === attr.value;
-					} )
-				);
-
-				if ( ! matchedVariation ) {
-					return null;
-				}
-
-				return (
-					productsState.productVariations[ matchedVariation.id ] ??
-					null
+				return resolveProduct(
+					productsState.products,
+					productsState.productVariations,
+					{ id, selectedAttributes }
 				);
 			},
 
