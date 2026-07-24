@@ -178,6 +178,7 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::HELCIM,
 			self::PAYPAL_WALLET,
 			self::AFFIRM,
 			self::AFTERPAY,
@@ -195,7 +196,6 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::HELCIM,
 		),
 		'PM' => array(
 			self::VISA => array(
@@ -215,12 +215,12 @@ class PaymentsExtensionSuggestions {
 			self::SQUARE, // Use the default details.
 			self::VISA,
 			self::AIRWALLEX,
+			self::HELCIM,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::AFFIRM,
 			self::AFTERPAY,
 			self::KLARNA, // Use the default details.
-			self::HELCIM,
 		),
 		'UM' => array(
 			self::VISA => array(

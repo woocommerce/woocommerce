@@ -944,21 +944,35 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Helcim is the last non-preferred suggestion in $country_code
+	 * @testdox Helcim is the last PSP suggestion in $country_code.
 	 *
 	 * @dataProvider data_provider_helcim_supported_countries
 	 *
 	 * @param string $country_code ISO 3166-1 alpha-2 country code.
+	 * @param string $preceding_psp Expected PSP immediately before Helcim.
 	 */
-	public function test_helcim_is_last_non_preferred_suggestion_in_supported_countries( string $country_code ): void {
-		$extensions = $this->sut->get_country_extensions( $country_code );
-		$helcim     = end( $extensions );
+	public function test_helcim_is_last_psp_suggestion_in_supported_countries( string $country_code, string $preceding_psp ): void {
+		$extensions    = $this->sut->get_country_extensions( $country_code );
+		$extension_ids = array_column( $extensions, 'id' );
+		$helcim_index  = array_search( PaymentsExtensionSuggestions::HELCIM, $extension_ids, true );
 
-		$this->assertIsArray( $helcim, "The final suggestion in {$country_code} should be an extension." );
-		$this->assertSame( 'helcim', $helcim['id'], "Helcim should be the final suggestion in {$country_code}." );
+		$this->assertIsInt( $helcim_index, "Helcim should be suggested in {$country_code}." );
+		if ( ! is_int( $helcim_index ) ) {
+			return;
+		}
+
+		$this->assertSame(
+			array(
+				$preceding_psp,
+				PaymentsExtensionSuggestions::HELCIM,
+				PaymentsExtensionSuggestions::PAYPAL_WALLET,
+			),
+			array_slice( $extension_ids, $helcim_index - 1, 3 ),
+			"Helcim should be the final PSP before express checkout suggestions in {$country_code}."
+		);
 		$this->assertNotContains(
 			PaymentsExtensionSuggestions::TAG_PREFERRED,
-			$helcim['tags'],
+			$extensions[ $helcim_index ]['tags'],
 			"Helcim should remain in other payment options for {$country_code}."
 		);
 	}
@@ -966,12 +980,12 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	/**
 	 * Data provider for Helcim's supported countries.
 	 *
-	 * @return array<string, array{string}>
+	 * @return array<string, array{string, string}>
 	 */
 	public function data_provider_helcim_supported_countries(): array {
 		return array(
-			'Canada'        => array( 'CA' ),
-			'United States' => array( 'US' ),
+			'Canada'        => array( 'CA', PaymentsExtensionSuggestions::GOCARDLESS ),
+			'United States' => array( 'US', PaymentsExtensionSuggestions::AIRWALLEX ),
 		);
 	}
 
