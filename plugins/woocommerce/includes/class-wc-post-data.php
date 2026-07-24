@@ -12,7 +12,6 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -80,7 +79,7 @@ class WC_Post_Data {
 		add_action( 'edited_term', array( __CLASS__, 'handle_attribute_term_updated' ), 10, 3 );
 		add_action( 'delete_term', array( __CLASS__, 'handle_attribute_term_deleted' ), 10, 4 );
 		// Product Variations - Parent Product Updates Attributes.
-		add_action( 'woocommerce_product_attributes_updated', array( __CLASS__, 'on_product_attributes_updated' ), 10, 2 );
+		add_action( 'woocommerce_product_attributes_updated', array( __CLASS__, 'on_product_attributes_updated' ), 10, 1 );
 		// Product Variations - Action Scheduler.
 		add_action( 'wc_regenerate_product_variation_summaries', array( __CLASS__, 'regenerate_product_variation_summaries' ), 10, 1 );
 		add_action( 'wc_regenerate_attribute_variation_summaries', array( __CLASS__, 'regenerate_attribute_variation_summaries' ), 10, 1 );
@@ -964,19 +963,11 @@ class WC_Post_Data {
 	 *
 	 * @since 10.2.0
 	 * @param WC_Product $product The variable product whose attributes were updated.
-	 * @param bool       $force   Whether the update was forced. Forced updates originate from the read-time
-	 *                            backwards-compatibility migration in the data store, where the product's
-	 *                            in-memory attributes can be an incomplete view of what's stored, so stale
-	 *                            attribute meta cleanup must be skipped to avoid deleting valid meta.
 	 *
 	 * @return void
 	 */
-	public static function on_product_attributes_updated( $product, $force = false ) {
+	public static function on_product_attributes_updated( $product ) {
 		if ( $product->is_type( 'variable' ) ) {
-			if ( ! $force ) {
-				self::delete_stale_variation_attribute_meta( $product );
-			}
-
 			global $wpdb;
 			$threshold     = self::get_variation_summaries_sync_threshold();
 			$variation_ids = $wpdb->get_col(
@@ -1009,71 +1000,6 @@ class WC_Post_Data {
 				);
 			}
 		}
-	}
-
-	/**
-	 * Deletes child variation attribute meta that no longer maps to a parent variation attribute.
-	 *
-	 * @param WC_Product $product The variable product whose attributes were updated.
-	 *
-	 * @return void
-	 */
-	private static function delete_stale_variation_attribute_meta( $product ) {
-		global $wpdb;
-
-		$valid_attribute_meta_keys = array();
-		foreach ( $product->get_attributes() as $attribute ) {
-			if ( ! $attribute instanceof WC_Product_Attribute || ! $attribute->get_variation() ) {
-				continue;
-			}
-
-			$valid_attribute_meta_keys[] = wc_variation_attribute_name( $attribute->get_name() );
-		}
-		$valid_attribute_meta_keys = array_values( array_unique( $valid_attribute_meta_keys ) );
-
-		$query_args = array(
-			$product->get_id(),
-			'product_variation',
-			$wpdb->esc_like( 'attribute_' ) . '%',
-		);
-		$not_in_sql = '';
-		if ( ! empty( $valid_attribute_meta_keys ) ) {
-			$not_in_sql = ' AND pm.meta_key NOT IN ( ' . implode( ', ', array_fill( 0, count( $valid_attribute_meta_keys ), '%s' ) ) . ' )';
-			$query_args = array_merge( $query_args, $valid_attribute_meta_keys );
-		}
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-		$stale_rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT pm.post_id, pm.meta_key
-					FROM {$wpdb->postmeta} pm
-					INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-					WHERE p.post_parent = %d
-				AND p.post_type = %s
-				AND pm.meta_key LIKE %s
-				{$not_in_sql}",
-				...$query_args
-			)
-		);
-
-		if ( empty( $stale_rows ) ) {
-			return;
-		}
-
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-		$variation_ids = array();
-		foreach ( $stale_rows as $row ) {
-			$variation_id                   = (int) $row->post_id;
-			$variation_ids[ $variation_id ] = $variation_id;
-			delete_post_meta( $variation_id, $row->meta_key );
-		}
-
-		$invalidator = wc_get_container()->get( ProductVersionStringInvalidator::class );
-		foreach ( $variation_ids as $variation_id ) {
-			clean_post_cache( $variation_id );
-			$invalidator->invalidate( $variation_id );
-		}
-		$invalidator->invalidate( $product->get_id() );
 	}
 
 	/**
