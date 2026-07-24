@@ -97,6 +97,10 @@ class CouponCodeLookupInvalidator {
 	 * @return void
 	 */
 	public function handle_transition_post_status( $new_status, $old_status, $post ): void {
+		if ( ! $post instanceof \WP_Post ) {
+			return;
+		}
+
 		if (
 			'shop_coupon' === $post->post_type
 			&& $new_status !== $old_status
