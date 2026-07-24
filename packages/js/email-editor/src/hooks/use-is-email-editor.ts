@@ -10,11 +10,9 @@ import { storeName } from '../store';
 import { EmailTemplate } from '../store/types';
 
 /**
- * String store name for the WordPress editor store.
- *
- * Using a string instead of `import { store } from '@wordpress/editor'` avoids
- * adding the `wp-editor` script as a dependency of consumers that only need
- * this detection hook (e.g. Product Collection in the block editor).
+ * Store name of the WordPress editor store.
+ * Using a hardcoded string allows us to avoid the import.
+ * See: https://github.com/woocommerce/woocommerce/issues/47831
  */
 const CORE_EDITOR_STORE = 'core/editor';
 
@@ -41,13 +39,13 @@ export function useIsEmailEditor(): boolean {
 		const emailPostType = emailEditorStore.getEmailPostType();
 
 		// Get the current post information from the WordPress editor when available.
-		const editorStore = select( CORE_EDITOR_STORE );
-		if ( ! editorStore ) {
+		const editorSelectors = select( CORE_EDITOR_STORE );
+		if ( ! editorSelectors ) {
 			return false;
 		}
 
-		const currentPostId = editorStore.getCurrentPostId();
-		const currentPostType = editorStore.getCurrentPostType();
+		const currentPostId = editorSelectors.getCurrentPostId();
+		const currentPostType = editorSelectors.getCurrentPostType();
 
 		// Check if the current post matches the email editor post
 		const currentPostMatch =
