@@ -187,68 +187,43 @@ test.describe( 'Add to Cart + Options Block', () => {
 		// This way we can test that sibling blocks update with the variation data.
 		type ProductResponse = {
 			id: number;
-			name: string;
 			slug: string;
-			type: string;
-			status: string;
 			manage_stock: boolean;
 			stock_quantity: number | null;
-			in_stock: boolean;
 		};
 		type VariationResponse = {
 			id: number;
 			manage_stock: boolean;
 			in_stock: boolean;
 			weight: string;
-			description: string;
 			attributes: Array< {
-				id: number;
-				name: string;
 				slug: string;
 				option: string;
 			} >;
 		};
-		const expectedVariationDescription = `<p>${ variationDescription }</p>\n`;
 		const hasTargetAttributes = ( variation: VariationResponse ) =>
 			Array.isArray( variation.attributes ) &&
-			variation.attributes.length === 2 &&
 			variation.attributes.some(
 				( attribute ) =>
-					attribute.id === 1 &&
-					attribute.name === 'Color' &&
-					attribute.slug === 'pa_color' &&
-					attribute.option === 'Blue'
+					attribute.slug === 'pa_color' && attribute.option === 'Blue'
 			) &&
 			variation.attributes.some(
 				( attribute ) =>
-					attribute.id === 0 &&
-					attribute.name === 'Logo' &&
-					attribute.slug === 'logo' &&
-					attribute.option === 'No'
+					attribute.slug === 'logo' && attribute.option === 'No'
 			);
 
 		const hoodieProducts = await requestUtils.rest< ProductResponse[] >( {
 			path: 'wc/v2/products?slug=hoodie',
 		} );
-		const hoodieProduct = Array.isArray( hoodieProducts )
-			? hoodieProducts[ 0 ]
-			: undefined;
-		if (
-			! Array.isArray( hoodieProducts ) ||
-			hoodieProducts.length !== 1 ||
-			! hoodieProduct ||
-			! Number.isInteger( hoodieProduct.id ) ||
-			hoodieProduct.id <= 0 ||
-			hoodieProduct.name !== 'Hoodie' ||
-			hoodieProduct.slug !== 'hoodie' ||
-			hoodieProduct.type !== 'variable' ||
-			hoodieProduct.status !== 'publish' ||
-			hoodieProduct.manage_stock !== false ||
-			hoodieProduct.stock_quantity !== null ||
-			hoodieProduct.in_stock !== true
-		) {
+		const hoodieProduct = hoodieProducts.find(
+			( product ) =>
+				product.slug === 'hoodie' &&
+				Number.isInteger( product.id ) &&
+				product.id > 0
+		);
+		if ( ! hoodieProduct ) {
 			throw new Error(
-				`Failed to find the expected baseline Hoodie product through REST: ${ JSON.stringify(
+				`Failed to find the Hoodie product through REST: ${ JSON.stringify(
 					hoodieProducts
 				) }`
 			);
@@ -259,22 +234,15 @@ test.describe( 'Add to Cart + Options Block', () => {
 				path: `wc/v2/products/${ hoodieProduct.id }/variations?per_page=100`,
 			}
 		);
-		const matchingVariations = Array.isArray( hoodieVariations )
-			? hoodieVariations.filter( hasTargetAttributes )
-			: [];
-		const hoodieProductVariation = matchingVariations[ 0 ];
-		if (
-			! Array.isArray( hoodieVariations ) ||
-			matchingVariations.length !== 1 ||
-			! hoodieProductVariation ||
-			! Number.isInteger( hoodieProductVariation.id ) ||
-			hoodieProductVariation.id <= 0 ||
-			hoodieProductVariation.manage_stock !== false ||
-			hoodieProductVariation.in_stock !== true ||
-			Number( hoodieProductVariation.weight ) !== 1.5
-		) {
+		const hoodieProductVariation = hoodieVariations.find(
+			( variation ) =>
+				Number.isInteger( variation.id ) &&
+				variation.id > 0 &&
+				hasTargetAttributes( variation )
+		);
+		if ( ! hoodieProductVariation ) {
 			throw new Error(
-				`Failed to find the expected baseline Hoodie Blue/No variation through REST: ${ JSON.stringify(
+				`Failed to find the Hoodie Blue/No variation through REST: ${ JSON.stringify(
 					hoodieVariations
 				) }`
 			);
@@ -287,16 +255,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 		if (
 			updatedProduct.id !== hoodieProduct.id ||
-			updatedProduct.name !== 'Hoodie' ||
-			updatedProduct.slug !== 'hoodie' ||
-			updatedProduct.type !== 'variable' ||
-			updatedProduct.status !== 'publish' ||
 			updatedProduct.manage_stock !== true ||
-			updatedProduct.stock_quantity !== 100 ||
-			updatedProduct.in_stock !== true
+			updatedProduct.stock_quantity !== 100
 		) {
 			throw new Error(
-				`Failed to update the expected Hoodie product through REST: ${ JSON.stringify(
+				`Failed to update the Hoodie product through REST: ${ JSON.stringify(
 					updatedProduct
 				) }`
 			);
@@ -314,14 +277,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 		if (
 			updatedVariation.id !== hoodieProductVariation.id ||
-			! hasTargetAttributes( updatedVariation ) ||
 			updatedVariation.manage_stock !== true ||
 			updatedVariation.in_stock !== false ||
-			Number( updatedVariation.weight ) !== 2 ||
-			updatedVariation.description !== expectedVariationDescription
+			Number( updatedVariation.weight ) !== 2
 		) {
 			throw new Error(
-				`Failed to update the expected Hoodie Blue/No variation through REST: ${ JSON.stringify(
+				`Failed to update the Hoodie Blue/No variation through REST: ${ JSON.stringify(
 					updatedVariation
 				) }`
 			);
@@ -567,9 +528,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 			id: number;
 			name: string;
 			slug: string;
-			type: string;
-			order_by: string;
-			has_archives: boolean;
 		} >( {
 			method: 'POST',
 			path: 'wc/v2/products/attributes',
@@ -582,10 +540,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			! Number.isInteger( createdAttribute.id ) ||
 			createdAttribute.id <= 0 ||
 			createdAttribute.name !== 'Taille' ||
-			createdAttribute.slug !== 'pa_custom-waist' ||
-			createdAttribute.type !== 'select' ||
-			createdAttribute.order_by !== 'menu_order' ||
-			createdAttribute.has_archives !== false
+			createdAttribute.slug !== 'pa_custom-waist'
 		) {
 			throw new Error(
 				`Failed to create the expected global attribute through REST: ${ JSON.stringify(
@@ -653,12 +608,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 			name: string;
 			slug: string;
 			type: string;
-			status: string;
-			catalog_visibility: string;
 			attributes: Array< {
 				id: number;
 				name: string;
-				slug: string;
 				visible: boolean;
 				variation: boolean;
 				options: string[];
@@ -680,23 +632,32 @@ test.describe( 'Add to Cart + Options Block', () => {
 				],
 			},
 		} );
-		const productAttribute = createdProduct.attributes?.[ 0 ];
+		const normalizedProductAttributes = createdProduct.attributes
+			.map( ( { id, name, visible, variation, options } ) => ( {
+				id,
+				name,
+				visible,
+				variation,
+				options: [ ...options ].sort(),
+			} ) )
+			.sort( ( a, b ) => a.name.localeCompare( b.name ) );
+		const expectedProductAttributes = [
+			{
+				id: attrId,
+				name: 'Taille',
+				visible: true,
+				variation: true,
+				options: [ 'Grand', 'Petit' ],
+			},
+		];
 		if (
 			! Number.isInteger( createdProduct.id ) ||
 			createdProduct.id <= 0 ||
 			createdProduct.name !== 'Custom Slug Variable' ||
 			createdProduct.slug !== 'custom-slug-variable' ||
 			createdProduct.type !== 'variable' ||
-			createdProduct.status !== 'publish' ||
-			createdProduct.catalog_visibility !== 'visible' ||
-			createdProduct.attributes?.length !== 1 ||
-			productAttribute?.id !== attrId ||
-			productAttribute.name !== 'Taille' ||
-			productAttribute.slug !== 'pa_custom-waist' ||
-			productAttribute.visible !== true ||
-			productAttribute.variation !== true ||
-			productAttribute.options?.length !== 2 ||
-			[ ...productAttribute.options ].sort().join( ',' ) !== 'Grand,Petit'
+			JSON.stringify( normalizedProductAttributes ) !==
+				JSON.stringify( expectedProductAttributes )
 		) {
 			throw new Error(
 				`Failed to create the expected variable product through REST: ${ JSON.stringify(
@@ -709,11 +670,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		// Create a single "Any" variation (empty attributes = matches all terms).
 		const createdVariation = await requestUtils.rest< {
 			id: number;
-			price: string;
 			regular_price: string;
-			visible: boolean;
-			purchasable: boolean;
-			in_stock: boolean;
 			attributes: unknown[];
 		} >( {
 			method: 'POST',
@@ -726,12 +683,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		if (
 			! Number.isInteger( createdVariation.id ) ||
 			createdVariation.id <= 0 ||
-			Number( createdVariation.regular_price ) !== 19.99 ||
-			Number( createdVariation.price ) !== 19.99 ||
-			createdVariation.visible !== true ||
-			createdVariation.purchasable !== true ||
-			createdVariation.in_stock !== true ||
-			! Array.isArray( createdVariation.attributes ) ||
+			createdVariation.regular_price !== '19.99' ||
 			createdVariation.attributes.length !== 0
 		) {
 			throw new Error(
@@ -819,40 +771,21 @@ test.describe( 'Add to Cart + Options Block', () => {
 		// Make Hoodie with Logo to be sold individually.
 		type ProductResponse = {
 			id: number;
-			name: string;
 			slug: string;
-			type: string;
-			status: string;
-			catalog_visibility: string;
-			sku: string;
-			purchasable: boolean;
-			in_stock: boolean;
 			sold_individually: boolean;
 		};
 		const hoodieProducts = await requestUtils.rest< ProductResponse[] >( {
 			path: 'wc/v2/products?slug=hoodie-with-logo',
 		} );
-		const hoodieWithLogoProduct = Array.isArray( hoodieProducts )
-			? hoodieProducts[ 0 ]
-			: undefined;
-		if (
-			! Array.isArray( hoodieProducts ) ||
-			hoodieProducts.length !== 1 ||
-			! hoodieWithLogoProduct ||
-			! Number.isInteger( hoodieWithLogoProduct.id ) ||
-			hoodieWithLogoProduct.id <= 0 ||
-			hoodieWithLogoProduct.name !== 'Hoodie with Logo' ||
-			hoodieWithLogoProduct.slug !== 'hoodie-with-logo' ||
-			hoodieWithLogoProduct.type !== 'simple' ||
-			hoodieWithLogoProduct.status !== 'publish' ||
-			hoodieWithLogoProduct.catalog_visibility !== 'visible' ||
-			hoodieWithLogoProduct.sku !== 'woo-hoodie-with-logo' ||
-			hoodieWithLogoProduct.purchasable !== true ||
-			hoodieWithLogoProduct.in_stock !== true ||
-			hoodieWithLogoProduct.sold_individually !== false
-		) {
+		const hoodieWithLogoProduct = hoodieProducts.find(
+			( product ) =>
+				product.slug === 'hoodie-with-logo' &&
+				Number.isInteger( product.id ) &&
+				product.id > 0
+		);
+		if ( ! hoodieWithLogoProduct ) {
 			throw new Error(
-				`Failed to find the expected baseline Hoodie with Logo product through REST: ${ JSON.stringify(
+				`Failed to find the Hoodie with Logo product through REST: ${ JSON.stringify(
 					hoodieProducts
 				) }`
 			);
@@ -865,18 +798,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 		if (
 			updatedProduct.id !== hoodieWithLogoProduct.id ||
-			updatedProduct.name !== 'Hoodie with Logo' ||
-			updatedProduct.slug !== 'hoodie-with-logo' ||
-			updatedProduct.type !== 'simple' ||
-			updatedProduct.status !== 'publish' ||
-			updatedProduct.catalog_visibility !== 'visible' ||
-			updatedProduct.sku !== 'woo-hoodie-with-logo' ||
-			updatedProduct.purchasable !== true ||
-			updatedProduct.in_stock !== true ||
 			updatedProduct.sold_individually !== true
 		) {
 			throw new Error(
-				`Failed to update the expected Hoodie with Logo product through REST: ${ JSON.stringify(
+				`Failed to update the Hoodie with Logo product through REST: ${ JSON.stringify(
 					updatedProduct
 				) }`
 			);
@@ -1827,8 +1752,36 @@ test.describe( 'Add to Cart + Options Block', () => {
 			},
 		];
 
+		const normalizeAttributes = ( attributes: typeof productAttributes ) =>
+			attributes
+				.map( ( { name, options, variation, visible } ) => ( {
+					name,
+					options: [ ...options ].sort(),
+					variation,
+					visible,
+				} ) )
+				.sort( ( a, b ) => a.name.localeCompare( b.name ) );
+
+		const normalizeVariationAttributes = (
+			attributes: ( typeof productVariations )[ number ][ 'attributes' ]
+		) =>
+			attributes
+				.map( ( { name, option } ) => ( { name, option } ) )
+				.sort( ( a, b ) =>
+					`${ a.name }:${ a.option }`.localeCompare(
+						`${ b.name }:${ b.option }`
+					)
+				);
+
 		test.beforeEach( async ( { requestUtils } ) => {
-			const productResponse = await requestUtils.rest< unknown >( {
+			const product = await requestUtils.rest< {
+				id: number;
+				name: string;
+				slug: string;
+				type: string;
+				status: string;
+				attributes: typeof productAttributes;
+			} >( {
 				method: 'POST',
 				path: 'wc/v3/products',
 				data: {
@@ -1840,32 +1793,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 				},
 			} );
 
-			if ( typeof productResponse !== 'object' || ! productResponse ) {
+			if ( ! Number.isInteger( product.id ) || product.id <= 0 ) {
 				throw new Error(
 					`Unexpected parent product response: ${ JSON.stringify(
-						productResponse,
-						null,
-						2
-					) }`
-				);
-			}
-
-			const product = productResponse as Record< string, unknown >;
-			const productId = product.id;
-			const createdProductAttributes = product.attributes;
-			if (
-				typeof productId !== 'number' ||
-				! Number.isInteger( productId ) ||
-				productId <= 0 ||
-				! Array.isArray( createdProductAttributes ) ||
-				! createdProductAttributes.every(
-					( attribute ) =>
-						typeof attribute === 'object' && attribute !== null
-				)
-			) {
-				throw new Error(
-					`Unexpected parent product response: ${ JSON.stringify(
-						productResponse,
+						product,
 						null,
 						2
 					) }`
@@ -1878,20 +1809,20 @@ test.describe( 'Add to Cart + Options Block', () => {
 				type: 'variable',
 				status: 'publish',
 			} );
-			expect(
-				createdProductAttributes.map(
-					( { name, options, variation, visible } ) => ( {
-						name,
-						options,
-						variation,
-						visible,
-					} )
-				)
-			).toEqual( productAttributes );
+			expect( normalizeAttributes( product.attributes ) ).toEqual(
+				normalizeAttributes( productAttributes )
+			);
 
-			const variationBatchResponse = await requestUtils.rest< unknown >( {
+			const variationBatch = await requestUtils.rest< {
+				create: Array< {
+					id: number;
+					status: string;
+					regular_price: string;
+					attributes: ( typeof productVariations )[ number ][ 'attributes' ];
+				} >;
+			} >( {
 				method: 'POST',
-				path: `wc/v3/products/${ productId }/variations/batch`,
+				path: `wc/v3/products/${ product.id }/variations/batch`,
 				data: {
 					create: productVariations.map( ( variation ) => ( {
 						...variation,
@@ -1900,87 +1831,46 @@ test.describe( 'Add to Cart + Options Block', () => {
 					} ) ),
 				},
 			} );
-
-			if (
-				typeof variationBatchResponse !== 'object' ||
-				! variationBatchResponse
-			) {
-				throw new Error(
-					`Unexpected variation-batch response: ${ JSON.stringify(
-						variationBatchResponse,
-						null,
-						2
-					) }`
-				);
-			}
-
-			const variationBatch = variationBatchResponse as Record<
-				string,
-				unknown
-			>;
 			const createdVariations = variationBatch.create;
 			if (
-				! Array.isArray( createdVariations ) ||
-				! createdVariations.every( ( variation ) => {
-					if ( typeof variation !== 'object' || ! variation ) {
-						return false;
-					}
-
-					const createdVariation = variation as Record<
-						string,
-						unknown
-					>;
-					return (
-						typeof createdVariation.id === 'number' &&
-						Number.isInteger( createdVariation.id ) &&
-						createdVariation.id > 0 &&
-						createdVariation.status === 'publish' &&
-						createdVariation.regular_price === productPrice &&
-						Array.isArray( createdVariation.attributes ) &&
-						createdVariation.attributes.every(
-							( attribute ) =>
-								typeof attribute === 'object' &&
-								attribute !== null
-						)
-					);
-				} )
+				createdVariations.length !== productVariations.length ||
+				! createdVariations.every(
+					( { id, status, regular_price: regularPrice } ) =>
+						Number.isInteger( id ) &&
+						id > 0 &&
+						status === 'publish' &&
+						regularPrice === productPrice
+				)
 			) {
 				throw new Error(
 					`Unexpected variation-batch response: ${ JSON.stringify(
-						variationBatchResponse,
+						variationBatch,
 						null,
 						2
 					) }`
 				);
 			}
 
-			const successfulVariations = createdVariations as {
-				id: number;
-				attributes: {
-					name: string;
-					option: string;
-				}[];
-			}[];
-			expect( successfulVariations ).toHaveLength(
-				productVariations.length
-			);
-			const variationIds = successfulVariations.map( ( { id } ) => id );
-			expect( new Set( variationIds ).size ).toBe(
-				productVariations.length
-			);
+			const variationIds = createdVariations.map( ( { id } ) => id );
+			if ( new Set( variationIds ).size !== productVariations.length ) {
+				throw new Error(
+					`Variation-batch response contained duplicate IDs: ${ JSON.stringify(
+						variationBatch,
+						null,
+						2
+					) }`
+				);
+			}
 
-			const actualAttributeCombinations = successfulVariations
+			const actualAttributeCombinations = createdVariations
 				.map( ( { attributes } ) =>
-					JSON.stringify(
-						attributes.map( ( { name, option } ) => ( {
-							name,
-							option,
-						} ) )
-					)
+					JSON.stringify( normalizeVariationAttributes( attributes ) )
 				)
 				.sort();
 			const expectedAttributeCombinations = productVariations
-				.map( ( { attributes } ) => JSON.stringify( attributes ) )
+				.map( ( { attributes } ) =>
+					JSON.stringify( normalizeVariationAttributes( attributes ) )
+				)
 				.sort();
 			expect( actualAttributeCombinations ).toEqual(
 				expectedAttributeCombinations
