@@ -39,6 +39,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			$schema['shell'],
 			'The shell title should use the decoded page title.'
 		);
+		$this->assertSame( 'default', $schema['section'], 'The default section should remain the stable schema value.' );
 	}
 
 	/**
@@ -85,6 +86,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'default', $schema['groups'] );
 		$this->assertSame( 'default', array_key_first( $schema['groups'] ) );
+		$this->assertArrayNotHasKey( 'order', $schema['groups']['default'], 'Internal group ordering should not leak into the schema.' );
 		$this->assertSame( 'woocommerce_test_text', $schema['groups']['default']['fields'][0]['id'] );
 		$this->assertSame( 'saved value', $schema['groups']['default']['fields'][0]['value'] );
 	}
@@ -393,5 +395,347 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			$field['customAttributes']
 		);
 		$this->assertSame( 'Option A', $field['options'][0]['label'] );
+	}
+
+	/**
+	 * @testdox It canonicalizes scalar option values and the selected value to strings.
+	 */
+	public function test_canonicalize_option_values_stringifies_scalar_option_values(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_option_values' );
+
+		$schema = SettingsUISchema::canonicalize_option_values(
+			$this->get_native_schema_with_field(
+				array(
+					'id'      => 'acme_tier',
+					'type'    => 'select',
+					'value'   => 1,
+					'options' => array(
+						array(
+							'label' => 'One',
+							'value' => 1,
+						),
+						array(
+							'label' => 'Enabled',
+							'value' => true,
+						),
+					),
+				)
+			)
+		);
+
+		$field = $schema['groups']['main']['fields'][0];
+
+		$this->assertSame( '1', $field['value'] );
+		$this->assertSame( array( '1', 'true' ), array_column( $field['options'], 'value' ), 'Boolean option values should convert like the client String() coercion, not the PHP string cast.' );
+	}
+
+	/**
+	 * @testdox It canonicalizes boolean values to the strings the client String() coercion produced before conversion.
+	 */
+	public function test_canonicalize_option_values_matches_client_coercion_for_booleans(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_option_values' );
+
+		$string_options = array(
+			array(
+				'label' => 'On',
+				'value' => 'true',
+			),
+			array(
+				'label' => 'Off',
+				'value' => 'false',
+			),
+		);
+
+		$schema = SettingsUISchema::canonicalize_option_values(
+			$this->get_native_schema_with_fields(
+				array(
+					array(
+						'id'      => 'acme_enabled',
+						'type'    => 'select',
+						'value'   => true,
+						'options' => $string_options,
+					),
+					array(
+						'id'      => 'acme_disabled',
+						'type'    => 'select',
+						'value'   => false,
+						'options' => $string_options,
+					),
+				)
+			)
+		);
+
+		$fields = $schema['groups']['main']['fields'];
+
+		$this->assertSame( 'true', $fields[0]['value'], 'A true value must keep matching the string option the client matched before canonicalization.' );
+		$this->assertSame( 'false', $fields[1]['value'], 'A false value must not collapse to the empty no-selection string.' );
+		$this->assertSame( array( 'true', 'false' ), array_column( $fields[0]['options'], 'value' ), 'String option values should pass through unchanged.' );
+	}
+
+	/**
+	 * @testdox It canonicalizes float option values locale-independently.
+	 */
+	public function test_canonicalize_option_values_stringifies_float_values(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_option_values' );
+
+		$schema = SettingsUISchema::canonicalize_option_values(
+			$this->get_native_schema_with_field(
+				array(
+					'id'      => 'acme_rate',
+					'type'    => 'select',
+					'value'   => 1.5,
+					'options' => array(
+						array(
+							'label' => 'Half',
+							'value' => 0.5,
+						),
+						array(
+							'label' => 'One and a half',
+							'value' => 1.5,
+						),
+					),
+				)
+			)
+		);
+
+		$field = $schema['groups']['main']['fields'][0];
+
+		$this->assertSame( '1.5', $field['value'] );
+		$this->assertSame( array( '0.5', '1.5' ), array_column( $field['options'], 'value' ), 'Float option values should convert with a dot decimal separator in any locale, matching the client String() coercion.' );
+	}
+
+	/**
+	 * @testdox It canonicalizes scalar members of a multiselect value list.
+	 */
+	public function test_canonicalize_option_values_stringifies_value_lists(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_option_values' );
+
+		$schema = SettingsUISchema::canonicalize_option_values(
+			$this->get_native_schema_with_field(
+				array(
+					'id'      => 'acme_tiers',
+					'type'    => 'array',
+					'value'   => array( 1, '2' ),
+					'options' => array(
+						array(
+							'label' => 'One',
+							'value' => 1,
+						),
+						array(
+							'label' => 'Two',
+							'value' => 2,
+						),
+					),
+				)
+			)
+		);
+
+		$field = $schema['groups']['main']['fields'][0];
+
+		$this->assertSame( array( '1', '2' ), $field['value'] );
+		$this->assertSame( array( '1', '2' ), array_column( $field['options'], 'value' ) );
+	}
+
+	/**
+	 * @testdox It leaves schemas with string option values untouched.
+	 */
+	public function test_canonicalize_option_values_leaves_canonical_schemas_untouched(): void {
+		$schema = $this->get_native_schema_with_field(
+			array(
+				'id'      => 'acme_tier',
+				'type'    => 'select',
+				'value'   => '1',
+				'options' => array(
+					array(
+						'label' => 'One',
+						'value' => '1',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( $schema, SettingsUISchema::canonicalize_option_values( $schema ), 'Canonical schemas should pass through unchanged without a doing-it-wrong notice.' );
+	}
+
+	/**
+	 * @testdox It leaves malformed option entries and values unchanged.
+	 */
+	public function test_canonicalize_option_values_leaves_malformed_entries_unchanged(): void {
+		$schema = $this->get_native_schema_with_field(
+			array(
+				'id'      => 'acme_tier',
+				'type'    => 'select',
+				'value'   => new \stdClass(),
+				'options' => array(
+					array(
+						'label' => 'Nested',
+						'value' => array( 'not-scalar' ),
+					),
+					'not-an-array',
+				),
+			)
+		);
+
+		$this->assertEquals( $schema, SettingsUISchema::canonicalize_option_values( $schema ), 'Malformed entries should pass through for the provider to fix.' );
+	}
+
+	/**
+	 * @testdox It canonicalizes visibility values compared against an options field.
+	 */
+	public function test_canonicalize_option_values_stringifies_visibility_values_for_option_controllers(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_option_values' );
+
+		$schema = SettingsUISchema::canonicalize_option_values(
+			$this->get_native_schema_with_fields(
+				array(
+					array(
+						'id'      => 'acme_tier',
+						'type'    => 'select',
+						'value'   => 1,
+						'options' => array(
+							array(
+								'label' => 'One',
+								'value' => 1,
+							),
+							array(
+								'label' => 'Two',
+								'value' => 2,
+							),
+						),
+					),
+					array(
+						'id'         => 'acme_tier_notes',
+						'type'       => 'text',
+						'value'      => '',
+						'visibility' => array(
+							'controller' => 'acme_tier',
+							'value'      => 1,
+						),
+					),
+					array(
+						'id'         => 'acme_tier_badge',
+						'type'       => 'text',
+						'value'      => '',
+						'visibility' => array(
+							'controller' => 'acme_tier',
+							'value'      => array( 1, true ),
+						),
+					),
+				)
+			)
+		);
+
+		$fields = $schema['groups']['main']['fields'];
+
+		$this->assertSame( '1', $fields[1]['visibility']['value'], 'Scalar visibility values must convert with the controller value they are compared against.' );
+		$this->assertSame( array( '1', 'true' ), $fields[2]['visibility']['value'], 'Visibility value lists must convert with the controller value they are compared against.' );
+	}
+
+	/**
+	 * @testdox It leaves visibility value lists containing a non-scalar member unchanged.
+	 */
+	public function test_canonicalize_option_values_leaves_visibility_value_lists_with_non_scalar_members_unchanged(): void {
+		$schema = $this->get_native_schema_with_fields(
+			array(
+				array(
+					'id'      => 'acme_tier',
+					'type'    => 'select',
+					'value'   => '1',
+					'options' => array(
+						array(
+							'label' => 'One',
+							'value' => '1',
+						),
+					),
+				),
+				array(
+					'id'         => 'acme_tier_notes',
+					'type'       => 'text',
+					'value'      => '',
+					'visibility' => array(
+						'controller' => 'acme_tier',
+						'value'      => array( 1, array( 'not-scalar' ) ),
+					),
+				),
+			)
+		);
+
+		$this->assertSame( $schema, SettingsUISchema::canonicalize_option_values( $schema ), 'Visibility value lists with a non-scalar member should pass through whole, scalar members included, for the provider to fix.' );
+	}
+
+	/**
+	 * @testdox It leaves visibility values unchanged when the controller has no options.
+	 */
+	public function test_canonicalize_option_values_leaves_visibility_values_for_non_option_controllers(): void {
+		$schema = $this->get_native_schema_with_fields(
+			array(
+				array(
+					'id'    => 'acme_enabled',
+					'type'  => 'checkbox',
+					'value' => true,
+				),
+				array(
+					'id'         => 'acme_enabled_notes',
+					'type'       => 'text',
+					'value'      => '',
+					'visibility' => array(
+						'controller' => 'acme_enabled',
+						'value'      => true,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( $schema, SettingsUISchema::canonicalize_option_values( $schema ), 'Checkbox controllers compare boolean values, so their visibility rules should pass through unchanged.' );
+	}
+
+	/**
+	 * @testdox It leaves associative value arrays unchanged.
+	 */
+	public function test_canonicalize_option_values_leaves_associative_values_unchanged(): void {
+		$schema = $this->get_native_schema_with_field(
+			array(
+				'id'      => 'acme_tiers',
+				'type'    => 'array',
+				'value'   => array( 'tier' => 1 ),
+				'options' => array(
+					array(
+						'label' => 'One',
+						'value' => '1',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( $schema, SettingsUISchema::canonicalize_option_values( $schema ), 'Associative value arrays should pass through unreindexed for the provider to fix.' );
+	}
+
+	/**
+	 * Build a minimal native schema with one field.
+	 *
+	 * @param array $field Field definition.
+	 * @return array
+	 */
+	private function get_native_schema_with_field( array $field ): array {
+		return $this->get_native_schema_with_fields( array( $field ) );
+	}
+
+	/**
+	 * Build a minimal native schema with the given fields.
+	 *
+	 * @param array $fields Field definitions.
+	 * @return array
+	 */
+	private function get_native_schema_with_fields( array $fields ): array {
+		return array(
+			'id'     => 'acme',
+			'title'  => 'Acme',
+			'groups' => array(
+				'main' => array(
+					'id'     => 'main',
+					'fields' => $fields,
+				),
+			),
+		);
 	}
 }

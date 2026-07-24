@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import { privateApis as themeProviderPrivateApis } from '@wordpress/theme';
+import { ThemeProvider } from '@wordpress/theme';
 import { UnsavedChangesWarning } from '@wordpress/editor';
 
 /**
@@ -17,7 +17,6 @@ import {
 } from './utilites/new-navigation';
 
 const { RouterProvider } = unlock( routerPrivateApis );
-const { ThemeProvider } = unlock( themeProviderPrivateApis );
 
 function ProductsLayout() {
 	// This ensures the edited entity id and type are initialized properly.

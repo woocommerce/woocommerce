@@ -619,7 +619,7 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		if ( ProductStatus::PUBLISH !== $variable_product->get_status() && ! current_user_can( 'edit_post', $variable_product->get_id() ) ) {
+		if ( ! $variable_product->is_viewable() ) {
 			wp_die();
 		}
 
@@ -772,13 +772,26 @@ class WC_AJAX {
 					VisualAttributeTermMeta::save_term_visual_from_request( (int) $result['term_id'], $taxonomy, $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 					$term = get_term_by( 'id', $result['term_id'], $taxonomy );
-					wp_send_json(
-						array(
-							'term_id' => $term->term_id,
-							'name'    => $term->name,
-							'slug'    => $term->slug,
-						)
+
+					if ( ! $term ) {
+						wp_send_json(
+							array(
+								'error' => __( 'Term not found', 'woocommerce' ),
+							)
+						);
+					}
+
+					$response = array(
+						'term_id' => $term->term_id,
+						'name'    => $term->name,
+						'slug'    => $term->slug,
 					);
+
+					if ( VisualAttributeTermMeta::is_visual_attribute_taxonomy( $taxonomy ) ) {
+						$response['visual'] = VisualAttributeTermMeta::get_term_visual( (int) $term->term_id );
+					}
+
+					wp_send_json( $response );
 				}//end if
 			}//end if
 		}//end if
@@ -1051,6 +1064,18 @@ class WC_AJAX {
 		$data  = array();
 		$items = $order->get_items();
 
+		/**
+		 * Customer download data store.
+		 *
+		 * @var WC_Customer_Download_Data_Store $data_store
+		 */
+		$data_store               = WC_Data_Store::load( 'customer-download' );
+		$existing_download_access = array();
+
+		foreach ( $data_store->get_downloads( array( 'order_id' => $order_id ) ) as $download ) {
+			$existing_download_access[ $download->get_product_id() . '|' . $download->get_download_id() ] = true;
+		}
+
 		// Check against order items first.
 		foreach ( $items as $item ) {
 			$product = $item->get_product();
@@ -1079,8 +1104,15 @@ class WC_AJAX {
 
 			if ( ! empty( $download_data['files'] ) ) {
 				foreach ( $download_data['files'] as $download_id => $file ) {
+					$download_access_key = $product_id . '|' . $download_id;
+
+					if ( isset( $existing_download_access[ $download_access_key ] ) ) {
+						continue;
+					}
+
 					$inserted_id = wc_downloadable_file_permission( $download_id, $product->get_id(), $order, $download_data['quantity'], $download_data['order_item'] );
 					if ( $inserted_id ) {
+						$existing_download_access[ $download_access_key ] = true;
 						$download = new WC_Customer_Download( $inserted_id );
 						++$loop;
 						++$file_counter;
@@ -2453,7 +2485,8 @@ class WC_AJAX {
 				$line_items[ $item_id ]['refund_total'] = wc_format_decimal( $total );
 			}
 			foreach ( $line_item_tax_totals as $item_id => $tax_totals ) {
-				$line_items[ $item_id ]['refund_tax'] = array_filter( array_map( 'wc_format_decimal', $tax_totals ) );
+				// Use is_numeric so a 0% tax amount ('0') is preserved. A callback-less array_filter would drop it as falsy, losing the 0-rate tax line (0% is a valid rate, not "no tax"). See #27118.
+				$line_items[ $item_id ]['refund_tax'] = array_filter( array_map( 'wc_format_decimal', $tax_totals ), 'is_numeric' );
 			}
 
 			// Create the refund object.
@@ -3024,16 +3057,19 @@ class WC_AJAX {
 			return;
 		}
 
+		$date_from = isset( $data['date_from'] ) ? wc_clean( $data['date_from'] ) : false;
+		$date_to   = isset( $data['date_to'] ) ? wc_clean( $data['date_to'] ) : false;
+
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
 
-			if ( 'false' !== $data['date_from'] ) {
-				$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( wc_clean( $data['date_from'] ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			if ( false !== $date_from && 'false' !== $date_from ) {
+				$date_on_sale_from = '' === $date_from ? null : date( 'Y-m-d 00:00:00', strtotime( $date_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 				$variation->set_date_on_sale_from( $date_on_sale_from );
 			}
 
-			if ( 'false' !== $data['date_to'] ) {
-				$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( wc_clean( $data['date_to'] ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			if ( false !== $date_to && 'false' !== $date_to ) {
+				$date_on_sale_to = '' === $date_to ? null : date( 'Y-m-d 23:59:59', strtotime( $date_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 				$variation->set_date_on_sale_to( $date_on_sale_to );
 			}
 
@@ -3425,7 +3461,7 @@ class WC_AJAX {
 		do_action( 'woocommerce_update_options' );
 		wp_send_json_success(
 			array(
-				'zones' => WC_Shipping_Zones::get_zones( 'json' ),
+				'zones' => WC_Shipping_Zones::get_zones_with_order_conflict_warnings( 'json' ),
 			)
 		);
 	}

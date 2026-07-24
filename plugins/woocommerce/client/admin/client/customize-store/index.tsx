@@ -1,4 +1,4 @@
-/* eslint-disable @woocommerce/dependency-group */
+/* eslint-disable import/order */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * External dependencies
@@ -89,7 +89,7 @@ const CustomizeStoreController = () => {
 	) => {
 		if ( isNewTabClick( event ) ) {
 			// New tab: page stays open, so fire-and-forget is safe
-			markTaskComplete();
+			void markTaskComplete();
 			return;
 		}
 

@@ -13,7 +13,6 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\ProductAttributes\ReservedAttributeNames;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\POSProductVisibilitySync;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -447,9 +446,12 @@ class WC_Meta_Box_Product_Data {
 		// Remove _product_template_id for products that were created with the new product editor.
 		$product->delete_meta_data( '_product_template_id' );
 
-		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
+		// Only sync POS visibility for product types where the "Available for POS" checkbox is rendered,
+		// so unsupported types (downloadable, grouped, external) don't silently acquire the pos-hidden term.
+		$pos_visibility_sync = wc_get_container()->get( POSProductVisibilitySync::class );
+		if ( $product instanceof WC_Product && $pos_visibility_sync->is_product_supported( $product ) ) {
 			$visible_in_pos = isset( $_POST['_visible_in_pos'] ) && 'yes' === wc_clean( wp_unslash( $_POST['_visible_in_pos'] ) );
-			wc_get_container()->get( POSProductVisibilitySync::class )->set_product_pos_visibility( $post_id, $visible_in_pos );
+			$pos_visibility_sync->set_product_pos_visibility( $post_id, $visible_in_pos );
 		}
 
 		/**

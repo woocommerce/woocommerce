@@ -7,8 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -59,12 +57,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-accounts.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-emails.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-integrations.php';
-				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' ) ) {
-					$settings[] = include_once __DIR__ . '/settings/class-wc-settings-site-visibility.php';
-				}
-				if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
-					$settings[] = include_once __DIR__ . '/settings/class-wc-settings-point-of-sale.php';
-				}
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-site-visibility.php';
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-point-of-sale.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-advanced.php';
 
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
@@ -79,27 +73,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						}
 					}
 				);
-
-				// Reset settings when features that affect settings are toggled.
-				add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( __CLASS__, 'reset_settings_pages_on_feature_change' ), 10, 2 );
 			}
 
 			return self::$settings;
-		}
-
-		/**
-		 * Reset settings when features that affect settings are toggled.
-		 *
-		 * @param string $feature_id The feature ID.
-		 * @param bool   $is_enabled Whether the feature is enabled.
-		 *
-		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-		 */
-		public static function reset_settings_pages_on_feature_change( $feature_id, $is_enabled ) {
-			if ( 'point_of_sale' === $feature_id && $is_enabled ) {
-				self::$settings = array();
-				self::get_settings_pages();
-			}
 		}
 
 		/**
@@ -128,6 +104,33 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			WC()->query->add_endpoints();
 
 			do_action( 'woocommerce_settings_saved' );
+
+			self::maybe_redirect_after_settings_ui_save();
+		}
+
+		/**
+		 * Redirect to the requested Settings UI destination after a form-post save.
+		 */
+		private static function maybe_redirect_after_settings_ui_save(): void {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings nonce is verified before this method is called.
+			if ( empty( $_POST['wc_settings_ui_redirect_to'] ) ) {
+				return;
+			}
+
+			$redirect_to = wp_validate_redirect(
+				esc_url_raw(
+					// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The settings nonce is verified before this method is called.
+					wp_unslash( $_POST['wc_settings_ui_redirect_to'] )
+				),
+				''
+			);
+
+			if ( '' === $redirect_to ) {
+				return;
+			}
+
+			wp_safe_redirect( $redirect_to );
+			exit;
 		}
 
 		/**
@@ -510,14 +513,21 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value     = $value['value'];
 						$disabled_values  = $value['disabled'] ?? array();
 						$show_desc_at_end = $value['desc_at_end'] ?? false;
+						$radio_title_id   = $value['id'] . '-title';
 
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+								<span class="wc-settings-radio-title">
+									<span id="<?php echo esc_attr( $radio_title_id ); ?>"><?php echo esc_html( $value['title'] ); ?></span>
+									<?php
+									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built by self::get_field_description(), which passes the tip through wc_help_tip(); that helper sanitizes the tip text and escapes the aria-label.
+									echo $tooltip_html;
+									?>
+								</span>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
-								<fieldset>
+								<fieldset aria-labelledby="<?php echo esc_attr( $radio_title_id ); ?>">
 									<?php
 									if ( ! $show_desc_at_end ) {
 										echo wp_kses_post( $description );

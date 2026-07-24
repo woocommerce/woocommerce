@@ -46,9 +46,9 @@ export const withNavigationHydration = ( data: { menuItems: MenuItem[] } ) =>
 				if ( ! shouldHydrate ) {
 					return;
 				}
-				startResolution( 'getMenuItems', [] );
-				setMenuItems( data.menuItems );
-				finishResolution( 'getMenuItems', [] );
+				void startResolution( 'getMenuItems', [] );
+				void setMenuItems( data.menuItems );
+				void finishResolution( 'getMenuItems', [] );
 			}, [ shouldHydrate ] );
 
 			return <OriginalComponent { ...props } />;

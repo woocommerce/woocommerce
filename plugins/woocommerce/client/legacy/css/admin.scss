@@ -1901,12 +1901,9 @@ ul.wc_coupon_list_block {
 
 	h2 {
 		margin: 0;
-		font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
-			"Helvetica Neue", sans-serif;
-		font-size: 21px;
-		font-weight: normal;
-		line-height: 1.2;
-		text-shadow: 1px 1px 1px white;
+		font-size: 20px;
+		font-weight: 600;
+		line-height: 1.3;
 		padding: 0;
 	}
 
@@ -1916,21 +1913,19 @@ ul.wc_coupon_list_block {
 
 	h3,
 	h4 {
-		color: #333;
-		margin: 1.33em 0 0;
+		color: $gray-900;
+		margin: 12px 0 0;
 	}
 
 	p {
-		color: #777;
+		color: $subtext;
 	}
 
 	p.order_number {
 		margin: 0;
-		font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
-			"Helvetica Neue", sans-serif;
 		font-weight: normal;
-		line-height: 1.6em;
-		font-size: 16px;
+		line-height: 1.5;
+		font-size: 13px;
 	}
 
 	.order_data_header {
@@ -1956,8 +1951,8 @@ ul.wc_coupon_list_block {
 	}
 
 	.order_data_column {
-		width: 32%;
-		padding: 0 2% 0 0;
+		width: 31%;
+		padding: 0 3% 0 0;
 		float: left;
 
 		> h3 span {
@@ -1968,12 +1963,31 @@ ul.wc_coupon_list_block {
 			padding-right: 0;
 		}
 
+		// Breathing room when columns stack at narrow widths.
+		// (No-op on float layouts that fit side-by-side.)
+		&:not(:last-child) {
+			margin-bottom: 24px;
+		}
+
 		p {
 			padding: 0 !important;
 		}
 
-		.address strong {
-			display: block;
+		.address {
+			margin-top: 8px;
+
+			p {
+				margin: 0 0 8px;
+				line-height: 1.6;
+				overflow-wrap: anywhere;
+			}
+
+			strong {
+				display: block;
+				margin-bottom: 4px;
+				font-weight: 600;
+				color: $gray-900; // Field labels use the primary admin text color.
+			}
 		}
 
 		.form-field {
@@ -1985,7 +1999,8 @@ ul.wc_coupon_list_block {
 
 			label {
 				display: block;
-				padding: 0 0 3px;
+				margin-bottom: 4px;
+				color: $gray-900;
 			}
 
 			input:not(.checkbox),
@@ -2005,7 +2020,7 @@ ul.wc_coupon_list_block {
 			small {
 				display: block;
 				margin: 5px 0 0;
-				color: #999;
+				color: $gray-900;
 			}
 		}
 
@@ -2040,6 +2055,7 @@ ul.wc_coupon_list_block {
 			}
 			input.date-picker {
 				width: 40%;
+				margin-right: 8px;
 			}
 			input.hour,
 			input.minute {
@@ -2047,8 +2063,8 @@ ul.wc_coupon_list_block {
 			}
 		}
 
-		p.none_set {
-			color: #999;
+		.none_set {
+			color: $subtext;
 		}
 
 		div.edit_address {
@@ -2082,13 +2098,13 @@ ul.wc_coupon_list_block {
 			margin: 0 0 0 6px;
 			overflow: hidden;
 			position: relative;
-			color: #999;
+			color: $subtext;
 			border: 0;
 			float: right;
 
 			&:hover,
 			&:focus {
-				color: #000;
+				color: var(--wp-admin-theme-color, #007cba);
 			}
 
 			&::after {
@@ -2127,6 +2143,8 @@ ul.wc_coupon_list_block {
 	margin: 0;
 	overflow: hidden;
 	zoom: 1;
+	padding: 0;
+	list-style: none;
 
 	li {
 		border-top: 1px solid #fff;
@@ -2177,6 +2195,84 @@ ul.wc_coupon_list_block {
 				width: 225px;
 				box-sizing: border-box;
 				float: left;
+			}
+		}
+	}
+}
+
+body.post-type-shop_order,
+body.woocommerce_page_wc-orders {
+	.order_actions {
+		display: flex;
+		flex-direction: column;
+		overflow: visible;
+
+		li {
+			border-top: 1px solid $gray-200;
+			border-bottom: 0;
+			padding: 16px 12px;
+			float: none;
+			width: auto;
+			text-align: left;
+
+			&:first-child {
+				border-top: 0;
+			}
+
+			&.wide {
+				padding: 16px 12px;
+			}
+
+			// Save row: keep the legacy trash link in its usual position while
+			// clearing old button margins that overflow under WP 7.0 sizing.
+			&.wide:has(.save_order) {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 8px;
+
+				#delete-action {
+					line-height: 40px;
+					text-align: left;
+					float: none;
+
+					&:not(:has(*)) {
+						display: none;
+					}
+				}
+
+				.save_order {
+					flex-shrink: 0;
+					margin: 0 0 0 auto;
+					float: none;
+				}
+			}
+
+			// Action row (top): select + Apply button. Replaces the legacy
+			// float layout where the Apply button was forced to width: 24px
+			// (a squished pill) and the select to a hardcoded 225px (overflowed
+			// on narrow sidebars).
+			&#actions {
+				display: flex;
+				gap: 8px;
+				align-items: stretch;
+
+				select {
+					flex: 1;
+					min-width: 0; // prevent flex blow-out on long option labels.
+					width: auto;
+					box-sizing: border-box;
+					float: none;
+				}
+
+				.button {
+					flex-shrink: 0;
+					width: auto;
+					box-sizing: border-box;
+					// Reset the legacy 1px button margin so the row doesn't overflow.
+					margin: 0;
+					float: none;
+				}
 			}
 		}
 	}
@@ -2237,6 +2333,7 @@ ul.wc_coupon_list_block {
 			width: 10em;
 			margin: 0 0 0 0.5em;
 			box-sizing: border-box;
+			position: relative;
 
 			input[type="text"] {
 				width: 96%;
@@ -2291,7 +2388,7 @@ ul.wc_coupon_list_block {
 	}
 
 	h3 small {
-		color: #999;
+		color: $gray-900;
 	}
 
 	.amount {
@@ -2359,7 +2456,7 @@ ul.wc_coupon_list_block {
 				text-align: left;
 				padding: 1em;
 				font-weight: normal;
-				color: #999;
+				color: $gray-900;
 				background: #f8f8f8;
 				-webkit-touch-callout: none;
 				-webkit-user-select: none;
@@ -2470,7 +2567,7 @@ ul.wc_coupon_list_block {
 					display: block;
 					margin-top: 0.5em;
 					font-size: 0.92em !important;
-					color: #888;
+					color: $gray-700;
 				}
 			}
 
@@ -2501,7 +2598,7 @@ ul.wc_coupon_list_block {
 
 				label {
 					white-space: nowrap;
-					color: #999;
+					color: $gray-700;
 					font-size: 0.833em;
 
 					input {
@@ -2588,7 +2685,7 @@ ul.wc_coupon_list_block {
 				.wc-order-item-discount,
 				.wc-order-item-refund-fields {
 					font-size: 0.92em !important;
-					color: #888;
+					color: $gray-700;
 				}
 
 				.wc-order-item-taxes,
@@ -2641,7 +2738,7 @@ ul.wc_coupon_list_block {
 			table.display_meta {
 				margin: 0.5em 0 0;
 				font-size: 0.92em !important;
-				color: #888;
+				color: $gray-700;
 
 				tr {
 					th {
@@ -2870,7 +2967,7 @@ ul.wc_coupon_list_block {
 	}
 
 	h3 small {
-		color: #999;
+		color: $gray-900;
 	}
 }
 
@@ -2901,7 +2998,6 @@ ul.wc_coupon_list_block {
 	padding: 0;
 
 	ul.order_actions li {
-		padding: 6px 10px;
 		box-sizing: border-box;
 
 		&:last-child {
@@ -3904,6 +4000,13 @@ mark.notice {
 	background: #fff;
 	color: $red;
 	margin: 0 0 0 10px;
+}
+
+// Mirrors the WP core rule for #lost-connection-notice.
+#wc-lost-connection-notice .spinner {
+	visibility: visible;
+	float: left;
+	margin: 0 5px 0 0;
 }
 
 a.export_rates,
@@ -5248,7 +5351,8 @@ img.help_tip {
 			padding-right: 24px;
 		}
 
-		th label {
+		th label,
+		th .wc-settings-radio-title {
 			position: relative;
 			display: block;
 
@@ -5461,7 +5565,8 @@ img.help_tip {
 				}
 			}
 
-			th label {
+			th label,
+			th .wc-settings-radio-title {
 				img.help_tip,
 				.woocommerce-help-tip {
 					margin: -7px -24px 0 0;
@@ -5587,6 +5692,30 @@ img.help_tip {
 					width: 100%;
 					height: auto;
 					display: block;
+				}
+
+				.woocommerce-product-gallery__video-preview {
+					display: block;
+					width: 100%;
+					aspect-ratio: 1;
+					object-fit: cover;
+					background: $gray-100;
+				}
+
+				&.video::before {
+					@include icon_dashicons("\f522");
+
+					left: 50%;
+					top: 50%;
+					transform: translate(-50%, -50%);
+					z-index: 1;
+					width: auto;
+					height: auto;
+					color: $contentbg;
+					font-size: 1.4em;
+					line-height: 1;
+					text-shadow: 0 0 0.25em rgba(0, 0, 0, 0.8);
+					pointer-events: none;
 				}
 			}
 
@@ -6619,12 +6748,26 @@ img.help_tip {
 				margin-top: 0.25em;
 			}
 		}
+
 		&.woocommerce_variation h3 {
 			a.delete,
 			a.edit,
 			.sort {
 				margin-top: 0.45em;
 			}
+		}
+
+		&.woocommerce_attribute h3 .woocommerce-attribute-global-badge {
+			display: inline-block;
+			margin-inline-start: 6px;
+			border-radius: 4px;
+			background: $gray-100;
+			padding: 4px 6px;
+			color: #3c434a;
+			font-size: 12px;
+			font-weight: 400;
+			line-height: 16px;
+			vertical-align: middle;
 		}
 
 		table {
@@ -7562,6 +7705,16 @@ table.bar_chart {
 		font-size: 13px;
 		font-weight: 400;
 		max-width: 500px;
+
+		// Sizes icon-font glyphs supplied by extension blank states to
+		// match the core mask icons below.
+		&::before {
+			display: block;
+			font-size: 32px;
+			line-height: 1;
+			margin: 0 auto 12px;
+			color: $gray-400;
+		}
 	}
 
 	.woocommerce-BlankState-buttons {
@@ -7638,6 +7791,9 @@ table.bar_chart {
 
 			&:first-child {
 				width: 100%;
+				// Reset the base 3% gutter so the full-width first column
+				// doesn't render at 103% and overflow at narrow viewports.
+				padding-right: 0;
 			}
 		}
 	}
@@ -8384,6 +8540,22 @@ table.bar_chart {
 		}
 	}
 
+	// General column Select2s (Status + Customer): same WP 7.0 sizing as above.
+	// The direct-child `>` scopes this to General — address fields are nested
+	// inside .edit_address and covered by the rule above.
+	#order_data .order_data_column > .form-field-wide .select2-container .select2-selection--single {
+		height: 40px;
+
+		.select2-selection__rendered {
+			line-height: 38px;
+			padding: 0 12px;
+		}
+
+		.select2-selection__arrow {
+			height: 38px;
+		}
+	}
+
 	// Table action icon buttons: prevent WP 7.0 min-height from stretching them.
 	.widefat {
 		.column-wc_actions {
@@ -8423,17 +8595,6 @@ table.bar_chart {
 	}
 
 
-	// Order actions: select + button overflow container due to WP 7.0 select margins.
-	.order_actions {
-		#actions select {
-			width: calc(100% - 32px);
-		}
-
-		// Move to trash: make sure it aligns better vertically with 7.0's increased button height.
-		#delete-action {
-			line-height: 35px;
-		}
-	}
 
 	// Order actions reload button: icon line-height must match WP 7.0 button height.
 	.button.wc-reload {
@@ -8628,6 +8789,112 @@ table.bar_chart {
 	&.post-type-product #postdivrich.woocommerce-product-description {
 		margin-left: 4px;
 		margin-right: 4px;
+	}
+
+	&.post-type-product #submitdiv {
+		--wc-product-publish-spacing-1: var(--wp-admin-grid-unit-05, 4px);
+		--wc-product-publish-spacing-2: var(--wp-admin-grid-unit-10, 8px);
+		--wc-product-publish-icon-size: 20px;
+		--wc-product-publish-row-horizontal-padding: 10px;
+		--wc-product-publish-summary-row-offset: calc(
+			var(--wc-product-publish-icon-size) +
+				6px
+		);
+		--wc-product-publish-panel-offset: calc(
+			var(--wc-product-publish-icon-size) +
+				5px
+		);
+
+		.misc-pub-catalog-visibility {
+			padding-left: calc(
+				var(--wc-product-publish-row-horizontal-padding) +
+					var(--wc-product-publish-summary-row-offset)
+			);
+			position: relative;
+		}
+
+		.misc-pub-catalog-visibility::before {
+			color: currentColor;
+			content: "\f180";
+			content: "\f180" / "";
+			display: inline-block;
+			font: normal 20px/1 dashicons;
+			left: calc(var(--wc-product-publish-row-horizontal-padding) - 1px);
+			position: absolute;
+			speak: never;
+			top: calc(var(--wc-product-publish-spacing-2) - 2px);
+			vertical-align: top;
+			width: var(--wc-product-publish-icon-size);
+		}
+
+		#catalog-visibility-select {
+			margin-left: calc(-1 * var(--wc-product-publish-panel-offset));
+			width: calc(100% + var(--wc-product-publish-panel-offset));
+		}
+
+		#catalog-visibility-select > p:first-of-type {
+			color: $wp-admin-icon-gray;
+			margin: var(--wc-product-publish-spacing-1) 0
+				var(--wc-product-publish-spacing-2);
+		}
+
+		#catalog-visibility-select input[type="radio"],
+		#catalog-visibility-select input[type="checkbox"] {
+			margin: 0 var(--wc-product-publish-spacing-1)
+				var(--wc-product-publish-spacing-1) 0;
+			vertical-align: text-top;
+		}
+
+		#catalog-visibility-select #_featured,
+		#catalog-visibility-select label[for="_featured"] {
+			position: relative;
+			top: calc(
+				var(--wc-product-publish-spacing-2) -
+					5px
+			);
+		}
+
+		#catalog-visibility-select label.selectit,
+		#catalog-visibility-select label[for="_featured"] {
+			display: inline-block;
+			line-height: 1.5;
+			max-width: calc(100% - 28px);
+		}
+
+		#catalog-visibility-select > p:last-child {
+			align-items: center;
+			display: flex;
+			gap: var(--wc-product-publish-spacing-2);
+			margin: var(--wc-product-publish-spacing-2) 0 0;
+		}
+
+		@media screen and (max-width: 782px) {
+			.misc-pub-catalog-visibility::before {
+				top: calc(var(--wc-product-publish-spacing-2) + 3px);
+			}
+
+			#catalog-visibility-select input[type="radio"],
+			#catalog-visibility-select input[type="checkbox"] {
+				margin: calc(-1 * var(--wc-product-publish-spacing-1))
+					var(--wc-product-publish-spacing-1) 0 0;
+				vertical-align: middle;
+			}
+
+			#catalog-visibility-select label.selectit,
+			#catalog-visibility-select label[for="_featured"] {
+				display: inline;
+				line-height: 280%;
+			}
+
+			#catalog-visibility-select > p:last-child {
+				display: block;
+			}
+
+			#catalog-visibility-select #_featured,
+			#catalog-visibility-select label[for="_featured"] {
+				top: 0;
+			}
+		}
 	}
 
 	// Shipping zone name input: ID selector in the base rule outranks the form-table override above.
@@ -9744,6 +10011,34 @@ body.woocommerce-settings-payments-section_legacy {
 		left: 0;
 		background: linear-gradient(to bottom right, transparent 47%, #7e8993 47%, #7e8993 53%, transparent 53%);
 	}
+}
+
+.wc-admin-visual-attribute-term-option {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+
+	.wc-admin-color-swatch {
+		margin-right: 0;
+		flex-shrink: 0;
+		height: 16px;
+		width: 16px;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
+}
+
+.select2-selection__choice .wc-admin-visual-attribute-term-option {
+	gap: 6px;
+	vertical-align: middle;
+	margin-bottom: 1px;
+	margin-inline-start: 2px;
+}
+
+.select2-results__option .wc-admin-visual-attribute-term-option {
+	margin-top: 2px;
+	width: 100%;
 }
 
 .wc-admin-visual-attribute-type fieldset {

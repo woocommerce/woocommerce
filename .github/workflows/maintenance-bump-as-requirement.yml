@@ -36,7 +36,7 @@ jobs:
 
         echo "version=$VERSION" >> $GITHUB_OUTPUT
     - name: Check out trunk
-      uses: actions/checkout@v4
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         ref: trunk
     - name: Check if version bump is needed
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out trunk
-      uses: actions/checkout@v4
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         ref: trunk
     - name: Set up dev environment

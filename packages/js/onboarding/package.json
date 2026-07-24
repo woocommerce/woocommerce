@@ -24,16 +24,13 @@
 		".": {
 			"wc-source": "./src/index.ts",
 			"types": "./build-types/index.d.ts",
-			"import": "./build-module/index.js",
-			"require": "./build/index.js"
+			"import": "./build-module/index.js"
 		}
 	},
-	"main": "build/index.js",
 	"module": "build-module/index.js",
 	"types": "build-types/index.d.ts",
 	"react-native": "src/index",
 	"files": [
-		"build",
 		"build-module",
 		"build-style",
 		"build-types"
@@ -44,7 +41,6 @@
 		"build:project:bundle": "NODE_ENV=production webpack",
 		"build:project:esm": "node build.mjs",
 		"build:publish:project": "pnpm --stream '/^build:publish:project:.*$/'",
-		"build:publish:project:cjs": "node build.mjs --commonjs",
 		"build:publish:project:types": "tsc --build --emitDeclarationOnly",
 		"build:publish:project:runtime": "pnpm build:project",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
@@ -87,12 +83,13 @@
 		"@types/jest": "29.5.x",
 		"@types/react": "18.3.x",
 		"@types/string-similarity": "4.0.0",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"css-loader": "6.11.x",
-		"eslint": "^8.55.0",
+		"eslint": "^10.0.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
@@ -110,8 +107,7 @@
 		"exports": {
 			".": {
 				"types": "./build-types/index.d.ts",
-				"import": "./build-module/index.js",
-				"require": "./build/index.js"
+				"import": "./build-module/index.js"
 			}
 		}
 	},

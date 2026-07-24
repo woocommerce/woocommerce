@@ -9,6 +9,16 @@ use Composer\Autoload\ClassLoader;
 /**
  * Tests for the WooCommerce-scoped Composer PSR-4 fallback autoloader.
  *
+ * Coverage boundary: register_woocommerce_psr4_fallback()'s decline-to-null path (a foreign-shaped
+ * probe loader) is pinned only at the helper level — see read_scoped_psr4_map() and
+ * read_scoped_file_path() below. It is not driven end-to-end through register_() because that would
+ * need two production testing seams on a bootstrap surface: register_() binds
+ * build_woocommerce_psr4_fallback() with early static binding (self::, so a subclass override won't
+ * dispatch) and memoizes its handler in a function-static that the woocommerce.php bootstrap already
+ * populates before any test runs (and PHP cannot reset a function-static). The helper tests guard
+ * the same null-returning logic; if the null-check wiring in register_() is ever refactored, add
+ * those seams to cover the contract end-to-end.
+ *
  * @package Automattic\WooCommerce\Tests
  */
 class AutoloaderTest extends \WC_Unit_Test_Case {
@@ -520,6 +530,126 @@ class AutoloaderTest extends \WC_Unit_Test_Case {
 		$this->assertTrue(
 			in_array( $first, spl_autoload_functions(), true ),
 			'The registered handler must be present on the SPL stack.'
+		);
+	}
+
+	/**
+	 * `ClassLoader::getPrefixesPsr4()` carries no return-type declaration, so an older or foreign
+	 * `Composer\Autoload\ClassLoader` reused from another path may return a non-array. The reader
+	 * must degrade that shape to null, because the map flows straight into find_scoped_file()'s
+	 * `array $psr4_entries` parameter on every autoload miss — outside the handler's try/catch — so
+	 * a non-array would raise an uncatchable TypeError and fatal the request.
+	 *
+	 * @testdox read_scoped_psr4_map() degrades to null on a foreign non-array shape.
+	 */
+	public function test_read_scoped_psr4_map_degrades_on_a_foreign_non_array_shape(): void {
+		// A foreign loader whose getPrefixesPsr4() returns a non-array (legal: the parent declares
+		// no return type). setPsr4() still works, so build() would treat it as a usable loader.
+		$foreign = new class() extends ClassLoader {
+			/**
+			 * Model a foreign/ancient loader that returns a non-array prefix map.
+			 *
+			 * @return string A deliberately non-array value.
+			 */
+			public function getPrefixesPsr4() {
+				return 'foreign-non-array-shape';
+			}
+		};
+
+		$this->assertNull(
+			Autoloader::read_scoped_psr4_map( $foreign ),
+			'A non-array getPrefixesPsr4() return must degrade to null, not flow into find_scoped_file().'
+		);
+	}
+
+	/**
+	 * A genuine loader returns its scoped PSR-4 map unchanged, so the handler keeps resolving
+	 * src classes normally.
+	 *
+	 * @testdox read_scoped_psr4_map() returns the array map from a genuine loader.
+	 */
+	public function test_read_scoped_psr4_map_returns_the_array_map_from_a_genuine_loader(): void {
+		$loader = new ClassLoader();
+		$loader->setPsr4( 'Automattic\\WooCommerce\\', array( dirname( WC_PLUGIN_FILE ) . '/src' ) );
+
+		$map = Autoloader::read_scoped_psr4_map( $loader );
+
+		$this->assertIsArray( $map, 'A genuine loader must yield an array map.' );
+		$this->assertArrayHasKey(
+			'Automattic\\WooCommerce\\',
+			$map,
+			'The scoped first-party prefix must be present in the returned map.'
+		);
+	}
+
+	/**
+	 * `ClassLoader::findFile()` also carries no return-type declaration, so the same older or foreign
+	 * `Composer\Autoload\ClassLoader` reused from another path may return a non-string. The reader
+	 * must degrade that shape to null, because find_scoped_file() declares a `: ?string` return and
+	 * the value reaches it on every autoload miss — outside the handler's try/catch — so a non-string
+	 * would raise an uncatchable TypeError and fatal the request.
+	 *
+	 * @testdox read_scoped_file_path() degrades to null on a foreign non-string shape.
+	 */
+	public function test_read_scoped_file_path_degrades_on_a_foreign_non_string_shape(): void {
+		// A foreign loader whose findFile() returns a non-array, non-string value (legal: the parent
+		// declares no return type).
+		$foreign = new class() extends ClassLoader {
+			/**
+			 * Model a foreign/ancient loader that returns a non-string from findFile().
+			 *
+			 * @param string $class_name The probed class name (ignored).
+			 *
+			 * @return array<int, string> A deliberately non-string value.
+			 */
+			public function findFile( $class_name ) {
+				// Avoid parameter not used PHPCS errors.
+				unset( $class_name );
+				return array( 'foreign-non-string-shape' );
+			}
+		};
+
+		$this->assertNull(
+			Autoloader::read_scoped_file_path( $foreign, 'Automattic\\WooCommerce\\Enums\\DefaultCustomerAddress' ),
+			'A non-string findFile() return must degrade to null, not flow into find_scoped_file()\'s ?string return.'
+		);
+	}
+
+	/**
+	 * A genuine loader still resolves a real src class to its file path, so normal resolution is
+	 * unaffected.
+	 *
+	 * @testdox read_scoped_file_path() returns the resolved path from a genuine loader.
+	 */
+	public function test_read_scoped_file_path_returns_the_path_from_a_genuine_loader(): void {
+		$loader = new ClassLoader();
+		$loader->setPsr4( 'Automattic\\WooCommerce\\', array( dirname( WC_PLUGIN_FILE ) . '/src' ) );
+
+		$path = Autoloader::read_scoped_file_path( $loader, 'Automattic\\WooCommerce\\Enums\\DefaultCustomerAddress' );
+
+		$this->assertIsString( $path, 'A genuine loader must resolve a real src class to a string path.' );
+		$this->assertStringContainsString(
+			'DefaultCustomerAddress',
+			$path,
+			'The resolved path must point at the probed class file.'
+		);
+	}
+
+	/**
+	 * Composer's findFile() returns the literal `false` on a miss — the most common non-string
+	 * return, since every class miss flows through it. read_scoped_file_path() must promote that
+	 * `false` to null (is_string() excludes it), because that promotion is exactly what stops a
+	 * TypeError at find_scoped_file()'s `?string` return on the most-travelled path.
+	 *
+	 * @testdox read_scoped_file_path() promotes findFile()'s false miss to null.
+	 */
+	public function test_read_scoped_file_path_promotes_a_false_miss_to_null(): void {
+		$loader = new ClassLoader();
+		$loader->setPsr4( 'Automattic\\WooCommerce\\', array( dirname( WC_PLUGIN_FILE ) . '/src' ) );
+
+		$this->assertNull(
+			Autoloader::read_scoped_file_path( $loader, 'Automattic\\WooCommerce\\Nope\\DoesNotExistXYZ' ),
+			'A findFile() miss (false) must promote to null, not surface as a non-string.'
 		);
 	}
 }

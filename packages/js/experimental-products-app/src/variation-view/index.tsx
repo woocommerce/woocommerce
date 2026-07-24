@@ -61,8 +61,8 @@ function variationMatchesSearch(
 			[] ),
 	];
 
-	return searchableValues.some( ( searchableValue ) =>
-		searchableValue?.toLowerCase().includes( value )
+	return searchableValues.some(
+		( searchableValue ) => searchableValue?.toLowerCase().includes( value )
 	);
 }
 
