@@ -2,8 +2,7 @@
  * External dependencies
  */
 import type { ProductResponseItem } from '@woocommerce/types';
-import type { ProductsStoreState } from '@woocommerce/stores/woocommerce/products';
-import type { Envelope } from '@woocommerce/stores/woocommerce/cart';
+import type { Envelope } from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies
@@ -25,11 +24,6 @@ let mockRegisteredStore: MockStore | null = null;
 // (`allowZero`/`inputElement`) `getContext()` returns.
 let mockContext: Context;
 
-// The `woocommerce/products` store's state, consulted one-directionally;
-// tests set `productInContext` directly rather than exercising the real
-// `woocommerce/products` getters.
-let mockProductsState: Partial< ProductsStoreState >;
-
 // The `woocommerce/add-to-cart-with-options` store's state this module reads
 // (`state.quantity`), standing in for this block instance's own
 // locally-tracked quantity map.
@@ -37,14 +31,14 @@ let mockAddToCartWithOptionsState: Partial<
 	AddToCartWithOptionsStore[ 'state' ]
 >;
 
-// The `woocommerce/cart` store's state this module reads (`itemInContext`).
-// Setting `itemInContext.draft` simulates a draft already present in the
-// resolved collection — whether seeded, written by this same surface, or
-// written by another surface sharing that collection; setting it to an
-// empty envelope simulates no draft for the in-context product (including
-// one belonging to a different collection, which `itemInContext` would
-// never surface here).
-let mockCartState: { itemInContext: Envelope };
+// The unified `woocommerce` store's state this module reads
+// (`itemInContext`). Setting `itemInContext.draftItem` simulates a draft
+// already present in the resolved collection — whether seeded, written by
+// this same surface, or written by another surface sharing that collection;
+// setting it to an empty envelope simulates no draft for the in-context
+// product (including one belonging to a different collection, which
+// `itemInContext` would never surface here).
+let mockWooState: { itemInContext: Partial< Envelope > };
 
 jest.mock(
 	'@wordpress/interactivity',
@@ -53,11 +47,8 @@ jest.mock(
 		getContext: jest.fn( () => mockContext ),
 		store: jest.fn(
 			( name: string, definition?: Record< string, unknown > ) => {
-				if ( name === 'woocommerce/products' ) {
-					return { state: mockProductsState };
-				}
-				if ( name === 'woocommerce/cart' ) {
-					return { state: mockCartState };
+				if ( name === 'woocommerce' ) {
+					return { state: mockWooState };
 				}
 				if ( name === 'woocommerce/add-to-cart-with-options' ) {
 					return {
@@ -82,10 +73,7 @@ jest.mock(
 	{ virtual: true }
 );
 
-jest.mock( '@woocommerce/stores/woocommerce/cart', () => ( {} ), {
-	virtual: true,
-} );
-jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ), {
+jest.mock( '@woocommerce/stores/woocommerce', () => ( {} ), {
 	virtual: true,
 } );
 
@@ -131,9 +119,8 @@ function makeProduct(
 describe( 'Quantity selector frontend store', () => {
 	beforeEach( () => {
 		mockContext = {};
-		mockProductsState = {};
 		mockAddToCartWithOptionsState = { quantity: {} };
-		mockCartState = { itemInContext: {} };
+		mockWooState = { itemInContext: {} };
 	} );
 
 	afterEach( () => {
@@ -142,11 +129,11 @@ describe( 'Quantity selector frontend store', () => {
 
 	describe( 'inputQuantity', () => {
 		it( "displays another surface's draft update for the same resolved collection, not this instance's stale local quantity", () => {
-			mockProductsState.productInContext = makeProduct();
-			mockAddToCartWithOptionsState.quantity = { 42: 1 };
-			mockCartState.itemInContext = {
-				draft: { id: 42, quantity: 3 },
+			mockWooState.itemInContext = {
+				product: makeProduct(),
+				draftItem: { id: 42, quantity: 3 },
 			};
+			mockAddToCartWithOptionsState.quantity = { 42: 1 };
 
 			const { state } = loadStore();
 
@@ -154,9 +141,8 @@ describe( 'Quantity selector frontend store', () => {
 		} );
 
 		it( 'falls back to the local quantity when the resolved collection holds no draft for the product (including a draft belonging to a different collection)', () => {
-			mockProductsState.productInContext = makeProduct();
+			mockWooState.itemInContext = { product: makeProduct() }; // No draft resolved for this collection.
 			mockAddToCartWithOptionsState.quantity = { 42: 1 };
-			mockCartState.itemInContext = {}; // No draft resolved for this collection.
 
 			const { state } = loadStore();
 
@@ -164,7 +150,7 @@ describe( 'Quantity selector frontend store', () => {
 		} );
 
 		it( 'returns 0 when no product is in context', () => {
-			mockProductsState.productInContext = null;
+			mockWooState.itemInContext = { product: null };
 
 			const { state } = loadStore();
 
@@ -172,9 +158,8 @@ describe( 'Quantity selector frontend store', () => {
 		} );
 
 		it( 'returns 0 when neither the draft nor the local quantity has an entry for the product', () => {
-			mockProductsState.productInContext = makeProduct();
+			mockWooState.itemInContext = { product: makeProduct() };
 			mockAddToCartWithOptionsState.quantity = {};
-			mockCartState.itemInContext = {};
 
 			const { state } = loadStore();
 
@@ -182,11 +167,11 @@ describe( 'Quantity selector frontend store', () => {
 		} );
 
 		it( 'prioritizes a transient local NaN over the draft, so a forced input refresh still reaches the bound value', () => {
-			mockProductsState.productInContext = makeProduct();
-			mockAddToCartWithOptionsState.quantity = { 42: NaN };
-			mockCartState.itemInContext = {
-				draft: { id: 42, quantity: 3 },
+			mockWooState.itemInContext = {
+				product: makeProduct(),
+				draftItem: { id: 42, quantity: 3 },
 			};
+			mockAddToCartWithOptionsState.quantity = { 42: NaN };
 
 			const { state } = loadStore();
 
@@ -201,11 +186,11 @@ describe( 'Quantity selector frontend store', () => {
 			// minimum: 1, multiple_of: 1. At the stale local quantity (1),
 			// decreasing would go below the minimum (1 - 1 = 0) and is
 			// disallowed; at the shared draft's quantity (3), it is allowed.
-			mockProductsState.productInContext = makeProduct();
-			mockAddToCartWithOptionsState.quantity = { 42: 1 };
-			mockCartState.itemInContext = {
-				draft: { id: 42, quantity: 3 },
+			mockWooState.itemInContext = {
+				product: makeProduct(),
+				draftItem: { id: 42, quantity: 3 },
 			};
+			mockAddToCartWithOptionsState.quantity = { 42: 1 };
 
 			const { state } = loadStore();
 
@@ -213,9 +198,8 @@ describe( 'Quantity selector frontend store', () => {
 		} );
 
 		it( 'falls back to the local quantity to gate the stepper buttons when the resolved collection holds no draft', () => {
-			mockProductsState.productInContext = makeProduct();
+			mockWooState.itemInContext = { product: makeProduct() };
 			mockAddToCartWithOptionsState.quantity = { 42: 1 };
-			mockCartState.itemInContext = {};
 
 			const { state } = loadStore();
 
@@ -228,21 +212,21 @@ describe( 'Quantity selector frontend store', () => {
 			// way, so drive the local value to the maximum instead — only
 			// the shared draft's lower quantity (3) permits a further
 			// increase.
-			mockProductsState.productInContext = makeProduct( {
-				add_to_cart: {
-					text: '',
-					description: '',
-					url: '',
-					minimum: 1,
-					maximum: 10,
-					multiple_of: 1,
-					single_text: '',
-				},
-			} );
-			mockAddToCartWithOptionsState.quantity = { 42: 10 };
-			mockCartState.itemInContext = {
-				draft: { id: 42, quantity: 3 },
+			mockWooState.itemInContext = {
+				product: makeProduct( {
+					add_to_cart: {
+						text: '',
+						description: '',
+						url: '',
+						minimum: 1,
+						maximum: 10,
+						multiple_of: 1,
+						single_text: '',
+					},
+				} ),
+				draftItem: { id: 42, quantity: 3 },
 			};
+			mockAddToCartWithOptionsState.quantity = { 42: 10 };
 
 			const { state } = loadStore();
 

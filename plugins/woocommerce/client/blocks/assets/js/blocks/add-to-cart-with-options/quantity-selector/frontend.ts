@@ -2,9 +2,8 @@
  * External dependencies
  */
 import { store, getContext, getElement } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/cart';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
+import type { WooCommerce } from '@woocommerce/stores/woocommerce';
 /**
  * Internal dependencies
  */
@@ -19,16 +18,11 @@ export type Context = {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
-	{},
-	{ lock: universalLock }
-);
-
-// Todo: Use the module exports instead of `store()` once the woocommerce
-// store is public.
-const { state: cartState } = store< WooCommerce >(
-	'woocommerce/cart',
+// A static value-import of the unified `woocommerce` root module (above),
+// rather than a type-only one, so this block self-registers
+// `state.itemInContext` regardless of which other blocks share the page.
+const { state: wooState } = store< WooCommerce >(
+	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
@@ -68,7 +62,7 @@ function resolveDisplayQuantity( productId: number ): number {
 		return localQuantity;
 	}
 
-	const draftQuantity = cartState.itemInContext.draft?.quantity;
+	const draftQuantity = wooState.itemInContext.draftItem?.quantity;
 
 	if ( typeof draftQuantity === 'number' ) {
 		return draftQuantity;
@@ -100,7 +94,7 @@ store< QuantitySelectorStore >(
 	{
 		state: {
 			get allowsQuantityChange(): boolean {
-				const product = productsState.productInContext;
+				const product = wooState.itemInContext.product;
 
 				if ( ! product ) {
 					return true;
@@ -109,7 +103,7 @@ store< QuantitySelectorStore >(
 				return product.is_in_stock && ! product.sold_individually;
 			},
 			get allowsDecrease() {
-				const product = productsState.productInContext;
+				const product = wooState.itemInContext.product;
 
 				if ( ! product ) {
 					return true;
@@ -126,7 +120,7 @@ store< QuantitySelectorStore >(
 				);
 			},
 			get allowsIncrease() {
-				const product = productsState.productInContext;
+				const product = wooState.itemInContext.product;
 
 				if ( ! product ) {
 					return true;
@@ -141,7 +135,7 @@ store< QuantitySelectorStore >(
 				);
 			},
 			get inputQuantity(): number {
-				const product = productsState.productInContext;
+				const product = wooState.itemInContext.product;
 
 				if ( ! product ) {
 					return 0;
@@ -158,7 +152,7 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const product = productsState.productInContext;
+				const product = wooState.itemInContext.product;
 
 				if ( ! product ) {
 					return;
@@ -185,7 +179,7 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const product = productsState.productInContext;
+				const product = wooState.itemInContext.product;
 
 				if ( ! product ) {
 					return;
@@ -222,7 +216,7 @@ store< QuantitySelectorStore >(
 			handleQuantityBlur: () => {
 				const { allowZero, inputElement } = getContext< Context >();
 
-				const product = productsState.productInContext;
+				const product = wooState.itemInContext.product;
 
 				if ( ! product ) {
 					return;
@@ -260,7 +254,7 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const product = productsState.productInContext;
+				const product = wooState.itemInContext.product;
 
 				if ( ! product ) {
 					return;

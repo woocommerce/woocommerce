@@ -7,14 +7,14 @@ import {
 	getConfig,
 	withSyncEvent,
 } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce';
 import type {
-	Store as WooCommerce,
+	WooCommerce,
 	SelectedAttributes,
-} from '@woocommerce/stores/woocommerce/cart';
+} from '@woocommerce/stores/woocommerce';
+import '@woocommerce/stores/woocommerce/cart';
+import type { Store as WooCommerceCart } from '@woocommerce/stores/woocommerce/cart';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -58,16 +58,19 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+// A static value-import of the unified `woocommerce` root module (above),
+// rather than a type-only one, so this block self-registers
+// `state.itemInContext` regardless of which other blocks share the page.
+const { state: wooState } = store< WooCommerce >(
+	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
 
 // Todo: Use the module exports instead of `store()` once the woocommerce
 // store is public.
-const { state: wooState, actions: wooActions } = store< WooCommerce >(
-	'woocommerce/cart',
+const { actions: wooActions } = store< WooCommerceCart >(
+	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
@@ -117,7 +120,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				return state.validationErrors.length === 0;
 			},
 			get allowsAddingToCart(): boolean {
-				const product = productsState.productInContext;
+				const product = wooState.itemInContext.product;
 
 				if ( ! product ) {
 					return false;
@@ -150,7 +153,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				}
 
 				// If selected quantity is invalid, add an error.
-				const product = productsState.productInContext;
+				const product = wooState.itemInContext.product;
 
 				if (
 					value === 0 ||
@@ -205,16 +208,22 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				// sibling variation's write would, and the draft's id
 				// migration (see the variation selector) is what carries it
 				// across a subsequent variation switch.
-				const { draft } = wooState.findItem( { id: productId } );
-				if ( draft ) {
-					draft.quantity = value;
+				const { draftItem } = wooState.findItem( { id: productId } );
+				if ( draftItem ) {
+					draftItem.quantity = value;
 				}
 
-				const parentProduct = productsState.findProduct( {
-					id: productsState.productId,
-					selectedAttributes: context.selectedAttributes,
-				} );
-				if ( parentProduct?.type === 'grouped' ) {
+				// The enclosing form's own top-level product — read via the
+				// unified store's raw page-level `products.productId`
+				// addressing, never the in-context envelope: a grouped
+				// child's own quantity input overrides `productId` to its
+				// own id for its per-child reads (see
+				// `GroupedProductItemSelector`), so `itemInContext.baseProduct`
+				// would resolve to the child (never type `'grouped'`) rather
+				// than telling us the enclosing form itself is grouped.
+				const topLevelProduct =
+					wooState.products.items[ wooState.products.productId ];
+				if ( topLevelProduct?.type === 'grouped' ) {
 					actions.validateGroupedProductQuantity();
 				} else {
 					actions.validateQuantity( productId, value );
@@ -288,7 +297,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					return;
 				}
 
-				const product = productsState.productInContext;
+				const product = wooState.itemInContext.product;
 
 				if ( ! product ) {
 					return;
@@ -297,8 +306,8 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				// `addItem()` resolves what to post itself: the in-context
 				// product's single draft for a simple/variable product, or
 				// every grouped child's draft (auto-batched) for a grouped
-				// product — reading `baseProductInContext`/`itemInContext`
-				// via the products/cart stores, never this action.
+				// product — reading `itemInContext` from the unified
+				// `woocommerce` store, never this action.
 				yield wooActions.addItem();
 			} ),
 		},

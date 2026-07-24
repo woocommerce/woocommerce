@@ -2,7 +2,6 @@
  * External dependencies
  */
 import type { ProductResponseItem } from '@woocommerce/types';
-import type { ProductsStoreState } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -29,19 +28,23 @@ let mockContext: Context;
 // read by `setQuantity` for the input element to dispatch a change event on.
 let mockQuantitySelectorContext: { inputElement?: HTMLInputElement | null };
 
-// The `woocommerce/products` store's state, consulted one-directionally;
-// tests set `productInContext`/`baseProductInContext`/`findProduct` directly
-// rather than exercising the real `woocommerce/products` getters.
-let mockProductsState: Partial< ProductsStoreState >;
+// The unified `woocommerce` store's state, consulted one-directionally.
+// `itemInContext.product` backs the context-aware reads (`allowsAddingToCart`,
+// `validateQuantity`, `addToCart`); `products.productId`/`.items` back the
+// page-level (context-*un*aware) grouped check in `setQuantity` — see that
+// test's own comment for why the check must stay non-contextual.
+let mockWooState: {
+	itemInContext: {
+		product: ProductResponseItem | null;
+	};
+	products: {
+		productId: number;
+		items: Record< number, ProductResponseItem >;
+	};
+	findItem: jest.Mock;
+};
 
-// The `woocommerce/cart` store's `findItem`, controlled per test. Returns
-// an envelope whose `draft` is a fresh, settable plain object per call —
-// mirroring the shape of the real draft view (an object `setQuantity` can
-// write `.quantity` onto) without exercising its family/id-migration
-// resolution, which is covered by the cart store's own tests.
-let mockFindItem: jest.Mock;
-
-// The `woocommerce/cart` store's action spies, controlled per test.
+// The `woocommerce` store's action spies, controlled per test.
 let mockAddItem: jest.Mock;
 let mockAddCartItem: jest.Mock;
 let mockBatchAddCartItems: jest.Mock;
@@ -67,14 +70,9 @@ jest.mock(
 		withSyncEvent: ( fn: unknown ) => fn,
 		store: jest.fn(
 			( name: string, definition?: Record< string, unknown > ) => {
-				if ( name === 'woocommerce/products' ) {
-					return { state: mockProductsState };
-				}
-				if ( name === 'woocommerce/cart' ) {
+				if ( name === 'woocommerce' ) {
 					return {
-						state: {
-							findItem: mockFindItem,
-						},
+						state: mockWooState,
 						actions: {
 							addItem: mockAddItem,
 							addCartItem: mockAddCartItem,
@@ -117,7 +115,7 @@ jest.mock(
 
 // Side-effect store registrations `frontend.ts` imports for ordering only;
 // the mocked `store()` above handles the registration calls directly.
-jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ), {
+jest.mock( '@woocommerce/stores/woocommerce', () => ( {} ), {
 	virtual: true,
 } );
 jest.mock( '@woocommerce/stores/woocommerce/cart', () => ( {} ), {
@@ -181,10 +179,13 @@ describe( 'Add to Cart + Options frontend store', () => {
 			groupedProductIds: [],
 		};
 		mockQuantitySelectorContext = {};
-		mockProductsState = {};
-		mockFindItem = jest.fn( ( args?: { id?: number } ) => ( {
-			draft: { id: args?.id },
-		} ) );
+		mockWooState = {
+			itemInContext: { product: null },
+			products: { productId: 0, items: {} },
+			findItem: jest.fn( ( args?: { id?: number } ) => ( {
+				draftItem: { id: args?.id },
+			} ) ),
+		};
 		mockAddItem = jest.fn( () => Promise.resolve() );
 		mockAddCartItem = jest.fn( () => Promise.resolve() );
 		mockBatchAddCartItems = jest.fn( () => Promise.resolve() );
@@ -197,31 +198,36 @@ describe( 'Add to Cart + Options frontend store', () => {
 	} );
 
 	describe( 'setQuantity', () => {
-		it( 'writes exactly one draft write via findItem({ id }).draft.quantity for a simple product', () => {
+		it( 'writes exactly one draft write via findItem({ id }).draftItem.quantity for a simple product', () => {
 			mockContext.quantity = { 42: 1 };
-			mockProductsState.baseProductInContext = {
-				id: 42,
-			} as ProductResponseItem;
-			mockProductsState.findProduct = jest.fn(
-				() => ( { id: 42, type: 'simple' } as ProductResponseItem )
-			);
+			mockWooState.products = {
+				productId: 42,
+				items: {
+					42: { id: 42, type: 'simple' } as ProductResponseItem,
+				},
+			};
 
 			const { actions } = loadStore();
 			actions.setQuantity( 42, 3 );
 
-			expect( mockFindItem ).toHaveBeenCalledTimes( 1 );
-			expect( mockFindItem ).toHaveBeenCalledWith( { id: 42 } );
-			const { draft } = mockFindItem.mock.results[ 0 ].value;
-			expect( draft.quantity ).toBe( 3 );
+			expect( mockWooState.findItem ).toHaveBeenCalledTimes( 1 );
+			expect( mockWooState.findItem ).toHaveBeenCalledWith( { id: 42 } );
+			const { draftItem } = mockWooState.findItem.mock.results[ 0 ].value;
+			expect( draftItem.quantity ).toBe( 3 );
 		} );
 
 		it( 'drafts only the edited id, not sibling variation ids, for a variable product', () => {
 			mockContext.quantity = { 1: 1, 2: 1, 3: 1 };
-			mockProductsState.baseProductInContext = {
-				id: 1,
-				variations: [ { id: 2 }, { id: 3 } ],
-			} as ProductResponseItem;
-			mockProductsState.findProduct = jest.fn( () => null );
+			mockWooState.products = {
+				productId: 1,
+				items: {
+					1: {
+						id: 1,
+						type: 'variable',
+						variations: [ { id: 2 }, { id: 3 } ],
+					} as ProductResponseItem,
+				},
+			};
 
 			const { actions } = loadStore();
 			actions.setQuantity( 2, 5 );
@@ -235,45 +241,73 @@ describe( 'Add to Cart + Options frontend store', () => {
 
 			// The draft write, too, is only ever made for the id the
 			// shopper actually edited — never every sibling variation.
-			expect( mockFindItem ).toHaveBeenCalledTimes( 1 );
-			expect( mockFindItem ).toHaveBeenCalledWith( { id: 2 } );
-			const { draft } = mockFindItem.mock.results[ 0 ].value;
-			expect( draft.quantity ).toBe( 5 );
+			expect( mockWooState.findItem ).toHaveBeenCalledTimes( 1 );
+			expect( mockWooState.findItem ).toHaveBeenCalledWith( { id: 2 } );
+			const { draftItem } = mockWooState.findItem.mock.results[ 0 ].value;
+			expect( draftItem.quantity ).toBe( 5 );
 		} );
 
 		it( 'writes the draft for a grouped product child row', () => {
-			// A grouped-product child row resolves `productInContext` to the
-			// child (its own nested `woocommerce/products` context), and the
-			// parent lookup used for validation resolves to the grouped
-			// parent — registered separately by the grouped-product-selector
-			// module, stubbed here since this test loads only `../frontend`.
+			// A grouped-product child row resolves `itemInContext.product`
+			// to the child (its own nested `woocommerce` context override —
+			// see `GroupedProductItemSelector::get_quantity_selector_markup`),
+			// while `products.productId`/`.items` — the page-level,
+			// context-*un*aware pair — still names the grouped parent.
 			mockContext.quantity = { 20: 0, 21: 0 };
-			mockProductsState.baseProductInContext = {
-				id: 20,
-			} as ProductResponseItem;
-			mockProductsState.findProduct = jest.fn(
-				() =>
-					( {
-						id: 10,
-						type: 'grouped',
-					} as ProductResponseItem )
-			);
+			mockWooState.products = {
+				productId: 10,
+				items: {
+					10: { id: 10, type: 'grouped' } as ProductResponseItem,
+				},
+			};
 
 			const { actions } = loadStore();
 			actions.validateGroupedProductQuantity = jest.fn();
 			actions.setQuantity( 20, 2 );
 
-			expect( mockFindItem ).toHaveBeenCalledWith( { id: 20 } );
-			const { draft } = mockFindItem.mock.results[ 0 ].value;
-			expect( draft.quantity ).toBe( 2 );
+			expect( mockWooState.findItem ).toHaveBeenCalledWith( { id: 20 } );
+			const { draftItem } = mockWooState.findItem.mock.results[ 0 ].value;
+			expect( draftItem.quantity ).toBe( 2 );
 			expect( actions.validateGroupedProductQuantity ).toHaveBeenCalled();
+		} );
+
+		it( 'routes a grouped child edit through whole-group validation even when the in-context envelope resolves to the child itself', () => {
+			// Pins the regression a context-aware grouped check would
+			// reintroduce: the child row's own `woocommerce` context
+			// override (`productId` = the child's id) makes
+			// `itemInContext.product` resolve to the CHILD's own
+			// (non-grouped) product — exactly as it does in production —
+			// while the page-level `products.productId`/`.items` pair still
+			// names the grouped parent. The grouped check must read the
+			// latter, never the former, or every child edit after the
+			// initial page load would silently skip whole-group validation
+			// (the "at least one selected" / all-children-in-range check).
+			mockContext.quantity = { 20: 0, 21: 0 };
+			mockWooState.itemInContext.product = {
+				id: 20,
+				type: 'simple',
+			} as ProductResponseItem;
+			mockWooState.products = {
+				productId: 10,
+				items: {
+					10: { id: 10, type: 'grouped' } as ProductResponseItem,
+				},
+			};
+
+			const { actions } = loadStore();
+			actions.validateGroupedProductQuantity = jest.fn();
+			actions.validateQuantity = jest.fn();
+			actions.setQuantity( 20, 2 );
+
+			expect( actions.validateGroupedProductQuantity ).toHaveBeenCalled();
+			expect( actions.validateQuantity ).not.toHaveBeenCalled();
 		} );
 	} );
 
 	describe( 'addToCart', () => {
 		it( 'posts the in-context simple/variable product via addItem(), never addCartItem', async () => {
 			mockContext.validationErrors = [];
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 42,
 				type: 'simple',
 			} as ProductResponseItem;
@@ -291,7 +325,7 @@ describe( 'Add to Cart + Options frontend store', () => {
 
 		it( 'posts a grouped product via addItem() too, with no special-casing', async () => {
 			mockContext.validationErrors = [];
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 10,
 				type: 'grouped',
 			} as ProductResponseItem;
@@ -307,7 +341,7 @@ describe( 'Add to Cart + Options frontend store', () => {
 
 		it( 'does nothing when no product is in context', async () => {
 			mockContext.validationErrors = [];
-			mockProductsState.productInContext = null;
+			mockWooState.itemInContext.product = null;
 
 			const { actions } = loadStore();
 			await runAction( actions.addToCart( makeSubmitEvent() ) );
@@ -325,7 +359,7 @@ describe( 'Add to Cart + Options frontend store', () => {
 					message: 'Please select a valid quantity.',
 				},
 			];
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 42,
 				type: 'simple',
 			} as ProductResponseItem;

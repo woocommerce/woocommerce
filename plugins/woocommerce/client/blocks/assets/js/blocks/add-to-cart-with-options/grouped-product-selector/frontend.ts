@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { store, getContext, getConfig } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
+import type { WooCommerce } from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies
@@ -17,8 +17,11 @@ import type {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+// A static value-import of the unified `woocommerce` root module (above),
+// rather than a type-only one, so this block self-registers
+// `state.findItem` regardless of which other blocks share the page.
+const { state: wooState } = store< WooCommerce >(
+	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
@@ -65,10 +68,10 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				const hasInvalidQuantity = Object.entries(
 					context.quantity
 				).some( ( [ id, qty ] ) => {
-					const product = productsState.findProduct( {
+					const product = wooState.findItem( {
 						id: Number( id ),
 						selectedAttributes: context.selectedAttributes,
-					} );
+					} ).product;
 					if ( ! product ) {
 						return false;
 					}

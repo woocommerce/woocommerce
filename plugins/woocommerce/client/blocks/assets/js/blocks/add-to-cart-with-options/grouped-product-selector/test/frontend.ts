@@ -2,7 +2,6 @@
  * External dependencies
  */
 import type { ProductResponseItem } from '@woocommerce/types';
-import type { ProductsStoreState } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -23,8 +22,9 @@ let mockRegisteredStore: MockStore | null = null;
 // returns.
 let mockContext: AddToCartWithOptionsStoreContext;
 
-// The `woocommerce/products` store's state, consulted one-directionally.
-let mockProductsState: Partial< ProductsStoreState >;
+// The unified `woocommerce` store's state, consulted one-directionally via
+// `findItem`.
+let mockWooState: { findItem: jest.Mock };
 
 jest.mock(
 	'@wordpress/interactivity',
@@ -33,8 +33,8 @@ jest.mock(
 		getContext: jest.fn( () => mockContext ),
 		store: jest.fn(
 			( name: string, definition?: Record< string, unknown > ) => {
-				if ( name === 'woocommerce/products' ) {
-					return { state: mockProductsState };
+				if ( name === 'woocommerce' ) {
+					return { state: mockWooState };
 				}
 				mockRegisteredStore = {
 					state: definition?.state ?? {},
@@ -48,7 +48,7 @@ jest.mock(
 	{ virtual: true }
 );
 
-jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ), {
+jest.mock( '@woocommerce/stores/woocommerce', () => ( {} ), {
 	virtual: true,
 } );
 
@@ -98,7 +98,7 @@ describe( 'Grouped product selector frontend store', () => {
 			tempQuantity: 0,
 			groupedProductIds: [ 10, 11 ],
 		};
-		mockProductsState = { findProduct: jest.fn() };
+		mockWooState = { findItem: jest.fn( () => ( { product: null } ) ) };
 	} );
 
 	afterEach( () => {
@@ -128,13 +128,12 @@ describe( 'Grouped product selector frontend store', () => {
 
 		it( 'adds an invalid-quantity error when a selected child is outside its min/max', () => {
 			mockContext.quantity = { 10: 100, 11: 0 };
-			( mockProductsState.findProduct as jest.Mock ).mockImplementation(
-				( { id }: { id: number } ) =>
-					( {
-						id,
-						add_to_cart: { minimum: 1, maximum: 5 },
-					} as unknown as ProductResponseItem )
-			);
+			mockWooState.findItem = jest.fn( ( { id }: { id: number } ) => ( {
+				product: {
+					id,
+					add_to_cart: { minimum: 1, maximum: 5 },
+				} as unknown as ProductResponseItem,
+			} ) );
 
 			const { actions } = loadStore();
 			actions.validateGroupedProductQuantity();
@@ -155,13 +154,12 @@ describe( 'Grouped product selector frontend store', () => {
 					message: 'stale error',
 				},
 			];
-			( mockProductsState.findProduct as jest.Mock ).mockImplementation(
-				( { id }: { id: number } ) =>
-					( {
-						id,
-						add_to_cart: { minimum: 1, maximum: 5 },
-					} as unknown as ProductResponseItem )
-			);
+			mockWooState.findItem = jest.fn( ( { id }: { id: number } ) => ( {
+				product: {
+					id,
+					add_to_cart: { minimum: 1, maximum: 5 },
+				} as unknown as ProductResponseItem,
+			} ) );
 
 			const { actions } = loadStore();
 			actions.validateGroupedProductQuantity();

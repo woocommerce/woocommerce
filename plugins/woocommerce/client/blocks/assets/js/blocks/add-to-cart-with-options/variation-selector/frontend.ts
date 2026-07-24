@@ -7,13 +7,11 @@ import {
 	getConfig,
 	getElement,
 } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce';
 import type {
 	SelectedAttributes,
-	Store as WooCommerce,
-} from '@woocommerce/stores/woocommerce/cart';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+	WooCommerce,
+} from '@woocommerce/stores/woocommerce';
 import type { ProductResponseItem } from '@woocommerce/types';
 
 /**
@@ -54,16 +52,11 @@ type ToggleContext = Context & {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
-	{},
-	{ lock: universalLock }
-);
-
-// Todo: Use the module exports instead of `store()` once the woocommerce
-// store is public.
-const { state: cartState } = store< WooCommerce >(
-	'woocommerce/cart',
+// A static value-import of the unified `woocommerce` root module (above),
+// rather than a type-only one, so this block self-registers
+// `state.itemInContext` regardless of which other blocks share the page.
+const { state: wooState } = store< WooCommerce >(
+	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
@@ -98,7 +91,7 @@ const isAttributeValueValid = ( {
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
 
-	const { baseProductInContext: product } = productsState;
+	const { baseProduct: product } = wooState.itemInContext;
 
 	if ( ! product?.variations?.length ) {
 		return false;
@@ -242,7 +235,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				// or the draft's `variation` is empty (no selection recorded
 				// there — e.g. a simple product's draft, or an untouched
 				// variable product's draft/seed).
-				const draftVariation = cartState.itemInContext.draft?.variation;
+				const draftVariation =
+					wooState.itemInContext.draftItem?.variation;
 				if ( draftVariation && draftVariation.length > 0 ) {
 					return draftVariation;
 				}
@@ -366,9 +360,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				// from any surface replaces the shared selection wholesale,
 				// matching the draft-first display (`state.selectedAttributes`)
 				// and validation (`validateVariation`).
-				const { draft } = cartState.itemInContext;
-				if ( draft ) {
-					draft.variation = context.selectedAttributes;
+				const { draftItem } = wooState.itemInContext;
+				if ( draftItem ) {
+					draftItem.variation = context.selectedAttributes;
 				}
 			},
 			autoselectAttributes( {
@@ -385,7 +379,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { selectedAttributes } = state;
 
-				const { baseProductInContext: product } = productsState;
+				const { baseProduct: product } = wooState.itemInContext;
 				if ( ! product ) {
 					return;
 				}
@@ -456,7 +450,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				} );
 			},
 			resolveVariationId: () => {
-				const { baseProductInContext: product } = productsState;
+				const { baseProduct: product } = wooState.itemInContext;
 
 				if ( ! product?.variations?.length ) {
 					return;
@@ -473,29 +467,32 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = state;
 				const productContext = getContext< {
 					variationId?: number | null;
-				} >( 'woocommerce/products' );
+				} >( 'woocommerce' );
 
-				const result = productsState.findProduct( {
+				const result = wooState.findItem( {
 					id: product.id,
 					selectedAttributes,
-				} );
-				// findProduct returns the parent when no variation
-				// matches — only accept an actual variation.
+				} ).product;
+				// The variation-existence probe resolves `null` when the
+				// selected attributes match no variation — only accept an
+				// actual variation.
 				const matchedVariation =
 					result && result.id !== product.id ? result : null;
 
 				const variationId = matchedVariation?.id ?? null;
 
-				// If there is context, update the context. Otherwise, update the state directly.
+				// If there is context, update the context. Otherwise,
+				// update the unified store's own page-level fallback
+				// directly.
 				( productContext
 					? productContext
-					: productsState
+					: wooState.products
 				).variationId = variationId;
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
-				const { baseProductInContext: product } = productsState;
+				const { baseProduct: product } = wooState.itemInContext;
 
 				if ( ! product?.variations?.length ) {
 					return;
@@ -512,12 +509,13 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				// dead-ending its submit even though it displays a complete
 				// configuration.
 				const { selectedAttributes } = state;
-				const result = productsState.findProduct( {
+				const result = wooState.findItem( {
 					id: product.id,
 					selectedAttributes,
-				} );
-				// findProduct returns the parent when no variation
-				// matches — only accept an actual variation.
+				} ).product;
+				// The variation-existence probe resolves `null` when the
+				// selected attributes match no variation — only accept an
+				// actual variation.
 				const matchedVariation =
 					result && result.id !== product.id ? result : null;
 
@@ -534,9 +532,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				// Check stock status from productVariations store.
+				// Check stock status from the unified store's variations map.
 				const variationData =
-					productsState.productVariations[ matchedVariation.id ];
+					wooState.products.variations[ matchedVariation.id ];
 
 				if ( ! variationData ) {
 					// Variation data not loaded - this is a data consistency issue.
@@ -565,7 +563,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { productVariationInContext: variation } = productsState;
+				const { variation } = wooState.itemInContext;
 
 				if ( ! variation ) {
 					return;
@@ -588,7 +586,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				// untouched surface's own out-of-bounds quantity needs
 				// correcting. Nothing to clamp when the draft view answers
 				// no numeric quantity yet.
-				const draftQuantity = cartState.itemInContext.draft?.quantity;
+				const draftQuantity =
+					wooState.itemInContext.draftItem?.quantity;
 				if ( typeof draftQuantity !== 'number' ) {
 					return;
 				}
