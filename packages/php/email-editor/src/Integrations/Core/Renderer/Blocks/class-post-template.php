@@ -131,7 +131,7 @@ class Post_Template extends Abstract_Block_Renderer {
 	 */
 	private function get_column_count( array $parsed_block, Dom_Document_Helper $dom, \DOMElement $list_element ): int {
 		$layout = $parsed_block['attrs']['layout'] ?? array();
-		$type   = is_array( $layout ) && isset( $layout['type'] ) ? (string) $layout['type'] : '';
+		$type   = is_array( $layout ) && isset( $layout['type'] ) && is_string( $layout['type'] ) ? $layout['type'] : '';
 
 		// A layout that is neither grid nor flex (default, constrained, flow) stacks in one column.
 		if ( '' !== $type && 'grid' !== $type && 'flex' !== $type ) {
