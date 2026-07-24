@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restore standalone WooCommerce Blocks shared package bundles for components, shared context, and shared higher-order components used by extensions.
