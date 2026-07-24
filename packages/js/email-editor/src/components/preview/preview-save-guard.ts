@@ -45,7 +45,7 @@ export const PreviewSaveGuard = () => {
 		event.stopPropagation();
 		event.stopImmediatePropagation();
 
-		dispatch( noticesStore ).createNotice(
+		void dispatch( noticesStore ).createNotice(
 			'warning',
 			__(
 				'You have unsaved changes. Please save the post before previewing.',
@@ -71,7 +71,7 @@ export const PreviewSaveGuard = () => {
 					( event.key === 'Enter' || event.key === ' ' ) &&
 					target?.closest( selector )
 				) {
-					guard( event );
+					void guard( event );
 				}
 			} catch ( error ) {
 				// eslint-disable-next-line no-console

@@ -14,7 +14,7 @@ dotenv.config( { path: __dirname + '/.env' } );
 
 if ( ! process.env.BASE_URL ) {
 	process.env.BASE_URL =
-		'http://localhost:' + ( process.env.WP_ENV_TESTS_PORT || '8086' );
+		'http://localhost:' + ( process.env.WP_ENV_PORT || '8086' );
 	console.log(
 		'BASE_URL is not set. Using default: ' + process.env.BASE_URL
 	);

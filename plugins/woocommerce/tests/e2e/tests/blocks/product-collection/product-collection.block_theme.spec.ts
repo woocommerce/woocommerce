@@ -6,6 +6,7 @@ import {
 	test as base,
 	expect,
 	wpCLI,
+	BASE_URL,
 	BLOCK_THEME_SLUG,
 } from '@woocommerce/e2e-utils';
 
@@ -455,9 +456,7 @@ test.describe( 'Product Collection', () => {
 
 			await page
 				.getByRole( 'option', {
-					name: `Cap http://localhost:${
-						process.env.WP_ENV_TESTS_PORT || '8086'
-					}/product/cap/`,
+					name: `Cap ${ BASE_URL }/product/cap/`,
 				} )
 				.click();
 			await page

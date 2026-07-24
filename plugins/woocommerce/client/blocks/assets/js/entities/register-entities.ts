@@ -17,7 +17,7 @@ export const registerProductEntity = () => {
 		return;
 	}
 	const { addEntities } = dispatch( coreStore );
-	addEntities( [ PRODUCT_ENTITY ] );
+	void addEntities( [ PRODUCT_ENTITY ] );
 	registered.push( PRODUCT_ENTITY.name );
 };
 
@@ -26,6 +26,6 @@ export const registerSettingsEntity = () => {
 		return;
 	}
 	const { addEntities } = dispatch( coreStore );
-	addEntities( [ SETTINGS_ENTITY ] );
+	void addEntities( [ SETTINGS_ENTITY ] );
 	registered.push( SETTINGS_ENTITY.name );
 };
