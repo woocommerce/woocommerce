@@ -9,8 +9,8 @@ import {
 	withSyncEvent,
 	getConfig,
 } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
+import type { WooCommerce } from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies
@@ -364,8 +364,8 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	} );
 };
 
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+const { state } = store< WooCommerce >(
+	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
@@ -653,12 +653,11 @@ const productGallery = {
 		/**
 		 * Sync the gallery to the blockified Add to Cart + Options block's
 		 * variation state. Bound via `data-wp-watch`, so it re-runs whenever
-		 * `productsState.productVariationInContext` changes.
+		 * `state.itemInContext.variation` changes.
 		 */
 		listenToProductDataChanges: () => {
 			const context = getContext();
-			const variationId =
-				productsState.productVariationInContext?.id ?? null;
+			const variationId = state.itemInContext.variation?.id ?? null;
 			const prevVariationId = lastSeenVariationId.get(
 				context.productId
 			);
@@ -674,7 +673,7 @@ const productGallery = {
 
 			lastSeenVariationId.set( context.productId, variationId );
 
-			const product = productsState.baseProductInContext;
+			const product = state.itemInContext.baseProduct;
 			if ( ! product ) {
 				return;
 			}

@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { getElement, store, getContext } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
+import type { WooCommerce } from '@woocommerce/stores/woocommerce';
 import type { ProductResponseItem } from '@woocommerce/types';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 
@@ -11,8 +11,8 @@ import { sanitizeHTML } from '@woocommerce/sanitize';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+const { state } = store< WooCommerce >(
+	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
@@ -41,7 +41,9 @@ const ALLOWED_ATTR = [
 	'aria-hidden',
 ];
 
-type Context = {
+/** The `woocommerce/product-elements` context: which product field this element mirrors. */
+export type Context = {
+	/** The `ProductResponseItem` field this element's `innerHTML` mirrors. */
 	productElementKey: keyof ProductResponseItem;
 };
 
@@ -51,7 +53,7 @@ store(
 		callbacks: {
 			updateValue: () => {
 				const element = getElement();
-				const product = productsState.productInContext;
+				const product = state.itemInContext.product;
 
 				if ( ! element.ref || ! product ) {
 					return;

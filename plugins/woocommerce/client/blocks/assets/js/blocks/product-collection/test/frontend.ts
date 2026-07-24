@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { ProductsStoreState } from '@woocommerce/stores/woocommerce/products';
+import type { ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -15,12 +15,12 @@ type MockStoreEntry = {
 	callbacks: Record< string, unknown >;
 };
 
-// `frontend.ts` registers `woocommerce/products` (read-only, to resolve the
-// in-context product for the viewed-product event) and its own
-// `woocommerce/product-collection` store. This registry merges every
+// `frontend.ts` registers `woocommerce` (read-only, to resolve the
+// in-context product for the viewed-product event via `itemInContext`) and
+// its own `woocommerce/product-collection` store. This registry merges every
 // `store()` call for a namespace onto one persistent entry, mirroring the
 // real Interactivity runtime, and `mockStoreCalls` records every namespace
-// passed to `store()` so a test can prove `woocommerce/cart` is never
+// passed to `store()` so a test can prove the cart machinery module is never
 // touched. Named `mock*` (rather than e.g. `registry`) so the `jest.mock()`
 // factory below — which may only close over `mock`-prefixed bindings — can
 // reference it.
@@ -36,11 +36,10 @@ function mockGetEntry( name: string ): MockStoreEntry {
 	return entry;
 }
 
-// The `woocommerce/products` store's state consulted by `actions.viewProduct`:
-// `productInContext` resolves the per-card product from the loop item's own
-// context — a getter distinct from, and unaffected by, the
-// `mainProductInContext` → `baseProductInContext` rename.
-let mockProductsState: Partial< ProductsStoreState >;
+// The unified `woocommerce` store's state consulted by `actions.viewProduct`:
+// `itemInContext.product` resolves the per-card product from the loop item's
+// own context.
+let mockWooState: { itemInContext: { product: ProductResponseItem | null } };
 
 // The block's own reactive context, as returned by `getContext()`.
 let mockContext: ProductCollectionStoreContext;
@@ -53,6 +52,12 @@ let mockElement: { ref: HTMLElement | null };
 let mockRouterNavigate: jest.Mock;
 let mockRouterPrefetch: jest.Mock;
 
+// Whether the cart machinery module (`@woocommerce/stores/woocommerce/cart`)
+// was ever loaded while requiring `frontend.ts`. It stays `false` as proof
+// this block reads product data through the root module alone and never
+// drags the cart's fetch/queue machinery onto a display-only page.
+let mockCartModuleLoaded: boolean;
+
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
@@ -61,8 +66,8 @@ jest.mock(
 		store: jest.fn(
 			( name: string, definition?: Record< string, unknown > ) => {
 				mockStoreCalls.push( name );
-				if ( name === 'woocommerce/products' ) {
-					return { state: mockProductsState };
+				if ( name === 'woocommerce' ) {
+					return { state: mockWooState };
 				}
 				const entry = mockGetEntry( name );
 				if ( definition?.actions ) {
@@ -86,6 +91,24 @@ jest.mock(
 			prefetch: mockRouterPrefetch,
 		},
 	} ),
+	{ virtual: true }
+);
+
+// The root module's side-effect registration: the mocked `store()` above
+// handles the actual `woocommerce` registration, so the real implementation
+// must never load (it would otherwise register the namespace a second time
+// against the mock).
+jest.mock( '@woocommerce/stores/woocommerce', () => ( {} ), { virtual: true } );
+
+// The cart machinery module: never imported by `frontend.ts` itself, so this
+// factory only runs — flipping the flag — if some future change reintroduces
+// a coupling to it.
+jest.mock(
+	'@woocommerce/stores/woocommerce/cart',
+	() => {
+		mockCartModuleLoaded = true;
+		return {};
+	},
 	{ virtual: true }
 );
 
@@ -147,10 +170,11 @@ describe( 'Product Collection frontend store', () => {
 			ariaLabelPrevious: 'Previous',
 			ariaLabelNext: 'Next',
 		};
-		mockProductsState = {};
+		mockWooState = { itemInContext: { product: null } };
 		mockElement = { ref: null };
 		mockRouterNavigate = jest.fn( () => Promise.resolve() );
 		mockRouterPrefetch = jest.fn( () => Promise.resolve() );
+		mockCartModuleLoaded = false;
 	} );
 
 	afterEach( () => {
@@ -158,13 +182,13 @@ describe( 'Product Collection frontend store', () => {
 	} );
 
 	describe( 'actions.viewProduct', () => {
-		it( 'reads the product id from productsState.productInContext', async () => {
+		it( 'reads the product id from state.itemInContext.product', async () => {
 			const { triggerViewedProductEvent } = jest.requireMock(
 				'../legacy-events'
 			) as { triggerViewedProductEvent: jest.Mock };
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 55,
-			} as ProductsStoreState[ 'productInContext' ];
+			} as ProductResponseItem;
 
 			const entries = loadModule();
 			const { actions } = entries.get(
@@ -194,16 +218,16 @@ describe( 'Product Collection frontend store', () => {
 				actions.viewProduct as () => Iterator< unknown >;
 
 			// First card / first paginated page.
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 11,
-			} as ProductsStoreState[ 'productInContext' ];
+			} as ProductResponseItem;
 			await runAction( viewProduct() );
 
 			// A different card — e.g. after a client-side pagination swap —
 			// must resolve its own id, not the previous card's.
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 22,
-			} as ProductsStoreState[ 'productInContext' ];
+			} as ProductResponseItem;
 			await runAction( viewProduct() );
 
 			expect( triggerViewedProductEvent ).toHaveBeenNthCalledWith( 1, {
@@ -220,7 +244,7 @@ describe( 'Product Collection frontend store', () => {
 			const { triggerViewedProductEvent } = jest.requireMock(
 				'../legacy-events'
 			) as { triggerViewedProductEvent: jest.Mock };
-			mockProductsState.productInContext = null;
+			mockWooState.itemInContext.product = null;
 
 			const entries = loadModule();
 			const { actions } = entries.get(
@@ -236,7 +260,7 @@ describe( 'Product Collection frontend store', () => {
 	} );
 
 	describe( 'actions.navigate', () => {
-		it( 'paginates client-side via the router without touching a cart store', async () => {
+		it( 'paginates client-side via the router without touching the cart machinery module', async () => {
 			const { triggerProductListRenderedEvent } = jest.requireMock(
 				'../legacy-events'
 			) as { triggerProductListRenderedEvent: jest.Mock };
@@ -265,21 +289,21 @@ describe( 'Product Collection frontend store', () => {
 			expect( triggerProductListRenderedEvent ).toHaveBeenCalledWith( {
 				collection: CoreCollectionNames.PRODUCT_CATALOG,
 			} );
-			expect( mockStoreCalls ).not.toContain( 'woocommerce/cart' );
+			expect( mockCartModuleLoaded ).toBe( false );
 		} );
 	} );
 
 	describe( 'store registration', () => {
-		it( 'never registers or reads the woocommerce/cart store', () => {
+		it( 'value-imports and reads the unified woocommerce store, never the cart machinery module', () => {
 			loadModule();
 
 			expect( mockStoreCalls ).toEqual(
 				expect.arrayContaining( [
-					'woocommerce/products',
+					'woocommerce',
 					'woocommerce/product-collection',
 				] )
 			);
-			expect( mockStoreCalls ).not.toContain( 'woocommerce/cart' );
+			expect( mockCartModuleLoaded ).toBe( false );
 		} );
 	} );
 } );

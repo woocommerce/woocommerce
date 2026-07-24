@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { ProductsStoreState } from '@woocommerce/stores/woocommerce/products';
+import type { ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -14,14 +14,14 @@ type MockStoreEntry = {
 	callbacks: Record< string, unknown >;
 };
 
-// `frontend.ts` registers `woocommerce/products` (read-only, to resolve the
-// in-context base product and the selected variation id) and its own
-// `woocommerce/product-gallery` store. This registry merges every `store()`
-// call for a namespace onto one persistent entry, mirroring the real
-// Interactivity runtime, and `mockStoreCalls` records every namespace passed
-// to `store()` so a test can prove `woocommerce/cart` is never touched.
-// Named `mock*` (rather than e.g. `registry`) so the `jest.mock()` factory
-// below — which may only close over `mock`-prefixed bindings — can
+// `frontend.ts` registers `woocommerce` (read-only, to resolve the in-context
+// base product and the selected variation id via `itemInContext`) and its
+// own `woocommerce/product-gallery` store. This registry merges every
+// `store()` call for a namespace onto one persistent entry, mirroring the
+// real Interactivity runtime, and `mockStoreCalls` records every namespace
+// passed to `store()` so a test can prove the cart machinery module is never
+// touched. Named `mock*` (rather than e.g. `registry`) so the `jest.mock()`
+// factory below — which may only close over `mock`-prefixed bindings — can
 // reference it.
 let mockRegistry: Map< string, MockStoreEntry >;
 let mockStoreCalls: string[];
@@ -35,13 +35,17 @@ function mockGetEntry( name: string ): MockStoreEntry {
 	return entry;
 }
 
-// The `woocommerce/products` store's state consulted by
-// `listenToProductDataChanges`: `productVariationInContext` (the derived
-// getter, not the raw `variationId`) drives change detection, and
-// `baseProductInContext` — the getter this store renamed from
-// `mainProductInContext` — resolves the parent product whose configured
+// The unified `woocommerce` store's state consulted by
+// `listenToProductDataChanges`: `itemInContext.variation` (the derived
+// envelope member, not the raw `variationId`) drives change detection, and
+// `itemInContext.baseProduct` resolves the parent product whose configured
 // image set gets applied.
-let mockProductsState: Partial< ProductsStoreState >;
+let mockWooState: {
+	itemInContext: {
+		variation: ProductResponseItem | null;
+		baseProduct: ProductResponseItem | null;
+	};
+};
 
 // The gallery's own reactive context, as returned by `getContext()`.
 let mockContext: ProductGalleryContext;
@@ -50,6 +54,12 @@ let mockContext: ProductGalleryContext;
 // the per-product configured image sets (`products[productId]`). This is the
 // unchanged, cross-domain settings bag, not the retiring cart-store surface.
 let mockConfig: ProductGalleryConfig;
+
+// Whether the cart machinery module (`@woocommerce/stores/woocommerce/cart`)
+// was ever loaded while requiring `frontend.ts`. It stays `false` as proof
+// this block reads product data through the root module alone and never
+// drags the cart's fetch/queue machinery onto a display-only page.
+let mockCartModuleLoaded: boolean;
 
 jest.mock(
 	'@wordpress/interactivity',
@@ -62,8 +72,8 @@ jest.mock(
 		store: jest.fn(
 			( name: string, definition?: Record< string, unknown > ) => {
 				mockStoreCalls.push( name );
-				if ( name === 'woocommerce/products' ) {
-					return { state: mockProductsState };
+				if ( name === 'woocommerce' ) {
+					return { state: mockWooState };
 				}
 				const entry = mockGetEntry( name );
 				if ( definition?.state ) {
@@ -86,12 +96,24 @@ jest.mock(
 );
 
 // Side-effect-only import `frontend.ts` makes for module ordering; the
-// mocked `store()` above handles the `woocommerce/products` registration
-// directly, so the real implementation must never load (it would otherwise
-// register the namespace a second time against the mock).
-jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ), {
+// mocked `store()` above handles the `woocommerce` registration directly, so
+// the real implementation must never load (it would otherwise register the
+// namespace a second time against the mock).
+jest.mock( '@woocommerce/stores/woocommerce', () => ( {} ), {
 	virtual: true,
 } );
+
+// The cart machinery module: never imported by `frontend.ts` itself, so this
+// factory only runs — flipping the flag — if some future change reintroduces
+// a coupling to it.
+jest.mock(
+	'@woocommerce/stores/woocommerce/cart',
+	() => {
+		mockCartModuleLoaded = true;
+		return {};
+	},
+	{ virtual: true }
+);
 
 /**
  * Loads a fresh copy of the product gallery frontend module so it registers
@@ -145,7 +167,10 @@ describe( 'Product Gallery frontend store', () => {
 				},
 			},
 		};
-		mockProductsState = {};
+		mockWooState = {
+			itemInContext: { variation: null, baseProduct: null },
+		};
+		mockCartModuleLoaded = false;
 	} );
 
 	afterEach( () => {
@@ -154,7 +179,7 @@ describe( 'Product Gallery frontend store', () => {
 
 	describe( 'callbacks.listenToProductDataChanges', () => {
 		it( 'is a no-op on the initial render, before any variation is selected', () => {
-			mockProductsState.productVariationInContext = null;
+			mockWooState.itemInContext.variation = null;
 
 			const entries = loadModule();
 			const { callbacks } = entries.get(
@@ -166,7 +191,7 @@ describe( 'Product Gallery frontend store', () => {
 			expect( mockContext.imageData ).toEqual( [] );
 		} );
 
-		it( 'applies the selected variation image set, resolving the product via baseProductInContext', () => {
+		it( 'applies the selected variation image set, resolving the product via itemInContext.baseProduct', () => {
 			const entries = loadModule();
 			const { callbacks } = entries.get(
 				'woocommerce/product-gallery'
@@ -175,19 +200,18 @@ describe( 'Product Gallery frontend store', () => {
 				callbacks.listenToProductDataChanges as () => void;
 
 			// Initial render: no variation selected yet.
-			mockProductsState.productVariationInContext = null;
+			mockWooState.itemInContext.variation = null;
 			listenToProductDataChanges();
 
-			// A variation gets selected. `baseProductInContext` — the getter
-			// renamed from `mainProductInContext` — is what resolves the
-			// parent product whose configured image set is applied; if it
-			// resolved nothing, no image update would occur.
-			mockProductsState.productVariationInContext = {
+			// A variation gets selected. `itemInContext.baseProduct` is what
+			// resolves the parent product whose configured image set is
+			// applied; if it resolved nothing, no image update would occur.
+			mockWooState.itemInContext.variation = {
 				id: 55,
-			} as ProductsStoreState[ 'productVariationInContext' ];
-			mockProductsState.baseProductInContext = {
+			} as ProductResponseItem;
+			mockWooState.itemInContext.baseProduct = {
 				id: 123,
-			} as ProductsStoreState[ 'baseProductInContext' ];
+			} as ProductResponseItem;
 			listenToProductDataChanges();
 
 			expect( mockContext.imageData ).toEqual( [ 10, 20 ] );
@@ -202,25 +226,25 @@ describe( 'Product Gallery frontend store', () => {
 			const listenToProductDataChanges =
 				callbacks.listenToProductDataChanges as () => void;
 
-			mockProductsState.productVariationInContext = null;
+			mockWooState.itemInContext.variation = null;
 			listenToProductDataChanges();
 
-			mockProductsState.productVariationInContext = {
+			mockWooState.itemInContext.variation = {
 				id: 55,
-			} as ProductsStoreState[ 'productVariationInContext' ];
-			mockProductsState.baseProductInContext = {
+			} as ProductResponseItem;
+			mockWooState.itemInContext.baseProduct = {
 				id: 123,
-			} as ProductsStoreState[ 'baseProductInContext' ];
+			} as ProductResponseItem;
 			listenToProductDataChanges();
 
-			mockProductsState.productVariationInContext = null;
+			mockWooState.itemInContext.variation = null;
 			listenToProductDataChanges();
 
 			expect( mockContext.imageData ).toEqual( [ 1, 2, 3 ] );
 		} );
 
-		it( 'does nothing when baseProductInContext resolves no product', () => {
-			mockProductsState.productVariationInContext = null;
+		it( 'does nothing when itemInContext.baseProduct resolves no product', () => {
+			mockWooState.itemInContext.variation = null;
 
 			const entries = loadModule();
 			const { callbacks } = entries.get(
@@ -231,10 +255,10 @@ describe( 'Product Gallery frontend store', () => {
 
 			listenToProductDataChanges();
 
-			mockProductsState.productVariationInContext = {
+			mockWooState.itemInContext.variation = {
 				id: 55,
-			} as ProductsStoreState[ 'productVariationInContext' ];
-			mockProductsState.baseProductInContext = null;
+			} as ProductResponseItem;
+			mockWooState.itemInContext.baseProduct = null;
 			listenToProductDataChanges();
 
 			expect( mockContext.imageData ).toEqual( [] );
@@ -242,16 +266,16 @@ describe( 'Product Gallery frontend store', () => {
 	} );
 
 	describe( 'store registration', () => {
-		it( 'never registers or reads the woocommerce/cart store', () => {
+		it( 'value-imports and reads the unified woocommerce store, never the cart machinery module', () => {
 			loadModule();
 
 			expect( mockStoreCalls ).toEqual(
 				expect.arrayContaining( [
-					'woocommerce/products',
+					'woocommerce',
 					'woocommerce/product-gallery',
 				] )
 			);
-			expect( mockStoreCalls ).not.toContain( 'woocommerce/cart' );
+			expect( mockCartModuleLoaded ).toBe( false );
 		} );
 	} );
 } );

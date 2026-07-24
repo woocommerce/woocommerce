@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { store, getElement, getContext } from '@wordpress/interactivity';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
+import type { WooCommerce } from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies
@@ -18,8 +19,12 @@ import './style.scss';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
+// A static value-import of the root module (above), rather than a
+// type-only one, so this block self-registers `state.itemInContext`
+// regardless of which other blocks share the page — no reliance on a
+// sibling block (e.g. Product Elements) to load the store first.
+const { state } = store< WooCommerce >(
+	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
@@ -208,7 +213,7 @@ const productCollectionStore = {
 			const { collection } =
 				getContext< ProductCollectionStoreContext >();
 
-			const productId = productsState.productInContext?.id;
+			const productId = state.itemInContext.product?.id;
 
 			if ( productId ) {
 				triggerViewedProductEvent( { collection, productId } );
