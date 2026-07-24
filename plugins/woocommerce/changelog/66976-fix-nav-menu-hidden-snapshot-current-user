@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Persist the default nav-menu hidden meta box snapshot only for the current user on the Appearance > Menus screen, matching WordPress core, so a read of another user's option (e.g. user-switching or admin tooling) can no longer overwrite that user's own first-visit snapshot.
