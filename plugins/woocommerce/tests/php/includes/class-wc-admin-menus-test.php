@@ -295,8 +295,9 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 		$first_visit->register_default_nav_menu_meta_boxes_filter();
 		get_user_option( 'metaboxhidden_nav-menus', $user_id );
 
-		// End of the first request: its hooks and instance no longer exist.
-		remove_all_filters( 'get_user_option_metaboxhidden_nav-menus' );
+		// End of the first request: its hook and instance no longer exist. Remove
+		// only this instance's callback so the test stays isolated from other hooks.
+		remove_filter( 'get_user_option_metaboxhidden_nav-menus', array( $first_visit, 'filter_default_nav_menu_hidden_meta_boxes' ), 10 );
 
 		// A plugin registers a nav-menus meta box after that first visit.
 		$GLOBALS['wp_meta_boxes']['nav-menus']['side']['default']['add-later-plugin-box'] = array( // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
