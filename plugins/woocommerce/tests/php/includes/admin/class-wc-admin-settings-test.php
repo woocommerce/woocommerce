@@ -455,6 +455,8 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 4, $xpath->query( $radio_title )->length );
 		$this->assertSame( 4, $xpath->query( $fieldset )->length );
 		$this->assertSame( 0, $xpath->query( $radio_title . '/span[@id="-title"]' )->length );
+		$this->assertSame( 1, $xpath->query( $radio_title . '/span[@id]' )->length );
+		$this->assertSame( 1, $xpath->query( $fieldset . '[@aria-labelledby]' )->length );
 		$this->assertSame( 1, $xpath->query( $radio_title . '/span[@id="0-title"]' )->length );
 		$this->assertSame( 1, $xpath->query( $fieldset . '[@aria-labelledby="0-title"]' )->length );
 		// Visible titles are still rendered for every group.
