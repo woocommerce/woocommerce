@@ -16,7 +16,7 @@ require_once WC_ABSPATH . 'includes/admin/list-tables/class-wc-admin-list-table-
  *
  * @package WooCommerce\Tests\Admin
  */
-class WC_Tests_Admin_List_Table_Products extends WC_Unit_Test_Case {
+class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * Original global stock management option.
