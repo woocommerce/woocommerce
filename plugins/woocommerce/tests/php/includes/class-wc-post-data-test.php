@@ -118,6 +118,30 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Updating a product category count does not capture parent recount state.
+	 */
+	public function test_updating_product_category_count_does_not_capture_parent_recount_state(): void {
+		$parent   = wp_insert_term( 'Parent category', 'product_cat' );
+		$category = wp_insert_term(
+			'Category',
+			'product_cat',
+			array(
+				'parent' => $parent['term_id'],
+			)
+		);
+
+		wp_update_term_count_now( array( $category['term_taxonomy_id'] ), 'product_cat' );
+
+		$recount_state = new ReflectionProperty( WC_Post_Data::class, 'product_cat_parent_recount_ids' );
+		$recount_state->setAccessible( true );
+
+		$this->assertSame( array(), $recount_state->getValue() );
+
+		wp_delete_term( $category['term_id'], 'product_cat' );
+		wp_delete_term( $parent['term_id'], 'product_cat' );
+	}
+
+	/**
 	 * @testdox Nested edits of the same product category recount every parent visited.
 	 */
 	public function test_nested_product_category_edits_recount_every_parent_visited(): void {

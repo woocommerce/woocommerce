@@ -60,8 +60,8 @@ class WC_Post_Data {
 
 		// Keep the callback inline to avoid expanding the public contract of this legacy, non-final class.
 		if ( null === $edit_term_taxonomy_callback ) {
-			$edit_term_taxonomy_callback = static function ( $tt_id, $taxonomy ) {
-				if ( 'product_cat' !== $taxonomy ) {
+			$edit_term_taxonomy_callback = static function ( $tt_id, $taxonomy, $args = null ) {
+				if ( 'product_cat' !== $taxonomy || ! is_array( $args ) ) {
 					return;
 				}
 
@@ -79,7 +79,7 @@ class WC_Post_Data {
 			'edit_term_taxonomy',
 			$edit_term_taxonomy_callback,
 			10,
-			2
+			3
 		);
 		add_action( 'edit_term', array( __CLASS__, 'edit_term' ), 10, 3 );
 		add_action( 'edited_term', array( __CLASS__, 'edited_term' ), 10, 3 );
