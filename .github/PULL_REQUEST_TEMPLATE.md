@@ -54,7 +54,9 @@ Using the [WooCommerce Testing Instructions Guide](https://developer.woocommerce
 
 ### Use of AI Tools
 
-<!-- You're free to use AI tooling to help with this contribution, but you must disclose what tooling you used and to what extent the PR was AI-authored. You're responsible for reviewing and understanding everything AI generated before submitting it. See the WordPress AI Guidelines: https://make.wordpress.org/ai/handbook/ai-guidelines/ -->
+<!--
+You are free to use artificial intelligence (AI) tooling to contribute, but you must disclose what tooling you are using and to what extent a pull request has been authored by AI. It is your responsibility to review and take responsibility for what AI generates. See the WordPress AI Guidelines: <https://make.wordpress.org/ai/handbook/ai-guidelines/>.
+-->
 
 ### Milestone
 
