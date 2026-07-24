@@ -25,10 +25,19 @@ class SubmissionHandlerRoutingTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
 		// Drive the production registration path: the flag was off at bootstrap,
-		// so re-run the init-hooked resolver now that it's on. Re-calling init()
-		// re-adds the actions that tearDown() removes, so this stays repeatable.
-		$handler = wc_get_container()->get( SubmissionHandler::class );
-		$handler->init();
+		// so re-run the init-hooked resolver now that it's on. The resolver populates
+		// the container with all OrderReviews services, and SubmissionHandler's init()
+		// wires both wp_ajax_ hooks. tearDown() removes the actions, so this stays
+		// repeatable on the next test.
+		// Drive the production resolver path to prove feature-flag gating works.
+		// The resolver populates the container with all OrderReviews services,
+		// and each service's init() auto-fires once on container construction.
+		WC()->maybe_init_order_reviews();
+
+		// Re-initialize the handler for test repeatability: the container only
+		// auto-calls init() on the first resolve, but tearDown() removes the
+		// actions, so the cached instance needs an explicit re-init between tests.
+		wc_get_container()->get( SubmissionHandler::class )->init();
 		update_option( 'comment_moderation', '0' );
 		wp_set_current_user( 0 );
 	}
@@ -51,11 +60,15 @@ class SubmissionHandlerRoutingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The nopriv AJAX action is registered through the production init path.
+	 * @testdox Both the authenticated and nopriv AJAX actions are wired through the production init path.
 	 */
-	public function test_nopriv_action_is_registered(): void {
+	public function test_action_hooks_are_registered(): void {
 		$handler = wc_get_container()->get( SubmissionHandler::class );
 
+		$this->assertNotFalse(
+			has_action( 'wp_ajax_' . SubmissionHandler::ACTION, array( $handler, 'handle' ) ),
+			'Authenticated submit_order_reviews action should be wired when the feature is enabled.'
+		);
 		$this->assertNotFalse(
 			has_action( 'wp_ajax_nopriv_' . SubmissionHandler::ACTION, array( $handler, 'handle' ) ),
 			'Guest submit_order_reviews action should be wired when the feature is enabled.'
