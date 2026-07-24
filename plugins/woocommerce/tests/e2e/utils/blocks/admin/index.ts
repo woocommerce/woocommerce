@@ -34,6 +34,13 @@ export class Admin extends CoreAdmin {
 		const closeWelcomeGuide = this.page
 			.getByRole( 'dialog', { name: 'Welcome to block Widgets' } )
 			.getByRole( 'button', { name: 'Close' } );
+
+		// Verify the script `/wp-admin/js/editor.min.js` wasn't loaded.
+		// See: https://github.com/woocommerce/woocommerce/issues/47831
+		await expect(
+			this.page.locator( 'script[src*="/wp-admin/js/editor.min.js"]' )
+		).toHaveCount( 0 );
+
 		// The welcome guide only shows when it hasn't been dismissed before, so
 		// wait for it briefly and close it only when it actually appears.
 		const guideAppeared = await closeWelcomeGuide
