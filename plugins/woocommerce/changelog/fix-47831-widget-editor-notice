@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent notice about wp-editor being enqueued from appearing in the Widgets screen
