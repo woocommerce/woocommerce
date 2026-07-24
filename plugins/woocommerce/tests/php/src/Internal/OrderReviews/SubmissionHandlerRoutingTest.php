@@ -23,7 +23,11 @@ class SubmissionHandlerRoutingTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
-		WC()->maybe_init_order_reviews();
+		// Drive the production registration path: the flag was off at bootstrap,
+		// so re-run the init-hooked resolver now that it's on. Re-calling init()
+		// re-adds the actions that tearDown() removes, so this stays repeatable.
+		$handler = wc_get_container()->get( SubmissionHandler::class );
+		$handler->init();
 		update_option( 'comment_moderation', '0' );
 		wp_set_current_user( 0 );
 	}
@@ -41,6 +45,7 @@ class SubmissionHandlerRoutingTest extends WC_Unit_Test_Case {
 		ItemEligibility::reset_cache();
 		remove_all_filters( 'wp_die_ajax_handler' );
 		remove_all_filters( 'wp_doing_ajax' );
+		remove_all_filters( 'wp_send_json_handler' );
 		parent::tearDown();
 	}
 
@@ -100,24 +105,30 @@ class SubmissionHandlerRoutingTest extends WC_Unit_Test_Case {
 	 * @return array{success:bool,data:mixed}
 	 */
 	private function dispatch(): array {
+		// Same capture pattern SubmissionHandlerTest uses: wp_send_json writes
+		// to the output buffer via wp_die, so an ob_start/ob_get_clean pair
+		// collects the rendered JSON. wp_send_json itself fires no filter.
+		add_filter( 'wp_die_ajax_handler', static fn() => static fn() => null );
+		add_filter( 'wp_doing_ajax', '__return_true' );
+
+		ob_start();
+		try {
+			do_action( 'wp_ajax_nopriv_' . SubmissionHandler::ACTION ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		} catch ( WPAjaxDieContinueException $e ) {
+			// Expected: wp_send_json_* always calls wp_die().
+			unset( $e );
+		}
+		$body = (string) ob_get_clean();
+
+		$decoded  = json_decode( $body, true );
 		$response = array(
 			'success' => false,
 			'data'    => null,
 		);
-
-		add_filter(
-			'wp_send_json',
-			static function ( $payload ) use ( &$response ) {
-				$response['success'] = ! empty( $payload['success'] );
-				$response['data']    = $payload['data'] ?? null;
-				return $payload;
-			}
-		);
-		add_filter( 'wp_die_ajax_handler', static fn() => static fn() => null );
-		add_filter( 'wp_doing_ajax', '__return_true' );
-
-		do_action( 'wp_ajax_nopriv_' . SubmissionHandler::ACTION ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-
+		if ( is_array( $decoded ) ) {
+			$response['success'] = ! empty( $decoded['success'] );
+			$response['data']    = $decoded['data'] ?? null;
+		}
 		return $response;
 	}
 }
