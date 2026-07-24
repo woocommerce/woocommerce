@@ -1,12 +1,12 @@
 # WooCommerce Block Entities
 
-This module contains the entity registration and management system for WooCommerce. Entities provide a standardized way to interact with WordPress data stores and enable consistent data access patterns across the admin interface.
+This module contains the entity helpers for WooCommerce. Entities provide a standardized way to interact with WordPress data stores and enable consistent data access patterns across the admin interface.
 
 ## Overview
 
-Entities have a dedicated module that loads consistently on every admin screen, ensuring they can be accessed and extended throughout the entire admin experience. This makes it possible to use the entities in this folder across all the admin screens.
+The pure entity helpers in this directory are bundled into their consumers and can be tree-shaken. Registration lives separately in `../entity-registration` and builds as a dedicated script that loads consistently on every admin screen.
 
-With this approach, third-party developers can also start using entities outside of the Gutenberg editor whenever needed.
+For backward compatibility, the registration script continues to expose the runtime helpers on `wc.wcEntities`. That global API is deprecated as of WooCommerce 11.1.0 and emits a warning when a helper is called. New code should import helpers from `@woocommerce/entities`.
 
 ## Available Entities
 
@@ -23,18 +23,19 @@ The product entity provides access to WooCommerce product data through WordPress
 
 ### Automatic Registration
 
-Entities are automatically registered when the module is loaded. This happens on every admin page through the `wc-entities` script.
+Entities are automatically registered on every admin page through the `wc-entities` script. The script performs registration as a side effect and temporarily retains the deprecated `wc.wcEntities` global for backward compatibility.
 
-### Manual Registration
+### Deprecated manual registration
 
-If you need to register entities manually (e.g., in tests), you can use the registration functions:
+The manual registration functions remain exported temporarily for compatibility:
 
 ```typescript
 import { registerProductEntity } from './entities/register-entities';
 
-// Register the product entity
 registerProductEntity();
 ```
+
+These functions are deprecated as of WooCommerce 11.1.0 and emit a warning when called. Rely on the automatically loaded `wc-entities` script instead.
 
 ### Using Entity Hooks
 
@@ -55,4 +56,4 @@ function MyComponent() {
 
 1. **Consistent Availability**: Entities are now available across all admin pages, not just the editor
 2. **Better Performance**: Centralized registration reduces duplicate entity definitions
-3. **Developer Experience**: Third-party developers can use entities outside of Gutenberg
+3. **Encapsulation**: Entity helpers remain internal to the bundles that consume them

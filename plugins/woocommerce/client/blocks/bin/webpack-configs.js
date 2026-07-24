@@ -91,18 +91,29 @@ const getSharedPlugins = ( {
  * @param {Object} options Build options.
  */
 const getCoreConfig = ( options = {} ) => {
-	const { alias, resolvePlugins = [] } = options;
+	const {
+		alias,
+		resolvePlugins = [],
+		entry = getEntryConfig( 'core', options.exclude || [] ),
+		exposeLibrary = true,
+		configName = 'Core',
+		uniqueName = 'webpackWcBlocksCoreJsonp',
+	} = options;
 	const resolve = getResolve( { alias, resolvePlugins } );
 	return {
-		entry: getEntryConfig( 'core', options.exclude || [] ),
+		entry,
 		output: {
 			filename: ( chunkData ) => {
 				return `${ paramCase( chunkData.chunk.name ) }.js`;
 			},
 			path: BUILD_DIR,
-			library: [ 'wc', '[name]' ],
-			libraryTarget: 'this',
-			uniqueName: 'webpackWcBlocksCoreJsonp',
+			...( exposeLibrary
+				? {
+						library: [ 'wc', '[name]' ],
+						libraryTarget: 'this',
+				  }
+				: {} ),
+			uniqueName,
 		},
 		module: {
 			rules: [
@@ -131,9 +142,9 @@ const getCoreConfig = ( options = {} ) => {
 		},
 		plugins: [
 			...getSharedPlugins( {
-				bundleAnalyzerReportTitle: 'Core',
+				bundleAnalyzerReportTitle: configName,
 			} ),
-			new ProgressBarPlugin( getProgressBarPluginConfig( 'Core' ) ),
+			new ProgressBarPlugin( getProgressBarPluginConfig( configName ) ),
 		],
 		optimization: {
 			...sharedOptimizationConfig,

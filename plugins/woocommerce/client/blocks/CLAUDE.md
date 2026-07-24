@@ -179,11 +179,13 @@ Third-party extensions consume these as externals — changing the public API of
 
 ## Build System
 
-Webpack is configured with **11 separate configs** in `bin/webpack-configs.js`:
+Webpack is configured with **11 separate configs** in `webpack.config.js`:
 
-- Core, Main, Frontend, Extensions, Payments, Styling, Site Editor, Interactivity, Cart/Checkout Frontend, Dependency Detection
+- Core, Entities, Main, Frontend, Extensions, Payments, Styling, Site Editor, Interactivity, Cart/Checkout Frontend, Dependency Detection
 
 Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP enqueues run against the final asset locations with no copy step. TypeScript uses **60+ path aliases** defined in `tsconfig.base.json`.
+
+`@woocommerce/entities` resolves to pure entity helpers that are bundled into consumers and can be tree-shaken. The separate `wc-entities` entry registers those entities as a side effect. It temporarily retains deprecated utility exports on `wc.wcEntities` for backward compatibility. Manual registration helpers also remain available as deprecated compatibility wrappers.
 
 ## Testing
 

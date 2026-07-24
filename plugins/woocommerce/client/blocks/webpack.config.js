@@ -7,6 +7,7 @@ const path = require( 'path' );
  * Internal dependencies
  */
 const { NODE_ENV, getAlias } = require( './bin/webpack-helpers.js' );
+const { getEntryConfig } = require( './bin/webpack-entries.js' );
 const {
 	getCoreConfig,
 	getMainConfig,
@@ -80,7 +81,24 @@ const CartAndCheckoutFrontendConfig = {
 const CoreConfig = {
 	...sharedConfig,
 	cache: getCacheConfig( 'core', [] ),
-	...getCoreConfig( { alias: getAlias() } ),
+	...getCoreConfig( {
+		alias: getAlias(),
+		exclude: [ 'wcEntities' ],
+	} ),
+};
+
+// Entity registration script with a deprecated compatibility global.
+const EntitiesConfig = {
+	...sharedConfig,
+	cache: getCacheConfig( 'entities', [] ),
+	...getCoreConfig( {
+		alias: getAlias(),
+		entry: {
+			wcEntities: getEntryConfig( 'core' ).wcEntities,
+		},
+		configName: 'Entities',
+		uniqueName: 'webpackWcBlocksEntitiesJsonp',
+	} ),
 };
 
 // Main Blocks config for registering Blocks and for the Editor.
@@ -156,6 +174,7 @@ const DependencyDetectionConfig = {
 module.exports = [
 	CartAndCheckoutFrontendConfig,
 	CoreConfig,
+	EntitiesConfig,
 	MainConfig,
 	FrontendConfig,
 	ExtensionsConfig,
