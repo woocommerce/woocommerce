@@ -182,10 +182,9 @@ export function resolveDraftKey(): DraftKey {
  * Reads the draft collection filed under `key`, tolerating a
  * not-yet-created collection as empty rather than dereferencing it.
  *
- * Never creates a collection — only {@link writeDraft} (or the store's own
- * `upsertDraftItem`, while it still exists) does that, lazily, on its first
- * use of a key. A read against a key with no collection yet simply finds
- * nothing, indistinguishable from an existing-but-empty collection.
+ * Never creates a collection — only {@link writeDraft} does that, lazily, on
+ * its first use of a key. A read against a key with no collection yet simply
+ * finds nothing, indistinguishable from an existing-but-empty collection.
  *
  * @param key The resolved draft key.
  * @return The collection filed under `key`, or `undefined` when none has
