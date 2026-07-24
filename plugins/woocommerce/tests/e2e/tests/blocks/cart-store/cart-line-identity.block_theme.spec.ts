@@ -303,7 +303,20 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 
 			// Add W: creates a new, separate line for W.
 			const addDifferentVariation = page.waitForResponse(
-				'**/wc/store/v1/batch**'
+				( response ) => {
+					return (
+						response.request().method() === 'POST' &&
+						response
+							.url()
+							.includes( '/wp-json/wc/store/v1/batch' ) &&
+						response
+							.request()
+							.postData()
+							?.includes( '/wc/store/v1/cart/add-item' ) ===
+							true &&
+						response.ok()
+					);
+				}
 			);
 			await addToCartButton.click();
 			await addDifferentVariation;
