@@ -193,12 +193,14 @@ class Utils {
 			// The initial `add-item` payload for this quantity selector's
 			// product, filed under its collection key in the `woocommerce/cart`
 			// state. The client consults it only via `getServerState()`, never
-			// applying it into a draft collection: `upsertDraftItem` composes
-			// a new draft from it on the shopper's first write, and `addItem`
-			// falls back to it when posting an untouched surface. `quantity`
-			// matches `$input_quantity` — the value actually bound to the
-			// rendered input above — not the product's raw minimum, so the
-			// seed never disagrees with the initial HTML.
+			// applying it into a draft collection: the draft view materializes
+			// a new draft from it on the shopper's first genuine write, and
+			// `addItem`'s no-payload fallback resolves the effective seed —
+			// the family seed re-addressed to the in-context id — when
+			// posting an untouched surface. `quantity` matches
+			// `$input_quantity` — the value actually bound to the rendered
+			// input above — not the product's raw minimum, so the seed never
+			// disagrees with the initial HTML.
 			$draft_seed = array(
 				'id'       => $product->get_id(),
 				'quantity' => $input_quantity,
