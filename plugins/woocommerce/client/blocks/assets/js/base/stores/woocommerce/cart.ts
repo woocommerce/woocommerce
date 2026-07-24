@@ -10,6 +10,7 @@ import type {
 	ApiErrorResponse,
 	CartResponseTotals,
 	Currency,
+	ProductResponseItem,
 } from '@woocommerce/types';
 import type {
 	Store as StoreNotices,
@@ -31,11 +32,12 @@ import {
 } from './mutation-batcher';
 import { attributeNamesMatch } from '../../utils/variations/attribute-matching';
 import {
+	effectiveVariationAttributes,
 	findDraftInCollection,
-	getDraftSeed,
 	resolveCollection,
 	resolveDraftKey,
 	resolveDraftView,
+	resolveEffectiveSeed,
 } from './draft-internals';
 
 export type WooCommerceConfig = {
@@ -210,8 +212,12 @@ export type Store = {
 		 * (no further checks); otherwise product/variation identity plus a
 		 * namespaced extension-prop comparison against the candidate line's
 		 * `extensions[<namespace>]` must resolve to exactly one candidate
-		 * (using the resolved draft view's own `variation`/extension props);
-		 * any remaining ambiguity leaves `cartItem`
+		 * (using the resolved draft view's own *effective* `variation` —
+		 * its specified selection completed from the variation's own meta,
+		 * see `draft-internals.ts`'s `effectiveVariationAttributes` — plus
+		 * its extension props); an incomplete effective payload (an
+		 * unspecified "any" attribute) pairs to nothing, and any remaining
+		 * ambiguity leaves `cartItem`
 		 * `undefined` — the server owns line identity, so this never
 		 * guesses. `filter` replaces the id-based identity matching
 		 * entirely, for extensions with their own notion of line identity.
@@ -257,14 +263,19 @@ export type Store = {
 		 *
 		 * With no argument, resolves the in-context product (via
 		 * `woocommerce/products`) and posts the resolved collection's
-		 * draft(s) for it: a simple/variable product's own single draft
-		 * (`itemInContext.draft`), or, for a grouped product, every child's
-		 * draft (children resolved one-directionally through the products
-		 * store) whose `quantity` is greater than `0`. Multiple children's
-		 * drafts are posted as one auto-batched request set through the
-		 * mutation queue rather than one request per child. Never posts
-		 * another collection's or another product's draft, and sends
-		 * nothing when the resolution yields no draft.
+		 * draft(s) for it: a simple/variable product's own live draft, or —
+		 * on an untouched surface with no live draft — its *effective* seed
+		 * (the family seed re-addressed to the in-context id; see
+		 * `draft-internals.ts`'s `resolveEffectiveSeed`), so a
+		 * resolved-variation surface with no live draft still posts a
+		 * minimal `{ id, quantity }` rather than silently no-opping; or, for
+		 * a grouped product, every child's draft (children resolved
+		 * one-directionally through the products store) whose `quantity`
+		 * is greater than `0`. Multiple children's drafts are posted as one
+		 * auto-batched request set through the mutation queue rather than
+		 * one request per child. Never posts another collection's or
+		 * another product's draft, and sends nothing when the resolution
+		 * yields no draft and no seed.
 		 *
 		 * With an explicit `payload`, posts it verbatim — extension props
 		 * at its root included — bypassing collection/product resolution
@@ -382,6 +393,33 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 	type: 'notice',
 	dismissible: true,
 } );
+
+/**
+ * Resolves the base (parent) product a given product/variation id belongs
+ * to, consulting the cart store's own one-directional `productsState`
+ * binding directly.
+ *
+ * A module-private mirror of `draft-internals.ts`'s own (unexported)
+ * `resolveBaseProduct` — needed here to resolve the `base` argument
+ * {@link effectiveVariationAttributes} takes at `findItem`'s pairing rung
+ * and `postDraftItems`' per-item capture. `id` may already name the base
+ * product, or one of its variations; either way the return is always the
+ * top-level product entry, never a variation. Degrades to `null` when `id`
+ * names a product `woocommerce/products` has no record of (a simple
+ * product, or an id the store never loaded) — every caller below then
+ * treats the lookup as "no family data", per
+ * {@link effectiveVariationAttributes}'s own degrade.
+ *
+ * @param id The product or variation id to resolve.
+ * @return The base product, or `null` when it cannot be resolved.
+ */
+function resolveBaseProduct( id: number ): ProductResponseItem | null {
+	const variation = productsState.productVariations[ id ];
+	if ( variation ) {
+		return productsState.products[ variation.parent ] ?? null;
+	}
+	return productsState.products[ id ] ?? null;
+}
 
 /**
  * Returns `true` when a variation cart line's recorded attribute values
@@ -608,7 +646,11 @@ function computeKeylessAddSuppressKeys(
 	products: Array< {
 		/** The product id used for matching. */
 		id: number;
-		/** The variation attributes used for matching, if any. */
+		/**
+		 * The variation attributes used for matching, if any — the
+		 * caller's *effective* attributes (`postDraftItems`) or its raw
+		 * `variation` (`addCartItemGenerator`, unchanged).
+		 */
 		variation?: CartVariationItem[] | SelectedAttributes[] | undefined;
 		/** Sum of all pre-add quantities across matching lines, captured before the optimistic bump. */
 		preAddTotal: number;
@@ -791,12 +833,17 @@ async function sendCartRequest(
  * Each item is posted **verbatim** as the request body — no
  * reconstruction — matching the write policy that a draft is exactly a
  * Store API `cart/add-item` payload (extension props at its root
- * included). Optimistically, an item bumps a matching existing cart line's
- * quantity in place (unless the line is `sold_individually`) or is pushed
- * as a new line when no line matches, mirroring `addCartItem`'s
- * keyless-add behavior. `sendCartRequest` calls made synchronously in the
- * same tick — as this function's `.map()` below does — are auto-batched
- * into a single `wc/store/v1/batch` request by the mutation queue.
+ * included). Identity comparisons alone (never the POST body) consult each
+ * item's *effective* attributes — its specified `variation` completed from
+ * the matching variation's own meta, via `draft-internals.ts`'s
+ * `effectiveVariationAttributes` — so an id-direct item (a variation id
+ * with an empty `variation`) still matches its own line. Optimistically, an
+ * item bumps a matching existing cart line's quantity in place (unless the
+ * line is `sold_individually`) or is pushed as a new line when no line
+ * matches, mirroring `addCartItem`'s keyless-add behavior. `sendCartRequest`
+ * calls made synchronously in the same tick — as this function's `.map()`
+ * below does — are auto-batched into a single `wc/store/v1/batch` request
+ * by the mutation queue.
  *
  * On success, `triggerAddedToCartEvent` fires once for the whole call
  * (not once per item), and info/error notices are derived from the cart
@@ -827,24 +874,47 @@ function* postDraftItems(
 	};
 
 	try {
+		// Each item's *effective* attributes — its specified `variation`
+		// completed from the matching variation's own meta (see
+		// `effectiveVariationAttributes`) — derived once here, per item, and
+		// fed into both the pre-add capture below and the optimistic
+		// existing-line lookup in the requests map. Never fed into the POST
+		// body itself: the request below still posts `item` verbatim (see
+		// the function doc). `undefined` signals an incomplete payload (an
+		// unspecified "any" attribute) — the item is then treated as
+		// matching no line in both consumers; the post still proceeds and
+		// any resulting server 400 surfaces through the notice path below.
+		const effectiveAttributesByItem = items.map( ( item ) =>
+			effectiveVariationAttributes(
+				resolveBaseProduct( item.id ),
+				item.id,
+				item.variation
+			)
+		);
+
 		// Per-item capture for the keyless-add exactness test (see
 		// `computeKeylessAddSuppressKeys`). Drafts are unique per product id
 		// by construction (at most one draft per id per collection; grouped
 		// children are distinct ids), so no per-token accumulation is needed.
-		const productCaptures = items.map( ( item ) => {
+		const productCaptures = items.map( ( item, index ) => {
+			const itemAttributes = effectiveAttributesByItem[ index ];
 			const preExistingKeys: string[] = [];
 			let preAddTotal = 0;
-			for ( const cartLine of state.cart.items ) {
-				if ( lineMatchesProduct( cartLine, item.id, item.variation ) ) {
-					preAddTotal += cartLine.quantity;
-					if ( cartLine.key ) {
-						preExistingKeys.push( cartLine.key );
+			if ( itemAttributes !== undefined ) {
+				for ( const cartLine of state.cart.items ) {
+					if (
+						lineMatchesProduct( cartLine, item.id, itemAttributes )
+					) {
+						preAddTotal += cartLine.quantity;
+						if ( cartLine.key ) {
+							preExistingKeys.push( cartLine.key );
+						}
 					}
 				}
 			}
 			return {
 				id: item.id,
-				variation: item.variation,
+				variation: itemAttributes,
 				preAddTotal,
 				// A quantity-less draft is a valid payload (the server
 				// defaults it to the product minimum); the optimistic
@@ -859,7 +929,7 @@ function* postDraftItems(
 		const requests = items.map( ( item, index ) => {
 			const existingItem = findCartLine( {
 				id: item.id,
-				variation: item.variation,
+				variation: effectiveAttributesByItem[ index ],
 			} );
 			const isLastItem = index === items.length - 1;
 
@@ -1403,16 +1473,32 @@ const { actions } = store< Store >(
 					};
 				}
 
-				// Rung 2: product/variation identity (using the resolved
-				// draft view's own `variation`, always a real array) plus a
+				// Rung 2: product/variation identity via the *effective*
+				// attributes — the draft view's specified `variation`
+				// (always a real array), completed from the variation's own
+				// meta (see `effectiveVariationAttributes`) — plus a
 				// namespaced extension-prop comparison against each
-				// candidate line's `extensions[<namespace>]`. Ambiguity —
-				// zero or more than one line surviving both checks — never
-				// guesses: `cartItem` stays `undefined`.
+				// candidate line's `extensions[<namespace>]`. An incomplete
+				// effective payload (an unspecified "any" attribute) pairs
+				// to nothing: no candidate survives. Ambiguity — zero or
+				// more than one line surviving both checks — never guesses:
+				// `cartItem` stays `undefined`.
 				const draft = resolveDraftView( draftKey, id );
-				const identityMatches = state.cart.items.filter( ( item ) =>
-					lineMatchesProduct( item, id, draft.variation )
+				const effectiveAttributes = effectiveVariationAttributes(
+					resolveBaseProduct( id ),
+					id,
+					draft.variation
 				);
+				const identityMatches =
+					effectiveAttributes === undefined
+						? []
+						: state.cart.items.filter( ( item ) =>
+								lineMatchesProduct(
+									item,
+									id,
+									effectiveAttributes
+								)
+						  );
 				const pairedMatches = identityMatches.filter( ( item ) =>
 					draftExtensionsMatchLine( draft, item )
 				);
@@ -1491,14 +1577,22 @@ const { actions } = store< Store >(
 				}
 
 				// The in-context live draft, falling back to the surface's
-				// server-filed seed so an untouched form still posts its
-				// default. Raw lookups, not the draft view: the view
+				// *effective* seed — the family seed re-addressed to this
+				// surface's in-context id (see `resolveEffectiveSeed`), so
+				// an untouched, resolved-variation surface still posts a
+				// minimal `{ id, quantity }` instead of silently no-opping.
+				// For an unresolved parent id this is an identity no-change:
+				// only the direct seed lookup ever applies, exactly today's
+				// behavior. Raw lookups, not the draft view: the view
 				// answers a seed read as an always-present envelope draft,
 				// which would turn a genuinely seedless surface's "nothing
 				// to post" into an attempted post of an empty payload.
 				const draft = findDraftInCollection( collection, product.id );
-				const seed = getDraftSeed( draftKey, product.id );
-				const itemToPost = draft ?? seed;
+				const effectiveSeed = resolveEffectiveSeed(
+					draftKey,
+					product.id
+				);
+				const itemToPost = draft ?? effectiveSeed;
 				if ( ! itemToPost ) {
 					return;
 				}
