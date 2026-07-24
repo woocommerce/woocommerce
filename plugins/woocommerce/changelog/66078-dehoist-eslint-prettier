@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Stop publicly hoisting eslint and prettier; the workspaces that use eslint now declare it. Monorepo tooling only; no production change.
+

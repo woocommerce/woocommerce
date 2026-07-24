@@ -177,6 +177,7 @@
 		"cssnano": "5.1.12",
 		"deep-freeze": "0.0.1",
 		"dotenv": "^16.3.1",
+		"eslint": "^10.0.0",
 		"eslint-import-resolver-typescript": "^4.4.5",
 		"eslint-import-resolver-webpack": "^0.13.11",
 		"eslint-plugin-playwright": "^2.10.5",
