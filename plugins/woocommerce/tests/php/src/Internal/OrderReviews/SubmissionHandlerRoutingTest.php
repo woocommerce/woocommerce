@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility;
 use Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
+use WPAjaxDieContinueException;
 
 /**
  * End-to-end wiring test for the submit_order_reviews AJAX action.
