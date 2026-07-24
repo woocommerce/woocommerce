@@ -216,6 +216,10 @@ class ProductsStore {
 		);
 		$query_string   = implode( '&', $include_params );
 
+		if ( current_user_can( 'edit_products' ) && current_user_can( 'edit_others_products' ) ) {
+			$query_string .= '&status=any';
+		}
+
 		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?' . $query_string );
 
 		if ( empty( $response['body'] ) ) {
@@ -260,7 +264,13 @@ class ProductsStore {
 			);
 		}
 
-		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?parent[]=' . $parent_id . '&type=variation' );
+		$query_string = 'parent[]=' . $parent_id . '&type=variation';
+
+		if ( current_user_can( 'edit_products' ) && current_user_can( 'edit_others_products' ) ) {
+			$query_string .= '&status=any';
+		}
+
+		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?' . $query_string );
 
 		self::$loaded_variation_parents[ $parent_id ] = true;
 

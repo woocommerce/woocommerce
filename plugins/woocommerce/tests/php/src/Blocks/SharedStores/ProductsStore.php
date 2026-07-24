@@ -402,11 +402,96 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox load_variations() requests status=any when the current user can query non-published products.
+	 */
+	public function test_load_variations_requests_status_any_for_admin(): void {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$product = WC_Helper_Product::create_variation_product();
+
+		$fake_hydration = $this->create_counting_hydration(
+			array(
+				'body' => array(),
+			)
+		);
+		$this->inject_hydration( $fake_hydration );
+
+		TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+
+		$this->assertStringContainsString( 'status=any', $fake_hydration->last_path );
+		$this->assertStringContainsString( 'type=variation', $fake_hydration->last_path );
+		$this->assertStringContainsString( 'parent[]=' . $product->get_id(), $fake_hydration->last_path );
+
+		$product->delete( true );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox load_variations() does not request status=any for guests.
+	 */
+	public function test_load_variations_omits_status_any_for_guest(): void {
+		wp_set_current_user( 0 );
+
+		$product = WC_Helper_Product::create_variation_product();
+
+		$fake_hydration = $this->create_counting_hydration(
+			array(
+				'body' => array(),
+			)
+		);
+		$this->inject_hydration( $fake_hydration );
+
+		TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+
+		$this->assertStringNotContainsString( 'status=any', $fake_hydration->last_path );
+		$this->assertStringContainsString( 'type=variation', $fake_hydration->last_path );
+		$this->assertStringContainsString( 'parent[]=' . $product->get_id(), $fake_hydration->last_path );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox load_purchasable_child_products() requests status=any when the current user can query non-published products.
+	 */
+	public function test_load_purchasable_child_products_requests_status_any_for_admin(): void {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$child   = WC_Helper_Product::create_simple_product();
+		$grouped = new WC_Product_Grouped();
+		$grouped->set_name( 'Grouped with status any' );
+		$grouped->set_children( array( $child->get_id() ) );
+		$grouped->save();
+
+		$fake_hydration = $this->create_counting_hydration(
+			array(
+				'body' => array(
+					array(
+						'id'             => $child->get_id(),
+						'is_purchasable' => true,
+					),
+				),
+			)
+		);
+		$this->inject_hydration( $fake_hydration );
+
+		TestedProductsStore::load_purchasable_child_products( $this->consent, $grouped->get_id() );
+
+		$this->assertStringContainsString( 'status=any', $fake_hydration->last_path );
+		$this->assertStringContainsString( 'include[]=' . $child->get_id(), $fake_hydration->last_path );
+
+		$grouped->delete( true );
+		$child->delete( true );
+		wp_set_current_user( 0 );
+	}
+
+	/**
 	 * Create an anonymous Hydration stand-in that counts how many times
 	 * get_rest_api_response_data was called and returns a canned response.
 	 *
 	 * @param array $response The response to return from get_rest_api_response_data.
-	 * @return object A fake Hydration with public `$call_count`.
+	 * @return object A fake Hydration with public `$call_count` and `$last_path`.
 	 */
 	private function create_counting_hydration( array $response ): object {
 		return new class( $response ) {
@@ -425,6 +510,13 @@ class ProductsStore extends \WC_Unit_Test_Case {
 			public int $call_count = 0;
 
 			/**
+			 * The most recent REST path requested.
+			 *
+			 * @var string
+			 */
+			public string $last_path = '';
+
+			/**
 			 * Constructor.
 			 *
 			 * @param array $response The canned response.
@@ -436,12 +528,11 @@ class ProductsStore extends \WC_Unit_Test_Case {
 			/**
 			 * Mimic Hydration::get_rest_api_response_data.
 			 *
-			 * @param string $path The REST path (ignored).
+			 * @param string $path The REST path.
 			 * @return array The canned response.
 			 */
 			public function get_rest_api_response_data( string $path ): array {
-				// Avoid parameter not used PHPCS errors.
-				unset( $path );
+				$this->last_path = $path;
 				++$this->call_count;
 				return $this->response;
 			}
