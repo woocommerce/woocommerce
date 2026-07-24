@@ -6,9 +6,14 @@ The store products API provides public product data so it can be rendered on the
 
 ### Draft and non-published products
 
-Draft and non-published products are only available to users who have permission to edit them, like shop managers or administrators.
+Non-published products like drafts, private or scheduled products are excluded from the collection endpoint for all users.
 
-Product variations are only available when the current user has the `edit_products` and `edit_others_products` capabilities.
+When accessing a product directly by its ID or slug, non-published products are available to users who have permission to edit them, like shop managers or administrators. Product variations are available when the user has the `edit_products` and `edit_others_products` capabilities.
+
+In other words:
+
+* `/wc/store/v1/products/` never returns unpublished products.
+* `/wc/store/v1/products/<id_of_an_unpublished_product>` returns the product if the user has permission to edit it, otherwise it returns 404.
 
 ### Password-protected products
 
