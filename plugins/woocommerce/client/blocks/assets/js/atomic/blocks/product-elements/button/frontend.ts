@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/products';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce';
+import type { WooCommerce } from '@woocommerce/stores/woocommerce';
+import type { Store as WooCommerceCart } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
@@ -19,10 +19,10 @@ const universalLock =
  * The button's own local context, server-seeded per instance by
  * `ProductButton::render()`.
  *
- * Product identity and cart state are read from `woocommerce/products` and
- * `woocommerce/cart` (see `productButtonStore` below); nothing here carries
- * form- or wrapper-specific data — the button never knows whether it is
- * standalone, inside a form, or on a collection card.
+ * Product identity and cart state are read from the unified `woocommerce`
+ * store (see `productButtonStore` below); nothing here carries form- or
+ * wrapper-specific data — the button never knows whether it is standalone,
+ * inside a form, or on a collection card.
  */
 export interface Context {
 	/** The label shown when the product is not (yet) in the cart. */
@@ -54,8 +54,8 @@ type ServerState = {
 	};
 };
 
-const { state: wooState } = store< WooCommerce >(
-	'woocommerce/cart',
+const { state } = store< WooCommerce >(
+	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
@@ -66,11 +66,25 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
-	{},
-	{ lock: universalLock }
-);
+/**
+ * Resolves the in-context product's in-cart quantity.
+ *
+ * A simple/variable product's own paired cart line is
+ * `state.itemInContext.cartItem?.quantity ?? 0`; a grouped product has no
+ * cart line of its own, so its quantity is the sum of every child's own
+ * paired line (`productButtonStore.state.groupedInCartQuantity`) — the
+ * same aggregate the cart store's own, now-removed `inCartQuantity` getter
+ * used to compute internally, resolved here since this button is its only
+ * consumer.
+ *
+ * @return The in-cart quantity for the in-context product.
+ */
+function resolveInCartQuantity(): number {
+	if ( state.itemInContext.product?.type === 'grouped' ) {
+		return productButtonStore.state.groupedInCartQuantity;
+	}
+	return state.itemInContext.cartItem?.quantity ?? 0;
+}
 
 const productButtonStore = {
 	state: {
@@ -83,14 +97,36 @@ const productButtonStore = {
 			return animationStatus === AnimationStatus.SLIDE_OUT;
 		},
 		/**
+		 * The summed in-cart quantity across a grouped product's children.
+		 *
+		 * Sums `state.findItem({ id: childId }).cartItem?.quantity ?? 0`
+		 * over the in-context grouped product's own `grouped_products` —
+		 * the grouped branch the cart store's removed `inCartQuantity`
+		 * getter used to compute, relocated here verbatim since this button
+		 * is its only consumer. Resolves to `0` when no product is in
+		 * context.
+		 */
+		get groupedInCartQuantity(): number {
+			const product = state.itemInContext.product;
+			return (
+				product?.grouped_products.reduce(
+					( total, childId ) =>
+						total +
+						( state.findItem( { id: childId } ).cartItem
+							?.quantity ?? 0 ),
+					0
+				) ?? 0
+			);
+		},
+		/**
 		 * The button's label.
 		 *
-		 * Derives product identity from `productsState.productInContext` and
-		 * reads `wooState.inCartQuantity` for the in-cart count — the same
-		 * envelope-backed getter the cart store exposes to every consumer, so
-		 * this resolves identically whether the button renders standalone,
-		 * inside a form, or on a collection card. It never reads any
-		 * form-specific context.
+		 * Derives product identity from `state.itemInContext.product` and
+		 * resolves the in-cart count via `resolveInCartQuantity()` — a
+		 * simple/variable product's own paired cart line, or a grouped
+		 * product's summed children — so this resolves identically whether
+		 * the button renders standalone, inside a form, or on a collection
+		 * card. It never reads any form-specific context.
 		 */
 		get addToCartText(): string {
 			const {
@@ -108,17 +144,15 @@ const productButtonStore = {
 				animationStatus === AnimationStatus.SLIDE_OUT;
 			const quantity = showTemporaryNumber
 				? tempQuantity || 0
-				: wooState.inCartQuantity;
+				: resolveInCartQuantity();
 
-			if ( productsState.productInContext?.type === 'grouped' ) {
-				// `inCartQuantity` already aggregates every grouped child's
-				// own in-cart quantity (see the cart store's getter); the
-				// grouped label itself only ever toggles between "add to
+			if ( state.itemInContext.product?.type === 'grouped' ) {
+				// The grouped label itself only ever toggles between "add to
 				// cart" and a static "in cart" string (no interpolated
 				// count), and — unlike the simple/variable branch below —
 				// only shows once `hasPressedButton`, so cart state left
 				// over from a previous visit never shows it prematurely.
-				if ( wooState.inCartQuantity > 0 && hasPressedButton ) {
+				if ( resolveInCartQuantity() > 0 && hasPressedButton ) {
 					return inTheCartText;
 				}
 				return addToCartText;
@@ -133,14 +167,14 @@ const productButtonStore = {
 		get displayViewCart(): boolean {
 			const { displayViewCart } = getContext< Context >();
 			if ( ! displayViewCart ) return false;
-			return wooState.inCartQuantity > 0;
+			return resolveInCartQuantity() > 0;
 		},
 	},
 	actions: {
 		/**
 		 * Adds the in-context product to the cart.
 		 *
-		 * Derives the product solely from `productsState.productInContext`
+		 * Derives the product solely from `state.itemInContext.product`
 		 * and posts `context.quantityToAdd` as an explicit `addItem()`
 		 * payload — a delta, added by the server to any existing line, so
 		 * rapid clicks keep compounding correctly. No draft is involved:
@@ -148,7 +182,7 @@ const productButtonStore = {
 		 * have populated one.
 		 */
 		*addItem(): Generator< unknown, void > {
-			const product = productsState.productInContext;
+			const product = state.itemInContext.product;
 
 			if ( ! product ) {
 				return;
@@ -158,8 +192,8 @@ const productButtonStore = {
 			// woocommerce store is public.
 			yield import( '@woocommerce/stores/woocommerce/cart' );
 
-			const { actions } = store< WooCommerce >(
-				'woocommerce/cart',
+			const { actions } = store< WooCommerceCart >(
+				'woocommerce',
 				{},
 				{ lock: universalLock }
 			);
@@ -177,8 +211,8 @@ const productButtonStore = {
 			// Todo: Use the module exports instead of `store()` once the
 			// woocommerce store is public.
 			yield import( '@woocommerce/stores/woocommerce/cart' );
-			const { actions } = store< WooCommerce >(
-				'woocommerce/cart',
+			const { actions } = store< WooCommerceCart >(
+				'woocommerce',
 				{},
 				{ lock: universalLock }
 			);
@@ -194,7 +228,7 @@ const productButtonStore = {
 				// When the second part of the animation ends, we update the
 				// temporary quantity to sync it with the cart and reset the
 				// animation status so it can be triggered again.
-				context.tempQuantity = wooState.inCartQuantity;
+				context.tempQuantity = resolveInCartQuantity();
 				context.animationStatus = AnimationStatus.IDLE;
 			}
 		},
@@ -211,7 +245,7 @@ const productButtonStore = {
 				// Only animate if the quantity number changes and there is no
 				// animation in progress.
 				if (
-					context.tempQuantity !== wooState.inCartQuantity &&
+					context.tempQuantity !== resolveInCartQuantity() &&
 					context.animationStatus === AnimationStatus.IDLE
 				) {
 					context.animationStatus = AnimationStatus.SLIDE_OUT;
@@ -228,7 +262,7 @@ const productButtonStore = {
 			// useLayoutEffect to avoid the useEffect flickering.
 			// eslint-disable-next-line react-hooks/rules-of-hooks
 			useLayoutEffect( () => {
-				context.tempQuantity = wooState.inCartQuantity;
+				context.tempQuantity = resolveInCartQuantity();
 				// eslint-disable-next-line react-hooks/exhaustive-deps
 			}, [] );
 		},
@@ -238,7 +272,7 @@ const productButtonStore = {
 			// sync with the quantity in the cart and the animation hasn't
 			// started yet.
 			if (
-				context.tempQuantity !== wooState.inCartQuantity &&
+				context.tempQuantity !== resolveInCartQuantity() &&
 				context.animationStatus === AnimationStatus.IDLE
 			) {
 				context.animationStatus = AnimationStatus.SLIDE_OUT;

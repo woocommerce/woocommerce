@@ -2,7 +2,6 @@
  * External dependencies
  */
 import type { ProductResponseItem } from '@woocommerce/types';
-import type { ProductsStoreState } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -16,7 +15,7 @@ type MockStore = {
 };
 
 // The `woocommerce/product-button` store `frontend.ts` registers. `frontend.ts`
-// also calls `store()` for `woocommerce/cart`, `woocommerce/products`, and
+// also calls `store()` for the unified `woocommerce` namespace and
 // `woocommerce/add-to-cart-with-options` purely to obtain state references —
 // the mock below routes those to their own fixtures and only merges the
 // local-namespace registration onto a persistent object, mirroring the real
@@ -29,28 +28,35 @@ let mockContext: Context;
 // Every `getContext()` call's namespace argument, recorded to prove the
 // button never reads another store's context (e.g. the add-to-cart-with-options
 // form's) to compute its label or decide what to add — it derives everything
-// from the products/cart stores instead.
+// from the unified `woocommerce` store instead.
 let mockGetContextCalls: Array< string | undefined >;
-
-// The `woocommerce/products` store's state, consulted one-directionally;
-// tests set `productInContext` directly rather than exercising the real
-// `woocommerce/products` getters.
-let mockProductsState: Partial< ProductsStoreState >;
 
 // The `woocommerce/add-to-cart-with-options` store's state, read only by
 // `handlePressedState` to gate the pressed state on form validity.
 let mockAddToCartWithOptionsState: { isFormValid?: boolean };
 
-// The `woocommerce/cart` store's state: `inCartQuantity` backs the label,
-// and `findItemInCart` is kept as a spy purely to prove the button no longer
+// Every child id passed to `findItem({ id })`, keyed to the paired cart
+// line's quantity — the fixture the grouped-aggregate getter sums over.
+// Absent from the map (or the map itself unset) means "no paired line",
+// mirroring the real envelope's `cartItem: undefined` on no match.
+let mockChildCartQuantities: Record< number, number >;
+
+// The unified `woocommerce` store's state: `itemInContext` backs the label
+// and badge reads (`.product`/`.cartItem`), and `findItem` backs the
+// grouped-aggregate getter, resolved against `mockChildCartQuantities`.
+// `findItemInCart` is kept as a spy purely to prove the button still never
 // calls it.
 let mockWooState: {
-	inCartQuantity: number;
+	itemInContext: {
+		product: ProductResponseItem | null;
+		cartItem: { quantity: number } | undefined;
+	};
+	findItem: jest.Mock;
 	findItemInCart: jest.Mock;
 };
 
-// The `woocommerce/cart` store's action spies. `addItem`/`refresh` are the
-// proposed actions; `addCartItem`/`refreshCartItems` are kept as spies purely
+// The `woocommerce` store's action spies. `addItem`/`refresh` are the
+// shipped actions; `addCartItem`/`refreshCartItems` are kept as spies purely
 // to prove the button no longer calls them.
 let mockAddItem: jest.Mock;
 let mockRefresh: jest.Mock;
@@ -67,13 +73,7 @@ jest.mock(
 		useLayoutEffect: ( callback: () => void ) => callback(),
 		store: jest.fn(
 			( name: string, definition?: Record< string, unknown > ) => {
-				if ( name === 'woocommerce/products' ) {
-					return { state: mockProductsState };
-				}
-				if ( name === 'woocommerce/add-to-cart-with-options' ) {
-					return { state: mockAddToCartWithOptionsState };
-				}
-				if ( name === 'woocommerce/cart' ) {
+				if ( name === 'woocommerce' ) {
 					return {
 						state: mockWooState,
 						actions: {
@@ -83,6 +83,9 @@ jest.mock(
 							refreshCartItems: mockRefreshCartItems,
 						},
 					};
+				}
+				if ( name === 'woocommerce/add-to-cart-with-options' ) {
+					return { state: mockAddToCartWithOptionsState };
 				}
 				if ( ! mockRegisteredStore ) {
 					mockRegisteredStore = {
@@ -118,7 +121,7 @@ jest.mock(
 
 // Side-effect store registrations `frontend.ts` imports for ordering only;
 // the mocked `store()` above handles the registration calls directly.
-jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ), {
+jest.mock( '@woocommerce/stores/woocommerce', () => ( {} ), {
 	virtual: true,
 } );
 jest.mock( '@woocommerce/stores/woocommerce/cart', () => ( {} ), {
@@ -175,10 +178,20 @@ describe( 'Product Button frontend store', () => {
 			inTheCartText: '### in cart',
 		};
 		mockGetContextCalls = [];
-		mockProductsState = {};
 		mockAddToCartWithOptionsState = {};
+		mockChildCartQuantities = {};
 		mockWooState = {
-			inCartQuantity: 0,
+			itemInContext: {
+				product: null,
+				cartItem: undefined,
+			},
+			findItem: jest.fn( ( ref?: { id?: number } ) => ( {
+				cartItem:
+					ref?.id !== undefined &&
+					mockChildCartQuantities[ ref.id ] !== undefined
+						? { quantity: mockChildCartQuantities[ ref.id ] }
+						: undefined,
+			} ) ),
 			findItemInCart: jest.fn(),
 		};
 		mockAddItem = jest.fn( () => Promise.resolve() );
@@ -191,9 +204,48 @@ describe( 'Product Button frontend store', () => {
 		jest.clearAllMocks();
 	} );
 
+	describe( 'state.groupedInCartQuantity', () => {
+		it( 'sums the paired cart line quantity for every child id', () => {
+			mockWooState.itemInContext.product = {
+				id: 10,
+				type: 'grouped',
+				grouped_products: [ 1, 2, 3 ],
+			} as ProductResponseItem;
+			mockChildCartQuantities = { 1: 2, 3: 1 };
+
+			const { state } = loadStore();
+
+			expect( state.groupedInCartQuantity ).toBe( 3 );
+			expect( mockWooState.findItem ).toHaveBeenCalledWith( { id: 1 } );
+			expect( mockWooState.findItem ).toHaveBeenCalledWith( { id: 2 } );
+			expect( mockWooState.findItem ).toHaveBeenCalledWith( { id: 3 } );
+		} );
+
+		it( 'treats a child with no paired line as zero', () => {
+			mockWooState.itemInContext.product = {
+				id: 10,
+				type: 'grouped',
+				grouped_products: [ 1, 2 ],
+			} as ProductResponseItem;
+			mockChildCartQuantities = { 1: 4 };
+
+			const { state } = loadStore();
+
+			expect( state.groupedInCartQuantity ).toBe( 4 );
+		} );
+
+		it( 'resolves to 0 when no product is in context', () => {
+			mockWooState.itemInContext.product = null;
+
+			const { state } = loadStore();
+
+			expect( state.groupedInCartQuantity ).toBe( 0 );
+		} );
+	} );
+
 	describe( 'state.addToCartText', () => {
 		it( 'shows the add-to-cart label when nothing is in the cart', () => {
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 1,
 				type: 'simple',
 			} as ProductResponseItem;
@@ -204,7 +256,7 @@ describe( 'Product Button frontend store', () => {
 		} );
 
 		it( 'interpolates the context tempQuantity into the in-cart label during IDLE', () => {
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 1,
 				type: 'simple',
 			} as ProductResponseItem;
@@ -215,15 +267,15 @@ describe( 'Product Button frontend store', () => {
 			expect( state.addToCartText ).toBe( '3 in cart' );
 		} );
 
-		it( 'reads inCartQuantity instead of tempQuantity once past IDLE/SLIDE_OUT', () => {
-			mockProductsState.productInContext = {
+		it( 'reads the paired cart line instead of tempQuantity once past IDLE/SLIDE_OUT', () => {
+			mockWooState.itemInContext.product = {
 				id: 1,
 				type: 'simple',
 			} as ProductResponseItem;
 			mockContext.animationStatus =
 				'SLIDE-IN' as Context[ 'animationStatus' ];
 			mockContext.tempQuantity = 1;
-			mockWooState.inCartQuantity = 5;
+			mockWooState.itemInContext.cartItem = { quantity: 5 };
 
 			const { state } = loadStore();
 
@@ -231,15 +283,15 @@ describe( 'Product Button frontend store', () => {
 		} );
 
 		it( 'renders identically for a standalone button and one nested in a form', () => {
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 1,
 				type: 'simple',
 			} as ProductResponseItem;
-			// Past IDLE/SLIDE_OUT, the label reads live `inCartQuantity`
+			// Past IDLE/SLIDE_OUT, the label reads the live paired cart line
 			// rather than the locally-tracked `tempQuantity`.
 			mockContext.animationStatus =
 				'SLIDE-IN' as Context[ 'animationStatus' ];
-			mockWooState.inCartQuantity = 2;
+			mockWooState.itemInContext.cartItem = { quantity: 2 };
 
 			// No `woocommerce/add-to-cart-with-options` fixture is set up:
 			// the label resolves the same whether or not a form wraps the
@@ -250,11 +302,11 @@ describe( 'Product Button frontend store', () => {
 		} );
 
 		it( 'never reads the add-to-cart-with-options form context or findItemInCart to compute the label', () => {
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 1,
 				type: 'simple',
 			} as ProductResponseItem;
-			mockWooState.inCartQuantity = 2;
+			mockWooState.itemInContext.cartItem = { quantity: 2 };
 
 			const { state } = loadStore();
 			mockGetContextCalls = [];
@@ -267,11 +319,11 @@ describe( 'Product Button frontend store', () => {
 		} );
 
 		it( 'shows the default label for a grouped product with nothing in cart', () => {
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 10,
 				type: 'grouped',
+				grouped_products: [ 1 ],
 			} as ProductResponseItem;
-			mockWooState.inCartQuantity = 0;
 			mockContext.hasPressedButton = true;
 
 			const { state } = loadStore();
@@ -280,11 +332,12 @@ describe( 'Product Button frontend store', () => {
 		} );
 
 		it( 'shows the static in-cart label for a grouped product once pressed', () => {
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 10,
 				type: 'grouped',
+				grouped_products: [ 1, 2 ],
 			} as ProductResponseItem;
-			mockWooState.inCartQuantity = 2;
+			mockChildCartQuantities = { 1: 2 };
 			mockContext.hasPressedButton = true;
 			mockContext.inTheCartText = 'Added to cart';
 
@@ -294,11 +347,12 @@ describe( 'Product Button frontend store', () => {
 		} );
 
 		it( 'keeps the default label for a grouped product in cart until the button is pressed', () => {
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 10,
 				type: 'grouped',
+				grouped_products: [ 1 ],
 			} as ProductResponseItem;
-			mockWooState.inCartQuantity = 2;
+			mockChildCartQuantities = { 1: 2 };
 			mockContext.hasPressedButton = false;
 
 			const { state } = loadStore();
@@ -310,7 +364,7 @@ describe( 'Product Button frontend store', () => {
 	describe( 'state.displayViewCart', () => {
 		it( 'is false when the context flag is off, regardless of cart contents', () => {
 			mockContext.displayViewCart = false;
-			mockWooState.inCartQuantity = 5;
+			mockWooState.itemInContext.cartItem = { quantity: 5 };
 
 			const { state } = loadStore();
 
@@ -319,7 +373,7 @@ describe( 'Product Button frontend store', () => {
 
 		it( 'is true once something is in the cart and the flag is on', () => {
 			mockContext.displayViewCart = true;
-			mockWooState.inCartQuantity = 1;
+			mockWooState.itemInContext.cartItem = { quantity: 1 };
 
 			const { state } = loadStore();
 
@@ -328,17 +382,31 @@ describe( 'Product Button frontend store', () => {
 
 		it( 'is false when the flag is on but nothing is in the cart', () => {
 			mockContext.displayViewCart = true;
-			mockWooState.inCartQuantity = 0;
+			mockWooState.itemInContext.cartItem = undefined;
 
 			const { state } = loadStore();
 
 			expect( state.displayViewCart ).toBe( false );
 		} );
+
+		it( 'sums the grouped children when displaying a grouped product', () => {
+			mockContext.displayViewCart = true;
+			mockWooState.itemInContext.product = {
+				id: 10,
+				type: 'grouped',
+				grouped_products: [ 1, 2 ],
+			} as ProductResponseItem;
+			mockChildCartQuantities = { 2: 1 };
+
+			const { state } = loadStore();
+
+			expect( state.displayViewCart ).toBe( true );
+		} );
 	} );
 
 	describe( 'actions.addItem', () => {
 		it( 'does nothing when no product is in context', async () => {
-			mockProductsState.productInContext = null;
+			mockWooState.itemInContext.product = null;
 
 			const { actions } = loadStore();
 			await runAction(
@@ -350,7 +418,7 @@ describe( 'Product Button frontend store', () => {
 		} );
 
 		it( 'posts the in-context product as an explicit addItem() payload, never addCartItem', async () => {
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 42,
 				type: 'simple',
 			} as ProductResponseItem;
@@ -370,7 +438,7 @@ describe( 'Product Button frontend store', () => {
 		} );
 
 		it( 'resolves the same product identity standalone and on a collection card, with no wrapper branching', async () => {
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 7,
 				type: 'simple',
 			} as ProductResponseItem;
@@ -392,7 +460,7 @@ describe( 'Product Button frontend store', () => {
 		} );
 
 		it( 'sets displayViewCart on the context after adding', async () => {
-			mockProductsState.productInContext = {
+			mockWooState.itemInContext.product = {
 				id: 42,
 				type: 'simple',
 			} as ProductResponseItem;
