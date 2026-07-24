@@ -50,9 +50,12 @@ test.describe( 'Merchant → Mini Cart', () => {
 				.getByRole( 'searchbox', { name: 'Search' } )
 				.fill( blockData.slug );
 
-			const miniCartButton = editor.page.getByRole( 'option', {
-				name: blockData.name,
-			} );
+			const miniCartButton = editor.page
+				.getByLabel( 'WooCommerce', { exact: true } )
+				.getByRole( 'option', {
+					name: blockData.name,
+					exact: true,
+				} );
 
 			await expect( miniCartButton ).toBeVisible();
 			await expect( miniCartButton ).toBeDisabled();
