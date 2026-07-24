@@ -716,7 +716,6 @@ class Products extends ControllerTestCase {
 		);
 
 		if ( ProductStatus::FUTURE === $status ) {
-			// Keep date_created in sync so product->save() does not overwrite the scheduled date.
 			$product->set_date_created( strtotime( '+1 year' ) );
 		}
 
