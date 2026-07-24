@@ -1082,12 +1082,23 @@ function wc_normalize_postcode( $postcode ) {
  * @return string
  */
 function wc_format_phone_number( $phone ) {
-	$phone = $phone ?? '';
+	$original = $phone ?? '';
 
-	if ( ! WC_Validation::is_phone( $phone ) ) {
-		return '';
-	}
-	return preg_replace( '/[^0-9\+\-\(\)\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $phone ) );
+	$is_valid  = WC_Validation::is_phone_format( $original );
+	$formatted = $is_valid
+		? (string) preg_replace( '/[^0-9\+\-\(\)\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $original ) )
+		: '';
+
+	/**
+	 * Filters the formatted phone number.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param string $formatted The formatted phone number, or an empty string if $original isn't a valid phone number.
+	 * @param string $original  The phone number passed to the function.
+	 * @param bool   $is_valid  Whether $original passed the default phone number validation.
+	 */
+	return apply_filters( 'woocommerce_format_phone_number', $formatted, $original, $is_valid );
 }
 
 /**
@@ -1684,6 +1695,7 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_de
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_set_default_payment_method_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_orders_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_view_order_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_order_withdrawal_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_downloads_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_edit_account_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_edit_address_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );

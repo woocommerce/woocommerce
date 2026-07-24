@@ -1,17 +1,17 @@
 <?php
-declare( strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable;
-use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests related to order list table in admin.
  */
 class ListTableTest extends \WC_Unit_Test_Case {
-	use HPOSToggleTrait;
 
 	/**
 	 * @var ListTable
@@ -19,12 +19,47 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Setup - enables HPOS.
+	 * Previous HPOS state.
+	 *
+	 * @var bool
+	 */
+	private static bool $hpos_prev_state;
+
+	/**
+	 * Set up class fixtures.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
+		self::$hpos_prev_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		OrderHelper::create_order_custom_table_if_not_exist();
+
+		if ( ! self::$hpos_prev_state ) {
+			OrderHelper::toggle_cot_feature_and_usage( true );
+		}
+	}
+
+	/**
+	 * Tear down class fixtures.
+	 */
+	public static function tearDownAfterClass(): void {
+		self::clear_hpos_orders();
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() !== self::$hpos_prev_state ) {
+			OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
+		}
+
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		parent::tearDownAfterClass();
+	}
+
+	/**
+	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->setup_cot();
-		$this->toggle_cot_authoritative( true );
 		$this->sut      = new ListTable();
 		$set_order_type = function ( $order_type ) {
 			$this->order_type = $order_type;
@@ -282,5 +317,45 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'some-term', $query_args['s'] ?? null, 'The search term should be added to the query args' );
 		$this->assertSame( 'order_id', $query_args['search_filter'] ?? null, 'The selected search filter should be applied' );
 		$this->assertArrayNotHasKey( 'no_found_rows', $query_args, 'Searches should count their actual results' );
+	}
+
+	/**
+	 * @testdox When a filter modifies the query args via woocommerce_order_list_table_prepare_items_query_args, the cache fast path is not used.
+	 */
+	public function test_filter_modifying_query_args_disables_no_found_rows(): void {
+		\WC_Helper_Order::create_order();
+
+		$called = false;
+
+		$callback = function ( $args ) use ( &$called ) {
+			$called               = true;
+			$args['meta_query'][] = array(
+				'key'     => 'my_custom_meta_key',
+				'value'   => 'any_value',
+				'compare' => '=',
+			);
+			return $args;
+		};
+		add_filter( 'woocommerce_order_list_table_prepare_items_query_args', $callback );
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		remove_filter( 'woocommerce_order_list_table_prepare_items_query_args', $callback );
+
+		$this->assertTrue( $called, 'The filter should have been invoked' );
+		$this->assertArrayNotHasKey( 'no_found_rows', $query_args, 'When a filter modifies the query args, the cache fast path should not be used' );
+	}
+
+	/**
+	 * @testdox Without any filter modifying the query args, the cache fast path is still used.
+	 */
+	public function test_basic_query_still_uses_no_found_rows(): void {
+		\WC_Helper_Order::create_order();
+
+		$this->sut->prepare_items();
+		$query_args = $this->get_order_query_args();
+
+		$this->assertTrue( $query_args['no_found_rows'] ?? false, 'A basic query should use the cache fast path' );
 	}
 }

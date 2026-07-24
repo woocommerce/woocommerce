@@ -336,8 +336,14 @@ class WC_Install {
 		'10.9.0'   => array(
 			'wc_update_1090_remove_task_list_reminder_bar_hidden_option',
 		),
+		'10.9.2'   => array(
+			'wc_update_10902_remove_deprecated_push_notifications_option',
+		),
 		'11.0.0'   => array(
 			'wc_update_1100_enable_point_of_sale_feature',
+		),
+		'11.1.0'   => array(
+			'wc_update_1110_delete_dashboard_outofstock_count_transient',
 		),
 	);
 
@@ -843,17 +849,31 @@ class WC_Install {
 	/**
 	 * Is this a brand new WC install?
 	 *
-	 * A brand new install has no version yet. Also treat empty installs as 'new'.
+	 * A brand-new installation has no version yet. Also treat empty installations as 'new'.
 	 *
-	 * @since  3.2.0
+	 * @since 11.0.0 returns false early for stores that are already live or have completed onboarding.
+	 * @since 3.2.0
+	 *
 	 * @return boolean
 	 */
 	public static function is_new_install() {
-		return is_null( get_option( 'woocommerce_version', null ) )
-			|| (
-				-1 === wc_get_page_id( 'shop' )
-				&& 0 === array_sum( wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' ) )
-			);
+		// Performance note: woocommerce_version is absent before the very first install routine completes.
+		if ( false === get_option( 'woocommerce_version' ) ) {
+			return true;
+		}
+
+		// Performance note: verify if the store is live. This option is auto-loaded, and verification is essentially free.
+		if ( 'no' === get_option( 'woocommerce_coming_soon', 'yes' ) ) {
+			return false;
+		}
+
+		// Performance note: verify if onboarding is complete. This option is auto-loaded, and verification is essentially free.
+		if ( in_array( 'setup', (array) get_option( 'woocommerce_task_list_completed_lists', array() ), true ) ) {
+			return false;
+		}
+
+		// Performance note: this is the original fallback. The store setup is incomplete, and even with a cold cache, we do not anticipate performance issues.
+		return -1 === wc_get_page_id( 'shop' ) && 0 === array_sum( wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' ) );
 	}
 
 	/**
@@ -2624,10 +2644,13 @@ $email_unsubscribes_table_schema;
 	 *
 	 * @throws Exception If unable to proceed with plugin installation.
 	 * @since  2.6.0
+	 * @deprecated 11.1.0 No longer used.
 	 *
 	 * @return void
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
+		wc_deprecated_function( 'WC_Install::background_installer', '11.1.0' );
+
 		// Explicitly clear the event.
 		$args = func_get_args();
 
@@ -2729,7 +2752,12 @@ $email_unsubscribes_table_schema;
 							__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
 							$e->getMessage(),
-							esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_slug ) )
+							esc_url(
+								wp_nonce_url(
+									admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_slug ),
+									'wc-install-plugin-redirect_' . $plugin_slug
+								)
+							)
 						)
 					);
 				}
@@ -2787,10 +2815,13 @@ $email_unsubscribes_table_schema;
 	 *
 	 * @throws Exception If unable to proceed with theme installation.
 	 * @since  3.1.0
+	 * @deprecated 11.1.0 No longer used.
 	 *
 	 * @return void
 	 */
 	public static function theme_background_installer( $theme_slug ) {
+		wc_deprecated_function( 'WC_Install::theme_background_installer', '11.1.0' );
+
 		// Explicitly clear the event.
 		$args = func_get_args();
 

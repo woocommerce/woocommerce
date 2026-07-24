@@ -98,7 +98,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * replacement items. Superseded by $bulk_delete_all_items_pending, which removes
 	 * every item type.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @var array<string>
 	 */
 	protected $item_types_to_bulk_delete = array();
@@ -109,7 +109,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set by remove_order_items() when called with no type (so every item type
 	 * should be removed). Processed and reset in save_items().
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @var bool
 	 */
 	protected $bulk_delete_all_items_pending = false;
@@ -958,7 +958,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				__METHOD__,
 				/* translators: %s: PHP type that was passed instead of a string. */
 				sprintf( esc_html__( 'remove_order_items() expects a string item type or null; received %s.', 'woocommerce' ), esc_html( gettype( $type ) ) ),
-				'10.9.0'
+				'11.0.0'
 			);
 			return;
 		}
@@ -1024,7 +1024,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * woocommerce_order_type_to_group filter so extension-registered types are
 	 * included.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @return array<string, string>
 	 */
 	protected function get_item_types_to_group() {
@@ -1998,6 +1998,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( 'inherit' === $shipping_tax_class ) {
 			$found_classes      = array_intersect( array_merge( array( '' ), WC_Tax::get_tax_class_slugs() ), $this->get_items_tax_classes() );
 			$shipping_tax_class = count( $found_classes ) ? current( $found_classes ) : false;
+
+			// Orders without product line items have no tax class to inherit, so use the standard class.
+			if ( false === $shipping_tax_class && 0 === count( $this->get_items() ) ) {
+				$shipping_tax_class = '';
+			}
 		}
 
 		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );

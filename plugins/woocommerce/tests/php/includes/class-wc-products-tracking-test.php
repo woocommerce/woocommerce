@@ -12,11 +12,13 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function setUp(): void {
+		parent::setUp();
+		$this->clear_tracks_events();
+
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-products-tracking.php';
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$products_tracking = new WC_Products_Tracking();
 		$products_tracking->init();
-		parent::setUp();
 	}
 
 	/**

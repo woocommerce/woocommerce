@@ -13,13 +13,15 @@ use EngineIntegrationTestCase;
 use WC_Order;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 /**
@@ -33,12 +35,7 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 	 * @param array{length: int, unit: string}|null $trial      Native trial duration, or null for none.
 	 */
 	private function make_plan( ?int $max_cycles = null, ?array $trial = null ): Plan {
-		$group_id = ( new PlanGroupRepository() )->insert(
-			PlanGroup::create( array( 'name' => 'Coffee club' ) )
-		);
-
 		$plan = Plan::create(
-			$group_id,
 			array(
 				'name'           => 'Monthly coffee',
 				'billing_policy' => new BillingPolicy( 'month', 1, null, $max_cycles, $trial ),
@@ -71,6 +68,9 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		return $order;
 	}
 
+	/**
+	 * @testdox create_from_order persists and links a lean contract.
+	 */
 	public function test_create_from_order_persists_and_links_contract(): void {
 		$order = $this->make_order();
 		$plan  = $this->make_plan();
@@ -97,6 +97,71 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( OrderLinkage::RELATION_PARENT, $tagged_order->get_meta( OrderLinkage::META_RELATION_TYPE ) );
 	}
 
+	/**
+	 * @testdox create_from_order builds cycle 1 as the paid origin period.
+	 */
+	public function test_create_from_order_builds_cycle_one_as_the_origin_period(): void {
+		$order = $this->make_order();
+		$order->set_date_paid( '2026-01-15 00:00:00' );
+		$order->save();
+
+		$contract = ( new ContractFactory() )->create_from_order( $order, $this->make_plan() );
+
+		// The contract's next-bill cache is the first renewal, one cadence out.
+		$this->assertSame( '2026-02-15 00:00:00', $contract->get_next_payment_gmt() );
+
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo  = new ContractRepository();
+		$cycle = $repo->find_chain_head( $contract_id );
+
+		$this->assertInstanceOf( Cycle::class, $cycle );
+		$this->assertSame( Cycle::KIND_BILLING, $cycle->get_kind() );
+		$this->assertSame( 1, $cycle->get_sequence_no() );
+
+		// Cycle 1 is the origin period: count 1, linked to the origin order, billed.
+		$this->assertSame( 1, $cycle->get_count() );
+		$this->assertSame( $order->get_id(), $cycle->get_order_id() );
+		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertSame( 'lite', $cycle->get_extension_slug() );
+
+		// Its period runs from the paid time to the first renewal date.
+		$this->assertSame( '2026-01-15 00:00:00', $cycle->get_starts_at_gmt() );
+		$this->assertSame( '2026-02-15 00:00:00', $cycle->get_ends_at_gmt() );
+		$this->assertSame( '19.99000000', $cycle->get_expected_total() );
+
+		// It carries the plan + items snapshots, stored on the repository create path.
+		$this->assertNotNull( $cycle->get_plan_snapshot_id() );
+		$this->assertNotNull( $cycle->get_items_snapshot_id() );
+
+		// The contract is the live source of truth: it records the SAME snapshot refs
+		// as cycle 1 and seeds its live billing total from the order.
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( $cycle->get_plan_snapshot_id(), $reloaded->get_plan_snapshot_id() );
+		$this->assertSame( $cycle->get_items_snapshot_id(), $reloaded->get_items_snapshot_id() );
+		$this->assertSame( '19.99000000', $reloaded->get_billing_total() );
+	}
+
+	/**
+	 * @testdox The origin cycle is reachable by the origin order id.
+	 */
+	public function test_origin_cycle_is_reachable_by_order_id(): void {
+		$order = $this->make_order();
+		$order->save();
+
+		$contract = ( new ContractFactory() )->create_from_order( $order, $this->make_plan() );
+
+		$cycles = ( new ContractRepository() )->find_cycles_by_order_id( $order->get_id() );
+		$this->assertCount( 1, $cycles );
+		$this->assertSame( $contract->get_id(), $cycles[0]->get_contract_id() );
+		$this->assertSame( 1, $cycles[0]->get_count() );
+	}
+
+	/**
+	 * @testdox The first renewal date follows the billing cadence.
+	 */
 	public function test_first_renewal_date_follows_billing_cadence(): void {
 		$order = $this->make_order();
 		$order->set_date_paid( '2026-01-15 00:00:00' );
@@ -104,10 +169,12 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 
 		$contract = ( new ContractFactory() )->create_from_order( $order, $this->make_plan() );
 
-		// Monthly cadence anchored on the paid date.
 		$this->assertSame( '2026-02-15 00:00:00', $contract->get_next_payment_gmt() );
 	}
 
+	/**
+	 * @testdox A native trial delays the first renewal date.
+	 */
 	public function test_native_trial_delays_first_renewal(): void {
 		$order = $this->make_order();
 		$order->set_date_paid( '2026-01-15 00:00:00' );
@@ -125,8 +192,19 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 
 		// First bill is the trial end, not one month out.
 		$this->assertSame( '2026-01-29 00:00:00', $contract->get_next_payment_gmt() );
+
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// Cycle 1's period end matches that first renewal date.
+		$cycle = ( new ContractRepository() )->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $cycle );
+		$this->assertSame( '2026-01-29 00:00:00', $cycle->get_ends_at_gmt() );
 	}
 
+	/**
+	 * @testdox Overrides take precedence over order-derived values.
+	 */
 	public function test_overrides_take_precedence(): void {
 		$order = $this->make_order();
 		$plan  = $this->make_plan();
@@ -140,14 +218,105 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 			)
 		);
 
-		$this->assertSame( '49.00', $contract->get_billing_total() );
+		// next_payment_gmt override sets both the cache and cycle 1's period end.
 		$this->assertSame( '2026-12-01 00:00:00', $contract->get_next_payment_gmt() );
+
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$cycle = ( new ContractRepository() )->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $cycle );
+		$this->assertSame( '49.00000000', $cycle->get_expected_total() );
+		$this->assertSame( '2026-12-01 00:00:00', $cycle->get_ends_at_gmt() );
 	}
 
+	/**
+	 * @testdox The origin cycle's plan snapshot freezes the pricing policy.
+	 */
+	public function test_plan_snapshot_round_trips_the_pricing_policy(): void {
+		$plan = Plan::create(
+			array(
+				'name'           => 'Discounted monthly',
+				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),
+				'pricing_policy' => PricingPolicy::from_array(
+					array(
+						'policies' => array(
+							array(
+								'type'            => 'bogo',
+								'duration_cycles' => 1,
+							),
+							array(
+								'type'  => 'percentage',
+								'value' => 10,
+							),
+						),
+					)
+				),
+				'category'       => Plan::DEFAULT_CATEGORY,
+				'extension_slug' => 'lite',
+			)
+		);
+		( new PlanRepository() )->insert( $plan );
+
+		$contract    = ( new ContractFactory() )->create_from_order( $this->make_order(), $plan );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo  = new ContractRepository();
+		$cycle = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $cycle );
+
+		$snapshot = $repo->find_plan_snapshot( $cycle->get_plan_snapshot_id() );
+		$this->assertInstanceOf( PlanSnapshot::class, $snapshot );
+
+		// The stored payload carries the frozen pricing policy.
+		$payload = $snapshot->to_array();
+		$this->assertArrayHasKey( 'pricing_policy', $payload );
+		$this->assertIsArray( $payload['pricing_policy'] );
+
+		// The typed accessor reconstructs the frozen terms: bogo (first cycle only,
+		// value normalized to 0.0) plus the percentage entry, intact after the
+		// snapshot's DB round-trip.
+		$pricing = $snapshot->get_pricing_policy();
+		$this->assertInstanceOf( PricingPolicy::class, $pricing );
+		$policies = $pricing->get_policies();
+		$this->assertCount( 2, $policies );
+		$this->assertSame( 'bogo', $policies[0]['type'] );
+		$this->assertSame( 0.0, $policies[0]['value'] );
+		$this->assertSame( 1, $policies[0]['duration_cycles'] ?? null );
+		$this->assertSame( 'percentage', $policies[1]['type'] );
+		$this->assertSame( 10.0, $policies[1]['value'] );
+	}
+
+	/**
+	 * @testdox The plan snapshot records an explicit null when the plan has no pricing policy.
+	 */
+	public function test_plan_snapshot_is_null_safe_without_a_pricing_policy(): void {
+		$contract    = ( new ContractFactory() )->create_from_order( $this->make_order(), $this->make_plan() );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo  = new ContractRepository();
+		$cycle = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $cycle );
+
+		$snapshot = $repo->find_plan_snapshot( $cycle->get_plan_snapshot_id() );
+		$this->assertInstanceOf( PlanSnapshot::class, $snapshot );
+
+		// Explicit null (not a missing key): the frozen terms deliberately record
+		// "no pricing policy at signup", distinguishable from a pre-key snapshot.
+		$payload = $snapshot->to_array();
+		$this->assertArrayHasKey( 'pricing_policy', $payload );
+		$this->assertNull( $payload['pricing_policy'] );
+		$this->assertNull( $snapshot->get_pricing_policy() );
+	}
+
+	/**
+	 * @testdox An unsaved plan is rejected.
+	 */
 	public function test_unsaved_plan_is_rejected(): void {
 		$order = $this->make_order();
 		$plan  = Plan::create(
-			1,
 			array(
 				'name'           => 'Monthly coffee',
 				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),
@@ -159,6 +328,9 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		( new ContractFactory() )->create_from_order( $order, $plan );
 	}
 
+	/**
+	 * @testdox An unsaved order is rejected.
+	 */
 	public function test_unsaved_order_is_rejected(): void {
 		// An order that was never saved reports id 0, which would persist
 		// origin_order_id => 0 and link the contract to a non-existent order.

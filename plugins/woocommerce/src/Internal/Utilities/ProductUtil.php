@@ -1,13 +1,28 @@
 <?php
 
-declare(strict_types=1);
+declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Utilities;
+
+use Automattic\WooCommerce\Caches\ProductCountCache;
 
 /**
  * Class with general utility methods related to products.
  */
 class ProductUtil {
+	/**
+	 * Transient name for the cached dashboard "out of stock" product count.
+	 *
+	 * Exposed as a constant so the one-time DB update that clears this transient
+	 * (wc_update_1110_delete_dashboard_outofstock_count_transient) stays in sync
+	 * with the runtime invalidation list below.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @var string
+	 */
+	public const OUTOFSTOCK_COUNT_TRANSIENT = 'wc_outofstock_count';
+
 	/**
 	 * Delete all product transients for a set of products.
 	 *
@@ -24,7 +39,7 @@ class ProductUtil {
 		$transients_to_clear = array(
 			'wc_products_onsale',
 			'wc_featured_products',
-			'wc_outofstock_count',
+			self::OUTOFSTOCK_COUNT_TRANSIENT,
 			'wc_low_stock_count',
 		);
 
@@ -129,7 +144,7 @@ class ProductUtil {
 	}
 
 	/**
-	 * Counts per-status number of products.
+	 * Counts per-status number of products of a given post type.
 	 *
 	 * @since 11.0.0
 	 *
@@ -137,7 +152,18 @@ class ProductUtil {
 	 * @return array<string,int>
 	 */
 	public function get_counts_for_type( string $post_type ): array {
-		// Performance note: integration point for upcoming persistent counters solution.
-		return array_map( 'intval', (array) wp_count_posts( $post_type ) );
+		$product_count_cache = wc_get_container()->get( ProductCountCache::class );
+		$count_per_status    = $product_count_cache->get( $post_type );
+
+		if ( null === $count_per_status ) {
+			$count_per_status = array_merge(
+				array_fill_keys( array_keys( get_post_stati() ), 0 ),
+				(array) wp_count_posts( $post_type )
+			);
+
+			$product_count_cache->set_multiple( $post_type, $count_per_status );
+		}
+
+		return array_map( 'intval', $count_per_status );
 	}
 }

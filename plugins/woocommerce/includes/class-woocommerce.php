@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\LegacyAssets\LegacySelect2UsageTracker;
 use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
@@ -38,6 +39,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
+use Automattic\WooCommerce\Caches\ProductCountCacheService;
 use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
@@ -57,7 +59,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '11.0.0-dev';
+	public $version = '11.1.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -325,6 +327,7 @@ final class WooCommerce {
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'load-post.php', array( $this, 'includes' ) );
+		add_action( 'load-post-new.php', array( $this, 'includes' ) );
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( $this, 'maybe_init_order_reviews' ), 1 );
 		add_action( 'init', array( $this, 'maybe_init_abandoned_cart_recovery' ), 1 );
@@ -375,6 +378,7 @@ final class WooCommerce {
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
 		$container->get( OrderCountCacheService::class );
+		$container->get( ProductCountCacheService::class );
 		$container->get( EmailImprovements::class );
 		$container->get( DeferredEmailQueue::class );
 		$container->get( AddressProviderController::class );
@@ -402,6 +406,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
+		$container->get( LegacySelect2UsageTracker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
 		$container->get( EmailLogger::class )->register();
@@ -411,7 +416,10 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
@@ -604,7 +612,12 @@ final class WooCommerce {
 	 *
 	 * Legacy REST requests should still run some extra code for backwards compatibility.
 	 *
-	 * @todo: replace this function once core WP function is available: https://core.trac.wordpress.org/ticket/42061.
+	 * This method cannot be replaced with core's wp_is_serving_rest_request(): that function reads the
+	 * REST_REQUEST constant, which is only defined once rest_api_loaded() runs on parse_request — long
+	 * after this method is first called during plugin bootstrap (e.g. to decide whether to load the
+	 * frontend includes). Sniffing the request URI is the only signal available that early. Code that
+	 * runs after parse_request should prefer wp_is_serving_rest_request(), or wp_is_rest_endpoint(),
+	 * which also covers internal REST requests dispatched during a regular page load.
 	 *
 	 * @return bool
 	 */
@@ -613,8 +626,13 @@ final class WooCommerce {
 			return false;
 		}
 
+		// Pretty permalinks: the REST prefix is part of the path, e.g. /wp-json/wc/v3/products.
+		// Plain permalinks: the route is passed as a query parameter instead, e.g. ?rest_route=/wc/v3/products
+		// (also used by Jetpack-signed REST requests regardless of the permalink structure).
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 		$rest_prefix         = trailingslashit( rest_get_url_prefix() );
-		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ) || ! empty( $_GET['rest_route'] );
+		// phpcs:enable
 
 		/**
 		 * Whether this is a REST API request.
@@ -633,8 +651,27 @@ final class WooCommerce {
 		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
 			return false;
 		}
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		return false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' );
+
+		// Pretty permalinks: the Store API namespace is part of the path, e.g. /wp-json/wc/store/v1/cart. Match the
+		// path only (a leading slash anchors the prefix) so a REST-like query argument such as
+		// /some-page/?arg=/wp-json/wc/store/ is not mistaken for a Store API request.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$path = wp_parse_url( '/' . ltrim( (string) wp_unslash( $_SERVER['REQUEST_URI'] ), '/' ), PHP_URL_PATH );
+		if ( is_string( $path ) && false !== strpos( $path, '/' . trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) ) {
+			return true;
+		}
+
+		// Plain permalinks: the route is passed as a query parameter, e.g. ?rest_route=/wc/store/v1/cart.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the route only, no state change.
+		if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the route only, no state change.
+			$rest_route = '/' . ltrim( rawurldecode( sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) ), '/' );
+			if ( 0 === strpos( $rest_route, '/wc/store/' ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -997,7 +1034,7 @@ final class WooCommerce {
 	 * so the order-edit action listener is registered before
 	 * `WC_Meta_Box_Order_Actions::save()` dispatches its hook on POST.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @internal
 	 */
 	public function maybe_init_abandoned_cart_recovery(): void {
@@ -1005,6 +1042,7 @@ final class WooCommerce {
 			return;
 		}
 		wc_get_container()->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\ManualSendHandler::class );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\AbandonedCartRecovery\Scheduler::class );
 	}
 
 	/**
@@ -1019,7 +1057,7 @@ final class WooCommerce {
 	 * stop working. Both consequences are wrong, so this method runs even
 	 * when no specific email kind that uses it is currently active.
 	 *
-	 * @since 10.9.0
+	 * @since 11.0.0
 	 * @internal
 	 */
 	public function init_email_unsubscribes(): void {
@@ -1254,8 +1292,9 @@ final class WooCommerce {
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function robots_txt( $output ) {
-		$site_url = wp_parse_url( site_url() );
-		$path     = ( ! empty( $site_url['path'] ) ) ? $site_url['path'] : '';
+		$upload_dir   = wp_get_upload_dir();
+		$upload_url   = wp_parse_url( $upload_dir['baseurl'] );
+		$uploads_path = ( is_array( $upload_url ) && ! empty( $upload_url['path'] ) ) ? rtrim( $upload_url['path'], '/' ) : '/wp-content/uploads';
 
 		$lines       = preg_split( '/\r\n|\r|\n/', $output );
 		$agent_index = array_search( 'User-agent: *', $lines, true );
@@ -1271,9 +1310,9 @@ final class WooCommerce {
 			$above[] = 'User-agent: *';
 		}
 
-		$above[] = "Disallow: $path/wp-content/uploads/wc-logs/";
-		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_transient_files/";
-		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_uploads/";
+		$above[] = "Disallow: $uploads_path/wc-logs/";
+		$above[] = "Disallow: $uploads_path/woocommerce_transient_files/";
+		$above[] = "Disallow: $uploads_path/woocommerce_uploads/";
 		$above[] = 'Disallow: /*?add-to-cart=';
 		$above[] = 'Disallow: /*?*add-to-cart=';
 

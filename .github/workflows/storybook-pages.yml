@@ -15,7 +15,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+              uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
               with:
                   ref: trunk
                   fetch-depth: 0
@@ -23,7 +23,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  install: true
+                  install: '@woocommerce/storybook...'
 
             - name: Build Storybook
               run: pnpm --filter='@woocommerce/storybook' build
@@ -31,8 +31,16 @@ jobs:
                   STORYBOOK_COMPOSITION_PATH_PREFIX: /woocommerce
 
             - name: Deploy
-              uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
+              uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   publish_dir: ./tools/storybook/storybook-static
                   force_orphan: true
+
+            - name: Report failure on Slack
+              if: ${{ failure() }}
+              env:
+                  SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+                  DEFAULT_CHECKS_CHANNEL: ${{ secrets.TEST_REPORTS_SLACK_CHANNEL }}
+                  DAILY_CHECKS_CHANNEL: ${{ secrets.DAILY_CHECKS_CHANNEL }}
+              run: pnpm utils slack-test-report -c failure -r "nightly-checks Storybook build and deploy" --config ".github/workflows/slack-report-config.json"

@@ -149,6 +149,32 @@ describe( 'Config', () => {
 			} );
 		} );
 
+		it( 'should support extglob negation in changes patterns', () => {
+			const parsed = parseCIConfig( {
+				name: 'foo',
+				config: {
+					ci: {
+						tests: [
+							{
+								name: 'default',
+								changes: 'foo/{*,!(bar)/**}',
+								command: 'foo',
+							},
+						],
+					},
+				},
+			} );
+
+			// changes[ 0 ] is the implicit `package.json` glob.
+			const changes = parsed.jobs[ 0 ].changes[ 1 ];
+
+			expect( changes.test( 'foo/file.ts' ) ).toBe( true );
+			expect( changes.test( 'foo/baz/file.ts' ) ).toBe( true );
+			expect( changes.test( 'foo/baz/deep/file.ts' ) ).toBe( true );
+			expect( changes.test( 'foo/bar/file.ts' ) ).toBe( false );
+			expect( changes.test( 'foo/bar/deep/file.ts' ) ).toBe( false );
+		} );
+
 		it( 'should parse test config with environment', () => {
 			const parsed = parseCIConfig( {
 				name: 'foo',
@@ -439,6 +465,70 @@ describe( 'Config', () => {
 					} );
 				};
 				expect( expectation ).toThrow();
+			}
+		);
+
+		it( 'should parse config with the usesSharedPluginBuild property', () => {
+			const parsed = parseCIConfig( {
+				name: 'foo',
+				config: {
+					ci: {
+						tests: [
+							{
+								name: 'default',
+								changes: [],
+								command: 'foo',
+								usesSharedPluginBuild: true,
+							},
+							{
+								name: 'other',
+								changes: [],
+								command: 'foo',
+							},
+						],
+					},
+				},
+			} );
+
+			expect( parsed ).toMatchObject( {
+				jobs: [
+					{
+						type: JobType.Test,
+						usesSharedPluginBuild: true,
+					},
+					{
+						type: JobType.Test,
+					},
+				],
+			} );
+			expect( parsed?.jobs[ 1 ] ).not.toHaveProperty(
+				'usesSharedPluginBuild'
+			);
+		} );
+
+		it.each( [ [ 'bad' ], [ 1 ] ] )(
+			'should error for config with invalid values for the usesSharedPluginBuild property',
+			( input ) => {
+				const expectation = () => {
+					parseCIConfig( {
+						name: 'foo',
+						config: {
+							ci: {
+								tests: [
+									{
+										name: 'default',
+										changes: [],
+										command: 'foo',
+										usesSharedPluginBuild: input,
+									},
+								],
+							},
+						},
+					} );
+				};
+				expect( expectation ).toThrow(
+					'The "usesSharedPluginBuild" property must be a boolean.'
+				);
 			}
 		);
 	} );

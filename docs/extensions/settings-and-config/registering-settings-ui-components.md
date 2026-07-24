@@ -1,10 +1,12 @@
 ---
 post_title: Registering settings UI components
-sidebar_label: Settings UI components
-sidebar_position: 6
+sidebar_label: Register settings UI components
+sidebar_position: 8
 ---
 
 # Registering settings UI components
+
+> **The settings UI is experimental** and subject to change. See the [settings UI status](./settings-ui.md#status) for details.
 
 Use custom components when a WooCommerce settings field needs plugin-specific React UI that cannot be represented by a native field type.
 

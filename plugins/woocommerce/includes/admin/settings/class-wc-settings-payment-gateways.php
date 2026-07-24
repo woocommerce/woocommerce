@@ -240,7 +240,9 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			return false;
 		}
 
-		return null !== SettingsSectionRegistry::get_instance()->get_registered( self::TAB_NAME, (string) $section );
+		$registry = $this->get_settings_section_registry();
+
+		return null !== $registry && null !== $registry->get_registered( self::TAB_NAME, (string) $section );
 	}
 
 	/**

@@ -1,3 +1,15 @@
+@import "../../base/components/button/style";
+@import "../../base/components/drawer/style";
+@import "../../base/components/cart-checkout/cart-line-items-table/style";
+@import "../../base/components/cart-checkout/payment-method-icons/style";
+@import "../../base/components/cart-checkout/product-badge/style";
+@import "../../base/components/cart-checkout/product-details/style";
+@import "../../base/components/cart-checkout/product-metadata/style";
+@import "../../base/components/quantity-selector/style";
+@import "../../base/components/product-name/style";
+@import "../../base/components/product-price/style";
+@import "quantity-badge/style";
+
 .wc-block-mini-cart {
 	display: inline-block;
 }
@@ -166,7 +178,7 @@ h2.wc-block-mini-cart__title {
 }
 
 .wc-block-mini-cart__footer {
-	border-top: 1px solid $universal-translucent-border-color;
+	border-top: 1px solid $universal-border-light;
 	padding: $gap-large $gap;
 
 	.wc-block-components-totals-item.wc-block-mini-cart__footer-subtotal {

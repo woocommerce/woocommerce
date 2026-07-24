@@ -252,45 +252,4 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( array( $product_1->get_id(), $product_2->get_id() ), $synced_ids, 'Each product should be synced at most once per request' );
 		$this->assertEmpty( $wc_deferred_product_sync, 'The queue should be empty after the sync' );
 	}
-
-	/**
-	 * @testdox Should delete variation attribute meta when the parent variation attribute is removed.
-	 */
-	public function test_product_attributes_updated_deletes_stale_variation_attribute_meta(): void {
-		$product       = WC_Helper_Product::create_variation_product();
-		$variation_ids = $product->get_children();
-
-		foreach ( $variation_ids as $variation_id ) {
-			update_post_meta( $variation_id, 'attribute_pa_colour', 'red' );
-			$this->assertSame( 'red', get_post_meta( $variation_id, 'attribute_pa_colour', true ), 'Variation should start with colour attribute meta' );
-		}
-
-		$attributes = $product->get_attributes();
-		unset( $attributes['pa_colour'] );
-		$product->set_attributes( $attributes );
-		$product->save();
-
-		foreach ( $variation_ids as $variation_id ) {
-			$this->assertFalse( metadata_exists( 'post', $variation_id, 'attribute_pa_colour' ), 'Removed parent variation attribute meta should be deleted from each child variation' );
-		}
-		$this->assertSame( 'huge', get_post_meta( $variation_ids[2], 'attribute_pa_size', true ), 'Remaining parent variation attribute meta should be preserved' );
-
-		$product       = WC_Helper_Product::create_variation_product();
-		$variation_ids = $product->get_children();
-
-		foreach ( $variation_ids as $variation_id ) {
-			update_post_meta( $variation_id, 'attribute_pa_size', 'huge' );
-			update_post_meta( $variation_id, 'attribute_pa_colour', 'red' );
-			update_post_meta( $variation_id, 'attribute_pa_number', '2' );
-		}
-
-		$product->set_attributes( array() );
-		$product->save();
-
-		foreach ( $variation_ids as $variation_id ) {
-			$this->assertFalse( metadata_exists( 'post', $variation_id, 'attribute_pa_size' ), 'Removed size attribute meta should be deleted from each child variation' );
-			$this->assertFalse( metadata_exists( 'post', $variation_id, 'attribute_pa_colour' ), 'Removed colour attribute meta should be deleted from each child variation' );
-			$this->assertFalse( metadata_exists( 'post', $variation_id, 'attribute_pa_number' ), 'Removed number attribute meta should be deleted from each child variation' );
-		}
-	}
 }

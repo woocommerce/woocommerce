@@ -66,10 +66,10 @@ test.describe( 'woocommerce/product-filter-active - Frontend', () => {
 		);
 
 		await expect(
-			page.getByText( 'Status: In stock' ).first()
+			page.getByText( 'Availability: In stock' ).first()
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Status: On backorder' ).first()
+			page.getByText( 'Availability: On backorder' ).first()
 		).toBeVisible();
 	} );
 

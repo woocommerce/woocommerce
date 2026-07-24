@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent ID-less classic settings radio fields from sharing a single "-title" ID that could cross-label radio groups for assistive technology.

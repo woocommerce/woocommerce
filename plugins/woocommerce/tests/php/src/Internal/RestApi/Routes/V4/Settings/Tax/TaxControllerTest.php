@@ -5,15 +5,16 @@ namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Settings\Tax;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Tax\Controller;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Tax\Schema\TaxSettingsSchema;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
+use WP_REST_Server;
 
 /**
  * Tests for the Tax Settings REST API controller.
  *
  * @class TaxControllerTest
  */
-class TaxControllerTest extends WC_REST_Unit_Test_Case {
+class TaxControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Endpoint.
 	 *
@@ -27,11 +28,27 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 	protected $sut;
 
 	/**
-	 * The ID of the store admin user.
+	 * REST server used to dispatch tax settings requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
+
+	/**
+	 * The ID of the store admin user, shared across all tests in the class for REST authentication.
 	 *
 	 * @var int
 	 */
-	protected $store_admin_id;
+	protected static $store_admin_id;
+
+	/**
+	 * Create the shared admin user once for the whole class.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$store_admin_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
 
 	/**
 	 * Set up test.
@@ -39,20 +56,23 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $this->store_admin_id );
+		wp_set_current_user( self::$store_admin_id );
 
 		$schema    = new TaxSettingsSchema();
 		$this->sut = new Controller();
 		$this->sut->init( $schema );
-		$this->sut->register_routes();
+		$this->server = $this->create_rest_server_with_routes(
+			array( array( $this->sut, 'register_routes' ) ),
+			true
+		);
 	}
 
 	/**
 	 * Tear down test.
 	 */
 	public function tearDown(): void {
-		wp_delete_user( $this->store_admin_id );
+		$this->clear_rest_server();
+		unset( $this->server, $this->sut );
 		parent::tearDown();
 	}
 
