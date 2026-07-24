@@ -35,7 +35,7 @@ import {
 	getDraftSeed,
 	resolveCollection,
 	resolveDraftKey,
-	warnDraftInvariant,
+	resolveDraftView,
 } from './draft-internals';
 
 export type WooCommerceConfig = {
@@ -71,14 +71,20 @@ export type DraftKey = string;
  * payload root, namespaced, exactly as the Store API accepts them; there is
  * no separate wrapper for them here (contrast with the read-only
  * `CartItem.extensions`, which reflects the *server's* response shape once a
- * line exists).
+ * line exists). There is no draft-writing action: every draft is read and
+ * written exclusively through the live draft view `findItem`/`itemInContext`
+ * expose as `Envelope.draft` (see `draft-internals.ts`'s
+ * `resolveDraftView`/`writeDraft`).
  */
 export type DraftItem = {
 	/**
-	 * The product or variation id being drafted. This is also the
-	 * per-collection uniqueness key: `upsertDraftItem` merges into the
-	 * resolved collection's draft whose `id` matches and appends otherwise,
-	 * so a collection holds at most one draft per `id`.
+	 * The product or variation id being drafted, and the per-collection
+	 * uniqueness key: a collection holds at most one draft per `id` on the
+	 * supported write path. Store-managed: it follows `variation` (a
+	 * `variation` write re-resolves the family and re-files the same draft
+	 * under whichever id its attributes match, migrating `id` and
+	 * `variation` together in the same step); a direct write to `id` is
+	 * rejected.
 	 */
 	id: number;
 	/**
@@ -91,7 +97,17 @@ export type DraftItem = {
 	 * behalf.
 	 */
 	quantity?: number;
-	/** Chosen attributes, for a variation draft. */
+	/**
+	 * The *specified* selection — the attributes a shopper or caller
+	 * actually recorded. Through the draft view, `variation` always reads
+	 * as a real array: `[]` means **nothing specified**, which for a draft
+	 * filed under a variation id means "the variation's own attributes
+	 * apply" (the Store API fills them server-side). Consumers judge
+	 * selection state by **emptiness, never truthiness**, and never
+	 * compare `draft.variation` against a cart line's `variation`
+	 * themselves — pairing, posting, and display resolution are the
+	 * store's boundaries.
+	 */
 	variation?: SelectedAttributes[];
 	/** Namespaced extension props riding at the payload root (e.g. `'my-plugin/gift-note'`). */
 	[ extensionProp: string ]: unknown;
@@ -136,7 +152,19 @@ export type Envelope = {
 	 * candidate line matches and none can be told apart.
 	 */
 	cartItem?: CartItem | OptimisticCartItem | undefined;
-	/** The resolved collection's draft for the product, when one exists. */
+	/**
+	 * The resolved collection's live, family-aware draft view for the
+	 * product (see `draft-internals.ts`'s `resolveDraftView`): present
+	 * whenever an id resolves (an explicit `id`/`key`/`filter` match, or a
+	 * product in context), `undefined` only when no id is given and no
+	 * product is in context. Reading it returns the live draft's values
+	 * when one exists, else the surface's server-filed seed values — a
+	 * read never materializes anything. Writing through it records
+	 * shopper/caller input: it merges onto the live draft, or composes and
+	 * materializes a new one from the seed on an untouched surface;
+	 * writing `variation` re-files the same draft under whichever id its
+	 * attributes resolve to.
+	 */
 	draft?: DraftItem | undefined;
 };
 
@@ -163,27 +191,27 @@ export type Store = {
 		 * `draft-internals.ts`) collection. Every read and write resolves
 		 * the nearest declared key (see `draft-internals.ts`'s
 		 * `resolveDraftKey`/`resolveCollection`). A collection is created
-		 * lazily, on its first shopper write — the server never seeds this
-		 * map. Drafts live alongside — never inside — the read-only `cart`
-		 * mirror above, and are written exclusively through
-		 * `upsertDraftItem`, or by direct mutation of an already-resolved
-		 * draft object.
+		 * lazily, on its first shopper write, made through the draft view
+		 * `findItem`/`itemInContext` expose as `Envelope.draft` — the
+		 * server never seeds this map, and no action writes it directly.
+		 * Drafts live alongside — never inside — the read-only `cart`
+		 * mirror above.
 		 */
 		draftItems: Record< DraftKey, DraftItem[] >;
 		/**
 		 * Finds an item by id/key, or by an extension-supplied predicate,
-		 * returning the read-only envelope pairing its draft with its cart
-		 * line. The draft is read from the resolved draft collection — the
-		 * nearest declared `context.draftKey`, falling back to the reserved
-		 * global draft key (see `draft-internals.ts`'s
-		 * `resolveDraftKey`/`resolveCollection`).
+		 * returning the read-only envelope pairing its live draft view with
+		 * its cart line. The draft view is resolved against the nearest
+		 * declared `context.draftKey`, falling back to the reserved global
+		 * draft key (see `draft-internals.ts`'s
+		 * `resolveDraftKey`/`resolveDraftView`).
 		 *
 		 * Implements the pairing ladder: an explicit `key` pairs exactly
 		 * (no further checks); otherwise product/variation identity plus a
 		 * namespaced extension-prop comparison against the candidate line's
 		 * `extensions[<namespace>]` must resolve to exactly one candidate
-		 * (using the resolved draft's own `variation`/extension props, when
-		 * one exists); any remaining ambiguity leaves `cartItem`
+		 * (using the resolved draft view's own `variation`/extension props);
+		 * any remaining ambiguity leaves `cartItem`
 		 * `undefined` — the server owns line identity, so this never
 		 * guesses. `filter` replaces the id-based identity matching
 		 * entirely, for extensions with their own notion of line identity.
@@ -204,9 +232,9 @@ export type Store = {
 		} ) => Envelope;
 		/**
 		 * The envelope for the in-context product: its resolved
-		 * collection's draft paired with its cart line, resolved via the
-		 * products store's `productInContext`. `undefined` product in
-		 * context (nothing rendered) yields an empty envelope. See
+		 * collection's live draft view paired with its cart line, resolved
+		 * via the products store's `productInContext`. `undefined` product
+		 * in context (nothing rendered) yields an empty envelope. See
 		 * `findItem` for the pairing ladder.
 		 */
 		itemInContext: Envelope;
@@ -223,40 +251,6 @@ export type Store = {
 		inCartQuantity: number;
 	};
 	actions: {
-		/**
-		 * Creates or updates a draft cart item in the resolved draft
-		 * collection — the nearest declared `context.draftKey`, falling
-		 * back to the reserved global draft key (see `draft-internals.ts`'s
-		 * `resolveDraftKey`/`resolveCollection`).
-		 *
-		 * Merges `partial` into the resolved collection's draft whose `id`
-		 * matches — `id` resolves from `options.id` when given, else from
-		 * `partial.id` — appending a new draft otherwise. Creating a new
-		 * draft composes it from the surface's server-filed
-		 * `draftSeeds[key][id]` (when one is filed for the resolved key
-		 * and id) merged under `partial`, so an untouched field falls back
-		 * to its server-rendered default; the resolved collection is
-		 * created lazily, on this first write, when it does not exist yet.
-		 *
-		 * Rejects (leaving state unchanged) when: no numeric target `id`
-		 * can be resolved; `partial.id` disagrees with an
-		 * already-resolved target `id`, i.e. an attempt to change an
-		 * existing draft's identity in place (remove the draft and add a
-		 * new one instead); or a brand new draft is being created without
-		 * a numeric `quantity` (from either `partial` or the seed). Every
-		 * rejection is a dev-build console warning and a silent no-op in
-		 * production.
-		 *
-		 * @param partial    The draft fields to create or merge.
-		 * @param options    Targeting options.
-		 * @param options.id An explicit id identifying which existing
-		 *                   draft to update, when it differs from
-		 *                   `partial.id` (e.g. `partial` omits `id`).
-		 */
-		upsertDraftItem: (
-			partial: Partial< DraftItem >,
-			options?: { id?: DraftItem[ 'id' ] }
-		) => void;
 		/**
 		 * Posts the in-context product's resolved collection's draft(s) to
 		 * the cart, or an explicit payload verbatim.
@@ -1369,7 +1363,7 @@ const { actions } = store< Store >(
 				key?: CartItem[ 'key' ];
 				filter?: ( item: CartItem | OptimisticCartItem ) => boolean;
 			} = {} ): Envelope {
-				const collection = resolveCollection( resolveDraftKey() ) ?? [];
+				const draftKey = resolveDraftKey();
 
 				// Rung 1: a context-known line key pairs exactly, no further
 				// identity/extension checks — the caller already knows
@@ -1378,12 +1372,13 @@ const { actions } = store< Store >(
 					const cartItem = state.cart.items.find(
 						( item ) => item.key === key
 					);
+					const targetId = id ?? cartItem?.id;
 					return {
 						cartItem,
-						draft: findDraftInCollection(
-							collection,
-							id ?? cartItem?.id
-						),
+						draft:
+							targetId !== undefined
+								? resolveDraftView( draftKey, targetId )
+								: undefined,
 					};
 				}
 
@@ -1394,7 +1389,10 @@ const { actions } = store< Store >(
 					return {
 						cartItem:
 							matches.length === 1 ? matches[ 0 ] : undefined,
-						draft: findDraftInCollection( collection, id ),
+						draft:
+							id !== undefined
+								? resolveDraftView( draftKey, id )
+								: undefined,
 					};
 				}
 
@@ -1406,14 +1404,14 @@ const { actions } = store< Store >(
 				}
 
 				// Rung 2: product/variation identity (using the resolved
-				// draft's own `variation`, when one exists) plus a
+				// draft view's own `variation`, always a real array) plus a
 				// namespaced extension-prop comparison against each
 				// candidate line's `extensions[<namespace>]`. Ambiguity —
 				// zero or more than one line surviving both checks — never
 				// guesses: `cartItem` stays `undefined`.
-				const draft = findDraftInCollection( collection, id );
+				const draft = resolveDraftView( draftKey, id );
 				const identityMatches = state.cart.items.filter( ( item ) =>
-					lineMatchesProduct( item, id, draft?.variation )
+					lineMatchesProduct( item, id, draft.variation )
 				);
 				const pairedMatches = identityMatches.filter( ( item ) =>
 					draftExtensionsMatchLine( draft, item )
@@ -1458,83 +1456,6 @@ const { actions } = store< Store >(
 			},
 		},
 		actions: {
-			upsertDraftItem(
-				partial: Partial< DraftItem >,
-				{ id }: { id?: DraftItem[ 'id' ] } = {}
-			) {
-				// The id used to look up an existing draft: an explicit
-				// `id` names "the draft I mean to update" independently of
-				// `partial.id`. When both are given they are compared below
-				// to catch an in-place rename attempt; when only one is
-				// given it doubles as both the lookup key and the value.
-				const targetId = id ?? partial.id;
-				if ( typeof targetId !== 'number' ) {
-					warnDraftInvariant(
-						'upsertDraftItem: a numeric "id" is required, via `partial.id` or `{ id }`.'
-					);
-					return;
-				}
-
-				const draftKey = resolveDraftKey();
-				const collection = resolveCollection( draftKey );
-				const existing = collection?.find(
-					( draft ) => draft.id === targetId
-				);
-
-				if ( existing ) {
-					if (
-						partial.id !== undefined &&
-						partial.id !== existing.id
-					) {
-						warnDraftInvariant(
-							`upsertDraftItem: cannot change draft id ${ existing.id } to ${ partial.id }; remove the draft and add a new one instead.`
-						);
-						return;
-					}
-					Object.assign( existing, partial, { id: existing.id } );
-					return;
-				}
-
-				// Creation composes the new draft from the surface's
-				// server-filed seed (when one exists for this key/id),
-				// merged under the shopper's own partial — so an untouched
-				// field falls back to its server-rendered default.
-				const seed = getDraftSeed( draftKey, targetId );
-				const draft = {
-					...seed,
-					...partial,
-					id: targetId,
-				} as DraftItem;
-
-				if ( typeof draft.quantity !== 'number' ) {
-					warnDraftInvariant(
-						'upsertDraftItem: a new draft requires a numeric "quantity".'
-					);
-					return;
-				}
-
-				// Lazily materializes the collection on its first write —
-				// nothing server-seeds `state.draftItems`, so a not-yet-
-				// written key holds no collection until this point.
-				//
-				// Assigns the fully-formed array (existing entries plus the
-				// new draft) in one atomic write, rather than
-				// `(state.draftItems[draftKey] ??= []).push(draft)`: the
-				// reactive state proxy notifies bindings synchronously on the
-				// *assignment* that materializes the collection, and a
-				// binding reading the collection at that exact moment (e.g. a
-				// `data-wp-text` on the same element the edit originated
-				// from) observes the collection before a subsequent `.push`
-				// — a direct array mutation the proxy does not intercept —
-				// ever lands, permanently caching that pre-push (empty) read.
-				// A single assignment carrying the complete contents has
-				// nothing left to race.
-				state.draftItems[ draftKey ] = [
-					...( state.draftItems[ draftKey ] ?? [] ),
-					draft,
-				];
-			},
-
 			*addItem( payload?: DraftItem ): AsyncAction< void > {
 				if ( payload ) {
 					yield* postDraftItems( [ payload ], actions );
@@ -1546,11 +1467,18 @@ const { actions } = store< Store >(
 					return;
 				}
 
+				const draftKey = resolveDraftKey();
+				const collection = resolveCollection( draftKey ) ?? [];
+
 				if ( product.type === 'grouped' ) {
+					// Raw, live-draft-only lookups (never the draft view,
+					// which also exposes seed values pre-materialization):
+					// an untouched grouped child never contributes to the
+					// post merely for carrying a server-filed seed — it
+					// must have been genuinely edited.
 					const drafts = product.grouped_products
-						.map(
-							( childId ) =>
-								state.findItem( { id: childId } ).draft
+						.map( ( childId ) =>
+							findDraftInCollection( collection, childId )
 						)
 						.filter(
 							( draft ): draft is DraftItem =>
@@ -1562,12 +1490,14 @@ const { actions } = store< Store >(
 					return;
 				}
 
-				// The in-context draft, falling back to the surface's
+				// The in-context live draft, falling back to the surface's
 				// server-filed seed so an untouched form still posts its
-				// default (seeds are never applied into collections, so an
-				// untouched surface never materializes a draft).
-				const { draft } = state.itemInContext;
-				const seed = getDraftSeed( resolveDraftKey(), product.id );
+				// default. Raw lookups, not the draft view: the view
+				// answers a seed read as an always-present envelope draft,
+				// which would turn a genuinely seedless surface's "nothing
+				// to post" into an attempted post of an empty payload.
+				const draft = findDraftInCollection( collection, product.id );
+				const seed = getDraftSeed( draftKey, product.id );
 				const itemToPost = draft ?? seed;
 				if ( ! itemToPost ) {
 					return;
