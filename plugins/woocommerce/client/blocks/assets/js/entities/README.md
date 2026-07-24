@@ -6,7 +6,7 @@ This module contains the entity helpers for WooCommerce. Entities provide a stan
 
 The pure entity helpers in this directory are bundled into their consumers and can be tree-shaken. Registration lives separately in `../entity-registration` and builds as a dedicated script that loads consistently on every admin screen.
 
-For backward compatibility, the registration script continues to expose the runtime helpers on `wc.wcEntities`. That global API is deprecated as of WooCommerce 11.1.0 and emits a warning when a helper is called. New code should import helpers from `@woocommerce/entities`.
+For backward compatibility, the registration script continues to expose the runtime helpers on `wc.wcEntities`. That global API is deprecated as of WooCommerce 11.1.0 and emits a warning when a helper is called.
 
 ## Available Entities
 

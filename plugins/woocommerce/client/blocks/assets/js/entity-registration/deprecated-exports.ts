@@ -21,7 +21,6 @@ const showDeprecationNotice = ( functionName: string ) => {
 
 	deprecated( `wc.wcEntities.${ functionName }()`, {
 		since: '11.1.0',
-		alternative: `${ functionName } from @woocommerce/entities`,
 		plugin: 'WooCommerce',
 		hint: 'The wc.wcEntities global is deprecated and will be removed in a future release.',
 	} );
@@ -29,8 +28,8 @@ const showDeprecationNotice = ( functionName: string ) => {
 };
 
 /**
- * @deprecated Since WooCommerce 11.1.0. Import useProduct from the
- * `@woocommerce/entities` package instead.
+ * @deprecated Since WooCommerce 11.1.0. The wc.wcEntities global will be
+ * removed in a future release.
  */
 export const useProduct: typeof useProductInternal = ( postId ) => {
 	showDeprecationNotice( 'useProduct' );
@@ -38,8 +37,8 @@ export const useProduct: typeof useProductInternal = ( postId ) => {
 };
 
 /**
- * @deprecated Since WooCommerce 11.1.0. Import isExternalProduct from the
- * `@woocommerce/entities` package instead.
+ * @deprecated Since WooCommerce 11.1.0. The wc.wcEntities global will be
+ * removed in a future release.
  */
 export const isExternalProduct: typeof isExternalProductInternal = (
 	product
@@ -49,8 +48,8 @@ export const isExternalProduct: typeof isExternalProductInternal = (
 };
 
 /**
- * @deprecated Since WooCommerce 11.1.0. Import isProductResponseItem from the
- * `@woocommerce/entities` package instead.
+ * @deprecated Since WooCommerce 11.1.0. The wc.wcEntities global will be
+ * removed in a future release.
  */
 export const isProductResponseItem: typeof isProductResponseItemInternal = (
 	product
