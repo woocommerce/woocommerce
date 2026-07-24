@@ -78,23 +78,30 @@ class Post_Template_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Count the grid cells produced (each carries the renderer's distinctive cell style).
+	 * Count the grid cells produced.
+	 *
+	 * Matches the renderer's full cell style tail (not just `text-align: center;`), so passed-through
+	 * item content that happens to contain a centered element can't inflate the count.
 	 *
 	 * @param string $rendered Rendered HTML.
 	 * @return int
 	 */
 	private function count_cells( string $rendered ): int {
-		return substr_count( $rendered, 'text-align: center;' );
+		return substr_count( $rendered, 'padding: 8px; vertical-align: top; text-align: center;' );
 	}
 
 	/**
-	 * Count the per-row tables produced (each is a fixed-layout table).
+	 * Count the per-row tables produced.
+	 *
+	 * Matches the renderer's full row-table style (the container table uses `border-collapse:
+	 * collapse;` without `table-layout: fixed;`), so item content that contains a fixed-layout table
+	 * can't inflate the count.
 	 *
 	 * @param string $rendered Rendered HTML.
 	 * @return int
 	 */
 	private function count_rows( string $rendered ): int {
-		return substr_count( $rendered, 'table-layout: fixed;' );
+		return substr_count( $rendered, 'border-collapse: collapse; table-layout: fixed;' );
 	}
 
 	/**
@@ -266,5 +273,74 @@ class Post_Template_Test extends \Email_Editor_Integration_Test_Case {
 
 		$this->assertStringContainsString( 'Not a post-template list.', $rendered );
 		$this->assertSame( 0, $this->count_rows( $rendered ) );
+	}
+
+	/**
+	 * The post-template list is matched by class, not by being the first `<ul>`: a sibling list that
+	 * appears earlier in the markup must not be mistaken for the repeater.
+	 */
+	public function testItFindsPostTemplateListEvenWhenAnotherListPrecedesIt(): void {
+		$parsed_block  = array(
+			'blockName'   => 'core/post-template',
+			'attrs'       => array(
+				'layout' => array(
+					'type'        => 'grid',
+					'columnCount' => 3,
+				),
+			),
+			'innerBlocks' => array(),
+		);
+		$post_template = $this->build_list(
+			array(
+				$this->featured_image( 'https://example.com/real1.png' ),
+				$this->featured_image( 'https://example.com/real2.png' ),
+				$this->featured_image( 'https://example.com/real3.png' ),
+			),
+			3
+		);
+		// A decoy list (e.g. an unrelated block) rendered before the post-template list.
+		$content = '<ul class="wp-block-list"><li>Decoy item</li></ul>' . $post_template;
+
+		$rendered = $this->renderer->render( $content, $parsed_block, $this->rendering_context );
+
+		// The real list is gridded (1 row of 3 cells); the decoy item is not pulled in as a cell.
+		$this->assertSame( 1, $this->count_rows( $rendered ) );
+		$this->assertSame( 3, $this->count_cells( $rendered ) );
+		$this->assertStringContainsString( 'real1.png', $rendered );
+		$this->assertStringNotContainsString( 'Decoy item', $rendered );
+	}
+
+	/**
+	 * Item content that mimics the renderer's own cell/row style strings must not inflate the grid
+	 * structure. This guards the test counters (and the grid) against passed-through markup such as a
+	 * centered paragraph or a fixed-layout table inside a post.
+	 */
+	public function testItCountsGridStructureIgnoringContentThatMimicsCellStyles(): void {
+		$parsed_block = array(
+			'blockName'   => 'core/post-template',
+			'attrs'       => array(
+				'layout' => array(
+					'type'        => 'grid',
+					'columnCount' => 2,
+				),
+			),
+			'innerBlocks' => array(),
+		);
+		// Each item embeds a centered paragraph and a fixed-layout table — the exact substrings the
+		// naive counters keyed on.
+		$decoy_markup = '<p style="text-align: center;">Centered copy</p><table style="table-layout: fixed;"><tr><td>x</td></tr></table>';
+		$content      = $this->build_list(
+			array(
+				$this->featured_image( 'https://example.com/p.png' ) . $decoy_markup,
+				$this->featured_image( 'https://example.com/q.png' ) . $decoy_markup,
+			),
+			2
+		);
+
+		$rendered = $this->renderer->render( $content, $parsed_block, $this->rendering_context );
+
+		// 2 items over 2 columns => exactly 1 row of 2 cells, regardless of the mimicking content.
+		$this->assertSame( 1, $this->count_rows( $rendered ) );
+		$this->assertSame( 2, $this->count_cells( $rendered ) );
 	}
 }

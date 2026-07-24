@@ -54,6 +54,22 @@ class Dom_Document_Helper {
 	}
 
 	/**
+	 * Returns every element matching the given tag name, in document order.
+	 *
+	 * @param string $tag_name The tag name to search for.
+	 * @return array<int, \DOMElement>
+	 */
+	public function find_elements( string $tag_name ): array {
+		$elements = array();
+		foreach ( $this->dom->getElementsByTagName( $tag_name ) as $element ) {
+			if ( $element instanceof \DOMElement ) {
+				$elements[] = $element;
+			}
+		}
+		return $elements;
+	}
+
+	/**
 	 * Returns the value of the given attribute from the given element.
 	 *
 	 * @param \DOMElement $element The element to get the attribute value from.

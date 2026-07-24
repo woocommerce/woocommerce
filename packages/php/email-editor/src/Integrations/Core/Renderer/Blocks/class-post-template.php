@@ -47,15 +47,25 @@ class Post_Template extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		$items = $this->extract_list_items( $block_content );
+		if ( '' === trim( $block_content ) ) {
+			return $block_content;
+		}
 
-		// If we can't find the expected list, leave the original content untouched so we never
+		$dom          = new Dom_Document_Helper( $block_content );
+		$list_element = $this->find_post_template_list( $dom );
+
+		// If we can't find the post-template list, leave the original content untouched so we never
 		// degrade output for markup shapes we don't recognize.
+		if ( null === $list_element ) {
+			return $block_content;
+		}
+
+		$items = $this->extract_list_items( $dom, $list_element );
 		if ( empty( $items ) ) {
 			return $block_content;
 		}
 
-		$columns = $this->get_column_count( $parsed_block, $block_content );
+		$columns = $this->get_column_count( $parsed_block, $dom, $list_element );
 
 		// Single-column (list/flow/constrained) layouts already stack correctly in email; only the
 		// multi-column grid/flex layouts need to be rebuilt as a table.
@@ -63,36 +73,42 @@ class Post_Template extends Abstract_Block_Renderer {
 			return $block_content;
 		}
 
-		return $this->build_grid_table( $items, $columns, $block_content );
+		return $this->build_grid_table( $items, $columns, $dom, $list_element );
+	}
+
+	/**
+	 * Locate the post-template list within the rendered content.
+	 *
+	 * The list is matched by its `wp-block-post-template` class rather than by being the first
+	 * `<ul>`, so a sibling list that happens to appear earlier in the markup can't be mistaken for
+	 * the repeater. Returns null when no such list is present.
+	 *
+	 * @param Dom_Document_Helper $dom Parsed block content.
+	 * @return \DOMElement|null
+	 */
+	private function find_post_template_list( Dom_Document_Helper $dom ): ?\DOMElement {
+		foreach ( $dom->find_elements( 'ul' ) as $list_element ) {
+			if ( false !== strpos( $dom->get_attribute_value( $list_element, 'class' ), 'wp-block-post-template' ) ) {
+				return $list_element;
+			}
+		}
+		return null;
 	}
 
 	/**
 	 * Extract the inner HTML of each direct-child `<li>` of the post-template list.
 	 *
-	 * Only the post-template's own list is handled: a nested list inside post content (e.g. a
-	 * `core/list` in an excerpt) must not be mistaken for the repeater, so the wrapper is required to
-	 * carry the `wp-block-post-template` class before its items are collected.
+	 * Only direct children are collected, so a nested list inside a post's content (e.g. a
+	 * `core/list` in an excerpt) contributes its markup to the item it lives in rather than being
+	 * mistaken for additional repeater items.
 	 *
-	 * @param string $block_content The rendered post-template block HTML.
+	 * @param Dom_Document_Helper $dom Parsed block content.
+	 * @param \DOMElement         $list_element The post-template list element.
 	 * @return array<int, string> Inner HTML of each list item, in document order.
 	 */
-	private function extract_list_items( string $block_content ): array {
-		if ( '' === trim( $block_content ) ) {
-			return array();
-		}
-
-		$dom  = new Dom_Document_Helper( $block_content );
-		$list = $dom->find_element( 'ul' );
-		if ( null === $list ) {
-			return array();
-		}
-
-		if ( false === strpos( $dom->get_attribute_value( $list, 'class' ), 'wp-block-post-template' ) ) {
-			return array();
-		}
-
+	private function extract_list_items( Dom_Document_Helper $dom, \DOMElement $list_element ): array {
 		$items = array();
-		foreach ( $list->childNodes as $node ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		foreach ( $list_element->childNodes as $node ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			if ( $node instanceof \DOMElement && 'li' === $node->tagName ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				$items[] = $dom->get_element_inner_html( $node );
 			}
@@ -108,11 +124,12 @@ class Post_Template extends Abstract_Block_Renderer {
 	 * WordPress core stamps on the rendered list, so it still works when the parsed attributes are
 	 * sparse. Non-grid/flex layouts always resolve to a single (stacked) column.
 	 *
-	 * @param array  $parsed_block Parsed block data.
-	 * @param string $block_content The rendered post-template block HTML.
+	 * @param array               $parsed_block Parsed block data.
+	 * @param Dom_Document_Helper $dom Parsed block content.
+	 * @param \DOMElement         $list_element The post-template list element.
 	 * @return int Column count (at least 1).
 	 */
-	private function get_column_count( array $parsed_block, string $block_content ): int {
+	private function get_column_count( array $parsed_block, Dom_Document_Helper $dom, \DOMElement $list_element ): int {
 		$layout = $parsed_block['attrs']['layout'] ?? array();
 		$type   = is_array( $layout ) && isset( $layout['type'] ) ? (string) $layout['type'] : '';
 
@@ -127,12 +144,8 @@ class Post_Template extends Abstract_Block_Renderer {
 		}
 
 		// Fallback: read the `columns-N` class WordPress core adds to the list wrapper.
-		if ( $columns < 1 ) {
-			$dom  = new Dom_Document_Helper( $block_content );
-			$list = $dom->find_element( 'ul' );
-			if ( $list && preg_match( '/(?:^|\s)columns-(\d+)(?:\s|$)/', $dom->get_attribute_value( $list, 'class' ), $matches ) ) {
-				$columns = (int) $matches[1];
-			}
+		if ( $columns < 1 && preg_match( '/(?:^|\s)columns-(\d+)(?:\s|$)/', $dom->get_attribute_value( $list_element, 'class' ), $matches ) ) {
+			$columns = (int) $matches[1];
 		}
 
 		if ( $columns < 1 ) {
@@ -149,12 +162,13 @@ class Post_Template extends Abstract_Block_Renderer {
 	 * into rows of `$columns` and each row is its own fixed-layout table, so every cell keeps a
 	 * consistent width regardless of how many items the final (possibly partial) row holds.
 	 *
-	 * @param array<int, string> $items Inner HTML of each list item.
-	 * @param int                $columns Number of columns.
-	 * @param string             $block_content The original block HTML (for wrapper classes).
+	 * @param array<int, string>  $items Inner HTML of each list item.
+	 * @param int                 $columns Number of columns.
+	 * @param Dom_Document_Helper $dom Parsed block content.
+	 * @param \DOMElement         $list_element The post-template list element (for wrapper classes).
 	 * @return string Grid table HTML.
 	 */
-	private function build_grid_table( array $items, int $columns, string $block_content ): string {
+	private function build_grid_table( array $items, int $columns, Dom_Document_Helper $dom, \DOMElement $list_element ): string {
 		$rows       = array();
 		$item_count = count( $items );
 		for ( $i = 0; $i < $item_count; $i += $columns ) {
@@ -162,7 +176,7 @@ class Post_Template extends Abstract_Block_Renderer {
 		}
 		$grid_content = implode( '', $rows );
 
-		$original_class = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'ul', 'class' ) ?? '';
+		$original_class = $dom->get_attribute_value( $list_element, 'class' );
 
 		$table_attrs = array(
 			'class' => trim( 'email-block-post-template ' . Html_Processing_Helper::clean_css_classes( $original_class ) ),
