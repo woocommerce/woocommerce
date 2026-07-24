@@ -150,7 +150,6 @@ class Bootstrap {
 			if ( ( new BlockRegistrationContext() )->should_register() ) {
 				$this->container->get( BlockPatterns::class );
 				$this->container->get( BlockTypesController::class );
-				$this->container->get( CoreBreadcrumbsCompatibility::class )->init();
 			}
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( Notices::class )->init();

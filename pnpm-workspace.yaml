@@ -86,13 +86,10 @@ packages:
     - 'tools/storybook'
     - 'tools/monorepo-utils'
 
-# Hoisting: restore pnpm 9 defaults that pnpm 10 removed.
-# pnpm 10 emptied public-hoist-pattern (was ['*eslint*', '*prettier*']).
-# Also hoist react/react-dom so phantom deps in @wordpress/* packages resolve
+# Hoist react/react-dom so phantom deps in @wordpress/* packages resolve
 # (e.g. @wordpress/dataviews imports react-dom/client without declaring it).
+# TODO Remove this as it's not a good pattern to hoist dependencies and @wordpress/* are now in good shape
 publicHoistPattern:
-    - '*eslint*'
-    - '*prettier*'
     - 'react'
     - 'react-dom'
     - '@use-gesture/react'

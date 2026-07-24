@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks;
 
+use Automattic\WooCommerce\Blocks\BlockTypesController;
 use Automattic\WooCommerce\Blocks\CoreBreadcrumbsCompatibility;
 use Automattic\WooCommerce\Blocks\Domain\Bootstrap;
 use Automattic\WooCommerce\Blocks\Domain\Package as BlocksPackage;
@@ -133,8 +134,6 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wp;
 
-		remove_filter( 'block_core_breadcrumbs_post_type_settings', array( $this->sut, 'set_product_breadcrumbs_preferred_taxonomy' ), 10 );
-		remove_filter( 'block_core_breadcrumbs_items', array( $this->sut, 'apply_woocommerce_breadcrumb_filters' ), 10 );
 		remove_filter( 'woocommerce_is_account_page', '__return_true' );
 
 		update_option( 'woocommerce_shop_page_id', $this->original_shop_page_id );
@@ -160,17 +159,6 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should register Core Breadcrumbs compatibility filters.
-	 */
-	public function test_init_registers_core_breadcrumbs_filters(): void {
-		$this->sut->init();
-		$this->sut->init();
-
-		$this->assertSame( 10, has_filter( 'block_core_breadcrumbs_post_type_settings', array( $this->sut, 'set_product_breadcrumbs_preferred_taxonomy' ) ), 'Product breadcrumb settings filter should be registered.' );
-		$this->assertSame( 10, has_filter( 'block_core_breadcrumbs_items', array( $this->sut, 'apply_woocommerce_breadcrumb_filters' ) ), 'Breadcrumb items filter should be registered.' );
-	}
-
-	/**
 	 * @testdox Should register Core Breadcrumbs compatibility filters through the Blocks bootstrap.
 	 */
 	public function test_blocks_bootstrap_registers_core_breadcrumbs_filters(): void {
@@ -183,14 +171,17 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		);
 
 		new Bootstrap( $container );
-		$compatibility = $container->get( CoreBreadcrumbsCompatibility::class );
+		$controller = $container->get( BlockTypesController::class );
 
 		try {
-			$this->assertSame( 10, has_filter( 'block_core_breadcrumbs_post_type_settings', array( $compatibility, 'set_product_breadcrumbs_preferred_taxonomy' ) ), 'Bootstrap should register the product breadcrumb settings filter.' );
-			$this->assertSame( 10, has_filter( 'block_core_breadcrumbs_items', array( $compatibility, 'apply_woocommerce_breadcrumb_filters' ) ), 'Bootstrap should register the breadcrumb items filter.' );
+			$this->assertSame( 10, has_filter( 'block_core_breadcrumbs_post_type_settings', array( $controller, 'set_product_breadcrumbs_preferred_taxonomy' ) ), 'Bootstrap should register the product breadcrumb settings filter.' );
+			$this->assertSame( 10, has_filter( 'block_core_breadcrumbs_items', array( $controller, 'apply_woocommerce_breadcrumb_filters' ) ), 'Bootstrap should register the breadcrumb items filter.' );
+			$this->assertSame( array( 'taxonomy' => 'product_cat' ), $controller->set_product_breadcrumbs_preferred_taxonomy( array(), 'product' ), 'BlockTypesController should set the product breadcrumb settings.' );
+			$this->assertSame( array(), $controller->apply_woocommerce_breadcrumb_filters( array() ), 'BlockTypesController should filter the breadcrumb items.' );
+			$this->assertTrue( remove_filter( 'block_core_breadcrumbs_items', array( $controller, 'apply_woocommerce_breadcrumb_filters' ), 10 ), 'The breadcrumb items filter should be removable.' );
 		} finally {
-			remove_filter( 'block_core_breadcrumbs_post_type_settings', array( $compatibility, 'set_product_breadcrumbs_preferred_taxonomy' ), 10 );
-			remove_filter( 'block_core_breadcrumbs_items', array( $compatibility, 'apply_woocommerce_breadcrumb_filters' ), 10 );
+			remove_filter( 'block_core_breadcrumbs_post_type_settings', array( $controller, 'set_product_breadcrumbs_preferred_taxonomy' ), 10 );
+			remove_filter( 'block_core_breadcrumbs_items', array( $controller, 'apply_woocommerce_breadcrumb_filters' ), 10 );
 		}
 	}
 

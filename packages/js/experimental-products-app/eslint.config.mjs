@@ -2,21 +2,16 @@
  * Internal dependencies
  */
 import woocommerce from '@woocommerce/eslint-config';
+import { coreModules } from '@woocommerce/eslint-config/core-modules.js';
 
 export default [
 	...woocommerce,
 	{
 		settings: {
 			'import/core-modules': [
-				'@woocommerce/data',
-				'@woocommerce/settings',
-				'@wordpress/components',
+				...coreModules,
 				'@wordpress/compose',
-				'@wordpress/core-data',
-				'@wordpress/data',
 				'@wordpress/dataviews',
-				'@wordpress/editor',
-				'@wordpress/element',
 				'@wordpress/html-entities',
 				'@wordpress/i18n',
 				'@wordpress/icons',

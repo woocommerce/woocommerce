@@ -63,6 +63,8 @@ final class BlockTypesController {
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
+		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
+		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 1 );
 	}
 
 	/**
@@ -580,5 +582,31 @@ final class BlockTypesController {
 		$args['style']         = array();
 
 		return $args;
+	}
+
+	/**
+	 * Set the preferred taxonomy and term for product breadcrumbs.
+	 *
+	 * @internal
+	 *
+	 * @param array  $settings The settings for the breadcrumbs block.
+	 * @param string $post_type The post type.
+	 * @param int    $post_id The current post ID.
+	 * @return array The settings for the breadcrumbs block.
+	 */
+	public function set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type, $post_id = 0 ) {
+		return Package::container()->get( CoreBreadcrumbsCompatibility::class )->set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type, $post_id );
+	}
+
+	/**
+	 * Apply WooCommerce compatibility behavior to Core breadcrumb items.
+	 *
+	 * @internal
+	 *
+	 * @param array $items Array of breadcrumb items from Core.
+	 * @return array Modified breadcrumb items.
+	 */
+	public function apply_woocommerce_breadcrumb_filters( $items ) {
+		return Package::container()->get( CoreBreadcrumbsCompatibility::class )->apply_woocommerce_breadcrumb_filters( $items );
 	}
 }

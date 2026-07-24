@@ -16,7 +16,7 @@ The Settings API and admin pages section has six approaches, outlined in the tab
 
 | Approach | Use when | Requires |
 | :---- | :---- | :---- |
-| [Settings API](/docs/extensions/settings-and-config/settings-api/) | Adding settings fields to an existing WooCommerce page, such as a payment gateway or shipping method | PHP |
+| [Settings API](/docs/extensions/settings-and-config/settings-api/) | Defining settings for a configurable component, such as a payment gateway or shipping method | PHP |
 | [Settings pages](/docs/extensions/settings-and-config/extend-wc-settings-page/) | Your extension needs a full tab under **WooCommerce > Settings** with one or more sections | PHP |
 | [Settings tab sections](/docs/extensions/settings-and-config/adding-a-section-to-a-settings-tab/) | Your settings belong under an existing WooCommerce tab rather than a new page | PHP |
 | [Admin pages](/docs/extensions/settings-and-config/working-with-woocommerce-admin-pages/) | Your extension needs a standalone page outside WooCommerce's settings structure | PHP or JavaScript |
@@ -25,41 +25,9 @@ The Settings API and admin pages section has six approaches, outlined in the tab
 
 ## Settings API
 
-`WC_Settings_API` is the class that all WooCommerce settings build on, with payment gateways and shipping methods directly extending it. It's going to be the right tool when your extension adds settings fields to an existing WooCommerce context instead of creating a standalone settings page.
+`WC_Settings_API` provides field definition, rendering, loading, and saving for configurable WooCommerce components. Plugin developers usually inherit it through `WC_Payment_Gateway`, `WC_Shipping_Method`, or `WC_Integration` rather than extending it directly.
 
-There are three core responsibilities of this class:
-
-- Define fields in `init_form_fields()`.
-- Render them through `admin_options()`.
-- Hook `process_admin_options()` to the update hook that matches your context.
-
-For `process_admin_options()`, those contexts could be `woocommerce_update_options_payment_gateways` for a payment gateway, or `woocommerce_update_options_shipping_methods` for a shipping method.
-
-The API lets you control field placements without presupposing a location. However, this means it doesn't create a settings page for you, so you'll need to register that separately if needed. For extensions that fit within payment or shipping contexts, you are extending the same class that WooCommerce's own gateways use.
-
-```php
-class My_Extension_Settings extends WC_Settings_API {
-	public function __construct() {
-		$this->id = 'my_extension';
-		$this->init_form_fields();
-		$this->init_settings();
-		add_action(
-			'woocommerce_update_options_' . $this->id,
-			array( $this, 'process_admin_options' )
-		);
-	}
-
-	public function init_form_fields() {
-		$this->form_fields = array(
-			'enabled' => array(
-				'title'   => __( 'Enable', 'my-extension' ),
-				'type'    => 'checkbox',
-				'default' => 'yes',
-			),
-		);
-	}
-}
-```
+Use the [Payment Gateway API](/docs/features/payments/payment-gateway-api/), [Shipping Method API](/docs/features/shipping/shipping-method-api/), or [integration settings](/docs/extensions/settings-and-config/implementing-settings/) guide for a complete implementation.
 
 ## Settings pages
 
@@ -113,7 +81,7 @@ Rather than creating a whole new page, you can add a section beneath an existing
 - `woocommerce_get_sections_{tab}` registers the section.
 - `woocommerce_get_settings_{tab}` supplies its fields.
 
-The `{tab}` portion of each filter corresponds to the tab you want to extend. For instance, `products` targets the **Products** tab, while `accounts` targets **Account and Privacy**.
+The `{tab}` portion of each filter corresponds to the settings page ID for the tab you want to extend. For instance, `products` targets the **Products** tab, while `account` targets **Accounts & Privacy**.
 
 Placing settings under an existing tab keeps the admin area organized and means merchants find your extension's options in an understandable context. The limit is that linking to your section from documentation or onboarding flows requires a URL with both a tab and a section parameter rather than a page URL you control.
 
