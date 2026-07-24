@@ -59,7 +59,7 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 	 * @return \WP_REST_Response
 	 */
 	public function get_counts( $request ) {
-$order_statuses = (array) $request->get_param( 'order_statuses' );
+		$order_statuses = (array) $request->get_param( 'order_statuses' );
 
 		// When a merchant has cleared every actionable order status there is nothing
 		// "to fulfill". Short-circuit to 0 rather than querying: an empty status list
@@ -91,7 +91,7 @@ $order_statuses = (array) $request->get_param( 'order_statuses' );
 				),
 				'products_low_in_stock_count' => $this->get_count_via(
 					'/wc-analytics/products/count-low-in-stock',
-array( 'status' => $request->get_param( 'product_status' ) )
+					array( 'status' => $request->get_param( 'product_status' ) )
 				),
 			)
 		);
@@ -153,12 +153,8 @@ array( 'status' => $request->get_param( 'product_status' ) )
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-$params['product_status'] = array(
+		$params['product_status'] = array(
 			'description'       => __( 'Product post status used for the low stock count.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'publish',
-			'sanitize_callback' => 'sanitize_key',
-		);
 			'type'              => 'string',
 			'default'           => 'publish',
 			'sanitize_callback' => 'sanitize_key',
@@ -175,7 +171,7 @@ $params['product_status'] = array(
 	 * @return array
 	 */
 	private function get_default_order_statuses() {
-$actionable = get_option( 'woocommerce_actionable_order_statuses', false );
+		$actionable = get_option( 'woocommerce_actionable_order_statuses', array() );
 
 		// Any array is respected as-is, including an explicitly empty one: the merchant
 		// intentionally cleared all actionable statuses, so there is nothing to fulfill,
