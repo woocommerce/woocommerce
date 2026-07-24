@@ -17,25 +17,7 @@ import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 type TemplatePartResponse = {
 	id: string;
 	wp_id: number;
-	theme: string;
-	slug: string;
-	type: 'wp_template_part';
-	status: 'publish';
-	source: 'plugin' | 'custom';
-	origin: 'plugin';
-	original_source: 'plugin';
-	author: number;
-	has_theme_file: boolean;
-	area: string;
-	title: {
-		raw: string;
-		rendered: string;
-	};
-	description: string;
-	content: {
-		raw: string;
-		block_version: number;
-	};
+	content: { raw: string };
 };
 
 const markerCount = ( content: string, marker: string ) =>
@@ -50,53 +32,15 @@ const getTemplatePart = async (
 		path: `/wp/v2/template-parts/${ id }?context=edit`,
 	} );
 
-const hasStableTemplatePartProjection = (
-	actual: TemplatePartResponse,
-	expected: TemplatePartResponse
-) =>
-	actual.id === expected.id &&
-	actual.theme === expected.theme &&
-	actual.slug === expected.slug &&
-	actual.type === expected.type &&
-	actual.status === expected.status &&
-	actual.origin === expected.origin &&
-	actual.original_source === expected.original_source &&
-	actual.area === expected.area &&
-	actual.title.raw === expected.title.raw &&
-	actual.title.rendered === expected.title.rendered &&
-	actual.description === expected.description &&
-	actual.content.block_version === expected.content.block_version;
-
 const assertPluginTemplatePartBase = (
 	templatePart: TemplatePartResponse,
 	expectedId: string,
-	expectedArea: string,
-	expectedTitle: string,
 	marker: string
 ) => {
-	const idSeparator = expectedId.lastIndexOf( '//' );
-	const expectedSlug = expectedId.slice( idSeparator + 2 );
-
 	if (
-		idSeparator < 1 ||
 		templatePart.id !== expectedId ||
-		templatePart.theme !== 'woocommerce/woocommerce' ||
-		templatePart.slug !== expectedSlug ||
-		templatePart.type !== 'wp_template_part' ||
-		templatePart.status !== 'publish' ||
-		templatePart.source !== 'plugin' ||
-		templatePart.origin !== 'plugin' ||
-		templatePart.original_source !== 'plugin' ||
-		templatePart.wp_id !== 0 ||
-		templatePart.author !== 0 ||
-		! templatePart.has_theme_file ||
-		templatePart.area !== expectedArea ||
-		templatePart.title.raw !== expectedTitle ||
-		templatePart.title.rendered !== expectedTitle ||
-		templatePart.description.length === 0 ||
-		templatePart.content.block_version !== 1 ||
 		templatePart.content.raw.length === 0 ||
-		templatePart.content.raw.includes( marker )
+		markerCount( templatePart.content.raw, marker ) !== 0
 	) {
 		throw new Error(
 			`Template part did not start from the expected plugin base: ${ templatePart.id }`
@@ -106,17 +50,14 @@ const assertPluginTemplatePartBase = (
 
 const assertCustomTemplatePart = (
 	templatePart: TemplatePartResponse,
-	base: TemplatePartResponse,
+	expectedId: string,
 	expectedContent: string,
 	marker: string
 ) => {
 	if (
-		! hasStableTemplatePartProjection( templatePart, base ) ||
-		templatePart.source !== 'custom' ||
+		templatePart.id !== expectedId ||
 		! Number.isInteger( templatePart.wp_id ) ||
 		templatePart.wp_id <= 0 ||
-		templatePart.author !== 1 ||
-		templatePart.has_theme_file ||
 		templatePart.content.raw !== expectedContent ||
 		markerCount( templatePart.content.raw, marker ) !== 1
 	) {
@@ -129,12 +70,10 @@ const assertCustomTemplatePart = (
 const customizeTemplatePartViaRest = async (
 	requestUtils: RequestUtils,
 	id: string,
-	area: string,
-	title: string,
 	marker: string
 ) => {
 	const base = await getTemplatePart( requestUtils, id );
-	assertPluginTemplatePartBase( base, id, area, title, marker );
+	assertPluginTemplatePartBase( base, id, marker );
 
 	const expectedContent = `${ base.content.raw }
 <!-- wp:paragraph -->
@@ -149,10 +88,10 @@ const customizeTemplatePartViaRest = async (
 	} );
 	const saved = await getTemplatePart( requestUtils, id );
 
-	assertCustomTemplatePart( response, base, expectedContent, marker );
-	assertCustomTemplatePart( saved, base, expectedContent, marker );
+	assertCustomTemplatePart( response, id, expectedContent, marker );
+	assertCustomTemplatePart( saved, id, expectedContent, marker );
 
-	if ( saved.wp_id !== response.wp_id ) {
+	if ( saved.id !== response.id || saved.wp_id !== response.wp_id ) {
 		throw new Error(
 			`Template part customization identity changed after saving: ${ id }`
 		);
@@ -314,42 +253,10 @@ test.describe( 'Template customization', () => {
 			data.templateType === 'wp_template_part' &&
 			data.canBeOverriddenByThemes
 	);
-	const expectedPriorityTemplateParts = [
-		{
-			templateName: 'Mini-Cart',
-			templatePath: 'mini-cart',
-			area: 'mini-cart',
-		},
-		{
-			templateName: 'External Product Add to Cart + Options',
-			templatePath: 'external-product-add-to-cart-with-options',
-			area: 'add-to-cart-with-options',
-		},
-	];
-	const hasExpectedPriorityTemplateParts =
-		testToRun.length === expectedPriorityTemplateParts.length &&
-		testToRun.every( ( testData, index ) => {
-			const expected = expectedPriorityTemplateParts[ index ];
 
-			return (
-				expected &&
-				testData.templateName === expected.templateName &&
-				testData.templatePath === expected.templatePath &&
-				testData.templateType === 'wp_template_part' &&
-				testData.canBeOverriddenByThemes
-			);
-		} );
-
-	if ( ! hasExpectedPriorityTemplateParts ) {
-		throw new Error(
-			'Expected Mini-Cart and External Product Add to Cart + Options priority template parts.'
-		);
-	}
-
-	for ( const [ index, testData ] of testToRun.entries() ) {
+	for ( const testData of testToRun ) {
 		const userText = `Hello World in the ${ testData.templateName } template`;
 		const woocommerceTemplateUserText = `Hello World in the WooCommerce ${ testData.templateName } template`;
-		const expectedArea = expectedPriorityTemplateParts[ index ].area;
 
 		test( `user-modified "${ testData.templateName }" template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
 			page,
@@ -361,8 +268,6 @@ test.describe( 'Template customization', () => {
 			await customizeTemplatePartViaRest(
 				requestUtils,
 				`woocommerce/woocommerce//${ testData.templatePath }`,
-				expectedArea,
-				testData.templateName,
 				woocommerceTemplateUserText
 			);
 

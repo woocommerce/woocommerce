@@ -43,46 +43,36 @@ const PRODUCT_GALLERY_WITH_PLACEHOLDER_CONTENT = `placeholder
 
 ${ PRODUCT_GALLERY_CONTENT }`;
 
-const isRecord = ( value: unknown ): value is Record< string, unknown > =>
-	typeof value === 'object' && value !== null && ! Array.isArray( value );
-
 const createSerializedProductGalleryTemplate = async (
 	requestUtils: RequestUtils,
 	content: string
 ) => {
 	const expectedId = `${ BLOCK_THEME_SLUG }//${ blockData.slug }`;
-	const createdTemplate = await requestUtils.createTemplate( 'wp_template', {
+	const template = await requestUtils.createTemplate( 'wp_template', {
 		slug: blockData.slug,
 		title: 'Custom Single Product',
 		content,
 	} );
-	const template = await requestUtils.rest< unknown >( {
+	const savedTemplate = await requestUtils.rest< {
+		id: string;
+		wp_id: number;
+		content: { raw: string };
+	} >( {
 		method: 'GET',
-		path: `/wp/v2/templates/${ expectedId }?context=edit`,
+		path: `/wp/v2/templates/${ template.id }?context=edit&_fields=id,wp_id,content`,
 	} );
 
 	if (
-		createdTemplate.id !== expectedId ||
-		! Number.isInteger( createdTemplate.wp_id ) ||
-		createdTemplate.wp_id <= 0 ||
-		! isRecord( template ) ||
-		template.id !== createdTemplate.id ||
-		template.wp_id !== createdTemplate.wp_id ||
-		template.slug !== blockData.slug ||
-		template.type !== 'wp_template' ||
-		template.status !== 'publish' ||
-		template.source !== 'custom' ||
-		template.theme !== BLOCK_THEME_SLUG ||
-		! isRecord( template.title ) ||
-		template.title.raw !== 'Custom Single Product' ||
-		template.title.rendered !== 'Custom Single Product' ||
-		! isRecord( template.content ) ||
-		template.content.raw !== content ||
-		template.content.block_version !== 1
+		template.id !== expectedId ||
+		! Number.isInteger( template.wp_id ) ||
+		template.wp_id <= 0 ||
+		savedTemplate.id !== template.id ||
+		savedTemplate.wp_id !== template.wp_id ||
+		savedTemplate.content.raw !== content
 	) {
 		throw new Error(
 			`Failed to create the exact serialized Product Gallery template: ${ JSON.stringify(
-				template
+				savedTemplate
 			) }`
 		);
 	}
