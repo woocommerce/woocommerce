@@ -37,8 +37,8 @@ class GroupedProductItemSelector extends AbstractBlock {
 	 * Gets the quantity selector markup for a product.
 	 *
 	 * @param \WC_Product $product   The product object.
-	 * @param string      $draft_key The `woocommerce/cart` collection key this child row's
-	 *                               initial draft seed is filed under.
+	 * @param string      $draft_key The `woocommerce` state's `draftSeeds` collection key this
+	 *                               child row's initial draft seed is filed under.
 	 * @return string The HTML markup for the quantity selector.
 	 */
 	private function get_quantity_selector_markup( $product, $draft_key ) {
@@ -146,12 +146,15 @@ class GroupedProductItemSelector extends AbstractBlock {
 			);
 		}
 
+		// Overrides only `productId`/`variationId` on the local `woocommerce`
+		// context bag; `draftKey` (if any) keeps inheriting from the
+		// ancestor bag.
 		$product_context_directive = wp_interactivity_data_wp_context(
 			array(
 				'productId'   => $product->get_id(),
 				'variationId' => null,
 			),
-			'woocommerce/products'
+			'woocommerce'
 		);
 		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-interactive="woocommerce/add-to-cart-with-options-quantity-selector" data-wp-on--change="actions.handleQuantityCheckboxChange" ' . $product_context_directive . ' aria-label="' . esc_attr( $label ) . '"/>';
 	}

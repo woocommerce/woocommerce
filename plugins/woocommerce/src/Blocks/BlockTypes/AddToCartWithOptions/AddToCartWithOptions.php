@@ -347,10 +347,11 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			// The initial `add-item` payload for this surface's product, filed
-			// under its collection key in the `woocommerce/cart` state. The
-			// client consults it only via `getServerState()`, never applying
-			// it into a draft collection: the draft view materializes a new
-			// draft from it on the shopper's first genuine write, and
+			// under its collection key in the `woocommerce` state's
+			// `draftSeeds` root. The client consults it only via
+			// `getServerState()`, never applying it into a draft collection:
+			// the draft view materializes a new draft from it on the
+			// shopper's first genuine write, and
 			// `addItem`'s no-payload fallback resolves the effective seed —
 			// the family seed re-addressed to the in-context id — when
 			// posting an untouched surface. Grouped products seed nothing
@@ -368,7 +369,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				}
 
 				wp_interactivity_state(
-					'woocommerce/cart',
+					'woocommerce',
 					array(
 						'draftSeeds' => array(
 							$draft_key => array(
@@ -614,7 +615,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					<input type="hidden" name="product_id" value="' . esc_attr( $product_id ) . '" />
 					<input type="hidden"
 						name="variation_id"
-						data-wp-bind--value="woocommerce/products::state.productVariationInContext.id"
+						data-wp-bind--value="woocommerce::state.itemInContext.variation.id"
 					/>
 				</div>';
 			}

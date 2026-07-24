@@ -193,7 +193,7 @@ class GroupedProductItemTest extends WC_Unit_Test_Case {
 			$product = $previous_product;
 		}
 
-		$state = wp_interactivity_state( 'woocommerce/cart' );
+		$state = wp_interactivity_state( 'woocommerce' );
 
 		$this->assertArrayHasKey( $draft_key, $state['draftSeeds'] ?? array(), 'The grouped child files its seed under the outer container\'s draft key.' );
 		$this->assertSame(

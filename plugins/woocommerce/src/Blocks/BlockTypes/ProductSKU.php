@@ -88,7 +88,7 @@ class ProductSKU extends AbstractBlock {
 			$suffix = sprintf( '<span class="wp-block-post-terms__suffix">%s</span>', $suffix );
 		}
 
-		$interactive_attributes = $is_interactive ? 'data-wp-interactive="woocommerce/products" data-wp-text="state.productInContext.sku"' : '';
+		$interactive_attributes = $is_interactive ? 'data-wp-interactive="woocommerce" data-wp-text="state.itemInContext.product.sku"' : '';
 
 		return sprintf(
 			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta wp-block-post-terms %1$s" style="%2$s">

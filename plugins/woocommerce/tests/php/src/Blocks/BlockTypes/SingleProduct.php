@@ -177,9 +177,9 @@ class SingleProduct extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox The wrapper carries both the default woocommerce/products context and a hand-rolled woocommerce/cart draft-key context shaped single-product/<productId>/<n>, and no draft-items or scope context.
+	 * @testdox The wrapper carries a single woocommerce:: context bag with productId/variationId addressing and the minted draft key shaped single-product/<productId>/<n>, no second context bag, and no draft-items or scope context.
 	 */
-	public function test_wrapper_emits_draft_key_context_and_no_retired_bags() {
+	public function test_wrapper_emits_single_context_bag_and_no_retired_bags() {
 		$product = WC_Helper_Product::create_simple_product();
 
 		try {
@@ -193,20 +193,17 @@ class SingleProduct extends \WP_UnitTestCase {
 			$this->assertTrue( $tags->next_tag( array( 'tag_name' => 'div' ) ), 'The wrapper div should be present.' );
 
 			$this->assertSame(
-				'woocommerce/products::' . wp_json_encode(
+				'woocommerce::' . wp_json_encode(
 					array(
 						'productId'   => $product->get_id(),
 						'variationId' => null,
+						'draftKey'    => 'single-product/' . $product->get_id() . '/1',
 					)
 				),
 				$tags->get_attribute( 'data-wp-context' ),
-				'The default woocommerce/products context should still be present, unaffected by the second context bag.'
+				'The single woocommerce:: context bag should carry productId, variationId, and the minted draft key.'
 			);
-			$this->assertSame(
-				'woocommerce/cart::' . wp_json_encode( array( 'draftKey' => 'single-product/' . $product->get_id() . '/1' ) ),
-				$tags->get_attribute( 'data-wp-context---draft-key' ),
-				'A second, hand-rolled woocommerce/cart draft-key context should be present, carrying the minted key.'
-			);
+			$this->assertNull( $tags->get_attribute( 'data-wp-context---draft-key' ), 'The hand-rolled second context bag should no longer be emitted.' );
 			$this->assertNull( $tags->get_attribute( 'data-wp-context---draft-items' ), 'The retired draft-items bag should no longer be emitted.' );
 			$this->assertNull( $tags->get_attribute( 'data-wp-context---scope' ), 'No scope context bag should be emitted.' );
 		} finally {
@@ -300,7 +297,7 @@ class SingleProduct extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Extracts every wrapper div's decoded `data-wp-context---draft-key`
+	 * Extracts every wrapper div's decoded single `data-wp-context`
 	 * `draftKey` value from a rendered markup string, in document order.
 	 *
 	 * @param string $markup Rendered HTML.
@@ -311,13 +308,13 @@ class SingleProduct extends \WP_UnitTestCase {
 		$draft_keys = array();
 
 		while ( $tags->next_tag( array( 'tag_name' => 'div' ) ) ) {
-			$draft_key_context = $tags->get_attribute( 'data-wp-context---draft-key' );
+			$context = $tags->get_attribute( 'data-wp-context' );
 
-			if ( null === $draft_key_context ) {
+			if ( null === $context || 0 !== strpos( $context, 'woocommerce::' ) ) {
 				continue;
 			}
 
-			$decoded      = json_decode( substr( $draft_key_context, strlen( 'woocommerce/cart::' ) ), true );
+			$decoded      = json_decode( substr( $context, strlen( 'woocommerce::' ) ), true );
 			$draft_keys[] = $decoded['draftKey'] ?? null;
 		}
 

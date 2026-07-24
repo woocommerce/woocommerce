@@ -240,33 +240,25 @@ class SingleProduct extends AbstractBlock {
 			$product->get_id()
 		);
 
+		// The single `woocommerce::` context bag for this block instance:
+		// its own `productId`/`variationId` addressing, plus its
+		// server-minted `woocommerce` state `draftKey` so descendant
+		// purchase surfaces can file their seeds under it. Read from
+		// `$this->draft_key` (minted in `update_context()`) rather than
+		// `$block->context['draftKey']`, since this block's `usesContext`
+		// doesn't declare `draftKey` — only its injection into descendant
+		// context, via the same filter, needs to.
 		$interactivity_context = array(
 			'productId'   => $product->get_id(),
 			'variationId' => null,
+			'draftKey'    => $this->draft_key,
 		);
 
 		$html = new \WP_HTML_Tag_Processor( $content );
 
 		if ( $html->next_tag( array( 'tag_name' => 'div' ) ) ) {
 			$html->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
-			$html->set_attribute( 'data-wp-context', 'woocommerce/products::' . wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
-
-			// Hand-rolled second context bag: `wp_interactivity_data_wp_context()` always
-			// emits an attribute literally named `data-wp-context`, so it cannot carry the
-			// draft key alongside the `woocommerce/products` context above on
-			// the same element — the HTML parser would keep the first and silently drop the
-			// second. The three-hyphen `data-wp-context---draft-key` form is the
-			// supported way to add a second context bag on one element (see
-			// Wishlist.php/SavedForLater.php's `data-wp-context---notices`). This block
-			// declares its server-minted `woocommerce/cart` draft key so descendant
-			// purchase surfaces can file their seeds under it. Read from `$this->draft_key`
-			// (minted in `update_context()`) rather than `$block->context['draftKey']`,
-			// since this block's `usesContext` doesn't declare `draftKey` — only its
-			// injection into descendant context, via the same filter, needs to.
-			$html->set_attribute(
-				'data-wp-context---draft-key',
-				'woocommerce/cart::' . wp_json_encode( array( 'draftKey' => $this->draft_key ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
-			);
+			$html->set_attribute( 'data-wp-context', 'woocommerce::' . wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 		}
 
 		$updated_html = $html->get_updated_html();

@@ -62,7 +62,7 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 		$state_data = $interactivity_ref->getProperty( 'state_data' );
 		$state_data->setAccessible( true );
 		$data = $state_data->getValue( $interactivity );
-		unset( $data['woocommerce'], $data['woocommerce/cart'] );
+		unset( $data['woocommerce'] );
 		$state_data->setValue( $interactivity, $data );
 	}
 
@@ -110,51 +110,62 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox load_cart_state() seeds cart and restUrl under the woocommerce/cart namespace.
+	 * @testdox load_cart_state() seeds cart state under the unified woocommerce namespace.
 	 */
-	public function test_cart_state_is_seeded_under_cart_namespace(): void {
+	public function test_cart_state_is_seeded_under_unified_namespace(): void {
 		BlocksSharedState::load_cart_state( $this->consent );
 
-		$cart_state = wp_interactivity_state( 'woocommerce/cart' );
+		$state = wp_interactivity_state( 'woocommerce' );
 
-		$this->assertArrayHasKey( 'cart', $cart_state );
-		$this->assertArrayHasKey( 'restUrl', $cart_state );
-		$this->assertSame( get_rest_url(), $cart_state['restUrl'] );
+		$this->assertArrayHasKey( 'cart', $state );
 	}
 
 	/**
-	 * @testdox load_cart_state() does not seed a pageScope into the woocommerce/cart state.
+	 * @testdox load_cart_state() seeds restUrl into the unified woocommerce namespace's config, not its state.
+	 */
+	public function test_rest_url_is_seeded_under_unified_config(): void {
+		BlocksSharedState::load_cart_state( $this->consent );
+
+		$config = wp_interactivity_config( 'woocommerce' );
+		$state  = wp_interactivity_state( 'woocommerce' );
+
+		$this->assertArrayHasKey( 'restUrl', $config );
+		$this->assertSame( get_rest_url(), $config['restUrl'] );
+		$this->assertArrayNotHasKey( 'restUrl', $state );
+	}
+
+	/**
+	 * @testdox load_cart_state() does not seed a pageScope into the woocommerce state.
 	 */
 	public function test_cart_state_seeds_no_page_scope(): void {
 		BlocksSharedState::load_cart_state( $this->consent );
 
-		$cart_state = wp_interactivity_state( 'woocommerce/cart' );
+		$state = wp_interactivity_state( 'woocommerce' );
 
-		$this->assertArrayNotHasKey( 'pageScope', $cart_state );
+		$this->assertArrayNotHasKey( 'pageScope', $state );
 	}
 
 	/**
-	 * @testdox load_cart_state() does not seed a noticeId into the woocommerce/cart state.
+	 * @testdox load_cart_state() does not seed a noticeId into the woocommerce state.
 	 */
 	public function test_cart_state_seeds_no_notice_id(): void {
 		BlocksSharedState::load_cart_state( $this->consent );
 
-		$cart_state = wp_interactivity_state( 'woocommerce/cart' );
+		$state = wp_interactivity_state( 'woocommerce' );
 
-		$this->assertArrayNotHasKey( 'noticeId', $cart_state );
+		$this->assertArrayNotHasKey( 'noticeId', $state );
 	}
 
 	/**
-	 * @testdox load_cart_state() does not seed any cart state under the bare woocommerce namespace.
+	 * @testdox load_cart_state() does not leave any cart state registered under the retired woocommerce/cart namespace.
 	 */
-	public function test_bare_namespace_carries_no_cart_state(): void {
+	public function test_retired_cart_namespace_carries_no_state(): void {
 		BlocksSharedState::load_cart_state( $this->consent );
 
-		$bare_state = wp_interactivity_state( 'woocommerce' );
+		$retired_namespace_state = wp_interactivity_state( 'woocommerce/cart' );
 
-		$this->assertArrayNotHasKey( 'cart', $bare_state );
-		$this->assertArrayNotHasKey( 'noticeId', $bare_state );
-		$this->assertArrayNotHasKey( 'restUrl', $bare_state );
+		$this->assertArrayNotHasKey( 'cart', $retired_namespace_state );
+		$this->assertArrayNotHasKey( 'restUrl', $retired_namespace_state );
 	}
 
 	/**

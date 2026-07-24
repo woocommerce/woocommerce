@@ -130,34 +130,26 @@ class ProductTemplate extends AbstractBlock {
 				'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
 				$product_id
 			);
+			// The single `woocommerce::` context bag for this loop item: the
+			// card's own `productId`/`variationId` addressing, plus the
+			// card's server-minted `woocommerce` state `draftKey` so
+			// descendant purchase surfaces (reached via the sibling
+			// `render_block_context` filter above) can file their seeds
+			// under it. All three keys inherit independently down the tree —
+			// a descendant overriding one (e.g. a grouped child row's own
+			// `productId`) still inherits the rest, including `draftKey`.
 			$product_context_directive = wp_interactivity_data_wp_context(
 				array(
 					'productId'   => $product_id,
 					'variationId' => null,
+					'draftKey'    => $draft_key,
 				),
-				'woocommerce/products'
+				'woocommerce'
 			);
-
-			// Hand-rolled second context bag: `wp_interactivity_data_wp_context()` always
-			// emits an attribute literally named `data-wp-context`, so it cannot carry the
-			// draft key alongside `$product_context_directive` on the same element — the
-			// HTML parser would keep the first and silently drop the second. The
-			// three-hyphen `data-wp-context---draft-key` form is the supported way to add
-			// a second context bag on one element (see Wishlist.php/SavedForLater.php's
-			// `data-wp-context---notices`). JSON_HEX_APOS is required because
-			// $li_directives below uses single-quoted attribute values. This loop item
-			// declares the card's server-minted `woocommerce/cart` draft key so descendant
-			// purchase surfaces (reached via the sibling `render_block_context` filter
-			// above) can file their seeds under it.
-			$draft_key_context_directive = 'data-wp-context---draft-key=\'woocommerce/cart::' . wp_json_encode(
-				array( 'draftKey' => $draft_key ),
-				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-			) . '\'';
 
 			$li_directives = '
 				data-wp-interactive="woocommerce/product-collection"
 				' . $product_context_directive . '
-				' . $draft_key_context_directive . '
 				data-wp-key="product-item-' . $product_id . '"
 			';
 

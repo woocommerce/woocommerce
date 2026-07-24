@@ -105,13 +105,14 @@ class Utils {
 	 *     @type int  $productId  Product ID for context-specific behavior.
 	 *     @type bool $allowZero  Whether to allow zero quantity.
 	 * }
-	 * @param bool   $set_product_context Whether to set a local woocommerce/products context on the wrapper.
-	 *                                    Only needed when the quantity input belongs to a different product than
-	 *                                    the one provided by the inherited context (e.g. child items in grouped products).
-	 *                                    Setting this unnecessarily shadows the parent context and prevents
-	 *                                    variationId updates from propagating.
-	 * @param string $draft_key The `woocommerce/cart` collection key this quantity selector's
-	 *                          initial draft seed is filed under. Defaults to the reserved
+	 * @param bool   $set_product_context Whether to override the `productId`/`variationId` keys of the
+	 *                                    local `woocommerce` context bag on the wrapper. Only needed when
+	 *                                    the quantity input belongs to a different product than the one
+	 *                                    provided by the inherited context (e.g. child items in grouped
+	 *                                    products). Setting this unnecessarily shadows the parent context
+	 *                                    and prevents variationId updates from propagating.
+	 * @param string $draft_key The `woocommerce` state's `draftSeeds` collection key this quantity
+	 *                          selector's initial draft seed is filed under. Defaults to the reserved
 	 *                          global collection key for quantity selectors rendered outside
 	 *                          any keyed purchase-surface container.
 	 *
@@ -127,12 +128,14 @@ class Utils {
 				'variationId' => null,
 			);
 
-			$products_context = 'woocommerce/products::' . wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
+			$products_context = 'woocommerce::' . wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 
-			// This moves the `woocommerce/products` context to a nested `div`,
+			// This moves the `woocommerce` context override to a nested `div`,
 			// as multiple context directives are not supported in the same
 			// element in WordPress 6.8. Once WooCommerce drops support for
-			// WordPress 6.8, this code can be refactored.
+			// WordPress 6.8, this code can be refactored. Only `productId`/
+			// `variationId` are overridden here; `draftKey` (if any) keeps
+			// inheriting from the ancestor bag.
 			if (
 				$processor->next_tag(
 					array(
@@ -152,9 +155,9 @@ class Utils {
 		// The quantity actually bound to the rendered input: the product's
 		// minimum purchase quantity, or `0` when this surface allows an empty
 		// starting quantity (an optional grouped-product child). Computed
-		// unconditionally so it can also feed the draft seed filed into
-		// `woocommerce/cart` state below, even on the (unexpected) chance the
-		// number input isn't found.
+		// unconditionally so it can also feed the draft seed filed into the
+		// `woocommerce` state's `draftSeeds` root below, even on the
+		// (unexpected) chance the number input isn't found.
 		$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
 		$input_quantity   = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
 
@@ -191,16 +194,17 @@ class Utils {
 
 		if ( $product instanceof \WC_Product ) {
 			// The initial `add-item` payload for this quantity selector's
-			// product, filed under its collection key in the `woocommerce/cart`
-			// state. The client consults it only via `getServerState()`, never
-			// applying it into a draft collection: the draft view materializes
-			// a new draft from it on the shopper's first genuine write, and
-			// `addItem`'s no-payload fallback resolves the effective seed —
-			// the family seed re-addressed to the in-context id — when
-			// posting an untouched surface. `quantity` matches
-			// `$input_quantity` — the value actually bound to the rendered
-			// input above — not the product's raw minimum, so the seed never
-			// disagrees with the initial HTML.
+			// product, filed under its collection key in the `woocommerce`
+			// state's `draftSeeds` root. The client consults it only via
+			// `getServerState()`, never applying it into a draft collection:
+			// the draft view materializes a new draft from it on the
+			// shopper's first genuine write, and `addItem`'s no-payload
+			// fallback resolves the effective seed — the family seed
+			// re-addressed to the in-context id — when posting an untouched
+			// surface. `quantity` matches `$input_quantity` — the value
+			// actually bound to the rendered input above — not the
+			// product's raw minimum, so the seed never disagrees with the
+			// initial HTML.
 			$draft_seed = array(
 				'id'       => $product->get_id(),
 				'quantity' => $input_quantity,
@@ -211,7 +215,7 @@ class Utils {
 			// quantity selector without an enclosing `selectedAttributes`
 			// context, so the seed must carry its own `variation` attributes
 			// here: this filing and the form-level one both accumulate into
-			// the same `draftSeeds[$draft_key][id]` entry in `woocommerce/cart`
+			// the same `draftSeeds[$draft_key][id]` entry in the `woocommerce`
 			// state, and an untouched direct-variation surface needs this
 			// filing's `{ attribute, value }` pairs so the client's cart-line
 			// pairing ladder can match the resulting line.
@@ -220,7 +224,7 @@ class Utils {
 			}
 
 			wp_interactivity_state(
-				'woocommerce/cart',
+				'woocommerce',
 				array(
 					'draftSeeds' => array(
 						$draft_key => array(
@@ -246,7 +250,7 @@ class Utils {
 	 * Shared by every surface that needs to describe a variation's selected
 	 * attributes with the same shape: the `selectedAttributes` context set for
 	 * `ProductType::VARIATION` products, and the `variation` field of any
-	 * `woocommerce/cart` draft seed for a variation-type product. Keeping a
+	 * `woocommerce` state draft seed for a variation-type product. Keeping a
 	 * single implementation ensures those seeds always carry a shape the
 	 * client's cart-line pairing ladder (`lineMatchesProduct`) can match.
 	 *

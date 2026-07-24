@@ -120,7 +120,7 @@ class QuantitySelectorTest extends WC_Unit_Test_Case {
 
 		$markup = $this->invoke_render( $this->build_block_stub( $product_id ) );
 
-		$state        = wp_interactivity_state( 'woocommerce/cart' );
+		$state        = wp_interactivity_state( 'woocommerce' );
 		$global_seeds = $state['draftSeeds']['woocommerce/global'] ?? array();
 
 		$this->assertArrayHasKey( $product_id, $global_seeds, 'The stepper files its draft seed under the reserved global collection key by default.' );
@@ -147,7 +147,7 @@ class QuantitySelectorTest extends WC_Unit_Test_Case {
 
 		$this->invoke_render( $this->build_block_stub( $product_id, $draft_key ) );
 
-		$state = wp_interactivity_state( 'woocommerce/cart' );
+		$state = wp_interactivity_state( 'woocommerce' );
 
 		$this->assertArrayHasKey( $draft_key, $state['draftSeeds'] ?? array(), 'The stepper files its draft seed under its block context\'s draftKey.' );
 		$this->assertSame(
@@ -185,7 +185,7 @@ class QuantitySelectorTest extends WC_Unit_Test_Case {
 
 		$this->invoke_render( $this->build_block_stub( $variation->get_id(), $draft_key ) );
 
-		$state = wp_interactivity_state( 'woocommerce/cart' );
+		$state = wp_interactivity_state( 'woocommerce' );
 
 		$this->assertSame(
 			array(

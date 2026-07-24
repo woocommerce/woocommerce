@@ -26,7 +26,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $store_namespace = 'woocommerce/products';
+	protected $store_namespace = 'woocommerce';
 
 	/**
 	 * Captured original Hydration registry entry for restoration in tearDown.
@@ -84,8 +84,9 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$state = wp_interactivity_state( $this->store_namespace );
 
 		$this->assertArrayHasKey( 'products', $state );
-		$this->assertArrayHasKey( $product->get_id(), $state['products'] );
-		$this->assertSame( $product->get_name(), $state['products'][ $product->get_id() ]['name'] );
+		$this->assertArrayHasKey( 'items', $state['products'] );
+		$this->assertArrayHasKey( $product->get_id(), $state['products']['items'] );
+		$this->assertSame( $product->get_name(), $state['products']['items'][ $product->get_id() ]['name'] );
 		$this->assertSame( $product->get_name(), $result['name'], 'Return value should contain the product data.' );
 
 		$product->delete( true );
@@ -126,13 +127,14 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 		$state = wp_interactivity_state( $this->store_namespace );
 
-		$this->assertArrayHasKey( 'productVariations', $state );
+		$this->assertArrayHasKey( 'products', $state );
+		$this->assertArrayHasKey( 'variations', $state['products'] );
 		$this->assertNotEmpty( $result, 'Should return loaded variations.' );
 
 		foreach ( $variation_ids as $variation_id ) {
 			$this->assertArrayHasKey(
 				$variation_id,
-				$state['productVariations'],
+				$state['products']['variations'],
 				"Variation {$variation_id} should be in state."
 			);
 		}
@@ -281,7 +283,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox register_getters() registers the derived state closures exactly once.
+	 * @testdox register_getters() registers the nested itemInContext derived state closures exactly once.
 	 */
 	public function test_register_getters_is_idempotent(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -301,20 +303,21 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertTrue( $flag->getValue(), 'getters_registered should remain true.' );
 
 		$state = wp_interactivity_state( $this->store_namespace );
-		$this->assertArrayHasKey( 'baseProductInContext', $state );
-		$this->assertArrayHasKey( 'productVariationInContext', $state );
-		$this->assertArrayHasKey( 'productInContext', $state );
-		$this->assertInstanceOf( \Closure::class, $state['baseProductInContext'] );
-		$this->assertInstanceOf( \Closure::class, $state['productVariationInContext'] );
-		$this->assertInstanceOf( \Closure::class, $state['productInContext'] );
+		$this->assertArrayHasKey( 'itemInContext', $state );
+		$this->assertArrayHasKey( 'baseProduct', $state['itemInContext'] );
+		$this->assertArrayHasKey( 'variation', $state['itemInContext'] );
+		$this->assertArrayHasKey( 'product', $state['itemInContext'] );
+		$this->assertInstanceOf( \Closure::class, $state['itemInContext']['baseProduct'] );
+		$this->assertInstanceOf( \Closure::class, $state['itemInContext']['variation'] );
+		$this->assertInstanceOf( \Closure::class, $state['itemInContext']['product'] );
 
 		$product->delete( true );
 	}
 
 	/**
-	 * @testdox state.baseProductInContext resolves to the hydrated product matching state.productId.
+	 * @testdox state.itemInContext.baseProduct resolves to the hydrated product matching state.products.productId.
 	 */
-	public function test_product_getter_reads_from_state(): void {
+	public function test_base_product_getter_reads_from_state(): void {
 		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
 
 		$product = WC_Helper_Product::create_simple_product();
@@ -323,11 +326,11 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 		wp_interactivity_state(
 			$this->store_namespace,
-			array( 'productId' => $product->get_id() )
+			array( 'products' => array( 'productId' => $product->get_id() ) )
 		);
 
 		$state   = wp_interactivity_state( $this->store_namespace );
-		$closure = $state['baseProductInContext'];
+		$closure = $state['itemInContext']['baseProduct'];
 		$this->assertInstanceOf( \Closure::class, $closure );
 
 		$resolved = $closure();
@@ -339,7 +342,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox state.productVariationInContext resolves to the hydrated variation matching state.variationId.
+	 * @testdox state.itemInContext.variation resolves to the hydrated variation matching state.products.variationId.
 	 */
 	public function test_selected_variation_getter_reads_from_state(): void {
 		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
@@ -352,11 +355,11 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 		wp_interactivity_state(
 			$this->store_namespace,
-			array( 'variationId' => $variation_id )
+			array( 'products' => array( 'variationId' => $variation_id ) )
 		);
 
 		$state   = wp_interactivity_state( $this->store_namespace );
-		$closure = $state['productVariationInContext'];
+		$closure = $state['itemInContext']['variation'];
 		$this->assertInstanceOf( \Closure::class, $closure );
 
 		$resolved = $closure();
@@ -368,7 +371,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox state.productInContext unwraps closure getters and falls back to the product when no variation is selected.
+	 * @testdox state.itemInContext.product unwraps closure getters and falls back to the base product when no variation is selected.
 	 */
 	public function test_product_in_context_unwraps_closure_selected_variation(): void {
 		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
@@ -379,24 +382,56 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 		wp_interactivity_state(
 			$this->store_namespace,
-			array( 'productId' => $product->get_id() )
+			array( 'products' => array( 'productId' => $product->get_id() ) )
 		);
 
 		$state = wp_interactivity_state( $this->store_namespace );
 
 		$this->assertInstanceOf(
 			\Closure::class,
-			$state['productVariationInContext'],
-			'productVariationInContext should still be a Closure at the point productInContext unwraps it.'
+			$state['itemInContext']['variation'],
+			'itemInContext.variation should still be a Closure at the point itemInContext.product unwraps it.'
 		);
 
-		$resolved = $state['productInContext']();
+		$resolved = $state['itemInContext']['product']();
 
 		$this->assertIsArray(
 			$resolved,
-			'productInContext should unwrap the closures and fall through to the product branch when no variation is selected.'
+			'itemInContext.product should unwrap the closures and fall through to the base product branch when no variation is selected.'
 		);
 		$this->assertSame( $product->get_name(), $resolved['name'] );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox state.itemInContext.product resolves to the selected variation, composing variation ?? baseProduct.
+	 */
+	public function test_product_in_context_composes_variation_over_base_product(): void {
+		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
+
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+		$variation_id  = (int) $variation_ids[0];
+
+		TestedProductsStore::load_product( $this->consent, $product->get_id() );
+		TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+
+		wp_interactivity_state(
+			$this->store_namespace,
+			array(
+				'products' => array(
+					'productId'   => $product->get_id(),
+					'variationId' => $variation_id,
+				),
+			)
+		);
+
+		$state    = wp_interactivity_state( $this->store_namespace );
+		$resolved = $state['itemInContext']['product']();
+
+		$this->assertIsArray( $resolved );
+		$this->assertSame( $variation_id, $resolved['id'], 'itemInContext.product should resolve the selected variation over the base product.' );
 
 		$product->delete( true );
 	}

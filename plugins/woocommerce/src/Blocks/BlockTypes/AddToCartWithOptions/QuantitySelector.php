@@ -120,9 +120,9 @@ class QuantitySelector extends AbstractBlock {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
 
 			$wrapper_attributes['data-wp-bind--hidden'] = 'woocommerce/add-to-cart-with-options-quantity-selector::!state.allowsQuantityChange';
-			$input_attributes['data-wp-bind--min']      = 'woocommerce/products::state.productInContext.add_to_cart.minimum';
-			$input_attributes['data-wp-bind--max']      = 'woocommerce/products::state.productInContext.add_to_cart.maximum';
-			$input_attributes['data-wp-bind--step']     = 'woocommerce/products::state.productInContext.add_to_cart.multiple_of';
+			$input_attributes['data-wp-bind--min']      = 'woocommerce::state.itemInContext.product.add_to_cart.minimum';
+			$input_attributes['data-wp-bind--max']      = 'woocommerce::state.itemInContext.product.add_to_cart.maximum';
+			$input_attributes['data-wp-bind--step']     = 'woocommerce::state.itemInContext.product.add_to_cart.multiple_of';
 			$input_attributes['data-wp-watch']          = 'woocommerce/add-to-cart-with-options::callbacks.watchQuantityConstraints';
 		}
 

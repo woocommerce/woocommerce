@@ -549,7 +549,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 	/**
 	 * Tests that a simple product's Add to Cart + Options form files its
-	 * initial `add-item` payload into the `woocommerce/cart` state's
+	 * initial `add-item` payload into the `woocommerce` state's
 	 * `draftSeeds` collection, under the reserved global collection key when
 	 * rendered outside any keyed purchase-surface container, so the client
 	 * can seed the correct values without them ever appearing in a context
@@ -571,7 +571,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			remove_filter( 'render_block_context', $filter, 1 );
 		}
 
-		$state        = wp_interactivity_state( 'woocommerce/cart' );
+		$state        = wp_interactivity_state( 'woocommerce' );
 		$global_seeds = $state['draftSeeds']['woocommerce/global'] ?? array();
 
 		$this->assertArrayHasKey( $product_id, $global_seeds, 'A form rendered outside any keyed container files its seed under the reserved global collection key.' );
@@ -611,7 +611,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			remove_filter( 'render_block_context', $filter, 1 );
 		}
 
-		$state = wp_interactivity_state( 'woocommerce/cart' );
+		$state = wp_interactivity_state( 'woocommerce' );
 
 		$this->assertArrayHasKey( $draft_key, $state['draftSeeds'] ?? array(), 'A surface inside a keyed container files its seed under that container\'s draft key.' );
 		$this->assertSame(
@@ -648,7 +648,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			remove_filter( 'render_block_context', $filter, 1 );
 		}
 
-		$state        = wp_interactivity_state( 'woocommerce/cart' );
+		$state        = wp_interactivity_state( 'woocommerce' );
 		$global_seeds = $state['draftSeeds']['woocommerce/global'] ?? array();
 
 		$this->assertArrayNotHasKey( $grouped_product_id, $global_seeds, 'The grouped product parent does not file its own draft seed; only its children do.' );
@@ -704,7 +704,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			remove_filter( 'render_block_context', $filter, 1 );
 		}
 
-		$state        = wp_interactivity_state( 'woocommerce/cart' );
+		$state        = wp_interactivity_state( 'woocommerce' );
 		$global_seeds = $state['draftSeeds']['woocommerce/global'] ?? array();
 
 		$this->assertSame(
@@ -714,6 +714,52 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			),
 			$global_seeds[ $product_id ],
 			'The variable product form files a seed with the parent id and default quantity, carrying no "variation" key until an attribute is selected.'
+		);
+	}
+
+	/**
+	 * Tests that a Variable product's hidden `variation_id` input binds to
+	 * the unified `woocommerce::state.itemInContext.variation.id` path,
+	 * rather than the retired `woocommerce/products::state.productVariationInContext.id`.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::render
+	 */
+	public function test_variable_product_hidden_variation_input_targets_unified_namespace() {
+		global $product;
+
+		$fixtures = new FixtureData();
+
+		$product = $fixtures->get_variable_product(
+			array(),
+			array(
+				$fixtures->get_product_attribute( 'color', array( 'red', 'green' ) ),
+			)
+		);
+
+		$product_id = $product->get_id();
+
+		$fixtures->get_variation_product(
+			$product_id,
+			array( 'pa_color' => 'red-slug' ),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		\WC_Product_Variable::sync( $product_id );
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringContainsString(
+			'data-wp-bind--value="woocommerce::state.itemInContext.variation.id"',
+			$markup,
+			'The hidden variation_id input should bind to the unified itemInContext.variation.id path.'
+		);
+		$this->assertStringNotContainsString(
+			'woocommerce/products::state.productVariationInContext.id',
+			$markup,
+			'No reference to the retired woocommerce/products namespace should remain.'
 		);
 	}
 
@@ -728,7 +774,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	 *
 	 * @param string      $quantity_html Quantity input HTML.
 	 * @param array       $context       Optional context for the quantity input.
-	 * @param string|null $draft_key     Optional `woocommerce/cart` collection key to file the seed under.
+	 * @param string|null $draft_key     Optional `woocommerce` state `draftSeeds` collection key to file the seed under.
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
 	private function invoke_make_quantity_input_interactive( $quantity_html, $context = array(), $draft_key = null ) {
@@ -748,9 +794,9 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests that `make_quantity_input_interactive` files a `woocommerce/cart`
-	 * draft seed for the global product in scope under the reserved global
-	 * collection key when no draft key is given.
+	 * Tests that `make_quantity_input_interactive` files a `woocommerce`
+	 * state draft seed for the global product in scope under the reserved
+	 * global collection key when no draft key is given.
 	 *
 	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::make_quantity_input_interactive
 	 */
@@ -765,7 +811,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$result = $this->invoke_make_quantity_input_interactive( $quantity_html );
 
-		$state        = wp_interactivity_state( 'woocommerce/cart' );
+		$state        = wp_interactivity_state( 'woocommerce' );
 		$global_seeds = $state['draftSeeds']['woocommerce/global'] ?? array();
 
 		$this->assertArrayHasKey( $product_id, $global_seeds, 'The quantity selector files a draft seed for the product in scope under the global collection key.' );
@@ -802,7 +848,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$this->invoke_make_quantity_input_interactive( $quantity_html, array(), $draft_key );
 
-		$state = wp_interactivity_state( 'woocommerce/cart' );
+		$state = wp_interactivity_state( 'woocommerce' );
 
 		$this->assertArrayHasKey( $draft_key, $state['draftSeeds'] ?? array(), 'The quantity selector files its draft seed under the given collection key.' );
 		$this->assertSame(
@@ -855,7 +901,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$this->invoke_make_quantity_input_interactive( $quantity_html );
 
-		$state        = wp_interactivity_state( 'woocommerce/cart' );
+		$state        = wp_interactivity_state( 'woocommerce' );
 		$global_seeds = $state['draftSeeds']['woocommerce/global'] ?? array();
 
 		$this->assertSame(
@@ -894,7 +940,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 		$this->invoke_make_quantity_input_interactive( $quantity_html, array( 'allowZero' => true ) );
 
-		$state        = wp_interactivity_state( 'woocommerce/cart' );
+		$state        = wp_interactivity_state( 'woocommerce' );
 		$global_seeds = $state['draftSeeds']['woocommerce/global'] ?? array();
 
 		$this->assertSame(
@@ -920,12 +966,12 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$previous_product = $product;
 		$product          = null;
 
-		$state_before = wp_interactivity_state( 'woocommerce/cart' );
+		$state_before = wp_interactivity_state( 'woocommerce' );
 
 		$quantity_html = '<div class="quantity"><input type="number" name="quantity" value="1" /></div>';
 		$result        = $this->invoke_make_quantity_input_interactive( $quantity_html );
 
-		$state_after = wp_interactivity_state( 'woocommerce/cart' );
+		$state_after = wp_interactivity_state( 'woocommerce' );
 
 		$this->assertSame( $state_before, $state_after, 'No draft seed is filed when there is no product in scope.' );
 		$this->assertStringNotContainsString( 'draft-seed', $result, 'No draft-seed context bag is emitted when there is no product in scope.' );

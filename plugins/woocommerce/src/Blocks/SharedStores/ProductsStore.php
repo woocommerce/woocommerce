@@ -8,21 +8,22 @@ use Automattic\WooCommerce\Blocks\Package;
 use InvalidArgumentException;
 
 /**
- * Shared store that hydrates the `woocommerce/products` Interactivity API
+ * Shared store that hydrates the unified `woocommerce` Interactivity API
  * store with product and variation data in Store API format.
  *
- * The store exposes two planes:
- * - Raw data (`products`, `productVariations`) populated by the `load_*`
- *   methods below, each keyed by ID.
- * - Selection (`productId`, `variationId`) — set by callers via
- *   `wp_interactivity_state` (global) or `data-wp-context` (per-element) —
- *   plus the derived getters (`baseProductInContext`,
- *   `productVariationInContext`, `productInContext`) registered by
+ * The store exposes two planes under `state.products`:
+ * - Raw data (`products.items`, `products.variations`) populated by the
+ *   `load_*` methods below, each keyed by ID.
+ * - Addressing (`products.productId`, `products.variationId`) — the global
+ *   fallback set by callers via `wp_interactivity_state`, overridden
+ *   per-element by the unified `woocommerce::{ productId?, variationId? }`
+ *   context bag — plus the derived `itemInContext` closures
+ *   (`baseProduct`, `variation`, `product`) registered by
  *   `register_getters()`.
  *
- * The derived getters are mirrored in the JS store
- * (client/blocks/assets/js/base/stores/woocommerce/products.ts) so that
- * directive bindings like `state.productInContext.sku` resolve during
+ * The derived closures are mirrored in the JS store
+ * (client/blocks/assets/js/base/stores/woocommerce/index.ts) so that
+ * directive bindings like `state.itemInContext.product.sku` resolve during
  * server-side rendering as well as on the client.
  *
  * See client/blocks/assets/js/base/stores/woocommerce/README.md for the
@@ -44,7 +45,7 @@ class ProductsStore {
 	 *
 	 * @var string
 	 */
-	private static string $store_namespace = 'woocommerce/products';
+	private static string $store_namespace = 'woocommerce';
 
 	/**
 	 * Products that have been loaded into state.
@@ -90,15 +91,19 @@ class ProductsStore {
 	}
 
 	/**
-	 * Register the derived-state getters once.
+	 * Register the nested `itemInContext` derived-state closures once.
 	 *
-	 * These closures mirror the JS getters in
-	 * client/blocks/assets/js/base/stores/woocommerce/products.ts so that
-	 * directives referencing state.baseProductInContext /
-	 * state.productVariationInContext / state.productInContext resolve
-	 * during SSR. Because they read from
-	 * wp_interactivity_state() at call time, they only need to be
-	 * registered once regardless of how many products are added.
+	 * These closures mirror the JS envelope in
+	 * client/blocks/assets/js/base/stores/woocommerce/index.ts so that
+	 * directives referencing state.itemInContext.baseProduct /
+	 * state.itemInContext.variation / state.itemInContext.product resolve
+	 * during SSR. Each closure resolves addressing from the unified
+	 * `woocommerce` context bag first, falling back to
+	 * `state.products.productId`/`state.products.variationId`, and is
+	 * draft-ignoring (the server never resolves the shopper's client-only
+	 * draft selection). Because they read from wp_interactivity_state() at
+	 * call time, they only need to be registered once regardless of how
+	 * many products are added.
 	 *
 	 * @return void
 	 */
@@ -112,46 +117,48 @@ class ProductsStore {
 		wp_interactivity_state(
 			self::$store_namespace,
 			array(
-				'baseProductInContext'      => function () {
-					$context    = wp_interactivity_get_context();
-					$state      = wp_interactivity_state( self::$store_namespace );
-					$product_id = array_key_exists( 'productId', $context )
-						? $context['productId']
-						: ( $state['productId'] ?? null );
+				'itemInContext' => array(
+					'baseProduct' => function () {
+						$context    = wp_interactivity_get_context();
+						$state      = wp_interactivity_state( self::$store_namespace );
+						$product_id = array_key_exists( 'productId', $context )
+							? $context['productId']
+							: ( $state['products']['productId'] ?? null );
 
-					if ( ! $product_id ) {
-						return null;
-					}
+						if ( ! $product_id ) {
+							return null;
+						}
 
-					return $state['products'][ $product_id ] ?? null;
-				},
-				'productVariationInContext' => function () {
-					$context      = wp_interactivity_get_context();
-					$state        = wp_interactivity_state( self::$store_namespace );
-					$variation_id = array_key_exists( 'variationId', $context )
-						? $context['variationId']
-						: ( $state['variationId'] ?? null );
+						return $state['products']['items'][ $product_id ] ?? null;
+					},
+					'variation'   => function () {
+						$context      = wp_interactivity_get_context();
+						$state        = wp_interactivity_state( self::$store_namespace );
+						$variation_id = array_key_exists( 'variationId', $context )
+							? $context['variationId']
+							: ( $state['products']['variationId'] ?? null );
 
-					if ( ! $variation_id ) {
-						return null;
-					}
+						if ( ! $variation_id ) {
+							return null;
+						}
 
-					return $state['productVariations'][ $variation_id ] ?? null;
-				},
-				'productInContext'          => function () {
-					$state    = wp_interactivity_state( self::$store_namespace );
-					$selected = $state['productVariationInContext'] instanceof \Closure
-						? $state['productVariationInContext']()
-						: $state['productVariationInContext'];
+						return $state['products']['variations'][ $variation_id ] ?? null;
+					},
+					'product'     => function () {
+						$state    = wp_interactivity_state( self::$store_namespace );
+						$selected = $state['itemInContext']['variation'] instanceof \Closure
+							? $state['itemInContext']['variation']()
+							: $state['itemInContext']['variation'];
 
-					if ( $selected ) {
-						return $selected;
-					}
+						if ( $selected ) {
+							return $selected;
+						}
 
-					return $state['baseProductInContext'] instanceof \Closure
-						? $state['baseProductInContext']()
-						: $state['baseProductInContext'];
-				},
+						return $state['itemInContext']['baseProduct'] instanceof \Closure
+							? $state['itemInContext']['baseProduct']()
+							: $state['itemInContext']['baseProduct'];
+					},
+				),
 			)
 		);
 	}
@@ -178,7 +185,7 @@ class ProductsStore {
 		self::register_getters();
 		wp_interactivity_state(
 			self::$store_namespace,
-			array( 'products' => array( $product_id => self::$products[ $product_id ] ) )
+			array( 'products' => array( 'items' => array( $product_id => self::$products[ $product_id ] ) ) )
 		);
 
 		return self::$products[ $product_id ];
@@ -235,7 +242,7 @@ class ProductsStore {
 		self::register_getters();
 		wp_interactivity_state(
 			self::$store_namespace,
-			array( 'products' => $keyed_products )
+			array( 'products' => array( 'items' => $keyed_products ) )
 		);
 
 		return $keyed_products;
@@ -275,7 +282,7 @@ class ProductsStore {
 		self::register_getters();
 		wp_interactivity_state(
 			self::$store_namespace,
-			array( 'productVariations' => $keyed_variations )
+			array( 'products' => array( 'variations' => $keyed_variations ) )
 		);
 
 		return $keyed_variations;

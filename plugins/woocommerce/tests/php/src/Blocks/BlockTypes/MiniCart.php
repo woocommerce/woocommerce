@@ -436,8 +436,8 @@ class MiniCart extends \WP_UnitTestCase {
 	/**
 	 * Test that the legacy jQuery-bridge event directives (fired by
 	 * `wc-blocks_added_to_cart`/`wc-blocks_removed_from_cart`) target the
-	 * public `woocommerce/cart::actions.refresh`, not the retired
-	 * `refreshCartItems`.
+	 * unified `woocommerce::actions.refresh`, not the retired
+	 * `woocommerce/cart::actions.refresh` or `refreshCartItems`.
 	 *
 	 * @return void
 	 */
@@ -446,19 +446,51 @@ class MiniCart extends \WP_UnitTestCase {
 		$output = render_block( $block[0] );
 
 		$this->assertStringContainsString(
-			'data-wp-on-document--wc-blocks_added_to_cart="woocommerce/cart::actions.refresh"',
+			'data-wp-on-document--wc-blocks_added_to_cart="woocommerce::actions.refresh"',
 			$output,
-			'The "added to cart" legacy-event directive should target actions.refresh.'
+			'The "added to cart" legacy-event directive should target actions.refresh under the unified namespace.'
 		);
 		$this->assertStringContainsString(
-			'data-wp-on-document--wc-blocks_removed_from_cart="woocommerce/cart::actions.refresh"',
+			'data-wp-on-document--wc-blocks_removed_from_cart="woocommerce::actions.refresh"',
 			$output,
-			'The "removed from cart" legacy-event directive should target actions.refresh.'
+			'The "removed from cart" legacy-event directive should target actions.refresh under the unified namespace.'
+		);
+		$this->assertStringNotContainsString(
+			'woocommerce/cart::actions.refresh',
+			$output,
+			'No reference to the retired woocommerce/cart namespace should remain.'
 		);
 		$this->assertStringNotContainsString(
 			'refreshCartItems',
 			$output,
 			'No refreshCartItems reference should remain in the Mini-Cart markup.'
+		);
+	}
+
+	/**
+	 * Test that the Mini-Cart Products Table's cart-items loop iterates
+	 * `woocommerce::state.cart.items`, the unified namespace's cart mirror,
+	 * not the retired `woocommerce/cart::state.cart.items`. The Products
+	 * Table markup is part of the drawer overlay, rendered separately from
+	 * the block's own `render()` output (normally printed in `wp_footer`),
+	 * so this calls `render_mini_cart_overlay()` directly.
+	 *
+	 * @return void
+	 */
+	public function test_products_table_iterates_unified_cart_items() {
+		ob_start();
+		$this->mock->render_mini_cart_overlay();
+		$overlay = ob_get_clean();
+
+		$this->assertStringContainsString(
+			'data-wp-each--cart-item="woocommerce::state.cart.items"',
+			$overlay,
+			'The products table should iterate the cart mirror under the unified namespace.'
+		);
+		$this->assertStringNotContainsString(
+			'woocommerce/cart::state.cart.items',
+			$overlay,
+			'No reference to the retired woocommerce/cart namespace should remain.'
 		);
 	}
 

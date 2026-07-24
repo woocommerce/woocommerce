@@ -33,9 +33,14 @@ class BlocksSharedState {
 	/**
 	 * The namespace for the cart reactive store's state.
 	 *
+	 * Unified with `$settings_namespace`: both the cart mirror and the
+	 * config plane live under the single `woocommerce` store namespace.
+	 * Kept as a separate property to keep each call site's intent (cart
+	 * state vs. shared config) legible at the call site.
+	 *
 	 * @var string
 	 */
-	private static string $cart_namespace = 'woocommerce/cart';
+	private static string $cart_namespace = 'woocommerce';
 
 	/**
 	 * Whether the core config has been registered.
@@ -99,6 +104,10 @@ class BlocksSharedState {
 	/**
 	 * Load cart state into interactivity state.
 	 *
+	 * Seeds the read-only cart mirror (`state.cart`) into the unified
+	 * `woocommerce` namespace, and `restUrl` into the same namespace's
+	 * config plane, alongside currency/locale/`nonOptimisticProperties`.
+	 *
 	 * @param string $consent_statement The consent statement string.
 	 * @return void
 	 * @throws InvalidArgumentException If consent statement doesn't match.
@@ -122,15 +131,15 @@ class BlocksSharedState {
 
 			wp_interactivity_config(
 				self::$settings_namespace,
-				array( 'nonOptimisticProperties' => self::get_non_optimistic_properties() )
+				array(
+					'nonOptimisticProperties' => self::get_non_optimistic_properties(),
+					'restUrl'                 => get_rest_url(),
+				)
 			);
 
 			wp_interactivity_state(
 				self::$cart_namespace,
-				array(
-					'cart'    => self::$blocks_shared_cart_state,
-					'restUrl' => get_rest_url(),
-				)
+				array( 'cart' => self::$blocks_shared_cart_state )
 			);
 		}
 	}

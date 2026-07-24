@@ -211,10 +211,10 @@ class ProductQuery extends AbstractBlock {
 				'variationId' => null,
 			);
 
-			$processor->set_attribute( 'data-wp-interactive', 'woocommerce/products' );
+			$processor->set_attribute( 'data-wp-interactive', 'woocommerce' );
 			$processor->set_attribute(
 				'data-wp-context',
-				'woocommerce/products::' . wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
+				'woocommerce::' . wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP )
 			);
 			$processor->set_attribute( 'data-wp-key', 'product-item-' . $product_id );
 		}

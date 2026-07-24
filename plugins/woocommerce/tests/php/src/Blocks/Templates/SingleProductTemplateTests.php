@@ -12,6 +12,31 @@ use WP_UnitTestCase;
 class SingleProductTemplateTests extends WP_UnitTestCase {
 
 	/**
+	 * Test that rendering the Single Product template for a singular product
+	 * page seeds `products.productId`/`products.variationId` into the
+	 * unified `woocommerce` interactivity state, so the `itemInContext`
+	 * closures can resolve addressing when no context bag overrides it.
+	 */
+	public function test_render_block_template_seeds_product_addressing_into_woocommerce_state() {
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		$single_product_template = new SingleProductTemplate();
+		$single_product_template->render_block_template();
+
+		$state = wp_interactivity_state( 'woocommerce' );
+
+		$this->assertArrayHasKey( 'products', $state );
+		$this->assertArrayHasKey( 'productId', $state['products'] );
+		$this->assertSame( $product->get_id(), $state['products']['productId'] );
+		$this->assertArrayHasKey( 'variationId', $state['products'] );
+		$this->assertNull( $state['products']['variationId'] );
+
+		$product->delete( true );
+	}
+
+	/**
 	 * Test that the Product Catalog template content isn't updated mistakenly.
 	 * In other words, make sure the Single Product template logic doesn't leak
 	 * into other templates.

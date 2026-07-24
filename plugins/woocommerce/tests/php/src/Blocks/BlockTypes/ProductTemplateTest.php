@@ -88,14 +88,21 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Builds the expected serialized `data-wp-context---draft-key` bag for a given key.
+	 * Builds the expected serialized single `woocommerce::` context bag for
+	 * a loop item, carrying its `productId`/`variationId` addressing plus
+	 * the minted `draftKey`.
 	 *
-	 * @param string $draft_key The minted draft key.
+	 * @param int    $product_id The card's product id.
+	 * @param string $draft_key  The minted draft key.
 	 * @return string Expected attribute markup.
 	 */
-	private function expected_draft_key_context_directive( string $draft_key ): string {
-		return 'data-wp-context---draft-key=\'woocommerce/cart::' . wp_json_encode(
-			array( 'draftKey' => $draft_key ),
+	private function expected_context_directive( int $product_id, string $draft_key ): string {
+		return 'data-wp-context=\'woocommerce::' . wp_json_encode(
+			array(
+				'productId'   => $product_id,
+				'variationId' => null,
+				'draftKey'    => $draft_key,
+			),
 			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 		) . '\'';
 	}
@@ -124,9 +131,9 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A loop item's <li> carries the default woocommerce/products context and a data-wp-context---draft-key bag with the minted collection/<queryId>/<productId> key, no draft-items bag, and no data-wp-init.
+	 * @testdox A loop item's <li> carries a single woocommerce:: context bag with productId/variationId addressing and the minted collection/<queryId>/<productId> draft key, no second context bag, no draft-items bag, and no data-wp-init.
 	 */
-	public function test_loop_item_emits_draft_key_context_and_no_retired_draft_items_bag(): void {
+	public function test_loop_item_emits_single_context_bag_and_no_retired_draft_items_bag(): void {
 		$product = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -141,17 +148,10 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
 
-		$expected_products_context  = 'data-wp-context=\'woocommerce/products::' . wp_json_encode(
-			array(
-				'productId'   => $product->get_id(),
-				'variationId' => null,
-			),
-			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-		) . '\'';
-		$expected_draft_key_context = $this->expected_draft_key_context_directive( 'collection/0/' . $product->get_id() );
+		$expected_context = $this->expected_context_directive( $product->get_id(), 'collection/0/' . $product->get_id() );
 
-		$this->assertStringContainsString( $expected_products_context, $markup, 'The default woocommerce/products context should still be present, unaffected by the second context bag.' );
-		$this->assertStringContainsString( $expected_draft_key_context, $markup, 'The minted collection/<queryId>/<productId> draft key should be present in a data-wp-context---draft-key bag.' );
+		$this->assertStringContainsString( $expected_context, $markup, 'The single woocommerce:: context bag should carry productId, variationId, and the minted draft key.' );
+		$this->assertStringNotContainsString( 'data-wp-context---draft-key', $markup, 'The hand-rolled second context bag should no longer be emitted.' );
 		$this->assertStringNotContainsString( 'data-wp-context---draft-items', $markup, 'The retired empty draft-items bag should no longer be emitted.' );
 		$this->assertStringNotContainsString( 'data-wp-init="woocommerce/cart::actions.registerOrRestoreDraftCollection"', $markup, 'The retired per-card register-or-restore init directive should no longer be emitted.' );
 		$this->assertStringContainsString( 'data-wp-key="product-item-' . $product->get_id() . '"', $markup, 'The existing data-wp-key directive should still be present.' );
@@ -172,8 +172,8 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 			WC_Helper_Product::delete_product( $second_product->get_id() );
 		}
 
-		$first_expected_key  = $this->expected_draft_key_context_directive( 'collection/0/' . $first_product->get_id() );
-		$second_expected_key = $this->expected_draft_key_context_directive( 'collection/0/' . $second_product->get_id() );
+		$first_expected_key  = $this->expected_context_directive( $first_product->get_id(), 'collection/0/' . $first_product->get_id() );
+		$second_expected_key = $this->expected_context_directive( $second_product->get_id(), 'collection/0/' . $second_product->get_id() );
 
 		$this->assertStringContainsString( $first_expected_key, $markup, "The first card's draft key should discriminate by product id." );
 		$this->assertStringContainsString( $second_expected_key, $markup, "The second card's draft key should discriminate by product id." );
@@ -197,7 +197,7 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
 
-		$expected_key = $this->expected_draft_key_context_directive( 'collection/3/' . $product->get_id() );
+		$expected_key = $this->expected_context_directive( $product->get_id(), 'collection/3/' . $product->get_id() );
 
 		$this->assertStringContainsString( $expected_key, $first_render, 'The first render should carry the minted draft key.' );
 		$this->assertStringContainsString( $expected_key, $second_render, 'The second render should carry the same minted draft key.' );
