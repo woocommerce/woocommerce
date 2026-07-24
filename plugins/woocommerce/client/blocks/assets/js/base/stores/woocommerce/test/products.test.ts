@@ -7,6 +7,8 @@ import type { ProductResponseItem } from '@woocommerce/types';
  * Internal dependencies
  */
 import type { ProductsStore } from '../products';
+import type { DraftItem, DraftKey } from '../cart';
+import { GLOBAL_DRAFT_KEY } from '../draft-internals';
 
 let mockRegisteredStore: {
 	state: ProductsStore[ 'state' ];
@@ -16,6 +18,45 @@ let mockStoreState: ProductsStore[ 'state' ];
 
 let mockContext: { productId?: number; variationId?: number | null } | null =
 	null;
+
+/**
+ * The mocked `woocommerce/cart` namespace state `draft-internals.ts` reads
+ * raw `state.draftItems` from. Kept as a single stable object per test (never
+ * replaced wholesale) so a write recorded through the products-side setter
+ * stays visible to a subsequent getter read within the same test — matching
+ * the real Interactivity runtime returning the same persistent store object
+ * across repeated `store()` calls.
+ *
+ * A products-only page where `cart.ts` never registered its state at all
+ * (an empty stub with no `draftItems` key) is simulated by casting a bare
+ * `{}` onto this variable directly, rather than by widening this type —
+ * proving the getter's/setter's reads degrade rather than throw.
+ */
+let mockCartState: { draftItems: Record< DraftKey, DraftItem[] > };
+
+/**
+ * The mocked `getServerState( 'woocommerce/cart' )` payload's `draftSeeds`,
+ * controlled per test. `undefined` simulates a page carrying no server-filed
+ * seeds at all.
+ */
+let mockDraftSeeds: Record< DraftKey, Record< number, DraftItem > > | undefined;
+
+/**
+ * The `woocommerce/products` namespace's own state, held stable across the
+ * repeated `store()` calls a single test makes: once for `products.ts`'s own
+ * registration (carrying the real `state` definition — getters included),
+ * and again for every lazy per-call read `draft-internals.ts` makes internally
+ * (via `getProductsState()`, passing an effectively empty definition). Both
+ * must resolve the identical object — never a freshly reconstructed one —
+ * or a family-resolution helper's read would silently miss data the test
+ * hydrated onto the first-returned reference.
+ */
+let mockProductsStateBase: {
+	products: Record< number, ProductResponseItem >;
+	productVariations: Record< number, ProductResponseItem >;
+	productId: number;
+	variationId: number | null;
+};
 
 const getMockStoreState = (): ProductsStore[ 'state' ] => {
 	if ( mockRegisteredStore === null ) {
@@ -36,37 +77,86 @@ const mockVariation = {
 	name: 'Test Variation',
 } as ProductResponseItem;
 
+/**
+ * A variable product family backing the family-draft-derivation and setter
+ * tests: variation 20 fixes `Color` but leaves `Logo` as "any" (`value:
+ * null`); variation 21 fixes both attributes concretely.
+ * `productVariations[20]`/`[21]` deliberately carry no `attributes` field of
+ * their own — the real Store API serializer always leaves it empty, so
+ * neither the derivation nor the setter may depend on it; the only usable
+ * per-variation attribute map is `familyVariableProduct.variations[]` (slug-valued,
+ * per the real shape).
+ */
+const familyVariableProduct = {
+	id: 10,
+	type: 'variable',
+	variations: [
+		{
+			id: 20,
+			attributes: [
+				{ name: 'Color', value: 'blue' },
+				{ name: 'Logo', value: null },
+			],
+		},
+		{
+			id: 21,
+			attributes: [
+				{ name: 'Color', value: 'red' },
+				{ name: 'Logo', value: 'yes' },
+			],
+		},
+	],
+} as unknown as ProductResponseItem;
+
+const variation20 = { id: 20, parent: 10, name: 'Blue' } as ProductResponseItem;
+const variation21 = {
+	id: 21,
+	parent: 10,
+	name: 'Red, Yes Logo',
+} as ProductResponseItem;
+
+/** A variation belonging to a different, unrelated product family. */
+const foreignVariation = {
+	id: 500,
+	parent: 999,
+	name: 'Foreign',
+} as ProductResponseItem;
+
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		store: jest.fn( ( namespace, definition ) => {
 			if ( namespace === 'woocommerce/products' ) {
-				// Simulate server-hydrated state merged with client definition.
-				// Getters from definition.state are preserved, and productId /
-				// variationId are added as plain values (simulating
-				// wp_interactivity_state hydration).
-				const stateBase = {
-					products: {} as Record< number, ProductResponseItem >,
-					productVariations: {} as Record<
-						number,
-						ProductResponseItem
-					>,
-					productId: 0,
-					variationId: null as number | null,
-				};
-				const descriptors = Object.getOwnPropertyDescriptors(
-					definition.state
-				);
-				Object.defineProperties( stateBase, descriptors );
-
+				// Simulate server-hydrated state merged with client
+				// definition. Getters from definition.state are preserved,
+				// and productId / variationId are added as plain values
+				// (simulating wp_interactivity_state hydration). A repeated
+				// call passing no `state` (draft-internals.ts's lazy reads)
+				// merges nothing new and simply re-wraps the same base —
+				// exactly how the real Interactivity runtime resolves an
+				// already-registered namespace.
+				if ( definition?.state ) {
+					Object.defineProperties(
+						mockProductsStateBase,
+						Object.getOwnPropertyDescriptors( definition.state )
+					);
+				}
 				mockRegisteredStore = {
-					state: stateBase as ProductsStore[ 'state' ],
+					state: mockProductsStateBase as ProductsStore[ 'state' ],
 				};
 				return mockRegisteredStore;
+			}
+			if ( namespace === 'woocommerce/cart' ) {
+				// A stable reference: repeated calls (draft-internals.ts
+				// never caches state at module scope) must observe the same
+				// object, so a write made through one call is visible to a
+				// later read through another.
+				return { state: mockCartState };
 			}
 			return {};
 		} ),
 		getContext: jest.fn( () => mockContext ),
+		getServerState: jest.fn( () => ( { draftSeeds: mockDraftSeeds } ) ),
 	} ),
 	{ virtual: true }
 );
@@ -75,6 +165,14 @@ describe( 'woocommerce/products store – product context derived state', () => 
 	beforeEach( () => {
 		mockRegisteredStore = null;
 		mockContext = null;
+		mockCartState = { draftItems: {} };
+		mockDraftSeeds = undefined;
+		mockProductsStateBase = {
+			products: {},
+			productVariations: {},
+			productId: 0,
+			variationId: null,
+		};
 
 		jest.isolateModules( () => require( '../products' ) );
 		mockStoreState = getMockStoreState();
@@ -160,6 +258,233 @@ describe( 'woocommerce/products store – product context derived state', () => 
 			mockStoreState.variationId = 999;
 
 			expect( mockStoreState.productVariationInContext ).toBeNull();
+		} );
+
+		describe( 'family draft derivation (direction A)', () => {
+			beforeEach( () => {
+				mockStoreState.products[ 10 ] = familyVariableProduct;
+				mockStoreState.productVariations[ 20 ] = variation20;
+				mockStoreState.productVariations[ 21 ] = variation21;
+				mockStoreState.productId = 10;
+				mockStoreState.variationId = null;
+			} );
+
+			it( 'resolves the matching variation for a family draft carrying a resolvable attribute set, with no further call', () => {
+				mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+					{
+						id: 10,
+						quantity: 1,
+						variation: [
+							{ attribute: 'Color', value: 'red' },
+							{ attribute: 'Logo', value: 'yes' },
+						],
+					} as DraftItem,
+				];
+
+				expect( mockStoreState.productVariationInContext ).toBe(
+					variation21
+				);
+				expect( mockStoreState.productInContext ).toBe( variation21 );
+			} );
+
+			it( 'resolves null for a family draft carrying an unresolvable attribute set, exactly as an equivalent variationId write resolves today', () => {
+				mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+					{
+						id: 10,
+						quantity: 1,
+						variation: [ { attribute: 'Color', value: 'green' } ],
+					} as DraftItem,
+				];
+
+				expect( mockStoreState.productVariationInContext ).toBeNull();
+				expect( mockStoreState.productInContext ).toBe(
+					familyVariableProduct
+				);
+			} );
+
+			it( 'resolves the variation via the id-direct rung for a family draft carrying a variation id but no attributes', () => {
+				mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+					{ id: 20, quantity: 1 } as DraftItem,
+				];
+
+				expect( mockStoreState.productVariationInContext ).toBe(
+					variation20
+				);
+			} );
+
+			it( 'falls back to variationId context/state resolution when no family draft exists in the collection (SSR/first-paint parity)', () => {
+				expect(
+					mockCartState.draftItems[ GLOBAL_DRAFT_KEY ]
+				).toBeUndefined();
+
+				mockStoreState.variationId = 20;
+
+				expect( mockStoreState.productVariationInContext ).toBe(
+					variation20
+				);
+			} );
+
+			it( 'degrades to the variationId fallback instead of throwing when the woocommerce/cart namespace never registered state (products-only page)', () => {
+				mockCartState = {} as typeof mockCartState;
+				mockStoreState.variationId = 21;
+
+				expect(
+					() => mockStoreState.productVariationInContext
+				).not.toThrow();
+				expect( mockStoreState.productVariationInContext ).toBe(
+					variation21
+				);
+			} );
+		} );
+
+		describe( 'setter (direction B)', () => {
+			let warnSpy: jest.SpyInstance;
+			let originalNodeEnv: string | undefined;
+
+			beforeEach( () => {
+				mockStoreState.products[ 10 ] = familyVariableProduct;
+				mockStoreState.productVariations[ 20 ] = variation20;
+				mockStoreState.productVariations[ 21 ] = variation21;
+				mockStoreState.productId = 10;
+				mockStoreState.variationId = null;
+
+				originalNodeEnv = process.env.NODE_ENV;
+				process.env.NODE_ENV = 'development';
+				warnSpy = jest
+					.spyOn( console, 'warn' )
+					.mockImplementation( () => {} );
+			} );
+
+			afterEach( () => {
+				warnSpy.mockRestore();
+				process.env.NODE_ENV = originalNodeEnv;
+			} );
+
+			it( 'writes variation derived from base.variations[] and the migrated id, materializing on an untouched surface', () => {
+				mockDraftSeeds = {
+					[ GLOBAL_DRAFT_KEY ]: {
+						10: { id: 10, quantity: 2 } as DraftItem,
+					},
+				};
+
+				mockStoreState.productVariationInContext = variation21;
+
+				expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual(
+					[
+						{
+							id: 21,
+							quantity: 2,
+							variation: [
+								{ attribute: 'Color', value: 'red' },
+								{ attribute: 'Logo', value: 'yes' },
+							],
+						},
+					]
+				);
+				// The assignment "sticks": reading the accessor again, against
+				// the same real serializer-shaped data (productVariations[21]
+				// carries no attributes field of its own), reflects it.
+				expect( mockStoreState.productVariationInContext ).toBe(
+					variation21
+				);
+			} );
+
+			it( 'files a partial selection at the parent id and warns naming the missing attribute(s) when an "any" attribute has no derivable value', () => {
+				mockDraftSeeds = {
+					[ GLOBAL_DRAFT_KEY ]: {
+						10: { id: 10, quantity: 3 } as DraftItem,
+					},
+				};
+
+				mockStoreState.productVariationInContext = variation20;
+
+				expect( warnSpy ).toHaveBeenCalledWith(
+					expect.stringContaining( 'Logo' )
+				);
+				expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual(
+					[
+						{
+							id: 10,
+							quantity: 3,
+							variation: [
+								{ attribute: 'Color', value: 'blue' },
+							],
+						},
+					]
+				);
+				// Files at the parent, so it renders unresolved rather than
+				// as a falsely-resolved variation.
+				expect( mockStoreState.productVariationInContext ).toBeNull();
+			} );
+
+			it( 'preserves a previously recorded "any" value from the existing family draft instead of warning', () => {
+				mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+					{
+						id: 20,
+						quantity: 4,
+						variation: [
+							{ attribute: 'Color', value: 'blue' },
+							{ attribute: 'Logo', value: 'existing' },
+						],
+					} as DraftItem,
+				];
+
+				mockStoreState.productVariationInContext = variation20;
+
+				expect( warnSpy ).not.toHaveBeenCalled();
+				expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual(
+					[
+						{
+							id: 20,
+							quantity: 4,
+							variation: [
+								{ attribute: 'Color', value: 'blue' },
+								{ attribute: 'Logo', value: 'existing' },
+							],
+						},
+					]
+				);
+			} );
+
+			it( 'clears the selection when assigned null: variation becomes [], id migrates to the parent', () => {
+				mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] = [
+					{
+						id: 21,
+						quantity: 5,
+						variation: [
+							{ attribute: 'Color', value: 'red' },
+							{ attribute: 'Logo', value: 'yes' },
+						],
+					} as DraftItem,
+				];
+
+				mockStoreState.productVariationInContext = null;
+
+				expect( mockCartState.draftItems[ GLOBAL_DRAFT_KEY ] ).toEqual(
+					[ { id: 10, quantity: 5, variation: [] } ]
+				);
+			} );
+
+			it( 'leaves state unchanged and warns when assigning a foreign variation', () => {
+				mockStoreState.productVariationInContext = foreignVariation;
+
+				expect( warnSpy ).toHaveBeenCalled();
+				expect(
+					mockCartState.draftItems[ GLOBAL_DRAFT_KEY ]
+				).toBeUndefined();
+			} );
+
+			it( 'leaves state unchanged and warns when assigning on a simple/grouped in-context product', () => {
+				mockStoreState.productId = 42; // mockProduct carries no `type` (not variable).
+				mockStoreState.variationId = null;
+
+				mockStoreState.productVariationInContext = variation21;
+
+				expect( warnSpy ).toHaveBeenCalled();
+				expect(
+					mockCartState.draftItems[ GLOBAL_DRAFT_KEY ]
+				).toBeUndefined();
+			} );
 		} );
 	} );
 
