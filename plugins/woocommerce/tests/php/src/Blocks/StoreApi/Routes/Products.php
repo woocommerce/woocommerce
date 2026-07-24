@@ -266,6 +266,7 @@ class Products extends ControllerTestCase {
 		$this->assertArrayHasKey( 'parent', $params );
 		$this->assertArrayHasKey( 'parent_exclude', $params );
 		$this->assertArrayHasKey( 'type', $params );
+		$this->assertArrayHasKey( 'status', $params );
 		$this->assertArrayHasKey( 'sku', $params );
 		$this->assertArrayHasKey( 'featured', $params );
 		$this->assertArrayHasKey( 'category', $params );
@@ -896,5 +897,275 @@ class Products extends ControllerTestCase {
 
 		$this->assertEquals( 404, $response->get_status() );
 		$this->assertFalse( get_transient( 'wc_related_' . $nonexistent_id ), 'No transient should be created for a non-existent product.' );
+	}
+
+	/**
+	 * Data provider for non-published statuses that privileged users can query.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function provider_queryable_non_published_statuses() {
+		return array(
+			'draft'   => array( ProductStatus::DRAFT ),
+			'pending' => array( ProductStatus::PENDING ),
+			'private' => array( ProductStatus::PRIVATE ),
+			'future'  => array( ProductStatus::FUTURE ),
+		);
+	}
+
+	/**
+	 * @testdox Guests requesting status=any on the collection endpoint are rejected.
+	 */
+	public function test_status_any_forbidden_for_guest() {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'status', 'any' );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Customers requesting status=any on the collection endpoint are rejected.
+	 */
+	public function test_status_any_forbidden_for_customer() {
+		$customer_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'status', 'any' );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status() );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Admins can include non-published products in the collection with status=any ($status).
+	 * @dataProvider provider_queryable_non_published_statuses
+	 *
+	 * @param string $status The product status to test.
+	 */
+	public function test_status_any_includes_non_published_products_for_admin( $status ) {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Admin Status Any Product ' . $status,
+				'regular_price' => 10,
+			)
+		);
+
+		if ( ProductStatus::FUTURE === $status ) {
+			wp_update_post(
+				array(
+					'ID'            => $product->get_id(),
+					'post_status'   => ProductStatus::FUTURE,
+					'post_date'     => gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS ),
+					'post_date_gmt' => gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS ),
+				)
+			);
+		} else {
+			$product->set_status( $status );
+			$product->save();
+		}
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'status', 'any' );
+		$request->set_param( 'include', array( $product->get_id() ) );
+
+		$response    = rest_get_server()->dispatch( $request );
+		$data        = $response->get_data();
+		$product_ids = array_map(
+			function ( $item ) {
+				return $item['id'];
+			},
+			$data
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertContains( $product->get_id(), $product_ids );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Admins can filter the collection to a specific non-publish status ($status).
+	 * @dataProvider provider_queryable_non_published_statuses
+	 *
+	 * @param string $status The product status to test.
+	 */
+	public function test_status_filter_returns_matching_products_for_admin( $status ) {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Admin Status Filter Product ' . $status,
+				'regular_price' => 10,
+			)
+		);
+
+		if ( ProductStatus::FUTURE === $status ) {
+			wp_update_post(
+				array(
+					'ID'            => $product->get_id(),
+					'post_status'   => ProductStatus::FUTURE,
+					'post_date'     => gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS ),
+					'post_date_gmt' => gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS ),
+				)
+			);
+		} else {
+			$product->set_status( $status );
+			$product->save();
+		}
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'status', $status );
+		$request->set_param( 'include', array( $product->get_id() ) );
+
+		$response    = rest_get_server()->dispatch( $request );
+		$data        = $response->get_data();
+		$product_ids = array_map(
+			function ( $item ) {
+				return $item['id'];
+			},
+			$data
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertContains( $product->get_id(), $product_ids );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Trash and auto-draft products stay excluded from status=any for admins.
+	 */
+	public function test_status_any_excludes_trash_and_auto_draft_for_admin() {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$fixtures = new FixtureData();
+		$trash    = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Admin Trash Product',
+				'regular_price' => 10,
+			)
+		);
+		$trash->set_status( ProductStatus::TRASH );
+		$trash->save();
+
+		$auto_draft = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Admin Auto Draft Product',
+				'regular_price' => 10,
+			)
+		);
+		$auto_draft->set_status( ProductStatus::AUTO_DRAFT );
+		$auto_draft->save();
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'status', 'any' );
+		$request->set_param( 'include', array( $trash->get_id(), $auto_draft->get_id() ) );
+
+		$response    = rest_get_server()->dispatch( $request );
+		$product_ids = array_map(
+			function ( $item ) {
+				return $item['id'];
+			},
+			$response->get_data()
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNotContains( $trash->get_id(), $product_ids );
+		$this->assertNotContains( $auto_draft->get_id(), $product_ids );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Admins can retrieve non-published products by ID ($status).
+	 * @dataProvider provider_queryable_non_published_statuses
+	 *
+	 * @param string $status The product status to test.
+	 */
+	public function test_non_published_product_by_id_available_to_admin( $status ) {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Admin By ID Product ' . $status,
+				'regular_price' => 10,
+			)
+		);
+
+		if ( ProductStatus::FUTURE === $status ) {
+			wp_update_post(
+				array(
+					'ID'            => $product->get_id(),
+					'post_status'   => ProductStatus::FUTURE,
+					'post_date'     => gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS ),
+					'post_date_gmt' => gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS ),
+				)
+			);
+		} else {
+			$product->set_status( $status );
+			$product->save();
+		}
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( $product->get_id(), $response->get_data()['id'] );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Admins can retrieve variations of a draft parent with status=any.
+	 */
+	public function test_status_any_returns_variations_of_draft_parent_for_admin() {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$fixtures  = new FixtureData();
+		$attribute = FixtureData::get_product_attribute( 'color', array( 'red', 'blue' ) );
+		$parent    = $fixtures->get_variable_product( array( 'name' => 'Draft Variable Parent' ), array( $attribute ) );
+		$variation = $fixtures->get_variation_product(
+			$parent->get_id(),
+			array( 'pa_color' => 'red' ),
+			array(
+				'regular_price' => 10,
+				'sku'           => 'draft-parent-variation-admin',
+			)
+		);
+		$parent->set_status( ProductStatus::DRAFT );
+		$parent->save();
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'parent', array( $parent->get_id() ) );
+		$request->set_param( 'type', 'variation' );
+		$request->set_param( 'status', 'any' );
+
+		$response    = rest_get_server()->dispatch( $request );
+		$product_ids = array_map(
+			function ( $item ) {
+				return $item['id'];
+			},
+			$response->get_data()
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertContains( $variation->get_id(), $product_ids );
+
+		wp_set_current_user( 0 );
 	}
 }

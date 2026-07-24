@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
@@ -248,6 +249,15 @@ class Products extends AbstractRoute {
 			'description'       => __( 'Limit result set to products assigned a specific type.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array_merge( array_keys( wc_get_product_types() ), [ ProductType::VARIATION ] ),
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['status'] = array(
+			'default'           => ProductStatus::PUBLISH,
+			'description'       => __( 'Limit result set to products assigned a specific status. Use `any` to include all non-trash statuses. Non-publish values require `edit_products` and `edit_others_products` capabilities.', 'woocommerce' ),
+			'type'              => 'string',
+			'enum'              => array_merge( array( 'any' ), ProductQuery::get_statuses_for_any() ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

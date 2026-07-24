@@ -6,7 +6,14 @@ The store products API provides public product data so it can be rendered on the
 
 ### Draft and non-published products
 
-Only published products are accessible via the Store API. Requesting a draft, pending, or other non-published product by ID or slug returns a `404` error. Non-published products are also excluded from the collection endpoint.
+By default, only published products are accessible via the Store API. Requesting a draft, pending, or other non-published product by ID or slug returns a `404` error for users who cannot edit that product. Non-published products are also excluded from the collection endpoint unless `status` is set to a non-publish value.
+
+Users with the `edit_products` and `edit_others_products` capabilities (for example administrators and shop managers) can:
+
+-   Retrieve non-published products they can edit by ID or slug.
+-   Pass `status=any` (or a specific non-publish status such as `draft`) on the collection endpoint to include those products. Requests with a non-publish `status` from users without those capabilities return `401` or `403`.
+
+Trash and auto-draft products are never returned by `status=any`.
 
 ### Password-protected products
 
@@ -31,6 +38,7 @@ GET /products?order=asc&orderby=price
 GET /products?parent=10
 GET /products?parent_exclude=10
 GET /products?type=simple
+GET /products?status=any
 GET /products?sku=sku-1,sku-2
 GET /products?featured=true
 GET /products?category=22
@@ -65,6 +73,7 @@ GET /products?return_rating_counts=true
 | `parent`                                    | array   |    no    | Limit result set to those of particular parent IDs.                                                                                                                                                                                   |
 | `parent_exclude`                            | array   |    no    | Limit result set to all items except those of a particular parent ID.                                                                                                                                                                 |
 | `type`                                      | string  |    no    | Limit result set to products assigned a specific type.                                                                                                                                                                                |
+| `status`                                    | string  |    no    | Limit result set to products assigned a specific status. Allowed values: `any`, `draft`, `pending`, `private`, `publish`, `future`. Default: `publish`. Non-publish values require `edit_products` and `edit_others_products`.        |
 | `sku`                                       | string  |    no    | Limit result set to products with specific SKU(s). Use commas to separate.                                                                                                                                                            |
 | `featured`                                  | boolean |    no    | Limit result set to featured products.                                                                                                                                                                                                |
 | `category`                                  | string  |    no    | Limit result set to products assigned to categories IDs or slugs, separated by commas.                                                                                                                                                |

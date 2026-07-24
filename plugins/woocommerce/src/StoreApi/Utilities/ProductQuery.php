@@ -19,13 +19,42 @@ use WC_Tax;
  */
 class ProductQuery implements QueryClausesGenerator {
 	/**
+	 * Statuses included when querying with `status=any`.
+	 *
+	 * Excludes trash and auto-draft so storefront consumers never receive those.
+	 *
+	 * @since 11.1.0
+	 * @return string[]
+	 */
+	public static function get_statuses_for_any(): array {
+		return array(
+			ProductStatus::PUBLISH,
+			ProductStatus::DRAFT,
+			ProductStatus::PENDING,
+			ProductStatus::PRIVATE,
+			ProductStatus::FUTURE,
+		);
+	}
+
+	/**
 	 * Prepare query args to pass to WP_Query for a REST API request.
 	 *
 	 * @param \WP_REST_Request $request Request data.
 	 * @return array
-	 * @throws RouteException If the related product ID is invalid or the product is not visible.
+	 * @throws RouteException If the related product ID is invalid, the product is not visible,
+	 *                        or if the requester cannot filter by the requested status.
 	 */
 	public function prepare_objects_query( $request ) {
+		$status = $request['status'] ?? ProductStatus::PUBLISH;
+
+		if ( ProductStatus::PUBLISH !== $status && ! ( current_user_can( 'edit_products' ) && current_user_can( 'edit_others_products' ) ) ) {
+			throw new RouteException(
+				'woocommerce_rest_product_status_forbidden',
+				esc_html__( 'You are not allowed to filter products by this status.', 'woocommerce' ),
+				is_user_logged_in() ? 403 : 401
+			);
+		}
+
 		$args = array(
 			'offset'              => $request['offset'],
 			'order'               => $request['order'],
@@ -36,11 +65,12 @@ class ProductQuery implements QueryClausesGenerator {
 			'posts_per_page'      => $request['per_page'] ? $request['per_page'] : -1,
 			'post_parent__in'     => $request['parent'],
 			'post_parent__not_in' => $request['parent_exclude'],
-			'search'              => $request['search'], // This uses search rather than s intentionally to handle searches internally.
+			'search'              => $request['search'],
+			// This uses search rather than s intentionally to handle searches internally.
 			'slug'                => $request['slug'],
 			'fields'              => 'ids',
 			'ignore_sticky_posts' => true,
-			'post_status'         => ProductStatus::PUBLISH,
+			'post_status'         => 'any' === $status ? self::get_statuses_for_any() : $status,
 			'date_query'          => array(),
 			'post_type'           => 'product',
 		);
@@ -419,15 +449,13 @@ class ProductQuery implements QueryClausesGenerator {
 	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		global $wpdb;
 
-		// SKU and slug lookups can return variations, so exclude any whose parent product is not published.
+		// SKU and slug lookups can return variations, so exclude any whose parent product is not queryable.
 		if ( in_array( 'product_variation', (array) $wp_query->get( 'post_type' ), true ) ) {
-			$args['where'] .= $wpdb->prepare(
-				" AND ( {$wpdb->posts}.post_type != 'product_variation' OR EXISTS (
+			$parent_statuses = $this->normalize_post_statuses( $wp_query->get( 'post_status' ) );
+			$args['where']  .= " AND ( {$wpdb->posts}.post_type != 'product_variation' OR EXISTS (
 					SELECT 1 FROM {$wpdb->posts} AS parent
-					WHERE parent.ID = {$wpdb->posts}.post_parent AND parent.post_status = %s
-				) ) ",
-				ProductStatus::PUBLISH
-			);
+					WHERE parent.ID = {$wpdb->posts}.post_parent AND parent.post_status IN ('" . implode( "','", array_map( 'esc_sql', $parent_statuses ) ) . "')
+				) ) ";
 		}
 
 		if ( $wp_query->get( 'search' ) ) {
@@ -473,6 +501,25 @@ class ProductQuery implements QueryClausesGenerator {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Normalize a WP_Query post_status value into a list of statuses for SQL filters.
+	 *
+	 * @since 11.1.0
+	 * @param string|array|null $post_status Post status from WP_Query.
+	 * @return string[]
+	 */
+	private function normalize_post_statuses( $post_status ): array {
+		if ( empty( $post_status ) || 'any' === $post_status ) {
+			return self::get_statuses_for_any();
+		}
+
+		if ( is_array( $post_status ) ) {
+			return in_array( 'any', $post_status, true ) ? self::get_statuses_for_any() : array_values( $post_status );
+		}
+
+		return array( $post_status );
 	}
 
 	/**
