@@ -17,9 +17,9 @@
  * so this fixture stands in for one, built on nothing but the surface a
  * third-party extension has today: the Store API's `ExtendSchema` (schema
  * extension + add-to-cart processing) and the public (locked)
- * `woocommerce/cart` Interactivity API store (`upsertDraftItem`, direct
- * mutation of a resolved draft, `addItem( payload )`). No WooCommerce core
- * file is changed.
+ * `woocommerce/cart` Interactivity API store (direct mutation of a
+ * resolved draft view, `addItem( payload )`). No WooCommerce core file is
+ * changed.
  *
  * How it works.
  *
@@ -31,11 +31,15 @@
  * addressed directly from markup with no registry of any kind — so picking
  * the same product in both slots produces two independent drafts rather
  * than one overwriting the other. A slot's quantity input has no init: its
- * first edit creates the slot's one draft via the store's public
- * `upsertDraftItem` (a creation convenience), and every edit after that is a
- * direct mutation of the already-resolved draft object, not an action call;
- * the slot renders a binding that reads the draft so either write's
- * re-render is observable. The button composes both slots' current drafts
+ * `data-wp-on--change` resolves the slot's declared key via the store's
+ * public `state.findItem( { id } )` and writes the resolved draft view's
+ * `quantity` directly (`draft.quantity = value`) — the single spelling for
+ * both the slot's first edit (the slot's collection does not exist yet;
+ * the view materializes the draft on this first write) and every edit
+ * after that (a direct mutation of the now-live draft), never an action
+ * call either way; the slot renders a binding that reads the draft so
+ * either write's re-render is observable. The button composes both slots'
+ * current drafts
  * by reading `state.draftItems` at its two declared keys directly — under
  * its existing lock consent — into one `cart/add-item` payload for the
  * bundle product, carrying a `wc-bundle-demo/children` prop at the payload
@@ -190,12 +194,15 @@ class WC_Bundle_Demo_Fixture {
 	 * `Wishlist.php` / `SavedForLater.php` already ship for a second
 	 * namespace (`data-wp-context---notices`).
 	 *
-	 * The quantity input has no init: its `data-wp-on--change` creates the
-	 * slot's one draft on its first edit (the store's public
-	 * `upsertDraftItem`, addressed by the slot's declared key) and directly
-	 * mutates the already-resolved draft on every edit after that. The
-	 * `<span>` renders a binding onto the same draft so either write's
-	 * re-render is observable.
+	 * The quantity input has no init: its `data-wp-on--change` resolves the
+	 * slot's declared key via the store's public `state.findItem( { id } )`
+	 * and writes the resolved draft view's `quantity` directly
+	 * (`draft.quantity = value`) — the single spelling for both the slot's
+	 * first edit (the view materializes the slot's one draft on this
+	 * write) and every edit after that (a direct mutation of the now-live
+	 * draft), never an action call either way. The `<span>` renders a
+	 * binding onto the same draft so either write's re-render is
+	 * observable.
 	 *
 	 * @param string $slot     The slot identifier (`slot-1`/`slot-2`), also
 	 *                         the suffix of the slot's own declared draft key.

@@ -43,11 +43,15 @@ declare( strict_types = 1 );
  *    `product-collection/frontend.ts` uses for its own client-side
  *    pagination links.
  *
- * Both surfaces' quantity inputs have no init: a first edit creates the
- * resolved collection's one draft via the store's public `upsertDraftItem`
- * (a creation convenience), and every edit after that is a direct mutation
- * of the already-resolved draft object; a bound `<span>` re-renders from
- * the same resolved draft either way. Because the unwrapped surface on
+ * Both surfaces' quantity inputs have no init: each one's
+ * `data-wp-on--change` resolves the surface's own key via the store's
+ * public `state.findItem( { id } )` and writes the resolved draft view's
+ * `quantity` directly (`draft.quantity = value`) — the single spelling for
+ * both the surface's first edit (the resolved collection holds no draft
+ * for this product yet; the view materializes it) and every edit after
+ * that (a direct mutation of the now-live draft), never an action call
+ * either way; a bound `<span>` re-renders from the same resolved draft
+ * either way. Because the unwrapped surface on
  * page A and the unwrapped surface on page B resolve the identical
  * fallback collection for the identical product id, an edit made on one is
  * visible on the other after navigating between them — while the keyed
@@ -217,10 +221,14 @@ class WC_Navigation_Survival_Fixture {
 	 * server-minted key alongside their own default context, and that
 	 * `bundle-demo.php`'s slots already ship for their own namespaced keys.
 	 *
-	 * The quantity input has no init: its `data-wp-on--change` creates this
-	 * surface's resolved draft on its first edit (the store's public
-	 * `upsertDraftItem`) and directly mutates the already-resolved draft on
-	 * every edit after that. Unlike `bundle-demo.php`'s slots, the input's
+	 * The quantity input has no init: its `data-wp-on--change` resolves
+	 * this surface's own key via the store's public
+	 * `state.findItem( { id } )` and writes the resolved draft view's
+	 * `quantity` directly (`draft.quantity = value`) — the single spelling
+	 * for both this surface's first edit (the resolved collection holds no
+	 * draft for this product yet; the view materializes it) and every edit
+	 * after that (a direct mutation of the now-live draft), never an
+	 * action call either way. Unlike `bundle-demo.php`'s slots, the input's
 	 * own `value` is *also* reactively bound (`data-wp-bind--value`), not
 	 * just the adjacent `<span>` — this surface must repaint correctly on a
 	 * freshly server-rendered instance of itself after a cross-page
