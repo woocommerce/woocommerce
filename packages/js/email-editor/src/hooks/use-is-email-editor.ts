@@ -34,10 +34,6 @@ export function useIsEmailEditor(): boolean {
 			return false;
 		}
 
-		// Get the email editor store's post information
-		const emailPostId = emailEditorStore.getEmailPostId();
-		const emailPostType = emailEditorStore.getEmailPostType();
-
 		// Get the current post information from the WordPress editor when available.
 		const editorSelectors = select( CORE_EDITOR_STORE );
 		if ( ! editorSelectors ) {
@@ -46,6 +42,10 @@ export function useIsEmailEditor(): boolean {
 
 		const currentPostId = editorSelectors.getCurrentPostId();
 		const currentPostType = editorSelectors.getCurrentPostType();
+
+		// Get the email editor store's post information
+		const emailPostId = emailEditorStore.getEmailPostId();
+		const emailPostType = emailEditorStore.getEmailPostType();
 
 		// Check if the current post matches the email editor post
 		const currentPostMatch =
