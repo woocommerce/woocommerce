@@ -302,7 +302,11 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			await expect( addToCartButton ).toHaveText( 'Add to cart' );
 
 			// Add W: creates a new, separate line for W.
+			const addDifferentVariation = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
 			await addToCartButton.click();
+			await addDifferentVariation;
 			await expect( addToCartButton ).toHaveText( '1 in cart' );
 
 			// Persisted cart: V incremented to 2 and W added as a distinct line,
