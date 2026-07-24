@@ -16,14 +16,15 @@
  * the page-wide one.
  *
  * A slot's quantity input has no init. Its `data-wp-on--change` resolves
- * the slot's declared key (reading its own `woocommerce/cart` context) and,
- * on the *first* edit — the slot's collection does not exist yet, nothing
- * seeds it up front — creates its one draft via the store's public
- * `upsertDraftItem` (a creation convenience — this is the only place this
- * fixture calls it); every edit after that is a **direct mutation** of the
- * already-resolved draft object (`draft.quantity = value`), never an action
- * call. Each slot renders a binding onto the same draft so either write's
- * re-render is directly observable. The "Add bundle to cart" button
+ * the slot's declared key (reading its own `woocommerce/cart` context) via
+ * the store's public `state.findItem( { id } )` and writes the resolved
+ * draft view's `quantity` directly (`draft.quantity = value`) — the single
+ * spelling for both the slot's *first* edit (the slot's collection does not
+ * exist yet, nothing seeds it up front; the view materializes the draft on
+ * this first write) and every edit after that (a **direct mutation** of the
+ * now-live draft), never an action call either way. Each slot renders a
+ * binding onto the same draft so either write's re-render is directly
+ * observable. The "Add bundle to cart" button
  * composes both slots' current drafts by reading `state.draftItems`
  * directly at the two declared keys — under its existing lock consent, so
  * no cross-collection store read needs any extra plumbing — into one
@@ -98,8 +99,8 @@ function resolveSlotDraftKey() {
  * holds at most one draft, its own child's).
  *
  * `undefined` both outside a slot and before the slot's first edit — a
- * slot's collection is created lazily, on its first `upsertDraftItem`
- * write (see {@link onSlotQuantityChange}); nothing seeds it up front.
+ * slot's collection is created lazily, on its first write through the
+ * draft view (see {@link onSlotQuantityChange}); nothing seeds it up front.
  *
  * @return {Object|undefined} The slot's draft, or `undefined` when none is
  *                             resolved yet.
@@ -112,12 +113,14 @@ function resolveSlotDraft() {
 /**
  * Writes a shopper's quantity edit to the slot's declared collection.
  *
- * Bound to the quantity input's `data-wp-on--change`. A slot's collection
- * does not exist until its first edit — nothing seeds it up front — so the
- * *first* call creates the slot's one draft via the store's public
- * `upsertDraftItem` (a creation convenience, addressed by the slot's own
- * declared key), and every call after that is a **direct mutation** of the
- * already-resolved draft object, never an action call. The slot's `<span>`
+ * Bound to the quantity input's `data-wp-on--change`. One spelling covers
+ * both the *first* edit for this slot (its collection does not exist yet —
+ * nothing seeds it up front — so the draft view materializes it from the
+ * slot's own child context) and every edit after that (a **direct
+ * mutation** of the now-live draft): `cart.state.findItem( { id } ).draft`
+ * resolves the draft view for the slot's own declared key (read off this
+ * element's `woocommerce/cart` context) and `childId`, and the assignment
+ * writes through it — never an action call either way. The slot's `<span>`
  * binding (`state.slotQuantityText`) reads the same draft, so either
  * write's re-render is observable.
  */
@@ -129,21 +132,8 @@ function onSlotQuantityChange() {
 		return;
 	}
 
-	const draft = resolveSlotDraft();
-
-	if ( draft ) {
-		// Direct mutation of the resolved draft object — reactive per the
-		// store's live envelope, honored by `addBundleToCart`'s compose
-		// below, deliberately not routed through `upsertDraftItem`.
-		draft.quantity = quantity;
-		return;
-	}
-
-	// First edit for this slot: create its one draft via the store's
-	// public creation convenience, addressed by the slot's own declared
-	// context (`childId`), not by any registry.
 	const { childId } = getContext();
-	cart.actions.upsertDraftItem( { id: childId, quantity } );
+	cart.state.findItem( { id: childId } ).draft.quantity = quantity;
 }
 
 store(
@@ -154,12 +144,13 @@ store(
 			 * The current element's slot's draft quantity, as text.
 			 *
 			 * A getter, re-evaluated on every render; reads the same
-			 * resolved draft {@link onSlotQuantityChange} writes — by
-			 * creation or direct mutation — so either write's re-render is
-			 * observable through this binding with no action call
-			 * involved. Falls back to the quantity input's rendered
-			 * default when the slot has no draft yet (its collection is
-			 * created lazily, on its first edit).
+			 * draft view {@link onSlotQuantityChange} writes through —
+			 * whether that write materializes the draft or mutates the
+			 * already-live one — so either write's re-render is observable
+			 * through this binding with no action call involved. Falls
+			 * back to the quantity input's rendered default when the slot
+			 * has no draft yet (its collection is created lazily, on its
+			 * first edit).
 			 */
 			get slotQuantityText() {
 				return String(

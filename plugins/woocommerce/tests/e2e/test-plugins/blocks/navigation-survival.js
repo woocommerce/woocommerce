@@ -21,14 +21,14 @@
  *
  * A surface's quantity input has no init. Its `data-wp-on--change` resolves
  * the surface's own key (this fixture's declared key, if any; otherwise
- * the store's own fallback) and, on the *first* edit — the resolved
- * collection holds no draft for this product yet — creates the draft via
- * the store's public `upsertDraftItem` (a creation convenience — this is
- * the only place this fixture calls it); every edit after that is a
- * **direct mutation** of the already-resolved draft object
- * (`draft.quantity = value`), never an action call. Each surface renders a
- * binding onto the same draft so either write's re-render is directly
- * observable.
+ * the store's own fallback) via the store's public
+ * `state.findItem( { id } )` and writes the resolved draft view's
+ * `quantity` directly (`draft.quantity = value`) — the single spelling for
+ * both the surface's *first* edit (the resolved collection holds no draft
+ * for this product yet; the view materializes it) and every edit after
+ * that (a **direct mutation** of the now-live draft), never an action call
+ * either way. Each surface renders a binding onto the same draft so either
+ * write's re-render is directly observable.
  *
  * The navigation link's `data-wp-on--click` reuses WooCommerce's own
  * shipped client-side navigation pattern verbatim (see
@@ -109,8 +109,8 @@ function resolveDraftKey() {
  * {@link resolveDraftKey} resolves.
  *
  * `undefined` before the surface's first edit — a surface's draft does not
- * exist until its resolved collection's first `upsertDraftItem` write (see
- * {@link onQuantityChange}); nothing seeds it up front.
+ * exist until its resolved collection's first write through the draft view
+ * (see {@link onQuantityChange}); nothing seeds it up front.
  *
  * @return {Object|undefined} This surface's draft, or `undefined` when none
  *                             is resolved yet.
@@ -124,13 +124,15 @@ function resolveDraft() {
 /**
  * Writes a shopper's quantity edit to this surface's resolved draft.
  *
- * Bound to the quantity input's `data-wp-on--change`. A surface's resolved
- * collection does not hold a draft for this product until its first edit —
- * nothing seeds it up front — so the *first* call creates it via the
- * store's public `upsertDraftItem` (a creation convenience, addressed by
- * this surface's own declared key, or the store's own fallback when none is
- * declared), and every call after that is a **direct mutation** of the
- * already-resolved draft object, never an action call. The surface's
+ * Bound to the quantity input's `data-wp-on--change`. One spelling covers
+ * both the surface's *first* edit (its resolved collection holds no draft
+ * for this product yet — nothing seeds it up front — so the draft view
+ * materializes it from this fixture's own declared `productId` context) and
+ * every edit after that (a **direct mutation** of the now-live draft):
+ * `cart.state.findItem( { id } ).draft` resolves the draft view for this
+ * surface's own declared key (this fixture's own context, or the store's
+ * own fallback when it declares none) and `productId`, and the assignment
+ * writes through it — never an action call either way. The surface's
  * `<span>` binding (`state.quantityText`) reads the same draft, so either
  * write's re-render is observable.
  */
@@ -142,23 +144,8 @@ function onQuantityChange() {
 		return;
 	}
 
-	const draft = resolveDraft();
-
-	if ( draft ) {
-		// Direct mutation of the resolved draft object — reactive per the
-		// store's live envelope, deliberately not routed through
-		// `upsertDraftItem`.
-		draft.quantity = quantity;
-		return;
-	}
-
-	// First edit for this surface: create its draft via the store's public
-	// creation convenience. `upsertDraftItem` resolves the same key this
-	// surface's own `woocommerce/cart` context declares (or the store's
-	// own fallback when it declares none), addressed by this fixture's own
-	// declared `productId` context, not by any registry.
 	const { productId } = getContext();
-	cart.actions.upsertDraftItem( { id: productId, quantity } );
+	cart.state.findItem( { id: productId } ).draft.quantity = quantity;
 }
 
 /**
@@ -206,13 +193,13 @@ store(
 			/**
 			 * The current element's surface's draft quantity, as text.
 			 *
-			 * A getter, re-evaluated on every render; reads the same
-			 * resolved draft {@link onQuantityChange} writes — by creation
-			 * or direct mutation — so either write's re-render is
-			 * observable through this binding with no action call
-			 * involved. Falls back to the quantity input's rendered
-			 * default when this surface's resolved collection holds no
-			 * draft for this product yet.
+			 * A getter, re-evaluated on every render; reads the same draft
+			 * view {@link onQuantityChange} writes through — whether that
+			 * write materializes the draft or mutates the already-live one
+			 * — so either write's re-render is observable through this
+			 * binding with no action call involved. Falls back to the
+			 * quantity input's rendered default when this surface's
+			 * resolved collection holds no draft for this product yet.
 			 */
 			get quantityText() {
 				return String(

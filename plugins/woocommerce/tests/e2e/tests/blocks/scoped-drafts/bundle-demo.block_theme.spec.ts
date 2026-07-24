@@ -7,9 +7,9 @@ import { test as base, expect, getPostIdBySlug } from '@woocommerce/e2e-utils';
  * E2E flows for the `wc-bundle-demo` fixture: a minimal bundle-style Store
  * API extension built entirely on today's extension points (`ExtendSchema`)
  * and the public `woocommerce/cart` Interactivity API store surface
- * (`upsertDraftItem`, `addItem( payload )`) — proving that a third-party
- * "bundle" of independently configurable child products can be composed and
- * added as one cart line with no core changes. See
+ * (`state.findItem( { id } ).draft`, `addItem( payload )`) — proving that a
+ * third-party "bundle" of independently configurable child products can be
+ * composed and added as one cart line with no core changes. See
  * `tests/e2e/test-plugins/blocks/bundle-demo.php` / `bundle-demo.js` for the
  * fixture itself.
  *
@@ -303,12 +303,13 @@ test.describe( 'Scoped drafts: bundle-demo extension adds as one unit', () => {
 			.locator( '.wc-bundle-demo__slot-quantity' );
 
 		// The fixture's quantity input has no action-bound submit step of its
-		// own — a slot's first edit creates its draft (`upsertDraftItem`) and
-		// every edit after that is a direct mutation of the resolved draft
-		// (`draft.quantity = value`); neither path is an action call.
-		// Recording every `wc/store/v1/batch` request from here on lets the
-		// assertions below prove that editing a slot's quantity fires none —
-		// only the explicit "Add bundle to cart" click does.
+		// own — every edit is the same direct write through the resolved
+		// draft view (`state.findItem( { id } ).draft.quantity = value`),
+		// whether it's the slot's first edit (materializing its draft) or a
+		// later one (mutating the now-live draft); neither case is an action
+		// call. Recording every `wc/store/v1/batch` request from here on lets
+		// the assertions below prove that editing a slot's quantity fires
+		// none — only the explicit "Add bundle to cart" click does.
 		const batchRequestUrls: string[] = [];
 		page.on( 'request', ( request ) => {
 			if ( request.url().includes( '/wc/store/v1/batch' ) ) {
@@ -322,13 +323,15 @@ test.describe( 'Scoped drafts: bundle-demo extension adds as one unit', () => {
 		} );
 
 		await test.step( 'a first edit creates slot A’s draft, a second edit directly mutates it and repaints only slot A’s own bound display, with no batch request fired', async () => {
-			// Slot A has no draft yet — this first edit creates one via the
-			// fixture's public `upsertDraftItem` creation convenience.
+			// Slot A has no draft yet — this first edit materializes one
+			// through the resolved draft view
+			// (`state.findItem( { id } ).draft.quantity = value`), the same
+			// spelling every edit uses.
 			await slotAQuantity.fill( '3' );
 			await slotAQuantity.dispatchEvent( 'change' );
 
 			// Slot A's draft now exists — this second edit is a direct
-			// mutation of the already-resolved draft object
+			// mutation of the already-resolved draft view
 			// (`draft.quantity = value`), never an action call.
 			await slotAQuantity.fill( '5' );
 			await slotAQuantity.dispatchEvent( 'change' );
