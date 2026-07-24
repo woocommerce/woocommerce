@@ -141,7 +141,17 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$section = is_string( $current_section ) ? $current_section : '';
 			$context = $this->get_settings_ui_request_context( $section );
 
-			if ( ! $context || ! $context->is_rendering_enabled() ) {
+			try {
+				if ( ! $context || ! $context->is_rendering_enabled() ) {
+					return $classes;
+				}
+
+				// The legacy fallback renderer needs the classic styling: the settings UI
+				// body class hides the legacy Save button via CSS.
+				if ( $context->has_schema_failed() || $context->has_script_handles_failed() ) {
+					return $classes;
+				}
+			} catch ( \Throwable $e ) {
 				return $classes;
 			}
 

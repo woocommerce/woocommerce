@@ -424,6 +424,38 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not add the Settings UI body class when schema generation falls back to legacy rendering.
+	 */
+	public function test_settings_ui_body_class_is_not_added_when_schema_generation_fails(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'advanced';
+		$current_tab     = 'settings_ui_flag_test';
+		$page            = $this->get_settings_ui_test_page_with_failing_schema();
+
+		$classes = $page->add_settings_ui_body_class( 'existing-class' );
+
+		$this->assertSame( 'existing-class', $classes, 'The fallback page should keep the classic body classes so the legacy Save button stays visible' );
+	}
+
+	/**
+	 * @testdox Should not add the Settings UI body class when script handle resolution falls back to legacy rendering.
+	 */
+	public function test_settings_ui_body_class_is_not_added_when_script_handle_resolution_fails(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+
+		global $current_section, $current_tab;
+		$current_section = 'advanced';
+		$current_tab     = 'settings_ui_flag_test';
+		$page            = $this->get_settings_ui_test_page_with_failing_script_handles();
+
+		$classes = $page->add_settings_ui_body_class( 'existing-class' );
+
+		$this->assertSame( 'existing-class', $classes, 'The fallback page should keep the classic body classes so the legacy Save button stays visible' );
+	}
+
+	/**
 	 * Enable the settings UI feature flag.
 	 *
 	 * @param array $features Feature flags.
