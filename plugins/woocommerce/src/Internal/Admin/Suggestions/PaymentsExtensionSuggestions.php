@@ -45,6 +45,7 @@ class PaymentsExtensionSuggestions {
 	const CLEARPAY          = 'clearpay';
 	const KLARNA            = 'klarna';
 	const KLARNA_CHECKOUT   = 'klarna_checkout';
+	const HELCIM            = 'helcim';
 	const HELIOPAY          = 'heliopay';
 	const MONEI             = 'monei';
 	const COINBASE          = 'coinbase';
@@ -194,6 +195,7 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::HELCIM,
 		),
 		'PM' => array(
 			self::VISA => array(
@@ -218,6 +220,7 @@ class PaymentsExtensionSuggestions {
 			self::AFFIRM,
 			self::AFTERPAY,
 			self::KLARNA, // Use the default details.
+			self::HELCIM,
 		),
 		'UM' => array(
 			self::VISA => array(
@@ -4129,6 +4132,23 @@ class PaymentsExtensionSuggestions {
 					array(
 						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=klarna-checkout',
+					),
+				),
+			),
+			self::HELCIM            => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'Helcim Commerce for WooCommerce', 'woocommerce' ),
+				'description' => esc_html__( 'Accept credit and debit card payments with Helcim.', 'woocommerce' ),
+				// Use the shared fallback until the official Helcim icon is available.
+				'icon'        => plugins_url( 'assets/images/icons/default-payments.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'helcim-commerce-for-woocommerce',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/helcim-commerce-for-woocommerce/',
 					),
 				),
 			),

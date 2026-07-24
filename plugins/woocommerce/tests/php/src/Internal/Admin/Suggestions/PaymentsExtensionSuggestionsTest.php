@@ -126,8 +126,8 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	public function data_provider_get_country_extensions_count_with_merchant_selling_online(): array {
 		// The counts are based on the data in PaymentExtensionSuggestions::$country_extensions.
 		$country_suggestions_count = array(
-			'CA' => 10,
-			'US' => 11,
+			'CA' => 11,
+			'US' => 12,
 			'GB' => 15,
 			'AT' => 13,
 			'BE' => 11,
@@ -437,8 +437,8 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	public function data_provider_get_country_extensions_count_with_merchant_selling_offline(): array {
 		// The counts are based on the data in PaymentExtensionSuggestions::$country_extensions.
 		$country_suggestions_count = array(
-			'CA' => 10,
-			'US' => 11,
+			'CA' => 11,
+			'US' => 12,
 			'GB' => 15,
 			'AT' => 13,
 			'BE' => 11,
@@ -941,6 +941,74 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			),
 			$mercado_pago['links']
 		);
+	}
+
+	/**
+	 * @testdox Helcim is the last non-preferred suggestion in $country_code
+	 *
+	 * @dataProvider data_provider_helcim_supported_countries
+	 *
+	 * @param string $country_code ISO 3166-1 alpha-2 country code.
+	 */
+	public function test_helcim_is_last_non_preferred_suggestion_in_supported_countries( string $country_code ): void {
+		$extensions = $this->sut->get_country_extensions( $country_code );
+		$helcim     = end( $extensions );
+
+		$this->assertIsArray( $helcim, "The final suggestion in {$country_code} should be an extension." );
+		$this->assertSame( 'helcim', $helcim['id'], "Helcim should be the final suggestion in {$country_code}." );
+		$this->assertNotContains(
+			PaymentsExtensionSuggestions::TAG_PREFERRED,
+			$helcim['tags'],
+			"Helcim should remain in other payment options for {$country_code}."
+		);
+	}
+
+	/**
+	 * Data provider for Helcim's supported countries.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function data_provider_helcim_supported_countries(): array {
+		return array(
+			'Canada'        => array( 'CA' ),
+			'United States' => array( 'US' ),
+		);
+	}
+
+	/**
+	 * @testdox Helcim has complete base suggestion details
+	 */
+	public function test_helcim_has_complete_base_details(): void {
+		$extension = $this->sut->get_by_id( 'helcim' );
+
+		$this->assertIsArray( $extension );
+		if ( ! is_array( $extension ) ) {
+			return;
+		}
+
+		$this->assertSame( PaymentsExtensionSuggestions::TYPE_PSP, $extension['_type'] );
+		$this->assertSame(
+			array(
+				'_type' => PaymentsExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'helcim-commerce-for-woocommerce',
+			),
+			$extension['plugin']
+		);
+		$this->assertSame(
+			array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					'url'   => 'https://woocommerce.com/products/helcim-commerce-for-woocommerce/',
+				),
+			),
+			$extension['links']
+		);
+		$this->assertSame(
+			plugins_url( 'assets/images/icons/default-payments.svg', WC_PLUGIN_FILE ),
+			$extension['icon']
+		);
+		$this->assertNotEmpty( $extension['title'] );
+		$this->assertNotEmpty( $extension['description'] );
 	}
 
 	/**
