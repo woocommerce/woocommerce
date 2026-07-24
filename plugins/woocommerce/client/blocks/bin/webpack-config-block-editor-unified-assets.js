@@ -3,7 +3,10 @@
  */
 const path = require( 'path' );
 const { omit } = require( 'lodash' );
+const cssnano = require( 'cssnano' );
+const postcss = require( 'postcss' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
+const webpack = require( 'webpack' );
 
 /**
  * Internal dependencies
@@ -34,6 +37,9 @@ const BABEL_CACHE_DIR = path.join(
 );
 const isProduction = NODE_ENV === 'production';
 const UNIFIED_EDITOR_STYLE_HANDLE = 'wc-block-library-style';
+const UNIFIED_EDITOR_STYLE_PATTERN = /^wc-block-library-style(?:-rtl)?\.css$/;
+const OPTIMIZE_UNIFIED_EDITOR_STYLES_PLUGIN =
+	'OptimizeUnifiedEditorStylesPlugin';
 
 const editorExternalPackages = [
 	'@woocommerce/block-data',
@@ -44,8 +50,11 @@ const editorExternalPackages = [
 	'@woocommerce/data',
 	'@woocommerce/entities',
 	'@woocommerce/price-format',
+	'@woocommerce/sanitize',
+	'@woocommerce/settings',
 	'@woocommerce/shared-context',
 	'@woocommerce/shared-hocs',
+	'@woocommerce/types',
 ];
 
 const shouldBundleWooPackage = ( request ) =>
@@ -111,6 +120,71 @@ const getUnifiedEditorPackageAliases = () => ( {
 		`../assets/js/shared/hocs/`
 	),
 } );
+
+/**
+ * Optimize the combined editor styles after CSS extraction and RTL generation.
+ *
+ * The inherited styling configuration runs PostCSS for every Sass entry before
+ * MiniCssExtractPlugin combines those entries. When multiple entries import the
+ * same shared styles, each entry is minified independently and the duplicate
+ * rules remain in the final combined stylesheet.
+ *
+ * This plugin runs cssnano once more at Webpack's optimize-size stage, after
+ * WebpackRTLPlugin has emitted its derived RTL asset. Processing at that point
+ * allows cssnano to remove duplicates across the complete LTR and RTL bundles
+ * rather than only within individual Sass entries.
+ *
+ * Only the unified editor stylesheet filenames are processed so legacy block
+ * styles and other build outputs remain unchanged. The plugin is added to the
+ * production configuration only; development builds avoid the additional work
+ * to preserve fast rebuilds and their existing source output.
+ */
+class OptimizeUnifiedEditorStylesPlugin {
+	/**
+	 * Apply the plugin.
+	 *
+	 * @param {webpack.Compiler} compiler Webpack compiler.
+	 */
+	apply( compiler ) {
+		compiler.hooks.thisCompilation.tap(
+			OPTIMIZE_UNIFIED_EDITOR_STYLES_PLUGIN,
+			( compilation ) => {
+				compilation.hooks.processAssets.tapPromise(
+					{
+						name: OPTIMIZE_UNIFIED_EDITOR_STYLES_PLUGIN,
+						stage: webpack.Compilation
+							.PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE,
+					},
+					async ( assets ) => {
+						await Promise.all(
+							Object.entries( assets )
+								.filter( ( [ assetName ] ) =>
+									UNIFIED_EDITOR_STYLE_PATTERN.test(
+										assetName
+									)
+								)
+								.map( async ( [ assetName, asset ] ) => {
+									const result = await postcss( [
+										cssnano,
+									] ).process( asset.source().toString(), {
+										from: undefined,
+										map: false,
+									} );
+
+									compilation.updateAsset(
+										assetName,
+										new webpack.sources.RawSource(
+											result.css
+										)
+									);
+								} )
+						);
+					}
+				);
+			}
+		);
+	}
+}
 
 /**
  * Reuse the established styling entry graph so the unified bundle includes
@@ -208,6 +282,9 @@ const getUnifiedMainConfig = ( options = {} ) => {
 			new ProgressBarPlugin(
 				getProgressBarPluginConfig( 'Unified editor' )
 			),
+			new webpack.optimize.LimitChunkCountPlugin( {
+				maxChunks: 1,
+			} ),
 		],
 		resolve: {
 			...resolve,
@@ -252,6 +329,10 @@ const getUnifiedStylingConfig = ( options = {} ) => {
 				},
 			},
 		},
+		plugins: [
+			...stylingConfig.plugins,
+			isProduction && new OptimizeUnifiedEditorStylesPlugin(),
+		].filter( Boolean ),
 	};
 };
 
