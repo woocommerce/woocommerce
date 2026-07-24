@@ -403,6 +403,13 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		// the assertions below exercise only the title-ID normalization.
 		$options = array(
 			array(
+				'title'   => 'String zero ID radio',
+				'type'    => 'radio',
+				'id'      => '0',
+				'value'   => 'd',
+				'options' => array( 'd' => 'Fourth option' ),
+			),
+			array(
 				'title'      => 'Boolean ID radio',
 				'type'       => 'radio',
 				'id'         => false,
@@ -449,13 +456,14 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		$radio_title = '//th[contains(concat(" ", normalize-space(@class), " "), " titledesc ")]/span[contains(concat(" ", normalize-space(@class), " "), " wc-settings-radio-title ")]';
 		$fieldset    = '//td[contains(concat(" ", normalize-space(@class), " "), " forminp-radio ")]/fieldset';
 
-		// All three rows render, none emits a title ID or an aria-labelledby from the non-string id.
-		$this->assertSame( 3, $xpath->query( $radio_title )->length );
-		$this->assertSame( 3, $xpath->query( $fieldset )->length );
+		// All four rows render, with the string zero ID preserved and the non-string IDs omitted.
+		$this->assertSame( 4, $xpath->query( $radio_title )->length );
+		$this->assertSame( 4, $xpath->query( $fieldset )->length );
 		$this->assertSame( 0, $xpath->query( $radio_title . '/span[@id="-title"]' )->length );
-		$this->assertSame( 0, $xpath->query( $radio_title . '/span[@id]' )->length );
-		$this->assertSame( 0, $xpath->query( $fieldset . '[@aria-labelledby]' )->length );
+		$this->assertSame( 1, $xpath->query( $radio_title . '/span[@id="0-title"]' )->length );
+		$this->assertSame( 1, $xpath->query( $fieldset . '[@aria-labelledby="0-title"]' )->length );
 		// Visible titles are still rendered for every group.
+		$this->assertSame( 1, $xpath->query( $radio_title . '/span[normalize-space(.)="String zero ID radio"]' )->length );
 		$this->assertSame( 1, $xpath->query( $radio_title . '/span[normalize-space(.)="Boolean ID radio"]' )->length );
 		$this->assertSame( 1, $xpath->query( $radio_title . '/span[normalize-space(.)="Array ID radio"]' )->length );
 		$this->assertSame( 1, $xpath->query( $radio_title . '/span[normalize-space(.)="Object ID radio"]' )->length );
