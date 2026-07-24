@@ -34,12 +34,12 @@ import {
 /**
  * Internal dependencies
  */
+import type { EventListenerRegistrationFunction } from '@woocommerce/blocks-checkout-events/event-emitter';
 import { reducer as emitReducer } from './event-emit';
 import { emitterCallback, noticeContexts } from '../../../event-emit';
 import { useStoreEvents } from '../../../hooks/use-store-events';
 
 import { useEditorContext } from '../../editor-context';
-import { EventListenerRegistrationFunction } from '../../../../../events/event-emitter';
 
 type CheckoutEventsContextType = {
 	// Submits the checkout and begins processing.

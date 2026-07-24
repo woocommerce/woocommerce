@@ -10,10 +10,10 @@ import { WPDataRegistry } from '@wordpress/data/build-types/registry';
 /**
  * Internal dependencies
  */
+import { CheckoutState } from '@woocommerce/block-data/checkout/default-state';
+import { PaymentState } from '@woocommerce/block-data/payment/default-state';
+import { CartState } from '@woocommerce/block-data/cart/default-state';
 import { useSchemaParser, type DocumentObject } from '../use-schema-parser';
-import { CheckoutState } from '../../../data/checkout/default-state';
-import { PaymentState } from '../../../data/payment/default-state';
-import { CartState } from '../../../data/cart/default-state';
 import checkoutSchema from './checkout-document-schema.json';
 
 // Mock the stores

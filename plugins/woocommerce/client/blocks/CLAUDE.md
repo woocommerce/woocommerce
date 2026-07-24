@@ -47,15 +47,17 @@ client/blocks/
 │   ├── atomic/              # Atomic/primitive blocks (product elements)
 │   ├── base/                # Shared components, context, hooks, stores
 │   │   └── stores/woocommerce/  # Interactivity API stores (LOCKED)
-│   ├── data/                # WordPress @data stores (Collections, Query State, Schema)
 │   ├── editor-components/   # 33+ shared editor UI components
 │   ├── extensions/          # Extension integrations
-│   ├── types/               # Shared TypeScript types
 │   └── utils/               # Utility functions
-├── packages/                # Packages exposed as window.wc.* globals (see below)
-│   ├── checkout/            # Checkout registry, slot/fill, filters
-│   ├── components/          # 23+ shared components
-│   └── prices/              # Price formatting and currency
+├── packages/
+│   ├── public-api/          # Supported package-root extension contracts
+│   │   ├── block-data/      # WordPress @data stores
+│   │   ├── blocks-checkout/ # Checkout registry, slot/fill, filters
+│   │   ├── blocks-components/
+│   │   └── ...              # Events, settings, types, and shared APIs
+│   └── internal/
+│       └── entities/        # Runtime-only external; not an extension API
 ├── tests/
 │   └── js/                  # Jest unit tests
 ├── bin/                     # Build scripts (webpack configs, ESLint plugin)
@@ -158,7 +160,12 @@ Block scripts are only enqueued when the block is actually rendered on the page,
 
 ## Webpack Externals (`window.wc.*`)
 
-Packages in `packages/` and core modules are built as webpack externals, exposed on `window.wc`. The mapping lives in `bin/webpack-helpers.js` (`wcDepMap`):
+API stability and asset externalization are separate concepts. Supported
+extension contracts live in `packages/public-api/`; runtime-only packages live
+in `packages/internal/`. Both kinds may be built as webpack externals and
+exposed on `window.wc`.
+
+The mapping lives in `bin/webpack-helpers.js` (`wcDepMap`):
 
 | Import | Global | Script handle |
 | ------ | ------ | ------------- |
@@ -173,9 +180,19 @@ Packages in `packages/` and core modules are built as webpack externals, exposed
 | `@woocommerce/shared-hocs` | `wc.wcBlocksSharedHocs` | `wc-blocks-shared-hocs` |
 | `@woocommerce/types` | `wc.wcTypes` | `wc-types` |
 
-`@woocommerce/blocks-checkout-events` is a pub/sub event emitter for checkout lifecycle hooks (`onCheckoutValidation`, `onCheckoutSuccess`, `onCheckoutFail`). Third-party extensions use it to run validation or react to checkout outcomes. Source: `assets/js/events/`.
+`@woocommerce/blocks-checkout-events` is a pub/sub event emitter for checkout lifecycle hooks (`onCheckoutValidation`, `onCheckoutSuccess`, `onCheckoutFail`). Third-party extensions use it to run validation or react to checkout outcomes. Source: `packages/public-api/blocks-checkout-events/`.
 
-Third-party extensions consume these as externals — changing the public API of these packages is a breaking change.
+Third-party extensions consume these as externals. Stable package-root exports
+are public API, so changing them without a deprecation path is a breaking
+change. Deep imports and exports prefixed with `__experimental` or `__unstable`
+are not stable unless separately documented.
+
+`@woocommerce/entities` is externalized as `wc.wcEntities` to share one runtime
+instance, but it remains internal under `packages/internal/entities/`. Its
+externalized build does not make it public API.
+
+The Blocks `package.json` uses `"private": true` to prevent npm publication.
+That field does not determine whether a browser API is public.
 
 ## Build System
 

@@ -10,7 +10,7 @@ import {
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-import type { ProductResponseItem } from '@woocommerce/types';
+import type { ProductResponseItem, SelectableItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -24,7 +24,6 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
-import type { SelectableItem } from '../../../types/type-defs/selectable-items';
 import type { VisualAttributeTerm } from '../../../base/utils/visual-attribute-terms';
 
 type VariationOptionItem = {

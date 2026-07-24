@@ -94,15 +94,9 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 │ Components placed here avoid loading larger Gutenberg dependencies to
 │ keep client script sizes to a minimum.
 │
-├── assets/js/blocks-registry
-│ Files that allows developers to connect their extensions to this plugin.
-│
 ├── assets/js/blocks
 │ The main blocks of the WooCommerce Blocks plugin such as the Active
 │ Filters Block.
-│
-├── assets/js/data
-│ Functionality to store data using Redux and wp.data.
 │
 ├── assets/js/editor-components
 │ Editor components such as the block-title component.
@@ -135,9 +129,6 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 ├── assets/js/shared
 │ Shared components of the WooCommerce Blocks plugin.
 │
-├── assets/js/types
-│ TypeScript definitions of the WooCommerce Blocks plugin.
-│
 ├── assets/js/utils
 │ Shared utilities of the WooCommerce Blocks plugin.
 │
@@ -151,10 +142,25 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 │ Images for the payment options and the previews.
 │
 ├── packages
-│ Things that are likely to be published as npm packages in the future. Packages can be:
-│ - Production JavaScript scripts and styles loaded on WordPress
-│ and the WooCommerce Blocks plugin or distributed as npm packages.
-│ - Development tools available on npm.
+│ Package-shaped modules used by the Blocks build.
+│
+│ ├── public-api
+│ │ Supported extension contracts. Stable package-root exports require
+│ │ backward-compatibility handling.
+│ │
+│ │ ├── block-data
+│ │ ├── blocks-checkout
+│ │ ├── blocks-checkout-events
+│ │ ├── blocks-components
+│ │ ├── blocks-registry
+│ │ ├── price-format
+│ │ ├── settings
+│ │ ├── shared-context
+│ │ ├── shared-hocs
+│ │ └── types
+│ │
+│ └── internal
+│   Runtime-only packages that are not supported extension APIs.
 │
 ├── patches
 │ Patches for 3rd party scripts applied when installing dependencies.
@@ -192,4 +198,3 @@ This file is inspired by the great work of @JustinyAhin and @gziolo in <https://
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/folder-structure.md)
 
 <!-- /FEEDBACK -->
-

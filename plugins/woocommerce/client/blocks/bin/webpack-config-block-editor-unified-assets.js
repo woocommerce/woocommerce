@@ -41,20 +41,30 @@ const UNIFIED_EDITOR_STYLE_PATTERN = /^wc-block-library-style(?:-rtl)?\.css$/;
 const OPTIMIZE_UNIFIED_EDITOR_STYLES_PLUGIN =
 	'OptimizeUnifiedEditorStylesPlugin';
 
-const editorExternalPackages = [
+// Supported extension contracts. Changes to stable root exports require
+// backwards-compatibility handling and a deprecation path.
+const publicApiPackages = [
 	'@woocommerce/block-data',
 	'@woocommerce/blocks-checkout',
 	'@woocommerce/blocks-checkout-events',
 	'@woocommerce/blocks-components',
 	'@woocommerce/blocks-registry',
 	'@woocommerce/data',
-	'@woocommerce/entities',
 	'@woocommerce/price-format',
 	'@woocommerce/sanitize',
 	'@woocommerce/settings',
 	'@woocommerce/shared-context',
 	'@woocommerce/shared-hocs',
 	'@woocommerce/types',
+];
+
+// Externalized to preserve a shared runtime instance, not to expose a
+// supported extension API.
+const internalRuntimePackages = [ '@woocommerce/entities' ];
+
+const editorExternalPackages = [
+	...publicApiPackages,
+	...internalRuntimePackages,
 ];
 
 const shouldBundleWooPackage = ( request ) =>
@@ -78,22 +88,25 @@ const requestToUnifiedEditorHandle = ( request ) => {
 };
 
 const getUnifiedEditorPackageAliases = () => ( {
-	'@woocommerce/block-data': path.resolve( __dirname, `../assets/js/data` ),
+	'@woocommerce/block-data': path.resolve(
+		__dirname,
+		`../packages/public-api/block-data`
+	),
 	'@woocommerce/blocks-checkout': path.resolve(
 		__dirname,
-		`../packages/checkout`
+		`../packages/public-api/blocks-checkout`
 	),
 	'@woocommerce/blocks-checkout-events': path.resolve(
 		__dirname,
-		`../assets/js/events`
+		`../packages/public-api/blocks-checkout-events`
 	),
 	'@woocommerce/blocks-components': path.resolve(
 		__dirname,
-		`../packages/components`
+		`../packages/public-api/blocks-components`
 	),
 	'@woocommerce/blocks-registry': path.resolve(
 		__dirname,
-		`../assets/js/blocks-registry`
+		`../packages/public-api/blocks-registry`
 	),
 	'@woocommerce/data': path.resolve(
 		__dirname,
@@ -101,7 +114,7 @@ const getUnifiedEditorPackageAliases = () => ( {
 	),
 	'@woocommerce/price-format': path.resolve(
 		__dirname,
-		`../packages/prices`
+		`../packages/public-api/price-format`
 	),
 	'@woocommerce/sanitize': path.resolve(
 		__dirname,
@@ -109,15 +122,15 @@ const getUnifiedEditorPackageAliases = () => ( {
 	),
 	'@woocommerce/settings': path.resolve(
 		__dirname,
-		`../assets/js/settings/shared`
+		`../packages/public-api/settings`
 	),
 	'@woocommerce/shared-context': path.resolve(
 		__dirname,
-		`../assets/js/shared/context/`
+		`../packages/public-api/shared-context/`
 	),
 	'@woocommerce/shared-hocs': path.resolve(
 		__dirname,
-		`../assets/js/shared/hocs/`
+		`../packages/public-api/shared-hocs/`
 	),
 } );
 

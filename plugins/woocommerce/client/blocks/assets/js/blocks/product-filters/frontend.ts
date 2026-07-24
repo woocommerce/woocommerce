@@ -6,8 +6,8 @@ import * as iAPI from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
+import type { SelectableItemsParentStore } from '@woocommerce/types';
 import { decodeHtmlEntities } from '../../utils/html-entities';
-import type { SelectableItemsParentStore } from '../../types/type-defs/selectable-items';
 import type {
 	ActiveFilterItem,
 	FilterItemFields,

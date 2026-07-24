@@ -20,13 +20,13 @@ import {
 	createBlock,
 	createBlocksFromInnerBlocksTemplate,
 } from '@wordpress/blocks';
+import { registerProductEntity } from '@woocommerce/entities/register-entities';
 
 /**
  * Internal dependencies
  */
 import { waitForStoreResolvers } from './wait-for-store-resolvers';
 import { unlock } from '../../utils/lock-unlock';
-import { registerProductEntity } from '../../../assets/js/entities/register-entities';
 
 const { ExperimentalBlockCanvas: BlockCanvas } = unlock(
 	blockEditorPrivateApis

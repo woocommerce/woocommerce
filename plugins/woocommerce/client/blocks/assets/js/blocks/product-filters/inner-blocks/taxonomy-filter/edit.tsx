@@ -17,13 +17,13 @@ import { objectHasProp } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
+import type { SelectableItemsContext } from '@woocommerce/types';
 import { TaxonomyFilterInspectorControls } from './inspector';
 import { termOptionsPreview } from './constants';
 import { EditProps } from './types';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import type { FilterOptionItem, FilterItemFields } from '../../types';
-import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
 import { getTaxonomyLabel } from './utils';

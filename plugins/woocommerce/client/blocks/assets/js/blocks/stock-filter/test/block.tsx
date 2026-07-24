@@ -19,7 +19,7 @@ import { server } from '@woocommerce/test-utils/msw';
 /**
  * Internal dependencies
  */
-import { allSettings } from '../../../settings/shared/settings-init';
+import { allSettings } from '@woocommerce/settings';
 import Block from '../block';
 import { Attributes } from '../types';
 

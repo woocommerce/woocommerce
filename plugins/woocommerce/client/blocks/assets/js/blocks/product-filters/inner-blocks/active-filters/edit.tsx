@@ -10,11 +10,11 @@ import {
 /**
  * Internal dependencies
  */
+import type { RemovableItemsContext } from '@woocommerce/types';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { filtersPreview } from './constants';
-import type { RemovableItemsContext } from '../../../../types/type-defs/removable-items';
 
 const Edit = () => {
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(

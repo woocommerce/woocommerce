@@ -7,10 +7,10 @@ import * as iAPI from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
+import type { RangeInputParentStore } from '@woocommerce/types';
 import type { ProductFiltersContext } from '../../types';
 import type { ProductFiltersStore } from '../../frontend';
 import { formatPrice, getCurrency } from '../../utils/price-currency';
-import type { RangeInputParentStore } from '../../../../types/type-defs/range-input';
 import { PRODUCT_FILTERS_STORE_NAME } from '../../constants';
 
 const { store, getContext, getServerContext, getConfig } = iAPI;
