@@ -35,16 +35,17 @@ const test = base.extend< {
 	},
 } );
 
-const waitForCartIdle = async ( page: Page ) => {
-	await page.evaluate( async () => {
-		const { store } = await import( '@wordpress/interactivity' );
-		const unlockKey =
-			'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-		await import( '@woocommerce/stores/woocommerce/cart' );
-		const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
-		await actions.waitForIdle();
+const waitForCartAddBatchResponse = ( page: Page ) =>
+	page.waitForResponse( ( response ) => {
+		const request = response.request();
+
+		return (
+			request.method() === 'POST' &&
+			response.url().includes( '/wp-json/wc/store/v1/batch' ) &&
+			request.postData()?.includes( '/wc/store/v1/cart/add-item' ) ===
+				true
+		);
 	} );
-};
 
 test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding 3rd-party product types to cart when using PHP templates', async ( {
@@ -868,8 +869,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 				.getByLabel( 'Increase quantity of T-Shirt' );
 			await increaseTShirtQuantityButton.click();
 
+			const cartAddResponsePromise = waitForCartAddBatchResponse( page );
 			await addToCartButton.click();
-			await waitForCartIdle( page );
+			const cartAddResponse = await cartAddResponsePromise;
+			await cartAddResponse.finished();
+			expect( cartAddResponse.ok() ).toBe( true );
 
 			await expect(
 				page.getByRole( 'button', {
@@ -930,8 +934,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
+			const cartAddResponsePromise = waitForCartAddBatchResponse( page );
 			await addToCartButton.click();
-			await waitForCartIdle( page );
+			const cartAddResponse = await cartAddResponsePromise;
+			await cartAddResponse.finished();
+			expect( cartAddResponse.ok() ).toBe( true );
 
 			await expect(
 				page.getByRole( 'button', {
@@ -1020,7 +1027,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await increaseBeanie.click();
 			await increaseTShirt.click();
 
+			const cartAddResponsePromise = waitForCartAddBatchResponse( page );
 			await addToCartButton.click();
+			const cartAddResponse = await cartAddResponsePromise;
+			await cartAddResponse.finished();
+			expect( cartAddResponse.ok() ).toBe( true );
 
 			await expect(
 				page.getByRole( 'button', {
@@ -1046,7 +1057,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 				.first();
 
+			const cartAddResponsePromise = waitForCartAddBatchResponse( page );
 			await addedToCartButton.click();
+			const cartAddResponse = await cartAddResponsePromise;
+			await cartAddResponse.finished();
+			expect( cartAddResponse.ok() ).toBe( true );
 
 			await expect(
 				page.getByLabel( 'Number of items in the cart: 4' )
@@ -1054,10 +1069,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await test.step( 'verify cart state persists after reload', async () => {
-			// Reloading while a batch request is still in flight aborts it,
-			// losing the re-add server-side.
-			await waitForCartIdle( page );
-
 			await page.reload();
 
 			await expect(
