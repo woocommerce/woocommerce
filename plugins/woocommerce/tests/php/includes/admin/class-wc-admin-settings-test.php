@@ -291,6 +291,56 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should label radio settings from their visible title.
+	 */
+	public function test_output_fields_labels_radio_setting_from_visible_title(): void {
+		$options = array(
+			array(
+				'id'       => 'test_radio_setting',
+				'title'    => 'Radio title',
+				'type'     => 'radio',
+				'value'    => 'abc',
+				'options'  => array(
+					'abc' => 'First option',
+					'xyz' => 'Second option',
+				),
+				'desc_tip' => 'Radio help',
+			),
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $options );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<table>' . $output . '</table>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The radio setting output should be valid enough for DOM parsing.' );
+
+		$xpath = new DOMXPath( $document );
+
+		$header      = '//th[contains(concat(" ", normalize-space(@class), " "), " titledesc ")]';
+		$radio_title = $header . '/span[contains(concat(" ", normalize-space(@class), " "), " wc-settings-radio-title ")]';
+		$title_text  = $radio_title . '/span[@id="test_radio_setting-title"]';
+		$radio       = '//td[contains(concat(" ", normalize-space(@class), " "), " forminp-radio ")]';
+
+		$this->assertSame( 0, $xpath->query( $header . '/label[@for="test_radio_setting"]' )->length );
+		$this->assertSame( 0, $xpath->query( $radio_title . '[@id]' )->length );
+		$this->assertSame( 1, $xpath->query( $title_text . '[normalize-space(.)="Radio title"]' )->length );
+		$this->assertSame( 1, $xpath->query( $radio_title . '/span[contains(concat(" ", normalize-space(@class), " "), " woocommerce-help-tip ")][@aria-label="Radio help"]' )->length );
+		$this->assertSame( 1, $xpath->query( $radio . '/fieldset[@aria-labelledby="test_radio_setting-title"]' )->length );
+		$this->assertSame( 0, $xpath->query( $radio . '/fieldset/legend' )->length );
+		$this->assertSame( 2, $xpath->query( $radio . '//input[@type="radio"]' )->length );
+	}
+
+	/**
 	 * Prepare globals used by WC_Admin_Settings::save().
 	 *
 	 * @param string|null $redirect_to Requested redirect target, or null to omit the Settings UI redirect field.

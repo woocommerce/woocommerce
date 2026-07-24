@@ -185,7 +185,7 @@ export const DisplayStyleSwitcher = ( {
 					setDisplayStyleBlocksAttributes(
 						nextDisplayStyleBlocksAttributes
 					);
-					replaceBlock(
+					void replaceBlock(
 						currentStyleBlock.clientId,
 						createBlock(
 							value,
@@ -198,7 +198,7 @@ export const DisplayStyleSwitcher = ( {
 						getFallbackDisplayStyleInsertionPoint
 					);
 
-					insertBlock(
+					void insertBlock(
 						createBlock( value ),
 						insertionPoint.index,
 						insertionPoint.rootClientId,

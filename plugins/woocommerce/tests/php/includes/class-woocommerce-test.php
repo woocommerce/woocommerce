@@ -74,6 +74,26 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should detect a REST API request that uses plain permalinks (?rest_route=).
+	 */
+	public function test_is_rest_api_request_returns_true_for_plain_permalinks(): void {
+		$_SERVER['REQUEST_URI'] = '/index.php?rest_route=/wc/v3/products';
+		$_GET['rest_route']     = '/wc/v3/products';
+
+		$this->assertTrue( WC()->is_rest_api_request(), 'A ?rest_route= request should be detected as a REST API request.' );
+	}
+
+	/**
+	 * @testdox Should not detect a request with an empty rest_route parameter as a REST API request.
+	 */
+	public function test_is_rest_api_request_returns_false_for_empty_rest_route(): void {
+		$_SERVER['REQUEST_URI'] = '/index.php?rest_route=';
+		$_GET['rest_route']     = '';
+
+		$this->assertFalse( WC()->is_rest_api_request(), 'An empty rest_route parameter should not be detected as a REST API request.' );
+	}
+
+	/**
 	 * Restore the request globals after each test.
 	 */
 	public function tearDown(): void {

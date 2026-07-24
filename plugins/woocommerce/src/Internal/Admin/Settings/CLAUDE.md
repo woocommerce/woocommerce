@@ -7,17 +7,17 @@
 
 **Common errors and fixes:**
 
-| Error | Wrong | Correct |
-|-------|-------|---------|
+| Error                    | Wrong                   | Correct                                |
+| ------------------------ | ----------------------- | -------------------------------------- |
 | Object with dynamic keys | `'items' => array(...)` | `'additionalProperties' => array(...)` |
-| Enum as type | `'type' => 'enum'` | `'type' => 'string', 'enum' => [...]` |
+| Enum as type             | `'type' => 'enum'`      | `'type' => 'string', 'enum' => [...]`  |
 
 **Valid types only:** `string`, `number`, `integer`, `boolean`, `array`, `object`, `null`
 
 **Schema keywords:**
 
 | Keyword | For Type | Purpose |
-|---------|----------|---------|
+| --------- | ---------- | --------- |
 | `properties` | `object` | Define named fields |
 | `additionalProperties` | `object` | Define dynamic keys |
 | `items` | `array` | Define element schema |
@@ -27,11 +27,12 @@
 
 ```text
 Settings/
-|-- PaymentsRestController.php       # Main REST endpoint
-|-- WooPaymentsRestController.php    # WooPayments endpoints
-|-- Payments.php                     # Business logic
-|-- PaymentsProviders.php            # Provider aggregation
-`-- Utils.php                        # Utilities
+|-- PaymentsRestController.php                          # Main REST endpoint
+|-- Payments.php                                        # Business logic
+|-- PaymentsProviders.php                               # Provider aggregation
+|-- Utils.php                                           # Utilities
+`-- PaymentsProviders/WooPayments/
+    `-- WooPaymentsRestController.php                   # WooPayments endpoints
 ```
 
 ## Critical Patterns
@@ -76,15 +77,6 @@ $schema = array(
     'type'    => 'object',
 );
 ```
-
-## Known Issues Fixed
-
-| File | Line | Issue | Fix |
-|------|------|-------|-----|
-| PaymentsRestController.php | 885-895 | `messages` uses `items` | Changed to `additionalProperties` |
-| WooPaymentsRestController.php | 1066-1076 | `messages` uses `items` | Changed to `additionalProperties` |
-| WooPaymentsRestController.php | 1107 | `type: enum` | Changed to `type: string` |
-| WooPaymentsRestController.php | 1246 | `type: enum` | Changed to `type: string` |
 
 ## Known Issues (Incomplete Schemas)
 
@@ -187,9 +179,9 @@ array(
 ## Key Classes
 
 | File | Endpoint | Key Methods |
-|------|----------|-------------|
+| ------ | ---------- | ------------- |
 | PaymentsRestController.php | `/wc-admin/settings/payments/*` | `get_providers()`, `set_country()`, `update_providers_order()` |
-| WooPaymentsRestController.php | `/wc-admin/settings/payments/providers/woopayments/*` | `get_onboarding_details()` |
+| PaymentsProviders/WooPayments/WooPaymentsRestController.php | `/wc-admin/settings/payments/providers/woopayments/*` | `get_onboarding_details()` |
 | Payments.php | N/A (business logic) | `get_payment_providers()`, `get_payment_extension_suggestions()` |
 
 ## Linting
