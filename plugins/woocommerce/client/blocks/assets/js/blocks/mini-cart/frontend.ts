@@ -13,8 +13,9 @@ import {
 import '@woocommerce/stores/woocommerce';
 import '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/store-notices';
+import type { WooCommerce } from '@woocommerce/stores/woocommerce';
 import type {
-	Store as WooCommerce,
+	Store as WooCommerceCart,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
 
@@ -177,11 +178,9 @@ const getFocusableElements = ( container: HTMLElement | null ) =>
 		  ).filter( ( el ) => el.offsetParent !== null )
 		: [];
 
-const { state: woocommerceState, actions } = store< WooCommerce >(
-	'woocommerce',
-	{},
-	{ lock: universalLock }
-);
+const { state: woocommerceState, actions } = store<
+	WooCommerce & WooCommerceCart
+>( 'woocommerce', {}, { lock: universalLock } );
 
 const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 	'woocommerce/mini-cart',
