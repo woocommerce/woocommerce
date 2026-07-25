@@ -6,9 +6,10 @@
  * it hosts {@link resolveBaseProduct}, {@link matchesSelectedAttributes},
  * {@link lineMatchesProduct}, {@link findCartLine}, and
  * {@link draftExtensionsMatchLine} — extracted, verbatim in behavior, out
- * of `cart.ts` so both today's cart module and any future module that
- * addresses cart lines can pair against them without either one
- * value-importing the other.
+ * of `cart.ts` so both the cart module and the root module (`index.ts`,
+ * whose `findItem`/`itemInContext` pairing rung imports
+ * {@link lineMatchesProduct} and {@link draftExtensionsMatchLine} directly)
+ * can pair against them without either one value-importing the other.
  *
  * Reaches the shared `woocommerce` namespace's nested `products.items`/
  * `products.variations` maps by `store( 'woocommerce', {}, { lock:
@@ -20,8 +21,8 @@
  * root module and never value-imports `cart.ts` or `./index`.
  * `findCartLine` takes the candidate cart lines as an explicit `items`
  * argument instead of reading a namespace's `cart.items` internally, so
- * every caller (this folder's cart module today; any future caller
- * addressing a differently-shaped cart) owns that read and decides how to
+ * every caller (`cart.ts`'s `postDraftItems`/`addCartItemGenerator`, each
+ * passing its own `state.cart.items`) owns that read and decides how to
  * guard it.
  */
 

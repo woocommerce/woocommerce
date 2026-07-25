@@ -1,22 +1,25 @@
 /**
- * Product resolution — the pure primitive backing `woocommerce/products`'
- * `findProduct` getter.
+ * Product resolution — the pure primitive backing the unified `woocommerce`
+ * store's `findItem`/`itemInContext` product-member resolution.
  *
  * A folder-internal module (not a public export surface of either store):
- * it hosts {@link resolveProduct}, the id/attribute resolution body
- * `products.ts`'s `findProduct` getter delegates to verbatim. Takes the
+ * it hosts {@link resolveProduct}, the id/attribute resolution body the
+ * root module (`index.ts`) delegates to for every product/variation lookup
+ * — the same body that once backed the retired `woocommerce/products`
+ * store's `findProduct` getter, since dissolved along with `products.ts`
+ * (see `index.ts`'s `resolveProductMember`, and `draft-internals.ts`'s
+ * `matchFamilyVariation`, both of which call it directly). Takes the
  * product/variation maps it resolves against as explicit arguments rather
  * than reaching a namespace by `store()` — unlike this folder's other
- * internal helper modules — because the maps' own shape is what a future
- * root store module changes (nested `state.products.items` /
- * `state.products.variations`, in place of today's flat
- * `state.products` / `state.productVariations`); a namespace read would
- * hard-code today's flat shape into the primitive. Passing the maps in
- * lets every caller — `products.ts` today, any future caller reading a
- * differently-shaped store — hand this primitive its own maps unchanged.
+ * internal helper modules — so it stays a pure function of its inputs,
+ * testable in isolation with plain object literals (see
+ * `test/product-resolution.test.ts`) and reusable by any caller willing to
+ * hand it its own maps unchanged, whatever shape its own state happens to
+ * be. The shipped shape both current callers pass is the nested
+ * `state.products.items` / `state.products.variations`.
  *
  * Value-imports only the existing attribute-matching util
- * ({@link attributeNamesMatch}); never `cart.ts` or `products.ts`.
+ * ({@link attributeNamesMatch}); never `cart.ts` or `index.ts`.
  */
 
 /**
@@ -34,9 +37,11 @@ import { attributeNamesMatch } from '../../utils/variations/attribute-matching';
  * Resolves a product or variation by id, optionally narrowing a variable
  * product to one of its variations via `selectedAttributes`.
  *
- * Reproduces `woocommerce/products`' `findProduct` getter's contract
- * exactly, as a pure function of the two maps passed in: `id` naming a
- * known variation resolves that variation directly, ignoring
+ * Reproduces the retired `woocommerce/products` store's `findProduct`
+ * getter's contract exactly (that store and getter are since dissolved; the
+ * root module's `state.itemInContext`/`state.findItem` are the current
+ * entry points), as a pure function of the two maps passed in: `id` naming
+ * a known variation resolves that variation directly, ignoring
  * `selectedAttributes` entirely; otherwise `id` resolves against `items`
  * — a non-variable product (or a variable product with no non-empty
  * `selectedAttributes`) resolves unchanged, while a variable product with
@@ -46,13 +51,14 @@ import { attributeNamesMatch } from '../../utils/variations/attribute-matching';
  * variation's own entry is absent from `variations`. An unknown `id`
  * (present in neither map) resolves `null`.
  *
- * @param items                   The product map to resolve `id` against
- *                                (`state.products` today; a future root
- *                                module's `state.products.items`).
+ * @param items                   The product map to resolve `id` against —
+ *                                the shipped nested `state.products.items`,
+ *                                as `index.ts` and `draft-internals.ts`
+ *                                pass it.
  * @param variations              The variation map `id` may name directly,
  *                                or a matched variation may resolve through
- *                                (`state.productVariations` today; a future
- *                                root module's `state.products.variations`).
+ *                                — the shipped nested
+ *                                `state.products.variations`.
  * @param args                    Resolution arguments.
  * @param args.id                 The product or variation id to resolve.
  * @param args.selectedAttributes The attributes to narrow a variable

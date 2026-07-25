@@ -195,10 +195,10 @@ const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 // Opens the namespace to bind `state` before any helper function below
-// references it — the same two-call shape `cart.ts`/`products.ts` use
-// (an early open, then the real registration once every getter it feeds
-// is declared). The real registration, passing the full state definition,
-// is the last statement in this module.
+// references it — the same two-call shape `cart.ts` uses (and this module
+// uses again, on itself: an early open, then the real registration once
+// every getter it feeds is declared). The real registration, passing the
+// full state definition, is the last statement in this module.
 const { state } = store< WooCommerce >(
 	'woocommerce',
 	{},

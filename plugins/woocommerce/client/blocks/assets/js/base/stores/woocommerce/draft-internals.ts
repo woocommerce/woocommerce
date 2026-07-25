@@ -91,7 +91,8 @@ type CartServerState = {
  *
  * Typed against `CartStore['state']` (the cart module's own state shape)
  * purely for the `draftItems` field this function's callers need; the
- * broader shape carries fields (`cart`, `nonce`, …) this module never reads.
+ * broader shape carries fields (`cart`, `itemInContext`, …) this module
+ * never reads.
  *
  * @return The shared `woocommerce` namespace's state object.
  */
@@ -135,10 +136,12 @@ function getProductsState(): ProductsState {
  * Returns `true` when two attribute names refer to the same attribute.
  *
  * A module-local copy of the normalize-and-compare helper in
- * `base/utils/variations/attribute-matching.ts` (also duplicated, rather
- * than imported, by `products.ts` itself), kept local so this module's own
- * value import list stays limited to `@wordpress/interactivity` and the
- * folder-internal `resolveProduct` primitive. Strips WordPress's
+ * `base/utils/variations/attribute-matching.ts`, kept local so this
+ * module's own value import list stays limited to `@wordpress/interactivity`
+ * and the folder-internal `resolveProduct` primitive — unlike
+ * `product-resolution.ts`, which imports the same util directly
+ * (`product-resolution.ts:31`) rather than keeping its own copy. Strips
+ * WordPress's
  * `attribute_`/`attribute_pa_` prefixes and normalizes
  * hyphens/case so a Store API label (`"Color"`) matches a PHP context slug
  * (`"attribute_pa_color"`).
@@ -503,10 +506,10 @@ export function resolveFamilyVariation(
 }
 
 /**
- * Derives a family variation's concrete `variation` attribute set for the
- * products-side setter, sourced from `base.variations[]`'s own entry for
- * `variationId` — **never** from the assigned variation object's own
- * `attributes`, which the real Store API serializer leaves empty.
+ * Derives a family variation's concrete `variation` attribute set, sourced
+ * from `base.variations[]`'s own entry for `variationId` — **never** from
+ * the assigned variation object's own `attributes`, which the real Store
+ * API serializer leaves empty.
  *
  * `base.variations[]` carries a concrete value for every attribute the
  * variation fixes, and a falsy value (`null`/`''`) for one it leaves "any"
@@ -516,8 +519,8 @@ export function resolveFamilyVariation(
  * own `variation` (the family draft's current selection) when one is
  * recorded there, and **omits** the attribute entirely otherwise — never
  * inventing a value nobody ever specified. The resulting set can therefore
- * be incomplete; an incomplete set is the caller's (the setter's) signal to
- * file the write as a partial selection at the parent id.
+ * be incomplete; an incomplete set signals a caller to file the write as a
+ * partial selection at the parent id.
  *
  * @param base          The family's base product, whose `variations[]`
  *                      backs this derivation.
@@ -659,8 +662,8 @@ function resolveVariationWriteId(
  * draft from the surface's seed when none exists yet.
  *
  * The one place that ever writes `state.draftItems` on the supported write
- * path — the draft view's set trap and the products store's
- * `productVariationInContext` setter both forward every write here.
+ * path — the draft view's set trap ({@link createDraftView}) forwards every
+ * write here.
  *
  * Resolution: {@link resolveLiveDraft} finds the live draft nearest `id` —
  * the exact-id draft first, then the family draft. When one exists, the
@@ -921,8 +924,8 @@ const draftViewCache = new Map<
 
 /**
  * Resolves the draft view for `(key, id)` — the live, family-aware `Proxy`
- * that `findItem`/`itemInContext` expose as `Envelope.draft` whenever an id
- * resolves. Reads answer the live draft's values, or the surface's seed
+ * that `findItem`/`itemInContext` expose as `Envelope.draftItem` whenever an
+ * id resolves. Reads answer the live draft's values, or the surface's seed
  * values pre-materialization, and never materialize anything; writes
  * forward to {@link writeDraft}. See {@link createDraftView} for the full
  * trap behavior.
