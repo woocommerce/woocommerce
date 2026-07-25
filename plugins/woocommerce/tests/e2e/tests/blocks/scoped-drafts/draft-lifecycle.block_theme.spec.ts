@@ -200,7 +200,7 @@ test.describe( 'Scoped drafts: draft lifecycle across navigation and reload', ()
 		await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
 		// The hidden `variation_id` input (AddToCartWithOptions.php) binds
-		// `woocommerce/products::state.productVariationInContext.id` — the
+		// `woocommerce::state.itemInContext.variation.id` — the
 		// resolved Blue+No variation. Capture it before navigating away so
 		// the post-round-trip step below can confirm the remounted card
 		// re-resolves this exact same variation, without pinning this
@@ -239,7 +239,7 @@ test.describe( 'Scoped drafts: draft lifecycle across navigation and reload', ()
 			await expect( colorBlueOption ).toBeChecked();
 			await expect( logoNoOption ).toBeChecked();
 
-			// `productVariationInContext` (products.ts) resolves the same
+			// `itemInContext.variation` (index.ts) resolves the same
 			// surviving family draft directly — via `resolveFamilyVariation`
 			// matching the draft's recorded attributes back to the Blue+No
 			// variation — independently of the remount-discarded
@@ -258,9 +258,9 @@ test.describe( 'Scoped drafts: draft lifecycle across navigation and reload', ()
 		await test.step( 'the remounted quantity input shows the surviving draft’s own quantity, not the server-seeded default', async () => {
 			// `resolveDisplayQuantity` (quantity-selector/frontend.ts)
 			// prefers the resolved collection's draft quantity over this
-			// instance's own local map. `itemInContext` (cart.ts) resolves
-			// through `productInContext.id`, which the family-draft-based
-			// `productVariationInContext` above already re-derives to the
+			// instance's own local map. `itemInContext` (index.ts) resolves
+			// through `itemInContext.variation.id`, which the family-draft-based
+			// resolution above already re-derives to the
 			// Blue+No variation id — the very id the surviving draft is
 			// filed under — so it addresses that exact same draft, quantity
 			// included. The remounted input therefore shows the shopper's

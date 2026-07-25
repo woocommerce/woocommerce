@@ -54,8 +54,8 @@ class ScopedDraftsPage {
 	 *
 	 * Every call adds a new, independent block instance. Each "Single
 	 * Product" block instance mints its own `single-product/<productId>/<n>`
-	 * draft key and declares it in a `woocommerce/cart` context bag (see
-	 * `SingleProduct.php`), so two calls for the same product remain fully
+	 * draft key and declares it in the unified `woocommerce` context bag
+	 * (see `SingleProduct.php`), so two calls for the same product remain fully
 	 * isolated from one another — the isolation comes from that minted key
 	 * (the `<n>` occurrence counter distinguishing same-product instances),
 	 * not from the context tree the block's markup happens to establish.

@@ -42,11 +42,7 @@ test.describe( 'Mutation Batcher', () => {
 				'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 			await import( '@woocommerce/stores/woocommerce/cart' );
-			const { actions } = store(
-				'woocommerce/cart',
-				{},
-				{ lock: unlockKey }
-			);
+			const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
 
 			// Three calls with no await between them — same microtick.
 			const p1 = actions.addCartItem( { id: 15, quantityToAdd: 1 } );
@@ -78,11 +74,7 @@ test.describe( 'Mutation Batcher', () => {
 				'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 			await import( '@woocommerce/stores/woocommerce/cart' );
-			const { actions } = store(
-				'woocommerce/cart',
-				{},
-				{ lock: unlockKey }
-			);
+			const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
 
 			// Each await breaks the microtick — each call becomes its own batch.
 			await actions.addCartItem( { id: 18, quantityToAdd: 1 } );
@@ -114,11 +106,7 @@ test.describe( 'Mutation Batcher', () => {
 				'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 			await import( '@woocommerce/stores/woocommerce/cart' );
-			const { actions } = store(
-				'woocommerce/cart',
-				{},
-				{ lock: unlockKey }
-			);
+			const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
 
 			// Batch 1: two sync calls
 			const p1 = actions.addCartItem( { id: 21, quantityToAdd: 1 } );
@@ -152,7 +140,7 @@ test.describe( 'Mutation Batcher', () => {
 
 			await import( '@woocommerce/stores/woocommerce/cart' );
 			const { actions, state } = store(
-				'woocommerce/cart',
+				'woocommerce',
 				{},
 				{ lock: unlockKey }
 			);
@@ -252,7 +240,7 @@ test.describe( 'Mutation Batcher', () => {
 
 			await import( '@woocommerce/stores/woocommerce/cart' );
 			const { actions, state } = store(
-				'woocommerce/cart',
+				'woocommerce',
 				{},
 				{ lock: unlockKey }
 			);

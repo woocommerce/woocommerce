@@ -4,8 +4,8 @@
 import { test as base, expect, getPostIdBySlug } from '@woocommerce/e2e-utils';
 
 /**
- * `wc-navigation-survival`: proves that a draft held in the public
- * `woocommerce/cart` store's keyed global state survives a genuine
+ * `wc-navigation-survival`: proves that a draft held in the public unified
+ * `woocommerce` store's keyed global state survives a genuine
  * client-side navigation between two ordinary pages, on the stock,
  * supported region-based Interactivity API router — no experimental
  * full-page navigation mode, no runtime patch. See
@@ -13,10 +13,10 @@ import { test as base, expect, getPostIdBySlug } from '@woocommerce/e2e-utils';
  * `navigation-survival.js` for the fixture itself.
  *
  * Both pages share one top-level `data-wp-router-region` id, so the
- * router's region-matching swap keeps the JS runtime (and the cart
- * store's global draft state) alive across the navigation instead of
+ * router's region-matching swap keeps the JS runtime (and the store's
+ * global draft state) alive across the navigation instead of
  * reloading the document. Page A carries two purchase surfaces for the
- * same product — one declaring no `woocommerce/cart` context of its own
+ * same product — one declaring no `woocommerce` context of its own
  * ("unwrapped", resolving the store's usual fallback collection, exactly
  * like a plain, container-free Add to Cart with Options form) and one
  * wrapped in the fixture's own declared draft key ("keyed", isolated by

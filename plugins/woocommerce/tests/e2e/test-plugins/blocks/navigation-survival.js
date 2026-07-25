@@ -1,12 +1,12 @@
 /**
  * `wc-navigation-survival`: a minimal fixture Interactivity API store
- * proving that a draft held in the public `woocommerce/cart` store's keyed
- * global state survives a genuine client-side navigation between two
+ * proving that a draft held in the public unified `woocommerce` store's
+ * keyed global state survives a genuine client-side navigation between two
  * pages, on the stock, supported region-based router — no experimental
  * full-page navigation mode, no runtime patch.
  *
  * Each page (rendered by the companion `navigation-survival.php`) carries
- * an "unwrapped" purchase surface — it declares no `woocommerce/cart`
+ * an "unwrapped" purchase surface — it declares no `woocommerce`
  * context of its own, so the store resolves its usual fallback collection
  * for it, exactly like a plain, container-free Add to Cart with Options
  * form — and page A additionally carries a "keyed" surface wrapped in this
@@ -23,12 +23,12 @@
  * the surface's own key (this fixture's declared key, if any; otherwise
  * the store's own fallback) via the store's public
  * `state.findItem( { id } )` and writes the resolved draft view's
- * `quantity` directly (`draft.quantity = value`) — the single spelling for
- * both the surface's *first* edit (the resolved collection holds no draft
- * for this product yet; the view materializes it) and every edit after
- * that (a **direct mutation** of the now-live draft), never an action call
- * either way. Each surface renders a binding onto the same draft so either
- * write's re-render is directly observable.
+ * `quantity` directly (`draftItem.quantity = value`) — the single spelling
+ * for both the surface's *first* edit (the resolved collection holds no
+ * draft for this product yet; the view materializes it) and every edit
+ * after that (a **direct mutation** of the now-live draft), never an
+ * action call either way. Each surface renders a binding onto the same
+ * draft so either write's re-render is directly observable.
  *
  * The navigation link's `data-wp-on--click` reuses WooCommerce's own
  * shipped client-side navigation pattern verbatim (see
@@ -39,23 +39,27 @@
  * reloading the document, keeping the JS runtime (and this store's global
  * draft state) alive across the navigation.
  *
- * This is a plain, unbundled ES module (no build step): `@wordpress/interactivity`
- * and `@woocommerce/stores/woocommerce/cart` are both script modules that
- * WordPress/WooCommerce already register, so a third-party extension can
- * depend on them directly. The cart store is accessed with its
- * private-store consent lock, exactly as a real extension will while the
- * store stays private.
+ * This is a plain, unbundled ES module (no build step): `@wordpress/interactivity`,
+ * `@woocommerce/stores/woocommerce` (the envelope/`findItem`/`draftItems`
+ * root), and `@woocommerce/stores/woocommerce/cart` (the retained module id
+ * for the cart mirror and actions; its store namespace is `woocommerce`,
+ * same as the root) are all script modules that WordPress/WooCommerce
+ * already register, so a third-party extension can depend on them
+ * directly. The store is accessed with its private-store consent lock,
+ * exactly as a real extension will while the store stays private.
  */
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
-// This resolves at runtime via WordPress's script-module import map (see
+// These resolve at runtime via WordPress's script-module import map (see
 // `navigation-survival.php`'s `register_script_module()`), not via static
-// bundling, so ESLint's module resolver cannot find it on disk.
+// bundling, so ESLint's module resolver cannot find them on disk.
+// eslint-disable-next-line import/no-unresolved
+import '@woocommerce/stores/woocommerce';
 // eslint-disable-next-line import/no-unresolved
 import '@woocommerce/stores/woocommerce/cart';
 
 /**
- * The consent string gating access to the `woocommerce/cart` store while it
+ * The consent string gating access to the `woocommerce` store while it
  * is private. Kept identical to the store's own lock string so this fixture
  * is denied nothing a real third-party extension will be denied once the
  * store is public.
@@ -68,9 +72,9 @@ const NAMESPACE = 'wc-navigation-survival';
 
 /**
  * The store's own reserved fallback draft key — the collection any
- * purchase surface declaring no `woocommerce/cart` context of its own
- * resolves to (see `cart.ts`'s `GLOBAL_DRAFT_KEY`, and the identical
- * literal PHP emitters fall back to, e.g.
+ * purchase surface declaring no `woocommerce` context of its own
+ * resolves to (see `draft-internals.ts`'s `GLOBAL_DRAFT_KEY`, and the
+ * identical literal PHP emitters fall back to, e.g.
  * `AddToCartWithOptions.php:195`). This is a pinned, cross-cutting literal
  * shared by the client store and every server emitter — not a private
  * implementation detail this fixture is reaching past — so the
@@ -87,11 +91,11 @@ const GLOBAL_DRAFT_KEY = 'woocommerce/global';
  */
 const RENDERED_DEFAULT_QUANTITY = 1;
 
-const cart = store( 'woocommerce/cart', {}, { lock: universalLock } );
+const cart = store( 'woocommerce', {}, { lock: universalLock } );
 
 /**
  * Resolves the current element's own surface's draft key: this fixture's
- * own declared `woocommerce/cart` draft key for the "keyed" surface
+ * own declared `woocommerce` draft key for the "keyed" surface
  * (`navigation-survival.php`'s `data-wp-context---draft-key`), or
  * {@link GLOBAL_DRAFT_KEY} for the "unwrapped" surface, which declares no
  * such context anywhere in its ancestry — the identical absent-context
@@ -100,7 +104,7 @@ const cart = store( 'woocommerce/cart', {}, { lock: universalLock } );
  * @return {string} The surface's resolved draft key.
  */
 function resolveDraftKey() {
-	return getContext( 'woocommerce/cart' )?.draftKey ?? GLOBAL_DRAFT_KEY;
+	return getContext( 'woocommerce' )?.draftKey ?? GLOBAL_DRAFT_KEY;
 }
 
 /**
@@ -129,7 +133,7 @@ function resolveDraft() {
  * for this product yet — nothing seeds it up front — so the draft view
  * materializes it from this fixture's own declared `productId` context) and
  * every edit after that (a **direct mutation** of the now-live draft):
- * `cart.state.findItem( { id } ).draft` resolves the draft view for this
+ * `cart.state.findItem( { id } ).draftItem` resolves the draft view for this
  * surface's own declared key (this fixture's own context, or the store's
  * own fallback when it declares none) and `productId`, and the assignment
  * writes through it — never an action call either way. The surface's
@@ -145,7 +149,7 @@ function onQuantityChange() {
 	}
 
 	const { productId } = getContext();
-	cart.state.findItem( { id: productId } ).draft.quantity = quantity;
+	cart.state.findItem( { id: productId } ).draftItem.quantity = quantity;
 }
 
 /**

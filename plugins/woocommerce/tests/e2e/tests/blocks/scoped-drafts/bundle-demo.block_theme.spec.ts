@@ -6,15 +6,15 @@ import { test as base, expect, getPostIdBySlug } from '@woocommerce/e2e-utils';
 /**
  * E2E flows for the `wc-bundle-demo` fixture: a minimal bundle-style Store
  * API extension built entirely on today's extension points (`ExtendSchema`)
- * and the public `woocommerce/cart` Interactivity API store surface
- * (`state.findItem( { id } ).draft`, `addItem( payload )`) — proving that a
+ * and the public unified `woocommerce` Interactivity API store surface
+ * (`state.findItem( { id } ).draftItem`, `addItem( payload )`) — proving that a
  * third-party "bundle" of independently configurable child products can be
  * composed and added as one cart line with no core changes. See
  * `tests/e2e/test-plugins/blocks/bundle-demo.php` / `bundle-demo.js` for the
  * fixture itself.
  *
  * Each `[wc_bundle_demo]` shortcode renders two child "slots" (`slot-1`,
- * `slot-2`), each declaring its own literal, namespaced `woocommerce/cart`
+ * `slot-2`), each declaring its own literal, namespaced `woocommerce`
  * draft key (`wc-bundle-demo/slot-1` / `wc-bundle-demo/slot-2` — the same
  * container primitive core blocks use, addressed directly from markup with
  * no registry of any kind), plus an "Add bundle to cart" button that

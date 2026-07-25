@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WooCommerce Blocks Test WC Bundle Demo
- * Description: Minimal fixture proving a bundle-style Store API extension built entirely on today's extension points and the public woocommerce/cart store surface.
+ * Description: Minimal fixture proving a bundle-style Store API extension built entirely on today's extension points and the public unified woocommerce store surface.
  * Plugin URI: https://github.com/woocommerce/woocommerce
  * Author: WooCommerce
  *
@@ -17,7 +17,7 @@
  * so this fixture stands in for one, built on nothing but the surface a
  * third-party extension has today: the Store API's `ExtendSchema` (schema
  * extension + add-to-cart processing) and the public (locked)
- * `woocommerce/cart` Interactivity API store (direct mutation of a
+ * `woocommerce` Interactivity API store (direct mutation of a
  * resolved draft view, `addItem( payload )`). No WooCommerce core file is
  * changed.
  *
@@ -26,14 +26,14 @@
  * The `[wc_bundle_demo bundle="<id>" child_a="<id>" child_b="<id>"]`
  * shortcode renders two "slot" elements — one per child product — plus an
  * "Add bundle to cart" button. Each slot declares its own literal,
- * namespaced `woocommerce/cart` draft key (`wc-bundle-demo/slot-1` /
+ * namespaced `woocommerce` draft key (`wc-bundle-demo/slot-1` /
  * `wc-bundle-demo/slot-2`) — the same container primitive core blocks use,
  * addressed directly from markup with no registry of any kind — so picking
  * the same product in both slots produces two independent drafts rather
  * than one overwriting the other. A slot's quantity input has no init: its
  * `data-wp-on--change` resolves the slot's declared key via the store's
  * public `state.findItem( { id } )` and writes the resolved draft view's
- * `quantity` directly (`draft.quantity = value`) — the single spelling for
+ * `quantity` directly (`draftItem.quantity = value`) — the single spelling for
  * both the slot's first edit (the slot's collection does not exist yet;
  * the view materializes the draft on this first write) and every edit
  * after that (a direct mutation of the now-live draft), never an action
@@ -109,19 +109,28 @@ class WC_Bundle_Demo_Fixture {
 	/**
 	 * Registers the demo's Interactivity API script module.
 	 *
-	 * A plain, unbundled ES module: `@wordpress/interactivity` and
-	 * `@woocommerce/stores/woocommerce/cart` are both already-registered
-	 * script modules (the latter is always registered by WooCommerce's
-	 * asset controller, whether or not any WooCommerce block is on the
-	 * page), so a third-party script module can depend on them with no
+	 * A plain, unbundled ES module: `@wordpress/interactivity`,
+	 * `@woocommerce/stores/woocommerce` (the envelope/`findItem`/
+	 * `draftItems` root), and `@woocommerce/stores/woocommerce/cart` (the
+	 * retained module id for the cart mirror and actions; its store
+	 * namespace is `woocommerce`, same as the root) are all
+	 * already-registered script modules (WooCommerce's asset controller
+	 * always registers both, whether or not any WooCommerce block is on
+	 * the page), so a third-party script module can depend on them with no
 	 * build step of its own — exactly as a real extension does while the
-	 * cart store is private.
+	 * store is private. Both are declared here — this fixture reads
+	 * `state.findItem`/`state.draftItems` (registered by the root module)
+	 * and calls `actions.addItem` (registered by the cart module).
 	 */
 	public function register_script_module() {
 		wp_register_script_module(
 			self::EXTENSION_NAMESPACE,
 			plugins_url( 'bundle-demo.js', __FILE__ ),
-			array( '@wordpress/interactivity', '@woocommerce/stores/woocommerce/cart' ),
+			array(
+				'@wordpress/interactivity',
+				'@woocommerce/stores/woocommerce',
+				'@woocommerce/stores/woocommerce/cart',
+			),
 			false
 		);
 	}
@@ -177,12 +186,12 @@ class WC_Bundle_Demo_Fixture {
 	}
 
 	/**
-	 * Renders one child slot: a declared `woocommerce/cart` draft key plus a
+	 * Renders one child slot: a declared `woocommerce` draft key plus a
 	 * quantity input.
 	 *
 	 * The slot element carries two context bags on one element — its own
 	 * `wc-bundle-demo` context (`childId`, `slotId`) and its own literal,
-	 * namespaced `woocommerce/cart` draft key (`wc-bundle-demo/slot-1` /
+	 * namespaced `woocommerce` draft key (`wc-bundle-demo/slot-1` /
 	 * `wc-bundle-demo/slot-2`) that isolates this slot's draft from the
 	 * other slot and from any other purchase surface on the page. A second
 	 * default `data-wp-context` would silently collide with the first (the
@@ -197,7 +206,7 @@ class WC_Bundle_Demo_Fixture {
 	 * The quantity input has no init: its `data-wp-on--change` resolves the
 	 * slot's declared key via the store's public `state.findItem( { id } )`
 	 * and writes the resolved draft view's `quantity` directly
-	 * (`draft.quantity = value`) — the single spelling for both the slot's
+	 * (`draftItem.quantity = value`) — the single spelling for both the slot's
 	 * first edit (the view materializes the slot's one draft on this
 	 * write) and every edit after that (a direct mutation of the now-live
 	 * draft), never an action call either way. The `<span>` renders a
@@ -229,11 +238,11 @@ class WC_Bundle_Demo_Fixture {
 		// this markup uses single-quoted attribute values (see the
 		// docblock above for why a second default `data-wp-context` cannot
 		// be used instead). This declares the slot's own literal,
-		// namespaced `woocommerce/cart` draft key, exactly as
+		// namespaced `woocommerce` draft key, exactly as
 		// ProductTemplate.php / SingleProduct.php declare their own
 		// server-minted key for their own containers — the extension gets
 		// the primitive from markup alone, with zero core changes.
-		$draft_key_context_directive = 'data-wp-context---draft-key=\'woocommerce/cart::' . wp_json_encode(
+		$draft_key_context_directive = 'data-wp-context---draft-key=\'woocommerce::' . wp_json_encode(
 			array( 'draftKey' => self::EXTENSION_NAMESPACE . '/' . $slot ),
 			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 		) . '\'';

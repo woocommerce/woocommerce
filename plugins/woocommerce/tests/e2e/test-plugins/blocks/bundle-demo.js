@@ -1,12 +1,12 @@
 /**
  * `wc-bundle-demo`: a minimal fixture Interactivity API store proving a
- * bundle-style Store API extension built entirely on the public
- * `woocommerce/cart` store surface — declared draft keys, direct mutation,
- * and `addItem( payload )` — plus today's Store API extension points, with
- * no WooCommerce core changes.
+ * bundle-style Store API extension built entirely on the public unified
+ * `woocommerce` store surface — declared draft keys, direct mutation, and
+ * `addItem( payload )` — plus today's Store API extension points, with no
+ * WooCommerce core changes.
  *
  * Each child slot (`slot-1`/`slot-2`, rendered by the companion
- * `bundle-demo.php`) declares its own literal, namespaced `woocommerce/cart`
+ * `bundle-demo.php`) declares its own literal, namespaced `woocommerce`
  * draft key (`wc-bundle-demo/slot-1` / `wc-bundle-demo/slot-2`, see that
  * file's `data-wp-context---draft-key` markup) — the same primitive core
  * blocks use to isolate purchase UI, addressed directly from markup with no
@@ -16,15 +16,15 @@
  * the page-wide one.
  *
  * A slot's quantity input has no init. Its `data-wp-on--change` resolves
- * the slot's declared key (reading its own `woocommerce/cart` context) via
+ * the slot's declared key (reading its own `woocommerce` context) via
  * the store's public `state.findItem( { id } )` and writes the resolved
- * draft view's `quantity` directly (`draft.quantity = value`) — the single
- * spelling for both the slot's *first* edit (the slot's collection does not
- * exist yet, nothing seeds it up front; the view materializes the draft on
- * this first write) and every edit after that (a **direct mutation** of the
- * now-live draft), never an action call either way. Each slot renders a
- * binding onto the same draft so either write's re-render is directly
- * observable. The "Add bundle to cart" button
+ * draft view's `quantity` directly (`draftItem.quantity = value`) — the
+ * single spelling for both the slot's *first* edit (the slot's collection
+ * does not exist yet, nothing seeds it up front; the view materializes the
+ * draft on this first write) and every edit after that (a **direct
+ * mutation** of the now-live draft), never an action call either way. Each
+ * slot renders a binding onto the same draft so either write's re-render is
+ * directly observable. The "Add bundle to cart" button
  * composes both slots' current drafts by reading `state.draftItems`
  * directly at the two declared keys — under its existing lock consent, so
  * no cross-collection store read needs any extra plumbing — into one
@@ -34,23 +34,27 @@
  * collection at all, so it contributes nothing to the composed payload —
  * the safe, expected outcome for an untouched slot.
  *
- * This is a plain, unbundled ES module (no build step): `@wordpress/interactivity`
- * and `@woocommerce/stores/woocommerce/cart` are both script modules that
- * WordPress/WooCommerce already register, so a third-party extension can
- * depend on them directly. The cart store is accessed with its
- * private-store consent lock, exactly as a real extension will while the
- * store stays private.
+ * This is a plain, unbundled ES module (no build step): `@wordpress/interactivity`,
+ * `@woocommerce/stores/woocommerce` (the envelope/`findItem`/`draftItems`
+ * root), and `@woocommerce/stores/woocommerce/cart` (the retained module id
+ * for the cart mirror and actions; its store namespace is `woocommerce`,
+ * same as the root) are all script modules that WordPress/WooCommerce
+ * already register, so a third-party extension can depend on them
+ * directly. The store is accessed with its private-store consent lock,
+ * exactly as a real extension will while the store stays private.
  */
 
 import { store, getContext, getElement } from '@wordpress/interactivity';
-// This resolves at runtime via WordPress's script-module import map (see
+// These resolve at runtime via WordPress's script-module import map (see
 // `bundle-demo.php`'s `register_script_module()`), not via static bundling,
-// so ESLint's module resolver cannot find it on disk.
+// so ESLint's module resolver cannot find them on disk.
+// eslint-disable-next-line import/no-unresolved
+import '@woocommerce/stores/woocommerce';
 // eslint-disable-next-line import/no-unresolved
 import '@woocommerce/stores/woocommerce/cart';
 
 /**
- * The consent string gating access to the `woocommerce/cart` store while it
+ * The consent string gating access to the `woocommerce` store while it
  * is private. Kept identical to the store's own lock string so this fixture
  * is denied nothing a real third-party extension will be denied once the
  * store is public.
@@ -79,10 +83,10 @@ const RENDERED_DEFAULT_QUANTITY = 1;
  */
 const SLOT_DRAFT_KEYS = [ 'wc-bundle-demo/slot-1', 'wc-bundle-demo/slot-2' ];
 
-const cart = store( 'woocommerce/cart', {}, { lock: universalLock } );
+const cart = store( 'woocommerce', {}, { lock: universalLock } );
 
 /**
- * Resolves the current element's own declared `woocommerce/cart` draft key
+ * Resolves the current element's own declared `woocommerce` draft key
  * — the slot's isolation boundary established by its own context bag
  * (`bundle-demo.php`'s `data-wp-context---draft-key`).
  *
@@ -90,7 +94,7 @@ const cart = store( 'woocommerce/cart', {}, { lock: universalLock } );
  *                              outside a slot.
  */
 function resolveSlotDraftKey() {
-	return getContext( 'woocommerce/cart' )?.draftKey;
+	return getContext( 'woocommerce' )?.draftKey;
 }
 
 /**
@@ -117,9 +121,9 @@ function resolveSlotDraft() {
  * both the *first* edit for this slot (its collection does not exist yet —
  * nothing seeds it up front — so the draft view materializes it from the
  * slot's own child context) and every edit after that (a **direct
- * mutation** of the now-live draft): `cart.state.findItem( { id } ).draft`
+ * mutation** of the now-live draft): `cart.state.findItem( { id } ).draftItem`
  * resolves the draft view for the slot's own declared key (read off this
- * element's `woocommerce/cart` context) and `childId`, and the assignment
+ * element's `woocommerce` context) and `childId`, and the assignment
  * writes through it — never an action call either way. The slot's `<span>`
  * binding (`state.slotQuantityText`) reads the same draft, so either
  * write's re-render is observable.
@@ -133,7 +137,7 @@ function onSlotQuantityChange() {
 	}
 
 	const { childId } = getContext();
-	cart.state.findItem( { id: childId } ).draft.quantity = quantity;
+	cart.state.findItem( { id: childId } ).draftItem.quantity = quantity;
 }
 
 store(

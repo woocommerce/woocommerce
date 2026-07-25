@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WooCommerce Blocks Test Navigation Survival
- * Description: Minimal fixture proving cross-page client-side navigation survival of drafts held in the public woocommerce/cart store's keyed global state, on the stock region-based Interactivity API router.
+ * Description: Minimal fixture proving cross-page client-side navigation survival of drafts held in the public unified woocommerce store's keyed global state, on the stock region-based Interactivity API router.
  * Plugin URI: https://github.com/woocommerce/woocommerce
  * Author: WooCommerce
  *
@@ -21,19 +21,19 @@ declare( strict_types = 1 );
  * top-level `data-wp-router-region` sharing the same id, the router's
  * region-matching swap keeps the JS runtime and its script modules alive
  * across the navigation instead of reloading the document, so the public
- * `woocommerce/cart` store's global draft state persists exactly as it
+ * `woocommerce` store's global draft state persists exactly as it
  * would for a shopper crossing between any two pages on a real site.
  *
  * How it works.
  *
  * The `[wc_navigation_survival product="<id>" page="a|b" target="<url>"]`
  * shortcode renders:
- *  - one purchase surface with no `woocommerce/cart` context of its own
+ *  - one purchase surface with no `woocommerce` context of its own
  *    ("unwrapped") — it resolves whichever collection the store falls back
  *    to when no draft key is declared, exactly like a plain, container-free
  *    Add to Cart with Options form;
  *  - on `page="a"` only, a second surface wrapped in this fixture's own
- *    declared `woocommerce/cart` draft key (the same
+ *    declared `woocommerce` draft key (the same
  *    `data-wp-context---draft-key` container primitive core blocks use,
  *    addressed directly from markup — see `bundle-demo.php` for the
  *    identical technique); and
@@ -91,7 +91,7 @@ class WC_Navigation_Survival_Fixture {
 	const ROUTER_REGION_ID = self::NAMESPACE . '-region';
 
 	/**
-	 * This fixture's own literal, namespaced `woocommerce/cart` draft key,
+	 * This fixture's own literal, namespaced `woocommerce` draft key,
 	 * declared only by the "keyed" surface (page A only) — the same
 	 * container primitive core blocks use, addressed directly from markup
 	 * with no registry of any kind.
@@ -118,13 +118,18 @@ class WC_Navigation_Survival_Fixture {
 	/**
 	 * Registers the demo's Interactivity API script module.
 	 *
-	 * A plain, unbundled ES module: `@wordpress/interactivity` and
-	 * `@woocommerce/stores/woocommerce/cart` are both already-registered
-	 * script modules (the latter is always registered by WooCommerce's
-	 * asset controller, whether or not any WooCommerce block is on the
-	 * page), so a third-party script module can depend on them with no
+	 * A plain, unbundled ES module: `@wordpress/interactivity`,
+	 * `@woocommerce/stores/woocommerce` (the envelope/`findItem`/
+	 * `draftItems` root), and `@woocommerce/stores/woocommerce/cart` (the
+	 * retained module id for the cart mirror and actions; its store
+	 * namespace is `woocommerce`, same as the root) are all
+	 * already-registered script modules (WooCommerce's asset controller
+	 * always registers both, whether or not any WooCommerce block is on
+	 * the page), so a third-party script module can depend on them with no
 	 * build step of its own — exactly as a real extension does while the
-	 * cart store is private.
+	 * store is private. Both are declared here — this fixture reads
+	 * `state.findItem`/`state.draftItems` (registered by the root module)
+	 * and calls `actions.addItem` (registered by the cart module).
 	 *
 	 * `@wordpress/interactivity-router` is declared as a **dynamic**
 	 * dependency (`import => 'dynamic'`): the shipped navigation pattern
@@ -143,6 +148,7 @@ class WC_Navigation_Survival_Fixture {
 			plugins_url( 'navigation-survival.js', __FILE__ ),
 			array(
 				'@wordpress/interactivity',
+				'@woocommerce/stores/woocommerce',
 				'@woocommerce/stores/woocommerce/cart',
 				array(
 					'id'     => '@wordpress/interactivity-router',
@@ -208,9 +214,9 @@ class WC_Navigation_Survival_Fixture {
 
 	/**
 	 * Renders one purchase surface: a quantity input and a bound display,
-	 * optionally declaring this fixture's own `woocommerce/cart` draft key.
+	 * optionally declaring this fixture's own `woocommerce` draft key.
 	 *
-	 * A surface with no `$draft_key` declares no `woocommerce/cart` context
+	 * A surface with no `$draft_key` declares no `woocommerce` context
 	 * of its own ("unwrapped") — it inherits none from its ancestors either
 	 * (the wrapper above declares only this fixture's own default-namespace
 	 * context), so the store resolves its usual fallback collection for it,
@@ -224,7 +230,7 @@ class WC_Navigation_Survival_Fixture {
 	 * The quantity input has no init: its `data-wp-on--change` resolves
 	 * this surface's own key via the store's public
 	 * `state.findItem( { id } )` and writes the resolved draft view's
-	 * `quantity` directly (`draft.quantity = value`) — the single spelling
+	 * `quantity` directly (`draftItem.quantity = value`) — the single spelling
 	 * for both this surface's first edit (the resolved collection holds no
 	 * draft for this product yet; the view materializes it) and every edit
 	 * after that (a direct mutation of the now-live draft), never an
@@ -243,7 +249,7 @@ class WC_Navigation_Survival_Fixture {
 	 *                               surfaces in markup, no directive
 	 *                               behavior depends on it.
 	 * @param string|null $draft_key This surface's own declared
-	 *                               `woocommerce/cart` draft key, or `null`
+	 *                               `woocommerce` draft key, or `null`
 	 *                               to declare none (unwrapped).
 	 * @return string The rendered surface markup.
 	 */
@@ -256,7 +262,7 @@ class WC_Navigation_Survival_Fixture {
 			// `bundle-demo.php`'s `render_slot()` for the identical
 			// technique and rationale — a second default `data-wp-context`
 			// would silently collide with the wrapper's own).
-			$draft_key_context_directive = ' data-wp-context---draft-key=\'woocommerce/cart::' . wp_json_encode(
+			$draft_key_context_directive = ' data-wp-context---draft-key=\'woocommerce::' . wp_json_encode(
 				array( 'draftKey' => $draft_key ),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			) . '\'';
