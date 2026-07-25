@@ -8,12 +8,15 @@
  * Each child slot (`slot-1`/`slot-2`, rendered by the companion
  * `bundle-demo.php`) declares its own literal, namespaced `woocommerce`
  * draft key (`wc-bundle-demo/slot-1` / `wc-bundle-demo/slot-2`, see that
- * file's `data-wp-context---draft-key` markup) — the same primitive core
- * blocks use to isolate purchase UI, addressed directly from markup with no
- * registry of any kind. Picking the same product in both slots therefore
- * produces two independent drafts rather than one draft overwriting the
- * other, because each slot resolves its own collection rather than sharing
- * the page-wide one.
+ * file's `data-wp-context---draft-key` markup) — hand-rolled as a second
+ * context bag because that key rides alongside the slot's own
+ * extension-namespace context on the same element, the same reason
+ * `Wishlist.php` / `SavedForLater.php` seed a second
+ * `data-wp-context---notices` bag alongside their own context — addressed
+ * directly from markup with no registry of any kind. Picking the same
+ * product in both slots therefore produces two independent drafts rather
+ * than one draft overwriting the other, because each slot resolves its own
+ * collection rather than sharing the page-wide one.
  *
  * A slot's quantity input has no init. Its `data-wp-on--change` resolves
  * the slot's declared key (reading its own `woocommerce` context) via

@@ -33,10 +33,13 @@ declare( strict_types = 1 );
  *    to when no draft key is declared, exactly like a plain, container-free
  *    Add to Cart with Options form;
  *  - on `page="a"` only, a second surface wrapped in this fixture's own
- *    declared `woocommerce` draft key (the same
- *    `data-wp-context---draft-key` container primitive core blocks use,
+ *    declared `woocommerce` draft key, hand-rolled as a second,
+ *    three-hyphen `data-wp-context---draft-key` bag (because that key
+ *    rides alongside this fixture's own extension-namespace context, the
+ *    same reason `Wishlist.php` / `SavedForLater.php` seed a second
+ *    `data-wp-context---notices` bag alongside their own context),
  *    addressed directly from markup — see `bundle-demo.php` for the
- *    identical technique); and
+ *    identical technique; and
  *  - a link whose `data-wp-on--click` imports
  *    `@wordpress/interactivity-router` and calls `actions.navigate()` on
  *    the anchor's own `href` — the same shipped pattern
@@ -46,7 +49,7 @@ declare( strict_types = 1 );
  * Both surfaces' quantity inputs have no init: each one's
  * `data-wp-on--change` resolves the surface's own key via the store's
  * public `state.findItem( { id } )` and writes the resolved draft view's
- * `quantity` directly (`draft.quantity = value`) — the single spelling for
+ * `quantity` directly (`draftItem.quantity = value`) — the single spelling for
  * both the surface's first edit (the resolved collection holds no draft
  * for this product yet; the view materializes it) and every edit after
  * that (a direct mutation of the now-live draft), never an action call
@@ -92,9 +95,12 @@ class WC_Navigation_Survival_Fixture {
 
 	/**
 	 * This fixture's own literal, namespaced `woocommerce` draft key,
-	 * declared only by the "keyed" surface (page A only) — the same
-	 * container primitive core blocks use, addressed directly from markup
-	 * with no registry of any kind.
+	 * declared only by the "keyed" surface (page A only) — hand-rolled as a
+	 * second, three-hyphen `data-wp-context---draft-key` bag because that
+	 * key rides alongside this fixture's own extension-namespace context,
+	 * the same reason `Wishlist.php` / `SavedForLater.php` seed a second
+	 * `data-wp-context---notices` bag alongside their own context,
+	 * addressed directly from markup with no registry of any kind.
 	 *
 	 * @var string
 	 */
@@ -222,10 +228,15 @@ class WC_Navigation_Survival_Fixture {
 	 * context), so the store resolves its usual fallback collection for it,
 	 * exactly like a plain, container-free Add to Cart with Options form. A
 	 * surface given `$draft_key` declares it via the hand-rolled
-	 * three-hyphen `data-wp-context---draft-key` form — the same mechanism
-	 * `ProductTemplate.php` / `SingleProduct.php` use to declare their own
-	 * server-minted key alongside their own default context, and that
+	 * three-hyphen `data-wp-context---draft-key` form, because that key
+	 * rides alongside this fixture's own extension-namespace context — the
+	 * same reason `Wishlist.php` / `SavedForLater.php` seed a second
+	 * `data-wp-context---notices` bag alongside their own context, and that
 	 * `bundle-demo.php`'s slots already ship for their own namespaced keys.
+	 * Core's own purchase containers (`ProductTemplate.php` /
+	 * `SingleProduct.php`) no longer need this second-bag technique at all
+	 * — they now emit one merged `data-wp-context` bag under `woocommerce`
+	 * for the whole container.
 	 *
 	 * The quantity input has no init: its `data-wp-on--change` resolves
 	 * this surface's own key via the store's public

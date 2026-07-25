@@ -27,10 +27,14 @@
  * shortcode renders two "slot" elements — one per child product — plus an
  * "Add bundle to cart" button. Each slot declares its own literal,
  * namespaced `woocommerce` draft key (`wc-bundle-demo/slot-1` /
- * `wc-bundle-demo/slot-2`) — the same container primitive core blocks use,
- * addressed directly from markup with no registry of any kind — so picking
- * the same product in both slots produces two independent drafts rather
- * than one overwriting the other. A slot's quantity input has no init: its
+ * `wc-bundle-demo/slot-2`) — hand-rolled as a second, three-hyphen
+ * `data-wp-context---draft-key` bag, because that key rides alongside the
+ * slot's own `wc-bundle-demo` context on the same element, the same reason
+ * `Wishlist.php` / `SavedForLater.php` seed a second
+ * `data-wp-context---notices` bag alongside their own context — addressed
+ * directly from markup with no registry of any kind — so picking the same
+ * product in both slots produces two independent drafts rather than one
+ * overwriting the other. A slot's quantity input has no init: its
  * `data-wp-on--change` resolves the slot's declared key via the store's
  * public `state.findItem( { id } )` and writes the resolved draft view's
  * `quantity` directly (`draftItem.quantity = value`) — the single spelling for
@@ -197,11 +201,13 @@ class WC_Bundle_Demo_Fixture {
 	 * default `data-wp-context` would silently collide with the first (the
 	 * HTML parser keeps only one `data-wp-context` attribute per element),
 	 * so the key bag is hand-rolled as the three-hyphen
-	 * `data-wp-context---draft-key` form — the same mechanism
-	 * `ProductTemplate.php` / `SingleProduct.php` use to declare their own
-	 * server-minted key alongside their own default context, and that
-	 * `Wishlist.php` / `SavedForLater.php` already ship for a second
-	 * namespace (`data-wp-context---notices`).
+	 * `data-wp-context---draft-key` form — needed because this key rides
+	 * alongside the slot's own default context on the same element, the
+	 * same reason `Wishlist.php` / `SavedForLater.php` already ship for a
+	 * second namespace (`data-wp-context---notices`). Core's own purchase
+	 * containers (`ProductTemplate.php` / `SingleProduct.php`) no longer
+	 * need this second-bag technique: they now emit one merged
+	 * `data-wp-context` bag under `woocommerce` for their own container.
 	 *
 	 * The quantity input has no init: its `data-wp-on--change` resolves the
 	 * slot's declared key via the store's public `state.findItem( { id } )`
@@ -238,10 +244,13 @@ class WC_Bundle_Demo_Fixture {
 		// this markup uses single-quoted attribute values (see the
 		// docblock above for why a second default `data-wp-context` cannot
 		// be used instead). This declares the slot's own literal,
-		// namespaced `woocommerce` draft key, exactly as
-		// ProductTemplate.php / SingleProduct.php declare their own
-		// server-minted key for their own containers — the extension gets
-		// the primitive from markup alone, with zero core changes.
+		// namespaced `woocommerce` draft key, for the same reason
+		// Wishlist.php / SavedForLater.php hand-roll their own second
+		// data-wp-context---notices bag — the extension gets the primitive
+		// from markup alone, with zero core changes. (Core's own purchase
+		// containers, ProductTemplate.php / SingleProduct.php, no longer
+		// need this second-bag technique: they now emit one merged
+		// data-wp-context bag under woocommerce instead.)
 		$draft_key_context_directive = 'data-wp-context---draft-key=\'woocommerce::' . wp_json_encode(
 			array( 'draftKey' => self::EXTENSION_NAMESPACE . '/' . $slot ),
 			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
