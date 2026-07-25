@@ -140,13 +140,12 @@ For private stores:
 - Not intended for third-party extension
 - Removing/changing store state is NOT a breaking change
 
-`assets/js/base/stores/woocommerce/` holds three reactive stores, each registered under its full namespace:
+`assets/js/base/stores/woocommerce/` holds two reactive stores, each registered under its full namespace:
 
-- `woocommerce/products` — server-populated product and variation data
-- `woocommerce/cart` — the read-only cart mirror plus a keyed global home for the draft cart items that back purchase UI, addressed by opaque server-defined draft keys; uses mutation batching for performance
+- `woocommerce` — the unified store: server-populated product and variation data, the read-only cart mirror, and the shopper's draft cart items, all behind one lazy in-context envelope; uses mutation batching for performance
 - `woocommerce/shopper-lists` — wishlist and saved-for-later state
 
-The cart store registers as `woocommerce/cart` (it moved off the retired root `woocommerce` store registration) and organizes shopper input in `state.draftItems`, a keyed map of draft collections addressed by opaque server-defined `draftKey`s: a container block declares its `draftKey` in `woocommerce/cart` context to isolate its subtree, while surfaces wrapped in no container resolve the reserved global key (`woocommerce/global`). See the store [README](assets/js/base/stores/woocommerce/README.md) for the full store surface and the [draft view proposal](assets/js/base/stores/woocommerce/draft-view-proposal.md) for the design rationale.
+The unified `woocommerce` store holds `state.draftItems` at its root, a keyed map of draft collections addressed by opaque server-defined `draftKey`s: a container declares its `draftKey` in the single `woocommerce::` context bag to isolate its subtree, while a surface wrapped in no container resolves the reserved global key (`woocommerce/global`). See the store [README](assets/js/base/stores/woocommerce/README.md) for the full store surface and the [unified store proposal](assets/js/base/stores/woocommerce/unified-store-proposal.md) for the design rationale.
 
 ### IntegrationRegistry (Extension API)
 
