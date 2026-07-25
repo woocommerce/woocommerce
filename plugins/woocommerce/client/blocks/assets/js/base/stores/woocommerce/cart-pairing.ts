@@ -210,17 +210,19 @@ export function lineMatchesProduct(
  *
  * The matcher behind `addCartItem`/`updateItem`'s keyed-or-keyless lookup
  * and `addItem`'s per-draft lookup: an explicit `key` pairs exactly,
- * otherwise {@link lineMatchesProduct} resolves identity. Takes the
- * candidate lines as an explicit `items` argument rather than reading a
- * namespace's `cart.items` internally, so the caller owns that read —
- * `cart.ts` passes its own `state.cart.items`; a caller addressing a
- * possibly-absent cart passes a guarded fallback. An empty (or missing)
- * `items` degrades to "no match" — `Array.prototype.find` over `[]` never
- * throws — never to an exception.
+ * otherwise {@link lineMatchesProduct} resolves identity — which requires
+ * `id`, so a call that gives neither `key` nor `id` degrades to "no match"
+ * rather than throwing. Takes the candidate lines as an explicit `items`
+ * argument rather than reading a namespace's `cart.items` internally, so the
+ * caller owns that read — `cart.ts` passes its own `state.cart.items`; a
+ * caller addressing a possibly-absent cart passes a guarded fallback. An
+ * empty (or missing) `items` degrades to "no match" — `Array.prototype.find`
+ * over `[]` never throws — never to an exception.
  *
  * @param items          The candidate cart lines to search.
  * @param args           Lookup arguments.
- * @param args.id        The product/variation id to match by identity.
+ * @param args.id        The product/variation id to match by identity when
+ *                       no `key` is given; unused when `key` pairs exactly.
  * @param args.key       A known cart-line key; pairs exactly when given,
  *                       regardless of `id`/`variation`.
  * @param args.variation The variation attributes to match against, if any.
@@ -233,13 +235,16 @@ export function findCartLine(
 		key,
 		variation,
 	}: {
-		id: number;
+		id?: number | undefined;
 		key?: string | undefined;
 		variation?: CartVariationItem[] | SelectedAttributes[] | undefined;
 	}
 ): CartItem | OptimisticCartItem | undefined {
 	if ( key ) {
 		return items.find( ( cartItem ) => key === cartItem.key );
+	}
+	if ( id === undefined ) {
+		return undefined;
 	}
 	return items.find( ( cartItem ) =>
 		lineMatchesProduct( cartItem, id, variation )
