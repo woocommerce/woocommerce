@@ -4,392 +4,273 @@ This folder contains the Interactivity API (iAPI) stores that WooCommerce blocks
 
 Stores in this folder:
 
--   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format.
--   [`woocommerce/cart`](#woocommercecart-store) — the read-only cart mirror plus a keyed global home for the draft cart items that back purchase UI (add-to-cart forms, buttons, the mini-cart), addressed by server-defined draft keys, with mutation batching for performance.
+-   [`woocommerce`](#woocommerce-store) — the unified store for product/variation data, the read-only cart mirror, the shopper's editable draft cart items, and the one in-context envelope (`state.itemInContext`, with `state.findItem` as its explicit-addressing twin) that ties them together for the item the surrounding markup implies.
 -   `woocommerce/shopper-lists` — wishlist and saved-for-later state for the shopper-lists blocks (unchanged; no dedicated section here).
 
 ---
 
-## `woocommerce/products` store
+## `woocommerce` store
 
-A locked, server-populated iAPI store that exposes WooCommerce products and variations in Store API format (`ProductResponseItem`) to interactive blocks. PHP loaders populate the raw data during render; JS and PHP derived getters expose the "current" product for the surrounding context so that directives like `data-wp-text="state.productInContext.sku"` resolve correctly on both the server (SSR) and the client.
-
-**Source files:**
-
--   JS: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/products.ts`
--   PHP: `plugins/woocommerce/src/Blocks/SharedStores/ProductsStore.php`
--   PHP procedural wrappers: `plugins/woocommerce/includes/wc-interactivity-api-functions.php`
--   Behavioral tests: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/test/products.test.ts`
-
-### When to use it
-
-Use this store when an interactive block needs to read product fields (price, SKU, stock, images, attributes, …) inside a directive, and the surrounding markup implies a single "current" product — a single product page, a product in a product-collection loop, a grouped-product child, a variation inside a variable product, etc.
+A single, locked iAPI store that exposes WooCommerce product and variation data (Store API format), the read-only cart mirror, and the shopper's in-progress draft cart items, all under one namespace. Interactive blocks read it whenever the surrounding markup implies a single "current" item — a single product page, a product in a Product Collection loop, a grouped-product child, a variation inside a variable product — and whenever they need to record purchase input (a quantity, a variation selection, a namespaced extension field) or add, update, or remove cart lines. Because reads and writes resolve from context, the same block code works whether it renders as a single product's main form, a Product Collection card, a mini-cart row, or a page-wide sticky bar.
 
 ### Architecture at a glance
 
 ```text
-PHP                                                  Client
-┌───────────────────────────────────┐               ┌───────────────────────────────────┐
-│ ProductsStore::load_product()     │               │ store<ProductsStore>(             │
-│ ProductsStore::load_variations()  │  populates    │   'woocommerce/products'          │
-│ ProductsStore::load_purchasable_  │──────────────▶│ )                                 │
-│   child_products()                │               │                                   │
-└────────────┬──────────────────────┘               │ state.products                    │
-             │                                      │ state.productVariations           │
-             ▼                                      │                                   │
-   wp_interactivity_state(                          │ Derived getters:                  │
-     'woocommerce/products',                        │ • state.baseProductInContext      │
-     [ 'products' => ..., ... ]                     │ • state.productVariationInContext │
-   )                                                │ • state.productInContext          │
-                                                    └─────────────────┬─────────────────┘
-                                                                 │
- Selection (one of):                                             ▼
- • Global: wp_interactivity_state(..., [        Directives bound in markup:
-     'productId' => N, 'variationId' => null   data-wp-interactive="woocommerce/products"
-   ])                                          data-wp-text="state.productInContext.sku"
- • Local context: data-wp-context=
-     'woocommerce/products::{"productId":N}'
+PHP                                                   Client
+
+ProductsStore::load_product() / load_variations() /   store< WooCommerce >( 'woocommerce', …,
+  load_purchasable_child_products()                     { lock: universalLock } )
+        │ populates
+        ▼                                              state.products    { items, variations,
+  wp_interactivity_state( 'woocommerce',                                    productId, variationId }
+    [ 'products' => … ] )                              state.cart        { items, totals, … }
+                                                        state.draftItems  { [draftKey]: DraftItem[] }
+BlocksSharedState::load_cart_state()
+        │ populates                                    state.itemInContext ─┐
+        ▼                                              state.findItem(ref)  ├─▶ Envelope
+  wp_interactivity_state( 'woocommerce',                                    │  { productId, variationId,
+    [ 'cart' => … ] )                                                       │    draftKey, product, variation,
+                                                                             │    baseProduct, draftItem, cartItem }
+
+Addressing, one bag per element:
+  data-wp-context='woocommerce::{ "productId": 123, "variationId": null, "draftKey": "collection/q1/123" }'
 ```
 
-Two planes:
+Three planes, one namespace:
 
-1. **Raw data** — `state.products` and `state.productVariations`, both keyed by ID. Populated from PHP.
-2. **Selection** — `state.productId` / `state.variationId` identify the "current" product/variation. Can be set globally via `wp_interactivity_state`, or via local context with `data-wp-context`. **Local context takes precedence over global state.**
+1.  **Read-only server data** — `state.products` (the product/variation cache) and `state.cart` (the Store API `/cart` mirror, with optimistic edits applied). Both are populated from PHP; nothing client-side writes to either.
+2.  **Client-editable input** — `state.draftItems`, the *only* editable home in the store, at the root. It is never nested inside `state.cart`: the cart mirror is wholesale-replaced on every commit, rollback, and refresh (`state.cart = serverState` / `= snapshot` / `= json` in `cart.ts`), so anything nested inside it would be clobbered on that hot path.
+3.  **Entry points** — `state.itemInContext` (a getter) and `state.findItem` (a function), both returning the same lazy `Envelope`. See [The envelope](#the-envelope).
 
-Derived getters mirror each other in JS (`products.ts`) and PHP (`ProductsStore::register_getters`) so that directive bindings resolve during SSR as well as on the client.
+### Two script modules, one namespace
+
+The store registers from two script modules under the same `'woocommerce'` namespace; the runtime deep-merges their partial registrations into one store, so a consumer never needs to know which module registered which member.
+
+-   **`@woocommerce/stores/woocommerce`** (`index.ts`) — the slim root: the `state.products`/`state.draftItems` defaults, the `itemInContext` getter, `findItem`, and the shared types. It bundles this folder's internal helper modules (`cart-pairing.ts`, `product-resolution.ts`, `draft-internals.ts`) rather than importing the cart machinery module, so it never drags cart fetch/queue machinery onto a page that only displays a product.
+-   **`@woocommerce/stores/woocommerce/cart`** (`cart.ts`) — the cart machinery: the read-only cart mirror's lifecycle, the cart actions (`addItem`, `updateItem`, `removeItem`, `refresh`, `addCartItem`), the mutation batcher, and legacy events.
+
+Neither module value-imports the other — types flow type-only. A **display-only page** (a Product Collection card, a product gallery, a Product Button rendered outside a form) only ever needs `@woocommerce/stores/woocommerce`. On such a page `state.cart` is simply absent — the cart module never registered it — so every read that touches the cart mirror is guarded rather than assumed present (`state.cart?.items ?? []`, in `index.ts`); `itemInContext.cartItem` and `findItem(...).cartItem` degrade to `undefined`, while `draftItem` still works (the draft view and the write routine live in the root's bundled helpers).
+
+A component that needs both loads the cart module **lazily**, only at the point it actually needs cart actions or the live mirror. The Product Button is the shipped example: it statically imports `@woocommerce/stores/woocommerce` for its envelope reads, and only `import( '@woocommerce/stores/woocommerce/cart' )`s inside its `addItem`/`refresh` actions — i.e. on click, not on render (`atomic/blocks/product-elements/button/frontend.ts`).
 
 ### State reference
 
-| Property                    | Type                                                          | Origin                    | Notes                                                                                                                                                                                                                         |
-| --------------------------- | ------------------------------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `products`                  | `Record<number, ProductResponseItem>`                         | Populated from PHP        | Keyed by product ID.                                                                                                                                                                                                          |
-| `productVariations`         | `Record<number, ProductResponseItem>`                         | Populated from PHP        | Keyed by variation ID.                                                                                                                                                                                                        |
-| `productId`                 | `number`                                                      | Populated / local context | Current product ID.                                                                                                                                                                                                           |
-| `variationId`               | `number \| null`                                              | Populated / local context | Current variation ID, or `null`.                                                                                                                                                                                              |
-| `baseProductInContext`      | `ProductResponseItem \| null`                                 | Derived                   | The top-level product for the current context. Always the parent product, **never** a variation.                                                                                                                              |
-| `productVariationInContext` | `ProductResponseItem \| null`                                 | Derived / assignable      | Get/set accessor — the products-side half of the sync with `woocommerce/cart`. **Get:** resolves the in-context product's family draft in the `woocommerce/cart` collection first (raw `state.draftItems` only, never seeds or cart getters): a draft with a non-empty `variation` resolves the matching variation; a draft with no attributes but a variation `id` resolves that variation directly (the **id-direct rung** — load-bearing for quantity-first and setter-selected surfaces, since it reads price/stock/image data straight off the variation record rather than through attributes, which the real serializer leaves empty on that object); a draft parked at the parent id (empty/no attributes) resolves `null`. When no family draft exists, falls back to today's `variationId` context/state resolution. **Set:** assign a `ProductResponseItem` variation belonging to the in-context product's family, or `null` to clear. Validates family membership (dev warning + no-op for a foreign variation or a simple/grouped context); derives the written attributes from the *base product's own* `variations[]` entry for the assigned id — never from the assigned object's own (empty) `attributes` — carrying forward any value already recorded for an "any" attribute the variation itself leaves unfixed, then writes the result into the shared family draft (through the same write routine every draft write goes through). An "any" attribute left with no derivable value degrades the write to a partial selection filed at the parent product, with a dev warning naming the missing attribute(s), rather than displaying a variation the shopper cannot actually add. |
-| `productInContext`          | `ProductResponseItem \| null`                                 | Derived                   | `productVariationInContext ?? baseProductInContext`. Bind to this in the common case.                                                                                                                                         |
-| `findProduct`               | `({ id, selectedAttributes }) => ProductResponseItem \| null` | Function                  | If `id` is a variation ID, returns it directly. For variable products with `selectedAttributes`, resolves to the matching variation. For any other product type (simple, grouped, external, etc.), returns the product as-is. |
+One table for the store's five root members:
 
-### Populating state (PHP)
+| Property | Type | Origin | Notes |
+| --- | --- | --- | --- |
+| `products.items` | `Record<number, ProductResponseItem>` | Populated from PHP (`ProductsStore`) | Parent and grouped-child products, keyed by product id. |
+| `products.variations` | `Record<number, ProductResponseItem>` | Populated from PHP | Keyed by variation id. |
+| `products.productId` / `products.variationId` | `number` / `number \| null` | Populated / addressing fallback | The page's own product/variation id — the internal global-addressing fallback consulted only when the `woocommerce::` context bag declares neither key. This is the only place these two names still exist, and they are nested here, never root-level bare names. |
+| `cart` | Store API `/cart` response (+ optimistic edits) | Populated from PHP (`BlocksSharedState::load_cart_state()`), reconciled by the cart machinery module | The read-only mirror. Registered by `cart.ts`, not the root module — absent on a page that never loads it (see [Two script modules, one namespace](#two-script-modules-one-namespace)). |
+| `draftItems` | `Record<DraftKey, DraftItem[]>` | Client-only | The one editable home, at the root. Never server-seeded; reload-reset. See [Writing: drafts](#writing-drafts). |
+| `itemInContext` | `Envelope` (getter) | Derived | The one entry point: the envelope for the item the surrounding markup implies. Every member is a lazy accessor. See [The envelope](#the-envelope). |
+| `findItem` | `(ref?: FindItemRef) => Envelope` | Function | `itemInContext`'s explicit-addressing twin — the same envelope shape, for an item that isn't necessarily the context item. |
 
-All loaders require a consent statement (they are experimental APIs). The literal to pass is:
+`nonce` and `restUrl`, both former root members, are no longer store state:
 
-```php
-'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce'
+-   `nonce` is a module-local variable in `cart.ts`, refreshed from each response's `Nonce` header and gated behind the existing `isNonceReady` promise — nothing outside that module ever read or wrote it as state.
+-   `restUrl` moved to `getConfig( 'woocommerce' )` (alongside `currency`, `locale`, and `nonOptimisticProperties`), seeded by `BlocksSharedState::load_cart_state()` via `wp_interactivity_config()` and read fresh on every request that needs it (`cart.ts`'s `getRestUrl()`).
+
+### The envelope
+
+`itemInContext` and `findItem` both return the same shape:
+
+```ts
+type Envelope = {
+	// addressing — resolves even when no product data is loaded
+	productId: number | null;
+	variationId: number | null;
+	draftKey: DraftKey;
+	// product data
+	product: ProductResponseItem | null;
+	variation: ProductResponseItem | null;
+	baseProduct: ProductResponseItem | null;
+	// shopper input
+	draftItem?: DraftItem;
+	// paired cart line
+	cartItem?: CartItem | OptimisticCartItem;
+};
 ```
 
-Loaders are idempotent — calling them multiple times for the same ID (or the same variation parent) is cheap.
+Every member is a **lazy accessor**: reading `product` runs only product resolution; the pairing ladder that resolves `cartItem` runs only when `cartItem` is read; `draftItem` returns the cached, live view for its `(draftKey, id)` pair. The envelope object itself is rebuilt on every read — a new object, not a cached one; only `draftItem`'s own identity is stabilized, by the view cache in `draft-internals.ts`.
 
-#### Load a single product
+`product` keeps an **entry-point-divergent no-match contract** — the same member name answers differently depending on how it was reached:
 
-Use `wc_interactivity_api_load_product( $consent, $product_id )`.
+| entry point | a variable product whose selection matches nothing |
+| --- | --- |
+| `itemInContext.product` | the **base product** — display never blanks; SSR renders base values, an empty hidden variation input, a hidden description. |
+| `findItem({ id })` | variation-by-id direct when `id` names a variation; otherwise the product unchanged. |
+| `findItem({ id, selectedAttributes })` | **`null`** — the existence probe that lets a caller distinguish "no match" from "the base product." |
 
-From `SingleProduct` block (`src/Blocks/BlockTypes/SingleProduct.php`):
+`variation` is the resolved variation or `null` at every entry point, and is **read-only** — see [Removed and relocated members](#removed-and-relocated-members). `baseProduct` is always the family's base/parent product.
 
-```php
-// Load product into the shared products store.
-wc_interactivity_api_load_product(
-    'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
-    $product->get_id()
-);
-```
+#### `findItem`'s four addressing forms
 
-#### Load purchasable child products of a grouped product
+`findItem` replaces the old `findProduct` getter with one function covering four addressing forms, each returning the same lazy envelope:
 
-Use `wc_interactivity_api_load_purchasable_child_products( $consent, $parent_id )`. This uses the Store API `include[]` filter (not `parent[]`) because grouped-product children are standalone products, not variations. Only products whose `is_purchasable` is `true` are added to state.
+1.  **`{ id }`** — any product, variation, or grouped-child id; the `findProduct` replacement for a product-only read. The Product Button's grouped in-cart aggregate sums exactly this form over a grouped product's children:
 
-#### Load variations of a variable product
-
-Use `wc_interactivity_api_load_variations( $consent, $parent_id )`. This fetches `/wc/store/v1/products?parent[]=<id>&type=variation` and populates `state.productVariations`, keyed by variation ID. Variations for a given parent are only loaded once per request.
-
-### Setting the "current" product
-
-There are two ways to point the store at a specific product. **Local context always wins over global state.** Choose based on how the consuming block is rendered.
-
-#### Globally (template-level)
-
-Set `productId` / `variationId` on the store once for the page. Used when there is exactly one product on the page — e.g. the single product template.
-
-From `SingleProductTemplate.php`:
-
-```php
-$product = wc_get_product( $post->ID );
-if ( $product ) {
-    $consent = 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
-
-    // Load the product data into the products store so derived
-    // state closures can resolve it during server-side rendering.
-    ProductsStore::load_product( $consent, $product->get_id() );
-
-    wp_interactivity_state(
-        'woocommerce/products',
-        array(
-            'productId'   => $product->get_id(),
-            'variationId' => null,
-        )
+    ```ts
+    product?.grouped_products.reduce(
+    	( total, childId ) =>
+    		total + ( state.findItem( { id: childId } ).cartItem?.quantity ?? 0 ),
+    	0
     );
+    ```
+
+    (`atomic/blocks/product-elements/button/frontend.ts`)
+
+2.  **`{ id, selectedAttributes }`** — narrows a variable product to the variation matching a caller-supplied attribute selection; the variation-existence probe. The variation selector uses it to tell "a variation matched" apart from "nothing matched":
+
+    ```ts
+    const result = wooState.findItem( { id: product.id, selectedAttributes } ).product;
+    const matchedVariation = result && result.id !== product.id ? result : null;
+    ```
+
+    (`blocks/add-to-cart-with-options/variation-selector/frontend.ts`)
+
+3.  **`{ key }`** — an explicit cart-line key, pairing exactly with no identity guessing, regardless of `id`. The mini-cart's own row resolves its line this way:
+
+    ```ts
+    const cartItem = woocommerceState.findItem( { id, key } ).cartItem;
+    ```
+
+    (`blocks/mini-cart/frontend.ts`) — once `key` is given it pairs exactly; `id` here only feeds the envelope's other members, never the pairing itself.
+
+4.  **`{ filter }`** — caller-owned narrowing, replacing id-based identity matching entirely, for a caller with its own notion of line identity (an extension pairing against a payload shape core has no name for):
+
+    ```ts
+    state.findItem( { filter: ( item ) => item.id === productId } );
+    ```
+
+#### Pairing the cart line (`cartItem`)
+
+`cartItem` is populated only when the resolution ladder narrows to exactly one candidate line:
+
+1.  **An explicit `key`** pairs exactly, with no further checks — the caller already knows precisely which line this is.
+2.  Otherwise, **product/variation identity** — using the resolved draft's *effective* attributes (its specified selection, completed from the matching variation's own meta wherever the draft leaves an attribute unspecified) plus a namespaced extension-prop comparison against each candidate line's `extensions[<namespace>]` — must resolve to exactly one line. A `filter` argument replaces this identity matching entirely.
+
+Any remaining ambiguity — zero lines, or more than one that can't be told apart — leaves `cartItem` `undefined`. The server owns cart-line identity, so the client never guesses at it; consumers must handle `cartItem === undefined`.
+
+### Context
+
+A single context namespace, `woocommerce`, carries addressing only — never resolved data, never selection state:
+
+```html
+<!-- one bag, one namespace; every key optional and independently inherited/overridden -->
+<li data-wp-context='woocommerce::{ "productId": 123, "variationId": null, "draftKey": "collection/q1/123" }'>
+	<!-- a grouped child row deeper in the tree overrides productId only; draftKey keeps inheriting -->
+	<div data-wp-context='woocommerce::{ "productId": 456, "variationId": null }'>…</div>
+</li>
+```
+
+`productId`/`variationId` fall back to `state.products.productId`/`.variationId` when a container declares neither key; `draftKey` falls back to the reserved global key, `'woocommerce/global'`. Declaring a key at all — even `null` — always wins over the state fallback; only the *absence* of the key falls back.
+
+The two core containers each emit **one** `data-wp-context` attribute carrying every key they need:
+
+-   `ProductTemplate.php` — one bag per Product Collection loop item, with `productId`, `variationId: null`, and the card's own minted `draftKey`.
+-   `SingleProduct.php` — one bag on the block's own wrapper, with the same three keys.
+
+A grouped child row overrides only `productId` (and sets `variationId: null`) on its own local bag — `draftKey` keeps inheriting from its container (`AddToCartWithOptions/GroupedProductItemSelector.php`'s checkbox markup). An extension gets the same isolation from markup alone by declaring a `draftKey`-only bag, with zero core changes.
+
+**Exception — one shipped consumer reads addressing directly.** The Add to Cart with Options form's grouped-product check needs to know whether the *enclosing form's own product* is grouped, not whatever product a nested context override currently points at. Because a grouped child row's own quantity input overrides `productId` to its own (simple) id for its per-child reads, a context-aware read (`itemInContext.baseProduct`) would resolve to the child on every keystroke inside a child row — never `'grouped'` — and permanently skip the whole-group validation the moment a shopper touches a child field. The form's `setQuantity` action therefore reads the raw page-level addressing directly:
+
+```ts
+const topLevelProduct = wooState.products.items[ wooState.products.productId ];
+if ( topLevelProduct?.type === 'grouped' ) {
+	actions.validateGroupedProductQuantity();
+} else {
+	actions.validateQuantity( productId, value );
 }
 ```
 
-#### Local context (block-level)
+(`blocks/add-to-cart-with-options/frontend.ts`) — this is the one place among the store's consumers that reads `state.products.*` directly instead of through the envelope, and it is deliberate, not an oversight.
 
-Set `productId` / `variationId` on a wrapper element via `data-wp-context`. Use this whenever the same block type can appear multiple times on a page for different products (product loops, grouped product children, variations).
+### First paint (SSR mirror)
 
-Use `wp_interactivity_data_wp_context()` to generate the properly encoded attribute. From `SingleProduct.php`:
-
-```php
-wc_interactivity_api_load_product(
-    'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
-    $product->get_id()
-);
-
-$context = array(
-    'productId'   => $product->get_id(),
-    'variationId' => null,
-);
-
-printf(
-    '<div data-wp-interactive="woocommerce/single-product" %s>%s</div>',
-    wp_interactivity_data_wp_context( $context, 'woocommerce/products' ),
-    $content
-);
-```
-
-The second argument to `wp_interactivity_data_wp_context` (`'woocommerce/products'`) namespaces the context to the `woocommerce/products` store; the JS store's `getContext< ProductContext >( 'woocommerce/products' )` calls read from it.
-
-### Reading product data in a block
-
-Once state is populated and a current product is set, blocks read from it either through directives (SSR + client) or through a JS store reference.
-
-#### From PHP / directives (SSR)
-
-The derived getters are registered on the PHP side via `ProductsStore::register_getters()`, so bindings resolve during server render — no client-side flash during hydration.
-
-From `ProductSKU.php`:
+`ProductsStore::register_getters()` registers the envelope's product members as PHP closures nested **one level inside** `itemInContext` — not three flat top-level getters:
 
 ```php
-$interactive_attributes = $is_interactive
-    ? 'data-wp-interactive="woocommerce/products" data-wp-text="state.productInContext.sku"'
-    : '';
+wp_interactivity_state( 'woocommerce', array(
+	'itemInContext' => array(
+		'baseProduct' => function () { /* … */ },
+		'variation'   => function () { /* … */ },
+		'product'     => function () { /* … */ },
+	),
+) );
 ```
 
-Any `ProductResponseItem` field can be bound the same way, e.g. `state.productInContext.price_html`, `state.productInContext.stock_availability.text`, `state.baseProductInContext.name`.
+Each closure resolves from the unified `woocommerce::` context bag first, falls back to `state.products.productId`/`.variationId`, and is draft-ignoring — the server never resolves the shopper's client-only draft selection. Because they read `wp_interactivity_state()` at call time, they only need registering once per request, no matter how many products get loaded.
 
-#### From JS (client)
+Six SSR-rendered directive bindings depend on these closures resolving correctly before hydration:
 
-Import the store for its side effects and reference it with the `ProductsStore` type.
+| binding | file | binding string |
+| --- | --- | --- |
+| SKU | `ProductSKU.php` | `data-wp-text="state.itemInContext.product.sku"` |
+| stock-availability text | `ProductStockIndicator.php` | `data-wp-text="state.itemInContext.product.stock_availability.text"` |
+| specification fields | `ProductSpecifications.php` | `data-wp-text="state.itemInContext.product.<api_field>"` |
+| quantity minimum/maximum/step | `AddToCartWithOptions/QuantitySelector.php` | `data-wp-bind--min="woocommerce::state.itemInContext.product.add_to_cart.minimum"` (`.maximum`, `.multiple_of` for max/step) |
+| hidden variation-id input | `AddToCartWithOptions/AddToCartWithOptions.php` | `data-wp-bind--value="woocommerce::state.itemInContext.variation.id"` |
+| variation-description visibility | `AddToCartWithOptions/VariationDescription.php` | `data-wp-bind--hidden="woocommerce::!state.itemInContext.variation.description"` |
 
-From `atomic/blocks/product-elements/button/frontend.ts`:
+The SKU, stock, and specification bindings render inside an element whose own `data-wp-interactive` is already `woocommerce`, so they reference the path bare (`state.itemInContext...`); the quantity and hidden-input bindings sit inside `woocommerce/add-to-cart-with-options[-quantity-selector]` elements, so they spell out the namespace (`woocommerce::state...`). The variation-description binding crosses namespaces the other way: its own element's `data-wp-interactive` is `woocommerce/product-elements`, so its `woocommerce::` prefix is load-bearing, not decorative.
+
+The mini-cart's own SSR path is namespace churn only — the path suffix is unchanged: `data-wp-each--cart-item="woocommerce::state.cart.items"` (`MiniCartProductsTableBlock.php`), same as it read under the old, separate cart namespace.
+
+### Writing: drafts
+
+A `DraftItem` is exactly a Store API `cart/add-item` payload — there is no mapping layer between what a purchase surface collects and what gets posted:
 
 ```ts
-import { store } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/products';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-
-// Stores are locked to prevent 3PD usage until the API is stable.
-const universalLock =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
-	{},
-	{ lock: universalLock }
-);
-
-// Later, in a getter or action:
-const product = productsState.productInContext;
-if ( ! product ) {
-	return;
-}
-// product.id, product.sku, product.prices.price, ...
-```
-
-#### Resolving a variation by attributes
-
-Use `state.findProduct({ id, selectedAttributes })` when you have a product or variation ID. If the ID is a variation, it returns it directly. For variable products with `selectedAttributes`, it resolves to the matching variation. For any other product type (simple, grouped, external, etc.), it returns the product as-is.
-
-From `base/utils/variations/does-cart-item-match-attributes.ts`:
-
-```ts
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
-	{},
-	{ lock: universalLock }
-);
-
-const parentProductId = productsState.productVariations[ cartItem.id ]?.parent;
-const productAttributes =
-	productsState.products[ parentProductId ]?.attributes ?? [];
-```
-
-For variable products, `findProduct` returns `null` when no variation matches the given attributes. For simple, grouped, external, or any other non-variable product type, it returns the product itself.
-
-### Patterns and pitfalls
-
--   **Always load before you bind.** If `wc_interactivity_api_load_product` was never called for the current `productId`, `state.baseProductInContext` resolves to `null` and directive bindings silently render empty.
--   **Prefer `productInContext`** for "whatever is currently being shown". Use `baseProductInContext` / `productVariationInContext` only when the distinction matters (e.g. rendering a variation-specific description vs. the parent title).
--   **`data-wp-context` sets local context.** Use it whenever the same block type can appear multiple times on a page for different products.
--   **Local context beats state.** If a block is wrapped in a `data-wp-context="woocommerce/products::{ ... }"` element, its `productId` / `variationId` override any globally-set values for descendants of that element. See `test/products.test.ts` for the exact precedence rules — notably, a context that has `productId` but no `variationId` key does **not** fall back to the global `variationId`.
--   **Keep the consent string in sync.** The literal string is defined in `ProductsStore::$consent_statement` (PHP) and `universalLock` (JS). They are intentionally different (loaders vs. store lock); copy-paste from this README or the source files.
--   **Do not extend this store from third-party code.** It is `lock: true` and private by design; anything here can change or disappear without notice.
-
----
-
-## `woocommerce/cart` store
-
-A locked, private iAPI store that holds two things: a **read-only mirror of the server cart** (`state.cart`, the Store API `/cart` response with optimistic edits applied) and the **draft cart items** that back purchase UI — the quantities, variation selections, and extension data a shopper is configuring before they add to cart.
-
-Shopper input is modeled as **draft cart items** that live in **global state, addressed by server-defined draft keys**. A draft is literally a Store API `cart/add-item` request payload — there is no mapping layer between what a form collects and what gets posted. `state.draftItems` is a keyed map of draft collections (`Record<DraftKey, DraftItem[]>`); each collection keeps the same product's input independent across the many places a purchase form can appear (a product template's main form, a sticky add-to-cart bar, a grouped child, a Product Collection card, a bundle slot). A container block isolates its own subtree by declaring an opaque, server-minted `draftKey` in its `woocommerce/cart` context; a surface wrapped in no container resolves the one reserved session-global collection. Surfaces that resolve the same key share drafts and stay in sync; surfaces under different keys are fully independent.
-
-**Source files:**
-
--   JS: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/cart.ts`
--   Container blocks (each mints and declares a `woocommerce/cart` draft key): `plugins/woocommerce/src/Blocks/BlockTypes/ProductTemplate.php` (Product Collection loop items), `plugins/woocommerce/src/Blocks/BlockTypes/SingleProduct.php` (Single Product block)
--   Product Collection root (`queryId` on block context + router region, read by `ProductTemplate.php` to mint keys): `plugins/woocommerce/src/Blocks/BlockTypes/ProductCollection/Renderer.php`
--   Draft-seed filing: `plugins/woocommerce/src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php`, `.../AddToCartWithOptions/Utils.php`, `.../AddToCartWithOptions/GroupedProductItemSelector.php`
--   Cart-state seeding: `plugins/woocommerce/src/Blocks/Utils/BlocksSharedState.php`
--   Behavioral tests: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/test/cart.ts`
-
-### When to use it
-
-Use this store when an interactive block needs to record shopper purchase input before an add-to-cart (a quantity, a variation selection, a namespaced extension field), read the live/optimistic cart, or add, update, or remove cart lines. Because every read and write resolves the draft collection for the nearest declared key and the product in context, the same block code works whether it is rendered as a single product's main form, a Product Collection card, a mini-cart row, or a page-wide sticky bar.
-
-### Architecture at a glance
-
-```text
-Two planes of state:
-
-  state.cart          read-only mirror of the Store API /cart response
-                      (with optimistic edits); the server owns line identity.
-
-  state.draftItems    the keyed draft home: Record<DraftKey, DraftItem[]>.
-                      One collection per key, at most one draft per product id
-                      within it. A DraftItem IS a cart/add-item payload. Lives
-                      alongside — never inside — state.cart, and is written only
-                      by the shopper (never server-seeded).
-
-Key resolution (one internal place — resolveDraftKey / resolveCollection):
-
-  context.draftKey    a container's declared key, inherited by its subtree.
-  GLOBAL_DRAFT_KEY    'woocommerce/global', the reserved fallback key.
-  key         = context.draftKey ?? GLOBAL_DRAFT_KEY
-  collection  = state.draftItems[key]      (undefined until first write)
-
-Reads (never guess a line):        Writes:
-
-  state.itemInContext  ─┐            direct mutation through the draft view:
-  state.findItem(…)     ├─▶ Envelope   itemInContext.draft.quantity = 3
-  state.inCartQuantity ─┘  { cartItem?, draft? }   (materializes on first write;
-                                     reactive, honored by addItem)
-                                     actions.addItem( payload? )  ── posts drafts
-                                     actions.updateItem / removeItem / refresh
-```
-
-### The draft-collection model
-
-`state.draftItems` is a keyed map of draft collections. A `DraftItem` is exactly a `cart/add-item` payload; a `DraftKey` is an opaque address for one collection:
-
-```ts
-type DraftKey = string; // an opaque address for one collection (see below)
+type DraftKey = string; // an opaque address for one collection
 
 type DraftItem = {
-    id: number; // product or variation id; also the per-collection uniqueness key
-    quantity?: number; // optional; an omitted quantity defaults server-side to the product minimum
-    variation?: SelectedAttributes[]; // the SPECIFIED selection; [] means nothing specified
-    [ extensionProp: string ]: unknown; // namespaced, e.g. 'my-plugin/gift-note'
+	id: number; // product or variation id; the per-collection uniqueness key
+	quantity?: number; // optional — an omitted quantity defaults server-side to the product minimum
+	variation?: SelectedAttributes[]; // the SPECIFIED selection; [] means nothing specified
+	[ extensionProp: string ]: unknown; // namespaced, e.g. 'my-plugin/gift-note'
 };
 
 state.draftItems: Record< DraftKey, DraftItem[] >;
 ```
 
-Extension props ride at the payload root, namespaced (a key containing a `/`), exactly as the Store API accepts them — there is no separate wrapper for them. This is the read model's mirror image of `CartItem.extensions`, which reflects the server's response once a line exists.
+Extension props ride at the payload root, namespaced (a key containing a `/`), exactly as the Store API accepts them. `state.draftItems` is never server-seeded: collections are created lazily, on a shopper's first write to a key, and hold at most one draft per product `id`. A container declares an opaque, server-minted `draftKey` in the single `woocommerce::` context bag to isolate its subtree (see [Context](#context)); a surface wrapped in no container resolves the reserved global key, `'woocommerce/global'`.
 
-**Keys are opaque.** A `DraftKey` is a plain string whose only contract is equality: the same key resolves the same collection, and nothing else is promised — no parseable format, no stability beyond a single browsing session. Core mints two formats (see [The container primitive](#the-container-primitive)), but a consumer never parses or constructs one; it only ever declares a key it was handed (or, for an extension, one it chose) and lets the store resolve it. Because a surface's key is identical across successive server renders of that surface, its drafts re-attach after region remounts and client-side navigations.
-
-**One collection per key; at most one draft per product `id` within it.** Writing through the draft view (see [Writing: drafts](#writing-drafts)) merges onto the draft nearest the written id — the exact-id draft, or, failing that, the draft already filed for another member of the same product family — and, only when neither exists, materializes a new one under the id the write resolves to. When a surface genuinely needs two independent drafts of the same product (two bundle slots offering the same child), its containers declare **two keys** rather than reaching for a second addressing concept — one draft per product per collection is the invariant, and the key is the only isolation boundary.
-
-**The server never seeds `state.draftItems`.** Collections are created lazily, on a shopper's first write to a key; the map starts empty on a fresh page load. Drafts are client-only reactive state the server never mirrors into `state.cart`. This is what makes client-side (router-region) navigation draft-safe: the cart mirror reconciles with the server, while a shopper's in-progress draft edits live in a plane the server never overwrites — keyed so they re-attach wherever their surface re-renders.
-
-### The container primitive
-
-A container isolates its subtree by declaring an opaque, server-minted draft key in its `woocommerce/cart` context — a single `draftKey`:
-
-```html
-data-wp-context---draft-key='woocommerce/cart::{"draftKey":"<key>"}'
-```
-
-Any surface nested inside that container then resolves that key's collection; a surface with no such ancestor resolves the reserved session-global collection under `GLOBAL_DRAFT_KEY` (`'woocommerce/global'`). The `draftKey` key is what creates the boundary — other `woocommerce/cart` context keys (a mini-cart row's `id`/`key`) do **not**.
-
-The two core containers WooCommerce ships mint their key server-side:
-
--   `ProductTemplate.php` — emits a `draftKey` bag on each Product Collection loop item (`<li>`), minting `collection/<queryId>/<productId>`, isolating every card in the grid. (`queryId` is a static block attribute unchanged by pagination, so the card's key is stable across successive renders.)
--   `SingleProduct.php` — emits a `draftKey` bag on the Single Product block wrapper, minting `single-product/<productId>/<n>`, where `<n>` is a per-request, per-product document-order occurrence counter. The counter is what keeps two Single Product blocks for the same product on one page mutually isolated.
-
-An extension gets the same primitive from markup alone: it declares a namespaced key of its own (e.g. `data-wp-context---draft-key='woocommerce/cart::{"draftKey":"my-plugin/slot-1"}'`) on its container element, with zero core changes. Key formats are internal and unpromised; the only contract is equality.
-
-The three-hyphen attribute name is required because `wp_interactivity_data_wp_context()` always emits an attribute literally named `data-wp-context`; an element that already carries a default context bag (here, the `woocommerce/products` product context) cannot carry a second one under the same attribute name — the HTML parser would keep the first and silently drop the second. `data-wp-context---<suffix>` is the supported way to add a second, namespaced context bag on one element (the same pattern the shopper-lists blocks use for `data-wp-context---notices`).
-
-**Resolution lives in one place.** A module-private `resolveDraftKey()` in `cart.ts` implements `context.draftKey ?? GLOBAL_DRAFT_KEY` (the nearest declared key wins by the runtime's own context inheritance; a call from outside any directive degrades to `GLOBAL_DRAFT_KEY` rather than throwing), and a companion `resolveCollection( key )` returns `state.draftItems[ key ]` (tolerating a not-yet-created collection as empty). Every getter and action routes through them. **No consumer ever reads or writes a key, or writes that fallback conditional** — you read a resolved draft through the envelope (below) and write it back, and the store does the addressing.
-
-### Reading: the in-context envelope
-
-Reads return an `Envelope`, which pairs the resolved collection's draft with the matching cart line:
-
-```ts
-type Envelope = {
-    cartItem?: CartItem | OptimisticCartItem | undefined;
-    draft?: DraftItem | undefined;
-};
-```
-
-There is no `isInCart` (or any other) member — no consumer needed the "in the cart, but no single identifiable line" tri-state, so the envelope carries only `cartItem` and `draft`.
-
--   `state.itemInContext` — the envelope for the product the surrounding markup implies, resolved through the `woocommerce/products` store's `productInContext`. The resolved collection's draft is paired with its cart line. When no product is in context (nothing rendered), it returns an empty envelope.
--   `state.findItem( { id?, key?, filter? } )` — the explicit primitive behind `itemInContext`, for looking up a specific draft/line pair. It resolves the draft from the nearest declared key's collection, same as `itemInContext`.
--   `state.inCartQuantity` — the in-context product's in-cart quantity. A grouped product aggregates its children's own in-cart quantities (each resolved independently, by id); a variable product resolves through its currently selected variation (the same resolution as `itemInContext`); a simple product is its own paired line's quantity. It is `0` when nothing pairs or no product is in context.
-
-**Pairing never guesses.** `cartItem` is populated only when the pairing ladder resolves to exactly one candidate line:
-
-1.  **An explicit `key`** pairs exactly, with no further checks — the caller already knows precisely which line this is (a mini-cart row passes the `key` it reads from its own `woocommerce/cart` context).
-2.  Otherwise, **product/variation identity** — using the resolved draft's **effective** attributes, not its raw `variation` — **plus a namespaced extension-prop comparison** against each candidate line's `extensions[<namespace>]` must resolve to exactly one line. The effective attributes are the draft's specified selection (always a real array; `[]` means nothing specified) completed from the matching variation's own meta wherever the draft leaves an attribute unspecified — the same fill the server itself performs before computing line identity. This is what lets an **id-direct draft** (a variation id with an empty `variation`, e.g. one materialized by a quantity-first edit on a default-attribute surface) pair to its own server line: server and client complete the same missing attributes from the same variation meta and arrive at the same identity. An unspecified "any" attribute neither the draft nor the variation's meta fixes leaves the payload incomplete — it pairs to nothing, mirroring the server's rejection of the equivalent add. A `filter` argument replaces this identity matching entirely, for extensions with their own notion of line identity.
-
-Any remaining ambiguity — zero lines, or more than one line that cannot be told apart — leaves **`cartItem` `undefined`**. The server owns cart-line identity, so the client never guesses at it. Consumers must handle `cartItem === undefined`.
-
-### Writing: drafts
-
-The `draft` an envelope hands back — `itemInContext.draft`, or `findItem( { id } ).draft` — is the store's **only** write surface. It is a live, per-`(key, id)` view, not a plain object or a copy: reading it answers the live draft's values when one exists, else the surface's server-filed seed values (see [The server half](#the-server-half)) — **a read never materializes anything**, it only subscribes. There is no draft-writing action anywhere on the store: `upsertDraftItem` has been removed, and nothing action-shaped replaces it. First edit and hundredth edit are the same spelling: `itemInContext.draft.quantity = 3`, `itemInContext.draft.variation = attrs`.
+The `draftItem` an envelope hands back — `itemInContext.draftItem`, or `findItem( { id } ).draftItem` — is the store's **only** write surface. It is a live, per-`(draftKey, id)` view, not a plain object or a copy: reading it answers the live draft's values when one exists, else the surface's server-filed seed values (see [The server half](#the-server-half)) — a read never materializes anything, it only subscribes. There is no draft-writing action anywhere on the store: `upsertDraftItem` has been removed, and nothing action-shaped replaces it. First edit and hundredth edit are the same spelling: `itemInContext.draftItem.quantity = 3`, `itemInContext.draftItem.variation = attrs`.
 
 Writing through the view does one of two things, depending on whether a draft already exists for the resolved id (or for another member of the same product family):
 
 -   **Onto an existing draft, a merge.** The write mutates the live draft in place, notifies every surface that resolves the same key, and is honored by `addItem` posting (which reads the collection at call time).
--   **Onto an untouched surface, a materialize.** The first write composes a new draft from the surface's server-filed seed (`{ ...seed, [prop]: value, id }`) and files it into the collection in one atomic step, so an untouched field falls back to its server-rendered default exactly as if the shopper had never touched it.
+-   **Onto an untouched surface, a materialize.** The first write composes a new draft from the surface's server-filed seed and files it into the collection in one atomic step, so an untouched field falls back to its server-rendered default exactly as if the shopper had never touched it.
 
 Two write-specific rules apply regardless of which of the above happens:
 
--   **Writing `variation` migrates `id`.** The view re-resolves the family's matching variation against the newly written attributes and re-files the *same* draft under whichever id they resolve to — the matched variation's id, or the base product's own id when nothing matches — with `quantity` and any extension props riding along unchanged. This is what keeps at most one draft per product family on the write path, and what the read/write sync with `woocommerce/products` (see that store's `productVariationInContext`) rides on.
--   **`id` cannot be written directly.** A draft's identity is store-managed — it follows `variation`, never a direct assignment — so an attempted `draft.id = …` is rejected: a dev-build `console.warn`, and a no-op, leaving state unchanged.
+-   **Writing `variation` migrates `id`.** The view re-resolves the family's matching variation against the newly written attributes and re-files the *same* draft under whichever id they resolve to — the matched variation's id, or the base product's own id when nothing matches — with `quantity` and any extension props riding along unchanged. This is what keeps at most one draft per product family on the write path.
+-   **`id` cannot be written directly.** A draft's identity is store-managed — it follows `variation`, never a direct assignment — so an attempted `draftItem.id = …` is rejected: a dev-build `console.warn`, and a no-op, leaving state unchanged.
 
-**`quantity` is optional.** A materializing write whose composed draft carries no numeric `quantity` — an untouched surface with no seeded quantity of its own, written to on some other field first — still materializes, with a dev-build warning: a quantity-less draft is a valid `cart/add-item` payload, and the server defaults an omitted quantity to the product's own minimum purchase quantity. Nothing client-side synthesizes a quantity on the draft's behalf.
+**`quantity` is optional.** A materializing write whose composed draft carries no numeric `quantity` still materializes, with a dev-build warning: a quantity-less draft is a valid `cart/add-item` payload, and the server defaults an omitted quantity to the product's own minimum purchase quantity. Nothing client-side synthesizes a quantity on the draft's behalf.
 
-**Bystander discipline.** Because watch and init callbacks re-run on every surface that resolves a shared collection, only a genuine shopper edit — or a clamp of the shared value itself — may write to a draft. A sibling surface that the shopper never touched must not write its stale local default back over the shared draft (for example, a never-selected variation surface must not overwrite "nothing selected" onto a variation another surface resolved). When building a new surface that shares a collection, gate every draft write behind an actual user action.
+**There is no assignable counterpart to `variation`.** The envelope's `variation` member is read-only at both entry points; the only way to write a selection is through `draftItem.variation`. A caller holding only a variation id — with no attribute set at hand — writes through the id-direct rung instead: `findItem( { id: variationId } ).draftItem`, which resolves and merges onto the same family draft `draftItem.variation = attrs` would. (A previous, now-removed member let a caller assign a resolved variation object directly on a separate registration this revision unified away; its setter forwarded into the very same write routine, framed at the time as keeping two stores' selection state in sync. With one store, there is nothing left to sync — `itemInContext.variation` and `itemInContext.draftItem.variation` are two reads of the same resolution, not two independent pieces of state. See [Removed and relocated members](#removed-and-relocated-members).)
+
+**Bystander discipline.** Because watch and init callbacks re-run on every surface that resolves a shared collection, only a genuine shopper edit — or a clamp of the shared value itself — may write to a draft. A sibling surface the shopper never touched must not write its stale local default back over the shared draft (for example, a never-selected variation surface must not overwrite "nothing selected" onto a variation another surface resolved). When building a new surface that shares a collection, gate every draft write behind an actual user action.
 
 ### Adding to cart: `addItem`
 
 `actions.addItem( payload? )` is polymorphic:
 
--   **`addItem()`** (no argument) resolves the in-context product via `woocommerce/products` and posts the resolved collection's draft(s) for it:
-    -   a simple or variable product posts its own live draft, **falling back to its *effective* seed** when no live draft exists yet — the family seed re-addressed to the in-context id (`{ ...( seed[ id ] ?? seed[ parentId ] ), id }`), not just the surface's own id. For an unresolved parent id this is an identity no-change, exactly today's behavior (only the direct seed lookup ever applies). For a resolved variation id whose seed was filed only under its parent — the common variable-surface case — this turns what would otherwise be a silent no-op into a minimal `{ id, quantity }` post: an untouched surface whose in-context id is a resolved variation now posts instead of sending nothing, and the server fills the rest authoritatively;
-    -   a grouped product posts every declared child's draft (children resolved one-directionally through the products store) whose `quantity` is greater than `0` — untouched children never post, because seeds are not consulted on this rung.
+-   **`addItem()`** (no argument) resolves the in-context product via `state.itemInContext` and posts the resolved collection's draft(s) for it:
+    -   a simple or variable product posts its own live draft, **falling back to its *effective* seed** when no live draft exists yet — the family seed re-addressed to the in-context id, not just the surface's own id;
+    -   a grouped product posts every declared child's draft — each child id read directly off the in-context product's own `grouped_products` list — whose `quantity` is greater than `0`; untouched children never post, because seeds are not consulted on this rung.
 
     Multiple children are posted as one auto-batched request set, not one request per child.
 -   **`addItem( payload )`** posts the payload verbatim — extension props at its root included — bypassing key and product resolution entirely. This is the path an extension composing its own `cart/add-item` payload (a bundle carrying `wc-bundle-demo/children`, say) uses.
 
-**Product-scoped posting is a guarantee, not a side effect.** `addItem` posts only the in-context product's draft (simple/variable), the grouped parent's declared children with `quantity > 0`, or an explicit payload — it **never iterates a collection**. This matters now that a session-global collection accumulates drafts from every page a shopper visited: an add from one surface can never leak an unrelated product's draft that happens to share the same key. When the resolution yields no draft (and no seed), `addItem` sends nothing.
+**Product-scoped posting is a guarantee, not a side effect.** `addItem` posts only the in-context product's draft (simple/variable), the grouped parent's declared children with `quantity > 0`, or an explicit payload — it **never iterates a collection**. When the resolution yields no draft (and no seed), `addItem` sends nothing.
 
 Every posted item optimistically bumps a matching existing cart line's quantity in place (unless `sold_individually`) or is pushed as a new line, commits or rolls back through the mutation queue, and fires the legacy added-to-cart event once per call on success. A cycle whose requests all fail rolls the cart back to its pre-cycle snapshot and surfaces a `woocommerce/store-notices` notice.
 
-> **Caveat — notice narrowing.** Form and button adds no longer pass a notice-suppression flag. An exact add stays notice-silent (the store proves the server total equals the pre-add total plus the posted delta and suppresses those lines), but a genuinely divergent server commit — a stock cap or a concurrent change — now surfaces a "quantity changed" notice where the previous code path was silent. This is a deliberate narrowing, not a regression in correctness.
+> **Caveat — notice narrowing.** Form and button adds no longer pass a notice-suppression flag. An exact add stays notice-silent, but a genuinely divergent server commit — a stock cap or a concurrent change — now surfaces a "quantity changed" notice where the previous code path was silent. This is a deliberate narrowing, not a regression in correctness.
 
 The store also exposes the retained cart-line actions:
 
@@ -402,35 +283,27 @@ The store also exposes the retained cart-line actions:
 
 Server-side rendering mints each collection's key and files each surface's initial draft as server state, so every visible value is correct in the initial HTML before hydration. **Nothing on the server writes a draft**: containers declare keys, purchase surfaces file seeds, and the client resolves and materializes drafts from there.
 
-#### Container boundaries
+`ProductTemplate.php` (Product Collection loop items) and `SingleProduct.php` (Single Product block) each mint a key and emit the single `woocommerce::` context bag documented under [Context](#context), carrying `productId`/`variationId`/`draftKey` together. Each also injects the same `draftKey` into its existing `render_block_context` filter, so descendant purchase surfaces render with the container's key in their block context and can file their seeds under it. That is the entire server-side isolation mechanism: one context bag plus block-context propagation — no push/pop, no registration.
 
-`ProductTemplate.php` (Product Collection loop items) and `SingleProduct.php` (Single Product block) each mint a key and emit the `data-wp-context---draft-key` bag documented under [The container primitive](#the-container-primitive). Each also **injects the same `draftKey` into its existing `render_block_context` filter**, so descendant purchase surfaces render with the container's key in their block context and can file their seeds under it. That is the entire server-side isolation mechanism: a `draftKey` context bag plus block-context propagation — no push/pop, no registration.
-
-`ProductCollection/Renderer.php` contributes **nothing** to the cart store. `queryId` lives only on the Product Collection block's own context (via `providesContext`) and on the collection root's `data-wp-router-region` attribute; `ProductTemplate.php` reads it from block context to mint each card's key. The cart store never sees `queryId`.
-
-#### Draft seeding
-
-Each purchase surface files its initial `cart/add-item` payload as server state, under its collection's key. The form-level emitter (`AddToCartWithOptions.php`) and the shared quantity-stepper emitter (`Utils::make_quantity_input_interactive()`, reached by the quantity-selector and grouped-product child-row blocks) each call:
+Each purchase surface files its initial `cart/add-item` payload as server state, under its collection's key, into the unified namespace's `draftSeeds`:
 
 ```php
-wp_interactivity_state( 'woocommerce/cart', array(
-    'draftSeeds' => array(
-        $draft_key => array(
-            $product_id => $seed_payload, // an initial cart/add-item payload
-        ),
-    ),
+wp_interactivity_state( 'woocommerce', array(
+	'draftSeeds' => array(
+		$draft_key => array(
+			$product_id => $seed_payload, // an initial cart/add-item payload
+		),
+	),
 ) );
 ```
 
-`$draft_key` is read from the surface's block context (`$block->context['draftKey'] ?? 'woocommerce/global'`) — the key its container injected, or the reserved global key when no container wraps it. The three seed-emitting blocks (`add-to-cart-with-options` and its quantity-selector and grouped-product child-row selectors) declare `draftKey` in their `usesContext` so the injected key actually reaches their render context. Seeds accumulate across surfaces into one `draftSeeds` payload and print once.
+(`AddToCartWithOptions.php`'s form-level emitter, and `AddToCartWithOptions/Utils::make_quantity_input_interactive()`, reached by the quantity-selector and grouped-product child-row blocks.) `$draft_key` is read from the surface's block context (`$block->context['draftKey'] ?? 'woocommerce/global'`) — the key its container injected, or the reserved global key when no container wraps it. Seeds accumulate across surfaces into one `draftSeeds` payload and print once.
 
-On the client, seeds are read **only through `getServerState( 'woocommerce/cart' )?.draftSeeds`** — the runtime's intact, per-page, navigation-fresh copy — and consulted at exactly two points: the draft view materializes a new draft composed from the seed on the shopper's first write to an untouched surface, and `addItem` falls back to the *effective* seed (the family seed re-addressed to the in-context id) for an untouched simple/variable surface with no live draft. A seed is **never applied into a collection**, so a re-delivered seed (on a region re-render or client-side navigation) can never replace or inject into an edited draft — the two live in different places. The runtime also auto-merges the incoming server state into a `state.draftSeeds` copy, but that client-side copy is **inert**: the store never reads it (it would accumulate stale entries across navigations); `getServerState()` is the only seed source.
+On the client, seeds are read only through `getServerState( 'woocommerce' )?.draftSeeds` — the runtime's intact, per-page, navigation-fresh copy — and consulted at exactly two points: the draft view materializes a new draft composed from the seed on the shopper's first write to an untouched surface, and `addItem` falls back to the *effective* seed for an untouched simple/variable surface with no live draft. A seed is never applied into a collection, so a re-delivered seed (on a region re-render or client-side navigation) can never replace or inject into an edited draft.
 
 Grouped-product child rows seed at quantity `0` (each is optional), so an untouched grouped form posts none of them; a grouped parent seeds nothing at the form level (it has no single id to add). A directly-referenced variation carries its own `{ attribute, value }` pairs in its seed, so an untouched direct-variation surface posts a line the cart-line pairing ladder can match.
 
-#### Cart-state seeding
-
-`BlocksSharedState::load_cart_state()` seeds the read-only cart mirror (`state.cart`) and the REST URL (`state.restUrl`) into `woocommerce/cart` state. It seeds **no draft addressing** — no keys, no seeds, and no notice id — so the client's `state.draftItems` starts empty on a fresh load; every collection is established by a shopper write against a container-declared or global key.
+`BlocksSharedState::load_cart_state()` seeds the read-only cart mirror (`state.cart`) into the unified `woocommerce` namespace, and `restUrl` into the same namespace's config plane (`wp_interactivity_config( 'woocommerce', […] )`) alongside currency, locale, and `nonOptimisticProperties`. It seeds no draft addressing — no keys, no seeds — so the client's `state.draftItems` starts empty on a fresh load; every collection is established by a shopper write against a container-declared or global key.
 
 ### Draft lifecycle
 
@@ -440,9 +313,9 @@ Drafts live for the length of a browsing session by design — a property of whe
 -   They **survive cross-page client-side navigation.** A draft edited on a purchase surface survives a genuine client-side (router-region) navigation to another page and back, for the lifetime of the continuous session. Store modules persist across the navigation; the incoming page's server state merges non-destructively and never carries drafts; a returning surface re-declares its same key and its drafts re-attach. Surfaces wrapped in no container share the one global collection across pages, so product A's unwrapped form on page B shows the edit made on page A.
 -   They **reset on a hard reload.** All client state reinitializes; `state.draftItems` starts empty and seeds re-derive fresh. Drafts are client-side only — there is no persistence layer.
 
-There is **no lifecycle machinery** behind this — no ledger, no restore protocol, no per-surface reconstruction. Survival is what the model yields on its own: global state that outlives region swaps and navigations, plus render-stable keys that re-address the same collection wherever a surface re-renders. In particular, a **remounted variable-product card re-presents its recorded attribute selection.** The card's attribute-selection UI state lives in products-namespace context, and the remount does discard that context — but `productVariationInContext` (see the `woocommerce/products` store) derives from the surviving family draft *ahead of* that context, so the matched variation resolves again on the first post-remount frame with no context to read from: the chips/dropdown re-check, and every reader derived from the resolved variation — price, SKU, stock, gallery, and hidden-input bindings — repaints to match. Nothing re-runs the original attribute-selection logic; the derivation simply reaches, from the draft alone, the same conclusion the discarded context used to hold. Display and posting stay in agreement, now in the shopper's favor: what re-presents is exactly what would be added.
+There is **no lifecycle machinery** behind this — no ledger, no restore protocol, no per-surface reconstruction. Survival is what the model yields on its own: global state that outlives region swaps and navigations, plus render-stable keys that re-address the same collection wherever a surface re-renders. In particular, a **remounted variable-product card re-presents its recorded attribute selection.** The card's attribute-selection UI state lives in `woocommerce` context, and the remount does discard that context — but `itemInContext.variation` derives from the surviving family draft *ahead of* that context (`index.ts`'s `resolveVariationInContext` checks the draft before falling back to addressing), so the matched variation resolves again on the first post-remount frame with no context to read from: the chips/dropdown re-check, and every reader derived from the resolved variation — price, SKU, stock, gallery, and hidden-input bindings — repaints to match. Nothing re-runs the original attribute-selection logic; the derivation simply reaches, from the draft alone, the same conclusion the discarded context used to hold. Display and posting stay in agreement, now in the shopper's favor: what re-presents is exactly what would be added.
 
-> **History.** An earlier iteration of this store stored drafts in context-held collections and kept a remounted Product Collection card's draft alive with Product-Collection-specific machinery: a module-private ledger keyed by a derived card identity, a register-or-restore init directive on every card, a render-time bridge in the resolver, a per-card `data-wp-init`, `seedDraftIfAbsent` with its `data-wp-context---draft-seed` bags, and the empty-collection `data-wp-context---draft-items` bags. That entire apparatus — and the `removeDraftItem` action alongside it — was deleted with no successor when drafts moved into keyed global state. None of it exists in the shipped store; it is recorded here only so readers migrating from that model know it is gone.
+> **History.** An earlier iteration of this store kept drafts in context-held collections and kept a remounted Product Collection card's draft alive with Product-Collection-specific machinery: a module-private ledger keyed by a derived card identity, a register-or-restore init directive on every card, a render-time bridge in the resolver, a per-card `data-wp-init`, `seedDraftIfAbsent` with its own context bags, and empty-collection context bags. That entire apparatus — and a `removeDraftItem` action alongside it — was deleted with no successor when drafts moved into keyed global state. None of it exists in the shipped store; it is recorded here only so readers migrating from that model know it is gone.
 
 #### Residuals worth knowing
 
@@ -454,39 +327,81 @@ These are accepted, shipped behaviors of the current validation-grade surface:
 -   **Hand-authored collections without a `queryId`** all mint under `collection/0/<productId>` and can therefore share drafts per product across two such collections. Enhanced pagination requires authored `queryId`s, so this affects only hand-rolled markup.
 -   **Duplicate-id drafts are possible via direct `push`.** Now that direct mutation is first-class, appending a second draft with an existing `id` straight onto a collection bypasses the one-draft-per-`id` invariant (lookups then resolve first-match). This is bounded — no shipped consumer appends directly; every write that goes through the draft view resolves the existing (exact-id or family) draft first and merges onto it rather than appending, which is what maintains the invariant on the supported write path.
 
+### Removed and relocated members
+
+This revision retires several members with no aliasing window — the store is private, locked, and has no third-party consumers to migrate gently. Each one's replacement, if any, is below.
+
+-   **`findProduct` is removed.** Every call site becomes a `findItem` form: `findProduct({ id })` → `findItem({ id }).product`; `findProduct({ id, selectedAttributes })` → `findItem({ id, selectedAttributes }).product`. See [`findItem`'s four addressing forms](#finditems-four-addressing-forms).
+-   **`inCartQuantity` is removed, with no store-level replacement.** A simple or variable product's own in-cart quantity is `itemInContext.cartItem?.quantity ?? 0` — the removed getter's own else-branch, now read directly. The grouped aggregate the getter used to compute (summing every child's own paired line) now lives in the Product Button's own private store, as `groupedInCartQuantity` (`atomic/blocks/product-elements/button/frontend.ts`), built on `findItem({ id: child }).cartItem`:
+
+    ```ts
+    get groupedInCartQuantity(): number {
+    	const product = state.itemInContext.product;
+    	return (
+    		product?.grouped_products.reduce(
+    			( total, childId ) =>
+    				total + ( state.findItem( { id: childId } ).cartItem?.quantity ?? 0 ),
+    			0
+    		) ?? 0
+    	);
+    }
+    ```
+
+    Read this as a **reference pattern**, not shared-store API: it is the Product Button's own getter, on its own namespace (`woocommerce/product-button`), because the button is presently the aggregate's only consumer. A second consumer materializing is what would justify promoting it into a bounded read on the shared store.
+-   **The assignable resolved-variation setter is removed, not relocated.** See [Writing: drafts](#writing-drafts) for what replaces it and why: the envelope's `variation` member is read-only, with no assignable counterpart, and a caller holding only a variation id writes through `findItem({ id: variationId }).draftItem` instead. The setter was retired as unconsumed surface — no shipped caller used it, by census — not because an envelope-nested setter is infeasible.
+
 ### Private and locked
 
-Like every store in this folder, `woocommerce/cart` is registered with `lock: true` and consumed with the `universalLock` consent string:
+Like every store in this folder, `woocommerce` is registered with `lock: true` and consumed with the `universalLock` consent string:
 
 ```ts
+import '@woocommerce/stores/woocommerce';
+import type { WooCommerce } from '@woocommerce/stores/woocommerce';
+// only where cart actions or state.cart are needed:
 import '@woocommerce/stores/woocommerce/cart';
-import type { Store as CartStore } from '@woocommerce/stores/woocommerce/cart';
+import type { Store as WooCommerceCart } from '@woocommerce/stores/woocommerce/cart';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
-    'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state, actions } = store< CartStore >(
-    'woocommerce/cart',
-    {},
-    { lock: universalLock }
-);
+const { state } = store< WooCommerce >( 'woocommerce', {}, { lock: universalLock } );
 
-// Reading the in-context product's in-cart count (from Product Button):
-const count = state.inCartQuantity;
+// Reading the in-context product's in-cart count:
+const count = state.itemInContext.cartItem?.quantity ?? 0;
 
-// Adding the in-context product's resolved-collection draft(s) to the cart:
+// Adding the in-context product's resolved-collection draft(s) to the cart
+// (needs the cart module's actions):
+const { actions } = store< WooCommerceCart >( 'woocommerce', {}, { lock: universalLock } );
 await actions.addItem();
 ```
 
-The store is **not a public API** while the keyed draft model is being validated. Its members can change or disappear without notice, and removing or changing state here is not a breaking change. Do not extend it from third-party code.
+The store is **not a public API** while this model is being validated. Its members can change or disappear without notice, and removing or changing state here is not a breaking change. Do not extend it from third-party code.
 
-Unlike the products store, the cart store has **no consent-gated PHP surface** — its server side is plain container-key and seed markup, so `universalLock` (JS, for the store lock) is the only consent string it involves. Copy it from this README or the source files rather than retyping.
+The PHP loaders in `ProductsStore.php` are gated by their own, separate PHP consent string (`ProductsStore::$consent_statement`); the JS half involves only `universalLock`. Keep both in sync with the source files rather than retyping — see [Source files](#source-files).
 
 ### Patterns and pitfalls
 
--   **Read through the envelope; write the draft it hands you.** Bind display to `state.itemInContext` / `state.inCartQuantity`, and record input by mutating the resolved draft view directly — `itemInContext.draft.quantity = value` — the one way to write a draft. Never write a draft from a callback that a shopper did not trigger.
+-   **Read through the envelope; write the `draftItem` it hands you.** Bind display to `state.itemInContext` (or `state.findItem(...)`), and record input by mutating the resolved draft view directly — `itemInContext.draftItem.quantity = value` — the one way to write a draft. Never write a draft from a callback that a shopper did not trigger.
 -   **Handle `cartItem === undefined`.** The pairing ladder returns `undefined` whenever it cannot identify exactly one line. Treat that as "no known line", not "not in cart".
--   **Let containers own isolation.** A consumer block resolves the nearest key automatically; it never reads, writes, or declares a key itself. Declaring a `draftKey` in `woocommerce/cart` context is the job of the container that wraps or repeats purchase UI — a core Product Collection card or Single Product block, or an extension's own container.
+-   **Let containers own isolation.** A consumer block resolves the nearest key automatically; it never reads, writes, or declares a key itself. Declaring `draftKey` in the `woocommerce` context bag is the job of the container that wraps or repeats purchase UI — a core Product Collection card or Single Product block, or an extension's own container.
+-   **Local context beats state, key presence beats absence.** A `woocommerce::` bag's own `productId`/`variationId` override the page-level `state.products.*` fallback for every descendant — even a key explicitly set to `null` wins over the state fallback. Only the *absence* of the key falls back to state.
+-   **Load only what you need.** A display-only surface needs only `@woocommerce/stores/woocommerce`; load `@woocommerce/stores/woocommerce/cart` lazily, at the point a component actually needs cart actions or `state.cart` — see [Two script modules, one namespace](#two-script-modules-one-namespace).
+-   **Always load a product before you bind to it.** If `wc_interactivity_api_load_product()` was never called for the addressed `productId`, `state.itemInContext.baseProduct` resolves to `null` and directive bindings silently render empty.
 -   **Drafts survive client navigation, not a reload.** Draft edits persist across Interactivity-API region updates (such as collection pagination) and cross-page client-side navigations, but are discarded on a hard reload. Persisting only for the session is by design, not a gap.
 -   **Do not extend this store from third-party code.** It is `lock: true` and private by design.
+
+### Source files
+
+-   JS:
+    -   `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/index.ts` — the root module: state defaults, the envelope, `findItem`.
+    -   `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/cart.ts` — the cart machinery module: the cart mirror, the cart actions.
+    -   `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/cart-pairing.ts` — the extracted cart-line pairing ladder (folder-internal).
+    -   `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/product-resolution.ts` — the extracted product/variation resolution primitive (folder-internal).
+    -   `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/draft-internals.ts` — the draft read/write plumbing shared by both modules (folder-internal).
+-   PHP:
+    -   `plugins/woocommerce/src/Blocks/SharedStores/ProductsStore.php` — loads product/variation data; registers the nested `itemInContext` SSR closures.
+    -   `plugins/woocommerce/src/Blocks/Utils/BlocksSharedState.php` — seeds the cart mirror and the `restUrl` config.
+    -   Container blocks (each mints and declares a `draftKey`): `plugins/woocommerce/src/Blocks/BlockTypes/ProductTemplate.php` (Product Collection loop items), `plugins/woocommerce/src/Blocks/BlockTypes/SingleProduct.php` (Single Product block).
+    -   Draft-seed filing: `plugins/woocommerce/src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php`, `.../AddToCartWithOptions/Utils.php`, `.../AddToCartWithOptions/GroupedProductItemSelector.php`.
+-   Behavioral tests: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/test/index.ts`, `.../test/cart.ts`, `.../test/cart-pairing.test.ts`, `.../test/product-resolution.test.ts`, `.../test/draft-internals.test.ts`.
