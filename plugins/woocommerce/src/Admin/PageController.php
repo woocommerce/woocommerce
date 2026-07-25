@@ -41,6 +41,13 @@ class PageController {
 	private $current_page = null;
 
 	/**
+	 * Whether the current page was selected by route-pattern fallback.
+	 *
+	 * @var bool
+	 */
+	private $current_page_is_route_pattern_match = false;
+
+	/**
 	 * Registered pages
 	 * Contains information (breadcrumbs, menu info) about JS powered pages and classic WooCommerce pages.
 	 *
@@ -130,6 +137,8 @@ class PageController {
 		$current_url       = '';
 		$current_screen_id = $this->get_current_screen_id();
 
+		$this->current_page_is_route_pattern_match = false;
+
 		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
 			$current_url = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 		}
@@ -166,6 +175,8 @@ class PageController {
 		foreach ( $this->pages as $page ) {
 			if (
 				empty( $page['js_page'] ) ||
+				! isset( $page['path'] ) ||
+				! is_string( $page['path'] ) ||
 				! $this->registered_path_matches_current_path( $page['path'], $current_path )
 			) {
 				continue;
@@ -178,7 +189,8 @@ class PageController {
 			}
 		}
 
-		$this->current_page = $matching_page;
+		$this->current_page                        = $matching_page;
+		$this->current_page_is_route_pattern_match = false !== $matching_page;
 	}
 
 	/**
@@ -196,15 +208,21 @@ class PageController {
 			return false;
 		}
 
-		$route_pattern = rtrim( $registered_parts['path'], '/' );
+		$route_pattern      = $registered_parts['path'];
+		$has_terminal_splat = 1 === preg_match( '#/\*$#', $route_pattern );
 
-		if ( 1 === preg_match( '#/\*$#', $route_pattern ) ) {
-			$route_regex = preg_quote( substr( $route_pattern, 0, -2 ), '#' ) . '(?:/.*)?';
+		if ( $has_terminal_splat ) {
+			$route_pattern = substr( $route_pattern, 0, -2 );
 		} else {
-			$route_regex = preg_quote( $route_pattern, '#' );
+			$route_pattern = rtrim( $route_pattern, '/' );
 		}
 
+		$route_regex = preg_quote( $route_pattern, '#' );
 		$route_regex = preg_replace( '#(^|/)\\\\:[A-Za-z0-9_]+(?=/|$)#', '$1[^/]+', $route_regex );
+
+		if ( $has_terminal_splat ) {
+			$route_regex .= '(?:/.*)?';
+		}
 
 		return 1 === preg_match( '#^' . $route_regex . '/*$#i', $current_parts['path'] );
 	}
@@ -225,6 +243,22 @@ class PageController {
 	}
 
 	/**
+	 * Whether a registered path contains a supported route pattern.
+	 *
+	 * @param mixed $registered_path Registered page path.
+	 * @return bool
+	 */
+	private function registered_path_has_route_pattern( $registered_path ) {
+		if ( ! is_string( $registered_path ) ) {
+			return false;
+		}
+
+		$path_parts = $this->split_registered_page_path( $registered_path );
+
+		return 1 === preg_match( '#(?:(?:^|/):[A-Za-z0-9_]+(?=/|$)|/\*$)#', $path_parts['path'] );
+	}
+
+	/**
 	 * Get a specificity score for a registered page path.
 	 *
 	 * @param string $registered_path Registered page path.
@@ -232,17 +266,20 @@ class PageController {
 	 */
 	private function get_registered_path_score( $registered_path ) {
 		$path_parts = $this->split_registered_page_path( $registered_path );
-		$segments   = array_filter(
-			explode( '/', trim( $path_parts['path'], '/' ) ),
-			function ( $segment ) {
-				return '' !== $segment;
-			}
-		);
+		$segments   = explode( '/', $path_parts['path'] );
 		$score      = count( $segments );
+
+		if ( in_array( '*', $segments, true ) ) {
+			$score -= 2;
+		}
 
 		foreach ( $segments as $segment ) {
 			if ( '*' === $segment ) {
-				$score -= 2;
+				continue;
+			}
+
+			if ( '' === $segment ) {
+				++$score;
 			} elseif ( 1 === preg_match( '#^:[A-Za-z0-9_]+$#', $segment ) ) {
 				$score += 3;
 			} else {
@@ -270,7 +307,13 @@ class PageController {
 
 		$page_title = ! empty( $current_page['page_title'] ) ? $current_page['page_title'] : $current_page['title'];
 		$page_title = (array) $page_title;
-		if ( 1 === count( $page_title ) ) {
+		if (
+			1 === count( $page_title ) ||
+			(
+				$this->current_page_is_route_pattern_match &&
+				$this->registered_path_has_route_pattern( $current_page['path'] ?? null )
+			)
+		) {
 			$breadcrumbs = $page_title;
 		} else {
 			// If this page has multiple title pieces, only link the first one.
@@ -289,11 +332,25 @@ class PageController {
 				if ( isset( $this->pages[ $parent_id ] ) ) {
 					$parent = $this->pages[ $parent_id ];
 
-					if ( 0 === strpos( $parent['path'], self::PAGE_ROOT ) ) {
-						$parent['path'] = 'admin.php?page=' . $parent['path'];
-					}
+					if ( $this->current_page_is_route_pattern_match ) {
+						$parent_path = $parent['path'] ?? null;
 
-					array_unshift( $breadcrumbs, array( $parent['path'], reset( $parent['title'] ) ) );
+						if ( ! is_string( $parent_path ) || $this->registered_path_has_route_pattern( $parent_path ) ) {
+							array_unshift( $breadcrumbs, reset( $parent['title'] ) );
+						} else {
+							if ( 0 === strpos( $parent_path, self::PAGE_ROOT ) ) {
+								$parent_path = 'admin.php?page=' . $parent_path;
+							}
+
+							array_unshift( $breadcrumbs, array( $parent_path, reset( $parent['title'] ) ) );
+						}
+					} else {
+						if ( 0 === strpos( $parent['path'], self::PAGE_ROOT ) ) {
+							$parent['path'] = 'admin.php?page=' . $parent['path'];
+						}
+
+						array_unshift( $breadcrumbs, array( $parent['path'], reset( $parent['title'] ) ) );
+					}
 					$parent_id = isset( $parent['parent'] ) ? $parent['parent'] : false;
 				} else {
 					$parent_id = false;

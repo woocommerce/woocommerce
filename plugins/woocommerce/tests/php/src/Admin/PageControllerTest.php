@@ -560,13 +560,16 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 */
 	public static function data_provider_test_registered_page_route_pattern_matches_current_request(): array {
 		return array(
-			'path parameter'               => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
-			'case-insensitive static path' => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2FROUTE-PARAMS%2Fsample' ),
-			'trailing slash in pattern'    => array( '/route-params/:itemName/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
-			'repeated request slashes'     => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2F%2F' ),
-			'wildcard base path'           => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard' ),
-			'wildcard base trailing slash' => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2F' ),
-			'wildcard descendant path'     => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme%2Falpha' ),
+			'path parameter'                => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'case-insensitive static path'  => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2FROUTE-PARAMS%2Fsample' ),
+			'trailing slash in pattern'     => array( '/route-params/:itemName/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'repeated request slashes'      => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2F%2F' ),
+			'wildcard base path'            => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard' ),
+			'wildcard base trailing slash'  => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2F' ),
+			'wildcard descendant path'      => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme%2Falpha' ),
+			'parameter and wildcard base'   => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123' ),
+			'parameter and wildcard child'  => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails' ),
+			'parameter and wildcard nested' => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails%2Fedit' ),
 		);
 	}
 
@@ -600,10 +603,66 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 */
 	public static function data_provider_test_registered_page_route_pattern_does_not_match_current_request(): array {
 		return array(
-			'parameter with extra segment' => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2Fdetails' ),
-			'partial parameter segment'    => array( '/route-patterns/:itemId/prefix-:suffix', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fprefix-value' ),
-			'non-terminal wildcard'        => array( '/route-patterns/:itemId/*/details', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fone%2Fdetails' ),
-			'different page root'          => array( '/route-params/:itemName', '/wp-admin/admin.php?page=other-page-root&path=%2Froute-params%2Fsample' ),
+			'parameter with extra segment'               => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2Fdetails' ),
+			'partial parameter segment'                  => array( '/route-patterns/:itemId/prefix-:suffix', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fprefix-value' ),
+			'non-terminal wildcard'                      => array( '/route-patterns/:itemId/*/details', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fone%2Fdetails' ),
+			'parameter and wildcard missing parameter'   => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns' ),
+			'static wildcard followed by trailing slash' => array( '/route-patterns/*/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails' ),
+			'wildcard followed by trailing slash'        => array( '/route-patterns/:itemId/*/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails' ),
+			'parameter and wildcard different root'      => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=other-page-root&path=%2Froute-patterns%2F123%2Fdetails' ),
+			'different page root'                        => array( '/route-params/:itemName', '/wp-admin/admin.php?page=other-page-root&path=%2Froute-params%2Fsample' ),
+		);
+	}
+
+	/**
+	 * @testdox Registered pages with invalid filtered paths do not match or throw.
+	 *
+	 * @dataProvider data_provider_test_registered_page_with_invalid_filtered_path_does_not_match
+	 *
+	 * @param mixed $invalid_path Invalid filtered path.
+	 */
+	public function test_registered_page_with_invalid_filtered_path_does_not_match( $invalid_path ): void {
+		$filter = function ( $options ) use ( $invalid_path ) {
+			if ( 'invalid-filtered-path-page' === ( $options['id'] ?? null ) ) {
+				$options['path'] = $invalid_path;
+			}
+
+			return $options;
+		};
+
+		add_filter( 'woocommerce_navigation_connect_page_options', $filter );
+
+		try {
+			$result = $this->get_publicly_registered_page_result_for_request(
+				'/wp-admin/admin.php?page=wc-admin&path=%2Funrelated',
+				function () {
+					wc_admin_register_page(
+						array(
+							'id'     => 'invalid-filtered-path-page',
+							'parent' => 'woocommerce',
+							'title'  => 'Invalid filtered path page',
+							'path'   => '/invalid-filtered-path',
+						)
+					);
+				}
+			);
+		} finally {
+			remove_filter( 'woocommerce_navigation_connect_page_options', $filter );
+		}
+
+		$this->assertFalse( $result['current_page'] );
+		$this->assertFalse( $result['is_registered_page'] );
+	}
+
+	/**
+	 * Data provider for invalid filtered registered-page paths.
+	 *
+	 * @return array[]
+	 */
+	public static function data_provider_test_registered_page_with_invalid_filtered_path_does_not_match(): array {
+		return array(
+			'array path' => array( array( 'invalid' ) ),
+			'null path'  => array( null ),
 		);
 	}
 
@@ -665,6 +724,26 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Trailing-slash routes use React Router specificity.
+	 */
+	public function test_registered_page_trailing_slash_route_uses_react_router_specificity(): void {
+		$this->assert_registered_page_for_request(
+			'route-trailing-slash-page',
+			'/wp-admin/admin.php?page=wc-admin&path=%2Froute-order%2F%2F',
+			array(
+				array(
+					'id'   => 'route-without-trailing-slash-page',
+					'path' => '/route-order',
+				),
+				array(
+					'id'   => 'route-trailing-slash-page',
+					'path' => '/route-order/',
+				),
+			)
+		);
+	}
+
+	/**
 	 * @testdox Equal specificity registered route patterns use registration order.
 	 */
 	public function test_registered_page_equal_specificity_route_patterns_use_registration_order(): void {
@@ -685,6 +764,209 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Fallback-selected route patterns do not create linked current-page breadcrumbs.
+	 */
+	public function test_route_pattern_fallback_uses_text_for_current_page_breadcrumbs(): void {
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2F123',
+			function () {
+				wc_admin_register_page(
+					array(
+						'id'     => 'route-pattern-breadcrumb-page',
+						'parent' => 'woocommerce',
+						'title'  => array( 'Parent crumb', 'Current crumb' ),
+						'path'   => '/breadcrumb/:itemId',
+					)
+				);
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				'Parent crumb',
+				'Current crumb',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
+	 * @testdox Exact route-template requests retain trunk's linked current-page breadcrumb.
+	 */
+	public function test_exact_route_pattern_request_retains_linked_current_page_breadcrumb(): void {
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2F%3AitemId',
+			function () {
+				wc_admin_register_page(
+					array(
+						'id'     => 'exact-route-pattern-breadcrumb-page',
+						'parent' => 'woocommerce',
+						'title'  => array( 'Parent crumb', 'Current crumb' ),
+						'path'   => '/breadcrumb/:itemId',
+					)
+				);
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				array( 'wc-admin&path=/breadcrumb/:itemId', 'Parent crumb' ),
+				'Current crumb',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
+	 * @testdox Fallback-selected pages do not create linked route-pattern parent breadcrumbs.
+	 */
+	public function test_route_pattern_fallback_uses_text_for_patterned_parent_breadcrumb(): void {
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2Fsettings%2F123',
+			function () {
+				$this->register_patterned_parent_and_child( '/breadcrumb/:section/:itemId' );
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				'Pattern parent',
+				'Child page',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
+	 * @testdox Exact child requests retain trunk's linked route-pattern parent breadcrumb.
+	 */
+	public function test_exact_child_request_retains_linked_patterned_parent_breadcrumb(): void {
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2Fstatic',
+			function () {
+				$this->register_patterned_parent_and_child( '/breadcrumb/static' );
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				array( 'admin.php?page=wc-admin&path=/breadcrumb/:section', 'Pattern parent' ),
+				'Child page',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
+	 * @testdox Fallback-selected pages use text for parents with invalid filtered paths.
+	 *
+	 * @dataProvider data_provider_test_route_pattern_fallback_with_invalid_parent_path
+	 *
+	 * @param mixed $invalid_path Invalid filtered parent path.
+	 */
+	public function test_route_pattern_fallback_uses_text_for_invalid_parent_path( $invalid_path ): void {
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2F123',
+			function () use ( $invalid_path ) {
+				wc_admin_register_page(
+					array(
+						'id'     => 'invalid-path-parent',
+						'parent' => 'woocommerce',
+						'title'  => 'Invalid path parent',
+						'path'   => '/breadcrumb-parent',
+					)
+				);
+				wc_admin_register_page(
+					array(
+						'id'     => 'invalid-path-child',
+						'parent' => 'invalid-path-parent',
+						'title'  => 'Child page',
+						'path'   => '/breadcrumb/:itemId',
+					)
+				);
+
+				$filter = function ( $options ) use ( $invalid_path ) {
+					if ( 'invalid-path-parent' === ( $options['id'] ?? null ) ) {
+						$options['path'] = $invalid_path;
+					}
+
+					return $options;
+				};
+
+				add_filter( 'woocommerce_navigation_connect_page_options', $filter );
+
+				try {
+					wc_admin_connect_page(
+						array(
+							'id'      => 'invalid-path-parent',
+							'parent'  => 'woocommerce',
+							'title'   => 'Invalid path parent',
+							'path'    => '/breadcrumb-parent',
+							'js_page' => true,
+						)
+					);
+				} finally {
+					remove_filter( 'woocommerce_navigation_connect_page_options', $filter );
+				}
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				'Invalid path parent',
+				'Child page',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
+	 * Data provider for invalid filtered parent paths.
+	 *
+	 * @return array[]
+	 */
+	public static function data_provider_test_route_pattern_fallback_with_invalid_parent_path(): array {
+		return array(
+			'array path' => array( array( 'invalid' ) ),
+			'null path'  => array( null ),
+		);
+	}
+
+	/**
+	 * Registers a patterned parent and a child page.
+	 *
+	 * @param string $child_path Child page path.
+	 */
+	private function register_patterned_parent_and_child( string $child_path ): void {
+		wc_admin_register_page(
+			array(
+				'id'     => 'patterned-breadcrumb-parent',
+				'parent' => 'woocommerce',
+				'title'  => 'Pattern parent',
+				'path'   => '/breadcrumb/:section',
+			)
+		);
+		wc_admin_register_page(
+			array(
+				'id'     => 'patterned-breadcrumb-child',
+				'parent' => 'patterned-breadcrumb-parent',
+				'title'  => 'Child page',
+				'path'   => $child_path,
+			)
+		);
+	}
+
+	/**
 	 * Gets the PageController result for a simulated admin request.
 	 *
 	 * @param string $request_uri Request URI.
@@ -695,11 +977,14 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$reflection            = new \ReflectionClass( $this->sut );
 		$pages_property        = $reflection->getProperty( 'pages' );
 		$current_page_property = $reflection->getProperty( 'current_page' );
+		$route_match_property  = $reflection->getProperty( 'current_page_is_route_pattern_match' );
 		$pages_property->setAccessible( true );
 		$current_page_property->setAccessible( true );
+		$route_match_property->setAccessible( true );
 
 		$original_pages        = $pages_property->getValue( $this->sut );
 		$original_current_page = $current_page_property->getValue( $this->sut );
+		$original_route_match  = $route_match_property->getValue( $this->sut );
 		$original_request_uri  = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request URI.
 		$registered_pages      = array();
 
@@ -714,6 +999,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		try {
 			$pages_property->setValue( $this->sut, $registered_pages );
 			$current_page_property->setValue( $this->sut, null );
+			$route_match_property->setValue( $this->sut, false );
 			$_SERVER['REQUEST_URI'] = $request_uri;
 
 			$this->sut->determine_current_page();
@@ -724,11 +1010,79 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		} finally {
 			$pages_property->setValue( $this->sut, $original_pages );
 			$current_page_property->setValue( $this->sut, $original_current_page );
+			$route_match_property->setValue( $this->sut, $original_route_match );
 
 			if ( null === $original_request_uri ) {
 				unset( $_SERVER['REQUEST_URI'] );
 			} else {
 				$_SERVER['REQUEST_URI'] = $original_request_uri;
+			}
+		}
+	}
+
+	/**
+	 * Gets the PageController result after registering pages through the public API.
+	 *
+	 * @param string   $request_uri   Request URI.
+	 * @param callable $register_pages Page registration callback.
+	 * @param bool     $get_breadcrumbs Whether to include generated breadcrumbs.
+	 * @return array{current_page: array|bool, is_registered_page: bool, breadcrumbs: array|null}
+	 */
+	private function get_publicly_registered_page_result_for_request( string $request_uri, callable $register_pages, bool $get_breadcrumbs = false ): array {
+		$reflection            = new \ReflectionClass( $this->sut );
+		$pages_property        = $reflection->getProperty( 'pages' );
+		$current_page_property = $reflection->getProperty( 'current_page' );
+		$route_match_property  = $reflection->getProperty( 'current_page_is_route_pattern_match' );
+		$original_request_uri  = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request URI.
+		$menu_global_names     = array( 'menu', 'submenu', '_wp_submenu_nopriv', '_registered_pages', '_parent_pages', '_wp_real_parent_file' );
+		$original_menu_globals = array();
+
+		$pages_property->setAccessible( true );
+		$current_page_property->setAccessible( true );
+		$route_match_property->setAccessible( true );
+
+		$original_pages        = $pages_property->getValue( $this->sut );
+		$original_current_page = $current_page_property->getValue( $this->sut );
+		$original_route_match  = $route_match_property->getValue( $this->sut );
+
+		foreach ( $menu_global_names as $global_name ) {
+			$original_menu_globals[ $global_name ] = array(
+				'exists' => array_key_exists( $global_name, $GLOBALS ),
+				'value'  => $GLOBALS[ $global_name ] ?? null,
+			);
+		}
+
+		try {
+			$pages_property->setValue( $this->sut, array() );
+			$current_page_property->setValue( $this->sut, null );
+			$route_match_property->setValue( $this->sut, false );
+			$_SERVER['REQUEST_URI'] = $request_uri;
+
+			$register_pages();
+			$this->sut->determine_current_page();
+
+			return array(
+				'current_page'       => $this->sut->get_current_page(),
+				'is_registered_page' => wc_admin_is_registered_page(),
+				'breadcrumbs'        => $get_breadcrumbs ? wc_admin_get_breadcrumbs() : null,
+			);
+		} finally {
+			$pages_property->setValue( $this->sut, $original_pages );
+			$current_page_property->setValue( $this->sut, $original_current_page );
+			$route_match_property->setValue( $this->sut, $original_route_match );
+
+			if ( null === $original_request_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $original_request_uri;
+			}
+
+			foreach ( $original_menu_globals as $global_name => $global_state ) {
+				if ( $global_state['exists'] ) {
+					$GLOBALS[ $global_name ] = $global_state['value'];
+				} else {
+					unset( $GLOBALS[ $global_name ] );
+				}
 			}
 		}
 	}
