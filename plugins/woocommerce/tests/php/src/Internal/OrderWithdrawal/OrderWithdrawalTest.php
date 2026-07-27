@@ -204,6 +204,41 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should match orders by custom order number instead of assuming the order number is the ID.
+	 */
+	public function test_process_current_request_matches_custom_order_number(): void {
+		$order               = $this->create_order_for_form_data();
+		$custom_order_number = 'CUSTOM-1001';
+		$capture             = $this->capture_wp_mail();
+		$filter              = static function ( $order_number, $filtered_order ) use ( $order, $custom_order_number ) {
+			if ( $filtered_order instanceof WC_Order && $order->get_id() === $filtered_order->get_id() ) {
+				return $custom_order_number;
+			}
+
+			return $order_number;
+		};
+
+		add_filter( 'woocommerce_order_number', $filter, 10, 2 );
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => $custom_order_number )
+			);
+
+			$state = $this->sut->process_current_request();
+
+			$this->assertSame( 'confirmation', $state->screen, 'Custom order number submissions should reach the confirmation screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
+			$this->assertTrue( $this->order_has_note_containing( $order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The custom-number matched order should receive a withdrawal note.' );
+			$this->assert_order_withdrawal_requested( $order );
+		} finally {
+			remove_filter( 'woocommerce_order_number', $filter, 10 );
+			$capture['remove']();
+		}
+	}
+
+	/**
 	 * @testdox Should reject duplicate withdrawal requests for an already flagged matched order.
 	 */
 	public function test_process_current_request_rejects_duplicate_withdrawal_for_matched_order(): void {

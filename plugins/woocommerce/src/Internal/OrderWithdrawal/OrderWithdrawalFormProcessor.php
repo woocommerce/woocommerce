@@ -296,22 +296,42 @@ final class OrderWithdrawalFormProcessor {
 	 */
 	private function get_matching_order( array $data ): ?WC_Order {
 		$order_number = $this->normalize_order_number( $data[ self::FIELD_ORDER_NUMBER ] );
+		$email        = $data[ self::FIELD_EMAIL ];
 
-		if ( '' === $order_number ) {
+		if ( '' === $order_number || '' === $email ) {
 			return null;
 		}
 
-		$order = wc_get_order( $order_number );
+		// Search by email first because the submitted order number may not be the internal order ID.
+		$candidate_orders = wc_get_orders(
+			array(
+				'billing_email' => $email,
+				'limit'         => -1,
+				'orderby'       => 'date',
+				'order'         => 'DESC',
+				'return'        => 'objects',
+			)
+		);
 
-		if ( ! $order instanceof WC_Order ) {
+		if ( ! is_array( $candidate_orders ) ) {
 			return null;
 		}
 
-		if ( ! $this->order_matches_form_data( $order, $data ) ) {
-			return null;
+		foreach ( $candidate_orders as $order ) {
+			if ( ! $order instanceof WC_Order ) {
+				continue;
+			}
+
+			if ( $this->normalize_order_number( (string) $order->get_order_number() ) !== $order_number ) {
+				continue;
+			}
+
+			if ( $this->order_matches_form_data( $order, $data ) ) {
+				return $order;
+			}
 		}
 
-		return $order;
+		return null;
 	}
 
 	/**
