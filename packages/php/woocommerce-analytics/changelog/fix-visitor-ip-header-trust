@@ -1,4 +1,4 @@
 Significance: patch
 Type: security
 
-Resolve the visitor IP without trusting forgeable proxy request headers.
+Resolve the visitor IP from the connecting address or its proxy, never from a forgeable request header.

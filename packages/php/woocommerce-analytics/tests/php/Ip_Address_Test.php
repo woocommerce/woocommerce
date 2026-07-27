@@ -71,6 +71,7 @@ class Ip_Address_Test extends BaseTestCase {
 			'HTTP_X_FORWARDED_FOR',
 			'HTTP_CLIENT_IP',
 			'HTTP_USER_AGENT',
+			'HTTP_X_REAL_IP',
 		);
 	}
 
@@ -269,6 +270,106 @@ class Ip_Address_Test extends BaseTestCase {
 		$this->assertNull(
 			$method->invoke( null ),
 			'A non-public IP must not produce an IP-derived visitor id in proxy mode.'
+		);
+	}
+
+	/**
+	 * A private REMOTE_ADDR proves the request came through a proxy on the local network,
+	 * so the address that proxy recorded is usable.
+	 */
+	public function test_internal_proxy_supplies_the_visitor_address(): void {
+		$_SERVER['REMOTE_ADDR']          = '10.0.0.5';
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.10';
+
+		$this->assertSame( '203.0.113.10', $this->resolved_ip() );
+	}
+
+	/**
+	 * The client-supplied end of the list must lose. A client sending its own
+	 * X-Forwarded-For produces "<forged>, <real>" once the proxy appends what it saw.
+	 */
+	public function test_forged_forwarded_entry_loses_to_the_proxy_written_one(): void {
+		$_SERVER['REMOTE_ADDR']          = '10.0.0.5';
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '198.51.100.99, 203.0.113.10';
+
+		$this->assertSame(
+			'203.0.113.10',
+			$this->resolved_ip(),
+			'Only the last X-Forwarded-For entry is written by the proxy.'
+		);
+	}
+
+	/**
+	 * With a public REMOTE_ADDR the client is talking to us directly, so any forwarded
+	 * header it sends is its own invention and must be ignored outright.
+	 */
+	public function test_forwarded_header_is_ignored_when_remote_addr_is_public(): void {
+		$_SERVER['REMOTE_ADDR']          = '203.0.113.10';
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '198.51.100.99';
+
+		$this->assertSame( '203.0.113.10', $this->resolved_ip() );
+	}
+
+	/**
+	 * Cf-Connecting-IP and X-Real-IP are passed through verbatim by an internal proxy
+	 * unless it is configured to overwrite them, so they stay client-controlled and
+	 * unusable even on a private REMOTE_ADDR.
+	 */
+	public function test_other_forwarded_headers_are_never_trusted(): void {
+		$_SERVER['REMOTE_ADDR']           = '10.0.0.5';
+		$_SERVER['HTTP_CF_CONNECTING_IP'] = '198.51.100.99';
+		$_SERVER['HTTP_X_REAL_IP']        = '198.51.100.98';
+
+		$this->assertSame( '', $this->resolved_ip() );
+	}
+
+	/**
+	 * Chained internal proxies leave a private address in the last entry. Scanning further
+	 * left would walk into client-supplied values, so no IP is the correct answer.
+	 */
+	public function test_chained_internal_proxies_yield_no_address(): void {
+		$_SERVER['REMOTE_ADDR']          = '10.0.0.5';
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.10, 10.0.0.6';
+
+		$this->assertSame( '', $this->resolved_ip() );
+	}
+
+	/**
+	 * A private REMOTE_ADDR with nothing forwarded stays unresolved.
+	 */
+	public function test_private_remote_addr_without_forwarded_header_yields_no_address(): void {
+		$_SERVER['REMOTE_ADDR'] = '10.0.0.5';
+
+		$this->assertSame( '', $this->resolved_ip() );
+	}
+
+	/**
+	 * Proxies write ports and bracketed IPv6; clean_ip() normalises both.
+	 *
+	 * @dataProvider forwarded_address_format_provider
+	 *
+	 * @param string $forwarded Raw last X-Forwarded-For entry.
+	 * @param string $expected  Normalised address.
+	 */
+	public function test_forwarded_address_formats_are_normalised( string $forwarded, string $expected ): void {
+		$_SERVER['REMOTE_ADDR']          = '10.0.0.5';
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = $forwarded;
+
+		$this->assertSame( $expected, $this->resolved_ip() );
+	}
+
+	/**
+	 * Address forms a proxy can legitimately write.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function forwarded_address_format_provider(): array {
+		return array(
+			'plain IPv4'          => array( '203.0.113.10', '203.0.113.10' ),
+			'IPv4 with port'      => array( '203.0.113.10:51234', '203.0.113.10' ),
+			'spaced list'         => array( '198.51.100.99 , 203.0.113.10', '203.0.113.10' ),
+			'bracketed IPv6'      => array( '[2001:db8::1]:443', '2001:db8::1' ),
+			'IPv4-mapped IPv6'    => array( '::ffff:203.0.113.10', '203.0.113.10' ),
 		);
 	}
 }

@@ -546,8 +546,15 @@ class WC_Analytics_Tracking {
 	 * trusting them unconditionally lets any client choose the address we report — and in
 	 * proxy tracking mode that address feeds the visitor id hash.
 	 *
+	 * When `REMOTE_ADDR` itself is non-routable, the request reached us through a proxy on
+	 * the local network — an external client cannot fake that — so the last entry of
+	 * `X-Forwarded-For`, the one the proxy wrote itself, is worth reading. See
+	 * `get_proxy_written_ip_address()` for why only that entry is trusted.
+	 *
 	 * @since 0.16.8 Stopped trusting `Cf-Connecting-IP`, `X-Forwarded-For` and `Client-IP`
 	 *               unconditionally.
+	 * @since 0.16.8 Recover the visitor address from the last `X-Forwarded-For` entry when
+	 *               `REMOTE_ADDR` is non-routable, instead of losing it entirely.
 	 *
 	 * @return string The user's IP address. An empty string when no public address resolved.
 	 */
@@ -558,6 +565,18 @@ class WC_Analytics_Tracking {
 		}
 
 		$ip = IP_Utils::get_ip();
+		$ip = is_string( $ip ) ? $ip : '';
+
+		// A non-routable terminating address is proof the request reached us through a proxy
+		// on the local network: an external client cannot make REMOTE_ADDR private. Only then
+		// is a forwarded value worth reading, and only the one the proxy wrote itself.
+		if ( ! IP_Utils::ip_is_public( $ip ) ) {
+			$proxy_written = self::get_proxy_written_ip_address();
+
+			if ( '' !== $proxy_written ) {
+				$ip = $proxy_written;
+			}
+		}
 
 		/**
 		 * Filters the visitor IP address used for analytics.
@@ -576,6 +595,35 @@ class WC_Analytics_Tracking {
 		self::$cached_ip = ( is_string( $ip ) && IP_Utils::ip_is_public( $ip ) ) ? $ip : '';
 
 		return self::$cached_ip;
+	}
+
+	/**
+	 * The address the nearest proxy recorded, from the last `X-Forwarded-For` entry.
+	 *
+	 * Only the last entry is usable. Proxies append the address they observed, so everything
+	 * to its left — including anything the client sent as its own `X-Forwarded-For` — is
+	 * client-controlled. Scanning leftwards for the first public address would walk straight
+	 * back into forged input, so a private last entry (chained internal proxies) correctly
+	 * yields nothing.
+	 *
+	 * Only called once `REMOTE_ADDR` has been shown to be non-routable. `Cf-Connecting-IP`
+	 * and `X-Real-IP` are deliberately not consulted: an internal proxy forwards client
+	 * headers verbatim unless configured otherwise, so those stay client-controlled.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @return string The proxy-written address, or an empty string when there is none.
+	 */
+	private static function get_proxy_written_ip_address() {
+		if ( empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+			return '';
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- IP_Utils::clean_ip() validates below.
+		$forwarded = explode( ',', wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
+		$written   = IP_Utils::clean_ip( end( $forwarded ) );
+
+		return is_string( $written ) ? $written : '';
 	}
 
 	/**
