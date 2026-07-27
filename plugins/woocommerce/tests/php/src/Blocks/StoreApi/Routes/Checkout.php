@@ -290,6 +290,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -532,6 +533,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 			array(
 				'billing_address' => (object) $this->get_fallback_billing_address(),
 				'payment_method'  => WC_Gateway_BACS::ID,
+				'expected_total'  => '3000',
 			)
 		);
 
@@ -562,6 +564,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 				'billing_address'  => (object) $this->get_fallback_billing_address(),
 				'shipping_address' => (object) $this->get_fallback_shipping_address(),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 
@@ -590,6 +593,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 				'billing_address'  => (object) $this->get_fallback_billing_address(),
 				'shipping_address' => (object) $this->get_fallback_shipping_address(),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '1000',
 			)
 		);
 
@@ -638,6 +642,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '4000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -678,6 +683,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => 'apples',
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -722,6 +728,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -771,6 +778,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -819,6 +827,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '2800',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -856,6 +865,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '2800',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -899,6 +909,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '2800',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -942,6 +953,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -976,6 +988,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -1008,6 +1021,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -1066,6 +1080,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '123456',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -1120,6 +1135,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '123456',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -1178,6 +1194,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1236,6 +1253,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => 'invalid-string',
@@ -1282,6 +1300,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'other_extension_data' => array(
 						'another_key' => true,
@@ -1328,6 +1347,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 
@@ -1373,6 +1393,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 				),
 				'create_account'   => true,
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1431,6 +1452,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 				),
 				'create_account'   => false,
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1488,6 +1510,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1543,6 +1566,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 
@@ -1600,6 +1624,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '4000',
 			)
 		);
 
@@ -1653,6 +1678,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1768,6 +1794,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/job-function'   => 'engineering',
 					'plugin-namespace/leave-on-porch' => true,
 				),
+				'expected_total'    => '3000',
 			)
 		);
 
@@ -1896,6 +1923,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '4000',
 			)
 		);
 
@@ -1941,6 +1969,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '4000',
 			)
 		);
 
@@ -2097,6 +2126,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID, // Payment method might still be required, even if free.
+				'expected_total'   => '0',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -2149,6 +2179,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => '',
+				'expected_total'   => '0',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -2214,6 +2245,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '1000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -2280,6 +2312,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '1000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -2397,6 +2430,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '5555555555',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 
@@ -2753,6 +2787,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'phone'      => '5555555555',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		return $request;
