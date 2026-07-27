@@ -439,6 +439,46 @@ class Post_Template_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * A post-card grid (featured image + date + title) keeps its text: the image is hoisted and
+	 * rebuilt, and the title/date are preserved below it rather than dropped.
+	 */
+	public function testItPreservesCardTextAlongsideHoistedImage(): void {
+		$parsed_block = array(
+			'blockName'   => 'core/post-template',
+			'attrs'       => array(
+				'layout' => array(
+					'type'        => 'grid',
+					'columnCount' => 2,
+				),
+			),
+			'innerBlocks' => array(),
+		);
+		$card         = function ( string $src, string $title ) {
+			return $this->nested_featured_image( $src, 1024, 512 )
+				. '<div class="wp-block-post-date"><time datetime="2026-07-24T14:41:24-04:00">July 24, 2026</time></div>'
+				. '<h2 class="wp-block-post-title">' . $title . '</h2>';
+		};
+		$content      = $this->build_list(
+			array(
+				$card( 'https://example.com/a.png', 'First post' ),
+				$card( 'https://example.com/b.png', 'Second post' ),
+			),
+			2
+		);
+
+		$rendered = $this->renderer->render( $content, $parsed_block, $this->rendering_context );
+
+		// Image is rebuilt (responsive style, no collapsing wrapper) AND the card text survives.
+		$this->assertStringContainsString( 'max-width: 100%; height: auto; display: block;', $rendered );
+		$this->assertStringNotContainsString( 'width="520px"', $rendered );
+		$this->assertStringContainsString( 'First post', $rendered );
+		$this->assertStringContainsString( 'Second post', $rendered );
+		$this->assertStringContainsString( 'July 24, 2026', $rendered );
+		$this->assertSame( 1, $this->count_rows( $rendered ) );
+		$this->assertSame( 2, $this->count_cells( $rendered ) );
+	}
+
+	/**
 	 * An item with no image (e.g. a title/excerpt-only card) is passed through unchanged, since text
 	 * content stacks correctly on its own and needs no rebuilding.
 	 */

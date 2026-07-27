@@ -270,35 +270,25 @@ class Post_Template extends Abstract_Block_Renderer {
 	 *
 	 * Each image in the item is rebuilt as a clean, responsive `<img>` (preserving its link) sitting
 	 * directly in the cell, so its width resolves against the grid column instead of collapsing inside
-	 * the fixed-width wrapper tables WordPress renders around it. An item with no image is returned
-	 * unchanged — its text content stacks correctly without intervention.
+	 * the fixed-width wrapper tables WordPress renders around it. Any non-image content the card holds
+	 * (post title, date, excerpt) is kept below the image, so a post grid isn't reduced to bare images.
+	 *
+	 * When the card is image-only (e.g. a featured-image sponsor grid) the leftover is nothing but the
+	 * now-empty wrapper shells, which are dropped so the output stays a clean logo grid. An item with no
+	 * image at all is returned unchanged — its text stacks correctly without intervention.
 	 *
 	 * @param string $item_html Inner HTML of a single list item.
 	 * @param int    $cell_width Cell content width in px.
 	 * @return string Cell content HTML.
 	 */
 	private function prepare_item_content( string $item_html, int $cell_width ): string {
-		$images = $this->extract_item_images( $item_html, $cell_width );
-		if ( empty( $images ) ) {
+		if ( false === strpos( $item_html, '<img' ) ) {
 			return $item_html;
 		}
-		return implode( '', $images );
-	}
 
-	/**
-	 * Extract every image from a list item and rebuild it for email.
-	 *
-	 * @param string $item_html Inner HTML of a single list item.
-	 * @param int    $cell_width Cell content width in px.
-	 * @return array<int, string> Rebuilt image HTML strings, in document order.
-	 */
-	private function extract_item_images( string $item_html, int $cell_width ): array {
-		if ( false === strpos( $item_html, '<img' ) ) {
-			return array();
-		}
-
-		$item_dom = new Dom_Document_Helper( $item_html );
-		$images   = array();
+		$item_dom       = new Dom_Document_Helper( $item_html );
+		$images         = array();
+		$remove_targets = array();
 
 		foreach ( $item_dom->find_elements( 'img' ) as $img_element ) {
 			$normalized_img = $this->normalize_image_for_email( $item_dom->get_outer_html( $img_element ), $cell_width );
@@ -312,9 +302,82 @@ class Post_Template extends Abstract_Block_Renderer {
 			} else {
 				$images[] = $normalized_img;
 			}
+			$remove_targets[] = $this->find_image_removal_target( $img_element );
 		}
 
-		return $images;
+		if ( empty( $images ) ) {
+			return $item_html;
+		}
+
+		// Strip the images we've hoisted so they aren't duplicated, then keep whatever real content
+		// remains (title/date/excerpt). If only empty wrapper shells are left, drop them entirely.
+		foreach ( $remove_targets as $target ) {
+			$item_dom->remove_element( $target );
+		}
+
+		return implode( '', $images ) . $this->extract_remaining_content( $item_dom );
+	}
+
+	/**
+	 * Choose which element to strip when hoisting an image, so the preserved remainder is clean.
+	 *
+	 * Climbs from the image through every ancestor that wraps nothing but that single image — no text,
+	 * no other media — and returns the outermost such wrapper. This removes the whole empty
+	 * `<figure>`/`<a>`/layout-table shell WordPress renders around a featured image in one go, rather
+	 * than leaving hollow, padded cells behind. Climbing stops as soon as an ancestor holds real
+	 * content, so a sibling title/date (outside the image's wrapper) and a `<figcaption>` (whose text
+	 * lives on the figure) are both preserved.
+	 *
+	 * @param \DOMElement $img_element The image element being hoisted.
+	 * @return \DOMElement The element to remove from the item.
+	 */
+	private function find_image_removal_target( \DOMElement $img_element ): \DOMElement {
+		$target = $img_element;
+		$parent = $img_element->parentNode; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		while ( $parent instanceof \DOMElement ) {
+			// Stop once the ancestor carries text (e.g. a caption or a sibling title) or wraps more
+			// than just this one image — removing it would take real content with it.
+			if ( '' !== trim( $parent->textContent ) || 1 !== $this->count_media_descendants( $parent ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				break;
+			}
+			$target = $parent;
+			$parent = $parent->parentNode; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		}
+		return $target;
+	}
+
+	/**
+	 * Count the media elements (images and embeds) contained within an element.
+	 *
+	 * @param \DOMElement $element The element to inspect.
+	 * @return int
+	 */
+	private function count_media_descendants( \DOMElement $element ): int {
+		$count = $element->getElementsByTagName( 'img' )->length;
+		foreach ( array( 'video', 'audio', 'iframe', 'svg' ) as $tag_name ) {
+			$count += $element->getElementsByTagName( $tag_name )->length;
+		}
+		return $count;
+	}
+
+	/**
+	 * Read back the card content left after the images were removed, or an empty string when nothing
+	 * but structural wrapper shells remain (so image-only cards stay a clean grid).
+	 *
+	 * @param Dom_Document_Helper $item_dom The item DOM after image removal.
+	 * @return string
+	 */
+	private function extract_remaining_content( Dom_Document_Helper $item_dom ): string {
+		$remainder = $item_dom->get_root_html();
+
+		// Treat the remainder as empty unless it carries visible text or embedded media — otherwise it
+		// is just the leftover wrapper markup (empty figures/tables) the image used to live in.
+		if ( '' === trim( str_replace( "\xc2\xa0", '', wp_strip_all_tags( $remainder ) ) )
+			&& ! preg_match( '/<(img|video|audio|iframe|svg)\b/i', $remainder ) ) {
+			return '';
+		}
+
+		return $remainder;
 	}
 
 	/**
