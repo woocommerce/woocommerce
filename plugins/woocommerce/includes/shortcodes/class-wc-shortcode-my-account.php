@@ -8,6 +8,8 @@
  * @version 2.0.0
  */
 
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -44,6 +46,12 @@ class WC_Shortcode_My_Account {
 		// Show the lost password page. This can still be accessed directly by logged in accounts which is important for the initial create password links sent via email.
 		if ( isset( $wp->query_vars['lost-password'] ) ) {
 			self::lost_password();
+			return;
+		}
+
+		if ( wc_get_container()->get( OrderWithdrawalController::class )->is_endpoint_request() ) {
+			// Order withdrawal is an EU regulation requirement which needs standalone access.
+			wc_get_container()->get( OrderWithdrawalController::class )->render_view();
 			return;
 		}
 

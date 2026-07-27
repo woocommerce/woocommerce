@@ -95,59 +95,25 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 * @return array
 		 */
 		private function get_task_header( $task ) {
-			$asset_url           = WC()->plugin_url() . '/assets/';
-			$task_json           = $task->get_json();
-			$default_task_header = array(
+			$asset_url = WC()->plugin_url() . '/assets/';
+			$task_json = $task->get_json();
+
+			$image_url = method_exists( $task, 'get_image_url' ) ? (string) $task->get_image_url() : '';
+			$image_alt = method_exists( $task, 'get_image_alt' ) ? (string) $task->get_image_alt() : '';
+
+			// Fallback to the generic WooCommerce setup illustration.
+			if ( '' === $image_url ) {
+				$image_url = $asset_url . 'images/dashboard-widget-setup.png';
+				$image_alt = __( 'WooCommerce setup illustration', 'woocommerce' );
+			}
+
+			return array(
 				'title'        => $task->get_title(),
 				'content'      => $task_json['content'] ?? '',
 				'button_label' => $task_json['actionLabel'] ?? $task->get_title(),
-				'image_url'    => $asset_url . 'images/dashboard-widget-setup.png',
-				'image_alt'    => __( 'WooCommerce setup illustration', 'woocommerce' ),
+				'image_url'    => $image_url,
+				'image_alt'    => $image_alt,
 			);
-			$task_images         = array(
-				'store_details'        => array(
-					'image_url' => $asset_url . 'images/task_list/store-details-illustration.png',
-					'image_alt' => __( 'Store location illustration', 'woocommerce' ),
-				),
-				'customize-store'      => array(
-					'image_url' => $asset_url . 'images/task_list/customize-store-illustration.svg',
-					'image_alt' => __( 'Customize your store illustration', 'woocommerce' ),
-				),
-				'tax'                  => array(
-					'image_url' => $asset_url . 'images/task_list/tax-illustration.svg',
-					'image_alt' => __( 'Tax illustration', 'woocommerce' ),
-				),
-				'shipping'             => array(
-					'image_url' => $asset_url . 'images/task_list/shipping-illustration.svg',
-					'image_alt' => __( 'Shipping illustration', 'woocommerce' ),
-				),
-				'marketing'            => array(
-					'image_url' => $asset_url . 'images/task_list/sales-illustration.svg',
-					'image_alt' => __( 'Marketing illustration', 'woocommerce' ),
-				),
-				'payments'             => array(
-					'image_url' => $asset_url . 'images/task_list/payment-illustration.svg',
-					'image_alt' => __( 'Payment illustration', 'woocommerce' ),
-				),
-				'woocommerce-payments' => array(
-					'image_url' => $asset_url . 'images/task_list/payment-illustration.svg',
-					'image_alt' => __( 'Payment illustration', 'woocommerce' ),
-				),
-				'products'             => array(
-					'image_url' => $asset_url . 'images/task_list/sales-section-illustration.svg',
-					'image_alt' => __( 'Products illustration', 'woocommerce' ),
-				),
-				'purchase'             => array(
-					'image_url' => $asset_url . 'images/task_list/purchase-illustration.png',
-					'image_alt' => __( 'Purchase illustration', 'woocommerce' ),
-				),
-				'launch-your-store'    => array(
-					'image_url' => $asset_url . 'images/task_list/launch-your-store-illustration.svg',
-					'image_alt' => __( 'Launch your store illustration', 'woocommerce' ),
-				),
-			);
-
-			return array_merge( $default_task_header, $task_images[ $task->get_id() ] ?? array() );
 		}
 
 		/**

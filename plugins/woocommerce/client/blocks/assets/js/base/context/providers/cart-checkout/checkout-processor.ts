@@ -149,7 +149,7 @@ const CheckoutProcessor = () => {
 			( checkoutIsProcessing || checkoutIsBeforeProcessing ) &&
 			! isExpressPaymentMethodActive
 		) {
-			__internalSetHasError( checkoutWillHaveError );
+			void __internalSetHasError( checkoutWillHaveError );
 		}
 	}, [
 		checkoutWillHaveError,
@@ -306,14 +306,14 @@ const CheckoutProcessor = () => {
 				return response.json();
 			} )
 			.then( ( responseJson: CheckoutResponseSuccess ) => {
-				__internalProcessCheckoutResponse( responseJson );
+				void __internalProcessCheckoutResponse( responseJson );
 				setIsProcessingOrder( false );
 			} )
 			.catch( ( errorResponse: ApiResponse< CheckoutResponseError > ) => {
 				processCheckoutResponseHeaders( errorResponse?.headers );
 				try {
 					// This attempts to parse a JSON error response where the status code was 4xx/5xx.
-					errorResponse
+					void errorResponse
 						.json()
 						.then(
 							( response ) => response as CheckoutResponseError
@@ -324,7 +324,7 @@ const CheckoutProcessor = () => {
 								receiveCartContents( response.data.cart );
 							}
 							processErrorResponse( response );
-							__internalProcessCheckoutResponse( response );
+							void __internalProcessCheckoutResponse( response );
 						} );
 				} catch {
 					let errorMessage = __(
@@ -344,7 +344,7 @@ const CheckoutProcessor = () => {
 						data: null,
 					} );
 				}
-				__internalSetHasError( true );
+				void __internalSetHasError( true );
 				setIsProcessingOrder( false );
 			} );
 	}, [
@@ -372,7 +372,7 @@ const CheckoutProcessor = () => {
 	// Process order if conditions are good.
 	useEffect( () => {
 		if ( paidAndWithoutErrors && ! isProcessingOrder ) {
-			processOrder();
+			void processOrder();
 		}
 	}, [ processOrder, paidAndWithoutErrors, isProcessingOrder ] );
 

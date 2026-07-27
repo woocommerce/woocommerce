@@ -20,11 +20,11 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	private $endpoint;
 
 	/**
-	 * User ID.
+	 * Shared admin user ID for REST auth.
 	 *
 	 * @var int
 	 */
-	private $user;
+	protected static $user;
 
 	/**
 	 * Runs after each test.
@@ -61,6 +61,15 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Create the shared admin user once for the whole class.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -76,12 +85,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->endpoint = new OrderNotesController();
 		$this->endpoint->init( $order_note_schema, $collection_query );
 
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-		wp_set_current_user( $this->user );
+		wp_set_current_user( self::$user );
 	}
 
 	/**
@@ -98,7 +102,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_items() {
 		// Create an order.
-		$order = OrderHelper::create_order( $this->user );
+		$order = OrderHelper::create_order( self::$user );
 
 		// Add some order notes.
 		$order->add_order_note( 'Test note 1', false, false );
@@ -120,8 +124,8 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_items_with_order_filter() {
 		// Create two orders.
-		$order1 = OrderHelper::create_order( $this->user );
-		$order2 = OrderHelper::create_order( $this->user );
+		$order1 = OrderHelper::create_order( self::$user );
+		$order2 = OrderHelper::create_order( self::$user );
 
 		// Add notes to both orders.
 		$order1->add_order_note( 'Order 1 note', false, false );
@@ -146,7 +150,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test getting order notes with type filter.
 	 */
 	public function test_get_items_with_type_filter() {
-		$order = OrderHelper::create_order( $this->user );
+		$order = OrderHelper::create_order( self::$user );
 
 		// Add different types of notes.
 		$order->add_order_note( 'Internal note', false, false );
@@ -195,7 +199,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test creating an order note.
 	 */
 	public function test_create_item() {
-		$order = OrderHelper::create_order( $this->user );
+		$order = OrderHelper::create_order( self::$user );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/order-notes' );
 		$request->set_body_params(
@@ -219,7 +223,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test creating a customer order note.
 	 */
 	public function test_create_is_customer_note() {
-		$order = OrderHelper::create_order( $this->user );
+		$order = OrderHelper::create_order( self::$user );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/order-notes' );
 		$request->set_body_params(
@@ -261,7 +265,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test creating order note without required fields.
 	 */
 	public function test_create_item_missing_fields() {
-		$order = OrderHelper::create_order( $this->user );
+		$order = OrderHelper::create_order( self::$user );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/order-notes' );
 		$request->set_body_params(
@@ -280,7 +284,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test getting a single order note.
 	 */
 	public function test_get_item() {
-		$order   = OrderHelper::create_order( $this->user );
+		$order   = OrderHelper::create_order( self::$user );
 		$note_id = $order->add_order_note( 'Test single note', false, false );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/order-notes/' . $note_id ) );
@@ -306,7 +310,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test deleting an order note.
 	 */
 	public function test_delete_item() {
-		$order   = OrderHelper::create_order( $this->user );
+		$order   = OrderHelper::create_order( self::$user );
 		$note_id = $order->add_order_note( 'Note to delete', false, false );
 
 		$request = new WP_REST_Request( 'DELETE', '/wc/v4/order-notes/' . $note_id );
@@ -358,7 +362,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_items_without_permission() {
 		wp_set_current_user( 0 );
-		$order = OrderHelper::create_order( $this->user );
+		$order = OrderHelper::create_order( self::$user );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/order-notes' );
 		$request->set_query_params( array( 'order_id' => $order->get_id() ) );
@@ -372,7 +376,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_create_item_without_permission() {
 		wp_set_current_user( 0 );
-		$order = OrderHelper::create_order( $this->user );
+		$order = OrderHelper::create_order( self::$user );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/order-notes' );
 		$request->set_body_params(
@@ -391,7 +395,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test that order note content is sanitized to prevent XSS.
 	 */
 	public function test_create_item_sanitizes_note_content() {
-		$order = OrderHelper::create_order( $this->user );
+		$order = OrderHelper::create_order( self::$user );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/order-notes' );
 		$request->set_body_params(
@@ -415,7 +419,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_item_without_permission() {
 		wp_set_current_user( 0 );
-		$order   = OrderHelper::create_order( $this->user );
+		$order   = OrderHelper::create_order( self::$user );
 		$note_id = $order->add_order_note( 'Note to delete', false, false );
 
 		$request = new WP_REST_Request( 'DELETE', '/wc/v4/order-notes/' . $note_id );

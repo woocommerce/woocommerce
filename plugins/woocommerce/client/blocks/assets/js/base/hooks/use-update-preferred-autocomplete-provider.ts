@@ -78,7 +78,7 @@ export function useUpdatePreferredAutocompleteProvider(
 	useEffect( () => {
 		// Check if window.wc.addressAutocomplete.providers exists
 		if ( ! window?.wc?.addressAutocomplete?.providers ) {
-			setActiveAddressAutocompleteProvider( '', addressType );
+			void setActiveAddressAutocompleteProvider( '', addressType );
 			if ( window?.wc?.addressAutocomplete?.activeProvider ) {
 				window.wc.addressAutocomplete.activeProvider[ addressType ] =
 					null;
@@ -94,7 +94,7 @@ export function useUpdatePreferredAutocompleteProvider(
 				];
 
 			if ( provider && provider.canSearch( country ) ) {
-				setActiveAddressAutocompleteProvider(
+				void setActiveAddressAutocompleteProvider(
 					provider.id,
 					addressType
 				);
@@ -107,7 +107,7 @@ export function useUpdatePreferredAutocompleteProvider(
 		}
 
 		// No provider supports this country, clear the active provider
-		setActiveAddressAutocompleteProvider( '', addressType );
+		void setActiveAddressAutocompleteProvider( '', addressType );
 		// Set globally as this is going to be the source of truth where the actual provider objects are stored.
 		if ( window?.wc?.addressAutocomplete?.activeProvider ) {
 			window.wc.addressAutocomplete.activeProvider[ addressType ] = null;

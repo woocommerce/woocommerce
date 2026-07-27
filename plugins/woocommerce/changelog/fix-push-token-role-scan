@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Push notifications: Improve performance of get_tokens_for_roles(): the role lookup is now restricted to users that actually own push tokens.

@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.8.0
+ * @version 11.1.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -64,6 +64,10 @@ $item_totals = $order->get_order_item_totals();
 if ( $item_totals ) {
 	foreach ( $item_totals as $total ) {
 		if ( $email_improvements_enabled ) {
+			// The shipping method name is already shown in the row header, so avoid duplicating it in the value cell.
+			if ( isset( $total['meta'] ) && $total['value'] === $total['meta'] ) {
+				$total['value'] = __( 'Free', 'woocommerce' );
+			}
 			$label = $total['label'];
 			if ( isset( $total['meta'] ) ) {
 				$label .= ' ' . $total['meta'];

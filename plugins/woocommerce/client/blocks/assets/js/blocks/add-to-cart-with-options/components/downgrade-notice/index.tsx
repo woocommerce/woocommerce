@@ -50,9 +50,8 @@ export const DowngradeNotice = ( {
 	const buttonLabel = __( 'Switch back', 'woocommerce' );
 
 	const handleClick = async () => {
-		const downgraded = await downgradeToClassicAddToCartWithOptions(
-			blockClientId
-		);
+		const downgraded =
+			await downgradeToClassicAddToCartWithOptions( blockClientId );
 		if ( downgraded ) {
 			recordEvent( 'blocks_add_to_cart_with_options_migration', {
 				transform_to: 'legacy',

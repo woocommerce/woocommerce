@@ -11,7 +11,7 @@ export const execAsync = promisify( exec );
 // Map just the raw value types of IncomingMessage to a new type for the response which includes a body string.
 type HttpsResponse = {
 	// I think it's fine to use this type this way just to exclude functions from the IncomingMessage type.
-	// eslint-disable-next-line @typescript-eslint/ban-types
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type, @typescript-eslint/no-empty-object-type
 	[ K in keyof IncomingMessage as IncomingMessage[ K ] extends Function
 		? never
 		: K ]: IncomingMessage[ K ];
