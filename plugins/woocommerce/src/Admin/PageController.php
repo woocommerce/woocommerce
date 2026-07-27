@@ -218,9 +218,14 @@ class PageController {
 		}
 
 		$route_regex = preg_quote( $route_pattern, '#' );
+
+		// preg_quote() escapes parameter colons (for example, `:itemId` becomes `\:itemId`).
+		// Match only complete parameter segments: `(^|/)` preserves the start-or-slash prefix,
+		// `\\:` targets the escaped colon, and `(?=/|$)` requires the parameter name to end the segment.
 		$route_regex = preg_replace( '#(^|/)\\\\:[A-Za-z0-9_]+(?=/|$)#', '$1[^/]+', $route_regex );
 
 		if ( $has_terminal_splat ) {
+			// A supported terminal `/*` matches both the base route and any descendants.
 			$route_regex .= '(?:/.*)?';
 		}
 
@@ -255,6 +260,8 @@ class PageController {
 
 		$path_parts = $this->split_registered_page_path( $registered_path );
 
+		// The first alternative recognizes a complete `:param` segment at the path start or after a slash.
+		// The second recognizes only a splat that occupies the terminal segment.
 		return 1 === preg_match( '#(?:(?:^|/):[A-Za-z0-9_]+(?=/|$)|/\*$)#', $path_parts['path'] );
 	}
 
