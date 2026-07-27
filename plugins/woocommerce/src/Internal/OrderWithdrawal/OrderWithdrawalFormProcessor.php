@@ -277,11 +277,11 @@ final class OrderWithdrawalFormProcessor {
 	private function get_matching_order( array $data ): ?WC_Order {
 		$order_number = $this->normalize_order_number( $data[ self::FIELD_ORDER_NUMBER ] );
 
-		if ( '' === $order_number || ! ctype_digit( $order_number ) ) {
+		if ( '' === $order_number ) {
 			return null;
 		}
 
-		$order = wc_get_order( absint( $order_number ) );
+		$order = wc_get_order( $order_number );
 
 		if ( ! $order instanceof WC_Order ) {
 			return null;
