@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add unit tests covering the woocommerce_show_marketplace_suggestions option gating of remote inbox notifications, following the WC Admin feature flag cleanup.
