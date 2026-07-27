@@ -107,11 +107,104 @@ baz/project-d/baz.js`;
 		expect( fileChanges ).toStrictEqual( true );
 	} );
 
+	it( 'should not associate non-code files with any project', () => {
+		jest.mocked( execSync ).mockImplementation( ( command ) => {
+			if ( command === 'git diff --name-only origin/trunk' ) {
+				return `AGENTS.md
+test/project-a/README.md
+test/project-a/CLAUDE.md
+test/project-a/changelog/fix-123
+test/project-a/readme.txt
+docs/docs-manifest.json
+foo/project-b/docs/guide.md`;
+			}
+
+			throw new Error( 'Invalid command' );
+		} );
+
+		const fileChanges = getFileChanges(
+			{
+				name: 'project-a',
+				path: 'test/project-a',
+				dependencies: [
+					{
+						name: 'project-b',
+						path: 'foo/project-b',
+						dependencies: [],
+					},
+				],
+			},
+			'origin/trunk',
+			''
+		);
+
+		// None of these files can change behaviour, so no project -- and therefore
+		// none of its dependents -- should be marked as changed.
+		expect( fileChanges ).toStrictEqual( {} );
+	} );
+
+	it( 'should associate source files that live inside a changelog directory', () => {
+		jest.mocked( execSync ).mockImplementation( ( command ) => {
+			if ( command === 'git diff --name-only origin/trunk' ) {
+				return `test/project-a/src/commands/changelog/index.ts
+test/project-a/changelog/fix-123`;
+			}
+
+			throw new Error( 'Invalid command' );
+		} );
+
+		const fileChanges = getFileChanges(
+			{
+				name: 'project-a',
+				path: 'test/project-a',
+				dependencies: [],
+			},
+			'origin/trunk',
+			''
+		);
+
+		// The entry is ignored; the module that happens to sit in a `changelog` directory is not.
+		expect( fileChanges ).toStrictEqual( {
+			'project-a': [ 'src/commands/changelog/index.ts' ],
+		} );
+	} );
+
+	it( 'should still associate code changes made alongside non-code files', () => {
+		jest.mocked( execSync ).mockImplementation( ( command ) => {
+			if ( command === 'git diff --name-only origin/trunk' ) {
+				return `test/project-a/README.md
+test/project-a/index.js
+foo/project-b/changelog/add-456`;
+			}
+
+			throw new Error( 'Invalid command' );
+		} );
+
+		const fileChanges = getFileChanges(
+			{
+				name: 'project-a',
+				path: 'test/project-a',
+				dependencies: [
+					{
+						name: 'project-b',
+						path: 'foo/project-b',
+						dependencies: [],
+					},
+				],
+			},
+			'origin/trunk',
+			''
+		);
+
+		expect( fileChanges ).toStrictEqual( {
+			'project-a': [ 'index.js' ],
+		} );
+	} );
+
 	it( 'should assign files to projects based on CI config patterns', () => {
 		jest.mocked( execSync ).mockImplementation( ( command ) => {
 			if ( command === 'git diff --name-only origin/trunk' ) {
-				return `plugins/woocommerce/changelog/fix-123
-plugins/woocommerce/tests/e2e/tests/blocks/test.spec.ts
+				return `plugins/woocommerce/tests/e2e/tests/blocks/test.spec.ts
 plugins/woocommerce/client/blocks/src/block.tsx`;
 			}
 
@@ -154,7 +247,6 @@ plugins/woocommerce/client/blocks/src/block.tsx`;
 		if ( fileChanges !== true ) {
 			expect( fileChanges ).toMatchObject( {
 				'@woocommerce/plugin-woocommerce': [
-					'changelog/fix-123',
 					'tests/e2e/tests/blocks/test.spec.ts',
 				],
 				'@woocommerce/block-library': [ 'src/block.tsx' ],

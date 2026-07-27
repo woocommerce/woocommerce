@@ -52,6 +52,49 @@ function getProjectPaths( graph: ProjectNode ): { [ name: string ]: string } {
 }
 
 /**
+ * Files that cannot change the behaviour of any project's code.
+ *
+ * Ownership is directory-based, so without this a package's `README.md` or changelog entry
+ * marks that package as changed, and `job-processing` then treats every dependent project as
+ * having changes too -- running their test jobs regardless of those jobs' own `changes` globs.
+ *
+ * Keep in sync with the `needs-code-validation` filter in `.github/workflows/ci.yml`. Patterns
+ * are case-sensitive for the same reason: `dorny/paths-filter` matches case-sensitively, and a
+ * mismatch between the two layers would mean a file is ignored by one and not the other.
+ */
+const MARKDOWN = /\.md$/;
+const PLUGIN_README = /(?:^|\/)readme\.txt$/;
+const DOCS_MANIFEST = 'docs/docs-manifest.json';
+
+/**
+ * A changelog entry lives directly inside a `changelog/` directory. Real source files do too --
+ * `tools/monorepo-utils/src/code-freeze/commands/changelog/index.ts`, for one -- so anything
+ * carrying a source extension is deliberately not treated as an entry.
+ */
+const CHANGELOG_ENTRY = /(?:^|\/)changelog\/[^/]+$/;
+const SOURCE_EXTENSION = /\.(?:[cm]?[jt]sx?|php|s?css|json|snap)$/;
+
+/**
+ * Checks whether a file is incapable of affecting any project's behaviour.
+ *
+ * @param {string} filePath The repo-relative path to check.
+ * @return {boolean} True when the file should be excluded from change detection.
+ */
+function isNonCodeFile( filePath: string ): boolean {
+	if ( MARKDOWN.test( filePath ) || PLUGIN_README.test( filePath ) ) {
+		return true;
+	}
+
+	if ( filePath === DOCS_MANIFEST ) {
+		return true;
+	}
+
+	return (
+		CHANGELOG_ENTRY.test( filePath ) && ! SOURCE_EXTENSION.test( filePath )
+	);
+}
+
+/**
  * Checks the changed files and returns any that are relevant to the project.
  *
  * @param {string}         projectPath  The path to the project to get changed files for.
@@ -108,14 +151,20 @@ export function getFileChanges(
 		return true;
 	}
 
-	const changedFilePaths = output.split( '\n' );
+	const allChangedFilePaths = output.split( '\n' );
 
 	// If the root lockfile has been changed we have no easy way
 	// of knowing which projects have been impacted. We want
 	// to re-run all jobs in all projects for safety.
-	if ( changedFilePaths.includes( 'pnpm-lock.yaml' ) ) {
+	if ( allChangedFilePaths.includes( 'pnpm-lock.yaml' ) ) {
 		return true;
 	}
+
+	// Drop files that cannot affect behaviour before anything claims ownership of them,
+	// so they never mark a project -- or, through the dependency graph, its dependents -- as changed.
+	const changedFilePaths = allChangedFilePaths.filter(
+		( filePath ) => ! isNonCodeFile( filePath )
+	);
 
 	const ownedFilePaths = [];
 
