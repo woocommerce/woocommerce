@@ -731,13 +731,10 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave stale variation attribute meta in place when set_product() switches to a simple product (documents the tradeoff tracked in #66733).
+	 * @testdox Should remove the previous variation's attribute meta when set_product() switches to a simple product.
 	 */
-	public function test_set_product_leaves_stale_variation_attribute_meta_when_switching_to_simple_product(): void {
-		$parent = new WC_Product_Variable();
-		$parent->set_name( 'Dummy Variable Product' );
-		$parent->save();
-
+	public function test_set_product_removes_stale_variation_attribute_meta_when_switching_to_simple_product(): void {
+		$parent    = $this->create_variable_parent_with_attributes( array( 'color' => array( 'blue', 'red' ) ) );
 		$variation = WC_Helper_Product::create_product_variation_object(
 			$parent->get_id(),
 			'VARIATION SKU ' . wp_generate_uuid4(),
@@ -753,6 +750,150 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$item->set_product( $this->product );
 
 		$this->assertSame( $this->product->get_id(), $item->get_product()->get_id(), 'get_product() should resolve to the simple product once variation_id is cleared.' );
-		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Accepted behavior: the stale "color" attribute meta survives the switch because clearing it blindly could delete a merchant\'s own custom meta. Removing it is tracked in #66733.' );
+		$this->assertSame( '', $item->get_meta( 'color' ), 'The previous variation\'s attribute meta should not survive the switch to a simple product.' );
+	}
+
+	/**
+	 * @testdox Should keep meta that is not a variation attribute when set_product() switches to a simple product.
+	 */
+	public function test_set_product_keeps_non_attribute_meta_when_switching_to_simple_product(): void {
+		$parent    = $this->create_variable_parent_with_attributes( array( 'color' => array( 'blue' ) ) );
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array( 'color' => 'blue' )
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+		$item->add_meta_data( 'engraving', 'Happy Birthday', true );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame( '', $item->get_meta( 'color' ), 'The variation attribute meta should be removed.' );
+		$this->assertSame( 'Happy Birthday', $item->get_meta( 'engraving' ), 'Meta that is not one of the variation\'s attributes belongs to the merchant or a plugin and must survive the switch.' );
+	}
+
+	/**
+	 * @testdox Should drop attribute meta the new variation does not define when set_product() switches between variations.
+	 */
+	public function test_set_product_removes_orphaned_attribute_meta_when_switching_between_variations(): void {
+		$parent = $this->create_variable_parent_with_attributes(
+			array(
+				'color' => array( 'blue', 'red' ),
+				'size'  => array( 'small', 'large' ),
+			)
+		);
+
+		$variation_a = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION A SKU ' . wp_generate_uuid4(),
+			10,
+			array(
+				'color' => 'blue',
+				'size'  => 'small',
+			)
+		);
+
+		// Recreate the parent without "size" so the second variation genuinely has no such attribute.
+		$parent_b    = $this->create_variable_parent_with_attributes( array( 'color' => array( 'red' ) ) );
+		$variation_b = WC_Helper_Product::create_product_variation_object(
+			$parent_b->get_id(),
+			'VARIATION B SKU ' . wp_generate_uuid4(),
+			15,
+			array( 'color' => 'red' )
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation_a );
+
+		$this->assertSame( 'small', $item->get_meta( 'size' ), 'Precondition: the first variation contributes a "size" attribute.' );
+
+		$item->set_product( $variation_b );
+
+		$this->assertSame( 'red', $item->get_meta( 'color' ), 'A shared attribute key should be overwritten with the new variation\'s value.' );
+		$this->assertSame( '', $item->get_meta( 'size' ), 'An attribute the new variation does not define should not linger on the item.' );
+	}
+
+	/**
+	 * @testdox Should keep attribute meta when the previous variation no longer exists, since there is nothing left to match against.
+	 */
+	public function test_set_product_keeps_attribute_meta_when_previous_variation_was_deleted(): void {
+		$parent    = $this->create_variable_parent_with_attributes( array( 'color' => array( 'blue' ) ) );
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array( 'color' => 'blue' )
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		wp_delete_post( $variation->get_id(), true );
+		wc_delete_product_transients( $variation->get_id() );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame( 0, $item->get_variation_id(), 'variation_id should still be reset even when the variation is gone.' );
+		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Known gap: without the variation there is no attribute list to match against, so its meta is kept rather than guessed at.' );
+	}
+
+	/**
+	 * @testdox Should keep attribute meta when the parent no longer declares the attribute for variations.
+	 */
+	public function test_set_product_keeps_attribute_meta_when_parent_no_longer_declares_the_attribute(): void {
+		$parent    = $this->create_variable_parent_with_attributes( array( 'color' => array( 'blue' ) ) );
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array( 'color' => 'blue' )
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		// A variation only reports the attributes its parent still marks as "used for variations",
+		// so dropping it from the parent hides it from the cleanup.
+		$parent->set_attributes( array() );
+		$parent->save();
+		wc_delete_product_transients( $variation->get_id() );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame( 0, $item->get_variation_id(), 'variation_id should still be reset.' );
+		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Known gap: the attribute list comes from the parent, so an attribute removed there can no longer be identified as stale.' );
+	}
+
+	/**
+	 * Create a variable product whose parent properly declares the given attributes for variations.
+	 *
+	 * A variation only reports attributes its parent marks with `is_variation`, so a parent built
+	 * without them makes variation attribute meta invisible to anything reading it back.
+	 *
+	 * @param array $attributes Map of attribute name to its possible options.
+	 * @return WC_Product_Variable
+	 */
+	private function create_variable_parent_with_attributes( array $attributes ): WC_Product_Variable {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+
+		$attribute_objects = array();
+		foreach ( $attributes as $name => $options ) {
+			$attribute = new WC_Product_Attribute();
+			$attribute->set_name( $name );
+			$attribute->set_options( $options );
+			$attribute->set_visible( true );
+			$attribute->set_variation( true );
+
+			$attribute_objects[] = $attribute;
+		}
+
+		$parent->set_attributes( $attribute_objects );
+		$parent->save();
+
+		return $parent;
 	}
 }

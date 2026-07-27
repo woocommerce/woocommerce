@@ -253,20 +253,61 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( ! ( $product instanceof \WC_Product ) ) {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
+
+		$new_variation_attributes = $product->is_type( ProductType::VARIATION ) && is_callable( array( $product, 'get_variation_attributes' ) )
+			? $product->get_variation_attributes()
+			: array();
+
+		$this->delete_stale_variation_attribute_meta( $new_variation_attributes );
+
 		if ( $product->is_type( ProductType::VARIATION ) ) {
 			$this->set_product_id( $product->get_parent_id() );
 			$this->set_variation_id( $product->get_id() );
-			$this->set_variation( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
+			$this->set_variation( $new_variation_attributes );
 		} else {
 			$this->set_product_id( $product->get_id() );
 			$this->set_variation_id( 0 );
-			// Any variation attribute meta written by a previous set_variation() call is left in
-			// place on purpose: it is stored with the `attribute_` prefix stripped, so a key like
-			// `color` is indistinguishable from a merchant's own custom meta and clearing it here
-			// risks deleting real data. Removing that stale display meta is tracked in #66733.
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
+	}
+
+	/**
+	 * Remove attribute meta left behind by the variation this item currently points at.
+	 *
+	 * `set_variation()` stores each variation attribute as item meta with the `attribute_`
+	 * prefix stripped, so a stored key such as `color` is indistinguishable from a merchant's
+	 * own custom meta. Keys are therefore only removed when they match an attribute of the
+	 * item's current variation, and only when the incoming product does not define the same
+	 * attribute — those are overwritten in place by `set_variation()` instead, which keeps
+	 * their stored meta rows intact.
+	 *
+	 * Best effort by design: when the current variation no longer exists there is no attribute
+	 * list left to match against, so its meta is kept rather than guessed at.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $new_variation_attributes Variation attributes of the incoming product, keyed with the `attribute_` prefix.
+	 * @return void
+	 */
+	private function delete_stale_variation_attribute_meta( array $new_variation_attributes ) {
+		if ( ! $this->get_variation_id() ) {
+			return;
+		}
+
+		$current_product = $this->get_product();
+		if ( ! $current_product instanceof \WC_Product_Variation ) {
+			return;
+		}
+
+		$stale_keys = array_diff(
+			array_keys( $current_product->get_variation_attributes() ),
+			array_keys( $new_variation_attributes )
+		);
+
+		foreach ( $stale_keys as $stale_key ) {
+			$this->delete_meta_data( str_replace( 'attribute_', '', $stale_key ) );
+		}
 	}
 
 	/**
