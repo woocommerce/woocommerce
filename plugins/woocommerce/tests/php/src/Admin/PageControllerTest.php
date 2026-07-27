@@ -974,19 +974,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 * @return array{current_page: array|bool, is_registered_page: bool}
 	 */
 	private function get_registered_page_result_for_request( string $request_uri, array $pages ): array {
-		$reflection            = new \ReflectionClass( $this->sut );
-		$pages_property        = $reflection->getProperty( 'pages' );
-		$current_page_property = $reflection->getProperty( 'current_page' );
-		$route_match_property  = $reflection->getProperty( 'current_page_is_route_pattern_match' );
-		$pages_property->setAccessible( true );
-		$current_page_property->setAccessible( true );
-		$route_match_property->setAccessible( true );
-
-		$original_pages        = $pages_property->getValue( $this->sut );
-		$original_current_page = $current_page_property->getValue( $this->sut );
-		$original_route_match  = $route_match_property->getValue( $this->sut );
-		$original_request_uri  = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request URI.
-		$registered_pages      = array();
+		$registered_pages = array();
 
 		foreach ( $pages as $page ) {
 			$registered_pages[ $page['id'] ] = array(
@@ -996,28 +984,18 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			);
 		}
 
-		try {
-			$pages_property->setValue( $this->sut, $registered_pages );
-			$current_page_property->setValue( $this->sut, null );
-			$route_match_property->setValue( $this->sut, false );
-			$_SERVER['REQUEST_URI'] = $request_uri;
+		return $this->run_with_page_controller_request_state(
+			$request_uri,
+			$registered_pages,
+			function () {
+				$this->sut->determine_current_page();
 
-			$this->sut->determine_current_page();
-			return array(
-				'current_page'       => $this->sut->get_current_page(),
-				'is_registered_page' => wc_admin_is_registered_page(),
-			);
-		} finally {
-			$pages_property->setValue( $this->sut, $original_pages );
-			$current_page_property->setValue( $this->sut, $original_current_page );
-			$route_match_property->setValue( $this->sut, $original_route_match );
-
-			if ( null === $original_request_uri ) {
-				unset( $_SERVER['REQUEST_URI'] );
-			} else {
-				$_SERVER['REQUEST_URI'] = $original_request_uri;
+				return array(
+					'current_page'       => $this->sut->get_current_page(),
+					'is_registered_page' => wc_admin_is_registered_page(),
+				);
 			}
-		}
+		);
 	}
 
 	/**
@@ -1029,21 +1007,8 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 * @return array{current_page: array|bool, is_registered_page: bool, breadcrumbs: array|null}
 	 */
 	private function get_publicly_registered_page_result_for_request( string $request_uri, callable $register_pages, bool $get_breadcrumbs = false ): array {
-		$reflection            = new \ReflectionClass( $this->sut );
-		$pages_property        = $reflection->getProperty( 'pages' );
-		$current_page_property = $reflection->getProperty( 'current_page' );
-		$route_match_property  = $reflection->getProperty( 'current_page_is_route_pattern_match' );
-		$original_request_uri  = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request URI.
 		$menu_global_names     = array( 'menu', 'submenu', '_wp_submenu_nopriv', '_registered_pages', '_parent_pages', '_wp_real_parent_file' );
 		$original_menu_globals = array();
-
-		$pages_property->setAccessible( true );
-		$current_page_property->setAccessible( true );
-		$route_match_property->setAccessible( true );
-
-		$original_pages        = $pages_property->getValue( $this->sut );
-		$original_current_page = $current_page_property->getValue( $this->sut );
-		$original_route_match  = $route_match_property->getValue( $this->sut );
 
 		foreach ( $menu_global_names as $global_name ) {
 			$original_menu_globals[ $global_name ] = array(
@@ -1053,19 +1018,63 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		}
 
 		try {
-			$pages_property->setValue( $this->sut, array() );
+			return $this->run_with_page_controller_request_state(
+				$request_uri,
+				array(),
+				function () use ( $register_pages, $get_breadcrumbs ) {
+					$register_pages();
+					$this->sut->determine_current_page();
+
+					return array(
+						'current_page'       => $this->sut->get_current_page(),
+						'is_registered_page' => wc_admin_is_registered_page(),
+						'breadcrumbs'        => $get_breadcrumbs ? wc_admin_get_breadcrumbs() : null,
+					);
+				}
+			);
+		} finally {
+			foreach ( $original_menu_globals as $global_name => $global_state ) {
+				if ( $global_state['exists'] ) {
+					$GLOBALS[ $global_name ] = $global_state['value'];
+				} else {
+					unset( $GLOBALS[ $global_name ] );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Runs a callback with isolated PageController state for a request.
+	 *
+	 * @template T of array
+	 * @param string   $request_uri Request URI.
+	 * @param array    $pages       Initial registered pages.
+	 * @param callable $callback    Callback to run with the isolated state.
+	 * @phpstan-param callable(): T $callback
+	 * @return array Callback result.
+	 * @phpstan-return T
+	 */
+	private function run_with_page_controller_request_state( string $request_uri, array $pages, callable $callback ): array {
+		$reflection            = new \ReflectionClass( $this->sut );
+		$pages_property        = $reflection->getProperty( 'pages' );
+		$current_page_property = $reflection->getProperty( 'current_page' );
+		$route_match_property  = $reflection->getProperty( 'current_page_is_route_pattern_match' );
+		$pages_property->setAccessible( true );
+		$current_page_property->setAccessible( true );
+		$route_match_property->setAccessible( true );
+
+		$original_pages        = $pages_property->getValue( $this->sut );
+		$original_current_page = $current_page_property->getValue( $this->sut );
+		$original_route_match  = $route_match_property->getValue( $this->sut );
+		$original_request_uri  = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request URI.
+
+		try {
+			$pages_property->setValue( $this->sut, $pages );
 			$current_page_property->setValue( $this->sut, null );
 			$route_match_property->setValue( $this->sut, false );
 			$_SERVER['REQUEST_URI'] = $request_uri;
 
-			$register_pages();
-			$this->sut->determine_current_page();
-
-			return array(
-				'current_page'       => $this->sut->get_current_page(),
-				'is_registered_page' => wc_admin_is_registered_page(),
-				'breadcrumbs'        => $get_breadcrumbs ? wc_admin_get_breadcrumbs() : null,
-			);
+			return $callback();
 		} finally {
 			$pages_property->setValue( $this->sut, $original_pages );
 			$current_page_property->setValue( $this->sut, $original_current_page );
@@ -1075,14 +1084,6 @@ class PageControllerTest extends WC_Unit_Test_Case {
 				unset( $_SERVER['REQUEST_URI'] );
 			} else {
 				$_SERVER['REQUEST_URI'] = $original_request_uri;
-			}
-
-			foreach ( $original_menu_globals as $global_name => $global_state ) {
-				if ( $global_state['exists'] ) {
-					$GLOBALS[ $global_name ] = $global_state['value'];
-				} else {
-					unset( $GLOBALS[ $global_name ] );
-				}
 			}
 		}
 	}
