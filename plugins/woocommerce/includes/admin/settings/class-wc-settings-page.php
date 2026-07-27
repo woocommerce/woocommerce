@@ -146,9 +146,13 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 					return $classes;
 				}
 
-				$is_rendering_drill_down = $context->is_drill_down()
-					&& ! $context->has_schema_failed()
-					&& ! $context->has_script_handles_failed();
+				// The legacy fallback renderer needs the classic styling: the settings UI
+				// body class hides the legacy Save button via CSS.
+				if ( $context->has_schema_failed() || $context->has_script_handles_failed() ) {
+					return $classes;
+				}
+
+				$is_rendering_drill_down = $context->is_drill_down();
 			} catch ( \Throwable $e ) {
 				return $classes;
 			}
