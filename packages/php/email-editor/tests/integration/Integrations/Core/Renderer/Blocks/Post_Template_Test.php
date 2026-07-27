@@ -78,6 +78,26 @@ class Post_Template_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * A featured-image `<li>` whose `<img>` carries the intrinsic width/height WordPress stores,
+	 * wrapped in the fixed-width tables the block editor renders around a post-template image. This is
+	 * the shape whose nested `width: 100%` collapses in email, so the renderer must hoist and rebuild
+	 * the image.
+	 *
+	 * @param string $src    Image URL.
+	 * @param int    $width  Intrinsic image width.
+	 * @param int    $height Intrinsic image height.
+	 * @return string
+	 */
+	private function nested_featured_image( string $src, int $width, int $height ): string {
+		return '<div><table width="100%" style="border-collapse:separate"><tbody><tr>'
+			. '<td width="520px" style="padding:30px">'
+			. '<figure class="wp-block-post-featured-image size-full">'
+			. '<a href="https://example.com/sponsor">'
+			. '<img src="' . esc_url( $src ) . '" alt="Sponsor" width="' . $width . '" height="' . $height . '" class="wp-image-1" style="width:100%;max-width:100%;object-fit:contain"/>'
+			. '</a></figure></td></tr></tbody></table></div>';
+	}
+
+	/**
 	 * Count the grid cells produced.
 	 *
 	 * Matches the renderer's full cell style tail (not just `text-align: center;`), so passed-through
@@ -342,5 +362,111 @@ class Post_Template_Test extends \Email_Editor_Integration_Test_Case {
 		// 2 items over 2 columns => exactly 1 row of 2 cells, regardless of the mimicking content.
 		$this->assertSame( 1, $this->count_rows( $rendered ) );
 		$this->assertSame( 2, $this->count_cells( $rendered ) );
+	}
+
+	/**
+	 * Each item's image is hoisted out of its fixed-width wrapper tables and rebuilt as a clean,
+	 * responsive `<img>` with a concrete pixel width — otherwise its `width: 100%` collapses to a few
+	 * pixels in email once the CSS grid is gone.
+	 */
+	public function testItRebuildsNestedImagesAsResponsiveImages(): void {
+		$parsed_block = array(
+			'blockName'   => 'core/post-template',
+			'attrs'       => array(
+				'layout' => array(
+					'type'        => 'grid',
+					'columnCount' => 3,
+				),
+			),
+			'innerBlocks' => array(),
+		);
+		$content      = $this->build_list(
+			array(
+				$this->nested_featured_image( 'https://example.com/logo1.png', 1024, 210 ),
+				$this->nested_featured_image( 'https://example.com/logo2.png', 1024, 210 ),
+				$this->nested_featured_image( 'https://example.com/logo3.png', 1024, 210 ),
+			),
+			3
+		);
+
+		$rendered = $this->renderer->render( $content, $parsed_block, $this->rendering_context );
+
+		// The collapsing web markup is gone: no fixed-width wrapper cell, no figure passthrough.
+		$this->assertStringNotContainsString( 'width="520px"', $rendered );
+		$this->assertStringNotContainsString( '<figure', $rendered );
+		// The images are rebuilt with the responsive email style, not the web `width: 100%` alone.
+		$this->assertStringContainsString( 'max-width: 100%; height: auto; display: block;', $rendered );
+		// Each image keeps its link and gets a concrete (non-percentage) pixel width for Outlook.
+		$this->assertSame( 3, substr_count( $rendered, 'href="https://example.com/sponsor"' ) );
+		$this->assertSame( 3, preg_match_all( '/<img[^>]*\swidth="\d+"/', $rendered ) );
+		$this->assertStringContainsString( 'logo1.png', $rendered );
+		$this->assertStringContainsString( 'logo3.png', $rendered );
+	}
+
+	/**
+	 * The rebuilt image's height is scaled from the intrinsic dimensions to the cell width, so it keeps
+	 * its aspect ratio in clients that size by the width/height attributes (Outlook).
+	 */
+	public function testItScalesImageHeightToPreserveAspectRatio(): void {
+		$parsed_block = array(
+			'blockName'   => 'core/post-template',
+			'attrs'       => array(
+				'layout' => array(
+					'type'        => 'grid',
+					'columnCount' => 2,
+				),
+			),
+			'innerBlocks' => array(),
+		);
+		// A 1000x500 image (2:1) in a 2-column grid: whatever width the cell resolves to, the height
+		// attribute must stay half of it.
+		$content = $this->build_list(
+			array(
+				$this->nested_featured_image( 'https://example.com/wide.png', 1000, 500 ),
+				$this->nested_featured_image( 'https://example.com/wide2.png', 1000, 500 ),
+			),
+			2
+		);
+
+		$rendered = $this->renderer->render( $content, $parsed_block, $this->rendering_context );
+
+		$this->assertSame( 1, preg_match( '/<img[^>]*\swidth="(\d+)"[^>]*\sheight="(\d+)"/', $rendered, $matches ) );
+		$width  = (int) $matches[1];
+		$height = (int) $matches[2];
+		$this->assertGreaterThan( 0, $width );
+		// 2:1 ratio preserved (allow +/-1px for rounding).
+		$this->assertEqualsWithDelta( $width / 2, $height, 1 );
+	}
+
+	/**
+	 * An item with no image (e.g. a title/excerpt-only card) is passed through unchanged, since text
+	 * content stacks correctly on its own and needs no rebuilding.
+	 */
+	public function testItPassesThroughItemsWithoutImages(): void {
+		$parsed_block = array(
+			'blockName'   => 'core/post-template',
+			'attrs'       => array(
+				'layout' => array(
+					'type'        => 'grid',
+					'columnCount' => 2,
+				),
+			),
+			'innerBlocks' => array(),
+		);
+		$content      = $this->build_list(
+			array(
+				'<h3 class="wp-block-post-title">First post</h3>',
+				'<h3 class="wp-block-post-title">Second post</h3>',
+			),
+			2
+		);
+
+		$rendered = $this->renderer->render( $content, $parsed_block, $this->rendering_context );
+
+		// The grid is still built, and the text content survives verbatim in its cell.
+		$this->assertSame( 1, $this->count_rows( $rendered ) );
+		$this->assertSame( 2, $this->count_cells( $rendered ) );
+		$this->assertStringContainsString( 'First post', $rendered );
+		$this->assertStringContainsString( 'Second post', $rendered );
 	}
 }

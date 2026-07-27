@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
@@ -23,8 +24,14 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
  * images (see {@see Gallery::build_gallery_table()}).
  *
  * The list items arrive already rendered (post-template is a dynamic block, so `$block_content`
- * holds the final `<ul><li>…</li></ul>`), so this renderer only rearranges them — it never
- * re-runs the query.
+ * holds the final `<ul><li>…</li></ul>`), so this renderer never re-runs the query. Each item's
+ * image is extracted and rebuilt as a clean, responsive `<img>` sitting directly in its grid cell —
+ * the same shape the Gallery renderer emits. This is deliberate: the images WordPress renders inside
+ * a post-template `<li>` are wrapped in fixed-width, auto-layout tables (`<td width="520">`) that
+ * were never sized for email, and a nested `width: 100%` image inside them collapses to a few pixels
+ * in Gmail (the width has no resolvable basis). Hoisting the image into the grid cell gives it a
+ * definite basis so it fills its column and scales down on mobile. An item with no image falls back
+ * to its original markup untouched (text content stacks correctly on its own).
  */
 class Post_Template extends Abstract_Block_Renderer {
 	/**
@@ -37,6 +44,14 @@ class Post_Template extends Abstract_Block_Renderer {
 	 * Per-cell padding (px) that stands in for the grid's `gap` between items.
 	 */
 	private const CELL_PADDING = 8;
+
+	/**
+	 * Responsive image style applied to every rebuilt grid image. `width: 100%` fills the column,
+	 * `max-width: 100%` lets it scale down on narrow viewports, and `height: auto` keeps the ratio.
+	 * The explicit `width` attribute (set alongside this) is the Outlook fallback, since Outlook
+	 * ignores `max-width`.
+	 */
+	private const IMAGE_STYLE = 'border: 0; line-height: 100%; width: 100%; max-width: 100%; height: auto; display: block;';
 
 	/**
 	 * Renders the post-template block content using a table-based grid layout.
@@ -73,7 +88,11 @@ class Post_Template extends Abstract_Block_Renderer {
 			return $block_content;
 		}
 
-		return $this->build_grid_table( $items, $columns, $dom, $list_element );
+		// The layout width (minus the email's root padding) is what each cell's images are sized to,
+		// so an image CDN / Outlook get a concrete pixel width rather than the intrinsic file width.
+		$layout_width = (int) Styles_Helper::parse_value( $rendering_context->get_layout_width_without_padding() );
+
+		return $this->build_grid_table( $items, $columns, $dom, $list_element, $layout_width );
 	}
 
 	/**
@@ -166,13 +185,16 @@ class Post_Template extends Abstract_Block_Renderer {
 	 * @param int                 $columns Number of columns.
 	 * @param Dom_Document_Helper $dom Parsed block content.
 	 * @param \DOMElement         $list_element The post-template list element (for wrapper classes).
+	 * @param int                 $layout_width Available layout width in px.
 	 * @return string Grid table HTML.
 	 */
-	private function build_grid_table( array $items, int $columns, Dom_Document_Helper $dom, \DOMElement $list_element ): string {
+	private function build_grid_table( array $items, int $columns, Dom_Document_Helper $dom, \DOMElement $list_element, int $layout_width ): string {
+		$cell_width = $this->get_cell_width( $layout_width, $columns );
+
 		$rows       = array();
 		$item_count = count( $items );
 		for ( $i = 0; $i < $item_count; $i += $columns ) {
-			$rows[] = $this->build_grid_row( array_slice( $items, $i, $columns ), $columns );
+			$rows[] = $this->build_grid_row( array_slice( $items, $i, $columns ), $columns, $cell_width );
 		}
 		$grid_content = implode( '', $rows );
 
@@ -188,6 +210,24 @@ class Post_Template extends Abstract_Block_Renderer {
 	}
 
 	/**
+	 * Estimate the rendered pixel width of a single grid cell's content area.
+	 *
+	 * The layout width is split evenly across the columns and the per-cell padding is removed from
+	 * both sides. Used to give each rebuilt image a concrete `width` attribute (the Outlook fallback)
+	 * instead of the intrinsic file width, which Outlook would otherwise honor literally and blow the
+	 * cell open.
+	 *
+	 * @param int $layout_width Available layout width in px.
+	 * @param int $columns Number of columns.
+	 * @return int Cell content width in px (at least 1).
+	 */
+	private function get_cell_width( int $layout_width, int $columns ): int {
+		$columns    = max( 1, $columns );
+		$cell_width = (int) floor( $layout_width / $columns ) - ( 2 * self::CELL_PADDING );
+		return max( 1, $cell_width );
+	}
+
+	/**
 	 * Build a single grid row as its own fixed-layout table.
 	 *
 	 * Every cell is a fixed `100 / $columns` percent wide and a partial final row is padded with
@@ -198,14 +238,16 @@ class Post_Template extends Abstract_Block_Renderer {
 	 *
 	 * @param array<int, string> $row_items Inner HTML of the items in this row.
 	 * @param int                $columns Total number of columns.
+	 * @param int                $cell_width Cell content width in px.
 	 * @return string Row table HTML.
 	 */
-	private function build_grid_row( array $row_items, int $columns ): string {
+	private function build_grid_row( array $row_items, int $columns, int $cell_width ): string {
 		$cell_width_percent = 100 / $columns;
 		$cells              = '';
 
 		for ( $col = 0; $col < $columns; $col++ ) {
-			$cell_attrs = array(
+			$cell_content = isset( $row_items[ $col ] ) ? $this->prepare_item_content( $row_items[ $col ], $cell_width ) : '';
+			$cell_attrs   = array(
 				'style'  => sprintf(
 					'width: %s; padding: %dpx; vertical-align: top; text-align: center;',
 					Html_Processing_Helper::sanitize_css_value( sprintf( '%.4f%%', $cell_width_percent ) ),
@@ -213,7 +255,7 @@ class Post_Template extends Abstract_Block_Renderer {
 				),
 				'valign' => 'top',
 			);
-			$cells     .= Table_Wrapper_Helper::render_table_cell( $row_items[ $col ] ?? '', $cell_attrs );
+			$cells       .= Table_Wrapper_Helper::render_table_cell( $cell_content, $cell_attrs );
 		}
 
 		return sprintf(
@@ -221,5 +263,125 @@ class Post_Template extends Abstract_Block_Renderer {
 			Html_Processing_Helper::sanitize_css_value( '100%' ),
 			$cells
 		);
+	}
+
+	/**
+	 * Turn a rendered `<li>`'s inner HTML into email-safe cell content.
+	 *
+	 * Each image in the item is rebuilt as a clean, responsive `<img>` (preserving its link) sitting
+	 * directly in the cell, so its width resolves against the grid column instead of collapsing inside
+	 * the fixed-width wrapper tables WordPress renders around it. An item with no image is returned
+	 * unchanged — its text content stacks correctly without intervention.
+	 *
+	 * @param string $item_html Inner HTML of a single list item.
+	 * @param int    $cell_width Cell content width in px.
+	 * @return string Cell content HTML.
+	 */
+	private function prepare_item_content( string $item_html, int $cell_width ): string {
+		$images = $this->extract_item_images( $item_html, $cell_width );
+		if ( empty( $images ) ) {
+			return $item_html;
+		}
+		return implode( '', $images );
+	}
+
+	/**
+	 * Extract every image from a list item and rebuild it for email.
+	 *
+	 * @param string $item_html Inner HTML of a single list item.
+	 * @param int    $cell_width Cell content width in px.
+	 * @return array<int, string> Rebuilt image HTML strings, in document order.
+	 */
+	private function extract_item_images( string $item_html, int $cell_width ): array {
+		if ( false === strpos( $item_html, '<img' ) ) {
+			return array();
+		}
+
+		$item_dom = new Dom_Document_Helper( $item_html );
+		$images   = array();
+
+		foreach ( $item_dom->find_elements( 'img' ) as $img_element ) {
+			$normalized_img = $this->normalize_image_for_email( $item_dom->get_outer_html( $img_element ), $cell_width );
+			if ( '' === $normalized_img ) {
+				continue;
+			}
+
+			$href = $this->find_link_href( $img_element );
+			if ( '' !== $href ) {
+				$images[] = '<a href="' . esc_url( $href ) . '">' . $normalized_img . '</a>';
+			} else {
+				$images[] = $normalized_img;
+			}
+		}
+
+		return $images;
+	}
+
+	/**
+	 * Return the href of the nearest ancestor `<a>` of the given image, or an empty string.
+	 *
+	 * @param \DOMElement $img_element The image element.
+	 * @return string
+	 */
+	private function find_link_href( \DOMElement $img_element ): string {
+		$parent = $img_element->parentNode; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		while ( $parent instanceof \DOMElement ) {
+			if ( 'a' === $parent->tagName ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				return $parent->getAttribute( 'href' );
+			}
+			$parent = $parent->parentNode; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		}
+		return '';
+	}
+
+	/**
+	 * Sanitize a raw `<img>` and normalize it for a grid cell.
+	 *
+	 * Reuses {@see Html_Processing_Helper::sanitize_image_html()} for the security pass (attribute
+	 * allowlist, URL/style sanitizing), then pins the display width to the cell and replaces the
+	 * web-only styling with the responsive email style. WordPress stores the intrinsic file width
+	 * (e.g. `width="1024"`) which Outlook honors literally, and the core web style carries a
+	 * `width: 100%` that collapses once the image is out of a CSS grid — so both are overwritten with
+	 * a concrete cell width plus {@see self::IMAGE_STYLE}.
+	 *
+	 * @param string $img_html Raw `<img>` HTML.
+	 * @param int    $cell_width Cell content width in px.
+	 * @return string Normalized `<img>` HTML, or an empty string when the image has no usable src.
+	 */
+	private function normalize_image_for_email( string $img_html, int $cell_width ): string {
+		$sanitized = Html_Processing_Helper::sanitize_image_html( $img_html );
+
+		$html = new \WP_HTML_Tag_Processor( $sanitized );
+		if ( ! $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
+			return '';
+		}
+
+		$src = $html->get_attribute( 'src' );
+		if ( ! is_string( $src ) || '' === $src ) {
+			return '';
+		}
+
+		// Scale the stored height to the cell width so the image keeps its aspect ratio in clients
+		// that read the attributes (Outlook). A missing/oversized/non-numeric dimension just leaves
+		// the height to `height: auto` in the style.
+		$raw_width  = $html->get_attribute( 'width' );
+		$raw_height = $html->get_attribute( 'height' );
+		$width      = is_string( $raw_width ) && is_numeric( $raw_width ) ? (int) $raw_width : 0;
+		$height     = is_string( $raw_height ) && is_numeric( $raw_height ) ? (int) $raw_height : 0;
+		if ( $width > 0 && $height > 0 ) {
+			$scaled_height = max( 1, (int) round( $height * ( $cell_width / $width ) ) );
+			$html->set_attribute( 'height', esc_attr( (string) $scaled_height ) );
+		} else {
+			$html->remove_attribute( 'height' );
+		}
+
+		$html->set_attribute( 'width', esc_attr( (string) $cell_width ) );
+
+		// Drop the web-only class (harmless in email, and the core/image renderer strips it too) and
+		// replace the web styling with the responsive email style.
+		$html->remove_attribute( 'class' );
+		$html->set_attribute( 'style', esc_attr( self::IMAGE_STYLE ) );
+
+		return $html->get_updated_html();
 	}
 }
