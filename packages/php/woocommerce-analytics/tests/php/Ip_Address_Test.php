@@ -326,12 +326,76 @@ class Ip_Address_Test extends BaseTestCase {
 	/**
 	 * Chained internal proxies leave a private address in the last entry. Scanning further
 	 * left would walk into client-supplied values, so no IP is the correct answer.
+	 *
+	 * Asserted directly against get_proxy_written_ip_address() rather than only through
+	 * resolved_ip(): the final ip_is_public() gate zeroes both "helper returned ''" and
+	 * "helper returned 10.0.0.6" the same way, so that assertion alone cannot prove the
+	 * helper read the last entry rather than, say, discarding a private one. A reflection
+	 * call on the helper pins that it returns the last entry verbatim (10.0.0.6, still
+	 * private) rather than scanning left for '203.0.113.10' — the mutation this test exists
+	 * to catch.
 	 */
 	public function test_chained_internal_proxies_yield_no_address(): void {
 		$_SERVER['REMOTE_ADDR']          = '10.0.0.5';
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.10, 10.0.0.6';
 
 		$this->assertSame( '', $this->resolved_ip() );
+
+		$reflection = new \ReflectionClass( WC_Analytics_Tracking::class );
+		$method     = $reflection->getMethod( 'get_proxy_written_ip_address' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			'10.0.0.6',
+			$method->invoke( null ),
+			'The helper must read the last entry verbatim, not scan left for a public-looking one.'
+		);
+	}
+
+	/**
+	 * A malformed REMOTE_ADDR (missing or unparsable) must be treated the same as a private
+	 * one: it cannot be proof of anything, so it must not itself unlock the forwarded header
+	 * in a way that later trusts unrelated attacker input differently than a clean private
+	 * REMOTE_ADDR would.
+	 */
+	public function test_trailing_comma_yields_no_address(): void {
+		$_SERVER['REMOTE_ADDR']          = '10.0.0.5';
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.10,';
+
+		$this->assertSame(
+			'',
+			$this->resolved_ip(),
+			'An empty last entry must resolve to no address, not silently fall back to an earlier one.'
+		);
+	}
+
+	/**
+	 * Regression: get_ip() must never be the value tested for "is REMOTE_ADDR private". With
+	 * trusted_ip_header configured, get_ip() selects a segment out of a client-supplied
+	 * X-Forwarded-For list, so it can be driven non-public by an attacker connecting directly
+	 * (a public REMOTE_ADDR) who simply prepends a private-looking address of their choosing.
+	 * If the proxy-recovery branch keyed off get_ip()'s result instead of REMOTE_ADDR itself,
+	 * this would then read the *last* X-Forwarded-For entry — also attacker-controlled here,
+	 * since there is no real proxy in front of this request — and report it as the visitor IP.
+	 */
+	public function test_forwarded_header_is_ignored_when_get_ip_result_is_private_but_remote_addr_is_public(): void {
+		update_site_option(
+			'trusted_ip_header',
+			(object) array(
+				'trusted_header' => 'HTTP_X_FORWARDED_FOR',
+				'segments'       => 2,
+				'reverse'        => false,
+			)
+		);
+
+		$_SERVER['REMOTE_ADDR']          = '198.51.100.66';
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '127.0.0.1, 8.8.8.8';
+
+		$this->assertNotSame(
+			'8.8.8.8',
+			$this->resolved_ip(),
+			'REMOTE_ADDR is public and directly connected, so no forwarded value may be trusted.'
+		);
 	}
 
 	/**

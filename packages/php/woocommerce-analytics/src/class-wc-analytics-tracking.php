@@ -546,10 +546,13 @@ class WC_Analytics_Tracking {
 	 * trusting them unconditionally lets any client choose the address we report — and in
 	 * proxy tracking mode that address feeds the visitor id hash.
 	 *
-	 * When `REMOTE_ADDR` itself is non-routable, the request reached us through a proxy on
-	 * the local network — an external client cannot fake that — so the last entry of
+	 * When `REMOTE_ADDR` itself — the address we actually terminated the connection on, not
+	 * whatever `get_ip()` resolved — is non-routable, the request reached us through a proxy
+	 * on the local network — an external client cannot fake that — so the last entry of
 	 * `X-Forwarded-For`, the one the proxy wrote itself, is worth reading. See
-	 * `get_proxy_written_ip_address()` for why only that entry is trusted.
+	 * `get_proxy_written_ip_address()` for why only that entry is trusted. `get_ip()`'s result
+	 * is not usable for this check: when `trusted_ip_header` is configured it is selected out
+	 * of a client-supplied list, so it can be made non-public by an external attacker too.
 	 *
 	 * @since 0.16.8 Stopped trusting `Cf-Connecting-IP`, `X-Forwarded-For` and `Client-IP`
 	 *               unconditionally.
@@ -567,10 +570,17 @@ class WC_Analytics_Tracking {
 		$ip = IP_Utils::get_ip();
 		$ip = is_string( $ip ) ? $ip : '';
 
-		// A non-routable terminating address is proof the request reached us through a proxy
-		// on the local network: an external client cannot make REMOTE_ADDR private. Only then
-		// is a forwarded value worth reading, and only the one the proxy wrote itself.
-		if ( ! IP_Utils::ip_is_public( $ip ) ) {
+		$remote_addr = isset( $_SERVER['REMOTE_ADDR'] )
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- IP_Utils::clean_ip() validates.
+			? IP_Utils::clean_ip( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
+			: false;
+
+		// The address we terminated on — never the resolved one, which may have been selected
+		// out of a client-supplied list by a configured trusted_ip_header. Only REMOTE_ADDR
+		// being non-routable proves a local proxy is in front of us, and that proof is what
+		// makes the forwarded value usable. A missing or malformed REMOTE_ADDR takes the same
+		// path as a private one.
+		if ( ! is_string( $remote_addr ) || ! IP_Utils::ip_is_public( $remote_addr ) ) {
 			$proxy_written = self::get_proxy_written_ip_address();
 
 			if ( '' !== $proxy_written ) {
