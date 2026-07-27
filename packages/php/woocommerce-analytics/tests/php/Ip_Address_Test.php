@@ -483,15 +483,20 @@ class Ip_Address_Test extends BaseTestCase {
 	/**
 	 * Address forms a proxy can legitimately write.
 	 *
+	 * These resolve through the public-address gate, so every address here has to be one
+	 * PHP classifies the same way on every supported version. Notably the IPv6 documentation
+	 * range `2001:db8::/32` does not qualify — 8.1 treats it as reserved and 8.4 does not —
+	 * so it cannot appear in this provider or in `non_public_address_provider()`.
+	 *
 	 * @return array<string, array{0: string, 1: string}>
 	 */
 	public function forwarded_address_format_provider(): array {
 		return array(
-			'plain IPv4'          => array( '203.0.113.10', '203.0.113.10' ),
-			'IPv4 with port'      => array( '203.0.113.10:51234', '203.0.113.10' ),
-			'spaced list'         => array( '198.51.100.99 , 203.0.113.10', '203.0.113.10' ),
-			'bracketed IPv6'      => array( '[2001:db8::1]:443', '2001:db8::1' ),
-			'IPv4-mapped IPv6'    => array( '::ffff:203.0.113.10', '203.0.113.10' ),
+			'plain IPv4'       => array( '203.0.113.10', '203.0.113.10' ),
+			'IPv4 with port'   => array( '203.0.113.10:51234', '203.0.113.10' ),
+			'spaced list'      => array( '198.51.100.99 , 203.0.113.10', '203.0.113.10' ),
+			'bracketed IPv6'   => array( '[2606:4700:4700::1111]:443', '2606:4700:4700::1111' ),
+			'IPv4-mapped IPv6' => array( '::ffff:203.0.113.10', '203.0.113.10' ),
 		);
 	}
 }
