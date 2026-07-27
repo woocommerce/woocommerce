@@ -30,6 +30,13 @@ class CheckoutFieldsFrontendTest extends TestCase {
 	private $controller;
 
 	/**
+	 * Field IDs registered during a test, to be deregistered in tearDown.
+	 *
+	 * @var string[]
+	 */
+	private $registered_fields = [];
+
+	/**
 	 * Setup.
 	 */
 	public function setUp(): void {
@@ -50,6 +57,21 @@ class CheckoutFieldsFrontendTest extends TestCase {
 		remove_filter( 'woocommerce_add_notice', [ $this, 'capture_notice' ] );
 		remove_filter( 'woocommerce_add_error', [ $this, 'capture_error' ] );
 		remove_filter( 'woocommerce_add_success', [ $this, 'capture_success' ] );
+
+		foreach ( $this->registered_fields as $field_id ) {
+			__internal_woocommerce_blocks_deregister_checkout_field( $field_id );
+		}
+		$this->registered_fields = [];
+	}
+
+	/**
+	 * Register a checkout field and track it for cleanup in tearDown.
+	 *
+	 * @param array $args Field registration arguments.
+	 */
+	private function register_checkout_field( array $args ): void {
+		woocommerce_register_additional_checkout_field( $args );
+		$this->registered_fields[] = $args['id'];
 	}
 
 	/**
@@ -124,7 +146,7 @@ class CheckoutFieldsFrontendTest extends TestCase {
 	 */
 	public function test_save_account_form_fields_contact_generic_validation_error() {
 
-		woocommerce_register_additional_checkout_field(
+		$this->register_checkout_field(
 			array(
 				'id'                => 'mynamespace/generic_validation_error',
 				'label'             => 'Optional field with validation',
@@ -161,8 +183,6 @@ class CheckoutFieldsFrontendTest extends TestCase {
 
 		$value = $this->controller->get_field_from_object( 'mynamespace/generic_validation_error', new WC_Customer( 1 ) );
 		$this->assertEquals( '', $value );
-
-		__internal_woocommerce_blocks_deregister_checkout_field( 'mynamespace/generic_validation_error' );
 	}
 
 	/**
@@ -170,7 +190,7 @@ class CheckoutFieldsFrontendTest extends TestCase {
 	 */
 	public function test_save_account_form_fields_contact_location_validation_error() {
 
-		woocommerce_register_additional_checkout_field(
+		$this->register_checkout_field(
 			array(
 				'id'       => 'mynamespace/location_validation_error',
 				'label'    => 'Impossible contact field',
@@ -197,8 +217,6 @@ class CheckoutFieldsFrontendTest extends TestCase {
 		$value = $this->controller->get_field_from_object( 'mynamespace/required_field', new WC_Customer( 1 ) );
 		$this->assertEquals( '', $value );
 
-		__internal_woocommerce_blocks_deregister_checkout_field( 'mynamespace/location_validation_error' );
-
 		remove_action( 'woocommerce_blocks_validate_location_contact_fields', $e_thrower );
 	}
 
@@ -207,7 +225,7 @@ class CheckoutFieldsFrontendTest extends TestCase {
 	 */
 	public function test_save_account_form_fields_contact_save_required_field() {
 
-		woocommerce_register_additional_checkout_field(
+		$this->register_checkout_field(
 			array(
 				'id'       => 'mynamespace/required_field',
 				'label'    => 'Required field',
@@ -238,8 +256,6 @@ class CheckoutFieldsFrontendTest extends TestCase {
 
 		$value = $this->controller->get_field_from_object( 'mynamespace/required_field', new WC_Customer( 1 ) );
 		$this->assertEquals( $hash, $value );
-
-		__internal_woocommerce_blocks_deregister_checkout_field( 'mynamespace/required_field' );
 	}
 
 	/**
@@ -247,7 +263,7 @@ class CheckoutFieldsFrontendTest extends TestCase {
 	 */
 	public function test_save_account_form_fields_contact_save_optional_field() {
 
-		woocommerce_register_additional_checkout_field(
+		$this->register_checkout_field(
 			array(
 				'id'       => 'mynamespace/optional_field',
 				'label'    => 'Optional field',
@@ -275,15 +291,13 @@ class CheckoutFieldsFrontendTest extends TestCase {
 
 		$value = $this->controller->get_field_from_object( 'mynamespace/optional_field', new WC_Customer( 1 ) );
 		$this->assertEquals( $hash, $value );
-
-		__internal_woocommerce_blocks_deregister_checkout_field( 'mynamespace/optional_field' );
 	}
 
 	/**
 	 * @testDox Contact additional field validation error for an optional email field to ensure validation rules are applied.
 	 */
 	public function test_save_account_form_fields_contact_email_validation_error_optional_field() {
-		woocommerce_register_additional_checkout_field(
+		$this->register_checkout_field(
 			array(
 				'id'                => 'mynamespace/email_validation_error',
 				'label'             => 'Optional field with validation',
@@ -325,15 +339,13 @@ class CheckoutFieldsFrontendTest extends TestCase {
 
 		$value = $this->controller->get_field_from_object( 'mynamespace/email_validation_error', new WC_Customer( 1 ) );
 		$this->assertEquals( '', $value );
-
-		__internal_woocommerce_blocks_deregister_checkout_field( 'mynamespace/email_validation_error' );
 	}
 
 	/**
 	 * @testDox Optional field with existing value can be cleared by submitting empty value.
 	 */
 	public function test_save_account_form_fields_optional_field_can_be_cleared() {
-		woocommerce_register_additional_checkout_field(
+		$this->register_checkout_field(
 			array(
 				'id'       => 'mynamespace/optional_field',
 				'label'    => 'Optional field',
@@ -355,15 +367,13 @@ class CheckoutFieldsFrontendTest extends TestCase {
 
 		$value = $this->controller->get_field_from_object( 'mynamespace/optional_field', new WC_Customer( 1 ) );
 		$this->assertEquals( '', $value );
-
-		__internal_woocommerce_blocks_deregister_checkout_field( 'mynamespace/optional_field' );
 	}
 
 	/**
 	 * @testDox Additional address field values with show_in_order_confirmation set to false are hidden when rendering order details.
 	 */
 	public function test_render_order_address_fields_hides_field_when_show_in_order_confirmation_is_false() {
-		woocommerce_register_additional_checkout_field(
+		$this->register_checkout_field(
 			array(
 				'id'                         => 'mynamespace/billing_confirmation_field',
 				'label'                      => 'Hidden on confirmation',
@@ -382,15 +392,13 @@ class CheckoutFieldsFrontendTest extends TestCase {
 		$content = ob_get_clean();
 
 		$this->assertStringNotContainsString( 'secret value', $content );
-
-		__internal_woocommerce_blocks_deregister_checkout_field( 'mynamespace/billing_confirmation_field' );
 	}
 
 	/**
 	 * @testDox Additional address field values with show_in_order_confirmation set to true (the default) are shown when rendering order details.
 	 */
 	public function test_render_order_address_fields_shows_field_when_show_in_order_confirmation_is_true() {
-		woocommerce_register_additional_checkout_field(
+		$this->register_checkout_field(
 			array(
 				'id'       => 'mynamespace/billing_confirmation_field',
 				'label'    => 'Shown on confirmation',
@@ -408,7 +416,5 @@ class CheckoutFieldsFrontendTest extends TestCase {
 		$content = ob_get_clean();
 
 		$this->assertStringContainsString( 'visible value', $content );
-
-		__internal_woocommerce_blocks_deregister_checkout_field( 'mynamespace/billing_confirmation_field' );
 	}
 }
