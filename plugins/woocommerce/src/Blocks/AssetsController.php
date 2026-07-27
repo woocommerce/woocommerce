@@ -144,7 +144,7 @@ final class AssetsController {
 	 */
 	private function register_deprecated_script_handles(): void {
 		wp_register_script( 'wc-blocks-vendors', false, array(), $this->api->wc_version, true );
-		wp_register_script( 'wc-blocks', false, array(), $this->api->wc_version, true );
+		wp_register_script( 'wc-blocks', false, array( 'wc-blocks-vendors' ), $this->api->wc_version, true );
 
 		$this->add_deprecated_script_handle_warnings(
 			array(
