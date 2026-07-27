@@ -13,10 +13,22 @@ declare(strict_types=1);
 class WC_Helper_API_Backoff_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * The REQUEST_URI value present before the test ran, restored on tear down.
+	 *
+	 * @var string|null
+	 */
+	private $original_request_uri;
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		// Saved raw to restore verbatim on tear down; not used for any logic.
+		$this->original_request_uri = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		// Default to a non-refresh request so is_rate_limited() is not bypassed.
+		$_SERVER['REQUEST_URI'] = '/wp-admin/admin.php?page=wc-admin';
 
 		$this->cleanup_transients();
 	}
@@ -26,6 +38,12 @@ class WC_Helper_API_Backoff_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->cleanup_transients();
+
+		if ( null === $this->original_request_uri ) {
+			unset( $_SERVER['REQUEST_URI'] );
+		} else {
+			$_SERVER['REQUEST_URI'] = $this->original_request_uri;
+		}
 
 		parent::tearDown();
 	}
@@ -149,6 +167,60 @@ class WC_Helper_API_Backoff_Test extends WC_Unit_Test_Case {
 		$this->assertFalse(
 			WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ),
 			'Clearing the backoff should lift the rate limit'
+		);
+	}
+
+	/**
+	 * @testdox Should bypass and clear the backoff during a Marketplace refresh request.
+	 */
+	public function test_refresh_request_bypasses_and_clears_backoff(): void {
+		$type = WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK;
+		WC_Helper_API_Backoff::record_from_response( $type, $this->make_rate_limited_response( array( 'retry-after' => '55' ) ) );
+
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/marketplace/refresh';
+
+		$this->assertTrue(
+			WC_Helper_API_Backoff::is_refresh_request(),
+			'The refresh REST route should be detected as a refresh request'
+		);
+		$this->assertFalse(
+			WC_Helper_API_Backoff::is_rate_limited( $type ),
+			'A refresh request should bypass the backoff'
+		);
+		$this->assertFalse(
+			get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . $type ),
+			'A refresh request should also clear the stored backoff'
+		);
+	}
+
+	/**
+	 * @testdox Should not treat a non-refresh request as a refresh.
+	 */
+	public function test_non_refresh_request_is_not_a_refresh(): void {
+		$_SERVER['REQUEST_URI'] = '/wp-admin/admin.php?page=wc-admin&tab=my-subscriptions';
+
+		$this->assertFalse(
+			WC_Helper_API_Backoff::is_refresh_request(),
+			'A non-refresh admin request should not be detected as a refresh'
+		);
+	}
+
+	/**
+	 * @testdox Should clear the backoff for every known request type.
+	 */
+	public function test_clear_all_clears_every_request_type(): void {
+		WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, $this->make_rate_limited_response( array( 'retry-after' => '55' ) ) );
+		WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS, $this->make_rate_limited_response( array( 'retry-after' => '55' ) ) );
+
+		WC_Helper_API_Backoff::clear_all();
+
+		$this->assertFalse(
+			WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ),
+			'clear_all() should clear the update-check backoff'
+		);
+		$this->assertFalse(
+			WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS ),
+			'clear_all() should clear the subscriptions backoff'
 		);
 	}
 }
