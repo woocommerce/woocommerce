@@ -1058,9 +1058,12 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
-	 * Reject the order if the total the shopper confirmed on the client no longer matches the
-	 * total the server recalculates for this place-order request. Without this guard the order
-	 * could be placed — and the shopper charged — at a total they never saw.
+	 * Reject the order if the total the server recalculates for this place-order request is higher
+	 * than the total the shopper confirmed on the client. Without this guard the order could be
+	 * placed — and the shopper charged — at a total they never saw.
+	 *
+	 * A recalculated total that is the same or lower (e.g. a coupon applied, a price drop) is not
+	 * rejected; the shopper never needs protecting from being charged less than they confirmed.
 	 *
 	 * Runs on POST /checkout only, before the draft order is materialised, so a mismatch leaves
 	 * no order behind. The check only runs when the client sends the total it displayed; flows
@@ -1070,7 +1073,7 @@ class Checkout extends AbstractCartRoute {
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
 	 * @param \WP_REST_Request $request Request object.
-	 * @throws RouteException When the totals differ. Returns HTTP 409 with the refreshed cart so the client can display the updated total.
+	 * @throws RouteException When the recalculated total is higher. Returns HTTP 409 with the refreshed cart so the client can display the updated total.
 	 */
 	private function validate_order_totals( \WP_REST_Request $request ): void {
 		$expected_total = (string) ( $request['expected_total'] ?? '' );
@@ -1086,13 +1089,27 @@ class Checkout extends AbstractCartRoute {
 			[ 'decimals' => $decimals ]
 		);
 
-		if ( $expected_total !== $actual_total ) {
-			throw new RouteException(
-				'woocommerce_rest_checkout_total_mismatch',
-				esc_html__( 'The order total changed while you were checking out. Please review the updated total and place your order again.', 'woocommerce' ),
-				409
-			);
+		if ( (int) $actual_total <= (int) $expected_total ) {
+			return;
 		}
+
+		$expected_amount = wc_remove_number_precision( absint( $expected_total ) );
+		$actual_amount   = wc_remove_number_precision( absint( $actual_total ) );
+
+		throw new RouteException(
+			'woocommerce_rest_checkout_total_mismatch',
+			sprintf(
+				/* translators: %1$s: total the shopper confirmed, %2$s: updated, higher total */
+				esc_html__( 'The order total changed from %1$s to %2$s while you were checking out. Please review the updated total and place your order again.', 'woocommerce' ),
+				esc_html( wc_price( $expected_amount, [ 'in_span' => false ] ) ),
+				esc_html( wc_price( $actual_amount, [ 'in_span' => false ] ) )
+			),
+			409,
+			[
+				'expected_total' => absint( $expected_total ),
+				'actual_total'   => absint( $actual_total ),
+			]
+		);
 	}
 
 	/**
