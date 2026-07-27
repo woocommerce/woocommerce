@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin;
 
+use Automattic\WooCommerce\Admin\PageController;
 use WC_Unit_Test_Case;
 
 /**
@@ -11,41 +12,50 @@ use WC_Unit_Test_Case;
  */
 class PageControllerCurrentScreenTest extends WC_Unit_Test_Case {
 	/**
-	 * @testdox Should return false when the WordPress screen API is unavailable.
+	 * Backup of $GLOBALS['current_screen'].
+	 *
+	 * @var object|null
 	 */
-	public function test_get_current_screen_id_returns_false_when_screen_api_is_unavailable(): void {
-		$process = proc_open( // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_proc_open -- Required to verify behavior before the WordPress admin bootstrap.
-			array(
-				PHP_BINARY,
-				dirname( __DIR__, 3 ) . '/fixtures/page-controller-without-screen-api.php',
-				ABSPATH . 'wp-load.php',
-			),
-			array(
-				1 => array( 'pipe', 'w' ),
-				2 => array( 'pipe', 'w' ),
-			),
-			$pipes
-		);
+	private $current_screen_backup;
 
-		if ( ! is_resource( $process ) ) {
-			$this->fail( 'Failed to start the isolated WordPress bootstrap process.' );
-		}
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->current_screen_backup = $GLOBALS['current_screen'] ?? null;
+	}
 
-		$stdout = stream_get_contents( $pipes[1] );
-		$stderr = stream_get_contents( $pipes[2] );
-		fclose( $pipes[1] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing a process pipe, not a filesystem resource.
-		fclose( $pipes[2] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing a process pipe, not a filesystem resource.
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		$GLOBALS['current_screen'] = $this->current_screen_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		parent::tearDown();
+	}
 
-		$exit_code = proc_close( $process );
+	/**
+	 * @testdox Should fall back to a filterable false when the current screen cannot be determined.
+	 */
+	public function test_get_current_screen_id_returns_false_when_current_screen_is_unavailable(): void {
+		$GLOBALS['current_screen'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$this->assertSame( 0, $exit_code, $stderr );
+		$filter_args = null;
+		$filter      = function ( $screen_id, $current_screen ) use ( &$filter_args ) {
+			$filter_args = array( $screen_id, $current_screen );
+			return $screen_id;
+		};
+		add_filter( 'woocommerce_navigation_current_screen_id', $filter, 10, 2 );
+
+		$screen_id = PageController::get_instance()->get_current_screen_id();
+
+		remove_filter( 'woocommerce_navigation_current_screen_id', $filter );
+
+		$this->assertFalse( $screen_id, 'get_current_screen_id() should return false when no screen is set.' );
 		$this->assertSame(
-			array(
-				'get_current_screen_exists' => false,
-				'screen_id'                 => false,
-			),
-			json_decode( trim( $stdout ), true, 512, JSON_THROW_ON_ERROR ),
-			'PageController should use its false fallback before WordPress loads the screen API.'
+			array( false, null ),
+			$filter_args,
+			'The false fallback should pass through the woocommerce_navigation_current_screen_id filter with a null screen.'
 		);
 	}
 }
