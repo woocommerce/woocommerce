@@ -70,6 +70,10 @@ final class CallbackUtil {
 	 * Closure signatures are based on their file location and line numbers,
 	 * providing consistent hashes across requests for the same closure code.
 	 *
+	 * Memoized per hook for the request, recomputed only when the registered
+	 * callbacks change, so repeated calls skip the reflection work that closure
+	 * and invokable callbacks require.
+	 *
 	 * @param string $hook_name The name of the hook to inspect.
 	 * @return array<int, array<string>> Array of priority => array( signatures ),  empty if hook has no callbacks.
 	 *
@@ -78,18 +82,34 @@ final class CallbackUtil {
 	public static function get_hook_callback_signatures( string $hook_name ): array {
 		global $wp_filter;
 
+		static $cache = array();
+
 		if ( ! isset( $wp_filter[ $hook_name ] ) ) {
+			unset( $cache[ $hook_name ] );
 			return array();
+		}
+
+		$callbacks_by_priority = $wp_filter[ $hook_name ]->callbacks;
+
+		// Objects inside compare by identity, so a replaced instance or closure is
+		// a mismatch; holding the array also stops their ids being reused.
+		if ( isset( $cache[ $hook_name ] ) && $cache[ $hook_name ]['callbacks'] === $callbacks_by_priority ) {
+			return $cache[ $hook_name ]['signatures'];
 		}
 
 		$result = array();
 
-		foreach ( $wp_filter[ $hook_name ]->callbacks as $priority => $priority_callbacks ) {
+		foreach ( $callbacks_by_priority as $priority => $priority_callbacks ) {
 			$result[ $priority ] = array_map(
 				fn( $callback_data ) => self::get_callback_signature( $callback_data['function'] ),
 				array_values( $priority_callbacks )
 			);
 		}
+
+		$cache[ $hook_name ] = array(
+			'callbacks'  => $callbacks_by_priority,
+			'signatures' => $result,
+		);
 
 		return $result;
 	}

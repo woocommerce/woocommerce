@@ -504,9 +504,8 @@ test.describe(
 		};
 
 		test.beforeAll( async () => {
-			( { source_url: downloadFile } = await getMediaBySlug(
-				'image-01'
-			) );
+			( { source_url: downloadFile } =
+				await getMediaBySlug( 'image-01' ) );
 
 			// Persist a Screen Options preference (an empty hidden-meta-boxes list) for the
 			// admin user (ID 1) so the box stays visible while the tests navigate between

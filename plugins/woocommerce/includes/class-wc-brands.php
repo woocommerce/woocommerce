@@ -562,6 +562,14 @@ class WC_Brands {
 			return '';
 		}
 
+		$args['width']  = self::normalize_product_brand_shortcode_dimension( $args['width'] );
+		$args['height'] = self::normalize_product_brand_shortcode_dimension( $args['height'] );
+
+		if ( '' !== $args['width'] || '' !== $args['height'] ) {
+			$args['width']  = '' !== $args['width'] ? $args['width'] : 'auto';
+			$args['height'] = '' !== $args['height'] ? $args['height'] : 'auto';
+		}
+
 		ob_start();
 
 		foreach ( $brands as $brand ) {
@@ -573,11 +581,6 @@ class WC_Brands {
 			$args['thumbnail'] = $thumbnail;
 			$args['term']      = get_term_by( 'id', $brand, 'product_brand' );
 
-			if ( $args['width'] || $args['height'] ) {
-				$args['width']  = ! empty( $args['width'] ) ? $args['width'] : 'auto';
-				$args['height'] = ! empty( $args['height'] ) ? $args['height'] : 'auto';
-			}
-
 			wc_get_template(
 				'shortcodes/single-brand.php',
 				$args,
@@ -587,6 +590,18 @@ class WC_Brands {
 		}
 
 		return ob_get_clean();
+	}
+
+	/**
+	 * Normalize a product brand shortcode image dimension.
+	 *
+	 * @param mixed $dimension Shortcode dimension value.
+	 * @return string Normalized dimension.
+	 */
+	private static function normalize_product_brand_shortcode_dimension( $dimension ) {
+		$dimension = is_scalar( $dimension ) ? trim( (string) $dimension ) : '';
+
+		return is_numeric( $dimension ) ? $dimension . 'px' : $dimension;
 	}
 
 	/**
