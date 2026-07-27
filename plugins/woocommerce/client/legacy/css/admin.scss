@@ -8051,12 +8051,8 @@ table.bar_chart {
 		width: 100% !important;
 	}
 
-	// Keep the clear (x) icon from overlapping the dropdown chevron on single
-	// selects inside the modal (e.g. the product-search rows). Reserve room
-	// for both icons and sit the clear icon to the left of the chevron. Scoped
-	// to the modal so no other select in admin shifts; rtlcss flips the
-	// right/margin values for RTL at build time.
-	.select2-selection--single {
+	// Reserve room for the clear (x) and chevron icons; .select2-container keeps this rule above the later global 24px padding.
+	.select2-container .select2-selection--single {
 		.select2-selection__rendered {
 			padding-right: 40px;
 		}
