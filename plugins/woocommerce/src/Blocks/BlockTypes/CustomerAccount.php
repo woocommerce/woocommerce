@@ -112,32 +112,6 @@ class CustomerAccount extends AbstractBlock {
 	}
 
 	/**
-	 * Data passed through from server to client for block.
-	 *
-	 * @param array $attributes Any attributes that currently are available from the block.
-	 */
-	protected function enqueue_data( array $attributes = [] ) {
-		parent::enqueue_data( $attributes );
-
-		if ( ! $this->asset_data_registry->exists( 'currentUserAvatarUrl' ) ) {
-			$avatar_url = '';
-			$user_id    = get_current_user_id();
-
-			if ( $user_id && get_option( 'show_avatars' ) ) {
-				$avatar_url = get_avatar_url(
-					$user_id,
-					array(
-						'size'    => 48,
-						'default' => 'blank',
-					)
-				);
-			}
-
-			$this->asset_data_registry->add( 'currentUserAvatarUrl', $avatar_url );
-		}
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.

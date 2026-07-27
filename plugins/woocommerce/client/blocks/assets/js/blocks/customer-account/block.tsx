@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
 import { Icon } from '@wordpress/icons';
 import {
 	customerAccountStyle,
@@ -32,35 +31,15 @@ const AccountIcon = ( {
 	displayStyle: DisplayStyle;
 	iconClass: string;
 } ) => {
-	if ( displayStyle === DisplayStyle.TEXT_ONLY ) {
-		return null;
-	}
-
-	const currentUserId = getSetting( 'currentUserId', null );
-	const avatarUrl = getSetting< string >( 'currentUserAvatarUrl', '' );
-
-	const avatar =
-		currentUserId && avatarUrl ? (
-			<img
-				className={ clsx(
-					'wc-block-customer-account__avatar',
-					iconClass
-				) }
-				src={ avatarUrl }
-				alt=""
-			/>
-		) : null;
-
-	return (
+	return displayStyle !== DisplayStyle.TEXT_ONLY ? (
 		<div className="wc-block-customer-account__visual">
 			<Icon
 				className={ iconClass }
 				icon={ icons[ iconStyle ] }
 				size={ 18 }
 			/>
-			{ avatar }
 		</div>
-	);
+	) : null;
 };
 
 const Label = ( { displayStyle }: { displayStyle: DisplayStyle } ) => {
