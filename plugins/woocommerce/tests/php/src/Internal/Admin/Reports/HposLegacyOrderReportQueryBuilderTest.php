@@ -118,8 +118,11 @@ class HposLegacyOrderReportQueryBuilderTest extends WC_Unit_Test_Case {
 		$local_date_expression = 'DATE_ADD(orders.date_created_gmt, INTERVAL 7200 SECOND)';
 
 		$this->assertStringContainsString( 'wc_orders AS orders', $query['from'] );
-		$this->assertStringContainsString( 'orders.total_amount', $query['select'] );
-		$this->assertStringContainsString( 'op_data.shipping_total_amount', $query['select'] );
+		// Aggregated money columns stay unwrapped: rounding inside SUM() would drift
+		// from the CPT path, which sums the unrounded meta values.
+		$this->assertStringContainsString( 'SUM( orders.total_amount)', $query['select'] );
+		$this->assertStringContainsString( 'SUM( op_data.shipping_total_amount)', $query['select'] );
+		$this->assertStringNotContainsString( 'ROUND', $query['select'] );
 		$this->assertStringContainsString( 'meta__refund_amount.meta_value', $query['select'] );
 		$this->assertStringContainsString( 'wc_order_operational_data AS op_data', $query['join'] );
 		$this->assertStringContainsString( 'wc_orders_meta AS meta__refund_amount', $query['join'] );

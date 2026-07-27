@@ -183,6 +183,13 @@ class HposLegacyOrderReportQueryBuilder {
 			return null;
 		}
 
+		// Only bare selects get the legacy money format; inside an aggregate the raw
+		// column must be used, as per-row rounding would accumulate error where the
+		// CPT path sums the unrounded meta values.
+		if ( ! $value['function'] && $this->is_money_meta_key( $type, $raw_key ) ) {
+			$get_key = $this->format_money_column( $get_key );
+		}
+
 		$expr = $value['function']
 			? "{$value['function']}({$distinct} {$get_key})"
 			: "{$distinct} {$get_key}";
@@ -232,10 +239,10 @@ class HposLegacyOrderReportQueryBuilder {
 	private function resolve_meta_select( $raw_key, $key, $join_type ) {
 		$schema = $this->get_report_schema();
 		if ( isset( $schema['order_column'][ $raw_key ] ) ) {
-			return array( $this->format_money_column( $schema['order_column'][ $raw_key ] ), array() );
+			return array( $schema['order_column'][ $raw_key ], array() );
 		}
 		if ( isset( $schema['op_data_column'][ $raw_key ] ) ) {
-			return array( $this->format_money_column( $schema['op_data_column'][ $raw_key ] ), $this->build_op_data_join() );
+			return array( $schema['op_data_column'][ $raw_key ], $this->build_op_data_join() );
 		}
 		if ( isset( $schema['address_column'][ $raw_key ] ) ) {
 			list( $address_type, $column ) = $schema['address_column'][ $raw_key ];
@@ -261,12 +268,12 @@ class HposLegacyOrderReportQueryBuilder {
 		$schema = $this->get_report_schema();
 		if ( isset( $schema['order_column'][ $raw_key ] ) ) {
 			$column = substr( $schema['order_column'][ $raw_key ], strlen( 'orders.' ) );
-			return array( $this->format_money_column( "parent_orders.{$column}" ), $this->build_parent_orders_join() );
+			return array( "parent_orders.{$column}", $this->build_parent_orders_join() );
 		}
 		if ( isset( $schema['op_data_column'][ $raw_key ] ) ) {
 			$column = substr( $schema['op_data_column'][ $raw_key ], strlen( 'op_data.' ) );
 			$joins  = array_merge( $this->build_parent_orders_join(), $this->build_parent_op_data_join() );
-			return array( $this->format_money_column( "parent_op_data.{$column}" ), $joins );
+			return array( "parent_op_data.{$column}", $joins );
 		}
 		if ( isset( $schema['address_column'][ $raw_key ] ) ) {
 			list( $address_type, $column ) = $schema['address_column'][ $raw_key ];
@@ -284,12 +291,30 @@ class HposLegacyOrderReportQueryBuilder {
 	}
 
 	/**
-	 * Wrap a mapped money column so raw SELECTs match the legacy meta format.
+	 * Whether a data row resolves to a mapped HPOS money column.
+	 *
+	 * @param string $type    Row type.
+	 * @param string $raw_key Original meta key.
+	 *
+	 * @return bool
+	 */
+	private function is_money_meta_key( $type, $raw_key ): bool {
+		if ( 'meta' !== $type && 'parent_meta' !== $type ) {
+			return false;
+		}
+
+		$schema = $this->get_report_schema();
+		return isset( $schema['order_column'][ $raw_key ] ) || isset( $schema['op_data_column'][ $raw_key ] );
+	}
+
+	/**
+	 * Wrap a mapped money column so bare SELECTs match the legacy meta format.
 	 *
 	 * HPOS money columns are DECIMAL(26,8), so selecting one raw yields e.g.
 	 * '50.00000000' where the CPT meta stores '50.00'. Rounding to the store's
-	 * price decimals restores the legacy format; stored values are already
-	 * rounded to that precision, so aggregates are unaffected.
+	 * price decimals restores the legacy format. Never applied inside aggregate
+	 * functions: several money metas are stored at full precision, so per-row
+	 * rounding would drift from the CPT sums.
 	 *
 	 * @param string $column Qualified column reference.
 	 *
