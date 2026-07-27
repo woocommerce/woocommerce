@@ -549,16 +549,24 @@ class Checkout extends AbstractCartRoute {
 		$this->validate_user_can_place_order();
 
 		/**
-		 * Before triggering validation, ensure totals are current and in turn, things such as shipping costs are present.
-		 * This is so plugins that validate other cart data (e.g. conditional shipping and payments) can access this data.
-		 */
-		$this->cart_controller->calculate_totals();
-
-		/**
 		 * Validate that the cart is not empty.
 		 */
 		$this->cart_controller->validate_cart_not_empty();
 		wc_log_order_step( '[Store API #2] Cart validated' );
+
+		/**
+		 * Persist customer session data from the request first so that OrderController::update_addresses_from_cart
+		 * uses the up-to-date customer address.
+		 */
+		$this->update_customer_from_request( $request );
+		// Customer save-point: 1 (session-stored).
+		wc_log_order_step( '[Store API #3] Updated customer data from request' );
+
+		/**
+		 * Before triggering validation, ensure totals are current and in turn, things such as shipping costs are present.
+		 * This is so plugins that validate other cart data (e.g. conditional shipping and payments) can access this data.
+		 */
+		$this->cart_controller->calculate_totals();
 
 		/**
 		 * Validate items and fix violations before the order is processed.
@@ -572,14 +580,6 @@ class Checkout extends AbstractCartRoute {
 		 * a quantity, a coupon expired, or shipping/tax was recalculated).
 		 */
 		$this->validate_order_totals( $request );
-
-		/**
-		 * Persist customer session data from the request first so that OrderController::update_addresses_from_cart
-		 * uses the up-to-date customer address.
-		 */
-		$this->update_customer_from_request( $request );
-		// Customer save-point: 1 (session-stored).
-		wc_log_order_step( '[Store API #3] Updated customer data from request' );
 
 		/**
 		 * Create (or update) Draft Order and process request data.
@@ -1058,12 +1058,7 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
-	 * Reject the order if the total the server recalculates for this place-order request is higher
-	 * than the total the shopper confirmed on the client. Without this guard the order could be
-	 * placed — and the shopper charged — at a total they never saw.
-	 *
-	 * A recalculated total that is the same or lower (e.g. a coupon applied, a price drop) is not
-	 * rejected; the shopper never needs protecting from being charged less than they confirmed.
+	 * Reject the order if what the customer is going to be charged at is higher from what they saw.
 	 *
 	 * Runs on POST /checkout only, before the draft order is materialised, so a mismatch leaves
 	 * no order behind. The check only runs when the client sends the total it displayed; flows

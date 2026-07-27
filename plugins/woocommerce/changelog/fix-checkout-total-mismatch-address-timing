@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API/Checkout Block: the checkout total-mismatch guard now runs after the request's addresses are applied, so address-driven tax and shipping changes are caught instead of being compared against the pre-request session total. Applying the addresses before totals are calculated also means the check adds no extra cart recalculation.
