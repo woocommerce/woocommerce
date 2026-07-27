@@ -190,7 +190,7 @@ class WC_Shortcode_My_Account {
 		/**
 		 * Filters the My Account > Edit address page title.
 		 *
-		 * @since 8.1.0
+		 * @since 2.1.0
 		 *
 		 * @param string $title        Page title.
 		 * @param string $address_type Type of address; 'billing' or 'shipping'.
