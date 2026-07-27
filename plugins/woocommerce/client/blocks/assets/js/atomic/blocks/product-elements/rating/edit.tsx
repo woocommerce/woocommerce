@@ -29,6 +29,7 @@ const Edit = (
 		...context,
 		shouldDisplayMockedReviewsWhenProductHasNoReviews: true,
 	};
+	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
 
 	const { product } = useProduct( context.postId );
 
@@ -43,7 +44,12 @@ const Edit = (
 				/>
 			</BlockControls>
 			<div { ...blockProps }>
-				<Block isAdmin={ true } { ...blockAttrs } product={ product } />
+				<Block
+					isAdmin={ true }
+					{ ...blockAttrs }
+					isDescendentOfQueryLoop={ isDescendentOfQueryLoop }
+					product={ product }
+				/>
 			</div>
 		</>
 	);
