@@ -1016,6 +1016,97 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should pass image attributes to the placeholder image filter.
+	 */
+	public function test_wc_placeholder_img_filter_receives_attributes() {
+		$captured_attr = null;
+		$attr          = array(
+			'class' => 'custom-class',
+			'alt'   => 'Custom alt',
+		);
+		$filter        = function ( $image_html, $size, $dimensions, $filter_attr = null ) use ( &$captured_attr ) {
+			$captured_attr = $filter_attr;
+
+			return $image_html;
+		};
+
+		add_filter( 'woocommerce_placeholder_img', $filter, 10, 4 );
+		try {
+			wc_placeholder_img( 'woocommerce_thumbnail', $attr );
+		} finally {
+			remove_filter( 'woocommerce_placeholder_img', $filter, 10 );
+		}
+
+		$this->assertSame( $attr, $captured_attr );
+	}
+
+	/**
+	 * @testdox Should use the filtered placeholder source for an attachment placeholder.
+	 */
+	public function test_wc_placeholder_img_uses_filtered_src_for_attachment_placeholder() {
+		$option_name                = 'woocommerce_placeholder_image';
+		$original_placeholder_image = get_option( $option_name, false );
+		$placeholder_image_id       = self::factory()->attachment->create(
+			array(
+				'file'           => 'placeholder.png',
+				'guid'           => 'https://example.com/wp-content/uploads/placeholder.png',
+				'post_mime_type' => 'image/png',
+			)
+		);
+		$placeholder_src            = 'https://example.com/custom-placeholder.png';
+		$filter                     = function () use ( $placeholder_src ) {
+			return $placeholder_src;
+		};
+		$passthrough_filter         = function ( $src ) {
+			return $src;
+		};
+
+		wp_update_attachment_metadata(
+			$placeholder_image_id,
+			array(
+				'width'  => 186,
+				'height' => 144,
+				'file'   => 'placeholder.png',
+			)
+		);
+		update_option( $option_name, $placeholder_image_id );
+		add_filter( 'woocommerce_placeholder_img_src', $filter );
+
+		try {
+			$image_html = wc_placeholder_img();
+
+			$this->assertStringContainsString( 'src="' . $placeholder_src . '"', $image_html );
+			$this->assertStringNotContainsString( 'srcset=', $image_html );
+
+			remove_filter( 'woocommerce_placeholder_img_src', $filter );
+			add_filter( 'woocommerce_placeholder_img_src', $passthrough_filter );
+
+			$this->assertSame(
+				wp_get_attachment_image(
+					$placeholder_image_id,
+					'woocommerce_thumbnail',
+					false,
+					array(
+						'class' => 'woocommerce-placeholder wp-post-image',
+						'alt'   => __( 'Placeholder', 'woocommerce' ),
+					)
+				),
+				wc_placeholder_img()
+			);
+		} finally {
+			remove_filter( 'woocommerce_placeholder_img_src', $filter );
+			remove_filter( 'woocommerce_placeholder_img_src', $passthrough_filter );
+			wp_delete_attachment( $placeholder_image_id, true );
+
+			if ( false === $original_placeholder_image ) {
+				delete_option( $option_name );
+			} else {
+				update_option( $option_name, $original_placeholder_image );
+			}
+		}
+	}
+
+	/**
 	 * Test wc_get_product_types().
 	 *
 	 * @since 2.3

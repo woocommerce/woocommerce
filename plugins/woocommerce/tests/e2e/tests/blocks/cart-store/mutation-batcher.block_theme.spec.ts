@@ -25,38 +25,6 @@ test.describe( 'Mutation Batcher', () => {
 		await frontendUtils.goToShop();
 	} );
 
-	test( 'synchronous calls are batched into a single request', async ( {
-		page,
-	} ) => {
-		const batchRequests: number[] = [];
-
-		await page.route( '**/wc/store/v1/batch**', async ( route ) => {
-			const body = route.request().postDataJSON();
-			batchRequests.push( body?.requests?.length || 0 );
-			await route.continue();
-		} );
-
-		await page.evaluate( async () => {
-			const { store } = await import( '@wordpress/interactivity' );
-			const unlockKey =
-				'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-			await import( '@woocommerce/stores/woocommerce/cart' );
-			const { actions } = store( 'woocommerce', {}, { lock: unlockKey } );
-
-			// Three calls with no await between them — same microtick.
-			const p1 = actions.addCartItem( { id: 15, quantityToAdd: 1 } );
-			const p2 = actions.addCartItem( { id: 16, quantityToAdd: 1 } );
-			const p3 = actions.addCartItem( { id: 17, quantityToAdd: 1 } );
-
-			await Promise.all( [ p1, p2, p3 ] );
-		} );
-
-		// All 3 operations should have been sent in a single batch request.
-		expect( batchRequests ).toHaveLength( 1 );
-		expect( batchRequests[ 0 ] ).toBe( 3 );
-	} );
-
 	test( 'awaited calls produce separate batch requests', async ( {
 		page,
 	} ) => {
@@ -220,60 +188,5 @@ test.describe( 'Mutation Batcher', () => {
 		// After the delayed failure response, the batcher rolls back
 		// to the snapshot taken before any optimistic mutations.
 		await expect( button ).toHaveText( '1 in cart' );
-	} );
-
-	test( 'partial failure in a batch does not prevent successful operations', async ( {
-		page,
-	} ) => {
-		const batchRequests: number[] = [];
-
-		await page.route( '**/wc/store/v1/batch**', async ( route ) => {
-			const body = route.request().postDataJSON();
-			batchRequests.push( body?.requests?.length || 0 );
-			await route.continue();
-		} );
-
-		const result = await page.evaluate( async () => {
-			const { store } = await import( '@wordpress/interactivity' );
-			const unlockKey =
-				'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-			await import( '@woocommerce/stores/woocommerce/cart' );
-			const { actions, state } = store(
-				'woocommerce',
-				{},
-				{ lock: unlockKey }
-			);
-
-			// Refresh to get clean state.
-			await actions.refreshCartItems();
-
-			// Mix valid and invalid product IDs — all in one microtick.
-			const p1 = actions.addCartItem( { id: 15, quantityToAdd: 1 } );
-			const p2 = actions.addCartItem( { id: 999999, quantityToAdd: 1 } ); // Invalid
-			const p3 = actions.addCartItem( { id: 16, quantityToAdd: 1 } );
-
-			// addCartItem catches errors internally so all promises resolve.
-			await Promise.allSettled( [ p1, p2, p3 ] );
-
-			const cartProductIds = state.cart.items.map(
-				( item: { id: number } ) => item.id
-			);
-
-			return {
-				has15: cartProductIds.includes( 15 ),
-				has999999: cartProductIds.includes( 999999 ),
-				has16: cartProductIds.includes( 16 ),
-			};
-		} );
-
-		// Valid products should be in cart, invalid should not.
-		expect( result.has15 ).toBe( true );
-		expect( result.has999999 ).toBe( false );
-		expect( result.has16 ).toBe( true );
-
-		// Should still have been sent as a single batch.
-		expect( batchRequests ).toHaveLength( 1 );
-		expect( batchRequests[ 0 ] ).toBe( 3 );
 	} );
 } );

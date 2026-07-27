@@ -46,7 +46,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 	const [ settingStatus, setStatus ] = useState( 'pristine' );
 	const updatePage = useCallback( () => {
 		setStatus( 'updating' );
-		Promise.resolve()
+		void Promise.resolve()
 			.then( () =>
 				triggerFetch( {
 					path: `/wc/v3/settings/advanced/${ settingName }`,
@@ -60,7 +60,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 			} )
 			.then( () => {
 				if ( ! postPublished ) {
-					editPost( { status: 'publish' } );
+					void editPost( { status: 'publish' } );
 					return savePost();
 				}
 			} )

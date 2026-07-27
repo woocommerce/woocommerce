@@ -24,7 +24,7 @@ export function SendPreview() {
 					recordEvent(
 						'header_preview_dropdown_send_test_email_selected'
 					);
-					togglePreviewModal( true );
+					void togglePreviewModal( true );
 				} }
 			>
 				{ __( 'Send a test email', __i18n_text_domain__ ) }
