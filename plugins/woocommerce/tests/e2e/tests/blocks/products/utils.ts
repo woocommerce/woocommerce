@@ -50,6 +50,7 @@ export const insertProductsQuery = async (
 			namespace: 'woocommerce/product-query',
 			query: {
 				inherit: options.inherit ?? true,
+				postType: 'product',
 			},
 		},
 		innerBlocks: productQueryInnerBlocksTemplate,

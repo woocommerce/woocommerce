@@ -18,7 +18,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-use Mockery\Adapter\Phpunit\MockeryTestCase;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use WC_Gateway_BACS;
 
 /**
@@ -26,9 +26,90 @@ use WC_Gateway_BACS;
  *
  * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r, WooCommerce.Commenting.CommentHooks.MissingHookComment
  */
-class Checkout extends MockeryTestCase {
+class Checkout extends \WP_Test_REST_TestCase {
+	use MockeryPHPUnitIntegration;
+	use StoreApiRestTestCaseTrait;
 
 	const TEST_COUPON_CODE = 'test_coupon_code';
+
+	/**
+	 * Product IDs shared by the class.
+	 *
+	 * @var int[]
+	 */
+	private static $product_ids = array();
+
+	/**
+	 * Coupon ID shared by the class.
+	 *
+	 * @var int
+	 */
+	private static $coupon_id;
+
+	/**
+	 * Payment gateway registry before the test.
+	 *
+	 * @var array
+	 */
+	private $payment_gateways_before_test = array();
+
+	/**
+	 * PayPal gateway singleton before the test.
+	 *
+	 * @var \WC_Gateway_Paypal
+	 */
+	private $paypal_gateway_before_test;
+
+	/**
+	 * Create immutable catalog rows shared by all test methods.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::$product_ids = array_map(
+			fn( $product ) => $product->get_id(),
+			self::create_class_fixture_products(
+				array(
+					array(
+						'name'          => 'Test Product 1',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					),
+					array(
+						'name'          => 'Test Product 2',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+					),
+					array(
+						'name'          => 'Virtual Test Product 2',
+						'stock_status'  => ProductStockStatus::IN_STOCK,
+						'regular_price' => 10,
+						'weight'        => 10,
+						'virtual'       => true,
+					),
+				),
+			)
+		);
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( self::TEST_COUPON_CODE );
+		$coupon->set_amount( 2 );
+		$coupon->save();
+		self::$coupon_id = $coupon->get_id();
+	}
+
+	/**
+	 * Delete class products through WooCommerce data stores.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		try {
+			self::delete_class_fixture_products( self::$product_ids );
+		} finally {
+			$coupon = new \WC_Coupon( self::$coupon_id );
+			$coupon->delete( true );
+		}
+	}
+
 	/**
 	 * Setup test product data. Called before every test.
 	 */
@@ -37,19 +118,13 @@ class Checkout extends MockeryTestCase {
 
 		add_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4 );
 
+		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
-		global $wp_rest_server;
-		$wp_rest_server = new \Spy_REST_Server();
-		do_action( 'rest_api_init', $wp_rest_server );
+		$this->initialize_store_api_server();
 
 		wp_set_current_user( 0 );
-
-		$coupon = new \WC_Coupon();
-		$coupon->set_code( self::TEST_COUPON_CODE );
-		$coupon->set_amount( 2 );
-		$coupon->save();
 
 		$formatters = new Formatters();
 		$formatters->register( 'money', MoneyFormatter::class );
@@ -77,38 +152,15 @@ class Checkout extends MockeryTestCase {
 		$order_route = new CheckoutOrderRoute( $schema_controller, $schema_controller->get( 'checkout-order' ) );
 		register_rest_route( $order_route->get_namespace(), $order_route->get_path(), $order_route->get_args(), true );
 
+		$this->payment_gateways_before_test = WC()->payment_gateways()->payment_gateways;
+		$this->paypal_gateway_before_test   = \WC_Gateway_Paypal::get_instance();
+
 		$fixtures = new FixtureData();
 		$fixtures->payments_enable_bacs();
 		$fixtures->shipping_add_pickup_location();
 		$fixtures->shipping_add_flat_rate_instance();
 
-		$this->products = array(
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-				)
-			),
-			$fixtures->get_simple_product(
-				array(
-					'name'          => 'Virtual Test Product 2',
-					'stock_status'  => ProductStockStatus::IN_STOCK,
-					'regular_price' => 10,
-					'weight'        => 10,
-					'virtual'       => true,
-				)
-			),
-		);
+		$this->products = array_map( 'wc_get_product', self::$product_ids );
 		wc_empty_cart();
 		wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
 		wc()->cart->add_to_cart( $this->products[1]->get_id(), 1 );
@@ -118,39 +170,70 @@ class Checkout extends MockeryTestCase {
 	 * Tear down Rest API server.
 	 */
 	protected function tearDown(): void {
-		parent::tearDown();
+		try {
+			remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 
-		remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
+			remove_all_filters( 'woocommerce_get_country_locale' );
+			remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
+			remove_all_filters( 'wc_order_statuses' );
+			remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
+			remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
+			remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
 
-		remove_all_filters( 'woocommerce_get_country_locale' );
-		remove_all_filters( 'woocommerce_register_shop_order_post_statuses' );
-		remove_all_filters( 'wc_order_statuses' );
-		remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
-		remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
-		remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
+			update_option( 'woocommerce_ship_to_countries', 'all' );
+			update_option( 'woocommerce_allowed_countries', 'all' );
+			update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+			update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
-		update_option( 'woocommerce_ship_to_countries', 'all' );
-		update_option( 'woocommerce_allowed_countries', 'all' );
-		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
-		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+			$fixtures = new FixtureData();
+			$fixtures->shipping_remove_pickup_location();
+			$fixtures->shipping_remove_methods_from_default_zone();
 
-		$fixtures = new FixtureData();
-		$fixtures->shipping_remove_pickup_location();
-		$fixtures->shipping_remove_methods_from_default_zone();
+			$customer_to_delete = get_user_by( 'email', 'testaccount@test.com' );
+			if ( $customer_to_delete ) {
+				wp_delete_user( $customer_to_delete->ID );
+			}
 
-		$coupon_to_delete = new \WC_Coupon( self::TEST_COUPON_CODE );
-		$coupon_to_delete->delete( true );
+			unset( WC()->countries->locale );
+			WC()->cart->empty_cart();
+			WC()->session->destroy_session();
+			WC()->customer = null;
+			WC()->initialize_cart();
 
-		$customer_to_delete = get_user_by( 'email', 'testaccount@test.com' );
-		if ( $customer_to_delete ) {
-			wp_delete_user( $customer_to_delete->ID );
+			$GLOBALS['wp_rest_server'] = null;
+		} finally {
+			try {
+				parent::tearDown();
+			} finally {
+				$this->invalidate_checkout_option_caches();
+				WC()->payment_gateways()->payment_gateways = $this->payment_gateways_before_test;
+				\WC_Gateway_Paypal::set_instance( $this->paypal_gateway_before_test );
+			}
 		}
+	}
 
-		unset( WC()->countries->locale );
-		WC()->cart->empty_cart();
-		WC()->session->destroy_session();
+	/**
+	 * Invalidate caches for options modified by checkout tests.
+	 */
+	private function invalidate_checkout_option_caches(): void {
+		$option_names = array(
+			'woocommerce_checkout_phone_field',
+			'woocommerce_enable_guest_checkout',
+			'woocommerce_enable_signup_and_login_from_checkout',
+			'woocommerce_ship_to_countries',
+			'woocommerce_allowed_countries',
+			'woocommerce_specific_ship_to_countries',
+			'woocommerce_specific_allowed_countries',
+			'woocommerce_bacs_settings',
+			'woocommerce_pickup_location_settings',
+			'pickup_location_pickup_locations',
+		);
 
-		$GLOBALS['wp_rest_server'] = null;
+		foreach ( $option_names as $option_name ) {
+			wp_cache_delete( $option_name, 'options' );
+		}
+		wp_cache_delete( 'alloptions', 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
 	}
 
 	/**
@@ -207,6 +290,185 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * Ensure an order is placed when the expected total sent by the client matches the server total.
+	 */
+	public function test_post_data_accepts_matching_expected_total() {
+		WC()->cart->calculate_totals();
+		$expected_total = (string) (int) round( (float) WC()->cart->get_total( 'edit' ) * pow( 10, wc_get_price_decimals() ), 0, PHP_ROUND_HALF_UP );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => $expected_total,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * Ensure an order is rejected with a 409 when the expected total sent by the client no longer
+	 * matches the total calculated on the server, and the refreshed cart is returned.
+	 */
+	public function test_post_data_rejects_mismatched_expected_total() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+				// A total the customer could never have seen for this cart.
+				'expected_total'   => '1',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 409, $response->get_status(), print_r( $data, true ) );
+		$this->assertEquals( 'woocommerce_rest_checkout_total_mismatch', $data['code'] );
+		$this->assertArrayHasKey( 'cart', $data['data'], 'The refreshed cart should be returned so the client can display the updated total.' );
+	}
+
+	/**
+	 * Ensure the total check is skipped (order placed) when the client does not send an expected total.
+	 */
+	public function test_post_data_skips_total_check_when_not_provided() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * Ensure a free order (zero total) is accepted when the client sends a matching expected total.
+	 */
+	public function test_post_data_accepts_matching_expected_total_for_free_order() {
+		$fixtures     = new FixtureData();
+		$free_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Free Test Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 0,
+				'virtual'       => true,
+			)
+		);
+
+		wc_empty_cart();
+		wc()->cart->add_to_cart( $free_product->get_id(), 1 );
+		wc()->cart->calculate_totals();
+
+		// The cart is genuinely free, and a zero total serialises to the string "0".
+		$expected_total = (string) (int) round( (float) WC()->cart->get_total( 'edit' ) * pow( 10, wc_get_price_decimals() ), 0, PHP_ROUND_HALF_UP );
+		$this->assertSame( '0', $expected_total );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'payment_method'  => WC_Gateway_BACS::ID,
+				'expected_total'  => $expected_total,
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -271,6 +533,7 @@ class Checkout extends MockeryTestCase {
 			array(
 				'billing_address' => (object) $this->get_fallback_billing_address(),
 				'payment_method'  => WC_Gateway_BACS::ID,
+				'expected_total'  => '3000',
 			)
 		);
 
@@ -301,6 +564,7 @@ class Checkout extends MockeryTestCase {
 				'billing_address'  => (object) $this->get_fallback_billing_address(),
 				'shipping_address' => (object) $this->get_fallback_shipping_address(),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 
@@ -329,6 +593,7 @@ class Checkout extends MockeryTestCase {
 				'billing_address'  => (object) $this->get_fallback_billing_address(),
 				'shipping_address' => (object) $this->get_fallback_shipping_address(),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '1000',
 			)
 		);
 
@@ -377,6 +642,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '4000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -417,6 +683,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => 'apples',
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -461,6 +728,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -510,6 +778,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -558,6 +827,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '2800',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -595,6 +865,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '2800',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -638,6 +909,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '2800',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -681,6 +953,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -715,6 +988,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -747,6 +1021,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -805,6 +1080,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '123456',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -859,6 +1135,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '123456',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -917,6 +1194,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -975,6 +1253,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => 'invalid-string',
@@ -1021,6 +1300,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'other_extension_data' => array(
 						'another_key' => true,
@@ -1067,6 +1347,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 
@@ -1112,6 +1393,7 @@ class Checkout extends MockeryTestCase {
 				),
 				'create_account'   => true,
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1170,6 +1452,7 @@ class Checkout extends MockeryTestCase {
 				),
 				'create_account'   => false,
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1227,6 +1510,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1282,6 +1566,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 
@@ -1339,6 +1624,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '4000',
 			)
 		);
 
@@ -1392,6 +1678,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,
@@ -1507,6 +1794,7 @@ class Checkout extends MockeryTestCase {
 					'plugin-namespace/job-function'   => 'engineering',
 					'plugin-namespace/leave-on-porch' => true,
 				),
+				'expected_total'    => '3000',
 			)
 		);
 
@@ -1635,6 +1923,7 @@ class Checkout extends MockeryTestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '4000',
 			)
 		);
 
@@ -1680,6 +1969,7 @@ class Checkout extends MockeryTestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '4000',
 			)
 		);
 
@@ -1836,6 +2126,7 @@ class Checkout extends MockeryTestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID, // Payment method might still be required, even if free.
+				'expected_total'   => '0',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -1888,6 +2179,7 @@ class Checkout extends MockeryTestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => '',
+				'expected_total'   => '0',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -1953,6 +2245,7 @@ class Checkout extends MockeryTestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '1000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -2019,6 +2312,7 @@ class Checkout extends MockeryTestCase {
 					'plugin-namespace/student-id' => '12345678',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '1000',
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -2136,6 +2430,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '5555555555',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 
@@ -2492,6 +2787,7 @@ class Checkout extends MockeryTestCase {
 					'phone'      => '5555555555',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 			)
 		);
 		return $request;

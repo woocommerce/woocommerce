@@ -100,13 +100,13 @@ export const PaymentEventsProvider = ( {
 			! checkoutHasError &&
 			! checkoutIsCalculating
 		) {
-			__internalSetPaymentProcessing();
+			void __internalSetPaymentProcessing();
 
 			// Note: the nature of this event emitter is that it will bail on any
 			// observer that returns a response that !== true. However, this still
 			// allows for other observers that return true for continuing through
 			// to the next observer (or bailing if there's a problem).
-			__internalEmitPaymentProcessingEvent(
+			void __internalEmitPaymentProcessingEvent(
 				currentObservers.current,
 				setValidationErrors
 			);
@@ -123,14 +123,14 @@ export const PaymentEventsProvider = ( {
 	// When checkout is returned to idle, and the payment setup has not completed, set payment status to idle
 	useEffect( () => {
 		if ( checkoutIsIdle && ! isPaymentReady ) {
-			__internalSetPaymentIdle();
+			void __internalSetPaymentIdle();
 		}
 	}, [ checkoutIsIdle, isPaymentReady, __internalSetPaymentIdle ] );
 
 	// if checkout has an error sync payment status back to idle.
 	useEffect( () => {
 		if ( checkoutHasError && isPaymentReady ) {
-			__internalSetPaymentIdle();
+			void __internalSetPaymentIdle();
 		}
 	}, [ checkoutHasError, isPaymentReady, __internalSetPaymentIdle ] );
 

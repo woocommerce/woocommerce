@@ -6,14 +6,21 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Controllers;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
 use WP_REST_Server;
 
 /**
  * Tests for the PushNotificationRestController class.
  */
-class PushNotificationRestControllerTest extends WC_REST_Unit_Test_Case {
+class PushNotificationRestControllerTest extends WC_Unit_Test_Case {
+
+	/**
+	 * REST server used to verify route registration.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
 
 	/**
 	 * The System Under Test.
@@ -28,15 +35,28 @@ class PushNotificationRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut = new PushNotificationRestController();
-		$this->sut->register_routes();
+		$this->sut    = new PushNotificationRestController();
+		$this->server = $this->create_rest_server_with_routes(
+			array( array( $this->sut, 'register_routes' ) ),
+			true
+		);
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		$this->clear_rest_server();
+		unset( $this->server, $this->sut );
+
+		parent::tearDown();
 	}
 
 	/**
 	 * @testdox Should register the send route.
 	 */
 	public function test_register_routes_adds_send_endpoint(): void {
-		$routes = rest_get_server()->get_routes();
+		$routes = $this->server->get_routes();
 
 		$this->assertArrayHasKey(
 			'/wc-push-notifications/send',

@@ -64,6 +64,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'cost'         => '9.59',
 		);
 		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping->load_shipping_methods();
 
 		WC_Helper_Shipping::force_customer_us_address();
 
@@ -373,7 +375,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$product_ids   = array();
 		$products_data = array(
 			'5.17',
 			'3.32',
@@ -384,16 +385,20 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 			'5.99',
 			'5.51',
 		);
+		$products      = array();
+
+		foreach ( $products_data as $price ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( $price );
+			$product->save();
+			$products[] = $product;
+		}
 
 		foreach ( $expected_values as $customer_tax_exempt => $value ) {
 			WC()->customer->set_is_vat_exempt( $customer_tax_exempt );
 
-			foreach ( $products_data as $price ) {
-				$loop_product  = WC_Helper_Product::create_simple_product();
-				$product_ids[] = $loop_product->get_id();
-				$loop_product->set_regular_price( $price );
-				$loop_product->save();
-				WC()->cart->add_to_cart( $loop_product->get_id(), 1 );
+			foreach ( $products as $product ) {
+				WC()->cart->add_to_cart( $product->get_id(), 1 );
 			}
 
 			WC()->cart->add_discount( $coupon->get_code() );

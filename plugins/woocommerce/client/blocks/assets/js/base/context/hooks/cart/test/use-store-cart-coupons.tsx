@@ -592,9 +592,8 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 
 			// Should not throw error even on network failure
 			await act( async () => {
-				const success = await result.current.applyCoupon(
-					'NETWORK_FAIL'
-				);
+				const success =
+					await result.current.applyCoupon( 'NETWORK_FAIL' );
 				expect( success ).toBe( false );
 			} );
 

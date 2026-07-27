@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Cart Link block: set the cart icon width to match the Mini-Cart icon size (1.5em) so it no longer renders oversized.

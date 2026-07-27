@@ -76,13 +76,13 @@ export const useValidateCheckout = (): ( () => Promise< {
 					isFailResponse( response )
 				) {
 					if ( response.validationErrors ) {
-						setValidationErrors( response.validationErrors );
+						void setValidationErrors( response.validationErrors );
 					}
 				}
 			} );
 
 			// Show all validation errors and scroll to the first one
-			showAllValidationErrors();
+			void showAllValidationErrors();
 			window.setTimeout( scrollToFirstValidationError, 50 );
 		}
 

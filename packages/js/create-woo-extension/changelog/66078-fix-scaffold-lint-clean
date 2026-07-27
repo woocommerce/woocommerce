@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix ESLint errors in the default scaffolded extension: allow the extension's own text domain, skip `no-require-imports` on CommonJS config files, declare `@wordpress/components`/`@wordpress/element`, and fix the example page's undefined `setInlineSelect` handler.
