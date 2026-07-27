@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal errors when updating malformed payment gateway settings.

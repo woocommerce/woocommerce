@@ -378,7 +378,7 @@ export const AddressAutocomplete = ( {
 					suppressSearchTimeoutRef.current = setTimeout( () => {
 						suppressSearchTimeoutRef.current = null;
 					}, 1000 );
-					provider
+					void provider
 						.select( selected.id, country )
 						.then( ( address ) => {
 							if ( addressType === 'shipping' ) {

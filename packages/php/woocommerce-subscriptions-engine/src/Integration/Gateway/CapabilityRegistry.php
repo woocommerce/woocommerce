@@ -11,8 +11,6 @@
  * and adds the live-gateway lookup, the override filter, and the ready-hook
  * wiring on top.
  *
- * Integration zone: WordPress-native. May use WooCommerce.
- *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway
  */
 

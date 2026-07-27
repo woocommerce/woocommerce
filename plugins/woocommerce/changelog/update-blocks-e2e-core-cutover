@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Merge the Blocks Playwright e2e suite into the Core e2e suite; no functional change to the plugin.
-
-

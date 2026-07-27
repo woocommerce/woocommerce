@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\CLI\Migrator\Commands\ResetCommand;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Commands\SetupCommand;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Commands\ListCommand;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Shopify\ShopifyPlatform;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Webflow\WebflowPlatform;
 use WP_CLI;
 use WC_Product_Factory;
 
@@ -69,5 +70,6 @@ final class Runner {
 	 */
 	private static function init_platforms(): void {
 		ShopifyPlatform::init();
+		WebflowPlatform::init();
 	}
 }

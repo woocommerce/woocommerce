@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFeed\Storage;
 
+use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedLockException;
 use Automattic\WooCommerce\Internal\ProductFeed\Storage\JsonFileFeed;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 
@@ -158,6 +159,40 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		// Resuming a feed that no longer exists throws.
 		$this->expectException( \Exception::class );
 		( new JsonFileFeed( 'test-feed' ) )->open( 'does-not-exist.json' );
+	}
+
+	/**
+	 * @testdox Should throw when another process already holds the feed file lock, so overlapping writes cannot interleave.
+	 */
+	public function test_open_throws_when_feed_file_is_locked_by_another_process() {
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->open();
+
+		$feed_two = new JsonFileFeed( 'test-feed' );
+
+		try {
+			$this->expectException( FeedLockException::class );
+			$feed_two->open( $identifier );
+		} finally {
+			$feed->flush();
+		}
+	}
+
+	/**
+	 * @testdox Should let a later process write the feed once the previous process releases the lock.
+	 */
+	public function test_open_succeeds_after_feed_file_lock_is_released() {
+		$feed       = new JsonFileFeed( 'test-feed' );
+		$identifier = $feed->open();
+		$feed->flush();
+
+		$feed_two = new JsonFileFeed( 'test-feed' );
+		$this->assertSame(
+			$identifier,
+			$feed_two->open( $identifier ),
+			'A resumed feed should acquire the lock once the previous holder released it.'
+		);
+		$feed_two->flush();
 	}
 
 	/**

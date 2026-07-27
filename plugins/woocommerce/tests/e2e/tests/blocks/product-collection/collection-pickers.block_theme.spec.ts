@@ -77,13 +77,17 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			await expect( doneButton ).toBeDisabled();
 
 			// Select first product
-			await productPicker.getByText( 'Album (woo-album)' ).click();
+			await productPicker
+				.getByRole( 'checkbox', { name: 'Album (woo-album)' } )
+				.click();
 
 			// Done button should now be enabled
 			await expect( doneButton ).toBeEnabled();
 
 			// Select second product
-			await productPicker.getByText( 'Beanie (woo-beanie)' ).click();
+			await productPicker
+				.getByRole( 'checkbox', { name: 'Beanie (woo-beanie)' } )
+				.click();
 
 			// Click Done
 			await doneButton.click();
@@ -108,7 +112,9 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			const productPicker = editor.canvas.locator(
 				SELECTORS.productPicker
 			);
-			await productPicker.getByText( 'Album (woo-album)' ).click();
+			await productPicker
+				.getByRole( 'checkbox', { name: 'Album (woo-album)' } )
+				.click();
 			await productPicker.locator( SELECTORS.pickerDoneButton ).click();
 
 			// Save and refresh
@@ -146,8 +152,12 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			const productPicker = editor.canvas.locator(
 				SELECTORS.productPicker
 			);
-			await productPicker.getByText( 'Album (woo-album)' ).click();
-			await productPicker.getByText( 'Beanie (woo-beanie)' ).click();
+			await productPicker
+				.getByRole( 'checkbox', { name: 'Album (woo-album)' } )
+				.click();
+			await productPicker
+				.getByRole( 'checkbox', { name: 'Beanie (woo-beanie)' } )
+				.click();
 			await productPicker.locator( SELECTORS.pickerDoneButton ).click();
 
 			await pageObject.refreshLocators( 'editor' );
@@ -239,7 +249,9 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			const productPicker = editor.canvas.locator(
 				SELECTORS.productPicker
 			);
-			await productPicker.getByText( 'Album (woo-album)' ).click();
+			await productPicker
+				.getByRole( 'checkbox', { name: 'Album (woo-album)' } )
+				.click();
 			await productPicker.locator( SELECTORS.pickerDoneButton ).click();
 
 			// Switch to Products by Category using toolbar
@@ -267,7 +279,9 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			const productPicker = editor.canvas.locator(
 				SELECTORS.productPicker
 			);
-			await productPicker.getByText( 'Album (woo-album)' ).click();
+			await productPicker
+				.getByRole( 'checkbox', { name: 'Album (woo-album)' } )
+				.click();
 			await productPicker.locator( SELECTORS.pickerDoneButton ).click();
 
 			// Switch to Featured Products (no picker needed)

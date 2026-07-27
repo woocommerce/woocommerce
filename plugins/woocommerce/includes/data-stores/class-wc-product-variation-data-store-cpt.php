@@ -21,18 +21,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT implements WC_Object_Data_Store_Interface {
 	/**
-	 * Meta data which should exist in the DB, even if empty.
-	 *
-	 * @since 3.6.0
-	 *
-	 * @var array
-	 */
-	protected $must_exist_meta_keys = array(
-		'_tax_class',
-		'_variation_description',
-	);
-
-	/**
 	 * Callback to remove unwanted meta data.
 	 *
 	 * @param object $meta Meta object.
@@ -169,7 +157,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
 
-			$this->update_post_meta_internal( $product, true, true );
+			$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );
 			$this->update_visibility( $product, true );
 			$this->update_attributes( $product, true );
@@ -607,19 +595,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @param bool       $force Force update. Used during create.
 	 */
 	public function update_post_meta( &$product, $force = false ) {
-		$this->update_post_meta_internal( $product, $force, false );
-	}
-
-	/**
-	 * Internal implementation of update_post_meta() that also knows whether the variation is being created.
-	 *
-	 * @since 3.0.0
-	 * @param WC_Product $product Product object.
-	 * @param bool       $force Force update. Used during create.
-	 * @param bool       $creating Whether the variation is being created.
-	 * @param array      $existing_meta_keys Existing meta keys map, maintained across calls during creation. Passed by reference.
-	 */
-	protected function update_post_meta_internal( &$product, $force, $creating, &$existing_meta_keys = null ) {
 		$meta_key_to_props = array(
 			'_variation_description' => 'description',
 		);
@@ -628,7 +603,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value   = $product->{"get_$prop"}( 'edit' );
-			$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value, $creating, $existing_meta_keys );
+			$updated = update_post_meta( $product->get_id(), $meta_key, $value );
 			if ( $updated ) {
 				$this->updated_props[] = $prop;
 			}
@@ -650,14 +625,14 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$cogs_value_is_additive = apply_filters( 'woocommerce_save_product_cogs_is_additive_flag', $cogs_value_is_additive, $product );
 
 			if ( ! is_null( $cogs_value_is_additive ) ) {
-				$updated = $this->update_or_delete_post_meta( $product, '_cogs_value_is_additive', $cogs_value_is_additive ? 'yes' : '', $creating, $existing_meta_keys );
+				$updated = $this->update_or_delete_post_meta( $product, '_cogs_value_is_additive', $cogs_value_is_additive ? 'yes' : '' );
 				if ( $updated ) {
 					$this->updated_props[] = 'cogs_value_is_additive';
 				}
 			}
 		}
 
-		parent::update_post_meta_internal( $product, $force, $creating, $existing_meta_keys );
+		parent::update_post_meta( $product, $force );
 	}
 
 	/**

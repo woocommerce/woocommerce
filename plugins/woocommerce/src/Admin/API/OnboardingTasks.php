@@ -193,7 +193,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 					'duration'     => array(
 						'description'       => __( 'Time period to snooze the task.', 'woocommerce' ),
 						'type'              => 'string',
-						'validate_callback' => function( $param, $request, $key ) {
+						'validate_callback' => function ( $param ) {
 							return in_array( $param, array_keys( $this->duration_to_ms ), true );
 						},
 					),
@@ -346,8 +346,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public static function import_sample_products() {
-		$sample_csv_file = Features::is_enabled( 'experimental-fashion-sample-products' ) ? WC_ABSPATH . 'sample-data/experimental_fashion_sample_9_products.csv' :
-		WC_ABSPATH . 'sample-data/experimental_sample_9_products.csv';
+		$sample_csv_file = WC_ABSPATH . 'sample-data/experimental_fashion_sample_9_products.csv';
 
 		$import = self::import_sample_products_from_csv( $sample_csv_file );
 		return rest_ensure_response( $import );
@@ -661,7 +660,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				'post_title'   => __( 'Homepage', 'woocommerce' ),
 				'post_type'    => 'page',
 				'post_status'  => 'publish',
-				'post_content' => '', // Template content is updated below, so images can be attached to the post.
+				'post_content' => '',
+			// Template content is updated below, so images can be attached to the post.
 			)
 		);
 
@@ -715,7 +715,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$params['extended_tasks'] = array(
 			'description'       => __( 'List of extended deprecated tasks from the client side filter.', 'woocommerce' ),
 			'type'              => 'array',
-			'validate_callback' => function( $param, $request, $key ) {
+			'validate_callback' => function ( $param ) {
 				$has_valid_keys = true;
 				foreach ( $param as $task ) {
 					if ( $has_valid_keys ) {
@@ -743,7 +743,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$lists = is_array( $task_list_ids ) && count( $task_list_ids ) > 0 ? TaskLists::get_lists_by_ids( $task_list_ids ) : TaskLists::get_lists();
 
 		$json = array_map(
-			function( $list ) {
+			function ( $list ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.listFound
 				return $list->sort_tasks()->get_json();
 			},
 			$lists
@@ -987,5 +987,4 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$task->mark_actioned();
 		return rest_ensure_response( $task->get_json() );
 	}
-
 }

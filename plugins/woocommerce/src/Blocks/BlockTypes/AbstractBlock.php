@@ -184,11 +184,15 @@ abstract class AbstractBlock {
 	 * @param string[] $chunks Array of chunk names.
 	 */
 	protected function register_chunk_translations( $chunks ) {
+		$script_handle = $this->get_block_type_script( 'handle' );
+		if ( ! is_string( $script_handle ) || '' === $script_handle ) {
+			return;
+		}
 		foreach ( $chunks as $chunk ) {
 			$handle = 'wc-blocks-' . $chunk . '-chunk';
 			$this->asset_api->register_script( $handle, $this->asset_api->get_block_asset_build_path( $chunk ), [], true );
 			wp_add_inline_script(
-				$this->get_block_type_script( 'handle' ),
+				$script_handle,
 				wp_scripts()->print_translations( $handle, false ),
 				'before'
 			);

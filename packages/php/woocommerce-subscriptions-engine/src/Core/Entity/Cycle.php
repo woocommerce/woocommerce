@@ -142,6 +142,23 @@ final class Cycle {
 	private $extension_slug;
 
 	/**
+	 * Crash-recovery lease expiry (GMT string), or null. Set when a `pending` cycle is
+	 * claimed; a stuck pending cycle past this moment is reclaimable. The create-as-claim
+	 * UNIQUE index is the primary concurrency guard - this only recovers a crashed charge.
+	 *
+	 * @var string|null
+	 */
+	private $claimed_until_gmt;
+
+	/**
+	 * Reserved retry moment (GMT string), or null. Additive column for a later
+	 * retry/dunning pass; not wired by the dispatcher yet.
+	 *
+	 * @var string|null
+	 */
+	private $retry_at_gmt;
+
+	/**
 	 * Typed plan snapshot held in memory, or null.
 	 *
 	 * @var PlanSnapshot|null
@@ -177,6 +194,8 @@ final class Cycle {
 		$this->items_snapshot_id = ScalarCoercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
 		$this->order_id          = ScalarCoercion::coerce_nullable_int( $data['order_id'] ?? null );
 		$this->extension_slug    = ScalarCoercion::coerce_nullable_string( $data['extension_slug'] ?? null );
+		$this->claimed_until_gmt = ScalarCoercion::coerce_nullable_string( $data['claimed_until'] ?? null );
+		$this->retry_at_gmt      = ScalarCoercion::coerce_nullable_string( $data['retry_at'] ?? null );
 		$this->plan_snapshot     = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
 		$this->items_snapshot    = ( $data['items_snapshot'] ?? null ) instanceof ItemsSnapshot ? $data['items_snapshot'] : null;
 	}
@@ -428,6 +447,39 @@ final class Cycle {
 	}
 
 	/**
+	 * Crash-recovery lease expiry (GMT string), or null.
+	 */
+	public function get_claimed_until_gmt(): ?string {
+		return $this->claimed_until_gmt;
+	}
+
+	/**
+	 * Set (or clear) the crash-recovery lease expiry. Post-freeze-mutable (with `status`,
+	 * `order_id`, `reason`): a claim stamps it, and a reclaim/resolve may re-stamp or clear it.
+	 *
+	 * @param string|null $claimed_until_gmt Lease expiry GMT string, or null to clear.
+	 */
+	public function set_claimed_until_gmt( ?string $claimed_until_gmt ): void {
+		$this->claimed_until_gmt = $claimed_until_gmt;
+	}
+
+	/**
+	 * Reserved retry moment (GMT string), or null.
+	 */
+	public function get_retry_at_gmt(): ?string {
+		return $this->retry_at_gmt;
+	}
+
+	/**
+	 * Set (or clear) the reserved retry moment. Reserved for a later retry/dunning pass.
+	 *
+	 * @param string|null $retry_at_gmt Retry moment GMT string, or null to clear.
+	 */
+	public function set_retry_at_gmt( ?string $retry_at_gmt ): void {
+		$this->retry_at_gmt = $retry_at_gmt;
+	}
+
+	/**
 	 * Typed plan snapshot held in memory, or null.
 	 */
 	public function get_plan_snapshot(): ?PlanSnapshot {
@@ -491,6 +543,8 @@ final class Cycle {
 			'items_snapshot_id' => $this->items_snapshot_id,
 			'order_id'          => $this->order_id,
 			'extension_slug'    => $this->extension_slug,
+			'claimed_until'     => $this->claimed_until_gmt,
+			'retry_at'          => $this->retry_at_gmt,
 		);
 	}
 

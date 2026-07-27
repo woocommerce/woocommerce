@@ -90,7 +90,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	private function adjust_character_encoding( $value ) {
 		$encoding = $this->params['character_encoding'];
-		return 'UTF-8' === $encoding ? $value : mb_convert_encoding( $value, 'UTF-8', $encoding );
+
+		// Skip conversion when the value is already UTF-8 or when mbstring is unavailable.
+		if ( 'UTF-8' === $encoding || ! function_exists( 'mb_convert_encoding' ) ) {
+			return $value;
+		}
+
+		return mb_convert_encoding( $value, 'UTF-8', $encoding );
 	}
 
 	/**
@@ -373,7 +379,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// Remove the ' prepended to fields that start with - if needed.
 		$value = $this->unescape_data( $value );
 
-		return floatval( $value );
+		// Use wc_format_decimal() rather than floatval() so the store's decimal separator
+		// setting is respected (e.g. a comma-separated weight like "1,5"). This mirrors how
+		// price fields are parsed above and how the product setters normalize these values.
+		return (float) wc_format_decimal( $value );
 	}
 
 	/**
@@ -725,12 +734,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Parse the published field. 1 is published, 0 is private, -1 is draft.
+	 * Parse the published field. 1 is published, 0 is private, -1 is draft, 2 is pending review.
 	 * Alternatively, 'true' can be used for published and 'false' for draft.
 	 *
 	 * @param string $value Field value.
 	 *
-	 * @return float|string
+	 * @return int|float|string
 	 */
 	public function parse_published_field( $value ) {
 		if ( '' === $value ) {
@@ -822,14 +831,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		/**
-		 * Match special column names.
+		 * Match special column names by prefix.
+		 *
+		 * These prefixes must stay in sync with the `starts_with()` checks in `expand_data()`,
+		 * which is what decides how the column is actually consumed. Matching anywhere in the
+		 * column name instead of at the start would apply a formatting callback to columns
+		 * `expand_data()` never treats as special.
 		 */
-		$regex_match_data_formatting = array(
-			'/attributes:value*/'    => array( $this, 'parse_comma_field' ),
-			'/attributes:visible*/'  => array( $this, 'parse_bool_field' ),
-			'/attributes:taxonomy*/' => array( $this, 'parse_bool_field' ),
-			'/downloads:url*/'       => array( $this, 'parse_download_file_field' ),
-			'/meta:*/'               => 'wp_kses_post', // Allow some HTML in meta fields.
+		$prefix_match_data_formatting = array(
+			'attributes:value'    => array( $this, 'parse_comma_field' ),
+			'attributes:visible'  => array( $this, 'parse_bool_field' ),
+			'attributes:taxonomy' => array( $this, 'parse_bool_field' ),
+			'downloads:url'       => array( $this, 'parse_download_file_field' ),
+			// Allow some HTML in meta fields.
+			'meta:'               => 'wp_kses_post',
 		);
 
 		$callbacks = array();
@@ -841,9 +856,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			if ( isset( $data_formatting[ $heading ] ) ) {
 				$callback = $data_formatting[ $heading ];
 			} else {
-				foreach ( $regex_match_data_formatting as $regex => $callback ) {
-					if ( preg_match( $regex, $heading ) ) {
-						$callback = $callback;
+				foreach ( $prefix_match_data_formatting as $prefix => $prefix_callback ) {
+					if ( $this->starts_with( $heading, $prefix ) ) {
+						$callback = $prefix_callback;
 						break;
 					}
 				}
@@ -881,9 +896,24 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		if ( isset( $data['images'] ) ) {
 			$images               = $data['images'];
 			$data['raw_image_id'] = array_shift( $images );
+			$gallery              = array_filter(
+				$images,
+				function ( $image ) {
+					return '' !== $image;
+				}
+			);
 
-			if ( ! empty( $images ) ) {
-				$data['raw_gallery_image_ids'] = $images;
+			// When any image value is provided, treat the remaining values as the full
+			// gallery. Setting the key even when no gallery images remain ensures that
+			// reducing the number of images in the CSV clears previously imported gallery
+			// images instead of leaving them in place, while a fully empty images cell
+			// (including one containing only separators) still leaves existing images
+			// untouched. Gating on the gallery values too keeps them imported when the
+			// featured-image slot is empty (e.g. a cell starting with a separator).
+			// See https://github.com/woocommerce/woocommerce/issues/34839
+			// and https://github.com/woocommerce/woocommerce/issues/66583.
+			if ( ! empty( $data['raw_image_id'] ) || ! empty( $gallery ) ) {
+				$data['raw_gallery_image_ids'] = $gallery;
 			}
 			unset( $data['images'] );
 		}
@@ -913,6 +943,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				-1 => ProductStatus::DRAFT,
 				0  => ProductStatus::PRIVATE,
 				1  => ProductStatus::PUBLISH,
+				2  => ProductStatus::PENDING,
 			);
 			$data['status'] = $statuses[ $published ] ?? ProductStatus::DRAFT;
 

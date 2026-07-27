@@ -7,20 +7,13 @@ import { createRoot } from 'react-dom/client';
 import type { ReactNode } from 'react';
 
 jest.mock( '@wordpress/admin-ui', () => ( {
-	Page: ( {
-		actions,
+	NavigableRegion: ( {
 		children,
 		className,
 	}: {
-		actions?: ReactNode;
 		children: ReactNode;
 		className?: string;
-	} ) => (
-		<div className={ className }>
-			{ actions }
-			{ children }
-		</div>
-	),
+	} ) => <div className={ className }>{ children }</div>,
 } ) );
 
 /**
@@ -355,6 +348,68 @@ describe( 'settings HTML rendering', () => {
 
 		act( () => root.unmount() );
 		container.remove();
+	} );
+
+	it( 'prompts before navigating away through the classic section links', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							value: 'Initial value',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, form, root } = renderElementInMainForm(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		// Classic section links render inside #mainform but outside the shell.
+		const sectionLinks = document.createElement( 'ul' );
+		sectionLinks.className = 'subsubsub';
+		sectionLinks.innerHTML =
+			'<li><a href="https://example.com/inventory">Inventory</a></li>';
+		form.insertBefore( sectionLinks, container );
+
+		try {
+			const input = container.querySelector( 'input[type="text"]' );
+			const link = sectionLinks.querySelector( 'a' );
+
+			expect( input ).toBeInstanceOf( HTMLInputElement );
+			expect( link ).not.toBeNull();
+
+			act( () => {
+				changeTextInput( input as HTMLInputElement, 'Changed value' );
+			} );
+
+			act( () => {
+				link?.dispatchEvent(
+					new MouseEvent( 'click', {
+						bubbles: true,
+						cancelable: true,
+						button: 0,
+					} )
+				);
+			} );
+
+			expect( document.body.textContent ).toContain(
+				'You have unsaved changes'
+			);
+		} finally {
+			act( () => root.unmount() );
+			form.remove();
+		}
 	} );
 
 	it( 'submits form-post saves with the pending destination', () => {

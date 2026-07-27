@@ -77,7 +77,7 @@ export const Card = ( {
 						} );
 						const { updateAndPersistSettingsForGroup } =
 							dispatch( settingsStore );
-						updateAndPersistSettingsForGroup( 'general', {
+						void updateAndPersistSettingsForGroup( 'general', {
 							general: {
 								woocommerce_calc_taxes: 'yes', // Stripe tax requires tax calculation to be enabled so let's do it here to save the user from doing it manually
 							},

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Store API: validate address data on the checkout-order endpoint before it is persisted, so a rejected request can no longer modify an existing order's address or totals.
