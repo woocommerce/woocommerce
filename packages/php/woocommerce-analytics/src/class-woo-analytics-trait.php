@@ -626,33 +626,35 @@ trait Woo_Analytics_Trait {
 	 * - For regular pages, it builds the breadcrumb from the page's ancestors, ordered from top-level to current.
 	 * - For all other cases, it returns the current page's title.
 	 *
-	 * Titles are capped before being returned; see `cap_breadcrumb_title()`.
+	 * Titles are capped before being returned; see `cap_page_string()`.
 	 *
 	 * @return array The breadcrumb trail as an array of titles.
 	 */
 	private function get_breadcrumb_titles() {
-		return array_map( array( $this, 'cap_breadcrumb_title' ), $this->build_breadcrumb_titles() );
+		return array_map( array( $this, 'cap_page_string' ), $this->build_breadcrumb_titles() );
 	}
 
 	/**
-	 * Limit the length of a single breadcrumb title.
+	 * Limit the length of a caller-influenced string bound for the page output.
 	 *
-	 * Breadcrumb titles are page and product names, which are short in practice.
-	 * The cap exists because one crumb is not: on a search page the trail embeds
-	 * the raw search term, so without a limit a single long request URL would
-	 * push an arbitrary amount of text into the cached copy of the page.
+	 * The values this caps — breadcrumb titles and the search term — are short in
+	 * practice, but on a search page both derive from the request URL. Without a
+	 * limit a single long request would push an arbitrary amount of text into the
+	 * cached copy of the page, and the search term reaches the pixel twice (as
+	 * `search_query` and inside the browser's own `_dl`), where an oversized URL
+	 * risks the event being rejected rather than merely bloated.
 	 *
 	 * @since 0.16.7
 	 *
-	 * @param string $title The breadcrumb title.
-	 * @return string The title, truncated if it exceeded the limit.
+	 * @param string $value The value bound for the page output.
+	 * @return string The value, truncated if it exceeded the limit.
 	 */
-	private function cap_breadcrumb_title( $title ) {
+	private function cap_page_string( $value ) {
 		$max_length = 200;
 
-		$title = (string) $title;
+		$value = (string) $value;
 
-		return mb_strlen( $title ) > $max_length ? mb_substr( $title, 0, $max_length ) : $title;
+		return mb_strlen( $value ) > $max_length ? mb_substr( $value, 0, $max_length ) : $value;
 	}
 
 	/**

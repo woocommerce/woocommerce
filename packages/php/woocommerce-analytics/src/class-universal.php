@@ -538,6 +538,10 @@ class Universal {
 
 	/**
 	 * Capture a search event.
+	 *
+	 * The term is capped because this event is assembled here but fired by the
+	 * client, so it travels through the page markup and then reaches the pixel
+	 * URL. See `cap_page_string()`.
 	 */
 	public function capture_search_query() {
 		if ( is_search() ) {
@@ -545,7 +549,7 @@ class Universal {
 			$this->enqueue_event(
 				'search',
 				array(
-					'search_query' => $wp_query->get( 's' ),
+					'search_query' => $this->cap_page_string( $wp_query->get( 's' ) ),
 					'qty'          => $wp_query->found_posts,
 				)
 			);

@@ -94,6 +94,11 @@ class Universal_Page_Output_Test extends BaseTestCase {
 		unset( $_COOKIE['woocommerceanalytics_session'] );
 
 		$this->reset_cached_ip();
+		$this->reset_event_queue();
+
+		global $wp_query;
+		$wp_query->is_search = false;
+		$wp_query->set( 's', '' );
 
 		parent::tear_down();
 	}
@@ -291,6 +296,63 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Test that a long search term is capped before it is queued for the page.
+	 *
+	 * The search event is assembled server-side and fired by the client, so the
+	 * term travels through the markup. It also reaches the pixel twice — once as
+	 * `search_query` and again inside the browser's own `_dl` — so an uncapped
+	 * term can push the pixel URL past what a server will accept, losing the
+	 * event outright.
+	 */
+	public function test_queued_search_event_caps_long_search_query(): void {
+		$search_query = $this->capture_search_event( str_repeat( 'A', 5000 ) );
+
+		$this->assertLessThanOrEqual(
+			200,
+			mb_strlen( $search_query ),
+			'A search term should be capped before it is queued into page output.'
+		);
+	}
+
+	/**
+	 * Test that an ordinary search term is queued unchanged.
+	 */
+	public function test_queued_search_event_keeps_ordinary_search_query_intact(): void {
+		$term = 'blue cotton t-shirt';
+
+		$this->assertSame(
+			$term,
+			$this->capture_search_event( $term ),
+			'Ordinary search terms should be recorded unchanged.'
+		);
+	}
+
+	/**
+	 * Run a search request through `capture_search_query()` and return the
+	 * `search_query` property it queued for the page.
+	 *
+	 * @param string $term The search term the visitor requested.
+	 * @return string The queued search query.
+	 */
+	private function capture_search_event( string $term ): string {
+		global $wp_query;
+
+		$wp_query->is_search = true;
+		$wp_query->set( 's', $term );
+
+		$universal = new Universal();
+		$universal->capture_search_query();
+
+		$queue = WC_Analytics_Tracking::get_event_queue();
+		$this->assertNotEmpty( $queue, 'A search event should have been queued.' );
+
+		$event = end( $queue );
+		$this->assertSame( 'search', $event['eventName'], 'The queued event should be the search event.' );
+
+		return (string) ( $event['props']['search_query'] ?? '' );
+	}
+
+	/**
 	 * Render the injected analytics script and return its markup.
 	 *
 	 * @return string The markup written by `inject_analytics_data()`.
@@ -315,6 +377,17 @@ class Universal_Page_Output_Test extends BaseTestCase {
 		$this->assertSame( 1, $matched, 'The rendered markup should assign wcAnalytics.breadcrumbs.' );
 
 		return (array) json_decode( $matches[1], true );
+	}
+
+	/**
+	 * Clear the `event_queue` static so a queued event cannot leak into another
+	 * test's rendered output.
+	 */
+	private function reset_event_queue(): void {
+		$reflection = new \ReflectionClass( WC_Analytics_Tracking::class );
+		$property   = $reflection->getProperty( 'event_queue' );
+		$property->setAccessible( true );
+		$property->setValue( null, array() );
 	}
 
 	/**
