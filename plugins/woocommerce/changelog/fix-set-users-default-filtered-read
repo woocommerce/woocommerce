@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make WC_Payment_Tokens::set_users_default() query the user's tokens directly instead of through get_customer_tokens(), so display-oriented filters can no longer starve the write path (with PayPal Payments' vaulting filter emptying the list, "make default" cleared no tokens, set none, and still reported success). As a consequence the woocommerce_get_customer_payment_tokens and woocommerce_get_customer_payment_tokens_limit filters no longer fire inside this write path; gateways syncing tokens in those callbacks (which already guard against re-entry from here) still sync on every display read, and the woocommerce_payment_token_set_default action fires exactly as before.

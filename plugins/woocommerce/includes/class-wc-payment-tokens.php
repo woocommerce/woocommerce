@@ -230,8 +230,21 @@ class WC_Payment_Tokens {
 	 * @param int $token_id The ID of the token that should be default.
 	 */
 	public static function set_users_default( $user_id, $token_id ) {
-		$data_store   = WC_Data_Store::load( 'payment-token' );
-		$users_tokens = self::get_customer_tokens( $user_id );
+		// Mirror the guard get_customer_tokens() applies: the data store reads a falsy user_id as
+		// "no user scope", which would turn this into an unscoped write across other users' tokens,
+		// and absint()s a negative one onto an unrelated user.
+		if ( $user_id < 1 ) {
+			return;
+		}
+
+		$data_store = WC_Data_Store::load( 'payment-token' );
+
+		// Query without going through get_customer_tokens(): this is a write path, and the
+		// display-oriented woocommerce_get_customer_payment_tokens_limit and
+		// woocommerce_get_customer_payment_tokens filters must not hide tokens from it, or the
+		// default flag is cleared from hidden tokens and never written to the requested one.
+		// Matches wc_delete_user_data() and the personal data eraser, which bypass them too.
+		$users_tokens = self::get_tokens( array( 'user_id' => $user_id ) );
 		foreach ( $users_tokens as $token ) {
 			if ( $token_id === $token->get_id() ) {
 				$data_store->set_default_status( $token->get_id(), true );

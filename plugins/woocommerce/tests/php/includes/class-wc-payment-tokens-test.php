@@ -749,4 +749,59 @@ class WC_Payment_Tokens_Test extends WC_Unit_Test_Case {
 			'Pagination should return the remaining tokens on the second page'
 		);
 	}
+
+	/**
+	 * @testdox set_users_default should mark the requested token as default even when the customer tokens limit filter hides it from display.
+	 */
+	public function test_set_users_default_is_not_starved_by_the_customer_limit_filter(): void {
+		WC_Helper_Payment_Token::create_cc_token( $this->user_id );
+		WC_Helper_Payment_Token::create_cc_token( $this->user_id );
+		$third = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
+
+		add_filter(
+			'woocommerce_get_customer_payment_tokens_limit',
+			function () {
+				return 1;
+			}
+		);
+
+		WC_Payment_Tokens::set_users_default( $this->user_id, $third->get_id() );
+
+		$default = WC_Payment_Tokens::get_customer_default_token( $this->user_id );
+
+		$this->assertNotNull(
+			$default,
+			'The customer should still have a default token after set_users_default()'
+		);
+		$this->assertSame(
+			$third->get_id(),
+			$default->get_id(),
+			'The requested token should become the default even when a display limit filter hides it'
+		);
+	}
+
+	/**
+	 * @testdox set_users_default should not touch any tokens when passed a zero or negative user id.
+	 */
+	public function test_set_users_default_ignores_invalid_user_ids(): void {
+		$first = WC_Helper_Payment_Token::create_cc_token( $this->user_id );
+		WC_Helper_Payment_Token::create_cc_token( $this->user_id );
+
+		// A falsy user id must not become an unscoped query writing to other users' tokens,
+		// and a negative one must not be absint()-ed onto an unrelated user's tokens.
+		WC_Payment_Tokens::set_users_default( 0, $first->get_id() + 1 );
+		WC_Payment_Tokens::set_users_default( -$this->user_id, $first->get_id() + 1 );
+
+		$default = WC_Payment_Tokens::get_customer_default_token( $this->user_id );
+
+		$this->assertNotNull(
+			$default,
+			'An invalid user id should leave every existing default token untouched'
+		);
+		$this->assertSame(
+			$first->get_id(),
+			$default->get_id(),
+			'The first token should remain the default after calls with invalid user ids'
+		);
+	}
 }
