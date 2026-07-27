@@ -273,7 +273,7 @@ class SettingsUIRequestContext {
 	 * settings tabs. Pages registered at the top level of settings are not
 	 * drill-downs: they hide the header and keep the tabs.
 	 *
-	 * @since 11.1.0
+	 * @since 11.0.0
 	 *
 	 * @return bool
 	 */

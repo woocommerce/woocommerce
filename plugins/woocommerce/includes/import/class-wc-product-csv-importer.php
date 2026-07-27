@@ -90,7 +90,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	private function adjust_character_encoding( $value ) {
 		$encoding = $this->params['character_encoding'];
-		return 'UTF-8' === $encoding ? $value : mb_convert_encoding( $value, 'UTF-8', $encoding );
+
+		// Skip conversion when the value is already UTF-8 or when mbstring is unavailable.
+		if ( 'UTF-8' === $encoding || ! function_exists( 'mb_convert_encoding' ) ) {
+			return $value;
+		}
+
+		return mb_convert_encoding( $value, 'UTF-8', $encoding );
 	}
 
 	/**
