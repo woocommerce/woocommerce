@@ -353,10 +353,10 @@ class Ip_Address_Test extends BaseTestCase {
 	}
 
 	/**
-	 * A malformed REMOTE_ADDR (missing or unparsable) must be treated the same as a private
-	 * one: it cannot be proof of anything, so it must not itself unlock the forwarded header
-	 * in a way that later trusts unrelated attacker input differently than a clean private
-	 * REMOTE_ADDR would.
+	 * A trailing comma in `X-Forwarded-For` leaves the last entry empty. That empty entry
+	 * must resolve to no address rather than being skipped in favor of the earlier,
+	 * client-controlled entry in front of it — the same left-of-the-proxy value a real
+	 * attacker would put there to be picked up if the code fell back to it.
 	 */
 	public function test_trailing_comma_yields_no_address(): void {
 		$_SERVER['REMOTE_ADDR']          = '10.0.0.5';

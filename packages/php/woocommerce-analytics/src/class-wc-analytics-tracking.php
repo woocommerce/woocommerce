@@ -620,6 +620,19 @@ class WC_Analytics_Tracking {
 	 * and `X-Real-IP` are deliberately not consulted: an internal proxy forwards client
 	 * headers verbatim unless configured otherwise, so those stay client-controlled.
 	 *
+	 * This still assumes the proxy in front of us is the one that wrote `X-Forwarded-For`,
+	 * and that assumption can be wrong. An nginx configured with only
+	 * `proxy_set_header X-Real-IP $remote_addr;`, for instance, leaves `X-Forwarded-For`
+	 * untouched and forwards whatever the client sent, verbatim — so the last entry is
+	 * attacker-chosen even though `REMOTE_ADDR` is private, and nothing observable from PHP
+	 * tells that configuration apart from one where a proxy really did write the header.
+	 * This is not a regression, though: the code this replaced trusted the first
+	 * `X-Forwarded-For` entry unconditionally on the same misconfigured setup, which handed
+	 * the attacker an even easier win. A site in that situation needs to populate the
+	 * `trusted_ip_header` site option — Jetpack Brute Force Protection does this by asking
+	 * WordPress.com which header is actually trustworthy — or to supply a value of its own
+	 * through the `woocommerce_analytics_visitor_ip` filter.
+	 *
 	 * @since 0.16.8
 	 *
 	 * @return string The proxy-written address, or an empty string when there is none.
