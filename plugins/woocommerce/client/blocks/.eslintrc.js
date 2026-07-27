@@ -221,7 +221,6 @@ module.exports = {
 					{
 						name: 'react',
 						importNames: [
-							// Hooks
 							'useState',
 							'useEffect',
 							'useContext',
@@ -237,7 +236,6 @@ module.exports = {
 							'useId',
 							'useSyncExternalStore',
 							'startTransition',
-							// Components & Utilities
 							'Fragment',
 							'createElement',
 							'cloneElement',
