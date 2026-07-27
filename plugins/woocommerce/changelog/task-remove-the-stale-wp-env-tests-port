@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Replace the stale WP_ENV_TESTS_PORT override with WP_ENV_PORT in the E2E, metrics and k6 test configs.

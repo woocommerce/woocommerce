@@ -1119,6 +1119,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$meta_containers = array(
 			$properties['meta_data']['items']['properties'],
 			$properties['line_items']['items']['properties']['meta_data']['items']['properties'],
+			$properties['tax_lines']['items']['properties']['meta_data']['items']['properties'],
 			$properties['shipping_lines']['items']['properties']['meta_data']['items']['properties'],
 			$properties['fee_lines']['items']['properties']['meta_data']['items']['properties'],
 			$properties['coupon_lines']['items']['properties']['meta_data']['items']['properties'],
