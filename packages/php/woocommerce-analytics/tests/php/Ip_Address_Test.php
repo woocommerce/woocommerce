@@ -391,10 +391,80 @@ class Ip_Address_Test extends BaseTestCase {
 		$_SERVER['REMOTE_ADDR']          = '198.51.100.66';
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '127.0.0.1, 8.8.8.8';
 
-		$this->assertNotSame(
-			'8.8.8.8',
+		$this->assertSame(
+			'',
 			$this->resolved_ip(),
 			'REMOTE_ADDR is public and directly connected, so no forwarded value may be trusted.'
+		);
+	}
+
+	/**
+	 * The configured header wins over the forwarded fallback. This is the nginx setup the
+	 * fallback's own docs tell sites to fix this way: nginx sets only X-Real-IP, forwards the
+	 * client's X-Forwarded-For verbatim, and REMOTE_ADDR is the loopback address nginx
+	 * connected from. Resolution already produced the real visitor, so the fallback — which
+	 * exists to supply an answer where there is none — must not run and overwrite it with the
+	 * attacker's value.
+	 */
+	public function test_configured_trusted_header_wins_over_the_forwarded_fallback(): void {
+		update_site_option(
+			'trusted_ip_header',
+			(object) array(
+				'trusted_header' => 'HTTP_X_REAL_IP',
+				'segments'       => 1,
+				'reverse'        => false,
+			)
+		);
+
+		$_SERVER['REMOTE_ADDR']          = '127.0.0.1';
+		$_SERVER['HTTP_X_REAL_IP']       = '203.0.113.77';
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '1.2.3.4';
+
+		$this->assertSame(
+			'203.0.113.77',
+			$this->resolved_ip(),
+			'A site-declared header that resolved must not be discarded for a client-supplied one.'
+		);
+	}
+
+	/**
+	 * Same rule with the segment selection: the site declared which X-Forwarded-For entry to
+	 * believe, that entry resolved to a public address, and the fallback's last-entry rule
+	 * (which here is the proxy's own address) must not silently override the configuration.
+	 */
+	public function test_trusted_header_segment_selection_wins_over_the_forwarded_fallback(): void {
+		update_site_option(
+			'trusted_ip_header',
+			(object) array(
+				'trusted_header' => 'HTTP_X_FORWARDED_FOR',
+				'segments'       => 2,
+				'reverse'        => false,
+			)
+		);
+
+		$_SERVER['REMOTE_ADDR']          = '10.0.0.5';
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.77, 198.51.100.9';
+
+		$this->assertSame(
+			'203.0.113.77',
+			$this->resolved_ip(),
+			'The segment the site declared trustworthy must survive a private REMOTE_ADDR.'
+		);
+	}
+
+	/**
+	 * An absent REMOTE_ADDR is not evidence of a local proxy, it is the absence of any
+	 * evidence, so the forwarded fallback must stay shut rather than treat it like a private
+	 * address.
+	 */
+	public function test_absent_remote_addr_does_not_open_the_forwarded_fallback(): void {
+		unset( $_SERVER['REMOTE_ADDR'] );
+		$_SERVER['HTTP_X_FORWARDED_FOR'] = '5.6.7.8';
+
+		$this->assertSame(
+			'',
+			$this->resolved_ip(),
+			'With no REMOTE_ADDR there is no proof of a proxy, so nothing forwarded may be trusted.'
 		);
 	}
 

@@ -546,18 +546,25 @@ class WC_Analytics_Tracking {
 	 * trusting them unconditionally lets any client choose the address we report — and in
 	 * proxy tracking mode that address feeds the visitor id hash.
 	 *
-	 * When `REMOTE_ADDR` itself — the address we actually terminated the connection on, not
-	 * whatever `get_ip()` resolved — is non-routable, the request reached us through a proxy
-	 * on the local network — an external client cannot fake that — so the last entry of
-	 * `X-Forwarded-For`, the one the proxy wrote itself, is worth reading. See
-	 * `get_proxy_written_ip_address()` for why only that entry is trusted. `get_ip()`'s result
-	 * is not usable for this check: when `trusted_ip_header` is configured it is selected out
-	 * of a client-supplied list, so it can be made non-public by an external attacker too.
+	 * Only when that resolution produced nothing usable does a forwarded value come into play,
+	 * and then only on the further condition that `REMOTE_ADDR` — the address we actually
+	 * terminated the connection on, not whatever `get_ip()` resolved — is present, parseable
+	 * and non-routable. Both halves are required. The second half is the proof that a proxy on
+	 * the local network is in front of us, since an external client cannot fake it; the first
+	 * half keeps that recovery from overwriting a good answer, because a site that configured
+	 * `trusted_ip_header` correctly has already produced the visitor address and its
+	 * `REMOTE_ADDR` is private precisely because the proxy it declared is doing its job. An
+	 * absent or malformed `REMOTE_ADDR` proves nothing either way, so it fails closed. See
+	 * `get_proxy_written_ip_address()` for why only the last `X-Forwarded-For` entry is read.
+	 * `get_ip()`'s result is not usable as the proxy proof: when `trusted_ip_header` is
+	 * configured it is selected out of a client-supplied list, so an external attacker can
+	 * drive it non-public too.
 	 *
 	 * @since 0.16.8 Stopped trusting `Cf-Connecting-IP`, `X-Forwarded-For` and `Client-IP`
 	 *               unconditionally.
 	 * @since 0.16.8 Recover the visitor address from the last `X-Forwarded-For` entry when
-	 *               `REMOTE_ADDR` is non-routable, instead of losing it entirely.
+	 *               nothing resolved and `REMOTE_ADDR` is non-routable, instead of losing it
+	 *               entirely.
 	 *
 	 * @return string The user's IP address. An empty string when no public address resolved.
 	 */
@@ -575,12 +582,16 @@ class WC_Analytics_Tracking {
 			? IP_Utils::clean_ip( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
 			: false;
 
-		// The address we terminated on — never the resolved one, which may have been selected
-		// out of a client-supplied list by a configured trusted_ip_header. Only REMOTE_ADDR
-		// being non-routable proves a local proxy is in front of us, and that proof is what
-		// makes the forwarded value usable. A missing or malformed REMOTE_ADDR takes the same
-		// path as a private one.
-		if ( ! is_string( $remote_addr ) || ! IP_Utils::ip_is_public( $remote_addr ) ) {
+		// The forwarded value only fills a gap; it never replaces an answer. So this runs when
+		// resolution produced nothing usable AND REMOTE_ADDR — the address we terminated on,
+		// never the resolved one, which a configured trusted_ip_header may have selected out
+		// of a client-supplied list — is present, parseable and non-routable, which is what
+		// proves a local proxy is in front of us. A site whose trusted_ip_header already gave
+		// us the visitor address keeps it, even though its REMOTE_ADDR is private; an absent
+		// or malformed REMOTE_ADDR is no evidence of a proxy at all, so it fails closed.
+		if ( ! IP_Utils::ip_is_public( $ip )
+			&& is_string( $remote_addr )
+			&& ! IP_Utils::ip_is_public( $remote_addr ) ) {
 			$proxy_written = self::get_proxy_written_ip_address();
 
 			if ( '' !== $proxy_written ) {
@@ -616,7 +627,8 @@ class WC_Analytics_Tracking {
 	 * back into forged input, so a private last entry (chained internal proxies) correctly
 	 * yields nothing.
 	 *
-	 * Only called once `REMOTE_ADDR` has been shown to be non-routable. `Cf-Connecting-IP`
+	 * Only called once resolution has produced nothing usable and `REMOTE_ADDR` has been shown
+	 * to be present, parseable and non-routable. `Cf-Connecting-IP`
 	 * and `X-Real-IP` are deliberately not consulted: an internal proxy forwards client
 	 * headers verbatim unless configured otherwise, so those stay client-controlled.
 	 *
