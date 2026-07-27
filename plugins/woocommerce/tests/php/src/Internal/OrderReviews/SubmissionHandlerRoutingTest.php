@@ -25,19 +25,10 @@ class SubmissionHandlerRoutingTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
 		// Drive the production registration path: the flag was off at bootstrap,
-		// so re-run the init-hooked resolver now that it's on. The resolver populates
-		// the container with all OrderReviews services, and SubmissionHandler's init()
-		// wires both wp_ajax_ hooks. tearDown() removes the actions, so this stays
-		// repeatable on the next test.
-		// Drive the production resolver path to prove feature-flag gating works.
-		// The resolver populates the container with all OrderReviews services,
-		// and each service's init() auto-fires once on container construction.
+		// so re-run the init-hooked resolver now that it's on. tearDown() drops the
+		// container's resolved-instance cache, so each test re-resolves a fresh
+		// SubmissionHandler whose auto-init() registers both wp_ajax_* hooks.
 		WC()->maybe_init_order_reviews();
-
-		// Re-initialize the handler for test repeatability: the container only
-		// auto-calls init() on the first resolve, but tearDown() removes the
-		// actions, so the cached instance needs an explicit re-init between tests.
-		wc_get_container()->get( SubmissionHandler::class )->init();
 		update_option( 'comment_moderation', '0' );
 		wp_set_current_user( 0 );
 	}
@@ -46,9 +37,11 @@ class SubmissionHandlerRoutingTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		$handler = wc_get_container()->get( SubmissionHandler::class );
-		remove_action( 'wp_ajax_' . SubmissionHandler::ACTION, array( $handler, 'handle' ) );
-		remove_action( 'wp_ajax_nopriv_' . SubmissionHandler::ACTION, array( $handler, 'handle' ) );
+		// Drop the container's resolved-instance cache so the next setUp()
+		// re-resolves a fresh SubmissionHandler. Without this, the cached instance
+		// would skip its auto-init() on the next resolve and the wp_ajax_* hooks
+		// would never register, regressing test_action_hooks_are_registered.
+		wc_get_container()->reset_all_resolved();
 		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 		delete_option( 'comment_moderation' );
 		$_POST = array();
