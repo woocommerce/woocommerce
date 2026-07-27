@@ -1,0 +1,4 @@
+Significance: patch
+Type: security
+
+Resolve the visitor IP without trusting forgeable proxy request headers.
