@@ -154,20 +154,10 @@
 					( e.target.tagName.toLowerCase() === 'input' ||
 						e.target.tagName.toLowerCase() === 'textarea' );
 
-				// Don't hijack Enter when the user is on an enhanced-select
-				// (selectWoo/select2) control. Focus on a *closed* control sits
-				// on the combobox element (not an <input>), so without this the
-				// Enter would "click OK", submitting and closing the modal and
-				// stranding the dropdown. Two checks cover both moments: focus
-				// on the control (first Enter, dropdown still closed) and any
-				// open select2 dropdown (which selectWoo attaches to <body>, so
-				// this must be a document-wide lookup, not scoped to the modal).
-				// Let selectWoo handle Enter natively (open the list / choose
-				// the highlighted item).
+				// Let selectWoo handle Enter on an enhanced-select control instead of submitting the modal.
 				var inEnhancedSelect = $( e.target ).closest(
 					'.select2-container, .select2-selection, .select2-search__field, [role="combobox"]'
-				).length > 0 ||
-					$( '.select2-container--open' ).length > 0;
+				).length > 0;
 
 				if ( ! isFormField && ! inEnhancedSelect ) {
 					if ( $( '#btn-ok' ).length ) {
