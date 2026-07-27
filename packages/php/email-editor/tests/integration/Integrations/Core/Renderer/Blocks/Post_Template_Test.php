@@ -535,6 +535,39 @@ class Post_Template_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * When a card's preserved (non-image) content carries unsafe markup — a `<script>` element or an
+	 * inline event handler — it is stripped from the rebuilt cell, while legitimate content and styles
+	 * are kept. Guards the reconstruct path against passing through markup that has no place in email.
+	 */
+	public function testItStripsScriptsAndEventHandlersFromPreservedContent(): void {
+		$parsed_block = array(
+			'blockName'   => 'core/post-template',
+			'attrs'       => array(
+				'layout' => array(
+					'type'        => 'grid',
+					'columnCount' => 2,
+				),
+			),
+			'innerBlocks' => array(),
+		);
+		$card    = $this->nested_featured_image( 'https://example.com/a.png', 800, 400 )
+			. '<h2 class="wp-block-post-title" style="color:#111" onmouseover="alert(1)">Card Title</h2>'
+			. '<script>alert(2)</script>';
+		$content = $this->build_list( array( $card, $card ), 2 );
+
+		$rendered = $this->renderer->render( $content, $parsed_block, $this->rendering_context );
+
+		// The image is rebuilt and the legitimate title (and its style) survive...
+		$this->assertStringContainsString( 'a.png', $rendered );
+		$this->assertStringContainsString( 'Card Title', $rendered );
+		$this->assertStringContainsString( 'color:#111', $rendered );
+		// ...but the handler and script are gone.
+		$this->assertStringNotContainsString( 'onmouseover', $rendered );
+		$this->assertStringNotContainsString( '<script', $rendered );
+		$this->assertStringNotContainsString( 'alert(2)', $rendered );
+	}
+
+	/**
 	 * A list whose class merely contains `wp-block-post-template` as a substring (not a whole token)
 	 * must not be mistaken for the repeater and rebuilt — the content is left untouched.
 	 */

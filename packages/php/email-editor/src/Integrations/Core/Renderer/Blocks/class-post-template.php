@@ -384,6 +384,8 @@ class Post_Template extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	private function extract_remaining_content( Dom_Document_Helper $item_dom ): string {
+		$this->strip_unsafe_markup( $item_dom );
+
 		$remainder = $item_dom->get_root_html();
 
 		// Treat the remainder as empty unless it carries visible text or embedded media — otherwise it
@@ -394,6 +396,44 @@ class Post_Template extends Abstract_Block_Renderer {
 		}
 
 		return $remainder;
+	}
+
+	/**
+	 * Strip markup that has no place in an email from the preserved remainder: `<script>`/`<style>`
+	 * elements and inline event-handler (`on*`) attributes.
+	 *
+	 * The images beside this content are already sanitized when they're rebuilt, so this keeps the
+	 * reconstructed cell internally consistent. It intentionally leaves `style` attributes and all
+	 * structural markup in place, so legitimate card content (title/date/excerpt) renders unchanged —
+	 * core never emits scripts or handlers there, making this a no-op for real content. Scoped to this
+	 * renderer's grid path only; it operates on the local item DOM and touches no shared helper.
+	 *
+	 * @param Dom_Document_Helper $item_dom The item DOM to clean in place.
+	 */
+	private function strip_unsafe_markup( Dom_Document_Helper $item_dom ): void {
+		foreach ( array( 'script', 'style' ) as $tag_name ) {
+			foreach ( $item_dom->find_elements( $tag_name ) as $element ) {
+				$item_dom->remove_element( $element );
+			}
+		}
+
+		foreach ( $item_dom->find_elements( '*' ) as $element ) {
+			$attributes = $element->attributes;
+			if ( null === $attributes ) {
+				continue;
+			}
+			// Collect handler attribute names first, then remove — mutating the live attribute map
+			// mid-iteration would skip entries.
+			$handler_attributes = array();
+			foreach ( $attributes as $attribute ) {
+				if ( 0 === stripos( $attribute->name, 'on' ) ) {
+					$handler_attributes[] = $attribute->name;
+				}
+			}
+			foreach ( $handler_attributes as $attribute_name ) {
+				$element->removeAttribute( $attribute_name );
+			}
+		}
 	}
 
 	/**
