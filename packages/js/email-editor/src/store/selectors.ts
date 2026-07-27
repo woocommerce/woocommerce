@@ -418,53 +418,109 @@ export function getPreviewState( state: State ): State[ 'preview' ] {
 	return state.preview;
 }
 
+const EMPTY_PERSONALIZATION_TAGS: PersonalizationTag[] = [];
+
+type PersonalizationTagsQuery = {
+	context: string;
+	per_page: number;
+	post_id?: number | string;
+};
+
 export const getPersonalizationTagsList = createRegistrySelector(
-	( select ) => () => {
-		const postId = select( storeName ).getEmailPostId();
-		const queryParams: Record< string, unknown > = {
-			context: 'view',
-			per_page: -1,
-		};
+	( select ) => {
+		// The block edit filter calls this selector once per block on every store
+		// change, so both the query and the filtered list are cached.
+		//
+		// `createRegistrySelector` resolves this factory once per registry, so the
+		// caches below are scoped to a registry rather than shared globally.
+		//
+		// The query object is reused because `getEntityRecords` forwards it to
+		// core-data's `getQueriedItems`, which is memoized by rememo and compares
+		// arguments by reference: a fresh object literal misses on every call and
+		// prepends a node to a list keyed on the entity's queried-data state, so
+		// the list grows until that state changes and every later call walks all
+		// of it. `getQueriedItems` also keeps a value-keyed cache (an
+		// `EquivalentKeyMap` per state), so the records array stays referentially
+		// stable across those misses — which is what lets `listCache` key on
+		// `tags` identity.
+		let queryCache: {
+			postId: number | string | undefined;
+			query: PersonalizationTagsQuery;
+		} | null = null;
 
-		// Include post_id for context-aware tag filtering (e.g., automation emails)
-		if ( postId ) {
-			queryParams.post_id = postId;
-		}
+		let listCache: {
+			tags: PersonalizationTag[];
+			postType: string;
+			templatePostTypes: string[] | undefined;
+			result: PersonalizationTag[];
+		} | null = null;
 
-		const tags = ( select( coreDataStore ).getEntityRecords(
-			PERSONALIZATION_TAG_ENTITY.kind,
-			PERSONALIZATION_TAG_ENTITY.name,
-			queryParams
-		) || [] ) as PersonalizationTag[];
+		return () => {
+			const postId = select( storeName ).getEmailPostId();
 
-		const postType = select( storeName ).getEmailPostType();
+			if ( ! queryCache || queryCache.postId !== postId ) {
+				queryCache = {
+					postId,
+					query: {
+						context: 'view',
+						per_page: -1,
+						// Include post_id for context-aware tag filtering (e.g., automation emails)
+						...( postId ? { post_id: postId } : {} ),
+					},
+				};
+			}
 
-		if ( ! postType ) {
-			return tags;
-		}
+			const tags = ( select( coreDataStore ).getEntityRecords(
+				PERSONALIZATION_TAG_ENTITY.kind,
+				PERSONALIZATION_TAG_ENTITY.name,
+				queryCache.query
+			) || EMPTY_PERSONALIZATION_TAGS ) as PersonalizationTag[];
 
-		// When postType is template, we filter tags by registered template postTypes.
-		if ( postType === 'wp_template' ) {
-			const postTemplate = select( storeName ).getCurrentTemplate();
-			return tags.filter( ( tag ) => {
-				return (
+			const postType = select( storeName ).getEmailPostType();
+
+			if ( ! postType ) {
+				return tags;
+			}
+
+			// When postType is template, we filter tags by registered template postTypes.
+			const templatePostTypes =
+				postType === 'wp_template'
+					? select( storeName ).getCurrentTemplate()?.post_types
+					: undefined;
+
+			if (
+				listCache &&
+				listCache.tags === tags &&
+				listCache.postType === postType &&
+				listCache.templatePostTypes === templatePostTypes
+			) {
+				return listCache.result;
+			}
+
+			const result = tags.filter( ( tag ) => {
+				if (
 					tag.postTypes === undefined ||
-					tag.postTypes.length === 0 ||
-					( Array.isArray( postTemplate.post_types ) &&
-						postTemplate.post_types.some( ( pt ) =>
-							tag.postTypes.includes( pt )
-						) )
-				);
-			} );
-		}
+					tag.postTypes.length === 0
+				) {
+					return true;
+				}
 
-		return tags.filter( ( tag ) => {
-			return (
-				tag.postTypes === undefined ||
-				tag.postTypes.length === 0 ||
-				tag.postTypes.includes( postType )
-			);
-		} );
+				if ( postType === 'wp_template' ) {
+					return (
+						Array.isArray( templatePostTypes ) &&
+						templatePostTypes.some( ( pt ) =>
+							tag.postTypes.includes( pt )
+						)
+					);
+				}
+
+				return tag.postTypes.includes( postType );
+			} );
+
+			listCache = { tags, postType, templatePostTypes, result };
+
+			return result;
+		};
 	}
 );
 
