@@ -327,13 +327,8 @@ class Ip_Address_Test extends BaseTestCase {
 	 * Chained internal proxies leave a private address in the last entry. Scanning further
 	 * left would walk into client-supplied values, so no IP is the correct answer.
 	 *
-	 * Asserted directly against get_proxy_written_ip_address() rather than only through
-	 * resolved_ip(): the final ip_is_public() gate zeroes both "helper returned ''" and
-	 * "helper returned 10.0.0.6" the same way, so that assertion alone cannot prove the
-	 * helper read the last entry rather than, say, discarding a private one. A reflection
-	 * call on the helper pins that it returns the last entry verbatim (10.0.0.6, still
-	 * private) rather than scanning left for '203.0.113.10' — the mutation this test exists
-	 * to catch.
+	 * The helper is asserted directly because the final gate zeroes both "returned ''" and
+	 * "returned 10.0.0.6", so resolved_ip() alone cannot tell a left-scan from a correct read.
 	 */
 	public function test_chained_internal_proxies_yield_no_address(): void {
 		$_SERVER['REMOTE_ADDR']          = '10.0.0.5';
@@ -353,10 +348,8 @@ class Ip_Address_Test extends BaseTestCase {
 	}
 
 	/**
-	 * A trailing comma in `X-Forwarded-For` leaves the last entry empty. That empty entry
-	 * must resolve to no address rather than being skipped in favor of the earlier,
-	 * client-controlled entry in front of it — the same left-of-the-proxy value a real
-	 * attacker would put there to be picked up if the code fell back to it.
+	 * A trailing comma leaves the last `X-Forwarded-For` entry empty. It must resolve to no
+	 * address rather than fall back to the client-controlled entry in front of it.
 	 */
 	public function test_trailing_comma_yields_no_address(): void {
 		$_SERVER['REMOTE_ADDR']          = '10.0.0.5';
@@ -370,13 +363,10 @@ class Ip_Address_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Regression: get_ip() must never be the value tested for "is REMOTE_ADDR private". With
-	 * trusted_ip_header configured, get_ip() selects a segment out of a client-supplied
-	 * X-Forwarded-For list, so it can be driven non-public by an attacker connecting directly
-	 * (a public REMOTE_ADDR) who simply prepends a private-looking address of their choosing.
-	 * If the proxy-recovery branch keyed off get_ip()'s result instead of REMOTE_ADDR itself,
-	 * this would then read the *last* X-Forwarded-For entry — also attacker-controlled here,
-	 * since there is no real proxy in front of this request — and report it as the visitor IP.
+	 * Regression: the fallback must key off REMOTE_ADDR, never off get_ip()'s result. With
+	 * trusted_ip_header configured, get_ip() picks a segment out of a client-supplied list, so
+	 * an attacker connecting directly can prepend a private-looking entry to drive it non-public
+	 * and have their own last entry reported back as the visitor IP.
 	 */
 	public function test_forwarded_header_is_ignored_when_get_ip_result_is_private_but_remote_addr_is_public(): void {
 		update_site_option(
@@ -399,12 +389,10 @@ class Ip_Address_Test extends BaseTestCase {
 	}
 
 	/**
-	 * The configured header wins over the forwarded fallback. This is the nginx setup the
-	 * fallback's own docs tell sites to fix this way: nginx sets only X-Real-IP, forwards the
-	 * client's X-Forwarded-For verbatim, and REMOTE_ADDR is the loopback address nginx
-	 * connected from. Resolution already produced the real visitor, so the fallback — which
-	 * exists to supply an answer where there is none — must not run and overwrite it with the
-	 * attacker's value.
+	 * The configured header wins over the forwarded fallback — exactly the nginx setup the
+	 * fallback's own docs tell sites to fix this way, where only X-Real-IP is written and the
+	 * client's X-Forwarded-For is passed through. Resolution already has the real visitor, so
+	 * the fallback must not overwrite it with the attacker's value.
 	 */
 	public function test_configured_trusted_header_wins_over_the_forwarded_fallback(): void {
 		update_site_option(

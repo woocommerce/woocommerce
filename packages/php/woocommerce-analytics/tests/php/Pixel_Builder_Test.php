@@ -341,9 +341,8 @@ class Pixel_Builder_Test extends BaseTestCase {
 	}
 
 	/**
-	 * An unresolved IP is an empty string, which is noise in the pixel URL. Dropping the
-	 * key is an intended consequence of switching to ip_is_public(): the old preg_match
-	 * kept `_via_ip=` in the query string.
+	 * An unresolved IP is an empty string. Dropping the key rather than sending `_via_ip=`,
+	 * as the old preg_match did, is an intended consequence of switching to ip_is_public().
 	 */
 	public function test_validate_and_sanitize_removes_empty_via_ip(): void {
 		$properties = array(

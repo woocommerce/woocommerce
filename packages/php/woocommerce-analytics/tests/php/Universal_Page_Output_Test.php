@@ -328,11 +328,9 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	 * Test that the server-fired pixel path keeps its request-derived
 	 * properties. That path runs on uncached requests and is the only place
 	 * where pixel.wp.com can learn the visitor's user agent and referrer, so
-	 * narrowing the page output must not narrow it too. The IP, however, must
-	 * come from the connecting address rather than a client-forgeable header:
-	 * `_via_ip` is sourced through `Automattic\Jetpack\IP\Utils::get_ip()`,
-	 * which only trusts a proxy header when the site has explicitly declared
-	 * it via the `trusted_ip_header` site option.
+	 * narrowing the page output must not narrow it too. The IP is the
+	 * exception: it comes from the connecting address, never a forgeable
+	 * header.
 	 */
 	public function test_server_fired_properties_retain_request_details(): void {
 		$properties = WC_Analytics_Tracking::get_common_properties();

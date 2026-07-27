@@ -540,31 +540,20 @@ class WC_Analytics_Tracking {
 	/**
 	 * Get the user's IP address.
 	 *
-	 * Resolution defaults to `REMOTE_ADDR`. A proxy header is only consulted when the site
-	 * has declared one trustworthy through Jetpack's `trusted_ip_header` site option, which
-	 * is determined by observation rather than guesswork. Request headers are forgeable, so
-	 * trusting them unconditionally lets any client choose the address we report — and in
-	 * proxy tracking mode that address feeds the visitor id hash.
+	 * Defaults to `REMOTE_ADDR`; a proxy header is only used when the site declared one through
+	 * Jetpack's `trusted_ip_header` site option. Headers are forgeable, and this address feeds
+	 * both `_via_ip` and the proxy-mode visitor id hash, so reading one unconditionally lets any
+	 * client choose the identity we report.
 	 *
-	 * Only when that resolution produced nothing usable does a forwarded value come into play,
-	 * and then only on the further condition that `REMOTE_ADDR` — the address we actually
-	 * terminated the connection on, not whatever `get_ip()` resolved — is present, parseable
-	 * and non-routable. Both halves are required. The second half is the proof that a proxy on
-	 * the local network is in front of us, since an external client cannot fake it; the first
-	 * half keeps that recovery from overwriting a good answer, because a site that configured
-	 * `trusted_ip_header` correctly has already produced the visitor address and its
-	 * `REMOTE_ADDR` is private precisely because the proxy it declared is doing its job. An
-	 * absent or malformed `REMOTE_ADDR` proves nothing either way, so it fails closed. See
-	 * `get_proxy_written_ip_address()` for why only the last `X-Forwarded-For` entry is read.
-	 * `get_ip()`'s result is not usable as the proxy proof: when `trusted_ip_header` is
-	 * configured it is selected out of a client-supplied list, so an external attacker can
-	 * drive it non-public too.
+	 * The `X-Forwarded-For` fallback needs both of its conditions. A non-routable `REMOTE_ADDR`
+	 * is the proof that a proxy on the local network is in front of us, since an external client
+	 * cannot fake it; `get_ip()`'s result cannot serve as that proof, because a configured
+	 * `trusted_ip_header` selects it out of a client-supplied list. Requiring the resolved
+	 * address to be unusable first stops the fallback overwriting the answer a correctly
+	 * configured site already produced.
 	 *
-	 * @since 0.16.8 Stopped trusting `Cf-Connecting-IP`, `X-Forwarded-For` and `Client-IP`
-	 *               unconditionally.
-	 * @since 0.16.8 Recover the visitor address from the last `X-Forwarded-For` entry when
-	 *               nothing resolved and `REMOTE_ADDR` is non-routable, instead of losing it
-	 *               entirely.
+	 * @since 0.16.8 Resolve from the connecting address instead of trusting `Cf-Connecting-IP`,
+	 *               `X-Forwarded-For` and `Client-IP` unconditionally.
 	 *
 	 * @return string The user's IP address. An empty string when no public address resolved.
 	 */
@@ -582,13 +571,9 @@ class WC_Analytics_Tracking {
 			? IP_Utils::clean_ip( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
 			: false;
 
-		// The forwarded value only fills a gap; it never replaces an answer. So this runs when
-		// resolution produced nothing usable AND REMOTE_ADDR — the address we terminated on,
-		// never the resolved one, which a configured trusted_ip_header may have selected out
-		// of a client-supplied list — is present, parseable and non-routable, which is what
-		// proves a local proxy is in front of us. A site whose trusted_ip_header already gave
-		// us the visitor address keeps it, even though its REMOTE_ADDR is private; an absent
-		// or malformed REMOTE_ADDR is no evidence of a proxy at all, so it fails closed.
+		// Fill a gap, never replace an answer: only when nothing usable resolved, and only when
+		// REMOTE_ADDR itself proves a local proxy is in front of us. An absent or unparseable
+		// REMOTE_ADDR proves nothing, so it fails closed.
 		if ( ! IP_Utils::ip_is_public( $ip )
 			&& is_string( $remote_addr )
 			&& ! IP_Utils::ip_is_public( $remote_addr ) ) {
@@ -602,10 +587,9 @@ class WC_Analytics_Tracking {
 		/**
 		 * Filters the visitor IP address used for analytics.
 		 *
-		 * For sites behind a proxy this package cannot identify on its own. The returned value
-		 * must be the visitor's own address; it is still required to be public and globally
-		 * routable, so passing a request header through verbatim reintroduces the spoofing this
-		 * resolution exists to prevent.
+		 * For proxy topologies this package cannot identify on its own. The value is still
+		 * required to be public and globally routable, so returning a request header verbatim
+		 * reintroduces the spoofing this resolution exists to prevent.
 		 *
 		 * @since 0.16.8
 		 *
@@ -621,29 +605,18 @@ class WC_Analytics_Tracking {
 	/**
 	 * The address the nearest proxy recorded, from the last `X-Forwarded-For` entry.
 	 *
-	 * Only the last entry is usable. Proxies append the address they observed, so everything
-	 * to its left — including anything the client sent as its own `X-Forwarded-For` — is
-	 * client-controlled. Scanning leftwards for the first public address would walk straight
-	 * back into forged input, so a private last entry (chained internal proxies) correctly
-	 * yields nothing.
+	 * Proxies append the address they observed, so only the last entry is proxy-written;
+	 * everything left of it, including an `X-Forwarded-For` the client sent itself, is
+	 * client-controlled. Scanning leftwards for the first public address would walk back into
+	 * forged input, so a private last entry (chained proxies) correctly yields nothing.
+	 * `Cf-Connecting-IP` and `X-Real-IP` are not read at all: a proxy forwards client headers
+	 * verbatim unless configured to overwrite them.
 	 *
-	 * Only called once resolution has produced nothing usable and `REMOTE_ADDR` has been shown
-	 * to be present, parseable and non-routable. `Cf-Connecting-IP`
-	 * and `X-Real-IP` are deliberately not consulted: an internal proxy forwards client
-	 * headers verbatim unless configured otherwise, so those stay client-controlled.
-	 *
-	 * This still assumes the proxy in front of us is the one that wrote `X-Forwarded-For`,
-	 * and that assumption can be wrong. An nginx configured with only
-	 * `proxy_set_header X-Real-IP $remote_addr;`, for instance, leaves `X-Forwarded-For`
-	 * untouched and forwards whatever the client sent, verbatim — so the last entry is
-	 * attacker-chosen even though `REMOTE_ADDR` is private, and nothing observable from PHP
-	 * tells that configuration apart from one where a proxy really did write the header.
-	 * This is not a regression, though: the code this replaced trusted the first
-	 * `X-Forwarded-For` entry unconditionally on the same misconfigured setup, which handed
-	 * the attacker an even easier win. A site in that situation needs to populate the
-	 * `trusted_ip_header` site option — Jetpack Brute Force Protection does this by asking
-	 * WordPress.com which header is actually trustworthy — or to supply a value of its own
-	 * through the `woocommerce_analytics_visitor_ip` filter.
+	 * Known limitation: this assumes the proxy in front of us wrote `X-Forwarded-For`. An nginx
+	 * setting only `proxy_set_header X-Real-IP $remote_addr;` leaves it untouched and forwards
+	 * the client's, and nothing observable from PHP tells the two apart. Such a site needs to
+	 * populate `trusted_ip_header` — Jetpack Brute Force Protection does — or supply its own
+	 * value through the `woocommerce_analytics_visitor_ip` filter.
 	 *
 	 * @since 0.16.8
 	 *
