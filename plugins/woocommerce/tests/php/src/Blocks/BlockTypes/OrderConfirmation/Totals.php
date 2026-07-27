@@ -174,6 +174,7 @@ class Totals extends \WP_UnitTestCase {
 				'create_account'   => true,
 				'customer_note'    => '<a href="http://attackerpage.com/csrf.html">This text should not save inside an anchor.</a><script>alert("alert")</script>',
 				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
 				'extensions'       => array(
 					'extension_namespace' => array(
 						'extension_key' => true,

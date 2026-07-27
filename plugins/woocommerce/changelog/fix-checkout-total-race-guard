@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Store API/Checkout Block: reject the order with a 409 when the total the shopper confirmed no longer matches the total calculated on the server (e.g. a product, price or quantity changed during checkout), so shoppers are never charged an unexpected amount.
