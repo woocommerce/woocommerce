@@ -239,35 +239,52 @@ class WC_Analytics_Tracking {
 	/**
 	 * Get the common properties for the event.
 	 *
+	 * Includes the request-derived properties from `get_server_details()`, so this
+	 * is only safe for events the server fires itself on an uncached request. The
+	 * cacheable page output must use `get_page_common_properties()` instead — see
+	 * the note there before adding any property here.
+	 *
 	 * @return array The common properties.
 	 */
 	public static function get_common_properties() {
+		return array_merge( self::get_page_common_properties(), self::get_server_details() );
+	}
+
+	/**
+	 * Get the common properties that are safe to embed in cacheable page HTML.
+	 *
+	 * Everything returned here is derived from the store, not from the current
+	 * request, because the page output this feeds is cached and replayed to later
+	 * visitors. Request headers are not part of the CDN cache key, so a property
+	 * derived from one would be attributed to every subsequent visitor of the
+	 * cached page. Anything request-derived belongs in `get_server_details()`,
+	 * which only reaches the server-fired pixel path.
+	 *
+	 * @since 0.16.7
+	 *
+	 * @return array The common properties.
+	 */
+	public static function get_page_common_properties() {
 		$blog_user_id    = self::get_blog_user_id();
-		$server_details  = self::get_server_details();
 		$blog_details    = self::get_blog_details();
 		$session_details = self::get_session_details();
 
-		$common_properties = array_merge(
-			array(
-				'session_id'     => $session_details['session_id'] ?? null,
-				'landing_page'   => $session_details['landing_page'] ?? null,
-				'is_engaged'     => $session_details['is_engaged'] ?? null,
-				'ui'             => $blog_user_id,
-				'blog_id'        => $blog_details['blog_id'] ?? null,
-				'store_id'       => $blog_details['store_id'] ?? null,
-				'url'            => $blog_details['url'] ?? null,
-				'woo_version'    => $blog_details['wc_version'] ?? null,
-				'wp_version'     => get_bloginfo( 'version' ),
-				'store_admin'    => count( array_intersect( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles ) ) > 0 ? 1 : 0,
-				'device'         => self::get_device_type(),
-				'store_currency' => $blog_details['store_currency'] ?? null,
-				'timezone'       => wp_timezone_string(),
-				'is_guest'       => ( $blog_user_id === null || $blog_user_id === 0 ) ? 1 : 0,
-			),
-			$server_details
+		return array(
+			'session_id'     => $session_details['session_id'] ?? null,
+			'landing_page'   => $session_details['landing_page'] ?? null,
+			'is_engaged'     => $session_details['is_engaged'] ?? null,
+			'ui'             => $blog_user_id,
+			'blog_id'        => $blog_details['blog_id'] ?? null,
+			'store_id'       => $blog_details['store_id'] ?? null,
+			'url'            => $blog_details['url'] ?? null,
+			'woo_version'    => $blog_details['wc_version'] ?? null,
+			'wp_version'     => get_bloginfo( 'version' ),
+			'store_admin'    => count( array_intersect( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles ) ) > 0 ? 1 : 0,
+			'device'         => self::get_device_type(),
+			'store_currency' => $blog_details['store_currency'] ?? null,
+			'timezone'       => wp_timezone_string(),
+			'is_guest'       => ( $blog_user_id === null || $blog_user_id === 0 ) ? 1 : 0,
 		);
-
-		return is_array( $common_properties ) ? $common_properties : array();
 	}
 
 	/**

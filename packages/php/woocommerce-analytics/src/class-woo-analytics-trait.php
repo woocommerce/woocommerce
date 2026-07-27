@@ -278,6 +278,28 @@ trait Woo_Analytics_Trait {
 	}
 
 	/**
+	 * Default event properties for the client, excluding anything derived from
+	 * the current request.
+	 *
+	 * Used for the properties embedded in front-end page HTML, which is cached
+	 * and replayed to later visitors. See
+	 * `WC_Analytics_Tracking::get_page_common_properties()`.
+	 *
+	 * @since 0.16.7
+	 *
+	 * @return array Array of standard event props.
+	 */
+	public function get_page_common_properties() {
+		$common_properties = WC_Analytics_Tracking::get_page_common_properties();
+
+		/** This filter is documented in src/class-woo-analytics-trait.php */
+		return apply_filters(
+			'jetpack_woocommerce_analytics_event_props',
+			$common_properties
+		);
+	}
+
+	/**
 	 * Enqueue an event with optional product and custom properties.
 	 *
 	 * @param string       $event_name The name of the event to record.
@@ -604,9 +626,41 @@ trait Woo_Analytics_Trait {
 	 * - For regular pages, it builds the breadcrumb from the page's ancestors, ordered from top-level to current.
 	 * - For all other cases, it returns the current page's title.
 	 *
+	 * Titles are capped before being returned; see `cap_breadcrumb_title()`.
+	 *
 	 * @return array The breadcrumb trail as an array of titles.
 	 */
 	private function get_breadcrumb_titles() {
+		return array_map( array( $this, 'cap_breadcrumb_title' ), $this->build_breadcrumb_titles() );
+	}
+
+	/**
+	 * Limit the length of a single breadcrumb title.
+	 *
+	 * Breadcrumb titles are page and product names, which are short in practice.
+	 * The cap exists because one crumb is not: on a search page the trail embeds
+	 * the raw search term, so without a limit a single long request URL would
+	 * push an arbitrary amount of text into the cached copy of the page.
+	 *
+	 * @since 0.16.7
+	 *
+	 * @param string $title The breadcrumb title.
+	 * @return string The title, truncated if it exceeded the limit.
+	 */
+	private function cap_breadcrumb_title( $title ) {
+		$max_length = 200;
+
+		$title = (string) $title;
+
+		return mb_strlen( $title ) > $max_length ? mb_substr( $title, 0, $max_length ) : $title;
+	}
+
+	/**
+	 * Build the uncapped breadcrumb trail. See `get_breadcrumb_titles()`.
+	 *
+	 * @return array The breadcrumb trail as an array of titles.
+	 */
+	private function build_breadcrumb_titles() {
 		if ( is_front_page() ) {
 			return array( __( 'Home', 'woocommerce-analytics' ) );
 		}

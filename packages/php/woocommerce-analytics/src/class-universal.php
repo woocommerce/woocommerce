@@ -76,7 +76,9 @@ class Universal {
 		$is_clickhouse_enabled     = Features::is_clickhouse_enabled();
 		$is_proxy_tracking_enabled = Features::is_proxy_tracking_enabled();
 		// When proxy tracking is enabled, we don't need to send the common properties to the client.
-		$common_properties = $is_proxy_tracking_enabled ? array() : $this->get_common_properties();
+		// Otherwise send only the page-safe properties: this markup is cacheable, so nothing
+		// derived from the current request may go into it.
+		$common_properties = $is_proxy_tracking_enabled ? array() : $this->get_page_common_properties();
 		?>
 		<script type="text/javascript">
 			(function() {
