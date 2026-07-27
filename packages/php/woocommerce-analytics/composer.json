@@ -10,6 +10,7 @@
 		"automattic/jetpack-connection": "^8.1",
 		"automattic/jetpack-constants": "^3.0",
 		"automattic/jetpack-device-detection": "^3.4",
+		"automattic/jetpack-ip": "^0.5",
 		"automattic/block-delimiter": "^0.3"
 	},
 	"require-dev": {

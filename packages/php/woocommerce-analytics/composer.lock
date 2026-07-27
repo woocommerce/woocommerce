@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8db8667282290c9a2a06b56b4263a59d",
+    "content-hash": "ea5b5168003a45b1c471e66bcdc66e24",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -405,6 +405,61 @@
                 "source": "https://github.com/Automattic/jetpack-device-detection/tree/v3.4.5"
             },
             "time": "2026-06-15T12:14:47+00:00"
+        },
+        {
+            "name": "automattic/jetpack-ip",
+            "version": "v0.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Automattic/jetpack-ip.git",
+                "reference": "ce3ace356ae9ea091fc942f54e702c4f12f7247f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Automattic/jetpack-ip/zipball/ce3ace356ae9ea091fc942f54e702c4f12f7247f",
+                "reference": "ce3ace356ae9ea091fc942f54e702c4f12f7247f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "require-dev": {
+                "automattic/phpunit-select-config": "^1.0.9",
+                "brain/monkey": "^2.6.2",
+                "yoast/phpunit-polyfills": "^4.0.0"
+            },
+            "suggest": {
+                "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
+            },
+            "type": "jetpack-library",
+            "extra": {
+                "autotagger": true,
+                "textdomain": "jetpack-ip",
+                "mirror-repo": "Automattic/jetpack-ip",
+                "branch-alias": {
+                    "dev-trunk": "0.5.x-dev"
+                },
+                "changelogger": {
+                    "link-template": "https://github.com/automattic/jetpack-ip/compare/v${old}...v${new}"
+                },
+                "version-constants": {
+                    "::PACKAGE_VERSION": "src/class-utils.php"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "Utilities for working with IP addresses.",
+            "support": {
+                "source": "https://github.com/Automattic/jetpack-ip/tree/v0.5.0"
+            },
+            "time": "2026-07-09T11:05:56+00:00"
         },
         {
             "name": "automattic/jetpack-redirect",

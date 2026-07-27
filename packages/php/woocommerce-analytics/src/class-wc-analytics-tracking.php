@@ -12,6 +12,7 @@ namespace Automattic\Woocommerce_Analytics;
 
 use Automattic\Jetpack\Device_Detection;
 use Automattic\Jetpack\Device_Detection\User_Agent_Info;
+use Automattic\Jetpack\IP\Utils as IP_Utils;
 use WP_Error;
 
 /**
@@ -539,41 +540,41 @@ class WC_Analytics_Tracking {
 	/**
 	 * Get the user's IP address.
 	 *
-	 * @return string The user's IP address. An empty string if no valid IP address is found.
+	 * Resolution defaults to `REMOTE_ADDR`. A proxy header is only consulted when the site
+	 * has declared one trustworthy through Jetpack's `trusted_ip_header` site option, which
+	 * is determined by observation rather than guesswork. Request headers are forgeable, so
+	 * trusting them unconditionally lets any client choose the address we report — and in
+	 * proxy tracking mode that address feeds the visitor id hash.
+	 *
+	 * @since 0.16.7 Stopped trusting `Cf-Connecting-IP`, `X-Forwarded-For` and `Client-IP`
+	 *               unconditionally.
+	 *
+	 * @return string The user's IP address. An empty string when no public address resolved.
 	 */
 	private static function get_user_ip_address() {
-		// Return cached IP if available
+		// Return cached IP if available.
 		if ( null !== self::$cached_ip ) {
 			return self::$cached_ip;
 		}
 
-		$ip_headers = array(
-			'HTTP_CF_CONNECTING_IP', // Cloudflare specific header.
-			'HTTP_X_FORWARDED_FOR',
-			'REMOTE_ADDR',
-			'HTTP_CLIENT_IP',
-		);
+		$ip = IP_Utils::get_ip();
 
-		foreach ( $ip_headers as $header ) {
-			if ( isset( $_SERVER[ $header ] ) ) {
-				$ip_list = explode( ',', wp_unslash( $_SERVER[ $header ] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				foreach ( $ip_list as $ip_candidate ) {
-					$ip_candidate = trim( $ip_candidate );
-					if ( filter_var(
-						$ip_candidate,
-						FILTER_VALIDATE_IP,
-						array( FILTER_FLAG_NO_RES_RANGE, FILTER_FLAG_IPV6 )
-					) ) {
-						// Cache the resolved IP
-						self::$cached_ip = $ip_candidate;
-						return self::$cached_ip;
-					}
-				}
-			}
-		}
+		/**
+		 * Filters the visitor IP address used for analytics.
+		 *
+		 * For sites behind a proxy this package cannot identify on its own. The returned value
+		 * must be the visitor's own address; it is still required to be public and globally
+		 * routable, so passing a request header through verbatim reintroduces the spoofing this
+		 * resolution exists to prevent.
+		 *
+		 * @since 0.16.7
+		 *
+		 * @param string $ip Resolved visitor IP, or an empty string when none was determined.
+		 */
+		$ip = apply_filters( 'woocommerce_analytics_visitor_ip', is_string( $ip ) ? $ip : '' );
 
-		// Cache empty result
-		self::$cached_ip = '';
+		self::$cached_ip = ( is_string( $ip ) && IP_Utils::ip_is_public( $ip ) ) ? $ip : '';
+
 		return self::$cached_ip;
 	}
 
