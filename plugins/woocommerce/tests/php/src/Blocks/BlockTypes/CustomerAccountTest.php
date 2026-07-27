@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use WP_UnitTestCase;
 
 /**
- * Tests for the Customer Account block type.
+ * Tests for the Customer Account block.
  */
 class CustomerAccountTest extends WP_UnitTestCase {
 

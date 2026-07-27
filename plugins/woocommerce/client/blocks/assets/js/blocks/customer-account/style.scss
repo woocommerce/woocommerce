@@ -76,17 +76,17 @@
 	}
 
 	.wc-block-customer-account__avatar {
+		// SVG icons have some transparent spacing around the actual icon.
+		// So we add some spacing around the avatar to simulate a similar size.
+		$avatar_spacing: 4%;
+		
 		border-radius: 50%;
 		position: absolute;
 		top: 50%;
-		left: 0;
 		transform: translateY(-50%);
-		width: 100%;
+		left: $avatar_spacing;
+		width: calc(100% - ($avatar_spacing * 2));
 		height: auto;
-		// SVG icons have some transparent spacing around the actual icon.
-		// So we add some transparent border around the avatar to simulate a
-		// similar size.
-		border: 4% solid transparent;
 	}
 }
 

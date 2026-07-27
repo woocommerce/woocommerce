@@ -347,11 +347,11 @@ class CustomerAccount extends AbstractBlock {
 	}
 
 	/**
-	 * Render the user avatar image.
+	 * Render the user avatar and icon.
 	 *
 	 * @param array $attributes Block attributes.
 	 *
-	 * @return string Avatar image markup.
+	 * @return string Avatar and icon markup.
 	 */
 	private function render_visual( $attributes ) {
 		if ( self::TEXT_ONLY === $attributes['displayStyle'] ) {
@@ -367,7 +367,7 @@ class CustomerAccount extends AbstractBlock {
 				'blank',
 				'',
 				array(
-					'class' => 'wc-block-customer-account__avatar ' . $attributes['iconClass'],
+					'class' => 'wc-block-customer-account__avatar',
 				)
 			);
 
