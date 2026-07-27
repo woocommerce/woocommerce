@@ -35,10 +35,11 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
  */
 class Post_Template extends Abstract_Block_Renderer {
 	/**
-	 * Upper bound on grid columns, matching the range the core Gallery renderer allows. Keeps a very
-	 * wide grid from producing unreadably narrow cells while still honoring the author's column choice.
+	 * Upper bound on grid columns, matching the maximum the core grid layout control allows (its
+	 * Columns range control tops out at 16). Honors any column count an author can pick in the editor,
+	 * while still bounding an out-of-range hand-edited value so it can't emit a runaway number of cells.
 	 */
-	private const MAX_COLUMNS = 8;
+	private const MAX_COLUMNS = 16;
 
 	/**
 	 * Per-cell padding (px) that stands in for the grid's `gap` between items.

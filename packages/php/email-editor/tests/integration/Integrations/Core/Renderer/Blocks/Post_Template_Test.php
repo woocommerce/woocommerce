@@ -188,6 +188,62 @@ class Post_Template_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Column counts above the Gallery block's 8 are honored: the grid layout control allows up to 16,
+	 * so the renderer must not silently reduce a 12-column author choice.
+	 */
+	public function testItHonorsColumnCountsAboveEight(): void {
+		$parsed_block = array(
+			'blockName'   => 'core/post-template',
+			'attrs'       => array(
+				'layout' => array(
+					'type'        => 'grid',
+					'columnCount' => 12,
+				),
+			),
+			'innerBlocks' => array(),
+		);
+		$items        = array();
+		for ( $i = 1; $i <= 12; $i++ ) {
+			$items[] = $this->featured_image( "https://example.com/img{$i}.png" );
+		}
+		$content = $this->build_list( $items, 12 );
+
+		$rendered = $this->renderer->render( $content, $parsed_block, $this->rendering_context );
+
+		// 12 items over 12 columns => a single row of 12 cells (not clamped down to 8).
+		$this->assertSame( 1, $this->count_rows( $rendered ) );
+		$this->assertSame( 12, $this->count_cells( $rendered ) );
+	}
+
+	/**
+	 * A column count beyond the editor's maximum (e.g. a hand-edited value) is clamped to 16 so it
+	 * can't emit a runaway number of cells.
+	 */
+	public function testItClampsColumnCountToMaximum(): void {
+		$parsed_block = array(
+			'blockName'   => 'core/post-template',
+			'attrs'       => array(
+				'layout' => array(
+					'type'        => 'grid',
+					'columnCount' => 99,
+				),
+			),
+			'innerBlocks' => array(),
+		);
+		$items        = array();
+		for ( $i = 1; $i <= 18; $i++ ) {
+			$items[] = $this->featured_image( "https://example.com/img{$i}.png" );
+		}
+		$content = $this->build_list( $items, 99 );
+
+		$rendered = $this->renderer->render( $content, $parsed_block, $this->rendering_context );
+
+		// Clamped to 16 columns: 18 items => a full row of 16 + a partial row padded to 16 (32 cells).
+		$this->assertSame( 2, $this->count_rows( $rendered ) );
+		$this->assertSame( 32, $this->count_cells( $rendered ) );
+	}
+
+	/**
 	 * A partial final row is padded with empty cells so items stay aligned to their column.
 	 */
 	public function testItPadsPartialRowToKeepColumnsAligned(): void {
