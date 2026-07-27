@@ -40,7 +40,7 @@ const CustomerAddress = () => {
 					select( validationStore ).getValidationErrors(),
 			};
 		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- Re-select validation errors when the shipping address changes.
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- Update validation errors when shipping address changes.
 		[ shippingAddress ]
 	);
 
