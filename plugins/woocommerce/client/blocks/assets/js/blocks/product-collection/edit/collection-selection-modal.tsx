@@ -19,12 +19,14 @@ const PatternSelectionModal = ( props: {
 	attributes: ProductCollectionAttributes;
 	tracksLocation: string;
 	closePatternSelectionModal: () => void;
+	setAttributes: ( attrs: Partial< ProductCollectionAttributes > ) => void;
 } ) => {
 	const { clientId, attributes, tracksLocation, closePatternSelectionModal } =
 		props;
 	const { collection } = attributes;
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
-	const { replaceBlock } = useDispatch( blockEditorStore );
+	// @ts-expect-error Type definitions for this function are missing
+	const { replaceInnerBlocks } = useDispatch( blockEditorStore );
 
 	const [ chosenCollection, selectCollectionName ] = useState( collection );
 
@@ -38,7 +40,12 @@ const PatternSelectionModal = ( props: {
 					location: tracksLocation,
 				}
 			);
-			applyCollection( chosenCollection, clientId, replaceBlock );
+			applyCollection(
+				chosenCollection,
+				props.setAttributes,
+				replaceInnerBlocks,
+				clientId
+			);
 		}
 	};
 

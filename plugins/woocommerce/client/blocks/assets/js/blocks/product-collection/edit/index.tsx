@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import { useState, useEffect } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
 import { Spinner, Flex } from '@wordpress/components';
@@ -38,11 +38,6 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 
 	const [ isSelectionModalOpen, setIsSelectionModalOpen ] = useState( false );
 
-	// Track if the collection-specific picker is active (Hand-Picked or Taxonomy).
-	// This allows multi-select before clicking "Done".
-	// Only one picker can be active at a time since collections are mutually exclusive.
-	const [ isPickerActive, setIsPickerActive ] = useState( false );
-
 	const isHandPickedCollection =
 		attributes.collection === CoreCollectionNames.HAND_PICKED;
 	const hasHandPickedProducts =
@@ -58,21 +53,11 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 		? ( attributes.query?.taxQuery?.[ taxonomySlug ]?.length ?? 0 ) > 0
 		: false;
 
-	// Activate the picker when a collection needs initial selection
-	useEffect( () => {
-		if ( isHandPickedCollection && ! hasHandPickedProducts ) {
-			setIsPickerActive( true );
-		} else if ( isTaxonomyCollection && ! hasSelectedTerms ) {
-			setIsPickerActive( true );
-		}
-	}, [
-		isHandPickedCollection,
-		hasHandPickedProducts,
-		isTaxonomyCollection,
-		hasSelectedTerms,
-	] );
-
-	const dismissPicker = () => setIsPickerActive( false );
+	// Derive picker visibility from block attributes so the state is
+	// automatically kept in sync by the Yjs RTC engine across all peers.
+	// Using local useState here would hide dismissal from remote collaborators.
+	const showMultiPicker = isHandPickedCollection && ! hasHandPickedProducts;
+	const showTaxonomyPicker = isTaxonomyCollection && ! hasSelectedTerms;
 
 	const hasInnerBlocks = useSelect(
 		( select ) =>
@@ -107,19 +92,16 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	};
 
 	const renderComponent = () => {
-		// Show the collection-specific picker if it's active (local state).
-		// This allows multi-select before clicking "Done".
-		// The inspector controls are inside ProductCollectionContent,
-		// so they're automatically hidden while the picker is shown.
-		if ( isPickerActive ) {
-			if ( isHandPickedCollection ) {
-				return (
-					<MultiProductPicker { ...props } onDone={ dismissPicker } />
-				);
-			}
-			if ( isTaxonomyCollection ) {
-				return <TaxonomyPicker { ...props } onDone={ dismissPicker } />;
-			}
+		// Show the collection-specific picker while the required selection
+		// hasn't been made yet. Derived from attributes (not local state)
+		// so it reflects correctly for all RTC peers.
+		if ( showMultiPicker ) {
+			return (
+				<MultiProductPicker { ...props } onDone={ () => {} } />
+			);
+		}
+		if ( showTaxonomyPicker ) {
+			return <TaxonomyPicker { ...props } onDone={ () => {} } />;
 		}
 
 		switch ( productCollectionUIStateInEditor ) {
@@ -148,12 +130,12 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 				// This case is hit when no products are selected
 				// and the picker was previously dismissed but products were removed
 				return (
-					<MultiProductPicker { ...props } onDone={ dismissPicker } />
+					<MultiProductPicker { ...props } onDone={ () => {} } />
 				);
 			case ProductCollectionUIStatesInEditor.TAXONOMY_PICKER:
 				// This case is hit when no taxonomy terms are selected
 				// and the picker was previously dismissed but terms were removed
-				return <TaxonomyPicker { ...props } onDone={ dismissPicker } />;
+				return <TaxonomyPicker { ...props } onDone={ () => {} } />;
 			case ProductCollectionUIStatesInEditor.VALID:
 			case ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW:
 				return (
@@ -179,6 +161,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 					clientId={ clientId }
 					attributes={ attributes }
 					tracksLocation={ tracksLocation }
+					setAttributes={ props.setAttributes }
 					closePatternSelectionModal={ () =>
 						setIsSelectionModalOpen( false )
 					}

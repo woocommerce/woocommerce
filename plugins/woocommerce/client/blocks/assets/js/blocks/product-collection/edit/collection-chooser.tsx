@@ -8,7 +8,6 @@ import { useResizeObserver } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import {
 	BlockInstance,
-	createBlock,
 	createBlocksFromInnerBlocksTemplate,
 	store as blocksStore,
 	BlockVariation,
@@ -18,7 +17,11 @@ import {
 /**
  * Internal dependencies
  */
-import { type CollectionName, CoreCollectionNames } from '../types';
+import {
+	type CollectionName,
+	type ProductCollectionAttributes,
+	CoreCollectionNames,
+} from '../types';
 import blockJson from '../block.json';
 import { getCollectionByName } from '../collections';
 import { getDefaultProductCollection } from '../utils';
@@ -39,8 +42,12 @@ type CollectionOptionsProps = {
 
 export const applyCollection = (
 	collectionName: CollectionName,
-	clientId: string,
-	replaceBlock: ( clientId: string, block: BlockInstance ) => void
+	setAttributes: ( attrs: Partial< ProductCollectionAttributes > ) => void,
+	replaceInnerBlocks: (
+		clientId: string,
+		innerBlocks: BlockInstance[]
+	) => void,
+	clientId: string
 ) => {
 	const collection = getCollectionByName( collectionName );
 
@@ -48,18 +55,30 @@ export const applyCollection = (
 		return;
 	}
 
-	const newBlock =
+	const defaultAttributes =
 		collection.name === CoreCollectionNames.PRODUCT_CATALOG
-			? getDefaultProductCollection()
-			: createBlock(
-					blockJson.name,
-					collection.attributes,
-					createBlocksFromInnerBlocksTemplate(
-						collection.innerBlocks
-					)
-			  );
+			? getDefaultProductCollection().attributes
+			: collection.attributes;
 
-	replaceBlock( clientId, newBlock );
+	// Update block attributes in-place so Yjs can diff and broadcast
+	// the change as a targeted attribute patch rather than a full
+	// block delete + insert (which breaks real-time collaboration).
+	setAttributes( {
+		...defaultAttributes,
+		collection: collectionName,
+	} as Partial< ProductCollectionAttributes > );
+
+	const innerBlockTemplate =
+		collection.name === CoreCollectionNames.PRODUCT_CATALOG
+			? getDefaultProductCollection().innerBlocks
+			: collection.innerBlocks;
+
+	if ( innerBlockTemplate ) {
+		replaceInnerBlocks(
+			clientId,
+			createBlocksFromInnerBlocksTemplate( innerBlockTemplate )
+		);
+	}
 };
 
 const CollectionButton = ( {
