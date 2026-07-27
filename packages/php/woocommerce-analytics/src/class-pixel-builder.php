@@ -7,6 +7,7 @@
 
 namespace Automattic\Woocommerce_Analytics;
 
+use Automattic\Jetpack\IP\Utils as IP_Utils;
 use WP_Error;
 
 /**
@@ -122,7 +123,7 @@ class Pixel_Builder {
 		}
 
 		// Delete non-routable IP addresses (geoip would discard these anyway).
-		if ( isset( $properties['_via_ip'] ) && preg_match( '/^192\.168|^10\./', $properties['_via_ip'] ) ) {
+		if ( isset( $properties['_via_ip'] ) && ! IP_Utils::ip_is_public( $properties['_via_ip'] ) ) {
 			unset( $properties['_via_ip'] );
 		}
 

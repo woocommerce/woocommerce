@@ -306,6 +306,58 @@ class Pixel_Builder_Test extends BaseTestCase {
 	}
 
 	/**
+	 * The old check was `preg_match( '/^192\.168|^10\./', ... )`, which let every other
+	 * non-routable range through. Each address below reached pixel.wp.com before this fix.
+	 *
+	 * @dataProvider non_routable_ip_provider
+	 *
+	 * @param string $ip Address to place in `_via_ip`.
+	 */
+	public function test_validate_and_sanitize_removes_all_non_routable_ips( string $ip ): void {
+		$properties = array(
+			'_en'     => 'woocommerceanalytics_test_event',
+			'_via_ip' => $ip,
+		);
+
+		$result = Pixel_Builder::validate_and_sanitize( $properties );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayNotHasKey( '_via_ip', $result, $ip . ' must not reach the pixel.' );
+	}
+
+	/**
+	 * Non-routable addresses the previous `preg_match` did not catch.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function non_routable_ip_provider(): array {
+		return array(
+			'private class B' => array( '172.16.0.1' ),
+			'loopback'        => array( '127.0.0.1' ),
+			'link-local'      => array( '169.254.169.254' ),
+			'IPv6 ULA'        => array( 'fd00::1' ),
+			'CGNAT'           => array( '100.64.0.1' ),
+		);
+	}
+
+	/**
+	 * An unresolved IP is an empty string, which is noise in the pixel URL. Dropping the
+	 * key is an intended consequence of switching to ip_is_public(): the old preg_match
+	 * kept `_via_ip=` in the query string.
+	 */
+	public function test_validate_and_sanitize_removes_empty_via_ip(): void {
+		$properties = array(
+			'_en'     => 'woocommerceanalytics_test_event',
+			'_via_ip' => '',
+		);
+
+		$result = Pixel_Builder::validate_and_sanitize( $properties );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayNotHasKey( '_via_ip', $result );
+	}
+
+	/**
 	 * Test validate_and_sanitize handles indexed arrays.
 	 */
 	public function test_validate_and_sanitize_handles_indexed_arrays(): void {
