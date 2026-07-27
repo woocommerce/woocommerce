@@ -59,13 +59,33 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	private const POISONED_SESSION_ID = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
 
 	/**
+	 * Globals this class overwrites, captured before the first change so
+	 * `tear_down()` can put back exactly what it found. `null` records a key
+	 * that was absent.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private $original_globals = array();
+
+	/**
 	 * Send every request through the poisoned headers and a session cookie, and
 	 * clear the cached IP so each test resolves them afresh.
 	 */
 	public function set_up(): void {
 		parent::set_up();
 
+		global $wp_query;
+
+		$this->original_globals = array(
+			'cookie'      => $_COOKIE['woocommerceanalytics_session'] ?? null,
+			'post'        => $GLOBALS['post'] ?? null,
+			'is_search'   => $wp_query->is_search,
+			'search_term' => $wp_query->get( 's' ),
+		);
+
 		foreach ( self::POISONED_HEADERS as $key => $value ) {
+			$this->original_globals[ 'server:' . $key ] = $_SERVER[ $key ] ?? null;
+
 			$_SERVER[ $key ] = $value;
 		}
 
@@ -83,22 +103,40 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Remove the poisoned headers and cookie so they cannot leak into other
-	 * test classes.
+	 * Put back every global this class touched, so a later test sees the state
+	 * it would have seen had this class not run.
 	 */
 	public function tear_down(): void {
+		global $wp_query;
+
+		// Superglobals cannot be passed by reference, so each is restored inline.
 		foreach ( array_keys( self::POISONED_HEADERS ) as $key ) {
-			unset( $_SERVER[ $key ] );
+			if ( $this->original_globals[ 'server:' . $key ] === null ) {
+				unset( $_SERVER[ $key ] );
+			} else {
+				$_SERVER[ $key ] = $this->original_globals[ 'server:' . $key ];
+			}
 		}
 
-		unset( $_COOKIE['woocommerceanalytics_session'] );
+		if ( $this->original_globals['cookie'] === null ) {
+			unset( $_COOKIE['woocommerceanalytics_session'] );
+		} else {
+			$_COOKIE['woocommerceanalytics_session'] = $this->original_globals['cookie'];
+		}
+
+		if ( $this->original_globals['post'] === null ) {
+			unset( $GLOBALS['post'] );
+		} else {
+			$GLOBALS['post'] = $this->original_globals['post'];
+		}
+
+		$wp_query->is_search = $this->original_globals['is_search'];
+		$wp_query->set( 's', $this->original_globals['search_term'] );
+
+		$this->original_globals = array();
 
 		$this->reset_cached_ip();
 		$this->reset_event_queue();
-
-		global $wp_query;
-		$wp_query->is_search = false;
-		$wp_query->set( 's', '' );
 
 		parent::tear_down();
 	}
@@ -219,8 +257,6 @@ class Universal_Page_Output_Test extends BaseTestCase {
 
 		$breadcrumbs = $this->get_rendered_breadcrumbs( $this->render_analytics_data() );
 
-		unset( $GLOBALS['post'] );
-
 		$this->assertNotEmpty( $breadcrumbs, 'The breadcrumb trail should still be rendered.' );
 
 		foreach ( $breadcrumbs as $title ) {
@@ -248,8 +284,6 @@ class Universal_Page_Output_Test extends BaseTestCase {
 		);
 
 		$breadcrumbs = $this->get_rendered_breadcrumbs( $this->render_analytics_data() );
-
-		unset( $GLOBALS['post'] );
 
 		$this->assertSame( array( $title ), $breadcrumbs, 'Ordinary titles should be sent unchanged.' );
 	}
@@ -372,11 +406,19 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	 * @return array The decoded breadcrumb titles.
 	 */
 	private function get_rendered_breadcrumbs( string $output ): array {
-		$matched = preg_match( '/wcAnalytics\.breadcrumbs = (.+);$/m', $output, $matches );
+		$assignment = 'wcAnalytics.breadcrumbs = ';
 
-		$this->assertSame( 1, $matched, 'The rendered markup should assign wcAnalytics.breadcrumbs.' );
+		$start = strpos( $output, $assignment );
+		$this->assertNotFalse( $start, 'The rendered markup should assign wcAnalytics.breadcrumbs.' );
 
-		return (array) json_decode( $matches[1], true );
+		$start += strlen( $assignment );
+		$end    = strpos( $output, "\n", $start );
+		$this->assertNotFalse( $end, 'The breadcrumb assignment should end with a line break.' );
+
+		// Take the rest of the line and drop the statement's trailing semicolon.
+		$json = rtrim( trim( substr( $output, $start, $end - $start ) ), ';' );
+
+		return (array) json_decode( $json, true );
 	}
 
 	/**
