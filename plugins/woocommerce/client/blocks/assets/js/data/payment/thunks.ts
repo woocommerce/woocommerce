@@ -50,12 +50,12 @@ export const __internalSetExpressPaymentError = ( message?: string ) => {
 		const { createErrorNotice, removeNotice } =
 			registry.dispatch( noticesStore );
 		if ( message ) {
-			createErrorNotice( message, {
+			void createErrorNotice( message, {
 				id: 'wc-express-payment-error',
 				context: noticeContexts.EXPRESS_PAYMENTS,
 			} );
 		} else {
-			removeNotice(
+			void removeNotice(
 				'wc-express-payment-error',
 				noticeContexts.EXPRESS_PAYMENTS
 			);
@@ -74,7 +74,7 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 		const { createErrorNotice, removeNotice } =
 			registry.dispatch( noticesStore );
 
-		removeNotice( 'wc-payment-error', noticeContexts.PAYMENTS );
+		void removeNotice( 'wc-payment-error', noticeContexts.PAYMENTS );
 		return emitEventWithAbort(
 			currentObserver,
 			EMIT_TYPES.PAYMENT_SETUP,
@@ -160,10 +160,10 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 					setShippingAddress( shippingAddress );
 				}
 
-				dispatch.__internalSetPaymentMethodData(
+				void dispatch.__internalSetPaymentMethodData(
 					isObject( paymentMethodData ) ? paymentMethodData : {}
 				);
-				dispatch.__internalSetPaymentReady();
+				void dispatch.__internalSetPaymentReady();
 			} else if ( isFailResponse( errorResponse ) ) {
 				const { paymentMethodData } = errorResponse?.meta || {};
 
@@ -180,7 +180,7 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 					) {
 						context = errorResponse.messageContext;
 					}
-					createErrorNotice( errorResponse.message, {
+					void createErrorNotice( errorResponse.message, {
 						id: 'wc-payment-error',
 						isDismissible: false,
 						context,
@@ -191,10 +191,10 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 					setBillingAddress( billingAddress );
 				}
 
-				dispatch.__internalSetPaymentMethodData(
+				void dispatch.__internalSetPaymentMethodData(
 					isObject( paymentMethodData ) ? paymentMethodData : {}
 				);
-				dispatch.__internalSetPaymentError();
+				void dispatch.__internalSetPaymentError();
 			} else if ( isErrorResponse( errorResponse ) ) {
 				if (
 					objectHasProp( errorResponse, 'message' ) &&
@@ -209,14 +209,14 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 					) {
 						context = errorResponse.messageContext;
 					}
-					createErrorNotice( errorResponse.message, {
+					void createErrorNotice( errorResponse.message, {
 						id: 'wc-payment-error',
 						isDismissible: false,
 						context,
 					} );
 				}
 
-				dispatch.__internalSetPaymentError();
+				void dispatch.__internalSetPaymentError();
 
 				if (
 					isValidValidationErrorsObject(
@@ -227,7 +227,7 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 				}
 			} else {
 				// Otherwise there are no payment methods doing anything so just assume payment method is ready.
-				dispatch.__internalSetPaymentReady();
+				void dispatch.__internalSetPaymentReady();
 			}
 		} );
 	};

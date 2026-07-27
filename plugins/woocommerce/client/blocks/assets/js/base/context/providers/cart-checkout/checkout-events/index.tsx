@@ -130,7 +130,7 @@ export const CheckoutEventsProvider = ( {
 
 	// Set the registered express payment methods
 	useEffect( () => {
-		__internalSetRegisteredExpressPaymentMethods(
+		void __internalSetRegisteredExpressPaymentMethods(
 			convertToPlainExpressPaymentMethods( registeredMethods )
 		);
 	}, [ registeredMethods ] );
@@ -146,7 +146,7 @@ export const CheckoutEventsProvider = ( {
 		) {
 			return;
 		}
-		__internalUpdateAvailablePaymentMethods();
+		void __internalUpdateAvailablePaymentMethods();
 	}, [
 		isEditor,
 		paymentMethods,
@@ -185,7 +185,7 @@ export const CheckoutEventsProvider = ( {
 	} );
 
 	if ( redirectUrl && redirectUrl !== checkoutRedirectUrl ) {
-		__internalSetRedirectUrl( redirectUrl );
+		void __internalSetRedirectUrl( redirectUrl );
 	}
 
 	const { setValidationErrors } = useDispatch( validationStore );
@@ -295,7 +295,7 @@ export const CheckoutEventsProvider = ( {
 	// the registered callbacks
 	useEffect( () => {
 		if ( isCheckoutBeforeProcessing ) {
-			__internalEmitValidateEvent( {
+			void __internalEmitValidateEvent( {
 				setValidationErrors,
 			} );
 		}
@@ -319,7 +319,7 @@ export const CheckoutEventsProvider = ( {
 		}
 
 		if ( isCheckoutAfterProcessing ) {
-			__internalEmitAfterProcessingEvents( {
+			void __internalEmitAfterProcessingEvents( {
 				notices: {
 					checkoutNotices,
 					paymentNotices,
@@ -347,7 +347,7 @@ export const CheckoutEventsProvider = ( {
 
 	const onSubmit = useCallback( () => {
 		dispatchCheckoutEvent( 'submit' );
-		__internalSetBeforeProcessing();
+		void __internalSetBeforeProcessing();
 	}, [ dispatchCheckoutEvent, __internalSetBeforeProcessing ] );
 
 	const checkoutEventHandlers = {

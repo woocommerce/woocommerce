@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Canonicalize non-string option values in Settings UI schemas so select and radio fields show the saved selection.

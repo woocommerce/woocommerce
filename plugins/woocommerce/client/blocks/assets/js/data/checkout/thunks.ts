@@ -56,11 +56,15 @@ export const __internalProcessCheckoutResponse = (
 ) => {
 	return ( { dispatch }: CheckoutThunkArgs ) => {
 		const paymentResult = getPaymentResultFromCheckoutResponse( response );
-		dispatch.__internalSetRedirectUrl( paymentResult?.redirectUrl || '' );
+		void dispatch.__internalSetRedirectUrl(
+			paymentResult?.redirectUrl || ''
+		);
 		// The local `dispatch` here is bound  to the actions of the data store. We need to use the global dispatch here
 		// to dispatch an action on a different store.
-		wpDispatch( paymentStore ).__internalSetPaymentResult( paymentResult );
-		dispatch.__internalSetAfterProcessing();
+		void wpDispatch( paymentStore ).__internalSetPaymentResult(
+			paymentResult
+		);
+		void dispatch.__internalSetAfterProcessing();
 	};
 };
 
@@ -74,7 +78,7 @@ export const __internalEmitValidateEvent: emitValidateEventType = ( {
 	return ( { dispatch, registry }: CheckoutThunkArgs ) => {
 		const { createErrorNotice } = registry.dispatch( noticesStore );
 		removeNoticesByStatus( 'error' );
-		checkoutEventsEmitter
+		void checkoutEventsEmitter
 			.emit( CHECKOUT_EVENTS.CHECKOUT_VALIDATION )
 			.then( ( responses ) => {
 				// If responses length is 0, then no observer returned a response that wasn't `true` or void, therefore,
@@ -84,7 +88,7 @@ export const __internalEmitValidateEvent: emitValidateEventType = ( {
 					responses.length === 0 ||
 					responses.every( isSuccessResponse )
 				) {
-					dispatch.__internalSetProcessing();
+					void dispatch.__internalSetProcessing();
 					return;
 				}
 				// If any observer returned a response, by this point we know that it's either failure or error due to
@@ -103,7 +107,7 @@ export const __internalEmitValidateEvent: emitValidateEventType = ( {
 							typeof errorMessage === 'string' &&
 							errorMessage
 						) {
-							createErrorNotice( errorMessage, { context } );
+							void createErrorNotice( errorMessage, { context } );
 						}
 						if (
 							isValidValidationErrorsObject( validationErrors )
@@ -112,8 +116,8 @@ export const __internalEmitValidateEvent: emitValidateEventType = ( {
 						}
 					}
 				);
-				dispatch.__internalSetIdle();
-				dispatch.__internalSetHasError();
+				void dispatch.__internalSetIdle();
+				void dispatch.__internalSetHasError();
 			} );
 	};
 };
@@ -137,7 +141,7 @@ export const __internalEmitAfterProcessingEvents: emitAfterProcessingEventsType 
 			if ( select.hasError() ) {
 				// allow payment methods or other things to customize the error
 				// with a fallback if nothing customizes it.
-				checkoutEventsEmitter
+				void checkoutEventsEmitter
 					.emitWithAbort( CHECKOUT_EVENTS.CHECKOUT_FAIL, data )
 					.then( ( observerResponses ) => {
 						runCheckoutFailObservers( {
@@ -149,7 +153,7 @@ export const __internalEmitAfterProcessingEvents: emitAfterProcessingEventsType 
 						} );
 					} );
 			} else {
-				checkoutEventsEmitter
+				void checkoutEventsEmitter
 					.emitWithAbort( CHECKOUT_EVENTS.CHECKOUT_SUCCESS, data )
 					.then( ( observerResponses ) => {
 						runCheckoutSuccessObservers( {
@@ -184,13 +188,13 @@ export const updateDraftOrder = ( data: CheckoutPutData ) => {
 
 export const disableCheckoutFor = ( asyncFunc: () => Promise< unknown > ) => {
 	return async ( { dispatch }: CheckoutThunkArgs ) => {
-		dispatch.__internalStartCalculation();
+		void dispatch.__internalStartCalculation();
 		try {
 			return await asyncFunc();
 			// No catch block here as we don't want to swallow any potential errors
 			// coming from asyncFunc.
 		} finally {
-			dispatch.__internalFinishCalculation();
+			void dispatch.__internalFinishCalculation();
 		}
 	};
 };

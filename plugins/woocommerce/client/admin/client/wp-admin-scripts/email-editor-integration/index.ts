@@ -115,7 +115,7 @@ if (
 		'wc_email_review_drawer'
 	) === '1'
 ) {
-	dispatch( INTEGRATION_STORE_NAME ).openReviewDrawer();
+	void dispatch( INTEGRATION_STORE_NAME ).openReviewDrawer();
 
 	// Strip the param from the URL so a refresh doesn't re-trigger the
 	// drawer auto-open. RSM-141 §5.2.
