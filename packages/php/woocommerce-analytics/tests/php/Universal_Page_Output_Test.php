@@ -52,6 +52,14 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	);
 
 	/**
+	 * The connecting address the web server reports. Unlike the poisoned headers this is
+	 * not client-supplied, so it is the only source `_via_ip` may legitimately come from.
+	 *
+	 * @var string
+	 */
+	private const CONNECTING_IP = '198.51.100.10';
+
+	/**
 	 * A session cookie value carrying another visitor's session.
 	 *
 	 * @var string
@@ -89,6 +97,10 @@ class Universal_Page_Output_Test extends BaseTestCase {
 			$_SERVER[ $key ] = $value;
 		}
 
+		$this->original_globals['server:REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'] ?? null;
+
+		$_SERVER['REMOTE_ADDR'] = self::CONNECTING_IP;
+
 		$_COOKIE['woocommerceanalytics_session'] = rawurlencode(
 			(string) wp_json_encode(
 				array(
@@ -110,7 +122,7 @@ class Universal_Page_Output_Test extends BaseTestCase {
 		global $wp_query;
 
 		// Superglobals cannot be passed by reference, so each is restored inline.
-		foreach ( array_keys( self::POISONED_HEADERS ) as $key ) {
+		foreach ( array_merge( array_keys( self::POISONED_HEADERS ), array( 'REMOTE_ADDR' ) ) as $key ) {
 			if ( $this->original_globals[ 'server:' . $key ] === null ) {
 				unset( $_SERVER[ $key ] );
 			} else {
@@ -315,8 +327,12 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	/**
 	 * Test that the server-fired pixel path keeps its request-derived
 	 * properties. That path runs on uncached requests and is the only place
-	 * where pixel.wp.com can learn the visitor's real IP, user agent and
-	 * referrer, so narrowing the page output must not narrow it too.
+	 * where pixel.wp.com can learn the visitor's user agent and referrer, so
+	 * narrowing the page output must not narrow it too. The IP, however, must
+	 * come from the connecting address rather than a client-forgeable header:
+	 * `_via_ip` is sourced through `Automattic\Jetpack\IP\Utils::get_ip()`,
+	 * which only trusts a proxy header when the site has explicitly declared
+	 * it via the `trusted_ip_header` site option.
 	 */
 	public function test_server_fired_properties_retain_request_details(): void {
 		$properties = WC_Analytics_Tracking::get_common_properties();
@@ -329,7 +345,12 @@ class Universal_Page_Output_Test extends BaseTestCase {
 			);
 		}
 
-		$this->assertSame( self::POISONED_HEADERS['HTTP_CF_CONNECTING_IP'], $properties['_via_ip'] );
+		$this->assertSame( self::CONNECTING_IP, $properties['_via_ip'] );
+		$this->assertNotSame(
+			self::POISONED_HEADERS['HTTP_CF_CONNECTING_IP'],
+			$properties['_via_ip'],
+			'A forged Cf-Connecting-IP must not reach the server-fired pixel.'
+		);
 		$this->assertSame( self::POISONED_HEADERS['HTTP_USER_AGENT'], $properties['_via_ua'] );
 		$this->assertSame( self::POISONED_HEADERS['HTTP_REFERER'], $properties['_via_ref'] );
 	}
