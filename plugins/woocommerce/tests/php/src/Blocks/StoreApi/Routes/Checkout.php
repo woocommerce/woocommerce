@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use WC_Gateway_BACS;
+use WC_Tax;
 
 /**
  * Checkout Controller Tests.
@@ -386,6 +387,155 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertEquals( 409, $response->get_status(), print_r( $data, true ) );
 		$this->assertEquals( 'woocommerce_rest_checkout_total_mismatch', $data['code'] );
 		$this->assertArrayHasKey( 'cart', $data['data'], 'The refreshed cart should be returned so the client can display the updated total.' );
+	}
+
+	/**
+	 * @testdox Should reject the order when this request's address changes the total, even if that total matches the pre-request session total.
+	 *
+	 * validate_order_totals() runs before update_customer_from_request(), so it checks the total for the
+	 * address already in the session, not the address this request is submitting. A client that (correctly)
+	 * echoes back the last total it saw before editing the address ends up matching that stale session
+	 * total, and the guard waves the order through even though the address in this very request raises it.
+	 */
+	public function test_post_data_rejects_expected_total_when_this_requests_address_changes_tax() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'CA Sales Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		// The address already in the session before this request: untaxed.
+		WC()->customer->set_billing_country( 'GB' );
+		WC()->customer->set_shipping_country( 'GB' );
+		WC()->cart->calculate_totals();
+		$expected_total = (string) (int) round( (float) WC()->cart->get_total( 'edit' ) * pow( 10, wc_get_price_decimals() ), 0, PHP_ROUND_HALF_UP );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '123 Main St',
+					'address_2'  => '',
+					'city'       => 'Beverly Hills',
+					'state'      => 'CA',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '123 Main St',
+					'address_2'  => '',
+					'city'       => 'Beverly Hills',
+					'state'      => 'CA',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '1234567890',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+				// The total for the GB address already in session, not for the CA address below.
+				'expected_total'   => $expected_total,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 409, $response->get_status(), 'The order should be rejected because the CA address in this request raises the total above what the shopper confirmed: ' . print_r( $data, true ) );
+	}
+
+	/**
+	 * @testdox Should accept the order when expected_total is correctly computed for this request's own address.
+	 *
+	 * A single-POST client (per the documented Store API flow) can submit an address for the first time
+	 * in the place-order request itself, with no prior PUT to sync it to the session. If it correctly
+	 * computes expected_total for that address, the order should place - but validate_order_totals() checks
+	 * the pre-request (addressless) session total instead, so it rejects a correctly-computed request.
+	 */
+	public function test_post_data_accepts_expected_total_correctly_computed_for_this_requests_address() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'CA Sales Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		// No address in the session yet, matching a fresh single-POST checkout.
+		WC()->customer->set_billing_country( '' );
+		WC()->customer->set_shipping_country( '' );
+
+		// Compute the total the order will actually settle at once the CA address in this request
+		// is applied - this is what a correctly implemented client would send as expected_total.
+		WC()->customer->set_billing_country( 'US' );
+		WC()->customer->set_billing_state( 'CA' );
+		WC()->customer->set_shipping_country( 'US' );
+		WC()->customer->set_shipping_state( 'CA' );
+		WC()->cart->calculate_totals();
+		$expected_total = (string) (int) round( (float) WC()->cart->get_total( 'edit' ) * pow( 10, wc_get_price_decimals() ), 0, PHP_ROUND_HALF_UP );
+
+		// Reset the session back to addressless, since the client hasn't PUT the address yet.
+		WC()->customer->set_billing_country( '' );
+		WC()->customer->set_shipping_country( '' );
+		WC()->cart->calculate_totals();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '123 Main St',
+					'address_2'  => '',
+					'city'       => 'Beverly Hills',
+					'state'      => 'CA',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '1234567890',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '123 Main St',
+					'address_2'  => '',
+					'city'       => 'Beverly Hills',
+					'state'      => 'CA',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '1234567890',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => $expected_total,
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), 'The order should place because expected_total is exactly what the server will charge for the CA address in this request: ' . print_r( $data, true ) );
 	}
 
 	/**
