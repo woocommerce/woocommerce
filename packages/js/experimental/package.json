@@ -90,6 +90,8 @@
 		"jest-environment-jsdom": "29.5.x",
 		"postcss": "8.4.x",
 		"postcss-loader": "4.3.x",
+		"react": "18.3.x",
+		"react-dom": "18.3.x",
 		"rimraf": "5.0.5",
 		"sass-loader": "10.5.x",
 		"ts-jest": "29.1.x",
