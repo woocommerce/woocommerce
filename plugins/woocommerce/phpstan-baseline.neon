@@ -47664,7 +47664,7 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\PageController\:\:get_current_screen_id\(\) should return string but returns bool\|string\.$#'
 			identifier: return.type
-			count: 2
+			count: 1
 			path: src/Admin/PageController.php
 
 		-
