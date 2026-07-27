@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.0.0-rc.1 2026-XX-XX =
+= 11.0.0-rc.1 2026-07-27 =
 
 **WooCommerce**
 
@@ -312,6 +312,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Warn when an order status key is too long and can't be stored. [#66164](https://github.com/woocommerce/woocommerce/pull/66164)
 * Fix - Improve lost connection detection on WooCommerce admin screens [#66676](https://github.com/woocommerce/woocommerce/pull/66676)
 * Fix - Restore 64px product thumbnails in the Mini Cart. [#66747](https://github.com/woocommerce/woocommerce/pull/66747)
+* Fix - Canonicalize non-string option values in Settings UI schemas so select and radio fields show the saved selection. [#66933](https://github.com/woocommerce/woocommerce/pull/66933)
+* Fix - Convert boolean Settings UI schema values the way the client does and canonicalize visibility values alongside their controller field. [#66955](https://github.com/woocommerce/woocommerce/pull/66955)
+* Fix - Preserve settings navigation when Payments sections fall back from the Settings UI. [#66907](https://github.com/woocommerce/woocommerce/pull/66907)
+* Fix - Prevent WordPress personal preferences from being exposed as customer metadata. [#66840](https://github.com/woocommerce/woocommerce/pull/66840)
+* Fix - Show the Save button when an experimental Settings UI page falls back to the legacy renderer. [#66980](https://github.com/woocommerce/woocommerce/pull/66980)
+* Fix - Stop the HPOS order meta corruption guard from treating extension-injected virtual meta rows (a meta_key and meta_value but no meta_id) as corrupt, which purged the meta cache and logged a warning on every read. [#66837](https://github.com/woocommerce/woocommerce/pull/66837)
 * Add - Add a "Send checkout recovery email" action to the order actions dropdown so merchants can manually send the Checkout Recovery email for pending or checkout-draft orders past the 1-hour abandonment threshold. [#65136](https://github.com/woocommerce/woocommerce/pull/65136)
 * Add - Add a contextual Marketplace recommendation card to the WooCommerce Orders screen, shown to eligible stores based on locally-evaluated promotion rules. [#65970](https://github.com/woocommerce/woocommerce/pull/65970)
 * Add - Add a native Settings UI page provider path for registered settings sections. [#65975](https://github.com/woocommerce/woocommerce/pull/65975)
@@ -417,6 +423,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Show WooCommerce Status and Recent Reviews dashboard widgets during store setup. [#65704](https://github.com/woocommerce/woocommerce/pull/65704)
 * Tweak - Standardize copy for Product Filters descriptions. [#65925](https://github.com/woocommerce/woocommerce/pull/65925)
 * Tweak - Update the Settings UI section card border radius to match DataForm styling. [#66042](https://github.com/woocommerce/woocommerce/pull/66042)
+* Tweak - Abandoned cart recovery: remove a redundant order lookup on every order status transition. [#67017](https://github.com/woocommerce/woocommerce/pull/67017)
 * Performance - Audit wc_product_dropdown_categories usages in admin [#66202](https://github.com/woocommerce/woocommerce/pull/66202)
 * Performance - Batch-prime product image attachment caches across the products collection endpoints (Store API, REST v3, v4) and reuse the shared helper in the Store API cart. [#65436](https://github.com/woocommerce/woocommerce/pull/65436)
 * Performance - Centralize wp_count_posts invocations towards products. [#65894](https://github.com/woocommerce/woocommerce/pull/65894)
@@ -434,6 +441,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Performance - Reduced the number of SQL queries required to fetch tax rates in the cart and during checkout. [#65558](https://github.com/woocommerce/woocommerce/pull/65558)
 * Performance - Store API: skip initializing the available payment gateways on checkout requests that do not provide a payment method. [#65931](https://github.com/woocommerce/woocommerce/pull/65931)
 * Performance - Update the admin to use persistent product status counters to improve performance with large product catalogs. [#65957](https://github.com/woocommerce/woocommerce/pull/65957)
+* Performance - Push notifications: Improve performance of get_tokens_for_roles(): the role lookup is now restricted to users that actually own push tokens. [#66857](https://github.com/woocommerce/woocommerce/pull/66857)
 * Enhancement - Add a filter to hide shipping details in email previews. [#65857](https://github.com/woocommerce/woocommerce/pull/65857)
 * Enhancement - Add unique CSS classes to the order data meta-box columns: order_data_column_general, order_data_column_billing, and order_data_column_shipping. [#65859](https://github.com/woocommerce/woocommerce/pull/65859)
 * Enhancement - Updated Product Image block to use larger thumbnails [#66191](https://github.com/woocommerce/woocommerce/pull/66191)
