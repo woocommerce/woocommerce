@@ -1,0 +1,4 @@
+Significance: patch
+Type: security
+
+Stop emitting request-derived properties into cacheable front-end page HTML.
