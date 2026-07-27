@@ -10,8 +10,10 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -391,6 +393,24 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			'context'     => array( 'edit' ),
 		);
 
+		$schema['properties']['can_be_refunded'] = array(
+			'description' => __( 'Whether the order can be refunded, based on its status and remaining refundable amount.', 'woocommerce' ),
+			'type'        => 'boolean',
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true,
+		);
+
+		$line_can_be_refunded_schema = array(
+			'description' => __( 'Whether this line has remaining refundable quantity or amount.', 'woocommerce' ),
+			'type'        => 'boolean',
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true,
+		);
+
+		$schema['properties']['line_items']['items']['properties']['can_be_refunded']     = $line_can_be_refunded_schema;
+		$schema['properties']['shipping_lines']['items']['properties']['can_be_refunded'] = $line_can_be_refunded_schema;
+		$schema['properties']['fee_lines']['items']['properties']['can_be_refunded']      = $line_can_be_refunded_schema;
+
 		if ( $this->cogs_is_enabled() ) {
 			$schema = $this->add_cogs_related_schema( $schema );
 		}
@@ -495,6 +515,87 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		if ( $cogs_is_enabled ) {
 			$data['cost_of_goods_sold']['total_value'] = $order->get_cogs_total_value();
+		}
+
+		if ( $order instanceof WC_Order ) {
+			$data = $this->add_can_be_refunded_fields( $data, $order, $request );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Add the can_be_refunded field to the order response, at order level and on
+	 * product/shipping/fee lines.
+	 *
+	 * The computation mirrors the wc/v4 Orders schema so both API versions report
+	 * identical refundability: order level requires a refundable status and a
+	 * remaining refundable amount; product lines require remaining refundable
+	 * quantity; shipping and fee lines require a remaining refundable amount at
+	 * currency precision, compared on a tax-inclusive absolute basis so
+	 * discount/negative lines are handled.
+	 *
+	 * @param array           $data    Prepared response data.
+	 * @param WC_Order        $order   Order object.
+	 * @param WP_REST_Request $request Request object.
+	 * @return array Response data with can_be_refunded fields added.
+	 *
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @since 11.1.0
+	 */
+	private function add_can_be_refunded_fields( array $data, WC_Order $order, $request ): array {
+		$fields = $this->get_fields_for_response( $request );
+
+		if ( rest_is_field_included( 'can_be_refunded', $fields ) ) {
+			$data['can_be_refunded'] = in_array( $order->get_status(), DataUtils::REFUNDABLE_STATUSES, true )
+				&& (float) $order->get_remaining_refund_amount() > 0;
+		}
+
+		$line_sections = array_intersect( array( 'line_items', 'shipping_lines', 'fee_lines' ), array_keys( $data ) );
+		if ( empty( $line_sections ) ) {
+			return $data;
+		}
+
+		// Computed once per order; with no refunds this reduces to a single cached
+		// get_refunds() call, so the common case adds no per-refund item loads.
+		$refund_data = wc_get_container()->get( DataUtils::class )->compute_refunded_quantities_and_totals( $order );
+		$decimals    = wc_get_price_decimals();
+
+		// Read from the order item objects, not the prepared response data: the
+		// response zeroes product_id when the product has been deleted, while
+		// refundability follows the stored line (a deleted product's line is still
+		// refundable by quantity), matching the wc/v4 Orders schema.
+		$order_items = $order->get_items( array( 'line_item', 'shipping', 'fee' ) );
+
+		if ( isset( $data['line_items'] ) ) {
+			foreach ( $data['line_items'] as &$line_item_data ) {
+				$item = $order_items[ $line_item_data['id'] ] ?? null;
+
+				$line_item_data['can_be_refunded'] = $item instanceof WC_Order_Item_Product
+					&& 0 !== $item->get_product_id()
+					&& ( $item->get_quantity() + ( $refund_data['qtys'][ $item->get_id() ] ?? 0 ) ) > 0;
+			}
+			unset( $line_item_data );
+		}
+
+		foreach ( array( 'shipping_lines', 'fee_lines' ) as $section ) {
+			if ( ! isset( $data[ $section ] ) ) {
+				continue;
+			}
+			foreach ( $data[ $section ] as &$line_data ) {
+				$item = $order_items[ $line_data['id'] ] ?? null;
+				if ( ! $item instanceof WC_Order_Item_Shipping && ! $item instanceof WC_Order_Item_Fee ) {
+					$line_data['can_be_refunded'] = false;
+					continue;
+				}
+
+				$refunded  = abs( (float) ( $refund_data['totals'][ $item->get_id() ] ?? 0.0 ) );
+				$remaining = abs( (float) $item->get_total() + (float) $item->get_total_tax() ) - $refunded;
+
+				$line_data['can_be_refunded'] = NumberUtil::round( $remaining, $decimals ) > 0;
+			}
+			unset( $line_data );
 		}
 
 		return $data;

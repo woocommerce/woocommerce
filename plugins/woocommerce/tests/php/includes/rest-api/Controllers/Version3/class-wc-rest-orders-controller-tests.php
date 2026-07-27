@@ -125,6 +125,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'is_editable',
 			'needs_payment',
 			'needs_processing',
+			'can_be_refunded',
 		);
 
 		if ( $with_cogs_enabled ) {
