@@ -219,11 +219,10 @@ class Post_Template extends Abstract_Block_Renderer {
 	 * cell open.
 	 *
 	 * @param int $layout_width Available layout width in px.
-	 * @param int $columns Number of columns.
+	 * @param int $columns Number of columns (>= 2; a grid is only built for multi-column layouts).
 	 * @return int Cell content width in px (at least 1).
 	 */
 	private function get_cell_width( int $layout_width, int $columns ): int {
-		$columns    = max( 1, $columns );
 		$cell_width = (int) floor( $layout_width / $columns ) - ( 2 * self::CELL_PADDING );
 		return max( 1, $cell_width );
 	}
