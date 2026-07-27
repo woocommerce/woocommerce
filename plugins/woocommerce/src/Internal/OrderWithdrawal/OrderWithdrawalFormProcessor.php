@@ -33,7 +33,9 @@ final class OrderWithdrawalFormProcessor {
 	public const WITHDRAWAL_TYPE_FULL     = 'full_order';
 	public const WITHDRAWAL_TYPE_SPECIFIC = 'specific_items_only';
 
-	private const LOGGER_SOURCE = 'order-withdrawal';
+	private const LOGGER_SOURCE                       = 'order-withdrawal';
+	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
+	private const ORDER_WITHDRAWAL_REQUESTED_VALUE    = 'yes';
 
 	/**
 	 * Process the current order withdrawal request.
@@ -250,6 +252,15 @@ final class OrderWithdrawalFormProcessor {
 			$matched_order = $this->get_matching_order( $data );
 
 			if ( $matched_order instanceof WC_Order ) {
+				if ( $this->has_order_withdrawal_request( $matched_order ) ) {
+					wc_add_notice(
+						__( 'A withdrawal request has already been submitted for this order. Please contact us if you need help or want to make changes.', 'woocommerce' ),
+						'error'
+					);
+
+					return false;
+				}
+
 				try {
 					if ( ! $this->add_order_withdrawal_note( $matched_order, $data ) ) {
 						$this->log_order_note_error( $matched_order );
@@ -260,6 +271,15 @@ final class OrderWithdrawalFormProcessor {
 			}
 
 			$this->send_order_withdrawal_emails( $data, $matched_order );
+
+			if ( $matched_order instanceof WC_Order ) {
+				try {
+					$this->mark_order_withdrawal_requested( $matched_order );
+				} catch ( Throwable $e ) {
+					$this->log_order_meta_error( $matched_order, $e );
+				}
+			}
+
 			return true;
 		} catch ( Throwable $e ) {
 			$this->log_submission_error( $e );
@@ -355,6 +375,25 @@ final class OrderWithdrawalFormProcessor {
 		}
 
 		return (bool) $order->add_order_note( $note, 0, false, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
+	}
+
+	/**
+	 * Whether the matched order already has a submitted withdrawal request.
+	 *
+	 * @param WC_Order $order Matched order.
+	 */
+	private function has_order_withdrawal_request( WC_Order $order ): bool {
+		return self::ORDER_WITHDRAWAL_REQUESTED_VALUE === $order->get_meta( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, true, 'edit' );
+	}
+
+	/**
+	 * Mark a matched order as having a submitted withdrawal request.
+	 *
+	 * @param WC_Order $order Matched order.
+	 */
+	private function mark_order_withdrawal_requested( WC_Order $order ): void {
+		$order->update_meta_data( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, self::ORDER_WITHDRAWAL_REQUESTED_VALUE );
+		$order->save_meta_data();
 	}
 
 	/**
@@ -578,6 +617,23 @@ final class OrderWithdrawalFormProcessor {
 
 		wc_get_logger()->warning(
 			$message,
+			array( 'source' => self::LOGGER_SOURCE )
+		);
+	}
+
+	/**
+	 * Log an order meta failure without failing the submission.
+	 *
+	 * @param WC_Order  $order Matched order.
+	 * @param Throwable $e     Order meta error.
+	 */
+	private function log_order_meta_error( WC_Order $order, Throwable $e ): void {
+		wc_get_logger()->warning(
+			sprintf(
+				'Order withdrawal meta flag could not be added to order %1$d. Error: %2$s',
+				$order->get_id(),
+				$e->getMessage()
+			),
 			array( 'source' => self::LOGGER_SOURCE )
 		);
 	}

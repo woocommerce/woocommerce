@@ -14,10 +14,11 @@ use WC_Unit_Test_Case;
  */
 class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
-	private const FEATURE_OPTION      = 'woocommerce_feature_order_withdrawal_enabled';
-	private const ENDPOINT_OPTION     = 'woocommerce_myaccount_order_withdrawal_endpoint';
-	private const FLUSH_QUEUE_OPTION  = 'woocommerce_queue_flush_rewrite_rules';
-	private const MISSING_OPTION_MARK = '__woocommerce_order_withdrawal_missing_option__';
+	private const FEATURE_OPTION                      = 'woocommerce_feature_order_withdrawal_enabled';
+	private const ENDPOINT_OPTION                     = 'woocommerce_myaccount_order_withdrawal_endpoint';
+	private const FLUSH_QUEUE_OPTION                  = 'woocommerce_queue_flush_rewrite_rules';
+	private const MISSING_OPTION_MARK                 = '__woocommerce_order_withdrawal_missing_option__';
+	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
 
 	/**
 	 * The System Under Test.
@@ -196,6 +197,35 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertStringContainsString( 'View matched order', (string) $merchant_email['message'], 'The merchant email should include clear link text for the matched order.' );
 			$this->assertTrue( $this->order_has_note_containing( $order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The matched order should receive a withdrawal note.' );
 			$this->assertTrue( $this->order_has_note_containing( $order, 'Items requested for withdrawal: Line item 1' ), 'Specific-item details should be included in the order note.' );
+			$this->assert_order_withdrawal_requested( $order );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should reject duplicate withdrawal requests for an already flagged matched order.
+	 */
+	public function test_process_current_request_rejects_duplicate_withdrawal_for_matched_order(): void {
+		$order = $this->create_order_for_form_data();
+		$order->update_meta_data( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, 'yes' );
+		$order->save_meta_data();
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state         = $this->sut->process_current_request();
+			$error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'review', $state->screen, 'Duplicate matched submissions should return to the review screen.' );
+			$this->assertCount( 1, $error_notices, 'Duplicate matched submissions should add one error notice.' );
+			$this->assertStringContainsString( 'already been submitted for this order', $error_notices[0]['notice'], 'The notice should explain that the order already has a withdrawal request.' );
+			$this->assertCount( 0, $capture['captures'], 'Duplicate matched submissions should not send notification emails.' );
+			$this->assertFalse( $this->order_has_note_containing( $order, 'Order withdrawal requested' ), 'Duplicate matched submissions should not add another order note.' );
 		} finally {
 			$capture['remove']();
 		}
@@ -229,6 +259,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should still be sent.' );
 			$this->assert_mail_sent_to( 'jane@example.test', $capture['captures'] );
 			$this->assert_mail_sent_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+			$this->assert_order_withdrawal_requested( $order );
 		} finally {
 			remove_filter( 'preprocess_comment', $fail_order_note, 10 );
 			$capture['remove']();
@@ -517,6 +548,18 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Assert that an order has been flagged as having a withdrawal request.
+	 *
+	 * @param WC_Order $order Order.
+	 */
+	private function assert_order_withdrawal_requested( WC_Order $order ): void {
+		$updated_order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $updated_order, 'The order should still exist.' );
+		$this->assertSame( 'yes', $updated_order->get_meta( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, true, 'edit' ), 'The matched order should be flagged as having a withdrawal request.' );
 	}
 
 	/**
