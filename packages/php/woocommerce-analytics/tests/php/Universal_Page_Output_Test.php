@@ -30,6 +30,15 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	private const REQUEST_DERIVED_PROPERTIES = array( '_via_ip', '_via_ua', '_via_ref', '_dr', '_dl', '_lg' );
 
 	/**
+	 * Properties read from the visitor's session cookie. The client owns this
+	 * cookie and reads it itself, so these must not reach cacheable page output
+	 * either.
+	 *
+	 * @var string[]
+	 */
+	private const SESSION_PROPERTIES = array( 'session_id', 'landing_page', 'is_engaged' );
+
+	/**
 	 * Request header values used to poison the page, keyed by superglobal key.
 	 * Each is distinctive enough to grep the whole response body for.
 	 *
@@ -43,8 +52,15 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	);
 
 	/**
-	 * Send every request through the poisoned headers, and clear the cached IP
-	 * so each test resolves them afresh.
+	 * A session cookie value carrying another visitor's session.
+	 *
+	 * @var string
+	 */
+	private const POISONED_SESSION_ID = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
+
+	/**
+	 * Send every request through the poisoned headers and a session cookie, and
+	 * clear the cached IP so each test resolves them afresh.
 	 */
 	public function set_up(): void {
 		parent::set_up();
@@ -53,20 +69,78 @@ class Universal_Page_Output_Test extends BaseTestCase {
 			$_SERVER[ $key ] = $value;
 		}
 
+		$_COOKIE['woocommerceanalytics_session'] = rawurlencode(
+			(string) wp_json_encode(
+				array(
+					'session_id'   => self::POISONED_SESSION_ID,
+					'landing_page' => '["Someone else\'s landing page"]',
+					'is_engaged'   => true,
+				)
+			)
+		);
+
 		$this->reset_cached_ip();
 	}
 
 	/**
-	 * Remove the poisoned headers so they cannot leak into other test classes.
+	 * Remove the poisoned headers and cookie so they cannot leak into other
+	 * test classes.
 	 */
 	public function tear_down(): void {
 		foreach ( array_keys( self::POISONED_HEADERS ) as $key ) {
 			unset( $_SERVER[ $key ] );
 		}
 
+		unset( $_COOKIE['woocommerceanalytics_session'] );
+
 		$this->reset_cached_ip();
 
 		parent::tear_down();
+	}
+
+	/**
+	 * Test that the visitor's session properties stay out of the page output.
+	 *
+	 * The client reads the same cookie through its own SessionManager, so these
+	 * are redundant in the markup — and the markup is cached, which would pin
+	 * one visitor's session identifier onto everyone served the cached copy.
+	 */
+	public function test_page_output_omits_session_properties(): void {
+		$output = $this->render_analytics_data();
+
+		foreach ( self::SESSION_PROPERTIES as $property ) {
+			$this->assertStringNotContainsString(
+				'"' . $property . '"',
+				$output,
+				sprintf( 'The "%s" session property must not reach cacheable page output.', $property )
+			);
+		}
+
+		$this->assertStringNotContainsString(
+			self::POISONED_SESSION_ID,
+			$output,
+			'A session identifier from the request cookie must not be reflected into cacheable page output.'
+		);
+	}
+
+	/**
+	 * Test that the server-fired path keeps the session properties. It runs on
+	 * uncached requests — including the proxy tracking endpoint — where the
+	 * cookie genuinely belongs to the visitor being recorded.
+	 */
+	public function test_server_fired_properties_retain_session_details(): void {
+		$properties = WC_Analytics_Tracking::get_common_properties();
+
+		foreach ( self::SESSION_PROPERTIES as $property ) {
+			$this->assertArrayHasKey(
+				$property,
+				$properties,
+				sprintf( 'The server-fired path still needs the "%s" property.', $property )
+			);
+		}
+
+		$this->assertSame( self::POISONED_SESSION_ID, $properties['session_id'] );
+		$this->assertTrue( $properties['is_engaged'] );
 	}
 
 	/**
