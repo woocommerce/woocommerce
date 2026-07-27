@@ -444,7 +444,9 @@ class WC_Admin_Menus {
 	 * across the multiple reads in a single page load and, crucially, across
 	 * later requests: boxes registered by plugins installed after the first
 	 * visit stay visible, matching vanilla WordPress instead of defaulting to
-	 * hidden on every recompute.
+	 * hidden on every recompute. As in core, only the current user's snapshot is
+	 * persisted, so reads on behalf of another user never overwrite that user's
+	 * own first-visit snapshot.
 	 *
 	 * @since 11.1.0
 	 *
@@ -511,7 +513,16 @@ class WC_Admin_Menus {
 		// Persist the snapshot, mirroring core's wp_initial_nav_menu_meta_boxes(),
 		// so later reads in this request and in future requests return this same
 		// list instead of recomputing it against a changed meta box registry.
-		update_user_meta( $user->ID, 'metaboxhidden_nav-menus', $hidden );
+		//
+		// Like core, only the current user's snapshot is persisted. This filter
+		// runs for whichever user's option is being read, so a read performed on
+		// behalf of another user (user-switching or admin tooling) still receives
+		// the computed default below for display, but must not consume that user's
+		// durable first-visit snapshot from this request's meta box registry.
+		$current_user_id = get_current_user_id();
+		if ( $current_user_id && (int) $user->ID === $current_user_id ) {
+			update_user_meta( $current_user_id, 'metaboxhidden_nav-menus', $hidden );
+		}
 
 		return $hidden;
 	}
