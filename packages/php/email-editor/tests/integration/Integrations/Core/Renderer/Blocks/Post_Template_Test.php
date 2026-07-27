@@ -535,6 +535,61 @@ class Post_Template_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * A list whose class merely contains `wp-block-post-template` as a substring (not a whole token)
+	 * must not be mistaken for the repeater and rebuilt — the content is left untouched.
+	 */
+	public function testItIgnoresListsWhoseClassOnlyContainsTheTokenAsSubstring(): void {
+		$parsed_block = array(
+			'blockName'   => 'core/post-template',
+			'attrs'       => array(
+				'layout' => array(
+					'type'        => 'grid',
+					'columnCount' => 3,
+				),
+			),
+			'innerBlocks' => array(),
+		);
+		// `my-wp-block-post-template-wrapper` contains the token as a substring but is not the token.
+		$content = '<ul class="my-wp-block-post-template-wrapper columns-3">'
+			. '<li>' . $this->featured_image( 'https://example.com/a.png' ) . '</li>'
+			. '<li>' . $this->featured_image( 'https://example.com/b.png' ) . '</li>'
+			. '</ul>';
+
+		$rendered = $this->renderer->render( $content, $parsed_block, $this->rendering_context );
+
+		// Not recognized as a post-template list: no grid is built and the original list survives.
+		$this->assertSame( 0, $this->count_rows( $rendered ) );
+		$this->assertStringContainsString( '<ul', $rendered );
+	}
+
+	/**
+	 * When every image in a card fails normalization, the images are still stripped (never restored)
+	 * so an unrenderable tag with a dangerous attribute can't reach the email through the remainder.
+	 */
+	public function testItStripsAllImagesWhenNoneCanBeRebuilt(): void {
+		$parsed_block = array(
+			'blockName'   => 'core/post-template',
+			'attrs'       => array(
+				'layout' => array(
+					'type'        => 'grid',
+					'columnCount' => 2,
+				),
+			),
+			'innerBlocks' => array(),
+		);
+		// The card's only image has an unsafe src (esc_url rejects it) plus a dangerous handler.
+		$card    = '<figure class="wp-block-image"><img src="javascript:alert(1)" alt="x" onerror="alert(1)"/></figure>';
+		$content = $this->build_list( array( $card, $card ), 2 );
+
+		$rendered = $this->renderer->render( $content, $parsed_block, $this->rendering_context );
+
+		// The grid is built, but the unrenderable image (and its handler / unsafe URL) is gone.
+		$this->assertSame( 1, $this->count_rows( $rendered ) );
+		$this->assertStringNotContainsString( 'javascript:', $rendered );
+		$this->assertStringNotContainsString( 'onerror', $rendered );
+	}
+
+	/**
 	 * An image that can't be rebuilt (its src was rejected by sanitizing) is dropped rather than left
 	 * behind in the preserved remainder, so its original unsanitized tag never reaches the email.
 	 */

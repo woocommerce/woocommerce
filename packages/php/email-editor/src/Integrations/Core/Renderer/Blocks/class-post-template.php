@@ -108,7 +108,11 @@ class Post_Template extends Abstract_Block_Renderer {
 	 */
 	private function find_post_template_list( Dom_Document_Helper $dom ): ?\DOMElement {
 		foreach ( $dom->find_elements( 'ul' ) as $list_element ) {
-			if ( false !== strpos( $dom->get_attribute_value( $list_element, 'class' ), 'wp-block-post-template' ) ) {
+			// Match `wp-block-post-template` as a whole class token, not a substring, so an unrelated
+			// list whose class merely contains the string (e.g. `my-wp-block-post-template-wrapper`)
+			// isn't mistaken for the repeater and rebuilt.
+			$classes = preg_split( '/\s+/', trim( $dom->get_attribute_value( $list_element, 'class' ) ) );
+			if ( is_array( $classes ) && in_array( 'wp-block-post-template', $classes, true ) ) {
 				return $list_element;
 			}
 		}
@@ -282,7 +286,10 @@ class Post_Template extends Abstract_Block_Renderer {
 	 * @return string Cell content HTML.
 	 */
 	private function prepare_item_content( string $item_html, int $cell_width ): string {
-		if ( false === strpos( $item_html, '<img' ) ) {
+		// `stripos` (not `strpos`) so an uppercase `<IMG>` fast-path isn't skipped. In practice the
+		// item HTML arrives lowercased by DOM serialization, but this keeps the guard correct if a
+		// caller ever passes raw markup.
+		if ( false === stripos( $item_html, '<img' ) ) {
 			return $item_html;
 		}
 
@@ -291,9 +298,9 @@ class Post_Template extends Abstract_Block_Renderer {
 		$remove_targets = array();
 
 		foreach ( $item_dom->find_elements( 'img' ) as $img_element ) {
-			// Strip every image from the item up front so none can linger in the preserved remainder —
-			// whether we rebuild it below or drop it as unrenderable. Targets are computed now (before
-			// any removal) and applied after the loop, so the media counts stay accurate.
+			// Record every image up front so none can linger in the preserved remainder — whether we
+			// rebuild it below or drop it as unrenderable. Targets are computed now (before any removal)
+			// so the media counts stay accurate.
 			$remove_targets[] = $this->find_image_removal_target( $img_element );
 
 			$normalized_img = $this->normalize_image_for_email( $item_dom->get_outer_html( $img_element ), $cell_width );
@@ -311,12 +318,15 @@ class Post_Template extends Abstract_Block_Renderer {
 			}
 		}
 
-		if ( empty( $images ) ) {
+		// The `<img` match was not a real image element (e.g. it sat inside a comment); leave the
+		// content untouched.
+		if ( empty( $remove_targets ) ) {
 			return $item_html;
 		}
 
-		// Strip the images we've hoisted so they aren't duplicated, then keep whatever real content
-		// remains (title/date/excerpt). If only empty wrapper shells are left, drop them entirely.
+		// Strip every image found — including any we couldn't rebuild — so an unrenderable, unsanitized
+		// `<img>` (e.g. one carrying `onerror`) can never survive through the remainder, then keep
+		// whatever real content remains (title/date/excerpt). Empty wrapper shells are dropped.
 		foreach ( $remove_targets as $target ) {
 			$item_dom->remove_element( $target );
 		}
