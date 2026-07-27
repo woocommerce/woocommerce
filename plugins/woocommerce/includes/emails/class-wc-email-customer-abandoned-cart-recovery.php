@@ -279,7 +279,7 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 			 *
 			 * @since 11.0.0
 			 *
-			 * @param string[]      $eligible_statuses Default: ABANDONED_STATUSES at manual send time, `pending` when scheduling.
+			 * @param string[]      $eligible_statuses Default: `pending` and `checkout-draft` at manual send time, `pending` when scheduling.
 			 * @param WC_Order|null $order             Order being inspected, or null if it could not be loaded.
 			 */
 			$eligible_statuses = (array) apply_filters(
