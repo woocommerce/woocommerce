@@ -86,14 +86,6 @@ packages:
     - 'tools/storybook'
     - 'tools/monorepo-utils'
 
-# Hoist react/react-dom so phantom deps in @wordpress/* packages resolve
-# (e.g. @wordpress/dataviews imports react-dom/client without declaring it).
-# TODO Remove this as it's not a good pattern to hoist dependencies and @wordpress/* are now in good shape
-publicHoistPattern:
-    - 'react'
-    - 'react-dom'
-    - '@use-gesture/react'
-
 # Quality of life tweaks (migrated from .npmrc)
 childConcurrency: 8        # 5 by default
 confirmModulesPurge: false
