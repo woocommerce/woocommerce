@@ -184,6 +184,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			try {
 				// Prevent getting "variation_invalid_id" error message from Variation Data Store.
 				if ( ProductType::VARIATION === $data['type'] ) {
+					$was_variation = $id && 'product_variation' === get_post_type( $id );
+
 					$id = wp_update_post(
 						array(
 							'ID'        => $id,
@@ -195,8 +197,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					// simple product, so the product data store may have assigned it
 					// the default product category. Variations must not carry
 					// product_cat/product_tag terms, and WordPress does not clear
-					// them when the post type changes, so remove them here.
-					if ( $id && ! is_wp_error( $id ) ) {
+					// them when the post type changes, so remove them here — but
+					// only when the post was just converted into a variation.
+					// Pre-existing variations (e.g. re-imports with "update
+					// existing" enabled) must keep any terms attached to them.
+					if ( $id && ! is_wp_error( $id ) && ! $was_variation ) {
 						wp_delete_object_term_relationships( $id, array( 'product_cat', 'product_tag' ) );
 					}
 				}

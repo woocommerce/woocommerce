@@ -2,6 +2,16 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.14.2](https://github.com/woocommerce/email-editor/releases/tag/2.14.2) - 2026-07-24 
+
+-   Patch - Clamp an oversized raw image width in email galleries down to the cell it renders in (scaling height to keep the aspect ratio), so wide originals no longer blow out the layout in Outlook, and drop the web-only class the sanitizer preserves. [#66824]
+-   Patch - Ensure emails render global font weight, style, and letter spacing. [#66620]
+-   Patch - For image blocks without a set width, only detect the width for local uploads images and fall back to the max width for external images. [#66729]
+-   Patch - Keep email galleries in normal document flow so the block after a gallery (e.g. a heading) keeps its vertical spacing. The gallery wrapper table's align="left" rendered as a float in email clients, pulling the gallery out of flow so the following block failed to clear it. Alignment is preserved via the existing text-align CSS. [#66833]
+-   Patch - Limit the front end email preview to published emails or users who can read the post, so unpublished emails are no longer shown to logged out visitors. [#66727]
+-   Patch - Wrap overflowing button/navigation rows in emails instead of stretching the layout. When auto-width buttons don't fit on one line, they now wrap (Gmail, Apple Mail, webmail) or stack vertically (Outlook) rather than pushing the email past its content width. [#66891]
+-   Patch - Render email galleries with the same number of columns the block author chose (up to 8) instead of clamping to 5. Clamping wide galleries forced extra partial rows whose trailing images stretched to a size the author never set. [#66801]
+
 ## [2.14.1](https://github.com/woocommerce/email-editor/releases/tag/2.14.1) - 2026-07-16 
 
 -   Patch - Fix email gallery aspect-ratio crop misclassifying images whose src contains a query-string ampersand (e.g. CDN URLs) as server-cropped, which stamped distorting fixed dimensions on uncropped images. The renderer now detects a server crop by comparing the filter result to the original URL before escaping. [#66739]

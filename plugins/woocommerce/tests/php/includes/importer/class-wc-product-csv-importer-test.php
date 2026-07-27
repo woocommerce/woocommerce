@@ -318,6 +318,67 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Re-importing an existing variation with update_existing enabled preserves taxonomy terms attached to it.
+	 */
+	public function test_reimporting_existing_variation_preserves_attached_terms() {
+		// Term creation during import requires the manage_product_terms capability.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$imported_ids = array();
+		$term_id      = 0;
+
+		try {
+			// Build the header-to-field mapping the way the admin import UI does.
+			$csv_file   = __DIR__ . '/variation-category-31815.csv';
+			$headers    = ( new WC_Product_CSV_Importer( $csv_file, array( 'parse' => false ) ) )->get_raw_keys();
+			$controller = new WC_Product_CSV_Importer_Controller();
+			$auto_map   = new ReflectionMethod( $controller, 'auto_map_columns' );
+			$auto_map->setAccessible( true );
+			$mapping = array_combine( $headers, $auto_map->invoke( $controller, $headers ) );
+
+			$data = ( new WC_Product_CSV_Importer(
+				$csv_file,
+				array(
+					'parse'   => true,
+					'mapping' => $mapping,
+				)
+			) )->import();
+
+			$imported_ids = array_merge( $data['imported'], $data['imported_variations'] );
+			$this->assertCount( 2, $data['imported_variations'], 'Expected 2 variations to be imported.' );
+
+			// Simulate an extension attaching a category to an existing variation.
+			$inserted     = wp_insert_term( 'Variation Extension Category', 'product_cat' );
+			$term_id      = is_wp_error( $inserted ) ? (int) $inserted->get_error_data( 'term_exists' ) : $inserted['term_id'];
+			$variation_id = $data['imported_variations'][0];
+			wp_set_object_terms( $variation_id, array( $term_id ), 'product_cat' );
+
+			$update = ( new WC_Product_CSV_Importer(
+				$csv_file,
+				array(
+					'parse'           => true,
+					'mapping'         => $mapping,
+					'update_existing' => true,
+				)
+			) )->import();
+
+			$this->assertContains( $variation_id, $update['updated'], 'Expected the existing variation to be updated by the re-import.' );
+			$this->assertSame(
+				array( $term_id ),
+				wp_get_object_terms( $variation_id, 'product_cat', array( 'fields' => 'ids' ) ),
+				'Terms attached to an existing variation must survive a re-import that updates it.'
+			);
+		} finally {
+			foreach ( $imported_ids as $id ) {
+				WC_Helper_Product::delete_product( $id );
+			}
+			if ( $term_id ) {
+				wp_delete_term( $term_id, 'product_cat' );
+			}
+		}
+	}
+
+	/**
 	 * @testdox parse_float_field should respect the store's decimal separator setting (issue #38116).
 	 * @dataProvider provider_parse_float_field_decimal_separator
 	 *
@@ -408,5 +469,46 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
 
 		$this->assertSame( '', $importer->parse_float_field( '' ), 'Empty values should be returned unchanged.' );
+	}
+
+	/**
+	 * @testdox adjust_character_encoding should convert values from the configured encoding to UTF-8 (issue #38541).
+	 * @dataProvider provider_adjust_character_encoding
+	 *
+	 * @param string $encoding The configured character encoding.
+	 * @param string $value    The raw value expressed in that encoding.
+	 * @param string $expected The expected UTF-8 value.
+	 */
+	public function test_adjust_character_encoding_converts_to_utf8( string $encoding, string $value, string $expected ) {
+		if ( ! function_exists( 'mb_convert_encoding' ) ) {
+			$this->markTestSkipped( 'The mbstring extension is required for this test.' );
+		}
+
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv', array( 'character_encoding' => $encoding ) );
+
+		$method = new ReflectionMethod( WC_Product_CSV_Importer::class, 'adjust_character_encoding' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			$expected,
+			$method->invoke( $importer, $value ),
+			"Expected a '{$encoding}' value to be converted to UTF-8."
+		);
+	}
+
+	/**
+	 * Data provider for test_adjust_character_encoding_converts_to_utf8.
+	 *
+	 * The é character is the single byte 0xE9 in both ISO-8859-1 and Windows-1252, and the
+	 * two-byte sequence 0xC3 0xA9 in UTF-8.
+	 *
+	 * @return array
+	 */
+	public function provider_adjust_character_encoding(): array {
+		return array(
+			'UTF-8 is returned unchanged' => array( 'UTF-8', 'Café', 'Café' ),
+			'ISO-8859-1 is converted'     => array( 'ISO-8859-1', "Caf\xE9", 'Café' ),
+			'Windows-1252 is converted'   => array( 'Windows-1252', "Caf\xE9", 'Café' ),
+		);
 	}
 }

@@ -365,9 +365,9 @@ const entries = {
 		wcBlocksSharedContext: './packages/public-api/shared-context/index.js',
 		wcBlocksSharedHocs: './packages/public-api/shared-hocs/index.js',
 		wcSchemaParser: './assets/js/utils/schema-parser/index.ts',
-		priceFormat: './packages/public-api/price-format/index.js',
-		wcTypes: './packages/public-api/types/index.ts',
-		wcEntities: './packages/internal/entities/index.ts',
+		priceFormat: './packages/prices/index.js',
+		wcTypes: './assets/js/types/index.ts',
+		wcEntities: './assets/js/entity-registration/index.ts',
 	},
 	main: {
 		// Shared blocks code

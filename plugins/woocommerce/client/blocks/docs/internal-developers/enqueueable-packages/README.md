@@ -44,6 +44,7 @@ Stable exports from these package roots are extension-facing contracts:
 | `@woocommerce/blocks-components` | `wc-blocks-components` | `wc.blocksComponents` | Shares components used by WooCommerce blocks and extensions. |
 | `@woocommerce/blocks-registry` | `wc-blocks-registry` | `wc.wcBlocksRegistry` | Keeps block, payment method, and product collection registrations in shared registries. |
 | `@woocommerce/data` | `wc-store-data` | `wc.data` | Shares WooCommerce Admin data stores without re-registering them from the editor bundle. |
+| `@woocommerce/entities` | `wc-entities` | `wc.wcEntities` (deprecated) | Registers WooCommerce entities once. The global helper exports remain temporarily for backward compatibility and must not be used as a public extension API. |
 | `@woocommerce/price-format` | `wc-price-format` | `wc.priceFormat` | Shares price and currency formatting across editor, frontend, and extension code. |
 | `@woocommerce/sanitize` | `wc-sanitize` | `wc.sanitize` | Shares HTML sanitization with the Components and Checkout package bundles. |
 | `@woocommerce/settings` | `wc-settings` | `wc.wcSettings` | Shares one runtime settings object across the editor and package bundles. |
