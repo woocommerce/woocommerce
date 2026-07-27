@@ -16,6 +16,7 @@ import {
 	CLASSIC_CHECKOUT_PAGE,
 } from '../../utils/pages';
 import { wpCLI } from '../../utils/cli';
+import { setGatewayEnabled } from '../../utils/payment-gateways';
 
 const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
@@ -31,31 +32,25 @@ const test = baseTest.extend( {
 			`wp option set woocommerce_test-custom-button_settings --format=json '{"enabled":"yes"}'`
 		);
 
-		// Ensuring that COD is enabled, so it can _also_ be used during checkout.
-		const codResponse = await restApi.get(
-			`${ WC_API_PATH }/payment_gateways/cod`
-		);
-		const codEnabled = codResponse.enabled;
-
-		if ( ! codEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: true,
-			} );
-		}
+		// COD is enabled globally in site setup; guard defensively in case it is
+		// somehow off so it can _also_ be used during checkout.
+		const codWasEnabled = await setGatewayEnabled( restApi, 'cod', true );
 
 		await page.context().clearCookies();
 		await use( page );
 
-		// Cleanup: restoring COD and removing the custom gateway
+		// Cleanup: deactivate the test plugin so its custom gateway stops being
+		// registered on every checkout/order-pay page for the rest of the run.
+		// The gateway hardcodes `enabled = 'yes'` in its constructor, so deleting
+		// the option alone would NOT disable it — only deactivation does.
+		await wpCLI(
+			'wp plugin deactivate woocommerce-blocks-test-plugins/custom-place-order-button-test.php'
+		);
 		await wpCLI(
 			`wp option delete woocommerce_test-custom-button_settings`
 		);
 
-		if ( ! codEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: codEnabled,
-			} );
-		}
+		await setGatewayEnabled( restApi, 'cod', codWasEnabled );
 	},
 	product: async ( { restApi }, use ) => {
 		let product;
@@ -75,6 +70,35 @@ const test = baseTest.extend( {
 } );
 
 test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
+	// The shared site setup attaches a free shipping method to zone 0, so every
+	// cart needs shipping. On the shortcode checkout that renders the collapsed
+	// "Ship to a different address?" block with hidden, empty required shipping
+	// fields. A custom place-order button's client-side validate() counts those
+	// hidden invalid fields and silently skips submission, so the order is never
+	// placed. Remove the baseline shipping for this spec so the cart does not
+	// need shipping, then restore it afterwards.
+	// TODO: Remove this workaround once the validation fix is merged.
+	// Bug fixed in https://github.com/woocommerce/woocommerce/pull/65933.
+	test.beforeAll( async ( { restApi } ) => {
+		const { data: methods } = await restApi.get<
+			{ instance_id: number }[]
+		>( `${ WC_API_PATH }/shipping/zones/0/methods` );
+
+		for ( const method of methods ) {
+			await restApi.delete(
+				`${ WC_API_PATH }/shipping/zones/0/methods/${ method.instance_id }`,
+				{ force: true }
+			);
+		}
+	} );
+
+	test.afterAll( async ( { restApi } ) => {
+		// Restore the baseline free shipping method on zone 0 (mirrors site setup).
+		await restApi.post( `${ WC_API_PATH }/shipping/zones/0/methods`, {
+			method_id: 'free_shipping',
+		} );
+	} );
+
 	test(
 		'clicking custom button triggers validation when form is invalid',
 		{ tag: [ tags.PAYMENTS ] },

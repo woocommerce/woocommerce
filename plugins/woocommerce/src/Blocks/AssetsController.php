@@ -38,7 +38,6 @@ final class AssetsController {
 	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
 		add_action( 'init', array( $this, 'register_assets' ) );
 		add_action( 'init', array( $this, 'register_script_modules' ) );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'register_and_enqueue_site_editor_assets' ) );
 		add_filter( 'wp_resource_hints', array( $this, 'add_resource_hints' ), 10, 2 );
 		add_action( 'body_class', array( $this, 'add_theme_body_class' ), 1 );
 		add_action( 'admin_body_class', array( $this, 'add_theme_body_class' ), 1 );
@@ -105,17 +104,6 @@ final class AssetsController {
 			array()
 		);
 
-		// Customer Effort Score.
-		$this->api->register_script(
-			'wc-customer-effort-score',
-			'assets/client/admin/customer-effort-score/index.js',
-			array( 'wp-data', 'wp-data-controls', 'wc-store-data' )
-		);
-		$this->api->register_style(
-			'wc-customer-effort-score',
-			'assets/client/admin/customer-effort-score/style.css',
-		);
-
 		wp_add_inline_script(
 			'wc-blocks-middleware',
 			"
@@ -126,15 +114,6 @@ final class AssetsController {
 			",
 			'before'
 		);
-	}
-
-	/**
-	 * Register and enqueue assets for exclusive usage within the Site Editor.
-	 */
-	public function register_and_enqueue_site_editor_assets() {
-		// Customer Effort Score.
-		wp_enqueue_script( 'wc-customer-effort-score' );
-		wp_enqueue_style( 'wc-customer-effort-score' );
 	}
 
 	/**

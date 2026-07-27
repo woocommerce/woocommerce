@@ -11,10 +11,12 @@ use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use WC_Tracks;
 use WC_Site_Tracking;
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features as WCAdminFeatures;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -294,11 +296,21 @@ class FeaturesController {
 
 		$legacy_features = array(
 			'analytics'                          => array(
-				'name'                         => __( 'Analytics', 'woocommerce' ),
-				'description'                  => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
+				'name'                         => __( 'WooCommerce Analytics', 'woocommerce' ),
+				'description'                  => __( 'Enable WooCommerce Analytics to track your store\'s key metrics and view them in a detailed dashboard. All data stays within your store.', 'woocommerce' ),
 				'option_key'                   => Analytics::TOGGLE_OPTION_NAME,
 				'is_experimental'              => false,
 				'enabled_by_default'           => true,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
+			ProductMediaGallery::FEATURE_ID      => array(
+				'name'                         => __( 'Product gallery videos', 'woocommerce' ),
+				'description'                  => __( 'Enable videos in product galleries.', 'woocommerce' ),
+				'option_key'                   => ProductMediaGallery::ENABLE_OPTION_NAME,
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
@@ -358,7 +370,7 @@ class FeaturesController {
 					'woocommerce'
 				),
 				'enabled_by_default'           => true,
-				'disable_ui'                   => false,
+				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
@@ -446,6 +458,14 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => false,
 			),
+			'order_withdrawal'                   => array(
+				'name'                         => __( 'Order withdrawal', 'woocommerce' ),
+				'description'                  => __( 'Enable the public order withdrawal endpoint for stakeholder testing.', 'woocommerce' ),
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'is_experimental'              => true,
+			),
 			'abandoned_cart_recovery'            => array(
 				'name'                         => __( 'Abandoned cart recovery', 'woocommerce' ),
 				'description'                  => __(
@@ -526,7 +546,7 @@ class FeaturesController {
 				),
 				'option_key'                   => \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME,
 				'is_experimental'              => true,
-				'enabled_by_default'           => false,
+				'enabled_by_default'           => \Automattic\WooCommerce\Internal\VariationGallery\Package::is_in_canary_cohort(),
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
@@ -556,6 +576,20 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'deprecated_since'             => '11.0.0',
 				'deprecated_value'             => true,
+			),
+			'point_of_sale_staff'                => array(
+				'name'                         => __( 'POS staff', 'woocommerce' ),
+				'description'                  => __(
+					'Experimental: POS staff management, roles, and order attribution.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				// Hidden while incomplete so it can't ship merchant-toggleable; flip to
+				// false when it's ready for an experimental preview.
+				'disable_ui'                   => true,
+				'is_experimental'              => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'fulfillments'                       => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
@@ -618,11 +652,13 @@ class FeaturesController {
 					'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.',
 					'woocommerce'
 				),
+				'is_experimental'              => false,
 				'enabled_by_default'           => true,
-				'is_experimental'              => true,
 				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => false,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'deprecated_since'             => '10.9.2',
+				'deprecated_value'             => true,
 			),
 			'rest_api_caching'                   => array(
 				'name'                         => __( 'REST API Caching', 'woocommerce' ),
@@ -906,6 +942,10 @@ class FeaturesController {
 		// Handle deprecated features - return the backwards-compatible value.
 		if ( ! empty( $feature['deprecated_since'] ) ) {
 			return (bool) ( $feature['deprecated_value'] ?? false );
+		}
+
+		if ( 'analytics' === $feature_id && WCAdminFeatures::is_analytics_disabled_by_legacy_filters() ) {
+			return false;
 		}
 
 		if ( $this->is_preview_email_improvements_enabled( $feature_id ) ) {

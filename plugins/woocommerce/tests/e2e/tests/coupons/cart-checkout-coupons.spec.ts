@@ -11,7 +11,6 @@ import {
  */
 import { tags, test, expect } from '../../fixtures/fixtures';
 import { createClassicCartPage, CLASSIC_CART_PAGE } from '../../utils/pages';
-import { updateIfNeeded } from '../../utils/settings';
 
 const firstProductName = 'Coupon test product';
 const coupon = {
@@ -30,8 +29,6 @@ test.describe(
 		test.beforeAll( async ( { restApi } ) => {
 			// Make sure the classic cart page exists.
 			await createClassicCartPage();
-
-			await updateIfNeeded( 'general/woocommerce_calc_taxes', 'no' );
 
 			// Make sure the currency is USD.
 			await restApi.put(

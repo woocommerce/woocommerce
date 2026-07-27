@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Align the Data status box with the Date range filter at mid-range viewports, drop the trailing colons on both labels, use a consistent "M j at H:i" date format, and pick up WP component defaults for the Update now button and bar typography.

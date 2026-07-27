@@ -7,7 +7,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { __, sprintf } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { CurriedSelectorsOf } from '@wordpress/data/build-types/types';
-// eslint-disable-next-line @wordpress/no-unsafe-wp-apis, @woocommerce/dependency-group
+// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
 
 /**

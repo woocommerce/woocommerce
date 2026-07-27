@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { recordEvent } from '@woocommerce/tracks';
 import { TaskType } from '@woocommerce/data';
 
@@ -16,7 +16,7 @@ jest.mock( '@woocommerce/tracks', () => ( {
 } ) );
 jest.mock( '../task-list-item', () => ( {
 	TaskListItem: ( props: TaskListItemProps ) => (
-		<div>{ props.task.title }</div>
+		<button onClick={ props.trackClick }>{ props.task.title }</button>
 	),
 } ) );
 jest.mock( '../task-list-menu', () => ( {
@@ -255,5 +255,69 @@ describe( 'TaskList', () => {
 		expect(
 			queryByText( dismissedTask[ 0 ].title )
 		).not.toBeInTheDocument();
+	} );
+
+	it( 'should fire extended tasklist task clicked event when a task is clicked', () => {
+		const { getByRole } = render(
+			<TaskList
+				id="extended"
+				eventPrefix="extended_tasklist_"
+				tasks={ [ ...tasks.extension ] }
+				title="List title"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
+		);
+
+		( recordEvent as jest.Mock ).mockClear();
+
+		fireEvent.click(
+			getByRole( 'button', { name: tasks.extension[ 0 ].title } )
+		);
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'extended_tasklist_task_click',
+			{
+				task_name: 'extension',
+				task_complete: false,
+				task_dismissed: false,
+				context: 'home',
+			}
+		);
+	} );
+
+	it( 'should include task_complete when a completed task is clicked', () => {
+		const { getByRole } = render(
+			<TaskList
+				id="extended"
+				eventPrefix="extended_tasklist_"
+				tasks={ [ tasks.setup[ 2 ] ] }
+				title="List title"
+				query={ {} }
+				isVisible={ true }
+				isHidden={ false }
+				isComplete={ false }
+				displayProgressHeader={ false }
+				keepCompletedTaskList="no"
+			/>
+		);
+
+		( recordEvent as jest.Mock ).mockClear();
+
+		fireEvent.click(
+			getByRole( 'button', { name: tasks.setup[ 2 ].title } )
+		);
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'extended_tasklist_task_click',
+			expect.objectContaining( {
+				task_name: 'completed',
+				task_complete: true,
+			} )
+		);
 	} );
 } );

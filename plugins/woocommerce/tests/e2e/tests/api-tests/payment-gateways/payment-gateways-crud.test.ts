@@ -27,7 +27,8 @@ test.describe( 'Payment Gateways API tests', () => {
 					description:
 						'Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.',
 					order: '',
-					enabled: false,
+					// Enabled by the shared site setup (offline gateway baseline).
+					enabled: true,
 					method_title: 'Direct bank transfer',
 					method_description:
 						'Take payments in person via BACS. More commonly known as direct bank/wire transfer.',
@@ -108,7 +109,8 @@ test.describe( 'Payment Gateways API tests', () => {
 					title: 'Cash on delivery',
 					description: 'Pay with cash upon delivery.',
 					order: '',
-					enabled: false,
+					// Enabled by the shared site setup (offline gateway baseline).
+					enabled: true,
 					method_title: 'Cash on delivery',
 					method_description:
 						'Let your shoppers pay upon delivery — by cash or other methods of payment.',
@@ -159,10 +161,15 @@ test.describe( 'Payment Gateways API tests', () => {
 						'Flat rate': {
 							flat_rate: 'Any &quot;Flat rate&quot; method',
 						},
-						'Free shipping': {
+						// The shared site setup attaches a free shipping method
+						// instance to zone 0, which adds a per-instance entry
+						// (free_shipping:<id>) alongside the base option. The
+						// instance ID is non-deterministic, so only assert the
+						// base option and tolerate the baseline instance.
+						'Free shipping': expect.objectContaining( {
 							free_shipping:
 								'Any &quot;Free shipping&quot; method',
-						},
+						} ),
 						'Local pickup': {
 							pickup_location:
 								'Any &quot;Local pickup&quot; method',
@@ -199,7 +206,8 @@ test.describe( 'Payment Gateways API tests', () => {
 				description:
 					'Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.',
 				order: '',
-				enabled: false,
+				// Enabled by the shared site setup (offline gateway baseline).
+				enabled: true,
 				method_title: 'Direct bank transfer',
 				method_description:
 					'Take payments in person via BACS. More commonly known as direct bank/wire transfer.',
@@ -233,12 +241,13 @@ test.describe( 'Payment Gateways API tests', () => {
 	} );
 
 	test( 'can update a payment gateway', async ( { request } ) => {
-		// call API to update a payment gateway
+		// BACS is enabled by the shared site setup, so toggle it off to prove the
+		// update works, then restore the baseline so no global state leaks.
 		const response = await request.put(
 			'./wp-json/wc/v3/payment_gateways/bacs',
 			{
 				data: {
-					enabled: true,
+					enabled: false,
 				},
 			}
 		);
@@ -247,14 +256,14 @@ test.describe( 'Payment Gateways API tests', () => {
 
 		expect( responseJSON ).toEqual(
 			expect.objectContaining( {
-				enabled: true,
+				enabled: false,
 			} )
 		);
 
-		// reset payment gateway setting
+		// restore the baseline payment gateway setting
 		await request.put( './wp-json/wc/v3/payment_gateways/bacs', {
 			data: {
-				enabled: false,
+				enabled: true,
 			},
 		} );
 	} );

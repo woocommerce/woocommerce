@@ -68,7 +68,13 @@ async function goToAttributesTab( page: Page ) {
 			.locator( '.attribute_tab' )
 			.getByRole( 'link', { name: 'Attributes' } );
 
-		await attributesTab.click();
+		// On a freshly reloaded edit page the tab click can fire before the
+		// metabox JS binds its handlers, silently leaving the General panel
+		// active. Retry the click until the Attributes panel is really shown.
+		await expect( async () => {
+			await attributesTab.click();
+			await expect( page.locator( '#product_attributes' ) ).toBeVisible();
+		} ).toPass();
 	} );
 }
 async function addAttribute(
@@ -92,17 +98,20 @@ async function addAttribute(
 	}
 
 	await test.step( `Type "${ attributeName }" in the "Attribute name" input field.`, async () => {
+		// Use pressSequentially (not fill): the "Save attributes" button is
+		// enabled by a `keyup` handler on these inputs (see meta-boxes.js).
+		// fill() only fires `input`, leaving the button disabled.
 		await page
 			.getByPlaceholder( 'e.g. length or weight' )
 			.last()
-			.type( attributeName );
+			.pressSequentially( attributeName );
 	} );
 
 	await test.step( `Type the attribute values "${ attributeValues }".`, async () => {
 		await page
 			.getByPlaceholder( 'Enter options for customers to choose from' )
 			.last()
-			.type( attributeValues );
+			.pressSequentially( attributeValues );
 	} );
 
 	await test.step( `Expect "Visible on the product page" checkbox to be checked by default`, async () => {

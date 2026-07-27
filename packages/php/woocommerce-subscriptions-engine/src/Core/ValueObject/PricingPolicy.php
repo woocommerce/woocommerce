@@ -6,7 +6,7 @@
  * Mirrors the `pricing_policy` JSON column shape. Shape:
  *   {
  *     policies: [
- *       { type: 'percentage'|'fixed_amount'|'price', value: float, starting_cycle?: int },
+ *       { type: 'percentage'|'fixed_amount'|'price'|'bogo', value: float, starting_cycle?: int, duration_cycles?: int },
  *       ...
  *     ],
  *     one_time_fees: [
@@ -20,12 +20,18 @@
  * genuinely untaxed. The two are not interchangeable - round-trip preserves
  * whichever was supplied.
  *
+ * `bogo` entries are value-less: `value` is absent (normalized to `0.0`) or
+ * explicitly `0`. The benefit is an in-kind bonus unit of the same line item
+ * ({@see self::calculate_bonus_quantity()}), never a price change.
+ *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject
  */
 
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
+
+use InvalidArgumentException;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -41,7 +47,7 @@ final class PricingPolicy {
 	/**
 	 * Recurring price adjustments, applied in array order.
 	 *
-	 * @var array<int, array{type: string, value: float, starting_cycle?: int}>
+	 * @var array<int, array{type: string, value: float, starting_cycle?: int, duration_cycles?: int}>
 	 */
 	private $policies;
 
@@ -55,8 +61,8 @@ final class PricingPolicy {
 	/**
 	 * Build a pricing policy.
 	 *
-	 * @param array<int, array{type: string, value: float, starting_cycle?: int}>                   $policies      Recurring price adjustments.
-	 * @param array<int, array{kind: string, amount: float, taxable: bool, tax_class: string|null}> $one_time_fees One-time fees.
+	 * @param array<int, array{type: string, value: float, starting_cycle?: int, duration_cycles?: int}> $policies      Recurring price adjustments.
+	 * @param array<int, array{kind: string, amount: float, taxable: bool, tax_class: string|null}>      $one_time_fees One-time fees.
 	 */
 	public function __construct( array $policies, array $one_time_fees ) {
 		$this->policies      = $policies;
@@ -92,8 +98,11 @@ final class PricingPolicy {
 				'type'  => isset( $entry['type'] ) && is_scalar( $entry['type'] ) ? (string) $entry['type'] : '',
 				'value' => isset( $entry['value'] ) && is_numeric( $entry['value'] ) ? (float) $entry['value'] : 0.0,
 			);
-			if ( isset( $entry['starting_cycle'] ) && is_numeric( $entry['starting_cycle'] ) ) {
-				$policy['starting_cycle'] = (int) $entry['starting_cycle'];
+			if ( isset( $entry['starting_cycle'] ) ) {
+				$policy['starting_cycle'] = self::normalize_cycle( $entry['starting_cycle'], 'starting_cycle' );
+			}
+			if ( isset( $entry['duration_cycles'] ) ) {
+				$policy['duration_cycles'] = self::normalize_cycle( $entry['duration_cycles'], 'duration_cycles' );
 			}
 			$policies[] = $policy;
 		}
@@ -125,7 +134,7 @@ final class PricingPolicy {
 	/**
 	 * Recurring price adjustments. Each entry: `{type, value, starting_cycle?}`.
 	 *
-	 * @return array<int, array{type: string, value: float, starting_cycle?: int}>
+	 * @return array<int, array{type: string, value: float, starting_cycle?: int, duration_cycles?: int}>
 	 */
 	public function get_policies(): array {
 		return $this->policies;
@@ -148,8 +157,12 @@ final class PricingPolicy {
 	 *  - `type: 'percentage'`   -> `base_price * (100 - value) / 100`.
 	 *  - `type: 'fixed_amount'` -> `max(0, base_price - value)` (clamped at zero).
 	 *  - `type: 'price'`        -> `value` (replaces base price entirely).
+	 *  - `type: 'bogo'`         -> no price change (money-neutral; the benefit is an
+	 *    in-kind bonus unit granted at order materialization -
+	 *    {@see self::calculate_bonus_quantity()}).
 	 *  - `starting_cycle` gate: skip the entry when `$cycle < starting_cycle`.
 	 *    A missing `starting_cycle` means the entry applies to all cycles.
+	 *  - `duration_cycles` gate: skip the entry once the duration window ends.
 	 *  - Entries are applied in array order; later entries operate on the result.
 	 *
 	 * One-time fees are intentionally not applied here.
@@ -161,7 +174,7 @@ final class PricingPolicy {
 		$price = $base_price;
 
 		foreach ( $this->policies as $policy ) {
-			if ( isset( $policy['starting_cycle'] ) && $cycle < (int) $policy['starting_cycle'] ) {
+			if ( ! $this->policy_applies_to_cycle( $policy, $cycle ) ) {
 				continue;
 			}
 
@@ -178,12 +191,69 @@ final class PricingPolicy {
 				case 'price':
 					$price = $value;
 					break;
+				case 'bogo':
+					// Money-neutral by design: the benefit is an in-kind bonus unit
+					// of the same line item, applied at order materialization via
+					// calculate_bonus_quantity() - never a price change.
+					break;
 				default:
 					break;
 			}
 		}
 
 		return $price;
+	}
+
+	/**
+	 * Apply the recurring policy chain to a line total for the given cycle.
+	 *
+	 * Line totals use the effective unit price produced by calculate_price().
+	 *
+	 * @param float $unit_price The product's base unit price for this cycle.
+	 * @param float $quantity   Quantity on the line.
+	 * @param int   $cycle      1-indexed cycle number.
+	 */
+	public function calculate_line_total( float $unit_price, float $quantity, int $cycle = 1 ): float {
+		$effective_unit_price = $this->calculate_price( $unit_price, $cycle );
+		return max( 0.0, $effective_unit_price * $quantity );
+	}
+
+	/**
+	 * The free units the chain's `bogo` entries grant for the given cycle.
+	 *
+	 * Each in-scope `bogo` entry grants one free unit per paid unit ("buy one, get
+	 * one" applied per unit), so a line of quantity q earns q bonus units per entry,
+	 * summed across entries. The same `starting_cycle`/`duration_cycles` gates as
+	 * the price chain apply ({@see self::policy_applies_to_cycle()}), so every-cycle
+	 * vs first-cycle BOGO is configured via scope, not a special case. Returns `0.0`
+	 * when no bogo entry is in scope or the paid quantity is not positive.
+	 *
+	 * The bonus is an in-kind benefit only: it never changes the price chain
+	 * ({@see self::calculate_price()} treats bogo as a no-op).
+	 *
+	 * @param float $paid_quantity Paid units on the line.
+	 * @param int   $cycle         1-indexed cycle number (1 = first billing cycle).
+	 */
+	public function calculate_bonus_quantity( float $paid_quantity, int $cycle = 1 ): float {
+		if ( $paid_quantity <= 0 ) {
+			return 0.0;
+		}
+
+		$bonus = 0.0;
+
+		foreach ( $this->policies as $policy ) {
+			if ( 'bogo' !== (string) ( $policy['type'] ?? '' ) ) {
+				continue;
+			}
+
+			if ( ! $this->policy_applies_to_cycle( $policy, $cycle ) ) {
+				continue;
+			}
+
+			$bonus += $paid_quantity;
+		}
+
+		return $bonus;
 	}
 
 	/**
@@ -195,6 +265,59 @@ final class PricingPolicy {
 		return array(
 			'policies'      => $this->policies,
 			'one_time_fees' => $this->one_time_fees,
+		);
+	}
+
+	/**
+	 * Whether a pricing policy entry applies to the requested cycle.
+	 *
+	 * @param array{starting_cycle?: int, duration_cycles?: int} $policy Policy entry.
+	 * @param int                                                $cycle  1-indexed cycle number.
+	 */
+	private function policy_applies_to_cycle( array $policy, int $cycle ): bool {
+		$starting_cycle = $policy['starting_cycle'] ?? 1;
+		if ( $cycle < $starting_cycle ) {
+			return false;
+		}
+
+		if ( isset( $policy['duration_cycles'] ) ) {
+			$last_cycle = $starting_cycle + $policy['duration_cycles'] - 1;
+			if ( $cycle > $last_cycle ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Normalize a cycle gate value, which must be an integer value.
+	 * Throws exceptions for invalid values.
+	 *
+	 * @param mixed  $value Raw field value.
+	 * @param string $field Field name.
+	 * @throws InvalidArgumentException If the value is not a whole number.
+	 */
+	private static function normalize_cycle( $value, string $field ): int {
+		$int_value = null;
+
+		if ( is_int( $value ) ) {
+			$int_value = $value;
+		} elseif ( is_float( $value ) && floor( $value ) === $value ) {
+			$int_value = (int) $value;
+		} elseif ( is_string( $value ) ) {
+			$validated = filter_var( $value, FILTER_VALIDATE_INT );
+			if ( false !== $validated ) {
+				$int_value = $validated;
+			}
+		}
+
+		if ( null !== $int_value && $int_value >= 0 ) {
+			return $int_value;
+		}
+
+		throw new InvalidArgumentException(
+			sprintf( 'pricing_policy.policies[].%s must be a positive integer.', $field )
 		);
 	}
 }

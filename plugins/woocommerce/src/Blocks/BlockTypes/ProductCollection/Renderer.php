@@ -33,6 +33,10 @@ class Renderer {
 	 * Constructor.
 	 */
 	public function __construct() {
+		if ( ! $this->should_handle_frontend_rendering() ) {
+			return;
+		}
+
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'handle_rendering' ), 10, 2 );
 
@@ -59,6 +63,15 @@ class Renderer {
 		);
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
 		add_filter( 'render_block_context', array( $this, 'extend_context_for_inner_blocks' ), 11, 1 );
+	}
+
+	/**
+	 * Check if the renderer should add frontend-only interactivity hooks.
+	 *
+	 * @return bool
+	 */
+	private function should_handle_frontend_rendering() {
+		return ! is_admin() && ! \WC()->is_rest_api_request();
 	}
 
 	/**
@@ -334,12 +347,6 @@ class Renderer {
 	 * }
 	 */
 	public function extend_context_for_inner_blocks( $context ) {
-		// Run only on frontend.
-		// This is needed to avoid SSR renders while in editor. @see https://github.com/woocommerce/woocommerce/issues/45181.
-		if ( is_admin() || \WC()->is_rest_api_request() ) {
-			return $context;
-		}
-
 		// Add iapi/provider to inner blocks so they can run this store's Interactivity API actions.
 		$context['iapi/provider'] = 'woocommerce/product-collection';
 

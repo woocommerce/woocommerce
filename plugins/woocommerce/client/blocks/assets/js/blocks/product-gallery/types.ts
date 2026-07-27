@@ -53,6 +53,7 @@ export type LegacyJQueryFormHandlers = {
 export interface ProductGalleryContext {
 	selectedImageId: number;
 	isDialogOpen: boolean;
+	videoLocation?: 'dialog' | 'gallery';
 	productId: string;
 	touchStartX: number;
 	touchCurrentX: number;

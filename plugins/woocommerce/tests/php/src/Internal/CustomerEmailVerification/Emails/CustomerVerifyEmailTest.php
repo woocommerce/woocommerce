@@ -42,16 +42,17 @@ class CustomerVerifyEmailTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox trigger() sends an email to the customer containing the verification code.
+	 * @testdox trigger() sends an email to the customer containing the verification link.
 	 */
-	public function test_trigger_sends_email_with_code(): void {
+	public function test_trigger_sends_email_with_link(): void {
 		$user_id = wc_create_new_customer( 'verify@example.com', 'verifytestuser', 'password' );
 		$this->assertIsInt( $user_id );
 
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
 
-		$this->sut->trigger( $user_id, '654321' );
+		$verify_url = 'https://example.com/?wc_verify_email_key=abc123&wc_verify_email_user=' . $user_id;
+		$this->sut->trigger( $user_id, $verify_url );
 
 		$after = count( $mailer->mock_sent );
 
@@ -59,11 +60,11 @@ class CustomerVerifyEmailTest extends WC_Unit_Test_Case {
 
 		$sent = $mailer->mock_sent[ $before ];
 		$this->assertSame( 'verify@example.com', $sent['to'][0][0], 'Email must be addressed to the customer.' );
-		$this->assertStringContainsString( '654321', $sent['body'], 'Email body must contain the verification code.' );
+		$this->assertStringContainsString( 'wc_verify_email_key=abc123', $sent['body'], 'Email body must contain the verification link.' );
 	}
 
 	/**
-	 * @testdox trigger() is a no-op when user_id or verify_code is missing.
+	 * @testdox trigger() is a no-op when user_id or verify_url is missing.
 	 */
 	public function test_trigger_noop_without_args(): void {
 		$mailer = tests_retrieve_phpmailer_instance();

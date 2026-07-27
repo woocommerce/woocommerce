@@ -6,6 +6,12 @@
 	<!-- Define files and folders to scan -->
 	<file>.</file>
 
+	<!-- Require class constants to have explicit visibility -->
+	<rule ref="PSR12.Properties.ConstantVisibility.NotFound">
+		<type>error</type>
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+
 	<!-- Exclude test files from FileName rules -->
 	<rule ref="WordPress.Files.FileName">
 		<exclude-pattern>tests/*</exclude-pattern>

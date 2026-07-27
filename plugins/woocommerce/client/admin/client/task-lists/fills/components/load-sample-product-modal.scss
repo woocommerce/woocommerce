@@ -4,14 +4,14 @@
 
 	@media (min-width: 783px ) {
 		& {
-			left: 35px;
+			inset-inline-start: 35px;
 		}
 	}
 
 
 	@include break-large {
 		& {
-			left: 160px;
+			inset-inline-start: 160px;
 		}
 	}
 

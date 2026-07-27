@@ -12,7 +12,7 @@ import { test, expect } from '@playwright/test';
  * dismiss flow, and the review-drawer-driven selective merge.
  *
  * Reviewing in Playwright UI mode:
- *   1. Run `npx playwright test --project=e2e tests/email-editor/update-propagation --ui`
+ *   1. Run `npx playwright test --project=core-serial tests/email-editor/update-propagation --ui`
  *   2. Filter the tree by `core-flows` and pick a test.
  *   3. For UI tests, toggle "Show browser" (👁 in the top-left toolbar) to watch the
  *      Chromium window drive the admin. For REST-only tests the Actions panel

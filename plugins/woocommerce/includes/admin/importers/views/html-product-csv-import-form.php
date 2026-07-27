@@ -79,17 +79,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<td><input type="checkbox" id="woocommerce-importer-map-preferences" name="map_preferences" value="1" /></td>
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
-					<th><label><?php esc_html_e( 'Character encoding of the file', 'woocommerce' ); ?></label><br/></th>
-					<td><select id="woocommerce-importer-character-encoding" name="character_encoding">
-							<option value="" selected><?php esc_html_e( 'Autodetect', 'woocommerce' ); ?></option>
-							<?php
-							$encodings = mb_list_encodings();
-							sort( $encodings, SORT_NATURAL );
-							foreach ( $encodings as $encoding ) {
-								echo '<option>' . esc_html( $encoding ) . '</option>';
-							}
+					<th><label for="woocommerce-importer-character-encoding"><?php esc_html_e( 'Character encoding of the file', 'woocommerce' ); ?></label><br/></th>
+					<td>
+						<?php
+						if ( function_exists( 'mb_list_encodings' ) ) {
 							?>
-						</select>
+							<select id="woocommerce-importer-character-encoding" name="character_encoding">
+								<option value="" selected><?php esc_html_e( 'Autodetect', 'woocommerce' ); ?></option>
+								<?php
+								$encodings = mb_list_encodings();
+								sort( $encodings, SORT_NATURAL );
+								foreach ( $encodings as $encoding ) {
+									echo '<option>' . esc_html( $encoding ) . '</option>';
+								}
+								?>
+							</select>
+							<?php
+						} else {
+							?>
+							<div class="notice notice-warning inline">
+								<p><?php esc_html_e( 'Your server does not support the mbstring PHP extension, so the file will be treated as UTF-8. Characters in other encodings may be removed.', 'woocommerce' ); ?></p>
+							</div>
+							<?php
+						}
+						?>
 					</td>
 				</tr>
 			</tbody>
@@ -108,11 +121,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 				return false;
 			} );
+
+			const uploadInput  = jQuery( '#upload' );
+			const fileUrlInput = jQuery( '#woocommerce-importer-file-url' );
+			const submitButton = jQuery( '.woocommerce-importer .button-next' );
+
+			function updateSubmitButton() {
+				const hasFile    = uploadInput.length && uploadInput.val().trim().length > 0;
+				const hasFileUrl = fileUrlInput.length && fileUrlInput.val().trim().length > 0;
+				submitButton.prop( 'disabled', ! hasFile && ! hasFileUrl );
+			}
+
+			uploadInput.on( 'change', updateSubmitButton );
+			fileUrlInput.on( 'input', updateSubmitButton );
+
+			updateSubmitButton();
 		});
 	</script>
 	<div class="wc-actions">
 		<a href="#" class="woocommerce-importer-toggle-advanced-options" data-hidetext="<?php esc_attr_e( 'Hide advanced options', 'woocommerce' ); ?>" data-showtext="<?php esc_attr_e( 'Show advanced options', 'woocommerce' ); ?>"><?php esc_html_e( 'Show advanced options', 'woocommerce' ); ?></a>
-		<button type="submit" class="button button-primary button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
+		<button type="submit" class="button button-primary button-next" value="<?php esc_attr_e( 'Continue', 'woocommerce' ); ?>" name="save_step" disabled><?php esc_html_e( 'Continue', 'woocommerce' ); ?></button>
 		<?php wp_nonce_field( 'woocommerce-csv-importer' ); ?>
 	</div>
 </form>

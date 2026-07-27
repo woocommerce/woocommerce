@@ -59,12 +59,17 @@ abstract class WC_Admin_List_Table {
 	 * @param string $which String which tablenav is being shown.
 	 */
 	public function maybe_render_blank_state( $which ) {
-		global $post_type;
+		global $post_type, $wp_query;
 
 		if ( $post_type === $this->list_table_type && 'bottom' === $which ) {
+			// Performance note: this is a lightweight alternative to wp_count_posts that does not access the cache or apply filters.
+			if ( $wp_query && ! empty( $wp_query->posts ) ) {
+				return;
+			}
+
+			// Performance note: the results of wp_count_posts are cached and at this point populated by status counters.
 			$counts = (array) wp_count_posts( $post_type );
 			$count  = array_sum( $counts ) - ( $counts['auto-draft'] ?? 0 );
-
 			if ( $count > 0 ) {
 				return;
 			}

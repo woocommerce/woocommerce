@@ -1,14 +1,16 @@
 /**
  * External dependencies
  */
+import { faker } from '@faker-js/faker';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
 import { tags, test, expect } from '../../fixtures/fixtures';
+import { setGatewayEnabled } from '../../utils/payment-gateways';
 
-const randomNum = new Date().getTime().toString();
+const randomNum = faker.string.alphanumeric( 10 );
 const customer = {
 	username: `customer${ randomNum }`,
 	password: 'password',
@@ -20,6 +22,7 @@ test.describe(
 	{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
 	() => {
 		let productId, orderId;
+		let codWasEnabled: boolean;
 
 		test.beforeAll( async ( { restApi } ) => {
 			// add product
@@ -59,10 +62,9 @@ test.describe(
 			await restApi.put( `${ WC_API_PATH }/orders/${ orderId }`, {
 				customer_id: customer.id,
 			} );
-			// enable COD payment
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: true,
-			} );
+			// COD is enabled globally in site setup; guard defensively in case it
+			// is somehow off, and restore its prior state in afterAll.
+			codWasEnabled = await setGatewayEnabled( restApi, 'cod', true );
 		} );
 
 		test.afterAll( async ( { restApi } ) => {
@@ -76,9 +78,7 @@ test.describe(
 				`${ WC_API_PATH }/customers/${ customer.id }`,
 				{ force: true }
 			);
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: false,
-			} );
+			await setGatewayEnabled( restApi, 'cod', codWasEnabled );
 		} );
 
 		test( 'allows customer to pay for their order in My Account', async ( {

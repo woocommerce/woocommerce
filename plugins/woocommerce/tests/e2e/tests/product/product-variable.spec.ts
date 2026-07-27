@@ -9,7 +9,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { tags, test, expect } from '../../fixtures/fixtures';
 import { checkCartContent } from '../../utils/cart';
-import { resetValue, updateIfNeeded } from '../../utils/settings';
+import { getFakeProduct } from '../../utils/data';
 
 const productPrice = 18.16;
 const cartDialogMessage =
@@ -172,17 +172,11 @@ test.describe(
 	'Variable Product Page',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
 	() => {
-		const variableProductName = `Variable single product ${ Date.now() }`;
-		const slug = variableProductName.replace( / /gi, '-' ).toLowerCase();
+		const variableProductName = getFakeProduct( { type: 'variable' } ).name;
+		let slug: string;
 		let variableProductId: number;
-		let calcTaxesState;
 
 		test.beforeAll( async ( { restApi } ) => {
-			calcTaxesState = await updateIfNeeded(
-				`general/woocommerce_calc_taxes`,
-				'no'
-			);
-
 			// add product
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
@@ -199,6 +193,7 @@ test.describe(
 				} )
 				.then( async ( response ) => {
 					variableProductId = response.data.id;
+					slug = response.data.slug;
 					for ( const key in variations1 ) {
 						await restApi.post(
 							`${ WC_API_PATH }/products/${ variableProductId }/variations`,
@@ -219,11 +214,6 @@ test.describe(
 				{
 					force: true,
 				}
-			);
-
-			await resetValue(
-				`general/woocommerce_calc_taxes`,
-				calcTaxesState
 			);
 		} );
 
@@ -307,17 +297,11 @@ test.describe(
 	'Shopper > Update variable product',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
 	() => {
-		const variableProductName = `Variable single product ${ Date.now() }`;
-		const slug = variableProductName.replace( / /gi, '-' ).toLowerCase();
+		const variableProductName = getFakeProduct( { type: 'variable' } ).name;
+		let slug: string;
 		let variableProductId: number;
-		let calcTaxesState;
 
 		test.beforeAll( async ( { restApi } ) => {
-			calcTaxesState = await updateIfNeeded(
-				`general/woocommerce_calc_taxes`,
-				'no'
-			);
-
 			// add product
 			await restApi
 				.post( `${ WC_API_PATH }/products`, {
@@ -340,6 +324,7 @@ test.describe(
 				} )
 				.then( async ( response ) => {
 					variableProductId = response.data.id;
+					slug = response.data.slug;
 					for ( const key in variations2 ) {
 						await restApi.post(
 							`${ WC_API_PATH }/products/${ variableProductId }/variations`,
@@ -360,11 +345,6 @@ test.describe(
 				{
 					force: true,
 				}
-			);
-
-			await resetValue(
-				`general/woocommerce_calc_taxes`,
-				calcTaxesState
 			);
 		} );
 

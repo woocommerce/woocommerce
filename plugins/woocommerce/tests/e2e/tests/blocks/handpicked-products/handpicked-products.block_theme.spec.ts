@@ -17,7 +17,9 @@ test.describe( `${ blockData.slug } Block`, () => {
 		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.slug } );
 		const blockLocator = await editor.getBlockByName( blockData.slug );
-		await blockLocator.getByText( 'Album' ).click();
+		await blockLocator
+			.getByRole( 'checkbox', { name: 'Album (woo-album)' } )
+			.click();
 		await blockLocator.getByText( 'Done' ).click();
 		await editor.publishAndVisitPost();
 		const blockLocatorFrontend = await frontendUtils.getBlockByName(

@@ -91,16 +91,14 @@ if ( 'customer_reset_password' === $email->id && isset( $reset_key, $user_id ) )
 	<?php
 endif;
 
-if ( 'customer_verify_email' === $email->id && $verify_code ) {
-	?>
-	<!-- wp:paragraph -->
-	<p><?php esc_html_e( 'Use this code to confirm your email address:', 'woocommerce' ); ?></p>
-	<!-- /wp:paragraph -->
-
-	<!-- wp:paragraph -->
-	<p style="font-size: 32px; font-weight: 700; letter-spacing: 0.4em; text-align: center;"><?php echo esc_html( $verify_code ); ?></p>
-	<!-- /wp:paragraph -->
-	<?php
+if ( 'customer_verify_email' === $email->id && $verify_url ) {
+	wc_get_template(
+		'emails/email-button.php',
+		array(
+			'url'   => $verify_url,
+			'label' => __( 'Confirm email address', 'woocommerce' ),
+		)
+	);
 }
 
 /**

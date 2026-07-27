@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve cart contents when paying for an existing order.

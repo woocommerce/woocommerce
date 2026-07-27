@@ -15,7 +15,7 @@ import { createClient } from '@woocommerce/e2e-utils-playwright';
  * (second backfill is a no-op).
  *
  * Reviewing in Playwright UI mode:
- *   1. Run `npx playwright test --project=e2e tests/email-editor/update-propagation --ui`
+ *   1. Run `npx playwright test --project=core-serial tests/email-editor/update-propagation --ui`
  *   2. Filter the tree by `backward-compat` and pick a test.
  *   3. All tests are REST-only except "BC no mass-fire" which attaches a Tracks
  *      spy via the page fixture (but does not navigate or interact with the UI).

@@ -13,7 +13,7 @@ import { test, expect } from '@playwright/test';
  * post identically and writes no new meta.
  *
  * Reviewing in Playwright UI mode:
- *   1. Run `npx playwright test --project=e2e tests/email-editor/update-propagation --ui`
+ *   1. Run `npx playwright test --project=core-serial tests/email-editor/update-propagation --ui`
  *   2. Filter the tree by `round-trip` and pick a test.
  *   3. All four tests are REST-only — no browser window is driven. The Actions
  *      panel in UI mode shows the full REST call sequence for each test.

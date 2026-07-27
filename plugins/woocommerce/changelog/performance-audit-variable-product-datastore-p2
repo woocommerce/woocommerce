@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Audit the variable product datastore and apply additional optimizations.

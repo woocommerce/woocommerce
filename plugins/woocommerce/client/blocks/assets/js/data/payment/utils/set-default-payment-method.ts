@@ -43,7 +43,7 @@ export const setDefaultPaymentMethod = async (
 		const paymentMethodSlug = savedPaymentMethod.method.gateway;
 		const savedTokenKey = `wc-${ paymentMethodSlug }-payment-token`;
 
-		dispatch( paymentStore ).__internalSetActivePaymentMethod(
+		void dispatch( paymentStore ).__internalSetActivePaymentMethod(
 			paymentMethodSlug,
 			{
 				token,
@@ -55,8 +55,8 @@ export const setDefaultPaymentMethod = async (
 		return;
 	}
 
-	dispatch( paymentStore ).__internalSetPaymentIdle();
-	dispatch( paymentStore ).__internalSetActivePaymentMethod(
+	void dispatch( paymentStore ).__internalSetPaymentIdle();
+	void dispatch( paymentStore ).__internalSetActivePaymentMethod(
 		paymentMethodKeys[ 0 ]
 	);
 };

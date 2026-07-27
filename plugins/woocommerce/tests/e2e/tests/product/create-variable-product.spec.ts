@@ -9,10 +9,11 @@ import { test, expect } from '@playwright/test';
 import { variableProducts as utils, api } from '../../utils';
 import { tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { getFakeProduct } from '../../utils/data';
 
 const { showVariableProductTour } = utils;
 const productPageURL = 'wp-admin/post-new.php?post_type=product';
-const variableProductName = 'Variable Product with Three Variations';
+const variableProductName = getFakeProduct( { type: 'variable' } ).name;
 
 let productId: number;
 

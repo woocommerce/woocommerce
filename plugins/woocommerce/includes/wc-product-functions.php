@@ -9,12 +9,12 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -444,8 +444,15 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
  * @return string
  */
 function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
-	$dimensions        = wc_get_image_size( $size );
-	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
+	$dimensions           = wc_get_image_size( $size );
+	$placeholder_image    = get_option( 'woocommerce_placeholder_image', 0 );
+	$use_attachment_image = wp_attachment_is_image( $placeholder_image );
+	$image                = null;
+
+	if ( $use_attachment_image && has_filter( 'woocommerce_placeholder_img_src' ) ) {
+		$image                = wc_placeholder_img_src( $size );
+		$use_attachment_image = wp_get_attachment_image_url( $placeholder_image, $size ) === $image;
+	}
 
 	$default_attr = array(
 		'class' => 'woocommerce-placeholder wp-post-image',
@@ -454,7 +461,7 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 
 	$attr = wp_parse_args( $attr, $default_attr );
 
-	if ( wp_attachment_is_image( $placeholder_image ) ) {
+	if ( $use_attachment_image ) {
 		$image_html = wp_get_attachment_image(
 			$placeholder_image,
 			$size,
@@ -462,7 +469,8 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 			$attr
 		);
 	} else {
-		$image      = wc_placeholder_img_src( $size );
+		// A changed source cannot use the attachment's srcset, as the browser could select it instead.
+		$image      = $image ?? wc_placeholder_img_src( $size );
 		$hwstring   = image_hwstring( $dimensions['width'], $dimensions['height'] );
 		$attributes = array();
 
@@ -473,7 +481,18 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail', $attr = '' ) {
 		$image_html = '<img src="' . esc_url( $image ) . '" ' . $hwstring . implode( ' ', $attributes ) . '/>';
 	}
 
-	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions );
+	/**
+	 * Filters the placeholder image HTML.
+	 *
+	 * @param string $image_html The placeholder image HTML.
+	 * @param string $size       Image size.
+	 * @param array  $dimensions Image width and height.
+	 * @param array  $attr       Attributes for the image markup.
+	 *
+	 * @since 2.0.0
+	 * @since 11.1.0 Added the `$attr` parameter.
+	 */
+	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions, $attr );
 }
 
 /**
@@ -924,6 +943,18 @@ add_filter( 'wp_get_attachment_image_attributes', 'wc_get_attachment_image_attri
  * @return array
  */
 function wc_prepare_attachment_for_js( $response ) {
+	if (
+		ProductMediaGallery::is_feature_enabled() &&
+		isset( $response['id'], $response['type'] ) &&
+		'video' === $response['type']
+	) {
+		$poster_id = absint( get_post_thumbnail_id( $response['id'] ) );
+
+		if ( $poster_id ) {
+			$response['poster_id'] = $poster_id;
+		}
+	}
+
 	/*
 	 * If the user can manage woocommerce, allow them to
 	 * see the image content.
@@ -1740,7 +1771,7 @@ function wc_products_array_filter_visible( $product ) {
  * @return bool
  */
 function wc_products_array_filter_visible_grouped( $product ) {
-	return $product && is_a( $product, 'WC_Product' ) && ( ProductStatus::PUBLISH === $product->get_status() || current_user_can( 'edit_product', $product->get_id() ) );
+	return $product && is_a( $product, 'WC_Product' ) && $product->is_viewable();
 }
 
 /**

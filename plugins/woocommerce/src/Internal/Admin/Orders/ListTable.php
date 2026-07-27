@@ -436,7 +436,7 @@ class ListTable extends WP_List_Table {
 		$order_query_args['paginate'] = true;
 
 		// Attempt to use cache if no additional query arguments are used.
-		if ( empty( array_diff( array_keys( $this->order_query_args ), array( 'limit', 'page', 'paginate', 'type', 'status', 'orderby', 'order' ) ) ) ) {
+		if ( empty( array_diff( array_keys( $order_query_args ), array( 'limit', 'page', 'paginate', 'type', 'status', 'orderby', 'order' ) ) ) ) {
 			$this->order_query_args['no_found_rows'] = true;
 			$order_query_args['no_found_rows']       = true;
 		}

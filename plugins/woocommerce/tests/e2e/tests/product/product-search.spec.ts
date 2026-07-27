@@ -8,23 +8,17 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { test, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { getFakeProduct } from '../../utils/data';
 
 let productId: number;
-const productName = `Unique thing that we sell ${ new Date()
-	.getTime()
-	.toString() }`;
-const productPrice = '9.99';
+const testProduct = getFakeProduct( { regular_price: '9.99' } );
 
 test.describe( 'Products > Search and View a product', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
 	test.beforeAll( async ( { restApi } ) => {
 		await restApi
-			.post( `${ WC_API_PATH }/products`, {
-				name: productName,
-				type: 'simple',
-				regular_price: productPrice,
-			} )
+			.post( `${ WC_API_PATH }/products`, testProduct )
 			.then( ( response ) => {
 				productId = response.data.id;
 			} );
@@ -38,7 +32,10 @@ test.describe( 'Products > Search and View a product', () => {
 
 	test( 'can do a partial search for a product', async ( { page } ) => {
 		// create a partial search string
-		const searchString = productName.substring( 0, productName.length / 2 );
+		const searchString = testProduct.name.substring(
+			0,
+			testProduct.name.length / 2
+		);
 
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
 
@@ -46,9 +43,12 @@ test.describe( 'Products > Search and View a product', () => {
 		await page.locator( '#post-search-input' ).fill( searchString );
 		await page.locator( '#search-submit' ).click();
 
-		await expect( page.locator( '.row-title' ) ).toContainText(
-			productName
-		);
+		// A partial search can match products that parallel workers create from
+		// this same spec, so scope the assertion to this test's product instead
+		// of asserting on every `.row-title` match.
+		await expect(
+			page.locator( '.row-title', { hasText: testProduct.name } )
+		).toBeVisible();
 	} );
 
 	test( "can view a product's details after search", async ( { page } ) => {
@@ -56,15 +56,19 @@ test.describe( 'Products > Search and View a product', () => {
 
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
 
-		await page.locator( '#post-search-input' ).fill( productName );
+		await page.locator( '#post-search-input' ).fill( testProduct.name );
 		await page.locator( '#search-submit' ).click();
 
-		await page.locator( '.row-title' ).click();
+		await page
+			.locator( '.row-title', { hasText: testProduct.name } )
+			.click();
 
 		await expect( page ).toHaveURL( productIdInURL );
-		await expect( page.locator( '#title' ) ).toHaveValue( productName );
+		await expect( page.locator( '#title' ) ).toHaveValue(
+			testProduct.name
+		);
 		await expect( page.locator( '#_regular_price' ) ).toHaveValue(
-			productPrice
+			testProduct.regular_price
 		);
 	} );
 

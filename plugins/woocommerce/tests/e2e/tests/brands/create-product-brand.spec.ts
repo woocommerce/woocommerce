@@ -61,8 +61,12 @@ test( 'Merchant can add brands', async ( { page } ) => {
 			.fill( brand.description );
 		await page.getByRole( 'button', { name: 'Upload/Add image' } ).click();
 		await page.getByRole( 'tab', { name: 'Media Library' } ).click();
+		// `.first()` guards against duplicate fixture media sharing a title — the
+		// `wp media import` in test-env-setup.sh is not idempotent, so re-running it
+		// can leave several attachments named e.g. `image-01`.
 		await page
 			.getByRole( 'checkbox', { name: brand.thumbnailFileName } )
+			.first()
 			.click();
 		await page.getByRole( 'button', { name: 'Use image' } ).click();
 		await page.getByRole( 'button', { name: 'Add New Brand' } ).click();
@@ -103,7 +107,7 @@ test( 'Merchant can add brands', async ( { page } ) => {
 
 		await page.getByRole( 'button', { name: 'Upload/Add image' } ).click();
 		await page.getByRole( 'tab', { name: 'Media Library' } ).click();
-		await page.getByLabel( brand.thumbnailFileName ).click();
+		await page.getByLabel( brand.thumbnailFileName ).first().click();
 		await page.getByRole( 'button', { name: 'Use image' } ).click();
 
 		await page.getByRole( 'button', { name: 'Update' } ).click();
