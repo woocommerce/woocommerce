@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Render a Query Loop's post-template grid as an email-safe table of columns. Grid layouts (e.g. a 3-column sponsor logo grid) previously collapsed to a single stacked column in email clients because CSS grid isn't supported; the post-template's items are now re-flowed into table columns matching the author's column count.
