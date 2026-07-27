@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+WC_Order_Item_Product::set_product() now removes attribute meta belonging to the line item's previous variation, so a reassigned item no longer displays attributes the new product does not have. Only keys matching the previous variation's own attributes are removed, leaving merchant and plugin meta untouched.
