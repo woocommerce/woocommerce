@@ -33,11 +33,16 @@ const CustomerAddress = () => {
 
 	const { isInitialized } = useCustomerData();
 
-	const { validationErrors } = useSelect( ( select ) => {
-		return {
-			validationErrors: select( validationStore ).getValidationErrors(),
-		};
-	}, [] );
+	const { validationErrors } = useSelect(
+		( select ) => {
+			return {
+				validationErrors:
+					select( validationStore ).getValidationErrors(),
+			};
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- Re-select validation errors when the shipping address changes.
+		[ shippingAddress ]
+	);
 
 	useEffect( () => {
 		// Check if any shipping field has validation errors

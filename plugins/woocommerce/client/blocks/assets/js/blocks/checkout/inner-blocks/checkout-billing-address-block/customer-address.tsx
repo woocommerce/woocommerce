@@ -31,11 +31,16 @@ const CustomerAddress = () => {
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const { isInitialized } = useCustomerData();
 
-	const { validationErrors } = useSelect( ( select ) => {
-		return {
-			validationErrors: select( validationStore ).getValidationErrors(),
-		};
-	}, [] );
+	const { validationErrors } = useSelect(
+		( select ) => {
+			return {
+				validationErrors:
+					select( validationStore ).getValidationErrors(),
+			};
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- Re-select validation errors when the billing address changes.
+		[ billingAddress ]
+	);
 
 	useEffect( () => {
 		// Check if any billing field has validation errors
