@@ -66,6 +66,8 @@ jobs:
           filters: |
             needs-code-validation:
               - '!(({,**/}*.md)|(docs/docs-manifest.json)|({,**/}changelog/*)|(.github/**)|(.husky/**)|(.cursor/**)|(.gitignore)|({,**/}readme.txt))'
+              # `changelog/*` also covers real modules, e.g. code-freeze/commands/changelog/index.ts.
+              - '{,**/}changelog/*.{ts,tsx,js,jsx,mjs,cjs,php,json,scss,css}'
             needs-changelog-validation:
               - '{packages,plugins}/*/!((changelog/*)|(readme.txt))'
             needs-markdown-validation:
