@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API/Checkout Block: the total-mismatch guard added in #66420 now only rejects the order when the recalculated total is higher than what the shopper confirmed (a lower total, e.g. from a coupon or price drop, is no longer treated as a mismatch), and the error message and data now report both the confirmed and updated totals.
