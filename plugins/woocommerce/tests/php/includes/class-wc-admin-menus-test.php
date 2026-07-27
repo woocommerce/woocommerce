@@ -202,8 +202,8 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 	 * A box registered after admin_head-nav-menus.php fires (the "WooCommerce
 	 * endpoints" box) must stay visible. The option is read twice on the same
 	 * page load: once before admin_head and again inside do_accordion_sections()
-	 * after admin_head-nav-menus.php. Memoization keeps the hidden list stable
-	 * across both reads so the late-registered box is not swept into it.
+	 * after admin_head-nav-menus.php. The persisted snapshot keeps the hidden
+	 * list stable across both reads so the late-registered box is not swept into it.
 	 */
 	public function test_filter_keeps_endpoints_box_visible_after_late_registration() {
 		$GLOBALS['wp_meta_boxes'] = $this->get_nav_meta_boxes();  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -228,5 +228,89 @@ class WC_Admin_Menus_Test extends WC_Unit_Test_Case {
 		$this->assertIsArray( $hidden_after );
 		$this->assertSame( $hidden_before, $hidden_after );
 		$this->assertNotContains( 'woocommerce_endpoints_nav_link', $hidden_after );
+	}
+
+	/**
+	 * A non-whitelisted box registered late in the same request must not be
+	 * swept into the hidden list on the second read. The snapshot is captured
+	 * on the first read; a box that did not exist then stays out of it, matching
+	 * WordPress core, which snapshots once before admin_head fires. This guards
+	 * the stability mechanism with a box the visible allowlist does not exclude.
+	 */
+	public function test_filter_keeps_late_registered_third_party_box_out_of_snapshot() {
+		$GLOBALS['wp_meta_boxes'] = $this->get_nav_meta_boxes();  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$user_id                  = $this->factory->user->create();
+
+		$menus = new WC_Admin_Menus();
+		$menus->register_default_nav_menu_meta_boxes_filter();
+
+		$hidden_before = get_user_option( 'metaboxhidden_nav-menus', $user_id );
+
+		// Simulate a third-party box registered late (e.g. on admin_head-nav-menus.php).
+		$GLOBALS['wp_meta_boxes']['nav-menus']['side']['low']['add-late-third-party'] = array( // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			'id'    => 'add-late-third-party',
+			'title' => 'Late third party',
+		);
+
+		$hidden_after = get_user_option( 'metaboxhidden_nav-menus', $user_id );
+
+		$this->assertSame( $hidden_before, $hidden_after );
+		$this->assertNotContains( 'add-late-third-party', $hidden_after );
+	}
+
+	/**
+	 * On a first-time user's visit the filter must persist the computed hidden
+	 * snapshot to user meta, mirroring WordPress core's wp_initial_nav_menu_meta_boxes().
+	 * Without persistence, the option reads false on every later request and the
+	 * hidden list is recomputed from the live meta box registry each time.
+	 */
+	public function test_filter_persists_hidden_snapshot_on_first_visit() {
+		$GLOBALS['wp_meta_boxes'] = $this->get_nav_meta_boxes();  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$user_id                  = $this->factory->user->create();
+
+		$menus = new WC_Admin_Menus();
+		$menus->register_default_nav_menu_meta_boxes_filter();
+
+		get_user_option( 'metaboxhidden_nav-menus', $user_id );
+
+		$persisted = get_user_meta( $user_id, 'metaboxhidden_nav-menus', true );
+
+		$this->assertIsArray( $persisted );
+		$this->assertContains( 'add-post-type-news', $persisted );
+		$this->assertNotContains( 'add-product_cat', $persisted );
+	}
+
+	/**
+	 * Once a snapshot is persisted, a third-party box registered on a later
+	 * request must stay visible, matching vanilla WordPress. The persisted
+	 * snapshot short-circuits the recompute, so the newly registered box is
+	 * not added to the hidden list.
+	 */
+	public function test_snapshot_persists_so_later_registered_third_party_box_stays_visible() {
+		$GLOBALS['wp_meta_boxes'] = $this->get_nav_meta_boxes();  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$user_id                  = $this->factory->user->create();
+
+		// First request: user visits the nav-menus screen for the first time.
+		$first_visit = new WC_Admin_Menus();
+		$first_visit->register_default_nav_menu_meta_boxes_filter();
+		get_user_option( 'metaboxhidden_nav-menus', $user_id );
+
+		// End of the first request: its hook and instance no longer exist. Remove
+		// only this instance's callback so the test stays isolated from other hooks.
+		remove_filter( 'get_user_option_metaboxhidden_nav-menus', array( $first_visit, 'filter_default_nav_menu_hidden_meta_boxes' ), 10 );
+
+		// A plugin registers a nav-menus meta box after that first visit.
+		$GLOBALS['wp_meta_boxes']['nav-menus']['side']['default']['add-later-plugin-box'] = array( // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			'id'    => 'add-later-plugin-box',
+			'title' => 'Later plugin box',
+		);
+
+		// Second request: a fresh instance handles the later page load.
+		$second_visit = new WC_Admin_Menus();
+		$second_visit->register_default_nav_menu_meta_boxes_filter();
+		$hidden = get_user_option( 'metaboxhidden_nav-menus', $user_id );
+
+		$this->assertIsArray( $hidden );
+		$this->assertNotContains( 'add-later-plugin-box', $hidden );
 	}
 }
