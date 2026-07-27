@@ -268,6 +268,24 @@ jQuery( function ( $ ) {
 								dataType: 'json',
 								delay: 250,
 								data: function ( params ) {
+									var exclude = [];
+
+									if ( $( this ).data( 'exclude' ) ) {
+										exclude = String(
+											$( this ).data( 'exclude' )
+										).split( ',' );
+									}
+
+									// Hide already selected options from the results, so a re-click cannot silently deselect them.
+									if (
+										$( this ).prop( 'multiple' ) &&
+										$( this ).val()
+									) {
+										exclude = exclude.concat(
+											$( this ).val()
+										);
+									}
+
 									return {
 										term: params.term,
 										action:
@@ -275,7 +293,7 @@ jQuery( function ( $ ) {
 											'woocommerce_json_search_products_and_variations',
 										security:
 											wc_enhanced_select_params.search_products_nonce,
-										exclude: $( this ).data( 'exclude' ),
+										exclude: exclude,
 										exclude_type:
 											$( this ).data( 'exclude_type' ),
 										include: $( this ).data( 'include' ),
