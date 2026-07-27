@@ -535,6 +535,36 @@ class Post_Template_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * An image that can't be rebuilt (its src was rejected by sanitizing) is dropped rather than left
+	 * behind in the preserved remainder, so its original unsanitized tag never reaches the email.
+	 */
+	public function testItDropsUnrenderableImageInsteadOfLeakingIt(): void {
+		$parsed_block = array(
+			'blockName'   => 'core/post-template',
+			'attrs'       => array(
+				'layout' => array(
+					'type'        => 'grid',
+					'columnCount' => 2,
+				),
+			),
+			'innerBlocks' => array(),
+		);
+		// Each card has a valid image plus a second image whose src esc_url() empties, in one figure.
+		$card    = '<figure class="wp-block-image">'
+			. '<img src="https://example.com/good.png" alt="Good" width="800" height="400"/>'
+			. '<img src="javascript:alert(1)" alt="Bad"/>'
+			. '</figure>';
+		$content = $this->build_list( array( $card, $card ), 2 );
+
+		$rendered = $this->renderer->render( $content, $parsed_block, $this->rendering_context );
+
+		// The valid image is rebuilt; the unrenderable one is gone entirely — no raw src leaks through.
+		$this->assertStringContainsString( 'good.png', $rendered );
+		$this->assertStringNotContainsString( 'javascript:', $rendered );
+		$this->assertStringNotContainsString( 'Bad', $rendered );
+	}
+
+	/**
 	 * An item with no image (e.g. a title/excerpt-only card) is passed through unchanged, since text
 	 * content stacks correctly on its own and needs no rebuilding.
 	 */

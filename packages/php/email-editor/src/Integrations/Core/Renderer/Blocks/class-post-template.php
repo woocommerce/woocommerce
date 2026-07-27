@@ -291,8 +291,15 @@ class Post_Template extends Abstract_Block_Renderer {
 		$remove_targets = array();
 
 		foreach ( $item_dom->find_elements( 'img' ) as $img_element ) {
+			// Strip every image from the item up front so none can linger in the preserved remainder —
+			// whether we rebuild it below or drop it as unrenderable. Targets are computed now (before
+			// any removal) and applied after the loop, so the media counts stay accurate.
+			$remove_targets[] = $this->find_image_removal_target( $img_element );
+
 			$normalized_img = $this->normalize_image_for_email( $item_dom->get_outer_html( $img_element ), $cell_width );
 			if ( '' === $normalized_img ) {
+				// The image had no usable src (e.g. an unsafe URL esc_url rejected); drop it rather than
+				// leak the original unsanitized tag through the remainder.
 				continue;
 			}
 
@@ -302,7 +309,6 @@ class Post_Template extends Abstract_Block_Renderer {
 			} else {
 				$images[] = $normalized_img;
 			}
-			$remove_targets[] = $this->find_image_removal_target( $img_element );
 		}
 
 		if ( empty( $images ) ) {
@@ -412,6 +418,10 @@ class Post_Template extends Abstract_Block_Renderer {
 	 * @return string Normalized `<img>` HTML, or an empty string when the image has no usable src.
 	 */
 	private function normalize_image_for_email( string $img_html, int $cell_width ): string {
+		if ( '' === $img_html ) {
+			return '';
+		}
+
 		$sanitized = Html_Processing_Helper::sanitize_image_html( $img_html );
 
 		$html = new \WP_HTML_Tag_Processor( $sanitized );
