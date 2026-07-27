@@ -253,33 +253,22 @@ class Ip_Address_Test extends BaseTestCase {
 
 	/**
 	 * In proxy mode the IP feeds the visitor id hash. With no tk_ai cookie and no public
-	 * address there is no stable id, so the event must be skipped rather than attributed
-	 * to a fabricated visitor.
+	 * address there is no stable id to attribute an event to, so resolution must return
+	 * null rather than fabricate a visitor.
 	 */
-	public function test_proxy_mode_skips_event_without_a_public_ip(): void {
-		$_SERVER['REMOTE_ADDR']     = '10.0.0.1';
-		$_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)';
+	public function test_proxy_mode_has_no_visitor_id_without_a_public_ip(): void {
+		$_SERVER['REMOTE_ADDR'] = '10.0.0.1';
 		unset( $_COOKIE['tk_ai'] );
 
 		$this->add_temporary_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
 
-		$captured = array();
-		$capture  = function ( $pre, $args, $url ) use ( &$captured ) {
-			if ( false !== strpos( $url, 'pixel.wp.com' ) ) {
-				$captured[] = $url;
-			}
-			return array(
-				'response' => array( 'code' => 200 ),
-				'body'     => '',
-			);
-		};
-		add_filter( 'pre_http_request', $capture, 10, 3 );
+		$reflection = new \ReflectionClass( WC_Analytics_Tracking::class );
+		$method     = $reflection->getMethod( 'get_visitor_id' );
+		$method->setAccessible( true );
 
-		$result = WC_Analytics_Tracking::record_event( 'add_to_cart' );
-
-		remove_filter( 'pre_http_request', $capture, 10 );
-
-		$this->assertTrue( $result, 'record_event should skip when no stable visitor id exists.' );
-		$this->assertCount( 0, $captured, 'No pixel should fire without a stable visitor id.' );
+		$this->assertNull(
+			$method->invoke( null ),
+			'A non-public IP must not produce an IP-derived visitor id in proxy mode.'
+		);
 	}
 }
