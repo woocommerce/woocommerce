@@ -143,11 +143,11 @@ class WC_Helper_API_Backoff {
 	 * no usable header is present (a malformed 429), the per-type `default` is
 	 * used so there is always a sensible backoff.
 	 *
-	 * @param string         $request_type The Helper API request type (e.g. 'update-check').
-	 * @param array|WP_Error $response     The raw response from the Helper API call.
+	 * @param string $request_type The Helper API request type (e.g. 'update-check').
+	 * @param array  $response     The rate-limited (HTTP 429) response from the Helper API call.
 	 * @return void
 	 */
-	public static function record_from_response( string $request_type, $response ): void {
+	public static function record_from_response( string $request_type, array $response ): void {
 		$now    = time();
 		$bounds = self::get_bounds( $request_type );
 
@@ -169,10 +169,10 @@ class WC_Helper_API_Backoff {
 	 * Extract the wait, in seconds, from a rate-limited response's `Retry-After`
 	 * header. Non-positive or missing values are treated as absent.
 	 *
-	 * @param array|WP_Error $response The raw response from the Helper API call.
+	 * @param array $response The rate-limited (HTTP 429) response from the Helper API call.
 	 * @return int|null Seconds to wait, or null when the header is absent/invalid.
 	 */
-	private static function get_retry_after_from_headers( $response ): ?int {
+	private static function get_retry_after_from_headers( array $response ): ?int {
 		$retry_after = wp_remote_retrieve_header( $response, 'retry-after' );
 		if ( is_numeric( $retry_after ) && (int) $retry_after > 0 ) {
 			return (int) $retry_after;

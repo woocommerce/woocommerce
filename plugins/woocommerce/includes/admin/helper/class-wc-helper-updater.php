@@ -710,7 +710,7 @@ class WC_Helper_Updater {
 
 			// Respect server-side rate limiting: on a 429, record the reset
 			// window so we hold off on further update-check calls until then.
-			if ( 429 === $response_code ) {
+			if ( 429 === $response_code && is_array( $request ) ) {
 				WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, $request );
 			}
 		} else {
