@@ -3617,11 +3617,7 @@ body.woocommerce_page_wc-orders {
 			}
 		}
 
-		// Respect the Columns menu (Screen Options) on small screens: hide the
-		// duplicated date/status copies in the order-number cell whenever the
-		// real column is hidden. WordPress toggles `.hidden` on the column
-		// header live, so this updates in both directions without JS.
-		// See https://github.com/woocommerce/woocommerce/issues/26495.
+		// Hide the small-screen date/status copies when the corresponding column is hidden via Screen Options.
 		&:has( thead th.column-order_date.hidden ) .order_date.small-screen-only {
 			display: none;
 		}
