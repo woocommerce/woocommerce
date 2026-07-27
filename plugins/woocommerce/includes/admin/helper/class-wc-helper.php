@@ -1928,7 +1928,7 @@ class WC_Helper {
 		try {
 			$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$source      = '';
-			if ( false !== stripos( $request_uri, 'wc/v3/marketplace/refresh' ) ) :
+			if ( WC_Helper_API_Backoff::is_refresh_request() ) :
 				$source = 'refresh-button';
 			elseif ( false !== stripos( $request_uri, 'my-subscriptions' ) ) :
 				$source = 'my-subscriptions';
