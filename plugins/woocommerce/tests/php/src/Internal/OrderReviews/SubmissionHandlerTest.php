@@ -30,6 +30,8 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$_POST = array();
 		update_option( 'comment_moderation', '0' );
+		update_option( 'comment_max_links', 2 );
+		update_option( 'moderation_keys', '' );
 		remove_all_filters( 'woocommerce_review_order_submitted' );
 		remove_all_filters( 'woocommerce_review_order_eligible_statuses' );
 		remove_all_filters( 'woocommerce_review_order_eligible_items' );
@@ -374,6 +376,122 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 
 		$comment = get_comment( $row['comment_id'] );
 		$this->assertSame( '0', $comment->comment_approved );
+	}
+
+	/**
+	 * @testdox A review with more links than comment_max_links is held for moderation, like an ordinary comment.
+	 */
+	public function test_link_count_over_limit_is_held(): void {
+		update_option( 'comment_max_links', 2 );
+
+		$built      = $this->make_order( 1 );
+		$order      = $built['order'];
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => 'Great deal, see <a href="https://spam.test/a">here</a> and <a href="https://spam.test/b">here</a>.',
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
+		$this->assertSame( 'pending_moderation', $row['status'] );
+
+		$comment = get_comment( $row['comment_id'] );
+		$this->assertSame( '0', $comment->comment_approved );
+	}
+
+	/**
+	 * @testdox A review matching a moderation keyword is held for moderation, like an ordinary comment.
+	 */
+	public function test_moderation_keyword_match_is_held(): void {
+		update_option( 'moderation_keys', "casino\nviagra" );
+
+		$built      = $this->make_order( 1 );
+		$order      = $built['order'];
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => 'Won big at the casino thanks to this product!',
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
+		$this->assertSame( 'pending_moderation', $row['status'] );
+
+		$comment = get_comment( $row['comment_id'] );
+		$this->assertSame( '0', $comment->comment_approved );
+	}
+
+	/**
+	 * @testdox A second submission after a moderator's spam/trash verdict cannot auto-approve.
+	 */
+	public function test_resubmit_after_spam_verdict_cannot_autoapprove(): void {
+		$built      = $this->make_order( 1 );
+		$order      = $built['order'];
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$_POST      = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => 'Original review text.',
+				),
+			),
+		);
+		$first      = $this->dispatch();
+		$comment_id = (int) reset( $first['data']['results'] )['comment_id'];
+
+		// A moderator marks the review as spam.
+		wp_spam_comment( $comment_id );
+		$this->assertSame( 'spam', wp_get_comment_status( $comment_id ) );
+
+		// The customer resubmits the same row.
+		$_POST  = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => 'Trying again with clean text.',
+				),
+			),
+		);
+		$second = $this->dispatch();
+		$row    = reset( $second['data']['results'] );
+
+		$this->assertSame( 'error', $row['status'] );
+		$this->assertSame( 'spam', wp_get_comment_status( $comment_id ), 'Moderator decision must stick; a second submission must not auto-approve.' );
 	}
 
 	/**

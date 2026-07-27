@@ -63,7 +63,7 @@ export const useJetpackPluginState = () => {
 	 */
 	const onClickInstall = useCallback( () => {
 		const thisUrl = window.location.href;
-		installJetpackAndConnect(
+		void installJetpackAndConnect(
 			createErrorNotice,
 			() => thisUrl + '&jetpackState=returning'
 		);

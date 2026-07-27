@@ -127,7 +127,6 @@ class SubmissionHandler {
 		$author_email = $order->get_billing_email();
 		$author_ip    = $order->get_customer_ip_address();
 		$author_agent = $order->get_customer_user_agent();
-		$require_mod  = (bool) get_option( 'comment_moderation' );
 
 		// Drop any per-request memoisation a prior caller may have populated,
 		// then preload the eligibility cache so the per-row decide() calls
@@ -222,12 +221,20 @@ class SubmissionHandler {
 			$existing = $decision['comment'] instanceof \WP_Comment ? $decision['comment'] : null;
 
 			if ( $existing instanceof \WP_Comment ) {
+				// A moderator's spam/trash decision is final.
+				if ( in_array( wp_get_comment_status( $existing ), array( 'spam', 'trash' ), true ) ) {
+					$result['error']       = 'update_failed';
+					$results[ $row_index ] = $result;
+					continue;
+				}
+
+				$approved  = self::comment_approval_status( $author_name, $author_email, $text, $author_ip, $author_agent );
 				$update_ok = wp_update_comment(
 					wp_slash(
 						array(
 							'comment_ID'       => (int) $existing->comment_ID,
 							'comment_content'  => $text,
-							'comment_approved' => $require_mod ? 0 : 1,
+							'comment_approved' => $approved,
 						)
 					)
 				);
@@ -240,10 +247,18 @@ class SubmissionHandler {
 				update_comment_meta( (int) $existing->comment_ID, 'rating', $rating );
 
 				$result['comment_id']  = (int) $existing->comment_ID;
-				$result['status']      = $require_mod ? 'pending_moderation' : 'ok';
+				$result['status']      = 1 === $approved ? 'ok' : 'pending_moderation';
 				$results[ $row_index ] = $result;
 				continue;
 			}
+
+			if ( self::has_rejected_review( $order, $line_product_id, $line_variation_id ) ) {
+				$result['error']       = 'update_failed';
+				$results[ $row_index ] = $result;
+				continue;
+			}
+
+			$approved = self::comment_approval_status( $author_name, $author_email, $text, $author_ip, $author_agent );
 
 			$comment_data = array(
 				'comment_post_ID'      => $review_post_id,
@@ -253,7 +268,7 @@ class SubmissionHandler {
 				'comment_agent'        => $author_agent,
 				'comment_content'      => $text,
 				'comment_type'         => 'review',
-				'comment_approved'     => $require_mod ? 0 : 1,
+				'comment_approved'     => $approved,
 				'user_id'              => $comment_user_id,
 			);
 
@@ -275,11 +290,68 @@ class SubmissionHandler {
 			}
 
 			$result['comment_id']  = (int) $comment_id;
-			$result['status']      = $require_mod ? 'pending_moderation' : 'ok';
+			$result['status']      = 1 === $approved ? 'ok' : 'pending_moderation';
 			$results[ $row_index ] = $result;
 		}//end foreach
 
 		return $results;
+	}
+
+	/**
+	 * Decide whether a review should be auto-approved, via WordPress's own `check_comment()`.
+	 *
+	 * @param string $author  Comment author name.
+	 * @param string $email   Comment author email.
+	 * @param string $content Comment content.
+	 * @param string $ip      Comment author IP.
+	 * @param string $agent   Comment author user agent.
+	 * @return int 1 to auto-approve, 0 to hold for moderation.
+	 */
+	private static function comment_approval_status( string $author, string $email, string $content, string $ip, string $agent ): int {
+		add_filter( 'pre_option_comment_previously_approved', '__return_zero' );
+		$approved = check_comment( $author, $email, '', $content, $ip, $agent, 'review' );
+		remove_filter( 'pre_option_comment_previously_approved', '__return_zero' );
+
+		return $approved ? 1 : 0;
+	}
+
+	/**
+	 * Whether a moderator already marked this exact order/product/variation
+	 * review as spam or trash.
+	 *
+	 * @param WC_Order $order        Order being reviewed.
+	 * @param int      $product_id   Parent product id.
+	 * @param int      $variation_id Variation id (0 for simple products).
+	 * @return bool
+	 */
+	private static function has_rejected_review( WC_Order $order, int $product_id, int $variation_id ): bool {
+		$email = $order->get_billing_email();
+		if ( '' === $email ) {
+			return false;
+		}
+
+		$comments = get_comments(
+			array(
+				'post_id'      => $product_id,
+				'author_email' => $email,
+				'type'         => 'review',
+				'status'       => array( 'spam', 'trash' ),
+				'number'       => 1,
+				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post_id + author_email.
+					'relation' => 'AND',
+					array(
+						'key'   => ItemEligibility::ORDER_META_KEY,
+						'value' => (string) $order->get_id(),
+					),
+					array(
+						'key'   => ItemEligibility::VARIATION_META_KEY,
+						'value' => (string) $variation_id,
+					),
+				),
+			)
+		);
+
+		return is_array( $comments ) && ! empty( $comments );
 	}
 
 	/**

@@ -409,6 +409,45 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_variation_prices returns a valid array structure when the woocommerce_variation_prices filter returns malformed data (null or false), restoring the pre-refactor foreach behaviour that tolerated non-array filter output.
+	 * @dataProvider provider_malformed_variation_prices_filter_values
+	 *
+	 * @param mixed $malformed_value The malformed value for returning via woocommerce_get_variation_prices_hash filter.
+	 */
+	public function test_get_variation_prices_tolerates_malformed_filter_output( $malformed_value ): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		// Bust the transient so read_price_data() always reaches the woocommerce_variation_prices filter.
+		$invalidate_cache = static fn( array $hash ) => array( ...$hash, wp_rand() );
+		add_filter( 'woocommerce_get_variation_prices_hash', $invalidate_cache );
+
+		$bad_filter = static fn() => $malformed_value;
+		add_filter( 'woocommerce_variation_prices', $bad_filter );
+
+		try {
+			$prices = $product->get_variation_prices();
+			$this->assertSame( $malformed_value, $prices );
+		} finally {
+			remove_filter( 'woocommerce_variation_prices', $bad_filter );
+			remove_filter( 'woocommerce_get_variation_prices_hash', $invalidate_cache );
+		}
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @return array<string,array>
+	 */
+	public function provider_malformed_variation_prices_filter_values(): array {
+		return array(
+			'null'   => array( null ),
+			'false'  => array( false ),
+			'string' => array( 'bad_return' ),
+			'object' => array( new stdClass() ),
+		);
+	}
+
+	/**
 	 * Create a real image attachment that passes `wp_attachment_is_image()`.
 	 *
 	 * @param string $title         Post title.

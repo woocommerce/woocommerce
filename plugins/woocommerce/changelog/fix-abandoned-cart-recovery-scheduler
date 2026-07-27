@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Schedule the abandoned cart recovery email only for orders created via checkout, honor the eligible-statuses filter when scheduling and cancelling, and skip queued sends when automated sending is turned off.
+

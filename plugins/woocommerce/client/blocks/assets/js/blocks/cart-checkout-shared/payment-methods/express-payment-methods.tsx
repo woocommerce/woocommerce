@@ -85,8 +85,8 @@ const ExpressPaymentMethods = () => {
 		( paymentMethodId ) => () => {
 			previousActivePaymentMethod.current = activePaymentMethod;
 			previousPaymentMethodData.current = paymentMethodData;
-			__internalSetExpressPaymentStarted();
-			__internalSetActivePaymentMethod( paymentMethodId );
+			void __internalSetExpressPaymentStarted();
+			void __internalSetActivePaymentMethod( paymentMethodId );
 		},
 		[
 			activePaymentMethod,
@@ -102,8 +102,8 @@ const ExpressPaymentMethods = () => {
 	 * This restores the active method and returns the state to pristine.
 	 */
 	const onExpressPaymentClose = useCallback( () => {
-		__internalSetPaymentIdle();
-		__internalSetActivePaymentMethod(
+		void __internalSetPaymentIdle();
+		void __internalSetActivePaymentMethod(
 			previousActivePaymentMethod.current,
 			previousPaymentMethodData.current
 		);
@@ -116,10 +116,10 @@ const ExpressPaymentMethods = () => {
 	 */
 	const onExpressPaymentError = useCallback(
 		( errorMessage ) => {
-			__internalSetPaymentError();
-			__internalSetPaymentMethodData( errorMessage );
-			__internalSetExpressPaymentError( errorMessage );
-			__internalSetActivePaymentMethod(
+			void __internalSetPaymentError();
+			void __internalSetPaymentMethodData( errorMessage );
+			void __internalSetExpressPaymentError( errorMessage );
+			void __internalSetActivePaymentMethod(
 				previousActivePaymentMethod.current,
 				previousPaymentMethodData.current
 			);
@@ -148,7 +148,7 @@ const ExpressPaymentMethods = () => {
 			if ( errorMessage ) {
 				onExpressPaymentError( errorMessage );
 			} else {
-				__internalSetExpressPaymentError( '' );
+				void __internalSetExpressPaymentError( '' );
 			}
 		},
 		[ __internalSetExpressPaymentError, onExpressPaymentError ]

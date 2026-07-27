@@ -185,6 +185,8 @@ Webpack is configured with **11 separate configs** in `bin/webpack-configs.js`:
 
 Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP enqueues run against the final asset locations with no copy step. TypeScript uses **60+ path aliases** defined in `tsconfig.base.json`.
 
+`@woocommerce/entities` resolves to pure entity helpers that are bundled into consumers and can be tree-shaken. The `wc-entities` entry registers those entities as a side effect. It temporarily retains deprecated utility exports on `wc.wcEntities` for backward compatibility. Manual registration helpers also remain available as deprecated compatibility wrappers.
+
 ## Testing
 
 ### Jest Unit Tests
