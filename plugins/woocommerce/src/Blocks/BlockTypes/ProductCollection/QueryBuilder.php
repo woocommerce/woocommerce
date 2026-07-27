@@ -532,9 +532,9 @@ class QueryBuilder {
 				$attribute_query = get_query_var( $attribute_query_type );
 
 				$is_canonical_filter = 0 === strpos( $attribute_name, AttributeFilter::FILTER_QUERY_VAR_PREFIX );
-				$is_and_filter       = 'and' === $attribute_query;
+				$is_multi_term_and   = 'and' === $attribute_query && count( array_filter( explode( ',', (string) $attribute_value ) ) ) > 1;
 
-				if ( empty( $attribute_value ) || ( $use_attribute_lookup && $is_canonical_filter && ! $is_and_filter ) ) {
+				if ( empty( $attribute_value ) || ( $use_attribute_lookup && $is_canonical_filter && ! $is_multi_term_and ) ) {
 					return $acc;
 				}
 
@@ -720,7 +720,9 @@ class QueryBuilder {
 					continue;
 				}
 
-				if ( 0 !== strpos( $filter_param, AttributeFilter::FILTER_QUERY_VAR_PREFIX ) || 'and' === $query_type_value ) {
+				$is_multi_term_and = 'and' === $query_type_value && count( array_filter( explode( ',', $filter_value ) ) ) > 1;
+
+				if ( 0 !== strpos( $filter_param, AttributeFilter::FILTER_QUERY_VAR_PREFIX ) || $is_multi_term_and ) {
 					continue;
 				}
 

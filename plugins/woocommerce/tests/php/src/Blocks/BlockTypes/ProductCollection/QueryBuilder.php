@@ -540,11 +540,13 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$parsed_block['attrs']['query']['order']      = 'asc';
 
 		set_query_var( 'filter_color', 'yellow-slug' );
-		set_query_var( 'query_type_color', 'or' );
+		set_query_var( 'query_type_color', 'and' );
 		$yellow_query_args = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 		$yellow_query      = new WP_Query( array_merge( $yellow_query_args, array( 'fields' => 'ids' ) ) );
 
 		$this->assertTrue( $yellow_query_args['isProductCollection'], 'Custom Product Collection queries should be marked for shared filtering.' );
+		$this->assertSame( 'yellow-slug', $yellow_query_args['filter_color'], 'Single-term AND filters should use shared filtering.' );
+		$this->assertSame( 'and', $yellow_query_args['query_type_color'], 'Single-term AND query types should be forwarded.' );
 		$this->assertNotContains( $product->get_id(), array_map( 'absint', $yellow_query->posts ), 'A parent-only yellow term must not match.' );
 		$this->assertContains( $yellow_product->get_id(), array_map( 'absint', $yellow_query->posts ), 'A real yellow variation should match.' );
 
