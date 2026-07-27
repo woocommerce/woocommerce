@@ -18,10 +18,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Helper API endpoint responds with a rate-limit status (HTTP 429), so the site
  * refrains from calling that endpoint again until the limit resets.
  *
- * The window is derived from the standard rate-limit headers returned by
- * WooCommerce.com — `X-RateLimit-Reset` (an absolute Unix timestamp) with a
- * `Retry-After` (delta seconds) fallback — and clamped to per-type minimum and
- * maximum bounds so each endpoint can back off for an appropriate amount of time.
+ * The window is taken from the response's `Retry-After` header (delta seconds)
+ * and honored as-is, capped only at a per-type maximum. This covers both the
+ * short window of a global rate limit and the longer window of a per-endpoint
+ * limit. When the header is absent, a per-type default window is applied
+ * instead. `Retry-After` is used in preference to `X-RateLimit-Reset` because
+ * it is a relative delta and therefore immune to clock skew between the site
+ * and WooCommerce.com.
  *
  * A manual "Refresh" request (the Marketplace refresh button) always bypasses
  * and clears the backoff so the user can force a fresh request at any time.
@@ -36,23 +39,39 @@ class WC_Helper_API_Backoff {
 	const TRANSIENT_PREFIX = '_woocommerce_helper_backoff_';
 
 	/**
+	 * Request type: the WooCommerce.com update-check endpoint.
+	 *
+	 * @var string
+	 */
+	const REQUEST_TYPE_UPDATE_CHECK = 'update-check';
+
+	/**
+	 * Request type: the WooCommerce.com subscriptions endpoint.
+	 *
+	 * @var string
+	 */
+	const REQUEST_TYPE_SUBSCRIPTIONS = 'subscriptions';
+
+	/**
 	 * Backoff bounds per request type, in seconds.
 	 *
-	 * `min` is the floor applied after any 429 (also the default when the
-	 * response carries no usable rate-limit header). `max` is the ceiling, a
-	 * safety net against an unexpectedly distant reset locking the endpoint out.
+	 * `default` is the window applied only when the response carries no usable
+	 * rate-limit header. `max` is the ceiling that an explicit header value is
+	 * capped at — a safety net against an unexpectedly distant reset locking the
+	 * endpoint out. An explicit header shorter than `default` (e.g. a global
+	 * rate limit's brief `Retry-After`) is honored as-is, not floored.
 	 *
-	 * @return array<string, array{min:int, max:int}>
+	 * @return array<string, array{default:int, max:int}>
 	 */
 	private static function get_all_bounds(): array {
 		return array(
-			'update-check'  => array(
-				'min' => HOUR_IN_SECONDS,
-				'max' => HOUR_IN_SECONDS * 3,
+			self::REQUEST_TYPE_UPDATE_CHECK  => array(
+				'default' => HOUR_IN_SECONDS,
+				'max'     => HOUR_IN_SECONDS * 3,
 			),
-			'subscriptions' => array(
-				'min' => 15 * MINUTE_IN_SECONDS,
-				'max' => HOUR_IN_SECONDS * 3,
+			self::REQUEST_TYPE_SUBSCRIPTIONS => array(
+				'default' => 15 * MINUTE_IN_SECONDS,
+				'max'     => HOUR_IN_SECONDS * 3,
 			),
 		);
 	}
@@ -63,15 +82,15 @@ class WC_Helper_API_Backoff {
 	 * Unknown request types fall back to a conservative default.
 	 *
 	 * @param string $request_type The Helper API request type (e.g. 'update-check').
-	 * @return array{min:int, max:int}
+	 * @return array{default:int, max:int}
 	 */
 	private static function get_bounds( string $request_type ): array {
-		$default = array(
-			'min' => HOUR_IN_SECONDS,
-			'max' => WEEK_IN_SECONDS,
+		$fallback = array(
+			'default' => HOUR_IN_SECONDS,
+			'max'     => WEEK_IN_SECONDS,
 		);
 
-		return self::get_all_bounds()[ $request_type ] ?? $default;
+		return self::get_all_bounds()[ $request_type ] ?? $fallback;
 	}
 
 	/**
@@ -118,39 +137,48 @@ class WC_Helper_API_Backoff {
 	/**
 	 * Record a backoff window for a request type from a rate-limited response.
 	 *
-	 * Reads `X-RateLimit-Reset` (absolute timestamp) then `Retry-After` (delta
-	 * seconds), clamps the resulting wait to the request type's [min, max]
-	 * bounds, and stores it. With no usable header the minimum bound is applied,
-	 * so a malformed 429 still produces a sensible backoff.
+	 * The wait is taken from the response's rate-limit headers and honored as-is,
+	 * capped only at the request type's `max`. This respects both a global rate
+	 * limit's short `Retry-After` and a per-endpoint limit's longer window. When
+	 * no usable header is present (a malformed 429), the per-type `default` is
+	 * used so there is always a sensible backoff.
 	 *
 	 * @param string         $request_type The Helper API request type (e.g. 'update-check').
 	 * @param array|WP_Error $response     The raw response from the Helper API call.
 	 * @return void
 	 */
 	public static function record_from_response( string $request_type, $response ): void {
-		$now         = time();
-		$bounds      = self::get_bounds( $request_type );
-		$retry_after = 0;
+		$now    = time();
+		$bounds = self::get_bounds( $request_type );
 
-		// Preferred signal: an absolute reset timestamp.
-		$reset = wp_remote_retrieve_header( $response, 'x-ratelimit-reset' );
-		if ( is_numeric( $reset ) ) {
-			$retry_after = (int) $reset - $now;
+		$retry_after = self::get_retry_after_from_headers( $response );
+
+		if ( null === $retry_after ) {
+			// No Retry-After header — apply the per-type default window.
+			$retry_after = $bounds['default'];
+		} else {
+			// Honor the server's directive, but never longer than the per-type
+			// maximum (a safety net against an erroneous far value).
+			$retry_after = min( $retry_after, $bounds['max'] );
 		}
-
-		// Fallback: Retry-After as a delta in seconds from now.
-		if ( $retry_after <= 0 ) {
-			$retry_after_header = wp_remote_retrieve_header( $response, 'retry-after' );
-			if ( is_numeric( $retry_after_header ) ) {
-				$retry_after = (int) $retry_after_header;
-			}
-		}
-
-		// Clamp to the per-type bounds. A missing/expired header yields the
-		// minimum; an unexpectedly distant reset is capped at the maximum.
-		$retry_after = max( $bounds['min'], min( $retry_after, $bounds['max'] ) );
 
 		set_transient( self::get_transient_key( $request_type ), $now + $retry_after, $retry_after );
+	}
+
+	/**
+	 * Extract the wait, in seconds, from a rate-limited response's `Retry-After`
+	 * header. Non-positive or missing values are treated as absent.
+	 *
+	 * @param array|WP_Error $response The raw response from the Helper API call.
+	 * @return int|null Seconds to wait, or null when the header is absent/invalid.
+	 */
+	private static function get_retry_after_from_headers( $response ): ?int {
+		$retry_after = wp_remote_retrieve_header( $response, 'retry-after' );
+		if ( is_numeric( $retry_after ) && (int) $retry_after > 0 ) {
+			return (int) $retry_after;
+		}
+
+		return null;
 	}
 
 	/**

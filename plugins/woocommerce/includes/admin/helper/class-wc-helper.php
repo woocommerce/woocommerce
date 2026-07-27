@@ -1918,6 +1918,13 @@ class WC_Helper {
 			delete_transient( $cache_key );
 		}
 
+		// If a previous subscriptions call was rate limited (HTTP 429), honor the
+		// server's reset window and skip the remote call until it passes. A manual
+		// refresh bypasses and clears the backoff (see WC_Helper_API_Backoff).
+		if ( WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS ) ) {
+			return array();
+		}
+
 		try {
 			$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$source      = '';
@@ -1956,6 +1963,12 @@ class WC_Helper {
 			if ( 200 !== $code ) {
 				set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
 
+				// Respect server-side rate limiting: on a 429, record the reset
+				// window so we hold off on further subscriptions calls until then.
+				if ( 429 === (int) $code ) {
+					WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS, $request );
+				}
+
 				throw new Exception( self::get_message_for_response_code( $code ), $code );
 			}
 
@@ -1967,6 +1980,9 @@ class WC_Helper {
 			}
 
 			set_transient( $cache_key, $data, 3 * HOUR_IN_SECONDS );
+
+			// A successful response clears any prior rate-limit backoff.
+			WC_Helper_API_Backoff::clear( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS );
 
 			// Remove notice after successful API call as it's no longer applicable.
 			self::remove_api_error_notice();

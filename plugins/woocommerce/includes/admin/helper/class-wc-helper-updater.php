@@ -21,13 +21,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Helper_Updater {
 
 	/**
-	 * Backoff request type key for the update-check endpoint.
-	 *
-	 * @var string
-	 */
-	const BACKOFF_REQUEST_TYPE = 'update-check';
-
-	/**
 	 * Loads the class, runs on init.
 	 */
 	public static function load() {
@@ -673,7 +666,7 @@ class WC_Helper_Updater {
 		// (or a flushed cache) can't slip past it — but clicking the Marketplace
 		// "Refresh" button bypasses and clears it. Return the last cached
 		// products, if any, rather than an empty set.
-		if ( WC_Helper_API_Backoff::is_rate_limited( self::BACKOFF_REQUEST_TYPE ) ) {
+		if ( WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ) ) {
 			return ( is_array( $data ) && isset( $data['products'] ) && is_array( $data['products'] ) )
 				? $data['products']
 				: array();
@@ -722,13 +715,13 @@ class WC_Helper_Updater {
 			// Respect server-side rate limiting: on a 429, record the reset
 			// window so we hold off on further update-check calls until then.
 			if ( 429 === $response_code ) {
-				WC_Helper_API_Backoff::record_from_response( self::BACKOFF_REQUEST_TYPE, $request );
+				WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, $request );
 			}
 		} else {
 			$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
 
 			// A successful response clears any prior rate-limit backoff.
-			WC_Helper_API_Backoff::clear( self::BACKOFF_REQUEST_TYPE );
+			WC_Helper_API_Backoff::clear( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
 		}
 
 		set_transient( $cache_key, $data, 12 * HOUR_IN_SECONDS );
