@@ -550,10 +550,10 @@ class Post_Template_Test extends \Email_Editor_Integration_Test_Case {
 			),
 			'innerBlocks' => array(),
 		);
-		$card    = $this->nested_featured_image( 'https://example.com/a.png', 800, 400 )
+		$card         = $this->nested_featured_image( 'https://example.com/a.png', 800, 400 )
 			. '<h2 class="wp-block-post-title" style="color:#111" onmouseover="alert(1)">Card Title</h2>'
 			. '<script>alert(2)</script>';
-		$content = $this->build_list( array( $card, $card ), 2 );
+		$content      = $this->build_list( array( $card, $card ), 2 );
 
 		$rendered = $this->renderer->render( $content, $parsed_block, $this->rendering_context );
 
