@@ -11,6 +11,7 @@ import { serialize, parse, BlockInstance } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { storeName, PERSONALIZATION_TAG_ENTITY } from './constants';
+import { getPersonalizationTagsQuery } from './personalization-tags-query';
 import {
 	State,
 	EmailTemplate,
@@ -420,34 +421,18 @@ export function getPreviewState( state: State ): State[ 'preview' ] {
 
 const EMPTY_PERSONALIZATION_TAGS: PersonalizationTag[] = [];
 
-type PersonalizationTagsQuery = {
-	context: string;
-	per_page: number;
-	post_id?: number | string;
-};
-
 export const getPersonalizationTagsList = createRegistrySelector(
 	( select ) => {
 		// The block edit filter calls this selector once per block on every store
-		// change, so both the query and the filtered list are cached.
+		// change, so the filtered list is cached alongside the shared query object
+		// from `getPersonalizationTagsQuery`.
 		//
 		// `createRegistrySelector` resolves this factory once per registry, so the
-		// caches below are scoped to a registry rather than shared globally.
+		// cache below is scoped to a registry rather than shared globally.
 		//
-		// The query object is reused because `getEntityRecords` forwards it to
-		// core-data's `getQueriedItems`, which is memoized by rememo and compares
-		// arguments by reference: a fresh object literal misses on every call and
-		// prepends a node to a list keyed on the entity's queried-data state, so
-		// the list grows until that state changes and every later call walks all
-		// of it. `getQueriedItems` also keeps a value-keyed cache (an
-		// `EquivalentKeyMap` per state), so the records array stays referentially
-		// stable across those misses — which is what lets `listCache` key on
-		// `tags` identity.
-		let queryCache: {
-			postId: number | string | undefined;
-			query: PersonalizationTagsQuery;
-		} | null = null;
-
+		// Keying on `tags` identity is sound because `getQueriedItems` keeps a
+		// value-keyed cache (an `EquivalentKeyMap` per state), so it hands back the
+		// same records array until the entity state itself changes.
 		let listCache: {
 			tags: PersonalizationTag[];
 			postType: string;
@@ -458,22 +443,10 @@ export const getPersonalizationTagsList = createRegistrySelector(
 		return () => {
 			const postId = select( storeName ).getEmailPostId();
 
-			if ( ! queryCache || queryCache.postId !== postId ) {
-				queryCache = {
-					postId,
-					query: {
-						context: 'view',
-						per_page: -1,
-						// Include post_id for context-aware tag filtering (e.g., automation emails)
-						...( postId ? { post_id: postId } : {} ),
-					},
-				};
-			}
-
 			const tags = ( select( coreDataStore ).getEntityRecords(
 				PERSONALIZATION_TAG_ENTITY.kind,
 				PERSONALIZATION_TAG_ENTITY.name,
-				queryCache.query
+				getPersonalizationTagsQuery( postId )
 			) || EMPTY_PERSONALIZATION_TAGS ) as PersonalizationTag[];
 
 			const postType = select( storeName ).getEmailPostType();
