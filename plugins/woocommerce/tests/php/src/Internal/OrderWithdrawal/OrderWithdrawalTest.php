@@ -239,6 +239,83 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should match normalized submitted order numbers only to the intended order.
+	 */
+	public function test_process_current_request_matches_normalized_order_number_to_intended_order(): void {
+		$target_order = $this->create_order_for_form_data();
+		$wrong_order  = $this->create_order_for_form_data();
+		$capture      = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '#' . $target_order->get_id() )
+			);
+
+			$state          = $this->sut->process_current_request();
+			$merchant_email = $this->get_captured_mail_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+
+			$this->assertSame( 'confirmation', $state->screen, 'Normalized order number submissions should reach the confirmation screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
+			$this->assertStringContainsString( str_replace( '&', '&amp;', $target_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should link to the intended order.' );
+			$this->assertStringNotContainsString( str_replace( '&', '&amp;', $wrong_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should not link to the wrong order.' );
+			$this->assertTrue( $this->order_has_note_containing( $target_order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The intended order should receive a withdrawal note.' );
+			$this->assertFalse( $this->order_has_note_containing( $wrong_order, 'Order withdrawal requested' ), 'The wrong order should not receive a withdrawal note.' );
+			$this->assert_order_withdrawal_requested( $target_order );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should not match an order that shares the email but has a different billing name.
+	 */
+	public function test_process_current_request_matches_only_order_with_same_email_and_billing_name(): void {
+		$target_order         = $this->create_order_for_form_data();
+		$different_name_order = $this->create_order_for_form_data(
+			array(
+				OrderWithdrawalFormProcessor::FIELD_FIRST_NAME => 'Janet',
+				OrderWithdrawalFormProcessor::FIELD_LAST_NAME  => 'Smith',
+			)
+		);
+		$custom_order_number  = 'CUSTOM-1001';
+		$capture              = $this->capture_wp_mail();
+		$filter               = static function ( $order_number, $filtered_order ) use ( $target_order, $different_name_order, $custom_order_number ) {
+			if (
+				$filtered_order instanceof WC_Order
+				&& in_array( $filtered_order->get_id(), array( $target_order->get_id(), $different_name_order->get_id() ), true )
+			) {
+				return $custom_order_number;
+			}
+
+			return $order_number;
+		};
+
+		add_filter( 'woocommerce_order_number', $filter, 10, 2 );
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => $custom_order_number )
+			);
+
+			$state          = $this->sut->process_current_request();
+			$merchant_email = $this->get_captured_mail_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+
+			$this->assertSame( 'confirmation', $state->screen, 'Matching submissions should reach the confirmation screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
+			$this->assertStringContainsString( str_replace( '&', '&amp;', $target_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should link to the intended order.' );
+			$this->assertStringNotContainsString( str_replace( '&', '&amp;', $different_name_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should not link to the order with a different billing name.' );
+			$this->assertTrue( $this->order_has_note_containing( $target_order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The intended order should receive a withdrawal note.' );
+			$this->assertFalse( $this->order_has_note_containing( $different_name_order, 'Order withdrawal requested' ), 'The order with a different billing name should not receive a withdrawal note.' );
+			$this->assert_order_withdrawal_requested( $target_order );
+		} finally {
+			remove_filter( 'woocommerce_order_number', $filter, 10 );
+			$capture['remove']();
+		}
+	}
+
+	/**
 	 * @testdox Should reject duplicate withdrawal requests for an already flagged matched order.
 	 */
 	public function test_process_current_request_rejects_duplicate_withdrawal_for_matched_order(): void {
