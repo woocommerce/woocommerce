@@ -470,4 +470,45 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( '', $importer->parse_float_field( '' ), 'Empty values should be returned unchanged.' );
 	}
+
+	/**
+	 * @testdox adjust_character_encoding should convert values from the configured encoding to UTF-8 (issue #38541).
+	 * @dataProvider provider_adjust_character_encoding
+	 *
+	 * @param string $encoding The configured character encoding.
+	 * @param string $value    The raw value expressed in that encoding.
+	 * @param string $expected The expected UTF-8 value.
+	 */
+	public function test_adjust_character_encoding_converts_to_utf8( string $encoding, string $value, string $expected ) {
+		if ( ! function_exists( 'mb_convert_encoding' ) ) {
+			$this->markTestSkipped( 'The mbstring extension is required for this test.' );
+		}
+
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv', array( 'character_encoding' => $encoding ) );
+
+		$method = new ReflectionMethod( WC_Product_CSV_Importer::class, 'adjust_character_encoding' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			$expected,
+			$method->invoke( $importer, $value ),
+			"Expected a '{$encoding}' value to be converted to UTF-8."
+		);
+	}
+
+	/**
+	 * Data provider for test_adjust_character_encoding_converts_to_utf8.
+	 *
+	 * The é character is the single byte 0xE9 in both ISO-8859-1 and Windows-1252, and the
+	 * two-byte sequence 0xC3 0xA9 in UTF-8.
+	 *
+	 * @return array
+	 */
+	public function provider_adjust_character_encoding(): array {
+		return array(
+			'UTF-8 is returned unchanged' => array( 'UTF-8', 'Café', 'Café' ),
+			'ISO-8859-1 is converted'     => array( 'ISO-8859-1', "Caf\xE9", 'Café' ),
+			'Windows-1252 is converted'   => array( 'Windows-1252', "Caf\xE9", 'Café' ),
+		);
+	}
 }
