@@ -237,13 +237,11 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
-	 * Get the common properties for the event.
+	 * Request-scoped — not for page output, see `get_page_common_properties()`.
 	 *
-	 * Includes the properties taken from the current request — the session cookie
-	 * and `get_server_details()` — so this is only safe for events the server fires
-	 * itself on an uncached request, which includes the proxy tracking endpoint.
-	 * The cacheable page output must use `get_page_common_properties()` instead —
-	 * see the note there before adding any property here.
+	 * Includes the session cookie and `get_server_details()`, so this is only safe
+	 * for events the server fires itself on an uncached request, which includes the
+	 * proxy tracking endpoint.
 	 *
 	 * @return array The common properties.
 	 */
@@ -279,13 +277,15 @@ class WC_Analytics_Tracking {
 	/**
 	 * Get the common properties that are safe to embed in cacheable page HTML.
 	 *
-	 * Everything returned here is derived from the store, not from the current
-	 * request, because the page output this feeds is cached and replayed to later
-	 * visitors. Neither request headers nor cookies are part of the CDN cache key,
-	 * so a property derived from one would be attributed to every subsequent
-	 * visitor of the cached page. Anything request-derived belongs in
-	 * `get_session_properties()` or `get_server_details()`, which only reach the
-	 * server-fired path.
+	 * Request headers and cookies are not part of the CDN cache key, so a property
+	 * derived from one is attributed to every later visitor of the cached page.
+	 * Anything request-derived belongs in `get_session_properties()` or
+	 * `get_server_details()`, which only reach the server-fired path.
+	 *
+	 * Two exceptions, neither of them licence to add a third: `device` is
+	 * User-Agent derived and a known gap, tracked for a client-side follow-up;
+	 * `ui`, `is_guest` and `store_admin` are safe only because caches bypass
+	 * logged-in requests.
 	 *
 	 * @since 0.16.7
 	 *

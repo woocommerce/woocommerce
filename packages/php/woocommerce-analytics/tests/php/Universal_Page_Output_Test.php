@@ -239,33 +239,45 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Test that a breadcrumb title cannot inflate the page.
-	 *
-	 * On search pages the breadcrumb trail embeds the raw search term, so a
-	 * long request can otherwise push an arbitrary amount of text into every
-	 * copy of the cached response.
+	 * Test that a breadcrumb title cannot inflate the page. Titles come from
+	 * `post_title`, which core does not bound.
 	 */
 	public function test_page_output_caps_long_breadcrumb_titles(): void {
-		$GLOBALS['post'] = new \WP_Post(
-			(object) array(
-				'ID'         => 1,
-				'post_title' => str_repeat( 'A', 5000 ),
-				'post_type'  => 'post',
-				'filter'     => 'raw',
-			)
+		$breadcrumbs = $this->render_breadcrumbs_for_title( str_repeat( 'A', 5000 ) );
+
+		$this->assertSame(
+			array( str_repeat( 'A', 199 ) . '…' ),
+			$breadcrumbs,
+			'A breadcrumb title should be capped before it reaches cacheable page output.'
 		);
+	}
 
-		$breadcrumbs = $this->get_rendered_breadcrumbs( $this->render_analytics_data() );
+	/**
+	 * Test that the cap counts characters rather than bytes. A byte-wise cut
+	 * splits the final UTF-8 sequence, which `wp_json_encode()` silently rewrites
+	 * to a replacement character.
+	 */
+	public function test_page_output_caps_breadcrumb_titles_by_character(): void {
+		$breadcrumbs = $this->render_breadcrumbs_for_title( str_repeat( '日', 250 ) );
 
-		$this->assertNotEmpty( $breadcrumbs, 'The breadcrumb trail should still be rendered.' );
+		$this->assertSame(
+			array( str_repeat( '日', 199 ) . '…' ),
+			$breadcrumbs,
+			'A breadcrumb title should be capped by character, not by byte.'
+		);
+	}
 
-		foreach ( $breadcrumbs as $title ) {
-			$this->assertLessThanOrEqual(
-				200,
-				mb_strlen( $title ),
-				'A breadcrumb title should be capped before it reaches cacheable page output.'
-			);
-		}
+	/**
+	 * Test that a title sitting exactly on the limit is not truncated.
+	 */
+	public function test_page_output_keeps_breadcrumb_titles_at_the_limit_intact(): void {
+		$title = str_repeat( 'A', 200 );
+
+		$this->assertSame(
+			array( $title ),
+			$this->render_breadcrumbs_for_title( $title ),
+			'A title exactly at the limit should be sent unchanged.'
+		);
 	}
 
 	/**
@@ -274,18 +286,11 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	public function test_page_output_keeps_short_breadcrumb_titles_intact(): void {
 		$title = 'Perfectly Ordinary Product Name';
 
-		$GLOBALS['post'] = new \WP_Post(
-			(object) array(
-				'ID'         => 1,
-				'post_title' => $title,
-				'post_type'  => 'post',
-				'filter'     => 'raw',
-			)
+		$this->assertSame(
+			array( $title ),
+			$this->render_breadcrumbs_for_title( $title ),
+			'Ordinary titles should be sent unchanged.'
 		);
-
-		$breadcrumbs = $this->get_rendered_breadcrumbs( $this->render_analytics_data() );
-
-		$this->assertSame( array( $title ), $breadcrumbs, 'Ordinary titles should be sent unchanged.' );
 	}
 
 	/**
@@ -330,20 +335,18 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Test that a long search term is capped before it is queued for the page.
+	 * Test that a long search term is capped before it is queued for the page. The
+	 * term reaches the pixel twice — as `search_query` and inside the browser's own
+	 * `_dl` — so an uncapped term can push the URL past what a server will accept.
 	 *
-	 * The search event is assembled server-side and fired by the client, so the
-	 * term travels through the markup. It also reaches the pixel twice — once as
-	 * `search_query` and again inside the browser's own `_dl` — so an uncapped
-	 * term can push the pixel URL past what a server will accept, losing the
-	 * event outright.
+	 * 1500 characters is deliberately under the 1600 bytes above which
+	 * `WP_Query::parse_query()` blanks `s`, so this is an input a request can
+	 * actually produce.
 	 */
 	public function test_queued_search_event_caps_long_search_query(): void {
-		$search_query = $this->capture_search_event( str_repeat( 'A', 5000 ) );
-
-		$this->assertLessThanOrEqual(
-			200,
-			mb_strlen( $search_query ),
+		$this->assertSame(
+			str_repeat( 'A', 199 ) . '…',
+			$this->capture_search_event( str_repeat( 'A', 1500 ) ),
 			'A search term should be capped before it is queued into page output.'
 		);
 	}
@@ -397,6 +400,25 @@ class Universal_Page_Output_Test extends BaseTestCase {
 		ob_start();
 		$universal->inject_analytics_data();
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render the page payload for a post with the given title.
+	 *
+	 * @param string $title The post title the breadcrumb trail is built from.
+	 * @return array The decoded breadcrumb titles.
+	 */
+	private function render_breadcrumbs_for_title( string $title ): array {
+		$GLOBALS['post'] = new \WP_Post(
+			(object) array(
+				'ID'         => 1,
+				'post_title' => $title,
+				'post_type'  => 'post',
+				'filter'     => 'raw',
+			)
+		);
+
+		return $this->get_rendered_breadcrumbs( $this->render_analytics_data() );
 	}
 
 	/**

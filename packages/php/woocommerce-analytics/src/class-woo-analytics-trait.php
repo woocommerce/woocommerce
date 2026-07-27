@@ -254,7 +254,10 @@ trait Woo_Analytics_Trait {
 	}
 
 	/**
-	 * Default event properties which should be included with all events.
+	 * Request-scoped — not for page output, see `get_page_common_properties()`.
+	 *
+	 * Default event properties for events the server fires itself on an uncached
+	 * request. See `WC_Analytics_Tracking::get_common_properties()`.
 	 *
 	 * @return array Array of standard event props.
 	 */
@@ -637,12 +640,13 @@ trait Woo_Analytics_Trait {
 	/**
 	 * Limit the length of a caller-influenced string bound for the page output.
 	 *
-	 * The values this caps — breadcrumb titles and the search term — are short in
-	 * practice, but on a search page both derive from the request URL. Without a
-	 * limit a single long request would push an arbitrary amount of text into the
-	 * cached copy of the page, and the search term reaches the pixel twice (as
-	 * `search_query` and inside the browser's own `_dl`), where an oversized URL
-	 * risks the event being rejected rather than merely bloated.
+	 * Breadcrumb titles come from `post_title`, which core does not bound, so this
+	 * is their only limit. The search term is already blanked by
+	 * `WP_Query::parse_query()` above 1600 bytes; capping it further keeps the
+	 * search pixel URL, which carries the term twice, from being rejected outright.
+	 *
+	 * Truncated values keep an ellipsis so they stay distinguishable downstream
+	 * from a value that genuinely ended at the limit.
 	 *
 	 * @since 0.16.7
 	 *
@@ -654,7 +658,11 @@ trait Woo_Analytics_Trait {
 
 		$value = (string) $value;
 
-		return mb_strlen( $value ) > $max_length ? mb_substr( $value, 0, $max_length ) : $value;
+		if ( mb_strlen( $value ) <= $max_length ) {
+			return $value;
+		}
+
+		return mb_substr( $value, 0, $max_length - 1 ) . '…';
 	}
 
 	/**
