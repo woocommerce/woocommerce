@@ -1645,7 +1645,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_Error|null WP_Error if a reserved name is blocked, null otherwise.
 	 */
 	protected function check_for_reserved_attribute_names( $attributes, $product ) {
-		$blocked_attribute_names = ReservedAttributeNames::get_blocked_reserved_names( $attributes, $product instanceof WC_Product ? $product : null );
+		$blocked_attribute_names = ReservedAttributeNames::get_blocked_reserved_names( $attributes, $product );
 		if ( empty( $blocked_attribute_names ) ) {
 			return null;
 		}

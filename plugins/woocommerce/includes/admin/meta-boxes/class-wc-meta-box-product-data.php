@@ -338,7 +338,7 @@ class WC_Meta_Box_Product_Data {
 		$product      = new $classname( $post_id );
 		$attributes   = self::prepare_attributes();
 
-		$blocked_attribute_names = ReservedAttributeNames::get_blocked_reserved_names( $attributes, $product instanceof WC_Product ? $product : null );
+		$blocked_attribute_names = ReservedAttributeNames::get_blocked_reserved_names( $attributes, $product );
 		if ( ! empty( $blocked_attribute_names ) ) {
 			$attributes = array_values(
 				array_filter(

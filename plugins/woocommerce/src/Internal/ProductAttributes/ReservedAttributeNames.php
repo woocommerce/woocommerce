@@ -31,16 +31,14 @@ class ReservedAttributeNames {
 	 * See {@see wc_check_if_attribute_name_is_reserved()} for the list of reserved names.
 	 *
 	 * @param WC_Product_Attribute[] $attributes      Attributes about to be saved on the product.
-	 * @param WC_Product|null        $current_product The product being updated, used to grandfather already-stored names, or null when creating.
+	 * @param WC_Product             $current_product The product being saved, used to grandfather already-stored names. Pass a fresh product instance when creating.
 	 * @return string[] The reserved custom attribute names (as provided in `$attributes`) that should be blocked.
 	 */
-	public static function get_blocked_reserved_names( array $attributes, ?WC_Product $current_product = null ): array {
+	public static function get_blocked_reserved_names( array $attributes, WC_Product $current_product ): array {
 		$existing_names = array();
-		if ( $current_product instanceof WC_Product ) {
-			foreach ( $current_product->get_attributes( 'edit' ) as $existing_attribute ) {
-				if ( $existing_attribute instanceof WC_Product_Attribute && ! $existing_attribute->is_taxonomy() ) {
-					$existing_names[] = sanitize_title( $existing_attribute->get_name() );
-				}
+		foreach ( $current_product->get_attributes( 'edit' ) as $existing_attribute ) {
+			if ( $existing_attribute instanceof WC_Product_Attribute && ! $existing_attribute->is_taxonomy() ) {
+				$existing_names[] = sanitize_title( $existing_attribute->get_name() );
 			}
 		}
 
@@ -69,8 +67,8 @@ class ReservedAttributeNames {
 	/**
 	 * Write a log entry for a reserved-name collision found.
 	 *
-	 * @param WC_Product|null $product        The product being saved.
-	 * @param string          $attribute_name The colliding attribute name.
+	 * @param WC_Product $product        The product being saved.
+	 * @param string     $attribute_name The colliding attribute name.
 	 */
 	private static function log_collision( WC_Product $product, string $attribute_name ): void {
 		$product_id = $product->get_id();

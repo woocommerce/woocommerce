@@ -930,7 +930,8 @@ class WC_AJAX {
 		$classname    = WC_Product_Factory::get_product_classname( $product_id, $product_type );
 		$product      = new $classname( $product_id );
 
-		$blocked_attribute_names = ReservedAttributeNames::get_blocked_reserved_names( $attributes, $product instanceof WC_Product ? $product : null );
+		// @phpstan-ignore argument.type (get_product_classname() always returns a WC_Product subclass)
+		$blocked_attribute_names = ReservedAttributeNames::get_blocked_reserved_names( $attributes, $product );
 		if ( ! empty( $blocked_attribute_names ) ) {
 			/* translators: %s: comma-separated list of attribute names. */
 			throw new Exception( esc_html( sprintf( __( 'The following attribute names are not allowed because they are reserved terms: %s. Please change them.', 'woocommerce' ), implode( ', ', $blocked_attribute_names ) ) ) );

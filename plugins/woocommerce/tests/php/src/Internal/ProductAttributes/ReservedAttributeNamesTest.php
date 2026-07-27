@@ -37,7 +37,7 @@ class ReservedAttributeNamesTest extends WC_Unit_Test_Case {
 			$this->create_custom_attribute( 'Color' ),
 		);
 
-		$blocked = ReservedAttributeNames::get_blocked_reserved_names( $attributes );
+		$blocked = ReservedAttributeNames::get_blocked_reserved_names( $attributes, new WC_Product_Variable() );
 
 		$this->assertSame( array( 'Variation' ), $blocked, 'Only the reserved attribute name should be blocked.' );
 	}
@@ -65,7 +65,7 @@ class ReservedAttributeNamesTest extends WC_Unit_Test_Case {
 		$taxonomy_attribute->set_id( 123 );
 		$taxonomy_attribute->set_name( 'pa_variation' );
 
-		$blocked = ReservedAttributeNames::get_blocked_reserved_names( array( $taxonomy_attribute ) );
+		$blocked = ReservedAttributeNames::get_blocked_reserved_names( array( $taxonomy_attribute ), new WC_Product_Variable() );
 
 		$this->assertSame( array(), $blocked, 'Global attributes are namespaced and should never be blocked.' );
 	}
@@ -106,7 +106,7 @@ class ReservedAttributeNamesTest extends WC_Unit_Test_Case {
 		$logger->expects( $this->never() )->method( 'warning' );
 		$this->install_logger( $logger );
 
-		ReservedAttributeNames::get_blocked_reserved_names( array( $this->create_custom_attribute( 'Variation' ) ) );
+		ReservedAttributeNames::get_blocked_reserved_names( array( $this->create_custom_attribute( 'Variation' ) ), new WC_Product_Variable() );
 	}
 
 	/**
