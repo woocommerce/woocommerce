@@ -546,7 +546,7 @@ class WC_Analytics_Tracking {
 	 * trusting them unconditionally lets any client choose the address we report — and in
 	 * proxy tracking mode that address feeds the visitor id hash.
 	 *
-	 * @since 0.16.7 Stopped trusting `Cf-Connecting-IP`, `X-Forwarded-For` and `Client-IP`
+	 * @since 0.16.8 Stopped trusting `Cf-Connecting-IP`, `X-Forwarded-For` and `Client-IP`
 	 *               unconditionally.
 	 *
 	 * @return string The user's IP address. An empty string when no public address resolved.
@@ -567,7 +567,7 @@ class WC_Analytics_Tracking {
 		 * routable, so passing a request header through verbatim reintroduces the spoofing this
 		 * resolution exists to prevent.
 		 *
-		 * @since 0.16.7
+		 * @since 0.16.8
 		 *
 		 * @param string $ip Resolved visitor IP, or an empty string when none was determined.
 		 */
