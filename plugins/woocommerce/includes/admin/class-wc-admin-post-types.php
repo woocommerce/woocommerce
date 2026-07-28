@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Utilities\TimeUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -467,15 +468,15 @@ class WC_Admin_Post_Types {
 			$submitted_sale_date_from = $request_data['_sale_price_dates_from'] ?? null;
 			if ( is_string( $submitted_sale_date_from ) ) {
 				/**
-				 * Sanitized sale start date.
+				 * Submitted sale start date.
 				 *
 				 * @var string $date_on_sale_from
 				 */
-				$date_on_sale_from = wc_clean( wp_unslash( $submitted_sale_date_from ) );
+				$date_on_sale_from = wp_unslash( $submitted_sale_date_from );
 
 				if ( '' === $date_on_sale_from ) {
 					$product->set_date_on_sale_from( '' );
-				} else {
+				} elseif ( TimeUtil::is_valid_date( $date_on_sale_from, 'Y-m-d' ) ) {
 					$timestamp = strtotime( $date_on_sale_from );
 					if ( false !== $timestamp ) {
 						$product->set_date_on_sale_from( date( 'Y-m-d 00:00:00', $timestamp ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
@@ -486,15 +487,15 @@ class WC_Admin_Post_Types {
 			$submitted_sale_date_to = $request_data['_sale_price_dates_to'] ?? null;
 			if ( is_string( $submitted_sale_date_to ) ) {
 				/**
-				 * Sanitized sale end date.
+				 * Submitted sale end date.
 				 *
 				 * @var string $date_on_sale_to
 				 */
-				$date_on_sale_to = wc_clean( wp_unslash( $submitted_sale_date_to ) );
+				$date_on_sale_to = wp_unslash( $submitted_sale_date_to );
 
 				if ( '' === $date_on_sale_to ) {
 					$product->set_date_on_sale_to( '' );
-				} else {
+				} elseif ( TimeUtil::is_valid_date( $date_on_sale_to, 'Y-m-d' ) ) {
 					$timestamp = strtotime( $date_on_sale_to );
 					if ( false !== $timestamp ) {
 						$product->set_date_on_sale_to( date( 'Y-m-d 23:59:59', $timestamp ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
