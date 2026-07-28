@@ -9,7 +9,7 @@ import deprecated from '@wordpress/deprecated';
 import {
 	registerProductEntity as registerProductEntityInternal,
 	registerSettingsEntity as registerSettingsEntityInternal,
-} from '../entity-registration/register-entities';
+} from '../../public-api/entity-registration/register-entities';
 
 const deprecationNoticesShown = new Set< string >();
 

@@ -10,7 +10,7 @@ import {
 	isExternalProduct as isExternalProductInternal,
 	isProductResponseItem as isProductResponseItemInternal,
 	useProduct as useProductInternal,
-} from '../entities';
+} from '../../internal/entities';
 
 const deprecationNoticesShown = new Set< string >();
 

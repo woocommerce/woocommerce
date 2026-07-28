@@ -7,8 +7,8 @@ import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { PRODUCT_ENTITY } from '../entities/product/constants';
-import { SETTINGS_ENTITY } from '../entities/settings/constants';
+import { PRODUCT_ENTITY } from '../../internal/entities/product/constants';
+import { SETTINGS_ENTITY } from '../../internal/entities/settings/constants';
 
 const registered: string[] = [];
 

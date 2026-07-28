@@ -5,7 +5,7 @@
 		".",
 		"../../../../../packages/public-api/blocks-checkout-events/*",
 		"../../../../../packages/public-api/blocks-checkout/index.js",
-		"../../../../../packages/public-api/price-format/index.js",
+		"../../../../../packages/public-api/price/index.js",
 		"../providers/cart-checkout/checkout-events/index.tsx",
 		"../providers/cart-checkout/payment-events/index.tsx",
 		"../providers/cart-checkout/shipping/index.js",
