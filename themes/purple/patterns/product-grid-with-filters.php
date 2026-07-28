@@ -49,8 +49,8 @@
 <!-- /wp:woocommerce/product-filter-price-slider --></div>
 <!-- /wp:woocommerce/product-filter-price -->
 
-<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
-<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- wp:spacer {"height":"var:preset|spacing|10"} -->
+<div style="height:var(--wp--preset--spacing--10)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer --></div>
 <!-- /wp:accordion-panel --></div>
 <!-- /wp:accordion-item -->
@@ -66,8 +66,8 @@
 <div class="wp-block-woocommerce-product-filter-checkbox-list wc-block-product-filter-checkbox-list"></div>
 <!-- /wp:woocommerce/product-filter-checkbox-list -->
 
-<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
-<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- wp:spacer {"height":"var:preset|spacing|10"} -->
+<div style="height:var(--wp--preset--spacing--10)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer --></div>
 <!-- /wp:woocommerce/product-filter-rating --></div>
 <!-- /wp:accordion-panel --></div>
@@ -84,8 +84,8 @@
 <div class="wp-block-woocommerce-product-filter-checkbox-list wc-block-product-filter-checkbox-list"></div>
 <!-- /wp:woocommerce/product-filter-checkbox-list -->
 
-<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
-<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- wp:spacer {"height":"var:preset|spacing|10"} -->
+<div style="height:var(--wp--preset--spacing--10)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer --></div>
 <!-- /wp:woocommerce/product-filter-attribute --></div>
 <!-- /wp:accordion-panel --></div>
@@ -103,8 +103,8 @@
 <!-- /wp:woocommerce/product-filter-checkbox-list --></div>
 <!-- /wp:woocommerce/product-filter-status -->
 
-<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
-<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- wp:spacer {"height":"var:preset|spacing|10"} -->
+<div style="height:var(--wp--preset--spacing--10)" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer --></div>
 <!-- /wp:accordion-panel --></div>
 <!-- /wp:accordion-item --></div>
