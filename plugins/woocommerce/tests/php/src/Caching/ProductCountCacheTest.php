@@ -57,6 +57,47 @@ final class ProductCountCacheTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Bulk cache writes normalize numeric status keys to strings.
+	 */
+	public function test_set_multiple_normalizes_numeric_status_keys(): void {
+		$result = $this->product_cache->set_multiple(
+			'product',
+			array(
+				123                    => 10,
+				ProductStatus::PUBLISH => 5,
+			)
+		);
+
+		$this->assertCount( 2, $result, 'All status keys should be cached.' );
+		$this->assertSame(
+			array(
+				123                    => 10,
+				ProductStatus::PUBLISH => 5,
+			),
+			$this->product_cache->get( 'product' ),
+			'Numeric status keys should retain their original value.'
+		);
+	}
+
+	/**
+	 * @testdox Previously cached numeric statuses are normalized when reading all statuses.
+	 */
+	public function test_get_normalizes_previously_cached_numeric_statuses(): void {
+		wp_cache_set( 'product-count_product_statuses', array( 123, ProductStatus::PUBLISH ) );
+		$this->product_cache->set( 'product', '123', 10 );
+		$this->product_cache->set( 'product', ProductStatus::PUBLISH, 5 );
+
+		$this->assertSame(
+			array(
+				123                    => 10,
+				ProductStatus::PUBLISH => 5,
+			),
+			$this->product_cache->get( 'product' ),
+			'Numeric statuses from an existing cache should not cause a type error.'
+		);
+	}
+
+	/**
 	 * @testdox Specific status slots are invalidated when flushed.
 	 */
 	public function test_flush_cache(): void {

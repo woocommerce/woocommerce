@@ -156,7 +156,7 @@ class ProductUtil {
 		$count_per_status    = $product_count_cache->get( $post_type );
 
 		if ( null === $count_per_status ) {
-			$count_per_status = array_merge(
+			$count_per_status = array_replace(
 				array_fill_keys( array_keys( get_post_stati() ), 0 ),
 				(array) wp_count_posts( $post_type )
 			);
