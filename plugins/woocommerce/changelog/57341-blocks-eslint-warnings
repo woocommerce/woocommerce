@@ -1,3 +1,3 @@
 Significance: patch
 Type: dev
-Comment: Harden selected Blocks ESLint warnings to errors.
+Comment: Fix ESLint warnings in Blocks.
