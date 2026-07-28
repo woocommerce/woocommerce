@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Relax product status type requirements in counter components to avoid admin errors.
+Temporary deactivate persistent product status counters and rollback to WordPress API usage.
