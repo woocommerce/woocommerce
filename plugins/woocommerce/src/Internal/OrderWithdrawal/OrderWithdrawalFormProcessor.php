@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Throwable;
 use WC_Order;
+use WC_Rate_Limiter;
 
 /**
  * Processes order withdrawal form requests.
@@ -35,6 +36,9 @@ final class OrderWithdrawalFormProcessor {
 	private const LOGGER_SOURCE                       = 'order-withdrawal';
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
 	private const ORDER_WITHDRAWAL_REQUESTED_VALUE    = 'yes';
+	private const RATE_LIMIT_IP_PREFIX                = 'order_withdrawal_ip_';
+	private const RATE_LIMIT_EMAIL_PREFIX             = 'order_withdrawal_email_';
+	private const RATE_LIMIT_DELAY                    = MINUTE_IN_SECONDS / 2;
 
 	/**
 	 * Process the current order withdrawal request.
@@ -247,6 +251,10 @@ final class OrderWithdrawalFormProcessor {
 	 * @param array<string,string> $data Form data.
 	 */
 	private function submit_order_withdrawal( array $data ): bool {
+		if ( ! $this->check_and_set_rate_limits( $data ) ) {
+			return false;
+		}
+
 		$matched_order = $this->get_matching_order( $data );
 
 		if ( $matched_order ) {
@@ -258,7 +266,9 @@ final class OrderWithdrawalFormProcessor {
 
 				return false;
 			}
+		}
 
+		if ( $matched_order ) {
 			$this->add_order_withdrawal_note( $matched_order, $data );
 		}
 
@@ -273,6 +283,65 @@ final class OrderWithdrawalFormProcessor {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Check and set order withdrawal submission rate limits.
+	 *
+	 * @param array<string,string> $data Form data.
+	 */
+	private function check_and_set_rate_limits( array $data ): bool {
+		$rate_limit_ids = $this->get_rate_limit_ids( $data );
+
+		foreach ( $rate_limit_ids as $rate_limit_id ) {
+			if ( WC_Rate_Limiter::retried_too_soon( $rate_limit_id ) ) {
+				wc_add_notice( __( 'Please wait before submitting another withdrawal request.', 'woocommerce' ), 'error' );
+
+				return false;
+			}
+		}
+
+		foreach ( $rate_limit_ids as $rate_limit_id ) {
+			WC_Rate_Limiter::set_rate_limit( $rate_limit_id, self::RATE_LIMIT_DELAY );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get order withdrawal rate limit identifiers for the current request.
+	 *
+	 * @param array<string,string> $data Form data.
+	 * @return string[]
+	 */
+	private function get_rate_limit_ids( array $data ): array {
+		$rate_limit_ids = array();
+		$ip_address     = $this->get_request_ip_address();
+		$email          = strtolower( trim( $data[ self::FIELD_EMAIL ] ) );
+
+		if ( '' !== $ip_address ) {
+			$rate_limit_ids[] = self::RATE_LIMIT_IP_PREFIX . hash( 'sha256', $ip_address );
+		}
+
+		if ( '' !== $email ) {
+			$rate_limit_ids[] = self::RATE_LIMIT_EMAIL_PREFIX . hash( 'sha256', $email );
+		}
+
+		return $rate_limit_ids;
+	}
+
+	/**
+	 * Get the request IP address for rate limiting.
+	 */
+	private function get_request_ip_address(): string {
+		if ( empty( $_SERVER['REMOTE_ADDR'] ) ) {
+			return '';
+		}
+
+		$value = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+		$value = trim( current( preg_split( '/,/', $value ) ) );
+
+		return (string) rest_is_ip_address( $value );
 	}
 
 	/**
