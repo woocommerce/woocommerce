@@ -1,8 +1,12 @@
 # Scratch file
-This file intentionally has bad markdown.
+
+This file used to have bad markdown, now fixed.
+
 - item one
 - item two
-Some text right after a list with no blank line.
-```
-code fence with no language
+
+Some text with a blank line before it.
+
+```text
+code fence with a language now
 ```
