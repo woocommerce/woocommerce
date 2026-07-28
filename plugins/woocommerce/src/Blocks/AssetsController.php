@@ -191,7 +191,7 @@ final class AssetsController {
 		foreach ( $handles as $handle ) {
 			$message = wp_json_encode(
 				sprintf(
-					'[WooCommerce] The "%s" script handle is a deprecated compatibility placeholder and does not load a script. Enqueue "wc-block-library" instead. See the enqueueable packages documentation: https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/docs/internal-developers/enqueueable-packages',
+					'[WooCommerce] The "%s" script handle is a deprecated compatibility placeholder and does not load a script. See the enqueueable packages documentation: https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/docs/internal-developers/enqueueable-packages',
 					$handle
 				)
 			);
