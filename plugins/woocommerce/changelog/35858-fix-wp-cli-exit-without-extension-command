@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-WP-CLI: don't terminate the whole CLI process when the optional wp-cli/extension-command package isn't installed; the `wc com extension` command is simply not registered instead.
+WP-CLI no longer exits the whole process when the optional wp-cli/extension-command package isn't installed.
