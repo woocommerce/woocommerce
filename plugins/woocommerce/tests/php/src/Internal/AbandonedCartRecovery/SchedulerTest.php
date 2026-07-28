@@ -257,10 +257,10 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 * Provide test cases for {@see test_handle_new_order_schedules_for_pending_order()}.
 	 */
 	public function provide_handle_new_order_test_cases(): array {
-		return [
-			'New order with no order object' => [ false ],
-			'New order with order object'    => [ true ],
-		];
+		return array(
+			'New order with no order object' => array( false ),
+			'New order with order object'    => array( true ),
+		);
 	}
 
 	/**
