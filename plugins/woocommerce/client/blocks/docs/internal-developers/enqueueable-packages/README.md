@@ -26,7 +26,7 @@ When the experiment is enabled, WooCommerce block types use:
 
 These assets replace WooCommerce's per-block editor assets. They do not combine every script loaded by the editor: shared WordPress dependencies and the enqueueable WooCommerce packages below remain external.
 
-The legacy per-block handles, such as `wc-cart-block` and `wc-checkout-block`, remain registered as compatibility placeholders. They preserve their dependency on `wc-blocks` but do not load the former per-block files, and log a deprecation warning when enqueued. Enqueue `wc-block-library` for the unified editor bundle instead.
+The legacy per-block handles, such as `wc-cart-block` and `wc-checkout-block`, remain registered as compatibility placeholders. They preserve their dependency on `wc-blocks` but do not load the former per-block files, and log a deprecation warning when enqueued.
 
 ## External package dependencies
 
