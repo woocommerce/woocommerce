@@ -259,8 +259,10 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * @since 11.1.0
 	 */
 	private function normalize_line_item_types( array $line_item ) {
+		// IDs must be whole numbers: silently truncating a fractional id such as
+		// 123.5 to 123 would target a different line or tax bucket than requested.
 		if ( isset( $line_item['line_item_id'] ) && ! is_int( $line_item['line_item_id'] ) ) {
-			if ( ! is_numeric( $line_item['line_item_id'] ) ) {
+			if ( ! is_numeric( $line_item['line_item_id'] ) || (float) (int) $line_item['line_item_id'] !== (float) $line_item['line_item_id'] ) {
 				return new WP_Error( 'invalid_line_item', __( 'Line item id must be an integer.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 			$line_item['line_item_id'] = (int) $line_item['line_item_id'];
@@ -286,8 +288,9 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 				return new WP_Error( 'invalid_line_item', __( 'refund_tax must be an array of objects with id and refund_total.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 			foreach ( $line_item['refund_tax'] as $index => $tax ) {
-				if ( ! is_array( $tax ) || ! isset( $tax['id'], $tax['refund_total'] ) || ! is_numeric( $tax['id'] ) || ! is_numeric( $tax['refund_total'] ) ) {
-					return new WP_Error( 'invalid_line_item', __( 'refund_tax entries must be objects with a numeric id and refund_total.', 'woocommerce' ), array( 'status' => 400 ) );
+				if ( ! is_array( $tax ) || ! isset( $tax['id'], $tax['refund_total'] ) || ! is_numeric( $tax['id'] ) || ! is_numeric( $tax['refund_total'] )
+					|| (float) (int) $tax['id'] !== (float) $tax['id'] ) {
+					return new WP_Error( 'invalid_line_item', __( 'refund_tax entries must be objects with an integer id and a numeric refund_total.', 'woocommerce' ), array( 'status' => 400 ) );
 				}
 				$line_item['refund_tax'][ $index ] = array(
 					'id'           => (int) $tax['id'],
