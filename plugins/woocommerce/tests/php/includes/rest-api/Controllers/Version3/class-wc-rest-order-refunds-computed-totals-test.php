@@ -820,6 +820,63 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox A fractional line item id returns 400 invalid_line_item instead of refunding a truncated id.
+	 */
+	public function test_fractional_line_item_id_returns_400(): void {
+		$order   = $this->create_order_with_product( 25.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'       => $item_id + 0.5,
+						'quantity' => 1,
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'invalid_line_item', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds(), 'A fractional id must never be truncated into a refund of a different line.' );
+	}
+
+	/**
+	 * @testdox A fractional refund_tax id returns 400 invalid_line_item instead of refunding a truncated tax bucket.
+	 */
+	public function test_fractional_refund_tax_id_returns_400(): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		$order       = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id     = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 50.00,
+						'refund_tax'   => array(
+							array(
+								'id'           => $tax_rate_id + 0.5,
+								'refund_total' => 5.00,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'invalid_line_item', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
 	 * @testdox A scalar line_items entry returns 400 invalid_line_item.
 	 */
 	public function test_scalar_line_items_entry_returns_400(): void {
