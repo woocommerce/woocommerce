@@ -155,10 +155,11 @@ jobs:
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
-      # Inline annotations are aimed at community contributors, who are least likely to be
-      # set up to run our linters locally. Members get the plain 'Lint' failure as before.
+      # Surfaces the PHPCS findings inline on 'Files changed' instead of leaving them
+      # in the raw CI log. Runs on every non-draft PR; community contributors gain the
+      # most, since they're least likely to be set up to run our linters locally.
       - name: 'Install cs2pr'
-        if: ${{ failure() && matrix.projectName == '@woocommerce/plugin-woocommerce' && github.event.pull_request.draft == false && github.event.pull_request.head.repo.fork }}
+        if: ${{ failure() && matrix.projectName == '@woocommerce/plugin-woocommerce' && github.event.pull_request.draft == false }}
         uses: 'shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240' # 2.37.2
         with:
           php-version: '7.4'
@@ -166,7 +167,7 @@ jobs:
           tools: 'cs2pr'
 
       - name: 'Lint: PHP checkstyle annotations'
-        if: ${{ failure() && matrix.projectName == '@woocommerce/plugin-woocommerce' && github.event.pull_request.draft == false && github.event.pull_request.head.repo.fork }}
+        if: ${{ failure() && matrix.projectName == '@woocommerce/plugin-woocommerce' && github.event.pull_request.draft == false }}
         working-directory: 'plugins/woocommerce'
         # Re-runs the same PHP diff the 'Lint' step above already checked, only to get
         # its output in checkstyle format for cs2pr. The pass/fail verdict already
