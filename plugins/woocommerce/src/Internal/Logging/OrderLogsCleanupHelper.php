@@ -122,6 +122,15 @@ class OrderLogsCleanupHelper {
 	}
 
 	/**
+	 * Continue an order debug logs cleanup that didn't drain the backlog in a single run.
+	 *
+	 * @internal
+	 */
+	public static function handle_woocommerce_cleanup_logs_extended(): void {
+		wc_get_container()->get( self::class )->cleanup();
+	}
+
+	/**
 	 * Clean up a batch of orders with dangling debug log meta.
 	 *
 	 * Dangling orders have `_debug_log_source` meta but no `_debug_log_source_pending_deletion`.
