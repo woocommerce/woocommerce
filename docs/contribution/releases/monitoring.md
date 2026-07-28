@@ -8,7 +8,7 @@ sidebar_position: 7
 
 After the release, the release lead should continue to monitor the following for any bugs directly related to the latest version.  Monitoring should continue for 3 days after a major release and 1 day for a point release.
 
-If there are questions whether a specific issue is critical enough to warrant a new point release, please start a discussion in the `#woo-core-releases` Slack channel.
+If there are questions whether a specific issue is critical enough to warrant a new point release, check the [release decision matrix](/docs/contribution/releases/decision-matrix) first; for genuine ties, start a discussion in the `#woo-core-releases` Slack channel.
 
 ## WordPress.org Forums
 

@@ -35,7 +35,7 @@ In all cases, point releases must remain backward compatible. No breaking change
 
 ## Evaluating whether to ship a point release
 
-Use your best judgement based on the urgency and severity of the outstanding issue. The release lead and the reporter should weigh:
+Use your best judgement based on the urgency and severity of the outstanding issue. These criteria align with the [release decision matrix](/docs/contribution/releases/decision-matrix), which maps impact classes to default verdicts. The release lead and the reporter should weigh:
 
 | Criterion | Guidance |
 | --- | --- |
