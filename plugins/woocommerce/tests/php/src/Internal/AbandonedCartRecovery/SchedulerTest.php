@@ -217,14 +217,26 @@ class SchedulerTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox handle_new_order() schedules the AS action and records the scheduled-at meta for a pending order when automated + enabled.
+	 * @dataProvider provide_handle_new_order_test_cases
+	 *
+	 * @param bool $supply_order_argument Whether to supply the order object as the second argument to handle_new_order().
 	 */
-	public function test_handle_new_order_schedules_for_pending_order(): void {
+	public function test_handle_new_order_schedules_for_pending_order( bool $supply_order_argument ): void {
 		$order = OrderHelper::create_order();
 		$order->set_created_via( 'checkout' );
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
-		$this->sut->handle_new_order( $order->get_id() );
+		$order_argument = $supply_order_argument ? $order : null;
+
+		$this->sut->handle_new_order( $order->get_id(), $order_argument );
+
+		if ( $order_argument ) {
+			$this->assertNotEmpty(
+				$order_argument->get_meta( Scheduler::SCHEDULED_META_KEY ),
+				'Scheduled-at meta must be populated on the supplied order object.'
+			);
+		}
 
 		$fresh = wc_get_order( $order->get_id() );
 		$this->assertNotEmpty(
@@ -235,6 +247,16 @@ class SchedulerTest extends WC_Unit_Test_Case {
 			as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ),
 			'An AS action must be queued for the new pending order.'
 		);
+	}
+
+	/**
+	 * Provide test cases for {@see test_handle_new_order_schedules_for_pending_order()}.
+	 */
+	public function provide_handle_new_order_test_cases(): array {
+		return [
+			'New order with no order object' => [ false ],
+			'New order with order object'    => [ true ],
+		];
 	}
 
 	/**
