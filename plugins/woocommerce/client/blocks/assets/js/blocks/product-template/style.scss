@@ -78,6 +78,14 @@ $min-product-width: 150px;
 }
 
 /**
+ * Keep product titles at the full product width so text alignment is
+ * consistent for both single-line and multi-line titles.
+ */
+.wc-block-product-template .wp-block-post-title {
+	width: 100%;
+}
+
+/**
  * Stack layout
  */
 .is-product-collection-layout-list .wc-block-product:not(:last-child) {
