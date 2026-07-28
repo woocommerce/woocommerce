@@ -508,11 +508,12 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		$item_id = $this->get_first_line_item_id( $order );
 
 		// In production this request path emits a PHP warning (undefined refund_total
-		// array key in wc_create_refund) and continues. PHPUnit converts that warning
-		// into an exception, which would make wc_create_refund fail with a 500 that
-		// does not happen outside the test runner — mask it to test the real behavior.
+		// array key in wc_create_refund; an E_NOTICE on PHP 7.4) and continues.
+		// PHPUnit converts it into an exception, which would make wc_create_refund
+		// fail with a 500 that does not happen outside the test runner — mask both
+		// error levels to test the real behavior.
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- scoped mask so PHPUnit does not convert a production-only PHP warning into an exception.
-		$error_reporting = error_reporting( E_ALL & ~E_WARNING );
+		$error_reporting = error_reporting( E_ALL & ~E_WARNING & ~E_NOTICE );
 		try {
 			$response = $this->do_create_request(
 				$order->get_id(),
@@ -548,7 +549,7 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 		// See test_unflagged_quantity_only_still_creates_zero_refund for why the
 		// PHP warning this legacy path emits must be masked under PHPUnit.
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- scoped mask so PHPUnit does not convert a production-only PHP warning into an exception.
-		$error_reporting = error_reporting( E_ALL & ~E_WARNING );
+		$error_reporting = error_reporting( E_ALL & ~E_WARNING & ~E_NOTICE );
 		try {
 			$response = $this->do_create_request(
 				$order->get_id(),
@@ -641,6 +642,199 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 
 		$this->assertArrayHasKey( 'compute_totals', $schema['properties'] );
 		$this->assertFalse( $schema['properties']['compute_totals']['default'] );
+	}
+
+	/**
+	 * @testdox An array refund_total returns 400 invalid_refund_total instead of a TypeError.
+	 */
+	public function test_array_refund_total_returns_400(): void {
+		$order   = $this->create_order_with_product( 25.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => array( 10.00 ),
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'invalid_refund_total', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox A non-numeric quantity returns 400 invalid_quantity.
+	 */
+	public function test_non_numeric_quantity_returns_400(): void {
+		$order   = $this->create_order_with_product( 25.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'       => $item_id,
+						'quantity' => 'two',
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'invalid_quantity', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox A fractional quantity returns 400 invalid_quantity.
+	 */
+	public function test_fractional_quantity_returns_400(): void {
+		$order   = $this->create_order_with_product( 25.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'       => $item_id,
+						'quantity' => 1.5,
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'invalid_quantity', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Numeric-string quantity and refund_total values are accepted and cast.
+	 */
+	public function test_numeric_string_values_are_accepted(): void {
+		$order   = $this->create_order_with_product( 25.00, 2 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'       => (string) $item_id,
+						'quantity' => '2',
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEquals( '50.00', $response->get_data()['amount'] );
+	}
+
+	/**
+	 * @testdox A non-array refund_tax returns 400 invalid_line_item.
+	 */
+	public function test_non_array_refund_tax_returns_400(): void {
+		$order   = $this->create_order_with_product( 25.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 10.00,
+						'refund_tax'   => 'nope',
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'invalid_line_item', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox A refund_tax entry with a non-numeric refund_total returns 400 invalid_line_item.
+	 */
+	public function test_malformed_refund_tax_entry_returns_400(): void {
+		$order   = $this->create_order_with_product( 25.00, 1 );
+		$item_id = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 10.00,
+						'refund_tax'   => array(
+							array(
+								'id'           => 1,
+								'refund_total' => array( 5.00 ),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'invalid_line_item', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox An array line item id returns 400 invalid_line_item.
+	 */
+	public function test_array_line_item_id_returns_400(): void {
+		$order = $this->create_order_with_product( 25.00, 1 );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'       => array( 1 ),
+						'quantity' => 1,
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'invalid_line_item', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox A scalar line_items entry returns 400 invalid_line_item.
+	 */
+	public function test_scalar_line_items_entry_returns_400(): void {
+		$order = $this->create_order_with_product( 25.00, 1 );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array( 'not-an-object' ),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'invalid_line_item', $response->get_data()['code'] );
 	}
 
 	/**

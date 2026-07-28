@@ -244,6 +244,62 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	}
 
 	/**
+	 * Validate and normalize the scalar types of one compute_totals line item.
+	 *
+	 * The REST schema cannot validate the line_items subtree (the property is
+	 * readonly for backward compatibility), so without this check malformed
+	 * values such as an array refund_total would reach the calculation engine
+	 * and fail with a TypeError instead of a 400 response. Uses the same error
+	 * codes as the engine's own validation, and casts numeric strings to their
+	 * proper types.
+	 *
+	 * @param array $line_item Line item in schema format (line_item_id keys).
+	 * @return array|WP_Error The normalized line item, or WP_Error on an invalid type.
+	 *
+	 * @since 11.1.0
+	 */
+	private function normalize_line_item_types( array $line_item ) {
+		if ( isset( $line_item['line_item_id'] ) && ! is_int( $line_item['line_item_id'] ) ) {
+			if ( ! is_numeric( $line_item['line_item_id'] ) ) {
+				return new WP_Error( 'invalid_line_item', __( 'Line item id must be an integer.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+			$line_item['line_item_id'] = (int) $line_item['line_item_id'];
+		}
+
+		if ( isset( $line_item['quantity'] ) ) {
+			$quantity = $line_item['quantity'];
+			if ( ! is_numeric( $quantity ) || (float) (int) $quantity !== (float) $quantity ) {
+				return new WP_Error( 'invalid_quantity', __( 'Quantity must be a whole number.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+			$line_item['quantity'] = (int) $quantity;
+		}
+
+		if ( isset( $line_item['refund_total'] ) ) {
+			if ( ! is_numeric( $line_item['refund_total'] ) ) {
+				return new WP_Error( 'invalid_refund_total', __( 'refund_total must be a number.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+			$line_item['refund_total'] = (float) $line_item['refund_total'];
+		}
+
+		if ( isset( $line_item['refund_tax'] ) ) {
+			if ( ! is_array( $line_item['refund_tax'] ) ) {
+				return new WP_Error( 'invalid_line_item', __( 'refund_tax must be an array of objects with id and refund_total.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+			foreach ( $line_item['refund_tax'] as $index => $tax ) {
+				if ( ! is_array( $tax ) || ! isset( $tax['id'], $tax['refund_total'] ) || ! is_numeric( $tax['id'] ) || ! is_numeric( $tax['refund_total'] ) ) {
+					return new WP_Error( 'invalid_line_item', __( 'refund_tax entries must be objects with a numeric id and refund_total.', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+				$line_item['refund_tax'][ $index ] = array(
+					'id'           => (int) $tax['id'],
+					'refund_total' => (float) $tax['refund_total'],
+				);
+			}
+		}
+
+		return $line_item;
+	}
+
+	/**
 	 * Get the shared refund calculation engine.
 	 *
 	 * DataUtils is the calculation/validation engine shared with the wc/v4
@@ -354,8 +410,9 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 
 		// Map the v3 public line-item shape ({id, quantity, refund_total, refund_tax})
 		// to the schema format the shared calculation engine consumes ({line_item_id,
-		// quantity, refund_total, refund_tax}). Malformed entries are left for
-		// validate_line_items below, which rejects them with specific error codes.
+		// quantity, refund_total, refund_tax}), and strictly validate value types:
+		// the REST layer cannot do it because the line_items schema property is
+		// readonly for backward compatibility, so its args are not registered.
 		$line_items = array();
 		foreach ( (array) ( $request['line_items'] ?? array() ) as $line_item ) {
 			if ( ! is_array( $line_item ) ) {
@@ -365,6 +422,11 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 			if ( isset( $line_item['id'] ) && ! isset( $line_item['line_item_id'] ) ) {
 				$line_item['line_item_id'] = $line_item['id'];
 				unset( $line_item['id'] );
+			}
+
+			$line_item = $this->normalize_line_item_types( $line_item );
+			if ( is_wp_error( $line_item ) ) {
+				return $line_item;
 			}
 
 			$line_items[] = $line_item;
