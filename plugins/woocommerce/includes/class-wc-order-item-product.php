@@ -282,6 +282,9 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * attribute — those are overwritten in place by `set_variation()` instead, which keeps
 	 * their stored meta rows intact.
 	 *
+	 * The current variation is read with `wc_get_product()` rather than `get_product()` so the
+	 * attribute list cannot be swapped out by the filters `get_product()` applies.
+	 *
 	 * Best effort by design: when the current variation no longer exists there is no attribute
 	 * list left to match against, so its meta is kept rather than guessed at.
 	 *
@@ -295,7 +298,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			return;
 		}
 
-		$current_product = $this->get_product();
+		$current_product = wc_get_product( $this->get_variation_id() );
 		if ( ! $current_product instanceof \WC_Product_Variation ) {
 			return;
 		}
