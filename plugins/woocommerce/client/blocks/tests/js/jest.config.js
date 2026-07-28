@@ -78,8 +78,9 @@ module.exports = {
 			'packages/public-api/blocks-components/$1',
 		'^@woocommerce/blocks-components$':
 			'packages/public-api/blocks-components',
-		'^@woocommerce/price-format/(.*)$': 'packages/public-api/prices/$1',
-		'^@woocommerce/price-format$': 'packages/public-api/prices',
+		'^@woocommerce/price-format/(.*)$':
+			'packages/public-api/price-format/$1',
+		'^@woocommerce/price-format$': 'packages/public-api/price-format',
 		'@woocommerce/block-hocs(.*)$': 'assets/js/hocs/$1',
 		'@woocommerce/base-components(.*)$': 'assets/js/base/components/$1',
 		'@woocommerce/base-context(.*)$': 'assets/js/base/context/$1',

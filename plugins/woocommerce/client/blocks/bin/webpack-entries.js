@@ -340,7 +340,7 @@ const entries = {
 	styling: {
 		// Packages styles
 		'packages-style': glob.sync(
-			'./packages/public-api/{prices,blocks-components,blocks-checkout}/**/index.{t,j}s',
+			'./packages/public-api/{price-format,blocks-components,blocks-checkout}/**/index.{t,j}s',
 			{
 				dotRelative: true,
 			}
@@ -365,7 +365,7 @@ const entries = {
 		wcBlocksSharedContext: './packages/public-api/shared-context/index.js',
 		wcBlocksSharedHocs: './packages/public-api/shared-hocs/index.js',
 		wcSchemaParser: './assets/js/utils/schema-parser/index.ts',
-		priceFormat: './packages/public-api/prices/index.js',
+		priceFormat: './packages/public-api/price-format/index.js',
 		wcTypes: './packages/public-api/types/index.ts',
 		wcEntities: './packages/public-api/entity-registration/index.ts',
 	},
