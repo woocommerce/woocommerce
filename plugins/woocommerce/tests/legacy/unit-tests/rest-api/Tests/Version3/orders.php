@@ -693,6 +693,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 				'id'  => 0,
 				'src' => '',
 			),
+			'can_be_refunded'  => false,
 		);
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -1175,8 +1176,9 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 47, count( $properties ) );
+		$this->assertEquals( 48, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
+		$this->assertArrayHasKey( 'can_be_refunded', $properties );
 	}
 
 	/**
@@ -1191,8 +1193,9 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$line_item_properties = $data['schema']['properties']['line_items']['items']['properties'];
-		$this->assertEquals( 17, count( $line_item_properties ) );
+		$this->assertEquals( 18, count( $line_item_properties ) );
 		$this->assertArrayHasKey( 'id', $line_item_properties );
+		$this->assertArrayHasKey( 'can_be_refunded', $line_item_properties );
 		$this->assertArrayHasKey( 'meta_data', $line_item_properties );
 		$this->assertArrayHasKey( 'parent_name', $line_item_properties );
 		$this->assertSame( array( 'string', 'null' ), $line_item_properties['parent_name']['type'] );
