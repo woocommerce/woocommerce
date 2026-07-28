@@ -3,6 +3,7 @@
 const {
     MARKER_PREFIX,
     classifyCheckRuns,
+    computeOverallState,
     parsePreviousState,
     buildCommentBody,
 } = require('./pr-readiness-checklist');
@@ -90,18 +91,20 @@ module.exports = async ({ github, context, core }) => {
         return;
     }
 
-    const { body, mentioned } = buildCommentBody({
-        tasks,
-        previousState,
-        authorLogin: pr.user.login,
-    });
+    const overallState = computeOverallState(tasks);
 
-    if (existingComment && !mentioned) {
+    if (existingComment && previousState === 'clear' && overallState === 'clear') {
         core.info(
             `Readiness state unchanged for #${pr.number}; skipping comment update.`
         );
         return;
     }
+
+    const { body } = buildCommentBody({
+        tasks,
+        previousState,
+        authorLogin: pr.user.login,
+    });
 
     if (existingComment) {
         await github.rest.issues.updateComment({
