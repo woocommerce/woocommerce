@@ -76,7 +76,7 @@ test('classifyCheckRuns: performance tests are not tracked', () => {
 
 test('classifyCheckRuns: PHPStan via test-matrix jobs with "PHPStan: PHP" prefix are classified as PHPStan task', () => {
     const tasks = classifyCheckRuns([
-        checkRun('PHPStan: PHP 7.4 - @woocommerce/email-editor-config [unit]', { conclusion: 'failure' }),
+        checkRun('PHPStan: PHP 7.4 - @woocommerce/email-editor [static:analysis]', { conclusion: 'failure' }),
     ]);
     assert.equal(tasks.length, 1);
     assert.equal(tasks[0].label, 'PHPStan');
@@ -85,11 +85,34 @@ test('classifyCheckRuns: PHPStan via test-matrix jobs with "PHPStan: PHP" prefix
 
 test('classifyCheckRuns: per-package PHPStan jobs do not match Unit tests (PHP) task', () => {
     const tasks = classifyCheckRuns([
-        checkRun('PHPStan: PHP 8.4 - @woocommerce/email-editor-config [unit]', { conclusion: 'failure' }),
+        checkRun('PHPStan: PHP 8.4 - @woocommerce/email-editor [static:analysis]', { conclusion: 'failure' }),
     ]);
-    // Should only match PHPStan, not Unit tests (PHP), since testType is [unit] not [unit:php]
+    // Should only match PHPStan, not Unit tests (PHP), since testType is [static:analysis] not [unit:php]
     assert.equal(tasks.length, 1);
     assert.equal(tasks[0].label, 'PHPStan');
+});
+
+test('classifyCheckRuns: a failing optional job does not flip the task to fail', () => {
+    const tasks = classifyCheckRuns([
+        checkRun('E2E Tests - @woocommerce/plugin-woocommerce [e2e]'),
+        checkRun(
+            'WP: pre-release - @woocommerce/plugin-woocommerce [e2e] (optional)',
+            { conclusion: 'failure' }
+        ),
+    ]);
+    assert.equal(tasks.length, 1);
+    assert.equal(tasks[0].label, 'E2E tests');
+    assert.equal(tasks[0].status, 'pass');
+});
+
+test('classifyCheckRuns: task is omitted when the only matching run is optional', () => {
+    const tasks = classifyCheckRuns([
+        checkRun(
+            'WP: pre-release - @woocommerce/plugin-woocommerce [e2e] (optional)',
+            { conclusion: 'failure' }
+        ),
+    ]);
+    assert.deepEqual(tasks, []);
 });
 
 test('computeOverallState: clear when there are no applicable tasks', () => {

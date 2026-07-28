@@ -58,7 +58,9 @@ const TASKS = [
 
 function classifyCheckRuns(checkRuns) {
     return TASKS.map((task) => {
-        const matching = checkRuns.filter((run) => task.matches(run.name));
+        const matching = checkRuns.filter(
+            (run) => task.matches(run.name) && !run.name.endsWith(' (optional)')
+        );
         const relevant = matching.filter((run) => run.conclusion !== 'skipped');
 
         if (relevant.length === 0) {
