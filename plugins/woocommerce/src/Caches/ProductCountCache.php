@@ -70,7 +70,7 @@ class ProductCountCache {
 	 *
 	 * @return string
 	 */
-	private function get_cache_key( string $product_type, $product_status ): string {
+	private function get_cache_key( string $product_type, string $product_status ): string {
 		return $this->cache_prefix . '_' . $product_type . '_' . $product_status;
 	}
 
@@ -93,7 +93,7 @@ class ProductCountCache {
 	 *
 	 * @return bool
 	 */
-	public function is_cached( string $product_type, $product_status ): bool {
+	public function is_cached( string $product_type, string $product_status ): bool {
 		return false !== wp_cache_get( $this->get_cache_key( $product_type, $product_status ) );
 	}
 
@@ -106,7 +106,7 @@ class ProductCountCache {
 	 *
 	 * @return bool
 	 */
-	public function set( string $product_type, $product_status, int $value ): bool {
+	public function set( string $product_type, string $product_status, int $value ): bool {
 		$this->ensure_statuses_for_type( $product_type, array( $product_status ) );
 		return wp_cache_set( $this->get_cache_key( $product_type, $product_status ), $value, '', $this->expiration );
 	}
@@ -166,7 +166,7 @@ class ProductCountCache {
 			}
 
 			$status                   = substr( $key, strlen( $cache_key_prefix ) );
-			$status_values[ $status ] = (int) $value;
+			$status_values[ $status ] = $value;
 		}
 
 		return $status_values;
@@ -181,7 +181,7 @@ class ProductCountCache {
 	 *
 	 * @return int|false
 	 */
-	public function increment( string $product_type, $product_status, int $offset = 1 ) {
+	public function increment( string $product_type, string $product_status, int $offset = 1 ) {
 		return wp_cache_incr( $this->get_cache_key( $product_type, $product_status ), $offset );
 	}
 
@@ -194,7 +194,7 @@ class ProductCountCache {
 	 *
 	 * @return int|false
 	 */
-	public function decrement( string $product_type, $product_status, int $offset = 1 ) {
+	public function decrement( string $product_type, string $product_status, int $offset = 1 ) {
 		return wp_cache_decr( $this->get_cache_key( $product_type, $product_status ), $offset );
 	}
 
