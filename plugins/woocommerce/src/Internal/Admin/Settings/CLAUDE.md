@@ -28,12 +28,25 @@
 ```text
 Settings/
 |-- PaymentsRestController.php                          # Main REST endpoint
+|-- PaymentsController.php                               # Settings UI wrapper
 |-- Payments.php                                        # Business logic
 |-- PaymentsProviders.php                               # Provider aggregation
 |-- Utils.php                                           # Utilities
-`-- PaymentsProviders/WooPayments/
-    `-- WooPaymentsRestController.php                   # WooPayments endpoints
+|-- LegacySettingsPageAdapter.php                        # Settings UI framework
+|-- RegisteredSettingsSectionAdapter.php                 # Settings UI framework
+|-- SettingsUIRequestContext.php                         # Settings UI framework
+|-- SettingsUISchema.php                                 # Settings UI framework
+|-- SettingsUIPageInterface.php                          # Settings UI framework
+|-- SettingsUIPages/                                     # Settings UI page adapters
+|-- Exceptions/                                          # ApiException, ApiArgumentException
+`-- PaymentsProviders/                                   # One file per gateway (Stripe, PayPal, ...)
+    `-- WooPayments/
+        |-- WooPaymentsRestController.php                # WooPayments endpoints
+        |-- WooPaymentsController.php
+        `-- WooPaymentsService.php
 ```
+
+Note: this directory holds two distinct things — the Payments REST API/business logic this doc focuses on, and the newer Settings UI framework classes (`PaymentsController.php`, `SettingsUI*`, `*Adapter.php`) that back the public wrappers in `src/Admin/Settings/`. See `src/Admin/Settings/AGENTS.md` for that layer.
 
 ## Critical Patterns
 
@@ -95,7 +108,7 @@ The `onboarding.state` field has an incomplete schema definition:
 ),
 ```
 
-**Actual implementation** (PaymentGateway.php:76-81):
+**Actual implementation** (PaymentsProviders/PaymentGateway.php:94-98):
 
 ```php
 'state' => array(
@@ -181,7 +194,7 @@ array(
 | File | Endpoint | Key Methods |
 | ------ | ---------- | ------------- |
 | PaymentsRestController.php | `/wc-admin/settings/payments/*` | `get_providers()`, `set_country()`, `update_providers_order()` |
-| PaymentsProviders/WooPayments/WooPaymentsRestController.php | `/wc-admin/settings/payments/providers/woopayments/*` | `get_onboarding_details()` |
+| PaymentsProviders/WooPayments/WooPaymentsRestController.php | `/wc-admin/settings/payments/woopayments/*` | `get_onboarding_details()` |
 | Payments.php | N/A (business logic) | `get_payment_providers()`, `get_payment_extension_suggestions()` |
 
 ## Linting
@@ -203,4 +216,4 @@ pnpm run lint:php:fix -- src/Internal/Admin/Settings/PaymentsRestController.php
 
 - JSON Schema Draft 04: <https://json-schema.org/draft-04/schema#>
 - WordPress REST API: <https://developer.wordpress.org/rest-api/>
-- Main plugin docs: `../../CLAUDE.md`
+- Main plugin docs: `../../../../../../AGENTS.md` (repo root)

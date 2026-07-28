@@ -1,7 +1,7 @@
 # PHP Testing - Claude Code Documentation
 
 **Scope**: PHPUnit test patterns for WooCommerce plugin tests
-**Parent**: `plugins/woocommerce/CLAUDE.md`
+**Parent**: `AGENTS.md` (repo root)
 
 ## Quick Reference: Resilient Test Patterns
 
@@ -15,13 +15,13 @@
 
 Why: Full equality breaks when new keys are added.
 
-**Example**: `WooPaymentsServiceTest.php:510-511`
+**Real example** (`WooPaymentsServiceTest.php:510-511`, already using the resilient pattern):
 
 ```php
-// WRONG - Breaks if new keys added to messages array
+// Avoid - breaks if new keys are added to the messages array
 $this->assertSame( array( 'not_supported' => null ), $result['messages'] );
 
-// CORRECT - Tests only what matters
+// Prefer - tests only what matters
 $this->assertArrayHasKey( 'not_supported', $result['messages'] );
 $this->assertNull( $result['messages']['not_supported'] );
 ```
@@ -278,6 +278,6 @@ tests/php/src/
 
 ## Related Docs
 
-- `plugins/woocommerce/CLAUDE.md` - Test commands, linting, workflow
+- `AGENTS.md` (repo root) - Test commands, linting, workflow
 - `src/Internal/Admin/Settings/CLAUDE.md` - Settings backend patterns
 - PHPUnit: <https://phpunit.de/manual/9.6/en/index.html>

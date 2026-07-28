@@ -205,6 +205,8 @@ The `PaymentsExtensionSuggestionsTest` class demonstrates good testing practices
 
 ### Example Test Structure
 
+Adapted from the real `PaymentsExtensionSuggestionsTest` (`tests/php/src/Internal/Admin/Suggestions/PaymentsExtensionSuggestionsTest.php`), which exercises `PaymentsExtensionSuggestions::get_country_extensions( string $country_code, string $context = '' ): array`:
+
 ```php
 class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
     /**
@@ -220,76 +222,47 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
     }
 
     /**
-     * @testdox Should return correct extension count for online merchants by country
-     * @dataProvider online_merchant_country_data
+     * @dataProvider data_provider_get_country_extensions_count_with_merchant_selling_online
+     *
+     * @param string $country        The country code.
+     * @param int    $expected_count The expected number of suggestions.
      */
-    public function test_get_country_extensions_count_for_online_merchants(
-        string $country_code,
-        int $expected_count
-    ) {
-        $merchant = array(
-            'country'       => $country_code,
-            'selling_venues' => 'online',
+    public function test_get_country_extensions_count_with_merchant_selling_online( string $country, int $expected_count ) {
+        update_option(
+            OnboardingProfile::DATA_OPTION,
+            array(
+                'business_choice'       => 'im_already_selling',
+                'selling_online_answer' => 'yes_im_selling_online',
+            )
         );
 
-        $result = $this->sut->get_country_extensions_count( $merchant );
+        $extensions = $this->sut->get_country_extensions( $country );
 
-        $this->assertSame(
-            $expected_count,
-            $result,
-            "Expected {$expected_count} extensions for online merchant in {$country_code}"
-        );
+        $this->assertCount( $expected_count, $extensions, "For merchant selling online, the country $country should have $expected_count suggestions." );
+
+        delete_option( OnboardingProfile::DATA_OPTION );
     }
 
     /**
-     * Data provider for online merchant tests.
+     * Data provider for test_get_country_extensions_count_with_merchant_selling_online.
      *
      * @return array
      */
-    public function online_merchant_country_data() {
-        return array(
-            'United States'    => array( 'US', 5 ),
-            'United Kingdom'   => array( 'GB', 4 ),
-            'Canada'           => array( 'CA', 3 ),
-            'Australia'        => array( 'AU', 3 ),
+    public function data_provider_get_country_extensions_count_with_merchant_selling_online(): array {
+        // Counts are based on the data in PaymentsExtensionSuggestions::$country_extensions.
+        $country_suggestions_count = array(
+            'CA' => 10,
+            'US' => 11,
+            'GB' => 14,
             // ... more countries
         );
-    }
 
-    /**
-     * @testdox Should return correct extension count for offline merchants by country
-     * @dataProvider offline_merchant_country_data
-     */
-    public function test_get_country_extensions_count_for_offline_merchants(
-        string $country_code,
-        int $expected_count
-    ) {
-        $merchant = array(
-            'country'        => $country_code,
-            'selling_venues' => 'offline',
-        );
+        $data = array();
+        foreach ( $country_suggestions_count as $country => $count ) {
+            $data[] = array( $country, $count );
+        }
 
-        $result = $this->sut->get_country_extensions_count( $merchant );
-
-        $this->assertSame(
-            $expected_count,
-            $result,
-            "Expected {$expected_count} extensions for offline merchant in {$country_code}"
-        );
-    }
-
-    /**
-     * Data provider for offline merchant tests.
-     *
-     * @return array
-     */
-    public function offline_merchant_country_data() {
-        return array(
-            'United States'  => array( 'US', 2 ),
-            'United Kingdom' => array( 'GB', 1 ),
-            'Canada'         => array( 'CA', 1 ),
-            // ... more countries
-        );
+        return $data;
     }
 }
 ```
@@ -298,10 +271,10 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 
 When working with payment extension suggestions:
 
-1. **Extension counts must match the implementation** in `src/Internal/Admin/Suggestions/PaymentsExtensionSuggestions.php`
-2. **When adding new countries** to the implementation, update both data providers in the test file
-3. **Tests are separated by merchant type** (online vs offline) as they have different extension counts
-4. **Data providers use descriptive keys** (country names) for better test output
+1. **Extension counts must match the implementation** in `src/Internal/Admin/Suggestions/PaymentsExtensionSuggestions.php` (`$country_extensions`)
+2. **When adding new countries** to the implementation, update the data provider(s) in the test file
+3. **Tests are separated by merchant type** (online vs offline, and both) since selling venue can affect which extensions are suggested
+4. This test file predates the project's `@testWith`-first convention for data-driven tests — new data-driven tests should still prefer `@testWith` over a `dataProvider` method where the dataset is simple enough to inline
 
 ## Mocking the WooCommerce Logger
 

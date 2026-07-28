@@ -5,7 +5,7 @@
 
 **See also:**
 
-- `../CLAUDE.md` - Testing, linting, and build commands
+- `../../CLAUDE.md` - Testing, linting, and build commands
 - `packages/js/data/src/payment-settings/` - Data layer and types
 
 ## Quick Workflow

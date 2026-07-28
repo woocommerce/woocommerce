@@ -228,7 +228,7 @@ pnpm test:js -- --coverage
 ### Test File Locations
 
 - JavaScript/Jest tests: `client/admin/client/**/*.test.tsx` or `*.test.ts`
-- Jest configuration: `client/admin/jest.config.js`
+- Jest configuration: `client/admin/client/jest.config.js`
 
 ### Troubleshooting JavaScript Tests
 

@@ -39,7 +39,7 @@ The client has already picked a specific variation; `id` is its post ID. The `va
 { "id": 42, "variation": [ {"attribute": "pa_color", "value": "blue"}, {"attribute": "pa_size", "value": "medium"} ] }
 ```
 
-This is what the standard product page posts: `id` is the variable parent product, and the user's dropdown selections come along as the variation array. The server resolves to the matching variation via `WC_Data_Store::find_matching_product_variation()`.
+This is what the standard product page posts: `id` is the variable parent product, and the user's dropdown selections come along as the variation array. The server resolves to the matching variation via `WC_Data_Store::load( 'product' )->find_matching_product_variation()`.
 
 Simple (non-variable) products have `variation = []` and skip the reconciliation entirely.
 
@@ -116,4 +116,4 @@ The variation path is where future regressions are most likely to land. Tests ar
 - [`CartController::get_variation_id_from_variation_data()`](../../../plugins/woocommerce/src/StoreApi/Utilities/CartController.php) — resolves a variable parent + posted attributes to a specific variation ID.
 - `wc_get_product_variation_attributes()` (WooCommerce core) — returns canonical slugs for a variation, with `''` for "Any" slots.
 - `WC_Product_Attribute::get_slugs()` (WooCommerce core) — returns the allowed slug list for an attribute on the parent product.
-- `WC_Data_Store::find_matching_product_variation()` (WooCommerce core) — underlying lookup used by `get_variation_id_from_variation_data()`.
+- `find_matching_product_variation()` (instance method on the product data store, reached via `WC_Data_Store::load( 'product' )`, defined in `includes/data-stores/class-wc-product-data-store-cpt.php`) — underlying lookup used by `get_variation_id_from_variation_data()`.

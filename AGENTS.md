@@ -32,6 +32,7 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 - **`woocommerce-git-draft-pr`** - Create draft PRs with proper template, changelog, and milestone handling
 - **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
 - **`woocommerce-performance`** - Performance guardrails. **Invoke when writing or reviewing PHP code.**
+- **`woocommerce-store-api`** - Store API (`/wc/store/v1/*`) route conventions
 
 ## Project Architecture
 
@@ -223,13 +224,13 @@ Reference: [WordPress Interactivity API - Private Stores](https://developer.word
 
 ```sh
 # Run specific test class
-pnpm test:php:env -- --filter TestClassName
+pnpm --filter=@woocommerce/plugin-woocommerce test:php:env -- --filter TestClassName
 
 # Lint changed files
-pnpm lint:php:changes
+pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
 
 # Fix linting issues
-pnpm lint:php:fix -- path/to/file.php
+pnpm --filter=@woocommerce/plugin-woocommerce lint:php:fix -- path/to/file.php
 ```
 
 For complete command reference and workflows, see `woocommerce-dev-cycle` skill.

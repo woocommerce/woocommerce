@@ -158,9 +158,9 @@ For multisite contexts, use `wp_prime_network_option_caches( $network_id, $keys 
 **WooCommerce settings API autoloads by default.** Any option registered and saved through `WC_Admin_Settings::save_fields()` is stored with `autoload = 'yes'` unless the field definition explicitly sets `'autoload' => false`. The relevant code is in `includes/admin/class-wc-admin-settings.php`:
 
 ```php
-// Line ~1035
+// Line ~1053
 $autoload_options[ $option_name ] = isset( $option['autoload'] ) ? (bool) $option['autoload'] : true;
-// Line ~1047
+// Line ~1065
 update_option( $name, $value, $autoload_options[ $name ] ? 'yes' : 'no' );
 ```
 

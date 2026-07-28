@@ -5,7 +5,7 @@
 
 **See also:**
 
-- `../../CLAUDE.md` - Plugin-level docs, PHP workflow, changelog process
+- `../../../../AGENTS.md` (repo root) - Plugin-level docs, PHP workflow, changelog process
 - `../../src/Blocks/` - PHP block classes (registration, rendering, services)
 - `docs/README.md` - Full handbook (contributors, extensibility, theming)
 
@@ -20,7 +20,7 @@ pnpm --filter=@woocommerce/block-library test:js                      # Jest uni
 pnpm --filter=@woocommerce/block-library test:js -- path/to/test      # Specific test file
 pnpm --filter=@woocommerce/block-library test:watch                   # Jest watch mode
 pnpm --filter=@woocommerce/block-library test:update                  # Update snapshots
-pnpm --filter=@woocommerce/block-library test:e2e                     # Playwright E2E tests
+pnpm --filter=@woocommerce/plugin-woocommerce test:e2e:blocks         # Playwright E2E tests (lives in the core e2e suite)
 
 # Lint (target specific files only)
 npx eslint --fix path/to/file.tsx                                      # Fix JS/TS file
@@ -28,8 +28,8 @@ pnpm --filter=@woocommerce/block-library lint:css                      # Styleli
 pnpm --filter=@woocommerce/block-library ts:check                     # TypeScript type checking
 
 # Environment
-pnpm --filter=@woocommerce/block-library env:start                    # Start wp-env + setup
-pnpm --filter=@woocommerce/block-library env:restart                  # Clean restart
+pnpm --filter=@woocommerce/block-library wp-env start                 # Start wp-env
+pnpm --filter=@woocommerce/block-library env:stop                     # Stop wp-env
 
 # Analysis
 pnpm --filter=@woocommerce/block-library knip                         # Find unused code (dead code detector)
@@ -139,7 +139,7 @@ For private stores:
 
 - Not intended for third-party extension
 - Removing/changing store state is NOT a breaking change
-- `assets/js/base/stores/woocommerce/` contains cart, product-data, products stores
+- `assets/js/base/stores/woocommerce/` contains cart, products, shopper-lists stores
 - Cart store uses mutation batching for performance
 
 ### IntegrationRegistry (Extension API)
@@ -179,9 +179,9 @@ Third-party extensions consume these as externals — changing the public API of
 
 ## Build System
 
-Webpack is configured with **11 separate configs** in `bin/webpack-configs.js`:
+Webpack is configured with **8 separate configs** in `bin/webpack-configs.js`:
 
-- Core, Main, Frontend, Extensions, Payments, Styling, Site Editor, Interactivity, Cart/Checkout Frontend, Dependency Detection
+- Core, Main, Front, Payments, Extensions, Site Editor, Styling, Cart/Checkout Frontend
 
 Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP enqueues run against the final asset locations with no copy step. TypeScript uses **60+ path aliases** defined in `tsconfig.base.json`.
 
@@ -189,7 +189,7 @@ Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP en
 
 ### Jest Unit Tests
 
-- Config: `tests/js/jest.config.json`
+- Config: `tests/js/jest.config.js`
 - Environment: `jest-fixed-jsdom`
 - Tests live in `test/` subdirectories alongside components
 - Path aliases mapped in jest config (mirrors tsconfig)
@@ -209,7 +209,7 @@ Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP en
 
 ## Gotchas
 
-- **ESLint config** has custom WooCommerce rules and lodash import restrictions - use the local `.eslintrc.js`, not the monorepo root
+- **ESLint config** has custom WooCommerce rules and lodash import restrictions - use the local `eslint.config.mjs`, not the monorepo root
 - **`side-effects` in package.json** is extensive - many files cannot be tree-shaken (CSS, block registrations, filters)
 - **StoreApi lives outside Blocks** at `src/StoreApi/`, not `src/Blocks/StoreApi/`
 - **Two DI containers** exist: `src/Blocks/Registry/Container.php` (blocks-specific, legacy) and the main WooCommerce DI container in `src/`

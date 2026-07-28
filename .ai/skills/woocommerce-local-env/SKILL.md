@@ -104,8 +104,9 @@ Recommend targeted watchers for focused work to reduce noise and startup time:
 ## Environment Details
 
 - Development URL: `http://localhost:8888/`
-- Test environment port: `8086`
-- wp-env config: `plugins/woocommerce/.wp-env.json`
+- PHPUnit test environment port: `8186` (config: `plugins/woocommerce/.wp-env.test.json`)
+- E2E test environment port: `8086` (config: `plugins/woocommerce/.wp-env.e2e.json`)
+- wp-env config (dev): `plugins/woocommerce/.wp-env.json`
 - wp-env PHP version: `8.1`
 - WooCommerce package: `@woocommerce/plugin-woocommerce`
 - Source README: `plugins/woocommerce/README.md`

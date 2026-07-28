@@ -5,7 +5,7 @@
 
 **See also:**
 
-- `../../CLAUDE.md` - PHP tests and plugin-level documentation
+- `../../../../AGENTS.md` (repo root) - PHP tests and plugin-level documentation
 - `client/settings-payments/CLAUDE.md` - Settings Payments module patterns
 
 ## Quick Reference Commands
@@ -159,8 +159,8 @@ even when you pass file arguments. Use `npx eslint` directly for per-file lintin
 
 **JavaScript Linting Configuration:**
 
-- **Tool**: ESLint 8.x
-- **Config**: Uses `@woocommerce/eslint-plugin`
+- **Tool**: ESLint 10.x (flat config)
+- **Config**: `eslint.config.mjs`, uses `@woocommerce/eslint-plugin`
 - **Files**: `./client/**/*.{js,ts,tsx}`
 - **Cache**: `node_modules/.cache/eslint`
 - **Note**: ESLint may show warnings from other files during scans; ignore them
@@ -193,8 +193,8 @@ This runs `tsc --build` to check TypeScript types without emitting files.
 
 ### Markdown Linting
 
-For detailed markdown linting instructions, see the "Markdown Linting"
-section in `../../CLAUDE.md`.
+For detailed markdown linting instructions, see the `woocommerce-markdown`
+skill under `.ai/skills/`.
 
 ## Building
 
@@ -393,7 +393,7 @@ client/admin/
 - **`webpack.config.js`**: Webpack build configuration
 - **`tsconfig.json`**: TypeScript configuration
 - **`client/jest.config.js`**: Jest test configuration
-- **`.eslintrc.js`** or **`eslint.config.js`**: ESLint configuration
+- **`eslint.config.mjs`**: ESLint configuration
 - **`babel.config.js`**: Babel transpilation configuration
 
 ## Testing Patterns
@@ -449,7 +449,7 @@ Coverage reports help identify untested code paths.
 
 - Auto-fix what's possible: `pnpm run lint:fix`
 - Review remaining errors manually
-- Check `.eslintrc.js` for rule configuration
+- Check `eslint.config.mjs` for rule configuration
 
 **TypeScript errors:**
 

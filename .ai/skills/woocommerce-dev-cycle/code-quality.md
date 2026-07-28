@@ -80,7 +80,7 @@ This command:
 - Identifies code style and potential issues
 - Does not modify files
 
-**Important:** The plugin-level `.eslintignore` excludes `client/blocks/`, so `lint:changes:branch:js` will not catch eslint or prettier issues in blocks code. For blocks changes, also run the blocks package lint:
+**Important:** The plugin-level `eslint.config.mjs` (flat config `ignores`) excludes `client/blocks/`, so `lint:changes:branch:js` will not catch eslint or prettier issues in blocks code. For blocks changes, also run the blocks package lint:
 
 ```bash
 # Check blocks JS/TS (includes prettier via eslint plugin)
@@ -237,7 +237,7 @@ pnpm run
 pnpm run lint           # Lint all files
 pnpm run lint:fix       # Fix all auto-fixable issues
 pnpm run lint:php       # PHP linting only
-pnpm run lint:js        # JavaScript linting only
+pnpm run lint:lang:js   # JavaScript linting only
 ```
 
 ## Troubleshooting

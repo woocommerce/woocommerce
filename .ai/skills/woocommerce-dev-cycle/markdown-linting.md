@@ -28,17 +28,17 @@ npm install -g markdownlint-cli
 
 ```bash
 # Check markdown file (run from repo root)
-markdownlint plugins/woocommerce/CLAUDE.md
+markdownlint AGENTS.md
 
 # RECOMMENDED: Auto-fix issues first (handles most errors)
-markdownlint --fix plugins/woocommerce/CLAUDE.md
+markdownlint --fix AGENTS.md
 
 # Check multiple files
-markdownlint packages/js/CLAUDE.md plugins/woocommerce/CLAUDE.md
+markdownlint packages/js/CLAUDE.md plugins/woocommerce/client/admin/CLAUDE.md
 
 # Lint all CLAUDE.md files
-markdownlint packages/js/CLAUDE.md plugins/woocommerce/CLAUDE.md \
-  plugins/woocommerce/client/admin/CLAUDE.md
+markdownlint packages/js/CLAUDE.md plugins/woocommerce/client/admin/CLAUDE.md \
+  plugins/woocommerce/client/blocks/CLAUDE.md
 ```
 
 ## Important: Always Run from Repository Root
@@ -50,10 +50,10 @@ Using absolute paths bypasses the config and may show incorrect errors.
 ```bash
 # ✅ CORRECT - run from repo root
 cd /path/to/woocommerce
-markdownlint plugins/woocommerce/CLAUDE.md
+markdownlint AGENTS.md
 
 # ❌ WRONG - bypasses config
-markdownlint /absolute/path/to/plugins/woocommerce/CLAUDE.md
+markdownlint /absolute/path/to/AGENTS.md
 ```
 
 ## Recommended Workflow
@@ -61,7 +61,7 @@ markdownlint /absolute/path/to/plugins/woocommerce/CLAUDE.md
 1. Make markdown changes
 2. Run `markdownlint --fix path/to/file.md` (auto-fixes most issues)
 3. Check remaining: `markdownlint path/to/file.md`
-4. Manually fix what remains (language specs, long lines)
+4. Manually fix what remains (mostly missing language specs)
 5. Verify clean, then commit
 
 ## Common Markdown Linting Issues
@@ -69,7 +69,7 @@ markdownlint /absolute/path/to/plugins/woocommerce/CLAUDE.md
 | Code | Issue | Description | Fix |
 |------|-------|-------------|-----|
 | **MD007** | List indentation | Wrong indentation level | Use 4 spaces for nested items |
-| **MD013** | Line length limit | Line exceeds 80 chars | Break into multiple lines |
+| **MD013** | Line length limit | Disabled (`line_length: 9999` in `.markdownlint.json`) | N/A |
 | **MD031** | Code blocks need blank lines | Missing blank lines | Add blank above/below code blocks |
 | **MD032** | Lists need blank lines | Missing blank lines | Add blank before/after lists |
 | **MD036** | Emphasis as heading | Using bold instead of heading | Use `###` not bold |
@@ -155,21 +155,6 @@ Common language specs:
 - `json` - JSON data
 - `markdown` or `md` - Markdown examples
 
-### Breaking Long Lines
-
-**Before:**
-
-```markdown
-This is a very long line that exceeds the 80 character limit and needs to be broken into multiple lines for better readability.
-```
-
-**After:**
-
-```markdown
-This is a very long line that exceeds the 80 character limit and needs to be
-broken into multiple lines for better readability.
-```
-
 ### Blank Lines Around Code Blocks
 
 **Before:**
@@ -198,5 +183,5 @@ More text
 
 - `markdownlint --fix` automatically handles most issues
 - CLAUDE.md files are AI assistant documentation and must be well-formatted for optimal parsing
-- Only a few issues require manual fixing (language specs, long lines)
+- Only a few issues require manual fixing (mostly missing language specs)
 - Always verify encoding after edits to prevent corruption

@@ -191,7 +191,7 @@ When creating closures with parameters required by signature but unused, use `un
 - Array/filter callbacks where signature is fixed
 - Interface implementations with unused parameters
 
-**Reference:** `tests/php/src/Internal/Admin/Settings/PaymentsRestControllerIntegrationTest.php:1647-1655`
+**Reference:** `tests/php/src/Internal/Admin/Settings/PaymentsRestControllerIntegrationTest.php:1855-1856` (and `:1864-1865`)
 
 ## Array and Operator Alignment
 

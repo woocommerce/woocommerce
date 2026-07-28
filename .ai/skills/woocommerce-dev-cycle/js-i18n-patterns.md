@@ -280,8 +280,8 @@ npx eslint client/path/to/file.tsx
 # Fix specific file
 npx eslint --fix client/path/to/file.tsx
 
-# Type check
-pnpm run ts:check
+# Type check (ts:check is defined per-package, e.g. client/admin, not at repo root)
+pnpm --filter=@woocommerce/admin-library ts:check
 
 # ❌ NEVER lint entire codebase
 pnpm run lint  # NO - lints everything
