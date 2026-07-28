@@ -211,7 +211,8 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 
 		$updated_product = wc_get_product( $product->get_id() );
 
-		$this->assert_date( '1970-01-01 00:00:00', $updated_product->get_date_on_sale_from( 'edit' ), 'start' );
+		// Like the full editor, an invalid start becomes timestamp 0, which WC_Data treats as empty on reload.
+		$this->assert_date( null, $updated_product->get_date_on_sale_from( 'edit' ), 'start' );
 		$this->assert_date( '1970-01-01 23:59:59', $updated_product->get_date_on_sale_to( 'edit' ), 'end' );
 	}
 
