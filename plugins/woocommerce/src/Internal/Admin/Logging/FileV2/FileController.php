@@ -28,14 +28,15 @@ class FileController {
 	 * @const array
 	 */
 	public const DEFAULTS_GET_FILES = array(
-		'date_end'    => 0,
-		'date_filter' => '',
-		'date_start'  => 0,
-		'offset'      => 0,
-		'order'       => 'desc',
-		'orderby'     => 'modified',
-		'per_page'    => 20,
-		'source'      => '',
+		'date_end'     => 0,
+		'date_filter'  => '',
+		'date_start'   => 0,
+		'exact_source' => false,
+		'offset'       => 0,
+		'order'        => 'desc',
+		'orderby'      => 'modified',
+		'per_page'     => 20,
+		'source'       => '',
 	);
 
 	/**
@@ -187,14 +188,17 @@ class FileController {
 	 * @param array $args      {
 	 *     Optional. Arguments to filter and sort the files that are returned.
 	 *
-	 *     @type int    $date_end    The end of the date range to filter by, as a Unix timestamp.
-	 *     @type string $date_filter Filter files by one of the date props. 'created' or 'modified'.
-	 *     @type int    $date_start  The beginning of the date range to filter by, as a Unix timestamp.
-	 *     @type int    $offset      Omit this number of files from the beginning of the list. Works with $per_page to do pagination.
-	 *     @type string $order       The sort direction. 'asc' or 'desc'. Defaults to 'desc'.
-	 *     @type string $orderby     The property to sort the list by. 'created', 'modified', 'source', 'size'. Defaults to 'modified'.
-	 *     @type int    $per_page    The number of files to include in the list. Works with $offset to do pagination.
-	 *     @type string $source      Only include files from this source.
+	 *     @type int    $date_end     The end of the date range to filter by, as a Unix timestamp.
+	 *     @type string $date_filter  Filter files by one of the date props. 'created' or 'modified'.
+	 *     @type int    $date_start   The beginning of the date range to filter by, as a Unix timestamp.
+	 *     @type bool   $exact_source Match $source exactly instead of as a name prefix. Defaults to false.
+	 *     @type int    $offset       Omit this number of files from the beginning of the list. Works with $per_page to do pagination.
+	 *     @type string $order        The sort direction. 'asc' or 'desc'. Defaults to 'desc'.
+	 *     @type string $orderby      The property to sort the list by. 'created', 'modified', 'source', 'size'. Defaults to 'modified'.
+	 *     @type int    $per_page     The number of files to include in the list. Works with $offset to do pagination.
+	 *     @type string $source       Only include files whose source begins with this value. Matching is a prefix by
+	 *                                default, so 'foo' also matches the 'foo-two' source; set $exact_source to true for
+	 *                                an exact match.
 	 * }
 	 * @param bool  $count_only Optional. True to return a total count of the files.
 	 *
@@ -214,6 +218,23 @@ class FileController {
 		}
 
 		$files = $this->convert_paths_to_objects( $paths );
+
+		/*
+		 * The glob pattern is only a prefix match, so a source like 'foo' also
+		 * matches files belonging to 'foo-two'. When 'exact_source' is requested,
+		 * filter down to the exact source so the caller only acts on the source it
+		 * asked for -- this is what clear() needs to avoid deleting a sibling
+		 * source's files. It is opt-in because some callers (e.g. the order-logs
+		 * cleanup) deliberately rely on the prefix match to sweep a family of
+		 * sub-sources. Rotated files still parse to their base source, so those
+		 * remain included either way.
+		 */
+		if ( $args['exact_source'] && '' !== $args['source'] ) {
+			$files = array_filter(
+				$files,
+				fn( $file ) => $args['source'] === $file->get_source()
+			);
+		}
 
 		if ( $args['date_filter'] && $args['date_start'] && $args['date_end'] ) {
 			switch ( $args['date_filter'] ) {
@@ -265,7 +286,7 @@ class FileController {
 					$sort_sets  = array(
 						array( $a->get_created_timestamp(), $b->get_created_timestamp() ),
 						array( $a->get_source(), $b->get_source() ),
-						array( $a->get_rotation() || -1, $b->get_rotation() || -1 ),
+						array( $a->get_rotation() ?? -1, $b->get_rotation() ?? -1 ),
 					);
 					$order_sets = array( $args['order'], 'asc', 'asc' );
 					return $multi_sorter( $sort_sets, $order_sets );
@@ -276,7 +297,7 @@ class FileController {
 					$sort_sets  = array(
 						array( $a->get_modified_timestamp(), $b->get_modified_timestamp() ),
 						array( $a->get_source(), $b->get_source() ),
-						array( $a->get_rotation() || -1, $b->get_rotation() || -1 ),
+						array( $a->get_rotation() ?? -1, $b->get_rotation() ?? -1 ),
 					);
 					$order_sets = array( $args['order'], 'asc', 'asc' );
 					return $multi_sorter( $sort_sets, $order_sets );
@@ -287,7 +308,7 @@ class FileController {
 					$sort_sets  = array(
 						array( $a->get_source(), $b->get_source() ),
 						array( $a->get_created_timestamp(), $b->get_created_timestamp() ),
-						array( $a->get_rotation() || -1, $b->get_rotation() || -1 ),
+						array( $a->get_rotation() ?? -1, $b->get_rotation() ?? -1 ),
 					);
 					$order_sets = array( $args['order'], 'desc', 'asc' );
 					return $multi_sorter( $sort_sets, $order_sets );
@@ -298,7 +319,7 @@ class FileController {
 					$sort_sets  = array(
 						array( $a->get_file_size(), $b->get_file_size() ),
 						array( $a->get_source(), $b->get_source() ),
-						array( $a->get_rotation() || -1, $b->get_rotation() || -1 ),
+						array( $a->get_rotation() ?? -1, $b->get_rotation() ?? -1 ),
 					);
 					$order_sets = array( $args['order'], 'asc', 'asc' );
 					return $multi_sorter( $sort_sets, $order_sets );

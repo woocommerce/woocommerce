@@ -346,6 +346,12 @@ export interface TestJobConfig extends BaseJobConfig {
 	 * A list of dependencies that if changed should trigger the job. If not set, any changed dependency will trigger the job.
 	 */
 	onlyForDependencies?: string[];
+
+	/**
+	 * Indicates whether the job consumes the shared WooCommerce plugin build
+	 * instead of building the plugin from source in its own matrix entry.
+	 */
+	usesSharedPluginBuild?: boolean;
 }
 
 /**
@@ -394,6 +400,15 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		name: raw.name,
 		onlyForDependencies: raw.onlyForDependencies,
 	};
+
+	if ( raw.usesSharedPluginBuild ) {
+		if ( typeof raw.usesSharedPluginBuild !== 'boolean' ) {
+			throw new ConfigError(
+				'The "usesSharedPluginBuild" property must be a boolean.'
+			);
+		}
+		config.usesSharedPluginBuild = raw.usesSharedPluginBuild;
+	}
 
 	if ( raw.testEnv ) {
 		if ( typeof raw.testEnv !== 'object' ) {

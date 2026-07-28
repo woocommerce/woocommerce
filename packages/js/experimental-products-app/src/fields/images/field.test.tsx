@@ -62,7 +62,7 @@ if ( isLatestWordPress() || isLatestMinusOneWordPress() ) {
 				name: 'Beanie',
 				images: [],
 				...overrides,
-			} as ProductEntityRecord );
+			} ) as ProductEntityRecord;
 
 		const renderImagesEdit = (
 			data: ProductEntityRecord,

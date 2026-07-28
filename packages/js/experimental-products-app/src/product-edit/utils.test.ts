@@ -91,7 +91,7 @@ if ( isLatestWordPress() || isLatestMinusOneWordPress() ) {
 				tags: [],
 				images: [],
 				...overrides,
-			} as unknown as ProductEntityRecord );
+			} ) as unknown as ProductEntityRecord;
 		const buildCostOfGoodsSold = (
 			definedValue: number | string | null = 5
 		): ProductEntityRecord[ 'cost_of_goods_sold' ] => ( {

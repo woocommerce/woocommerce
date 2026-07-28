@@ -81,7 +81,7 @@ if ( isLatestWordPress() || isLatestMinusOneWordPress() ) {
 				downloadable: true,
 				downloads: [],
 				...overrides,
-			} as ProductEntityRecord );
+			} ) as ProductEntityRecord;
 
 		const renderEdit = (
 			data: ProductEntityRecord,

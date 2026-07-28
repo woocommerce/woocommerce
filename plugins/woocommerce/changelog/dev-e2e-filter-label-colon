@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update customer list e2e selectors to match the colon-less Show filter label.

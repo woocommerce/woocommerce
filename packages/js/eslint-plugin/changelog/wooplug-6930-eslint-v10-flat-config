@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Add ESLint v9/v10 Flat Config support. `configs.recommended` is now a Flat Config array rather than an eslintrc object, the `eslint` peer range is `^9.22.0 || ^10.0.0`, and prettier `>=3` is required. There is no eslintrc compatibility wrapper: consumers must migrate to `eslint.config.mjs`. Do not register `eslint-plugin-import` or `eslint-plugin-react` yourself; neither supports ESLint v10, and `recommended` provides the wrapped instances.

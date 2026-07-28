@@ -65,10 +65,11 @@
 	"devDependencies": {
 		"@babel/core": "7.25.7",
 		"@types/jest": "29.5.x",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"eslint": "^8.55.0",
+		"eslint": "^10.0.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",

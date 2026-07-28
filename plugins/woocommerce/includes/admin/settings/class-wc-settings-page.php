@@ -141,15 +141,37 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$section = is_string( $current_section ) ? $current_section : '';
 			$context = $this->get_settings_ui_request_context( $section );
 
-			if ( ! $context || ! $context->is_rendering_enabled() ) {
+			try {
+				if ( ! $context || ! $context->is_rendering_enabled() ) {
+					return $classes;
+				}
+
+				// The legacy fallback renderer needs the classic styling: the settings UI
+				// body class hides the legacy Save button via CSS.
+				if ( $context->has_schema_failed() || $context->has_script_handles_failed() ) {
+					return $classes;
+				}
+
+				$is_rendering_drill_down = $context->is_drill_down();
+			} catch ( \Throwable $e ) {
 				return $classes;
 			}
 
-			if ( str_contains( $classes, 'woocommerce-settings-ui-page' ) ) {
-				return $classes;
+			$body_classes = explode( ' ', $classes );
+
+			if ( ! in_array( 'woocommerce-settings-ui-page', $body_classes, true ) ) {
+				$classes       .= ' woocommerce-settings-ui-page';
+				$body_classes[] = 'woocommerce-settings-ui-page';
 			}
 
-			return "$classes woocommerce-settings-ui-page";
+			if (
+				$is_rendering_drill_down
+				&& ! in_array( 'woocommerce-settings-ui-drill-down', $body_classes, true )
+			) {
+				$classes .= ' woocommerce-settings-ui-drill-down';
+			}
+
+			return $classes;
 		}
 
 		/**

@@ -310,9 +310,8 @@ export const useTransactionalEmails = (
 				}
 
 				// Now we can fetch the old settings and update the settings
-				const currentSettings = await select(
-					settingsStore
-				).getSettings( settingsGroup );
+				const currentSettings =
+					await select( settingsStore ).getSettings( settingsGroup );
 				const updatedSettings = { ...currentSettings } as {
 					[ key: string ]: { [ key: string ]: unknown };
 				};
