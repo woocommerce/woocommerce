@@ -1,31 +1,46 @@
 /**
  * External dependencies
  */
-import { store as coreStore } from '@wordpress/core-data';
-import { dispatch } from '@wordpress/data';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
  */
-import { PRODUCT_ENTITY } from './product/constants';
-import { SETTINGS_ENTITY } from './settings/constants';
+import {
+	registerProductEntity as registerProductEntityInternal,
+	registerSettingsEntity as registerSettingsEntityInternal,
+} from '../entity-registration/register-entities';
 
-const registered: string[] = [];
+const deprecationNoticesShown = new Set< string >();
 
-export const registerProductEntity = () => {
-	if ( registered.includes( PRODUCT_ENTITY.name ) ) {
+const showDeprecationNotice = ( functionName: string ) => {
+	if ( deprecationNoticesShown.has( functionName ) ) {
 		return;
 	}
-	const { addEntities } = dispatch( coreStore );
-	void addEntities( [ PRODUCT_ENTITY ] );
-	registered.push( PRODUCT_ENTITY.name );
+
+	deprecated( `${ functionName }()`, {
+		since: '11.1.0',
+		alternative: 'automatic entity registration',
+		plugin: 'WooCommerce',
+		hint: 'Entities are registered automatically by the wc-entities script. Remove this call.',
+	} );
+	deprecationNoticesShown.add( functionName );
 };
 
+/**
+ * @deprecated Since WooCommerce 11.1.0. Entities are registered automatically
+ * by the wc-entities script.
+ */
+export const registerProductEntity = () => {
+	showDeprecationNotice( 'registerProductEntity' );
+	return registerProductEntityInternal();
+};
+
+/**
+ * @deprecated Since WooCommerce 11.1.0. Entities are registered automatically
+ * by the wc-entities script.
+ */
 export const registerSettingsEntity = () => {
-	if ( registered.includes( SETTINGS_ENTITY.name ) ) {
-		return;
-	}
-	const { addEntities } = dispatch( coreStore );
-	void addEntities( [ SETTINGS_ENTITY ] );
-	registered.push( SETTINGS_ENTITY.name );
+	showDeprecationNotice( 'registerSettingsEntity' );
+	return registerSettingsEntityInternal();
 };

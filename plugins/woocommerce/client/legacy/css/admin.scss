@@ -3618,6 +3618,15 @@ body.woocommerce_page_wc-orders {
 			}
 		}
 
+		// Hide the small-screen date/status copies when the corresponding column is hidden via Screen Options.
+		&:has( thead th.column-order_date.hidden ) .order_date.small-screen-only {
+			display: none;
+		}
+
+		&:has( thead th.column-order_status.hidden ) .order_status.small-screen-only {
+			display: none;
+		}
+
 	}
 }
 

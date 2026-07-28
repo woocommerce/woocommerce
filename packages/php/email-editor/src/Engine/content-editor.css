@@ -89,6 +89,14 @@
 	font-weight: bold;
 }
 
+/*
+ * Embed block enhancements
+ */
+.wp-block-embed figcaption {
+	/* Center-align embed captions like core WordPress, matching the email renderer and the table block */
+	text-align: center;
+}
+
 .wp-block-image.alignleft,
 .wp-block-image.alignright {
 	margin-inline: 0 0;

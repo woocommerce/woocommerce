@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.15.0](https://github.com/woocommerce/email-editor/releases/tag/2.15.0) - 2026-07-28 
+
+-   Minor - Enable the embed block for supported video providers in the email editor and improve embed rendering in emails. [#66968]
+-   Patch - Render a Query Loop's post-template grid as an email-safe table of columns. Grid layouts (e.g. a 3-column sponsor logo grid) previously collapsed to a single stacked column in email clients because CSS grid isn't supported; the post-template's items are now re-flowed into table columns matching the author's column count. [#66993]
+
 ## [2.14.2](https://github.com/woocommerce/email-editor/releases/tag/2.14.2) - 2026-07-24 
 
 -   Patch - Clamp an oversized raw image width in email galleries down to the cell it renders in (scaling height to keep the aspect ratio), so wide originals no longer blow out the layout in Outlook, and drop the web-only class the sanitizer preserves. [#66824]
