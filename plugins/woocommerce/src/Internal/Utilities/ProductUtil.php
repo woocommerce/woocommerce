@@ -4,8 +4,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
-use Automattic\WooCommerce\Caches\ProductCountCache;
-
 /**
  * Class with general utility methods related to products.
  */
@@ -144,26 +142,14 @@ class ProductUtil {
 	}
 
 	/**
-	 * Counts per-status number of products of a given post type.
+	 * Counts per-status number of products.
 	 *
 	 * @since 11.0.0
 	 *
-	 * @param string $post_type Post type (e.g. 'product', 'product_variation').
+	 * @param string $post_type Post type.
 	 * @return array<string,int>
 	 */
 	public function get_counts_for_type( string $post_type ): array {
-		$product_count_cache = wc_get_container()->get( ProductCountCache::class );
-		$count_per_status    = $product_count_cache->get( $post_type );
-
-		if ( null === $count_per_status ) {
-			$count_per_status = array_replace(
-				array_fill_keys( array_keys( get_post_stati() ), 0 ),
-				(array) wp_count_posts( $post_type )
-			);
-
-			$product_count_cache->set_multiple( $post_type, $count_per_status );
-		}
-
-		return array_map( 'intval', $count_per_status );
+		return array_map( 'intval', (array) wp_count_posts( $post_type ) );
 	}
 }

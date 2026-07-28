@@ -51,21 +51,24 @@ class ProductCountCacheService {
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @internal
+	 *
+	 * @return void
 	 */
 	final public function init(): void {
 		$this->product_count_cache = new ProductCountCache();
 
-		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'schedule_background_actions' ) );
-		add_action( self::BACKGROUND_EVENT_HOOK, array( $this, 'prime_cache_if_cold' ) );
-		if ( defined( 'WC_PLUGIN_BASENAME' ) ) {
-			add_action( 'deactivate_' . WC_PLUGIN_BASENAME, array( $this, 'unschedule_background_actions' ) );
-		}
+		add_action( self::BACKGROUND_EVENT_HOOK, array( $this, 'handle_legacy_background_action' ) );
+		add_action( 'action_scheduler_init', array( $this, 'unschedule_background_actions' ) );
+	}
 
-		// transition_post_status owns all mid-lifecycle status changes; woocommerce_new_product corrects for creation-time
-		// ephemeral transitions before the final status is committed; before_delete_post closes the lifecycle.
-		add_action( 'woocommerce_new_product', array( $this, 'update_on_new_product' ), 10, 2 );
-		add_action( 'transition_post_status', array( $this, 'update_on_product_status_changed' ), 10, 3 );
-		add_action( 'before_delete_post', array( $this, 'update_on_product_deleted' ), 10, 2 );
+	/**
+	 * Handle product count cache refresh actions scheduled by WooCommerce 11.0 prereleases.
+	 *
+	 * @param string $product_type The product post type.
+	 * @return void
+	 */
+	public function handle_legacy_background_action( string $product_type = 'product' ): void {
+		// Intentionally left blank so already-scheduled actions complete successfully.
 	}
 
 	/**
@@ -94,12 +97,12 @@ class ProductCountCacheService {
 	}
 
 	/**
-	 * Unschedules background actions.
+	 * Unschedule background actions.
 	 *
 	 * @return void
 	 */
 	public function unschedule_background_actions(): void {
-		WC()->queue()->cancel_all( self::BACKGROUND_EVENT_HOOK );
+		as_unschedule_all_actions( self::BACKGROUND_EVENT_HOOK );
 	}
 
 	/**

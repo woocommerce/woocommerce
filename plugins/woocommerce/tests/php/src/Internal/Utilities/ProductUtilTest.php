@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\Utilities;
 
+use Automattic\WooCommerce\Caches\ProductCountCache;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
@@ -31,6 +32,30 @@ class ProductUtilTest extends \WC_Unit_Test_Case {
 		$published->delete( true );
 		$draft->delete( true );
 		$pending->delete( true );
+	}
+
+	/**
+	 * @testdox `get_counts_for_type` ignores stale persistent product count cache values.
+	 */
+	public function test_get_counts_for_type_ignores_persistent_product_count_cache(): void {
+		$product_count_cache = new ProductCountCache();
+		$product_count_cache->flush( 'product' );
+
+		$wordpress_counts    = array_map( 'intval', (array) wp_count_posts( 'product' ) );
+		$stale_publish_count = ( $wordpress_counts[ ProductStatus::PUBLISH ] ?? 0 ) + 100;
+		$product_count_cache->set( 'product', ProductStatus::PUBLISH, $stale_publish_count );
+
+		try {
+			$actual_counts = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
+
+			$this->assertSame(
+				$wordpress_counts[ ProductStatus::PUBLISH ] ?? 0,
+				$actual_counts[ ProductStatus::PUBLISH ] ?? 0
+			);
+			$this->assertNotSame( $stale_publish_count, $actual_counts[ ProductStatus::PUBLISH ] ?? 0 );
+		} finally {
+			$product_count_cache->flush( 'product' );
+		}
 	}
 
 	/**

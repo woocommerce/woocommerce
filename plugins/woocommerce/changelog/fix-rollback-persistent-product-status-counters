@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Roll back persistent product status counters and clean up their scheduled refresh actions.

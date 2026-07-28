@@ -36,7 +36,7 @@ class ProductCountCache {
 	private function get_saved_statuses_for_type( string $product_type ): array {
 		$statuses = wp_cache_get( $this->get_saved_statuses_cache_key( $product_type ) );
 
-		return is_array( $statuses ) ? array_map( 'strval', $statuses ) : array();
+		return is_array( $statuses ) ? $statuses : array();
 	}
 
 	/**
@@ -124,11 +124,11 @@ class ProductCountCache {
 			return array();
 		}
 
-		$this->ensure_statuses_for_type( $product_type, array_map( 'strval', array_keys( $counts ) ) );
+		$this->ensure_statuses_for_type( $product_type, array_keys( $counts ) );
 
 		$mapped_counts = array();
 		foreach ( $counts as $status => $count ) {
-			$mapped_counts[ $this->get_cache_key( $product_type, (string) $status ) ] = (int) $count;
+			$mapped_counts[ $this->get_cache_key( $product_type, $status ) ] = (int) $count;
 		}
 
 		return wp_cache_set_multiple( $mapped_counts, '', $this->expiration );

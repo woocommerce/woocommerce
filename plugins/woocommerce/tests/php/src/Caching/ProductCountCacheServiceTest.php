@@ -34,6 +34,8 @@ final class ProductCountCacheServiceTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$this->markTestSkipped( 'Persistent product count caching is temporarily disabled while its implementation is being fixed.' );
 		$this->product_cache = new ProductCountCache();
 		$this->product_cache->flush();
 		$this->product_util = wc_get_container()->get( ProductUtil::class );
