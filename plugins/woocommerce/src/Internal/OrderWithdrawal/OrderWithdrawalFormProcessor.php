@@ -302,6 +302,14 @@ final class OrderWithdrawalFormProcessor {
 			return null;
 		}
 
+		if ( ctype_digit( $order_number ) ) {
+			$order = wc_get_order( (int) $order_number );
+
+			if ( $order instanceof WC_Order && $this->order_matches_form_data( $order, $data ) ) {
+				return $order;
+			}
+		}
+
 		// Search by email first because the submitted order number may not be the internal order ID.
 		$candidate_orders = wc_get_orders(
 			array(
