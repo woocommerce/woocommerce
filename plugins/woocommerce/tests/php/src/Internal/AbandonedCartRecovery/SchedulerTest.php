@@ -229,6 +229,10 @@ class SchedulerTest extends WC_Unit_Test_Case {
 
 		$order_argument = $supply_order_argument ? $order : null;
 
+		if ( $supply_order_argument ) {
+			wc_get_container()->get( OrderCache::class )->remove( $order->get_id() );
+		}
+
 		$this->sut->handle_new_order( $order->get_id(), $order_argument );
 
 		if ( $order_argument ) {
