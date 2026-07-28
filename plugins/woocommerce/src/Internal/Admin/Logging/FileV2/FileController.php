@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+use Exception;
 use PclZip;
 use WC_Cache_Helper;
 use WP_Error;
@@ -513,6 +515,65 @@ class FileController {
 
 			if ( true === $result ) {
 				$deleted ++;
+			}
+		}
+
+		if ( $deleted > 0 ) {
+			$this->invalidate_cache();
+		}
+
+		return $deleted;
+	}
+
+	/**
+	 * Delete files of a given source that were last modified before a given time.
+	 *
+	 * Files are enumerated lazily and are neither sorted nor turned into File instances, so this
+	 * stays cheap on directories holding a large number of files, unlike get_files().
+	 *
+	 * @param string $source          Match files whose name begins with this source.
+	 * @param int    $modified_before Only delete files modified before this Unix timestamp.
+	 * @param int    $limit           The maximum number of files to delete.
+	 *
+	 * @return int The number of files that were deleted.
+	 */
+	public function delete_stale_files( string $source, int $modified_before, int $limit ): int {
+		if ( '' === $source || $limit < 1 ) {
+			return 0;
+		}
+
+		try {
+			$filesystem = FilesystemUtil::get_wp_filesystem_direct();
+			$iterator   = new \FilesystemIterator(
+				Settings::get_log_directory(),
+				\FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_PATHNAME
+			);
+		} catch ( Exception $exception ) {
+			return 0;
+		}
+
+		$deleted = 0;
+
+		foreach ( $iterator as $path ) {
+			$path     = (string) $path;
+			$basename = basename( $path );
+
+			if ( 0 !== strpos( $basename, $source ) || '.log' !== substr( $basename, -4 ) ) {
+				continue;
+			}
+
+			$modified = $filesystem->mtime( $path );
+
+			if ( false === $modified || $modified >= $modified_before ) {
+				continue;
+			}
+
+			if ( $filesystem->delete( $path, false, 'f' ) ) {
+				++$deleted;
+			}
+
+			if ( $deleted >= $limit ) {
+				break;
 			}
 		}
 

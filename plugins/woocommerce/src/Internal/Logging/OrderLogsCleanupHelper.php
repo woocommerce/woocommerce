@@ -19,14 +19,24 @@ use WC_Logger;
 class OrderLogsCleanupHelper {
 
 	/**
-	 * Number of log files to delete per batch.
+	 * Maximum number of log files to delete per run.
 	 */
 	public const MAX_FILES_PER_RUN = 1000;
 
 	/**
-	 * Number of orders to clean up per batch.
+	 * Maximum number of orders to clean up per run.
 	 */
 	public const MAX_ORDERS_PER_RUN = 100;
+
+	/**
+	 * Hook of the action scheduled to continue a cleanup that didn't drain the backlog.
+	 */
+	public const EXTENDED_CLEANUP_HOOK = 'woocommerce_cleanup_logs_extended';
+
+	/**
+	 * Delay, in seconds, before a follow-up cleanup run.
+	 */
+	private const EXTENDED_CLEANUP_DELAY = 5 * MINUTE_IN_SECONDS;
 
 	/**
 	 * True if HPOS is enabled.
@@ -101,68 +111,71 @@ class OrderLogsCleanupHelper {
 
 		// Old files are deleted in bulk first, so that the per-order log clearing below
 		// doesn't scan a directory still full of them.
-		$this->cleanup_old_log_files( $max_age );
+		$more_files  = $this->cleanup_old_log_files( $max_age );
+		$more_orders = $this->cleanup_dangling_orders( $max_age );
 
-		$this->cleanup_dangling_orders( $max_age );
+		// Each run handles a single batch, so that it can't grow unbounded on a large
+		// backlog. Anything left over is picked up by a follow-up run a few minutes later.
+		if ( $more_files || $more_orders ) {
+			$this->schedule_extended_cleanup();
+		}
 	}
 
 	/**
-	 * Clean up orders with dangling debug log meta, in batches, until none remain.
+	 * Clean up a batch of orders with dangling debug log meta.
 	 *
 	 * Dangling orders have `_debug_log_source` meta but no `_debug_log_source_pending_deletion`.
 	 *
 	 * @param int $max_age Maximum age in seconds before an order's debug log meta is eligible for cleanup.
+	 *
+	 * @return bool True if there may be more orders left to clean up.
 	 */
-	private function cleanup_dangling_orders( int $max_age ): void {
-		do {
-			$dangling_orders = $this->get_dangling_orders( $max_age );
-			$fetched_count   = count( $dangling_orders );
+	private function cleanup_dangling_orders( int $max_age ): bool {
+		$dangling_orders = $this->get_dangling_orders( $max_age );
 
-			if ( 0 === $fetched_count ) {
-				break;
-			}
+		if ( empty( $dangling_orders ) ) {
+			return false;
+		}
 
-			$deleted_meta_rows = $this->clear_logs_and_delete_meta( $dangling_orders );
-		} while ( $deleted_meta_rows > 0 && self::MAX_ORDERS_PER_RUN === $fetched_count );
+		$deleted_meta_rows = $this->clear_logs_and_delete_meta( $dangling_orders );
+
+		return $deleted_meta_rows > 0 && self::MAX_ORDERS_PER_RUN === count( $dangling_orders );
 	}
 
 	/**
-	 * Delete place-order-debug-* log files from the filesystem, in batches, until none remain.
+	 * Delete a batch of place-order-debug-* log files from the filesystem.
 	 *
 	 * @param int $max_age Maximum age in seconds before a file is eligible for deletion.
+	 *
+	 * @return bool True if there may be more files left to delete.
 	 */
-	private function cleanup_old_log_files( int $max_age ): void {
+	private function cleanup_old_log_files( int $max_age ): bool {
 		if ( LoggingUtil::get_default_handler() !== LogHandlerFileV2::class ) {
+			return false;
+		}
+
+		$deleted = wc_get_container()->get( FileController::class )->delete_stale_files(
+			'place-order-debug',
+			time() - $max_age,
+			self::MAX_FILES_PER_RUN
+		);
+
+		return self::MAX_FILES_PER_RUN === $deleted;
+	}
+
+	/**
+	 * Schedule a follow-up cleanup run to continue draining the backlog.
+	 */
+	private function schedule_extended_cleanup(): void {
+		if ( ! function_exists( 'as_schedule_single_action' ) || ! function_exists( 'as_has_scheduled_action' ) ) {
 			return;
 		}
 
-		$file_controller = wc_get_container()->get( FileController::class );
-		$date_end        = time() - $max_age;
+		if ( as_has_scheduled_action( self::EXTENDED_CLEANUP_HOOK, array(), 'woocommerce' ) ) {
+			return;
+		}
 
-		do {
-			$files = $file_controller->get_files(
-				array(
-					'source'      => 'place-order-debug',
-					'date_filter' => 'modified',
-					'date_start'  => 1,
-					'date_end'    => $date_end,
-					'per_page'    => self::MAX_FILES_PER_RUN,
-				)
-			);
-
-			if ( ! is_array( $files ) ) {
-				return;
-			}
-
-			$fetched_count = count( $files );
-			$deleted_count = 0;
-
-			foreach ( $files as $file ) {
-				if ( $file->delete() ) {
-					++$deleted_count;
-				}
-			}
-		} while ( $deleted_count > 0 && self::MAX_FILES_PER_RUN === $fetched_count );
+		as_schedule_single_action( time() + self::EXTENDED_CLEANUP_DELAY, self::EXTENDED_CLEANUP_HOOK, array(), 'woocommerce' );
 	}
 
 	/**

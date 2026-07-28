@@ -113,6 +113,7 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_debug_log_source' ) );
 
 		self::delete_all_log_files();
+		as_unschedule_all_actions( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK );
 
 		$this->sut                = $this->container->get( OrderLogsDeletionProcessor::class );
 		$this->sut_cleanup_helper = $this->container->get( OrderLogsCleanupHelper::class );
@@ -132,6 +133,7 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		self::delete_all_log_files();
+		as_unschedule_all_actions( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK );
 		parent::tearDown();
 		if ( $this->data_store_filter_callback ) {
 				remove_filter( 'woocommerce_order_data_store', $this->data_store_filter_callback, 99999 );
@@ -538,13 +540,14 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox cleanup() keeps deleting old log files in batches until none remain, even when there are more than one batch's worth.
+	 * @testdox cleanup() deletes one batch of old log files per run and schedules a follow-up run to drain the rest.
 	 */
-	public function test_cleanup_drains_old_log_files_beyond_one_batch(): void {
+	public function test_cleanup_deletes_one_batch_of_log_files_and_reschedules(): void {
 		$file_controller = wc_get_container()->get( FileController::class );
 		$log_directory   = Settings::get_log_directory();
 
-		$file_count = OrderLogsCleanupHelper::MAX_FILES_PER_RUN + 5;
+		$extra      = 5;
+		$file_count = OrderLogsCleanupHelper::MAX_FILES_PER_RUN + $extra;
 		$date       = gmdate( 'Y-m-d', strtotime( '-4 days' ) );
 		$old_time   = time() - 4 * DAY_IN_SECONDS;
 
@@ -562,19 +565,37 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 		$this->sut_cleanup_helper->cleanup();
 
 		$this->assertEquals(
+			$extra,
+			$file_controller->get_files( array( 'source' => 'place-order-debug' ), true ),
+			'Only one batch should be deleted per run'
+		);
+		$this->assertTrue(
+			as_has_scheduled_action( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK, array(), 'woocommerce' ),
+			'A follow-up run should be scheduled while files remain'
+		);
+
+		as_unschedule_all_actions( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK );
+		$this->sut_cleanup_helper->cleanup();
+
+		$this->assertEquals(
 			0,
 			$file_controller->get_files( array( 'source' => 'place-order-debug' ), true ),
-			'All old files should be deleted, not just the first batch'
+			'The follow-up run should delete the remaining files'
+		);
+		$this->assertFalse(
+			as_has_scheduled_action( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK, array(), 'woocommerce' ),
+			'No follow-up run should be scheduled once the backlog is drained'
 		);
 	}
 
 	/**
-	 * @testdox cleanup() keeps deleting dangling order meta in batches until none remain, even when there are more than one batch's worth.
+	 * @testdox cleanup() deletes one batch of dangling order meta per run and schedules a follow-up run to drain the rest.
 	 */
-	public function test_cleanup_drains_dangling_orders_beyond_one_batch(): void {
+	public function test_cleanup_deletes_one_batch_of_dangling_orders_and_reschedules(): void {
 		$this->setup_hpos_and_reset_container( true );
 
-		$order_count = OrderLogsCleanupHelper::MAX_ORDERS_PER_RUN + 5;
+		$extra       = 5;
+		$order_count = OrderLogsCleanupHelper::MAX_ORDERS_PER_RUN + $extra;
 
 		for ( $i = 0; $i < $order_count; $i++ ) {
 			$order = wc_create_order();
@@ -588,9 +609,22 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 		$this->sut_cleanup_helper->cleanup();
 
 		$this->assertEquals(
+			$extra,
+			$this->count_debug_log_source_meta_entries(),
+			'Only one batch should be cleaned up per run'
+		);
+		$this->assertTrue(
+			as_has_scheduled_action( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK, array(), 'woocommerce' ),
+			'A follow-up run should be scheduled while dangling orders remain'
+		);
+
+		as_unschedule_all_actions( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK );
+		$this->sut_cleanup_helper->cleanup();
+
+		$this->assertEquals(
 			0,
 			$this->count_debug_log_source_meta_entries(),
-			'All dangling order meta should be deleted, not just the first batch'
+			'The follow-up run should clean up the remaining orders'
 		);
 	}
 

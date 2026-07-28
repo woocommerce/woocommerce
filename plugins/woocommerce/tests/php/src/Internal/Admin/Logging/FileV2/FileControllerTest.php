@@ -185,6 +185,57 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The delete_stale_files method should only delete files of the given source that are older than the given time, up to the limit.
+	 */
+	public function test_delete_stale_files() {
+		$directory = Settings::get_log_directory();
+		$old_time  = time() - 4 * DAY_IN_SECONDS;
+
+		$paths = array(
+			'stale1'       => $directory . 'unit-testing-a-2025-01-01-' . wp_hash( 'a' ) . '.log',
+			'stale2'       => $directory . 'unit-testing-b-2025-01-01-' . wp_hash( 'b' ) . '.log',
+			'recent'       => $directory . 'unit-testing-c-2025-01-01-' . wp_hash( 'c' ) . '.log',
+			'other_source' => $directory . 'other-source-2025-01-01-' . wp_hash( 'd' ) . '.log',
+		);
+
+		foreach ( $paths as $key => $path ) {
+			file_put_contents( $path, 'entry' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			if ( 'recent' !== $key ) {
+				touch( $path, $old_time ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+			}
+		}
+		clearstatcache();
+
+		$deleted = $this->sut->delete_stale_files( 'unit-testing', time() - DAY_IN_SECONDS, 10 );
+
+		$this->assertEquals( 2, $deleted );
+		$this->assertFileDoesNotExist( $paths['stale1'] );
+		$this->assertFileDoesNotExist( $paths['stale2'] );
+		$this->assertFileExists( $paths['recent'], 'Files newer than the cutoff should be kept' );
+		$this->assertFileExists( $paths['other_source'], 'Files of other sources should be kept' );
+	}
+
+	/**
+	 * @testdox The delete_stale_files method should not delete more files than the given limit.
+	 */
+	public function test_delete_stale_files_respects_limit() {
+		$directory = Settings::get_log_directory();
+		$old_time  = time() - 4 * DAY_IN_SECONDS;
+
+		for ( $i = 0; $i < 5; $i++ ) {
+			$path = $directory . "unit-testing-{$i}-2025-01-01-" . wp_hash( (string) $i ) . '.log';
+			file_put_contents( $path, 'entry' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			touch( $path, $old_time ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+		}
+		clearstatcache();
+
+		$deleted = $this->sut->delete_stale_files( 'unit-testing', time() - DAY_IN_SECONDS, 3 );
+
+		$this->assertEquals( 3, $deleted );
+		$this->assertCount( 2, glob( $directory . '*.log' ) );
+	}
+
+	/**
 	 * @testdox The write_to_file method should leave a file with a stale hash suffix alone and write to a new file with the current hash.
 	 */
 	public function test_write_to_file_hash_mismatch_creates_new_file() {
