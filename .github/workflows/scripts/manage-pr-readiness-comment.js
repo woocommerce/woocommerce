@@ -26,11 +26,22 @@ async function findExistingComment(github, context, prNumber) {
 }
 
 async function resolvePullRequest(github, context) {
-    const headSha = context.payload.workflow_run.head_sha;
+    const { head_sha: headSha, head_repository: headRepository } =
+        context.payload.workflow_run;
+
+    // Query the commit's own repo (the fork, for a fork PR), not the base
+    // repo: GitHub's commit->PR association index has been observed to lag
+    // significantly for the base repo on a commit that only exists on a
+    // fork, while the same query against the fork itself resolves
+    // immediately. `head_repository` is populated on `workflow_run` even
+    // when `pull_requests` is emptied for forks, so it's always available.
+    const sourceOwner = headRepository ? headRepository.owner.login : context.repo.owner;
+    const sourceRepo = headRepository ? headRepository.name : context.repo.repo;
+
     const { data: associated } =
         await github.rest.repos.listPullRequestsAssociatedWithCommit({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
+            owner: sourceOwner,
+            repo: sourceRepo,
             commit_sha: headSha,
         });
 
