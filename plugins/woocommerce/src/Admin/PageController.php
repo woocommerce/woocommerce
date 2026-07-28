@@ -41,7 +41,12 @@ class PageController {
 	private $current_page = null;
 
 	/**
-	 * Whether the current page was selected by route-pattern fallback.
+	 * Whether the current page was resolved by matching a route pattern.
+	 *
+	 * Only true when the fallback matcher selected a page whose registered path actually
+	 * carries a `:param` or terminal `/*` segment. The fallback also matches pattern-free
+	 * paths (it tolerates trailing slashes and casing), and those resolve to a concrete,
+	 * linkable path just like an exact match does.
 	 *
 	 * @var bool
 	 */
@@ -190,7 +195,7 @@ class PageController {
 		}
 
 		$this->current_page                        = $matching_page;
-		$this->current_page_is_route_pattern_match = false !== $matching_page;
+		$this->current_page_is_route_pattern_match = false !== $matching_page && $this->registered_path_has_route_pattern( $matching_page['path'] ?? null );
 	}
 
 	/**
@@ -314,13 +319,8 @@ class PageController {
 
 		$page_title = ! empty( $current_page['page_title'] ) ? $current_page['page_title'] : $current_page['title'];
 		$page_title = (array) $page_title;
-		if (
-			1 === count( $page_title ) ||
-			(
-				$this->current_page_is_route_pattern_match &&
-				$this->registered_path_has_route_pattern( $current_page['path'] ?? null )
-			)
-		) {
+		// A patterned path is not linkable: it would point at the literal `:param`/`*` template.
+		if ( 1 === count( $page_title ) || $this->current_page_is_route_pattern_match ) {
 			$breadcrumbs = $page_title;
 		} else {
 			// If this page has multiple title pieces, only link the first one.

@@ -866,6 +866,30 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Fallback-selected pattern-free paths retain trunk's linked parent breadcrumb.
+	 */
+	public function test_fallback_selected_pattern_free_path_retains_linked_patterned_parent_breadcrumb(): void {
+		// The trailing slash makes this miss the exact-match loop and resolve through the fallback
+		// matcher, but `/breadcrumb/static` carries no route pattern, so breadcrumbs stay trunk-identical.
+		$result = $this->get_publicly_registered_page_result_for_request(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fbreadcrumb%2Fstatic%2F',
+			function () {
+				$this->register_patterned_parent_and_child( '/breadcrumb/static' );
+			},
+			true
+		);
+
+		$this->assertSame(
+			array(
+				array( 'admin.php?page=' . PageController::PAGE_ROOT, 'WooCommerce' ),
+				array( 'admin.php?page=wc-admin&path=/breadcrumb/:section', 'Pattern parent' ),
+				'Child page',
+			),
+			$result['breadcrumbs']
+		);
+	}
+
+	/**
 	 * @testdox Fallback-selected pages use text for parents with invalid filtered paths.
 	 *
 	 * @dataProvider data_provider_test_route_pattern_fallback_with_invalid_parent_path
