@@ -365,6 +365,19 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertStringContainsString( 'already been submitted for this order', $error_notices[0]['notice'], 'The notice should explain that the order already has a withdrawal request.' );
 			$this->assertCount( 0, $capture['captures'], 'Duplicate matched submissions should not send notification emails.' );
 			$this->assertFalse( $this->order_has_note_containing( $order, 'Order withdrawal requested' ), 'Duplicate matched submissions should not add another order note.' );
+
+			wc_clear_notices();
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$second_state         = $this->sut->process_current_request();
+			$second_error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'review', $second_state->screen, 'Duplicate matched submissions should not leave behind a rate limit.' );
+			$this->assertCount( 1, $second_error_notices, 'The second duplicate submission should add only the duplicate-order error notice.' );
+			$this->assertStringContainsString( 'already been submitted for this order', $second_error_notices[0]['notice'], 'The released rate limit should allow duplicate-order validation to run again.' );
 		} finally {
 			$capture['remove']();
 		}
@@ -454,6 +467,20 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertCount( 2, $capture['captures'], 'The processor should attempt both notification emails before surfacing the failure.' );
 			$this->assertNotEmpty( $error_notices, 'Email failures should add an error notice.' );
 			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $error_notices[0]['notice'], 'The error notice should tell the user the submission did not complete.' );
+
+			wc_clear_notices();
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '999999999' )
+			);
+
+			$second_state         = $this->sut->process_current_request();
+			$second_error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'review', $second_state->screen, 'Email failures should not leave behind a rate limit.' );
+			$this->assertCount( 4, $capture['captures'], 'The second failed submission should attempt notification emails again.' );
+			$this->assertNotEmpty( $second_error_notices, 'The second email failure should add an error notice.' );
+			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $second_error_notices[0]['notice'], 'The released rate limit should allow email delivery to be attempted again.' );
 		} finally {
 			$capture['remove']();
 		}
