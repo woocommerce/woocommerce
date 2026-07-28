@@ -196,24 +196,26 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Quick Edit normalizes invalid sale dates like the full product editor.
+	 * @testdox Quick Edit preserves sale dates when submitted values cannot be parsed.
 	 */
-	public function test_quick_edit_matches_full_editor_invalid_date_behavior(): void {
+	public function test_quick_edit_preserves_sale_dates_for_unparseable_values(): void {
 		$product = $this->create_product( ProductType::SIMPLE );
+		$product->set_date_on_sale_from( '2098-01-01 00:00:00' );
+		$product->set_date_on_sale_to( '2098-12-31 23:59:59' );
+		$product->save();
 
 		$this->quick_edit(
 			$product,
 			array(
-				'_sale_price_dates_from' => 'invalid-date',
-				'_sale_price_dates_to'   => 'invalid-date',
+				'_sale_price_dates_from' => 'tomorow',
+				'_sale_price_dates_to'   => 'tomorow',
 			)
 		);
 
 		$updated_product = wc_get_product( $product->get_id() );
 
-		// Like the full editor, an invalid start becomes timestamp 0, which WC_Data treats as empty on reload.
-		$this->assert_date( null, $updated_product->get_date_on_sale_from( 'edit' ), 'start' );
-		$this->assert_date( '1970-01-01 23:59:59', $updated_product->get_date_on_sale_to( 'edit' ), 'end' );
+		$this->assert_date( '2098-01-01 00:00:00', $updated_product->get_date_on_sale_from( 'edit' ), 'start' );
+		$this->assert_date( '2098-12-31 23:59:59', $updated_product->get_date_on_sale_to( 'edit' ), 'end' );
 	}
 
 	/**

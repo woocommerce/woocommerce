@@ -463,41 +463,43 @@ class WC_Admin_Post_Types {
 				$product->set_sale_price( $sale_price );
 			}
 
-			// Match the full product editor's date parsing and site-timezone behavior.
-			if ( isset( $request_data['_sale_price_dates_from'] ) ) {
-				$date_on_sale_from = '';
-				if ( is_string( $request_data['_sale_price_dates_from'] ) ) {
-					/**
-					 * Sanitized sale start date.
-					 *
-					 * @var string $date_on_sale_from
-					 */
-					$date_on_sale_from = wc_clean( wp_unslash( $request_data['_sale_price_dates_from'] ) );
-				}
+			// Parse valid dates using the full product editor's site-timezone behavior.
+			$submitted_sale_date_from = $request_data['_sale_price_dates_from'] ?? null;
+			if ( is_string( $submitted_sale_date_from ) ) {
+				/**
+				 * Sanitized sale start date.
+				 *
+				 * @var string $date_on_sale_from
+				 */
+				$date_on_sale_from = wc_clean( wp_unslash( $submitted_sale_date_from ) );
 
-				if ( ! empty( $date_on_sale_from ) ) {
-					$date_on_sale_from = date( 'Y-m-d 00:00:00', (int) strtotime( $date_on_sale_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+				if ( '' === $date_on_sale_from ) {
+					$product->set_date_on_sale_from( '' );
+				} else {
+					$timestamp = strtotime( $date_on_sale_from );
+					if ( false !== $timestamp ) {
+						$product->set_date_on_sale_from( date( 'Y-m-d 00:00:00', $timestamp ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+					}
 				}
-
-				$product->set_date_on_sale_from( $date_on_sale_from );
 			}
 
-			if ( isset( $request_data['_sale_price_dates_to'] ) ) {
-				$date_on_sale_to = '';
-				if ( is_string( $request_data['_sale_price_dates_to'] ) ) {
-					/**
-					 * Sanitized sale end date.
-					 *
-					 * @var string $date_on_sale_to
-					 */
-					$date_on_sale_to = wc_clean( wp_unslash( $request_data['_sale_price_dates_to'] ) );
-				}
+			$submitted_sale_date_to = $request_data['_sale_price_dates_to'] ?? null;
+			if ( is_string( $submitted_sale_date_to ) ) {
+				/**
+				 * Sanitized sale end date.
+				 *
+				 * @var string $date_on_sale_to
+				 */
+				$date_on_sale_to = wc_clean( wp_unslash( $submitted_sale_date_to ) );
 
-				if ( ! empty( $date_on_sale_to ) ) {
-					$date_on_sale_to = date( 'Y-m-d 23:59:59', (int) strtotime( $date_on_sale_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+				if ( '' === $date_on_sale_to ) {
+					$product->set_date_on_sale_to( '' );
+				} else {
+					$timestamp = strtotime( $date_on_sale_to );
+					if ( false !== $timestamp ) {
+						$product->set_date_on_sale_to( date( 'Y-m-d 23:59:59', $timestamp ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+					}
 				}
-
-				$product->set_date_on_sale_to( $date_on_sale_to );
 			}
 		}
 
