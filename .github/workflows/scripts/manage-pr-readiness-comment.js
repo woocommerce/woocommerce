@@ -38,7 +38,7 @@ async function resolvePullRequest(github, context) {
 
 module.exports = async ({ github, context, core }) => {
     const triggeringEvent = context.payload.workflow_run.event;
-    if (triggeringEvent !== 'pull_request') {
+    if (!['pull_request', 'pull_request_target'].includes(triggeringEvent)) {
         core.info(`Ignoring workflow_run for event '${triggeringEvent}'.`);
         return;
     }
@@ -90,11 +90,18 @@ module.exports = async ({ github, context, core }) => {
         return;
     }
 
-    const { body } = buildCommentBody({
+    const { body, mentioned } = buildCommentBody({
         tasks,
         previousState,
         authorLogin: pr.user.login,
     });
+
+    if (existingComment && !mentioned) {
+        core.info(
+            `Readiness state unchanged for #${pr.number}; skipping comment update.`
+        );
+        return;
+    }
 
     if (existingComment) {
         await github.rest.issues.updateComment({

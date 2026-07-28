@@ -21,7 +21,7 @@ concurrency:
 jobs:
   update-comment:
     name: 'Update PR readiness comment'
-    if: github.event.workflow_run.event == 'pull_request'
+    if: github.event.workflow_run.event == 'pull_request' || github.event.workflow_run.event == 'pull_request_target'
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
