@@ -344,9 +344,11 @@ class WC_Post_Types {
 			$supports[] = 'comments';
 		}
 
-		$shop_page_id = wc_get_page_id( 'shop' );
+		$shop_page_id         = wc_get_page_id( 'shop' );
+		$theme_support        = wc_current_theme_supports_woocommerce_or_fse();
+		$theme_may_be_skipped = wp_doing_cron() || self::wp_cli_skips_active_theme();
 
-		if ( wc_current_theme_supports_woocommerce_or_fse() ) {
+		if ( self::resolve_theme_support_for_product_archive( $theme_support, $theme_may_be_skipped ) ) {
 			$has_archive = $shop_page_id && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop';
 		} else {
 			$has_archive = false;
@@ -356,7 +358,7 @@ class WC_Post_Types {
 		// Skip this check in WP-CLI and cron contexts: themes may not be loaded (e.g. --skip-themes),
 		// which would incorrectly record theme support as "no" and corrupt rewrite rules on the frontend.
 		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! wp_doing_cron() ) {
-			$theme_support = wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
+			$theme_support = $theme_support ? 'yes' : 'no';
 			if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
 				update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 			}
@@ -539,6 +541,50 @@ class WC_Post_Types {
 		}
 
 		do_action( 'woocommerce_after_register_post_type' );
+	}
+
+	/**
+	 * Resolve theme support used to register the product archive.
+	 *
+	 * @param bool $theme_support        Whether the current request reports theme support.
+	 * @param bool $theme_may_be_skipped Whether the request may not have loaded the active theme.
+	 * @return bool
+	 */
+	private static function resolve_theme_support_for_product_archive( bool $theme_support, bool $theme_may_be_skipped ): bool {
+		if ( $theme_support || ! $theme_may_be_skipped ) {
+			return $theme_support;
+		}
+
+		return 'yes' === get_option( 'current_theme_supports_woocommerce' );
+	}
+
+	/**
+	 * Determine whether WP-CLI skipped the active theme.
+	 *
+	 * @return bool
+	 */
+	private static function wp_cli_skips_active_theme(): bool {
+		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) || ! is_callable( array( 'WP_CLI', 'get_config' ) ) ) {
+			return false;
+		}
+
+		/**
+		 * WP-CLI configuration getter.
+		 *
+		 * @var callable $get_wp_cli_config
+		 */
+		$get_wp_cli_config = array( 'WP_CLI', 'get_config' );
+		$skipped_themes    = $get_wp_cli_config( 'skip-themes' );
+
+		if ( true === $skipped_themes ) {
+			return true;
+		}
+
+		if ( ! is_array( $skipped_themes ) ) {
+			$skipped_themes = explode( ',', (string) $skipped_themes );
+		}
+
+		return in_array( get_stylesheet(), $skipped_themes, true );
 	}
 
 	/**
