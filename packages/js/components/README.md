@@ -60,5 +60,5 @@ module.exports = {
 
 Then, you will need to create the following files:
 
-1. Create a new file called woocommerce-settings.js in the ./mock directory. You can find the content for this file [here](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/mocks/woocommerce-settings.js#L1).
-2. Next, create a file named setup-globals.js. You can find the content for this file [here](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/setup-globals.js#L44). The purpose of this file is to mock the wcSettings global variable.
+1. Create a new file called woocommerce-settings.js in the ./mock directory. You can find the content for this file [packages/js/internal-js-tests/src/mocks/woocommerce-settings.js#L1](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/mocks/woocommerce-settings.js#L1).
+2. Next, create a file named setup-globals.js. You can find the content for this file [packages/js/internal-js-tests/src/setup-globals.js#L44](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/internal-js-tests/src/setup-globals.js#L44). The purpose of this file is to mock the wcSettings global variable.
