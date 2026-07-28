@@ -187,7 +187,12 @@ class Formatter extends KeepAChangelogParser {
 				$rows    = explode( "\n", $content );
 				foreach ( $rows as $row ) {
 					$row = trim( $row );
-					$row = preg_replace( '/' . $this->bullet . '/', '', $row, 1 );
+					// Strip the bullet only as a literal prefix. It is configurable ('* ' in the legacy core
+					// formatter), so it is not safe to interpolate into a pattern, and removing a later
+					// occurrence would corrupt the entry text.
+					if ( 0 === strpos( $row, $this->bullet ) ) {
+						$row = substr( $row, strlen( $this->bullet ) );
+					}
 					// Drop the marker that format() appends after a major significance, otherwise it lands in the
 					// significance segment below and the entry is re-emitted with no significance at all.
 					$row = preg_replace( '/^(major)\s*' . preg_quote( self::BREAKING_CHANGE_MARKER, '/' ) . '/i', '$1', $row );
