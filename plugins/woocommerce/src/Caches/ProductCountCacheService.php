@@ -55,20 +55,13 @@ class ProductCountCacheService {
 	final public function init(): void {
 		$this->product_count_cache = new ProductCountCache();
 
-		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'schedule_background_actions' ) );
+		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'unschedule_background_actions' ) );
 		add_action( self::BACKGROUND_EVENT_HOOK, array( $this, 'prime_cache_if_cold' ) );
 		if ( defined( 'WC_PLUGIN_BASENAME' ) ) {
 			add_action( 'deactivate_' . WC_PLUGIN_BASENAME, array( $this, 'unschedule_background_actions' ) );
 		}
 
-		// Early return to skip logic execution before the product status counters are re-enabled (to avoid failing jobs for stores already migrated to v11.0 pre-release).
-		return;
-
-		// transition_post_status owns all mid-lifecycle status changes; woocommerce_new_product corrects for creation-time
-		// ephemeral transitions before the final status is committed; before_delete_post closes the lifecycle.
-		add_action( 'woocommerce_new_product', array( $this, 'update_on_new_product' ), 10, 2 );
-		add_action( 'transition_post_status', array( $this, 'update_on_product_status_changed' ), 10, 3 );
-		add_action( 'before_delete_post', array( $this, 'update_on_product_deleted' ), 10, 2 );
+		// Until counters reactivated, disable callbacks for woocommerce_new_product, transition_post_status, before_delete_post hooks.
 	}
 
 	/**
@@ -78,14 +71,7 @@ class ProductCountCacheService {
 	 * @return void
 	 */
 	public function prime_cache_if_cold( string $product_type = 'product' ): void {
-		// Early return to skip logic execution before the product status counters are re-enabled (to avoid failing jobs for stores already migrated to v11.0 pre-release).
-		return;
-
-		// Cache warm-up is only effective when an object cache plugin is active, and the cache entry is missing.
-		if ( wp_using_ext_object_cache() && null === $this->product_count_cache->get( $product_type ) ) {
-			$this->product_count_cache->flush( $product_type );
-			wc_get_container()->get( ProductUtil::class )->get_counts_for_type( $product_type );
-		}
+		// Until counters reactivated, this task is no-op.
 	}
 
 	/**
