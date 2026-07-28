@@ -445,36 +445,39 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A second submission after a moderator's spam/trash verdict cannot auto-approve.
+	 * A second submission after a moderator's spam/trash verdict cannot auto-approve, whether the
+	 * spammed review has a normal VARIATION_META_KEY value or predates that meta key entirely.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $with_variation_meta False simulates a review written before 10.9.0, with no VARIATION_META_KEY row.
 	 */
-	public function test_resubmit_after_spam_verdict_cannot_autoapprove(): void {
+	public function test_resubmit_after_spam_verdict_cannot_autoapprove( bool $with_variation_meta ): void {
 		$built      = $this->make_order( 1 );
 		$order      = $built['order'];
 		$product_id = $built['product_ids'][0];
 		$item_id    = $built['item_ids'][0];
 
-		$_POST      = array(
-			'order_id' => $order->get_id(),
-			'key'      => $order->get_order_key(),
-			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
-			'reviews'  => array(
-				array(
-					'product_id'    => $product_id,
-					'order_item_id' => $item_id,
-					'rating'        => 5,
-					'text'          => 'Original review text.',
-				),
-			),
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product_id,
+				'comment_author'       => 'Jane Doe',
+				'comment_author_email' => $order->get_billing_email(),
+				'comment_content'      => 'Original review text.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
 		);
-		$first      = $this->dispatch();
-		$comment_id = (int) reset( $first['data']['results'] )['comment_id'];
-
-		// A moderator marks the review as spam.
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
+		if ( $with_variation_meta ) {
+			add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, '0', true );
+		}
 		wp_spam_comment( $comment_id );
-		$this->assertSame( 'spam', wp_get_comment_status( $comment_id ) );
+		ItemEligibility::reset_cache();
 
 		// The customer resubmits the same row.
-		$_POST  = array(
+		$_POST    = array(
 			'order_id' => $order->get_id(),
 			'key'      => $order->get_order_key(),
 			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
@@ -487,11 +490,72 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 				),
 			),
 		);
-		$second = $this->dispatch();
-		$row    = reset( $second['data']['results'] );
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
 
 		$this->assertSame( 'error', $row['status'] );
 		$this->assertSame( 'spam', wp_get_comment_status( $comment_id ), 'Moderator decision must stick; a second submission must not auto-approve.' );
+	}
+
+	/**
+	 * A spam verdict recorded against one variation's explicit meta value must not block a sibling variation.
+	 *
+	 * @testWith ["A", "error"]
+	 *           ["B", "ok"]
+	 *
+	 * @param string $resubmit Which variation, "A" or "B", resubmits a review.
+	 * @param string $expected_status Expected row status for that resubmission.
+	 */
+	public function test_resubmit_after_spam_verdict_is_scoped_to_its_variation( string $resubmit, string $expected_status ): void {
+		$variable      = WC_Helper_Product::create_variation_product();
+		$variation_ids = $variable->get_children();
+		$variation_a   = wc_get_product( $variation_ids[0] );
+		$variation_b   = wc_get_product( $variation_ids[1] );
+
+		$order = $this->make_empty_order();
+		$order->add_product( $variation_a, 1 );
+		$order->add_product( $variation_b, 1 );
+		$order->save();
+
+		$items  = array_values( $order->get_items() );
+		$item_a = $items[0];
+		$item_b = $items[1];
+
+		// A moderator marks variation A's review as spam.
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'      => $variable->get_id(),
+				'comment_author'       => 'Jane Doe',
+				'comment_author_email' => $order->get_billing_email(),
+				'comment_content'      => 'Original review text.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
+		);
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
+		add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, (int) $variation_a->get_id(), true );
+		wp_spam_comment( $comment_id );
+
+		$target = 'A' === $resubmit ? $variation_a : $variation_b;
+		$item   = 'A' === $resubmit ? $item_a : $item_b;
+
+		$_POST    = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $target->get_id(),
+					'order_item_id' => $item->get_id(),
+					'rating'        => 5,
+					'text'          => 'Trying again.',
+				),
+			),
+		);
+		$response = $this->dispatch();
+		$row      = reset( $response['data']['results'] );
+
+		$this->assertSame( $expected_status, $row['status'] );
 	}
 
 	/**

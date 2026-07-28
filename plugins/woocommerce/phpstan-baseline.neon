@@ -47614,18 +47614,6 @@ parameters:
 			path: src/Admin/Overrides/ThemeUpgraderSkin.php
 
 		-
-			message: '#^@param Automattic\\WooCommerce\\Admin\\WP_Screen \$current_screen does not accept actual type of parameter\: WP_Screen\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Admin/PageController.php
-
-		-
-			message: '#^@param Automattic\\WooCommerce\\Admin\\WP_Screen \$current_screen does not accept actual type of parameter\: null\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Admin/PageController.php
-
-		-
 			message: '#^Binary operation "\." between ''&path\='' and non\-empty\-array\<mixed\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -47664,7 +47652,7 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\PageController\:\:get_current_screen_id\(\) should return string but returns bool\|string\.$#'
 			identifier: return.type
-			count: 2
+			count: 1
 			path: src/Admin/PageController.php
 
 		-
