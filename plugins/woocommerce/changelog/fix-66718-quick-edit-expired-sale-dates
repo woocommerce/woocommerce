@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Clear expired scheduled sale dates during Quick Edit so a new sale price takes effect immediately.
