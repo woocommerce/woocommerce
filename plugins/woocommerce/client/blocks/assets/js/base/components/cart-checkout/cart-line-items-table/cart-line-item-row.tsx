@@ -35,6 +35,7 @@ import ProductBackorderBadge from '../product-backorder-badge';
 import ProductImage from '../product-image';
 import ProductMetadata from '../product-metadata';
 import ProductSaleBadge from '../product-sale-badge';
+import { CartItemActions } from './slotfills';
 
 /**
  * Convert a Dinero object with precision to store currency minor unit.
@@ -307,6 +308,10 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 							itemData={ itemData }
 							variation={ variation }
 						/>
+
+						<div className="wc-block-cart-item__actions">
+							<CartItemActions lineItem={ lineItem } cart={ cart } />
+						</div>
 
 						<div className="wc-block-cart-item__quantity">
 							{ ! soldIndividually && (
