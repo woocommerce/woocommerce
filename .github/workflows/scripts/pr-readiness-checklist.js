@@ -84,9 +84,61 @@ function computeOverallState(tasks) {
     return tasks.some((task) => task.status === 'fail') ? 'failing' : 'clear';
 }
 
+function parsePreviousState(commentBody) {
+    if (!commentBody) {
+        return null;
+    }
+    const match = commentBody.match(
+        /<!-- pr-readiness-summary status=(failing|clear) -->/
+    );
+    return match ? match[1] : null;
+}
+
+const TRANSITION_MESSAGES = {
+    'none->failing': (authorLogin) =>
+        `Thanks for the PR, @${authorLogin}! A few things need attention before this can be reviewed:`,
+    'none->clear': (authorLogin) =>
+        `Thanks for your contribution, @${authorLogin}! Everything's passing — we'll take a look soon.`,
+    'failing->clear': (authorLogin) =>
+        `All checks are passing now, @${authorLogin} — thanks for addressing the feedback!`,
+    'clear->failing': (authorLogin) =>
+        `Heads up @${authorLogin} — a new push introduced some failures that need attention:`,
+};
+
+function buildCommentBody({ tasks, previousState, authorLogin }) {
+    const overallState = computeOverallState(tasks);
+    const transitionKey = `${previousState || 'none'}->${overallState}`;
+    const mentionMessage = TRANSITION_MESSAGES[transitionKey];
+
+    const lines = [`${MARKER_PREFIX} status=${overallState} -->`];
+
+    if (mentionMessage) {
+        lines.push('', mentionMessage(authorLogin));
+    }
+
+    lines.push('');
+
+    if (overallState === 'clear') {
+        lines.push('✅ All checks are passing.');
+    } else {
+        lines.push(
+            ...tasks.map(
+                (task) =>
+                    `- ${task.status === 'fail' ? '❌' : '✅'} **${task.label}**${
+                        task.status === 'fail' ? ` — ${task.remediation}` : ''
+                    }`
+            )
+        );
+    }
+
+    return { body: lines.join('\n'), mentioned: Boolean(mentionMessage) };
+}
+
 module.exports = {
     MARKER_PREFIX,
     TASKS,
     classifyCheckRuns,
     computeOverallState,
+    parsePreviousState,
+    buildCommentBody,
 };

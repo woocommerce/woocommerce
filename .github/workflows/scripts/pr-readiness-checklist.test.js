@@ -4,6 +4,8 @@ const test = require('node:test');
 const {
     classifyCheckRuns,
     computeOverallState,
+    parsePreviousState,
+    buildCommentBody,
 } = require('./pr-readiness-checklist');
 
 function checkRun(name, overrides = {}) {
@@ -87,5 +89,98 @@ test('computeOverallState: failing when any applicable task failed', () => {
             { label: 'PHPStan', status: 'fail' },
         ]),
         'failing'
+    );
+});
+
+test('parsePreviousState: reads the status embedded in the marker', () => {
+    assert.equal(
+        parsePreviousState('<!-- pr-readiness-summary status=failing -->\n\nsome text'),
+        'failing'
+    );
+});
+
+test('parsePreviousState: returns null for a comment with no marker', () => {
+    assert.equal(parsePreviousState('just a regular comment'), null);
+});
+
+test('parsePreviousState: returns null for a missing comment', () => {
+    assert.equal(parsePreviousState(undefined), null);
+    assert.equal(parsePreviousState(null), null);
+});
+
+test('buildCommentBody: first-ever comment with failures mentions the author', () => {
+    const { body, mentioned } = buildCommentBody({
+        tasks: [
+            { label: 'Lint', status: 'fail', remediation: 'See annotations.' },
+            { label: 'Milestone', status: 'pass', remediation: 'n/a' },
+        ],
+        previousState: null,
+        authorLogin: 'octocat',
+    });
+
+    assert.equal(mentioned, true);
+    assert.ok(body.includes('<!-- pr-readiness-summary status=failing -->'));
+    assert.ok(body.includes('Thanks for the PR, @octocat!'));
+    assert.ok(body.includes('❌ **Lint** — See annotations.'));
+    assert.ok(body.includes('✅ **Milestone**'));
+    assert.ok(!body.includes('✅ **Milestone** —'));
+});
+
+test('buildCommentBody: first-ever comment with everything passing thanks the author', () => {
+    const { body, mentioned } = buildCommentBody({
+        tasks: [{ label: 'Lint', status: 'pass', remediation: 'n/a' }],
+        previousState: null,
+        authorLogin: 'octocat',
+    });
+
+    assert.equal(mentioned, true);
+    assert.ok(body.includes('<!-- pr-readiness-summary status=clear -->'));
+    assert.ok(body.includes("Thanks for your contribution, @octocat!"));
+    assert.ok(body.includes('✅ All checks are passing.'));
+});
+
+test('buildCommentBody: still failing does not re-mention the author', () => {
+    const { body, mentioned } = buildCommentBody({
+        tasks: [{ label: 'Lint', status: 'fail', remediation: 'See annotations.' }],
+        previousState: 'failing',
+        authorLogin: 'octocat',
+    });
+
+    assert.equal(mentioned, false);
+    assert.ok(!body.includes('@octocat'));
+});
+
+test('buildCommentBody: fixed from failing to clear mentions the author', () => {
+    const { body, mentioned } = buildCommentBody({
+        tasks: [{ label: 'Lint', status: 'pass', remediation: 'n/a' }],
+        previousState: 'failing',
+        authorLogin: 'octocat',
+    });
+
+    assert.equal(mentioned, true);
+    assert.ok(body.includes('All checks are passing now, @octocat'));
+});
+
+test('buildCommentBody: still clear makes no change and does not mention', () => {
+    const { body, mentioned } = buildCommentBody({
+        tasks: [{ label: 'Lint', status: 'pass', remediation: 'n/a' }],
+        previousState: 'clear',
+        authorLogin: 'octocat',
+    });
+
+    assert.equal(mentioned, false);
+    assert.ok(!body.includes('@octocat'));
+});
+
+test('buildCommentBody: regression from clear to failing mentions the author', () => {
+    const { body, mentioned } = buildCommentBody({
+        tasks: [{ label: 'Lint', status: 'fail', remediation: 'See annotations.' }],
+        previousState: 'clear',
+        authorLogin: 'octocat',
+    });
+
+    assert.equal(mentioned, true);
+    assert.ok(
+        body.includes('Heads up @octocat — a new push introduced some failures')
     );
 });
