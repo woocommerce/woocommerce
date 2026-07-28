@@ -77,9 +77,12 @@ describe( 'useUserTheme', () => {
 		expect( result.current.userTheme ).toBe( first );
 	} );
 
-	// The counterpart: editing styles must still produce a new object, or the
-	// canvas would never restyle.
-	it( 'returns a new userTheme when the styles change', () => {
+	// The counterpart: an edit must still produce a new object, or the canvas
+	// would never restyle. Both values are checked because
+	// `useGlobalStylesOutputWithConfig` bails out to an empty stylesheet unless
+	// it has styles *and* settings, so a stale `settings` drops the generated
+	// CSS entirely rather than just leaving it out of date.
+	it( 'returns a new userTheme when the styles or the settings change', () => {
 		const settings = { color: { palette: [] } };
 		mockGlobalStylePost( {
 			id: 1,
@@ -96,6 +99,18 @@ describe( 'useUserTheme', () => {
 
 		expect( result.current.userTheme ).not.toBe( first );
 		expect( result.current.userTheme.styles ).toBe( updatedStyles );
+
+		const afterStyles = result.current.userTheme;
+		const updatedSettings = { color: { palette: [ { slug: 'accent' } ] } };
+		mockGlobalStylePost( {
+			id: 1,
+			styles: updatedStyles,
+			settings: updatedSettings,
+		} );
+		rerender();
+
+		expect( result.current.userTheme ).not.toBe( afterStyles );
+		expect( result.current.userTheme.settings ).toBe( updatedSettings );
 	} );
 
 	// The post is absent until it resolves, which is when the editor first
