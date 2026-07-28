@@ -10,7 +10,7 @@ const TASKS = [
     },
     {
         label: 'PHPStan',
-        matches: (name) => name === 'PHPStan Analysis',
+        matches: (name) => name === 'PHPStan Analysis' || name.startsWith('PHPStan: PHP'),
         remediation: 'See the inline annotations on this PR for details.',
     },
     {

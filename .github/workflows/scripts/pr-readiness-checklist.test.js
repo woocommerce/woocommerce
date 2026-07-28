@@ -74,6 +74,24 @@ test('classifyCheckRuns: performance tests are not tracked', () => {
     assert.deepEqual(tasks, []);
 });
 
+test('classifyCheckRuns: PHPStan via test-matrix jobs with "PHPStan: PHP" prefix are classified as PHPStan task', () => {
+    const tasks = classifyCheckRuns([
+        checkRun('PHPStan: PHP 7.4 - @woocommerce/email-editor-config [unit]', { conclusion: 'failure' }),
+    ]);
+    assert.equal(tasks.length, 1);
+    assert.equal(tasks[0].label, 'PHPStan');
+    assert.equal(tasks[0].status, 'fail');
+});
+
+test('classifyCheckRuns: per-package PHPStan jobs do not match Unit tests (PHP) task', () => {
+    const tasks = classifyCheckRuns([
+        checkRun('PHPStan: PHP 8.4 - @woocommerce/email-editor-config [unit]', { conclusion: 'failure' }),
+    ]);
+    // Should only match PHPStan, not Unit tests (PHP), since testType is [unit] not [unit:php]
+    assert.equal(tasks.length, 1);
+    assert.equal(tasks[0].label, 'PHPStan');
+});
+
 test('computeOverallState: clear when there are no applicable tasks', () => {
     assert.equal(computeOverallState([]), 'clear');
 });
