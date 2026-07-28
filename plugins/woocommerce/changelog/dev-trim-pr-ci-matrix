@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo CI: run the Metrics and PHP 7.4 WP latest-1 checks on trunk pushes and on-demand triggers only (no longer on pull requests), and cap artifact retention for CI test results and release contributor reports.

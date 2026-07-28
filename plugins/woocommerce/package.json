@@ -197,7 +197,6 @@
 						}
 					},
 					"events": [
-						"pull_request",
 						"push",
 						"php-unit-php-7.4-wp-latest-1"
 					]
@@ -774,7 +773,6 @@
 					},
 					"events": [
 						"push",
-						"pull_request",
 						"perf-metrics"
 					],
 					"report": {

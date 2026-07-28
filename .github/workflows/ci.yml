@@ -379,6 +379,7 @@ jobs:
           if-no-files-found: ignore
           include-hidden-files: true
           overwrite: true
+          retention-days: 3
 
       - name: 'Upload artifacts'
         if: ${{ always() && matrix.report.resultsPath != '' }}
@@ -386,6 +387,7 @@ jobs:
         with:
           name: '${{ matrix.report.resultsBlobName }}__${{ strategy.job-index }}'
           path: ${{ env.ARTIFACTS_PATH }}
+          retention-days: 7
 
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
@@ -495,6 +497,7 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}
           pattern: ${{ matrix.report }}__*
           delete-merged: true
+          retention-days: 14
 
       - name: 'Publish report to dashboard'
         if: ${{ !! steps.merge-artifacts.outputs.artifact-id }}
