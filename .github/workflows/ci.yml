@@ -174,12 +174,16 @@ jobs:
         # happened in 'Lint' -- this step can only add inline annotations, never change it.
         run: |
           baseBranch="origin/trunk"
-          changedFiles=$(git diff $(git merge-base HEAD "$baseBranch") --relative --name-only --diff-filter=d -- '*.php')
-          if [[ -z "$changedFiles" ]]; then
+          # -z plus mapfile keeps one path per argument; a space or glob character in a
+          # filename would otherwise split into several bogus arguments.
+          mapfile -d '' changedFiles < <(
+            git diff "$(git merge-base HEAD "$baseBranch")" --relative --name-only -z --diff-filter=d -- '*.php'
+          )
+          if (( ${#changedFiles[@]} == 0 )); then
             echo 'No changed PHP files detected; skipping checkstyle annotations.'
             exit 0
           fi
-          composer exec phpcs-changed -- --git --git-base "$baseBranch" --report=checkstyle $changedFiles > checkstyle.xml || true
+          composer exec phpcs-changed -- --git --git-base "$baseBranch" --report=checkstyle "${changedFiles[@]}" > checkstyle.xml || true
           # phpcs reports paths relative to this working directory, but GitHub resolves
           # annotation paths from the repo root -- without this they never attach to the diff.
           sed -i 's|<file name="|<file name="plugins/woocommerce/|g' checkstyle.xml
