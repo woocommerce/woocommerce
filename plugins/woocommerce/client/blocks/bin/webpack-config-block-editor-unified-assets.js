@@ -104,7 +104,7 @@ const getUnifiedEditorPackageAliases = () => ( {
 	),
 	'@woocommerce/price-format': path.resolve(
 		__dirname,
-		`../packages/public-api/price`
+		`../packages/public-api/prices`
 	),
 	'@woocommerce/sanitize': path.resolve(
 		__dirname,

@@ -119,10 +119,10 @@
 				"packages/public-api/blocks-components/*"
 			],
 			"@woocommerce/price-format": [
-				"packages/public-api/price"
+				"packages/public-api/prices"
 			],
 			"@woocommerce/price-format/*": [
-				"packages/public-api/price/*"
+				"packages/public-api/prices/*"
 			],
 			"@woocommerce/block-settings": [
 				"assets/js/settings/blocks"

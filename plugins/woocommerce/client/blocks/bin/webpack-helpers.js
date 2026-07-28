@@ -122,7 +122,7 @@ const getAlias = ( options = {} ) => {
 		),
 		'@woocommerce/price-format': path.resolve(
 			__dirname,
-			`../packages/public-api/price`
+			`../packages/public-api/prices`
 		),
 		'@woocommerce/settings': path.resolve(
 			__dirname,
