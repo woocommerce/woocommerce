@@ -1136,6 +1136,18 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox clear_cache cascades to the extension suggestions service.
+	 */
+	public function test_clear_cache_cascades_to_extension_suggestions(): void {
+		// The tearDown clears the cache once more, so expect at least one cascade call rather than exactly one.
+		$this->mock_extension_suggestions
+			->expects( $this->atLeastOnce() )
+			->method( 'clear_cache' );
+
+		$this->sut->clear_cache();
+	}
+
+	/**
 	 * Test that get_payment_gateway_details does not override gateway details with those from the suggestion
 	 * when they exist.
 	 */
