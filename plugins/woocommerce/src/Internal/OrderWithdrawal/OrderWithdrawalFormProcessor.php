@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
-use RuntimeException;
 use Throwable;
 use WC_Order;
 
@@ -248,45 +247,32 @@ final class OrderWithdrawalFormProcessor {
 	 * @param array<string,string> $data Form data.
 	 */
 	private function submit_order_withdrawal( array $data ): bool {
-		try {
-			$matched_order = $this->get_matching_order( $data );
+		$matched_order = $this->get_matching_order( $data );
 
-			if ( $matched_order instanceof WC_Order ) {
-				if ( $this->has_order_withdrawal_request( $matched_order ) ) {
-					wc_add_notice(
-						__( 'A withdrawal request has already been submitted for this order. Please contact us if you need help or want to make changes.', 'woocommerce' ),
-						'error'
-					);
+		if ( $matched_order instanceof WC_Order ) {
+			if ( $this->has_order_withdrawal_request( $matched_order ) ) {
+				wc_add_notice(
+					__( 'A withdrawal request has already been submitted for this order. Please contact us if you need help or want to make changes.', 'woocommerce' ),
+					'error'
+				);
 
-					return false;
-				}
-
-				try {
-					if ( ! $this->add_order_withdrawal_note( $matched_order, $data ) ) {
-						$this->log_order_note_error( $matched_order );
-					}
-				} catch ( Throwable $e ) {
-					$this->log_order_note_error( $matched_order, $e );
-				}
+				return false;
 			}
 
-			$this->send_order_withdrawal_emails( $data, $matched_order );
+			$this->add_order_withdrawal_note( $matched_order, $data );
+		}
 
-			if ( $matched_order instanceof WC_Order ) {
-				try {
-					$this->mark_order_withdrawal_requested( $matched_order );
-				} catch ( Throwable $e ) {
-					$this->log_order_meta_error( $matched_order, $e );
-				}
-			}
-
-			return true;
-		} catch ( Throwable $e ) {
-			$this->log_submission_error( $e );
+		if ( ! $this->send_order_withdrawal_emails( $data, $matched_order ) ) {
 			wc_add_notice( __( 'We could not submit your withdrawal request. Please try again or contact us if the problem continues.', 'woocommerce' ), 'error' );
 
 			return false;
 		}
+
+		if ( $matched_order instanceof WC_Order ) {
+			$this->mark_order_withdrawal_requested( $matched_order );
+		}
+
+		return true;
 	}
 
 	/**
@@ -386,7 +372,7 @@ final class OrderWithdrawalFormProcessor {
 	 * @param WC_Order             $order Matched order.
 	 * @param array<string,string> $data  Form data.
 	 */
-	private function add_order_withdrawal_note( WC_Order $order, array $data ): bool {
+	private function add_order_withdrawal_note( WC_Order $order, array $data ): void {
 		$note = sprintf(
 			/* translators: 1: customer name, 2: customer email address. */
 			__( 'Order withdrawal requested by %1$s (%2$s).', 'woocommerce' ),
@@ -402,7 +388,13 @@ final class OrderWithdrawalFormProcessor {
 			);
 		}
 
-		return (bool) $order->add_order_note( $note, 0, false, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
+		try {
+			if ( ! $order->add_order_note( $note, 0, false, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) ) ) {
+				$this->log_order_note_error( $order );
+			}
+		} catch ( Throwable $e ) {
+			$this->log_order_note_error( $order, $e );
+		}
 	}
 
 	/**
@@ -420,8 +412,12 @@ final class OrderWithdrawalFormProcessor {
 	 * @param WC_Order $order Matched order.
 	 */
 	private function mark_order_withdrawal_requested( WC_Order $order ): void {
-		$order->update_meta_data( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, self::ORDER_WITHDRAWAL_REQUESTED_VALUE );
-		$order->save_meta_data();
+		try {
+			$order->update_meta_data( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, self::ORDER_WITHDRAWAL_REQUESTED_VALUE );
+			$order->save_meta_data();
+		} catch ( Throwable $e ) {
+			$this->log_order_meta_error( $order, $e );
+		}
 	}
 
 	/**
@@ -429,22 +425,31 @@ final class OrderWithdrawalFormProcessor {
 	 *
 	 * @param array<string,string> $data          Form data.
 	 * @param WC_Order|null        $matched_order Matched order, if found.
-	 * @throws RuntimeException When either email cannot be sent.
 	 */
-	private function send_order_withdrawal_emails( array $data, ?WC_Order $matched_order ): void {
-		$submitted_at  = time();
-		$customer_sent = $this->send_customer_order_withdrawal_email( $data, $submitted_at );
-		$merchant_sent = $this->send_merchant_order_withdrawal_email( $data, $matched_order, $submitted_at );
+	private function send_order_withdrawal_emails( array $data, ?WC_Order $matched_order ): bool {
+		try {
+			$submitted_at  = time();
+			$customer_sent = $this->send_customer_order_withdrawal_email( $data, $submitted_at );
+			$merchant_sent = $this->send_merchant_order_withdrawal_email( $data, $matched_order, $submitted_at );
+		} catch ( Throwable $e ) {
+			$this->log_email_error( $e );
+
+			return false;
+		}
 
 		if ( ! $customer_sent || ! $merchant_sent ) {
-			throw new RuntimeException(
+			$this->log_email_error(
 				sprintf(
 					'Order withdrawal notification email failed. Customer email sent: %s. Merchant email sent: %s.',
 					$customer_sent ? 'yes' : 'no',
 					$merchant_sent ? 'yes' : 'no'
 				)
 			);
+
+			return false;
 		}
+
+		return true;
 	}
 
 	/**
@@ -473,13 +478,12 @@ final class OrderWithdrawalFormProcessor {
 	 * @param array<string,string> $data          Form data.
 	 * @param WC_Order|null        $matched_order Matched order, if found.
 	 * @param int                  $submitted_at  Unix timestamp for the submission.
-	 * @throws RuntimeException When no merchant recipient is configured.
 	 */
 	private function send_merchant_order_withdrawal_email( array $data, ?WC_Order $matched_order, int $submitted_at ): bool {
 		$recipient = sanitize_email( (string) get_option( 'admin_email' ) );
 
 		if ( '' === $recipient || ! is_email( $recipient ) ) {
-			throw new RuntimeException( 'No valid merchant email recipient is configured for order withdrawal notifications.' );
+			return false;
 		}
 
 		$subject = sprintf(
@@ -619,13 +623,15 @@ final class OrderWithdrawalFormProcessor {
 	}
 
 	/**
-	 * Log a submission failure.
+	 * Log an email failure.
 	 *
-	 * @param Throwable $e Submission error.
+	 * @param Throwable|string $error Email error.
 	 */
-	private function log_submission_error( Throwable $e ): void {
+	private function log_email_error( $error ): void {
+		$message = $error instanceof Throwable ? $error->getMessage() : $error;
+
 		wc_get_logger()->warning(
-			sprintf( 'Order withdrawal submission failed: %s', $e->getMessage() ),
+			sprintf( 'Order withdrawal email failed: %s', $message ),
 			array( 'source' => self::LOGGER_SOURCE )
 		);
 	}
