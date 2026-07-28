@@ -118,7 +118,7 @@ const buildLineItem = (): CartItem =>
 			line_total_tax: '0',
 		},
 		extensions: {},
-	} as unknown as CartItem );
+	} ) as unknown as CartItem;
 
 /**
  * Configure `getSetting` and `getSettingWithCoercion` mocks for the three

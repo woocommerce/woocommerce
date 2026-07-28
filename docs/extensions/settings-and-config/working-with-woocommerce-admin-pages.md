@@ -1,6 +1,7 @@
 ---
 post_title: Integrating admin pages into WooCommerce extensions
-sidebar_label: Integrating admin pages
+sidebar_label: Admin pages
+sidebar_position: 4
 
 ---
 

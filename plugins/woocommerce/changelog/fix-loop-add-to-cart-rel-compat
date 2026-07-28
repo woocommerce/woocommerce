@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: This is a compatibility follow-up to #66743. The user-facing change is already covered by its existing changelog entry.

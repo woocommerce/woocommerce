@@ -452,7 +452,8 @@ class Html_Processing_Helper {
 
 		// First pass: Process attributes for allowed tags only.
 		while ( $html->next_tag() ) {
-			$tag_name = $html->get_tag();
+			// get_tag() returns the tag name uppercased, so normalize before comparing.
+			$tag_name = strtolower( (string) $html->get_tag() );
 
 			// Skip processing for disallowed tags.
 			if ( ! in_array( $tag_name, $allowed_tags, true ) ) {
@@ -469,29 +470,25 @@ class Html_Processing_Helper {
 			}
 		}
 
-		// Second pass: Remove disallowed tags using a simple regex approach.
+		// Second pass: strip every tag that is not in the allow-list, keeping its
+		// inner text. This covers opening, closing, self-closing and void tags
+		// (e.g. <img>, <svg>) in one pass.
 		$final_html = $html->get_updated_html();
 
-		// Create a regex pattern to match disallowed tags.
-		$allowed_tags_pattern = implode( '|', array_map( 'preg_quote', $allowed_tags ) );
+		$allowed_tags_pattern = implode( '|', array_map( static fn( $tag ) => preg_quote( $tag, '/' ), $allowed_tags ) );
 
-		// Remove disallowed opening and closing tags, keeping only their content.
-		$result = preg_replace( '/<(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*>(.*?)<\/(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*>/s', '$1', $final_html );
-		if ( null === $result ) {
-			$final_html = '';
-		} else {
-			$final_html = $result;
-		}
+		/*
+		 * Match a tag whose name is not allowed and remove it:
+		 *   <\/?                       an opening or closing tag.
+		 *   (?! allowed (?=[\s/>]|$) ) skip allowed names, but only when the name
+		 *                              ends at a real tag-name terminator, so a
+		 *                              custom element like "a-b" is not treated
+		 *                              as the allowed "a".
+		 *   [a-z][^>]*>                the tag name and the rest of the tag.
+		 */
+		$result = preg_replace( '/<\/?(?!(?:' . $allowed_tags_pattern . ')(?=[\s\/>]|$))[a-z][^>]*>/is', '', $final_html );
 
-		// Remove disallowed self-closing tags.
-		$result = preg_replace( '/<(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*\/>/s', '', $final_html );
-		if ( null === $result ) {
-			$final_html = '';
-		} else {
-			$final_html = $result;
-		}
-
-		return $final_html;
+		return null === $result ? '' : $result;
 	}
 
 	/**

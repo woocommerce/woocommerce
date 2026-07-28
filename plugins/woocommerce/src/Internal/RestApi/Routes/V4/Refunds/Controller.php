@@ -359,6 +359,20 @@ class Controller extends AbstractController {
 			return $this->get_route_error_by_code( self::RESOURCE_EXISTS );
 		}
 
+		// The refund amount field was renamed from 'amount' to 'total'. Reject the old
+		// name explicitly: unknown params are silently dropped by the REST layer, so a
+		// request sending 'amount' as a cap would otherwise fall back to the full
+		// line-item total and refund more than the client intended. has_param(), not a
+		// get_param() null check — get_param() returns null for both an absent field
+		// and an explicit {"amount": null}, and the explicit-null form must be rejected
+		// too rather than reaching the calculated-total fallback.
+		if ( $request->has_param( 'amount' ) ) {
+			return $this->get_route_error_response(
+				'unsupported_amount_field',
+				__( 'The amount field is not supported. Use total instead.', 'woocommerce' )
+			);
+		}
+
 		$order = wc_get_order( $request['order_id'] );
 
 		// wc_get_order can return a WC_Order_Refund for refund IDs — reject those
@@ -420,15 +434,22 @@ class Controller extends AbstractController {
 			// amount, so mixing the two forms across line items is well-defined.
 			$line_item_data   = $this->data_utils->convert_line_items_to_internal_format( $line_items, $order );
 			$calculated_total = ! empty( $line_items ) ? $this->data_utils->calculate_refund_amount( $line_items ) : 0;
-			$refund_amount    = ! empty( $request['amount'] ) ? $request['amount'] : $calculated_total;
 
-			if ( 0 > $refund_amount || ! $refund_amount ) {
+			// has_param() distinguishes an omitted total from an explicitly supplied one —
+			// the schema declares no default, so the param exists only when the client sent
+			// it. An explicit zero (including string forms like "0.00", which are truthy)
+			// must be rejected rather than silently falling back to the calculated amount:
+			// a request meaning "refund nothing" must never refund the full computed total.
+			$has_total     = $request->has_param( 'total' );
+			$refund_amount = $has_total ? $request['total'] : $calculated_total;
+
+			if ( (float) $refund_amount <= 0 ) {
 				return $this->get_route_error_response( 'invalid_refund_amount', __( 'Refund total must be greater than zero.', 'woocommerce' ) );
 			}
 
-			// Prevent under-refunding: amount cannot be less than calculated line items total.
+			// Prevent under-refunding: total cannot be less than calculated line items total.
 			// Over-refunding is allowed for goodwill/compensation scenarios.
-			if ( ! empty( $request['amount'] ) && $calculated_total > 0 && NumberUtil::round( (float) $refund_amount, wc_get_price_decimals() ) < NumberUtil::round( $calculated_total, wc_get_price_decimals() ) ) {
+			if ( $has_total && $calculated_total > 0 && NumberUtil::round( (float) $refund_amount, wc_get_price_decimals() ) < NumberUtil::round( $calculated_total, wc_get_price_decimals() ) ) {
 				return $this->get_route_error_response(
 					'invalid_refund_amount',
 					sprintf(
