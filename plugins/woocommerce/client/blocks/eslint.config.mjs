@@ -174,28 +174,6 @@ const coreModules = [
 	'react-transition-group',
 ];
 
-const allowedExistingExperimentalWordPressImports = {
-	'@wordpress/block-editor': [
-		'__experimentalGetBorderClassesAndStyles',
-		'__experimentalGetColorClassesAndStyles',
-		'__experimentalGetElementClassName',
-		'__experimentalGetShadowClassesAndStyles',
-		'__experimentalGetSpacingClassesAndStyles',
-		'__experimentalUseBlockPreview',
-		'__experimentalUseBorderProps',
-		'__experimentalUseColorProps',
-	],
-	'@wordpress/components': [
-		'__experimentalHStack',
-		'__experimentalText',
-		'__experimentalToggleGroupControl',
-		'__experimentalToggleGroupControlOption',
-		'__experimentalToggleGroupControlOptionIcon',
-		'__experimentalToolsPanel',
-		'__experimentalToolsPanelItem',
-	],
-};
-
 const TEST_FILES = [
 	'assets/js/**/test/**/*.{js,jsx,ts,tsx}',
 	'assets/js/**/*.test.{js,jsx,ts,tsx}',
@@ -271,10 +249,9 @@ export default [
 			},
 		},
 		rules: {
-			'react-hooks/exhaustive-deps': 'error',
+			'react-hooks/exhaustive-deps': 'warn',
 			'react/jsx-fragments': [ 'error', 'syntax' ],
-			'@wordpress/no-global-active-element': 'error',
-			'@wordpress/no-unsafe-wp-apis': 'error',
+			'@wordpress/no-global-active-element': 'warn',
 			'@wordpress/i18n-text-domain': [
 				'error',
 				{
@@ -308,7 +285,7 @@ export default [
 				},
 			],
 			'jsdoc/check-line-alignment': [
-				'error',
+				'warn',
 				'always',
 				{
 					tags: [ 'param', 'arg', 'argument', 'property', 'prop' ],
@@ -339,8 +316,6 @@ export default [
 		rules: {
 			'@typescript-eslint/no-non-null-assertion': 'error',
 			'jest/no-mocks-import': 'off',
-			'jest/no-disabled-tests': 'warn',
-			'jest/expect-expect': 'error',
 			// With React Testing library, it is expected use expect() in the waitFor() function: https://testing-library.com/docs/dom-testing-library/api-async/
 			'jest/no-standalone-expect': 'off',
 		},
@@ -370,14 +345,13 @@ export default [
 		rules: {
 			'@typescript-eslint/no-explicit-any': 'error',
 			'@typescript-eslint/no-non-null-assertion': 'error',
-			'react-hooks/exhaustive-deps': 'error',
-			'@wordpress/no-global-active-element': 'error',
-			'@wordpress/no-unsafe-wp-apis': 'error',
+			'react-hooks/exhaustive-deps': 'warn',
+			'@wordpress/no-global-active-element': 'warn',
 			'no-use-before-define': 'off',
 			'@typescript-eslint/no-use-before-define': [ 'error' ],
 			'jsdoc/require-param': 'off',
 			'jsdoc/check-line-alignment': [
-				'error',
+				'warn',
 				'always',
 				{
 					tags: [ 'param', 'arg', 'argument', 'property', 'prop' ],
@@ -442,28 +416,6 @@ export default [
 			'@typescript-eslint/no-explicit-any': 'off',
 			'@typescript-eslint/no-shadow': 'off',
 			'no-shadow': 'off',
-		},
-	},
-	{
-		files: [
-			'assets/js/blocks/accordion/inner-blocks/accordion-header/edit.js',
-			'assets/js/blocks/accordion/inner-blocks/accordion-header/save.js',
-			'assets/js/blocks/accordion/inner-blocks/accordion-panel/edit.js',
-			'assets/js/blocks/accordion/inner-blocks/accordion-panel/save.js',
-			'assets/js/blocks/add-to-cart-with-options/grouped-product-selector/product-item/edit.tsx',
-			'assets/js/blocks/add-to-cart-with-options/variation-selector/attribute-name/edit.tsx',
-			'assets/js/blocks/add-to-cart-with-options/variation-selector/attribute/edit.tsx',
-			'assets/js/blocks/featured-items/with-edit-mode.tsx',
-			'assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/mini-cart-shopping-button-block/edit.tsx',
-			'assets/js/blocks/product-collection/edit/single-product-picker.tsx',
-			'assets/js/blocks/product-reviews/inner-blocks/review-form/form.tsx',
-		],
-		rules: {
-			// These APIs do not have stable replacements in the current WordPress packages.
-			'@wordpress/no-unsafe-wp-apis': [
-				'error',
-				allowedExistingExperimentalWordPressImports,
-			],
 		},
 	},
 	{

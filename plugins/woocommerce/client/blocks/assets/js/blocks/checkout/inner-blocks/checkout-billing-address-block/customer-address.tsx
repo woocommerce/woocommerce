@@ -38,7 +38,6 @@ const CustomerAddress = () => {
 					select( validationStore ).getValidationErrors(),
 			};
 		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- Update validation errors when billing address changes.
 		[ billingAddress ]
 	);
 
