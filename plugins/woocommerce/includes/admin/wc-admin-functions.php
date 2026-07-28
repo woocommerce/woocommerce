@@ -430,7 +430,7 @@ function wc_save_order_items( $order_id, $items ) {
 
 			if (
 				! empty( $item_data['shipping_method'] ) &&
-				in_array( $item_data['shipping_method_title'], array( '', __( 'Shipping', 'woocommerce' ) ), true )
+				'' === $item_data['shipping_method_title']
 			) {
 				if ( null === $shipping_methods ) {
 					$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();

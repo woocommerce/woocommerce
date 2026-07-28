@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide additional address fields with show_in_order_confirmation set to false from the order confirmation block theme thank you page, classic theme order details, and My Account order details.

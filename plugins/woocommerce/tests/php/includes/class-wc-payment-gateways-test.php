@@ -38,14 +38,38 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Gateway settings updates diagnose malformed values and track enabled repairs.
+	 * @testdox Gateway settings option changes use gateway defaults for malformed transition values.
+	 * @dataProvider provider_malformed_gateway_settings_transitions
+	 *
+	 * @param string|null $enabled_default     The gateway's enabled form-field default, or null to remove the field.
+	 * @param mixed       $old_value           The previously stored option value, or null for an added option.
+	 * @param mixed       $new_value           The option value to add or update.
+	 * @param string[]    $warning_sides       The malformed transition sides expected to produce warnings.
+	 * @param int         $info_count          The expected number of informational log entries.
+	 * @param int         $action_count        The expected number of gateway-enabled actions.
+	 * @param int         $enable_tracks_count The expected number of gateway-enable Tracks events.
+	 * @param int         $disable_tracks_count The expected number of gateway-disable Tracks events.
 	 */
-	public function test_gateway_settings_updates_handle_non_array_values(): void {
-		$option_name       = 'woocommerce_cod_settings';
-		$disabled_settings = array( 'enabled' => 'no' );
-		$enabled_settings  = array( 'enabled' => 'yes' );
-		$tracking_option   = get_option( 'woocommerce_allow_tracking', null );
-		$current_user_id   = get_current_user_id();
+	public function test_gateway_settings_option_changes_handle_non_array_values(
+		?string $enabled_default,
+		$old_value,
+		$new_value,
+		array $warning_sides,
+		int $info_count,
+		int $action_count,
+		int $enable_tracks_count,
+		int $disable_tracks_count
+	): void {
+		$option_name     = 'woocommerce_cod_settings';
+		$gateway         = $this->sut->payment_gateways()['cod'];
+		$tracking_option = get_option( 'woocommerce_allow_tracking', null );
+		$current_user_id = get_current_user_id();
+
+		if ( null === $enabled_default ) {
+			unset( $gateway->form_fields['enabled'] );
+		} else {
+			$gateway->form_fields['enabled']['default'] = $enabled_default;
+		}
 
 		// phpcs:disable Squiz.Commenting
 		$fake_logger = new class() {
@@ -88,44 +112,50 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		try {
 			wp_set_current_user( 0 );
 			update_option( 'woocommerce_allow_tracking', 'yes' );
-			$this->clear_tracks_events();
 
 			delete_option( $option_name );
-			add_option( $option_name, $disabled_settings );
+			if ( null === $old_value ) {
+				$this->clear_tracks_events();
+				add_option( $option_name, $new_value );
+			} else {
+				add_option( $option_name, $old_value );
+				$fake_logger->infos    = array();
+				$fake_logger->warnings = array();
+				$enabled_gateways      = array();
+				$this->clear_tracks_events();
 
-			update_option( $option_name, '{"enabled":"yes"}' );
-			$malformed_value        = get_option( $option_name );
-			$malformed_info_count   = count( $fake_logger->infos );
-			$malformed_action_count = count( $enabled_gateways );
-			$malformed_tracks_count = count( $this->get_tracks_events( 'wcadmin_settings_payments_provider_enable' ) );
+				update_option( $option_name, $new_value );
+			}
 
-			update_option( $option_name, $enabled_settings );
-
-			$this->assertSame( '{"enabled":"yes"}', $malformed_value, 'The malformed gateway settings should remain a string.' );
-			$this->assertSame( 0, $malformed_info_count, 'A malformed new value should not log an enable transition.' );
-			$this->assertSame( 0, $malformed_action_count, 'A malformed new value should not fire the gateway-enabled action.' );
-			$this->assertSame( 0, $malformed_tracks_count, 'A malformed new value should not record an enable event.' );
-
-			$this->assertSame( $enabled_settings, get_option( $option_name ), 'Valid gateway settings should be stored after a malformed value.' );
-			$this->assertCount( 2, $fake_logger->warnings, 'Both malformed transition values should produce diagnostic warnings.' );
-			$this->assertSame(
-				'Payment gateway transition handling skipped because the new value for "woocommerce_cod_settings" is not an array.',
-				$fake_logger->warnings[0]['message'],
-				'The malformed new value warning should identify the affected option.'
-			);
-			$this->assertSame(
-				'Previous payment gateway settings for "woocommerce_cod_settings" were not an array; treating the gateway as disabled.',
-				$fake_logger->warnings[1]['message'],
-				'The malformed old value warning should describe the repair behavior.'
-			);
-			$this->assertCount( 1, $fake_logger->infos, 'Repairing to enabled settings should log one enable transition.' );
-			$this->assertCount( 1, $enabled_gateways, 'Repairing to enabled settings should fire the gateway-enabled action once.' );
-			$this->assertSame( 'cod', $enabled_gateways[0]->id, 'The gateway-enabled action should receive the repaired gateway.' );
+			$this->assertSame( $new_value, get_option( $option_name ), 'The option hook should not rewrite or decode the stored settings value.' );
+			$this->assertCount( $info_count, $fake_logger->infos, 'The transition should produce the expected number of informational log entries.' );
+			$this->assertCount( $action_count, $enabled_gateways, 'The transition should fire the gateway-enabled action the expected number of times.' );
+			if ( 1 === $action_count ) {
+				$this->assertSame( $gateway, $enabled_gateways[0], 'The gateway-enabled action should receive the COD gateway instance.' );
+			}
 			$this->assertCount(
-				1,
+				$enable_tracks_count,
 				$this->get_tracks_events( 'wcadmin_settings_payments_provider_enable' ),
-				'Repairing to enabled settings should record one enable event.'
+				'The transition should record the expected number of gateway-enable events.'
 			);
+			$this->assertCount(
+				$disable_tracks_count,
+				$this->get_tracks_events( 'wcadmin_settings_payments_provider_disable' ),
+				'The transition should record the expected number of gateway-disable events.'
+			);
+			if ( 1 === $info_count ) {
+				$this->assertSame( 'Payment gateway enabled: "Cash on delivery"', $fake_logger->infos[0]['message'], 'The informational log should identify the enabled gateway.' );
+			}
+
+			$this->assertCount( count( $warning_sides ), $fake_logger->warnings, 'Each malformed transition side should produce one warning.' );
+			foreach ( $warning_sides as $warning_index => $warning_side ) {
+				$expected_warning = 'new' === $warning_side
+					? sprintf( 'New payment gateway settings for "%s" were not an array; using gateway defaults for transition handling.', $option_name )
+					: sprintf( 'Previous payment gateway settings for "%s" were not an array; using gateway defaults for transition handling.', $option_name );
+
+				$this->assertSame( $expected_warning, $fake_logger->warnings[ $warning_index ]['message'], "The malformed {$warning_side} value warning should describe the fallback behavior." );
+				$this->assertSame( array( 'source' => 'payment-gateways' ), $fake_logger->warnings[ $warning_index ]['data'], "The malformed {$warning_side} value warning should use the payment-gateways source." );
+			}
 		} finally {
 			remove_action( 'woocommerce_payment_gateway_enabled', $action_watcher );
 			wc_get_container()->reset_replacement( \Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders::class );
@@ -138,6 +168,32 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 				update_option( 'woocommerce_allow_tracking', $tracking_option );
 			}
 		}
+	}
+
+	/**
+	 * Provides malformed gateway settings transitions.
+	 *
+	 * @return array<string, array{0: string|null, 1: mixed, 2: mixed, 3: string[], 4: int, 5: int, 6: int, 7: int}>
+	 */
+	public function provider_malformed_gateway_settings_transitions(): array {
+		$malformed_old = '{"enabled":"yes"}';
+		$malformed_new = '{"enabled":"no"}';
+		$disabled      = array( 'enabled' => 'no' );
+		$enabled       = array( 'enabled' => 'yes' );
+
+		return array(
+			'default disabled: malformed to explicit disabled' => array( 'no', $malformed_old, $disabled, array( 'old' ), 0, 0, 0, 0 ),
+			'default disabled: malformed to explicit enabled' => array( 'no', $malformed_old, $enabled, array( 'old' ), 1, 1, 1, 0 ),
+			'default enabled: malformed to explicit enabled' => array( 'yes', $malformed_old, $enabled, array( 'old' ), 0, 0, 0, 0 ),
+			'default enabled: malformed to explicit disabled' => array( 'yes', $malformed_old, $disabled, array( 'old' ), 0, 0, 0, 1 ),
+			'default disabled: explicit disabled to malformed' => array( 'no', $disabled, $malformed_new, array( 'new' ), 0, 0, 0, 0 ),
+			'default enabled: explicit disabled to malformed' => array( 'yes', $disabled, $malformed_new, array( 'new' ), 1, 1, 1, 0 ),
+			'default disabled: explicit enabled to malformed' => array( 'no', $enabled, $malformed_new, array( 'new' ), 0, 0, 0, 1 ),
+			'default enabled: explicit enabled to malformed' => array( 'yes', $enabled, $malformed_new, array( 'new' ), 0, 0, 0, 0 ),
+			'default enabled: distinct malformed values'  => array( 'yes', $malformed_old, $malformed_new, array( 'new', 'old' ), 0, 0, 0, 0 ),
+			'missing enabled field: enabled to malformed' => array( null, $enabled, $malformed_new, array( 'new' ), 0, 0, 0, 1 ),
+			'add malformed value with enabled default'    => array( 'yes', null, $malformed_new, array( 'new' ), 0, 0, 0, 0 ),
+		);
 	}
 
 	/**

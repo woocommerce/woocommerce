@@ -52,6 +52,8 @@ let initialBundleAnalyzerPort = 8888;
 const getSharedPlugins = ( {
 	bundleAnalyzerReportTitle,
 	checkCircularDeps = true,
+	dependencyRequestToExternal = requestToExternal,
+	dependencyRequestToHandle = requestToHandle,
 } ) =>
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
@@ -72,8 +74,8 @@ const getSharedPlugins = ( {
 			injectPolyfill: true,
 			combineAssets: ASSET_CHECK,
 			outputFormat: ASSET_CHECK ? 'json' : 'php',
-			requestToExternal,
-			requestToHandle,
+			requestToExternal: dependencyRequestToExternal,
+			requestToHandle: dependencyRequestToHandle,
 		} ),
 		// Substitute the `__i18n_text_domain__` identifier used by the
 		// @woocommerce/email-editor package with the WooCommerce text
@@ -884,6 +886,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 };
 
 module.exports = {
+	getSharedPlugins,
 	getCoreConfig,
 	getFrontConfig,
 	getMainConfig,

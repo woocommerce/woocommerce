@@ -12,7 +12,7 @@ A plugin can define its own code API and get a matching GraphQL endpoint using W
 
 ## Prerequisites
 
-- WooCommerce 10.9+ on PHP 8.1+. Since WooCommerce 11.1 the `dual_code_graphql_api` feature flag is **not** required: it gates WooCommerce core's own endpoint, not plugin endpoints (see [Gating your endpoint](#gating-your-endpoint), including the note about earlier versions).
+- WooCommerce installed with the `dual_code_graphql_api` feature flag enabled, on PHP 8.1+.
 - The plugin's own Composer autoloader (PSR-4) and a `vendor/autoload.php`.
 
 The endpoint is **dedicated**: each plugin registers its own REST route. You cannot federate into core's `/wc/graphql`.
@@ -60,31 +60,13 @@ use Automattic\WooCommerce\Api\Infrastructure\Main as WooCommerceApiMain;
 
 add_action( 'plugins_loaded', static function () {
     if ( ! method_exists( WooCommerceApiMain::class, 'register_graphql_endpoint' ) ) {
-        return; // WooCommerce too old (no dual API infrastructure)
+        return; // WooCommerce too old, or feature/PHP unavailable
     }
     WooCommerceApiMain::register_graphql_endpoint( __DIR__, 'my-plugin', '/graphql' );
 } );
 ```
 
-The first argument may be your plugin directory (the controller class is resolved by convention) or the fully-qualified controller class name. This is a silent no-op when the required infrastructure is not available (see [Prerequisites](#prerequisites)). Your endpoint goes through the same request pipeline as core's and inherits the core [GraphQL settings](./caching-and-settings.md).
-
-**Note:** Call `register_graphql_endpoint()` unconditionally at bootstrap, as shown above: don't wrap it in `rest_api_init`. The actual route registration is already deferred internally, and WooCommerce uses the call itself to know that a plugin endpoint exists on the site (for example, to decide whether to show the shared GraphQL settings section). A call deferred to `rest_api_init` never happens on admin, cron, or CLI requests, so that detection would break there.
-
-### Gating your endpoint
-
-The `dual_code_graphql_api` feature flag gates WooCommerce core's own endpoint only: your endpoint is registered whenever the required infrastructure is available, regardless of the flag state. Choose how (and whether) to gate it:
-
-- **Always on** (shown above): installing your plugin is what enables the endpoint. No extra code.
-- **Your own switch**: check your own option, setting, or constant before calling `register_graphql_endpoint()`.
-- **Follow the core feature flag**: opt back into the pre-11.1 behavior by checking the flag yourself:
-
-    ```php
-    if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'dual_code_graphql_api' ) ) {
-        WooCommerceApiMain::register_graphql_endpoint( __DIR__, 'my-plugin', '/graphql' );
-    }
-    ```
-
-> **Before WooCommerce 11.1** (that is, on 10.9 and 11.0) the feature flag gated plugin endpoints too: with the flag off, `register_graphql_endpoint()` was a silent no-op and your endpoint was not registered. If your plugin supports those versions, your endpoint only exists there when the site owner has enabled the flag (see [Requirements](./README.md#requirements)) — regardless of which gating strategy you choose.
+The first argument may be your plugin directory (the controller class is resolved by convention) or the fully-qualified controller class name. This is a no-op when the feature flag is off or PHP is < 8.1. Your endpoint goes through the same request pipeline as core's and inherits the core [GraphQL settings](./caching-and-settings.md).
 
 ## 4. Reuse or replace the convention classes
 
