@@ -65,7 +65,9 @@ class WC_CLI {
 		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_Update_Command::register_commands' );
 		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_Tracker_Command::register_commands' );
 		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_COM_Command::register_commands' );
-		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_COM_Extension_Command::register_commands' );
+		if ( class_exists( 'WC_CLI_COM_Extension_Command' ) ) {
+			WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_COM_Extension_Command::register_commands' );
+		}
 		if ( defined( 'WOOCOMMERCE_MIGRATOR_ENABLED' ) && WOOCOMMERCE_MIGRATOR_ENABLED ) {
 			WP_CLI::add_hook( 'after_wp_load', 'Automattic\WooCommerce\Internal\CLI\Migrator\Runner::register_commands' );
 		}
