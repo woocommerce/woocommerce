@@ -4,7 +4,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Caches;
 
-use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use WC_Product;
 use WP_Post;
 
@@ -51,16 +50,21 @@ class ProductCountCacheService {
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @internal
-	 *
-	 * @return void
 	 */
 	final public function init(): void {
 		$this->product_count_cache = new ProductCountCache();
 
 		add_action( self::BACKGROUND_EVENT_HOOK, array( $this, 'prime_cache_if_cold' ) );
 		add_action( 'action_scheduler_init', array( $this, 'unschedule_background_actions' ) );
-	}
 
+		return;
+
+		// transition_post_status owns all mid-lifecycle status changes; woocommerce_new_product corrects for creation-time
+		// ephemeral transitions before the final status is committed; before_delete_post closes the lifecycle.
+		add_action( 'woocommerce_new_product', array( $this, 'update_on_new_product' ), 10, 2 ); // phpcs:ignore Squiz.PHP.NonExecutableCode.Unreachable
+		add_action( 'transition_post_status', array( $this, 'update_on_product_status_changed' ), 10, 3 ); // phpcs:ignore Squiz.PHP.NonExecutableCode.Unreachable
+		add_action( 'before_delete_post', array( $this, 'update_on_product_deleted' ), 10, 2 ); // phpcs:ignore Squiz.PHP.NonExecutableCode.Unreachable
+	}
 
 	/**
 	 * Primes the product count cache for a given post type when it is cold.
@@ -69,9 +73,15 @@ class ProductCountCacheService {
 	 * @return void
 	 */
 	public function prime_cache_if_cold( $product_type = 'product' ): void {
-		// Intentionally left blank so already-scheduled actions complete successfully.
-	}
+		// Early return to skip logic execution before the product status counters are re-enabled (to avoid failing jobs for stores already migrated to v11.0 pre-release).
+		return;
 
+		// Cache warm-up is only effective when an object cache plugin is active, and the cache entry is missing.
+		if ( wp_using_ext_object_cache() && null === $this->product_count_cache->get( $product_type ) ) { // phpcs:ignore Squiz.PHP.NonExecutableCode.Unreachable
+			$this->product_count_cache->flush( $product_type ); // phpcs:ignore Squiz.PHP.NonExecutableCode.Unreachable
+			wc_get_container()->get( ProductUtil::class )->get_counts_for_type( $product_type ); // phpcs:ignore Squiz.PHP.NonExecutableCode.Unreachable
+		}
+	}
 
 	/**
 	 * Unschedule background actions.
@@ -80,5 +90,117 @@ class ProductCountCacheService {
 	 */
 	public function unschedule_background_actions(): void {
 		as_unschedule_all_actions( self::BACKGROUND_EVENT_HOOK );
+	}
+
+	/**
+	 * Update the cache when a new product is created.
+	 *
+	 * @param int        $product_id Product ID.
+	 * @param WC_Product $product    The product.
+	 * @return void
+	 */
+	public function update_on_new_product( int $product_id, WC_Product $product ): void {
+		// transition_post_status already counted this product — reverse any errant decrement from a cold step 1 and stop.
+		// In-memory status may diverge from DB after a mid-creation wp_update_post; do not increment here.
+		if ( isset( $this->product_statuses[ $product_id ] ) ) {
+			$this->maybe_restore_initial_status_count( $product_id );
+			unset( $this->products_in_creation[ $product_id ] );
+			return;
+		}
+
+		// Cache was cold throughout creation — transition_post_status never fired; use in-memory status as the sole count.
+		$product_status = $product->get_status();
+		if ( $this->product_count_cache->is_cached( 'product', $product_status ) ) {
+			$this->product_statuses[ $product_id ] = $product_status;
+			$this->product_count_cache->increment( 'product', $product_status );
+		}
+		unset( $this->products_in_creation[ $product_id ] );
+	}
+
+	/**
+	 * Update the cache whenever a product status changes.
+	 *
+	 * @param string  $new_status The new post status.
+	 * @param string  $old_status The previous post status.
+	 * @param WP_Post $post       The post object.
+	 *
+	 * @return void
+	 */
+	public function update_on_product_status_changed( string $new_status, string $old_status, WP_Post $post ): void {
+		if ( 'product' !== $post->post_type ) {
+			return;
+		}
+
+		$product_id = $post->ID;
+
+		// WordPress uses 'new' as old_status exclusively on the first transition_post_status of a newly inserted post.
+		if ( 'new' === $old_status ) {
+			$this->products_in_creation[ $product_id ] = true;
+		}
+
+		$is_new_cached = $this->product_count_cache->is_cached( 'product', $new_status );
+		$is_old_cached = $this->product_count_cache->is_cached( 'product', $old_status );
+		if ( ! $is_new_cached && ! $is_old_cached ) {
+			return;
+		}
+
+		// If the status count has already been incremented for this product, skip.
+		if ( ( $this->product_statuses[ $product_id ] ?? null ) === $new_status ) {
+			return;
+		}
+
+		$previously_tracked                    = isset( $this->product_statuses[ $product_id ] );
+		$this->product_statuses[ $product_id ] = $new_status;
+		$was_decremented                       = $is_old_cached && false !== $this->product_count_cache->decrement( 'product', $old_status );
+		if ( $is_new_cached ) {
+			$this->product_count_cache->increment( 'product', $new_status );
+		}
+
+		// Record old status for creation-time correction only; existing-product decrements are correct and must not be reversed.
+		// If $previously_tracked, an earlier transition already counted the old status — decrement is legitimate.
+		if ( ! $previously_tracked && $was_decremented && ! isset( $this->initial_product_statuses[ $product_id ] ) && isset( $this->products_in_creation[ $product_id ] ) ) {
+			$this->initial_product_statuses[ $product_id ] = $old_status;
+		} elseif ( ( $this->initial_product_statuses[ $product_id ] ?? null ) === $new_status ) {
+			unset( $this->initial_product_statuses[ $product_id ] );
+		}
+	}
+
+	/**
+	 * Update the cache when a product is permanently deleted.
+	 *
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    The post object.
+	 *
+	 * @return void
+	 */
+	public function update_on_product_deleted( int $post_id, WP_Post $post ): void {
+		if ( 'product' === $post->post_type ) {
+			// Reverse any errant decrement from a mid-creation status transition that update_on_new_product will never get to correct.
+			$this->maybe_restore_initial_status_count( $post_id );
+
+			$product_status = $post->post_status;
+			if ( $this->product_count_cache->is_cached( 'product', $product_status ) ) {
+				$this->product_count_cache->decrement( 'product', $product_status );
+			}
+
+			unset( $this->product_statuses[ $post_id ], $this->products_in_creation[ $post_id ] );
+		}
+	}
+
+	/**
+	 * Reverses an errant decrement recorded in initial_product_statuses for a given product, if any.
+	 *
+	 * @param int $product_id Product ID.
+	 *
+	 * @return void
+	 */
+	private function maybe_restore_initial_status_count( int $product_id ): void {
+		if ( isset( $this->initial_product_statuses[ $product_id ] ) ) {
+			$initial_status = $this->initial_product_statuses[ $product_id ];
+			unset( $this->initial_product_statuses[ $product_id ] );
+			if ( $this->product_count_cache->is_cached( 'product', $initial_status ) ) {
+				$this->product_count_cache->increment( 'product', $initial_status );
+			}
+		}
 	}
 }

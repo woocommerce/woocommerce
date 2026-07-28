@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -63,6 +64,36 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$cogs_controller              = wc_get_container()->get( CostOfGoodsSoldController::class );
 		$this->cogs_is_enabled        = $cogs_controller->feature_is_enabled();
 		$this->use_cogs_lookup_column = $this->cogs_is_enabled && $cogs_controller->product_meta_lookup_table_cogs_value_columns_exist();
+	}
+
+	/**
+	 * Pre-warm the wp_count_posts cache before the list table renders.
+	 *
+	 * @internal
+	 * @since 11.0.0
+	 *
+	 * @return void
+	 */
+	public function prime_status_counts_cache(): void {
+		$screen = get_current_screen();
+		if ( ! $screen || 'edit-product' !== $screen->id ) {
+			return;
+		}
+
+		// Performance note: the current listings architecture prevents us from isolating wp_count_posts calls.
+		// In the context of the products page, we can still isolate the underlying SQL by warming up the wp_count_posts cache.
+		$cache = (object) array_map(
+			static fn ( $count ) => $count ? (string) $count : (int) $count,
+			wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' )
+		);
+		// Trade-off: private-status tally may read slightly high for restricted roles (other users' privates included) — non-critical.
+		wp_cache_set_multiple(
+			array(
+				'posts-product' => $cache,
+				'posts-product_readable_' . get_current_user_id() => $cache,
+			),
+			'counts'
+		);
 	}
 
 	/**
@@ -202,7 +233,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render column: thumb.
 	 */
 	protected function render_thumb_column() {
-		echo '<a href="' . esc_url( get_edit_post_link( $this->object->get_id() ) ) . '">' . $this->object->get_image( 'thumbnail' ) . '</a>'; // WPCS: XSS ok.
+		echo '<a href="' . esc_url( get_edit_post_link( $this->object->get_id() ) ) . '">' . $this->object->get_image( 'thumbnail' ) . '</a>';
+		// WPCS: XSS ok.
 	}
 
 	/**
@@ -318,7 +350,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_cat=' . $term->slug . '&post_type=product' ) ) . '">' . esc_html( $term->name ) . '</a>';
 			}
 
-			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_cat', $this->object->get_id(), $termlist, $terms ); // WPCS: XSS ok.
+			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_cat', $this->object->get_id(), $termlist, $terms );
+			// WPCS: XSS ok.
 		}
 	}
 
@@ -335,7 +368,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$termlist[] = '<a href="' . esc_url( admin_url( 'edit.php?product_tag=' . $term->slug . '&post_type=product' ) ) . '">' . esc_html( $term->name ) . '</a>';
 			}
 
-			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_tag', $this->object->get_id(), $termlist, $terms ); // WPCS: XSS ok.
+			echo apply_filters( 'woocommerce_admin_product_term_list', implode( ', ', $termlist ), 'product_tag', $this->object->get_id(), $termlist, $terms );
+			// WPCS: XSS ok.
 		}
 	}
 
@@ -402,7 +436,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 		$output = ob_get_clean();
 
-		echo apply_filters( 'woocommerce_product_filters', $output ); // WPCS: XSS ok.
+		echo apply_filters( 'woocommerce_product_filters', $output );
+		// WPCS: XSS ok.
 	}
 
 	/**
@@ -425,8 +460,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				)
 			);
 		} else {
-			$current_category_slug = isset( $_GET['product_cat'] ) ? wc_clean( wp_unslash( $_GET['product_cat'] ) ) : false; // WPCS: input var ok, CSRF ok.
-			$current_category      = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'product_cat' ) : false;
+			$current_category_slug = isset( $_GET['product_cat'] ) ? wc_clean( wp_unslash( $_GET['product_cat'] ) ) : false;
+			// WPCS: input var ok, CSRF ok.
+			$current_category = $current_category_slug ? get_term_by( 'slug', $current_category_slug, 'product_cat' ) : false;
 			?>
 			<select class="wc-category-search" name="product_cat" data-placeholder="<?php esc_attr_e( 'Filter by category', 'woocommerce' ); ?>" data-allow_clear="true">
 				<?php if ( $current_category_slug && $current_category ) : ?>
@@ -443,8 +479,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @since 3.5.0
 	 */
 	protected function render_products_type_filter() {
-		$current_product_type = isset( $_REQUEST['product_type'] ) ? wc_clean( wp_unslash( $_REQUEST['product_type'] ) ) : false; // WPCS: input var ok, sanitization ok.
-		$output               = '<select name="product_type" id="dropdown_product_type"><option value="">' . esc_html__( 'Filter by product type', 'woocommerce' ) . '</option>';
+		$current_product_type = isset( $_REQUEST['product_type'] ) ? wc_clean( wp_unslash( $_REQUEST['product_type'] ) ) : false;
+		// WPCS: input var ok, sanitization ok.
+		$output = '<select name="product_type" id="dropdown_product_type"><option value="">' . esc_html__( 'Filter by product type', 'woocommerce' ) . '</option>';
 
 		foreach ( wc_get_product_types() as $value => $label ) {
 			$output .= '<option value="' . esc_attr( $value ) . '" ';
@@ -464,7 +501,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		$output .= '</select>';
-		echo $output; // WPCS: XSS ok.
+		echo $output;
+		// WPCS: XSS ok.
 	}
 
 	/**
@@ -473,16 +511,18 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @since 3.5.0
 	 */
 	public function render_products_stock_status_filter() {
-		$current_stock_status = isset( $_REQUEST['stock_status'] ) ? wc_clean( wp_unslash( $_REQUEST['stock_status'] ) ) : false; // WPCS: input var ok, sanitization ok.
-		$stock_statuses       = wc_get_product_stock_status_options();
-		$output               = '<select name="stock_status"><option value="">' . esc_html__( 'Filter by stock status', 'woocommerce' ) . '</option>';
+		$current_stock_status = isset( $_REQUEST['stock_status'] ) ? wc_clean( wp_unslash( $_REQUEST['stock_status'] ) ) : false;
+		// WPCS: input var ok, sanitization ok.
+		$stock_statuses = wc_get_product_stock_status_options();
+		$output         = '<select name="stock_status"><option value="">' . esc_html__( 'Filter by stock status', 'woocommerce' ) . '</option>';
 
 		foreach ( $stock_statuses as $status => $label ) {
 			$output .= '<option ' . selected( $status, $current_stock_status, false ) . ' value="' . esc_attr( $status ) . '">' . esc_html( $label ) . '</option>';
 		}
 
 		$output .= '</select>';
-		echo $output; // WPCS: XSS ok.
+		echo $output;
+		// WPCS: XSS ok.
 	}
 
 	/**
@@ -530,11 +570,13 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	public function search_label( $query ) {
 		global $pagenow, $typenow;
 
-		if ( 'edit.php' !== $pagenow || 'product' !== $typenow || ! get_query_var( 'product_search' ) || ! isset( $_GET['s'] ) ) { // WPCS: input var ok.
+		if ( 'edit.php' !== $pagenow || 'product' !== $typenow || ! get_query_var( 'product_search' ) || ! isset( $_GET['s'] ) ) {
+			// WPCS: input var ok.
 			return $query;
 		}
 
-		return wc_clean( wp_unslash( $_GET['s'] ) ); // WPCS: input var ok, sanitization ok.
+		return wc_clean( wp_unslash( $_GET['s'] ) );
+		// WPCS: input var ok, sanitization ok.
 	}
 
 	/**
@@ -641,7 +683,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			remove_filter( 'posts_clauses', array( $this, 'order_by_cogs_value_asc_post_clauses' ) );
 			remove_filter( 'posts_clauses', array( $this, 'order_by_cogs_value_desc_post_clauses' ) );
 		}
-		return $posts; // Keeping this here for backward compatibility.
+		return $posts;
+		// Keeping this here for backward compatibility.
 	}
 
 	/**
@@ -803,7 +846,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	public function add_variation_parents_for_shipping_class( $pieces, $wp_query ) {
 		global $wpdb;
-		if ( isset( $_GET['product_shipping_class'] ) && '0' !== $_GET['product_shipping_class'] ) { // WPCS: input var ok.
+		if ( isset( $_GET['product_shipping_class'] ) && '0' !== $_GET['product_shipping_class'] ) {
+			// WPCS: input var ok.
 			$replaced_where   = str_replace( ".post_type = 'product'", ".post_type = 'product_variation'", $pieces['where'] );
 			$pieces['where'] .= " OR {$wpdb->posts}.ID in (
 				SELECT {$wpdb->posts}.post_parent FROM
