@@ -338,7 +338,7 @@ const blockStylingEntries = getBlockEntries(
 
 const entries = {
 	styling: {
-		// Packages styles
+		// Package entry points included in the styling build.
 		'packages-style': glob.sync(
 			'./packages/public-api/{price-format,blocks-components,blocks-checkout}/**/index.{t,j}s',
 			{
