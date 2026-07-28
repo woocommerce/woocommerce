@@ -136,7 +136,7 @@ class ProductCountCacheService {
 	 *
 	 * @return void
 	 */
-	public function update_on_product_status_changed( string $new_status, string $old_status, WP_Post $post ): void {
+	public function update_on_product_status_changed( $new_status, $old_status, WP_Post $post ): void {
 		if ( 'product' !== $post->post_type ) {
 			return;
 		}
