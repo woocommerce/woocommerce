@@ -61,7 +61,7 @@ class ProductCountCacheService {
 			add_action( 'deactivate_' . WC_PLUGIN_BASENAME, array( $this, 'unschedule_background_actions' ) );
 		}
 
-		// Until counters reactivated, disable callbacks for woocommerce_new_product, transition_post_status, before_delete_post hooks.
+		// Until persistent counters reactivated, disable callbacks for woocommerce_new_product, transition_post_status, before_delete_post hooks.
 	}
 
 	/**
@@ -71,7 +71,7 @@ class ProductCountCacheService {
 	 * @return void
 	 */
 	public function prime_cache_if_cold( string $product_type = 'product' ): void {
-		// Until counters reactivated, this task is no-op.
+		// Until persistent counters reactivated, this task is no-op.
 	}
 
 	/**

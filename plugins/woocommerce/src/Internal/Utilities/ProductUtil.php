@@ -152,7 +152,7 @@ class ProductUtil {
 	 * @return array<string,int>
 	 */
 	public function get_counts_for_type( string $post_type ): array {
-		// Until counters reactivated, switch back to WordPress API for accessing post status counters.
+		// Until persistent counters reactivated, switch back to WordPress API for accessing post status counters.
 		return array_map( 'intval', (array) wp_count_posts( $post_type ) );
 	}
 }
