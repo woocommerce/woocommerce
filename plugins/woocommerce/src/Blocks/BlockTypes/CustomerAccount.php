@@ -361,6 +361,7 @@ class CustomerAccount extends AbstractBlock {
 		$icon    = $this->render_icon( $attributes );
 		$user_id = get_current_user_id();
 		if ( $user_id ) {
+			// We use `blank` as the default so if the user has no avatar, the icon underneath is visible.
 			$avatar = get_avatar(
 				$user_id,
 				48,

@@ -49,12 +49,11 @@ class CustomerAccountTest extends WP_UnitTestCase {
 	/**
 	 * Render the Customer Account block via do_blocks().
 	 *
-	 * @param string $attrs_json JSON object string for block attributes.
+	 * @param string $attrs JSON object string for block attributes.
 	 * @return string Rendered markup.
 	 */
-	private function render_customer_account( string $attrs_json = '' ): string {
-		$attrs = '' !== $attrs_json ? ' ' . $attrs_json : '';
-		return do_blocks( "<!-- wp:woocommerce/customer-account{$attrs} /-->" );
+	private function render_customer_account( string $attrs = '' ): string {
+		return do_blocks( "<!-- wp:woocommerce/customer-account {$attrs} /-->" );
 	}
 
 	/**

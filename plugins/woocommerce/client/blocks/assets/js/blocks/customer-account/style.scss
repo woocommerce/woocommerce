@@ -71,21 +71,21 @@
 
 	:where(.icon),
 	.wc-block-customer-account__account-icon {
+		display: block;
 		width: em($grid-unit-30);
 		height: em($grid-unit-30);
-		display: block;
 	}
 
 	:where(.wc-block-customer-account__avatar) {
 		// SVG icons have some transparent spacing around the actual icon.
 		// So we add some spacing around the avatar to simulate a similar size.
 		$avatar_spacing: 4%;
-		
+
 		border-radius: 50%;
 		position: absolute;
+		left: 50%;
 		top: 50%;
-		transform: translateY(-50%);
-		left: $avatar_spacing;
+		transform: translate(-50%, -50%);
 		width: calc(100% - ($avatar_spacing * 2));
 		height: auto;
 	}
