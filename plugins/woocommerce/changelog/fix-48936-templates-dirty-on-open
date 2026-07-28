@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix WooCommerce Cart and Checkout templates/pages being flagged as dirty (Save button enabled) in the Site Editor without any real edit, when opening them, navigating to them, or switching editor views.
