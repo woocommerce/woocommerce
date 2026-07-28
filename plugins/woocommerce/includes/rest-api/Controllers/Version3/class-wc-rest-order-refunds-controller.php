@@ -168,11 +168,11 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		/**
 		 * Filters the refund preview data before it is returned.
 		 *
-		 * @since 11.1.0
-		 *
 		 * @param array           $preview Preview data (breakdown, subtotal, tax, total, max_refundable).
 		 * @param WC_Order        $order   The order the refund preview was computed for.
 		 * @param WP_REST_Request $request The request.
+		 *
+		 * @since 11.1.0
 		 */
 		$preview = apply_filters( 'woocommerce_rest_prepare_order_refund_preview', $preview, $order, $request );
 
