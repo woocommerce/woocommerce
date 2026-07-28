@@ -61,11 +61,14 @@ class ProductCountCacheService {
 			add_action( 'deactivate_' . WC_PLUGIN_BASENAME, array( $this, 'unschedule_background_actions' ) );
 		}
 
+		// Early return to skip logic execution before the product status counters are re-enabled (to avoid failing jobs for stores already migrated to v11.0 pre-release).
+		return;
+
 		// transition_post_status owns all mid-lifecycle status changes; woocommerce_new_product corrects for creation-time
 		// ephemeral transitions before the final status is committed; before_delete_post closes the lifecycle.
-		// add_action( 'woocommerce_new_product', array( $this, 'update_on_new_product' ), 10, 2 );
-		// add_action( 'transition_post_status', array( $this, 'update_on_product_status_changed' ), 10, 3 );
-		// add_action( 'before_delete_post', array( $this, 'update_on_product_deleted' ), 10, 2 );
+		add_action( 'woocommerce_new_product', array( $this, 'update_on_new_product' ), 10, 2 );
+		add_action( 'transition_post_status', array( $this, 'update_on_product_status_changed' ), 10, 3 );
+		add_action( 'before_delete_post', array( $this, 'update_on_product_deleted' ), 10, 2 );
 	}
 
 	/**
@@ -75,6 +78,9 @@ class ProductCountCacheService {
 	 * @return void
 	 */
 	public function prime_cache_if_cold( string $product_type = 'product' ): void {
+		// Early return to skip logic execution before the product status counters are re-enabled (to avoid failing jobs for stores already migrated to v11.0 pre-release).
+		return;
+
 		// Cache warm-up is only effective when an object cache plugin is active, and the cache entry is missing.
 		if ( wp_using_ext_object_cache() && null === $this->product_count_cache->get( $product_type ) ) {
 			$this->product_count_cache->flush( $product_type );
