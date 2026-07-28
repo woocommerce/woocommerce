@@ -28,12 +28,13 @@
 	],
 	"main": "index.js",
 	"dependencies": {
-		"@typescript-eslint/eslint-plugin": "^5.62.0",
-		"@typescript-eslint/parser": "^5.62.0",
-		"@wordpress/eslint-plugin": "14.7.0",
-		"eslint-plugin-react-hooks": "^4.6.0",
-		"eslint-plugin-testing-library": "^5.11.1",
-		"prettier": "npm:wp-prettier@^2.8.5"
+		"@wordpress/eslint-plugin": "25.6.0",
+		"eslint-plugin-testing-library": "^7.16.2",
+		"prettier": "npm:wp-prettier@3.0.3",
+		"typescript-eslint": "^8.63.0"
+	},
+	"peerDependencies": {
+		"eslint": "^9.22.0 || ^10.0.0"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -48,11 +49,8 @@
 	},
 	"devDependencies": {
 		"@babel/core": "7.25.7",
-		"eslint": "^8.55.0",
-		"jest": "29.5.x",
-		"jest-cli": "29.5.x",
+		"eslint": "^10.0.0",
 		"rimraf": "5.0.5",
-		"ts-jest": "29.1.x",
 		"typescript": "5.7.x"
 	},
 	"lint-staged": {

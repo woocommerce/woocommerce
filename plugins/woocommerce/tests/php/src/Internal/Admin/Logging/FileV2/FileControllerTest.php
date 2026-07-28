@@ -232,6 +232,67 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The get_files method breaks ties between same-source rotations by rotation number.
+	 */
+	public function test_get_files_orders_same_source_rotations_by_rotation(): void {
+		/*
+		 * Create a current file plus two rotations for one source, all sharing a
+		 * created day. Standard filenames embed the created date, so
+		 * get_created_timestamp() is parsed from the filename rather than falling
+		 * back to the live filectime(); this keeps the created values tied -- and
+		 * therefore the rotation tie-break under test -- deterministic.
+		 */
+		$created = strtotime( '-1 day' );
+		foreach ( array( null, 0, 1 ) as $rotation ) {
+			$file_id = File::generate_file_id( 'rotated-source', $rotation, $created );
+			$path    = Settings::get_log_directory() . $file_id . '-' . File::generate_hash( $file_id ) . '.log';
+			$file    = new File( $path );
+			$file->write( 'test' );
+		}
+
+		$files = $this->sut->get_files(
+			array(
+				'source'   => 'rotated-source',
+				'orderby'  => 'created',
+				'order'    => 'desc',
+				'per_page' => 10,
+			)
+		);
+
+		$rotations = array_map(
+			fn( $retrieved ) => $retrieved->get_rotation(),
+			$files
+		);
+		$this->assertSame(
+			array( null, 0, 1 ),
+			$rotations,
+			'Same-source rotations must sort by rotation ascending (current file first), not in arbitrary order.'
+		);
+	}
+
+	/**
+	 * @testdox The get_files method prefix-matches source by default but matches exactly when exact_source is set.
+	 */
+	public function test_get_files_exact_source_excludes_prefix_siblings(): void {
+		$this->handler->handle( time(), 'debug', 'a', array( 'source' => 'foo' ) );
+		$this->handler->handle( time(), 'debug', 'b', array( 'source' => 'foo-two' ) );
+
+		// Default matching is a prefix, so 'foo' also returns the 'foo-two' source.
+		$prefix = $this->sut->get_files( array( 'source' => 'foo' ) );
+		$this->assertCount( 2, $prefix );
+
+		// Exact matching returns only the 'foo' source.
+		$exact = $this->sut->get_files(
+			array(
+				'source'       => 'foo',
+				'exact_source' => true,
+			)
+		);
+		$this->assertCount( 1, $exact );
+		$this->assertEquals( 'foo', array_shift( $exact )->get_source() );
+	}
+
+	/**
 	 * @testdox The get_files method should return a count of files that meet the filtering criteria.
 	 */
 	public function test_get_files_count_only(): void {

@@ -20,6 +20,17 @@ export class Editor extends CoreEditor {
 		this.wpCoreVersion = wpCoreVersion;
 	}
 
+	/**
+	 * Returns a locator for Custom HTML block content in the Site Editor canvas.
+	 * WordPress 7.0 renders the content inside an additional iframe.
+	 * WordPress 6.9 and 7.1+ render it directly in the editor canvas.
+	 */
+	getCustomHtmlBlockContentLocator( content: string ) {
+		return this.wpCoreVersion === 7
+			? this.canvas.frameLocator( 'iframe' ).getByText( content )
+			: this.canvas.getByText( content );
+	}
+
 	async getBlockByName( name: string ) {
 		const blockSelector = `[data-type="${ name }"]`;
 		const canvasLocator = this.page

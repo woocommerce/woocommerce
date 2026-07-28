@@ -169,7 +169,25 @@ read: [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
 ## Test helper plugins
 
-Some E2E suites need fixture mechanisms that can't be expressed cleanly with REST or WP-CLI alone — for example, filter-driven content overrides, server-side event mirroring, or synchronous triggers for normally-scheduled jobs. These ship as small PHP plugins under `tests/e2e/test-plugins/`, mounted via `.wp-env.e2e.json`'s `plugins` array.
+Some E2E suites need fixture mechanisms that can't be expressed cleanly with REST or WP-CLI alone — for example, filter-driven content overrides, server-side event mirroring, or synchronous triggers for normally-scheduled jobs. These ship as small PHP plugins under `tests/e2e/test-plugins/`.
+
+### Convention
+
+Every always-on or externally downloaded helper is a **self-contained folder** at `tests/e2e/test-plugins/<slug>/<slug>.php` (the main file matches the folder name), with a full plugin header (`Plugin Name`, `Description`, `Version`, `Requires PHP`, `Author`). Never bind-mount an individual `.php` file — mount a folder or download a zip. The per-test block plugins under `blocks/` are single files, but their whole parent folder is mounted at once (see below).
+
+Keep `Requires PHP` at the **lowest PHP version any E2E environment runs** (currently `7.4`, the same floor as WooCommerce itself) and keep the helper's code compatible with it. WordPress silently refuses to load a plugin whose `Requires PHP` is higher than the running version: it still reports as active, but none of its hooks run and its REST routes return `rest_no_route` (404).
+
+How a helper is wired up depends on when it needs to be active:
+
+- **Always-on helpers** are listed in `.wp-env.e2e.json`'s `plugins` array, which mounts the folder **and auto-activates** it. Do not add a manual `wp plugin activate …` line for these. Current always-on helpers:
+    - `woocommerce-e2e-test-helper` — the general-purpose helper bundle, covering three concerns in one plugin:
+        - **Filter setter** — registers WordPress filters from an `e2e-filters` cookie so tests can override filtered values on the fly.
+        - **Process waiting actions** — runs the Action Scheduler queue synchronously when a request carries the `?process-waiting-actions` query param (used by the analytics suite so order data lands in reports immediately).
+        - **Test helper REST API** — endpoints (`e2e-feature-flags`, `e2e-options`, `e2e-environment`, `e2e-theme`) for toggling feature flags, setting/deleting options, reading environment info and switching themes during a test.
+    - `wc-email-template-sync-test-helper` — see below (email template sync fixtures for RSM-146).
+- **Per-test block plugins** live in `tests/e2e/test-plugins/blocks/`, mounted (not auto-activated) via the `woocommerce-blocks-test-plugins` mapping. Each is activated and deactivated by the spec that needs it (e.g. `wp plugin activate woocommerce-blocks-test-plugins/<file>.php`), because they change store behavior globally and must not be on for every test.
+
+`woocommerce-cleanup` also lives under `test-plugins/`, but it is **not** in the wp-env `plugins` array — it's an on-demand site-reset tool installed only by the external (non-wp-env) setup path, `bin/test-env-setup-external.sh`.
 
 ### `wc-email-template-sync-test-helper`
 

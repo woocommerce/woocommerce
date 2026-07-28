@@ -15,6 +15,60 @@ use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
  */
 class WC_Admin_Tests_RemoteSpecs_RuleProcessors_BaseLocationCountryRuleProcessor extends WC_Unit_Test_Case {
 	/**
+	 * Store base country fixture.
+	 *
+	 * @var string
+	 */
+	private $default_country;
+
+	/**
+	 * Store address fixture.
+	 *
+	 * @var string
+	 */
+	private $store_address;
+
+	/**
+	 * Onboarding profile fixture.
+	 *
+	 * @var array
+	 */
+	private $onboarding_profile;
+
+	/**
+	 * Option filters installed for the current test.
+	 *
+	 * @var array
+	 */
+	private $option_filters = array();
+
+	/**
+	 * Set up option fixtures without triggering unrelated update hooks.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->default_country    = 'US:CA';
+		$this->store_address      = '';
+		$this->onboarding_profile = array();
+		$this->option_filters     = array(
+			'woocommerce_default_country'  => function () {
+				return $this->default_country;
+			},
+			'woocommerce_store_address'    => function () {
+				return $this->store_address;
+			},
+			OnboardingProfile::DATA_OPTION => function () {
+				return $this->onboarding_profile;
+			},
+		);
+
+		foreach ( $this->option_filters as $option => $filter ) {
+			add_filter( 'pre_option_' . $option, $filter );
+		}
+	}
+
+	/**
 	 * Get the publish_before rule.
 	 *
 	 * @return object The rule.
@@ -33,19 +87,20 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_BaseLocationCountryRuleProcessor
 	 * Tear down.
 	 */
 	public function tearDown(): void {
+		foreach ( $this->option_filters as $option => $filter ) {
+			remove_filter( 'pre_option_' . $option, $filter );
+		}
+
 		parent::tearDown();
-		update_option( 'woocommerce_store_address', '' );
-		update_option( 'woocommerce_default_country', 'US:CA' );
-		update_option( OnboardingProfile::DATA_OPTION, array() );
 	}
 
 	/**
-	 * Tests that the processor returns false if not default country.
+	 * Tests that the processor returns false if the base country is empty.
 	 *
 	 * @group fast
 	 */
-	public function test_spec_fails_if_wc_get_base_location_is_not_an_array() {
-		update_option( 'woocommerce_default_country', '' );
+	public function test_spec_fails_if_base_country_is_empty() {
+		$this->default_country = '';
 
 		$processor = new BaseLocationCountryRuleProcessor();
 
@@ -60,9 +115,6 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_BaseLocationCountryRuleProcessor
 	 * @group fast
 	 */
 	public function test_spec_fails_if_base_location_is_default_and_onboarding_is_not_completed() {
-		update_option( 'woocommerce_default_country', 'US:CA' );
-		update_option( OnboardingProfile::DATA_OPTION, array() );
-
 		$processor = new BaseLocationCountryRuleProcessor();
 
 		$result = $processor->process( $this->get_rule(), new stdClass() );
@@ -76,8 +128,7 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_BaseLocationCountryRuleProcessor
 	 * @group fast
 	 */
 	public function test_spec_succeeds_if_base_location_is_default_and_onboarding_is_completed() {
-		update_option( 'woocommerce_default_country', 'US:CA' );
-		update_option( OnboardingProfile::DATA_OPTION, array( 'completed' => true ) );
+		$this->onboarding_profile = array( 'completed' => true );
 
 		$processor = new BaseLocationCountryRuleProcessor();
 
@@ -92,8 +143,7 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_BaseLocationCountryRuleProcessor
 	 * @group fast
 	 */
 	public function test_spec_succeeds_if_base_location_is_default_and_onboarding_is_skipped() {
-		update_option( 'woocommerce_default_country', 'US:CA' );
-		update_option( OnboardingProfile::DATA_OPTION, array( 'skipped' => true ) );
+		$this->onboarding_profile = array( 'skipped' => true );
 
 		$processor = new BaseLocationCountryRuleProcessor();
 
@@ -108,8 +158,7 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_BaseLocationCountryRuleProcessor
 	 * @group fast
 	 */
 	public function test_spec_succeeds_if_base_location_is_not_default() {
-		update_option( 'woocommerce_default_country', 'US:FL' );
-		update_option( OnboardingProfile::DATA_OPTION, array() );
+		$this->default_country = 'US:FL';
 
 		$processor = new BaseLocationCountryRuleProcessor();
 
@@ -124,8 +173,7 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_BaseLocationCountryRuleProcessor
 	 * @group fast
 	 */
 	public function test_spec_succeeds_if_base_location_is_default_and_is_store_country_set_is_true() {
-		update_option( 'woocommerce_default_country', 'US:CA' );
-		update_option( OnboardingProfile::DATA_OPTION, array( 'is_store_country_set' => true ) );
+		$this->onboarding_profile = array( 'is_store_country_set' => true );
 
 		$processor = new BaseLocationCountryRuleProcessor();
 
@@ -140,9 +188,7 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_BaseLocationCountryRuleProcessor
 	 * @group fast
 	 */
 	public function test_spec_succeeds_if_store_address_is_updated() {
-		update_option( 'woocommerce_store_address', 'updated' );
-		update_option( 'woocommerce_default_country', 'US:CA' );
-		update_option( OnboardingProfile::DATA_OPTION, array() );
+		$this->store_address = 'updated';
 
 		$processor = new BaseLocationCountryRuleProcessor();
 
