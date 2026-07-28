@@ -44,14 +44,6 @@ class WooPayments extends Incentive {
 	private ?array $incentives_memo = null;
 
 	/**
-	 * The memoized result of the WooPayments account data check to avoid reading the account cache
-	 * multiple times during a request. It is checked once per incentive visibility check.
-	 *
-	 * @var bool|null
-	 */
-	private ?bool $has_wcpay_account_data_memo = null;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param string $suggestion_id The suggestion ID.
@@ -101,8 +93,7 @@ class WooPayments extends Incentive {
 	 * This is useful for testing purposes.
 	 */
 	public function reset_memo() {
-		$this->incentives_memo             = null;
-		$this->has_wcpay_account_data_memo = null;
+		$this->incentives_memo = null;
 	}
 
 	/**
@@ -287,15 +278,12 @@ class WooPayments extends Incentive {
 	 * @return boolean
 	 */
 	private function has_wcpay_account_data(): bool {
-		if ( null !== $this->has_wcpay_account_data_memo ) {
-			return $this->has_wcpay_account_data_memo;
+		$account_data = get_option( 'wcpay_account_data', array() );
+		if ( ! empty( $account_data['data']['account_id'] ) ) {
+			return true;
 		}
 
-		$account_data = get_option( 'wcpay_account_data', array() );
-
-		$this->has_wcpay_account_data_memo = ! empty( $account_data['data']['account_id'] );
-
-		return $this->has_wcpay_account_data_memo;
+		return false;
 	}
 
 	/**
