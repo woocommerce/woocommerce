@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Register legacy block bundle handles as deprecated compatibility placeholders when unified editor assets are enabled.
