@@ -61,22 +61,22 @@
 		text-decoration: underline;
 	}
 
-	.wc-block-customer-account__visual {
+	:where(.wc-block-customer-account__visual) {
 		position: relative;
 	}
 
-	.wc-block-customer-account__visual + .label {
+	:where(.wc-block-customer-account__visual + .label) {
 		padding-left: em($gap-smallest);
 	}
 
-	.icon,
+	:where(.icon),
 	.wc-block-customer-account__account-icon {
 		width: em($grid-unit-30);
 		height: em($grid-unit-30);
 		display: block;
 	}
 
-	.wc-block-customer-account__avatar {
+	:where(.wc-block-customer-account__avatar) {
 		// SVG icons have some transparent spacing around the actual icon.
 		// So we add some spacing around the avatar to simulate a similar size.
 		$avatar_spacing: 4%;
