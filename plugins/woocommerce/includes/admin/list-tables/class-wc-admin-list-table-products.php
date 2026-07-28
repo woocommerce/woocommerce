@@ -263,6 +263,19 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				'<div class="cogs_value">' . esc_html( $this->object->get_cogs_value() ?? '0' ) . '</div>' :
 				'';
 
+		/**
+		 * Product represented by the current list-table row.
+		 * Narrow the inherited object type without adding a PHPStan baseline entry.
+		 * In future we should correct the type of $this->object.
+		 *
+		 * @var WC_Product $product
+		 */
+		$product        = $this->object;
+		$sale_date_from = $product->get_date_on_sale_from( 'edit' );
+		$sale_date_to   = $product->get_date_on_sale_to( 'edit' );
+		$sale_date_from = $sale_date_from ? date_i18n( 'Y-m-d', $sale_date_from->getOffsetTimestamp() ) : '';
+		$sale_date_to   = $sale_date_to ? date_i18n( 'Y-m-d', $sale_date_to->getOffsetTimestamp() ) : '';
+
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- the COGS value is already escaped.
 		/* Custom inline data for woocommerce. */
 		echo '
@@ -272,6 +285,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				<div class="global_unique_id">' . esc_html( $this->object->get_global_unique_id() ) . '</div>
 				<div class="regular_price">' . esc_html( $this->object->get_regular_price() ) . '</div>
 				<div class="sale_price">' . esc_html( $this->object->get_sale_price() ) . '</div>
+				<div class="sale_price_dates_from">' . esc_html( $sale_date_from ) . '</div>
+				<div class="sale_price_dates_to">' . esc_html( $sale_date_to ) . '</div>
 				<div class="weight">' . esc_html( $this->object->get_weight() ) . '</div>
 				<div class="length">' . esc_html( $this->object->get_length() ) . '</div>
 				<div class="width">' . esc_html( $this->object->get_width() ) . '</div>
