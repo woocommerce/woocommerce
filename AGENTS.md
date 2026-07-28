@@ -197,6 +197,17 @@ Country and state/province lists live in `plugins/woocommerce/i18n/countries.php
 
 Use `Automattic\WooCommerce\Database\Migrations\MigrationHelper::migrate_country_states()` from a `wc_update_*` function in `wc-update-functions.php`, passing an old-code to new-code map; see `wc_update_721_adjust_new_zealand_states()` for the pattern. Use the helper rather than writing your own partial migration, since it's easy to miss one of the places a code is stored. Purely additive changes (new codes, no renames) don't need a migration.
 
+## Comments and Docblocks
+
+Docblocks are expected on methods, classes, and hooks (see the `woocommerce-backend-dev` skill for exact requirements). Inline comments are the exception, not the default: add one only when the code can't explain itself, for example a non-obvious "why", a hidden constraint, or a workaround for a specific bug. Either way, don't add a comment that just restates what the identifier names already say.
+
+When writing a comment or docblock description:
+
+- **Keep it short.** 3-4 lines is the target for a docblock description (`@param`/`@return`/`@since` lines are separate and don't count against this). If it's running longer, the comment is likely explaining something the code itself should make obvious. Simplify the code first.
+- **Use plain language.** Say what the code does or why in ordinary words. Avoid dense or clever phrasing, and avoid vague jargon for guard conditions (e.g. "gates", "gating"). Say "guard", "check", "only when" instead.
+- **Don't force-wrap at a fixed column.** This repo has no enforced 80- or 120-column limit on comment prose (`.markdownlint.json` disables `MD013`, and there's no PHPCS `LineLength` override), and plenty of existing docblocks already run past both. Match the wrap width already used in the surrounding file instead of imposing your own.
+- **Decorative comments are worse than none.** A comment that restates the next line, marks an obvious section (`// Loop over items`), or pads a docblock out to look thorough adds noise a future reader has to read past to find the comments that actually matter.
+
 ## Block Development
 
 ### `block.json` Attribute Defaults
