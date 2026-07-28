@@ -53,7 +53,9 @@ rsync -rc --exclude-from="$PROJECT_PATH/.distignore" "$PROJECT_PATH/" "$DEST_PAT
 
 echo "Regenerating autoloader for production..."
 cd "$DEST_PATH" || exit
-composer dump-autoload --no-dev --quiet --optimize || exit "$?"
+# No --optimize: the plugin loads classes through the Jetpack autoloader, so the
+# optimized classmaps are never read at runtime and only bloat the zip.
+composer dump-autoload --no-dev --quiet || exit "$?"
 # Remove composer files from the build.
 rm composer.*
 
