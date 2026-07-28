@@ -25,15 +25,15 @@ A finding that cannot be reproduced on two independent stacks does not block the
 
 | Impact class | Default verdict | Example |
 | --- | --- | --- |
-| Checkout or revenue interruption - a store cannot take payments | Release-blocking; no modifiers apply | The bar everything else is measured against |
+| Checkout or revenue interruption - a store cannot take payments | Release-blocking; no modifiers apply | - |
 | Site down or fatal on load, in Core or any Woo-owned extension - including older extension versions running with the new Core | Release-blocking | [#64394](https://github.com/woocommerce/woocommerce/pull/64394) forced the 10.9.0 revert; [#65957](https://github.com/woocommerce/woocommerce/pull/65957) rescheduled 11.0.0 after a fatal surfaced on an early deployment |
 | Data loss or corruption | Release-blocking | - |
-| A break in a public contract or shared surface with consumers in the wild - PHP API, hooks, REST, datastore behavior | Release-blocking | [#65595](https://github.com/woocommerce/woocommerce/pull/65595) changed datastore behavior extensions relied on and forced a revert; [#66382](https://github.com/woocommerce/woocommerce/pull/66382) removed released public methods, restored the same day by [#66822](https://github.com/woocommerce/woocommerce/pull/66822) |
-| A contract change whose surface has no known consumers, or that went through the deprecation path | Fix in a point release, or next release | The backward-compatibility guidance in the repository's `AGENTS.md` |
+| A break in a public contract or shared surface with consumers in the wild - PHP API, hooks, REST, datastore behavior | Release-blocking | [#65595](https://github.com/woocommerce/woocommerce/pull/65595) changed datastore behavior extensions relied on and forced a revert; [#66382](https://github.com/woocommerce/woocommerce/pull/66382) removed released public methods, restored within a day by [#66822](https://github.com/woocommerce/woocommerce/pull/66822) |
+| A contract change whose surface has no known consumers, or that went through the deprecation path in the repository's `AGENTS.md` | Fix in a point release, or next release | - |
 | WordPress forward-compatibility - the release breaks under a WordPress version shipping before our next release | Fix in a point release scheduled before the WordPress date; release-blocking if the breakage is site-down class | [#67061](https://github.com/woocommerce/woocommerce/pull/67061) shipped WordPress 7.1 fixes inside the 11.0.0 rebuild, because 7.1 lands before 11.1.0 |
-| Broken upgrade path - the update itself fails or leaves a site inconsistent | Release-blocking if deterministic; fix in a point release if transient and self-healing | The 10.9.1 upgrade race self-healed on cache refresh and produced a single report - it did not block |
+| Broken upgrade path - the update itself fails or leaves a site inconsistent | Release-blocking if deterministic; fix in a point release if transient and self-healing | The 10.9.1 upgrade race self-healed on cache refresh and produced a single report - no point release was needed |
 | A regression in a default-on, merchant-facing feature | Release-blocking without a workaround; fix in a point release with one | - |
-| A regression behind a flag that is off by default | Fix in a point release, or next release | The 11.0 REST API field rename shipped because the flag is off by default, with the fix scheduled for a later release |
+| A regression behind a flag that is off by default | Fix in a point release, or next release | An 11.0 REST API field inconsistency was judged non-blocking because the flag is off by default, with the rename scheduled for a later release |
 | A performance regression | Release-blocking at scale with no mitigation; otherwise fix in a point release with the mitigation named | [#66088](https://github.com/woocommerce/woocommerce/pull/66088) had a filter mitigation available immediately; the fix ([#66786](https://github.com/woocommerce/woocommerce/pull/66786)) was backported into the next build |
 | Cosmetic and UX papercuts | Next release | - |
 
