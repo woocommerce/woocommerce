@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { isExperimentalWcRestApiV4Enabled } from '../settings/blocks/feature-flags';
+import { isExperimentalWcRestApiV4Enabled } from '../../../assets/js/settings/blocks/feature-flags';
 import {
 	registerProductEntity,
 	registerSettingsEntity,
