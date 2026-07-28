@@ -88,6 +88,9 @@
 			"@woocommerce/block-data/*": [
 				"packages/public-api/block-data/*"
 			],
+			"@woocommerce/block-data/*": [
+				"assets/js/data/*"
+			],
 			"@woocommerce/block-hocs": [
 				"assets/js/hocs"
 			],

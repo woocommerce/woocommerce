@@ -28,15 +28,9 @@ These assets replace WooCommerce's per-block editor assets. They do not combine 
 
 ## External package dependencies
 
-The generated asset file for `wc-block-library` declares packages that remain
-separate scripts. Externalization controls how an asset is loaded; it does not
-determine whether the package is a supported extension API.
+The generated asset file for `wc-block-library` declares packages that remain separate scripts:
 
-### Public API packages
-
-Stable exports from these package roots are extension-facing contracts:
-
-| Package import | Script handle | Global | Purpose |
+| Package import | Script handle | Global | Why it stays external |
 | --- | --- | --- | --- |
 | `@woocommerce/block-data` | `wc-blocks-data-store` | `wc.wcBlocksData` | Registers WooCommerce Blocks data stores once and shares them with editor extensions and checkout APIs. |
 | `@woocommerce/blocks-checkout` | `wc-blocks-checkout` | `wc.blocksCheckout` | Shares checkout filters, slot/fill APIs, and checkout registry helpers with extensions. |

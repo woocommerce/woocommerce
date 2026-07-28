@@ -5,10 +5,11 @@
  * @package WooCommerce\Classes
  */
 
-use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\CallbackUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -135,10 +136,19 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			$product_id = $product->get_id();
 			wp_prime_option_caches(
 				array(
+					// Transients from \WC_Product_Variable_Data_Store_CPT class.
 					'_transient_wc_var_prices_' . $product_id,
 					'_transient_timeout_wc_var_prices_' . $product_id,
 					'_transient_wc_product_children_' . $product_id,
 					'_transient_timeout_wc_product_children_' . $product_id,
+					// Transients from \WC_Product_Variable class.
+					'_transient_wc_child_has_weight_' . $product_id,
+					'_transient_timeout_wc_child_has_weight_' . $product_id,
+					'_transient_wc_child_has_dimensions_' . $product_id,
+					'_transient_timeout_wc_child_has_dimensions_' . $product_id,
+					// Transients from \wc_get_related_products function.
+					'_transient_wc_related_' . $product_id,
+					'_transient_timeout_wc_related_' . $product_id,
 				)
 			);
 		}
@@ -1019,8 +1029,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 		}
 
-		delete_transient( 'wc_product_children_' . $product_id );
-		delete_transient( 'wc_var_prices_' . $product_id );
+		wc_get_container()->get( ProductUtil::class )->delete_product_specific_transients_for_products( array( $product_id ) );
 	}
 
 	/**
@@ -1047,8 +1056,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 		}
 
-		delete_transient( 'wc_product_children_' . $product_id );
-		delete_transient( 'wc_var_prices_' . $product_id );
+		wc_get_container()->get( ProductUtil::class )->delete_product_specific_transients_for_products( array( $product_id ) );
 	}
 
 	/**

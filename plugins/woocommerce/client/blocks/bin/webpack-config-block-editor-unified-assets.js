@@ -41,30 +41,20 @@ const UNIFIED_EDITOR_STYLE_PATTERN = /^wc-block-library-style(?:-rtl)?\.css$/;
 const OPTIMIZE_UNIFIED_EDITOR_STYLES_PLUGIN =
 	'OptimizeUnifiedEditorStylesPlugin';
 
-// Supported extension contracts. Changes to stable root exports require
-// backwards-compatibility handling and a deprecation path.
-const publicApiPackages = [
+const editorExternalPackages = [
 	'@woocommerce/block-data',
 	'@woocommerce/blocks-checkout',
 	'@woocommerce/blocks-checkout-events',
 	'@woocommerce/blocks-components',
 	'@woocommerce/blocks-registry',
 	'@woocommerce/data',
+	'@woocommerce/entities',
 	'@woocommerce/price-format',
 	'@woocommerce/sanitize',
 	'@woocommerce/settings',
 	'@woocommerce/shared-context',
 	'@woocommerce/shared-hocs',
 	'@woocommerce/types',
-];
-
-// Externalized to preserve a shared runtime instance, not to expose a
-// supported extension API.
-const internalRuntimePackages = [ '@woocommerce/entities' ];
-
-const editorExternalPackages = [
-	...publicApiPackages,
-	...internalRuntimePackages,
 ];
 
 const shouldBundleWooPackage = ( request ) =>
