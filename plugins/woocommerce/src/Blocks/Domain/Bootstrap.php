@@ -37,6 +37,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\TemplateOptions;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 
 
 /**
@@ -170,8 +171,10 @@ class Bootstrap {
 	 * @return bool
 	 */
 	protected function is_built() {
+		$editor_asset = BlockEditorUnifiedAssets::is_enabled() ? 'wc-block-library.js' : 'featured-product.js';
+
 		return file_exists(
-			$this->package->get_path( 'assets/client/blocks/featured-product.js' )
+			$this->package->get_path( 'assets/client/blocks/' . $editor_asset )
 		);
 	}
 
