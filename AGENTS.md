@@ -187,6 +187,16 @@ WordPress exposes more contracts than class and function signatures. The followi
 4. State the impact in the PR description: what changed, who could consume it, and why it is safe or what the deprecation path is.
 5. If you cannot establish the impact, stop and flag it to the user as needing review.
 
+## Country and State (Region) Data
+
+Country and state/province lists live in `plugins/woocommerce/i18n/countries.php` and `plugins/woocommerce/i18n/states.php` (see `plugins/woocommerce/i18n/README.md`).
+
+**Follow the CLDR standard.** Codes and names should match the [Unicode CLDR](https://cldr.unicode.org/) project. CLDR is the actively maintained, widely used source for this kind of data, so following it keeps WooCommerce consistent with the wider ecosystem and avoids the drift and upkeep of a homegrown list. If CLDR doesn't yet have the code or name a region needs, propose the change to CLDR first rather than diverging from it.
+
+**Adding new codes is safe. Renaming or removing existing ones is not.** Do that only when CLDR itself has changed, and expect it to need a migration. State/country codes are stored in orders, shipping zones, tax rates, and store settings. Editing `states.php`/`countries.php` only changes what new data looks like. Every already-stored old code is left behind, no longer matching the dropdown or validation that now expects the new one.
+
+Use `Automattic\WooCommerce\Database\Migrations\MigrationHelper::migrate_country_states()` from a `wc_update_*` function in `wc-update-functions.php`, passing an old-code to new-code map; see `wc_update_721_adjust_new_zealand_states()` for the pattern. Use the helper rather than writing your own partial migration, since it's easy to miss one of the places a code is stored. Purely additive changes (new codes, no renames) don't need a migration.
+
 ## Block Development
 
 ### `block.json` Attribute Defaults
