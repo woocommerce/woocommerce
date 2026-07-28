@@ -109,10 +109,10 @@ class OrderLogsCleanupHelper {
 			return;
 		}
 
-		// Old files are deleted in bulk first, so that the per-order log clearing below
-		// doesn't scan a directory still full of them.
-		$more_files  = $this->cleanup_old_log_files( $max_age );
-		$more_orders = $this->cleanup_dangling_orders( $max_age );
+		$files_swept_in_bulk = LogHandlerFileV2::class === LoggingUtil::get_default_handler();
+
+		$more_files  = $files_swept_in_bulk && $this->cleanup_old_log_files( $max_age );
+		$more_orders = $this->cleanup_dangling_orders( $max_age, $files_swept_in_bulk );
 
 		// Each run handles a single batch, so that it can't grow unbounded on a large
 		// backlog. Anything left over is picked up by a follow-up run a few minutes later.
@@ -126,20 +126,25 @@ class OrderLogsCleanupHelper {
 	 *
 	 * Dangling orders have `_debug_log_source` meta but no `_debug_log_source_pending_deletion`.
 	 *
-	 * @param int $max_age Maximum age in seconds before an order's debug log meta is eligible for cleanup.
+	 * @param int  $max_age             Maximum age in seconds before an order's debug log meta is eligible for cleanup.
+	 * @param bool $files_swept_in_bulk True if the file sweep is already deleting these orders' log files.
 	 *
 	 * @return bool True if there may be more orders left to clean up.
 	 */
-	private function cleanup_dangling_orders( int $max_age ): bool {
+	private function cleanup_dangling_orders( int $max_age, bool $files_swept_in_bulk ): bool {
 		$dangling_orders = $this->get_dangling_orders( $max_age );
 
 		if ( empty( $dangling_orders ) ) {
 			return false;
 		}
 
-		$deleted_meta_rows = $this->clear_logs_and_delete_meta( $dangling_orders );
+		// Clearing each order's log source individually scans the log directory once per
+		// order, so it's only worth doing when the bulk sweep isn't deleting the files.
+		$deleted = $files_swept_in_bulk
+			? $this->delete_debug_log_meta_entries( array_keys( $dangling_orders ) )
+			: $this->clear_logs_and_delete_meta( $dangling_orders );
 
-		return $deleted_meta_rows > 0 && self::MAX_ORDERS_PER_RUN === count( $dangling_orders );
+		return $deleted && self::MAX_ORDERS_PER_RUN === count( $dangling_orders );
 	}
 
 	/**
@@ -150,10 +155,6 @@ class OrderLogsCleanupHelper {
 	 * @return bool True if there may be more files left to delete.
 	 */
 	private function cleanup_old_log_files( int $max_age ): bool {
-		if ( LoggingUtil::get_default_handler() !== LogHandlerFileV2::class ) {
-			return false;
-		}
-
 		$deleted = wc_get_container()->get( FileController::class )->delete_stale_files(
 			'place-order-debug',
 			time() - $max_age,
@@ -186,11 +187,11 @@ class OrderLogsCleanupHelper {
 	 *
 	 * @param array $items Associative array of order ID => log source name.
 	 *
-	 * @return int Number of meta table rows that were deleted.
+	 * @return bool True if any meta entries were deleted.
 	 */
-	public function clear_logs_and_delete_meta( array $items ): int {
+	public function clear_logs_and_delete_meta( array $items ): bool {
 		if ( empty( $items ) ) {
-			return 0;
+			return false;
 		}
 
 		$logger = wc_get_logger();
@@ -200,8 +201,7 @@ class OrderLogsCleanupHelper {
 			}
 		}
 
-		$order_ids = array_keys( $items );
-		return $this->delete_debug_log_meta_entries( $order_ids );
+		return $this->delete_debug_log_meta_entries( array_keys( $items ) );
 	}
 
 	/**
@@ -257,9 +257,9 @@ class OrderLogsCleanupHelper {
 	 *
 	 * @param array $order_ids Array of order IDs to delete meta for.
 	 *
-	 * @return int Number of meta table rows that were deleted.
+	 * @return bool True if any meta entries were deleted.
 	 */
-	private function delete_debug_log_meta_entries( array $order_ids ): int {
+	private function delete_debug_log_meta_entries( array $order_ids ): bool {
 		global $wpdb;
 
 		$tables = array(
@@ -278,7 +278,7 @@ class OrderLogsCleanupHelper {
 
 		$id_placeholders = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
 
-		$deleted = 0;
+		$deleted = false;
 
 		foreach ( $tables as $table_config ) {
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
@@ -292,8 +292,8 @@ class OrderLogsCleanupHelper {
 			);
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
-			if ( is_int( $result ) ) {
-				$deleted += $result;
+			if ( is_int( $result ) && $result > 0 ) {
+				$deleted = true;
 			}
 		}
 

@@ -400,12 +400,7 @@ class FileController {
 		if ( is_null( $file->get_rotation() ) ) {
 			$current['current'] = $file;
 		} else {
-			$created = 0;
-			if ( $file->has_standard_filename() ) {
-				$created = $file->get_created_timestamp();
-			}
-
-			$current_file_id = File::generate_file_id( $file->get_source(), null, $created );
+			$current_file_id = File::generate_file_id( $file->get_source(), null, $this->get_filename_timestamp( $file ) );
 			$result          = $this->get_file_by_id( $current_file_id );
 			if ( ! is_wp_error( $result ) ) {
 				$current['current'] = $result;
@@ -413,6 +408,17 @@ class FileController {
 		}
 
 		return array_merge( $current, $this->get_rotation_siblings( $file ) );
+	}
+
+	/**
+	 * Get the creation timestamp encoded in a file's name, or 0 if it doesn't use the standard format.
+	 *
+	 * @param File $file The file to get the timestamp from.
+	 *
+	 * @return int
+	 */
+	private function get_filename_timestamp( File $file ): int {
+		return $file->has_standard_filename() ? $file->get_created_timestamp() : 0;
 	}
 
 	/**
@@ -424,10 +430,7 @@ class FileController {
 	 */
 	private function get_rotation_siblings( File $file ): array {
 		$source  = $file->get_source();
-		$created = 0;
-		if ( $file->has_standard_filename() ) {
-			$created = $file->get_created_timestamp();
-		}
+		$created = $this->get_filename_timestamp( $file );
 
 		$rotations_pattern = sprintf(
 			'.[%s]',
@@ -546,7 +549,7 @@ class FileController {
 			$filesystem = FilesystemUtil::get_wp_filesystem_direct();
 			$iterator   = new \FilesystemIterator(
 				Settings::get_log_directory(),
-				\FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_PATHNAME
+				\FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_PATHNAME | \FilesystemIterator::KEY_AS_FILENAME
 			);
 		} catch ( Exception $exception ) {
 			return 0;
@@ -554,13 +557,12 @@ class FileController {
 
 		$deleted = 0;
 
-		foreach ( $iterator as $path ) {
-			$path     = (string) $path;
-			$basename = basename( $path );
-
-			if ( 0 !== strpos( $basename, $source ) || '.log' !== substr( $basename, -4 ) ) {
+		foreach ( $iterator as $basename => $path ) {
+			if ( ! str_starts_with( (string) $basename, $source ) || ! str_ends_with( (string) $basename, '.log' ) ) {
 				continue;
 			}
+
+			$path = (string) $path;
 
 			$modified = $filesystem->mtime( $path );
 

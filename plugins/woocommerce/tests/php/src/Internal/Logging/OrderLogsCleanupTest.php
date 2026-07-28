@@ -730,18 +730,6 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	 * Delete all place-order-debug log files using the FileV2 controller.
 	 */
 	private static function delete_all_log_files(): void {
-		$file_controller = wc_get_container()->get( FileController::class );
-		$files           = $file_controller->get_files(
-			array(
-				'source'   => 'place-order-debug',
-				'per_page' => PHP_INT_MAX,
-			)
-		);
-
-		if ( is_array( $files ) && ! empty( $files ) ) {
-			foreach ( $files as $file ) {
-				$file->delete();
-			}
-		}
+		wc_get_container()->get( FileController::class )->delete_stale_files( 'place-order-debug', PHP_INT_MAX, PHP_INT_MAX );
 	}
 }

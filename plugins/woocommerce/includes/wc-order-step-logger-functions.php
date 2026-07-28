@@ -36,19 +36,17 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 			return; // Nothing to log.
 		}
 
-		/**
-		 * Filters whether order step logging is enabled.
-		 *
-		 * @param bool $enabled Whether order step logging is enabled. Default true.
-		 *
-		 * @since 11.1.0
-		 */
-		if ( ! apply_filters( 'woocommerce_order_step_logging_enabled', true ) ) {
-			return;
-		}
-
 		if ( $first_step ) {
-			$logging_active = true;
+			/**
+			 * Filters whether order step logging is enabled.
+			 *
+			 * Evaluated once per logging session, so that a checkout is either logged in full or not at all.
+			 *
+			 * @param bool $enabled Whether order step logging is enabled. Default true.
+			 *
+			 * @since 11.1.0
+			 */
+			$logging_active = (bool) apply_filters( 'woocommerce_order_step_logging_enabled', true );
 		}
 
 		if ( ! $logging_active ) {

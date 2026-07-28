@@ -2031,7 +2031,20 @@ function wc_cleanup_logs() {
 	wc_get_container()->get( OrderLogsCleanupHelper::class )->cleanup();
 }
 add_action( 'woocommerce_cleanup_logs', 'wc_cleanup_logs' );
-add_action( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK, 'wc_cleanup_logs' );
+
+/**
+ * Continue an order debug logs cleanup that didn't drain the backlog in a single run.
+ *
+ * Only the order logs cleanup is repeated, since the retention cleanup that runs alongside it
+ * daily doesn't leave a backlog behind.
+ *
+ * @since 11.1.0
+ * @return void
+ */
+function wc_cleanup_order_debug_logs() {
+	wc_get_container()->get( OrderLogsCleanupHelper::class )->cleanup();
+}
+add_action( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK, 'wc_cleanup_order_debug_logs' );
 
 /**
  * Prints human-readable information about a variable.
