@@ -249,6 +249,11 @@ export default [
 			},
 		},
 		rules: {
+			/*
+			 * Relaxed with the rest of the upgrade-surfaced rules; see
+			 * tools/eslint-config. eslint-plugin-react-hooks v7 reports more here
+			 * than v4 did.
+			 */
 			'react-hooks/exhaustive-deps': 'warn',
 			'react/jsx-fragments': [ 'error', 'syntax' ],
 			'@wordpress/no-global-active-element': 'warn',
@@ -282,14 +287,6 @@ export default [
 				{
 					properties: 'never',
 					ignoreGlobals: true,
-				},
-			],
-			'jsdoc/check-line-alignment': [
-				'warn',
-				'always',
-				{
-					tags: [ 'param', 'arg', 'argument', 'property', 'prop' ],
-					preserveMainDescriptionPostDelimiter: true,
 				},
 			],
 			'react/react-in-jsx-scope': 'off',
@@ -345,19 +342,9 @@ export default [
 		rules: {
 			'@typescript-eslint/no-explicit-any': 'error',
 			'@typescript-eslint/no-non-null-assertion': 'error',
-			'react-hooks/exhaustive-deps': 'warn',
-			'@wordpress/no-global-active-element': 'warn',
 			'no-use-before-define': 'off',
 			'@typescript-eslint/no-use-before-define': [ 'error' ],
 			'jsdoc/require-param': 'off',
-			'jsdoc/check-line-alignment': [
-				'warn',
-				'always',
-				{
-					tags: [ 'param', 'arg', 'argument', 'property', 'prop' ],
-					preserveMainDescriptionPostDelimiter: true,
-				},
-			],
 			'no-shadow': 'off',
 			camelcase: 'off',
 			'@typescript-eslint/naming-convention': [
@@ -395,8 +382,9 @@ export default [
 			// Explicitly turning this on because we need to catch import errors that we don't catch with TS right now
 			// due to it only being run in a checking capacity.
 			'import/named': 'warn',
-			// These rules have a larger backlog under the flat-config ESLint
-			// stack and will be hardened separately.
+			//  These should absolutely be linted, but due to there being a large number
+			//  of changes needed to fix for example `export *` of packages with only default exports
+			//  we will leave these as warnings for now until those can be fixed.
 			'import/namespace': 'warn',
 			'import/export': 'warn',
 			'import/no-duplicates': 'warn',
