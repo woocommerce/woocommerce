@@ -20,9 +20,9 @@ import { validationStore } from '@woocommerce/block-data';
 import * as actionCreators from '@woocommerce/block-data/validation/actions';
 import FrontendBlock from '../frontend';
 
-jest.mock( '../../../../../data/validation/actions', () => {
+jest.mock( '@woocommerce/block-data/validation/actions', () => {
 	const actions = jest.requireActual(
-		'../../../../../data/validation/actions'
+		'@woocommerce/block-data/validation/actions'
 	);
 	return {
 		...actions,
