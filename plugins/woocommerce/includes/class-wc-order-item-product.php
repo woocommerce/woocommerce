@@ -279,16 +279,14 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * prefix stripped, so a stored key such as `color` is indistinguishable from a merchant's
 	 * own custom meta. Keys are therefore only removed when they match an attribute of the
 	 * item's current variation, and only when the incoming product does not define the same
-	 * attribute — those are overwritten in place by `set_variation()` instead, which keeps
-	 * their stored meta rows intact.
+	 * attribute — those are overwritten by `set_variation()` instead, which keeps their key
+	 * and value.
 	 *
 	 * The current variation is read with `wc_get_product()` rather than `get_product()` so the
 	 * attribute list cannot be swapped out by the filters `get_product()` applies.
 	 *
 	 * Best effort by design: when the current variation no longer exists there is no attribute
 	 * list left to match against, so its meta is kept rather than guessed at.
-	 *
-	 * @since 11.1.0
 	 *
 	 * @param array $new_variation_attributes Variation attributes of the incoming product, keyed with the `attribute_` prefix.
 	 * @return void
