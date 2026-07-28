@@ -47,7 +47,7 @@ class WC_Geolocation {
 	 * @var array
 	 */
 	private static $ip_lookup_apis = array(
-		'ipify'  => 'https://api.ipify.org/',
+		'ipify'  => 'https://api64.ipify.org',
 		'ipecho' => 'https://ipecho.net/plain',
 		'ident'  => 'https://ident.me',
 		'tnedi'  => 'https://tnedi.me',

@@ -63,7 +63,7 @@ test.describe( 'Shopper → Shipping', () => {
 		await admin.page.getByText( 'Flat rate' ).click();
 		await admin.page.getByRole( 'button', { name: 'Continue' } ).click();
 		await admin.page
-			.getByRole( 'button', { name: 'Create and save' } )
+			.getByRole( 'button', { name: 'Save zone and method' } )
 			.click();
 		await expect( admin.page.getByText( 'Flat rate' ) ).toBeVisible();
 		if (

@@ -450,28 +450,54 @@ class WC_Admin_Post_Types {
 		$product->set_featured( isset( $request_data['_featured'] ) );
 
 		if ( $product->is_type( ProductType::SIMPLE ) || $product->is_type( ProductType::EXTERNAL ) ) {
-			$old_regular_price = $product->get_regular_price( 'edit' );
-			$old_sale_price    = $product->get_sale_price( 'edit' );
 
 			if ( isset( $request_data['_regular_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-				$new_regular_price = ( '' === $request_data['_regular_price'] ) ? '' : wc_format_decimal( $request_data['_regular_price'] );
-				$product->set_regular_price( $new_regular_price );
+				$regular_price = ( '' === $request_data['_regular_price'] ) ? '' : wc_format_decimal( $request_data['_regular_price'] );
+				$product->set_regular_price( $regular_price );
 			}
 
 			if ( isset( $request_data['_sale_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-				$new_sale_price = ( '' === $request_data['_sale_price'] ) ? '' : wc_format_decimal( $request_data['_sale_price'] );
-				$product->set_sale_price( $new_sale_price );
+				$sale_price = ( '' === $request_data['_sale_price'] ) ? '' : wc_format_decimal( $request_data['_sale_price'] );
+				$product->set_sale_price( $sale_price );
 			}
 
-			$regular_price = $product->get_regular_price( 'edit' );
-			$sale_price    = $product->get_sale_price( 'edit' );
-			$price_changed = $regular_price !== $old_regular_price || $sale_price !== $old_sale_price;
+			// Match the full product editor's date parsing and site-timezone behavior.
+			if ( isset( $request_data['_sale_price_dates_from'] ) ) {
+				$date_on_sale_from = '';
+				if ( is_string( $request_data['_sale_price_dates_from'] ) ) {
+					/**
+					 * Sanitized sale start date.
+					 *
+					 * @var string $date_on_sale_from
+					 */
+					$date_on_sale_from = wc_clean( wp_unslash( $request_data['_sale_price_dates_from'] ) );
+				}
 
-			if ( $price_changed && ( '' === $sale_price || $sale_price >= $regular_price ) ) {
-				$product->set_date_on_sale_to( '' );
-				$product->set_date_on_sale_from( '' );
+				if ( ! empty( $date_on_sale_from ) ) {
+					$date_on_sale_from = date( 'Y-m-d 00:00:00', (int) strtotime( $date_on_sale_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+				}
+
+				$product->set_date_on_sale_from( $date_on_sale_from );
+			}
+
+			if ( isset( $request_data['_sale_price_dates_to'] ) ) {
+				$date_on_sale_to = '';
+				if ( is_string( $request_data['_sale_price_dates_to'] ) ) {
+					/**
+					 * Sanitized sale end date.
+					 *
+					 * @var string $date_on_sale_to
+					 */
+					$date_on_sale_to = wc_clean( wp_unslash( $request_data['_sale_price_dates_to'] ) );
+				}
+
+				if ( ! empty( $date_on_sale_to ) ) {
+					$date_on_sale_to = date( 'Y-m-d 23:59:59', (int) strtotime( $date_on_sale_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+				}
+
+				$product->set_date_on_sale_to( $date_on_sale_to );
 			}
 		}
 
@@ -499,7 +525,12 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-			$stock_amount = 'yes' === $manage_stock && isset( $request_data['_stock'] ) && is_numeric( wp_unslash( $request_data['_stock'] ) ) ? wc_stock_amount( wp_unslash( $request_data['_stock'] ) ) : '';
+			if ( 'yes' === $manage_stock && isset( $request_data['_stock'] ) ) {
+				$stock_value  = wp_unslash( $request_data['_stock'] );
+				$stock_amount = is_numeric( $stock_value ) ? wc_stock_amount( $stock_value ) : 0;
+			} else {
+				$stock_amount = '';
+			}
 			$product->set_stock_quantity( $stock_amount );
 		}
 
