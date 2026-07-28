@@ -339,7 +339,7 @@ final class OrderWithdrawalFormProcessor {
 		}
 
 		$value = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
-		$value = trim( current( preg_split( '/,/', $value ) ) );
+		$value = trim( explode( ',', $value )[0] );
 
 		return (string) rest_is_ip_address( $value );
 	}
