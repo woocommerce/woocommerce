@@ -56,8 +56,12 @@ cd "$DEST_PATH" || exit
 # No --optimize: the plugin loads classes through the Jetpack autoloader, so the
 # optimized classmaps are never read at runtime and only bloat the zip.
 composer dump-autoload --no-dev --quiet || exit "$?"
-# Remove composer files from the build.
+# Remove composer files from the build. The installers plugin and installed.json
+# are needed while the dump runs above (so they can't go in .distignore), but
+# nothing reads them at runtime.
 rm composer.*
+rm -rf vendor/composer/installers
+rm -f vendor/composer/installed.json
 
 echo "Generating zip file..."
 cd "$BUILD_PATH" || exit
