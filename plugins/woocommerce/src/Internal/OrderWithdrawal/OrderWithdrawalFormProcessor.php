@@ -249,7 +249,7 @@ final class OrderWithdrawalFormProcessor {
 	private function submit_order_withdrawal( array $data ): bool {
 		$matched_order = $this->get_matching_order( $data );
 
-		if ( $matched_order instanceof WC_Order ) {
+		if ( $matched_order ) {
 			if ( $this->has_order_withdrawal_request( $matched_order ) ) {
 				wc_add_notice(
 					__( 'A withdrawal request has already been submitted for this order. Please contact us if you need help or want to make changes.', 'woocommerce' ),
@@ -268,7 +268,7 @@ final class OrderWithdrawalFormProcessor {
 			return false;
 		}
 
-		if ( $matched_order instanceof WC_Order ) {
+		if ( $matched_order ) {
 			$this->mark_order_withdrawal_requested( $matched_order );
 		}
 
