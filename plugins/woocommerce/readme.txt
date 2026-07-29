@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.0.0-rc.2 2026-XX-XX =
+= 11.0.0-rc.2 2026-07-29 =
 
 **WooCommerce**
 
@@ -318,6 +318,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Prevent WordPress personal preferences from being exposed as customer metadata. [#66840](https://github.com/woocommerce/woocommerce/pull/66840)
 * Fix - Show the Save button when an experimental Settings UI page falls back to the legacy renderer. [#66980](https://github.com/woocommerce/woocommerce/pull/66980)
 * Fix - Stop the HPOS order meta corruption guard from treating extension-injected virtual meta rows (a meta_key and meta_value but no meta_id) as corrupt, which purged the meta cache and logged a warning on every read. [#66837](https://github.com/woocommerce/woocommerce/pull/66837)
+* Fix - Fix a fatal error on the shortcode checkout when a phone, postcode, or state validated field is registered outside the billing and shipping fieldsets. [#67107](https://github.com/woocommerce/woocommerce/pull/67107)
+* Fix - Temporary deactivate persistent product status counters and rollback to WordPress API usage. [#67094](https://github.com/woocommerce/woocommerce/pull/67094)
 * Add - Add a "Send checkout recovery email" action to the order actions dropdown so merchants can manually send the Checkout Recovery email for pending or checkout-draft orders past the 1-hour abandonment threshold. [#65136](https://github.com/woocommerce/woocommerce/pull/65136)
 * Add - Add a contextual Marketplace recommendation card to the WooCommerce Orders screen, shown to eligible stores based on locally-evaluated promotion rules. [#65970](https://github.com/woocommerce/woocommerce/pull/65970)
 * Add - Add a native Settings UI page provider path for registered settings sections. [#65975](https://github.com/woocommerce/woocommerce/pull/65975)
@@ -403,6 +405,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Use the public postcode-validator API instead of reaching into the package's internal CJS regex map. [#65382](https://github.com/woocommerce/woocommerce/pull/65382)
 * Dev - Warn when deprecated AssetDataRegistry key check arguments are explicitly provided. [#66036](https://github.com/woocommerce/woocommerce/pull/66036)
 * Dev - De-flake blocks e2e tests. [#66584](https://github.com/woocommerce/woocommerce/pull/66584)
+* Dev - Fix email editor E2E tests on WordPress 7.1: update the preview "open in new tab" tracking selector to the new menu item and use a single-line block edit so the Save button enables. [#67061](https://github.com/woocommerce/woocommerce/pull/67061)
 * Tweak - Add aria-label to payment methods list for improved screen reader accessibility [#65201](https://github.com/woocommerce/woocommerce/pull/65201)
 * Tweak - Add proper ARIA roles and scope attributes to cart table headers for screen reader accessibility (WCAG 1.3.1) [#65364](https://github.com/woocommerce/woocommerce/pull/65364)
 * Tweak - Align the Data status box with the Date range filter at mid-range viewports, drop the trailing colons on both labels, use a consistent "M j at H:i" date format, and pick up WP component defaults for the Update now button and bar typography. [#64846](https://github.com/woocommerce/woocommerce/pull/64846)
