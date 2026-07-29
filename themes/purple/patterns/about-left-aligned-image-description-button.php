@@ -30,8 +30,8 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"textColor":"theme-1","className":"is-style-outline","style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-1"}}}}} -->
-<div class="wp-block-button is-style-outline"><a class="wp-block-button__link has-theme-1-color has-text-color has-link-color wp-element-button"><?php esc_html_e( 'Shop now', 'purple' ); ?></a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-outline"} -->
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Shop now', 'purple' ); ?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group --></div>

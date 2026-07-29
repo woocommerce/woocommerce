@@ -65,11 +65,35 @@
 					"section-2": {
 						"color": {
 							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"elements": {
+							"heading": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							},
+							"link": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							}
 						}
 					},
 					"section-3": {
 						"color": {
 							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"elements": {
+							"heading": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							},
+							"link": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							}
 						}
 					}
 				}
@@ -79,11 +103,35 @@
 					"section-2": {
 						"color": {
 							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"elements": {
+							"heading": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							},
+							"link": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							}
 						}
 					},
 					"section-3": {
 						"color": {
 							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"elements": {
+							"heading": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							},
+							"link": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							}
 						}
 					}
 				}
@@ -93,11 +141,35 @@
 					"section-2": {
 						"color": {
 							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"elements": {
+							"heading": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							},
+							"link": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							}
 						}
 					},
 					"section-3": {
 						"color": {
 							"text": "var(--wp--preset--color--theme-2)"
+						},
+						"elements": {
+							"heading": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							},
+							"link": {
+								"color": {
+									"text": "var(--wp--preset--color--theme-2)"
+								}
+							}
 						}
 					}
 				}
