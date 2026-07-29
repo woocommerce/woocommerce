@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix scheduled sales briefly showing and charging the wrong price between the sale start/end time and the scheduled-sale event running.

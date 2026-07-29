@@ -17,9 +17,12 @@ const {
 	getStylingConfig,
 	getCartAndCheckoutFrontendConfig,
 } = require( './bin/webpack-configs.js' );
+const {
+	getUnifiedMainConfig,
+	getUnifiedStylingConfig,
+} = require( './bin/webpack-config-block-editor-unified-assets.js' );
 
 const interactivityBlocksConfig = require( './bin/webpack-config-interactive-blocks.js' );
-const interactivityAPIConfig = require( './bin/webpack-config-interactivity.js' );
 const dependencyDetectionConfig = require( './bin/webpack-config-dependency-detection.js' );
 const isWatch =
 	NODE_ENV === 'development' && process.argv.includes( '--watch' );
@@ -40,7 +43,9 @@ const getCacheConfig = ( name, configPaths = [] ) =>
 						require.resolve(
 							'@woocommerce/dependency-extraction-webpack-plugin'
 						),
-						require.resolve( '@woocommerce/internal-style-build' ),
+						require.resolve(
+							'@woocommerce/internal-build/style-build'
+						),
 						...configPaths.map( ( configPath ) =>
 							path.resolve( __dirname, configPath )
 						),
@@ -89,6 +94,13 @@ const MainConfig = {
 	...getMainConfig( { alias: getAlias() } ),
 };
 
+// Unified Blocks config enabled at runtime by a WooCommerce feature flag.
+const UnifiedMainConfig = {
+	...sharedConfig,
+	cache: getCacheConfig( 'unified-main', [] ),
+	...getUnifiedMainConfig( { alias: getAlias() } ),
+};
+
 // Frontend config for scripts used in the store itself.
 const FrontendConfig = {
 	...sharedConfig,
@@ -123,9 +135,14 @@ const StylingConfig = {
 	...getStylingConfig( { alias: getAlias() } ),
 };
 
-/**
- * Config to generate the site editor scripts.
- */
+// Unified editor styles enabled at runtime by a WooCommerce feature flag.
+const UnifiedStylingConfig = {
+	...sharedConfig,
+	cache: getCacheConfig( 'unified-styling', [] ),
+	...getUnifiedStylingConfig( { alias: getAlias() } ),
+};
+
+// Scripts used exclusively in the Site Editor by the legacy asset path.
 const SiteEditorConfig = {
 	...sharedConfig,
 	cache: getCacheConfig( 'site-editor', [] ),
@@ -138,14 +155,6 @@ const InteractivityBlocksConfig = {
 		'bin/webpack-config-interactive-blocks.js',
 	] ),
 	...interactivityBlocksConfig,
-};
-
-const InteractivityAPIConfig = {
-	...sharedConfig,
-	cache: getCacheConfig( 'interactivity-api', [
-		'bin/webpack-config-interactivity.js',
-	] ),
-	...interactivityAPIConfig,
 };
 
 /**
@@ -164,12 +173,13 @@ module.exports = [
 	CartAndCheckoutFrontendConfig,
 	CoreConfig,
 	MainConfig,
+	UnifiedMainConfig,
 	FrontendConfig,
 	ExtensionsConfig,
 	PaymentsConfig,
 	SiteEditorConfig,
 	StylingConfig,
+	UnifiedStylingConfig,
 	InteractivityBlocksConfig,
-	InteractivityAPIConfig,
 	DependencyDetectionConfig,
 ];

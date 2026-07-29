@@ -76,7 +76,9 @@ class Universal {
 		$is_clickhouse_enabled     = Features::is_clickhouse_enabled();
 		$is_proxy_tracking_enabled = Features::is_proxy_tracking_enabled();
 		// When proxy tracking is enabled, we don't need to send the common properties to the client.
-		$common_properties = $is_proxy_tracking_enabled ? array() : $this->get_common_properties();
+		// Otherwise send only the page-safe properties: this markup is cacheable, so nothing
+		// derived from the current request may go into it.
+		$common_properties = $is_proxy_tracking_enabled ? array() : $this->get_page_common_properties();
 		?>
 		<script type="text/javascript">
 			(function() {
@@ -134,6 +136,10 @@ class Universal {
 	public function capture_remove_from_cart( $cart_item_key, $cart ) {
 		$item = $cart->removed_cart_contents[ $cart_item_key ] ?? null;
 
+		if ( ! is_array( $item ) || ! isset( $item['product_id'], $item['quantity'] ) ) {
+			return;
+		}
+
 		WC_Analytics_Tracking::record_event(
 			'remove_from_cart',
 			$this->get_cart_checkout_event_properties(
@@ -156,6 +162,10 @@ class Universal {
 	 * @return void
 	 */
 	public function capture_cart_quantity_update( $cart_item_key, $quantity, $old_quantity, $cart ) {
+		if ( ! isset( $cart->cart_contents[ $cart_item_key ]['product_id'] ) ) {
+			return;
+		}
+
 		$product_id = $cart->cart_contents[ $cart_item_key ]['product_id'];
 		if ( $quantity > $old_quantity ) {
 			WC_Analytics_Tracking::record_event(
@@ -528,6 +538,10 @@ class Universal {
 
 	/**
 	 * Capture a search event.
+	 *
+	 * The term is capped because this event is assembled here but fired by the
+	 * client, so it travels through the page markup and then reaches the pixel
+	 * URL. See `cap_page_string()`.
 	 */
 	public function capture_search_query() {
 		if ( is_search() ) {
@@ -535,7 +549,7 @@ class Universal {
 			$this->enqueue_event(
 				'search',
 				array(
-					'search_query' => $wp_query->get( 's' ),
+					'search_query' => $this->cap_page_string( $wp_query->get( 's' ) ),
 					'qty'          => $wp_query->found_posts,
 				)
 			);

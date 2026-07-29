@@ -29,7 +29,7 @@ import type { EmailType } from './settings-email-listing-slotfill';
 import { buildEmailEditorReviewUrl } from './build-email-editor-review-url';
 import { shouldShowReviewUpdate } from './settings-email-listing-update-state';
 
-interface UpdatesCellProps {
+export interface UpdatesCellProps {
 	post: EmailType;
 }
 

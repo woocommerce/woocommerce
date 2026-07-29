@@ -800,4 +800,541 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 		$this->assertCount( 8, $orderby_enum );
 		$this->assertCount( 5, $schema['properties']['status']['enum'] );
 	}
+
+	// ── Issue #64195: relax output schema for WC response quirks ──
+
+	/**
+	 * @testdox Should strip format date-time from output schema properties.
+	 */
+	public function test_output_schema_strips_format_date_time(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'date_created' => array( 'type' => 'date-time' ),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertArrayNotHasKey( 'format', $schema['properties']['date_created'], 'date-time format should be stripped from output schema (WC dates omit timezone)' );
+	}
+
+	/**
+	 * @testdox Should strip format uri from output schema properties.
+	 */
+	public function test_output_schema_strips_format_uri(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'external_url' => array(
+						'type'   => 'string',
+						'format' => 'uri',
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertArrayNotHasKey( 'format', $schema['properties']['external_url'], 'uri format should be stripped from output schema (WC returns empty strings)' );
+	}
+
+	/**
+	 * @testdox Should preserve formats other than date-time and uri in output schema.
+	 */
+	public function test_output_schema_preserves_other_formats(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'email'    => array(
+						'type'   => 'string',
+						'format' => 'email',
+					),
+					'hostname' => array(
+						'type'   => 'string',
+						'format' => 'hostname',
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertSame( 'email', $schema['properties']['email']['format'] );
+		$this->assertSame( 'hostname', $schema['properties']['hostname']['format'] );
+	}
+
+	/**
+	 * Expected widened scalar union: {@see RestAbilityFactory::OUTPUT_SCALAR_UNION}.
+	 */
+	private const SCALAR_UNION_WITH_NULL = array( 'string', 'integer', 'number', 'boolean', 'array', 'object', 'null' );
+
+	/**
+	 * @testdox Should widen any single scalar type to the full scalar union plus null in output schema.
+	 */
+	public function test_output_schema_widens_scalar_types_to_full_union(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'low_stock_amount' => array( 'type' => 'integer' ),
+					'price'            => array( 'type' => 'number' ),
+					'name'             => array( 'type' => 'string' ),
+					'on_sale'          => array( 'type' => 'boolean' ),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['properties']['low_stock_amount']['type'] );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['properties']['price']['type'] );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['properties']['name']['type'] );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['properties']['on_sale']['type'] );
+	}
+
+	/**
+	 * @testdox Should admit cross-scalar values for fields whose declared type disagrees with the actual response.
+	 *
+	 * Documents the motivating bug: several WooCommerce REST controllers declare a
+	 * scalar type that does not match what they return — `shipping_class_id` is
+	 * declared `string` but returned as `int`, `meta_data[].display_value` is
+	 * declared `string` but can be array/object, etc. The widened union admits
+	 * every scalar so structuredContent validation passes regardless of which
+	 * scalar the controller actually emits.
+	 */
+	public function test_output_schema_admits_cross_scalar_values_for_mismatched_declarations(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'shipping_class_id' => array( 'type' => 'string' ),
+					'image_id'          => array( 'type' => 'integer' ),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		foreach ( array( 'shipping_class_id', 'image_id' ) as $field ) {
+			$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['properties'][ $field ]['type'] );
+			$this->assertContains( 'string', $schema['properties'][ $field ]['type'] );
+			$this->assertContains( 'integer', $schema['properties'][ $field ]['type'] );
+			$this->assertContains( 'array', $schema['properties'][ $field ]['type'] );
+			$this->assertContains( 'object', $schema['properties'][ $field ]['type'] );
+			$this->assertContains( 'null', $schema['properties'][ $field ]['type'] );
+		}
+	}
+
+	/**
+	 * @testdox Should admit array and object values for fields declared as a scalar (meta_data display_value case).
+	 *
+	 * `meta_data[].display_value` is declared as `string` in the orders schema
+	 * but the REST controller returns whatever shape the underlying meta value
+	 * has — including arrays for variation attributes and serialized custom
+	 * data. Widening the output union to include `array` and `object` keeps
+	 * structuredContent validation passing for those rows.
+	 */
+	public function test_output_schema_admits_array_and_object_for_declared_scalar_fields(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'display_value' => array( 'type' => 'string' ),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertContains( 'array', $schema['properties']['display_value']['type'] );
+		$this->assertContains( 'object', $schema['properties']['display_value']['type'] );
+	}
+
+	/**
+	 * @testdox Should not union null into object or array types in output schema.
+	 */
+	public function test_output_schema_does_not_union_null_into_compound_types(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'meta_data'  => array(
+						'type'  => 'array',
+						'items' => array( 'type' => 'object' ),
+					),
+					'attributes' => array(
+						'type'       => 'object',
+						'properties' => array(),
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertSame( 'array', $schema['properties']['meta_data']['type'], 'array type should remain a single string' );
+		$this->assertSame( 'object', $schema['properties']['attributes']['type'], 'object type should remain a single string' );
+	}
+
+	/**
+	 * @testdox Should widen pre-existing scalar-plus-null unions to the full output union.
+	 *
+	 * `low_stock_amount` is declared as `[integer, null]` in the products
+	 * schema but the controller returns an empty string when unset (via
+	 * `set_low_stock_amount('')`), which neither member of the declared union
+	 * admits. Widening scalar-only unions covers that case.
+	 */
+	public function test_output_schema_widens_pre_existing_scalar_unions(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'low_stock_amount' => array( 'type' => array( 'integer', 'null' ) ),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['properties']['low_stock_amount']['type'] );
+	}
+
+	/**
+	 * @testdox Should leave unions containing compound types untouched in output schema.
+	 *
+	 * If the schema author declared a union that includes `object` or `array`,
+	 * trust that — widening would lose information without a known WC quirk to
+	 * justify it.
+	 */
+	public function test_output_schema_leaves_compound_unions_untouched(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'payload' => array( 'type' => array( 'object', 'null' ) ),
+					'mixed'   => array( 'type' => array( 'string', 'array' ) ),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertSame( array( 'object', 'null' ), $schema['properties']['payload']['type'] );
+		$this->assertSame( array( 'string', 'array' ), $schema['properties']['mixed']['type'] );
+	}
+
+	/**
+	 * @testdox Should relax nested properties and items in output schema.
+	 */
+	public function test_output_schema_relaxes_nested_properties_and_items(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'images' => array(
+						'type'  => 'array',
+						'items' => array(
+							'type'       => 'object',
+							'properties' => array(
+								'src'          => array(
+									'type'   => 'string',
+									'format' => 'uri',
+								),
+								'date_created' => array( 'type' => 'date-time' ),
+								'id'           => array( 'type' => 'integer' ),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$image = $schema['properties']['images']['items']['properties'];
+		$this->assertArrayNotHasKey( 'format', $image['src'], 'Nested uri format should be stripped' );
+		$this->assertArrayNotHasKey( 'format', $image['date_created'], 'Nested date-time format should be stripped' );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $image['id']['type'], 'Nested scalar should be widened to the full scalar union with null' );
+	}
+
+	/**
+	 * @testdox Should strip format date-time set directly on a property (post-sanitization shape).
+	 */
+	public function test_output_schema_strips_format_date_time_when_set_directly(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'date_created' => array(
+						'type'   => 'string',
+						'format' => 'date-time',
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertArrayNotHasKey( 'format', $schema['properties']['date_created'], 'format: date-time should be stripped when declared directly, not only when arrived via the date-time pseudo-type' );
+	}
+
+	/**
+	 * @testdox Should strip format date-time and uri even when the property has no type key.
+	 */
+	public function test_output_schema_strips_format_when_no_type_key(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'untyped_date' => array( 'format' => 'date-time' ),
+					'untyped_uri'  => array( 'format' => 'uri' ),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertArrayNotHasKey( 'format', $schema['properties']['untyped_date'] );
+		$this->assertArrayNotHasKey( 'format', $schema['properties']['untyped_uri'] );
+	}
+
+	/**
+	 * @testdox Should relax the inner schema embedded in the delete operation wrapper.
+	 */
+	public function test_output_schema_delete_operation_relaxes_previous_schema(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'id'           => array( 'type' => 'integer' ),
+					'date_created' => array(
+						'type'   => 'string',
+						'format' => 'date-time',
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'delete' );
+
+		$this->assertSame( 'object', $schema['type'], 'delete wrapper outer type should remain object' );
+		$this->assertSame( 'boolean', $schema['properties']['deleted']['type'], 'delete wrapper deleted flag should remain a single boolean' );
+
+		$previous = $schema['properties']['previous'];
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $previous['properties']['id']['type'], 'previous schema should have scalar widened to the full scalar union with null' );
+		$this->assertArrayNotHasKey( 'format', $previous['properties']['date_created'], 'previous schema should have date-time format stripped' );
+	}
+
+	/**
+	 * @testdox Should strip formats inside combiner sub-schemas but skip null-union there.
+	 */
+	public function test_output_schema_relaxes_combiner_sub_schemas(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'either' => array(
+						'anyOf' => array(
+							array(
+								'type'   => 'string',
+								'format' => 'date-time',
+							),
+							array( 'type' => 'integer' ),
+						),
+					),
+					'one_of' => array(
+						'oneOf' => array(
+							array(
+								'type'   => 'string',
+								'format' => 'uri',
+							),
+						),
+					),
+					'all_of' => array(
+						'allOf' => array(
+							array( 'type' => 'number' ),
+						),
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertArrayNotHasKey( 'format', $schema['properties']['either']['anyOf'][0], 'anyOf branch should have format: date-time stripped' );
+		$this->assertSame( 'string', $schema['properties']['either']['anyOf'][0]['type'], 'null should not be unioned inside combiner branches' );
+		$this->assertSame( 'integer', $schema['properties']['either']['anyOf'][1]['type'] );
+		$this->assertArrayNotHasKey( 'format', $schema['properties']['one_of']['oneOf'][0], 'oneOf branch should have format: uri stripped' );
+		$this->assertSame( 'string', $schema['properties']['one_of']['oneOf'][0]['type'] );
+		$this->assertSame( 'number', $schema['properties']['all_of']['allOf'][0]['type'] );
+	}
+
+	/**
+	 * @testdox Should preserve oneOf semantics by not adding null to every branch.
+	 */
+	public function test_output_schema_preserves_oneof_exactly_one_semantics(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'value' => array(
+						'oneOf' => array(
+							array( 'type' => 'string' ),
+							array( 'type' => 'integer' ),
+						),
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$branches = $schema['properties']['value']['oneOf'];
+		$this->assertSame( 'string', $branches[0]['type'], 'oneOf branches must remain non-nullable so null does not match every branch and break the "exactly one" rule' );
+		$this->assertSame( 'integer', $branches[1]['type'] );
+	}
+
+	/**
+	 * @testdox Should not null-union scalars nested deep inside a oneOf branch.
+	 */
+	public function test_output_schema_propagates_no_null_union_into_nested_oneof_descendants(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'shape' => array(
+						'oneOf' => array(
+							array(
+								'type'       => 'object',
+								'properties' => array(
+									'value' => array( 'type' => 'string' ),
+								),
+							),
+							array(
+								'type'       => 'object',
+								'properties' => array(
+									'value' => array( 'type' => 'integer' ),
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$branches = $schema['properties']['shape']['oneOf'];
+		$this->assertSame( 'string', $branches[0]['properties']['value']['type'], 'Nested property inside oneOf branch must not be unioned with null; otherwise {"value": null} matches both branches and breaks oneOf semantics' );
+		$this->assertSame( 'integer', $branches[1]['properties']['value']['type'] );
+	}
+
+	/**
+	 * @testdox Should normalize date-time pseudo-type inside tuple-form items.
+	 */
+	public function test_sanitize_schema_normalizes_tuple_form_items(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'pair' => array(
+						'type'  => 'array',
+						'items' => array(
+							array( 'type' => 'date-time' ),
+							array( 'type' => 'integer' ),
+						),
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$entries = $schema['properties']['pair']['items'];
+		$this->assertSame(
+			self::SCALAR_UNION_WITH_NULL,
+			$entries[0]['type'],
+			'date-time pseudo-type must be normalized to string by sanitize_schema, then widened by relax'
+		);
+		$this->assertArrayNotHasKey( 'format', $entries[0], 'format: date-time emitted by sanitize_schema must then be stripped by relax' );
+	}
+
+	/**
+	 * @testdox Should relax each entry of a tuple-form items array.
+	 */
+	public function test_output_schema_relaxes_tuple_form_items(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'pair' => array(
+						'type'  => 'array',
+						'items' => array(
+							array(
+								'type'   => 'string',
+								'format' => 'date-time',
+							),
+							array( 'type' => 'integer' ),
+						),
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$items = $schema['properties']['pair']['items'];
+		$this->assertArrayNotHasKey( 'format', $items[0], 'first tuple entry should have format stripped' );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $items[0]['type'], 'tuple entries are positional and not combiner branches, so scalar widening applies' );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $items[1]['type'] );
+	}
+
+	/**
+	 * @testdox Should relax sub-schemas declared on additionalProperties.
+	 */
+	public function test_output_schema_relaxes_additional_properties(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'                 => 'object',
+				'additionalProperties' => array(
+					'type'   => 'string',
+					'format' => 'uri',
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$this->assertArrayNotHasKey( 'format', $schema['additionalProperties'], 'additionalProperties schema should have format: uri stripped' );
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $schema['additionalProperties']['type'] );
+	}
+
+	/**
+	 * @testdox Should relax inner items for list operation output schema.
+	 */
+	public function test_output_schema_list_operation_relaxes_inner_items(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'id'           => array( 'type' => 'integer' ),
+					'date_created' => array( 'type' => 'date-time' ),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'list' );
+
+		$this->assertSame( 'object', $schema['type'], 'list wrapper outer type should remain object' );
+		$this->assertSame( 'array', $schema['properties']['data']['type'], 'list wrapper data property should remain array' );
+
+		$item = $schema['properties']['data']['items'];
+		$this->assertSame( self::SCALAR_UNION_WITH_NULL, $item['properties']['id']['type'] );
+		$this->assertArrayNotHasKey( 'format', $item['properties']['date_created'] );
+	}
 }

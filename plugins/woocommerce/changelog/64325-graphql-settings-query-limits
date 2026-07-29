@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a configurable maximum query depth to the GraphQL settings section.

@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
+import { Disabled } from '@wordpress/components';
 import clsx from 'clsx';
 import { decodeHtmlEntities } from '@woocommerce/utils';
 import { getSetting } from '@woocommerce/settings';
@@ -24,6 +25,10 @@ import {
 import { EditProps } from './types';
 import './editor.scss';
 import { getColorClasses, getColorVars } from './utils';
+import {
+	getVisualAttributeTermStyle,
+	isVisualAttributeTermEmpty,
+} from '../../../../base/utils/visual-attribute-terms';
 
 const Edit = ( props: EditProps ): JSX.Element => {
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
@@ -56,7 +61,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const { isLoading = false, items = [] } =
 		context?.[ 'woocommerce/selectableItems' ] ?? {};
 
-	const hasColorSwatches = items.some( ( item ) => 'color' in item );
+	const hasVisualSwatches = items.some( ( item ) => 'visual' in item );
 
 	const globalColors = getSetting< { background?: string; text?: string } >(
 		'globalStylesColors',
@@ -67,10 +72,11 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {
 			'is-loading': isLoading,
-			'is-style-swatch': hasColorSwatches,
+			'is-style-swatch': hasVisualSwatches,
 			...getColorClasses( attributes ),
 		} ),
 		style: {
+			...colorVars,
 			'--wc-product-filter-chips-text':
 				colorVars[ '--wc-product-filter-chips-text' ] ||
 				globalColors.text ||
@@ -107,63 +113,64 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	return (
 		<>
 			<div { ...blockProps }>
-				<div className="wc-block-product-filter-chips__items">
-					{ isLoading && loadingState }
-					{ ! isLoading &&
-						( isLongList
-							? items.slice( 0, threshold )
-							: items
-						).map( ( item, index ) => (
-							<div
-								key={ index }
-								className="wc-block-product-filter-chips__item"
-								aria-checked={ !! item.selected }
-							>
-								<span className="wc-block-product-filter-chips__label">
-									<span
-										className={ clsx(
-											'wc-block-product-filter-chips__swatch',
-											{
-												'wc-block-product-filter-chips__swatch--no-color':
-													! item.color,
-											}
-										) }
-										style={
-											item.color
-												? {
-														backgroundColor:
-															item.color,
-												  }
-												: undefined
-										}
-										aria-hidden="true"
-									/>
-									<span className="wc-block-product-filter-chips__text">
-										{ typeof item.label === 'string'
-											? decodeHtmlEntities( item.label )
-											: item.label }
-									</span>
-									{ item.count !== undefined && (
-										<span className="wc-block-product-filter-chips__count">
-											{ ` (${ item.count })` }
+				<Disabled>
+					<div className="wc-block-product-filter-chips__items">
+						{ isLoading && loadingState }
+						{ ! isLoading &&
+							( isLongList
+								? items.slice( 0, threshold )
+								: items
+							).map( ( item, index ) => (
+								<div
+									key={ index }
+									className="wc-block-product-filter-chips__item"
+									aria-checked={ !! item.selected }
+								>
+									<span className="wc-block-product-filter-chips__label">
+										<span
+											className={ clsx(
+												'wc-block-product-filter-chips__swatch',
+												{
+													'wc-block-product-filter-chips__swatch--no-color':
+														isVisualAttributeTermEmpty(
+															item.visual
+														),
+												}
+											) }
+											style={ getVisualAttributeTermStyle(
+												item.visual
+											) }
+											aria-hidden="true"
+										/>
+										<span className="wc-block-product-filter-chips__text">
+											{ typeof item.label === 'string'
+												? decodeHtmlEntities(
+														item.label
+												  )
+												: item.label }
 										</span>
-									) }
-								</span>
-							</div>
-						) ) }
-				</div>
-				{ ! isLoading && isLongList && (
-					<button className="wc-block-product-filter-chips__show-more">
-						{ __( 'Show more…', 'woocommerce' ) }
-					</button>
-				) }
+										{ item.count !== undefined && (
+											<span className="wc-block-product-filter-chips__count">
+												{ ` (${ item.count })` }
+											</span>
+										) }
+									</span>
+								</div>
+							) ) }
+					</div>
+					{ ! isLoading && isLongList && (
+						<button className="wc-block-product-filter-chips__show-more">
+							{ __( 'Show more…', 'woocommerce' ) }
+						</button>
+					) }
+				</Disabled>
 			</div>
 			<InspectorControls group="color">
 				{ colorGradientSettings.hasColorsOrGradients && (
 					<ColorGradientSettingsDropdown
 						__experimentalIsRenderedInSidebar
 						settings={ [
-							...( ! hasColorSwatches
+							...( ! hasVisualSwatches
 								? [
 										{
 											label: __(
@@ -210,7 +217,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 									} );
 								},
 							},
-							...( ! hasColorSwatches
+							...( ! hasVisualSwatches
 								? [
 										{
 											label: __(
@@ -285,7 +292,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 									} );
 								},
 							},
-							...( ! hasColorSwatches
+							...( ! hasVisualSwatches
 								? [
 										{
 											label: __(

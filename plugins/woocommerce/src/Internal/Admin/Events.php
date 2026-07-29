@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizeStoreWithBlocks;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
@@ -145,9 +144,7 @@ class Events {
 			RemoteInboxNotificationsEngine::run();
 		}
 
-		if ( Features::is_enabled( 'core-profiler' ) ) {
-			( new MailchimpScheduler() )->run();
-		}
+		( new MailchimpScheduler() )->run();
 	}
 
 	/**
@@ -221,11 +218,6 @@ class Events {
 	 * @return bool Whether remote inbox notifications are enabled.
 	 */
 	protected function is_remote_inbox_notifications_enabled() {
-		// Check if the feature flag is disabled.
-		if ( ! Features::is_enabled( 'remote-inbox-notifications' ) ) {
-			return false;
-		}
-
 		// Check if the site has opted out of marketplace suggestions.
 		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) !== 'yes' ) {
 			return false;

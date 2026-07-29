@@ -114,13 +114,15 @@ class ApiController {
 				$response['completed_at'] = wc_rest_prepare_date_response( $response['completed_at'] );
 			}
 
-			// Remove sensitive data from the response.
-			if ( isset( $response['action_id'] ) ) {
-				unset( $response['action_id'] );
-			}
-			if ( isset( $response['path'] ) ) {
-				unset( $response['path'] );
-			}
+			// Remove sensitive and internal data from the response.
+			unset(
+				$response['action_id'],
+				$response['path'],
+				$response['file_name'],
+				$response['page'],
+				$response['entries_written'],
+				$response['updated_at']
+			);
 		} catch ( \Exception $e ) {
 			wc_get_logger()->error(
 				'Feed generation failed',

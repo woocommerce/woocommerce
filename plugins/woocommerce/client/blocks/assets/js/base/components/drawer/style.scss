@@ -31,7 +31,7 @@ $drawer-animation-duration: 0.3s;
 }
 
 .wc-block-components-drawer__screen-overlay {
-	background-color: rgba(95, 95, 95, 0.35);
+	background-color: $drawer-overlay-background;
 	bottom: 0;
 	left: 0;
 	position: fixed;
@@ -60,7 +60,6 @@ $drawer-animation-duration: 0.3s;
 }
 
 .wc-block-components-drawer {
-	border-left: 1px solid $universal-translucent-border-color;
 	background: #fff;
 	display: block;
 	height: 100%;

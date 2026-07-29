@@ -48,6 +48,7 @@ class ImportRunSql implements StepProcessor {
 		$result = StepProcessorResult::success( RunSql::get_step_name() );
 
 		$sql = trim( $schema->sql->contents );
+		$sql = str_replace( RunSql::TABLE_PREFIX_PLACEHOLDER, $wpdb->prefix, $sql );
 
 		// Check if the query type is allowed.
 		if ( ! $this->is_allowed_query_type( $sql ) ) {

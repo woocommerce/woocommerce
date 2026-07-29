@@ -131,14 +131,17 @@ export const getIncompatiblePaymentMethods = createSelector(
 			return {};
 		}
 
+		// Match express methods on `paymentMethodId` (falling back to `name`) rather
+		// than their store key, so a distinct client-side `name` isn't flagged.
+		const availableExpressPaymentMethodIds = Object.values(
+			availableExpressPaymentMethods
+		).map( ( method ) => method.paymentMethodId ?? method.name );
+
 		return Object.fromEntries(
-			Object.entries( globalPaymentMethods ).filter( ( [ k ] ) => {
+			Object.entries( globalPaymentMethods ).filter( ( [ id ] ) => {
 				return ! (
-					k in
-					{
-						...availablePaymentMethods,
-						...availableExpressPaymentMethods,
-					}
+					id in availablePaymentMethods ||
+					availableExpressPaymentMethodIds.includes( id )
 				);
 			} )
 		);

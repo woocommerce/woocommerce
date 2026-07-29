@@ -113,10 +113,13 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox create_transient_file throws an exception if the transient file can't be created.
 	 */
 	public function test_create_transient_file_throws_if_file_cant_be_created() {
+		// Point the engine at a directory that does not exist on disk and bypass mkdir
+		// so put_contents (native @file_put_contents under WP_Filesystem_Direct) fails.
+		$nonexistent_base = sys_get_temp_dir() . '/wc-transient-nonexistent-' . wp_generate_uuid4();
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_upload_dir' => fn() => array( 'basedir' => '/wordpress/uploads' ),
-				'realpath'      => fn( $path ) => '/real' . $path,
+				'wp_upload_dir' => fn() => array( 'basedir' => $nonexistent_base ),
+				'realpath'      => fn( $path ) => $path,
 				'is_dir'        => fn() => true,
 				'random_bytes'  => fn( $length ) => implode( array_map( 'chr', array( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ) ) ),
 				'gmdate'        => fn( $format, $date = null ) =>
@@ -124,22 +127,8 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 			),
 		);
 
-		// phpcs:disable Squiz.Commenting.FunctionComment.Missing
-		$fake_wp_filesystem = new class() {
-			public function put_contents( string $file, string $contents, $mode = false ): bool {
-				return false;
-			}
-		};
-		// phpcs:enable Squiz.Commenting.FunctionComment.Missing
-
-		$this->register_legacy_proxy_global_mocks(
-			array(
-				'wp_filesystem' => $fake_wp_filesystem,
-			)
-		);
-
 		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( "Can't create file: /real/wordpress/uploads/woocommerce_transient_files/2023-12-02/000102030405060708090a0b0c0d0e0f" );
+		$this->expectExceptionMessage( "Can't create file: " . $nonexistent_base . '/woocommerce_transient_files/2023-12-02/000102030405060708090a0b0c0d0e0f' );
 
 		$this->sut->create_transient_file( 'foobar', '2023-12-02' );
 	}
@@ -247,43 +236,40 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox get_transient_files_directory creates the default base directory if it doesn't exist and the woocommerce_transient_files_directory filter is not used.
 	 */
 	public function test_get_transient_files_directory_creates_default_directory_if_it_does_not_exist() {
-		$created_dir = null;
+		// Use a real temp upload base so put_contents (which now goes through
+		// WP_Filesystem_Direct → native @file_put_contents) can actually write.
+		$upload_base   = sys_get_temp_dir() . '/wc-transient-create-' . wp_generate_uuid4();
+		$transient_dir = $upload_base . '/woocommerce_transient_files';
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wp_upload_dir' => fn() => array( 'basedir' => '/wordpress/uploads' ),
-				'realpath'      => fn( $path ) => false,
-				'wp_mkdir_p'    => function( $directory ) use ( &$created_dir ) {
-					$created_dir = $directory;
-					return true; },
+				'wp_upload_dir' => fn() => array( 'basedir' => $upload_base ),
+				// First realpath() call returns false to force the create branch; rely on
+				// the real wp_mkdir_p afterward so the second realpath() (unmocked) succeeds.
+				'realpath'      => function ( $path ) {
+					static $first_call = true;
+					if ( $first_call ) {
+						$first_call = false;
+						return false;
+					}
+					return realpath( $path );
+				},
+				'wp_mkdir_p'    => fn( $directory ) => wp_mkdir_p( $directory ),
 			)
 		);
 
-		// phpcs:disable Squiz.Commenting
-		$fake_wp_filesystem = new class() {
-			public $created_files = array();
+		try {
+			$result = $this->sut->get_transient_files_directory();
 
-			public function put_contents( string $file, string $contents, $mode = false ): int {
-				$this->created_files[ $file ] = $contents;
-				return strlen( $contents );
-			}
-		};
-		// phpcs:enable Squiz.Commenting
-
-		$this->register_legacy_proxy_global_mocks(
-			array(
-				'wp_filesystem' => $fake_wp_filesystem,
-			)
-		);
-
-		$this->sut->get_transient_files_directory();
-		$this->assertEquals( '/wordpress/uploads/woocommerce_transient_files', $created_dir );
-
-		$expected_created_files = array(
-			'/wordpress/uploads/woocommerce_transient_files/.htaccess' => 'deny from all',
-			'/wordpress/uploads/woocommerce_transient_files/index.html' => '',
-		);
-		$this->assertEquals( $expected_created_files, $fake_wp_filesystem->created_files );
+			$this->assertEquals( realpath( $transient_dir ), $result );
+			$this->assertDirectoryExists( $transient_dir );
+			$this->assertFileExists( $transient_dir . '/.htaccess' );
+			$this->assertEquals( 'deny from all', file_get_contents( $transient_dir . '/.htaccess' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$this->assertFileExists( $transient_dir . '/index.html' );
+			$this->assertEquals( '', file_get_contents( $transient_dir . '/index.html' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		} finally {
+			self::rmdir_recursive( $upload_base, true );
+		}
 	}
 
 	/**

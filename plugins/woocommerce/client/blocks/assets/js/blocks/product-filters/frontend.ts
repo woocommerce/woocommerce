@@ -15,10 +15,12 @@ import type {
 	ProductFiltersContext,
 } from './types';
 import { getClosestColor } from './utils/get-closest-color';
+import { reload } from '../../utils/navigation';
+import { PRODUCT_FILTERS_STORE_NAME } from './constants';
 
 const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
 
-const BLOCK_NAME = 'woocommerce/product-filters';
+const BLOCK_NAME = PRODUCT_FILTERS_STORE_NAME;
 
 type ValidFilterOptionItem = FilterOptionItem & {
 	type: string;
@@ -77,7 +79,6 @@ function unselectFilter( item: ValidFilterOptionItem ) {
 const productFiltersStore = {
 	state: {
 		get params() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
 			const params: Record< string, string > = {};
 
 			function addParam( key: string, value: string ) {
@@ -89,7 +90,7 @@ const productFiltersStore = {
 			const config = getConfig( BLOCK_NAME );
 			const taxonomyParamsMap = config?.taxonomyParamsMap || {};
 
-			activeFilters.forEach( ( filter ) => {
+			state.activeFilters.forEach( ( filter ) => {
 				// todo: refactor this to use params data from Automattic\WooCommerce\Internal\ProductFilters\Params.
 				const { type, value } = filter;
 
@@ -199,7 +200,7 @@ const productFiltersStore = {
 					? itemArg
 					: context.item;
 			if ( ! item || ! isValidFilterOptionItem( item ) ) return;
-			const isSelected = context.activeFilters.some(
+			const isSelected = state.activeFilters.some(
 				( f ) => f.type === item.type && f.value === item.value
 			);
 			if ( isSelected ) {
@@ -207,16 +208,15 @@ const productFiltersStore = {
 			} else {
 				selectFilter( item );
 			}
-			actions.navigate();
+			void actions.navigate();
 		},
-		// TODO: Remove the hardcoded type once https://github.com/woocommerce/gutenberg/pull/8 is merged.
-		*navigate(): Generator {
+		*navigate() {
 			const context = getServerContext
 				? getServerContext< ProductFiltersContext >()
 				: getContext< ProductFiltersContext >();
 
-			const canonicalUrl = getConfig( BLOCK_NAME ).canonicalUrl;
-			const url = new URL( canonicalUrl );
+			const config = getConfig( BLOCK_NAME );
+			const url = new URL( config.canonicalUrl );
 			const { searchParams } = url;
 
 			for ( const key in context.params ) {
@@ -244,6 +244,19 @@ const productFiltersStore = {
 			}
 
 			if ( window.location.href === url.href ) {
+				return;
+			}
+
+			// Per-instance context (set when Product Filters is a descendant
+			// of Product Collection) wins over the global config, which is
+			// the fallback for the sibling-block layout.
+			const forcePageReload =
+				typeof context.forcePageReload === 'boolean'
+					? context.forcePageReload
+					: config?.forcePageReload;
+
+			if ( forcePageReload ) {
+				reload( url.href );
 				return;
 			}
 
@@ -289,6 +302,15 @@ const productFiltersStore = {
 			} else {
 				document.body.style.overflow = 'auto';
 			}
+		},
+		syncActiveFiltersWithServer: () => {
+			if ( ! getServerContext ) return;
+			const context = getContext< ProductFiltersContext >();
+			const serverContext = getServerContext< ProductFiltersContext >();
+
+			context.activeFilters = Array.isArray( serverContext.activeFilters )
+				? serverContext.activeFilters.map( ( item ) => ( { ...item } ) )
+				: [];
 		},
 	},
 };

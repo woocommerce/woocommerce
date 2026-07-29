@@ -7,8 +7,14 @@ import {
 	useBlockProps,
 	InnerBlocks,
 } from '@wordpress/block-editor';
-import { PanelBody, ColorPicker } from '@wordpress/components';
 import { type BlockEditProps } from '@wordpress/blocks';
+import {
+	ColorPicker,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 
 export type Attributes = {
 	color?: string;
@@ -36,19 +42,35 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 		);
 	}
 
+	const DEFAULT_COLOR = '#bea0f2';
+
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
-					<ColorPicker
-						color={ color }
-						onChange={ ( newColor: string ) =>
-							setAttributes( { color: newColor } )
+				<ToolsPanel
+					label={ __( 'Settings', 'woocommerce' ) }
+					resetAll={ () => {
+						setAttributes( { color: DEFAULT_COLOR } );
+					} }
+				>
+					<ToolsPanelItem
+						hasValue={ () => color !== DEFAULT_COLOR }
+						label={ __( 'Color', 'woocommerce' ) }
+						onDeselect={ () =>
+							setAttributes( { color: DEFAULT_COLOR } )
 						}
-						enableAlpha
-						defaultValue="#bea0f2"
-					/>
-				</PanelBody>
+						isShownByDefault
+					>
+						<ColorPicker
+							color={ color }
+							onChange={ ( newColor: string ) =>
+								setAttributes( { color: newColor } )
+							}
+							enableAlpha
+							defaultValue={ DEFAULT_COLOR }
+						/>
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 			<div { ...blockProps }>
 				<InnerBlocks />

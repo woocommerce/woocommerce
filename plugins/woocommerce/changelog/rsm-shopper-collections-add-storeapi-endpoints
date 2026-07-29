@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add the foundation for shopper lists via new Store API endpoints under /wc/store/v1/shopper-lists. Lists are persisted per-user in usermeta.

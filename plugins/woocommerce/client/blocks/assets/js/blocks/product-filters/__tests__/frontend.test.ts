@@ -1,3 +1,7 @@
+/*
+ * @jest-environment-options {"url": "https://example.com/shop/"}
+ */
+
 /**
  * Internal dependencies
  */
@@ -6,6 +10,11 @@ import type { ProductFiltersStore } from '../frontend';
 const mockGetContext = jest.fn();
 const mockGetServerContext = jest.fn();
 const mockGetConfig = jest.fn();
+const mockReload = jest.fn();
+
+jest.mock( '../../../utils/navigation', () => ( {
+	reload: mockReload,
+} ) );
 
 let mockRegisteredStore: {
 	state: ProductFiltersStore[ 'state' ];
@@ -39,17 +48,25 @@ jest.mock(
 	{ virtual: true }
 );
 
+// Captured before any test navigates, so each test starts from the env URL.
+const initialUrl = window.location.href;
+
 describe( 'product filters interactivity store', () => {
 	beforeEach( () => {
 		jest.resetModules();
 		mockGetContext.mockReset();
 		mockGetServerContext.mockReset();
 		mockGetConfig.mockReset();
+		mockReload.mockReset();
 		mockRegisteredStore = null;
 
 		jest.isolateModules( () => {
 			require( '../frontend' );
 		} );
+	} );
+
+	afterEach( () => {
+		window.history.replaceState( {}, '', initialUrl );
 	} );
 
 	it( 'ignores invalid selectable item payloads', () => {
@@ -194,19 +211,11 @@ describe( 'product filters interactivity store', () => {
 					);
 				}
 
-				const originalLocation = window.location;
-
-				const locationMock = {
-					href: 'https://example.com/shop/?existing=1',
-				};
-
-				delete ( window as unknown as Record< string, unknown > )
-					.location;
-				Object.defineProperty( window, 'location', {
-					value: locationMock,
-					writable: true,
-					configurable: true,
-				} );
+				window.history.replaceState(
+					{},
+					'',
+					'https://example.com/shop/?existing=1'
+				);
 
 				const canonicalUrl = 'https://example.com/shop/';
 
@@ -274,14 +283,161 @@ describe( 'product filters interactivity store', () => {
 					);
 				} finally {
 					consoleWarnSpy.mockRestore();
-
-					Object.defineProperty( window, 'location', {
-						value: originalLocation,
-						writable: true,
-						configurable: true,
-					} );
 				}
 			} );
 		}
 	);
+
+	it( 'triggers a full-page reload instead of router when forcePageReload is true', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+
+		window.history.replaceState( {}, '', 'https://example.com/shop/' );
+
+		const canonicalUrl = 'https://example.com/shop/';
+
+		const context = {
+			isOverlayOpened: false,
+			params: { color: 'blue' },
+			activeFilters: [],
+			item: {
+				type: 'attribute/color',
+				label: 'Blue',
+				value: 'blue',
+				selected: true,
+				count: 1,
+				attributeQueryType: 'or' as const,
+			},
+			activeLabelTemplate: '{{label}}',
+			filterType: 'attribute/color',
+		};
+
+		mockGetContext.mockReturnValue( context );
+		mockGetServerContext.mockReturnValue( context );
+
+		mockGetConfig.mockImplementation( ( key: string ) => {
+			if ( key === 'woocommerce/product-filters' ) {
+				return { canonicalUrl, forcePageReload: true };
+			}
+			return {};
+		} );
+
+		Object.defineProperty( mockRegisteredStore.state, 'params', {
+			get: () => ( { color: 'blue' } ),
+		} );
+
+		const iterator = mockRegisteredStore.actions.navigate();
+
+		// forcePageReload exits early before yielding the router import
+		const result = iterator.next();
+		expect( result.done ).toBe( true );
+
+		expect( mockReload ).toHaveBeenCalledTimes( 1 );
+		expect( mockReload ).toHaveBeenCalledWith(
+			'https://example.com/shop/?color=blue'
+		);
+	} );
+
+	describe( 'forcePageReload context resolution', () => {
+		const setupNavigate = ( {
+			contextForcePageReload,
+			configForcePageReload,
+		}: {
+			contextForcePageReload: boolean | null | undefined;
+			configForcePageReload: boolean | undefined;
+		} ) => {
+			if ( ! mockRegisteredStore ) {
+				throw new Error( 'Product filters store was not registered.' );
+			}
+
+			window.history.replaceState( {}, '', 'https://example.com/shop/' );
+
+			const context = {
+				isOverlayOpened: false,
+				params: { color: 'blue' },
+				activeFilters: [],
+				item: {
+					type: 'attribute/color',
+					label: 'Blue',
+					value: 'blue',
+					selected: true,
+					count: 1,
+					attributeQueryType: 'or' as const,
+				},
+				activeLabelTemplate: '{{label}}',
+				filterType: 'attribute/color',
+				forcePageReload: contextForcePageReload,
+			};
+
+			mockGetContext.mockReturnValue( context );
+			mockGetServerContext.mockReturnValue( context );
+
+			mockGetConfig.mockImplementation( ( key: string ) => {
+				if ( key === 'woocommerce/product-filters' ) {
+					return {
+						canonicalUrl: 'https://example.com/shop/',
+						forcePageReload: configForcePageReload,
+					};
+				}
+				return {};
+			} );
+
+			Object.defineProperty( mockRegisteredStore.state, 'params', {
+				get: () => ( { color: 'blue' } ),
+			} );
+
+			return {
+				store: mockRegisteredStore,
+			};
+		};
+
+		it( 'reloads when context.forcePageReload is true (descendant case, no config)', () => {
+			const { store: registeredStore } = setupNavigate( {
+				contextForcePageReload: true,
+				configForcePageReload: undefined,
+			} );
+
+			const iterator = registeredStore.actions.navigate();
+			const result = iterator.next();
+
+			expect( result.done ).toBe( true );
+			expect( mockReload ).toHaveBeenCalledWith(
+				'https://example.com/shop/?color=blue'
+			);
+		} );
+
+		it( 'context.forcePageReload=true overrides config.forcePageReload=false', () => {
+			const { store: registeredStore } = setupNavigate( {
+				contextForcePageReload: true,
+				configForcePageReload: false,
+			} );
+
+			const iterator = registeredStore.actions.navigate();
+			const result = iterator.next();
+
+			expect( result.done ).toBe( true );
+			expect( mockReload ).toHaveBeenCalledTimes( 1 );
+		} );
+
+		it( 'context.forcePageReload=false overrides config.forcePageReload=true (uses router)', () => {
+			const { store: registeredStore } = setupNavigate( {
+				contextForcePageReload: false,
+				configForcePageReload: true,
+			} );
+
+			const routerNavigate = jest.fn();
+
+			const iterator = registeredStore.actions.navigate();
+			const firstYield = iterator.next();
+
+			expect( firstYield.done ).toBe( false );
+			iterator.next( {
+				actions: { navigate: routerNavigate },
+			} );
+
+			expect( mockReload ).not.toHaveBeenCalled();
+			expect( routerNavigate ).toHaveBeenCalledTimes( 1 );
+		} );
+	} );
 } );

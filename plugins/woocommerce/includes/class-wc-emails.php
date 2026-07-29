@@ -104,6 +104,7 @@ class WC_Emails {
 				'woocommerce_order_status_pending_to_processing',
 				'woocommerce_order_status_pending_to_completed',
 				'woocommerce_order_status_processing_to_cancelled',
+				'woocommerce_order_status_pending_to_cancelled',
 				'woocommerce_order_status_pending_to_failed',
 				'woocommerce_order_status_pending_to_on-hold',
 				'woocommerce_order_status_failed_to_processing',
@@ -297,11 +298,9 @@ class WC_Emails {
 			'WC_Email_Customer_Reset_Password'       => __DIR__ . '/emails/class-wc-email-customer-reset-password.php',
 			'WC_Email_Customer_New_Account'          => __DIR__ . '/emails/class-wc-email-customer-new-account.php',
 			'WC_Email_Admin_Payment_Gateway_Enabled' => __DIR__ . '/emails/class-wc-email-admin-payment-gateway-enabled.php',
+			'WC_Email_Customer_POS_Completed_Order'  => __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php',
+			'WC_Email_Customer_POS_Refunded_Order'   => __DIR__ . '/emails/class-wc-email-customer-pos-refunded-order.php',
 		);
-		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
-			$emails['WC_Email_Customer_POS_Completed_Order'] = __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php';
-			$emails['WC_Email_Customer_POS_Refunded_Order']  = __DIR__ . '/emails/class-wc-email-customer-pos-refunded-order.php';
-		}
 		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
 			$emails['WC_Email_Customer_Fulfillment_Created'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-created.php';
 			$emails['WC_Email_Customer_Fulfillment_Updated'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-updated.php';
@@ -309,6 +308,9 @@ class WC_Emails {
 		}
 		if ( FeaturesUtil::feature_is_enabled( 'customer_review_request' ) ) {
 			$emails['WC_Email_Customer_Review_Request'] = __DIR__ . '/emails/class-wc-email-customer-review-request.php';
+		}
+		if ( FeaturesUtil::feature_is_enabled( 'abandoned_cart_recovery' ) ) {
+			$emails['WC_Email_Customer_Abandoned_Cart_Recovery'] = __DIR__ . '/emails/class-wc-email-customer-abandoned-cart-recovery.php';
 		}
 
 		// Prime caches to reduce future queries.
@@ -1195,10 +1197,25 @@ class WC_Emails {
 		$order = wc_get_order( $args['order_id'] );
 		if (
 		! $args['product'] ||
-		! is_object( $args['product'] ) ||
+		! $args['product'] instanceof WC_Product ||
 		! $args['quantity'] ||
 		! $order
 		) {
+			return;
+		}
+
+		if ( 'no' === get_option( 'woocommerce_notify_backorder', 'yes' ) ) {
+			return;
+		}
+
+		/**
+		 * Determine if the current product should trigger a backorder notification.
+		 *
+		 * @param bool $send       Whether the backorder notification should be sent.
+		 * @param int  $product_id The backordered product id.
+		 * @since 11.0.0
+		 */
+		if ( false === apply_filters( 'woocommerce_should_send_backorder_notification', true, $args['product']->get_id() ) ) {
 			return;
 		}
 

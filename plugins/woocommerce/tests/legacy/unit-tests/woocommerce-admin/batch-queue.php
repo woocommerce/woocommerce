@@ -143,16 +143,16 @@ class WC_Admin_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case 
 		// Insert a blocking job.
 		CustomersScheduler::schedule_action( 'import_batch_init', array( 1, false ) );
 		// Verify that the action was properly blocked.
-		$this->assertCount(
-			1,
-			OrdersScheduler::queue()->search(
-				array(
-					'hook' => OrdersScheduler::get_action( 'import_batch_init' ),
-				)
+		$pending_import_batch_init_actions = OrdersScheduler::queue()->search(
+			array(
+				'status' => OrderStatus::PENDING,
+				'hook'   => OrdersScheduler::get_action( 'import_batch_init' ),
 			)
 		);
+		$this->assertCount( 1, $pending_import_batch_init_actions );
 		// Verify that a second follow up action was queued.
-		WC_Helper_Queue::run_all_pending();
+		$queue_runner = new ActionScheduler_QueueRunner();
+		$queue_runner->process_action( key( $pending_import_batch_init_actions ) );
 		$this->assertCount(
 			2,
 			OrdersScheduler::queue()->search(
@@ -161,21 +161,21 @@ class WC_Admin_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case 
 				)
 			)
 		);
+		CustomersScheduler::clear_queued_actions();
+		OrdersScheduler::clear_queued_actions();
 
 		// Queue an action that isn't blocked.
 		OrdersScheduler::schedule_action( 'import', array( 0 ) );
 		// Verify that the dependent action was queued.
-		$this->assertCount(
-			1,
-			OrdersScheduler::queue()->search(
-				array(
-					'status' => OrderStatus::PENDING,
-					'hook'   => OrdersScheduler::get_action( 'import' ),
-				)
+		$pending_import_actions = OrdersScheduler::queue()->search(
+			array(
+				'status' => OrderStatus::PENDING,
+				'hook'   => OrdersScheduler::get_action( 'import' ),
 			)
 		);
+		$this->assertCount( 1, $pending_import_actions );
 		// Verify that no follow up action was queued.
-		WC_Helper_Queue::run_all_pending();
+		$queue_runner->process_action( key( $pending_import_actions ) );
 		$this->assertCount(
 			0,
 			OrdersScheduler::queue()->search(

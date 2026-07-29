@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a merchant-configurable maximum-rating threshold to the store_review push notification, so only reviews at or below the threshold trigger a notification. Default behaviour (notify on every approved review) is unchanged.

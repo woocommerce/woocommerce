@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import type { VisualAttributeTerm } from '../../base/utils/visual-attribute-terms';
+
 export interface AttributeSetting {
 	attribute_id: string;
 	attribute_name: string;
@@ -38,6 +43,8 @@ export interface AttributeTerm {
 	name: string;
 	parent: number;
 	slug: string;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	__experimentalVisual?: VisualAttributeTerm | null;
 }
 
 export interface AttributeMetadata {

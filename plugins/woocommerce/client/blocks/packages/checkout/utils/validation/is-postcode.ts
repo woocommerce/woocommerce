@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { POSTCODE_REGEXES } from 'postcode-validator/lib/cjs/postcode-regexes.js';
+import {
+	postcodeValidator,
+	postcodeValidatorExistsForCountry,
+} from 'postcode-validator';
 
 const CUSTOM_REGEXES = new Map< string, RegExp >( [
 	[ 'BA', /^([7-8]{1})([0-9]{4})$/ ],
@@ -19,21 +22,22 @@ const CUSTOM_REGEXES = new Map< string, RegExp >( [
 	[ 'SI', /^([1-9][0-9]{3})$/ ],
 ] );
 
-const DEFAULT_REGEXES = new Map< string, RegExp >( [
-	...POSTCODE_REGEXES,
-	...CUSTOM_REGEXES,
-] );
-
 export interface IsPostcodeProps {
 	postcode: string;
 	country: string;
 }
 
 const isPostcode = ( { postcode, country }: IsPostcodeProps ): boolean => {
-	// If the country is not in the list of regexes, trying to test it would result in an error, so we skip and assume
+	const customRegex = CUSTOM_REGEXES.get( country );
+	if ( customRegex ) {
+		return customRegex.test( postcode );
+	}
+	// If the country is not in the upstream list, trying to validate it would throw, so we skip and assume
 	// that it is valid.
-	const postcodeTest = DEFAULT_REGEXES.get( country )?.test( postcode );
-	return typeof postcodeTest !== 'undefined' ? postcodeTest : true;
+	if ( postcodeValidatorExistsForCountry( country ) ) {
+		return postcodeValidator( postcode, country );
+	}
+	return true;
 };
 
 export default isPostcode;

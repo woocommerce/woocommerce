@@ -11,17 +11,40 @@ use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPrefe
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use WC_Data_Exception;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_Http;
 use WP_REST_Request;
+use WP_REST_Server;
+use WP_UnitTest_Factory;
 
 /**
  * Tests for the NotificationPreferencesRestController class.
  *
  * @package WooCommerce\Tests\PushNotifications
  */
-class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
+class NotificationPreferencesRestControllerTest extends WC_Unit_Test_Case {
 	use PushNotificationsTestTrait;
+
+	/**
+	 * REST server used to dispatch notification preference requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
+
+	/**
+	 * Shop manager fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_user_id;
+
+	/**
+	 * Subscriber fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_subscriber_id;
 
 	/**
 	 * Shop manager user ID for testing.
@@ -38,16 +61,25 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	private $subscriber_id;
 
 	/**
+	 * Create immutable users shared by the test class.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$fixture_user_id       = $factory->user->create( array( 'role' => 'shop_manager' ) );
+		self::$fixture_subscriber_id = $factory->user->create( array( 'role' => 'subscriber' ) );
+	}
+
+	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->set_up_features_controller_mock();
 		$this->reset_push_notifications_cache();
 
-		$this->user_id       = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		$this->subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$this->user_id       = self::$fixture_user_id;
+		$this->subscriber_id = self::$fixture_subscriber_id;
 	}
 
 	/**
@@ -56,7 +88,11 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * mocks they need (e.g. replacing the service) so the resolved controller picks them up.
 	 */
 	private function register_routes(): void {
-		wc_get_container()->get( NotificationPreferencesRestController::class )->register_routes();
+		$controller   = wc_get_container()->get( NotificationPreferencesRestController::class );
+		$this->server = $this->create_rest_server_with_routes(
+			array( array( $controller, 'register_routes' ) ),
+			true
+		);
 	}
 
 	/**
@@ -66,11 +102,11 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( 0 );
 
 		Users::delete_site_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY );
-		wp_delete_user( $this->user_id );
-		wp_delete_user( $this->subscriber_id );
 
 		$this->reset_container_replacements();
 		wc_get_container()->reset_all_resolved();
+		$this->clear_rest_server();
+		unset( $this->server );
 
 		parent::tearDown();
 	}
@@ -462,6 +498,69 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'max_rating', $data['store_review'] );
 		$this->assertNull( $data['store_review']['max_rating'] );
+	}
+
+	/**
+	 * @testdox GET should include store_stock with all sub-flags in the defaults.
+	 */
+	public function test_get_preferences_includes_store_stock_with_sub_flags() {
+		wp_set_current_user( $this->user_id );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
+
+		$request  = new WP_REST_Request( 'GET', '/wc-push-notifications/preferences' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::OK, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'store_stock', $data );
+		$this->assertArrayHasKey( 'enabled', $data['store_stock'] );
+		$this->assertArrayHasKey( 'low_stock', $data['store_stock'] );
+		$this->assertArrayHasKey( 'out_of_stock', $data['store_stock'] );
+		$this->assertArrayHasKey( 'on_backorder', $data['store_stock'] );
+	}
+
+	/**
+	 * @testdox POST should accept and persist store_stock sub-flag updates.
+	 */
+	public function test_post_preferences_updates_stock_sub_flags() {
+		wp_set_current_user( $this->user_id );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
+		$request->set_param(
+			'store_stock',
+			array(
+				'low_stock'    => false,
+				'on_backorder' => true,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::OK, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertFalse( $data['store_stock']['low_stock'] );
+		$this->assertTrue( $data['store_stock']['on_backorder'] );
+	}
+
+	/**
+	 * @testdox POST should reject non-boolean store_stock sub-fields via REST validation.
+	 */
+	public function test_post_preferences_rejects_non_boolean_stock_sub_flag() {
+		wp_set_current_user( $this->user_id );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
+		$request->set_param( 'store_stock', array( 'low_stock' => 'not-a-boolean' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::BAD_REQUEST, $response->get_status() );
 	}
 
 	/**

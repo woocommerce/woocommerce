@@ -107,6 +107,10 @@ class Checkout extends AbstractCartRoute {
 							'description' => __( 'Customer password for new accounts, if applicable.', 'woocommerce' ),
 							'type'        => 'string',
 						],
+						'expected_total'    => [
+							'description' => __( 'The order total the shopper confirmed on the client, as a string in the smallest unit of the store currency (e.g. cents), matching the cart `totals.total_price` format. When provided, the order is rejected if the total calculated on the server no longer matches it, protecting the shopper from being charged an unexpected amount.', 'woocommerce' ),
+							'type'        => 'string',
+						],
 					],
 					$this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE )
 				),
@@ -277,8 +281,8 @@ class Checkout extends AbstractCartRoute {
 					continue;
 				}
 
-				// Clean the field value to trim whitespace.
-				$field_value = wc_clean( wp_unslash( $field_values[ $field_key ] ?? '' ) );
+				// Clean the field value to trim whitespace. Request body is JSON-decoded and never magic-quoted, so no wp_unslash().
+				$field_value = wc_clean( $field_values[ $field_key ] ?? '' );
 
 				if ( empty( $field_value ) ) {
 					if ( true === $field['required'] ) {
@@ -560,6 +564,14 @@ class Checkout extends AbstractCartRoute {
 		 * Validate items and fix violations before the order is processed.
 		 */
 		$this->cart_controller->validate_cart();
+
+		/**
+		 * Reject the order if the total the shopper confirmed no longer matches the total the
+		 * server calculates for this request (e.g. a server-side filter or another concurrent
+		 * request changed the cart, a product price/quantity was edited, a stock limit clamped
+		 * a quantity, a coupon expired, or shipping/tax was recalculated).
+		 */
+		$this->validate_order_totals( $request );
 
 		/**
 		 * Persist customer session data from the request first so that OrderController::update_addresses_from_cart
@@ -902,11 +914,9 @@ class Checkout extends AbstractCartRoute {
 			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 
 			if ( 'shipping_address' === $context_data['param'] ) {
-				$field_values = (array) $request['shipping_address'] ?? ( $request['billing_address'] ?? [] );
-
-				if ( ! WC()->cart->needs_shipping() ) {
-					$field_values = $request['billing_address'] ?? [];
-				}
+				$field_values = WC()->cart->needs_shipping()
+					? (array) ( $request['shipping_address'] ?? $request['billing_address'] ?? [] )
+					: (array) ( $request['billing_address'] ?? [] );
 			} else {
 				$field_values = (array) $request[ $context_data['param'] ] ?? [];
 			}
@@ -946,12 +956,13 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WC_Payment_Gateway|null
 	 */
 	private function get_request_payment_method( \WP_REST_Request $request ) {
-		$available_gateways     = WC()->payment_gateways->get_available_payment_gateways();
 		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
 
 		if ( empty( $request_payment_method ) ) {
 			return null;
 		}
+
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		if ( ! isset( $available_gateways[ $request_payment_method ] ) ) {
 			$all_payment_gateways = WC()->payment_gateways->payment_gateways();
@@ -1044,6 +1055,44 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Reject the order if the total the shopper confirmed on the client no longer matches the
+	 * total the server recalculates for this place-order request. Without this guard the order
+	 * could be placed — and the shopper charged — at a total they never saw.
+	 *
+	 * Runs on POST /checkout only, before the draft order is materialised, so a mismatch leaves
+	 * no order behind. The check only runs when the client sends the total it displayed; flows
+	 * that cannot know the final total up front (e.g. some express payment methods) omit it and
+	 * are unaffected.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @throws RouteException When the totals differ. Returns HTTP 409 with the refreshed cart so the client can display the updated total.
+	 */
+	private function validate_order_totals( \WP_REST_Request $request ): void {
+		$expected_total = (string) ( $request['expected_total'] ?? '' );
+
+		if ( '' === $expected_total ) {
+			return;
+		}
+
+		// CartSchema::prepare_money_response() is not exported, so we use the money formatter directly here to match the total_price format.
+		$decimals     = wc_get_price_decimals();
+		$actual_total = woocommerce_store_api_get_formatter( 'money' )->format(
+			$this->cart_controller->get_cart_instance()->get_total( 'edit' ),
+			[ 'decimals' => $decimals ]
+		);
+
+		if ( $expected_total !== $actual_total ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_total_mismatch',
+				esc_html__( 'The order total changed while you were checking out. Please review the updated total and place your order again.', 'woocommerce' ),
+				409
+			);
+		}
 	}
 
 	/**

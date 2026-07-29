@@ -29,8 +29,6 @@ import {
  * Numeric semver compare. Returns negative if `a < b`, zero if equal, positive
  * if `a > b`. Lightweight implementation — template versions don't carry
  * pre-release / build metadata so we don't need full semver semantics.
- * Mirrors the helper in `settings-email-listing-update-cell.tsx` so the
- * banner and the list cell stay in lockstep.
  */
 function compareTemplateVersions( a: string, b: string ): number {
 	const partsA = a.split( '.' ).map( ( s ) => parseInt( s, 10 ) || 0 );
@@ -243,8 +241,7 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 	// the merchant's stored version is at-or-above the registry's current,
 	// so they've reviewed this release — even if status stays
 	// `core_updated_customized` because they kept some customizations on
-	// purpose during a drawer apply. Hide the indicator; the cell uses
-	// the same check via `currentVersion` on the slotfill payload.
+	// purpose during a drawer apply. Hide the indicator.
 	const summaryShowsReviewed =
 		effectiveSummary !== null &&
 		effectiveSummary.version_from !== '' &&

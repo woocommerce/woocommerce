@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Move `OrderDetailRedesign` feature class to the `Internal` namespace so it can be removed without breaking backwards compatibility if the feature is not shipped.

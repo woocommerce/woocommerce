@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Email;
 
 use Automattic\WooCommerce\Internal\Email\EmailLogger;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Unit_Test_Case;
 
@@ -28,6 +29,8 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
 		$this->sut = new EmailLogger();
 	}
 
@@ -37,6 +40,8 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_email_log_enabled' );
 		remove_all_filters( 'woocommerce_email_log_context' );
+		remove_all_filters( 'woocommerce_email_log_add_order_note' );
+		remove_all_filters( 'woocommerce_mail_callback' );
 		remove_all_actions( 'woocommerce_email_disabled' );
 		remove_all_actions( 'woocommerce_email_skipped' );
 		remove_action( 'woocommerce_email_sent', array( $this->sut, 'handle_woocommerce_email_sent' ) );
@@ -368,6 +373,162 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An order note is added when an email is sent successfully for an order.
+	 */
+	public function test_order_note_added_on_successful_send_for_order(): void {
+		$order = $this->createMock( \WC_Order::class );
+		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
+		$order->expects( $this->once() )
+			->method( 'add_order_note' )
+			->with(
+				$this->stringContains( 'sent' ),
+				0,
+				false,
+				$this->callback( fn( $meta ) => isset( $meta['note_group'] ) && OrderNoteGroup::EMAIL_NOTIFICATION === $meta['note_group'] )
+			);
+
+		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com', $order );
+		$this->sut->handle_woocommerce_email_sent( true, 'customer_processing_order', $email );
+	}
+
+	/**
+	 * @testdox An order note is added when an email fails to send for an order (no error reason).
+	 */
+	public function test_order_note_added_on_failed_send_for_order(): void {
+		$order = $this->createMock( \WC_Order::class );
+		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
+		$order->expects( $this->once() )
+			->method( 'add_order_note' )
+			->with(
+				$this->logicalAnd(
+					$this->stringContains( 'failed to send.' ),
+					$this->logicalNot( $this->stringContains( 'failed to send:' ) )
+				),
+				0,
+				false,
+				$this->callback( fn( $meta ) => isset( $meta['note_group'] ) && OrderNoteGroup::EMAIL_NOTIFICATION === $meta['note_group'] )
+			);
+
+		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com', $order );
+		$this->sut->handle_woocommerce_email_sent( false, 'customer_processing_order', $email );
+	}
+
+	/**
+	 * @testdox The order note for a failed send includes the error reason in colon-form.
+	 */
+	public function test_order_note_failure_includes_error_reason(): void {
+		$order = $this->createMock( \WC_Order::class );
+		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
+		$order->expects( $this->once() )
+			->method( 'add_order_note' )
+			->with(
+				$this->logicalAnd(
+					$this->stringContains( 'failed to send:' ),
+					$this->stringContains( 'SMTP connect() failed' )
+				)
+			);
+
+		$error = new \WP_Error( 'wp_mail_failed', 'SMTP connect() failed' );
+		$this->sut->capture_mail_error( $error );
+
+		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com', $order );
+		$this->sut->handle_woocommerce_email_sent( false, 'customer_processing_order', $email );
+	}
+
+	/**
+	 * @testdox The order note redacts email addresses embedded in the failure reason.
+	 */
+	public function test_order_note_failure_redacts_email_addresses_in_reason(): void {
+		$order = $this->createMock( \WC_Order::class );
+		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
+		$order->expects( $this->once() )
+			->method( 'add_order_note' )
+			->with(
+				$this->logicalAnd(
+					$this->stringContains( '[redacted_email]' ),
+					$this->logicalNot( $this->stringContains( 'customer@example.com' ) )
+				)
+			);
+
+		$error = new \WP_Error(
+			'wp_mail_failed',
+			'SMTP Error: Could not send to customer@example.com (rejected by server.example.org).'
+		);
+		$this->sut->capture_mail_error( $error );
+
+		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com', $order );
+		$this->sut->handle_woocommerce_email_sent( false, 'customer_processing_order', $email );
+	}
+
+	/**
+	 * @testdox No order note is added when the email is not associated with an order.
+	 */
+	public function test_no_order_note_for_non_order_object(): void {
+		$product = $this->createMock( \WC_Product::class );
+		$product->method( 'get_id' )->willReturn( 10 );
+
+		$email = $this->create_mock_email( 'some_product_email', 'admin@example.com', $product );
+
+		// Should complete without throwing – product objects do not get order notes.
+		$this->sut->handle_woocommerce_email_sent( true, 'some_product_email', $email );
+
+		$this->assertLogged( 'info', 'some_product_email' );
+	}
+
+	/**
+	 * @testdox No order note is added when the order object has not been read from the datastore (e.g. a preview dummy).
+	 */
+	public function test_no_order_note_for_unloaded_order_object(): void {
+		$order = $this->createMock( \WC_Order::class );
+		$order->method( 'get_id' )->willReturn( 12345 );
+		$order->method( 'get_object_read' )->willReturn( false );
+		$order->expects( $this->never() )->method( 'add_order_note' );
+
+		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com', $order );
+		$this->sut->handle_woocommerce_email_sent( true, 'customer_processing_order', $email );
+
+		// Logger entry should still be written even though no note is added.
+		$this->assertLogged( 'info', 'customer_processing_order' );
+	}
+
+	/**
+	 * @testdox No order note is added when logging is disabled by the filter.
+	 */
+	public function test_no_order_note_when_logging_disabled_by_filter(): void {
+		add_filter( 'woocommerce_email_log_enabled', '__return_false' );
+
+		$order = $this->createMock( \WC_Order::class );
+		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
+		$order->expects( $this->never() )->method( 'add_order_note' );
+
+		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com', $order );
+		$this->sut->handle_woocommerce_email_sent( true, 'customer_processing_order', $email );
+	}
+
+	/**
+	 * @testdox woocommerce_email_log_add_order_note filter can suppress the order note independently of logging.
+	 */
+	public function test_order_note_suppressed_by_add_order_note_filter(): void {
+		add_filter( 'woocommerce_email_log_add_order_note', '__return_false' );
+
+		$order = $this->createMock( \WC_Order::class );
+		$order->method( 'get_id' )->willReturn( 42 );
+		$order->method( 'get_object_read' )->willReturn( true );
+		$order->expects( $this->never() )->method( 'add_order_note' );
+
+		$email = $this->create_mock_email( 'customer_processing_order', 'customer@example.com', $order );
+		$this->sut->handle_woocommerce_email_sent( true, 'customer_processing_order', $email );
+
+		// Logger entry should still be written even though the note is suppressed.
+		$this->assertLogged( 'info', 'customer_processing_order' );
+	}
+
+	/**
 	 * @testdox Logs a notice entry when email is disabled.
 	 */
 	public function test_logs_notice_when_email_is_disabled(): void {
@@ -611,15 +772,16 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	 *
 	 * Exposes both protected helpers as public `run_*` wrappers and records whether send() was called.
 	 *
-	 * @param string $email_id    Email type ID.
-	 * @param string $recipient   Recipient email address (empty string = no recipient).
-	 * @param bool   $is_enabled  Return value for is_enabled().
-	 * @param bool   $send_return Return value for the stubbed send().
+	 * @param string $email_id       Email type ID.
+	 * @param string $recipient      Recipient email address (empty string = no recipient).
+	 * @param bool   $is_enabled     Return value for is_enabled().
+	 * @param bool   $send_return    Return value for the stubbed send() (ignored if $use_real_send is true).
+	 * @param bool   $use_real_send  If true, keep the real WC_Email::send() instead of stubbing it.
 	 * @return object Anonymous class instance with `run_send_notification()`, `run_send_if_recipient()`,
 	 *                `send_called`, and `send_args` properties.
 	 */
-	private function create_testable_email( string $email_id, string $recipient, bool $is_enabled, bool $send_return = false ): object {
-		return new class( $email_id, $recipient, $is_enabled, $send_return ) extends \WC_Email {
+	private function create_testable_email( string $email_id, string $recipient, bool $is_enabled, bool $send_return = false, bool $use_real_send = false ): object {
+		return new class( $email_id, $recipient, $is_enabled, $send_return, $use_real_send ) extends \WC_Email {
 			/** @var bool Whether send() has been invoked. */
 			public bool $send_called = false;
 			/** @var array Arguments captured from the most recent send() call. */
@@ -631,6 +793,8 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 			private bool $test_is_enabled;
 			/** @var bool Value returned by send(). */
 			private bool $test_send_return;
+			/** @var bool Whether to delegate to the real WC_Email::send() instead of returning $test_send_return. */
+			private bool $use_real_send;
 
 			/**
 			 * Construct the test double.
@@ -639,13 +803,15 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 			 * @param string $recipient   Recipient string for get_recipient().
 			 * @param bool   $is_enabled  Value to return from is_enabled().
 			 * @param bool   $send_return Value to return from send().
+			 * @param bool   $use_real_send Whether to delegate to the real send() instead of the stub.
 			 */
-			public function __construct( string $email_id, string $recipient, bool $is_enabled, bool $send_return ) {
+			public function __construct( string $email_id, string $recipient, bool $is_enabled, bool $send_return, bool $use_real_send ) {
 				// Deliberately skip parent::__construct() to avoid side-effects in tests.
 				$this->id               = $email_id;
 				$this->test_recipient   = $recipient;
 				$this->test_is_enabled  = $is_enabled;
 				$this->test_send_return = $send_return;
+				$this->use_real_send    = $use_real_send;
 			}
 
 			/**
@@ -703,6 +869,11 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 			public function send( $to, $subject, $message, $headers, $attachments ): bool {
 				$this->send_called = true;
 				$this->send_args   = array( $to, $subject, $message, $headers, $attachments );
+
+				if ( $this->use_real_send ) {
+					return parent::send( $to, $subject, $message, $headers, $attachments );
+				}
+
 				return $this->test_send_return;
 			}
 
@@ -733,7 +904,171 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 		$email->id     = $email_id;
 		$email->object = $wc_object;
 		$email->expects( $this->any() )->method( 'get_recipient' )->willReturn( $recipient );
+		$email->expects( $this->any() )->method( 'get_title' )->willReturn( $email_id );
 
 		return $email;
+	}
+
+	/**
+	 * @testdox send() returns false and warns when the mail callback returns a non-scalar.
+	 */
+	public function test_send_returns_false_and_warns_when_mail_callback_returns_non_scalar(): void {
+		add_filter(
+			'woocommerce_mail_callback',
+			function () {
+				return static function () {
+					return new \WP_Error( 'failed', 'Mail failed' );
+				};
+			}
+		);
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Email::send' );
+
+		$notices = array();
+		$action  = function ( $function_name, $message, $version ) use ( &$notices ) {
+			$notices[] = array(
+				'function_name' => $function_name,
+				'message'       => $message,
+				'version'       => $version,
+			);
+		};
+		add_action( 'doing_it_wrong_run', $action, 10, 3 );
+
+		try {
+			$email  = new \WC_Email();
+			$result = $email->send( 'test@example.com', 'Subject', 'Message', '', array() );
+		} finally {
+			remove_action( 'doing_it_wrong_run', $action, 10 );
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$this->assertFalse( $result, 'A non-scalar callback return should resolve to false' );
+		$this->assertNotEmpty( $notices );
+		$this->assertSame( 'WC_Email::send', $notices[0]['function_name'] );
+		$this->assertStringContainsString( 'woocommerce_mail_callback filter should return a boolean; object returned.', $notices[0]['message'] );
+		$this->assertSame( '11.1.0', $notices[0]['version'] );
+	}
+
+	/**
+	 * @testdox send() coerces a scalar mail callback return to bool and warns.
+	 *
+	 * @dataProvider provider_scalar_callback_returns
+	 *
+	 * @param mixed  $callback_return Value returned by the mail callback.
+	 * @param bool   $expected        Expected coerced send result.
+	 * @param string $expected_type   gettype() of the returned value, as reported in the notice.
+	 */
+	public function test_send_coerces_scalar_callback_return_and_warns( $callback_return, bool $expected, string $expected_type ): void {
+		add_filter(
+			'woocommerce_mail_callback',
+			function () use ( $callback_return ) {
+				return static function () use ( $callback_return ) {
+					return $callback_return;
+				};
+			}
+		);
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Email::send' );
+
+		$notices = array();
+		$action  = function ( $function_name, $message, $version ) use ( &$notices ) {
+			$notices[] = array(
+				'function_name' => $function_name,
+				'message'       => $message,
+				'version'       => $version,
+			);
+		};
+		add_action( 'doing_it_wrong_run', $action, 10, 3 );
+
+		try {
+			$email  = new \WC_Email();
+			$result = $email->send( 'test@example.com', 'Subject', 'Message', '', array() );
+		} finally {
+			remove_action( 'doing_it_wrong_run', $action, 10 );
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$this->assertSame( $expected, $result );
+		$this->assertNotEmpty( $notices );
+		$this->assertStringContainsString( "woocommerce_mail_callback filter should return a boolean; {$expected_type} returned.", $notices[0]['message'] );
+	}
+
+	/**
+	 * Scalar mail callback return values and their expected coercion.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provider_scalar_callback_returns(): array {
+		return array(
+			'integer 1 is a success'     => array( 1, true, 'integer' ),
+			'string yes is a success'    => array( 'yes', true, 'string' ),
+			'integer 0 is a failure'     => array( 0, false, 'integer' ),
+			'random string is a failure' => array( 'sent', false, 'string' ),
+		);
+	}
+
+	/**
+	 * @testdox send_notification() does not throw a TypeError when the mail callback returns a non-bool.
+	 */
+	public function test_send_notification_does_not_fatal_when_mail_callback_returns_non_bool(): void {
+		add_filter(
+			'woocommerce_mail_callback',
+			function () {
+				return static function () {
+					return new \WP_Error( 'failed', 'Mail failed' );
+				};
+			}
+		);
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Email::send' );
+
+		$email = $this->create_testable_email( 'my_email', 'admin@example.com', true, false, true );
+
+		try {
+			$result = $email->run_send_notification();
+		} finally {
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$this->assertIsBool( $result, 'send_notification() should return a bool instead of fataling' );
+		$this->assertFalse( $result, 'Should resolve to false when the underlying mail callback returns a non-bool' );
+	}
+
+	/**
+	 * @testdox send() passes false to woocommerce_email_sent when the mail callback returns a non-bool.
+	 */
+	public function test_send_fires_email_sent_action_with_bool_when_callback_returns_non_bool(): void {
+		add_filter(
+			'woocommerce_mail_callback',
+			function () {
+				return static function () {
+					return new \WP_Error( 'failed', 'Mail failed' );
+				};
+			}
+		);
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Email::send' );
+
+		$received_return = null;
+		add_action(
+			'woocommerce_email_sent',
+			function ( $result ) use ( &$received_return ) {
+				$received_return = $result;
+			},
+			10,
+			1
+		);
+
+		$email = new \WC_Email();
+		try {
+			$email->send( 'test@example.com', 'Subject', 'Message', '', array() );
+		} finally {
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$this->assertIsBool( $received_return, 'woocommerce_email_sent should receive a bool even when the mail callback returns a non-bool' );
+		$this->assertFalse( $received_return );
+
+		remove_all_actions( 'woocommerce_email_sent' );
 	}
 }

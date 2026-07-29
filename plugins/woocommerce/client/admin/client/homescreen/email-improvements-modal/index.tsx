@@ -24,8 +24,11 @@ export const EmailImprovementsModal = ( {
 	const [ guideIsOpen, setGuideIsOpen ] = useState( false );
 	const [ searchParams ] = useSearchParams();
 
-	let title = __( 'Your store emails have had an upgrade!', 'woocommerce' );
-	let description = __(
+	let title = __< string >(
+		'Your store emails have had an upgrade!',
+		'woocommerce'
+	);
+	let description = __< string >(
 		'We’ve made some exciting improvements to your email templates, including modern, shopper-friendly designs and new customization options. Head to your email settings to explore the new changes.',
 		'woocommerce'
 	);

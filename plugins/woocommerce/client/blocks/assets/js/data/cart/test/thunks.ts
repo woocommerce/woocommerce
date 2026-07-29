@@ -13,9 +13,20 @@ import {
 } from '../thunks';
 import { apiFetchWithHeaders } from '../../shared-controls';
 import { getIsCustomerDataDirty } from '../utils';
+import { store as checkoutStore } from '../../checkout';
 
 jest.mock( '../../shared-controls', () => ( {
 	apiFetchWithHeaders: jest.fn(),
+} ) );
+
+jest.mock( '@woocommerce/base-utils', () => ( {
+	...jest.requireActual( '@woocommerce/base-utils' ),
+	hasCollectableRate: jest.fn( ( chosenRates ) => {
+		if ( Array.isArray( chosenRates ) ) {
+			return chosenRates.includes( 'pickup_location' );
+		}
+		return chosenRates === 'pickup_location';
+	} ),
 } ) );
 
 jest.mock( '../notify-quantity-changes', () => ( {
@@ -28,6 +39,7 @@ jest.mock( '../notify-errors', () => ( {
 
 jest.mock( '../utils', () => ( {
 	getIsCustomerDataDirty: jest.fn( () => false ),
+	getTriggerStoreSyncEvent: jest.fn( () => false ),
 	setIsCustomerDataDirty: jest.fn(),
 	setTriggerStoreSyncEvent: jest.fn(),
 } ) );
@@ -397,6 +409,15 @@ describe( 'applyExtensionCartUpdate', () => {
 		receiveCart: jest.fn(),
 		receiveError: jest.fn(),
 	} );
+	const createMockRegistry = () => {
+		const setPrefersCollection = jest.fn();
+		return {
+			registry: {
+				dispatch: jest.fn( () => ( { setPrefersCollection } ) ),
+			},
+			setPrefersCollection,
+		};
+	};
 
 	beforeEach( () => {
 		jest.clearAllMocks();
@@ -415,6 +436,64 @@ describe( 'applyExtensionCartUpdate', () => {
 		} )( { dispatch } as never );
 
 		expect( dispatch.receiveCart ).toHaveBeenCalledWith( mockResponse );
+	} );
+
+	it( 'should set prefersCollection true when the extension response selects local pickup', async () => {
+		const dispatch = createMockDispatch();
+		const { registry, setPrefersCollection } = createMockRegistry();
+		mockApiFetchWithHeaders.mockResolvedValue( {
+			response: {
+				...mockResponse,
+				shipping_rates: [
+					{
+						package_id: 0,
+						shipping_rates: [
+							{
+								method_id: 'pickup_location',
+								selected: true,
+							},
+						],
+					},
+				],
+			},
+		} );
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+		} )( { dispatch, registry } as never );
+
+		expect( registry.dispatch ).toHaveBeenCalledWith( checkoutStore );
+		expect( setPrefersCollection ).toHaveBeenCalledWith( true );
+	} );
+
+	it( 'should set prefersCollection false when the extension response selects shipping', async () => {
+		const dispatch = createMockDispatch();
+		const { registry, setPrefersCollection } = createMockRegistry();
+		mockApiFetchWithHeaders.mockResolvedValue( {
+			response: {
+				...mockResponse,
+				shipping_rates: [
+					{
+						package_id: 0,
+						shipping_rates: [
+							{
+								method_id: 'flat_rate',
+								selected: true,
+							},
+						],
+					},
+				],
+			},
+		} );
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+		} )( { dispatch, registry } as never );
+
+		expect( registry.dispatch ).toHaveBeenCalledWith( checkoutStore );
+		expect( setPrefersCollection ).toHaveBeenCalledWith( false );
 	} );
 
 	it( 'should strip both addresses when customer data is dirty and no overwrite specified', async () => {

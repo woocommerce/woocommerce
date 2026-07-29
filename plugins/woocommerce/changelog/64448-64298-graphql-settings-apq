@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a setting to toggle Apollo Automatic Persisted Queries (APQ) caching on the GraphQL settings page.

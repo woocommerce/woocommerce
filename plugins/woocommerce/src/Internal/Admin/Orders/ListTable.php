@@ -254,12 +254,18 @@ class ListTable extends WP_List_Table {
 			$search_label .= '</span>';
 		}
 
+		// Add new.
+		$add_new_button = '';
+		if ( $post_type && current_user_can( $post_type->cap->publish_posts ) ) {
+			$add_new_button = "<a href='" . esc_url( $new_page_link ) . "' class='page-title-action'>{$add_new}</a>";
+		}
+
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo wp_kses_post(
 			"
 			<div class='wrap'>
 				<h1 class='wp-heading-inline'>{$title}</h1>
-				<a href='" . esc_url( $new_page_link ) . "' class='page-title-action'>{$add_new}</a>
+				{$add_new_button}
 				{$search_label}
 				<hr class='wp-header-end'>"
 		);
@@ -286,14 +292,14 @@ class ListTable extends WP_List_Table {
 	 */
 	public function render_blank_state(): void {
 		?>
-			<div class="woocommerce-BlankState">
+			<div class="woocommerce-BlankState woocommerce-BlankState--orders">
 
 				<h2 class="woocommerce-BlankState-message">
 					<?php esc_html_e( 'When you receive a new order, it will appear here.', 'woocommerce' ); ?>
 				</h2>
 
 				<div class="woocommerce-BlankState-buttons">
-					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
+					<a class="woocommerce-BlankState-cta button button-secondary" target="_blank" rel="noopener noreferrer" href="https://woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
 				</div>
 
 			<?php
@@ -430,7 +436,7 @@ class ListTable extends WP_List_Table {
 		$order_query_args['paginate'] = true;
 
 		// Attempt to use cache if no additional query arguments are used.
-		if ( empty( array_diff( array_keys( $this->order_query_args ), array( 'limit', 'page', 'paginate', 'type', 'status', 'orderby', 'order' ) ) ) ) {
+		if ( empty( array_diff( array_keys( $order_query_args ), array( 'limit', 'page', 'paginate', 'type', 'status', 'orderby', 'order' ) ) ) ) {
 			$this->order_query_args['no_found_rows'] = true;
 			$order_query_args['no_found_rows']       = true;
 		}
@@ -571,11 +577,13 @@ class ListTable extends WP_List_Table {
 		if ( ! empty( $search_term ) ) {
 			$this->order_query_args['s'] = $search_term;
 			$this->has_filter            = true;
-		}
 
-		$filter = trim( sanitize_text_field( $this->request['search-filter'] ) );
-		if ( ! empty( $filter ) ) {
-			$this->order_query_args['search_filter'] = $filter;
+			// 'search_filter' is inert without a search term, but setting it (the form always submits the dropdown)
+			// would disqualify the request from the cached-count fast path in prepare_items() and force a COUNT.
+			$filter = trim( sanitize_text_field( $this->request['search-filter'] ) );
+			if ( ! empty( $filter ) ) {
+				$this->order_query_args['search_filter'] = $filter;
+			}
 		}
 	}
 
