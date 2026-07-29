@@ -861,11 +861,10 @@ class WC_Checkout {
 	/**
 	 * Get the country to validate a fieldset's fields against.
 	 *
-	 * The country is taken from the posted data when the fieldset has a country field, and falls back to the
-	 * matching customer getter otherwise. Only some fieldsets have one: 'billing' and 'shipping' do, while
-	 * 'order', 'account', and most fieldsets registered through the 'woocommerce_checkout_fields' filter do
-	 * not. When there is no getter an empty string is returned and the fields are validated without country
-	 * specific rules, instead of fataling on an undefined method.
+	 * Uses the posted country when the fieldset has one. Only 'billing' and 'shipping' have a customer
+	 * country to fall back on, so every other fieldset, including those registered through the
+	 * 'woocommerce_checkout_fields' filter, is validated without country specific rules instead of
+	 * fataling on an undefined method.
 	 *
 	 * @param  string $fieldset_key Fieldset key.
 	 * @param  array  $data         An array of posted data.
@@ -876,9 +875,14 @@ class WC_Checkout {
 			return $data[ $fieldset_key . '_country' ];
 		}
 
-		$getter = "get_{$fieldset_key}_country";
-
-		return is_callable( array( WC()->customer, $getter ) ) ? WC()->customer->$getter() : '';
+		switch ( $fieldset_key ) {
+			case 'shipping':
+				return WC()->customer->get_shipping_country();
+			case 'billing':
+				return WC()->customer->get_billing_country();
+			default:
+				return '';
+		}
 	}
 
 	/**

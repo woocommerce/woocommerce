@@ -348,6 +348,38 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'validate_posted_data' ignores customer getters that only match a fieldset key by accident.
+	 *
+	 * 'WC_Customer::get_default_country()' is public, so looking the getter up from the fieldset key made a
+	 * fieldset named 'default' validate against the store's base country and emit a deprecation notice.
+	 * 'ABCDE' passes the country agnostic postcode check but fails the store's base country rules.
+	 */
+	public function test_validate_posted_data_ignores_incidentally_matching_customer_getters() {
+		$this->register_extra_checkout_field(
+			'default',
+			'default_postcode',
+			array(
+				'label'    => 'Default postcode',
+				'validate' => array( 'postcode' ),
+			)
+		);
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'default_postcode'          => 'ABCDE',
+		);
+
+		$errors = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+
+		$this->assertEmpty(
+			$errors->get_error_message( 'default_postcode_validation' ),
+			"Only billing and shipping have a country, so the 'default' fieldset must not resolve to one."
+		);
+	}
+
+	/**
 	 * @testdox 'validate_posted_data' prefers the posted country over the one stored on the customer.
 	 */
 	public function test_validate_posted_data_prefers_the_posted_country() {
