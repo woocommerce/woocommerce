@@ -136,11 +136,30 @@ const SILENT_STATUS_MESSAGES = {
     'clear->clear': (authorLogin) => `Hi @${authorLogin}, still all green here.`,
 };
 
+// GitHub only sends a mention notification when a comment is *created*,
+// never when an existing one is edited - so editing the sticky checklist
+// comment in place, however its intro line reads, never actually notifies
+// anyone past the very first time it's created. A transition listed here
+// gets a short, separate comment (a real `createComment` call) instead, so
+// the author is actually notified when it matters.
+//
+// `none->failing` and `none->clear` are deliberately absent: those are the
+// sticky comment's own first-ever creation, which already notifies on its
+// own - a second comment right after would just be a redundant duplicate.
+// `failing->clear` and `clear->clear` are ordinary/successful re-runs, not
+// something that needs to interrupt the author. `failing->failing` is a
+// repeated failure, already covered by "no re-ping while still failing".
+const PING_MESSAGES = {
+    'clear->failing': (authorLogin) =>
+        `@${authorLogin}, the readiness checklist now has failures — see the checklist above.`,
+};
+
 function buildCommentBody({ tasks, previousState, authorLogin }) {
     const overallState = computeOverallState(tasks);
     const transitionKey = `${previousState || 'none'}->${overallState}`;
     const mentionMessage = TRANSITION_MESSAGES[transitionKey];
     const introMessage = mentionMessage || SILENT_STATUS_MESSAGES[transitionKey];
+    const pingMessage = PING_MESSAGES[transitionKey];
 
     const lines = [
         `${MARKER_PREFIX} status=${overallState} -->`,
@@ -174,7 +193,11 @@ function buildCommentBody({ tasks, previousState, authorLogin }) {
         );
     }
 
-    return { body: lines.join('\n'), mentioned: Boolean(mentionMessage) };
+    return {
+        body: lines.join('\n'),
+        mentioned: Boolean(mentionMessage),
+        pingBody: pingMessage ? pingMessage(authorLogin) : null,
+    };
 }
 
 module.exports = {

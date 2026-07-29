@@ -180,8 +180,8 @@ test('parsePreviousState: returns null for a missing comment', () => {
     assert.equal(parsePreviousState(null), null);
 });
 
-test('buildCommentBody: first-ever comment with failures mentions the author', () => {
-    const { body, mentioned } = buildCommentBody({
+test('buildCommentBody: first-ever comment with failures mentions the author, no separate ping', () => {
+    const { body, mentioned, pingBody } = buildCommentBody({
         tasks: [
             { label: 'Lint', status: 'fail', remediation: 'See annotations.' },
             { label: 'Milestone', status: 'pass', remediation: 'n/a' },
@@ -197,10 +197,13 @@ test('buildCommentBody: first-ever comment with failures mentions the author', (
     assert.ok(body.includes('❌ **Lint** — See annotations.'));
     assert.ok(body.includes('✅ **Milestone**'));
     assert.ok(!body.includes('✅ **Milestone** —'));
+    // The comment creation itself already notifies; a second ping would be
+    // a redundant duplicate for the very first comment on the PR.
+    assert.equal(pingBody, null);
 });
 
-test('buildCommentBody: first-ever comment with everything passing thanks the author', () => {
-    const { body, mentioned } = buildCommentBody({
+test('buildCommentBody: first-ever comment with everything passing thanks the author, no ping', () => {
+    const { body, mentioned, pingBody } = buildCommentBody({
         tasks: [{ label: 'Lint', status: 'pass', remediation: 'n/a' }],
         previousState: null,
         authorLogin: 'octocat',
@@ -211,10 +214,11 @@ test('buildCommentBody: first-ever comment with everything passing thanks the au
     assert.ok(body.includes('## PR Readiness Checks'));
     assert.ok(body.includes("Thanks for your contribution, @octocat!"));
     assert.ok(body.includes('✅ All checks are passing.'));
+    assert.equal(pingBody, null);
 });
 
-test('buildCommentBody: still failing does not re-mention but keeps the header and author line', () => {
-    const { body, mentioned } = buildCommentBody({
+test('buildCommentBody: still failing does not re-mention, no ping, keeps header and author line', () => {
+    const { body, mentioned, pingBody } = buildCommentBody({
         tasks: [{ label: 'Lint', status: 'fail', remediation: 'See annotations.' }],
         previousState: 'failing',
         authorLogin: 'octocat',
@@ -225,10 +229,11 @@ test('buildCommentBody: still failing does not re-mention but keeps the header a
     assert.ok(body.includes('@octocat'));
     assert.ok(body.includes("here's the current status"));
     assert.ok(!body.includes('Thanks for the PR'));
+    assert.equal(pingBody, null);
 });
 
-test('buildCommentBody: fixed from failing to clear mentions the author', () => {
-    const { body, mentioned } = buildCommentBody({
+test('buildCommentBody: fixed from failing to clear mentions the author, no ping (ordinary success)', () => {
+    const { body, mentioned, pingBody } = buildCommentBody({
         tasks: [{ label: 'Lint', status: 'pass', remediation: 'n/a' }],
         previousState: 'failing',
         authorLogin: 'octocat',
@@ -237,10 +242,11 @@ test('buildCommentBody: fixed from failing to clear mentions the author', () => 
     assert.equal(mentioned, true);
     assert.ok(body.includes('## PR Readiness Checks'));
     assert.ok(body.includes('All checks are passing now, @octocat'));
+    assert.equal(pingBody, null);
 });
 
-test('buildCommentBody: still clear does not re-mention but keeps the header and author line', () => {
-    const { body, mentioned } = buildCommentBody({
+test('buildCommentBody: still clear does not re-mention, no ping, keeps header and author line', () => {
+    const { body, mentioned, pingBody } = buildCommentBody({
         tasks: [{ label: 'Lint', status: 'pass', remediation: 'n/a' }],
         previousState: 'clear',
         authorLogin: 'octocat',
@@ -249,6 +255,7 @@ test('buildCommentBody: still clear does not re-mention but keeps the header and
     assert.equal(mentioned, false);
     assert.ok(body.includes('## PR Readiness Checks'));
     assert.ok(body.includes('@octocat, still all green here.'));
+    assert.equal(pingBody, null);
 });
 
 test('buildCommentBody: a failing task with one job url renders a single Job link', () => {
@@ -311,8 +318,8 @@ test('buildCommentBody: a passing task with job urls (should not happen) renders
     assert.ok(!body.includes('[Job]'));
 });
 
-test('buildCommentBody: regression from clear to failing mentions the author', () => {
-    const { body, mentioned } = buildCommentBody({
+test('buildCommentBody: regression from clear to failing mentions the author and pings separately', () => {
+    const { body, mentioned, pingBody } = buildCommentBody({
         tasks: [{ label: 'Lint', status: 'fail', remediation: 'See annotations.' }],
         previousState: 'clear',
         authorLogin: 'octocat',
@@ -321,5 +328,12 @@ test('buildCommentBody: regression from clear to failing mentions the author', (
     assert.equal(mentioned, true);
     assert.ok(
         body.includes('Heads up @octocat — a new push introduced some failures')
+    );
+    // A comment already exists (state was previously clear), so editing it
+    // alone would notify no one - this is the one transition that needs a
+    // real, separate createComment call.
+    assert.equal(
+        pingBody,
+        '@octocat, the readiness checklist now has failures — see the checklist above.'
     );
 });

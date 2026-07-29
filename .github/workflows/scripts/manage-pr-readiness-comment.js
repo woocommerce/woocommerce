@@ -111,7 +111,7 @@ module.exports = async ({ github, context, core }) => {
         return;
     }
 
-    const { body } = buildCommentBody({
+    const { body, pingBody } = buildCommentBody({
         tasks,
         previousState,
         authorLogin: pr.user.login,
@@ -133,5 +133,18 @@ module.exports = async ({ github, context, core }) => {
             body,
         });
         core.info(`Created PR readiness comment on #${pr.number}.`);
+    }
+
+    // Editing the sticky comment above never notifies anyone (GitHub only
+    // notifies on comment creation), so a transition that actually needs
+    // the author's attention gets its own short, separate comment here.
+    if (pingBody) {
+        await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: pr.number,
+            body: pingBody,
+        });
+        core.info(`Posted readiness regression ping on #${pr.number}.`);
     }
 };
