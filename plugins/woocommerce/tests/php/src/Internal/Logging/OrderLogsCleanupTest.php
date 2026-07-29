@@ -629,6 +629,15 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The cleanup helper registers the extended cleanup callback when the container initializes it.
+	 */
+	public function test_extended_cleanup_hook_is_registered_on_init(): void {
+		$this->assertNotFalse(
+			has_action( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK, array( $this->sut_cleanup_helper, 'cleanup' ) )
+		);
+	}
+
+	/**
 	 * @testdox An in-progress extended cleanup doesn't block scheduling the next follow-up run.
 	 */
 	public function test_extended_cleanup_schedules_a_follow_up_while_running(): void {

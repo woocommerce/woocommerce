@@ -2032,11 +2032,6 @@ function wc_cleanup_logs() {
 }
 add_action( 'woocommerce_cleanup_logs', 'wc_cleanup_logs' );
 
-add_action(
-	OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK,
-	array( OrderLogsCleanupHelper::class, 'handle_woocommerce_cleanup_logs_extended' )
-);
-
 /**
  * Prints human-readable information about a variable.
  *

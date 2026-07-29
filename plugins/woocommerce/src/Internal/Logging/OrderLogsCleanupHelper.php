@@ -53,6 +53,20 @@ class OrderLogsCleanupHelper {
 	private bool $cpt_in_use = false;
 
 	/**
+	 * True once the orders data store in use has been determined.
+	 *
+	 * @var bool
+	 */
+	private bool $order_store_resolved = false;
+
+	/**
+	 * The instance of CustomOrdersTableController to use.
+	 *
+	 * @var CustomOrdersTableController
+	 */
+	private CustomOrdersTableController $hpos_controller;
+
+	/**
 	 * The instance of DataSynchronizer to use.
 	 *
 	 * @var DataSynchronizer
@@ -60,7 +74,7 @@ class OrderLogsCleanupHelper {
 	private DataSynchronizer $data_synchronizer;
 
 	/**
-	 * Initialize the instance.
+	 * Initialize the instance and register hooks.
 	 * This is invoked by the dependency injection container.
 	 *
 	 * @internal
@@ -71,12 +85,30 @@ class OrderLogsCleanupHelper {
 	 * @return void
 	 */
 	final public function init( CustomOrdersTableController $hpos_controller, DataSynchronizer $data_synchronizer ): void {
-		$this->hpos_in_use = $hpos_controller->custom_orders_table_usage_is_enabled();
+		$this->hpos_controller   = $hpos_controller;
+		$this->data_synchronizer = $data_synchronizer;
+
+		add_action( self::EXTENDED_CLEANUP_HOOK, array( $this, 'cleanup' ) );
+	}
+
+	/**
+	 * Determine which orders data store is in use.
+	 *
+	 * Resolved on demand rather than in `init()`: the container resolves this class while
+	 * WooCommerce is still booting, and loading the orders data store that early would run
+	 * the `woocommerce_order_data_store` filter before extensions have registered.
+	 */
+	private function resolve_order_store(): void {
+		if ( $this->order_store_resolved ) {
+			return;
+		}
+
+		$this->hpos_in_use = $this->hpos_controller->custom_orders_table_usage_is_enabled();
 		if ( ! $this->hpos_in_use ) {
 			$this->cpt_in_use = \WC_Order_Data_Store_CPT::class === \WC_Data_Store::load( 'order' )->get_current_class_name();
 		}
 
-		$this->data_synchronizer = $data_synchronizer;
+		$this->order_store_resolved = true;
 	}
 
 	/**
@@ -100,9 +132,14 @@ class OrderLogsCleanupHelper {
 	/**
 	 * Run all cleanup tasks: dangling order meta and old log files.
 	 *
+	 * Also registered as the callback for the follow-up run scheduled by
+	 * `schedule_extended_cleanup()`.
+	 *
 	 * @since 10.7.0
 	 */
 	public function cleanup(): void {
+		$this->resolve_order_store();
+
 		$max_age = $this->get_max_age_in_seconds();
 
 		if ( 0 === $max_age ) {
@@ -119,15 +156,6 @@ class OrderLogsCleanupHelper {
 		if ( $more_files || $more_orders ) {
 			$this->schedule_extended_cleanup();
 		}
-	}
-
-	/**
-	 * Continue an order debug logs cleanup that didn't drain the backlog in a single run.
-	 *
-	 * @internal
-	 */
-	public static function handle_woocommerce_cleanup_logs_extended(): void {
-		wc_get_container()->get( self::class )->cleanup();
 	}
 
 	/**
@@ -215,6 +243,8 @@ class OrderLogsCleanupHelper {
 		if ( empty( $items ) ) {
 			return false;
 		}
+
+		$this->resolve_order_store();
 
 		$logger = wc_get_logger();
 		if ( $logger instanceof WC_Logger ) {
