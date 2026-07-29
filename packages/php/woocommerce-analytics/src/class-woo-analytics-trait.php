@@ -266,19 +266,23 @@ trait Woo_Analytics_Trait {
 		/**
 		 * Allow defining custom event properties in WooCommerce Analytics.
 		 *
+		 * See `WC_Analytics_Tracking::get_properties()` for the full contract
+		 * around `$is_client_supplied`.
+		 *
 		 * @module woocommerce-analytics
 		 *
 		 * @since 12.5
 		 * @since 0.16.8 Added the `$event_name` and `$is_client_supplied` parameters.
 		 *
 		 * @param array  $properties Array of event props to be filtered.
-		 * @param string $event_name Event name.
+		 * @param string $event_name Event name. Empty string here: this call builds
+		 *                           common properties, not properties for a specific event.
 		 * @param bool   $is_client_supplied Whether the props came from an untrusted client.
 		 */
 		$properties = apply_filters(
 			'jetpack_woocommerce_analytics_event_props',
 			$common_properties,
-			null,
+			'',
 			false
 		);
 
@@ -304,7 +308,7 @@ trait Woo_Analytics_Trait {
 		return apply_filters(
 			'jetpack_woocommerce_analytics_event_props',
 			$common_properties,
-			null,
+			'',
 			false
 		);
 	}
