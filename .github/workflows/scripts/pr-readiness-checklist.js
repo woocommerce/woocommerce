@@ -174,9 +174,8 @@ function buildCommentBody({ tasks, previousState, authorLogin, stickyCommentUrl 
         lines.push('✅ All checks are passing.');
     } else {
         lines.push(
-            ...tasks.map((task) => {
+            ...tasks.flatMap((task) => {
                 const marker = task.status === 'fail' ? '❌' : '✅';
-                const suffix = task.status === 'fail' ? ` — ${task.remediation}` : '';
                 const jobLinks =
                     task.status === 'fail' && task.jobUrls && task.jobUrls.length > 0
                         ? ' ' +
@@ -188,7 +187,14 @@ function buildCommentBody({ tasks, previousState, authorLogin, stickyCommentUrl 
                               )
                               .join(', ')
                         : '';
-                return `- ${marker} **${task.label}**${suffix}${jobLinks}`;
+                const statusLine = `- ${marker} **${task.label}**${jobLinks}`;
+                // Remediation text (and any non-CI link it carries, e.g. a
+                // guide) goes on its own indented line, kept separate from
+                // the CI job links on the status line above.
+                if (task.status === 'fail') {
+                    return [statusLine, `    - ${task.remediation}`];
+                }
+                return [statusLine];
             })
         );
     }
