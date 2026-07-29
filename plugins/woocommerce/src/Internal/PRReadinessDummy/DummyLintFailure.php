@@ -16,7 +16,7 @@ namespace Automattic\WooCommerce\Internal\PRReadinessDummy;
 class DummyLintFailure {
 
 	/**
-	 * Always returns true.
+	 * Always returns true. No-op commit for the clear->clear test step.
 	 *
 	 * @return bool
 	 */
