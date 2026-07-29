@@ -233,7 +233,7 @@ class WC_Abstract_Order_Update_Taxes_Test extends WC_Unit_Test_Case {
 		// $5 * 10% = $0.50 — already 2-decimal, idempotency target.
 		$order = $this->build_order_from_flat_rate_shipping( '5.00', '50.00' );
 
-		$first_pass  = wc_round_tax_total( '5.00' );
+		$first_pass  = wc_round_tax_total( '0.50' );
 		$second_pass = wc_round_tax_total( (string) $first_pass );
 		$order_value = (float) $order->get_shipping_tax();
 
@@ -268,6 +268,83 @@ class WC_Abstract_Order_Update_Taxes_Test extends WC_Unit_Test_Case {
 				'Per-rate WC_Order_Item_Tax rows (%.4f) must sum to order total_tax (%.4f) so analytics reports match order view.',
 				$row_sum,
 				$order_total
+			)
+		);
+
+		$order->delete( true );
+	}
+
+	/**
+	 * Multi-rate variant at the 0.5 boundary: independently rounded per-rate
+	 * WC_Order_Item_Tax rows must sum to order total_tax/shipping_tax/cart_tax
+	 * when round_at_subtotal is enabled. Complements the single-rate test above
+	 * — catches per-rate drift when the rounding mode or filter would change
+	 * the aggregate.
+	 */
+	public function test_multi_rate_tax_item_rows_sum_to_order_total_tax_in_subtotal_mode() {
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
+		update_option( 'woocommerce_price_num_decimals', 2 );
+
+		$this->add_tax_rate(
+			array(
+				'tax_rate'       => '5.0000',
+				'tax_rate_name'  => 'TAX-A',
+				'tax_rate_order' => '1',
+			)
+		);
+		$this->add_tax_rate(
+			array(
+				'tax_rate'       => '3.2500',
+				'tax_rate_name'  => 'TAX-B',
+				'tax_rate_order' => '2',
+			)
+		);
+
+		$order = $this->build_order_from_flat_rate_shipping( '10.00', '100.00' );
+
+		$row_sum     = $this->sum_tax_item_totals( $order );
+		$order_total = (float) $order->get_total_tax();
+		$order_ship  = (float) $order->get_shipping_tax();
+		$order_cart  = (float) $order->get_cart_tax();
+
+		$this->assertEquals(
+			$row_sum,
+			$order_total,
+			sprintf(
+				'Multi-rate per-rate row sum (%.4f) must equal order total_tax (%.4f) under round_at_subtotal=yes.',
+				$row_sum,
+				$order_total
+			)
+		);
+
+		// Each per-rate row was independently rounded through wc_round_tax_total(),
+		// so sub-cent divergence between the row sum and the order-level shipping_tax
+		// is permitted only at the level wc_round_tax_total() itself produces.
+		// Asserting equality locks the symmetry the fix establishes.
+		$row_ship_sum = 0.0;
+		$row_cart_sum = 0.0;
+		foreach ( $order->get_items( 'tax' ) as $item ) {
+			$row_ship_sum += (float) $item->get_shipping_tax_total();
+			$row_cart_sum += (float) $item->get_tax_total();
+		}
+		$this->assertEquals(
+			$row_ship_sum,
+			$order_ship,
+			sprintf(
+				'Multi-rate per-rate shipping_tax_total rows (%.4f) must equal order shipping_tax (%.4f).',
+				$row_ship_sum,
+				$order_ship
+			)
+		);
+		$this->assertEquals(
+			$row_cart_sum,
+			$order_cart,
+			sprintf(
+				'Multi-rate per-rate tax_total rows (%.4f) must equal order cart_tax (%.4f).',
+				$row_cart_sum,
+				$order_cart
 			)
 		);
 
