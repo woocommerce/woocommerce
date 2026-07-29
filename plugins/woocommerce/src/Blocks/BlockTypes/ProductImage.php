@@ -289,9 +289,11 @@ class ProductImage extends AbstractBlock {
 
 		add_filter( 'wp_calculate_image_srcset', $adjust_srcset, 10, 4 );
 
-		$image_html = $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
-
-		remove_filter( 'wp_calculate_image_srcset', $adjust_srcset, 10 );
+		try {
+			$image_html = $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
+		} finally {
+			remove_filter( 'wp_calculate_image_srcset', $adjust_srcset, 10 );
+		}
 
 		return $image_html;
 	}
