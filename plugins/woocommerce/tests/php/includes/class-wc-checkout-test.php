@@ -283,8 +283,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox 'validate_posted_data' validates a postcode field in a fieldset without a country, without country specific rules.
 	 *
+	 * 'ABCDE' is deliberately valid only without a country: it passes the country agnostic check but fails the
+	 * store's own base country rules, so this fails if the fieldset ever resolves to a real country.
+	 *
 	 * @testWith ["INVALID!", true]
-	 *           ["12345", false]
+	 *           ["ABCDE", false]
 	 *
 	 * @param string $postcode     The posted postcode.
 	 * @param bool   $expect_error True to expect a validation error for the postcode field.
@@ -337,6 +340,34 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->sut->validate_posted_data( $data, $errors );
 
 		$this->assertEmpty( $errors->get_error_message( 'order_state_validation' ) );
+	}
+
+	/**
+	 * @testdox 'validate_posted_data' prefers the posted country over the one stored on the customer.
+	 */
+	public function test_validate_posted_data_prefers_the_posted_country() {
+		$original_billing_country = WC()->customer->get_billing_country();
+
+		WC()->customer->set_billing_country( 'GB' );
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'billing_country'           => 'US',
+			'billing_postcode'          => '12345',
+		);
+
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_posted_data( $data, $errors );
+		} finally {
+			WC()->customer->set_billing_country( $original_billing_country );
+		}
+
+		$this->assertEmpty(
+			$errors->get_error_message( 'billing_postcode_validation' ),
+			"'12345' is a valid US postcode, so the posted country must win over the customer's GB country."
+		);
 	}
 
 	/**
