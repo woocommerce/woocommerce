@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revert the payment token query changes introduced in PR #66607.
