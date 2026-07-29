@@ -49,8 +49,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 		delete_option( 'woocommerce_calc_taxes' );
-<<<<<<< HEAD
-=======
 
 		foreach ( $this->extra_field_filters as $extra_field_filter ) {
 			remove_filter( 'woocommerce_checkout_fields', $extra_field_filter );
@@ -59,7 +57,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->extra_field_filters = array();
 
 		parent::tearDown();
->>>>>>> fdaa3b2a4d (Fix fatal error validating checkout fields outside the billing and shipping fieldsets (#67100))
 	}
 
 	/**
@@ -217,8 +214,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-<<<<<<< HEAD
-=======
 	 * @testdox 'validate_posted_data' reports a required field error, and doesn't throw, for an empty phone field in a fieldset without a country.
 	 *
 	 * @testWith ["order"]
@@ -486,68 +481,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'get_posted_data' respects the selected shipping address.
-	 *
-	 * @testWith [null, false]
-	 *           ["0", false]
-	 *           ["1", true]
-	 *
-	 * @param string|null $posted_value              Raw posted 'ship_to_different_address' value, or null to omit the field.
-	 * @param bool        $ship_to_different_address Whether a separate shipping address is expected to be selected.
-	 */
-	public function test_get_posted_data_respects_shipping_address_selection( $posted_value, $ship_to_different_address ) {
-		add_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
-
-		$posted_data = array(
-			'woocommerce-process-checkout-nonce' => 'test-nonce',
-			'billing_first_name'                 => 'Billing',
-			'billing_last_name'                  => 'Customer',
-			'billing_company'                    => 'Billing Company',
-			'billing_address_1'                  => '123 Billing Street',
-			'billing_address_2'                  => 'Suite 4',
-			'billing_city'                       => 'Billington',
-			'billing_postcode'                   => '12345',
-			'billing_country'                    => 'US',
-			'billing_state'                      => 'CA',
-			'shipping_first_name'                => 'Hidden',
-			'shipping_last_name'                 => 'Autofill',
-			'shipping_company'                   => 'Hidden Company',
-			'shipping_address_1'                 => '999 Hidden Street',
-			'shipping_address_2'                 => 'Hidden Suite',
-			'shipping_city'                      => 'Hidden City',
-			'shipping_postcode'                  => '99999',
-			'shipping_country'                   => 'CA',
-			'shipping_state'                     => 'BC',
-		);
-		if ( null !== $posted_value ) {
-			$posted_data['ship_to_different_address'] = $posted_value;
-		}
-
-		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
-		$_POST         = $posted_data;
-
-		try {
-			$data = $this->sut->get_posted_data();
-		} finally {
-			$_POST = $original_post;
-			remove_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
-		}
-
-		$this->assertSame( $ship_to_different_address, $data['ship_to_different_address'] );
-		$expected_address_type = $ship_to_different_address ? 'shipping' : 'billing';
-
-		foreach ( array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'postcode', 'country', 'state' ) as $field ) {
-			$this->assertArrayHasKey( 'shipping_' . $field, $data, "Shipping {$field} should be present after checkout normalization." );
-			$this->assertSame(
-				$posted_data[ $expected_address_type . '_' . $field ],
-				$data[ 'shipping_' . $field ],
-				"Shipping {$field} should use the {$expected_address_type} {$field} value."
-			);
-		}
-	}
-
-	/**
->>>>>>> fdaa3b2a4d (Fix fatal error validating checkout fields outside the billing and shipping fieldsets (#67100))
 	 * @testdox 'validate_checkout' adds a "We don't ship to country X" error but only if the country exists.
 	 *
 	 * @testWith [ "XX", false ]
