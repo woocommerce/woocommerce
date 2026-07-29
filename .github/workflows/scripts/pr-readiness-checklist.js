@@ -150,11 +150,11 @@ const SILENT_STATUS_MESSAGES = {
 // something that needs to interrupt the author. `failing->failing` is a
 // repeated failure, already covered by "no re-ping while still failing".
 const PING_MESSAGES = {
-    'clear->failing': (authorLogin) =>
-        `@${authorLogin}, the readiness checklist now has failures — see the checklist above.`,
+    'clear->failing': (authorLogin, stickyCommentUrl) =>
+        `@${authorLogin}, the readiness checklist now has failures — see [the checklist above](${stickyCommentUrl}).`,
 };
 
-function buildCommentBody({ tasks, previousState, authorLogin }) {
+function buildCommentBody({ tasks, previousState, authorLogin, stickyCommentUrl }) {
     const overallState = computeOverallState(tasks);
     const transitionKey = `${previousState || 'none'}->${overallState}`;
     const mentionMessage = TRANSITION_MESSAGES[transitionKey];
@@ -196,7 +196,7 @@ function buildCommentBody({ tasks, previousState, authorLogin }) {
     return {
         body: lines.join('\n'),
         mentioned: Boolean(mentionMessage),
-        pingBody: pingMessage ? pingMessage(authorLogin) : null,
+        pingBody: pingMessage ? pingMessage(authorLogin, stickyCommentUrl) : null,
     };
 }
 

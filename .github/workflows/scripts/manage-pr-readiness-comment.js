@@ -115,6 +115,12 @@ module.exports = async ({ github, context, core }) => {
         tasks,
         previousState,
         authorLogin: pr.user.login,
+        // Only relevant when a ping fires, which only happens when a
+        // sticky comment already exists (clear->failing requires a prior
+        // 'clear' state) - html_url comes straight from the listComments
+        // fetch, no extra API call, and (like job html_urls) is generated
+        // deterministically by GitHub, never derived from PR content.
+        stickyCommentUrl: existingComment ? existingComment.html_url : null,
     });
 
     if (existingComment) {

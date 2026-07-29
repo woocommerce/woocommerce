@@ -323,6 +323,7 @@ test('buildCommentBody: regression from clear to failing mentions the author and
         tasks: [{ label: 'Lint', status: 'fail', remediation: 'See annotations.' }],
         previousState: 'clear',
         authorLogin: 'octocat',
+        stickyCommentUrl: 'https://github.com/owner/repo/pull/1#issuecomment-123',
     });
 
     assert.equal(mentioned, true);
@@ -331,9 +332,11 @@ test('buildCommentBody: regression from clear to failing mentions the author and
     );
     // A comment already exists (state was previously clear), so editing it
     // alone would notify no one - this is the one transition that needs a
-    // real, separate createComment call.
+    // real, separate createComment call. It links straight to the sticky
+    // comment (its html_url, already fetched, no extra API call, and safe
+    // to embed directly - GitHub-generated, not PR-author-controlled).
     assert.equal(
         pingBody,
-        '@octocat, the readiness checklist now has failures — see the checklist above.'
+        '@octocat, the readiness checklist now has failures — see [the checklist above](https://github.com/owner/repo/pull/1#issuecomment-123).'
     );
 });
