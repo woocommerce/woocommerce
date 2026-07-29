@@ -11,19 +11,11 @@ import { useIncompatiblePaymentGatewaysNotice } from './use-incompatible-payment
 import { useIncompatibleExtensionNotice } from './use-incompatible-extensions-notice';
 
 type StoredIncompatibleExtension = { [ k: string ]: string[] };
-const initialDismissedNotices: React.SetStateAction<
-	StoredIncompatibleExtension[]
-> = [];
+const initialDismissedNotices: StoredIncompatibleExtension[] = [];
 
-const areEqual = ( array1: string[], array2: string[] ) => {
-	if ( array1.length !== array2.length ) {
-		return false;
-	}
-
-	const uniqueCollectionValues = new Set( [ ...array1, ...array2 ] );
-
-	return uniqueCollectionValues.size === array1.length;
-};
+// Whether every item in `subset` is also present in `superset`.
+const isSubsetOf = ( subset: string[], superset: string[] ) =>
+	subset.every( ( item ) => superset.includes( item ) );
 
 const sortAlphabetically = ( obj: {
 	[ key: string ]: string;
@@ -71,52 +63,54 @@ export const useCombinedIncompatibilityNotice = (
 
 	const [ isVisible, setIsVisible ] = useState( false );
 
-	const isDismissedNoticeUpToDate = dismissedNotices.some(
-		( notice ) =>
-			Object.keys( notice ).includes( blockName ) &&
-			areEqual(
-				notice[ blockName as keyof object ],
-				allIncompatibleItemSlugs
-			)
+	// Every incompatible item the merchant has already dismissed for this block.
+	// Reduce (not find) so we tolerate the legacy shape where a single block
+	// could have accumulated multiple stored entries.
+	const dismissedItemSlugs = dismissedNotices.reduce< string[] >(
+		( acc, notice ) => {
+			if ( Object.keys( notice ).includes( blockName ) ) {
+				acc.push( ...notice[ blockName ] );
+			}
+			return acc;
+		},
+		[]
+	);
+
+	// The notice stays dismissed as long as every currently-incompatible item
+	// has already been acknowledged. Removing an item (e.g. disabling a gateway)
+	// keeps it dismissed; a brand-new, never-acknowledged item brings it back.
+	const isDismissedNoticeUpToDate = isSubsetOf(
+		allIncompatibleItemSlugs,
+		dismissedItemSlugs
 	);
 
 	const shouldBeDismissed =
 		allIncompatibleItemCount === 0 || isDismissedNoticeUpToDate;
 
 	const dismissNotice = () => {
-		const dismissedNoticesSet = new Set( dismissedNotices );
-		dismissedNoticesSet.add( {
-			[ blockName ]: allIncompatibleItemSlugs,
-		} );
-		setDismissedNotices( [ ...dismissedNoticesSet ] );
+		// Consolidate any existing entries for this block into a single record
+		// holding the union of everything acknowledged so far, so that later
+		// re-enabling a previously-dismissed item doesn't resurface the notice.
+		const otherBlockNotices = dismissedNotices.filter(
+			( notice ) => ! Object.keys( notice ).includes( blockName )
+		);
+		const acknowledgedSlugs = [
+			...new Set( [
+				...dismissedItemSlugs,
+				...allIncompatibleItemSlugs,
+			] ),
+		];
+		setDismissedNotices( [
+			...otherBlockNotices,
+			{ [ blockName ]: acknowledgedSlugs },
+		] );
 	};
 
-	// This ensures the modal is not loaded on first render. This is required so
+	// This ensures the notice is not shown on first render. This is required so
 	// Gutenberg doesn't steal the focus from the Guide and focuses the block.
 	useEffect( () => {
 		setIsVisible( ! shouldBeDismissed );
-
-		if ( ! shouldBeDismissed && ! isDismissedNoticeUpToDate ) {
-			setDismissedNotices( ( previousDismissedNotices ) =>
-				previousDismissedNotices.reduce(
-					( acc: StoredIncompatibleExtension[], curr ) => {
-						if ( Object.keys( curr ).includes( blockName ) ) {
-							return acc;
-						}
-						acc.push( curr );
-
-						return acc;
-					},
-					[]
-				)
-			);
-		}
-	}, [
-		shouldBeDismissed,
-		isDismissedNoticeUpToDate,
-		setDismissedNotices,
-		blockName,
-	] );
+	}, [ shouldBeDismissed ] );
 
 	return [
 		isVisible,
