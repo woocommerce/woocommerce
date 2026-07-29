@@ -171,8 +171,14 @@ export class Editor extends CoreEditor {
 		await this.searchTemplate( { templateName } );
 
 		await this.page
+			.locator( '.dataviews-view-grid .dataviews-view-grid__card' )
+			.filter( {
+				has: this.page.getByRole( 'button', {
+					name: templateName,
+					exact: true,
+				} ),
+			} )
 			.getByRole( 'button', { name: 'Actions' } )
-			.first()
 			.click();
 		await this.page
 			.getByRole( 'menuitem', { name: /Reset|Delete/ } )
