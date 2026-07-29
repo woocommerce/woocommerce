@@ -1,6 +1,9 @@
 <?php
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 /**
  * Tests for WC_Abstract_Order::update_taxes() covering rounding parity with the
  * cart, per-rate tax-item symmetry, prices-inclusive HALF_DOWN mode, and the
@@ -142,6 +145,7 @@ class WC_Abstract_Order_Update_Taxes_Test extends WC_Unit_Test_Case {
 				'billing_state'      => 'NY',
 				'billing_postcode'   => '10001',
 				'billing_country'    => 'US',
+				'payment_method'     => 'bacs',
 			),
 			$billing_overrides
 		);
@@ -277,12 +281,20 @@ class WC_Abstract_Order_Update_Taxes_Test extends WC_Unit_Test_Case {
 	/**
 	 * Multi-rate variant at the 0.5 boundary: independently rounded per-rate
 	 * WC_Order_Item_Tax rows must sum to order total_tax/shipping_tax/cart_tax
-	 * when round_at_subtotal is enabled. Complements the single-rate test above
-	 * — catches per-rate drift when the rounding mode or filter would change
-	 * the aggregate.
+	 * when round_at_subtotal is enabled. Complements the single-rate test above.
+	 *
+	 * Runs under woocommerce_prices_include_tax='yes' so the live mode flips
+	 * to PHP_ROUND_HALF_DOWN (WC_TAX_ROUNDING_MODE resolved from 'auto' in the
+	 * test bootstrap re-reads the option on every call). $10 shipping across
+	 * 5% + 3.25% yields an aggregate of 0.825:
+	 *   - per-rate rows (already via wc_round_tax_total):    0.50 + 0.32 = 0.82
+	 *   - legacy aggregate (NumberUtil::round HALF_UP):      0.83
+	 *   - fixed aggregate (wc_round_tax_total HALF_DOWN):    0.82
+	 * Without the per-rate rounding AND the aggregate primitive both going
+	 * through wc_round_tax_total, this assertion fails on trunk.
 	 */
 	public function test_multi_rate_tax_item_rows_sum_to_order_total_tax_in_subtotal_mode() {
-		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
 		update_option( 'woocommerce_price_num_decimals', 2 );
@@ -304,6 +316,9 @@ class WC_Abstract_Order_Update_Taxes_Test extends WC_Unit_Test_Case {
 
 		$order = $this->build_order_from_flat_rate_shipping( '10.00', '100.00' );
 
+		// HALF_DOWN fixture: $10 × (5% + 3.25%) lands at 0.50 + 0.325 = 0.825.
+		// Per-rate rows sum to 0.82; if the aggregate primitive falls back to
+		// HALF_UP, total_tax reads 0.83 — silence = bug.
 		$row_sum     = $this->sum_tax_item_totals( $order );
 		$order_total = (float) $order->get_total_tax();
 		$order_ship  = (float) $order->get_shipping_tax();
@@ -313,7 +328,7 @@ class WC_Abstract_Order_Update_Taxes_Test extends WC_Unit_Test_Case {
 			$row_sum,
 			$order_total,
 			sprintf(
-				'Multi-rate per-rate row sum (%.4f) must equal order total_tax (%.4f) under round_at_subtotal=yes.',
+				'Multi-rate per-rate row sum (%.4f) must equal order total_tax (%.4f) under HALF_DOWN + round_at_subtotal=yes.',
 				$row_sum,
 				$order_total
 			)
@@ -333,7 +348,7 @@ class WC_Abstract_Order_Update_Taxes_Test extends WC_Unit_Test_Case {
 			$row_ship_sum,
 			$order_ship,
 			sprintf(
-				'Multi-rate per-rate shipping_tax_total rows (%.4f) must equal order shipping_tax (%.4f).',
+				'Multi-rate per-rate shipping_tax_total rows (%.4f) must equal order shipping_tax (%.4f) under HALF_DOWN.',
 				$row_ship_sum,
 				$order_ship
 			)
@@ -342,7 +357,7 @@ class WC_Abstract_Order_Update_Taxes_Test extends WC_Unit_Test_Case {
 			$row_cart_sum,
 			$order_cart,
 			sprintf(
-				'Multi-rate per-rate tax_total rows (%.4f) must equal order cart_tax (%.4f).',
+				'Multi-rate per-rate tax_total rows (%.4f) must equal order cart_tax (%.4f) under HALF_DOWN.',
 				$row_cart_sum,
 				$order_cart
 			)
@@ -421,18 +436,84 @@ class WC_Abstract_Order_Update_Taxes_Test extends WC_Unit_Test_Case {
 	public function test_wc_round_tax_total_filter_can_override_order_tax() {
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
 		update_option( 'woocommerce_price_num_decimals', 2 );
 
-		$this->add_tax_rate( array( 'tax_rate' => '10.0000' ) );
+		$rate_a = $this->add_tax_rate(
+			array(
+				'tax_rate'       => '5.0000',
+				'tax_rate_name'  => 'TAX-A',
+				'tax_rate_order' => '1',
+			)
+		);
+		$rate_b = $this->add_tax_rate(
+			array(
+				'tax_rate'       => '3.2500',
+				'tax_rate_name'  => 'TAX-B',
+				'tax_rate_order' => '2',
+			)
+		);
 
-		// Filter returns a deterministic upstream value whenever update_taxes() aggregates shipping tax.
+		// Build a minimal order with a single shipping item carrying two rate
+		// taxes. Bypasses WC_Checkout / WC_Cart_Totals so the assertion is
+		// not contaminated by intermediate set_shipping_tax() calls and the
+		// aggregate wc_round_tax_total(0.825) call is the only one we lock
+		// onto with the marker callback.
+		$order = new WC_Order();
+		$order->set_status( 'pending' );
+		$order->save();
+
+		$line_item = new WC_Order_Item_Product();
+		$line_item->set_props(
+			array(
+				'name'      => 'Test',
+				'subtotal'  => '100.00',
+				'total'     => '100.00',
+				'quantity'  => 1,
+				'tax_class' => '',
+			)
+		);
+		$line_item->set_taxes(
+			array(
+				'total' => array(
+					$rate_a => '5.0',
+					$rate_b => '3.25',
+				),
+			)
+		);
+		$order->add_item( $line_item );
+
+		$ship_item = new WC_Order_Item_Shipping();
+		$ship_item->set_props(
+			array(
+				'name'       => 'Flat rate',
+				'method_id'  => 'flat_rate',
+				'total'      => '10.00',
+				'tax_status' => ProductTaxStatus::TAXABLE,
+			)
+		);
+		$ship_item->set_taxes(
+			array(
+				'total' => array(
+					$rate_a => '0.50',
+					$rate_b => '0.325',
+				),
+			)
+		);
+		$order->add_item( $ship_item );
+		$order->save();
+
+		// Marker fires only when the aggregate-unrounded sum lands at exactly
+		// 0.825 (5% × 10 + 3.25% × 10). Per-rate wc_round_tax_total calls (5.0,
+		// 3.25, 0.50, 0.325) and aggregate cart_tax (8.25) bypass untouched, so
+		// the marker is exclusively a witness to aggregate shipping_tax wiring.
 		$marker                = 999.42;
-		$marker_callback       = function ( $rounded, $value, $precision, $mode ) use ( $marker ) {
+		$seen_values           = array();
+		$marker_callback       = function ( $rounded, $value, $precision, $mode ) use ( $marker, &$seen_values ) {
 			// WordPress coding standard passes $precision and $mode signature parameters even when unused.
 			unset( $precision, $mode );
-			// Only intercept when called on the aggregation path: return marker whenever input > 0 and small.
-			if ( (float) $value > 0 && (float) $value < 100.0 ) {
+			$seen_values[] = (float) $value;
+			if ( 0.825 === (float) $value ) {
 				return $marker;
 			}
 			return $rounded;
@@ -440,14 +521,13 @@ class WC_Abstract_Order_Update_Taxes_Test extends WC_Unit_Test_Case {
 		$this->filter_callback = $marker_callback;
 		add_filter( 'wc_round_tax_total', $marker_callback, 10, 4 );
 
-		$order = $this->build_order_from_flat_rate_shipping( '1.00', '10.00' );
+		$order->update_taxes();
 
-		// The fix routes set_shipping_tax() through wc_round_tax_total(), so the filter must apply.
-		// Without the fix, this reads the order's shipping tax as ~0.10 (one-rate at 10% on $1) but
-		// the filter clamps every wc_round_tax_total() call to a small positive range to a known
-		// marker, so any per-rate shipping-tax or final aggregate round hit by the filter produces
-		// the marker instead of the natural value. Asserting strict equality on the marker pulls
-		// proof that the filter fired on the aggregation path — not just that shipping_tax > 0.
+		// The aggregate set_shipping_tax( wc_round_tax_total( 0.825 ) ) on
+		// the fix branch fires the filter, the marker wins, and shipping_tax
+		// reads back as the marker. On trunk the aggregate falls through
+		// NumberUtil::round which never invokes the filter, the natural
+		// 0.82 value is stored, and the assertion fails.
 		$shipping_tax = (float) $order->get_shipping_tax();
 		$this->assertEqualsWithDelta(
 			$marker,
