@@ -185,16 +185,17 @@ class PageController {
 		$matching_score = null;
 
 		foreach ( $this->pages as $page ) {
-			if (
-				empty( $page['js_page'] ) ||
-				! isset( $page['path'] ) ||
-				! is_string( $page['path'] ) ||
-				! $this->registered_path_matches_current_path( $page['path'], $current_path )
-			) {
+			if ( empty( $page['js_page'] ) || ! isset( $page['path'] ) || ! is_string( $page['path'] ) ) {
 				continue;
 			}
 
-			$score = $this->get_registered_path_score( $page['path'] );
+			$registered_parts = $this->split_registered_page_path( $page['path'] );
+
+			if ( ! $this->registered_path_matches_current_path( $registered_parts, $current_path_parts ) ) {
+				continue;
+			}
+
+			$score = $this->get_registered_path_score( $registered_parts['path'] );
 			if ( null === $matching_score || $score > $matching_score ) {
 				$matching_page  = $page;
 				$matching_score = $score;
@@ -208,15 +209,15 @@ class PageController {
 	/**
 	 * Whether a registered path matches the current request path.
 	 *
-	 * @param string $registered_path Registered page path.
-	 * @param string $current_path Current request path.
+	 * Both paths arrive pre-split so the current request path is only parsed once per request,
+	 * rather than once per registered page. The caller guarantees a non-empty current app path.
+	 *
+	 * @param array $registered_parts Registered page path, as returned by split_registered_page_path().
+	 * @param array $current_parts Current request path, as returned by split_registered_page_path().
 	 * @return bool
 	 */
-	private function registered_path_matches_current_path( $registered_path, $current_path ) {
-		$registered_parts = $this->split_registered_page_path( $registered_path );
-		$current_parts    = $this->split_registered_page_path( $current_path );
-
-		if ( $registered_parts['root'] !== $current_parts['root'] || '' === $registered_parts['path'] || '' === $current_parts['path'] ) {
+	private function registered_path_matches_current_path( $registered_parts, $current_parts ) {
+		if ( $registered_parts['root'] !== $current_parts['root'] || '' === $registered_parts['path'] ) {
 			return false;
 		}
 
@@ -280,13 +281,15 @@ class PageController {
 	/**
 	 * Get a specificity score for a registered page path.
 	 *
-	 * @param string $registered_path Registered page path.
+	 * Only meaningful for app paths that already matched the current request, which is why a `*`
+	 * segment can be scored as a wildcard here: the matcher only treats a terminal `/*` as a splat.
+	 *
+	 * @param string $app_path Registered page app path (the part after `&path=`).
 	 * @return int
 	 */
-	private function get_registered_path_score( $registered_path ) {
-		$path_parts = $this->split_registered_page_path( $registered_path );
-		$segments   = explode( '/', $path_parts['path'] );
-		$score      = count( $segments );
+	private function get_registered_path_score( $app_path ) {
+		$segments = explode( '/', $app_path );
+		$score    = count( $segments );
 
 		if ( in_array( '*', $segments, true ) ) {
 			$score -= 2;
