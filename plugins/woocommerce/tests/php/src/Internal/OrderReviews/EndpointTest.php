@@ -803,14 +803,15 @@ class EndpointTest extends WC_Unit_Test_Case {
 	/**
 	 * Remove every page that could match the Review Order lookup, plus the
 	 * stored option, so a test can stage a clean slate before exercising
-	 * `maybe_create_host_page()`.
+	 * `maybe_create_host_page()`. Trashed pages must go too: `'any'` skips
+	 * `trash`, but `wc_create_page()` untrashes matching pages.
 	 */
 	private function reset_review_order_pages(): void {
 		$candidates = get_posts(
 			array(
 				'name'             => 'review-order',
 				'post_type'        => 'page',
-				'post_status'      => 'any',
+				'post_status'      => array_keys( get_post_stati() ),
 				'numberposts'      => -1,
 				'suppress_filters' => false,
 			)
@@ -824,13 +825,15 @@ class EndpointTest extends WC_Unit_Test_Case {
 	/**
 	 * Remove every page that could match the Shop page lookup, plus the
 	 * stored option, so a test can stage an intentionally empty setting.
+	 * Trashed pages must go too: `'any'` skips `trash`, but
+	 * `wc_create_page()` untrashes matching pages.
 	 */
 	private function reset_shop_pages(): void {
 		$candidates = get_posts(
 			array(
 				'name'             => 'shop',
 				'post_type'        => 'page',
-				'post_status'      => 'any',
+				'post_status'      => array_keys( get_post_stati() ),
 				'numberposts'      => -1,
 				'suppress_filters' => false,
 			)
