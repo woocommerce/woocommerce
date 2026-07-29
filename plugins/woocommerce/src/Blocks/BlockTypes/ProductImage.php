@@ -268,10 +268,10 @@ class ProductImage extends AbstractBlock {
 			$aspect_ratio_parts = explode( '/', $aspect_ratio );
 			$block_aspect_ratio = (int) $aspect_ratio_parts[0] / (int) $aspect_ratio_parts[1];
 
-			$image_aspect_radio = $image_meta['width'] / $image_meta['height'];
+			$image_aspect_ratio = $image_meta['width'] / $image_meta['height'];
 
-			if ( $image_aspect_radio > $block_aspect_ratio ) {
-				$stretch_factor = $image_aspect_radio / $block_aspect_ratio;
+			if ( $image_aspect_ratio > $block_aspect_ratio ) {
+				$stretch_factor = $image_aspect_ratio / $block_aspect_ratio;
 
 				foreach ( $sources as $key => $source ) {
 					$sources[ $key ]['value'] = (int) round( $source['value'] / $stretch_factor );
