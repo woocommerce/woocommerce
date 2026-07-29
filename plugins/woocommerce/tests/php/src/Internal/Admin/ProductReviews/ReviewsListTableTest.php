@@ -74,7 +74,12 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			if ( 'cb' !== $column_id ) {
 				$this->assertStringContainsString( 'data-colname="' . $column_name . '"', $row_output );
 			} else {
-				$this->assertStringContainsString( '<th scope="row" class="check-column"></th>', $row_output );
+				// WordPress 7.1 changed the list table check column cell from <th> to <td>.
+				$this->assertMatchesRegularExpression(
+					'~<(th|td)[^>]*\bclass="check-column"></\1>~',
+					$row_output,
+					'The row should contain an empty check-column cell.'
+				);
 			}
 		}
 
