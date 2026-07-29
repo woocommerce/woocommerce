@@ -267,4 +267,102 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		$this->reset_pixel_batch_queue();
 		unset( $_COOKIE['tk_ai'] );
 	}
+
+	/**
+	 * Simulates a stale MU-plugin copy: it calls record_event() with no flag,
+	 * during a POST to the track endpoint. The guard must strip anyway.
+	 */
+	public function test_record_event_strips_during_a_proxy_request(): void {
+		$_COOKIE['tk_ai']           = 'test-visitor-id-1234567890ab';
+		$_SERVER['REQUEST_METHOD']  = 'POST';
+		$_SERVER['REQUEST_URI']     = '/wp-json/woocommerce-analytics/v1/track';
+		$this->reset_pixel_batch_queue();
+
+		WC_Analytics_Tracking::record_event(
+			'add_to_cart',
+			array( 'store_id' => 'someone-elses-store' )
+		);
+
+		$props = $this->get_queued_pixel_props();
+
+		$this->assertNotSame( 'someone-elses-store', $props['store_id'] ?? null );
+
+		$this->reset_pixel_batch_queue();
+		unset( $_COOKIE['tk_ai'], $_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'] );
+	}
+
+	/**
+	 * The over-stripping guard. If the path or method test is ever loosened,
+	 * this is what fails — trusted server-side callers must keep their
+	 * properties on every request that is not a proxy POST.
+	 *
+	 * @dataProvider non_proxy_request_provider
+	 *
+	 * @param string $method Request method.
+	 * @param string $uri    Request URI.
+	 */
+	public function test_record_event_does_not_strip_outside_a_proxy_request( string $method, string $uri ): void {
+		$_COOKIE['tk_ai']          = 'test-visitor-id-1234567890ab';
+		$_SERVER['REQUEST_METHOD'] = $method;
+		$_SERVER['REQUEST_URI']    = $uri;
+		$this->reset_pixel_batch_queue();
+
+		WC_Analytics_Tracking::record_event(
+			'add_to_cart',
+			array( 'store_id' => 'set-by-trusted-caller' )
+		);
+
+		$props = $this->get_queued_pixel_props();
+
+		$this->assertSame( 'set-by-trusted-caller', $props['store_id'] ?? null );
+
+		$this->reset_pixel_batch_queue();
+		unset( $_COOKIE['tk_ai'], $_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'] );
+	}
+
+	/**
+	 * Requests that must not trigger the guard.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function non_proxy_request_provider(): array {
+		return array(
+			'GET to the track path'      => array( 'GET', '/wp-json/woocommerce-analytics/v1/track' ),
+			'POST to the Store API'      => array( 'POST', '/wp-json/wc/store/v1/checkout' ),
+			'POST to a lookalike suffix' => array( 'POST', '/wp-json/other/woocommerce-analytics/v1/tracking' ),
+			'POST to the site root'      => array( 'POST', '/' ),
+		);
+	}
+
+	/**
+	 * Shapes that must still match, so the safety net is not defeated by a
+	 * query string, a trailing slash, or a subdirectory install.
+	 *
+	 * @dataProvider proxy_request_shape_provider
+	 *
+	 * @param string $uri Request URI.
+	 */
+	public function test_is_proxy_tracking_request_matches_real_world_shapes( string $uri ): void {
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_SERVER['REQUEST_URI']    = $uri;
+
+		$this->assertTrue( WC_Analytics_Tracking::is_proxy_tracking_request(), $uri );
+
+		unset( $_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'] );
+	}
+
+	/**
+	 * URIs that must match.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function proxy_request_shape_provider(): array {
+		return array(
+			'plain'             => array( '/wp-json/woocommerce-analytics/v1/track' ),
+			'trailing slash'    => array( '/wp-json/woocommerce-analytics/v1/track/' ),
+			'query string'      => array( '/wp-json/woocommerce-analytics/v1/track?_wpnonce=abc123' ),
+			'subdirectory'      => array( '/shop/wp-json/woocommerce-analytics/v1/track' ),
+			'rest_route form'   => array( '/index.php/wp-json/woocommerce-analytics/v1/track' ),
+		);
+	}
 }
