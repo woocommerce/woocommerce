@@ -257,7 +257,7 @@ final class OrderWithdrawalFormProcessor {
 			return false;
 		}
 
-		$this->set_rate_limits( $rate_limit_ids );
+		$this->apply_rate_limits( $rate_limit_ids );
 
 		$matched_order = $this->get_matching_order( $data );
 
@@ -268,8 +268,8 @@ final class OrderWithdrawalFormProcessor {
 					'error'
 				);
 
-				$this->clear_rate_limits( $rate_limit_ids );
-
+				$this->apply_rate_limits( $rate_limit_ids, -1 );
+	
 				return false;
 			}
 
@@ -278,7 +278,7 @@ final class OrderWithdrawalFormProcessor {
 
 		if ( ! $this->send_order_withdrawal_emails( $data, $matched_order ) ) {
 			wc_add_notice( __( 'We could not submit your withdrawal request. Please try again or contact us if the problem continues.', 'woocommerce' ), 'error' );
-			$this->clear_rate_limits( $rate_limit_ids );
+			$this->apply_rate_limits( $rate_limit_ids, -1 );
 
 			return false;
 		}
@@ -308,24 +308,14 @@ final class OrderWithdrawalFormProcessor {
 	}
 
 	/**
-	 * Set order withdrawal submission rate limits.
+	 * Set or clear the order withdrawal submission rate limits.
 	 *
 	 * @param string[] $rate_limit_ids Rate limit IDs.
+	 * @param int      $delay          Delay in seconds for the rate limit. Use -1 to clear the rate limit.
 	 */
-	private function set_rate_limits( array $rate_limit_ids ): void {
+	private function apply_rate_limits( array $rate_limit_ids, $delay = self::RATE_LIMIT_DELAY ): void {
 		foreach ( $rate_limit_ids as $rate_limit_id ) {
-			WC_Rate_Limiter::set_rate_limit( $rate_limit_id, self::RATE_LIMIT_DELAY );
-		}
-	}
-
-	/**
-	 * Clear order withdrawal submission rate limits.
-	 *
-	 * @param string[] $rate_limit_ids Rate limit IDs.
-	 */
-	private function clear_rate_limits( array $rate_limit_ids ): void {
-		foreach ( $rate_limit_ids as $rate_limit_id ) {
-			WC_Rate_Limiter::set_rate_limit( $rate_limit_id, -1 );
+			WC_Rate_Limiter::set_rate_limit( $rate_limit_id, $delay );
 		}
 	}
 
