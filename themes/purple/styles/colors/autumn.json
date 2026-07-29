@@ -1,0 +1,45 @@
+{
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"color": "#301f12",
+					"name": "Color 1",
+					"slug": "theme-1"
+				},
+				{
+					"color": "#e5e5e5",
+					"name": "Color 2",
+					"slug": "theme-2"
+				},
+				{
+					"color": "#343d2a",
+					"name": "Color 3",
+					"slug": "theme-3"
+				},
+				{
+					"color": "#a4a4a4",
+					"name": "Color 4",
+					"slug": "theme-4"
+				},
+				{
+					"color": "#281a0f",
+					"name": "Color 5",
+					"slug": "theme-5"
+				},
+				{
+					"color": "rgba(229, 229, 229, 0.2)",
+					"name": "Color 6",
+					"slug": "theme-6"
+				},
+				{
+					"color": "#e2b63e",
+					"name": "Color 7",
+					"slug": "theme-7"
+				}
+			]
+		}
+	},
+	"version": 3,
+	"title": "Autumn"
+}

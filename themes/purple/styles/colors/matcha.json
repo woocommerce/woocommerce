@@ -1,0 +1,45 @@
+{
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"color": "#f0efed",
+					"name": "Color 1",
+					"slug": "theme-1"
+				},
+				{
+					"color": "#000000",
+					"name": "Color 2",
+					"slug": "theme-2"
+				},
+				{
+					"color": "#56543b",
+					"name": "Color 3",
+					"slug": "theme-3"
+				},
+				{
+					"color": "#373330",
+					"name": "Color 4",
+					"slug": "theme-4"
+				},
+				{
+					"color": "#f4eecc",
+					"name": "Color 5",
+					"slug": "theme-5"
+				},
+				{
+					"color": "rgba(17, 17, 17, 0.2)",
+					"name": "Color 6",
+					"slug": "theme-6"
+				},
+				{
+					"color": "#687300",
+					"name": "Color 7",
+					"slug": "theme-7"
+				}
+			]
+		}
+	},
+	"version": 3,
+	"title": "Matcha"
+}

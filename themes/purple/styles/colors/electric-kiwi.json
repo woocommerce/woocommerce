@@ -1,0 +1,45 @@
+{
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"color": "#262623",
+					"name": "Color 1",
+					"slug": "theme-1"
+				},
+				{
+					"color": "#f8f9f7",
+					"name": "Color 2",
+					"slug": "theme-2"
+				},
+				{
+					"color": "#1a1b19",
+					"name": "Color 3",
+					"slug": "theme-3"
+				},
+				{
+					"color": "#969795",
+					"name": "Color 4",
+					"slug": "theme-4"
+				},
+				{
+					"color": "#c2ff00",
+					"name": "Color 5",
+					"slug": "theme-5"
+				},
+				{
+					"color": "rgba(248, 249, 247, 0.2)",
+					"name": "Color 6",
+					"slug": "theme-6"
+				},
+				{
+					"color": "#c2ff00",
+					"name": "Color 7",
+					"slug": "theme-7"
+				}
+			]
+		}
+	},
+	"version": 3,
+	"title": "Electric Kiwi"
+}
