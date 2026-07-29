@@ -195,7 +195,7 @@ Country and state/province lists live in `plugins/woocommerce/i18n/countries.php
 
 **Adding new codes is safe. Renaming or removing existing ones is not.** Do that only when CLDR itself has changed, and expect it to need a migration. State/country codes are stored in orders, shipping zones, tax rates, and store settings. Editing `states.php`/`countries.php` only changes what new data looks like. Every already-stored old code is left behind, no longer matching the dropdown or validation that now expects the new one.
 
-Use `Automattic\WooCommerce\Database\Migrations\MigrationHelper::migrate_country_states()` from a `wc_update_*` function in `wc-update-functions.php`, passing an old-code to new-code map; see `wc_update_721_adjust_new_zealand_states()` for the pattern. Use the helper rather than writing your own partial migration, since it's easy to miss one of the places a code is stored. Purely additive changes (new codes, no renames) don't need a migration.
+To rename subdivision codes, use `Automattic\WooCommerce\Database\Migrations\MigrationHelper::migrate_country_states()` from a `wc_update_*` function in `wc-update-functions.php`, passing a map of old codes to new ones. See `wc_update_721_adjust_new_zealand_states()` for the pattern. Use the helper rather than writing your own partial migration, since it's easy to miss one of the places a code is stored. The helper only covers subdivision codes, so country or other changes might need a custom migration routine. Purely additive changes (new codes, no renames) don't need a migration.
 
 ## Comments and Docblocks
 
