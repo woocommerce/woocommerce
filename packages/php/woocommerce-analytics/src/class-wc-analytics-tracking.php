@@ -37,8 +37,7 @@ class WC_Analytics_Tracking {
 	 *
 	 * The server's own values for these describe the /track request itself — its
 	 * URL, its referrer, its Accept-Language header — not the page the event
-	 * happened on. The client's values are the correct ones, so they are excluded
-	 * from the reserved set.
+	 * happened on. The client's values are the correct ones.
 	 *
 	 * @since 0.16.8
 	 *
@@ -463,9 +462,7 @@ class WC_Analytics_Tracking {
 	 *
 	 * Derived from the properties the server actually computes rather than
 	 * restated as a literal, so a property added to `get_page_common_properties()`
-	 * or `get_server_details()` is protected without a second edit here. The
-	 * failure mode of a hand-maintained list — a new property silently losing its
-	 * protection — cannot occur.
+	 * or `get_server_details()` is protected without a second edit here.
 	 *
 	 * Memoized: a batch of events would otherwise recompute the common properties
 	 * once per event.
