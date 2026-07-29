@@ -237,8 +237,9 @@ abstract class AbstractBlock {
 			)
 		);
 
-		// WordPress reports incorrect usage when wp-editor is loaded alongside the block-based widget editor,
-		// as it conflicts with the wp-edit-widgets and wp-customize-widgets scripts.
+		// For performance, the unified block library combines all block editor assets, so its dependencies include
+		// wp-editor even though blocks available in the widget editor do not use it. WordPress treats loading
+		// wp-editor alongside the block-based widget editor as incorrect usage, so remove it only on this screen.
 		if ( 'wc-block-library' === $handle && function_exists( 'get_current_screen' ) ) {
 			$screen = get_current_screen();
 			if ( $screen && 'widgets' === $screen->base ) {
