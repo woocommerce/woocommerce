@@ -380,6 +380,37 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'validate_posted_data' doesn't throw when the customer object isn't set up yet.
+	 *
+	 * 'WC()->customer' is null until 'WC_Woocommerce::initialize_cart()' runs, and 'validate_posted_data'
+	 * has to survive that. 'ABCDE' passes the country agnostic postcode check but fails the store's base
+	 * country rules, so this also pins that no country is assumed when the customer can't supply one.
+	 */
+	public function test_validate_posted_data_does_not_throw_without_a_customer_object() {
+		$original_customer = WC()->customer;
+
+		WC()->customer = null;
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'billing_postcode'          => 'ABCDE',
+		);
+
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_posted_data( $data, $errors );
+		} finally {
+			WC()->customer = $original_customer;
+		}
+
+		$this->assertEmpty(
+			$errors->get_error_message( 'billing_postcode_validation' ),
+			'Without a customer object there is no country to validate against.'
+		);
+	}
+
+	/**
 	 * @testdox 'validate_posted_data' prefers the posted country over the one stored on the customer.
 	 */
 	public function test_validate_posted_data_prefers_the_posted_country() {

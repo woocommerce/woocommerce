@@ -862,9 +862,9 @@ class WC_Checkout {
 	 * Get the country to validate a fieldset's fields against.
 	 *
 	 * Uses the posted country when the fieldset has one. Only 'billing' and 'shipping' have a customer
-	 * country to fall back on, so every other fieldset, including those registered through the
-	 * 'woocommerce_checkout_fields' filter, is validated without country specific rules instead of
-	 * fataling on an undefined method.
+	 * country to fall back on, and only once the customer object is set up, so every other fieldset,
+	 * including those registered through the 'woocommerce_checkout_fields' filter, is validated without
+	 * country specific rules instead of fataling on an undefined method.
 	 *
 	 * @param  string $fieldset_key Fieldset key.
 	 * @param  array  $data         An array of posted data.
@@ -873,6 +873,10 @@ class WC_Checkout {
 	private function get_fieldset_country( $fieldset_key, $data ) {
 		if ( isset( $data[ $fieldset_key . '_country' ] ) ) {
 			return $data[ $fieldset_key . '_country' ];
+		}
+
+		if ( ! WC()->customer instanceof WC_Customer ) {
+			return '';
 		}
 
 		switch ( $fieldset_key ) {
