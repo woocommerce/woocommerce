@@ -37,6 +37,24 @@
 					"name": "Color 7",
 					"slug": "theme-7"
 				}
+			],
+			"duotone": [
+				{
+					"colors": [
+						"#f8f9f7",
+						"#262623"
+					],
+					"name": "Duotone 1",
+					"slug": "duotone-1"
+				},
+				{
+					"colors": [
+						"#262623",
+						"#c2ff00"
+					],
+					"name": "Duotone 2",
+					"slug": "duotone-2"
+				}
 			]
 		}
 	},
