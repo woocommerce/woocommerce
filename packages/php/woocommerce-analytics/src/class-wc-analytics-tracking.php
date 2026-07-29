@@ -33,6 +33,33 @@ class WC_Analytics_Tracking {
 	const DAILY_SALT_OPTION = 'woocommerce_analytics_daily_salt';
 
 	/**
+	 * Property names a client is authoritative for on the proxy path.
+	 *
+	 * The server's own values for these describe the /track request itself — its
+	 * URL, its referrer, its Accept-Language header — not the page the event
+	 * happened on. The client's values are the correct ones, so they are excluded
+	 * from the reserved set.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @var string[]
+	 */
+	const CLIENT_OVERRIDABLE_PROPERTIES = array( '_lg', '_dl', '_dr' );
+
+	/**
+	 * Identity and envelope property names a client may never set.
+	 *
+	 * These are also protected today by `$required_properties` merging last in
+	 * `get_properties()`. Listed explicitly so that merge ordering is not the only
+	 * thing standing between a client and the visitor id.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @var string[]
+	 */
+	const RESERVED_IDENTITY_PROPERTIES = array( '_ui', '_ut', '_en', 'browser_type' );
+
+	/**
 	 * Event queue.
 	 *
 	 * @var array
@@ -66,6 +93,13 @@ class WC_Analytics_Tracking {
 	 * @var string|null
 	 */
 	private static $cached_visitor_id = null;
+
+	/**
+	 * Memoized reserved property names for the current request.
+	 *
+	 * @var string[]|null
+	 */
+	private static $reserved_property_names = null;
 
 	/**
 	 * Record an event in Tracks and ClickHouse (If enabled).
@@ -365,6 +399,68 @@ class WC_Analytics_Tracking {
 		}
 
 		return $all_properties;
+	}
+
+	/**
+	 * Get the property names a client may not set.
+	 *
+	 * Derived from the properties the server actually computes rather than
+	 * restated as a literal, so a property added to `get_page_common_properties()`
+	 * or `get_server_details()` is protected without a second edit here. The
+	 * failure mode of a hand-maintained list — a new property silently losing its
+	 * protection — cannot occur.
+	 *
+	 * Memoized: a batch of events would otherwise recompute the common properties
+	 * once per event.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @return string[] Reserved property names.
+	 */
+	public static function get_reserved_property_names() {
+		if ( null !== self::$reserved_property_names ) {
+			return self::$reserved_property_names;
+		}
+
+		$server_owned = array_diff(
+			array_keys( self::get_common_properties() ),
+			self::CLIENT_OVERRIDABLE_PROPERTIES
+		);
+
+		self::$reserved_property_names = array_values(
+			array_unique( array_merge( $server_owned, self::RESERVED_IDENTITY_PROPERTIES ) )
+		);
+
+		return self::$reserved_property_names;
+	}
+
+	/**
+	 * Remove server-owned properties from a client-supplied property array.
+	 *
+	 * Stripping is silent and the event still records. Rejecting the event would
+	 * turn the endpoint into an oracle for probing the reserved list, and
+	 * analytics should not fail loudly on a malformed client.
+	 *
+	 * Does not cover property names introduced by callbacks on
+	 * `jetpack_woocommerce_analytics_event_props`: those do not exist until after
+	 * the filter has run, by which point a client value of the same name has
+	 * already been merged. See the filter's docblock for the contract callbacks
+	 * are expected to follow.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @param array $event_properties Client-supplied properties.
+	 * @return array Properties with reserved names removed.
+	 */
+	public static function strip_reserved_properties( $event_properties ) {
+		if ( ! is_array( $event_properties ) || empty( $event_properties ) ) {
+			return array();
+		}
+
+		return array_diff_key(
+			$event_properties,
+			array_flip( self::get_reserved_property_names() )
+		);
 	}
 
 	/**
