@@ -174,6 +174,13 @@ class PageController {
 			}
 		}
 
+		// Route templates only apply to requests with an app path.
+		$current_path_parts = $this->split_registered_page_path( $current_path );
+		if ( '' === $current_path_parts['path'] ) {
+			$this->current_page = false;
+			return;
+		}
+
 		$matching_page  = false;
 		$matching_score = null;
 

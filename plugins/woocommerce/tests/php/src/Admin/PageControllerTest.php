@@ -611,6 +611,8 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			'wildcard followed by trailing slash'        => array( '/route-patterns/:itemId/*/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails' ),
 			'parameter and wildcard different root'      => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=other-page-root&path=%2Froute-patterns%2F123%2Fdetails' ),
 			'different page root'                        => array( '/route-params/:itemName', '/wp-admin/admin.php?page=other-page-root&path=%2Froute-params%2Fsample' ),
+			'wc-admin request without app path'          => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin' ),
+			'unrelated admin request'                    => array( '/route-params/:itemName', '/wp-admin/edit.php?post_type=product' ),
 		);
 	}
 
