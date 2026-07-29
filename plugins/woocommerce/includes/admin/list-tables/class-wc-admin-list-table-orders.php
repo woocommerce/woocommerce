@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable;
+use Automattic\WooCommerce\Internal\Utilities\OrderItemMetaUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -235,23 +236,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * @return string
 	 */
 	public static function get_order_preview_item_html( $order ) {
-		$hidden_order_itemmeta = apply_filters(
-			'woocommerce_hidden_order_itemmeta',
-			array(
-				'_qty',
-				'_tax_class',
-				'_product_id',
-				'_variation_id',
-				'_line_subtotal',
-				'_line_subtotal_tax',
-				'_line_total',
-				'_line_tax',
-				'method_id',
-				'cost',
-				'_reduced_stock',
-				'_restock_refunded_items',
-			)
-		);
+		$hidden_order_itemmeta = OrderItemMetaUtil::get_hidden_keys();
 
 		$line_items = apply_filters( 'woocommerce_admin_order_preview_line_items', $order->get_items(), $order );
 		$columns    = apply_filters(

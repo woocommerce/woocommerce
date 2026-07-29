@@ -4,6 +4,9 @@ jQuery( function ( $ ) {
 	 * Users country and state fields
 	 */
 	var wcSystemStatus = {
+		toolsPollTimer: null,
+		toolsPollInProgress: false,
+
 		init: function () {
 			$( document.body )
 				.on(
@@ -17,6 +20,85 @@ jQuery( function ( $ ) {
 				.on( 'aftercopy', '#copy-for-support, #copy-for-github', this.copySuccess )
 				.on( 'aftercopyfailure', '#copy-for-support, #copy-for-github', this.copyFail )
 				.on( 'click', '#download-for-support', this.downloadReport );
+
+			this.maybePollTools();
+		},
+
+		/**
+		 * Start polling the tools page if a background tool is running.
+		 */
+		maybePollTools: function() {
+			if (
+				this.toolsPollTimer ||
+				! woocommerce_admin_system_status.tools_url ||
+				! this.shouldPollTools()
+			) {
+				return;
+			}
+
+			this.toolsPollTimer = window.setInterval(
+				$.proxy( this.pollTools, this ),
+				parseInt( woocommerce_admin_system_status.tools_poll_interval, 10 ) || 10000
+			);
+		},
+
+		/**
+		 * Check whether any tool rows still need polling.
+		 *
+		 * @return {Bool}
+		 */
+		shouldPollTools: function() {
+			return $( '.wc_status_table--tools tr.requires-refresh' ).is( function() {
+				var $row = $( this );
+				return $row.find( '.run-tool-status' ).length > 0 || $row.find( '.run-tool .button:disabled' ).length > 0;
+			});
+		},
+
+		/**
+		 * Refresh background tool rows from the tools page.
+		 */
+		pollTools: function() {
+			if ( this.toolsPollInProgress ) {
+				return;
+			}
+
+			this.toolsPollInProgress = true;
+
+			var self = this;
+			var toolsUrl = woocommerce_admin_system_status.tools_url;
+			var pollUrl = toolsUrl + ( toolsUrl.indexOf( '?' ) === -1 ? '?' : '&' ) + 'wc_status_tools_poll=' + Date.now();
+
+			$.get( pollUrl )
+				.done( function( response ) {
+					var $response = $( '<div>' ).append( $.parseHTML( response ) );
+
+					$( '.wc_status_table--tools tr.requires-refresh' ).each( function() {
+						var $currentRow = $( this );
+						var action      = $currentRow.data( 'tool-action' );
+
+						if ( ! action ) {
+							return;
+						}
+
+						var $updatedRow = $response.find( '.wc_status_table--tools tr[data-tool-action="' + action + '"]' );
+
+						if ( $updatedRow.length ) {
+							$currentRow.replaceWith( $updatedRow );
+						}
+					});
+
+					if ( ! self.shouldPollTools() ) {
+						window.clearInterval( self.toolsPollTimer );
+						self.toolsPollTimer = null;
+					}
+				})
+				.fail( function() {
+					window.clearInterval( self.toolsPollTimer );
+					self.toolsPollTimer = null;
+				})
+				.always( function() {
+					self.toolsPollInProgress = false;
+				});
 		},
 
 		/**
@@ -82,7 +164,7 @@ jQuery( function ( $ ) {
 				return false;
 			} catch ( e ) {
 				/* jshint devel: true */
-				console.log( e );
+				window.console.log( e );
 			}
 
 			return false;
@@ -177,7 +259,7 @@ jQuery( function ( $ ) {
 
 	wcSystemStatus.init();
 
-	$( '.wc_status_table' ).on( 'click', '.run-tool .button', function( evt ) {
+	$( '.wc_status_table' ).on( 'click', '.run-tool input.button', function( evt ) {
 		evt.stopImmediatePropagation();
 		return window.confirm( woocommerce_admin_system_status.run_tool_confirmation );
 	});

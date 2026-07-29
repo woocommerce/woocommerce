@@ -29,11 +29,14 @@ class WCTransactionalEmails {
 		'customer_new_account',
 		'customer_note',
 		'customer_on_hold_order',
+		'customer_pos_completed_order',
+		'customer_pos_refunded_order',
 		'customer_processing_order',
 		'customer_refunded_order',
 		'customer_partially_refunded_order',
 		'customer_reset_password',
 		'customer_review_request',
+		'customer_verify_email',
 		'failed_order',
 		'new_order',
 	);
@@ -70,11 +73,6 @@ class WCTransactionalEmails {
 	 */
 	public static function get_core_transactional_emails() {
 		$emails = self::$core_transactional_emails;
-
-		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
-			$emails[] = 'customer_pos_completed_order';
-			$emails[] = 'customer_pos_refunded_order';
-		}
 
 		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
 			$fulfillment_emails = array(

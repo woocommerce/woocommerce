@@ -41,6 +41,13 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
 	 * Original timezone before this test started.
 	 * @var string
 	 */
@@ -86,7 +93,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
 		update_option( 'timezone_string', 'Asia/Kolkata' );
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
-		$this->setup_cot();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$this->toggle_cot_authoritative( true );
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 		$this->toggle_cot_feature_and_usage( false );
 		$container = wc_get_container();
@@ -593,6 +602,77 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE %s", $order_id, '_wp_trash_meta_%' ) ) );
 		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key LIKE '_wp_trash_meta_%'", $order_id ) ) );
 		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
+	}
+
+	/**
+	 * @testdox Restoring an HPOS order from trash does not re-fire transactional email dispatch, but still fires the status transition actions.
+	 */
+	public function test_cot_datastore_untrash_suspends_email_dispatch_but_keeps_status_actions() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		$status_action_count       = 0;
+		$status_notification_count = 0;
+		$status_action             = function ( $order_id ) use ( $order, &$status_action_count ) {
+			if ( $order->get_id() === $order_id ) {
+				++$status_action_count;
+			}
+		};
+		$notification_action       = function ( $order_id ) use ( $order, &$status_notification_count ) {
+			if ( $order->get_id() === $order_id ) {
+				++$status_notification_count;
+			}
+		};
+
+		add_action( 'woocommerce_order_status_completed', $status_action );
+		add_action( 'woocommerce_order_status_completed_notification', $notification_action );
+
+		try {
+			$this->assertTrue( $this->sut->untrash_order( $order ) );
+		} finally {
+			remove_action( 'woocommerce_order_status_completed', $status_action );
+			remove_action( 'woocommerce_order_status_completed_notification', $notification_action );
+		}
+
+		$this->assertSame( OrderStatus::COMPLETED, $order->get_status() );
+		// The status transition action still fires so 3rd-party integrations keep working.
+		$this->assertSame( 1, $status_action_count );
+		// The _notification action (which transactional emails listen to) must NOT fire on restore.
+		$this->assertSame( 0, $status_notification_count );
+	}
+
+	/**
+	 * @testdox After untrash, the WC_Emails transactional dispatch listeners are reinstated.
+	 */
+	public function test_cot_datastore_untrash_restores_email_dispatch_after_save() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		$dispatch_callbacks_before = array(
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'send_transactional_email' ) ),
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'queue_transactional_email' ) ),
+		);
+
+		$this->assertTrue( $this->sut->untrash_order( $order ) );
+
+		$dispatch_callbacks_after = array(
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'send_transactional_email' ) ),
+			has_action( 'woocommerce_order_status_completed', array( 'WC_Emails', 'queue_transactional_email' ) ),
+		);
+
+		$this->assertSame( $dispatch_callbacks_before, $dispatch_callbacks_after );
 	}
 
 	/**
@@ -1225,6 +1305,16 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		);
 		$this->assertCount( 12, $query->orders, 'A limit of -1 can successfully be combined with an offset.' );
 		$this->assertEquals( array_slice( $test_orders, 18 ), $query->orders, 'The expected dataset is supplied when an offset is combined with a limit of -1.' );
+		$this->assertEquals(
+			30,
+			$query->found_orders,
+			'A limit of -1 combined with an offset still calculates all found orders.'
+		);
+		$this->assertEquals(
+			0,
+			$query->max_num_pages,
+			'A limit of -1 combined with an offset is treated as unpaged.'
+		);
 
 		$query = new OrdersTableQuery( array( 'limit' => 5 ) );
 		$this->assertCount( 5, $query->orders, 'Limits are respected when applied.' );
@@ -3143,7 +3233,12 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'test_value', $r_order->get_meta( 'test_key', true ) );
 
 		$different_request && $this->reset_order_data_store_state( $cot_store );
-		sleep( 2 );
+
+		// Backdate the modified date on both records (save() backfills the post while sync is on) so the
+		// upcoming sync-off meta update bumps the order's modified date past the post's, without waiting
+		// on the real clock.
+		$r_order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$r_order->save();
 
 		$this->disable_cot_sync();
 		$r_order->update_meta_data( 'test_key', 'test_value_updated' );
@@ -3670,6 +3765,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 * @param string $datastore_to_use Which datastore to use. Either 'hpos' or 'posts'.
 	 */
 	public function test_order_util_get_count_for_type( $datastore_to_use ) {
+		global $wpdb;
+
 		$this->disable_cot_sync();
 
 		if ( 'hpos' === $datastore_to_use ) {
@@ -3681,16 +3778,42 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		// Create a few orders in various states.
 		$order_statuses = array_keys( wc_get_order_statuses() );
 
-		$expected_counts = array_combine( $order_statuses, array_fill( 0, count( $order_statuses ), 0 ) );
+		$expected_counts    = array_combine( $order_statuses, array_fill( 0, count( $order_statuses ), 0 ) );
+		$order_placeholders = array();
+		$order_values       = array();
+		$next_order_id      = null;
+
+		if ( 'hpos' === $datastore_to_use ) {
+			$next_order_id = (int) $wpdb->get_var( "SELECT GREATEST(COALESCE((SELECT MAX(id) FROM {$wpdb->prefix}wc_orders), 0), COALESCE((SELECT MAX(ID) FROM {$wpdb->posts}), 0)) + 1" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are provided by WordPress.
+		}
+
 		foreach ( $order_statuses as $i => $status ) {
 			foreach ( range( 0, $i ) as $_ ) {
 				$expected_counts[ $status ] = $i + 1;
 
-				$order = WC_Helper_Order::create_order();
-				$order->set_status( $status );
-				$order->save();
+				if ( null !== $next_order_id ) {
+					$order_placeholders[] = '(%d, %s, %s)';
+					array_push( $order_values, $next_order_id++, 'shop_order', $status );
+				} else {
+					$order_placeholders[] = '(%s, %s)';
+					array_push( $order_values, 'shop_order', $status );
+				}
 			}
 		}
+
+		if ( 'hpos' === $datastore_to_use ) {
+			$table_name = $wpdb->prefix . 'wc_orders';
+			$columns    = 'id, type, status';
+		} else {
+			$table_name = $wpdb->posts;
+			$columns    = 'post_type, post_status';
+		}
+
+		$insert_query = $wpdb->prepare(
+			"INSERT INTO {$table_name} ({$columns}) VALUES " . implode( ', ', $order_placeholders ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.NotPrepared -- Table and columns are selected from constants above; placeholders are generated above.
+			$order_values
+		);
+		$wpdb->query( $insert_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared immediately above.
 
 		$real_counts = OrderUtil::get_count_for_type( 'shop_order' );
 		foreach ( $expected_counts as $status => $count ) {

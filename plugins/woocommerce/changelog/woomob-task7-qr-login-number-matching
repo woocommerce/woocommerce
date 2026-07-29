@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a number-matching approval step to the mobile-app QR login: after the merchant scans the QR, the mobile app shows a 3-digit number, and wc-admin asks the merchant to tap the matching value from a server-shuffled triple. A wrong tap (or the explicit "I don't recognise this device" cancel link) terminates the session permanently — defending against shoulder-surfed QR codes and leaked screenshots. Older mobile clients without the new capability flag receive 426 Upgrade Required so they can prompt for an app update.

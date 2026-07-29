@@ -19,7 +19,9 @@ interface ProductListProps {
 	containerRef?: ( element: HTMLDivElement | null ) => void;
 }
 
-export default function ProductList( props: ProductListProps ): JSX.Element {
+export default function ProductList(
+	props: ProductListProps
+): React.JSX.Element {
 	const {
 		title,
 		description,

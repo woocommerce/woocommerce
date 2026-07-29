@@ -27,6 +27,14 @@ class Formatter extends KeepAChangelogParser {
 	use PluginTrait;
 
 	/**
+	 * Marker appended after the significance of a major change. Written by format() and stripped by
+	 * parse(), so both sides must share this definition for a changelog to survive a round trip.
+	 *
+	 * @var string
+	 */
+	const BREAKING_CHANGE_MARKER = '[ **BREAKING CHANGE** ]';
+
+	/**
 	 * Bullet for changes.
 	 *
 	 * @var string
@@ -178,9 +186,19 @@ class Formatter extends KeepAChangelogParser {
 				$changes = array();
 				$rows    = explode( "\n", $content );
 				foreach ( $rows as $row ) {
-					$row          = trim( $row );
-					$row          = preg_replace( '/' . $this->bullet . '/', '', $row, 1 );
-					$row_segments = explode( ' - ', $row );
+					$row = trim( $row );
+					// Strip the bullet only as a literal prefix. It is configurable ('* ' in the legacy core
+					// formatter), so it is not safe to interpolate into a pattern, and removing a later
+					// occurrence would corrupt the entry text.
+					if ( 0 === strpos( $row, $this->bullet ) ) {
+						$row = substr( $row, strlen( $this->bullet ) );
+					}
+					// Drop the marker that format() appends after a major significance, otherwise it lands in the
+					// significance segment below and the entry is re-emitted with no significance at all.
+					$row = preg_replace( '/^(major)\s*' . preg_quote( self::BREAKING_CHANGE_MARKER, '/' ) . '/i', '$1', $row );
+
+					// Limit the split so that content containing " - " is not truncated at its own separator.
+					$row_segments = explode( ' - ', $row, 2 );
 					$significance = trim( strtolower( $row_segments[0] ) );
 
 					array_push(
@@ -253,7 +271,7 @@ class Formatter extends KeepAChangelogParser {
 			foreach ( $entry->getChangesBySubheading() as $heading => $changes ) {
 				foreach ( $changes as $change ) {
 					$significance    = $change->getSignificance();
-					$breaking_change = 'major' === $significance ? ' [ **BREAKING CHANGE** ]' : '';
+					$breaking_change = 'major' === $significance ? ' ' . self::BREAKING_CHANGE_MARKER : '';
 					$text            = trim( $change->getContent() );
 					if ( '' !== $text ) {
 						$preamble = $is_subentry ? '' : $bullet . ucfirst( $significance ) . $breaking_change . ' - ';

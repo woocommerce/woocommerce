@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E: de-flake analytics-data.spec by scoping analytics assertions to the spec's own products, polling for analytics-import readiness instead of a fixed wait, and matching summary tiles independently of the comparison delta text.

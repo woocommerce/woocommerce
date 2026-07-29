@@ -30,7 +30,7 @@ From the dynamic context above (read full diffs only if the stat summary is ambi
 - **Significance**: Patch (most common), Minor (new features), Major (breaking — rare)
 - **Bug fix?** Look for issue refs in commits/branch name (e.g., `#12345`, `fix/issue-12345`)
 - **UI changes?** Changes in `client/`, `templates/`, CSS/SCSS, JSX/TSX
-- **Plugin-affecting?** Code shipped to users = yes. CI/CD, workflows, tooling, docs = no. This drives changelog, testing, and PR body complexity — non-plugin PRs use a simplified body (see Step 3).
+- **Plugin-affecting?** Code shipped to users = yes. CI/CD, workflows, tooling, docs = no. This drives the Milestone, Changelog, and Release Communication decisions in Step 3.
 
 ### 2. Gather Context
 
@@ -42,39 +42,23 @@ Extract issue/PR refs from commits and branch name:
 
 ### 3. Generate PR Title + Body
 
-Use the PR template from the dynamic context above. Preserve HTML comments from the template in every retained section; several comments are automation markers or test fixtures for milestone, changelog, and other GitHub checks.
-
 **Title** (under 70 chars, verb-first — the repo convention):
 
 - `Fix <what was broken>`, `Add <what>`, or other verb (Restore, Bump, Prepare, etc.)
 - Optional area prefix: `[Email Editor] Fix double margin-top in flex layout`
 - No `fix:`/`feat:` prefixes. No Linear ticket refs — Linear is internal, PRs are public.
 
-**Body** — depends on whether the change is plugin-affecting:
+**Body** — fill in `.github/PULL_REQUEST_TEMPLATE.md` (loaded in dynamic context above) section by section, in order. The template's HTML comments describe what each section is for — follow them as the per-section instructions. Repo-specific rules that the template doesn't carry, layered on top:
 
-#### Non-plugin changes (CI/CD, tooling, docs, `.ai/skills/`, workflows)
+- **Changes proposed**: 2-3 sentences. Lead with WHY, then WHAT. No filler ("This PR addresses..."). Drop the `Closes # .` line if you don't have a GitHub issue ref. Drop the `Bug introduced in PR # .` line if not a bug fix or origin PR unknown.
+- **Milestone**: tick the auto-assign box only for plugin-affecting changes. The section itself stays — the template marks it do-not-remove.
+- **Changelog entry**:
+    - Plugin-affecting, no changelog files in the diff → tick `Automatically create` with Significance, Type, and a user-facing Message.
+    - Plugin-affecting with changelog files already in the diff → tick `does not require` with the Comment "Created manually."
+    - Not plugin-affecting → tick `does not require` with a Comment explaining why (e.g., "Internal tooling, not shipped to merchants").
+- **Release Communication**: tick `Feature Highlight` for user-visible features merchants will notice, or `Developer Advisory` for changes affecting extension/theme developers (hook signatures, deprecations, REST API field changes). Otherwise leave both unchecked.
 
-Use a simplified body with only these sections:
-
-- **Submission Review Guidelines**: Keep as-is from template.
-- **Changes proposed**: 2-3 sentences. Lead with WHY, then WHAT.
-- **Milestone**: Keep the section and check auto-assign `[x]` unless a milestone will be assigned manually. Keep the surrounding template comments, including `<!-- milestone-target-selection -->` and `<!-- /milestone-target-selection -->`.
-
-Skip Screenshots, Testing instructions, Testing done, and Changelog sections entirely.
-
-#### Plugin-affecting changes
-
-Use the full template:
-
-- **Submission Review Guidelines**: Keep as-is from template.
-- **Changes proposed**: 2-3 sentences. Lead with WHY, then WHAT. No filler ("This PR addresses..."). Include `Closes #1234.` if applicable. For bugs: `Bug introduced in PR #XXXX.` (omit this line entirely if not a bug fix).
-- **Screenshots**: Remove section if no UI changes. For UI changes, use Chrome DevTools MCP to capture screenshots if available; otherwise remind user to add them before marking ready.
-- **Testing instructions**: Concrete numbered steps with expected outcomes derived from the diff. Each step must be actionable — don't reference links that won't exist yet.
-- **Testing done**: Fill with what's verifiable from the session (commits, test runs, lint runs). If nothing is verifiable, write "Author to fill in before marking ready."
-- **Milestone**: Check auto-assign `[x]` unless a milestone will be assigned manually. Keep the surrounding template comments, including `<!-- milestone-target-selection -->` and `<!-- /milestone-target-selection -->`.
-- **Changelog**: If changelogs already in diff → "does not require" (created manually). Otherwise → "Automatically create" `[x]` with Significance, Type, and a user-facing Message. Keep the template comments in this section, including inline comments after headings such as `#### Message <!-- Add a changelog message here -->`.
-
-Do not strip HTML comments (`<!-- -->`) from retained template sections. They support PR automation and GitHub tests. Remove only unfilled placeholder lines that are actual visible placeholders (e.g., `Closes # .`, `Bug introduced in PR # .`).
+After filling, keep the template's HTML comments (`<!-- -->`) — they support PR automation and GitHub tests. Remove only unfilled placeholder lines that are actual visible placeholders (e.g., `Closes # .`, `Bug introduced in PR # .`).
 
 ### 4. Preview
 
@@ -96,5 +80,5 @@ Output the PR URL. If UI changes need screenshots, remind the user.
 
 - No Co-Authored-By lines or self-attribution
 - Never commit code — pushing is fine
-- Preserve the PR template section headings and HTML comments exactly in retained sections; the Milestone section is required for all PRs unless a milestone is assigned manually
+- Preserve the PR template section headings and HTML comments exactly
 - Changelog checkboxes must match CI automation format

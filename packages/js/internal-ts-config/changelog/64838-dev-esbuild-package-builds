@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Inlined the wireit-wrapped types generator command into the build script.

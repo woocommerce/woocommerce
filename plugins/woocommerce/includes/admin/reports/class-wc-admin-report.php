@@ -6,7 +6,8 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Internal\Admin\Reports\HposLegacyOrderReportQueryBuilder;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -122,231 +123,244 @@ class WC_Admin_Report {
 
 		$order_status = apply_filters( 'woocommerce_reports_order_statuses', $order_status );
 
-		$query  = array();
-		$select = array();
+		$args['order_status'] = $order_status;
 
-		foreach ( $data as $raw_key => $value ) {
-			$key      = sanitize_key( $raw_key );
-			$distinct = '';
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$query = wc_get_container()->get( HposLegacyOrderReportQueryBuilder::class )->build_query( $args, (int) $this->start_date, (int) $this->end_date );
+		} else {
+			$query  = array();
+			$select = array();
 
-			if ( isset( $value['distinct'] ) ) {
-				$distinct = 'DISTINCT';
-			}
+			foreach ( $data as $raw_key => $value ) {
+				$key      = sanitize_key( $raw_key );
+				$distinct = '';
 
-			switch ( $value['type'] ) {
-				case 'meta':
-					$get_key = "meta_{$key}.meta_value";
-					break;
-				case 'parent_meta':
-					$get_key = "parent_meta_{$key}.meta_value";
-					break;
-				case 'post_data':
-					$get_key = "posts.{$key}";
-					break;
-				case 'order_item_meta':
-					$get_key = "order_item_meta_{$key}.meta_value";
-					break;
-				case 'order_item':
-					$get_key = "order_items.{$key}";
-					break;
-			}
+				if ( isset( $value['distinct'] ) ) {
+					$distinct = 'DISTINCT';
+				}
 
-			if ( empty( $get_key ) ) {
-				// Skip to the next foreach iteration else the query will be invalid.
-				continue;
-			}
+				switch ( $value['type'] ) {
+					case 'meta':
+						$get_key = "meta_{$key}.meta_value";
+						break;
+					case 'parent_meta':
+						$get_key = "parent_meta_{$key}.meta_value";
+						break;
+					case 'post_data':
+						$get_key = "posts.{$key}";
+						break;
+					case 'order_item_meta':
+						$get_key = "order_item_meta_{$key}.meta_value";
+						break;
+					case 'order_item':
+						$get_key = "order_items.{$key}";
+						break;
+				}
 
-			if ( $value['function'] ) {
-				$get = "{$value['function']}({$distinct} {$get_key})";
-			} else {
-				$get = "{$distinct} {$get_key}";
-			}
-
-			$select[] = "{$get} as {$value['name']}";
-		}
-
-		$query['select'] = 'SELECT ' . implode( ',', $select );
-		$query['from']   = "FROM {$wpdb->posts} AS posts";
-
-		// Joins.
-		$joins = array();
-
-		foreach ( ( $data + $where ) as $raw_key => $value ) {
-			$join_type = isset( $value['join_type'] ) ? $value['join_type'] : 'INNER';
-			$type      = isset( $value['type'] ) ? $value['type'] : false;
-			$key       = sanitize_key( $raw_key );
-
-			switch ( $type ) {
-				case 'meta':
-					$joins[ "meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS meta_{$key} ON ( posts.ID = meta_{$key}.post_id AND meta_{$key}.meta_key = '{$raw_key}' )";
-					break;
-				case 'parent_meta':
-					$joins[ "parent_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS parent_meta_{$key} ON (posts.post_parent = parent_meta_{$key}.post_id) AND (parent_meta_{$key}.meta_key = '{$raw_key}')";
-					break;
-				case 'order_item_meta':
-					$joins['order_items'] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON (posts.ID = order_items.order_id)";
-
-					if ( ! empty( $value['order_item_type'] ) ) {
-						$joins['order_items'] .= " AND (order_items.order_item_type = '{$value['order_item_type']}')";
-					}
-
-					$joins[ "order_item_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON " .
-														"(order_items.order_item_id = order_item_meta_{$key}.order_item_id) " .
-														" AND (order_item_meta_{$key}.meta_key = '{$raw_key}')";
-					break;
-				case 'order_item':
-					$joins['order_items'] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
-					break;
-			}
-		}
-
-		if ( ! empty( $where_meta ) ) {
-			foreach ( $where_meta as $value ) {
-				if ( ! is_array( $value ) ) {
+				if ( empty( $get_key ) ) {
+					// Skip to the next foreach iteration else the query will be invalid.
 					continue;
 				}
+
+				if ( $value['function'] ) {
+					$get = "{$value['function']}({$distinct} {$get_key})";
+				} else {
+					$get = "{$distinct} {$get_key}";
+				}
+
+				$select[] = "{$get} as {$value['name']}";
+			}
+
+			$query['select'] = 'SELECT ' . implode( ',', $select );
+			$query['from']   = "FROM {$wpdb->posts} AS posts";
+
+			// Joins.
+			$joins = array();
+
+			foreach ( ( $data + $where ) as $raw_key => $value ) {
 				$join_type = isset( $value['join_type'] ) ? $value['join_type'] : 'INNER';
 				$type      = isset( $value['type'] ) ? $value['type'] : false;
-				$key       = sanitize_key( is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'] );
+				$key       = sanitize_key( $raw_key );
 
-				if ( 'order_item_meta' === $type ) {
+				switch ( $type ) {
+					case 'meta':
+						$joins[ "meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS meta_{$key} ON ( posts.ID = meta_{$key}.post_id AND meta_{$key}.meta_key = '{$raw_key}' )";
+						break;
+					case 'parent_meta':
+						$joins[ "parent_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS parent_meta_{$key} ON (posts.post_parent = parent_meta_{$key}.post_id) AND (parent_meta_{$key}.meta_key = '{$raw_key}')";
+						break;
+					case 'order_item_meta':
+						$joins['order_items'] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON (posts.ID = order_items.order_id)";
 
-					$joins['order_items']              = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
-					$joins[ "order_item_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items.order_item_id = order_item_meta_{$key}.order_item_id";
-
-				} else {
-					// If we have a where clause for meta, join the postmeta table.
-					$joins[ "meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS meta_{$key} ON posts.ID = meta_{$key}.post_id";
-				}
-			}
-		}
-
-		if ( ! empty( $parent_order_status ) ) {
-			$joins['parent'] = "LEFT JOIN {$wpdb->posts} AS parent ON posts.post_parent = parent.ID";
-		}
-
-		$query['join'] = implode( ' ', $joins );
-
-		$query['where'] = "
-			WHERE 	posts.post_type 	IN ( '" . implode( "','", $order_types ) . "' )
-			";
-
-		if ( ! empty( $order_status ) ) {
-			$query['where'] .= "
-				AND 	posts.post_status 	IN ( 'wc-" . implode( "','wc-", $order_status ) . "')
-			";
-		}
-
-		if ( ! empty( $parent_order_status ) ) {
-			if ( ! empty( $order_status ) ) {
-				$query['where'] .= " AND ( parent.post_status IN ( 'wc-" . implode( "','wc-", $parent_order_status ) . "') OR parent.ID IS NULL ) ";
-			} else {
-				$query['where'] .= " AND parent.post_status IN ( 'wc-" . implode( "','wc-", $parent_order_status ) . "') ";
-			}
-		}
-
-		// phpcs:disable WordPress.DateTime.RestrictedFunctions.date_date
-		if ( $filter_range ) {
-			$query['where'] .= "
-				AND 	posts.post_date >= '" . date( 'Y-m-d H:i:s', $this->start_date ) . "'
-				AND 	posts.post_date < '" . date( 'Y-m-d H:i:s', strtotime( '+1 DAY', $this->end_date ) ) . "'
-			";
-		}
-		// phpcs:enable WordPress.DateTime.RestrictedFunctions.date_date
-
-		if ( ! empty( $where_meta ) ) {
-
-			$relation = isset( $where_meta['relation'] ) ? $where_meta['relation'] : 'AND';
-
-			$query['where'] .= ' AND (';
-
-			foreach ( $where_meta as $index => $value ) {
-
-				if ( ! is_array( $value ) ) {
-					continue;
-				}
-
-				$key = sanitize_key( is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'] );
-
-				if ( strtolower( $value['operator'] ) === 'in' || strtolower( $value['operator'] ) === 'not in' ) {
-
-					if ( ! empty( $value['meta_value'] ) && ! is_array( $value['meta_value'] ) ) {
-						$value['meta_value'] = (array) $value['meta_value']; // @phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-					}
-
-					if ( ! empty( $value['meta_value'] ) ) {
-						$formats     = implode( ', ', array_fill( 0, count( $value['meta_value'] ), '%s' ) );
-						$where_value = $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['meta_value'] ) . ')'; // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-					}
-				} else {
-					$where_value = $value['operator'] . ' ' . $wpdb->prepare( '%s', $value['meta_value'] );
-				}
-
-				if ( ! empty( $where_value ) ) {
-					if ( $index > 0 ) {
-						$query['where'] .= ' ' . $relation;
-					}
-
-					if ( isset( $value['type'] ) && 'order_item_meta' === $value['type'] ) {
-
-						if ( is_array( $value['meta_key'] ) ) {
-							$query['where'] .= " ( order_item_meta_{$key}.meta_key   IN ('" . implode( "','", $value['meta_key'] ) . "')";
-						} else {
-							$query['where'] .= " ( order_item_meta_{$key}.meta_key   = '{$value['meta_key']}'";
+						if ( ! empty( $value['order_item_type'] ) ) {
+							$joins['order_items'] .= " AND (order_items.order_item_type = '{$value['order_item_type']}')";
 						}
 
-						$query['where'] .= " AND order_item_meta_{$key}.meta_value {$where_value} )";
+						$joins[ "order_item_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON " .
+															"(order_items.order_item_id = order_item_meta_{$key}.order_item_id) " .
+															" AND (order_item_meta_{$key}.meta_key = '{$raw_key}')";
+						break;
+					case 'order_item':
+						$joins['order_items'] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
+						break;
+				}
+			}
+
+			if ( ! empty( $where_meta ) ) {
+				foreach ( $where_meta as $value ) {
+					if ( ! is_array( $value ) ) {
+						continue;
+					}
+					$join_type = isset( $value['join_type'] ) ? $value['join_type'] : 'INNER';
+					$type      = isset( $value['type'] ) ? $value['type'] : false;
+					$key       = sanitize_key( is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'] );
+
+					if ( 'order_item_meta' === $type ) {
+
+						$joins['order_items']              = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_items.order_id";
+						$joins[ "order_item_meta_{$key}" ] = "{$join_type} JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_{$key} ON order_items.order_item_id = order_item_meta_{$key}.order_item_id";
+
 					} else {
+						// If we have a where clause for meta, join the postmeta table.
+						$joins[ "meta_{$key}" ] = "{$join_type} JOIN {$wpdb->postmeta} AS meta_{$key} ON posts.ID = meta_{$key}.post_id";
+					}
+				}
+			}
 
-						if ( is_array( $value['meta_key'] ) ) {
-							$query['where'] .= " ( meta_{$key}.meta_key   IN ('" . implode( "','", $value['meta_key'] ) . "')";
-						} else {
-							$query['where'] .= " ( meta_{$key}.meta_key   = '{$value['meta_key']}'";
+			if ( ! empty( $parent_order_status ) ) {
+				$joins['parent'] = "LEFT JOIN {$wpdb->posts} AS parent ON posts.post_parent = parent.ID";
+			}
+
+			$query['join'] = implode( ' ', $joins );
+
+			$query['where'] = "
+				WHERE 	posts.post_type 	IN ( '" . implode( "','", $order_types ) . "' )
+				";
+
+			if ( ! empty( $order_status ) ) {
+				$query['where'] .= "
+					AND 	posts.post_status 	IN ( 'wc-" . implode( "','wc-", $order_status ) . "')
+				";
+			}
+
+			if ( ! empty( $parent_order_status ) ) {
+				if ( ! empty( $order_status ) ) {
+					$query['where'] .= " AND ( parent.post_status IN ( 'wc-" . implode( "','wc-", $parent_order_status ) . "') OR parent.ID IS NULL ) ";
+				} else {
+					$query['where'] .= " AND parent.post_status IN ( 'wc-" . implode( "','wc-", $parent_order_status ) . "') ";
+				}
+			}
+
+			// phpcs:disable WordPress.DateTime.RestrictedFunctions.date_date
+			if ( $filter_range ) {
+				$query['where'] .= "
+					AND 	posts.post_date >= '" . date( 'Y-m-d H:i:s', $this->start_date ) . "'
+					AND 	posts.post_date < '" . date( 'Y-m-d H:i:s', strtotime( '+1 DAY', $this->end_date ) ) . "'
+				";
+			}
+			// phpcs:enable WordPress.DateTime.RestrictedFunctions.date_date
+
+			if ( ! empty( $where_meta ) ) {
+
+				$relation = isset( $where_meta['relation'] ) ? $where_meta['relation'] : 'AND';
+
+				$query['where'] .= ' AND (';
+
+				foreach ( $where_meta as $index => $value ) {
+
+					if ( ! is_array( $value ) ) {
+						continue;
+					}
+
+					$key = sanitize_key( is_array( $value['meta_key'] ) ? $value['meta_key'][0] . '_array' : $value['meta_key'] );
+
+					if ( strtolower( $value['operator'] ) === 'in' || strtolower( $value['operator'] ) === 'not in' ) {
+
+						if ( ! empty( $value['meta_value'] ) && ! is_array( $value['meta_value'] ) ) {
+							$value['meta_value'] = (array) $value['meta_value']; // @phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 						}
 
-						$query['where'] .= " AND meta_{$key}.meta_value {$where_value} )";
+						if ( ! empty( $value['meta_value'] ) ) {
+							$formats     = implode( ', ', array_fill( 0, count( $value['meta_value'] ), '%s' ) );
+							$where_value = $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['meta_value'] ) . ')'; // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+						}
+					} else {
+						$where_value = $value['operator'] . ' ' . $wpdb->prepare( '%s', $value['meta_value'] );
+					}
+
+					if ( ! empty( $where_value ) ) {
+						if ( $index > 0 ) {
+							$query['where'] .= ' ' . $relation;
+						}
+
+						if ( isset( $value['type'] ) && 'order_item_meta' === $value['type'] ) {
+
+							if ( is_array( $value['meta_key'] ) ) {
+								$query['where'] .= " ( order_item_meta_{$key}.meta_key   IN ('" . implode( "','", $value['meta_key'] ) . "')";
+							} else {
+								$query['where'] .= " ( order_item_meta_{$key}.meta_key   = '{$value['meta_key']}'";
+							}
+
+							$query['where'] .= " AND order_item_meta_{$key}.meta_value {$where_value} )";
+						} else {
+
+							if ( is_array( $value['meta_key'] ) ) {
+								$query['where'] .= " ( meta_{$key}.meta_key   IN ('" . implode( "','", $value['meta_key'] ) . "')";
+							} else {
+								$query['where'] .= " ( meta_{$key}.meta_key   = '{$value['meta_key']}'";
+							}
+
+							$query['where'] .= " AND meta_{$key}.meta_value {$where_value} )";
+						}
+					}
+				}
+
+				$query['where'] .= ')';
+			}
+
+			if ( ! empty( $where ) ) {
+
+				foreach ( $where as $value ) {
+
+					if ( strtolower( $value['operator'] ) === 'in' || strtolower( $value['operator'] ) === 'not in' ) {
+
+						if ( ! empty( $value['value'] ) && ! is_array( $value['value'] ) ) {
+							$value['value'] = (array) $value['value'];
+						}
+						if ( ! empty( $value['value'] ) ) {
+							$formats     = implode( ', ', array_fill( 0, count( $value['value'] ), '%s' ) );
+							$where_value = $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['value'] ) . ')'; // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+						}
+					} else {
+						$where_value = $value['operator'] . ' ' . $wpdb->prepare( '%s', $value['value'] );
+					}
+
+					if ( ! empty( $where_value ) ) {
+						$query['where'] .= " AND {$value['key']} {$where_value}";
 					}
 				}
 			}
 
-			$query['where'] .= ')';
-		}
+			if ( $group_by ) {
+				$query['group_by'] = "GROUP BY {$group_by}";
+			}
 
-		if ( ! empty( $where ) ) {
+			if ( $order_by ) {
+				$query['order_by'] = "ORDER BY {$order_by}";
+			}
 
-			foreach ( $where as $value ) {
-
-				if ( strtolower( $value['operator'] ) === 'in' || strtolower( $value['operator'] ) === 'not in' ) {
-
-					if ( ! empty( $value['value'] ) && ! is_array( $value['value'] ) ) {
-						$value['value'] = (array) $value['value'];
-					}
-					if ( ! empty( $value['value'] ) ) {
-						$formats     = implode( ', ', array_fill( 0, count( $value['value'] ), '%s' ) );
-						$where_value = $value['operator'] . ' (' . $wpdb->prepare( $formats, $value['value'] ) . ')'; // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-					}
-				} else {
-					$where_value = $value['operator'] . ' ' . $wpdb->prepare( '%s', $value['value'] );
-				}
-
-				if ( ! empty( $where_value ) ) {
-					$query['where'] .= " AND {$value['key']} {$where_value}";
-				}
+			if ( $limit ) {
+				$query['limit'] = "LIMIT {$limit}";
 			}
 		}
 
-		if ( $group_by ) {
-			$query['group_by'] = "GROUP BY {$group_by}";
-		}
-
-		if ( $order_by ) {
-			$query['order_by'] = "ORDER BY {$order_by}";
-		}
-
-		if ( $limit ) {
-			$query['limit'] = "LIMIT {$limit}";
-		}
-
+		/**
+		 * Filters the legacy order report SQL clauses before they are combined into a SQL string.
+		 *
+		 * @param array $query SQL clauses keyed by select/from/join/where/group_by/order_by/limit.
+		 *
+		 * @since 2.1.0
+		 */
 		$query = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
 		$query = implode( ' ', $query );
 
@@ -359,6 +373,14 @@ class WC_Admin_Report {
 		if ( $debug || $nocache ) {
 			self::enable_big_selects();
 
+			/**
+			 * Filters the legacy order report query result.
+			 *
+			 * @param mixed $result Query result returned by wpdb.
+			 * @param array $data   Report data arguments.
+			 *
+			 * @since 2.1.0
+			 */
 			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 		} else {
 			$query_hash = md5( $query_type . $query );
@@ -366,6 +388,14 @@ class WC_Admin_Report {
 			if ( null === $result ) {
 				self::enable_big_selects();
 
+				/**
+				 * Filters the legacy order report query result.
+				 *
+				 * @param mixed $result Query result returned by wpdb.
+				 * @param array $data   Report data arguments.
+				 *
+				 * @since 2.1.0
+				 */
 				$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 			}
 			$this->set_cached_query( $query_hash, $result );

@@ -61,7 +61,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
 		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
-		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
+		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ), 5 );
 
 		include_once __DIR__ . '/class-wc-admin-upload-downloadable-product.php';
 
@@ -395,10 +395,8 @@ class WC_Admin_Post_Types {
 	private function quick_edit_save( $post_id, $product ) {
 		$request_data = $this->request_data();
 
-		$data_store        = $product->get_data_store();
-		$old_regular_price = $product->get_regular_price();
-		$old_sale_price    = $product->get_sale_price();
-		$input_to_props    = array(
+		$data_store     = $product->get_data_store();
+		$input_to_props = array(
 			'_weight'     => 'weight',
 			'_length'     => 'length',
 			'_width'      => 'width',
@@ -455,32 +453,51 @@ class WC_Admin_Post_Types {
 
 			if ( isset( $request_data['_regular_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-				$new_regular_price = ( '' === $request_data['_regular_price'] ) ? '' : wc_format_decimal( $request_data['_regular_price'] );
-				$product->set_regular_price( $new_regular_price );
-			} else {
-				$new_regular_price = null;
+				$regular_price = ( '' === $request_data['_regular_price'] ) ? '' : wc_format_decimal( $request_data['_regular_price'] );
+				$product->set_regular_price( $regular_price );
 			}
 
 			if ( isset( $request_data['_sale_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-				$new_sale_price = ( '' === $request_data['_sale_price'] ) ? '' : wc_format_decimal( $request_data['_sale_price'] );
-				$product->set_sale_price( $new_sale_price );
-			} else {
-				$new_sale_price = null;
+				$sale_price = ( '' === $request_data['_sale_price'] ) ? '' : wc_format_decimal( $request_data['_sale_price'] );
+				$product->set_sale_price( $sale_price );
 			}
 
-			// Handle price - remove dates and set to lowest.
-			$price_changed = false;
+			// Match the full product editor's date parsing and site-timezone behavior.
+			if ( isset( $request_data['_sale_price_dates_from'] ) ) {
+				$date_on_sale_from = '';
+				if ( is_string( $request_data['_sale_price_dates_from'] ) ) {
+					/**
+					 * Sanitized sale start date.
+					 *
+					 * @var string $date_on_sale_from
+					 */
+					$date_on_sale_from = wc_clean( wp_unslash( $request_data['_sale_price_dates_from'] ) );
+				}
 
-			if ( ! is_null( $new_regular_price ) && $new_regular_price !== $old_regular_price ) {
-				$price_changed = true;
-			} elseif ( ! is_null( $new_sale_price ) && $new_sale_price !== $old_sale_price ) {
-				$price_changed = true;
+				if ( ! empty( $date_on_sale_from ) ) {
+					$date_on_sale_from = date( 'Y-m-d 00:00:00', (int) strtotime( $date_on_sale_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+				}
+
+				$product->set_date_on_sale_from( $date_on_sale_from );
 			}
 
-			if ( $price_changed ) {
-				$product->set_date_on_sale_to( '' );
-				$product->set_date_on_sale_from( '' );
+			if ( isset( $request_data['_sale_price_dates_to'] ) ) {
+				$date_on_sale_to = '';
+				if ( is_string( $request_data['_sale_price_dates_to'] ) ) {
+					/**
+					 * Sanitized sale end date.
+					 *
+					 * @var string $date_on_sale_to
+					 */
+					$date_on_sale_to = wc_clean( wp_unslash( $request_data['_sale_price_dates_to'] ) );
+				}
+
+				if ( ! empty( $date_on_sale_to ) ) {
+					$date_on_sale_to = date( 'Y-m-d 23:59:59', (int) strtotime( $date_on_sale_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+				}
+
+				$product->set_date_on_sale_to( $date_on_sale_to );
 			}
 		}
 
@@ -508,7 +525,12 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-			$stock_amount = 'yes' === $manage_stock && isset( $request_data['_stock'] ) && is_numeric( wp_unslash( $request_data['_stock'] ) ) ? wc_stock_amount( wp_unslash( $request_data['_stock'] ) ) : '';
+			if ( 'yes' === $manage_stock && isset( $request_data['_stock'] ) ) {
+				$stock_value  = wp_unslash( $request_data['_stock'] );
+				$stock_amount = is_numeric( $stock_value ) ? wc_stock_amount( $stock_value ) : 0;
+			} else {
+				$stock_amount = '';
+			}
 			$product->set_stock_quantity( $stock_amount );
 		}
 
@@ -726,13 +748,18 @@ class WC_Admin_Post_Types {
 	/**
 	 * Hidden default Meta-Boxes.
 	 *
-	 * @param  array  $hidden Hidden boxes.
-	 * @param  object $screen Current screen.
+	 * @param  array     $hidden Hidden boxes.
+	 * @param  WP_Screen $screen Current screen.
 	 * @return array
 	 */
 	public function hidden_meta_boxes( $hidden, $screen ) {
 		if ( 'product' === $screen->post_type && 'post' === $screen->base ) {
 			$hidden = array_merge( $hidden, array( 'postcustom' ) );
+		}
+
+		// Download permissions are granted automatically, so hide the box by default on order screens (HPOS and legacy CPT). Merchants can re-enable it via Screen Options.
+		if ( wc_get_page_screen_id( 'shop-order' ) === $screen->id ) {
+			$hidden = array_merge( $hidden, array( 'woocommerce-order-downloads' ) );
 		}
 
 		return $hidden;
@@ -754,7 +781,7 @@ class WC_Admin_Post_Types {
 		$current_featured   = wc_bool_to_string( $product_object->get_featured() );
 		$visibility_options = wc_get_product_visibility_options();
 		?>
-		<div class="misc-pub-section" id="catalog-visibility">
+		<div class="misc-pub-section misc-pub-catalog-visibility" id="catalog-visibility">
 			<?php esc_html_e( 'Catalog visibility:', 'woocommerce' ); ?>
 			<strong id="catalog-visibility-display">
 				<?php
@@ -781,7 +808,7 @@ class WC_Admin_Post_Types {
 					echo '<input type="radio" name="_visibility" id="_visibility_' . esc_attr( $name ) . '" value="' . esc_attr( $name ) . '" ' . checked( $current_visibility, $name, false ) . ' data-label="' . esc_attr( $label ) . '" /> <label for="_visibility_' . esc_attr( $name ) . '" class="selectit">' . esc_html( $label ) . '</label><br />';
 				}
 
-				echo '<br /><input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . esc_html__( 'This is a featured product', 'woocommerce' ) . '</label><br />';
+				echo '<input type="checkbox" name="_featured" id="_featured" ' . checked( $current_featured, 'yes', false ) . ' /> <label for="_featured">' . esc_html__( 'This is a featured product', 'woocommerce' ) . '</label><br />';
 				?>
 				<p>
 					<a href="#catalog-visibility" class="save-post-visibility hide-if-no-js button"><?php esc_html_e( 'OK', 'woocommerce' ); ?></a>

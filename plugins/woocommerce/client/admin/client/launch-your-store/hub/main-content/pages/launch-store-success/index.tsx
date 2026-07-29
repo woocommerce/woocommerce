@@ -56,7 +56,7 @@ export const LaunchYourStoreSuccess = ( {
 	className,
 }: MainContentComponentProps ) => {
 	const copyLink = __( 'Copy link', 'woocommerce' );
-	const copied = __( 'Copied!', 'woocommerce' );
+	const copied = __< string >( 'Copied!', 'woocommerce' );
 	const homeUrl: string = getSetting( 'homeUrl', '' );
 	const urlObject = new URL( homeUrl );
 	let hostname: string = urlObject?.hostname;
@@ -64,7 +64,7 @@ export const LaunchYourStoreSuccess = ( {
 		hostname += ':' + urlObject.port;
 	}
 
-	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
+	const [ copyLinkText, setCopyLinkText ] = useState< string >( copyLink );
 
 	const copyClipboardRef = useCopyToClipboard< HTMLAnchorElement >(
 		homeUrl,

@@ -283,19 +283,23 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( ! isset( $calculate_tax_for['country'], $calculate_tax_for['state'], $calculate_tax_for['postcode'], $calculate_tax_for['city'] ) ) {
 			return false;
 		}
+
+		$inc_tax = ! empty( $calculate_tax_for['prices_include_tax'] );
+
 		if ( '0' !== $this->get_tax_class() && ProductTaxStatus::TAXABLE === $this->get_tax_status() && wc_tax_enabled() ) {
 			$calculate_tax_for['tax_class'] = $this->get_tax_class();
 			$tax_rates                      = WC_Tax::find_rates( $calculate_tax_for );
-			$taxes                          = WC_Tax::calc_tax( $this->get_total(), $tax_rates, false );
+			$taxes                          = WC_Tax::calc_tax( $this->get_total(), $tax_rates, $inc_tax );
 
 			if ( method_exists( $this, 'get_subtotal' ) ) {
-				$subtotal_taxes = WC_Tax::calc_tax( $this->get_subtotal(), $tax_rates, false );
+				$subtotal_taxes = WC_Tax::calc_tax( $this->get_subtotal(), $tax_rates, $inc_tax );
 				$this->set_taxes(
 					array(
 						'total'    => $taxes,
 						'subtotal' => $subtotal_taxes,
 					)
 				);
+
 			} else {
 				$this->set_taxes( array( 'total' => $taxes ) );
 			}

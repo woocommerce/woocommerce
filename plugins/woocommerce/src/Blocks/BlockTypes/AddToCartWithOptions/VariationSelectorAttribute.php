@@ -23,6 +23,25 @@ class VariationSelectorAttribute extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-variation-selector-attribute';
 
 	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 * @return void
+	 */
+	protected function enqueue_data( array $attributes = array() ): void {
+		parent::enqueue_data( $attributes );
+
+		if ( is_admin() ) {
+			$this->asset_data_registry->add(
+				'experimentalVisualAttributes',
+				array_key_exists( 'wc-visual', wc_get_attribute_types() )
+			);
+		}
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -113,11 +132,20 @@ class VariationSelectorAttribute extends AbstractBlock {
 			'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
 		);
 
+		// Hidden input for legacy form POST submissions (page refresh). Chips and
+		// dropdown UI elements do not include name="attribute_*" fields.
+		$hidden_attribute_input = sprintf(
+			'<input type="hidden" name="%1$s" value="%2$s" data-wp-bind--value="context.selectedValue" />',
+			esc_attr( $attribute_slug ),
+			esc_attr( $default_selected ?? '' )
+		);
+
 		return sprintf(
-			'<div %s %s>%s</div>',
+			'<div %s %s>%s%s</div>',
 			get_block_wrapper_attributes( $interactive_attributes ),
 			wp_interactivity_data_wp_context( $interactive_context ),
-			$inner_html
+			$inner_html,
+			$hidden_attribute_input
 		);
 	}
 
@@ -265,13 +293,14 @@ class VariationSelectorAttribute extends AbstractBlock {
 			if ( ! is_array( $attribute_term ) || ! isset( $attribute_term['value'], $attribute_term['label'] ) ) {
 				continue;
 			}
-			$value = (string) $attribute_term['value'];
-			$slug  = sanitize_title( $value );
-			$item  = array(
+			$value     = (string) $attribute_term['value'];
+			$term_name = wp_specialchars_decode( $attribute_term['label'], ENT_QUOTES );
+			$slug      = sanitize_title( $value );
+			$item      = array(
 				'id'        => $id_prefix . '-' . $slug,
-				'label'     => (string) $attribute_term['label'],
+				'label'     => $term_name,
 				'value'     => $value,
-				'ariaLabel' => (string) $attribute_term['label'],
+				'ariaLabel' => $term_name,
 				'selected'  => $default_selected === $value,
 			);
 

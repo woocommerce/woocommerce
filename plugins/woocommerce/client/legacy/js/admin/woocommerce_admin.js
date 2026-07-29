@@ -5,6 +5,19 @@
 			return;
 		}
 
+		// Toggle #wc-lost-connection-notice via WP core's heartbeat events (see WC_Admin_Assets::render_lost_connection_notice()).
+		if ( woocommerce_admin.show_lost_connection_notice ) {
+			$( document )
+				.on( 'heartbeat-connection-lost.wc-lost-connection-notice', function ( event, error, status ) {
+					if ( 'timeout' === error || 603 === status ) {
+						$( '#wc-lost-connection-notice' ).show();
+					}
+				} )
+				.on( 'heartbeat-connection-restored.wc-lost-connection-notice', function () {
+					$( '#wc-lost-connection-notice' ).hide();
+				} );
+		}
+
 		// Add buttons to product screen.
 		var $product_screen = $( '.edit-php.post-type-product' ),
 			$title_action = $product_screen.find( '.page-title-action:first' ),

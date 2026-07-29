@@ -23,7 +23,6 @@ import {
 	LayoutOptions,
 	WidthOptions,
 } from './types';
-import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 
 export const PRODUCT_COLLECTION_BLOCK_NAME = blockJson.name;
 const PRODUCT_TITLE_NAME = `${ PRODUCT_COLLECTION_BLOCK_NAME }/product-title`;
@@ -131,8 +130,12 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 		[
 			'woocommerce/product-image',
 			{
-				imageSizing: ImageSizing.THUMBNAIL,
 				showSaleBadge: false,
+				style: {
+					dimensions: {
+						aspectRatio: '1/1',
+					},
+				},
 			},
 			[
 				[

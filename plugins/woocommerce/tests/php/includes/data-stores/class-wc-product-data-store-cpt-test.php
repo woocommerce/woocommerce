@@ -299,6 +299,10 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_load_product_cogs_value', fn( $value, $product ) => $value + $product->get_id(), 10, 2 );
 
+		// The save above populates the product object cache; flush so the re-read goes through the
+		// data store and applies the load filter registered after the save.
+		wp_cache_flush();
+
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 12.34 + $product->get_id(), $product->get_cogs_value() );
 	}
