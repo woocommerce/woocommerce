@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Respect hidden Date and Status columns on the admin orders list below 782px, so the Columns menu (Screen Options) is honored at every screen width.

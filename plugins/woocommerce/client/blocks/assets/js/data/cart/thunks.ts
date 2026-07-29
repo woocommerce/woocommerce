@@ -133,7 +133,7 @@ export const receiveError =
  * Updates the checkout store with the shopper's collection preference based on
  * the selected shipping rates in the cart.
  *
- * @param {CartResponse} response
+ * @param {CartResponse}              response
  * @param {CartThunkArgs['registry']} registry
  */
 const syncPrefersCollectionFromSelectedShippingRates = (
