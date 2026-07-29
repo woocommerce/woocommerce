@@ -66,66 +66,76 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( 'Zoom while hovering setting', () => {
-		test( 'should be enabled by default', async ( { pageObject } ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-			const zoomWhileHoveringSetting =
-				pageObject.getZoomWhileHoveringSetting();
-
-			await expect( zoomWhileHoveringSetting ).toBeChecked();
-		} );
-		test( 'should work on frontend when is enabled', async ( {
+		test( 'should be enabled by default and work on frontend when is enabled', async ( {
 			pageObject,
 			editor,
 			page,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-			await pageObject.toggleZoomWhileHoveringSetting( true );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
+
+			await test.step( 'should be enabled by default', async () => {
+				const zoomWhileHoveringSetting =
+					pageObject.getZoomWhileHoveringSetting();
+
+				await expect( zoomWhileHoveringSetting ).toBeChecked();
 			} );
 
-			await page.goto( blockData.productPage );
+			await test.step( 'should work on frontend when is enabled', async () => {
+				await pageObject.toggleZoomWhileHoveringSetting( true );
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 
-			const viewerBlock = await pageObject.getViewerBlock( {
-				page: 'frontend',
-			} );
+				await page.goto( blockData.productPage );
 
-			const selectedImage = viewerBlock.locator( 'img' ).first();
+				const viewerBlock = await pageObject.getViewerBlock( {
+					page: 'frontend',
+				} );
 
-			await test.step( 'for selected image', async () => {
-				// img[style] is the selector because the style attribute is Interactivity API.
+				const selectedImage = viewerBlock.locator( 'img' ).first();
 
-				const style = await selectedImage.evaluate(
-					( el ) => el.style
-				);
+				// Preserve the original hover diagnostic under the former test-title step.
+				// eslint-disable-next-line playwright/no-nested-step
+				await test.step( 'for selected image', async () => {
+					// img[style] is the selector because the style attribute is Interactivity API.
 
-				expect( style.transform ).toBe( '' );
+					const style = await selectedImage.evaluate(
+						( el ) => el.style
+					);
 
-				await selectedImage.hover();
+					expect( style.transform ).toBe( '' );
 
-				const styleOnHover = await selectedImage.evaluate(
-					( el ) => el.style
-				);
+					await selectedImage.hover();
 
-				expect( styleOnHover.transform ).toBe( 'scale(1.3)' );
-			} );
+					const styleOnHover = await selectedImage.evaluate(
+						( el ) => el.style
+					);
 
-			await test.step( 'styles are not applied to other images', async () => {
-				// img[style] is the selector because the style attribute is Interactivity API.
-				const hiddenImage = viewerBlock.locator( 'img' ).nth( 1 );
-				const style = await hiddenImage.evaluate( ( el ) => el.style );
+					expect( styleOnHover.transform ).toBe( 'scale(1.3)' );
+				} );
 
-				expect( style.transform ).toBe( '' );
+				// Preserve the original non-selected-image diagnostic under the former test-title step.
+				// eslint-disable-next-line playwright/no-nested-step
+				await test.step( 'styles are not applied to other images', async () => {
+					// img[style] is the selector because the style attribute is Interactivity API.
+					const hiddenImage = viewerBlock.locator( 'img' ).nth( 1 );
+					const style = await hiddenImage.evaluate(
+						( el ) => el.style
+					);
 
-				await selectedImage.hover();
+					expect( style.transform ).toBe( '' );
 
-				const styleOnHover = await hiddenImage.evaluate(
-					( el ) => el.style
-				);
+					await selectedImage.hover();
 
-				expect( styleOnHover.transform ).toBe( '' );
+					const styleOnHover = await hiddenImage.evaluate(
+						( el ) => el.style
+					);
+
+					expect( styleOnHover.transform ).toBe( '' );
+				} );
 			} );
 		} );
+
 		test( 'should not work on frontend when is disabled', async ( {
 			pageObject,
 			editor,

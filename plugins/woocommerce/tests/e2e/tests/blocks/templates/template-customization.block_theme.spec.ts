@@ -6,12 +6,97 @@ import {
 	expect,
 	BLOCK_THEME_SLUG,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
+	type RequestUtils,
 } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
 import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
+
+type TemplatePartResponse = {
+	id: string;
+	wp_id: number;
+	content: { raw: string };
+};
+
+const markerCount = ( content: string, marker: string ) =>
+	content.split( marker ).length - 1;
+
+const getTemplatePart = async (
+	requestUtils: RequestUtils,
+	id: string
+): Promise< TemplatePartResponse > =>
+	requestUtils.rest< TemplatePartResponse >( {
+		method: 'GET',
+		path: `/wp/v2/template-parts/${ id }?context=edit`,
+	} );
+
+const assertPluginTemplatePartBase = (
+	templatePart: TemplatePartResponse,
+	expectedId: string,
+	marker: string
+) => {
+	if (
+		templatePart.id !== expectedId ||
+		templatePart.content.raw.length === 0 ||
+		markerCount( templatePart.content.raw, marker ) !== 0
+	) {
+		throw new Error(
+			`Template part did not start from the expected plugin base: ${ templatePart.id }`
+		);
+	}
+};
+
+const assertCustomTemplatePart = (
+	templatePart: TemplatePartResponse,
+	expectedId: string,
+	expectedContent: string,
+	marker: string
+) => {
+	if (
+		templatePart.id !== expectedId ||
+		! Number.isInteger( templatePart.wp_id ) ||
+		templatePart.wp_id <= 0 ||
+		templatePart.content.raw !== expectedContent ||
+		markerCount( templatePart.content.raw, marker ) !== 1
+	) {
+		throw new Error(
+			`Template part customization did not match the requested state: ${ templatePart.id }`
+		);
+	}
+};
+
+const customizeTemplatePartViaRest = async (
+	requestUtils: RequestUtils,
+	id: string,
+	marker: string
+) => {
+	const base = await getTemplatePart( requestUtils, id );
+	assertPluginTemplatePartBase( base, id, marker );
+
+	const expectedContent = `${ base.content.raw }
+<!-- wp:paragraph -->
+<p>${ marker }</p>
+<!-- /wp:paragraph -->`;
+	const response = await requestUtils.rest< TemplatePartResponse >( {
+		method: 'PUT',
+		path: `/wp/v2/template-parts/${ id }?context=edit`,
+		data: {
+			content: expectedContent,
+		},
+	} );
+	const saved = await getTemplatePart( requestUtils, id );
+
+	assertCustomTemplatePart( response, id, expectedContent, marker );
+	assertCustomTemplatePart( saved, id, expectedContent, marker );
+
+	if ( saved.id !== response.id || saved.wp_id !== response.wp_id ) {
+		throw new Error(
+			`Template part customization identity changed after saving: ${ id }`
+		);
+	}
+};
 
 test.describe( 'Template customization', () => {
 	CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
@@ -180,21 +265,11 @@ test.describe( 'Template customization', () => {
 			requestUtils,
 			frontendUtils,
 		} ) => {
-			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ testData.templatePath }`,
-				postType: testData.templateType,
-				canvas: 'edit',
-			} );
-
-			await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
-
-			await editor.insertBlock( {
-				name: 'core/paragraph',
-				attributes: { content: woocommerceTemplateUserText },
-			} );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+			await customizeTemplatePartViaRest(
+				requestUtils,
+				`woocommerce/woocommerce//${ testData.templatePath }`,
+				woocommerceTemplateUserText
+			);
 
 			await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
 

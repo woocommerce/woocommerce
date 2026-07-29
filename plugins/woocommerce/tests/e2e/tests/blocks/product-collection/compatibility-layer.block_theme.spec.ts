@@ -94,25 +94,27 @@ test.describe( 'Product Collection: Compatibility Layer', () => {
 		await pageObject.goToProductCatalogFrontend();
 	} );
 
-	for ( const scenario of singleOccurrenceScenarios ) {
-		test( `${ scenario.title } is attached to the page`, async ( {
-			pageObject,
-		} ) => {
-			const hooks = pageObject.locateByTestId( scenario.dataTestId );
+	test( 'all compatibility hooks are attached to the Product Catalog page', async ( {
+		pageObject,
+	} ) => {
+		for ( const scenario of singleOccurrenceScenarios ) {
+			await test.step( `${ scenario.title } is attached to the page`, async () => {
+				const hooks = pageObject.locateByTestId( scenario.dataTestId );
 
-			await expect( hooks ).toHaveCount( scenario.amount );
-			await expect( hooks ).toHaveText( scenario.content );
-		} );
-	}
+				await expect.soft( hooks ).toHaveCount( scenario.amount );
+				await expect.soft( hooks ).toHaveText( scenario.content );
+			} );
+		}
 
-	for ( const scenario of multipleOccurrenceScenarios ) {
-		test( `${ scenario.title } is attached to the page`, async ( {
-			pageObject,
-		} ) => {
-			const hooks = pageObject.locateByTestId( scenario.dataTestId );
+		for ( const scenario of multipleOccurrenceScenarios ) {
+			await test.step( `${ scenario.title } is attached to the page`, async () => {
+				const hooks = pageObject.locateByTestId( scenario.dataTestId );
 
-			await expect( hooks ).toHaveCount( scenario.amount );
-			await expect( hooks.first() ).toHaveText( scenario.content );
-		} );
-	}
+				await expect.soft( hooks ).toHaveCount( scenario.amount );
+				await expect
+					.soft( hooks.first() )
+					.toHaveText( scenario.content );
+			} );
+		}
+	} );
 } );

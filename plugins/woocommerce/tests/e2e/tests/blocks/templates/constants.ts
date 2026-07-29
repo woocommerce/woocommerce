@@ -34,6 +34,71 @@ type TemplateCustomizationTest = {
 	isTaxonomyTemplate?: boolean;
 };
 
+type TemplateContentResponse = {
+	id: string;
+	wp_id: number;
+	content: { raw: string };
+};
+
+const SINGLE_PRODUCT_TEMPLATE_ID = 'woocommerce/woocommerce//single-product';
+const ADD_TO_CART_WITH_OPTIONS_BLOCK =
+	'<!-- wp:woocommerce/add-to-cart-with-options /-->';
+const ADD_TO_CART_WITH_OPTIONS_BLOCK_START =
+	'<!-- wp:woocommerce/add-to-cart-with-options';
+
+const blockCount = ( content: string ) =>
+	content.split( ADD_TO_CART_WITH_OPTIONS_BLOCK_START ).length - 1;
+
+const getSingleProductTemplate = async (
+	requestUtils: RequestUtils
+): Promise< TemplateContentResponse > =>
+	requestUtils.rest< TemplateContentResponse >( {
+		method: 'GET',
+		path: `/wp/v2/templates/${ SINGLE_PRODUCT_TEMPLATE_ID }?context=edit`,
+	} );
+
+const ensureAddToCartWithOptionsOnSingleProduct = async (
+	requestUtils: RequestUtils
+) => {
+	const template = await getSingleProductTemplate( requestUtils );
+	if (
+		template.id !== SINGLE_PRODUCT_TEMPLATE_ID ||
+		typeof template.content?.raw !== 'string' ||
+		template.content.raw.length === 0
+	) {
+		throw new Error( 'Single Product template content was unavailable' );
+	}
+
+	const currentBlockCount = blockCount( template.content.raw );
+	if ( currentBlockCount === 1 ) {
+		return;
+	}
+	if ( currentBlockCount > 1 ) {
+		throw new Error(
+			'Single Product template has duplicate prerequisites'
+		);
+	}
+
+	const expectedContent = `${ template.content.raw }
+${ ADD_TO_CART_WITH_OPTIONS_BLOCK }`;
+	const saved = await requestUtils.rest< TemplateContentResponse >( {
+		method: 'PUT',
+		path: `/wp/v2/templates/${ SINGLE_PRODUCT_TEMPLATE_ID }?context=edit`,
+		data: {
+			content: expectedContent,
+		},
+	} );
+
+	if (
+		saved.id !== SINGLE_PRODUCT_TEMPLATE_ID ||
+		! Number.isInteger( saved.wp_id ) ||
+		saved.wp_id <= 0 ||
+		saved.content.raw !== expectedContent
+	) {
+		throw new Error( 'Add to Cart + Options prerequisite was not saved' );
+	}
+};
+
 export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 	{
 		visitPage: async ( { frontendUtils } ) =>
@@ -110,20 +175,10 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		canBeOverriddenByThemes: true,
 	},
 	{
-		visitPage: async ( { admin, editor, page } ) => {
+		visitPage: async ( { page, requestUtils } ) => {
 			// We will be able to simplify this logic once the blockified
 			// Add to Cart with Options block is the default.
-			await admin.visitSiteEditor( {
-				postId: 'woocommerce/woocommerce//single-product',
-				postType: 'wp_template',
-				canvas: 'edit',
-			} );
-			await editor.insertBlock( {
-				name: 'woocommerce/add-to-cart-with-options',
-			} );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+			await ensureAddToCartWithOptionsOnSingleProduct( requestUtils );
 
 			await page.goto( '/product/wordpress-pennant/' );
 		},

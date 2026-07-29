@@ -83,20 +83,20 @@ test.describe( 'Product Collection: Extensibility Events', () => {
 	} );
 
 	test.describe( 'wc-blocks_viewed_product is emitted', () => {
-		let promise: Promise< { productId?: number; collection?: string } >;
-
-		test.beforeEach( async ( { page, pageObject } ) => {
+		test( 'for each product link', async ( { page, pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock( 'featured' );
 
-			let resolvePayload!: ( payload: {
-				productId?: number;
-				collection?: string;
-			} ) => void;
-			promise = new Promise( ( resolve ) => {
-				resolvePayload = resolve;
-			} );
+			type Payload = { productId?: number; collection?: string };
+			let resolvePayload: ( ( payload: Payload ) => void ) | undefined;
 
-			await page.exposeFunction( 'resolvePayload', resolvePayload );
+			await page.exposeFunction(
+				'resolvePayload',
+				( payload: Payload ) => {
+					const resolve = resolvePayload;
+					resolvePayload = undefined;
+					resolve?.( payload );
+				}
+			);
 			await page.addInitScript( () => {
 				window.document.addEventListener(
 					'wc-blocks_viewed_product',
@@ -106,44 +106,57 @@ test.describe( 'Product Collection: Extensibility Events', () => {
 				);
 			} );
 
+			const armPayload = () =>
+				new Promise< Payload >( ( resolve ) => {
+					resolvePayload = resolve;
+				} );
+
+			const imagePayload = armPayload();
 			await pageObject.publishAndGoToFrontend();
-		} );
+			const collectionUrl = page.url();
 
-		test( 'when Product Image is clicked', async ( { page } ) => {
-			await page
-				.locator( '[data-block-name="woocommerce/product-image"]' )
-				.nth( 0 )
-				.click();
+			await test.step( 'when Product Image is clicked', async () => {
+				await page
+					.locator( '[data-block-name="woocommerce/product-image"]' )
+					.nth( 0 )
+					.click();
 
-			const { collection, productId } = await promise;
-			expect( collection ).toEqual(
-				'woocommerce/product-collection/featured'
-			);
-			expect( productId ).toEqual( expect.any( Number ) );
-		} );
+				const { collection, productId } = await imagePayload;
+				expect( collection ).toEqual(
+					'woocommerce/product-collection/featured'
+				);
+				expect( productId ).toEqual( expect.any( Number ) );
+			} );
 
-		test( 'when Product Title is clicked', async ( { page } ) => {
-			await page
-				.locator( '.wp-block-post-title' )
-				.first()
-				.getByRole( 'link' )
-				.click();
+			await test.step( 'when Product Title is clicked', async () => {
+				await page.goto( collectionUrl );
+				const titlePayload = armPayload();
+				await page
+					.locator( '.wp-block-post-title' )
+					.first()
+					.getByRole( 'link' )
+					.click();
 
-			const { collection, productId } = await promise;
-			expect( collection ).toEqual(
-				'woocommerce/product-collection/featured'
-			);
-			expect( productId ).toEqual( expect.any( Number ) );
-		} );
+				const { collection, productId } = await titlePayload;
+				expect( collection ).toEqual(
+					'woocommerce/product-collection/featured'
+				);
+				expect( productId ).toEqual( expect.any( Number ) );
+			} );
 
-		test( 'when Add to Cart Anchor is clicked', async ( { page } ) => {
-			await page.getByLabel( 'Select options for “V-Neck T-' ).click();
+			await test.step( 'when Add to Cart Anchor is clicked', async () => {
+				await page.goto( collectionUrl );
+				const addToCartPayload = armPayload();
+				await page
+					.getByLabel( 'Select options for “V-Neck T-' )
+					.click();
 
-			const { collection, productId } = await promise;
-			expect( collection ).toEqual(
-				'woocommerce/product-collection/featured'
-			);
-			expect( productId ).toEqual( expect.any( Number ) );
+				const { collection, productId } = await addToCartPayload;
+				expect( collection ).toEqual(
+					'woocommerce/product-collection/featured'
+				);
+				expect( productId ).toEqual( expect.any( Number ) );
+			} );
 		} );
 	} );
 } );

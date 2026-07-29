@@ -71,92 +71,110 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 } );
 
 test.describe( `${ blockData.name } Block - editor side`, () => {
-	test.beforeEach( async ( { admin, editor } ) => {
-		await admin.createNewPost();
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'price-filter',
-				heading: 'Filter By Price',
-			},
+	test( 'supports title, display style, and filter button controls', async ( {
+		admin,
+		page,
+		editor,
+	} ) => {
+		await test.step( "should allow changing the block's title", async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'price-filter',
+					heading: 'Filter By Price',
+				},
+			} );
+			await editor.openDocumentSettingsSidebar();
+
+			const textSelector =
+				'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
+
+			const title = 'New Title';
+
+			await editor.canvas.locator( textSelector ).fill( title );
+
+			await expect( editor.canvas.locator( textSelector ) ).toHaveText(
+				title
+			);
 		} );
-		await editor.openDocumentSettingsSidebar();
-	} );
 
-	test( "should allow changing the block's title", async ( { editor } ) => {
-		const textSelector =
-			'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
+		await test.step( 'should allow changing the display style', async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'price-filter',
+					heading: 'Filter By Price',
+				},
+			} );
+			await editor.openDocumentSettingsSidebar();
 
-		const title = 'New Title';
+			const priceFilterControls = await editor.getBlockByName(
+				'woocommerce/price-filter'
+			);
+			await editor.selectBlocks( priceFilterControls );
 
-		await editor.canvas.locator( textSelector ).fill( title );
+			await expect(
+				priceFilterControls.getByRole( 'textbox', {
+					name: 'Filter products by minimum',
+				} )
+			).toBeVisible();
 
-		await expect( editor.canvas.locator( textSelector ) ).toHaveText(
-			title
-		);
-	} );
+			await expect(
+				priceFilterControls.getByRole( 'textbox', {
+					name: 'Filter products by maximum',
+				} )
+			).toBeVisible();
 
-	test( 'should allow changing the display style', async ( {
-		page,
-		editor,
-	} ) => {
-		const priceFilterControls = await editor.getBlockByName(
-			'woocommerce/price-filter'
-		);
-		await editor.selectBlocks( priceFilterControls );
+			await page
+				.getByLabel( 'Price Range Selector' )
+				.getByText( 'Text' )
+				.click();
 
-		await expect(
-			priceFilterControls.getByRole( 'textbox', {
-				name: 'Filter products by minimum',
-			} )
-		).toBeVisible();
+			await expect(
+				priceFilterControls.getByRole( 'textbox', {
+					name: 'Filter products by minimum',
+				} )
+			).toBeHidden();
 
-		await expect(
-			priceFilterControls.getByRole( 'textbox', {
-				name: 'Filter products by maximum',
-			} )
-		).toBeVisible();
+			await expect(
+				priceFilterControls.getByRole( 'textbox', {
+					name: 'Filter products by maximum',
+				} )
+			).toBeHidden();
+		} );
 
-		await page
-			.getByLabel( 'Price Range Selector' )
-			.getByText( 'Text' )
-			.click();
+		await test.step( 'should allow toggling the visibility of the filter button', async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'price-filter',
+					heading: 'Filter By Price',
+				},
+			} );
+			await editor.openDocumentSettingsSidebar();
 
-		await expect(
-			priceFilterControls.getByRole( 'textbox', {
-				name: 'Filter products by minimum',
-			} )
-		).toBeHidden();
+			const priceFilterControls = await editor.getBlockByName(
+				blockData.slug
+			);
+			await editor.selectBlocks( priceFilterControls );
 
-		await expect(
-			priceFilterControls.getByRole( 'textbox', {
-				name: 'Filter products by maximum',
-			} )
-		).toBeHidden();
-	} );
+			await expect(
+				priceFilterControls.getByRole( 'button', {
+					name: 'Apply',
+				} )
+			).toBeHidden();
 
-	test( 'should allow toggling the visibility of the filter button', async ( {
-		page,
-		editor,
-	} ) => {
-		const priceFilterControls = await editor.getBlockByName(
-			blockData.slug
-		);
-		await editor.selectBlocks( priceFilterControls );
+			await page.getByText( "Show 'Apply filters' button" ).click();
 
-		await expect(
-			priceFilterControls.getByRole( 'button', {
-				name: 'Apply',
-			} )
-		).toBeHidden();
-
-		await page.getByText( "Show 'Apply filters' button" ).click();
-
-		await expect(
-			priceFilterControls.getByRole( 'button', {
-				name: 'Apply',
-			} )
-		).toBeVisible();
+			await expect(
+				priceFilterControls.getByRole( 'button', {
+					name: 'Apply',
+				} )
+			).toBeVisible();
+		} );
 	} );
 } );
 
@@ -201,7 +219,10 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 			} );
 	} );
 
-	test( 'should show all products', async ( { frontendUtils } ) => {
+	test( 'should show all products and then only products that match the filter', async ( {
+		page,
+		frontendUtils,
+	} ) => {
 		const allProductsBlock = await frontendUtils.getBlockByName(
 			'woocommerce/all-products'
 		);
@@ -216,28 +237,6 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		const products = allProductsBlock.getByRole( 'listitem' );
 
 		await expect( products ).toHaveCount( 9 );
-	} );
-
-	test( 'should show only products that match the filter', async ( {
-		page,
-		frontendUtils,
-	} ) => {
-		// The price filter input is initially enabled, but it becomes disabled
-		// for the time it takes to fetch the data. To avoid setting the filter
-		// value before the input is properly initialized, we wait for the input
-		// to be disabled first. This is a safeguard to avoid flakiness which
-		// should be addressed in the code, but All Products block will be
-		// deprecated in the future, so we are not going to optimize it.
-		await page
-			.getByRole( 'textbox', {
-				name: 'Filter products by maximum price',
-				disabled: true,
-			} )
-			.waitFor( { timeout: 3000 } )
-			.catch( () => {
-				// Do not throw in case Playwright doesn't make it in time for the
-				// initial (pre-request) render.
-			} );
 
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
@@ -247,19 +246,12 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		await maxPriceInput.fill( '$5' );
 		await maxPriceInput.press( 'Tab' );
 
-		const allProductsBlock = await frontendUtils.getBlockByName(
-			'woocommerce/all-products'
-		);
-
-		const img = allProductsBlock.locator( 'img' ).first();
 		await expect( img ).not.toHaveAttribute(
 			'src',
 			blockData.placeholderUrl
 		);
 
-		const allProducts = allProductsBlock.getByRole( 'listitem' );
-
-		await expect( allProducts ).toHaveCount( 1 );
+		await expect( products ).toHaveCount( 1 );
 		expect( page.url() ).toContain(
 			blockData.urlSearchParamWhenFilterIsApplied
 		);
@@ -290,7 +282,10 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await page.goto( '/shop' );
 	} );
 
-	test( 'should show all products', async ( { frontendUtils } ) => {
+	test( 'should show all products and then only products that match the filter', async ( {
+		page,
+		frontendUtils,
+	} ) => {
 		const legacyTemplate = await frontendUtils.getBlockByName(
 			'woocommerce/legacy-template'
 		);
@@ -300,12 +295,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			.locator( '.product' );
 
 		await expect( products ).toHaveCount( 16 );
-	} );
 
-	test( 'should show only products that match the filter', async ( {
-		page,
-		frontendUtils,
-	} ) => {
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
@@ -317,31 +307,12 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
-		const legacyTemplate = await frontendUtils.getBlockByName(
-			'woocommerce/legacy-template'
-		);
-
-		const products = legacyTemplate
-			.getByRole( 'list' )
-			.locator( '.product' );
-
 		await expect( products ).toHaveCount( 1 );
 	} );
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test( 'should show all products', async ( { page, templateCompiler } ) => {
-		await templateCompiler.compile();
-
-		await page.goto( '/shop' );
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
-
-		await expect( products ).toHaveCount( 16 );
-	} );
-
-	test( 'should show only products that match the filter', async ( {
+	test( 'should show all products and then only products that match the filter', async ( {
 		page,
 		frontendUtils,
 		templateCompiler,
@@ -349,6 +320,12 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await templateCompiler.compile();
 
 		await page.goto( '/shop' );
+		const products = page
+			.locator( '.wp-block-woocommerce-product-template' )
+			.getByRole( 'listitem' );
+
+		await expect( products ).toHaveCount( 16 );
+
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
@@ -359,10 +336,6 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await expect( page ).toHaveURL(
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
-
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
 
 		await expect( products ).toHaveCount( 1 );
 	} );

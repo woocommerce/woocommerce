@@ -1,8 +1,15 @@
 /**
  * External dependencies
  */
-import { Locator } from '@playwright/test';
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import type { Locator } from '@playwright/test';
+import {
+	test as base,
+	expect,
+	BLOCK_THEME_SLUG,
+	type Admin,
+	type Editor,
+	type RequestUtils,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -14,6 +21,87 @@ const blockData = {
 	title: 'Product Gallery',
 	slug: 'single-product',
 	productPage: '/product/beanie/',
+};
+
+const PRODUCT_GALLERY_CONTENT = `<!-- wp:woocommerce/product-gallery -->
+<div class="wp-block-woocommerce-product-gallery wc-block-product-gallery"><!-- wp:woocommerce/product-gallery-thumbnails /-->
+
+<!-- wp:woocommerce/product-gallery-large-image -->
+<div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks"><!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false} -->
+<div class="is-loading"></div>
+<!-- /wp:woocommerce/product-image -->
+
+<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
+
+<!-- wp:woocommerce/product-gallery-large-image-next-previous -->
+<div class="wp-block-woocommerce-product-gallery-large-image-next-previous"></div>
+<!-- /wp:woocommerce/product-gallery-large-image-next-previous --></div>
+<!-- /wp:woocommerce/product-gallery-large-image --></div>
+<!-- /wp:woocommerce/product-gallery -->`;
+
+const PRODUCT_GALLERY_WITH_PLACEHOLDER_CONTENT = `placeholder
+
+${ PRODUCT_GALLERY_CONTENT }`;
+
+const createSerializedProductGalleryTemplate = async (
+	requestUtils: RequestUtils,
+	content: string
+) => {
+	const expectedId = `${ BLOCK_THEME_SLUG }//${ blockData.slug }`;
+	const template = await requestUtils.createTemplate( 'wp_template', {
+		slug: blockData.slug,
+		title: 'Custom Single Product',
+		content,
+	} );
+	const savedTemplate = await requestUtils.rest< {
+		id: string;
+		wp_id: number;
+		content: { raw: string };
+	} >( {
+		method: 'GET',
+		path: `/wp/v2/templates/${ template.id }?context=edit&_fields=id,wp_id,content`,
+	} );
+
+	if (
+		template.id !== expectedId ||
+		! Number.isInteger( template.wp_id ) ||
+		template.wp_id <= 0 ||
+		savedTemplate.id !== template.id ||
+		savedTemplate.wp_id !== template.wp_id ||
+		savedTemplate.content.raw !== content
+	) {
+		throw new Error(
+			`Failed to create the exact serialized Product Gallery template: ${ JSON.stringify(
+				savedTemplate
+			) }`
+		);
+	}
+};
+
+const openPlaceholderProductGalleryTemplate = async ( {
+	admin,
+	editor,
+	requestUtils,
+}: {
+	admin: Admin;
+	editor: Editor;
+	requestUtils: RequestUtils;
+} ) => {
+	const template = await requestUtils.createTemplate( 'wp_template', {
+		slug: blockData.slug,
+		title: 'Custom Single Product',
+		content: 'placeholder',
+	} );
+
+	await admin.visitSiteEditor( {
+		postId: template.id,
+		postType: 'wp_template',
+		canvas: 'edit',
+	} );
+
+	await expect(
+		editor.getCustomHtmlBlockContentLocator( 'placeholder' )
+	).toBeVisible();
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
@@ -67,102 +155,63 @@ const getThumbnailImageIdByNth = async (
 };
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
-		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug: blockData.slug,
-			title: 'Custom Single Product',
-			content: 'placeholder',
-		} );
-
-		await admin.visitSiteEditor( {
-			postId: template.id,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
-		await expect(
-			editor.getCustomHtmlBlockContentLocator( 'placeholder' )
-		).toBeVisible();
-	} );
-
 	test.describe( 'with thumbnails', () => {
-		test( 'should have as first thumbnail, the same image that it is visible in the product block', async ( {
+		test( 'should match the initial thumbnail and change image when another thumbnail is clicked', async ( {
 			page,
-			editor,
 			pageObject,
+			requestUtils,
 		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+			await createSerializedProductGalleryTemplate(
+				requestUtils,
+				PRODUCT_GALLERY_CONTENT
+			);
 
 			await page.goto( blockData.productPage );
 
 			const viewerImageId = await pageObject.getViewerImageId();
-
-			const firstImageThumbnailId = await getThumbnailImageIdByNth(
-				0,
-				await pageObject.getThumbnailsBlock( {
-					page: 'frontend',
-				} )
-			);
-
-			expect( viewerImageId ).toBe( firstImageThumbnailId );
-		} );
-
-		test( 'should change the image when the user click on a thumbnail image', async ( {
-			page,
-			editor,
-			pageObject,
-		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
+			const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
+				page: 'frontend',
 			} );
 
-			await page.goto( blockData.productPage );
+			await test.step( 'should have as first thumbnail, the same image that it is visible in the product block', async () => {
+				const firstImageThumbnailId = await getThumbnailImageIdByNth(
+					0,
+					thumbnailsBlock
+				);
 
-			const viewerImageId = await pageObject.getViewerImageId();
+				expect( viewerImageId ).toBe( firstImageThumbnailId );
+			} );
 
-			const secondImageThumbnailId = await getThumbnailImageIdByNth(
-				1,
-				await pageObject.getThumbnailsBlock( {
-					page: 'frontend',
-				} )
-			);
+			await test.step( 'should change the image when the user click on a thumbnail image', async () => {
+				const secondImageThumbnailId = await getThumbnailImageIdByNth(
+					1,
+					thumbnailsBlock
+				);
 
-			expect( viewerImageId ).not.toBe( secondImageThumbnailId );
+				expect( viewerImageId ).not.toBe( secondImageThumbnailId );
 
-			await (
-				await pageObject.getThumbnailsBlock( {
-					page: 'frontend',
-				} )
-			)
-				.locator( 'img' )
-				.nth( 1 )
-				.click();
+				await thumbnailsBlock.locator( 'img' ).nth( 1 ).click();
 
-			await expect( async () => {
-				const newViewerImageId = await pageObject.getViewerImageId();
+				await expect( async () => {
+					const newViewerImageId =
+						await pageObject.getViewerImageId();
 
-				expect( newViewerImageId ).toBe( secondImageThumbnailId );
-			} ).toPass( { timeout: 1_000 } );
+					expect( newViewerImageId ).toBe( secondImageThumbnailId );
+				} ).toPass( { timeout: 1_000 } );
+			} );
 		} );
 	} );
 
 	test.describe( 'with previous and next buttons', () => {
 		test( 'should change the image when the user click on the previous or next button', async ( {
 			page,
-			editor,
 			pageObject,
+			requestUtils,
 		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+			await createSerializedProductGalleryTemplate(
+				requestUtils,
+				PRODUCT_GALLERY_CONTENT
+			);
 
 			await page.goto( blockData.productPage );
 
@@ -194,16 +243,15 @@ test.describe( `${ blockData.name }`, () => {
 	test.describe( 'within pop-up', () => {
 		test( 'should display the same selected image when the pop-up is opened', async ( {
 			page,
-			editor,
 			pageObject,
+			requestUtils,
 		} ) => {
 			await page.setViewportSize( { width: 800, height: 800 } );
 
-			await pageObject.addProductGalleryBlock( { cleanContent: false } );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+			await createSerializedProductGalleryTemplate(
+				requestUtils,
+				PRODUCT_GALLERY_WITH_PLACEHOLDER_CONTENT
+			);
 
 			await page.goto( blockData.productPage );
 
@@ -248,38 +296,41 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( 'open pop-up when clicked option', () => {
-		test( 'should be enabled by default', async ( {
-			pageObject,
-			editor,
-		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-			await editor.openDocumentSettingsSidebar();
-			const fullScreenOption = pageObject.getFullScreenOnClickSetting();
+		test.beforeEach( openPlaceholderProductGalleryTemplate );
 
-			await expect( fullScreenOption ).toBeChecked();
-		} );
-
-		test( 'should open dialog on the frontend', async ( {
+		test( 'should be enabled by default and open dialog on the frontend', async ( {
 			pageObject,
 			page,
 			editor,
 		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
+			await test.step( 'should be enabled by default', async () => {
+				await pageObject.addProductGalleryBlock( {
+					cleanContent: true,
+				} );
+				await editor.openDocumentSettingsSidebar();
+				const fullScreenOption =
+					pageObject.getFullScreenOnClickSetting();
+
+				await expect( fullScreenOption ).toBeChecked();
 			} );
 
-			await page.goto( blockData.productPage );
+			await test.step( 'should open dialog on the frontend', async () => {
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 
-			const viewerBlock = await pageObject.getViewerBlock( {
-				page: 'frontend',
+				await page.goto( blockData.productPage );
+
+				const viewerBlock = await pageObject.getViewerBlock( {
+					page: 'frontend',
+				} );
+
+				await expect( page.locator( 'dialog' ) ).toBeHidden();
+
+				await viewerBlock.click();
+
+				await expect( page.locator( 'dialog' ) ).toBeVisible();
 			} );
-
-			await expect( page.locator( 'dialog' ) ).toBeHidden();
-
-			await viewerBlock.click();
-
-			await expect( page.locator( 'dialog' ) ).toBeVisible();
 		} );
 
 		test( 'should not open dialog when the setting is disable on the frontend', async ( {
@@ -309,67 +360,76 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( 'block availability', () => {
-		test( 'should be available on the Single Product Template', async ( {
-			page,
-			editor,
-		} ) => {
-			await editor.openGlobalBlockInserter();
-			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
-			const productGalleryBlockOption = page
-				.getByRole( 'listbox', { name: 'WooCommerce' } )
-				.getByRole( 'option', { name: blockData.title } );
+		test.beforeEach( openPlaceholderProductGalleryTemplate );
 
-			await expect( productGalleryBlockOption ).toBeVisible();
-		} );
-
-		test( 'should be hidden on the post editor globally', async ( {
+		test( 'should expose Product Gallery only in supported Single Product contexts', async ( {
 			admin,
 			page,
 			editor,
 		} ) => {
-			await admin.createNewPost();
-			await editor.openGlobalBlockInserter();
-			const productGalleryBlockOption = page
-				.getByRole( 'listbox', { name: 'WooCommerce' } )
-				.getByRole( 'option', { name: blockData.title } );
+			await test.step( 'should be available on the Single Product Template', async () => {
+				await editor.openGlobalBlockInserter();
+				await page.getByRole( 'tab', { name: 'Blocks' } ).click();
+				const productGalleryBlockOption = page
+					.getByRole( 'listbox', { name: 'WooCommerce' } )
+					.getByRole( 'option', { name: blockData.title } );
 
-			await expect( productGalleryBlockOption ).toBeHidden();
-		} );
+				await expect( productGalleryBlockOption ).toBeVisible();
+			} );
 
-		test( 'on the post editor, block should be in Single Product by default and is visible in inserter', async ( {
-			admin,
-			editor,
-		} ) => {
-			await admin.createNewPost();
-			await editor.insertBlockUsingGlobalInserter( 'Product' );
-			await editor.canvas.getByText( 'Album' ).click();
-			await editor.canvas.getByText( 'Done' ).click();
-			// Block should be in Single Product by default.
-			await expect(
-				await editor.getBlockByName( blockData.name )
-			).toHaveCount( 1 );
-			const singleProductBlock = await editor.getBlockByName(
-				'woocommerce/single-product'
-			);
-			const singleProductClientId =
-				( await singleProductBlock.getAttribute( 'data-block' ) ) ?? '';
-			await editor.insertBlock(
-				{ name: blockData.name },
-				{ clientId: singleProductClientId }
-			);
+			await editor.closeGlobalBlockInserter();
 
-			// Block should be visible in inserter and hence can be inserted in Single Product block.
-			await expect(
-				await editor.getBlockByName( blockData.name )
-			).toHaveCount( 2 );
+			await test.step( 'should be hidden on the post editor globally', async () => {
+				await admin.createNewPost();
+				await editor.openGlobalBlockInserter();
+				const productGalleryBlockOption = page
+					.getByRole( 'listbox', { name: 'WooCommerce' } )
+					.getByRole( 'option', { name: blockData.title } );
+
+				await expect( productGalleryBlockOption ).toBeHidden();
+			} );
+
+			await editor.closeGlobalBlockInserter();
+
+			await test.step( 'on the post editor, block should be in Single Product by default and is visible in inserter', async () => {
+				await editor.insertBlockUsingGlobalInserter( 'Product' );
+				await editor.canvas.getByText( 'Album' ).click();
+				await editor.canvas.getByText( 'Done' ).click();
+				// Block should be in Single Product by default.
+				await expect(
+					await editor.getBlockByName( blockData.name )
+				).toHaveCount( 1 );
+				const singleProductBlock = await editor.getBlockByName(
+					'woocommerce/single-product'
+				);
+				const singleProductClientId =
+					( await singleProductBlock.getAttribute( 'data-block' ) ) ??
+					'';
+				await editor.insertBlock(
+					{ name: blockData.name },
+					{ clientId: singleProductClientId }
+				);
+
+				// Block should be visible in inserter and hence can be inserted in Single Product block.
+				await expect(
+					await editor.getBlockByName( blockData.name )
+				).toHaveCount( 2 );
+			} );
 		} );
 	} );
 
 	test( 'should persistently display the block when navigating back to the template without a page reload', async ( {
+		admin,
 		editor,
 		pageObject,
 		page,
+		requestUtils,
 	} ) => {
+		await openPlaceholderProductGalleryTemplate( {
+			admin,
+			editor,
+			requestUtils,
+		} );
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,
@@ -397,12 +457,12 @@ test.describe( `${ blockData.name }`, () => {
 	test( 'block has opinionated layout on mobile', async ( {
 		page,
 		pageObject,
-		editor,
+		requestUtils,
 	} ) => {
-		await pageObject.addProductGalleryBlock( { cleanContent: true } );
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
+		await createSerializedProductGalleryTemplate(
+			requestUtils,
+			PRODUCT_GALLERY_CONTENT
+		);
 
 		await page.goto( blockData.productPage );
 

@@ -66,7 +66,7 @@ export class FrontendUtils {
 	/**
 	 * Start tracking cart-related requests and return a function to wait for completion
 	 */
-	private trackCartRequests( timeout = 5000 ) {
+	trackCartRequests( timeout = 5000 ) {
 		// key: request url, value: count of pending requests with this url
 		const pendingRequests = new Map< string, number >();
 

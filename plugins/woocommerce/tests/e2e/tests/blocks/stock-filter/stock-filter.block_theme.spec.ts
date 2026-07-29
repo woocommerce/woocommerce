@@ -25,90 +25,110 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 } );
 
 test.describe( `${ blockData.name } Block`, () => {
-	test.beforeEach( async ( { admin, editor } ) => {
-		await admin.createNewPost();
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'stock-filter',
-				heading: 'Filter By Price',
-			},
+	test( 'supports title, display style, and filter button controls', async ( {
+		admin,
+		page,
+		editor,
+	} ) => {
+		await test.step( "should allow changing the block's title", async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'stock-filter',
+					heading: 'Filter By Price',
+				},
+			} );
+
+			await editor.openDocumentSettingsSidebar();
+
+			const textSelector =
+				'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
+
+			const title = 'New Title';
+
+			await editor.canvas.locator( textSelector ).fill( title );
+
+			await expect( editor.canvas.locator( textSelector ) ).toHaveText(
+				title
+			);
 		} );
 
-		await editor.openDocumentSettingsSidebar();
-	} );
+		await test.step( 'should allow changing the display style', async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'stock-filter',
+					heading: 'Filter By Price',
+				},
+			} );
 
-	test( "should allow changing the block's title", async ( { editor } ) => {
-		const textSelector =
-			'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
+			await editor.openDocumentSettingsSidebar();
 
-		const title = 'New Title';
+			const stockFilter = await editor.getBlockByName( blockData.slug );
+			await editor.selectBlocks( stockFilter );
 
-		await editor.canvas.locator( textSelector ).fill( title );
+			await expect(
+				stockFilter.getByRole( 'checkbox', {
+					name: 'In Stock',
+				} )
+			).toBeVisible();
 
-		await expect( editor.canvas.locator( textSelector ) ).toHaveText(
-			title
-		);
-	} );
+			await expect(
+				stockFilter.getByRole( 'checkbox', {
+					name: 'Out of Stock',
+				} )
+			).toBeVisible();
 
-	test( 'should allow changing the display style', async ( {
-		page,
-		editor,
-	} ) => {
-		const stockFilter = await editor.getBlockByName( blockData.slug );
-		await editor.selectBlocks( stockFilter );
+			await page.getByLabel( 'DropDown' ).click();
 
-		await expect(
-			stockFilter.getByRole( 'checkbox', {
-				name: 'In Stock',
-			} )
-		).toBeVisible();
+			await expect(
+				stockFilter.getByRole( 'checkbox', {
+					name: 'In Stock',
+				} )
+			).toBeHidden();
 
-		await expect(
-			stockFilter.getByRole( 'checkbox', {
-				name: 'Out of Stock',
-			} )
-		).toBeVisible();
+			await expect(
+				stockFilter.getByRole( 'checkbox', {
+					name: 'Out of Stock',
+				} )
+			).toBeHidden();
 
-		await page.getByLabel( 'DropDown' ).click();
+			await expect( editor.canvas.getByRole( 'combobox' ) ).toBeVisible();
+		} );
 
-		await expect(
-			stockFilter.getByRole( 'checkbox', {
-				name: 'In Stock',
-			} )
-		).toBeHidden();
+		await test.step( 'should allow toggling the visibility of the filter button', async () => {
+			await admin.createNewPost();
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: {
+					filterType: 'stock-filter',
+					heading: 'Filter By Price',
+				},
+			} );
 
-		await expect(
-			stockFilter.getByRole( 'checkbox', {
-				name: 'Out of Stock',
-			} )
-		).toBeHidden();
+			await editor.openDocumentSettingsSidebar();
 
-		await expect( editor.canvas.getByRole( 'combobox' ) ).toBeVisible();
-	} );
+			const priceFilterControls = await editor.getBlockByName(
+				blockData.slug
+			);
+			await editor.selectBlocks( priceFilterControls );
 
-	test( 'should allow toggling the visibility of the filter button', async ( {
-		page,
-		editor,
-	} ) => {
-		const priceFilterControls = await editor.getBlockByName(
-			blockData.slug
-		);
-		await editor.selectBlocks( priceFilterControls );
+			await expect(
+				priceFilterControls.getByRole( 'button', {
+					name: 'Apply',
+				} )
+			).toBeHidden();
 
-		await expect(
-			priceFilterControls.getByRole( 'button', {
-				name: 'Apply',
-			} )
-		).toBeHidden();
+			await page.getByText( "Show 'Apply filters' button" ).click();
 
-		await page.getByText( "Show 'Apply filters' button" ).click();
-
-		await expect(
-			priceFilterControls.getByRole( 'button', {
-				name: 'Apply',
-			} )
-		).toBeVisible();
+			await expect(
+				priceFilterControls.getByRole( 'button', {
+					name: 'Apply',
+				} )
+			).toBeVisible();
+		} );
 	} );
 } );
 
@@ -140,76 +160,80 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await page.goto( '/shop' );
 	} );
 
-	test( 'should show all products', async ( { frontendUtils } ) => {
-		const legacyTemplate = await frontendUtils.getBlockByName(
-			'woocommerce/legacy-template'
-		);
-
-		const stockFilter = await frontendUtils.getBlockByName(
-			'woocommerce/filter-wrapper'
-		);
-
-		const products = legacyTemplate
-			.getByRole( 'list' )
-			.locator( '.product' );
-
-		await expect( products ).toHaveCount( 16 );
-
-		await expect( stockFilter.getByText( 'In Stock' ) ).toBeVisible();
-		await expect( stockFilter.getByText( 'Out of Stock' ) ).toBeVisible();
-	} );
-
-	test( 'should show only products that match the filter', async ( {
+	test( 'should show all products and then only products that match the filter', async ( {
 		frontendUtils,
 	} ) => {
-		const stockFilter = await frontendUtils.getBlockByName(
-			'woocommerce/filter-wrapper'
-		);
+		await test.step( 'should show all products', async () => {
+			const legacyTemplate = await frontendUtils.getBlockByName(
+				'woocommerce/legacy-template'
+			);
 
-		await stockFilter.getByText( 'Out of Stock' ).click();
+			const stockFilter = await frontendUtils.getBlockByName(
+				'woocommerce/filter-wrapper'
+			);
 
-		const legacyTemplate = await frontendUtils.getBlockByName(
-			'woocommerce/legacy-template'
-		);
+			const products = legacyTemplate
+				.getByRole( 'list' )
+				.locator( '.product' );
 
-		const products = legacyTemplate
-			.getByRole( 'list' )
-			.locator( '.product' );
+			await expect( products ).toHaveCount( 16 );
 
-		await expect( products ).toHaveCount( 1 );
+			await expect( stockFilter.getByText( 'In Stock' ) ).toBeVisible();
+			await expect(
+				stockFilter.getByText( 'Out of Stock' )
+			).toBeVisible();
+		} );
+
+		await test.step( 'should show only products that match the filter', async () => {
+			const stockFilter = await frontendUtils.getBlockByName(
+				'woocommerce/filter-wrapper'
+			);
+
+			await stockFilter.getByText( 'Out of Stock' ).click();
+
+			const legacyTemplate = await frontendUtils.getBlockByName(
+				'woocommerce/legacy-template'
+			);
+
+			const products = legacyTemplate
+				.getByRole( 'list' )
+				.locator( '.product' );
+
+			await expect( products ).toHaveCount( 1 );
+		} );
 	} );
 } );
 
 test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test( 'should show all products', async ( { page, templateCompiler } ) => {
-		await templateCompiler.compile();
-
-		await page.goto( '/shop' );
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
-
-		await expect( products ).toHaveCount( 16 );
-	} );
-
-	test( 'should show only products that match the filter', async ( {
+	test( 'should show all products and then only products that match the filter', async ( {
 		page,
 		templateCompiler,
 	} ) => {
 		await templateCompiler.compile();
 
 		await page.goto( '/shop' );
-		await page.getByText( 'Out of Stock' ).click();
 
-		await expect( page ).toHaveURL(
-			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
-		);
+		await test.step( 'should show all products', async () => {
+			const products = page
+				.locator( '.wp-block-woocommerce-product-template' )
+				.getByRole( 'listitem' );
 
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
+			await expect( products ).toHaveCount( 16 );
+		} );
 
-		await expect( products ).toHaveCount( 1 );
+		await test.step( 'should show only products that match the filter', async () => {
+			await page.getByText( 'Out of Stock' ).click();
+
+			await expect( page ).toHaveURL(
+				new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
+			);
+
+			const products = page
+				.locator( '.wp-block-woocommerce-product-template' )
+				.getByRole( 'listitem' );
+
+			await expect( products ).toHaveCount( 1 );
+		} );
 	} );
 
 	test( 'should refresh the page only if the user clicks on button', async ( {

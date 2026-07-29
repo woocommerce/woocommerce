@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { Page } from '@playwright/test';
 import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
@@ -33,6 +34,18 @@ const test = base.extend< {
 		await use( pageObject );
 	},
 } );
+
+const waitForCartAddBatchResponse = ( page: Page ) =>
+	page.waitForResponse( ( response ) => {
+		const request = response.request();
+
+		return (
+			request.method() === 'POST' &&
+			response.url().includes( '/wp-json/wc/store/v1/batch' ) &&
+			request.postData()?.includes( '/wc/store/v1/cart/add-item' ) ===
+				true
+		);
+	} );
 
 test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding 3rd-party product types to cart when using PHP templates', async ( {
@@ -179,27 +192,114 @@ test.describe( 'Add to Cart + Options Block', () => {
 		productGalleryPageObject,
 		editor,
 		wpCoreVersion,
+		requestUtils,
 	} ) => {
 		const variationDescription =
 			'This is the output of the variation description';
 		// Set a variable product as having 100 in stock and one of its variations as being out of stock.
 		// This way we can test that sibling blocks update with the variation data.
-		let cliOutput = await wpCLI(
-			`post list --post_type=product --field=ID --name="Hoodie" --format=ids`
+		type ProductResponse = {
+			id: number;
+			slug: string;
+			manage_stock: boolean;
+			stock_quantity: number | null;
+		};
+		type VariationResponse = {
+			id: number;
+			manage_stock: boolean;
+			in_stock: boolean;
+			weight: string;
+			attributes: Array< {
+				slug: string;
+				option: string;
+			} >;
+		};
+		const hasTargetAttributes = ( variation: VariationResponse ) =>
+			Array.isArray( variation.attributes ) &&
+			variation.attributes.some(
+				( attribute ) =>
+					attribute.slug === 'pa_color' && attribute.option === 'Blue'
+			) &&
+			variation.attributes.some(
+				( attribute ) =>
+					attribute.slug === 'logo' && attribute.option === 'No'
+			);
+
+		const hoodieProducts = await requestUtils.rest< ProductResponse[] >( {
+			path: 'wc/v2/products?slug=hoodie',
+		} );
+		const hoodieProduct = hoodieProducts.find(
+			( product ) =>
+				product.slug === 'hoodie' &&
+				Number.isInteger( product.id ) &&
+				product.id > 0
 		);
-		const hoodieProductId = cliOutput.stdout.match( /\d+/g )?.pop();
-		cliOutput = await wpCLI(
-			'post list --post_type=product_variation --field=ID --name="Hoodie - Blue, No" --format=ids'
+		if ( ! hoodieProduct ) {
+			throw new Error(
+				`Failed to find the Hoodie product through REST: ${ JSON.stringify(
+					hoodieProducts
+				) }`
+			);
+		}
+
+		const hoodieVariations = await requestUtils.rest< VariationResponse[] >(
+			{
+				path: `wc/v2/products/${ hoodieProduct.id }/variations?per_page=100`,
+			}
 		);
-		const hoodieProductVariationId = cliOutput.stdout
-			.match( /\d+/g )
-			?.pop();
-		await wpCLI(
-			`wc product update ${ hoodieProductId } --manage_stock=true --stock_quantity=100 --user=1`
+		const hoodieProductVariation = hoodieVariations.find(
+			( variation ) =>
+				Number.isInteger( variation.id ) &&
+				variation.id > 0 &&
+				hasTargetAttributes( variation )
 		);
-		await wpCLI(
-			`wc product_variation update ${ hoodieProductId } ${ hoodieProductVariationId } --manage_stock=true --in_stock=false --weight=2 --description="${ variationDescription }" --user=1`
-		);
+		if ( ! hoodieProductVariation ) {
+			throw new Error(
+				`Failed to find the Hoodie Blue/No variation through REST: ${ JSON.stringify(
+					hoodieVariations
+				) }`
+			);
+		}
+
+		const updatedProduct = await requestUtils.rest< ProductResponse >( {
+			method: 'POST',
+			path: `wc/v2/products/${ hoodieProduct.id }`,
+			data: { manage_stock: true, stock_quantity: 100 },
+		} );
+		if (
+			updatedProduct.id !== hoodieProduct.id ||
+			updatedProduct.manage_stock !== true ||
+			updatedProduct.stock_quantity !== 100
+		) {
+			throw new Error(
+				`Failed to update the Hoodie product through REST: ${ JSON.stringify(
+					updatedProduct
+				) }`
+			);
+		}
+
+		const updatedVariation = await requestUtils.rest< VariationResponse >( {
+			method: 'POST',
+			path: `wc/v2/products/${ hoodieProduct.id }/variations/${ hoodieProductVariation.id }`,
+			data: {
+				manage_stock: true,
+				in_stock: false,
+				weight: '2',
+				description: variationDescription,
+			},
+		} );
+		if (
+			updatedVariation.id !== hoodieProductVariation.id ||
+			updatedVariation.manage_stock !== true ||
+			updatedVariation.in_stock !== false ||
+			Number( updatedVariation.weight ) !== 2
+		) {
+			throw new Error(
+				`Failed to update the Hoodie Blue/No variation through REST: ${ JSON.stringify(
+					updatedVariation
+				) }`
+			);
+		}
 
 		await pageObject.updateSingleProductTemplate();
 
@@ -434,42 +534,177 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		requestUtils,
 	} ) => {
 		// Create a global attribute where the slug intentionally differs from the name.
-		const attrOutput = await wpCLI(
-			`wc product_attribute create --name="Taille" --slug="custom-waist" --user=1`
-		);
-		const attrId = attrOutput.stdout.match(
-			/product_attribute\s+(\d+)/
-		)?.[ 1 ];
+		const createdAttribute = await requestUtils.rest< {
+			id: number;
+			name: string;
+			slug: string;
+		} >( {
+			method: 'POST',
+			path: 'wc/v2/products/attributes',
+			data: {
+				name: 'Taille',
+				slug: 'custom-waist',
+			},
+		} );
+		if (
+			! Number.isInteger( createdAttribute.id ) ||
+			createdAttribute.id <= 0 ||
+			createdAttribute.name !== 'Taille' ||
+			createdAttribute.slug !== 'pa_custom-waist'
+		) {
+			throw new Error(
+				`Failed to create the expected global attribute through REST: ${ JSON.stringify(
+					createdAttribute
+				) }`
+			);
+		}
+		const attrId = createdAttribute.id;
 
 		// Create terms with custom slugs that also differ from the names.
-		await wpCLI(
-			`wc product_attribute_term create ${ attrId } --name="Petit" --slug="s-m" --user=1`
-		);
-		await wpCLI(
-			`wc product_attribute_term create ${ attrId } --name="Grand" --slug="m-l" --user=1`
-		);
+		const createdPetitTerm = await requestUtils.rest< {
+			id: number;
+			name: string;
+			slug: string;
+		} >( {
+			method: 'POST',
+			path: `wc/v2/products/attributes/${ attrId }/terms`,
+			data: {
+				name: 'Petit',
+				slug: 's-m',
+			},
+		} );
+		if (
+			! Number.isInteger( createdPetitTerm.id ) ||
+			createdPetitTerm.id <= 0 ||
+			createdPetitTerm.name !== 'Petit' ||
+			createdPetitTerm.slug !== 's-m'
+		) {
+			throw new Error(
+				`Failed to create the expected Petit term through REST: ${ JSON.stringify(
+					createdPetitTerm
+				) }`
+			);
+		}
+
+		const createdGrandTerm = await requestUtils.rest< {
+			id: number;
+			name: string;
+			slug: string;
+		} >( {
+			method: 'POST',
+			path: `wc/v2/products/attributes/${ attrId }/terms`,
+			data: {
+				name: 'Grand',
+				slug: 'm-l',
+			},
+		} );
+		if (
+			! Number.isInteger( createdGrandTerm.id ) ||
+			createdGrandTerm.id <= 0 ||
+			createdGrandTerm.id === createdPetitTerm.id ||
+			createdGrandTerm.name !== 'Grand' ||
+			createdGrandTerm.slug !== 'm-l'
+		) {
+			throw new Error(
+				`Failed to create the expected Grand term through REST: ${ JSON.stringify(
+					createdGrandTerm
+				) }`
+			);
+		}
 
 		// Create a variable product using the global attribute.
-		const prodOutput = await wpCLI(
-			`wc product create --user=1 --slug="custom-slug-variable" --name="Custom Slug Variable" --type="variable" --attributes='${ JSON.stringify(
-				[
+		const createdProduct = await requestUtils.rest< {
+			id: number;
+			name: string;
+			slug: string;
+			type: string;
+			attributes: Array< {
+				id: number;
+				name: string;
+				visible: boolean;
+				variation: boolean;
+				options: string[];
+			} >;
+		} >( {
+			method: 'POST',
+			path: 'wc/v2/products',
+			data: {
+				slug: 'custom-slug-variable',
+				name: 'Custom Slug Variable',
+				type: 'variable',
+				attributes: [
 					{
 						id: Number( attrId ),
 						visible: true,
 						variation: true,
 						options: [ 'Petit', 'Grand' ],
 					},
-				]
-			) }'`
-		);
-		const productId = prodOutput.stdout.match( /product\s+(\d+)/ )?.[ 1 ];
+				],
+			},
+		} );
+		const normalizedProductAttributes = createdProduct.attributes
+			.map( ( { id, name, visible, variation, options } ) => ( {
+				id,
+				name,
+				visible,
+				variation,
+				options: [ ...options ].sort(),
+			} ) )
+			.sort( ( a, b ) => a.name.localeCompare( b.name ) );
+		const expectedProductAttributes = [
+			{
+				id: attrId,
+				name: 'Taille',
+				visible: true,
+				variation: true,
+				options: [ 'Grand', 'Petit' ],
+			},
+		];
+		if (
+			! Number.isInteger( createdProduct.id ) ||
+			createdProduct.id <= 0 ||
+			createdProduct.name !== 'Custom Slug Variable' ||
+			createdProduct.slug !== 'custom-slug-variable' ||
+			createdProduct.type !== 'variable' ||
+			JSON.stringify( normalizedProductAttributes ) !==
+				JSON.stringify( expectedProductAttributes )
+		) {
+			throw new Error(
+				`Failed to create the expected variable product through REST: ${ JSON.stringify(
+					createdProduct
+				) }`
+			);
+		}
+		const productId = createdProduct.id;
 
 		// Create a single "Any" variation (empty attributes = matches all terms).
-		await wpCLI(
-			`wc product_variation create "${ productId }" --user=1 --regular_price="19.99" --attributes='[]'`
-		);
+		const createdVariation = await requestUtils.rest< {
+			id: number;
+			regular_price: string;
+			attributes: unknown[];
+		} >( {
+			method: 'POST',
+			path: `wc/v2/products/${ productId }/variations`,
+			data: {
+				regular_price: '19.99',
+				attributes: [],
+			},
+		} );
+		if (
+			! Number.isInteger( createdVariation.id ) ||
+			createdVariation.id <= 0 ||
+			Number( createdVariation.regular_price ) !== 19.99 ||
+			createdVariation.attributes.length !== 0
+		) {
+			throw new Error(
+				`Failed to create the expected Any variation through REST: ${ JSON.stringify(
+					createdVariation
+				) }`
+			);
+		}
 
 		await pageObject.updateSingleProductTemplate();
 
@@ -544,15 +779,46 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		requestUtils,
 	} ) => {
 		// Make Hoodie with Logo to be sold individually.
-		const cliOutput = await wpCLI(
-			`post list --post_type=product --field=ID --name="Hoodie with Logo" --format=ids`
+		type ProductResponse = {
+			id: number;
+			slug: string;
+			sold_individually: boolean;
+		};
+		const hoodieProducts = await requestUtils.rest< ProductResponse[] >( {
+			path: 'wc/v2/products?slug=hoodie-with-logo',
+		} );
+		const hoodieWithLogoProduct = hoodieProducts.find(
+			( product ) =>
+				product.slug === 'hoodie-with-logo' &&
+				Number.isInteger( product.id ) &&
+				product.id > 0
 		);
-		const hoodieWithLogoProductId = cliOutput.stdout.match( /\d+/g )?.pop();
-		await wpCLI(
-			`wc product update ${ hoodieWithLogoProductId } --sold_individually=true --user=1`
-		);
+		if ( ! hoodieWithLogoProduct ) {
+			throw new Error(
+				`Failed to find the Hoodie with Logo product through REST: ${ JSON.stringify(
+					hoodieProducts
+				) }`
+			);
+		}
+
+		const updatedProduct = await requestUtils.rest< ProductResponse >( {
+			method: 'POST',
+			path: `wc/v2/products/${ hoodieWithLogoProduct.id }`,
+			data: { sold_individually: true },
+		} );
+		if (
+			updatedProduct.id !== hoodieWithLogoProduct.id ||
+			updatedProduct.sold_individually !== true
+		) {
+			throw new Error(
+				`Failed to update the Hoodie with Logo product through REST: ${ JSON.stringify(
+					updatedProduct
+				) }`
+			);
+		}
 
 		await pageObject.updateSingleProductTemplate();
 
@@ -603,7 +869,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 				.getByLabel( 'Increase quantity of T-Shirt' );
 			await increaseTShirtQuantityButton.click();
 
+			const cartAddResponsePromise = waitForCartAddBatchResponse( page );
 			await addToCartButton.click();
+			const cartAddResponse = await cartAddResponsePromise;
+			await cartAddResponse.finished();
+			expect( cartAddResponse.ok() ).toBe( true );
 
 			await expect(
 				page.getByRole( 'button', {
@@ -664,12 +934,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
-			// Set up waitForResponse BEFORE the click to avoid race condition
-			// where page.reload() executes before the cart is updated.
-			const batchPromise = page.waitForResponse(
-				'**/wc/store/v1/batch**'
-			);
+			const cartAddResponsePromise = waitForCartAddBatchResponse( page );
 			await addToCartButton.click();
+			const cartAddResponse = await cartAddResponsePromise;
+			await cartAddResponse.finished();
+			expect( cartAddResponse.ok() ).toBe( true );
 
 			await expect(
 				page.getByRole( 'button', {
@@ -677,8 +946,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 					exact: true,
 				} )
 			).toBeVisible();
-
-			await batchPromise;
 
 			await expect(
 				page.getByLabel( 'Number of items in the cart: 3' )
@@ -760,7 +1027,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await increaseBeanie.click();
 			await increaseTShirt.click();
 
+			const cartAddResponsePromise = waitForCartAddBatchResponse( page );
 			await addToCartButton.click();
+			const cartAddResponse = await cartAddResponsePromise;
+			await cartAddResponse.finished();
+			expect( cartAddResponse.ok() ).toBe( true );
 
 			await expect(
 				page.getByRole( 'button', {
@@ -786,7 +1057,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 				.first();
 
+			const cartAddResponsePromise = waitForCartAddBatchResponse( page );
 			await addedToCartButton.click();
+			const cartAddResponse = await cartAddResponsePromise;
+			await cartAddResponse.finished();
+			expect( cartAddResponse.ok() ).toBe( true );
 
 			await expect(
 				page.getByLabel( 'Number of items in the cart: 4' )
@@ -794,21 +1069,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await test.step( 'verify cart state persists after reload', async () => {
-			// Reloading while a batch request is still in flight aborts it,
-			// losing the re-add server-side.
-			await page.evaluate( async () => {
-				const { store } = await import( '@wordpress/interactivity' );
-				const unlockKey =
-					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-				await import( '@woocommerce/stores/woocommerce/cart' );
-				const { actions } = store(
-					'woocommerce',
-					{},
-					{ lock: unlockKey }
-				);
-				await actions.waitForIdle();
-			} );
-
 			await page.reload();
 
 			await expect(
@@ -1191,7 +1451,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( addToCartButton ).toHaveText( '1 in cart' );
 	} );
 
-	test( "allows adding simple products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
+	test( 'redirects simple, variable, and grouped products to cart when enabled', async ( {
 		page,
 		pageObject,
 		editor,
@@ -1204,89 +1464,81 @@ test.describe( 'Add to Cart + Options Block', () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/product/t-shirt' );
+		await test.step( "allows adding simple products to cart when the 'Redirect to cart after successful addition' setting is enabled", async () => {
+			await page.goto( '/product/t-shirt' );
 
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart',
+			} );
+
+			await addToCartButton.click();
+
+			await expect(
+				page.getByLabel( 'Quantity of T-Shirt in your cart.' )
+			).toHaveValue( '1' );
 		} );
 
-		await addToCartButton.click();
+		await test.step( "allows adding variable products to cart when the 'Redirect to cart after successful addition' setting is enabled", async () => {
+			await page.getByLabel( 'Remove T-Shirt from cart' ).click();
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Your cart is currently empty!',
+				} )
+			).toBeVisible();
 
-		await expect(
-			page.getByLabel( 'Quantity of T-Shirt in your cart.' )
-		).toHaveValue( '1' );
-	} );
+			// We intentionally test the V-Neck T-Shirt because it has variations
+			// using 'any' as a variation attribute.
+			await page.goto( '/product/v-neck-t-shirt/' );
 
-	test( "allows adding variable products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
-		page,
-		pageObject,
-		editor,
-	} ) => {
-		await wpCLI( `option set woocommerce_cart_redirect_after_add yes` );
+			const addToCartBlock = page.locator(
+				'.wp-block-add-to-cart-with-options'
+			);
+			const colorBlueOption = addToCartBlock
+				.getByRole( 'radiogroup', { name: 'Color' } )
+				.getByRole( 'radio', { name: 'Blue', exact: true } );
+			const sizeLargeOption = addToCartBlock
+				.getByRole( 'radiogroup', { name: 'Size' } )
+				.getByRole( 'radio', { name: 'Large', exact: true } );
 
-		await pageObject.updateSingleProductTemplate();
+			await colorBlueOption.click();
+			await sizeLargeOption.click();
 
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart',
+			} );
+
+			await addToCartButton.click();
+
+			await expect(
+				page.getByLabel( 'Quantity of V-Neck T-Shirt in your cart.' )
+			).toHaveValue( '1' );
 		} );
 
-		// We intentionally test the V-Neck T-Shirt because it has variations
-		// using 'any' as a variation attribute.
-		await page.goto( '/product/v-neck-t-shirt/' );
+		await test.step( "allows adding grouped products to cart when the 'Redirect to cart after successful addition' setting is enabled", async () => {
+			await page.getByLabel( 'Remove V-Neck T-Shirt from cart' ).click();
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Your cart is currently empty!',
+				} )
+			).toBeVisible();
 
-		const addToCartBlock = page.locator(
-			'.wp-block-add-to-cart-with-options'
-		);
-		const colorBlueOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'radio', { name: 'Blue', exact: true } );
-		const sizeLargeOption = addToCartBlock
-			.getByRole( 'radiogroup', { name: 'Size' } )
-			.getByRole( 'radio', { name: 'Large', exact: true } );
+			await page.goto( '/product/logo-collection' );
 
-		await colorBlueOption.click();
-		await sizeLargeOption.click();
+			const increaseQuantityButton = page.getByLabel(
+				'Increase quantity of T-Shirt'
+			);
+			await increaseQuantityButton.click();
 
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart',
+			} );
+
+			await addToCartButton.click();
+
+			await expect(
+				page.getByLabel( 'Quantity of T-Shirt in your cart.' )
+			).toHaveValue( '1' );
 		} );
-
-		await addToCartButton.click();
-
-		await expect(
-			page.getByLabel( 'Quantity of V-Neck T-Shirt in your cart.' )
-		).toHaveValue( '1' );
-	} );
-
-	test( "allows adding grouped products to cart when the 'Redirect to cart after successful addition' setting is enabled", async ( {
-		page,
-		pageObject,
-		editor,
-	} ) => {
-		await wpCLI( `option set woocommerce_cart_redirect_after_add yes` );
-
-		await pageObject.updateSingleProductTemplate();
-
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-
-		await page.goto( '/product/logo-collection' );
-
-		const increaseQuantityButton = page.getByLabel(
-			'Increase quantity of T-Shirt'
-		);
-		await increaseQuantityButton.click();
-
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
-		} );
-
-		await addToCartButton.click();
-
-		await expect(
-			page.getByLabel( 'Quantity of T-Shirt in your cart.' )
-		).toHaveValue( '1' );
 	} );
 
 	test( 'allows adding simple products to cart when inside the Product block', async ( {
@@ -1507,33 +1759,129 @@ test.describe( 'Add to Cart + Options Block', () => {
 			},
 		];
 
-		test.beforeEach( async () => {
-			const cliOutput = await wpCLI(
-				`wc product create --user=1 --slug="${ productSlug }" --name="${ productName }" --type="variable" --attributes='${ JSON.stringify(
-					productAttributes
-				) }'`
-			);
-			const match: RegExpMatchArray | null = cliOutput.stdout.match(
-				/Success:\s+Created\s+product\s+(\d+)\.\n?$/
-			);
-			const productId: string | null = match ? match[ 1 ] : null;
-			if ( ! productId ) {
+		const normalizeAttributes = ( attributes: typeof productAttributes ) =>
+			attributes
+				.map( ( { name, options, variation, visible } ) => ( {
+					name,
+					options: [ ...options ].sort(),
+					variation,
+					visible,
+				} ) )
+				.sort( ( a, b ) => a.name.localeCompare( b.name ) );
+
+		const normalizeVariationAttributes = (
+			attributes: ( typeof productVariations )[ number ][ 'attributes' ]
+		) =>
+			attributes
+				.map( ( { name, option } ) => ( { name, option } ) )
+				.sort( ( a, b ) =>
+					`${ a.name }:${ a.option }`.localeCompare(
+						`${ b.name }:${ b.option }`
+					)
+				);
+
+		test.beforeEach( async ( { requestUtils } ) => {
+			const product = await requestUtils.rest< {
+				id: number;
+				name: string;
+				slug: string;
+				type: string;
+				status: string;
+				attributes: typeof productAttributes;
+			} >( {
+				method: 'POST',
+				path: 'wc/v3/products',
+				data: {
+					name: productName,
+					slug: productSlug,
+					type: 'variable',
+					status: 'publish',
+					attributes: productAttributes,
+				},
+			} );
+
+			if ( ! Number.isInteger( product.id ) || product.id <= 0 ) {
 				throw new Error(
-					`No productId found, cliOutput: ${ JSON.stringify(
-						cliOutput,
+					`Unexpected parent product response: ${ JSON.stringify(
+						product,
 						null,
 						2
 					) }`
 				);
 			}
 
-			for ( const productVariation of productVariations ) {
-				await wpCLI(
-					`wc product_variation create --user=1 "${ productId }" --regular_price="${ productPrice }" --attributes='${ JSON.stringify(
-						productVariation.attributes
-					) }'`
+			expect( product ).toMatchObject( {
+				name: productName,
+				slug: productSlug,
+				type: 'variable',
+				status: 'publish',
+			} );
+			expect( normalizeAttributes( product.attributes ) ).toEqual(
+				normalizeAttributes( productAttributes )
+			);
+
+			const variationBatch = await requestUtils.rest< {
+				create: Array< {
+					id: number;
+					status: string;
+					regular_price: string;
+					attributes: ( typeof productVariations )[ number ][ 'attributes' ];
+				} >;
+			} >( {
+				method: 'POST',
+				path: `wc/v3/products/${ product.id }/variations/batch`,
+				data: {
+					create: productVariations.map( ( variation ) => ( {
+						...variation,
+						status: 'publish',
+						regular_price: productPrice,
+					} ) ),
+				},
+			} );
+			const createdVariations = variationBatch.create;
+			if (
+				createdVariations.length !== productVariations.length ||
+				! createdVariations.every(
+					( { id, status, regular_price: regularPrice } ) =>
+						Number.isInteger( id ) &&
+						id > 0 &&
+						status === 'publish' &&
+						regularPrice === productPrice
+				)
+			) {
+				throw new Error(
+					`Unexpected variation-batch response: ${ JSON.stringify(
+						variationBatch,
+						null,
+						2
+					) }`
 				);
 			}
+
+			const variationIds = createdVariations.map( ( { id } ) => id );
+			if ( new Set( variationIds ).size !== productVariations.length ) {
+				throw new Error(
+					`Variation-batch response contained duplicate IDs: ${ JSON.stringify(
+						variationBatch,
+						null,
+						2
+					) }`
+				);
+			}
+
+			const actualAttributeCombinations = createdVariations
+				.map( ( { attributes } ) =>
+					JSON.stringify( normalizeVariationAttributes( attributes ) )
+				)
+				.sort();
+			const expectedAttributeCombinations = productVariations
+				.map( ( { attributes } ) =>
+					JSON.stringify( normalizeVariationAttributes( attributes ) )
+				)
+				.sort();
+			expect( actualAttributeCombinations ).toEqual(
+				expectedAttributeCombinations
+			);
 		} );
 
 		for ( const optionStyle of [ 'chips', 'dropdown' ] as (

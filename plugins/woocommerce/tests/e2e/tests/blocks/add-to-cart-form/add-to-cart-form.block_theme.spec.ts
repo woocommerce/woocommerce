@@ -235,220 +235,151 @@ test.describe( `${ blockData.name } Block`, () => {
 	} );
 
 	test.describe( 'Stepper Layout', () => {
-		test( 'has the stepper option visible', async ( {
-			admin,
-			editor,
-			blockUtils,
-		} ) => {
-			await admin.createNewPost();
-			await editor.insertBlock( { name: 'woocommerce/single-product' } );
-
-			await blockUtils.configureSingleProductBlock();
-
-			await blockUtils.enableStepperMode();
-
-			const minusButton = editor.canvas.locator(
-				blockData.selectors.editor.stepperMinusButton
-			);
-			const plusButton = editor.canvas.locator(
-				blockData.selectors.editor.stepperPlusButton
-			);
-
-			await expect( minusButton ).toBeVisible();
-			await expect( plusButton ).toBeVisible();
-		} );
-
-		test( 'has the stepper mode working on the frontend', async ( {
+		test( 'supports Stepper editor and frontend behaviors', async ( {
 			admin,
 			editor,
 			blockUtils,
 			page,
 		} ) => {
-			await admin.createNewPost();
-			await editor.insertBlock( { name: 'woocommerce/single-product' } );
+			await test.step( 'has the stepper option visible', async () => {
+				await admin.createNewPost();
+				await editor.insertBlock( {
+					name: 'woocommerce/single-product',
+				} );
 
-			const productName = 'Hoodie with Logo';
+				await blockUtils.configureSingleProductBlock();
 
-			await blockUtils.configureSingleProductBlock( productName );
+				await blockUtils.enableStepperMode();
 
-			await blockUtils.enableStepperMode();
+				const minusButton = editor.canvas.locator(
+					blockData.selectors.editor.stepperMinusButton
+				);
+				const plusButton = editor.canvas.locator(
+					blockData.selectors.editor.stepperPlusButton
+				);
 
-			await editor.publishAndVisitPost();
-
-			const minusButton = page.getByLabel( `Reduce quantity` );
-			const plusButton = page.getByLabel( `Increase quantity` );
-
-			await expect( minusButton ).toBeVisible();
-			await expect( plusButton ).toBeVisible();
-
-			const input = page.getByLabel( 'Product quantity' );
-
-			await expect( input ).toHaveValue( '1' );
-			await plusButton.click();
-			await expect( input ).toHaveValue( '2' );
-			await minusButton.click();
-			await expect( input ).toHaveValue( '1' );
-			// Ensure the quantity doesn't go below 1.
-			await minusButton.click();
-			await expect( input ).toHaveValue( '1' );
-		} );
-
-		test( "doesn't render stepper when the product is sold individually", async ( {
-			admin,
-			editor,
-			blockUtils,
-			page,
-		} ) => {
-			await blockUtils.createSoldIndividuallyProduct();
-			await admin.createNewPost();
-			await editor.insertBlock( { name: 'woocommerce/single-product' } );
-
-			const productName = 'Sold Individually';
-
-			await blockUtils.configureSingleProductBlock( productName );
-			await blockUtils.enableStepperMode();
-
-			await editor.publishAndVisitPost();
-
-			const minusButton = page.getByLabel( `Reduce quantity` );
-			const plusButton = page.getByLabel( `Increase quantity` );
-
-			await expect( minusButton ).toBeHidden();
-			await expect( plusButton ).toBeHidden();
-		} );
-
-		test( "doesn't render stepper when the product stock is managed and the stock quantity is 1", async ( {
-			admin,
-			editor,
-			blockUtils,
-			page,
-		} ) => {
-			await blockUtils.createManagedStockProduct();
-			await admin.createNewPost();
-			await editor.insertBlock( { name: 'woocommerce/single-product' } );
-
-			const productName = 'Managed Stock';
-
-			await blockUtils.configureSingleProductBlock( productName );
-			await blockUtils.enableStepperMode();
-
-			await editor.publishAndVisitPost();
-
-			const minusButton = page.getByLabel( `Reduce quantity` );
-			const plusButton = page.getByLabel( `Increase quantity` );
-
-			await expect( minusButton ).toBeHidden();
-			await expect( plusButton ).toBeHidden();
-		} );
-
-		test( 'has the stepper mode working on the frontend with min, max, and step attributes', async ( {
-			admin,
-			editor,
-			blockUtils,
-			page,
-		} ) => {
-			await admin.createNewPost();
-			await editor.insertBlock( { name: 'woocommerce/single-product' } );
-
-			const productName = 'Hoodie with Logo';
-
-			await blockUtils.configureSingleProductBlock( productName );
-
-			await blockUtils.enableStepperMode();
-			await editor.publishAndVisitPost();
-
-			await blockUtils.setMinMaxAndStep( {
-				min: 2,
-				max: 10,
-				step: 2,
+				await expect( minusButton ).toBeVisible();
+				await expect( plusButton ).toBeVisible();
 			} );
 
-			const minusButton = page.getByLabel( `Reduce quantity` );
-			const plusButton = page.getByLabel( `Increase quantity` );
+			await test.step( 'has the stepper mode working on the frontend', async () => {
+				await admin.createNewPost();
+				await editor.insertBlock( {
+					name: 'woocommerce/single-product',
+				} );
 
-			await expect( minusButton ).toBeVisible();
-			await expect( plusButton ).toBeVisible();
+				const productName = 'Hoodie with Logo';
 
-			const input = page.getByLabel( 'Product quantity' );
+				await blockUtils.configureSingleProductBlock( productName );
 
-			await expect( input ).toHaveValue( '2' );
-			await minusButton.click();
-			await expect( input ).toHaveValue( '2' );
-			await plusButton.click();
-			await expect( input ).toHaveValue( '4' );
-			await plusButton.click();
-			await expect( input ).toHaveValue( '6' );
-			await plusButton.click();
-			await expect( input ).toHaveValue( '8' );
-			await plusButton.click();
-			await expect( input ).toHaveValue( '10' );
-			await plusButton.click();
-			await expect( input ).toHaveValue( '10' );
-		} );
+				await blockUtils.enableStepperMode();
 
-		test( 'should trigger input change event when plus stepper button is clicked', async ( {
-			admin,
-			editor,
-			blockUtils,
-			page,
-		} ) => {
-			await admin.createNewPost();
-			await editor.insertBlock( { name: 'woocommerce/single-product' } );
+				await editor.publishAndVisitPost();
 
-			const productName = 'Hoodie with Logo';
+				const minusButton = page.getByLabel( `Reduce quantity` );
+				const plusButton = page.getByLabel( `Increase quantity` );
 
-			await blockUtils.configureSingleProductBlock( productName );
+				await expect( minusButton ).toBeVisible();
+				await expect( plusButton ).toBeVisible();
 
-			await blockUtils.enableStepperMode();
-			await editor.publishAndVisitPost();
+				const input = page.getByLabel( 'Product quantity' );
 
-			const plusButton = page.getByLabel( `Increase quantity` );
-
-			await blockUtils.addChangeEventListenerToQuantityInput();
-
-			await plusButton.click();
-
-			const eventFired = await page.evaluate( () => window.eventFired );
-
-			expect( eventFired ).toBe( true );
-		} );
-
-		test( 'should not trigger input change event when plus stepper button is clicked and the value exceeds the maximum limit', async ( {
-			admin,
-			editor,
-			blockUtils,
-			page,
-		} ) => {
-			await admin.createNewPost();
-			await editor.insertBlock( { name: 'woocommerce/single-product' } );
-
-			const productName = 'Hoodie with Logo';
-
-			await blockUtils.configureSingleProductBlock( productName );
-
-			await blockUtils.enableStepperMode();
-			await editor.publishAndVisitPost();
-			await blockUtils.setMinMaxAndStep( {
-				min: 1,
-				max: 4,
-				step: 1,
-			} );
-
-			const plusButton = page.getByLabel( `Increase quantity` );
-
-			for ( let i = 0; i < 5; i++ ) {
+				await expect( input ).toHaveValue( '1' );
 				await plusButton.click();
-			}
+				await expect( input ).toHaveValue( '2' );
+				await minusButton.click();
+				await expect( input ).toHaveValue( '1' );
+				// Ensure the quantity doesn't go below 1.
+				await minusButton.click();
+				await expect( input ).toHaveValue( '1' );
+			} );
 
-			await blockUtils.addChangeEventListenerToQuantityInput();
+			await test.step( "doesn't render stepper when the product is sold individually", async () => {
+				await blockUtils.createSoldIndividuallyProduct();
+				await admin.createNewPost();
+				await editor.insertBlock( {
+					name: 'woocommerce/single-product',
+				} );
 
-			await plusButton.click();
+				const productName = 'Sold Individually';
 
-			const eventFired = await page.evaluate( () => window.eventFired );
+				await blockUtils.configureSingleProductBlock( productName );
+				await blockUtils.enableStepperMode();
 
-			expect( eventFired ).toBeUndefined();
+				await editor.publishAndVisitPost();
+
+				const minusButton = page.getByLabel( `Reduce quantity` );
+				const plusButton = page.getByLabel( `Increase quantity` );
+
+				await expect( minusButton ).toBeHidden();
+				await expect( plusButton ).toBeHidden();
+			} );
+
+			await test.step( "doesn't render stepper when the product stock is managed and the stock quantity is 1", async () => {
+				await blockUtils.createManagedStockProduct();
+				await admin.createNewPost();
+				await editor.insertBlock( {
+					name: 'woocommerce/single-product',
+				} );
+
+				const productName = 'Managed Stock';
+
+				await blockUtils.configureSingleProductBlock( productName );
+				await blockUtils.enableStepperMode();
+
+				await editor.publishAndVisitPost();
+
+				const minusButton = page.getByLabel( `Reduce quantity` );
+				const plusButton = page.getByLabel( `Increase quantity` );
+
+				await expect( minusButton ).toBeHidden();
+				await expect( plusButton ).toBeHidden();
+			} );
+
+			await test.step( 'has the stepper mode working on the frontend with min, max, and step attributes', async () => {
+				await admin.createNewPost();
+				await editor.insertBlock( {
+					name: 'woocommerce/single-product',
+				} );
+
+				const productName = 'Hoodie with Logo';
+
+				await blockUtils.configureSingleProductBlock( productName );
+
+				await blockUtils.enableStepperMode();
+				await editor.publishAndVisitPost();
+
+				await blockUtils.setMinMaxAndStep( {
+					min: 2,
+					max: 10,
+					step: 2,
+				} );
+
+				const minusButton = page.getByLabel( `Reduce quantity` );
+				const plusButton = page.getByLabel( `Increase quantity` );
+
+				await expect( minusButton ).toBeVisible();
+				await expect( plusButton ).toBeVisible();
+
+				const input = page.getByLabel( 'Product quantity' );
+
+				await expect( input ).toHaveValue( '2' );
+				await minusButton.click();
+				await expect( input ).toHaveValue( '2' );
+				await plusButton.click();
+				await expect( input ).toHaveValue( '4' );
+				await plusButton.click();
+				await expect( input ).toHaveValue( '6' );
+				await plusButton.click();
+				await expect( input ).toHaveValue( '8' );
+				await plusButton.click();
+				await expect( input ).toHaveValue( '10' );
+				await plusButton.click();
+				await expect( input ).toHaveValue( '10' );
+			} );
 		} );
-		test( 'should trigger input change event when minus stepper button is clicked', async ( {
+
+		test( 'should dispatch change events only for valid stepper quantity changes', async ( {
 			admin,
 			editor,
 			blockUtils,
@@ -463,44 +394,81 @@ test.describe( `${ blockData.name } Block`, () => {
 
 			await blockUtils.enableStepperMode();
 			await editor.publishAndVisitPost();
+			const cleanUrl = page.url();
 
-			const plusButton = page.getByLabel( `Increase quantity` );
-			await plusButton.click();
-			const minusButton = page.getByLabel( `Reduce quantity` );
+			await test.step( 'should trigger input change event when plus stepper button is clicked', async () => {
+				const plusButton = page.getByLabel( `Increase quantity` );
 
-			await blockUtils.addChangeEventListenerToQuantityInput();
+				await blockUtils.addChangeEventListenerToQuantityInput();
 
-			await minusButton.click();
+				await plusButton.click();
 
-			const eventFired = await page.evaluate( () => window.eventFired );
+				const eventFired = await page.evaluate(
+					() => window.eventFired
+				);
 
-			expect( eventFired ).toBe( true );
-		} );
-		test( 'should not trigger input change event when minus stepper button is clicked and the value goes below the minimum limit', async ( {
-			admin,
-			editor,
-			blockUtils,
-			page,
-		} ) => {
-			await admin.createNewPost();
-			await editor.insertBlock( { name: 'woocommerce/single-product' } );
+				expect( eventFired ).toBe( true );
+			} );
 
-			const productName = 'Hoodie with Logo';
+			await test.step( 'should not trigger input change event when plus stepper button is clicked and the value exceeds the maximum limit', async () => {
+				await page.goto( cleanUrl );
 
-			await blockUtils.configureSingleProductBlock( productName );
+				await blockUtils.setMinMaxAndStep( {
+					min: 1,
+					max: 4,
+					step: 1,
+				} );
 
-			await blockUtils.enableStepperMode();
-			await editor.publishAndVisitPost();
+				const plusButton = page.getByLabel( `Increase quantity` );
 
-			const minusButton = page.getByLabel( `Reduce quantity` );
+				for ( let i = 0; i < 5; i++ ) {
+					await plusButton.click();
+				}
 
-			await blockUtils.addChangeEventListenerToQuantityInput();
+				await blockUtils.addChangeEventListenerToQuantityInput();
 
-			await minusButton.click();
+				await plusButton.click();
 
-			const eventFired = await page.evaluate( () => window.eventFired );
+				const eventFired = await page.evaluate(
+					() => window.eventFired
+				);
 
-			expect( eventFired ).toBeUndefined();
+				expect( eventFired ).toBeUndefined();
+			} );
+
+			await test.step( 'should trigger input change event when minus stepper button is clicked', async () => {
+				await page.goto( cleanUrl );
+
+				const plusButton = page.getByLabel( `Increase quantity` );
+				await plusButton.click();
+				const minusButton = page.getByLabel( `Reduce quantity` );
+
+				await blockUtils.addChangeEventListenerToQuantityInput();
+
+				await minusButton.click();
+
+				const eventFired = await page.evaluate(
+					() => window.eventFired
+				);
+
+				expect( eventFired ).toBe( true );
+			} );
+
+			await test.step( 'should not trigger input change event when minus stepper button is clicked and the value goes below the minimum limit', async () => {
+				await page.goto( cleanUrl );
+
+				const minusButton = page.getByLabel( `Reduce quantity` );
+
+				await blockUtils.addChangeEventListenerToQuantityInput();
+
+				await minusButton.click();
+
+				const eventFired = await page.evaluate(
+					() => window.eventFired
+				);
+
+				expect( eventFired ).toBeUndefined();
+			} );
 		} );
 	} );
 

@@ -4,7 +4,6 @@
 import {
 	expect,
 	test as base,
-	wpCLI,
 	BLOCK_THEME_SLUG,
 	BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG,
 	BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG,
@@ -30,15 +29,31 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Notice Templates', () => {
-	test.beforeEach( async ( { frontendUtils } ) => {
-		const cliOutput = await wpCLI(
-			'post list --title="Cart Shortcode" --post_type=page --field=ID'
+	test.beforeEach( async ( { frontendUtils, requestUtils } ) => {
+		const cartShortcodePages = await requestUtils.rest<
+			Array< { id: number; slug: string } >
+		>( {
+			path: '/wp/v2/pages?slug=cart-shortcode&context=edit&_fields=id,slug',
+		} );
+		const cartShortcodePage = cartShortcodePages.find(
+			( page ) =>
+				page.slug === 'cart-shortcode' &&
+				Number.isInteger( page.id ) &&
+				page.id > 0
 		);
-		const cartShortcodeID = cliOutput.stdout.match( /\d+/g )?.pop();
+		if ( ! cartShortcodePage ) {
+			throw new Error( 'Expected a valid Cart Shortcode page from REST' );
+		}
 
-		await wpCLI(
-			`option update woocommerce_cart_page_id ${ cartShortcodeID }`
-		);
+		const cartShortcodeID = String( cartShortcodePage.id );
+		const cartPageSetting = await requestUtils.rest< { value: string } >( {
+			method: 'PUT',
+			path: 'wc/v3/settings/advanced/woocommerce_cart_page_id',
+			data: { value: cartShortcodeID },
+		} );
+		if ( cartPageSetting.value !== cartShortcodeID ) {
+			throw new Error( 'Cart page setting REST response did not match' );
+		}
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );

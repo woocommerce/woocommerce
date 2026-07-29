@@ -284,16 +284,35 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			const addToCartButton = addToCartBlock.locator(
 				'.single_add_to_cart_button'
 			);
+			const waitForAddItemBatchResponse = () =>
+				page.waitForResponse( ( response ) => {
+					return (
+						response.request().method() === 'POST' &&
+						response
+							.url()
+							.includes( '/wp-json/wc/store/v1/batch' ) &&
+						response
+							.request()
+							.postData()
+							?.includes( '/wc/store/v1/cart/add-item' ) ===
+							true &&
+						response.ok()
+					);
+				} );
 
 			// Select variation V (Blue, Large) and add it: creates V's line.
 			await colorBlueOption.click();
 			await sizeLargeOption.click();
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+			const initialVariationAdd = waitForAddItemBatchResponse();
 			await addToCartButton.click();
+			await initialVariationAdd;
 			await expect( addToCartButton ).toHaveText( '1 in cart' );
 
 			// Add V again: increments V's existing line (no second V line).
+			const repeatedVariationAdd = waitForAddItemBatchResponse();
 			await addToCartButton.click();
+			await repeatedVariationAdd;
 			await expect( addToCartButton ).toHaveText( '2 in cart' );
 
 			// Select a different variation W (Red, Large), not in the cart: the
@@ -302,7 +321,9 @@ test.describe( 'Add to cart respects cart-line identity', () => {
 			await expect( addToCartButton ).toHaveText( 'Add to cart' );
 
 			// Add W: creates a new, separate line for W.
+			const differentVariationAdd = waitForAddItemBatchResponse();
 			await addToCartButton.click();
+			await differentVariationAdd;
 			await expect( addToCartButton ).toHaveText( '1 in cart' );
 
 			// Persisted cart: V incremented to 2 and W added as a distinct line,

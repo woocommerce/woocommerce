@@ -54,76 +54,76 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 	} );
 
-	test( 'should be visible and contain correct inner blocks', async ( {
+	test( 'should expose the correct inner blocks in the editor and list view', async ( {
 		editor,
 		pageObject,
 	} ) => {
-		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+		await test.step( 'should be visible and contain correct inner blocks', async () => {
+			await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
-		const block = editor.canvas.getByLabel(
-			blockData.selectors.editor.blocks.filters.label
-		);
-		await expect( block ).toBeVisible();
+			const block = editor.canvas.getByLabel(
+				blockData.selectors.editor.blocks.filters.label
+			);
+			await expect( block ).toBeVisible();
 
-		const activeFilterBlock = block.getByLabel( 'Block: Active' );
-		await expect( activeFilterBlock ).toBeVisible();
+			const activeFilterBlock = block.getByLabel( 'Block: Active' );
+			await expect( activeFilterBlock ).toBeVisible();
 
-		const colorHeading = block.getByText( 'Color', {
-			exact: true,
+			const colorHeading = block.getByText( 'Color', {
+				exact: true,
+			} );
+			const colorFilterBlock = block.getByLabel( 'Block: Color' );
+			const expectedColorFilterOptions = [
+				'Blue',
+				'Green',
+				'Gray',
+				'Red',
+				'Yellow',
+			];
+			await expect( colorHeading ).toBeVisible();
+			await expect( colorFilterBlock ).toBeVisible();
+			for ( const option of expectedColorFilterOptions ) {
+				await expect( colorFilterBlock ).toContainText( option );
+			}
 		} );
-		const colorFilterBlock = block.getByLabel( 'Block: Color' );
-		const expectedColorFilterOptions = [
-			'Blue',
-			'Green',
-			'Gray',
-			'Red',
-			'Yellow',
-		];
-		await expect( colorHeading ).toBeVisible();
-		await expect( colorFilterBlock ).toBeVisible();
-		for ( const option of expectedColorFilterOptions ) {
-			await expect( colorFilterBlock ).toContainText( option );
-		}
-	} );
 
-	test( 'should contain the correct inner block names in the list view', async ( {
-		editor,
-		pageObject,
-	} ) => {
-		await pageObject.addProductFiltersBlock( { cleanContent: true } );
+		await test.step( 'should contain the correct inner block names in the list view', async () => {
+			const block = editor.canvas.getByLabel(
+				blockData.selectors.editor.blocks.filters.label
+			);
+			await expect( block ).toBeVisible();
 
-		const block = editor.canvas.getByLabel(
-			blockData.selectors.editor.blocks.filters.label
-		);
-		await expect( block ).toBeVisible();
+			await pageObject.page.getByLabel( 'Document Overview' ).click();
+			const listView = pageObject.page.getByLabel( 'List View' );
 
-		await pageObject.page.getByLabel( 'Document Overview' ).click();
-		const listView = pageObject.page.getByLabel( 'List View' );
+			await expect( listView ).toBeVisible();
 
-		await expect( listView ).toBeVisible();
+			const productFiltersBlockListItem = listView.getByRole( 'link', {
+				name: blockData.selectors.editor.blocks.filters.title,
+			} );
+			await expect( productFiltersBlockListItem ).toBeVisible();
+			const listViewExpander =
+				pageObject.page.getByTestId( 'list-view-expander' );
+			const listViewExpanderIcon = listViewExpander.locator( 'svg' );
 
-		const productFiltersBlockListItem = listView.getByRole( 'link', {
-			name: blockData.selectors.editor.blocks.filters.title,
+			await listViewExpanderIcon.click();
+
+			const productFilterHeadingListItem = listView.getByText(
+				'Filters',
+				{
+					exact: true,
+				}
+			);
+			await expect( productFilterHeadingListItem ).toBeVisible();
+
+			const productFilterActiveBlocksListItem =
+				listView.getByText( 'Active' );
+			await expect( productFilterActiveBlocksListItem ).toBeVisible();
+
+			const productFilterAttributeBlockListItem = listView.getByText(
+				'Color' // it must select the attribute with the highest product count
+			);
+			await expect( productFilterAttributeBlockListItem ).toBeVisible();
 		} );
-		await expect( productFiltersBlockListItem ).toBeVisible();
-		const listViewExpander =
-			pageObject.page.getByTestId( 'list-view-expander' );
-		const listViewExpanderIcon = listViewExpander.locator( 'svg' );
-
-		await listViewExpanderIcon.click();
-
-		const productFilterHeadingListItem = listView.getByText( 'Filters', {
-			exact: true,
-		} );
-		await expect( productFilterHeadingListItem ).toBeVisible();
-
-		const productFilterActiveBlocksListItem =
-			listView.getByText( 'Active' );
-		await expect( productFilterActiveBlocksListItem ).toBeVisible();
-
-		const productFilterAttributeBlockListItem = listView.getByText(
-			'Color' // it must select the attribute with the highest product count
-		);
-		await expect( productFilterAttributeBlockListItem ).toBeVisible();
 	} );
 } );

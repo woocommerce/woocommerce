@@ -85,45 +85,49 @@ test.describe( 'Product Collection: Collections', () => {
 		await expect( pageObject.products ).toHaveCount( 5 );
 	} );
 
-	test( 'On Sale Products collection can be added and displays proper products', async ( {
+	test( 'On Sale and Featured Product collections can be added and display proper products', async ( {
 		pageObject,
 	} ) => {
-		await pageObject.createNewPostAndInsertBlock( 'onSale' );
+		await test.step( 'On Sale Products collection can be added and displays proper products', async () => {
+			await pageObject.createNewPostAndInsertBlock( 'onSale' );
 
-		const onSaleProducts = [
-			'Beanie',
-			'Beanie with Logo',
-			'Belt',
-			'Cap',
-			'Hoodie',
-		];
+			const onSaleProducts = [
+				'Beanie',
+				'Beanie with Logo',
+				'Belt',
+				'Cap',
+				'Hoodie',
+			];
 
-		await expect( pageObject.products ).toHaveCount( 5 );
-		await expect( pageObject.productTitles ).toHaveText( onSaleProducts );
+			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( pageObject.productTitles ).toHaveText(
+				onSaleProducts
+			);
 
-		await pageObject.publishAndGoToFrontend();
+			await pageObject.publishAndGoToFrontend();
 
-		await expect( pageObject.products ).toHaveCount( 5 );
-	} );
+			await expect( pageObject.products ).toHaveCount( 5 );
+		} );
 
-	test( 'Featured Products collection can be added and displays proper products', async ( {
-		pageObject,
-	} ) => {
-		await pageObject.createNewPostAndInsertBlock( 'featured' );
+		await test.step( 'Featured Products collection can be added and displays proper products', async () => {
+			await pageObject.createNewPostAndInsertBlock( 'featured' );
 
-		const featuredProducts = [
-			'Cap',
-			'Hoodie with Zipper',
-			'Sunglasses',
-			'V-Neck T-Shirt',
-		];
+			const featuredProducts = [
+				'Cap',
+				'Hoodie with Zipper',
+				'Sunglasses',
+				'V-Neck T-Shirt',
+			];
 
-		await expect( pageObject.products ).toHaveCount( 4 );
-		await expect( pageObject.productTitles ).toHaveText( featuredProducts );
+			await expect( pageObject.products ).toHaveCount( 4 );
+			await expect( pageObject.productTitles ).toHaveText(
+				featuredProducts
+			);
 
-		await pageObject.publishAndGoToFrontend();
+			await pageObject.publishAndGoToFrontend();
 
-		await expect( pageObject.products ).toHaveCount( 4 );
+			await expect( pageObject.products ).toHaveCount( 4 );
+		} );
 	} );
 
 	test( 'Product Catalog collection can be added in post and syncs query with template', async ( {
@@ -174,45 +178,113 @@ test.describe( 'Product Collection: Collections', () => {
 	} );
 
 	test.describe( 'Have hidden implementation in UI', () => {
-		test( 'New Arrivals', async ( { pageObject } ) => {
-			await pageObject.createNewPostAndInsertBlock( 'newArrivals' );
-			const input = await pageObject.getOrderByElement();
+		test( 'Built-in collections', async ( {
+			pageObject,
+			editor,
+			admin,
+		} ) => {
+			await admin.createNewPost();
 
-			await expect( input ).toBeHidden();
-		} );
+			await test.step( 'New Arrivals', async () => {
+				await editor.setContent( '' );
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInPost( 'newArrivals' );
+				await pageObject.chooseProductInEditorProductPickerIfAvailable(
+					admin.page
+				);
+				await admin.page
+					.getByRole( 'toolbar', { name: 'Block Tools' } )
+					.getByRole( 'button', { name: 'Choose collection' } )
+					.waitFor();
+				await pageObject.refreshLocators( 'editor' );
+				await editor.openDocumentSettingsSidebar();
 
-		test( 'Top Rated Products', async ( { pageObject } ) => {
-			await pageObject.createNewPostAndInsertBlock( 'topRated' );
-			const input = await pageObject.getOrderByElement();
+				const input = await pageObject.getOrderByElement();
 
-			await expect( input ).toBeHidden();
-		} );
+				await expect( input ).toBeHidden();
+			} );
 
-		test( 'Best Sellers', async ( { pageObject } ) => {
-			await pageObject.createNewPostAndInsertBlock( 'bestSellers' );
-			const input = await pageObject.getOrderByElement();
+			await test.step( 'Top Rated Products', async () => {
+				await editor.setContent( '' );
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInPost( 'topRated' );
+				await pageObject.chooseProductInEditorProductPickerIfAvailable(
+					admin.page
+				);
+				await admin.page
+					.getByRole( 'toolbar', { name: 'Block Tools' } )
+					.getByRole( 'button', { name: 'Choose collection' } )
+					.waitFor();
+				await pageObject.refreshLocators( 'editor' );
+				await editor.openDocumentSettingsSidebar();
 
-			await expect( input ).toBeHidden();
-		} );
+				const input = await pageObject.getOrderByElement();
 
-		test( 'On Sale Products', async ( { pageObject } ) => {
-			await pageObject.createNewPostAndInsertBlock( 'onSale' );
-			const sidebarSettings = pageObject.locateSidebarSettings();
-			const input = sidebarSettings.getByLabel(
-				SELECTORS.onSaleControlLabel
-			);
+				await expect( input ).toBeHidden();
+			} );
 
-			await expect( input ).toBeHidden();
-		} );
+			await test.step( 'Best Sellers', async () => {
+				await editor.setContent( '' );
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInPost( 'bestSellers' );
+				await pageObject.chooseProductInEditorProductPickerIfAvailable(
+					admin.page
+				);
+				await admin.page
+					.getByRole( 'toolbar', { name: 'Block Tools' } )
+					.getByRole( 'button', { name: 'Choose collection' } )
+					.waitFor();
+				await pageObject.refreshLocators( 'editor' );
+				await editor.openDocumentSettingsSidebar();
 
-		test( 'Featured Products', async ( { pageObject } ) => {
-			await pageObject.createNewPostAndInsertBlock( 'featured' );
-			const sidebarSettings = pageObject.locateSidebarSettings();
-			const input = sidebarSettings.getByLabel(
-				SELECTORS.featuredControlLabel
-			);
+				const input = await pageObject.getOrderByElement();
 
-			await expect( input ).toBeHidden();
+				await expect( input ).toBeHidden();
+			} );
+
+			await test.step( 'On Sale Products', async () => {
+				await editor.setContent( '' );
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInPost( 'onSale' );
+				await pageObject.chooseProductInEditorProductPickerIfAvailable(
+					admin.page
+				);
+				await admin.page
+					.getByRole( 'toolbar', { name: 'Block Tools' } )
+					.getByRole( 'button', { name: 'Choose collection' } )
+					.waitFor();
+				await pageObject.refreshLocators( 'editor' );
+				await editor.openDocumentSettingsSidebar();
+
+				const sidebarSettings = pageObject.locateSidebarSettings();
+				const input = sidebarSettings.getByLabel(
+					SELECTORS.onSaleControlLabel
+				);
+
+				await expect( input ).toBeHidden();
+			} );
+
+			await test.step( 'Featured Products', async () => {
+				await editor.setContent( '' );
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInPost( 'featured' );
+				await pageObject.chooseProductInEditorProductPickerIfAvailable(
+					admin.page
+				);
+				await admin.page
+					.getByRole( 'toolbar', { name: 'Block Tools' } )
+					.getByRole( 'button', { name: 'Choose collection' } )
+					.waitFor();
+				await pageObject.refreshLocators( 'editor' );
+				await editor.openDocumentSettingsSidebar();
+
+				const sidebarSettings = pageObject.locateSidebarSettings();
+				const input = sidebarSettings.getByLabel(
+					SELECTORS.featuredControlLabel
+				);
+
+				await expect( input ).toBeHidden();
+			} );
 		} );
 	} );
 

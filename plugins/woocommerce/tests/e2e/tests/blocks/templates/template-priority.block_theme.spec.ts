@@ -2,26 +2,146 @@
  * External dependencies
  */
 import {
-	test as base,
+	test,
 	expect,
 	BLOCK_THEME_SLUG,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
+	type RequestUtils,
 } from '@woocommerce/e2e-utils';
 
-/**
- * Internal dependencies
- */
-import TemplatesPage from './templates.page';
+type TemplateResponse = {
+	id: string;
+	wp_id: number;
+	content: { raw: string };
+};
 
-const test = base.extend< { pageObject: TemplatesPage } >( {
-	pageObject: async ( { admin, editor }, use ) => {
-		const pageObject = new TemplatesPage( {
-			admin,
-			editor,
-		} );
-		await use( pageObject );
-	},
-} );
+const markerCount = ( content: string, marker: string ) =>
+	content.split( marker ).length - 1;
+
+const getTemplate = async (
+	requestUtils: RequestUtils,
+	id: string
+): Promise< TemplateResponse > =>
+	requestUtils.rest< TemplateResponse >( {
+		method: 'GET',
+		path: `/wp/v2/templates/${ id }?context=edit`,
+	} );
+
+const assertPluginBase = (
+	template: TemplateResponse,
+	expectedId: string,
+	marker: string
+) => {
+	if (
+		template.id !== expectedId ||
+		template.content.raw.length === 0 ||
+		markerCount( template.content.raw, marker ) !== 0
+	) {
+		throw new Error(
+			`Template did not start from the expected plugin base: ${ template.id }`
+		);
+	}
+};
+
+const assertCustomTemplate = (
+	template: TemplateResponse,
+	expectedId: string,
+	expectedContent: string,
+	marker: string
+) => {
+	if (
+		template.id !== expectedId ||
+		! Number.isInteger( template.wp_id ) ||
+		template.wp_id <= 0 ||
+		template.content.raw !== expectedContent ||
+		markerCount( template.content.raw, marker ) !== 1
+	) {
+		throw new Error(
+			`Template customization did not match the requested state: ${ template.id }`
+		);
+	}
+};
+
+const customizeTemplateViaRest = async (
+	requestUtils: RequestUtils,
+	id: string,
+	marker: string
+) => {
+	const base = await getTemplate( requestUtils, id );
+	assertPluginBase( base, id, marker );
+
+	const expectedContent = `${ base.content.raw }
+<!-- wp:paragraph -->
+<p>${ marker }</p>
+<!-- /wp:paragraph -->`;
+	const response = await requestUtils.rest< TemplateResponse >( {
+		method: 'PUT',
+		path: `/wp/v2/templates/${ id }?context=edit`,
+		data: {
+			content: expectedContent,
+		},
+	} );
+	const saved = await getTemplate( requestUtils, id );
+
+	assertCustomTemplate( response, id, expectedContent, marker );
+	assertCustomTemplate( saved, id, expectedContent, marker );
+
+	if ( saved.id !== response.id || saved.wp_id !== response.wp_id ) {
+		throw new Error(
+			`Template customization identity changed after saving: ${ id }`
+		);
+	}
+
+	return { base, saved };
+};
+
+const assertTemplateRestored = async (
+	requestUtils: RequestUtils,
+	base: TemplateResponse,
+	marker: string
+) => {
+	const restored = await getTemplate( requestUtils, base.id );
+
+	if (
+		restored.id !== base.id ||
+		restored.content.raw !== base.content.raw ||
+		markerCount( restored.content.raw, marker ) !== 0
+	) {
+		throw new Error(
+			`Template was not restored to its original base: ${ base.id }`
+		);
+	}
+};
+
+const assertCoexistingTemplates = async (
+	requestUtils: RequestUtils,
+	first: TemplateResponse,
+	firstMarker: string,
+	second: TemplateResponse,
+	secondMarker: string
+) => {
+	const savedFirst = await getTemplate( requestUtils, first.id );
+	const savedSecond = await getTemplate( requestUtils, second.id );
+
+	if (
+		savedFirst.id !== first.id ||
+		savedSecond.id !== second.id ||
+		! Number.isInteger( savedFirst.wp_id ) ||
+		savedFirst.wp_id <= 0 ||
+		! Number.isInteger( savedSecond.wp_id ) ||
+		savedSecond.wp_id <= 0 ||
+		savedFirst.wp_id !== first.wp_id ||
+		savedSecond.wp_id !== second.wp_id ||
+		savedFirst.id === savedSecond.id ||
+		savedFirst.wp_id === savedSecond.wp_id ||
+		savedFirst.content.raw !== first.content.raw ||
+		savedSecond.content.raw !== second.content.raw ||
+		markerCount( savedFirst.content.raw, firstMarker ) !== 1 ||
+		markerCount( savedSecond.content.raw, secondMarker ) !== 1
+	) {
+		throw new Error( 'Template fallback customizations did not coexist' );
+	}
+};
 
 test.describe( 'Template priority', () => {
 	// Templates might come from different sources, and they should have this order of priority:
@@ -60,8 +180,10 @@ test.describe( 'Template priority', () => {
 			editor,
 			page,
 			requestUtils,
-			pageObject,
 		} ) => {
+			let wooCommerceTemplateBase: TemplateResponse | undefined;
+			let wooCommerceTemplate: TemplateResponse | undefined;
+
 			await test.step( 'WooCommerce template', async () => {
 				await page.goto( testData.path );
 
@@ -92,10 +214,12 @@ test.describe( 'Template priority', () => {
 
 			if ( testData.fallbackTemplate ) {
 				await test.step( 'custom fallback template with WooCommerce slug', async () => {
-					await pageObject.addParagraphToTemplate(
+					const customized = await customizeTemplateViaRest(
+						requestUtils,
 						`woocommerce/woocommerce//${ testData.fallbackTemplate.templatePath }`,
 						'Custom fallback template with WooCommerce slug'
 					);
+					wooCommerceTemplate = customized.saved;
 
 					await page.goto( testData.path );
 
@@ -110,8 +234,23 @@ test.describe( 'Template priority', () => {
 				} );
 
 				await test.step( 'custom fallback template with theme slug', async () => {
-					await pageObject.addParagraphToTemplate(
+					const customized = await customizeTemplateViaRest(
+						requestUtils,
 						`${ BLOCK_THEME_SLUG }//${ testData.fallbackTemplate.templatePath }`,
+						'Custom fallback template with theme slug'
+					);
+
+					if ( ! wooCommerceTemplate ) {
+						throw new Error(
+							'WooCommerce fallback template was not customized'
+						);
+					}
+
+					await assertCoexistingTemplates(
+						requestUtils,
+						wooCommerceTemplate,
+						'Custom fallback template with WooCommerce slug',
+						customized.saved,
 						'Custom fallback template with theme slug'
 					);
 
@@ -145,10 +284,12 @@ test.describe( 'Template priority', () => {
 				! testData.isTaxonomyTemplate
 			) {
 				await test.step( 'custom template with WooCommerce slug', async () => {
-					await pageObject.addParagraphToTemplate(
+					const customized = await customizeTemplateViaRest(
+						requestUtils,
 						`woocommerce/woocommerce//${ testData.templatePath }`,
 						'Custom template with WooCommerce slug'
 					);
+					wooCommerceTemplateBase = customized.base;
 
 					await page.goto( testData.path );
 
@@ -178,6 +319,18 @@ test.describe( 'Template priority', () => {
 				await editor.revertTemplate( {
 					templateName: testData.templateName,
 				} );
+
+				if ( ! wooCommerceTemplateBase ) {
+					throw new Error(
+						'WooCommerce template base was not captured'
+					);
+				}
+
+				await assertTemplateRestored(
+					requestUtils,
+					wooCommerceTemplateBase,
+					'Custom template with WooCommerce slug'
+				);
 			}
 
 			await test.step( 'custom template with theme slug', async () => {
@@ -205,7 +358,8 @@ test.describe( 'Template priority', () => {
 						isOnlyCurrentEntityDirty: true,
 					} );
 				} else {
-					await pageObject.addParagraphToTemplate(
+					await customizeTemplateViaRest(
+						requestUtils,
 						`${ BLOCK_THEME_SLUG }//${ testData.templatePath }`,
 						'Custom template with theme slug'
 					);

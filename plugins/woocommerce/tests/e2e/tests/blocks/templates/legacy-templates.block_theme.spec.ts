@@ -1,13 +1,98 @@
 /**
  * External dependencies
  */
-import { test, expect, wpCLI } from '@woocommerce/e2e-utils';
+import { test, expect, wpCLI, type RequestUtils } from '@woocommerce/e2e-utils';
+
+type TemplateResponse = {
+	id: string;
+	wp_id: number;
+	content: { raw: string };
+};
+
+const markerCount = ( content: string, marker: string ) =>
+	content.split( marker ).length - 1;
+
+const getTemplate = async (
+	requestUtils: RequestUtils,
+	id: string
+): Promise< TemplateResponse > =>
+	requestUtils.rest< TemplateResponse >( {
+		method: 'GET',
+		path: `/wp/v2/templates/${ id }?context=edit`,
+	} );
+
+const assertPluginBase = (
+	template: TemplateResponse,
+	expectedId: string,
+	marker: string
+) => {
+	if (
+		template.id !== expectedId ||
+		template.content.raw.length === 0 ||
+		markerCount( template.content.raw, marker ) !== 0
+	) {
+		throw new Error(
+			`Template did not start from the expected plugin base: ${ template.id }`
+		);
+	}
+};
+
+const assertCustomTemplate = (
+	template: TemplateResponse,
+	expectedId: string,
+	expectedContent: string,
+	marker: string
+) => {
+	if (
+		template.id !== expectedId ||
+		! Number.isInteger( template.wp_id ) ||
+		template.wp_id <= 0 ||
+		template.content.raw !== expectedContent ||
+		markerCount( template.content.raw, marker ) !== 1
+	) {
+		throw new Error(
+			`Template customization did not match the requested state: ${ template.id }`
+		);
+	}
+};
+
+const customizeTemplateViaRest = async (
+	requestUtils: RequestUtils,
+	id: string,
+	marker: string
+) => {
+	const base = await getTemplate( requestUtils, id );
+	assertPluginBase( base, id, marker );
+
+	const expectedContent = `${ base.content.raw }
+<!-- wp:paragraph -->
+<p>${ marker }</p>
+<!-- /wp:paragraph -->`;
+	const response = await requestUtils.rest< TemplateResponse >( {
+		method: 'PUT',
+		path: `/wp/v2/templates/${ id }?context=edit`,
+		data: {
+			content: expectedContent,
+		},
+	} );
+	const saved = await getTemplate( requestUtils, id );
+
+	assertCustomTemplate( response, id, expectedContent, marker );
+	assertCustomTemplate( saved, id, expectedContent, marker );
+
+	if ( saved.id !== response.id || saved.wp_id !== response.wp_id ) {
+		throw new Error(
+			`Template customization identity changed after saving: ${ id }`
+		);
+	}
+};
 
 test.describe( 'Legacy templates', () => {
 	test( 'woocommerce//* slug is supported', async ( {
 		admin,
 		page,
 		editor,
+		requestUtils,
 	} ) => {
 		const template = {
 			id: 'single-product',
@@ -17,31 +102,21 @@ test.describe( 'Legacy templates', () => {
 		};
 
 		await test.step( 'Customize existing template to create DB entry', async () => {
+			await customizeTemplateViaRest(
+				requestUtils,
+				`woocommerce/woocommerce//${ template.id }`,
+				template.customText
+			);
+
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//${ template.id }`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );
 
-			const title = editor.canvas.getByText( 'Title' ).first();
-
-			await title.click();
-			await title.press( 'Enter' );
-
-			const emptyBlock = editor.canvas
-				.getByLabel( 'Empty block' )
-				.first();
-
-			await emptyBlock.fill( template.customText );
-			await page.keyboard.press( 'Escape' );
-
 			await expect(
 				editor.canvas.getByText( template.customText )
 			).toBeVisible();
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
 		} );
 
 		await test.step( 'Update created term to legacy format in the DB', async () => {

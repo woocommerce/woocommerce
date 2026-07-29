@@ -264,7 +264,19 @@ test.describe( 'Shopper → Local pickup', () => {
 
 		// Go to checkout.
 		await frontendUtils.goToShop();
+		const addToCartResponse = page.waitForResponse( ( response ) => {
+			return (
+				response.request().method() === 'POST' &&
+				response.url().includes( '/wp-json/wc/store/v1/batch' ) &&
+				response
+					.request()
+					.postData()
+					?.includes( '/wc/store/v1/cart/add-item' ) === true &&
+				response.ok()
+			);
+		} );
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await addToCartResponse;
 		await frontendUtils.goToCheckout();
 
 		await expect(
@@ -512,80 +524,87 @@ test.describe( 'Shopper → Place Virtual Order', () => {
 		).toBeVisible();
 	} );
 
-	test( 'can place a digital order when shipping is disabled', async ( {
+	test( 'can place orders when shipping is disabled with Local Pickup off and on', async ( {
 		checkoutPageObject,
 		frontendUtils,
 		localPickupUtils,
 		page,
+		requestUtils,
 	} ) => {
-		await localPickupUtils.disableLocalPickup();
+		await test.step( 'can place a digital order when shipping is disabled', async () => {
+			await localPickupUtils.disableLocalPickup();
 
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCart();
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await frontendUtils.goToCart();
 
-		await expect(
-			page.getByText( 'Delivery', { exact: true } )
-		).toBeHidden();
+			await expect(
+				page.getByText( 'Delivery', { exact: true } )
+			).toBeHidden();
 
-		await frontendUtils.goToCheckout();
+			await frontendUtils.goToCheckout();
 
-		// Delivery total in the sidebar.
-		await expect(
-			page.getByText( 'Delivery', { exact: true } )
-		).toBeHidden();
+			// Delivery total in the sidebar.
+			await expect(
+				page.getByText( 'Delivery', { exact: true } )
+			).toBeHidden();
 
-		// Ship/Pickup method selector.
-		await expect( page.getByText( 'Ship', { exact: true } ) ).toBeHidden();
-		await expect(
-			page.getByText( 'Pickup', { exact: true } )
-		).toBeHidden();
+			// Ship/Pickup method selector.
+			await expect(
+				page.getByText( 'Ship', { exact: true } )
+			).toBeHidden();
+			await expect(
+				page.getByText( 'Pickup', { exact: true } )
+			).toBeHidden();
 
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			await checkoutPageObject.placeOrder();
 
-		await expect(
-			page.getByText( 'Thank you. Your order has been received.' )
-		).toBeVisible();
+			await expect(
+				page.getByText( 'Thank you. Your order has been received.' )
+			).toBeVisible();
 
-		await localPickupUtils.enableLocalPickup();
-	} );
+			await localPickupUtils.enableLocalPickup();
+		} );
 
-	test( 'can place a digital order when shipping is disabled, but Local Pickup is still enabled', async ( {
-		checkoutPageObject,
-		frontendUtils,
-		localPickupUtils,
-		page,
-	} ) => {
-		await localPickupUtils.enableLocalPickup();
+		await test.step( 'can place a digital order when shipping is disabled, but Local Pickup is still enabled', async () => {
+			await requestUtils.rest( {
+				method: 'PUT',
+				path: 'wc/v3/settings/general/woocommerce_ship_to_countries',
+				data: { value: 'disabled' },
+			} );
+			await localPickupUtils.enableLocalPickup();
 
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
-		await frontendUtils.goToCart();
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
+			await frontendUtils.goToCart();
 
-		await expect(
-			page.getByText( 'Delivery', { exact: true } )
-		).toBeHidden();
+			await expect(
+				page.getByText( 'Delivery', { exact: true } )
+			).toBeHidden();
 
-		await frontendUtils.goToCheckout();
+			await frontendUtils.goToCheckout();
 
-		// Delivery total in the sidebar.
-		await expect(
-			page.getByText( 'Delivery', { exact: true } )
-		).toBeHidden();
+			// Delivery total in the sidebar.
+			await expect(
+				page.getByText( 'Delivery', { exact: true } )
+			).toBeHidden();
 
-		// Ship/Pickup method selector.
-		await expect( page.getByText( 'Ship', { exact: true } ) ).toBeHidden();
-		await expect(
-			page.getByText( 'Pickup', { exact: true } )
-		).toBeHidden();
+			// Ship/Pickup method selector.
+			await expect(
+				page.getByText( 'Ship', { exact: true } )
+			).toBeHidden();
+			await expect(
+				page.getByText( 'Pickup', { exact: true } )
+			).toBeHidden();
 
-		await checkoutPageObject.fillInCheckoutWithTestData();
-		await checkoutPageObject.placeOrder();
+			await checkoutPageObject.fillInCheckoutWithTestData();
+			await checkoutPageObject.placeOrder();
 
-		await expect(
-			page.getByText( 'Thank you. Your order has been received.' )
-		).toBeVisible();
+			await expect(
+				page.getByText( 'Thank you. Your order has been received.' )
+			).toBeVisible();
+		} );
 	} );
 } );
 

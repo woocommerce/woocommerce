@@ -27,114 +27,114 @@ test.describe( `${ blockData.name } frontend`, () => {
 		hasTouch: true,
 	} );
 
-	test( 'should not switch to the next image when the user cursor is focused on the rating with keyboard', async ( {
+	test( 'does not switch images during keyboard interaction outside the gallery', async ( {
 		page,
 	} ) => {
-		await page.goto( blockData.productPage );
+		await test.step( 'should not switch to the next image when the user cursor is focused on the rating with keyboard', async () => {
+			await page.goto( blockData.productPage );
 
-		const activeImageSrc = await page
-			.locator( '.flex-active' )
-			.getAttribute( 'src' );
+			const activeImageSrc = await page
+				.locator( '.flex-active' )
+				.getAttribute( 'src' );
 
-		await page.getByRole( 'tab', { name: 'Reviews' } ).click();
+			await page.getByRole( 'tab', { name: 'Reviews' } ).click();
 
-		const rating = page.locator( '.star-3' );
-		await rating.click();
-		await rating.focus();
+			const rating = page.locator( '.star-3' );
+			await rating.click();
+			await rating.focus();
 
-		await page.keyboard.press( 'ArrowRight' );
+			await page.keyboard.press( 'ArrowRight' );
 
-		const newActiveImage = page.locator( '.flex-active' );
+			const newActiveImage = page.locator( '.flex-active' );
 
-		await expect( newActiveImage ).toHaveAttribute(
-			'src',
-			activeImageSrc as string
-		);
-	} );
-
-	test( 'should not switch to the next image when the user cursor is focused on the tabs with keyboard', async ( {
-		page,
-	} ) => {
-		await page.goto( blockData.productPage );
-
-		const activeImageSrc = await page
-			.locator( '.flex-active' )
-			.getAttribute( 'src' );
-
-		await page.getByRole( 'tab', { name: 'Reviews' } ).focus();
-
-		await page.keyboard.press( 'ArrowRight' );
-
-		const newActiveImage = page.locator( '.flex-active' );
-
-		await expect( newActiveImage ).toHaveAttribute(
-			'src',
-			activeImageSrc as string
-		);
-	} );
-
-	test( 'should switch to the next image when the user cursor is focused on tabs with touch event', async ( {
-		page,
-	} ) => {
-		await page.goto( blockData.productPage );
-
-		const activeImageSrc = await page
-			.locator( '.flex-active' )
-			.getAttribute( 'src' );
-
-		await page.getByRole( 'tab', { name: 'Description' } ).click();
-		await page.getByRole( 'tab', { name: 'Reviews' } ).click();
-
-		await page
-			.locator( '.flex-control-nav.flex-control-thumbs' )
-			.locator( 'img' )
-			.nth( 2 )
-			.tap();
-
-		const newActiveImage = page.locator( '.flex-active' );
-
-		await expect( newActiveImage ).not.toHaveAttribute(
-			'src',
-			activeImageSrc as string
-		);
-	} );
-
-	test( 'aligns the active slide when the gallery width is fractional', async ( {
-		page,
-	} ) => {
-		await page.goto( blockData.productPage );
-
-		const gallery = page.locator( '.woocommerce-product-gallery' );
-		const viewport = page.locator( '.flex-viewport' );
-		const thumbnails = page.locator(
-			'.flex-control-nav.flex-control-thumbs img'
-		);
-
-		await expect( gallery ).toBeVisible();
-		await expect( viewport ).toBeVisible();
-		await expect( gallery ).toHaveCSS( 'opacity', '1' );
-
-		await gallery.evaluate( ( element ) => {
-			( element as HTMLElement ).style.width = '320.5px';
-			window.dispatchEvent( new Event( 'resize' ) );
+			await expect( newActiveImage ).toHaveAttribute(
+				'src',
+				activeImageSrc as string
+			);
 		} );
 
-		const targetThumbnail = thumbnails.nth( 1 );
-		await targetThumbnail.click();
-		await expect( targetThumbnail ).toHaveClass( /flex-active/ );
+		await test.step( 'should not switch to the next image when the user cursor is focused on the tabs with keyboard', async () => {
+			await page.goto( blockData.productPage );
 
-		await expect
-			.poll( async () => {
-				const activeSlideBox = await gallery
-					.locator( '.flex-active-slide' )
-					.boundingBox();
-				const viewportBox = await viewport.boundingBox();
+			const activeImageSrc = await page
+				.locator( '.flex-active' )
+				.getAttribute( 'src' );
 
-				return activeSlideBox && viewportBox
-					? activeSlideBox.x - viewportBox.x
-					: null;
-			} )
-			.toBeCloseTo( 0, 1 );
+			await page.getByRole( 'tab', { name: 'Reviews' } ).focus();
+
+			await page.keyboard.press( 'ArrowRight' );
+
+			const newActiveImage = page.locator( '.flex-active' );
+
+			await expect( newActiveImage ).toHaveAttribute(
+				'src',
+				activeImageSrc as string
+			);
+		} );
+	} );
+
+	test( 'handles touch interaction and fractional-width gallery alignment', async ( {
+		page,
+	} ) => {
+		await test.step( 'should switch to the next image when the user cursor is focused on tabs with touch event', async () => {
+			await page.goto( blockData.productPage );
+
+			const activeImageSrc = await page
+				.locator( '.flex-active' )
+				.getAttribute( 'src' );
+
+			await page.getByRole( 'tab', { name: 'Description' } ).click();
+			await page.getByRole( 'tab', { name: 'Reviews' } ).click();
+
+			await page
+				.locator( '.flex-control-nav.flex-control-thumbs' )
+				.locator( 'img' )
+				.nth( 2 )
+				.tap();
+
+			const newActiveImage = page.locator( '.flex-active' );
+
+			await expect( newActiveImage ).not.toHaveAttribute(
+				'src',
+				activeImageSrc as string
+			);
+		} );
+
+		await test.step( 'aligns the active slide when the gallery width is fractional', async () => {
+			await page.goto( blockData.productPage );
+
+			const gallery = page.locator( '.woocommerce-product-gallery' );
+			const viewport = page.locator( '.flex-viewport' );
+			const thumbnails = page.locator(
+				'.flex-control-nav.flex-control-thumbs img'
+			);
+
+			await expect( gallery ).toBeVisible();
+			await expect( viewport ).toBeVisible();
+			await expect( gallery ).toHaveCSS( 'opacity', '1' );
+
+			await gallery.evaluate( ( element ) => {
+				( element as HTMLElement ).style.width = '320.5px';
+				window.dispatchEvent( new Event( 'resize' ) );
+			} );
+
+			const targetThumbnail = thumbnails.nth( 1 );
+			await targetThumbnail.click();
+			await expect( targetThumbnail ).toHaveClass( /flex-active/ );
+
+			await expect
+				.poll( async () => {
+					const activeSlideBox = await gallery
+						.locator( '.flex-active-slide' )
+						.boundingBox();
+					const viewportBox = await viewport.boundingBox();
+
+					return activeSlideBox && viewportBox
+						? activeSlideBox.x - viewportBox.x
+						: null;
+				} )
+				.toBeCloseTo( 0, 1 );
+		} );
 	} );
 } );
 

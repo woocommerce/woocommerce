@@ -297,51 +297,55 @@ test.describe( 'Shopper → Order Confirmation → Downloadable Products', () =>
 		confirmationPageUrl = checkoutPageObject.page.url();
 	} );
 
-	test( 'Confirm shipping address section is hidden, but billing is visible', async ( {
-		checkoutPageObject,
-	} ) => {
-		await expect(
-			checkoutPageObject.page.getByRole( 'heading', {
-				name: 'Shipping address',
-			} )
-		).toBeHidden();
-		await expect(
-			checkoutPageObject.page.getByRole( 'heading', {
-				name: 'Billing address',
-			} )
-		).toBeVisible();
-	} );
-
-	test( 'Confirm order downloads are visible', async ( {
+	test( 'should show downloadable order details before and after order completion', async ( {
 		checkoutPageObject,
 		admin,
 	} ) => {
-		// While order is pending the downloads are hidden.
-		await expect(
-			checkoutPageObject.page.getByRole( 'heading', {
-				name: 'Downloads',
-			} )
-		).toBeHidden();
+		await test.step( 'Confirm shipping address section is hidden, but billing is visible', async () => {
+			await expect(
+				checkoutPageObject.page.getByRole( 'heading', {
+					name: 'Shipping address',
+				} )
+			).toBeHidden();
+			await expect(
+				checkoutPageObject.page.getByRole( 'heading', {
+					name: 'Billing address',
+				} )
+			).toBeVisible();
+		} );
 
-		// Update last order status to completed.
-		await admin.visitAdminPage( 'edit.php', 'post_type=shop_order' );
-		await admin.page.locator( '.wp-list-table' ).waitFor();
-		await admin.page.click(
-			'.wp-list-table tbody tr:first-child a.order-view'
-		);
-		await admin.page.getByRole( 'textbox', { name: 'On hold' } ).click();
-		await admin.page.getByRole( 'option', { name: 'Completed' } ).click();
-		await admin.page
-			.getByRole( 'button', { name: 'Update' } )
-			.first()
-			.click();
+		await test.step( 'Confirm order downloads are visible', async () => {
+			// While order is pending the downloads are hidden.
+			await expect(
+				checkoutPageObject.page.getByRole( 'heading', {
+					name: 'Downloads',
+				} )
+			).toBeHidden();
 
-		// Go back to page.
-		await checkoutPageObject.page.goto( confirmationPageUrl );
-		await expect(
-			checkoutPageObject.page.getByRole( 'heading', {
-				name: 'Downloads',
-			} )
-		).toBeVisible();
+			// Update last order status to completed.
+			await admin.visitAdminPage( 'edit.php', 'post_type=shop_order' );
+			await admin.page.locator( '.wp-list-table' ).waitFor();
+			await admin.page.click(
+				'.wp-list-table tbody tr:first-child a.order-view'
+			);
+			await admin.page
+				.getByRole( 'textbox', { name: 'On hold' } )
+				.click();
+			await admin.page
+				.getByRole( 'option', { name: 'Completed' } )
+				.click();
+			await admin.page
+				.getByRole( 'button', { name: 'Update' } )
+				.first()
+				.click();
+
+			// Go back to page.
+			await checkoutPageObject.page.goto( confirmationPageUrl );
+			await expect(
+				checkoutPageObject.page.getByRole( 'heading', {
+					name: 'Downloads',
+				} )
+			).toBeVisible();
+		} );
 	} );
 } );

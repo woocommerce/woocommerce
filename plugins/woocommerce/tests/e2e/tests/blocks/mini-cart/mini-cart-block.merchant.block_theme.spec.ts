@@ -52,6 +52,8 @@ test.describe( 'Merchant → Mini Cart', () => {
 
 			const miniCartButton = editor.page.getByRole( 'option', {
 				name: blockData.name,
+				exact: true,
+				disabled: true,
 			} );
 
 			await expect( miniCartButton ).toBeVisible();

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test as base, wpCLI } from '@woocommerce/e2e-utils';
+import { expect, test } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -10,47 +10,74 @@ import {
 	REGULAR_PRICED_PRODUCT_NAME,
 	SIMPLE_PHYSICAL_PRODUCT_NAME,
 } from '../checkout/constants';
-import ProductCollectionPage from '../product-collection/product-collection.page';
-
-const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
-	productCollectionPage: async ( { page, admin, editor }, use ) => {
-		const pageObject = new ProductCollectionPage( {
-			page,
-			admin,
-			editor,
-		} );
-		await use( pageObject );
-	},
-} );
 
 test.describe( 'Shopper → Notices', () => {
 	test( 'Shopper sees SSR error notice in mini cart when product goes out of stock', async ( {
 		page,
 		browser,
 		frontendUtils,
+		requestUtils,
 	} ) => {
 		const productName = 'Limited Stock Product';
 
 		// Create a product with only 1 in stock.
-		const result = await wpCLI(
-			`wc product create --name="${ productName }" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin --porcelain`
-		);
-		// Extract just the numeric ID from output (npm adds prefix lines to stdout).
-		const productId = result.stdout.match( /^\d+$/m )?.[ 0 ];
-		if ( ! productId ) {
+		const createdProduct = await requestUtils.rest< unknown >( {
+			method: 'POST',
+			path: 'wc/v2/products',
+			data: {
+				name: productName,
+				regular_price: '10',
+				manage_stock: true,
+				stock_quantity: 1,
+			},
+		} );
+		if (
+			typeof createdProduct !== 'object' ||
+			createdProduct === null ||
+			! ( 'id' in createdProduct ) ||
+			typeof createdProduct.id !== 'number' ||
+			! Number.isInteger( createdProduct.id ) ||
+			createdProduct.id <= 0
+		) {
 			throw new Error(
-				`Failed to extract product ID from wpCLI output: ${ result.stdout }`
+				`Failed to create a product through REST: ${ JSON.stringify(
+					createdProduct
+				) }`
 			);
 		}
+		const productId = createdProduct.id;
 
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( productName );
 
 		// Set product to out of stock while it's in cart.
-		await wpCLI(
-			`wc product update ${ productId } --stock_quantity=0 --in_stock=false --user=admin`
-		);
+		const updatedProduct = await requestUtils.rest< unknown >( {
+			method: 'POST',
+			path: `wc/v2/products/${ productId }`,
+			data: {
+				stock_quantity: 0,
+				in_stock: false,
+			},
+		} );
+		if (
+			typeof updatedProduct !== 'object' ||
+			updatedProduct === null ||
+			! ( 'id' in updatedProduct ) ||
+			updatedProduct.id !== productId ||
+			! ( 'manage_stock' in updatedProduct ) ||
+			updatedProduct.manage_stock !== true ||
+			! ( 'stock_quantity' in updatedProduct ) ||
+			updatedProduct.stock_quantity !== 0 ||
+			! ( 'in_stock' in updatedProduct ) ||
+			updatedProduct.in_stock !== false
+		) {
+			throw new Error(
+				`Failed to mark the product out of stock through REST: ${ JSON.stringify(
+					updatedProduct
+				) }`
+			);
+		}
 
 		// Get the current URL to revisit with JS disabled.
 		const currentUrl = page.url();
@@ -85,7 +112,7 @@ test.describe( 'Shopper → Notices', () => {
 		page,
 		editor,
 		admin,
-		productCollectionPage,
+		frontendUtils,
 	} ) => {
 		const checkMiniCartTitle = async ( itemCount: number ) => {
 			try {
@@ -131,10 +158,7 @@ test.describe( 'Shopper → Notices', () => {
 		await editor.page
 			.getByRole( 'button', { name: 'Save', exact: true } )
 			.click();
-		await productCollectionPage.createNewPostAndInsertBlock(
-			'productCatalog'
-		);
-		await productCollectionPage.publishAndGoToFrontend();
+		await frontendUtils.goToShop();
 		await page
 			.getByLabel( `Add to cart: “${ SIMPLE_PHYSICAL_PRODUCT_NAME }”` )
 			.click();
@@ -162,14 +186,23 @@ test.describe( 'Shopper → Notices', () => {
 } );
 
 test.describe( 'Shopper → Tax', () => {
-	test.beforeEach( async () => {
-		await wpCLI( 'option set woocommerce_prices_include_tax no' );
-		await wpCLI( 'option set woocommerce_tax_display_cart incl' );
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/tax/woocommerce_prices_include_tax',
+			data: { value: 'no' },
+		} );
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/tax/woocommerce_tax_display_cart',
+			data: { value: 'incl' },
+		} );
 	} );
 
 	test( 'User can see tax label and price including tax', async ( {
 		frontendUtils,
 		page,
+		requestUtils,
 	} ) => {
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
@@ -188,8 +221,16 @@ test.describe( 'Shopper → Tax', () => {
 
 		await expect( miniCartLocator ).toContainText( '(incl. tax)' );
 
-		await wpCLI( 'option set woocommerce_prices_include_tax yes' );
-		await wpCLI( 'option set woocommerce_tax_display_cart excl' );
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/tax/woocommerce_prices_include_tax',
+			data: { value: 'yes' },
+		} );
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/tax/woocommerce_tax_display_cart',
+			data: { value: 'excl' },
+		} );
 		await page.reload();
 
 		await expect( miniCartLocator ).toContainText( '(ex. tax)' );
