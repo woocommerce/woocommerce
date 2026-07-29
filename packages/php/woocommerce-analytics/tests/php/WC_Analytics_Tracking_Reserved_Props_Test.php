@@ -400,4 +400,72 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 
 		$this->assertFalse( WC_Analytics_Tracking::is_proxy_tracking_request() );
 	}
+
+	/**
+	 * A callback that assigns unconditionally beats a client value of the same
+	 * name. This is the pattern the filter docblock tells extensions to use.
+	 */
+	public function test_filter_callback_assigning_unconditionally_beats_the_client(): void {
+		$callback = function ( $props ) {
+			$props['partner_tier'] = 'gold';
+			return $props;
+		};
+		add_filter( 'jetpack_woocommerce_analytics_event_props', $callback );
+
+		$props = WC_Analytics_Tracking::get_properties(
+			'woocommerceanalytics_add_to_cart',
+			array( 'partner_tier' => 'forged' ),
+			true
+		);
+
+		remove_filter( 'jetpack_woocommerce_analytics_event_props', $callback );
+
+		$this->assertSame( 'gold', $props['partner_tier'] );
+	}
+
+	/**
+	 * The known limitation, asserted so it is a recorded decision rather than an
+	 * assumption: a callback that defers to an existing value loses to the
+	 * client, because the reserved set cannot cover names the filter invents.
+	 * If this ever starts passing, the limitation has been closed and the spec
+	 * needs updating.
+	 */
+	public function test_filter_callback_deferring_to_an_existing_value_loses_to_the_client(): void {
+		$callback = function ( $props ) {
+			$props['partner_tier'] = isset( $props['partner_tier'] ) ? $props['partner_tier'] : 'gold';
+			return $props;
+		};
+		add_filter( 'jetpack_woocommerce_analytics_event_props', $callback );
+
+		$props = WC_Analytics_Tracking::get_properties(
+			'woocommerceanalytics_add_to_cart',
+			array( 'partner_tier' => 'forged' ),
+			true
+		);
+
+		remove_filter( 'jetpack_woocommerce_analytics_event_props', $callback );
+
+		$this->assertSame( 'forged', $props['partner_tier'], 'Known limitation: see the spec.' );
+	}
+
+	/**
+	 * The third argument tells a callback whether the properties it is looking
+	 * at came from an untrusted client, which is the only way it can know to
+	 * assign unconditionally.
+	 */
+	public function test_filter_receives_the_client_supplied_flag(): void {
+		$seen     = array();
+		$callback = function ( $props, $event_name, $is_client_supplied ) use ( &$seen ) {
+			$seen[] = $is_client_supplied;
+			return $props;
+		};
+		add_filter( 'jetpack_woocommerce_analytics_event_props', $callback, 10, 3 );
+
+		WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_add_to_cart', array(), true );
+		WC_Analytics_Tracking::get_properties( 'woocommerceanalytics_add_to_cart', array(), false );
+
+		remove_filter( 'jetpack_woocommerce_analytics_event_props', $callback, 10 );
+
+		$this->assertSame( array( true, false ), $seen );
+	}
 }

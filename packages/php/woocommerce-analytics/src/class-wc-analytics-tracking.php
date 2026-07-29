@@ -394,19 +394,33 @@ class WC_Analytics_Tracking {
 	 * @param bool   $is_client_supplied Whether $event_properties came from an untrusted client.
 	 * @return array
 	 */
-	public static function get_properties( $event_name, $event_properties, $is_client_supplied = false ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- consumed by a filter argument added in a follow-up change.
+	public static function get_properties( $event_name, $event_properties, $is_client_supplied = false ) {
 		$common_properties = self::get_common_properties();
 
 		/**
 		 * Allow defining custom event properties in WooCommerce Analytics.
 		 *
+		 * On the proxy path the incoming array contains client-controlled values:
+		 * a callback setting a server-authoritative property must assign
+		 * unconditionally rather than defer to what is already there, because a
+		 * client can supply that property name itself. `$is_client_supplied` says
+		 * when that applies.
+		 *
 		 * @module woocommerce-analytics
 		 *
 		 * @since 12.5
+		 * @since 0.16.8 Added the `$is_client_supplied` parameter.
 		 *
-		 * @param array $all_props Array of event props to be filtered.
+		 * @param array  $all_props Array of event props to be filtered.
+		 * @param string $event_name Event name.
+		 * @param bool   $is_client_supplied Whether the props came from an untrusted client.
 		 */
-		$properties = apply_filters( 'jetpack_woocommerce_analytics_event_props', array_merge( $common_properties, $event_properties ), $event_name );
+		$properties = apply_filters(
+			'jetpack_woocommerce_analytics_event_props',
+			array_merge( $common_properties, $event_properties ),
+			$event_name,
+			$is_client_supplied
+		);
 
 		$required_properties = $event_name
 			? array(

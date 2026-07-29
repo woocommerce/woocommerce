@@ -269,12 +269,17 @@ trait Woo_Analytics_Trait {
 		 * @module woocommerce-analytics
 		 *
 		 * @since 12.5
+		 * @since 0.16.8 Added the `$event_name` and `$is_client_supplied` parameters.
 		 *
-		 * @param array $properties Array of event props to be filtered.
+		 * @param array  $properties Array of event props to be filtered.
+		 * @param string $event_name Event name.
+		 * @param bool   $is_client_supplied Whether the props came from an untrusted client.
 		 */
 		$properties = apply_filters(
 			'jetpack_woocommerce_analytics_event_props',
-			$common_properties
+			$common_properties,
+			null,
+			false
 		);
 
 		return $properties;
@@ -298,7 +303,9 @@ trait Woo_Analytics_Trait {
 		/** This filter is documented in src/class-woo-analytics-trait.php */
 		return apply_filters(
 			'jetpack_woocommerce_analytics_event_props',
-			$common_properties
+			$common_properties,
+			null,
+			false
 		);
 	}
 
