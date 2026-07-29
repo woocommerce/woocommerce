@@ -50,7 +50,7 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	 * @param string $stored_support      Stored support from the last trusted request.
 	 * @param bool   $expected             Expected resolved support.
 	 */
-	public function test_resolve_theme_support_for_product_archive(
+	public function test_should_register_product_archive(
 		bool $runtime_support,
 		bool $theme_may_be_skipped,
 		string $stored_support,
@@ -58,7 +58,7 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	): void {
 		update_option( 'current_theme_supports_woocommerce', $stored_support );
 
-		$method = new ReflectionMethod( WC_Post_Types::class, 'resolve_theme_support_for_product_archive' );
+		$method = new ReflectionMethod( WC_Post_Types::class, 'should_register_product_archive' );
 		$method->setAccessible( true );
 
 		$this->assertSame(
