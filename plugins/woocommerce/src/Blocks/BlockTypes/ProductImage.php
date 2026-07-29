@@ -260,33 +260,34 @@ class ProductImage extends AbstractBlock {
 			$attr['loading'] = $loading_attr;
 		}
 
-		add_filter(
-			'wp_calculate_image_srcset',
-			function ( $sources, $size_array, $image_src, $image_meta ) use ( $aspect_ratio ) {
-				if ( ! $aspect_ratio ) {
-					return $sources;
-				}
-
-				$aspect_ratio_parts = explode( '/', $aspect_ratio );
-				$block_aspect_ratio = (int) $aspect_ratio_parts[0] / (int) $aspect_ratio_parts[1];
-
-				$image_aspect_radio = $image_meta['width'] / $image_meta['height'];
-
-				if ( $image_aspect_radio > $block_aspect_ratio ) {
-					$stretch_factor = $image_aspect_radio / $block_aspect_ratio;
-
-					foreach ( $sources as $key => $source ) {
-						$sources[ $key ]['value'] = (int) round( $source['value'] / $stretch_factor );
-					}
-				}
-
+		$adjust_srcset = function ( $sources, $size_array, $image_src, $image_meta ) use ( $aspect_ratio ) {
+			if ( ! $aspect_ratio ) {
 				return $sources;
-			},
-			10,
-			4
-		);
+			}
 
-		return $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
+			$aspect_ratio_parts = explode( '/', $aspect_ratio );
+			$block_aspect_ratio = (int) $aspect_ratio_parts[0] / (int) $aspect_ratio_parts[1];
+
+			$image_aspect_radio = $image_meta['width'] / $image_meta['height'];
+
+			if ( $image_aspect_radio > $block_aspect_ratio ) {
+				$stretch_factor = $image_aspect_radio / $block_aspect_ratio;
+
+				foreach ( $sources as $key => $source ) {
+					$sources[ $key ]['value'] = (int) round( $source['value'] / $stretch_factor );
+				}
+			}
+
+			return $sources;
+		};
+
+		add_filter( 'wp_calculate_image_srcset', $adjust_srcset, 10, 4 );
+
+		$image_html = $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
+
+		remove_filter( 'wp_calculate_image_srcset', $adjust_srcset, 10 );
+
+		return $image_html;
 	}
 
 	/**
