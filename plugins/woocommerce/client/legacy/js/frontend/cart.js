@@ -307,7 +307,10 @@ jQuery( function ( $ ) {
 		toggle_shipping_on_keydown: function ( event ) {
 			if ( event.key === ' ' ) {
 				event.preventDefault();
-				$( event.currentTarget ).trigger( 'click' );
+
+				if ( ! event.originalEvent || ! event.originalEvent.repeat ) {
+					$( event.currentTarget ).trigger( 'click' );
+				}
 			}
 		},
 
