@@ -61,6 +61,10 @@ class WooCommerceAnalyticsProxySpeed {
 	/**
 	 * Check if current request is a proxy request.
 	 *
+	 * Duplicated as WC_Analytics_Tracking::is_proxy_tracking_request(). This copy
+	 * cannot delegate to that one: init() calls this before load_autoloader(), so
+	 * no package class exists yet. Change both together.
+	 *
 	 * @return bool
 	 */
 	private function is_proxy_request() {
@@ -214,7 +218,7 @@ class WooCommerceAnalyticsProxySpeed {
 				continue;
 			}
 
-			$result = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::record_event( $event_name, $properties );
+			$result = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::record_client_event( $event_name, $properties );
 
 			if ( is_wp_error( $result ) ) {
 				$results[ $index ] = array(
