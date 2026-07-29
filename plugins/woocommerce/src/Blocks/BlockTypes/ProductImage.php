@@ -263,8 +263,12 @@ class ProductImage extends AbstractBlock {
 		add_filter(
 			'wp_calculate_image_srcset',
 			function ( $sources, $size_array, $image_src, $image_meta ) use ( $aspect_ratio ) {
+				if ( ! $aspect_ratio ) {
+					return $sources;
+				}
+
 				$aspect_ratio_parts = explode( '/', $aspect_ratio );
-				$block_aspect_ratio = $aspect_ratio_parts[0] / $aspect_ratio_parts[1];
+				$block_aspect_ratio = (int) $aspect_ratio_parts[0] / (int) $aspect_ratio_parts[1];
 
 				$image_aspect_radio = $image_meta['width'] / $image_meta['height'];
 
