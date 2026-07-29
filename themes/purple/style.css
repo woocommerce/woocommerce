@@ -34,6 +34,17 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* Outline buttons default to the ink color via this custom property
+ * (see the outline variation css in theme.json). Inside section styles
+ * and covers the local text color already accounts for the surface, so
+ * resolve to currentColor there and let the context decide. */
+.is-style-section-1,
+.is-style-section-2,
+.is-style-section-3,
+.wp-block-cover {
+	--wp--custom--outline-button-color: currentColor;
+}
+
 /*
  * Tighten margin when a heading follows another heading in post content.
  * The extra top-margin in theme.json signals a section break above; when

@@ -76,6 +76,7 @@
 			]
 		},
 		"custom": {
+			"outline-button-color": "var(--wp--preset--color--theme-2)",
 			"spacing-unit": "10",
 			"wide-size": "1340"
 		},
@@ -217,7 +218,7 @@
 					}
 				},
 				"typography": {
-					"fontSize":  "var(--wp--preset--font-size--medium)",
+					"fontSize": "var(--wp--preset--font-size--medium)",
 					"fontWeight": "400"
 				}
 			},
@@ -244,7 +245,7 @@
 							"color": "currentColor",
 							"width": "1px"
 						},
-						"css": ".wp-block-button__link:not(.has-background):hover {background-color:color-mix(in srgb, currentColor 5%, transparent);}",
+						"css": ".wp-block-button__link:not(.has-background):hover {background-color:color-mix(in srgb, currentColor 5%, transparent);}&.wp-block-button__link:not(.has-text-color) {color:var(--wp--custom--outline-button-color);}",
 						"spacing": {
 							"padding": {
 								"bottom": "calc(0.75em - 1px)",
@@ -307,7 +308,7 @@
 					}
 				}
 			},
-			"core/comment-reply-link": {	
+			"core/comment-reply-link": {
 				"typography": {
 					"fontSize": "var(--wp--preset--font-size--small)",
 					"lineHeight": "1.71"
@@ -427,7 +428,7 @@
 					"fontSize": "var(--wp--preset--font-size--large)",
 					"fontStyle": "normal",
 					"fontWeight": "700",
-					"letterSpacing":"0.09em",
+					"letterSpacing": "0.09em",
 					"lineHeight": "1.18",
 					"textTransform": "uppercase"
 				}
@@ -449,18 +450,18 @@
 					"blockGap": "0"
 				}
 			},
-			"woocommerce/add-to-cart-with-options-variation-selector-attribute-name" : {
+			"woocommerce/add-to-cart-with-options-variation-selector-attribute-name": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-4)"
 				},
 				"typography": {
-					"fontSize":  "var(--wp--preset--font-size--small)",
+					"fontSize": "var(--wp--preset--font-size--small)",
 					"lineHeight": "1.71"
 				}
 			},
 			"woocommerce/breadcrumbs": {
 				"typography": {
-					"fontSize":  "var(--wp--preset--font-size--small)",
+					"fontSize": "var(--wp--preset--font-size--small)",
 					"lineHeight": "1.71"
 				}
 			},
@@ -529,32 +530,32 @@
 					"text": "var(--wp--preset--color--theme-2)"
 				}
 			},
-			"woocommerce/product-reviews" : {
+			"woocommerce/product-reviews": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-2)"
 				}
 			},
-			"woocommerce/product-review-author-name" : {
+			"woocommerce/product-review-author-name": {
 				"typography": {
-					"fontSize":  "var(--wp--preset--font-size--small)",
+					"fontSize": "var(--wp--preset--font-size--small)",
 					"fontWeight": "700",
 					"lineHeight": "1.71"
 				}
 			},
-			"woocommerce/product-review-date" : {
+			"woocommerce/product-review-date": {
 				"typography": {
-					"fontSize":  "var(--wp--preset--font-size--small)",
+					"fontSize": "var(--wp--preset--font-size--small)",
 					"lineHeight": "1.71"
 				}
 			},
-			"woocommerce/product-review-content" : {
+			"woocommerce/product-review-content": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-4)"
 				}
 			},
 			"woocommerce/product-sale-badge": {
 				"typography": {
-					"fontSize":  "var(--wp--preset--font-size--small)",
+					"fontSize": "var(--wp--preset--font-size--small)",
 					"fontWeight": "400",
 					"lineHeight": "1.71",
 					"textTransform": "none"
@@ -570,14 +571,14 @@
 					"color": "var(--wp--preset--color--theme-7)"
 				}
 			},
-			"woocommerce/product-summary" : {
+			"woocommerce/product-summary": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-4)"
 				}
 			},
 			"woocommerce/product-title": {
 				"typography": {
-					"fontSize":  "var(--wp--preset--font-size--large)",
+					"fontSize": "var(--wp--preset--font-size--large)",
 					"lineHeight": "1.18"
 				}
 			}
@@ -677,7 +678,7 @@
 					"fontSize": "var(--wp--preset--font-size--small)",
 					"fontWeight": "400",
 					"lineHeight": "1.71",
-					"letterSpacing":"0.06rem",
+					"letterSpacing": "0.06rem",
 					"textTransform": "uppercase"
 				}
 			},
@@ -714,7 +715,7 @@
 		},
 		"typography": {
 			"fontFamily": "var(--wp--preset--font-family--inter)",
-			"fontSize":  "var(--wp--preset--font-size--medium)",
+			"fontSize": "var(--wp--preset--font-size--medium)",
 			"fontStyle": "normal",
 			"fontWeight": "300",
 			"lineHeight": "1.5625"
