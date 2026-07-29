@@ -18,7 +18,6 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 	let orderId: number,
 		secondOrderId: number,
 		orderToCancel: number,
-		shippingOrderId: number,
 		customerId: number;
 	const username = `big.archie.${ Date.now() }`;
 
@@ -32,7 +31,7 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			} );
 		await restApi
 			.post( `${ WC_API_PATH }/orders`, {
-				status: 'processing',
+				status: 'pending',
 			} )
 			.then( ( response: { data: { id: number } } ) => {
 				secondOrderId = response.data.id;
@@ -44,14 +43,6 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			.then( ( response: { data: { id: number } } ) => {
 				orderToCancel = response.data.id;
 			} );
-		await restApi
-			.post( `${ WC_API_PATH }/orders`, {
-				status: 'pending',
-			} )
-			.then( ( response: { data: { id: number } } ) => {
-				shippingOrderId = response.data.id;
-			} );
-
 		await restApi
 			.post( `${ WC_API_PATH }/customers`, {
 				email: `${ username }@email.addr`,
@@ -96,9 +87,6 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			force: true,
 		} );
 		await restApi.delete( `${ WC_API_PATH }/orders/${ orderToCancel }`, {
-			force: true,
-		} );
-		await restApi.delete( `${ WC_API_PATH }/orders/${ shippingOrderId }`, {
 			force: true,
 		} );
 		await restApi.delete( `${ WC_API_PATH }/customers/${ customerId }`, {
@@ -154,43 +142,6 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 				.locator( `:is(#order-${ orderId }, #post-${ orderId })` )
 				.getByRole( 'cell', { name: 'Completed' } )
 		).toBeVisible();
-	} );
-
-	test( 'updates shipping line names when the method changes', async ( {
-		page,
-	} ) => {
-		await page.goto(
-			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ shippingOrderId }`
-		);
-
-		await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
-		await page.getByRole( 'button', { name: 'Add shipping' } ).click();
-
-		const shippingRow = page.locator( 'tr.shipping' ).last();
-		await expect( shippingRow ).toBeVisible();
-		await shippingRow
-			.getByRole( 'link', { name: 'Edit shipping' } )
-			.click();
-
-		const method = shippingRow.locator( 'select.shipping_method' );
-		const name = shippingRow.locator( 'input.shipping_method_name' );
-
-		await method.selectOption( 'free_shipping' );
-		await expect( name ).toHaveValue( 'Free shipping' );
-
-		await method.selectOption( '' );
-		await expect( name ).toHaveValue( 'Shipping' );
-
-		await method.selectOption( 'free_shipping' );
-		await expect( name ).toHaveValue( 'Free shipping' );
-		await method.selectOption( 'other' );
-		await expect( name ).toHaveValue( 'Shipping' );
-
-		await method.selectOption( 'free_shipping' );
-		await expect( name ).toHaveValue( 'Free shipping' );
-		await name.fill( 'Local courier' );
-		await method.selectOption( '' );
-		await expect( name ).toHaveValue( 'Local courier' );
 	} );
 
 	test( 'can update order status to cancelled', async ( { page } ) => {
@@ -420,6 +371,39 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 				.pressSequentially( username );
 			await page.waitForSelector( 'li.select2-results__option' );
 			await page.locator( 'li.select2-results__option' ).click();
+		} );
+
+		await test.step( 'Update the shipping method name', async () => {
+			await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
+			await page.getByRole( 'button', { name: 'Add shipping' } ).click();
+
+			const shippingRow = page.locator( 'tr.shipping' ).last();
+			await expect( shippingRow ).toBeVisible();
+			await shippingRow
+				.getByRole( 'link', { name: 'Edit shipping' } )
+				.click();
+
+			const method = shippingRow.locator( 'select.shipping_method' );
+			const name = shippingRow.locator( 'input.shipping_method_name' );
+
+			await method.selectOption( 'free_shipping' );
+			await expect( name ).toHaveValue( 'Free shipping' );
+
+			await method.selectOption( '' );
+			await expect( name ).toHaveValue( 'Shipping' );
+
+			await method.selectOption( 'free_shipping' );
+			await expect( name ).toHaveValue( 'Free shipping' );
+			await method.selectOption( 'other' );
+			await expect( name ).toHaveValue( 'Shipping' );
+
+			await method.selectOption( 'free_shipping' );
+			await expect( name ).toHaveValue( 'Free shipping' );
+			await name.fill( 'Local courier' );
+			await method.selectOption( '' );
+			await expect( name ).toHaveValue( 'Local courier' );
+
+			await page.locator( 'button.save-action' ).click();
 		} );
 
 		await test.step( 'Load the billing address and then copy it to the shipping address', async () => {
