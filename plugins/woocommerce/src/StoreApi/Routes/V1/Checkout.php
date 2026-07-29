@@ -108,8 +108,11 @@ class Checkout extends AbstractCartRoute {
 							'type'        => 'string',
 						],
 						'expected_total'    => [
-							'description' => __( 'The order total the shopper confirmed on the client, as a string in the smallest unit of the store currency (e.g. cents), matching the cart `totals.total_price` format. When provided, the order is rejected if the total calculated on the server no longer matches it, protecting the shopper from being charged an unexpected amount.', 'woocommerce' ),
-							'type'        => 'string',
+							'description'       => __( 'The order total the shopper confirmed on the client, as a string in the smallest unit of the store currency (e.g. cents), matching the cart `totals.total_price` format. When provided, the order is rejected if the total calculated on the server no longer matches it, protecting the shopper from being charged an unexpected amount.', 'woocommerce' ),
+							'type'              => 'string',
+							// Digits only. The value is compared as an integer, so decimals or stray characters would silently weaken the check.
+							'pattern'           => '^[0-9]+$',
+							'validate_callback' => 'rest_validate_request_arg',
 						],
 					],
 					$this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE )
@@ -1071,6 +1074,7 @@ class Checkout extends AbstractCartRoute {
 	 * @throws RouteException When the recalculated total is higher. Returns HTTP 409 with the refreshed cart so the client can display the updated total.
 	 */
 	private function validate_order_totals( \WP_REST_Request $request ): void {
+		// The route schema constrains this to minor-unit digits, so the integer comparison below is exact.
 		$expected_total = (string) ( $request['expected_total'] ?? '' );
 
 		if ( '' === $expected_total ) {
