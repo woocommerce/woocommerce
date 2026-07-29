@@ -403,12 +403,9 @@ class PageController {
 			$this->determine_current_page();
 		}
 
-		/**
-		 * Current page was determined above.
-		 *
-		 * @var array|false $current_page
-		 */
+		/** @var array|false $current_page */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- Narrows the nullable property after determine_current_page().
 		$current_page = $this->current_page;
+
 		return $current_page;
 	}
 
