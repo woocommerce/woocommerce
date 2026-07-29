@@ -94,7 +94,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Monotonic counter used to build collision-free temporary array keys for
 	 * not-yet-persisted items.
 	 *
-	 * count() is not safe for this: when items are removed and re-added before
+	 * Using count() is not safe for this: when items are removed and re-added before
 	 * save(), the count repeats a previous value, so two distinct unsaved items
 	 * map to the same 'new:<type><N>' key and the second silently overwrites the
 	 * first (it is then lost on save()). A never-reused counter guarantees a
