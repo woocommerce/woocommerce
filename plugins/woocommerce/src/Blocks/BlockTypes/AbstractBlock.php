@@ -237,7 +237,7 @@ abstract class AbstractBlock {
 			)
 		);
 
-		// Loading wp-editor in the widget editor causes block initialization errors.
+		// WordPress explicitly disallows loading wp-editor alongside the block-based widget editor.
 		if ( 'wc-block-library' === $handle && function_exists( 'get_current_screen' ) ) {
 			$screen = get_current_screen();
 			if ( $screen && 'widgets' === $screen->base ) {
