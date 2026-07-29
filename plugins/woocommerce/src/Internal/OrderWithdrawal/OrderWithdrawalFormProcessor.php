@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Throwable;
+use WC_Geolocation;
 use WC_Order;
 use WC_Rate_Limiter;
 
@@ -327,7 +328,7 @@ final class OrderWithdrawalFormProcessor {
 	 */
 	private function get_rate_limit_ids( array $data ): array {
 		$rate_limit_ids = array();
-		$ip_address     = $this->get_request_ip_address();
+		$ip_address     = WC_Geolocation::get_ip_address();
 		$email          = strtolower( trim( $data[ self::FIELD_EMAIL ] ) );
 
 		if ( '' !== $ip_address ) {
@@ -339,20 +340,6 @@ final class OrderWithdrawalFormProcessor {
 		}
 
 		return $rate_limit_ids;
-	}
-
-	/**
-	 * Get the request IP address for rate limiting.
-	 */
-	private function get_request_ip_address(): string {
-		if ( empty( $_SERVER['REMOTE_ADDR'] ) ) {
-			return '';
-		}
-
-		$value = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
-		$value = trim( explode( ',', $value )[0] );
-
-		return (string) rest_is_ip_address( $value );
 	}
 
 	/**
