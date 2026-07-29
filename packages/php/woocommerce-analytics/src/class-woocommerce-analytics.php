@@ -174,8 +174,17 @@ class Woocommerce_Analytics {
 
 	/**
 	 * Register REST API routes.
+	 *
+	 * The tracking proxy endpoint is unauthenticated by design — it exists to
+	 * receive front-end events — so it is only registered where proxy tracking is
+	 * actually in use. The check lives here rather than at the `add_action` site
+	 * because `rest_api_init` fires late enough for the filter to be registered.
 	 */
 	public static function register_rest_routes() {
+		if ( ! \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled() ) {
+			return;
+		}
+
 		$controller = new WC_Analytics_Tracking_Proxy();
 		$controller->register_routes();
 	}
