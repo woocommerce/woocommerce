@@ -23,7 +23,7 @@
 					"slug": "theme-4"
 				},
 				{
-					"color": "#c2ff00",
+					"color": "#314a0d",
 					"name": "Color 5",
 					"slug": "theme-5"
 				},
@@ -33,7 +33,7 @@
 					"slug": "theme-6"
 				},
 				{
-					"color": "#c2ff00",
+					"color": "#a3f107",
 					"name": "Color 7",
 					"slug": "theme-7"
 				}
@@ -49,8 +49,8 @@
 				},
 				{
 					"colors": [
-						"#262623",
-						"#c2ff00"
+						"#f8f9f7",
+						"#314a0d"
 					],
 					"name": "Duotone 2",
 					"slug": "duotone-2"
