@@ -208,7 +208,7 @@ const productFiltersStore = {
 			} else {
 				selectFilter( item );
 			}
-			actions.navigate();
+			void actions.navigate();
 		},
 		*navigate() {
 			const context = getServerContext

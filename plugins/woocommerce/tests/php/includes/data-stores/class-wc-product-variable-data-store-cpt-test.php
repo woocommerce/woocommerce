@@ -1883,4 +1883,35 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$product->delete();
 	}
+
+	/**
+	 * @testdox read_variation_attributes returns all assigned values even when a variation meta key is stored with non-canonical casing (e.g. attribute_pa_Size instead of attribute_pa_size).
+	 */
+	public function test_read_variation_attributes_non_canonical_meta_key_casing(): void {
+		global $wpdb;
+
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+
+		// Simulate legacy/third-party data: one variation's attribute meta key stored with non-canonical casing.
+		$variation_id = current( array_filter( $product->get_children(), static fn( $id ) => 'small' === get_post_meta( $id, 'attribute_pa_size', true ) ) );
+		$wpdb->update(
+			$wpdb->postmeta,
+			array(
+				'meta_key' => 'attribute_pa_Size', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			),
+			array(
+				'post_id'  => $variation_id,
+				'meta_key' => 'attribute_pa_size', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			)
+		);
+		WC_Cache_Helper::invalidate_cache_group( 'product_' . $product_id );
+		$product = wc_get_product( $product_id );
+
+		$sizes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product )['pa_size'];
+
+		$this->assertSame( array( 'small', 'large', 'huge' ), $sizes );
+
+		$product->delete( true );
+	}
 }

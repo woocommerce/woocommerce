@@ -80,10 +80,8 @@ Static helpers used by generated resolvers: exception translation, pagination co
 
 Bootstrap and registration:
 
-- `is_enabled(): bool`: whether the Dual Code & GraphQL API feature is active: the infrastructure is available and the `dual_code_graphql_api` flag is on. The flag gates WooCommerce core's own endpoint only.
-- `is_infrastructure_available(): bool`: whether the server can run the dual API infrastructure. That's all that plugin endpoint registration requires.
-- `has_registered_plugin_endpoints(): bool`: whether some plugin has registered an endpoint during the current request.
-- `register_graphql_endpoint( string $plugin_dir_or_controller_class, string $route_namespace, string $route, array $methods = ['GET','POST'] ): void`: register a plugin endpoint. Silent no-op when the infrastructure is unavailable; doesn't depend on the feature flag.
+- `is_enabled(): bool`: checks PHP 8.1+ and the `dual_code_graphql_api` flag.
+- `register_graphql_endpoint( string $plugin_dir_or_controller_class, string $route_namespace, string $route, array $methods = ['GET','POST'] ): void`: register a plugin endpoint. No-op when the feature is off.
 - `instantiate_graphql_controller( string $controller_class_name ): ?GraphQLControllerBase`.
 
 ### `MetadataController`, `QueryInfoExtractor`

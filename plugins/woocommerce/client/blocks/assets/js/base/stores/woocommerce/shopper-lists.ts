@@ -250,7 +250,7 @@ const { state, actions } = store< Store >(
 						list.items.push( item );
 					}
 				} catch ( error ) {
-					actions.showNoticeError( error as Error );
+					void actions.showNoticeError( error as Error );
 				}
 			},
 
@@ -276,7 +276,7 @@ const { state, actions } = store< Store >(
 						{ method: 'DELETE' }
 					);
 				} catch ( error ) {
-					actions.showNoticeError( error as Error );
+					void actions.showNoticeError( error as Error );
 					return;
 				}
 

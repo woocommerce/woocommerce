@@ -1461,6 +1461,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 			'data-product_id'  => $product->get_id(),
 			'data-product_sku' => $product->get_sku(),
 			'aria-label'       => $product->add_to_cart_description(),
+			'rel'              => '',
 		);
 
 		if ( $product->get_permalink() !== $product->add_to_cart_url() ) {

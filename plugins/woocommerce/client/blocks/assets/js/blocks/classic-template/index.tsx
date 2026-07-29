@@ -96,7 +96,7 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 						replaceBlock,
 						selectBlock,
 					} );
-					createInfoNotice(
+					void createInfoNotice(
 						__(
 							'Template transformed into blocks!',
 							'woocommerce'
@@ -110,7 +110,7 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 											getBlocks()
 										);
 
-										replaceBlocks(
+										void replaceBlocks(
 											clientIds,
 											createBlock(
 												'core/group',
@@ -208,7 +208,7 @@ const Edit = ( {
 				template: templateSlug ?? attributes.template,
 				align: attributes.align ?? 'wide',
 			} ),
-		[ attributes.align, attributes.template, setAttributes ]
+		[ attributes.align, attributes.template, setAttributes, templateSlug ]
 	);
 
 	const { getDescription, getSkeleton, blockifyConfig } =

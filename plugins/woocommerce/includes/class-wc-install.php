@@ -2644,10 +2644,13 @@ $email_unsubscribes_table_schema;
 	 *
 	 * @throws Exception If unable to proceed with plugin installation.
 	 * @since  2.6.0
+	 * @deprecated 11.1.0 No longer used.
 	 *
 	 * @return void
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
+		wc_deprecated_function( 'WC_Install::background_installer', '11.1.0' );
+
 		// Explicitly clear the event.
 		$args = func_get_args();
 
@@ -2749,7 +2752,12 @@ $email_unsubscribes_table_schema;
 							__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
 							$plugin_to_install['name'],
 							$e->getMessage(),
-							esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_slug ) )
+							esc_url(
+								wp_nonce_url(
+									admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_slug ),
+									'wc-install-plugin-redirect_' . $plugin_slug
+								)
+							)
 						)
 					);
 				}
@@ -2807,10 +2815,13 @@ $email_unsubscribes_table_schema;
 	 *
 	 * @throws Exception If unable to proceed with theme installation.
 	 * @since  3.1.0
+	 * @deprecated 11.1.0 No longer used.
 	 *
 	 * @return void
 	 */
 	public static function theme_background_installer( $theme_slug ) {
+		wc_deprecated_function( 'WC_Install::theme_background_installer', '11.1.0' );
+
 		// Explicitly clear the event.
 		$args = func_get_args();
 

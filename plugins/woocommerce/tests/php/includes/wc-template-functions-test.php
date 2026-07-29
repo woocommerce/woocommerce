@@ -179,7 +179,30 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$markup  = $this->render_loop_add_to_cart( $product );
 
 		$this->assertStringContainsString( 'href="' . esc_url( $product->get_permalink() ) . '"', $markup );
-		$this->assertStringNotContainsString( 'rel="nofollow"', $markup );
+		$this->assertStringContainsString( 'rel=""', $markup );
+	}
+
+	/**
+	 * @testdox Loop button filter arguments retain an empty rel attribute for product permalink links.
+	 */
+	public function test_loop_button_product_permalink_filter_args_include_empty_rel(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$filtered_args = null;
+		$filter        = static function ( array $args ) use ( &$filtered_args ): array {
+			$filtered_args = $args;
+			return $args;
+		};
+
+		add_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		try {
+			$this->render_loop_add_to_cart( $product );
+		} finally {
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		}
+
+		$this->assertIsArray( $filtered_args );
+		$this->assertArrayHasKey( 'rel', $filtered_args['attributes'] );
+		$this->assertSame( '', $filtered_args['attributes']['rel'] );
 	}
 
 	/**
