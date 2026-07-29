@@ -70,6 +70,14 @@ async function attachAnnotationDetails(github, context, tasks, core) {
                 const details = annotationLists
                     .flat()
                     .filter((annotation) => annotation.annotation_level === 'failure')
+                    // GitHub auto-generates a generic annotation on the
+                    // workflow file itself whenever a step exits non-zero,
+                    // separate from any explicit ::error:: output the step
+                    // produced. It carries no diagnostic value, so drop it.
+                    .filter(
+                        (annotation) =>
+                            !annotation.message.startsWith('Process completed with exit code')
+                    )
                     .slice(0, MAX_ANNOTATIONS_PER_TASK)
                     .map((annotation) => {
                         const path = sanitizeAnnotationText(annotation.path);
