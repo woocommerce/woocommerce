@@ -21,7 +21,7 @@
 <p class="has-text-align-center has-theme-2-color has-text-color has-link-color"><?php esc_html_e( '“With high-quality materials and expert craftsmanship, our products are built to last and exceed your expectations.”', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:image {"width":"163px","sizeSlug":"full","linkDestination":"none","align":"center","style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}}} -->
+<!-- wp:image {"width":"163px","sizeSlug":"full","linkDestination":"none","align":"center","style":{"color":{"duotone":"var:preset|duotone|duotone-2"},"spacing":{"margin":{"top":"var:preset|spacing|50"}}}} -->
 <figure class="wp-block-image aligncenter size-full is-resized" style="margin-top:var(--wp--preset--spacing--50)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-1.webp" alt="<?php esc_attr_e( 'Brand logo', 'purple' ); ?>" style="width:163px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
@@ -31,7 +31,7 @@
 <p class="has-text-align-center has-theme-2-color has-text-color has-link-color"><?php esc_html_e( '“With high-quality materials and expert craftsmanship, our products are built to last and exceed your expectations.”', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:image {"width":"135px","sizeSlug":"full","linkDestination":"none","align":"center","style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}}} -->
+<!-- wp:image {"width":"135px","sizeSlug":"full","linkDestination":"none","align":"center","style":{"color":{"duotone":"var:preset|duotone|duotone-2"},"spacing":{"margin":{"top":"var:preset|spacing|50"}}}} -->
 <figure class="wp-block-image aligncenter size-full is-resized" style="margin-top:var(--wp--preset--spacing--50)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-2.webp" alt="<?php esc_attr_e( 'Brand logo', 'purple' ); ?>" style="width:135px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column --></div>

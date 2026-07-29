@@ -18,7 +18,7 @@
 <p class="has-text-align-center has-theme-2-color has-text-color has-link-color has-large-font-size" style="margin-top:var(--wp--preset--spacing--50)"><?php esc_html_e('“With high-quality materials and expert craftsmanship, our products are built to last and exceed your expectations.”', 'purple');?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:image {"width":"130px","sizeSlug":"full","linkDestination":"none","align":"center","style":{"spacing":{"margin":{"top":"var:preset|spacing|30"}}}} -->
+<!-- wp:image {"width":"130px","sizeSlug":"full","linkDestination":"none","align":"center","style":{"color":{"duotone":"var:preset|duotone|duotone-2"},"spacing":{"margin":{"top":"var:preset|spacing|30"}}}} -->
 <figure class="wp-block-image aligncenter size-full is-resized" style="margin-top:var(--wp--preset--spacing--30)"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-3.webp" alt="<?php esc_attr_e('Brand logo', 'purple');?>" style="width:130px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group -->
