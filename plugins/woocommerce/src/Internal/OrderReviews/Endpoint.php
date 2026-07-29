@@ -176,8 +176,9 @@ class Endpoint {
 	 * Append the Review Order page to any caller of
 	 * `WC_Install::create_pages()` — keeps Status → Tools' "Create default
 	 * pages" repair path and any third-party callers seeded with our page
-	 * whenever the feature is on, without having to call create_pages()
-	 * with a one-off filter in `maybe_create_host_page()`.
+	 * whenever the feature is on. `maybe_create_host_page()` relies on this
+	 * injection too, layering its own scoping filter on top so its internal
+	 * repair creates only this page.
 	 *
 	 * @since 10.8.0
 	 *
