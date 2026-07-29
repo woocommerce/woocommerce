@@ -1630,6 +1630,37 @@ jQuery( function ( $ ) {
 		},
 
 		/**
+		 * Load a variations page, bypassing the unsaved-changes prompt.
+		 *
+		 * Server-side mutations navigate after their state change is already
+		 * resolved (saved, discarded, or in flight), so their refresh must run
+		 * unconditionally. The prompt lives in page_selector(), on the
+		 * merchant-initiated path only.
+		 *
+		 * @param {Int} page
+		 */
+		navigate: function ( page ) {
+			var wrapper = $( '#variable_product_options' ).find(
+				'.woocommerce_variations'
+			);
+
+			// Callers pass the page as a string when read from data attributes.
+			page = parseInt( page, 10 ) || 1;
+
+			$( '.variations-pagenav .page-selector' ).val( page );
+
+			wc_meta_boxes_product_variations_pagenav.change_classes(
+				page,
+				parseInt( wrapper.attr( 'data-total_pages' ), 10 )
+			);
+			wc_meta_boxes_product_variations_ajax
+				.load_variations( page )
+				.then(
+					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state()
+				);
+		},
+
+		/**
 		 * Navigate on variations pages
 		 *
 		 * @param {Int} page
@@ -1640,7 +1671,7 @@ jQuery( function ( $ ) {
 			qty = qty || 0;
 
 			wc_meta_boxes_product_variations_pagenav.set_paginav( qty );
-			wc_meta_boxes_product_variations_pagenav.set_page( page );
+			wc_meta_boxes_product_variations_pagenav.navigate( page );
 		},
 
 		/**
@@ -1656,8 +1687,8 @@ jQuery( function ( $ ) {
 
 			$( '.variations-pagenav .page-selector' ).val( selected );
 
-			// check_for_changes() is always called, so the prompt itself behaves
-			// exactly as it always has. Only the abort below is new.
+			// This handler only runs for merchant-initiated page changes;
+			// server-side mutations refresh through navigate() directly.
 			if ( ! wc_meta_boxes_product_variations_ajax.check_for_changes() ) {
 				// Restore the dirty state cleared for legacy callers when the prompt is dismissed.
 				need_update.addClass( 'variation-needs-update' );
@@ -1665,15 +1696,7 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			wc_meta_boxes_product_variations_pagenav.change_classes(
-				selected,
-				parseInt( wrapper.attr( 'data-total_pages' ), 10 )
-			);
-			wc_meta_boxes_product_variations_ajax
-				.load_variations( selected )
-				.then(
-					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state()
-				);
+			wc_meta_boxes_product_variations_pagenav.navigate( selected );
 		},
 
 		/**
