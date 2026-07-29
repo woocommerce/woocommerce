@@ -136,7 +136,11 @@ final class AssetsController {
 			array( 'wc-blocks-middleware', 'wc-entities' ),
 			true
 		);
-		$this->register_deprecated_script_handles();
+
+		if ( is_admin() ) {
+			// Register deprecated script handles for backward compatibility in the admin context.
+			$this->register_deprecated_script_handles();
+		}
 	}
 
 	/**
