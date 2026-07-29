@@ -44,12 +44,19 @@ function ProductTypeSwitcher() {
 
 export default function ProductTypeSelectorPlugin() {
 	const { slug, type } = useSelect( ( select ) => {
-		const { slug: currentPostSlug, type: currentPostType } = select(
-			'core/editor'
-		).getCurrentPost< {
-			slug: string;
-			type: string;
-		} >();
+		const editorStore = select( 'core/editor' );
+		if ( ! editorStore ) {
+			return {
+				slug: '',
+				type: '',
+			};
+		}
+
+		const { slug: currentPostSlug, type: currentPostType } =
+			editorStore.getCurrentPost< {
+				slug: string;
+				type: string;
+			} >();
 
 		return {
 			slug: currentPostSlug,
