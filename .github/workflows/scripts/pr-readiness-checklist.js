@@ -12,11 +12,6 @@ const TASKS = [
         label: 'PHPStan',
         matches: (name) => name === 'PHPStan Analysis' || name.startsWith('PHPStan: PHP'),
         remediation: 'See the inline annotations on this PR for details.',
-        // PHPStan emits native `::error file=,line=,col=::message` workflow
-        // commands, which GitHub turns into structured check-run
-        // annotations. Surface a few of them directly instead of only
-        // pointing at the job.
-        annotatable: true,
     },
     {
         label: 'Unit tests (PHP)',
@@ -98,10 +93,6 @@ function classifyCheckRuns(checkRuns) {
                 .map((run) => run.html_url);
         }
 
-        if (failing && task.annotatable) {
-            result.checkRunIds = failingRuns.map((run) => run.id);
-        }
-
         return result;
     }).filter(Boolean);
 }
@@ -120,6 +111,10 @@ function parsePreviousState(commentBody) {
     return match ? match[1] : null;
 }
 
+const HEADER = '## PR Readiness Checks';
+
+// Mention-worthy transitions: the ones a real state change happened on.
+// These are the only ones that also flip the returned `mentioned` flag.
 const TRANSITION_MESSAGES = {
     'none->failing': (authorLogin) =>
         `Thanks for the PR, @${authorLogin}! A few things need attention before this can be reviewed:`,
@@ -131,24 +126,36 @@ const TRANSITION_MESSAGES = {
         `Heads up @${authorLogin} — a new push introduced some failures that need attention:`,
 };
 
+// Same-state re-runs: the comment still updates silently (no new mention),
+// but the body always carries an author-anchored line so a reader dropping
+// into the comment mid-thread (or an edit notification, however rare)
+// still has that context - the checklist is never shown bare.
+const SILENT_STATUS_MESSAGES = {
+    'failing->failing': (authorLogin) =>
+        `Hi @${authorLogin}, here's the current status — a few things still need attention:`,
+    'clear->clear': (authorLogin) => `Hi @${authorLogin}, still all green here.`,
+};
+
 function buildCommentBody({ tasks, previousState, authorLogin }) {
     const overallState = computeOverallState(tasks);
     const transitionKey = `${previousState || 'none'}->${overallState}`;
     const mentionMessage = TRANSITION_MESSAGES[transitionKey];
+    const introMessage = mentionMessage || SILENT_STATUS_MESSAGES[transitionKey];
 
-    const lines = [`${MARKER_PREFIX} status=${overallState} -->`];
-
-    if (mentionMessage) {
-        lines.push('', mentionMessage(authorLogin));
-    }
-
-    lines.push('');
+    const lines = [
+        `${MARKER_PREFIX} status=${overallState} -->`,
+        '',
+        HEADER,
+        '',
+        introMessage(authorLogin),
+        '',
+    ];
 
     if (overallState === 'clear') {
         lines.push('✅ All checks are passing.');
     } else {
         lines.push(
-            ...tasks.flatMap((task) => {
+            ...tasks.map((task) => {
                 const marker = task.status === 'fail' ? '❌' : '✅';
                 const suffix = task.status === 'fail' ? ` — ${task.remediation}` : '';
                 const jobLinks =
@@ -162,11 +169,7 @@ function buildCommentBody({ tasks, previousState, authorLogin }) {
                               )
                               .join(', ')
                         : '';
-                const statusLine = `- ${marker} **${task.label}**${suffix}${jobLinks}`;
-                if (task.status === 'fail' && task.details && task.details.length > 0) {
-                    return [statusLine, ...task.details.map((detail) => `    - ${detail}`)];
-                }
-                return [statusLine];
+                return `- ${marker} **${task.label}**${suffix}${jobLinks}`;
             })
         );
     }

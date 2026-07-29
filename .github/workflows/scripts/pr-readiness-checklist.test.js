@@ -115,30 +115,6 @@ test('classifyCheckRuns: task is omitted when the only matching run is optional'
     assert.deepEqual(tasks, []);
 });
 
-test('classifyCheckRuns: a failing annotatable task carries the failing run ids', () => {
-    const tasks = classifyCheckRuns([
-        checkRun('PHPStan Analysis', { id: 111, conclusion: 'failure' }),
-    ]);
-    assert.equal(tasks.length, 1);
-    assert.equal(tasks[0].label, 'PHPStan');
-    assert.deepEqual(tasks[0].checkRunIds, [111]);
-});
-
-test('classifyCheckRuns: a failing non-annotatable task carries no run ids', () => {
-    const tasks = classifyCheckRuns([
-        checkRun('Lint - @woocommerce/plugin-woocommerce', { id: 222, conclusion: 'failure' }),
-    ]);
-    assert.equal(tasks.length, 1);
-    assert.equal(tasks[0].checkRunIds, undefined);
-});
-
-test('classifyCheckRuns: a passing annotatable task carries no run ids', () => {
-    const tasks = classifyCheckRuns([checkRun('PHPStan Analysis', { id: 333 })]);
-    assert.equal(tasks.length, 1);
-    assert.equal(tasks[0].status, 'pass');
-    assert.equal(tasks[0].checkRunIds, undefined);
-});
-
 test('classifyCheckRuns: a failing task (any label) carries its job url', () => {
     const tasks = classifyCheckRuns([
         checkRun('Lint - @woocommerce/plugin-woocommerce', {
@@ -216,6 +192,7 @@ test('buildCommentBody: first-ever comment with failures mentions the author', (
 
     assert.equal(mentioned, true);
     assert.ok(body.includes('<!-- pr-readiness-summary status=failing -->'));
+    assert.ok(body.includes('## PR Readiness Checks'));
     assert.ok(body.includes('Thanks for the PR, @octocat!'));
     assert.ok(body.includes('❌ **Lint** — See annotations.'));
     assert.ok(body.includes('✅ **Milestone**'));
@@ -231,11 +208,12 @@ test('buildCommentBody: first-ever comment with everything passing thanks the au
 
     assert.equal(mentioned, true);
     assert.ok(body.includes('<!-- pr-readiness-summary status=clear -->'));
+    assert.ok(body.includes('## PR Readiness Checks'));
     assert.ok(body.includes("Thanks for your contribution, @octocat!"));
     assert.ok(body.includes('✅ All checks are passing.'));
 });
 
-test('buildCommentBody: still failing does not re-mention the author', () => {
+test('buildCommentBody: still failing does not re-mention but keeps the header and author line', () => {
     const { body, mentioned } = buildCommentBody({
         tasks: [{ label: 'Lint', status: 'fail', remediation: 'See annotations.' }],
         previousState: 'failing',
@@ -243,7 +221,10 @@ test('buildCommentBody: still failing does not re-mention the author', () => {
     });
 
     assert.equal(mentioned, false);
-    assert.ok(!body.includes('@octocat'));
+    assert.ok(body.includes('## PR Readiness Checks'));
+    assert.ok(body.includes('@octocat'));
+    assert.ok(body.includes("here's the current status"));
+    assert.ok(!body.includes('Thanks for the PR'));
 });
 
 test('buildCommentBody: fixed from failing to clear mentions the author', () => {
@@ -254,10 +235,11 @@ test('buildCommentBody: fixed from failing to clear mentions the author', () => 
     });
 
     assert.equal(mentioned, true);
+    assert.ok(body.includes('## PR Readiness Checks'));
     assert.ok(body.includes('All checks are passing now, @octocat'));
 });
 
-test('buildCommentBody: still clear makes no change and does not mention', () => {
+test('buildCommentBody: still clear does not re-mention but keeps the header and author line', () => {
     const { body, mentioned } = buildCommentBody({
         tasks: [{ label: 'Lint', status: 'pass', remediation: 'n/a' }],
         previousState: 'clear',
@@ -265,41 +247,8 @@ test('buildCommentBody: still clear makes no change and does not mention', () =>
     });
 
     assert.equal(mentioned, false);
-    assert.ok(!body.includes('@octocat'));
-});
-
-test('buildCommentBody: a failing task with details renders them as a nested sub-list', () => {
-    const { body } = buildCommentBody({
-        tasks: [
-            {
-                label: 'PHPStan',
-                status: 'fail',
-                remediation: 'See annotations.',
-                details: [
-                    '`src/Foo.php:42 — Call to a member function calculate() on null.`',
-                ],
-            },
-        ],
-        previousState: 'failing',
-        authorLogin: 'octocat',
-    });
-
-    assert.ok(body.includes('❌ **PHPStan** — See annotations.'));
-    assert.ok(
-        body.includes(
-            '    - `src/Foo.php:42 — Call to a member function calculate() on null.`'
-        )
-    );
-});
-
-test('buildCommentBody: a failing task with no details renders no sub-list', () => {
-    const { body } = buildCommentBody({
-        tasks: [{ label: 'Lint', status: 'fail', remediation: 'See annotations.' }],
-        previousState: 'failing',
-        authorLogin: 'octocat',
-    });
-
-    assert.ok(!body.includes('    -'));
+    assert.ok(body.includes('## PR Readiness Checks'));
+    assert.ok(body.includes('@octocat, still all green here.'));
 });
 
 test('buildCommentBody: a failing task with one job url renders a single Job link', () => {
@@ -360,19 +309,6 @@ test('buildCommentBody: a passing task with job urls (should not happen) renders
     });
 
     assert.ok(!body.includes('[Job]'));
-});
-
-test('buildCommentBody: a passing task with details (should not happen) renders no sub-list', () => {
-    const { body } = buildCommentBody({
-        tasks: [
-            { label: 'Lint', status: 'fail', remediation: 'See annotations.' },
-            { label: 'PHPStan', status: 'pass', remediation: 'n/a', details: ['`ignored`'] },
-        ],
-        previousState: 'failing',
-        authorLogin: 'octocat',
-    });
-
-    assert.ok(!body.includes('    -'));
 });
 
 test('buildCommentBody: regression from clear to failing mentions the author', () => {
