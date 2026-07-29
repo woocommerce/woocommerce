@@ -1287,7 +1287,7 @@ jQuery( function ( $ ) {
 						if ( value.indexOf( '%' ) >= 0 ) {
 							data.value =
 								accounting.unformat(
-									value.replace( /%/, '' ),
+									value.replace( '%', '' ),
 									woocommerce_admin.mon_decimal_point
 								) + '%';
 						} else {
