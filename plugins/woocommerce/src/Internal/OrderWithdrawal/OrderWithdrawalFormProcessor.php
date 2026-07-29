@@ -258,7 +258,11 @@ final class OrderWithdrawalFormProcessor {
 			return false;
 		}
 
-		$this->apply_rate_limits( $rate_limit_ids );
+		if ( ! $this->apply_rate_limits( $rate_limit_ids ) ) {
+			wc_add_notice( __( 'We could not submit your withdrawal request. Please try again or contact us if the problem continues.', 'woocommerce' ), 'error' );
+
+			return false;
+		}
 
 		$matched_order = $this->get_matching_order( $data );
 
@@ -313,11 +317,24 @@ final class OrderWithdrawalFormProcessor {
 	 *
 	 * @param string[] $rate_limit_ids Rate limit IDs.
 	 * @param int      $delay          Delay in seconds for the rate limit. Use -1 to clear the rate limit.
+	 * @return bool True if all rate limits were applied, false otherwise.
 	 */
-	private function apply_rate_limits( array $rate_limit_ids, $delay = self::RATE_LIMIT_DELAY ): void {
+	private function apply_rate_limits( array $rate_limit_ids, int $delay = self::RATE_LIMIT_DELAY ): bool {
+		$applied_rate_limit_ids = array();
+
 		foreach ( $rate_limit_ids as $rate_limit_id ) {
-			WC_Rate_Limiter::set_rate_limit( $rate_limit_id, $delay );
+			if ( ! WC_Rate_Limiter::set_rate_limit( $rate_limit_id, $delay ) ) {
+				foreach ( $applied_rate_limit_ids as $applied_rate_limit_id ) {
+					WC_Rate_Limiter::set_rate_limit( $applied_rate_limit_id, -1 );
+				}
+
+				return false;
+			}
+
+			$applied_rate_limit_ids[] = $rate_limit_id;
 		}
+
+		return true;
 	}
 
 	/**
