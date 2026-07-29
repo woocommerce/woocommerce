@@ -531,7 +531,8 @@ class WC_Analytics_Tracking {
 			return false;
 		}
 
-		$method = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Compared against a fixed string below; unsanitized on purpose to stay byte-for-byte in step with the MU-plugin template's read.
+		$method = strtoupper( wp_unslash( $_SERVER['REQUEST_METHOD'] ) );
 		if ( 'POST' !== $method ) {
 			return false;
 		}

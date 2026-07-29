@@ -379,4 +379,17 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 			'rest_route form'   => array( '/index.php/wp-json/woocommerce-analytics/v1/track' ),
 		);
 	}
+
+	/**
+	 * The character restriction on the path must reject anything outside the
+	 * allowed set, matching the MU-plugin template's is_proxy_request(). This
+	 * is the one piece of the "kept in step with the template" claim that was
+	 * previously covered only by inspection, not by an assertion.
+	 */
+	public function test_is_proxy_tracking_request_rejects_disallowed_characters(): void {
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_SERVER['REQUEST_URI']    = '/wp-json/woocommerce-analytics/v1/track%20';
+
+		$this->assertFalse( WC_Analytics_Tracking::is_proxy_tracking_request() );
+	}
 }
