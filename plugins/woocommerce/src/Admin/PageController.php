@@ -347,27 +347,24 @@ class PageController {
 
 			while ( $parent_id ) {
 				if ( isset( $this->pages[ $parent_id ] ) ) {
-					$parent = $this->pages[ $parent_id ];
+					$parent      = $this->pages[ $parent_id ];
+					$parent_path = $parent['path'] ?? null;
 
-					if ( $this->current_page_is_route_pattern_match ) {
-						$parent_path = $parent['path'] ?? null;
+					// Once the current page resolved through route-pattern matching, a patterned ancestor
+					// is not linkable either: the link would point at the literal `:param`/`*` template.
+					$parent_is_linkable = ! $this->current_page_is_route_pattern_match ||
+						( is_string( $parent_path ) && ! $this->registered_path_has_route_pattern( $parent_path ) );
 
-						if ( ! is_string( $parent_path ) || $this->registered_path_has_route_pattern( $parent_path ) ) {
-							array_unshift( $breadcrumbs, reset( $parent['title'] ) );
-						} else {
-							if ( 0 === strpos( $parent_path, self::PAGE_ROOT ) ) {
-								$parent_path = 'admin.php?page=' . $parent_path;
-							}
-
-							array_unshift( $breadcrumbs, array( $parent_path, reset( $parent['title'] ) ) );
+					if ( $parent_is_linkable ) {
+						if ( 0 === strpos( $parent_path, self::PAGE_ROOT ) ) {
+							$parent_path = 'admin.php?page=' . $parent_path;
 						}
+
+						array_unshift( $breadcrumbs, array( $parent_path, reset( $parent['title'] ) ) );
 					} else {
-						if ( 0 === strpos( $parent['path'], self::PAGE_ROOT ) ) {
-							$parent['path'] = 'admin.php?page=' . $parent['path'];
-						}
-
-						array_unshift( $breadcrumbs, array( $parent['path'], reset( $parent['title'] ) ) );
+						array_unshift( $breadcrumbs, reset( $parent['title'] ) );
 					}
+
 					$parent_id = isset( $parent['parent'] ) ? $parent['parent'] : false;
 				} else {
 					$parent_id = false;
