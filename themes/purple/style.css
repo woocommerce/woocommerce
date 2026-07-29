@@ -81,6 +81,38 @@ textarea {
 }
 
 /* ==========================================================================
+   WooCommerce — Mini cart
+   ========================================================================== */
+
+/* WooCommerce hardcodes a white drawer surface; the drawer text follows the
+ * scheme, so on dark palettes it rendered light-on-white. Paint the surface
+ * with theme-1 (white in light schemes, so no change there). The overlay
+ * ancestor bumps specificity above WooCommerce's own drawer rule. */
+.wc-block-components-drawer__screen-overlay .wc-block-components-drawer,
+.wc-block-components-drawer .wp-block-woocommerce-mini-cart-contents {
+	background-color: var(--wp--preset--color--theme-1);
+}
+
+/* WooCommerce's outlined component buttons (e.g. the mini cart "View cart")
+ * use currentColor and a hardcoded #1e1e1e hover; align them with the
+ * theme's outline button style. The doubled class outranks WooCommerce's
+ * own rules regardless of stylesheet order. */
+.wc-block-components-button.wc-block-components-button:not(.is-link).outlined,
+.wc-block-components-button.wc-block-components-button:not(.is-link).is-style-outline {
+	color: var(--wp--custom--outline-button-color);
+}
+
+.wc-block-components-button.wc-block-components-button:not(.is-link).outlined:hover,
+.wc-block-components-button.wc-block-components-button:not(.is-link).outlined:focus,
+.wc-block-components-button.wc-block-components-button:not(.is-link).outlined:active,
+.wc-block-components-button.wc-block-components-button:not(.is-link).is-style-outline:hover,
+.wc-block-components-button.wc-block-components-button:not(.is-link).is-style-outline:focus,
+.wc-block-components-button.wc-block-components-button:not(.is-link).is-style-outline:active {
+	background-color: color-mix(in srgb, currentColor 5%, transparent);
+	color: var(--wp--custom--outline-button-color);
+}
+
+/* ==========================================================================
    WooCommerce — Checkout
    ========================================================================== */
 
@@ -420,6 +452,7 @@ textarea {
 	background-color: #fff;
 	border: 0;
 	box-shadow: none;
+	color: #111111;
 	flex: 1 1 auto;
 	font-weight: 400;
 	margin: 0;
@@ -439,11 +472,13 @@ textarea {
 
 .wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--minus {
 	background-color: #fff;
+	color: #111111;
 	order: 1;
 }
 
 .wc-block-components-quantity-selector > .wc-block-components-quantity-selector__button--plus {
 	background-color: #fff;
+	color: #111111;
 	order: 3;
 }
 
