@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Services;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
+use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\WpcomNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
@@ -15,6 +16,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -615,28 +617,21 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 
 		$notification = new NewOrderNotification( $this->order_id );
 
-		as_schedule_single_action(
-			time() + NotificationProcessor::SAFETY_NET_DELAY,
-			NotificationProcessor::SAFETY_NET_HOOK,
-			array(
-				'type'        => $notification->get_type(),
-				'resource_id' => $this->order_id,
-			),
-			NotificationProcessor::ACTION_SCHEDULER_GROUP
+		// Seed the precondition through the REAL schedule path so the test setup
+		// and production use the same arg shape; if the schedule shape ever drifts
+		// from the cancel shape again, this assertion fails in CI.
+		$this->schedule_safety_net( $notification );
+		$this->assertTrue(
+			$this->is_safety_net_pending( $notification ),
+			'Safety net should be pending before processing.'
 		);
 
 		$this->sut->process( $notification );
 
-		$scheduled = as_next_scheduled_action(
-			NotificationProcessor::SAFETY_NET_HOOK,
-			array(
-				'type'        => 'store_order',
-				'resource_id' => $this->order_id,
-			),
-			NotificationProcessor::ACTION_SCHEDULER_GROUP
+		$this->assertFalse(
+			$this->is_safety_net_pending( $notification ),
+			'Safety net should be cancelled after successful send.'
 		);
-
-		$this->assertFalse( $scheduled, 'Safety net should be cancelled after successful send.' );
 	}
 
 	/**
@@ -652,28 +647,94 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 
 		$notification = new NewOrderNotification( $this->order_id );
 
-		as_schedule_single_action(
-			time() + NotificationProcessor::SAFETY_NET_DELAY,
-			NotificationProcessor::SAFETY_NET_HOOK,
-			array(
-				'type'        => $notification->get_type(),
-				'resource_id' => $this->order_id,
-			),
-			NotificationProcessor::ACTION_SCHEDULER_GROUP
+		$this->schedule_safety_net( $notification );
+		$this->assertTrue(
+			$this->is_safety_net_pending( $notification ),
+			'Safety net should be pending before processing.'
 		);
 
 		$this->sut->process( $notification );
 
-		$scheduled = as_next_scheduled_action(
-			NotificationProcessor::SAFETY_NET_HOOK,
+		$this->assertFalse(
+			$this->is_safety_net_pending( $notification ),
+			'Safety net should be cancelled when retry is scheduled.'
+		);
+	}
+
+	/**
+	 * Locks the schedule/cancel arg-shape contract for the StockNotification
+	 * subclass, whose identity (and therefore safety-net match key) includes
+	 * `event_type`. Schedules via the real path, then cancels using a
+	 * notification reconstructed from the serialized payload — exactly what the
+	 * loopback controller does on the primary success path — to prove the
+	 * round-tripped args still match.
+	 *
+	 * @testdox Should cancel a stock notification's safety net using a reconstructed notification.
+	 */
+	public function test_process_cancels_safety_net_for_stock_notification(): void {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
 			array(
-				'type'        => 'store_order',
-				'resource_id' => $this->order_id,
-			),
-			NotificationProcessor::ACTION_SCHEDULER_GROUP
+				'manage_stock'   => true,
+				'stock_quantity' => 0,
+			)
 		);
 
-		$this->assertFalse( $scheduled, 'Safety net should be cancelled when retry is scheduled.' );
+		$this->dispatcher->method( 'dispatch' )->willReturn(
+			array(
+				'success'     => true,
+				'retry_after' => null,
+			)
+		);
+
+		$notification = new StockNotification( $product->get_id(), StockNotification::EVENT_OUT_OF_STOCK );
+
+		$this->schedule_safety_net( $notification );
+		$this->assertTrue(
+			$this->is_safety_net_pending( $notification ),
+			'Stock safety net should be pending before processing.'
+		);
+
+		// Reconstruct from the serialized payload, mirroring the loopback controller.
+		$reconstructed = Notification::from_array( $notification->to_array() );
+		$this->sut->process( $reconstructed );
+
+		$this->assertFalse(
+			$this->is_safety_net_pending( $notification ),
+			'Stock safety net should be cancelled after successful send.'
+		);
+	}
+
+	/**
+	 * Schedules a safety-net action through the real
+	 * {@see PendingNotificationStore::schedule_safety_net()} so tests exercise
+	 * the production schedule shape rather than a hand-built fixture.
+	 *
+	 * @param Notification $notification The notification to schedule a safety net for.
+	 * @return void
+	 */
+	private function schedule_safety_net( Notification $notification ): void {
+		$store = new PendingNotificationStore();
+		$store->init( $this->createMock( InternalNotificationDispatcher::class ) );
+
+		$method = new \ReflectionMethod( PendingNotificationStore::class, 'schedule_safety_net' );
+		$method->setAccessible( true );
+		$method->invoke( $store, $notification );
+	}
+
+	/**
+	 * Whether a safety-net action is currently scheduled for a notification,
+	 * matched on its canonical args.
+	 *
+	 * @param Notification $notification The notification to check.
+	 * @return bool
+	 */
+	private function is_safety_net_pending( Notification $notification ): bool {
+		return as_has_scheduled_action(
+			NotificationProcessor::SAFETY_NET_HOOK,
+			$notification->get_safety_net_args(),
+			NotificationProcessor::ACTION_SCHEDULER_GROUP
+		);
 	}
 
 	/**

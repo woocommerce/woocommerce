@@ -51,7 +51,7 @@
 		font-style: normal;
 		line-height: 1.5;
 		font-weight: bold;
-		margin: $gap-smaller 0;
+		margin: $gap-smaller 0 $gap-smallest;
 
 		.is-placeholder & {
 			& > div {

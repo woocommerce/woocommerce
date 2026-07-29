@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Guard against non-string screen ID in visual attribute script enqueue

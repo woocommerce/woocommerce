@@ -19,7 +19,7 @@ export const useIntroductionBanner = (): UseIntroductionBanner => {
 	const { updateOptions } = useDispatch( optionsStore );
 
 	const dismissIntroductionBanner = () => {
-		updateOptions( {
+		void updateOptions( {
 			[ OPTION_NAME_BANNER_DISMISSED ]: OPTION_VALUE_YES,
 		} );
 		recordEvent( 'marketing_multichannel_banner_dismissed', {} );

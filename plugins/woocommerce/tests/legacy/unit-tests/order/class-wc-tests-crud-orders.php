@@ -2333,6 +2333,47 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_subtotal_amount_to_display() excludes fee tax from the items subtotal in fixed end-price mode.
+	 */
+	public function test_get_subtotal_amount_to_display_excludes_fee_tax_in_fixed_price_mode(): void {
+		$context = $this->create_manual_order_tax_context();
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		$order = $this->create_manual_order_for_tax_context( $context, '24' );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'       => 'Handling',
+				'tax_status' => ProductTaxStatus::TAXABLE,
+				'tax_class'  => $context['tax_class_slug'],
+				'total'      => 10,
+			)
+		);
+		$order->add_item( $fee );
+
+		try {
+			$order->calculate_totals();
+
+			$line_item = current( $order->get_items() );
+
+			// Guard the precondition: the fee must be taxed, otherwise get_cart_tax()
+			// would equal the item tax and the buggy code would also yield €22.02.
+			$this->assertEquals( 0.90, round( (float) $fee->get_total_tax(), 2 ), 'Test setup must include taxable fee tax' );
+
+			// The €24 tax-inclusive item carries €1.98 tax, so the ex-tax items subtotal is €22.02.
+			// The €0.90 taxable-fee tax (also part of get_cart_tax()) must not be subtracted from it.
+			$this->assertEquals( 22.02, round( (float) $order->get_subtotal_amount_to_display(), 2 ), 'Displayed items subtotal must exclude fee tax' );
+			$this->assertEquals(
+				round( (float) $order->get_item_subtotal_to_display( $line_item ), 2 ),
+				round( (float) $order->get_subtotal_amount_to_display(), 2 ),
+				'Displayed items subtotal must match the per-item displayed subtotal'
+			);
+		} finally {
+			$this->cleanup_manual_order_tax_context( $context, $order );
+		}
+	}
+
+	/**
 	 * Creates tax rates and a product for manual order tax tests.
 	 *
 	 * @param string $prices_include_tax Whether prices include tax.

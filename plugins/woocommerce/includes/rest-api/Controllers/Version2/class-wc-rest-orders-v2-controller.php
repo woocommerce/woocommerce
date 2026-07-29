@@ -248,7 +248,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	protected function get_order_item_data( $item ) {
 		$data           = $item->get_data();
-		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total' );
+		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total', 'discount', 'discount_tax' );
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
@@ -1513,7 +1513,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							),
 							'value' => array(
 								'description' => __( 'Meta value.', 'woocommerce' ),
-								'type'        => 'mixed',
+								'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 								'context'     => array( 'view', 'edit' ),
 							),
 						),
@@ -1539,7 +1539,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							),
 							'parent_name'      => array(
 								'description' => __( 'Parent product name if the product is a variation.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => array( 'string', 'null' ),
 								'context'     => array( 'view', 'edit' ),
 							),
 							'product_id'       => array(
@@ -1630,7 +1630,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value'         => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 										'display_key'   => array(
@@ -1640,8 +1640,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 											'readonly'    => true,
 										),
 										'display_value' => array(
-											'description' => __( 'Meta value for UI display.', 'woocommerce' ),
-											'type'        => 'string',
+											'description' => __( 'Meta value for UI display. May be a string or, when mirroring a complex meta value, an array or object.', 'woocommerce' ),
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),
@@ -1758,7 +1758,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1849,7 +1849,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -1947,7 +1947,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 									),
@@ -2023,7 +2023,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
-											'type'        => 'mixed',
+											'type'        => array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' ),
 											'context'     => array( 'view', 'edit' ),
 										),
 									),

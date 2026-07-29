@@ -64,7 +64,7 @@ const PaymentMethodCard = ( {
 
 	useEffect( () => {
 		if ( ! canSavePaymentMethod && shouldSavePaymentMethod ) {
-			__internalSetShouldSavePaymentMethod( false );
+			void __internalSetShouldSavePaymentMethod( false );
 		}
 	}, [
 		canSavePaymentMethod,

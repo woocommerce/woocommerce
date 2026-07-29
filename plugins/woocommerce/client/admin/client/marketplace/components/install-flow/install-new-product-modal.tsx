@@ -162,7 +162,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 					throw response;
 				}
 
-				dispatch( installingStore ).startInstalling(
+				void dispatch( installingStore ).startInstalling(
 					String( product.id ?? '' )
 				);
 				setDocumentationUrl( response.data.documentation_url );
@@ -175,7 +175,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 					response.data.product_type,
 					response.data.zip_slug
 				).then( ( downloadResponse ) => {
-					dispatch( installingStore ).stopInstalling(
+					void dispatch( installingStore ).stopInstalling(
 						String( product.id ?? '' )
 					);
 

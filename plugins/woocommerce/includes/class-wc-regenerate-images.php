@@ -48,7 +48,6 @@ class WC_Regenerate_Images {
 
 			self::$background_process = new WC_Regenerate_Images_Request();
 
-			add_action( 'admin_init', array( __CLASS__, 'regenerating_notice' ) );
 			add_action( 'woocommerce_hide_regenerating_thumbnails_notice', array( __CLASS__, 'dismiss_regenerating_notice' ) );
 
 			// Regenerate thumbnails in the background after settings changes. Not ran on multisite to avoid multiple simultaneous jobs.
@@ -139,14 +138,26 @@ class WC_Regenerate_Images {
 	}
 
 	/**
-	 * Show notice when job is running in background.
+	 * See if thumbnail regeneration is currently in progress.
+	 *
+	 * @since 11.0.0
+	 * @return bool
+	 */
+	public static function is_regeneration_in_progress() {
+		// WC_Regenerate_Images_Request::is_running() returns whether the queue is empty.
+		return self::$background_process && ! self::$background_process->is_running();
+	}
+
+	/**
+	 * Previously kept the regenerating thumbnails admin notice in sync with the job state.
+	 *
+	 * Regeneration progress is now shown beside the regenerate thumbnails status tool.
+	 *
+	 * @deprecated 11.0.0 Use WC_Regenerate_Images::is_regeneration_in_progress() instead.
+	 * @return void
 	 */
 	public static function regenerating_notice() {
-		if ( ! self::$background_process->is_running() ) {
-			WC_Admin_Notices::add_notice( 'regenerating_thumbnails' );
-		} else {
-			WC_Admin_Notices::remove_notice( 'regenerating_thumbnails' );
-		}
+		wc_deprecated_function( 'WC_Regenerate_Images::regenerating_notice', '11.0.0', 'WC_Regenerate_Images::is_regeneration_in_progress' );
 	}
 
 	/**

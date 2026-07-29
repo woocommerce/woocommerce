@@ -63,16 +63,30 @@ class ShopperList {
 	}
 
 	/**
-	 * Load a list by slug. Returns false for any other list that doesn't exist.
+	 * Load a list by slug. Returns false for a disabled, unknown, or unloadable list.
 	 *
-	 * @param string   $slug List identifier.
+	 * @param string   $slug    List identifier.
 	 * @param int|null $user_id Defaults to the current user.
 	 * @return self|false
 	 */
 	public static function get_by_slug( string $slug, ?int $user_id = null ) {
-		// Gate disabled or unknown slugs upfront so previously-persisted lists
-		// don't bypass the feature flag (the Store API surfaces this as 404).
 		if ( ! wc_get_container()->get( ShopperListsController::class )->is_enabled( $slug ) ) {
+			return false;
+		}
+
+		return self::get_by_slug_raw( $slug, $user_id );
+	}
+
+	/**
+	 * Load a list by slug without the feature-flag gate, for internal callers
+	 * (e.g. privacy export/erase). Do not use for user-facing reads.
+	 *
+	 * @param string   $slug    List identifier.
+	 * @param int|null $user_id Defaults to the current user.
+	 * @return self|false
+	 */
+	public static function get_by_slug_raw( string $slug, ?int $user_id = null ) {
+		if ( ! in_array( $slug, wc_get_container()->get( ShopperListsController::class )->get_supported_slugs(), true ) ) {
 			return false;
 		}
 
@@ -87,7 +101,6 @@ class ShopperList {
 			return self::from_array( $stored, $user_id );
 		}
 
-		// In-memory list; saved on the first save().
 		return new self(
 			$user_id,
 			$slug,

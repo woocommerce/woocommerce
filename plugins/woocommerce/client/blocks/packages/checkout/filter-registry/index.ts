@@ -121,7 +121,7 @@ const updatePreviousFilterRun = < T >(
  */
 const checkMembersShallowEqual = <
 	T extends Record< string, unknown > | null,
-	U extends Record< string, unknown > | null
+	U extends Record< string, unknown > | null,
 >(
 	a: T,
 	b: U

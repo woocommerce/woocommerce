@@ -1,10 +1,12 @@
 ---
 post_title: Registering settings UI components
-sidebar_label: Settings UI components
-sidebar_position: 6
+sidebar_label: Register settings UI components
+sidebar_position: 8
 ---
 
 # Registering settings UI components
+
+> **The settings UI is experimental** and subject to change. See the [settings UI status](./settings-ui.md#status) for details.
 
 Use custom components when a WooCommerce settings field needs plugin-specific React UI that cannot be represented by a native field type.
 
@@ -31,10 +33,10 @@ The `component` value is a name, not a script handle. It lets the PHP schema say
 
 ## Register JavaScript components
 
-Register components with `registerSettingsExtension()` from `@woocommerce/settings-ui-sdk`:
+Register components with `registerSettingsExtension()` from `@woocommerce/settings-ui`:
 
 ```ts
-import { registerSettingsExtension } from '@woocommerce/settings-ui-sdk';
+import { registerSettingsExtension } from '@woocommerce/settings-ui';
 import { PaymentMethodPicker } from './payment-method-picker';
 
 registerSettingsExtension( {
@@ -48,7 +50,7 @@ registerSettingsExtension( {
 } );
 ```
 
-Registrations are scoped by settings page and, optionally, by section. This prevents one plugin from accidentally replacing another plugin's field behavior.
+Registrations are scoped by settings page and, optionally, by section. This prevents one plugin from accidentally replacing another plugin's field behavior. Omit `section` for a page-wide registration, use `section: ''` for the default section only, or pass a section id such as `section: 'payments'` for one named section.
 
 ## Component props
 
@@ -77,12 +79,12 @@ type SettingsFieldComponentProps = {
 };
 ```
 
-Call `onChange()` with the next field value. The SDK handles hidden input serialization for the field's save adapter.
+Call `onChange()` with the next field value. The settings UI handles hidden input serialization for the field's save adapter.
 
 ## Example component
 
 ```tsx
-import type { SettingsFieldComponentProps } from '@woocommerce/settings-ui-sdk';
+import type { SettingsFieldComponentProps } from '@woocommerce/settings-ui';
 
 export const PaymentMethodPicker = ( {
 	field,
@@ -159,11 +161,28 @@ Resolution order is:
 1. `field.component`
 2. `fieldOverrides[ field.id ]`
 3. `typeRenderers[ field.type ]`
-4. Native SDK field renderer
+4. Native field renderer
 
 ## Enqueue the component script
 
-Register your script in WordPress and return its handle from the settings UI adapter:
+Register your script in WordPress and return its handle from the settings integration that owns the fields.
+
+For a section registered under an existing tab, return the handle from the section object:
+
+```php
+<?php
+use Automattic\WooCommerce\Admin\Settings\SettingsSection;
+
+final class My_Plugin_Settings_Section extends SettingsSection {
+	// Other settings section methods omitted for brevity.
+
+	public function get_script_handles( WC_Settings_Page $parent_page ): array {
+		return array( 'my-plugin-settings-ui' );
+	}
+}
+```
+
+For a full settings tab that opts in through a `WC_Settings_Page` adapter, return the handle from the adapter:
 
 ```php
 <?php
@@ -176,4 +195,4 @@ final class My_Plugin_Settings_UI_Page extends LegacySettingsPageAdapter {
 }
 ```
 
-WooCommerce loads the SDK first, then your script, then mounts the settings app.
+WooCommerce loads the settings UI package first, then your script, then mounts the settings app.

@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Updated order line item product caching to leverage the product object caching feature.

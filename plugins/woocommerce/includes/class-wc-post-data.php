@@ -113,9 +113,18 @@ class WC_Post_Data {
 	public static function do_deferred_product_sync() {
 		global $wc_deferred_product_sync;
 
-		if ( ! empty( $wc_deferred_product_sync ) ) {
-			$wc_deferred_product_sync = wp_parse_id_list( $wc_deferred_product_sync );
-			array_walk( $wc_deferred_product_sync, array( __CLASS__, 'deferred_product_sync' ) );
+		// Syncing a product may defer more products (e.g. from hooks fired while saving it),
+		// so the queue is drained in rounds, syncing each product at most once.
+		$processed = array();
+		while ( ! empty( $wc_deferred_product_sync ) ) {
+			$product_ids              = array_diff( wp_parse_id_list( $wc_deferred_product_sync ), $processed );
+			$wc_deferred_product_sync = array();
+
+			foreach ( $product_ids as $product_id ) {
+				self::deferred_product_sync( $product_id );
+			}
+
+			$processed = array_merge( $processed, $product_ids );
 		}
 	}
 

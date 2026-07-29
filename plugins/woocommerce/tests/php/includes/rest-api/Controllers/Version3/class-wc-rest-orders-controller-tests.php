@@ -28,16 +28,32 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	private $cot_state;
 
 	/**
+	 * Administrator ID used to authenticate requests.
+	 *
+	 * @var int
+	 */
+	protected static $administrator_id;
+
+	/**
+	 * Create immutable class fixtures.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$administrator_id = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Orders_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user     = self::$administrator_id;
 		wp_set_current_user( $this->user );
 
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
@@ -380,10 +396,10 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->toggle_cot_feature_and_usage( true );
 
 		// A refund (type 'shop_order_refund') is used because it's a real in-core order type that shares the same table as orders.
-		$order  = OrderHelper::create_order();
+		$order  = wc_create_order();
 		$refund = wc_create_refund(
 			array(
-				'amount'   => 10,
+				'amount'   => 0,
 				'order_id' => $order->get_id(),
 			)
 		);
@@ -413,7 +429,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->toggle_cot_feature_and_usage( true );
 		wc_register_order_type( 'shop_test' );
 
-		$order = OrderHelper::create_order();
+		$order = wc_create_order();
 		$this->assertSame(
 			1,
 			$wpdb->update(
@@ -718,11 +734,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_created_via_param_is_filters_order_when_cot_is_enabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
-		$order_admin = WC_Helper_Order::create_order();
+		$order_admin = wc_create_order();
 		$order_admin->set_created_via( 'admin' );
 		$order_admin->save();
 
@@ -744,7 +760,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_get_orders_by_invalid_created_via_when_cot_is_enabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
@@ -764,11 +780,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_created_via_param_is_filters_order_when_cot_is_disabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
-		$order_admin = WC_Helper_Order::create_order();
+		$order_admin = wc_create_order();
 		$order_admin->set_created_via( 'admin' );
 		$order_admin->save();
 
@@ -790,7 +806,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_get_orders_by_invalid_created_via_when_cot_is_disabled() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 
-		$order_checkout = WC_Helper_Order::create_order();
+		$order_checkout = wc_create_order();
 		$order_checkout->set_created_via( 'checkout' );
 		$order_checkout->save();
 
@@ -1069,7 +1085,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox Updating an order with incomplete meta_data entries does not cause errors.
 	 */
 	public function test_update_meta_data_with_incomplete_entries(): void {
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+		$order = wc_create_order();
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_header( 'content-type', 'application/json' );
@@ -1079,5 +1095,209 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_order( $order->get_id() ) );
+	}
+
+	/**
+	 * @testdox Updating an order accepts round-tripped line item meta_data display values with complex values.
+	 */
+	public function test_update_line_item_meta_data_ignores_display_values_with_complex_values(): void {
+		$product            = WC_Helper_Product::create_simple_product();
+		$complex_meta_value = array(
+			array(
+				'guid'      => 'https://example.com/wp-content/uploads/2022/03/upload.jpg',
+				'file_type' => 'image/jpeg',
+				'file_name' => 'upload.jpg',
+				'title'     => 'upload',
+				'key'       => 'file-key',
+			),
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+						'meta_data'  => array(
+							array(
+								'key'   => '_file_upload_data',
+								'value' => $complex_meta_value,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+
+		$response_data  = $response->get_data();
+		$line_item_data = $response_data['line_items'][0];
+		$meta_data      = $line_item_data['meta_data'][0];
+		$this->assertIsArray( $meta_data['display_value'] );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $response_data['id'] );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'     => OrderStatus::PROCESSING,
+					'line_items' => array(
+						array(
+							'id'        => $line_item_data['id'],
+							'meta_data' => array( $meta_data ),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$order      = wc_get_order( $response_data['id'] );
+		$line_items = $order->get_items( 'line_item' );
+		$line_item  = $line_items[ $line_item_data['id'] ];
+		$this->assertEquals( $complex_meta_value, $line_item->get_meta( '_file_upload_data' ) );
+	}
+
+	/**
+	 * @testdox Published order schema advertises a standard type union for meta_data value/display_value, not the non-standard 'mixed'.
+	 */
+	public function test_meta_data_schema_advertises_type_union(): void {
+		$expected_union = array( 'null', 'object', 'string', 'number', 'boolean', 'integer', 'array' );
+
+		$schema     = $this->endpoint->get_item_schema();
+		$properties = $schema['properties'];
+
+		// Every order meta_data value field, at every level, should advertise the union instead of 'mixed'.
+		$meta_containers = array(
+			$properties['meta_data']['items']['properties'],
+			$properties['line_items']['items']['properties']['meta_data']['items']['properties'],
+			$properties['tax_lines']['items']['properties']['meta_data']['items']['properties'],
+			$properties['shipping_lines']['items']['properties']['meta_data']['items']['properties'],
+			$properties['fee_lines']['items']['properties']['meta_data']['items']['properties'],
+			$properties['coupon_lines']['items']['properties']['meta_data']['items']['properties'],
+		);
+		foreach ( $meta_containers as $meta_properties ) {
+			$this->assertEquals( $expected_union, $meta_properties['value']['type'] );
+		}
+
+		// The line item block also exposes read-only display fields with the same union type.
+		$line_item_meta = $properties['line_items']['items']['properties']['meta_data']['items']['properties'];
+		$this->assertEquals( $expected_union, $line_item_meta['display_value']['type'] );
+		$this->assertTrue( $line_item_meta['display_value']['readonly'] );
+		$this->assertTrue( $line_item_meta['display_key']['readonly'] );
+	}
+
+	/**
+	 * Builds a variable product with a single variation carrying a real "color" attribute.
+	 *
+	 * @return array Two-element array: the WC_Product_Variable parent and its WC_Product_Variation.
+	 */
+	private function create_variable_product_with_color_variation(): array {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'REST Switch Parent' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'color' );
+		$attribute->set_options( array( 'blue', 'green' ) );
+		$attribute->set_variation( true );
+		$parent->set_attributes( array( $attribute ) );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'REST-VAR-' . wp_generate_uuid4(),
+			10,
+			array( 'color' => 'blue' )
+		);
+
+		return array( $parent, $variation );
+	}
+
+	/**
+	 * Creates an order carrying the given variation as its single line item.
+	 *
+	 * @param WC_Product_Variation $variation Variation to add as a line item.
+	 * @return array Two-element array: the saved WC_Order and the line item ID.
+	 */
+	private function create_order_with_variation_line_item( $variation ): array {
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+		$item->set_quantity( 1 );
+		$item->set_total( 10 );
+		$order->add_item( $item );
+		$order->save();
+
+		return array( $order, $item->get_id() );
+	}
+
+	/**
+	 * @testdox PUT /orders that switches a variation line item to a simple product clears variation_id over the REST round trip.
+	 */
+	public function test_update_line_item_to_simple_product_clears_variation_id(): void {
+		$fixture                 = $this->create_variable_product_with_color_variation();
+		$variation               = $fixture[1];
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+		$simple                  = WC_Helper_Product::create_simple_product();
+
+		$this->assertSame( $variation->get_id(), (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'Precondition: the line item stored the variation ID.' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'line_items' => array(
+						array(
+							'id'         => $item_id,
+							'product_id' => $simple->get_id(),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'variation_id should be reset to 0 after switching to a simple product over REST.' );
+		$this->assertSame( 0, (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The persisted _variation_id meta should be 0.' );
+		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the simple product, not the old variation.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with a product_id-only payload targeting the variable parent demotes the item and clears variation_id.
+	 */
+	public function test_update_line_item_to_variable_parent_clears_variation_id(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'line_items' => array(
+						array(
+							'id'         => $item_id,
+							'product_id' => $parent->get_id(),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'A product_id-only payload targeting the variable parent succeeds with no error.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'Omitting variation_id demotes the item to its parent and clears variation_id.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the variable parent.' );
 	}
 }

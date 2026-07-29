@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @woocommerce/dependency-group */
 /**
  * External dependencies
  */

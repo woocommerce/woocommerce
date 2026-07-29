@@ -103,25 +103,73 @@ class ProductImage extends AbstractBlock {
 	private function render_anchor( $product, $on_sale_badge, $product_image, $attributes, $inner_blocks_content ) {
 		$product_permalink = $product->get_permalink();
 
-		$is_link        = isset( $attributes['showProductLink'] ) ? $attributes['showProductLink'] : true;
-		$href_attribute = $is_link ? sprintf( 'href="%s"', esc_url( $product_permalink ) ) : 'href="#" onclick="return false;"';
-		$wrapper_style  = ! $is_link ? 'pointer-events: none; cursor: default;' : '';
-		$directive      = $is_link ? 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"' : '';
+		$is_link = isset( $attributes['showProductLink'] ) ? $attributes['showProductLink'] : true;
 
 		$inner_blocks_container = sprintf(
 			'<div class="wc-block-components-product-image__inner-container">%s</div>',
 			$inner_blocks_content
 		);
 
+		if ( ! $is_link ) {
+			return $on_sale_badge . $product_image . $inner_blocks_container;
+		}
+
 		return sprintf(
-			'<a %1$s style="%2$s" %3$s>%4$s%5$s%6$s</a>',
-			$href_attribute,
-			esc_attr( $wrapper_style ),
-			$directive,
+			'<a href="%1$s" data-wp-on--click="woocommerce/product-collection::actions.viewProduct">%2$s%3$s%4$s</a>',
+			esc_url( $product_permalink ),
 			$on_sale_badge,
 			$product_image,
 			$inner_blocks_container
 		);
+	}
+
+	/**
+	 * Get the store thumbnail aspect ratio from WooCommerce Customizer settings.
+	 *
+	 * @return string|null CSS aspect ratio value (e.g. "1/1", "4/3"), or null when uncropped.
+	 */
+	private function get_store_thumbnail_aspect_ratio() {
+		$cropping = get_option( 'woocommerce_thumbnail_cropping', '1:1' );
+
+		if ( 'uncropped' === $cropping ) {
+			return null;
+		}
+
+		if ( 'custom' === $cropping ) {
+			$width  = max( 1, (float) get_option( 'woocommerce_thumbnail_cropping_custom_width', '4' ) );
+			$height = max( 1, (float) get_option( 'woocommerce_thumbnail_cropping_custom_height', '3' ) );
+
+			return $width . '/' . $height;
+		}
+
+		return str_replace( ':', '/', $cropping );
+	}
+
+	/**
+	 * Resolve the aspect ratio for a product image.
+	 *
+	 * Block-level overrides take priority over store thumbnail cropping settings.
+	 *
+	 * @param array $attributes Parsed block attributes.
+	 * @return string|null CSS aspect ratio value, or null when no ratio should be applied.
+	 */
+	private function resolve_aspect_ratio( $attributes ) {
+		if ( ! empty( $attributes['style']['dimensions']['aspectRatio'] ) ) {
+			return $attributes['style']['dimensions']['aspectRatio'];
+		}
+
+		if ( ! empty( $attributes['aspectRatio'] ) ) {
+			return $attributes['aspectRatio'];
+		}
+
+		// For backwards compatibility, we interpret "thumbnail" as following
+		// the store thumbnail cropping settings.
+		// "cropped" was used as a synonym for "thumbnail" in the past, but it's now deprecated.
+		if ( 'thumbnail' === $attributes['imageSizing'] || 'cropped' === $attributes['imageSizing'] ) {
+			return $this->get_store_thumbnail_aspect_ratio();
+		}
+
+		return null;
 	}
 
 	/**
@@ -133,8 +181,7 @@ class ProductImage extends AbstractBlock {
 	 * @return string
 	 */
 	private function render_image( $product, $attributes, $image_id = null ) {
-		$image_size = 'single' === $attributes['imageSizing'] ? 'woocommerce_single' : 'woocommerce_thumbnail';
-
+		$image_size  = 'large';
 		$image_style = '';
 
 		if ( ! empty( $attributes['height'] ) ) {
@@ -147,13 +194,9 @@ class ProductImage extends AbstractBlock {
 			$image_style .= sprintf( 'object-fit:%s;', $attributes['scale'] );
 		}
 
-		// Keep this aspect ratio for backward compatibility.
-		if ( ! empty( $attributes['aspectRatio'] ) ) {
-			$image_style .= sprintf( 'aspect-ratio:%s;', $attributes['aspectRatio'] );
-		}
-
-		if ( ! empty( $attributes['style']['dimensions']['aspectRatio'] ) ) {
-			$image_style .= sprintf( 'aspect-ratio:%s;', $attributes['style']['dimensions']['aspectRatio'] );
+		$aspect_ratio = $this->resolve_aspect_ratio( $attributes );
+		if ( $aspect_ratio ) {
+			$image_style .= sprintf( 'aspect-ratio:%s;', $aspect_ratio );
 		}
 
 		if ( ! empty( $attributes['style']['dimensions']['minHeight'] ) ) {
@@ -228,8 +271,8 @@ class ProductImage extends AbstractBlock {
 	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
-		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 		$this->asset_data_registry->add( 'placeholderImgSrcFullSize', wc_placeholder_img_src( 'woocommerce_single' ) );
+		$this->asset_data_registry->add( 'thumbnailAspectRatio', $this->get_store_thumbnail_aspect_ratio() );
 	}
 
 	/**
@@ -241,13 +284,13 @@ class ProductImage extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$parsed_attributes  = $this->parse_attributes( $attributes );
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
-		$post_id            = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
-		$image_id           = isset( $block->context['imageId'] ) ? (int) $block->context['imageId'] : null;
-		$product            = wc_get_product( $post_id );
-		$aspect_ratio       = $parsed_attributes['aspectRatio'] ?? $parsed_attributes['style']['dimensions']['aspectRatio'] ?? 'auto';
-		$aspect_ratio_class = 'wc-block-components-product-image--aspect-ratio-' . str_replace( '/', '-', $aspect_ratio );
+		$parsed_attributes     = $this->parse_attributes( $attributes );
+		$classes_and_styles    = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+		$post_id               = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
+		$image_id              = isset( $block->context['imageId'] ) ? (int) $block->context['imageId'] : null;
+		$product               = wc_get_product( $post_id );
+		$resolved_aspect_ratio = $this->resolve_aspect_ratio( $parsed_attributes );
+		$aspect_ratio_class    = 'wc-block-components-product-image--aspect-ratio-' . ( $resolved_aspect_ratio ? str_replace( '/', '-', $resolved_aspect_ratio ) : 'auto' );
 
 		$classes = implode(
 			' ',

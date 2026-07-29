@@ -22,6 +22,8 @@ const singletonWpModules = [
 	'@wordpress/html-entities',
 	'@wordpress/keyboard-shortcuts',
 	'@wordpress/patterns',
+	'@wordpress/rich-text',
+	'@wordpress/notices',
 ];
 
 const wpSingletonMapper = singletonWpModules.reduce( ( acc, mod ) => {
@@ -72,6 +74,7 @@ module.exports = {
 		'@woocommerce/base-hocs(.*)$': 'assets/js/base/hocs/$1',
 		'@woocommerce/base-hooks(.*)$': 'assets/js/base/hooks/$1',
 		'@woocommerce/base-utils(.*)$': 'assets/js/base/utils',
+		'@woocommerce/block-data/(.*)$': 'assets/js/data/$1',
 		'@woocommerce/block-data': 'assets/js/data',
 		'@woocommerce/resource-previews': 'assets/js/previews',
 		'@woocommerce/shared-context': 'assets/js/shared/context',
@@ -89,8 +92,7 @@ module.exports = {
 		// subpath imports through source so tests don't depend on built
 		// artifacts. Must come after all blocks-internal aliases above and
 		// before the generic build-module rewrite so @woocommerce/* subpaths
-		// (e.g. @woocommerce/product-editor/build-module/utils/...) land on
-		// src/ instead of build/.
+		// land on src/ instead of build/.
 		'^@woocommerce/([^/]+)/(?:src|build|build-module|build-types)/(.+)$':
 			'<rootDir>/../../../../packages/js/$1/src/$2',
 		'^@woocommerce/([^/]+)/(.+)$':

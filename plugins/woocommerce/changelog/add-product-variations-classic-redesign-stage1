@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add Stage 1 of the variations classic redesign: a DataViews-based Variations tab in the classic product editor, behind the product_variations_classic_redesign feature flag (default off).

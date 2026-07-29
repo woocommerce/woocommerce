@@ -1,8 +1,10 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
 use Automattic\WooCommerce\Admin\API\Reports\Customers\Query as CustomersQuery;
+use Automattic\WooCommerce\Admin\Overrides\Order as AdminOrder;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
@@ -51,17 +53,16 @@ class CustomerHistory {
 			$customer_id   = $order->get_customer_id();
 			$billing_email = $order->get_billing_email();
 			$result        = $this->query_hpos( $customer_id, $billing_email );
-		} elseif ( method_exists( $order, 'get_report_customer_id' ) ) {
-			$result = $this->query_cpt( $order->get_report_customer_id() );
 		} else {
-			wc_get_logger()->warning(
-				'CustomerHistory: Order object does not have get_report_customer_id method.',
-				array( 'source' => 'customer-history' )
-			);
-			$result = (object) array(
-				'orders_count' => 0,
-				'total_spend'  => 0,
-			);
+			$customer_report_id = $this->get_cpt_report_customer_id( $order );
+			if ( $customer_report_id > 0 ) {
+				$result = $this->query_cpt( $customer_report_id );
+			} else {
+				$result = (object) array(
+					'orders_count' => 0,
+					'total_spend'  => 0,
+				);
+			}
 		}
 
 		$orders_count = (int) ( $result->orders_count ?? 0 );
@@ -224,6 +225,22 @@ class CustomerHistory {
 			'orders_count' => $customer_row['orders_count'] ?? 0,
 			'total_spend'  => $customer_row['total_spend'] ?? 0,
 		);
+	}
+
+	/**
+	 * Get the analytics customer ID for a CPT-backed order.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @return int The reports customer ID.
+	 */
+	private function get_cpt_report_customer_id( WC_Order $order ): int {
+		if ( ! $order->get_id() ) {
+			return 0;
+		}
+
+		$report_order = $order instanceof AdminOrder ? $order : new AdminOrder( $order->get_id() );
+
+		return (int) $report_order->get_report_customer_id();
 	}
 
 	/**

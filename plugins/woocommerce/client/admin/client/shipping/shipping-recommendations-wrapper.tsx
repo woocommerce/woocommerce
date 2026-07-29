@@ -10,12 +10,6 @@ import { EmbeddedBodyProps } from '../embedded-body-layout/embedded-body-props';
 import RecommendationsEligibilityWrapper from '../settings-recommendations/recommendations-eligibility-wrapper';
 
 const ShippingRecommendationsLoader = lazy( () => {
-	if ( window.wcAdminFeatures[ 'shipping-smart-defaults' ] ) {
-		return import(
-			/* webpackChunkName: "shipping-recommendations" */ './experimental-shipping-recommendations'
-		);
-	}
-
 	return import(
 		/* webpackChunkName: "shipping-recommendations" */ './shipping-recommendations'
 	);

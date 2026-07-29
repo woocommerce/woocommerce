@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add Tracks instrumentation for the block-email update flow: server-side `_available`, `_applied` (auto + selective), and `_backfill_completed` events, plus list-page `_viewed`. Also stamps the backfill-complete option on fresh installs so the divergence sweep is not permanently dormant.

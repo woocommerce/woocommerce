@@ -47,7 +47,7 @@ export default function ProductFeaturedBanner() {
 	const [ activeIndex, setActiveIndex ] = useState( 0 );
 	const [ isDismissed, setIsDismissed ] = useState( false );
 	const [ autoRotate, setAutoRotate ] = useState( true );
-	const carouselItemRef = useRef< HTMLLIElement >( null );
+	const carouselItemRef = useRef< HTMLLIElement | null >( null );
 
 	useEffect( () => {
 		let interval: NodeJS.Timeout;

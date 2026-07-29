@@ -5,7 +5,6 @@ import { memo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { styles } from '@wordpress/icons';
-// eslint-disable-next-line @woocommerce/dependency-group
 import { PluginSidebar, PluginSidebarMoreMenuItem } from '@wordpress/editor';
 
 /**

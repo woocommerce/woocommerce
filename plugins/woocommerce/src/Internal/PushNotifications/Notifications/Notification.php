@@ -173,6 +173,28 @@ abstract class Notification {
 	}
 
 	/**
+	 * Canonical positional ActionScheduler arguments for the safety-net job.
+	 *
+	 * Single source of truth shared by the scheduler (and its dedupe guard) and
+	 * the cancel path so the serialized args always match. Action Scheduler
+	 * matches the stored args by exact equality, so any divergence between the
+	 * schedule-side and cancel-side shapes silently breaks cancellation.
+	 *
+	 * The args are keyed on the notification's *identity* — the minimal data
+	 * needed to uniquely identify and reconstruct the notification — mirroring
+	 * {@see self::get_identifier()}. Volatile payload fields (e.g. a stock
+	 * snapshot captured at trigger time) must not be included: they are not part
+	 * of the identity and may differ between schedule and cancel.
+	 *
+	 * @return array<int, mixed>
+	 *
+	 * @since 10.9.0
+	 */
+	public function get_safety_net_args(): array {
+		return array( $this->get_type(), $this->get_resource_id() );
+	}
+
+	/**
 	 * Decide whether this notification should be delivered to a user given
 	 * their stored preference value for {@see static::get_type()}.
 	 *
