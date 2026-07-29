@@ -6,6 +6,8 @@
  * @package Automattic\WooCommerce\Internal\PRReadinessDummy
  */
 
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Internal\PRReadinessDummy;
 
 /**
@@ -19,10 +21,6 @@ class DummyLintFailure {
 	 * @return bool
 	 */
 	public function check(): bool {
-		if ( true ) {
-			return true;
-		}
-
-		return false;
+		return true;
 	}
 }

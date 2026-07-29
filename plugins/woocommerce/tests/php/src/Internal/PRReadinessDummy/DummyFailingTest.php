@@ -6,6 +6,8 @@
  * @package Automattic\WooCommerce\Tests\Internal\PRReadinessDummy
  */
 
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Tests\Internal\PRReadinessDummy;
 
 use WC_Unit_Test_Case;

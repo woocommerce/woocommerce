@@ -6,6 +6,8 @@
  * @package Automattic\WooCommerce\Internal\PRReadinessDummy
  */
 
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Internal\PRReadinessDummy;
 
 /**
