@@ -5,6 +5,8 @@
  * @package WooCommerce\RestApi
  */
 
+declare(strict_types=1);
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -26,5 +28,5 @@ class WC_REST_Products_Catalog_Controller {
 	/**
 	 * Register routes. Intentionally a no-op.
 	 */
-	public function register_routes() {}
+	public function register_routes(): void {}
 }
