@@ -95,6 +95,8 @@ Register pages with `wc_admin_register_page()` using these parameters:
 -   `icon` - Dashicons helper class or base64-encoded SVG. Include the entire dashicon class name, ie `dashicons-*`. This is optional and won't be included in WC Navigation.
 -   `position` - Menu item position for parent pages. Optional. See: `add_menu_page()`.
 
+A path registered without a leading slash is normalized to one, because React Router resolves such a route against the app root and renders it at `/your-path`. Request paths are matched as they arrive: a `path` query argument without a leading slash matches no React route, so it is not recognized here either.
+
 Route templates are matching patterns, not URL templates. `PageController` does not interpolate request values when it registers the corresponding WordPress menu item, so WordPress receives the literal route template as the menu slug (for example, `wc-admin&path=/orders/:orderId`). Treat route templates as direct-load recognition paths, and use static paths for merchant-facing navigation. When a page is selected through fallback route matching, its own breadcrumb label is unlinked rather than pointing to the literal template; static ancestor breadcrumbs can still link normally.
 
 ### Example - Adding a New Analytics Report

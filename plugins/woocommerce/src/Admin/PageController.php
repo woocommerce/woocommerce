@@ -191,6 +191,15 @@ class PageController {
 
 			$registered_parts = $this->split_registered_page_path( $page['path'] );
 
+			// React Router resolves a registered route that omits the leading slash against the app
+			// root, so `route/:itemId` renders at `/route/123`. Normalize the registered side to the
+			// path the client actually renders. The request path is left alone on purpose: the admin
+			// history passes `?path=` through verbatim, so a request without a leading slash matches
+			// no React route and must not be recognized here either.
+			if ( '' !== $registered_parts['path'] ) {
+				$registered_parts['path'] = '/' . ltrim( $registered_parts['path'], '/' );
+			}
+
 			if ( ! $this->registered_path_matches_current_path( $registered_parts, $current_path_parts ) ) {
 				continue;
 			}

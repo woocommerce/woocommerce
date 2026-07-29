@@ -560,16 +560,21 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 */
 	public static function data_provider_test_registered_page_route_pattern_matches_current_request(): array {
 		return array(
-			'path parameter'                => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
-			'case-insensitive static path'  => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2FROUTE-PARAMS%2Fsample' ),
-			'trailing slash in pattern'     => array( '/route-params/:itemName/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
-			'repeated request slashes'      => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2F%2F' ),
-			'wildcard base path'            => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard' ),
-			'wildcard base trailing slash'  => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2F' ),
-			'wildcard descendant path'      => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme%2Falpha' ),
-			'parameter and wildcard base'   => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123' ),
-			'parameter and wildcard child'  => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails' ),
-			'parameter and wildcard nested' => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails%2Fedit' ),
+			'path parameter'                    => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'case-insensitive static path'      => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2FROUTE-PARAMS%2Fsample' ),
+			'trailing slash in pattern'         => array( '/route-params/:itemName/', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'repeated request slashes'          => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample%2F%2F' ),
+			'wildcard base path'                => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard' ),
+			'wildcard base trailing slash'      => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2F' ),
+			'wildcard descendant path'          => array( '/route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme%2Falpha' ),
+			'parameter and wildcard base'       => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123' ),
+			'parameter and wildcard child'      => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails' ),
+			'parameter and wildcard nested'     => array( '/route-patterns/:itemId/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123%2Fdetails%2Fedit' ),
+			// React Router resolves a leading-slash-less registered route against the app root, so
+			// these render at `/route-params/sample` on the client and must be recognized here too.
+			'parameter without leading slash'   => array( 'route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
+			'static path without leading slash' => array( 'route-params', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params' ),
+			'wildcard without leading slash'    => array( 'route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme' ),
 		);
 	}
 
@@ -613,6 +618,32 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			'different page root'                        => array( '/route-params/:itemName', '/wp-admin/admin.php?page=other-page-root&path=%2Froute-params%2Fsample' ),
 			'wc-admin request without app path'          => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin' ),
 			'unrelated admin request'                    => array( '/route-params/:itemName', '/wp-admin/edit.php?post_type=product' ),
+			// The admin history passes `?path=` through verbatim, so a request without a leading slash
+			// matches no React route. Normalizing the registered side must not make PHP recognize it.
+			'request without leading slash'              => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=route-params%2Fsample' ),
+			'both sides without leading slash'           => array( 'route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=route-params%2Fsample' ),
+		);
+	}
+
+	/**
+	 * @testdox Registered route patterns score the same with or without a leading slash.
+	 */
+	public function test_registered_page_leading_slash_does_not_affect_route_pattern_specificity(): void {
+		// Both registrations render the same client route, so neither may outrank the other on
+		// specificity alone; the earlier registration wins the tie.
+		$this->assert_registered_page_for_request(
+			'route-slashless-page',
+			'/wp-admin/admin.php?page=wc-admin&path=%2Froute-patterns%2F123',
+			array(
+				array(
+					'id'   => 'route-slashless-page',
+					'path' => 'route-patterns/:itemId',
+				),
+				array(
+					'id'   => 'route-slashed-page',
+					'path' => '/route-patterns/:itemId',
+				),
+			)
 		);
 	}
 
