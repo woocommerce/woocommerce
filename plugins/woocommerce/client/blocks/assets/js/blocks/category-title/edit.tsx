@@ -17,7 +17,6 @@ import {
 } from '@wordpress/block-editor';
 import { usePreviewMode } from '@woocommerce/base-hooks';
 import { previewCategories } from '@woocommerce/resource-previews';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	ToggleControl,
 	TextControl,

@@ -7,9 +7,17 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 	let $termsCheckbox;
 	let $termsRow;
 	let capturedApi;
+	// Set the number of invalid `.form-row` elements that are hidden (e.g. the
+	// collapsed "Ship to a different address?" shipping fields). These must never
+	// block submission, so `validate()` should only count visible invalid fields.
+	let setHiddenInvalidCount;
 
 	beforeEach( () => {
 		capturedApi = null;
+		let hiddenInvalidCount = 0;
+		setHiddenInvalidCount = ( count ) => {
+			hiddenInvalidCount = count;
+		};
 
 		// used to track whether terms checkbox is checked
 		let termsChecked = false;
@@ -61,11 +69,26 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				if ( selector === '.input-text, select, input:checkbox' ) {
 					return { trigger: jest.fn() };
 				}
-				if ( selector === '.woocommerce-invalid' ) {
+				if ( selector === '.woocommerce-invalid:visible' ) {
+					// Visible invalid fields only (e.g. the terms row). Hidden
+					// invalid fields are deliberately excluded.
 					return {
 						length: formInvalidElements.size,
 						first: jest.fn( () => ( {
 							length: formInvalidElements.size > 0 ? 1 : 0,
+							offset: jest.fn( () => ( { top: 100 } ) ),
+						} ) ),
+					};
+				}
+				if ( selector === '.woocommerce-invalid' ) {
+					// Unfiltered query (includes hidden fields). The implementation
+					// must NOT use this to gate submission; counting hidden invalid
+					// fields here is the regression these tests guard against.
+					const total = formInvalidElements.size + hiddenInvalidCount;
+					return {
+						length: total,
+						first: jest.fn( () => ( {
+							length: total > 0 ? 1 : 0,
 							offset: jest.fn( () => ( { top: 100 } ) ),
 						} ) ),
 					};
@@ -268,6 +291,34 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			// Second attempt: should pass on first try (not require double-click)
 			const secondResult = await capturedApi.validate();
 			expect( secondResult.hasError ).toBe( false );
+		} );
+	} );
+
+	describe( 'Hidden field validation', () => {
+		test( 'should ignore invalid fields that are hidden (e.g. collapsed shipping address)', async () => {
+			// A shippable cart renders the "Ship to a different address?" block,
+			// whose required shipping fields are present but hidden when the option
+			// is unchecked. Field-level validation flags them as invalid regardless
+			// of visibility, so validate() must only count *visible* invalid fields
+			// or the order is never submitted even when the visible form is valid.
+			$termsCheckbox.setChecked( true );
+			setHiddenInvalidCount( 5 );
+
+			const result = await capturedApi.validate();
+
+			expect( result.hasError ).toBe( false );
+		} );
+
+		test( 'should only count visible invalid fields', async () => {
+			$termsCheckbox.setChecked( true );
+			setHiddenInvalidCount( 5 );
+
+			await capturedApi.validate();
+
+			expect( $form.find ).toHaveBeenCalledWith(
+				'.woocommerce-invalid:visible'
+			);
+			expect( $form.find ).not.toHaveBeenCalledWith( '.woocommerce-invalid' );
 		} );
 	} );
 } );

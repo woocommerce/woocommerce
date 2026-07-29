@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
+use Automattic\WooCommerce\Blocks\CoreBreadcrumbsCompatibility;
 use Automattic\WooCommerce\Blocks\DependencyDetection;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
@@ -36,6 +37,7 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\TemplateOptions;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 
 
 /**
@@ -145,10 +147,11 @@ class Bootstrap {
 
 		// Load assets unless this is a request specifically for the store API.
 		if ( ! $is_store_api_request ) {
-			// Template related functionality. These won't be loaded for store API requests, but may be loaded for
-			// regular rest requests to maintain compatibility with the store editor.
-			$this->container->get( BlockPatterns::class );
-			$this->container->get( BlockTypesController::class );
+			// Skip block/pattern registration on non-rendering requests. See BlockRegistrationContext.
+			if ( ( new BlockRegistrationContext() )->should_register() ) {
+				$this->container->get( BlockPatterns::class );
+				$this->container->get( BlockTypesController::class );
+			}
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( Notices::class )->init();
 
@@ -168,9 +171,23 @@ class Bootstrap {
 	 * @return bool
 	 */
 	protected function is_built() {
+		$editor_asset = $this->is_block_editor_unified_assets_enabled_during_bootstrap() ? 'wc-block-library.js' : 'featured-product.js';
+
 		return file_exists(
-			$this->package->get_path( 'assets/client/blocks/featured-product.js' )
+			$this->package->get_path( 'assets/client/blocks/' . $editor_asset )
 		);
+	}
+
+	/**
+	 * Check whether unified block editor assets are enabled during plugin bootstrap.
+	 *
+	 * Feature definitions contain translated presentation strings and are not safe to use before init.
+	 *
+	 * @return bool
+	 */
+	private function is_block_editor_unified_assets_enabled_during_bootstrap(): bool {
+		// Keep this fallback aligned with `enabled_by_default` for unified block editor assets in FeaturesController.
+		return 'yes' === get_option( BlockEditorUnifiedAssets::OPTION_NAME, 'no' );
 	}
 
 	/**
@@ -185,9 +202,8 @@ class Bootstrap {
 			function () {
 				echo '<div class="error"><p>';
 				printf(
-					/* translators: %1$s is the node install command, %2$s is the install command, %3$s is the build command, %4$s is the watch command. */
-					esc_html__( 'WooCommerce Blocks development mode requires files to be built. From the root directory, run %1$s to ensure your node version is aligned, run %2$s to install dependencies, %3$s to build the files or %4$s to build the files and watch for changes.', 'woocommerce' ),
-					'<code>nvm use</code>',
+					/* translators: %1$s is the install command, %2$s is the build command, %3$s is the watch command. */
+					esc_html__( 'WooCommerce Blocks development mode requires files to be built. From the root directory, run %1$s to install dependencies, %2$s to build the files or %3$s to build the files and watch for changes.', 'woocommerce' ),
 					'<code>pnpm install</code>',
 					'<code>pnpm --filter="@woocommerce/plugin-woocommerce" build</code>',
 					'<code>pnpm --filter="@woocommerce/plugin-woocommerce" watch:build</code>'
@@ -243,6 +259,12 @@ class Bootstrap {
 				$asset_api           = $container->get( AssetApi::class );
 				$asset_data_registry = $container->get( AssetDataRegistry::class );
 				return new BlockTypesController( $asset_api, $asset_data_registry );
+			}
+		);
+		$this->container->register(
+			CoreBreadcrumbsCompatibility::class,
+			function () {
+				return new CoreBreadcrumbsCompatibility();
 			}
 		);
 		$this->container->register(

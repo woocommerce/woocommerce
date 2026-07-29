@@ -22,6 +22,10 @@ jest.mock( '../../settings-recommendations/dismissable-list', () => ( {
 		children,
 } ) );
 
+jest.mock( '~/hooks/use-option-dismiss', () => ( {
+	useOptionDismiss: () => ( { isDismissed: false, onDismiss: jest.fn() } ),
+} ) );
+
 const mockActivePlugins = ( plugins: string[] ) => {
 	( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
 		fn( () => ( {

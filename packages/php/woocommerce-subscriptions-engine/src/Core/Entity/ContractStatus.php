@@ -21,11 +21,11 @@ defined( 'ABSPATH' ) || exit;
  */
 final class ContractStatus {
 
-	const ACTIVE               = 'active';
-	const ON_HOLD              = 'on-hold';
-	const PENDING_CANCELLATION = 'pending-cancellation';
-	const CANCELLED            = 'cancelled';
-	const EXPIRED              = 'expired';
+	public const ACTIVE               = 'active';
+	public const ON_HOLD              = 'on-hold';
+	public const PENDING_CANCELLATION = 'pending-cancellation';
+	public const CANCELLED            = 'cancelled';
+	public const EXPIRED              = 'expired';
 
 	/**
 	 * All known statuses.

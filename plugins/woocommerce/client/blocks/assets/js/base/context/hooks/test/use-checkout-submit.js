@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import TestRenderer, { act } from 'react-test-renderer';
+import { renderHook } from '@testing-library/react';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 
 /**
@@ -30,38 +30,25 @@ jest.mock( '../../providers/cart-checkout/checkout-events', () => {
 } );
 
 describe( 'useCheckoutSubmit', () => {
-	let registry, renderer;
+	let registry;
 
-	const getWrappedComponents = ( Component ) => (
-		<RegistryProvider value={ registry }>
-			<Component />
-		</RegistryProvider>
+	const wrapper = ( { children } ) => (
+		<RegistryProvider value={ registry }>{ children }</RegistryProvider>
 	);
-
-	const getTestComponent = () => () => {
-		const data = useCheckoutSubmit();
-		return <div { ...data } />;
-	};
 
 	beforeEach( () => {
 		registry = createRegistry( {
 			[ CHECKOUT_STORE_KEY ]: checkoutStoreConfig,
 			[ PAYMENT_STORE_KEY ]: paymentDataStoreConfig,
 		} );
-		renderer = null;
 	} );
 
 	it( 'onSubmit calls the correct action in the checkout events context', () => {
-		const TestComponent = getTestComponent();
-
-		act( () => {
-			renderer = TestRenderer.create(
-				getWrappedComponents( TestComponent )
-			);
+		const { result } = renderHook( () => useCheckoutSubmit(), {
+			wrapper,
 		} );
 
-		//eslint-disable-next-line testing-library/await-async-query
-		const { onSubmit } = renderer.root.findByType( 'div' ).props;
+		const { onSubmit } = result.current;
 
 		onSubmit();
 

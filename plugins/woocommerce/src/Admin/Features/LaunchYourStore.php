@@ -40,6 +40,7 @@ class LaunchYourStore {
 			'woocommerce_coming_soon'      => array( 'yes', 'no' ),
 			'woocommerce_store_pages_only' => array( 'yes', 'no' ),
 			'woocommerce_private_link'     => array( 'yes', 'no' ),
+			'woocommerce_feature_site_visibility_badge_enabled' => array( 'yes', 'no' ),
 		);
 
 		$event_data = array();
@@ -123,6 +124,7 @@ class LaunchYourStore {
 				'woocommerce_store_pages_only' => get_option( 'woocommerce_store_pages_only' ),
 				'woocommerce_private_link'     => get_option( 'woocommerce_private_link' ),
 				'woocommerce_share_key'        => get_option( 'woocommerce_share_key' ),
+				'woocommerce_feature_site_visibility_badge_enabled' => get_option( 'woocommerce_feature_site_visibility_badge_enabled', 'yes' ),
 			);
 		}
 

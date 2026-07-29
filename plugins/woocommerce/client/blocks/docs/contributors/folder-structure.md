@@ -49,9 +49,7 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 │ Docker config files for the development and testing environment.
 │
 ├── .env
-├── .wp-env.json
-│ Config files for the development and testing environment.
-│ Includes WordPress, the WooCommerce plugin and the Storefront theme.
+│ Config file for the development and testing environment.
 │
 ├── composer.lock
 ├── composer.json
@@ -169,9 +167,6 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 │
 ├── templates/emails
 │ Email templates of the WooCommerce Blocks plugin.
-│
-├── tests/e2e
-│ Set of end-to-end tests.
 │
 ├── tests/js
 │ Configuration for Jest.

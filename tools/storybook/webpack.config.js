@@ -8,19 +8,9 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
  * External dependencies
  */
 const wcAdminWebpackConfig = require( '../../plugins/woocommerce/client/admin/webpack.config.js' );
-
-const wcAdminPackages = [
-	'components',
-	'csv-export',
-	'currency',
-	'date',
-	'navigation',
-	'number',
-	'data',
-	'tracks',
-	'experimental',
-	'onboarding',
-];
+const {
+	WebpackRTLPlugin,
+} = require( '@woocommerce/internal-build/style-build' );
 
 module.exports = ( storybookConfig ) => {
 	storybookConfig.module.rules = [
@@ -28,12 +18,14 @@ module.exports = ( storybookConfig ) => {
 		...wcAdminWebpackConfig.module.rules,
 	];
 
-	storybookConfig.resolve.alias = wcAdminWebpackConfig.resolve.alias;
+	// Copy (don't share) the admin alias object since we mutate it below.
+	storybookConfig.resolve.alias = { ...wcAdminWebpackConfig.resolve.alias };
 
-	wcAdminPackages.forEach( ( name ) => {
-		storybookConfig.resolve.alias[ `@woocommerce/${ name }` ] =
-			path.resolve( __dirname, `../../packages/js/${ name }/src` );
-	} );
+	// Bundle every `@woocommerce/*` package from source, mirroring the admin
+	// webpack config. Each package declares a `"wc-source"` conditional export
+	// resolving to its `./src/index.ts`, so activating the condition picks up
+	// all current and future packages without a hardcoded alias list.
+	storybookConfig.resolve.conditionNames = [ 'wc-source', '...' ];
 
 	storybookConfig.resolve.alias[ '@woocommerce/settings' ] = path.resolve(
 		__dirname,
@@ -58,8 +50,20 @@ module.exports = ( storybookConfig ) => {
 		'node_modules',
 	];
 
+	// When USE_RTL_STYLE is set (the `storybook-rtl` script), swap the
+	// inherited RTL plugin for an in-place instance so the compiled CSS is
+	// rewritten to RTL rather than emitted as an unused `-rtl.css` sibling.
+	// This keeps RTL preview on the existing rtlcss toolchain now that the
+	// stylesheets are bundled from source instead of copied as pre-built files.
+	const useRtl = process.env.USE_RTL_STYLE === 'true';
+	const inheritedPlugins = wcAdminWebpackConfig.plugins.map( ( plugin ) =>
+		useRtl && plugin instanceof WebpackRTLPlugin
+			? new WebpackRTLPlugin( { inPlace: true } )
+			: plugin
+	);
+
 	storybookConfig.plugins.push(
-		...wcAdminWebpackConfig.plugins,
+		...inheritedPlugins,
 		new CopyWebpackPlugin( {
 			patterns: [
 				{
@@ -67,38 +71,23 @@ module.exports = ( storybookConfig ) => {
 					to: 'wordpress/css/[name][ext]',
 				},
 				{
-					from: require.resolve(
-						'@wordpress/components/build-style/style.css'
+					/*
+					 * Resolve the package root via its exported `package.json`
+					 * and join the CSS path manually. `@wordpress/components`
+					 * still maps `build-style` as a deprecated trailing-slash
+					 * folder export, which Node 24 no longer honors, so a direct
+					 * `require.resolve` of the stylesheet throws
+					 * ERR_PACKAGE_PATH_NOT_EXPORTED.
+					 */
+					from: path.join(
+						path.dirname(
+							require.resolve(
+								'@wordpress/components/package.json'
+							)
+						),
+						'build-style/style.css'
 					),
 					to: 'wordpress/css/components.css',
-				},
-				{
-					from: path.resolve(
-						__dirname,
-						`../../packages/js/components/build-style/*.css`
-					),
-					to: `./component-css/[name][ext]`,
-				},
-				{
-					from: path.resolve(
-						__dirname,
-						`../../packages/js/onboarding/build-style/*.css`
-					),
-					to: `./onboarding-css/[name][ext]`,
-				},
-				{
-					from: path.resolve(
-						__dirname,
-						`../../packages/js/experimental/build-style/*.css`
-					),
-					to: `./experimental-css/[name][ext]`,
-				},
-				{
-					from: path.resolve(
-						__dirname,
-						`../../plugins/woocommerce/client/admin/build/app/*.css`
-					),
-					to: `./app-css/[name][ext]`,
 				},
 			],
 		} )

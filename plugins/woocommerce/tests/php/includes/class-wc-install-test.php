@@ -2,6 +2,8 @@
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Caches\ProductCountCache;
+use Automattic\WooCommerce\Enums\ProductStatus;
 
 /**
  * Class WC_Install_Test.
@@ -191,11 +193,13 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_is_new_install(): void {
-		// Determining if we are in a new install is based on the following three factors.
-		$version       = null;
-		$shop_id       = null;
-		$post_count    = 0;
-		$counted_posts = false;
+		// Determining if we are in a new install is based on the following factors.
+		$version         = false;
+		$shop_id         = null;
+		$post_count      = 0;
+		$counted_posts   = false;
+		$coming_soon     = 'yes';
+		$completed_lists = array();
 
 		$supply_version = function () use ( &$version ) {
 			return $version;
@@ -205,15 +209,25 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			return $shop_id;
 		};
 
-		$supply_post_count = function () use ( &$post_count ) {
+		$supply_post_count = function () use ( &$post_count, &$counted_posts ) {
 			$counted_posts = true;
-			return $post_count;
+			return (object) array( ProductStatus::PUBLISH => $post_count );
+		};
+
+		$supply_coming_soon = function () use ( &$coming_soon ) {
+			return $coming_soon;
+		};
+
+		$supply_completed_lists = function () use ( &$completed_lists ) {
+			return $completed_lists;
 		};
 
 		// Make it straightforward to test different values for our key variables.
 		add_filter( 'option_woocommerce_version', $supply_version );
 		add_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
 		add_filter( 'wp_count_posts', $supply_post_count );
+		add_filter( 'pre_option_woocommerce_coming_soon', $supply_coming_soon );
+		add_filter( 'pre_option_woocommerce_task_list_completed_lists', $supply_completed_lists );
 
 		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is null.' );
 
@@ -223,13 +237,22 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$post_count = 1;
 		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is null (even if the shop ID is set and we have one or more products).' );
 
-		$version = '9.0.0';
+		$version     = '9.0.0';
+		$coming_soon = 'no';
+		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if the store is live (coming soon is disabled).' );
+
+		$coming_soon     = 'yes';
+		$completed_lists = array( 'setup' );
+		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if onboarding has been completed.' );
+
+		$completed_lists = array();
 		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if the WC version is set, we have a shop ID and we have one or more products.' );
 
 		$shop_id = null;
 		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if the WC version is set and we have one or more products (even if the shop ID is not set).' );
 
 		$post_count = 0;
+		( new ProductCountCache() )->flush( 'product' );
 		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is set but the shop ID is not set and we do not have any products.' );
 
 		$counted_posts = false;
@@ -239,9 +262,11 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( $counted_posts, 'For established stores (version and shop ID both set), we do not need to count the number of existing products.' );
 
 		// Cleanup.
-		remove_filter( 'option_woocommerce_db_version', $supply_version );
+		remove_filter( 'option_woocommerce_version', $supply_version );
 		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
 		remove_filter( 'wp_count_posts', $supply_post_count );
+		remove_filter( 'pre_option_woocommerce_coming_soon', $supply_coming_soon );
+		remove_filter( 'pre_option_woocommerce_task_list_completed_lists', $supply_completed_lists );
 	}
 
 	/**
@@ -256,18 +281,18 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * @param bool|null $auto_update Whether to enable auto-updates (TRUE) or not. NULL means use the defaults.
 	 */
 	public function test_db_auto_updates( ?bool $auto_update = null ): void {
-		$options = array( 'woocommerce_db_version', 'woocommerce_version' );
+		$update_versions = array_keys( WC_Install::get_db_update_callbacks() );
+		$from_version    = $update_versions[ count( $update_versions ) - 2 ];
+		$maybe_update_db = function () {
+			static::maybe_update_db_version();
+		};
 
 		if ( ! is_null( $auto_update ) ) {
 			add_filter( 'woocommerce_enable_auto_update_db', fn() => $auto_update );
 		}
 
-		foreach ( $options as $option_name ) {
-			update_option( $option_name, '9.4.0' );
-		}
-
-		// Trigger version check.
-		\WC_Install::check_version();
+		update_option( 'woocommerce_db_version', $from_version );
+		$maybe_update_db->call( new WC_Install() );
 
 		// Did we schedule anything automatically?
 		$update_scheduled = ! is_null( WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' ) );
@@ -277,6 +302,27 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertFalse( $update_scheduled );
 		}
+	}
+
+	/**
+	 * Tests that the version check reaches the automatic database updater.
+	 *
+	 * This is a single end-to-end smoke test of the check_version() -> install() ->
+	 * maybe_update_db_version() wiring; the auto-update on/off/default decision logic
+	 * itself is covered for all variations by test_db_auto_updates() above.
+	 *
+	 * @testdox The version check schedules the automatic database update.
+	 */
+	public function test_version_check_schedules_db_auto_update(): void {
+		$update_versions = array_keys( WC_Install::get_db_update_callbacks() );
+		$from_version    = $update_versions[ count( $update_versions ) - 2 ];
+
+		update_option( 'woocommerce_db_version', $from_version );
+		update_option( 'woocommerce_version', $from_version );
+
+		WC_Install::check_version();
+
+		$this->assertNotNull( WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' ) );
 	}
 
 	/**
@@ -308,7 +354,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_order_stats_schema_includes_fulfillment_status_for_new_install_with_fulfillments_feature_enabled(): void {
 		// Mock is_new_install to return true.
-		$version = null;
+		$version = false;
 		$shop_id = null;
 
 		$supply_version = function () use ( &$version ) {
@@ -358,7 +404,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_feature_fulfillments_enabled' );
 
 		// Mock is_new_install to return true.
-		$version = null;
+		$version = false;
 		$shop_id = null;
 
 		$supply_version = function () use ( &$version ) {
@@ -482,5 +528,93 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'option_woocommerce_version', $supply_version );
 		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
 		remove_filter( 'pre_option_' . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, $supply_column_status );
+	}
+
+	/**
+	 * @testdox Should return every actionscheduler_* table that exists in the database, each prefixed with the table prefix.
+	 */
+	public function test_get_action_scheduler_tables_matches_database_tables(): void {
+		global $wpdb;
+
+		// Action Scheduler is bundled with WooCommerce, so its tables exist in the test database. Comparing
+		// against the live schema (rather than re-listing the same hardcoded names the method returns) means
+		// this test fails if Action Scheduler ever adds, renames or drops a table and the method drifts out
+		// of sync, which would otherwise leave those tables behind on uninstall.
+		$actual_tables = $wpdb->get_col(
+			"SHOW TABLES LIKE '" . $wpdb->esc_like( $wpdb->prefix . 'actionscheduler_' ) . "%'"
+		);
+
+		$this->assertNotEmpty(
+			$actual_tables,
+			'No actionscheduler_* tables were found in the database; the test environment is not set up as expected.'
+		);
+
+		$reported_tables = WC_Install::get_action_scheduler_tables();
+
+		foreach ( $reported_tables as $table ) {
+			$this->assertStringStartsWith(
+				$wpdb->prefix,
+				$table,
+				"Action Scheduler table {$table} should be prefixed with the database table prefix."
+			);
+		}
+
+		sort( $actual_tables );
+		sort( $reported_tables );
+
+		$this->assertSame(
+			$actual_tables,
+			$reported_tables,
+			'get_action_scheduler_tables() should match the actionscheduler_* tables present in the database.'
+		);
+	}
+
+	/**
+	 * @testdox Should delete the placeholder image attachment and its meta.
+	 */
+	public function test_delete_placeholder_image_removes_attachment(): void {
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'woocommerce-placeholder',
+				'post_mime_type' => 'image/webp',
+				'post_status'    => 'inherit',
+				'post_type'      => 'attachment',
+			)
+		);
+		update_post_meta( $attachment_id, '_wp_attached_file', 'woocommerce-placeholder.webp' );
+		update_option( 'woocommerce_placeholder_image', $attachment_id );
+
+		WC_Install::delete_placeholder_image();
+
+		$this->assertNull( get_post( $attachment_id ), 'The placeholder attachment post should be deleted.' );
+		$this->assertSame(
+			'',
+			get_post_meta( $attachment_id, '_wp_attached_file', true ),
+			'The placeholder attachment meta should be deleted.'
+		);
+	}
+
+	/**
+	 * @testdox Should not delete a custom image set by the merchant as the placeholder.
+	 */
+	public function test_delete_placeholder_image_keeps_custom_attachment(): void {
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'merchant-logo',
+				'post_mime_type' => 'image/png',
+				'post_status'    => 'inherit',
+				'post_type'      => 'attachment',
+			)
+		);
+		update_post_meta( $attachment_id, '_wp_attached_file', '2026/06/merchant-logo.png' );
+		update_option( 'woocommerce_placeholder_image', $attachment_id );
+
+		WC_Install::delete_placeholder_image();
+
+		$this->assertInstanceOf(
+			WP_Post::class,
+			get_post( $attachment_id ),
+			'A custom merchant placeholder attachment should not be deleted.'
+		);
 	}
 }

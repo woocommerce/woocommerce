@@ -911,9 +911,14 @@ class OrdersTableQuery {
 
 		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 
+		$filtered_sql = $this->sql;
 		if ( ! $this->suppress_filters ) {
 			/**
 			 * Filters the completed SQL query.
+			 *
+			 * Note: queries left unmodified by this filter may later be rewritten for performance (see
+			 * OrdersTableStatusUnionQuery), in which case the SQL received here is not the SQL that ends up
+			 * being executed. Returning a modified query from this filter disables any such rewrite.
 			 *
 			 * @since 7.9.0
 			 *
@@ -921,8 +926,22 @@ class OrdersTableQuery {
 			 * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).
 			 * @param array            $args  Query args.
 			 */
-			$this->sql = apply_filters_ref_array( 'woocommerce_orders_table_query_sql', array( $this->sql, &$this, $this->args ) );
+			$filtered_sql = apply_filters_ref_array( 'woocommerce_orders_table_query_sql', array( $this->sql, &$this, $this->args ) );
 		}
+
+		if ( $filtered_sql === $this->sql ) {
+			// On large HPOS stores this multi-status, date-ordered query can get a slow plan (scanning millions of
+			// rows); rewriting it as a UNION of single-status queries lets the type_status_date index serve each
+			// branch. Only attempted when no 'woocommerce_orders_table_query_sql' callback changed the query. See
+			// OrdersTableStatusUnionQuery.
+			$status_union_sql = ( new OrdersTableStatusUnionQuery( $this ) )->get_sql(
+				compact( 'fields', 'join', 'where', 'groupby', 'orderby', 'limits' ),
+				$this->suppress_filters
+			);
+			$filtered_sql     = $status_union_sql ?? $this->sql;
+		}
+
+		$this->sql = $filtered_sql;
 
 		$this->build_count_query( $fields, $join, $where, $groupby );
 	}

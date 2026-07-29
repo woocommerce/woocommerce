@@ -85,6 +85,9 @@
 			"@woocommerce/block-data": [
 				"assets/js/data"
 			],
+			"@woocommerce/block-data/*": [
+				"assets/js/data/*"
+			],
 			"@woocommerce/block-hocs": [
 				"assets/js/hocs"
 			],
@@ -146,7 +149,7 @@
 				"assets/js/utils"
 			],
 			"@woocommerce/e2e-utils": [
-				"../../tests/e2e-pw/utils/blocks"
+				"../../tests/e2e/utils/blocks"
 			],
 			"@woocommerce/test-utils/msw": [
 				"tests/js/config/msw-setup"

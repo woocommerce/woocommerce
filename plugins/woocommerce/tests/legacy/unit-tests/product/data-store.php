@@ -1014,43 +1014,30 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	 * Test WC_Product_Data_Store_CPT::create_all_product_variations
 	 */
 	public function test_variable_create_all_product_variations() {
-		$product = new WC_Product_Variable();
-		$product->set_name( 'Test Variable Product' );
-
-		$attribute_1 = new WC_Product_Attribute();
-		$attribute_1->set_name( 'color' );
-		$attribute_1->set_visible( true );
-		$attribute_1->set_variation( true );
-		$attribute_1->set_options( array( 'red', 'green', 'blue' ) );
-
-		$attribute_2 = new WC_Product_Attribute();
-		$attribute_2->set_name( 'size' );
-		$attribute_2->set_visible( true );
-		$attribute_2->set_variation( true );
-		$attribute_2->set_options( array( 'small', 'medium', 'large' ) );
-
-		$attribute_3 = new WC_Product_Attribute();
-		$attribute_3->set_name( 'pattern' );
-		$attribute_3->set_visible( true );
-		$attribute_3->set_variation( true );
-		$attribute_3->set_options( array( 'striped', 'polka-dot', 'plain' ) );
-
-		$attributes = array(
-			$attribute_1,
-			$attribute_2,
-			$attribute_3,
+		$product = $this->create_variable_product_with_attributes(
+			array(
+				'color' => array( 'red', 'blue' ),
+				'size'  => array( 'small', 'large' ),
+			)
 		);
-
-		$product->set_attributes( $attributes );
-		$product_id = $product->save();
 
 		// Test all variations get linked.
 		$data_store = WC_Data_Store::load( 'product' );
-		$count      = $data_store->create_all_product_variations( wc_get_product( $product_id ) );
-		$this->assertEquals( 27, $count );
+		$count      = $data_store->create_all_product_variations( wc_get_product( $product->get_id() ) );
+		$this->assertEquals( 4, $count );
+
+		$created_combinations = array_map(
+			static function ( $variation_id ) {
+				$attributes = wc_get_product( $variation_id )->get_attributes();
+				return $attributes['color'] . ':' . $attributes['size'];
+			},
+			wc_get_product( $product->get_id() )->get_children()
+		);
+		sort( $created_combinations );
+		$this->assertSame( array( 'blue:large', 'blue:small', 'red:large', 'red:small' ), $created_combinations );
 
 		// Test duplicates are not created.
-		$count = $data_store->create_all_product_variations( wc_get_product( $product_id ) );
+		$count = $data_store->create_all_product_variations( wc_get_product( $product->get_id() ) );
 		$this->assertEquals( 0, $count );
 	}
 
@@ -1100,46 +1087,56 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	 * Test WC_Product_Data_Store_CPT::create_all_product_variations
 	 */
 	public function test_variable_create_all_product_variations_limits() {
-		$product = new WC_Product_Variable();
-		$product->set_name( 'Test Variable Product' );
-
-		$attribute_1 = new WC_Product_Attribute();
-		$attribute_1->set_name( 'color' );
-		$attribute_1->set_visible( true );
-		$attribute_1->set_variation( true );
-		$attribute_1->set_options( array( 'red', 'green', 'blue' ) );
-
-		$attribute_2 = new WC_Product_Attribute();
-		$attribute_2->set_name( 'size' );
-		$attribute_2->set_visible( true );
-		$attribute_2->set_variation( true );
-		$attribute_2->set_options( array( 'small', 'medium', 'large' ) );
-
-		$attribute_3 = new WC_Product_Attribute();
-		$attribute_3->set_name( 'pattern' );
-		$attribute_3->set_visible( true );
-		$attribute_3->set_variation( true );
-		$attribute_3->set_options( array( 'striped', 'polka-dot', 'plain' ) );
-
-		$attributes = array(
-			$attribute_1,
-			$attribute_2,
-			$attribute_3,
+		$product = $this->create_variable_product_with_attributes(
+			array(
+				'color' => array( 'red', 'blue' ),
+				'size'  => array( 'small', 'medium', 'large', 'extra-large' ),
+			)
 		);
 
-		$product->set_attributes( $attributes );
-		$product_id = $product->save();
-
-		// Test creation with a limit of 10.
+		// Test creation across multiple limited batches and a partial final batch.
 		$data_store = WC_Data_Store::load( 'product' );
-		$count      = $data_store->create_all_product_variations( wc_get_product( $product_id ), 10 );
-		$this->assertEquals( 10, $count );
+		$count      = $data_store->create_all_product_variations( wc_get_product( $product->get_id() ), 3 );
+		$this->assertEquals( 3, $count );
+		$this->assertCount( 3, wc_get_product( $product->get_id() )->get_children() );
 
-		$count = $data_store->create_all_product_variations( wc_get_product( $product_id ), 10 );
-		$this->assertEquals( 10, $count );
+		$count = $data_store->create_all_product_variations( wc_get_product( $product->get_id() ), 3 );
+		$this->assertEquals( 3, $count );
+		$this->assertCount( 6, wc_get_product( $product->get_id() )->get_children() );
 
-		$count = $data_store->create_all_product_variations( wc_get_product( $product_id ), 10 );
-		$this->assertEquals( 7, $count );
+		$count = $data_store->create_all_product_variations( wc_get_product( $product->get_id() ), 3 );
+		$this->assertEquals( 2, $count );
+		$this->assertCount( 8, wc_get_product( $product->get_id() )->get_children() );
+
+		$count = $data_store->create_all_product_variations( wc_get_product( $product->get_id() ), 3 );
+		$this->assertEquals( 0, $count );
+		$this->assertCount( 8, wc_get_product( $product->get_id() )->get_children() );
+	}
+
+	/**
+	 * Create a variable product with local variation attributes.
+	 *
+	 * @param array $attribute_options Attribute names mapped to option lists.
+	 * @return WC_Product_Variable
+	 */
+	private function create_variable_product_with_attributes( array $attribute_options ) {
+		$attributes = array();
+
+		foreach ( $attribute_options as $name => $options ) {
+			$attribute = new WC_Product_Attribute();
+			$attribute->set_name( $name );
+			$attribute->set_visible( true );
+			$attribute->set_variation( true );
+			$attribute->set_options( $options );
+			$attributes[] = $attribute;
+		}
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Test Variable Product' );
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		return $product;
 	}
 
 	/**

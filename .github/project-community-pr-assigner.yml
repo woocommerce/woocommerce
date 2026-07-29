@@ -1,19 +1,22 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
+#
+# nerrad is the interim reviewer for the paths formerly owned by the flux team
+# (removed), pending a replacement team.
 
 "*":
-  - team: flux
+  - nerrad
 
 ".github/**/*":
-  - team: flux
+  - nerrad
 
 "bin/*":
-  - team: flux
+  - nerrad
 
 "docs/**/*":
   - team: developer-advocacy
 
 "packages/js/api/**/*":
-  - team: flux
+  - nerrad
 
 "packages/js/components/**/*":
   - team: woo-fse
@@ -34,10 +37,10 @@
   - team: rubik
 
 "packages/js/dependency-extraction-webpack-plugin/**/*":
-  - team: flux
+  - nerrad
 
 "packages/js/eslint-plugin/**/*":
-  - team: flux
+  - nerrad
 
 "packages/js/experimental/**/*":
   - team: woo-fse
@@ -55,7 +58,7 @@
   - team: rubik
 
 "packages/js/tracks/**/*":
-  - team: flux
+  - nerrad
 
 "packages/js/email-editor/**/*":
   - team: ballade
@@ -64,7 +67,7 @@
   - team: ballade
 
 "plugins/woocommerce/**/*":
-  - team: flux
+  - nerrad
 
 "plugins/woocommerce/templates/**/*":
   - team: rubik
@@ -95,7 +98,7 @@
   - team: woo-fse
 
 "plugins/woocommerce-beta-tester/**/*":
-  - team: flux
+  - nerrad
 
 "plugins/woocommerce/src/Internal/EmailEditor/**/*":
   - team: ballade
@@ -104,10 +107,10 @@
   - team: ballade
 
 "tools/**/*":
-  - team: flux
+  - nerrad
 
 '**/composer.json':
-  - team: flux
+  - nerrad
 
 '**/package.json':
-  - team: flux
+  - nerrad

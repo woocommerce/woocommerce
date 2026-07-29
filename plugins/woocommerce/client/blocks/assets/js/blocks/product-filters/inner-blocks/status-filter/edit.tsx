@@ -30,7 +30,7 @@ const Edit = ( props: EditProps ) => {
 					'core/heading',
 					{
 						level: 3,
-						content: __( 'Status', 'woocommerce' ),
+						content: __( 'Availability', 'woocommerce' ),
 						style: {
 							spacing: {
 								margin: {

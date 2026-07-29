@@ -41,7 +41,7 @@ describe( 'saveSelectedProducts', () => {
 			tags: [],
 			images: [],
 			...overrides,
-		} as unknown as ProductEntityRecord );
+		} ) as unknown as ProductEntityRecord;
 
 	const buildVariation = (
 		overrides: Partial< ProductEntityRecord > = {}

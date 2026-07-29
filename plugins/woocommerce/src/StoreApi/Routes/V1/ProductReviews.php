@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use WP_Comment_Query;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
 
 /**
@@ -73,6 +74,8 @@ class ProductReviews extends AbstractRoute {
 			'order'         => $request['order'],
 			'number'        => $request['per_page'],
 			'post__in'      => $request['product_id'],
+			// Exclude reviews of non-published products.
+			'post_status'   => ProductStatus::PUBLISH,
 		);
 
 		/**
