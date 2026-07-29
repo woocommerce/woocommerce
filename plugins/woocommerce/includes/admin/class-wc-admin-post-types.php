@@ -450,37 +450,54 @@ class WC_Admin_Post_Types {
 		$product->set_featured( isset( $request_data['_featured'] ) );
 
 		if ( $product->is_type( ProductType::SIMPLE ) || $product->is_type( ProductType::EXTERNAL ) ) {
-			// The Quick Edit form is prefilled with view-context (filtered) prices, so detecting
-			// an actual edit requires comparing the submission against those same values.
-			$old_regular_price = $this->normalize_price_for_comparison( $product->get_regular_price() );
-			$old_sale_price    = $this->normalize_price_for_comparison( $product->get_sale_price() );
 
 			if ( isset( $request_data['_regular_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-				$new_regular_price = ( '' === $request_data['_regular_price'] ) ? '' : wc_format_decimal( $request_data['_regular_price'] );
-				$product->set_regular_price( $new_regular_price );
+				$regular_price = ( '' === $request_data['_regular_price'] ) ? '' : wc_format_decimal( $request_data['_regular_price'] );
+				$product->set_regular_price( $regular_price );
 			}
 
 			if ( isset( $request_data['_sale_price'] ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-				$new_sale_price = ( '' === $request_data['_sale_price'] ) ? '' : wc_format_decimal( $request_data['_sale_price'] );
-				$product->set_sale_price( $new_sale_price );
+				$sale_price = ( '' === $request_data['_sale_price'] ) ? '' : wc_format_decimal( $request_data['_sale_price'] );
+				$product->set_sale_price( $sale_price );
 			}
 
-			$regular_price = $product->get_regular_price( 'edit' );
-			$sale_price    = $product->get_sale_price( 'edit' );
+			// Match the full product editor's date parsing and site-timezone behavior.
+			if ( isset( $request_data['_sale_price_dates_from'] ) ) {
+				$date_on_sale_from = '';
+				if ( is_string( $request_data['_sale_price_dates_from'] ) ) {
+					/**
+					 * Sanitized sale start date.
+					 *
+					 * @var string $date_on_sale_from
+					 */
+					$date_on_sale_from = wc_clean( wp_unslash( $request_data['_sale_price_dates_from'] ) );
+				}
 
-			// Only a submitted field can be a changed field.
-			$regular_price_changed = isset( $request_data['_regular_price'] ) && $this->normalize_price_for_comparison( $regular_price ) !== $old_regular_price;
-			$sale_price_changed    = isset( $request_data['_sale_price'] ) && $this->normalize_price_for_comparison( $sale_price ) !== $old_sale_price;
+				if ( ! empty( $date_on_sale_from ) ) {
+					$date_on_sale_from = date( 'Y-m-d 00:00:00', (int) strtotime( $date_on_sale_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+				}
 
-			$price_changed  = $regular_price_changed || $sale_price_changed;
-			$sale_date_to   = $product->get_date_on_sale_to( 'edit' );
-			$sale_has_ended = $sale_date_to && $sale_date_to->getTimestamp() < time();
+				$product->set_date_on_sale_from( $date_on_sale_from );
+			}
 
-			if ( $price_changed && ( '' === $sale_price || $sale_price >= $regular_price || $sale_has_ended ) ) {
-				$product->set_date_on_sale_to( '' );
-				$product->set_date_on_sale_from( '' );
+			if ( isset( $request_data['_sale_price_dates_to'] ) ) {
+				$date_on_sale_to = '';
+				if ( is_string( $request_data['_sale_price_dates_to'] ) ) {
+					/**
+					 * Sanitized sale end date.
+					 *
+					 * @var string $date_on_sale_to
+					 */
+					$date_on_sale_to = wc_clean( wp_unslash( $request_data['_sale_price_dates_to'] ) );
+				}
+
+				if ( ! empty( $date_on_sale_to ) ) {
+					$date_on_sale_to = date( 'Y-m-d 23:59:59', (int) strtotime( $date_on_sale_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+				}
+
+				$product->set_date_on_sale_to( $date_on_sale_to );
 			}
 		}
 
@@ -522,20 +539,6 @@ class WC_Admin_Post_Types {
 		$product->save();
 
 		do_action( 'woocommerce_product_quick_edit_save', $product );
-	}
-
-	/**
-	 * Normalize a price value for change detection during Quick Edit.
-	 *
-	 * View-context prices pass through the woocommerce_product_get_regular_price and
-	 * woocommerce_product_get_sale_price filters, which may return non-scalar values
-	 * or differently formatted numbers.
-	 *
-	 * @param mixed $price Raw price value.
-	 * @return string Normalized price string.
-	 */
-	private function normalize_price_for_comparison( $price ): string {
-		return wc_format_decimal( is_scalar( $price ) ? (string) $price : '', false, true );
 	}
 
 	/**
