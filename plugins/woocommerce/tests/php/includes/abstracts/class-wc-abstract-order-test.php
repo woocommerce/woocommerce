@@ -695,7 +695,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->add_item( $make_fee( 'Fresh B' ) );
 		$order->save();
 
-		$names = wp_list_pluck( wc_get_order( $order->get_id() )->get_items( 'fee' ), 'name' );
+		$names = array_map( fn( $item ) => $item->get_name(), wc_get_order( $order->get_id() )->get_items( 'fee' ) );
 		$this->assertContains( 'Fresh A', $names, 'Earlier unsaved fee must survive a later add_item().' );
 		$this->assertContains( 'Fresh B', $names );
 		$this->assertCount( 2, $names );

@@ -98,7 +98,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * first (it is then lost on save()). A never-reused counter guarantees a
 	 * unique key for every unsaved item for the lifetime of the object.
 	 *
-	 * @since 10.9.0
+	 * @since 11.1.0
 	 * @var int
 	 */
 	protected $temp_item_id_counter = 0;
