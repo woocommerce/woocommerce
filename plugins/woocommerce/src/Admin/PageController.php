@@ -204,7 +204,7 @@ class PageController {
 		}
 
 		$this->current_page                        = $matching_page;
-		$this->current_page_is_route_pattern_match = false !== $matching_page && $this->registered_path_has_route_pattern( $matching_page['path'] ?? null );
+		$this->current_page_is_route_pattern_match = false !== $matching_page && $this->registered_path_has_route_pattern( $matching_page['path'] );
 	}
 
 	/**
@@ -286,14 +286,13 @@ class PageController {
 	/**
 	 * Whether a registered path contains a supported route pattern.
 	 *
-	 * @param mixed $registered_path Registered page path.
+	 * Callers are responsible for rejecting non-string paths, which a page options filter can
+	 * produce; both call sites already do so before reaching here.
+	 *
+	 * @param string $registered_path Registered page path.
 	 * @return bool
 	 */
 	private function registered_path_has_route_pattern( $registered_path ) {
-		if ( ! is_string( $registered_path ) ) {
-			return false;
-		}
-
 		$path_parts = $this->split_registered_page_path( $registered_path );
 
 		// The first alternative recognizes a complete `:param` segment at the path start or after a slash.
