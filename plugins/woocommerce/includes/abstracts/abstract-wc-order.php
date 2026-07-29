@@ -2089,8 +2089,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax->set_label( WC_Tax::get_rate_label( $tax_rate_object_or_id ) );
 			$tax->set_compound( WC_Tax::is_compound( $tax_rate_object_or_id ) );
 			$tax->set_rate_percent( WC_Tax::get_rate_percent_value( $tax_rate_object_or_id ) );
-			$tax->set_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 );
-			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
+			$tax->set_tax_total( wc_round_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 ) );
+			$tax->set_shipping_tax_total( wc_round_tax_total( $shipping_taxes[ $tax_rate_id ] ?? 0 ) );
 
 			$saved_rate_ids[] = $tax_rate_id;
 			$tax->save();
@@ -2108,15 +2108,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$item->set_label( WC_Tax::get_rate_label( $tax_rate_object_or_id ) );
 			$item->set_compound( WC_Tax::is_compound( $tax_rate_object_or_id ) );
 			$item->set_rate_percent( WC_Tax::get_rate_percent_value( $tax_rate_object_or_id ) );
-			$item->set_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 );
-			$item->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
+			$item->set_tax_total( wc_round_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 ) );
+			$item->set_shipping_tax_total( wc_round_tax_total( $shipping_taxes[ $tax_rate_id ] ?? 0 ) );
 
 			$this->add_item( $item );
 		}
 
 		// Final rounding mirrors WC_Cart_Totals::calculate_totals() so order tax matches the value shown at checkout when per-rate sums land on a 0.5 boundary.
-		$this->set_shipping_tax( (string) NumberUtil::round( array_sum( $shipping_taxes ), wc_get_price_decimals() ) );
-		$this->set_cart_tax( (string) NumberUtil::round( array_sum( $cart_taxes ), wc_get_price_decimals() ) );
+		// Uses wc_round_tax_total() so the rounding mode (WC_TAX_ROUNDING_MODE, set from woocommerce_prices_include_tax) and the public 'wc_round_tax_total' filter are honored — matching the rest of update_taxes() and WC_Cart_Totals.
+		$this->set_shipping_tax( wc_round_tax_total( array_sum( $shipping_taxes ) ) );
+		$this->set_cart_tax( wc_round_tax_total( array_sum( $cart_taxes ) ) );
 		$this->save();
 	}
 
