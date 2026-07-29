@@ -55,6 +55,23 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	);
 
 	/**
+	 * The updated coupon properties.
+	 *
+	 * No longer written to. Each save now records its updated properties in a local
+	 * variable and passes them straight to woocommerce_coupon_object_updated_props,
+	 * so this property stays empty. Read the hook's second argument instead.
+	 *
+	 * Kept declared so that a subclass still reading it gets an array rather than
+	 * null: on PHP 8, `in_array( ..., $this->updated_props )` and
+	 * `count( $this->updated_props )` throw a TypeError when handed null.
+	 *
+	 * @since 4.1.0
+	 * @deprecated 11.1.0 Use the second argument of woocommerce_coupon_object_updated_props.
+	 * @var array
+	 */
+	protected $updated_props = array();
+
+	/**
 	 * Method to create a new coupon in the database.
 	 *
 	 * @since 3.0.0
