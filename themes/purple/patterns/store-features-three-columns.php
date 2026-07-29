@@ -15,7 +15,7 @@
 <div class="wp-block-column" style="padding-right:var(--wp--preset--spacing--70);padding-left:var(--wp--preset--spacing--70);flex-basis:33%"><!-- wp:group {"style":{"spacing":{"padding":{"right":"0","left":"0"},"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","verticalAlignment":"center"}} -->
 <div class="wp-block-group" style="padding-right:0;padding-left:0"><!-- wp:group {"style":{"border":{"radius":"999px","width":"1px"},"spacing":{"margin":{"bottom":"var:preset|spacing|10"}}},"borderColor":"theme-6","layout":{"type":"default"}} -->
 <div class="wp-block-group has-border-color has-theme-6-border-color" style="border-radius:999px;border-width:1px;margin-bottom:var(--wp--preset--spacing--10)"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-truck.svg","width":"32px","sizeSlug":"full","linkDestination":"none","style":{"color":{"duotone":"var:preset|duotone|duotone-1"}}} -->
-<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-truck.svg" alt="<?php esc_attr_e( 'Truck icon', 'purple' ); ?>" style="width:32px"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-truck.svg" alt="" style="width:32px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group -->
 
@@ -35,7 +35,7 @@
 <div class="wp-block-column" style="padding-right:var(--wp--preset--spacing--70);padding-left:var(--wp--preset--spacing--70);flex-basis:33%"><!-- wp:group {"style":{"spacing":{"padding":{"right":"0","left":"0"},"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","verticalAlignment":"center"}} -->
 <div class="wp-block-group" style="padding-right:0;padding-left:0"><!-- wp:group {"style":{"border":{"radius":"999px","width":"1px"},"spacing":{"margin":{"bottom":"var:preset|spacing|10"}}},"borderColor":"theme-6","layout":{"type":"default"}} -->
 <div class="wp-block-group has-border-color has-theme-6-border-color" style="border-radius:999px;border-width:1px;margin-bottom:var(--wp--preset--spacing--10)"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-gift.svg","width":"32px","sizeSlug":"full","linkDestination":"none","style":{"color":{"duotone":"var:preset|duotone|duotone-1"}}} -->
-<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-gift.svg" alt="<?php esc_attr_e( 'Gift icon', 'purple' ); ?>" style="width:32px"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-gift.svg" alt="" style="width:32px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group -->
 
@@ -55,7 +55,7 @@
 <div class="wp-block-column" style="padding-right:var(--wp--preset--spacing--70);padding-left:var(--wp--preset--spacing--70);flex-basis:33%"><!-- wp:group {"style":{"spacing":{"padding":{"right":"0","left":"0"},"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","orientation":"vertical","verticalAlignment":"center","justifyContent":"center"}} -->
 <div class="wp-block-group" style="padding-right:0;padding-left:0"><!-- wp:group {"style":{"border":{"radius":"999px","width":"1px"},"spacing":{"margin":{"bottom":"var:preset|spacing|10"}}},"borderColor":"theme-6","layout":{"type":"default"}} -->
 <div class="wp-block-group has-border-color has-theme-6-border-color" style="border-radius:999px;border-width:1px;margin-bottom:var(--wp--preset--spacing--10)"><!-- wp:image {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-return.svg","width":"32px","sizeSlug":"full","linkDestination":"none","style":{"color":{"duotone":"var:preset|duotone|duotone-1"}}} -->
-<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-return.svg" alt="<?php esc_attr_e( 'Return icon', 'purple' ); ?>" style="width:32px"/></figure>
+<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/icon-return.svg" alt="" style="width:32px"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:group -->
 
