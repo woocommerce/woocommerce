@@ -23,8 +23,8 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:group {"align":"wide","style":{"spacing":{"blockGap":"var:preset|spacing|50","margin":{"top":"var:preset|spacing|70"}}},"layout":{"type":"grid","minimumColumnWidth":"18rem"}} -->
-<div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--70)"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pink-sweater-man-1.webp","alt":"<?php esc_attr_e('Model in a bright pink knit sweater.', 'purple');?>","dimRatio":40,"overlayColor":"theme-2","isUserOverlayColor":true,"focalPoint":{"x":0.71999999999999997,"y":0.55000000000000004},"isDark":false,"sizeSlug":"full","style":{"layout":{"columnSpan":2,"rowSpan":2},"dimensions":{"aspectRatio":"auto"}}} -->
-<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background  size-full" alt="<?php esc_attr_e('Model in a bright pink knit sweater.', 'purple');?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pink-sweater-man-1.webp" style="object-position:72% 55%" data-object-fit="cover" data-object-position="72% 55%"/><span aria-hidden="true" class="wp-block-cover__background has-theme-2-background-color has-background-dim-40 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:heading {"style":{"typography":{"textAlign":"center"}},"fontSize":"xx-large"} -->
+<div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--70)"><!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pink-sweater-man-1.webp","alt":"<?php esc_attr_e('Model in a bright pink knit sweater.', 'purple');?>","dimRatio":20,"isUserOverlayColor":true,"focalPoint":{"x":0.71999999999999997,"y":0.55000000000000004},"sizeSlug":"full","style":{"layout":{"columnSpan":2,"rowSpan":2},"dimensions":{"aspectRatio":"auto"}}} -->
+<div class="wp-block-cover"><img class="wp-block-cover__image-background  size-full" alt="<?php esc_attr_e('Model in a bright pink knit sweater.', 'purple');?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/pink-sweater-man-1.webp" style="object-position:72% 55%" data-object-fit="cover" data-object-position="72% 55%"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-20 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:heading {"style":{"typography":{"textAlign":"center"}},"fontSize":"xx-large"} -->
 <h2 class="wp-block-heading has-text-align-center has-xx-large-font-size"><?php esc_html_e('Cardigans', 'purple');?></h2>
 <!-- /wp:heading -->
 
@@ -39,8 +39,8 @@
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover -->
 
-<!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/green-sweater-hands.webp","alt":"<?php esc_attr_e('Hands touching a soft green knit sweater sleeve.', 'purple');?>","dimRatio":40,"overlayColor":"theme-2","isUserOverlayColor":true,"minHeightUnit":"px","sizeSlug":"large","style":{"layout":{"columnSpan":2,"rowSpan":1}}} -->
-<div class="wp-block-cover"><img class="wp-block-cover__image-background  size-large" alt="<?php esc_attr_e('Hands touching a soft green knit sweater sleeve.', 'purple');?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/green-sweater-hands.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-theme-2-background-color has-background-dim-40 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:heading {"style":{"typography":{"textAlign":"center"}}} -->
+<!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/green-sweater-hands.webp","alt":"<?php esc_attr_e('Hands touching a soft green knit sweater sleeve.', 'purple');?>","dimRatio":20,"isUserOverlayColor":true,"minHeightUnit":"px","sizeSlug":"large","style":{"layout":{"columnSpan":2,"rowSpan":1}}} -->
+<div class="wp-block-cover"><img class="wp-block-cover__image-background  size-large" alt="<?php esc_attr_e('Hands touching a soft green knit sweater sleeve.', 'purple');?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/green-sweater-hands.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-20 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:heading {"style":{"typography":{"textAlign":"center"}}} -->
 <h2 class="wp-block-heading has-text-align-center"><?php esc_html_e('Sweaters', 'purple');?></h2>
 <!-- /wp:heading -->
 
@@ -55,8 +55,8 @@
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover -->
 
-<!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/product-socks-gray-purple-theme-2.webp","alt":"<?php esc_attr_e('Close-up of the toes of gray cable-knit socks.', 'purple');?>","dimRatio":40,"overlayColor":"theme-2","isUserOverlayColor":true,"minHeightUnit":"px","isDark":false,"sizeSlug":"large","style":{"layout":{"columnSpan":1,"rowSpan":1}}} -->
-<div class="wp-block-cover is-light"><img class="wp-block-cover__image-background  size-large" alt="<?php esc_attr_e('Close-up of the toes of gray cable-knit socks.', 'purple');?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/product-socks-gray-purple-theme-2.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-theme-2-background-color has-background-dim-40 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:heading {"style":{"typography":{"textAlign":"center"}}} -->
+<!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/product-socks-gray-purple-theme-2.webp","alt":"<?php esc_attr_e('Close-up of the toes of gray cable-knit socks.', 'purple');?>","dimRatio":20,"isUserOverlayColor":true,"minHeightUnit":"px","sizeSlug":"large","style":{"layout":{"columnSpan":1,"rowSpan":1}}} -->
+<div class="wp-block-cover"><img class="wp-block-cover__image-background  size-large" alt="<?php esc_attr_e('Close-up of the toes of gray cable-knit socks.', 'purple');?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/product-socks-gray-purple-theme-2.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-20 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:heading {"style":{"typography":{"textAlign":"center"}}} -->
 <h2 class="wp-block-heading has-text-align-center"><?php esc_html_e('Socks', 'purple');?></h2>
 <!-- /wp:heading -->
 
@@ -71,8 +71,8 @@
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover -->
 
-<!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/product-beanie-lavander-purple-theme-3.webp","alt":"<?php esc_attr_e('Close-up of the ribbed knit texture of a lavender beanie.', 'purple');?>","dimRatio":40,"overlayColor":"theme-2","isUserOverlayColor":true,"sizeSlug":"large","style":{"layout":{"columnSpan":1,"rowSpan":1}}} -->
-<div class="wp-block-cover"><img class="wp-block-cover__image-background  size-large" alt="<?php esc_attr_e('Close-up of the ribbed knit texture of a lavender beanie.', 'purple');?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/product-beanie-lavander-purple-theme-3.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-theme-2-background-color has-background-dim-40 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:heading {"style":{"typography":{"textAlign":"center"}}} -->
+<!-- wp:cover {"url":"<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/product-beanie-lavander-purple-theme-3.webp","alt":"<?php esc_attr_e('Close-up of the ribbed knit texture of a lavender beanie.', 'purple');?>","dimRatio":20,"isUserOverlayColor":true,"sizeSlug":"large","style":{"layout":{"columnSpan":1,"rowSpan":1}}} -->
+<div class="wp-block-cover"><img class="wp-block-cover__image-background  size-large" alt="<?php esc_attr_e('Close-up of the ribbed knit texture of a lavender beanie.', 'purple');?>" src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/product-beanie-lavander-purple-theme-3.webp" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim-20 has-background-dim"></span><div class="wp-block-cover__inner-container"><!-- wp:heading {"style":{"typography":{"textAlign":"center"}}} -->
 <h2 class="wp-block-heading has-text-align-center"><?php esc_html_e('Beanies', 'purple');?></h2>
 <!-- /wp:heading -->
 

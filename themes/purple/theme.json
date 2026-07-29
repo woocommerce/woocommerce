@@ -265,18 +265,15 @@
 				}
 			},
 			"core/cover": {
-				"color": {
-					"text": "var(--wp--preset--color--theme-1)"
-				},
 				"elements": {
 					"heading": {
 						"color": {
-							"text": "var(--wp--preset--color--theme-1)"
+							"text": "inherit"
 						}
 					},
 					"link": {
 						"color": {
-							"text": "var(--wp--preset--color--theme-1)"
+							"text": "inherit"
 						}
 					}
 				}
