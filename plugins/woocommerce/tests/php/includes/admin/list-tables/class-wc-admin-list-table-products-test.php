@@ -153,13 +153,13 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	 * @return array
 	 */
 	private function query_product_ids_for_stock_status( $stock_status, $additional_filter = null ) {
-		$list_table   = ( new ReflectionClass( WC_Admin_List_Table_Products::class ) )->newInstanceWithoutConstructor();
+		$sut          = ( new ReflectionClass( WC_Admin_List_Table_Products::class ) )->newInstanceWithoutConstructor();
 		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
 
 		$_GET['stock_status'] = $stock_status;
-		add_filter( 'posts_clauses', array( $list_table, 'filter_stock_status_post_clauses' ) );
+		add_filter( 'posts_clauses', array( $sut, 'filter_stock_status_post_clauses' ) );
 		if ( $additional_filter ) {
-			add_filter( 'posts_clauses', array( $list_table, $additional_filter ) );
+			add_filter( 'posts_clauses', array( $sut, $additional_filter ) );
 		}
 
 		try {
@@ -176,9 +176,9 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 
 			return array_map( 'intval', $query->posts );
 		} finally {
-			remove_filter( 'posts_clauses', array( $list_table, 'filter_stock_status_post_clauses' ) );
+			remove_filter( 'posts_clauses', array( $sut, 'filter_stock_status_post_clauses' ) );
 			if ( $additional_filter ) {
-				remove_filter( 'posts_clauses', array( $list_table, $additional_filter ) );
+				remove_filter( 'posts_clauses', array( $sut, $additional_filter ) );
 			}
 			$_GET = $original_get;
 		}
