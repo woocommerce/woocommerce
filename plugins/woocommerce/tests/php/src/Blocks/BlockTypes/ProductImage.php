@@ -350,6 +350,51 @@ class ProductImage extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should reduce srcset width descriptors for wide images in portrait aspect ratios.
+	 */
+	public function test_product_image_render_adjusts_srcset_for_portrait_aspect_ratio() {
+		$data = $this->create_product_with_image();
+
+		wp_update_attachment_metadata(
+			$data['image_id'],
+			array(
+				'width'  => 2000,
+				'height' => 1000,
+				'file'   => 'wide-image.jpg',
+				'sizes'  => array(
+					'large' => array(
+						'file'      => 'wide-image.jpg',
+						'width'     => 2000,
+						'height'    => 1000,
+						'mime-type' => 'image/jpeg',
+					),
+				),
+			)
+		);
+		update_post_meta( $data['image_id'], '_wp_attached_file', 'wide-image.jpg' );
+
+		$default_markup  = $this->render_product_image_block( $data['product'], '{"imageSizing":"single"}' );
+		$portrait_markup = $this->render_product_image_block( $data['product'], '{"aspectRatio":"3/4"}' );
+
+		preg_match( '/srcset="([^"]+)"/', $default_markup, $default_srcset );
+		preg_match( '/srcset="([^"]+)"/', $portrait_markup, $portrait_srcset );
+
+		$this->assertNotEmpty( $default_srcset[1] );
+		$this->assertNotEmpty( $portrait_srcset[1] );
+
+		preg_match_all( '/(\d+)w/', $default_srcset[1], $default_widths );
+		preg_match_all( '/(\d+)w/', $portrait_srcset[1], $portrait_widths );
+
+		$this->assertLessThan(
+			max( array_map( 'intval', $default_widths[1] ) ),
+			max( array_map( 'intval', $portrait_widths[1] ) )
+		);
+
+		$data['product']->delete( true );
+		wp_delete_attachment( $data['image_id'], true );
+	}
+
+	/**
 	 * Test that the ProductImage block handles invalid product IDs correctly.
 	 */
 	public function test_product_image_render_with_invalid_product() {
