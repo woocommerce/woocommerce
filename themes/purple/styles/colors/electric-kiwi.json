@@ -58,6 +58,59 @@
 			]
 		}
 	},
+	"styles": {
+		"blocks": {
+			"core/column": {
+				"variations": {
+					"section-2": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						}
+					},
+					"section-3": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						}
+					}
+				}
+			},
+			"core/columns": {
+				"variations": {
+					"section-2": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						}
+					},
+					"section-3": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						}
+					}
+				}
+			},
+			"core/group": {
+				"variations": {
+					"section-2": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						}
+					},
+					"section-3": {
+						"color": {
+							"text": "var(--wp--preset--color--theme-2)"
+						}
+					}
+				}
+			}
+		},
+		"elements": {
+			"button": {
+				"color": {
+					"text": "var(--wp--preset--color--theme-2)"
+				}
+			}
+		}
+	},
 	"version": 3,
 	"title": "Electric Kiwi"
 }
