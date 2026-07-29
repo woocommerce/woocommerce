@@ -16,10 +16,25 @@ use WorDBless\BaseTestCase;
 class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 
 	/**
+	 * Snapshot of $_SERVER taken in set_up(), restored in tear_down().
+	 *
+	 * Several tests mutate REQUEST_METHOD/REQUEST_URI to exercise
+	 * is_proxy_tracking_request(). Restoring the full array — rather than
+	 * unset()-ing the specific keys a test touched — puts back whatever the
+	 * WordPress bootstrap actually populated (e.g. REQUEST_URI defaults to
+	 * '', not "absent"), and does so from tear_down() so a failed assertion
+	 * mid-test cannot skip cleanup and leak state into the next test.
+	 *
+	 * @var array
+	 */
+	private $server_snapshot = array();
+
+	/**
 	 * Clear the memoized reserved-name list before each test.
 	 */
 	public function set_up(): void {
 		parent::set_up();
+		$this->server_snapshot = $_SERVER;
 		$this->reset_reserved_property_names();
 		$this->reset_pixel_batch_queue();
 	}
@@ -28,6 +43,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	 * Clear the memoized reserved-name list after each test.
 	 */
 	public function tear_down(): void {
+		$_SERVER = $this->server_snapshot;
 		$this->reset_reserved_property_names();
 		$this->reset_pixel_batch_queue();
 		parent::tear_down();
@@ -288,7 +304,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		$this->assertNotSame( 'someone-elses-store', $props['store_id'] ?? null );
 
 		$this->reset_pixel_batch_queue();
-		unset( $_COOKIE['tk_ai'], $_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'] );
+		unset( $_COOKIE['tk_ai'] );
 	}
 
 	/**
@@ -317,7 +333,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		$this->assertSame( 'set-by-trusted-caller', $props['store_id'] ?? null );
 
 		$this->reset_pixel_batch_queue();
-		unset( $_COOKIE['tk_ai'], $_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'] );
+		unset( $_COOKIE['tk_ai'] );
 	}
 
 	/**
@@ -347,8 +363,6 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		$_SERVER['REQUEST_URI']    = $uri;
 
 		$this->assertTrue( WC_Analytics_Tracking::is_proxy_tracking_request(), $uri );
-
-		unset( $_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'] );
 	}
 
 	/**
