@@ -45,6 +45,7 @@ function ProductTypeSwitcher() {
 export default function ProductTypeSelectorPlugin() {
 	const { slug, type } = useSelect( ( select ) => {
 		const editorStore = select( 'core/editor' );
+		// The widget editor does not load wp-editor, so the core/editor store may be unavailable.
 		if ( ! editorStore ) {
 			return {
 				slug: '',
