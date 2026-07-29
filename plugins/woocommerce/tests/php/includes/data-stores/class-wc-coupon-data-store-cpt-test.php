@@ -227,4 +227,57 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'A nested metadata-hook save must not erase or contaminate the outer save\'s props.'
 		);
 	}
+
+	/**
+	 * @testdox Should populate the deprecated updated-props property only for the duration of the hook.
+	 */
+	public function test_deprecated_updated_props_property_mirrors_the_current_save(): void {
+		$store = new class() extends WC_Coupon_Data_Store_CPT {
+			/**
+			 * Expose the deprecated updated-props state that a subclass may still read.
+			 *
+			 * @return array
+			 */
+			public function get_updated_props(): array {
+				return $this->updated_props;
+			}
+		};
+
+		// Returning an object shares one store instance across every coupon in this test.
+		$store_filter = function () use ( $store ) {
+			return $store;
+		};
+		add_filter( 'woocommerce_coupon_data_store', $store_filter );
+
+		$observed_during_hook = null;
+
+		try {
+			$coupon = $this->create_settled_coupon();
+
+			add_action(
+				'woocommerce_coupon_object_updated_props',
+				function () use ( $store, &$observed_during_hook ) {
+					$observed_during_hook = $store->get_updated_props();
+				},
+				10,
+				2
+			);
+
+			$coupon->set_amount( 5 );
+			$coupon->save();
+		} finally {
+			remove_filter( 'woocommerce_coupon_data_store', $store_filter );
+		}
+
+		$this->assertSame(
+			array( 'amount' ),
+			$observed_during_hook,
+			'A subclass reading the deprecated property during the hook should see the current save\'s props.'
+		);
+		$this->assertSame(
+			array(),
+			$store->get_updated_props(),
+			'The deprecated property must be emptied after the hook so no props carry over to the next save.'
+		);
+	}
 }

@@ -57,13 +57,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	/**
 	 * The updated coupon properties.
 	 *
-	 * No longer written to. Each save now records its updated properties in a local
-	 * variable and passes them straight to woocommerce_coupon_object_updated_props,
-	 * so this property stays empty. Read the hook's second argument instead.
-	 *
-	 * Kept declared so that a subclass still reading it gets an array rather than
-	 * null: on PHP 8, `in_array( ..., $this->updated_props )` and
-	 * `count( $this->updated_props )` throw a TypeError when handed null.
+	 * Each save now records its updated properties in a local variable, so this
+	 * property no longer accumulates across saves. It is populated with the current
+	 * save's properties only for the duration of the
+	 * woocommerce_coupon_object_updated_props call, and emptied again afterwards, so
+	 * that code still reading it during that hook keeps working. Read the hook's
+	 * second argument instead.
 	 *
 	 * @since 4.1.0
 	 * @deprecated 11.1.0 Use the second argument of woocommerce_coupon_object_updated_props.
@@ -327,6 +326,11 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			}
 		}
 
+		// Mirror the payload onto the deprecated property so that code still reading it
+		// during the hook sees this save's properties, then empty it again so nothing
+		// carries over to the next save.
+		$this->updated_props = $updated_props;
+
 		/**
 		 * Fires after a coupon's properties have been updated.
 		 *
@@ -336,6 +340,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		 * @since 3.0.0
 		 */
 		do_action( 'woocommerce_coupon_object_updated_props', $coupon, $updated_props );
+
+		$this->updated_props = array();
 	}
 
 	/**
