@@ -42,17 +42,17 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product archive registration uses runtime support unless the active theme may be skipped.
+	 * @testdox Product archive registration uses runtime support unless WP-CLI skipped the active theme.
 	 * @dataProvider provide_product_archive_theme_support_cases
 	 *
-	 * @param bool   $runtime_support     Whether the current request reports theme support.
-	 * @param bool   $theme_may_be_skipped Whether the request may not have loaded the active theme.
-	 * @param string $stored_support      Stored support from the last trusted request.
-	 * @param bool   $expected             Expected resolved support.
+	 * @param bool   $runtime_support      Whether the current request reports theme support.
+	 * @param bool   $active_theme_skipped Whether WP-CLI skipped the active theme.
+	 * @param string $stored_support       Stored support from the last trusted request.
+	 * @param bool   $expected              Expected resolved support.
 	 */
 	public function test_should_register_product_archive(
 		bool $runtime_support,
-		bool $theme_may_be_skipped,
+		bool $active_theme_skipped,
 		string $stored_support,
 		bool $expected
 	): void {
@@ -63,8 +63,8 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			$expected,
-			$method->invoke( null, $runtime_support, $theme_may_be_skipped ),
-			'Product archive support should only fall back to trusted stored support when the theme may be absent.'
+			$method->invoke( null, $runtime_support, $active_theme_skipped ),
+			'Product archive support should only fall back to trusted stored support when WP-CLI skipped the active theme.'
 		);
 	}
 
@@ -75,11 +75,11 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	 */
 	public function provide_product_archive_theme_support_cases(): array {
 		return array(
-			'loaded supported theme'                => array( true, false, 'no', true ),
-			'loaded unsupported theme'              => array( false, false, 'yes', false ),
-			'skipped previously supported theme'    => array( false, true, 'yes', true ),
-			'skipped previously unsupported theme'  => array( false, true, 'no', false ),
-			'supported theme in unreliable context' => array( true, true, 'no', true ),
+			'supported runtime'                    => array( true, false, 'no', true ),
+			'ordinary cron ignores stored support' => array( false, false, 'yes', false ),
+			'WP-CLI skipped supported theme'       => array( false, true, 'yes', true ),
+			'WP-CLI skipped unsupported theme'     => array( false, true, 'no', false ),
+			'supported WP-CLI runtime'             => array( true, true, 'no', true ),
 		);
 	}
 }

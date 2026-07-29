@@ -179,6 +179,8 @@ const serialRunSpecs = [
 	// Toggles the global `woocommerce_cart_redirect_after_add` setting, which
 	// changes add-to-cart behavior for every other worker — not parallel-safe.
 	'**/tests/shop/cart-redirection.spec.ts',
+	// Switches the active theme and flushes global rewrite rules.
+	'**/tests/shop/product-archive-rewrites.spec.ts',
 	// Trashes and restores the global Shop page in a fixture; while trashed, every
 	// other worker's shop/cart/account navigation 404s.
 	'**/tests/shop/shop-title-after-deletion.spec.ts',

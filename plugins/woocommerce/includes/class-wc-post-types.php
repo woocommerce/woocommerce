@@ -346,9 +346,9 @@ class WC_Post_Types {
 
 		$shop_page_id         = wc_get_page_id( 'shop' );
 		$theme_support        = wc_current_theme_supports_woocommerce_or_fse();
-		$theme_may_be_skipped = wp_doing_cron() || self::wp_cli_skips_active_theme();
+		$active_theme_skipped = self::wp_cli_skips_active_theme();
 
-		if ( self::should_register_product_archive( $theme_support, $theme_may_be_skipped ) ) {
+		if ( self::should_register_product_archive( $theme_support, $active_theme_skipped ) ) {
 			$has_archive = $shop_page_id && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop';
 		} else {
 			$has_archive = false;
@@ -547,11 +547,11 @@ class WC_Post_Types {
 	 * Resolve theme support used to register the product archive.
 	 *
 	 * @param bool $theme_support        Whether the current request reports theme support.
-	 * @param bool $theme_may_be_skipped Whether the request may not have loaded the active theme.
+	 * @param bool $active_theme_skipped Whether WP-CLI skipped the active theme.
 	 * @return bool
 	 */
-	private static function should_register_product_archive( bool $theme_support, bool $theme_may_be_skipped ): bool {
-		if ( $theme_support || ! $theme_may_be_skipped ) {
+	private static function should_register_product_archive( bool $theme_support, bool $active_theme_skipped ): bool {
+		if ( $theme_support || ! $active_theme_skipped ) {
 			return $theme_support;
 		}
 
