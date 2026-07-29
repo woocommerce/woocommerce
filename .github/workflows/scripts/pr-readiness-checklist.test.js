@@ -115,6 +115,30 @@ test('classifyCheckRuns: task is omitted when the only matching run is optional'
     assert.deepEqual(tasks, []);
 });
 
+test('classifyCheckRuns: a failing annotatable task carries the failing run ids', () => {
+    const tasks = classifyCheckRuns([
+        checkRun('PHPStan Analysis', { id: 111, conclusion: 'failure' }),
+    ]);
+    assert.equal(tasks.length, 1);
+    assert.equal(tasks[0].label, 'PHPStan');
+    assert.deepEqual(tasks[0].checkRunIds, [111]);
+});
+
+test('classifyCheckRuns: a failing non-annotatable task carries no run ids', () => {
+    const tasks = classifyCheckRuns([
+        checkRun('Lint - @woocommerce/plugin-woocommerce', { id: 222, conclusion: 'failure' }),
+    ]);
+    assert.equal(tasks.length, 1);
+    assert.equal(tasks[0].checkRunIds, undefined);
+});
+
+test('classifyCheckRuns: a passing annotatable task carries no run ids', () => {
+    const tasks = classifyCheckRuns([checkRun('PHPStan Analysis', { id: 333 })]);
+    assert.equal(tasks.length, 1);
+    assert.equal(tasks[0].status, 'pass');
+    assert.equal(tasks[0].checkRunIds, undefined);
+});
+
 test('computeOverallState: clear when there are no applicable tasks', () => {
     assert.equal(computeOverallState([]), 'clear');
 });
@@ -211,6 +235,53 @@ test('buildCommentBody: still clear makes no change and does not mention', () =>
 
     assert.equal(mentioned, false);
     assert.ok(!body.includes('@octocat'));
+});
+
+test('buildCommentBody: a failing task with details renders them as a nested sub-list', () => {
+    const { body } = buildCommentBody({
+        tasks: [
+            {
+                label: 'PHPStan',
+                status: 'fail',
+                remediation: 'See annotations.',
+                details: [
+                    '`src/Foo.php:42 — Call to a member function calculate() on null.`',
+                ],
+            },
+        ],
+        previousState: 'failing',
+        authorLogin: 'octocat',
+    });
+
+    assert.ok(body.includes('❌ **PHPStan** — See annotations.'));
+    assert.ok(
+        body.includes(
+            '    - `src/Foo.php:42 — Call to a member function calculate() on null.`'
+        )
+    );
+});
+
+test('buildCommentBody: a failing task with no details renders no sub-list', () => {
+    const { body } = buildCommentBody({
+        tasks: [{ label: 'Lint', status: 'fail', remediation: 'See annotations.' }],
+        previousState: 'failing',
+        authorLogin: 'octocat',
+    });
+
+    assert.ok(!body.includes('    -'));
+});
+
+test('buildCommentBody: a passing task with details (should not happen) renders no sub-list', () => {
+    const { body } = buildCommentBody({
+        tasks: [
+            { label: 'Lint', status: 'fail', remediation: 'See annotations.' },
+            { label: 'PHPStan', status: 'pass', remediation: 'n/a', details: ['`ignored`'] },
+        ],
+        previousState: 'failing',
+        authorLogin: 'octocat',
+    });
+
+    assert.ok(!body.includes('    -'));
 });
 
 test('buildCommentBody: regression from clear to failing mentions the author', () => {

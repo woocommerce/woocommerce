@@ -25,6 +25,70 @@ async function findExistingComment(github, context, prNumber) {
     );
 }
 
+const MAX_ANNOTATIONS_PER_TASK = 5;
+const MAX_ANNOTATION_TEXT_LENGTH = 200;
+
+// Annotation path/message text originates from the PR author's own code
+// (e.g. a PHPStan message quoting a class/method/variable name they chose),
+// so it must never be embedded as live markdown - a crafted identifier
+// could render as a link, image, raw HTML, or an @mention of an unrelated
+// user. Collapsing to one line, stripping backticks, and capping length
+// makes the string safe to wrap in a single inline code span, which GitHub
+// renders as inert literal text with no markdown/HTML interpretation.
+function sanitizeAnnotationText(text) {
+    return String(text)
+        .replace(/\s+/g, ' ')
+        .replace(/`/g, "'")
+        .trim()
+        .slice(0, MAX_ANNOTATION_TEXT_LENGTH);
+}
+
+// For tasks marked `annotatable` in pr-readiness-checklist.js, pull a few
+// real check-run annotations (e.g. PHPStan's file/line/message) so the
+// checklist carries actionable detail instead of only "see the job".
+// Best-effort: a fetch failure just leaves the task without `details`.
+async function attachAnnotationDetails(github, context, tasks, core) {
+    return Promise.all(
+        tasks.map(async (task) => {
+            const { checkRunIds, ...rest } = task;
+            if (task.status !== 'fail' || !checkRunIds || checkRunIds.length === 0) {
+                return rest;
+            }
+
+            try {
+                const annotationLists = await Promise.all(
+                    checkRunIds.map((checkRunId) =>
+                        github.paginate(github.rest.checks.listAnnotations, {
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            check_run_id: checkRunId,
+                            per_page: 100,
+                        })
+                    )
+                );
+
+                const details = annotationLists
+                    .flat()
+                    .filter((annotation) => annotation.annotation_level === 'failure')
+                    .slice(0, MAX_ANNOTATIONS_PER_TASK)
+                    .map((annotation) => {
+                        const path = sanitizeAnnotationText(annotation.path);
+                        const line = sanitizeAnnotationText(annotation.start_line);
+                        const message = sanitizeAnnotationText(annotation.message);
+                        return `\`${path}:${line} — ${message}\``;
+                    });
+
+                return details.length > 0 ? { ...rest, details } : rest;
+            } catch (error) {
+                core.warning(
+                    `Failed to fetch annotations for ${task.label}: ${error.message}`
+                );
+                return rest;
+            }
+        })
+    );
+}
+
 async function resolvePullRequest(github, context) {
     const { head_sha: headSha, head_repository: headRepository } =
         context.payload.workflow_run;
@@ -88,7 +152,12 @@ module.exports = async ({ github, context, core }) => {
         return;
     }
 
-    const tasks = classifyCheckRuns(checkRuns);
+    const tasks = await attachAnnotationDetails(
+        github,
+        context,
+        classifyCheckRuns(checkRuns),
+        core
+    );
 
     const existingComment = await findExistingComment(github, context, pr.number);
     const previousState = parsePreviousState(

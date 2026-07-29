@@ -12,6 +12,11 @@ const TASKS = [
         label: 'PHPStan',
         matches: (name) => name === 'PHPStan Analysis' || name.startsWith('PHPStan: PHP'),
         remediation: 'See the inline annotations on this PR for details.',
+        // PHPStan emits native `::error file=,line=,col=::message` workflow
+        // commands, which GitHub turns into structured check-run
+        // annotations. Surface a few of them directly instead of only
+        // pointing at the job.
+        annotatable: true,
     },
     {
         label: 'Unit tests (PHP)',
@@ -72,13 +77,20 @@ function classifyCheckRuns(checkRuns) {
             return null;
         }
 
-        const failing = relevant.some((run) => run.conclusion !== 'success');
+        const failingRuns = relevant.filter((run) => run.conclusion !== 'success');
+        const failing = failingRuns.length > 0;
 
-        return {
+        const result = {
             label: task.label,
             status: failing ? 'fail' : 'pass',
             remediation: task.remediation,
         };
+
+        if (failing && task.annotatable) {
+            result.checkRunIds = failingRuns.map((run) => run.id);
+        }
+
+        return result;
     }).filter(Boolean);
 }
 
@@ -124,12 +136,15 @@ function buildCommentBody({ tasks, previousState, authorLogin }) {
         lines.push('✅ All checks are passing.');
     } else {
         lines.push(
-            ...tasks.map(
-                (task) =>
-                    `- ${task.status === 'fail' ? '❌' : '✅'} **${task.label}**${
-                        task.status === 'fail' ? ` — ${task.remediation}` : ''
-                    }`
-            )
+            ...tasks.flatMap((task) => {
+                const statusLine = `- ${task.status === 'fail' ? '❌' : '✅'} **${task.label}**${
+                    task.status === 'fail' ? ` — ${task.remediation}` : ''
+                }`;
+                if (task.status === 'fail' && task.details && task.details.length > 0) {
+                    return [statusLine, ...task.details.map((detail) => `    - ${detail}`)];
+                }
+                return [statusLine];
+            })
         );
     }
 
