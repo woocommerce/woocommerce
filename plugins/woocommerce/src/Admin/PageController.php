@@ -174,7 +174,8 @@ class PageController {
 			}
 		}
 
-		// Route templates only apply to requests with an app path.
+		// Route templates only apply to requests with an app path. The request path is split but never
+		// normalized, unlike the registered paths below: see split_normalized_registered_page_path().
 		$current_path_parts = $this->split_registered_page_path( $current_path );
 		if ( '' === $current_path_parts['path'] ) {
 			$this->current_page = false;
@@ -189,16 +190,7 @@ class PageController {
 				continue;
 			}
 
-			$registered_parts = $this->split_registered_page_path( $page['path'] );
-
-			// React Router resolves a registered route that omits the leading slash against the app
-			// root, so `route/:itemId` renders at `/route/123`. Normalize the registered side to the
-			// path the client actually renders. The request path is left alone on purpose: the admin
-			// history passes `?path=` through verbatim, so a request without a leading slash matches
-			// no React route and must not be recognized here either.
-			if ( '' !== $registered_parts['path'] ) {
-				$registered_parts['path'] = '/' . ltrim( $registered_parts['path'], '/' );
-			}
+			$registered_parts = $this->split_normalized_registered_page_path( $page['path'] );
 
 			if ( ! $this->registered_path_matches_current_path( $registered_parts, $current_path_parts ) ) {
 				continue;
@@ -213,6 +205,28 @@ class PageController {
 
 		$this->current_page                        = $matching_page;
 		$this->current_page_is_route_pattern_match = false !== $matching_page && $this->registered_path_has_route_pattern( $matching_page['path'] ?? null );
+	}
+
+	/**
+	 * Split a registered page path into root and app path pieces, normalized for route matching.
+	 *
+	 * React Router resolves a registered route that omits the leading slash against the app root, so
+	 * `route/:itemId` renders at `/route/123`. Normalizing the registered side describes the path the
+	 * client actually renders. Current request paths are deliberately not normalized this way: the
+	 * admin history assigns `pathname` from the `path` query argument verbatim, so a request without a
+	 * leading slash matches no React route and must not be recognized here either.
+	 *
+	 * @param string $registered_path Registered page path.
+	 * @return array
+	 */
+	private function split_normalized_registered_page_path( $registered_path ) {
+		$path_parts = $this->split_registered_page_path( $registered_path );
+
+		if ( '' !== $path_parts['path'] ) {
+			$path_parts['path'] = '/' . ltrim( $path_parts['path'], '/' );
+		}
+
+		return $path_parts;
 	}
 
 	/**
