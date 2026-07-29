@@ -258,14 +258,35 @@ class PageController {
 		// preg_quote() escapes parameter colons (for example, `:itemId` becomes `\:itemId`).
 		// Match only complete parameter segments: `(^|/)` preserves the start-or-slash prefix,
 		// `\\:` targets the escaped colon, and `(?=/|$)` requires the parameter name to end the segment.
-		$route_regex = preg_replace( '#(^|/)\\\\:[A-Za-z0-9_]+(?=/|$)#', '$1[^/]+', $route_regex );
+		// Falling back to the quoted pattern on a PCRE failure keeps `:itemId` literal, which matches
+		// nothing it should not, rather than leaving an empty pattern that matches everything.
+		$route_regex = preg_replace( '#(^|/)\\\\:[A-Za-z0-9_]+(?=/|$)#', '$1[^/]+', $route_regex ) ?? $route_regex;
 
 		if ( $has_terminal_splat ) {
 			// A supported terminal `/*` matches both the base route and any descendants.
 			$route_regex .= '(?:/.*)?';
 		}
 
-		return 1 === preg_match( '#^' . $route_regex . '/*$#i', $current_parts['path'] );
+		return 1 === preg_match( '#^' . $route_regex . '/*$#' . $this->get_route_regex_modifiers( $route_regex, $current_parts['path'] ), $current_parts['path'] );
+	}
+
+	/**
+	 * Get the modifiers to compile a route regex with.
+	 *
+	 * React Router compares paths case-insensitively with JavaScript's Unicode-aware casing, so
+	 * `/CAFÉ/42` reaches a route registered as `/café/:id`. PCRE only folds non-ASCII case in UTF-8
+	 * mode, which is why `u` is added whenever both sides are valid UTF-8. It is withheld otherwise:
+	 * `preg_match()` fails outright on malformed UTF-8, and a failed match would silently read as an
+	 * unrecognized page rather than falling back to the byte-wise comparison used before.
+	 *
+	 * @param string $route_regex Compiled route regex source.
+	 * @param string $current_path Current request app path.
+	 * @return string
+	 */
+	private function get_route_regex_modifiers( $route_regex, $current_path ) {
+		$is_utf8 = 1 === preg_match( '//u', $route_regex ) && 1 === preg_match( '//u', $current_path );
+
+		return $is_utf8 ? 'iu' : 'i';
 	}
 
 	/**

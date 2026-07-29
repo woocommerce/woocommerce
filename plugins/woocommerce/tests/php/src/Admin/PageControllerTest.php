@@ -575,6 +575,11 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			'parameter without leading slash'   => array( 'route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params%2Fsample' ),
 			'static path without leading slash' => array( 'route-params', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-params' ),
 			'wildcard without leading slash'    => array( 'route-wildcard/*', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-wildcard%2Ftheme' ),
+			// React Router compares with JavaScript's Unicode-aware casing, so a non-ASCII segment
+			// reaches its route whatever case the request uses.
+			'non-ascii segment'                 => array( '/route-café/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf%C3%A9%2F42' ),
+			'non-ascii segment upper-cased'     => array( '/route-café/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-CAF%C3%89%2F42' ),
+			'non-ascii segment in request only' => array( '/route-CAFÉ/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf%C3%A9%2F42' ),
 		);
 	}
 
@@ -622,6 +627,28 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			// matches no React route. Normalizing the registered side must not make PHP recognize it.
 			'request without leading slash'              => array( '/route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=route-params%2Fsample' ),
 			'both sides without leading slash'           => array( 'route-params/:itemName', '/wp-admin/admin.php?page=wc-admin&path=route-params%2Fsample' ),
+			// Case folding must not reach across distinct characters: `é` is not `e`.
+			'non-ascii segment without diacritic'        => array( '/route-café/:itemId', '/wp-admin/admin.php?page=wc-admin&path=%2Froute-cafe%2F42' ),
+			// A malformed UTF-8 request path falls back to byte-wise matching rather than failing.
+			'malformed utf-8 request path'               => array( '/route-café/:itemId', "/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf\xE9%2F42" ),
+		);
+	}
+
+	/**
+	 * @testdox Malformed UTF-8 registered paths still match byte-identical requests.
+	 */
+	public function test_registered_page_malformed_utf8_path_matches_byte_identical_request(): void {
+		// Adding the `u` modifier unconditionally would make preg_match() fail here, which would read
+		// as an unrecognized page. The matcher falls back to the byte-wise comparison instead.
+		$this->assert_registered_page_for_request(
+			'route-malformed-page',
+			"/wp-admin/admin.php?page=wc-admin&path=%2Froute-caf\xE9%2F42",
+			array(
+				array(
+					'id'   => 'route-malformed-page',
+					'path' => "/route-caf\xE9/:itemId",
+				),
+			)
 		);
 	}
 
