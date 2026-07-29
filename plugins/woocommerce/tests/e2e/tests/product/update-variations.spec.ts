@@ -37,6 +37,25 @@ let productId_indivEdit: number,
 	defaultVariation,
 	variationIds_indivEdit: number[];
 
+async function gotToVariationsTab( page: Page ) {
+	await test.step( 'Click on the "Variations" tab.', async () => {
+		await expect( async () => {
+			await page
+				.getByRole( 'link', { name: 'Variations' } )
+				.last()
+				.click();
+
+			// Sometimes the click on link is too fast and the initial tab (General) is still visible
+			// so we need to wait make sure some content from the variations tab is visible.
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+
+			await expect( expandButton ).toBeVisible();
+		} ).toPass();
+	} );
+}
+
 test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -104,25 +123,6 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 	test.afterAll( async () => {
 		await deleteProductsAddedByTests();
 	} );
-
-	async function gotToVariationsTab( page: Page ) {
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await expect( async () => {
-				await page
-					.getByRole( 'link', { name: 'Variations' } )
-					.last()
-					.click();
-
-				// Sometimes the click on link is too fast and the initial tab (General) is still visible
-				// so we need to wait make sure some content from the variations tab is visible.
-				const expandButton = page
-					.getByRole( 'link', { name: 'Expand' } )
-					.first();
-
-				await expect( expandButton ).toBeVisible();
-			} ).toPass();
-		} );
-	}
 
 	test( 'can individually edit variations', async ( { page } ) => {
 		const variationRows = page.locator( '.woocommerce_variation' );
@@ -418,7 +418,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		await test.step( 'Click "Save changes"', async () => {
 			await page.getByRole( 'button', { name: 'Save changes' } ).click();
 			await page.waitForFunction(
-				() => ! Boolean( document.querySelector( '.blockUI' ) )
+				() => ! document.querySelector( '.blockUI' )
 			);
 		} );
 

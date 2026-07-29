@@ -111,10 +111,10 @@ jQuery( function ( $ ) {
 							'&action=edit&'
 					);
 
-					$.get( this_page_url, function ( response ) {
+					$.get( this_page_url, function ( page_html ) {
 						$( '#variable_product_options' ).unblock();
 						$( '#variable_product_options_inner' ).replaceWith(
-							$( response ).find(
+							$( page_html ).find(
 								'#variable_product_options_inner'
 							)
 						);
@@ -122,7 +122,7 @@ jQuery( function ( $ ) {
 						$(
 							'#product_attributes > .product_attributes'
 						).replaceWith(
-							$( response ).find(
+							$( page_html ).find(
 								'#product_attributes > .product_attributes'
 							)
 						);
@@ -1287,7 +1287,7 @@ jQuery( function ( $ ) {
 						if ( value.indexOf( '%' ) >= 0 ) {
 							data.value =
 								accounting.unformat(
-									value.replace( /\%/, '' ),
+									value.replace( /%/, '' ),
 									woocommerce_admin.mon_decimal_point
 								) + '%';
 						} else {
