@@ -177,11 +177,24 @@ class OrderLogsCleanupHelper {
 	 * Schedule a follow-up cleanup run to continue draining the backlog.
 	 */
 	private function schedule_extended_cleanup(): void {
-		if ( ! function_exists( 'as_schedule_single_action' ) || ! function_exists( 'as_has_scheduled_action' ) ) {
+		if ( ! function_exists( 'as_schedule_single_action' ) || ! function_exists( 'as_get_scheduled_actions' ) ) {
 			return;
 		}
 
-		if ( as_has_scheduled_action( self::EXTENDED_CLEANUP_HOOK, array(), 'woocommerce' ) ) {
+		// Only pending actions count: when this runs as the extended cleanup callback, the
+		// current action is in-progress and would otherwise match, blocking the follow-up.
+		$pending = as_get_scheduled_actions(
+			array(
+				'hook'     => self::EXTENDED_CLEANUP_HOOK,
+				'args'     => array(),
+				'group'    => 'woocommerce',
+				'status'   => \ActionScheduler_Store::STATUS_PENDING,
+				'per_page' => 1,
+			),
+			'ids'
+		);
+
+		if ( ! empty( $pending ) ) {
 			return;
 		}
 

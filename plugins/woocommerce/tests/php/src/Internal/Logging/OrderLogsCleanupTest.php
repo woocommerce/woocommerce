@@ -629,6 +629,48 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An in-progress extended cleanup doesn't block scheduling the next follow-up run.
+	 */
+	public function test_extended_cleanup_schedules_a_follow_up_while_running(): void {
+		$schedule = new \ReflectionMethod( OrderLogsCleanupHelper::class, 'schedule_extended_cleanup' );
+		$schedule->setAccessible( true );
+
+		$schedule->invoke( $this->sut_cleanup_helper );
+		$first = $this->get_pending_extended_cleanup_ids();
+		$this->assertCount( 1, $first );
+
+		// Simulate the queue runner picking up the action: cleanup() then runs as its callback.
+		\ActionScheduler::store()->log_execution( current( $first ) );
+
+		$schedule->invoke( $this->sut_cleanup_helper );
+		$second = $this->get_pending_extended_cleanup_ids();
+
+		$this->assertCount( 1, $second, 'A follow-up run should be scheduled while the current one is in progress' );
+		$this->assertNotEquals( current( $first ), current( $second ) );
+
+		// as_unschedule_all_actions() only cancels pending actions, so drop the in-progress one here.
+		\ActionScheduler::store()->delete_action( current( $first ) );
+	}
+
+	/**
+	 * Get the IDs of the pending extended cleanup actions.
+	 *
+	 * @return array
+	 */
+	private function get_pending_extended_cleanup_ids(): array {
+		return as_get_scheduled_actions(
+			array(
+				'hook'     => OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK,
+				'args'     => array(),
+				'group'    => 'woocommerce',
+				'status'   => \ActionScheduler_Store::STATUS_PENDING,
+				'per_page' => 5,
+			),
+			'ids'
+		);
+	}
+
+	/**
 	 * Count the `_debug_log_source` meta entries in the HPOS orders meta table.
 	 *
 	 * @return int
