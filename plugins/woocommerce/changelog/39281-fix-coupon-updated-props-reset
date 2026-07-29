@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix the woocommerce_coupon_object_updated_props hook so it reports only the props changed by the current save, instead of an array that grows with duplicates across repeated saves of the same coupon. WC_Coupon_Data_Store_CPT::$updated_props is deprecated and now always empty; read the hook's second argument instead.
+Fix the woocommerce_coupon_object_updated_props hook so it reports only the props changed by the current save, instead of an array that grows with duplicates across repeated saves of the same coupon. WC_Coupon_Data_Store_CPT::$updated_props is deprecated: it now holds the current save's props only while that hook runs, and is empty otherwise. Read the hook's second argument instead.
