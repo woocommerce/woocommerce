@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Hide the Downloadable product permissions meta box by default on the order edit screen. Merchants can re-enable it via Screen Options.

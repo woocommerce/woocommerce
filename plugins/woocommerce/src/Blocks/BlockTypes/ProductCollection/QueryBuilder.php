@@ -9,7 +9,9 @@ use Automattic\WooCommerce\Blocks\BlockTypes\RatingFilter;
 use Automattic\WooCommerce\Blocks\BlockTypes\StockFilter;
 use WP_Query;
 use WC_Tax;
+use Automattic\WooCommerce\Enums\CatalogSortOrder;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
  * QueryBuilder class.
@@ -984,7 +986,7 @@ class QueryBuilder {
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
 
 		// If prices are shown incl. tax, we want to remove the taxes from the filter amount to match prices stored excl. tax.
-		if ( 'incl' === $tax_display ) {
+		if ( TaxDisplayMode::INCLUSIVE === $tax_display ) {
 			/**
 			 * Filters if taxes should be removed from locations outside the store base location.
 			 *
@@ -1021,7 +1023,7 @@ class QueryBuilder {
 	 */
 	private function should_adjust_price_range_for_taxes() {
 		$display_setting      = get_option( 'woocommerce_tax_display_shop' ); // Tax display setting ('incl' or 'excl').
-		$price_storage_method = wc_prices_include_tax() ? 'incl' : 'excl';
+		$price_storage_method = wc_prices_include_tax() ? TaxDisplayMode::INCLUSIVE : TaxDisplayMode::EXCLUSIVE;
 
 		return $display_setting !== $price_storage_method;
 	}
@@ -1118,7 +1120,7 @@ class QueryBuilder {
 			return array( 'orderby' => $orderby );
 		}
 
-		if ( 'price' === $orderby ) {
+		if ( CatalogSortOrder::PRICE === $orderby ) {
 			add_filter( 'posts_clauses', array( $this, 'add_price_sorting_posts_clauses' ), 10, 2 );
 			return array(
 				'isProductCollection' => true,
@@ -1127,7 +1129,7 @@ class QueryBuilder {
 		}
 
 		// The popularity orderby value here is for backwards compatibility as we have since removed the filter option.
-		if ( 'sales' === $orderby || 'popularity' === $orderby ) {
+		if ( 'sales' === $orderby || CatalogSortOrder::POPULARITY === $orderby ) {
 			add_filter( 'posts_clauses', array( $this, 'add_sales_sorting_posts_clauses' ), 10, 2 );
 			return array(
 				'isProductCollection' => true,
@@ -1135,7 +1137,7 @@ class QueryBuilder {
 			);
 		}
 
-		if ( 'menu_order' === $orderby ) {
+		if ( CatalogSortOrder::MENU_ORDER === $orderby ) {
 			add_filter( 'posts_clauses', array( $this, 'add_menu_order_with_title_fallback_posts_clauses' ), 10, 2 );
 			return array(
 				'isProductCollection' => true,

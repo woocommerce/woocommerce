@@ -232,4 +232,38 @@ class WC_Frontend_Scripts_Test extends WC_Unit_Test_Case {
 		$this->assertNotContains( 'cod', $data['gateways_with_custom_place_order_button'] );
 		$this->assertNotContains( 'cheque', $data['gateways_with_custom_place_order_button'] );
 	}
+
+	/**
+	 * Test that scripts with legacy handles and their aliases use blocking strategy.
+	 *
+	 * WordPress (since 6.3) discards loading strategies on alias scripts
+	 * (src=false). To avoid strategy mismatches, both the real script and
+	 * its legacy alias must be registered as blocking (in_footer=true).
+	 */
+	public function test_legacy_handle_scripts_use_blocking_strategy(): void {
+		$reflection = new ReflectionClass( 'WC_Frontend_Scripts' );
+		$method     = $reflection->getMethod( 'register_scripts' );
+		$method->setAccessible( true );
+		$method->invoke( null );
+
+		$get_scripts_method = $reflection->getMethod( 'get_scripts' );
+		$get_scripts_method->setAccessible( true );
+		$scripts = $get_scripts_method->invoke( null );
+
+		foreach ( $scripts as $name => $props ) {
+			if ( ! isset( $props['legacy_handle'] ) ) {
+				continue;
+			}
+
+			$legacy_handle = $props['legacy_handle'];
+
+			// Real script must be blocking (no defer strategy).
+			$real_strategy = wp_scripts()->get_data( $name, 'strategy' );
+			$this->assertFalse( $real_strategy, "Real handle '{$name}' should not have a loading strategy (blocking)." );
+
+			// Alias script must also be blocking.
+			$legacy_strategy = wp_scripts()->get_data( $legacy_handle, 'strategy' );
+			$this->assertFalse( $legacy_strategy, "Legacy handle '{$legacy_handle}' should not have a loading strategy (blocking)." );
+		}
+	}
 }

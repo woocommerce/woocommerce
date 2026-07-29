@@ -16,6 +16,14 @@ import '../style.scss';
 import '../../validation-input-error/style.scss';
 import { ValidatedTextInputProps } from '../types';
 
+const getFormattedValue = (
+	val: string | number | readonly string[] | undefined,
+	customFormatter?: ValidatedTextInputProps[ 'customFormatter' ]
+) => {
+	const stringVal = typeof val === 'string' ? val : String( val || '' );
+	return customFormatter ? customFormatter( stringVal ) : stringVal;
+};
+
 export default {
 	title: 'External Components/ValidatedTextInput',
 	component: ValidatedTextInput,
@@ -217,29 +225,20 @@ export default {
 const Template: StoryFn< ValidatedTextInputProps > = ( args ) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [ _, updateArgs ] = useArgs();
-	const getFormattedValue = (
-		val: string | number | readonly string[] | undefined
-	) => {
-		const stringVal = typeof val === 'string' ? val : String( val || '' );
-		return args.customFormatter
-			? args.customFormatter( stringVal )
-			: stringVal;
-	};
+	const { customFormatter } = args;
 
 	const [ inputValue, setInputValue ] = useState(
-		getFormattedValue( args.value )
+		getFormattedValue( args.value, customFormatter )
 	);
 	const { setValidationErrors, showValidationError } =
 		useDispatch( validationStore );
 
 	useEffect( () => {
-		setInputValue( getFormattedValue( args.value ) );
-	}, [ args.value, args.customFormatter ] );
+		setInputValue( getFormattedValue( args.value, customFormatter ) );
+	}, [ args.value, customFormatter ] );
 
 	const onChange = ( newValue: string ) => {
-		const formattedValue = args.customFormatter
-			? args.customFormatter( newValue )
-			: newValue;
+		const formattedValue = getFormattedValue( newValue, customFormatter );
 
 		setInputValue( formattedValue );
 

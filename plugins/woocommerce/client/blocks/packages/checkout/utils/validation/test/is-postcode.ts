@@ -189,6 +189,11 @@ describe( 'isPostcode', () => {
 		[ true, '123456', 'TW' ],
 		[ true, '12345', 'TW' ],
 		[ true, '123', 'TW' ],
+
+		// Unknown country codes — assumed valid since no regex applies.
+		[ true, '12345', 'XX' ],
+		[ true, 'anything', 'ZZ' ],
+		[ true, '', 'XX' ],
 	];
 
 	test.each( cases )( '%s: %s for %s', ( result, postcode, country ) =>

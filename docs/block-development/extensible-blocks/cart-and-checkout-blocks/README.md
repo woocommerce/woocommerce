@@ -126,6 +126,54 @@ For accessing store data, using the [`wc/store/...`](https://github.com/woocomme
 
 ## Back-end extensibility
 
+### Declaring compatibility with the Cart and Checkout blocks
+
+Declaring compatibility helps merchants understand whether an extension supports the Cart and Checkout blocks if compatibility conflicts arise. Extensions usually fall into one of these categories:
+
+- An extension that is incompatible with the Cart and Checkout blocks should declare its incompatibility.
+- An extension that is compatible with the Cart and Checkout blocks should declare its compatibility.
+- An extension that does not affect the Cart or Checkout flow does not need to declare compatibility.
+
+WooCommerce only checks block compatibility for extensions that declare the `WC tested up to` header in the main plugin file. Add the header with the WooCommerce version your extension has tested against:
+
+```php
+<?php
+/**
+ * Plugin Name: WooCommerce Example Extension
+ * Plugin URI: https://wordpress.org/plugins/example-extension/
+ * Description: Sample description.
+ * Author: WooCommerce
+ * Author URI: https://woocommerce.com/
+ * Version: 1.0.0
+ * Text Domain: woocommerce-example-extension
+ * Domain Path: /languages
+ * WC requires at least: 6.0
+ * WC tested up to: 8.0
+ */
+```
+
+To declare that an extension is compatible with the Cart and Checkout blocks, add the following snippet to the main plugin file:
+
+```php
+add_action( 'before_woocommerce_init', function() {
+	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
+	}
+} );
+```
+
+To declare that an extension is incompatible with the Cart and Checkout blocks, add the following snippet to the main plugin file:
+
+```php
+add_action( 'before_woocommerce_init', function() {
+	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, false );
+	}
+} );
+```
+
+If you prefer to include the compatibility declaration outside the main plugin file, pass the plugin file path, such as `my-plugin-slug/my-plugin.php`, instead of `__FILE__`.
+
 ### Modifying information during the Checkout process
 
 Modifying the server-side part of the Cart and Checkout blocks is possible using PHP. Some actions and filters from the shortcode cart/checkout experience will work too, but not all of them. We have a working document ([Hook alternatives document](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/hook-alternatives.md)) that outlines which hooks are supported as well as alternatives.

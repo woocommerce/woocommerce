@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix PHP 8.5+ deprecation notices when a block without a front-end script (e.g. Coming Soon) registers chunk translations with a null script handle.

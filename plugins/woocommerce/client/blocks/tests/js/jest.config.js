@@ -22,6 +22,8 @@ const singletonWpModules = [
 	'@wordpress/html-entities',
 	'@wordpress/keyboard-shortcuts',
 	'@wordpress/patterns',
+	'@wordpress/rich-text',
+	'@wordpress/notices',
 ];
 
 const wpSingletonMapper = singletonWpModules.reduce( ( acc, mod ) => {
@@ -72,6 +74,7 @@ module.exports = {
 		'@woocommerce/base-hocs(.*)$': 'assets/js/base/hocs/$1',
 		'@woocommerce/base-hooks(.*)$': 'assets/js/base/hooks/$1',
 		'@woocommerce/base-utils(.*)$': 'assets/js/base/utils',
+		'@woocommerce/block-data/(.*)$': 'assets/js/data/$1',
 		'@woocommerce/block-data': 'assets/js/data',
 		'@woocommerce/resource-previews': 'assets/js/previews',
 		'@woocommerce/shared-context': 'assets/js/shared/context',

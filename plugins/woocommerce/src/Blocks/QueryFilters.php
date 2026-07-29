@@ -9,6 +9,9 @@ use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 /**
  * Process the query data for filtering purposes.
  *
+ * Do not delete this file until https://github.com/woocommerce/woocommerce/issues/52311 is resolved.
+ * The upgrade flow can still load stale autoloader manifests that point to this file.
+ *
  * @deprecated 11.0.0 Use QueryClauses and FilterDataProvider instead. This class will be removed in WooCommerce 12.0.
  */
 final class QueryFilters {

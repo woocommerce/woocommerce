@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a ghost 0.00 "Order fully refunded" refund from being created when partial refunds sum a float epsilon above the stored order total.

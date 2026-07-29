@@ -88,7 +88,7 @@ class WC_Unit_Tests_Bootstrap {
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
-		$this->maybe_announce_skipped_graphql_infra_tests();
+		$this->maybe_announce_skipped_graphql_tests();
 
 		// Ensure theme install tests use direct filesystem method.
 		if ( ! defined( 'FS_METHOD' ) ) {
@@ -180,37 +180,42 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Echo "Not running GraphQL …" messages when the current invocation
-	 * does not include the `wc-phpunit-graphql-infra` and/or
-	 * `wc-phpunit-graphql-api` suites, mirroring the "Not running ajax
-	 * tests" line printed by WP's own bootstrap for the `ajax`, `ms-files`
-	 * and `external-http` groups.
+	 * Echo a "Not running GraphQL …" message when an explicit `--testsuite`
+	 * filter is given that omits `wc-phpunit-graphql`, mirroring the "Not
+	 * running ajax tests" line printed by WP's own bootstrap for the `ajax`,
+	 * `ms-files` and `external-http` groups.
 	 *
-	 * Both GraphQL suites live in their own suites because they require
-	 * PHP 8.1+ and are excluded from the default suite.
+	 * The GraphQL suite is kept separate because it requires PHP 8.1+, so
+	 * PHP 7.4 / 8.0 CI jobs point `--testsuite` at the legacy + main suites
+	 * only. A default run (no `--testsuite` filter) runs the full suite list,
+	 * which includes the GraphQL suite, so there is nothing to announce. The
+	 * `--testsuite` value may be a comma-joined suite list, hence the substring
+	 * match rather than an exact comparison.
 	 */
-	private function maybe_announce_skipped_graphql_infra_tests() {
-		$argv          = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
-		$running_infra = false;
-		$running_api   = false;
+	private function maybe_announce_skipped_graphql_tests() {
+		$argv = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
+
+		$has_testsuite_filter = false;
+		$running_graphql      = false;
 		foreach ( $argv as $arg ) {
-			if ( 'wc-phpunit-full' === $arg || '--testsuite=wc-phpunit-full' === $arg ) {
-				return;
+			if ( ! is_string( $arg ) ) {
+				continue;
 			}
-			if ( 'wc-phpunit-graphql-infra' === $arg || '--testsuite=wc-phpunit-graphql-infra' === $arg ) {
-				$running_infra = true;
+			if ( false !== strpos( $arg, '--testsuite' ) ) {
+				$has_testsuite_filter = true;
 			}
-			if ( 'wc-phpunit-graphql-api' === $arg || '--testsuite=wc-phpunit-graphql-api' === $arg ) {
-				$running_api = true;
+			if ( false !== strpos( $arg, 'wc-phpunit-graphql' ) ) {
+				$running_graphql = true;
 			}
 		}
 
-		if ( ! $running_infra ) {
-			echo 'Not running GraphQL infrastructure tests. To execute these, use --testsuite=wc-phpunit-graphql-infra or wc-phpunit-full.' . PHP_EOL;
+		// Without an explicit --testsuite filter the default suite list runs,
+		// which already includes the GraphQL suite: nothing is skipped.
+		if ( ! $has_testsuite_filter || $running_graphql ) {
+			return;
 		}
-		if ( ! $running_api ) {
-			echo 'Not running GraphQL API command tests. To execute these, use --testsuite=wc-phpunit-graphql-api or wc-phpunit-full.' . PHP_EOL;
-		}
+
+		echo 'Not running GraphQL tests. To execute these, add wc-phpunit-graphql to --testsuite (a default run without --testsuite includes it).' . PHP_EOL;
 	}
 
 	/**

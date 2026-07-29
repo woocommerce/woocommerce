@@ -26,7 +26,10 @@ import {
 	SavedPaymentMethodOptions,
 } from '../../../blocks/cart-checkout-shared/payment-methods';
 import { defaultCartState } from '../../cart/default-state';
-import { getRegisteredExpressPaymentMethods } from '../selectors';
+import {
+	getRegisteredExpressPaymentMethods,
+	getIncompatiblePaymentMethods,
+} from '../selectors';
 
 jest.mock( '@wordpress/data', () => {
 	const originalModule = jest.requireActual( '@wordpress/data' );
@@ -75,6 +78,15 @@ jest.mock( '@woocommerce/settings', () => {
 						},
 					],
 				};
+			}
+			if ( setting === 'globalPaymentMethods' ) {
+				return [
+					{
+						id: 'woo-payment-gateway',
+						title: 'Woo Payment Gateway',
+					},
+					{ id: 'stripe', title: 'Stripe' },
+				];
 			}
 			return originalModule.getSetting( setting, ...rest );
 		},
@@ -499,6 +511,102 @@ describe( 'Payment Selectors Unit Tests', () => {
 				description: 'Pay with Apple Pay',
 				gatewayId: 'apple-pay',
 				supportsStyle: [ 'height' ],
+			} );
+		} );
+	} );
+
+	describe( 'getIncompatiblePaymentMethods', () => {
+		// The mocked `globalPaymentMethods` setting (see jest.mock above) exposes
+		// two server-side gateways: `woo-payment-gateway` and `stripe`.
+		const buildState = ( {
+			availablePaymentMethods = {},
+			availableExpressPaymentMethods = {},
+		} ) => ( {
+			status: 'idle',
+			activePaymentMethod: '',
+			availablePaymentMethods,
+			availableExpressPaymentMethods,
+			registeredExpressPaymentMethods: {},
+			savedPaymentMethods: {},
+			paymentMethodData: {},
+			paymentResult: null,
+			paymentMethodsInitialized: true,
+			expressPaymentMethodsInitialized: true,
+			shouldSavePaymentMethod: false,
+		} );
+
+		it( 'does not flag an express method whose client-side name differs from its gateway id', () => {
+			const state = buildState( {
+				// Keyed by the client-side `name`, which differs from the
+				// server-side gateway id. The match must happen via
+				// `paymentMethodId`, not the key.
+				availableExpressPaymentMethods: {
+					woo_express: {
+						name: 'woo_express',
+						title: 'Woo Express',
+						description: '',
+						gatewayId: 'woo-payment-gateway',
+						paymentMethodId: 'woo-payment-gateway',
+						supportsStyle: [],
+					},
+				},
+				availablePaymentMethods: {
+					stripe: {
+						name: 'stripe',
+						title: 'Stripe',
+						description: '',
+						gatewayId: 'stripe',
+						supportsStyle: [],
+					},
+				},
+			} );
+
+			expect( getIncompatiblePaymentMethods( state ) ).toEqual( {} );
+		} );
+
+		it( 'falls back to `name` when an express method has no paymentMethodId', () => {
+			const state = buildState( {
+				availableExpressPaymentMethods: {
+					stripe: {
+						name: 'stripe',
+						title: 'Stripe',
+						description: '',
+						gatewayId: 'stripe',
+						// No paymentMethodId — should fall back to `name`.
+						paymentMethodId: undefined,
+						supportsStyle: [],
+					},
+				},
+				availablePaymentMethods: {
+					'woo-payment-gateway': {
+						name: 'woo-payment-gateway',
+						title: 'Woo Payment Gateway',
+						description: '',
+						gatewayId: 'woo-payment-gateway',
+						supportsStyle: [],
+					},
+				},
+			} );
+
+			expect( getIncompatiblePaymentMethods( state ) ).toEqual( {} );
+		} );
+
+		it( 'still flags a server gateway that has no matching available method', () => {
+			const state = buildState( {
+				availablePaymentMethods: {
+					stripe: {
+						name: 'stripe',
+						title: 'Stripe',
+						description: '',
+						gatewayId: 'stripe',
+						supportsStyle: [],
+					},
+				},
+				availableExpressPaymentMethods: {},
+			} );
+
+			expect( getIncompatiblePaymentMethods( state ) ).toEqual( {
+				'woo-payment-gateway': 'Woo Payment Gateway',
 			} );
 		} );
 	} );

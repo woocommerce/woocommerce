@@ -52,7 +52,7 @@ if ( wc_tax_enabled() ) {
 				<?php
 				if ( ! empty( $order_taxes ) ) :
 					foreach ( $order_taxes as $tax_id => $tax_item ) :
-						$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
+						$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] ?? 0 ) ?? '';
 						$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );
 						$column_label   = ! empty( $tax_item['label'] ) ? $tax_item['label'] : __( 'Tax', 'woocommerce' );
 						/* translators: %1$s: tax item name %2$s: tax class name  */

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent client-side-only blocks from disappearing from the post editor inserter.

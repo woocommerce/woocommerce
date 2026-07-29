@@ -113,7 +113,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function assign_report_columns() {
 		$table_name = self::get_db_table_name();
 		// Avoid ambiguous columns in SQL query.
-		$refunds = "ABS( SUM( CASE WHEN {$table_name}.net_total < 0 THEN {$table_name}.net_total + {$table_name}.tax_total + {$table_name}.shipping_total ELSE 0 END ) )";
+		// Identify refund rows by the sign of the whole row (net + tax + shipping), not net alone:
+		// when a prior partial refund already covered the net portion, an incremental full-refund
+		// row can have net_total = 0 while still carrying negative tax or shipping.
+		$refunds = "ABS( SUM( CASE WHEN ( {$table_name}.net_total + {$table_name}.tax_total + {$table_name}.shipping_total ) < 0 THEN {$table_name}.net_total + {$table_name}.tax_total + {$table_name}.shipping_total ELSE 0 END ) )";
 		if ( ! OrderUtil::uses_new_full_refund_data() ) {
 			$refunds = "ABS( SUM( CASE WHEN {$table_name}.net_total < 0 THEN {$table_name}.net_total ELSE 0 END ) )";
 		}
@@ -606,10 +609,26 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					|| self::should_split_full_refund_using_parent_order( $order, $parent_order )
 				);
 				if ( $use_parent_refund_amounts ) {
+					// A full refund derives its amounts from the parent order so that net, tax
+					// and shipping each zero out — a lump-sum refund carries no line items of its
+					// own, so the parent is the only reliable source for that split.
 					$data['num_items_sold'] = -1 * self::get_num_items_sold( $parent_order );
 					$data['tax_total']      = -1 * $parent_order->get_total_tax();
 					$data['net_total']      = -1 * self::get_net_total( $parent_order );
 					$data['shipping_total'] = -1 * $parent_order->get_shipping_total();
+
+					// If earlier refunds already booked part of the order, subtract what they
+					// recorded so this row only captures the remaining, not-yet-refunded portion.
+					// With no prior refunds this loop is skipped, leaving the totals above intact.
+					foreach ( $parent_order->get_refunds() as $prior_refund ) {
+						if ( $prior_refund->get_id() === $order->get_id() ) {
+							continue;
+						}
+						$data['num_items_sold'] -= self::get_num_items_sold( $prior_refund );
+						$data['tax_total']      -= (float) $prior_refund->get_total_tax();
+						$data['net_total']      -= self::get_net_total( $prior_refund );
+						$data['shipping_total'] -= (float) $prior_refund->get_shipping_total();
+					}
 				}
 			}
 			/**
