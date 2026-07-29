@@ -18,6 +18,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * @var callable|null Callback registering an extra checkout field, removed on tear down.
+	 */
+	private $extra_field_filter = null;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -47,7 +52,29 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 		delete_option( 'woocommerce_calc_taxes' );
 
+		if ( null !== $this->extra_field_filter ) {
+			remove_filter( 'woocommerce_checkout_fields', $this->extra_field_filter );
+			$this->extra_field_filter = null;
+		}
+
 		parent::tearDown();
+	}
+
+	/**
+	 * Register an extra checkout field in an arbitrary fieldset, the way checkout field editor plugins do.
+	 *
+	 * @param string $fieldset_key Fieldset the field belongs to.
+	 * @param string $key          Field key.
+	 * @param array  $field        Field definition.
+	 */
+	private function register_extra_checkout_field( $fieldset_key, $key, $field ) {
+		$this->extra_field_filter = function ( $fields ) use ( $fieldset_key, $key, $field ) {
+			$fields[ $fieldset_key ][ $key ] = $field;
+
+			return $fields;
+		};
+
+		add_filter( 'woocommerce_checkout_fields', $this->extra_field_filter );
 	}
 
 	/**
@@ -181,6 +208,179 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $errors->get_error_message( 'billing_country_validation' ) );
 		$this->assertEmpty( $errors->get_error_message( 'shipping_country_validation' ) );
+	}
+
+	/**
+	 * @testdox 'validate_posted_data' reports a required field error, and doesn't throw, for an empty phone field in a fieldset without a country.
+	 *
+	 * @testWith ["order"]
+	 *           ["custom"]
+	 *
+	 * @param string $fieldset_key The fieldset the phone field belongs to.
+	 */
+	public function test_validate_posted_data_does_not_throw_for_empty_phone_field_without_a_country( $fieldset_key ) {
+		$this->register_extra_checkout_field(
+			$fieldset_key,
+			'extra_phone',
+			array(
+				'label'    => 'Phone number',
+				'validate' => array( 'phone' ),
+				'required' => true,
+			)
+		);
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'extra_phone'               => '',
+		);
+
+		$errors = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+
+		$this->assertEquals(
+			'<strong>Phone number</strong> is a required field.',
+			$errors->get_error_message( 'extra_phone_required' ),
+			'An empty required phone field should be reported as missing, not blow up while resolving the country.'
+		);
+		$this->assertEmpty( $errors->get_error_message( 'extra_phone_validation' ) );
+	}
+
+	/**
+	 * @testdox 'validate_posted_data' validates a phone field in a fieldset without a country, without country specific rules.
+	 *
+	 * @testWith ["not a phone number", true]
+	 *           ["+34 600 000 000", false]
+	 *
+	 * @param string $phone        The posted phone number.
+	 * @param bool   $expect_error True to expect a validation error for the phone field.
+	 */
+	public function test_validate_posted_data_validates_phone_field_in_order_fieldset( $phone, $expect_error ) {
+		$this->register_extra_checkout_field(
+			'order',
+			'order_phone',
+			array(
+				'label'    => 'Phone number',
+				'validate' => array( 'phone' ),
+			)
+		);
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'order_phone'               => $phone,
+		);
+
+		$errors = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+
+		$this->assertEquals(
+			$expect_error ? '<strong>Phone number</strong> is not a valid phone number.' : '',
+			$errors->get_error_message( 'order_phone_validation' )
+		);
+	}
+
+	/**
+	 * @testdox 'validate_posted_data' validates a postcode field in a fieldset without a country, without country specific rules.
+	 *
+	 * @testWith ["INVALID!", true]
+	 *           ["12345", false]
+	 *
+	 * @param string $postcode     The posted postcode.
+	 * @param bool   $expect_error True to expect a validation error for the postcode field.
+	 */
+	public function test_validate_posted_data_validates_postcode_field_in_order_fieldset( $postcode, $expect_error ) {
+		$this->register_extra_checkout_field(
+			'order',
+			'order_postcode',
+			array(
+				'label'    => 'Delivery postcode',
+				'validate' => array( 'postcode' ),
+			)
+		);
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'order_postcode'            => $postcode,
+		);
+
+		$errors = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+
+		$this->assertEquals(
+			$expect_error ? '<strong>Delivery postcode</strong> is not a valid postcode / ZIP.' : '',
+			$errors->get_error_message( 'order_postcode_validation' )
+		);
+	}
+
+	/**
+	 * @testdox 'validate_posted_data' skips state validation, and doesn't throw, for a state field in a fieldset without a country.
+	 */
+	public function test_validate_posted_data_does_not_throw_for_state_field_in_order_fieldset() {
+		$this->register_extra_checkout_field(
+			'order',
+			'order_state',
+			array(
+				'label'    => 'Delivery state',
+				'validate' => array( 'state' ),
+			)
+		);
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'order_state'               => 'Not a real state',
+		);
+
+		$errors = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+
+		$this->assertEmpty( $errors->get_error_message( 'order_state_validation' ) );
+	}
+
+	/**
+	 * @testdox 'validate_posted_data' still falls back to the customer country for billing and shipping fields.
+	 *
+	 * @testWith ["billing", "GB", true]
+	 *           ["billing", "US", false]
+	 *           ["shipping", "GB", true]
+	 *           ["shipping", "US", false]
+	 *
+	 * @param string $fieldset_key     The fieldset holding the postcode field.
+	 * @param string $customer_country The country stored on the customer object.
+	 * @param bool   $expect_error     True to expect a validation error for the postcode field.
+	 */
+	public function test_validate_posted_data_falls_back_to_the_customer_country( $fieldset_key, $customer_country, $expect_error ) {
+		add_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
+
+		$original_billing_country  = WC()->customer->get_billing_country();
+		$original_shipping_country = WC()->customer->get_shipping_country();
+
+		WC()->customer->set_billing_country( $customer_country );
+		WC()->customer->set_shipping_country( $customer_country );
+
+		// The country is deliberately not posted, so it has to be resolved from the customer object.
+		$data = array(
+			'ship_to_different_address' => true,
+			$fieldset_key . '_postcode' => '12345',
+		);
+
+		$errors = new WP_Error();
+
+		try {
+			$this->sut->validate_posted_data( $data, $errors );
+		} finally {
+			WC()->customer->set_billing_country( $original_billing_country );
+			WC()->customer->set_shipping_country( $original_shipping_country );
+			remove_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
+		}
+
+		$this->assertEquals(
+			$expect_error,
+			! empty( $errors->get_error_message( $fieldset_key . '_postcode_validation' ) ),
+			"'12345' should " . ( $expect_error ? 'not ' : '' ) . "be accepted as a {$customer_country} postcode."
+		);
 	}
 
 	/**

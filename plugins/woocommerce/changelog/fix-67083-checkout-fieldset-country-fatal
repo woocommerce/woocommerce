@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a fatal error on the shortcode checkout when a phone or postcode validated field is registered outside the billing and shipping fieldsets.
