@@ -106,11 +106,14 @@ class WC_Analytics_Tracking {
 	 *
 	 * @param string $event_name The name of the event.
 	 * @param array  $event_properties Custom properties to send with the event.
+	 * @param bool   $is_client_supplied Whether $event_properties came from an untrusted
+	 *                                   client. Reserved property names are stripped when
+	 *                                   true. Defaults to false for server-side callers.
 	 *
 	 * @return bool|WP_Error True on emit or deliberate skip (no consent, bot UA,
 	 *                       or cookie-less context); WP_Error if pixel firing failed.
 	 */
-	public static function record_event( $event_name, $event_properties = array() ) {
+	public static function record_event( $event_name, $event_properties = array(), $is_client_supplied = false ) {
 		// Check consent before recording any event.
 		if ( ! Consent_Manager::has_analytics_consent() ) {
 			return true; // Skip recording.
@@ -126,8 +129,12 @@ class WC_Analytics_Tracking {
 			return true;
 		}
 
+		if ( $is_client_supplied ) {
+			$event_properties = self::strip_reserved_properties( $event_properties );
+		}
+
 		$prefixed_event_name = self::PREFIX . $event_name;
-		$properties          = self::get_properties( $prefixed_event_name, $event_properties );
+		$properties          = self::get_properties( $prefixed_event_name, $event_properties, $is_client_supplied );
 
 		// Record Tracks event.
 		$tracks_error  = null;
@@ -155,6 +162,25 @@ class WC_Analytics_Tracking {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Record an event whose properties came from an untrusted client.
+	 *
+	 * The entry point for the tracking proxy: the REST controller and the
+	 * MU-plugin speed module both come through here. It exists as a distinct
+	 * method rather than a sanitizer callers must remember to invoke, so that a
+	 * future entry point choosing the wrong one is visible at the call site.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @param string $event_name The name of the event.
+	 * @param array  $event_properties Client-supplied properties.
+	 *
+	 * @return bool|WP_Error True on emit or deliberate skip; WP_Error if pixel firing failed.
+	 */
+	public static function record_client_event( $event_name, $event_properties = array() ) {
+		return self::record_event( $event_name, $event_properties, true );
 	}
 
 	/**
@@ -349,9 +375,10 @@ class WC_Analytics_Tracking {
 	 *
 	 * @param string $event_name Event name.
 	 * @param array  $event_properties Event specific properties.
+	 * @param bool   $is_client_supplied Whether $event_properties came from an untrusted client.
 	 * @return array
 	 */
-	public static function get_properties( $event_name, $event_properties ) {
+	public static function get_properties( $event_name, $event_properties, $is_client_supplied = false ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- consumed by a filter argument added in a follow-up change.
 		$common_properties = self::get_common_properties();
 
 		/**

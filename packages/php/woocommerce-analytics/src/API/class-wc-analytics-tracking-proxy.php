@@ -100,7 +100,7 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 				continue;
 			}
 
-			$result = WC_Analytics_Tracking::record_event( $event_name, $properties );
+			$result = WC_Analytics_Tracking::record_client_event( $event_name, $properties );
 
 			if ( is_wp_error( $result ) ) {
 				$results[ $index ] = array(

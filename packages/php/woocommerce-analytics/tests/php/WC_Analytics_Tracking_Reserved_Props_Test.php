@@ -21,6 +21,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		$this->reset_reserved_property_names();
+		$this->reset_pixel_batch_queue();
 	}
 
 	/**
@@ -28,6 +29,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	 */
 	public function tear_down(): void {
 		$this->reset_reserved_property_names();
+		$this->reset_pixel_batch_queue();
 		parent::tear_down();
 	}
 
@@ -140,5 +142,129 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		$this->assertSame( array(), WC_Analytics_Tracking::strip_reserved_properties( array() ) );
 		$this->assertSame( array(), WC_Analytics_Tracking::strip_reserved_properties( 'not-an-array' ) );
 		$this->assertSame( array(), WC_Analytics_Tracking::strip_reserved_properties( null ) );
+	}
+
+	/**
+	 * Read the queued pixel URLs. record_event() queues rather than sends when
+	 * the Requests library supports request_multiple(), which it does here.
+	 *
+	 * @return array
+	 */
+	private function get_pixel_batch_queue(): array {
+		$reflection = new \ReflectionClass( WC_Analytics_Tracking::class );
+		$property   = $reflection->getProperty( 'pixel_batch_queue' );
+		$property->setAccessible( true );
+		return $property->getValue();
+	}
+
+	/**
+	 * Clear the queued pixel URLs and the cached visitor id, so one test's
+	 * cookie cannot leak into the next.
+	 */
+	private function reset_pixel_batch_queue(): void {
+		$reflection = new \ReflectionClass( WC_Analytics_Tracking::class );
+
+		$property = $reflection->getProperty( 'pixel_batch_queue' );
+		$property->setAccessible( true );
+		$property->setValue( null, array() );
+
+		$visitor = $reflection->getProperty( 'cached_visitor_id' );
+		$visitor->setAccessible( true );
+		$visitor->setValue( null, null );
+	}
+
+	/**
+	 * Parse the query string of the single queued pixel into an array.
+	 *
+	 * @return array
+	 */
+	private function get_queued_pixel_props(): array {
+		$queue = $this->get_pixel_batch_queue();
+		$this->assertCount( 1, $queue, 'Expected exactly one queued pixel.' );
+
+		$query = wp_parse_url( $queue[0], PHP_URL_QUERY );
+		$props = array();
+		parse_str( (string) $query, $props );
+
+		return $props;
+	}
+
+	/**
+	 * A client that posts server-owned properties must not see them reach the
+	 * pixel. This is the core of WOOA7S-1803.
+	 */
+	public function test_record_client_event_drops_client_supplied_server_properties(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		$this->reset_pixel_batch_queue();
+
+		WC_Analytics_Tracking::record_client_event(
+			'add_to_cart',
+			array(
+				'_via_ip'  => '8.8.8.8',
+				'store_id' => 'someone-elses-store',
+				'_ui'      => 'forged-visitor',
+				'pi'       => 42,
+			)
+		);
+
+		$props = $this->get_queued_pixel_props();
+
+		$this->assertNotSame( '8.8.8.8', $props['_via_ip'] ?? null, '_via_ip must come from the server.' );
+		$this->assertNotSame( 'someone-elses-store', $props['store_id'] ?? null, 'store_id must come from the server.' );
+		$this->assertSame( 'test-visitor-id-1234567890ab', $props['_ui'] ?? null, '_ui must come from the tk_ai cookie.' );
+		$this->assertSame( '42', $props['pi'] ?? null, 'Event-specific properties must survive.' );
+
+		$this->reset_pixel_batch_queue();
+		unset( $_COOKIE['tk_ai'] );
+	}
+
+	/**
+	 * The three client-authoritative properties must survive to the pixel,
+	 * otherwise proxy-mode page attribution breaks: the server's values would
+	 * describe the /track request instead of the page.
+	 */
+	public function test_record_client_event_keeps_client_authoritative_properties(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		$this->reset_pixel_batch_queue();
+
+		WC_Analytics_Tracking::record_client_event(
+			'add_to_cart',
+			array(
+				'_lg' => 'en-GB',
+				'_dl' => 'https://example.com/product/thing',
+				'_dr' => 'https://example.com/',
+			)
+		);
+
+		$props = $this->get_queued_pixel_props();
+
+		$this->assertSame( 'en-GB', $props['_lg'] ?? null );
+		$this->assertSame( 'https://example.com/product/thing', $props['_dl'] ?? null );
+		$this->assertSame( 'https://example.com/', $props['_dr'] ?? null );
+
+		$this->reset_pixel_batch_queue();
+		unset( $_COOKIE['tk_ai'] );
+	}
+
+	/**
+	 * The trusted path is unchanged: a server-side caller can still set a
+	 * property that collides with a common one. Universal and My_Account rely
+	 * on record_event() keeping these semantics.
+	 */
+	public function test_record_event_leaves_trusted_caller_properties_alone(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		$this->reset_pixel_batch_queue();
+
+		WC_Analytics_Tracking::record_event(
+			'add_to_cart',
+			array( 'store_id' => 'set-by-trusted-caller' )
+		);
+
+		$props = $this->get_queued_pixel_props();
+
+		$this->assertSame( 'set-by-trusted-caller', $props['store_id'] ?? null );
+
+		$this->reset_pixel_batch_queue();
+		unset( $_COOKIE['tk_ai'] );
 	}
 }
