@@ -237,7 +237,8 @@ abstract class AbstractBlock {
 			)
 		);
 
-		// WordPress explicitly disallows loading wp-editor alongside the block-based widget editor.
+		// WordPress reports incorrect usage when wp-editor is loaded alongside the block-based widget editor,
+		// as it conflicts with the wp-edit-widgets and wp-customize-widgets scripts.
 		if ( 'wc-block-library' === $handle && function_exists( 'get_current_screen' ) ) {
 			$screen = get_current_screen();
 			if ( $screen && 'widgets' === $screen->base ) {
