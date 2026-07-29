@@ -272,9 +272,7 @@ final class OrderWithdrawalFormProcessor {
 
 				return false;
 			}
-		}
 
-		if ( $matched_order ) {
 			$this->add_order_withdrawal_note( $matched_order, $data );
 		}
 
