@@ -8,7 +8,7 @@ post_title: WordPress and WooCommerce version support policy
 
 Woo uses a latest-minus-one (L-1) policy for WordPress and WooCommerce version
 compatibility. This policy defines the versions that we officially test and
-support; it is separate from entitlement to customer support services.
+support as dependencies; it is separate from entitlement to customer support services.
 
 L-1 includes:
 
