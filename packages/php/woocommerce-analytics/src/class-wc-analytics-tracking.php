@@ -39,6 +39,10 @@ class WC_Analytics_Tracking {
 	 * URL, its referrer, its Accept-Language header — not the page the event
 	 * happened on. The client's values are the correct ones.
 	 *
+	 * `_via_ref` stays server-owned despite coming from the same header as `_dr`:
+	 * it records the referrer of the request that fired the pixel, which on the
+	 * proxy path is the /track POST, and is not used for page attribution.
+	 *
 	 * @since 0.16.8
 	 *
 	 * @var string[]
@@ -48,15 +52,54 @@ class WC_Analytics_Tracking {
 	/**
 	 * Identity and envelope property names a client may never set.
 	 *
-	 * These are also protected today by `$required_properties` merging last in
-	 * `get_properties()`. Listed explicitly so that merge ordering is not the only
-	 * thing standing between a client and the visitor id.
+	 * Each is also protected today by something else: `_ui`, `_ut`, `_en` and
+	 * `_ts` by `$required_properties` merging last in `get_properties()`,
+	 * `browser_type` by `Pixel_Builder::validate_and_sanitize()` assigning it
+	 * unconditionally. Listed explicitly so that neither merge ordering nor a
+	 * downstream overwrite is the only thing standing between a client and the
+	 * visitor id.
 	 *
 	 * @since 0.16.8
 	 *
 	 * @var string[]
 	 */
-	const RESERVED_IDENTITY_PROPERTIES = array( '_ui', '_ut', '_en', 'browser_type' );
+	const RESERVED_IDENTITY_PROPERTIES = array( '_ui', '_ut', '_en', '_ts', 'browser_type' );
+
+	/**
+	 * Maximum number of events a single client request may record.
+	 *
+	 * Each event becomes an outbound pixel request, so an unbounded batch turns
+	 * the unauthenticated endpoint into an amplifier. The client's own batch size
+	 * is 10 (see `api-client.ts`); the headroom is for retries coalescing.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @var int
+	 */
+	const MAX_CLIENT_EVENTS_PER_REQUEST = 50;
+
+	/**
+	 * Maximum number of properties a client may set on one event.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @var int
+	 */
+	const MAX_CLIENT_PROPERTIES_PER_EVENT = 50;
+
+	/**
+	 * Maximum length of a single client-supplied property value.
+	 *
+	 * Set for the same reason `Woo_Analytics_Trait::cap_page_string()` bounds
+	 * caller-influenced strings on the page-output path: values reach the pixel
+	 * URL, which is rejected outright once it grows too long. The two are
+	 * independent — a change to one does not imply a change to the other.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @var int
+	 */
+	const MAX_CLIENT_PROPERTY_LENGTH = 200;
 
 	/**
 	 * Path suffix of the proxy tracking endpoint.
@@ -116,11 +159,14 @@ class WC_Analytics_Tracking {
 	/**
 	 * Record an event in Tracks and ClickHouse (If enabled).
 	 *
+	 * @since 0.16.8 Added the `$is_client_supplied` parameter.
+	 *
 	 * @param string $event_name The name of the event.
 	 * @param array  $event_properties Custom properties to send with the event.
 	 * @param bool   $is_client_supplied Whether $event_properties came from an untrusted
-	 *                                   client. Reserved property names are stripped when
-	 *                                   true. Defaults to false for server-side callers.
+	 *                                   client. Reserved property names are stripped and
+	 *                                   the rest are capped when true. Defaults to false
+	 *                                   for server-side callers.
 	 *
 	 * @return bool|WP_Error True on emit or deliberate skip (no consent, bot UA,
 	 *                       or cookie-less context); WP_Error if pixel firing failed.
@@ -145,7 +191,7 @@ class WC_Analytics_Tracking {
 		$is_client_supplied = $is_client_supplied || self::is_proxy_tracking_request();
 
 		if ( $is_client_supplied ) {
-			$event_properties = self::strip_reserved_properties( $event_properties );
+			$event_properties = self::sanitize_client_properties( $event_properties );
 		}
 
 		$prefixed_event_name = self::PREFIX . $event_name;
@@ -421,6 +467,15 @@ class WC_Analytics_Tracking {
 			$is_client_supplied
 		);
 
+		if ( $is_client_supplied ) {
+			// A callback that defers to an existing value hands a reserved property
+			// back to the client, which supplied it. Re-assert the server's own.
+			$properties = array_merge(
+				$properties,
+				array_intersect_key( $common_properties, array_flip( self::get_reserved_property_names() ) )
+			);
+		}
+
 		$required_properties = $event_name
 			? array(
 				'_en' => $event_name,
@@ -460,9 +515,12 @@ class WC_Analytics_Tracking {
 	/**
 	 * Get the property names a client may not set.
 	 *
-	 * Derived from the properties the server actually computes rather than
-	 * restated as a literal, so a property added to `get_page_common_properties()`
-	 * or `get_server_details()` is protected without a second edit here.
+	 * Derived from `get_common_properties()` — everything `get_session_properties()`,
+	 * `get_page_common_properties()` and `get_server_details()` compute — rather
+	 * than restated as a literal, so a property added to any of the three is
+	 * protected with no edit to this method. The pinned list in
+	 * `WC_Analytics_Tracking_Reserved_Props_Test` still fails on the addition, on
+	 * purpose: protection is automatic, granting an exemption is not.
 	 *
 	 * Memoized: a batch of events would otherwise recompute the common properties
 	 * once per event.
@@ -495,16 +553,18 @@ class WC_Analytics_Tracking {
 	 * turn the endpoint into an oracle for probing the reserved list, and
 	 * analytics should not fail loudly on a malformed client.
 	 *
-	 * Does not cover property names introduced by callbacks on
-	 * `jetpack_woocommerce_analytics_event_props`: those do not exist until after
-	 * the filter has run, by which point a client value of the same name has
-	 * already been merged. See the filter's docblock for the contract callbacks
-	 * are expected to follow.
+	 * Reserved names a callback on `jetpack_woocommerce_analytics_event_props`
+	 * introduces are re-asserted after the filter runs; see `get_properties()`.
+	 * Names the filter invents are still the client's to win — see the filter's
+	 * docblock for the contract callbacks are expected to follow.
 	 *
 	 * @since 0.16.8
 	 *
-	 * @param array $event_properties Client-supplied properties.
-	 * @return array Properties with reserved names removed.
+	 * @param array $event_properties Client-supplied properties. Any non-array value
+	 *                                is tolerated — the REST body is attacker-shaped —
+	 *                                and yields an empty array.
+	 * @return array Properties with reserved names removed; empty array for empty or
+	 *               non-array input.
 	 */
 	public static function strip_reserved_properties( $event_properties ) {
 		if ( ! is_array( $event_properties ) || empty( $event_properties ) ) {
@@ -515,6 +575,74 @@ class WC_Analytics_Tracking {
 			$event_properties,
 			array_flip( self::get_reserved_property_names() )
 		);
+	}
+
+	/**
+	 * Strip and bound a client-supplied property array.
+	 *
+	 * The single place the untrusted-input rules are applied, so that the REST
+	 * controller, the MU-plugin speed module and the stale-template safety net
+	 * cannot drift apart on what "sanitized" means.
+	 *
+	 * Capping is silent and lossy for the same reason stripping is: an
+	 * unauthenticated endpoint that reports which values it rejected is an oracle,
+	 * and analytics should not fail loudly on a malformed client. Truncated values
+	 * keep an ellipsis so they stay distinguishable downstream from a value that
+	 * genuinely ended at the limit, matching `Woo_Analytics_Trait::cap_page_string()`.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @param array $event_properties Client-supplied properties.
+	 * @return array Sanitized properties.
+	 */
+	public static function sanitize_client_properties( $event_properties ) {
+		$event_properties = self::strip_reserved_properties( $event_properties );
+
+		if ( count( $event_properties ) > self::MAX_CLIENT_PROPERTIES_PER_EVENT ) {
+			$event_properties = array_slice( $event_properties, 0, self::MAX_CLIENT_PROPERTIES_PER_EVENT, true );
+		}
+
+		foreach ( $event_properties as $key => $value ) {
+			// Arrays are flattened later by get_properties(); bound their members too.
+			if ( is_array( $value ) ) {
+				$event_properties[ $key ] = array_map( array( __CLASS__, 'cap_client_value' ), $value );
+				continue;
+			}
+
+			$event_properties[ $key ] = self::cap_client_value( $value );
+		}
+
+		return $event_properties;
+	}
+
+	/**
+	 * Bound one client-supplied value on its way to the pixel URL.
+	 *
+	 * Nested arrays are collapsed to an empty string rather than capped: the
+	 * flattening in `get_properties()` calls `implode()` on array members, which
+	 * emits an "Array to string conversion" warning for a nested one. Letting an
+	 * unauthenticated caller write warnings into the error log is the actual
+	 * problem; the value itself is meaningless either way.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @param mixed $value Client-supplied value.
+	 * @return mixed Bounded value.
+	 */
+	private static function cap_client_value( $value ) {
+		if ( is_array( $value ) || is_object( $value ) ) {
+			return '';
+		}
+
+		if ( ! is_string( $value ) ) {
+			return $value;
+		}
+
+		if ( mb_strlen( $value ) <= self::MAX_CLIENT_PROPERTY_LENGTH ) {
+			return $value;
+		}
+
+		return mb_substr( $value, 0, self::MAX_CLIENT_PROPERTY_LENGTH - 1 ) . '…';
 	}
 
 	/**

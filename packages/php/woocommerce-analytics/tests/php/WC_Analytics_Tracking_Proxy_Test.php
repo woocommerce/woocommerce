@@ -42,7 +42,7 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 		parent::set_up();
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
 		$GLOBALS['wp_rest_server'] = null;
-		$this->server_snapshot    = $_SERVER;
+		$this->server_snapshot     = $_SERVER;
 		$this->reset_pixel_batch_queue();
 	}
 
@@ -55,7 +55,7 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 	public function tear_down(): void {
 		remove_all_filters( 'woocommerce_analytics_experimental_proxy_tracking_enabled' );
 		$GLOBALS['wp_rest_server'] = null;
-		$_SERVER                  = $this->server_snapshot;
+		$_SERVER                   = $this->server_snapshot;
 		unset( $_COOKIE['tk_ai'] );
 		$this->reset_pixel_batch_queue();
 		parent::tear_down();
@@ -75,8 +75,10 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Clear the queued pixel URLs and the cached visitor id, so one test's
-	 * cookie or event cannot leak into the next.
+	 * Clear the queued pixel URLs and every per-request memo, so one test's
+	 * cookie, IP or event cannot leak into the next. `cached_ip` in particular
+	 * survives the whole PHP process, so a test that never set REMOTE_ADDR would
+	 * otherwise pin '' for every test after it.
 	 */
 	private function reset_pixel_batch_queue(): void {
 		$reflection = new \ReflectionClass( WC_Analytics_Tracking::class );
@@ -84,6 +86,14 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 		$property = $reflection->getProperty( 'pixel_batch_queue' );
 		$property->setAccessible( true );
 		$property->setValue( null, array() );
+
+		$ip = $reflection->getProperty( 'cached_ip' );
+		$ip->setAccessible( true );
+		$ip->setValue( null, null );
+
+		$reserved = $reflection->getProperty( 'reserved_property_names' );
+		$reserved->setAccessible( true );
+		$reserved->setValue( null, null );
 
 		$visitor = $reflection->getProperty( 'cached_visitor_id' );
 		$visitor->setAccessible( true );
@@ -152,6 +162,12 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 		$_SERVER['REQUEST_METHOD'] = 'POST';
 		$_SERVER['REQUEST_URI']    = '/?rest_route=/woocommerce-analytics/v1/track';
 
+		// Seeded so the assertions below prove the server's value replaced the
+		// forged one. Unseeded, store_id is absent from the pixel entirely and
+		// _via_ip is '', so an assertNotSame() would pass on absence alone.
+		$_SERVER['REMOTE_ADDR'] = '203.0.113.7';
+		update_option( 'woocommerce_store_id', 'real-store-id' );
+
 		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
 		Woocommerce_Analytics::register_rest_routes();
 
@@ -176,8 +192,117 @@ class WC_Analytics_Tracking_Proxy_Test extends BaseTestCase {
 
 		$props = $this->get_queued_pixel_props();
 
-		$this->assertNotSame( 'someone-elses-store', $props['store_id'] ?? null, 'store_id must not survive a forged value posted to /track.' );
-		$this->assertNotSame( '8.8.8.8', $props['_via_ip'] ?? null, '_via_ip must not survive a forged value posted to /track.' );
+		$this->assertSame( 'real-store-id', $props['store_id'] ?? null, 'store_id must be the server value, not merely absent.' );
+		$this->assertSame( '203.0.113.7', $props['_via_ip'] ?? null, '_via_ip must be the server value, not merely absent.' );
 		$this->assertSame( '42', $props['pi'] ?? null, 'Event-specific properties must still survive.' );
+	}
+
+	/**
+	 * The route being absent from get_routes() is a white-box fact; what actually
+	 * has to hold is that a POST arriving anyway records nothing. Pinning the
+	 * behaviour means a future move to "register but reject in the callback" has
+	 * to be a deliberate decision rather than a silent one.
+	 */
+	public function test_post_records_nothing_when_proxy_tracking_is_disabled(): void {
+		$_COOKIE['tk_ai']          = 'test-visitor-id-1234567890ab';
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_SERVER['REQUEST_URI']    = '/?rest_route=/woocommerce-analytics/v1/track';
+
+		// No filter: proxy tracking is off by default.
+		Woocommerce_Analytics::register_rest_routes();
+
+		$request = new \WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'event_name' => 'add_to_cart',
+					'properties' => array( 'pi' => 42 ),
+				)
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 404, $response->get_status(), 'A POST to /track must not be served where proxy tracking is off.' );
+		$this->assertSame( array(), $this->get_pixel_batch_queue(), 'No pixel may be queued when the route is gated off.' );
+	}
+
+	/**
+	 * The batch loop is the controller's main path, and the memoized reserved
+	 * list is justified by batches specifically — so a later event in the same
+	 * request must still be stripped. Also covers the 207 partial-failure branch,
+	 * which nothing else exercises.
+	 */
+	public function test_batch_strips_every_event_and_reports_per_event_results(): void {
+		$_COOKIE['tk_ai']          = 'test-visitor-id-1234567890ab';
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_SERVER['REQUEST_URI']    = '/?rest_route=/woocommerce-analytics/v1/track';
+		update_option( 'woocommerce_store_id', 'real-store-id' );
+
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		Woocommerce_Analytics::register_rest_routes();
+
+		$request = new \WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					// No event_name: must fail on its own without aborting the batch.
+					array( 'properties' => array( 'pi' => 1 ) ),
+					array(
+						'event_name' => 'add_to_cart',
+						'properties' => array(
+							'store_id' => 'someone-elses-store',
+							'pi'       => 2,
+						),
+					),
+				)
+			)
+		);
+
+		$response = rest_do_request( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 207, $response->get_status() );
+		$this->assertFalse( $data['results'][0]['success'] );
+		$this->assertTrue( $data['results'][1]['success'] );
+
+		$props = $this->get_queued_pixel_props();
+		$this->assertSame( 'real-store-id', $props['store_id'] ?? null, 'The memoized reserved list must still strip on a later event in the batch.' );
+		$this->assertSame( '2', $props['pi'] ?? null );
+	}
+
+	/**
+	 * Every event becomes an outbound pixel request, so an unauthenticated caller
+	 * must not be able to fan out an unbounded batch.
+	 */
+	public function test_batch_size_is_capped(): void {
+		$_COOKIE['tk_ai']          = 'test-visitor-id-1234567890ab';
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_SERVER['REQUEST_URI']    = '/?rest_route=/woocommerce-analytics/v1/track';
+
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+		Woocommerce_Analytics::register_rest_routes();
+
+		$events = array();
+		for ( $i = 0; $i < WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST + 10; $i++ ) {
+			$events[] = array(
+				'event_name' => 'add_to_cart',
+				'properties' => array( 'pi' => $i ),
+			);
+		}
+
+		$request = new \WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( $events ) );
+
+		rest_do_request( $request );
+
+		$this->assertCount(
+			WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST,
+			$this->get_pixel_batch_queue(),
+			'The batch must be truncated to MAX_CLIENT_EVENTS_PER_REQUEST.'
+		);
 	}
 }

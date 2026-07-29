@@ -191,6 +191,12 @@ class Woocommerce_Analytics {
 
 	/**
 	 * Maybe update proxy speed module.
+	 *
+	 * Turning proxy tracking off uninstalls the module as well as leaving the REST
+	 * route unregistered, so the two halves of "the endpoint is gone" agree. The
+	 * module itself also refuses requests while the feature is off, because this
+	 * runs on `admin_init` behind a day-long transient and cannot be relied on to
+	 * take effect promptly.
 	 */
 	public static function maybe_update_proxy_speed_module() {
 		// Skip if we've already checked recently.
@@ -200,7 +206,7 @@ class Woocommerce_Analytics {
 
 		$version = get_option( self::PROXY_SPEED_MODULE_VERSION_OPTION, false );
 
-		if ( \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled() ) {
+		if ( self::should_install_proxy_speed_module() ) {
 			if ( $version !== self::PACKAGE_VERSION ) {
 				self::maybe_add_proxy_speed_module();
 			}
@@ -214,14 +220,34 @@ class Woocommerce_Analytics {
 	}
 
 	/**
+	 * Whether the proxy speed module belongs on this site.
+	 *
+	 * It is an accelerator for the tracking proxy, so it needs both its own
+	 * opt-in and the feature it accelerates. Without the second condition,
+	 * turning proxy tracking off would leave an installed module answering
+	 * requests the REST route no longer serves.
+	 *
+	 * @since 0.16.8
+	 *
+	 * @return bool
+	 */
+	private static function should_install_proxy_speed_module() {
+		return \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled()
+			&& \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled();
+	}
+
+	/**
 	 * Maybe add proxy speed module.
 	 */
 	public static function maybe_add_proxy_speed_module() {
-		if ( ! \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled() ) {
+		if ( ! self::should_install_proxy_speed_module() ) {
 			return;
 		}
 
 		if ( ! self::init_filesystem() ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->error( 'WooCommerce Analytics proxy speed module not installed: filesystem unavailable.', array( 'source' => 'woocommerce-analytics' ) );
+			}
 			return;
 		}
 
@@ -234,6 +260,9 @@ class Woocommerce_Analytics {
 
 		// If the mu-plugin directory doesn't exist, we can't copy the files.
 		if ( ! is_dir( WPMU_PLUGIN_DIR ) ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->error( 'WooCommerce Analytics proxy speed module not installed: mu-plugins directory could not be created.', array( 'source' => 'woocommerce-analytics' ) );
+			}
 			return;
 		}
 

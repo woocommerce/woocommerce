@@ -140,8 +140,10 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 	 * Test that update is skipped when version matches current package version.
 	 */
 	public function test_maybe_update_proxy_speed_module_skips_when_version_matches(): void {
-		// Enable the feature flag so the update path is checked.
+		// Enable both flags: the module is only installed where the feature it
+		// accelerates is also on.
 		add_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
+		add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
 
 		// Set version to match current.
 		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION, Woocommerce_Analytics::PACKAGE_VERSION );
@@ -151,6 +153,49 @@ class Woocommerce_Analytics_Test extends BaseTestCase {
 
 		// Version should remain the same (no update needed).
 		$this->assertSame( Woocommerce_Analytics::PACKAGE_VERSION, get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION ) );
+
+		remove_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
+		remove_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
+	}
+
+	/**
+	 * Turning proxy tracking off must uninstall the speed module, not just leave
+	 * the REST route unregistered. Otherwise the module keeps intercepting POSTs
+	 * at MU-plugin stage on a site whose operator believes the endpoint is gone.
+	 */
+	public function test_maybe_update_proxy_speed_module_removes_when_proxy_tracking_disabled(): void {
+		// The module's own flag stays on; only proxy tracking is off.
+		add_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
+
+		update_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION, Woocommerce_Analytics::PACKAGE_VERSION );
+
+		Woocommerce_Analytics::maybe_update_proxy_speed_module();
+
+		$this->assertFalse(
+			get_option( Woocommerce_Analytics::PROXY_SPEED_MODULE_VERSION_OPTION ),
+			'The speed module must be uninstalled when proxy tracking is disabled.'
+		);
+
+		remove_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
+	}
+
+	/**
+	 * The install path needs both flags, so that an operator cannot end up with a
+	 * module installed for a feature that is switched off.
+	 */
+	public function test_maybe_add_proxy_speed_module_requires_proxy_tracking_too(): void {
+		add_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
+
+		if ( ! defined( 'WPMU_PLUGIN_DIR' ) ) {
+			define( 'WPMU_PLUGIN_DIR', $this->temp_mu_plugin_dir );
+		}
+
+		Woocommerce_Analytics::maybe_add_proxy_speed_module();
+
+		$this->assertFileDoesNotExist(
+			$this->temp_mu_plugin_dir . '/woocommerce-analytics-proxy-speed-module.php',
+			'No module may be written while proxy tracking is disabled.'
+		);
 
 		remove_filter( 'woocommerce_analytics_auto_install_proxy_speed_module', '__return_true' );
 	}

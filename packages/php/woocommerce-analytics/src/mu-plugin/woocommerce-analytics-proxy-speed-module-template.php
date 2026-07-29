@@ -159,6 +159,22 @@ class WooCommerceAnalyticsProxySpeed {
 	 * @return void
 	 */
 	private function process_proxy_request() {
+		// The REST route is only registered where proxy tracking is enabled, but this
+		// module runs at MU-plugin stage and never reaches rest_api_init, so without
+		// this check the endpoint would keep answering on sites that turned the
+		// feature off. The check lives here rather than in init() because it needs
+		// the autoloader, which init() loads only after is_proxy_request() matches.
+		if ( ! \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled() ) {
+			$this->send_json_response(
+				array(
+					'success' => false,
+					'error'   => 'Proxy tracking is not enabled on this site.',
+				),
+				403
+			);
+			return;
+		}
+
 		// Apply magic quotes to superglobals ($_GET, $_POST, $_COOKIE, $_REQUEST) for compatibility with the regular API flow.
 		if ( function_exists( 'wp_magic_quotes' ) ) {
 			wp_magic_quotes();
@@ -191,6 +207,14 @@ class WooCommerceAnalyticsProxySpeed {
 		// Normalize: wrap a single event object or unexpected scalar in an array.
 		if ( ! is_array( $events ) || isset( $events['event_name'] ) ) {
 			$events = array( $events );
+		}
+
+		// Same bound as the REST controller. The constant lives in the package rather
+		// than being restated here: unlike is_proxy_request(), this runs after the
+		// autoloader, so the class is available.
+		$max_events = \Automattic\Woocommerce_Analytics\WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST;
+		if ( count( $events ) > $max_events ) {
+			$events = array_slice( $events, 0, $max_events, true );
 		}
 
 		$results    = array();

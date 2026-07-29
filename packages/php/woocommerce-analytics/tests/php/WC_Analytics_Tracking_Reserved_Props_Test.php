@@ -52,6 +52,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	 */
 	public function tear_down(): void {
 		$_SERVER = $this->server_snapshot;
+		unset( $_COOKIE['tk_ai'] );
 		$this->reset_reserved_property_names();
 		$this->reset_pixel_batch_queue();
 		$this->reset_cached_ip();
@@ -72,9 +73,10 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 
 	/**
 	 * Pins the effective reserved set. This test exists to fail: adding a
-	 * property to get_page_common_properties() or get_server_details() must
-	 * force a deliberate decision about whether a client may set it, rather
-	 * than silently inheriting protection or silently missing out on it.
+	 * property to get_session_properties(), get_page_common_properties() or
+	 * get_server_details() must force a deliberate decision about whether a
+	 * client may set it, rather than silently inheriting protection or silently
+	 * missing out on it.
 	 */
 	public function test_reserved_property_names_match_the_documented_set(): void {
 		$expected = array(
@@ -102,6 +104,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 			'_ui',
 			'_ut',
 			'_en',
+			'_ts',
 			'browser_type',
 		);
 
@@ -319,11 +322,17 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	/**
 	 * Simulates a stale MU-plugin copy: it calls record_event() with no flag,
 	 * during a POST to the track endpoint. The guard must strip anyway.
+	 *
+	 * `woocommerce_store_id` is seeded so the assertion proves the server's value
+	 * replaced the forged one. Without it the property is absent from the pixel
+	 * entirely — `get_option()` returns null and `http_build_query()` drops nulls
+	 * — and an assertNotSame() would pass on absence alone.
 	 */
 	public function test_record_event_strips_during_a_proxy_request(): void {
-		$_COOKIE['tk_ai']           = 'test-visitor-id-1234567890ab';
-		$_SERVER['REQUEST_METHOD']  = 'POST';
-		$_SERVER['REQUEST_URI']     = '/wp-json/woocommerce-analytics/v1/track';
+		$_COOKIE['tk_ai']          = 'test-visitor-id-1234567890ab';
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_SERVER['REQUEST_URI']    = '/wp-json/woocommerce-analytics/v1/track';
+		update_option( 'woocommerce_store_id', 'real-store-id' );
 		$this->reset_pixel_batch_queue();
 
 		WC_Analytics_Tracking::record_event(
@@ -333,10 +342,7 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 
 		$props = $this->get_queued_pixel_props();
 
-		$this->assertNotSame( 'someone-elses-store', $props['store_id'] ?? null );
-
-		$this->reset_pixel_batch_queue();
-		unset( $_COOKIE['tk_ai'] );
+		$this->assertSame( 'real-store-id', $props['store_id'] ?? null, 'The server value must replace the forged one, not merely be absent.' );
 	}
 
 	/**
@@ -515,5 +521,234 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		remove_filter( 'jetpack_woocommerce_analytics_event_props', $callback, 10 );
 
 		$this->assertSame( array( true, false ), $seen );
+	}
+
+	/**
+	 * A callback that defers to an existing value hands a *reserved* property
+	 * straight back to the client that supplied it. The strip runs before the
+	 * filter, so it cannot see this; get_properties() re-asserts the server's
+	 * values afterwards. Contrast with
+	 * test_filter_callback_deferring_to_an_existing_value_loses_to_the_client(),
+	 * which covers a name the filter invents — still the client's to win.
+	 */
+	public function test_filter_callback_cannot_hand_a_reserved_property_back_to_the_client(): void {
+		update_option( 'woocommerce_store_id', 'real-store-id' );
+
+		$callback = function ( $props ) {
+			$props['store_id'] = isset( $props['store_id'] ) ? $props['store_id'] : 'unused';
+			return $props;
+		};
+		add_filter( 'jetpack_woocommerce_analytics_event_props', $callback );
+
+		$props = WC_Analytics_Tracking::get_properties(
+			'woocommerceanalytics_add_to_cart',
+			array( 'store_id' => 'someone-elses-store' ),
+			true
+		);
+
+		remove_filter( 'jetpack_woocommerce_analytics_event_props', $callback );
+
+		$this->assertSame( 'real-store-id', $props['store_id'] );
+	}
+
+	/**
+	 * The trusted path must keep its escape hatch: a server-side caller can still
+	 * set a property that collides with a common one, and the post-filter
+	 * re-assertion must not take that away.
+	 */
+	public function test_reserved_properties_are_not_re_asserted_for_trusted_callers(): void {
+		update_option( 'woocommerce_store_id', 'real-store-id' );
+
+		$props = WC_Analytics_Tracking::get_properties(
+			'woocommerceanalytics_add_to_cart',
+			array( 'store_id' => 'set-by-trusted-caller' ),
+			false
+		);
+
+		$this->assertSame( 'set-by-trusted-caller', $props['store_id'] );
+	}
+
+	/**
+	 * `_ts` is in $required_properties and in RESERVED_IDENTITY_PROPERTIES, so a
+	 * client cannot forge the event timestamp at either layer.
+	 */
+	public function test_client_cannot_forge_the_event_timestamp(): void {
+		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+
+		WC_Analytics_Tracking::record_client_event(
+			'add_to_cart',
+			array(
+				'_ts' => '1',
+				'pi'  => 42,
+			)
+		);
+
+		$props = $this->get_queued_pixel_props();
+
+		$this->assertMatchesRegularExpression( '/^\d{13}$/', (string) ( $props['_ts'] ?? '' ), '_ts must be the server timestamp.' );
+	}
+
+	/**
+	 * The endpoint is unauthenticated and every property reaches the pixel URL,
+	 * which is rejected outright once it grows too long. Values are truncated
+	 * with an ellipsis so a capped value stays distinguishable from one that
+	 * genuinely ended at the limit.
+	 */
+	public function test_client_property_values_are_capped(): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array(
+				'pn'    => str_repeat( 'a', 500 ),
+				'short' => 'kept',
+			)
+		);
+
+		$this->assertSame( WC_Analytics_Tracking::MAX_CLIENT_PROPERTY_LENGTH, mb_strlen( $sanitized['pn'] ) );
+		$this->assertStringEndsWith( '…', $sanitized['pn'] );
+		$this->assertSame( 'kept', $sanitized['short'], 'Values within the limit must be untouched.' );
+	}
+
+	/**
+	 * A client cannot widen its own footprint by sending hundreds of properties.
+	 */
+	public function test_client_property_count_is_capped(): void {
+		$properties = array();
+		for ( $i = 0; $i < WC_Analytics_Tracking::MAX_CLIENT_PROPERTIES_PER_EVENT + 25; $i++ ) {
+			$properties[ 'p' . $i ] = $i;
+		}
+
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( $properties );
+
+		$this->assertCount( WC_Analytics_Tracking::MAX_CLIENT_PROPERTIES_PER_EVENT, $sanitized );
+	}
+
+	/**
+	 * get_properties() flattens array values with implode(), which emits an
+	 * "Array to string conversion" warning for a nested array. Letting an
+	 * unauthenticated caller write warnings into the error log is the problem
+	 * worth closing; the value itself is meaningless either way.
+	 */
+	public function test_nested_client_arrays_do_not_reach_the_flattening_step(): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array( 'foo' => array( array( 1, 2 ), 'ok' ) )
+		);
+
+		$this->assertSame( array( '', 'ok' ), $sanitized['foo'] );
+	}
+
+	/**
+	 * Non-string scalars are analytics payload, not text: capping them would
+	 * change their type on the way to the pixel.
+	 */
+	public function test_client_scalar_values_keep_their_type(): void {
+		$sanitized = WC_Analytics_Tracking::sanitize_client_properties(
+			array(
+				'pi' => 42,
+				'ch' => true,
+			)
+		);
+
+		$this->assertSame( 42, $sanitized['pi'] );
+		$this->assertTrue( $sanitized['ch'] );
+	}
+
+	/**
+	 * The guard's defensive early returns, none of which a data provider typed
+	 * `string` can reach. WorDBless leaves REQUEST_METHOD absent and REQUEST_URI
+	 * empty, so without this the `! isset()` branches are never executed and
+	 * could be deleted with the suite still green.
+	 *
+	 * @dataProvider malformed_request_provider
+	 *
+	 * @param array $server Superglobal overrides; a null value means unset the key.
+	 */
+	public function test_is_proxy_tracking_request_is_false_for_malformed_requests( array $server ): void {
+		foreach ( $server as $key => $value ) {
+			if ( null === $value ) {
+				unset( $_SERVER[ $key ] );
+				continue;
+			}
+			$_SERVER[ $key ] = $value;
+		}
+
+		$this->assertFalse( WC_Analytics_Tracking::is_proxy_tracking_request() );
+	}
+
+	/**
+	 * Malformed request shapes that must not reach the suffix comparison.
+	 *
+	 * @return array<string, array{0: array}>
+	 */
+	public function malformed_request_provider(): array {
+		$uri = '/wp-json/woocommerce-analytics/v1/track';
+
+		return array(
+			'no REQUEST_METHOD (WP-CLI, cron)' => array(
+				array(
+					'REQUEST_METHOD' => null,
+					'REQUEST_URI'    => $uri,
+				),
+			),
+			'no REQUEST_URI'                   => array(
+				array(
+					'REQUEST_METHOD' => 'POST',
+					'REQUEST_URI'    => null,
+				),
+			),
+			'empty REQUEST_URI'                => array(
+				array(
+					'REQUEST_METHOD' => 'POST',
+					'REQUEST_URI'    => '',
+				),
+			),
+			'non-string REQUEST_URI'           => array(
+				array(
+					'REQUEST_METHOD' => 'POST',
+					'REQUEST_URI'    => array( $uri ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * The two copies of the request-shape logic must not drift: the template's
+	 * copy is the first thing that decides whether a request is a proxy POST, it
+	 * runs before the autoloader so it cannot delegate, and nothing else in the
+	 * suite executes it. Asserting on the source text is crude, but it is the
+	 * only thing standing behind the "Change both together" comments.
+	 */
+	public function test_mu_plugin_template_stays_in_step_with_the_package(): void {
+		$template = file_get_contents(
+			dirname( __DIR__, 2 ) . '/src/mu-plugin/woocommerce-analytics-proxy-speed-module-template.php'
+		);
+
+		$this->assertSame(
+			1,
+			preg_match( "/const PROXY_REQUEST_PATH = '([^']+)';/", $template, $matches ),
+			'The template must declare PROXY_REQUEST_PATH.'
+		);
+		$this->assertSame( WC_Analytics_Tracking::PROXY_REQUEST_PATH, $matches[1] );
+
+		$this->assertStringContainsString(
+			'preg_match( \'/[^A-Za-z0-9\-._~\/]/\', $path )',
+			$template,
+			'The template must keep the same character restriction as is_proxy_tracking_request().'
+		);
+
+		$this->assertStringContainsString(
+			'::record_client_event(',
+			$template,
+			'The template must record through the untrusted-client entry point.'
+		);
+		$this->assertStringNotContainsString(
+			'::record_event(',
+			$template,
+			'The template must not call the trusted entry point.'
+		);
+
+		$this->assertStringContainsString(
+			'Features::is_proxy_tracking_enabled()',
+			$template,
+			'The template must refuse requests while proxy tracking is disabled; the REST gate cannot reach it.'
+		);
 	}
 }

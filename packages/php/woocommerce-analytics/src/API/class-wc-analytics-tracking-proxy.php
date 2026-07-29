@@ -41,7 +41,10 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'track_events' ),
-					'permission_callback' => '__return_true', // no need to check permissions
+					// Unauthenticated by design: this receives front-end events. The route is
+					// only registered where proxy tracking is enabled, and track_events()
+					// records via record_client_event(), which strips server-owned properties.
+					'permission_callback' => '__return_true',
 					'schema'              => array( $this, 'get_public_item_schema' ),
 				),
 			)
@@ -72,6 +75,13 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 		if ( ! is_array( $events ) || ( isset( $events['event_name'] ) ) ) {
 			// If $events is a single event (associative array), wrap it in an array.
 			$events = array( $events );
+		}
+
+		// Bound the batch: every event becomes an outbound pixel request, and this
+		// endpoint is unauthenticated. Dropping the tail is silent on purpose — see
+		// WC_Analytics_Tracking::sanitize_client_properties().
+		if ( count( $events ) > WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST ) {
+			$events = array_slice( $events, 0, WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST, true );
 		}
 
 		$results    = array();

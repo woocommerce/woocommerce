@@ -1,4 +1,4 @@
 Significance: patch
 Type: security
 
-Stop the tracking proxy endpoint from accepting client-supplied values for server-derived event properties, and only register it where proxy tracking is enabled.
+Stop the tracking proxy endpoint from accepting client-supplied values for server-derived event properties, bound the size of what it accepts, and only serve it where proxy tracking is enabled.
