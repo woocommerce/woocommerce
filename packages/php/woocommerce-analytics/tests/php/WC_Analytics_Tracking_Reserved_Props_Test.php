@@ -385,10 +385,18 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	 * allowed set, matching the MU-plugin template's is_proxy_request(). This
 	 * is the one piece of the "kept in step with the template" claim that was
 	 * previously covered only by inspection, not by an assertion.
+	 *
+	 * The disallowed '%' sits mid-path, not at the end, on purpose: the path
+	 * still ends with the exact proxy suffix, so the suffix comparison alone
+	 * would accept this request. Only the character-restriction check can
+	 * reject it. A trailing disallowed character (e.g. a suffix of
+	 * "/track%20") would also break the suffix match by itself, so it would
+	 * return false regardless of whether the character check exists — that
+	 * shape cannot isolate the regex, and must not be used here.
 	 */
 	public function test_is_proxy_tracking_request_rejects_disallowed_characters(): void {
 		$_SERVER['REQUEST_METHOD'] = 'POST';
-		$_SERVER['REQUEST_URI']    = '/wp-json/woocommerce-analytics/v1/track%20';
+		$_SERVER['REQUEST_URI']    = '/wp%20json/woocommerce-analytics/v1/track';
 
 		$this->assertFalse( WC_Analytics_Tracking::is_proxy_tracking_request() );
 	}
