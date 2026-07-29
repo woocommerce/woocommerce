@@ -243,6 +243,8 @@ jQuery( function ( $ ) {
 		init: function ( cart ) {
 			this.cart = cart;
 			this.toggle_shipping = this.toggle_shipping.bind( this );
+			this.toggle_shipping_on_keydown =
+				this.toggle_shipping_on_keydown.bind( this );
 			this.shipping_method_selected =
 				this.shipping_method_selected.bind( this );
 			this.shipping_calculator_submit =
@@ -252,6 +254,11 @@ jQuery( function ( $ ) {
 				'click',
 				'.shipping-calculator-button',
 				this.toggle_shipping
+			);
+			$( document ).on(
+				'keydown',
+				'.shipping-calculator-button',
+				this.toggle_shipping_on_keydown
 			);
 			$( document ).on(
 				'change',
@@ -291,12 +298,25 @@ jQuery( function ( $ ) {
 		},
 
 		/**
+		 * Handle when pressing the Space key on the shipping calculator link.
+		 * This is necessary because the link has the role="button" attribute
+		 * and needs to act like a button.
+		 *
+		 * @param {Object} event The jQuery event.
+		 */
+		toggle_shipping_on_keydown: function ( event ) {
+			if ( event.key === ' ' ) {
+				event.preventDefault();
+				$( event.currentTarget ).trigger( 'click' );
+			}
+		},
+
+		/**
 		 * Handles when a shipping method is selected.
 		 */
 		shipping_method_selected: function ( event ) {
 			var shipping_methods = {};
 
-			// eslint-disable-next-line max-len
 			$(
 				'select.shipping_method, :input[name^=shipping_method][type=radio]:checked, :input[name^=shipping_method][type=hidden]'
 			).each( function () {
