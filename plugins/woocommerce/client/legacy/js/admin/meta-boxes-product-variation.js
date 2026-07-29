@@ -1656,7 +1656,7 @@ jQuery( function ( $ ) {
 			wc_meta_boxes_product_variations_ajax
 				.load_variations( page )
 				.then(
-					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state()
+					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state
 				);
 		},
 
