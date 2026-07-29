@@ -6,6 +6,14 @@ import { getSetting, CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import { useLocalStorageState } from '@woocommerce/base-hooks';
 
+/**
+ * localStorage key for the storefront banner's dismissed extensions. Kept
+ * distinct from the editor sidebar notice's key so the two surfaces don't share
+ * (and overwrite) each other's storage.
+ */
+export const DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY =
+	'wc-blocks_dismissed_incompatible_extensions_notices_frontend';
+
 // Whether every item in `subset` is also present in `superset`.
 const isSubsetOf = ( subset: string[], superset: string[] ): boolean =>
 	subset.every( ( item ) => superset.includes( item ) );
@@ -40,12 +48,9 @@ interface Props {
 export const IncompatibleExtensionsFrontendNotice = ( {
 	block,
 }: Props ): JSX.Element | null => {
-	// A dedicated key: this storefront banner must not share storage with the
-	// editor sidebar notice, which stores a different (per-block) shape under
-	// `wc-blocks_dismissed_incompatible_extensions_notices`.
 	const [ dismissedSlugs, setDismissedSlugs ] = useLocalStorageState<
 		string[]
-	>( 'wc-blocks_dismissed_incompatible_extensions_notices_frontend', [] );
+	>( DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY, [] );
 
 	const { extensions, slugs } = getIncompatibleExtensions();
 	const count = slugs.length;

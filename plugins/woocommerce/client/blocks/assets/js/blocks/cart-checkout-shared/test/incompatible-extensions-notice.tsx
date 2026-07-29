@@ -7,7 +7,10 @@ import { getSetting } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import { IncompatibleExtensionsFrontendNotice } from '../incompatible-extensions-notice';
+import {
+	IncompatibleExtensionsFrontendNotice,
+	DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY,
+} from '../incompatible-extensions-notice';
 
 jest.mock( '@woocommerce/settings', () => ( {
 	getSetting: jest.fn(),
@@ -45,10 +48,10 @@ jest.mock( '@woocommerce/base-components/notice-banner', () => ( {
 
 const mockGetSetting = getSetting as jest.MockedFunction< typeof getSetting >;
 
-// The storefront banner's own key, and the editor notice's key it must no
-// longer collide with.
-const FRONTEND_KEY =
-	'wc-blocks_dismissed_incompatible_extensions_notices_frontend';
+// The storefront banner's own key, imported so a rename is caught here. The
+// editor notice's key is kept as a literal on purpose: importing it would pull
+// the editor hook's data-store dependencies into this test.
+const FRONTEND_KEY = DISMISSED_INCOMPATIBLE_EXTENSIONS_FRONTEND_STORAGE_KEY;
 const EDITOR_KEY = 'wc-blocks_dismissed_incompatible_extensions_notices';
 
 const setIncompatibleExtensions = (
