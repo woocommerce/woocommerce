@@ -58,8 +58,20 @@ const TASKS = [
 
 const MAX_JOB_LINKS_PER_TASK = 2;
 
+// Returns { tasks, hasPending }. `tasks` holds only decided (pass/fail)
+// tasks - a task with zero matching runs ("not applicable") and a task
+// still in_progress ("not decided yet") both leave no entry in `tasks`,
+// but only the latter also sets `hasPending`. That distinction matters:
+// three separate workflows (CI, PHPStan Analysis, Require milestone) each
+// trigger their own workflow_run independently, so it's normal for e.g.
+// PHPStan and Milestone to complete (and pass) minutes before CI's
+// Lint/Unit/E2E/API jobs do. Without `hasPending`, computeOverallState
+// would see only the two decided, passing tasks and call it "clear" -
+// announcing all-clear while most checks haven't even run yet.
 function classifyCheckRuns(checkRuns) {
-    return TASKS.map((task) => {
+    let hasPending = false;
+
+    const tasks = TASKS.map((task) => {
         const matching = checkRuns.filter(
             (run) => task.matches(run.name) && !run.name.endsWith(' (optional)')
         );
@@ -71,6 +83,7 @@ function classifyCheckRuns(checkRuns) {
 
         const undecided = relevant.some((run) => run.status !== 'completed');
         if (undecided) {
+            hasPending = true;
             return null;
         }
 
@@ -95,6 +108,8 @@ function classifyCheckRuns(checkRuns) {
 
         return result;
     }).filter(Boolean);
+
+    return { tasks, hasPending };
 }
 
 function computeOverallState(tasks) {

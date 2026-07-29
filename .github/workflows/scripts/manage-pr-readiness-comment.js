@@ -88,7 +88,7 @@ module.exports = async ({ github, context, core }) => {
         return;
     }
 
-    const tasks = classifyCheckRuns(checkRuns);
+    const { tasks, hasPending } = classifyCheckRuns(checkRuns);
 
     const existingComment = await findExistingComment(github, context, pr.number);
     const previousState = parsePreviousState(
@@ -103,6 +103,21 @@ module.exports = async ({ github, context, core }) => {
     }
 
     const overallState = computeOverallState(tasks);
+
+    // Three separate workflows trigger this independently, so it's normal
+    // for some to finish (and pass) while others - e.g. CI's slower
+    // Lint/Unit/E2E/API jobs - are still running. Reporting "clear" from
+    // only the tasks decided so far would be a false all-clear; wait for
+    // a later trigger, once every task has actually settled. A real
+    // failure already found among the decided tasks is reported right
+    // away regardless - that's actionable now and shouldn't wait on
+    // slower jobs.
+    if (hasPending && overallState === 'clear') {
+        core.info(
+            `Some checks for #${pr.number} are still in progress; deferring instead of reporting a premature all-clear.`
+        );
+        return;
+    }
 
     if (existingComment && previousState === 'clear' && overallState === 'clear') {
         core.info(

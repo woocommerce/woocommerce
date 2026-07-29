@@ -18,19 +18,19 @@ function checkRun(name, overrides = {}) {
 }
 
 test('classifyCheckRuns: task is omitted when no check-run matches it', () => {
-    const tasks = classifyCheckRuns([checkRun('Some Unrelated Check')]);
+    const { tasks } = classifyCheckRuns([checkRun('Some Unrelated Check')]);
     assert.deepEqual(tasks, []);
 });
 
 test('classifyCheckRuns: task passes when its only matching run succeeded', () => {
-    const tasks = classifyCheckRuns([checkRun('Validate changelog')]);
+    const { tasks } = classifyCheckRuns([checkRun('Validate changelog')]);
     assert.equal(tasks.length, 1);
     assert.equal(tasks[0].label, 'Changelog entry');
     assert.equal(tasks[0].status, 'pass');
 });
 
 test('classifyCheckRuns: task fails when any matching run failed', () => {
-    const tasks = classifyCheckRuns([
+    const { tasks } = classifyCheckRuns([
         checkRun('Lint - @woocommerce/plugin-woocommerce'),
         checkRun('Lint - @woocommerce/blocks', { conclusion: 'failure' }),
     ]);
@@ -40,21 +40,61 @@ test('classifyCheckRuns: task fails when any matching run failed', () => {
 });
 
 test('classifyCheckRuns: skipped runs are treated as not applicable, not failing', () => {
-    const tasks = classifyCheckRuns([
+    const { tasks } = classifyCheckRuns([
         checkRun('Validate markdown', { conclusion: 'skipped' }),
     ]);
     assert.deepEqual(tasks, []);
 });
 
-test('classifyCheckRuns: still-running matching runs omit the task for this update', () => {
-    const tasks = classifyCheckRuns([
+test('classifyCheckRuns: still-running matching runs omit the task for this update and flag hasPending', () => {
+    const { tasks, hasPending } = classifyCheckRuns([
         checkRun('PHPStan Analysis', { status: 'in_progress', conclusion: null }),
     ]);
     assert.deepEqual(tasks, []);
+    assert.equal(hasPending, true);
+});
+
+test('classifyCheckRuns: a task with zero matching runs does not flag hasPending (not applicable, not pending)', () => {
+    const { tasks, hasPending } = classifyCheckRuns([checkRun('Some Unrelated Check')]);
+    assert.deepEqual(tasks, []);
+    assert.equal(hasPending, false);
+});
+
+test('classifyCheckRuns: hasPending stays true even when other tasks are fully decided', () => {
+    // The real-world case this guards against: PHPStan and Milestone
+    // (separate, faster workflows) complete and pass while CI's slower
+    // Lint job is still running - the decided tasks must not silently
+    // imply "everything's fine".
+    const { tasks, hasPending } = classifyCheckRuns([
+        checkRun('PHPStan Analysis'),
+        checkRun('Ensure milestone is or will be assigned'),
+        checkRun('Lint - @woocommerce/plugin-woocommerce', {
+            status: 'in_progress',
+            conclusion: null,
+        }),
+    ]);
+    assert.equal(hasPending, true);
+    const labels = tasks.map((task) => task.label).sort();
+    assert.deepEqual(labels, ['Milestone', 'PHPStan']);
+    assert.ok(tasks.every((task) => task.status === 'pass'));
+});
+
+test('classifyCheckRuns: a decided failure surfaces alongside a still-pending task', () => {
+    const { tasks, hasPending } = classifyCheckRuns([
+        checkRun('Validate changelog', { conclusion: 'failure' }),
+        checkRun('Lint - @woocommerce/plugin-woocommerce', {
+            status: 'in_progress',
+            conclusion: null,
+        }),
+    ]);
+    assert.equal(hasPending, true);
+    assert.equal(tasks.length, 1);
+    assert.equal(tasks[0].label, 'Changelog entry');
+    assert.equal(tasks[0].status, 'fail');
 });
 
 test('classifyCheckRuns: matches dynamic test job names by bracketed testType', () => {
-    const tasks = classifyCheckRuns([
+    const { tasks } = classifyCheckRuns([
         checkRun('Unit Tests - @woocommerce/plugin-woocommerce [unit:php]'),
         checkRun('E2E Tests - @woocommerce/plugin-woocommerce [e2e]', { conclusion: 'failure' }),
         checkRun('API Tests - @woocommerce/plugin-woocommerce [api]'),
@@ -68,14 +108,14 @@ test('classifyCheckRuns: matches dynamic test job names by bracketed testType', 
 });
 
 test('classifyCheckRuns: performance tests are not tracked', () => {
-    const tasks = classifyCheckRuns([
+    const { tasks } = classifyCheckRuns([
         checkRun('Performance Tests - @woocommerce/plugin-woocommerce [performance]'),
     ]);
     assert.deepEqual(tasks, []);
 });
 
 test('classifyCheckRuns: PHPStan via test-matrix jobs with "PHPStan: PHP" prefix are classified as PHPStan task', () => {
-    const tasks = classifyCheckRuns([
+    const { tasks } = classifyCheckRuns([
         checkRun('PHPStan: PHP 7.4 - @woocommerce/email-editor-config [static:analysis]', { conclusion: 'failure' }),
     ]);
     assert.equal(tasks.length, 1);
@@ -84,7 +124,7 @@ test('classifyCheckRuns: PHPStan via test-matrix jobs with "PHPStan: PHP" prefix
 });
 
 test('classifyCheckRuns: per-package PHPStan jobs do not match Unit tests (PHP) task', () => {
-    const tasks = classifyCheckRuns([
+    const { tasks } = classifyCheckRuns([
         checkRun('PHPStan: PHP 8.4 - @woocommerce/email-editor-config [static:analysis]', { conclusion: 'failure' }),
     ]);
     // Should only match PHPStan, not Unit tests (PHP), since testType is [static:analysis] not [unit:php]
@@ -93,7 +133,7 @@ test('classifyCheckRuns: per-package PHPStan jobs do not match Unit tests (PHP) 
 });
 
 test('classifyCheckRuns: a failing optional job does not flip the task to fail', () => {
-    const tasks = classifyCheckRuns([
+    const { tasks } = classifyCheckRuns([
         checkRun('E2E Tests - @woocommerce/plugin-woocommerce [e2e]'),
         checkRun(
             'WP: pre-release - @woocommerce/plugin-woocommerce [e2e] (optional)',
@@ -106,7 +146,7 @@ test('classifyCheckRuns: a failing optional job does not flip the task to fail',
 });
 
 test('classifyCheckRuns: task is omitted when the only matching run is optional', () => {
-    const tasks = classifyCheckRuns([
+    const { tasks } = classifyCheckRuns([
         checkRun(
             'WP: pre-release - @woocommerce/plugin-woocommerce [e2e] (optional)',
             { conclusion: 'failure' }
@@ -116,7 +156,7 @@ test('classifyCheckRuns: task is omitted when the only matching run is optional'
 });
 
 test('classifyCheckRuns: a failing task (any label) carries its job url', () => {
-    const tasks = classifyCheckRuns([
+    const { tasks } = classifyCheckRuns([
         checkRun('Lint - @woocommerce/plugin-woocommerce', {
             conclusion: 'failure',
             html_url: 'https://github.com/woocommerce/woocommerce/actions/runs/1/job/1',
@@ -129,7 +169,7 @@ test('classifyCheckRuns: a failing task (any label) carries its job url', () => 
 });
 
 test('classifyCheckRuns: job urls are capped at 2 even with more failing runs', () => {
-    const tasks = classifyCheckRuns([
+    const { tasks } = classifyCheckRuns([
         checkRun('Unit Tests - A [unit:php]', { conclusion: 'failure', html_url: 'url-a' }),
         checkRun('Unit Tests - B [unit:php]', { conclusion: 'failure', html_url: 'url-b' }),
         checkRun('Unit Tests - C [unit:php]', { conclusion: 'failure', html_url: 'url-c' }),
@@ -139,7 +179,7 @@ test('classifyCheckRuns: job urls are capped at 2 even with more failing runs', 
 });
 
 test('classifyCheckRuns: a passing task carries no job urls', () => {
-    const tasks = classifyCheckRuns([
+    const { tasks } = classifyCheckRuns([
         checkRun('Lint - @woocommerce/plugin-woocommerce', { html_url: 'url-a' }),
     ]);
     assert.equal(tasks.length, 1);
