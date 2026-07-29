@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the Cart/Checkout incompatible extensions sidebar notice dismissed when an incompatible payment gateway or extension is disabled; it now reappears only when a new, never-acknowledged incompatibility is added.
