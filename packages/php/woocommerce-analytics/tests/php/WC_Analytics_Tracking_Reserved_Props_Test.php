@@ -37,15 +37,25 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		$this->server_snapshot = $_SERVER;
 		$this->reset_reserved_property_names();
 		$this->reset_pixel_batch_queue();
+		$this->reset_cached_ip();
+		delete_transient( 'wc_analytics_blog_details' );
 	}
 
 	/**
 	 * Clear the memoized reserved-name list after each test.
+	 *
+	 * Runs unconditionally regardless of the test outcome, so a seeded
+	 * `woocommerce_store_id` option, the blog-details transient, or the cached
+	 * IP address set up for one test (to prove substitution rather than mere
+	 * absence, see test_record_client_event_drops_client_supplied_server_properties())
+	 * cannot leak into the next test even if an assertion fails first.
 	 */
 	public function tear_down(): void {
 		$_SERVER = $this->server_snapshot;
 		$this->reset_reserved_property_names();
 		$this->reset_pixel_batch_queue();
+		$this->reset_cached_ip();
+		delete_transient( 'wc_analytics_blog_details' );
 		parent::tear_down();
 	}
 
@@ -190,6 +200,18 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Clear the cached IP address, so a REMOTE_ADDR seeded for one test cannot
+	 * leak into the next: get_user_ip_address() memoizes its result for the
+	 * life of the PHP process.
+	 */
+	private function reset_cached_ip(): void {
+		$reflection = new \ReflectionClass( WC_Analytics_Tracking::class );
+		$property   = $reflection->getProperty( 'cached_ip' );
+		$property->setAccessible( true );
+		$property->setValue( null, null );
+	}
+
+	/**
 	 * Parse the query string of the single queued pixel into an array.
 	 *
 	 * @return array
@@ -208,9 +230,19 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	/**
 	 * A client that posts server-owned properties must not see them reach the
 	 * pixel. This is the core of WOOA7S-1803.
+	 *
+	 * Both `store_id` and `_via_ip` are seeded with a real server-derived value
+	 * before the call, so the assertions prove the server's value replaced the
+	 * client's forged one, not merely that the forged one is absent. Under
+	 * WorDBless, `get_option( 'woocommerce_store_id', null )` is null and
+	 * `http_build_query()` drops null values, so an assertNotSame() against an
+	 * unseeded environment would pass on absence alone and miss a stripped-but-
+	 * not-substituted bug.
 	 */
 	public function test_record_client_event_drops_client_supplied_server_properties(): void {
-		$_COOKIE['tk_ai'] = 'test-visitor-id-1234567890ab';
+		$_COOKIE['tk_ai']       = 'test-visitor-id-1234567890ab';
+		$_SERVER['REMOTE_ADDR'] = '203.0.113.7';
+		update_option( 'woocommerce_store_id', 'real-store-id' );
 		$this->reset_pixel_batch_queue();
 
 		WC_Analytics_Tracking::record_client_event(
@@ -225,8 +257,8 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 
 		$props = $this->get_queued_pixel_props();
 
-		$this->assertNotSame( '8.8.8.8', $props['_via_ip'] ?? null, '_via_ip must come from the server.' );
-		$this->assertNotSame( 'someone-elses-store', $props['store_id'] ?? null, 'store_id must come from the server.' );
+		$this->assertSame( '203.0.113.7', $props['_via_ip'] ?? null, '_via_ip must come from the server (REMOTE_ADDR), not the client.' );
+		$this->assertSame( 'real-store-id', $props['store_id'] ?? null, 'store_id must come from the server (woocommerce_store_id option), not the client.' );
 		$this->assertSame( 'test-visitor-id-1234567890ab', $props['_ui'] ?? null, '_ui must come from the tk_ai cookie.' );
 		$this->assertSame( '42', $props['pi'] ?? null, 'Event-specific properties must survive.' );
 
@@ -339,14 +371,24 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	/**
 	 * Requests that must not trigger the guard.
 	 *
+	 * The `?rest_route=` case is load-bearing, not incidental: on a
+	 * plain-permalink site `rest_url()` produces exactly this shape, whose
+	 * parsed path is `/`, so the guard correctly does not match it — and
+	 * neither does `WooCommerceAnalyticsProxySpeed::is_proxy_request()` in the
+	 * MU-plugin template. The two copies agreeing here is what keeps a stale
+	 * template from intercepting a request this guard would not recognise. On
+	 * such sites `record_client_event()` — not this guard — is the only thing
+	 * stripping reserved properties.
+	 *
 	 * @return array<string, array{0: string, 1: string}>
 	 */
 	public function non_proxy_request_provider(): array {
 		return array(
-			'GET to the track path'      => array( 'GET', '/wp-json/woocommerce-analytics/v1/track' ),
-			'POST to the Store API'      => array( 'POST', '/wp-json/wc/store/v1/checkout' ),
-			'POST to a lookalike suffix' => array( 'POST', '/wp-json/other/woocommerce-analytics/v1/tracking' ),
-			'POST to the site root'      => array( 'POST', '/' ),
+			'GET to the track path'          => array( 'GET', '/wp-json/woocommerce-analytics/v1/track' ),
+			'POST to the Store API'          => array( 'POST', '/wp-json/wc/store/v1/checkout' ),
+			'POST to a lookalike suffix'     => array( 'POST', '/wp-json/other/woocommerce-analytics/v1/tracking' ),
+			'POST to the site root'          => array( 'POST', '/' ),
+			'POST with rest_route query var' => array( 'POST', '/?rest_route=/woocommerce-analytics/v1/track' ),
 		);
 	}
 
@@ -368,15 +410,21 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	/**
 	 * URIs that must match.
 	 *
+	 * Note what is deliberately absent: the genuine `?rest_route=` query-var
+	 * form (e.g. `/?rest_route=/woocommerce-analytics/v1/track`, what
+	 * `rest_url()` produces on a plain-permalink site) does NOT match this
+	 * guard — its parsed path is just `/`. That is covered as a non-matching
+	 * case in non_proxy_request_provider(), not here.
+	 *
 	 * @return array<string, array{0: string}>
 	 */
 	public function proxy_request_shape_provider(): array {
 		return array(
-			'plain'             => array( '/wp-json/woocommerce-analytics/v1/track' ),
-			'trailing slash'    => array( '/wp-json/woocommerce-analytics/v1/track/' ),
-			'query string'      => array( '/wp-json/woocommerce-analytics/v1/track?_wpnonce=abc123' ),
-			'subdirectory'      => array( '/shop/wp-json/woocommerce-analytics/v1/track' ),
-			'rest_route form'   => array( '/index.php/wp-json/woocommerce-analytics/v1/track' ),
+			'plain'                                    => array( '/wp-json/woocommerce-analytics/v1/track' ),
+			'trailing slash'                           => array( '/wp-json/woocommerce-analytics/v1/track/' ),
+			'query string'                             => array( '/wp-json/woocommerce-analytics/v1/track?_wpnonce=abc123' ),
+			'subdirectory'                             => array( '/shop/wp-json/woocommerce-analytics/v1/track' ),
+			'index.php-prefixed pretty-permalink form' => array( '/index.php/wp-json/woocommerce-analytics/v1/track' ),
 		);
 	}
 
