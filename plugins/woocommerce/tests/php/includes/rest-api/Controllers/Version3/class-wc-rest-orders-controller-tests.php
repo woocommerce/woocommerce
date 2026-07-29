@@ -873,10 +873,10 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @testdox Updating an order ignores response-only line item meta display fields.
 	 */
 	public function test_order_update_ignores_line_item_meta_display_fields(): void {
-		$order       = WC_Helper_Order::create_order();
-		$line_items  = $order->get_items( 'line_item' );
-		$line_item   = reset( $line_items );
-		$meta_value  = array(
+		$order      = WC_Helper_Order::create_order();
+		$line_items = $order->get_items( 'line_item' );
+		$line_item  = reset( $line_items );
+		$meta_value = array(
 			array(
 				'guid'      => 'https://example.com/wp-content/uploads/custom-image.jpg',
 				'file_type' => 'image/jpeg',
@@ -885,7 +885,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'key'       => 'custom-image-key',
 			),
 		);
-		$meta_key    = '_file_upload_data';
+		$meta_key   = '_file_upload_data';
 
 		$line_item->add_meta_data( $meta_key, $meta_value, true );
 		$line_item->save();
