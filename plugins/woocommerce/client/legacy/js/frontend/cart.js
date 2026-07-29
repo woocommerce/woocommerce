@@ -155,7 +155,7 @@ jQuery( function ( $ ) {
 				$new_coupon_field.val( $old_coupon_field_val );
 				// The coupon input with error needs to be focused before adding the live region
 				// with the error message, otherwise the screen reader won't read it.
-				$new_coupon_field.focus();
+				$new_coupon_field.trigger( 'focus' );
 				show_coupon_error( $old_coupon_error_msg, $new_coupon_field_wrapper, true );
 			}
 

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
@@ -418,6 +419,17 @@ class ProductQuery implements QueryClausesGenerator {
 	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		global $wpdb;
 
+		// SKU and slug lookups can return variations, so exclude any whose parent product is not published.
+		if ( in_array( 'product_variation', (array) $wp_query->get( 'post_type' ), true ) ) {
+			$args['where'] .= $wpdb->prepare(
+				" AND ( {$wpdb->posts}.post_type != 'product_variation' OR EXISTS (
+					SELECT 1 FROM {$wpdb->posts} AS parent
+					WHERE parent.ID = {$wpdb->posts}.post_parent AND parent.post_status = %s
+				) ) ",
+				ProductStatus::PUBLISH
+			);
+		}
+
 		if ( $wp_query->get( 'search' ) ) {
 			$search         = '%' . $wpdb->esc_like( $wp_query->get( 'search' ) ) . '%';
 			$search_query   = wc_product_sku_enabled()
@@ -550,7 +562,7 @@ class ProductQuery implements QueryClausesGenerator {
 	 */
 	protected function adjust_price_filters_for_displayed_taxes() {
 		$display  = get_option( 'woocommerce_tax_display_shop' );
-		$database = wc_prices_include_tax() ? 'incl' : 'excl';
+		$database = wc_prices_include_tax() ? TaxDisplayMode::INCLUSIVE : TaxDisplayMode::EXCLUSIVE;
 
 		return $display !== $database;
 	}
@@ -580,7 +592,7 @@ class ProductQuery implements QueryClausesGenerator {
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
 
 		// If prices are shown incl. tax, we want to remove the taxes from the filter amount to match prices stored excl. tax.
-		if ( 'incl' === $tax_display ) {
+		if ( TaxDisplayMode::INCLUSIVE === $tax_display ) {
 			/**
 			 * Filters if taxes should be removed from locations outside the store base location.
 			 *

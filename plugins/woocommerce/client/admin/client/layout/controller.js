@@ -25,6 +25,7 @@ import { useReports } from '../analytics/report/use-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { useFilterHook } from '~/utils/use-filter-hook';
 import { NoMatch } from './NoMatch';
+import { isFeatureEnabled } from '~/utils/features';
 
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
@@ -90,7 +91,7 @@ export const getPages = ( reports = [] ) => {
 		capability: 'manage_woocommerce',
 	} );
 
-	if ( window.wcAdminFeatures.analytics ) {
+	if ( isFeatureEnabled( 'analytics' ) ) {
 		pages.push( {
 			container: Dashboard,
 			path: '/analytics/overview',
@@ -153,22 +154,20 @@ export const getPages = ( reports = [] ) => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures.marketing ) {
-		pages.push( {
-			container: MarketingOverviewMultichannel,
-			path: '/marketing',
-			breadcrumbs: [
-				...initialBreadcrumbs,
-				[ '/marketing', __( 'Marketing', 'woocommerce' ) ],
-				__( 'Overview', 'woocommerce' ),
-			],
-			wpOpenMenu: 'toplevel_page_woocommerce-marketing',
-			navArgs: {
-				id: 'woocommerce-marketing-overview',
-			},
-			capability: 'view_woocommerce_reports',
-		} );
-	}
+	pages.push( {
+		container: MarketingOverviewMultichannel,
+		path: '/marketing',
+		breadcrumbs: [
+			...initialBreadcrumbs,
+			[ '/marketing', __( 'Marketing', 'woocommerce' ) ],
+			__( 'Overview', 'woocommerce' ),
+		],
+		wpOpenMenu: 'toplevel_page_woocommerce-marketing',
+		navArgs: {
+			id: 'woocommerce-marketing-overview',
+		},
+		capability: 'view_woocommerce_reports',
+	} );
 
 	pages.push( {
 		container: Marketplace,
@@ -187,90 +186,74 @@ export const getPages = ( reports = [] ) => {
 		},
 	} );
 
-	if ( window.wcAdminFeatures.onboarding ) {
-		pages.push( {
-			container: CoreProfiler,
-			path: '/setup-wizard',
-			breadcrumbs: [
-				...initialBreadcrumbs,
-				__( 'Profiler', 'woocommerce' ),
-			],
-			capability: 'manage_woocommerce',
-			layout: {
-				header: false,
-				footer: false,
-				showNotices: true,
-				showStoreAlerts: false,
-				showPluginArea: false,
-			},
-		} );
-	}
+	pages.push( {
+		container: CoreProfiler,
+		path: '/setup-wizard',
+		breadcrumbs: [ ...initialBreadcrumbs, __( 'Profiler', 'woocommerce' ) ],
+		capability: 'manage_woocommerce',
+		layout: {
+			header: false,
+			footer: false,
+			showNotices: true,
+			showStoreAlerts: false,
+			showPluginArea: false,
+		},
+	} );
 
-	if ( window.wcAdminFeatures[ 'core-profiler' ] ) {
-		pages.push( {
-			container: CoreProfiler,
-			path: '/profiler',
-			breadcrumbs: [
-				...initialBreadcrumbs,
-				__( 'Profiler', 'woocommerce' ),
-			],
-			capability: 'manage_woocommerce',
-		} );
-	}
+	pages.push( {
+		container: CoreProfiler,
+		path: '/profiler',
+		breadcrumbs: [ ...initialBreadcrumbs, __( 'Profiler', 'woocommerce' ) ],
+		capability: 'manage_woocommerce',
+	} );
 
-	if ( window.wcAdminFeatures[ 'customize-store' ] ) {
-		pages.push( {
-			container: CustomizeStore,
-			path: '/customize-store/*',
-			breadcrumbs: [
-				...initialBreadcrumbs,
-				__( 'Customize Your Store', 'woocommerce' ),
-			],
-			layout: {
-				header: false,
-				footer: true,
-				showNotices: true,
-				showStoreAlerts: false,
-				showPluginArea: false,
-			},
-			capability: 'manage_woocommerce',
-		} );
-	}
+	pages.push( {
+		container: CustomizeStore,
+		path: '/customize-store/*',
+		breadcrumbs: [
+			...initialBreadcrumbs,
+			__( 'Customize Your Store', 'woocommerce' ),
+		],
+		layout: {
+			header: false,
+			footer: true,
+			showNotices: true,
+			showStoreAlerts: false,
+			showPluginArea: false,
+		},
+		capability: 'manage_woocommerce',
+	} );
 
-	if ( window.wcAdminFeatures[ 'launch-your-store' ] ) {
-		pages.push( {
-			container: LaunchStore,
-			path: '/launch-your-store/*',
-			breadcrumbs: [
-				...initialBreadcrumbs,
-				__( 'Launch Your Store', 'woocommerce' ),
-			],
-			layout: {
-				header: false,
-				footer: true,
-				showNotices: true,
-				showStoreAlerts: false,
-				showPluginArea: false,
-			},
-			capability: 'manage_woocommerce',
-		} );
-	}
+	pages.push( {
+		container: LaunchStore,
+		path: '/launch-your-store/*',
+		breadcrumbs: [
+			...initialBreadcrumbs,
+			__( 'Launch Your Store', 'woocommerce' ),
+		],
+		layout: {
+			header: false,
+			footer: true,
+			showNotices: true,
+			showStoreAlerts: false,
+			showPluginArea: false,
+		},
+		capability: 'manage_woocommerce',
+	} );
 
-	if ( window.wcAdminFeatures[ 'wc-pay-welcome-page' ] ) {
-		pages.push( {
-			container: WCPaymentsWelcomePage,
-			path: '/wc-pay-welcome-page',
-			breadcrumbs: [
-				[ '/wc-pay-welcome-page', __( 'WooPayments', 'woocommerce' ) ],
-				__( 'WooPayments', 'woocommerce' ),
-			],
-			navArgs: {
-				id: 'woocommerce-wc-pay-welcome-page',
-			},
-			wpOpenMenu: 'toplevel_page_woocommerce-wc-pay-welcome-page',
-			capability: 'manage_woocommerce',
-		} );
-	}
+	pages.push( {
+		container: WCPaymentsWelcomePage,
+		path: '/wc-pay-welcome-page',
+		breadcrumbs: [
+			[ '/wc-pay-welcome-page', __( 'WooPayments', 'woocommerce' ) ],
+			__( 'WooPayments', 'woocommerce' ),
+		],
+		navArgs: {
+			id: 'woocommerce-wc-pay-welcome-page',
+		},
+		wpOpenMenu: 'toplevel_page_woocommerce-wc-pay-welcome-page',
+		capability: 'manage_woocommerce',
+	} );
 
 	pages.push( {
 		container: MobileAppLoginPage,

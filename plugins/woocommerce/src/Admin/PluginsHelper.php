@@ -626,15 +626,9 @@ class PluginsHelper {
 
 		$notice_type = WC_Helper_Updater::get_woo_connect_notice_type();
 
-		if ( 'none' === $notice_type ) {
+		// The outdated plugin risk state is reported in Site Health.
+		if ( in_array( $notice_type, array( 'none', 'long' ), true ) ) {
 			return;
-		}
-
-		$notice_string = '';
-
-		if ( 'long' === $notice_type ) {
-			$notice_string .= __( 'Your store might be at risk as you are running old versions of WooCommerce plugins.', 'woocommerce' );
-			$notice_string .= ' ';
 		}
 
 		$connect_page_url = add_query_arg(
@@ -648,7 +642,7 @@ class PluginsHelper {
 			admin_url( 'admin.php' )
 		);
 
-		$notice_string .= sprintf(
+		$notice_string = sprintf(
 			/* translators: %s: Connect page URL */
 			__( '<a id="woo-connect-notice-url" href="%s">Connect your store</a> to WooCommerce.com to get updates and streamlined support for your subscriptions.', 'woocommerce' ),
 			esc_url( $connect_page_url )
@@ -671,7 +665,7 @@ class PluginsHelper {
 
 		$notice_type = WC_Helper_Updater::get_woo_connect_notice_type();
 
-		if ( 'none' === $notice_type ) {
+		if ( in_array( $notice_type, array( 'none', 'long' ), true ) ) {
 			return;
 		}
 

@@ -59,6 +59,8 @@ package-lock.json
 
 # wp-env config
 .wp-env.override.json
+.wp-env.test.override.json
+.wp-env.e2e.override.json
 
 # Unit tests
 tmp/
@@ -118,17 +120,6 @@ changes.json
 .claude/docs/analysis/
 .claude/docs/research/
 CLAUDE.local.md
-.agents/
-
-# AI agent scratchpad and temp (scaffold-project)
-.agents/scratchpad/**
-!.agents/scratchpad/**/
-!.agents/scratchpad/TEMPLATE.md
-!.agents/scratchpad/**/.gitkeep
-# Re-include .agents/tmp/ dir (the unanchored "tmp/" rule above ignores it)
-!.agents/tmp/
-.agents/tmp/*
-!.agents/tmp/.gitkeep
 
 # Cursor related files
 .cursorignore

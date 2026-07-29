@@ -263,7 +263,10 @@ const Table: React.FC< TableProps > = ( {
 												'Sort by %s in ascending order',
 												'woocommerce'
 											),
-											screenReaderLabel || label
+											screenReaderLabel ??
+												( typeof label === 'string'
+													? label
+													: '' )
 									  )
 									: sprintf(
 											/* translators: %s: column label */
@@ -271,7 +274,10 @@ const Table: React.FC< TableProps > = ( {
 												'Sort by %s in descending order',
 												'woocommerce'
 											),
-											screenReaderLabel || label
+											screenReaderLabel ??
+												( typeof label === 'string'
+													? label
+													: '' )
 									  );
 
 							const textLabel = (

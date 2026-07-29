@@ -16,11 +16,26 @@ $border-width: 1px;
 			margin: 0;
 			width: 100%;
 			overflow: hidden;
+			border-radius: $universal-border-radius;
+			position: relative;
 			// ensure the buttons don't create a horizontal layout shift
 			min-height: 48px;
 			// ensure the elements take space before the button is loaded
 			// 150 is the minimum width of the button; allows for
 			min-width: 150px;
+
+			&:focus-within::after,
+			&.wc-block-components-express-payment__event-button--focused::after {
+				border: 2px solid $studio-blue;
+				border-radius: inherit;
+				box-shadow: inset 0 0 0 1px $white;
+				content: "";
+				inset: 0;
+				outline: 3px solid transparent;
+				pointer-events: none;
+				position: absolute;
+				z-index: 1;
+			}
 
 			> img {
 				width: 100%;

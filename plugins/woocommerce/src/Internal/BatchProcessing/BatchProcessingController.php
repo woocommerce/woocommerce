@@ -52,6 +52,42 @@ class BatchProcessingController {
 	const FAILING_PROCESS_MAX_ATTEMPTS_DEFAULT = 5;
 
 	/**
+	 * Option name used as a self-expiring mutex around mutations of the enqueued-processors option.
+	 *
+	 * The row holds the lock's release time (a microtime float); its mere existence is the lock. The lock lives in
+	 * the options table (rather than a MySQL named lock) so it is naturally scoped to this install's wp_options and
+	 * routes to the primary database like any other write, avoiding the replica-routing and server-global-namespace
+	 * pitfalls of GET_LOCK. Modeled on WC_Install::create_lock().
+	 *
+	 * @since 11.0.0
+	 */
+	const ENQUEUED_PROCESSORS_LOCK_OPTION = 'wc_pending_batch_processes_lock';
+
+	/**
+	 * How long (in seconds, fractional) a held enqueued-processors lock stays valid before it is considered stale
+	 * and can be taken over.
+	 *
+	 * Kept short deliberately: enqueue_processor() runs on the 'shutdown' hook of nearly every request under
+	 * continuous HPOS background sync, and the guarded critical section is just a couple of option queries. The
+	 * value must exceed the worst-case hold time (a normal holder releases in milliseconds), and also bounds how
+	 * long a contender waits before stealing a lock left behind by a crashed request.
+	 *
+	 * @since 11.0.0
+	 */
+	const ENQUEUED_PROCESSORS_LOCK_TTL = 1.0;
+
+	/**
+	 * Number of times to attempt to acquire the enqueued-processors lock before giving up and proceeding without it.
+	 *
+	 * The delay between attempts is ENQUEUED_PROCESSORS_LOCK_TTL / ENQUEUED_PROCESSORS_LOCK_ATTEMPTS, so the total
+	 * acquisition window is one TTL — long enough for a normal holder to finish and release, after which a stale
+	 * lock becomes stealable.
+	 *
+	 * @since 11.0.0
+	 */
+	const ENQUEUED_PROCESSORS_LOCK_ATTEMPTS = 20;
+
+	/**
 	 * Instance of WC_Logger class.
 	 *
 	 * @var \WC_Logger_Interface
@@ -96,29 +132,233 @@ class BatchProcessingController {
 	 * @param string $processor_class_name Fully qualified class name of the processor, must implement `BatchProcessorInterface`.
 	 */
 	public function enqueue_processor( string $processor_class_name ): void {
-		$pending_updates = $this->get_enqueued_processors();
-
-		// De-duplicate defensively. Historically this method compared the class name against array_keys() rather
-		// than the stored values, so the same processor was appended on every call and bloated the option. Building
-		// the unique list in a single pass heals stores already carrying duplicates on their next enqueue while
-		// keeping only one entry per class name in memory (so the cleanup stays bounded even when the stored list
-		// ballooned to thousands of entries), and skips any non-string values a corrupted option may hold.
-		$deduplicated_updates = array();
-		$seen                 = array();
-		foreach ( $pending_updates as $value ) {
-			if ( is_string( $value ) && ! isset( $seen[ $value ] ) ) {
-				$seen[ $value ]         = true;
-				$deduplicated_updates[] = $value;
-			}
-		}
-		if ( ! in_array( $processor_class_name, $deduplicated_updates, true ) ) {
-			$deduplicated_updates[] = $processor_class_name;
-		}
-		if ( $deduplicated_updates !== $pending_updates ) {
-			$this->set_enqueued_processors( $deduplicated_updates );
+		/*
+		 * Fast path: if the processor is already enqueued and the stored list is clean, there is nothing to write.
+		 * This avoids taking the lock and re-reading the option on the hot path, which matters because
+		 * DataSynchronizer::handle_continuous_background_sync() calls this on the 'shutdown' hook of every request
+		 * when HPOS background sync runs in continuous mode. The check uses the (possibly request-cached) value;
+		 * the authoritative re-read happens inside the critical section below only when an update is actually needed.
+		 */
+		if ( $this->enqueued_list_needs_update( $this->get_enqueued_processors(), $processor_class_name ) ) {
+			$this->mutate_enqueued_processors(
+				function ( array $pending_updates ) use ( $processor_class_name ): array {
+					$deduplicated_updates = $this->sanitize_processor_list( $pending_updates );
+					if ( ! in_array( $processor_class_name, $deduplicated_updates, true ) ) {
+						$deduplicated_updates[] = $processor_class_name;
+					}
+					return $deduplicated_updates;
+				}
+			);
 		}
 
 		$this->schedule_watchdog_action( false, true );
+	}
+
+	/**
+	 * Reduce a processor list to unique, non-empty class-name strings, preserving order.
+	 *
+	 * The enqueued-processors option is a plain serialized array, so a corrupted option (or the historical
+	 * duplicate-accumulation bug) can leave it holding duplicates, empty strings, or non-string values. Sanitizing
+	 * before any comparison keeps the mutators safe and heals the stored list on the next write: in particular
+	 * array_diff() string-casts its operands and would fatal on an object entry in PHP 8, so removals run on the
+	 * sanitized list. Empty strings are dropped too: they are never a valid class name, and left in place would be
+	 * scheduled and then fatal in get_processor_instance( '' ), with the watchdog rescheduling them indefinitely.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param array $processors Raw processor list as read from the option.
+	 * @return array Sanitized list of unique class-name strings.
+	 */
+	private function sanitize_processor_list( array $processors ): array {
+		$sanitized = array();
+		$seen      = array();
+		foreach ( $processors as $value ) {
+			if ( is_string( $value ) && '' !== $value && ! isset( $seen[ $value ] ) ) {
+				$seen[ $value ] = true;
+				$sanitized[]    = $value;
+			}
+		}
+		return $sanitized;
+	}
+
+	/**
+	 * Determine whether the stored enqueued-processors list needs to be rewritten to include a given processor
+	 * or to heal pre-existing corruption (duplicates or non-string entries).
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param array  $processors           Current list of enqueued processors.
+	 * @param string $processor_class_name Fully qualified class name of the processor to ensure is enqueued.
+	 *
+	 * @return bool True if the list should be rewritten, false if it is already clean and contains the processor.
+	 */
+	private function enqueued_list_needs_update( array $processors, string $processor_class_name ): bool {
+		$seen           = array();
+		$contains_class = false;
+		foreach ( $processors as $value ) {
+			if ( ! is_string( $value ) || isset( $seen[ $value ] ) ) {
+				// Non-string entry or duplicate: the list needs healing.
+				return true;
+			}
+			$seen[ $value ] = true;
+			if ( $value === $processor_class_name ) {
+				$contains_class = true;
+			}
+		}
+
+		return ! $contains_class;
+	}
+
+	/**
+	 * Run a read-modify-write of the enqueued-processors option inside a short-lived critical section.
+	 *
+	 * The list is stored in a single option and mutated by several code paths (including the per-request
+	 * 'shutdown' enqueue from continuous HPOS background sync), so an unguarded read-modify-write can lose
+	 * updates under concurrency: two requests read the same list, each writes its own version, and the later
+	 * write silently drops the other's change. This serializes those mutations with a self-expiring options-table
+	 * mutex and re-reads the freshest persisted value inside the lock so the mutator always operates on current
+	 * state.
+	 *
+	 * The lock is best-effort: if it cannot be acquired within ENQUEUED_PROCESSORS_LOCK_ATTEMPTS tries the mutation
+	 * still proceeds, which is no worse than the previous lock-free behavior. The fresh re-read inside the section
+	 * narrows the race window even when the lock provides no real exclusion, and the watchdog reconciles any
+	 * residual divergence on its next run.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param callable $mutator Receives the current list (array of class-name strings) and returns the new list.
+	 *
+	 * @return array The list as persisted (the mutator's return value).
+	 */
+	private function mutate_enqueued_processors( callable $mutator ): array {
+		$lock_token = $this->acquire_enqueued_processors_lock();
+		try {
+			/*
+			 * Drop any request-cached copy so the read below reflects writes committed by concurrent requests
+			 * that landed after this request first read the option. Both the per-option entry AND the shared
+			 * 'notoptions' entry must be cleared: when the option does not yet exist (first enqueue, or after a
+			 * corrupted option was deleted), get_option() short-circuits on a stale 'notoptions' hit and would
+			 * otherwise return the default empty list even though a concurrent request just created the row.
+			 */
+			wp_cache_delete( self::ENQUEUED_PROCESSORS_OPTION_NAME, 'options' );
+			wp_cache_delete( 'notoptions', 'options' );
+			$current = $this->get_enqueued_processors();
+			$updated = $mutator( $current );
+			if ( $updated !== $current ) {
+				$this->set_enqueued_processors( $updated );
+			}
+			return $updated;
+		} finally {
+			if ( null !== $lock_token ) {
+				$this->release_enqueued_processors_lock( $lock_token );
+			}
+		}
+	}
+
+	/**
+	 * Acquire the enqueued-processors lock by claiming a row in the options table.
+	 *
+	 * The claim is an atomic INSERT (which fails if the row already exists, making it a mutex); if the row exists
+	 * but its stored release time has already passed, a conditional UPDATE takes the stale lock over. Failure to
+	 * claim is retried up to ENQUEUED_PROCESSORS_LOCK_ATTEMPTS times with a short delay before the caller falls
+	 * back to its best-effort unguarded path. Modeled on WC_Install::create_lock().
+	 *
+	 * Release times are stored as fixed-width, zero-padded-fraction strings (`number_format( ..., 6 )`) so the
+	 * database compares and matches them as plain strings without a numeric cast; for the current epoch the
+	 * integer part is a stable ten digits, so lexical order matches chronological order.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return string|null The stored release time when the lock was acquired (which must be passed to
+	 *                     release_enqueued_processors_lock()), or null when it could not be acquired.
+	 */
+	private function acquire_enqueued_processors_lock(): ?string {
+		global $wpdb;
+
+		$attempts    = max( 1, self::ENQUEUED_PROCESSORS_LOCK_ATTEMPTS );
+		$delay_micro = (int) ( ( self::ENQUEUED_PROCESSORS_LOCK_TTL / $attempts ) * 1_000_000 );
+
+		// A contended INSERT fails on the duplicate key by design, so silence wpdb error reporting to keep the
+		// expected-failure path from spamming the log in debug mode; restore the prior setting when done.
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			for ( $attempt = 0; $attempt < $attempts; $attempt++ ) {
+				$time   = microtime( true );
+				$now    = number_format( $time, 6, '.', '' );
+				$expiry = number_format( $time + self::ENQUEUED_PROCESSORS_LOCK_TTL, 6, '.', '' );
+
+				// The unique option_name key makes this INSERT a mutex: it fails when the lock row already exists.
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$acquired = $wpdb->insert(
+					$wpdb->options,
+					array(
+						'option_name'  => self::ENQUEUED_PROCESSORS_LOCK_OPTION,
+						'option_value' => $expiry,
+						'autoload'     => 'no',
+					),
+					array( '%s', '%s', '%s' )
+				);
+
+				if ( ! $acquired ) {
+					/*
+					 * The lock row exists; take it over only if its stored release time is already in the past.
+					 * $wpdb->update() cannot express the "<" comparison, so this conditional takeover uses raw SQL.
+					 * The table is a trusted internal identifier and every value is bound through a placeholder.
+					 */
+					$takeover = $wpdb->prepare(
+						"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value < %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						$expiry,
+						self::ENQUEUED_PROCESSORS_LOCK_OPTION,
+						$now
+					);
+					if ( is_string( $takeover ) ) {
+						// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+						$acquired = $wpdb->query( $takeover );
+					}
+				}
+
+				if ( $acquired ) {
+					return $expiry;
+				}
+
+				if ( $attempt < $attempts - 1 && $delay_micro > 0 ) {
+					usleep( $delay_micro );
+				}
+			}
+
+			return null;
+		} finally {
+			$wpdb->suppress_errors( $suppress );
+		}
+	}
+
+	/**
+	 * Release the enqueued-processors lock by deleting the options-table row we own.
+	 *
+	 * The delete is conditional on the stored release time still matching the one written when the lock was
+	 * acquired, so a lock that expired and was taken over by another request is never released out from under it.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param string $expiry The release time returned by acquire_enqueued_processors_lock().
+	 */
+	private function release_enqueued_processors_lock( string $expiry ): void {
+		global $wpdb;
+
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->delete(
+				$wpdb->options,
+				array(
+					'option_name'  => self::ENQUEUED_PROCESSORS_LOCK_OPTION,
+					'option_value' => $expiry,
+				),
+				array( '%s', '%s' )
+			);
+		} finally {
+			$wpdb->suppress_errors( $suppress );
+		}
 	}
 
 	/**
@@ -156,7 +396,7 @@ class BatchProcessingController {
 	 * (because they have just been enqueued, or because the processing for a batch failed).
 	 */
 	private function handle_watchdog_action(): void {
-		$pending_processes = $this->get_enqueued_processors();
+		$pending_processes = $this->sanitize_processor_list( $this->get_enqueued_processors() );
 		if ( empty( $pending_processes ) ) {
 			return;
 		}
@@ -385,11 +625,21 @@ class BatchProcessingController {
 	 * @param string $processor_class_name Full processor class name.
 	 */
 	private function dequeue_processor( string $processor_class_name ): void {
-		$pending_processes = $this->get_enqueued_processors();
-		if ( in_array( $processor_class_name, $pending_processes, true ) ) {
+		// Always resolve membership authoritatively inside the lock (no unguarded fast-path read): this runs when a
+		// batch finishes, not on a per-request hot path, so correctness is preferred over skipping the lock.
+		$removed = false;
+		$this->mutate_enqueued_processors(
+			function ( array $pending_processes ) use ( $processor_class_name, &$removed ): array {
+				if ( ! in_array( $processor_class_name, $pending_processes, true ) ) {
+					return $pending_processes;
+				}
+				$removed = true;
+				return array_values( array_diff( $this->sanitize_processor_list( $pending_processes ), array( $processor_class_name ) ) );
+			}
+		);
+
+		if ( $removed ) {
 			$this->clear_processor_state( $processor_class_name );
-			$pending_processes = array_diff( $pending_processes, array( $processor_class_name ) );
-			$this->set_enqueued_processors( $pending_processes );
 		}
 	}
 
@@ -420,19 +670,51 @@ class BatchProcessingController {
 	 * @return bool True if the processor has been dequeued, false if the processor wasn't enqueued (so nothing has been done).
 	 */
 	public function remove_processor( string $processor_class_name ): bool {
-		$enqueued_processors = $this->get_enqueued_processors();
-		if ( ! in_array( $processor_class_name, $enqueued_processors, true ) ) {
+		// Resolve membership authoritatively inside the lock (no unguarded fast-path read). remove_processor() is
+		// not a per-request hot path — the continuous-sync 'shutdown' handler enqueues rather than removes — so it
+		// always takes the lock and re-reads the freshest list rather than acting on a possibly-stale cached copy.
+		$was_enqueued         = false;
+		$remaining_processors = $this->mutate_enqueued_processors(
+			function ( array $enqueued_processors ) use ( $processor_class_name, &$was_enqueued ): array {
+				if ( ! in_array( $processor_class_name, $enqueued_processors, true ) ) {
+					return $enqueued_processors;
+				}
+				$was_enqueued = true;
+				return array_values( array_diff( $this->sanitize_processor_list( $enqueued_processors ), array( $processor_class_name ) ) );
+			}
+		);
+
+		if ( ! $was_enqueued ) {
 			return false;
 		}
 
-		$enqueued_processors = array_diff( $enqueued_processors, array( $processor_class_name ) );
-		if ( empty( $enqueued_processors ) ) {
-			$this->force_clear_all_processes();
+		/*
+		 * $remaining_processors is the list exactly as persisted inside the critical section above, so the empty
+		 * check is decided from the lock-guarded snapshot rather than a second, unguarded re-read (which would only
+		 * ever see this request's own post-mutation value anyway). When that snapshot is empty we unschedule every
+		 * single-batch action to sweep up any orphaned "ghost" actions left in Action Scheduler for processors that
+		 * are no longer enqueued; otherwise only the removed processor's own scheduling needs tearing down, so we
+		 * unschedule by class name.
+		 *
+		 * This intentionally does NOT unschedule the watchdog: handle_watchdog_action() returns without rescheduling
+		 * itself once the list is empty (so a lingering watchdog fires at most once more and then stops), and leaving
+		 * it in place is what makes the empty-list sweep safe. force_clear_all_processes() is deliberately avoided:
+		 * its own unguarded read-modify-write would clobber a processor that a concurrent request enqueued in the gap
+		 * after this mutation committed — the exact lost-update race this change exists to prevent.
+		 *
+		 * There is still a narrow window: a concurrent request can enqueue processor Q and have the watchdog schedule
+		 * Q's single-batch action after our lock releases but before the sweep runs, in which case the sweep cancels
+		 * Q's action even though Q remains enqueued. Q is never lost from the option (the source of truth), so this is
+		 * a bounded scheduling delay, not a lost update: the watchdog we leave in place reschedules Q on its next run.
+		 * That recovery is bounded by the watchdog delay (woocommerce_batch_processor_watchdog_delay_seconds), not the
+		 * next request, because remove_or_retry_failed_processors() no-ops while any watchdog is already scheduled.
+		 */
+		if ( empty( $remaining_processors ) ) {
+			as_unschedule_all_actions( self::PROCESS_SINGLE_BATCH_ACTION_NAME );
 		} else {
-			update_option( self::ENQUEUED_PROCESSORS_OPTION_NAME, $enqueued_processors, false );
 			as_unschedule_all_actions( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
-			$this->clear_processor_state( $processor_class_name );
 		}
+		$this->clear_processor_state( $processor_class_name );
 
 		return true;
 	}
@@ -572,7 +854,12 @@ class BatchProcessingController {
 			return;
 		}
 
-		$enqueued_processors    = $this->get_enqueued_processors();
+		/*
+		 * Sanitize before array_diff()/array_filter(): array_diff() string-casts its operands (fatal on an object
+		 * entry in PHP 8) and is_scheduled() is typed string, so a corrupted option must be reduced to class-name
+		 * strings first.
+		 */
+		$enqueued_processors    = $this->sanitize_processor_list( $this->get_enqueued_processors() );
 		$unscheduled_processors = array_diff( $enqueued_processors, array_filter( $enqueued_processors, array( $this, 'is_scheduled' ) ) );
 
 		foreach ( $unscheduled_processors as $processor ) {

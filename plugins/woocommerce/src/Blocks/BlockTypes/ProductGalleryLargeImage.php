@@ -85,13 +85,13 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		foreach ( $block->inner_blocks as $inner_block ) {
 			if ( 'woocommerce/product-image' === $inner_block->name ) {
-				// Product Image requires special handling because we need to render it once for each image.
-				$images_html .= $this->get_main_images_html( $block->context, $product, $inner_block );
+				// Product Image requires special handling because we need to render it once for each media item.
+				$images_html .= $this->get_main_media_html( $block->context, $product, $inner_block );
 			} else {
-				// For Next/Previous Buttons block, check if we have more than one image, otherwise don't render it.
+				// For Next/Previous Buttons block, check if we have more than one media item, otherwise don't render it.
 				if ( 'woocommerce/product-gallery-large-image-next-previous' === $inner_block->name ) {
-					$product_gallery_image_count = ProductGalleryUtils::get_product_gallery_image_count( $product );
-					if ( $product_gallery_image_count <= 1 ) {
+					$product_gallery_media_count = ProductGalleryUtils::get_product_gallery_media_count( $product );
+					if ( $product_gallery_media_count <= 1 ) {
 						continue;
 					}
 				}
@@ -114,7 +114,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		ob_start();
 		?>
 			<div class="wc-block-product-gallery-large-image wp-block-woocommerce-product-gallery-large-image">
-				<?php // No need to use wp_kses here because the image HTML is built internally. ?>
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo $images_html; ?>
 				<div class="wc-block-product-gallery-large-image__inner-blocks">
@@ -137,22 +136,10 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	 * @return string
 	 */
 	private function update_single_image( $image_html, $context, $index ) {
-		$p = new \WP_HTML_Tag_Processor( $image_html );
-
-		if ( $p->next_tag( 'a' ) ) {
-			$p->remove_attribute( 'onclick' );
-			$p->remove_attribute( 'style' );
-			$p->set_attribute( 'tabindex', '-1' );
-		} else {
-			/**
-			 * If we can't find and <a> tag, we're at the end of the document.
-			 * We need to reinitialize the processor instance to search for <img> tag.
-			 */
-			$p = new \WP_HTML_Tag_Processor( $image_html );
-		}
+		$p = $this->get_product_image_processor( $image_html );
 
 		// Bail out early if we don't find any image.
-		if ( ! $p->next_tag( 'img' ) ) {
+		if ( ! $p->next_tag( array( 'tag_name' => 'img' ) ) ) {
 			return $image_html;
 		}
 
@@ -192,15 +179,15 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	}
 
 	/**
-	 * Get the main images html code. The first element of the array contains the HTML of the first image that is visible, the second element contains the HTML of the other images that are hidden.
+	 * Get the main media HTML.
 	 *
 	 * @param array       $context The block context.
 	 * @param \WC_Product $product The product object.
 	 * @param WP_Block    $inner_block The inner block object.
-	 * @return array
+	 * @return string
 	 */
-	private function get_main_images_html( $context, $product, $inner_block ) {
-		$image_data = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_single' );
+	private function get_main_media_html( $context, $product, $inner_block ) {
+		$media_data = ProductGalleryUtils::get_product_gallery_media_data( $product, 'woocommerce_single' );
 
 		ob_start();
 		?>
@@ -212,19 +199,25 @@ class ProductGalleryLargeImage extends AbstractBlock {
 				tabindex="0"
 				aria-roledescription="carousel"
 			>
-				<?php foreach ( $image_data as $index => $image ) : ?>
+				<?php foreach ( $media_data as $index => $media ) : ?>
 					<li
 						class="wc-block-product-gallery-large-image__wrapper"
 					>
 						<?php
-							$image_html = (
-								new WP_Block(
-									$inner_block->parsed_block,
-									array_merge( $context, array( 'imageId' => $image['id'] ) )
-								)
-							)->render( array( 'dynamic' => true ) );
+						if ( 'video' === ( $media['media_type'] ?? '' ) ) {
+							echo $this->get_video_html( $media, $context, $inner_block ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							continue;
+						}
 
-							echo $this->update_single_image( $image_html, $context, $index ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						$image_html = (
+							new WP_Block(
+								$inner_block->parsed_block,
+								array_merge( $context, array( 'imageId' => $media['id'] ) )
+							)
+						)->render( array( 'dynamic' => true ) );
+
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo $this->update_single_image( $image_html, $context, $index );
 						?>
 					</li>
 				<?php endforeach; ?>
@@ -233,6 +226,119 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		$template = ob_get_clean();
 
 		return wp_interactivity_process_directives( $template );
+	}
+
+	/**
+	 * Get a Product Image processor prepared for gallery updates.
+	 *
+	 * @param string $image_html The image html.
+	 * @return \WP_HTML_Tag_Processor
+	 */
+	private function get_product_image_processor( $image_html ) {
+		$p = new \WP_HTML_Tag_Processor( $image_html );
+
+		if ( $p->next_tag( array( 'tag_name' => 'a' ) ) ) {
+			$p->remove_attribute( 'onclick' );
+			$p->remove_attribute( 'style' );
+			$p->set_attribute( 'tabindex', '-1' );
+		} else {
+			$p = new \WP_HTML_Tag_Processor( $image_html );
+		}
+
+		return $p;
+	}
+
+	/**
+	 * Get video HTML for the product gallery large image area.
+	 *
+	 * @param array    $media       Video media data.
+	 * @param array    $context     The block context.
+	 * @param WP_Block $inner_block The inner block object.
+	 * @return string
+	 */
+	private function get_video_html( $media, $context, $inner_block ) {
+		$image_html = (
+			new WP_Block(
+				$inner_block->parsed_block,
+				$context
+			)
+		)->render( array( 'dynamic' => true ) );
+
+		return $this->replace_product_image_with_video( $image_html, $media, $context );
+	}
+
+	/**
+	 * Replace Product Image markup with product gallery video markup.
+	 *
+	 * @param string $image_html Product Image HTML.
+	 * @param array  $media      Video media data.
+	 * @param array  $context    The block context.
+	 * @return string
+	 */
+	private function replace_product_image_with_video( $image_html, $media, $context ) {
+		$p = $this->get_product_image_processor( $image_html );
+
+		if ( ! $p->next_tag( array( 'tag_name' => 'img' ) ) ) {
+			return $image_html;
+		}
+
+		$attrs = ProductGalleryUtils::get_video_attributes( $media, 'gallery' );
+
+		if ( empty( $attrs ) ) {
+			return $image_html;
+		}
+
+		$image_style   = $p->get_attribute( 'style' );
+		$video_classes = 'wc-block-woocommerce-product-gallery-large-image__image ' .
+			'wc-block-woocommerce-product-gallery-large-image__video';
+
+		if ( ! empty( $context['fullScreenOnClick'] ) ) {
+			$video_classes             .= ' wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click';
+			$attrs['data-wp-on--click'] = 'actions.openDialog';
+		}
+
+		$attrs = array_merge(
+			$attrs,
+			array(
+				'class'                  => $video_classes,
+				'data-wp-on--touchend'   => 'actions.onTouchEnd',
+				'data-wp-on--touchmove'  => 'actions.onTouchMove',
+				'data-wp-on--touchstart' => 'actions.onTouchStart',
+				'draggable'              => 'false',
+				'tabindex'               => '-1',
+			)
+		);
+
+		if ( is_string( $image_style ) && '' !== $image_style ) {
+			$attrs['style'] = $image_style;
+		}
+
+		$placeholder_attribute = 'data-wc-product-gallery-video-placeholder';
+
+		if ( ! $p->set_attribute( $placeholder_attribute, '1' ) ) {
+			return $image_html;
+		}
+
+		$updated_html      = $p->get_updated_html();
+		$video_html        = ProductGalleryUtils::get_video_html( $attrs );
+		$pattern           = sprintf(
+			'/<img\b(?=[^>]*\s%s(?:\s*=\s*(?:"1"|\'1\'|1))?)[^>]*>/i',
+			preg_quote( $placeholder_attribute, '/' )
+		);
+		$replacement_count = 0;
+		$video_markup      = preg_replace_callback(
+			$pattern,
+			static function () use ( $video_html ) {
+				return $video_html;
+			},
+			$updated_html,
+			1,
+			$replacement_count
+		);
+
+		return is_string( $video_markup ) && $replacement_count
+			? $video_markup
+			: $image_html;
 	}
 
 	/**

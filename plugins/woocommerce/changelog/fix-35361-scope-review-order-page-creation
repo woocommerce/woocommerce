@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the Review Order page from restoring an intentionally empty Shop page setting. If your Shop page setting was cleared by this bug, clear it once more after updating.

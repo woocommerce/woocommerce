@@ -378,6 +378,18 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			$post_status = 'wc-' . $post_status;
 		}
 
+		// The status column holds at most 20 characters, so a longer key can't be stored.
+		if ( strlen( $post_status ) > 20 ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					'Order status "%s" is longer than the storage limit of 20 characters and cannot be stored.',
+					esc_html( $order_status )
+				),
+				'11.0.0'
+			);
+		}
+
 		return $post_status;
 	}
 

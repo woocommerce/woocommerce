@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from '@testing-library/react';
 import { paymentStore } from '@woocommerce/block-data';
 import {
 	registerExpressPaymentMethod,
@@ -34,7 +40,7 @@ jest.mock( '../express-payment/express-payment-context', () => {
 const mockExpressPaymentMethodNames = [ 'paypal', 'google-pay', 'apple-pay' ];
 
 const MockExpressButton = jest.fn( ( { name } ) => (
-	<div className="boo">{ `${ name } button` }</div>
+	<button className="boo">{ `${ name } button` }</button>
 ) );
 
 const MockEditorExpressButton = jest.fn( ( { name } ) => (
@@ -252,6 +258,79 @@ describe( 'Express payment methods', () => {
 						)
 					).toHaveProperty( 'tagName', 'LI' );
 				} );
+			} );
+
+			it( 'should add a focused class to the active express payment method item', async () => {
+				render( <ExpressPaymentMethods /> );
+
+				const button = screen.getByText( 'paypal button' );
+				const paymentMethodItem = document.querySelector(
+					'#express-payment-method-paypal'
+				);
+
+				await act( async () => {
+					button.focus();
+					fireEvent.focusIn( button );
+				} );
+
+				await waitFor( () =>
+					expect( paymentMethodItem ).toHaveClass(
+						'wc-block-components-express-payment__event-button--focused'
+					)
+				);
+
+				await act( async () => {
+					button.blur();
+					fireEvent.focusOut( button );
+					await new Promise( ( resolve ) =>
+						setTimeout( resolve, 0 )
+					);
+				} );
+
+				await waitFor( () =>
+					expect( paymentMethodItem ).not.toHaveClass(
+						'wc-block-components-express-payment__event-button--focused'
+					)
+				);
+			} );
+
+			it( 'should keep a focused express payment iframe when the window loses focus', async () => {
+				render( <ExpressPaymentMethods /> );
+
+				const paymentMethodItem = document.querySelector(
+					'#express-payment-method-paypal'
+				);
+				expect( paymentMethodItem ).not.toBeNull();
+
+				if ( ! paymentMethodItem ) {
+					throw new Error(
+						'Missing #express-payment-method-paypal in test DOM'
+					);
+				}
+
+				const iframe = document.createElement( 'iframe' );
+				paymentMethodItem.appendChild( iframe );
+
+				await act( async () => {
+					iframe.focus();
+					fireEvent.focusIn( iframe );
+				} );
+
+				await waitFor( () =>
+					expect( paymentMethodItem ).toHaveClass(
+						'wc-block-components-express-payment__event-button--focused'
+					)
+				);
+
+				await act( async () => {
+					window.dispatchEvent( new Event( 'blur' ) );
+				} );
+
+				await waitFor( () =>
+					expect( paymentMethodItem ).toHaveClass(
+						'wc-block-components-express-payment__event-button--focused'
+					)
+				);
 			} );
 		} );
 		describe( 'In an editor context', () => {

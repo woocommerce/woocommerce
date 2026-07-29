@@ -14,8 +14,16 @@ import type {
 	RawShopperListItem,
 	Store as ShopperListsStore,
 } from '@woocommerce/stores/woocommerce/shopper-lists';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type {
+	SelectedAttributes,
+	Store as WooCommerce,
+} from '@woocommerce/stores/woocommerce/cart';
 import { sanitizeHTML } from '@woocommerce/sanitize';
+
+/**
+ * Internal dependencies
+ */
+import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -133,6 +141,51 @@ const formatVariationLabel = ( item: RawShopperListItem ): string => {
 };
 
 const getList = ( slug: string ) => shopperListsState.lists[ slug ] ?? null;
+
+/** A single line of the shared cart store, optimistic or server-confirmed. */
+type CartLine = WooCommerce[ 'state' ][ 'cart' ][ 'items' ][ number ];
+
+/**
+ * Sums the quantity across every cart line that represents the given product.
+ *
+ * The "did the add succeed?" check for Move to cart cannot read a single line:
+ * the server owns cart-line identity for adds, so a product already present as
+ * one line (e.g. a meta line) can be resolved into a new standalone line rather
+ * than an in-place bump. Reading one id-matched line would then see no growth
+ * and misread a correct add as a failure. Summing the quantity over all
+ * matching lines makes the comparison order-independent and robust to the
+ * server splitting or merging lines.
+ *
+ * Matching mirrors the cart store's `findItemInCart` product-matching: a simple
+ * product matches by `id`; a variation additionally requires the same number of
+ * variation attributes and the same attribute values, evaluated with
+ * `doesCartItemMatchAttributes` (the selector's own semantics).
+ *
+ * @param items     The current cart lines (`cartState.cart.items`).
+ * @param id        The product id to match.
+ * @param variation Selected variation attributes (cart shape). Empty/omitted
+ *                  for a simple product; provided to match variation lines.
+ * @return The total quantity across all matching lines (0 when none match).
+ */
+const sumMatchingCartQuantity = (
+	items: readonly CartLine[],
+	id: number,
+	variation?: SelectedAttributes[]
+): number =>
+	items.reduce( ( total, cartItem ) => {
+		let matches: boolean;
+		if ( cartItem.type === 'variation' ) {
+			matches =
+				id === cartItem.id &&
+				Array.isArray( cartItem.variation ) &&
+				Array.isArray( variation ) &&
+				cartItem.variation.length === variation.length &&
+				doesCartItemMatchAttributes( cartItem, variation );
+		} else {
+			matches = id === cartItem.id;
+		}
+		return matches ? total + cartItem.quantity : total;
+	}, 0 );
 
 store< BlockStore >(
 	'woocommerce/saved-for-later',
@@ -263,15 +316,26 @@ store< BlockStore >(
 
 				// `cartActions.addCartItem` catches its own errors and
 				// surfaces them as store notices, so the yield resolves
-				// the same way on success and failure. Snapshot the
-				// matching line's quantity, run the add, then only remove
-				// from the saved list if it actually grew.
-				const lookup = {
-					id: listItem.id,
-					...( isVariation && { variation } ),
-				};
-				const beforeItem = cartState.findItemInCart( lookup );
-				const beforeQuantity = beforeItem?.quantity ?? 0;
+				// the same way on success and failure. To tell success from
+				// failure we have to read the cart ourselves. The server owns
+				// cart-line identity for adds, so a successful add can land as
+				// a brand new standalone line rather than bumping an existing
+				// one — e.g. when this product is in the cart only as a meta
+				// line (a bundle child, booking, or add-on configuration). A
+				// single id-matched read would misjudge that case: it can
+				// resolve to the unchanged pre-existing line both times, see no
+				// growth, and conclude the add failed even though a new line
+				// was correctly created. So instead, compare the total quantity
+				// across every line matching this product before and after the
+				// add, and only remove from the saved list when that total
+				// grew. Both reads observe the server-reconciled cart because
+				// `addCartItem` resolves only after the mutation batcher commits
+				// it, so the comparison is order-independent.
+				const beforeSum = sumMatchingCartQuantity(
+					cartState.cart.items,
+					listItem.id,
+					isVariation ? variation : undefined
+				);
 
 				pendingKeys[ listItem.key ] = true;
 				try {
@@ -282,10 +346,13 @@ store< BlockStore >(
 						...( isVariation && { variation } ),
 					} );
 
-					const afterItem = cartState.findItemInCart( lookup );
-					const afterQuantity = afterItem?.quantity ?? 0;
+					const afterSum = sumMatchingCartQuantity(
+						cartState.cart.items,
+						listItem.id,
+						isVariation ? variation : undefined
+					);
 
-					if ( afterQuantity <= beforeQuantity ) {
+					if ( afterSum <= beforeSum ) {
 						return;
 					}
 

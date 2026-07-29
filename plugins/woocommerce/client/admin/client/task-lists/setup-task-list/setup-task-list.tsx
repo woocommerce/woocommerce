@@ -23,7 +23,7 @@ import { useLayoutContext } from '@woocommerce/admin-layout';
 /**
  * Internal dependencies
  */
-import { taskHeaders } from './components/task-headers';
+import { taskHeaders, DefaultTaskHeader } from './components/task-headers';
 import DismissModal from './components/dismiss-modal';
 import TaskListCompleted from './components/task-list-completed';
 import { ProgressHeader } from '~/task-lists/components/progress-header';
@@ -116,11 +116,11 @@ export const SetupTaskList = ( {
 	);
 
 	const hideTasks = () => {
-		hideTaskList( id );
+		void hideTaskList( id );
 	};
 
 	const keepTasks = () => {
-		keepCompletedTasks( id );
+		void keepCompletedTasks( id );
 	};
 
 	const renderMenu = () => {
@@ -187,7 +187,7 @@ export const SetupTaskList = ( {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks || {};
 
-		visitedTask( taskId );
+		void visitedTask( taskId );
 		await userPreferences.updateUserPreferences( {
 			task_list_tracked_started_tasks: {
 				...( trackedStartedTasks || {} ),
@@ -212,11 +212,11 @@ export const SetupTaskList = ( {
 	};
 
 	const goToTask = ( task: TaskType ) => {
-		trackClick( task ).then( () => {
+		void trackClick( task ).then( () => {
 			if ( ! isComplete ) {
 				// Invalidate the task list selector cache to force a re-fetch.
 				// This ensures the task completion status is up-to-date after visiting a task.
-				invalidateResolutionForStoreSelector( 'getTaskLists' );
+				void invalidateResolutionForStoreSelector( 'getTaskLists' );
 			}
 		} );
 
@@ -231,7 +231,11 @@ export const SetupTaskList = ( {
 	};
 
 	const showTaskHeader = ( task: TaskType ) => {
-		if ( taskHeaders[ task.id ] || hasTaskListHeaderSlotFills ) {
+		if (
+			taskHeaders[ task.id ] ||
+			hasTaskListHeaderSlotFills ||
+			task.imageUrl
+		) {
 			setHeaderData( {
 				task,
 				goToTask: () => goToTask( task ),
@@ -312,7 +316,8 @@ export const SetupTaskList = ( {
 							) : (
 								headerData?.task &&
 								createElement(
-									taskHeaders[ headerData.task.id ],
+									taskHeaders[ headerData.task.id ] ??
+										DefaultTaskHeader,
 									headerData
 								)
 							) }
