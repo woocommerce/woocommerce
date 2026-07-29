@@ -8050,6 +8050,17 @@ table.bar_chart {
 	.select2-container {
 		width: 100% !important;
 	}
+
+	// Reserve room for the clear (x) and chevron icons; .select2-container keeps this rule above the later global 24px padding.
+	.select2-container .select2-selection--single {
+		.select2-selection__rendered {
+			padding-right: 40px;
+		}
+
+		.select2-selection__clear {
+			margin-right: 18px;
+		}
+	}
 }
 
 .wc-backbone-modal-backdrop {
