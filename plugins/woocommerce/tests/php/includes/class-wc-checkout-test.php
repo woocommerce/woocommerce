@@ -18,9 +18,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * @var callable|null Callback registering an extra checkout field, removed on tear down.
+	 * @var callable[] Callbacks registering extra checkout fields, all removed on tear down.
 	 */
-	private $extra_field_filter = null;
+	private $extra_field_filters = array();
 
 	/**
 	 * Runs before each test.
@@ -52,10 +52,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 		delete_option( 'woocommerce_calc_taxes' );
 
-		if ( null !== $this->extra_field_filter ) {
-			remove_filter( 'woocommerce_checkout_fields', $this->extra_field_filter );
-			$this->extra_field_filter = null;
+		foreach ( $this->extra_field_filters as $extra_field_filter ) {
+			remove_filter( 'woocommerce_checkout_fields', $extra_field_filter );
 		}
+
+		$this->extra_field_filters = array();
 
 		parent::tearDown();
 	}
@@ -63,18 +64,22 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Register an extra checkout field in an arbitrary fieldset, the way checkout field editor plugins do.
 	 *
+	 * Can be called more than once per test: each callback is tracked and removed on tear down.
+	 *
 	 * @param string $fieldset_key Fieldset the field belongs to.
 	 * @param string $key          Field key.
 	 * @param array  $field        Field definition.
 	 */
 	private function register_extra_checkout_field( $fieldset_key, $key, $field ) {
-		$this->extra_field_filter = function ( $fields ) use ( $fieldset_key, $key, $field ) {
+		$extra_field_filter = function ( $fields ) use ( $fieldset_key, $key, $field ) {
 			$fields[ $fieldset_key ][ $key ] = $field;
 
 			return $fields;
 		};
 
-		add_filter( 'woocommerce_checkout_fields', $this->extra_field_filter );
+		$this->extra_field_filters[] = $extra_field_filter;
+
+		add_filter( 'woocommerce_checkout_fields', $extra_field_filter );
 	}
 
 	/**
