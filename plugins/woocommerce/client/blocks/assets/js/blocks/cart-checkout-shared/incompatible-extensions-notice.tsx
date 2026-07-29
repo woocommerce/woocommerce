@@ -6,11 +6,9 @@ import { getSetting, CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import { useLocalStorageState } from '@woocommerce/base-hooks';
 
-const areArraysEqual = ( a: string[], b: string[] ): boolean => {
-	if ( a.length !== b.length ) return false;
-	const unique = new Set( [ ...a, ...b ] );
-	return unique.size === a.length;
-};
+// Whether every item in `subset` is also present in `superset`.
+const isSubsetOf = ( subset: string[], superset: string[] ): boolean =>
+	subset.every( ( item ) => superset.includes( item ) );
 
 interface IncompatibleExtension {
 	id: string;
@@ -42,14 +40,20 @@ interface Props {
 export const IncompatibleExtensionsFrontendNotice = ( {
 	block,
 }: Props ): JSX.Element | null => {
+	// A dedicated key: this storefront banner must not share storage with the
+	// editor sidebar notice, which stores a different (per-block) shape under
+	// `wc-blocks_dismissed_incompatible_extensions_notices`.
 	const [ dismissedSlugs, setDismissedSlugs ] = useLocalStorageState<
 		string[]
-	>( 'wc-blocks_dismissed_incompatible_extensions_notices', [] );
+	>( 'wc-blocks_dismissed_incompatible_extensions_notices_frontend', [] );
 
 	const { extensions, slugs } = getIncompatibleExtensions();
 	const count = slugs.length;
 
-	const isDismissedAndUpToDate = areArraysEqual( dismissedSlugs, slugs );
+	// Stay dismissed while every currently-incompatible extension has already
+	// been acknowledged; deactivating one keeps it dismissed, while a new,
+	// never-acknowledged extension brings the notice back.
+	const isDismissedAndUpToDate = isSubsetOf( slugs, dismissedSlugs );
 
 	const shouldShow =
 		CURRENT_USER_IS_ADMIN && count > 0 && ! isDismissedAndUpToDate;
@@ -59,7 +63,9 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 	}
 
 	const dismissNotice = () => {
-		setDismissedSlugs( slugs );
+		// Record the union of everything acknowledged so far, so that later
+		// reactivating a previously dismissed extension doesn't resurface it.
+		setDismissedSlugs( [ ...new Set( [ ...dismissedSlugs, ...slugs ] ) ] );
 	};
 
 	const extensionNames = Object.values( extensions );
