@@ -139,6 +139,37 @@ test('classifyCheckRuns: a passing annotatable task carries no run ids', () => {
     assert.equal(tasks[0].checkRunIds, undefined);
 });
 
+test('classifyCheckRuns: a failing task (any label) carries its job url', () => {
+    const tasks = classifyCheckRuns([
+        checkRun('Lint - @woocommerce/plugin-woocommerce', {
+            conclusion: 'failure',
+            html_url: 'https://github.com/woocommerce/woocommerce/actions/runs/1/job/1',
+        }),
+    ]);
+    assert.equal(tasks.length, 1);
+    assert.deepEqual(tasks[0].jobUrls, [
+        'https://github.com/woocommerce/woocommerce/actions/runs/1/job/1',
+    ]);
+});
+
+test('classifyCheckRuns: job urls are capped at 2 even with more failing runs', () => {
+    const tasks = classifyCheckRuns([
+        checkRun('Unit Tests - A [unit:php]', { conclusion: 'failure', html_url: 'url-a' }),
+        checkRun('Unit Tests - B [unit:php]', { conclusion: 'failure', html_url: 'url-b' }),
+        checkRun('Unit Tests - C [unit:php]', { conclusion: 'failure', html_url: 'url-c' }),
+    ]);
+    assert.equal(tasks.length, 1);
+    assert.deepEqual(tasks[0].jobUrls, ['url-a', 'url-b']);
+});
+
+test('classifyCheckRuns: a passing task carries no job urls', () => {
+    const tasks = classifyCheckRuns([
+        checkRun('Lint - @woocommerce/plugin-woocommerce', { html_url: 'url-a' }),
+    ]);
+    assert.equal(tasks.length, 1);
+    assert.equal(tasks[0].jobUrls, undefined);
+});
+
 test('computeOverallState: clear when there are no applicable tasks', () => {
     assert.equal(computeOverallState([]), 'clear');
 });
@@ -269,6 +300,66 @@ test('buildCommentBody: a failing task with no details renders no sub-list', () 
     });
 
     assert.ok(!body.includes('    -'));
+});
+
+test('buildCommentBody: a failing task with one job url renders a single Job link', () => {
+    const { body } = buildCommentBody({
+        tasks: [
+            {
+                label: 'Lint',
+                status: 'fail',
+                remediation: 'See annotations.',
+                jobUrls: ['https://example.com/job/1'],
+            },
+        ],
+        previousState: 'failing',
+        authorLogin: 'octocat',
+    });
+
+    assert.ok(
+        body.includes(
+            '❌ **Lint** — See annotations. [Job](https://example.com/job/1)'
+        )
+    );
+});
+
+test('buildCommentBody: a failing task with multiple job urls numbers each link', () => {
+    const { body } = buildCommentBody({
+        tasks: [
+            {
+                label: 'Unit tests (PHP)',
+                status: 'fail',
+                remediation: 'See the failing job.',
+                jobUrls: ['https://example.com/job/1', 'https://example.com/job/2'],
+            },
+        ],
+        previousState: 'failing',
+        authorLogin: 'octocat',
+    });
+
+    assert.ok(
+        body.includes(
+            '[Job 1](https://example.com/job/1), [Job 2](https://example.com/job/2)'
+        )
+    );
+});
+
+test('buildCommentBody: a passing task with job urls (should not happen) renders no link', () => {
+    const { body } = buildCommentBody({
+        tasks: [
+            { label: 'Lint', status: 'fail', remediation: 'See annotations.' },
+            {
+                label: 'PHPStan',
+                status: 'pass',
+                remediation: 'n/a',
+                jobUrls: ['https://example.com/job/1'],
+            },
+        ],
+        previousState: 'failing',
+        authorLogin: 'octocat',
+    });
+
+    assert.ok(!body.includes('[Job]'));
 });
 
 test('buildCommentBody: a passing task with details (should not happen) renders no sub-list', () => {

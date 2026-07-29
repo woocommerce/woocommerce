@@ -61,6 +61,8 @@ const TASKS = [
     },
 ];
 
+const MAX_JOB_LINKS_PER_TASK = 2;
+
 function classifyCheckRuns(checkRuns) {
     return TASKS.map((task) => {
         const matching = checkRuns.filter(
@@ -85,6 +87,16 @@ function classifyCheckRuns(checkRuns) {
             status: failing ? 'fail' : 'pass',
             remediation: task.remediation,
         };
+
+        if (failing) {
+            // html_url is generated deterministically by GitHub from
+            // repo/run/job ids, never from PR-authored content, so unlike
+            // annotation text it's safe to link directly with no
+            // sanitization.
+            result.jobUrls = failingRuns
+                .slice(0, MAX_JOB_LINKS_PER_TASK)
+                .map((run) => run.html_url);
+        }
 
         if (failing && task.annotatable) {
             result.checkRunIds = failingRuns.map((run) => run.id);
@@ -137,9 +149,20 @@ function buildCommentBody({ tasks, previousState, authorLogin }) {
     } else {
         lines.push(
             ...tasks.flatMap((task) => {
-                const statusLine = `- ${task.status === 'fail' ? '❌' : '✅'} **${task.label}**${
-                    task.status === 'fail' ? ` — ${task.remediation}` : ''
-                }`;
+                const marker = task.status === 'fail' ? '❌' : '✅';
+                const suffix = task.status === 'fail' ? ` — ${task.remediation}` : '';
+                const jobLinks =
+                    task.status === 'fail' && task.jobUrls && task.jobUrls.length > 0
+                        ? ' ' +
+                          task.jobUrls
+                              .map((url, index) =>
+                                  task.jobUrls.length > 1
+                                      ? `[Job ${index + 1}](${url})`
+                                      : `[Job](${url})`
+                              )
+                              .join(', ')
+                        : '';
+                const statusLine = `- ${marker} **${task.label}**${suffix}${jobLinks}`;
                 if (task.status === 'fail' && task.details && task.details.length > 0) {
                     return [statusLine, ...task.details.map((detail) => `    - ${detail}`)];
                 }
