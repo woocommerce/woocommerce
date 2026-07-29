@@ -65,7 +65,9 @@ To register a React-powered page, use the [`wc_admin_register_page()`](https://w
 
 Registering a React-powered page is similar to connecting a PHP page, but with some key differences. Registering pages will automatically create WordPress menu items for them, with the appropriate hierarchy based on the value of `parent`.
 
-Route templates recognize direct loads for matching React routes registered with `woocommerce_admin_pages_list`. Named parameters must occupy a complete path segment, and a wildcard is recognized only when `/*` ends the path. Route templates do not generate concrete WordPress menu or linked breadcrumb URLs; use static paths for navigation that merchants should click directly.
+Route templates recognize direct loads for matching React routes registered with `woocommerce_admin_pages_list`. Named parameters must occupy a complete path segment, and a wildcard is recognized only when `/*` ends the path.
+
+Route templates are matching patterns, not URL templates. `PageController` does not interpolate request values when it registers the corresponding WordPress menu item, so WordPress receives the literal route template as the menu slug (for example, `wc-admin&path=/orders/:orderId`). Treat route templates as direct-load recognition paths, and use static paths for merchant-facing navigation. When a page is selected through fallback route matching, its own breadcrumb label is unlinked rather than pointing to the literal template; static ancestor breadcrumbs can still link normally.
 
 ### Example: Adding a new WooCommerce Admin page
 

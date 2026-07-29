@@ -379,7 +379,9 @@ class PageController {
 		/**
 		 * The navigation breadcrumbs for the current page.
 		 *
-		 * @param array         $breadcrumbs Navigation pieces (breadcrumbs).
+		 * @since 6.5.0
+		 *
+		 * @param array         $breadcrumbs Navigation pieces. Each piece is either a URL and label array or an unlinked label string.
 		 * @param array|boolean $current_page The connected page data or false if not identified.
 		 */
 		return apply_filters( 'woocommerce_navigation_get_breadcrumbs', $breadcrumbs, $current_page );
