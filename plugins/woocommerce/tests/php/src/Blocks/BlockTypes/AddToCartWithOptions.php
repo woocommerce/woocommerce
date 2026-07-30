@@ -542,7 +542,9 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 
 	/**
 	 * Tests that only containers holding a visible quantity input are classed. The hidden
-	 * containers sit on either side of the visible one, so this also covers both orderings.
+	 * containers sit on either side of the visible one, so this also covers both orderings,
+	 * and the trailing input outside any container covers a visible input that follows a
+	 * hidden-only container without being inside it.
 	 *
 	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::add_quantity_stepper_classes
 	 */
@@ -552,6 +554,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			. '<div class="quantity visible"><input type="number" class="input-text qty text" name="quantity" value="1" /></div>'
 			. '<div class="quantity after"><input class="qty" type="hidden" name="quantity[2]" value="1" />1</div>'
 			. '<div class="quantity uppercase"><input class="qty" TYPE="HIDDEN" name="quantity[3]" value="3" />3</div>'
+			. '<input class="qty" type="number" name="loose" value="1" />'
 			. '</form>';
 
 		$result = Utils::add_quantity_stepper_classes( $quantity_html );
@@ -560,6 +563,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$this->assertStringContainsString( 'class="quantity before"', $result, 'A hidden-only container preceding the visible one should be left unchanged.' );
 		$this->assertStringContainsString( 'class="quantity after"', $result, 'A hidden-only container following the visible one should be left unchanged.' );
 		$this->assertStringContainsString( 'class="quantity uppercase"', $result, 'The type attribute is case-insensitive, so TYPE="HIDDEN" should be treated as hidden too.' );
+		$this->assertMatchesRegularExpression( '/wc-block-components-quantity-selector__input"[^>]*name="loose"/', $result, 'A visible input outside any container should still be classed, so the assertions above are not vacuous.' );
 	}
 
 	/**

@@ -114,22 +114,40 @@ class AddToCartForm extends AbstractBlock {
 	private function add_stepper_classes_to_add_to_cart_form_input( $product_html ) {
 		$processor = new \WP_HTML_Tag_Processor( $product_html );
 
-		// Quantity containers don't nest, so the last one seen is always the one enclosing
-		// the current input.
+		// Track DIV nesting so a pending container is dropped once it closes. Without this, a
+		// visible input appearing after the container could claim it from the outside.
 		$pending_container = false;
+		$depth             = 0;
+		$container_depth   = 0;
 
-		while ( $processor->next_tag() ) {
-			if (
-				$processor->get_tag() === 'DIV' &&
-				$processor->has_class( 'quantity' )
-			) {
-				// Defer classing the container until a visible quantity input proves it needs it.
-				$processor->set_bookmark( 'quantity_container' );
-				$pending_container = true;
+		while ( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
+			if ( $processor->get_tag() === 'DIV' ) {
+				if ( $processor->is_tag_closer() ) {
+					--$depth;
+
+					if ( $pending_container && $depth < $container_depth ) {
+						// The container closed with no visible quantity input inside it.
+						$pending_container = false;
+					}
+
+					continue;
+				}
+
+				++$depth;
+
+				if ( $processor->has_class( 'quantity' ) ) {
+					// Defer classing the container until a visible quantity input proves it needs it.
+					$processor->set_bookmark( 'quantity_container' );
+					$pending_container = true;
+					$container_depth   = $depth;
+				}
+
+				continue;
 			}
 
 			if (
 				$processor->get_tag() === 'INPUT' &&
+				! $processor->is_tag_closer() &&
 				$processor->has_class( 'qty' ) &&
 				'hidden' !== strtolower( (string) $processor->get_attribute( 'type' ) )
 			) {
