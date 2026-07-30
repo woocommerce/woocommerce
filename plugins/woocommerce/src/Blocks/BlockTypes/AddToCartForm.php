@@ -73,8 +73,8 @@ class AddToCartForm extends AbstractBlock {
 	 * @return string Add to Cart form HTML with increment and decrement buttons.
 	 */
 	private function add_steppers( $product_html, $product_name ) {
-		// Regex pattern to match the <input> element with id starting with 'quantity_'.
-		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
+		// Regex pattern to match the visible <input> element with id starting with 'quantity_'.
+		$pattern = '/(<input(?![^>]*type="hidden")[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Add the minus button BEFORE the matched <input> element so DOM order matches the
 		// visual order (− input +), giving a logical focus and reading sequence.
 		// Use preg_replace_callback to avoid backreference interpretation of $, \ sequences in product names.
@@ -110,12 +110,18 @@ class AddToCartForm extends AbstractBlock {
 	private function add_stepper_classes_to_add_to_cart_form_input( $product_html ) {
 		$processor = new \WP_HTML_Tag_Processor( $product_html );
 
+		// Quantity containers don't nest, so the last one seen is always the one enclosing
+		// the current input.
+		$pending_container = false;
+
 		while ( $processor->next_tag() ) {
 			if (
 				$processor->get_tag() === 'DIV' &&
 				$processor->has_class( 'quantity' )
 			) {
-				$processor->add_class( 'wc-block-components-quantity-selector' );
+				// Defer classing the container until a visible quantity input proves it needs it.
+				$processor->set_bookmark( 'quantity_container' );
+				$pending_container = true;
 			}
 
 			if (
@@ -124,6 +130,16 @@ class AddToCartForm extends AbstractBlock {
 				$processor->get_attribute( 'type' ) !== 'hidden'
 			) {
 				$processor->add_class( 'wc-block-components-quantity-selector__input' );
+
+				if ( $pending_container ) {
+					// seek() rewinds the cursor, so bookmark the input to resume from after
+					// classing the container — otherwise the container is re-walked forever.
+					$processor->set_bookmark( 'visible_quantity_input' );
+					$processor->seek( 'quantity_container' );
+					$processor->add_class( 'wc-block-components-quantity-selector' );
+					$processor->seek( 'visible_quantity_input' );
+					$pending_container = false;
+				}
 			}
 		}
 

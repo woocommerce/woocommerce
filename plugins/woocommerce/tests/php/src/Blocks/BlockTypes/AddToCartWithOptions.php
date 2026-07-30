@@ -541,6 +541,26 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that only containers holding a visible quantity input are classed. The hidden
+	 * containers sit on either side of the visible one, so this also covers both orderings.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::add_quantity_stepper_classes
+	 */
+	public function test_add_quantity_stepper_classes_skips_containers_without_a_visible_quantity_input() {
+		$quantity_html = '<form class="cart">'
+			. '<div class="quantity before"><input class="qty" type="hidden" name="quantity[1]" value="2" />2</div>'
+			. '<div class="quantity visible"><input type="number" class="input-text qty text" name="quantity" value="1" /></div>'
+			. '<div class="quantity after"><input class="qty" type="hidden" name="quantity[2]" value="1" />1</div>'
+			. '</form>';
+
+		$result = Utils::add_quantity_stepper_classes( $quantity_html );
+
+		$this->assertStringContainsString( 'class="quantity visible wc-block-components-quantity-selector"', $result, 'The container holding the visible quantity input should receive the stepper wrapper class.' );
+		$this->assertStringContainsString( 'class="quantity before"', $result, 'A hidden-only container preceding the visible one should be left unchanged.' );
+		$this->assertStringContainsString( 'class="quantity after"', $result, 'A hidden-only container following the visible one should be left unchanged.' );
+	}
+
+	/**
 	 * Tests that the Add to Wishlist Button is injected as the last child only
 	 * when the `product_wishlist` feature flag is enabled.
 	 *

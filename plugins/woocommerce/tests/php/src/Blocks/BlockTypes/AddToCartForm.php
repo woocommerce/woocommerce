@@ -47,6 +47,42 @@ class AddToCartForm extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that only containers holding a visible quantity input are classed. The hidden
+	 * containers sit on either side of the visible one, so this also covers both orderings.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartForm::add_stepper_classes_to_add_to_cart_form_input
+	 */
+	public function test_add_stepper_classes_skips_containers_without_a_visible_quantity_input(): void {
+		$quantity_html = '<form class="cart">'
+			. '<div class="quantity before"><input class="qty" type="hidden" name="quantity[1]" value="2" />2</div>'
+			. '<div class="quantity visible"><input type="number" class="input-text qty text" name="quantity" value="1" /></div>'
+			. '<div class="quantity after"><input class="qty" type="hidden" name="quantity[2]" value="1" />1</div>'
+			. '</form>';
+
+		$block = new class(
+			Package::container()->get( Api::class ),
+			Package::container()->get( AssetDataRegistry::class ),
+			new IntegrationRegistry()
+		) extends \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartForm {
+			/**
+			 * Skip block registration; woocommerce/add-to-cart-form is already registered when WooCommerce loads.
+			 */
+			protected function initialize() {
+			}
+		};
+
+		$reflection = new \ReflectionClass( $block );
+		$method     = $reflection->getMethod( 'add_stepper_classes_to_add_to_cart_form_input' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $block, $quantity_html );
+
+		$this->assertStringContainsString( 'class="quantity visible wc-block-components-quantity-selector"', $result, 'The container holding the visible quantity input should receive the stepper wrapper class.' );
+		$this->assertStringContainsString( 'class="quantity before"', $result, 'A hidden-only container preceding the visible one should be left unchanged.' );
+		$this->assertStringContainsString( 'class="quantity after"', $result, 'A hidden-only container following the visible one should be left unchanged.' );
+	}
+
+	/**
 	 * Tests that add_steppers injects the buttons in visual DOM order (− input +),
 	 * so keyboard focus and screen-reader reading order are logical.
 	 *
