@@ -112,14 +112,16 @@ if ( ! function_exists( 'purple_get_cart_page_content' ) ) :
 				<!-- /wp:spacer -->
 
 				<!-- wp:paragraph {"align":"center"} -->
-				<p class="has-text-align-center"><?php
-					echo sprintf(
+				<p class="has-text-align-center">
+				<?php
+					printf(
 						/* translators: 1: opening anchor tag, 2: closing anchor tag */
 						esc_html__( 'Have an account? %1$sLog in%2$s to check out faster.', 'purple' ),
 						'<a href="' . esc_url( $account_url ) . '">',
 						'</a>'
 					);
-				?></p>
+				?>
+				</p>
 				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:group -->

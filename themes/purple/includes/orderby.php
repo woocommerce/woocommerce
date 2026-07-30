@@ -30,8 +30,8 @@ $id_suffix = wp_unique_id();
 		<button type="button" class="orderby-button">
 			<selectedcontent></selectedcontent>
 		</button>
-		<?php foreach ( $catalog_orderby_options as $id => $name ) : ?>
-			<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $orderby, $id ); ?>><?php echo esc_html( $name ); ?></option>
+		<?php foreach ( $catalog_orderby_options as $option_value => $name ) : ?>
+			<option value="<?php echo esc_attr( $option_value ); ?>" <?php selected( $orderby, $option_value ); ?>><?php echo esc_html( $name ); ?></option>
 		<?php endforeach; ?>
 	</select>
 	<input type="hidden" name="paged" value="1" />

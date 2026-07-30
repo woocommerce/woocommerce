@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<ruleset name="Purple">
+	<description>WordPress coding standards configuration for the Purple theme.</description>
+
+	<file>.</file>
+
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="tab-width" value="4"/>
+	<arg value="sp"/>
+	<arg name="parallel" value="8"/>
+
+	<rule ref="WordPress"/>
+
+	<!-- Inline PHP inside serialized block markup must keep its exact
+	     placement: reflowing it onto separate lines changes the blocks'
+	     innerHTML and risks block validation in the editor. -->
+	<rule ref="Squiz.PHP.EmbeddedPhp">
+		<exclude-pattern>*/patterns/*</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="purple"/>
+			</property>
+		</properties>
+	</rule>
+
+	<config name="minimum_wp_version" value="7.0"/>
+</ruleset>

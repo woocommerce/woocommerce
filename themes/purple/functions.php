@@ -1,6 +1,6 @@
 <?php
 /**
- * purple functions and definitions
+ * Purple functions and definitions
  *
  * @link https://developer.wordpress.org/themes/basics/theme-functions/
  *
@@ -190,12 +190,15 @@ if ( ! function_exists( 'purple_setup' ) ) :
 		// Enqueue editor styles.
 		add_editor_style( 'style.css' );
 		// Unregister Jetpack form patterns and core patterns bundled in WordPress.
-		// Simple sites
+		// Simple sites.
 		purple_unregister_patterns();
-		add_filter( 'wp_loaded', function () {
-			// Atomic sites
-			purple_unregister_patterns();
-		} );
+		add_filter(
+			'wp_loaded',
+			function () {
+				// Atomic sites.
+				purple_unregister_patterns();
+			}
+		);
 		// Remove theme support for the core and featured patterns coming from the Dotorg pattern directory.
 		remove_theme_support( 'core-block-patterns' );
 	}
@@ -265,7 +268,6 @@ if ( ! function_exists( 'purple_styles' ) ) :
 
 		// Enqueue theme stylesheet.
 		wp_enqueue_style( 'purple-style' );
-
 	}
 
 endif;
