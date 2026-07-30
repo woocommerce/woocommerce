@@ -32,9 +32,9 @@ class VersionStringGenerator {
 	/**
 	 * Legacy proxy instance.
 	 *
-	 * @var LegacyProxy|null
+	 * @var LegacyProxy
 	 */
-	private ?LegacyProxy $legacy_proxy = null;
+	private LegacyProxy $legacy_proxy;
 
 	/**
 	 * Initialize the class dependencies.
@@ -91,13 +91,19 @@ class VersionStringGenerator {
 		$version   = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 
 		if ( ! is_string( $version ) || '' === $version ) {
+			$entry_exists = $this->cache_entry_exists( $version, $found );
+
+			if ( $entry_exists ) {
+				$this->log_invalid_cached_value( $id, $version );
+			}
+
 			if ( $generate ) {
 				// The new version is written to the same cache key, replacing the invalid
 				// value, so deleting it first would only add a redundant round-trip.
 				return $this->generate_version( $id );
 			}
 
-			if ( $this->cache_entry_exists( $version, $found ) ) {
+			if ( $entry_exists ) {
 				wp_cache_delete( $cache_key, self::CACHE_GROUP );
 			}
 
@@ -185,6 +191,27 @@ class VersionStringGenerator {
 	 */
 	private function cache_entry_exists( $value, $found ): bool {
 		return (bool) $found || ( false !== $value && null !== $value );
+	}
+
+	/**
+	 * Log a value found in the version string cache that isn't a usable version string.
+	 *
+	 * This should never happen with a well-behaved object cache, so surface it for
+	 * diagnosis rather than silently self-healing.
+	 *
+	 * @param string $id    The ID the invalid value was cached for.
+	 * @param mixed  $value The invalid cached value.
+	 * @return void
+	 */
+	private function log_invalid_cached_value( string $id, $value ): void {
+		$this->legacy_proxy->call_function( 'wc_get_logger' )->warning(
+			sprintf(
+				'Discarded an invalid version string cache entry for ID "%1$s" (got %2$s); the version will be regenerated.',
+				$id,
+				gettype( $value )
+			),
+			array( 'source' => 'version-string-generator' )
+		);
 	}
 
 	/**

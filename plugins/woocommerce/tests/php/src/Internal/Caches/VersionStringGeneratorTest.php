@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\Caches;
 
 use Automattic\WooCommerce\Internal\Caches\VersionStringGenerator;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Unit_Test_Case;
 
 /**
  * Tests for VersionStringGenerator.
  */
 class VersionStringGeneratorTest extends WC_Unit_Test_Case {
+
+	use LoggerSpyTrait;
 
 	/**
 	 * The System Under Test.
@@ -294,6 +297,34 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 		$version = $this->sut->get_version( 'invalid-value-regenerated' );
 
 		$this->assertTrue( wp_is_uuid( (string) $version, 4 ), 'A new version should be generated over the invalid value' );
+	}
+
+	/**
+	 * @testdox get_version logs a warning when it discards an invalid cached value.
+	 */
+	public function test_get_version_logs_when_discarding_invalid_cached_value(): void {
+		$cache_key = $this->get_version_cache_key( 'logged-invalid-value' );
+		wp_cache_set( $cache_key, 42, $this->get_cache_group() );
+
+		$this->sut->get_version( 'logged-invalid-value' );
+
+		$this->assertLogged(
+			'warning',
+			'Discarded an invalid version string cache entry for ID "logged-invalid-value" (got integer)',
+			array( 'source' => 'version-string-generator' )
+		);
+	}
+
+	/**
+	 * @testdox get_version does not log on a genuine cache miss.
+	 */
+	public function test_get_version_does_not_log_on_genuine_cache_miss(): void {
+		$this->sut->get_version( 'unlogged-cache-miss' );
+
+		$this->assertEmpty(
+			$this->captured_logs,
+			'A genuine cache miss is the common path and should never be logged'
+		);
 	}
 
 	/**
