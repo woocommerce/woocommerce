@@ -23,6 +23,8 @@
 		"eslint": "^10.0.0",
 		"globals": "^16.5.0",
 		"prettier": "npm:wp-prettier@3.0.3",
+		"react": "18.3.x",
+		"react-dom": "18.3.x",
 		"ts-loader": "9.5.x",
 		"typescript": "5.7.x",
 		"uglify-js": "^3.17.4"

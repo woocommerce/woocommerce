@@ -622,4 +622,137 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		// Clean up order.
 		$order->delete( true );
 	}
+
+	/**
+	 * @testdox Should reset variation_id to 0 when set_product() switches the item to a non-variation product.
+	 */
+	public function test_set_product_resets_variation_id_when_switching_to_simple_product(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array()
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		$this->assertSame( $variation->get_id(), $item->get_variation_id(), 'Precondition: the item should carry the variation ID before switching.' );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame( 0, $item->get_variation_id(), 'variation_id should be reset to 0 when switching to a non-variation product.' );
+		$this->assertSame( $this->product->get_id(), $item->get_product_id(), 'product_id should point at the newly set product.' );
+		$this->assertSame( $this->product->get_id(), $item->get_product()->get_id(), 'get_product() should return the newly set product, not the stale variation.' );
+	}
+
+	/**
+	 * @testdox Should update variation_id when set_product() switches the item between two variations.
+	 */
+	public function test_set_product_updates_variation_id_when_switching_between_variations(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+		$parent->save();
+
+		$variation_a = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION A SKU ' . wp_generate_uuid4(),
+			10,
+			array()
+		);
+		$variation_b = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION B SKU ' . wp_generate_uuid4(),
+			15,
+			array()
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation_a );
+		$item->set_product( $variation_b );
+
+		$this->assertSame( $variation_b->get_id(), $item->get_variation_id(), 'variation_id should track the most recently set variation.' );
+		$this->assertSame( $parent->get_id(), $item->get_product_id(), 'product_id should remain the shared parent.' );
+	}
+
+	/**
+	 * @testdox Should clear variation_id when set_product() is given the variable parent of the item's own current variation.
+	 */
+	public function test_set_product_clears_variation_id_when_switched_to_own_variable_parent(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'T-Shirt' );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array()
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		$this->assertSame( $variation->get_id(), $item->get_variation_id(), 'Precondition: the item should carry the variation ID before switching to the parent.' );
+
+		$this->assertFalse( $parent->is_type( 'variation' ), 'Precondition: a WC_Product_Variable is not itself a variation.' );
+
+		$item->set_product( $parent );
+
+		$this->assertSame( 0, $item->get_variation_id(), 'A variable parent is not itself a sellable line item, so setting it deliberately clears variation_id rather than preserving the previously selected variation.' );
+		$this->assertSame( $parent->get_id(), $item->get_product_id(), 'product_id should point at the variable parent.' );
+	}
+
+	/**
+	 * @testdox Should set product_id and variation_id when set_product() switches the item from a simple product to a variation.
+	 */
+	public function test_set_product_sets_variation_id_when_switching_from_simple_product_to_variation(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array()
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->product );
+		$item->set_product( $variation );
+
+		$this->assertSame( $parent->get_id(), $item->get_product_id(), 'product_id should point at the variation\'s parent when switching from a simple product.' );
+		$this->assertSame( $variation->get_id(), $item->get_variation_id(), 'variation_id should be set to the variation ID when switching from a simple product.' );
+	}
+
+	/**
+	 * @testdox Should leave stale variation attribute meta in place when set_product() switches to a simple product (documents the tradeoff tracked in #66733).
+	 */
+	public function test_set_product_leaves_stale_variation_attribute_meta_when_switching_to_simple_product(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array( 'color' => 'blue' )
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Precondition: set_variation() writes the variation attribute as display meta with the attribute_ prefix stripped.' );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame( $this->product->get_id(), $item->get_product()->get_id(), 'get_product() should resolve to the simple product once variation_id is cleared.' );
+		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Accepted behavior: the stale "color" attribute meta survives the switch because clearing it blindly could delete a merchant\'s own custom meta. Removing it is tracked in #66733.' );
+	}
 }

@@ -47,19 +47,19 @@ export const withPluginsHydration = ( data: PluginHydrationData ) =>
 				if ( ! shouldHydrate ) {
 					return;
 				}
-				startResolution( 'getActivePlugins', [] );
-				startResolution( 'getInstalledPlugins', [] );
-				startResolution( 'isJetpackConnected', [] );
-				updateActivePlugins( data.activePlugins, true );
-				updateInstalledPlugins( data.installedPlugins, true );
-				updateIsJetpackConnected(
+				void startResolution( 'getActivePlugins', [] );
+				void startResolution( 'getInstalledPlugins', [] );
+				void startResolution( 'isJetpackConnected', [] );
+				void updateActivePlugins( data.activePlugins, true );
+				void updateInstalledPlugins( data.installedPlugins, true );
+				void updateIsJetpackConnected(
 					data.jetpackStatus && data.jetpackStatus.isActive
 						? true
 						: false
 				);
-				finishResolution( 'getActivePlugins', [] );
-				finishResolution( 'getInstalledPlugins', [] );
-				finishResolution( 'isJetpackConnected', [] );
+				void finishResolution( 'getActivePlugins', [] );
+				void finishResolution( 'getInstalledPlugins', [] );
+				void finishResolution( 'isJetpackConnected', [] );
 			}, [ shouldHydrate ] );
 
 			return <OriginalComponent { ...props } />;

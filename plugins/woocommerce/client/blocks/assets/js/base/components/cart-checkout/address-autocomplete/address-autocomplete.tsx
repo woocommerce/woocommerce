@@ -240,7 +240,8 @@ export const AddressAutocomplete = ( {
 			const parentElement = inputElement.parentElement;
 			if ( parentElement ) {
 				// Store current focus state and cursor position
-				const hasFocus = document.activeElement === inputElement;
+				const hasFocus =
+					inputElement.ownerDocument.activeElement === inputElement;
 				const selectionStart = inputElement.selectionStart;
 				const selectionEnd = inputElement.selectionEnd;
 
@@ -377,7 +378,7 @@ export const AddressAutocomplete = ( {
 					suppressSearchTimeoutRef.current = setTimeout( () => {
 						suppressSearchTimeoutRef.current = null;
 					}, 1000 );
-					provider
+					void provider
 						.select( selected.id, country )
 						.then( ( address ) => {
 							if ( addressType === 'shipping' ) {

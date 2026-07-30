@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revert the fixed end-prices order calculation changes from PR #63744, which caused tax-inclusive stores using the woocommerce_adjust_non_base_location_prices filter to charge the net amount on block/Store API checkout

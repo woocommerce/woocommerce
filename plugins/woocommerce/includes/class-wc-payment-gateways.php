@@ -195,17 +195,22 @@ class WC_Payment_Gateways {
 
 			if ( ! is_array( $value ) ) {
 				$logger->warning(
-					sprintf( 'Payment gateway transition handling skipped because the new value for "%s" is not an array.', $option ),
+					sprintf( 'New payment gateway settings for "%s" were not an array; using gateway defaults for transition handling.', $option ),
 					array( 'source' => 'payment-gateways' )
 				);
-				return;
 			}
 
-			$logger->warning(
-				sprintf( 'Previous payment gateway settings for "%s" were not an array; treating the gateway as disabled.', $option ),
-				array( 'source' => 'payment-gateways' )
-			);
-			$old_value = array( 'enabled' => 'no' );
+			if ( null !== $old_value && ! is_array( $old_value ) ) {
+				$logger->warning(
+					sprintf( 'Previous payment gateway settings for "%s" were not an array; using gateway defaults for transition handling.', $option ),
+					array( 'source' => 'payment-gateways' )
+				);
+			}
+
+			$value = $this->normalize_gateway_settings_for_transition( $gateway, $value );
+			if ( null !== $old_value ) {
+				$old_value = $this->normalize_gateway_settings_for_transition( $gateway, $old_value );
+			}
 		}
 
 		if ( $this->was_gateway_enabled( $value, $old_value ) ) {
@@ -233,6 +238,25 @@ class WC_Payment_Gateways {
 			// This is a change to a payment gateway's settings and it was just disabled. Let's track it.
 			$this->record_gateway_event( 'disable', $gateway );
 		}
+	}
+
+	/**
+	 * Normalize gateway settings for transition handling.
+	 *
+	 * @param WC_Payment_Gateway $gateway  Payment gateway.
+	 * @param mixed              $settings Gateway settings.
+	 * @return array Normalized gateway settings.
+	 */
+	private function normalize_gateway_settings_for_transition( $gateway, $settings ) {
+		if ( is_array( $settings ) ) {
+			return $settings;
+		}
+
+		$form_fields     = $gateway->get_form_fields();
+		$enabled_field   = $form_fields['enabled'] ?? array();
+		$enabled_default = $gateway->get_field_default( $enabled_field );
+
+		return array( 'enabled' => 'yes' === $enabled_default ? 'yes' : 'no' );
 	}
 
 	/**

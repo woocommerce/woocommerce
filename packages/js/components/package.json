@@ -180,6 +180,7 @@
 		"postcss-loader": "4.3.x",
 		"qrcode.react": "^3.1.0",
 		"react": "18.3.x",
+		"react-dom": "18.3.x",
 		"redux": "4.2.1",
 		"rimraf": "5.0.5",
 		"sass-loader": "10.5.x",
