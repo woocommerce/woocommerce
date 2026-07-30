@@ -16,12 +16,11 @@ namespace Automattic\WooCommerce\Internal\PRReadinessDummy2;
 class DummyPHPStanFailure {
 
 	/**
-	 * Broken again (verified) to trigger PHPStan failure.
+	 * Fixed to return a value.
 	 *
 	 * @return int
 	 */
 	public function run(): int {
-		$value = null;
-		return $value->calculate();
+		return 42;
 	}
 }
