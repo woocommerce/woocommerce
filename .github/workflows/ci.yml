@@ -60,12 +60,18 @@ jobs:
       - uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
         id: target-changes
         with:
+          # `**/` requires at least one leading directory, so a `**/`-only pattern silently
+          # misses repository-root files. Every root-anchored ignore below uses `{,**/}` so
+          # that e.g. `AGENTS.md` is excluded the same way `docs/foo.md` is.
           filters: |
             needs-code-validation:
-              - '!((**/*.md)|(docs/docs-manifest.json)|(**/changelog/*)|(.github/**)|(.husky/**)|(.cursor/**)|(.gitignore)|(**/readme.txt))'
+              - '!(({,**/}*.md)|(docs/docs-manifest.json)|({,**/}changelog/*)|(.github/**)|(.husky/**)|(.cursor/**)|(.gitignore)|({,**/}readme.txt))'
+              # `changelog/*` also covers real modules, e.g. code-freeze/commands/changelog/index.ts.
+              - '{,**/}changelog/*.{ts,tsx,js,jsx,mjs,cjs,php,json,scss,css}'
             needs-changelog-validation:
               - '{packages,plugins}/*/!((changelog/*)|(readme.txt))'
             needs-markdown-validation:
+              - '*.md'
               - '!(.github/**)/**/*.md'
             needs-syncpack-validation:
               - '(.syncpackrc)|(pnpm-lock.yaml)'
@@ -158,8 +164,10 @@ jobs:
   woocommerce-plugin-build-artifact:
     name: "Build WooCommerce plugin artifact${{ needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' && ' (optional)' || '' }}"
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    needs: 'project-jobs'
-    if: ${{ !cancelled() && needs.project-jobs.result == 'success' && inputs.artifactName == '' && needs.project-jobs.outputs.shared-plugin-build-needed == 'true' }}
+    needs: [ 'identify-jobs-to-run', 'project-jobs' ]
+    # The `needs-code-validation` clause mirrors `project-test-jobs`: without it this job builds a
+    # plugin zip for consumers that are themselves gated off, which is pure waste on docs-only PRs.
+    if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.result == 'success' && inputs.artifactName == '' && needs.project-jobs.outputs.shared-plugin-build-needed == 'true' }}
     permissions:
       contents: read
     env:
@@ -200,7 +208,7 @@ jobs:
   project-test-jobs:
     name: '${{ matrix.name }}'
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    needs: [ 'project-jobs', 'woocommerce-plugin-build-artifact' ]
+    needs: [ 'identify-jobs-to-run', 'project-jobs', 'woocommerce-plugin-build-artifact' ]
     if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' && ( needs.woocommerce-plugin-build-artifact.result == 'success' || needs.woocommerce-plugin-build-artifact.result == 'skipped' || needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' ) }}
     env: ${{ matrix.testEnv.envVars }}
     strategy:
@@ -475,7 +483,7 @@ jobs:
 
   test-reports:
     name: 'Test reports - ${{ matrix.report }}'
-    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs']
+    needs: ['identify-jobs-to-run', 'project-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || ( needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && ! github.event.pull_request.head.repo.fork ) ) && needs.project-jobs.outputs.report-jobs != '[]' }}
     strategy:
       fail-fast: false
