@@ -25,6 +25,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	#mainform {
+		// The shell uses a 48px gutter, which has no WPDS spacing token.
 		padding: 0 48px 48px;
 	}
 
@@ -39,6 +40,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		font-size: var(--wpds-typography-font-size-md);
 		height: auto;
 		line-height: var(--wpds-typography-line-height-sm);
+		// Offset the 48px form gutter; WPDS has no matching negative token.
 		margin: 0 -48px;
 
 		&:has(.wc-settings-ui-shell__navigation) .wc-settings-ui-shell__header {
@@ -48,11 +50,14 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	.wc-settings-ui-shell__header {
 		background: var(--wpds-color-background-surface-neutral-strong);
-		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
-		padding: 24px 48px;
+		border-bottom: var(--wpds-border-width-xs) solid
+			var(--wpds-color-stroke-surface-neutral-weak);
+		// The horizontal 48px shell gutter has no WPDS spacing token.
+		padding: var(--wpds-dimension-padding-2xl) 48px;
 	}
 
 	.wc-settings-ui-shell__title {
+		// Preserve the shell title size; WPDS has no 16px font token.
 		font-size: 16px;
 		font-weight: var(--wpds-typography-font-weight-medium);
 		line-height: var(--wpds-typography-line-height-md);
@@ -60,7 +65,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui-shell__header-row > .wc-settings-ui-shell__badge {
-		margin-inline-start: var(--wpds-dimension-gap-sm, 8px);
+		margin-inline-start: var(--wpds-dimension-gap-sm);
 	}
 
 	.wc-settings-ui-shell__header-actions {
@@ -75,6 +80,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	// Carries #mainform so the margins beat extension styles targeting bare
 	// `nav` elements inside the settings form (WooPayments ships one).
 	#mainform .wc-settings-ui-shell__breadcrumbs {
+		// Preserve the breadcrumb size; WPDS has no 16px font token.
 		font-size: 16px;
 		line-height: var(--wpds-typography-line-height-md);
 		margin: 0;
@@ -86,7 +92,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		&::after {
 			color: var(--wpds-color-foreground-content-neutral-weak);
 			content: "/";
-			margin: 0 var(--wpds-dimension-gap-sm, 8px);
+			margin: 0 var(--wpds-dimension-gap-sm);
 		}
 
 		a {
@@ -101,7 +107,8 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui-shell__navigation {
-		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral-weak);
+		border-bottom: var(--wpds-border-width-xs) solid
+			var(--wpds-color-stroke-surface-neutral-weak);
 		margin: 0;
 		width: 100%;
 	}
@@ -112,6 +119,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		display: flex;
 		margin: 0 !important;
 		overflow-x: auto;
+		// The horizontal 48px shell gutter has no WPDS spacing token.
 		padding: 0 48px;
 		width: 100%;
 	}
@@ -122,6 +130,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		display: inline-flex;
 		font-size: var(--wpds-typography-font-size-md);
 		font-weight: var(--wpds-typography-font-weight-medium);
+		// Preserve the 48px tab height; WPDS has no matching size token.
 		height: 48px;
 		line-height: var(--wpds-typography-line-height-sm);
 		padding: 0 var(--wpds-dimension-padding-lg);
@@ -142,10 +151,11 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 			&::after {
 				background: var(--wpds-color-stroke-interactive-brand);
+				// Keep the pill shape; WPDS has no fully rounded radius token.
 				border-radius: 999px;
 				bottom: 0;
 				content: "";
-				height: 2px;
+				height: var(--wpds-border-width-sm);
 				left: 0;
 				position: absolute;
 				right: 0;
@@ -154,12 +164,14 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui-shell__notice {
-		margin: 24px 48px 0;
+		// The horizontal 48px shell gutter has no WPDS spacing token.
+		margin: var(--wpds-dimension-gap-xl) 48px 0;
 	}
 
 	.wc-settings-ui {
 		box-sizing: border-box;
-		margin: 32px auto 48px;
+		// Preserve the 48px bottom spacing; WPDS has no matching gap token.
+		margin: var(--wpds-dimension-gap-2xl) auto 48px;
 		max-width: var(--wpds-dimension-surface-width-xl);
 	}
 
@@ -169,10 +181,10 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	.wc-settings-ui__section-description {
 		color: var(--wpds-color-foreground-content-neutral-weak);
-		margin: 8px 0 0;
+		margin: var(--wpds-dimension-gap-sm) 0 0;
 
 		p {
-			margin: 0 0 8px;
+			margin: 0 0 var(--wpds-dimension-gap-sm);
 		}
 
 		p:last-child {
@@ -192,11 +204,11 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	.wc-settings-ui__info {
 		background: var(--wpds-color-background-surface-neutral-weak);
 		border-radius: var(--wpds-border-radius-md);
-		padding: 16px;
+		padding: var(--wpds-dimension-padding-lg);
 
 		strong {
 			display: block;
-			margin-bottom: 4px;
+			margin-bottom: var(--wpds-dimension-gap-xs);
 		}
 
 		p {
@@ -216,9 +228,9 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 		.components-base-control__help {
 			color: var(--wpds-color-foreground-content-neutral-weak);
-			font-size: 13px;
-			line-height: 20px;
-			margin-top: 8px;
+			font-size: var(--wpds-typography-font-size-md);
+			line-height: var(--wpds-typography-line-height-sm);
+			margin-top: var(--wpds-dimension-gap-sm);
 		}
 	}
 
@@ -228,11 +240,12 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	// Owned input skin: deliberately not borrowing internal
 	// @wordpress/components classnames, which carry no compatibility
-	// guarantee. Values mirror the 40px TextControl input.
+	// guarantee. Values mirror the default-size TextControl input.
 	.wc-settings-ui__number-control-input {
 		appearance: textfield;
-		border: 1px solid #949494;
-		border-radius: 2px;
+		border: var(--wpds-border-width-xs) solid
+			var(--wpds-color-stroke-interactive-neutral);
+		border-radius: var(--wpds-border-radius-sm);
 		box-shadow: 0 0 0 transparent;
 		box-sizing: border-box;
 		font-family: inherit;
@@ -240,21 +253,24 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		font-size: 16px;
 		line-height: normal;
 		margin: 0;
-		min-height: 40px;
-		padding: 6px 12px;
-		// Keep typed values clear of the spin buttons.
+		min-height: var(--wpds-dimension-size-lg);
+		// WPDS has no token for the 6px vertical input padding.
+		padding: 6px var(--wpds-dimension-padding-md);
+		// WPDS has no padding token for the 64px spin-button clearance.
 		padding-right: 64px;
 		transition: box-shadow 0.1s linear;
 		width: 100%;
 
+		// Preserve the mobile Safari breakpoint; WPDS has no breakpoint tokens.
 		@media (min-width: 600px) {
-			font-size: 13px;
+			font-size: var(--wpds-typography-font-size-md);
 		}
 
 		&:focus {
-			border-color: var(--wp-admin-theme-color);
-			box-shadow: 0 0 0 0.5px var(--wp-admin-theme-color);
-			outline: 2px solid transparent;
+			border-color: var(--wpds-color-stroke-focus);
+			// WPDS has no token for the 0.5px focus-ring expansion.
+			box-shadow: 0 0 0 0.5px var(--wpds-color-stroke-focus);
+			outline: var(--wpds-border-width-sm) solid transparent;
 		}
 
 		&::-webkit-inner-spin-button,
@@ -267,6 +283,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	.wc-settings-ui__number-control-spin-buttons {
 		display: flex;
 		position: absolute;
+		// WPDS has no spacing token for the 6px spinner inset.
 		right: 6px;
 		top: 50%;
 		transform: translateY(-50%);
@@ -279,33 +296,37 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		z-index: 100000;
 	}
 
+	// Preserve the existing responsive cutoff; WPDS has no breakpoint tokens.
 	@media (max-width: 960px) {
 		#mainform {
-			padding: 0 24px 32px;
+			padding: 0 var(--wpds-dimension-padding-2xl)
+				var(--wpds-dimension-padding-3xl);
 		}
 
 		.wc-settings-ui-shell {
-			margin-left: -24px;
-			margin-right: -24px;
+			margin-left: calc(var(--wpds-dimension-gap-xl) * -1);
+			margin-right: calc(var(--wpds-dimension-gap-xl) * -1);
 		}
 
 		.wc-settings-ui-shell__header {
-			padding-left: 24px;
-			padding-right: 24px;
+			padding-left: var(--wpds-dimension-padding-2xl);
+			padding-right: var(--wpds-dimension-padding-2xl);
 		}
 
 		.wc-settings-ui-shell__tabs {
-			padding-left: 24px;
-			padding-right: 24px;
+			padding-left: var(--wpds-dimension-padding-2xl);
+			padding-right: var(--wpds-dimension-padding-2xl);
 		}
 
 		.wc-settings-ui-shell__notice {
-			margin-left: 24px;
-			margin-right: 24px;
+			margin-left: var(--wpds-dimension-gap-xl);
+			margin-right: var(--wpds-dimension-gap-xl);
 		}
 
 		.wc-settings-ui {
-			margin: 48px 24px 32px;
+			// Preserve the 48px top spacing; WPDS has no matching gap token.
+			margin: 48px var(--wpds-dimension-gap-xl)
+				var(--wpds-dimension-gap-2xl);
 			max-width: none;
 		}
 
@@ -314,7 +335,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 
 		.wc-settings-ui__section-actions {
-			margin-top: 16px;
+			margin-top: var(--wpds-dimension-gap-lg);
 		}
 	}
 }
