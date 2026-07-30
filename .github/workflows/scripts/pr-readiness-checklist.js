@@ -148,7 +148,7 @@ const TRANSITION_MESSAGES = {
 const SILENT_STATUS_MESSAGES = {
     'failing->failing': (authorLogin) =>
         `Hi @${authorLogin}, here's the current status — a few things still need attention:`,
-    'clear->clear': (authorLogin) => `Hi @${authorLogin}, still all green here.`,
+    'clear->clear': (authorLogin) => `Your readiness checks are still all passing — no new blockers here.`,
 };
 
 // GitHub only sends a mention notification when a comment is *created*,
@@ -186,11 +186,11 @@ function buildCommentBody({ tasks, previousState, authorLogin, stickyCommentUrl 
     ];
 
     if (overallState === 'clear') {
-        lines.push('✅ All checks are passing.');
+        lines.push('🟢 All checks are passing.');
     } else {
         lines.push(
             ...tasks.flatMap((task) => {
-                const marker = task.status === 'fail' ? '❌' : '✅';
+                const marker = task.status === 'fail' ? '🔴' : '🟢';
                 const jobLinks =
                     task.status === 'fail' && task.jobUrls && task.jobUrls.length > 0
                         ? ' ' +

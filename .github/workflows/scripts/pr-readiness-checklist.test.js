@@ -234,9 +234,9 @@ test('buildCommentBody: first-ever comment with failures mentions the author, no
     assert.ok(body.includes('<!-- pr-readiness-summary status=failing -->'));
     assert.ok(body.includes('## PR Readiness Checks'));
     assert.ok(body.includes('Thanks for the PR, @octocat!'));
-    assert.ok(body.includes('❌ **Lint**'));
+    assert.ok(body.includes('🔴 **Lint**'));
     assert.ok(body.includes('    - See annotations.'));
-    assert.ok(body.includes('✅ **Milestone**'));
+    assert.ok(body.includes('🟢 **Milestone**'));
     // A passing task never gets a remediation sub-bullet.
     assert.ok(!body.includes('    - n/a'));
     // The comment creation itself already notifies; a second ping would be
@@ -255,7 +255,7 @@ test('buildCommentBody: first-ever comment with everything passing thanks the au
     assert.ok(body.includes('<!-- pr-readiness-summary status=clear -->'));
     assert.ok(body.includes('## PR Readiness Checks'));
     assert.ok(body.includes("Thanks for your contribution, @octocat!"));
-    assert.ok(body.includes('✅ All checks are passing.'));
+    assert.ok(body.includes('🟢 All checks are passing.'));
     assert.equal(pingBody, null);
 });
 
@@ -296,7 +296,7 @@ test('buildCommentBody: still clear does not re-mention, no ping, keeps header a
 
     assert.equal(mentioned, false);
     assert.ok(body.includes('## PR Readiness Checks'));
-    assert.ok(body.includes('@octocat, still all green here.'));
+    assert.ok(body.includes('Your readiness checks are still all passing'));
     assert.equal(pingBody, null);
 });
 
@@ -314,7 +314,7 @@ test('buildCommentBody: a failing task with one job url renders a single Job lin
         authorLogin: 'octocat',
     });
 
-    assert.ok(body.includes('❌ **Lint** [Job](https://example.com/job/1)'));
+    assert.ok(body.includes('🔴 **Lint** [Job](https://example.com/job/1)'));
     assert.ok(body.includes('    - See annotations.'));
 });
 
