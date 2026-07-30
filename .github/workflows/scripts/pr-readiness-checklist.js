@@ -189,28 +189,26 @@ function buildCommentBody({ tasks, previousState, authorLogin, stickyCommentUrl 
         lines.push('🟢 All checks are passing.');
     } else {
         lines.push(
-            ...tasks.flatMap((task) => {
-                const marker = task.status === 'fail' ? '🔴' : '🟢';
-                const jobLinks =
-                    task.status === 'fail' && task.jobUrls && task.jobUrls.length > 0
-                        ? ' ' +
-                          task.jobUrls
-                              .map((url, index) =>
-                                  task.jobUrls.length > 1
-                                      ? `[Job ${index + 1}](${url})`
-                                      : `[Job](${url})`
-                              )
-                              .join(', ')
-                        : '';
-                const statusLine = `- ${marker} **${task.label}**${jobLinks}`;
-                // Remediation text (and any non-CI link it carries, e.g. a
-                // guide) goes on its own indented line, kept separate from
-                // the CI job links on the status line above.
-                if (task.status === 'fail') {
-                    return [statusLine, `    - ${task.remediation}`];
-                }
-                return [statusLine];
-            })
+            ...tasks
+                .filter((task) => task.status === 'fail')
+                .flatMap((task) => {
+                    const jobLinks =
+                        task.jobUrls && task.jobUrls.length > 0
+                            ? ' ' +
+                              task.jobUrls
+                                  .map((url, index) =>
+                                      task.jobUrls.length > 1
+                                          ? `[Job ${index + 1}](${url})`
+                                          : `[Job](${url})`
+                                  )
+                                  .join(', ')
+                            : '';
+                    const statusLine = `🔴 ${task.label}${jobLinks}`;
+                    // Remediation text (and any non-CI link it carries, e.g. a
+                    // guide) goes on its own indented line, kept separate from
+                    // the CI job links on the status line above.
+                    return [statusLine, `- ${task.remediation}`];
+                })
         );
     }
 

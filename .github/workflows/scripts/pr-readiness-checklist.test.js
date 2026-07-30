@@ -234,10 +234,10 @@ test('buildCommentBody: first-ever comment with failures mentions the author, no
     assert.ok(body.includes('<!-- pr-readiness-summary status=failing -->'));
     assert.ok(body.includes('## PR Readiness Checks'));
     assert.ok(body.includes('Thanks for the PR, @octocat!'));
-    assert.ok(body.includes('🔴 **Lint**'));
-    assert.ok(body.includes('    - See annotations.'));
-    assert.ok(body.includes('🟢 **Milestone**'));
-    // A passing task never gets a remediation sub-bullet.
+    assert.ok(body.includes('🔴 Lint'));
+    assert.ok(body.includes('- See annotations.'));
+    // Passing tasks are not shown in failing state.
+    assert.ok(!body.includes('Milestone'));
     assert.ok(!body.includes('    - n/a'));
     // The comment creation itself already notifies; a second ping would be
     // a redundant duplicate for the very first comment on the PR.
@@ -314,8 +314,8 @@ test('buildCommentBody: a failing task with one job url renders a single Job lin
         authorLogin: 'octocat',
     });
 
-    assert.ok(body.includes('🔴 **Lint** [Job](https://example.com/job/1)'));
-    assert.ok(body.includes('    - See annotations.'));
+    assert.ok(body.includes('🔴 Lint [Job](https://example.com/job/1)'));
+    assert.ok(body.includes('- See annotations.'));
 });
 
 test('buildCommentBody: a failing task with multiple job urls numbers each link', () => {
@@ -339,7 +339,7 @@ test('buildCommentBody: a failing task with multiple job urls numbers each link'
     );
 });
 
-test('buildCommentBody: a passing task with job urls (should not happen) renders no link', () => {
+test('buildCommentBody: passing tasks are not shown in failing state', () => {
     const { body } = buildCommentBody({
         tasks: [
             { label: 'Lint', status: 'fail', remediation: 'See annotations.' },
@@ -354,6 +354,10 @@ test('buildCommentBody: a passing task with job urls (should not happen) renders
         authorLogin: 'octocat',
     });
 
+    // Only failing task shown
+    assert.ok(body.includes('🔴 Lint'));
+    // Passing task not shown at all
+    assert.ok(!body.includes('PHPStan'));
     assert.ok(!body.includes('[Job]'));
 });
 
