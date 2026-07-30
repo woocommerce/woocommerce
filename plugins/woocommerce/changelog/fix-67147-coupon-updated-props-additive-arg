@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add a third argument to the woocommerce_coupon_object_updated_props hook listing only the properties changed by the current save. The second argument keeps its historical behavior of accumulating properties across saves of the same coupon object, so existing listeners are unaffected. WC_Coupon_Data_Store_CPT::$updated_props is deprecated: read the hook's third argument instead.
