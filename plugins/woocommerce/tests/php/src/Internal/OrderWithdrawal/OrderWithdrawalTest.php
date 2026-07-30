@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormState;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormView;
 use WC_Order;
+use WC_Rate_Limiter;
 use WC_Unit_Test_Case;
 
 /**
@@ -19,6 +20,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	private const FLUSH_QUEUE_OPTION                  = 'woocommerce_queue_flush_rewrite_rules';
 	private const MISSING_OPTION_MARK                 = '__woocommerce_order_withdrawal_missing_option__';
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
+	private const RATE_LIMIT_PREFIX                   = 'order_withdrawal_';
 
 	/**
 	 * The System Under Test.
@@ -47,6 +49,20 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 * @var bool
 	 */
 	private bool $had_request_method = false;
+
+	/**
+	 * Original REMOTE_ADDR value.
+	 *
+	 * @var string|null
+	 */
+	private ?string $original_remote_addr = null;
+
+	/**
+	 * Whether REMOTE_ADDR existed before the test.
+	 *
+	 * @var bool
+	 */
+	private bool $had_remote_addr = false;
 
 	/**
 	 * Original WooCommerce session.
@@ -93,6 +109,8 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$this->original_post               = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$this->had_request_method          = filter_has_var( INPUT_SERVER, 'REQUEST_METHOD' );
 		$this->original_request_method     = $this->had_request_method ? filter_input( INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) : null;
+		$this->had_remote_addr             = array_key_exists( 'REMOTE_ADDR', $_SERVER );
+		$this->original_remote_addr        = $this->had_remote_addr ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : null;
 		$this->original_session            = WC()->session;
 		$this->original_feature_option     = get_option( self::FEATURE_OPTION, self::MISSING_OPTION_MARK );
 		$this->original_endpoint_option    = get_option( self::ENDPOINT_OPTION, self::MISSING_OPTION_MARK );
@@ -104,6 +122,8 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 		$_POST                     = array();
 		$_SERVER['REQUEST_METHOD'] = 'GET';
+		$_SERVER['REMOTE_ADDR']    = '203.0.113.10';
+		$this->clear_order_withdrawal_rate_limits();
 		$this->disable_feature();
 		delete_option( self::ENDPOINT_OPTION );
 		delete_option( self::FLUSH_QUEUE_OPTION );
@@ -122,10 +142,17 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			unset( $_SERVER['REQUEST_METHOD'] );
 		}
 
+		if ( $this->had_remote_addr ) {
+			$_SERVER['REMOTE_ADDR'] = (string) $this->original_remote_addr;
+		} else {
+			unset( $_SERVER['REMOTE_ADDR'] );
+		}
+
 		$this->restore_option( self::FEATURE_OPTION, $this->original_feature_option );
 		$this->restore_option( self::ENDPOINT_OPTION, $this->original_endpoint_option );
 		$this->restore_option( self::FLUSH_QUEUE_OPTION, $this->original_flush_queue_option );
 		wc_clear_notices();
+		$this->clear_order_withdrawal_rate_limits();
 		$this->delete_created_orders();
 		WC()->session = $this->original_session;
 
@@ -338,6 +365,19 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertStringContainsString( 'already been submitted for this order', $error_notices[0]['notice'], 'The notice should explain that the order already has a withdrawal request.' );
 			$this->assertCount( 0, $capture['captures'], 'Duplicate matched submissions should not send notification emails.' );
 			$this->assertFalse( $this->order_has_note_containing( $order, 'Order withdrawal requested' ), 'Duplicate matched submissions should not add another order note.' );
+
+			wc_clear_notices();
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$second_state         = $this->sut->process_current_request();
+			$second_error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'review', $second_state->screen, 'Duplicate matched submissions should not leave behind a rate limit.' );
+			$this->assertCount( 1, $second_error_notices, 'The second duplicate submission should add only the duplicate-order error notice.' );
+			$this->assertStringContainsString( 'already been submitted for this order', $second_error_notices[0]['notice'], 'The released rate limit should allow duplicate-order validation to run again.' );
 		} finally {
 			$capture['remove']();
 		}
@@ -427,6 +467,89 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertCount( 2, $capture['captures'], 'The processor should attempt both notification emails before surfacing the failure.' );
 			$this->assertNotEmpty( $error_notices, 'Email failures should add an error notice.' );
 			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $error_notices[0]['notice'], 'The error notice should tell the user the submission did not complete.' );
+
+			wc_clear_notices();
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '999999999' )
+			);
+
+			$second_state         = $this->sut->process_current_request();
+			$second_error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'review', $second_state->screen, 'Email failures should not leave behind a rate limit.' );
+			$this->assertCount( 4, $capture['captures'], 'The second failed submission should attempt notification emails again.' );
+			$this->assertNotEmpty( $second_error_notices, 'The second email failure should add an error notice.' );
+			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $second_error_notices[0]['notice'], 'The released rate limit should allow email delivery to be attempted again.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should rate limit confirmed submissions by IP address before sending emails.
+	 */
+	public function test_process_current_request_rate_limits_confirmed_submissions_by_ip_address(): void {
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '999999998' )
+			);
+
+			$first_state = $this->sut->process_current_request();
+
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array(
+					OrderWithdrawalFormProcessor::FIELD_EMAIL              => 'another@example.test',
+					OrderWithdrawalFormProcessor::FIELD_EMAIL_CONFIRMATION => 'another@example.test',
+					OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER       => '999999999',
+				)
+			);
+
+			$second_state  = $this->sut->process_current_request();
+			$error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'confirmation', $first_state->screen, 'The first confirmed submission should complete.' );
+			$this->assertSame( 'review', $second_state->screen, 'A repeated submission from the same IP should return to the review screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The rate-limited submission should not send additional notification emails.' );
+			$this->assertNotEmpty( $error_notices, 'Rate-limited submissions should add an error notice.' );
+			$this->assertStringContainsString( 'Please wait before submitting another withdrawal request.', $error_notices[0]['notice'], 'The notice should ask the customer to wait.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should rate limit confirmed submissions by email before sending emails.
+	 */
+	public function test_process_current_request_rate_limits_confirmed_submissions_by_email(): void {
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '999999998' )
+			);
+
+			$first_state = $this->sut->process_current_request();
+
+			$_SERVER['REMOTE_ADDR'] = '203.0.113.11';
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '999999999' )
+			);
+
+			$second_state  = $this->sut->process_current_request();
+			$error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'confirmation', $first_state->screen, 'The first confirmed submission should complete.' );
+			$this->assertSame( 'review', $second_state->screen, 'A repeated submission for the same email should return to the review screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The rate-limited submission should not send additional notification emails.' );
+			$this->assertNotEmpty( $error_notices, 'Rate-limited submissions should add an error notice.' );
+			$this->assertStringContainsString( 'Please wait before submitting another withdrawal request.', $error_notices[0]['notice'], 'The notice should ask the customer to wait.' );
 		} finally {
 			$capture['remove']();
 		}
@@ -687,6 +810,22 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		}
 
 		$this->created_order_ids = array();
+	}
+
+	/**
+	 * Clear order withdrawal rate limits created during tests.
+	 */
+	private function clear_order_withdrawal_rate_limits(): void {
+		global $wpdb;
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_rate_limits WHERE rate_limit_key LIKE %s",
+				$wpdb->esc_like( self::RATE_LIMIT_PREFIX ) . '%'
+			)
+		);
+
+		\WC_Cache_Helper::invalidate_cache_group( WC_Rate_Limiter::CACHE_GROUP );
 	}
 
 	/**
