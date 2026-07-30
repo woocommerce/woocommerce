@@ -178,15 +178,15 @@ jobs:
               fi
             fi
 
-            # No PRs against release branch should remain open.
-            count=$( gh pr list --search "is:open base:$BRANCH" --limit 1 --json number | jq length )
+            # No non-draft PRs against release branch should remain open.
+            count=$( gh pr list --search "is:open draft:false base:$BRANCH" --limit 1 --json number | jq length )
             if (( count > 0 )); then
               fail "There are open PRs against the release branch ($BRANCH)."
             fi
 
-            # No PRs with same milestone as main version should remain open.
+            # No non-draft PRs with same milestone as main version should remain open.
             milestone="$version_prefix.0"
-            count=$( gh pr list --search "is:open milestone:$milestone" --limit 1 --json number | jq length )
+            count=$( gh pr list --search "is:open draft:false milestone:$milestone" --limit 1 --json number | jq length )
             if (( count > 0 )); then
               fail "There are open PRs with milestone '$milestone'."
             fi
