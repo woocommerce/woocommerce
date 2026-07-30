@@ -479,6 +479,21 @@ textarea {
 	min-height: 44px;
 }
 
+/* WooCommerce unsets the stepper width inside add-to-cart-with-options,
+ * so grouped-product steppers are content-sized, and a number input's
+ * intrinsic width varies with its max attribute: rows with and without
+ * managed stock rendered uneven widths (WOOTHME-413). Pin the input to
+ * the same 40px floor the workaround below uses so every stepper sizes
+ * identically, and keep the selector from being squeezed by long titles
+ * in its nowrap row; those wrap inside the label instead. */
+.wp-block-woocommerce-add-to-cart-with-options-grouped-product-item .wc-block-add-to-cart-with-options-grouped-product-item-selector {
+	flex-shrink: 0;
+}
+
+.wp-block-woocommerce-add-to-cart-with-options-grouped-product-item .wc-block-components-quantity-selector input.wc-block-components-quantity-selector__input {
+	width: 40px;
+}
+
 /* Editor preview uses legacy .qty classes; frontend adds __input. */
 .woocommerce .wc-block-components-quantity-selector input.qty,
 .wc-block-components-quantity-selector input.qty,
