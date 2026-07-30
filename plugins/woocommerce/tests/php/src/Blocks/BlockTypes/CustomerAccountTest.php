@@ -93,6 +93,21 @@ class CustomerAccountTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should not render avatar markup when show_avatars is disabled.
+	 */
+	public function test_does_not_render_avatar_when_show_avatars_is_disabled(): void {
+		wp_set_current_user( $this->user_id );
+		update_option( 'show_avatars', 0 );
+
+		$markup = $this->render_customer_account(
+			'{"iconClass":"wc-block-customer-account__account-icon"}'
+		);
+
+		$this->assertStringNotContainsString( 'wc-block-customer-account__avatar', $markup );
+		$this->assertStringNotContainsString( 'custom-avatar.jpg', $markup );
+	}
+
+	/**
 	 * Data provider for displayStyle attribute tests.
 	 *
 	 * @return array<string, array{string, bool, bool, bool}>
