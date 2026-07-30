@@ -30,6 +30,7 @@ interface WithReviewsProps {
 
 interface WithReviewsState {
 	error: string | ErrorObject | null;
+	hasReviewsHiddenByOffset: boolean;
 	loading: boolean;
 	reviews: Review[];
 	totalReviews: number;
@@ -57,6 +58,7 @@ const withReviews = (
 
 		state: WithReviewsState = {
 			error: null,
+			hasReviewsHiddenByOffset: false,
 			loading: true,
 			reviews:
 				this.isPreview && this.props.attributes?.previewReviews
@@ -74,13 +76,15 @@ const withReviews = (
 		}
 
 		componentDidUpdate( prevProps: WithReviewsProps ) {
-			if ( prevProps.reviewsToDisplay < this.props.reviewsToDisplay ) {
+			if ( this.shouldReplaceReviews( prevProps, this.props ) ) {
+				this.replaceReviews();
+			} else if (
+				prevProps.reviewsToDisplay < this.props.reviewsToDisplay
+			) {
 				// Since this attribute might be controlled via something with
 				// short intervals between value changes, this allows for optionally
 				// delaying review fetches via the provided delay function.
 				this.delayedAppendReviews();
-			} else if ( this.shouldReplaceReviews( prevProps, this.props ) ) {
-				this.replaceReviews();
 			}
 		}
 
@@ -199,6 +203,10 @@ const withReviews = (
 
 						if ( this.isMounted ) {
 							this.setState( {
+								hasReviewsHiddenByOffset:
+									configuredOffset > 0 &&
+									newTotalReviews > 0 &&
+									availableReviews === 0,
 								reviews: oldReviews
 									.filter(
 										( review ) =>
@@ -232,12 +240,19 @@ const withReviews = (
 
 		render() {
 			const { reviewsToDisplay } = this.props;
-			const { error, loading, reviews, totalReviews } = this.state;
+			const {
+				error,
+				hasReviewsHiddenByOffset,
+				loading,
+				reviews,
+				totalReviews,
+			} = this.state;
 
 			return (
 				<OriginalComponent
 					{ ...this.props }
 					error={ error }
+					hasReviewsHiddenByOffset={ hasReviewsHiddenByOffset }
 					isLoading={ loading }
 					reviews={ reviews.slice( 0, reviewsToDisplay ) }
 					totalReviews={ totalReviews }

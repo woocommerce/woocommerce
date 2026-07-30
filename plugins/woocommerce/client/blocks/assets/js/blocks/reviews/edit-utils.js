@@ -20,6 +20,20 @@ import {
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 
+const MIN_REVIEW_COUNT = 1;
+const MAX_REVIEW_COUNT = 20;
+const DEFAULT_REVIEW_COUNT = 10;
+
+const normalizeReviewCount = ( value ) => {
+	const parsedValue = Number.parseInt( value, 10 );
+	const reviewCount = Number.isNaN( parsedValue )
+		? DEFAULT_REVIEW_COUNT
+		: parsedValue;
+	return Math.max(
+		MIN_REVIEW_COUNT,
+		Math.min( MAX_REVIEW_COUNT, reviewCount )
+	);
+};
 export const getBlockControls = ( editMode, setAttributes, buttonTitle ) => (
 	<BlockControls>
 		<ToolbarGroup
@@ -223,9 +237,6 @@ export const getSharedReviewListControls = (
 	setAttributes,
 	{ showOffset = false } = {}
 ) => {
-	const minPerPage = 1;
-	const maxPerPage = 20;
-	const defaultPerPage = 10;
 	const defaultOffset = 0;
 
 	return (
@@ -281,11 +292,13 @@ export const getSharedReviewListControls = (
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				hasValue={ () =>
-					attributes.reviewsOnPageLoad !== defaultPerPage
+					attributes.reviewsOnPageLoad !== DEFAULT_REVIEW_COUNT
 				}
 				label={ __( 'Number of reviews', 'woocommerce' ) }
 				onDeselect={ () =>
-					setAttributes( { reviewsOnPageLoad: defaultPerPage } )
+					setAttributes( {
+						reviewsOnPageLoad: DEFAULT_REVIEW_COUNT,
+					} )
 				}
 				isShownByDefault
 			>
@@ -293,14 +306,14 @@ export const getSharedReviewListControls = (
 					__next40pxDefaultSize
 					label={ __( 'Number of reviews', 'woocommerce' ) }
 					value={ String( attributes.reviewsOnPageLoad ) }
-					onChange={ ( value ) =>
+					onChange={ ( value ) => {
 						setAttributes( {
-							reviewsOnPageLoad: Number( value ),
-						} )
-					}
+							reviewsOnPageLoad: normalizeReviewCount( value ),
+						} );
+					} }
 					type="number"
-					max={ maxPerPage }
-					min={ minPerPage }
+					max={ MAX_REVIEW_COUNT }
+					min={ MIN_REVIEW_COUNT }
 					step={ 1 }
 				/>
 			</ToolsPanelItem>
@@ -335,13 +348,13 @@ export const getSharedReviewListControls = (
 			<ToolsPanelItem
 				hasValue={ () =>
 					! attributes.showLoadMore ||
-					attributes.reviewsOnLoadMore !== defaultPerPage
+					attributes.reviewsOnLoadMore !== DEFAULT_REVIEW_COUNT
 				}
 				label={ __( 'Load more', 'woocommerce' ) }
 				onDeselect={ () =>
 					setAttributes( {
 						showLoadMore: true,
-						reviewsOnLoadMore: defaultPerPage,
+						reviewsOnLoadMore: DEFAULT_REVIEW_COUNT,
 					} )
 				}
 				isShownByDefault
@@ -368,12 +381,13 @@ export const getSharedReviewListControls = (
 							value={ String( attributes.reviewsOnLoadMore ) }
 							onChange={ ( value ) =>
 								setAttributes( {
-									reviewsOnLoadMore: Number( value ),
+									reviewsOnLoadMore:
+										normalizeReviewCount( value ),
 								} )
 							}
 							type="number"
-							max={ maxPerPage }
-							min={ minPerPage }
+							max={ MAX_REVIEW_COUNT }
+							min={ MIN_REVIEW_COUNT }
 							step={ 1 }
 						/>
 					) }
