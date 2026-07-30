@@ -261,7 +261,6 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		transition: box-shadow 0.1s linear;
 		width: 100%;
 
-		// Preserve the mobile Safari breakpoint; WPDS has no breakpoint tokens.
 		@media (min-width: 600px) {
 			font-size: var(--wpds-typography-font-size-md);
 		}
@@ -296,7 +295,6 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		z-index: 100000;
 	}
 
-	// Preserve the existing responsive cutoff; WPDS has no breakpoint tokens.
 	@media (max-width: 960px) {
 		#mainform {
 			padding: 0 var(--wpds-dimension-padding-2xl)
