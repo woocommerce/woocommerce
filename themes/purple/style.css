@@ -487,7 +487,11 @@ textarea {
  * identically, and keep the selector from being squeezed by long titles
  * in its nowrap row; those wrap inside the label instead. */
 .wp-block-woocommerce-add-to-cart-with-options-grouped-product-item .wc-block-add-to-cart-with-options-grouped-product-item-selector {
+	/* WooCommerce reserves min-width: 6.8em and end-aligns the stepper
+	 * inside it; with the steppers pinned uniform that just indents them
+	 * off the content edge. Let the wrapper hug the stepper instead. */
 	flex-shrink: 0;
+	min-width: 0;
 }
 
 /* The doubled class outranks the width: auto in the stepper workaround
