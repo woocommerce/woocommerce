@@ -23,11 +23,7 @@
 <div class="wp-block-group alignwide"><!-- wp:woocommerce/product-results-count {"metadata":{"blockVisibility":{"viewport":{"mobile":false}}}} /-->
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"4px"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
-<div class="wp-block-group"><!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2"} -->
-<p class="has-theme-2-color has-text-color has-link-color"><?php esc_html_e('Sort by:', 'purple');?></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:woocommerce/catalog-sorting {"fontSize":"medium","style":{"layout":{"selfStretch":"fit","flexSize":null}}} /--></div>
+<div class="wp-block-group"><!-- wp:woocommerce/catalog-sorting {"fontSize":"medium","useLabel":true,"style":{"layout":{"selfStretch":"fit","flexSize":null}}} /--></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>

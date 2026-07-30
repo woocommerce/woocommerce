@@ -266,12 +266,29 @@ textarea {
  * Continues PR #82 exploration: https://github.com/woocommerce/woo-themes/pull/82
  * Closed/open styles from Figma Dropdown/Default (1:6531) and Dropdown/Open Links (37:1153).
  * Strip native chrome with appearance: none first; opt into base-select for the picker. */
-.woocommerce.wc-block-catalog-sorting {
-	font-size: var(--wp--preset--font-size--medium) !important;
+/* The block renders its own "Sort by" label beside the select; as inline
+ * content the label sits on the baseline while the select is middle-aligned,
+ * so their text drifts apart vertically. Center both in a flex row. */
+/* The frontend nests label + select in form.woocommerce-ordering; the
+ * editor preview renders them inside a Disabled wrapper instead
+ * (.components-disabled). Flex every possible parent so the pair centers
+ * and gaps identically in either context. */
+.woocommerce.wc-block-catalog-sorting,
+.woocommerce.wc-block-catalog-sorting .components-disabled,
+.woocommerce.wc-block-catalog-sorting form.woocommerce-ordering {
+	align-items: center;
+	display: flex;
+	gap: 0.3em;
+	margin-bottom: 0;
 }
 
-.woocommerce.wc-block-catalog-sorting form.woocommerce-ordering {
-	margin-bottom: 0;
+/* WooCommerce's label rules add bottom and right margins that push the
+ * label off-center and double the gap; the flex gap handles spacing. The
+ * doubled-class selector beats WooCommerce's editor-only
+ * label.orderby-label margin-right rule. */
+.woocommerce.wc-block-catalog-sorting label,
+.woocommerce.wc-block-catalog-sorting.wc-block-catalog-sorting label.orderby-label {
+	margin: 0;
 }
 
 .woocommerce.wc-block-catalog-sorting select.orderby {
@@ -287,7 +304,7 @@ textarea {
 	color: var(--wp--preset--color--theme-2);
 	cursor: pointer;
 	font-family: inherit;
-	font-size: var(--wp--preset--font-size--medium) !important;
+	font-size: inherit;
 	font-weight: inherit;
 	line-height: 1.5625;
 	outline: none;
@@ -369,7 +386,7 @@ textarea {
 		color: var(--wp--preset--color--theme-2);
 		display: flex;
 		flex-direction: column;
-		font-size: var(--wp--preset--font-size--medium);
+		font-size: inherit;
 		gap: 0;
 		line-height: 1.5625;
 		margin-block-start: 12px;
@@ -390,7 +407,7 @@ textarea {
 		background-color: transparent;
 		box-sizing: border-box;
 		color: var(--wp--preset--color--theme-2);
-		font-size: var(--wp--preset--font-size--medium);
+		font-size: inherit;
 		gap: 0;
 		line-height: 1.5625;
 		min-block-size: auto;
