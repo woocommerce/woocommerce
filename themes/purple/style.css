@@ -159,6 +159,16 @@ textarea {
 	box-shadow: 0 0 0 0.5px var(--wp--preset--color--theme-6);
 }
 
+/* Coupon and gift card fields sit in the order summary, where WooCommerce's
+ * component styles tie the generic override above on specificity and load
+ * later, keeping their rounded corners. The doubled component class wins
+ * the tie; the cart block and extension fields that reuse the text-input
+ * component (e.g. Gift Cards) get the same treatment. */
+.wp-block-woocommerce-cart .wc-block-components-text-input.wc-block-components-text-input input,
+.wp-block-woocommerce-checkout .wc-block-components-text-input.wc-block-components-text-input input {
+	border-radius: 0;
+}
+
 /* ==========================================================================
    WooCommerce — My Account
    ========================================================================== */
