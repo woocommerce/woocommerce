@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\OrderWithdrawal;
 
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormState;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormView;
@@ -20,6 +22,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	private const FLUSH_QUEUE_OPTION                  = 'woocommerce_queue_flush_rewrite_rules';
 	private const MISSING_OPTION_MARK                 = '__woocommerce_order_withdrawal_missing_option__';
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
+	private const INBOX_NOTE_NAME_PREFIX              = 'wc-order-withdrawal-requested-';
 	private const RATE_LIMIT_PREFIX                   = 'order_withdrawal_';
 
 	/**
@@ -154,6 +157,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		wc_clear_notices();
 		$this->clear_order_withdrawal_rate_limits();
 		$this->delete_created_orders();
+		$this->delete_created_inbox_notes();
 		WC()->session = $this->original_session;
 
 		parent::tearDown();
@@ -365,6 +369,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertStringContainsString( 'already been submitted for this order', $error_notices[0]['notice'], 'The notice should explain that the order already has a withdrawal request.' );
 			$this->assertCount( 0, $capture['captures'], 'Duplicate matched submissions should not send notification emails.' );
 			$this->assertFalse( $this->order_has_note_containing( $order, 'Order withdrawal requested' ), 'Duplicate matched submissions should not add another order note.' );
+			$this->assertCount( 0, $this->get_created_inbox_note_ids(), 'Duplicate matched submissions should not create merchant inbox notifications.' );
 
 			wc_clear_notices();
 			$this->prepare_post_request(
@@ -449,6 +454,80 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should add a merchant inbox notification with a view order action when a confirmed submission matches an order.
+	 */
+	public function test_process_current_request_adds_inbox_note_with_order_action_for_exact_order_match(): void {
+		$order   = $this->create_order_for_form_data();
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state    = $this->sut->process_current_request();
+			$note_ids = $this->get_created_inbox_note_ids();
+
+			$this->assertSame( 'confirmation', $state->screen, 'Matched confirm submissions should reach the confirmation screen.' );
+			$this->assertCount( 1, $note_ids, 'A matched submission should create one merchant inbox notification.' );
+
+			$note = Notes::get_note( $note_ids[0] );
+
+			$this->assertInstanceOf( Note::class, $note, 'The merchant inbox notification should be readable.' );
+			$this->assertSame( Note::E_WC_ADMIN_NOTE_INFORMATIONAL, $note->get_type(), 'The inbox notification should be informational.' );
+			$this->assertSame( Note::E_WC_ADMIN_NOTE_UNACTIONED, $note->get_status(), 'The inbox notification should start unactioned.' );
+			$this->assertSame( 'Withdraw Order Request', $note->get_title(), 'The inbox notification should have the expected title.' );
+			$this->assertStringContainsString( 'Jane Doe', $note->get_content(), 'The inbox notification should include the customer name.' );
+			$this->assertStringContainsString( 'jane@example.test', $note->get_content(), 'The inbox notification should include the customer email address.' );
+			$this->assertStringContainsString( 'Items requested for withdrawal: Line item 1', $note->get_content(), 'The inbox notification should include the withdrawal details.' );
+
+			$actions = $note->get_actions();
+
+			$this->assertCount( 1, $actions, 'The inbox notification should have one action.' );
+			$this->assertSame( 'view-order', $actions[0]->name, 'The inbox notification action should be the view order action.' );
+			$this->assertSame( $order->get_edit_order_url(), $actions[0]->query, 'The inbox notification action should link to the matched order.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should add a merchant inbox notification without an order action when no order matches.
+	 */
+	public function test_process_current_request_adds_inbox_note_without_order_action_when_order_does_not_match(): void {
+		$order   = $this->create_order_for_form_data(
+			array(
+				OrderWithdrawalFormProcessor::FIELD_EMAIL => 'different@example.test',
+				OrderWithdrawalFormProcessor::FIELD_EMAIL_CONFIRMATION => 'different@example.test',
+			)
+		);
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state    = $this->sut->process_current_request();
+			$note_ids = $this->get_created_inbox_note_ids();
+
+			$this->assertSame( 'confirmation', $state->screen, 'Unmatched confirm submissions should still reach the confirmation screen.' );
+			$this->assertCount( 1, $note_ids, 'An unmatched submission should create one merchant inbox notification.' );
+
+			$note = Notes::get_note( $note_ids[0] );
+
+			$this->assertInstanceOf( Note::class, $note, 'The merchant inbox notification should be readable.' );
+			$this->assertStringContainsString( 'jane@example.test', $note->get_content(), 'The inbox notification should include the customer email address.' );
+			$this->assertStringContainsString( 'could not match this request to an order automatically', $note->get_content(), 'The inbox notification should explain that no order was matched.' );
+			$this->assertCount( 0, $note->get_actions(), 'An unmatched submission should not add a view order action.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
 	 * @testdox Should keep the user on review with an error notice when notification emails fail.
 	 */
 	public function test_process_current_request_surfaces_error_when_emails_fail(): void {
@@ -467,6 +546,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertCount( 2, $capture['captures'], 'The processor should attempt both notification emails before surfacing the failure.' );
 			$this->assertNotEmpty( $error_notices, 'Email failures should add an error notice.' );
 			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $error_notices[0]['notice'], 'The error notice should tell the user the submission did not complete.' );
+			$this->assertCount( 0, $this->get_created_inbox_note_ids(), 'Email failures should not create merchant inbox notifications.' );
 
 			wc_clear_notices();
 			$this->prepare_post_request(
@@ -795,6 +875,37 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( WC_Order::class, $updated_order, 'The order should still exist.' );
 		$this->assertSame( 'yes', $updated_order->get_meta( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, true, 'edit' ), 'The matched order should be flagged as having a withdrawal request.' );
+	}
+
+	/**
+	 * Get the IDs of order withdrawal inbox notes created during a test.
+	 *
+	 * @return int[]
+	 */
+	private function get_created_inbox_note_ids(): array {
+		global $wpdb;
+
+		$note_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT note_id FROM {$wpdb->prefix}wc_admin_notes WHERE name LIKE %s",
+				$wpdb->esc_like( self::INBOX_NOTE_NAME_PREFIX ) . '%'
+			)
+		);
+
+		return array_map( 'intval', (array) $note_ids );
+	}
+
+	/**
+	 * Delete inbox notes created during a test.
+	 */
+	private function delete_created_inbox_notes(): void {
+		foreach ( $this->get_created_inbox_note_ids() as $note_id ) {
+			$note = Notes::get_note( $note_id );
+
+			if ( $note instanceof Note ) {
+				$note->delete();
+			}
+		}
 	}
 
 	/**
