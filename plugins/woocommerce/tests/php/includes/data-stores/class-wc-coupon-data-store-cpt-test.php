@@ -13,22 +13,30 @@ declare( strict_types = 1 );
 class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * The payload of every woocommerce_coupon_object_updated_props fire, in order.
+	 * The second argument (accumulated props) of every woocommerce_coupon_object_updated_props fire, in order.
 	 *
 	 * @var array[]
 	 */
-	private $captured_payloads = array();
+	private $captured_accumulated_payloads = array();
+
+	/**
+	 * The third argument (current save's props) of every woocommerce_coupon_object_updated_props fire, in order.
+	 *
+	 * @var array[]
+	 */
+	private $captured_current_payloads = array();
 
 	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->captured_payloads = array();
+		$this->captured_accumulated_payloads = array();
+		$this->captured_current_payloads     = array();
 	}
 
 	/**
-	 * Record the payload of every woocommerce_coupon_object_updated_props fire.
+	 * Record both prop payloads of every woocommerce_coupon_object_updated_props fire.
 	 *
 	 * Registered at priority 10 so that it observes the outer payload before any
 	 * listener registered at a later priority can trigger a nested save.
@@ -36,11 +44,12 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	private function capture_updated_props(): void {
 		add_action(
 			'woocommerce_coupon_object_updated_props',
-			function ( $coupon, $updated_props ) {
-				$this->captured_payloads[] = $updated_props;
+			function ( $coupon, $accumulated_props, $updated_props ) {
+				$this->captured_accumulated_payloads[] = $accumulated_props;
+				$this->captured_current_payloads[]     = $updated_props;
 			},
 			10,
-			2
+			3
 		);
 	}
 
@@ -64,9 +73,29 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not accumulate props across repeated saves of the same coupon object.
+	 * @testdox Should keep accumulating props across saves in the second hook argument for backward compatibility.
 	 */
-	public function test_updated_props_do_not_accumulate_across_saves(): void {
+	public function test_second_argument_accumulates_across_saves(): void {
+		$coupon = $this->create_settled_coupon();
+		$this->capture_updated_props();
+
+		$coupon->set_amount( 5 );
+		$coupon->save();
+
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$this->assertSame(
+			array( array( 'amount' ), array( 'amount', 'amount' ) ),
+			$this->captured_accumulated_payloads,
+			'The second argument must keep its historical accumulate-with-duplicates behavior across saves of the same coupon object.'
+		);
+	}
+
+	/**
+	 * @testdox Should report only the current save's props in the third hook argument.
+	 */
+	public function test_third_argument_does_not_accumulate_across_saves(): void {
 		$coupon = $this->create_settled_coupon();
 		$this->capture_updated_props();
 
@@ -78,15 +107,15 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			array( array( 'amount' ), array( 'amount' ) ),
-			$this->captured_payloads,
-			'Each save should report only the props that save changed, with no duplicates carried over.'
+			$this->captured_current_payloads,
+			'Each save should report only the props that save changed in the third argument, with no duplicates carried over.'
 		);
 	}
 
 	/**
-	 * @testdox Should report an empty prop list for a save that changes nothing.
+	 * @testdox Should report an empty current-save prop list for a save that changes nothing.
 	 */
-	public function test_no_op_save_reports_no_updated_props(): void {
+	public function test_no_op_save_reports_no_current_updated_props(): void {
 		$coupon = $this->create_settled_coupon();
 		$this->capture_updated_props();
 
@@ -97,8 +126,13 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			array( array( 'amount' ), array() ),
-			$this->captured_payloads,
-			'A save that changes nothing must not report props left over from an earlier save.'
+			$this->captured_current_payloads,
+			'A save that changes nothing must not report props left over from an earlier save in the third argument.'
+		);
+		$this->assertSame(
+			array( array( 'amount' ), array( 'amount' ) ),
+			$this->captured_accumulated_payloads,
+			'The second argument keeps reporting the earlier save\'s props, preserving the historical behavior.'
 		);
 	}
 
@@ -117,13 +151,13 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			array( array( 'amount' ), array( 'usage_limit' ) ),
-			$this->captured_payloads,
-			'The second save should report usage_limit only, not the amount from the first save.'
+			$this->captured_current_payloads,
+			'The second save should report usage_limit only in the third argument, not the amount from the first save.'
 		);
 	}
 
 	/**
-	 * @testdox Should not carry props from a create into a subsequent update.
+	 * @testdox Should not carry props from a create into a subsequent update in the third argument.
 	 */
 	public function test_update_after_create_reports_only_changed_props(): void {
 		$this->capture_updated_props();
@@ -136,17 +170,17 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$coupon->set_amount( 10 );
 		$coupon->save();
 
-		$this->assertCount( 2, $this->captured_payloads, 'Create and update should each fire the action exactly once.' );
-		$this->assertContains( 'amount', $this->captured_payloads[0], 'The create should report the amount it wrote.' );
+		$this->assertCount( 2, $this->captured_current_payloads, 'Create and update should each fire the action exactly once.' );
+		$this->assertContains( 'amount', $this->captured_current_payloads[0], 'The create should report the amount it wrote.' );
 		$this->assertSame(
 			array( 'amount' ),
-			$this->captured_payloads[1],
-			'The update should report amount only, not the props written during the create.'
+			$this->captured_current_payloads[1],
+			'The update should report amount only in the third argument, not the props written during the create.'
 		);
 	}
 
 	/**
-	 * @testdox Should report only its own props for a save triggered from inside the hook.
+	 * @testdox Should report only its own props in the third argument for a save triggered from inside the hook.
 	 */
 	public function test_nested_save_from_listener_reports_only_its_own_props(): void {
 		$coupon = $this->create_settled_coupon();
@@ -174,24 +208,24 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			array( array( 'amount' ), array( 'usage_limit' ) ),
-			$this->captured_payloads,
-			'A save triggered from inside the hook must report only its own props, not the outer save\'s.'
+			$this->captured_current_payloads,
+			'A save triggered from inside the hook must report only its own props in the third argument, not the outer save\'s.'
 		);
 	}
 
 	/**
-	 * @testdox Should isolate nested and outer props when re-entered during a metadata update.
+	 * @testdox Should isolate nested and outer current-save props when re-entered during a metadata update.
 	 */
 	public function test_nested_save_from_metadata_hook_does_not_contaminate_outer_payload(): void {
 		$coupon = $this->create_settled_coupon();
 		$this->capture_updated_props();
 
 		// The nested save re-enters mid-write, when individual_use's meta row is written, so both
-		// payloads land in $captured_payloads. Which slot each lands in is guaranteed: the nested
-		// save runs to completion inside the outer save's update_or_delete_post_meta() call, so its
-		// hook always fires first, whichever meta key triggers the re-entry. The order of the props
-		// within a payload is not guaranteed — it follows the $meta_key_to_props map — so the slots
-		// are pinned below but their contents compare canonicalized.
+		// payloads land in $captured_current_payloads. Which slot each lands in is guaranteed: the
+		// nested save runs to completion inside the outer save's update_or_delete_post_meta() call,
+		// so its hook always fires first, whichever meta key triggers the re-entry. The order of the
+		// props within a payload is not guaranteed — it follows the $meta_key_to_props map — so the
+		// slots are pinned below but their contents compare canonicalized.
 		$nested_save_done  = false;
 		$metadata_listener = function ( $meta_id, $object_id, $meta_key ) use ( $coupon, &$nested_save_done ) {
 			unset( $meta_id );
@@ -215,23 +249,23 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			remove_action( 'updated_post_meta', $metadata_listener, 10 );
 		}
 
-		$this->assertCount( 2, $this->captured_payloads, 'The nested save and the outer save should each fire the action exactly once.' );
+		$this->assertCount( 2, $this->captured_current_payloads, 'The nested save and the outer save should each fire the action exactly once.' );
 		$this->assertEqualsCanonicalizing(
 			array( 'usage_limit' ),
-			$this->captured_payloads[0],
+			$this->captured_current_payloads[0],
 			'The nested save fires first, and must report only the prop it wrote.'
 		);
 		$this->assertEqualsCanonicalizing(
 			array( 'amount', 'individual_use' ),
-			$this->captured_payloads[1],
-			'A nested metadata-hook save must not erase or contaminate the outer save\'s props.'
+			$this->captured_current_payloads[1],
+			'A nested metadata-hook save must not erase or contaminate the outer save\'s current props.'
 		);
 	}
 
 	/**
-	 * @testdox Should populate the deprecated updated-props property only for the duration of the hook.
+	 * @testdox Should keep accumulating in the deprecated updated-props property for backward compatibility.
 	 */
-	public function test_deprecated_updated_props_property_mirrors_the_current_save(): void {
+	public function test_deprecated_updated_props_property_keeps_accumulating(): void {
 		$store = new class() extends WC_Coupon_Data_Store_CPT {
 			/**
 			 * Expose the deprecated updated-props state that a subclass may still read.
@@ -249,35 +283,22 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_coupon_data_store', $store_filter );
 
-		$observed_during_hook = null;
-
 		try {
 			$coupon = $this->create_settled_coupon();
 
-			add_action(
-				'woocommerce_coupon_object_updated_props',
-				function () use ( $store, &$observed_during_hook ) {
-					$observed_during_hook = $store->get_updated_props();
-				},
-				10,
-				2
-			);
-
 			$coupon->set_amount( 5 );
+			$coupon->save();
+
+			$coupon->set_amount( 10 );
 			$coupon->save();
 		} finally {
 			remove_filter( 'woocommerce_coupon_data_store', $store_filter );
 		}
 
 		$this->assertSame(
-			array( 'amount' ),
-			$observed_during_hook,
-			'A subclass reading the deprecated property during the hook should see the current save\'s props.'
-		);
-		$this->assertSame(
-			array(),
-			$store->get_updated_props(),
-			'The deprecated property must be emptied after the hook so no props carry over to the next save.'
+			array( 'amount', 'amount' ),
+			array_slice( $store->get_updated_props(), -2 ),
+			'A subclass reading the deprecated property must keep seeing the historical accumulated list after saves.'
 		);
 	}
 }
