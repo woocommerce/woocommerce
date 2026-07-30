@@ -86,7 +86,7 @@ class VersionStringGenerator {
 		$version   = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 
 		if ( ! is_string( $version ) || '' === $version ) {
-			if ( false !== $version || true === $found ) {
+			if ( $this->cache_entry_exists( $version, $found ) ) {
 				wp_cache_delete( $cache_key, self::CACHE_GROUP );
 			}
 			return $generate ? $this->generate_version( $id ) : null;
@@ -144,16 +144,35 @@ class VersionStringGenerator {
 
 		// Some object cache implementations may return non-boolean values.
 		// Verify the store by reading the value back.
-		$stored_value = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$found        = false;
+		$stored_value = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 		if ( $stored_value === $version ) {
 			return true;
 		}
 
 		// The stored value doesn't match; clean up and report failure.
-		if ( false !== $stored_value ) {
+		if ( $this->cache_entry_exists( $stored_value, $found ) ) {
 			wp_cache_delete( $cache_key, self::CACHE_GROUP );
 		}
 		return false;
+	}
+
+	/**
+	 * Tell whether a value read from the cache is evidence that an entry is stored.
+	 *
+	 * Object cache drop-ins replace wp_cache_get() wholesale, so neither the returned
+	 * value nor the found flag is trustworthy on its own: some drop-ins never populate
+	 * $found, and some signal a miss with null rather than false. The value is therefore
+	 * the primary evidence, with $found as a tie-breaker that tells a stored false apart
+	 * from a genuine miss. $found is checked loosely because a drop-in may report it as a
+	 * truthy non-boolean.
+	 *
+	 * @param mixed $value The value returned by wp_cache_get().
+	 * @param mixed $found The found flag as populated by wp_cache_get(), if it populates it at all.
+	 * @return bool True if an entry appears to be stored, false if this looks like a miss.
+	 */
+	private function cache_entry_exists( $value, $found ): bool {
+		return (bool) $found || ( false !== $value && null !== $value );
 	}
 
 	/**

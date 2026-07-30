@@ -20,6 +20,13 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * The real object cache, saved while a mock is installed in its place.
+	 *
+	 * @var \WP_Object_Cache|null
+	 */
+	private $original_object_cache = null;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -34,6 +41,7 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
+		$this->restore_object_cache();
 		remove_all_filters( 'woocommerce_version_string_generator_ttl' );
 		$this->sut = null;
 		parent::tearDown();
@@ -48,6 +56,50 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 		$reflection = new \ReflectionClass( $this->sut );
 		$constant   = $reflection->getConstant( 'CACHE_GROUP' );
 		return $constant;
+	}
+
+	/**
+	 * Get the cache key the SUT uses for an ID.
+	 *
+	 * @param string $id The ID to get the cache key for.
+	 * @return string
+	 */
+	private function get_version_cache_key( string $id ): string {
+		return 'wc_version_string_' . md5( $id );
+	}
+
+	/**
+	 * Install a mock object cache in place of the real one.
+	 *
+	 * The real cache is restored in tearDown, so tests don't need to unwind it themselves.
+	 *
+	 * @return \WP_Object_Cache|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private function install_mock_object_cache() {
+		global $wp_object_cache;
+
+		$mock = $this->createMock( \WP_Object_Cache::class );
+
+		$this->original_object_cache = $wp_object_cache;
+		$wp_object_cache             = $mock; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		return $mock;
+	}
+
+	/**
+	 * Restore the real object cache, if a mock was installed in its place.
+	 *
+	 * @return void
+	 */
+	private function restore_object_cache(): void {
+		global $wp_object_cache;
+
+		if ( null === $this->original_object_cache ) {
+			return;
+		}
+
+		$wp_object_cache             = $this->original_object_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$this->original_object_cache = null;
 	}
 
 	/**
@@ -122,91 +174,105 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	 * @testdox get_version does not delete on a genuine cache miss.
 	 */
 	public function test_get_version_does_not_delete_on_genuine_cache_miss(): void {
-		global $wp_object_cache;
-		$original_cache = $wp_object_cache;
+		$mock_cache = $this->install_mock_object_cache();
+		$mock_cache
+			->expects( $this->once() )
+			->method( 'get' )
+			->willReturnCallback(
+				static function ( $key, $group, $force, &$found ) {
+					$found = false;
+					return false;
+				}
+			);
+		$mock_cache->expects( $this->never() )->method( 'delete' );
 
-		try {
-			$mock_cache = $this->createMock( \WP_Object_Cache::class );
-			$mock_cache
-				->expects( $this->once() )
-				->method( 'get' )
-				->willReturnCallback(
-					static function ( $key, $group, $force, &$found ) {
-						$found = false;
-						return false;
-					}
-				);
-			$mock_cache->expects( $this->never() )->method( 'delete' );
-			$wp_object_cache = $mock_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$version = $this->sut->get_version( 'genuine-cache-miss', false );
 
-			$version = $this->sut->get_version( 'genuine-cache-miss', false );
+		$this->assertNull( $version, 'A genuine cache miss should return null when generation is disabled' );
+	}
 
-			$this->assertNull( $version, 'A genuine cache miss should return null when generation is disabled' );
-		} finally {
-			$wp_object_cache = $original_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
+	/**
+	 * @testdox get_version does not delete when the cache signals a miss with null instead of false.
+	 */
+	public function test_get_version_does_not_delete_on_null_cache_miss(): void {
+		$mock_cache = $this->install_mock_object_cache();
+		$mock_cache
+			->expects( $this->once() )
+			->method( 'get' )
+			->willReturn( null );
+		$mock_cache->expects( $this->never() )->method( 'delete' );
+
+		$version = $this->sut->get_version( 'null-cache-miss', false );
+
+		$this->assertNull( $version, 'A null miss should be treated as a miss, not as a stored invalid value' );
+	}
+
+	/**
+	 * @testdox get_version deletes a stored false when the cache reports found as a truthy non-boolean.
+	 */
+	public function test_get_version_deletes_stored_false_when_found_flag_is_truthy(): void {
+		$mock_cache = $this->install_mock_object_cache();
+		$mock_cache
+			->expects( $this->once() )
+			->method( 'get' )
+			->willReturnCallback(
+				static function ( $key, $group, $force, &$found ) {
+					$found = 1;
+					return false;
+				}
+			);
+		$mock_cache
+			->expects( $this->once() )
+			->method( 'delete' )
+			->with( $this->get_version_cache_key( 'stored-false-truthy-found' ), $this->get_cache_group() )
+			->willReturn( true );
+
+		$version = $this->sut->get_version( 'stored-false-truthy-found', false );
+
+		$this->assertNull( $version, 'A stored false should be treated as an invalid cached value' );
 	}
 
 	/**
 	 * @testdox get_version accepts a cached string when the cache does not set the found flag.
 	 */
 	public function test_get_version_accepts_cached_string_without_found_flag(): void {
-		global $wp_object_cache;
-		$original_cache = $wp_object_cache;
-		$cache_group    = $this->get_cache_group();
-		$cache_key      = 'wc_version_string_' . md5( 'cached-string-without-found' );
 		$cached_version = 'cached-version';
 
-		try {
-			$mock_cache = $this->createMock( \WP_Object_Cache::class );
-			$mock_cache
-				->expects( $this->once() )
-				->method( 'get' )
-				->willReturn( $cached_version );
-			$mock_cache
-				->expects( $this->once() )
-				->method( 'set' )
-				->with( $cache_key, $cached_version, $cache_group, DAY_IN_SECONDS )
-				->willReturn( true );
-			$mock_cache->expects( $this->never() )->method( 'delete' );
-			$wp_object_cache = $mock_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$mock_cache = $this->install_mock_object_cache();
+		$mock_cache
+			->expects( $this->once() )
+			->method( 'get' )
+			->willReturn( $cached_version );
+		$mock_cache
+			->expects( $this->once() )
+			->method( 'set' )
+			->with( $this->get_version_cache_key( 'cached-string-without-found' ), $cached_version, $this->get_cache_group(), DAY_IN_SECONDS )
+			->willReturn( true );
+		$mock_cache->expects( $this->never() )->method( 'delete' );
 
-			$version = $this->sut->get_version( 'cached-string-without-found' );
+		$version = $this->sut->get_version( 'cached-string-without-found' );
 
-			$this->assertSame( $cached_version, $version, 'A valid cached string should not depend on the found flag' );
-		} finally {
-			$wp_object_cache = $original_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
+		$this->assertSame( $cached_version, $version, 'A valid cached string should not depend on the found flag' );
 	}
 
 	/**
 	 * @testdox get_version deletes an invalid non-false value when the cache does not set the found flag.
 	 */
 	public function test_get_version_deletes_invalid_non_false_value_without_found_flag(): void {
-		global $wp_object_cache;
-		$original_cache = $wp_object_cache;
-		$cache_group    = $this->get_cache_group();
-		$cache_key      = 'wc_version_string_' . md5( 'invalid-value-without-found' );
+		$mock_cache = $this->install_mock_object_cache();
+		$mock_cache
+			->expects( $this->once() )
+			->method( 'get' )
+			->willReturn( true );
+		$mock_cache
+			->expects( $this->once() )
+			->method( 'delete' )
+			->with( $this->get_version_cache_key( 'invalid-value-without-found' ), $this->get_cache_group() )
+			->willReturn( true );
 
-		try {
-			$mock_cache = $this->createMock( \WP_Object_Cache::class );
-			$mock_cache
-				->expects( $this->once() )
-				->method( 'get' )
-				->willReturn( true );
-			$mock_cache
-				->expects( $this->once() )
-				->method( 'delete' )
-				->with( $cache_key, $cache_group )
-				->willReturn( true );
-			$wp_object_cache = $mock_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$version = $this->sut->get_version( 'invalid-value-without-found', false );
 
-			$version = $this->sut->get_version( 'invalid-value-without-found', false );
-
-			$this->assertNull( $version, 'An invalid cached value should be treated as a miss' );
-		} finally {
-			$wp_object_cache = $original_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
+		$this->assertNull( $version, 'An invalid cached value should be treated as a miss' );
 	}
 
 	/**
