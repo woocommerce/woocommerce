@@ -564,17 +564,13 @@ class WC_Post_Types {
 	 * @return bool
 	 */
 	private static function wp_cli_skips_active_theme(): bool {
-		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) || ! is_callable( array( 'WP_CLI', 'get_config' ) ) ) {
+		$get_wp_cli_config = array( 'WP_CLI', 'get_config' );
+
+		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) || ! is_callable( $get_wp_cli_config ) ) {
 			return false;
 		}
 
-		/**
-		 * WP-CLI configuration getter.
-		 *
-		 * @var callable $get_wp_cli_config
-		 */
-		$get_wp_cli_config = array( 'WP_CLI', 'get_config' );
-		$skipped_themes    = $get_wp_cli_config( 'skip-themes' );
+		$skipped_themes = $get_wp_cli_config( 'skip-themes' );
 
 		if ( true === $skipped_themes ) {
 			return true;
