@@ -39,6 +39,7 @@ final class OrderWithdrawalFormProcessor {
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
 	private const ORDER_WITHDRAWAL_REQUESTED_VALUE    = 'yes';
 	private const INBOX_NOTE_NAME_PREFIX              = 'wc-order-withdrawal-requested-';
+	private const WITHDRAWAL_WINDOW_IN_SECONDS        = 14 * DAY_IN_SECONDS;
 	private const RATE_LIMIT_IP_PREFIX                = 'order_withdrawal_ip_';
 	private const RATE_LIMIT_EMAIL_PREFIX             = 'order_withdrawal_email_';
 	private const RATE_LIMIT_DELAY                    = MINUTE_IN_SECONDS / 2;
@@ -541,7 +542,33 @@ final class OrderWithdrawalFormProcessor {
 			$content .= ' ' . __( 'WooCommerce could not match this request to an order automatically.', 'woocommerce' );
 		}
 
+		if ( $matched_order instanceof WC_Order && $this->is_order_outside_withdrawal_window( $matched_order ) ) {
+			$content .= ' ' . $this->get_withdrawal_window_warning_message();
+		}
+
 		return $content;
+	}
+
+	/**
+	 * Whether the matched order is outside the valid withdrawal request window.
+	 *
+	 * @param WC_Order $order Matched order.
+	 */
+	private function is_order_outside_withdrawal_window( WC_Order $order ): bool {
+		$date_created = $order->get_date_created( 'edit' );
+
+		if ( ! $date_created ) {
+			return false;
+		}
+
+		return ( time() - self::WITHDRAWAL_WINDOW_IN_SECONDS ) > $date_created->getTimestamp();
+	}
+
+	/**
+	 * Get the warning shown to merchants when a request is outside the valid window.
+	 */
+	private function get_withdrawal_window_warning_message(): string {
+		return __( 'This order is older than 14 days. Order withdrawal requests are only valid within 14 days of the order date.', 'woocommerce' );
 	}
 
 	/**
@@ -668,6 +695,10 @@ final class OrderWithdrawalFormProcessor {
 
 		if ( $matched_order instanceof WC_Order ) {
 			$order_url = $matched_order->get_edit_order_url();
+
+			if ( $this->is_order_outside_withdrawal_window( $matched_order ) ) {
+				$body .= '<p>' . esc_html( $this->get_withdrawal_window_warning_message() ) . '</p>';
+			}
 
 			$body .= sprintf(
 				'<p>%s</p>',

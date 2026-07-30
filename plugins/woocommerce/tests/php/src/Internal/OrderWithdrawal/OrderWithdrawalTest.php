@@ -493,6 +493,44 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should warn merchants when the matched order is older than fourteen days.
+	 */
+	public function test_process_current_request_warns_merchants_for_order_older_than_fourteen_days(): void {
+		$order = $this->create_order_for_form_data();
+		$order->set_date_created( time() - ( 15 * DAY_IN_SECONDS ) );
+		$order->save();
+
+		$capture         = $this->capture_wp_mail();
+		$warning_message = 'This order is older than 14 days. Order withdrawal requests are only valid within 14 days of the order date.';
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state    = $this->sut->process_current_request();
+			$note_ids = $this->get_created_inbox_note_ids();
+
+			$this->assertSame( 'confirmation', $state->screen, 'Matched confirm submissions should reach the confirmation screen.' );
+			$this->assertCount( 1, $note_ids, 'A matched submission should create one merchant inbox notification.' );
+
+			$note = Notes::get_note( $note_ids[0] );
+
+			$this->assertInstanceOf( Note::class, $note, 'The merchant inbox notification should be readable.' );
+			$this->assertStringContainsString( $warning_message, $note->get_content(), 'The inbox notification should warn when the order is outside the withdrawal window.' );
+
+			$customer_email = $this->get_captured_mail_to( 'jane@example.test', $capture['captures'] );
+			$merchant_email = $this->get_captured_mail_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+
+			$this->assertStringContainsString( $warning_message, (string) $merchant_email['message'], 'The merchant email should warn when the order is outside the withdrawal window.' );
+			$this->assertStringNotContainsString( $warning_message, (string) $customer_email['message'], 'The customer email should not include the merchant withdrawal window warning.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
 	 * @testdox Should add a merchant inbox notification without an order action when no order matches.
 	 */
 	public function test_process_current_request_adds_inbox_note_without_order_action_when_order_does_not_match(): void {
