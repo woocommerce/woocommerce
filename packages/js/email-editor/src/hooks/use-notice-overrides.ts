@@ -31,9 +31,10 @@ function getNoticeOverrides(): Record< string, NoticeOverride > {
 			content: __( 'Email saved.', __i18n_text_domain__ ),
 			removeActions: false,
 			contentCheck: ( content: string ) =>
-				// Intentionally without text domain to match the core translation.
-				// eslint-disable-next-line @wordpress/i18n-text-domain
-				content.includes( __( 'Post updated.' ) ),
+				// Intentionally without text domain to match the core translations.
+				content.includes( __( 'Post updated.' ) ) ||
+				content.includes( __( 'Post published.' ) ) ||
+				content.includes( __( 'Draft saved.' ) ),
 		},
 	};
 }
