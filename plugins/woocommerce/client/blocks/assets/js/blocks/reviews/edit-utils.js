@@ -102,6 +102,42 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 				/>
 			</ToolsPanelItem>
 			<ToolsPanelItem
+				hasValue={ () => ! attributes.showReviewDate }
+				label={ __( 'Review date', 'woocommerce' ) }
+				onDeselect={ () => setAttributes( { showReviewDate: true } ) }
+				isShownByDefault
+			>
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label={ __( 'Review date', 'woocommerce' ) }
+					checked={ attributes.showReviewDate }
+					onChange={ () =>
+						setAttributes( {
+							showReviewDate: ! attributes.showReviewDate,
+						} )
+					}
+				/>
+			</ToolsPanelItem>
+			<ToolsPanelItem
+				hasValue={ () => ! attributes.showReviewContent }
+				label={ __( 'Review content', 'woocommerce' ) }
+				onDeselect={ () =>
+					setAttributes( { showReviewContent: true } )
+				}
+				isShownByDefault
+			>
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label={ __( 'Review content', 'woocommerce' ) }
+					checked={ attributes.showReviewContent }
+					onChange={ () =>
+						setAttributes( {
+							showReviewContent: ! attributes.showReviewContent,
+						} )
+					}
+				/>
+			</ToolsPanelItem>
+			<ToolsPanelItem
 				hasValue={ () =>
 					! attributes.showReviewImage ||
 					attributes.imageType !== 'reviewer'
@@ -178,42 +214,6 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 					) }
 				</div>
 			</ToolsPanelItem>
-			<ToolsPanelItem
-				hasValue={ () => ! attributes.showReviewDate }
-				label={ __( 'Review date', 'woocommerce' ) }
-				onDeselect={ () => setAttributes( { showReviewDate: true } ) }
-				isShownByDefault
-			>
-				<ToggleControl
-					__nextHasNoMarginBottom
-					label={ __( 'Review date', 'woocommerce' ) }
-					checked={ attributes.showReviewDate }
-					onChange={ () =>
-						setAttributes( {
-							showReviewDate: ! attributes.showReviewDate,
-						} )
-					}
-				/>
-			</ToolsPanelItem>
-			<ToolsPanelItem
-				hasValue={ () => ! attributes.showReviewContent }
-				label={ __( 'Review content', 'woocommerce' ) }
-				onDeselect={ () =>
-					setAttributes( { showReviewContent: true } )
-				}
-				isShownByDefault
-			>
-				<ToggleControl
-					__nextHasNoMarginBottom
-					label={ __( 'Review content', 'woocommerce' ) }
-					checked={ attributes.showReviewContent }
-					onChange={ () =>
-						setAttributes( {
-							showReviewContent: ! attributes.showReviewContent,
-						} )
-					}
-				/>
-			</ToolsPanelItem>
 		</>
 	);
 };
@@ -266,7 +266,11 @@ export const getSharedReviewListControls = (
 			>
 				<ToggleControl
 					__nextHasNoMarginBottom
-					label={ __( 'Show sort dropdown', 'woocommerce' ) }
+					label={ __( 'Sorting', 'woocommerce' ) }
+					help={ __(
+						'Let shoppers change the sorting order.',
+						'woocommerce'
+					) }
 					checked={ attributes.showOrderby }
 					onChange={ () =>
 						setAttributes( {
@@ -315,7 +319,7 @@ export const getSharedReviewListControls = (
 						__next40pxDefaultSize
 						label={ __( 'Offset', 'woocommerce' ) }
 						help={ __(
-							'Skips this many reviews before the ones shown',
+							'Skips this many reviews from the top of the list.',
 							'woocommerce'
 						) }
 						value={ String( attributes.offset ?? defaultOffset ) }
@@ -346,6 +350,10 @@ export const getSharedReviewListControls = (
 					<ToggleControl
 						__nextHasNoMarginBottom
 						label={ __( 'Load more', 'woocommerce' ) }
+						help={ __(
+							'Let shoppers load more reviews.',
+							'woocommerce'
+						) }
 						checked={ attributes.showLoadMore }
 						onChange={ () =>
 							setAttributes( {
