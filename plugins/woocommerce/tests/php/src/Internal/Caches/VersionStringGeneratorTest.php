@@ -180,6 +180,36 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_version deletes an invalid non-false value when the cache does not set the found flag.
+	 */
+	public function test_get_version_deletes_invalid_non_false_value_without_found_flag(): void {
+		global $wp_object_cache;
+		$original_cache = $wp_object_cache;
+		$cache_group    = $this->get_cache_group();
+		$cache_key      = 'wc_version_string_' . md5( 'invalid-value-without-found' );
+
+		try {
+			$mock_cache = $this->createMock( \WP_Object_Cache::class );
+			$mock_cache
+				->expects( $this->once() )
+				->method( 'get' )
+				->willReturn( true );
+			$mock_cache
+				->expects( $this->once() )
+				->method( 'delete' )
+				->with( $cache_key, $cache_group )
+				->willReturn( true );
+			$wp_object_cache = $mock_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+			$version = $this->sut->get_version( 'invalid-value-without-found', false );
+
+			$this->assertNull( $version, 'An invalid cached value should be treated as a miss' );
+		} finally {
+			$wp_object_cache = $original_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
+
+	/**
 	 * @testdox get_version generates version by default when it doesn't exist.
 	 */
 	public function test_get_version_generates_by_default() {
