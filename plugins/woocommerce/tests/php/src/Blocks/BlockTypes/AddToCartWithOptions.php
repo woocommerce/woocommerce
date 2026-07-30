@@ -551,6 +551,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			. '<div class="quantity before"><input class="qty" type="hidden" name="quantity[1]" value="2" />2</div>'
 			. '<div class="quantity visible"><input type="number" class="input-text qty text" name="quantity" value="1" /></div>'
 			. '<div class="quantity after"><input class="qty" type="hidden" name="quantity[2]" value="1" />1</div>'
+			. '<div class="quantity uppercase"><input class="qty" TYPE="HIDDEN" name="quantity[3]" value="3" />3</div>'
 			. '</form>';
 
 		$result = Utils::add_quantity_stepper_classes( $quantity_html );
@@ -558,6 +559,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$this->assertStringContainsString( 'class="quantity visible wc-block-components-quantity-selector"', $result, 'The container holding the visible quantity input should receive the stepper wrapper class.' );
 		$this->assertStringContainsString( 'class="quantity before"', $result, 'A hidden-only container preceding the visible one should be left unchanged.' );
 		$this->assertStringContainsString( 'class="quantity after"', $result, 'A hidden-only container following the visible one should be left unchanged.' );
+		$this->assertStringContainsString( 'class="quantity uppercase"', $result, 'The type attribute is case-insensitive, so TYPE="HIDDEN" should be treated as hidden too.' );
 	}
 
 	/**
