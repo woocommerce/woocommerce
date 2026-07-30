@@ -363,9 +363,9 @@ class ProductImage extends \WP_UnitTestCase {
 				'file'   => 'wide-image.jpg',
 				'sizes'  => array(
 					'large' => array(
-						'file'      => 'wide-image.jpg',
-						'width'     => 2000,
-						'height'    => 1000,
+						'file'      => 'wide-image-1024x512.jpg',
+						'width'     => 1024,
+						'height'    => 512,
 						'mime-type' => 'image/jpeg',
 					),
 				),
@@ -376,19 +376,8 @@ class ProductImage extends \WP_UnitTestCase {
 		$default_markup  = $this->render_product_image_block( $data['product'], '{"imageSizing":"single"}' );
 		$portrait_markup = $this->render_product_image_block( $data['product'], '{"aspectRatio":"3/4"}' );
 
-		preg_match( '/srcset="([^"]+)"/', $default_markup, $default_srcset );
-		preg_match( '/srcset="([^"]+)"/', $portrait_markup, $portrait_srcset );
-
-		$this->assertNotEmpty( $default_srcset[1] );
-		$this->assertNotEmpty( $portrait_srcset[1] );
-
-		preg_match_all( '/(\d+)w/', $default_srcset[1], $default_widths );
-		preg_match_all( '/(\d+)w/', $portrait_srcset[1], $portrait_widths );
-
-		$this->assertLessThan(
-			max( array_map( 'intval', $default_widths[1] ) ),
-			max( array_map( 'intval', $portrait_widths[1] ) )
-		);
+		$this->assertStringContainsString( 'http://localhost:8186/wp-content/uploads/wide-image-1024x512.jpg 1024w', $default_markup );
+		$this->assertStringContainsString( 'http://localhost:8186/wp-content/uploads/wide-image-1024x512.jpg 384w', $portrait_markup );
 
 		$data['product']->delete( true );
 		wp_delete_attachment( $data['image_id'], true );
