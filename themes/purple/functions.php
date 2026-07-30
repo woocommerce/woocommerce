@@ -320,12 +320,13 @@ if ( ! function_exists( 'purple_styles' ) ) :
 	 */
 	function purple_styles() {
 
-		// Register theme stylesheet.
+		// Register theme stylesheet. Use the template (parent) directory and
+		// version so the file still resolves when a child theme is active.
 		wp_register_style(
 			'purple-style',
-			get_stylesheet_directory_uri() . '/style.css',
+			get_template_directory_uri() . '/style.css',
 			array(),
-			wp_get_theme()->get( 'Version' )
+			wp_get_theme( get_template() )->get( 'Version' )
 		);
 
 		// Enqueue theme stylesheet.
@@ -351,9 +352,9 @@ if ( ! function_exists( 'purple_scripts' ) ) :
 	function purple_scripts() {
 		wp_enqueue_script(
 			'purple-navigation-dropdown',
-			get_stylesheet_directory_uri() . '/assets/js/navigation-dropdown.js',
+			get_template_directory_uri() . '/assets/js/navigation-dropdown.js',
 			array(),
-			wp_get_theme()->get( 'Version' ),
+			wp_get_theme( get_template() )->get( 'Version' ),
 			array(
 				'in_footer' => true,
 				'strategy'  => 'defer',
