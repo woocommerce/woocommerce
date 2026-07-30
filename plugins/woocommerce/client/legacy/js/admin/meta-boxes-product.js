@@ -1,4 +1,80 @@
-/*global woocommerce_admin_meta_boxes, _ */
+/*global woocommerce_admin_meta_boxes, _, module */
+
+/*
+ * Keep the "Product short description" editor alive when its metabox is moved.
+ * WordPress repositions postboxes by detaching and re-inserting the DOM node,
+ * which reloads the TinyMCE iframe and wipes its document. The iframe is only
+ * hidden in "Text" mode, so a move breaks that too, just invisibly until the
+ * user returns to the Visual tab.
+ */
+const shortDescriptionEditor = ( function () {
+	let tornDown = false;
+
+	return {
+		/**
+		 * Destroy the editor ahead of a metabox move.
+		 */
+		teardown: function () {
+			const editor = window.tinymce && window.tinymce.get( 'excerpt' );
+
+			if ( ! editor ) {
+				return;
+			}
+
+			// Ask the editor for its own element rather than looking the id up
+			// in the document: while a postbox is being dragged, core's sortable
+			// helper is a clone of it (see postbox.js), and that clone carries a
+			// second element with the same id.
+			const textarea = editor.getElement();
+
+			// Removing the editor is what flushes its content into the textarea:
+			// TinyMCE's remove() saves whenever the editor still has a body, and
+			// for a textarea that write is unconditional. In Visual mode that
+			// flush is what carries the content across the move.
+			//
+			// In Text mode the editor is only hidden, so it still has a body and
+			// that same flush overwrites what the user typed. This snapshot is
+			// the only thing protecting those edits, so do not drop it.
+			const isTextMode = editor.isHidden();
+			const textModeContent = isTextMode ? textarea.value : null;
+
+			window.tinymce.execCommand( 'mceRemoveEditor', false, 'excerpt' );
+
+			if ( isTextMode ) {
+				// Core builds a fresh instance when the user returns to the
+				// Visual tab, so nothing is re-initialized here.
+				textarea.value = textModeContent;
+				return;
+			}
+
+			// Core marks the textarea aria-hidden while the visual editor is up,
+			// and removing the editor makes it visible again.
+			textarea.removeAttribute( 'aria-hidden' );
+			tornDown = true;
+		},
+
+		/**
+		 * Rebuild the editor after a metabox move.
+		 */
+		restore: function () {
+			if ( ! tornDown ) {
+				return;
+			}
+
+			tornDown = false;
+
+			// Re-initialize from the editor's own settings, exactly as core's
+			// switchEditors() does. mceAddEditor would instead rebuild it from
+			// whichever editor initialized last on the page.
+			window.tinymce.init( window.tinyMCEPreInit.mceInit.excerpt );
+		},
+	};
+}() );
+
+if ( typeof module !== 'undefined' && module.exports ) {
+	module.exports = shortDescriptionEditor;
+}
+
 jQuery( function ( $ ) {
 	let isPageUnloading = false;
 
@@ -1635,4 +1711,45 @@ jQuery( function ( $ ) {
 			.insertAfter( addProductImagesLink )
 			.tipTip( tooltipData );
 	}
+
+	// Header order buttons (WP >= 5.5): core moves the box in a click handler
+	// bound directly on the button, so tear down in the capture phase (which
+	// runs first) and restore in a delegated bubble-phase handler (which runs
+	// after the move).
+	document.addEventListener(
+		'click',
+		function ( event ) {
+			const button =
+				event.target.closest &&
+				event.target.closest(
+					'#postexcerpt .handle-order-higher, #postexcerpt .handle-order-lower'
+				);
+
+			// Buttons on the first/last position are a no-op in core.
+			if ( button && 'true' !== button.getAttribute( 'aria-disabled' ) ) {
+				shortDescriptionEditor.teardown();
+			}
+		},
+		true
+	);
+
+	$( document ).on(
+		'click',
+		'#postexcerpt .handle-order-higher, #postexcerpt .handle-order-lower',
+		shortDescriptionEditor.restore
+	);
+
+	// Drag-and-drop sorting: jQuery UI sortable events bubble up from the
+	// .meta-box-sortables containers.
+	$( '#poststuff' )
+		.on( 'sortstart', function ( event, ui ) {
+			if ( ui.item.is( '#postexcerpt' ) ) {
+				shortDescriptionEditor.teardown();
+			}
+		} )
+		.on( 'sortstop', function ( event, ui ) {
+			if ( ui.item.is( '#postexcerpt' ) ) {
+				shortDescriptionEditor.restore();
+			}
+		} );
 } );
