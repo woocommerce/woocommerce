@@ -106,16 +106,9 @@ const isAttributeValueValid = ( {
 		return false;
 	}
 
-	// Check if there is at least one available variation matching the current
+	// Check if there is at least one existing variation matching the current
 	// selected attributes and the attribute value being checked.
 	return product.variations.some( ( variation ) => {
-		const variationData =
-			productsState.productVariations[ variation.id ] ?? variation;
-
-		if ( ! isVariationInStockAndPurchasable( variationData ) ) {
-			return false;
-		}
-
 		const variationAttrValue = getVariationAttributeValue(
 			variation,
 			attributeName
@@ -281,6 +274,50 @@ const isAttributeValueOutOfStock = ( {
 	} );
 };
 
+const isAttributeValueInStockAndPurchasable = ( {
+	attributeName,
+	attributeValue,
+	selectedAttributes,
+}: {
+	attributeName: string;
+	attributeValue: string;
+	selectedAttributes: SelectedAttributes[];
+} ) => {
+	const { mainProductInContext: product } = productsState;
+
+	if ( ! product?.variations?.length ) {
+		return false;
+	}
+
+	return product.variations.some( ( variation ) => {
+		const variationData =
+			productsState.productVariations[ variation.id ] ?? variation;
+
+		if ( ! isVariationInStockAndPurchasable( variationData ) ) {
+			return false;
+		}
+
+		const variationAttrValue = getVariationAttributeValue(
+			variation,
+			attributeName
+		);
+
+		if (
+			variationAttrValue !== attributeValue &&
+			variationAttrValue !== null
+		) {
+			return false;
+		}
+
+		return doSelectedAttributesMatchVariation( {
+			variation,
+			attributeName,
+			attributeValue,
+			selectedAttributes,
+		} );
+	} );
+};
+
 /**
  * Return the product attributes and options from Store API format.
  *
@@ -374,19 +411,19 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const outOfStockOptionTitle = getOutOfStockOptionTitle();
 
 				return variationAttributeOptions.map( ( row, index ) => {
-					const invalid = ! isAttributeValueValid( {
+					const attributeValue = {
 						attributeName: name,
 						attributeValue: row.value,
 						selectedAttributes,
-					} );
+					};
+					const invalid = ! isAttributeValueValid( attributeValue );
+					const inStockAndPurchasable =
+						isAttributeValueInStockAndPurchasable( attributeValue );
 					const outOfStock =
-						invalid &&
-						isAttributeValueOutOfStock( {
-							attributeName: name,
-							attributeValue: row.value,
-							selectedAttributes,
-						} );
-					const disabled = invalid && ! outOfStock;
+						! inStockAndPurchasable &&
+						isAttributeValueOutOfStock( attributeValue );
+					const disabled =
+						invalid || ( ! inStockAndPurchasable && ! outOfStock );
 					const selected = selectedAttributes.some(
 						( attrObject ) =>
 							attributeNamesMatch( attrObject.attribute, name ) &&
@@ -405,7 +442,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						selected,
 						disabled,
 						hidden: hideInvalid && disabled,
-						isUnavailable: outOfStock,
+						looksDisabled: outOfStock,
 						...( row.visual !== undefined && {
 							visual: row.visual,
 						} ),

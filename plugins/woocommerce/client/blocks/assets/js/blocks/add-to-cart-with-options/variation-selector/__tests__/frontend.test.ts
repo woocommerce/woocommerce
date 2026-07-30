@@ -10,7 +10,7 @@ type MockAddToCartWithOptionsStore = {
 			title?: string;
 			disabled: boolean;
 			hidden: boolean;
-			isUnavailable?: boolean;
+			looksDisabled?: boolean;
 		} >;
 	};
 	actions: {
@@ -18,6 +18,10 @@ type MockAddToCartWithOptionsStore = {
 			value: string;
 			hidden?: boolean;
 			disabled?: boolean;
+		} ) => void;
+		autoselectAttributes: ( args: {
+			includedAttributes?: string[];
+			excludedAttributes?: string[];
 		} ) => void;
 	};
 };
@@ -104,7 +108,7 @@ const createProduct = () =>
 				attributes: [ { name: 'Size', value: 'large' } ],
 			},
 		],
-	} as ProductResponseItem );
+	} ) as ProductResponseItem;
 
 const createVariation = (
 	id: number,
@@ -116,13 +120,14 @@ const createVariation = (
 		type: 'variation',
 		is_in_stock: isInStock,
 		is_purchasable: isPurchasable,
-	} as ProductResponseItem );
+	} ) as ProductResponseItem;
 
 describe( 'Add to Cart + Options variation selector frontend', () => {
 	beforeEach( () => {
 		// mockProductsState and mockContext are populated after requiring the
 		// module because selectableItems is a lazy getter evaluated by each test.
 		jest.isolateModules( () => {
+			// eslint-disable-next-line @typescript-eslint/no-require-imports -- Requiring inside isolateModules gives each test a fresh store definition.
 			require( '../frontend' );
 		} );
 
@@ -152,7 +157,7 @@ describe( 'Add to Cart + Options variation selector frontend', () => {
 				title: 'Out of stock',
 				disabled: false,
 				hidden: false,
-				isUnavailable: true,
+				looksDisabled: true,
 			},
 		] );
 
@@ -166,7 +171,7 @@ describe( 'Add to Cart + Options variation selector frontend', () => {
 		] );
 	} );
 
-	it( 'hides out-of-stock variation options when configured to hide invalid options', () => {
+	it( 'keeps out-of-stock options visible when invalid options are hidden', () => {
 		mockContext.disabledAttributesAction = 'hide';
 
 		expect(
@@ -178,8 +183,47 @@ describe( 'Add to Cart + Options variation selector frontend', () => {
 				title: 'Out of stock',
 				disabled: false,
 				hidden: false,
-				isUnavailable: true,
+				looksDisabled: true,
 			},
+		] );
+	} );
+
+	it( 'keeps out-of-stock options selectable when only stock status is available', () => {
+		mockProductsState.productVariations[ 11 ] = {
+			id: 11,
+			type: 'variation',
+			is_in_stock: false,
+		} as ProductResponseItem;
+
+		expect(
+			mockAddToCartWithOptionsStore?.state.selectableItems[ 1 ]
+		).toMatchObject( {
+			value: 'large',
+			title: 'Out of stock',
+			disabled: false,
+			hidden: false,
+			looksDisabled: true,
+		} );
+	} );
+
+	it( 'keeps out-of-stock options valid for autoselection', () => {
+		mockProductsState.mainProductInContext = {
+			...createProduct(),
+			variations: [
+				{
+					id: 11,
+					attributes: [ { name: 'Size', value: 'large' } ],
+				},
+			],
+		} as ProductResponseItem;
+		mockContext.autoselect = true;
+
+		mockAddToCartWithOptionsStore?.actions.autoselectAttributes( {
+			includedAttributes: [ 'Size' ],
+		} );
+
+		expect( mockContext.selectedAttributes ).toEqual( [
+			{ attribute: 'Size', value: 'large' },
 		] );
 	} );
 
@@ -196,7 +240,7 @@ describe( 'Add to Cart + Options variation selector frontend', () => {
 			{ value: 'small', disabled: false, hidden: false },
 			{
 				value: 'large',
-				title: undefined,
+				title: '',
 				disabled: true,
 				hidden: false,
 			},
@@ -216,7 +260,7 @@ describe( 'Add to Cart + Options variation selector frontend', () => {
 			{ value: 'small', disabled: false, hidden: false },
 			{
 				value: 'large',
-				title: undefined,
+				title: '',
 				disabled: true,
 				hidden: false,
 			},
@@ -259,7 +303,7 @@ describe( 'Add to Cart + Options variation selector frontend', () => {
 			{ value: 'small', disabled: false, hidden: false },
 			{
 				value: 'large',
-				title: undefined,
+				title: '',
 				disabled: true,
 				hidden: false,
 			},
