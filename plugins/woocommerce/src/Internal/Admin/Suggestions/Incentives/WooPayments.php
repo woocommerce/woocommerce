@@ -264,16 +264,15 @@ class WooPayments extends Incentive {
 		if ( false !== $had_wcpay ) {
 			$stored_value = filter_var( $had_wcpay, FILTER_VALIDATE_BOOLEAN );
 
-			// A stored negative is always trusted: each revision of this logic is stricter than
-			// the one before it, so a store that didn't qualify under an earlier revision can't
-			// start qualifying under this one.
+			// A cached 'no' holds whatever version produced it, since each revision of this logic
+			// only narrows what qualifies: a store that didn't qualify before can't start now.
 			//
-			// A stored positive is only trusted when the current logic determined it. Earlier
-			// revisions counted test-mode usage (a test-drive account or a test-mode order) as
-			// the real thing and froze the result, so those positives get re-determined once.
-			// The WooPayments plugin writes this same option and may still be running an older
-			// revision of the shared logic, so this is what keeps the two safe to ship in any
-			// order rather than whichever one runs first winning permanently.
+			// A cached 'yes' is trusted only when the current version produced it. Earlier
+			// revisions counted test-mode usage - a test-drive account, a test-mode order - as
+			// the real thing and froze that, so those get re-derived once. The WooPayments
+			// plugin writes this same option from its own copy of this logic, which may still
+			// be an older one, so this is what lets the two ship in either order instead of
+			// whichever runs first winning permanently.
 			if ( ! $stored_value
 				|| (int) get_option( $this->store_had_woopayments_version_option_name, 0 ) >= self::STORE_HAD_WOOPAYMENTS_LOGIC_VERSION ) {
 
