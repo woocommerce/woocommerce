@@ -490,7 +490,9 @@ textarea {
 	flex-shrink: 0;
 }
 
-.wp-block-woocommerce-add-to-cart-with-options-grouped-product-item .wc-block-components-quantity-selector input.wc-block-components-quantity-selector__input {
+/* The doubled class outranks the width: auto in the stepper workaround
+ * below, which ties this rule's specificity otherwise and loads later. */
+.wp-block-woocommerce-add-to-cart-with-options-grouped-product-item .wc-block-components-quantity-selector input.wc-block-components-quantity-selector__input.wc-block-components-quantity-selector__input {
 	width: 40px;
 }
 
