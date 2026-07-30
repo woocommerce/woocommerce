@@ -3,7 +3,10 @@
  * Title: 404
  * Slug: purple/hidden-404
  * Inserter: no
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Page not found"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|140","bottom":"var:preset|spacing|140"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->

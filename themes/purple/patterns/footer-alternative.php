@@ -7,7 +7,10 @@
  * Description: A three-column store footer with site title and address, contact info, social links, and a bottom row with legal links and copyright.
  * Block Types: core/template-part/footer
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Store Footer","categories":["footer","purple"],"patternName":"purple/footer-alternative"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->

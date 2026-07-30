@@ -6,7 +6,10 @@
  * Keywords: about, text, media, columns
  * Description: A three-column section with store featured services.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Three columns of store features with icons","categories":["purple"],"patternName":"purple/store-features-three-columns","description":"A three-column section with store featured services."},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|90","bottom":"var:preset|spacing|90"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->

@@ -3,7 +3,10 @@
  * Title: Cart page title
  * Slug: purple/hidden-cart-page-title
  * Inserter: no
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:heading {"level":1,"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|30"}}},"fontSize":"xx-large"} -->

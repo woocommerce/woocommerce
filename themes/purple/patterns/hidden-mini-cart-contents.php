@@ -3,7 +3,10 @@
  * Title: Mini cart contents
  * Slug: purple/hidden-mini-cart-contents
  * Inserter: no
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:woocommerce/mini-cart-contents {"width":"560px"} -->

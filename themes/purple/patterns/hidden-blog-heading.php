@@ -3,7 +3,10 @@
  * Title: Blog heading
  * Slug: purple/hidden-blog-heading
  * Inserter: no
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:heading {"level":1,"metadata":{"patternName":"purple/hidden-blog-heading","name":"Blog heading"},"align":"wide","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->

@@ -6,7 +6,10 @@
  * Keywords: about, text, media, columns
  * Description: A four-column store features section with an alternative layout.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Four columns of store features with icons alternative","categories":["purple"],"patternName":"purple/store-features-four-columns-alternative","description":"A four-column store features section with an alternative layout."},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"},"blockGap":"0","margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->

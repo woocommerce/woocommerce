@@ -6,7 +6,10 @@
  * Keywords: about, text, media, image
  * Description: A section with an image on the left, description and button on the right.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Image on the left, description on the right","categories":["about","purple"],"patternName":"purple/about-left-aligned-image-description-button","description":"A section with an image on the left, description and button on the right."},"align":"full","className":"is-style-section-2","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"default"}} -->

@@ -6,7 +6,10 @@
  * Keywords: about, text, image, media
  * Description: A section with alternating columns of text and an image.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"categories":["about","purple"],"name":"About section with alternating columns","patternName":"purple/about-alternating-columns","description":"A section with alternating columns of text and an image."},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|140","bottom":"var:preset|spacing|140"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->

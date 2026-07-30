@@ -6,7 +6,10 @@
  * Keywords: faq, text
  * Description: A list of questions and answers.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"FAQ list of questions and answers","description":"A list of questions and answers.","categories":["about","purple"],"patternName":"purple/about-faq-question-list"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|90","bottom":"var:preset|spacing|90"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->

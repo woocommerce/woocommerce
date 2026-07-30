@@ -4,7 +4,10 @@
  * Slug: purple/storefront
  * Inserter: no
  * Template Types: front-page
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:pattern {"slug":"purple/hero-with-text-and-two-buttons"} /-->

@@ -6,7 +6,10 @@
  * Keywords: about, intro, heading, image, button
  * Description: A two-column about section with text on one side and an image placeholder on the other.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"About","categories":["about","purple"],"patternName":"purple/about-left-aligned-heading-text-and-button-right-image"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->

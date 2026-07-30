@@ -3,7 +3,10 @@
  * Title: WooCommerce order confirmation
  * Slug: purple/hidden-order-confirmation
  * Inserter: no
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"tagName":"main","metadata":{"patternName":"purple/hidden-order-confirmation","name":"WooCommerce order confirmation"},"style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|50"}}},"layout":{"inherit":true,"type":"constrained","contentSize":"1060px"}} -->

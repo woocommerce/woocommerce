@@ -6,7 +6,10 @@
  * Keywords: about, text, intro
  * Description: An intro section with a heading, paragraph, button and image.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"categories":["about","purple"],"name":"Left-aligned image, text on the right","patternName":"purple/about-left-aligned-image-right-text","description":"An intro section with a heading, paragraph, button and image."},"align":"full","className":"alignfull","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|140","bottom":"var:preset|spacing|140"}}},"backgroundColor":"theme-5","layout":{"type":"constrained","justifyContent":"center"}} -->

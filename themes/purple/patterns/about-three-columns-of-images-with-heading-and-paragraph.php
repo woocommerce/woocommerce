@@ -6,7 +6,10 @@
  * Keywords: about, intro, columns, heading
  * Description: A section with a heading and short paragraph above a row of three images.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Three columns of images with heading and paragraph","categories":["about","purple"],"patternName":"purple/about-three-columns-of-images-with-heading-and-paragraph"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"},"blockGap":"var:preset|spacing|30"}},"layout":{"type":"constrained","justifyContent":"center"}} -->

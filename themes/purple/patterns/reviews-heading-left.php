@@ -6,7 +6,10 @@
  * Keywords: reviews, testimonials, ratings, stars, columns
  * Description: A reviews section with the heading on the left and two columns containing four customer reviews on the right.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Reviews: heading on left, two columns of reviews on right","categories":["testimonials","purple"],"patternName":"purple/reviews-heading-left"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->

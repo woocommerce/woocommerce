@@ -6,7 +6,10 @@
  * Keywords: about, text, image, media
  * Description: A section with two columns of text, heading and an image.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"About 2 columns with heading","patternName":"purple/about-2-columns-with-heading","description":"A section with two columns of text, heading and an image.","categories":["about","purple"]},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->

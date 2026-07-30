@@ -7,7 +7,10 @@
  * Description: A list of posts in 3 columns with a center-aligned section heading.
  * Block Types: core/query
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"List of posts with center aligned heading","categories":["purple"],"description":"A list of posts in 3 columns with a center-aligned section heading.","patternName":"purple/posts-three-columns-center-aligned-heading"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70","left":"var:preset|spacing|50","right":"var:preset|spacing|50"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->

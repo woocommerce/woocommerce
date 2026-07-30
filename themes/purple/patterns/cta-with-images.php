@@ -6,7 +6,10 @@
  * Keywords: call-to-action, gallery, images
  * Description: A call to action with three images of different sizes.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"CTA with images","categories":["purple"],"patternName":"purple/cta-with-images","description":"A call to action with three images of different sizes."},"align":"full","className":"is-style-section-2","style":{"spacing":{"padding":{"top":"var:preset|spacing|90","bottom":"var:preset|spacing|90"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->

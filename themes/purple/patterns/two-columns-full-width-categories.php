@@ -6,7 +6,10 @@
  * Keywords: columns, gallery, media, featured, category
  * Description: A section with two full width Featured Category blocks.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Two columns full width categories","categories":["woo-commerce","purple"],"patternName":"purple/two-columns-full-width-categories","description":"A section with two full width Featured Category blocks."},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"default"}} -->

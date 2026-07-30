@@ -8,7 +8,10 @@
  * Block Types: core/post-content
  * Post Types: page, wp_template
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:pattern {"slug":"purple/about-alternating-columns"} /-->

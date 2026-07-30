@@ -3,7 +3,10 @@
  * Title: No search results
  * Slug: purple/hidden-no-search-results
  * Inserter: no
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:paragraph {"align":"left","metadata":{"patternName":"purple/hidden-no-search-results","name":"No search results"},"style":{"typography":{"textAlign":"left"},"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->

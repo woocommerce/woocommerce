@@ -6,7 +6,10 @@
  * Keywords: contact, form, contact-form, address
  * Description: A contact section with heading, address, contact form, and storefront image.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Contact","categories":["about","contact","purple"],"patternName":"purple/contact-form-with-address-and-image"},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->

@@ -6,7 +6,10 @@
  * Keywords: banner, call-to-action, media
  * Description: A social media call to action with a hero image.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Social media call to action with hero image","patternName":"purple/social-media-call-to-action-with-hero-image","description":"A social media call to action with a hero image.","categories":["purple"]},"align":"full","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->

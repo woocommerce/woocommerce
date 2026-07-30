@@ -3,7 +3,10 @@
  * Title: WooCommerce single product
  * Slug: purple/hidden-single-product
  * Inserter: no
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Single Product"},"align":"wide","style":{"spacing":{"blockGap":"0","margin":{"top":"0","bottom":"0"},"padding":{"bottom":"var:preset|spacing|50"}}},"layout":{"type":"default"}} -->

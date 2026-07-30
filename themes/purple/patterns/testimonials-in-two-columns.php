@@ -6,7 +6,10 @@
  * Keywords: testimonials, text, media
  * Description: A section with a heading and a 2 column testimonial grid.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Testimonials in two columns","categories":["testimonials","purple"],"patternName":"purple/testimonials-in-two-columns","description":"A section with a heading and a 2 column testimonial grid."},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|140","bottom":"var:preset|spacing|140"},"margin":{"top":"0","bottom":"0"}}},"backgroundColor":"theme-5","layout":{"type":"constrained"}} -->

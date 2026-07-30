@@ -7,7 +7,10 @@
  * Description: A list of posts in 3 columns with featured image, date, and title.
  * Block Types: core/query
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"List of posts in three columns","categories":["purple"],"description":"A list of posts in 3 columns with featured image, date, and title.","patternName":"purple/posts-three-columns"},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"0","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->

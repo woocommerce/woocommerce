@@ -6,7 +6,10 @@
  * Keywords: about, text, media, columns
  * Description: A two-column section with store featured services.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Two columns of store features with icons","categories":["purple"],"patternName":"purple/store-features-two-columns","description":"A two-column section with store featured services."},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30","left":"var:preset|spacing|50","right":"var:preset|spacing|50"},"margin":{"top":"0","bottom":"0"}}},"backgroundColor":"theme-5","layout":{"type":"constrained"}} -->

@@ -6,7 +6,10 @@
  * Keywords: about, text, intro
  * Description: A section with a product image and a large sized paragraph.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"categories":["about","purple"],"name":"Left-aligned product, text on the right","description":"A section with a product image and a large sized paragraph.","patternName":"purple/about-left-aligned-product-right-text"},"align":"full","className":"alignfull is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"},"blockGap":"0"},"dimensions":{"minHeight":""}},"layout":{"type":"constrained","justifyContent":"center"}} -->

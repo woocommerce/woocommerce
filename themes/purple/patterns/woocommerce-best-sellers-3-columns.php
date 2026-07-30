@@ -7,7 +7,10 @@
  * Description: A section with a heading and a 3 column product grid.
  * Block Types: woocommerce/product-collection
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"categories":["woo-commerce","purple"],"patternName":"purple/woocommerce-best-sellers-3-columns","name":"Best sellers collection, 3 columns","description":"A section with a heading and a 3 column product grid."},"align":"full","className":"is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"blockGap":"0","padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70","left":"var:preset|spacing|50","right":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->

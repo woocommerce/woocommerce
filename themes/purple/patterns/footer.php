@@ -7,7 +7,10 @@
  * Description: A footer pattern with social links and navigation.
  * Block Types: core/template-part/footer
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Footer","patternName":"purple/footer","description":"A footer pattern with social links and navigation.","categories":["footer","purple"]},"align":"full","className":"is-style-default","style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->

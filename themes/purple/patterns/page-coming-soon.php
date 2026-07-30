@@ -8,7 +8,10 @@
  * Block Types: core/post-content
  * Post Types: page, wp_template
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:columns {"lock":{"move":false,"remove":false},"metadata":{"name":"Coming soon: Split layout with image","categories":["purple"],"patternName":"purple/coming-soon"},"align":"full","className":"is-style-default","style":{"spacing":{"blockGap":{"top":"0","left":"0"},"margin":{"top":"0","bottom":"0"}}}} -->

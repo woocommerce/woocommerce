@@ -7,7 +7,10 @@
  * Description: A product catalog grid with sorting and pagination, without sidebar filters.
  * Block Types: woocommerce/product-collection
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Product grid without filters","categories":["woo-commerce","purple"],"patternName":"purple/product-grid-without-filters","description":"A product catalog grid with sorting and pagination, without sidebar filters."},"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|70","bottom":"0"}}},"layout":{"type":"constrained"}} -->
@@ -34,19 +37,19 @@
 
 <!-- wp:group {"style":{"spacing":{"margin":{"top":"var:preset|spacing|30","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--30);margin-bottom:0"><!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
-<!-- wp:query-pagination-previous {"label":"<?php esc_html_e('Previous', 'purple');?>"} /-->
+<!-- wp:query-pagination-previous {"label":"<?php esc_html_e( 'Previous', 'purple' );?>"} /-->
 
 <!-- wp:query-pagination-numbers /-->
 
-<!-- wp:query-pagination-next {"label":"<?php esc_html_e('Next', 'purple');?>"} /-->
+<!-- wp:query-pagination-next {"label":"<?php esc_html_e( 'Next', 'purple' );?>"} /-->
 <!-- /wp:query-pagination --></div>
 <!-- /wp:group -->
 
 <!-- wp:woocommerce/product-collection-no-results -->
 <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"left","flexWrap":"wrap"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
-<p><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element, 3. is the start of a 'a' HTML element, 4. is the end of a 'a' HTML element */ 
-echo sprintf( esc_html__( 'No results found. You can try %1$sclearing any filters%2$s or head to our %3$sstore\'s home.%4$s', 'purple' ), '<a class="wc-link-clear-any-filters" href="' . esc_url( '#' ) . '">', '</a>', '<a class="wc-link-stores-home" href="' . esc_url( '#' ) . '">', '</a>' ); ?></p>
+<p><?php /* Translators: 1. is the start of a 'a' HTML element, 2. is the end of a 'a' HTML element, 3. is the start of a 'a' HTML element, 4. is the end of a 'a' HTML element */
+printf( esc_html__( 'No results found. You can try %1$sclearing any filters%2$s or head to our %3$sstore\'s home.%4$s', 'purple' ), '<a class="wc-link-clear-any-filters" href="' . esc_url( '#' ) . '">', '</a>', '<a class="wc-link-stores-home" href="' . esc_url( '#' ) . '">', '</a>' ); ?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 <!-- /wp:woocommerce/product-collection-no-results --></div>

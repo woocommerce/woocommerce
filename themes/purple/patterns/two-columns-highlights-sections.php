@@ -6,7 +6,10 @@
  * Keywords: about, columns, media, featured
  * Description: A section with 2 columns of highlights.
  * Viewport width: 1440
+ *
+ * @package purple
  */
+
 ?>
 
 <!-- wp:group {"metadata":{"name":"Two columns highlights sections","patternName":"purple/two-columns-highlights-sections","description":"A section with 2 columns of highlights.","categories":["purple"]},"align":"full","className":"is-style-section-1","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
