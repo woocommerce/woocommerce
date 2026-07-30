@@ -53,6 +53,13 @@ class FrontendContainerBlock extends Component<
 			: parseInt( attributes.reviewsOnLoadMore, 10 );
 	}
 
+	getOffset() {
+		const { attributes } = this.props;
+		const offset = Number( attributes.offset ?? 0 );
+
+		return Number.isInteger( offset ) && offset >= 0 ? offset : 0;
+	}
+
 	onAppendReviews() {
 		const { reviewsToDisplay } = this.state;
 
@@ -107,6 +114,7 @@ class FrontendContainerBlock extends Component<
 				onReviewsAppended={ this.onReviewsAppended }
 				onReviewsLoadError={ this.onReviewsLoadError }
 				onReviewsReplaced={ this.onReviewsReplaced }
+				offset={ this.getOffset() }
 				order={ order }
 				orderby={ orderby }
 				productId={ productId }

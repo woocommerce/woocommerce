@@ -74,6 +74,63 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		await expect( reviews.first() ).toHaveText( highestRating.review );
 	} );
 
+	test( 'can skip reviews with an offset and load subsequent reviews', async ( {
+		page,
+		frontendUtils,
+		editor,
+	} ) => {
+		const blockLocator = await editor.getBlockByName( BLOCK_NAME );
+		await blockLocator
+			.getByRole( 'checkbox', {
+				name: 'Clothing',
+				exact: true,
+			} )
+			.check();
+		await blockLocator
+			.getByRole( 'checkbox', { name: /Accessories/ } )
+			.check();
+		await blockLocator
+			.getByRole( 'button', {
+				name: 'Done',
+			} )
+			.click();
+
+		await editor.openDocumentSettingsSidebar();
+		const sidebarSettings = page.getByRole( 'region', {
+			name: 'Editor settings',
+		} );
+		await sidebarSettings
+			.getByRole( 'spinbutton', { name: 'Number of reviews' } )
+			.fill( '1' );
+		await sidebarSettings
+			.getByRole( 'spinbutton', { name: 'Offset' } )
+			.fill( '1' );
+
+		await expect(
+			editor.canvas.getByText( allReviews[ 2 ].review )
+		).toBeVisible();
+		await expect(
+			editor.canvas.getByText( allReviews[ 3 ].review )
+		).toHaveCount( 0 );
+
+		await editor.publishAndVisitPost();
+
+		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
+		const reviews = block.locator(
+			'.wc-block-components-review-list-item__text'
+		);
+
+		await expect( reviews ).toHaveCount( 1 );
+		await expect( reviews.first() ).toHaveText( allReviews[ 2 ].review );
+
+		await page.getByRole( 'button', { name: 'Load more reviews' } ).click();
+
+		await expect( reviews ).toHaveCount( 3 );
+		await expect( block.getByText( allReviews[ 3 ].review ) ).toHaveCount(
+			0
+		);
+	} );
+
 	test( 'can sort by lowest rating', async ( {
 		page,
 		frontendUtils,

@@ -120,18 +120,21 @@ const ReviewsByProductEditor = ( {
 					) }
 				</ToolsPanel>
 				<ToolsPanel
-					label={ __( 'List Settings', 'woocommerce' ) }
+					label={ __( 'List settings', 'woocommerce' ) }
 					resetAll={ () =>
 						setAttributes( {
 							showOrderby: true,
 							orderby: 'most-recent',
 							reviewsOnPageLoad: 10,
+							offset: 0,
 							showLoadMore: true,
 							reviewsOnLoadMore: 10,
 						} )
 					}
 				>
-					{ getSharedReviewListControls( attributes, setAttributes ) }
+					{ getSharedReviewListControls( attributes, setAttributes, {
+						showOffset: true,
+					} ) }
 				</ToolsPanel>
 			</InspectorControls>
 		);

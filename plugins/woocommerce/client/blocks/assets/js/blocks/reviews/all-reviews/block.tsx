@@ -77,7 +77,7 @@ const AllReviewsEditor = ( {
 					) }
 				</ToolsPanel>
 				<ToolsPanel
-					label={ __( 'List Settings', 'woocommerce' ) }
+					label={ __( 'List settings', 'woocommerce' ) }
 					resetAll={ () =>
 						setAttributes( {
 							showOrderby: true,

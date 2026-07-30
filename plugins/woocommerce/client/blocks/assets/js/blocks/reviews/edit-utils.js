@@ -9,8 +9,9 @@ import {
 	Notice,
 	ToggleControl,
 	ToolbarGroup,
-	RangeControl,
 	SelectControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalInputControl as InputControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -217,37 +218,28 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 	);
 };
 
-export const getSharedReviewListControls = ( attributes, setAttributes ) => {
+export const getSharedReviewListControls = (
+	attributes,
+	setAttributes,
+	{ showOffset = false } = {}
+) => {
 	const minPerPage = 1;
 	const maxPerPage = 20;
+	const defaultPerPage = 10;
+	const defaultOffset = 0;
 
 	return (
 		<>
 			<ToolsPanelItem
-				hasValue={ () => ! attributes.showOrderby }
-				label={ __( 'Order by', 'woocommerce' ) }
-				onDeselect={ () => setAttributes( { showOrderby: true } ) }
-				isShownByDefault
-			>
-				<ToggleControl
-					__nextHasNoMarginBottom
-					label={ __( 'Order by', 'woocommerce' ) }
-					checked={ attributes.showOrderby }
-					onChange={ () =>
-						setAttributes( {
-							showOrderby: ! attributes.showOrderby,
-						} )
-					}
-				/>
-			</ToolsPanelItem>
-			<ToolsPanelItem
 				hasValue={ () => attributes.orderby !== 'most-recent' }
-				label={ __( 'Order Product Reviews by', 'woocommerce' ) }
+				label={ __( 'Default sort order', 'woocommerce' ) }
 				onDeselect={ () => setAttributes( { orderby: 'most-recent' } ) }
 				isShownByDefault
 			>
 				<SelectControl
-					label={ __( 'Order Product Reviews by', 'woocommerce' ) }
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
+					label={ __( 'Default sort order', 'woocommerce' ) }
 					value={ attributes.orderby }
 					options={ [
 						{
@@ -267,31 +259,85 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 				/>
 			</ToolsPanelItem>
 			<ToolsPanelItem
-				hasValue={ () => attributes.reviewsOnPageLoad !== 10 }
-				label={ __( 'Starting Number of Reviews', 'woocommerce' ) }
-				onDeselect={ () => setAttributes( { reviewsOnPageLoad: 10 } ) }
+				hasValue={ () => ! attributes.showOrderby }
+				label={ __( 'Show sort dropdown', 'woocommerce' ) }
+				onDeselect={ () => setAttributes( { showOrderby: true } ) }
 				isShownByDefault
 			>
-				<RangeControl
-					label={ __( 'Starting Number of Reviews', 'woocommerce' ) }
-					value={ attributes.reviewsOnPageLoad }
-					onChange={ ( reviewsOnPageLoad ) =>
-						setAttributes( { reviewsOnPageLoad } )
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label={ __( 'Show sort dropdown', 'woocommerce' ) }
+					checked={ attributes.showOrderby }
+					onChange={ () =>
+						setAttributes( {
+							showOrderby: ! attributes.showOrderby,
+						} )
 					}
-					max={ maxPerPage }
-					min={ minPerPage }
 				/>
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				hasValue={ () =>
+					attributes.reviewsOnPageLoad !== defaultPerPage
+				}
+				label={ __( 'Number of reviews', 'woocommerce' ) }
+				onDeselect={ () =>
+					setAttributes( { reviewsOnPageLoad: defaultPerPage } )
+				}
+				isShownByDefault
+			>
+				<InputControl
+					__next40pxDefaultSize
+					label={ __( 'Number of reviews', 'woocommerce' ) }
+					value={ String( attributes.reviewsOnPageLoad ) }
+					onChange={ ( value ) =>
+						setAttributes( {
+							reviewsOnPageLoad: Number( value ),
+						} )
+					}
+					type="number"
+					max={ maxPerPage }
+					min={ minPerPage }
+					step={ 1 }
+				/>
+			</ToolsPanelItem>
+			{ showOffset && (
+				<ToolsPanelItem
+					hasValue={ () =>
+						( attributes.offset ?? defaultOffset ) !== defaultOffset
+					}
+					label={ __( 'Offset', 'woocommerce' ) }
+					onDeselect={ () =>
+						setAttributes( { offset: defaultOffset } )
+					}
+					isShownByDefault
+				>
+					<InputControl
+						__next40pxDefaultSize
+						label={ __( 'Offset', 'woocommerce' ) }
+						help={ __(
+							'Skips this many reviews before the ones shown',
+							'woocommerce'
+						) }
+						value={ String( attributes.offset ?? defaultOffset ) }
+						onChange={ ( value ) =>
+							setAttributes( { offset: Number( value ) } )
+						}
+						type="number"
+						min={ defaultOffset }
+						step={ 1 }
+					/>
+				</ToolsPanelItem>
+			) }
+			<ToolsPanelItem
+				hasValue={ () =>
 					! attributes.showLoadMore ||
-					attributes.reviewsOnLoadMore !== 10
+					attributes.reviewsOnLoadMore !== defaultPerPage
 				}
 				label={ __( 'Load more', 'woocommerce' ) }
 				onDeselect={ () =>
 					setAttributes( {
 						showLoadMore: true,
-						reviewsOnLoadMore: 10,
+						reviewsOnLoadMore: defaultPerPage,
 					} )
 				}
 				isShownByDefault
@@ -308,14 +354,19 @@ export const getSharedReviewListControls = ( attributes, setAttributes ) => {
 						}
 					/>
 					{ attributes.showLoadMore && (
-						<RangeControl
-							label={ __( 'Load More Reviews', 'woocommerce' ) }
-							value={ attributes.reviewsOnLoadMore }
-							onChange={ ( reviewsOnLoadMore ) =>
-								setAttributes( { reviewsOnLoadMore } )
+						<InputControl
+							__next40pxDefaultSize
+							label={ __( 'Load more reviews', 'woocommerce' ) }
+							value={ String( attributes.reviewsOnLoadMore ) }
+							onChange={ ( value ) =>
+								setAttributes( {
+									reviewsOnLoadMore: Number( value ),
+								} )
 							}
+							type="number"
 							max={ maxPerPage }
 							min={ minPerPage }
+							step={ 1 }
 						/>
 					) }
 				</div>

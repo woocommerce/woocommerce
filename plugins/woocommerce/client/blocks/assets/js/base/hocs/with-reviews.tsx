@@ -18,6 +18,7 @@ interface WithReviewsProps {
 	reviewsToDisplay: number;
 	categoryIds?: string | string[];
 	delayFunction?: ( f: () => void ) => DelayedFunction;
+	offset?: number | string;
 	onReviewsAppended?: () => void;
 	onReviewsLoadError?: ( error: ErrorObject ) => void;
 	onReviewsReplaced?: () => void;
@@ -90,6 +91,7 @@ const withReviews = (
 			return (
 				prevProps.orderby !== nextProps.orderby ||
 				prevProps.order !== nextProps.order ||
+				this.getOffset( prevProps ) !== this.getOffset( nextProps ) ||
 				prevProps.productId !== nextProps.productId ||
 				! isShallowEqual(
 					prevProps.categoryIds as string[],
@@ -108,6 +110,14 @@ const withReviews = (
 			}
 		}
 
+		getOffset( props = this.props ) {
+			const parsedOffset = Number( props.offset ?? 0 );
+
+			return Number.isInteger( parsedOffset ) && parsedOffset >= 0
+				? parsedOffset
+				: 0;
+		}
+
 		getArgs( reviewsToSkip: number ) {
 			const { categoryIds, order, orderby, productId, reviewsToDisplay } =
 				this.props;
@@ -115,7 +125,7 @@ const withReviews = (
 				order,
 				orderby,
 				per_page: reviewsToDisplay - reviewsToSkip,
-				offset: reviewsToSkip,
+				offset: this.getOffset() + reviewsToSkip,
 			};
 
 			if ( categoryIds ) {
@@ -167,6 +177,7 @@ const withReviews = (
 		updateListOfReviews( oldReviews: Review[] = [] ) {
 			const { reviewsToDisplay } = this.props;
 			const { totalReviews } = this.state;
+			const configuredOffset = this.getOffset();
 			const reviewsToLoad =
 				Math.min( totalReviews, reviewsToDisplay ) - oldReviews.length;
 
@@ -181,6 +192,11 @@ const withReviews = (
 						reviews: newReviews,
 						totalReviews: newTotalReviews,
 					} ) => {
+						const availableReviews = Math.max(
+							newTotalReviews - configuredOffset,
+							0
+						);
+
 						if ( this.isMounted ) {
 							this.setState( {
 								reviews: oldReviews
@@ -189,7 +205,7 @@ const withReviews = (
 											Object.keys( review ).length
 									)
 									.concat( newReviews ),
-								totalReviews: newTotalReviews,
+								totalReviews: availableReviews,
 								loading: false,
 								error: null,
 							} );
