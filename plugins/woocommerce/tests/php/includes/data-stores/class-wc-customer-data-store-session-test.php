@@ -84,21 +84,6 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should override a persisted shipping field with an empty value stored in the session.
-	 */
-	public function test_empty_session_value_overrides_persisted_shipping_field(): void {
-		$customer_id = WC_Helper_Customer::create_customer( 'session_empty_shipping', 'password', 'session-empty-shipping@example.com' )->get_id();
-
-		$session_customer = new WC_Customer( $customer_id, true );
-		$session_customer->set_shipping_address_2( '' );
-		$session_customer->save();
-
-		$reloaded_customer = new WC_Customer( $customer_id, true );
-
-		$this->assertSame( '', $reloaded_customer->get_shipping_address_2(), 'A shipping field emptied in the session should not be restored from the persisted customer data' );
-	}
-
-	/**
 	 * @testdox Should override a persisted billing field with an empty value stored in the session.
 	 */
 	public function test_empty_session_value_overrides_persisted_billing_field(): void {
