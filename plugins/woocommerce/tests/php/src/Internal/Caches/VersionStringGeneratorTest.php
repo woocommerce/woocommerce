@@ -276,6 +276,27 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_version replaces an invalid cached value without a separate delete when generating.
+	 */
+	public function test_get_version_does_not_delete_when_generating_a_replacement(): void {
+		$mock_cache = $this->install_mock_object_cache();
+		$mock_cache
+			->expects( $this->once() )
+			->method( 'get' )
+			->willReturn( array( 'unexpected' ) );
+		$mock_cache
+			->expects( $this->once() )
+			->method( 'set' )
+			->with( $this->get_version_cache_key( 'invalid-value-regenerated' ), $this->anything(), $this->get_cache_group(), DAY_IN_SECONDS )
+			->willReturn( true );
+		$mock_cache->expects( $this->never() )->method( 'delete' );
+
+		$version = $this->sut->get_version( 'invalid-value-regenerated' );
+
+		$this->assertTrue( wp_is_uuid( (string) $version, 4 ), 'A new version should be generated over the invalid value' );
+	}
+
+	/**
 	 * @testdox get_version generates version by default when it doesn't exist.
 	 */
 	public function test_get_version_generates_by_default() {

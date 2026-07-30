@@ -71,6 +71,11 @@ class VersionStringGenerator {
 	 * If no valid version exists and $generate is true, a new version will be created.
 	 * If no valid version exists and $generate is false, null will be returned.
 	 *
+	 * Cached values that aren't non-empty strings are treated as invalid and are never
+	 * returned. When $generate is true they are overwritten by the newly generated
+	 * version; when $generate is false they are deleted, which means a call with
+	 * $generate set to false can write to the cache.
+	 *
 	 * @param string $id       The ID to get the version string for.
 	 * @param bool   $generate Whether to generate a new version if one doesn't exist. Default true.
 	 * @return string|null Version string, or null if not found and $generate is false.
@@ -86,10 +91,17 @@ class VersionStringGenerator {
 		$version   = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 
 		if ( ! is_string( $version ) || '' === $version ) {
+			if ( $generate ) {
+				// The new version is written to the same cache key, replacing the invalid
+				// value, so deleting it first would only add a redundant round-trip.
+				return $this->generate_version( $id );
+			}
+
 			if ( $this->cache_entry_exists( $version, $found ) ) {
 				wp_cache_delete( $cache_key, self::CACHE_GROUP );
 			}
-			return $generate ? $this->generate_version( $id ) : null;
+
+			return null;
 		}
 
 		// Refresh the cache lifetime.
