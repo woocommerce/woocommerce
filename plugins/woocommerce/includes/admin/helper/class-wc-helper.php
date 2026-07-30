@@ -1910,6 +1910,7 @@ class WC_Helper {
 				}
 
 				$product_id = $subscription['product_id'] ?? null;
+				// Enforce an integer or digit-only string before validating its range.
 				if ( ! is_int( $product_id ) && ( ! is_string( $product_id ) || ! ctype_digit( $product_id ) ) ) {
 					return false;
 				}
