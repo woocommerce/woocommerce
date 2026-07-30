@@ -82,17 +82,18 @@ class VersionStringGenerator {
 		$this->validate_input( $id );
 
 		$cache_key = $this->get_cache_key( $id );
-		$version   = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$found     = false;
+		$version   = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 
-		if ( false === $version ) {
-			if ( ! $generate ) {
-				return null;
+		if ( ! is_string( $version ) ) {
+			if ( false !== $version || true === $found ) {
+				wp_cache_delete( $cache_key, self::CACHE_GROUP );
 			}
-			$version = $this->generate_version( $id );
-		} else {
-			// Refresh the cache lifetime.
-			$this->store_version( $id, $version );
+			return $generate ? $this->generate_version( $id ) : null;
 		}
+
+		// Refresh the cache lifetime.
+		$this->store_version( $id, $version );
 		return $version;
 	}
 

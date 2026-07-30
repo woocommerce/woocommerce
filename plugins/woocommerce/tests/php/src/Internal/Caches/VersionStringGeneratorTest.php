@@ -134,6 +134,60 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Invalid values that can be returned by an object cache.
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public static function invalid_cached_version_values(): array {
+		return array(
+			'boolean false' => array( false ),
+			'null'          => array( null ),
+			'array'         => array( array( 'unexpected' ) ),
+			'integer'       => array( 42 ),
+		);
+	}
+
+	/**
+	 * @testdox get_version replaces invalid cached values when generation is enabled.
+	 * @dataProvider invalid_cached_version_values
+	 *
+	 * @param mixed $invalid_value Invalid cached value.
+	 */
+	public function test_get_version_replaces_invalid_cached_value_when_generation_enabled( $invalid_value ): void {
+		$cache_key = 'wc_version_string_' . md5( 'invalid-cached-version' );
+		wp_cache_set( $cache_key, $invalid_value, $this->get_cache_group() );
+
+		$version = $this->sut->get_version( 'invalid-cached-version' );
+
+		$this->assertIsString( $version, 'A new version string should be generated' );
+		$this->assertTrue( wp_is_uuid( (string) $version, 4 ), 'The generated version should be a UUID' );
+		$this->assertSame(
+			$version,
+			wp_cache_get( $cache_key, $this->get_cache_group() ),
+			'The invalid cached value should be replaced'
+		);
+	}
+
+	/**
+	 * @testdox get_version deletes invalid cached values when generation is disabled.
+	 * @dataProvider invalid_cached_version_values
+	 *
+	 * @param mixed $invalid_value Invalid cached value.
+	 */
+	public function test_get_version_deletes_invalid_cached_value_when_generation_disabled( $invalid_value ): void {
+		$cache_key = 'wc_version_string_' . md5( 'invalid-cached-version' );
+		wp_cache_set( $cache_key, $invalid_value, $this->get_cache_group() );
+
+		$version = $this->sut->get_version( 'invalid-cached-version', false );
+
+		$this->assertNull( $version, 'Generation-disabled cache misses should return null' );
+
+		$found = null;
+		wp_cache_get( $cache_key, $this->get_cache_group(), false, $found );
+		$this->assertFalse( $found, 'The invalid cached value should be deleted' );
+	}
+
+	/**
 	 * @testdox generate_version sets a new version for a not yet versioned ID.
 	 */
 	public function test_generate_version_creates_new() {
