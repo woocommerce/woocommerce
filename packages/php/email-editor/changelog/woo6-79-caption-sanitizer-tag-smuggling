@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure block captions keep only the allowed formatting tags and attributes, including when the authored caption markup is malformed.
