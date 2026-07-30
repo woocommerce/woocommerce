@@ -16,7 +16,7 @@ namespace Automattic\WooCommerce\Internal\PRReadinessDummy2;
 class DummyPHPStanFailure {
 
 	/**
-	 * Broken again to trigger PHPStan failure.
+	 * Broken again (verified) to trigger PHPStan failure.
 	 *
 	 * @return int
 	 */
