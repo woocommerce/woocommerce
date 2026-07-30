@@ -40,9 +40,11 @@ class Utils {
 	 */
 	public static function add_quantity_steppers( $quantity_html, $product_name ) {
 		// Regex pattern to match the visible <input> element with id starting with 'quantity_'.
-		// The type lookahead is case-insensitive because `type` is an enumerated attribute, so
-		// TYPE="HIDDEN" is just as hidden as type="hidden". The id stays case-sensitive.
-		$pattern = '/(<input(?![^>]*(?i:type="hidden"))[^>]*id="quantity_[^"]*"[^>]*\/>)/';
+		// The type lookahead covers every way a hidden input can be written — single or double
+		// quoted, unquoted, spaced around the `=`, and any casing, since `type` is an enumerated
+		// attribute. The leading \s anchors it to a real attribute so `data-type="hidden"` on a
+		// visible input doesn't match. The id stays case-sensitive.
+		$pattern = '/(<input(?![^>]*(?i:\stype\s*=\s*["\']?hidden))[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Add the minus button BEFORE the matched <input> element so DOM order matches the
 		// visual order (− input +), giving a logical focus and reading sequence.
 		// Use preg_replace_callback to avoid backreference interpretation of $, \ sequences in product names.

@@ -563,6 +563,36 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that no stepper buttons are injected around a hidden quantity input, however the
+	 * type attribute is written.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::add_quantity_steppers
+	 */
+	public function test_add_quantity_steppers_skips_hidden_inputs_whatever_the_attribute_form() {
+		$hidden_forms = array(
+			'double quoted' => '<input class="qty" type="hidden" id="quantity_1" />',
+			'single quoted' => "<input class=\"qty\" type='hidden' id=\"quantity_2\" />",
+			'unquoted'      => '<input class="qty" type=hidden id="quantity_3" />',
+			'spaced'        => '<input class="qty" type = "hidden" id="quantity_4" />',
+			'uppercase'     => '<input class="qty" TYPE="HIDDEN" id="quantity_5" />',
+		);
+
+		foreach ( $hidden_forms as $label => $quantity_html ) {
+			$this->assertStringNotContainsString(
+				'wc-block-components-quantity-selector__button',
+				Utils::add_quantity_steppers( $quantity_html, 'Test Product' ),
+				"A hidden quantity input written as {$label} should not get stepper buttons."
+			);
+		}
+
+		$this->assertStringContainsString(
+			'wc-block-components-quantity-selector__button',
+			Utils::add_quantity_steppers( '<input class="qty" data-type="hidden" type="number" id="quantity_6" />', 'Test Product' ),
+			'A visible quantity input should still get stepper buttons, even alongside a data-type="hidden" attribute.'
+		);
+	}
+
+	/**
 	 * Tests that the Add to Wishlist Button is injected as the last child only
 	 * when the `product_wishlist` feature flag is enabled.
 	 *

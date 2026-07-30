@@ -85,6 +85,52 @@ class AddToCartForm extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that no stepper buttons are injected around a hidden quantity input, however the
+	 * type attribute is written.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartForm::add_steppers
+	 */
+	public function test_add_steppers_skips_hidden_inputs_whatever_the_attribute_form(): void {
+		$hidden_forms = array(
+			'double quoted' => '<input class="qty" type="hidden" id="quantity_1" />',
+			'single quoted' => "<input class=\"qty\" type='hidden' id=\"quantity_2\" />",
+			'unquoted'      => '<input class="qty" type=hidden id="quantity_3" />',
+			'spaced'        => '<input class="qty" type = "hidden" id="quantity_4" />',
+			'uppercase'     => '<input class="qty" TYPE="HIDDEN" id="quantity_5" />',
+		);
+
+		$block = new class(
+			Package::container()->get( Api::class ),
+			Package::container()->get( AssetDataRegistry::class ),
+			new IntegrationRegistry()
+		) extends \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartForm {
+			/**
+			 * Skip block registration; woocommerce/add-to-cart-form is already registered when WooCommerce loads.
+			 */
+			protected function initialize() {
+			}
+		};
+
+		$reflection = new \ReflectionClass( $block );
+		$method     = $reflection->getMethod( 'add_steppers' );
+		$method->setAccessible( true );
+
+		foreach ( $hidden_forms as $label => $quantity_html ) {
+			$this->assertStringNotContainsString(
+				'wc-block-components-quantity-selector__button',
+				$method->invoke( $block, $quantity_html, 'Test Product' ),
+				"A hidden quantity input written as {$label} should not get stepper buttons."
+			);
+		}
+
+		$this->assertStringContainsString(
+			'wc-block-components-quantity-selector__button',
+			$method->invoke( $block, '<input class="qty" data-type="hidden" type="number" id="quantity_6" />', 'Test Product' ),
+			'A visible quantity input should still get stepper buttons, even alongside a data-type="hidden" attribute.'
+		);
+	}
+
+	/**
 	 * Tests that add_steppers injects the buttons in visual DOM order (− input +),
 	 * so keyboard focus and screen-reader reading order are logical.
 	 *
