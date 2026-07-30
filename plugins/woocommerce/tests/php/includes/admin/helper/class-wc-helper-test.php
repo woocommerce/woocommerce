@@ -34,6 +34,51 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Get subscription data containing valid and malformed entries.
+	 *
+	 * @return array
+	 */
+	private function get_mixed_subscription_data(): array {
+		return array(
+			'scalar'            => 'corrupted',
+			'missing ID'        => array( 'product_key' => 'missing-id' ),
+			'array ID'          => array( 'product_id' => array( 456 ) ),
+			'zero ID'           => array( 'product_id' => 0 ),
+			'negative ID'       => array( 'product_id' => -10 ),
+			'float ID'          => array( 'product_id' => 900001.9 ),
+			'decimal string ID' => array( 'product_id' => '900002.9' ),
+			'scientific ID'     => array( 'product_id' => '9e5' ),
+			'signed ID'         => array( 'product_id' => '+900003' ),
+			'whitespace ID'     => array( 'product_id' => ' 900004 ' ),
+			'boolean ID'        => array( 'product_id' => true ),
+			'overflowing ID'    => array( 'product_id' => (string) PHP_INT_MAX . '0' ),
+			'valid integer ID'  => array(
+				'product_id'  => 123,
+				'product_key' => 'integer-key',
+				'metadata'    => array( 'preserved' => true ),
+			),
+			'valid string ID'   => array(
+				'product_id'  => '456',
+				'product_key' => 'string-key',
+			),
+		);
+	}
+
+	/**
+	 * Get the valid entries from the mixed subscription fixture.
+	 *
+	 * @return array
+	 */
+	private function get_valid_subscription_data(): array {
+		$data = $this->get_mixed_subscription_data();
+
+		return array(
+			'valid integer ID' => $data['valid integer ID'],
+			'valid string ID'  => $data['valid string ID'],
+		);
+	}
+
+	/**
 	 * @testdox get_subscriptions should delete corrupted string transient and return empty array.
 	 */
 	public function test_get_subscriptions_handles_corrupted_string_transient(): void {
@@ -73,6 +118,53 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		$result = WC_Helper::get_subscriptions();
 
 		$this->assertEquals( $valid_data, $result, 'Valid cached data should be returned as-is' );
+	}
+
+	/**
+	 * @testdox get_subscriptions should filter malformed cached entries without modifying valid subscriptions.
+	 */
+	public function test_get_subscriptions_filters_malformed_cached_entries(): void {
+		set_transient( '_woocommerce_helper_subscriptions', $this->get_mixed_subscription_data(), HOUR_IN_SECONDS );
+
+		$result = WC_Helper::get_subscriptions();
+
+		$this->assertSame( $this->get_valid_subscription_data(), $result, 'Only valid cached subscriptions should be returned unchanged' );
+	}
+
+	/**
+	 * @testdox get_subscriptions should filter malformed API entries before caching them.
+	 */
+	public function test_get_subscriptions_filters_malformed_api_entries(): void {
+		$response_data = $this->get_mixed_subscription_data();
+		$previous_auth = WC_Helper_Options::get( 'auth', array() );
+		$http_mock     = static function () use ( $response_data ) {
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode( $response_data ),
+			);
+		};
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'access_token'        => 'test-token',
+				'access_token_secret' => 'test-secret',
+			)
+		);
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = WC_Helper::get_subscriptions();
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+			WC_Helper_Options::update( 'auth', $previous_auth );
+		}
+
+		$this->assertSame( $this->get_valid_subscription_data(), $result, 'Only valid API subscriptions should be returned unchanged' );
+		$this->assertSame(
+			$this->get_valid_subscription_data(),
+			get_transient( '_woocommerce_helper_subscriptions' ),
+			'Only valid API subscriptions should be cached'
+		);
 	}
 
 	/**
@@ -169,6 +261,34 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'pre_http_request', $http_mock );
 
 		$this->assertIsArray( $result, 'Result should be an array even with corrupted subscriptions transient' );
+	}
+
+	/**
+	 * @testdox get_subscription_list_data should handle malformed subscription entries.
+	 */
+	public function test_get_subscription_list_data_handles_malformed_entries(): void {
+		set_transient(
+			'_woocommerce_helper_subscriptions',
+			array(
+				'corrupted',
+				array( 'product_key' => 'missing-id' ),
+				array( 'product_id' => array( 456 ) ),
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$http_mock = static function () {
+			return new WP_Error( 'test', 'Mocked error' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = WC_Helper::get_subscription_list_data();
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertIsArray( $result, 'Malformed subscription entries should not interrupt the Extensions list' );
 	}
 
 	/**
