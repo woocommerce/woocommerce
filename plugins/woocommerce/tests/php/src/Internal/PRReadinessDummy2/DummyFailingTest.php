@@ -18,9 +18,9 @@ use WC_Unit_Test_Case;
 class DummyFailingTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Intentionally fails to exercise the readiness bot's "Unit tests (PHP)" task.
+	 * Fixed to pass.
 	 */
 	public function test_intentional_failure() {
-		$this->assertTrue( false, 'Intentional failure for PR readiness bot dummy test PR.' );
+		$this->assertTrue( true );
 	}
 }

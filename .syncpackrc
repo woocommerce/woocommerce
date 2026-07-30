@@ -564,7 +564,6 @@
 			"pinVersion": "4.3.x"
 		},
 		{
-			"label": "rimraf is pinned repo-wide",
 			"dependencies": [
 				"rimraf"
 			],
