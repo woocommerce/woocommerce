@@ -18,7 +18,7 @@ interface WithReviewsProps {
 	reviewsToDisplay: number;
 	categoryIds?: string | string[];
 	delayFunction?: ( f: () => void ) => DelayedFunction;
-	offset?: number | string;
+	offset?: number;
 	onReviewsAppended?: () => void;
 	onReviewsLoadError?: ( error: ErrorObject ) => void;
 	onReviewsReplaced?: () => void;

@@ -17,9 +17,15 @@ const selector = `
 const getProps = ( el: HTMLElement ) => {
 	const showOrderby = el.dataset.showOrderby === 'true';
 	const showLoadMore = el.dataset.showLoadMore === 'true';
+	const parsedOffset = Number( el.dataset.offset ?? 0 );
+	const offset =
+		Number.isInteger( parsedOffset ) && parsedOffset >= 0
+			? parsedOffset
+			: 0;
 
 	return {
 		attributes: {
+			offset,
 			showOrderby,
 			showLoadMore,
 			showReviewDate: el.classList.contains( 'has-date' ),
