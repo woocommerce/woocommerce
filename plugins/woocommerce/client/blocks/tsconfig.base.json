@@ -85,6 +85,9 @@
 			"@woocommerce/block-data": [
 				"assets/js/data"
 			],
+			"@woocommerce/block-data/*": [
+				"assets/js/data/*"
+			],
 			"@woocommerce/block-hocs": [
 				"assets/js/hocs"
 			],

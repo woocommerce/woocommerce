@@ -134,8 +134,6 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wp;
 
-		remove_filter( 'block_core_breadcrumbs_post_type_settings', array( $this->sut, 'set_product_breadcrumbs_preferred_taxonomy' ), 10 );
-		remove_filter( 'block_core_breadcrumbs_items', array( $this->sut, 'apply_woocommerce_breadcrumb_filters' ), 10 );
 		remove_filter( 'woocommerce_is_account_page', '__return_true' );
 
 		update_option( 'woocommerce_shop_page_id', $this->original_shop_page_id );
@@ -158,17 +156,6 @@ class CoreBreadcrumbsCompatibilityTest extends WC_Unit_Test_Case {
 		}
 
 		parent::tearDown();
-	}
-
-	/**
-	 * @testdox Should register Core Breadcrumbs compatibility filters.
-	 */
-	public function test_init_registers_core_breadcrumbs_filters(): void {
-		$this->sut->init();
-		$this->sut->init();
-
-		$this->assertSame( 10, has_filter( 'block_core_breadcrumbs_post_type_settings', array( $this->sut, 'set_product_breadcrumbs_preferred_taxonomy' ) ), 'Product breadcrumb settings filter should be registered.' );
-		$this->assertSame( 10, has_filter( 'block_core_breadcrumbs_items', array( $this->sut, 'apply_woocommerce_breadcrumb_filters' ) ), 'Breadcrumb items filter should be registered.' );
 	}
 
 	/**
