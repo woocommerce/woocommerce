@@ -119,6 +119,67 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_version does not delete on a genuine cache miss.
+	 */
+	public function test_get_version_does_not_delete_on_genuine_cache_miss(): void {
+		global $wp_object_cache;
+		$original_cache = $wp_object_cache;
+
+		try {
+			$mock_cache = $this->createMock( \WP_Object_Cache::class );
+			$mock_cache
+				->expects( $this->once() )
+				->method( 'get' )
+				->willReturnCallback(
+					static function ( $key, $group, $force, &$found ) {
+						$found = false;
+						return false;
+					}
+				);
+			$mock_cache->expects( $this->never() )->method( 'delete' );
+			$wp_object_cache = $mock_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+			$version = $this->sut->get_version( 'genuine-cache-miss', false );
+
+			$this->assertNull( $version, 'A genuine cache miss should return null when generation is disabled' );
+		} finally {
+			$wp_object_cache = $original_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
+
+	/**
+	 * @testdox get_version accepts a cached string when the cache does not set the found flag.
+	 */
+	public function test_get_version_accepts_cached_string_without_found_flag(): void {
+		global $wp_object_cache;
+		$original_cache = $wp_object_cache;
+		$cache_group    = $this->get_cache_group();
+		$cache_key      = 'wc_version_string_' . md5( 'cached-string-without-found' );
+		$cached_version = 'cached-version';
+
+		try {
+			$mock_cache = $this->createMock( \WP_Object_Cache::class );
+			$mock_cache
+				->expects( $this->once() )
+				->method( 'get' )
+				->willReturn( $cached_version );
+			$mock_cache
+				->expects( $this->once() )
+				->method( 'set' )
+				->with( $cache_key, $cached_version, $cache_group, DAY_IN_SECONDS )
+				->willReturn( true );
+			$mock_cache->expects( $this->never() )->method( 'delete' );
+			$wp_object_cache = $mock_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+			$version = $this->sut->get_version( 'cached-string-without-found' );
+
+			$this->assertSame( $cached_version, $version, 'A valid cached string should not depend on the found flag' );
+		} finally {
+			$wp_object_cache = $original_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
+
+	/**
 	 * @testdox get_version generates version by default when it doesn't exist.
 	 */
 	public function test_get_version_generates_by_default() {
@@ -141,6 +202,7 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	public static function invalid_cached_version_values(): array {
 		return array(
 			'boolean false' => array( false ),
+			'empty string'  => array( '' ),
 			'null'          => array( null ),
 			'array'         => array( array( 'unexpected' ) ),
 			'integer'       => array( 42 ),

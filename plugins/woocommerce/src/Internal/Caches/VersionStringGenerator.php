@@ -68,8 +68,8 @@ class VersionStringGenerator {
 	/**
 	 * Get the current version string for an ID.
 	 *
-	 * If no version exists and $generate is true, a new version will be created.
-	 * If no version exists and $generate is false, null will be returned.
+	 * If no valid version exists and $generate is true, a new version will be created.
+	 * If no valid version exists and $generate is false, null will be returned.
 	 *
 	 * @param string $id       The ID to get the version string for.
 	 * @param bool   $generate Whether to generate a new version if one doesn't exist. Default true.
@@ -85,7 +85,7 @@ class VersionStringGenerator {
 		$found     = false;
 		$version   = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 
-		if ( ! is_string( $version ) ) {
+		if ( ! is_string( $version ) || '' === $version ) {
 			if ( false !== $version || true === $found ) {
 				wp_cache_delete( $cache_key, self::CACHE_GROUP );
 			}
