@@ -313,6 +313,15 @@ textarea {
 	vertical-align: middle;
 }
 
+/* The custom styling strips the border and browser outline, so keyboard
+ * focus was invisible (WOOTHME-404). revert restores the browser's native
+ * focus ring, matching the rings on unstyled links and buttons; mouse
+ * focus stays clean via outline: none above. */
+.woocommerce.wc-block-catalog-sorting select.orderby:focus-visible {
+	outline: revert;
+	outline-offset: 2px;
+}
+
 @supports (appearance: base-select) {
 	.woocommerce.wc-block-catalog-sorting select.orderby,
 	.woocommerce.wc-block-catalog-sorting select.orderby::picker(select) {
