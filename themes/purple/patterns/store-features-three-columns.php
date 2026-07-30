@@ -21,7 +21,7 @@
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group"><!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"500","lineHeight":"1.18"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"large"} -->
-<p class="has-theme-2-color has-text-color has-link-color has-large-font-size" style="font-style:normal;font-weight:500;line-height:1.18"><?php esc_html_e( 'Free Shipping', 'purple' ); ?></p>
+<p class="has-theme-2-color has-text-color has-link-color has-large-font-size" style="font-style:normal;font-weight:500;line-height:1.18"><?php esc_html_e( 'Free shipping', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"style":{"typography":{"textAlign":"center"},"spacing":{"margin":{"top":"var:preset|spacing|10"}}},"fontSize":"medium"} -->
@@ -41,7 +41,7 @@
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group"><!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"500","lineHeight":"1.18"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"large"} -->
-<p class="has-theme-2-color has-text-color has-link-color has-large-font-size" style="font-style:normal;font-weight:500;line-height:1.18"><?php esc_html_e( 'Gift Wrapping', 'purple' ); ?></p>
+<p class="has-theme-2-color has-text-color has-link-color has-large-font-size" style="font-style:normal;font-weight:500;line-height:1.18"><?php esc_html_e( 'Gift wrapping', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"style":{"typography":{"textAlign":"center"},"spacing":{"margin":{"top":"var:preset|spacing|10","bottom":"0"}}},"fontSize":"medium"} -->
@@ -61,7 +61,7 @@
 
 <!-- wp:group {"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group"><!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"500","lineHeight":"1.18"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"large"} -->
-<p class="has-theme-2-color has-text-color has-link-color has-large-font-size" style="font-style:normal;font-weight:500;line-height:1.18"><?php esc_html_e( 'Free Returns', 'purple' ); ?></p>
+<p class="has-theme-2-color has-text-color has-link-color has-large-font-size" style="font-style:normal;font-weight:500;line-height:1.18"><?php esc_html_e( 'Free returns', 'purple' ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"style":{"typography":{"textAlign":"center"},"spacing":{"margin":{"top":"var:preset|spacing|10"}}},"fontSize":"medium"} -->

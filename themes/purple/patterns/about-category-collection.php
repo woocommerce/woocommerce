@@ -11,7 +11,7 @@
 <!-- wp:group {"metadata":{"name":"Collection of categories with images","description":"A section with a collection of categories with images.","categories":["purple"]},"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|90","bottom":"var:preset|spacing|90"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--90);padding-bottom:var(--wp--preset--spacing--90)"><!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide"><!-- wp:paragraph {"style":{"typography":{"textTransform":"uppercase","textAlign":"center","letterSpacing":"0.08em","lineHeight":"1.28"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2","fontSize":"small"} -->
-<p class="has-text-align-center has-theme-2-color has-text-color has-link-color has-small-font-size" style="letter-spacing:0.08em;line-height:1.28;text-transform:uppercase"><?php esc_html_e('Our Selection', 'purple');?></p>
+<p class="has-text-align-center has-theme-2-color has-text-color has-link-color has-small-font-size" style="letter-spacing:0.08em;line-height:1.28;text-transform:uppercase"><?php esc_html_e('Our selection', 'purple');?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:heading {"style":{"typography":{"textAlign":"center"}}} -->
@@ -34,7 +34,7 @@
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-contrast"} -->
-<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop Cardigans', 'purple');?></a></div>
+<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop cardigans', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover -->
@@ -50,7 +50,7 @@
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-contrast"} -->
-<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop Sweaters', 'purple');?></a></div>
+<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop sweaters', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover -->
@@ -66,7 +66,7 @@
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-contrast"} -->
-<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop Socks', 'purple');?></a></div>
+<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop socks', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover -->
@@ -82,7 +82,7 @@
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-button-contrast"} -->
-<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop Beanies', 'purple');?></a></div>
+<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e('Shop beanies', 'purple');?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div></div>
 <!-- /wp:cover --></div>

@@ -14,7 +14,7 @@
 <!-- /wp:image -->
 
 <!-- wp:heading {"style":{"typography":{"textAlign":"center"},"spacing":{"margin":{"top":"var:preset|spacing|50"}}}} -->
-<h2 class="wp-block-heading has-text-align-center" style="margin-top:var(--wp--preset--spacing--50)"><?php esc_html_e('New arrival: Socks', 'purple');?></h2>
+<h2 class="wp-block-heading has-text-align-center" style="margin-top:var(--wp--preset--spacing--50)"><?php esc_html_e('New arrival: socks', 'purple');?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->

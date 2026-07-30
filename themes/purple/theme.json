@@ -2,15 +2,15 @@
 	"customTemplates": [
 		{
 			"name": "template-page-no-title",
-			"title": "Page No Title"
+			"title": "Page no title"
 		},
 		{
 			"name": "template-page-w-cover",
-			"title": "Page with Cover"
+			"title": "Page with cover"
 		},
 		{
 			"name": "template-blank",
-			"title": "Blank Template"
+			"title": "Blank template"
 		}
 	],
 	"settings": {

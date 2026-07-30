@@ -57,9 +57,9 @@
 <div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--20)">
 
 <!-- wp:navigation {"overlayMenu":"never","style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"fontSize":"small","layout":{"type":"flex","orientation":"horizontal"}} -->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Shipping & Returns', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Privacy Policy', 'purple' ); ?>","url":"#"} /-->
-<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Terms & Conditions', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Shipping & returns', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Privacy policy', 'purple' ); ?>","url":"#"} /-->
+<!-- wp:navigation-link {"label":"<?php esc_html_e( 'Terms & conditions', 'purple' ); ?>","url":"#"} /-->
 <!-- /wp:navigation -->
 
 <!-- wp:paragraph {"className":"underline-link","style":{"typography":{"textAlign":"left"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->

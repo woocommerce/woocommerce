@@ -16,7 +16,7 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:heading {"style":{"typography":{"textAlign":"center"}}} -->
-<h2 class="wp-block-heading has-text-align-center"><?php esc_html_e( 'Latest News', 'purple' ); ?></h2>
+<h2 class="wp-block-heading has-text-align-center"><?php esc_html_e( 'Latest news', 'purple' ); ?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:group {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}},"layout":{"type":"constrained"}} -->

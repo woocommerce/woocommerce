@@ -14,7 +14,7 @@
 <div class="wp-block-group alignfull is-style-default" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--70);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--70);padding-left:var(--wp--preset--spacing--50)"><!-- wp:columns {"verticalAlignment":"center","align":"wide"} -->
 <div class="wp-block-columns alignwide are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center","width":"25%"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:25%"><!-- wp:heading -->
-<h2 class="wp-block-heading"><?php esc_html_e( 'Our Bestsellers', 'purple' ); ?></h2>
+<h2 class="wp-block-heading"><?php esc_html_e( 'Our bestsellers', 'purple' ); ?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:buttons -->

@@ -67,7 +67,7 @@
 
 <!-- wp:accordion-item -->
 <div class="wp-block-accordion-item"><!-- wp:accordion-heading {"level":3,"style":{"border":{"bottom":{"color":"var:preset|color|theme-6","width":"1px"}},"spacing":{"padding":{"top":"0.94rem","bottom":"0.94rem"}}}} -->
-<h3 class="wp-block-accordion-heading has-icon has-icon-right" style="border-bottom-color:var(--wp--preset--color--theme-6);border-bottom-width:1px"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.94rem;padding-bottom:0.94rem"><span class="wp-block-accordion-heading__toggle-title"><?php esc_html_e( 'Additional Information', 'purple' ); ?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
+<h3 class="wp-block-accordion-heading has-icon has-icon-right" style="border-bottom-color:var(--wp--preset--color--theme-6);border-bottom-width:1px"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.94rem;padding-bottom:0.94rem"><span class="wp-block-accordion-heading__toggle-title"><?php esc_html_e( 'Additional information', 'purple' ); ?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
 <!-- /wp:accordion-heading -->
 
 <!-- wp:accordion-panel {"style":{"spacing":{"padding":{"top":"0","bottom":"0"},"blockGap":"0"}}} -->

@@ -22,7 +22,7 @@
 <!-- /wp:group -->
 
 <!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"600","lineHeight":"1.5"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2"} -->
-<p class="has-theme-2-color has-text-color has-link-color" style="font-style:normal;font-weight:600;line-height:1.5"><?php esc_html_e( 'In Store Collection', 'purple' ); ?></p>
+<p class="has-theme-2-color has-text-color has-link-color" style="font-style:normal;font-weight:600;line-height:1.5"><?php esc_html_e( 'In store collection', 'purple' ); ?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->
@@ -36,7 +36,7 @@
 <!-- /wp:group -->
 
 <!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"600","lineHeight":"1.5"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2"} -->
-<p class="has-theme-2-color has-text-color has-link-color" style="font-style:normal;font-weight:600;line-height:1.5"><?php esc_html_e( 'Gift Wrapping', 'purple' ); ?></p>
+<p class="has-theme-2-color has-text-color has-link-color" style="font-style:normal;font-weight:600;line-height:1.5"><?php esc_html_e( 'Gift wrapping', 'purple' ); ?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
@@ -54,7 +54,7 @@
 <!-- /wp:group -->
 
 <!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"600","lineHeight":"1.5"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2"} -->
-<p class="has-theme-2-color has-text-color has-link-color" style="font-style:normal;font-weight:600;line-height:1.5"><?php esc_html_e( 'Free Returns', 'purple' ); ?></p>
+<p class="has-theme-2-color has-text-color has-link-color" style="font-style:normal;font-weight:600;line-height:1.5"><?php esc_html_e( 'Free returns', 'purple' ); ?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->
@@ -68,7 +68,7 @@
 <!-- /wp:group -->
 
 <!-- wp:paragraph {"style":{"typography":{"fontStyle":"normal","fontWeight":"600","lineHeight":"1.5"},"elements":{"link":{"color":{"text":"var:preset|color|theme-2"}}}},"textColor":"theme-2"} -->
-<p class="has-theme-2-color has-text-color has-link-color" style="font-style:normal;font-weight:600;line-height:1.5"><?php esc_html_e( 'Secure Payments', 'purple' ); ?></p>
+<p class="has-theme-2-color has-text-color has-link-color" style="font-style:normal;font-weight:600;line-height:1.5"><?php esc_html_e( 'Secure payments', 'purple' ); ?></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
