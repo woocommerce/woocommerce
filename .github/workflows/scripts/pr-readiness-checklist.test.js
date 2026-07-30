@@ -93,6 +93,29 @@ test('classifyCheckRuns: a decided failure surfaces alongside a still-pending ta
     assert.equal(tasks[0].status, 'fail');
 });
 
+test('classifyCheckRuns: a completed failing matrix job is surfaced even when a sibling is still running', () => {
+    // E2E job 1 has completed and failed; E2E job 2 is still running.
+    // The failure should surface immediately (actionable now) while hasPending
+    // is true so the comment will update once job 2 settles.
+    const { tasks, hasPending } = classifyCheckRuns([
+        checkRun('E2E Tests - @woocommerce/plugin-woocommerce [e2e]', {
+            conclusion: 'failure',
+            html_url: 'https://github.com/woocommerce/woocommerce/actions/runs/1/job/1',
+        }),
+        checkRun('E2E Tests - @woocommerce/blocks [e2e]', {
+            status: 'in_progress',
+            conclusion: null,
+        }),
+    ]);
+    assert.equal(hasPending, true);
+    assert.equal(tasks.length, 1);
+    assert.equal(tasks[0].label, 'E2E tests');
+    assert.equal(tasks[0].status, 'fail');
+    assert.deepEqual(tasks[0].jobUrls, [
+        'https://github.com/woocommerce/woocommerce/actions/runs/1/job/1',
+    ]);
+});
+
 test('classifyCheckRuns: matches dynamic test job names by bracketed testType', () => {
     const { tasks } = classifyCheckRuns([
         checkRun('Unit Tests - @woocommerce/plugin-woocommerce [unit:php]'),

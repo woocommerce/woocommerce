@@ -82,12 +82,33 @@ function classifyCheckRuns(checkRuns) {
         }
 
         const undecided = relevant.some((run) => run.status !== 'completed');
+
         if (undecided) {
             hasPending = true;
+            // If some runs have already completed and failed, surface the failure
+            // immediately while other sibling runs are still in progress. The
+            // comment will update once all runs settle, but actionable failures
+            // are not hidden.
+            const completedFailingRuns = relevant.filter(
+                (run) => run.status === 'completed' && run.conclusion !== 'success'
+            );
+            if (completedFailingRuns.length > 0) {
+                const result = {
+                    label: task.label,
+                    status: 'fail',
+                    remediation: task.remediation,
+                    jobUrls: completedFailingRuns
+                        .slice(0, MAX_JOB_LINKS_PER_TASK)
+                        .map((run) => run.html_url),
+                };
+                return result;
+            }
+            // No completed failures yet, just pending.
             return null;
         }
 
         const failingRuns = relevant.filter((run) => run.conclusion !== 'success');
+
         const failing = failingRuns.length > 0;
 
         const result = {
