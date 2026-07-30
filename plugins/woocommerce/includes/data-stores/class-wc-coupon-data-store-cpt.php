@@ -63,6 +63,12 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * backward compatibility. To learn what the current save changed, use the third
 	 * argument of the woocommerce_coupon_object_updated_props action instead.
 	 *
+	 * Despite the deprecation, this property feeds the second argument of that
+	 * action and must not be removed without retiring the argument too. The third
+	 * argument is a semantic narrowing, not a drop-in replacement: consumers that
+	 * checked the accumulated list for properties changed by earlier saves will
+	 * not find them in the per-save list.
+	 *
 	 * @since 4.1.0
 	 * @deprecated 11.1.0 Use the third argument of woocommerce_coupon_object_updated_props.
 	 * @var array
@@ -270,7 +276,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @since 3.0.0
 	 */
 	private function update_post_meta( &$coupon ) {
-		$updated_props = array();
+		$current_save_props = array();
 
 		$meta_key_to_props = array(
 			'discount_type'              => 'discount_type',
@@ -322,9 +328,11 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 
 			if ( $updated ) {
 				$this->updated_props[] = $prop;
-				$updated_props[]       = $prop;
+				$current_save_props[]  = $prop;
 			}
 		}
+
+		$accumulated_props = $this->updated_props;
 
 		/**
 		 * Fires after a coupon's properties have been updated.
@@ -332,17 +340,21 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		 * The second argument keeps its historical behavior for backward compatibility:
 		 * it accumulates properties across every save performed through this data store
 		 * instance, so repeated saves of the same coupon object re-report earlier
-		 * saves' properties, with duplicates. Use the third argument to get only the
-		 * properties written by the current save.
+		 * saves' properties, with duplicates. When a plugin shares one store instance
+		 * across coupons by returning an object from the woocommerce_coupon_data_store
+		 * filter, the accumulated list can include properties written for a different
+		 * coupon than the first argument. Listeners that correlate the two arguments
+		 * should use the third argument, which lists only the properties written by
+		 * the current save of this coupon.
 		 *
-		 * @param WC_Coupon $coupon            Coupon object.
-		 * @param string[]  $accumulated_props Properties updated by all saves through this data store instance, with duplicates.
-		 * @param string[]  $updated_props     Properties updated by the current save only.
+		 * @param WC_Coupon $coupon             Coupon object.
+		 * @param string[]  $accumulated_props  Properties updated by all saves through this data store instance, with duplicates.
+		 * @param string[]  $current_save_props Properties updated by the current save only.
 		 *
 		 * @since 3.0.0
 		 * @since 11.1.0 The third argument, listing only the current save's properties, was added.
 		 */
-		do_action( 'woocommerce_coupon_object_updated_props', $coupon, $this->updated_props, $updated_props );
+		do_action( 'woocommerce_coupon_object_updated_props', $coupon, $accumulated_props, $current_save_props );
 	}
 
 	/**
