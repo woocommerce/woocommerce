@@ -45,17 +45,6 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
 	--wp--custom--outline-button-color: currentColor;
 }
 
-/*
- * Tighten margin when a heading follows another heading in post content.
- * The extra top-margin in theme.json signals a section break above; when
- * two headings are adjacent the subordinate one should sit closer to its
- * parent rather than read as a new section. The class is unwrapped from
- * :where() so we beat the theme.json-generated `:root :where(...)` rule
- * (which is 0,1,0 specificity from :root).
- */
-.wp-block-post-content :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
-	margin-top: var(--wp--style--block-gap);
-}
 
 /* ==========================================================================
    Forms
