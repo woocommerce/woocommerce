@@ -99,6 +99,14 @@ class CustomerAccountTest extends WP_UnitTestCase {
 		wp_set_current_user( $this->user_id );
 		update_option( 'show_avatars', 0 );
 
+		add_filter(
+			'pre_get_avatar_data',
+			function ( $args ) {
+				$args['url'] = 'https://example.com/custom-avatar.jpg';
+				return $args;
+			}
+		);
+
 		$markup = $this->render_customer_account(
 			'{"iconClass":"wc-block-customer-account__account-icon"}'
 		);
