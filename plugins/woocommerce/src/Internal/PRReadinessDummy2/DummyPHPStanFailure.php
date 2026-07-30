@@ -24,3 +24,4 @@ class DummyPHPStanFailure {
 		return 42;
 	}
 }
+// Final trivial edit for clear->clear transition
