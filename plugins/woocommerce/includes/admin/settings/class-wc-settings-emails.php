@@ -644,10 +644,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				$post_id_for_template = $post_id;
 			}
 		}
-		// Create URL for email editor template mode.
+		// The email editor's template mode opens through an email post's
+		// editor session, so the URL requires a post ID. When no post exists,
+		// the URL stays null and the client creates a post on demand, building
+		// the URL itself from the template ID passed below.
+		$email_template_id = get_stylesheet() . '//' . WooEmailTemplate::TEMPLATE_SLUG;
 		$edit_template_url = null;
 		if ( $post_id_for_template ) {
-			$email_template_id = get_stylesheet() . '//' . WooEmailTemplate::TEMPLATE_SLUG;
 			$edit_template_url = admin_url( 'post.php?post=' . $post_id_for_template . '&action=edit&template=' . $email_template_id );
 		}
 
@@ -656,6 +659,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			id="wc_settings_email_listing_slotfill" class="wc-settings-prevent-change-event woocommerce-email-listing-listview"
 			data-email-types="<?php echo esc_attr( wp_json_encode( $email_types ) ); ?>"
 			data-edit-template-url="<?php echo esc_attr( $edit_template_url ); ?>"
+			data-email-template-id="<?php echo esc_attr( $email_template_id ); ?>"
 		>
 			<div style="
 			display: flex;
