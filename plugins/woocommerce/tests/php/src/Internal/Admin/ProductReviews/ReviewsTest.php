@@ -151,6 +151,32 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `apply_legacy_reviews_per_page_filter` re-applies the legacy `edit_comments_per_page` filter.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::apply_legacy_reviews_per_page_filter()
+	 *
+	 * @return void
+	 */
+	public function test_apply_legacy_reviews_per_page_filter(): void {
+		$reviews = wc_get_container()->get( Reviews::class );
+
+		// With no legacy filter attached, the value passes through unchanged.
+		$this->assertSame( 20, $reviews->apply_legacy_reviews_per_page_filter( 20 ) );
+
+		// With a legacy `edit_comments_per_page` filter attached, its value is applied.
+		$legacy = static function () {
+			return 45;
+		};
+		add_filter( 'edit_comments_per_page', $legacy );
+
+		try {
+			$this->assertSame( 45, $reviews->apply_legacy_reviews_per_page_filter( 20 ) );
+		} finally {
+			remove_filter( 'edit_comments_per_page', $legacy );
+		}
+	}
+
+	/**
 	 * @testdox `get_pending_count_bubble` will return the HTML for the pending reviews (awaiting moderation).
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_pending_count_bubble()

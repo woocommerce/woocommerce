@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\ProductReviews;
 
+use Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews;
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable;
 use Generator;
 use ReflectionClass;
@@ -1885,39 +1886,37 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `get_per_page` honors the dedicated filter and still applies the legacy `edit_comments_per_page` filter, which keeps precedence.
+	 * @testdox `get_per_page` and the Screen Options input both reflect the legacy `edit_comments_per_page` filter, so they never diverge.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::get_per_page()
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::apply_legacy_reviews_per_page_filter()
 	 *
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_per_page_applies_legacy_comments_filter() {
+	public function test_get_per_page_bridges_legacy_comments_filter() {
+		// Instantiating Reviews registers the bridge that re-applies `edit_comments_per_page` onto the dedicated
+		// `edit_product_reviews_per_page` filter.
+		wc_get_container()->get( Reviews::class );
+
 		$list_table = $this->get_reviews_list_table();
 		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_per_page' );
 		$method->setAccessible( true );
 
-		$dedicated = static function () {
-			return 30;
-		};
-		$legacy    = static function () {
+		$legacy = static function () {
 			return 45;
 		};
-
-		add_filter( 'edit_product_reviews_per_page', $dedicated );
 		add_filter( 'edit_comments_per_page', $legacy );
 
 		try {
-			// The legacy `edit_comments_per_page` filter is still applied for backward compatibility, and keeps
-			// precedence over the dedicated filter (it is applied last).
+			// The list reflects the legacy filter (it keeps precedence)...
 			$this->assertSame( 45, $method->invoke( $list_table ) );
 
-			// With only the dedicated `edit_product_reviews_per_page` filter in place, it is honored.
-			remove_filter( 'edit_comments_per_page', $legacy );
-			$this->assertSame( 30, $method->invoke( $list_table ) );
+			// ...and so does the Screen Options input, which WordPress core renders by applying the same
+			// `edit_product_reviews_per_page` filter. Both run through the bridge, so they can never diverge.
+			$this->assertSame( 45, (int) apply_filters( Reviews::PER_PAGE_USER_OPTION_KEY, 20 ) );
 		} finally {
-			// Remove the filters in `finally` so a failed assertion cannot leak them into subsequent tests.
-			remove_filter( 'edit_product_reviews_per_page', $dedicated );
+			// Remove the test filter in `finally` so a failed assertion cannot leak it into subsequent tests.
 			remove_filter( 'edit_comments_per_page', $legacy );
 		}
 	}

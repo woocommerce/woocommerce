@@ -64,6 +64,10 @@ class Reviews {
 		add_action( 'admin_notices', array( $this, 'display_notices' ) );
 
 		add_filter( 'set_screen_option_' . self::PER_PAGE_USER_OPTION_KEY, array( $this, 'set_reviews_per_page_option' ), 10, 3 );
+
+		// Bridge the legacy `edit_comments_per_page` filter onto the dedicated per-page filter, so both the reviews
+		// list and the Screen Options input stay in sync (WordPress core runs the same filter for each).
+		add_filter( self::PER_PAGE_USER_OPTION_KEY, array( $this, 'apply_legacy_reviews_per_page_filter' ) );
 	}
 
 	/**
@@ -632,6 +636,28 @@ class Reviews {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Bridges the legacy `edit_comments_per_page` filter onto the dedicated reviews per-page filter.
+	 *
+	 * The reviews list historically took its page size from core's `edit_comments_per_page` filter. Re-applying it
+	 * through {@see Reviews::PER_PAGE_USER_OPTION_KEY} keeps existing integrations working and — since core runs that
+	 * same filter when rendering the Screen Options input — keeps the list and the input in agreement. It is applied
+	 * last (and not re-bounded), so it keeps precedence, which is the backward-compatibility case being preserved.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param int $per_page Number of reviews to show per page.
+	 * @return int
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function apply_legacy_reviews_per_page_filter( $per_page ): int {
+		// Re-applies WordPress core's own `edit_comments_per_page` filter for backward compatibility. It is a core
+		// hook, not a WooCommerce-owned one, so it is not documented as a WooCommerce hook here.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		return (int) apply_filters( 'edit_comments_per_page', $per_page );
 	}
 
 	/**

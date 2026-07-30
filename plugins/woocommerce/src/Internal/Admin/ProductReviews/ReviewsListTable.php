@@ -121,50 +121,14 @@ class ReviewsListTable extends WP_List_Table {
 	/**
 	 * Returns the number of items to show per page.
 	 *
-	 * Reads the dedicated {@see Reviews::PER_PAGE_USER_OPTION_KEY} user option, which is set through the
-	 * "Number of reviews per page" control in the screen options, bounded to `1`-`999`
-	 * (see {@see Reviews::set_reviews_per_page_option()}). It then re-applies WordPress core's
-	 * `edit_comments_per_page` filter for backward compatibility: this list previously derived its page size via
-	 * {@see WP_List_Table::get_items_per_page()} using that option key, so existing integrations — including the
-	 * workaround shared in https://github.com/woocommerce/woocommerce/issues/55944 — hook `edit_comments_per_page`
-	 * to size the reviews list.
-	 *
-	 * `edit_comments_per_page` is WordPress core's own filter for the Comments admin screen; it is not scoped to
-	 * Product Reviews, so a callback registered against it also runs here (and vice versa) — that coupling predates
-	 * this change. It is applied last so it keeps precedence over the dedicated option/filter for those existing
-	 * integrations, and its return value is intentionally not re-bounded to `1`-`999`: doing so would break
-	 * integrations that rely on it to set a page size outside that range, which is the exact backward-compatibility
-	 * case this bridge exists to preserve.
+	 * Reads the dedicated {@see Reviews::PER_PAGE_USER_OPTION_KEY} option. The legacy `edit_comments_per_page`
+	 * backward-compatibility filter is bridged onto that option's filter in {@see Reviews}, so the value returned
+	 * here matches what the Screen Options input renders (WordPress core runs the same filter for both).
 	 *
 	 * @return int Customized per-page value if available, or 20 as the default.
 	 */
 	protected function get_per_page() : int {
-		/**
-		 * Filters the number of product reviews shown per page on the Product Reviews list table.
-		 *
-		 * This dedicated filter is induced by {@see WP_List_Table::get_items_per_page()} from the
-		 * {@see Reviews::PER_PAGE_USER_OPTION_KEY} option key passed below; it is distinct from the legacy
-		 * `edit_comments_per_page` filter re-applied further down for backward compatibility.
-		 *
-		 * @since 11.1.0
-		 *
-		 * @param int $per_page Number of reviews to show per page.
-		 */
-		$per_page = $this->get_items_per_page( Reviews::PER_PAGE_USER_OPTION_KEY );
-
-		/**
-		 * Filters the number of product reviews shown per page on the Product Reviews list table.
-		 *
-		 * Retained for backward compatibility with integrations that sized this list through WordPress core's
-		 * `edit_comments_per_page` filter before the dedicated `edit_product_reviews_per_page` option existed.
-		 *
-		 * @since 6.7.0
-		 *
-		 * @param int $per_page Number of reviews to show per page.
-		 */
-		$per_page = (int) apply_filters( 'edit_comments_per_page', $per_page );
-
-		return $per_page;
+		return $this->get_items_per_page( Reviews::PER_PAGE_USER_OPTION_KEY );
 	}
 
 	/**
