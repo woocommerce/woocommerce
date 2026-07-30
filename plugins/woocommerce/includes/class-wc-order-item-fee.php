@@ -92,12 +92,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 			return false;
 		}
 		// Use regular calculation unless the fee is negative.
-<<<<<<< HEAD
 		if ( 0 <= $this->get_total() ) {
-			unset( $calculate_tax_for['prices_include_tax'] );
-=======
-		if ( 0 <= $total ) {
->>>>>>> 092c641ef4 (Revert the fixed end-prices order calculation changes (#63744 and #65535) (#67142))
 			return parent::calculate_taxes( $calculate_tax_for );
 		}
 
