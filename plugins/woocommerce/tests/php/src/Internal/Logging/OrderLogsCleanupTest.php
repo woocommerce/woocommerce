@@ -638,22 +638,28 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An in-progress extended cleanup doesn't block scheduling the next follow-up run.
+	 * @testdox An in-progress extended cleanup run still schedules the next follow-up run.
 	 */
 	public function test_extended_cleanup_schedules_a_follow_up_while_running(): void {
-		$schedule = new \ReflectionMethod( OrderLogsCleanupHelper::class, 'schedule_extended_cleanup' );
-		$schedule->setAccessible( true );
+		$this->setup_hpos_and_reset_container( true );
 
-		$schedule->invoke( $this->sut_cleanup_helper );
+		// Two full batches, so the second run still has a batch left to hand over.
+		for ( $i = 0; $i < 2 * OrderLogsCleanupHelper::MAX_ORDERS_PER_RUN; $i++ ) {
+			$order = wc_create_order();
+			$order->set_date_created( strtotime( '-5 days' ) );
+			$order->add_meta_data( '_debug_log_source', 'place-order-debug-running-' . $i, true );
+			$order->save();
+		}
+
+		$this->sut_cleanup_helper->cleanup();
 		$first = $this->get_pending_extended_cleanup_ids();
 		$this->assertCount( 1, $first );
 
-		// Simulate the queue runner picking up the action: cleanup() then runs as its callback.
+		// Simulate the queue runner picking the action up, then run it.
 		\ActionScheduler::store()->log_execution( current( $first ) );
+		$this->sut_cleanup_helper->cleanup();
 
-		$schedule->invoke( $this->sut_cleanup_helper );
 		$second = $this->get_pending_extended_cleanup_ids();
-
 		$this->assertCount( 1, $second, 'A follow-up run should be scheduled while the current one is in progress' );
 		$this->assertNotEquals( current( $first ), current( $second ) );
 
@@ -765,8 +771,8 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Initialize HPOS and reset the DI container resolutions
-	 * (resetting the container is needed because the tested class checks for HPOS activation
-	 * only once when the DI container first retrieves it).
+	 * (resetting the container is needed because OrderLogsDeletionProcessor checks for HPOS
+	 * activation only once when the DI container first retrieves it).
 	 *
 	 * @param bool $enable_hpos Test with HPOS active or not.
 	 */

@@ -6,9 +6,9 @@ namespace Automattic\WooCommerce\Internal\Logging;
 
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
 use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Utilities\LoggingUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Logger;
 
 /**
@@ -39,34 +39,6 @@ class OrderLogsCleanupHelper {
 	private const EXTENDED_CLEANUP_DELAY = 5 * MINUTE_IN_SECONDS;
 
 	/**
-	 * True if HPOS is enabled.
-	 *
-	 * @var bool
-	 */
-	private bool $hpos_in_use = false;
-
-	/**
-	 * True if HPOS is disabled and the orders data store in use is the old CPT one.
-	 *
-	 * @var bool
-	 */
-	private bool $cpt_in_use = false;
-
-	/**
-	 * True once the orders data store in use has been determined.
-	 *
-	 * @var bool
-	 */
-	private bool $order_store_resolved = false;
-
-	/**
-	 * The instance of CustomOrdersTableController to use.
-	 *
-	 * @var CustomOrdersTableController
-	 */
-	private CustomOrdersTableController $hpos_controller;
-
-	/**
 	 * The instance of DataSynchronizer to use.
 	 *
 	 * @var DataSynchronizer
@@ -79,36 +51,14 @@ class OrderLogsCleanupHelper {
 	 *
 	 * @internal
 	 *
-	 * @param CustomOrdersTableController $hpos_controller The instance of CustomOrdersTableController to use.
-	 * @param DataSynchronizer            $data_synchronizer The instance of DataSynchronizer to use.
+	 * @param DataSynchronizer $data_synchronizer The instance of DataSynchronizer to use.
 	 *
 	 * @return void
 	 */
-	final public function init( CustomOrdersTableController $hpos_controller, DataSynchronizer $data_synchronizer ): void {
-		$this->hpos_controller   = $hpos_controller;
+	final public function init( DataSynchronizer $data_synchronizer ): void {
 		$this->data_synchronizer = $data_synchronizer;
 
 		add_action( self::EXTENDED_CLEANUP_HOOK, array( $this, 'cleanup' ) );
-	}
-
-	/**
-	 * Determine which orders data store is in use.
-	 *
-	 * Resolved on demand rather than in `init()`: the container resolves this class while
-	 * WooCommerce is still booting, and loading the orders data store that early would run
-	 * the `woocommerce_order_data_store` filter before extensions have registered.
-	 */
-	private function resolve_order_store(): void {
-		if ( $this->order_store_resolved ) {
-			return;
-		}
-
-		$this->hpos_in_use = $this->hpos_controller->custom_orders_table_usage_is_enabled();
-		if ( ! $this->hpos_in_use ) {
-			$this->cpt_in_use = \WC_Order_Data_Store_CPT::class === \WC_Data_Store::load( 'order' )->get_current_class_name();
-		}
-
-		$this->order_store_resolved = true;
 	}
 
 	/**
@@ -132,14 +82,11 @@ class OrderLogsCleanupHelper {
 	/**
 	 * Run all cleanup tasks: dangling order meta and old log files.
 	 *
-	 * Also registered as the callback for the follow-up run scheduled by
-	 * `schedule_extended_cleanup()`.
+	 * Also the callback for the extended cleanup action.
 	 *
 	 * @since 10.7.0
 	 */
 	public function cleanup(): void {
-		$this->resolve_order_store();
-
 		$max_age = $this->get_max_age_in_seconds();
 
 		if ( 0 === $max_age ) {
@@ -218,11 +165,12 @@ class OrderLogsCleanupHelper {
 				'group'    => 'woocommerce',
 				'status'   => \ActionScheduler_Store::STATUS_PENDING,
 				'per_page' => 1,
+				'orderby'  => 'none',
 			),
 			'ids'
 		);
 
-		if ( ! empty( $pending ) ) {
+		if ( $pending ) {
 			return;
 		}
 
@@ -243,8 +191,6 @@ class OrderLogsCleanupHelper {
 		if ( empty( $items ) ) {
 			return false;
 		}
-
-		$this->resolve_order_store();
 
 		$logger = wc_get_logger();
 		if ( $logger instanceof WC_Logger ) {
@@ -267,19 +213,20 @@ class OrderLogsCleanupHelper {
 	 * @return array Associative array of order ID => log source name.
 	 */
 	private function get_dangling_orders( int $max_age ): array {
-		if ( ! $this->hpos_in_use && ! $this->cpt_in_use ) {
+		if ( OrderUtil::unknown_orders_data_store_in_use() ) {
 			return array();
 		}
 
 		global $wpdb;
 
+		$hpos_in_use = OrderUtil::custom_orders_table_usage_is_enabled();
 		$cutoff_date = gmdate( 'Y-m-d H:i:s', time() - $max_age );
 
-		$meta_table  = $this->hpos_in_use ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta;
-		$order_table = $this->hpos_in_use ? "{$wpdb->prefix}wc_orders" : $wpdb->posts;
-		$id_column   = $this->hpos_in_use ? 'order_id' : 'post_id';
-		$type_column = $this->hpos_in_use ? 'type' : 'post_type';
-		$date_column = $this->hpos_in_use ? 'date_created_gmt' : 'post_date_gmt';
+		$meta_table  = $hpos_in_use ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta;
+		$order_table = $hpos_in_use ? "{$wpdb->prefix}wc_orders" : $wpdb->posts;
+		$id_column   = $hpos_in_use ? 'order_id' : 'post_id';
+		$type_column = $hpos_in_use ? 'type' : 'post_type';
+		$date_column = $hpos_in_use ? 'date_created_gmt' : 'post_date_gmt';
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results(
@@ -314,17 +261,19 @@ class OrderLogsCleanupHelper {
 	private function delete_debug_log_meta_entries( array $order_ids ): bool {
 		global $wpdb;
 
+		$hpos_in_use = OrderUtil::custom_orders_table_usage_is_enabled();
+
 		$tables = array(
 			array(
-				'table'     => $this->hpos_in_use ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta,
-				'id_column' => $this->hpos_in_use ? 'order_id' : 'post_id',
+				'table'     => $hpos_in_use ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta,
+				'id_column' => $hpos_in_use ? 'order_id' : 'post_id',
 			),
 		);
 
 		if ( $this->data_synchronizer->data_sync_is_enabled() ) {
 			$tables[] = array(
-				'table'     => $this->hpos_in_use ? $wpdb->postmeta : "{$wpdb->prefix}wc_orders_meta",
-				'id_column' => $this->hpos_in_use ? 'post_id' : 'order_id',
+				'table'     => $hpos_in_use ? $wpdb->postmeta : "{$wpdb->prefix}wc_orders_meta",
+				'id_column' => $hpos_in_use ? 'post_id' : 'order_id',
 			);
 		}
 
