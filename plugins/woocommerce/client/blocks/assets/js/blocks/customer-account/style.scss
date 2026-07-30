@@ -69,7 +69,7 @@
 		padding-left: em($gap-smallest);
 	}
 
-	:where(.icon),
+	:where(.wc-block-customer-account__visual > svg),
 	.wc-block-customer-account__account-icon {
 		display: block;
 		width: em($grid-unit-30);
