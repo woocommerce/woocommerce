@@ -1029,7 +1029,10 @@ test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 		await expect( page.locator( 'input.variation_id' ) ).toHaveValue(
 			/^[1-9][0-9]*$/
 		);
-		const addToCartButton = page.locator( '.single_add_to_cart_button' );
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+			exact: true,
+		} );
 		await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 		await addToCartButton.click();
 
