@@ -208,7 +208,7 @@ const Edit = ( {
 				template: templateSlug ?? attributes.template,
 				align: attributes.align ?? 'wide',
 			} ),
-		[ attributes.align, attributes.template, setAttributes ]
+		[ attributes.align, attributes.template, setAttributes, templateSlug ]
 	);
 
 	const { getDescription, getSkeleton, blockifyConfig } =

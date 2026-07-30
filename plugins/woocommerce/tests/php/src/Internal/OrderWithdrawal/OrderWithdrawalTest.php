@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Tests\Internal\OrderWithdrawal;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormState;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormView;
+use WC_Order;
+use WC_Rate_Limiter;
 use WC_Unit_Test_Case;
 
 /**
@@ -13,10 +15,12 @@ use WC_Unit_Test_Case;
  */
 class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
-	private const FEATURE_OPTION      = 'woocommerce_feature_order_withdrawal_enabled';
-	private const ENDPOINT_OPTION     = 'woocommerce_myaccount_order_withdrawal_endpoint';
-	private const FLUSH_QUEUE_OPTION  = 'woocommerce_queue_flush_rewrite_rules';
-	private const MISSING_OPTION_MARK = '__woocommerce_order_withdrawal_missing_option__';
+	private const FEATURE_OPTION                      = 'woocommerce_feature_order_withdrawal_enabled';
+	private const ENDPOINT_OPTION                     = 'woocommerce_myaccount_order_withdrawal_endpoint';
+	private const FLUSH_QUEUE_OPTION                  = 'woocommerce_queue_flush_rewrite_rules';
+	private const MISSING_OPTION_MARK                 = '__woocommerce_order_withdrawal_missing_option__';
+	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
+	private const RATE_LIMIT_PREFIX                   = 'order_withdrawal_';
 
 	/**
 	 * The System Under Test.
@@ -47,6 +51,20 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	private bool $had_request_method = false;
 
 	/**
+	 * Original REMOTE_ADDR value.
+	 *
+	 * @var string|null
+	 */
+	private ?string $original_remote_addr = null;
+
+	/**
+	 * Whether REMOTE_ADDR existed before the test.
+	 *
+	 * @var bool
+	 */
+	private bool $had_remote_addr = false;
+
+	/**
 	 * Original WooCommerce session.
 	 *
 	 * @var \WC_Session|null
@@ -75,6 +93,13 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	private $original_flush_queue_option;
 
 	/**
+	 * Created order IDs.
+	 *
+	 * @var int[]
+	 */
+	private array $created_order_ids = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -84,6 +109,8 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$this->original_post               = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$this->had_request_method          = filter_has_var( INPUT_SERVER, 'REQUEST_METHOD' );
 		$this->original_request_method     = $this->had_request_method ? filter_input( INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) : null;
+		$this->had_remote_addr             = array_key_exists( 'REMOTE_ADDR', $_SERVER );
+		$this->original_remote_addr        = $this->had_remote_addr ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : null;
 		$this->original_session            = WC()->session;
 		$this->original_feature_option     = get_option( self::FEATURE_OPTION, self::MISSING_OPTION_MARK );
 		$this->original_endpoint_option    = get_option( self::ENDPOINT_OPTION, self::MISSING_OPTION_MARK );
@@ -95,6 +122,8 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 		$_POST                     = array();
 		$_SERVER['REQUEST_METHOD'] = 'GET';
+		$_SERVER['REMOTE_ADDR']    = '203.0.113.10';
+		$this->clear_order_withdrawal_rate_limits();
 		$this->disable_feature();
 		delete_option( self::ENDPOINT_OPTION );
 		delete_option( self::FLUSH_QUEUE_OPTION );
@@ -113,10 +142,18 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			unset( $_SERVER['REQUEST_METHOD'] );
 		}
 
+		if ( $this->had_remote_addr ) {
+			$_SERVER['REMOTE_ADDR'] = (string) $this->original_remote_addr;
+		} else {
+			unset( $_SERVER['REMOTE_ADDR'] );
+		}
+
 		$this->restore_option( self::FEATURE_OPTION, $this->original_feature_option );
 		$this->restore_option( self::ENDPOINT_OPTION, $this->original_endpoint_option );
 		$this->restore_option( self::FLUSH_QUEUE_OPTION, $this->original_flush_queue_option );
 		wc_clear_notices();
+		$this->clear_order_withdrawal_rate_limits();
+		$this->delete_created_orders();
 		WC()->session = $this->original_session;
 
 		parent::tearDown();
@@ -159,9 +196,363 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 */
 	public function provide_valid_submission_actions(): array {
 		return array(
-			'review action'  => array( OrderWithdrawalFormProcessor::ACTION_REVIEW, 'review' ),
-			'confirm action' => array( OrderWithdrawalFormProcessor::ACTION_CONFIRM, 'confirmation' ),
+			'review action' => array( OrderWithdrawalFormProcessor::ACTION_REVIEW, 'review' ),
 		);
+	}
+
+	/**
+	 * @testdox Should add an order note and send emails when a confirmed submission matches an order exactly.
+	 */
+	public function test_process_current_request_adds_note_and_sends_emails_for_exact_order_match(): void {
+		$order   = $this->create_order_for_form_data();
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state = $this->sut->process_current_request();
+
+			$this->assertSame( 'confirmation', $state->screen, 'Matched confirm submissions should reach the confirmation screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
+			$this->assert_mail_sent_to( 'jane@example.test', $capture['captures'] );
+			$this->assert_mail_sent_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+			$merchant_email = $this->get_captured_mail_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+			$this->assertStringContainsString( str_replace( '&', '&amp;', $order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should link to the matched order.' );
+			$this->assertStringContainsString( 'View matched order', (string) $merchant_email['message'], 'The merchant email should include clear link text for the matched order.' );
+			$this->assertTrue( $this->order_has_note_containing( $order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The matched order should receive a withdrawal note.' );
+			$this->assertTrue( $this->order_has_note_containing( $order, 'Items requested for withdrawal: Line item 1' ), 'Specific-item details should be included in the order note.' );
+			$this->assert_order_withdrawal_requested( $order );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should match orders by custom order number instead of assuming the order number is the ID.
+	 */
+	public function test_process_current_request_matches_custom_order_number(): void {
+		$order               = $this->create_order_for_form_data();
+		$custom_order_number = 'CUSTOM-1001';
+		$capture             = $this->capture_wp_mail();
+		$filter              = static function ( $order_number, $filtered_order ) use ( $order, $custom_order_number ) {
+			if ( $filtered_order instanceof WC_Order && $order->get_id() === $filtered_order->get_id() ) {
+				return $custom_order_number;
+			}
+
+			return $order_number;
+		};
+
+		add_filter( 'woocommerce_order_number', $filter, 10, 2 );
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => $custom_order_number )
+			);
+
+			$state = $this->sut->process_current_request();
+
+			$this->assertSame( 'confirmation', $state->screen, 'Custom order number submissions should reach the confirmation screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
+			$this->assertTrue( $this->order_has_note_containing( $order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The custom-number matched order should receive a withdrawal note.' );
+			$this->assert_order_withdrawal_requested( $order );
+		} finally {
+			remove_filter( 'woocommerce_order_number', $filter, 10 );
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should match normalized submitted order numbers only to the intended order.
+	 */
+	public function test_process_current_request_matches_normalized_order_number_to_intended_order(): void {
+		$target_order = $this->create_order_for_form_data();
+		$wrong_order  = $this->create_order_for_form_data();
+		$capture      = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '#' . $target_order->get_id() )
+			);
+
+			$state          = $this->sut->process_current_request();
+			$merchant_email = $this->get_captured_mail_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+
+			$this->assertSame( 'confirmation', $state->screen, 'Normalized order number submissions should reach the confirmation screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
+			$this->assertStringContainsString( str_replace( '&', '&amp;', $target_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should link to the intended order.' );
+			$this->assertStringNotContainsString( str_replace( '&', '&amp;', $wrong_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should not link to the wrong order.' );
+			$this->assertTrue( $this->order_has_note_containing( $target_order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The intended order should receive a withdrawal note.' );
+			$this->assertFalse( $this->order_has_note_containing( $wrong_order, 'Order withdrawal requested' ), 'The wrong order should not receive a withdrawal note.' );
+			$this->assert_order_withdrawal_requested( $target_order );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should not match an order that shares the email but has a different billing name.
+	 */
+	public function test_process_current_request_matches_only_order_with_same_email_and_billing_name(): void {
+		$target_order         = $this->create_order_for_form_data();
+		$different_name_order = $this->create_order_for_form_data(
+			array(
+				OrderWithdrawalFormProcessor::FIELD_FIRST_NAME => 'Janet',
+				OrderWithdrawalFormProcessor::FIELD_LAST_NAME  => 'Smith',
+			)
+		);
+		$custom_order_number  = 'CUSTOM-1001';
+		$capture              = $this->capture_wp_mail();
+		$filter               = static function ( $order_number, $filtered_order ) use ( $target_order, $different_name_order, $custom_order_number ) {
+			if (
+				$filtered_order instanceof WC_Order
+				&& in_array( $filtered_order->get_id(), array( $target_order->get_id(), $different_name_order->get_id() ), true )
+			) {
+				return $custom_order_number;
+			}
+
+			return $order_number;
+		};
+
+		add_filter( 'woocommerce_order_number', $filter, 10, 2 );
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => $custom_order_number )
+			);
+
+			$state          = $this->sut->process_current_request();
+			$merchant_email = $this->get_captured_mail_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+
+			$this->assertSame( 'confirmation', $state->screen, 'Matching submissions should reach the confirmation screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
+			$this->assertStringContainsString( str_replace( '&', '&amp;', $target_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should link to the intended order.' );
+			$this->assertStringNotContainsString( str_replace( '&', '&amp;', $different_name_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should not link to the order with a different billing name.' );
+			$this->assertTrue( $this->order_has_note_containing( $target_order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The intended order should receive a withdrawal note.' );
+			$this->assertFalse( $this->order_has_note_containing( $different_name_order, 'Order withdrawal requested' ), 'The order with a different billing name should not receive a withdrawal note.' );
+			$this->assert_order_withdrawal_requested( $target_order );
+		} finally {
+			remove_filter( 'woocommerce_order_number', $filter, 10 );
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should reject duplicate withdrawal requests for an already flagged matched order.
+	 */
+	public function test_process_current_request_rejects_duplicate_withdrawal_for_matched_order(): void {
+		$order = $this->create_order_for_form_data();
+		$order->update_meta_data( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, 'yes' );
+		$order->save_meta_data();
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state         = $this->sut->process_current_request();
+			$error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'review', $state->screen, 'Duplicate matched submissions should return to the review screen.' );
+			$this->assertCount( 1, $error_notices, 'Duplicate matched submissions should add one error notice.' );
+			$this->assertStringContainsString( 'already been submitted for this order', $error_notices[0]['notice'], 'The notice should explain that the order already has a withdrawal request.' );
+			$this->assertCount( 0, $capture['captures'], 'Duplicate matched submissions should not send notification emails.' );
+			$this->assertFalse( $this->order_has_note_containing( $order, 'Order withdrawal requested' ), 'Duplicate matched submissions should not add another order note.' );
+
+			wc_clear_notices();
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$second_state         = $this->sut->process_current_request();
+			$second_error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'review', $second_state->screen, 'Duplicate matched submissions should not leave behind a rate limit.' );
+			$this->assertCount( 1, $second_error_notices, 'The second duplicate submission should add only the duplicate-order error notice.' );
+			$this->assertStringContainsString( 'already been submitted for this order', $second_error_notices[0]['notice'], 'The released rate limit should allow duplicate-order validation to run again.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should submit and send emails when adding the matched order note fails.
+	 */
+	public function test_process_current_request_treats_order_note_failure_as_best_effort(): void {
+		$order           = $this->create_order_for_form_data();
+		$capture         = $this->capture_wp_mail();
+		$fail_order_note = static function ( $commentdata ) {
+			if ( is_array( $commentdata ) && 'order_note' === ( $commentdata['comment_type'] ?? '' ) ) {
+				throw new \RuntimeException( 'Order note insert failed.' );
+			}
+
+			return $commentdata;
+		};
+
+		add_filter( 'preprocess_comment', $fail_order_note, 10, 1 );
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state = $this->sut->process_current_request();
+
+			$this->assertSame( 'confirmation', $state->screen, 'Order note failures should not block submission.' );
+			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should still be sent.' );
+			$this->assert_mail_sent_to( 'jane@example.test', $capture['captures'] );
+			$this->assert_mail_sent_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+			$this->assert_order_withdrawal_requested( $order );
+		} finally {
+			remove_filter( 'preprocess_comment', $fail_order_note, 10 );
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should send emails without adding a note when no exact order match is found.
+	 */
+	public function test_process_current_request_sends_emails_without_note_when_order_does_not_match(): void {
+		$order   = $this->create_order_for_form_data(
+			array(
+				OrderWithdrawalFormProcessor::FIELD_EMAIL => 'different@example.test',
+				OrderWithdrawalFormProcessor::FIELD_EMAIL_CONFIRMATION => 'different@example.test',
+			)
+		);
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state = $this->sut->process_current_request();
+
+			$this->assertSame( 'confirmation', $state->screen, 'Unmatched confirm submissions should still reach the confirmation screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent even without a match.' );
+			$this->assert_mail_sent_to( 'jane@example.test', $capture['captures'] );
+			$this->assert_mail_sent_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+			$this->assertFalse( $this->order_has_note_containing( $order, 'Order withdrawal requested' ), 'An order note should not be added when the identifying data does not all match.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should keep the user on review with an error notice when notification emails fail.
+	 */
+	public function test_process_current_request_surfaces_error_when_emails_fail(): void {
+		$capture = $this->capture_wp_mail( false );
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '999999999' )
+			);
+
+			$state         = $this->sut->process_current_request();
+			$error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'review', $state->screen, 'Email failures should keep the submitted details on the review screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The processor should attempt both notification emails before surfacing the failure.' );
+			$this->assertNotEmpty( $error_notices, 'Email failures should add an error notice.' );
+			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $error_notices[0]['notice'], 'The error notice should tell the user the submission did not complete.' );
+
+			wc_clear_notices();
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '999999999' )
+			);
+
+			$second_state         = $this->sut->process_current_request();
+			$second_error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'review', $second_state->screen, 'Email failures should not leave behind a rate limit.' );
+			$this->assertCount( 4, $capture['captures'], 'The second failed submission should attempt notification emails again.' );
+			$this->assertNotEmpty( $second_error_notices, 'The second email failure should add an error notice.' );
+			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $second_error_notices[0]['notice'], 'The released rate limit should allow email delivery to be attempted again.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should rate limit confirmed submissions by IP address before sending emails.
+	 */
+	public function test_process_current_request_rate_limits_confirmed_submissions_by_ip_address(): void {
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '999999998' )
+			);
+
+			$first_state = $this->sut->process_current_request();
+
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array(
+					OrderWithdrawalFormProcessor::FIELD_EMAIL              => 'another@example.test',
+					OrderWithdrawalFormProcessor::FIELD_EMAIL_CONFIRMATION => 'another@example.test',
+					OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER       => '999999999',
+				)
+			);
+
+			$second_state  = $this->sut->process_current_request();
+			$error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'confirmation', $first_state->screen, 'The first confirmed submission should complete.' );
+			$this->assertSame( 'review', $second_state->screen, 'A repeated submission from the same IP should return to the review screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The rate-limited submission should not send additional notification emails.' );
+			$this->assertNotEmpty( $error_notices, 'Rate-limited submissions should add an error notice.' );
+			$this->assertStringContainsString( 'Please wait before submitting another withdrawal request.', $error_notices[0]['notice'], 'The notice should ask the customer to wait.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should rate limit confirmed submissions by email before sending emails.
+	 */
+	public function test_process_current_request_rate_limits_confirmed_submissions_by_email(): void {
+		$capture = $this->capture_wp_mail();
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '999999998' )
+			);
+
+			$first_state = $this->sut->process_current_request();
+
+			$_SERVER['REMOTE_ADDR'] = '203.0.113.11';
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '999999999' )
+			);
+
+			$second_state  = $this->sut->process_current_request();
+			$error_notices = wc_get_notices( 'error' );
+
+			$this->assertSame( 'confirmation', $first_state->screen, 'The first confirmed submission should complete.' );
+			$this->assertSame( 'review', $second_state->screen, 'A repeated submission for the same email should return to the review screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The rate-limited submission should not send additional notification emails.' );
+			$this->assertNotEmpty( $error_notices, 'Rate-limited submissions should add an error notice.' );
+			$this->assertStringContainsString( 'Please wait before submitting another withdrawal request.', $error_notices[0]['notice'], 'The notice should ask the customer to wait.' );
+		} finally {
+			$capture['remove']();
+		}
 	}
 
 	/**
@@ -281,6 +672,160 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			OrderWithdrawalFormProcessor::FIELD_WITHDRAWAL_TYPE => OrderWithdrawalFormProcessor::WITHDRAWAL_TYPE_SPECIFIC,
 			OrderWithdrawalFormProcessor::FIELD_ADDITIONAL_DETAILS => 'Line item 1',
 		);
+	}
+
+	/**
+	 * Create an order from the default valid form data.
+	 *
+	 * @param array<string,string> $field_overrides Field value overrides keyed by unprefixed field key.
+	 */
+	private function create_order_for_form_data( array $field_overrides = array() ): WC_Order {
+		$data  = array_merge( $this->get_valid_form_data(), $field_overrides );
+		$order = wc_create_order();
+
+		if ( ! $order instanceof WC_Order ) {
+			$this->fail( 'Expected wc_create_order() to create a WC_Order instance.' );
+		}
+
+		$order->set_billing_first_name( $data[ OrderWithdrawalFormProcessor::FIELD_FIRST_NAME ] );
+		$order->set_billing_last_name( $data[ OrderWithdrawalFormProcessor::FIELD_LAST_NAME ] );
+		$order->set_billing_email( $data[ OrderWithdrawalFormProcessor::FIELD_EMAIL ] );
+		$order->save();
+
+		$this->created_order_ids[] = $order->get_id();
+
+		return $order;
+	}
+
+	/**
+	 * Capture wp_mail() calls without sending real email.
+	 *
+	 * @param bool $send_result Value returned to wp_mail().
+	 * @return array{captures: array<int,array<string,mixed>>, remove: callable}
+	 */
+	private function capture_wp_mail( bool $send_result = true ): array {
+		$captures = array();
+
+		$capture = static function ( $short_circuit, $atts ) use ( &$captures, $send_result ) {
+			unset( $short_circuit );
+			$captures[] = is_array( $atts ) ? $atts : array();
+
+			return $send_result;
+		};
+
+		add_filter( 'pre_wp_mail', $capture, 10, 2 );
+
+		$remove = static function () use ( $capture ) {
+			remove_filter( 'pre_wp_mail', $capture, 10 );
+		};
+
+		return array(
+			'captures' => &$captures,
+			'remove'   => $remove,
+		);
+	}
+
+	/**
+	 * Assert an email was sent to a recipient.
+	 *
+	 * @param string                         $recipient Recipient email.
+	 * @param array<int,array<string,mixed>> $captures   Captured email arguments.
+	 */
+	private function assert_mail_sent_to( string $recipient, array $captures ): void {
+		$recipients = array();
+
+		foreach ( $captures as $mail ) {
+			$to = $mail['to'] ?? '';
+
+			if ( is_array( $to ) ) {
+				$recipients = array_merge( $recipients, $to );
+			} else {
+				$recipients[] = (string) $to;
+			}
+		}
+
+		$this->assertContains( $recipient, $recipients, sprintf( 'Expected an email to be sent to %s.', $recipient ) );
+	}
+
+	/**
+	 * Get a captured email sent to a recipient.
+	 *
+	 * @param string                         $recipient Recipient email.
+	 * @param array<int,array<string,mixed>> $captures   Captured email arguments.
+	 * @return array<string,mixed>
+	 */
+	private function get_captured_mail_to( string $recipient, array $captures ): array {
+		foreach ( $captures as $mail ) {
+			$to         = $mail['to'] ?? '';
+			$recipients = is_array( $to ) ? $to : array( (string) $to );
+
+			if ( in_array( $recipient, $recipients, true ) ) {
+				return $mail;
+			}
+		}
+
+		$this->fail( sprintf( 'Expected an email to be sent to %s.', $recipient ) );
+	}
+
+	/**
+	 * Whether an order has a note containing specific text.
+	 *
+	 * @param WC_Order $order  Order.
+	 * @param string   $needle Note content to search for.
+	 */
+	private function order_has_note_containing( WC_Order $order, string $needle ): bool {
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+
+		foreach ( $notes as $note ) {
+			if ( false !== strpos( (string) $note->content, $needle ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Assert that an order has been flagged as having a withdrawal request.
+	 *
+	 * @param WC_Order $order Order.
+	 */
+	private function assert_order_withdrawal_requested( WC_Order $order ): void {
+		$updated_order = wc_get_order( $order->get_id() );
+
+		$this->assertInstanceOf( WC_Order::class, $updated_order, 'The order should still exist.' );
+		$this->assertSame( 'yes', $updated_order->get_meta( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, true, 'edit' ), 'The matched order should be flagged as having a withdrawal request.' );
+	}
+
+	/**
+	 * Delete orders created during a test.
+	 */
+	private function delete_created_orders(): void {
+		foreach ( $this->created_order_ids as $order_id ) {
+			$order = wc_get_order( $order_id );
+
+			if ( $order instanceof WC_Order ) {
+				$order->delete( true );
+			}
+		}
+
+		$this->created_order_ids = array();
+	}
+
+	/**
+	 * Clear order withdrawal rate limits created during tests.
+	 */
+	private function clear_order_withdrawal_rate_limits(): void {
+		global $wpdb;
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_rate_limits WHERE rate_limit_key LIKE %s",
+				$wpdb->esc_like( self::RATE_LIMIT_PREFIX ) . '%'
+			)
+		);
+
+		\WC_Cache_Helper::invalidate_cache_group( WC_Rate_Limiter::CACHE_GROUP );
 	}
 
 	/**
