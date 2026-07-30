@@ -93,6 +93,85 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should deliver the accumulated props to callbacks registered with two accepted args.
+	 */
+	public function test_second_argument_is_delivered_to_two_argument_callbacks(): void {
+		$coupon = $this->create_settled_coupon();
+
+		$received = array();
+		add_action(
+			'woocommerce_coupon_object_updated_props',
+			function ( $coupon, $updated_props ) use ( &$received ) {
+				$received[] = $updated_props;
+			},
+			10,
+			2
+		);
+
+		$coupon->set_amount( 5 );
+		$coupon->save();
+
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$this->assertSame(
+			array( array( 'amount' ), array( 'amount', 'amount' ) ),
+			$received,
+			'A legacy callback registered with two accepted args must keep receiving the accumulated list at position two.'
+		);
+	}
+
+	/**
+	 * @testdox Should accumulate props across different coupons when a store instance is shared.
+	 */
+	public function test_second_argument_accumulates_across_coupons_when_store_is_shared(): void {
+		$store = new WC_Coupon_Data_Store_CPT();
+
+		// Returning an object shares one store instance across every coupon in this test.
+		$store_filter = function () use ( $store ) {
+			return $store;
+		};
+		add_filter( 'woocommerce_coupon_data_store', $store_filter );
+
+		$fires = array();
+
+		try {
+			$coupon_a = WC_Helper_Coupon::create_coupon( 'shared-store-a' );
+			$coupon_a->save();
+			$coupon_b = WC_Helper_Coupon::create_coupon( 'shared-store-b' );
+			$coupon_b->save();
+
+			add_action(
+				'woocommerce_coupon_object_updated_props',
+				function ( $coupon, $accumulated_props ) use ( &$fires ) {
+					$fires[] = array(
+						'coupon_id'   => $coupon->get_id(),
+						'accumulated' => $accumulated_props,
+					);
+				},
+				10,
+				2
+			);
+
+			$coupon_a->set_amount( 5 );
+			$coupon_a->save();
+
+			$coupon_b->set_usage_limit( 3 );
+			$coupon_b->save();
+		} finally {
+			remove_filter( 'woocommerce_coupon_data_store', $store_filter );
+		}
+
+		$this->assertCount( 2, $fires, 'Each coupon save should fire the action exactly once.' );
+		$this->assertSame( $coupon_b->get_id(), $fires[1]['coupon_id'], 'The second fire belongs to coupon B.' );
+		$this->assertSame(
+			array( 'amount', 'usage_limit' ),
+			array_slice( $fires[1]['accumulated'], -2 ),
+			'With a shared store instance, coupon B\'s payload retains the prop written for coupon A: accumulation belongs to the store instance, not the coupon.'
+		);
+	}
+
+	/**
 	 * @testdox Should report only the current save's props in the third hook argument.
 	 */
 	public function test_third_argument_does_not_accumulate_across_saves(): void {
