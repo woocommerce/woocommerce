@@ -22,11 +22,11 @@
 
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button -->
-<div class="wp-block-button"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Shop new arrivals', 'purple' ); ?></a></div>
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( add_query_arg( 'orderby', 'date', function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' ) ) ); ?>"><?php esc_html_e( 'Shop new arrivals', 'purple' ); ?></a></div>
 <!-- /wp:button -->
 
 <!-- wp:button {"className":"is-style-button-contrast"} -->
-<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Shop all products', 'purple' ); ?></a></div>
+<div class="wp-block-button is-style-button-contrast"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' ) ); ?>"><?php esc_html_e( 'Shop all products', 'purple' ); ?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group --></div></div>
