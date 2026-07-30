@@ -24,10 +24,14 @@
 <h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title"><?php esc_html_e( 'What’s the difference between cashmere and wool?', 'purple' ); ?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
 <!-- /wp:accordion-heading -->
 
-<!-- wp:accordion-panel {"style":{"spacing":{"padding":{"bottom":"var:preset|spacing|30"}}}} -->
-<div role="region" class="wp-block-accordion-panel" style="padding-bottom:var(--wp--preset--spacing--30)"><!-- wp:paragraph -->
+<!-- wp:accordion-panel {"style":{"spacing":{"blockGap":"0"}}} -->
+<div role="region" class="wp-block-accordion-panel"><!-- wp:paragraph -->
 <p><?php esc_html_e( 'Wool is a natural fiber harvested from sheep. It’s known for its durability, breathability, and excellent insulation properties. Wool fibers are thicker and more robust than cashmere, making them ideal for outerwear, suits, and knitwear designed for long-term wear and colder climates. Cashmere is a natural fiber obtained from the undercoat of cashmere goats, primarily found in regions like Mongolia, Nepal, and northern China. Renowned for its exceptional softness, warmth, and lightweight feel, cashmere is significantly finer than sheep’s wool, which gives it a smooth, almost silky texture against the skin.', 'purple' ); ?></p>
-<!-- /wp:paragraph --></div>
+<!-- /wp:paragraph -->
+
+<!-- wp:spacer {"height":"var:preset|spacing|30"} -->
+<div style="height:var(--wp--preset--spacing--30)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer --></div>
 <!-- /wp:accordion-panel --></div>
 <!-- /wp:accordion-item -->
 
@@ -36,10 +40,14 @@
 <h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title"><?php esc_html_e( 'How should I wash my knitwear?', 'purple' ); ?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
 <!-- /wp:accordion-heading -->
 
-<!-- wp:accordion-panel {"style":{"spacing":{"padding":{"bottom":"var:preset|spacing|30"}}}} -->
-<div role="region" class="wp-block-accordion-panel" style="padding-bottom:var(--wp--preset--spacing--30)"><!-- wp:paragraph -->
+<!-- wp:accordion-panel {"style":{"spacing":{"blockGap":"0"}}} -->
+<div role="region" class="wp-block-accordion-panel"><!-- wp:paragraph -->
 <p><?php esc_html_e( 'Wool is a natural fiber harvested from sheep. It’s known for its durability, breathability, and excellent insulation properties. Wool fibers are thicker and more robust than cashmere, making them ideal for outerwear, suits, and knitwear designed for long-term wear and colder climates. Cashmere is a natural fiber obtained from the undercoat of cashmere goats, primarily found in regions like Mongolia, Nepal, and northern China. Renowned for its exceptional softness, warmth, and lightweight feel, cashmere is significantly finer than sheep’s wool, which gives it a smooth, almost silky texture against the skin.', 'purple' ); ?></p>
-<!-- /wp:paragraph --></div>
+<!-- /wp:paragraph -->
+
+<!-- wp:spacer {"height":"var:preset|spacing|30"} -->
+<div style="height:var(--wp--preset--spacing--30)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer --></div>
 <!-- /wp:accordion-panel --></div>
 <!-- /wp:accordion-item -->
 
@@ -48,10 +56,14 @@
 <h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title"><?php esc_html_e( 'Why does my knitwear pill and how can I prevent it?', 'purple' ); ?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
 <!-- /wp:accordion-heading -->
 
-<!-- wp:accordion-panel {"style":{"spacing":{"padding":{"bottom":"var:preset|spacing|30"}}}} -->
-<div role="region" class="wp-block-accordion-panel" style="padding-bottom:var(--wp--preset--spacing--30)"><!-- wp:paragraph -->
+<!-- wp:accordion-panel {"style":{"spacing":{"blockGap":"0"}}} -->
+<div role="region" class="wp-block-accordion-panel"><!-- wp:paragraph -->
 <p><?php esc_html_e( 'Wool is a natural fiber harvested from sheep. It’s known for its durability, breathability, and excellent insulation properties. Wool fibers are thicker and more robust than cashmere, making them ideal for outerwear, suits, and knitwear designed for long-term wear and colder climates. Cashmere is a natural fiber obtained from the undercoat of cashmere goats, primarily found in regions like Mongolia, Nepal, and northern China. Renowned for its exceptional softness, warmth, and lightweight feel, cashmere is significantly finer than sheep’s wool, which gives it a smooth, almost silky texture against the skin.', 'purple' ); ?></p>
-<!-- /wp:paragraph --></div>
+<!-- /wp:paragraph -->
+
+<!-- wp:spacer {"height":"var:preset|spacing|30"} -->
+<div style="height:var(--wp--preset--spacing--30)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer --></div>
 <!-- /wp:accordion-panel --></div>
 <!-- /wp:accordion-item -->
 
@@ -60,10 +72,14 @@
 <h3 class="wp-block-accordion-heading"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title"><?php esc_html_e( 'What materials are best for sensitive skin?', 'purple' ); ?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
 <!-- /wp:accordion-heading -->
 
-<!-- wp:accordion-panel {"style":{"spacing":{"padding":{"bottom":"var:preset|spacing|30"}}}} -->
-<div role="region" class="wp-block-accordion-panel" style="padding-bottom:var(--wp--preset--spacing--30)"><!-- wp:paragraph -->
+<!-- wp:accordion-panel {"style":{"spacing":{"blockGap":"0"}}} -->
+<div role="region" class="wp-block-accordion-panel"><!-- wp:paragraph -->
 <p><?php esc_html_e( 'Wool is a natural fiber harvested from sheep. It’s known for its durability, breathability, and excellent insulation properties. Wool fibers are thicker and more robust than cashmere, making them ideal for outerwear, suits, and knitwear designed for long-term wear and colder climates. Cashmere is a natural fiber obtained from the undercoat of cashmere goats, primarily found in regions like Mongolia, Nepal, and northern China. Renowned for its exceptional softness, warmth, and lightweight feel, cashmere is significantly finer than sheep’s wool, which gives it a smooth, almost silky texture against the skin.', 'purple' ); ?></p>
-<!-- /wp:paragraph --></div>
+<!-- /wp:paragraph -->
+
+<!-- wp:spacer {"height":"var:preset|spacing|30"} -->
+<div style="height:var(--wp--preset--spacing--30)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer --></div>
 <!-- /wp:accordion-panel --></div>
 <!-- /wp:accordion-item -->
 
@@ -72,10 +88,14 @@
 <h3 class="wp-block-accordion-heading has-medium-font-size" style="font-style:normal;font-weight:400"><button type="button" class="wp-block-accordion-heading__toggle" style="padding-top:0.88rem;padding-bottom:0.88rem"><span class="wp-block-accordion-heading__toggle-title"><?php esc_html_e( 'How do I store knitwear during warmer months?', 'purple' ); ?></span><span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span></button></h3>
 <!-- /wp:accordion-heading -->
 
-<!-- wp:accordion-panel {"style":{"spacing":{"padding":{"bottom":"var:preset|spacing|30"}}}} -->
-<div role="region" class="wp-block-accordion-panel" style="padding-bottom:var(--wp--preset--spacing--30)"><!-- wp:paragraph -->
+<!-- wp:accordion-panel {"style":{"spacing":{"blockGap":"0"}}} -->
+<div role="region" class="wp-block-accordion-panel"><!-- wp:paragraph -->
 <p><?php esc_html_e( 'Wool is a natural fiber harvested from sheep. It’s known for its durability, breathability, and excellent insulation properties. Wool fibers are thicker and more robust than cashmere, making them ideal for outerwear, suits, and knitwear designed for long-term wear and colder climates. Cashmere is a natural fiber obtained from the undercoat of cashmere goats, primarily found in regions like Mongolia, Nepal, and northern China. Renowned for its exceptional softness, warmth, and lightweight feel, cashmere is significantly finer than sheep’s wool, which gives it a smooth, almost silky texture against the skin.', 'purple' ); ?></p>
-<!-- /wp:paragraph --></div>
+<!-- /wp:paragraph -->
+
+<!-- wp:spacer {"height":"var:preset|spacing|30"} -->
+<div style="height:var(--wp--preset--spacing--30)" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer --></div>
 <!-- /wp:accordion-panel --></div>
 <!-- /wp:accordion-item --></div>
 <!-- /wp:accordion --></div>
