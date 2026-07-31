@@ -26,8 +26,10 @@
 /packages/*/vendor-prefixed/vendor
 /packages/blueprint/blueprint.php
 /packages/blueprint/src/docs
+/packages/email-editor/docs
 /packages/email-editor/email-editor.php
 /packages/email-editor/tasks
+/src/StoreApi/docs
 /e2e/
 babel.config.js
 # Do not exclude composer.* files. They will be cleaned up separately.
@@ -50,9 +52,7 @@ README.md
 renovate.json
 tsconfig.*
 webpack.config.js
-/client/legacy/
-/client/admin/
-/client/blocks/
+/client/
 phpstan.neon
 phpstan-baseline.neon
 /php-stubs/
