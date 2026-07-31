@@ -280,6 +280,7 @@ class ProductImage extends AbstractBlock {
 				count( $aspect_ratio_parts ) !== 2 ||
 				! is_numeric( $aspect_ratio_parts[0] ) ||
 				! is_numeric( $aspect_ratio_parts[1] ) ||
+				$aspect_ratio_parts[0] <= 0 ||
 				$aspect_ratio_parts[1] <= 0
 			) {
 				return $sources;
