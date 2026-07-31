@@ -32,6 +32,12 @@ publication. It does not make these browser APIs private.
 | `@woocommerce/shared-hocs` | `wc-blocks-shared-hocs` | `wc.wcBlocksSharedHocs` |
 | `@woocommerce/types` | `wc-types` | `wc.wcTypes` |
 
+## Loading the scripts
+
+WooCommerce does not guarantee that these scripts will be enqueued on any
+particular page. Any plugin, extension, or custom code that uses these APIs
+must enqueue the corresponding script handle listed above.
+
 The independently published `@woocommerce/data` and `@woocommerce/sanitize`
 packages remain in the monorepo-level `packages/js` directory.
 
