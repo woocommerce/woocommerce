@@ -37,6 +37,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	 */
 	public static function tearDownAfterClass(): void {
 		remove_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
+
+		parent::tearDownAfterClass();
 	}
 
 	/**
