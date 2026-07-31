@@ -25,9 +25,7 @@
 /packages/*/vendor-prefixed/setup.sh
 /packages/*/vendor-prefixed/vendor
 /packages/blueprint/src/docs
-/packages/email-editor/docs
 /packages/email-editor/tasks
-/src/StoreApi/docs
 /e2e/
 babel.config.js
 # Do not exclude composer.* files. They will be cleaned up separately.
