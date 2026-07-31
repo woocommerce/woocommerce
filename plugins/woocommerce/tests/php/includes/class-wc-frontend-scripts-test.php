@@ -234,36 +234,71 @@ class WC_Frontend_Scripts_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that scripts with legacy handles and their aliases use blocking strategy.
+	 * Invoke WC_Frontend_Scripts::register_scripts() and return the script definitions.
 	 *
-	 * WordPress (since 6.3) discards loading strategies on alias scripts
-	 * (src=false). To avoid strategy mismatches, both the real script and
-	 * its legacy alias must be registered as blocking (in_footer=true).
+	 * @return array
 	 */
-	public function test_legacy_handle_scripts_use_blocking_strategy(): void {
+	private function register_frontend_scripts(): array {
 		$reflection = new ReflectionClass( 'WC_Frontend_Scripts' );
-		$method     = $reflection->getMethod( 'register_scripts' );
-		$method->setAccessible( true );
-		$method->invoke( null );
 
-		$get_scripts_method = $reflection->getMethod( 'get_scripts' );
-		$get_scripts_method->setAccessible( true );
-		$scripts = $get_scripts_method->invoke( null );
+		$register = $reflection->getMethod( 'register_scripts' );
+		$register->setAccessible( true );
+		$register->invoke( null );
+
+		$get_scripts = $reflection->getMethod( 'get_scripts' );
+		$get_scripts->setAccessible( true );
+
+		return $get_scripts->invoke( null );
+	}
+
+	/**
+	 * Test that scripts with legacy alias handles stay deferred and footer-printed.
+	 */
+	public function test_legacy_handle_scripts_keep_defer_strategy(): void {
+		$scripts = $this->register_frontend_scripts();
 
 		foreach ( $scripts as $name => $props ) {
 			if ( ! isset( $props['legacy_handle'] ) ) {
 				continue;
 			}
 
-			$legacy_handle = $props['legacy_handle'];
-
-			// Real script must be blocking (no defer strategy).
-			$real_strategy = wp_scripts()->get_data( $name, 'strategy' );
-			$this->assertFalse( $real_strategy, "Real handle '{$name}' should not have a loading strategy (blocking)." );
-
-			// Alias script must also be blocking.
-			$legacy_strategy = wp_scripts()->get_data( $legacy_handle, 'strategy' );
-			$this->assertFalse( $legacy_strategy, "Legacy handle '{$legacy_handle}' should not have a loading strategy (blocking)." );
+			$this->assertSame( 'defer', wp_scripts()->get_data( $name, 'strategy' ), "Real handle '{$name}' should keep the defer loading strategy." );
+			$this->assertSame( 1, wp_scripts()->get_data( $name, 'group' ), "Real handle '{$name}' should be printed in the footer." );
 		}
+	}
+
+	/**
+	 * Test that a blocking script registered against a legacy alias after the head
+	 * is printed still executes after the handle it depends on.
+	 */
+	public function test_late_blocking_dependent_downgrades_legacy_handle(): void {
+		$this->register_frontend_scripts();
+		wp_enqueue_script( 'wc-cart' );
+
+		ob_start();
+		wp_scripts()->do_head_items();
+		ob_end_clean();
+
+		// A gateway enqueues its blocking script only once the head has been printed.
+		wp_register_script( 'test-gateway-form', 'https://example.com/gateway.js', array( 'jquery-payment' ), '1', array( 'in_footer' => true ) );
+		wp_enqueue_script( 'test-gateway-form' );
+
+		ob_start();
+		wp_scripts()->do_footer_items();
+		$footer = ob_get_clean();
+
+		$payment_position = strpos( $footer, 'id="wc-jquery-payment-js"' );
+		$gateway_position = strpos( $footer, 'id="test-gateway-form-js"' );
+
+		$this->assertNotFalse( $payment_position, 'wc-jquery-payment should be printed in the footer.' );
+		$this->assertNotFalse( $gateway_position, 'The gateway script should be printed in the footer.' );
+		$this->assertLessThan( $gateway_position, $payment_position, 'wc-jquery-payment should be printed before the gateway script that depends on it.' );
+
+		preg_match( '#<script([^>]*)id="wc-jquery-payment-js"#', $footer, $matches );
+		$this->assertStringNotContainsString( ' defer', $matches[1], 'wc-jquery-payment should be downgraded to blocking when a blocking script depends on its legacy alias.' );
+
+		// Only the affected handle is downgraded; the rest of the chain stays deferred.
+		preg_match( '#<script([^>]*)id="wc-cart-js"#', $footer, $cart_matches );
+		$this->assertStringContainsString( ' defer', $cart_matches[1], 'wc-cart should remain deferred.' );
 	}
 }

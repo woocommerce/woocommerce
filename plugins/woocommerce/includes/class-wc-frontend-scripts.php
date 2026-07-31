@@ -143,9 +143,12 @@ class WC_Frontend_Scripts {
 	 * @param  string                                          $path      Full URL of the script, or path of the script relative to the WordPress root directory.
 	 * @param  string[]                                        $deps      An array of registered script handles this script depends on.
 	 * @param  string                                          $version   String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes. If version is set to false, a version number is automatically added equal to current installed WordPress version. If set to null, no version is added.
-	 * @param  bool|array{strategy?: string, in_footer?: bool} $in_footer Whether to enqueue the script before </body> (boolean), or an array of arguments such as 'strategy' and 'in_footer'. Default array( 'strategy' => 'defer' ).
+	 * @param  bool|array{strategy?: string, in_footer?: bool} $in_footer Whether to enqueue the script before </body> (boolean), or an array of arguments such as 'strategy' and 'in_footer'. Default array( 'in_footer' => true, 'strategy' => 'defer' ).
 	 */
-	private static function register_script( $handle, $path, $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array( 'strategy' => 'defer' ) ) {
+	private static function register_script( $handle, $path, $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array(
+		'in_footer' => true,
+		'strategy'  => 'defer',
+	) ) {
 		self::$registered_scripts[] = $handle;
 		wp_register_script( $handle, $path, $deps, $version, $in_footer );
 	}
@@ -158,9 +161,12 @@ class WC_Frontend_Scripts {
 	 * @param  string                                          $path      Full URL of the script, or path of the script relative to the WordPress root directory.
 	 * @param  string[]                                        $deps      An array of registered script handles this script depends on.
 	 * @param  string                                          $version   String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes. If version is set to false, a version number is automatically added equal to current installed WordPress version. If set to null, no version is added.
-	 * @param  bool|array{strategy?: string, in_footer?: bool} $in_footer Whether to enqueue the script before </body> (boolean), or an array of arguments such as 'strategy' and 'in_footer'. Default array( 'strategy' => 'defer' ).
+	 * @param  bool|array{strategy?: string, in_footer?: bool} $in_footer Whether to enqueue the script before </body> (boolean), or an array of arguments such as 'strategy' and 'in_footer'. Default array( 'in_footer' => true, 'strategy' => 'defer' ).
 	 */
-	private static function enqueue_script( $handle, $path = '', $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array( 'strategy' => 'defer' ) ) {
+	private static function enqueue_script( $handle, $path = '', $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array(
+		'in_footer' => true,
+		'strategy'  => 'defer',
+	) ) {
 		if ( ! in_array( $handle, self::$registered_scripts, true ) && $path ) {
 			self::register_script( $handle, $path, $deps, $version, $in_footer );
 		}
@@ -414,25 +420,12 @@ class WC_Frontend_Scripts {
 		$register_scripts = self::get_scripts();
 
 		foreach ( $register_scripts as $name => $props ) {
-			$is_legacy_handle = isset( $props['legacy_handle'] );
+			self::register_script( $name, $props['src'], $props['deps'], $props['version'] );
 
-			/*
-			 * Scripts with legacy alias handles must use a blocking strategy.
-			 * WordPress (since 6.3) silently discards loading strategies on alias
-			 * scripts (registered with src=false). If the real script uses defer
-			 * but the alias cannot inherit it, the strategy mismatch breaks
-			 * dependency resolution for third-party code that depends on the
-			 * legacy handle (e.g. payment gateways using 'jquery-payment').
-			 *
-			 * Using blocking for both the real script and its alias ensures
-			 * consistent execution order through the dependency chain.
-			 */
-			$in_footer = $is_legacy_handle ? true : array( 'strategy' => 'defer' );
-
-			self::register_script( $name, $props['src'], $props['deps'], $props['version'], $in_footer );
-
-			if ( $is_legacy_handle ) {
-				self::register_script( $props['legacy_handle'], false, array( $name ), $props['version'], $in_footer );
+			// Alias scripts (src=false) can't carry a strategy, and WordPress exempts them
+			// from the "no strategy means blocking" rule, so the real script stays deferred.
+			if ( isset( $props['legacy_handle'] ) ) {
+				self::register_script( $props['legacy_handle'], false, array( $name ), $props['version'], array( 'in_footer' => true ) );
 			}
 		}
 	}
