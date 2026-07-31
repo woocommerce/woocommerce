@@ -601,7 +601,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 
 		$schema['properties']['line_items']['items']['properties']['refund_total'] = array(
 			'description' => __( 'Amount to refund for this line item. Tax-exclusive, with taxes supplied separately via refund_tax — except when compute_totals is true and refund_tax is omitted, in which case it is tax-inclusive. When compute_totals is true it may be omitted (or null) to have the server compute it from quantity.', 'woocommerce' ),
-			'type'        => 'number',
+			'type'        => array( 'number', 'null' ),
 			'context'     => array( 'edit' ),
 		);
 
