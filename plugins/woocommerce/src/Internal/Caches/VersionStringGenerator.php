@@ -94,7 +94,7 @@ class VersionStringGenerator {
 			$entry_exists = $this->cache_entry_exists( $version, $found );
 
 			if ( $entry_exists ) {
-				$this->log_invalid_cached_value( $id, $version );
+				$this->log_invalid_cached_value( $id, $version, $generate );
 			}
 
 			if ( $generate ) {
@@ -199,16 +199,18 @@ class VersionStringGenerator {
 	 * This should never happen with a well-behaved object cache, so surface it for
 	 * diagnosis rather than silently self-healing.
 	 *
-	 * @param string $id    The ID the invalid value was cached for.
-	 * @param mixed  $value The invalid cached value.
+	 * @param string $id           The ID the invalid value was cached for.
+	 * @param mixed  $value        The invalid cached value.
+	 * @param bool   $regenerating Whether a replacement version is being generated.
 	 * @return void
 	 */
-	private function log_invalid_cached_value( string $id, $value ): void {
+	private function log_invalid_cached_value( string $id, $value, bool $regenerating ): void {
 		$this->legacy_proxy->call_function( 'wc_get_logger' )->warning(
 			sprintf(
-				'Discarded an invalid version string cache entry for ID "%1$s" (got %2$s); the version will be regenerated.',
+				'Discarded an invalid version string cache entry for ID "%1$s" (got %2$s); %3$s.',
 				$id,
-				gettype( $value )
+				gettype( $value ),
+				$regenerating ? 'the version will be regenerated' : 'the entry will be deleted'
 			),
 			array( 'source' => 'version-string-generator' )
 		);

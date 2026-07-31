@@ -310,7 +310,24 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 
 		$this->assertLogged(
 			'warning',
-			'Discarded an invalid version string cache entry for ID "logged-invalid-value" (got integer)',
+			'Discarded an invalid version string cache entry for ID "logged-invalid-value" (got integer); the version will be regenerated.',
+			array( 'source' => 'version-string-generator' )
+		);
+	}
+
+	/**
+	 * @testdox get_version logs the deletion outcome when generation is disabled.
+	 */
+	public function test_get_version_logs_deletion_outcome_when_generation_disabled(): void {
+		$cache_key = $this->get_version_cache_key( 'logged-invalid-value-no-generate' );
+		wp_cache_set( $cache_key, 42, $this->get_cache_group() );
+
+		$this->sut->get_version( 'logged-invalid-value-no-generate', false );
+
+		// Nothing is regenerated on this path, so the message must not claim it is.
+		$this->assertLogged(
+			'warning',
+			'Discarded an invalid version string cache entry for ID "logged-invalid-value-no-generate" (got integer); the entry will be deleted.',
 			array( 'source' => 'version-string-generator' )
 		);
 	}
