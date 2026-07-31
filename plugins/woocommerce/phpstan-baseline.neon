@@ -53757,13 +53757,6 @@ parameters:
 			count: 1
 			path: src/Blocks/Domain/Services/Hydration.php
 
-
-		-
-			message: '#^Parameter \#2 \$path of method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\Hydration\:\:get_response_from_controller\(\) expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/Domain/Services/Hydration.php
-
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\Notices\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
