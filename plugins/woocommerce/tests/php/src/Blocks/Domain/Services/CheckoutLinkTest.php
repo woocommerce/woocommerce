@@ -5,16 +5,15 @@ namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutLink;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for CheckoutLink.
  */
-class CheckoutLinkTest extends TestCase {
+class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	/**
 	 * Setup the test environment.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 		$_GET = [];
 		// Reset global cart/session if needed.
@@ -25,10 +24,15 @@ class CheckoutLinkTest extends TestCase {
 	/**
 	 * Tear down the test environment.
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		$_GET                       = [];
 		$GLOBALS['added_to_cart']   = [];
 		$GLOBALS['applied_coupons'] = [];
+
+		// The cart lives on the WC singleton, so the rollback does not clear it. Without this
+		// the products this test adds stay in the cart for every later test in the process.
+		WC()->cart->empty_cart();
+
 		parent::tearDown();
 	}
 

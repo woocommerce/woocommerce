@@ -7,12 +7,11 @@ use Automattic\WooCommerce\Internal\AddressProvider\AbstractAutomatticAddressPro
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 use Automattic\Jetpack\Constants;
 use WC_Address_Provider;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * Tests for AbstractAutomatticAddressProvider functionality
  */
-class AbstractAutomatticAddressProviderTest extends TestCase {
+class AbstractAutomatticAddressProviderTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * The mock logger.
@@ -31,7 +30,7 @@ class AbstractAutomatticAddressProviderTest extends TestCase {
 	/**
 	 * Setup test case.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Setup mock logger.
@@ -70,8 +69,7 @@ class AbstractAutomatticAddressProviderTest extends TestCase {
 	/**
 	 * Tear down test case.
 	 */
-	protected function tearDown(): void {
-		parent::tearDown();
+	public function tearDown(): void {
 		remove_all_filters( 'pre_update_option_woocommerce_address_autocomplete_enabled' );
 		remove_all_filters( 'woocommerce_is_checkout' );
 		remove_all_actions( 'wp_enqueue_scripts' );
@@ -85,6 +83,8 @@ class AbstractAutomatticAddressProviderTest extends TestCase {
 		delete_option( 'test-provider_address_autocomplete_jwt' );
 		delete_option( 'test-provider_jwt_retry_data' );
 		delete_option( 'woocommerce_address_autocomplete_enabled' );
+
+		parent::tearDown();
 	}
 
 	/**
