@@ -23,6 +23,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
+		parent::setUp();
 
 		// phpcs:disable Squiz.Commenting
 

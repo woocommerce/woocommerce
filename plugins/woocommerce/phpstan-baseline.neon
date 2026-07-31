@@ -60892,12 +60892,6 @@ parameters:
 			path: src/Internal/CLI/Migrator/Runner.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on Automattic\\WooCommerce\\Proxies\\LegacyProxy\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Caches/VersionStringGenerator.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Caches\\VersionStringGenerator\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

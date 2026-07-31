@@ -29,6 +29,8 @@ class BlockHooksTests extends WP_UnitTestCase {
 	 * Initiate the mock object.
 	 */
 	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
 		delete_option( self::$option_name );
 		self::$block_instance = new BlockHooksTestBlock();
 	}

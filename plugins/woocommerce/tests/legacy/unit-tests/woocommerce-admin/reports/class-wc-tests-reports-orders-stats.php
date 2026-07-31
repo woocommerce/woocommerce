@@ -23,6 +23,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	 * Don't cache report data during these tests.
 	 */
 	public static function setUpBeforeClass(): void {
+		// Must come first: the parent reconnects `$wpdb`, which discards anything this
+		// method has written but not committed. The matching `parent::tearDownAfterClass()`
+		// goes last, so the two are deliberately not symmetrical.
+		parent::setUpBeforeClass();
+
 		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
 
 		$db_version = strstr( WC()->version, '-', true );
@@ -37,6 +42,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	 */
 	public static function tearDownAfterClass(): void {
 		remove_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
+
+		parent::tearDownAfterClass();
 	}
 
 	/**
