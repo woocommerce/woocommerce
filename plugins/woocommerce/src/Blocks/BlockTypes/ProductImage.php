@@ -262,6 +262,7 @@ class ProductImage extends AbstractBlock {
 
 		$adjust_srcset = function ( $sources, $size_array, $image_src, $image_meta ) use ( $aspect_ratio ) {
 			if (
+				! $aspect_ratio ||
 				empty( $sources ) ||
 				empty( $image_meta['width'] ) ||
 				empty( $image_meta['height'] )
