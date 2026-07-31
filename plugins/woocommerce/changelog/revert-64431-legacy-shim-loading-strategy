@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revert the legacy script shim loading strategy change (#64431) that broke script ordering on the classic cart and checkout.
