@@ -143,6 +143,37 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A product line whose value is exhausted by an amount-only refund is not refundable despite remaining quantity.
+	 */
+	public function test_value_exhausted_line_not_refundable_despite_remaining_quantity(): void {
+		$order      = $this->create_order_with_product();
+		$line_item  = current( $order->get_items() );
+		$line_total = (float) $line_item->get_total() + (float) $line_item->get_total_tax();
+
+		// Amount-only refund (qty 0) consumes the line's full monetary value while
+		// leaving its quantity untouched. The order keeps a remaining amount
+		// (shipping), so the order-level flag does not mask the line-level one.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $line_total,
+				'line_items' => array(
+					$line_item->get_id() => array(
+						'qty'          => 0,
+						'refund_total' => $line_total,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$data = $this->get_order_response( $order->get_id() );
+
+		$this->assertTrue( $data['can_be_refunded'], 'Order with a remaining amount should stay refundable' );
+		$this->assertFalse( $data['line_items'][0]['can_be_refunded'], 'A line with no remaining value must not be refundable even with remaining quantity' );
+	}
+
+	/**
 	 * @testdox Partially refunded order has mixed can_be_refunded values.
 	 */
 	public function test_partially_refunded_order(): void {

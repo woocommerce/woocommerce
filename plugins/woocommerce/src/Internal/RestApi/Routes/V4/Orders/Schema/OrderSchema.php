@@ -692,8 +692,19 @@ class OrderSchema extends AbstractSchema {
 			foreach ( $line_items as $line_item ) {
 				$item_data = $this->order_item_schema->get_item_response( $line_item, $request );
 
+				// A product line is refundable when it has remaining quantity AND remaining
+				// monetary value. Amount-only refunds (qty 0) can exhaust a line's value
+				// while leaving its quantity untouched; without the value check the field
+				// would advertise a line the refund endpoints reject as already refunded.
+				// Zero-priced lines carry no value, so they stay refundable by quantity
+				// alone (a restock-only refund).
+				$line_gross          = NumberUtil::round( abs( (float) $line_item->get_total() + (float) $line_item->get_total_tax() ), wc_get_price_decimals() );
+				$line_refunded       = abs( (float) ( $refund_data['totals'][ $line_item->get_id() ] ?? 0.0 ) );
+				$has_remaining_value = 0.0 === $line_gross || NumberUtil::round( $line_gross - $line_refunded, wc_get_price_decimals() ) > 0;
+
 				$item_data['can_be_refunded'] = 0 !== $line_item->get_product_id()
-					&& ( $line_item->get_quantity() + ( $refund_data['qtys'][ $line_item->get_id() ] ?? 0 ) ) > 0;
+					&& ( $line_item->get_quantity() + ( $refund_data['qtys'][ $line_item->get_id() ] ?? 0 ) ) > 0
+					&& $has_remaining_value;
 
 				$data['line_items'][] = $item_data;
 			}

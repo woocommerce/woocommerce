@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+can_be_refunded on product lines now accounts for remaining monetary value, so lines exhausted by amount-only refunds are no longer advertised as refundable.

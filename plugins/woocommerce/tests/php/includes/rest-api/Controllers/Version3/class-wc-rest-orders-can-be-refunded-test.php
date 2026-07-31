@@ -154,6 +154,38 @@ class WC_REST_Orders_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A product line whose value is exhausted by an amount-only refund is not refundable despite remaining quantity.
+	 */
+	public function test_value_exhausted_line_not_refundable_despite_remaining_quantity(): void {
+		$order = $this->create_order_with_product( 50.00, 1 );
+		// Extra unallocated amount keeps the order refundable after the line is exhausted,
+		// so the order-level flag does not mask the line-level one.
+		$order->set_total( 60.00 );
+		$order->save();
+		$item_id = $this->get_first_line_item_id( $order );
+
+		// Amount-only refund (qty 0) consumes the line's full monetary value while
+		// leaving its quantity untouched.
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 50.00,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 0,
+						'refund_total' => 50.00,
+					),
+				),
+			)
+		);
+
+		$data = $this->get_order_response( $order->get_id() );
+
+		$this->assertTrue( $data['can_be_refunded'], 'Order with a remaining amount should stay refundable.' );
+		$this->assertFalse( $data['line_items'][0]['can_be_refunded'], 'A line with no remaining value must not be refundable even with remaining quantity.' );
+	}
+
+	/**
 	 * @testdox Non-refundable statuses report can_be_refunded false and refundable statuses true.
 	 * @dataProvider status_provider
 	 *

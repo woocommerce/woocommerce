@@ -572,9 +572,24 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			foreach ( $data['line_items'] as &$line_item_data ) {
 				$item = $order_items[ $line_item_data['id'] ] ?? null;
 
-				$line_item_data['can_be_refunded'] = $item instanceof WC_Order_Item_Product
-					&& 0 !== $item->get_product_id()
-					&& ( $item->get_quantity() + ( $refund_data['qtys'][ $item->get_id() ] ?? 0 ) ) > 0;
+				if ( ! $item instanceof WC_Order_Item_Product ) {
+					$line_item_data['can_be_refunded'] = false;
+					continue;
+				}
+
+				// A product line is refundable when it has remaining quantity AND remaining
+				// monetary value. Amount-only refunds (qty 0) can exhaust a line's value
+				// while leaving its quantity untouched; without the value check the field
+				// would advertise a line the refund endpoints reject as already refunded.
+				// Zero-priced lines carry no value, so they stay refundable by quantity
+				// alone (a restock-only refund). Mirrors the wc/v4 Orders schema.
+				$line_gross          = NumberUtil::round( abs( (float) $item->get_total() + (float) $item->get_total_tax() ), $decimals );
+				$line_refunded       = abs( (float) ( $refund_data['totals'][ $item->get_id() ] ?? 0.0 ) );
+				$has_remaining_value = 0.0 === $line_gross || NumberUtil::round( $line_gross - $line_refunded, $decimals ) > 0;
+
+				$line_item_data['can_be_refunded'] = 0 !== $item->get_product_id()
+					&& ( $item->get_quantity() + ( $refund_data['qtys'][ $item->get_id() ] ?? 0 ) ) > 0
+					&& $has_remaining_value;
 			}
 			unset( $line_item_data );
 		}
