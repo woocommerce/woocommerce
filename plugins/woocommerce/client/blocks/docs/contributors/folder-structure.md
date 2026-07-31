@@ -153,7 +153,7 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 │ │ ├── blocks-checkout-events
 │ │ ├── blocks-components
 │ │ ├── blocks-registry
-│ │ ├── prices
+│ │ ├── price-format
 │ │ ├── settings
 │ │ ├── shared-context
 │ │ ├── shared-hocs
