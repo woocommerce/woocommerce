@@ -157,9 +157,19 @@ class OrderControllerTests extends TestCase {
 		$this->expectExceptionCode( 409 );
 		$this->expectExceptionMessage( '"fake-coupon" was removed from the cart. Please enter a valid email at checkout to use coupon code &quot;fake-coupon&quot;.' );
 
-		$order  = WC_Helper_Order::create_order();
-		$coupon = CouponHelper::create_coupon( 'fake-coupon', 'publish', array( 'customer_email' => 'random-email@example.com' ) );
-		$order->add_coupon( $coupon->get_code() );
+		$order       = WC_Helper_Order::create_order();
+		$coupon      = CouponHelper::create_coupon( 'fake-coupon', 'publish', array( 'customer_email' => 'random-email@example.com' ) );
+		$coupon_item = new \WC_Order_Item_Coupon();
+		$coupon_item->set_props(
+			array(
+				'code'         => $coupon->get_code(),
+				'discount'     => 0,
+				'discount_tax' => 0,
+				'order_id'     => $order->get_id(),
+			)
+		);
+		$coupon_item->save();
+		$order->add_item( $coupon_item );
 		$order->save();
 		$this->assertEquals( array( 'fake-coupon' ), $order->get_coupon_codes() );
 
@@ -179,9 +189,19 @@ class OrderControllerTests extends TestCase {
 		$this->expectExceptionCode( 409 );
 		$this->expectExceptionMessage( '"fake-coupon" was removed from the order. Please enter a valid email at checkout to use coupon code &quot;fake-coupon&quot;.' );
 
-		$order  = WC_Helper_Order::create_order();
-		$coupon = CouponHelper::create_coupon( 'fake-coupon', 'publish', array( 'customer_email' => 'random-email@example.com' ) );
-		$order->add_coupon( $coupon->get_code() );
+		$order       = WC_Helper_Order::create_order();
+		$coupon      = CouponHelper::create_coupon( 'fake-coupon', 'publish', array( 'customer_email' => 'random-email@example.com' ) );
+		$coupon_item = new \WC_Order_Item_Coupon();
+		$coupon_item->set_props(
+			array(
+				'code'         => $coupon->get_code(),
+				'discount'     => 0,
+				'discount_tax' => 0,
+				'order_id'     => $order->get_id(),
+			)
+		);
+		$coupon_item->save();
+		$order->add_item( $coupon_item );
 		$order->save();
 		$this->assertEquals( array( 'fake-coupon' ), $order->get_coupon_codes() );
 
