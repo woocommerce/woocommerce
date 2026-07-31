@@ -126,12 +126,12 @@ const ValidatedTextInput = forwardRef<
 					customValidationRef.current( inputObject ) &&
 					errorsHidden
 				) {
-					clearValidationError( errorIdString );
+					void clearValidationError( errorIdString );
 					return;
 				}
 
 				if ( ! errorsHidden ) {
-					showValidationError( errorIdString );
+					void showValidationError( errorIdString );
 				}
 
 				const validityMessage = getValidityMessageForInput(
@@ -141,7 +141,7 @@ const ValidatedTextInput = forwardRef<
 				);
 
 				if ( validityMessage ) {
-					setValidationErrors( {
+					void setValidationErrors( {
 						[ errorIdString ]: {
 							message: validityMessage,
 							hidden: errorsHidden,
@@ -249,7 +249,7 @@ const ValidatedTextInput = forwardRef<
 		// Remove validation errors when unmounted.
 		useEffect( () => {
 			return () => {
-				clearValidationError( errorIdString );
+				void clearValidationError( errorIdString );
 			};
 		}, [ clearValidationError, errorIdString ] );
 
@@ -288,7 +288,7 @@ const ValidatedTextInput = forwardRef<
 				ref={ inputRef }
 				onChange={ ( newValue ) => {
 					// Hide errors while typing.
-					hideValidationError( errorIdString );
+					void hideValidationError( errorIdString );
 
 					// Validate the input value.
 					validateInput( true );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add stricter checks for order re-use in AbandonedCartRecovery unit tests

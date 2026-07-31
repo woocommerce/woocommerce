@@ -190,6 +190,29 @@ class WC_Payment_Gateways {
 	 * @since 8.5.0
 	 */
 	private function payment_gateway_settings_option_changed( $gateway, $value, $option, $old_value = null ) {
+		if ( ! is_array( $value ) || ( null !== $old_value && ! is_array( $old_value ) ) ) {
+			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+
+			if ( ! is_array( $value ) ) {
+				$logger->warning(
+					sprintf( 'New payment gateway settings for "%s" were not an array; using gateway defaults for transition handling.', $option ),
+					array( 'source' => 'payment-gateways' )
+				);
+			}
+
+			if ( null !== $old_value && ! is_array( $old_value ) ) {
+				$logger->warning(
+					sprintf( 'Previous payment gateway settings for "%s" were not an array; using gateway defaults for transition handling.', $option ),
+					array( 'source' => 'payment-gateways' )
+				);
+			}
+
+			$value = $this->normalize_gateway_settings_for_transition( $gateway, $value );
+			if ( null !== $old_value ) {
+				$old_value = $this->normalize_gateway_settings_for_transition( $gateway, $old_value );
+			}
+		}
+
 		if ( $this->was_gateway_enabled( $value, $old_value ) ) {
 			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
 			$logger->info( sprintf( 'Payment gateway enabled: "%s"', $gateway->get_method_title() ) );
@@ -215,6 +238,25 @@ class WC_Payment_Gateways {
 			// This is a change to a payment gateway's settings and it was just disabled. Let's track it.
 			$this->record_gateway_event( 'disable', $gateway );
 		}
+	}
+
+	/**
+	 * Normalize gateway settings for transition handling.
+	 *
+	 * @param WC_Payment_Gateway $gateway  Payment gateway.
+	 * @param mixed              $settings Gateway settings.
+	 * @return array Normalized gateway settings.
+	 */
+	private function normalize_gateway_settings_for_transition( $gateway, $settings ) {
+		if ( is_array( $settings ) ) {
+			return $settings;
+		}
+
+		$form_fields     = $gateway->get_form_fields();
+		$enabled_field   = $form_fields['enabled'] ?? array();
+		$enabled_default = $gateway->get_field_default( $enabled_field );
+
+		return array( 'enabled' => 'yes' === $enabled_default ? 'yes' : 'no' );
 	}
 
 	/**

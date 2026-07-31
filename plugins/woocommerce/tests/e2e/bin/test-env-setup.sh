@@ -27,9 +27,6 @@ fi
 echo -e 'Activate WooCommerce \n'
 $WP_CLI_PREFIX wp plugin activate woocommerce
 
-echo -e 'Install twentytwenty, twentytwentytwo and storefront themes \n'
-$WP_CLI_PREFIX wp theme install storefront twentytwenty twentytwentytwo &
-
 echo -e 'Activate default theme \n'
 $WP_CLI_PREFIX wp theme activate twentytwentythree
 

@@ -116,7 +116,9 @@ describe( 'withCategory Component', () => {
 			mockUtils.getCategory.mockImplementation( () =>
 				Promise.reject( error )
 			);
-			mockBaseUtils.formatError.mockImplementation( () => formattedError );
+			mockBaseUtils.formatError.mockImplementation(
+				() => formattedError
+			);
 			await renderComponent();
 		} );
 
