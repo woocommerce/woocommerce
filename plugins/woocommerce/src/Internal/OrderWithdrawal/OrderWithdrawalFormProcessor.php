@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Throwable;
 use WC_Geolocation;
@@ -281,6 +282,7 @@ final class OrderWithdrawalFormProcessor {
 			}
 
 			$this->add_order_withdrawal_note( $matched_order, $data );
+			$this->add_order_withdrawal_inbox_note( $matched_order );
 		}
 
 		if ( ! $this->send_order_withdrawal_emails( $data, $matched_order ) ) {
@@ -289,8 +291,6 @@ final class OrderWithdrawalFormProcessor {
 
 			return false;
 		}
-
-		$this->add_order_withdrawal_inbox_note( $data, $matched_order );
 
 		if ( $matched_order ) {
 			$this->mark_order_withdrawal_requested( $matched_order );
@@ -488,24 +488,31 @@ final class OrderWithdrawalFormProcessor {
 	/**
 	 * Add a withdrawal request notification to the merchant's WooCommerce inbox.
 	 *
-	 * @param array<string,string> $data          Form data.
-	 * @param WC_Order|null        $matched_order Matched order, if found.
+	 * @param WC_Order $matched_order Matched order.
 	 */
-	private function add_order_withdrawal_inbox_note( array $data, ?WC_Order $matched_order ): void {
+	private function add_order_withdrawal_inbox_note( WC_Order $matched_order ): void {
+		if ( $this->has_order_withdrawal_request( $matched_order ) ) {
+			return;
+		}
+
 		try {
 			$note = new Note();
 			$note->set_title( __( 'Withdraw Order Request', 'woocommerce' ) );
-			$note->set_content( $this->get_inbox_note_content( $data, $matched_order ) );
+			$note->set_content(
+				sprintf(
+				/* translators: %s: order number. */
+					__( 'A customer submitted a withdrawal request for order %s. Review the matched order to confirm the request details.', 'woocommerce' ),
+					$matched_order->get_order_number()
+				)
+			);
 			$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-			$note->set_name( $this->get_inbox_note_name( $data, $matched_order ) );
+			$note->set_name( self::INBOX_NOTE_NAME_PREFIX . 'order-' . $matched_order->get_id() );
 			$note->set_source( 'woocommerce-admin' );
 
-			if ( $matched_order instanceof WC_Order ) {
-				$order_url = $matched_order->get_edit_order_url();
+			$order_url = $matched_order->get_edit_order_url();
 
-				if ( '' !== $order_url ) {
-					$note->add_action( 'view-order', __( 'View order', 'woocommerce' ), $order_url );
-				}
+			if ( '' !== $order_url ) {
+				$note->add_action( 'view-order', __( 'View order', 'woocommerce' ), $order_url );
 			}
 
 			$note->save();
@@ -515,50 +522,22 @@ final class OrderWithdrawalFormProcessor {
 	}
 
 	/**
-	 * Get the content for the merchant inbox notification.
+	 * Delete the withdrawal request inbox notification associated with an order.
 	 *
-	 * @param array<string,string> $data          Form data.
-	 * @param WC_Order|null        $matched_order Matched order, if found.
+	 * @param int|WC_Order $order Order ID or order object.
 	 */
-	private function get_inbox_note_content( array $data, ?WC_Order $matched_order ): string {
-		$content = sprintf(
-			/* translators: 1: customer name, 2: customer email address, 3: order number submitted by the customer. */
-			__( 'Order withdrawal requested by %1$s (%2$s) for order %3$s.', 'woocommerce' ),
-			$this->get_customer_name( $data ),
-			$data[ self::FIELD_EMAIL ],
-			$data[ self::FIELD_ORDER_NUMBER ]
-		);
+	public function delete_order_withdrawal_inbox_note_for_order( $order ): void {
+		$order_id = $order instanceof WC_Order ? $order->get_id() : absint( $order );
 
-		if ( self::WITHDRAWAL_TYPE_SPECIFIC === $data[ self::FIELD_WITHDRAWAL_TYPE ] ) {
-			$content .= ' ' . sprintf(
-				/* translators: %s: items the customer listed for partial withdrawal. */
-				__( 'Items requested for withdrawal: %s', 'woocommerce' ),
-				$data[ self::FIELD_ADDITIONAL_DETAILS ]
-			);
+		if ( 0 === $order_id ) {
+			return;
 		}
 
-		if ( ! $matched_order instanceof WC_Order ) {
-			$content .= ' ' . __( 'WooCommerce could not match this request to an order automatically.', 'woocommerce' );
+		try {
+			Notes::delete_notes_with_name( self::INBOX_NOTE_NAME_PREFIX . 'order-' . $order_id );
+		} catch ( Throwable $e ) {
+			$this->log_inbox_note_error( $e );
 		}
-
-		return $content;
-	}
-
-	/**
-	 * Get a unique name for the merchant inbox notification.
-	 *
-	 * @param array<string,string> $data          Form data.
-	 * @param WC_Order|null        $matched_order Matched order, if found.
-	 */
-	private function get_inbox_note_name( array $data, ?WC_Order $matched_order ): string {
-		if ( $matched_order instanceof WC_Order ) {
-			return self::INBOX_NOTE_NAME_PREFIX . 'order-' . $matched_order->get_id();
-		}
-
-		return self::INBOX_NOTE_NAME_PREFIX . 'unmatched-' . hash(
-			'sha256',
-			strtolower( trim( $data[ self::FIELD_EMAIL ] ) ) . '|' . $data[ self::FIELD_ORDER_NUMBER ] . '|' . microtime()
-		);
 	}
 
 	/**
