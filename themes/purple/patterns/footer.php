@@ -70,8 +70,8 @@
 
 <!-- wp:site-title {"level":0,"style":{"typography":{"fontStyle":"normal","fontWeight":"300","textTransform":"none","letterSpacing":"0px"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} /-->
 
-<!-- wp:paragraph {"className":"underline-link","style":{"typography":{"textAlign":"left"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
-<p class="has-text-align-left underline-link has-theme-4-color has-text-color has-link-color has-small-font-size"><?php
+<!-- wp:paragraph {"style":{"typography":{"textAlign":"left"},"elements":{"link":{"color":{"text":"var:preset|color|theme-4"}}}},"textColor":"theme-4","fontSize":"small"} -->
+<p class="has-text-align-left has-theme-4-color has-text-color has-link-color has-small-font-size"><?php
 	printf(
 		/* translators: %1$s: opening anchor tag. %2$s: closing anchor tag. */
 		esc_html__( 'All rights reserved. Designed with %1$sWooCommerce%2$s.', 'purple' ),

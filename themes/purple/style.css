@@ -18,13 +18,13 @@ Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blo
    Utilities
    ========================================================================== */
 
-/* Utility class for underlined links. */
-.underline-link a {
-	text-decoration: underline;
-}
-
-.underline-link a:hover {
-	text-decoration: none;
+/*
+ * Link styles
+ * https://github.com/WordPress/gutenberg/issues/42319
+ */
+a {
+	text-decoration-thickness: max(0.025em, 1px) !important;
+	text-underline-offset: 0.15em;
 }
 
 /* Add a transition state for buttons. */
@@ -80,6 +80,18 @@ textarea {
 .wc-block-components-drawer__screen-overlay .wc-block-components-drawer,
 .wc-block-components-drawer .wp-block-woocommerce-mini-cart-contents {
 	background-color: var(--wp--preset--color--theme-1);
+}
+
+/* Product name links in the mini cart drawer and the cart block are
+ * WooCommerce components, not blocks, so the chrome opt-outs in theme.json
+ * can't reach them; their context makes them clearly interactive, so skip
+ * the content-link underline here too. */
+a.wc-block-components-product-name {
+	text-decoration: none;
+}
+
+a.wc-block-components-product-name:hover {
+	text-decoration: underline;
 }
 
 /* WooCommerce's outlined component buttons (e.g. the mini cart "View cart")
@@ -242,10 +254,6 @@ textarea {
 .woocommerce-LostPassword.lost_password {
 	margin-bottom: 0;
 	margin-top: var(--wp--preset--spacing--50);
-}
-
-.woocommerce-MyAccount-content a:where(:not(.button):not(.wp-element-button)) {
-	text-decoration: underline;
 }
 
 /* WOOPRD-1561: My Account address styles. */
@@ -439,17 +447,6 @@ textarea {
 /* ==========================================================================
    WooCommerce — Single product
    ========================================================================== */
-
-/* Underline links in the product summary and description; remove on hover to match .underline-link. */
-.wc-block-components-product-summary a,
-.wc-block-product-description a {
-	text-decoration: underline;
-}
-
-.wc-block-components-product-summary a:hover,
-.wc-block-product-description a:hover {
-	text-decoration: none;
-}
 
 .wp-block-product-specifications-item__value p {
 	margin: 0

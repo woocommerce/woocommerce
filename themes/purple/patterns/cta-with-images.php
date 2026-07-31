@@ -40,8 +40,8 @@
 <h2 class="wp-block-heading has-text-align-center"><?php esc_html_e( 'A brighter, better wardrobe', 'purple' ); ?></h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"className":"underline-link","style":{"typography":{"textAlign":"center"}}} -->
-<p class="has-text-align-center underline-link"><a href="<?php echo esc_url( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' ) ); ?>"><?php esc_html_e( 'Shop now', 'purple' ); ?></a></p>
+<!-- wp:paragraph {"style":{"typography":{"textAlign":"center"}}} -->
+<p class="has-text-align-center"><a href="<?php echo esc_url( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' ) ); ?>"><?php esc_html_e( 'Shop now', 'purple' ); ?></a></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
