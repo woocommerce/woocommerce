@@ -495,9 +495,9 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not add a merchant inbox notification when no order matches.
+	 * @testdox Should skip the merchant inbox notification when no order matches.
 	 */
-	public function test_process_current_request_does_not_add_inbox_note_when_order_does_not_match(): void {
+	public function test_process_current_request_skips_inbox_note_when_order_does_not_match(): void {
 		$order   = $this->create_order_for_form_data(
 			array(
 				OrderWithdrawalFormProcessor::FIELD_EMAIL => 'different@example.test',
