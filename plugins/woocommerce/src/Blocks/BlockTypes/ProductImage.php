@@ -263,9 +263,13 @@ class ProductImage extends AbstractBlock {
 		$adjust_srcset = function ( $sources, $size_array, $image_src, $image_meta ) use ( $aspect_ratio ) {
 			if (
 				! is_string( $aspect_ratio ) ||
-				empty( $sources ) ||
-				empty( $image_meta['width'] ) ||
-				empty( $image_meta['height'] )
+				! is_array( $sources ) ||
+				! is_array( $image_meta ) ||
+				! isset( $image_meta['width'], $image_meta['height'] ) ||
+				! is_numeric( $image_meta['width'] ) ||
+				! is_numeric( $image_meta['height'] ) ||
+				$image_meta['width'] <= 0 ||
+				$image_meta['height'] <= 0
 			) {
 				return $sources;
 			}
