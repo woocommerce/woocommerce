@@ -376,8 +376,8 @@ class ProductImage extends \WP_UnitTestCase {
 		$default_markup  = $this->render_product_image_block( $data['product'], '{"imageSizing":"single"}' );
 		$portrait_markup = $this->render_product_image_block( $data['product'], '{"aspectRatio":"3/4"}' );
 
-		$this->assertStringContainsString( 'http://localhost:8186/wp-content/uploads/wide-image-1024x512.jpg 1024w', $default_markup );
-		$this->assertStringContainsString( 'http://localhost:8186/wp-content/uploads/wide-image-1024x512.jpg 384w', $portrait_markup );
+		$this->assertStringContainsString( 'wide-image-1024x512.jpg 1024w', $default_markup );
+		$this->assertStringContainsString( 'wide-image-1024x512.jpg 384w', $portrait_markup );
 
 		$data['product']->delete( true );
 		wp_delete_attachment( $data['image_id'], true );
