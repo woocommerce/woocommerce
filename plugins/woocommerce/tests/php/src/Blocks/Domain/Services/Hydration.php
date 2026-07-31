@@ -95,4 +95,22 @@ class Hydration extends TestCase {
 
 		$this->assertEmpty( $response );
 	}
+
+	/**
+	 * @testDox Hydrating a cart route leaves the cart context as it found it.
+	 */
+	public function test_cart_context_is_restored_after_hydration() {
+		// Set the context explicitly rather than reading whatever the previous test left behind:
+		// this is the state a front-end render starts in, and the assertion below is only
+		// meaningful against a known starting point.
+		WC()->cart->cart_context = 'shortcode';
+
+		$this->sut->get_rest_api_response_data( '/wc/store/v1/cart' );
+
+		$this->assertSame(
+			'shortcode',
+			WC()->cart->cart_context,
+			'Hydration must not leak the store-api cart context into the surrounding request.'
+		);
+	}
 }
