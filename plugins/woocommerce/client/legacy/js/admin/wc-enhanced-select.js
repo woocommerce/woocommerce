@@ -268,22 +268,20 @@ jQuery( function ( $ ) {
 								dataType: 'json',
 								delay: 250,
 								data: function ( params ) {
-									var exclude = [];
+									let exclude = $( this ).data( 'exclude' );
+									const currentValue = $( this ).val();
 
-									if ( $( this ).data( 'exclude' ) ) {
-										exclude = String(
-											$( this ).data( 'exclude' )
-										).split( ',' );
-									}
-
-									// Hide already selected options from the results, so a re-click cannot silently deselect them.
+									// Hide already selected options from the results in multiple selects.
 									if (
-										$( this ).prop( 'multiple' ) &&
-										$( this ).val()
+										Array.isArray( currentValue ) &&
+										$( this ).prop( 'multiple' )
 									) {
-										exclude = exclude.concat(
-											$( this ).val()
-										);
+										const defaultExcluded =
+											String( exclude ).split( ',' );
+										exclude = [
+											...defaultExcluded,
+											...currentValue,
+										];
 									}
 
 									return {
