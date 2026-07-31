@@ -24,6 +24,15 @@ This page provides guidance for troubleshooting and recovering from issues that 
 
 ⚠️ _Do not re-run any workflows until you understand the cause of the failure._ Re-running without fixing the root issue can make things more complicated.
 
+### The Code Freeze workflow failed
+
+Two known failure modes are false positives rather than real blockers:
+
+- **The "open automation PRs" check fails.** This check flags _any_ open PR authored by the release automation, not just PRs that could affect the feature freeze. If the open PRs are unrelated to the freeze, the check can be temporarily disabled and the workflow re-run.
+- **"Webhook request failed: Duplicate post detected (409)".** This means a Call for Testing post for the same version already exists (usually left over from earlier testing), so the workflow couldn't create a new one. Remove or account for the stale post and re-run.
+
+In both cases, verify that the parts of the workflow that did run (branch creation, version bumps) completed before re-running.
+
 ### A workflow failed or timed out while creating a PR or pushing changes
 
 Workflows that perform Git operations (such as `Release: Bump version number` or `Release: Build ZIP file`) can occasionally fail with a timeout while creating a PR or pushing to the repository. This is caused by a GitHub security check that compares workflow files against their `trunk` versions during the operation: when the changeset between the release branch and `trunk` is large, the check can time out.
@@ -48,6 +57,13 @@ During the release process, you may encounter CI test failures on release-relate
 5. **Handle complex cases**: If backporting isn't possible due to dependencies or the cause isn't clear, document what you've found and ask for help in the release Slack channel.
 
 Note that a failing check that is not required and is clearly unrelated to the change (for example, a comparison job that references code only present on trunk) does not have to block merging a release-related PR. When in doubt, ask in the release Slack channel before merging over a failure.
+
+### The "Build ZIP file" workflow refuses to build because of open PRs
+
+The blocker check in this workflow looks for open PRs whose **base branch is the release branch** — milestone membership is irrelevant, so removing a milestone from a PR won't unblock the build. Every open PR targeting `release/X.Y` has to be addressed:
+
+- Merge the ones that belong in the release.
+- Close stale or redundant ones — including auto-generated cherry-pick/backport PRs whose changes are already present on the release branch. Leave a short comment explaining why, and delete their branches.
 
 ### Something looks wrong in the final release ZIP. Can I start over?
 
@@ -91,6 +107,8 @@ Common errors and what they mean:
 | `E175013: Access to '/!svn/me' forbidden` | Invalid or outdated SVN credentials | Update the SVN credentials secret in the repository and re-run |
 | `E200009: a peg revision is not allowed here` | A file name in the build contains an `@` character, which SVN interprets as a peg revision | Escape the `@` in the workflow's SVN operations |
 
+**"The released ZIP differs from SVN trunk" reports.** SVN commits are atomic, so a partially uploaded release is not a plausible explanation. The usual cause is that the comparison was made against SVN `trunk`, which is updated on every upload — including prereleases — and can therefore hold a _newer_ version than the latest point release. The source of truth for any given release is its SVN **tag**, not `trunk`.
+
 ### A serious bug was detected during internal checks / monitoring
 
 For RC and stable releases, deploying to our staging environment and monitoring for errors is required before the release is made publicly available. If a serious bug is detected during this monitoring period, follow these steps:
@@ -118,6 +136,8 @@ If a severe regression or bug is discovered (e.g., checkout failure or unrecover
    - Use the [`Release: Update stable tag`](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) workflow, making sure to check the _Revert_ option to allow downgrading.
    - Merge any auto-generated PRs right away.
 3. Follow the [Point Releases guide](/docs/contribution/releases/point-releases) to create a tracking issue, prepare the fix, and ship the patch.
+
+⚠️ _After reverting the stable tag, make sure the upcoming point release doesn't silently overwrite it._ Update the `Stable tag` in the release branch's `readme.txt` to the reverted version as well, so building the patch release doesn't move the tag forward again before the fix is confirmed. The stable tag is then bumped intentionally as part of the point release's own publishing steps.
 
 ### The release is out, but sites don't see the update yet
 
