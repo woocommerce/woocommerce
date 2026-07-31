@@ -26881,90 +26881,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
 		-
-			message: '#^Cannot call method get_type\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_catalog_visibility\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_description\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_featured\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_menu_order\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_name\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_purchase_note\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_reviews_allowed\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_short_description\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_slug\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_status\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_tax_class\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_tax_status\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Cannot call method set_virtual\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
 			message: '#^Method WC_REST_Products_V2_Controller\:\:batch_items\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -27098,12 +27014,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$product of method WC_REST_Products_V2_Controller\:\:get_product_data\(\) expects WC_Product, WC_Data given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Parameter \#1 \$product of method WC_REST_Products_V2_Controller\:\:save_product_shipping_data\(\) expects WC_Product, object\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
@@ -30016,96 +29926,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
 
 		-
-			message: '#^Cannot call method get_type\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_catalog_visibility\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_description\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_featured\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_menu_order\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_name\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_post_password\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_purchase_note\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_reviews_allowed\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_short_description\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_slug\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_status\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_tax_class\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_tax_status\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method set_virtual\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
 			message: '#^Method WC_Product\:\:has_options\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -30229,12 +30049,6 @@ parameters:
 			message: '#^Parameter \#1 \$post_type of function is_post_type_viewable expects string\|WP_Post_Type, WP_Post_Type\|null given\.$#'
 			identifier: argument.type
 			count: 2
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Parameter \#1 \$product of method WC_REST_Products_V2_Controller\:\:save_product_shipping_data\(\) expects WC_Product, object\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
 
 		-
@@ -65467,96 +65281,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
-			message: '#^Cannot call method get_type\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_catalog_visibility\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_description\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_featured\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_menu_order\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_name\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_post_password\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_purchase_note\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_reviews_allowed\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_short_description\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_slug\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_status\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_tax_class\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_tax_status\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method set_virtual\(\) on object\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\Controller\:\:create_item\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -65702,12 +65426,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\Controller\:\:set_product_images\(\) expects Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product, WC_Product given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Parameter \#1 \$product of method WC_REST_Products_V2_Controller\:\:save_product_shipping_data\(\) expects WC_Product, object\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php

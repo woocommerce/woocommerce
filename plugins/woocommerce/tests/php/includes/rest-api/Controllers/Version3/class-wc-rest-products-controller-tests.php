@@ -2226,7 +2226,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$variable_product = WC_Helper_Product::create_variation_product();
 		$product_id       = $variable_product->get_children()[0];
 
-		$custom_data_store = new class() extends WC_Product_Data_Store_CPT {
+		$custom_data_store           = new class() extends WC_Product_Data_Store_CPT {
 			/**
 			 * Number of products read through the extension data store.
 			 *
@@ -2244,7 +2244,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 				$product->set_object_read( true );
 			}
 		};
-		$register_custom_data_store = static function ( $data_stores ) use ( $custom_data_store ) {
+		$register_custom_data_store  = static function ( $data_stores ) use ( $custom_data_store ) {
 			$data_stores['product-simple'] = $custom_data_store;
 			return $data_stores;
 		};
