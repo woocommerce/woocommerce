@@ -71,7 +71,7 @@ class PushNotifications {
 	public function on_init(): void {
 		// The status endpoint stays available even when push notifications are
 		// disabled, so clients can discover the state and fall back if needed.
-		( new PushNotificationStatusRestController() )->register();
+		wc_get_container()->get( PushNotificationStatusRestController::class )->register();
 
 		if ( ! $this->should_be_enabled() ) {
 			return;

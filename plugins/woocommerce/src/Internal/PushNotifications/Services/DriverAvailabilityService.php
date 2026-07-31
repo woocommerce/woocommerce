@@ -7,9 +7,10 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Exception;
-use WC_Logger;
+use Throwable;
+use WC_Logger_Interface;
 
 /**
  * Reports which push notification drivers are installed and whether push
@@ -233,12 +234,13 @@ class DriverAvailabilityService {
 			$proxy = wc_get_container()->get( LegacyProxy::class );
 
 			return $check( $proxy->get_instance_of( JetpackConnectionManager::class ) );
-		} catch ( Exception $e ) {
+		} catch ( Throwable $e ) {
 			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
 
-			if ( $logger instanceof WC_Logger ) {
+			if ( $logger instanceof WC_Logger_Interface ) {
 				$logger->error(
-					'Error determining Jetpack connection state for push notifications: ' . $e->getMessage()
+					'Error determining Jetpack connection state for push notifications: ' . $e->getMessage(),
+					array( 'source' => PushNotifications::FEATURE_NAME )
 				);
 			}
 

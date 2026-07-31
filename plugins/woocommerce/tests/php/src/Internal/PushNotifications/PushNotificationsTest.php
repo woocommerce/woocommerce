@@ -107,7 +107,7 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 			->method( 'error' )
 			->with(
 				$this->stringContains( 'Error determining Jetpack connection state for push notifications' ),
-				$this->anything()
+				array( 'source' => PushNotifications::FEATURE_NAME )
 			);
 
 		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $logger_mock ) );

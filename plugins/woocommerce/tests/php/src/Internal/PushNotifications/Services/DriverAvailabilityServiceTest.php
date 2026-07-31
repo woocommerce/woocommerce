@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Services;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\DriverAvailabilityService;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
@@ -73,17 +74,19 @@ class DriverAvailabilityServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Mocks the Jetpack connection manager so the given method returns the supplied value.
+	 * Mocks the Jetpack connection manager so both the blog and user connection
+	 * checks return the supplied value. Both are stubbed because get_status()
+	 * evaluates every driver, so leaving one unstubbed would run real Jetpack code.
 	 *
-	 * @param string $method The manager method to mock.
-	 * @param bool   $value  The value the method should return.
+	 * @param bool $connected The connection state the manager should report.
 	 */
-	private function mock_manager_method( string $method, bool $value ): void {
+	private function mock_jetpack_connection( bool $connected ): void {
 		$manager = $this->getMockBuilder( JetpackConnectionManager::class )
 			->disableOriginalConstructor()
-			->onlyMethods( array( $method ) )
+			->onlyMethods( array( 'is_connected', 'has_connected_owner' ) )
 			->getMock();
-		$manager->method( $method )->willReturn( $value );
+		$manager->method( 'is_connected' )->willReturn( $connected );
+		$manager->method( 'has_connected_owner' )->willReturn( $connected );
 
 		wc_get_container()->get( LegacyProxy::class )->register_class_mocks(
 			array( JetpackConnectionManager::class => $manager )
@@ -240,7 +243,7 @@ class DriverAvailabilityServiceTest extends WC_Unit_Test_Case {
 	 * @param bool $is_connected Whether Jetpack reports a blog connection.
 	 */
 	public function test_is_remote_proxy_available_reflects_real_blog_connection( bool $is_connected ) {
-		$this->mock_manager_method( 'is_connected', $is_connected );
+		$this->mock_jetpack_connection( $is_connected );
 
 		$this->assertSame( $is_connected, ( new DriverAvailabilityService() )->is_remote_proxy_available() );
 	}
@@ -254,7 +257,7 @@ class DriverAvailabilityServiceTest extends WC_Unit_Test_Case {
 	 * @param bool $has_owner Whether Jetpack reports a connected owner.
 	 */
 	public function test_jetpack_sync_connected_reflects_real_user_connection( bool $has_owner ) {
-		$this->mock_manager_method( 'has_connected_owner', $has_owner );
+		$this->mock_jetpack_connection( $has_owner );
 
 		/**
 		 * A service with only the Jetpack Sync package-detection seam stubbed, so
@@ -282,7 +285,10 @@ class DriverAvailabilityServiceTest extends WC_Unit_Test_Case {
 		$logger_mock = $this->createMock( WC_Logger::class );
 		$logger_mock->expects( $this->once() )
 			->method( 'error' )
-			->with( $this->stringContains( 'Error determining Jetpack connection state for push notifications' ) );
+			->with(
+				$this->stringContains( 'Error determining Jetpack connection state for push notifications' ),
+				array( 'source' => PushNotifications::FEATURE_NAME )
+			);
 
 		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $logger_mock ) );
 
