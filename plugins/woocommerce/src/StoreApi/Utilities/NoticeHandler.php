@@ -44,7 +44,10 @@ class NoticeHandler {
 	 * For example, cart validation processes may add error notices to prevent checkout.
 	 * Since we're not rendering notices at all, we need to catch them and group them in a single WP_Error instance.
 	 *
-	 * This method will discard notices once complete.
+	 * Unlike `convert_notices_to_exceptions()`, this leaves the notice queue untouched. Callers
+	 * that need the notices cleared are expected to manage the queue themselves — see
+	 * `CartController::validate_cart_items()`, which snapshots it beforehand and restores it
+	 * afterwards so that notices raised by `woocommerce_check_cart_items` do not survive.
 	 *
 	 * @param string $error_code Error code for the thrown exceptions.
 	 *
