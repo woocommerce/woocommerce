@@ -12,9 +12,9 @@ use WP_UnitTestCase;
  */
 class BlockHooksTests extends WP_UnitTestCase {
 	/**
-	 * This variable holds our Product Query object.
+	 * The mock block providing the `register_hooked_block` callback under test.
 	 *
-	 * @var TestBlock
+	 * @var BlockHooksTestBlock
 	 */
 	protected static $block_instance;
 
@@ -26,13 +26,34 @@ class BlockHooksTests extends WP_UnitTestCase {
 	protected static $option_name = 'woocommerce_hooked_blocks_version';
 
 	/**
-	 * Initiate the mock object.
+	 * Instantiate the mock block once for the whole class.
+	 *
+	 * Constructing it registers the `woocommerce/test-block` block type, and the block
+	 * registry is not reset between tests — constructing it per test makes WordPress report
+	 * "Block type is already registered", which the incorrect-usage catcher turns into a
+	 * failure. The filter the tests actually exercise is (re)registered per test in `setUp()`.
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 
-		delete_option( self::$option_name );
 		self::$block_instance = new BlockHooksTestBlock();
+	}
+
+	/**
+	 * Register the hooked-block filter for every test.
+	 *
+	 * WordPress snapshots the hook globals once per process and restores that snapshot after
+	 * every test, so a filter registered before the snapshot is taken — from
+	 * `setUpBeforeClass`, where the block's constructor adds it — is dropped as soon as the
+	 * first test finishes. Every later test then asserts against a filter that is no longer
+	 * there and passes for the wrong reason. Re-adding it here, after `parent::setUp()`, keeps
+	 * it in place for each test and lets the restore take it away again afterwards.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		delete_option( self::$option_name );
+		add_filter( 'hooked_block_types', array( self::$block_instance, 'register_hooked_block' ), 9, 4 );
 	}
 
 	/**
