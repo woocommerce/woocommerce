@@ -7,7 +7,7 @@ import type { Notice } from '@woocommerce/stores/store-notices';
 /**
  * Internal dependencies
  */
-import type { Store, OptimisticCartItem } from '../cart';
+import type { Store, OptimisticCartItem, AddCartItemOutcome } from '../cart';
 
 type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
 
@@ -62,10 +62,10 @@ type CapturedRequest = {
 /**
  * Drives an Interactivity API async action generator to completion.
  *
- * Async actions are typed as `void` for consumers but are generators
- * internally. Each yielded value is awaited (resolving the batched cart
- * request and any dynamic imports) and the resolved value is fed back into the
- * generator until it is done.
+ * Async actions are typed as `void` (or a resolved value) for consumers but
+ * are generators internally. Each yielded value is awaited (resolving the
+ * batched cart request and any dynamic imports) and the resolved value is fed
+ * back into the generator until it is done.
  *
  * When a yielded promise rejects, the rejection is routed back into the
  * generator via `iterator.throw()` (mirroring the real Interactivity runtime),
@@ -74,9 +74,9 @@ type CapturedRequest = {
  * catch re-throws here so `await runAction(...)` still rejects.
  *
  * @param action The async action return value cast to a generator.
- * @return A promise that resolves once the generator has finished.
+ * @return A promise resolving to the generator's final (`done`) return value.
  */
-async function runAction( action: unknown ): Promise< void > {
+async function runAction( action: unknown ): Promise< unknown > {
 	const iterator = action as Generator< unknown, unknown, unknown >;
 	let next = iterator.next();
 	while ( ! next.done ) {
@@ -89,6 +89,7 @@ async function runAction( action: unknown ): Promise< void > {
 			next = iterator.throw( error );
 		}
 	}
+	return next.value;
 }
 
 /**
@@ -321,6 +322,86 @@ function mockBatchFetchFailing( {
 		}
 	) as unknown as typeof fetch;
 	return captured;
+}
+
+/**
+ * Installs a `global.fetch` mock whose batch responses reject only the
+ * mutation(s) targeting a specific product id, letting every other mutation
+ * in the same batch succeed.
+ *
+ * Unlike {@link mockBatchFetchFailing} (which fails every request matching a
+ * given path), this discriminates by the posted product id so two mutations
+ * hitting the same endpoint (e.g. two `add-item` calls) can settle
+ * differently within one batch — reproducing one accepted and one rejected
+ * product in the same request cycle.
+ *
+ * @param options           Failure configuration.
+ * @param options.failForId The product id whose mutation(s) should fail.
+ * @param options.status    The HTTP status to report for the failed mutation.
+ * @param options.code      The error code carried in the failed response body.
+ * @param options.message   The human-readable error message in the body.
+ */
+function mockBatchFetchFailingProduct( {
+	failForId,
+	status = 400,
+	code = 'woocommerce_rest_cart_product_no_stock',
+	message = 'You cannot add that amount to the cart.',
+}: {
+	failForId: number;
+	status?: number;
+	code?: string;
+	message?: string;
+} ): void {
+	global.fetch = jest.fn(
+		async ( _url: RequestInfo | URL, init?: RequestInit ) => {
+			// The GET refresh has no body; reply with an empty cart and a nonce.
+			if ( ! init?.body ) {
+				return new Response(
+					JSON.stringify( { items: [], totals: {}, errors: [] } ),
+					{ headers: { Nonce: 'test-nonce-123' } }
+				);
+			}
+			const parsed = JSON.parse( init.body as string ) as {
+				requests: CapturedRequest[];
+			};
+			const serverCart = JSON.parse( JSON.stringify( mockState.cart ) );
+			const responses = parsed.requests.map( ( request ) =>
+				request.body.id === failForId
+					? { status, body: { code, message } }
+					: { status: 200, body: serverCart }
+			);
+			return new Response( JSON.stringify( { responses } ), {
+				headers: { Nonce: 'test-nonce-123' },
+			} );
+		}
+	) as unknown as typeof fetch;
+}
+
+/**
+ * Installs a `global.fetch` mock whose batch request fails entirely — a
+ * non-2xx response to the outer `/batch` POST itself, not a per-item
+ * rejection — reproducing a whole-batch/transport failure with no
+ * per-product server error code.
+ *
+ * The GET refresh still resolves the nonce gate. The batch POST resolves with
+ * a non-2xx HTTP status, which the mutation queue reports as one `Error`
+ * (lacking a `code` property) shared by every tracked request in the cycle.
+ */
+function mockBatchFetchWholeBatchFailure(): void {
+	global.fetch = jest.fn(
+		async ( _url: RequestInfo | URL, init?: RequestInit ) => {
+			// The GET refresh has no body; reply with an empty cart and a nonce.
+			if ( ! init?.body ) {
+				return new Response(
+					JSON.stringify( { items: [], totals: {}, errors: [] } ),
+					{ headers: { Nonce: 'test-nonce-123' } }
+				);
+			}
+			// The whole batch request fails at the HTTP level (no per-item
+			// responses are ever parsed).
+			return new Response( 'Internal Server Error', { status: 500 } );
+		}
+	) as unknown as typeof fetch;
 }
 
 /**
@@ -598,7 +679,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						type: 'simple',
 					} )
 				)
-			).resolves.toBeUndefined();
+			).resolves.toEqual( { success: true } );
 
 			expect( captured ).toHaveLength( 1 );
 			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
@@ -620,7 +701,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 						type: 'simple',
 					} )
 				)
-			).resolves.toBeUndefined();
+			).resolves.toEqual( { success: true } );
 		} );
 
 		it( 'still throws when both quantity and quantityToAdd are passed together', async () => {
@@ -638,6 +719,161 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					} )
 				)
 			).rejects.toThrow();
+		} );
+	} );
+
+	describe( 'addCartItem resolved outcome', () => {
+		it( 'resolves { success: true } when the Store API accepts the request', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			const outcome = await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			expect( outcome ).toEqual( { success: true } );
+		} );
+
+		it( 'resolves { success: false, error: { code, message } } carrying the server-supplied code and message on a per-item rejection, without the promise rejecting', async () => {
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+				status: 400,
+				code: 'woocommerce_rest_product_out_of_stock',
+				message: 'You cannot add that amount to the cart.',
+			} );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			spyOnShowNoticeError();
+
+			const outcome = await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			expect( outcome ).toEqual( {
+				success: false,
+				error: {
+					code: 'woocommerce_rest_product_out_of_stock',
+					message: 'You cannot add that amount to the cart.',
+				},
+			} );
+		} );
+
+		it( 'resolves { success: false, error } with a non-empty message and no code on a whole-batch/transport failure', async () => {
+			mockBatchFetchWholeBatchFailure();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			spyOnShowNoticeError();
+
+			const outcome = ( await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			) ) as AddCartItemOutcome;
+
+			if ( outcome.success ) {
+				throw new Error(
+					'expected a failure outcome for a whole-batch/transport failure'
+				);
+			}
+			expect( typeof outcome.error.message ).toBe( 'string' );
+			expect( outcome.error.message.length ).toBeGreaterThan( 0 );
+			expect( outcome.error.code ).toBeUndefined();
+		} );
+
+		it( 'resolves each call in a shared batch with only its own product outcome, never a shared or last-write-wins value', async () => {
+			mockBatchFetchFailingProduct( {
+				failForId: 99,
+				code: 'woocommerce_rest_cart_product_no_stock',
+				message: 'You cannot add that amount to the cart.',
+			} );
+			const actions = await loadCartStore();
+			seedCart( [] );
+			spyOnShowNoticeError();
+
+			const [ acceptedOutcome, rejectedOutcome ] = await Promise.all( [
+				runAction(
+					actions.addCartItem( {
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 99,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+			] );
+
+			expect( acceptedOutcome ).toEqual( { success: true } );
+			expect( rejectedOutcome ).toEqual( {
+				success: false,
+				error: {
+					code: 'woocommerce_rest_cart_product_no_stock',
+					message: 'You cannot add that amount to the cart.',
+				},
+			} );
+		} );
+
+		it( 'still resolves { success: true } when a step after the successful request throws (post-success client bug)', async () => {
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+			spyOnShowNoticeError();
+			// Simulate a client bug in post-success processing (e.g. a notices
+			// import rejection or a11y chunk-load failure): the captured
+			// success outcome must survive this throw.
+			actions.updateNotices = jest.fn( () => {
+				throw new Error( 'post-success client bug' );
+			} ) as unknown as Store[ 'actions' ][ 'updateNotices' ];
+
+			const outcome = await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			expect( outcome ).toEqual( { success: true } );
+		} );
+
+		it( 'resolves { success: true } and omits unrelated cart.errors from the outcome', async () => {
+			mockBatchFetchReturning( {
+				items: [ makeKeyedLine( { id: 42, quantity: 4 } ) ],
+				totals: {},
+				errors: [
+					{
+						code: 'woocommerce_rest_cart_coupon_error',
+						message: 'The coupon has expired.',
+					},
+				],
+			} as unknown as Cart );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
+
+			const outcome = await runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+
+			expect( outcome ).toEqual( { success: true } );
 		} );
 	} );
 
