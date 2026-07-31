@@ -171,7 +171,7 @@ const ReviewsByCategoryEditor = ( {
 		);
 	};
 
-	if ( ! categoryIds || editMode ) {
+	if ( ! categoryIds || categoryIds.length === 0 || editMode ) {
 		return renderEditMode();
 	}
 
