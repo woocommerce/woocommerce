@@ -60,5 +60,5 @@ if ( appRoot ) {
 	);
 
 	// Render the Customer Effort Score Tracks.
-	renderCustomerEffortScoreTracks( appRoot );
+	renderCustomerEffortScoreTracks( appRoot, hydrateUser );
 }

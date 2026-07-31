@@ -14,6 +14,7 @@ import {
 	activityPanelStore,
 	ordersStore,
 	productsStore,
+	useUser,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
@@ -35,7 +36,7 @@ const PUBLISHED_PRODUCTS_QUERY_PARAMS = {
 	_fields: [ 'id' ],
 };
 
-export const ActivityPanel = () => {
+const ActivityPanelContent = () => {
 	const panelsData = useSelect( ( select ) => {
 		const {
 			getOrdersTotalCount,
@@ -182,4 +183,12 @@ export const ActivityPanel = () => {
 			} ) }
 		</Panel>
 	);
+};
+
+export const ActivityPanel = () => {
+	const { currentUserCan } = useUser();
+
+	return currentUserCan( 'manage_woocommerce' ) ? (
+		<ActivityPanelContent />
+	) : null;
 };

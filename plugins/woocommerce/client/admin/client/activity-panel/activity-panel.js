@@ -63,7 +63,12 @@ const SetupTasksPanel = lazy( () =>
 	)
 );
 
-export const ActivityPanel = ( { isEmbedded, query } ) => {
+const ActivityPanelContent = ( {
+	activityPanelCounts,
+	canManageWooCommerce,
+	isEmbedded,
+	query,
+} ) => {
 	const isHomescreen = query.page === 'wc-admin' && ! query.path;
 
 	const [ currentTab, setCurrentTab ] = useState( '' );
@@ -127,18 +132,15 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	);
 
 	const checkIfHasAbbreviatedNotifications = useCallback(
-		( select, setupTaskListHidden, thingsToDoNextCount ) => {
-			const counts =
-				select( activityPanelStore ).getActivityPanelCounts();
-
+		( setupTaskListHidden, thingsToDoNextCount ) => {
 			const isOrdersCardVisible = setupTaskListHidden
-				? ( counts?.orders_to_fulfill_count ?? 0 ) > 0
+				? ( activityPanelCounts?.orders_to_fulfill_count ?? 0 ) > 0
 				: false;
 			const isReviewsCardVisible = setupTaskListHidden
-				? ( counts?.reviews_to_moderate_count ?? 0 ) > 0
+				? ( activityPanelCounts?.reviews_to_moderate_count ?? 0 ) > 0
 				: false;
 			const isLowStockCardVisible = setupTaskListHidden
-				? ( counts?.products_low_in_stock_count ?? 0 ) > 0
+				? ( activityPanelCounts?.products_low_in_stock_count ?? 0 ) > 0
 				: false;
 
 			return (
@@ -149,7 +151,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				hasExtendedNotifications
 			);
 		},
-		[ hasExtendedNotifications ]
+		[ activityPanelCounts, hasExtendedNotifications ]
 	);
 
 	const {
@@ -170,7 +172,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			return {
 				hasUnreadNotes: checkIfHasUnreadNotes( select ),
 				hasAbbreviatedNotifications: checkIfHasAbbreviatedNotifications(
-					select,
 					setupTaskListHidden,
 					thingsToDoNextCount
 				),
@@ -189,8 +190,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	);
 
 	const { showCesModal } = useDispatch( CES_STORE_KEY );
-
-	const { currentUserCan } = useUser();
 
 	// Single decision point for a tab click. Side-effect tabs (Preview store,
 	// Feedback CES modal) bail out before any panel state is touched. The
@@ -279,7 +278,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				( isEmbedded || ! isHomescreen ) &&
 				! isPerformingSetupTask() &&
 				! isProductScreen() &&
-				currentUserCan( 'manage_woocommerce' ),
+				canManageWooCommerce,
 		};
 
 		const feedback = {
@@ -329,7 +328,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			title: __( 'Finish setup', 'woocommerce' ),
 			icon: <Icon icon={ listView } size={ 18 } />,
 			visible:
-				currentUserCan( 'manage_woocommerce' ) &&
+				canManageWooCommerce &&
 				! requestingTaskListOptions &&
 				! setupTaskListHidden &&
 				! setupTaskListComplete &&
@@ -341,14 +340,14 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			name: 'help',
 			icon: <Icon icon={ helpIcon } />,
 			visible:
-				currentUserCan( 'manage_woocommerce' ) &&
+				canManageWooCommerce &&
 				( ( isHomescreen && ! isEmbedded ) || isPerformingSetupTask() ),
 		};
 
 		const displayOptions = {
 			component: DisplayOptions,
 			visible:
-				currentUserCan( 'manage_woocommerce' ) &&
+				canManageWooCommerce &&
 				! isEmbedded &&
 				isHomescreen &&
 				! isPerformingSetupTask(),
@@ -467,6 +466,31 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				</Section>
 			</div>
 		</LayoutContextProvider>
+	);
+};
+
+const ActivityPanelWithCounts = ( props ) => {
+	const activityPanelCounts = useSelect(
+		( select ) => select( activityPanelStore ).getActivityPanelCounts(),
+		[]
+	);
+
+	return (
+		<ActivityPanelContent
+			{ ...props }
+			activityPanelCounts={ activityPanelCounts }
+			canManageWooCommerce
+		/>
+	);
+};
+
+export const ActivityPanel = ( props ) => {
+	const { currentUserCan } = useUser();
+
+	return currentUserCan( 'manage_woocommerce' ) ? (
+		<ActivityPanelWithCounts { ...props } />
+	) : (
+		<ActivityPanelContent { ...props } canManageWooCommerce={ false } />
 	);
 };
 

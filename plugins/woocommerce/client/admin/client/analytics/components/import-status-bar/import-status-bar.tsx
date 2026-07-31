@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { dateI18n } from '@wordpress/date';
 import { Button, Spinner } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
-import { useSettings } from '@woocommerce/data';
+import { useSettings, useUser } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -39,37 +39,18 @@ const formatStatusDate = ( date: string | null ): string => {
 };
 
 /**
- * Analytics Import Status Bar Component
+ * Analytics Import Status Bar Content
  *
  * Displays the current analytics import status including:
  * - Last processed date
  * - Next scheduled import time
  * - Manual "Update now" button
  *
- * Only displays in scheduled mode. Hidden in immediate mode.
- *
- * @return {JSX.Element|null} The status bar component or null if hidden
  */
-export function ImportStatusBar(): JSX.Element | null {
+function ImportStatusBarContent() {
 	const { status, isLoading, triggerImport, isTriggeringImport } =
 		useImportStatus();
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { wcAdminSettings } = useSettings( 'wc_admin', [
-		'wcAdminSettings',
-	] ) as unknown as {
-		wcAdminSettings: {
-			woocommerce_analytics_scheduled_import: 'yes' | 'no';
-		};
-	};
-
-	// Don't render if scheduled import is disabled (immediate mode)
-	// Use the value from the settings hook rather than the status object; accessing settings is faster because they are preloaded.
-	if (
-		! wcAdminSettings?.woocommerce_analytics_scheduled_import ||
-		wcAdminSettings.woocommerce_analytics_scheduled_import === 'no'
-	) {
-		return null;
-	}
 
 	/**
 	 * Handle manual import trigger
@@ -176,4 +157,39 @@ export function ImportStatusBar(): JSX.Element | null {
 			</div>
 		</div>
 	);
+}
+
+/**
+ * Mount the import status resolver only when scheduled imports are enabled.
+ */
+function ScheduledImportStatusBar() {
+	const { wcAdminSettings } = useSettings( 'wc_admin', [
+		'wcAdminSettings',
+	] ) as unknown as {
+		wcAdminSettings: {
+			woocommerce_analytics_scheduled_import: 'yes' | 'no';
+		};
+	};
+	const isScheduledImportEnabled =
+		wcAdminSettings?.woocommerce_analytics_scheduled_import === 'yes';
+
+	if ( ! isScheduledImportEnabled ) {
+		return null;
+	}
+
+	return <ImportStatusBarContent />;
+}
+
+/**
+ * Mount the scheduled-mode status UI only when the current user can access its
+ * protected endpoint.
+ */
+export function ImportStatusBar() {
+	const { currentUserCan } = useUser();
+
+	if ( ! currentUserCan( 'manage_woocommerce' ) ) {
+		return null;
+	}
+
+	return <ScheduledImportStatusBar />;
 }

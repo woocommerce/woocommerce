@@ -9,7 +9,13 @@ import {
 	createEvent,
 } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
-import { useUser } from '@woocommerce/data';
+import {
+	activityPanelStore,
+	notesStore,
+	optionsStore,
+	userStore,
+	useUser,
+} from '@woocommerce/data';
 import { useState } from '@wordpress/element';
 
 /**
@@ -249,6 +255,61 @@ describe( 'Activity Panel', () => {
 		);
 
 		expect( queryByRole( 'tab', { name: 'Finish setup' } ) ).toBeDefined();
+	} );
+
+	it.each( [
+		{
+			description:
+				'does not request Activity Panel counts without permission',
+			canManageWooCommerce: false,
+			expectedCalls: 0,
+		},
+		{
+			description: 'requests Activity Panel counts with permission',
+			canManageWooCommerce: true,
+			expectedCalls: 1,
+		},
+	] )( '$description', ( { canManageWooCommerce, expectedCalls } ) => {
+		const getActivityPanelCounts = jest.fn().mockReturnValue( {} );
+		const select = jest.fn( ( store ) => {
+			if ( store === activityPanelStore ) {
+				return { getActivityPanelCounts };
+			}
+
+			if ( store === notesStore ) {
+				return {
+					getNotes: jest.fn(),
+					getNotesError: jest.fn(),
+					isResolving: jest.fn(),
+				};
+			}
+
+			if ( store === optionsStore ) {
+				return { getOption: jest.fn() };
+			}
+
+			if ( store === userStore ) {
+				return { getCurrentUser: jest.fn().mockReturnValue( {} ) };
+			}
+
+			return {
+				getTaskList: jest.fn(),
+				hasFinishedResolution: jest.fn().mockReturnValue( true ),
+			};
+		} );
+
+		useUser.mockReturnValue( {
+			currentUserCan: () => canManageWooCommerce,
+		} );
+		useSelect.mockImplementation( ( mapSelect ) => mapSelect( select ) );
+
+		render(
+			<ActivityPanel
+				query={ { page: 'wc-admin', path: '/analytics/overview' } }
+			/>
+		);
+
+		expect( getActivityPanelCounts ).toHaveBeenCalledTimes( expectedCalls );
 	} );
 
 	describe( 'panel', () => {

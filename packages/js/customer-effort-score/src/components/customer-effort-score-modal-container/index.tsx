@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { optionsStore } from '@woocommerce/data';
+import { optionsStore, useUser } from '@woocommerce/data';
 import { createElement } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -15,7 +15,7 @@ import { getStoreAgeInWeeks } from '../../utils';
 import { ADMIN_INSTALL_TIMESTAMP_OPTION_NAME } from '../../constants';
 import store from '../../store';
 
-export const CustomerEffortScoreModalContainer = () => {
+const CustomerEffortScoreModal = () => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 	const { hideCesModal } = useDispatch( store );
 	const {
@@ -96,4 +96,21 @@ export const CustomerEffortScoreModalContainer = () => {
 			validateExtraFields={ visibleCESModalData.validateExtraFields }
 		/>
 	);
+};
+
+export const CustomerEffortScoreModalContainer = () => {
+	const { currentUserCan } = useUser();
+	const visibleCESModalData = useSelect(
+		( select ) => select( store ).getVisibleCESModalData(),
+		[]
+	);
+	const canAccessCustomerEffortScore =
+		currentUserCan( 'manage_woocommerce' ) ||
+		currentUserCan( 'edit_others_shop_orders' );
+
+	if ( ! canAccessCustomerEffortScore || ! visibleCESModalData ) {
+		return null;
+	}
+
+	return <CustomerEffortScoreModal />;
 };

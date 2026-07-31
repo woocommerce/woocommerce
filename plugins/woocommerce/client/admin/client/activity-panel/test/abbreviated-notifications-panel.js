@@ -3,6 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
+import { activityPanelStore, useUser } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -20,7 +21,21 @@ jest.mock( '@wordpress/data', () => {
 	};
 } );
 
+jest.mock( '@woocommerce/data', () => ( {
+	...jest.requireActual( '@woocommerce/data' ),
+	useUser: jest.fn().mockReturnValue( {
+		currentUserCan: () => true,
+	} ),
+} ) );
+
 describe( 'Inbox', () => {
+	beforeEach( () => {
+		useSelect.mockReturnValue( {} );
+		useUser.mockReturnValue( {
+			currentUserCan: () => true,
+		} );
+	} );
+
 	it( 'does not show any abbreviated notifications', () => {
 		const { queryByText } = render(
 			<AbbreviatedNotificationsPanel thingsToDoNextCount={ 0 } />
@@ -111,5 +126,37 @@ describe( 'Inbox', () => {
 		expect( getByText( 'Orders to fulfill' ) ).toBeDefined();
 		expect( getByText( 'Reviews to moderate' ) ).toBeDefined();
 		expect( getByText( 'Inventory to review' ) ).toBeDefined();
+	} );
+
+	it.each( [
+		{
+			description:
+				'does not request Activity Panel counts without permission',
+			canManageWooCommerce: false,
+			expectedCalls: 0,
+		},
+		{
+			description: 'requests Activity Panel counts with permission',
+			canManageWooCommerce: true,
+			expectedCalls: 1,
+		},
+	] )( '$description', ( { canManageWooCommerce, expectedCalls } ) => {
+		const getActivityPanelCounts = jest.fn().mockReturnValue( {} );
+		const select = jest.fn( ( store ) => {
+			if ( store === activityPanelStore ) {
+				return { getActivityPanelCounts };
+			}
+
+			return {};
+		} );
+
+		useUser.mockReturnValue( {
+			currentUserCan: () => canManageWooCommerce,
+		} );
+		useSelect.mockImplementation( ( mapSelect ) => mapSelect( select ) );
+
+		render( <AbbreviatedNotificationsPanel thingsToDoNextCount={ 0 } /> );
+
+		expect( getActivityPanelCounts ).toHaveBeenCalledTimes( expectedCalls );
 	} );
 } );

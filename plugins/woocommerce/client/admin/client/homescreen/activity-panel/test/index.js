@@ -4,6 +4,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useSelect } from '@wordpress/data';
+import {
+	activityPanelStore,
+	ordersStore,
+	productsStore,
+	useUser,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -22,6 +28,13 @@ jest.mock( '@wordpress/data', () => {
 		} ),
 	};
 } );
+
+jest.mock( '@woocommerce/data', () => ( {
+	...jest.requireActual( '@woocommerce/data' ),
+	useUser: jest.fn().mockReturnValue( {
+		currentUserCan: () => true,
+	} ),
+} ) );
 
 // Mock the panels.
 jest.mock( '../panels', () => {
@@ -55,6 +68,15 @@ jest.mock( '../orders/utils', () => {
 } );
 
 describe( 'ActivityPanel', () => {
+	beforeEach( () => {
+		useSelect.mockReturnValue( {
+			isTaskListHidden: false,
+		} );
+		useUser.mockReturnValue( {
+			currentUserCan: () => true,
+		} );
+	} );
+
 	it( 'should render a panel with two rows', () => {
 		render( <ActivityPanel /> );
 		expect( screen.getByText( 'custom-panel-1' ) ).not.toBeNull();
@@ -94,5 +116,51 @@ describe( 'ActivityPanel', () => {
 		expect( recordEvent ).toHaveBeenCalledWith( 'activity_panel_open', {
 			tab: 'custom-panel-2',
 		} );
+	} );
+
+	it.each( [
+		{
+			description:
+				'does not request Activity Panel counts without permission',
+			canManageWooCommerce: false,
+			expectedCalls: 0,
+		},
+		{
+			description: 'requests Activity Panel counts with permission',
+			canManageWooCommerce: true,
+			expectedCalls: 1,
+		},
+	] )( '$description', ( { canManageWooCommerce, expectedCalls } ) => {
+		const getActivityPanelCounts = jest.fn().mockReturnValue( {} );
+		const select = jest.fn( ( store ) => {
+			if ( store === activityPanelStore ) {
+				return { getActivityPanelCounts };
+			}
+
+			if ( store === ordersStore ) {
+				return {
+					getOrdersTotalCount: jest.fn().mockReturnValue( 0 ),
+					hasFinishedResolution: jest.fn().mockReturnValue( true ),
+				};
+			}
+
+			if ( store === productsStore ) {
+				return {
+					getProductsTotalCount: jest.fn().mockReturnValue( 0 ),
+					hasFinishedResolution: jest.fn().mockReturnValue( true ),
+				};
+			}
+
+			return {};
+		} );
+
+		useUser.mockReturnValue( {
+			currentUserCan: () => canManageWooCommerce,
+		} );
+		useSelect.mockImplementation( ( mapSelect ) => mapSelect( select ) );
+
+		render( <ActivityPanel /> );
+
+		expect( getActivityPanelCounts ).toHaveBeenCalledTimes( expectedCalls );
 	} );
 } );

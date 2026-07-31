@@ -9,7 +9,7 @@ import { useSelect } from '@wordpress/data';
 import { box, comment, page } from '@wordpress/icons';
 import { createSlotFill } from '@wordpress/components';
 import { isWCAdmin } from '@woocommerce/navigation';
-import { activityPanelStore } from '@woocommerce/data';
+import { activityPanelStore, useUser } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -27,24 +27,18 @@ const { Slot: AbbreviatedNotificationSlot } = createSlotFill(
 	ABBREVIATED_NOTIFICATION_SLOT_NAME
 );
 
-export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
-	const {
-		ordersToProcessCount,
-		reviewsToModerateCount,
-		stockNoticesCount,
-		isSetupTaskListHidden,
-		isExtendedTaskListHidden,
-	} = useSelect( ( select ) => {
-		const counts = select( activityPanelStore ).getActivityPanelCounts();
+const ActivityCountNotifications = ( { isSetupTaskListHidden } ) => {
+	const { ordersToProcessCount, reviewsToModerateCount, stockNoticesCount } =
+		useSelect( ( select ) => {
+			const counts =
+				select( activityPanelStore ).getActivityPanelCounts();
 
-		return {
-			ordersToProcessCount: counts?.orders_to_fulfill_count ?? 0,
-			reviewsToModerateCount: counts?.reviews_to_moderate_count ?? 0,
-			stockNoticesCount: counts?.products_low_in_stock_count ?? 0,
-			isSetupTaskListHidden: ! isTaskListVisible( 'setup' ),
-			isExtendedTaskListHidden: ! isTaskListVisible( 'extended' ),
-		};
-	}, [] );
+			return {
+				ordersToProcessCount: counts?.orders_to_fulfill_count ?? 0,
+				reviewsToModerateCount: counts?.reviews_to_moderate_count ?? 0,
+				stockNoticesCount: counts?.products_low_in_stock_count ?? 0,
+			};
+		}, [] );
 
 	const trackAbbreviatedCardClick = ( name ) => {
 		recordEvent( 'activity_panel_click', {
@@ -55,34 +49,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 	const isWCAdminPage = isWCAdmin();
 
 	return (
-		<div className="woocommerce-abbreviated-notifications">
-			{ thingsToDoNextCount > 0 && ! isExtendedTaskListHidden && (
-				<AbbreviatedCard
-					className="woocommerce-abbreviated-notification"
-					icon={ <Bell /> }
-					href={ `admin.php?page=wc-admin#${ EXTENDED_TASK_LIST_ID }` }
-					onClick={ () =>
-						trackAbbreviatedCardClick( 'thingsToDoNext' )
-					}
-					type={ isWCAdminPage ? 'wc-admin' : 'wp-admin' }
-				>
-					<Text as="h3">
-						{ __( 'Things to do next', 'woocommerce' ) }
-					</Text>
-					<Text as="p">
-						{ sprintf(
-							/* translators: Things the user has to do */
-							_n(
-								'You have %d new thing to do',
-								'You have %d new things to do',
-								thingsToDoNextCount,
-								'woocommerce'
-							),
-							thingsToDoNextCount
-						) }
-					</Text>
-				</AbbreviatedCard>
-			) }
+		<>
 			{ ordersToProcessCount > 0 && isSetupTaskListHidden && (
 				<AbbreviatedCard
 					className="woocommerce-abbreviated-notification"
@@ -157,6 +124,57 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 						) }
 					</Text>
 				</AbbreviatedCard>
+			) }
+		</>
+	);
+};
+
+export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
+	const { currentUserCan } = useUser();
+	const { isSetupTaskListHidden, isExtendedTaskListHidden } = useSelect(
+		() => ( {
+			isSetupTaskListHidden: ! isTaskListVisible( 'setup' ),
+			isExtendedTaskListHidden: ! isTaskListVisible( 'extended' ),
+		} ),
+		[]
+	);
+	const isWCAdminPage = isWCAdmin();
+
+	return (
+		<div className="woocommerce-abbreviated-notifications">
+			{ thingsToDoNextCount > 0 && ! isExtendedTaskListHidden && (
+				<AbbreviatedCard
+					className="woocommerce-abbreviated-notification"
+					icon={ <Bell /> }
+					href={ `admin.php?page=wc-admin#${ EXTENDED_TASK_LIST_ID }` }
+					onClick={ () =>
+						recordEvent( 'activity_panel_click', {
+							task: 'thingsToDoNext',
+						} )
+					}
+					type={ isWCAdminPage ? 'wc-admin' : 'wp-admin' }
+				>
+					<Text as="h3">
+						{ __( 'Things to do next', 'woocommerce' ) }
+					</Text>
+					<Text as="p">
+						{ sprintf(
+							/* translators: Things the user has to do */
+							_n(
+								'You have %d new thing to do',
+								'You have %d new things to do',
+								thingsToDoNextCount,
+								'woocommerce'
+							),
+							thingsToDoNextCount
+						) }
+					</Text>
+				</AbbreviatedCard>
+			) }
+			{ currentUserCan( 'manage_woocommerce' ) && (
+				<ActivityCountNotifications
+					isSetupTaskListHidden={ isSetupTaskListHidden }
+				/>
 			) }
 			{ ! isExtendedTaskListHidden && <AbbreviatedNotificationSlot /> }
 		</div>
