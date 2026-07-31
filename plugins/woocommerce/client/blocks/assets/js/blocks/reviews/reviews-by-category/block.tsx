@@ -47,31 +47,6 @@ const ReviewsByCategoryEditor = ( {
 		return (
 			<InspectorControls key="inspector">
 				<ToolsPanel
-					label={ __( 'Category', 'woocommerce' ) }
-					resetAll={ () => setAttributes( { categoryIds: [] } ) }
-				>
-					<ToolsPanelItem
-						hasValue={ () =>
-							( attributes.categoryIds || [] ).length > 0
-						}
-						label={ __( 'Category', 'woocommerce' ) }
-						onDeselect={ () =>
-							setAttributes( { categoryIds: [] } )
-						}
-						isShownByDefault
-					>
-						<ProductCategoryControl
-							selected={ attributes.categoryIds }
-							onChange={ ( value = [] ) => {
-								const ids = value.map( ( { id } ) => id );
-								setAttributes( { categoryIds: ids } );
-							} }
-							isCompact={ true }
-							showReviewCount={ true }
-						/>
-					</ToolsPanelItem>
-				</ToolsPanel>
-				<ToolsPanel
 					label={ __( 'Content', 'woocommerce' ) }
 					resetAll={ () =>
 						setAttributes( {
@@ -127,6 +102,31 @@ const ReviewsByCategoryEditor = ( {
 						showOffset: true,
 					} ) }
 				</ToolsPanel>
+				<ToolsPanel
+					label={ __( 'Category', 'woocommerce' ) }
+					resetAll={ () => setAttributes( { categoryIds: [] } ) }
+				>
+					<ToolsPanelItem
+						hasValue={ () =>
+							( attributes.categoryIds || [] ).length > 0
+						}
+						label={ __( 'Category', 'woocommerce' ) }
+						onDeselect={ () =>
+							setAttributes( { categoryIds: [] } )
+						}
+						isShownByDefault
+					>
+						<ProductCategoryControl
+							selected={ attributes.categoryIds }
+							onChange={ ( value = [] ) => {
+								const ids = value.map( ( { id } ) => id );
+								setAttributes( { categoryIds: ids } );
+							} }
+							isCompact={ true }
+							showReviewCount={ true }
+						/>
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 		);
 	};
@@ -174,7 +174,7 @@ const ReviewsByCategoryEditor = ( {
 		);
 	};
 
-	if ( ! categoryIds || editMode ) {
+	if ( ! categoryIds || categoryIds.length === 0 || editMode ) {
 		return renderEditMode();
 	}
 
