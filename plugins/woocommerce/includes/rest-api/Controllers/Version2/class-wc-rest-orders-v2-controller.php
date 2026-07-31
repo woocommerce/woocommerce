@@ -793,6 +793,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 *
 	 * @since  3.0.0
 	 * @throws WC_REST_Exception But all errors are validated before returning any data.
+	 * @throws Exception When the order save is silently aborted and the order has no ID (caught internally).
 	 * @param  WP_REST_Request $request  Full details about the request.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WC_Data|WP_Error
@@ -824,6 +825,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				$object->set_created_via( 'rest-api' );
 				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 				$object->save();
+
+				// WC_Abstract_Order::save() handles exceptions internally; a silently aborted save leaves the order without an ID.
+				if ( ! $object->get_id() ) {
+					throw new Exception( __( 'Unable to create order.', 'woocommerce' ) );
+				}
+
 				$object->calculate_totals();
 			} else {
 				// If items have changed, recalculate order totals.
@@ -851,6 +858,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		} catch ( Exception $e ) {
+			return $this->get_unexpected_exception_error_response( $e );
 		}
 	}
 

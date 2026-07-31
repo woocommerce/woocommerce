@@ -30232,12 +30232,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
 
 		-
-			message: '#^Parameter \#1 \$product of method WC_Admin_Duplicate_Product\:\:product_duplicate\(\) expects WC_Product, WC_Data\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
 			message: '#^Parameter \#1 \$product of method WC_REST_Products_V2_Controller\:\:save_product_shipping_data\(\) expects WC_Product, object\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -65708,12 +65702,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\Controller\:\:set_product_images\(\) expects Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product, WC_Product given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Parameter \#1 \$product of method WC_Admin_Duplicate_Product\:\:product_duplicate\(\) expects WC_Product, Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Data\|WP_Error given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php

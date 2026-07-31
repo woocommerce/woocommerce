@@ -146,8 +146,25 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Creating product object from request data in preparation for copying.
-		$updated_product    = $this->prepare_object_for_database( $request );
-		$duplicated_product = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $updated_product );
+		try {
+			$updated_product = $this->prepare_object_for_database( $request );
+
+			if ( is_wp_error( $updated_product ) ) {
+				return $updated_product;
+			}
+
+			if ( ! $updated_product instanceof WC_Product ) {
+				return new WP_Error(
+					"woocommerce_rest_{$this->post_type}_not_created",
+					__( 'Invalid product.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$duplicated_product = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $updated_product );
+		} catch ( Exception $e ) {
+			return $this->get_unexpected_exception_error_response( $e );
+		}
 
 		if ( is_wp_error( $duplicated_product ) ) {
 			return new WP_Error( 'woocommerce_rest_product_duplicate_error', $duplicated_product->get_error_message(), array( 'status' => 400 ) );

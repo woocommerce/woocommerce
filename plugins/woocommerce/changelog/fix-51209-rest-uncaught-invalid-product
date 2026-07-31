@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error in the REST API when saving or duplicating a product, order, or refund throws an unexpected exception; return a 400 error response instead.

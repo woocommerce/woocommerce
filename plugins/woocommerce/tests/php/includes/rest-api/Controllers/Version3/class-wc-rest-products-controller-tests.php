@@ -2186,4 +2186,96 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $product->get_id() ) );
 	}
+
+	/**
+	 * @testdox Updating a product using a variation ID and a type param returns an error response instead of a fatal error.
+	 */
+	public function test_update_with_variation_id_and_type_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $variation_id );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status(), 'The uncaught exception should surface as a 400 error response' );
+		$this->assertEquals( 'woocommerce_rest_product_not_created', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox A WC_Data_Exception thrown while saving a product keeps returning the generic not-created error code.
+	 */
+	public function test_update_returns_generic_error_code_when_save_throws_data_exception(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$throw_data_exception = function () {
+			throw new WC_Data_Exception( 'custom_save_failure', 'Simulated save failure.' );
+		};
+		add_action( 'woocommerce_before_product_object_save', $throw_data_exception );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_body_params( array( 'name' => 'Renamed product' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		remove_action( 'woocommerce_before_product_object_save', $throw_data_exception );
+
+		$this->assertEquals( 400, $response->get_status(), 'A save-time WC_Data_Exception should surface as a 400 error response' );
+		$this->assertEquals( 'woocommerce_rest_product_not_created', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Duplicating a product using a variation ID and a type param returns an error response instead of a fatal error.
+	 */
+	public function test_duplicate_with_variation_id_and_type_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $variation_id . '/duplicate' );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status(), 'The uncaught exception should surface as a 400 error response' );
+		$this->assertEquals( 'woocommerce_rest_product_not_created', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Duplicating a product returns an error response instead of a fatal error when duplication throws.
+	 */
+	public function test_duplicate_returns_error_response_when_duplication_throws(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$throw_exception = function () {
+			throw new Exception( 'Simulated duplication failure.' );
+		};
+		add_action( 'woocommerce_product_duplicate_before_save', $throw_exception );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/duplicate' );
+
+		$response = $this->server->dispatch( $request );
+
+		remove_action( 'woocommerce_product_duplicate_before_save', $throw_exception );
+
+		$this->assertEquals( 400, $response->get_status(), 'The uncaught exception should surface as a 400 error response' );
+		$this->assertEquals( 'woocommerce_rest_product_not_created', $response->get_data()['code'] );
+	}
+
+
+
+	/**
+	 * @testdox Duplicating a product using a variation ID returns the variation endpoint error instead of an empty product.
+	 */
+	public function test_duplicate_with_variation_id_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $variation_id . '/duplicate' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status(), 'Duplicating a variation should return the variations endpoint error' );
+		$this->assertEquals( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
+	}
 }
