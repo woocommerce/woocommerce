@@ -6,11 +6,11 @@ import {
 	useInnerBlocksProps,
 	BlockContextProvider,
 } from '@wordpress/block-editor';
+import type { RemovableItemsContext } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import type { RemovableItemsContext } from '@woocommerce/types';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';

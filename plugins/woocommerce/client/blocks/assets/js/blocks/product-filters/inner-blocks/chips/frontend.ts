@@ -6,6 +6,7 @@ import type {
 	SelectableItem,
 	SelectableItemsParentStore,
 } from '@woocommerce/types';
+
 /**
  * Internal dependencies
  */

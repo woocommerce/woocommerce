@@ -10,7 +10,6 @@ import type {
 /**
  * Internal dependencies
  */
-
 import type { ProductFiltersContext } from '../../types';
 import type { ProductFiltersStore } from '../../frontend';
 import { PRODUCT_FILTERS_STORE_NAME } from '../../constants';
