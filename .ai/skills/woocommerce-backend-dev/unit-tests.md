@@ -211,7 +211,7 @@ When several tests call the same method with different inputs but the same asser
 - Prefer **`@testWith`** when the inputs are simple values (strings, numbers, booleans) or arrays written directly in the annotation (see real examples in `wc-core-functions-test.php`).
 - Use a **`dataProvider`** method only when the dataset needs to be built with logic (loops, constants, fixtures) rather than written out literally.
 
-**Avoid: repeated tests, same shape**
+**Avoid - Repeated tests, same shape:**
 
 ```php
 public function test_get_shipping_cost_us() {
@@ -227,7 +227,7 @@ public function test_get_shipping_cost_mx() {
 }
 ```
 
-**Prefer: one test with `@testWith`**
+**Prefer - One test with `@testWith`:**
 
 ```php
 /**
