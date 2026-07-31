@@ -159,7 +159,7 @@ class Personalizer {
 
 				$value = $tag->execute_callback( $this->get_callback_context( self::RENDERING_CONTEXT_HREF ), $token['arguments'] );
 				$value = $this->replace_link_href( $href, $tag->get_token(), $value );
-				if ( $value ) {
+				if ( '' !== $value ) {
 					$content_processor->set_attribute( 'href', $value );
 					$content_processor->remove_attribute( 'data-link-href' );
 					$content_processor->remove_attribute( 'contenteditable' );
@@ -218,6 +218,8 @@ class Personalizer {
 		// form when a replaced token occurrence exists only there (e.g. URL-encoded tokens).
 		// Only tokens that are actually replaced matter here — an unregistered bracket
 		// sequence that exists purely in the decoded form must not force the decoded base.
+		// Known tradeoff: the base is chosen for the whole href, so when the decoded form
+		// is used, unrelated percent-encoding elsewhere in the URL is decoded too.
 		$base = $href;
 		foreach ( array_keys( $replacements ) as $token_string ) {
 			if ( substr_count( $href, $token_string ) !== substr_count( $decoded_href, $token_string ) ) {

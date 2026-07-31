@@ -494,6 +494,37 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 			'<a href="http://example.com/?count=0">Click here</a>',
 			$this->personalizer->personalize_content( $html_content )
 		);
+
+		// The data-link-href site must also treat "0" as a valid value and clean up the editor-only attributes.
+		$this->assertSame(
+			'<a  href="http://0">Click here</a>',
+			$this->personalizer->personalize_content( '<a data-link-href="[test/count]" href="#">Click here</a>' )
+		);
+	}
+
+	/**
+	 * Test that a token present only in URL-encoded form switches the whole href to the decoded base.
+	 *
+	 * This pins a known tradeoff: the decoded base also decodes unrelated percent-encoding
+	 * elsewhere in the URL (the redirect parameter below loses its encoding).
+	 */
+	public function testEncodedOnlyTokenDecodesWholeHrefBase(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'coupon',
+				'test/coupon',
+				'Test',
+				function () {
+					return 'SAVE20';
+				}
+			)
+		);
+
+		$html_content = '<a href="https://example.com/?redirect=%2Fpath%3Fa%3D1%26b%3D2&tag=%5Btest/coupon%5D">Click here</a>';
+		$this->assertSame(
+			'<a href="https://example.com/?redirect=/path?a=1&#038;b=2&#038;tag=SAVE20">Click here</a>',
+			$this->personalizer->personalize_content( $html_content )
+		);
 	}
 
 	/**
