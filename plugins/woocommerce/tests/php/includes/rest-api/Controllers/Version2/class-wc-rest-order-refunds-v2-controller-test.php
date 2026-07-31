@@ -90,32 +90,4 @@ class WC_REST_Order_Refunds_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_order( $response->get_data()['id'] ) );
 	}
-
-	/**
-	 * @testdox Creating a refund returns an error response instead of a fatal error when an unexpected exception is thrown.
-	 */
-	public function test_create_refund_returns_error_response_on_unexpected_exception(): void {
-		wp_set_current_user( 1 );
-		$order = WC_Helper_Order::create_order();
-
-		$throw_exception = function () {
-			throw new Exception( 'Simulated post-create failure.' );
-		};
-		add_filter( 'woocommerce_rest_pre_insert_shop_order_refund_object', $throw_exception );
-
-		$request = new WP_REST_Request( 'POST', '/wc/v2/orders/' . $order->get_id() . '/refunds' );
-		$request->set_body_params(
-			array(
-				'amount'     => '1.00',
-				'api_refund' => false,
-			)
-		);
-
-		$response = $this->server->dispatch( $request );
-
-		remove_filter( 'woocommerce_rest_pre_insert_shop_order_refund_object', $throw_exception );
-
-		$this->assertEquals( 400, $response->get_status(), 'The unexpected exception should surface as a 400 error response' );
-		$this->assertEquals( 'woocommerce_rest_shop_order_refund_not_created', $response->get_data()['code'] );
-	}
 }

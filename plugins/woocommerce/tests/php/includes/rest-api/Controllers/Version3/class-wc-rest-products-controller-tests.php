@@ -2199,30 +2199,108 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 400, $response->get_status(), 'The uncaught exception should surface as a 400 error response' );
-		$this->assertEquals( 'woocommerce_rest_product_not_created', $response->get_data()['code'] );
+		$this->assertSame( 404, $response->get_status(), 'Variations should be handled by the variations endpoint.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
 	}
 
 	/**
-	 * @testdox A WC_Data_Exception thrown while saving a product keeps returning the generic not-created error code.
+	 * @testdox Updating a product can still change its product type.
 	 */
-	public function test_update_returns_generic_error_code_when_save_throws_data_exception(): void {
+	public function test_update_can_change_product_type(): void {
 		$product = WC_Helper_Product::create_simple_product();
 
-		$throw_data_exception = function () {
-			throw new WC_Data_Exception( 'custom_save_failure', 'Simulated save failure.' );
-		};
-		add_action( 'woocommerce_before_product_object_save', $throw_data_exception );
-
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
-		$request->set_body_params( array( 'name' => 'Renamed product' ) );
+		$request->set_body_params( array( 'type' => 'variable' ) );
 
-		$response = $this->server->dispatch( $request );
+		$response        = $this->server->dispatch( $request );
+		$updated_product = wc_get_product( $product->get_id() );
 
-		remove_action( 'woocommerce_before_product_object_save', $throw_data_exception );
+		$this->assertSame( 200, $response->get_status(), 'Valid product type changes should continue to succeed.' );
+		$this->assertInstanceOf( WC_Product_Variable::class, $updated_product );
+	}
 
-		$this->assertEquals( 400, $response->get_status(), 'A save-time WC_Data_Exception should surface as a 400 error response' );
-		$this->assertEquals( 'woocommerce_rest_product_not_created', $response->get_data()['code'] );
+	/**
+	 * @testdox Product preparation allows an extension-backed product whose ID collides with a variation post.
+	 */
+	public function test_prepare_object_allows_extension_product_when_id_collides_with_variation_post(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$product_id       = $variable_product->get_children()[0];
+
+		$custom_data_store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Number of products read through the extension data store.
+			 *
+			 * @var int
+			 */
+			public $read_count = 0;
+
+			/**
+			 * Mark the extension-backed product as read without loading the colliding WordPress post.
+			 *
+			 * @param WC_Product $product Product being read.
+			 */
+			public function read( &$product ) {
+				++$this->read_count;
+				$product->set_object_read( true );
+			}
+		};
+		$register_custom_data_store = static function ( $data_stores ) use ( $custom_data_store ) {
+			$data_stores['product-simple'] = $custom_data_store;
+			return $data_stores;
+		};
+		$resolve_custom_product_type = static function ( $product_type, $queried_product_id ) use ( $product_id ) {
+			return $product_id === $queried_product_id ? ProductType::SIMPLE : $product_type;
+		};
+		add_filter( 'woocommerce_data_stores', $register_custom_data_store );
+		add_filter( 'woocommerce_product_type_query', $resolve_custom_product_type, 10, 2 );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product_id );
+		$request->set_url_params( array( 'id' => $product_id ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$prepare_method = new ReflectionMethod( $this->endpoint, 'prepare_object_for_database' );
+		$prepare_method->setAccessible( true );
+
+		try {
+			$result = $prepare_method->invoke( $this->endpoint, $request, false );
+		} finally {
+			remove_filter( 'woocommerce_data_stores', $register_custom_data_store );
+			remove_filter( 'woocommerce_product_type_query', $resolve_custom_product_type );
+		}
+
+		$this->assertInstanceOf( WC_Product_Simple::class, $result );
+		$this->assertSame( $product_id, $result->get_id() );
+		$this->assertSame( 'product_variation', get_post_type( $product_id ) );
+		$this->assertSame( 1, $custom_data_store->read_count, 'Product type detection should not construct the product twice.' );
+	}
+
+	/**
+	 * @testdox Product constructor exceptions are rethrown when the product still exists.
+	 */
+	public function test_prepare_object_rethrows_unexpected_constructor_exception(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_url_params( array( 'id' => $product->get_id() ) );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$throw_exception = function ( $product_id ) use ( $product ) {
+			if ( $product->get_id() === $product_id ) {
+				throw new Exception( 'Simulated unexpected read failure.' );
+			}
+		};
+		add_action( 'woocommerce_product_read', $throw_exception );
+
+		$prepare_method = new ReflectionMethod( $this->endpoint, 'prepare_object_for_database' );
+		$prepare_method->setAccessible( true );
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Simulated unexpected read failure.' );
+
+		try {
+			$prepare_method->invoke( $this->endpoint, $request, false );
+		} finally {
+			remove_action( 'woocommerce_product_read', $throw_exception );
+		}
 	}
 
 	/**
@@ -2237,32 +2315,9 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 400, $response->get_status(), 'The uncaught exception should surface as a 400 error response' );
-		$this->assertEquals( 'woocommerce_rest_product_not_created', $response->get_data()['code'] );
+		$this->assertSame( 404, $response->get_status(), 'Variations should be handled by the variations endpoint.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
 	}
-
-	/**
-	 * @testdox Duplicating a product returns an error response instead of a fatal error when duplication throws.
-	 */
-	public function test_duplicate_returns_error_response_when_duplication_throws(): void {
-		$product = WC_Helper_Product::create_simple_product();
-
-		$throw_exception = function () {
-			throw new Exception( 'Simulated duplication failure.' );
-		};
-		add_action( 'woocommerce_product_duplicate_before_save', $throw_exception );
-
-		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/duplicate' );
-
-		$response = $this->server->dispatch( $request );
-
-		remove_action( 'woocommerce_product_duplicate_before_save', $throw_exception );
-
-		$this->assertEquals( 400, $response->get_status(), 'The uncaught exception should surface as a 400 error response' );
-		$this->assertEquals( 'woocommerce_rest_product_not_created', $response->get_data()['code'] );
-	}
-
-
 
 	/**
 	 * @testdox Duplicating a product using a variation ID returns the variation endpoint error instead of an empty product.
@@ -2275,7 +2330,40 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 404, $response->get_status(), 'Duplicating a variation should return the variations endpoint error' );
-		$this->assertEquals( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
+		$this->assertSame( 404, $response->get_status(), 'Duplicating a variation should return the variations endpoint error.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Batch updates continue processing valid products when a variation is rejected.
+	 */
+	public function test_batch_update_handles_variation_error_per_item(): void {
+		$product          = WC_Helper_Product::create_simple_product();
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'   => $variation_id,
+						'type' => 'simple',
+					),
+					array(
+						'id'   => $product->get_id(),
+						'name' => 'Updated in batch',
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $data['update'][0]['error']['code'] );
+		$this->assertSame( 'Updated in batch', $data['update'][1]['name'] );
+		$this->assertSame( 'Updated in batch', wc_get_product( $product->get_id() )->get_name() );
 	}
 }

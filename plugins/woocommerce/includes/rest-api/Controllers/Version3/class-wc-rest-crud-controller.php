@@ -151,28 +151,6 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	}
 
 	/**
-	 * Log an unexpected exception and build the error response for it.
-	 *
-	 * @since 11.1.0
-	 * @param Exception $e The unexpected exception.
-	 * @return WP_Error
-	 */
-	protected function get_unexpected_exception_error_response( Exception $e ) {
-		$error = "woocommerce_rest_{$this->post_type}_not_created";
-
-		wc_get_logger()->error(
-			$e->getMessage(),
-			array(
-				'source' => 'woocommerce-rest-api',
-				'error'  => $error,
-				'code'   => 400,
-			)
-		);
-
-		return new WP_Error( $error, $e->getMessage(), array( 'status' => 400 ) );
-	}
-
-	/**
 	 * Save an object data.
 	 *
 	 * @since  3.0.0
@@ -191,9 +169,17 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			try {
 				$object->save();
 			} catch ( Exception $e ) {
-				// This inner catch takes precedence for save() failures so that typed exceptions
-				// thrown during save keep returning the generic not-created error code.
-				return $this->get_unexpected_exception_error_response( $e );
+				$error = "woocommerce_rest_{$this->post_type}_not_created";
+
+				wc_get_logger()->error(
+					$e->getMessage(),
+					array(
+						'source' => 'woocommerce-rest-api',
+						'error'  => $error,
+						'code'   => 400,
+					)
+				);
+				return new WP_Error( $error, $e->getMessage(), array( 'status' => 400 ) );
 			}
 
 			return $this->get_object( $object->get_id() );
@@ -201,8 +187,6 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		} catch ( Exception $e ) {
-			return $this->get_unexpected_exception_error_response( $e );
 		}
 	}
 

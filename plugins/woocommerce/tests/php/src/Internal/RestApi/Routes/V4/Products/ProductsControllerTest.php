@@ -2049,45 +2049,8 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 400, $response->get_status(), 'The uncaught exception should surface as a 400 error response' );
-		$this->assertEquals( 'woocommerce_rest_product_not_created', $response->get_data()['code'] );
-	}
-
-	/**
-	 * @testdox Duplicating a product returns an error response instead of a fatal error when duplication throws.
-	 */
-	public function test_duplicate_returns_error_response_when_duplication_throws(): void {
-		$product = WC_Helper_Product::create_simple_product();
-
-		$throw_exception = function () {
-			throw new \Exception( 'Simulated duplication failure.' );
-		};
-		add_action( 'woocommerce_product_duplicate_before_save', $throw_exception );
-
-		$request = new WP_REST_Request( 'POST', '/wc/v4/products/' . $product->get_id() . '/duplicate' );
-
-		$response = $this->server->dispatch( $request );
-
-		remove_action( 'woocommerce_product_duplicate_before_save', $throw_exception );
-
-		$this->assertEquals( 400, $response->get_status(), 'The uncaught exception should surface as a 400 error response' );
-		$this->assertEquals( 'woocommerce_rest_product_not_created', $response->get_data()['code'] );
-	}
-
-
-	/**
-	 * @testdox Duplicating a product using a variation ID returns the variation endpoint error instead of an empty product.
-	 */
-	public function test_duplicate_with_variation_id_returns_error_response(): void {
-		$variable_product = WC_Helper_Product::create_variation_product();
-		$variation_id     = $variable_product->get_children()[0];
-
-		$request = new WP_REST_Request( 'POST', '/wc/v4/products/' . $variation_id . '/duplicate' );
-
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 404, $response->get_status(), 'Duplicating a variation should return the variations endpoint error' );
-		$this->assertEquals( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
+		$this->assertSame( 404, $response->get_status(), 'Variations should be handled by the variations endpoint.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
 	}
 
 	/**
