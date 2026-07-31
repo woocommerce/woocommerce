@@ -1510,6 +1510,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// Delete the user meta.
 		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
+		// We changed the underlying data directly, so clear the cache to simulate a fresh request.
+		$this->service->clear_cache();
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
@@ -1568,6 +1570,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 
 		// Delete the user meta.
 		delete_user_meta( get_current_user_id(), Incentive::PREFIX . 'dismissed' );
+		// We changed the underlying data directly, so clear the cache to simulate a fresh request.
+		$this->service->clear_cache();
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
@@ -1932,8 +1936,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_currency', 'USD' );
 		WC()->payment_gateways()->init();
 
-		// Reset the controller memo to pick up the new gateway details.
-		$this->providers_service->reset_memo();
+		// Clear cached provider data to pick up the new gateway details.
+		$this->providers_service->clear_cache();
 	}
 
 	/**
@@ -1952,8 +1956,8 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_currency', 'USD' );
 		WC()->payment_gateways()->init();
 
-		// Reset the service memo to pick up the new gateway details.
-		$this->providers_service->reset_memo();
+		// Clear cached provider data to pick up the new gateway details.
+		$this->providers_service->clear_cache();
 	}
 
 	/**
@@ -1985,7 +1989,7 @@ class PaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 
-		$this->providers_service->reset_memo();
+		$this->providers_service->clear_cache();
 
 		$active_plugin_paths = array( 'woocommerce/woocommerce.php' );
 		$active_plugin_slugs = array( 'woocommerce' );

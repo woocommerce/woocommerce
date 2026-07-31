@@ -18,11 +18,15 @@ class Hydration {
 	protected $asset_data_registry;
 
 	/**
-	 * Cached notices to restore after hydrating the API.
+	 * Snapshot of store notices taken by cache_store_notices(), to restore after hydrating the API.
 	 *
-	 * @var array
+	 * `null` means no snapshot has been taken this cycle, either because the method has not run yet or because
+	 * its guards skipped the snapshot (for example, the notice functions were unavailable). restore_cached_store_notices()
+	 * only restores from a non-null array, so a `null` value always leaves the session untouched.
+	 *
+	 * @var array|null
 	 */
-	protected $cached_store_notices = array();
+	protected $cached_store_notices = null;
 
 	/**
 	 * Constructor.
@@ -251,25 +255,45 @@ class Hydration {
 	}
 
 	/**
-	 * Cache notices before hydrating the API if the customer has a session.
+	 * Whether the store notice functions (`wc_get_notices()`, `wc_clear_notices()`, `wc_set_notices()`) are
+	 * available to call.
+	 *
+	 * These three functions share a single definition site in `includes/wc-notice-functions.php`, which
+	 * WooCommerce loads only for frontend/REST requests (or via `wc_load_cart()`). On a plain wp-admin load the
+	 * functions may therefore be absent even when a WooCommerce session exists, so this seam must be checked
+	 * independently of the session guard. It is `protected` so tests can override it to force the unavailable
+	 * branch deterministically.
+	 *
+	 * @since 11.1.0
+	 * @return bool True if the notice functions are defined and safe to call.
+	 */
+	protected function store_notice_functions_available(): bool {
+		return function_exists( 'wc_set_notices' );
+	}
+
+	/**
+	 * Cache notices before hydrating the API if the customer has a session and the notice functions are available.
 	 */
 	protected function cache_store_notices() {
-		if ( ! did_action( 'woocommerce_init' ) || null === WC()->session ) {
+		$this->cached_store_notices = null;
+
+		if ( ! did_action( 'woocommerce_init' ) || null === WC()->session || ! $this->store_notice_functions_available() ) {
 			return;
 		}
+
 		$this->cached_store_notices = wc_get_notices();
 		wc_clear_notices();
 	}
 
 	/**
-	 * Restore notices into current session from cache.
+	 * Restore notices into current session from cache, only if a snapshot was taken this cycle.
 	 */
 	protected function restore_cached_store_notices() {
-		if ( ! did_action( 'woocommerce_init' ) || null === WC()->session ) {
+		if ( ! did_action( 'woocommerce_init' ) || null === WC()->session || ! is_array( $this->cached_store_notices ) ) {
 			return;
 		}
 
 		wc_set_notices( $this->cached_store_notices );
-		$this->cached_store_notices = array();
+		$this->cached_store_notices = null;
 	}
 }

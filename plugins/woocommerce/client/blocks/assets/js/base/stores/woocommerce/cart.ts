@@ -512,7 +512,7 @@ const { actions } = store< Store >(
 						);
 					}
 				} catch ( error ) {
-					actions.showNoticeError( error as Error );
+					void actions.showNoticeError( error as Error );
 				}
 			},
 
@@ -777,7 +777,7 @@ const { actions } = store< Store >(
 					}
 				} catch ( error ) {
 					// Show error notice
-					actions.showNoticeError( error as Error );
+					void actions.showNoticeError( error as Error );
 
 					// Only record a failure outcome if the request-settlement
 					// boundary above did not already capture a success — a throw
@@ -1058,7 +1058,7 @@ const { actions } = store< Store >(
 						yield actions.updateNotices( errorNotices );
 					}
 				} catch ( error ) {
-					actions.showNoticeError( error as Error );
+					void actions.showNoticeError( error as Error );
 				}
 			},
 
@@ -1191,7 +1191,7 @@ const { actions } = store< Store >(
 );
 
 // Trigger initial cart refresh.
-actions.refreshCartItems();
+void actions.refreshCartItems();
 
 window.addEventListener(
 	'wc-blocks_store_sync_required',
@@ -1201,7 +1201,7 @@ window.addEventListener(
 			id: number;
 		} >;
 		if ( customEvent.detail.type === 'from_@wordpress/data' ) {
-			actions.refreshCartItems();
+			void actions.refreshCartItems();
 		}
 	}
 );
