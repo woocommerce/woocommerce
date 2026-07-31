@@ -276,8 +276,9 @@ jQuery( function ( $ ) {
 										Array.isArray( currentValue ) &&
 										$( this ).prop( 'multiple' )
 									) {
-										const defaultExcluded =
-											String( exclude ).split( ',' );
+										const defaultExcluded = exclude
+											? String( exclude ).split( ',' )
+											: [];
 										exclude = [
 											...defaultExcluded,
 											...currentValue,
