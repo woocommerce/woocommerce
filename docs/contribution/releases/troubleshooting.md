@@ -60,10 +60,10 @@ Note that a failing check that is not required and is clearly unrelated to the c
 
 ### The "Build ZIP file" workflow refuses to build because of open PRs
 
-The blocker check in this workflow looks for open PRs whose **base branch is the release branch** — milestone membership is irrelevant, so removing a milestone from a PR won't unblock the build. Every open PR targeting `release/X.Y` has to be addressed:
+The blocker check in this workflow looks for open PRs whose **base branch is the release branch**: milestone membership is irrelevant, so removing a milestone from a PR won't unblock the build. Every open PR targeting `release/X.Y` has to be addressed:
 
 - Merge the ones that belong in the release.
-- Close stale or redundant ones — including auto-generated cherry-pick/backport PRs whose changes are already present on the release branch. Leave a short comment explaining why, and delete their branches.
+- Close stale or redundant ones, including auto-generated cherry-pick/backport PRs whose changes are already present on the release branch. Leave a short comment explaining why, and delete their branches.
 
 ### Something looks wrong in the final release ZIP. Can I start over?
 
@@ -107,7 +107,7 @@ Common errors and what they mean:
 | `E175013: Access to '/!svn/me' forbidden` | Invalid or outdated SVN credentials | Update the SVN credentials secret in the repository and re-run |
 | `E200009: a peg revision is not allowed here` | A file name in the build contains an `@` character, which SVN interprets as a peg revision | Escape the `@` in the workflow's SVN operations |
 
-**"The released ZIP differs from SVN trunk" reports.** SVN commits are atomic, so a partially uploaded release is not a plausible explanation. The usual cause is that the comparison was made against SVN `trunk`, which is updated on every upload — including prereleases — and can therefore hold a _newer_ version than the latest point release. The source of truth for any given release is its SVN **tag**, not `trunk`.
+**"The released ZIP differs from SVN trunk" reports.** SVN commits are atomic, so a partially uploaded release is not a plausible explanation. The usual cause is that the comparison was made against SVN `trunk`, which is updated on every upload (including prereleases) and can therefore hold a _newer_ version than the latest point release. The source of truth for any given release is its SVN **tag**, not `trunk`.
 
 ### A serious bug was detected during internal checks / monitoring
 
