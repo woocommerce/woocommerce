@@ -331,8 +331,7 @@ jobs:
 
       - name: 'Run tests (${{ matrix.testType }})'
         # `woocommercebot` PRs run on the `WooCommerce Release Checks` group (see `runs-on` above),
-        # which is slower than `ubuntu-latest`: the longest blocks e2e shard takes ~13 min hosted
-        # but overruns 20 there, so those PRs get a larger e2e budget.
+        # which is slower than `ubuntu-latest`, so they need a larger e2e budget than other PRs.
         timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && ( github.event.pull_request.user.login == 'woocommercebot' && 30 || 20 ) ) || ( matrix.testType == 'unit:php' && 20 ) ) ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
