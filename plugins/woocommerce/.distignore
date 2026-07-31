@@ -40,8 +40,6 @@ global.d.ts
 none
 package-lock.json
 package.json
-packages/woocommerce-admin/docs
-packages/woocommerce-blocks/docs
 phpcs.xml
 phpunit.xml
 phpunit.xml.dist
