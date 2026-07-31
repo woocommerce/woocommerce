@@ -24,13 +24,30 @@ This page provides guidance for troubleshooting and recovering from issues that 
 
 ⚠️ _Do not re-run any workflows until you understand the cause of the failure._ Re-running without fixing the root issue can make things more complicated.
 
+### A workflow failed or timed out while creating a PR or pushing changes
+
+Workflows that perform Git operations (such as `Release: Bump version number` or `Release: Build ZIP file`) can occasionally fail with a timeout while creating a PR or pushing to the repository. This is caused by a GitHub security check that compares workflow files against their `trunk` versions during the operation: when the changeset between the release branch and `trunk` is large, the check can time out.
+
+1. **Re-run the workflow.** The timeout is intermittent and not related to the release contents, so a re-run often succeeds.
+2. **If the failure persists,** sync the workflow files (`.github/workflows/`) from `trunk` to the release branch to reduce the diff, then re-run.
+
+### The changelog workflow fails with "Your local changes would be overwritten"
+
+The `Release: Compile changelog` workflow checks out both `trunk` and the release branch. The file `tools/monorepo-utils/dist/index.js` is a build artifact that is committed to the repository, and on the rare occasions it's updated on `trunk`, the two branches diverge and the checkout fails with an error similar to _"Your local changes to the following files would be overwritten"_.
+
+To unblock, backport the updated `tools/monorepo-utils/dist/index.js` from `trunk` to the release branch and re-run the workflow.
+
 ### CI is failing on a release-related PR
 
 During the release process, you may encounter CI test failures on release-related PRs. These failures sometimes occur because test fixes were merged to trunk but not backported to the release branch before it was cut.
 
-1. **Identify the cause**: Check if the failing tests pass on trunk. If they do, the fix likely needs to be backported.
-2. **Backport test fixes**: If possible, [backport](/docs/contribution/releases/backporting) the relevant test fixes from trunk to the release branch, then re-run the CI workflow.
-3. **Handle complex cases**: If backporting isn't possible due to dependencies or the cause isn't clear, document what you've found and ask for help in the release Slack channel.
+1. **Check [GitHub's status page](https://www.githubstatus.com/) first**: PRs stuck on _"Waiting for status to be reported"_ or entire batches of failing jobs are often caused by a GitHub Actions incident, not by the release.
+2. **Identify the cause**: Check if the failing tests pass on trunk. If they do, the fix likely needs to be backported.
+3. **Backport test fixes**: If possible, [backport](/docs/contribution/releases/backporting) the relevant test fixes from trunk to the release branch, then re-run the CI workflow.
+4. **Re-run before assuming a regression**: If nothing relevant changed since the last green run, the failure is likely flakiness. If a test keeps flaking on the release branch, file an issue for the owning team and don't let it block the release.
+5. **Handle complex cases**: If backporting isn't possible due to dependencies or the cause isn't clear, document what you've found and ask for help in the release Slack channel.
+
+Note that a failing check that is not required and is clearly unrelated to the change (for example, a comparison job that references code only present on trunk) does not have to block merging a release-related PR. When in doubt, ask in the release Slack channel before merging over a failure.
 
 ### Something looks wrong in the final release ZIP. Can I start over?
 
@@ -49,6 +66,30 @@ If, after downloading and unzipping the generated artifact, something seems off 
 4. Review any [auto-generated PRs](https://github.com/woocommerce/woocommerce/pulls?q=is%3Aopen+is%3Apr+author%3Aapp%2Fgithub-actions+label%3ARelease): if there are open PRs that weren't merged and are no longer needed, close them and delete their branches.
 
 **Once you know which step failed,** re-run only that step as described in the [Building & Publishing guide](/docs/contribution/releases/building-and-publishing). Make sure to run skipped workflows in the correct order and double-check all configuration (version number, release type, etc.) before proceeding.
+
+### The "Upload release to WordPress.org" workflow failed or timed out
+
+Uploads to WordPress.org SVN are the most failure-prone step of the release, especially for the first beta of a cycle, which carries the largest changeset since the previous SVN tag. Later releases in the cycle have much smaller diffs and rarely hit these issues.
+
+**Before re-running anything, check what actually landed on the SVN side.** SVN commits are atomic, and a run that "failed" on the GitHub side may still have committed successfully, because timeouts sometimes happen while the server is sending its response. Verify whether the [SVN tag](https://plugins.trac.wordpress.org/browser/woocommerce/tags) for the version exists and whether [SVN `trunk`](https://plugins.trac.wordpress.org/browser/woocommerce/trunk) was updated:
+
+- **If the tag exists and looks correct,** the upload succeeded regardless of the workflow status: continue with the release process. Re-running the workflow against an existing tag will fail.
+- **If SVN `trunk` was updated but the tag is missing,** the tag can be recreated with a manual copy, since the workflow commits to `trunk` first and then copies it to the tag:
+
+  ```bash
+  svn copy https://plugins.svn.wordpress.org/woocommerce/trunk https://plugins.svn.wordpress.org/woocommerce/tags/X.Y.Z -m "Tag X.Y.Z"
+  ```
+
+- **If nothing landed,** re-run the workflow. A failed run resends everything, so there is no risk of a partial upload.
+
+Common errors and what they mean:
+
+| Error | Cause | Action |
+| ----- | ----- | ------ |
+| `504 Gateway Time-out` during "Committing transaction" | The commit may have succeeded; the timeout occurred on the server response | Verify the tag on SVN before doing anything else |
+| `E000104` / `500 Internal Server Error` | Server-side issue on WordPress.org | Retry; if it persists, wait and try again later |
+| `E175013: Access to '/!svn/me' forbidden` | Invalid or outdated SVN credentials | Update the SVN credentials secret in the repository and re-run |
+| `E200009: a peg revision is not allowed here` | A file name in the build contains an `@` character, which SVN interprets as a peg revision | Escape the `@` in the workflow's SVN operations |
 
 ### A serious bug was detected during internal checks / monitoring
 
@@ -77,6 +118,13 @@ If a severe regression or bug is discovered (e.g., checkout failure or unrecover
    - Use the [`Release: Update stable tag`](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) workflow, making sure to check the _Revert_ option to allow downgrading.
    - Merge any auto-generated PRs right away.
 3. Follow the [Point Releases guide](/docs/contribution/releases/point-releases) to create a tracking issue, prepare the fix, and ship the patch.
+
+### The release is out, but sites don't see the update yet
+
+This is usually not a problem:
+
+- WordPress checks for plugin updates roughly every 12 hours by default, so it can take a while for a newly published release to be offered on any given site.
+- Only the `Stable tag` in the `readme.txt` on WordPress.org's SVN `trunk` controls what the updater offers. The `readme.txt` bundled inside a released ZIP always shows the previous version as stable: that's expected, since published releases are frozen and can't be edited.
 
 ### The release needs to be delayed. What should we do?
 
