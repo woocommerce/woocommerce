@@ -230,6 +230,42 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox Duplicate tax IDs within a line return 400 duplicate_tax_id and create no refund.
+	 */
+	public function test_duplicate_refund_tax_ids_return_400(): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		$order       = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id     = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 50.00,
+						'refund_tax'   => array(
+							array(
+								'id'           => $tax_rate_id,
+								'refund_total' => 5.00,
+							),
+							array(
+								'id'           => $tax_rate_id,
+								'refund_total' => 5.00,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'duplicate_tax_id', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds(), 'A refund with inconsistent tax accounting must never be created.' );
+	}
+
+	/**
 	 * @testdox A quantity-form refund after a partial amount refund is clamped to the line's remaining refundable amount.
 	 */
 	public function test_quantity_refund_clamped_to_remaining(): void {

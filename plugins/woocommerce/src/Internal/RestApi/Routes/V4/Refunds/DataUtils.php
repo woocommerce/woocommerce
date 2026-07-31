@@ -365,7 +365,23 @@ class DataUtils {
 				// equivalent for the inclusive form.
 				$line_refund_gross = (float) $line_item['refund_total'];
 				if ( ! empty( $line_item['refund_tax'] ) && is_array( $line_item['refund_tax'] ) ) {
+					$seen_tax_ids = array();
 					foreach ( $line_item['refund_tax'] as $tax ) {
+						// Reject duplicate tax IDs within a line: the gross sum here and
+						// calculate_refund_amount() count every entry, but the internal
+						// conversion keys taxes by ID, so a duplicate would silently
+						// overwrite its sibling and store less than the refund amount.
+						$tax_id = $tax['id'] ?? null;
+						if ( null !== $tax_id && isset( $seen_tax_ids[ $tax_id ] ) ) {
+							return new WP_Error(
+								'duplicate_tax_id',
+								__( 'Each tax can appear at most once per line item in refund_tax.', 'woocommerce' ),
+								array( 'status' => WP_Http::BAD_REQUEST )
+							);
+						}
+						if ( null !== $tax_id ) {
+							$seen_tax_ids[ $tax_id ] = true;
+						}
 						$line_refund_gross += (float) ( $tax['refund_total'] ?? 0 );
 					}
 				}
