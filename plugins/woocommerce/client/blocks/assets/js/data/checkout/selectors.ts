@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { select } from '@wordpress/data';
+import { createSelector, select } from '@wordpress/data';
 import { hasCollectableRate } from '@woocommerce/base-utils';
 import { isString, objectHasProp } from '@woocommerce/types';
-import type { AddressFormType } from '@woocommerce/settings';
+import { getSetting, type AddressFormType } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -12,6 +12,43 @@ import type { AddressFormType } from '@woocommerce/settings';
 import { STATUS } from './constants';
 import { CheckoutState } from './default-state';
 import { STORE_KEY as cartStoreKey } from '../cart/constants';
+
+/**
+ * Returns the core subset of checkout state. Pairs with the `getCheckoutData`
+ * resolver, which fetches the full checkout payload from the Store API when
+ * the page is not server-hydrated.
+ */
+export const getCheckoutData = createSelector(
+	( state: CheckoutState ) => {
+		return {
+			orderId: state.orderId,
+			customerId: state.customerId,
+			orderNotes: state.orderNotes,
+			additionalFields: state.additionalFields,
+		};
+	},
+	( state: CheckoutState ) => [
+		state.orderId,
+		state.customerId,
+		state.orderNotes,
+		state.additionalFields,
+	]
+);
+
+/**
+ * Whether the checkout payload was server-hydrated.
+ *
+ * Returns `false` when the checkout data is fetched on the client instead.
+ * Extensions (payment gateways, custom fields) can read this to defer
+ * rendering per-user UI until the client-side data has loaded.
+ */
+export const isCheckoutDataHydrated = (): boolean => {
+	return (
+		Object.keys(
+			getSetting< Record< string, unknown > >( 'checkoutData', {} )
+		).length > 0
+	);
+};
 
 export const getCustomerId = ( state: CheckoutState ) => {
 	return state.customerId;

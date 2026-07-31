@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an experimental woocommerce_should_hydrate filter that lets cache integrations serve neutral, cacheable markup for the cart, checkout, mini-cart and product button blocks, with per-user data loaded client-side from the Store API.

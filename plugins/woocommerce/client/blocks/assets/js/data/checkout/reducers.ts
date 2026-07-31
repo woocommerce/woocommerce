@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { Reducer } from 'redux';
+import { isSameAddress } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -93,6 +94,53 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 				...state,
 				calculatingCount: Math.max( 0, state.calculatingCount - 1 ),
 			};
+			break;
+
+		case types.RECEIVE_CHECKOUT_DATA:
+			if ( action.checkoutData ) {
+				const hasBillingAddress = !! (
+					action.checkoutData.billing_address?.address_1 &&
+					( action.checkoutData.billing_address?.first_name ||
+						action.checkoutData.billing_address?.last_name )
+				);
+
+				const hasShippingAddress = !! (
+					action.checkoutData.shipping_address?.address_1 &&
+					( action.checkoutData.shipping_address?.first_name ||
+						action.checkoutData.shipping_address?.last_name )
+				);
+
+				const billingMatchesShipping =
+					action.checkoutData.billing_address &&
+					action.checkoutData.shipping_address
+						? isSameAddress(
+								action.checkoutData.billing_address,
+								action.checkoutData.shipping_address
+						  )
+						: state.useShippingAsBilling;
+
+				newState = {
+					...state,
+					orderId: action.checkoutData.order_id || state.orderId,
+					customerId:
+						action.checkoutData.customer_id || state.customerId,
+					orderNotes:
+						action.checkoutData.customer_note || state.orderNotes,
+					additionalFields: {
+						...state.additionalFields,
+					},
+					useShippingAsBilling:
+						hasBillingAddress || hasShippingAddress
+							? billingMatchesShipping
+							: state.useShippingAsBilling,
+					editingBillingAddress: hasBillingAddress
+						? false
+						: state.editingBillingAddress,
+					editingShippingAddress: hasShippingAddress
+						? false
+						: state.editingShippingAddress,
+				};
+			}
 			break;
 
 		case types.SET_CUSTOMER_ID:

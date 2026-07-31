@@ -353,6 +353,58 @@ function emitSyncEvent( {
 }
 
 /**
+ * Mirrors IAPI cart fetches into the @wordpress/data cart store so a single
+ * GET /cart hydrates both and the Redux resolver short-circuits. Reads the
+ * global `wp.data` because this script module can't import it directly.
+ */
+const pushCartToReduxStore = ( cart: Cart ): void => {
+	const data = (
+		window as unknown as {
+			wp?: {
+				data?: {
+					dispatch: ( key: string ) => {
+						receiveCart?: ( cart: Cart ) => void;
+						finishResolution?: ( name: string ) => void;
+					};
+				};
+			};
+		}
+	 ).wp?.data;
+	if ( ! data ) {
+		return;
+	}
+	try {
+		const cartDispatch = data.dispatch( 'wc/store/cart' );
+		cartDispatch.receiveCart?.( cart );
+		cartDispatch.finishResolution?.( 'getCartData' );
+		( window as { wcIapiCartHydrated?: boolean } ).wcIapiCartHydrated =
+			true;
+	} catch {}
+};
+
+/**
+ * Mirrors the fresh Store API nonce from IAPI fetch responses into the
+ * apiFetch nonce middleware used by the React cart/checkout blocks, so
+ * mutations don't start from a stale nonce when the IAPI fetch is the only
+ * request on page load. `setNonce` is monkey-patched onto apiFetch by
+ * middleware/store-api-nonce.
+ */
+const pushNonceToApiFetchMiddleware = ( headers: Headers ): void => {
+	const apiFetch = (
+		window as unknown as {
+			wp?: {
+				apiFetch?: {
+					setNonce?: ( headers: Headers ) => void;
+				};
+			};
+		}
+	 ).wp?.apiFetch;
+	try {
+		apiFetch?.setNonce?.( headers );
+	} catch {}
+};
+
+/**
  * Cart request queue singleton
  *
  * Lazily initialized on first use since state isn't available at module load.
@@ -383,11 +435,13 @@ async function sendCartRequest(
 			},
 			commit: ( serverState ) => {
 				stateRef.cart = serverState;
+				pushCartToReduxStore( serverState );
 			},
 			fetchHandler: async ( ...args ) => {
 				const response = await fetch( ...args );
 				stateRef.nonce =
 					response.headers.get( 'Nonce' ) || stateRef.nonce;
+				pushNonceToApiFetchMiddleware( response.headers );
 				return response;
 			},
 		} );
@@ -401,6 +455,7 @@ const universalLock =
 
 // Todo: export this store once the store is public.
 const { state } = store< Store >( 'woocommerce', {}, { lock: universalLock } );
+
 const { actions } = store< Store >(
 	'woocommerce',
 	{
@@ -1011,7 +1066,9 @@ const { actions } = store< Store >(
 				}
 
 				// Skips if there's a pending request.
-				if ( pendingRefresh ) return;
+				if ( pendingRefresh ) {
+					return;
+				}
 
 				pendingRefresh = true;
 
@@ -1027,6 +1084,7 @@ const { actions } = store< Store >(
 
 					// Extract fresh nonce from response headers.
 					state.nonce = res.headers.get( 'Nonce' ) || state.nonce;
+					pushNonceToApiFetchMiddleware( res.headers );
 
 					if ( resolveNonceReady ) {
 						resolveNonceReady();
@@ -1036,8 +1094,9 @@ const { actions } = store< Store >(
 					const json = ( yield res.json() ) as Cart;
 
 					// Checks if the response contains an error.
-					if ( isApiErrorResponse( res, json ) )
+					if ( isApiErrorResponse( res, json ) ) {
 						throw generateError( json );
+					}
 
 					// If the batcher started a cycle while we were fetching,
 					// discard this response — the batcher will reconcile.
@@ -1047,6 +1106,8 @@ const { actions } = store< Store >(
 
 					// Updates the local cart.
 					state.cart = json;
+
+					pushCartToReduxStore( json );
 
 					// Resets the timeout.
 					refreshTimeout = 3000;

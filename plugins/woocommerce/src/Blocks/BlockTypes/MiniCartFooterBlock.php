@@ -1,8 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
-
 
 /**
  * MiniCartFooterBlock class.
@@ -45,9 +45,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 		$subtotal_label                   = __( 'Subtotal', 'woocommerce' );
 		$other_costs_label                = $this->get_totals_item_description();
 		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === TaxDisplayMode::INCLUSIVE;
-		$subtotal                         = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
 		$formatted_subtotal               = '';
-		$html                             = new \WP_HTML_Tag_Processor( wc_price( $subtotal ) );
 		$wrapper_attributes               = get_block_wrapper_attributes(
 			array(
 				'data-wp-interactive' => 'woocommerce/mini-cart-footer-block',
@@ -55,10 +53,17 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 			)
 		);
 
-		if ( $html->next_tag( 'bdi' ) ) {
-			while ( $html->next_token() ) {
-				if ( '#text' === $html->get_token_name() ) {
-						$formatted_subtotal .= $html->get_modifiable_text();
+		$should_hydrate = BlocksSharedState::should_hydrate( $this->get_full_block_name() );
+
+		if ( $should_hydrate && $cart ) {
+			$subtotal = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
+			$html     = new \WP_HTML_Tag_Processor( wc_price( $subtotal ) );
+
+			if ( $html->next_tag( 'bdi' ) ) {
+				while ( $html->next_token() ) {
+					if ( '#text' === $html->get_token_name() ) {
+							$formatted_subtotal .= $html->get_modifiable_text();
+					}
 				}
 			}
 		}

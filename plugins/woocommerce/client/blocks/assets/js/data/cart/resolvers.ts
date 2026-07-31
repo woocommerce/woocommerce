@@ -2,13 +2,14 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import { select } from '@wordpress/data';
 import { CartResponse } from '@woocommerce/types';
 import { previewCart } from '@woocommerce/resource-previews';
 
 /**
  * Internal dependencies
  */
-import { CART_API_ERROR } from './constants';
+import { CART_API_ERROR, STORE_KEY } from './constants';
 import type { CartDispatchFromMap, CartResolveSelectFromMap } from './index';
 import { setTriggerStoreSyncEvent } from './utils';
 import { isEditor } from '../utils';
@@ -21,6 +22,16 @@ export const getCartData =
 	async ( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
 		if ( isEditor() ) {
 			dispatch.receiveCart( previewCart );
+			return;
+		}
+
+		// Skip when the IAPI cart store already pushed cart data into this
+		// store — a single GET /cart hydrates both.
+		if (
+			( window as { wcIapiCartHydrated?: boolean } )
+				.wcIapiCartHydrated &&
+			select( STORE_KEY ).getCartData().items.length > 0
+		) {
 			return;
 		}
 
@@ -37,6 +48,14 @@ export const getCartData =
 		) {
 			// @ts-expect-error setCartHash exists but is not typed
 			apiFetch.setCartHash( response?.headers );
+		}
+
+		if (
+			// @ts-expect-error setNonce is monkey patched in middleware/store-api-nonce
+			typeof apiFetch.setNonce === 'function'
+		) {
+			// @ts-expect-error setNonce is monkey patched in middleware/store-api-nonce
+			apiFetch.setNonce( response?.headers );
 		}
 
 		try {

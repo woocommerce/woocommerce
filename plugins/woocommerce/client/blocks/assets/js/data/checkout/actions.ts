@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { AddressFormType, OrderFormValues } from '@woocommerce/settings';
+import type { CheckoutResponseSuccess } from '@woocommerce/types';
 import deprecated from '@wordpress/deprecated';
 
 /**
@@ -115,6 +116,18 @@ export const __internalDecrementCalculating = () => {
 		type: types.DECREMENT_CALCULATING,
 	};
 };
+
+/**
+ * Receive checkout data from API
+ *
+ * @param checkoutData Checkout data from the API response
+ */
+export const receiveCheckoutData = (
+	checkoutData: CheckoutResponseSuccess
+) => ( {
+	type: types.RECEIVE_CHECKOUT_DATA,
+	checkoutData,
+} );
 
 /**
  * Set the customer id

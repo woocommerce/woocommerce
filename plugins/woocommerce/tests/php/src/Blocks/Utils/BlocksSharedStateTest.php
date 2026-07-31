@@ -30,6 +30,10 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_cart_contents_count' );
+		if ( isset( WC()->cart ) ) {
+			WC()->cart->empty_cart();
+		}
+		wp_set_current_user( 0 );
 		$this->reset_shared_state();
 		parent::tearDown();
 	}
@@ -100,5 +104,82 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'nonOptimisticProperties', $config );
 		$this->assertSame( array(), $config['nonOptimisticProperties'] );
+	}
+
+	/**
+	 * @testdox should_hydrate returns false for anonymous requests with an empty cart.
+	 */
+	public function test_should_hydrate_false_for_anonymous_empty_cart(): void {
+		wp_set_current_user( 0 );
+		WC()->cart->empty_cart();
+
+		$this->assertFalse( BlocksSharedState::should_hydrate() );
+		$this->assertFalse( BlocksSharedState::should_hydrate( 'woocommerce/cart' ) );
+	}
+
+	/**
+	 * @testdox should_hydrate returns true for logged-in users even with an empty cart.
+	 */
+	public function test_should_hydrate_true_for_logged_in_users(): void {
+		$user_id = $this->factory()->user->create();
+		wp_set_current_user( $user_id );
+		WC()->cart->empty_cart();
+
+		$this->assertTrue( BlocksSharedState::should_hydrate() );
+	}
+
+	/**
+	 * @testdox should_hydrate returns true for anonymous requests with a non-empty cart.
+	 */
+	public function test_should_hydrate_true_for_anonymous_with_cart_contents(): void {
+		wp_set_current_user( 0 );
+		$product = \WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$this->assertTrue( BlocksSharedState::should_hydrate() );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox woocommerce_should_hydrate filter overrides the default and receives the namespace.
+	 */
+	public function test_should_hydrate_filter_overrides_default(): void {
+		wp_set_current_user( 0 );
+		WC()->cart->empty_cart();
+
+		$received_default   = null;
+		$received_namespace = null;
+		$filter             = function ( $default_value, $store_namespace ) use ( &$received_default, &$received_namespace ) {
+			$received_default   = $default_value;
+			$received_namespace = $store_namespace;
+			return true;
+		};
+		add_filter( 'woocommerce_should_hydrate', $filter, 10, 2 );
+
+		$this->assertTrue( BlocksSharedState::should_hydrate( 'woocommerce/cart' ) );
+		$this->assertFalse( $received_default );
+		$this->assertSame( 'woocommerce/cart', $received_namespace );
+
+		remove_filter( 'woocommerce_should_hydrate', $filter, 10 );
+	}
+
+	/**
+	 * @testdox woocommerce_should_hydrate filter can force neutral output for personalized requests.
+	 */
+	public function test_should_hydrate_filter_can_force_neutral(): void {
+		wp_set_current_user( 0 );
+		$product = \WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$filter = fn() => false;
+		add_filter( 'woocommerce_should_hydrate', $filter );
+
+		$this->assertFalse( BlocksSharedState::should_hydrate() );
+
+		remove_filter( 'woocommerce_should_hydrate', $filter );
+		WC()->cart->empty_cart();
+		$product->delete( true );
 	}
 }
