@@ -46,6 +46,10 @@ const program = new Command()
 		'Only output the post as HTML, do not publish a draft.'
 	)
 	.option(
+		'--outputPath <path>',
+		'Write generated HTML to this path. Requires --outputOnly.'
+	)
+	.option(
 		'--tags <tags>',
 		'Comma separated list of tags to add to the post.',
 		'Releases,WooCommerce Core'
@@ -57,6 +61,7 @@ const program = new Command()
 	.action( async ( releaseVersion, options ) => {
 		const {
 			outputOnly,
+			outputPath,
 			siteId = DEVELOPER_WOOCOMMERCE_SITE_ID,
 			tags,
 			releaseDate,
@@ -86,6 +91,10 @@ const program = new Command()
 			throw new Error(
 				`Invalid release date: ${ releaseDate }. Provide release date as mm-dd-yyyy.`
 			);
+		}
+
+		if ( outputPath && ! isOutputOnly ) {
+			throw new Error( '--outputPath requires --outputOnly.' );
 		}
 
 		const prereleaseVersion = semverVersion.prerelease[ 1 ];
@@ -119,10 +128,9 @@ const program = new Command()
 		} );
 
 		if ( isOutputOnly ) {
-			const tmpFile = join(
-				tmpdir(),
-				`beta-release-${ releaseVersion }.html`
-			);
+			const tmpFile =
+				outputPath ||
+				join( tmpdir(), `beta-release-${ releaseVersion }.html` );
 
 			await writeFile( tmpFile, html );
 

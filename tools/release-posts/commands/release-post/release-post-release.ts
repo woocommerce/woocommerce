@@ -53,6 +53,19 @@ const program = new Command()
 		'The previous version in x.y.z format. Ex: 7.0.0'
 	)
 	.option( '--outputOnly', 'Only output the post, do not publish it' )
+	.option(
+		'--outputPath <path>',
+		'Write generated HTML to this path. Requires --outputOnly.'
+	)
+	.option(
+		'--releaseDate <date>',
+		'The release date as mm-dd-yyyy, defaults to today.',
+		new Date().toLocaleDateString( 'en-US', {
+			month: '2-digit',
+			day: '2-digit',
+			year: 'numeric',
+		} )
+	)
 	.option( '--editPostId <postId>', 'Updates an existing post' )
 	.option(
 		'--tags <tags>',
@@ -71,6 +84,7 @@ const program = new Command()
 			'Releases',
 		];
 		const isOutputOnly = !! options.outputOnly;
+		const releaseDate = new Date( options.releaseDate );
 
 		if ( ! VERSION_VALIDATION_REGEX.test( currentVersion ) ) {
 			throw new Error(
@@ -84,25 +98,38 @@ const program = new Command()
 			);
 		}
 
-		const clientId = getEnvVar( 'WPCOM_OAUTH_CLIENT_ID', true );
-		const clientSecret = getEnvVar( 'WPCOM_OAUTH_CLIENT_SECRET', true );
-		const redirectUri =
-			getEnvVar( 'WPCOM_OAUTH_REDIRECT_URI' ) ||
-			'http://localhost:3000/oauth';
-		const authToken =
-			isOutputOnly ||
-			( await getWordpressComAuthToken(
+		if ( Number.isNaN( releaseDate.valueOf() ) ) {
+			throw new Error(
+				`Invalid release date: ${ options.releaseDate }. Provide release date as mm-dd-yyyy.`
+			);
+		}
+
+		if ( options.outputPath && ! isOutputOnly ) {
+			throw new Error( '--outputPath requires --outputOnly.' );
+		}
+
+		let authToken = '';
+
+		if ( ! isOutputOnly ) {
+			const clientId = getEnvVar( 'WPCOM_OAUTH_CLIENT_ID', true );
+			const clientSecret = getEnvVar( 'WPCOM_OAUTH_CLIENT_SECRET', true );
+			const redirectUri =
+				getEnvVar( 'WPCOM_OAUTH_REDIRECT_URI' ) ||
+				'http://localhost:3000/oauth';
+
+			authToken = await getWordpressComAuthToken(
 				clientId,
 				clientSecret,
 				siteId,
 				redirectUri,
 				'posts'
-			) );
-
-		if ( ! authToken ) {
-			throw new Error(
-				'Error getting auth token, check your env settings are correct.'
 			);
+
+			if ( ! authToken ) {
+				throw new Error(
+					'Error getting auth token, check your env settings are correct.'
+				);
+			}
 		}
 
 		Logger.startTask( `Making temporary clone of ${ SOURCE_REPO }...` );
@@ -196,8 +223,8 @@ const program = new Command()
 		const title = `WooCommerce ${ currentVersion } Released`;
 
 		const contributors = await generateContributors(
-			currentVersion,
-			previousVersion.toString()
+			currentBranch,
+			previousBranch
 		);
 
 		const postVariables = {
@@ -206,7 +233,7 @@ const program = new Command()
 			changes,
 			displayVersion: currentVersion,
 			releaseBranch: `${ currentParsed.major }.${ currentParsed.minor }`,
-			releaseDate: new Date(),
+			releaseDate,
 		};
 
 		const html =
@@ -234,10 +261,9 @@ const program = new Command()
 		Logger.endTask();
 
 		if ( isOutputOnly ) {
-			const tmpFile = join(
-				tmpdir(),
-				`release-${ currentVersion }.html`
-			);
+			const tmpFile =
+				options.outputPath ||
+				join( tmpdir(), `release-${ currentVersion }.html` );
 
 			await writeFile( tmpFile, html );
 
