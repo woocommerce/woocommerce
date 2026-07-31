@@ -100,6 +100,9 @@ class Totals extends \WP_UnitTestCase {
 	 * tearDown.
 	 */
 	public function tearDown(): void {
+		global $wp_rest_server;
+		$wp_rest_server = null;
+
 		parent::tearDown();
 		remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
 		WC()->cart->empty_cart();
