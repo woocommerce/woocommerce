@@ -1,251 +1,216 @@
-/**
- * Tests for keeping the Product short description editor alive across metabox moves.
- *
- * Moving a postbox detaches and re-inserts its DOM node, which reloads the
- * TinyMCE iframe and wipes the editor document. See
- * https://github.com/woocommerce/woocommerce/issues/32113.
- */
-
 global.jQuery = jest.fn();
 
 const {
-	teardown: teardownShortDescriptionEditor,
-	restore: restoreShortDescriptionEditor,
+	teardown,
+	restore,
+	bindPostboxEvents,
 } = require( '../meta-boxes-product' );
 
-/**
- * Install a TinyMCE stub that mimics the parts of the real API this code leans on.
- *
- * The important fidelity detail is that remove() flushes the editor's content
- * into the textarea unconditionally, because TinyMCE's Editor.remove() calls
- * save() whenever the editor still has a body, and for a textarea target that
- * write is not gated by the is_removing flag. That is what makes the Visual-mode
- * path work without an explicit save(), and what would clobber the user's typing
- * in Text mode if the snapshot/restore pair were removed.
- *
- * @param {Object}  options            Stub options.
- * @param {boolean} options.hidden     Whether the editor is in "Text" mode.
- * @param {string}  options.content    Content the editor would flush on removal.
- * @param {boolean} options.hasEditor  Whether an editor instance exists at all.
- * @return {Object} The installed tinymce stub.
- */
-function stubTinyMce( { hidden = false, content = '', hasEditor = true } = {} ) {
-	// TinyMCE caches the element it was bound to, so this deliberately captures
-	// the node now rather than looking the id up later.
-	const target = document.querySelector( '#postexcerpt #excerpt' );
-	let editor = hasEditor
-		? { isHidden: () => hidden, getElement: () => target }
-		: null;
+const $ = function ( target ) {
+	const element =
+		typeof target === 'string' ? document.querySelector( target ) : target;
+	const listeners = [];
 
-	const tinymce = {
+	return {
+		on: function ( namespacedEvent, handler ) {
+			const event = namespacedEvent.split( '.' )[ 0 ];
+			const listener = ( domEvent ) => handler( domEvent, domEvent.detail );
+
+			element.addEventListener( event, listener );
+			listeners.push( { event, listener } );
+			return this;
+		},
+		off: function () {
+			listeners.forEach( ( { event, listener } ) => {
+				element.removeEventListener( event, listener );
+			} );
+		},
+		is: function ( selector ) {
+			return element.matches( selector );
+		},
+	};
+};
+
+function renderEditor( value = '' ) {
+	document.body.innerHTML =
+		'<div id="poststuff"><div id="postexcerpt">' +
+		'<button class="handle-order-higher" aria-disabled="false">' +
+		'<span>Move</span></button>' +
+		'<textarea id="excerpt" aria-hidden="true"></textarea>' +
+		'</div></div>';
+
+	const textarea = document.querySelector( '#excerpt' );
+	textarea.value = value;
+	return textarea;
+}
+
+function installTinyMce( {
+	hidden = false,
+	savedContent = '',
+	deferInit = false,
+} = {} ) {
+	const textarea = document.querySelector( '#excerpt' );
+	const resolveInitializations = [];
+	const createEditor = ( isHidden ) => ( {
+		getElement: () => textarea,
+		isHidden: () => isHidden,
+		setHidden: ( value ) => ( isHidden = value ),
+	} );
+	let editor = createEditor( hidden );
+
+	window.tinymce = {
 		get: jest.fn( () => editor ),
-		init: jest.fn(),
-		execCommand: jest.fn( ( command ) => {
-			if ( 'mceRemoveEditor' === command ) {
-				if ( target ) {
-					target.value = content;
-				}
+		init: jest.fn( () => {
+			const initializedEditor = ( editor = createEditor( false ) );
 
-				editor = null;
+			if ( ! deferInit ) {
+				return Promise.resolve( [ editor ] );
 			}
+
+			return new Promise( ( resolve ) => {
+				resolveInitializations.push( () =>
+					resolve( [ initializedEditor ] )
+				);
+			} );
 		} ),
+		execCommand: jest.fn( () => {
+			textarea.value = savedContent;
+			editor = null;
+		} ),
+		resolveInit: ( index ) => resolveInitializations[ index ](),
 	};
 
-	window.tinymce = tinymce;
-
-	return tinymce;
-}
-
-/**
- * Add a copy of the postbox carrying a duplicate id, as core's sortable helper
- * does while a postbox is being dragged.
- *
- * @param {string} value Value to put in the duplicate textarea.
- * @return {HTMLElement} The inserted copy.
- */
-function insertDragHelperClone( value ) {
-	const postbox = document.querySelector( '#postexcerpt' );
-	const clone = postbox.cloneNode( true );
-
-	clone.removeAttribute( 'id' );
-
-	const cloned = clone.querySelector( 'textarea' );
-	cloned.value = value;
-	// The clone goes earlier in tree order, so a browser resolves the duplicate
-	// id to it rather than to the real textarea. jsdom keeps returning the
-	// original, so make getElementById behave the way a browser would; without
-	// this the tests would pass even when the code looks the id up itself.
-	postbox.parentElement.insertBefore( clone, postbox );
-	jest.spyOn( document, 'getElementById' ).mockImplementation( ( id ) =>
-		'excerpt' === id ? cloned : null
-	);
-
-	return clone;
-}
-
-/**
- * Render the markup wp_editor() produces for the short description box.
- *
- * @param {string} value Initial textarea value.
- */
-function renderEditorMarkup( value = '' ) {
-	document.body.innerHTML =
-		'<div id="sortables">' +
-		'<div id="postexcerpt">' +
-		'<textarea id="excerpt" aria-hidden="true"></textarea>' +
-		'</div>' +
-		'</div>';
-	document.querySelector( '#postexcerpt #excerpt' ).value = value;
+	return window.tinymce;
 }
 
 describe( 'Product short description editor across metabox moves', () => {
+	let unbindPostboxEvents;
+
 	beforeEach( () => {
-		// WordPress always prints these alongside a wp_editor() instance.
-		window.tinyMCEPreInit = { mceInit: { excerpt: { selector: '#excerpt' } } };
+		unbindPostboxEvents = null;
+		window.tinyMCEPreInit = {
+			mceInit: { excerpt: { selector: '#excerpt' } },
+		};
+		window.switchEditors = {
+			go: jest.fn( () => {
+				const editor = window.tinymce.get( 'excerpt' );
+				editor.getElement().value = '<p>normalized</p>';
+				editor.setHidden( true );
+			} ),
+		};
 	} );
 
-	afterEach( () => {
-		// Clear any torn-down state before removing the stubs, since the module
-		// keeps that flag between tests.
-		restoreShortDescriptionEditor();
+	afterEach( async () => {
+		if ( unbindPostboxEvents ) {
+			unbindPostboxEvents();
+		}
 
+		await restore();
+		jest.useRealTimers();
 		jest.restoreAllMocks();
 		delete window.tinymce;
 		delete window.tinyMCEPreInit;
+		delete window.switchEditors;
 		document.body.innerHTML = '';
 	} );
 
-	describe( 'Text mode', () => {
-		test( 'keeps what the user typed in the textarea', () => {
-			renderEditorMarkup( 'typed in the textarea' );
-			// The hidden editor still holds older content and would flush it.
-			stubTinyMce( { hidden: true, content: 'stale editor content' } );
-
-			teardownShortDescriptionEditor();
-
-			expect( document.querySelector( '#postexcerpt #excerpt' ).value ).toBe(
-				'typed in the textarea'
-			);
+	test( 'preserves Visual content and rebuilds from the excerpt settings', async () => {
+		const textarea = renderEditor();
+		const settings = window.tinyMCEPreInit.mceInit.excerpt;
+		const tinymce = installTinyMce( {
+			savedContent: '<p>written in the editor</p>',
 		} );
 
-		test( 'leaves re-initialization to core', () => {
-			renderEditorMarkup( 'typed in the textarea' );
-			const tinymce = stubTinyMce( { hidden: true, content: 'stale' } );
+		teardown();
+		expect( textarea.value ).toBe( '<p>written in the editor</p>' );
+		expect( textarea.hasAttribute( 'aria-hidden' ) ).toBe( false );
 
-			teardownShortDescriptionEditor();
-			restoreShortDescriptionEditor();
-
-			expect( tinymce.init ).not.toHaveBeenCalled();
-		} );
+		await restore();
+		expect( tinymce.init ).toHaveBeenCalledWith( settings );
 	} );
 
-	describe( 'Visual mode', () => {
-		test( 'carries the editor content into the textarea', () => {
-			renderEditorMarkup( '' );
-			stubTinyMce( { content: '<p>written in the editor</p>' } );
-
-			teardownShortDescriptionEditor();
-
-			expect( document.querySelector( '#postexcerpt #excerpt' ).value ).toBe(
-				'<p>written in the editor</p>'
-			);
+	test( 'preserves raw Text mode through rapid consecutive moves', async () => {
+		const content = '<custom-element>raw</custom-element>\n';
+		const textarea = renderEditor( content );
+		const originalSetup = jest.fn();
+		const settings = window.tinyMCEPreInit.mceInit.excerpt;
+		settings.setup = originalSetup;
+		const tinymce = installTinyMce( {
+			hidden: true,
+			savedContent: 'stale editor content',
+			deferInit: true,
 		} );
 
-		test( 'rebuilds the editor from its own stored settings', () => {
-			renderEditorMarkup( '' );
-			const tinymce = stubTinyMce( { content: 'content' } );
-			const excerptSettings = { selector: '#excerpt', toolbar1: 'bold' };
-			window.tinyMCEPreInit = {
-				mceInit: {
-					excerpt: excerptSettings,
-					// A later-initialized editor must not supply the settings.
-					content: { selector: '#content', toolbar1: 'italic' },
-				},
-			};
+		teardown();
+		expect( textarea.value ).toBe( content );
+		const firstRestore = restore();
+		teardown();
+		const secondRestore = restore();
 
-			teardownShortDescriptionEditor();
-			restoreShortDescriptionEditor();
+		tinymce.resolveInit( 0 );
+		await firstRestore;
+		expect( window.switchEditors.go ).not.toHaveBeenCalled();
+		expect( textarea.value ).toBe( content );
+		tinymce.resolveInit( 1 );
+		await secondRestore;
 
-			expect( tinymce.init ).toHaveBeenCalledWith( excerptSettings );
-		} );
-
-		test( 'stops hiding the textarea from assistive tech while it is visible', () => {
-			renderEditorMarkup( '' );
-			stubTinyMce( { content: 'content' } );
-
-			teardownShortDescriptionEditor();
-
-			expect(
-				document.querySelector( '#postexcerpt #excerpt' ).hasAttribute( 'aria-hidden' )
-			).toBe( false );
-		} );
+		expect( tinymce.get( 'excerpt' ).isHidden() ).toBe( true );
+		expect( window.switchEditors.go ).toHaveBeenCalledTimes( 1 );
+		expect( window.switchEditors.go ).toHaveBeenCalledWith(
+			'excerpt',
+			'html'
+		);
+		expect( textarea.value ).toBe( content );
+		expect( tinymce.init.mock.calls[ 0 ][ 0 ] ).toBe( settings );
+		expect( tinymce.init.mock.calls[ 1 ][ 0 ] ).toBe( settings );
+		expect( settings.setup ).toBe( originalSetup );
 	} );
 
-	// While a postbox is dragged, core's sortable helper is a clone of it that
-	// carries a second element with the same id, so looking the id up in the
-	// document resolves to the wrong node. The code has to ask the editor which
-	// element it owns instead.
-	describe( 'while a drag helper clone duplicates the id', () => {
-		test( 'takes the textarea from the editor rather than the document', () => {
-			renderEditorMarkup( 'typed in the textarea' );
-			stubTinyMce( { hidden: true, content: 'stale editor content' } );
-			const clone = insertDragHelperClone( 'clone value' );
-
-			teardownShortDescriptionEditor();
-
-			expect( document.querySelector( '#postexcerpt #excerpt' ).value ).toBe(
-				'typed in the textarea'
-			);
-			expect( clone.querySelector( 'textarea' ).value ).toBe(
-				'clone value'
-			);
+	test( 'uses the editor textarea when a drag helper duplicates its id', () => {
+		const textarea = renderEditor( 'real content' );
+		const tinymce = installTinyMce( {
+			hidden: true,
+			savedContent: 'stale editor content',
 		} );
+		const clone = document.querySelector( '#postexcerpt' ).cloneNode( true );
+		clone.removeAttribute( 'id' );
+		clone.querySelector( 'textarea' ).value = 'clone content';
+		document.body.prepend( clone );
 
-		test( 'leaves the clone untouched when clearing aria-hidden', () => {
-			renderEditorMarkup( '' );
-			stubTinyMce( { content: 'content' } );
-			const clone = insertDragHelperClone( '' );
+		teardown();
 
-			teardownShortDescriptionEditor();
-
-			expect(
-				document.querySelector( '#postexcerpt #excerpt' ).hasAttribute( 'aria-hidden' )
-			).toBe( false );
-			expect(
-				clone.querySelector( 'textarea' ).hasAttribute( 'aria-hidden' )
-			).toBe( true );
-		} );
+		expect( tinymce.execCommand ).toHaveBeenCalledWith(
+			'mceRemoveEditor',
+			false,
+			'excerpt'
+		);
+		expect( textarea.value ).toBe( 'real content' );
+		expect( clone.querySelector( 'textarea' ).value ).toBe( 'clone content' );
 	} );
 
-	describe( 'when there is nothing to tear down', () => {
-		test( 'does nothing without a TinyMCE instance', () => {
-			renderEditorMarkup( 'untouched' );
-			const tinymce = stubTinyMce( { hasEditor: false } );
+	test( 'restores through the order-button and sortable event paths', async () => {
+		jest.useFakeTimers();
+		renderEditor( 'content' );
+		const tinymce = installTinyMce();
+		unbindPostboxEvents = bindPostboxEvents( $ );
+		const button = document.querySelector( '.handle-order-higher' );
+		button.addEventListener( 'click', ( event ) => event.stopPropagation() );
 
-			expect( () => teardownShortDescriptionEditor() ).not.toThrow();
-			expect( tinymce.execCommand ).not.toHaveBeenCalled();
-			expect( document.querySelector( '#postexcerpt #excerpt' ).value ).toBe(
-				'untouched'
-			);
-		} );
+		button.querySelector( 'span' ).click();
 
-		test( 'does nothing when TinyMCE is unavailable', () => {
-			renderEditorMarkup( 'untouched' );
+		expect( tinymce.execCommand ).toHaveBeenCalledTimes( 1 );
+		jest.runOnlyPendingTimers();
+		await Promise.resolve();
+		expect( tinymce.init ).toHaveBeenCalledTimes( 1 );
 
-			expect( () => teardownShortDescriptionEditor() ).not.toThrow();
-			expect( document.querySelector( '#postexcerpt #excerpt' ).value ).toBe(
-				'untouched'
-			);
-		} );
+		const poststuff = document.querySelector( '#poststuff' );
+		const ui = { item: $( document.querySelector( '#postexcerpt' ) ) };
 
-		test( 'restore is a no-op when no teardown happened', () => {
-			renderEditorMarkup( '' );
-			const tinymce = stubTinyMce( { content: 'content' } );
+		poststuff.dispatchEvent( new CustomEvent( 'sortstart', { detail: ui } ) );
+		poststuff.dispatchEvent( new CustomEvent( 'sortstop', { detail: ui } ) );
+		await Promise.resolve();
 
-			restoreShortDescriptionEditor();
-
-			expect( tinymce.init ).not.toHaveBeenCalled();
-			expect( tinymce.execCommand ).not.toHaveBeenCalled();
-		} );
+		expect( tinymce.execCommand ).toHaveBeenCalledTimes( 2 );
+		expect( tinymce.init ).toHaveBeenCalledTimes( 2 );
 	} );
 } );
