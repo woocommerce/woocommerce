@@ -23,7 +23,7 @@ class Utils {
 			if (
 				$processor->get_tag() === 'INPUT' &&
 				$processor->has_class( 'qty' ) &&
-				'hidden' !== strtolower( (string) $processor->get_attribute( 'type' ) )
+				$processor->get_attribute( 'type' ) !== 'hidden'
 			) {
 				return true;
 			}
@@ -39,12 +39,8 @@ class Utils {
 	 * @return string Quantity input HTML with increment and decrement buttons.
 	 */
 	public static function add_quantity_steppers( $quantity_html, $product_name ) {
-		// Regex pattern to match the visible <input> element with id starting with 'quantity_'.
-		// The type lookahead covers every way a hidden input can be written — single or double
-		// quoted, unquoted, spaced around the `=`, and any casing, since `type` is an enumerated
-		// attribute. The leading \s anchors it to a real attribute so `data-type="hidden"` on a
-		// visible input doesn't match. The id stays case-sensitive.
-		$pattern = '/(<input(?![^>]*(?i:\stype\s*=\s*["\']?hidden))[^>]*id="quantity_[^"]*"[^>]*\/>)/';
+		// Regex pattern to match the <input> element with id starting with 'quantity_'.
+		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Add the minus button BEFORE the matched <input> element so DOM order matches the
 		// visual order (− input +), giving a logical focus and reading sequence.
 		// Use preg_replace_callback to avoid backreference interpretation of $, \ sequences in product names.
@@ -80,54 +76,20 @@ class Utils {
 	public static function add_quantity_stepper_classes( $quantity_html ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 
-		// Track DIV nesting so a pending container is dropped once it closes. Without this, a
-		// visible input appearing after the container could claim it from the outside.
-		$pending_container = false;
-		$depth             = 0;
-		$container_depth   = 0;
-
-		while ( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
-			if ( $processor->get_tag() === 'DIV' ) {
-				if ( $processor->is_tag_closer() ) {
-					--$depth;
-
-					if ( $pending_container && $depth < $container_depth ) {
-						// The container closed with no visible quantity input inside it.
-						$pending_container = false;
-					}
-
-					continue;
-				}
-
-				++$depth;
-
-				if ( $processor->has_class( 'quantity' ) ) {
-					// Defer classing the container until a visible quantity input proves it needs it.
-					$processor->set_bookmark( 'quantity_container' );
-					$pending_container = true;
-					$container_depth   = $depth;
-				}
-
-				continue;
+		while ( $processor->next_tag() ) {
+			if (
+				$processor->get_tag() === 'DIV' &&
+				$processor->has_class( 'quantity' )
+			) {
+				$processor->add_class( 'wc-block-components-quantity-selector' );
 			}
 
 			if (
 				$processor->get_tag() === 'INPUT' &&
-				! $processor->is_tag_closer() &&
 				$processor->has_class( 'qty' ) &&
-				'hidden' !== strtolower( (string) $processor->get_attribute( 'type' ) )
+				$processor->get_attribute( 'type' ) !== 'hidden'
 			) {
 				$processor->add_class( 'wc-block-components-quantity-selector__input' );
-
-				if ( $pending_container ) {
-					// seek() rewinds the cursor, so bookmark the input to resume from after
-					// classing the container — otherwise the container is re-walked forever.
-					$processor->set_bookmark( 'visible_quantity_input' );
-					$processor->seek( 'quantity_container' );
-					$processor->add_class( 'wc-block-components-quantity-selector' );
-					$processor->seek( 'visible_quantity_input' );
-					$pending_container = false;
-				}
 			}
 		}
 

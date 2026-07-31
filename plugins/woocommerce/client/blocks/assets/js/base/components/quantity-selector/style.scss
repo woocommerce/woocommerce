@@ -12,12 +12,19 @@
 }
 
 .wc-block-components-quantity-selector {
-	border: 1px solid $universal-translucent-border-color;
-	border-radius: $universal-border-radius;
-	box-sizing: border-box;
-	display: flex;
-	position: relative;
-	width: 107px;
+	// A `div.quantity` is classed as a quantity selector on sight, so a form that
+	// renders a hidden quantity input next to a static number — a Product Bundle
+	// with a fixed quantity, for example — would otherwise get a stepper box drawn
+	// around text the shopper cannot change. `:where()` keeps the guard at zero
+	// specificity, so the declarations below cascade exactly as they did before.
+	&:where(:has(input:not([type="hidden"]))) {
+		border: 1px solid $universal-translucent-border-color;
+		border-radius: $universal-border-radius;
+		box-sizing: border-box;
+		display: flex;
+		position: relative;
+		width: 107px;
+	}
 
 	// Extra label for specificity needed in the editor.
 	input.wc-block-components-quantity-selector__input {
