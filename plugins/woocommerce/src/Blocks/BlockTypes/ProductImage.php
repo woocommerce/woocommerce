@@ -262,7 +262,7 @@ class ProductImage extends AbstractBlock {
 
 		$adjust_srcset = function ( $sources, $size_array, $image_src, $image_meta ) use ( $aspect_ratio ) {
 			if (
-				! $aspect_ratio ||
+				! is_string( $aspect_ratio ) ||
 				empty( $sources ) ||
 				empty( $image_meta['width'] ) ||
 				empty( $image_meta['height'] )
@@ -290,6 +290,9 @@ class ProductImage extends AbstractBlock {
 				$stretch_factor = $image_aspect_ratio / $block_aspect_ratio;
 
 				foreach ( $sources as $key => $source ) {
+					if ( ! is_array( $source ) || ! isset( $source['value'] ) || ! is_numeric( $source['value'] ) ) {
+						continue;
+					}
 					$sources[ $key ]['value'] = (int) round( $source['value'] / $stretch_factor );
 				}
 			}
@@ -299,7 +302,7 @@ class ProductImage extends AbstractBlock {
 
 		$maybe_adjust_srcset =
 			'cover' === $attributes['scale'] &&
-			$aspect_ratio &&
+			is_string( $aspect_ratio ) &&
 			false !== strpos( $aspect_ratio, '/' );
 
 		if ( $maybe_adjust_srcset ) {
