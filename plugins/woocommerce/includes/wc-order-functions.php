@@ -1290,7 +1290,7 @@ function wc_get_order_notes( $args ) {
 /**
  * Get the last note for an order.
  *
- * @since  10.8.0
+ * @since  11.1.0
  * @param  int    $order_id Order ID.
  * @param  string $type     Define what type of note to retrieve.
  *                          Accepts 'customer', 'internal' or empty for both.

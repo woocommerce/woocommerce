@@ -1875,7 +1875,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_last_order_note().
 	 *
-	 * @since 10.8.0
+	 * @since 11.1.0
 	 */
 	public function test_wc_get_last_order_note() {
 		$order = WC_Helper_Order::create_order();
