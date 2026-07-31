@@ -46,7 +46,7 @@ class NoticeHandler {
 	 *
 	 * Unlike `convert_notices_to_exceptions()`, this leaves the notice queue untouched. Callers
 	 * that need the notices cleared are expected to manage the queue themselves — see
-	 * `CartController::validate_cart_items()`, which snapshots it beforehand and restores it
+	 * `CartController::validate_cart()`, which snapshots it beforehand and restores it
 	 * afterwards so that notices raised by `woocommerce_check_cart_items` do not survive.
 	 *
 	 * @param string $error_code Error code for the thrown exceptions.
