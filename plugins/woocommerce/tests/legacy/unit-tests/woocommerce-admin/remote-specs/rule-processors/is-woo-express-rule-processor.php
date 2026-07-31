@@ -17,6 +17,8 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_IsWooExpressRuleProcessor extend
 	 * Set Up Before Class.
 	 */
 	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
 		/**
 		 * Fake function wc_calypso_bridge_is_woo_express_plan so that we can test the processor.
 		 */
