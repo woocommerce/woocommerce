@@ -8,7 +8,6 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Blocks\Package;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Opis\JsonSchema\{
 	Validator,
 	ValidationResult,
@@ -20,7 +19,7 @@ use WC_Customer;
 /**
  * DocumentObjectTests class.
  */
-class DocumentObjectTests extends TestCase {
+class DocumentObjectTests extends \WC_Unit_Test_Case {
 	/**
 	 * Trait to use for the test_additional_fields_schema test.
 	 *
@@ -121,8 +120,11 @@ class DocumentObjectTests extends TestCase {
 	 * Tear down the test environment.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
+		// The cart lives on the WC singleton, which the rollback does not touch, so empty it
+		// before handing back to the parent.
 		wc_empty_cart();
+
+		parent::tearDown();
 	}
 	/**
 	 * test_default_document_schema.

@@ -5,12 +5,11 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * QuantityLimitsTests class.
  */
-class QuantityLimitsTests extends TestCase {
+class QuantityLimitsTests extends \WC_Unit_Test_Case {
 	/**
 	 * @var string
 	 */
@@ -20,8 +19,9 @@ class QuantityLimitsTests extends TestCase {
 	 * Set up test environment.
 	 */
 	public function setUp(): void {
-		$this->manage_stock = get_option( 'woocommerce_manage_stock' );
 		parent::setUp();
+
+		$this->manage_stock = get_option( 'woocommerce_manage_stock' );
 	}
 
 	/**

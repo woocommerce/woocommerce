@@ -9,12 +9,11 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * OrderControllerTests class.
  */
-class OrderControllerTests extends TestCase {
+class OrderControllerTests extends \WC_Unit_Test_Case {
 	/**
 	 * Whether the checkout phone field option existed before the test.
 	 *
