@@ -28,16 +28,37 @@ trait AuthorizesPushNotificationRequests {
 	 * @return bool|WP_Error
 	 */
 	public function authorize_as_authenticated( WP_REST_Request $request ) {
+		$authorized = $this->authorize_as_authenticated_ignoring_enablement( $request );
+
+		if ( true !== $authorized ) {
+			return $authorized;
+		}
+
+		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks the user is authenticated and holds at least one role allowed to
+	 * interact with push notifications, without requiring the module to be
+	 * enabled. Used by endpoints (e.g. status) that must stay reachable when
+	 * push notifications are disabled so clients can discover the state and
+	 * fall back.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return bool|WP_Error
+	 */
+	public function authorize_as_authenticated_ignoring_enablement( WP_REST_Request $request ) {
 		if ( ! get_current_user_id() ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_view',
 				__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
-		}
-
-		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
-			return false;
 		}
 
 		$has_valid_role = array_reduce(
