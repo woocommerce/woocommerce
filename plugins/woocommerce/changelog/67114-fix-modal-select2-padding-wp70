@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Add products modal select2 icon padding being overridden by the WP 7.0+ admin styles, so long product names no longer run under the clear/chevron icons.
