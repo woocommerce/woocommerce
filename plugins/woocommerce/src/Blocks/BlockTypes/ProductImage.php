@@ -276,14 +276,12 @@ class ProductImage extends AbstractBlock {
 				count( $aspect_ratio_parts ) !== 2 ||
 				! is_numeric( $aspect_ratio_parts[0] ) ||
 				! is_numeric( $aspect_ratio_parts[1] ) ||
-				$aspect_ratio_parts[0] <= 0 ||
 				$aspect_ratio_parts[1] <= 0
 			) {
 				return $sources;
 			}
 
-			$block_aspect_ratio = (float) $aspect_ratio_parts[0] / (float) $aspect_ratio_parts[1];
-
+			$block_aspect_ratio = $aspect_ratio_parts[0] / $aspect_ratio_parts[1];
 			$image_aspect_ratio = $image_meta['width'] / $image_meta['height'];
 
 			if ( $image_aspect_ratio > $block_aspect_ratio ) {
