@@ -24,10 +24,8 @@
 /packages/*/vendor-prefixed/patches
 /packages/*/vendor-prefixed/setup.sh
 /packages/*/vendor-prefixed/vendor
-/packages/blueprint/blueprint.php
 /packages/blueprint/src/docs
 /packages/email-editor/docs
-/packages/email-editor/email-editor.php
 /packages/email-editor/tasks
 /src/StoreApi/docs
 /e2e/
