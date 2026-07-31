@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Print frontend scripts in the footer with the defer strategy instead of forcing legacy alias handles to be blocking, fixing classic cart and checkout on sites that load a second jQuery instance.
