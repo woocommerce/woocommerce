@@ -10,8 +10,8 @@ program
 	.name( 'release-post' )
 	.version( '0.0.1' )
 	.command( 'release', 'Generate release post', { isDefault: true } )
+	.command( 'dot', 'Generate draft dot release post' )
 	.command( 'beta', 'Generate draft beta release post' )
-	.command( 'rc', 'Generate draft RC release post' )
 	.command(
 		'contributors',
 		'Generate a list of contributors for a release post'

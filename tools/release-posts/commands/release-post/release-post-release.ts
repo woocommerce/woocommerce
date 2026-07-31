@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { scanForChanges } from 'code-analyzer/src/lib/scan-changes';
+import {
+	scanChangesForDB,
+	scanForChanges,
+} from 'code-analyzer/src/lib/scan-changes';
 import semver from 'semver';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
@@ -105,6 +108,12 @@ const program = new Command()
 		Logger.startTask( `Making temporary clone of ${ SOURCE_REPO }...` );
 		const currentParsed = semver.parse( currentVersion );
 		const previousParsed = semver.parse( previousVersion );
+		if ( ! currentParsed ) {
+			throw new Error( 'Unable to parse current version' );
+		}
+		if ( ! previousParsed ) {
+			throw new Error( 'Unable to parse previous version' );
+		}
 		const tmpRepoPath = await cloneRepo( SOURCE_REPO );
 		Logger.endTask();
 		let currentBranch;
@@ -113,15 +122,12 @@ const program = new Command()
 		let previousVersionRef;
 
 		try {
-			if ( ! currentParsed ) {
-				throw new Error( 'Unable to parse current version' );
-			}
 			currentBranch = `release/${ currentParsed.major }.${ currentParsed.minor }`;
 			currentVersionRef = await getCommitHash(
 				tmpRepoPath,
 				`remotes/origin/${ currentBranch }`
 			);
-		} catch ( error: unknown ) {
+		} catch {
 			Logger.notice(
 				`Unable to find '${ currentBranch }', using 'trunk'.`
 			);
@@ -133,15 +139,12 @@ const program = new Command()
 		}
 
 		try {
-			if ( ! previousParsed ) {
-				throw new Error( 'Unable to parse previous version' );
-			}
 			previousBranch = `release/${ previousParsed.major }.${ previousParsed.minor }`;
 			previousVersionRef = await getCommitHash(
 				tmpRepoPath,
 				`remotes/origin/${ previousBranch }`
 			);
-		} catch ( error: unknown ) {
+		} catch {
 			throw new Error(
 				`Unable to find '${ previousBranch }'. Branch for previous version must exist.`
 			);
@@ -161,21 +164,33 @@ const program = new Command()
 					authToken
 				);
 				postContent = prevPost.content;
-			} catch ( error: unknown ) {
+			} catch {
 				throw new Error(
 					`Unable to fetch existing post with ID: ${ options.editPostId }`
 				);
 			}
 		}
 
-		const changes = await scanForChanges(
-			currentVersionRef,
-			`${ previousParsed.major }.${ previousParsed.minor }.${ previousParsed.patch }`,
-			SOURCE_REPO,
-			previousVersionRef,
-			'cli',
-			tmpRepoPath
-		);
+		const changes =
+			typeof options.editPostId !== 'undefined'
+				? await scanForChanges(
+						currentVersionRef,
+						`${ previousParsed.major }.${ previousParsed.minor }.${ previousParsed.patch }`,
+						SOURCE_REPO,
+						previousVersionRef,
+						'cli',
+						tmpRepoPath
+				  )
+				: {
+						hooks: new Map(),
+						templates: new Map(),
+						db: await scanChangesForDB(
+							currentVersionRef,
+							previousVersionRef,
+							SOURCE_REPO,
+							tmpRepoPath
+						),
+				  };
 
 		Logger.startTask( 'Finding contributors' );
 		const title = `WooCommerce ${ currentVersion } Released`;
@@ -190,6 +205,8 @@ const program = new Command()
 			title,
 			changes,
 			displayVersion: currentVersion,
+			releaseBranch: `${ currentParsed.major }.${ currentParsed.minor }`,
+			releaseDate: new Date(),
 		};
 
 		const html =

@@ -1,64 +1,187 @@
-<!-- wp:heading -->
-<h1><%= title %></h1>
-<!-- /wp:heading -->
+<%
+  const releaseBranchName =
+    typeof releaseBranch !== 'undefined'
+      ? releaseBranch
+      : displayVersion.replace( /\.\d+(?:-.+)?$/, '' );
+  const releaseDateLabel =
+    typeof releaseDate !== 'undefined'
+      ? releaseDate.toLocaleDateString( 'en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        } )
+      : '[Month DD, YYYY]';
+  const contributorsByLogin = new Map();
+  let pullRequestCount = 0;
 
-<!-- wp:paragraph -->
-<p>We are pleased to announce the release of WooCommerce <%= displayVersion %>. This release should be backwards compatible with the previous version.</p>
+  for ( const packageName in contributors ) {
+    const packageData = contributors[ packageName ];
+
+    if ( ! packageData.contributors ) {
+      continue;
+    }
+
+    pullRequestCount +=
+      packageData.totalPullRequests ?? packageData.totalCommits ?? 0;
+
+    for ( const contributor of packageData.contributors ) {
+      if (
+        contributor.login &&
+        ! contributorsByLogin.has( contributor.login )
+      ) {
+        contributorsByLogin.set( contributor.login, contributor );
+      }
+    }
+  }
+
+  const contributorCount = contributorsByLogin.size;
+-%>
+<!-- wp:group {"metadata":{"name":"Release"},"align":"wide","className":"entry-content","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignwide entry-content"><!-- wp:group {"metadata":{"name":"Release Card"},"className":"woo-release-card","style":{"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"border":{"radius":"8px"}},"backgroundColor":"base","layout":{"type":"constrained","contentSize":"960px"}} -->
+<div class="wp-block-group woo-release-card has-base-background-color has-background" style="border-radius:8px;padding-top:var(--wp--preset--spacing--20);padding-right:var(--wp--preset--spacing--20);padding-bottom:var(--wp--preset--spacing--20);padding-left:var(--wp--preset--spacing--20)"><!-- wp:columns {"verticalAlignment":"top","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|30"}}}} -->
+<div class="wp-block-columns are-vertically-aligned-top"><!-- wp:column {"verticalAlignment":"top","width":"64%"} -->
+<div class="wp-block-column is-vertically-aligned-top" style="flex-basis:64%"><!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|10"}}},"fontSize":"small"} -->
+<p class="has-small-font-size" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--10)"><span style="border:1px solid #dcdcde;border-radius:999px;padding:2px 8px;">Release</span></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<p>This release contains:</p>
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|10"}}},"fontSize":"large"} -->
+<p class="has-large-font-size" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--10)"><strong>WooCommerce <%= displayVersion %> is available now</strong></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:list -->
-<ul>
-  <% for ( const packageName in contributors ) { %>    
-    <% const {org, repo, contributors: packageContributors, totalCommits, baseRef, headRef} = contributors[packageName] %>
-    <% if ( packageContributors ) { %>
-      <li>
-        <a target="_blank" href="https://github.com/<%= org %>/<%= repo %>/compare/<%= baseRef %>...<%= headRef %>">
-          <%= totalCommits %> commits from <%= packageContributors.length %> contributors
-        </a> 
-        in <%= packageName %>.
-      </li>
-    <% } %>
-  <% } %>
-</ul>
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|20"}}}} -->
+<p style="margin-top:0;margin-bottom:var(--wp--preset--spacing--20)">This release is now available for download. Review the highlights below, follow the update guide, and check the full changelog before updating production sites.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"fontSize":"small"} -->
+<p class="has-small-font-size" style="margin-top:0;margin-bottom:0"><strong>Highlights</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"fontSize":"small"} -->
+<ul class="wp-block-list has-small-font-size"><!-- wp:list-item -->
+<li>Highlight one with the main release improvement</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Highlight two focused on developer or extension impact</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Highlight three focused on performance, reliability, or UX</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list --></div>
+<!-- /wp:column -->
+
+<!-- wp:column {"verticalAlignment":"top","width":"36%"} -->
+<div class="wp-block-column is-vertically-aligned-top" style="flex-basis:36%"><!-- wp:list {"fontSize":"small"} -->
+<ul class="wp-block-list has-small-font-size"><!-- wp:list-item -->
+<li>Released: <%= releaseDateLabel %></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Backwards compatible</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Database update: <%= changes.db ? 'Yes' : 'No' %></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>PRs: <%= pullRequestCount %></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Contributors: <%= contributorCount %></li>
+<!-- /wp:list-item --></ul>
 <!-- /wp:list -->
 
-<!-- wp:paragraph -->
-<p>
-  As always, we recommend creating a backup of your site and making sure that your theme and any other plugins are compatible before updating. 
-  You can check out <a href="https://woocommerce.com/document/how-to-update-woocommerce/" target="_blank">this update guide</a> for more information.
-</p>
-<!-- /wp:paragraph -->
+<!-- wp:separator {"className":"is-style-wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20"}}}} -->
+<hr class="wp-block-separator has-alpha-channel-opacity is-style-wide" style="margin-top:var(--wp--preset--spacing--20);margin-bottom:var(--wp--preset--spacing--20)"/>
+<!-- /wp:separator -->
 
-<!-- wp:heading -->
-<h2 id="what-s-new-in-<%= displayVersion %>">What's new in <%= displayVersion %>?</h2>
+<!-- wp:buttons {"layout":{"type":"flex","orientation":"vertical","justifyContent":"stretch"}} -->
+<div class="wp-block-buttons"><!-- wp:button {"width":100,"className":"is-style-fill"} -->
+<div class="wp-block-button has-custom-width wp-block-button__width-100 is-style-fill"><a class="wp-block-button__link wp-element-button" href="https://downloads.wordpress.org/plugin/woocommerce.<%= displayVersion %>.zip">Download</a></div>
+<!-- /wp:button -->
+
+<!-- wp:button {"width":100,"className":"is-style-outline"} -->
+<div class="wp-block-button has-custom-width wp-block-button__width-100 is-style-outline"><a class="wp-block-button__link wp-element-button" href="https://woocommerce.com/document/how-to-update-woocommerce/">Update guide</a></div>
+<!-- /wp:button -->
+
+<!-- wp:button {"width":100,"className":"is-style-outline"} -->
+<div class="wp-block-button has-custom-width wp-block-button__width-100 is-style-outline"><a class="wp-block-button__link wp-element-button" href="https://github.com/woocommerce/woocommerce/blob/release/<%= releaseBranchName %>/plugins/woocommerce/readme.txt">Full changelog</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
+<!-- /wp:column --></div>
+<!-- /wp:columns --></div>
+<!-- /wp:group -->
+
+<!-- wp:more -->
+<div><!--more--></div>
+<!-- /wp:more -->
+
+<!-- wp:heading {"anchor":"h-feature-one"} -->
+<h2 id="h-feature-one" class="wp-block-heading">Feature one</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>WHAT'S NEW ITEMS</p>
+<p>Reprehenderit ullamco in consequat mollit officia id. Dolore ad aute labore magna velit dolor laboris dolore sint reprehenderit duis non reprehenderit velit est. Nisi nisi anim officia occaecat irure irure tempor ex est anim. Reprehenderit cupidatat do in commodo culpa enim occaecat aute nisi fugiat. Duis labore velit incididunt sint consequat ad laborum esse ex duis veniam aliqua est sint. Fugiat enim elit sunt irure voluptate culpa est sit aliqua incididunt cupidatat proident labore adipisicing sint. #11111</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<p>
-  These are just some of the changes that are included in WooCommerce <%= displayVersion %>. 
-  You can find the complete changelog for this release in the <a href="https://github.com/woocommerce/woocommerce/blob/release/<%= displayVersion %>/changelog.txt" target="_blank">changelog.txt file</a>.
-</p>
-<!-- /wp:paragraph -->
-
-
-<!-- release:hooks --><%- include( 'hooks' ) %><!-- /release:hooks -->
-<!-- release:database --><%- include( 'database' ) %><!-- /release:database -->
-<!-- release:templates --><%- include( 'templates' ) %><!-- /release:templates -->
-
-<!-- wp:heading -->
-<h2 id="deprecations">Deprecations</h2>
+<!-- wp:heading {"anchor":"h-feature-two"} -->
+<h2 id="h-feature-two" class="wp-block-heading">Feature two</h2>
 <!-- /wp:heading -->
+
 <!-- wp:paragraph -->
-<p>There are no deprecations in this release.</p>
+<p>Reprehenderit ullamco in consequat mollit officia id. Dolore ad aute labore magna velit dolor laboris dolore sint reprehenderit duis non reprehenderit velit est. Nisi nisi anim officia occaecat irure irure tempor ex est anim. Reprehenderit cupidatat do in commodo culpa enim occaecat aute nisi fugiat. Duis labore velit incididunt sint consequat ad laborum esse ex duis veniam aliqua est sint. Fugiat enim elit sunt irure voluptate culpa est sit aliqua incididunt cupidatat proident labore adipisicing sint. #11111</p>
 <!-- /wp:paragraph -->
 
-<!-- release:contributors--><%- include('contributors') %><!-- /release:contributors -->
+<!-- wp:heading {"anchor":"h-feature-three"} -->
+<h2 id="h-feature-three" class="wp-block-heading">Feature three</h2>
+<!-- /wp:heading -->
 
+<!-- wp:paragraph -->
+<p>Reprehenderit ullamco in consequat mollit officia id. Dolore ad aute labore magna velit dolor laboris dolore sint reprehenderit duis non reprehenderit velit est. Nisi nisi anim officia occaecat irure irure tempor ex est anim. Reprehenderit cupidatat do in commodo culpa enim occaecat aute nisi fugiat. Duis labore velit incididunt sint consequat ad laborum esse ex duis veniam aliqua est sint. Fugiat enim elit sunt irure voluptate culpa est sit aliqua incididunt cupidatat proident labore adipisicing sint. #11111</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"anchor":"h-feature-four"} -->
+<h2 id="h-feature-four" class="wp-block-heading">Feature four</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Reprehenderit ullamco in consequat mollit officia id. Dolore ad aute labore magna velit dolor laboris dolore sint reprehenderit duis non reprehenderit velit est. Nisi nisi anim officia occaecat irure irure tempor ex est anim. Reprehenderit cupidatat do in commodo culpa enim occaecat aute nisi fugiat. Duis labore velit incididunt sint consequat ad laborum esse ex duis veniam aliqua est sint. Fugiat enim elit sunt irure voluptate culpa est sit aliqua incididunt cupidatat proident labore adipisicing sint. #11111</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"anchor":"h-developer-updates"} -->
+<h2 id="h-developer-updates" class="wp-block-heading">Developer updates</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>For more information about this release, including developer advisories, API changes, and database updates, read <a href="#">the WooCommerce <%= releaseBranchName %> pre-release highlights</a>.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"anchor":"h-code-contributors"} -->
+<h2 id="h-code-contributors" class="wp-block-heading">Code contributors</h2>
+<!-- /wp:heading -->
+
+<%- include( 'contributors', { contributors, displayVersion: releaseBranchName } ) %>
+
+<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|30","left":"var:preset|spacing|30","right":"var:preset|spacing|30"},"blockGap":"var:preset|spacing|10","margin":{"top":"var:preset|spacing|40"}},"border":{"radius":"6px"}},"backgroundColor":"base","layout":{"type":"constrained"}} -->
+<div class="wp-block-group has-base-background-color has-background" style="border-radius:6px;margin-top:var(--wp--preset--spacing--40);padding-top:var(--wp--preset--spacing--30);padding-right:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--30);padding-left:var(--wp--preset--spacing--30)"><!-- wp:heading {"style":{"spacing":{"margin":{"top":"0"}}},"fontSize":"x-large","anchor":"h-download-woocommerce-<%= releaseBranchName.replace( '.', '-' ) %>"} -->
+<h2 id="h-download-woocommerce-<%= releaseBranchName.replace( '.', '-' ) %>" class="wp-block-heading has-x-large-font-size" style="margin-top:0">Download WooCommerce <%= releaseBranchName %></h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Browse our <a href="https://woocommerce.com/document/how-to-update-woocommerce">update guide</a> for more details on how to update to the latest version of WooCommerce.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-fill"} -->
+<div class="wp-block-button is-style-fill"><a class="wp-block-button__link wp-element-button" href="https://downloads.wordpress.org/plugin/woocommerce.<%= displayVersion %>.zip">Download WooCommerce <%= releaseBranchName %></a></div>
+<!-- /wp:button -->
+
+<!-- wp:button {"className":"is-style-outline"} -->
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="https://github.com/woocommerce/woocommerce/blob/release/<%= releaseBranchName %>/plugins/woocommerce/readme.txt">Full changelog</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->

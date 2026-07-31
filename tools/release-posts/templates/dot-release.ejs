@@ -1,0 +1,100 @@
+<%
+  const releaseBranchName =
+    typeof releaseBranch !== 'undefined'
+      ? releaseBranch
+      : displayVersion.replace( /\.\d+(?:-.+)?$/, '' );
+  const releaseDateLabel =
+    typeof releaseDate !== 'undefined'
+      ? releaseDate.toLocaleDateString( 'en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        } )
+      : '[Month DD, YYYY]';
+  const securityUpdateLabel =
+    typeof securityUpdate !== 'undefined' && securityUpdate ? 'Yes' : 'No';
+  const databaseUpdateLabel = changes.db ? 'Yes' : 'No';
+-%>
+<!-- wp:group {"metadata":{"name":"Dot Release"},"align":"wide","className":"entry-content","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignwide entry-content"><!-- wp:group {"metadata":{"name":"Dot Release Card"},"className":"woo-release-card","style":{"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"border":{"radius":"8px"}},"backgroundColor":"base","layout":{"type":"constrained","contentSize":"960px"}} -->
+<div class="wp-block-group woo-release-card has-base-background-color has-background" style="border-radius:8px;padding-top:var(--wp--preset--spacing--20);padding-right:var(--wp--preset--spacing--20);padding-bottom:var(--wp--preset--spacing--20);padding-left:var(--wp--preset--spacing--20)"><!-- wp:columns {"verticalAlignment":"top","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|30"}}}} -->
+<div class="wp-block-columns are-vertically-aligned-top"><!-- wp:column {"verticalAlignment":"top","width":"64%"} -->
+<div class="wp-block-column is-vertically-aligned-top" style="flex-basis:64%"><!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|10"}}},"fontSize":"small"} -->
+<p class="has-small-font-size" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--10)"><span style="border:1px solid #dcdcde;border-radius:999px;padding:2px 8px;">Dot release</span></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|10"}}},"fontSize":"large"} -->
+<p class="has-large-font-size" style="margin-top:0;margin-bottom:var(--wp--preset--spacing--10)"><strong>WooCommerce <%= displayVersion %> is available now</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"var:preset|spacing|20"}}}} -->
+<p style="margin-top:0;margin-bottom:var(--wp--preset--spacing--20)">This dot release is now available for download. Review the fixes below.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0","bottom":"0"}}},"fontSize":"small"} -->
+<p class="has-small-font-size" style="margin-top:0;margin-bottom:0"><strong>Updates</strong></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"fontSize":"small"} -->
+<ul class="wp-block-list has-small-font-size"><!-- wp:list-item -->
+<li>Fix one for a regression, compatibility issue, or production bug</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Fix two with the affected feature area or behavior</li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Security fix, if applicable</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list --></div>
+<!-- /wp:column -->
+
+<!-- wp:column {"verticalAlignment":"top","width":"36%"} -->
+<div class="wp-block-column is-vertically-aligned-top" style="flex-basis:36%"><!-- wp:list {"fontSize":"small"} -->
+<ul class="wp-block-list has-small-font-size"><!-- wp:list-item -->
+<li>Released: <%= releaseDateLabel %></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Security update: <%= securityUpdateLabel %></li>
+<!-- /wp:list-item -->
+
+<!-- wp:list-item -->
+<li>Database update: <%= databaseUpdateLabel %></li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:separator {"className":"is-style-wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20"}}}} -->
+<hr class="wp-block-separator has-alpha-channel-opacity is-style-wide" style="margin-top:var(--wp--preset--spacing--20);margin-bottom:var(--wp--preset--spacing--20)"/>
+<!-- /wp:separator -->
+
+<!-- wp:buttons {"layout":{"type":"flex","orientation":"vertical","justifyContent":"stretch"}} -->
+<div class="wp-block-buttons"><!-- wp:button {"width":100,"className":"is-style-fill"} -->
+<div class="wp-block-button has-custom-width wp-block-button__width-100 is-style-fill"><a class="wp-block-button__link wp-element-button" href="https://downloads.wordpress.org/plugin/woocommerce.<%= displayVersion %>.zip">Download</a></div>
+<!-- /wp:button -->
+
+<!-- wp:button {"width":100,"className":"is-style-outline"} -->
+<div class="wp-block-button has-custom-width wp-block-button__width-100 is-style-outline"><a class="wp-block-button__link wp-element-button" href="https://woocommerce.com/document/how-to-update-woocommerce/">Update guide</a></div>
+<!-- /wp:button -->
+
+<!-- wp:button {"width":100,"className":"is-style-outline"} -->
+<div class="wp-block-button has-custom-width wp-block-button__width-100 is-style-outline"><a class="wp-block-button__link wp-element-button" href="https://github.com/woocommerce/woocommerce/blob/release/<%= releaseBranchName %>/plugins/woocommerce/readme.txt">Full changelog</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
+<!-- /wp:column --></div>
+<!-- /wp:columns --></div>
+<!-- /wp:group -->
+
+<!-- wp:more -->
+<div><!--more--></div>
+<!-- /wp:more -->
+
+<!-- wp:heading {"anchor":"h-what-s-in-this-release"} -->
+<h2 id="h-what-s-in-this-release" class="wp-block-heading">What's in this release</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p></p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->

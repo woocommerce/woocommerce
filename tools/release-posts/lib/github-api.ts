@@ -7,6 +7,7 @@ import { getEnvVar } from '@woocommerce/monorepo-utils/src/core/environment';
 
 export type ContributorData = {
 	totalCommits: number;
+	totalPullRequests: number;
 	contributors: Record< string, unknown >[];
 	org: string;
 	repo: string;
@@ -27,6 +28,13 @@ const filterUniqBy = ( arr: Record< string, unknown >[], key: string ) => {
 };
 
 const PAGE_SIZE = 100;
+const PULL_REQUEST_PATTERN = /\(#(\d+)\)/g;
+
+type CompareCommit = {
+	commit: {
+		message: string;
+	};
+};
 
 export const getContributorData = async (
 	orgName: string,
@@ -34,12 +42,31 @@ export const getContributorData = async (
 	baseRef: string,
 	headRef: string
 ) => {
-	const isValidAuthor = ( commit: { author?: { login?: string | null; } | null; } ) => {
-		return !! commit.author && !! commit.author.login && ! commit.author.login.includes( 'bot' ) && 'invalid-email-address' !== commit.author.login;
+	const isValidAuthor = ( commit: {
+		author?: { login?: string | null } | null;
+	} ) => {
+		return (
+			!! commit.author &&
+			!! commit.author.login &&
+			! commit.author.login.includes( 'bot' ) &&
+			commit.author.login !== 'invalid-email-address'
+		);
 	};
 	const octokit = new Octokit( {
 		auth: getEnvVar( 'GITHUB_ACCESS_TOKEN', true ),
 	} );
+	const pullRequests = new Set< string >();
+
+	const trackPullRequests = ( commitsToTrack: CompareCommit[] ) => {
+		for ( const commit of commitsToTrack ) {
+			const matches =
+				commit.commit.message.matchAll( PULL_REQUEST_PATTERN );
+
+			for ( const match of matches ) {
+				pullRequests.add( match[ 1 ] );
+			}
+		}
+	};
 
 	const {
 		data: { total_commits, commits },
@@ -52,12 +79,11 @@ export const getContributorData = async (
 
 	const pages = Math.ceil( total_commits / PAGE_SIZE );
 	const allAuthors = [];
+	trackPullRequests( commits );
 
 	// add page 1 commits
 	allAuthors.push(
-		...commits
-			.filter( isValidAuthor )
-			.map( ( commit ) => commit.author )
+		...commits.filter( isValidAuthor ).map( ( commit ) => commit.author )
 	);
 
 	for ( let i = 2; i <= pages; i++ ) {
@@ -71,6 +97,8 @@ export const getContributorData = async (
 			page: i,
 		} );
 
+		trackPullRequests( pageCommits );
+
 		allAuthors.push(
 			...pageCommits
 				.filter( isValidAuthor )
@@ -80,6 +108,7 @@ export const getContributorData = async (
 
 	return {
 		totalCommits: total_commits,
+		totalPullRequests: pullRequests.size,
 		contributors: shuffle(
 			filterUniqBy(
 				allAuthors as Array< Record< string, unknown > >,
