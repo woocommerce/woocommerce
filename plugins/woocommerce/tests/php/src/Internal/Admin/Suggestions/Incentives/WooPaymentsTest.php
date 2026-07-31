@@ -141,6 +141,8 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		delete_option( 'wcpay_account_data' );
 
 		$this->sut->clear_cache();
+
+		parent::tearDown();
 	}
 
 	/**
