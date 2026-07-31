@@ -8069,8 +8069,10 @@ table.bar_chart {
 			padding-right: 40px;
 		}
 
+		// Pull the clear (x) into the 40px padding zone so it sits beside the chevron
+		// rather than at the text edge.
 		.select2-selection__clear {
-			margin-right: 18px;
+			margin-right: -10px;
 		}
 	}
 }
