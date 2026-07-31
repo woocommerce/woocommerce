@@ -173,6 +173,10 @@ WordPress exposes more contracts than class and function signatures. The followi
 
 **Hooks and filters are public contracts.** Every `do_action` and `apply_filters` call is an interface that third-party callbacks depend on. Removing a hook, renaming it, or removing/reordering its arguments breaks every attached callback. Changing *when* or *whether* a hook fires can break consumers that depend on its timing. Additive is the safe path: append new arguments at the end, never remove or reorder existing ones. To retire a hook, fire it through `do_action_deprecated()` / `apply_filters_deprecated()` for a deprecation window instead of deleting it.
 
+**Never trust data received through hooks.** Hook callbacks run on values supplied by arbitrary third-party code, so a callback parameter can arrive with an unexpected type at any time. Keep hook callback parameters untyped and validate or coerce the value before passing it to strictly typed code — adding a native type to a callback signature turns bad input into a fatal. A classic trap: all WordPress nonce functions default the action to `-1` (an integer), so code assuming a nonce action is a string fatals on something as simple as `wp_nonce_url( 'admin.php' )` for a logged-out user.
+
+**Registered script and style handles are public contracts.** Third-party code enqueues WooCommerce handles and lists them as dependencies — including handles that were only ever registered incidentally. Renaming a handle breaks those consumers, and once a rename has shipped and third parties have adapted, renaming it back breaks them again. To rename with a compatibility window, register the legacy handle as an alias that depends on the new handle (the same pattern WordPress core uses for `jquery` → `jquery-core`); do not register the same file under both handles, or pages with mixed consumers will load it twice.
+
 **Do not assume global state.** Code can run in admin, REST, CLI, cron, webhook, and front-end contexts, and not all of them set the globals a front-end request does (`$post`, `$wp_query`, an initialized session or cart). A newly introduced read of a global, or of `WC()->…` state, in a path reachable outside a standard request is a fatal or a silent misbehavior in the contexts that do not set it. Guard the exact dependency explicitly: use `function_exists`/`class_exists` for symbols, `isset` for variables, `did_action` for lifecycle state, and verify that `WC()` and the required component are initialized before dereferencing `WC()->…`.
 
 **Do not assume single-site.** Multisite changes where data lives: site-scoped vs network-scoped options (`get_option` vs `get_site_option`), per-site tables, user roles and capabilities, and upload paths all differ. A change that reads or writes site state must state in its PR whether it behaves correctly under multisite — and if it was not tested there, say so explicitly.
@@ -186,6 +190,14 @@ WordPress exposes more contracts than class and function signatures. The followi
 3. Prefer the additive path (new optional method, appended hook argument, new symbol + deprecation) over changing what exists.
 4. State the impact in the PR description: what changed, who could consume it, and why it is safe or what the deprecation path is.
 5. If you cannot establish the impact, stop and flag it to the user as needing review.
+
+## Database Migrations
+
+Database migrations live in `WC_Install::$db_updates`, keyed by version. Each key runs once: when a site updates, only the callbacks under keys *newer* than the site's stored database version execute. This makes the choice of key load-bearing:
+
+- **A migration added after a prerelease of the same version has shipped needs its own new key.** Adding a callback under a key that a beta already used (e.g. adding to `10.8.0` after `10.8.0-beta.1` shipped) means sites that installed the beta silently skip the new callback. Use a suffixed key instead: `10.8.0-1`.
+- **Never key a migration with a future patch version.** A fix shipping in `X.Y.0` must not use the `X.Y.1` key — patch keys are reserved for actual patch releases, and keys must never be ahead of the plugin version.
+- **Changing a feature flag's `enabled_by_default` does not affect existing sites.** Default flag values are persisted to the database on install/update (since 10.5.0), so flipping a default only changes behavior for new installs. If existing sites must pick up the new value, ship a migration — or stop gating the functionality behind a flag entirely if it must be always-on.
 
 ## Block Development
 
