@@ -9,7 +9,7 @@
 							"fontStyle": "normal",
 							"fontWeight": "300 900",
 							"src": [
-								"file:./assets/fonts/figtree/figtree-300-900-normal.ttf"
+								"file:./assets/fonts/figtree/figtree-300-900-normal.woff2"
 							]
 						},
 						{
@@ -17,7 +17,7 @@
 							"fontStyle": "italic",
 							"fontWeight": "300 900",
 							"src": [
-								"file:./assets/fonts/figtree/figtree-300-900-italic.ttf"
+								"file:./assets/fonts/figtree/figtree-300-900-italic.woff2"
 							]
 						}
 					],
@@ -32,7 +32,7 @@
 							"fontStyle": "italic",
 							"fontWeight": "100 900",
 							"src": [
-								"file:./assets/fonts/jost/jost-100-900-italic.ttf"
+								"file:./assets/fonts/jost/jost-100-900-italic.woff2"
 							]
 						},
 						{
@@ -40,7 +40,7 @@
 							"fontStyle": "normal",
 							"fontWeight": "100 900",
 							"src": [
-								"file:./assets/fonts/jost/jost-100-900-normal.ttf"
+								"file:./assets/fonts/jost/jost-100-900-normal.woff2"
 							]
 						}
 					],

@@ -9,7 +9,7 @@
 							"fontStyle": "italic",
 							"fontWeight": "400 700",
 							"src": [
-								"file:./assets/fonts/libre-baskerville/libre-baskerville-400-700-italic.ttf"
+								"file:./assets/fonts/libre-baskerville/libre-baskerville-400-700-italic.woff2"
 							]
 						},
 						{
@@ -17,7 +17,7 @@
 							"fontStyle": "normal",
 							"fontWeight": "400 700",
 							"src": [
-								"file:./assets/fonts/libre-baskerville/libre-baskerville-400-700-normal.ttf"
+								"file:./assets/fonts/libre-baskerville/libre-baskerville-400-700-normal.woff2"
 							]
 						}
 					],
@@ -32,7 +32,7 @@
 							"fontStyle": "italic",
 							"fontWeight": "200 900",
 							"src": [
-								"file:./assets/fonts/source-serif-4/source-serif-4-200-900-italic.ttf"
+								"file:./assets/fonts/source-serif-4/source-serif-4-200-900-italic.woff2"
 							]
 						},
 						{
@@ -40,7 +40,7 @@
 							"fontStyle": "normal",
 							"fontWeight": "200 900",
 							"src": [
-								"file:./assets/fonts/source-serif-4/source-serif-4-200-900-normal.ttf"
+								"file:./assets/fonts/source-serif-4/source-serif-4-200-900-normal.woff2"
 							]
 						}
 					],

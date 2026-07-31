@@ -9,7 +9,7 @@
 							"fontStyle": "italic",
 							"fontWeight": "100 800",
 							"src": [
-								"file:./assets/fonts/suse-mono/suse-mono-100-800-italic.ttf"
+								"file:./assets/fonts/suse-mono/suse-mono-100-800-italic.woff2"
 							]
 						},
 						{
@@ -17,7 +17,7 @@
 							"fontStyle": "normal",
 							"fontWeight": "100 800",
 							"src": [
-								"file:./assets/fonts/suse-mono/suse-mono-100-800-normal.ttf"
+								"file:./assets/fonts/suse-mono/suse-mono-100-800-normal.woff2"
 							]
 						}
 					],

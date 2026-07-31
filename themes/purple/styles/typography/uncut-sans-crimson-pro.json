@@ -9,7 +9,7 @@
 							"fontStyle": "normal",
 							"fontWeight": "300 700",
 							"src": [
-								"file:./assets/fonts/uncut-sans-variable/uncut-sans-variable-300-700-normal.ttf"
+								"file:./assets/fonts/uncut-sans-variable/uncut-sans-variable-300-700-normal.woff2"
 							]
 						}
 					],
@@ -24,7 +24,7 @@
 							"fontStyle": "normal",
 							"fontWeight": "200 900",
 							"src": [
-								"file:./assets/fonts/crimson-pro/crimson-pro-200-900-normal.ttf"
+								"file:./assets/fonts/crimson-pro/crimson-pro-200-900-normal.woff2"
 							]
 						},
 						{
@@ -32,7 +32,7 @@
 							"fontStyle": "italic",
 							"fontWeight": "200 900",
 							"src": [
-								"file:./assets/fonts/crimson-pro/crimson-pro-200-900-italic.ttf"
+								"file:./assets/fonts/crimson-pro/crimson-pro-200-900-italic.woff2"
 							]
 						}
 					],

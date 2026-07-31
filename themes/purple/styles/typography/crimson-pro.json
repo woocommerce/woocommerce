@@ -9,7 +9,7 @@
 							"fontStyle": "normal",
 							"fontWeight": "200 900",
 							"src": [
-								"file:./assets/fonts/crimson-pro/crimson-pro-200-900-normal.ttf"
+								"file:./assets/fonts/crimson-pro/crimson-pro-200-900-normal.woff2"
 							]
 						},
 						{
@@ -17,7 +17,7 @@
 							"fontStyle": "italic",
 							"fontWeight": "200 900",
 							"src": [
-								"file:./assets/fonts/crimson-pro/crimson-pro-200-900-italic.ttf"
+								"file:./assets/fonts/crimson-pro/crimson-pro-200-900-italic.woff2"
 							]
 						}
 					],
