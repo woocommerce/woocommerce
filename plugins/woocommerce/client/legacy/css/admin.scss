@@ -8047,6 +8047,16 @@ table.bar_chart {
 		min-height: 180px
 	}
 
+	// Fixed layout so a long nowrap select2 selection truncates inside the Product
+	// column instead of stretching it and pushing Quantity past the modal edge.
+	&.wc-backbone-modal-add-products table.widefat {
+		table-layout: fixed;
+
+		th:last-child {
+			width: 100px;
+		}
+	}
+
 	.select2-container {
 		width: 100% !important;
 	}
