@@ -308,7 +308,6 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 						id: product.id,
 						quantityToAdd: quantity[ product.id ],
 						variation: selectedAttributes,
-						type: product.type,
 					},
 					{
 						showCartUpdatesNotices: false,

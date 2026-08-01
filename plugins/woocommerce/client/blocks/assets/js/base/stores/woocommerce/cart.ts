@@ -45,7 +45,6 @@ export type OptimisticCartItem = {
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
-	type: string;
 };
 
 export type ClientCartItem = Omit<
@@ -220,7 +219,7 @@ function lineMatchesProduct(
 	id: number,
 	variation?: CartVariationItem[] | SelectedAttributes[]
 ): boolean {
-	if ( item.type === 'variation' ) {
+	if ( isCartItem( item ) && item.type === 'variation' ) {
 		if (
 			id !== item.id ||
 			! item.variation ||
@@ -633,7 +632,10 @@ const { actions } = store< Store >(
 					) {
 						return false;
 					}
-					if ( cartItem.type === 'variation' ) {
+					if (
+						isCartItem( cartItem ) &&
+						cartItem.type === 'variation'
+					) {
 						if (
 							id !== cartItem.id ||
 							! cartItem.variation ||

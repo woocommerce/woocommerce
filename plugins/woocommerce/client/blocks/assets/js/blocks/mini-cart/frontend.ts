@@ -880,7 +880,6 @@ const { state: cartItemState } = store(
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity,
 					variation,
-					type: cartItemState.cartItem.type,
 				} );
 			},
 
@@ -902,7 +901,6 @@ const { state: cartItemState } = store(
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
 					variation,
-					type: cartItemState.cartItem.type,
 				} );
 			},
 
@@ -920,7 +918,6 @@ const { state: cartItemState } = store(
 					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
 					variation,
-					type: cartItemState.cartItem.type,
 				} );
 			},
 
