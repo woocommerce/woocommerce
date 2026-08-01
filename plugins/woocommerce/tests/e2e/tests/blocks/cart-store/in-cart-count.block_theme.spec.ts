@@ -16,7 +16,19 @@ import {
 } from './utils';
 
 /**
- * End-to-end tests for "In-cart count reflects only the standalone line".
+ * Activation slug of the canonical-line-filter helper plugin
+ * (`test-plugins/blocks/canonical-line-filter.php`). When active, it marks
+ * canonical exactly the lines the cart-line-identity helper plugin
+ * differentiates — those carrying the `_cart_line_identity` cart-item data
+ * key — and leaves every other line's computed default untouched.
+ */
+const CANONICAL_LINE_FILTER_PLUGIN =
+	'woocommerce-blocks-test-canonical-line-filter';
+
+/**
+ * End-to-end tests for the product button's in-cart count matching the
+ * canonical cart line for a product, on the server-rendered paint and after
+ * client hydration.
  *
  * Background: the ProductButton block (and the Add to Cart with Options
  * button) must show the count for the *canonical* line — the single line a
@@ -39,17 +51,27 @@ import {
  *    line) as canonical or not regardless of cart-key identity
  *  - A meta-exclusion guard in the iAPI cart store's keyless `findItemInCart`
  *    branch that excludes a line only on strict `is_canonical_line === false`
- *  - `ProductButton.php`'s server seed, which computes its count
- *    independently via `WC_Cart::generate_cart_id()` (not via
- *    `CartItemUtils`), looking up the cart line at that key directly
+ *  - `ProductButton.php`'s server seed, which reads the same hydrated,
+ *    filter-applied `/wc/store/v1/cart` payload the client hydrates from and
+ *    mirrors the client's match rule over that array, instead of deriving
+ *    its own cart key — so the two surfaces cannot disagree about anything
+ *    the cart route itself resolves (this is scoped to divergence sources
+ *    internal to that route; it is not a claim that the seed tracks
+ *    whatever the client will end up showing)
  *
  * The "meta-differentiated line" precondition is simulated by the
  * cart-line-identity helper plugin (`woocommerce-blocks-test-cart-line-identity`),
  * which attaches a unique `cart_item_data` marker to a flagged add-to-cart
  * request so core's `generate_cart_id` mints a distinct, non-canonical cart
  * line for the same product id — a stand-in for a bundle child / booking /
- * add-on / recipient line, since those extensions are not installed in e2e
- * and no in-repo callback attaches to the filter above.
+ * add-on / recipient line, since those extensions are not installed in e2e.
+ * "Callback attached" means the canonical-line-filter helper plugin
+ * (`woocommerce-blocks-test-canonical-line-filter`), which attaches a
+ * targeted callback to the filter above, marking exactly
+ * `_cart_line_identity`-carrying lines canonical; only the "With a
+ * canonical-line callback attached" tests near the end of this file activate
+ * it, so every other test here runs with no callback attached and observes
+ * the core-computed default.
  *
  * Most tests run as a guest so each gets an isolated empty cart via a fresh
  * guest session cookie. The variation-aware test (via Add to Cart with
@@ -72,7 +94,7 @@ const test = base.extend< {
 // session cookie, i.e. an isolated empty cart. The helper plugin is
 // re-activated in `beforeEach` because the DB is reset between tests.
 // ---------------------------------------------------------------------------
-test.describe( 'In-cart count reflects only the standalone line', () => {
+test.describe( 'With no canonical-line callback attached, in-cart count reflects only the canonical line', () => {
 	test.use( { storageState: guestFile } );
 
 	test.beforeEach( async ( { requestUtils } ) => {
@@ -392,7 +414,7 @@ test.describe( 'In-cart count reflects only the standalone line', () => {
 // via the site editor. It runs in its own describe block without the guest
 // storage state override, so the default admin storage state applies.
 // ---------------------------------------------------------------------------
-test.describe( 'In-cart count reflects only the standalone line — variation handling', () => {
+test.describe( 'With no canonical-line callback attached, in-cart count reflects only the canonical line — variation handling', () => {
 	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.activatePlugin( CART_LINE_IDENTITY_PLUGIN );
 	} );
@@ -449,5 +471,131 @@ test.describe( 'In-cart count reflects only the standalone line — variation ha
 		// Re-select V (Blue, Large) — should show "1 in cart" again.
 		await colorBlueOption.click();
 		await expect( addToCartButton ).toHaveText( '1 in cart' );
+	} );
+} );
+
+// ---------------------------------------------------------------------------
+// With-callback coverage: the canonical-line-filter helper plugin marks the
+// cart-line-identity-marked line(s) canonical, so the server seed and the
+// client hydration must agree on that line's own quantity instead of
+// excluding it. This is the headline outcome the fix restores.
+//
+// Both helper plugins are activated in `beforeEach`, never `beforeAll`: the
+// blocks project restores the database after every test, which is also what
+// keeps the callback scoped away from every other test in this file — the
+// no-callback describes above activate only the cart-line-identity plugin.
+// ---------------------------------------------------------------------------
+test.describe( 'With a canonical-line callback attached', () => {
+	test.use( { storageState: guestFile } );
+
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.activatePlugin( CART_LINE_IDENTITY_PLUGIN );
+		await requestUtils.activatePlugin( CANONICAL_LINE_FILTER_PLUGIN );
+	} );
+
+	// -------------------------------------------------------------------------
+	// Callback-marked meta line is server-rendered at its own quantity and
+	// survives hydration — the server and client agree throughout.
+	// -------------------------------------------------------------------------
+	test( 'a callback-marked meta-differentiated line is server-rendered at its own quantity and survives hydration, never showing "Add to cart"', async ( {
+		page,
+	} ) => {
+		// Seed: three flagged adds carrying the same marker merge into one
+		// meta-differentiated line at quantity 3.
+		await seedMetaLine( page, PRODUCT_X.id );
+		await seedMetaLine( page, PRODUCT_X.id );
+		await seedMetaLine( page, PRODUCT_X.id );
+
+		// Register the Store API cart response listener BEFORE navigating so
+		// we can await it after the page loads (waitForResponse must be set
+		// up before the response fires, or it times out).
+		const cartResponse = page.waitForResponse(
+			'**/wp-json/wc/store/v1/cart**'
+		);
+
+		await page.goto( '/shop' );
+
+		// Server-rendered (first-paint) button text: the callback marks the
+		// meta line canonical, so the seed's mirrored match rule counts it
+		// at its own quantity instead of excluding it.
+		const btn = productButton( page, PRODUCT_X.id );
+		await expect( btn ).toHaveText( '3 in cart' );
+
+		// After the iAPI store hydrates from the same filtered cart payload,
+		// the count must still read "3 in cart" — no correction, because
+		// the server and client already agree.
+		await cartResponse;
+		await expect( btn ).toHaveText( '3 in cart' );
+
+		// The button must never fall back to "Add to cart" at either point.
+		await expect( btn ).not.toHaveText( 'Add to cart' );
+	} );
+
+	// -------------------------------------------------------------------------
+	// No-JS / server-seed-only render shows the callback-marked line's
+	// quantity, not "Add to cart".
+	// -------------------------------------------------------------------------
+	test( 'with JavaScript disabled, the server-rendered button shows "3 in cart" for a callback-marked meta-differentiated line', async ( {
+		page,
+		browser,
+	} ) => {
+		// Use the main page (JS enabled) to seed the meta line, sharing the
+		// guest session cookie.
+		await seedMetaLine( page, PRODUCT_X.id );
+		await seedMetaLine( page, PRODUCT_X.id );
+		await seedMetaLine( page, PRODUCT_X.id );
+
+		// Copy the session cookie so the JS-disabled context sees the same cart.
+		const cookies = await page.context().cookies();
+
+		// Create a JS-disabled context, transfer cookies, and load /shop.
+		const noJsContext = await browser.newContext( {
+			javaScriptEnabled: false,
+		} );
+		try {
+			await noJsContext.addCookies( cookies );
+			const noJsPage = await noJsContext.newPage();
+			await noJsPage.goto( '/shop' );
+
+			// With no client JS to hydrate, this is the PHP seed's value
+			// alone — the callback-marked meta line's own quantity, not
+			// "Add to cart".
+			const btn = productButton( noJsPage, PRODUCT_X.id );
+			await expect( btn ).toHaveText( '3 in cart' );
+		} finally {
+			await noJsContext.close();
+		}
+	} );
+
+	// -------------------------------------------------------------------------
+	// Two canonical lines for the same product: the first in cart order
+	// wins, never the sum.
+	// -------------------------------------------------------------------------
+	test( 'with two canonical lines for the same product, the button shows the quantity of the first line in cart order, never the sum', async ( {
+		page,
+		frontendUtils,
+	} ) => {
+		// Add product X plainly twice first: one canonical line at quantity
+		// 2, canonical under the default cart-key-identity rule alone (no
+		// callback needed for a plain line).
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( PRODUCT_X.name );
+		await frontendUtils.addToCart( PRODUCT_X.name );
+
+		// Then seed a meta-differentiated line at quantity 3, which the
+		// callback also marks canonical — the cart now has two canonical
+		// lines for the same product, the plain line first in cart order.
+		await seedMetaLine( page, PRODUCT_X.id );
+		await seedMetaLine( page, PRODUCT_X.id );
+		await seedMetaLine( page, PRODUCT_X.id );
+
+		await page.goto( '/shop' );
+
+		// The first canonical line in cart order wins — "2 in cart" — both
+		// on the server paint and after hydration; never the sum of the two
+		// canonical lines' quantities ("5 in cart").
+		const btn = productButton( page, PRODUCT_X.id );
+		await expect( btn ).toHaveText( '2 in cart' );
+		await expect( btn ).not.toHaveText( '5 in cart' );
 	} );
 } );
