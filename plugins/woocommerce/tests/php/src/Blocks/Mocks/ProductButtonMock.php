@@ -26,16 +26,16 @@ class ProductButtonMock extends ProductButton {
 	}
 
 	/**
-	 * Get the standalone cart item quantity for a product ID.
+	 * Get the quantity of the product's first canonical cart line, in cart order.
 	 *
 	 * @param int $product_id The product ID.
-	 * @return int The standalone cart item quantity.
+	 * @return int|float The quantity of the product's first canonical cart line, or 0.
 	 */
-	public function call_get_cart_item_quantity_by_product_id( int $product_id ): int {
+	public function call_get_cart_item_quantity_by_product_id( int $product_id ) {
 		$reflection = new \ReflectionClass( ProductButton::class );
 		$method     = $reflection->getMethod( 'get_cart_item_quantity_by_product_id' );
 		$method->setAccessible( true );
 
-		return (int) $method->invoke( $this, $product_id );
+		return $method->invoke( $this, $product_id );
 	}
 }

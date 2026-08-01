@@ -24,11 +24,15 @@ class ProductButton extends AbstractBlock {
 
 
 	/**
-	 * Cart.
+	 * Memoized index of the first canonical cart line's quantity per product ID.
 	 *
-	 * @var array
+	 * Built once, on first use, from the hydrated cart snapshot, and reused for
+	 * every product ID asked about for the lifetime of this block instance.
+	 *
+	 * @var array|null
+	 * @phpstan-var array<int, int|float>|null
 	 */
-	private static $cart = null;
+	private $cart_item_quantity_index = null;
 
 	/**
 	 * Register the context.
@@ -326,21 +330,68 @@ class ProductButton extends AbstractBlock {
 	}
 
 	/**
-	 * Get the standalone cart item quantity for a product ID.
+	 * Get the quantity of the product's first canonical cart line, in cart order.
+	 *
+	 * Resolved from the same hydrated, filter-applied cart snapshot the client
+	 * hydrates its own state from (the Store API cart response's `items`,
+	 * subject to the `woocommerce_store_api_cart_item_is_canonical_line`
+	 * filter), via a per-request index built once, on first use, and reused
+	 * for every product ID asked about afterwards. Returns 0 when the product
+	 * has no canonical cart line, or when the cart is unavailable.
 	 *
 	 * @param int $product_id The product ID.
-	 * @return int The standalone cart item quantity.
+	 * @return int|float The quantity of the product's first canonical cart line, or 0.
 	 */
 	private function get_cart_item_quantity_by_product_id( $product_id ) {
-		// @phpstan-ignore isset.property (WC()->cart is declared non-null but can be null before WC fully initialises)
-		if ( ! isset( WC()->cart ) ) {
-			return 0;
+		if ( null === $this->cart_item_quantity_index ) {
+			$this->cart_item_quantity_index = $this->build_cart_item_quantity_index();
 		}
 
-		$cart_item_key = WC()->cart->generate_cart_id( $product_id );
-		$cart_item     = WC()->cart->get_cart_item( $cart_item_key );
+		return $this->cart_item_quantity_index[ $product_id ] ?? 0;
+	}
 
-		return (int) ( $cart_item['quantity'] ?? 0 );
+	/**
+	 * Build a one-pass index of the first canonical cart line's quantity per product ID.
+	 *
+	 * Mirrors the client's canonical-line matching against the hydrated cart
+	 * snapshot returned by BlocksSharedState::get_cart_items(): an entry with
+	 * no `id` key (the schema's empty-array placeholder for a line whose
+	 * product no longer resolves) is skipped; an entry whose
+	 * `is_canonical_line` is present and strictly `false` is skipped, while a
+	 * missing field counts, matching the client; an entry whose `type` is
+	 * `variation` is never matched by product ID alone and is skipped; and
+	 * among the entries that survive for a given product ID, only the first
+	 * one in cart order is kept.
+	 *
+	 * @return array Quantity keyed by product ID.
+	 * @phpstan-return array<int, int|float>
+	 */
+	private function build_cart_item_quantity_index() {
+		$index = array();
+
+		$items = BlocksSharedState::get_cart_items( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+
+		foreach ( $items as $item ) {
+			if ( ! isset( $item['id'] ) ) {
+				continue;
+			}
+
+			if ( false === ( $item['is_canonical_line'] ?? true ) ) {
+				continue;
+			}
+
+			if ( 'variation' === ( $item['type'] ?? null ) ) {
+				continue;
+			}
+
+			if ( isset( $index[ $item['id'] ] ) ) {
+				continue;
+			}
+
+			$index[ $item['id'] ] = $item['quantity'] ?? 0;
+		}
+
+		return $index;
 	}
 
 	/**

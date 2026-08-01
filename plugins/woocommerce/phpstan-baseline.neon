@@ -51286,12 +51286,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductButton.php
 
 		-
-			message: '#^Static property Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductButton\:\:\$cart is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: src/Blocks/BlockTypes/ProductButton.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$count\.$#'
 			identifier: property.notFound
 			count: 4
