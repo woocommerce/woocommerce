@@ -105,6 +105,13 @@ class BlocksSharedState {
 			if ( $cart_exists ) {
 				$cart_response                  = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/cart' );
 				self::$blocks_shared_cart_state = $cart_response['body'] ?? array();
+
+				if ( ! isset( self::$blocks_shared_cart_state['items'] ) ) {
+					wc_get_logger()->warning(
+						'Hydrated cart state has no items array; the cart route likely returned an error response.',
+						array( 'source' => 'blocks-shared-state' )
+					);
+				}
 			} else {
 				self::$blocks_shared_cart_state = array();
 			}
@@ -236,5 +243,32 @@ class BlocksSharedState {
 		}
 
 		return $notices;
+	}
+
+	/**
+	 * Get the hydrated cart snapshot's line items.
+	 *
+	 * Returns the exact `items` array published as the client's `state.cart.items`,
+	 * i.e. the Store API cart response's `items` property as captured by the
+	 * memoized hydration snapshot used by `load_cart_state()`.
+	 *
+	 * Some entries may be a literal empty array (`[]`). The Store API cart-item
+	 * schema emits an empty array for a line whose `data` property is not a
+	 * `WC_Product` (for example, a line referencing a deleted product).
+	 * Consumers must skip such entries.
+	 *
+	 * @param string $consent_statement The consent statement string.
+	 * @return array Array of cart items, in the Store API cart-item schema shape.
+	 * @throws InvalidArgumentException If consent statement doesn't match.
+	 */
+	public static function get_cart_items( string $consent_statement ): array {
+		self::check_consent( $consent_statement );
+
+		// Ensure cart state is loaded so this method works independently.
+		if ( null === self::$blocks_shared_cart_state ) {
+			self::load_cart_state( $consent_statement );
+		}
+
+		return self::$blocks_shared_cart_state['items'] ?? array();
 	}
 }
