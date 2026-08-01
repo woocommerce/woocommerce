@@ -1134,7 +1134,7 @@ apply_filters( 'woocommerce_store_api_cart_item_is_canonical_line', boolean $is_
 
 ### Description
 
-The canonical line is the single line a configuration-free add of the product (or product + variation) would be merged into; at most one such line can exist per product + variation. Core computes the default from cart-key identity: a line is canonical when its stored key matches the key a plain add (no extra cart_item_data) would produce. An extension that intercepts a product's plain adds — for example, a bundle that stamps its container line with cart_item_data so the line is never cart-key-identical to a plain add — can use this filter to mark that line as canonical for its own purposes. A non-boolean return is ignored in favor of the core-computed default.
+The canonical line is the single line a configuration-free add of the product (or product + variation) would be merged into; at most one such line can exist per product + variation. Core computes the default from cart-key identity: a line is canonical when its stored key matches the key a plain add (no extra cart_item_data) would produce. An extension that intercepts a product's plain adds — for example, a bundle that stamps its container line with cart_item_data so the line is never cart-key-identical to a plain add — can use this filter to mark that line as canonical for its own purposes. A non-boolean return is ignored in favor of the core-computed default. The resolved value also drives the product button's server-rendered in-cart count, which reads the same hydrated cart response the client hydrates from.
 
 ### Parameters
 
