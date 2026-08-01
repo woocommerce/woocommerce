@@ -55,6 +55,7 @@ const Option = ( {
 					[ `${ name }-${ value }__content` ]: content,
 				} ) }
 				aria-disabled={ disabled }
+				disabled={ disabled }
 				onKeyDown={ ( event ) => {
 					// Prevent option changing via keyboard when loading from server.
 					if (
@@ -62,7 +63,7 @@ const Option = ( {
 						[
 							'ArrowUp',
 							'ArrowDown',
-							'AllowLeft',
+							'ArrowLeft',
 							'ArrowRight',
 						].includes( event.key )
 					) {

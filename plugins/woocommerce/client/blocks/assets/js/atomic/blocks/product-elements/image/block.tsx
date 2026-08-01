@@ -97,7 +97,7 @@ const Image = ( {
 }: ImageProps ): JSX.Element => {
 	const { src, srcset, sizes, alt } = image || {};
 	const imageProps = {
-		alt: alt || fallbackAlt,
+		alt: alt ?? fallbackAlt,
 		hidden: ! loaded,
 		src,
 		srcSet: srcset,
@@ -222,11 +222,13 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		);
 	}
 
-	const image = chooseImage( product, imageId );
-
-	if ( image ) {
-		image.alt = image.alt || decodeEntities( product.name );
-	}
+	const rawImage = chooseImage( product, imageId );
+	const image = rawImage
+		? {
+				...rawImage,
+				alt: rawImage.alt ?? decodeEntities( product.name ),
+		  }
+		: null;
 
 	const ParentComponent = showProductLink ? 'a' : Fragment;
 	const anchorLabel = product?.name

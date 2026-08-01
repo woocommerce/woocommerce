@@ -42,7 +42,7 @@ export const OfficialBadge = ( {
 	suggestionId,
 }: OfficialBadgeProps ) => {
 	const [ isPopoverVisible, setPopoverVisible ] = useState( false );
-	const buttonRef = useRef< HTMLButtonElement >( null );
+	const buttonRef = useRef< HTMLSpanElement >( null );
 
 	const handleClick = ( event: React.MouseEvent | React.KeyboardEvent ) => {
 		const clickedElement = event.target as HTMLElement;
@@ -83,6 +83,12 @@ export const OfficialBadge = ( {
 				className="woocommerce-official-extension-badge__container"
 				tabIndex={ 0 }
 				role="button"
+				aria-haspopup="dialog"
+				aria-expanded={ isPopoverVisible }
+				aria-label={ __(
+					'Official WooCommerce extension badge',
+					'woocommerce'
+				) }
 				ref={ buttonRef }
 				onClick={ handleClick }
 				onKeyDown={ handleKeyDown }

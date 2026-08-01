@@ -28,7 +28,7 @@ const ProductImage = ( {
 	width,
 	height,
 }: ProductImageProps ): JSX.Element => {
-	const rawAlt = image.alt || fallbackAlt;
+	const rawAlt = image.alt ?? fallbackAlt;
 
 	// Use display width for sizes so the browser picks an appropriately
 	// sized source from the thumbnail srcset.
@@ -40,7 +40,7 @@ const ProductImage = ( {
 	const imageProps = image.thumbnail
 		? {
 				src: image.thumbnail,
-				alt: rawAlt ? decodeEntities( rawAlt ) : 'Product Image',
+				alt: decodeEntities( rawAlt ),
 				srcSet: image.thumbnail_srcset || undefined,
 				sizes: sizesAttr,
 		  }

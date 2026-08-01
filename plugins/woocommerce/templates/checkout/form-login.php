@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.0.0
+ * @version 11.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -29,7 +29,7 @@ if ( $login_reminder_at_checkout ) : ?>
 		<?php
 		wc_print_notice(
 			apply_filters( 'woocommerce_checkout_login_message', esc_html__( 'Returning customer?', 'woocommerce' ) ) . // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			' <a href="#" class="showlogin">' . esc_html__( 'Click here to login', 'woocommerce' ) . '</a>',
+			' <a href="#" role="button" aria-label="' . esc_attr__( 'Enter your login details', 'woocommerce' ) . '" aria-controls="woocommerce-checkout-login-form" aria-expanded="false" class="showlogin">' . esc_html__( 'Click here to login', 'woocommerce' ) . '</a>',
 			'notice'
 		);
 		?>

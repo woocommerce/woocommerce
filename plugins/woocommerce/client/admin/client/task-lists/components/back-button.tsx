@@ -33,15 +33,17 @@ export const BackButton = ( { title }: BackButtonProps ) => {
 			<div
 				tabIndex={ 0 }
 				role="button"
+				aria-label={ homeText }
 				data-testid="header-back-button"
 				className="woocommerce-layout__header-back-button"
+				onClick={ navigateHome }
 				onKeyDown={ ( { keyCode } ) => {
 					if ( keyCode === ENTER || keyCode === SPACE ) {
 						navigateHome();
 					}
 				} }
 			>
-				<Icon icon={ chevronLeft } onClick={ navigateHome } />
+				<Icon icon={ chevronLeft } />
 			</div>
 		</Tooltip>
 	);
