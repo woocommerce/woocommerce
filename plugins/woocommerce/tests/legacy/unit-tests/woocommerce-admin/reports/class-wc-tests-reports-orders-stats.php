@@ -40,7 +40,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	 * This has to be registered per test, and after `parent::setUp()`. WordPress snapshots the
 	 * hook globals once per process and restores that snapshot after every test, so a filter
 	 * added from `setUpBeforeClass` is dropped once the first test finishes — leaving the rest
-	 * of the class reading cached report data, which is what these tests set out to avoid.
+	 * of the class running with report caching enabled, which is what these tests set out to avoid.
 	 * Registering it after the snapshot also means the restore removes it, so no class-level
 	 * teardown is needed to keep it away from other tests.
 	 */
