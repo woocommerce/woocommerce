@@ -477,10 +477,10 @@ function flushMicrotasks(): Promise< void > {
  * Builds a minimal server-confirmed cart line carrying a key.
  *
  * Defaults `is_canonical_line` to `true` so a plain call produces a
- * standalone line — the kind the product-button count reflects and that
- * `findItemInCart` matches on a keyless lookup. Callers that need a
- * meta-differentiated line (a bundle child, booking, or add-on) must pass
- * `is_canonical_line: false` explicitly as an override.
+ * canonical line — the line `findItemInCart` matches on a keyless
+ * lookup. Callers that need a meta-differentiated line (a bundle
+ * child, booking, or add-on) must pass `is_canonical_line: false`
+ * explicitly as an override.
  *
  * @param overrides Partial cart-line fields to override the defaults.
  * @return A cart line suitable for seeding `state.cart.items`.
