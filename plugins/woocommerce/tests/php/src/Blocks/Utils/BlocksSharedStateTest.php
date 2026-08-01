@@ -266,7 +266,8 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 			 * @return array The canned response.
 			 */
 			public function get_rest_api_response_data( string $path ): array {
-				unset( $path ); // Avoid parameter not used PHPCS errors.
+				// Avoid parameter not used PHPCS errors.
+				unset( $path );
 				++$this->call_count;
 				return $this->response;
 			}
