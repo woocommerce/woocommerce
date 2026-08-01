@@ -34,9 +34,17 @@ class CartItemUtils {
 	 * use Automattic\WooCommerce\StoreApi\Utilities\CartItemUtils;
 	 *
 	 * if ( CartItemUtils::is_standalone_line( $cart_item ) ) {
-	 *     // This is the standalone line — show an "Add to cart" button.
+	 *     // The stored cart key matches the key a plain add (no extra
+	 *     // cart_item_data) would produce for this product + variation.
 	 * }
 	 * ```
+	 *
+	 * Code that needs to know whether a line counts toward a product's
+	 * in-cart count should read the Store API cart-item response's
+	 * is_canonical_line field instead: it applies the
+	 * woocommerce_store_api_cart_item_is_canonical_line filter on top of
+	 * this helper's result, and that filter is what an extension can
+	 * override.
 	 *
 	 * @since 11.1.0
 	 *

@@ -314,4 +314,93 @@ class CartItemSchemaIsCanonicalLineTest extends WC_Unit_Test_Case {
 			);
 		}
 	}
+
+	// -------------------------------------------------------------------------
+	// get_is_canonical_line() — hook docblock prose
+	// -------------------------------------------------------------------------
+
+	/**
+	 * @testdox The hook docblock must state that the filtered value also governs the product button's server-rendered in-cart count.
+	 */
+	public function test_hook_docblock_states_it_also_governs_the_server_rendered_in_cart_count(): void {
+		$doc_comment = $this->get_hook_doc_comment();
+
+		$this->assertStringContainsString(
+			'product button',
+			$doc_comment,
+			'The hook docblock must mention the product button.'
+		);
+		$this->assertStringContainsString(
+			'server-rendered',
+			$doc_comment,
+			'The hook docblock must mention that the count is server-rendered.'
+		);
+		$this->assertStringContainsString(
+			'in-cart count',
+			$doc_comment,
+			'The hook docblock must mention the in-cart count.'
+		);
+		$this->assertStringContainsString(
+			'hydrated cart response',
+			$doc_comment,
+			'The hook docblock must mention that the count reads the same hydrated cart response the client hydrates from.'
+		);
+	}
+
+	/**
+	 * @testdox The apply_filters() call must still use the same hook name, the same two arguments in the same order, and the same surrounding boolean-integrity guard.
+	 */
+	public function test_apply_filters_call_is_unchanged(): void {
+		$source = $this->get_get_is_canonical_line_source();
+
+		$this->assertStringContainsString(
+			"apply_filters( 'woocommerce_store_api_cart_item_is_canonical_line', \$default, \$cart_item );",
+			$source,
+			'The apply_filters() call must keep the same hook name and the same two arguments ($default, $cart_item) in the same order.'
+		);
+		$this->assertStringContainsString(
+			'return is_bool( $filtered ) ? $filtered : $default;',
+			$source,
+			'The boolean-integrity guard discarding a non-boolean filter return must be unchanged.'
+		);
+	}
+
+	/**
+	 * Fetch the doc comment attached to the apply_filters() call inside
+	 * get_is_canonical_line(), i.e. the hook docblock under test.
+	 *
+	 * @return string
+	 */
+	private function get_hook_doc_comment(): string {
+		$source = $this->get_get_is_canonical_line_source();
+
+		$doc_start = strpos( $source, '/**' );
+		$doc_end   = strpos( $source, '*/', $doc_start );
+
+		$this->assertNotFalse( $doc_start, 'get_is_canonical_line() must contain a hook docblock.' );
+		$this->assertNotFalse( $doc_end, 'The hook docblock must be closed.' );
+
+		return substr( $source, $doc_start, $doc_end - $doc_start + 2 );
+	}
+
+	/**
+	 * Read get_is_canonical_line()'s exact source text (signature through
+	 * closing brace) from its declaring file.
+	 *
+	 * @return string
+	 */
+	private function get_get_is_canonical_line_source(): string {
+		$reflection = new \ReflectionMethod( CartItemSchema::class, 'get_is_canonical_line' );
+		$filename   = $reflection->getFileName();
+
+		$this->assertIsString( $filename, 'The declaring file must be resolvable.' );
+
+		$lines      = file( $filename ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local repository file, read only to assert on its contents in this test.
+		$start_line = $reflection->getStartLine();
+		$end_line   = $reflection->getEndLine();
+
+		$body = array_slice( $lines, $start_line - 1, $end_line - $start_line + 1 );
+
+		return implode( '', $body );
+	}
 }
