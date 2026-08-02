@@ -377,8 +377,8 @@ class Controller extends AbstractController {
 	/**
 	 * Check whether the current user may access fulfillments of the given order.
 	 *
-	 * @param \WC_Order|false|null $order   The order the request was authorized against, or a falsy value if none was resolved.
-	 * @param WP_REST_Request      $request The request for which the permission is checked.
+	 * @param \WC_Order|\WC_Order_Refund|false|null $order   The order the request was authorized against, or a falsy value if none was resolved.
+	 * @param WP_REST_Request                       $request The request for which the permission is checked.
 	 * @return bool|WP_Error True if the current user has the capability, otherwise an "Unauthorized" error or False if no error is available for the request method.
 	 */
 	private function check_order_access( $order, WP_REST_Request $request ) {
@@ -387,7 +387,16 @@ class Controller extends AbstractController {
 			return new WP_Error(
 				'woocommerce_rest_order_id_required',
 				esc_html__( 'The order ID is required.', 'woocommerce' ),
-				array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
+
+		// wc_get_order() returns a refund object for refund IDs. Refunds have no customer and cannot have fulfillments.
+		if ( ! $order instanceof WC_Order ) {
+			return new WP_Error(
+				'woocommerce_rest_order_invalid_id',
+				esc_html__( 'Invalid order ID.', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
 			);
 		}
 
