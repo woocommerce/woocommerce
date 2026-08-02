@@ -460,6 +460,101 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test a default request (no _fields) includes all aggregate fields with computed values.
+	 */
+	public function test_default_request_includes_aggregate_fields(): void {
+		$customer    = $this->create_test_customer();
+		$last_active = time() - HOUR_IN_SECONDS;
+		update_user_meta( $customer->get_id(), 'wc_last_active', (string) $last_active );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $customer->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertArrayHasKey( 'orders_count', $response_data );
+		$this->assertArrayHasKey( 'total_spent', $response_data );
+		$this->assertArrayHasKey( 'avatar_url', $response_data );
+		$this->assertEquals( 0, $response_data['orders_count'] );
+		$this->assertEquals( 0.0, (float) $response_data['total_spent'] );
+		$this->assertNotEmpty( $response_data['avatar_url'] );
+		$this->assertSame( gmdate( 'Y-m-d\TH:i:s', $last_active ), $response_data['last_active_gmt'] );
+		$this->assertNotNull( $response_data['last_active'] );
+	}
+
+	/**
+	 * Test a sparse _fields request that excludes the aggregate fields omits them from the
+	 * response and skips computing them.
+	 */
+	public function test_fields_parameter_excluding_aggregates_omits_and_skips_them(): void {
+		$customer = $this->create_test_customer();
+
+		$avatar_lookups       = 0;
+		$count_avatar_lookups = function ( $args ) use ( &$avatar_lookups ) {
+			++$avatar_lookups;
+			return $args;
+		};
+		add_filter( 'pre_get_avatar_data', $count_avatar_lookups );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $customer->get_id() );
+		$request->set_param( '_fields', 'id,email' );
+		$response = $this->server->dispatch( $request );
+
+		remove_filter( 'pre_get_avatar_data', $count_avatar_lookups );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertArrayHasKey( 'email', $response_data );
+		foreach ( array( 'orders_count', 'total_spent', 'avatar_url', 'last_active', 'last_active_gmt' ) as $field ) {
+			$this->assertArrayNotHasKey( $field, $response_data, "Response must not contain unrequested field: {$field}" );
+		}
+		$this->assertSame( 0, $avatar_lookups, 'avatar_url must not be computed when it is not requested via _fields' );
+	}
+
+	/**
+	 * Test requesting last_active and last_active_gmt via _fields runs the wc_last_active meta
+	 * normalization while other aggregates stay omitted.
+	 */
+	public function test_fields_parameter_requesting_last_active_runs_meta_normalization(): void {
+		$active_customer = $this->create_test_customer();
+		$last_active     = time() - HOUR_IN_SECONDS;
+		update_user_meta( $active_customer->get_id(), 'wc_last_active', (string) $last_active );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $active_customer->get_id() );
+		$request->set_param( '_fields', 'id,last_active,last_active_gmt' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertSame( gmdate( 'Y-m-d\TH:i:s', $last_active ), $response_data['last_active_gmt'] );
+		$this->assertNotNull( $response_data['last_active'] );
+		$this->assertArrayNotHasKey( 'orders_count', $response_data );
+		$this->assertArrayNotHasKey( 'avatar_url', $response_data );
+
+		// Empty meta must still normalize to null when the fields are requested.
+		$inactive_customer = $this->create_test_customer(
+			array(
+				'email'    => 'inactive@example.com',
+				'username' => 'inactivedoe',
+			)
+		);
+		update_user_meta( $inactive_customer->get_id(), 'wc_last_active', '' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $inactive_customer->get_id() );
+		$request->set_param( '_fields', 'last_active,last_active_gmt' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertNull( $response_data['last_active'] );
+		$this->assertNull( $response_data['last_active_gmt'] );
+	}
+
+	/**
 	 * Test search functionality.
 	 */
 	public function test_search(): void {
