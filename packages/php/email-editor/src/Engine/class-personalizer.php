@@ -252,6 +252,7 @@ class Personalizer {
 			}
 
 			$value = $tag->execute_callback( $this->get_callback_context( self::RENDERING_CONTEXT_HREF ), $token['arguments'] );
+			$value = $this->intercept_value( $value, $token_string, self::RENDERING_CONTEXT_HREF );
 			if ( '' !== $value ) {
 				$replacements[ $token_string ] = $value;
 			}

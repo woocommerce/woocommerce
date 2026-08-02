@@ -1119,4 +1119,87 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 			$calls
 		);
 	}
+
+	/**
+	 * Test that the interceptor receives the resolved value, the tag token found in
+	 * the href, and the href rendering context for a plain anchor with an embedded
+	 * tag, and that its return value is written as the href.
+	 */
+	public function testValueInterceptorForPlainHrefTag(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store URL',
+				'woocommerce/store-url',
+				'Store',
+				function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Parameters unused in this test.
+					return 'https://example.com/store';
+				}
+			)
+		);
+
+		$calls = array();
+		$this->personalizer->set_value_interceptor(
+			function ( string $value, string $source, string $rendering_context ) use ( &$calls ): string {
+				$calls[] = array( $value, $source, $rendering_context );
+				return 'https://intercepted.example.com';
+			}
+		);
+
+		$html_content = '<a href="http://[woocommerce/store-url]">Click here</a>';
+		$this->assertSame( '<a href="https://intercepted.example.com">Click here</a>', $this->personalizer->personalize_content( $html_content ) );
+		$this->assertSame(
+			array(
+				array( 'https://example.com/store', '[woocommerce/store-url]', Personalizer::RENDERING_CONTEXT_HREF ),
+			),
+			$calls
+		);
+	}
+
+	/**
+	 * Test that the interceptor is called once per tag token embedded in a plain
+	 * href and that each return value replaces its token in the URL.
+	 */
+	public function testValueInterceptorForMultipleHrefTokens(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'One',
+				'test/one',
+				'Test',
+				function () {
+					return 'first-value';
+				}
+			)
+		);
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Two',
+				'test/two',
+				'Test',
+				function () {
+					return 'second-value';
+				}
+			)
+		);
+
+		$calls = array();
+		$this->personalizer->set_value_interceptor(
+			function ( string $value, string $source, string $rendering_context ) use ( &$calls ): string {
+				$calls[] = array( $value, $source, $rendering_context );
+				return '[test/one]' === $source ? 'ONE' : 'TWO';
+			}
+		);
+
+		// Note: WordPress encodes & as &#038; in URLs.
+		$this->assertSame(
+			'<a href="https://example.com/?a=ONE&#038;b=TWO">Click</a>',
+			$this->personalizer->personalize_content( '<a href="https://example.com/?a=[test/one]&b=[test/two]">Click</a>' )
+		);
+		$this->assertSame(
+			array(
+				array( 'first-value', '[test/one]', Personalizer::RENDERING_CONTEXT_HREF ),
+				array( 'second-value', '[test/two]', Personalizer::RENDERING_CONTEXT_HREF ),
+			),
+			$calls
+		);
+	}
 }
