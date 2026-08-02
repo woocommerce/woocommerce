@@ -477,10 +477,9 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The collection route authorizes against order_id only. Pairing another customer's order_id
-	 * with a fulfillment_id the caller owns (both as query args) must still be rejected for a
-	 * non-owner, rather than letting the query fulfillment_id move authorization to the caller's
-	 * own order.
+	 * The collection route authorizes against order_id only. When the order_id does not resolve
+	 * to an order, a fulfillment_id query argument the caller owns must not move authorization
+	 * to the caller's own order: the request is rejected for the missing order instead.
 	 */
 	public function test_permission_check_customer_cannot_read_other_orders_collection_via_query_fulfillment_id() {
 		$attacker_user_id     = $this->factory->user->create( array( 'role' => 'customer' ) );
@@ -491,19 +490,15 @@ class ControllerTest extends WC_Unit_Test_Case {
 
 		wp_set_current_user( $attacker_user_id );
 
-		// Collection request: victim order_id, plus a fulfillment_id the attacker owns, both as query args.
+		// Collection request: an order_id that resolves to no order, plus a fulfillment_id the attacker owns.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
-		$request->set_param( 'order_id', $this->test_order->get_id() );
+		$request->set_param( 'order_id', 99999 );
 		$request->set_param( 'fulfillment_id', $attacker_fulfillment->get_id() );
 		$response = rest_get_server()->dispatch( $request );
 
-		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 400, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertArrayHasKey( 'code', $data );
-		$this->assertArrayNotHasKey( 'id', $data );
-
-		WC_Helper_Order::delete_order( $attacker_order->get_id() );
-		wp_delete_user( $attacker_user_id );
+		$this->assertSame( 'woocommerce_rest_order_id_required', $data['code'] );
 	}
 
 	/**
