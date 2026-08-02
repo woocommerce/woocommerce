@@ -282,7 +282,7 @@ class ControllerTest extends WC_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/99999' );
 
 		$response = rest_get_server()->dispatch( $request );
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 404, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertEquals( 'woocommerce_rest_fulfillment_invalid_id', $data['code'] );
 	}
@@ -312,7 +312,7 @@ class ControllerTest extends WC_Unit_Test_Case {
 		$request->set_body( wp_json_encode( $this->get_test_fulfillment_data() ) );
 
 		$response = rest_get_server()->dispatch( $request );
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 404, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertEquals( 'woocommerce_rest_fulfillment_invalid_id', $data['code'] );
 	}
@@ -334,7 +334,7 @@ class ControllerTest extends WC_Unit_Test_Case {
 		// Verify the fulfillment is deleted.
 		$get_request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $fulfillment->get_id() );
 		$get_response = rest_get_server()->dispatch( $get_request );
-		$this->assertEquals( 400, $get_response->get_status() );
+		$this->assertEquals( 404, $get_response->get_status() );
 	}
 
 	/**
@@ -346,7 +346,7 @@ class ControllerTest extends WC_Unit_Test_Case {
 		$request = new WP_REST_Request( 'DELETE', '/wc/v4/fulfillments/99999' );
 
 		$response = rest_get_server()->dispatch( $request );
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 404, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertEquals( 'woocommerce_rest_fulfillment_invalid_id', $data['code'] );
 	}

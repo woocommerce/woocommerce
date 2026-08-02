@@ -15,7 +15,6 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\OrderFulfillmentsRestController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
@@ -344,30 +343,40 @@ class Controller extends AbstractController {
 	 */
 	public function check_permission_for_single_fulfillment( WP_REST_Request $request ) {
 		$url_params     = $request->get_url_params();
-		$fulfillment_id = isset( $url_params['fulfillment_id'] ) ? (int) $url_params['fulfillment_id'] : 0;
+		$fulfillment_id = (int) ( $url_params['fulfillment_id'] ?? 0 );
 
 		if ( ! $fulfillment_id ) {
 			return new WP_Error(
 				'woocommerce_rest_fulfillment_invalid_id',
 				esc_html__( 'Invalid fulfillment ID.', 'woocommerce' ),
-				array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
+				array( 'status' => WP_Http::BAD_REQUEST )
 			);
 		}
 
 		try {
 			$fulfillment = new Fulfillment( $fulfillment_id );
-			$order       = wc_get_order( (int) $fulfillment->get_entity_id() );
-		} catch ( ApiException $ex ) {
-			return new WP_Error(
-				$ex->getErrorCode(),
-				$ex->getMessage(),
-				array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
-			);
 		} catch ( \Throwable $e ) {
 			return new WP_Error(
 				'woocommerce_rest_fulfillment_invalid_id',
-				$e->getMessage(),
-				array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
+				esc_html__( 'Invalid fulfillment ID.', 'woocommerce' ),
+				array( 'status' => WP_Http::NOT_FOUND )
+			);
+		}
+
+		if ( WC_Order::class !== $fulfillment->get_entity_type() ) {
+			return new WP_Error(
+				'woocommerce_rest_invalid_entity_type',
+				esc_html__( 'The entity type must be "order".', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
+
+		$order = wc_get_order( (int) $fulfillment->get_entity_id() );
+		if ( ! $order instanceof WC_Order ) {
+			return new WP_Error(
+				'woocommerce_rest_order_invalid_id',
+				esc_html__( 'Invalid order ID.', 'woocommerce' ),
+				array( 'status' => WP_Http::NOT_FOUND )
 			);
 		}
 
