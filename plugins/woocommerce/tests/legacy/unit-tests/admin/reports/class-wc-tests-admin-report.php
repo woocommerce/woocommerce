@@ -18,6 +18,8 @@ class WC_Tests_Admin_Report extends WC_Unit_Test_Case {
 	 *
 	 */
 	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
 		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/reports/class-wc-admin-report.php';
 	}
 

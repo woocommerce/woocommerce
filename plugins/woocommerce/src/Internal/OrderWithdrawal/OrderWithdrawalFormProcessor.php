@@ -5,7 +5,9 @@ namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Throwable;
+use WC_Geolocation;
 use WC_Order;
+use WC_Rate_Limiter;
 
 /**
  * Processes order withdrawal form requests.
@@ -35,6 +37,9 @@ final class OrderWithdrawalFormProcessor {
 	private const LOGGER_SOURCE                       = 'order-withdrawal';
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
 	private const ORDER_WITHDRAWAL_REQUESTED_VALUE    = 'yes';
+	private const RATE_LIMIT_IP_PREFIX                = 'order_withdrawal_ip_';
+	private const RATE_LIMIT_EMAIL_PREFIX             = 'order_withdrawal_email_';
+	private const RATE_LIMIT_DELAY                    = MINUTE_IN_SECONDS / 2;
 
 	/**
 	 * Process the current order withdrawal request.
@@ -247,6 +252,18 @@ final class OrderWithdrawalFormProcessor {
 	 * @param array<string,string> $data Form data.
 	 */
 	private function submit_order_withdrawal( array $data ): bool {
+		$rate_limit_ids = $this->get_rate_limit_ids( $data );
+
+		if ( ! $this->check_rate_limits( $rate_limit_ids ) ) {
+			return false;
+		}
+
+		if ( ! $this->apply_rate_limits( $rate_limit_ids ) ) {
+			wc_add_notice( __( 'We could not submit your withdrawal request. Please try again or contact us if the problem continues.', 'woocommerce' ), 'error' );
+
+			return false;
+		}
+
 		$matched_order = $this->get_matching_order( $data );
 
 		if ( $matched_order ) {
@@ -256,6 +273,8 @@ final class OrderWithdrawalFormProcessor {
 					'error'
 				);
 
+				$this->apply_rate_limits( $rate_limit_ids, -1 );
+
 				return false;
 			}
 
@@ -264,6 +283,7 @@ final class OrderWithdrawalFormProcessor {
 
 		if ( ! $this->send_order_withdrawal_emails( $data, $matched_order ) ) {
 			wc_add_notice( __( 'We could not submit your withdrawal request. Please try again or contact us if the problem continues.', 'woocommerce' ), 'error' );
+			$this->apply_rate_limits( $rate_limit_ids, -1 );
 
 			return false;
 		}
@@ -273,6 +293,70 @@ final class OrderWithdrawalFormProcessor {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Check order withdrawal submission rate limits.
+	 *
+	 * @param string[] $rate_limit_ids Rate limit IDs.
+	 */
+	private function check_rate_limits( array $rate_limit_ids ): bool {
+		foreach ( $rate_limit_ids as $rate_limit_id ) {
+			if ( WC_Rate_Limiter::retried_too_soon( $rate_limit_id ) ) {
+				wc_add_notice( __( 'Please wait before submitting another withdrawal request.', 'woocommerce' ), 'error' );
+
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Set or clear the order withdrawal submission rate limits.
+	 *
+	 * @param string[] $rate_limit_ids Rate limit IDs.
+	 * @param int      $delay          Delay in seconds for the rate limit. Use -1 to clear the rate limit.
+	 * @return bool True if all rate limits were applied, false otherwise.
+	 */
+	private function apply_rate_limits( array $rate_limit_ids, int $delay = self::RATE_LIMIT_DELAY ): bool {
+		$applied_rate_limit_ids = array();
+
+		foreach ( $rate_limit_ids as $rate_limit_id ) {
+			if ( ! WC_Rate_Limiter::set_rate_limit( $rate_limit_id, $delay ) ) {
+				foreach ( $applied_rate_limit_ids as $applied_rate_limit_id ) {
+					WC_Rate_Limiter::set_rate_limit( $applied_rate_limit_id, -1 );
+				}
+
+				return false;
+			}
+
+			$applied_rate_limit_ids[] = $rate_limit_id;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get order withdrawal rate limit identifiers for the current request.
+	 *
+	 * @param array<string,string> $data Form data.
+	 * @return string[]
+	 */
+	private function get_rate_limit_ids( array $data ): array {
+		$rate_limit_ids = array();
+		$ip_address     = WC_Geolocation::get_ip_address();
+		$email          = strtolower( trim( $data[ self::FIELD_EMAIL ] ) );
+
+		if ( '' !== $ip_address ) {
+			$rate_limit_ids[] = self::RATE_LIMIT_IP_PREFIX . hash( 'sha256', $ip_address );
+		}
+
+		if ( '' !== $email ) {
+			$rate_limit_ids[] = self::RATE_LIMIT_EMAIL_PREFIX . hash( 'sha256', $email );
+		}
+
+		return $rate_limit_ids;
 	}
 
 	/**
