@@ -13,6 +13,7 @@ export interface CartResponseTotalsItem extends CurrencyResponse {
 export interface CartResponseCouponItem {
 	code: string;
 	discount_type: string;
+	is_removable: boolean;
 	totals: CartResponseTotalsItem;
 }
 
