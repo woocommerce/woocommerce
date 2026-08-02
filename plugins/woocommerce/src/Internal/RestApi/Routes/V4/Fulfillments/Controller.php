@@ -301,7 +301,7 @@ class Controller extends AbstractController {
 	 * endpoint against the entity_id in the request body. A fulfillment_id query argument has no
 	 * effect on which order is authorized.
 	 *
-	 * @param WP_REST_Request $request The request for which the permission is checked.
+	 * @param WP_REST_Request<array<string, mixed>> $request The request for which the permission is checked.
 	 * @return bool|WP_Error True if the current user has the capability, otherwise an "Unauthorized" error or False if no error is available for the request method.
 	 */
 	public function check_permission_for_fulfillments( WP_REST_Request $request ) {
@@ -338,8 +338,10 @@ class Controller extends AbstractController {
 	 * fulfillment_id route placeholder, so it always matches the order the handler acts on. Any
 	 * request-supplied order_id is ignored.
 	 *
-	 * @param WP_REST_Request $request The request for which the permission is checked.
+	 * @param WP_REST_Request<array<string, mixed>> $request The request for which the permission is checked.
 	 * @return bool|WP_Error True if the current user has the capability, otherwise an "Unauthorized" error or False if no error is available for the request method.
+	 *
+	 * @since 11.1.0
 	 */
 	public function check_permission_for_single_fulfillment( WP_REST_Request $request ) {
 		$url_params     = $request->get_url_params();
@@ -387,7 +389,7 @@ class Controller extends AbstractController {
 	 * Check whether the current user may access fulfillments of the given order.
 	 *
 	 * @param \WC_Order|\WC_Order_Refund|false|null $order   The order the request was authorized against, or a falsy value if none was resolved.
-	 * @param WP_REST_Request                       $request The request for which the permission is checked.
+	 * @param WP_REST_Request<array<string, mixed>> $request The request for which the permission is checked.
 	 * @return bool|WP_Error True if the current user has the capability, otherwise an "Unauthorized" error or False if no error is available for the request method.
 	 */
 	private function check_order_access( $order, WP_REST_Request $request ) {

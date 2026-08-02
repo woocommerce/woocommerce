@@ -64363,12 +64363,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Customers/UpdateUtils.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Fulfillments\\Controller\:\:check_permission_for_fulfillments\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Fulfillments/Controller.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Fulfillments\\Controller\:\:check_permission_for_providers\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
