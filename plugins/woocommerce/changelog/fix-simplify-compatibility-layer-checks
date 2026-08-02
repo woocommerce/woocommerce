@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Move logic to enable or disable the compatibility layer in block templates from 'template_redirect' to 'template_include' to be more accurate with the resolved template

@@ -144,7 +144,7 @@ const StoreNotices = ( {
 							key={ 'store-notice-' + status }
 							{ ...noticeProps }
 						>
-							<RawHTML>{ noticeGroup[ 0 ].content }</RawHTML>
+							<RawHTML>{ uniqueNotices[ 0 ].content }</RawHTML>
 						</StoreNotice>
 					) : (
 						<StoreNotice

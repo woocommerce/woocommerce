@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
@@ -715,6 +716,86 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox calculate_taxes handles inherited shipping tax when no taxable product class is available.
+	 * @dataProvider inherited_shipping_tax_without_taxable_products_provider
+	 *
+	 * @param bool  $add_non_taxable_product Whether to add a non-taxable product to the order.
+	 * @param bool  $add_non_taxable_fee     Whether to add a non-taxable fee to the order.
+	 * @param float $expected_shipping_tax   Expected shipping tax total.
+	 */
+	public function test_calculate_taxes_handles_inherited_shipping_tax_without_taxable_products( bool $add_non_taxable_product, bool $add_non_taxable_fee, float $expected_shipping_tax ): void {
+		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes', 'no' );
+		$original_shipping_tax_class = get_option( 'woocommerce_shipping_tax_class', 'inherit' );
+		$order                       = new WC_Order();
+		$product                     = null;
+
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'Standard tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		try {
+			if ( $add_non_taxable_product ) {
+				$product = WC_Helper_Product::create_simple_product();
+				$product->set_tax_status( ProductTaxStatus::NONE );
+				$product->save();
+				$order->add_product( $product );
+			}
+
+			if ( $add_non_taxable_fee ) {
+				$fee_item = new WC_Order_Item_Fee();
+				$fee_item->set_name( 'Manual fee' );
+				$fee_item->set_amount( '5' );
+				$fee_item->set_total( '5' );
+				$fee_item->set_tax_status( ProductTaxStatus::NONE );
+				$order->add_item( $fee_item );
+			}
+
+			$shipping_item = new WC_Order_Item_Shipping();
+			$shipping_item->set_method_title( 'Manual shipping' );
+			$shipping_item->set_total( '10' );
+			$order->add_item( $shipping_item );
+
+			$order->calculate_totals();
+
+			$this->assertSame( $expected_shipping_tax, (float) $order->get_shipping_tax() );
+		} finally {
+			WC_Tax::_delete_tax_rate( $tax_rate_id );
+			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
+			update_option( 'woocommerce_shipping_tax_class', $original_shipping_tax_class );
+			$order->delete( true );
+			if ( $product ) {
+				$product->delete( true );
+			}
+		}
+	}
+
+	/**
+	 * Data provider for inherited shipping tax calculations without taxable products.
+	 *
+	 * @return array<string, array{bool, bool, float}>
+	 */
+	public function inherited_shipping_tax_without_taxable_products_provider(): array {
+		return array(
+			'shipping-only order'           => array( false, false, 1.0 ),
+			'non-taxable product'           => array( true, false, 0.0 ),
+			'non-taxable fee with shipping' => array( false, true, 1.0 ),
+		);
+	}
+
+	/**
 	 * Get an order object with a fixed total COGS value.
 	 *
 	 * @return WC_Order
@@ -750,6 +831,48 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$reloaded_after_save = wc_get_order( $order_id );
 		$this->assertCount( 0, $reloaded_after_save->get_items(), 'Line items should be removed from the DB after save().' );
 		$this->assertCount( 0, $reloaded_after_save->get_items( 'shipping' ), 'Shipping items should be removed from the DB after save().' );
+	}
+
+	/**
+	 * @testdox add_item() must not overwrite an earlier unsaved item when items are removed and re-added before save().
+	 */
+	public function test_add_item_keeps_unsaved_items_after_remove_and_readd() {
+		$make_fee = function ( $name ) {
+			$fee = new WC_Order_Item_Fee();
+			$fee->set_name( $name );
+			$fee->set_amount( '1' );
+			$fee->set_total( '1' );
+			$fee->set_tax_status( 'none' );
+			return $fee;
+		};
+
+		$order = new WC_Order();
+		$order->add_item( $make_fee( 'Existing 1' ) );
+		$order->add_item( $make_fee( 'Existing 2' ) );
+		$order->save();
+
+		$find = function ( $name ) use ( $order ) {
+			foreach ( $order->get_items( 'fee' ) as $item ) {
+				if ( $name === $item->get_name() ) {
+					return $item;
+				}
+			}
+			return null;
+		};
+
+		// Remove an existing fee and add a fresh one, twice, all before saving.
+		// With count()-based temporary keys the two fresh fees collide on the same
+		// 'new:fee_lines<N>' key and the first ('Fresh A') is silently dropped.
+		$order->remove_item( $find( 'Existing 1' )->get_id() );
+		$order->add_item( $make_fee( 'Fresh A' ) );
+		$order->remove_item( $find( 'Existing 2' )->get_id() );
+		$order->add_item( $make_fee( 'Fresh B' ) );
+		$order->save();
+
+		$names = array_map( fn( $item ) => $item->get_name(), wc_get_order( $order->get_id() )->get_items( 'fee' ) );
+		$this->assertContains( 'Fresh A', $names, 'Earlier unsaved fee must survive a later add_item().' );
+		$this->assertContains( 'Fresh B', $names );
+		$this->assertCount( 2, $names );
 	}
 
 	/**

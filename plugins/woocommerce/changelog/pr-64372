@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add woocommerce_webhook_enable_delivery_log filter to disable delivery logs.

@@ -46,7 +46,10 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				),
 			),
 			'typography' => array(
-				'fontFamily' => 'Test Font Family',
+				'fontFamily'    => 'Test Font Family',
+				'fontWeight'    => '300',
+				'fontStyle'     => 'italic',
+				'letterSpacing' => '-0.1px',
 			),
 			'color'      => array(
 				'background' => '#123456',
@@ -267,6 +270,9 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$style = $this->getStylesValueForTag( $rendered['html'], array( 'tag_name' => 'body' ) );
 		$this->assertIsString( $style );
 		$this->assertStringContainsString( 'background-color: #123456', $style );
+		$this->assertStringContainsString( 'font-weight: 300;', $style );
+		$this->assertStringContainsString( 'font-style: italic;', $style );
+		$this->assertStringContainsString( 'letter-spacing: -.1px;', $style );
 
 		// Verify layout element styles.
 		$doc = new \DOMDocument();
@@ -281,6 +287,9 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$style = $wrapper->getAttribute( 'style' );
 		$this->assertStringContainsString( 'background-color: #123456', $style );
 		$this->assertStringContainsString( 'font-family: Test Font Family;', $style );
+		$this->assertStringContainsString( 'font-weight: 300;', $style );
+		$this->assertStringContainsString( 'font-style: italic;', $style );
+		$this->assertStringContainsString( 'letter-spacing: -.1px;', $style );
 		$this->assertStringContainsString( 'padding-top: 3px;', $style );
 		$this->assertStringContainsString( 'padding-bottom: 4px;', $style );
 		// Horizontal padding is now distributed to individual block wrappers via Spacing_Preprocessor.

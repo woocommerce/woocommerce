@@ -17,9 +17,9 @@ if [[ -z "$PLUGIN_SLUG" ]]; then
 	exit 1
 fi
 
-# Command prefix for running wp-cli against the single-container test environment
-# (started via `wp-env --config .wp-env.test.json`, whose container is `cli`).
-wp_cli="pnpm wp-env:test run cli"
+# Command prefix for running wp-cli against the single-container E2E environment
+# (started via `wp-env --config .wp-env.e2e.json`, whose container is `cli`).
+wp_cli="pnpm wp-env:e2e run cli"
 
 echo "Installing $PLUGIN_NAME from $PLUGIN_REPOSITORY"
 download_url=$( curl -s "https://api.github.com/repos/$PLUGIN_REPOSITORY/releases/latest" | grep browser_download_url | cut -d '"' -f 4 )

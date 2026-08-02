@@ -44,6 +44,7 @@ import {
 	useTaskListsState,
 } from '~/hooks/use-tasklists-state';
 import { hasTwoColumnLayout } from './utils';
+import { isFeatureEnabled } from '~/utils/features';
 
 const TaskLists = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../task-lists' ).then(
@@ -148,7 +149,7 @@ export const Layout = ( {
 					<InboxPanel />
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
-					{ window.wcAdminFeatures.analytics && <StatsOverview /> }
+					{ isFeatureEnabled( 'analytics' ) && <StatsOverview /> }
 					{ ! isSetupTaskListActive && <StoreManagementLinks /> }
 				</Column>
 			</>

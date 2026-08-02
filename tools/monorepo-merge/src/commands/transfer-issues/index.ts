@@ -162,20 +162,38 @@ export default class TransferIssues extends Command {
 		CliUx.ux.action.stop();
 
 		CliUx.ux.action.start( 'Running post-transfer tasks' );
+		const postTransferFailures: string[] = [];
 		for ( const issue of issuesToTransfer ) {
 			if ( ! issue.newID ) {
 				continue;
 			}
 
-			this.resetProjectFields( authenticatedGraphQL, issue );
+			/*
+			 * These are awaited so failures surface, but one issue failing must
+			 * not leave the remaining transferred issues unprocessed.
+			 */
+			try {
+				await this.resetProjectFields( authenticatedGraphQL, issue );
 
-			this.addLabelsToIssue(
-				authenticatedGraphQL,
-				issue.newID,
-				labelsToAdd
-			);
+				await this.addLabelsToIssue(
+					authenticatedGraphQL,
+					issue.newID,
+					labelsToAdd
+				);
+			} catch ( error ) {
+				postTransferFailures.push(
+					`${ issue.title }: ${ ( error as Error ).message }`
+				);
+			}
 		}
 		CliUx.ux.action.stop();
+
+		if ( postTransferFailures.length > 0 ) {
+			this.log(
+				'Post-transfer tasks failed for:\n' +
+					postTransferFailures.join( '\n' )
+			);
+		}
 
 		this.log(
 			'Successfully transferred ' +

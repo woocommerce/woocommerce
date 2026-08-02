@@ -222,7 +222,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	public function test_list_hydrates_the_plan_snapshot(): void {
 		$this->sign_up_contract();
 
-		$contracts = Subscriptions::list( 1 );
+		$contracts = Subscriptions::list( array( 'limit' => 1 ) );
 		$this->assertCount( 1, $contracts );
 
 		$snapshot = $contracts[0]->get_plan_snapshot();
@@ -242,6 +242,57 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		// Newest first, and both signups are present.
 		$this->assertSame( array( $second->get_id(), $first->get_id() ), array_slice( $ids, 0, 2 ) );
 		$this->assertInstanceOf( Contract::class, $contracts[0] );
+	}
+
+	/**
+	 * @testdox list passes status / sort / search / paging args through to the query.
+	 */
+	public function test_list_passes_query_args_through(): void {
+		$active_low  = $this->seed_list_contract( ContractStatus::ACTIVE, '10.00' );
+		$active_high = $this->seed_list_contract( ContractStatus::ACTIVE, '20.00' );
+		$this->seed_list_contract( ContractStatus::CANCELLED, '30.00' );
+
+		// Status filter + sort compose through the facade.
+		$ids = array_map(
+			static fn ( Contract $c ) => (int) $c->get_id(),
+			Subscriptions::list(
+				array(
+					'status'  => ContractStatus::ACTIVE,
+					'orderby' => 'total',
+					'order'   => 'ASC',
+				)
+			)
+		);
+		$this->assertSame( array( $active_low, $active_high ), $ids );
+
+		// Paging windows the same filtered set.
+		$page = Subscriptions::list(
+			array(
+				'status' => ContractStatus::ACTIVE,
+				'limit'  => 1,
+				'offset' => 1,
+			)
+		);
+		$this->assertCount( 1, $page );
+	}
+
+	/**
+	 * @testdox count_by_status returns a full status map and count honours the same filter.
+	 */
+	public function test_count_by_status_and_count(): void {
+		$this->seed_list_contract( ContractStatus::ACTIVE );
+		$this->seed_list_contract( ContractStatus::ACTIVE );
+		$this->seed_list_contract( ContractStatus::ON_HOLD );
+
+		$by_status = Subscriptions::count_by_status();
+		$this->assertSame( ContractStatus::all(), array_keys( $by_status ) );
+		$this->assertSame( 2, $by_status[ ContractStatus::ACTIVE ] );
+		$this->assertSame( 1, $by_status[ ContractStatus::ON_HOLD ] );
+		$this->assertSame( 0, $by_status[ ContractStatus::CANCELLED ] );
+
+		// The grand total and a status-filtered total agree with the map.
+		$this->assertSame( 3, Subscriptions::count() );
+		$this->assertSame( 2, Subscriptions::count( array( 'status' => ContractStatus::ACTIVE ) ) );
 	}
 
 	/**
@@ -308,6 +359,29 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$after_cancel = Subscriptions::get( $contract_id );
 		$this->assertInstanceOf( Contract::class, $after_cancel );
 		$this->assertSame( ContractStatus::CANCELLED, $after_cancel->get_status() );
+	}
+
+	/**
+	 * Seed a bare contract at a status and billing total for the list-query tests,
+	 * returning its id.
+	 *
+	 * @param string $status        Contract status.
+	 * @param string $billing_total Billing total (decimal string).
+	 */
+	private function seed_list_contract( string $status = ContractStatus::ACTIVE, string $billing_total = '19.99' ): int {
+		$contract = Contract::create(
+			array(
+				'customer_id'      => 42,
+				'status'           => $status,
+				'currency'         => 'USD',
+				'selling_plan_id'  => 1,
+				'start_gmt'        => '2026-01-01 00:00:00',
+				'next_payment_gmt' => '2099-02-01 00:00:00',
+				'billing_total'    => $billing_total,
+			)
+		);
+
+		return ( new ContractRepository() )->insert( $contract );
 	}
 
 	/**

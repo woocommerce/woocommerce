@@ -57,9 +57,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-accounts.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-emails.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-integrations.php';
-				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' ) ) {
-					$settings[] = include_once __DIR__ . '/settings/class-wc-settings-site-visibility.php';
-				}
+				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-site-visibility.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-point-of-sale.php';
 				$settings[] = include_once __DIR__ . '/settings/class-wc-settings-advanced.php';
 
@@ -515,14 +513,23 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$option_value     = $value['value'];
 						$disabled_values  = $value['disabled'] ?? array();
 						$show_desc_at_end = $value['desc_at_end'] ?? false;
+						// Only build a title ID when the field has a usable ID.
+						$normalized_id  = is_scalar( $value['id'] ) ? (string) $value['id'] : '';
+						$radio_title_id = '' !== $normalized_id ? $normalized_id . '-title' : '';
 
 						?>
 						<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 							<th scope="row" class="titledesc">
-								<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo $tooltip_html; // WPCS: XSS ok. ?></label>
+								<span class="wc-settings-radio-title">
+									<span<?php echo '' !== $radio_title_id ? ' id="' . esc_attr( $radio_title_id ) . '"' : ''; ?>><?php echo esc_html( $value['title'] ); ?></span>
+									<?php
+									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built by self::get_field_description(), which passes the tip through wc_help_tip(); that helper sanitizes the tip text and escapes the aria-label.
+									echo $tooltip_html;
+									?>
+								</span>
 							</th>
 							<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
-								<fieldset>
+								<fieldset<?php echo '' !== $radio_title_id ? ' aria-labelledby="' . esc_attr( $radio_title_id ) . '"' : ''; ?>>
 									<?php
 									if ( ! $show_desc_at_end ) {
 										echo wp_kses_post( $description );
