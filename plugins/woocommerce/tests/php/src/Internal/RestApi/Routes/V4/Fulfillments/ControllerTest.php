@@ -512,7 +512,7 @@ class ControllerTest extends WC_Unit_Test_Case {
 	 * legitimate access.
 	 */
 	public function test_permission_check_customer_can_read_own_single_fulfillment() {
-		wp_set_current_user( $this->customer_user_id );
+		wp_set_current_user( self::$customer_user_id );
 
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
 		$response = rest_get_server()->dispatch( $request );
