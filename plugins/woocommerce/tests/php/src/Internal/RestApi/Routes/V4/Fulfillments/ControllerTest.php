@@ -477,11 +477,10 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Guards the route-detection choice: the single-item route is detected from the URL (route)
-	 * params, not from has_param()/get_param() which also match query args. So pairing another
-	 * customer's order_id with a fulfillment_id the caller owns (both as query args) on the
-	 * collection route must still authorize against order_id and be rejected for a non-owner, rather
-	 * than letting the query fulfillment_id move authorization to the caller's own order.
+	 * The collection route authorizes against order_id only. Pairing another customer's order_id
+	 * with a fulfillment_id the caller owns (both as query args) must still be rejected for a
+	 * non-owner, rather than letting the query fulfillment_id move authorization to the caller's
+	 * own order.
 	 */
 	public function test_permission_check_customer_cannot_read_other_orders_collection_via_query_fulfillment_id() {
 		$attacker_user_id     = $this->factory->user->create( array( 'role' => 'customer' ) );

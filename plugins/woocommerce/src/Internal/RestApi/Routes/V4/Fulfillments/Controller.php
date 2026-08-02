@@ -118,18 +118,18 @@ class Controller extends AbstractController {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_fulfillment' ),
-					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
+					'permission_callback' => array( $this, 'check_permission_for_single_fulfillment' ),
 				),
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_fulfillment' ),
-					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
+					'permission_callback' => array( $this, 'check_permission_for_single_fulfillment' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_fulfillment' ),
-					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
+					'permission_callback' => array( $this, 'check_permission_for_single_fulfillment' ),
 					'args'                => array(
 						'notify_customer' => array(
 							'description' => __( 'Whether to notify the customer about the fulfillment update.', 'woocommerce' ),
@@ -296,54 +296,22 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Permission check for REST API endpoints, given the request method.
-	 * For all fulfillments methods that have an order_id, we need to be sure the user has permission to view the order.
-	 * For all other methods, we check if the user is logged in as admin and has the required capability.
+	 * Permission check for the collection and create endpoints.
+	 *
+	 * The collection endpoint is authorized against the order_id query argument, and the create
+	 * endpoint against the entity_id in the request body. A fulfillment_id query argument has no
+	 * effect on which order is authorized.
 	 *
 	 * @param WP_REST_Request $request The request for which the permission is checked.
 	 * @return bool|WP_Error True if the current user has the capability, otherwise an "Unauthorized" error or False if no error is available for the request method.
-	 *
-	 * @throws WP_Error If the URL contains an order, but the order does not exist.
 	 */
 	public function check_permission_for_fulfillments( WP_REST_Request $request ) {
 		// Fetch the order first if there's an order_id in the request.
 		$order = null;
 
-		// fulfillment_id is a route (path) parameter on the single-item endpoints only. Detect it via
-		// the URL params rather than has_param()/get_param(), which also match query-string args, so a
-		// stray ?fulfillment_id= on the collection route cannot change which order is authorized.
-		$url_params     = $request->get_url_params();
-		$is_single_item = isset( $url_params['fulfillment_id'] );
-
-		// Collection route: authorize against the order_id query arg.
-		if ( ! $is_single_item && $request->has_param( 'order_id' ) ) {
+		if ( $request->has_param( 'order_id' ) ) {
 			$order_id = (int) $request->get_param( 'order_id' );
 			$order    = wc_get_order( $order_id );
-		}
-
-		// Single-item routes: derive the order from the requested fulfillment so authorization targets
-		// the same order the handler acts on; any request-supplied order_id is ignored.
-		if ( ! $order && $is_single_item ) {
-			$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
-			if ( $fulfillment_id ) {
-				try {
-					$fulfillment = new Fulfillment( $fulfillment_id );
-					$order_id    = (int) $fulfillment->get_entity_id();
-					$order       = wc_get_order( $order_id );
-				} catch ( ApiException $ex ) {
-					return new WP_Error(
-						$ex->getErrorCode(),
-						$ex->getMessage(),
-						array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
-					);
-				} catch ( \Throwable $e ) {
-					return new WP_Error(
-						'woocommerce_rest_fulfillment_invalid_id',
-						$e->getMessage(),
-						array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
-					);
-				}
-			}
 		}
 
 		// If there's no order_id in the request, try to get it from the request body.
@@ -361,7 +329,60 @@ class Controller extends AbstractController {
 			$order    = wc_get_order( $order_id );
 		}
 
-		// If there's still no order, return an error.
+		return $this->check_order_access( $order, $request );
+	}
+
+	/**
+	 * Permission check for the single-fulfillment endpoints.
+	 *
+	 * The order to authorize against is derived from the requested fulfillment, read from the
+	 * fulfillment_id route placeholder, so it always matches the order the handler acts on. Any
+	 * request-supplied order_id is ignored.
+	 *
+	 * @param WP_REST_Request $request The request for which the permission is checked.
+	 * @return bool|WP_Error True if the current user has the capability, otherwise an "Unauthorized" error or False if no error is available for the request method.
+	 */
+	public function check_permission_for_single_fulfillment( WP_REST_Request $request ) {
+		$url_params     = $request->get_url_params();
+		$fulfillment_id = isset( $url_params['fulfillment_id'] ) ? (int) $url_params['fulfillment_id'] : 0;
+
+		if ( ! $fulfillment_id ) {
+			return new WP_Error(
+				'woocommerce_rest_fulfillment_invalid_id',
+				esc_html__( 'Invalid fulfillment ID.', 'woocommerce' ),
+				array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
+			);
+		}
+
+		try {
+			$fulfillment = new Fulfillment( $fulfillment_id );
+			$order       = wc_get_order( (int) $fulfillment->get_entity_id() );
+		} catch ( ApiException $ex ) {
+			return new WP_Error(
+				$ex->getErrorCode(),
+				$ex->getMessage(),
+				array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
+			);
+		} catch ( \Throwable $e ) {
+			return new WP_Error(
+				'woocommerce_rest_fulfillment_invalid_id',
+				$e->getMessage(),
+				array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
+			);
+		}
+
+		return $this->check_order_access( $order, $request );
+	}
+
+	/**
+	 * Check whether the current user may access fulfillments of the given order.
+	 *
+	 * @param \WC_Order|false|null $order   The order the request was authorized against, or a falsy value if none was resolved.
+	 * @param WP_REST_Request      $request The request for which the permission is checked.
+	 * @return bool|WP_Error True if the current user has the capability, otherwise an "Unauthorized" error or False if no error is available for the request method.
+	 */
+	private function check_order_access( $order, WP_REST_Request $request ) {
+		// If there's no order, return an error.
 		if ( ! $order ) {
 			return new WP_Error(
 				'woocommerce_rest_order_id_required',
@@ -376,7 +397,7 @@ class Controller extends AbstractController {
 			return true;
 		}
 
-		// Check if the order exists, and if the current user is the owner of the order, and the request is a read request.
+		// Check if the current user is the owner of the order, and the request is a read request.
 		// Guest order fulfillments are rendered server-side via templates, so they don't need REST API access.
 		// The get_current_user_id() > 0 check prevents unauthenticated users from accessing guest orders
 		// where both get_current_user_id() and get_customer_id() would return 0.
