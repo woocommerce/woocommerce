@@ -518,6 +518,39 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The order owner only gets read access on the single-item route: update and delete
+	 * requests on their own fulfillment are refused.
+	 */
+	public function test_permission_check_customer_cannot_write_own_single_fulfillment() {
+		wp_set_current_user( self::$customer_user_id );
+
+		$update_request = new WP_REST_Request( 'PUT', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$update_request->set_header( 'Content-Type', 'application/json' );
+		$update_request->set_body( wp_json_encode( $this->get_test_fulfillment_data() ) );
+		$update_response = rest_get_server()->dispatch( $update_request );
+		$this->assertSame( 403, $update_response->get_status() );
+
+		$delete_request  = new WP_REST_Request( 'DELETE', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$delete_response = rest_get_server()->dispatch( $delete_request );
+		$this->assertSame( 403, $delete_response->get_status() );
+	}
+
+	/**
+	 * A zero fulfillment ID matches the single-item route regex and must be rejected by the
+	 * permission callback before any lookup.
+	 */
+	public function test_permission_check_zero_fulfillment_id() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/0' );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'woocommerce_rest_fulfillment_invalid_id', $data['code'] );
+	}
+
+	/**
 	 * Test schema validation for get fulfillments
 	 */
 	public function test_get_fulfillments_schema() {
