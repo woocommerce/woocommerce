@@ -206,6 +206,7 @@ class Personalizer {
 
 				$value = $tag->execute_callback( $this->get_callback_context( self::RENDERING_CONTEXT_HREF ), $token['arguments'] );
 				$value = $this->replace_link_href( $href, $tag->get_token(), $value );
+				$value = $this->intercept_value( $value, $href, self::RENDERING_CONTEXT_HREF );
 				if ( '' !== $value ) {
 					$content_processor->set_attribute( 'href', $value );
 					$content_processor->remove_attribute( 'data-link-href' );
