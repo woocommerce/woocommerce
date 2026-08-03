@@ -9,11 +9,17 @@ jQuery( function( $ ) {
 	 * WCOrdersTable class.
 	 */
 	var WCOrdersTable = function() {
+
+		const SELECTORS = [
+			// WordPress 7.1 renders primary order cells as th instead of td.
+			".post-type-shop_order .wp-list-table tbody :is(td.check-column, th.check-column)",
+			".woocommerce_page_wc-orders .wp-list-table.orders tbody :is(td.check-column, th.check-column)"
+		]
+
 		$( document )
 			.on(
 				'click',
-				// WordPress 7.1 renders primary order cells as th instead of td.
-				'.post-type-shop_order .wp-list-table tbody td, .woocommerce_page_wc-orders .wp-list-table.orders tbody :is(td, th)',
+				SELECTORS.join( ', ' ),
 				this.onRowClick
 			)
 			.on( 'click', '.order-preview:not(.disabled)', this.onPreview );
