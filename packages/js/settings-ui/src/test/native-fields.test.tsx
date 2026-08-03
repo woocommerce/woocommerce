@@ -419,6 +419,87 @@ describe( 'NativeSettingsField', () => {
 		} );
 	} );
 
+	describe( 'select fields', () => {
+		it( 'renders a public select control and propagates scalar values', () => {
+			const onChange = jest.fn();
+			const container = render(
+				<NativeSettingsField
+					{ ...makeProps(
+						{
+							id: 'wc_test_select',
+							label: 'Inventory format',
+							description: 'Choose how inventory is displayed.',
+							type: 'select',
+							options: [
+								{ value: 'one', label: 'One' },
+								{ value: 'two', label: 'Two' },
+							],
+						},
+						'one',
+						onChange
+					) }
+				/>
+			);
+
+			const select = container.querySelector( 'select' );
+			expect( select ).toBeInstanceOf( HTMLSelectElement );
+			expect( select ).toHaveValue( 'one' );
+			expect( container.textContent ).toContain( 'Inventory format' );
+			expect( container.textContent ).toContain(
+				'Choose how inventory is displayed.'
+			);
+
+			act( () => {
+				if ( select instanceof HTMLSelectElement ) {
+					select.value = 'two';
+					select.dispatchEvent(
+						new Event( 'change', {
+							bubbles: true,
+							cancelable: true,
+						} )
+					);
+				}
+			} );
+
+			expect( onChange ).toHaveBeenCalledWith( 'two' );
+		} );
+
+		it.each( [
+			[ 'an empty option list', [], '' ],
+			[
+				'an unmatched stored value',
+				[ { label: 'One', value: 'one' } ],
+				'legacy',
+			],
+		] )(
+			'keeps the labeled control for %s',
+			( _scenario, options, value ) => {
+				const container = render(
+					<NativeSettingsField
+						{ ...makeProps(
+							{
+								id: 'wc_test_select',
+								label: 'Test select',
+								type: 'select',
+								options,
+							},
+							value
+						) }
+					/>
+				);
+
+				const select = container.querySelector( 'select' );
+				expect( select ).toBeInstanceOf( HTMLSelectElement );
+				expect( select ).toHaveAccessibleName( 'Test select' );
+				expect( select ).toHaveValue( value );
+				expect( select?.selectedOptions[ 0 ] ).toHaveTextContent(
+					'Select'
+				);
+				expect( select?.selectedOptions[ 0 ] ).toBeDisabled();
+			}
+		);
+	} );
+
 	describe( 'text fields', () => {
 		it( 'renders text fields without spin buttons', () => {
 			const container = render(
