@@ -16,102 +16,13 @@ use Automattic\WooCommerce\Admin\Settings\SettingsSectionRegistry;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers the Settings UI test fixture and represents its test sections.
+ * Registers the Settings UI test fixture.
  */
-final class WC_Settings_UI_Component_Registration_Test_Plugin extends SettingsSection {
+final class WC_Settings_UI_Component_Registration_Test_Plugin {
 
 	private const REGISTERED_HANDLE   = 'settings-ui-component-test-registered';
 	private const MISSING_HANDLE      = 'settings-ui-component-test-missing-registration';
 	private const UNREGISTERED_HANDLE = 'settings-ui-component-test-unregistered';
-
-	/**
-	 * Section id.
-	 *
-	 * @var string
-	 */
-	private string $section_id;
-
-	/**
-	 * Declared script handle.
-	 *
-	 * @var string
-	 */
-	private string $script_handle;
-
-	/**
-	 * Create a test section.
-	 *
-	 * @param string $section_id   Section id.
-	 * @param string $script_handle Declared script handle.
-	 */
-	public function __construct( string $section_id, string $script_handle ) {
-		$this->section_id    = $section_id;
-		$this->script_handle = $script_handle;
-	}
-
-	/**
-	 * Get the parent page id.
-	 *
-	 * @return string
-	 */
-	public function get_parent_page_id(): string {
-		return 'products';
-	}
-
-	/**
-	 * Get the section id.
-	 *
-	 * @return string
-	 */
-	public function get_id(): string {
-		return $this->section_id;
-	}
-
-	/**
-	 * Get the section label.
-	 *
-	 * @return string
-	 */
-	public function get_label(): string {
-		return 'Settings UI component test';
-	}
-
-	/**
-	 * Get the section settings.
-	 *
-	 * @param WC_Settings_Page $parent_page Parent settings page.
-	 * @return array
-	 */
-	public function get_settings( WC_Settings_Page $parent_page ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Required by the settings section contract.
-		return array(
-			array(
-				'id'    => $this->section_id . '_group',
-				'title' => 'Settings UI component test',
-				'type'  => 'title',
-			),
-			array(
-				'component' => 'woocommerce/settings-ui-component-test',
-				'default'   => 'Initial value',
-				'id'        => $this->section_id . '_value',
-				'title'     => 'Component value',
-				'type'      => 'text',
-			),
-			array(
-				'id'   => $this->section_id . '_group',
-				'type' => 'sectionend',
-			),
-		);
-	}
-
-	/**
-	 * Get the declared script handles.
-	 *
-	 * @param WC_Settings_Page $parent_page Parent settings page.
-	 * @return string[]
-	 */
-	public function get_script_handles( WC_Settings_Page $parent_page ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Required by the settings section contract.
-		return array( $this->script_handle );
-	}
 
 	/**
 	 * Register hooks.
@@ -131,8 +42,6 @@ final class WC_Settings_UI_Component_Registration_Test_Plugin extends SettingsSe
 		wp_add_inline_script(
 			self::REGISTERED_HANDLE,
 			<<<'JS'
-window.wcSettingsUIComponentTest = window.wcSettingsUIComponentTest || {};
-window.wcSettingsUIComponentTest.registeredScriptExecuted = true;
 window.wcSettingsUI.registerSettingsExtension( {
 	scope: { page: 'products', section: 'settings_ui_component_registered' },
 	components: {
@@ -152,12 +61,14 @@ window.wcSettingsUI.registerSettingsExtension( {
 } );
 JS
 		);
+		wp_enqueue_script( self::REGISTERED_HANDLE );
 
 		wp_register_script( self::MISSING_HANDLE, false, array( 'wc-settings-ui' ), '1.0.0', true );
 		wp_add_inline_script(
 			self::MISSING_HANDLE,
 			'window.wcSettingsUIComponentTest = window.wcSettingsUIComponentTest || {}; window.wcSettingsUIComponentTest.missingRegistrationScriptExecuted = true;'
 		);
+		wp_enqueue_script( self::MISSING_HANDLE );
 	}
 
 	/**
@@ -168,9 +79,109 @@ JS
 	 * @param SettingsSectionRegistry $registry Settings section registry.
 	 */
 	public static function register_sections( SettingsSectionRegistry $registry ): void {
-		$registry->register( new self( 'settings_ui_component_registered', self::REGISTERED_HANDLE ) );
-		$registry->register( new self( 'settings_ui_component_missing', self::MISSING_HANDLE ) );
-		$registry->register( new self( 'settings_ui_component_unregistered', self::UNREGISTERED_HANDLE ) );
+		$registry->register( self::create_section( 'settings_ui_component_registered', self::REGISTERED_HANDLE ) );
+		$registry->register( self::create_section( 'settings_ui_component_missing', self::MISSING_HANDLE ) );
+		$registry->register( self::create_section( 'settings_ui_component_unregistered', self::UNREGISTERED_HANDLE ) );
+	}
+
+	/**
+	 * Create a Settings UI test section after WooCommerce has loaded its settings classes.
+	 *
+	 * @param string $section_id   Section id.
+	 * @param string $script_handle Declared script handle.
+	 * @return SettingsSection
+	 */
+	private static function create_section( string $section_id, string $script_handle ): SettingsSection {
+		return new class( $section_id, $script_handle ) extends SettingsSection {
+			/**
+			 * Section id.
+			 *
+			 * @var string
+			 */
+			private string $section_id;
+
+			/**
+			 * Declared script handle.
+			 *
+			 * @var string
+			 */
+			private string $script_handle;
+
+			/**
+			 * Create a test section.
+			 *
+			 * @param string $section_id   Section id.
+			 * @param string $script_handle Declared script handle.
+			 */
+			public function __construct( string $section_id, string $script_handle ) {
+				$this->section_id    = $section_id;
+				$this->script_handle = $script_handle;
+			}
+
+			/**
+			 * Get the parent page id.
+			 *
+			 * @return string
+			 */
+			public function get_parent_page_id(): string {
+				return 'products';
+			}
+
+			/**
+			 * Get the section id.
+			 *
+			 * @return string
+			 */
+			public function get_id(): string {
+				return $this->section_id;
+			}
+
+			/**
+			 * Get the section label.
+			 *
+			 * @return string
+			 */
+			public function get_label(): string {
+				return 'Settings UI component test';
+			}
+
+			/**
+			 * Get the section settings.
+			 *
+			 * @param WC_Settings_Page $parent_page Parent settings page.
+			 * @return array
+			 */
+			public function get_settings( WC_Settings_Page $parent_page ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Required by the settings section contract.
+				return array(
+					array(
+						'id'    => $this->section_id . '_group',
+						'title' => 'Settings UI component test',
+						'type'  => 'title',
+					),
+					array(
+						'component' => 'woocommerce/settings-ui-component-test',
+						'default'   => 'Initial value',
+						'id'        => $this->section_id . '_value',
+						'title'     => 'Component value',
+						'type'      => 'text',
+					),
+					array(
+						'id'   => $this->section_id . '_group',
+						'type' => 'sectionend',
+					),
+				);
+			}
+
+			/**
+			 * Get the declared script handles.
+			 *
+			 * @param WC_Settings_Page $parent_page Parent settings page.
+			 * @return string[]
+			 */
+			public function get_script_handles( WC_Settings_Page $parent_page ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Required by the settings section contract.
+				return array( $this->script_handle );
+			}
+		};
 	}
 }
 

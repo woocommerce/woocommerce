@@ -99,8 +99,12 @@ const expectUnsafeMarkupRemoved = ( container: HTMLElement ) => {
 };
 
 describe( 'settings HTML rendering', () => {
+	const originalUrl = window.location.href;
+
 	afterEach( () => {
 		__resetRegistry();
+		jest.restoreAllMocks();
+		window.history.replaceState( {}, '', originalUrl );
 	} );
 
 	it( 'renders settings as centered sections and cards', () => {
@@ -200,15 +204,12 @@ describe( 'settings HTML rendering', () => {
 	} );
 
 	it( 'fails closed when an explicit component is not registered', () => {
-		const originalUrl = window.location.href;
 		window.history.replaceState(
 			{},
 			'',
 			'/wp-admin/admin.php?page=wc-settings&tab=products&section=advanced&preserved=yes#wc-settings'
 		);
-		const consoleErrorSpy = jest
-			.spyOn( console, 'error' )
-			.mockImplementation( () => undefined );
+		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
 		const schema: SettingsUISchema = {
 			id: 'products',
 			title: 'Products',
@@ -260,8 +261,6 @@ describe( 'settings HTML rendering', () => {
 
 		act( () => root.unmount() );
 		container.remove();
-		consoleErrorSpy.mockRestore();
-		window.history.replaceState( {}, '', originalUrl );
 	} );
 
 	it( 'contains errors thrown by registered field components', () => {
@@ -274,9 +273,7 @@ describe( 'settings HTML rendering', () => {
 				'test/throwing-component': ThrowingField,
 			},
 		} );
-		const consoleErrorSpy = jest
-			.spyOn( console, 'error' )
-			.mockImplementation( () => undefined );
+		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
 		const schema: SettingsUISchema = {
 			id: 'test-page',
 			title: 'Test page',
@@ -313,7 +310,6 @@ describe( 'settings HTML rendering', () => {
 
 		act( () => root.unmount() );
 		container.remove();
-		consoleErrorSpy.mockRestore();
 	} );
 
 	it( 'sanitizes native field descriptions before rendering', () => {

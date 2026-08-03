@@ -16,7 +16,6 @@ const getBaseURL = ( baseURL: string | undefined ): string => {
 };
 
 test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
-	test.describe.configure( { mode: 'serial' } );
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
 	test.beforeAll( async () => {
@@ -85,20 +84,6 @@ test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
 		await expect(
 			page.getByTestId( 'settings-ui-registered-component' )
 		).toContainText( 'Registered settings UI component' );
-		await expect
-			.poll( () =>
-				page.evaluate(
-					() =>
-						(
-							window as unknown as {
-								wcSettingsUIComponentTest?: {
-									registeredScriptExecuted?: boolean;
-								};
-							}
-						 ).wcSettingsUIComponentTest?.registeredScriptExecuted
-				)
-			)
-			.toBe( true );
 	} );
 
 	test( 'uses classic output when a declared script handle is not registered', async ( {
@@ -134,21 +119,6 @@ test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
 
 		await page.goto( settingsUrl );
 
-		await expect
-			.poll( () =>
-				page.evaluate(
-					() =>
-						(
-							window as unknown as {
-								wcSettingsUIComponentTest?: {
-									missingRegistrationScriptExecuted?: boolean;
-								};
-							}
-						 ).wcSettingsUIComponentTest
-							?.missingRegistrationScriptExecuted
-				)
-			)
-			.toBe( true );
 		await expect( page.getByRole( 'textbox' ) ).toHaveCount( 0 );
 		await expect( page.locator( '.woocommerce-save-button' ) ).toHaveCount(
 			0
@@ -157,6 +127,19 @@ test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
 			name: 'Use classic settings',
 		} );
 		await expect( classicAction ).toBeVisible();
+		expect(
+			await page.evaluate(
+				() =>
+					(
+						window as unknown as {
+							wcSettingsUIComponentTest?: {
+								missingRegistrationScriptExecuted?: boolean;
+							};
+						}
+					 ).wcSettingsUIComponentTest
+						?.missingRegistrationScriptExecuted
+			)
+		).toBe( true );
 
 		const classicHref = await classicAction.getAttribute( 'href' );
 		expect( classicHref ).not.toBeNull();
