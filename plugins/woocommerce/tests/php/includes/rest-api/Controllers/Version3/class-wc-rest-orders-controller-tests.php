@@ -1215,11 +1215,26 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox PUT /orders with a product_id-only payload targeting the variable parent demotes the item and clears variation_id.
+	 * @testdox PUT /orders with an unchanged parent product_id preserves the variation when variation_id is omitted.
 	 */
-	public function test_update_line_item_to_variable_parent_clears_variation_id(): void {
+	public function test_update_line_item_with_unchanged_parent_preserves_omitted_variation_id(): void {
 		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
 		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+		$item                       = new WC_Order_Item_Product( $item_id );
+		$item->set_name( 'Historical variation line item' );
+		$item->save();
+
+		$product_filter_ran             = false;
+		$product_filter_ran_before_save = false;
+		$product_filter                 = static function ( $product ) use ( &$product_filter_ran ) {
+			$product_filter_ran = true;
+			return $product;
+		};
+		$before_save_hook               = static function () use ( &$product_filter_ran, &$product_filter_ran_before_save ) {
+			$product_filter_ran_before_save = $product_filter_ran;
+		};
+		add_filter( 'woocommerce_order_item_product', $product_filter );
+		add_action( 'woocommerce_rest_set_order_item', $before_save_hook, 10, 0 );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_header( 'content-type', 'application/json' );
@@ -1236,11 +1251,57 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$response = $this->server->dispatch( $request );
+		try {
+			$response = $this->server->dispatch( $request );
+		} finally {
+			remove_filter( 'woocommerce_order_item_product', $product_filter );
+			remove_action( 'woocommerce_rest_set_order_item', $before_save_hook, 10 );
+		}
 		$this->assertSame( 200, $response->get_status(), 'A product_id-only payload targeting the variable parent succeeds with no error.' );
+		$this->assertTrue( $product_filter_ran_before_save, 'Product filters should run before the REST set-item hook.' );
 
-		$reloaded = new WC_Order_Item_Product( $item_id );
-		$this->assertSame( 0, $reloaded->get_variation_id(), 'Omitting variation_id demotes the item to its parent and clears variation_id.' );
-		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the variable parent.' );
+		$response_item = $response->get_data()['line_items'][0];
+		$reloaded      = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'Omitting variation_id should preserve the existing variation.' );
+		$this->assertSame( $variation->get_id(), (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The persisted _variation_id meta should remain unchanged.' );
+		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'get_product() should continue to resolve to the variation.' );
+		$this->assertSame( $parent->get_id(), $response_item['product_id'], 'The response should retain the variable parent product ID.' );
+		$this->assertSame( $variation->get_id(), $response_item['variation_id'], 'The response should retain the variation ID.' );
+		$this->assertSame( 'Historical variation line item', $reloaded->get_name(), 'Omitted item fields should retain their historical values.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with an explicit zero variation_id deliberately switches the line item to its variable parent.
+	 */
+	public function test_update_line_item_with_explicit_zero_variation_id_switches_to_parent(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'line_items' => array(
+						array(
+							'id'           => $item_id,
+							'product_id'   => $parent->get_id(),
+							'variation_id' => 0,
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'An explicit zero variation_id should be accepted.' );
+
+		$response_item = $response->get_data()['line_items'][0];
+		$reloaded      = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'An explicit zero variation_id should deliberately clear the variation.' );
+		$this->assertSame( 0, (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The explicit zero variation ID should be persisted.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the variable parent after explicit demotion.' );
+		$this->assertSame( $parent->get_id(), $response_item['product_id'], 'The response should identify the variable parent.' );
+		$this->assertSame( 0, $response_item['variation_id'], 'The response should expose the explicit variation demotion.' );
 	}
 }

@@ -938,10 +938,23 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
-		$item    = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
-		$product = wc_get_product( $this->get_product_id( $posted, $action ) );
+		$item = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
+		/**
+		 * Product line item being updated.
+		 *
+		 * @var WC_Order_Item_Product $product_item Product line item being updated.
+		 */
+		$product_item = $item;
 
-		if ( $product && $product !== $item->get_product() ) {
+		$preserve_current_variation = 'update' === $action
+			&& $product_item->get_variation_id()
+			&& empty( $posted['sku'] )
+			&& array_key_exists( 'product_id', $posted )
+			&& ! array_key_exists( 'variation_id', $posted )
+			&& (int) $posted['product_id'] === $product_item->get_product_id();
+		$product                    = $preserve_current_variation ? $product_item->get_product() : wc_get_product( $this->get_product_id( $posted, $action ) );
+
+		if ( ! $preserve_current_variation && $product instanceof WC_Product && $product !== $item->get_product() ) {
 			$item->set_product( $product );
 
 			if ( 'create' === $action ) {

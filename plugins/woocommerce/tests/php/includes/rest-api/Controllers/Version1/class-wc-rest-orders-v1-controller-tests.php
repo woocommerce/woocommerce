@@ -49,6 +49,25 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Creates an order containing a variation line item.
+	 *
+	 * @return array{WC_Product_Variable, WC_Product_Variation, WC_Order, WC_Order_Item_Product}
+	 */
+	private function create_order_with_variation_line_item(): array {
+		$parent    = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$order     = new WC_Order();
+		$item      = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+		$item->set_quantity( 1 );
+		$item->set_total( 10 );
+		$order->add_item( $item );
+		$order->save();
+
+		return array( $parent, $variation, $order, $item );
+	}
+
+	/**
 	 * Test that an order can be fetched via REST API V1 without triggering a deprecation notice.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/39006
@@ -121,5 +140,106 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 400, $response->get_status(), 'The order was not updated, as the specified customer does not belong to the blog.' );
 		$this->assertEquals( 'woocommerce_rest_invalid_customer_id', $response->get_data()['code'], 'The returned error indicates the customer ID was invalid.' );
+	}
+
+	/**
+	 * @testdox Updating a variation line item with its unchanged parent product_id preserves an omitted variation_id.
+	 */
+	public function test_update_line_item_with_unchanged_parent_preserves_omitted_variation_id(): void {
+		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
+		$item->set_name( 'Historical variation line item' );
+		$item->save();
+
+		$product_filter_ran             = false;
+		$product_filter_ran_before_save = false;
+		$product_filter                 = static function ( $product ) use ( &$product_filter_ran ) {
+			$product_filter_ran = true;
+			return $product;
+		};
+		$before_save_hook               = static function () use ( &$product_filter_ran, &$product_filter_ran_before_save ) {
+			$product_filter_ran_before_save = $product_filter_ran;
+		};
+		add_filter( 'woocommerce_order_item_product', $product_filter );
+		add_action( 'woocommerce_rest_set_order_item', $before_save_hook, 10, 0 );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'         => $item->get_id(),
+						'product_id' => $parent->get_id(),
+					),
+				),
+			)
+		);
+
+		try {
+			$response = $this->server->dispatch( $request );
+		} finally {
+			remove_filter( 'woocommerce_order_item_product', $product_filter );
+			remove_action( 'woocommerce_rest_set_order_item', $before_save_hook, 10 );
+		}
+		$this->assertSame( 200, $response->get_status(), 'The partial update should succeed.' );
+		$this->assertTrue( $product_filter_ran_before_save, 'Product filters should run before the REST set-item hook.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'Omitting variation_id should preserve the existing variation.' );
+		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'get_product() should continue to resolve to the variation.' );
+		$this->assertSame( 'Historical variation line item', $reloaded->get_name(), 'Omitted item fields should retain their historical values.' );
+	}
+
+	/**
+	 * @testdox Updating a variation line item with an explicit zero variation_id switches it to the parent.
+	 */
+	public function test_update_line_item_with_explicit_zero_variation_id_switches_to_parent(): void {
+		list( $parent, , $order, $item ) = $this->create_order_with_variation_line_item();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'           => $item->get_id(),
+						'product_id'   => $parent->get_id(),
+						'variation_id' => 0,
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'The explicit variation demotion should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'An explicit zero variation_id should clear the existing variation.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the variable parent.' );
+	}
+
+	/**
+	 * @testdox Updating a variation line item to a different simple product clears variation_id.
+	 */
+	public function test_update_line_item_to_simple_product_clears_variation_id(): void {
+		list( , , $order, $item ) = $this->create_order_with_variation_line_item();
+		$simple                   = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'         => $item->get_id(),
+						'product_id' => $simple->get_id(),
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'Switching to a simple product should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching to a simple product should clear variation_id.' );
+		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the new simple product.' );
 	}
 }
