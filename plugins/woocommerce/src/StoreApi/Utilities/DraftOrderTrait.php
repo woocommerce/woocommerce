@@ -61,7 +61,12 @@ trait DraftOrderTrait {
 		}
 
 		// Pending and failed orders can be retried if the cart hasn't changed.
-		if ( $order_object->needs_payment() && $order_object->has_cart_hash( wc()->cart->get_cart_hash() ) ) {
+		// We check the status explicitly (rather than using needs_payment()) so that
+		// zero-cost orders (e.g. subscription renewals with a 100% discount) are
+		// also eligible for retry.
+		$valid_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order_object );
+
+		if ( $order_object->has_status( $valid_statuses ) && $order_object->has_cart_hash( wc()->cart->get_cart_hash() ) ) {
 			return true;
 		}
 

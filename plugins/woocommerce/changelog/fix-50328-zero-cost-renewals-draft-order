@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow zero-cost order retries by checking order status directly instead of needs_payment(), which requires total > 0.
