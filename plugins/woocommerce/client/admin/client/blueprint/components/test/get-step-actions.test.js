@@ -70,6 +70,18 @@ describe( 'getStepActions', () => {
 		] );
 	} );
 
+	it( 'should report unrecognised steps named after object prototype properties', () => {
+		const steps = [
+			{ step: '__proto__' },
+			{ step: 'constructor' },
+			{ step: 'toString' },
+		];
+
+		expect( getStepActions( steps ) ).toEqual( [
+			'Run 3 other steps (__proto__, constructor, toString)',
+		] );
+	} );
+
 	it( 'should tolerate an empty or malformed step list', () => {
 		expect( getStepActions( [] ) ).toEqual( [] );
 		expect(

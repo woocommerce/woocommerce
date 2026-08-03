@@ -87,25 +87,25 @@ const STEP_ACTIONS: Record< string, ( count: number ) => string > = {
  * @return string[] a list of descriptions, ready to show as a list
  */
 export const getStepActions = ( steps: BlueprintStep[] ): string[] => {
-	const counts = steps.reduce< Record< string, number > >( ( acc, step ) => {
+	const counts = steps.reduce< Map< string, number > >( ( acc, step ) => {
 		const name = step?.step;
 		if ( name && ! SETTINGS_STEPS.includes( name ) ) {
-			acc[ name ] = ( acc[ name ] || 0 ) + 1;
+			acc.set( name, ( acc.get( name ) || 0 ) + 1 );
 		}
 		return acc;
-	}, {} );
+	}, new Map() );
 
 	const actions = Object.keys( STEP_ACTIONS )
-		.filter( ( name ) => counts[ name ] )
-		.map( ( name ) => STEP_ACTIONS[ name ]( counts[ name ] ) );
+		.filter( ( name ) => counts.has( name ) )
+		.map( ( name ) => STEP_ACTIONS[ name ]( counts.get( name ) || 0 ) );
 
-	const unrecognized = Object.keys( counts )
-		.filter( ( name ) => ! STEP_ACTIONS[ name ] )
+	const unrecognized = Array.from( counts.keys() )
+		.filter( ( name ) => ! Object.hasOwn( STEP_ACTIONS, name ) )
 		.sort();
 
 	if ( unrecognized.length ) {
 		const total = unrecognized.reduce(
-			( sum, name ) => sum + counts[ name ],
+			( sum, name ) => sum + ( counts.get( name ) || 0 ),
 			0
 		);
 

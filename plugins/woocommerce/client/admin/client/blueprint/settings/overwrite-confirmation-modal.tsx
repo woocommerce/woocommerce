@@ -22,7 +22,9 @@ export const OverwriteConfirmationModal = ( {
 	overwrittenItems,
 	additionalActions = [],
 }: OverwriteConfirmationModalProps ) => {
-	if ( ! isOpen ) return null;
+	if ( ! isOpen ) {
+		return null;
+	}
 	return (
 		<Modal
 			title={ __( 'Review what this Blueprint will do', 'woocommerce' ) }
