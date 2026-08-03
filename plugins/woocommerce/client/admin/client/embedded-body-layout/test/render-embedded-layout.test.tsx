@@ -65,6 +65,11 @@ describe( 'embedded-layout', () => {
 		expect(
 			mockEmbeddedRoot.classList.contains( 'is-embed-loading' )
 		).toBeFalsy();
+		const noticeLayout = document.querySelector(
+			'#wpbody-content > .woocommerce-layout'
+		);
+		expect( noticeLayout ).toBeInTheDocument();
+		expect( noticeLayout?.nextElementSibling ).toHaveClass( 'wrap' );
 		expect( result ).toBeTruthy();
 	} );
 
