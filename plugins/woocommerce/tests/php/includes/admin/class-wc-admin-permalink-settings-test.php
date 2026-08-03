@@ -78,10 +78,8 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	 *
 	 * WordPress's own Permalinks page redirects after processing the POST (see
 	 * `wp-admin/options-permalink.php`), so a save and its resulting render never happen on the
-	 * same `WC_Admin_Permalink_Settings` instance in production: the save-time instance reads
-	 * `$this->permalinks` in its constructor before writing the new value, and is discarded; the
-	 * subsequent GET request (post-redirect) constructs a fresh instance that reads back the
-	 * now-persisted value. Mirror that with two separate instantiations rather than reusing one.
+	 * same `WC_Admin_Permalink_Settings` instance in production. Mirror that with two separate
+	 * instantiations rather than reusing one.
 	 *
 	 * @param string      $product_permalink           Posted `product_permalink` radio value.
 	 * @param string|null $product_permalink_structure Posted `product_permalink_structure` text value, if any.
@@ -101,6 +99,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 			unset( $_POST['product_permalink_structure'] );
 		}
 
+		// First request: the save-time instance persists the new structure and is discarded.
 		new WC_Admin_Permalink_Settings();
 
 		unset(
@@ -112,11 +111,19 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 			$_POST['product_permalink'],
 			$_POST['product_permalink_structure']
 		);
+
+		// Second request (post-redirect): a fresh instance reads back the now-persisted value.
 		$sut = new WC_Admin_Permalink_Settings();
 
 		ob_start();
-		$sut->settings();
-		return (string) ob_get_clean();
+		try {
+			$sut->settings();
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		return $output;
 	}
 
 	/**
@@ -126,16 +133,24 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	 * @param string $expected_id Either 'default', 'shop_base', 'shop_base_category', or 'custom'.
 	 */
 	private function assert_only_radio_checked( string $html, string $expected_id ): void {
-		preg_match_all( '/<input name="product_permalink"[^>]*>/', $html, $matches );
-		$radios = $matches[0];
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( $html );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
 
-		$this->assertCount( 4, $radios, 'Expected exactly 4 product_permalink radios in the rendered markup.' );
+		$this->assertTrue( $loaded, 'The permalink settings output should be valid enough for DOM parsing.' );
+
+		$xpath  = new DOMXPath( $document );
+		$radios = $xpath->query( '//input[@name="product_permalink"]' );
+
+		$this->assertSame( 4, $radios->length, 'Expected exactly 4 product_permalink radios in the rendered markup.' );
 
 		$labels         = array( 'default', 'shop_base', 'shop_base_category', 'custom' );
 		$checked_labels = array();
 
-		foreach ( $radios as $index => $radio_html ) {
-			if ( false !== strpos( $radio_html, "checked='checked'" ) ) {
+		foreach ( $radios as $index => $radio ) {
+			if ( $radio->hasAttribute( 'checked' ) ) {
 				$checked_labels[] = $labels[ $index ];
 			}
 		}
@@ -143,7 +158,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array( $expected_id ),
 			$checked_labels,
-			"Expected only the '{$expected_id}' radio to be checked. Rendered radios:\n" . implode( "\n", $radios )
+			"Expected only the '{$expected_id}' radio to be checked."
 		);
 	}
 
