@@ -35,6 +35,13 @@ class SettingsUIRequestContext {
 	private const DRILL_DOWN_TABS = array( 'checkout' );
 
 	/**
+	 * Query argument used to request classic settings for the current request.
+	 *
+	 * @var string
+	 */
+	private const CLASSIC_REQUEST_QUERY_ARG = 'wc_settings_ui';
+
+	/**
 	 * Context instances keyed by settings page object and section.
 	 *
 	 * @var array<string, SettingsUIRequestContext>
@@ -112,6 +119,13 @@ class SettingsUIRequestContext {
 	private bool $schema_failed = false;
 
 	/**
+	 * Developer-facing schema failure reason.
+	 *
+	 * @var string
+	 */
+	private string $schema_failure_reason = '';
+
+	/**
 	 * Constructor.
 	 *
 	 * @param \WC_Settings_Page $settings_page Settings page.
@@ -120,7 +134,7 @@ class SettingsUIRequestContext {
 	private function __construct( \WC_Settings_Page $settings_page, string $section ) {
 		$this->settings_page    = $settings_page;
 		$this->section          = $section;
-		$this->settings_ui_page = self::resolve_settings_ui_page( $settings_page, $section );
+		$this->settings_ui_page = self::is_classic_request() ? null : self::resolve_settings_ui_page( $settings_page, $section );
 	}
 
 	/**
@@ -129,7 +143,7 @@ class SettingsUIRequestContext {
 	 * @return SettingsUIRequestContext|null
 	 */
 	public static function get_current(): ?SettingsUIRequestContext {
-		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'settings-ui' ) || ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( self::is_classic_request() || ! PageController::is_settings_page() || ! Features::is_enabled( 'settings-ui' ) || ! current_user_can( 'manage_woocommerce' ) ) {
 			return null;
 		}
 
@@ -342,6 +356,10 @@ class SettingsUIRequestContext {
 	 * @return array|null
 	 */
 	public function get_schema(): ?array {
+		if ( $this->has_script_handles_failed() ) {
+			return null;
+		}
+
 		if ( ! $this->schema_resolved ) {
 			$this->resolve_schema();
 		}
@@ -360,6 +378,40 @@ class SettingsUIRequestContext {
 		}
 
 		return $this->schema_failed;
+	}
+
+	/**
+	 * Get the schema failure reason.
+	 *
+	 * @return string
+	 *
+	 * @since 11.1.0
+	 */
+	public function get_schema_failure_reason(): string {
+		if ( ! $this->schema_resolved ) {
+			$this->resolve_schema();
+		}
+
+		return '' !== $this->schema_failure_reason
+			? $this->schema_failure_reason
+			: __( 'Settings UI schema could not be resolved.', 'woocommerce' );
+	}
+
+	/**
+	 * Whether the current request explicitly asks for classic settings.
+	 *
+	 * @return bool
+	 */
+	private static function is_classic_request(): bool {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only request override that changes rendering only.
+		if ( ! isset( $_GET[ self::CLASSIC_REQUEST_QUERY_ARG ] ) ) {
+			return false;
+		}
+
+		$rendering_mode = wp_unslash( $_GET[ self::CLASSIC_REQUEST_QUERY_ARG ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Type checked and sanitized below.
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		return is_string( $rendering_mode ) && 'classic' === sanitize_key( $rendering_mode );
 	}
 
 	/**
@@ -443,20 +495,65 @@ class SettingsUIRequestContext {
 		}
 
 		try {
-			$this->script_handles = self::filter_script_handles( $this->settings_ui_page->get_script_handles( $this->section ) );
+			$this->script_handles = self::validate_and_enqueue_script_handles( $this->settings_ui_page->get_script_handles( $this->section ) );
 		} catch ( \Throwable $e ) {
 			$this->script_handles_failed = true;
 
 			self::log_resolution_failure( 'Settings UI script handles', $this->get_page_id(), $this->section, $e, __METHOD__ );
 
-			if ( $e instanceof \Exception ) {
-				$this->script_handles_failure_reason = sprintf(
-					/* translators: %s: exception message. */
-					__( 'Settings UI script handles could not be resolved: %s', 'woocommerce' ),
-					$e->getMessage()
+			$this->script_handles_failure_reason = sprintf(
+				/* translators: %s: failure reason. */
+				__( 'Settings UI script handles could not be resolved: %s', 'woocommerce' ),
+				self::sanitize_failure_reason( $e )
+			);
+		}
+	}
+
+	/**
+	 * Validate and enqueue extension script handles.
+	 *
+	 * @param array $script_handles Declared script handles.
+	 * @return string[] Validated script handles.
+	 * @throws \InvalidArgumentException When a handle is not a non-empty string.
+	 * @throws \RuntimeException When a handle is not registered or cannot be enqueued.
+	 */
+	private static function validate_and_enqueue_script_handles( array $script_handles ): array {
+		// Exception messages are cached diagnostics rather than HTML output. Dynamic
+		// handles are sanitized before the exception crosses this boundary.
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		foreach ( $script_handles as $script_handle ) {
+			if ( ! is_string( $script_handle ) || '' === trim( $script_handle ) ) {
+				throw new \InvalidArgumentException( __( 'Settings UI script handles must be non-empty strings.', 'woocommerce' ) );
+			}
+
+			if ( ! wp_script_is( $script_handle, 'registered' ) ) {
+				throw new \RuntimeException(
+					sprintf(
+						/* translators: %s: script handle. */
+						__( 'Settings UI script handle "%s" is not registered.', 'woocommerce' ),
+						sanitize_text_field( $script_handle )
+					)
 				);
 			}
 		}
+
+		$script_handles = array_values( array_unique( $script_handles ) );
+		foreach ( $script_handles as $script_handle ) {
+			wp_enqueue_script( $script_handle );
+
+			if ( ! wp_script_is( $script_handle, 'enqueued' ) ) {
+				throw new \RuntimeException(
+					sprintf(
+						/* translators: %s: script handle. */
+						__( 'Settings UI script handle "%s" could not be enqueued.', 'woocommerce' ),
+						sanitize_text_field( $script_handle )
+					)
+				);
+			}
+		}
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+
+		return $script_handles;
 	}
 
 	/**
@@ -471,16 +568,32 @@ class SettingsUIRequestContext {
 		}
 
 		try {
-			$schema       = $this->settings_ui_page->get_schema( $this->section );
-			$schema       = SettingsUISchema::canonicalize_option_values( $schema );
-			$schema       = $this->apply_section_navigation( $schema );
-			$schema       = $this->apply_shell_header_visibility( $schema );
-			$this->schema = $this->ensure_drill_down_breadcrumbs( $schema );
+			$schema = $this->settings_ui_page->get_schema( $this->section );
+			$schema = SettingsUISchema::canonicalize_option_values( $schema );
+			$schema = $this->apply_section_navigation( $schema );
+			$schema = $this->apply_shell_header_visibility( $schema );
+			$schema = $this->ensure_drill_down_breadcrumbs( $schema );
+
+			SettingsUISchema::assert_valid_schema( $schema );
+			$this->schema = $schema;
 		} catch ( \Throwable $e ) {
-			$this->schema_failed = true;
+			$this->schema_failed         = true;
+			$this->schema_failure_reason = self::sanitize_failure_reason( $e );
 
 			self::log_resolution_failure( 'Settings UI schema', $this->get_page_id(), $this->section, $e, __METHOD__ );
 		}
+	}
+
+	/**
+	 * Sanitize a failure reason before it reaches developer-facing output.
+	 *
+	 * @param \Throwable $e Resolution failure.
+	 * @return string
+	 */
+	private static function sanitize_failure_reason( \Throwable $e ): string {
+		$reason = sanitize_text_field( $e->getMessage() );
+
+		return '' !== $reason ? $reason : get_class( $e );
 	}
 
 	/**
@@ -582,22 +695,5 @@ class SettingsUIRequestContext {
 		);
 
 		return $schema;
-	}
-
-	/**
-	 * Filter extension-provided script handles to valid WordPress script handle strings.
-	 *
-	 * @param array $script_handles Raw script handles.
-	 * @return string[]
-	 */
-	private static function filter_script_handles( array $script_handles ): array {
-		return array_values(
-			array_filter(
-				$script_handles,
-				static function ( $script_handle ): bool {
-					return is_string( $script_handle ) && '' !== $script_handle;
-				}
-			)
-		);
 	}
 }

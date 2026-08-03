@@ -413,37 +413,42 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$section = is_string( $current_section ) ? $current_section : '';
 			$context = $this->get_settings_ui_request_context( $section );
 
-			if ( $context && $context->is_rendering_enabled() ) {
-				$settings_ui_page = $context->get_settings_ui_page();
-				assert( $settings_ui_page instanceof SettingsUIPageInterface );
+			try {
+				if ( $context && $context->is_rendering_enabled() ) {
+					$settings_ui_page = $context->get_settings_ui_page();
+					assert( $settings_ui_page instanceof SettingsUIPageInterface );
 
-				if ( $context->has_schema_failed() ) {
-					$this->log_settings_ui_fallback(
-						$settings_ui_page,
-						$section,
-						__( 'Settings UI schema generation failed.', 'woocommerce' )
-					);
-				} else {
-					$script_handles = $context->get_script_handles();
+					if ( $context->has_schema_failed() ) {
+						$schema_failure_reason = method_exists( $context, 'get_schema_failure_reason' )
+							? $context->get_schema_failure_reason()
+							: __( 'Settings UI schema generation failed.', 'woocommerce' );
 
-					if ( $context->has_script_handles_failed() ) {
-						$this->log_settings_ui_fallback( $settings_ui_page, $section, $context->get_script_handles_failure_reason() );
+						$this->log_settings_ui_fallback( $settings_ui_page, $section, $schema_failure_reason );
 					} else {
-						foreach ( $script_handles as $script_handle ) {
-							wp_enqueue_script( $script_handle );
+						$script_handles = $context->get_script_handles();
+
+						if ( $context->has_script_handles_failed() ) {
+							$this->log_settings_ui_fallback( $settings_ui_page, $section, $context->get_script_handles_failure_reason() );
+						} else {
+							foreach ( $script_handles as $script_handle ) {
+								wp_enqueue_script( $script_handle );
+							}
+
+							$GLOBALS['hide_save_button'] = true;
+
+							printf(
+								'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
+								esc_attr( 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $section ? 'default' : $section ) ),
+								esc_attr( $context->get_page_id() ),
+								esc_attr( $section )
+							);
+							return;
 						}
-
-						$GLOBALS['hide_save_button'] = true;
-
-						printf(
-							'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
-							esc_attr( 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $section ? 'default' : $section ) ),
-							esc_attr( $context->get_page_id() ),
-							esc_attr( $section )
-						);
-						return;
 					}
 				}
+			} catch ( \Throwable $e ) {
+				// A stale or unavailable Settings UI class must keep the classic renderer usable during updates.
+				$context = null;
 			}
 
 			// We can't use "get_settings_for_section" here
