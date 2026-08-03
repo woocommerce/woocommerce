@@ -27,6 +27,10 @@ class WC_Embed {
 		// Filter all of the content that's going to be embedded.
 		add_filter( 'the_excerpt_embed', array( __CLASS__, 'the_excerpt' ), 10 );
 
+		// Filter the featured image that's going to be embedded.
+		add_filter( 'embed_thumbnail_id', array( __CLASS__, 'handle_embed_thumbnail_id' ), 10 );
+		add_filter( 'oembed_response_data', array( __CLASS__, 'handle_oembed_response_data' ), 10, 2 );
+
 		// Make sure no comments display. Doesn't make sense for products.
 		add_action( 'embed_content_meta', array( __CLASS__, 'remove_comments_button' ), 5 );
 
@@ -59,6 +63,35 @@ class WC_Embed {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Handle the embed_thumbnail_id filter.
+	 *
+	 * @internal
+	 *
+	 * @param int|false $thumbnail_id Attachment ID, or false if there is none.
+	 * @return int|false
+	 */
+	public static function handle_embed_thumbnail_id( $thumbnail_id ) {
+		return self::is_embedded_product() && post_password_required() ? 0 : $thumbnail_id;
+	}
+
+	/**
+	 * Handle the oembed_response_data filter.
+	 *
+	 * @internal
+	 *
+	 * @param array   $data oEmbed response data.
+	 * @param WP_Post $post Post object.
+	 * @return array
+	 */
+	public static function handle_oembed_response_data( $data, $post ) {
+		if ( 'product' === $post->post_type && post_password_required( $post ) ) {
+			unset( $data['thumbnail_url'], $data['thumbnail_width'], $data['thumbnail_height'] );
+		}
+
+		return $data;
 	}
 
 	/**

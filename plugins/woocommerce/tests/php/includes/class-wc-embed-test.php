@@ -7,7 +7,7 @@ declare( strict_types = 1 );
 class WC_Embed_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox Password-protected product embeds should not expose the price, short description, or rating.
+	 * @testdox Password-protected product embeds should not expose the image, price, short description, or rating.
 	 */
 	public function test_embed_does_not_expose_password_protected_product_data(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -28,6 +28,20 @@ class WC_Embed_Test extends WC_Unit_Test_Case {
 
 		$this->go_to_product_embed( $product );
 		$this->assertTrue( post_password_required(), 'The product should require a password.' );
+		$this->assertSame( 0, WC_Embed::handle_embed_thumbnail_id( 123 ), 'The product image should not be rendered.' );
+		$response_data = WC_Embed::handle_oembed_response_data(
+			array(
+				'title'            => 'Protected product',
+				'thumbnail_url'    => 'https://example.com/image.jpg',
+				'thumbnail_width'  => 600,
+				'thumbnail_height' => 600,
+			),
+			get_post( $product->get_id() )
+		);
+		$this->assertSame( 'Protected product', $response_data['title'], 'The product title should remain in the oEmbed response.' );
+		$this->assertArrayNotHasKey( 'thumbnail_url', $response_data, 'The product image URL should not be in the oEmbed response.' );
+		$this->assertArrayNotHasKey( 'thumbnail_width', $response_data, 'The product image width should not be in the oEmbed response.' );
+		$this->assertArrayNotHasKey( 'thumbnail_height', $response_data, 'The product image height should not be in the oEmbed response.' );
 
 		ob_start();
 		$excerpt = WC_Embed::the_excerpt( 'Password required' );
@@ -48,6 +62,16 @@ class WC_Embed_Test extends WC_Unit_Test_Case {
 		$product->save();
 
 		$this->go_to_product_embed( $product );
+		$this->assertSame( 123, WC_Embed::handle_embed_thumbnail_id( 123 ), 'The product image should be rendered.' );
+		$response_data = array(
+			'title'         => 'Public product',
+			'thumbnail_url' => 'https://example.com/image.jpg',
+		);
+		$this->assertSame(
+			$response_data,
+			WC_Embed::handle_oembed_response_data( $response_data, get_post( $product->get_id() ) ),
+			'The public product image should remain in the oEmbed response.'
+		);
 
 		ob_start();
 		$excerpt = WC_Embed::the_excerpt( 'Original excerpt' );
