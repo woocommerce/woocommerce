@@ -2713,6 +2713,19 @@ FROM $order_meta_table
 		);
 
 		if ( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE === $post_type ) {
+			// Delete order notes (comments) associated with this order before deleting the post,
+			// mirroring what wp_delete_post() does to ensure cache invalidation and meta cleanup.
+			$comments = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT comment_ID FROM {$wpdb->comments} WHERE comment_post_ID = %d",
+					$order_id
+				)
+			);
+
+			foreach ( $comments as $comment_id ) {
+				wp_delete_comment( $comment_id, true );
+			}
+
 			$wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->posts} WHERE ID=%d OR post_parent=%d",

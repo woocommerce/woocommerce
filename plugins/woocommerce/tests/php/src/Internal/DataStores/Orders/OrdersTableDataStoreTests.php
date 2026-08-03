@@ -4265,4 +4265,84 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->delete();
 		$product->delete();
 	}
+
+	/**
+	 * @testDox When an order with a placeholder post is deleted with sync disabled, associated order notes (comments) are also deleted.
+	 */
+	public function test_order_notes_deleted_when_placeholder_order_deleted_with_sync_disabled() {
+		$this->allow_current_user_to_delete_posts();
+		$this->toggle_cot_feature_and_usage( true );
+		$this->toggle_cot_authoritative( true );
+		$this->disable_cot_sync();
+
+		$order = OrderHelper::create_order();
+		$order_id = $order->get_id();
+
+		// Add order notes.
+		$note1_id = $order->add_order_note( 'Test note 1' );
+		$note2_id = $order->add_order_note( 'Test note 2' );
+		$order->save();
+
+		// Verify notes exist.
+		$this->assertNotNull( get_comment( $note1_id ) );
+		$this->assertNotNull( get_comment( $note2_id ) );
+
+		// Verify this is a placeholder post type.
+		$post_type = get_post_type( $order_id );
+		$this->assertEquals( 'shop_order_placehold', $post_type );
+
+		// Delete the order.
+		$order->delete( true );
+
+		// Verify order notes are deleted.
+		$this->assertNull( get_comment( $note1_id ), 'Order note 1 should be deleted when placeholder order is deleted' );
+		$this->assertNull( get_comment( $note2_id ), 'Order note 2 should be deleted when placeholder order is deleted' );
+
+		// Verify commentmeta is also cleaned up.
+		global $wpdb;
+		$meta_count = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->commentmeta} WHERE comment_id IN (%d, %d)",
+				$note1_id,
+				$note2_id
+			)
+		);
+		$this->assertEquals( 0, $meta_count, 'Commentmeta should be empty after notes are deleted' );
+	}
+
+	/**
+	 * @testDox When an order with a real post is deleted with sync disabled, order notes are preserved and a deletion marker is created.
+	 */
+	public function test_order_notes_preserved_when_non_placeholder_order_deleted_with_sync_disabled() {
+		$this->allow_current_user_to_delete_posts();
+		$this->toggle_cot_feature_and_usage( true );
+		$this->toggle_cot_authoritative( false );
+		$this->disable_cot_sync();
+
+		$order = OrderHelper::create_order();
+		$order_id = $order->get_id();
+
+		// Add an order note.
+		$note_id = $order->add_order_note( 'Test note for non-placeholder' );
+		$order->save();
+
+		$this->assertNotNull( get_comment( $note_id ) );
+
+		// Delete the order.
+		$order->delete( true );
+
+		// Verify the note is preserved (non-placeholder path keeps the post).
+		$this->assertNotNull( get_comment( $note_id ), 'Order note should be preserved when non-placeholder order is deleted with sync disabled' );
+
+		// Verify a deletion record was created.
+		global $wpdb;
+		$deletion_count = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM " . self::get_meta_table_name() . " WHERE order_id = %d AND meta_key = %s",
+				$order_id,
+				\Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer::DELETED_RECORD_META_KEY
+			)
+		);
+		$this->assertGreaterThan( 0, $deletion_count, 'Deletion marker should exist for non-placeholder order' );
+	}
 }
