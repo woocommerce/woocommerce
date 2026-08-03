@@ -133,7 +133,7 @@ class InitTest extends MockeryTestCase {
 	 * A third party filtering plugins_api can throw. The export group should still list the installed plugins.
 	 */
 	public function test_get_plugins_for_export_group_falls_back_when_plugins_api_throws() {
-		delete_transient( 'woocommerce_blueprint_installed_wp_org_plugins' );
+		delete_transient( $this->init::INSTALLED_WP_ORG_PLUGINS_TRANSIENT );
 
 		$mock_plugins = array(
 			'plugin-1/plugin.php' => array( 'Name' => 'Plugin One' ),
@@ -147,14 +147,14 @@ class InitTest extends MockeryTestCase {
 		$result = $this->init->get_plugins_for_export_group();
 
 		$this->assertSame( array( 'plugin-1/plugin.php', 'plugin-2/plugin.php' ), wp_list_pluck( $result, 'id' ) );
-		$this->assertFalse( get_transient( 'woocommerce_blueprint_installed_wp_org_plugins' ) );
+		$this->assertFalse( get_transient( $this->init::INSTALLED_WP_ORG_PLUGINS_TRANSIENT ) );
 	}
 
 	/**
 	 * A third party filtering themes_api can throw. The export group should still list the installed themes.
 	 */
 	public function test_get_themes_for_export_group_falls_back_when_themes_api_throws() {
-		delete_transient( 'woocommerce_blueprint_installed_wp_org_themes' );
+		delete_transient( $this->init::INSTALLED_WP_ORG_THEMES_TRANSIENT );
 
 		$mock_theme_1      = $this->createThemeStub( 'theme-one', 'Theme One' );
 		$mock_theme_2      = $this->createThemeStub( 'custom-theme', 'Custom Theme' );
@@ -172,7 +172,7 @@ class InitTest extends MockeryTestCase {
 		$result = $this->init->get_themes_for_export_group();
 
 		$this->assertSame( array( 'theme-one', 'custom-theme' ), wp_list_pluck( $result, 'id' ) );
-		$this->assertFalse( get_transient( 'woocommerce_blueprint_installed_wp_org_themes' ) );
+		$this->assertFalse( get_transient( $this->init::INSTALLED_WP_ORG_THEMES_TRANSIENT ) );
 	}
 
 	/**
