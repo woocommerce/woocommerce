@@ -126,11 +126,11 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 		}
 
 		// Files without a supporting image editor (e.g. SVGs) can never be regenerated, so remove them from the queue.
-		$mime_type = $attachment->post_mime_type;
+		// The file-derived mime type is checked first, since the editor loads the file and the recorded type can be stale.
+		$mime_type = wp_check_filetype( $fullsizepath )['type'];
 
-		if ( ! $mime_type || ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			// The recorded mime type may be missing or stale; check the actual file before deciding to skip.
-			$mime_type = wp_check_filetype( $fullsizepath )['type'];
+		if ( ! $mime_type ) {
+			$mime_type = $attachment->post_mime_type;
 		}
 
 		if ( ! $mime_type || ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
