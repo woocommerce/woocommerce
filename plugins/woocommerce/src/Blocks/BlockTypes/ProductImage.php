@@ -301,7 +301,6 @@ class ProductImage extends AbstractBlock {
 						continue;
 					}
 					$sources[ $key ]['value'] = max( 1, (int) round( $source['value'] / $stretch_factor ) );
-
 				}
 			}
 
