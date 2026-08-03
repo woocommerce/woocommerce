@@ -28,7 +28,7 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	/**
 	 * Previous value of the sitewide low stock amount option, restored in tearDown.
 	 *
-	 * @var string
+	 * @var string|false
 	 */
 	private $previous_low_stock_amount_option;
 
@@ -38,7 +38,7 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->original_manage_stock            = get_option( 'woocommerce_manage_stock' );
-		$this->previous_low_stock_amount_option = get_option( 'woocommerce_notify_low_stock_amount', 2 );
+		$this->previous_low_stock_amount_option = get_option( 'woocommerce_notify_low_stock_amount' );
 	}
 
 	/**
@@ -51,7 +51,11 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			update_option( 'woocommerce_manage_stock', $this->original_manage_stock );
 		}
 
-		update_option( 'woocommerce_notify_low_stock_amount', $this->previous_low_stock_amount_option );
+		if ( false === $this->previous_low_stock_amount_option ) {
+			delete_option( 'woocommerce_notify_low_stock_amount' );
+		} else {
+			update_option( 'woocommerce_notify_low_stock_amount', $this->previous_low_stock_amount_option );
+		}
 		unset( $_GET['stock_status'] );
 
 		parent::tearDown();
@@ -261,6 +265,15 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			)
 		);
 
+		$above_normalized_threshold = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 2,
+				'stock_status'   => ProductStockStatus::IN_STOCK,
+			)
+		);
+
 		$list_table = new WC_Admin_List_Table_Products();
 		add_filter( 'posts_clauses', array( $list_table, 'filter_low_stock_post_clauses' ) );
 
@@ -276,6 +289,7 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 		remove_filter( 'posts_clauses', array( $list_table, 'filter_low_stock_post_clauses' ) );
 
 		$this->assertContains( $low_stock_no_amount->get_id(), $found_ids, 'Quantity of 1 with an empty sitewide option should still be treated as low stock (threshold normalized to 1, not 0)' );
+		$this->assertNotContains( $above_normalized_threshold->get_id(), $found_ids, 'Quantity of 2 with an empty sitewide option should fall above the normalized threshold of 1' );
 	}
 
 	/**
