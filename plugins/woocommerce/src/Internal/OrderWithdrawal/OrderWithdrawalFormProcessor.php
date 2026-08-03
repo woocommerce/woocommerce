@@ -269,20 +269,15 @@ final class OrderWithdrawalFormProcessor {
 
 		$matched_order = $this->get_matching_order( $data );
 
-		if ( $matched_order ) {
-			if ( $this->has_order_withdrawal_request( $matched_order ) ) {
-				wc_add_notice(
-					__( 'A withdrawal request has already been submitted for this order. Please contact us if you need help or want to make changes.', 'woocommerce' ),
-					'error'
-				);
+		if ( $matched_order && $this->has_order_withdrawal_request( $matched_order ) ) {
+			wc_add_notice(
+				__( 'A withdrawal request has already been submitted for this order. Please contact us if you need help or want to make changes.', 'woocommerce' ),
+				'error'
+			);
 
-				$this->apply_rate_limits( $rate_limit_ids, -1 );
+			$this->apply_rate_limits( $rate_limit_ids, -1 );
 
-				return false;
-			}
-
-			$this->add_order_withdrawal_note( $matched_order, $data );
-			$this->add_order_withdrawal_inbox_note( $matched_order );
+			return false;
 		}
 
 		if ( ! $this->send_order_withdrawal_emails( $data, $matched_order ) ) {
@@ -294,6 +289,8 @@ final class OrderWithdrawalFormProcessor {
 
 		if ( $matched_order ) {
 			$this->mark_order_withdrawal_requested( $matched_order );
+			$this->add_order_withdrawal_note( $matched_order, $data );
+			$this->add_order_withdrawal_inbox_note( $matched_order );
 		}
 
 		return true;
@@ -482,10 +479,6 @@ final class OrderWithdrawalFormProcessor {
 	 * @param WC_Order $matched_order Matched order.
 	 */
 	private function add_order_withdrawal_inbox_note( WC_Order $matched_order ): void {
-		if ( $this->has_order_withdrawal_request( $matched_order ) ) {
-			return;
-		}
-
 		try {
 			$note = new Note();
 			$note->set_title( __( 'Withdraw Order Request', 'woocommerce' ) );

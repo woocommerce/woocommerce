@@ -584,12 +584,13 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 * @testdox Should keep the user on review with an error notice when notification emails fail.
 	 */
 	public function test_process_current_request_surfaces_error_when_emails_fail(): void {
+		$order   = $this->create_order_for_form_data();
 		$capture = $this->capture_wp_mail( false );
 
 		try {
 			$this->prepare_post_request(
 				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
-				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '999999999' )
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
 			);
 
 			$state         = $this->sut->process_current_request();
@@ -599,12 +600,18 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertCount( 2, $capture['captures'], 'The processor should attempt both notification emails before surfacing the failure.' );
 			$this->assertNotEmpty( $error_notices, 'Email failures should add an error notice.' );
 			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $error_notices[0]['notice'], 'The error notice should tell the user the submission did not complete.' );
+			$this->assertFalse( $this->order_has_note_containing( $order, 'Order withdrawal requested' ), 'Email failures should not add a retryable request to the order notes.' );
+			$this->assertNotSame(
+				'yes',
+				$order->get_meta( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, true, 'edit' ),
+				'Email failures should not mark the matched order as having a withdrawal request.'
+			);
 			$this->assertCount( 0, $this->get_created_inbox_note_ids(), 'Email failures should not create merchant inbox notifications.' );
 
 			wc_clear_notices();
 			$this->prepare_post_request(
 				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
-				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => '999999999' )
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
 			);
 
 			$second_state         = $this->sut->process_current_request();
