@@ -321,19 +321,20 @@ class OrderMilestoneEasterEgg {
 			return array();
 		}
 
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
 		$qualifying_order_ids = array_map(
 			'absint',
 			$wpdb->get_col(
 				$wpdb->prepare(
-					'SELECT id
-					FROM %i
+					"SELECT id
+					FROM {$orders_table}
 					WHERE type = %s
 					AND status IN ( %s, %s )
 					AND transaction_id IS NOT NULL
 					AND transaction_id <> %s
 					ORDER BY date_created_gmt ASC, id ASC
-					LIMIT %d',
-					OrdersTableDataStore::get_orders_table_name(),
+					LIMIT %d",
 					'shop_order',
 					'wc-processing',
 					'wc-completed',
@@ -342,6 +343,7 @@ class OrderMilestoneEasterEgg {
 				)
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		$milestone_order_ids = array();
 		foreach ( self::MILESTONE_POSITIONS as $pos => $key ) {

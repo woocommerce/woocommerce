@@ -628,7 +628,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$statuses = wp_cache_get( self::ORDERS_STATUSES_ALL_CACHE_KEY, 'woocommerce_analytics' );
 		if ( false === $statuses ) {
 			$table_name = self::get_db_table_name();
-			$statuses   = $wpdb->get_col( $wpdb->prepare( 'SELECT DISTINCT status FROM %i', $table_name ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+			$statuses = $wpdb->get_col( "SELECT DISTINCT status FROM {$table_name}" );
 			wp_cache_set( self::ORDERS_STATUSES_ALL_CACHE_KEY, $statuses, 'woocommerce_analytics', YEAR_IN_SECONDS );
 		}
 
