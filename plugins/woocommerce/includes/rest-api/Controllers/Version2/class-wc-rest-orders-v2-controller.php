@@ -958,9 +958,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			if ( ! ( $current_variation instanceof WC_Product_Variation ) || $current_variation->get_id() !== $current_variation_id ) {
 				$current_variation = wc_get_product( $current_variation_id );
 			}
+			$parent_sku                    = $current_variation instanceof WC_Product_Variation ? ( $current_variation->get_parent_data()['sku'] ?? '' ) : '';
+			$parent_sku_can_be_normalized  = is_scalar( $parent_sku ) || ( is_object( $parent_sku ) && is_callable( array( $parent_sku, '__toString' ) ) );
 			$variation_inherits_posted_sku = $current_variation instanceof WC_Product_Variation
 				&& '' === $current_variation->get_sku( 'edit' )
-				&& wc_strtolower( (string) $posted['sku'] ) === wc_strtolower( (string) ( $current_variation->get_parent_data()['sku'] ?? '' ) );
+				&& $parent_sku_can_be_normalized
+				&& wc_strtolower( (string) $posted['sku'] ) === wc_strtolower( (string) $parent_sku );
 		}
 
 		$preserve_current_variation = $preserve_current_variation

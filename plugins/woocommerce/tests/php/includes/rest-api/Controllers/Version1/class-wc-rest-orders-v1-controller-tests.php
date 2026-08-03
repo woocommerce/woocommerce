@@ -263,4 +263,28 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching by SKU zero should clear variation_id.' );
 		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should use the SKU lookup result.' );
 	}
+
+	/**
+	 * @testdox Updating a variation line item to a sibling variation honors the explicit variation_id.
+	 */
+	public function test_update_line_item_switches_to_sibling_variation(): void {
+		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
+		$sibling                                   = wc_get_product( $parent->get_children()[1] );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'           => $item->get_id(),
+				'product_id'   => $parent->get_id(),
+				'variation_id' => $sibling->get_id(),
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'Switching to a sibling variation should succeed.' );
+
+		$response_item = $response->get_data()['line_items'][0];
+		$reloaded      = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( $sibling->get_id(), $reloaded->get_variation_id(), 'The sibling variation ID should be persisted.' );
+		$this->assertSame( $sibling->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the sibling variation.' );
+		$this->assertSame( $sibling->get_id(), $response_item['variation_id'], 'The response should identify the sibling variation.' );
+	}
 }
