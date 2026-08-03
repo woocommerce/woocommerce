@@ -300,7 +300,8 @@ class ProductImage extends AbstractBlock {
 					if ( ! is_array( $source ) || ! isset( $source['value'] ) || ! is_numeric( $source['value'] ) ) {
 						continue;
 					}
-					$sources[ $key ]['value'] = (int) round( $source['value'] / $stretch_factor );
+					$sources[ $key ]['value'] = max( 1, (int) round( $source['value'] / $stretch_factor ) );
+
 				}
 			}
 
