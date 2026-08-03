@@ -130,6 +130,52 @@ class InitTest extends MockeryTestCase {
 	}
 
 	/**
+	 * A third party filtering plugins_api can throw. The export group should still list the installed plugins.
+	 */
+	public function test_get_plugins_for_export_group_falls_back_when_plugins_api_throws() {
+		delete_transient( 'woocommerce_blueprint_installed_wp_org_plugins' );
+
+		$mock_plugins = array(
+			'plugin-1/plugin.php' => array( 'Name' => 'Plugin One' ),
+			'plugin-2/plugin.php' => array( 'Name' => 'Plugin Two' ),
+		);
+
+		$this->init->shouldReceive( 'wp_get_plugins' )->andReturn( $mock_plugins );
+		$this->init->shouldReceive( 'wp_get_option' )->andReturn( array( 'plugin-1/plugin.php' ) );
+		$this->init->shouldReceive( 'wp_plugins_api' )->once()->andThrow( new \TypeError( 'Argument #1 ($slug) must be of type string, null given' ) );
+
+		$result = $this->init->get_plugins_for_export_group();
+
+		$this->assertSame( array( 'plugin-1/plugin.php', 'plugin-2/plugin.php' ), wp_list_pluck( $result, 'id' ) );
+		$this->assertFalse( get_transient( 'woocommerce_blueprint_installed_wp_org_plugins' ) );
+	}
+
+	/**
+	 * A third party filtering themes_api can throw. The export group should still list the installed themes.
+	 */
+	public function test_get_themes_for_export_group_falls_back_when_themes_api_throws() {
+		delete_transient( 'woocommerce_blueprint_installed_wp_org_themes' );
+
+		$mock_theme_1      = $this->createThemeStub( 'theme-one', 'Theme One' );
+		$mock_theme_2      = $this->createThemeStub( 'custom-theme', 'Custom Theme' );
+		$mock_active_theme = $this->createThemeStub( 'theme-one', 'Theme One' );
+
+		$this->init->shouldReceive( 'wp_get_themes' )->andReturn(
+			array(
+				'theme-one'    => $mock_theme_1,
+				'custom-theme' => $mock_theme_2,
+			)
+		);
+		$this->init->shouldReceive( 'wp_get_theme' )->andReturn( $mock_active_theme );
+		$this->init->shouldReceive( 'wp_themes_api' )->once()->andThrow( new \TypeError( 'Argument #1 ($slug) must be of type string, null given' ) );
+
+		$result = $this->init->get_themes_for_export_group();
+
+		$this->assertSame( array( 'theme-one', 'custom-theme' ), wp_list_pluck( $result, 'id' ) );
+		$this->assertFalse( get_transient( 'woocommerce_blueprint_installed_wp_org_themes' ) );
+	}
+
+	/**
 	 * Test the get_step_groups_for_js method.
 	 */
 	public function test_get_step_groups_for_js() {
