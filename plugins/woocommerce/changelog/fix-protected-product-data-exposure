@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent password-protected products from exposing images, prices, ratings, and short descriptions before authentication.
