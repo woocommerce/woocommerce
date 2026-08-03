@@ -196,7 +196,11 @@ test.describe( 'Product Reviews', () => {
 			const reviewRow = page.locator( `#comment-${ review.id }` );
 
 			await expect(
-				reviewRow.getByRole( 'cell', { name: updatedReview } )
+				reviewRow.getByRole( 'cell', { name: updatedReview } ).or(
+					reviewRow.getByRole( 'rowheader', {
+						name: updatedReview,
+					} )
+				)
 			).toBeVisible();
 			await expect(
 				reviewRow.getByLabel( `${ updatedRating } out of 5` )
@@ -326,7 +330,11 @@ test.describe( 'Product Reviews', () => {
 			await page.getByRole( 'button', { name: 'Undo' } ).click();
 
 			await expect(
-				reviewRow.getByRole( 'cell', { name: review.review } )
+				reviewRow.getByRole( 'cell', { name: review.review } ).or(
+					reviewRow.getByRole( 'rowheader', {
+						name: review.review,
+					} )
+				)
 			).toBeVisible();
 
 			await reviewRow.getByRole( 'button', { name: 'Trash' } ).click();
@@ -346,7 +354,11 @@ test.describe( 'Product Reviews', () => {
 			await page.click( 'a[href*="comment_status=trash"]' );
 
 			await expect(
-				reviewRow.getByRole( 'cell', { name: review.review } )
+				reviewRow.getByRole( 'cell', { name: review.review } ).or(
+					reviewRow.getByRole( 'rowheader', {
+						name: review.review,
+					} )
+				)
 			).toBeVisible();
 
 			await page.goto(

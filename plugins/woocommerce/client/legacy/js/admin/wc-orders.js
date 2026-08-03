@@ -12,7 +12,8 @@ jQuery( function( $ ) {
 		$( document )
 			.on(
 				'click',
-				'.post-type-shop_order .wp-list-table tbody td, .woocommerce_page_wc-orders .wp-list-table.orders tbody td',
+				// WordPress 7.1 renders primary order cells as th instead of td.
+				'.post-type-shop_order .wp-list-table tbody td, .woocommerce_page_wc-orders .wp-list-table.orders tbody :is(td, th)',
 				this.onRowClick
 			)
 			.on( 'click', '.order-preview:not(.disabled)', this.onPreview );
