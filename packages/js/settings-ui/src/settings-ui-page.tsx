@@ -33,6 +33,7 @@ import {
 import type {
 	SettingsUIField,
 	SettingsUIGroup,
+	SettingsUIShellBadgeIntent,
 	SettingsUISaveStrategy,
 	SettingsUISchema,
 	SettingsFieldContext,
@@ -103,13 +104,19 @@ const getActionVariant = ( variant?: string ) =>
 		? variant
 		: 'secondary' ) as 'primary' | 'secondary' | 'tertiary' | 'link';
 
+const BADGE_INTENTS = {
+	default: true,
+	info: true,
+	success: true,
+	warning: true,
+	error: true,
+} satisfies Record< SettingsUIShellBadgeIntent, true >;
+
 // TS unions erase at runtime, so guard the className interpolation against
 // unexpected strings from PHP-supplied schemas.
-const getBadgeIntent = ( intent?: string ) =>
-	[ 'default', 'info', 'success', 'warning', 'error' ].includes(
-		intent || ''
-	)
-		? intent
+const getBadgeIntent = ( intent?: string ): SettingsUIShellBadgeIntent =>
+	intent && Object.prototype.hasOwnProperty.call( BADGE_INTENTS, intent )
+		? ( intent as SettingsUIShellBadgeIntent )
 		: 'default';
 
 const getSaveStrategy = ( schema: SettingsUISchema ): SettingsUISaveStrategy =>

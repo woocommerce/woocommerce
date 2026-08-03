@@ -251,9 +251,10 @@ class WCAdminAssets {
 		wp_enqueue_style( 'wc-onboarding' );
 
 		if ( PageController::is_settings_page() ) {
-			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $this->get_settings_ui_script_dependencies() );
+			$settings_ui_dependencies = $this->get_settings_ui_script_dependencies();
+			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $settings_ui_dependencies );
 			$this->register_style( 'settings-embed', 'style', array( 'wp-components' ) );
-			$this->enqueue_settings_ui_style();
+			$this->enqueue_settings_ui_style( $settings_ui_dependencies );
 		}
 
 		// Preload our assets.
@@ -464,10 +465,10 @@ class WCAdminAssets {
 
 	/**
 	 * Enqueue the Settings UI package style when its runtime dependency resolves.
+	 *
+	 * @param array $dependencies Resolved Settings UI script dependencies.
 	 */
-	private function enqueue_settings_ui_style(): void {
-		$dependencies = $this->get_settings_ui_script_dependencies();
-
+	private function enqueue_settings_ui_style( array $dependencies ): void {
 		if ( ! in_array( 'wc-settings-ui', $dependencies, true ) || ! wp_style_is( 'wc-settings-ui', 'registered' ) ) {
 			return;
 		}

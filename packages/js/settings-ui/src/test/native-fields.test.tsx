@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+/* global HTMLSelectElement */
 import { speak } from '@wordpress/a11y';
 import { createElement } from '@wordpress/element';
 import { act } from 'react';

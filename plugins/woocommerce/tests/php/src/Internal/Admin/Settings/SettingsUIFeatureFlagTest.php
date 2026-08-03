@@ -400,9 +400,10 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		$assets = new WCAdminAssets();
 		$assets->register_scripts();
+		$dependencies = $this->invoke_private_method( $assets, 'get_settings_ui_script_dependencies' );
 
-		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style' );
-		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style' );
+		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
+		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
 
 		$registered_style = wp_styles()->registered['wc-settings-ui'] ?? null;
 		$this->assertNotNull( $registered_style, 'The Settings UI style should be registered by the admin asset registry.' );
@@ -420,7 +421,8 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		$assets = new WCAdminAssets();
 		$assets->register_scripts();
-		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style' );
+		$dependencies = $this->invoke_private_method( $assets, 'get_settings_ui_script_dependencies' );
+		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
 
 		$this->assertFalse( wp_style_is( 'wc-settings-ui', 'enqueued' ), 'Disabled Settings UI requests should keep the new stylesheet out of the queue.' );
 	}
@@ -444,7 +446,8 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		$assets = new WCAdminAssets();
 		$assets->register_scripts();
-		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style' );
+		$dependencies = $this->invoke_private_method( $assets, 'get_settings_ui_script_dependencies' );
+		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
 
 		$this->assertFalse( wp_style_is( 'wc-settings-ui', 'enqueued' ), 'Classic settings pages should not request the Settings UI stylesheet.' );
 	}
@@ -466,7 +469,8 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 
 		foreach ( $fallback_pages as $failure => $page ) {
 			$this->set_current_settings_page_request( $page, 'advanced' );
-			$this->invoke_private_method( $assets, 'enqueue_settings_ui_style' );
+			$dependencies = $this->invoke_private_method( $assets, 'get_settings_ui_script_dependencies' );
+			$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
 
 			$this->assertFalse( wp_style_is( 'wc-settings-ui', 'enqueued' ), "A {$failure} failure should keep the Settings UI stylesheet out of the queue." );
 			SettingsUIRequestContext::reset();
