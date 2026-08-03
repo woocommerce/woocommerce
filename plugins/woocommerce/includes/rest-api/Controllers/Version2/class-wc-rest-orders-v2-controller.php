@@ -939,22 +939,22 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
 		$item = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
-		/**
-		 * Product line item being updated.
-		 *
-		 * @var WC_Order_Item_Product $product_item Product line item being updated.
-		 */
-		$product_item = $item;
 
 		$preserve_current_variation = 'update' === $action
-			&& $product_item->get_variation_id()
-			&& empty( $posted['sku'] )
+			&& $item instanceof WC_Order_Item_Product
+			&& $item->get_variation_id()
 			&& array_key_exists( 'product_id', $posted )
-			&& ! array_key_exists( 'variation_id', $posted )
-			&& (int) $posted['product_id'] === $product_item->get_product_id();
-		$product                    = $preserve_current_variation ? $product_item->get_product() : wc_get_product( $this->get_product_id( $posted, $action ) );
+			&& ( ! array_key_exists( 'variation_id', $posted ) || (int) $posted['variation_id'] === $item->get_variation_id() )
+			&& (int) $posted['product_id'] === $item->get_product_id();
+		$current_product            = $preserve_current_variation && $item instanceof WC_Order_Item_Product ? $item->get_product() : null;
+		$preserve_current_variation = $preserve_current_variation
+			&& ( empty( $posted['sku'] ) || ( $current_product instanceof WC_Product && $current_product->get_sku() === $posted['sku'] ) );
+		$product                    = $preserve_current_variation ? $current_product : wc_get_product( $this->get_product_id( $posted, $action ) );
+		$should_set_product         = ! $preserve_current_variation
+			&& $product instanceof WC_Product
+			&& ( is_null( $current_product ) ? $item->get_product() : $current_product ) !== $product;
 
-		if ( ! $preserve_current_variation && $product instanceof WC_Product && $product !== $item->get_product() ) {
+		if ( $should_set_product ) {
 			$item->set_product( $product );
 
 			if ( 'create' === $action ) {

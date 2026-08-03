@@ -190,6 +190,65 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Round-tripping a variation with its parent's inherited SKU preserves the variation ID.
+	 */
+	public function test_round_trip_line_item_with_inherited_parent_sku_preserves_variation_id(): void {
+		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
+		$parent_sku                                = 'REST-V1-PARENT-' . wp_generate_uuid4();
+		$parent->set_sku( $parent_sku );
+		$parent->save();
+		$variation->set_sku( '' );
+		$variation->save();
+
+		$get_request  = new WP_REST_Request( 'GET', '/wc/v1/orders/' . $order->get_id() );
+		$get_response = $this->server->dispatch( $get_request );
+		$this->assertSame( 200, $get_response->get_status(), 'Fetching the order should succeed.' );
+
+		$round_trip_item = $get_response->get_data()['line_items'][0];
+		$this->assertSame( $parent_sku, $round_trip_item['sku'], 'The response should expose the SKU inherited from the parent.' );
+
+		$put_request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
+		$put_request->set_body_params( array( 'line_items' => array( $round_trip_item ) ) );
+		$put_response = $this->server->dispatch( $put_request );
+		$this->assertSame( 200, $put_response->get_status(), 'Round-tripping the line item should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The inherited parent SKU should not demote the variation.' );
+		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'The line item should continue to resolve to the variation.' );
+	}
+
+	/**
+	 * @testdox Updating a variation line item with another product's SKU still switches products.
+	 */
+	public function test_update_line_item_with_different_product_sku_switches_products(): void {
+		list( $parent, , $order, $item ) = $this->create_order_with_variation_line_item();
+		$simple                          = WC_Helper_Product::create_simple_product();
+		$simple_sku                      = 'REST-V1-SIMPLE-' . wp_generate_uuid4();
+		$simple->set_sku( $simple_sku );
+		$simple->save();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'         => $item->get_id(),
+						'product_id' => $parent->get_id(),
+						'sku'        => $simple_sku,
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'Switching by SKU should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching to a simple product by SKU should clear variation_id.' );
+		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the product selected by SKU.' );
+	}
+
+	/**
 	 * @testdox Updating a variation line item with an explicit zero variation_id switches it to the parent.
 	 */
 	public function test_update_line_item_with_explicit_zero_variation_id_switches_to_parent(): void {

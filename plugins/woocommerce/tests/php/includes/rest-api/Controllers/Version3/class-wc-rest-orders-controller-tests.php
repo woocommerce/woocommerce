@@ -1271,6 +1271,102 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox PUT /orders preserves a variation when round-tripping its parent's inherited SKU.
+	 */
+	public function test_round_trip_line_item_with_inherited_parent_sku_preserves_variation_id(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		$parent_sku                 = 'REST-V3-PARENT-' . wp_generate_uuid4();
+		$parent->set_sku( $parent_sku );
+		$parent->save();
+		$variation->set_sku( '' );
+		$variation->save();
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+
+		$get_request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() );
+		$get_response = $this->server->dispatch( $get_request );
+		$this->assertSame( 200, $get_response->get_status(), 'Fetching the order should succeed.' );
+
+		$round_trip_item = $get_response->get_data()['line_items'][0];
+		$this->assertSame( $parent_sku, $round_trip_item['sku'], 'The response should expose the SKU inherited from the parent.' );
+
+		$put_request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$put_request->set_header( 'content-type', 'application/json' );
+		$put_request->set_body( wp_json_encode( array( 'line_items' => array( $round_trip_item ) ) ) );
+		$put_response = $this->server->dispatch( $put_request );
+		$this->assertSame( 200, $put_response->get_status(), 'Round-tripping the line item should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The inherited parent SKU should not demote the variation.' );
+		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'The line item should continue to resolve to the variation.' );
+	}
+
+	/**
+	 * @testdox PUT /orders still switches products when SKU conflicts with the unchanged parent product_id.
+	 */
+	public function test_update_line_item_with_different_product_sku_switches_products(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+		$simple                     = WC_Helper_Product::create_simple_product();
+		$simple_sku                 = 'REST-V3-SIMPLE-' . wp_generate_uuid4();
+		$simple->set_sku( $simple_sku );
+		$simple->save();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'line_items' => array(
+						array(
+							'id'         => $item_id,
+							'product_id' => $parent->get_id(),
+							'sku'        => $simple_sku,
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'Switching by SKU should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching to a simple product by SKU should clear variation_id.' );
+		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the product selected by SKU.' );
+	}
+
+	/**
+	 * @testdox PUT /orders does not fatal when a non-product order item ID is submitted under line_items.
+	 */
+	public function test_update_line_item_with_non_product_order_item_id_does_not_fatal(): void {
+		$order = new WC_Order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_name( 'Fee submitted as a line item' );
+		$fee->set_total( 10 );
+		$order->add_item( $fee );
+		$order->save();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'line_items' => array(
+						array( 'id' => $fee->get_id() ),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'The mismatched order item should retain the previous no-op behavior.' );
+
+		$reloaded = new WC_Order_Item_Fee( $fee->get_id() );
+		$this->assertSame( 'Fee submitted as a line item', $reloaded->get_name(), 'The fee should remain unchanged.' );
+		$this->assertSame( 10.0, (float) $reloaded->get_total(), 'The fee total should remain unchanged.' );
+	}
+
+	/**
 	 * @testdox PUT /orders with an explicit zero variation_id deliberately switches the line item to its variable parent.
 	 */
 	public function test_update_line_item_with_explicit_zero_variation_id_switches_to_parent(): void {
