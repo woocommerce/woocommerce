@@ -166,8 +166,8 @@ class SingleProduct extends \WP_UnitTestCase {
 				)
 			);
 
-			$this->assertMatchesRegularExpression(
-				'/This content is password[- ]protected/',
+			$this->assertStringContainsString(
+				'This content is password-protected',
 				$markup,
 				'Password-protected products should render the password form.'
 			);
