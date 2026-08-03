@@ -1297,6 +1297,43 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox PUT /orders honors a filtered SKU alias that resolves to the current parent.
+	 */
+	public function test_update_line_item_honors_filtered_parent_sku_alias(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+
+		$alias_sku = 'REST-V3-ALIAS-' . wp_generate_uuid4();
+		$parent->set_sku( 'REST-V3-PARENT-' . wp_generate_uuid4() );
+		$parent->save();
+		$variation->set_sku( '' );
+		$variation->save();
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+
+		$sku_filter = static function ( $product_id, $posted_sku ) use ( $alias_sku, $parent ) {
+			return $alias_sku === $posted_sku ? $parent->get_id() : $product_id;
+		};
+		add_filter( 'woocommerce_get_product_id_by_sku', $sku_filter, 10, 2 );
+
+		try {
+			$response = $this->dispatch_line_item_update(
+				$order->get_id(),
+				array(
+					'id'         => $item_id,
+					'product_id' => $parent->get_id(),
+					'sku'        => $alias_sku,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_get_product_id_by_sku', $sku_filter, 10 );
+		}
+		$this->assertSame( 200, $response->get_status(), 'The filtered parent alias update should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'A filtered alias resolving to the parent should clear variation_id.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should use the filtered parent result.' );
+	}
+
+	/**
 	 * @testdox PUT /orders treats SKU zero as a product reference.
 	 */
 	public function test_update_line_item_with_zero_sku_switches_to_resolved_product(): void {

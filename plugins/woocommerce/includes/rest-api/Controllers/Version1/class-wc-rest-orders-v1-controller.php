@@ -676,24 +676,26 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		$current_product_id   = $item->get_product_id();
 		$current_variation_id = $item->get_variation_id();
 
-		$preserve_current_variation = 'update' === $action
+		$preserve_current_variation    = 'update' === $action
 			&& $current_variation_id
 			&& array_key_exists( 'product_id', $posted )
 			&& ( ! array_key_exists( 'variation_id', $posted ) || (int) $posted['variation_id'] === $current_variation_id )
 			&& (int) $posted['product_id'] === $current_product_id;
-		$current_product            = $preserve_current_variation ? $item->get_product() : null;
-		$variation_inherits_sku     = false;
+		$current_product               = $preserve_current_variation ? $item->get_product() : null;
+		$variation_inherits_posted_sku = false;
 
 		if ( $preserve_current_variation && $has_posted_sku && $product_id === $current_product_id ) {
 			$current_variation = $current_product;
 			if ( ! ( $current_variation instanceof WC_Product_Variation ) || $current_variation->get_id() !== $current_variation_id ) {
 				$current_variation = wc_get_product( $current_variation_id );
 			}
-			$variation_inherits_sku = $current_variation instanceof WC_Product_Variation && '' === $current_variation->get_sku( 'edit' );
+			$variation_inherits_posted_sku = $current_variation instanceof WC_Product_Variation
+				&& '' === $current_variation->get_sku( 'edit' )
+				&& wc_strtolower( (string) $posted['sku'] ) === wc_strtolower( (string) ( $current_variation->get_parent_data()['sku'] ?? '' ) );
 		}
 
 		$preserve_current_variation = $preserve_current_variation
-			&& ( ! $has_posted_sku || $product_id === $current_variation_id || $variation_inherits_sku );
+			&& ( ! $has_posted_sku || $product_id === $current_variation_id || $variation_inherits_posted_sku );
 		$product                    = $preserve_current_variation ? $current_product : wc_get_product( $product_id );
 		$should_set_product         = ! $preserve_current_variation
 			&& $product instanceof WC_Product

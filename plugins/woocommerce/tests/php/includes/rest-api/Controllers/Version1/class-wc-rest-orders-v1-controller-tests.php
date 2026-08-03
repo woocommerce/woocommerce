@@ -206,18 +206,18 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Updating a variation line item honors filtered SKU resolution.
+	 * @testdox Updating a variation line item honors a filtered SKU alias that resolves to its parent.
 	 */
-	public function test_update_line_item_honors_filtered_sku_resolution(): void {
+	public function test_update_line_item_honors_filtered_parent_sku_alias(): void {
 		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
-		$simple                                    = WC_Helper_Product::create_simple_product();
-		$sku                                       = 'REST-V1-FILTER-' . wp_generate_uuid4();
-		$parent->set_sku( $sku );
+
+		$alias_sku = 'REST-V1-ALIAS-' . wp_generate_uuid4();
+		$parent->set_sku( 'REST-V1-PARENT-' . wp_generate_uuid4() );
 		$parent->save();
 		$variation->set_sku( '' );
 		$variation->save();
-		$sku_filter = static function ( $product_id, $posted_sku ) use ( $sku, $simple ) {
-			return $sku === $posted_sku ? $simple->get_id() : $product_id;
+		$sku_filter = static function ( $product_id, $posted_sku ) use ( $alias_sku, $parent ) {
+			return $alias_sku === $posted_sku ? $parent->get_id() : $product_id;
 		};
 		add_filter( 'woocommerce_get_product_id_by_sku', $sku_filter, 10, 2 );
 
@@ -227,16 +227,40 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 				array(
 					'id'         => $item->get_id(),
 					'product_id' => $parent->get_id(),
-					'sku'        => $sku,
+					'sku'        => $alias_sku,
 				)
 			);
 		} finally {
 			remove_filter( 'woocommerce_get_product_id_by_sku', $sku_filter, 10 );
 		}
-		$this->assertSame( 200, $response->get_status(), 'The filtered SKU update should succeed.' );
+		$this->assertSame( 200, $response->get_status(), 'The filtered parent alias update should succeed.' );
 
 		$reloaded = new WC_Order_Item_Product( $item->get_id() );
-		$this->assertSame( 0, $reloaded->get_variation_id(), 'Filtered resolution to a simple product should clear variation_id.' );
-		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should use the filtered SKU result.' );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'A filtered alias resolving to the parent should clear variation_id.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should use the filtered parent result.' );
+	}
+
+	/**
+	 * @testdox Updating a variation line item treats SKU zero as a product reference.
+	 */
+	public function test_update_line_item_with_zero_sku_switches_to_resolved_product(): void {
+		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
+		$simple                                    = WC_Helper_Product::create_simple_product();
+		$simple->set_sku( '0' );
+		$simple->save();
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item->get_id(),
+				'product_id' => $parent->get_id(),
+				'sku'        => '0',
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'Switching by SKU zero should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching by SKU zero should clear variation_id.' );
+		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should use the SKU lookup result.' );
 	}
 }
