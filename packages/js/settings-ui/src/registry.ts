@@ -183,15 +183,22 @@ export const resolveFieldComponent = (
 	context: SettingsFieldContext
 ): SettingsFieldComponent | undefined => {
 	const componentName = field.component;
-	const component = componentName
-		? findInMatchingRegistrations(
-				context,
-				( registration ) => registration.components?.[ componentName ]
-		  )
-		: undefined;
+	if ( componentName ) {
+		const component = findInMatchingRegistrations(
+			context,
+			( registration ) => registration.components?.[ componentName ]
+		);
+
+		if ( ! component ) {
+			throw new Error(
+				`Component "${ componentName }" is not registered.`
+			);
+		}
+
+		return component;
+	}
 
 	const resolvedComponent =
-		component ??
 		findInMatchingRegistrations(
 			context,
 			( registration ) => registration.fieldOverrides?.[ field.id ]
@@ -203,13 +210,6 @@ export const resolveFieldComponent = (
 
 	if ( resolvedComponent ) {
 		return resolvedComponent;
-	}
-
-	if ( field.component ) {
-		warn( `Component "${ field.component }" is not registered.`, {
-			field,
-			context,
-		} );
 	}
 
 	return undefined;
