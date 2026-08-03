@@ -25,26 +25,6 @@ const test = base.extend< { postCompiler: PostCompiler } >( {
 } );
 
 test.describe( `${ BLOCK_NAME } Block`, () => {
-	test( 'block can be inserted and it is rendered on the frontend', async ( {
-		editor,
-		admin,
-		page,
-	} ) => {
-		await admin.createNewPost();
-		await editor.insertBlock( { name: BLOCK_NAME } );
-		await editor.publishAndVisitPost();
-
-		await page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wp-json/wc/store/v1/products' ) &&
-				response.status() === 200
-		);
-
-		await expect(
-			page.locator( '.wc-block-grid__product.wc-block-layout' )
-		).toHaveCount( 9 );
-	} );
-
 	// Check this regression: hhttps://github.com/woocommerce/woocommerce/pull/58741.
 	// The block has a dependency on the Mini Cart block/Checkout/Cart blocks.
 	// This test checks that the block can be inserted and it is rendered on the frontend without the mini cart block.
