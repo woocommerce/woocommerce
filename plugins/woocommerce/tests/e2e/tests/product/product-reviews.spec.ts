@@ -330,6 +330,7 @@ test.describe( 'Product Reviews', () => {
 			).toBeTruthy();
 			await page.getByRole( 'button', { name: 'Undo' } ).click();
 
+			// WordPress 7.1 renders primary list-table cells as row headers.
 			await expect(
 				reviewRow.getByRole( 'cell', { name: review.review } ).or(
 					reviewRow.getByRole( 'rowheader', {
@@ -354,6 +355,7 @@ test.describe( 'Product Reviews', () => {
 
 			await page.click( 'a[href*="comment_status=trash"]' );
 
+			// WordPress 7.1 renders primary list-table cells as row headers.
 			await expect(
 				reviewRow.getByRole( 'cell', { name: review.review } ).or(
 					reviewRow.getByRole( 'rowheader', {
