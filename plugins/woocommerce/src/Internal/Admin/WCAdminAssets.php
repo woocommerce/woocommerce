@@ -253,7 +253,6 @@ class WCAdminAssets {
 		if ( PageController::is_settings_page() ) {
 			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $this->get_settings_ui_script_dependencies() );
 			$this->register_style( 'settings-embed', 'style', array( 'wp-components' ) );
-			$this->enqueue_settings_ui_style();
 		}
 
 		// Preload our assets.
@@ -401,10 +400,6 @@ class WCAdminAssets {
 			array(
 				'handle' => 'wc-onboarding',
 			),
-			array(
-				'handle'       => 'wc-settings-ui',
-				'dependencies' => array( 'wp-components' ),
-			),
 		);
 
 		$css_file_version = self::get_file_version( 'css' );
@@ -444,35 +439,20 @@ class WCAdminAssets {
 			}
 
 			$context = SettingsUIRequestContext::get_current();
-			if ( ! $context || $context->has_script_handles_failed() ) {
-				return array();
-			}
-			if ( null === $context->get_schema() || $context->has_schema_failed() ) {
-				return array();
-			}
-
-			$dependencies = array_merge(
-				array( 'wc-settings-ui' ),
-				$context->get_script_handles()
-			);
-
-			return array_values( array_unique( $dependencies ) );
 		} catch ( \Throwable $e ) {
 			return array();
 		}
-	}
 
-	/**
-	 * Enqueue the Settings UI package style when its runtime dependency resolves.
-	 */
-	private function enqueue_settings_ui_style(): void {
-		$dependencies = $this->get_settings_ui_script_dependencies();
-
-		if ( ! in_array( 'wc-settings-ui', $dependencies, true ) || ! wp_style_is( 'wc-settings-ui', 'registered' ) ) {
-			return;
+		if ( ! $context ) {
+			return array();
 		}
 
-		wp_enqueue_style( 'wc-settings-ui' );
+		$dependencies = array_merge(
+			array( 'wc-settings-ui' ),
+			$context->get_script_handles()
+		);
+
+		return array_values( array_unique( $dependencies ) );
 	}
 
 	/**
