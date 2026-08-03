@@ -271,17 +271,13 @@ export const getSharedReviewListControls = (
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				hasValue={ () => ! attributes.showOrderby }
-				label={ __( 'Show sort dropdown', 'woocommerce' ) }
+				label={ __( 'Show "Order by" dropdown', 'woocommerce' ) }
 				onDeselect={ () => setAttributes( { showOrderby: true } ) }
 				isShownByDefault
 			>
 				<ToggleControl
 					__nextHasNoMarginBottom
-					label={ __( 'Sorting', 'woocommerce' ) }
-					help={ __(
-						'Let shoppers change the sorting order.',
-						'woocommerce'
-					) }
+					label={ __( 'Show "Order by" dropdown', 'woocommerce' ) }
 					checked={ attributes.showOrderby }
 					onChange={ () =>
 						setAttributes( {
@@ -332,7 +328,7 @@ export const getSharedReviewListControls = (
 						__next40pxDefaultSize
 						label={ __( 'Offset', 'woocommerce' ) }
 						help={ __(
-							'Skips this many reviews from the top of the list.',
+							'Number to reviews to skip.',
 							'woocommerce'
 						) }
 						value={ String( attributes.offset ?? defaultOffset ) }
@@ -350,7 +346,7 @@ export const getSharedReviewListControls = (
 					! attributes.showLoadMore ||
 					attributes.reviewsOnLoadMore !== DEFAULT_REVIEW_COUNT
 				}
-				label={ __( 'Load more', 'woocommerce' ) }
+				label={ __( 'Show "Load more" button', 'woocommerce' ) }
 				onDeselect={ () =>
 					setAttributes( {
 						showLoadMore: true,
@@ -362,11 +358,7 @@ export const getSharedReviewListControls = (
 				<div className="wc-block-reviews__tools-panel-item-container">
 					<ToggleControl
 						__nextHasNoMarginBottom
-						label={ __( 'Load more', 'woocommerce' ) }
-						help={ __(
-							'Let shoppers load more reviews.',
-							'woocommerce'
-						) }
+						label={ __( 'Show "Load more" button', 'woocommerce' ) }
 						checked={ attributes.showLoadMore }
 						onChange={ () =>
 							setAttributes( {
