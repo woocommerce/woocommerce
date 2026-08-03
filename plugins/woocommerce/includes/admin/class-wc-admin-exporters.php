@@ -133,6 +133,12 @@ class WC_Admin_Exporters {
 				$exporter->set_filename( wp_unslash( $_GET['filename'] ) ); // WPCS: input var ok, sanitization ok.
 			}
 
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			if ( ! empty( $_GET['delimiter'] ) ) {
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$exporter->set_delimiter( sanitize_text_field( wp_unslash( $_GET['delimiter'] ) ) );
+			}
+
 			$exporter->export();
 		}
 	}
@@ -181,6 +187,12 @@ class WC_Admin_Exporters {
 			}
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_POST['delimiter'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$exporter->set_delimiter( sanitize_text_field( wp_unslash( $_POST['delimiter'] ) ) );
+		}
+
 		if ( ! empty( $_POST['filename'] ) ) { // WPCS: input var ok.
 			$exporter->set_filename( wp_unslash( $_POST['filename'] ) ); // WPCS: input var ok, sanitization ok.
 		}
@@ -196,6 +208,11 @@ class WC_Admin_Exporters {
 				'filename' => $exporter->get_filename(),
 			)
 		);
+
+		if ( ! empty( $_POST['delimiter'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$query_args['delimiter'] = sanitize_text_field( wp_unslash( $_POST['delimiter'] ) );
+		}
 
 		if ( 100 === $exporter->get_percent_complete() ) {
 			wp_send_json_success(

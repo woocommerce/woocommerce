@@ -171,7 +171,7 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 	 * @return array
 	 */
 	private function get_default_order_statuses() {
-		$actionable = get_option( 'woocommerce_actionable_order_statuses', false );
+		$actionable = get_option( 'woocommerce_actionable_order_statuses', array() );
 
 		// Any array is respected as-is, including an explicitly empty one: the merchant
 		// intentionally cleared all actionable statuses, so there is nothing to fulfill,

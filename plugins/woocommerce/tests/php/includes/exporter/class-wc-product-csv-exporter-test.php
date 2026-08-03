@@ -161,4 +161,32 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 			);
 		}
 	}
+
+		/**
+		 * @testdox set_delimiter overrides the default comma delimiter.
+		 */
+	public function test_set_delimiter_changes_delimiter(): void {
+		$exporter = new WC_Product_CSV_Exporter();
+		$exporter->set_delimiter( ';' );
+
+		$this->assertSame(
+			';',
+			$exporter->get_delimiter(),
+			'set_delimiter should override the default delimiter for the next write.'
+		);
+	}
+
+	/**
+	 * @testdox set_delimiter rejects multi-character values and falls back to the default.
+	 */
+	public function test_set_delimiter_rejects_multi_character_values(): void {
+		$exporter = new WC_Product_CSV_Exporter();
+		$exporter->set_delimiter( '||' );
+
+		$this->assertSame(
+			',',
+			$exporter->get_delimiter(),
+			'PHP fputcsv requires a single-character delimiter; multi-character input should fall back to the default.'
+		);
+	}
 }

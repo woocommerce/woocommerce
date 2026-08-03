@@ -136,13 +136,37 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 							</td>
 						</tr>
 						<?php do_action( 'woocommerce_product_export_row' ); ?>
+						<tr class="woocommerce-exporter-advanced hidden">
+							<th scope="row">
+								<label for="woocommerce-exporter-delimiter"><?php esc_html_e( 'CSV Delimiter', 'woocommerce' ); ?></label>
+							</th>
+							<td><input type="text" id="woocommerce-exporter-delimiter" name="delimiter" placeholder="," size="2" /></td>
+						</tr>
 					</tbody>
 				</table>
 				<progress class="woocommerce-exporter-progress" max="100" value="0"></progress>
 			</section>
 			<div class="wc-actions">
+				<a href="#" class="woocommerce-exporter-toggle-advanced-options" aria-expanded="false" data-hidetext="<?php esc_attr_e( 'Hide advanced options', 'woocommerce' ); ?>" data-showtext="<?php esc_attr_e( 'Show advanced options', 'woocommerce' ); ?>"><?php esc_html_e( 'Show advanced options', 'woocommerce' ); ?></a>
 				<button type="submit" class="woocommerce-exporter-button button button-primary" value="<?php esc_attr_e( 'Generate CSV', 'woocommerce' ); ?>"><?php esc_html_e( 'Generate CSV', 'woocommerce' ); ?></button>
 			</div>
+			<script type="text/javascript">
+				jQuery(function() {
+					jQuery( '.woocommerce-exporter-toggle-advanced-options' ).on( 'click', function() {
+						var $el = jQuery( '.woocommerce-exporter-advanced' );
+						if ( $el.is( '.hidden' ) ) {
+							$el.removeClass( 'hidden' );
+							jQuery( this ).attr( 'aria-expanded', 'true' );
+							jQuery( this ).text( jQuery( this ).data( 'hidetext' ) );
+						} else {
+							$el.addClass( 'hidden' );
+							jQuery( this ).attr( 'aria-expanded', 'false' );
+							jQuery( this ).text( jQuery( this ).data( 'showtext' ) );
+						}
+						return false;
+					} );
+				});
+			</script>
 		</form>
 	</div>
 </div>

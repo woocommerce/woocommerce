@@ -215,6 +215,22 @@ abstract class WC_CSV_Exporter {
 	}
 
 	/**
+	 * Set the delimiter used when writing the CSV output.
+	 *
+	 * PHP's fputcsv() requires a single-character delimiter. Empty or multi-character
+	 * input falls back to the default comma to keep the writer safe across PHP targets.
+	 *
+	 * @param string $delimiter Delimiter character.
+	 */
+	public function set_delimiter( string $delimiter ): void {
+		$delimiter = sanitize_text_field( $delimiter );
+		if ( 1 !== strlen( $delimiter ) ) {
+			$delimiter = ',';
+		}
+		$this->delimiter = $delimiter;
+	}
+
+	/**
 	 * Generate and return a filename.
 	 *
 	 * @return string
