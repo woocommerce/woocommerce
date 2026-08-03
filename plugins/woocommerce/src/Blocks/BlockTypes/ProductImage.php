@@ -261,8 +261,8 @@ class ProductImage extends AbstractBlock {
 		}
 
 		$srcset_aspect_ratio = $aspect_ratio;
-		if ( is_string( $srcset_aspect_ratio ) && is_numeric( $srcset_aspect_ratio ) ) {
-			$srcset_aspect_ratio .= '/1';
+		if ( is_numeric( $srcset_aspect_ratio ) ) {
+			$srcset_aspect_ratio = (string) $srcset_aspect_ratio . '/1';
 		}
 
 		$adjust_srcset = function ( $sources, $size_array, $image_src, $image_meta ) use ( $srcset_aspect_ratio ) {
