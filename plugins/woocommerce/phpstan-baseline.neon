@@ -14203,30 +14203,6 @@ parameters:
 			path: includes/class-wc-regenerate-images.php
 
 		-
-			message: '#^Method WC_Regenerate_Images\:\:resize_and_return_image\(\) should return string but returns array\.$#'
-			identifier: return.type
-			count: 3
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:resize_and_return_image\(\) should return string but returns array\<int, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:resize_and_return_image\(\) should return string but returns array\|string\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
-			message: '#^Method WC_Regenerate_Images\:\:unfiltered_image_downsize\(\) should return string but returns list\<bool\|int\|string\>\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
 			message: '#^Parameter \#1 \$str of function md5 expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
