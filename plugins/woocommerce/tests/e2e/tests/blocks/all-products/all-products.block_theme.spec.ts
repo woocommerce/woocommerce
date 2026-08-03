@@ -89,19 +89,27 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		await expect(
 			page.getByRole( 'checkbox', { name: 'Small' } )
 		).toBeVisible();
-		await expect(
-			page.getByRole( 'checkbox', { name: 'Out of Stock' } )
-		).toBeVisible();
 
-		await page.getByRole( 'checkbox', { name: 'Out of Stock' } ).click();
+		const outOfStockCheckbox = page.getByRole( 'checkbox', {
+			name: 'Out of Stock',
+		} );
+		await expect( outOfStockCheckbox ).toBeVisible();
+		await outOfStockCheckbox.click();
 
+		await expect( page ).toHaveURL( /filter_stock_status=outofstock/ );
 		await expect( products ).toHaveCount( 1 );
 		await expect(
 			page.getByRole( 'heading', { name: 'Active filters' } )
 		).toBeVisible();
 		await expect( page.getByText( 'Stock Status:' ) ).toBeVisible();
-		await expect(
-			page.getByRole( 'button', { name: 'Clear All Filters' } )
-		).toBeVisible();
+
+		const clearAllFiltersButton = page.getByRole( 'button', {
+			name: 'Clear All Filters',
+		} );
+		await expect( clearAllFiltersButton ).toBeVisible();
+		await clearAllFiltersButton.click();
+
+		await expect( page ).not.toHaveURL( /filter_stock_status/ );
+		await expect( products ).toHaveCount( 9 );
 	} );
 } );
