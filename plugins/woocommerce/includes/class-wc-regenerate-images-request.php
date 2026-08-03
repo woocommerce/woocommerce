@@ -101,11 +101,6 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 			return false;
 		}
 
-		// Files without a supporting image editor (e.g. SVGs) can never be regenerated, so remove them from the queue.
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $attachment->post_mime_type ) ) ) {
-			return false;
-		}
-
 		if ( ! function_exists( 'wp_crop_image' ) ) {
 			include ABSPATH . 'wp-admin/includes/image.php';
 		}
@@ -127,6 +122,18 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 
 		// Check if the file exists, if not just remove item from queue.
 		if ( false === $fullsizepath || is_wp_error( $fullsizepath ) || ! file_exists( $fullsizepath ) ) {
+			return false;
+		}
+
+		// Files without a supporting image editor (e.g. SVGs) can never be regenerated, so remove them from the queue.
+		$mime_type = $attachment->post_mime_type;
+
+		if ( ! $mime_type ) {
+			// The attachment post may lack a mime type (e.g. sloppy importers); fall back to the actual file.
+			$mime_type = wp_check_filetype( $fullsizepath )['type'];
+		}
+
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			return false;
 		}
 
