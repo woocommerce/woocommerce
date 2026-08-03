@@ -261,8 +261,12 @@ class ProductImage extends AbstractBlock {
 		}
 
 		$adjust_srcset = function ( $sources, $size_array, $image_src, $image_meta ) use ( $aspect_ratio ) {
+			if ( '1' === $aspect_ratio ) {
+				$aspect_ratio = '1/1';
+			}
 			if (
 				! is_string( $aspect_ratio ) ||
+				false === strpos( $aspect_ratio, '/' ) ||
 				! is_array( $sources ) ||
 				! is_array( $image_meta ) ||
 				! isset( $image_meta['width'], $image_meta['height'] ) ||
@@ -305,8 +309,7 @@ class ProductImage extends AbstractBlock {
 
 		$maybe_adjust_srcset =
 			'cover' === $attributes['scale'] &&
-			is_string( $aspect_ratio ) &&
-			false !== strpos( $aspect_ratio, '/' );
+			is_string( $aspect_ratio );
 
 		if ( $maybe_adjust_srcset ) {
 			add_filter( 'wp_calculate_image_srcset', $adjust_srcset, 10, 4 );
