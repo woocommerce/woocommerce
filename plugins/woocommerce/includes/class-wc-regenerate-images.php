@@ -333,7 +333,10 @@ class WC_Regenerate_Images {
 	 * @return array
 	 */
 	public static function adjust_intermediate_image_sizes_advanced( $sizes ) {
-		if ( ! isset( $sizes[ self::$regenerate_size ] ) ) {
+		if ( ! is_array( $sizes ) ) {
+				return array();
+			}
+			if ( ! isset( $sizes[ self::$regenerate_size ] ) ) {
 			return array();
 		}
 		return array( self::$regenerate_size => $sizes[ self::$regenerate_size ] );
@@ -428,9 +431,10 @@ class WC_Regenerate_Images {
 			$metadata = array();
 		}
 
-		// We only want to regen a specific image size. `intermediate_image_sizes_advanced` is what
-		// core's wp_create_image_subsizes()/_wp_make_subsizes() actually reads since WP 5.3, so both
-		// filters are needed to stop it from regenerating every registered size.
+		// We only want to regen a specific image size. Both `intermediate_image_sizes` and, since
+		// WP 5.3, `intermediate_image_sizes_advanced` are read by core's subsize generation
+		// (wp_create_image_subsizes()/_wp_make_subsizes()), so both filters are hooked to stop it
+		// from regenerating every registered size.
 		add_filter( 'intermediate_image_sizes', array( __CLASS__, 'adjust_intermediate_image_sizes' ) );
 		add_filter( 'intermediate_image_sizes_advanced', array( __CLASS__, 'adjust_intermediate_image_sizes_advanced' ) );
 
@@ -446,10 +450,17 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
-		if ( isset( $new_metadata['sizes'][ self::$regenerate_size ] ) ) {
+		/*
+		 * Always write the stored metadata back. wp_generate_attachment_metadata() starts by
+		 * persisting an initial metadata array with an empty `sizes` array (wp_create_image_subsizes()),
+		 * which would otherwise wipe the attachment's existing `sizes` whenever the regenerated size
+		 * below is missing from the returned metadata (for example if the image editor fails on it).
+		 * Keep the pre-existing sizes as the base so a partial regen can never truncate them.
+		 */
+		if ( isset( $new_metadata['sizes'] ) && is_array( $new_metadata['sizes'] ) && isset( $new_metadata['sizes'][ self::$regenerate_size ] ) ) {
 			$metadata['sizes'][ self::$regenerate_size ] = $new_metadata['sizes'][ self::$regenerate_size ];
-			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
+		wp_update_attachment_metadata( $attachment_id, $metadata );
 
 		// Now we've done our regen, attempt to return the new size.
 		$new_image = self::unfiltered_image_downsize( $attachment_id, self::$regenerate_size );

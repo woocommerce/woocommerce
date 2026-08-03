@@ -25,7 +25,7 @@ class WC_Regenerate_Images_Test extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$property = $this->get_regenerate_size_property();
+		$property                       = $this->get_regenerate_size_property();
 		$this->original_regenerate_size = $property->getValue();
 	}
 
@@ -105,23 +105,53 @@ class WC_Regenerate_Images_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The intermediate_image_sizes_advanced filter should stop wp_generate_attachment_metadata() from regenerating every registered size.
+	 * @testdox resize_and_return_image() should preserve pre-existing size entries when the requested size fails to regenerate.
 	 */
-	public function test_advanced_filter_restricts_wp_generate_attachment_metadata_to_one_size() {
-		$attachment_id = $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg' );
-		$fullsizepath  = get_attached_file( $attachment_id );
+	public function test_resize_and_return_image_preserves_pre_existing_sizes_on_regen_failure() {
+		$attachment_id = $this->factory->attachment->create_upload_object(
+			DIR_TESTDATA . '/images/canola.jpg'
+		);
+
+		$initial_meta = wp_get_attachment_metadata( $attachment_id );
+		$this->assertNotEmpty( $initial_meta, 'Initial attachment metadata must exist.' );
+		$this->assertIsArray( $initial_meta['sizes'], 'Initial _wp_attachment_metadata must carry sizes.' );
+		$this->assertNotEmpty( $initial_meta['sizes'], 'Pre-existing sizes must not be empty before the test runs.' );
+		$initial_size_keys = array_keys( $initial_meta['sizes'] );
+
+		// Simulate a scenario where the requested size is removed from the sizes list
+		// (e.g. _wp_make_subsizes() hits an editor error and produces nothing).
+		// Run with the lowest-possible priority so the callback runs *after* the
+		// resize_and_return_image callbacks added at default priority and overrides
+		// them to an empty array.
+		add_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', PHP_INT_MAX );
 
 		$regenerate_size = $this->get_regenerate_size_property();
 		$regenerate_size->setValue( null, 'woocommerce_thumbnail' );
 
-		add_filter( 'intermediate_image_sizes_advanced', array( 'WC_Regenerate_Images', 'adjust_intermediate_image_sizes_advanced' ) );
-		$metadata = wp_generate_attachment_metadata( $attachment_id, $fullsizepath );
-		remove_filter( 'intermediate_image_sizes_advanced', array( 'WC_Regenerate_Images', 'adjust_intermediate_image_sizes_advanced' ) );
+		$method = ( new \ReflectionClass( WC_Regenerate_Images::class ) )
+			->getMethod( 'resize_and_return_image' );
+		$method->setAccessible( true );
 
-		$this->assertSame(
-			array( 'woocommerce_thumbnail' ),
-			array_keys( $metadata['sizes'] ),
-			'Without this filter, core regenerates every registered size (thumbnail, medium, large, ...) instead of just the one requested.'
+		$image_data = array(
+			wp_get_attachment_url( $attachment_id ),
+			800,
+			600,
 		);
+
+		$method->invoke( null, $attachment_id, $image_data, 'woocommerce_thumbnail', false );
+
+		remove_filter( 'intermediate_image_sizes_advanced', '__return_empty_array', PHP_INT_MAX );
+
+		$stored_meta = wp_get_attachment_metadata( $attachment_id );
+		$this->assertIsArray( $stored_meta, 'Stored metadata must survive a failed regen.' );
+		$this->assertNotEmpty( $stored_meta['sizes'], 'sizes must not be empty after a failed regen — the fix must restore pre-existing sizes.' );
+
+		foreach ( $initial_size_keys as $size_key ) {
+			$this->assertArrayHasKey(
+				$size_key,
+				$stored_meta['sizes'],
+				"Size '{$size_key}' must be preserved after a regen failure."
+			);
+		}
 	}
 }
