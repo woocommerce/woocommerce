@@ -59,6 +59,7 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		add_filter( 'woocommerce_settings_pages', array( $this, 'add_endpoint_setting' ), 10, 1 );
 		add_action( 'woocommerce_account_' . self::ENDPOINT_KEY . '_endpoint', array( $this, 'render_view' ) );
 		add_action( 'woocommerce_before_delete_order', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
+		add_action( 'before_delete_post', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
 	}
 
