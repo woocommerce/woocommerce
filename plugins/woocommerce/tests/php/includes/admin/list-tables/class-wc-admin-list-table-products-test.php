@@ -37,7 +37,7 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->original_manage_stock             = get_option( 'woocommerce_manage_stock' );
+		$this->original_manage_stock            = get_option( 'woocommerce_manage_stock' );
 		$this->previous_low_stock_amount_option = get_option( 'woocommerce_notify_low_stock_amount', 2 );
 	}
 
