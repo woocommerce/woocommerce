@@ -482,7 +482,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertInstanceOf( Note::class, $note, 'The merchant inbox notification should be readable.' );
 			$this->assertSame( Note::E_WC_ADMIN_NOTE_INFORMATIONAL, $note->get_type(), 'The inbox notification should be informational.' );
 			$this->assertSame( Note::E_WC_ADMIN_NOTE_UNACTIONED, $note->get_status(), 'The inbox notification should start unactioned.' );
-			$this->assertSame( 'Withdraw Order Request', $note->get_title(), 'The inbox notification should have the expected title.' );
+			$this->assertSame( sprintf( 'Withdraw order request for #%s', $order->get_order_number() ), $note->get_title(), 'The inbox notification should have the expected title.' );
 			$this->assertStringContainsString( (string) $order->get_order_number(), $note->get_content(), 'The inbox notification should include the order number.' );
 			$this->assertStringContainsString( 'Review the matched order to confirm the request details.', $note->get_content(), 'The inbox notification should direct merchants to the matched order.' );
 			$this->assertStringNotContainsString( 'Jane Doe', $note->get_content(), 'The inbox notification should not include the customer name.' );

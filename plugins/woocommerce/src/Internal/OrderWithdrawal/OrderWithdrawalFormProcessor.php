@@ -481,7 +481,13 @@ final class OrderWithdrawalFormProcessor {
 	private function add_order_withdrawal_inbox_note( WC_Order $matched_order ): void {
 		try {
 			$note = new Note();
-			$note->set_title( __( 'Withdraw Order Request', 'woocommerce' ) );
+			$note->set_title(
+				sprintf(
+					/* translators: %s: order number. */
+					__( 'Withdraw order request for #%s', 'woocommerce' ),
+					$matched_order->get_order_number()
+				)
+			);
 			$note->set_content(
 				sprintf(
 				/* translators: %s: order number. */
