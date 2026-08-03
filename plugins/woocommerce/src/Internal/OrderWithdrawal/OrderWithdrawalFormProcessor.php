@@ -462,19 +462,10 @@ final class OrderWithdrawalFormProcessor {
 	 */
 	private function add_order_withdrawal_note( WC_Order $order, array $data ): void {
 		$note = sprintf(
-			/* translators: 1: customer name, 2: customer email address. */
-			__( 'Order withdrawal requested by %1$s (%2$s).', 'woocommerce' ),
-			$this->get_customer_name( $data ),
-			$data[ self::FIELD_EMAIL ]
+			/* translators: %s: withdrawal type label. */
+			__( 'Order withdrawal requested. Withdrawal type: %s.', 'woocommerce' ),
+			$this->get_withdrawal_type_label( $data[ self::FIELD_WITHDRAWAL_TYPE ] )
 		);
-
-		if ( self::WITHDRAWAL_TYPE_SPECIFIC === $data[ self::FIELD_WITHDRAWAL_TYPE ] ) {
-			$note .= "\n\n" . sprintf(
-				/* translators: %s: items the customer listed for partial withdrawal. */
-				__( 'Items requested for withdrawal: %s', 'woocommerce' ),
-				$data[ self::FIELD_ADDITIONAL_DETAILS ]
-			);
-		}
 
 		try {
 			if ( ! $order->add_order_note( $note, 0, false, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) ) ) {

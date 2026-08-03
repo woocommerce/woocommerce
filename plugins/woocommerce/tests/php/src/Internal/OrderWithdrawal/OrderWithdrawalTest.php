@@ -26,6 +26,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
 	private const INBOX_NOTE_NAME_PREFIX              = 'wc-order-withdrawal-requested-';
 	private const RATE_LIMIT_PREFIX                   = 'order_withdrawal_';
+	private const ORDER_NOTE_WITHDRAWAL_REQUESTED     = 'Order withdrawal requested. Withdrawal type: Specific items only.';
 
 	/**
 	 * The System Under Test.
@@ -228,8 +229,10 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$merchant_email = $this->get_captured_mail_to( (string) get_option( 'admin_email' ), $capture['captures'] );
 			$this->assertStringContainsString( str_replace( '&', '&amp;', $order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should link to the matched order.' );
 			$this->assertStringContainsString( 'View matched order', (string) $merchant_email['message'], 'The merchant email should include clear link text for the matched order.' );
-			$this->assertTrue( $this->order_has_note_containing( $order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The matched order should receive a withdrawal note.' );
-			$this->assertTrue( $this->order_has_note_containing( $order, 'Items requested for withdrawal: Line item 1' ), 'Specific-item details should be included in the order note.' );
+			$this->assertTrue( $this->order_has_note_containing( $order, self::ORDER_NOTE_WITHDRAWAL_REQUESTED ), 'The matched order should receive a withdrawal note.' );
+			$this->assertFalse( $this->order_has_note_containing( $order, 'Jane Doe' ), 'The order note should not include the customer name.' );
+			$this->assertFalse( $this->order_has_note_containing( $order, 'jane@example.test' ), 'The order note should not include the customer email address.' );
+			$this->assertFalse( $this->order_has_note_containing( $order, 'Line item 1' ), 'The order note should not include free-form withdrawal details.' );
 			$this->assert_order_withdrawal_requested( $order );
 		} finally {
 			$capture['remove']();
@@ -263,7 +266,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 			$this->assertSame( 'confirmation', $state->screen, 'Custom order number submissions should reach the confirmation screen.' );
 			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
-			$this->assertTrue( $this->order_has_note_containing( $order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The custom-number matched order should receive a withdrawal note.' );
+			$this->assertTrue( $this->order_has_note_containing( $order, self::ORDER_NOTE_WITHDRAWAL_REQUESTED ), 'The custom-number matched order should receive a withdrawal note.' );
 			$this->assert_order_withdrawal_requested( $order );
 		} finally {
 			remove_filter( 'woocommerce_order_number', $filter, 10 );
@@ -292,7 +295,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
 			$this->assertStringContainsString( str_replace( '&', '&amp;', $target_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should link to the intended order.' );
 			$this->assertStringNotContainsString( str_replace( '&', '&amp;', $wrong_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should not link to the wrong order.' );
-			$this->assertTrue( $this->order_has_note_containing( $target_order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The intended order should receive a withdrawal note.' );
+			$this->assertTrue( $this->order_has_note_containing( $target_order, self::ORDER_NOTE_WITHDRAWAL_REQUESTED ), 'The intended order should receive a withdrawal note.' );
 			$this->assertFalse( $this->order_has_note_containing( $wrong_order, 'Order withdrawal requested' ), 'The wrong order should not receive a withdrawal note.' );
 			$this->assert_order_withdrawal_requested( $target_order );
 		} finally {
@@ -339,7 +342,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertCount( 2, $capture['captures'], 'The customer and merchant emails should both be sent.' );
 			$this->assertStringContainsString( str_replace( '&', '&amp;', $target_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should link to the intended order.' );
 			$this->assertStringNotContainsString( str_replace( '&', '&amp;', $different_name_order->get_edit_order_url() ), (string) $merchant_email['message'], 'The merchant email should not link to the order with a different billing name.' );
-			$this->assertTrue( $this->order_has_note_containing( $target_order, 'Order withdrawal requested by Jane Doe (jane@example.test).' ), 'The intended order should receive a withdrawal note.' );
+			$this->assertTrue( $this->order_has_note_containing( $target_order, self::ORDER_NOTE_WITHDRAWAL_REQUESTED ), 'The intended order should receive a withdrawal note.' );
 			$this->assertFalse( $this->order_has_note_containing( $different_name_order, 'Order withdrawal requested' ), 'The order with a different billing name should not receive a withdrawal note.' );
 			$this->assert_order_withdrawal_requested( $target_order );
 		} finally {
