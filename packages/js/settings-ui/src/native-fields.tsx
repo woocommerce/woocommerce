@@ -12,11 +12,15 @@ import { warn } from './diagnostics';
 import { sanitizeSettingsHtml } from './html';
 import { NumberSpinControl } from './number-spin-control';
 import type { SettingsFieldComponentProps, SettingsValue } from './types';
+import {
+	toCanonicalDateTime,
+	toCanonicalNumberValue,
+	toStoreLocalDateTime,
+} from './values';
 
 type TextInputType =
 	| 'text'
 	| 'password'
-	| 'datetime-local'
 	| 'date'
 	| 'time'
 	| 'email'
@@ -26,7 +30,6 @@ type TextInputType =
 const textInputTypes: TextInputType[] = [
 	'text',
 	'password',
-	'datetime-local',
 	'date',
 	'time',
 	'email',
@@ -59,20 +62,24 @@ const toStringCustomAttribute = (
 };
 
 const getNumberInputAttributes = (
-	customAttributes?: Record< string, string | number | boolean >
+	field: SettingsFieldComponentProps[ 'field' ]
 ) => {
+	const customAttributes = field.customAttributes;
 	const safeAttributes =
 		customAttributes && typeof customAttributes === 'object'
 			? customAttributes
 			: {};
-	const { disabled, placeholder, ...inputAttributes } = safeAttributes;
+	const { disabled, placeholder, ...customInputAttributes } = safeAttributes;
 	const placeholderAttribute =
 		typeof placeholder === 'boolean' ? undefined : placeholder;
 
 	return {
 		disabled: toPresenceBooleanCustomAttribute( disabled ),
 		placeholder: toStringCustomAttribute( placeholderAttribute ),
-		inputAttributes,
+		inputAttributes: {
+			...field.validation,
+			...customInputAttributes,
+		},
 	};
 };
 
@@ -192,8 +199,8 @@ export const NativeSettingsField = ( {
 		);
 	}
 
-	if ( field.type === 'number' ) {
-		const numberInput = getNumberInputAttributes( field.customAttributes );
+	if ( field.type === 'number' || field.type === 'integer' ) {
+		const numberInput = getNumberInputAttributes( field );
 
 		return (
 			<NumberSpinControl
@@ -203,8 +210,33 @@ export const NativeSettingsField = ( {
 				value={ toStringValue( value ) }
 				placeholder={ field.placeholder ?? numberInput.placeholder }
 				disabled={ field.disabled ?? numberInput.disabled }
-				onChange={ onChange }
+				onChange={ ( nextValue ) =>
+					onChange(
+						toCanonicalNumberValue(
+							nextValue,
+							field.type === 'integer'
+						)
+					)
+				}
 				inputAttributes={ numberInput.inputAttributes }
+			/>
+		);
+	}
+
+	if ( field.type === 'datetime-local' ) {
+		return (
+			<InputControl
+				className="wc-settings-ui__control"
+				type="datetime-local"
+				label={ field.label }
+				details={ getHelp( field.description ) }
+				value={ toStoreLocalDateTime( value ) }
+				placeholder={ field.placeholder }
+				disabled={ field.disabled }
+				onChange={ ( event ) =>
+					onChange( toCanonicalDateTime( event.target.value ) )
+				}
+				{ ...field.customAttributes }
 			/>
 		);
 	}

@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { speak } from '@wordpress/a11y';
-import { createElement } from '@wordpress/element';
+import {
+	getSettings as getDateSettings,
+	setSettings as setDateSettings,
+} from '@wordpress/date';
+import { createElement, useState } from '@wordpress/element';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -56,10 +60,12 @@ const makeProps = (
 
 describe( 'NativeSettingsField', () => {
 	let cleanup: ( () => void ) | null = null;
+	const originalDateSettings = getDateSettings();
 
 	afterEach( () => {
 		cleanup?.();
 		cleanup = null;
+		setDateSettings( originalDateSettings );
 	} );
 
 	const render = ( element: JSX.Element ) => {
@@ -79,6 +85,39 @@ describe( 'NativeSettingsField', () => {
 				new MouseEvent( 'click', { bubbles: true } )
 			);
 		} );
+	};
+
+	const changeInput = ( input: HTMLInputElement, value: string ) => {
+		const valueSetter = Object.getOwnPropertyDescriptor(
+			HTMLInputElement.prototype,
+			'value'
+		)?.set;
+
+		act( () => {
+			valueSetter?.call( input, value );
+			input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+		} );
+	};
+
+	const renderStatefulField = (
+		field: SettingsUIField,
+		initialValue: SettingsValue,
+		onChange: jest.Mock
+	) => {
+		const StatefulField = () => {
+			const [ value, setValue ] = useState( initialValue );
+
+			return (
+				<NativeSettingsField
+					{ ...makeProps( field, value, ( nextValue ) => {
+						onChange( nextValue );
+						setValue( nextValue );
+					} ) }
+				/>
+			);
+		};
+
+		return render( <StatefulField /> );
 	};
 
 	const getSpinButton = ( container: HTMLElement, ariaLabel: string ) => {
@@ -110,7 +149,7 @@ describe( 'NativeSettingsField', () => {
 
 		it( 'renders a number input with custom spin buttons instead of native spinners', () => {
 			const container = render(
-				<NativeSettingsField { ...makeProps( numberField, '5' ) } />
+				<NativeSettingsField { ...makeProps( numberField, 5 ) } />
 			);
 
 			const input = container.querySelector( 'input[type="number"]' );
@@ -126,6 +165,26 @@ describe( 'NativeSettingsField', () => {
 			).toBeInstanceOf( HTMLButtonElement );
 		} );
 
+		it( 'uses canonical validation bounds when custom attributes omit them', () => {
+			const container = render(
+				<NativeSettingsField
+					{ ...makeProps(
+						{
+							...numberField,
+							validation: { min: 2, max: 8 },
+							customAttributes: { step: 0.5 },
+						},
+						5
+					) }
+				/>
+			);
+			const input = container.querySelector( 'input[type="number"]' );
+
+			expect( input ).toHaveAttribute( 'min', '2' );
+			expect( input ).toHaveAttribute( 'max', '8' );
+			expect( input ).toHaveAttribute( 'step', '0.5' );
+		} );
+
 		it( 'honors placeholder and disabled custom attributes for number inputs', () => {
 			const container = render(
 				<NativeSettingsField
@@ -138,7 +197,7 @@ describe( 'NativeSettingsField', () => {
 								placeholder: 'Only configurable in code',
 							},
 						},
-						''
+						null
 					) }
 				/>
 			);
@@ -175,7 +234,7 @@ describe( 'NativeSettingsField', () => {
 								disabled: 'false',
 							},
 						},
-						'5'
+						5
 					) }
 				/>
 			);
@@ -207,7 +266,7 @@ describe( 'NativeSettingsField', () => {
 								disabled: 'true',
 							},
 						},
-						'5'
+						5
 					) }
 				/>
 			);
@@ -231,7 +290,7 @@ describe( 'NativeSettingsField', () => {
 			const onChange = jest.fn();
 			const container = render(
 				<NativeSettingsField
-					{ ...makeProps( numberField, '5', onChange ) }
+					{ ...makeProps( numberField, 5, onChange ) }
 				/>
 			);
 
@@ -239,13 +298,13 @@ describe( 'NativeSettingsField', () => {
 				getSpinButton( container, 'Increment Low stock threshold' )
 			);
 
-			expect( onChange ).toHaveBeenCalledWith( '6' );
+			expect( onChange ).toHaveBeenCalledWith( 6 );
 			expect( speak ).toHaveBeenCalledWith( '6' );
 		} );
 
 		it( 'disables the decrement button at the minimum value', () => {
 			const container = render(
-				<NativeSettingsField { ...makeProps( numberField, '0' ) } />
+				<NativeSettingsField { ...makeProps( numberField, 0 ) } />
 			);
 
 			expect(
@@ -268,7 +327,7 @@ describe( 'NativeSettingsField', () => {
 							...numberField,
 							customAttributes: { min: 0, max: 10, step: 1 },
 						},
-						'10'
+						10
 					) }
 				/>
 			);
@@ -294,7 +353,7 @@ describe( 'NativeSettingsField', () => {
 							...numberField,
 							customAttributes: { min: 0, step: 0 },
 						},
-						'5',
+						5,
 						onChange
 					) }
 				/>
@@ -304,7 +363,7 @@ describe( 'NativeSettingsField', () => {
 				getSpinButton( container, 'Increment Low stock threshold' )
 			);
 
-			expect( onChange ).toHaveBeenCalledWith( '6' );
+			expect( onChange ).toHaveBeenCalledWith( 6 );
 		} );
 
 		it( 'clamps stepping to the maximum and avoids float precision drift', () => {
@@ -316,7 +375,7 @@ describe( 'NativeSettingsField', () => {
 							...numberField,
 							customAttributes: { min: 0, max: 0.3, step: 0.2 },
 						},
-						'0.1',
+						0.1,
 						onChange
 					) }
 				/>
@@ -326,7 +385,7 @@ describe( 'NativeSettingsField', () => {
 				getSpinButton( container, 'Increment Low stock threshold' )
 			);
 
-			expect( onChange ).toHaveBeenCalledWith( '0.3' );
+			expect( onChange ).toHaveBeenCalledWith( 0.3 );
 		} );
 
 		it( 'preserves current value precision when it exceeds step precision', () => {
@@ -338,7 +397,7 @@ describe( 'NativeSettingsField', () => {
 							...numberField,
 							customAttributes: { min: 0, step: 0.1 },
 						},
-						'0.05',
+						0.05,
 						onChange
 					) }
 				/>
@@ -348,7 +407,7 @@ describe( 'NativeSettingsField', () => {
 				getSpinButton( container, 'Increment Low stock threshold' )
 			);
 
-			expect( onChange ).toHaveBeenCalledWith( '0.15' );
+			expect( onChange ).toHaveBeenCalledWith( 0.15 );
 		} );
 
 		it( 'handles scientific-notation steps', () => {
@@ -360,7 +419,7 @@ describe( 'NativeSettingsField', () => {
 							...numberField,
 							customAttributes: { min: 0, step: 1e-7 },
 						},
-						'0',
+						0,
 						onChange
 					) }
 				/>
@@ -370,7 +429,7 @@ describe( 'NativeSettingsField', () => {
 				getSpinButton( container, 'Increment Low stock threshold' )
 			);
 
-			expect( onChange ).toHaveBeenCalledWith( '1e-7' );
+			expect( onChange ).toHaveBeenCalledWith( 1e-7 );
 		} );
 
 		it( 'does not exceed toFixed precision limits for tiny scientific-notation steps', () => {
@@ -382,7 +441,7 @@ describe( 'NativeSettingsField', () => {
 							...numberField,
 							customAttributes: { min: 0, step: 1e-200 },
 						},
-						'0',
+						0,
 						onChange
 					) }
 				/>
@@ -393,7 +452,7 @@ describe( 'NativeSettingsField', () => {
 					getSpinButton( container, 'Increment Low stock threshold' )
 				)
 			).not.toThrow();
-			expect( onChange ).toHaveBeenCalledWith( '1e-200' );
+			expect( onChange ).toHaveBeenCalledWith( 1e-200 );
 		} );
 
 		it( 'steps onto the minimum from an empty value', () => {
@@ -405,7 +464,7 @@ describe( 'NativeSettingsField', () => {
 							...numberField,
 							customAttributes: { min: 2, step: 1 },
 						},
-						'',
+						null,
 						onChange
 					) }
 				/>
@@ -415,7 +474,127 @@ describe( 'NativeSettingsField', () => {
 				getSpinButton( container, 'Increment Low stock threshold' )
 			);
 
-			expect( onChange ).toHaveBeenCalledWith( '2' );
+			expect( onChange ).toHaveBeenCalledWith( 2 );
+		} );
+
+		it( 'keeps sequential number edits canonical', () => {
+			const onChange = jest.fn();
+			const container = renderStatefulField( numberField, 5, onChange );
+
+			clickButton(
+				getSpinButton( container, 'Increment Low stock threshold' )
+			);
+			clickButton(
+				getSpinButton( container, 'Increment Low stock threshold' )
+			);
+
+			expect( onChange.mock.calls.map( ( [ value ] ) => value ) ).toEqual(
+				[ 6, 7 ]
+			);
+		} );
+
+		it( 'emits null when a number is cleared', () => {
+			const onChange = jest.fn();
+			const container = renderStatefulField( numberField, 5, onChange );
+			const input = container.querySelector( 'input[type="number"]' );
+
+			expect( input ).toBeInstanceOf( HTMLInputElement );
+			changeInput( input as HTMLInputElement, '' );
+			expect( onChange ).toHaveBeenLastCalledWith( null );
+		} );
+
+		it( 'emits null for an unsafe integral number', () => {
+			const onChange = jest.fn();
+			const container = renderStatefulField( numberField, 5, onChange );
+			const input = container.querySelector( 'input[type="number"]' );
+
+			expect( input ).toBeInstanceOf( HTMLInputElement );
+			changeInput( input as HTMLInputElement, '9007199254740992' );
+			expect( onChange ).toHaveBeenLastCalledWith( null );
+		} );
+	} );
+
+	describe( 'integer fields', () => {
+		it( 'uses NumberSpinControl and emits safe integers rather than text', () => {
+			const onChange = jest.fn();
+			const container = renderStatefulField(
+				{
+					id: 'wc_test_integer',
+					label: 'Items per row',
+					type: 'integer',
+					customAttributes: { min: 1, step: 1 },
+				},
+				2,
+				onChange
+			);
+
+			expect(
+				container.querySelector( 'input[type="number"]' )
+			).toBeInstanceOf( HTMLInputElement );
+			expect(
+				container.querySelector( 'input[type="text"]' )
+			).toBeNull();
+			clickButton(
+				getSpinButton( container, 'Increment Items per row' )
+			);
+			expect( onChange ).toHaveBeenLastCalledWith( 3 );
+		} );
+
+		it( 'emits null for fractional or unsafe integer input', () => {
+			const onChange = jest.fn();
+			const container = renderStatefulField(
+				{
+					id: 'wc_test_integer',
+					label: 'Items per row',
+					type: 'integer',
+				},
+				2,
+				onChange
+			);
+			const input = container.querySelector( 'input[type="number"]' );
+
+			expect( input ).toBeInstanceOf( HTMLInputElement );
+			changeInput( input as HTMLInputElement, '2.5' );
+			changeInput( input as HTMLInputElement, '9007199254740992' );
+			expect( onChange.mock.calls.map( ( [ value ] ) => value ) ).toEqual(
+				[ null, null ]
+			);
+		} );
+	} );
+
+	describe( 'datetime-local fields', () => {
+		it( 'displays canonical ISO state as local wall time and emits ISO or null', () => {
+			setDateSettings( {
+				...originalDateSettings,
+				timezone: {
+					...originalDateSettings.timezone,
+					offset: '-5',
+					offsetFormatted: '-05:00',
+					string: 'America/New_York',
+				},
+			} );
+			const onChange = jest.fn();
+			const container = renderStatefulField(
+				{
+					id: 'wc_test_starts_at',
+					label: 'Starts at',
+					type: 'datetime-local',
+				},
+				'2026-01-01T17:30:00Z',
+				onChange
+			);
+			const input = container.querySelector(
+				'input[type="datetime-local"]'
+			);
+
+			expect( input ).toBeInstanceOf( HTMLInputElement );
+			expect( input ).toHaveValue( '2026-01-01T12:30' );
+			changeInput( input as HTMLInputElement, '2026-01-01T13:45:00' );
+			expect( onChange ).toHaveBeenLastCalledWith(
+				'2026-01-01T18:45:00Z'
+			);
+			changeInput( input as HTMLInputElement, '' );
+			expect( onChange ).toHaveBeenLastCalledWith( null );
 		} );
 	} );
 

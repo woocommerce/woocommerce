@@ -37,6 +37,7 @@ class SettingsUISchema {
 		'datetime-local',
 		'email',
 		'info',
+		'integer',
 		'number',
 		'password',
 		'radio',
@@ -61,6 +62,13 @@ class SettingsUISchema {
 	 * @var string[]
 	 */
 	private const RANGE_ATTRIBUTES = array( 'min', 'max', 'step' );
+
+	/**
+	 * Largest integer JavaScript can represent exactly.
+	 *
+	 * @var string
+	 */
+	private const JAVASCRIPT_SAFE_INTEGER = '9007199254740991';
 
 	/**
 	 * Build a schema from a legacy WC settings array.
@@ -161,7 +169,7 @@ class SettingsUISchema {
 
 		$decoded_title = html_entity_decode( $title, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 );
 
-		return array(
+		$schema = array(
 			'id'      => $page_id,
 			'title'   => $decoded_title,
 			'section' => '' === $section ? self::DEFAULT_GROUP_ID : $section,
@@ -173,6 +181,8 @@ class SettingsUISchema {
 			),
 			'groups'  => $groups,
 		);
+
+		return self::canonicalize_schema_values( $schema, true );
 	}
 
 	// Exception messages are not HTML output. Dynamic values are sanitized once
@@ -286,11 +296,32 @@ class SettingsUISchema {
 	 * @return array Schema with scalar option values canonicalized to strings.
 	 */
 	public static function canonicalize_option_values( array $schema ): array {
+		$converted_fields = array();
+		$schema           = self::canonicalize_option_values_and_collect( $schema, $converted_fields );
+
+		self::emit_conversion_notice(
+			__METHOD__,
+			$converted_fields,
+			/* translators: %s: comma-separated field ids. */
+			__( 'A Settings UI schema provider supplied non-string option, field, or visibility values that WooCommerce converted for compatibility: %s. Update the provider to supply string values.', 'woocommerce' ),
+			'11.0.0'
+		);
+
+		return $schema;
+	}
+
+	/**
+	 * Canonicalize option values and collect affected field ids.
+	 *
+	 * @param array    $schema Settings UI schema.
+	 * @param string[] $converted_fields Affected field ids.
+	 * @return array Canonicalized schema.
+	 */
+	private static function canonicalize_option_values_and_collect( array $schema, array &$converted_fields ): array {
 		if ( ! isset( $schema['groups'] ) || ! is_array( $schema['groups'] ) ) {
 			return $schema;
 		}
 
-		$converted_fields = array();
 		$option_field_ids = array();
 
 		foreach ( $schema['groups'] as &$group ) {
@@ -308,8 +339,9 @@ class SettingsUISchema {
 					continue;
 				}
 
-				$option_field_ids[] = $field['id'];
-				$converted          = false;
+				$option_field_ids[ $field['id'] ] = true;
+
+				$converted = false;
 
 				foreach ( $field['options'] as &$option ) {
 					if (
@@ -378,19 +410,591 @@ class SettingsUISchema {
 		}
 		unset( $group );
 
-		if ( ! empty( $converted_fields ) ) {
-			wc_doing_it_wrong(
+		return $schema;
+	}
+
+	/**
+	 * Canonicalize typed field values and compatibility metadata.
+	 *
+	 * This additive entry point preserves canonicalize_option_values() for
+	 * existing callers while letting request resolution issue one aggregate
+	 * compatibility notice for the complete native-provider pass.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $schema Settings UI schema.
+	 * @param bool  $legacy_derived Whether the schema came from legacy settings definitions.
+	 * @return array Canonicalized schema.
+	 * @throws \InvalidArgumentException When a value cannot be converted without loss.
+	 */
+	public static function canonicalize_schema_values( array $schema, bool $legacy_derived = false ): array {
+		if ( ! isset( $schema['groups'] ) || ! is_array( $schema['groups'] ) ) {
+			return $schema;
+		}
+
+		$converted_fields = array();
+		$original_values  = array();
+
+		foreach ( $schema['groups'] as &$group ) {
+			if ( ! is_array( $group ) || ! isset( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
+				continue;
+			}
+
+			foreach ( $group['fields'] as &$field ) {
+				if ( ! is_array( $field ) || ! isset( $field['id'] ) || ! is_string( $field['id'] ) ) {
+					continue;
+				}
+
+				if ( array_key_exists( 'value', $field ) ) {
+					$original_values[ $field['id'] ] = $field['value'];
+				}
+			}
+			unset( $field );
+		}
+		unset( $group );
+
+		$schema = self::canonicalize_option_values_and_collect( $schema, $converted_fields );
+		foreach ( $schema['groups'] as &$group ) {
+			if ( ! is_array( $group ) || ! isset( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
+				continue;
+			}
+
+			foreach ( $group['fields'] as &$field ) {
+				if ( ! is_array( $field ) || ! isset( $field['id'] ) || ! is_string( $field['id'] ) ) {
+					continue;
+				}
+
+				self::canonicalize_field( $field, $converted_fields );
+			}
+			unset( $field );
+		}
+		unset( $group );
+
+		self::preserve_converted_form_values( $schema, $original_values );
+
+		if ( ! $legacy_derived ) {
+			self::emit_conversion_notice(
 				__METHOD__,
-				sprintf(
-					/* translators: %s: comma-separated field ids. */
-					esc_html__( 'A Settings UI schema provider supplied non-string option, field, or visibility values that WooCommerce converted for compatibility: %s. Update the provider to supply string values.', 'woocommerce' ),
-					esc_html( implode( ', ', array_unique( $converted_fields ) ) )
-				),
-				'11.0.0'
+				$converted_fields,
+				/* translators: %s: comma-separated field ids. */
+				__( 'A Settings UI schema provider supplied legacy field values or metadata that WooCommerce converted for compatibility: %s. Update the provider to supply canonical values.', 'woocommerce' ),
+				'11.1.0'
 			);
 		}
 
 		return $schema;
+	}
+
+	/**
+	 * Canonicalize one field in place.
+	 *
+	 * @param array    $field Field definition.
+	 * @param string[] $converted_fields Affected field ids.
+	 */
+	private static function canonicalize_field( array &$field, array &$converted_fields ): void {
+		$type = $field['type'] ?? null;
+		if ( ! is_string( $type ) ) {
+			return;
+		}
+
+		$original_type  = $type;
+		$original_value = $field['value'] ?? null;
+
+		$numeric_validation_converted = false;
+
+		if ( 'number' === $type && self::should_promote_to_integer( $field ) ) {
+			$type          = 'integer';
+			$field['type'] = $type;
+		}
+
+		if ( array_key_exists( 'value', $field ) ) {
+			switch ( $type ) {
+				case 'array':
+					$field['value'] = self::canonicalize_array_value( $field['value'], $field['id'] );
+					break;
+				case 'checkbox':
+					$field['value'] = self::canonicalize_checkbox_value( $field['value'], $field['id'] );
+					break;
+				case 'number':
+					$field['value'] = self::canonicalize_number( $field['value'], false, $field['id'], 'value' );
+					break;
+				case 'integer':
+					$field['value'] = self::canonicalize_number( $field['value'], true, $field['id'], 'value' );
+					break;
+				case 'datetime-local':
+					$field['value'] = self::canonicalize_datetime( $field['value'], $field['id'] );
+					break;
+			}
+		}
+
+		if ( in_array( $type, array( 'number', 'integer' ), true ) ) {
+			$numeric_validation_converted = self::canonicalize_numeric_validation( $field, 'integer' === $type );
+		}
+
+		if (
+			$original_type !== $field['type'] ||
+			( array_key_exists( 'value', $field ) && $original_value !== $field['value'] ) ||
+			$numeric_validation_converted
+		) {
+			$converted_fields[] = $field['id'];
+		}
+	}
+
+	/**
+	 * Whether a legacy number follows the HTML integer step contract.
+	 *
+	 * @param array $field Field definition.
+	 * @return bool
+	 */
+	private static function should_promote_to_integer( array $field ): bool {
+		$attributes = isset( $field['customAttributes'] ) && is_array( $field['customAttributes'] ) ? $field['customAttributes'] : array();
+		if ( ! array_key_exists( 'step', $attributes ) || '1' !== self::get_integral_decimal( $attributes['step'] ) ) {
+			return false;
+		}
+
+		$base = $attributes['min'] ?? ( $field['value'] ?? '' );
+		if ( is_string( $base ) && '' === trim( $base ) ) {
+			$base = 0;
+		}
+
+		return null !== self::get_integral_decimal( $base );
+	}
+
+	/**
+	 * Canonicalize an array value to a string list.
+	 *
+	 * @param mixed  $value Candidate value.
+	 * @param string $field_id Field id.
+	 * @return array
+	 * @throws \InvalidArgumentException When the value cannot become a string list.
+	 */
+	private static function canonicalize_array_value( $value, string $field_id ): array {
+		if ( is_string( $value ) ) {
+			return '' === $value ? array() : array( $value );
+		}
+
+		if ( ! is_array( $value ) || ! ArrayUtil::array_is_list( $value ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" value must be a string list.', $field_id ) );
+		}
+
+		$canonical = array();
+		foreach ( $value as $item ) {
+			if ( ! is_scalar( $item ) ) {
+				throw self::invalid_schema( sprintf( 'Field "%s" value must be a string list.', $field_id ) );
+			}
+			$canonical[] = is_string( $item ) ? $item : self::to_canonical_string( $item );
+		}
+
+		return $canonical;
+	}
+
+	/**
+	 * Canonicalize a checkbox value.
+	 *
+	 * @param mixed  $value Candidate value.
+	 * @param string $field_id Field id.
+	 * @return bool
+	 * @throws \InvalidArgumentException When the value is ambiguous.
+	 */
+	private static function canonicalize_checkbox_value( $value, string $field_id ): bool {
+		if ( is_bool( $value ) ) {
+			return $value;
+		}
+
+		if ( is_int( $value ) && in_array( $value, array( 0, 1 ), true ) ) {
+			return 1 === $value;
+		}
+
+		if ( is_string( $value ) ) {
+			$normalized = strtolower( trim( $value ) );
+			if ( in_array( $normalized, array( '1', 'true', 'yes' ), true ) ) {
+				return true;
+			}
+			if ( in_array( $normalized, array( '', '0', 'false', 'no' ), true ) ) {
+				return false;
+			}
+		}
+
+		throw self::invalid_schema( sprintf( 'Field "%s" checkbox value is ambiguous.', $field_id ) );
+	}
+
+	/**
+	 * Canonicalize a number without first rounding integral strings.
+	 *
+	 * @param mixed  $value Candidate value.
+	 * @param bool   $integer_only Whether the result must be an integer.
+	 * @param string $field_id Field id.
+	 * @param string $property Value or bound name.
+	 * @return int|float|null
+	 * @throws \InvalidArgumentException When the number is invalid, unsafe, or lossy.
+	 */
+	private static function canonicalize_number( $value, bool $integer_only, string $field_id, string $property ) {
+		if ( null === $value || ( is_string( $value ) && '' === trim( $value ) ) ) {
+			return null;
+		}
+
+		if ( is_int( $value ) ) {
+			self::assert_safe_integer( (string) $value, $field_id, $property );
+			return $value;
+		}
+
+		if ( is_float( $value ) ) {
+			if ( ! is_finite( $value ) ) {
+				throw self::invalid_schema( sprintf( 'Field "%1$s" %2$s must be a finite number.', $field_id, $property ) );
+			}
+
+			if ( floor( $value ) === $value ) {
+				$integral = sprintf( '%.0f', $value );
+				self::assert_safe_integer( $integral, $field_id, $property );
+				return $integer_only ? (int) $integral : $value;
+			}
+
+			if ( $integer_only ) {
+				throw self::invalid_schema( sprintf( 'Field "%1$s" %2$s must be an integer.', $field_id, $property ) );
+			}
+
+			return $value;
+		}
+
+		$integral = self::get_integral_decimal( $value );
+		if ( null !== $integral ) {
+			self::assert_safe_integer( $integral, $field_id, $property );
+
+			return (int) $integral;
+		}
+
+		if ( $integer_only ) {
+			throw self::invalid_schema( sprintf( 'Field "%1$s" %2$s must be an integer.', $field_id, $property ) );
+		}
+
+		if ( ! is_string( $value ) || ! self::is_decimal_number( trim( $value ) ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%1$s" %2$s must be a finite number.', $field_id, $property ) );
+		}
+
+		$number = (float) trim( $value );
+		if ( ! is_finite( $number ) || ( 0.0 === $number && ! self::decimal_string_is_zero( trim( $value ) ) ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%1$s" %2$s cannot be represented as a finite number without loss.', $field_id, $property ) );
+		}
+
+		return $number;
+	}
+
+	/**
+	 * Return the exact integral decimal represented by a numeric value.
+	 *
+	 * @param mixed $value Candidate numeric value.
+	 * @return string|null Normalized signed integer, or null when non-integral.
+	 */
+	private static function get_integral_decimal( $value ): ?string {
+		if ( is_int( $value ) ) {
+			return (string) $value;
+		}
+
+		if ( is_float( $value ) ) {
+			return is_finite( $value ) && floor( $value ) === $value ? sprintf( '%.0f', $value ) : null;
+		}
+
+		if ( ! is_string( $value ) ) {
+			return null;
+		}
+
+		$value = trim( $value );
+		if ( ! preg_match( '/^([+-]?)(?:(\d+)(?:\.(\d*))?|\.(\d+))(?:[eE]([+-]?\d+))?$/', $value, $matches ) ) {
+			return null;
+		}
+
+		$whole    = $matches[2] ?? '';
+		$fraction = '' !== ( $matches[3] ?? '' ) ? $matches[3] : ( $matches[4] ?? '' );
+		$digits   = ltrim( $whole . $fraction, '0' );
+		$digits   = '' === $digits ? '0' : $digits;
+		$exponent = $matches[5] ?? '0';
+		$negative = '-' === ( $matches[1] ?? '' );
+		$scale    = strlen( $fraction );
+
+		if ( strlen( ltrim( $exponent, '+-' ) ) > 6 ) {
+			if ( '0' === $digits ) {
+				return '0';
+			}
+
+			return '-' === substr( $exponent, 0, 1 ) ? null : ( $negative ? '-' : '' ) . str_repeat( '9', 17 );
+		}
+
+		$decimal_places = $scale - (int) $exponent;
+		if ( 0 < $decimal_places ) {
+			if ( $decimal_places >= strlen( $digits ) ) {
+				return '0' === $digits ? '0' : null;
+			}
+
+			$trailing = substr( $digits, -$decimal_places );
+			if ( '' !== trim( $trailing, '0' ) ) {
+				return null;
+			}
+			$digits = substr( $digits, 0, -$decimal_places );
+		} elseif ( 0 > $decimal_places ) {
+			$zeros = -$decimal_places;
+			if ( 17 < strlen( $digits ) + $zeros ) {
+				$digits = str_repeat( '9', 17 );
+			} else {
+				$digits .= str_repeat( '0', $zeros );
+			}
+		}
+
+		$digits = ltrim( $digits, '0' );
+		if ( '' === $digits ) {
+			return '0';
+		}
+
+		return $negative ? '-' . $digits : $digits;
+	}
+
+	/**
+	 * Assert an exact integer fits both JavaScript and the current PHP runtime.
+	 *
+	 * @param string $integer Normalized signed integer.
+	 * @param string $field_id Field id.
+	 * @param string $property Value or bound name.
+	 * @throws \InvalidArgumentException When the integer is unsafe.
+	 */
+	private static function assert_safe_integer( string $integer, string $field_id, string $property ): void {
+		$absolute = ltrim( $integer, '-' );
+		if ( self::unsigned_decimal_is_greater( $absolute, self::JAVASCRIPT_SAFE_INTEGER ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%1$s" %2$s is outside the JavaScript safe integer range.', $field_id, $property ) );
+		}
+
+		$php_integer_limit = '-' === substr( $integer, 0, 1 ) ? ltrim( (string) PHP_INT_MIN, '-' ) : (string) PHP_INT_MAX;
+		if ( self::unsigned_decimal_is_greater( $absolute, $php_integer_limit ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%1$s" %2$s cannot be represented as an integer on this PHP platform.', $field_id, $property ) );
+		}
+	}
+
+	/**
+	 * Compare normalized unsigned decimal strings.
+	 *
+	 * @param string $left Left operand.
+	 * @param string $right Right operand.
+	 * @return bool
+	 */
+	private static function unsigned_decimal_is_greater( string $left, string $right ): bool {
+		$left  = ltrim( $left, '0' );
+		$right = ltrim( $right, '0' );
+		$left  = '' === $left ? '0' : $left;
+		$right = '' === $right ? '0' : $right;
+
+		return strlen( $left ) !== strlen( $right ) ? strlen( $left ) > strlen( $right ) : 0 < strcmp( $left, $right );
+	}
+
+	/**
+	 * Whether a string follows the HTML decimal-number grammar.
+	 *
+	 * @param string $value Candidate number.
+	 * @return bool
+	 */
+	private static function is_decimal_number( string $value ): bool {
+		return 1 === preg_match( '/^[+-]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:[eE][+-]?\d+)?$/', $value );
+	}
+
+	/**
+	 * Whether a decimal numeric string represents zero.
+	 *
+	 * @param string $value Candidate number.
+	 * @return bool
+	 */
+	private static function decimal_string_is_zero( string $value ): bool {
+		$mantissa = preg_replace( '/[eE].*$/', '', $value );
+		return '' === trim( (string) $mantissa, '+-0.' );
+	}
+
+	/**
+	 * Canonicalize numeric validation and mirror it to legacy attributes.
+	 *
+	 * @param array $field Field definition.
+	 * @param bool  $integer_only Whether bounds must be integers.
+	 * @return bool Whether provider-supplied metadata required compatibility conversion.
+	 * @throws \InvalidArgumentException When bounds are invalid or disagree.
+	 */
+	private static function canonicalize_numeric_validation( array &$field, bool $integer_only ): bool {
+		$attributes = $field['customAttributes'] ?? array();
+		$validation = $field['validation'] ?? array();
+		$converted  = false;
+
+		if ( ! is_array( $attributes ) || ! is_array( $validation ) ) {
+			return false;
+		}
+
+		foreach ( array( 'min', 'max' ) as $bound ) {
+			$has_attribute  = array_key_exists( $bound, $attributes );
+			$has_validation = array_key_exists( $bound, $validation );
+			if ( ! $has_attribute && ! $has_validation ) {
+				continue;
+			}
+
+			$original_attribute  = $has_attribute ? $attributes[ $bound ] : null;
+			$original_validation = $has_validation ? $validation[ $bound ] : null;
+			$attribute_value     = $has_attribute ? self::canonicalize_number( $original_attribute, $integer_only, $field['id'], $bound ) : null;
+			$validation_value    = $has_validation ? self::canonicalize_number( $original_validation, $integer_only, $field['id'], $bound ) : null;
+
+			if ( $has_attribute && $has_validation && ! self::numeric_values_agree( $attribute_value, $validation_value ) ) {
+				throw self::invalid_schema( sprintf( 'Field "%1$s" %2$s disagrees between customAttributes and validation.', $field['id'], $bound ) );
+			}
+
+			$canonical            = $has_validation ? $validation_value : $attribute_value;
+			$validation[ $bound ] = $canonical;
+			$attributes[ $bound ] = $canonical;
+			$converted            = $converted ||
+				( $has_attribute && ! $has_validation ) ||
+				( $has_attribute && $original_attribute !== $attribute_value ) ||
+				( $has_validation && $original_validation !== $validation_value );
+		}
+
+		if ( ! empty( $validation ) ) {
+			$field['validation'] = $validation;
+		}
+		if ( ! empty( $attributes ) ) {
+			$field['customAttributes'] = $attributes;
+		}
+
+		return $converted;
+	}
+
+	/**
+	 * Whether two numeric values describe the same number.
+	 *
+	 * @param mixed $left Left operand.
+	 * @param mixed $right Right operand.
+	 * @return bool
+	 */
+	private static function numeric_values_agree( $left, $right ): bool {
+		if ( ! is_numeric( $left ) || ! is_numeric( $right ) ) {
+			return false;
+		}
+
+		return (float) $left === (float) $right;
+	}
+
+	/**
+	 * Canonicalize a store-local or already-qualified datetime.
+	 *
+	 * @param mixed  $value Candidate value.
+	 * @param string $field_id Field id.
+	 * @return string|null
+	 * @throws \InvalidArgumentException When the datetime is malformed.
+	 */
+	private static function canonicalize_datetime( $value, string $field_id ): ?string {
+		if ( null === $value || ( is_string( $value ) && '' === trim( $value ) ) ) {
+			return null;
+		}
+
+		if ( ! is_string( $value ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" datetime value must be a string or null.', $field_id ) );
+		}
+
+		$value = trim( $value );
+		if ( preg_match( '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?$/', $value ) ) {
+			$format   = 16 === strlen( $value ) ? '!Y-m-d\TH:i' : '!Y-m-d\TH:i:s';
+			$datetime = \DateTimeImmutable::createFromFormat( $format, $value, wp_timezone() );
+		} elseif ( preg_match( '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:Z|[+-]\d{2}:\d{2})$/', $value ) ) {
+			$format   = preg_match( '/T\d{2}:\d{2}:/', $value ) ? '!Y-m-d\TH:i:sP' : '!Y-m-d\TH:iP';
+			$datetime = \DateTimeImmutable::createFromFormat( $format, $value );
+		} else {
+			throw self::invalid_schema( sprintf( 'Field "%s" datetime value is malformed.', $field_id ) );
+		}
+
+		$errors = \DateTimeImmutable::getLastErrors();
+		if ( false === $datetime || ( is_array( $errors ) && ( 0 < $errors['warning_count'] || 0 < $errors['error_count'] ) ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" datetime value is malformed.', $field_id ) );
+		}
+
+		return $datetime->format( 'Y-m-d\TH:i:sP' );
+	}
+
+	/**
+	 * Preserve valid pre-conversion form values for changed fields.
+	 *
+	 * @param array $schema Canonical schema.
+	 * @param array $original_values Original values keyed by field id.
+	 * @throws \InvalidArgumentException When a converted value has no safe form representation.
+	 */
+	private static function preserve_converted_form_values( array &$schema, array $original_values ): void {
+		$page_save_adapter = isset( $schema['save'] ) && is_array( $schema['save'] ) ? ( $schema['save']['adapter'] ?? 'form_post' ) : 'form_post';
+		if ( 'form_post' !== $page_save_adapter ) {
+			return;
+		}
+
+		foreach ( $schema['groups'] as &$group ) {
+			if ( ! is_array( $group ) || ! isset( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
+				continue;
+			}
+
+			foreach ( $group['fields'] as &$field ) {
+				if ( ! is_array( $field ) || ! isset( $field['id'] ) || ! array_key_exists( $field['id'], $original_values ) ) {
+					continue;
+				}
+
+				$original = $original_values[ $field['id'] ];
+				if ( ( $field['value'] ?? null ) === $original || 'form_post' !== self::get_field_save_adapter( $field ) ) {
+					continue;
+				}
+
+				if ( isset( $field['save'] ) && is_array( $field['save'] ) && array_key_exists( 'initialValue', $field['save'] ) ) {
+					continue;
+				}
+
+				if ( ! self::is_form_value( $original ) ) {
+					throw self::invalid_schema( sprintf( 'Field "%s" must define save.initialValue before its native form value can be converted.', $field['id'] ) );
+				}
+
+				if ( ! isset( $field['save'] ) || ! is_array( $field['save'] ) ) {
+					$field['save'] = array( 'adapter' => 'form_post' );
+				}
+				$field['save']['initialValue'] = $original;
+			}
+			unset( $field );
+		}
+		unset( $group );
+	}
+
+	/**
+	 * Get a field's effective save adapter.
+	 *
+	 * @param array $field Field definition.
+	 * @return string
+	 */
+	private static function get_field_save_adapter( array $field ): string {
+		return isset( $field['save'] ) && is_array( $field['save'] ) ? ( $field['save']['adapter'] ?? 'form_post' ) : 'form_post';
+	}
+
+	/**
+	 * Whether a value is a valid HTML form representation.
+	 *
+	 * @param mixed $value Candidate value.
+	 * @return bool
+	 */
+	private static function is_form_value( $value ): bool {
+		return is_string( $value ) || ( is_array( $value ) && ArrayUtil::array_is_list( $value ) && count( $value ) === count( array_filter( $value, 'is_string' ) ) );
+	}
+
+	/**
+	 * Emit one compatibility notice for all affected fields.
+	 *
+	 * @param string   $method Method name reported by the notice.
+	 * @param string[] $field_ids Affected field ids.
+	 * @param string   $message Translatable sprintf message.
+	 * @param string   $version Version when the notice was introduced.
+	 */
+	private static function emit_conversion_notice( string $method, array $field_ids, string $message, string $version ): void {
+		if ( empty( $field_ids ) ) {
+			return;
+		}
+
+		wc_doing_it_wrong(
+			$method,
+			sprintf(
+				/* translators: %s: comma-separated field ids. */
+				esc_html( $message ),
+				esc_html( implode( ', ', array_unique( $field_ids ) ) )
+			),
+			$version
+		);
 	}
 
 	/**
@@ -422,14 +1026,17 @@ class SettingsUISchema {
 	/**
 	 * Whether a visibility rule carries a value compared against an options field.
 	 *
-	 * @param mixed $rule Candidate visibility rule.
-	 * @param array $option_field_ids Ids of fields carrying an options array.
+	 * @param mixed               $rule Candidate visibility rule.
+	 * @param array<string, bool> $option_field_ids Ids of fields carrying an options array.
 	 * @return bool
 	 */
 	private static function is_canonicalizable_visibility_rule( $rule, array $option_field_ids ): bool {
+		$controller = is_array( $rule ) ? ( $rule['controller'] ?? null ) : null;
+
 		return is_array( $rule )
 			&& array_key_exists( 'value', $rule )
-			&& in_array( $rule['controller'] ?? null, $option_field_ids, true );
+			&& is_string( $controller )
+			&& isset( $option_field_ids[ $controller ] );
 	}
 
 	/**
@@ -471,14 +1078,23 @@ class SettingsUISchema {
 		}
 
 		$canonical_type = self::normalize_type( $type );
-		$field          = array(
+		$save           = self::get_save_schema( $setting, $default_save_adapter );
+		if ( 'info' === $type ) {
+			$save = array( 'adapter' => 'none' );
+		}
+		$raw_value = self::get_field_raw_value( $setting, $save );
+		$field     = array(
 			'id'          => $id,
 			'label'       => self::get_field_label( $setting, $id, $type ),
 			'type'        => $canonical_type,
 			'description' => self::get_field_description( $setting, $type ),
-			'value'       => self::get_field_value( $setting, $canonical_type ),
-			'save'        => self::get_save_schema( $setting, $default_save_adapter ),
+			'value'       => $raw_value,
+			'save'        => $save,
 		);
+
+		if ( 'form_post' === ( $save['adapter'] ?? null ) && ! array_key_exists( 'initialValue', $save ) && self::is_form_value( $raw_value ) ) {
+			$field['save']['initialValue'] = $raw_value;
+		}
 
 		foreach ( array( 'component', 'placeholder', 'disabled' ) as $key ) {
 			if ( array_key_exists( $key, $setting ) ) {
@@ -577,39 +1193,46 @@ class SettingsUISchema {
 	}
 
 	/**
-	 * Get a field value.
+	 * Get the raw value for a legacy field.
 	 *
-	 * @param array  $setting Legacy field definition.
-	 * @param string $type Canonical field type.
+	 * Option-backed values are read only for legacy form-post fields. The field
+	 * name is the persistence source of truth and supports the same flat or
+	 * one-level nested shape as the classic form.
+	 *
+	 * @param array $setting Legacy field definition.
+	 * @param array $save Field save metadata.
 	 * @return mixed
+	 * @throws \InvalidArgumentException When the effective field name is unsupported.
 	 */
-	private static function get_field_value( array $setting, string $type ) {
+	private static function get_field_raw_value( array $setting, array $save ) {
 		if ( array_key_exists( 'value', $setting ) ) {
-			return self::normalize_value( $setting['value'], $type );
+			return $setting['value'];
 		}
 
 		$default = $setting['default'] ?? '';
-		$value   = \WC_Admin_Settings::get_option( (string) $setting['id'], $default );
-
-		return self::normalize_value( $value, $type );
-	}
-
-	/**
-	 * Normalize a value for the canonical schema.
-	 *
-	 * @param mixed  $value Field value.
-	 * @param string $type Canonical type.
-	 * @return mixed
-	 */
-	private static function normalize_value( $value, string $type ) {
-		switch ( $type ) {
-			case 'array':
-				return is_array( $value ) ? array_values( $value ) : array();
-			case 'checkbox':
-				return function_exists( 'wc_string_to_bool' ) ? wc_string_to_bool( $value ) : (bool) $value;
-			default:
-				return $value;
+		if ( 'form_post' !== ( $save['adapter'] ?? null ) ) {
+			return $default;
 		}
+
+		$field_name = $save['name'] ?? $setting['id'] ?? '';
+		if ( ! is_string( $field_name ) || '' === $field_name ) {
+			throw self::invalid_schema( 'A legacy form-post field must define a non-empty field name.' );
+		}
+
+		if ( false === strpos( $field_name, '[' ) && false === strpos( $field_name, ']' ) ) {
+			return get_option( $field_name, $default );
+		}
+
+		if ( ! preg_match( '/^([^\[\]]+)\[([^\[\]]+)\]$/', $field_name, $matches ) ) {
+			throw self::invalid_schema( sprintf( 'Legacy form-post field "%s" may use only one bracketed setting name.', $field_name ) );
+		}
+
+		$option = get_option( $matches[1], array() );
+		if ( ! is_array( $option ) ) {
+			throw self::invalid_schema( sprintf( 'Legacy form-post field "%s" option value must be an array.', $field_name ) );
+		}
+
+		return array_key_exists( $matches[2], $option ) ? $option[ $matches[2] ] : $default;
 	}
 
 	/**
@@ -982,6 +1605,7 @@ class SettingsUISchema {
 		self::assert_field_value( $field );
 		self::assert_field_options( $field );
 		self::assert_custom_attributes( $field );
+		self::assert_field_validation( $field );
 		self::assert_field_save( $field );
 		self::assert_visibility( $field );
 	}
@@ -999,13 +1623,19 @@ class SettingsUISchema {
 		$value = $field['value'];
 		switch ( $field['type'] ) {
 			case 'array':
-				$valid = is_array( $value ) && ArrayUtil::array_is_list( $value ) && count( $value ) === count( array_filter( $value, 'is_string' ) );
+				$valid = is_array( $value ) && self::is_form_value( $value );
 				break;
 			case 'checkbox':
 				$valid = is_bool( $value );
 				break;
 			case 'number':
-				$valid = self::is_finite_number( $value, true );
+				$valid = self::is_canonical_number( $value );
+				break;
+			case 'integer':
+				$valid = null === $value || ( is_int( $value ) && self::is_canonical_number( $value ) );
+				break;
+			case 'datetime-local':
+				$valid = null === $value || ( is_string( $value ) && 1 === preg_match( '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/', $value ) );
 				break;
 			default:
 				$valid = is_string( $value );
@@ -1074,14 +1704,46 @@ class SettingsUISchema {
 			}
 
 			if ( in_array( $attribute, self::RANGE_ATTRIBUTES, true ) ) {
-				if ( 'number' !== $field['type'] ) {
-					throw self::invalid_schema( sprintf( 'Field "%s" may define "%s" only when its type is "number".', $field['id'], $attribute ) );
+				if ( ! in_array( $field['type'], array( 'number', 'integer' ), true ) ) {
+					throw self::invalid_schema( sprintf( 'Field "%s" may define "%s" only when its type is "number" or "integer".', $field['id'], $attribute ) );
 				}
 
 				$allow_any = 'step' === $attribute;
-				if ( ! self::is_finite_number( $value, false ) && ! ( $allow_any && 'any' === $value ) ) {
+				$valid     = $allow_any
+					? self::is_finite_number( $value, false ) || 'any' === $value
+					: self::is_canonical_number( $value );
+				if ( ! $valid ) {
 					throw self::invalid_schema( sprintf( 'Field "%s" custom attribute "%s" must be a finite number.', $field['id'], $attribute ) );
 				}
+
+				if ( 'integer' === $field['type'] && in_array( $attribute, array( 'min', 'max' ), true ) && ! is_int( $value ) ) {
+					throw self::invalid_schema( sprintf( 'Field "%s" custom attribute "%s" must be an integer.', $field['id'], $attribute ) );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Assert canonical field validation metadata.
+	 *
+	 * @param array $field Field definition.
+	 */
+	private static function assert_field_validation( array $field ): void {
+		if ( ! array_key_exists( 'validation', $field ) ) {
+			return;
+		}
+
+		if ( ! is_array( $field['validation'] ) || ! in_array( $field['type'], array( 'number', 'integer' ), true ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" validation is supported only for numeric fields.', $field['id'] ) );
+		}
+
+		foreach ( $field['validation'] as $rule => $value ) {
+			if ( ! in_array( $rule, array( 'min', 'max' ), true ) || null === $value || ! self::is_canonical_number( $value ) ) {
+				throw self::invalid_schema( sprintf( 'Field "%1$s" validation rule "%2$s" must be a finite numeric bound.', $field['id'], is_scalar( $rule ) ? (string) $rule : gettype( $rule ) ) );
+			}
+
+			if ( 'integer' === $field['type'] && ! is_int( $value ) ) {
+				throw self::invalid_schema( sprintf( 'Field "%1$s" validation rule "%2$s" must be an integer.', $field['id'], $rule ) );
 			}
 		}
 	}
@@ -1097,13 +1759,17 @@ class SettingsUISchema {
 			throw self::invalid_schema( sprintf( 'Field "%s" save metadata must be an array.', $field['id'] ) );
 		}
 
-		$adapter = is_array( $save ) ? ( $save['adapter'] ?? null ) : 'form_post';
+		$adapter = self::get_field_save_adapter( $field );
 		if ( ! is_string( $adapter ) || ! in_array( $adapter, array( 'form_post', 'none' ), true ) ) {
 			throw self::invalid_schema( sprintf( 'Field "%s" save adapter must be "form_post" or "none".', $field['id'] ) );
 		}
 
 		if ( is_array( $save ) && array_key_exists( 'name', $save ) ) {
 			self::assert_non_empty_string( $save['name'], sprintf( 'Field "%s" save name must be a non-empty string.', $field['id'] ) );
+		}
+
+		if ( is_array( $save ) && array_key_exists( 'initialValue', $save ) && ! self::is_form_value( $save['initialValue'] ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" save.initialValue must be a string or string list.', $field['id'] ) );
 		}
 
 		if ( 'info' === $field['type'] && 'none' !== $adapter ) {
@@ -1167,7 +1833,7 @@ class SettingsUISchema {
 			return is_finite( $value );
 		}
 
-		return is_array( $value ) && ArrayUtil::array_is_list( $value ) && count( $value ) === count( array_filter( $value, 'is_string' ) );
+		return is_array( $value ) && self::is_form_value( $value );
 	}
 
 	/**
@@ -1195,6 +1861,28 @@ class SettingsUISchema {
 		}
 
 		return is_numeric( $value ) && is_finite( (float) $value );
+	}
+
+	/**
+	 * Whether a value satisfies the final JavaScript number contract.
+	 *
+	 * @param mixed $value Candidate value.
+	 * @return bool
+	 */
+	private static function is_canonical_number( $value ): bool {
+		if ( null === $value ) {
+			return true;
+		}
+
+		if ( is_int( $value ) ) {
+			return ! self::unsigned_decimal_is_greater( ltrim( (string) $value, '-' ), self::JAVASCRIPT_SAFE_INTEGER );
+		}
+
+		if ( ! is_float( $value ) || ! is_finite( $value ) ) {
+			return false;
+		}
+
+		return floor( $value ) !== $value || ! self::unsigned_decimal_is_greater( ltrim( sprintf( '%.0f', $value ), '-' ), self::JAVASCRIPT_SAFE_INTEGER );
 	}
 
 	/**

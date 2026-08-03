@@ -259,8 +259,9 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			array(
-				'adapter' => 'form_post',
-				'name'    => 'woocommerce_test[nested]',
+				'adapter'      => 'form_post',
+				'name'         => 'woocommerce_test[nested]',
+				'initialValue' => '',
 			),
 			$schema['groups']['default']['fields'][0]['save']
 		);
@@ -735,6 +736,530 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It canonicalizes legacy values, numeric bounds, and original form representations atomically.
+	 */
+	public function test_from_legacy_settings_canonicalizes_typed_values_and_preserves_form_values(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'acme',
+			'',
+			'Acme',
+			array(
+				array(
+					'id'                => 'acme_quantity',
+					'label'             => 'Quantity',
+					'type'              => 'number',
+					'value'             => '02',
+					'custom_attributes' => array(
+						'min'  => '0',
+						'max'  => '10',
+						'step' => '1',
+					),
+				),
+			)
+		);
+
+		$field = $schema['groups']['default']['fields'][0];
+
+		$this->assertSame( 'integer', $field['type'] );
+		$this->assertSame( 2, $field['value'] );
+		$this->assertSame(
+			array(
+				'min' => 0,
+				'max' => 10,
+			),
+			$field['validation']
+		);
+		$this->assertSame( '02', $field['save']['initialValue'] );
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
+	 * @testdox It canonicalizes native numeric values without rounding unsafe integers first.
+	 *
+	 * @dataProvider canonical_numeric_values
+	 *
+	 * @param mixed          $raw Raw schema value.
+	 * @param string         $type Field type.
+	 * @param int|float|null $expected Expected canonical value.
+	 */
+	public function test_canonicalize_schema_values_handles_numeric_boundaries( $raw, string $type, $expected ): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_schema_values' );
+
+		$schema = $this->get_native_schema_with_field(
+			array(
+				'id'    => 'acme_number',
+				'label' => 'Number',
+				'type'  => $type,
+				'value' => $raw,
+				'save'  => array( 'adapter' => 'custom' ),
+			)
+		);
+
+		$canonical = SettingsUISchema::canonicalize_schema_values( $schema );
+
+		$this->assertSame( $expected, $canonical['groups']['main']['fields'][0]['value'] );
+	}
+
+	/**
+	 * Canonical numeric value fixtures.
+	 *
+	 * @return array<string, array{mixed, string, int|float|null}>
+	 */
+	public static function canonical_numeric_values(): array {
+		return array(
+			'empty number'         => array( '', 'number', null ),
+			'whitespace number'    => array( '  ', 'number', null ),
+			'zero number'          => array( '0', 'number', 0 ),
+			'decimal number'       => array( '1.25', 'number', 1.25 ),
+			'exponent number'      => array( '1e3', 'number', 1000 ),
+			'safe integer maximum' => array( '9007199254740991', 'integer', 9007199254740991 ),
+			'safe integer minimum' => array( '-9007199254740991', 'integer', -9007199254740991 ),
+		);
+	}
+
+	/**
+	 * @testdox It rejects integral numeric values outside JavaScript's safe range before conversion.
+	 *
+	 * @dataProvider unsafe_integral_values
+	 *
+	 * @param string $value Unsafe integral value.
+	 */
+	public function test_canonicalize_schema_values_rejects_unsafe_integral_values( string $value ): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'outside the JavaScript safe integer range' );
+
+		SettingsUISchema::canonicalize_schema_values(
+			$this->get_native_schema_with_field(
+				array(
+					'id'    => 'acme_integer',
+					'label' => 'Integer',
+					'type'  => 'integer',
+					'value' => $value,
+					'save'  => array( 'adapter' => 'custom' ),
+				)
+			)
+		);
+	}
+
+	/**
+	 * Unsafe integral value fixtures.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function unsafe_integral_values(): array {
+		return array(
+			'above maximum' => array( '9007199254740992' ),
+			'below minimum' => array( '-9007199254740992' ),
+			'exponent'      => array( '9.007199254740992e15' ),
+		);
+	}
+
+	/**
+	 * @testdox It rejects unsafe integral bounds before converting them to floats.
+	 */
+	public function test_canonicalize_schema_values_rejects_unsafe_integral_bounds(): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'max is outside the JavaScript safe integer range' );
+
+		SettingsUISchema::canonicalize_schema_values(
+			$this->get_native_schema_with_field(
+				array(
+					'id'               => 'acme_number',
+					'label'            => 'Number',
+					'type'             => 'number',
+					'value'            => 2,
+					'customAttributes' => array( 'max' => '9007199254740992' ),
+					'save'             => array( 'adapter' => 'custom' ),
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox It promotes step-one numbers only when the selected step base is integral.
+	 *
+	 * @dataProvider integer_inference_values
+	 *
+	 * @param array  $field Field definition.
+	 * @param string $expected_type Expected canonical type.
+	 */
+	public function test_canonicalize_schema_values_infers_integer_from_step_base( array $field, string $expected_type ): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_schema_values' );
+
+		$field += array(
+			'id'    => 'acme_number',
+			'label' => 'Number',
+			'type'  => 'number',
+			'save'  => array( 'adapter' => 'custom' ),
+		);
+
+		$schema = SettingsUISchema::canonicalize_schema_values( $this->get_native_schema_with_field( $field ) );
+
+		$this->assertSame( $expected_type, $schema['groups']['main']['fields'][0]['type'] );
+	}
+
+	/**
+	 * Integer inference fixtures.
+	 *
+	 * @return array<string, array{array, string}>
+	 */
+	public static function integer_inference_values(): array {
+		return array(
+			'min takes precedence'       => array(
+				array(
+					'value'            => '2',
+					'customAttributes' => array(
+						'step' => '1',
+						'min'  => '0.5',
+					),
+				),
+				'number',
+			),
+			'integral current value'     => array(
+				array(
+					'value'            => '2',
+					'customAttributes' => array( 'step' => 1 ),
+				),
+				'integer',
+			),
+			'empty uses zero step base'  => array(
+				array(
+					'value'            => '',
+					'customAttributes' => array( 'step' => 1 ),
+				),
+				'integer',
+			),
+			'non-unit step stays number' => array(
+				array(
+					'value'            => '2',
+					'customAttributes' => array( 'step' => '0.5' ),
+				),
+				'number',
+			),
+			'near-one step stays number' => array(
+				array(
+					'value'            => '2',
+					'customAttributes' => array( 'step' => '1.0000000000000000001' ),
+				),
+				'number',
+			),
+		);
+	}
+
+	/**
+	 * @testdox It does not require form representation metadata for a page-level custom save strategy.
+	 */
+	public function test_canonicalize_schema_values_skips_initial_value_for_custom_page_save(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_schema_values' );
+
+		$schema         = $this->get_native_schema_with_field(
+			array(
+				'id'      => 'acme_choices',
+				'label'   => 'Choices',
+				'type'    => 'array',
+				'value'   => array( 1 ),
+				'options' => array(
+					array(
+						'label' => 'One',
+						'value' => '1',
+					),
+				),
+			)
+		);
+		$schema['save'] = array(
+			'adapter' => 'custom',
+			'handler' => 'acme/save',
+		);
+
+		$canonical = SettingsUISchema::canonicalize_schema_values( $schema );
+		$field     = $canonical['groups']['main']['fields'][0];
+
+		$this->assertSame( array( '1' ), $field['value'] );
+		$this->assertArrayNotHasKey( 'save', $field );
+		SettingsUISchema::assert_valid_schema( $canonical );
+	}
+
+	/**
+	 * @testdox It converts store-local datetimes to timezone-qualified ISO values while preserving form precision.
+	 */
+	public function test_from_legacy_settings_canonicalizes_local_datetime(): void {
+		$original_timezone = get_option( 'timezone_string' );
+		update_option( 'timezone_string', 'America/New_York' );
+
+		try {
+			$schema = SettingsUISchema::from_legacy_settings(
+				'acme',
+				'',
+				'Acme',
+				array(
+					array(
+						'id'    => 'acme_start',
+						'label' => 'Starts',
+						'type'  => 'datetime-local',
+						'value' => '2026-11-01T01:30',
+					),
+				)
+			);
+		} finally {
+			update_option( 'timezone_string', $original_timezone );
+		}
+
+		$field = $schema['groups']['default']['fields'][0];
+		$this->assertSame( '2026-11-01T01:30:00-04:00', $field['value'], 'PHP deterministically chooses the first occurrence of New York\'s repeated hour.' );
+		$this->assertSame( '2026-11-01T01:30', $field['save']['initialValue'] );
+	}
+
+	/**
+	 * @testdox It reads one-level legacy form names and captures the exact nested member.
+	 */
+	public function test_from_legacy_settings_reads_nested_form_option_once(): void {
+		update_option(
+			'acme_settings',
+			array(
+				'quantity' => '02',
+				'other'    => 'keep',
+			)
+		);
+
+		try {
+			$schema = SettingsUISchema::from_legacy_settings(
+				'acme',
+				'',
+				'Acme',
+				array(
+					array(
+						'id'                => 'acme_quantity',
+						'field_name'        => 'acme_settings[quantity]',
+						'label'             => 'Quantity',
+						'type'              => 'number',
+						'custom_attributes' => array( 'step' => 1 ),
+					),
+				)
+			);
+		} finally {
+			delete_option( 'acme_settings' );
+		}
+
+		$field = $schema['groups']['default']['fields'][0];
+		$this->assertSame( 2, $field['value'] );
+		$this->assertSame( '02', $field['save']['initialValue'] );
+	}
+
+	/**
+	 * @testdox It rejects deeper legacy form names rather than guessing an option path.
+	 */
+	public function test_from_legacy_settings_rejects_deep_form_option_names(): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'one bracketed setting name' );
+
+		SettingsUISchema::from_legacy_settings(
+			'acme',
+			'',
+			'Acme',
+			array(
+				array(
+					'id'         => 'acme_quantity',
+					'field_name' => 'acme_settings[group][quantity]',
+					'label'      => 'Quantity',
+					'type'       => 'number',
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox It requires an explicit original form value when native compatibility conversion cannot preserve one.
+	 */
+	public function test_canonicalize_schema_values_rejects_ambiguous_native_form_value(): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'must define save.initialValue' );
+
+		SettingsUISchema::canonicalize_schema_values(
+			$this->get_native_schema_with_field(
+				array(
+					'id'      => 'acme_choices',
+					'label'   => 'Choices',
+					'type'    => 'array',
+					'value'   => array( 1 ),
+					'options' => array(
+						array(
+							'label' => 'One',
+							'value' => '1',
+						),
+					),
+					'save'    => array( 'adapter' => 'form_post' ),
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox It rejects conflicting legacy and canonical numeric bounds.
+	 */
+	public function test_canonicalize_schema_values_rejects_conflicting_bounds(): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'min disagrees between customAttributes and validation' );
+
+		SettingsUISchema::canonicalize_schema_values(
+			$this->get_native_schema_with_field(
+				array(
+					'id'               => 'acme_number',
+					'label'            => 'Number',
+					'type'             => 'number',
+					'value'            => 2,
+					'customAttributes' => array( 'min' => '1' ),
+					'validation'       => array( 'min' => 2 ),
+					'save'             => array( 'adapter' => 'custom' ),
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox It accepts PHP's warning-free DST gap shift and rejects malformed local dates.
+	 */
+	public function test_canonicalize_schema_values_handles_dst_gap_and_invalid_dates(): void {
+		$original_timezone = get_option( 'timezone_string' );
+		update_option( 'timezone_string', 'America/New_York' );
+
+		try {
+			$schema = SettingsUISchema::canonicalize_schema_values(
+				$this->get_native_schema_with_field(
+					array(
+						'id'    => 'acme_start',
+						'label' => 'Starts',
+						'type'  => 'datetime-local',
+						'value' => '2026-03-08T02:30',
+						'save'  => array( 'adapter' => 'custom' ),
+					)
+				),
+				true
+			);
+
+			$this->assertSame( '2026-03-08T03:30:00-04:00', $schema['groups']['main']['fields'][0]['value'] );
+
+			$this->expectException( \InvalidArgumentException::class );
+			$this->expectExceptionMessage( 'datetime value is malformed' );
+			SettingsUISchema::canonicalize_schema_values(
+				$this->get_native_schema_with_field(
+					array(
+						'id'    => 'acme_start',
+						'label' => 'Starts',
+						'type'  => 'datetime-local',
+						'value' => '2026-02-30T12:00',
+						'save'  => array( 'adapter' => 'custom' ),
+					)
+				),
+				true
+			);
+		} finally {
+			update_option( 'timezone_string', $original_timezone );
+		}
+	}
+
+	/**
+	 * @testdox It leaves fully canonical native typed values unchanged without a compatibility notice.
+	 */
+	public function test_canonicalize_schema_values_leaves_canonical_native_values_unchanged(): void {
+		$schema = $this->get_native_schema_with_fields(
+			array(
+				array(
+					'id'    => 'acme_number',
+					'label' => 'Number',
+					'type'  => 'number',
+					'value' => 1.5,
+					'save'  => array( 'adapter' => 'custom' ),
+				),
+				array(
+					'id'    => 'acme_integer',
+					'label' => 'Integer',
+					'type'  => 'integer',
+					'value' => 2,
+					'save'  => array( 'adapter' => 'custom' ),
+				),
+				array(
+					'id'    => 'acme_start',
+					'label' => 'Starts',
+					'type'  => 'datetime-local',
+					'value' => '2026-08-03T12:30:00+00:00',
+					'save'  => array( 'adapter' => 'custom' ),
+				),
+			)
+		);
+
+		$this->assertSame( $schema, SettingsUISchema::canonicalize_schema_values( $schema ) );
+	}
+
+	/**
+	 * @testdox It mirrors canonical native validation without reporting a compatibility conversion.
+	 */
+	public function test_canonicalize_schema_values_silently_mirrors_canonical_validation(): void {
+		$schema = $this->get_native_schema_with_field(
+			array(
+				'id'         => 'acme_number',
+				'label'      => 'Number',
+				'type'       => 'number',
+				'value'      => 1.5,
+				'validation' => array(
+					'min' => 0.5,
+					'max' => 2.5,
+				),
+				'save'       => array( 'adapter' => 'custom' ),
+			)
+		);
+
+		$canonical = SettingsUISchema::canonicalize_schema_values( $schema );
+		$field     = $canonical['groups']['main']['fields'][0];
+
+		$this->assertSame( $field['validation'], $field['customAttributes'] );
+	}
+
+	/**
+	 * @testdox It does not read option-backed values for non-saving legacy fields.
+	 */
+	public function test_from_legacy_settings_does_not_read_options_for_non_saving_fields(): void {
+		$option_reads = 0;
+		$listener     = static function ( $fallback_value ) use ( &$option_reads ) {
+			++$option_reads;
+			return $fallback_value;
+		};
+		add_filter( 'default_option_acme_external', $listener );
+
+		try {
+			SettingsUISchema::from_legacy_settings(
+				'acme',
+				'',
+				'Acme',
+				array(
+					array(
+						'id'        => 'acme_external',
+						'label'     => 'External',
+						'type'      => 'text',
+						'is_option' => false,
+					),
+				)
+			);
+			SettingsUISchema::from_legacy_settings(
+				'acme',
+				'',
+				'Acme',
+				array(
+					array(
+						'id'    => 'acme_external',
+						'label' => 'External',
+						'type'  => 'text',
+					),
+				),
+				'custom'
+			);
+		} finally {
+			remove_filter( 'default_option_acme_external', $listener );
+		}
+
+		$this->assertSame( 0, $option_reads );
+	}
+
+	/**
 	 * @testdox It accepts every field type supported by the current renderer.
 	 *
 	 * @dataProvider supported_field_types
@@ -779,10 +1304,11 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			'array'          => array( 'array', array( 'a' ) ),
 			'checkbox'       => array( 'checkbox', true ),
 			'date'           => array( 'date', '2026-08-03' ),
-			'datetime-local' => array( 'datetime-local', '2026-08-03T12:30' ),
+			'datetime-local' => array( 'datetime-local', '2026-08-03T12:30:00+00:00' ),
 			'email'          => array( 'email', 'merchant@example.com' ),
 			'info'           => array( 'info', null ),
-			'number'         => array( 'number', '02' ),
+			'integer'        => array( 'integer', 2 ),
+			'number'         => array( 'number', 2 ),
 			'password'       => array( 'password', 'secret' ),
 			'radio'          => array( 'radio', 'a' ),
 			'select'         => array( 'select', 'a' ),
@@ -931,7 +1457,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			'empty component name'        => array( $invalid_component, 'Field "acme_field" component must be a non-empty string.' ),
 			'unsupported field save'      => array( $invalid_field_save, 'Field "acme_field" save adapter must be "form_post" or "none".' ),
 			'missing visibility control'  => array( $invalid_visibility, 'Field "acme_field" visibility controller "missing" does not reference a field.' ),
-			'bound on text field'         => array( $invalid_bound, 'Field "acme_field" may define "min" only when its type is "number".' ),
+			'bound on text field'         => array( $invalid_bound, 'Field "acme_field" may define "min" only when its type is "number" or "integer".' ),
 			'saving info field'           => array( $invalid_info, 'Field "acme_field" of type "info" must use the "none" save adapter.' ),
 			'malformed shell navigation'  => array( $invalid_shell, 'Shell navigation item 0 href must be a string.' ),
 			'malformed breadcrumb'        => array( $invalid_breadcrumb, 'Shell breadcrumb 0 label must be a string.' ),

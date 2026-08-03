@@ -2442,6 +2442,9 @@ importers:
       '@wordpress/components':
         specifier: catalog:wp-min
         version: 30.6.5(@emotion/is-prop-valid@1.4.0)(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/date':
+        specifier: catalog:wp-min
+        version: 5.33.1
       '@wordpress/element':
         specifier: catalog:wp-min
         version: 6.33.1

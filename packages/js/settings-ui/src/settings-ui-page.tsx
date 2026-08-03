@@ -49,6 +49,7 @@ import type {
 	SettingsValue,
 	SettingsValues,
 } from './types';
+import { areSettingsValuesEqual } from './values';
 
 type SaveNotice = {
 	status: 'success' | 'error';
@@ -77,19 +78,6 @@ const getInitialValues = ( schema: SettingsUISchema ): SettingsValues => {
 	return values;
 };
 
-const areValuesEqual = ( a: SettingsValue, b: SettingsValue ) => {
-	if ( Array.isArray( a ) || Array.isArray( b ) ) {
-		return (
-			Array.isArray( a ) &&
-			Array.isArray( b ) &&
-			a.length === b.length &&
-			a.every( ( value, index ) => value === b[ index ] )
-		);
-	}
-
-	return a === b;
-};
-
 const getChangedValues = (
 	values: SettingsValues,
 	initialValues: SettingsValues
@@ -97,7 +85,7 @@ const getChangedValues = (
 	const changedValues: Partial< SettingsValues > = {};
 
 	Object.keys( values ).forEach( ( key ) => {
-		if ( ! areValuesEqual( values[ key ], initialValues[ key ] ) ) {
+		if ( ! areSettingsValuesEqual( values[ key ], initialValues[ key ] ) ) {
 			changedValues[ key ] = values[ key ];
 		}
 	} );
@@ -331,7 +319,7 @@ const valueMatchesVisibilityRule = (
 		: [ expected ?? true ];
 
 	return expectedValues.some( ( expectedValue ) =>
-		areValuesEqual( value, expectedValue )
+		areSettingsValuesEqual( value, expectedValue )
 	);
 };
 
@@ -650,10 +638,14 @@ export const SettingsUIPage = ( {
 
 	const setValue = useCallback(
 		( fieldId: string, nextValue: SettingsValue ) => {
-			setValuesState( ( currentValues ) => ( {
-				...currentValues,
-				[ fieldId ]: nextValue,
-			} ) );
+			setValuesState( ( currentValues ) =>
+				areSettingsValuesEqual( currentValues[ fieldId ], nextValue )
+					? currentValues
+					: {
+							...currentValues,
+							[ fieldId ]: nextValue,
+					  }
+			);
 		},
 		[]
 	);
@@ -1013,6 +1005,7 @@ export const SettingsUIPage = ( {
 						<HiddenInputs
 							field={ field }
 							value={ values[ field.id ] }
+							initialCanonicalValue={ initialValues[ field.id ] }
 							key={ field.id }
 						/>
 					) ) }
