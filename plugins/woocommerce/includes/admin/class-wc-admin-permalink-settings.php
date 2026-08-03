@@ -116,12 +116,19 @@ class WC_Admin_Permalink_Settings {
 		 * selection into the literal default product slug). Compare against that same
 		 * sanitized form so the matching radio stays checked after a save, instead of always
 		 * falling back to "Custom base". See https://github.com/woocommerce/woocommerce/issues/29050.
+		 *
+		 * settings_save() computes its default-slug fallback inside a
+		 * wc_switch_to_site_locale()/wc_restore_locale() pair, so it always stores the site
+		 * locale's translation. Match that here too, or an admin whose profile locale differs
+		 * from the site locale would compare against their own locale's translation instead.
 		 */
+		wc_switch_to_site_locale();
 		$structures_for_comparison = array(
 			0 => wc_sanitize_permalink( _x( 'product', 'slug', 'woocommerce' ) ),
 			1 => wc_sanitize_permalink( $structures[1] ),
 			2 => wc_sanitize_permalink( $structures[2] ),
 		);
+		wc_restore_locale();
 		?>
 		<table class="form-table wc-permalink-structure">
 			<tbody>
