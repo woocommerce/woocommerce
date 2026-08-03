@@ -182,8 +182,7 @@ class SingleProduct extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$product    = wc_get_product( $block->context['postId'] );
-		$product_id = $product->get_id();
+		$product = wc_get_product( $block->context['postId'] );
 
 		if (
 			! $product instanceof \WC_Product ||
@@ -191,6 +190,8 @@ class SingleProduct extends AbstractBlock {
 		) {
 			return '';
 		}
+
+		$product_id = $product->get_id();
 
 		if ( post_password_required( $product_id ) ) {
 			return get_the_password_form( $product_id );
