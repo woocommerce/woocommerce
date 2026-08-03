@@ -88,7 +88,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	 * @return string Rendered settings HTML.
 	 */
 	private function save_and_render( string $product_permalink, ?string $product_permalink_structure = null ): string {
-		$_POST['permalink_structure']               = '';
+		$_POST['permalink_structure']                = '';
 		$_POST['wc-permalinks-nonce']                = wp_create_nonce( 'wc-permalinks' );
 		$_POST['woocommerce_product_category_slug']  = 'product-category';
 		$_POST['woocommerce_product_tag_slug']       = 'product-tag';
@@ -162,7 +162,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	public function test_shop_base_structure_stays_checked_after_save(): void {
 		$shop_page_id = $this->ensure_shop_page();
 		$base_slug    = urldecode( get_page_uri( $shop_page_id ) );
-		$html      = $this->save_and_render( '/' . trailingslashit( $base_slug ) );
+		$html         = $this->save_and_render( '/' . trailingslashit( $base_slug ) );
 
 		$this->assert_only_radio_checked( $html, 'shop_base' );
 	}
@@ -173,7 +173,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	public function test_shop_base_with_category_structure_stays_checked_after_save(): void {
 		$shop_page_id = $this->ensure_shop_page();
 		$base_slug    = urldecode( get_page_uri( $shop_page_id ) );
-		$html      = $this->save_and_render( '/' . trailingslashit( $base_slug ) . trailingslashit( '%product_cat%' ) );
+		$html         = $this->save_and_render( '/' . trailingslashit( $base_slug ) . trailingslashit( '%product_cat%' ) );
 
 		$this->assert_only_radio_checked( $html, 'shop_base_category' );
 	}
