@@ -31,6 +31,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import './style.scss';
 import { OverwriteConfirmationModal } from '../settings/overwrite-confirmation-modal';
 import { getOptionGroupsFromSteps } from './get-option-groups';
+import { getStepActions } from './get-step-actions';
 import {
 	BlueprintQueueResponse,
 	BlueprintImportResponse,
@@ -189,7 +190,7 @@ const checkImportAllowed = async (): Promise< boolean > => {
 			method: 'GET',
 		} );
 		return response.import_allowed;
-	} catch ( error ) {
+	} catch {
 		throw new Error(
 			__( 'Failed to check if imports are allowed.', 'woocommerce' )
 		);
@@ -201,6 +202,7 @@ interface FileUploadContext {
 	steps?: BlueprintStep[];
 	error?: Error;
 	settings_to_overwrite?: string[];
+	step_actions?: string[];
 	import_allowed?: boolean;
 }
 
@@ -347,6 +349,8 @@ export const fileUploadMachine = setup( {
 								event.output
 							) as string[];
 						},
+						step_actions: ( { event } ) =>
+							getStepActions( event.output ),
 					} ),
 				},
 				onError: {
@@ -485,7 +489,7 @@ export const BlueprintUploadDropzone = () => {
 							{
 								br: <br />,
 								link: (
-									// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/control-has-associated-label
+									// eslint-disable-next-line jsx-a11y/anchor-has-content
 									<a
 										href={ getAdminLink(
 											'admin.php?page=wc-settings&tab=site-visibility'
@@ -527,7 +531,7 @@ export const BlueprintUploadDropzone = () => {
 							<div className="blueprint-upload-dropzone">
 								<Icon icon={ upload } />
 								<p className="blueprint-upload-dropzone-text">
-									{ __( 'Drag and drop or ', 'woocommerce' ) }
+									{ __( 'Drag and drop or', 'woocommerce' ) }{ ' ' }
 									<span>
 										{ __( 'choose a file', 'woocommerce' ) }
 									</span>
@@ -610,6 +614,7 @@ export const BlueprintUploadDropzone = () => {
 					overwrittenItems={
 						state.context.settings_to_overwrite || []
 					}
+					additionalActions={ state.context.step_actions || [] }
 				/>
 			) }
 		</>
