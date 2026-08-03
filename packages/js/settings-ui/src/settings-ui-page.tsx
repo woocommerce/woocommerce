@@ -332,6 +332,12 @@ const getVisible = ( {
 const getAllFields = ( schema: SettingsUISchema ): SettingsUIField[] =>
 	Object.values( schema.groups ).flatMap( ( group ) => group.fields );
 
+const getClassicSettingsUrl = () => {
+	const url = new URL( window.location.href );
+	url.searchParams.set( 'wc_settings_ui', 'classic' );
+	return url.toString();
+};
+
 type ErrorBoundaryProps = {
 	children: ReactNode;
 };
@@ -362,9 +368,17 @@ export class SettingsUIErrorBoundary extends Component<
 			return (
 				<Notice status="error" isDismissible={ false }>
 					{ __(
-						'Something went wrong while rendering this settings page. Reload the page with the settings UI feature disabled to use the classic settings screen.',
+						'Something went wrong while rendering this settings page.',
 						'woocommerce'
 					) }
+					<div className="components-notice__buttons">
+						<Button
+							href={ getClassicSettingsUrl() }
+							variant="link"
+						>
+							{ __( 'Use classic settings', 'woocommerce' ) }
+						</Button>
+					</div>
 				</Notice>
 			);
 		}

@@ -90,6 +90,33 @@ describe( 'settings extension registry', () => {
 		).toBe( fieldOverride );
 	} );
 
+	it( 'does not fall back when an explicit component is missing', () => {
+		const fieldOverride: SettingsFieldComponent = () => null;
+		const typeRenderer: SettingsFieldComponent = () => null;
+
+		registerSettingsExtension( {
+			scope: { page: 'registry-missing-component' },
+			fieldOverrides: {
+				field: fieldOverride,
+			},
+			typeRenderers: {
+				text: typeRenderer,
+			},
+		} );
+
+		expect( () =>
+			resolveFieldComponent(
+				{
+					id: 'field',
+					label: 'Field',
+					type: 'text',
+					component: 'test/missing-component',
+				},
+				{ page: 'registry-missing-component' }
+			)
+		).toThrow( 'Component "test/missing-component" is not registered.' );
+	} );
+
 	it( 'ignores malformed registration payloads', () => {
 		const warnSpy = jest
 			.spyOn( console, 'warn' )
@@ -101,7 +128,7 @@ describe( 'settings extension registry', () => {
 				components: [],
 			} as unknown as SettingsExtensionRegistration )
 		).not.toThrow();
-		expect(
+		expect( () =>
 			resolveFieldComponent(
 				{
 					id: 'field',
@@ -111,7 +138,7 @@ describe( 'settings extension registry', () => {
 				},
 				{ page: 'registry-invalid' }
 			)
-		).toBeUndefined();
+		).toThrow( 'Component "0" is not registered.' );
 		expect( warnSpy ).toHaveBeenCalledWith(
 			expect.stringContaining(
 				'Invalid settings extension registration payload.'
@@ -210,10 +237,7 @@ describe( 'settings extension registry', () => {
 				{ page: 'registry-section-scope', section: 'advanced' }
 			)
 		).toBeUndefined();
-		const warnSpy = jest
-			.spyOn( console, 'warn' )
-			.mockImplementation( jest.fn() );
-		expect(
+		expect( () =>
 			resolveFieldComponent(
 				{
 					id: 'field',
@@ -223,8 +247,7 @@ describe( 'settings extension registry', () => {
 				},
 				{ page: 'registry-section-scope', section: '' }
 			)
-		).toBeUndefined();
-		warnSpy.mockRestore();
+		).toThrow( 'Component "named-section" is not registered.' );
 		expect(
 			resolveFieldComponent(
 				{

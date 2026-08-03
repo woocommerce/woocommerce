@@ -19,7 +19,7 @@ jest.mock( '@wordpress/admin-ui', () => ( {
 /**
  * Internal dependencies
  */
-import { SettingsUIPage } from '../settings-ui-page';
+import { SettingsUIErrorBoundary, SettingsUIPage } from '../settings-ui-page';
 import { __resetRegistry, registerSettingsExtension } from '../registry';
 import type { SettingsUISchema } from '../types';
 
@@ -197,6 +197,123 @@ describe( 'settings HTML rendering', () => {
 
 		act( () => root.unmount() );
 		container.remove();
+	} );
+
+	it( 'fails closed when an explicit component is not registered', () => {
+		const originalUrl = window.location.href;
+		window.history.replaceState(
+			{},
+			'',
+			'/wp-admin/admin.php?page=wc-settings&tab=products&section=advanced&preserved=yes#wc-settings'
+		);
+		const consoleErrorSpy = jest
+			.spyOn( console, 'error' )
+			.mockImplementation( () => undefined );
+		const schema: SettingsUISchema = {
+			id: 'products',
+			title: 'Products',
+			section: 'advanced',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							component: 'test/missing-component',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		expect( container.textContent ).toContain(
+			'Something went wrong while rendering this settings page.'
+		);
+		expect( container.querySelector( 'input' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeNull();
+		const classicAction = Array.from(
+			container.querySelectorAll( 'a' )
+		).find(
+			( link ) => link.textContent?.trim() === 'Use classic settings'
+		);
+		expect( classicAction ).toBeDefined();
+		const classicUrl = new URL( classicAction?.href || '' );
+		expect( classicUrl.searchParams.getAll( 'wc_settings_ui' ) ).toEqual( [
+			'classic',
+		] );
+		expect( classicUrl.searchParams.get( 'page' ) ).toBe( 'wc-settings' );
+		expect( classicUrl.searchParams.get( 'tab' ) ).toBe( 'products' );
+		expect( classicUrl.searchParams.get( 'section' ) ).toBe( 'advanced' );
+		expect( classicUrl.searchParams.get( 'preserved' ) ).toBe( 'yes' );
+		expect( classicUrl.hash ).toBe( '#wc-settings' );
+
+		act( () => root.unmount() );
+		container.remove();
+		consoleErrorSpy.mockRestore();
+		window.history.replaceState( {}, '', originalUrl );
+	} );
+
+	it( 'contains errors thrown by registered field components', () => {
+		const ThrowingField = () => {
+			throw new Error( 'Test component failed.' );
+		};
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			components: {
+				'test/throwing-component': ThrowingField,
+			},
+		} );
+		const consoleErrorSpy = jest
+			.spyOn( console, 'error' )
+			.mockImplementation( () => undefined );
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							component: 'test/throwing-component',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		expect( container.textContent ).toContain(
+			'Something went wrong while rendering this settings page.'
+		);
+		expect( container.querySelector( 'input' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeNull();
+
+		act( () => root.unmount() );
+		container.remove();
+		consoleErrorSpy.mockRestore();
 	} );
 
 	it( 'sanitizes native field descriptions before rendering', () => {

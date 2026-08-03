@@ -151,10 +151,25 @@ registerSettingsExtension( {
 		page: 'my_plugin',
 	},
 	typeRenderers: {
-		my_plugin_color: ColorField,
+		text: TextField,
 	},
 } );
 ```
+
+`typeRenderers` only overrides a canonical field type that WooCommerce already accepts. It does not register a new field type. PHP rejects unknown types before the Settings UI mounts.
+
+To migrate an extension-defined type, keep the field's storage shape on a canonical type and name the specialized component explicitly:
+
+```php
+array(
+	'id'        => 'my_plugin_color',
+	'title'     => __( 'Color', 'my-plugin' ),
+	'type'      => 'text',
+	'component' => 'my-plugin/color-field',
+)
+```
+
+Register `my-plugin/color-field` in `components`, or use `fieldOverrides` when the PHP field metadata cannot be changed yet.
 
 Resolution order is:
 
@@ -196,3 +211,9 @@ final class My_Plugin_Settings_UI_Page extends LegacySettingsPageAdapter {
 ```
 
 WooCommerce loads the settings UI package first, then your script, then mounts the settings app.
+
+## Failure and fallback behavior
+
+WooCommerce validates server-observable schema metadata and declared script handles before rendering the Settings UI mount. An invalid schema or a script handle that is not registered and enqueued renders the complete classic settings page in the same response.
+
+PHP cannot inspect the component registry in the browser. If a declared script executes but does not register the named component, or if the component throws while rendering, the Settings UI fails closed inside its page error boundary. It renders no editable fallback control and no Save action. The error notice offers a **Use classic settings** action that reloads the same page and section with `wc_settings_ui=classic` for that request. The action does not disable the feature flag, persist a preference, or reload automatically.
