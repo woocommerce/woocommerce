@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo CI: cap artifact retention for CI test results (3/7/14 days) and release contributor reports (30 days) instead of the 90-day default.

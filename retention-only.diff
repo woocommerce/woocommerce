@@ -1,0 +1,40 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 370a4c8bc47ba..196a81c9a145c 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -379,6 +379,7 @@ jobs:
+           if-no-files-found: ignore
+           include-hidden-files: true
+           overwrite: true
++          retention-days: 3
+ 
+       - name: 'Upload artifacts'
+         if: ${{ always() && matrix.report.resultsPath != '' }}
+@@ -386,6 +387,7 @@ jobs:
+         with:
+           name: '${{ matrix.report.resultsBlobName }}__${{ strategy.job-index }}'
+           path: ${{ env.ARTIFACTS_PATH }}
++          retention-days: 7
+ 
+   evaluate-project-jobs:
+     # In order to add a required status check we need a consistent job that we can grab onto.
+@@ -495,6 +497,7 @@ jobs:
+           name: ${{ env.ARTIFACT_NAME }}
+           pattern: ${{ matrix.report }}__*
+           delete-merged: true
++          retention-days: 14
+ 
+       - name: 'Publish report to dashboard'
+         if: ${{ !! steps.merge-artifacts.outputs.artifact-id }}
+diff --git a/.github/workflows/release-commits-and-contributors.yml b/.github/workflows/release-commits-and-contributors.yml
+index 9cdf09d8f482c..f30ab5dabe8bc 100644
+--- a/.github/workflows/release-commits-and-contributors.yml
++++ b/.github/workflows/release-commits-and-contributors.yml
+@@ -182,6 +182,7 @@ jobs:
+         with:
+           name: contributors-release-${{ needs.extract-versions.outputs.current_version }}
+           path: ${{ steps.generate-contributors-list.outputs.filepath }}
++          retention-days: 30
+ 
+       - name: Output artifact URL
+         id: output-artifact-url
