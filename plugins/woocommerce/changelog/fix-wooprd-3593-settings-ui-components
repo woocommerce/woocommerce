@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent missing Settings UI components from falling back to editable native controls.
