@@ -68,3 +68,4 @@ For scheduled releases, the readiness review is the one in the RC sub-issue. Poi
 
 - [ ] Wait at least 1 hour for all automations to complete and make sure to merge any follow-up [PRs]({repository_url}/pulls?q=is:open+is:pr+draft:false+milestone:{release_milestone}) under the `{release_milestone}` milestone.
 - [ ] Continue monitoring for bugs related to the release for at least 3 days. See the [release monitoring guide](https://developer.woocommerce.com/docs/contribution/releases/monitoring/) for more details.
+- [ ] If this is the stable release of a new major version: move the floor forward in the [security support policy](https://developer.woocommerce.com/docs/contribution/releases/security-support/) page (last 21 major versions).
