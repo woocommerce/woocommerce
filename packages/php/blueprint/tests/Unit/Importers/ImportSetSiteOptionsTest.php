@@ -156,128 +156,145 @@ class ImportSetSiteOptionsTest extends TestCase {
 	}
 
 	/**
-	 * Restricted options must be matched no matter how the key is cased or padded.
+	 * Test restricted option spelling variants.
 	 *
-	 * WordPress trims option names, and option lookups are resolved by MySQL's
-	 * case-insensitive collation, so 'wp_USER_roles' and ' siteurl' both land on the
-	 * genuine restricted row. A case-sensitive comparison let them through.
-	 *
-	 * @return void
+	 * @testdox Restricted options are matched regardless of key case, padding, or database collation.
 	 */
-	public function test_process_restricted_options_ignores_key_case_and_whitespace() {
+	public function test_process_restricted_options_ignores_key_case_and_whitespace(): void {
+		$accented_key    = "wp_us\u{00e9}r_roles";
 		$schema          = Mockery::mock();
 		$schema->options = array(
 			'wp_USER_roles' => array( 'customer' => array( 'capabilities' => array( 'manage_options' => true ) ) ),
 			'ADMIN_EMAIL'   => 'danger@example.com',
 			' siteurl'      => 'https://evil.example.com',
+			$accented_key   => array( 'customer' => array( 'capabilities' => array( 'manage_options' => true ) ) ),
 		);
 
-		$import_set_site_options = Mockery::mock( ImportSetSiteOptions::class )
+		$sut = Mockery::mock( ImportSetSiteOptions::class )
 			->makePartial()
 			->shouldAllowMockingProtectedMethods();
 
 		// Any write at all means the restriction was bypassed.
-		$import_set_site_options->shouldNotReceive( 'wp_update_option' );
+		$sut->shouldNotReceive( 'wp_update_option' );
 
-		$result = $import_set_site_options->process( $schema );
+		$result = $sut->process( $schema );
 
 		$this->assertTrue( $result->is_success() );
 
 		$messages = $result->get_messages( 'warn' );
-		$this->assertCount( 3, $messages );
+		$this->assertCount( 4, $messages );
 		$this->assertEquals( "Cannot modify 'wp_USER_roles' option: Modifying is restricted for this key.", $messages[0]['message'] );
 		$this->assertEquals( "Cannot modify 'ADMIN_EMAIL' option: Modifying is restricted for this key.", $messages[1]['message'] );
 		$this->assertEquals( "Cannot modify ' siteurl' option: Modifying is restricted for this key.", $messages[2]['message'] );
+		$this->assertEquals( "Cannot modify '{$accented_key}' option: Modifying is restricted for this key.", $messages[3]['message'] );
 
 		$this->assertNotEquals( 'danger@example.com', get_option( 'admin_email' ) );
 		$this->assertNotEquals( 'https://evil.example.com', get_option( 'siteurl' ) );
 	}
 
 	/**
-	 * A key that the database resolves to a restricted row must be restricted too.
+	 * Test an accent-equivalent key without a canonical row.
 	 *
-	 * Normalising the string covers case and whitespace, but not every equivalence the
-	 * collation applies (accent folding, for example), so the resolved name is checked
-	 * as well. The resolution itself is stubbed here to keep the assertion independent
-	 * of which collation the test database happens to run.
-	 *
-	 * @return void
+	 * @testdox Accent-equivalent keys remain restricted when the canonical option row is absent.
 	 */
-	public function test_process_restricts_keys_that_resolve_to_a_restricted_option() {
-		$key = "wp_us\u{00e9}r_roles";
+	public function test_process_restricts_collation_equivalent_key_without_canonical_row(): void {
+		global $wpdb;
+
+		$canonical_key = 'rewrite_rules';
+		$accented_key  = "r\u{00e9}write_rules";
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Preserve any equivalent row while testing its absence.
+		$original_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT option_name, option_value, autoload FROM {$wpdb->options} WHERE option_name = %s LIMIT 1",
+				$canonical_key
+			),
+			ARRAY_A
+		);
+
+		delete_option( $canonical_key );
+		delete_option( $accented_key );
+
+		try {
+			$schema          = Mockery::mock();
+			$schema->options = array( $accented_key => array( 'marker' => 'blocked' ) );
+			$sut             = new ImportSetSiteOptions();
+
+			$result = $sut->process( $schema );
+
+			$this->assertTrue( $result->is_success() );
+			$messages = $result->get_messages( 'warn' );
+			$this->assertCount( 1, $messages );
+			$this->assertEquals( "Cannot modify '{$accented_key}' option: Modifying is restricted for this key.", $messages[0]['message'] );
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Verify the bypass did not create an exact variant row.
+			$stored_variant = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT option_name FROM {$wpdb->options} WHERE BINARY option_name = %s LIMIT 1",
+					$accented_key
+				)
+			);
+			$this->assertNull( $stored_variant );
+		} finally {
+			delete_option( $canonical_key );
+			delete_option( $accented_key );
+			if ( is_array( $original_row ) ) {
+				add_option( $original_row['option_name'], maybe_unserialize( $original_row['option_value'] ), '', $original_row['autoload'] );
+			}
+		}
+	}
+
+	/**
+	 * Test batching of database collation checks.
+	 *
+	 * @testdox Multiple imported option names use one database-collation query.
+	 */
+	public function test_process_batches_database_collation_checks(): void {
+		global $wpdb;
 
 		$schema          = Mockery::mock();
-		$schema->options = array( $key => array( 'customer' => array( 'capabilities' => array( 'manage_options' => true ) ) ) );
-
-		$import_set_site_options = Mockery::mock( ImportSetSiteOptions::class )
+		$schema->options = array(
+			'blueprint_alpha' => 'one',
+			'blueprint_beta'  => 'two',
+			'blueprint_gamma' => 'three',
+		);
+		$sut             = Mockery::mock( ImportSetSiteOptions::class )
 			->makePartial()
 			->shouldAllowMockingProtectedMethods();
 
-		$import_set_site_options->shouldReceive( 'get_stored_option_name' )
-			->with( $key )
-			->andReturn( 'wp_user_roles' );
-		$import_set_site_options->shouldNotReceive( 'wp_update_option' );
+		$sut->shouldReceive( 'wp_update_option' )->times( 3 )->andReturn( true );
+		$sut->shouldReceive( 'wp_get_option' )->with( 'blueprint_alpha' )->andReturn( 'one' );
+		$sut->shouldReceive( 'wp_get_option' )->with( 'blueprint_beta' )->andReturn( 'two' );
+		$sut->shouldReceive( 'wp_get_option' )->with( 'blueprint_gamma' )->andReturn( 'three' );
 
-		$result = $import_set_site_options->process( $schema );
+		$query_count_before = $wpdb->num_queries;
+		$result             = $sut->process( $schema );
 
 		$this->assertTrue( $result->is_success() );
-
-		$messages = $result->get_messages( 'warn' );
-		$this->assertCount( 1, $messages );
-		$this->assertEquals( "Cannot modify '{$key}' option: Modifying is restricted for this key.", $messages[0]['message'] );
+		$this->assertSame( 1, $wpdb->num_queries - $query_count_before );
 	}
 
 	/**
-	 * The database lookup must resolve a key to the option name as actually stored.
+	 * Test that similar unrestricted option names remain writable.
 	 *
-	 * This is the layer that catches equivalences string normalisation cannot model, so
-	 * it is asserted against a real database rather than a stub.
-	 *
-	 * @return void
+	 * @testdox Options that merely contain a restricted name remain writable.
 	 */
-	public function test_get_stored_option_name_resolves_key_through_the_database() {
-		$import_set_site_options = new ImportSetSiteOptions();
-
-		$method = new \ReflectionMethod( ImportSetSiteOptions::class, 'get_stored_option_name' );
-		$method->setAccessible( true );
-
-		// An exact match resolves to itself.
-		$this->assertSame( 'admin_email', $method->invoke( $import_set_site_options, 'admin_email' ) );
-
-		// A differently cased key resolves to the stored name, because the lookup runs
-		// through the same case-insensitive collation WordPress writes through.
-		$this->assertSame( 'admin_email', $method->invoke( $import_set_site_options, 'ADMIN_EMAIL' ) );
-
-		// Surrounding whitespace is trimmed, as WordPress trims it.
-		$this->assertSame( 'admin_email', $method->invoke( $import_set_site_options, '  admin_email  ' ) );
-
-		// A key matching no row resolves to null rather than to something restricted.
-		$this->assertNull( $method->invoke( $import_set_site_options, 'blueprint_no_such_option_xyz' ) );
-	}
-
-	/**
-	 * Options that merely contain a restricted name are still writable.
-	 *
-	 * Guards against the restriction becoming an over-eager substring match.
-	 *
-	 * @return void
-	 */
-	public function test_process_allows_options_that_only_resemble_restricted_ones() {
+	public function test_process_allows_options_that_only_resemble_restricted_ones(): void {
 		$schema          = Mockery::mock();
 		$schema->options = array( 'my_siteurl_backup' => 'https://example.com' );
 
-		$import_set_site_options = Mockery::mock( ImportSetSiteOptions::class )
+		$sut = Mockery::mock( ImportSetSiteOptions::class )
 			->makePartial()
 			->shouldAllowMockingProtectedMethods();
 
-		$import_set_site_options->shouldReceive( 'wp_update_option' )
+		$sut->shouldReceive( 'wp_update_option' )
 			->with( 'my_siteurl_backup', 'https://example.com' )
 			->andReturn( true );
-		$import_set_site_options->shouldReceive( 'wp_get_option' )
+		$sut->shouldReceive( 'wp_get_option' )
 			->with( 'my_siteurl_backup' )
 			->andReturn( 'https://example.com' );
 
-		$result = $import_set_site_options->process( $schema );
+		$result = $sut->process( $schema );
 
 		$this->assertTrue( $result->is_success() );
 		$this->assertCount( 0, $result->get_messages( 'warn' ) );

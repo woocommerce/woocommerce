@@ -20,8 +20,8 @@ class ImportSetSiteOptions implements StepProcessor {
 	/**
 	 * List of WordPress options that should not be modified.
 	 *
-	 * Entries must be lowercase — keys are normalised to lowercase before being
-	 * compared against this list. See is_restricted_option().
+	 * Entries must be lowercase so normalised keys can be compared directly before
+	 * the database-collation check.
 	 *
 	 * @var array<string>
 	 */
@@ -49,10 +49,11 @@ class ImportSetSiteOptions implements StepProcessor {
 	 * @return StepProcessorResult
 	 */
 	public function process( $schema ): StepProcessorResult {
-		$result = StepProcessorResult::success( SetSiteOptions::get_step_name() );
+		$result                  = StepProcessorResult::success( SetSiteOptions::get_step_name() );
+		$restricted_option_names = $this->get_restricted_option_names( array_keys( (array) $schema->options ) );
 		foreach ( $schema->options as $key => $value ) {
 			// Skip if the option should not be modified.
-			if ( $this->is_restricted_option( $key ) ) {
+			if ( isset( $restricted_option_names[ (string) $key ] ) ) {
 				$result->add_warn( "Cannot modify '{$key}' option: Modifying is restricted for this key." );
 				continue;
 			}
@@ -80,37 +81,38 @@ class ImportSetSiteOptions implements StepProcessor {
 	}
 
 	/**
-	 * Check whether a blueprint is allowed to write to the given option key.
+	 * Find restricted option names among imported keys.
 	 *
-	 * A plain, case-sensitive comparison against RESTRICTED_OPTIONS is not enough,
-	 * because the key a blueprint supplies and the row WordPress ultimately writes to
-	 * are matched by two different sets of rules:
+	 * @param array<int|string> $keys Option keys from the blueprint.
 	 *
-	 * - WordPress trims option names before reading or writing them, so ' wp_user_roles'
-	 *   and 'wp_user_roles' are the same option.
-	 * - Option lookups are resolved by MySQL using the table's collation, which is
-	 *   case-insensitive (and, for the utf8mb4 collations WordPress uses, also
-	 *   accent-insensitive) by default. 'wp_USER_roles' therefore reads and writes the
-	 *   existing 'wp_user_roles' row.
-	 *
-	 * This is checked in two layers. The first normalises the key and compares it against
-	 * the list, which covers case and surrounding whitespace and works even when the
-	 * restricted option does not exist yet. The second asks the database which row the key
-	 * actually resolves to and restricts the write when that row is a restricted option,
-	 * which covers equivalences string normalisation cannot model on its own.
-	 *
-	 * @param string $key The option key from the blueprint.
-	 *
-	 * @return bool True if the option must not be modified.
+	 * @return array<int|string, bool> Restricted option names as keys.
 	 */
-	protected function is_restricted_option( $key ): bool {
-		if ( in_array( $this->normalize_option_name( $key ), self::RESTRICTED_OPTIONS, true ) ) {
-			return true;
+	private function get_restricted_option_names( array $keys ): array {
+		$restricted_option_names = array();
+		$database_candidates     = array();
+
+		foreach ( $keys as $key ) {
+			$key = (string) $key;
+			if ( in_array( self::normalize_option_name( $key ), self::RESTRICTED_OPTIONS, true ) ) {
+				$restricted_option_names[ $key ] = true;
+				continue;
+			}
+
+			$database_candidates[] = array(
+				'original' => $key,
+				'trimmed'  => trim( $key ),
+			);
 		}
 
-		$stored_name = $this->get_stored_option_name( $key );
+		$candidate_names = array_column( $database_candidates, 'trimmed' );
+		foreach ( $this->get_collation_restricted_option_indexes( $candidate_names ) as $candidate_index ) {
+			if ( ! isset( $database_candidates[ $candidate_index ] ) ) {
+				continue;
+			}
+			$restricted_option_names[ $database_candidates[ $candidate_index ]['original'] ] = true;
+		}
 
-		return null !== $stored_name && in_array( $this->normalize_option_name( $stored_name ), self::RESTRICTED_OPTIONS, true );
+		return $restricted_option_names;
 	}
 
 	/**
@@ -123,37 +125,59 @@ class ImportSetSiteOptions implements StepProcessor {
 	 *
 	 * @return string
 	 */
-	private function normalize_option_name( $key ): string {
+	private static function normalize_option_name( $key ): string {
 		return strtolower( trim( (string) $key ) );
 	}
 
 	/**
-	 * Resolve an option key to the option name as it is actually stored.
+	 * Match candidates against restricted names using the options table collation.
 	 *
-	 * Runs the lookup through the database so the key is matched using the same collation
-	 * WordPress uses when it reads and writes the option. Returns null when the key does
-	 * not resolve to an existing row, or when there is no database to ask.
+	 * The empty option_name branches give both derived tables the real column type and
+	 * collation without requiring a restricted option row to exist.
 	 *
-	 * @param string $key The option key from the blueprint.
+	 * @param array<string> $candidate_names Trimmed option names from the blueprint.
 	 *
-	 * @return string|null The stored option name, or null if the key matches no row.
+	 * @return array<int> Indexes of candidates that match a restricted option.
 	 */
-	protected function get_stored_option_name( $key ) {
+	private function get_collation_restricted_option_indexes( array $candidate_names ): array {
 		global $wpdb;
 
-		if ( ! isset( $wpdb ) || ! is_object( $wpdb ) || ! method_exists( $wpdb, 'get_var' ) ) {
-			return null;
+		if ( empty( $candidate_names ) || ! isset( $wpdb ) || ! is_object( $wpdb ) || ! isset( $wpdb->options ) || ! method_exists( $wpdb, 'get_col' ) || ! method_exists( $wpdb, 'prepare' ) ) {
+			return array();
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- The point of this query is to let the database resolve the key with its own collation, which a cached lookup by the supplied key cannot do.
-		$stored_name = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT option_name FROM {$wpdb->options} WHERE option_name = %s LIMIT 1",
-				trim( (string) $key )
-			)
+		$candidate_rows  = implode(
+			' UNION ALL ',
+			array_fill( 0, count( $candidate_names ), 'SELECT %d AS candidate_index, %s AS option_name' )
 		);
+		$restricted_rows = implode(
+			' UNION ALL ',
+			array_fill( 0, count( self::RESTRICTED_OPTIONS ), 'SELECT %s AS option_name' )
+		);
+		$query_args      = array();
 
-		return is_string( $stored_name ) ? $stored_name : null;
+		foreach ( $candidate_names as $candidate_index => $candidate_name ) {
+			$query_args[] = $candidate_index;
+			$query_args[] = $candidate_name;
+		}
+		$query_args = array_merge( $query_args, self::RESTRICTED_OPTIONS );
+
+		$query = "
+			SELECT DISTINCT candidates.candidate_index
+			FROM (
+				SELECT 0 AS candidate_index, option_name FROM {$wpdb->options} WHERE 1 = 0
+				UNION ALL {$candidate_rows}
+			) AS candidates
+			INNER JOIN (
+				SELECT option_name FROM {$wpdb->options} WHERE 1 = 0
+				UNION ALL {$restricted_rows}
+			) AS restricted_options USING ( option_name )
+		";
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- A single prepared comparison applies the options table's collation without an N-query loop.
+		$restricted_indexes = $wpdb->get_col( $wpdb->prepare( $query, $query_args ) );
+
+		return array_map( 'intval', $restricted_indexes );
 	}
 
 	/**
