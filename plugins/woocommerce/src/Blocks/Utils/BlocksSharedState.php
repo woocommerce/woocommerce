@@ -92,6 +92,29 @@ class BlocksSharedState {
 	/**
 	 * Load cart state into interactivity state.
 	 *
+	 * Hydrates the Store API cart response once per request and publishes it,
+	 * untransformed, as `state.cart` in the `woocommerce` Interactivity API
+	 * store. That published state is the single read surface for the hydrated
+	 * cart: server-side code that needs it reads
+	 * `wp_interactivity_state( 'woocommerce' )['cart']` — the same value the
+	 * client hydrates from — rather than a parallel copy.
+	 *
+	 * This matters because the cart is rendered twice, on the server for the
+	 * first paint and on the client after hydration, and the two must agree.
+	 * Reading the published state makes them agree by construction; a second
+	 * accessor returning an internal copy would only agree by coincidence, and
+	 * would silently diverge the moment anything transformed the state on its
+	 * way out. Callers are responsible for calling this method first; it is
+	 * memoized, so calling it when another block already did costs nothing.
+	 *
+	 * Note that entries in `state.cart.items` may be a literal empty array
+	 * (`[]`) — the Store API cart-item schema emits one for a line whose
+	 * `data` property is not a `WC_Product`, for example a line referencing a
+	 * deleted product. Consumers must skip such entries.
+	 *
+	 * See `client/blocks/assets/js/base/stores/woocommerce/README.md` for the
+	 * store-level view of this contract.
+	 *
 	 * @param string $consent_statement The consent statement string.
 	 * @return void
 	 * @throws InvalidArgumentException If consent statement doesn't match.
@@ -238,30 +261,4 @@ class BlocksSharedState {
 		return $notices;
 	}
 
-	/**
-	 * Get the hydrated cart snapshot's line items.
-	 *
-	 * Returns the exact `items` array published as the client's `state.cart.items`,
-	 * i.e. the Store API cart response's `items` property as captured by the
-	 * memoized hydration snapshot used by `load_cart_state()`.
-	 *
-	 * Some entries may be a literal empty array (`[]`). The Store API cart-item
-	 * schema emits an empty array for a line whose `data` property is not a
-	 * `WC_Product` (for example, a line referencing a deleted product).
-	 * Consumers must skip such entries.
-	 *
-	 * @param string $consent_statement The consent statement string.
-	 * @return array Array of cart items, in the Store API cart-item schema shape.
-	 * @throws InvalidArgumentException If consent statement doesn't match.
-	 */
-	public static function get_cart_items( string $consent_statement ): array {
-		self::check_consent( $consent_statement );
-
-		// Ensure cart state is loaded so this method works independently.
-		if ( null === self::$blocks_shared_cart_state ) {
-			self::load_cart_state( $consent_statement );
-		}
-
-		return self::$blocks_shared_cart_state['items'] ?? array();
-	}
 }

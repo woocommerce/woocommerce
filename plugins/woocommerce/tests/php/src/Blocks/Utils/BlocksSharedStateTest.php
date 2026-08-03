@@ -59,14 +59,19 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 		$cart_state->setAccessible( true );
 		$cart_state->setValue( null, null );
 
+		// Both the config and the state must be cleared: wp_interactivity_state()
+		// merges recursively, so a previous test's cart would blend into the next
+		// one's rather than replace it.
 		$interactivity     = wp_interactivity();
 		$interactivity_ref = new \ReflectionClass( $interactivity );
-		$config_data       = $interactivity_ref->getProperty( 'config_data' );
 
-		$config_data->setAccessible( true );
-		$data = $config_data->getValue( $interactivity );
-		unset( $data['woocommerce'] );
-		$config_data->setValue( $interactivity, $data );
+		foreach ( array( 'config_data', 'state_data' ) as $property_name ) {
+			$property = $interactivity_ref->getProperty( $property_name );
+			$property->setAccessible( true );
+			$data = $property->getValue( $interactivity );
+			unset( $data['woocommerce'] );
+			$property->setValue( $interactivity, $data );
+		}
 	}
 
 	/**
@@ -113,88 +118,104 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_cart_items() rejects calls without the consent string, before any cart work happens.
+	 * @testdox load_cart_state() rejects calls without the consent string, before any cart work happens.
 	 */
-	public function test_get_cart_items_throws_without_consent(): void {
+	public function test_load_cart_state_throws_without_consent(): void {
 		$fake = $this->create_counting_hydration( array( 'body' => array( 'items' => array( array( 'key' => 'abc' ) ) ) ) );
 		$this->inject_hydration( $fake );
 
 		$this->expectException( \InvalidArgumentException::class );
 
 		try {
-			BlocksSharedState::get_cart_items( 'nope' );
+			BlocksSharedState::load_cart_state( 'nope' );
 		} finally {
 			$this->assertSame( 0, $fake->call_count, 'Hydration should not run before consent is checked.' );
 		}
 	}
 
 	/**
-	 * @testdox get_cart_items() self-heals by loading cart state when it has not been loaded yet.
+	 * The hydrated cart response must reach the interactivity state untransformed,
+	 * because that published value is what both the client and server-side
+	 * consumers read. A transformation here would let the two describe
+	 * different carts.
+	 *
+	 * @testdox load_cart_state() publishes the hydrated cart response verbatim as state.cart.
 	 */
-	public function test_get_cart_items_self_heals_without_prior_load_cart_state(): void {
-		$items = array( array( 'key' => 'item-1' ) );
-		$fake  = $this->create_counting_hydration( array( 'body' => array( 'items' => $items ) ) );
-		$this->inject_hydration( $fake );
+	public function test_load_cart_state_publishes_the_hydrated_response_verbatim(): void {
+		$body = array(
+			'items'       => array( array( 'key' => 'item-1' ), array( 'key' => 'item-2' ) ),
+			'items_count' => 2,
+		);
+		$this->inject_hydration( $this->create_counting_hydration( array( 'body' => $body ) ) );
 
-		$result = BlocksSharedState::get_cart_items( $this->consent );
+		BlocksSharedState::load_cart_state( $this->consent );
 
-		$this->assertSame( $items, $result );
-		$this->assertSame( 1, $fake->call_count, 'get_cart_items() should self-heal by running hydration exactly once.' );
+		$this->assertSame( $body, $this->published_cart() );
 	}
 
 	/**
-	 * @testdox get_cart_items() returns the same items loaded by a prior load_cart_state() call, without hydrating again.
+	 * @testdox load_cart_state() hydrates at most once per request across repeated calls.
 	 */
-	public function test_get_cart_items_after_load_cart_state_reuses_memoized_state(): void {
+	public function test_load_cart_state_hydrates_at_most_once(): void {
 		$items = array( array( 'key' => 'item-1' ) );
 		$fake  = $this->create_counting_hydration( array( 'body' => array( 'items' => $items ) ) );
 		$this->inject_hydration( $fake );
 
 		BlocksSharedState::load_cart_state( $this->consent );
-		$result = BlocksSharedState::get_cart_items( $this->consent );
+		BlocksSharedState::load_cart_state( $this->consent );
 
-		$this->assertSame( $items, $result );
+		$this->assertSame( $items, $this->published_cart()['items'] );
 		$this->assertSame( 1, $fake->call_count, 'Hydration should run at most once across both calls.' );
 	}
 
 	/**
-	 * @testdox get_cart_items() returns an empty array and raises no error or notice when WC()->cart is unavailable.
+	 * @testdox load_cart_state() publishes an empty cart, and raises no error, when WC()->cart is unavailable.
 	 */
-	public function test_get_cart_items_returns_empty_array_when_cart_unavailable(): void {
+	public function test_load_cart_state_publishes_empty_cart_when_cart_unavailable(): void {
 		$original_cart = WC()->cart;
 		WC()->cart     = null;
 
 		try {
-			$result = BlocksSharedState::get_cart_items( $this->consent );
+			BlocksSharedState::load_cart_state( $this->consent );
 		} finally {
 			WC()->cart = $original_cart;
 		}
 
-		$this->assertSame( array(), $result );
+		$this->assertSame( array(), $this->published_cart() );
 	}
 
 	/**
-	 * @testdox get_cart_items() returns an empty array when the stored response body has no items key.
+	 * @testdox load_cart_state() publishes a cart with no items key when the response body has none, as happens when the cart route returns an error response.
 	 */
-	public function test_get_cart_items_returns_empty_array_when_body_has_no_items_key(): void {
-		$fake = $this->create_counting_hydration( array( 'body' => array( 'errors' => array() ) ) );
-		$this->inject_hydration( $fake );
+	public function test_load_cart_state_publishes_body_without_items_key_as_is(): void {
+		$this->inject_hydration( $this->create_counting_hydration( array( 'body' => array( 'errors' => array() ) ) ) );
 
-		$result = BlocksSharedState::get_cart_items( $this->consent );
+		BlocksSharedState::load_cart_state( $this->consent );
 
-		$this->assertSame( array(), $result );
+		$this->assertArrayNotHasKey( 'items', $this->published_cart() );
 	}
 
 	/**
-	 * @testdox get_cart_items() returns an empty array when hydration returns no body at all, as happens on the hydration-exception path.
+	 * @testdox load_cart_state() publishes an empty cart when hydration returns no body at all, as happens on the hydration-exception path.
 	 */
-	public function test_get_cart_items_returns_empty_array_when_hydration_returns_no_body(): void {
-		$fake = $this->create_counting_hydration( array() );
-		$this->inject_hydration( $fake );
+	public function test_load_cart_state_publishes_empty_cart_when_hydration_returns_no_body(): void {
+		$this->inject_hydration( $this->create_counting_hydration( array() ) );
 
-		$result = BlocksSharedState::get_cart_items( $this->consent );
+		BlocksSharedState::load_cart_state( $this->consent );
 
-		$this->assertSame( array(), $result );
+		$this->assertSame( array(), $this->published_cart() );
+	}
+
+	/**
+	 * Read the cart as published to the interactivity state — the same surface
+	 * the client and server-side consumers read.
+	 *
+	 * @return array
+	 */
+	private function published_cart(): array {
+		$state = wp_interactivity_state( 'woocommerce' );
+
+		return $state['cart'] ?? array();
 	}
 
 	/**

@@ -353,9 +353,14 @@ class ProductButton extends AbstractBlock {
 	/**
 	 * Build a one-pass index of the first canonical cart line's quantity per product ID.
 	 *
-	 * Mirrors the client's canonical-line matching against the hydrated cart
-	 * snapshot returned by BlocksSharedState::get_cart_items(): an entry with
-	 * no `id` key (the schema's empty-array placeholder for a line whose
+	 * Reads the cart lines straight off the published Interactivity API state
+	 * (`state.cart.items` in the `woocommerce` store), which is the same value
+	 * the client hydrates from — so the two cannot describe different carts.
+	 * BlocksSharedState::load_cart_state() is what publishes it, and is
+	 * memoized, so calling it here is free when render() already did.
+	 *
+	 * Mirrors the client's canonical-line matching over those lines: an entry
+	 * with no `id` key (the schema's empty-array placeholder for a line whose
 	 * product no longer resolves) is skipped; an entry whose
 	 * `is_canonical_line` is present and strictly `false` is skipped, while a
 	 * missing field counts, matching the client; an entry whose `type` is
@@ -369,7 +374,10 @@ class ProductButton extends AbstractBlock {
 	private function build_cart_item_quantity_index() {
 		$index = array();
 
-		$items = BlocksSharedState::get_cart_items( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		BlocksSharedState::load_cart_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+
+		$cart_state = wp_interactivity_state( 'woocommerce' );
+		$items      = $cart_state['cart']['items'] ?? array();
 
 		foreach ( $items as $item ) {
 			if ( ! isset( $item['id'] ) ) {

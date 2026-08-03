@@ -112,7 +112,7 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Wrap a list of items into the response shape BlocksSharedState::get_cart_items() reads from.
+	 * Wrap a list of items into the response shape load_cart_state() publishes from.
 	 *
 	 * @param array $items The cart items.
 	 * @return array
@@ -140,6 +140,17 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 		$cart_state = $reflection->getProperty( 'blocks_shared_cart_state' );
 		$cart_state->setAccessible( true );
 		$cart_state->setValue( null, null );
+
+		// The seed reads the published interactivity state, and
+		// wp_interactivity_state() merges recursively rather than replacing, so
+		// a previous test's cart would blend into the next one's if left behind.
+		$interactivity     = wp_interactivity();
+		$interactivity_ref = new \ReflectionClass( $interactivity );
+		$state_data        = $interactivity_ref->getProperty( 'state_data' );
+		$state_data->setAccessible( true );
+		$data = $state_data->getValue( $interactivity );
+		unset( $data['woocommerce'] );
+		$state_data->setValue( $interactivity, $data );
 	}
 
 	/**
