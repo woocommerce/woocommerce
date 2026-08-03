@@ -31,6 +31,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import './style.scss';
 import { OverwriteConfirmationModal } from '../settings/overwrite-confirmation-modal';
 import { getOptionGroupsFromSteps } from './get-option-groups';
+import { getStepActions } from './get-step-actions';
 import {
 	BlueprintQueueResponse,
 	BlueprintImportResponse,
@@ -201,6 +202,7 @@ interface FileUploadContext {
 	steps?: BlueprintStep[];
 	error?: Error;
 	settings_to_overwrite?: string[];
+	step_actions?: string[];
 	import_allowed?: boolean;
 }
 
@@ -347,6 +349,8 @@ export const fileUploadMachine = setup( {
 								event.output
 							) as string[];
 						},
+						step_actions: ( { event } ) =>
+							getStepActions( event.output ),
 					} ),
 				},
 				onError: {
@@ -610,6 +614,7 @@ export const BlueprintUploadDropzone = () => {
 					overwrittenItems={
 						state.context.settings_to_overwrite || []
 					}
+					additionalActions={ state.context.step_actions || [] }
 				/>
 			) }
 		</>
