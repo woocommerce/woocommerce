@@ -28,7 +28,7 @@ class WC_Embed_Test extends WC_Unit_Test_Case {
 
 		$this->go_to_product_embed( $product );
 		$this->assertTrue( post_password_required(), 'The product should require a password.' );
-		$this->assertSame( 0, WC_Embed::handle_embed_thumbnail_id( 123 ), 'The product image should not be rendered.' );
+		$this->assertFalse( WC_Embed::handle_embed_thumbnail_id( 123 ), 'The product image should not be rendered.' );
 		$response_data = WC_Embed::handle_oembed_response_data(
 			array(
 				'title'            => 'Protected product',

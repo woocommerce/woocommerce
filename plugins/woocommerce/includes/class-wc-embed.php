@@ -74,7 +74,7 @@ class WC_Embed {
 	 * @return int|false
 	 */
 	public static function handle_embed_thumbnail_id( $thumbnail_id ) {
-		return self::is_embedded_product() && post_password_required() ? 0 : $thumbnail_id;
+		return self::is_embedded_product() && post_password_required() ? false : $thumbnail_id;
 	}
 
 	/**
