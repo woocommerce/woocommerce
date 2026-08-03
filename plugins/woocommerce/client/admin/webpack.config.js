@@ -35,6 +35,46 @@ const getSubdirectoriesAt = ( searchPath ) => {
 
 const WC_ADMIN_PACKAGES_DIR = '../../../../packages/js';
 const WP_ADMIN_SCRIPTS_DIR = './client/wp-admin-scripts';
+const SETTINGS_UI_PACKAGE_DIR = path.resolve(
+	__dirname,
+	`${ WC_ADMIN_PACKAGES_DIR }/settings-ui`
+);
+
+const resolvePackageDirectory = ( packageName, fromDirectory ) =>
+	path.dirname(
+		require.resolve( `${ packageName }/package.json`, {
+			paths: [ fromDirectory ],
+		} )
+	);
+
+const dataViewsPackageDirectory = resolvePackageDirectory(
+	'@wordpress/dataviews',
+	SETTINGS_UI_PACKAGE_DIR
+);
+const dataViewsUiPackageDirectory = resolvePackageDirectory(
+	'@wordpress/ui',
+	dataViewsPackageDirectory
+);
+const dataViewsBundledPackageDirectories = [
+	resolvePackageDirectory(
+		'@wordpress/components',
+		dataViewsPackageDirectory
+	),
+	resolvePackageDirectory( '@wordpress/compose', dataViewsPackageDirectory ),
+	resolvePackageDirectory( '@wordpress/data', dataViewsPackageDirectory ),
+	dataViewsUiPackageDirectory,
+	resolvePackageDirectory( '@wordpress/theme', dataViewsUiPackageDirectory ),
+];
+const dataViewsBundledDependencyRoots = [
+	...new Set(
+		dataViewsBundledPackageDirectories.map( ( packageDirectory ) =>
+			path.resolve( packageDirectory, '../..' )
+		)
+	),
+];
+const dataViewsWpEntry = require.resolve( '@wordpress/dataviews/wp', {
+	paths: [ SETTINGS_UI_PACKAGE_DIR ],
+} );
 
 // Admin writes directly to the plugin's `assets/client/admin/` so PHP can
 // enqueue without an intermediate copy step. The JS config and every composed
@@ -176,6 +216,18 @@ const jsConfig = {
 	module: {
 		parser: styleConfig.parser,
 		rules: [
+			{
+				// DataViews' /wp build inlines WordPress packages but leaves their
+				// third-party imports external. Resolve those imports from the exact
+				// package graph bundled into this entry under pnpm's strict layout.
+				include: dataViewsWpEntry,
+				resolve: {
+					modules: [
+						...dataViewsBundledDependencyRoots,
+						'node_modules',
+					],
+				},
+			},
 			{
 				test: /\.(t|j)sx?$/,
 				parser: {
