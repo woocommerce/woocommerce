@@ -308,34 +308,24 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Hash a value using wp_fast_hash (from WP 6.8 onwards).
-	 *
-	 * This method can be removed when the minimum version supported is 6.8.
+	 * Hash a value for the session cookie integrity tag.
 	 *
 	 * @param string $message Value to hash.
 	 * @return string Hashed value.
 	 */
 	private function hash( string $message ) {
-		if ( function_exists( 'wp_fast_hash' ) ) {
-			return wp_fast_hash( $message );
-		}
 		return hash_hmac( 'md5', $message, wp_hash( $message ) );
 	}
 
 	/**
-	 * Verify a hash using wp_verify_fast_hash (from WP 6.8 onwards).
-	 *
-	 * This method can be removed when the minimum version supported is 6.8.
+	 * Verify a hash produced by self::hash().
 	 *
 	 * @param string $message Message to verify.
 	 * @param string $hash Hash to verify.
 	 * @return bool Whether the hash is valid.
 	 */
 	private function verify_hash( string $message, string $hash ) {
-		if ( function_exists( 'wp_verify_fast_hash' ) ) {
-			return wp_verify_fast_hash( $message, $hash );
-		}
-		return hash_equals( hash_hmac( 'md5', $message, wp_hash( $message ) ), $hash );
+		return hash_equals( $this->hash( $message ), $hash );
 	}
 
 	/**
