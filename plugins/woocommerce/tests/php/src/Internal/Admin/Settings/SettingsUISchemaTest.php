@@ -290,6 +290,30 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It keeps info fields non-saving when their description comes from desc.
+	 */
+	public function test_from_legacy_settings_marks_info_fields_with_descriptions_as_non_saving(): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'test',
+			'',
+			'Test settings',
+			array(
+				array(
+					'id'   => 'woocommerce_test_info',
+					'type' => 'info',
+					'desc' => 'Read-only information.',
+				),
+			)
+		);
+
+		$field = $schema['groups']['default']['fields'][0];
+
+		$this->assertSame( 'Read-only information.', $field['description'] );
+		$this->assertSame( array( 'adapter' => 'none' ), $field['save'] );
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
 	 * @testdox It preserves both legacy descriptions and string desc_tip values.
 	 */
 	public function test_from_legacy_settings_preserves_desc_and_string_desc_tip(): void {
@@ -708,6 +732,320 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( $schema, SettingsUISchema::canonicalize_option_values( $schema ), 'Associative value arrays should pass through unreindexed for the provider to fix.' );
+	}
+
+	/**
+	 * @testdox It accepts every field type supported by the current renderer.
+	 *
+	 * @dataProvider supported_field_types
+	 *
+	 * @param string $type Field type.
+	 * @param mixed  $value Field value.
+	 */
+	public function test_assert_valid_schema_accepts_supported_field_types( string $type, $value ): void {
+		$field = array(
+			'id'    => 'acme_' . str_replace( '-', '_', $type ),
+			'label' => 'Acme field',
+			'type'  => $type,
+			'value' => $value,
+			'save'  => array( 'adapter' => 'form_post' ),
+		);
+
+		if ( in_array( $type, array( 'array', 'radio', 'select' ), true ) ) {
+			$field['options'] = array(
+				array(
+					'label' => 'Option A',
+					'value' => 'a',
+				),
+			);
+		}
+
+		if ( 'info' === $type ) {
+			unset( $field['value'] );
+			$field['save'] = array( 'adapter' => 'none' );
+		}
+
+		SettingsUISchema::assert_valid_schema( $this->get_native_schema_with_field( $field ) );
+		$this->addToAssertionCount( 1 );
+	}
+
+	/**
+	 * Supported field type fixtures.
+	 *
+	 * @return array<string, array{string, mixed}>
+	 */
+	public static function supported_field_types(): array {
+		return array(
+			'array'          => array( 'array', array( 'a' ) ),
+			'checkbox'       => array( 'checkbox', true ),
+			'date'           => array( 'date', '2026-08-03' ),
+			'datetime-local' => array( 'datetime-local', '2026-08-03T12:30' ),
+			'email'          => array( 'email', 'merchant@example.com' ),
+			'info'           => array( 'info', null ),
+			'number'         => array( 'number', '02' ),
+			'password'       => array( 'password', 'secret' ),
+			'radio'          => array( 'radio', 'a' ),
+			'select'         => array( 'select', 'a' ),
+			'tel'            => array( 'tel', '+1 555 555 5555' ),
+			'text'           => array( 'text', 'Acme' ),
+			'textarea'       => array( 'textarea', 'Acme description' ),
+			'time'           => array( 'time', '12:30' ),
+			'url'            => array( 'url', 'https://example.com' ),
+		);
+	}
+
+	/**
+	 * @testdox It normalizes every legacy field type alias before validation.
+	 *
+	 * @dataProvider legacy_field_type_aliases
+	 *
+	 * @param string $legacy_type Legacy field type.
+	 * @param string $canonical_type Canonical field type.
+	 */
+	public function test_from_legacy_settings_normalizes_aliases_before_validation( string $legacy_type, string $canonical_type ): void {
+		$schema = SettingsUISchema::from_legacy_settings(
+			'acme',
+			'',
+			'Acme',
+			array(
+				array(
+					'id'      => 'acme_field',
+					'label'   => 'Acme field',
+					'type'    => $legacy_type,
+					'value'   => 'a',
+					'options' => array( 'a' => 'Option A' ),
+				),
+			)
+		);
+
+		$this->assertSame( $canonical_type, $schema['groups']['default']['fields'][0]['type'] );
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
+	 * Legacy field type aliases.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public static function legacy_field_type_aliases(): array {
+		return array(
+			'multiselect'            => array( 'multiselect', 'array' ),
+			'multi_select_countries' => array( 'multi_select_countries', 'array' ),
+			'single_select_country'  => array( 'single_select_country', 'select' ),
+			'single_select_page'     => array( 'single_select_page', 'select' ),
+		);
+	}
+
+	/**
+	 * @testdox It rejects malformed schemas with a precise boundary reason.
+	 *
+	 * @dataProvider invalid_schemas
+	 *
+	 * @param array  $schema Invalid schema.
+	 * @param string $reason Expected exception message.
+	 */
+	public function test_assert_valid_schema_rejects_malformed_schemas( array $schema, string $reason ): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( $reason );
+
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
+	 * Invalid schema fixtures.
+	 *
+	 * @return array<string, array{array, string}>
+	 */
+	public static function invalid_schemas(): array {
+		$valid = self::get_valid_schema_for_validation();
+
+		$unknown_type                                        = $valid;
+		$unknown_type['groups']['main']['fields'][0]['type'] = 'custom';
+		$duplicate_id                                        = $valid;
+		$duplicate_id['groups']['main']['fields'][]          = $duplicate_id['groups']['main']['fields'][0];
+		$group_field_collision                               = $valid;
+		$group_field_collision['groups']['main']['fields'][0]['id'] = 'main';
+		$empty_schema_id                                        = $valid;
+		$empty_schema_id['id']                                  = '';
+		$malformed_group                                        = $valid;
+		$malformed_group['groups']['main']['fields']            = 'invalid';
+		$missing_options                                        = $valid;
+		$missing_options['groups']['main']['fields'][0]['type'] = 'select';
+		$invalid_option = $missing_options;
+		$invalid_option['groups']['main']['fields'][0]['options'] = array(
+			array(
+				'label' => 'One',
+				'value' => 1,
+			),
+		);
+		$invalid_component                                        = $valid;
+		$invalid_component['groups']['main']['fields'][0]['component'] = '';
+		$invalid_field_save                                        = $valid;
+		$invalid_field_save['groups']['main']['fields'][0]['save'] = array( 'adapter' => 'custom' );
+		$invalid_visibility                                        = $valid;
+		$invalid_visibility['groups']['main']['fields'][0]['visibility'] = array( 'controller' => 'missing' );
+		$invalid_bound = $valid;
+		$invalid_bound['groups']['main']['fields'][0]['customAttributes'] = array( 'min' => 1 );
+		$invalid_info                                        = $valid;
+		$invalid_info['groups']['main']['fields'][0]['type'] = 'info';
+		$invalid_shell                                       = $valid;
+		$invalid_shell['shell']['navigation']                = array(
+			array(
+				'id'    => 'general',
+				'label' => 'General',
+			),
+		);
+		$invalid_breadcrumb                                  = $valid;
+		$invalid_breadcrumb['shell']['breadcrumbs']          = array( array( 'label' => 1 ) );
+		$invalid_badge                                       = $valid;
+		$invalid_badge['shell']['badges']                    = array(
+			array(
+				'label'  => 'Beta',
+				'intent' => 'purple',
+			),
+		);
+		$invalid_action                                      = $valid;
+		$invalid_action['groups']['main']['actions']         = array(
+			array(
+				'id'    => '',
+				'label' => 'Docs',
+				'href'  => 'https://example.com',
+			),
+		);
+		$invalid_page_save                                   = $valid;
+		$invalid_page_save['save']                           = array( 'adapter' => 'custom' );
+		$invalid_navigation_component                        = $valid;
+		$invalid_navigation_component['shell']['navigationComponent'] = '';
+		$invalid_group_map                    = $valid;
+		$invalid_group_map['groups']['other'] = $invalid_group_map['groups']['main'];
+		unset( $invalid_group_map['groups']['main'] );
+
+		return array(
+			'unknown field type'          => array( $unknown_type, 'Field "acme_field" has unsupported type "custom".' ),
+			'duplicate field id'          => array( $duplicate_id, 'Field id "acme_field" is duplicated.' ),
+			'group and field collision'   => array( $group_field_collision, 'Field id "main" collides with a group id.' ),
+			'empty schema id'             => array( $empty_schema_id, 'Schema id must be a non-empty string.' ),
+			'malformed group fields'      => array( $malformed_group, 'Group "main" fields must be a list.' ),
+			'missing choice options'      => array( $missing_options, 'Field "acme_field" of type "select" must define a non-empty options list.' ),
+			'non-string option value'     => array( $invalid_option, 'Field "acme_field" option 0 value must be a string.' ),
+			'empty component name'        => array( $invalid_component, 'Field "acme_field" component must be a non-empty string.' ),
+			'unsupported field save'      => array( $invalid_field_save, 'Field "acme_field" save adapter must be "form_post" or "none".' ),
+			'missing visibility control'  => array( $invalid_visibility, 'Field "acme_field" visibility controller "missing" does not reference a field.' ),
+			'bound on text field'         => array( $invalid_bound, 'Field "acme_field" may define "min" only when its type is "number".' ),
+			'saving info field'           => array( $invalid_info, 'Field "acme_field" of type "info" must use the "none" save adapter.' ),
+			'malformed shell navigation'  => array( $invalid_shell, 'Shell navigation item 0 href must be a string.' ),
+			'malformed breadcrumb'        => array( $invalid_breadcrumb, 'Shell breadcrumb 0 label must be a string.' ),
+			'invalid badge intent'        => array( $invalid_badge, 'Shell badge 0 intent "purple" is not supported.' ),
+			'empty group action id'       => array( $invalid_action, 'Group "main" action 0 id must be a non-empty string.' ),
+			'custom save without handler' => array( $invalid_page_save, 'Schema custom save strategy must define a non-empty handler.' ),
+			'empty navigation component'  => array( $invalid_navigation_component, 'Shell navigationComponent must be a non-empty string.' ),
+			'group map id mismatch'       => array( $invalid_group_map, 'Group map key "other" must match group id "main".' ),
+		);
+	}
+
+	/**
+	 * @testdox It accepts valid optional shell, field, visibility, action, and save metadata.
+	 */
+	public function test_assert_valid_schema_accepts_optional_metadata(): void {
+		$schema                              = self::get_valid_schema_for_validation();
+		$schema['save']                      = array(
+			'adapter' => 'custom',
+			'handler' => 'acme/save',
+		);
+		$schema['shell']                     = array(
+			'header'              => 'visible',
+			'title'               => 'Acme settings',
+			'subtitle'            => 'Configure Acme.',
+			'breadcrumbs'         => array(
+				array(
+					'label' => 'Settings',
+					'href'  => 'https://example.com/settings',
+				),
+			),
+			'badges'              => array(
+				array(
+					'label'  => 'Beta',
+					'intent' => 'info',
+				),
+			),
+			'navigation'          => array(
+				array(
+					'id'     => 'general',
+					'label'  => 'General',
+					'href'   => 'https://example.com/general',
+					'active' => true,
+				),
+			),
+			'sectionNavigation'   => array(),
+			'navigationComponent' => 'acme/navigation',
+		);
+		$schema['groups']['main']['actions'] = array(
+			array(
+				'id'      => 'docs',
+				'label'   => 'Documentation',
+				'href'    => 'https://example.com/docs',
+				'variant' => 'link',
+				'target'  => '_blank',
+				'rel'     => 'noopener',
+			),
+		);
+		$schema['groups']['main']['fields'][0]['component']  = 'acme/text';
+		$schema['groups']['main']['fields'][0]['visibility'] = array(
+			'controller' => 'acme_enabled',
+			'value'      => array( true, false ),
+		);
+		$schema['groups']['main']['fields'][]                = array(
+			'id'    => 'acme_enabled',
+			'label' => 'Enabled',
+			'type'  => 'checkbox',
+			'value' => true,
+			'save'  => array(
+				'adapter' => 'form_post',
+				'name'    => 'acme_enabled',
+			),
+		);
+
+		SettingsUISchema::assert_valid_schema( $schema );
+		$this->addToAssertionCount( 1 );
+	}
+
+	/**
+	 * Build a valid schema for validation tests.
+	 *
+	 * @return array
+	 */
+	private static function get_valid_schema_for_validation(): array {
+		return array(
+			'id'      => 'acme',
+			'title'   => 'Acme',
+			'section' => 'general',
+			'save'    => array( 'adapter' => 'form_post' ),
+			'shell'   => array(
+				'header' => 'hidden',
+				'title'  => 'Acme',
+			),
+			'groups'  => array(
+				'main' => array(
+					'id'          => 'main',
+					'title'       => 'Main',
+					'description' => 'Main settings.',
+					'actions'     => array(),
+					'fields'      => array(
+						array(
+							'id'          => 'acme_field',
+							'label'       => 'Acme field',
+							'type'        => 'text',
+							'description' => 'A text field.',
+							'value'       => 'Acme',
+							'save'        => array(
+								'adapter' => 'form_post',
+								'name'    => 'acme_field',
+							),
+						),
+					),
+				),
+			),
+		);
 	}
 
 	/**

@@ -26,6 +26,43 @@ class SettingsUISchema {
 	private const DEFAULT_GROUP_ID = 'default';
 
 	/**
+	 * Field types that the current Settings UI renderer handles explicitly.
+	 *
+	 * @var string[]
+	 */
+	private const SUPPORTED_FIELD_TYPES = array(
+		'array',
+		'checkbox',
+		'date',
+		'datetime-local',
+		'email',
+		'info',
+		'number',
+		'password',
+		'radio',
+		'select',
+		'tel',
+		'text',
+		'textarea',
+		'time',
+		'url',
+	);
+
+	/**
+	 * Field types that require a choice list.
+	 *
+	 * @var string[]
+	 */
+	private const CHOICE_FIELD_TYPES = array( 'array', 'radio', 'select' );
+
+	/**
+	 * Custom attributes that describe a numeric range.
+	 *
+	 * @var string[]
+	 */
+	private const RANGE_ATTRIBUTES = array( 'min', 'max', 'step' );
+
+	/**
 	 * Build a schema from a legacy WC settings array.
 	 *
 	 * @since 10.9.0
@@ -136,6 +173,101 @@ class SettingsUISchema {
 			),
 			'groups'  => $groups,
 		);
+	}
+
+	// Exception messages are not HTML output. Dynamic values are sanitized once
+	// by invalid_schema() before the exception crosses the schema boundary.
+	// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+
+	/**
+	 * Assert that a schema is safe for the current Settings UI renderer.
+	 *
+	 * Compatibility normalization and request-owned shell defaults must run
+	 * before this assertion. An invalid schema throws before it can be cached or
+	 * emitted to JavaScript.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array $schema Settings UI schema.
+	 * @throws \InvalidArgumentException When the schema is malformed or unsupported.
+	 */
+	public static function assert_valid_schema( array $schema ): void {
+		self::assert_non_empty_string( $schema['id'] ?? null, 'Schema id must be a non-empty string.' );
+
+		foreach ( array( 'title', 'section' ) as $property ) {
+			if ( array_key_exists( $property, $schema ) && ! is_string( $schema[ $property ] ) ) {
+				throw self::invalid_schema( sprintf( 'Schema %s must be a string.', $property ) );
+			}
+		}
+
+		if ( array_key_exists( 'section', $schema ) && '' === $schema['section'] ) {
+			throw self::invalid_schema( 'Schema section must be a non-empty string.' );
+		}
+
+		self::assert_page_save_strategy( $schema['save'] ?? null );
+		self::assert_shell( $schema['shell'] ?? null );
+
+		if ( ! isset( $schema['groups'] ) || ! is_array( $schema['groups'] ) ) {
+			throw self::invalid_schema( 'Schema groups must be a map.' );
+		}
+
+		$group_ids = array();
+		foreach ( $schema['groups'] as $group_key => $group ) {
+			if ( ! is_string( $group_key ) || '' === $group_key ) {
+				throw self::invalid_schema( 'Group map keys must be non-empty strings.' );
+			}
+
+			if ( ! is_array( $group ) ) {
+				throw self::invalid_schema( sprintf( 'Group "%s" must be an array.', $group_key ) );
+			}
+
+			self::assert_non_empty_string( $group['id'] ?? null, sprintf( 'Group "%s" id must be a non-empty string.', $group_key ) );
+			if ( $group_key !== $group['id'] ) {
+				throw self::invalid_schema( sprintf( 'Group map key "%s" must match group id "%s".', $group_key, $group['id'] ) );
+			}
+
+			$group_ids[] = $group['id'];
+		}
+
+		$field_ids        = array();
+		$visibility_rules = array();
+		foreach ( $schema['groups'] as $group ) {
+			$group_id = $group['id'];
+			self::assert_optional_strings( $group, array( 'title', 'description' ), sprintf( 'Group "%s"', $group_id ) );
+			self::assert_group_actions( $group['actions'] ?? null, $group_id );
+
+			if ( ! isset( $group['fields'] ) || ! is_array( $group['fields'] ) || ! ArrayUtil::array_is_list( $group['fields'] ) ) {
+				throw self::invalid_schema( sprintf( 'Group "%s" fields must be a list.', $group_id ) );
+			}
+
+			foreach ( $group['fields'] as $field_index => $field ) {
+				if ( ! is_array( $field ) ) {
+					throw self::invalid_schema( sprintf( 'Group "%s" field %d must be an array.', $group_id, $field_index ) );
+				}
+
+				self::assert_non_empty_string( $field['id'] ?? null, sprintf( 'Group "%s" field %d id must be a non-empty string.', $group_id, $field_index ) );
+				$field_id = $field['id'];
+				if ( in_array( $field_id, $field_ids, true ) ) {
+					throw self::invalid_schema( sprintf( 'Field id "%s" is duplicated.', $field_id ) );
+				}
+				if ( in_array( $field_id, $group_ids, true ) ) {
+					throw self::invalid_schema( sprintf( 'Field id "%s" collides with a group id.', $field_id ) );
+				}
+
+				$field_ids[] = $field_id;
+				self::assert_field( $field );
+				if ( isset( $field['visibility'] ) ) {
+					$visibility_rules[ $field_id ] = $field['visibility'];
+				}
+			}
+		}
+
+		foreach ( $visibility_rules as $field_id => $visibility ) {
+			$controller = $visibility['controller'];
+			if ( ! in_array( $controller, $field_ids, true ) ) {
+				throw self::invalid_schema( sprintf( 'Field "%s" visibility controller "%s" does not reference a field.', $field_id, $controller ) );
+			}
+		}
 	}
 
 	/**
@@ -368,9 +500,11 @@ class SettingsUISchema {
 			$field['options'] = $options;
 		}
 
-		if ( 'info' === $type && '' === $field['description'] && isset( $setting['text'] ) && is_scalar( $setting['text'] ) ) {
-			$field['description'] = wp_kses_post( (string) $setting['text'] );
-			$field['save']        = array( 'adapter' => 'none' );
+		if ( 'info' === $type ) {
+			if ( '' === $field['description'] && isset( $setting['text'] ) && is_scalar( $setting['text'] ) ) {
+				$field['description'] = wp_kses_post( (string) $setting['text'] );
+			}
+			$field['save'] = array( 'adapter' => 'none' );
 		}
 
 		return $field;
@@ -632,6 +766,476 @@ class SettingsUISchema {
 
 		return $actions;
 	}
+
+	// The assertion helpers deliberately propagate InvalidArgumentException to
+	// the public boundary method, whose contract documents that exception.
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.Missing
+
+	/**
+	 * Assert page-level save metadata.
+	 *
+	 * @param mixed $save Save metadata, or null when omitted.
+	 */
+	private static function assert_page_save_strategy( $save ): void {
+		if ( null === $save ) {
+			return;
+		}
+
+		if ( ! is_array( $save ) ) {
+			throw self::invalid_schema( 'Schema save strategy must be an array.' );
+		}
+
+		$adapter = $save['adapter'] ?? null;
+		if ( ! is_string( $adapter ) || ! in_array( $adapter, array( 'custom', 'form_post', 'none' ), true ) ) {
+			throw self::invalid_schema( 'Schema save adapter must be "custom", "form_post", or "none".' );
+		}
+
+		if ( 'custom' === $adapter ) {
+			self::assert_non_empty_string( $save['handler'] ?? null, 'Schema custom save strategy must define a non-empty handler.' );
+		} elseif ( array_key_exists( 'handler', $save ) ) {
+			throw self::invalid_schema( 'Schema save handler is only valid for the "custom" adapter.' );
+		}
+	}
+
+	/**
+	 * Assert shell metadata.
+	 *
+	 * @param mixed $shell Shell metadata, or null when omitted.
+	 */
+	private static function assert_shell( $shell ): void {
+		if ( null === $shell ) {
+			return;
+		}
+
+		if ( ! is_array( $shell ) ) {
+			throw self::invalid_schema( 'Schema shell must be an array.' );
+		}
+
+		self::assert_optional_strings( $shell, array( 'title', 'subtitle' ), 'Shell' );
+		if ( isset( $shell['header'] ) && ! in_array( $shell['header'], array( 'hidden', 'visible' ), true ) ) {
+			throw self::invalid_schema( 'Shell header must be "hidden" or "visible".' );
+		}
+
+		if ( array_key_exists( 'navigationComponent', $shell ) ) {
+			self::assert_non_empty_string( $shell['navigationComponent'], 'Shell navigationComponent must be a non-empty string.' );
+		}
+
+		foreach ( array( 'navigation', 'sectionNavigation' ) as $property ) {
+			if ( ! array_key_exists( $property, $shell ) ) {
+				continue;
+			}
+
+			self::assert_shell_navigation( $shell[ $property ], 'Shell ' . $property );
+		}
+
+		self::assert_shell_breadcrumbs( $shell['breadcrumbs'] ?? null );
+		self::assert_shell_badges( $shell['badges'] ?? null );
+	}
+
+	/**
+	 * Assert shell navigation items.
+	 *
+	 * @param mixed  $items Navigation items.
+	 * @param string $context Error message context.
+	 */
+	private static function assert_shell_navigation( $items, string $context ): void {
+		if ( ! is_array( $items ) || ! ArrayUtil::array_is_list( $items ) ) {
+			throw self::invalid_schema( $context . ' must be a list.' );
+		}
+
+		$ids = array();
+		foreach ( $items as $index => $item ) {
+			if ( ! is_array( $item ) ) {
+				throw self::invalid_schema( sprintf( '%s item %d must be an array.', $context, $index ) );
+			}
+
+			self::assert_non_empty_string( $item['id'] ?? null, sprintf( '%s item %d id must be a non-empty string.', $context, $index ) );
+			if ( in_array( $item['id'], $ids, true ) ) {
+				throw self::invalid_schema( sprintf( '%s item id "%s" is duplicated.', $context, $item['id'] ) );
+			}
+			$ids[] = $item['id'];
+
+			foreach ( array( 'label', 'href' ) as $property ) {
+				if ( ! isset( $item[ $property ] ) || ! is_string( $item[ $property ] ) ) {
+					throw self::invalid_schema( sprintf( '%s item %d %s must be a string.', $context, $index, $property ) );
+				}
+			}
+
+			if ( isset( $item['active'] ) && ! is_bool( $item['active'] ) ) {
+				throw self::invalid_schema( sprintf( '%s item %d active must be a boolean.', $context, $index ) );
+			}
+		}
+	}
+
+	/**
+	 * Assert shell breadcrumbs.
+	 *
+	 * @param mixed $breadcrumbs Breadcrumb metadata, or null when omitted.
+	 */
+	private static function assert_shell_breadcrumbs( $breadcrumbs ): void {
+		if ( null === $breadcrumbs ) {
+			return;
+		}
+
+		if ( ! is_array( $breadcrumbs ) || ! ArrayUtil::array_is_list( $breadcrumbs ) ) {
+			throw self::invalid_schema( 'Shell breadcrumbs must be a list.' );
+		}
+
+		foreach ( $breadcrumbs as $index => $breadcrumb ) {
+			if ( ! is_array( $breadcrumb ) || ! isset( $breadcrumb['label'] ) || ! is_string( $breadcrumb['label'] ) ) {
+				throw self::invalid_schema( sprintf( 'Shell breadcrumb %d label must be a string.', $index ) );
+			}
+
+			if ( isset( $breadcrumb['href'] ) && ! is_string( $breadcrumb['href'] ) ) {
+				throw self::invalid_schema( sprintf( 'Shell breadcrumb %d href must be a string.', $index ) );
+			}
+		}
+	}
+
+	/**
+	 * Assert shell badges.
+	 *
+	 * @param mixed $badges Badge metadata, or null when omitted.
+	 */
+	private static function assert_shell_badges( $badges ): void {
+		if ( null === $badges ) {
+			return;
+		}
+
+		if ( ! is_array( $badges ) || ! ArrayUtil::array_is_list( $badges ) ) {
+			throw self::invalid_schema( 'Shell badges must be a list.' );
+		}
+
+		foreach ( $badges as $index => $badge ) {
+			if ( ! is_array( $badge ) || ! isset( $badge['label'] ) || ! is_string( $badge['label'] ) ) {
+				throw self::invalid_schema( sprintf( 'Shell badge %d label must be a string.', $index ) );
+			}
+
+			if ( isset( $badge['intent'] ) && ! in_array( $badge['intent'], array( 'default', 'info', 'success', 'warning', 'error' ), true ) ) {
+				throw self::invalid_schema( sprintf( 'Shell badge %d intent "%s" is not supported.', $index, is_scalar( $badge['intent'] ) ? (string) $badge['intent'] : gettype( $badge['intent'] ) ) );
+			}
+		}
+	}
+
+	/**
+	 * Assert group header actions.
+	 *
+	 * @param mixed  $actions Group actions, or null when omitted.
+	 * @param string $group_id Group id.
+	 */
+	private static function assert_group_actions( $actions, string $group_id ): void {
+		if ( null === $actions ) {
+			return;
+		}
+
+		if ( ! is_array( $actions ) || ! ArrayUtil::array_is_list( $actions ) ) {
+			throw self::invalid_schema( sprintf( 'Group "%s" actions must be a list.', $group_id ) );
+		}
+
+		$ids = array();
+		foreach ( $actions as $index => $action ) {
+			if ( ! is_array( $action ) ) {
+				throw self::invalid_schema( sprintf( 'Group "%s" action %d must be an array.', $group_id, $index ) );
+			}
+
+			self::assert_non_empty_string( $action['id'] ?? null, sprintf( 'Group "%s" action %d id must be a non-empty string.', $group_id, $index ) );
+			if ( in_array( $action['id'], $ids, true ) ) {
+				throw self::invalid_schema( sprintf( 'Group "%s" action id "%s" is duplicated.', $group_id, $action['id'] ) );
+			}
+			$ids[] = $action['id'];
+
+			foreach ( array( 'label', 'href' ) as $property ) {
+				if ( ! isset( $action[ $property ] ) || ! is_string( $action[ $property ] ) ) {
+					throw self::invalid_schema( sprintf( 'Group "%s" action %d %s must be a string.', $group_id, $index, $property ) );
+				}
+			}
+
+			self::assert_optional_strings( $action, array( 'variant', 'target', 'rel' ), sprintf( 'Group "%s" action %d', $group_id, $index ) );
+		}
+	}
+
+	/**
+	 * Assert a field definition.
+	 *
+	 * @param array $field Field definition.
+	 */
+	private static function assert_field( array $field ): void {
+		$field_id = $field['id'];
+		if ( ! isset( $field['label'] ) || ! is_string( $field['label'] ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" label must be a string.', $field_id ) );
+		}
+
+		$type = $field['type'] ?? null;
+		if ( ! is_string( $type ) || ! in_array( $type, self::SUPPORTED_FIELD_TYPES, true ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" has unsupported type "%s".', $field_id, is_scalar( $type ) ? (string) $type : gettype( $type ) ) );
+		}
+
+		self::assert_optional_strings( $field, array( 'description', 'placeholder' ), sprintf( 'Field "%s"', $field_id ) );
+		if ( isset( $field['disabled'] ) && ! is_bool( $field['disabled'] ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" disabled must be a boolean.', $field_id ) );
+		}
+
+		if ( array_key_exists( 'component', $field ) ) {
+			self::assert_non_empty_string( $field['component'], sprintf( 'Field "%s" component must be a non-empty string.', $field_id ) );
+		}
+
+		self::assert_field_value( $field );
+		self::assert_field_options( $field );
+		self::assert_custom_attributes( $field );
+		self::assert_field_save( $field );
+		self::assert_visibility( $field );
+	}
+
+	/**
+	 * Assert a field value when supplied.
+	 *
+	 * @param array $field Field definition.
+	 */
+	private static function assert_field_value( array $field ): void {
+		if ( ! array_key_exists( 'value', $field ) ) {
+			return;
+		}
+
+		$value = $field['value'];
+		switch ( $field['type'] ) {
+			case 'array':
+				$valid = is_array( $value ) && ArrayUtil::array_is_list( $value ) && count( $value ) === count( array_filter( $value, 'is_string' ) );
+				break;
+			case 'checkbox':
+				$valid = is_bool( $value );
+				break;
+			case 'number':
+				$valid = self::is_finite_number( $value, true );
+				break;
+			default:
+				$valid = is_string( $value );
+				break;
+		}
+
+		if ( ! $valid ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" value is invalid for type "%s".', $field['id'], $field['type'] ) );
+		}
+	}
+
+	/**
+	 * Assert choice options.
+	 *
+	 * @param array $field Field definition.
+	 */
+	private static function assert_field_options( array $field ): void {
+		$field_id = $field['id'];
+		$options  = $field['options'] ?? null;
+		if ( in_array( $field['type'], self::CHOICE_FIELD_TYPES, true ) && ( ! is_array( $options ) || empty( $options ) || ! ArrayUtil::array_is_list( $options ) ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" of type "%s" must define a non-empty options list.', $field_id, $field['type'] ) );
+		}
+
+		if ( null === $options ) {
+			return;
+		}
+
+		if ( ! is_array( $options ) || ! ArrayUtil::array_is_list( $options ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" options must be a list.', $field_id ) );
+		}
+
+		foreach ( $options as $index => $option ) {
+			if ( ! is_array( $option ) ) {
+				throw self::invalid_schema( sprintf( 'Field "%s" option %d must be an array.', $field_id, $index ) );
+			}
+
+			foreach ( array( 'label', 'value' ) as $property ) {
+				if ( ! isset( $option[ $property ] ) || ! is_string( $option[ $property ] ) ) {
+					throw self::invalid_schema( sprintf( 'Field "%s" option %d %s must be a string.', $field_id, $index, $property ) );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Assert custom input attributes.
+	 *
+	 * @param array $field Field definition.
+	 */
+	private static function assert_custom_attributes( array $field ): void {
+		if ( ! array_key_exists( 'customAttributes', $field ) ) {
+			return;
+		}
+
+		if ( ! is_array( $field['customAttributes'] ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" customAttributes must be a map.', $field['id'] ) );
+		}
+
+		foreach ( $field['customAttributes'] as $attribute => $value ) {
+			if ( ! is_string( $attribute ) || '' === $attribute ) {
+				throw self::invalid_schema( sprintf( 'Field "%s" custom attribute names must be non-empty strings.', $field['id'] ) );
+			}
+
+			if ( ! is_string( $value ) && ! is_int( $value ) && ! is_float( $value ) && ! is_bool( $value ) ) {
+				throw self::invalid_schema( sprintf( 'Field "%s" custom attribute "%s" has an invalid value.', $field['id'], $attribute ) );
+			}
+
+			if ( in_array( $attribute, self::RANGE_ATTRIBUTES, true ) ) {
+				if ( 'number' !== $field['type'] ) {
+					throw self::invalid_schema( sprintf( 'Field "%s" may define "%s" only when its type is "number".', $field['id'], $attribute ) );
+				}
+
+				$allow_any = 'step' === $attribute;
+				if ( ! self::is_finite_number( $value, false ) && ! ( $allow_any && 'any' === $value ) ) {
+					throw self::invalid_schema( sprintf( 'Field "%s" custom attribute "%s" must be a finite number.', $field['id'], $attribute ) );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Assert field save metadata.
+	 *
+	 * @param array $field Field definition.
+	 */
+	private static function assert_field_save( array $field ): void {
+		$save = $field['save'] ?? null;
+		if ( null !== $save && ! is_array( $save ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" save metadata must be an array.', $field['id'] ) );
+		}
+
+		$adapter = is_array( $save ) ? ( $save['adapter'] ?? null ) : 'form_post';
+		if ( ! is_string( $adapter ) || ! in_array( $adapter, array( 'form_post', 'none' ), true ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" save adapter must be "form_post" or "none".', $field['id'] ) );
+		}
+
+		if ( is_array( $save ) && array_key_exists( 'name', $save ) ) {
+			self::assert_non_empty_string( $save['name'], sprintf( 'Field "%s" save name must be a non-empty string.', $field['id'] ) );
+		}
+
+		if ( 'info' === $field['type'] && 'none' !== $adapter ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" of type "info" must use the "none" save adapter.', $field['id'] ) );
+		}
+	}
+
+	/**
+	 * Assert field visibility metadata.
+	 *
+	 * @param array $field Field definition.
+	 */
+	private static function assert_visibility( array $field ): void {
+		if ( ! array_key_exists( 'visibility', $field ) ) {
+			return;
+		}
+
+		$visibility = $field['visibility'];
+		if ( ! is_array( $visibility ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" visibility must be an array.', $field['id'] ) );
+		}
+
+		self::assert_non_empty_string( $visibility['controller'] ?? null, sprintf( 'Field "%s" visibility controller must be a non-empty string.', $field['id'] ) );
+		if ( array_key_exists( 'value', $visibility ) && ! self::is_visibility_value( $visibility['value'] ) ) {
+			throw self::invalid_schema( sprintf( 'Field "%s" visibility value is invalid.', $field['id'] ) );
+		}
+	}
+
+	/**
+	 * Whether a value is representable by the visibility rule contract.
+	 *
+	 * Visibility rules accept either one settings value or a list of settings
+	 * values. String lists are valid in both positions and are disambiguated by
+	 * the renderer at comparison time.
+	 *
+	 * @param mixed $value Candidate value.
+	 * @return bool
+	 */
+	private static function is_visibility_value( $value ): bool {
+		if ( self::is_settings_value( $value ) ) {
+			return true;
+		}
+
+		return is_array( $value )
+			&& ArrayUtil::array_is_list( $value )
+			&& count( $value ) === count( array_filter( $value, array( __CLASS__, 'is_settings_value' ) ) );
+	}
+
+	/**
+	 * Whether a value is representable by the Settings UI state contract.
+	 *
+	 * @param mixed $value Candidate value.
+	 * @return bool
+	 */
+	private static function is_settings_value( $value ): bool {
+		if ( null === $value || is_string( $value ) || is_bool( $value ) || is_int( $value ) ) {
+			return true;
+		}
+
+		if ( is_float( $value ) ) {
+			return is_finite( $value );
+		}
+
+		return is_array( $value ) && ArrayUtil::array_is_list( $value ) && count( $value ) === count( array_filter( $value, 'is_string' ) );
+	}
+
+	/**
+	 * Whether a value is a finite number accepted by the transitional renderer.
+	 *
+	 * @param mixed $value Candidate value.
+	 * @param bool  $allow_empty_string Whether an empty input representation is valid.
+	 * @return bool
+	 */
+	private static function is_finite_number( $value, bool $allow_empty_string ): bool {
+		if ( is_int( $value ) ) {
+			return true;
+		}
+
+		if ( is_float( $value ) ) {
+			return is_finite( $value );
+		}
+
+		if ( ! is_string( $value ) ) {
+			return false;
+		}
+
+		if ( $allow_empty_string && '' === $value ) {
+			return true;
+		}
+
+		return is_numeric( $value ) && is_finite( (float) $value );
+	}
+
+	/**
+	 * Assert optional string properties.
+	 *
+	 * @param array    $value Candidate container.
+	 * @param string[] $properties Property names.
+	 * @param string   $context Error message context.
+	 */
+	private static function assert_optional_strings( array $value, array $properties, string $context ): void {
+		foreach ( $properties as $property ) {
+			if ( array_key_exists( $property, $value ) && ! is_string( $value[ $property ] ) ) {
+				throw self::invalid_schema( sprintf( '%s %s must be a string.', $context, $property ) );
+			}
+		}
+	}
+
+	/**
+	 * Assert a non-empty string.
+	 *
+	 * @param mixed  $value Candidate value.
+	 * @param string $message Exception message.
+	 */
+	private static function assert_non_empty_string( $value, string $message ): void {
+		if ( ! is_string( $value ) || '' === $value ) {
+			throw self::invalid_schema( $message );
+		}
+	}
+
+	/**
+	 * Build a safely escaped schema validation exception.
+	 *
+	 * @param string $message Developer-facing validation reason.
+	 * @return \InvalidArgumentException
+	 */
+	private static function invalid_schema( string $message ): \InvalidArgumentException {
+		return new \InvalidArgumentException( sanitize_text_field( $message ) );
+	}
+
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.Missing
+	// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 
 	/**
 	 * Get the default group.
