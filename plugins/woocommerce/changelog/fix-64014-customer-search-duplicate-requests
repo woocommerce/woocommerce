@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add query deduplication and unmount cleanup to SelectControl to prevent duplicate AJAX requests in customer search (WooCommerce > Customers)
