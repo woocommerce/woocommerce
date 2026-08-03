@@ -694,6 +694,26 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that GoCardless is placed immediately after Klarna Checkout in the GB suggestions order.
+	 *
+	 * The order of entries in PaymentsExtensionSuggestions::$country_extensions determines the
+	 * suggestions' display priority, so this guards against accidental reordering.
+	 */
+	public function test_get_country_extensions_gb_gocardless_order() {
+		// Act.
+		$extensions = $this->sut->get_country_extensions( 'GB' );
+		$ids        = array_column( $extensions, 'id' );
+
+		// Assert.
+		$this->assertCount( 15, $ids );
+		$klarna_checkout_index = array_search( PaymentsExtensionSuggestions::KLARNA_CHECKOUT, $ids, true );
+		$gocardless_index      = array_search( PaymentsExtensionSuggestions::GOCARDLESS, $ids, true );
+		$this->assertNotFalse( $klarna_checkout_index, 'Klarna Checkout should be in the GB suggestions.' );
+		$this->assertNotFalse( $gocardless_index, 'GoCardless should be in the GB suggestions.' );
+		$this->assertSame( $klarna_checkout_index + 1, $gocardless_index, 'GoCardless should immediately follow Klarna Checkout in the GB suggestions.' );
+	}
+
+	/**
 	 * Test getting payment extension suggestions by country with per-country config that uses merges.
 	 */
 	public function test_get_country_extensions_with_per_country_merges() {
