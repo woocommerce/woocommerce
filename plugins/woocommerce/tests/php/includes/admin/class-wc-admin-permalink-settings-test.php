@@ -76,6 +76,13 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	/**
 	 * Save a product permalink choice through the real save path and render the settings HTML.
 	 *
+	 * WordPress's own Permalinks page redirects after processing the POST (see
+	 * `wp-admin/options-permalink.php`), so a save and its resulting render never happen on the
+	 * same `WC_Admin_Permalink_Settings` instance in production: the save-time instance reads
+	 * `$this->permalinks` in its constructor before writing the new value, and is discarded; the
+	 * subsequent GET request (post-redirect) constructs a fresh instance that reads back the
+	 * now-persisted value. Mirror that with two separate instantiations rather than reusing one.
+	 *
 	 * @param string      $product_permalink           Posted `product_permalink` radio value.
 	 * @param string|null $product_permalink_structure Posted `product_permalink_structure` text value, if any.
 	 * @return string Rendered settings HTML.
@@ -94,6 +101,17 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 			unset( $_POST['product_permalink_structure'] );
 		}
 
+		new WC_Admin_Permalink_Settings();
+
+		unset(
+			$_POST['permalink_structure'],
+			$_POST['wc-permalinks-nonce'],
+			$_POST['woocommerce_product_category_slug'],
+			$_POST['woocommerce_product_tag_slug'],
+			$_POST['woocommerce_product_attribute_slug'],
+			$_POST['product_permalink'],
+			$_POST['product_permalink_structure']
+		);
 		$sut = new WC_Admin_Permalink_Settings();
 
 		ob_start();
