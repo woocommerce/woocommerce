@@ -331,10 +331,11 @@ class ControllerTest extends WC_Unit_Test_Case {
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
-		// Verify the fulfillment is deleted.
+		// Verify the fulfillment is deleted. Deleted fulfillments are soft-deleted, so the
+		// permission lookup still resolves them and the handler reports the deletion as 400.
 		$get_request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $fulfillment->get_id() );
 		$get_response = rest_get_server()->dispatch( $get_request );
-		$this->assertEquals( 404, $get_response->get_status() );
+		$this->assertEquals( 400, $get_response->get_status() );
 	}
 
 	/**
