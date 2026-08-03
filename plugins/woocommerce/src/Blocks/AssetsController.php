@@ -149,7 +149,7 @@ final class AssetsController {
 	private function register_deprecated_script_handles(): void {
 		$script_dependencies = array(
 			'wc-blocks-vendors' => array(),
-			'wc-blocks'         => array( 'wc-blocks-vendors' ),
+			'wc-blocks'         => array( 'wc-blocks-vendors', 'wc-block-library' ),
 		);
 		$build_path          = WC_ABSPATH . 'assets/client/blocks/';
 		$asset_files         = glob( $build_path . '*.asset.php' );
