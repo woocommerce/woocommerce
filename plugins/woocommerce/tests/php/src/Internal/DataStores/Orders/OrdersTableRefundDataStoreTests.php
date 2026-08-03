@@ -272,6 +272,63 @@ class OrdersTableRefundDataStoreTests extends \WC_Unit_Test_Case {
 
 
 	/**
+	 * @testDox Test that deleting a refund invalidates cached refund totals on the parent order.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_on_or_off True to test with HPOS on, false to test with HPOS off.
+	 */
+	public function test_delete_refund_invalidates_cached_totals( $hpos_on_or_off ) {
+		$this->toggle_cot_authoritative( $hpos_on_or_off );
+
+		$order = OrderHelper::create_order();
+		$order->set_total( 100 );
+		$order->set_shipping_total( 10 );
+		$order->set_shipping_tax( 2 );
+		$order->set_cart_tax( 8 );
+		$order->save();
+
+		// Create a partial refund.
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 50,
+				'line_items' => array(),
+			)
+		);
+		$this->assertNotNull( $refund );
+		$this->assertTrue( $refund->get_id() > 0 );
+
+		// Prime the caches by reading refund totals.
+		$parent = wc_get_order( $order->get_id() );
+		$this->assertEquals( 50, $parent->get_total_refunded() );
+		$this->assertGreaterThan( 0, $parent->get_total_tax_refunded() + $parent->get_total_shipping_refunded() + $parent->get_total_shipping_tax_refunded() );
+
+		// Delete the refund.
+		$parent->remove_refund( $refund->get_id() );
+
+		// Re-read the order and verify totals are no longer stale.
+		$parent_refreshed = wc_get_order( $order->get_id() );
+		$this->assertEquals( 0, $parent_refreshed->get_total_refunded(), 'total_refunded should be 0 after deleting the only refund' );
+		$this->assertEquals( 0, $parent_refreshed->get_total_tax_refunded(), 'total_tax_refunded should be 0 after deleting the only refund' );
+		$this->assertEquals( 0, $parent_refreshed->get_total_shipping_refunded(), 'total_shipping_refunded should be 0 after deleting the only refund' );
+		$this->assertEquals( 0, $parent_refreshed->get_total_shipping_tax_refunded(), 'total_shipping_tax_refunded should be 0 after deleting the only refund' );
+
+		// Verify a new refund for the same amount succeeds.
+		$new_refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 50,
+				'line_items' => array(),
+			)
+		);
+		$this->assertNotNull( $new_refund );
+		$this->assertTrue( $new_refund->get_id() > 0 );
+		$this->assertEquals( 50, wc_get_order( $order->get_id() )->get_total_refunded() );
+	}
+
+	/**
 	 * @testDox  Test that refund hooks are fired as expected.
 	 * @testWith [true]
 	 *           [false]

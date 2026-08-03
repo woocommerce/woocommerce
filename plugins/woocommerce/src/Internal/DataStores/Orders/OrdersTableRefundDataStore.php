@@ -81,6 +81,19 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $refund->get_parent_id();
 		wp_cache_delete( $refund_cache_key, 'orders' );
 
+		// Invalidate cached refund totals so the parent order can be refunded again.
+		$parent_order_id = $refund->get_parent_id();
+		$cache_prefix    = WC_Cache_Helper::get_cache_prefix( 'orders' );
+		$cache_keys      = array(
+			'total_refunded'              . $parent_order_id,
+			'total_tax_refunded'          . $parent_order_id,
+			'total_shipping_refunded'     . $parent_order_id,
+			'total_shipping_tax_refunded' . $parent_order_id,
+		);
+		foreach ( $cache_keys as $key ) {
+			wp_cache_delete( $cache_prefix . $key, 'orders' );
+		}
+
 		$this->delete_order_data_from_custom_order_tables( $refund_id );
 		$refund->set_id( 0 );
 

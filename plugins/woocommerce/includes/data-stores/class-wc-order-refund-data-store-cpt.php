@@ -56,6 +56,19 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $parent_order_id;
 		wp_delete_post( $id );
 		wp_cache_delete( $refund_cache_key, 'orders' );
+
+		// Invalidate cached refund totals so the parent order can be refunded again.
+		$cache_prefix = WC_Cache_Helper::get_cache_prefix( 'orders' );
+		$cache_keys   = array(
+			'total_refunded'              . $parent_order_id,
+			'total_tax_refunded'          . $parent_order_id,
+			'total_shipping_refunded'     . $parent_order_id,
+			'total_shipping_tax_refunded' . $parent_order_id,
+		);
+		foreach ( $cache_keys as $key ) {
+			wp_cache_delete( $cache_prefix . $key, 'orders' );
+		}
+
 		$order->set_id( 0 );
 
 		/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Invalidate cached total_refunded, total_tax_refunded, total_shipping_refunded, and total_shipping_tax_refunded when a refund is deleted.
