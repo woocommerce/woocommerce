@@ -1,4 +1,5 @@
 export { SettingsUIErrorBoundary, SettingsUIPage } from './settings-ui-page';
+export { DataForm } from './dataform-runtime';
 export { NativeSettingsField } from './native-fields';
 export { HiddenInputs, getHiddenInputs } from './hidden-inputs';
 export {
