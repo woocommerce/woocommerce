@@ -71,6 +71,10 @@ class WC_Embed {
 	public static function the_excerpt( $excerpt ) {
 		global $post;
 
+		if ( post_password_required( $post ) ) {
+			return $excerpt;
+		}
+
 		// Get product.
 		$_product = wc_get_product( get_the_ID() );
 
@@ -116,8 +120,8 @@ class WC_Embed {
 	 * @since 2.4.11
 	 */
 	public static function get_ratings() {
-		// Make sure we're only affecting embedded products.
-		if ( ! self::is_embedded_product() ) {
+		// Make sure we're only affecting embedded, non-password-protected products.
+		if ( ! self::is_embedded_product() || post_password_required() ) {
 			return;
 		}
 
