@@ -517,9 +517,15 @@ final class OrderWithdrawalFormProcessor {
 	 * @param int|WC_Order $order Order ID or order object.
 	 */
 	public function delete_order_withdrawal_inbox_note_for_order( $order ): void {
-		$order_id = $order instanceof WC_Order ? $order->get_id() : absint( $order );
+		if ( $order instanceof WC_Order ) {
+			$order_id = $order->get_id();
+		} elseif ( is_int( $order ) ) {
+			$order_id = $order;
+		} else {
+			return;
+		}
 
-		if ( 0 === $order_id ) {
+		if ( 0 >= $order_id ) {
 			return;
 		}
 
