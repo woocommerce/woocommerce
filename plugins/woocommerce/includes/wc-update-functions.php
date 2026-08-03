@@ -3593,3 +3593,20 @@ function wc_update_1100_enable_point_of_sale_feature() {
 function wc_update_1110_delete_dashboard_outofstock_count_transient() {
 	delete_transient( ProductUtil::OUTOFSTOCK_COUNT_TRANSIENT );
 }
+
+/**
+ * Update the India state code for Chhattisgarh from CT to CG
+ * to match the ISO 3161-2:IN standard.
+ *
+ * @since 11.1.0
+ *
+ * @return bool True if there are more records that need to be migrated, false otherwise.
+ */
+function wc_update_1110_migrate_india_chhattisgarh_state_code() {
+	return MigrationHelper::migrate_country_states(
+		'IN',
+		array(
+			'CT' => 'CG',
+		)
+	);
+}

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Correct Indian state code for Chhattisgarh from CT to CG per ISO 3166-2:IN, with database migration for existing records.
