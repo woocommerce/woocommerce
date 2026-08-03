@@ -97,9 +97,8 @@ class FrontendContainerBlock extends Component<
 		const { reviewsToDisplay } = this.state;
 		const { order, orderby } = getSortArgs( this.state.orderby );
 
-		// The Reviews by Category block saves data-category-ids="" when no
-		// categories are selected. In that case, do not render any reviews to
-		// avoid showing all reviews unfiltered.
+		// An empty string is only serialized by Reviews by Category when no
+		// categories are selected. All Reviews omits this attribute entirely.
 		if ( categoryIds === '' ) {
 			return null;
 		}
