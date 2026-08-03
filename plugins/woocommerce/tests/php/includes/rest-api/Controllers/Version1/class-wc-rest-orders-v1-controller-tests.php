@@ -207,8 +207,11 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * @testdox Updating a variation line item honors a filtered SKU alias that resolves to its parent.
+	 * @dataProvider provide_parent_sku_shapes
+	 *
+	 * @param bool $use_malformed_parent_sku Whether to inject malformed raw parent SKU data.
 	 */
-	public function test_update_line_item_honors_filtered_parent_sku_alias(): void {
+	public function test_update_line_item_honors_filtered_parent_sku_alias( bool $use_malformed_parent_sku ): void {
 		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
 
 		$alias_sku = 'REST-V1-ALIAS-' . wp_generate_uuid4();
@@ -216,6 +219,20 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$parent->save();
 		$variation->set_sku( '' );
 		$variation->save();
+
+		$product_filter = null;
+		if ( $use_malformed_parent_sku ) {
+			$malformed_variation = new WC_Product_Variation( $variation->get_id() );
+			$parent_data         = $malformed_variation->get_parent_data();
+			$parent_data['sku']  = new stdClass();
+			$malformed_variation->set_parent_data( $parent_data );
+			$this->assertInstanceOf( stdClass::class, $malformed_variation->get_parent_data()['sku'], 'Precondition: the variation should expose malformed raw parent SKU data.' );
+			$product_filter = static function ( $product ) use ( $malformed_variation ) {
+				return $product instanceof WC_Product_Variation && $product->get_id() === $malformed_variation->get_id() ? $malformed_variation : $product;
+			};
+			add_filter( 'woocommerce_order_item_product', $product_filter );
+		}
+
 		$sku_filter = static function ( $product_id, $posted_sku ) use ( $alias_sku, $parent ) {
 			return $alias_sku === $posted_sku ? $parent->get_id() : $product_id;
 		};
@@ -232,12 +249,27 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 			);
 		} finally {
 			remove_filter( 'woocommerce_get_product_id_by_sku', $sku_filter, 10 );
+			if ( $product_filter ) {
+				remove_filter( 'woocommerce_order_item_product', $product_filter );
+			}
 		}
 		$this->assertSame( 200, $response->get_status(), 'The filtered parent alias update should succeed.' );
 
 		$reloaded = new WC_Order_Item_Product( $item->get_id() );
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'A filtered alias resolving to the parent should clear variation_id.' );
 		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should use the filtered parent result.' );
+	}
+
+	/**
+	 * Provides raw parent SKU shapes for filtered alias updates.
+	 *
+	 * @return array<string, array{bool}>
+	 */
+	public function provide_parent_sku_shapes(): array {
+		return array(
+			'ordinary parent SKU'  => array( false ),
+			'malformed parent SKU' => array( true ),
+		);
 	}
 
 	/**
