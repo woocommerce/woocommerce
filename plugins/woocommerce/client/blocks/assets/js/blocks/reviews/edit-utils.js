@@ -328,7 +328,7 @@ export const getSharedReviewListControls = (
 						__next40pxDefaultSize
 						label={ __( 'Offset', 'woocommerce' ) }
 						help={ __(
-							'Number to reviews to skip.',
+							'Number of reviews to skip',
 							'woocommerce'
 						) }
 						value={ String( attributes.offset ?? defaultOffset ) }
