@@ -80,6 +80,42 @@ class Settings {
 	}
 
 	/**
+	 * Validate a filtered list of default order statuses against the known statuses, falling back
+	 * to the built-in default if the filter returned something unusable.
+	 *
+	 * @param mixed $statuses     Value returned by a default-order-statuses filter.
+	 * @param array $all_statuses Known order statuses, keyed by status slug.
+	 * @param array $fallback     Built-in default to use if $statuses is invalid.
+	 * @return array
+	 */
+	private function sanitize_default_order_statuses( $statuses, $all_statuses, $fallback ) {
+		if ( ! is_array( $statuses ) ) {
+			return $fallback;
+		}
+		$sanitized = array_values( array_intersect( $statuses, array_keys( $all_statuses ) ) );
+		return empty( $sanitized ) ? $fallback : $sanitized;
+	}
+
+	/**
+	 * Validate a value that should be a non-empty array of order status slugs (an option value
+	 * or a default-order-statuses filter's return value), falling back to the built-in default
+	 * if it isn't usable.
+	 *
+	 * Cheap type/emptiness check only - does not cross-check slugs against registered or synced
+	 * order statuses. Runtime call sites intentionally accept slugs outside that set and must
+	 * not pay for OrdersDataStore::get_all_statuses()'s DB-backed lookup on every request. Only
+	 * add_settings() needs the fuller cross-check, via sanitize_default_order_statuses().
+	 *
+	 * @since 11.1.0
+	 * @param mixed $value    Value to validate.
+	 * @param array $fallback Built-in default to use if $value is not a non-empty array.
+	 * @return array
+	 */
+	public static function get_valid_order_statuses_or_default( $value, array $fallback ): array {
+		return ( is_array( $value ) && ! empty( $value ) ) ? array_values( $value ) : $fallback;
+	}
+
+	/**
 	 * Return an object defining the currency options for the site's current currency
 	 *
 	 * @return  array  Settings for the current currency {
@@ -321,12 +357,30 @@ class Settings {
 		$registered_statuses   = self::get_order_statuses( wc_get_order_statuses() );
 		$all_statuses          = array_merge( $unregistered_statuses, $registered_statuses );
 
+		/**
+		 * Filters the default set of order statuses excluded from Analytics report totals.
+		 *
+		 * @since 11.1.0
+		 * @param array $default_statuses Default excluded order statuses.
+		 */
+		$default_excluded_statuses = apply_filters( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( 'pending', 'cancelled', 'failed' ) );
+		$default_excluded_statuses = $this->sanitize_default_order_statuses( $default_excluded_statuses, $all_statuses, array( 'pending', 'cancelled', 'failed' ) );
+
+		/**
+		 * Filters the default set of order statuses considered actionable in Analytics.
+		 *
+		 * @since 11.1.0
+		 * @param array $default_statuses Default actionable order statuses.
+		 */
+		$default_actionable_statuses = apply_filters( 'woocommerce_analytics_settings_default_actionable_order_statuses', array( 'processing', 'on-hold' ) );
+		$default_actionable_statuses = $this->sanitize_default_order_statuses( $default_actionable_statuses, $all_statuses, array( 'processing', 'on-hold' ) );
+
 		$settings[] = array(
 			'id'          => 'woocommerce_excluded_report_order_statuses',
 			'option_key'  => 'woocommerce_excluded_report_order_statuses',
 			'label'       => __( 'Excluded report order statuses', 'woocommerce' ),
 			'description' => __( 'Statuses that should not be included when calculating report totals.', 'woocommerce' ),
-			'default'     => array( 'pending', 'cancelled', 'failed' ),
+			'default'     => $default_excluded_statuses,
 			'type'        => 'multiselect',
 			'options'     => $all_statuses,
 		);
@@ -335,7 +389,7 @@ class Settings {
 			'option_key'  => 'woocommerce_actionable_order_statuses',
 			'label'       => __( 'Actionable order statuses', 'woocommerce' ),
 			'description' => __( 'Statuses that require extra action on behalf of the store admin.', 'woocommerce' ),
-			'default'     => array( 'processing', 'on-hold' ),
+			'default'     => $default_actionable_statuses,
 			'type'        => 'multiselect',
 			'options'     => $all_statuses,
 		);
