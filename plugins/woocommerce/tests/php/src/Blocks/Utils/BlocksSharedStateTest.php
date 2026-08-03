@@ -6,14 +6,11 @@ namespace Automattic\WooCommerce\Tests\Blocks\Utils;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
-use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 
 /**
  * Tests for the BlocksSharedState class.
  */
 class BlocksSharedStateTest extends \WC_Unit_Test_Case {
-
-	use LoggerSpyTrait;
 
 	/**
 	 * The consent statement required by the private API.
@@ -174,7 +171,6 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( array(), $result );
-		$this->assertCount( 0, $this->get_logs_by_level( 'warning' ), 'No warning should be logged when the cart is simply unavailable.' );
 	}
 
 	/**
@@ -190,41 +186,15 @@ class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox load_cart_state() logs exactly one warning per request when hydration ran with a cart available but the stored body has no items key.
+	 * @testdox get_cart_items() returns an empty array when hydration returns no body at all, as happens on the hydration-exception path.
 	 */
-	public function test_load_cart_state_logs_warning_once_when_items_key_missing(): void {
-		$fake = $this->create_counting_hydration( array( 'body' => array( 'errors' => array() ) ) );
-		$this->inject_hydration( $fake );
-
-		BlocksSharedState::load_cart_state( $this->consent );
-		// Calling the accessor afterwards must not log a second warning; the memo guard makes hydration once-per-request.
-		BlocksSharedState::get_cart_items( $this->consent );
-
-		$this->assertCount( 1, $this->get_logs_by_level( 'warning' ) );
-	}
-
-	/**
-	 * @testdox load_cart_state() logs the items-less-body warning when hydration returns no body at all, as happens on the hydration-exception path.
-	 */
-	public function test_load_cart_state_logs_warning_when_hydration_returns_no_body(): void {
+	public function test_get_cart_items_returns_empty_array_when_hydration_returns_no_body(): void {
 		$fake = $this->create_counting_hydration( array() );
 		$this->inject_hydration( $fake );
 
-		BlocksSharedState::load_cart_state( $this->consent );
+		$result = BlocksSharedState::get_cart_items( $this->consent );
 
-		$this->assertCount( 1, $this->get_logs_by_level( 'warning' ) );
-	}
-
-	/**
-	 * @testdox load_cart_state() does not log a warning when the stored response body has an items key.
-	 */
-	public function test_load_cart_state_does_not_log_warning_when_items_key_present(): void {
-		$fake = $this->create_counting_hydration( array( 'body' => array( 'items' => array() ) ) );
-		$this->inject_hydration( $fake );
-
-		BlocksSharedState::load_cart_state( $this->consent );
-
-		$this->assertCount( 0, $this->get_logs_by_level( 'warning' ) );
+		$this->assertSame( array(), $result );
 	}
 
 	/**

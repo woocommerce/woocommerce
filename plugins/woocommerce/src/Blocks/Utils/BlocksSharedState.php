@@ -105,13 +105,6 @@ class BlocksSharedState {
 			if ( $cart_exists ) {
 				$cart_response                  = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/cart' );
 				self::$blocks_shared_cart_state = $cart_response['body'] ?? array();
-
-				if ( ! isset( self::$blocks_shared_cart_state['items'] ) ) {
-					wc_get_logger()->warning(
-						'Hydrated cart state has no items array; the cart route likely returned an error response.',
-						array( 'source' => 'blocks-shared-state' )
-					);
-				}
 			} else {
 				self::$blocks_shared_cart_state = array();
 			}
