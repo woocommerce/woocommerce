@@ -184,7 +184,7 @@ class SingleProduct extends AbstractBlock {
 	protected function render( $attributes, $content, $block ) {
 		$product = wc_get_product( $block->context['postId'] );
 
-		if ( ! $product instanceof \WC_Product ) {
+		if ( ! $product instanceof \WC_Product || $product->is_viewable() ) {
 			return '';
 		}
 
