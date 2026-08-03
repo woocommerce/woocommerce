@@ -10,7 +10,10 @@ import {
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-import type { ProductResponseItem } from '@woocommerce/types';
+import type {
+	ProductResponseItem,
+	ProductResponseVariationsItem,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -32,6 +35,7 @@ type VariationOptionItem = {
 	label: string;
 	value: string;
 	ariaLabel?: string;
+	title?: string;
 	visual?: VisualAttributeTerm;
 };
 
@@ -55,6 +59,16 @@ const { state: productsState } = store< ProductsStore >(
 	{},
 	{ lock: universalLock }
 );
+
+const getOutOfStockOptionTitle = () => {
+	const config = getConfig< {
+		variationOptionTooltips?: {
+			outOfStock?: string;
+		};
+	} >();
+
+	return config.variationOptionTooltips?.outOfStock;
+};
 
 const isAttributeValueValid = ( {
 	attributeName,
@@ -92,7 +106,7 @@ const isAttributeValueValid = ( {
 		return false;
 	}
 
-	// Check if there is at least one available variation matching the current
+	// Check if there is at least one existing variation matching the current
 	// selected attributes and the attribute value being checked.
 	return product.variations.some( ( variation ) => {
 		const variationAttrValue = getVariationAttributeValue(
@@ -143,6 +157,164 @@ const isAttributeValueValid = ( {
 		).length;
 
 		return matchingAttributes >= attributesToMatch;
+	} );
+};
+
+const isVariationInStockAndPurchasable = (
+	variation: ProductResponseItem | ProductResponseVariationsItem
+) => {
+	if ( 'is_in_stock' in variation && ! variation.is_in_stock ) {
+		return false;
+	}
+
+	if ( 'is_purchasable' in variation && ! variation.is_purchasable ) {
+		return false;
+	}
+
+	return true;
+};
+
+const isVariationOutOfStock = (
+	variation: ProductResponseItem | ProductResponseVariationsItem
+) => {
+	return 'is_in_stock' in variation && ! variation.is_in_stock;
+};
+
+const doSelectedAttributesMatchVariation = ( {
+	variation,
+	attributeName,
+	attributeValue,
+	selectedAttributes,
+}: {
+	variation: ProductResponseVariationsItem;
+	attributeName: string;
+	attributeValue: string;
+	selectedAttributes: SelectedAttributes[];
+} ) => {
+	const isCurrentAttributeSelected = selectedAttributes.some(
+		( selectedAttribute ) =>
+			attributeNamesMatch( selectedAttribute.attribute, attributeName )
+	);
+	const attributesToMatch = isCurrentAttributeSelected
+		? selectedAttributes.length - 1
+		: selectedAttributes.length;
+
+	const matchingAttributes = selectedAttributes.filter(
+		( selectedAttribute ) => {
+			const availableVariationAttributeValue = getVariationAttributeValue(
+				variation,
+				selectedAttribute.attribute
+			);
+
+			if (
+				availableVariationAttributeValue === selectedAttribute.value
+			) {
+				return true;
+			}
+
+			if ( availableVariationAttributeValue === null ) {
+				if (
+					! attributeNamesMatch(
+						selectedAttribute.attribute,
+						attributeName
+					) ||
+					attributeValue === selectedAttribute.value
+				) {
+					return true;
+				}
+			}
+			return false;
+		}
+	).length;
+
+	return matchingAttributes >= attributesToMatch;
+};
+
+const isAttributeValueOutOfStock = ( {
+	attributeName,
+	attributeValue,
+	selectedAttributes,
+}: {
+	attributeName: string;
+	attributeValue: string;
+	selectedAttributes: SelectedAttributes[];
+} ) => {
+	const { mainProductInContext: product } = productsState;
+
+	if ( ! product?.variations?.length ) {
+		return false;
+	}
+
+	return product.variations.some( ( variation ) => {
+		const variationData =
+			productsState.productVariations[ variation.id ] ?? variation;
+
+		if ( ! isVariationOutOfStock( variationData ) ) {
+			return false;
+		}
+
+		const variationAttrValue = getVariationAttributeValue(
+			variation,
+			attributeName
+		);
+
+		if (
+			variationAttrValue !== attributeValue &&
+			variationAttrValue !== null
+		) {
+			return false;
+		}
+
+		return doSelectedAttributesMatchVariation( {
+			variation,
+			attributeName,
+			attributeValue,
+			selectedAttributes,
+		} );
+	} );
+};
+
+const isAttributeValueInStockAndPurchasable = ( {
+	attributeName,
+	attributeValue,
+	selectedAttributes,
+}: {
+	attributeName: string;
+	attributeValue: string;
+	selectedAttributes: SelectedAttributes[];
+} ) => {
+	const { mainProductInContext: product } = productsState;
+
+	if ( ! product?.variations?.length ) {
+		return false;
+	}
+
+	return product.variations.some( ( variation ) => {
+		const variationData =
+			productsState.productVariations[ variation.id ] ?? variation;
+
+		if ( ! isVariationInStockAndPurchasable( variationData ) ) {
+			return false;
+		}
+
+		const variationAttrValue = getVariationAttributeValue(
+			variation,
+			attributeName
+		);
+
+		if (
+			variationAttrValue !== attributeValue &&
+			variationAttrValue !== null
+		) {
+			return false;
+		}
+
+		return doSelectedAttributesMatchVariation( {
+			variation,
+			attributeName,
+			attributeValue,
+			selectedAttributes,
+		} );
 	} );
 };
 
@@ -236,12 +408,22 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return [];
 				}
 
+				const outOfStockOptionTitle = getOutOfStockOptionTitle();
+
 				return variationAttributeOptions.map( ( row, index ) => {
-					const disabled = ! isAttributeValueValid( {
+					const attributeValue = {
 						attributeName: name,
 						attributeValue: row.value,
 						selectedAttributes,
-					} );
+					};
+					const invalid = ! isAttributeValueValid( attributeValue );
+					const inStockAndPurchasable =
+						isAttributeValueInStockAndPurchasable( attributeValue );
+					const outOfStock =
+						! inStockAndPurchasable &&
+						isAttributeValueOutOfStock( attributeValue );
+					const disabled =
+						invalid || ( ! inStockAndPurchasable && ! outOfStock );
 					const selected = selectedAttributes.some(
 						( attrObject ) =>
 							attributeNamesMatch( attrObject.attribute, name ) &&
@@ -252,10 +434,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						label: row.label,
 						value: row.value,
 						ariaLabel: row.ariaLabel || row.label,
+						title:
+							outOfStock && outOfStockOptionTitle
+								? outOfStockOptionTitle
+								: '',
 						index,
 						selected,
 						disabled,
 						hidden: hideInvalid && disabled,
+						looksDisabled: outOfStock,
 						...( row.visual !== undefined && {
 							visual: row.visual,
 						} ),

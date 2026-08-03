@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fixes the hiding and graying of out of stock variations in the add to cart + options block.
