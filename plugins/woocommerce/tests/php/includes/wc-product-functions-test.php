@@ -1043,6 +1043,10 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$empty_related_products = wc_get_related_products( $main_product->get_id(), 'non-numeric-limit' );
 		$this->assertEquals( array(), $empty_related_products );
 
+		// Test with limit -1 (show all related products).
+		$all_related_with_unlimited = wc_get_related_products( $main_product->get_id(), -1 );
+		$this->assertCount( 3, $all_related_with_unlimited, 'Limit -1 should return all 3 related products' );
+
 		// Clean up.
 		WC_Helper_Product::delete_product( $main_product->get_id() );
 		WC_Helper_Product::delete_product( $related_product1->get_id() );
