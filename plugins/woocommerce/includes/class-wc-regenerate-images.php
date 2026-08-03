@@ -386,12 +386,12 @@ class WC_Regenerate_Images {
 		// Files without a supporting image editor (e.g. SVGs) can never be resized, so don't attempt it on every request.
 		$mime_type = get_post_mime_type( $attachment_id );
 
-		if ( ! $mime_type ) {
-			// The attachment post may lack a mime type (e.g. sloppy importers); fall back to the actual file.
+		if ( ! $mime_type || ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			// The recorded mime type may be missing or stale; check the actual file before deciding to skip.
 			$mime_type = wp_check_filetype( $fullsizepath )['type'];
 		}
 
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+		if ( ! $mime_type || ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			return $image;
 		}
 
