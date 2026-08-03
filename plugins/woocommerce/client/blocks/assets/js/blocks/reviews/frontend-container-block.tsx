@@ -93,13 +93,11 @@ class FrontendContainerBlock extends Component<
 
 	render() {
 		const { attributes } = this.props;
-		const { categoryIds, productId } = attributes;
+		const { categoryIds, productId, isFilteredReviewsBlock } = attributes;
 		const { reviewsToDisplay } = this.state;
 		const { order, orderby } = getSortArgs( this.state.orderby );
 
-		// An empty string is only serialized by Reviews by Category when no
-		// categories are selected. All Reviews omits this attribute entirely.
-		if ( categoryIds === '' ) {
+		if ( isFilteredReviewsBlock && ! categoryIds && ! productId ) {
 			return null;
 		}
 
