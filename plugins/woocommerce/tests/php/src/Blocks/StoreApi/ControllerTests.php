@@ -22,6 +22,21 @@ class ControllerTests extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * Discard the Spy_REST_Server this class installed.
+	 *
+	 * `$wp_rest_server` is not one of the globals WordPress resets between tests, so without
+	 * this the spy stays in place for every test that runs afterwards in the same process,
+	 * and `rest_get_server()` keeps handing it out. Nulling it lets the next caller build a
+	 * fresh server.
+	 */
+	protected function tearDown(): void {
+		global $wp_rest_server;
+		$wp_rest_server = null;
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Test v1 route registration.
 	 */
 	public function test_v1_routes() {
