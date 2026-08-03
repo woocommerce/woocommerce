@@ -1180,6 +1180,21 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Dispatches a v3 line-item update.
+	 *
+	 * @param int   $order_id Order ID.
+	 * @param array $line_item Line-item payload.
+	 * @return WP_REST_Response
+	 */
+	private function dispatch_line_item_update( int $order_id, array $line_item ): WP_REST_Response {
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'line_items' => array( $line_item ) ) ) );
+
+		return $this->server->dispatch( $request );
+	}
+
+	/**
 	 * @testdox PUT /orders that switches a variation line item to a simple product clears variation_id over the REST round trip.
 	 */
 	public function test_update_line_item_to_simple_product_clears_variation_id(): void {
@@ -1190,22 +1205,13 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( $variation->get_id(), (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'Precondition: the line item stored the variation ID.' );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'line_items' => array(
-						array(
-							'id'         => $item_id,
-							'product_id' => $simple->get_id(),
-						),
-					),
-				)
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $simple->get_id(),
 			)
 		);
-
-		$response = $this->server->dispatch( $request );
 		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
 
 		$reloaded = new WC_Order_Item_Product( $item_id );
@@ -1236,23 +1242,14 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		add_filter( 'woocommerce_order_item_product', $product_filter );
 		add_action( 'woocommerce_rest_set_order_item', $before_save_hook, 10, 0 );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'line_items' => array(
-						array(
-							'id'         => $item_id,
-							'product_id' => $parent->get_id(),
-						),
-					),
-				)
-			)
-		);
-
 		try {
-			$response = $this->server->dispatch( $request );
+			$response = $this->dispatch_line_item_update(
+				$order->get_id(),
+				array(
+					'id'         => $item_id,
+					'product_id' => $parent->get_id(),
+				)
+			);
 		} finally {
 			remove_filter( 'woocommerce_order_item_product', $product_filter );
 			remove_action( 'woocommerce_rest_set_order_item', $before_save_hook, 10 );
@@ -1271,9 +1268,9 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox PUT /orders preserves a variation when round-tripping its parent's inherited SKU.
+	 * @testdox PUT /orders preserves a variation when its inherited parent SKU differs only by case.
 	 */
-	public function test_round_trip_line_item_with_inherited_parent_sku_preserves_variation_id(): void {
+	public function test_update_line_item_with_case_equivalent_inherited_parent_sku_preserves_variation_id(): void {
 		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
 		$parent_sku                 = 'REST-V3-PARENT-' . wp_generate_uuid4();
 		$parent->set_sku( $parent_sku );
@@ -1288,16 +1285,41 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$round_trip_item = $get_response->get_data()['line_items'][0];
 		$this->assertSame( $parent_sku, $round_trip_item['sku'], 'The response should expose the SKU inherited from the parent.' );
+		$round_trip_item['sku'] = strtolower( $parent_sku );
+		$this->assertSame( $parent->get_id(), wc_get_product_id_by_sku( $round_trip_item['sku'] ), 'The SKU lookup should honor database collation.' );
 
-		$put_request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$put_request->set_header( 'content-type', 'application/json' );
-		$put_request->set_body( wp_json_encode( array( 'line_items' => array( $round_trip_item ) ) ) );
-		$put_response = $this->server->dispatch( $put_request );
+		$put_response = $this->dispatch_line_item_update( $order->get_id(), $round_trip_item );
 		$this->assertSame( 200, $put_response->get_status(), 'Round-tripping the line item should succeed.' );
 
 		$reloaded = new WC_Order_Item_Product( $item_id );
 		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The inherited parent SKU should not demote the variation.' );
 		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'The line item should continue to resolve to the variation.' );
+	}
+
+	/**
+	 * @testdox PUT /orders treats SKU zero as a product reference.
+	 */
+	public function test_update_line_item_with_zero_sku_switches_to_resolved_product(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+		$simple                     = WC_Helper_Product::create_simple_product();
+		$simple->set_sku( '0' );
+		$simple->save();
+		$this->assertSame( $simple->get_id(), wc_get_product_id_by_sku( '0' ), 'SKU zero should resolve to the simple product.' );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $parent->get_id(),
+				'sku'        => '0',
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'Switching by SKU zero should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching by SKU zero should clear variation_id.' );
+		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should use the SKU lookup result.' );
 	}
 
 	/**
@@ -1311,23 +1333,14 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$simple->set_sku( $simple_sku );
 		$simple->save();
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'line_items' => array(
-						array(
-							'id'         => $item_id,
-							'product_id' => $parent->get_id(),
-							'sku'        => $simple_sku,
-						),
-					),
-				)
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $parent->get_id(),
+				'sku'        => $simple_sku,
 			)
 		);
-
-		$response = $this->server->dispatch( $request );
 		$this->assertSame( 200, $response->get_status(), 'Switching by SKU should succeed.' );
 
 		$reloaded = new WC_Order_Item_Product( $item_id );
@@ -1346,19 +1359,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order->add_item( $fee );
 		$order->save();
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'line_items' => array(
-						array( 'id' => $fee->get_id() ),
-					),
-				)
-			)
-		);
-
-		$response = $this->server->dispatch( $request );
+		$response = $this->dispatch_line_item_update( $order->get_id(), array( 'id' => $fee->get_id() ) );
 		$this->assertSame( 200, $response->get_status(), 'The mismatched order item should retain the previous no-op behavior.' );
 
 		$reloaded = new WC_Order_Item_Fee( $fee->get_id() );
@@ -1373,23 +1374,14 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
 		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'line_items' => array(
-						array(
-							'id'           => $item_id,
-							'product_id'   => $parent->get_id(),
-							'variation_id' => 0,
-						),
-					),
-				)
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'           => $item_id,
+				'product_id'   => $parent->get_id(),
+				'variation_id' => 0,
 			)
 		);
-
-		$response = $this->server->dispatch( $request );
 		$this->assertSame( 200, $response->get_status(), 'An explicit zero variation_id should be accepted.' );
 
 		$response_item = $response->get_data()['line_items'][0];

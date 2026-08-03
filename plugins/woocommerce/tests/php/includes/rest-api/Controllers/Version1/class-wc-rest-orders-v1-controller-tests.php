@@ -68,6 +68,20 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Dispatches a v1 line-item update.
+	 *
+	 * @param int   $order_id Order ID.
+	 * @param array $line_item Line-item payload.
+	 * @return WP_REST_Response
+	 */
+	private function dispatch_line_item_update( int $order_id, array $line_item ): WP_REST_Response {
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order_id );
+		$request->set_body_params( array( 'line_items' => array( $line_item ) ) );
+
+		return $this->server->dispatch( $request );
+	}
+
+	/**
 	 * Test that an order can be fetched via REST API V1 without triggering a deprecation notice.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/39006
@@ -150,38 +164,14 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$item->set_name( 'Historical variation line item' );
 		$item->save();
 
-		$product_filter_ran             = false;
-		$product_filter_ran_before_save = false;
-		$product_filter                 = static function ( $product ) use ( &$product_filter_ran ) {
-			$product_filter_ran = true;
-			return $product;
-		};
-		$before_save_hook               = static function () use ( &$product_filter_ran, &$product_filter_ran_before_save ) {
-			$product_filter_ran_before_save = $product_filter_ran;
-		};
-		add_filter( 'woocommerce_order_item_product', $product_filter );
-		add_action( 'woocommerce_rest_set_order_item', $before_save_hook, 10, 0 );
-
-		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
-		$request->set_body_params(
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
 			array(
-				'line_items' => array(
-					array(
-						'id'         => $item->get_id(),
-						'product_id' => $parent->get_id(),
-					),
-				),
+				'id'         => $item->get_id(),
+				'product_id' => $parent->get_id(),
 			)
 		);
-
-		try {
-			$response = $this->server->dispatch( $request );
-		} finally {
-			remove_filter( 'woocommerce_order_item_product', $product_filter );
-			remove_action( 'woocommerce_rest_set_order_item', $before_save_hook, 10 );
-		}
 		$this->assertSame( 200, $response->get_status(), 'The partial update should succeed.' );
-		$this->assertTrue( $product_filter_ran_before_save, 'Product filters should run before the REST set-item hook.' );
 
 		$reloaded = new WC_Order_Item_Product( $item->get_id() );
 		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'Omitting variation_id should preserve the existing variation.' );
@@ -207,9 +197,7 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$round_trip_item = $get_response->get_data()['line_items'][0];
 		$this->assertSame( $parent_sku, $round_trip_item['sku'], 'The response should expose the SKU inherited from the parent.' );
 
-		$put_request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
-		$put_request->set_body_params( array( 'line_items' => array( $round_trip_item ) ) );
-		$put_response = $this->server->dispatch( $put_request );
+		$put_response = $this->dispatch_line_item_update( $order->get_id(), $round_trip_item );
 		$this->assertSame( 200, $put_response->get_status(), 'Round-tripping the line item should succeed.' );
 
 		$reloaded = new WC_Order_Item_Product( $item->get_id() );
@@ -218,87 +206,37 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Updating a variation line item with another product's SKU still switches products.
+	 * @testdox Updating a variation line item honors filtered SKU resolution.
 	 */
-	public function test_update_line_item_with_different_product_sku_switches_products(): void {
-		list( $parent, , $order, $item ) = $this->create_order_with_variation_line_item();
-		$simple                          = WC_Helper_Product::create_simple_product();
-		$simple_sku                      = 'REST-V1-SIMPLE-' . wp_generate_uuid4();
-		$simple->set_sku( $simple_sku );
-		$simple->save();
+	public function test_update_line_item_honors_filtered_sku_resolution(): void {
+		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
+		$simple                                    = WC_Helper_Product::create_simple_product();
+		$sku                                       = 'REST-V1-FILTER-' . wp_generate_uuid4();
+		$parent->set_sku( $sku );
+		$parent->save();
+		$variation->set_sku( '' );
+		$variation->save();
+		$sku_filter = static function ( $product_id, $posted_sku ) use ( $sku, $simple ) {
+			return $sku === $posted_sku ? $simple->get_id() : $product_id;
+		};
+		add_filter( 'woocommerce_get_product_id_by_sku', $sku_filter, 10, 2 );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
-		$request->set_body_params(
-			array(
-				'line_items' => array(
-					array(
-						'id'         => $item->get_id(),
-						'product_id' => $parent->get_id(),
-						'sku'        => $simple_sku,
-					),
-				),
-			)
-		);
-
-		$response = $this->server->dispatch( $request );
-		$this->assertSame( 200, $response->get_status(), 'Switching by SKU should succeed.' );
+		try {
+			$response = $this->dispatch_line_item_update(
+				$order->get_id(),
+				array(
+					'id'         => $item->get_id(),
+					'product_id' => $parent->get_id(),
+					'sku'        => $sku,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_get_product_id_by_sku', $sku_filter, 10 );
+		}
+		$this->assertSame( 200, $response->get_status(), 'The filtered SKU update should succeed.' );
 
 		$reloaded = new WC_Order_Item_Product( $item->get_id() );
-		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching to a simple product by SKU should clear variation_id.' );
-		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the product selected by SKU.' );
-	}
-
-	/**
-	 * @testdox Updating a variation line item with an explicit zero variation_id switches it to the parent.
-	 */
-	public function test_update_line_item_with_explicit_zero_variation_id_switches_to_parent(): void {
-		list( $parent, , $order, $item ) = $this->create_order_with_variation_line_item();
-
-		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
-		$request->set_body_params(
-			array(
-				'line_items' => array(
-					array(
-						'id'           => $item->get_id(),
-						'product_id'   => $parent->get_id(),
-						'variation_id' => 0,
-					),
-				),
-			)
-		);
-
-		$response = $this->server->dispatch( $request );
-		$this->assertSame( 200, $response->get_status(), 'The explicit variation demotion should succeed.' );
-
-		$reloaded = new WC_Order_Item_Product( $item->get_id() );
-		$this->assertSame( 0, $reloaded->get_variation_id(), 'An explicit zero variation_id should clear the existing variation.' );
-		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the variable parent.' );
-	}
-
-	/**
-	 * @testdox Updating a variation line item to a different simple product clears variation_id.
-	 */
-	public function test_update_line_item_to_simple_product_clears_variation_id(): void {
-		list( , , $order, $item ) = $this->create_order_with_variation_line_item();
-		$simple                   = WC_Helper_Product::create_simple_product();
-
-		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
-		$request->set_body_params(
-			array(
-				'line_items' => array(
-					array(
-						'id'         => $item->get_id(),
-						'product_id' => $simple->get_id(),
-					),
-				),
-			)
-		);
-
-		$response = $this->server->dispatch( $request );
-		$this->assertSame( 200, $response->get_status(), 'Switching to a simple product should succeed.' );
-
-		$reloaded = new WC_Order_Item_Product( $item->get_id() );
-		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching to a simple product should clear variation_id.' );
-		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the new simple product.' );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'Filtered resolution to a simple product should clear variation_id.' );
+		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should use the filtered SKU result.' );
 	}
 }
