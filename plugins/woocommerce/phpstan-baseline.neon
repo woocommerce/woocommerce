@@ -47614,18 +47614,6 @@ parameters:
 			path: src/Admin/Overrides/ThemeUpgraderSkin.php
 
 		-
-			message: '#^@param Automattic\\WooCommerce\\Admin\\WP_Screen \$current_screen does not accept actual type of parameter\: WP_Screen\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Admin/PageController.php
-
-		-
-			message: '#^@param Automattic\\WooCommerce\\Admin\\WP_Screen \$current_screen does not accept actual type of parameter\: null\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Admin/PageController.php
-
-		-
 			message: '#^Binary operation "\." between ''&path\='' and non\-empty\-array\<mixed\>\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -47664,7 +47652,7 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\PageController\:\:get_current_screen_id\(\) should return string but returns bool\|string\.$#'
 			identifier: return.type
-			count: 2
+			count: 1
 			path: src/Admin/PageController.php
 
 		-
@@ -49642,18 +49630,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AbstractBlock.php
 
 		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractBlock.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\|string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractBlock.php
-
-		-
 			message: '#^Parameter \#1 \$file_or_folder of function register_block_type_from_metadata expects string, string\|true given\.$#'
 			identifier: argument.type
 			count: 1
@@ -49666,31 +49642,7 @@ parameters:
 			path: src/Blocks/BlockTypes/AbstractBlock.php
 
 		-
-			message: '#^Parameter \#1 \$handle of method Automattic\\WooCommerce\\Blocks\\Assets\\Api\:\:register_script\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractBlock.php
-
-		-
-			message: '#^Parameter \#1 \$handle of method Automattic\\WooCommerce\\Blocks\\Assets\\Api\:\:register_script\(\) expects string, array\|string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractBlock.php
-
-		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, array\|WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractBlock.php
-
-		-
-			message: '#^Parameter \#1 \$relative_src of method Automattic\\WooCommerce\\Blocks\\Assets\\Api\:\:get_script_data\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractBlock.php
-
-		-
-			message: '#^Parameter \#1 \$relative_src of method Automattic\\WooCommerce\\Blocks\\Assets\\Api\:\:get_script_data\(\) expects string, array\|string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AbstractBlock.php
@@ -49715,18 +49667,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$data of function wp_add_inline_script expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractBlock.php
-
-		-
-			message: '#^Parameter \#2 \$relative_src of method Automattic\\WooCommerce\\Blocks\\Assets\\Api\:\:register_script\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractBlock.php
-
-		-
-			message: '#^Parameter \#2 \$relative_src of method Automattic\\WooCommerce\\Blocks\\Assets\\Api\:\:register_script\(\) expects string, array\|string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AbstractBlock.php
@@ -50248,12 +50188,6 @@ parameters:
 			path: src/Blocks/BlockTypes/Cart.php
 
 		-
-			message: '#^PHPDoc tag @return has invalid value \(array\|string;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 148 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/Cart.php
-
-		-
 			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -50393,12 +50327,6 @@ parameters:
 
 		-
 			message: '#^PHPDoc tag @return has invalid value \(array;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 81 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/Checkout.php
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(array\|string;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 148 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Blocks/BlockTypes/Checkout.php
@@ -50926,12 +50854,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^PHPDoc tag @return has invalid value \(array\|string;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 148 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Parameter \#1 \$content of function do_blocks expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -51047,12 +50969,6 @@ parameters:
 
 		-
 			message: '#^PHPDoc tag @return has invalid value \(array;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 91 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartContents.php
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(array\|string;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 152 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartContents.php
@@ -60974,12 +60890,6 @@ parameters:
 			identifier: class.notFound
 			count: 4
 			path: src/Internal/CLI/Migrator/Runner.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on Automattic\\WooCommerce\\Proxies\\LegacyProxy\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Caches/VersionStringGenerator.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Caches\\VersionStringGenerator\:\:init\(\) has no return type specified\.$#'
