@@ -182,20 +182,28 @@ class SingleProduct extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$product = wc_get_product( $block->context['postId'] );
+		$product    = wc_get_product( $block->context['postId'] );
+		$product_id = $product->get_id();
 
-		if ( ! $product instanceof \WC_Product || $product->is_viewable() ) {
+		if (
+			! $product instanceof \WC_Product ||
+			! $product->is_viewable()
+		) {
 			return '';
+		}
+
+		if ( post_password_required( $product_id ) ) {
+			return get_the_password_form( $product_id );
 		}
 
 		// Load product into the shared products store.
 		wc_interactivity_api_load_product(
 			'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
-			$product->get_id()
+			$product_id
 		);
 
 		$interactivity_context = array(
-			'productId'   => $product->get_id(),
+			'productId'   => $product_id,
 			'variationId' => null,
 		);
 
