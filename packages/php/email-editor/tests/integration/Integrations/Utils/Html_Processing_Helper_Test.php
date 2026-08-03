@@ -13,8 +13,9 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper
 /**
  * Integration test for Html_Processing_Helper.
  *
- * These run against the real WordPress WP_HTML_Tag_Processor, which the unit
- * tests only stub, so caption sanitization is exercised end to end.
+ * Caption sanitization is only meaningful against the real WP_HTML_Tag_Processor
+ * and wp_kses(), so it is covered here rather than in the unit suite, which stubs
+ * the HTML API.
  */
 class Html_Processing_Helper_Test extends \Email_Editor_Integration_Test_Case {
 	/**
@@ -51,6 +52,91 @@ class Html_Processing_Helper_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * A tag smuggled in through a ">" in an attribute value must not keep its
+	 * attributes.
+	 *
+	 * The ">" in "<img alt="a><em onclick=alert(1)>x">" belongs to the alt value,
+	 * but the tag span is still cut there, so an <em> falls out of the split. What
+	 * has to hold is that it is rebuilt from the allow-list: the onclick is gone,
+	 * the href below is gone, and the leftover text is escaped rather than markup.
+	 */
+	public function test_sanitize_caption_html_neutralizes_tag_smuggling_via_attribute_values(): void {
+		$this->assertSame(
+			'<em>x"&gt;',
+			Html_Processing_Helper::sanitize_caption_html( '<img alt="a><em onclick=alert(1)>x">' )
+		);
+
+		$smuggled_link = Html_Processing_Helper::sanitize_caption_html( '<img alt="a><a href="javascript:alert(1)">click</a>">' );
+		$this->assertStringNotContainsString( 'href', $smuggled_link );
+		$this->assertStringContainsString( 'click', $smuggled_link );
+	}
+
+	/**
+	 * A tag without a closing ">" must not survive as markup.
+	 *
+	 * Callers wrap the sanitized caption in markup (Embed::render_caption appends
+	 * "</div>"), and a browser consumes that wrapper as part of any tag the caption
+	 * leaves open, so the caption has to be complete markup on its own.
+	 *
+	 * Which way an unterminated tag goes depends on what is attached to the
+	 * pre_kses hook — core escapes it to text, and without that callback kses drops
+	 * the tag or supplies the missing ">". The assertions cover what holds either
+	 * way, so they do not turn red on a caller that filters differently.
+	 */
+	public function test_sanitize_caption_html_neutralizes_unterminated_tags(): void {
+		$unterminated_img = Html_Processing_Helper::sanitize_caption_html( 'caption<img src=x onerror="alert(1)"' );
+		$this->assertStringContainsString( 'caption', $unterminated_img );
+		$this->assertStringNotContainsString( '<img', $unterminated_img );
+		$this->assertNoEventHandlers( $unterminated_img );
+
+		// An unterminated tag that is on the list may be rebuilt rather than
+		// escaped, but never keeps an attribute the allow-list rejects.
+		$unterminated_link = Html_Processing_Helper::sanitize_caption_html( 'caption<a href="https://x.test" onmouseover="alert(1)"' );
+		$this->assertStringContainsString( 'caption', $unterminated_link );
+		$this->assertNoEventHandlers( $unterminated_link );
+	}
+
+	/**
+	 * Assert that no tag in the given HTML carries an event-handler attribute.
+	 *
+	 * Checks the parsed attributes rather than the serialized string, so a handler
+	 * that only survives as escaped text does not count as a failure.
+	 *
+	 * @param string $html Sanitized HTML to inspect.
+	 */
+	private function assertNoEventHandlers( string $html ): void {
+		$processor = new \WP_HTML_Tag_Processor( $html );
+		while ( $processor->next_tag() ) {
+			$handlers = $processor->get_attribute_names_with_prefix( 'on' );
+			$this->assertSame(
+				array(),
+				is_array( $handlers ) ? $handlers : array(),
+				sprintf( 'Event handler survived on <%s> in: %s', strtolower( (string) $processor->get_tag() ), $html )
+			);
+		}
+	}
+
+	/**
+	 * A caption of never-closed executable tags must stay cheap to sanitize.
+	 *
+	 * The executable-element pass matches lazily, so with the closing tag left to a
+	 * backreference every unclosed opening tag costs a scan to the end of the
+	 * caption, and a few hundred kilobytes take seconds. This caption is also large
+	 * enough to exhaust PCRE's backtrack limit, which must leave the author's text
+	 * alone rather than discard the caption.
+	 */
+	public function test_sanitize_caption_html_handles_many_unclosed_executable_tags(): void {
+		$caption = str_repeat( '<script>', 131072 ) . 'My <strong>caption</strong> text';
+
+		$started = microtime( true );
+		$result  = Html_Processing_Helper::sanitize_caption_html( $caption );
+		$elapsed = microtime( true ) - $started;
+
+		$this->assertSame( 'My <strong>caption</strong> text', $result );
+		$this->assertLessThan( 5, $elapsed, 'Sanitizing a caption of unclosed tags should not take seconds.' );
+	}
+
+	/**
 	 * Safe caption markup must be preserved.
 	 */
 	public function test_sanitize_caption_html_preserves_safe_markup(): void {
@@ -59,10 +145,54 @@ class Html_Processing_Helper_Test extends \Email_Editor_Integration_Test_Case {
 			Html_Processing_Helper::sanitize_caption_html( 'My <strong>video</strong> caption' )
 		);
 
+		$this->assertSame(
+			'This is plain text',
+			Html_Processing_Helper::sanitize_caption_html( 'This is plain text' )
+		);
+
+		$this->assertSame( '', Html_Processing_Helper::sanitize_caption_html( '' ) );
+
+		$nested = '<strong><em><a href="https://example.com">Nested <mark>highlighted</mark> link</a></em></strong>';
+		$this->assertSame( $nested, Html_Processing_Helper::sanitize_caption_html( $nested ) );
+
 		// A valid link is preserved; target="_blank" gains rel="noopener noreferrer".
 		$linked = Html_Processing_Helper::sanitize_caption_html( '<a href="https://example.com" target="_blank">link</a>' );
 		$this->assertStringContainsString( 'href="https://example.com"', $linked );
 		$this->assertStringContainsString( 'target="_blank"', $linked );
-		$this->assertStringContainsString( 'noopener', $linked );
+		$this->assertStringContainsString( 'rel="noopener noreferrer"', $linked );
+	}
+
+	/**
+	 * Disallowed elements are removed but their text content is kept, except for
+	 * executable elements, which are dropped together with their content.
+	 */
+	public function test_sanitize_caption_html_unwraps_disallowed_elements(): void {
+		$this->assertSame(
+			'Not allowed<strong>Bold</strong><em>italic</em>',
+			Html_Processing_Helper::sanitize_caption_html( '<div>Not allowed</div><strong>Bold</strong><script>alert("xss")</script><em>italic</em>' )
+		);
+
+		// Void and self-closing elements are covered too; "<br/>" is normalized.
+		$this->assertSame(
+			'<br /><strong>Bold</strong><em>italic</em>',
+			Html_Processing_Helper::sanitize_caption_html( '<br/><strong>Bold</strong><hr/><em>italic</em>' )
+		);
+	}
+
+	/**
+	 * Attribute values on allowed elements are narrowed to the caption rules.
+	 */
+	public function test_sanitize_caption_html_narrows_attribute_values(): void {
+		// Only the safe CSS properties survive.
+		$this->assertSame(
+			'<span style="font-size: 14px">x</span>',
+			Html_Processing_Helper::sanitize_caption_html( '<span style="font-size: 14px; position: absolute">x</span>' )
+		);
+
+		// data-* values must be a single token; "a b" is rejected.
+		$attributed = Html_Processing_Helper::sanitize_caption_html( '<span class="ok" data-id="5" data-bad="a b">x</span>' );
+		$this->assertStringContainsString( 'class="ok"', $attributed );
+		$this->assertStringContainsString( 'data-id="5"', $attributed );
+		$this->assertStringNotContainsString( 'data-bad', $attributed );
 	}
 }

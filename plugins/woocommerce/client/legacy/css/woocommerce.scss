@@ -2323,6 +2323,8 @@ p.demo_store,
  * Order withdrawal form
  */
 .woocommerce-order-withdrawal-content {
+	max-width: 680px;
+
 	&__intro {
 		margin-bottom: 0.5em;
 	}
