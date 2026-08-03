@@ -314,6 +314,59 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It rejects duplicate legacy group ids before either group can be overwritten.
+	 *
+	 * @dataProvider duplicate_legacy_group_ids
+	 *
+	 * @param string $group_id Duplicate group id.
+	 */
+	public function test_from_legacy_settings_rejects_duplicate_group_ids( string $group_id ): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( sprintf( 'Group id "%s" is duplicated.', $group_id ) );
+
+		SettingsUISchema::from_legacy_settings(
+			'acme',
+			'',
+			'Acme',
+			array(
+				array(
+					'id'    => $group_id,
+					'type'  => 'title',
+					'title' => 'First',
+				),
+				array(
+					'id'    => 'acme_enabled',
+					'type'  => 'checkbox',
+					'title' => 'Enabled',
+				),
+				array( 'type' => 'sectionend' ),
+				array(
+					'id'    => $group_id,
+					'type'  => 'title',
+					'title' => 'Second',
+				),
+				array(
+					'id'    => 'acme_label',
+					'type'  => 'text',
+					'title' => 'Label',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Duplicate legacy group id fixtures.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function duplicate_legacy_group_ids(): array {
+		return array(
+			'normal id'      => array( 'main' ),
+			'zero-string id' => array( '0' ),
+		);
+	}
+
+	/**
 	 * @testdox It preserves both legacy descriptions and string desc_tip values.
 	 */
 	public function test_from_legacy_settings_preserves_desc_and_string_desc_tip(): void {

@@ -341,6 +341,51 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should use complete classic fallback when legacy group ids are duplicated.
+	 */
+	public function test_duplicate_legacy_group_ids_use_classic_fallback_without_changing_the_option(): void {
+		global $current_section, $current_tab, $wpdb;
+
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Settings_Page::output' );
+
+		update_option( 'woocommerce_settings_ui_flag_test', 'yes' );
+		$stored_before = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
+				'woocommerce_settings_ui_flag_test'
+			)
+		);
+
+		$current_section = '';
+		$current_tab     = 'settings_ui_flag_test';
+		$page            = $this->get_settings_ui_test_page_with_duplicate_group_ids();
+		$context         = SettingsUIRequestContext::for_settings_page( $page, '' );
+
+		try {
+			$output = $this->render_settings_view( $page );
+		} finally {
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$stored_after = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
+				'woocommerce_settings_ui_flag_test'
+			)
+		);
+
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+		$this->assertStringContainsString( 'class="woocommerce-save-button', $output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertNull( $context->get_schema() );
+		$this->assertTrue( $context->has_schema_failed() );
+		$this->assertStringContainsString( 'Group id "main" is duplicated.', $context->get_schema_failure_reason() );
+		$this->assertSame( $stored_before, $stored_after );
+	}
+
+	/**
 	 * @testdox Should fall back to classic settings when a declared script handle is not registered.
 	 */
 	public function test_unregistered_script_handle_uses_classic_fallback_with_precise_reason(): void {
@@ -1215,6 +1260,63 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 						'id'    => 'woocommerce_settings_ui_flag_test',
 						'type'  => 'text',
 						'title' => 'Settings UI flag test',
+					),
+				);
+			}
+		};
+	}
+
+	/**
+	 * Build a settings page whose legacy settings contain duplicate group ids.
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	private function get_settings_ui_test_page_with_duplicate_group_ids(): \WC_Settings_Page {
+		return new class() extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'settings_ui_flag_test';
+				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Get the settings UI page adapter.
+			 *
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
+				return new \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter( $this );
+			}
+
+			/**
+			 * Get settings for the default section.
+			 *
+			 * @return array
+			 */
+			protected function get_settings_for_default_section() {
+				return array(
+					array(
+						'id'    => 'main',
+						'type'  => 'title',
+						'title' => 'First group',
+					),
+					array(
+						'id'    => 'woocommerce_settings_ui_flag_test',
+						'type'  => 'checkbox',
+						'title' => 'Enabled',
+					),
+					array( 'type' => 'sectionend' ),
+					array(
+						'id'    => 'main',
+						'type'  => 'title',
+						'title' => 'Second group',
+					),
+					array(
+						'id'    => 'woocommerce_settings_ui_flag_test_label',
+						'type'  => 'text',
+						'title' => 'Label',
 					),
 				);
 			}

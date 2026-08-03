@@ -90,8 +90,8 @@ class SettingsUISchema {
 
 			if ( 'title' === $type ) {
 				$visibility_controller = null;
-				if ( $current_group && $current_id ) {
-					$groups[ $current_id ] = $current_group;
+				if ( null !== $current_group && null !== $current_id ) {
+					self::add_group( $groups, $current_id, $current_group );
 				}
 
 				$current_id    = isset( $setting['id'] ) && is_scalar( $setting['id'] ) && '' !== (string) $setting['id']
@@ -111,8 +111,8 @@ class SettingsUISchema {
 
 			if ( 'sectionend' === $type ) {
 				$visibility_controller = null;
-				if ( $current_group && $current_id ) {
-					$groups[ $current_id ] = $current_group;
+				if ( null !== $current_group && null !== $current_id ) {
+					self::add_group( $groups, $current_id, $current_group );
 				}
 				$current_group = null;
 				$current_id    = null;
@@ -143,8 +143,8 @@ class SettingsUISchema {
 			}
 		}
 
-		if ( $current_group && $current_id ) {
-			$groups[ $current_id ] = $current_group;
+		if ( null !== $current_group && null !== $current_id ) {
+			self::add_group( $groups, $current_id, $current_group );
 		}
 
 		uasort(
@@ -1252,5 +1252,24 @@ class SettingsUISchema {
 			'order'       => $order,
 			'fields'      => array(),
 		);
+	}
+
+	/**
+	 * Add a legacy group without allowing a later group to overwrite it.
+	 *
+	 * @param array  $groups Groups keyed by id.
+	 * @param string $group_id Group id.
+	 * @param array  $group Group definition.
+	 * @throws \InvalidArgumentException When the group id is duplicated.
+	 */
+	private static function add_group( array &$groups, string $group_id, array $group ): void {
+		// Exception messages are sanitized by invalid_schema() before they cross the schema boundary.
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		if ( array_key_exists( $group_id, $groups ) ) {
+			throw self::invalid_schema( sprintf( 'Group id "%s" is duplicated.', $group_id ) );
+		}
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+
+		$groups[ $group_id ] = $group;
 	}
 }
