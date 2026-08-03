@@ -260,13 +260,14 @@ class ProductImage extends AbstractBlock {
 			$attr['loading'] = $loading_attr;
 		}
 
-		$adjust_srcset = function ( $sources, $size_array, $image_src, $image_meta ) use ( $aspect_ratio ) {
-			if ( '1' === $aspect_ratio ) {
-				$aspect_ratio = '1/1';
-			}
+		$srcset_aspect_ratio = $aspect_ratio;
+		if ( is_string( $srcset_aspect_ratio ) && is_numeric( $srcset_aspect_ratio ) ) {
+			$srcset_aspect_ratio .= '/1';
+		}
+
+		$adjust_srcset = function ( $sources, $size_array, $image_src, $image_meta ) use ( $srcset_aspect_ratio ) {
 			if (
-				! is_string( $aspect_ratio ) ||
-				false === strpos( $aspect_ratio, '/' ) ||
+				! is_string( $srcset_aspect_ratio ) ||
 				! is_array( $sources ) ||
 				! is_array( $image_meta ) ||
 				! isset( $image_meta['width'], $image_meta['height'] ) ||
@@ -278,7 +279,7 @@ class ProductImage extends AbstractBlock {
 				return $sources;
 			}
 
-			$aspect_ratio_parts = explode( '/', $aspect_ratio );
+			$aspect_ratio_parts = explode( '/', $srcset_aspect_ratio );
 
 			if (
 				count( $aspect_ratio_parts ) !== 2 ||
@@ -309,7 +310,8 @@ class ProductImage extends AbstractBlock {
 
 		$maybe_adjust_srcset =
 			'cover' === $attributes['scale'] &&
-			is_string( $aspect_ratio );
+			is_string( $srcset_aspect_ratio ) &&
+			false !== strpos( $srcset_aspect_ratio, '/' );
 
 		if ( $maybe_adjust_srcset ) {
 			add_filter( 'wp_calculate_image_srcset', $adjust_srcset, 10, 4 );
