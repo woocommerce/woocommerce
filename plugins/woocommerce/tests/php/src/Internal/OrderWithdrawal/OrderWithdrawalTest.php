@@ -159,8 +159,8 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$this->restore_option( self::FLUSH_QUEUE_OPTION, $this->original_flush_queue_option );
 		wc_clear_notices();
 		$this->clear_order_withdrawal_rate_limits();
-		$this->delete_created_orders();
 		$this->delete_created_inbox_notes();
+		$this->delete_created_orders();
 		WC()->session = $this->original_session;
 
 		parent::tearDown();
@@ -947,28 +947,31 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 * @return int[]
 	 */
 	private function get_created_inbox_note_ids(): array {
-		global $wpdb;
+		$note_ids = array();
 
-		$note_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT note_id FROM {$wpdb->prefix}wc_admin_notes WHERE name LIKE %s",
-				$wpdb->esc_like( self::INBOX_NOTE_NAME_PREFIX ) . '%'
-			)
-		);
+		foreach ( $this->created_order_ids as $order_id ) {
+			$note = Notes::get_note_by_name( self::INBOX_NOTE_NAME_PREFIX . 'order-' . $order_id );
 
-		return array_map( 'intval', (array) $note_ids );
+			if ( $note instanceof Note ) {
+				$note_ids[] = $note->get_id();
+			}
+		}
+
+		return array_map( 'intval', $note_ids );
 	}
 
 	/**
 	 * Delete inbox notes created during a test.
 	 */
 	private function delete_created_inbox_notes(): void {
-		foreach ( $this->get_created_inbox_note_ids() as $note_id ) {
-			$note = Notes::get_note( $note_id );
+		$note_names = array();
 
-			if ( $note instanceof Note ) {
-				$note->delete();
-			}
+		foreach ( $this->created_order_ids as $order_id ) {
+			$note_names[] = self::INBOX_NOTE_NAME_PREFIX . 'order-' . $order_id;
+		}
+
+		if ( ! empty( $note_names ) ) {
+			Notes::delete_notes_with_name( $note_names );
 		}
 	}
 
