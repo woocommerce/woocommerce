@@ -260,5 +260,4 @@ class BlocksSharedState {
 
 		return $notices;
 	}
-
 }

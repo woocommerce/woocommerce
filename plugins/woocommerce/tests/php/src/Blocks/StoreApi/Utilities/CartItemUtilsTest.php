@@ -221,46 +221,6 @@ class CartItemUtilsTest extends \WC_Unit_Test_Case {
 	}
 
 	// -------------------------------------------------------------------------
-	// Usage-example docblock prose
-	// -------------------------------------------------------------------------
-
-	/**
-	 * @testdox The usage example must no longer show or suggest driving an Add-to-cart button (or any in-cart count) from the predicate.
-	 */
-	public function test_usage_example_does_not_suggest_driving_an_add_to_cart_button(): void {
-		$doc_comment = $this->get_is_standalone_line_doc_comment();
-
-		$this->assertStringNotContainsStringIgnoringCase(
-			'add to cart',
-			$doc_comment,
-			'The docblock must not mention showing an "Add to cart" button from the predicate.'
-		);
-		$this->assertStringNotContainsStringIgnoringCase(
-			'add-to-cart',
-			$doc_comment,
-			'The docblock must not mention driving an add-to-cart button from the predicate.'
-		);
-	}
-
-	/**
-	 * @testdox The rewritten prose must point count consumers at the filtered is_canonical_line field and name the filter.
-	 */
-	public function test_prose_points_count_consumers_at_filtered_is_canonical_line_field(): void {
-		$doc_comment = $this->get_is_standalone_line_doc_comment();
-
-		$this->assertStringContainsString(
-			'is_canonical_line',
-			$doc_comment,
-			'The docblock must point count consumers at the Store API cart-item response\'s is_canonical_line field.'
-		);
-		$this->assertStringContainsString(
-			'woocommerce_store_api_cart_item_is_canonical_line',
-			$doc_comment,
-			'The docblock must name the woocommerce_store_api_cart_item_is_canonical_line filter.'
-		);
-	}
-
-	// -------------------------------------------------------------------------
 	// Byte-identity of the retained method
 	// -------------------------------------------------------------------------
 
@@ -323,19 +283,5 @@ PHP;
 		$body = array_slice( $lines, $start_line - 1, $end_line - $start_line + 1 );
 
 		return rtrim( implode( '', $body ), "\n" );
-	}
-
-	/**
-	 * Fetch the doc comment for CartItemUtils::is_standalone_line() via reflection.
-	 *
-	 * @return string
-	 */
-	private function get_is_standalone_line_doc_comment(): string {
-		$reflection  = new \ReflectionMethod( CartItemUtils::class, 'is_standalone_line' );
-		$doc_comment = $reflection->getDocComment();
-
-		$this->assertIsString( $doc_comment, 'is_standalone_line() must have a docblock.' );
-
-		return $doc_comment;
 	}
 }

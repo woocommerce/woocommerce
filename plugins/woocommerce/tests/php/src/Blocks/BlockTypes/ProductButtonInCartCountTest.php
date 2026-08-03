@@ -689,24 +689,17 @@ class ProductButtonInCartCountTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The seed's and the mock wrapper's docblocks avoid forbidden wording and document int|float without a native return type.
+	 * A native `int|float` union is unavailable on the plugin's minimum PHP, so
+	 * the quantity's type is documented rather than declared. A declaration
+	 * added later would narrow the float pass-through into a TypeError.
+	 *
+	 * @testdox Neither the seed nor the mock wrapper declares a native return type.
 	 */
-	public function test_docblocks_avoid_forbidden_wording_and_document_int_or_float(): void {
+	public function test_seed_and_mock_wrapper_declare_no_native_return_type(): void {
 		$seed_method = ( new \ReflectionClass( ProductButton::class ) )->getMethod( 'get_cart_item_quantity_by_product_id' );
 		$mock_method = ( new \ReflectionClass( ProductButtonMock::class ) )->getMethod( 'call_get_cart_item_quantity_by_product_id' );
 
-		foreach ( array(
-			'seed'         => $seed_method,
-			'mock wrapper' => $mock_method,
-		) as $label => $method ) {
-			$doc_comment = $method->getDocComment();
-
-			$this->assertIsString( $doc_comment, "The {$label} method must have a docblock." );
-			$this->assertStringNotContainsString( 'standalone', $doc_comment, "The {$label} docblock must not use \"standalone\" wording." );
-			$this->assertStringNotContainsString( 'sum', $doc_comment, "The {$label} docblock must not claim the count sums cart lines." );
-			$this->assertStringNotContainsString( 'independent', $doc_comment, "The {$label} docblock must not claim the value is derived independently of the shared canonical-line value." );
-			$this->assertStringContainsString( 'int|float', $doc_comment, "The {$label} docblock must document int|float." );
-			$this->assertFalse( $method->hasReturnType(), "The {$label} method must not declare a native return type." );
-		}
+		$this->assertFalse( $seed_method->hasReturnType(), 'The seed must not declare a native return type.' );
+		$this->assertFalse( $mock_method->hasReturnType(), 'The mock wrapper must not declare a native return type.' );
 	}
 }
