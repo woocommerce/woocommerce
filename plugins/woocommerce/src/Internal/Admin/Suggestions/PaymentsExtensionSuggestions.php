@@ -264,6 +264,7 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::GOCARDLESS,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
 			self::AFFIRM          => array(
