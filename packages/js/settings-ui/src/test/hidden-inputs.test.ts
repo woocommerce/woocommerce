@@ -76,6 +76,20 @@ describe( 'getHiddenInputs', () => {
 		).toEqual( [] );
 	} );
 
+	it( 'fails closed for unsupported save adapters', () => {
+		expect( () =>
+			getHiddenInputs(
+				{
+					id: 'quantity',
+					label: 'Quantity',
+					type: 'number',
+					save: { adapter: 'custom', name: 'quantity' },
+				},
+				2
+			)
+		).toThrow( 'Save adapter "custom" is not supported.' );
+	} );
+
 	it( 'preserves the original form representation while the canonical value is unchanged', () => {
 		const field = formPostField( {
 			save: {
@@ -127,11 +141,7 @@ describe( 'getHiddenInputs', () => {
 		}
 	);
 
-	it( 'serializes flat and one-level nested names but not deeper names', () => {
-		const consoleError = jest
-			.spyOn( console, 'error' )
-			.mockImplementation( () => {} );
-
+	it( 'serializes flat and one-level nested names and fails closed for deeper names', () => {
 		expect(
 			getHiddenInputs(
 				formPostField( {
@@ -144,7 +154,7 @@ describe( 'getHiddenInputs', () => {
 				1
 			)
 		).toEqual( [ { name: 'settings[quantity]', value: '2' } ] );
-		expect(
+		expect( () =>
 			getHiddenInputs(
 				formPostField( {
 					save: {
@@ -155,14 +165,9 @@ describe( 'getHiddenInputs', () => {
 				2,
 				1
 			)
-		).toEqual( [] );
-		expect( consoleError ).toHaveBeenCalledWith(
-			expect.stringContaining(
-				'Form-post field name "settings[group][quantity]" is not supported.'
-			),
-			expect.any( Object )
+		).toThrow(
+			'Form-post field name "settings[group][quantity]" is not supported.'
 		);
-		consoleError.mockRestore();
 	} );
 
 	it( 'keeps array entries bracketed for one-level nested names', () => {

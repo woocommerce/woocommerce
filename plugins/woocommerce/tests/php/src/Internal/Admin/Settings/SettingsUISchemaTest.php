@@ -287,7 +287,8 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		$field = $schema['groups']['default']['fields'][0];
 
 		$this->assertSame( 'Read-only <strong>information</strong>alert("x").', $field['description'] );
-		$this->assertSame( array( 'adapter' => 'none' ), $field['save'] );
+		$this->assertArrayHasKey( 'adapter', $field['save'] );
+		$this->assertSame( 'none', $field['save']['adapter'] );
 	}
 
 	/**
@@ -310,8 +311,62 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		$field = $schema['groups']['default']['fields'][0];
 
 		$this->assertSame( 'Read-only information.', $field['description'] );
-		$this->assertSame( array( 'adapter' => 'none' ), $field['save'] );
+		$this->assertArrayHasKey( 'adapter', $field['save'] );
+		$this->assertSame( 'none', $field['save']['adapter'] );
 		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
+	 * @testdox It rejects duplicate legacy group ids before either group can be overwritten.
+	 *
+	 * @dataProvider duplicate_legacy_group_ids
+	 *
+	 * @param string $group_id Duplicate group id.
+	 */
+	public function test_from_legacy_settings_rejects_duplicate_group_ids( string $group_id ): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( sprintf( 'Group id "%s" is duplicated.', $group_id ) );
+
+		SettingsUISchema::from_legacy_settings(
+			'acme',
+			'',
+			'Acme',
+			array(
+				array(
+					'id'    => $group_id,
+					'type'  => 'title',
+					'title' => 'First',
+				),
+				array(
+					'id'    => 'acme_enabled',
+					'type'  => 'checkbox',
+					'title' => 'Enabled',
+				),
+				array( 'type' => 'sectionend' ),
+				array(
+					'id'    => $group_id,
+					'type'  => 'title',
+					'title' => 'Second',
+				),
+				array(
+					'id'    => 'acme_label',
+					'type'  => 'text',
+					'title' => 'Label',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Duplicate legacy group id fixtures.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function duplicate_legacy_group_ids(): array {
+		return array(
+			'normal id'      => array( 'main' ),
+			'zero-string id' => array( '0' ),
+		);
 	}
 
 	/**
@@ -884,8 +939,6 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	 * @param string $expected_type Expected canonical type.
 	 */
 	public function test_canonicalize_schema_values_infers_integer_from_step_base( array $field, string $expected_type ): void {
-		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_schema_values' );
-
 		$field += array(
 			'id'    => 'acme_number',
 			'label' => 'Number',
@@ -893,7 +946,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			'save'  => array( 'adapter' => 'custom' ),
 		);
 
-		$schema = SettingsUISchema::canonicalize_schema_values( $this->get_native_schema_with_field( $field ) );
+		$schema = SettingsUISchema::canonicalize_schema_values( $this->get_native_schema_with_field( $field ), true );
 
 		$this->assertSame( $expected_type, $schema['groups']['main']['fields'][0]['type'] );
 	}
@@ -1164,11 +1217,12 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		$schema = $this->get_native_schema_with_fields(
 			array(
 				array(
-					'id'    => 'acme_number',
-					'label' => 'Number',
-					'type'  => 'number',
-					'value' => 1.5,
-					'save'  => array( 'adapter' => 'custom' ),
+					'id'               => 'acme_number',
+					'label'            => 'Number',
+					'type'             => 'number',
+					'value'            => 2,
+					'customAttributes' => array( 'step' => 1 ),
+					'save'             => array( 'adapter' => 'custom' ),
 				),
 				array(
 					'id'    => 'acme_integer',
@@ -1188,6 +1242,29 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( $schema, SettingsUISchema::canonicalize_schema_values( $schema ) );
+	}
+
+	/**
+	 * @testdox It requires checkbox form representations to match the classic sanitizer meaning.
+	 */
+	public function test_canonicalize_schema_values_rejects_incompatible_checkbox_form_value(): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'must define save.initialValue' );
+
+		SettingsUISchema::canonicalize_schema_values(
+			$this->get_native_schema_with_field(
+				array(
+					'id'    => 'acme_enabled',
+					'label' => 'Enabled',
+					'type'  => 'checkbox',
+					'value' => 'true',
+					'save'  => array(
+						'adapter' => 'form_post',
+						'name'    => 'acme_enabled',
+					),
+				)
+			)
+		);
 	}
 
 	/**
@@ -1305,6 +1382,96 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 		} finally {
 			delete_option( 'acme_quantity' );
 		}
+	}
+
+	/**
+	 * @testdox It preserves a native checkbox through the classic save pipeline with a compatible original value.
+	 */
+	public function test_schema_post_preserves_native_checkbox_form_value(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_schema_values' );
+
+		$settings = array(
+			array(
+				'id'    => 'acme_enabled',
+				'title' => 'Enabled',
+				'type'  => 'checkbox',
+			),
+		);
+		update_option( 'acme_enabled', 'yes' );
+
+		try {
+			$schema = SettingsUISchema::canonicalize_schema_values(
+				$this->get_native_schema_with_field(
+					array(
+						'id'    => 'acme_enabled',
+						'label' => 'Enabled',
+						'type'  => 'checkbox',
+						'value' => 'true',
+						'save'  => array(
+							'adapter'      => 'form_post',
+							'name'         => 'acme_enabled',
+							'initialValue' => 'yes',
+						),
+					)
+				)
+			);
+			SettingsUISchema::assert_valid_schema( $schema );
+			$post     = $this->get_schema_post_data( $schema );
+			$captured = $this->save_fields_and_capture( $settings, $post, 'acme_enabled' );
+
+			$this->assertSame( array( 'acme_enabled' => 'yes' ), $post );
+			$this->assertSame( 'yes', $captured['global']['raw'] );
+			$this->assertSame( 'yes', $captured['specific']['sanitized'] );
+			$this->assertSame( 'yes', get_option( 'acme_enabled' ) );
+			$this->assertSame( 'yes', $this->get_raw_option_value( 'acme_enabled' ) );
+		} finally {
+			delete_option( 'acme_enabled' );
+		}
+	}
+
+	/**
+	 * @testdox It rejects form-post names that the hidden-input serializer cannot represent.
+	 */
+	public function test_assert_valid_schema_rejects_unsupported_form_post_names(): void {
+		$schema = self::get_valid_schema_for_validation();
+		$schema['groups']['main']['fields'][0]['save']['name'] = 'settings[group][quantity]';
+
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'is not a supported form-post field name' );
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
+	 * @testdox It rejects integer steps that cannot preserve integer values.
+	 *
+	 * @dataProvider invalid_integer_steps
+	 *
+	 * @param int|float|string $step Invalid integer step.
+	 */
+	public function test_assert_valid_schema_rejects_invalid_integer_steps( $step ): void {
+		$schema                    = self::get_valid_schema_for_validation();
+		$field                     = &$schema['groups']['main']['fields'][0];
+		$field['type']             = 'integer';
+		$field['value']            = 2;
+		$field['customAttributes'] = array( 'step' => $step );
+
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'custom attribute "step" must be a positive integer' );
+		SettingsUISchema::assert_valid_schema( $schema );
+	}
+
+	/**
+	 * Invalid integer step fixtures.
+	 *
+	 * @return array<string, array{int|float|string}>
+	 */
+	public static function invalid_integer_steps(): array {
+		return array(
+			'fractional' => array( 0.5 ),
+			'zero'       => array( 0 ),
+			'negative'   => array( -1 ),
+			'any'        => array( 'any' ),
+		);
 	}
 
 	/**

@@ -6,7 +6,6 @@ import { createElement, Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { error } from './diagnostics';
 import type { SettingsUIField, SettingsValue } from './types';
 import { areSettingsValuesEqual, toStoreLocalDateTime } from './values';
 
@@ -82,17 +81,13 @@ export const getHiddenInputs = (
 	}
 
 	if ( adapter !== 'form_post' ) {
-		error( `Save adapter "${ adapter }" is not supported.`, { field } );
-		return [];
+		throw new Error( `Save adapter "${ adapter }" is not supported.` );
 	}
 
 	const name = getFieldName( field );
 
 	if ( ! isSupportedFieldName( name, field.type === 'array' ) ) {
-		error( `Form-post field name "${ name }" is not supported.`, {
-			field,
-		} );
-		return [];
+		throw new Error( `Form-post field name "${ name }" is not supported.` );
 	}
 
 	if (

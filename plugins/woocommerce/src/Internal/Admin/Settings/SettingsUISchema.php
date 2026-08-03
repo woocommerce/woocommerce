@@ -98,8 +98,8 @@ class SettingsUISchema {
 
 			if ( 'title' === $type ) {
 				$visibility_controller = null;
-				if ( $current_group && $current_id ) {
-					$groups[ $current_id ] = $current_group;
+				if ( null !== $current_group && null !== $current_id ) {
+					self::add_group( $groups, $current_id, $current_group );
 				}
 
 				$current_id    = isset( $setting['id'] ) && is_scalar( $setting['id'] ) && '' !== (string) $setting['id']
@@ -119,8 +119,8 @@ class SettingsUISchema {
 
 			if ( 'sectionend' === $type ) {
 				$visibility_controller = null;
-				if ( $current_group && $current_id ) {
-					$groups[ $current_id ] = $current_group;
+				if ( null !== $current_group && null !== $current_id ) {
+					self::add_group( $groups, $current_id, $current_group );
 				}
 				$current_group = null;
 				$current_id    = null;
@@ -151,8 +151,8 @@ class SettingsUISchema {
 			}
 		}
 
-		if ( $current_group && $current_id ) {
-			$groups[ $current_id ] = $current_group;
+		if ( null !== $current_group && null !== $current_id ) {
+			self::add_group( $groups, $current_id, $current_group );
 		}
 
 		uasort(
@@ -464,7 +464,7 @@ class SettingsUISchema {
 					continue;
 				}
 
-				self::canonicalize_field( $field, $converted_fields );
+				self::canonicalize_field( $field, $converted_fields, $legacy_derived );
 			}
 			unset( $field );
 		}
@@ -490,8 +490,9 @@ class SettingsUISchema {
 	 *
 	 * @param array    $field Field definition.
 	 * @param string[] $converted_fields Affected field ids.
+	 * @param bool     $legacy_derived Whether the schema came from legacy settings definitions.
 	 */
-	private static function canonicalize_field( array &$field, array &$converted_fields ): void {
+	private static function canonicalize_field( array &$field, array &$converted_fields, bool $legacy_derived ): void {
 		$type = $field['type'] ?? null;
 		if ( ! is_string( $type ) ) {
 			return;
@@ -502,7 +503,7 @@ class SettingsUISchema {
 
 		$numeric_validation_converted = false;
 
-		if ( 'number' === $type && self::should_promote_to_integer( $field ) ) {
+		if ( $legacy_derived && 'number' === $type && self::should_promote_to_integer( $field ) ) {
 			$type          = 'integer';
 			$field['type'] = $type;
 		}
@@ -939,7 +940,7 @@ class SettingsUISchema {
 					continue;
 				}
 
-				if ( ! self::is_form_value( $original ) ) {
+				if ( ! self::is_form_value_for_field( $original, $field ) ) {
 					throw self::invalid_schema( sprintf( 'Field "%s" must define save.initialValue before its native form value can be converted.', $field['id'] ) );
 				}
 
@@ -971,6 +972,31 @@ class SettingsUISchema {
 	 */
 	private static function is_form_value( $value ): bool {
 		return is_string( $value ) || ( is_array( $value ) && ArrayUtil::array_is_list( $value ) && count( $value ) === count( array_filter( $value, 'is_string' ) ) );
+	}
+
+	/**
+	 * Whether a form value preserves the canonical field value through the
+	 * classic save pipeline.
+	 *
+	 * @param mixed $value Candidate form value.
+	 * @param array $field Canonical field definition.
+	 * @return bool
+	 */
+	private static function is_form_value_for_field( $value, array $field ): bool {
+		if ( ! self::is_form_value( $value ) ) {
+			return false;
+		}
+
+		if ( 'checkbox' !== ( $field['type'] ?? null ) ) {
+			return true;
+		}
+
+		if ( ! is_string( $value ) || ! is_bool( $field['value'] ?? null ) ) {
+			return false;
+		}
+
+		$checked = '1' === $value || 'yes' === $value;
+		return $checked === $field['value'];
 	}
 
 	/**
@@ -1716,6 +1742,13 @@ class SettingsUISchema {
 					throw self::invalid_schema( sprintf( 'Field "%s" custom attribute "%s" must be a finite number.', $field['id'], $attribute ) );
 				}
 
+				if ( 'integer' === $field['type'] && 'step' === $attribute ) {
+					$integer_step = self::get_integral_decimal( $value );
+					if ( null === $integer_step || '0' === $integer_step || '-' === substr( $integer_step, 0, 1 ) ) {
+						throw self::invalid_schema( sprintf( 'Field "%s" custom attribute "step" must be a positive integer.', $field['id'] ) );
+					}
+				}
+
 				if ( 'integer' === $field['type'] && in_array( $attribute, array( 'min', 'max' ), true ) && ! is_int( $value ) ) {
 					throw self::invalid_schema( sprintf( 'Field "%s" custom attribute "%s" must be an integer.', $field['id'], $attribute ) );
 				}
@@ -1768,13 +1801,42 @@ class SettingsUISchema {
 			self::assert_non_empty_string( $save['name'], sprintf( 'Field "%s" save name must be a non-empty string.', $field['id'] ) );
 		}
 
-		if ( is_array( $save ) && array_key_exists( 'initialValue', $save ) && ! self::is_form_value( $save['initialValue'] ) ) {
-			throw self::invalid_schema( sprintf( 'Field "%s" save.initialValue must be a string or string list.', $field['id'] ) );
+		if ( 'form_post' === $adapter ) {
+			$name = is_array( $save ) && array_key_exists( 'name', $save ) ? $save['name'] : $field['id'];
+			if ( ! self::is_supported_form_post_name( $name, 'array' === $field['type'] ) ) {
+				throw self::invalid_schema( sprintf( 'Field "%s" save name "%s" is not a supported form-post field name.', $field['id'], $name ) );
+			}
+		}
+
+		if ( is_array( $save ) && array_key_exists( 'initialValue', $save ) ) {
+			if ( ! self::is_form_value( $save['initialValue'] ) ) {
+				throw self::invalid_schema( sprintf( 'Field "%s" save.initialValue must be a string or string list.', $field['id'] ) );
+			}
+
+			if ( ! self::is_form_value_for_field( $save['initialValue'], $field ) ) {
+				throw self::invalid_schema( sprintf( 'Field "%s" save.initialValue must preserve its canonical value through classic form-post semantics.', $field['id'] ) );
+			}
 		}
 
 		if ( 'info' === $field['type'] && 'none' !== $adapter ) {
 			throw self::invalid_schema( sprintf( 'Field "%s" of type "info" must use the "none" save adapter.', $field['id'] ) );
 		}
+	}
+
+	/**
+	 * Whether a field name can be serialized by the form-post adapter.
+	 *
+	 * @param mixed $name Candidate field name.
+	 * @param bool  $is_array Whether the field posts a string list.
+	 * @return bool
+	 */
+	private static function is_supported_form_post_name( $name, bool $is_array ): bool {
+		if ( ! is_string( $name ) || '' === $name ) {
+			return false;
+		}
+
+		$base_name = $is_array && '[]' === substr( $name, -2 ) ? substr( $name, 0, -2 ) : $name;
+		return 1 === preg_match( '/^[^\[\]]+(?:\[[^\[\]]+\])?$/', $base_name );
 	}
 
 	/**
@@ -1940,5 +2002,24 @@ class SettingsUISchema {
 			'order'       => $order,
 			'fields'      => array(),
 		);
+	}
+
+	/**
+	 * Add a legacy group without allowing a later group to overwrite it.
+	 *
+	 * @param array  $groups Groups keyed by id.
+	 * @param string $group_id Group id.
+	 * @param array  $group Group definition.
+	 * @throws \InvalidArgumentException When the group id is duplicated.
+	 */
+	private static function add_group( array &$groups, string $group_id, array $group ): void {
+		// Exception messages are sanitized by invalid_schema() before they cross the schema boundary.
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		if ( array_key_exists( $group_id, $groups ) ) {
+			throw self::invalid_schema( sprintf( 'Group id "%s" is duplicated.', $group_id ) );
+		}
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+
+		$groups[ $group_id ] = $group;
 	}
 }
