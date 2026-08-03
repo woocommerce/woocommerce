@@ -195,6 +195,7 @@ test.describe( 'Product Reviews', () => {
 
 			const reviewRow = page.locator( `#comment-${ review.id }` );
 
+			// WordPress 7.1 renders primary list-table cells as row headers.
 			await expect(
 				reviewRow.getByRole( 'cell', { name: updatedReview } ).or(
 					reviewRow.getByRole( 'rowheader', {
