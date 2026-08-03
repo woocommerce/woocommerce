@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve original form values until a canonical Settings UI field is edited.

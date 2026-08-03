@@ -37,6 +37,14 @@ test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
 
 		await resetFeatureFlags( request, url );
 		await setOption( request, url, 'woocommerce_enable_reviews', 'yes' );
+		await setOption( request, url, 'woocommerce_manage_stock', 'yes' );
+		await setOption( request, url, 'woocommerce_hold_stock_minutes', '60' );
+		await setOption(
+			request,
+			url,
+			'woocommerce_notify_low_stock_amount',
+			'2'
+		);
 		await wpCLI(
 			'wp plugin deactivate settings-ui-component-registration'
 		);
@@ -65,6 +73,59 @@ test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
 		await expect(
 			page.locator( '#woocommerce_enable_reviews' )
 		).not.toBeChecked();
+	} );
+
+	test( 'preserves an untouched inventory value when another setting is saved', async ( {
+		baseURL,
+		page,
+	} ) => {
+		const url = getBaseURL( baseURL );
+		await setFeatureFlag( request, url, 'settings-ui', true );
+		await setOption( request, url, 'woocommerce_manage_stock', 'yes' );
+		await setOption( request, url, 'woocommerce_hold_stock_minutes', '60' );
+		await setOption(
+			request,
+			url,
+			'woocommerce_notify_low_stock_amount',
+			'02'
+		);
+
+		await page.goto(
+			'wp-admin/admin.php?page=wc-settings&tab=products&section=inventory'
+		);
+
+		const editedHoldStock = page.getByRole( 'spinbutton', {
+			name: 'Hold stock (minutes)',
+		} );
+		const preservedLowStock = page.getByRole( 'spinbutton', {
+			name: 'Low stock threshold',
+		} );
+		const lowStockFormValue = page.locator(
+			'input[type="hidden"][name="woocommerce_notify_low_stock_amount"]'
+		);
+
+		await expect(
+			page.locator( '[data-wc-settings-ui="1"]' )
+		).toBeVisible();
+		await expect( preservedLowStock ).toHaveValue( '2' );
+		await expect( lowStockFormValue ).toHaveValue( '02' );
+		await editedHoldStock.fill( '61' );
+		await expect( lowStockFormValue ).toHaveValue( '02' );
+		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
+
+		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
+			'Your settings have been saved.'
+		);
+		await expect( preservedLowStock ).toBeVisible();
+		await expect( preservedLowStock ).toHaveValue( '2' );
+		await expect( editedHoldStock ).toHaveValue( '61' );
+
+		const [ holdStockOption, lowStockOption ] = await Promise.all( [
+			wpCLI( 'wp option get woocommerce_hold_stock_minutes' ),
+			wpCLI( 'wp option get woocommerce_notify_low_stock_amount' ),
+		] );
+		expect( holdStockOption.stdout.trim() ).toBe( '61' );
+		expect( lowStockOption.stdout.trim() ).toBe( '02' );
 	} );
 
 	test( 'loads a declared component registration before mounting settings', async ( {

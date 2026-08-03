@@ -1260,6 +1260,205 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox It preserves an unchanged numeric form value through the classic save pipeline.
+	 */
+	public function test_schema_post_preserves_unchanged_numeric_form_value(): void {
+		$settings = $this->get_numeric_save_settings();
+		update_option( 'acme_quantity', '02' );
+
+		try {
+			$schema   = SettingsUISchema::from_legacy_settings( 'acme', '', 'Acme', $settings );
+			$post     = $this->get_schema_post_data( $schema );
+			$captured = $this->save_fields_and_capture( $settings, $post, 'acme_quantity' );
+
+			$this->assertSame( array( 'acme_quantity' => '02' ), $post );
+			$this->assertSame( '02', $captured['global']['raw'] );
+			$this->assertSame( '02', $captured['global']['sanitized'] );
+			$this->assertSame( '02', $captured['specific']['raw'] );
+			$this->assertSame( '02', $captured['specific']['sanitized'] );
+			$this->assertSame( '02', get_option( 'acme_quantity' ) );
+			$this->assertSame( '02', $this->get_raw_option_value( 'acme_quantity' ) );
+		} finally {
+			delete_option( 'acme_quantity' );
+		}
+	}
+
+	/**
+	 * @testdox It sends edited numeric state through the existing classic sanitizer.
+	 */
+	public function test_schema_post_saves_edited_numeric_value_canonically(): void {
+		$settings = $this->get_numeric_save_settings();
+		update_option( 'acme_quantity', '01' );
+
+		try {
+			$schema   = SettingsUISchema::from_legacy_settings( 'acme', '', 'Acme', $settings );
+			$post     = $this->get_schema_post_data( $schema, array( 'acme_quantity' => '2' ) );
+			$captured = $this->save_fields_and_capture( $settings, $post, 'acme_quantity' );
+
+			$this->assertSame( array( 'acme_quantity' => '2' ), $post );
+			$this->assertSame( '2', $captured['global']['raw'] );
+			$this->assertSame( '2', $captured['global']['sanitized'] );
+			$this->assertSame( '2', $captured['specific']['raw'] );
+			$this->assertSame( '2', $captured['specific']['sanitized'] );
+			$this->assertSame( '2', get_option( 'acme_quantity' ) );
+			$this->assertSame( '2', $this->get_raw_option_value( 'acme_quantity' ) );
+		} finally {
+			delete_option( 'acme_quantity' );
+		}
+	}
+
+	/**
+	 * @testdox It preserves classic POST shapes for nested, checkbox, array, and datetime fields.
+	 */
+	public function test_schema_post_matches_classic_shapes_for_typed_fields(): void {
+		$original_timezone = get_option( 'timezone_string' );
+		$settings          = array(
+			array(
+				'id'                => 'acme_quantity',
+				'field_name'        => 'acme_settings[quantity]',
+				'title'             => 'Quantity',
+				'type'              => 'number',
+				'custom_attributes' => array( 'step' => 1 ),
+			),
+			array(
+				'id'    => 'acme_enabled',
+				'title' => 'Enabled',
+				'type'  => 'checkbox',
+			),
+			array(
+				'id'      => 'acme_methods',
+				'title'   => 'Methods',
+				'type'    => 'multiselect',
+				'options' => array(
+					'card' => 'Card',
+					'link' => 'Link',
+				),
+			),
+			array(
+				'id'    => 'acme_start',
+				'title' => 'Starts',
+				'type'  => 'datetime-local',
+			),
+		);
+		$option_names      = array( 'acme_settings', 'acme_enabled', 'acme_methods', 'acme_start' );
+
+		update_option(
+			'acme_settings',
+			array(
+				'quantity' => '02',
+				'other'    => 'keep',
+			)
+		);
+		update_option( 'acme_enabled', 'yes' );
+		update_option( 'acme_methods', array( 'card' ) );
+		update_option( 'acme_start', '2026-08-03T12:30' );
+		update_option( 'timezone_string', 'America/New_York' );
+
+		$captured = array();
+		$listener = static function ( $value, $option, $raw_value ) use ( &$captured ) {
+			$captured[ $option['id'] ] = $raw_value;
+			return $value;
+		};
+		add_filter( 'woocommerce_admin_settings_sanitize_option', $listener, 10, 3 );
+
+		try {
+			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-settings.php';
+			$schema = SettingsUISchema::from_legacy_settings( 'acme', '', 'Acme', $settings );
+			$post   = $this->get_schema_post_data(
+				$schema,
+				array(
+					'acme_quantity' => '3',
+					'acme_enabled'  => 'no',
+					'acme_methods'  => array( 'card', 'link' ),
+					'acme_start'    => '2026-08-03T13:45:00',
+				)
+			);
+
+			$this->assertTrue( \WC_Admin_Settings::save_fields( $settings, $post ) );
+			$this->clear_option_caches( $option_names );
+
+			$this->assertSame(
+				array(
+					'acme_settings' => array( 'quantity' => '3' ),
+					'acme_enabled'  => 'no',
+					'acme_methods'  => array( 'card', 'link' ),
+					'acme_start'    => '2026-08-03T13:45:00',
+				),
+				$post
+			);
+			$this->assertSame( '3', $captured['acme_quantity'] );
+			$this->assertSame( 'no', $captured['acme_enabled'] );
+			$this->assertSame( array( 'card', 'link' ), $captured['acme_methods'] );
+			$this->assertSame( '2026-08-03T13:45:00', $captured['acme_start'] );
+			$this->assertSame(
+				array(
+					'quantity' => '3',
+					'other'    => 'keep',
+				),
+				get_option( 'acme_settings' )
+			);
+			$this->assertSame( 'no', get_option( 'acme_enabled' ) );
+			$this->assertSame( array( 'card', 'link' ), get_option( 'acme_methods' ) );
+			$this->assertSame( '2026-08-03T13:45:00', get_option( 'acme_start' ) );
+			$this->assertSame( maybe_serialize( get_option( 'acme_settings' ) ), $this->get_raw_option_value( 'acme_settings' ) );
+			$this->assertSame( maybe_serialize( get_option( 'acme_methods' ) ), $this->get_raw_option_value( 'acme_methods' ) );
+		} finally {
+			remove_filter( 'woocommerce_admin_settings_sanitize_option', $listener, 10 );
+			update_option( 'timezone_string', $original_timezone );
+			foreach ( $option_names as $option_name ) {
+				delete_option( $option_name );
+			}
+		}
+	}
+
+	/**
+	 * @testdox It preserves valid native form values and accepts explicit original representations.
+	 */
+	public function test_canonicalize_schema_values_preserves_native_form_representations(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_schema_values' );
+
+		$schema = SettingsUISchema::canonicalize_schema_values(
+			$this->get_native_schema_with_fields(
+				array(
+					array(
+						'id'    => 'acme_quantity',
+						'label' => 'Quantity',
+						'type'  => 'number',
+						'value' => '02',
+						'save'  => array(
+							'adapter' => 'form_post',
+							'name'    => 'acme_quantity',
+						),
+					),
+					array(
+						'id'      => 'acme_methods',
+						'label'   => 'Methods',
+						'type'    => 'array',
+						'value'   => array( 1 ),
+						'options' => array(
+							array(
+								'label' => 'One',
+								'value' => '1',
+							),
+						),
+						'save'    => array(
+							'adapter'      => 'form_post',
+							'name'         => 'acme_methods',
+							'initialValue' => array( 'legacy-one' ),
+						),
+					),
+				)
+			)
+		);
+
+		$fields = $schema['groups']['main']['fields'];
+		$this->assertSame( 2, $fields[0]['value'] );
+		$this->assertSame( '02', $fields[0]['save']['initialValue'] );
+		$this->assertSame( array( '1' ), $fields[1]['value'] );
+		$this->assertSame( array( 'legacy-one' ), $fields[1]['save']['initialValue'] );
+	}
+
+	/**
 	 * @testdox It accepts every field type supported by the current renderer.
 	 *
 	 * @dataProvider supported_field_types
@@ -1600,6 +1799,133 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 					'fields' => $fields,
 				),
 			),
+		);
+	}
+
+	/**
+	 * Get a legacy numeric field used by save-pipeline tests.
+	 *
+	 * @return array
+	 */
+	private function get_numeric_save_settings(): array {
+		return array(
+			array(
+				'id'                => 'acme_quantity',
+				'title'             => 'Quantity',
+				'type'              => 'number',
+				'custom_attributes' => array( 'step' => 1 ),
+			),
+		);
+	}
+
+	/**
+	 * Build classic POST data from schema fields and optional edited values.
+	 *
+	 * @param array $schema Settings UI schema.
+	 * @param array $edited_form_values Serialized values changed by the client, keyed by field id.
+	 * @return array
+	 */
+	private function get_schema_post_data( array $schema, array $edited_form_values = array() ): array {
+		$post = array();
+
+		foreach ( $schema['groups'] as $group ) {
+			foreach ( $group['fields'] as $field ) {
+				if ( 'form_post' !== ( $field['save']['adapter'] ?? null ) ) {
+					continue;
+				}
+
+				if ( array_key_exists( $field['id'], $edited_form_values ) ) {
+					$form_value = $edited_form_values[ $field['id'] ];
+				} elseif ( array_key_exists( 'initialValue', $field['save'] ) ) {
+					$form_value = $field['save']['initialValue'];
+				} else {
+					continue;
+				}
+
+				$name = $field['save']['name'] ?? $field['id'];
+				if ( preg_match( '/^([^\[\]]+)\[([^\[\]]+)\]$/', $name, $matches ) ) {
+					$post[ $matches[1] ][ $matches[2] ] = $form_value;
+				} else {
+					$post[ $name ] = $form_value;
+				}
+			}
+		}
+
+		return $post;
+	}
+
+	/**
+	 * Save fields while capturing global and option-specific sanitizer inputs.
+	 *
+	 * @param array  $settings Legacy settings definitions.
+	 * @param array  $post Schema-derived POST data.
+	 * @param string $option_name Option name.
+	 * @return array
+	 */
+	private function save_fields_and_capture( array $settings, array $post, string $option_name ): array {
+		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-settings.php';
+
+		$captured = array();
+		$global   = static function ( $value, $option, $raw_value ) use ( &$captured ) {
+			unset( $option );
+			$captured['global'] = array(
+				'raw'       => $raw_value,
+				'sanitized' => $value,
+			);
+			return $value;
+		};
+		$specific = static function ( $value, $option, $raw_value ) use ( &$captured ) {
+			unset( $option );
+			$captured['specific'] = array(
+				'raw'       => $raw_value,
+				'sanitized' => $value,
+			);
+			return $value;
+		};
+
+		add_filter( 'woocommerce_admin_settings_sanitize_option', $global, 10, 3 );
+		add_filter( 'woocommerce_admin_settings_sanitize_option_' . $option_name, $specific, 10, 3 );
+
+		try {
+			$this->assertTrue( \WC_Admin_Settings::save_fields( $settings, $post ) );
+		} finally {
+			remove_filter( 'woocommerce_admin_settings_sanitize_option', $global, 10 );
+			remove_filter( 'woocommerce_admin_settings_sanitize_option_' . $option_name, $specific, 10 );
+		}
+
+		$this->clear_option_caches( array( $option_name ) );
+
+		return $captured;
+	}
+
+	/**
+	 * Clear option caches before persistence assertions.
+	 *
+	 * @param string[] $option_names Option names.
+	 */
+	private function clear_option_caches( array $option_names ): void {
+		foreach ( $option_names as $option_name ) {
+			wp_cache_delete( $option_name, 'options' );
+		}
+
+		wp_cache_delete( 'alloptions', 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
+	}
+
+	/**
+	 * Read an option's raw database representation.
+	 *
+	 * @param string $option_name Option name.
+	 * @return string|null
+	 */
+	private function get_raw_option_value( string $option_name ): ?string {
+		global $wpdb;
+
+		return $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
+				$option_name
+			)
 		);
 	}
 }
