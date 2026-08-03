@@ -507,7 +507,7 @@ final class OrderWithdrawalFormProcessor {
 
 			$note->save();
 		} catch ( Throwable $e ) {
-			$this->log_inbox_note_error( $e );
+			$this->log_inbox_note_error( $e, $matched_order->get_id() );
 		}
 	}
 
@@ -532,7 +532,7 @@ final class OrderWithdrawalFormProcessor {
 		try {
 			Notes::delete_notes_with_name( self::INBOX_NOTE_NAME_PREFIX . 'order-' . $order_id );
 		} catch ( Throwable $e ) {
-			$this->log_inbox_note_error( $e );
+			$this->log_inbox_note_error( $e, $order_id );
 		}
 	}
 
@@ -778,11 +778,12 @@ final class OrderWithdrawalFormProcessor {
 	/**
 	 * Log an inbox note failure without failing the submission.
 	 *
-	 * @param Throwable $e Inbox note error.
+	 * @param Throwable $e        Inbox note error.
+	 * @param int       $order_id Order ID.
 	 */
-	private function log_inbox_note_error( Throwable $e ): void {
+	private function log_inbox_note_error( Throwable $e, int $order_id ): void {
 		wc_get_logger()->warning(
-			sprintf( 'Order withdrawal inbox note could not be created. Error: %s', $e->getMessage() ),
+			sprintf( 'Order withdrawal inbox note could not be processed for order %1$d. Error: %2$s', $order_id, $e->getMessage() ),
 			array( 'source' => self::LOGGER_SOURCE )
 		);
 	}
