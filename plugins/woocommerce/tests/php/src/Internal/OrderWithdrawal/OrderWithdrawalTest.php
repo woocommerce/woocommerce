@@ -601,9 +601,13 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertNotEmpty( $error_notices, 'Email failures should add an error notice.' );
 			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $error_notices[0]['notice'], 'The error notice should tell the user the submission did not complete.' );
 			$this->assertFalse( $this->order_has_note_containing( $order, 'Order withdrawal requested' ), 'Email failures should not add a retryable request to the order notes.' );
+
+			$updated_order = wc_get_order( $order->get_id() );
+
+			$this->assertInstanceOf( WC_Order::class, $updated_order, 'The matched order should still exist.' );
 			$this->assertNotSame(
 				'yes',
-				$order->get_meta( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, true, 'edit' ),
+				$updated_order->get_meta( self::ORDER_WITHDRAWAL_REQUESTED_META_KEY, true, 'edit' ),
 				'Email failures should not mark the matched order as having a withdrawal request.'
 			);
 			$this->assertCount( 0, $this->get_created_inbox_note_ids(), 'Email failures should not create merchant inbox notifications.' );
