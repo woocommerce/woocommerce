@@ -254,7 +254,10 @@ trait Woo_Analytics_Trait {
 	}
 
 	/**
-	 * Default event properties which should be included with all events.
+	 * Request-scoped — not for page output, see `get_page_common_properties()`.
+	 *
+	 * Default event properties for events the server fires itself on an uncached
+	 * request. See `WC_Analytics_Tracking::get_common_properties()`.
 	 *
 	 * @return array Array of standard event props.
 	 */
@@ -275,6 +278,28 @@ trait Woo_Analytics_Trait {
 		);
 
 		return $properties;
+	}
+
+	/**
+	 * Default event properties for the client, excluding anything derived from
+	 * the current request.
+	 *
+	 * Used for the properties embedded in front-end page HTML, which is cached
+	 * and replayed to later visitors. See
+	 * `WC_Analytics_Tracking::get_page_common_properties()`.
+	 *
+	 * @since 0.16.7
+	 *
+	 * @return array Array of standard event props.
+	 */
+	public function get_page_common_properties() {
+		$common_properties = WC_Analytics_Tracking::get_page_common_properties();
+
+		/** This filter is documented in src/class-woo-analytics-trait.php */
+		return apply_filters(
+			'jetpack_woocommerce_analytics_event_props',
+			$common_properties
+		);
 	}
 
 	/**
@@ -604,9 +629,48 @@ trait Woo_Analytics_Trait {
 	 * - For regular pages, it builds the breadcrumb from the page's ancestors, ordered from top-level to current.
 	 * - For all other cases, it returns the current page's title.
 	 *
+	 * Titles are capped before being returned; see `cap_page_string()`.
+	 *
 	 * @return array The breadcrumb trail as an array of titles.
 	 */
 	private function get_breadcrumb_titles() {
+		return array_map( array( $this, 'cap_page_string' ), $this->build_breadcrumb_titles() );
+	}
+
+	/**
+	 * Limit the length of a caller-influenced string bound for the page output.
+	 *
+	 * Breadcrumb titles come from `post_title`, which core does not bound, so this
+	 * is their only limit. The search term is already blanked by
+	 * `WP_Query::parse_query()` above 1600 bytes; capping it further keeps the
+	 * search pixel URL, which carries the term twice, from being rejected outright.
+	 *
+	 * Truncated values keep an ellipsis so they stay distinguishable downstream
+	 * from a value that genuinely ended at the limit.
+	 *
+	 * @since 0.16.7
+	 *
+	 * @param string $value The value bound for the page output.
+	 * @return string The value, truncated if it exceeded the limit.
+	 */
+	private function cap_page_string( $value ) {
+		$max_length = 200;
+
+		$value = (string) $value;
+
+		if ( mb_strlen( $value ) <= $max_length ) {
+			return $value;
+		}
+
+		return mb_substr( $value, 0, $max_length - 1 ) . '…';
+	}
+
+	/**
+	 * Build the uncapped breadcrumb trail. See `get_breadcrumb_titles()`.
+	 *
+	 * @return array The breadcrumb trail as an array of titles.
+	 */
+	private function build_breadcrumb_titles() {
 		if ( is_front_page() ) {
 			return array( __( 'Home', 'woocommerce-analytics' ) );
 		}

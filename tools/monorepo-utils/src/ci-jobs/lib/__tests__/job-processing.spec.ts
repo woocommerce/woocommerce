@@ -1593,64 +1593,118 @@ describe( 'Job Processing', () => {
 			);
 		} );
 
-		it.each( [ [ [] ], [ [ '--sharding=1/1' ] ] ] )(
-			'should not create sharded jobs for shards',
-			async ( shardingArguments ) => {
-				const jobs = getShardedJobs(
-					{
-						projectName: 'test',
-						projectPath: 'test',
-						name: 'Default',
-						command: 'test-cmd',
-						shardNumber: 0,
-						testEnv: {
-							shouldCreate: false,
-							envVars: {},
-						},
-						optional: false,
-						testType: 'e2e',
-						report: {
-							resultsBlobName: 'blob-name',
-							resultsPath: 'results-path',
-							allure: false,
-						},
-					},
-					{
-						type: JobType.Test,
-						testType: 'e2e',
-						name: 'Default',
-						shardingArguments,
-						events: [],
-						changes: [ /test.js$/ ],
-						command: 'test-cmd',
-						report: {
-							resultsBlobName: 'blob-name',
-							resultsPath: 'results-path',
-							allure: false,
-						},
-					}
-				);
-
-				expect( jobs ).toHaveLength( 1 );
-				expect( jobs ).toContainEqual( {
+		it( 'should not create sharded jobs when there are no sharding arguments', async () => {
+			const jobs = getShardedJobs(
+				{
 					projectName: 'test',
 					projectPath: 'test',
 					name: 'Default',
 					command: 'test-cmd',
 					shardNumber: 0,
-					optional: false,
-					testType: 'e2e',
 					testEnv: {
 						shouldCreate: false,
 						envVars: {},
 					},
+					optional: false,
+					testType: 'e2e',
 					report: {
 						resultsBlobName: 'blob-name',
 						resultsPath: 'results-path',
 						allure: false,
 					},
-				} );
-			}
-		);
+				},
+				{
+					type: JobType.Test,
+					testType: 'e2e',
+					name: 'Default',
+					shardingArguments: [],
+					events: [],
+					changes: [ /test.js$/ ],
+					command: 'test-cmd',
+					report: {
+						resultsBlobName: 'blob-name',
+						resultsPath: 'results-path',
+						allure: false,
+					},
+				}
+			);
+
+			expect( jobs ).toHaveLength( 1 );
+			expect( jobs ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd',
+				shardNumber: 0,
+				optional: false,
+				testType: 'e2e',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				report: {
+					resultsBlobName: 'blob-name',
+					resultsPath: 'results-path',
+					allure: false,
+				},
+			} );
+		} );
+
+		it( 'should apply a single sharding argument as one job without an N/M suffix', async () => {
+			const jobs = getShardedJobs(
+				{
+					projectName: 'test',
+					projectPath: 'test',
+					name: 'Default',
+					command: 'test-cmd',
+					shardNumber: 0,
+					testEnv: {
+						shouldCreate: false,
+						envVars: {},
+					},
+					optional: false,
+					testType: 'e2e',
+					report: {
+						resultsBlobName: 'blob-name',
+						resultsPath: 'results-path',
+						allure: false,
+					},
+				},
+				{
+					type: JobType.Test,
+					testType: 'e2e',
+					name: 'Default',
+					shardingArguments: [ '--shard-arg-1' ],
+					events: [],
+					changes: [ /test.js$/ ],
+					command: 'test-cmd',
+					report: {
+						resultsBlobName: 'blob-name',
+						resultsPath: 'results-path',
+						allure: false,
+					},
+				}
+			);
+
+			expect( jobs ).toHaveLength( 1 );
+			expect( jobs ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd --shard-arg-1',
+				shardNumber: 0,
+				optional: false,
+				testType: 'e2e',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				report: {
+					resultsBlobName: 'blob-name',
+					resultsPath: 'results-path',
+					allure: false,
+				},
+			} );
+		} );
 	} );
 } );

@@ -49,7 +49,7 @@ export const useCustomerEffortScoreModal = () => {
 			? rawShownForActions
 			: [];
 
-		updateOptions( {
+		void updateOptions( {
 			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
 				action,
 				...shownForActionsOption,
@@ -66,7 +66,7 @@ export const useCustomerEffortScoreModal = () => {
 		_showCesModal( surveyProps, props, onSubmitNoticeProps, tracksProps );
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore We don't have type definitions for this.
-		markCesAsShown( surveyProps.action );
+		void markCesAsShown( surveyProps.action );
 	};
 
 	return {

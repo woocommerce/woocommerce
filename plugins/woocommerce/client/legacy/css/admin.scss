@@ -3618,6 +3618,15 @@ body.woocommerce_page_wc-orders {
 			}
 		}
 
+		// Hide the small-screen date/status copies when the corresponding column is hidden via Screen Options.
+		&:has( thead th.column-order_date.hidden ) .order_date.small-screen-only {
+			display: none;
+		}
+
+		&:has( thead th.column-order_status.hidden ) .order_status.small-screen-only {
+			display: none;
+		}
+
 	}
 }
 
@@ -4000,6 +4009,13 @@ mark.notice {
 	background: #fff;
 	color: $red;
 	margin: 0 0 0 10px;
+}
+
+// Mirrors the WP core rule for #lost-connection-notice.
+#wc-lost-connection-notice .spinner {
+	visibility: visible;
+	float: left;
+	margin: 0 5px 0 0;
 }
 
 a.export_rates,
@@ -5344,7 +5360,8 @@ img.help_tip {
 			padding-right: 24px;
 		}
 
-		th label {
+		th label,
+		th .wc-settings-radio-title {
 			position: relative;
 			display: block;
 
@@ -5557,7 +5574,8 @@ img.help_tip {
 				}
 			}
 
-			th label {
+			th label,
+			th .wc-settings-radio-title {
 				img.help_tip,
 				.woocommerce-help-tip {
 					margin: -7px -24px 0 0;
@@ -7288,7 +7306,7 @@ img.ui-datepicker-trigger {
 								margin: 0 10px 0 0;
 								background: transparent;
 								border: 0;
-								color: #777;
+								color: $wp-admin-text-gray;
 								text-align: center;
 								box-shadow: none;
 
@@ -8031,6 +8049,17 @@ table.bar_chart {
 
 	.select2-container {
 		width: 100% !important;
+	}
+
+	// Reserve room for the clear (x) and chevron icons; .select2-container keeps this rule above the later global 24px padding.
+	.select2-container .select2-selection--single {
+		.select2-selection__rendered {
+			padding-right: 40px;
+		}
+
+		.select2-selection__clear {
+			margin-right: 18px;
+		}
 	}
 }
 

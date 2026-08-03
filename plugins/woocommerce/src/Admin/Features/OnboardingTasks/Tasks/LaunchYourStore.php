@@ -29,6 +29,24 @@ class LaunchYourStore extends Task {
 	}
 
 	/**
+	 * Contextual image URL.
+	 *
+	 * @return string
+	 */
+	public function get_image_url() {
+		return WC()->plugin_url() . '/assets/images/task_list/launch-your-store-illustration.svg';
+	}
+
+	/**
+	 * Alt text for the contextual image.
+	 *
+	 * @return string
+	 */
+	public function get_image_alt() {
+		return __( 'Launch your store illustration', 'woocommerce' );
+	}
+
+	/**
 	 * Title.
 	 *
 	 * @return string
