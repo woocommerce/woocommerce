@@ -85,6 +85,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 				name: 'Filter products by minimum price',
 			} )
 		).toBeVisible();
+		await expect( page.getByPlaceholder( 'Select Color' ) ).toBeVisible();
 		await expect(
 			page.getByRole( 'checkbox', { name: 'Small' } )
 		).toBeVisible();
@@ -95,5 +96,12 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		await page.getByRole( 'checkbox', { name: 'Out of Stock' } ).click();
 
 		await expect( products ).toHaveCount( 1 );
+		await expect(
+			page.getByRole( 'heading', { name: 'Active filters' } )
+		).toBeVisible();
+		await expect( page.getByText( 'Stock Status:' ) ).toBeVisible();
+		await expect(
+			page.getByRole( 'button', { name: 'Clear All Filters' } )
+		).toBeVisible();
 	} );
 } );
