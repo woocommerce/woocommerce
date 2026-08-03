@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fail closed when a declared settings component is not registered and offer a request-only classic settings reload.
