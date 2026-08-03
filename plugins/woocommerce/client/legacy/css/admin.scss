@@ -3618,6 +3618,15 @@ body.woocommerce_page_wc-orders {
 			}
 		}
 
+		// Hide the small-screen date/status copies when the corresponding column is hidden via Screen Options.
+		&:has( thead th.column-order_date.hidden ) .order_date.small-screen-only {
+			display: none;
+		}
+
+		&:has( thead th.column-order_status.hidden ) .order_status.small-screen-only {
+			display: none;
+		}
+
 	}
 }
 
@@ -7297,7 +7306,7 @@ img.ui-datepicker-trigger {
 								margin: 0 10px 0 0;
 								background: transparent;
 								border: 0;
-								color: #777;
+								color: $wp-admin-text-gray;
 								text-align: center;
 								box-shadow: none;
 
@@ -8040,6 +8049,17 @@ table.bar_chart {
 
 	.select2-container {
 		width: 100% !important;
+	}
+
+	// Reserve room for the clear (x) and chevron icons; .select2-container keeps this rule above the later global 24px padding.
+	.select2-container .select2-selection--single {
+		.select2-selection__rendered {
+			padding-right: 40px;
+		}
+
+		.select2-selection__clear {
+			margin-right: 18px;
+		}
 	}
 }
 
