@@ -24,7 +24,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	private const FLUSH_QUEUE_OPTION                  = 'woocommerce_queue_flush_rewrite_rules';
 	private const MISSING_OPTION_MARK                 = '__woocommerce_order_withdrawal_missing_option__';
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
-	private const INBOX_NOTE_NAME_PREFIX              = 'wc-order-withdrawal-requested-';
+	private const INBOX_NOTE_NAME_PREFIX              = 'wc-order-withdrawal-requested-order-';
 	private const RATE_LIMIT_PREFIX                   = 'order_withdrawal_';
 	private const ORDER_NOTE_WITHDRAWAL_REQUESTED     = 'Order withdrawal requested. Withdrawal type: Specific items only.';
 
@@ -482,7 +482,8 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertInstanceOf( Note::class, $note, 'The merchant inbox notification should be readable.' );
 			$this->assertSame( Note::E_WC_ADMIN_NOTE_INFORMATIONAL, $note->get_type(), 'The inbox notification should be informational.' );
 			$this->assertSame( Note::E_WC_ADMIN_NOTE_UNACTIONED, $note->get_status(), 'The inbox notification should start unactioned.' );
-			$this->assertSame( sprintf( 'Withdraw order request for #%s', $order->get_order_number() ), $note->get_title(), 'The inbox notification should have the expected title.' );
+			$this->assertSame( sprintf( 'Order withdrawal request for #%s', $order->get_order_number() ), $note->get_title(), 'The inbox notification should have the expected title.' );
+			$this->assertStringContainsString( sprintf( 'order #%s', $order->get_order_number() ), $note->get_content(), 'The inbox notification should consistently prefix the order number.' );
 			$this->assertStringContainsString( (string) $order->get_order_number(), $note->get_content(), 'The inbox notification should include the order number.' );
 			$this->assertStringContainsString( 'Review the matched order to confirm the request details.', $note->get_content(), 'The inbox notification should direct merchants to the matched order.' );
 			$this->assertStringNotContainsString( 'Jane Doe', $note->get_content(), 'The inbox notification should not include the customer name.' );
@@ -533,7 +534,6 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	public function test_delete_order_withdrawal_inbox_note_for_order_deletes_matched_inbox_note(): void {
 		$order   = $this->create_order_for_form_data();
 		$capture = $this->capture_wp_mail();
-		add_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
 
 		try {
 			$this->prepare_post_request(
@@ -547,12 +547,44 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 			$this->assertCount( 1, $note_ids, 'A matched submission should create one merchant inbox notification.' );
 
-			$order->delete( true );
+			$this->sut->delete_order_withdrawal_inbox_note_for_order( $order );
 
-			$this->assertCount( 0, $this->get_created_inbox_note_ids(), 'Deleting the order should remove the associated merchant inbox notification.' );
+			$this->assertCount( 0, $this->get_created_inbox_note_ids(), 'Cleaning up the order should remove the associated merchant inbox notification.' );
 		} finally {
-			remove_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
 			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Should not delete a merchant inbox notification for a non-order post ID.
+	 */
+	public function test_delete_order_withdrawal_inbox_note_for_order_ignores_non_order_post_ids(): void {
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Not an order',
+				'post_status' => 'publish',
+				'post_type'   => 'post',
+			)
+		);
+
+		$this->assertIsInt( $post_id, 'The test post should be created.' );
+
+		$note_name = self::INBOX_NOTE_NAME_PREFIX . $post_id;
+		$note      = new Note();
+		$note->set_title( 'Order withdrawal request for non-order post' );
+		$note->set_content( 'This note should not be deleted.' );
+		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+		$note->set_name( $note_name );
+		$note->set_source( 'woocommerce-admin' );
+		$note->save();
+
+		try {
+			$this->sut->delete_order_withdrawal_inbox_note_for_order( $post_id );
+
+			$this->assertInstanceOf( Note::class, Notes::get_note_by_name( $note_name ), 'Non-order post deletion should not delete matching inbox notes.' );
+		} finally {
+			Notes::delete_notes_with_name( $note_name );
+			wp_delete_post( $post_id, true );
 		}
 	}
 
@@ -950,7 +982,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$note_ids = array();
 
 		foreach ( $this->created_order_ids as $order_id ) {
-			$note = Notes::get_note_by_name( self::INBOX_NOTE_NAME_PREFIX . 'order-' . $order_id );
+			$note = Notes::get_note_by_name( self::INBOX_NOTE_NAME_PREFIX . $order_id );
 
 			if ( $note instanceof Note ) {
 				$note_ids[] = $note->get_id();
@@ -967,7 +999,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$note_names = array();
 
 		foreach ( $this->created_order_ids as $order_id ) {
-			$note_names[] = self::INBOX_NOTE_NAME_PREFIX . 'order-' . $order_id;
+			$note_names[] = self::INBOX_NOTE_NAME_PREFIX . $order_id;
 		}
 
 		if ( ! empty( $note_names ) ) {

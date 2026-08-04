@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Throwable;
 use WC_Geolocation;
 use WC_Order;
@@ -39,7 +40,7 @@ final class OrderWithdrawalFormProcessor {
 	private const LOGGER_SOURCE                       = 'order-withdrawal';
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
 	private const ORDER_WITHDRAWAL_REQUESTED_VALUE    = 'yes';
-	private const INBOX_NOTE_NAME_PREFIX              = 'wc-order-withdrawal-requested-';
+	private const INBOX_NOTE_NAME_PREFIX              = 'wc-order-withdrawal-requested-order-';
 	private const RATE_LIMIT_IP_PREFIX                = 'order_withdrawal_ip_';
 	private const RATE_LIMIT_EMAIL_PREFIX             = 'order_withdrawal_email_';
 	private const RATE_LIMIT_DELAY                    = MINUTE_IN_SECONDS / 2;
@@ -484,19 +485,19 @@ final class OrderWithdrawalFormProcessor {
 			$note->set_title(
 				sprintf(
 					/* translators: %s: order number. */
-					__( 'Withdraw order request for #%s', 'woocommerce' ),
+					__( 'Order withdrawal request for #%s', 'woocommerce' ),
 					$matched_order->get_order_number()
 				)
 			);
 			$note->set_content(
 				sprintf(
 				/* translators: %s: order number. */
-					__( 'A customer submitted a withdrawal request for order %s. Review the matched order to confirm the request details.', 'woocommerce' ),
+					__( 'A customer submitted an order withdrawal request for order #%s. Review the matched order to confirm the request details.', 'woocommerce' ),
 					$matched_order->get_order_number()
 				)
 			);
 			$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-			$note->set_name( self::INBOX_NOTE_NAME_PREFIX . 'order-' . $matched_order->get_id() );
+			$note->set_name( self::INBOX_NOTE_NAME_PREFIX . $matched_order->get_id() );
 			$note->set_source( 'woocommerce-admin' );
 
 			$order_url = $matched_order->get_edit_order_url();
@@ -520,6 +521,10 @@ final class OrderWithdrawalFormProcessor {
 		if ( $order instanceof WC_Order ) {
 			$order_id = $order->get_id();
 		} elseif ( is_int( $order ) ) {
+			if ( ! OrderUtil::is_order( $order ) ) {
+				return;
+			}
+
 			$order_id = $order;
 		} else {
 			return;
@@ -530,7 +535,7 @@ final class OrderWithdrawalFormProcessor {
 		}
 
 		try {
-			Notes::delete_notes_with_name( self::INBOX_NOTE_NAME_PREFIX . 'order-' . $order_id );
+			Notes::delete_notes_with_name( self::INBOX_NOTE_NAME_PREFIX . $order_id );
 		} catch ( Throwable $e ) {
 			$this->log_inbox_note_error( $e, $order_id );
 		}
