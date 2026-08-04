@@ -176,6 +176,11 @@ class SingleProduct extends \WP_UnitTestCase {
 				$markup,
 				'Password-protected products should not render block content.'
 			);
+			$this->assertStringNotContainsString(
+				'?product=' . $product->get_slug(),
+				$markup,
+				'Password form should redirect to the current page instead of the product page.'
+			);
 		} finally {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}

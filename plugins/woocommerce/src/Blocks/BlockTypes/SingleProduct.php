@@ -194,7 +194,20 @@ class SingleProduct extends AbstractBlock {
 		$product_id = $product->get_id();
 
 		if ( post_password_required( $product_id ) ) {
-			return get_the_password_form( $product_id );
+			$password_form = get_the_password_form( $product_id );
+			$html          = new \WP_HTML_Tag_Processor( $password_form );
+			$current_url   = home_url( add_query_arg( null, null ) );
+
+			while ( $html->next_tag( array( 'tag_name' => 'input' ) ) ) {
+				if ( 'redirect_to' !== $html->get_attribute( 'name' ) ) {
+					continue;
+				}
+
+				$html->set_attribute( 'value', $current_url );
+				break;
+			}
+
+			return $html->get_updated_html();
 		}
 
 		// Load product into the shared products store.
