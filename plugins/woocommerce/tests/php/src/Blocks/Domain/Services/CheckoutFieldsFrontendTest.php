@@ -62,6 +62,8 @@ class CheckoutFieldsFrontendTest extends TestCase {
 			__internal_woocommerce_blocks_deregister_checkout_field( $field_id );
 		}
 		$this->registered_fields = [];
+
+		parent::tearDown();
 	}
 
 	/**
