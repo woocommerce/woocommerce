@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AmazonPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Antom;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Eway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\GoCardless;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Helcim;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\HelioPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Klarna;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\KlarnaCheckout;
@@ -132,6 +133,7 @@ class PaymentsProviders {
 		'airwallex_*'                 => Airwallex::class,
 		'vivawallet*'                 => Vivacom::class,
 		'tilopay'                     => Tilopay::class,
+		'helcimjs'                    => Helcim::class,
 		'helio'                       => HelioPay::class,
 		'paytrail'                    => Paytrail::class,
 		'monei'                       => Monei::class,
@@ -172,6 +174,7 @@ class PaymentsProviders {
 		ExtensionSuggestions::AIRWALLEX         => Airwallex::class,
 		ExtensionSuggestions::VIVA_WALLET       => Vivacom::class,
 		ExtensionSuggestions::TILOPAY           => Tilopay::class,
+		ExtensionSuggestions::HELCIM            => Helcim::class,
 		ExtensionSuggestions::HELIOPAY          => HelioPay::class,
 		ExtensionSuggestions::PAYTRAIL          => Paytrail::class,
 		ExtensionSuggestions::MONEI             => Monei::class,
