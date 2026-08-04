@@ -392,6 +392,34 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not resolve the Settings UI schema while determining script dependencies.
+	 */
+	public function test_settings_ui_script_dependencies_preserve_schema_filter_timing(): void {
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		$page = $this->get_settings_ui_test_page();
+		$this->set_current_settings_page_request( $page );
+
+		$schema_filter_calls = 0;
+		$schema_filter       = static function ( array $settings ) use ( &$schema_filter_calls ): array {
+			++$schema_filter_calls;
+			return $settings;
+		};
+		add_filter( 'woocommerce_get_settings_settings_ui_flag_test', $schema_filter );
+
+		try {
+			$dependencies = $this->invoke_private_method( new WCAdminAssets(), 'get_settings_ui_script_dependencies' );
+
+			$this->assertContains( 'wc-settings-ui', $dependencies );
+			$this->assertSame( 0, $schema_filter_calls, 'Asset dependency resolution should not move public settings filters earlier in the request.' );
+
+			SettingsUIRequestContext::for_settings_page( $page, '' )->get_schema();
+			$this->assertSame( 1, $schema_filter_calls, 'The settings filter should still run when the schema is requested.' );
+		} finally {
+			remove_filter( 'woocommerce_get_settings_settings_ui_flag_test', $schema_filter );
+		}
+	}
+
+	/**
 	 * @testdox Should enqueue matching Settings UI styles once for a resolved context.
 	 */
 	public function test_settings_ui_style_is_enqueued_once_for_a_resolved_context(): void {
@@ -453,28 +481,18 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not enqueue Settings UI styles when shell prerequisites fail.
+	 * @testdox Should not enqueue Settings UI styles when script handles fail.
 	 */
-	public function test_settings_ui_style_is_not_enqueued_for_fallback_contexts(): void {
+	public function test_settings_ui_style_is_not_enqueued_when_script_handles_fail(): void {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
-
-		$fallback_pages = array(
-			'script handles' => $this->get_settings_ui_test_page_with_failing_script_handles(),
-			'schema'         => $this->get_settings_ui_test_page_with_failing_schema(),
-		);
-		$this->set_current_settings_page_request( reset( $fallback_pages ), 'advanced' );
+		$this->set_current_settings_page_request( $this->get_settings_ui_test_page_with_failing_script_handles(), 'advanced' );
 
 		$assets = new WCAdminAssets();
 		$assets->register_scripts();
+		$dependencies = $this->invoke_private_method( $assets, 'get_settings_ui_script_dependencies' );
+		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
 
-		foreach ( $fallback_pages as $failure => $page ) {
-			$this->set_current_settings_page_request( $page, 'advanced' );
-			$dependencies = $this->invoke_private_method( $assets, 'get_settings_ui_script_dependencies' );
-			$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
-
-			$this->assertFalse( wp_style_is( 'wc-settings-ui', 'enqueued' ), "A {$failure} failure should keep the Settings UI stylesheet out of the queue." );
-			SettingsUIRequestContext::reset();
-		}
+		$this->assertFalse( wp_style_is( 'wc-settings-ui', 'enqueued' ), 'A script handle failure should keep the Settings UI stylesheet out of the queue.' );
 	}
 
 	/**

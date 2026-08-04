@@ -448,9 +448,6 @@ class WCAdminAssets {
 			if ( ! $context || $context->has_script_handles_failed() ) {
 				return array();
 			}
-			if ( null === $context->get_schema() || $context->has_schema_failed() ) {
-				return array();
-			}
 
 			$dependencies = array_merge(
 				array( 'wc-settings-ui' ),
