@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\DataStore as NotesDataStore;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Throwable;
@@ -135,6 +136,11 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 			return true;
 		}
 
+		/**
+		 * Data store instance.
+		 *
+		 * @var NotesDataStore $data_store
+		 */
 		$data_store = Notes::load_data_store();
 		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
 
