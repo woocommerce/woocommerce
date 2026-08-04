@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Komoju;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
+use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakeKomojuPaymentGateway;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
@@ -203,6 +204,59 @@ class KomojuTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertTrue( $is_test_mode_onboarding );
+	}
+
+	/**
+	 * @testdox is_in_test_mode() reads the key the gateway resolved for itself, in preference to
+	 *          the options we would otherwise read ourselves.
+	 */
+	public function test_is_in_test_mode_prefers_the_key_resolved_by_the_gateway(): void {
+		// Arrange. The option says live, the gateway says test - the gateway must win.
+		update_option( 'komoju_woocommerce_secret_key', 'sk_live_456' );
+		$gateway = new FakeKomojuPaymentGateway( 'komoju' );
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$gateway->secretKey = 'sk_test_123';
+
+		// Act.
+		$is_test_mode = $this->sut->is_in_test_mode( $gateway );
+
+		// Assert.
+		$this->assertTrue( $is_test_mode );
+	}
+
+	/**
+	 * @testdox is_account_connected() returns true from the key the gateway resolved for itself,
+	 *          even when nothing is saved in the options we read as a fallback.
+	 */
+	public function test_is_account_connected_uses_the_key_resolved_by_the_gateway(): void {
+		// Arrange. No options saved, so only the gateway's own key can answer this.
+		$gateway = new FakeKomojuPaymentGateway( 'komoju' );
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$gateway->secretKey = 'sk_live_456';
+
+		// Act.
+		$is_connected = $this->sut->is_account_connected( $gateway );
+
+		// Assert.
+		$this->assertTrue( $is_connected );
+	}
+
+	/**
+	 * @testdox The secret key falls back to the options when the gateway has no resolved key,
+	 *          matching extension versions older than 2.5.0.
+	 */
+	public function test_secret_key_falls_back_to_the_options_for_older_extension_versions(): void {
+		// Arrange. The gateway leaves its key null, the way pre-2.5.0 versions do.
+		update_option( 'komoju_woocommerce_secret_key', 'sk_test_123' );
+		$gateway = new FakeKomojuPaymentGateway( 'komoju' );
+
+		// Act.
+		$is_test_mode = $this->sut->is_in_test_mode( $gateway );
+		$is_connected = $this->sut->is_account_connected( $gateway );
+
+		// Assert.
+		$this->assertTrue( $is_test_mode );
+		$this->assertTrue( $is_connected );
 	}
 
 	/**

@@ -84,7 +84,7 @@ class Komoju extends PaymentGateway {
 		try {
 			// Check for a saved key first. The extension's helper below reports a store with no
 			// key at all as live, but we want that case to stay undetermined so the caller decides.
-			$secret_key = $this->get_secret_key();
+			$secret_key = $this->get_secret_key( $payment_gateway );
 			if ( empty( $secret_key ) ) {
 				return null;
 			}
@@ -127,7 +127,7 @@ class Komoju extends PaymentGateway {
 		try {
 			// KOMOJU doesn't expose a dedicated "is connected" API. It considers the merchant
 			// connected once a secret key is saved.
-			return ! empty( $this->get_secret_key() );
+			return ! empty( $this->get_secret_key( $payment_gateway ) );
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
@@ -144,12 +144,24 @@ class Komoju extends PaymentGateway {
 	}
 
 	/**
-	 * Get the KOMOJU secret key, checking the current global option first and falling back
-	 * to the legacy per-gateway settings array, same as the plugin itself.
+	 * Get the KOMOJU secret key.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
 	 * @return string The secret key, or an empty string if none is saved.
 	 */
-	private function get_secret_key(): string {
+	private function get_secret_key( WC_Payment_Gateway $payment_gateway ): string {
+		// Prefer the key the gateway resolved for itself, so we keep tracking where KOMOJU
+		// sources it from. Its `get_option_compat()` reads the current global option and falls
+		// back to the legacy per-gateway settings array, which is what we reproduce below.
+		if ( isset( $payment_gateway->secretKey ) && is_string( $payment_gateway->secretKey ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			return $payment_gateway->secretKey; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		}
+
+		// The property only exists since extension version 2.5.0, so reproduce its resolution
+		// for older versions. Note that we cannot use the gateway's own `get_option()` here:
+		// it reads `woocommerce_{$id}_settings`, which for the per-method `komoju_*` gateways
+		// is not where the shared key lives.
 		$secret_key = get_option( 'komoju_woocommerce_secret_key' );
 		if ( empty( $secret_key ) ) {
 			$legacy_settings = get_option( 'woocommerce_komoju_settings' );
