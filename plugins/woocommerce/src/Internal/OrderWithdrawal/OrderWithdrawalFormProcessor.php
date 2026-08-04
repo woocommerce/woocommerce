@@ -483,6 +483,16 @@ final class OrderWithdrawalFormProcessor {
 	 */
 	private function add_order_withdrawal_inbox_note( WC_Order $matched_order ): void {
 		try {
+			$content = sprintf(
+				/* translators: %s: order number. */
+				__( 'A customer submitted an order withdrawal request for order #%s. Review the matched order to confirm the request details.', 'woocommerce' ),
+				$matched_order->get_order_number()
+			);
+
+			if ( $this->is_order_outside_withdrawal_window( $matched_order ) ) {
+				$content .= ' ' . $this->get_withdrawal_window_warning_message();
+			}
+
 			$note = new Note();
 			$note->set_title(
 				sprintf(
@@ -491,13 +501,7 @@ final class OrderWithdrawalFormProcessor {
 					$matched_order->get_order_number()
 				)
 			);
-			$note->set_content(
-				sprintf(
-				/* translators: %s: order number. */
-					__( 'A customer submitted an order withdrawal request for order #%s. Review the matched order to confirm the request details.', 'woocommerce' ),
-					$matched_order->get_order_number()
-				)
-			);
+			$note->set_content( $content );
 			$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 			$note->set_name( self::INBOX_NOTE_NAME_PREFIX . $matched_order->get_id() );
 			$note->set_source( 'woocommerce-admin' );
@@ -532,15 +536,15 @@ final class OrderWithdrawalFormProcessor {
 			return;
 		}
 
-		if ( $matched_order instanceof WC_Order ) {
-			if ( $this->is_order_outside_withdrawal_window( $matched_order ) ) {
-				$content .= ' ' . $this->get_withdrawal_window_warning_message();
-			}
-		} else {
-			$content .= ' ' . __( 'WooCommerce could not match this request to an order automatically.', 'woocommerce' );
+		if ( 0 >= $order_id ) {
+			return;
 		}
 
-		return $content;
+		try {
+			Notes::delete_notes_with_name( self::INBOX_NOTE_NAME_PREFIX . $order_id );
+		} catch ( Throwable $e ) {
+			$this->log_inbox_note_error( $e, $order_id );
+		}
 	}
 
 	/**
@@ -568,26 +572,6 @@ final class OrderWithdrawalFormProcessor {
 			self::WITHDRAWAL_WINDOW_IN_DAYS,
 			self::WITHDRAWAL_WINDOW_IN_DAYS
 		);
-	}
-
-	/**
-	 * Get a unique name for the merchant inbox notification.
-	 *
-	 * @param array<string,string> $data          Form data.
-	 * @param WC_Order|null        $matched_order Matched order, if found.
-	 */
-	private function get_inbox_note_name( array $data, ?WC_Order $matched_order ): string {
-		if ( $matched_order instanceof WC_Order ) {
-			return self::INBOX_NOTE_NAME_PREFIX . 'order-' . $matched_order->get_id();
-		if ( 0 >= $order_id ) {
-			return;
-		}
-
-		try {
-			Notes::delete_notes_with_name( self::INBOX_NOTE_NAME_PREFIX . $order_id );
-		} catch ( Throwable $e ) {
-			$this->log_inbox_note_error( $e, $order_id );
-		}
 	}
 
 	/**
