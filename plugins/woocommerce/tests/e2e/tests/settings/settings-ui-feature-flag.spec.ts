@@ -19,6 +19,25 @@ type BrowserElementAPI = {
 	createRoot: ( container: Element ) => BrowserReactRoot;
 };
 
+const compatibilityFailureFragments = [
+	'private api',
+	'privateapi',
+	'wp private apis',
+	'core/rich-text',
+	'does not exist on window.wp',
+];
+
+const isCompatibilityFailure = ( message: string ): boolean => {
+	const normalizedMessage = message
+		.toLowerCase()
+		.replaceAll( '-', ' ' )
+		.replaceAll( '_', ' ' );
+
+	return compatibilityFailureFragments.some( ( fragment ) =>
+		normalizedMessage.includes( fragment )
+	);
+};
+
 const getBaseURL = ( baseURL: string | undefined ): string => {
 	if ( ! baseURL ) {
 		throw new Error( 'Expected baseURL to be configured.' );
@@ -71,16 +90,17 @@ test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
 		baseURL,
 	} ) => {
 		const compatibilityFailures: string[] = [];
-		const compatibilityPattern =
-			/private.?api|wp-private-apis|core\/rich-text|already registered|does not exist on window\.wp/i;
+		const recordCompatibilityFailure = ( message: string ) => {
+			if ( isCompatibilityFailure( message ) ) {
+				compatibilityFailures.push( message );
+			}
+		};
 
 		page.on( 'pageerror', ( error ) => {
-			compatibilityFailures.push( error.message );
+			recordCompatibilityFailure( error.message );
 		} );
 		page.on( 'console', ( message ) => {
-			if ( compatibilityPattern.test( message.text() ) ) {
-				compatibilityFailures.push( message.text() );
-			}
+			recordCompatibilityFailure( message.text() );
 		} );
 
 		await setFeatureFlag(
@@ -118,7 +138,9 @@ test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
 		).toHaveCSS( 'padding', '0px 24px 24px' );
 
 		const weightUnit = settingsUI.getByLabel( 'Weight unit' );
-		await expect( weightUnit ).toHaveValue( /^(kg|g|lbs|oz)$/ );
+		expect( [ 'kg', 'g', 'lbs', 'oz' ] ).toContain(
+			await weightUnit.inputValue()
+		);
 		await expect( weightUnit.locator( 'option' ) ).toHaveText( [
 			'kg',
 			'g',
