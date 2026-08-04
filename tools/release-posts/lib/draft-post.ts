@@ -2,7 +2,6 @@
  * External dependencies
  */
 import fetch from 'node-fetch';
-import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 
 // Typing just the things we need from the WP.com Post object.
 // (which is not the same as WP Post object or API Post object).
@@ -25,28 +24,22 @@ export const fetchWpComPost = async (
 	postId: string,
 	authToken: string
 ) => {
-	try {
-		const post = await fetch(
-			`https://public-api.wordpress.com/rest/v1.1/sites/${ siteId }/posts/${ postId }`,
-			{
-				headers: {
-					Authorization: `Bearer ${ authToken }`,
-					'Content-Type': 'application/json',
-				},
-			}
-		);
-
-		if ( post.status !== 200 ) {
-			const text = await post.text();
-			throw new Error( `Error creating draft post: ${ text }` );
+	const post = await fetch(
+		`https://public-api.wordpress.com/rest/v1.1/sites/${ siteId }/posts/${ postId }`,
+		{
+			headers: {
+				Authorization: `Bearer ${ authToken }`,
+				'Content-Type': 'application/json',
+			},
 		}
+	);
 
-		return post.json();
-	} catch ( e: unknown ) {
-		if ( e instanceof Error ) {
-			Logger.error( e.message );
-		}
+	if ( post.status !== 200 ) {
+		const text = await post.text();
+		throw new Error( `Error fetching post: ${ text }` );
 	}
+
+	return post.json();
 };
 
 export const searchForPostsByCategory = async (
@@ -55,31 +48,25 @@ export const searchForPostsByCategory = async (
 	category: string,
 	authToken: string
 ) => {
-	try {
-		const post = await fetch(
-			`https://public-api.wordpress.com/rest/v1.1/sites/${ siteId }/posts?${ new URLSearchParams(
-				{ search, category }
-			) }`,
-			{
-				headers: {
-					Authorization: `Bearer ${ authToken }`,
-					'Content-Type': 'application/json',
-				},
-				method: 'GET',
-			}
-		);
-
-		if ( post.status !== 200 ) {
-			const text = await post.text();
-			throw new Error( `Error creating draft post: ${ text }` );
+	const post = await fetch(
+		`https://public-api.wordpress.com/rest/v1.1/sites/${ siteId }/posts?${ new URLSearchParams(
+			{ search, category }
+		) }`,
+		{
+			headers: {
+				Authorization: `Bearer ${ authToken }`,
+				'Content-Type': 'application/json',
+			},
+			method: 'GET',
 		}
+	);
 
-		return ( await post.json() ).posts as WordpressComPost[];
-	} catch ( e: unknown ) {
-		if ( e instanceof Error ) {
-			Logger.error( e.message );
-		}
+	if ( post.status !== 200 ) {
+		const text = await post.text();
+		throw new Error( `Error searching for posts: ${ text }` );
 	}
+
+	return ( await post.json() ).posts as WordpressComPost[];
 };
 
 /**
@@ -97,32 +84,26 @@ export const editWpComPostContent = async (
 	postContent: string,
 	authToken: string
 ) => {
-	try {
-		const post = await fetch(
-			`https://public-api.wordpress.com/rest/v1.2/sites/${ siteId }/posts/${ postId }`,
-			{
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${ authToken }`,
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify( {
-					content: postContent,
-				} ),
-			}
-		);
-
-		if ( post.status !== 200 ) {
-			const text = await post.text();
-			throw new Error( `Error creating draft post: ${ text }` );
+	const post = await fetch(
+		`https://public-api.wordpress.com/rest/v1.2/sites/${ siteId }/posts/${ postId }`,
+		{
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${ authToken }`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify( {
+				content: postContent,
+			} ),
 		}
+	);
 
-		return post.json();
-	} catch ( e: unknown ) {
-		if ( e instanceof Error ) {
-			Logger.error( e.message );
-		}
+	if ( post.status !== 200 ) {
+		const text = await post.text();
+		throw new Error( `Error editing post: ${ text }` );
 	}
+
+	return post.json();
 };
 
 /**
@@ -141,33 +122,27 @@ export const createWpComDraftPost = async (
 	tags: string[],
 	authToken: string
 ) => {
-	try {
-		const post = await fetch(
-			`https://public-api.wordpress.com/rest/v1.2/sites/${ siteId }/posts/new`,
-			{
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${ authToken }`,
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify( {
-					title: postTitle,
-					content: postContent,
-					status: 'draft',
-					tags,
-				} ),
-			}
-		);
-
-		if ( post.status !== 200 ) {
-			const text = await post.text();
-			throw new Error( `Error creating draft post: ${ text }` );
+	const post = await fetch(
+		`https://public-api.wordpress.com/rest/v1.2/sites/${ siteId }/posts/new`,
+		{
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${ authToken }`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify( {
+				title: postTitle,
+				content: postContent,
+				status: 'draft',
+				tags,
+			} ),
 		}
+	);
 
-		return post.json();
-	} catch ( e: unknown ) {
-		if ( e instanceof Error ) {
-			Logger.error( e.message );
-		}
+	if ( post.status !== 200 ) {
+		const text = await post.text();
+		throw new Error( `Error creating draft post: ${ text }` );
 	}
+
+	return post.json();
 };

@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { scanForChanges } from 'code-analyzer/src/lib/scan-changes';
+import {
+	scanChangesForDB,
+	scanForChanges,
+} from 'code-analyzer/src/lib/scan-changes';
 import semver from 'semver';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
@@ -27,6 +30,7 @@ import {
 import { getWordpressComAuthToken } from '../../lib/oauth-helper';
 import { generateContributors } from '../../lib/contributors';
 import { editPostHTML } from '../../lib/edit-post';
+import { formatReleaseDate, parseReleaseDate } from '../../lib/dates';
 
 const DEVELOPER_WOOCOMMERCE_SITE_ID = '96396764';
 
@@ -50,6 +54,15 @@ const program = new Command()
 		'The previous version in x.y.z format. Ex: 7.0.0'
 	)
 	.option( '--outputOnly', 'Only output the post, do not publish it' )
+	.option(
+		'--outputPath <path>',
+		'Write generated HTML to this path. Requires --outputOnly.'
+	)
+	.option(
+		'--releaseDate <date>',
+		'The release date as mm-dd-yyyy, defaults to today.',
+		formatReleaseDate( new Date() )
+	)
 	.option( '--editPostId <postId>', 'Updates an existing post' )
 	.option(
 		'--tags <tags>',
@@ -68,6 +81,7 @@ const program = new Command()
 			'Releases',
 		];
 		const isOutputOnly = !! options.outputOnly;
+		const releaseDate = parseReleaseDate( options.releaseDate );
 
 		if ( ! VERSION_VALIDATION_REGEX.test( currentVersion ) ) {
 			throw new Error(
@@ -81,30 +95,43 @@ const program = new Command()
 			);
 		}
 
-		const clientId = getEnvVar( 'WPCOM_OAUTH_CLIENT_ID', true );
-		const clientSecret = getEnvVar( 'WPCOM_OAUTH_CLIENT_SECRET', true );
-		const redirectUri =
-			getEnvVar( 'WPCOM_OAUTH_REDIRECT_URI' ) ||
-			'http://localhost:3000/oauth';
-		const authToken =
-			isOutputOnly ||
-			( await getWordpressComAuthToken(
+		if ( options.outputPath && ! isOutputOnly ) {
+			throw new Error( '--outputPath requires --outputOnly.' );
+		}
+
+		let authToken = '';
+
+		if ( ! isOutputOnly ) {
+			const clientId = getEnvVar( 'WPCOM_OAUTH_CLIENT_ID', true );
+			const clientSecret = getEnvVar( 'WPCOM_OAUTH_CLIENT_SECRET', true );
+			const redirectUri =
+				getEnvVar( 'WPCOM_OAUTH_REDIRECT_URI' ) ||
+				'http://localhost:3000/oauth';
+
+			authToken = await getWordpressComAuthToken(
 				clientId,
 				clientSecret,
 				siteId,
 				redirectUri,
 				'posts'
-			) );
-
-		if ( ! authToken ) {
-			throw new Error(
-				'Error getting auth token, check your env settings are correct.'
 			);
+
+			if ( ! authToken ) {
+				throw new Error(
+					'Error getting auth token, check your env settings are correct.'
+				);
+			}
 		}
 
 		Logger.startTask( `Making temporary clone of ${ SOURCE_REPO }...` );
 		const currentParsed = semver.parse( currentVersion );
 		const previousParsed = semver.parse( previousVersion );
+		if ( ! currentParsed ) {
+			throw new Error( 'Unable to parse current version' );
+		}
+		if ( ! previousParsed ) {
+			throw new Error( 'Unable to parse previous version' );
+		}
 		const tmpRepoPath = await cloneRepo( SOURCE_REPO );
 		Logger.endTask();
 		let currentBranch;
@@ -113,15 +140,12 @@ const program = new Command()
 		let previousVersionRef;
 
 		try {
-			if ( ! currentParsed ) {
-				throw new Error( 'Unable to parse current version' );
-			}
 			currentBranch = `release/${ currentParsed.major }.${ currentParsed.minor }`;
 			currentVersionRef = await getCommitHash(
 				tmpRepoPath,
 				`remotes/origin/${ currentBranch }`
 			);
-		} catch ( error: unknown ) {
+		} catch {
 			Logger.notice(
 				`Unable to find '${ currentBranch }', using 'trunk'.`
 			);
@@ -133,15 +157,12 @@ const program = new Command()
 		}
 
 		try {
-			if ( ! previousParsed ) {
-				throw new Error( 'Unable to parse previous version' );
-			}
 			previousBranch = `release/${ previousParsed.major }.${ previousParsed.minor }`;
 			previousVersionRef = await getCommitHash(
 				tmpRepoPath,
 				`remotes/origin/${ previousBranch }`
 			);
-		} catch ( error: unknown ) {
+		} catch {
 			throw new Error(
 				`Unable to find '${ previousBranch }'. Branch for previous version must exist.`
 			);
@@ -162,27 +183,41 @@ const program = new Command()
 				);
 				postContent = prevPost.content;
 			} catch ( error: unknown ) {
+				const details =
+					error instanceof Error ? `: ${ error.message }` : '';
 				throw new Error(
-					`Unable to fetch existing post with ID: ${ options.editPostId }`
+					`Unable to fetch existing post with ID ${ options.editPostId }${ details }`
 				);
 			}
 		}
 
-		const changes = await scanForChanges(
-			currentVersionRef,
-			`${ previousParsed.major }.${ previousParsed.minor }.${ previousParsed.patch }`,
-			SOURCE_REPO,
-			previousVersionRef,
-			'cli',
-			tmpRepoPath
-		);
+		const changes =
+			typeof options.editPostId !== 'undefined'
+				? await scanForChanges(
+						currentVersionRef,
+						`${ previousParsed.major }.${ previousParsed.minor }.${ previousParsed.patch }`,
+						SOURCE_REPO,
+						previousVersionRef,
+						'cli',
+						tmpRepoPath
+				  )
+				: {
+						hooks: new Map(),
+						templates: new Map(),
+						db: await scanChangesForDB(
+							currentVersionRef,
+							previousVersionRef,
+							SOURCE_REPO,
+							tmpRepoPath
+						),
+				  };
 
 		Logger.startTask( 'Finding contributors' );
 		const title = `WooCommerce ${ currentVersion } Released`;
 
 		const contributors = await generateContributors(
-			currentVersion,
-			previousVersion.toString()
+			currentBranch,
+			previousBranch
 		);
 
 		const postVariables = {
@@ -190,6 +225,8 @@ const program = new Command()
 			title,
 			changes,
 			displayVersion: currentVersion,
+			releaseBranch: `${ currentParsed.major }.${ currentParsed.minor }`,
+			releaseDate,
 		};
 
 		const html =
@@ -217,10 +254,9 @@ const program = new Command()
 		Logger.endTask();
 
 		if ( isOutputOnly ) {
-			const tmpFile = join(
-				tmpdir(),
-				`release-${ currentVersion }.html`
-			);
+			const tmpFile =
+				options.outputPath ||
+				join( tmpdir(), `release-${ currentVersion }.html` );
 
 			await writeFile( tmpFile, html );
 
@@ -246,11 +282,8 @@ const program = new Command()
 						  );
 
 				Logger.notice( `Published draft release post at ${ URL }` );
+			} finally {
 				Logger.endTask();
-			} catch ( error: unknown ) {
-				if ( error instanceof Error ) {
-					Logger.error( error.message );
-				}
 			}
 		}
 	} );

@@ -12,14 +12,16 @@ don't have access to a WordPress.com auth token.
 2. Make sure you have added a `.env` file with the env variables set. WCCOM_TOKEN is optional if you're using `--outputOnly`, but
    the `GITHUB_ACCESS_TOKEN` is required. If you need help generating a token see [the docs](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token). To silence all CLI output, set `LOGGER_LEVEL` to `"silent"`.
 3. Note that the env file should live at the same path that you're running the command from.
-4. Run the tool via the npm script, e.g. `pnpm release-post release "6.8.0" --outputOnly`
-5. For more help on individual options, run the help `pnpm release-post <command> --help`. e.g. `pnpm release-post rc --help`
+4. Run the tool via the npm script, e.g. `pnpm release-post release "6.8.0" "6.7.0" --outputOnly`
+5. For more help on individual options, run the help `pnpm release-post <command> --help`. e.g. `pnpm release-post beta --help`
+
+To generate a dot release post, run `pnpm release-post dot "<currentVersion>" "<previousVersion>" --outputOnly`, e.g. `pnpm release-post dot "11.0.1" "11.0.0" --outputOnly`.
 
 ## Publishing Draft Posts
 
-This tool will publish draft posts to `https://developer.woocommerce.com` for you if you omit the `--outputOnly` flag. There is some minimal first time setup for this though:
+This tool will publish draft posts to `https://developer.woocommerce.com` for you if you omit the `--outputOnly` flag. There is some minimal first-time setup for this though:
 
-1. Create an app on WordPress.com [here](https://developer.wordpress.com/apps/).
+1. Create a [WordPress.com application](https://developer.wordpress.com/apps/).
 2. Recommended settings:
    - Name can be anything
    - Description can be left blank

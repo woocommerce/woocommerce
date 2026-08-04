@@ -1,35 +1,45 @@
-<% const NUMBER_COLUMNS_TO_DISPLAY = 6 %>
-<% for ( const packageName in contributors ) { %>  
-  <% const packageContributors = contributors[packageName].contributors %>
+<%
+  const contributorsByLogin = new Map();
+  let pullRequestCount = 0;
 
-  <% if (packageContributors) { %> 
-    <% if (packageContributors.length) { %>
-      <h2><%= packageName.replace('-', ' ') %></h2>
-    <% } %>
-    <% const lastContributor = packageContributors[packageContributors.length - 1] %>
-    <% let column = 1 %>
-    <% for ( const contributor of packageContributors ) { %>
-      <% if (column % NUMBER_COLUMNS_TO_DISPLAY === 1) { %>
-        <!-- wp:columns -->
-        <div class="wp-block-columns">
-          <%- include('contributor', { contributor: contributor }) %>        
-      <% } else { %>
-        <%- include('contributor', { contributor: contributor }) %>
-      <% } %>      
-      
-      <% if ( contributor.login === lastContributor.login &&  packageContributors.length  % NUMBER_COLUMNS_TO_DISPLAY !== 0 ) { %>
-        <% const columnsToAdd = NUMBER_COLUMNS_TO_DISPLAY - ( packageContributors.length % NUMBER_COLUMNS_TO_DISPLAY ) %>
-        <% for ( let i = 0; i < columnsToAdd; i++ ) { %>
-          <!-- wp:column -->
-          <div class="wp-block-column"></div>
-          <!-- /wp:column -->
-        <% } %>
-      <% } %>
-      <% column ++ %>
-      <% if ( ( column % NUMBER_COLUMNS_TO_DISPLAY === 1 ) || contributor.login === lastContributor.login ) { %>
-        </div>
-        <!-- /wp:columns -->
-      <% } %>
-    <% } %>  
-  <% } %>  
-<% } %> 
+  for ( const packageName in contributors ) {
+    const packageData = contributors[packageName];
+
+    if ( ! packageData.contributors ) {
+      continue;
+    }
+
+    pullRequestCount +=
+      packageData.totalPullRequests ?? packageData.totalCommits ?? 0;
+
+    for ( const contributor of packageData.contributors ) {
+      if (
+        contributor.login &&
+        ! contributorsByLogin.has( contributor.login )
+      ) {
+        contributorsByLogin.set( contributor.login, contributor );
+      }
+    }
+  }
+
+  const contributorNames = Array.from( contributorsByLogin.values() )
+    .map( ( contributor ) => String( contributor.login ) )
+    .sort( ( firstContributor, secondContributor ) =>
+      firstContributor.localeCompare( secondContributor )
+    );
+  const contributorDisplayVersion =
+    typeof displayVersion !== 'undefined'
+      ? displayVersion
+      : Object.values( contributors )
+          .find( ( packageData ) => packageData.headRef )
+          ?.headRef.replace( /^release\//, '' ) || '';
+-%>
+<% if ( contributorNames.length ) { -%>
+<!-- wp:paragraph -->
+<p>WooCommerce <%= contributorDisplayVersion %> includes <%= pullRequestCount %> PRs from <%= contributorNames.length %> contributors:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|contrast-2"}}}},"textColor":"contrast-2"} -->
+<p class="has-contrast-2-color has-text-color has-link-color"><% contributorNames.forEach( ( contributorName, index ) => { %><a href="https://github.com/<%= encodeURIComponent( contributorName ) %>" target="_blank"><%= contributorName %></a><% if ( index < contributorNames.length - 1 ) { %>, <% } %><% } ); %></p>
+<!-- /wp:paragraph -->
+<% } -%>

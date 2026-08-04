@@ -1,28 +1,35 @@
-name: 'Release: Generate Number of Commits and Contributors'
+name: 'Release: Generate Post Drafts and Summary'
 on:
   workflow_dispatch:
     inputs:
       version:
         type: string
         required: true
-        description: 'The release version (in X.Y or X.Y.Z-beta.N formats) to generate the release summary for.'
+        description: 'The beta version (in X.Y.Z-beta.1 or X.Y.Z-beta.2 format) to generate release posts for.'
   workflow_call:
     inputs:
       version:
         type: string
         required: true
-        description: 'The release version (in X.Y or X.Y.Z-beta.N formats) to generate the release summary for.'
+        description: 'The beta version (in X.Y.Z-beta.1 or X.Y.Z-beta.2 format) to generate release posts for.'
+
+permissions:
+  contents: read
 
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
 
 jobs:
   extract-versions:
-    name: Extract release current and previous versions
+    name: Extract release versions and date
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     outputs:
+      beta_version: ${{ steps.version-from-input.outputs.beta_version }}
+      final_version: ${{ steps.version-from-input.outputs.final_version }}
+      release_date: ${{ steps.version-from-input.outputs.release_date }}
       current_version: ${{ steps.calculate-versions.outputs.current_version }}
       previous_version: ${{ steps.calculate-versions.outputs.previous_version }}
+      previous_release_version: ${{ steps.calculate-versions.outputs.previous_release_version }}
     steps:
       - name: Ensure running from trunk branch
         run: |
@@ -34,27 +41,57 @@ jobs:
       - name: Extract version from the provided input version
         id: version-from-input
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          BETA_VERSION: ${{ inputs.version }}
+          EVENT_RELEASE_PUBLISHED_AT: ${{ github.event.release.published_at }}
         with:
           script: |
-            const currentVersion = '${{ inputs.version }}';
-            console.log(`Current version from input: ${currentVersion}`);
+            const betaVersion = process.env.BETA_VERSION;
+            console.log(`Beta version from input: ${betaVersion}`);
 
-            const versionMatch = currentVersion.match(/^(\d+)\.(\d+)(?:\.\d+)?(?:-(beta)\.(\d+))?$/);
+            const versionMatch = betaVersion.match(/^(\d+)\.(\d+)\.(\d+)-beta\.(1|2)$/);
             if (!versionMatch) {
-              core.setFailed(`Version format must be 'x.y' or 'x.y.z-beta.N'. Provided: ${currentVersion}`);
-              process.exit(1);
+              core.setFailed(`Version format must be 'x.y.z-beta.1' or 'x.y.z-beta.2'. Provided: ${betaVersion}`);
+              return;
             }
 
             const major = parseInt(versionMatch[1]);
             const minor = parseInt(versionMatch[2]);
-            const prereleaseType = versionMatch[3] || '';
-            const prereleaseVersion = versionMatch[4] || '';
+            const patch = parseInt(versionMatch[3]);
+            const betaNumber = parseInt(versionMatch[4]);
+            const finalVersion = `${major}.${minor}.${patch}`;
 
-            console.log(`Parsed version: major=${major}, minor=${minor}, prerelease_type=${prereleaseType}, prerelease_version=${prereleaseVersion}`);
+            let betaPublishedAt = process.env.EVENT_RELEASE_PUBLISHED_AT;
+            if (!betaPublishedAt) {
+              const { data: release } = await github.rest.repos.getReleaseByTag({
+                ...context.repo,
+                tag: betaVersion,
+              });
+              betaPublishedAt = release.published_at || release.created_at;
+            }
+
+            const betaPublishedDate = new Date(betaPublishedAt);
+            if (Number.isNaN(betaPublishedDate.valueOf())) {
+              core.setFailed(`Unable to determine the published date for ${betaVersion}.`);
+              return;
+            }
+
+            const releaseDate = new Date(betaPublishedDate);
+            releaseDate.setUTCDate(releaseDate.getUTCDate() + (betaNumber === 1 ? 15 : 8));
+            const releaseDateValue = [
+              String(releaseDate.getUTCMonth() + 1).padStart(2, '0'),
+              String(releaseDate.getUTCDate()).padStart(2, '0'),
+              releaseDate.getUTCFullYear(),
+            ].join('-');
+
+            console.log(`Final version: ${finalVersion}`);
+            console.log(`Final release date: ${releaseDateValue}`);
 
             core.setOutput('major', major);
             core.setOutput('minor', minor);
-            core.setOutput('is_prerelease', prereleaseType !== '');
+            core.setOutput('beta_version', betaVersion);
+            core.setOutput('final_version', finalVersion);
+            core.setOutput('release_date', releaseDateValue);
 
       - name: Calculate current and previous version
         id: calculate-versions
@@ -76,6 +113,7 @@ jobs:
 
             core.setOutput('current_version', `${major}.${minor}`);
             core.setOutput('previous_version', previousVersion);
+            core.setOutput('previous_release_version', `${previousVersion}.0`);
 
       - name: Check the necessary branches exist
         run: |
@@ -128,13 +166,13 @@ jobs:
             exit 1
           fi
 
-  generate-contributors-list:
-    name: Generate contributors list
+  generate-release-posts:
+    name: Generate beta and final release posts
     needs: extract-versions
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     outputs:
-      contributor_list_path: ${{ steps.generate-contributors-list.outputs.filepath }}
-      artifact_url: ${{ steps.output-artifact-url.outputs.artifact_url }}
+      beta_artifact_url: ${{ steps.upload-beta-post.outputs.artifact-url }}
+      release_artifact_url: ${{ steps.upload-release-post.outputs.artifact-url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -156,38 +194,45 @@ jobs:
         run: |
           pnpm install
 
-      - name: Generate contributors list
-        id: generate-contributors-list
+      - name: Generate release post HTML
+        id: generate-release-posts
         working-directory: tools/release-posts
         env:
+          BETA_OUTPUT_PATH: ${{ runner.temp }}/beta-release-${{ needs.extract-versions.outputs.beta_version }}.html
+          BETA_VERSION: ${{ needs.extract-versions.outputs.beta_version }}
+          FINAL_VERSION: ${{ needs.extract-versions.outputs.final_version }}
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PREVIOUS_RELEASE_VERSION: ${{ needs.extract-versions.outputs.previous_release_version }}
+          RELEASE_DATE: ${{ needs.extract-versions.outputs.release_date }}
+          RELEASE_OUTPUT_PATH: ${{ runner.temp }}/release-${{ needs.extract-versions.outputs.final_version }}.html
         run: |
-          CURRENT_BRANCH="release/${{ needs.extract-versions.outputs.current_version }}"
-          PREVIOUS_BRANCH="release/${{ needs.extract-versions.outputs.previous_version }}"
+          pnpm run release-post beta "$BETA_VERSION" \
+            --releaseDate "$RELEASE_DATE" \
+            --outputOnly \
+            --outputPath "$BETA_OUTPUT_PATH"
 
-          OUTPUT=$(pnpm run release-post contributors ${CURRENT_BRANCH} ${PREVIOUS_BRANCH})
-          echo "$OUTPUT"
+          pnpm run release-post release "$FINAL_VERSION" \
+            "$PREVIOUS_RELEASE_VERSION" \
+            --releaseDate "$RELEASE_DATE" \
+            --outputOnly \
+            --outputPath "$RELEASE_OUTPUT_PATH"
 
-          HTML_FILE_PATH=$(echo "$OUTPUT" | grep "Contributors HTML generated at" | sed 's/.*Contributors HTML generated at //')
-          if [ -z "$HTML_FILE_PATH" ]; then
-            echo "Error: Could not find HTML file path in $OUTPUT"
-            exit 1
-          fi
+          echo "beta_filepath=$BETA_OUTPUT_PATH" >> "$GITHUB_OUTPUT"
+          echo "release_filepath=$RELEASE_OUTPUT_PATH" >> "$GITHUB_OUTPUT"
 
-          echo "filepath=${HTML_FILE_PATH}" >> $GITHUB_OUTPUT
-
-      - name: Upload contributors HTML
-        id: artifact-upload
+      - name: Upload beta release post HTML
+        id: upload-beta-post
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: contributors-release-${{ needs.extract-versions.outputs.current_version }}
-          path: ${{ steps.generate-contributors-list.outputs.filepath }}
+          name: beta-release-post-${{ needs.extract-versions.outputs.beta_version }}
+          path: ${{ steps.generate-release-posts.outputs.beta_filepath }}
 
-      - name: Output artifact URL
-        id: output-artifact-url
-        run: |
-          ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
-          echo "artifact_url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
+      - name: Upload final release post HTML
+        id: upload-release-post
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-post-${{ needs.extract-versions.outputs.final_version }}
+          path: ${{ steps.generate-release-posts.outputs.release_filepath }}
 
   db-updates:
     name: Check for database updates
@@ -321,7 +366,7 @@ jobs:
 
   send-slack-notification:
     name: Send Slack Notification
-    needs: [extract-versions, count-commits-and-contributors, generate-contributors-list, db-updates]
+    needs: [extract-versions, count-commits-and-contributors, generate-release-posts, db-updates]
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     steps:
       - name: Send Slack message
@@ -336,7 +381,8 @@ jobs:
             📊 *Statistics:*
             • Commits: ${{ needs.count-commits-and-contributors.outputs.commit_count }}
             • Contributors: ${{ needs.count-commits-and-contributors.outputs.contributor_count }}
-            • <${{ needs.generate-contributors-list.outputs.artifact_url }}|Download Contributors List>
+            • <${{ needs.generate-release-posts.outputs.beta_artifact_url }}|Download Beta Release Post HTML>
+            • <${{ needs.generate-release-posts.outputs.release_artifact_url }}|Download Final Release Post HTML>
 
             :database: *Database Updates:*
             ${{ needs.db-updates.outputs.has_updates == 'true' && needs.db-updates.outputs.formatted_updates || 'This release does not include a database update.' }}

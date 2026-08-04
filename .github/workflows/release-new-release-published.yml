@@ -13,7 +13,7 @@ env:
 jobs:
   # Jobs to run after a pre-release is published (triggered by the "prereleased" GH event).
   generate-release-commits-and-contributors:
-    name: 'Call release commits and contributors workflow'
+    name: 'Generate release post drafts and summary'
     if: ${{ ( github.event.action == 'prereleased' || ( github.event.action == 'published' && github.event.release.prerelease ) ) &&  contains( inputs.release_tag_name, '-beta' ) }}
     uses: woocommerce/woocommerce/.github/workflows/release-commits-and-contributors.yml@trunk
     with:

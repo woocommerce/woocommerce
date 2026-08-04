@@ -22,8 +22,8 @@ const program = new Command()
 		'The version of the plugin to generate a post for, please use the tag version from Github.'
 	)
 	.argument(
-		'--previousVersion <previousVersion>',
-		'If you would like to compare against a version other than last minor you can provide a tag version from Github.'
+		'<previousVersion>',
+		'The previous plugin tag or release branch to compare against.'
 	)
 	.action( async ( currentVersion, previousVersion ) => {
 		Logger.startTask( 'Generating contributors list...' );
@@ -37,6 +37,7 @@ const program = new Command()
 
 		const html = await renderTemplate( 'contributors.ejs', {
 			contributors,
+			displayVersion: currentVersion.replace( /^release\//, '' ),
 		} );
 
 		const tmpFile = join(
