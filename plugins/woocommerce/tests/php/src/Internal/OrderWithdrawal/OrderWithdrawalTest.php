@@ -531,6 +531,42 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not warn merchants when the matched order is within fourteen days.
+	 */
+	public function test_process_current_request_does_not_warn_merchants_for_order_newer_than_fourteen_days(): void {
+		$order = $this->create_order_for_form_data();
+		$order->set_date_created( time() - ( 13 * DAY_IN_SECONDS ) );
+		$order->save();
+
+		$capture         = $this->capture_wp_mail();
+		$warning_message = 'This order is older than 14 days. Only orders within 14 days of delivery are eligible for withdrawal.';
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state    = $this->sut->process_current_request();
+			$note_ids = $this->get_created_inbox_note_ids();
+
+			$this->assertSame( 'confirmation', $state->screen, 'Matched confirm submissions should reach the confirmation screen.' );
+			$this->assertCount( 1, $note_ids, 'A matched submission should create one merchant inbox notification.' );
+
+			$note = Notes::get_note( $note_ids[0] );
+
+			$this->assertInstanceOf( Note::class, $note, 'The merchant inbox notification should be readable.' );
+			$this->assertStringNotContainsString( $warning_message, $note->get_content(), 'The inbox notification should not warn when the order is inside the withdrawal window.' );
+
+			$merchant_email = $this->get_captured_mail_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+
+			$this->assertStringNotContainsString( $warning_message, (string) $merchant_email['message'], 'The merchant email should not warn when the order is inside the withdrawal window.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
 	 * @testdox Should add a merchant inbox notification without an order action when no order matches.
 	 */
 	public function test_process_current_request_adds_inbox_note_without_order_action_when_order_does_not_match(): void {
