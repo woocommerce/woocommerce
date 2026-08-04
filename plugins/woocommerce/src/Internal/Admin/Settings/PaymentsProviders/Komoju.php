@@ -46,6 +46,35 @@ class Komoju extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
+		return $this->is_komoju_in_sandbox_mode( $payment_gateway ) ?? parent::is_in_test_mode( $payment_gateway );
+	}
+
+	/**
+	 * Try to determine if the payment gateway is in test mode onboarding (aka sandbox).
+	 *
+	 * This is a best-effort attempt, as there is no standard way to determine this.
+	 * Trust the true value, but don't consider a false value as definitive.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
+	 */
+	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
+		// A `sk_test_` key is a sandbox credential, so the account itself is a test account,
+		// not just a live account processing test payments. KOMOJU exposes no separate
+		// onboarding environment signal, so the same check answers both questions.
+		return $this->is_komoju_in_sandbox_mode( $payment_gateway ) ?? parent::is_in_test_mode_onboarding( $payment_gateway );
+	}
+
+	/**
+	 * Check if the KOMOJU payment gateway is in sandbox mode.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return ?bool True if the payment gateway is in sandbox mode, false otherwise.
+	 *               Null if the environment could not be determined.
+	 */
+	private function is_komoju_in_sandbox_mode( WC_Payment_Gateway $payment_gateway ): ?bool {
 		try {
 			// KOMOJU has no dedicated test-mode setting; it infers the environment from
 			// whether the stored secret key has the `sk_test_` (vs. `sk_live_`) prefix.
@@ -58,7 +87,7 @@ class Komoju extends PaymentGateway {
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
-				'Failed to determine if gateway is in test mode: ' . $e->getMessage(),
+				'Failed to determine if gateway is in sandbox mode: ' . $e->getMessage(),
 				array(
 					'gateway'   => $payment_gateway->id,
 					'source'    => 'settings-payments',
@@ -67,7 +96,8 @@ class Komoju extends PaymentGateway {
 			);
 		}
 
-		return parent::is_in_test_mode( $payment_gateway );
+		// Let the caller know that we couldn't determine the environment.
+		return null;
 	}
 
 	/**

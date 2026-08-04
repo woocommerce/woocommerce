@@ -153,6 +153,56 @@ class KomojuTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox is_in_test_mode_onboarding() returns true with a test secret key, since a `sk_test_`
+	 *          credential means the account itself is a sandbox account, not just a live account
+	 *          processing test payments.
+	 */
+	public function test_is_in_test_mode_onboarding_returns_true_with_a_test_secret_key(): void {
+		update_option( 'komoju_woocommerce_secret_key', 'sk_test_123' );
+
+		$is_test_mode_onboarding = $this->sut->is_in_test_mode_onboarding( $this->get_fake_gateway() );
+
+		$this->assertTrue( $is_test_mode_onboarding );
+	}
+
+	/**
+	 * @testdox is_in_test_mode_onboarding() returns false when the secret key has the `sk_live_` prefix.
+	 */
+	public function test_is_in_test_mode_onboarding_returns_false_with_a_live_secret_key(): void {
+		update_option( 'komoju_woocommerce_secret_key', 'sk_live_456' );
+
+		$is_test_mode_onboarding = $this->sut->is_in_test_mode_onboarding( $this->get_fake_gateway() );
+
+		$this->assertFalse( $is_test_mode_onboarding );
+	}
+
+	/**
+	 * @testdox is_in_test_mode_onboarding() returns true when only the legacy per-gateway secret key
+	 *          is set with the `sk_test_` prefix.
+	 */
+	public function test_is_in_test_mode_onboarding_returns_true_with_the_legacy_secret_key(): void {
+		update_option( 'woocommerce_komoju_settings', array( 'secretKey' => 'sk_test_789' ) );
+
+		$is_test_mode_onboarding = $this->sut->is_in_test_mode_onboarding( $this->get_fake_gateway() );
+
+		$this->assertTrue( $is_test_mode_onboarding );
+	}
+
+	/**
+	 * @testdox is_in_test_mode_onboarding() falls back to the generic detection when no secret key
+	 *          is saved anywhere, instead of erroring out.
+	 */
+	public function test_is_in_test_mode_onboarding_falls_back_when_no_secret_key_is_saved(): void {
+		// The fake gateway's own is_in_test_mode_onboarding() returns true, proving this genuinely
+		// delegates to the generic provider fallback rather than defaulting to false.
+		$is_test_mode_onboarding = $this->sut->is_in_test_mode_onboarding(
+			$this->get_fake_gateway( array( 'test_mode_onboarding' => true ) )
+		);
+
+		$this->assertTrue( $is_test_mode_onboarding );
+	}
+
+	/**
 	 * @testdox is_account_connected() returns false when no secret key is saved anywhere.
 	 */
 	public function test_is_account_connected_returns_false_without_a_secret_key(): void {
