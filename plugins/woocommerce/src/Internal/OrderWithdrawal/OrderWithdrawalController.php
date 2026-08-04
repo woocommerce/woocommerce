@@ -18,6 +18,7 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	private const ENDPOINT_KEY    = 'order-withdrawal';
 	private const ENDPOINT_SLUG   = 'withdraw-order';
 	private const ENDPOINT_OPTION = 'woocommerce_myaccount_order_withdrawal_endpoint';
+	private const TRACKS_EVENT    = 'order_withdrawal_feature_setting_update';
 
 	/**
 	 * Form processor.
@@ -54,6 +55,7 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	 */
 	public function register(): void {
 		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'maybe_flush_rewrite_rules' ), 10, 1 );
+		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'track_feature_setting_update' ), 10, 2 );
 		add_filter( 'woocommerce_get_query_vars', array( $this, 'add_query_var' ), 10, 1 );
 		add_filter( 'woocommerce_endpoint_' . self::ENDPOINT_KEY . '_title', array( $this, 'get_endpoint_title' ), 10, 1 );
 		add_filter( 'woocommerce_settings_pages', array( $this, 'add_endpoint_setting' ), 10, 1 );
@@ -96,6 +98,27 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		if ( self::FEATURE_ID === $feature_id ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
+	}
+
+	/**
+	 * Track when the order withdrawal feature setting is updated.
+	 *
+	 * @param string $feature_id Feature being toggled.
+	 * @param bool   $enabled    Whether the feature is now enabled.
+	 *
+	 * @since 11.1.0
+	 */
+	public function track_feature_setting_update( string $feature_id, bool $enabled ): void {
+		if ( self::FEATURE_ID !== $feature_id ) {
+			return;
+		}
+
+		\WC_Tracks::record_event(
+			self::TRACKS_EVENT,
+			array(
+				'enabled' => $enabled ? 'yes' : 'no',
+			)
+		);
 	}
 
 	/**
