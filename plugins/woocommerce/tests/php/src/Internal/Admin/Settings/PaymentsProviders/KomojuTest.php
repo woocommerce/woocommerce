@@ -45,19 +45,6 @@ class KomojuTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy = $container->get( LegacyProxy::class );
 
 		$this->sut = new Komoju( $this->mockable_proxy );
-
-		delete_option( 'komoju_woocommerce_secret_key' );
-		delete_option( 'woocommerce_komoju_settings' );
-	}
-
-	/**
-	 * Tear down test.
-	 */
-	public function tearDown(): void {
-		delete_option( 'komoju_woocommerce_secret_key' );
-		delete_option( 'woocommerce_komoju_settings' );
-
-		parent::tearDown();
 	}
 
 	/**
