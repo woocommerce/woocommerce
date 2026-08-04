@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update checkout taxes when a customer changes country before completing their address.
