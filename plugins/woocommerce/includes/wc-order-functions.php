@@ -1288,30 +1288,6 @@ function wc_get_order_notes( $args ) {
 }
 
 /**
- * Get the last note for an order.
- *
- * @since  11.1.0
- * @param  int    $order_id Order ID.
- * @param  string $type     Define what type of note to retrieve.
- *                          Accepts 'customer', 'internal' or empty for both.
- *                          Default empty.
- * @return stdClass|null    Object with order note details or null when no note exists.
- */
-function wc_get_last_order_note( $order_id, $type = '' ) {
-	$args = array(
-		'order_id' => $order_id,
-		'limit'    => 1,
-	);
-
-	if ( $type ) {
-		$args['type'] = $type;
-	}
-
-	$notes = wc_get_order_notes( $args );
-	return ! empty( $notes ) ? current( $notes ) : null;
-}
-
-/**
  * Create an order note.
  *
  * @since  3.2.0

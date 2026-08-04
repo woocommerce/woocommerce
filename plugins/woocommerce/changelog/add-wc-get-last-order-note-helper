@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add wc_get_last_order_note() helper function to retrieve the most recent note from an order
+Add OrderUtil::get_last_order_note() helper to retrieve the most recent note from an order

@@ -295,4 +295,28 @@ final class OrderUtil {
 		return ! self::custom_orders_table_usage_is_enabled() &&
 			( \WC_Order_Data_Store_CPT::class !== \WC_Data_Store::load( 'order' )->get_current_class_name() );
 	}
+
+	/**
+	 * Get the last note for an order.
+	 *
+	 * @param int    $order_id Order ID.
+	 * @param string $type     Define what type of note to retrieve.
+	 *                         Accepts 'customer', 'internal' or empty for both.
+	 *                         Default empty.
+	 * @return \stdClass|null Object with order note details or null when no note exists.
+	 * @since 11.1.0
+	 */
+	public static function get_last_order_note( int $order_id, string $type = '' ): ?\stdClass {
+		$args = array(
+			'order_id' => $order_id,
+			'limit'    => 1,
+		);
+
+		if ( '' !== $type ) {
+			$args['type'] = $type;
+		}
+
+		$notes = wc_get_order_notes( $args );
+		return empty( $notes ) ? null : current( $notes );
+	}
 }

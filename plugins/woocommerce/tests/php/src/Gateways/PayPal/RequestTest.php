@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -741,7 +742,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $capture_api_call_count, 'Expected capture_auth API to be called once' );
 		// Verify order note was added.
 		$order = wc_get_order( $order->get_id() );
-		$note  = wc_get_last_order_note( $order->get_id() );
+		$note  = OrderUtil::get_last_order_note( $order->get_id() );
 
 		$this->assertNotNull( $note );
 		$this->assertStringContainsString( 'PayPal capture authorized payment failed', $note->content );
@@ -787,7 +788,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $capture_api_call_count, 'Expected capture_auth API to be called once' );
 		// Verify order note was added with authorization ID message.
 		$order = wc_get_order( $order->get_id() );
-		$note  = wc_get_last_order_note( $order->get_id() );
+		$note  = OrderUtil::get_last_order_note( $order->get_id() );
 
 		$this->assertNotNull( $note );
 		$this->assertStringContainsString( 'PayPal capture authorized payment failed', $note->content );
@@ -836,7 +837,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $capture_api_call_count, 'Expected capture_auth API to be called once' );
 		// Verify order note was added.
 		$order = wc_get_order( $order->get_id() );
-		$note  = wc_get_last_order_note( $order->get_id() );
+		$note  = OrderUtil::get_last_order_note( $order->get_id() );
 
 		$this->assertNotNull( $note );
 		$this->assertStringContainsString( 'PayPal capture authorized payment failed', $note->content );

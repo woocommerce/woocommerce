@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Class WC_Gateway_Paypal_Test.
@@ -46,7 +47,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		// reset error.
 		remove_filter( 'pre_http_request', array( $this, '__return_paypal_error' ) );
 
-		$note = wc_get_last_order_note( $order->get_id() );
+		$note = OrderUtil::get_last_order_note( $order->get_id() );
 		$this->assertStringContainsString( $this->error_message_26960, $note->content );
 	}
 

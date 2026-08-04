@@ -1018,7 +1018,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		add_action( 'woocommerce_payment_complete', array( $this, 'throwAnException' ) );
 
 		$this->assertFalse( $object->payment_complete( '12345' ) );
-		$note = wc_get_last_order_note( $object->get_id() );
+		$note = OrderUtil::get_last_order_note( $object->get_id() );
 		$this->assertStringContainsString( 'Payment complete event failed', $note->content );
 
 		remove_action( 'woocommerce_payment_complete', array( $this, 'throwAnException' ) );
@@ -1101,7 +1101,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_payment_complete_order_status', array( $this, 'throwAnException' ) );
 
 		$this->assertFalse( $object->update_status( OrderStatus::ON_HOLD ) );
-		$note = wc_get_last_order_note( $object->get_id() );
+		$note = OrderUtil::get_last_order_note( $object->get_id() );
 		$this->assertStringContainsString( 'Update status event failed', $note->content );
 
 		remove_filter( 'woocommerce_payment_complete_order_status', array( $this, 'throwAnException' ) );
@@ -1118,7 +1118,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->update_status( OrderStatus::ON_HOLD );
 		remove_filter( 'woocommerce_order_status_on-hold', array( $this, 'throwAnException' ) );
 
-		$note = wc_get_last_order_note( $object->get_id() );
+		$note = OrderUtil::get_last_order_note( $object->get_id() );
 
 		$this->assertStringContainsString( __( 'Error during status transition.', 'woocommerce' ), $note->content );
 	}
@@ -2082,7 +2082,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		add_action( 'woocommerce_before_order_object_save', array( $this, 'throwAnException' ) );
 
 		$object->save();
-		$note = wc_get_last_order_note( $object->get_id() );
+		$note = OrderUtil::get_last_order_note( $object->get_id() );
 		$this->assertStringContainsString( 'Error saving order', $note->content );
 
 		remove_action( 'woocommerce_before_order_object_save', array( $this, 'throwAnException' ) );
