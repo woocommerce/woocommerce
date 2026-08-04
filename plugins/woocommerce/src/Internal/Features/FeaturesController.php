@@ -460,11 +460,11 @@ class FeaturesController {
 			),
 			'order_withdrawal'                     => array(
 				'name'                         => __( 'Order withdrawal', 'woocommerce' ),
-				'description'                  => __( 'Enable the public order withdrawal endpoint for stakeholder testing.', 'woocommerce' ),
+				'description'                  => __( 'Enable the public order withdrawal endpoint for customer requests.', 'woocommerce' ),
 				'enabled_by_default'           => false,
 				'disable_ui'                   => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-				'is_experimental'              => true,
+				'is_experimental'              => false,
 			),
 			'abandoned_cart_recovery'              => array(
 				'name'                         => __( 'Abandoned cart recovery', 'woocommerce' ),
