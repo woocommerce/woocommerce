@@ -46,6 +46,7 @@ class PaymentsExtensionSuggestions {
 	const KLARNA            = 'klarna';
 	const KLARNA_CHECKOUT   = 'klarna_checkout';
 	const HELCIM            = 'helcim';
+	const KOMOJU            = 'komoju';
 	const HELIOPAY          = 'heliopay';
 	const MONEI             = 'monei';
 	const COINBASE          = 'coinbase';
@@ -2020,6 +2021,7 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::KOMOJU,
 			self::AIRWALLEX,
 			self::VISA,
 			self::PAYPAL_WALLET,
@@ -4165,6 +4167,38 @@ class PaymentsExtensionSuggestions {
 					array(
 						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=helcim-commerce-for-woocommerce',
+					),
+				),
+			),
+			self::KOMOJU            => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'KOMOJU Payments', 'woocommerce' ),
+				'description' => esc_html__( 'Easily add popular Japanese payment methods like konbini, PayPay, and more with KOMOJU’s secure extension to optimize checkout.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/komoju.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'komoju-japanese-payments',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => 'https://en.komoju.com/pricing/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/komoju-japanese-payments/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://toc.komoju.com/toc/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/komoju-japanese-payments/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=komoju-japanese-payments',
 					),
 				),
 			),
