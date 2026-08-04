@@ -639,9 +639,35 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should register order withdrawal hooks.
+	 * @testdox Should register cleanup hooks for HPOS and legacy order deletion.
 	 */
-	public function test_controller_registers_order_withdrawal_hooks(): void {
+	public function test_controller_registers_order_deletion_cleanup_hooks(): void {
+		$controller = new OrderWithdrawalController();
+		$controller->init( $this->sut, new OrderWithdrawalFormView() );
+
+		try {
+			$controller->register();
+
+			$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
+			$this->assertNotFalse( has_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
+		} finally {
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
+			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
+			remove_filter( 'woocommerce_settings_pages', array( $controller, 'add_endpoint_setting' ), 10 );
+			remove_action( 'woocommerce_account_order-withdrawal_endpoint', array( $controller, 'render_view' ), 10 );
+			remove_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
+			remove_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
+			remove_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
+		}
+	}
+
+	/**
+	 * @testdox Should skip the feature highlight notification hooks when order withdrawal is enabled.
+	 */
+	public function test_controller_skips_feature_highlight_notification_hooks_when_feature_is_enabled(): void {
+		$this->enable_feature();
+
 		$controller   = new OrderWithdrawalController();
 		$notification = new OrderWithdrawalFeatureHighlightNotification();
 
@@ -650,13 +676,9 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		try {
 			$controller->register();
 
-			$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
-			$this->assertNotFalse( has_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
-			$this->assertNotFalse( has_action( 'update_option_woocommerce_coming_soon', array( $notification, 'maybe_add_note_when_store_goes_live' ) ) );
-			$this->assertNotFalse( has_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ) ) );
+			$this->assertFalse( has_action( 'update_option_woocommerce_coming_soon', array( $notification, 'maybe_add_note_when_store_goes_live' ) ), 'The feature highlight notification should not listen for coming-soon changes when the feature is enabled.' );
+			$this->assertFalse( has_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ) ), 'The feature highlight notification should not run daily when the feature is enabled.' );
 		} finally {
-			remove_action( 'update_option_woocommerce_coming_soon', array( $notification, 'maybe_add_note_when_store_goes_live' ), 10 );
-			remove_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ), 10 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
 			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
 			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
@@ -1099,6 +1121,13 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 */
 	private function disable_feature(): void {
 		update_option( self::FEATURE_OPTION, 'no' );
+	}
+
+	/**
+	 * Enable the order withdrawal feature.
+	 */
+	private function enable_feature(): void {
+		update_option( self::FEATURE_OPTION, 'yes' );
 	}
 
 	/**

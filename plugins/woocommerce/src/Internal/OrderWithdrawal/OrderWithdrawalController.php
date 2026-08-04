@@ -71,7 +71,9 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		add_action( 'before_delete_post', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
 
-		$this->feature_highlight_notification->register();
+		if ( ! $this->is_enabled() ) {
+			$this->feature_highlight_notification->register();
+		}
 	}
 
 	/**

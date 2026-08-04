@@ -3,11 +3,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\OrderWithdrawal;
 
-use Automattic\WooCommerce\Admin\Notes\DataStore;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Throwable;
 
 /**
@@ -20,7 +18,6 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	public const NOTE_NAME      = 'wc-admin-order-withdrawal-feature';
 	public const CREATED_OPTION = 'woocommerce_order_withdrawal_inbox_notification_created';
 
-	private const FEATURE_ID                        = 'order_withdrawal';
 	private const ALLOWED_COUNTRIES_OPTION          = 'woocommerce_allowed_countries';
 	private const ALL_EXCEPT_COUNTRIES_OPTION       = 'woocommerce_all_except_countries';
 	private const SPECIFIC_ALLOWED_COUNTRIES_OPTION = 'woocommerce_specific_allowed_countries';
@@ -91,7 +88,6 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 	 */
 	public function is_applicable(): bool {
 		return 'no' === get_option( self::COMING_SOON_OPTION, 'yes' )
-			&& ! FeaturesUtil::feature_is_enabled( self::FEATURE_ID )
 			&& $this->store_sells_to_eu_or_all_countries();
 	}
 
