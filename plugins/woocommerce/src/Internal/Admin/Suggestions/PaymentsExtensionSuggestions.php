@@ -4137,7 +4137,7 @@ class PaymentsExtensionSuggestions {
 			),
 			self::HELCIM            => array(
 				'_type'       => self::TYPE_PSP,
-				'title'       => esc_html__( 'Helcim Commerce for WooCommerce', 'woocommerce' ),
+				'title'       => esc_html__( 'Helcim', 'woocommerce' ),
 				'description' => esc_html__( 'Accept credit cards and Google Pay directly on your store with zero monthly fees. Save up to 25% using Helcim’s transparent interchange-plus pricing.', 'woocommerce' ),
 				'icon'        => plugins_url( 'assets/images/onboarding/icons/helcim.svg', WC_PLUGIN_FILE ),
 				'plugin'      => array(
