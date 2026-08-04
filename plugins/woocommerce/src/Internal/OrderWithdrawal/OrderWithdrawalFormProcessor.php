@@ -40,6 +40,8 @@ final class OrderWithdrawalFormProcessor {
 	private const LOGGER_SOURCE                       = 'order-withdrawal';
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
 	private const ORDER_WITHDRAWAL_REQUESTED_VALUE    = 'yes';
+	private const WITHDRAWAL_WINDOW_IN_DAYS           = 14;
+	private const WITHDRAWAL_WINDOW_IN_SECONDS        = self::WITHDRAWAL_WINDOW_IN_DAYS * DAY_IN_SECONDS;
 	private const INBOX_NOTE_NAME_PREFIX              = 'wc-order-withdrawal-requested-order-';
 	private const RATE_LIMIT_IP_PREFIX                = 'order_withdrawal_ip_';
 	private const RATE_LIMIT_EMAIL_PREFIX             = 'order_withdrawal_email_';
@@ -481,6 +483,16 @@ final class OrderWithdrawalFormProcessor {
 	 */
 	private function add_order_withdrawal_inbox_note( WC_Order $matched_order ): void {
 		try {
+			$content = sprintf(
+				/* translators: %s: order number. */
+				__( 'A customer submitted an order withdrawal request for order #%s. Review the matched order to confirm the request details.', 'woocommerce' ),
+				$matched_order->get_order_number()
+			);
+
+			if ( $this->is_order_outside_withdrawal_window( $matched_order ) ) {
+				$content .= ' ' . $this->get_withdrawal_window_warning_message();
+			}
+
 			$note = new Note();
 			$note->set_title(
 				sprintf(
@@ -489,13 +501,7 @@ final class OrderWithdrawalFormProcessor {
 					$matched_order->get_order_number()
 				)
 			);
-			$note->set_content(
-				sprintf(
-				/* translators: %s: order number. */
-					__( 'A customer submitted an order withdrawal request for order #%s. Review the matched order to confirm the request details.', 'woocommerce' ),
-					$matched_order->get_order_number()
-				)
-			);
+			$note->set_content( $content );
 			$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 			$note->set_name( self::INBOX_NOTE_NAME_PREFIX . $matched_order->get_id() );
 			$note->set_source( 'woocommerce-admin' );
@@ -539,6 +545,33 @@ final class OrderWithdrawalFormProcessor {
 		} catch ( Throwable $e ) {
 			$this->log_inbox_note_error( $e, $order_id );
 		}
+	}
+
+	/**
+	 * Whether the matched order is outside the valid withdrawal request window.
+	 *
+	 * @param WC_Order $order Matched order.
+	 */
+	private function is_order_outside_withdrawal_window( WC_Order $order ): bool {
+		$date_created = $order->get_date_created( 'edit' );
+
+		if ( ! $date_created ) {
+			return false;
+		}
+
+		return ( time() - self::WITHDRAWAL_WINDOW_IN_SECONDS ) > $date_created->getTimestamp();
+	}
+
+	/**
+	 * Get the warning shown to merchants when a request is outside the valid window.
+	 */
+	private function get_withdrawal_window_warning_message(): string {
+		return sprintf(
+			/* translators: 1: number of days since the order was placed. 2: length of the withdrawal window in days. */
+			__( 'This order is older than %1$d days. Only orders within %2$d days of delivery are eligible for withdrawal.', 'woocommerce' ),
+			self::WITHDRAWAL_WINDOW_IN_DAYS,
+			self::WITHDRAWAL_WINDOW_IN_DAYS
+		);
 	}
 
 	/**
@@ -648,6 +681,10 @@ final class OrderWithdrawalFormProcessor {
 
 		if ( $matched_order instanceof WC_Order ) {
 			$order_url = $matched_order->get_edit_order_url();
+
+			if ( $this->is_order_outside_withdrawal_window( $matched_order ) ) {
+				$body .= '<p>' . esc_html( $this->get_withdrawal_window_warning_message() ) . '</p>';
+			}
 
 			$body .= sprintf(
 				'<p>%s</p>',

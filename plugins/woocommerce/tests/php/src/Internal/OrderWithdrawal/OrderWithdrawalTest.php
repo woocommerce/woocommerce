@@ -501,6 +501,55 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should warn merchants only when the matched order is older than fourteen days.
+	 * @testWith [15, true]
+	 *           [13, false]
+	 *
+	 * @param int  $order_age_days     Order age in days.
+	 * @param bool $is_warning_expected Whether the warning should be included for merchants.
+	 */
+	public function test_process_current_request_warns_merchants_only_for_orders_older_than_fourteen_days( int $order_age_days, bool $is_warning_expected ): void {
+		$order = $this->create_order_for_form_data();
+		$order->set_date_created( time() - ( $order_age_days * DAY_IN_SECONDS ) );
+		$order->save();
+
+		$capture         = $this->capture_wp_mail();
+		$warning_message = 'This order is older than 14 days. Only orders within 14 days of delivery are eligible for withdrawal.';
+
+		try {
+			$this->prepare_post_request(
+				OrderWithdrawalFormProcessor::ACTION_CONFIRM,
+				array( OrderWithdrawalFormProcessor::FIELD_ORDER_NUMBER => (string) $order->get_id() )
+			);
+
+			$state    = $this->sut->process_current_request();
+			$note_ids = $this->get_created_inbox_note_ids();
+
+			$this->assertSame( 'confirmation', $state->screen, 'Matched confirm submissions should reach the confirmation screen.' );
+			$this->assertCount( 1, $note_ids, 'A matched submission should create one merchant inbox notification.' );
+
+			$note = Notes::get_note( $note_ids[0] );
+
+			$this->assertInstanceOf( Note::class, $note, 'The merchant inbox notification should be readable.' );
+
+			$customer_email = $this->get_captured_mail_to( 'jane@example.test', $capture['captures'] );
+			$merchant_email = $this->get_captured_mail_to( (string) get_option( 'admin_email' ), $capture['captures'] );
+
+			if ( $is_warning_expected ) {
+				$this->assertStringContainsString( $warning_message, $note->get_content(), 'The inbox notification should warn when the order is outside the withdrawal window.' );
+				$this->assertStringContainsString( $warning_message, (string) $merchant_email['message'], 'The merchant email should warn when the order is outside the withdrawal window.' );
+			} else {
+				$this->assertStringNotContainsString( $warning_message, $note->get_content(), 'The inbox notification should not warn when the order is inside the withdrawal window.' );
+				$this->assertStringNotContainsString( $warning_message, (string) $merchant_email['message'], 'The merchant email should not warn when the order is inside the withdrawal window.' );
+			}
+
+			$this->assertStringNotContainsString( $warning_message, (string) $customer_email['message'], 'The customer email should not include the merchant withdrawal window warning.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
 	 * @testdox Should skip the merchant inbox notification when no order matches.
 	 */
 	public function test_process_current_request_skips_inbox_note_when_order_does_not_match(): void {
