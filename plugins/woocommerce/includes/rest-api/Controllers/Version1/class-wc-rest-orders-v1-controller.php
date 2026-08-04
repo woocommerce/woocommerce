@@ -623,8 +623,13 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function get_product_id( $posted, $action = 'create' ) {
 		if ( array_key_exists( 'sku', $posted ) && '' !== (string) $posted['sku'] ) {
-			$product_id = (int) wc_get_product_id_by_sku( (string) $posted['sku'] );
-		} elseif ( ! empty( $posted['product_id'] ) && empty( $posted['variation_id'] ) ) {
+			$product_id           = (int) wc_get_product_id_by_sku( (string) $posted['sku'] );
+			$should_use_posted_id = 'create' === $action && '0' === (string) $posted['sku'] && ! $product_id;
+			if ( ! $should_use_posted_id ) {
+				return $product_id;
+			}
+		}
+		if ( ! empty( $posted['product_id'] ) && empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['product_id'];
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];

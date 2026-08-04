@@ -1344,15 +1344,26 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox PUT /orders treats SKU zero as a product reference.
+	 * @testdox Creating with unresolved SKU zero falls back while updates honor resolvable SKU zero.
 	 */
-	public function test_update_line_item_with_zero_sku_switches_to_resolved_product(): void {
+	public function test_zero_sku_product_reference_behavior(): void {
 		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
 		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
-		$simple                     = WC_Helper_Product::create_simple_product();
-		$simple->set_sku( '0' );
-		$simple->save();
-		$this->assertSame( $simple->get_id(), wc_get_product_id_by_sku( '0' ), 'SKU zero should resolve to the simple product.' );
+		$posted_product             = WC_Helper_Product::create_simple_product();
+		$sku_product                = WC_Helper_Product::create_simple_product();
+		$create_request             = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$create_line_item           = array(
+			'product_id' => $posted_product->get_id(),
+			'sku'        => '0',
+		);
+		$create_request->set_body_params( array( 'line_items' => array( $create_line_item ) ) );
+
+		$create_response = $this->server->dispatch( $create_request );
+		$this->assertSame( $posted_product->get_id(), $create_response->get_data()['line_items'][0]['product_id'], 'An unresolved SKU zero should fall back to the posted product ID on create.' );
+
+		$sku_product->set_sku( '0' );
+		$sku_product->save();
+		$this->assertSame( $sku_product->get_id(), wc_get_product_id_by_sku( '0' ), 'SKU zero should resolve to the simple product.' );
 
 		$response = $this->dispatch_line_item_update(
 			$order->get_id(),
@@ -1366,7 +1377,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$reloaded = new WC_Order_Item_Product( $item_id );
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching by SKU zero should clear variation_id.' );
-		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should use the SKU lookup result.' );
+		$this->assertSame( $sku_product->get_id(), $reloaded->get_product()->get_id(), 'The line item should use the SKU lookup result.' );
 	}
 
 	/**
