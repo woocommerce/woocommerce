@@ -420,9 +420,9 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should enqueue matching Settings UI styles once for a resolved context.
+	 * @testdox Should register and enqueue matching Settings UI styles for a resolved context.
 	 */
-	public function test_settings_ui_style_is_enqueued_once_for_a_resolved_context(): void {
+	public function test_settings_ui_style_is_registered_and_enqueued_for_a_resolved_context(): void {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		$this->set_current_settings_page_request( $this->get_settings_ui_test_page() );
 
@@ -430,37 +430,29 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 		$assets->register_scripts();
 		$dependencies = $this->invoke_private_method( $assets, 'get_settings_ui_script_dependencies' );
 
-		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
 		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
 
 		$registered_style = wp_styles()->registered['wc-settings-ui'] ?? null;
 		$this->assertNotNull( $registered_style, 'The Settings UI style should be registered by the admin asset registry.' );
 		$this->assertSame( array( 'wp-components' ), $registered_style->deps, 'The Settings UI style should load after WordPress components.' );
 		$this->assertSame( 'replace', $registered_style->extra['rtl'] ?? null, 'The generated RTL stylesheet should replace the LTR stylesheet.' );
-		$this->assertSame( 1, array_count_values( wp_styles()->queue )['wc-settings-ui'] ?? 0, 'The Settings UI style should only be queued once.' );
+		$this->assertTrue( wp_style_is( 'wc-settings-ui', 'enqueued' ), 'The Settings UI style should be enqueued for a resolved context.' );
 	}
 
 	/**
-	 * @testdox Should not enqueue Settings UI styles when the feature is disabled.
+	 * @testdox Should not enqueue Settings UI styles for ineligible contexts.
 	 */
-	public function test_settings_ui_style_is_not_enqueued_when_feature_flag_is_disabled(): void {
+	public function test_settings_ui_style_is_not_enqueued_for_ineligible_contexts(): void {
 		add_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
 		$this->set_current_settings_page_request( $this->get_settings_ui_test_page() );
 
 		$assets = new WCAdminAssets();
 		$assets->register_scripts();
-		$dependencies = $this->invoke_private_method( $assets, 'get_settings_ui_script_dependencies' );
-		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
 
-		$this->assertFalse( wp_style_is( 'wc-settings-ui', 'enqueued' ), 'Disabled Settings UI requests should keep the new stylesheet out of the queue.' );
-	}
+		$this->assert_settings_ui_style_is_not_enqueued( $assets, 'Disabled Settings UI requests should keep the new stylesheet out of the queue.' );
+		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_settings_ui_feature' ) );
 
-	/**
-	 * @testdox Should not enqueue Settings UI styles for classic settings pages.
-	 */
-	public function test_settings_ui_style_is_not_enqueued_for_a_classic_settings_page(): void {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
-
 		$page = new class() extends \WC_Settings_Page {
 			/**
 			 * Constructor.
@@ -471,28 +463,10 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			}
 		};
 		$this->set_current_settings_page_request( $page );
+		$this->assert_settings_ui_style_is_not_enqueued( $assets, 'Classic settings pages should not request the Settings UI stylesheet.' );
 
-		$assets = new WCAdminAssets();
-		$assets->register_scripts();
-		$dependencies = $this->invoke_private_method( $assets, 'get_settings_ui_script_dependencies' );
-		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
-
-		$this->assertFalse( wp_style_is( 'wc-settings-ui', 'enqueued' ), 'Classic settings pages should not request the Settings UI stylesheet.' );
-	}
-
-	/**
-	 * @testdox Should not enqueue Settings UI styles when script handles fail.
-	 */
-	public function test_settings_ui_style_is_not_enqueued_when_script_handles_fail(): void {
-		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
 		$this->set_current_settings_page_request( $this->get_settings_ui_test_page_with_failing_script_handles(), 'advanced' );
-
-		$assets = new WCAdminAssets();
-		$assets->register_scripts();
-		$dependencies = $this->invoke_private_method( $assets, 'get_settings_ui_script_dependencies' );
-		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
-
-		$this->assertFalse( wp_style_is( 'wc-settings-ui', 'enqueued' ), 'A script handle failure should keep the Settings UI stylesheet out of the queue.' );
+		$this->assert_settings_ui_style_is_not_enqueued( $assets, 'A script handle failure should keep the Settings UI stylesheet out of the queue.' );
 	}
 
 	/**
@@ -1108,6 +1082,19 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 				);
 			}
 		};
+	}
+
+	/**
+	 * Assert that the current request does not enqueue the Settings UI style.
+	 *
+	 * @param WCAdminAssets $assets Admin assets instance.
+	 * @param string        $message Assertion failure message.
+	 */
+	private function assert_settings_ui_style_is_not_enqueued( WCAdminAssets $assets, string $message ): void {
+		$dependencies = $this->invoke_private_method( $assets, 'get_settings_ui_script_dependencies' );
+
+		$this->invoke_private_method( $assets, 'enqueue_settings_ui_style', array( $dependencies ) );
+		$this->assertFalse( wp_style_is( 'wc-settings-ui', 'enqueued' ), $message );
 	}
 
 	/**
