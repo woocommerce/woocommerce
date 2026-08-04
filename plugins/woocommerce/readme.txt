@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.0.0 2026-XX-XX =
+= 11.0.0 2026-08-04 =
 
 **WooCommerce**
 
@@ -320,6 +320,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Temporary deactivate persistent product status counters and rollback to WordPress API usage. [#67094](https://github.com/woocommerce/woocommerce/pull/67094)
 * Fix - Add no-op WC_REST_Layout_Templates_Controller and WC_REST_Products_Catalog_Controller stubs so an in-place update from 10.9.x does not fatal when the 10.9 controller list instantiates a class whose file has already been swapped away. [#67138](https://github.com/woocommerce/woocommerce/pull/67138)
 * Fix - Revert the fixed end-prices order calculation changes from PR #63744, which caused tax-inclusive stores using the woocommerce_adjust_non_base_location_prices filter to charge the net amount on block/Store API checkout [#67161](https://github.com/woocommerce/woocommerce/pull/67161)
+* Fix - Revert the legacy script blocking change (#64431) that broke the classic cart and checkout on sites loading a second jQuery instance. [#67363](https://github.com/woocommerce/woocommerce/pull/67363)
 * Add - Add a "Send checkout recovery email" action to the order actions dropdown so merchants can manually send the Checkout Recovery email for pending or checkout-draft orders past the 1-hour abandonment threshold. [#65136](https://github.com/woocommerce/woocommerce/pull/65136)
 * Add - Add a contextual Marketplace recommendation card to the WooCommerce Orders screen, shown to eligible stores based on locally-evaluated promotion rules. [#65970](https://github.com/woocommerce/woocommerce/pull/65970)
 * Add - Add a native Settings UI page provider path for registered settings sections. [#65975](https://github.com/woocommerce/woocommerce/pull/65975)
