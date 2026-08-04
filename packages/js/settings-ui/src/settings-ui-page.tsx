@@ -225,6 +225,7 @@ const UnsavedChangesModal = ( {
 					value={ __( 'Save', 'woocommerce' ) }
 					isBusy={ isSaving }
 					disabled={ isSaving }
+					accessibleWhenDisabled
 					onClick={ onSave }
 				>
 					{ __( 'Save', 'woocommerce' ) }

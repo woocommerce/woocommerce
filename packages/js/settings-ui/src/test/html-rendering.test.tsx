@@ -675,12 +675,15 @@ describe( 'settings HTML rendering', () => {
 		} );
 
 		const discardButton = getUnsavedChangesActionButton( 'Discard' );
+		const saveButton = getUnsavedChangesActionButton( 'Save' );
 		const modal = document.body.querySelector(
 			'.wc-settings-ui__unsaved-changes-modal'
 		);
 
 		expect( saveHandler ).toHaveBeenCalledTimes( 1 );
 		expect( discardButton ).toBeDisabled();
+		expect( saveButton ).toHaveAttribute( 'aria-disabled', 'true' );
+		expect( saveButton ).not.toBeDisabled();
 		expect(
 			document.body.querySelector( 'button[aria-label="Close"]' )
 		).toBeNull();
