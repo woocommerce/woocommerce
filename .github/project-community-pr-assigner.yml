@@ -7,9 +7,6 @@
 ".github/**/*":
   - adimoldovan
 
-"bin/**/*":
-  - kalessil
-
 "docs/**/*":
   - team: developer-advocacy
 
@@ -29,7 +26,7 @@
   - adimoldovan
 
 "packages/js/eslint-plugin/**/*":
-  - manzoorwanijk
+  - gigitux
 
 "packages/js/navigation/**/*":
   - team: somewherewarm
@@ -71,4 +68,4 @@
   - team: ballade
 
 "tools/**/*":
-  - manzoorwanijk
+  - gigitux

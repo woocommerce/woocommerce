@@ -4,9 +4,8 @@
 **/package.json @woocommerce/woo-fse
 
 # Monorepo tooling folders.
-/bin/ @kalessil
-/tools/ @manzoorwanijk
-/packages/js/eslint-plugin/ @manzoorwanijk
+/tools/ @gigitux
+/packages/js/eslint-plugin/ @gigitux
 /packages/js/dependency-extraction-webpack-plugin/ @woocommerce/woo-fse
 /packages/js/e2e-utils-playwright/ @adimoldovan
 
