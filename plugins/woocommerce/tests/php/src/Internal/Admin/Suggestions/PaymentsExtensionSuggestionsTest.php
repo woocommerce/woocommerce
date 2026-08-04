@@ -218,7 +218,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'HK' => 8,
 			'IN' => 7,
 			'ID' => 4,
-			'JP' => 7,
+			'JP' => 8,
 			'MY' => 5,
 			'NC' => 3,
 			'NZ' => 9,
@@ -611,7 +611,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'HK' => 8,
 			'IN' => 7,
 			'ID' => 4,
-			'JP' => 7,
+			'JP' => 8,
 			'MY' => 5,
 			'NC' => 3,
 			'NZ' => 9,
@@ -1060,6 +1060,27 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			PaymentsExtensionSuggestions::TAG_PREFERRED,
 			$helcim['tags'],
 			"Helcim should remain in other payment options for {$country_code}."
+		);
+	}
+
+	/**
+	 * @testdox Visa is the last "other payment provider" in Japan.
+	 */
+	public function test_visa_is_last_other_payment_provider_in_jp(): void {
+		$extensions = $this->sut->get_country_extensions( 'JP' );
+		$psp_ids    = array_column(
+			array_filter(
+				$extensions,
+				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
+			),
+			'id'
+		);
+
+		$this->assertContains( PaymentsExtensionSuggestions::AIRWALLEX, $psp_ids, 'Airwallex should be suggested in JP.' );
+		$this->assertSame(
+			PaymentsExtensionSuggestions::VISA,
+			end( $psp_ids ),
+			'Visa should be the last PSP suggestion in JP.'
 		);
 	}
 

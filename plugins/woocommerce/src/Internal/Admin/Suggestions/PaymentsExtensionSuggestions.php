@@ -2020,6 +2020,7 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
+			self::AIRWALLEX,
 			self::VISA,
 			self::PAYPAL_WALLET,
 			self::AMAZON_PAY,
