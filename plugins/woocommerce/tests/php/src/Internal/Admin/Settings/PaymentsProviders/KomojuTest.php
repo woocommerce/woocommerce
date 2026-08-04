@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentsProviders;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Komoju;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
@@ -62,17 +63,22 @@ class KomojuTest extends WC_Unit_Test_Case {
 	/**
 	 * Get a fake KOMOJU gateway object for testing.
 	 *
+	 * @param array $extra_props Optional. Additional gateway properties to apply on top of the defaults.
+	 *
 	 * @return FakePaymentGateway
 	 */
-	private function get_fake_gateway(): FakePaymentGateway {
+	private function get_fake_gateway( array $extra_props = array() ): FakePaymentGateway {
 		return new FakePaymentGateway(
 			'komoju',
-			array(
-				'enabled'            => true,
-				'plugin_slug'        => 'komoju-japanese-payments',
-				'plugin_file'        => 'komoju-japanese-payments/index',
-				'method_title'       => 'KOMOJU',
-				'method_description' => 'Deprecated legacy combined gateway.',
+			array_merge(
+				array(
+					'enabled'            => true,
+					'plugin_slug'        => 'komoju-japanese-payments',
+					'plugin_file'        => 'komoju-japanese-payments/index',
+					'method_title'       => 'KOMOJU',
+					'method_description' => 'Deprecated legacy combined gateway.',
+				),
+				$extra_props
 			),
 		);
 	}
@@ -93,20 +99,70 @@ class KomojuTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox is_in_test_mode() falls back to the generic detection when the KOMOJU
-	 *          extension classes are not loaded, instead of erroring out.
+	 * @testdox get_settings_url() defers to the gateway's own settings section for per-method
+	 *          gateways, since they already have a real settings section unlike the legacy gateway.
 	 */
-	public function test_is_in_test_mode_falls_back_when_komoju_class_is_missing(): void {
-		// Arrange - the KOMOJU extension is not installed in the test environment,
-		// so `WC_Gateway_Komoju` does not exist here. This exercises the defensive
-		// class_exists()/is_callable() guard rather than the real KOMOJU logic.
-		$this->assertFalse( class_exists( '\WC_Gateway_Komoju' ) );
+	public function test_get_settings_url_defers_to_the_gateways_own_settings_section_for_a_per_method_gateway(): void {
+		$gateway = new FakePaymentGateway(
+			'komoju_konbini',
+			array(
+				'method_title' => 'KOMOJU - Konbini',
+				'settings_url' => 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=komoju_konbini',
+			)
+		);
 
-		// Act.
+		$settings_url = $this->sut->get_settings_url( $gateway );
+
+		$this->assertSame(
+			add_query_arg( array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ), $gateway->get_settings_url() ),
+			$settings_url
+		);
+	}
+
+	/**
+	 * @testdox is_in_test_mode() returns true when the current global secret key has the `sk_test_` prefix.
+	 */
+	public function test_is_in_test_mode_returns_true_with_a_test_secret_key(): void {
+		update_option( 'komoju_woocommerce_secret_key', 'sk_test_123' );
+
 		$is_test_mode = $this->sut->is_in_test_mode( $this->get_fake_gateway() );
 
-		// Assert - falls back to the generic provider behaviour instead of fataling.
+		$this->assertTrue( $is_test_mode );
+	}
+
+	/**
+	 * @testdox is_in_test_mode() returns false when the current global secret key has the `sk_live_` prefix.
+	 */
+	public function test_is_in_test_mode_returns_false_with_a_live_secret_key(): void {
+		update_option( 'komoju_woocommerce_secret_key', 'sk_live_456' );
+
+		$is_test_mode = $this->sut->is_in_test_mode( $this->get_fake_gateway() );
+
 		$this->assertFalse( $is_test_mode );
+	}
+
+	/**
+	 * @testdox is_in_test_mode() returns true when only the legacy per-gateway secret key
+	 *          is set with the `sk_test_` prefix.
+	 */
+	public function test_is_in_test_mode_returns_true_with_the_legacy_secret_key(): void {
+		update_option( 'woocommerce_komoju_settings', array( 'secretKey' => 'sk_test_789' ) );
+
+		$is_test_mode = $this->sut->is_in_test_mode( $this->get_fake_gateway() );
+
+		$this->assertTrue( $is_test_mode );
+	}
+
+	/**
+	 * @testdox is_in_test_mode() falls back to the generic detection when no secret key is saved anywhere,
+	 *          instead of erroring out.
+	 */
+	public function test_is_in_test_mode_falls_back_when_no_secret_key_is_saved(): void {
+		// The fake gateway's own is_test_mode() returns true, proving this genuinely
+		// delegates to the generic provider fallback rather than defaulting to false.
+		$is_test_mode = $this->sut->is_in_test_mode( $this->get_fake_gateway( array( 'test_mode' => true ) ) );
+
+		$this->assertTrue( $is_test_mode );
 	}
 
 	/**

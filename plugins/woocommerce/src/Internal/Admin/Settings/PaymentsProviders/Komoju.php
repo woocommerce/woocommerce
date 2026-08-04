@@ -24,8 +24,14 @@ class Komoju extends PaymentGateway {
 	 * @return string The settings URL for the payment gateway.
 	 */
 	public function get_settings_url( WC_Payment_Gateway $payment_gateway ): string {
-		// KOMOJU's account connection and payment method selection happen on its own
-		// dedicated settings tab, not on the legacy combined gateway's settings section.
+		// The legacy combined gateway has no settings section of its own; account connection
+		// and payment method selection happen on KOMOJU's dedicated settings tab instead.
+		// Per-method gateways (`komoju_*`) already have a real settings section, so defer to
+		// the generic gateway settings URL logic for those.
+		if ( 'komoju' !== $payment_gateway->id ) {
+			return parent::get_settings_url( $payment_gateway );
+		}
+
 		return admin_url( 'admin.php?page=wc-settings&tab=komoju_settings' );
 	}
 
@@ -43,10 +49,11 @@ class Komoju extends PaymentGateway {
 		try {
 			// KOMOJU has no dedicated test-mode setting; it infers the environment from
 			// whether the stored secret key has the `sk_test_` (vs. `sk_live_`) prefix.
-			if ( class_exists( '\WC_Gateway_Komoju' ) &&
-				is_callable( '\WC_Gateway_Komoju::komoju_is_test_mode' ) ) {
-
-				return wc_string_to_bool( \WC_Gateway_Komoju::komoju_is_test_mode() );
+			// Read the key directly instead of relying on the extension's own
+			// `komoju_is_test_mode()` helper, which isn't present on older extension versions.
+			$secret_key = $this->get_secret_key();
+			if ( ! empty( $secret_key ) ) {
+				return str_starts_with( $secret_key, 'sk_test_' );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
@@ -74,15 +81,8 @@ class Komoju extends PaymentGateway {
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
 			// KOMOJU doesn't expose a dedicated "is connected" API. It considers the merchant
-			// connected once a secret key is saved, checking the current global option first
-			// and falling back to the legacy per-gateway settings array, same as the plugin itself.
-			$secret_key = get_option( 'komoju_woocommerce_secret_key' );
-			if ( empty( $secret_key ) ) {
-				$legacy_settings = get_option( 'woocommerce_komoju_settings' );
-				$secret_key      = is_array( $legacy_settings ) ? ( $legacy_settings['secretKey'] ?? '' ) : '';
-			}
-
-			return ! empty( $secret_key );
+			// connected once a secret key is saved.
+			return ! empty( $this->get_secret_key() );
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
@@ -96,5 +96,21 @@ class Komoju extends PaymentGateway {
 		}
 
 		return parent::is_account_connected( $payment_gateway );
+	}
+
+	/**
+	 * Get the KOMOJU secret key, checking the current global option first and falling back
+	 * to the legacy per-gateway settings array, same as the plugin itself.
+	 *
+	 * @return string The secret key, or an empty string if none is saved.
+	 */
+	private function get_secret_key(): string {
+		$secret_key = get_option( 'komoju_woocommerce_secret_key' );
+		if ( empty( $secret_key ) ) {
+			$legacy_settings = get_option( 'woocommerce_komoju_settings' );
+			$secret_key      = is_array( $legacy_settings ) ? ( $legacy_settings['secretKey'] ?? '' ) : '';
+		}
+
+		return is_string( $secret_key ) ? $secret_key : '';
 	}
 }
