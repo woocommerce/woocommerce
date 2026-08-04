@@ -95,28 +95,28 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 		&,
 		&--default {
-			background: var(--wpds-color-background-surface-neutral-weak, #f5f5f5);
-			color: var(--wpds-color-foreground-content-neutral, #070707);
+			background: #f5f5f5;
+			color: #070707;
 		}
 
 		&--info {
-			background: var(--wpds-color-background-surface-info, #deebfa);
-			color: var(--wpds-color-foreground-content-info, #001b4f);
+			background: #deebfa;
+			color: #001b4f;
 		}
 
 		&--success {
-			background: var(--wpds-color-background-surface-success, #c6f7cd);
-			color: var(--wpds-color-foreground-content-success, #002900);
+			background: #c6f7cd;
+			color: #002900;
 		}
 
 		&--warning {
-			background: var(--wpds-color-background-surface-warning, #fde6be);
-			color: var(--wpds-color-foreground-content-warning, #2e1900);
+			background: #fde6be;
+			color: #2e1900;
 		}
 
 		&--error {
-			background: var(--wpds-color-background-surface-error, #f6e6e3);
-			color: var(--wpds-color-foreground-content-error, #470000);
+			background: #f6e6e3;
+			color: #470000;
 		}
 	}
 
@@ -219,7 +219,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui__section-card {
-		background: var(--wpds-color-background-surface-neutral-strong, #fff);
+		background: #fff;
 		border: 1px solid var(--wpds-color-stroke-surface-neutral-weak, #f0f0f0);
 		border-radius: var(--wpds-border-radius-lg, 8px);
 		box-sizing: border-box;
@@ -241,7 +241,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	}
 
 	.wc-settings-ui__section-header h2 {
-		color: var(--wpds-color-foreground-content-neutral, #1e1e1e);
+		color: #1e1e1e;
 		font-size: 15px;
 		font-weight: var(--wpds-typography-font-weight-medium, 500);
 		line-height: 20px;
@@ -314,7 +314,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		}
 
 		.components-base-control__help {
-			color: var(--wpds-color-foreground-content-neutral-weak, #707070);
+			color: #707070;
 			font-size: 12px;
 			line-height: 16px;
 			margin-top: 8px;
