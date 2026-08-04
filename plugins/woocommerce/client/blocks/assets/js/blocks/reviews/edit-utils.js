@@ -23,6 +23,7 @@ import {
 const MIN_REVIEW_COUNT = 1;
 const MAX_REVIEW_COUNT = 20;
 const DEFAULT_REVIEW_COUNT = 10;
+const MIN_REVIEW_OFFSET = 0;
 
 const normalizeReviewCount = ( value ) => {
 	const parsedValue = Number.parseInt( value, 10 );
@@ -34,6 +35,27 @@ const normalizeReviewCount = ( value ) => {
 		Math.min( MAX_REVIEW_COUNT, reviewCount )
 	);
 };
+
+const normalizeReviewOffset = ( value ) => {
+	const parsedValue = Number.parseInt( value, 10 );
+	return Number.isNaN( parsedValue )
+		? MIN_REVIEW_OFFSET
+		: Math.max( MIN_REVIEW_OFFSET, parsedValue );
+};
+
+const createInputStateReducer =
+	( normalizeValue, lastValidValue ) => ( state, action ) => ( {
+		...state,
+		value:
+			state.value === '' && action.type === 'CHANGE'
+				? ''
+				: String(
+						state.value === ''
+							? lastValidValue
+							: normalizeValue( state.value )
+				  ),
+	} );
+
 export const getBlockControls = ( editMode, setAttributes, buttonTitle ) => (
 	<BlockControls>
 		<ToolbarGroup
@@ -237,8 +259,6 @@ export const getSharedReviewListControls = (
 	setAttributes,
 	{ showOffset = false } = {}
 ) => {
-	const defaultOffset = 0;
-
 	return (
 		<>
 			<ToolsPanelItem
@@ -300,9 +320,17 @@ export const getSharedReviewListControls = (
 			>
 				<InputControl
 					__next40pxDefaultSize
+					__unstableStateReducer={ createInputStateReducer(
+						normalizeReviewCount,
+						attributes.reviewsOnPageLoad
+					) }
 					label={ __( 'Number of reviews', 'woocommerce' ) }
 					value={ String( attributes.reviewsOnPageLoad ) }
 					onChange={ ( value ) => {
+						if ( value === '' ) {
+							return;
+						}
+
 						setAttributes( {
 							reviewsOnPageLoad: normalizeReviewCount( value ),
 						} );
@@ -316,27 +344,40 @@ export const getSharedReviewListControls = (
 			{ showOffset && (
 				<ToolsPanelItem
 					hasValue={ () =>
-						( attributes.offset ?? defaultOffset ) !== defaultOffset
+						( attributes.offset ?? MIN_REVIEW_OFFSET ) !==
+						MIN_REVIEW_OFFSET
 					}
 					label={ __( 'Offset', 'woocommerce' ) }
 					onDeselect={ () =>
-						setAttributes( { offset: defaultOffset } )
+						setAttributes( { offset: MIN_REVIEW_OFFSET } )
 					}
 					isShownByDefault
 				>
 					<InputControl
 						__next40pxDefaultSize
+						__unstableStateReducer={ createInputStateReducer(
+							normalizeReviewOffset,
+							attributes.offset ?? MIN_REVIEW_OFFSET
+						) }
 						label={ __( 'Offset', 'woocommerce' ) }
 						help={ __(
 							'Number of reviews to skip',
 							'woocommerce'
 						) }
-						value={ String( attributes.offset ?? defaultOffset ) }
-						onChange={ ( value ) =>
-							setAttributes( { offset: Number( value ) } )
-						}
+						value={ String(
+							attributes.offset ?? MIN_REVIEW_OFFSET
+						) }
+						onChange={ ( value ) => {
+							if ( value === '' ) {
+								return;
+							}
+
+							setAttributes( {
+								offset: normalizeReviewOffset( value ),
+							} );
+						} }
 						type="number"
-						min={ defaultOffset }
+						min={ MIN_REVIEW_OFFSET }
 						step={ 1 }
 					/>
 				</ToolsPanelItem>
@@ -369,14 +410,22 @@ export const getSharedReviewListControls = (
 					{ attributes.showLoadMore && (
 						<InputControl
 							__next40pxDefaultSize
+							__unstableStateReducer={ createInputStateReducer(
+								normalizeReviewCount,
+								attributes.reviewsOnLoadMore
+							) }
 							label={ __( 'Load more reviews', 'woocommerce' ) }
 							value={ String( attributes.reviewsOnLoadMore ) }
-							onChange={ ( value ) =>
+							onChange={ ( value ) => {
+								if ( value === '' ) {
+									return;
+								}
+
 								setAttributes( {
 									reviewsOnLoadMore:
 										normalizeReviewCount( value ),
-								} )
-							}
+								} );
+							} }
 							type="number"
 							max={ MAX_REVIEW_COUNT }
 							min={ MIN_REVIEW_COUNT }
