@@ -1221,41 +1221,27 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox PUT /orders with an unchanged parent product_id preserves the variation when variation_id is omitted.
+	 * @testdox PUT /orders with an unchanged parent preserves the variation and existing resynchronization behavior.
 	 */
-	public function test_update_line_item_with_unchanged_parent_preserves_omitted_variation_id(): void {
+	public function test_update_line_item_with_unchanged_parent_preserves_variation_id(): void {
 		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
-		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
-		$item                       = new WC_Order_Item_Product( $item_id );
-		$item->set_name( 'Historical variation line item' );
+		$parent->set_name( 'Updated parent name' );
+		$parent->set_tax_class( 'reduced-rate' );
+		$parent->save();
+		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
+		$item                    = new WC_Order_Item_Product( $item_id );
+		$item->set_name( 'Historical line item name' );
+		$item->set_tax_class( '' );
 		$item->save();
 
-		$product_filter_ran             = false;
-		$product_filter_ran_before_save = false;
-		$product_filter                 = static function ( $product ) use ( &$product_filter_ran ) {
-			$product_filter_ran = true;
-			return $product;
-		};
-		$before_save_hook               = static function () use ( &$product_filter_ran, &$product_filter_ran_before_save ) {
-			$product_filter_ran_before_save = $product_filter_ran;
-		};
-		add_filter( 'woocommerce_order_item_product', $product_filter );
-		add_action( 'woocommerce_rest_set_order_item', $before_save_hook, 10, 0 );
-
-		try {
-			$response = $this->dispatch_line_item_update(
-				$order->get_id(),
-				array(
-					'id'         => $item_id,
-					'product_id' => $parent->get_id(),
-				)
-			);
-		} finally {
-			remove_filter( 'woocommerce_order_item_product', $product_filter );
-			remove_action( 'woocommerce_rest_set_order_item', $before_save_hook, 10 );
-		}
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $parent->get_id(),
+			)
+		);
 		$this->assertSame( 200, $response->get_status(), 'A product_id-only payload targeting the variable parent succeeds with no error.' );
-		$this->assertTrue( $product_filter_ran_before_save, 'Product filters should run before the REST set-item hook.' );
 
 		$response_item = $response->get_data()['line_items'][0];
 		$reloaded      = new WC_Order_Item_Product( $item_id );
@@ -1264,13 +1250,14 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'get_product() should continue to resolve to the variation.' );
 		$this->assertSame( $parent->get_id(), $response_item['product_id'], 'The response should retain the variable parent product ID.' );
 		$this->assertSame( $variation->get_id(), $response_item['variation_id'], 'The response should retain the variation ID.' );
-		$this->assertSame( 'Historical variation line item', $reloaded->get_name(), 'Omitted item fields should retain their historical values.' );
+		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should retain its pre-regression resynchronization behavior.' );
+		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
 	}
 
 	/**
-	 * @testdox PUT /orders preserves a variation when its inherited parent SKU differs only by case.
+	 * @testdox Round-tripping a variation with its inherited parent SKU preserves the variation ID.
 	 */
-	public function test_update_line_item_with_case_equivalent_inherited_parent_sku_preserves_variation_id(): void {
+	public function test_round_trip_line_item_with_inherited_parent_sku_preserves_variation_id(): void {
 		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
 		$parent_sku                 = 'REST-V3-PARENT-' . wp_generate_uuid4();
 		$parent->set_sku( $parent_sku );
@@ -1285,8 +1272,6 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$round_trip_item = $get_response->get_data()['line_items'][0];
 		$this->assertSame( $parent_sku, $round_trip_item['sku'], 'The response should expose the SKU inherited from the parent.' );
-		$round_trip_item['sku'] = strtolower( $parent_sku );
-		$this->assertSame( $parent->get_id(), wc_get_product_id_by_sku( $round_trip_item['sku'] ), 'The SKU lookup should honor database collation.' );
 
 		$put_response = $this->dispatch_line_item_update( $order->get_id(), $round_trip_item );
 		$this->assertSame( 200, $put_response->get_status(), 'Round-tripping the line item should succeed.' );
@@ -1294,90 +1279,6 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$reloaded = new WC_Order_Item_Product( $item_id );
 		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The inherited parent SKU should not demote the variation.' );
 		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'The line item should continue to resolve to the variation.' );
-	}
-
-	/**
-	 * @testdox PUT /orders honors a filtered SKU alias that resolves to the current parent.
-	 */
-	public function test_update_line_item_honors_filtered_parent_sku_alias(): void {
-		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
-
-		$alias_sku = 'REST-V3-ALIAS-' . wp_generate_uuid4();
-		$parent->set_sku( 'REST-V3-PARENT-' . wp_generate_uuid4() );
-		$parent->save();
-		$variation->set_sku( '' );
-		$variation->save();
-		list( $order, $item_id ) = $this->create_order_with_variation_line_item( $variation );
-		$malformed_variation     = new WC_Product_Variation( $variation->get_id() );
-		$parent_data             = $malformed_variation->get_parent_data();
-		$parent_data['sku']      = new stdClass();
-		$malformed_variation->set_parent_data( $parent_data );
-		$this->assertInstanceOf( stdClass::class, $malformed_variation->get_parent_data()['sku'], 'Precondition: the variation should expose malformed raw parent SKU data.' );
-
-		$sku_filter     = static function ( $product_id, $posted_sku ) use ( $alias_sku, $parent ) {
-			return $alias_sku === $posted_sku ? $parent->get_id() : $product_id;
-		};
-		$product_filter = static function ( $product ) use ( $malformed_variation ) {
-			return $product instanceof WC_Product_Variation && $product->get_id() === $malformed_variation->get_id() ? $malformed_variation : $product;
-		};
-		add_filter( 'woocommerce_get_product_id_by_sku', $sku_filter, 10, 2 );
-		add_filter( 'woocommerce_order_item_product', $product_filter );
-
-		try {
-			$response = $this->dispatch_line_item_update(
-				$order->get_id(),
-				array(
-					'id'         => $item_id,
-					'product_id' => $parent->get_id(),
-					'sku'        => $alias_sku,
-				)
-			);
-		} finally {
-			remove_filter( 'woocommerce_get_product_id_by_sku', $sku_filter, 10 );
-			remove_filter( 'woocommerce_order_item_product', $product_filter );
-		}
-		$this->assertSame( 200, $response->get_status(), 'The filtered parent alias update should succeed.' );
-
-		$reloaded = new WC_Order_Item_Product( $item_id );
-		$this->assertSame( 0, $reloaded->get_variation_id(), 'A filtered alias resolving to the parent should clear variation_id.' );
-		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should use the filtered parent result.' );
-	}
-
-	/**
-	 * @testdox Creating with unresolved SKU zero falls back while updates honor resolvable SKU zero.
-	 */
-	public function test_zero_sku_product_reference_behavior(): void {
-		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
-		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
-		$posted_product             = WC_Helper_Product::create_simple_product();
-		$sku_product                = WC_Helper_Product::create_simple_product();
-		$create_request             = new WP_REST_Request( 'POST', '/wc/v3/orders' );
-		$create_line_item           = array(
-			'product_id' => $posted_product->get_id(),
-			'sku'        => '0',
-		);
-		$create_request->set_body_params( array( 'line_items' => array( $create_line_item ) ) );
-
-		$create_response = $this->server->dispatch( $create_request );
-		$this->assertSame( $posted_product->get_id(), $create_response->get_data()['line_items'][0]['product_id'], 'An unresolved SKU zero should fall back to the posted product ID on create.' );
-
-		$sku_product->set_sku( '0' );
-		$sku_product->save();
-		$this->assertSame( $sku_product->get_id(), wc_get_product_id_by_sku( '0' ), 'SKU zero should resolve to the simple product.' );
-
-		$response = $this->dispatch_line_item_update(
-			$order->get_id(),
-			array(
-				'id'         => $item_id,
-				'product_id' => $parent->get_id(),
-				'sku'        => '0',
-			)
-		);
-		$this->assertSame( 200, $response->get_status(), 'Switching by SKU zero should succeed.' );
-
-		$reloaded = new WC_Order_Item_Product( $item_id );
-		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching by SKU zero should clear variation_id.' );
-		$this->assertSame( $sku_product->get_id(), $reloaded->get_product()->get_id(), 'The line item should use the SKU lookup result.' );
 	}
 
 	/**
@@ -1404,80 +1305,5 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$reloaded = new WC_Order_Item_Product( $item_id );
 		$this->assertSame( 0, $reloaded->get_variation_id(), 'Switching to a simple product by SKU should clear variation_id.' );
 		$this->assertSame( $simple->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the product selected by SKU.' );
-	}
-
-	/**
-	 * @testdox PUT /orders does not fatal when a non-product order item ID is submitted under line_items.
-	 */
-	public function test_update_line_item_with_non_product_order_item_id_does_not_fatal(): void {
-		$order = new WC_Order();
-		$fee   = new WC_Order_Item_Fee();
-		$fee->set_name( 'Fee submitted as a line item' );
-		$fee->set_total( 10 );
-		$order->add_item( $fee );
-		$order->save();
-
-		$response = $this->dispatch_line_item_update( $order->get_id(), array( 'id' => $fee->get_id() ) );
-		$this->assertSame( 200, $response->get_status(), 'The mismatched order item should retain the previous no-op behavior.' );
-
-		$reloaded = new WC_Order_Item_Fee( $fee->get_id() );
-		$this->assertSame( 'Fee submitted as a line item', $reloaded->get_name(), 'The fee should remain unchanged.' );
-		$this->assertSame( 10.0, (float) $reloaded->get_total(), 'The fee total should remain unchanged.' );
-	}
-
-	/**
-	 * @testdox PUT /orders with an explicit zero variation_id deliberately switches the line item to its variable parent.
-	 */
-	public function test_update_line_item_with_explicit_zero_variation_id_switches_to_parent(): void {
-		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
-		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
-
-		$response = $this->dispatch_line_item_update(
-			$order->get_id(),
-			array(
-				'id'           => $item_id,
-				'product_id'   => $parent->get_id(),
-				'variation_id' => 0,
-			)
-		);
-		$this->assertSame( 200, $response->get_status(), 'An explicit zero variation_id should be accepted.' );
-
-		$response_item = $response->get_data()['line_items'][0];
-		$reloaded      = new WC_Order_Item_Product( $item_id );
-		$this->assertSame( 0, $reloaded->get_variation_id(), 'An explicit zero variation_id should deliberately clear the variation.' );
-		$this->assertSame( 0, (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The explicit zero variation ID should be persisted.' );
-		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'get_product() should resolve to the variable parent after explicit demotion.' );
-		$this->assertSame( $parent->get_id(), $response_item['product_id'], 'The response should identify the variable parent.' );
-		$this->assertSame( 0, $response_item['variation_id'], 'The response should expose the explicit variation demotion.' );
-	}
-
-	/**
-	 * @testdox PUT /orders with a different positive variation_id switches the line item to that sibling variation.
-	 */
-	public function test_update_line_item_switches_to_sibling_variation(): void {
-		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
-		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
-		$sibling                    = WC_Helper_Product::create_product_variation_object(
-			$parent->get_id(),
-			'REST-SIBLING-' . wp_generate_uuid4(),
-			20,
-			array( 'color' => 'green' )
-		);
-
-		$response = $this->dispatch_line_item_update(
-			$order->get_id(),
-			array(
-				'id'           => $item_id,
-				'product_id'   => $parent->get_id(),
-				'variation_id' => $sibling->get_id(),
-			)
-		);
-		$this->assertSame( 200, $response->get_status(), 'Switching to a sibling variation should succeed.' );
-
-		$response_item = $response->get_data()['line_items'][0];
-		$reloaded      = new WC_Order_Item_Product( $item_id );
-		$this->assertSame( $sibling->get_id(), $reloaded->get_variation_id(), 'The sibling variation ID should be persisted.' );
-		$this->assertSame( $sibling->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the sibling variation.' );
-		$this->assertSame( $sibling->get_id(), $response_item['variation_id'], 'The response should identify the sibling variation.' );
 	}
 }

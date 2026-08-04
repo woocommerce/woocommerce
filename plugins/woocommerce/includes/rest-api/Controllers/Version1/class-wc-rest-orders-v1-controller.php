@@ -622,14 +622,9 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return int
 	 */
 	protected function get_product_id( $posted, $action = 'create' ) {
-		if ( array_key_exists( 'sku', $posted ) && '' !== (string) $posted['sku'] ) {
-			$product_id           = (int) wc_get_product_id_by_sku( (string) $posted['sku'] );
-			$should_use_posted_id = 'create' === $action && '0' === (string) $posted['sku'] && ! $product_id;
-			if ( ! $should_use_posted_id ) {
-				return $product_id;
-			}
-		}
-		if ( ! empty( $posted['product_id'] ) && empty( $posted['variation_id'] ) ) {
+		if ( ! empty( $posted['sku'] ) ) {
+			$product_id = (int) wc_get_product_id_by_sku( $posted['sku'] );
+		} elseif ( ! empty( $posted['product_id'] ) && empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['product_id'];
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];
@@ -676,41 +671,22 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function prepare_line_items( $posted, $action = 'create' ) {
 		$item                 = new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' );
-		$product_id           = $this->get_product_id( $posted, $action );
-		$has_posted_sku       = array_key_exists( 'sku', $posted ) && '' !== (string) $posted['sku'];
+		$product              = wc_get_product( $this->get_product_id( $posted, $action ) );
 		$current_product_id   = $item->get_product_id();
 		$current_variation_id = $item->get_variation_id();
-
-		$preserve_current_variation    = 'update' === $action
+		$restore_variation_id = 'update' === $action
 			&& $current_variation_id
 			&& array_key_exists( 'product_id', $posted )
 			&& ( ! array_key_exists( 'variation_id', $posted ) || (int) $posted['variation_id'] === $current_variation_id )
-			&& (int) $posted['product_id'] === $current_product_id;
-		$current_product               = $preserve_current_variation ? $item->get_product() : null;
-		$variation_inherits_posted_sku = false;
-
-		if ( $preserve_current_variation && $has_posted_sku && $product_id === $current_product_id ) {
-			$current_variation = $current_product;
-			if ( ! ( $current_variation instanceof WC_Product_Variation ) || $current_variation->get_id() !== $current_variation_id ) {
-				$current_variation = wc_get_product( $current_variation_id );
-			}
-			$parent_sku                    = $current_variation instanceof WC_Product_Variation ? ( $current_variation->get_parent_data()['sku'] ?? '' ) : '';
-			$parent_sku_can_be_normalized  = is_scalar( $parent_sku ) || ( is_object( $parent_sku ) && is_callable( array( $parent_sku, '__toString' ) ) );
-			$variation_inherits_posted_sku = $current_variation instanceof WC_Product_Variation
-				&& '' === $current_variation->get_sku( 'edit' )
-				&& $parent_sku_can_be_normalized
-				&& wc_strtolower( (string) $posted['sku'] ) === wc_strtolower( (string) $parent_sku );
-		}
-
-		$preserve_current_variation = $preserve_current_variation
-			&& ( ! $has_posted_sku || $product_id === $current_variation_id || $variation_inherits_posted_sku );
-		$product                    = $preserve_current_variation ? $current_product : wc_get_product( $product_id );
-		$should_set_product         = ! $preserve_current_variation
 			&& $product instanceof WC_Product
-			&& ( is_null( $current_product ) ? $item->get_product() : $current_product ) !== $product;
+			&& (int) $posted['product_id'] === $current_product_id
+			&& in_array( $product->get_id(), array( $current_product_id, $current_variation_id ), true );
 
-		if ( $should_set_product ) {
+		if ( $product && $product !== $item->get_product() ) {
 			$item->set_product( $product );
+			if ( $restore_variation_id ) {
+				$item->set_variation_id( $current_variation_id );
+			}
 
 			if ( 'create' === $action ) {
 				$quantity = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
