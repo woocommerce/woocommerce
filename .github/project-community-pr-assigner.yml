@@ -1,20 +1,11 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
 # Community PRs are routed by product area. Rules accumulate when a PR spans areas.
-# Product mappings follow WooCommerce's cross-functional triage structure; shared
+# Product mappings follow WooCommerce's current triage structure; shared
 # backend and developer-tooling fallbacks use recent contribution activity.
 
 # Repository infrastructure and developer tooling.
 '.github/**/*':
     - adimoldovan
-
-'{.codecov.yml,.coderabbit.yml,CODEOWNERS}':
-    - adimoldovan
-
-'{.ai,.claude,.codex,.cursor,.husky,.linear}/**/*':
-    - gigitux
-
-'{.editorconfig,.gitattributes,.gitignore,.npmrc,.nvmrc,.pnpmfile.cjs,.prettierrc.js,.stylelintrc,.syncpackrc,AGENTS.md,CLAUDE.md,eslint.config.mjs,package.json,phpcs.xml,pnpm-workspace.yaml,tsconfig.base.json}':
-    - gigitux
 
 'docs/**/*':
     - team: developer-advocacy
@@ -32,12 +23,6 @@
     - adimoldovan
 
 'packages/php/{monorepo-plugin,remote-specs-validation}/**/*':
-    - gigitux
-
-'plugins/woocommerce/{bin,lib,php-stubs}/**/*':
-    - gigitux
-
-'plugins/woocommerce/client/admin/{bin,config}/**/*':
     - gigitux
 
 'plugins/woocommerce/tests/{Tools,bin,cli,e2e,metrics,performance}/**/*':

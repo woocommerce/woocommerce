@@ -1,17 +1,10 @@
-# Monorepo CI and package managers manifests.
+# Monorepo CI.
 /.github/ @adimoldovan
-**/composer.json @woocommerce/woo-fse
-**/package.json @woocommerce/woo-fse
 
 # Monorepo tooling folders.
-/tools/ @gigitux
-/packages/js/eslint-plugin/ @gigitux
-/packages/js/dependency-extraction-webpack-plugin/ @woocommerce/woo-fse
 /packages/js/e2e-utils-playwright/ @adimoldovan
 
 # Files in root of repository
-/.* @woocommerce/woo-fse
-/*.* @woocommerce/woo-fse
 /changelog.txt
 /pnpm-lock.yaml
 
