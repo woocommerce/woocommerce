@@ -56,6 +56,7 @@ const dataViewsUiPackageDirectory = resolvePackageDirectory(
 	dataViewsPackageDirectory
 );
 const dataViewsBundledPackageDirectories = [
+	dataViewsPackageDirectory,
 	resolvePackageDirectory(
 		'@wordpress/components',
 		dataViewsPackageDirectory
