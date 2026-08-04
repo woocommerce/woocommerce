@@ -131,6 +131,59 @@ class HelcimTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fall back to the generic account-connected heuristic when the environment option is entirely absent.
+	 */
+	public function test_is_account_connected_falls_back_when_environment_option_missing(): void {
+		// Simulates a pre-v5 Helcim install: same gateway id, but no 'environment'
+		// option was ever registered, so it's absent from both settings and form_fields.
+		$fake_gateway = new FakePaymentGateway(
+			'helcimjs',
+			array(
+				'settings'          => array(
+					'legacy_api_token' => 'real_legacy_live_token',
+				),
+				'account_connected' => true,
+			),
+		);
+
+		$this->assertTrue( $this->sut->is_account_connected( $fake_gateway ) );
+	}
+
+	/**
+	 * @testdox Should fall back to the generic account-connected heuristic for an unrecognized environment value.
+	 */
+	public function test_is_account_connected_falls_back_for_unrecognized_environment(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'helcimjs',
+			array(
+				'settings'          => array(
+					'environment' => 'staging',
+				),
+				'account_connected' => false,
+			),
+		);
+
+		$this->assertFalse( $this->sut->is_account_connected( $fake_gateway ) );
+	}
+
+	/**
+	 * @testdox Should fall back to the generic test-mode heuristic for an unrecognized environment value.
+	 */
+	public function test_is_in_test_mode_falls_back_for_unrecognized_environment(): void {
+		$fake_gateway = new FakePaymentGateway(
+			'helcimjs',
+			array(
+				'settings'  => array(
+					'environment' => 'staging',
+				),
+				'test_mode' => true,
+			),
+		);
+
+		$this->assertTrue( $this->sut->is_in_test_mode( $fake_gateway ) );
+	}
+
+	/**
 	 * @testdox Should report the same test-mode-onboarding value as test mode.
 	 */
 	public function test_is_in_test_mode_onboarding_matches_is_in_test_mode(): void {

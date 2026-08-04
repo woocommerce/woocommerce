@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * This class handles all the custom logic for the Helcim payment gateway provider.
  *
- * `@internal`
+ * @internal
  */
 class Helcim extends PaymentGateway {
 
@@ -88,7 +88,7 @@ class Helcim extends PaymentGateway {
 			// Helcim stores the active environment ('sandbox'|'live') as a gateway option,
 			// read through the gateway's own get_option() so we follow whatever option key
 			// and precedence the extension uses internally.
-			$environment = $payment_gateway->get_option( 'environment', 'sandbox' );
+			$environment = $payment_gateway->get_option( 'environment' );
 			if ( ! is_string( $environment ) ) {
 				return null;
 			}
