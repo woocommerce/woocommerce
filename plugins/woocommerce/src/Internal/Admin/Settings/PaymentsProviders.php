@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Helcim;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\HelioPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Klarna;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\KlarnaCheckout;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Komoju;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Monei;
@@ -115,6 +116,8 @@ class PaymentsProviders {
 		'stripe_*'                    => Stripe::class,
 		'mollie'                      => Mollie::class,
 		'mollie_wc_gateway_*'         => Mollie::class, // Target all the Mollie gateways.
+		// Only the legacy combined gateway; per-method `komoju_*` gateways keep their own settings sections.
+		'komoju'                      => Komoju::class,
 		'amazon_payments_advanced*'   => AmazonPay::class,
 		'woo-mercado-pago-*'          => MercadoPago::class,
 		'affirm'                      => Affirm::class,
