@@ -13,6 +13,8 @@ defined( 'ABSPATH' ) || exit;
  * Helcim payment gateway provider class.
  *
  * This class handles all the custom logic for the Helcim payment gateway provider.
+ *
+ * `@internal`
  */
 class Helcim extends PaymentGateway {
 
