@@ -308,6 +308,121 @@ class IntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refresh a never-edited scratchpad from the file template when the editor opens directly.
+	 */
+	public function test_editor_open_refreshes_untouched_scratchpad(): void {
+		$this->bootstrap_email_editor();
+		$this->skip_if_unsupported_environment();
+
+		$post_id = $this->create_scratchpad( 'customer_processing_order' );
+
+		$append_marker = static function ( $template_html ) {
+			return $template_html . "\n<!-- wp:paragraph --><p>FRESH_TEMPLATE_MARKER</p><!-- /wp:paragraph -->";
+		};
+		add_filter( 'woocommerce_email_block_template_html', $append_marker );
+
+		try {
+			$this->invoke_maybe_refresh_scratchpad( $post_id );
+		} finally {
+			remove_filter( 'woocommerce_email_block_template_html', $append_marker );
+		}
+
+		$refreshed = get_post( $post_id );
+		$this->assertStringContainsString( 'FRESH_TEMPLATE_MARKER', $refreshed->post_content, 'Opening the editor must refresh an untouched scratchpad to the current file template' );
+		$this->assertSame(
+			sha1( (string) $refreshed->post_content ),
+			get_post_meta( $post_id, \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ),
+			'The source hash must be restamped so the scratchpad still counts as never-edited'
+		);
+	}
+
+	/**
+	 * @testdox Should not touch an edited scratchpad when the editor opens directly.
+	 */
+	public function test_editor_open_leaves_edited_scratchpad_untouched(): void {
+		$this->bootstrap_email_editor();
+		$this->skip_if_unsupported_environment();
+
+		$post_id        = $this->create_scratchpad( 'customer_completed_order' );
+		$edited_content = get_post( $post_id )->post_content . "\n<!-- wp:paragraph --><p>MERCHANT_EDIT</p><!-- /wp:paragraph -->";
+		wp_update_post(
+			array(
+				'ID'            => $post_id,
+				'post_content'  => $edited_content,
+				'page_template' => '',
+			)
+		);
+
+		$append_marker = static function ( $template_html ) {
+			return $template_html . "\n<!-- wp:paragraph --><p>FRESH_TEMPLATE_MARKER</p><!-- /wp:paragraph -->";
+		};
+		add_filter( 'woocommerce_email_block_template_html', $append_marker );
+
+		try {
+			$this->invoke_maybe_refresh_scratchpad( $post_id );
+		} finally {
+			remove_filter( 'woocommerce_email_block_template_html', $append_marker );
+		}
+
+		$this->assertSame( $edited_content, get_post( $post_id )->post_content, 'An edited scratchpad must never be refreshed' );
+	}
+
+	/**
+	 * @testdox Should not touch a published email post when the editor opens directly.
+	 */
+	public function test_editor_open_leaves_published_post_untouched(): void {
+		$this->bootstrap_email_editor();
+		$this->skip_if_unsupported_environment();
+
+		$post_id = $this->create_scratchpad( 'customer_new_account' );
+		wp_update_post(
+			array(
+				'ID'            => $post_id,
+				'post_status'   => 'publish',
+				'page_template' => '',
+			)
+		);
+		$published_content = get_post( $post_id )->post_content;
+
+		$append_marker = static function ( $template_html ) {
+			return $template_html . "\n<!-- wp:paragraph --><p>FRESH_TEMPLATE_MARKER</p><!-- /wp:paragraph -->";
+		};
+		add_filter( 'woocommerce_email_block_template_html', $append_marker );
+
+		try {
+			$this->invoke_maybe_refresh_scratchpad( $post_id );
+		} finally {
+			remove_filter( 'woocommerce_email_block_template_html', $append_marker );
+		}
+
+		$this->assertSame( $published_content, get_post( $post_id )->post_content, 'A published post must never be refreshed' );
+	}
+
+	/**
+	 * Create a draft scratchpad for a core transactional email.
+	 *
+	 * @param string $email_id Core transactional email ID.
+	 * @return int The scratchpad post ID.
+	 */
+	private function create_scratchpad( string $email_id ): int {
+		$email = $this->posts_manager->get_email_by_id( $email_id );
+		$this->assertNotNull( $email, 'The core transactional email must resolve' );
+
+		return ( new \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator() )->create_draft( $email );
+	}
+
+	/**
+	 * Invoke the private editor-open refresh hook with a fresh post object.
+	 *
+	 * @param int $post_id The post to open.
+	 */
+	private function invoke_maybe_refresh_scratchpad( int $post_id ): void {
+		$method = new \ReflectionMethod( Integration::class, 'maybe_refresh_scratchpad' );
+		$method->setAccessible( true );
+		$method->invoke( $this->sut, get_post( $post_id ) );
+	}
+
+	/**
 	 * Inject a WC_Email stub mimicking a third-party email whose get_subject()
 	 * requires send-time state, and opt it into the block editor.
 	 *
