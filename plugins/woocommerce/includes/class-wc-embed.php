@@ -27,10 +27,6 @@ class WC_Embed {
 		// Filter all of the content that's going to be embedded.
 		add_filter( 'the_excerpt_embed', array( __CLASS__, 'the_excerpt' ), 10 );
 
-		// Filter the featured image that's going to be embedded.
-		add_filter( 'embed_thumbnail_id', array( __CLASS__, 'handle_embed_thumbnail_id' ), 10 );
-		add_filter( 'oembed_response_data', array( __CLASS__, 'handle_oembed_response_data' ), 10, 2 );
-
 		// Make sure no comments display. Doesn't make sense for products.
 		add_action( 'embed_content_meta', array( __CLASS__, 'remove_comments_button' ), 5 );
 
@@ -66,35 +62,6 @@ class WC_Embed {
 	}
 
 	/**
-	 * Handle the embed_thumbnail_id filter.
-	 *
-	 * @internal
-	 *
-	 * @param int|false $thumbnail_id Attachment ID, or false if there is none.
-	 * @return int|false
-	 */
-	public static function handle_embed_thumbnail_id( $thumbnail_id ) {
-		return self::is_embedded_product() && post_password_required() ? false : $thumbnail_id;
-	}
-
-	/**
-	 * Handle the oembed_response_data filter.
-	 *
-	 * @internal
-	 *
-	 * @param array   $data oEmbed response data.
-	 * @param WP_Post $post Post object.
-	 * @return array
-	 */
-	public static function handle_oembed_response_data( $data, $post ) {
-		if ( 'product' === $post->post_type && post_password_required( $post ) ) {
-			unset( $data['thumbnail_url'], $data['thumbnail_width'], $data['thumbnail_height'] );
-		}
-
-		return $data;
-	}
-
-	/**
 	 * Create the excerpt for embedded products - we want to add the buy button to it.
 	 *
 	 * @since 2.4.11
@@ -104,10 +71,6 @@ class WC_Embed {
 	public static function the_excerpt( $excerpt ) {
 		global $post;
 
-		if ( post_password_required( $post ) ) {
-			return $excerpt;
-		}
-
 		// Get product.
 		$_product = wc_get_product( get_the_ID() );
 
@@ -115,7 +78,7 @@ class WC_Embed {
 		if ( self::is_embedded_product() ) {
 			echo '<p><span class="wc-embed-price">' . $_product->get_price_html() . '</span></p>'; // WPCS: XSS ok.
 
-			if ( ! empty( $post->post_excerpt ) ) {
+			if ( ! post_password_required( $post ) && ! empty( $post->post_excerpt ) ) {
 				ob_start();
 				woocommerce_template_single_excerpt();
 				$excerpt = ob_get_clean();
@@ -153,8 +116,8 @@ class WC_Embed {
 	 * @since 2.4.11
 	 */
 	public static function get_ratings() {
-		// Make sure we're only affecting embedded, non-password-protected products.
-		if ( ! self::is_embedded_product() || post_password_required() ) {
+		// Make sure we're only affecting embedded products.
+		if ( ! self::is_embedded_product() ) {
 			return;
 		}
 
