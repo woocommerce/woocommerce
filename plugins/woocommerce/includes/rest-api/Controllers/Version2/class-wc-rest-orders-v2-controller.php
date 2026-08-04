@@ -941,8 +941,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$item                 = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 		$product              = wc_get_product( $this->get_product_id( $posted, $action ) );
 		$product_item         = $item instanceof WC_Order_Item_Product ? $item : null;
-		$current_product_id   = $product_item ? $product_item->get_product_id() : 0;
-		$current_variation_id = $product_item ? $product_item->get_variation_id() : 0;
+		$current_product_id   = $product_item ? (int) $product_item->get_product_id( 'edit' ) : 0;
+		$current_variation_id = $product_item ? (int) $product_item->get_variation_id( 'edit' ) : 0;
 		$restore_variation_id = 'update' === $action
 			&& $current_variation_id
 			&& array_key_exists( 'product_id', $posted )

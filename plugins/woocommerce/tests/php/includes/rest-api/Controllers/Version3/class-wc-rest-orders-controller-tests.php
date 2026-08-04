@@ -1221,7 +1221,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox PUT /orders with an unchanged parent preserves the variation and existing resynchronization behavior.
+	 * @testdox PUT /orders with an unchanged parent preserves the variation despite a filtered view variation ID.
 	 */
 	public function test_update_line_item_with_unchanged_parent_preserves_variation_id(): void {
 		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
@@ -1233,14 +1233,23 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$item->set_name( 'Historical line item name' );
 		$item->set_tax_class( '' );
 		$item->save();
+		$variation_id_filter    = static function ( $variation_id, $order_item ) use ( $item_id ) {
+			return $item_id === $order_item->get_id() ? 0 : $variation_id;
+		};
+		$variation_id_hook_name = 'woocommerce_order_item_get_variation_id';
+		add_filter( $variation_id_hook_name, $variation_id_filter, 10, 2 );
 
-		$response = $this->dispatch_line_item_update(
-			$order->get_id(),
-			array(
-				'id'         => $item_id,
-				'product_id' => $parent->get_id(),
-			)
-		);
+		try {
+			$response = $this->dispatch_line_item_update(
+				$order->get_id(),
+				array(
+					'id'         => $item_id,
+					'product_id' => $parent->get_id(),
+				)
+			);
+		} finally {
+			remove_filter( $variation_id_hook_name, $variation_id_filter, 10 );
+		}
 		$this->assertSame( 200, $response->get_status(), 'A product_id-only payload targeting the variable parent succeeds with no error.' );
 
 		$response_item = $response->get_data()['line_items'][0];
@@ -1252,6 +1261,29 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $variation->get_id(), $response_item['variation_id'], 'The response should retain the variation ID.' );
 		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should retain its pre-regression resynchronization behavior.' );
 		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with an explicit zero variation ID demotes a variation to its parent.
+	 */
+	public function test_update_line_item_with_zero_variation_id_switches_to_parent(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'           => $item_id,
+				'product_id'   => $parent->get_id(),
+				'variation_id' => 0,
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'Explicitly demoting the line item should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'An explicit zero variation ID should clear the existing variation.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product_id(), 'The line item should retain the submitted parent product ID.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line item should resolve to the parent product.' );
 	}
 
 	/**

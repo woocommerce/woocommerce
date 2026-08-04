@@ -143,7 +143,7 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Updating a variation with its unchanged parent preserves the variation and existing resynchronization behavior.
+	 * @testdox Updating with the unchanged parent preserves the variation despite a filtered view product ID.
 	 */
 	public function test_update_line_item_with_unchanged_parent_preserves_variation_id(): void {
 		list( $parent, $variation, $order, $item ) = $this->create_order_with_variation_line_item();
@@ -153,6 +153,12 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$item->set_name( 'Historical line item name' );
 		$item->set_tax_class( '' );
 		$item->save();
+		$filtered_product     = WC_Helper_Product::create_simple_product();
+		$product_id_filter    = static function ( $product_id, $order_item ) use ( $filtered_product, $item ) {
+			return $item->get_id() === $order_item->get_id() ? $filtered_product->get_id() : $product_id;
+		};
+		$product_id_hook_name = 'woocommerce_order_item_get_product_id';
+		add_filter( $product_id_hook_name, $product_id_filter, 10, 2 );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
 		$request->set_body_params(
@@ -166,7 +172,11 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$response = $this->server->dispatch( $request );
+		try {
+			$response = $this->server->dispatch( $request );
+		} finally {
+			remove_filter( $product_id_hook_name, $product_id_filter, 10 );
+		}
 		$this->assertSame( 200, $response->get_status(), 'The partial update should succeed.' );
 
 		$reloaded = new WC_Order_Item_Product( $item->get_id() );

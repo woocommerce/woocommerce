@@ -672,8 +672,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	protected function prepare_line_items( $posted, $action = 'create' ) {
 		$item                 = new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' );
 		$product              = wc_get_product( $this->get_product_id( $posted, $action ) );
-		$current_product_id   = $item->get_product_id();
-		$current_variation_id = $item->get_variation_id();
+		$current_product_id   = (int) $item->get_product_id( 'edit' );
+		$current_variation_id = (int) $item->get_variation_id( 'edit' );
 		$restore_variation_id = 'update' === $action
 			&& $current_variation_id
 			&& array_key_exists( 'product_id', $posted )
