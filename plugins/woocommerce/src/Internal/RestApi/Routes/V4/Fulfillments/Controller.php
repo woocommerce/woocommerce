@@ -56,6 +56,16 @@ class Controller extends AbstractController {
 	protected $order_fulfillments_controller;
 
 	/**
+	 * The fulfillment addressed by the current single-item request.
+	 *
+	 * Populated by resolve_fulfillment_from_url() so the permission callback and the handler
+	 * that follows it act on the same object instead of loading it twice.
+	 *
+	 * @var Fulfillment|null
+	 */
+	private $requested_fulfillment = null;
+
+	/**
 	 * Initialize the controller.
 	 *
 	 * @param FulfillmentSchema               $item_schema                   Fulfillment schema class.
@@ -225,27 +235,13 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response
 	 */
 	public function get_fulfillment( WP_REST_Request $request ): WP_REST_Response {
-		$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
-		$fulfillment    = new Fulfillment( $fulfillment_id );
+		$fulfillment = $this->resolve_fulfillment_from_url( $request );
 
-		if ( ! $fulfillment->get_id() ) {
-			return $this->prepare_error_response(
-				'woocommerce_rest_fulfillment_invalid_id',
-				__( 'Invalid fulfillment ID.', 'woocommerce' ),
-				array( 'status' => esc_attr( WP_Http::NOT_FOUND ) )
-			);
+		if ( is_wp_error( $fulfillment ) ) {
+			return $this->error_response_from_wp_error( $fulfillment );
 		}
 
-		if ( $fulfillment->get_entity_type() !== WC_Order::class ) {
-			return $this->prepare_error_response(
-				'woocommerce_rest_invalid_entity_type',
-				__( 'The entity type must be "order".', 'woocommerce' ),
-				array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
-			);
-		}
-
-		$order_id = (int) $fulfillment->get_entity_id();
-		$request->set_param( 'order_id', $order_id );
+		$this->pin_request_to_fulfillment( $request, $fulfillment );
 		return $this->order_fulfillments_controller->get_fulfillment( $request );
 	}
 
@@ -256,27 +252,13 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response
 	 */
 	public function update_fulfillment( WP_REST_Request $request ): WP_REST_Response {
-		$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
-		$fulfillment    = new Fulfillment( $fulfillment_id );
+		$fulfillment = $this->resolve_fulfillment_from_url( $request );
 
-		if ( ! $fulfillment->get_id() ) {
-			return $this->prepare_error_response(
-				'woocommerce_rest_fulfillment_invalid_id',
-				__( 'Invalid fulfillment ID.', 'woocommerce' ),
-				array( 'status' => esc_attr( WP_Http::NOT_FOUND ) )
-			);
+		if ( is_wp_error( $fulfillment ) ) {
+			return $this->error_response_from_wp_error( $fulfillment );
 		}
 
-		if ( $fulfillment->get_entity_type() !== WC_Order::class ) {
-			return $this->prepare_error_response(
-				'woocommerce_rest_invalid_entity_type',
-				__( 'The entity type must be "order".', 'woocommerce' ),
-				array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
-			);
-		}
-
-		$order_id = (int) $fulfillment->get_entity_id();
-		$request->set_param( 'order_id', $order_id );
+		$this->pin_request_to_fulfillment( $request, $fulfillment );
 		return $this->order_fulfillments_controller->update_fulfillment( $request );
 	}
 
@@ -287,10 +269,13 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response
 	 */
 	public function delete_fulfillment( WP_REST_Request $request ): WP_REST_Response {
-		$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
-		$fulfillment    = new Fulfillment( $fulfillment_id );
-		$order_id       = (int) $fulfillment->get_entity_id();
-		$request->set_param( 'order_id', $order_id );
+		$fulfillment = $this->resolve_fulfillment_from_url( $request );
+
+		if ( is_wp_error( $fulfillment ) ) {
+			return $this->error_response_from_wp_error( $fulfillment );
+		}
+
+		$this->pin_request_to_fulfillment( $request, $fulfillment );
 		return $this->order_fulfillments_controller->delete_fulfillment( $request );
 	}
 
@@ -348,6 +333,43 @@ class Controller extends AbstractController {
 	 * @since 11.1.0
 	 */
 	public function check_permission_for_single_fulfillment( WP_REST_Request $request ) {
+		$fulfillment = $this->resolve_fulfillment_from_url( $request );
+
+		if ( is_wp_error( $fulfillment ) ) {
+			return $fulfillment;
+		}
+
+		$order = wc_get_order( (int) $fulfillment->get_entity_id() );
+		if ( ! $order instanceof WC_Order ) {
+			return new WP_Error(
+				'woocommerce_rest_order_invalid_id',
+				esc_html__( 'Invalid order ID.', 'woocommerce' ),
+				array( 'status' => WP_Http::NOT_FOUND )
+			);
+		}
+
+		return $this->check_order_access( $order, $request );
+	}
+
+	/**
+	 * Load the fulfillment addressed by the fulfillment_id route placeholder.
+	 *
+	 * The ID is read from get_url_params() rather than get_param(), because
+	 * WP_REST_Request::get_parameter_order() ranks query string arguments above URL placeholders.
+	 * Reading it with get_param() would let a `?fulfillment_id=` argument point the handler at a
+	 * different fulfillment than the one the permission callback authorized.
+	 *
+	 * The result is kept on the instance so the handler that runs after the permission callback
+	 * reuses the same object rather than reading it from the database again.
+	 *
+	 * @param WP_REST_Request $request The request to read the placeholder from.
+	 *
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return Fulfillment|WP_Error The requested fulfillment, or an error if it does not exist or does not belong to an order.
+	 *
+	 * @since 11.1.0
+	 */
+	private function resolve_fulfillment_from_url( WP_REST_Request $request ) {
 		$url_params     = $request->get_url_params();
 		$fulfillment_id = (int) ( $url_params['fulfillment_id'] ?? 0 );
 
@@ -359,7 +381,12 @@ class Controller extends AbstractController {
 			);
 		}
 
+		if ( $this->requested_fulfillment instanceof Fulfillment && $this->requested_fulfillment->get_id() === $fulfillment_id ) {
+			return $this->requested_fulfillment;
+		}
+
 		try {
+			// The data store throws when no row matches, so this is also the not-found path.
 			$fulfillment = new Fulfillment( $fulfillment_id );
 		} catch ( \Throwable $e ) {
 			return new WP_Error(
@@ -377,16 +404,50 @@ class Controller extends AbstractController {
 			);
 		}
 
-		$order = wc_get_order( (int) $fulfillment->get_entity_id() );
-		if ( ! $order instanceof WC_Order ) {
-			return new WP_Error(
-				'woocommerce_rest_order_invalid_id',
-				esc_html__( 'Invalid order ID.', 'woocommerce' ),
-				array( 'status' => WP_Http::NOT_FOUND )
-			);
-		}
+		$this->requested_fulfillment = $fulfillment;
 
-		return $this->check_order_access( $order, $request );
+		return $fulfillment;
+	}
+
+	/**
+	 * Overwrite the fulfillment and order the delegate controller will act on.
+	 *
+	 * The delegate reads both with get_param(), so the values resolved from the route placeholder
+	 * are written back to the request before handing it over. WP_REST_Request::set_param() writes
+	 * to every parameter source that already holds the key, so a spoofed query string value is
+	 * replaced rather than left in place at a higher priority.
+	 *
+	 * @param WP_REST_Request $request     The request being delegated.
+	 * @param Fulfillment     $fulfillment The fulfillment the request was authorized against.
+	 *
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return void
+	 *
+	 * @since 11.1.0
+	 */
+	private function pin_request_to_fulfillment( WP_REST_Request $request, Fulfillment $fulfillment ): void {
+		$request->set_param( 'fulfillment_id', $fulfillment->get_id() );
+		$request->set_param( 'order_id', (int) $fulfillment->get_entity_id() );
+	}
+
+	/**
+	 * Convert a WP_Error into the response shape the handlers return.
+	 *
+	 * @param WP_Error $error The error to convert.
+	 *
+	 * @return WP_REST_Response
+	 *
+	 * @since 11.1.0
+	 */
+	private function error_response_from_wp_error( WP_Error $error ): WP_REST_Response {
+		$error_data = $error->get_error_data();
+		$status     = is_array( $error_data ) && isset( $error_data['status'] ) ? (int) $error_data['status'] : WP_Http::BAD_REQUEST;
+
+		return $this->prepare_error_response(
+			(string) $error->get_error_code(),
+			$error->get_error_message(),
+			array( 'status' => $status )
+		);
 	}
 
 	/**

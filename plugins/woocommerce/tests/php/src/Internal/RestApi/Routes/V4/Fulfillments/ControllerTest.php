@@ -478,6 +478,101 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Regression test: WP_REST_Request ranks query string arguments above URL placeholders, so a
+	 * handler reading fulfillment_id with get_param() would act on a different fulfillment than
+	 * the one the permission callback authorized. The handler must follow the path, which means a
+	 * caller asking for their own fulfillment while naming someone else's in the query string
+	 * gets back their own.
+	 */
+	public function test_customer_cannot_read_other_orders_fulfillment_via_query_fulfillment_id() {
+		$attacker_user_id     = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$attacker_order       = WC_Helper_Order::create_order( $attacker_user_id );
+		$attacker_fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => $attacker_order->get_id() )
+		);
+
+		wp_set_current_user( $attacker_user_id );
+
+		// The path addresses the attacker's own fulfillment; the query string asks for the victim's.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $attacker_fulfillment->get_id() );
+		$request->set_param( 'fulfillment_id', $this->test_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( $attacker_fulfillment->get_id(), $data['id'] );
+		$this->assertSame( (string) $attacker_order->get_id(), $data['entity_id'] );
+
+		WC_Helper_Order::delete_order( $attacker_order->get_id() );
+		wp_delete_user( $attacker_user_id );
+	}
+
+	/**
+	 * The same query string argument must not redirect a write either: a delete addressed at one
+	 * fulfillment must not remove the one named in the query string.
+	 */
+	public function test_delete_fulfillment_ignores_query_fulfillment_id() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$target = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => $this->test_order->get_id() )
+		);
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/fulfillments/' . $target->get_id() );
+		$request->set_param( 'fulfillment_id', $this->test_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		// The fulfillment named in the query string is untouched.
+		$survivor = new Fulfillment( $this->test_fulfillment->get_id() );
+		$this->assertNull( $survivor->get_date_deleted() );
+	}
+
+	/**
+	 * delete_fulfillment() must resolve the fulfillment itself rather than relying on the
+	 * permission callback having done it. The Fulfillment constructor throws when no row matches,
+	 * so a handler without its own not-found path fatals instead of returning a response.
+	 */
+	public function test_delete_fulfillment_handler_reports_unknown_id() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/fulfillments/99999' );
+		$request->set_url_params( array( 'fulfillment_id' => '99999' ) );
+
+		$response = $this->controller->delete_fulfillment( $request );
+
+		$this->assertSame( 404, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'woocommerce_rest_fulfillment_invalid_id', $data['code'] );
+	}
+
+	/**
+	 * wc_get_order() returns a WC_Order_Refund for a refund ID, and refunds have no
+	 * get_customer_id(). The collection route must reject one as a bad order rather than fataling
+	 * in the owner check.
+	 */
+	public function test_get_fulfillments_rejects_refund_id_as_order_id() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $this->test_order->get_id(),
+				'amount'   => 1,
+			)
+		);
+		$this->assertNotWPError( $refund );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
+		$request->set_param( 'order_id', $refund->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'woocommerce_rest_order_invalid_id', $data['code'] );
+	}
+
+	/**
 	 * The collection route authorizes against order_id only. When the order_id does not resolve
 	 * to an order, a fulfillment_id query argument the caller owns must not move authorization
 	 * to the caller's own order: the request is rejected for the missing order instead.
