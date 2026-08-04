@@ -153,17 +153,21 @@ class HelcimTest extends WC_Unit_Test_Case {
 	 * @testdox Should fall back to the generic account-connected heuristic for an unrecognized environment value.
 	 */
 	public function test_is_account_connected_falls_back_for_unrecognized_environment(): void {
+		// account_connected is true here (not false) so the assertion can't pass
+		// by coincidence: an incorrectly-sandbox or incorrectly-live read would
+		// look up an absent token option and return false either way, while only
+		// a correct null (unrecognized -> defer to parent) read reaches this true.
 		$fake_gateway = new FakePaymentGateway(
 			'helcimjs',
 			array(
 				'settings'          => array(
 					'environment' => 'staging',
 				),
-				'account_connected' => false,
+				'account_connected' => true,
 			),
 		);
 
-		$this->assertFalse( $this->sut->is_account_connected( $fake_gateway ) );
+		$this->assertTrue( $this->sut->is_account_connected( $fake_gateway ) );
 	}
 
 	/**
