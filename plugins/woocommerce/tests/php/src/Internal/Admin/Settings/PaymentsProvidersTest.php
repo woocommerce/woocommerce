@@ -869,7 +869,13 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Assert that the custom provider supplied details are returned.
 		$this->assertSame( 'mollie_wc_gateway_bogus', $gateway_details['id'] );
 		// This settings URL is provided by the custom provider.
-		$this->assertSame( admin_url( 'admin.php?page=wc-settings&tab=mollie_settings&section=mollie_payment_methods' ), $gateway_details['management']['_links']['settings']['href'] );
+		$this->assertSame(
+			add_query_arg(
+				array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ),
+				admin_url( 'admin.php?page=wc-settings&tab=mollie_settings&section=mollie_payment_methods' )
+			),
+			$gateway_details['management']['_links']['settings']['href']
+		);
 		$this->assertTrue( $gateway_details['state']['test_mode'] ); // It should be in test mode because of the DB options. The custom provider logic handles this.
 
 		// Clean up.

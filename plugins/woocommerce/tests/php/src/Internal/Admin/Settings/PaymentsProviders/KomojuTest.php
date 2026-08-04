@@ -80,7 +80,10 @@ class KomojuTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertSame(
-			admin_url( 'admin.php?page=wc-settings&tab=komoju_settings' ),
+			add_query_arg(
+				array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ),
+				admin_url( 'admin.php?page=wc-settings&tab=komoju_settings' )
+			),
 			$settings_url
 		);
 	}

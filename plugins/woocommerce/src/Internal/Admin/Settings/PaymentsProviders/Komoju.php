@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Throwable;
 use WC_Payment_Gateway;
@@ -32,7 +33,12 @@ class Komoju extends PaymentGateway {
 			return parent::get_settings_url( $payment_gateway );
 		}
 
-		return admin_url( 'admin.php?page=wc-settings&tab=komoju_settings' );
+		return add_query_arg(
+			array(
+				'from' => Payments::FROM_PAYMENTS_SETTINGS,
+			),
+			admin_url( 'admin.php?page=wc-settings&tab=komoju_settings' )
+		);
 	}
 
 	/**
