@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { BlockEditProps } from '@wordpress/blocks';
-
-/**
- * Internal dependencies
- */
-import type { RemovableItemsBlockContext } from '../../../../types/type-defs/removable-items';
+import type { RemovableItemsBlockContext } from '@woocommerce/types';
 
 export type Color = {
 	slug?: string;
