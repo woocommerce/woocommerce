@@ -32,6 +32,21 @@ class CartTokenUtils {
 	}
 
 	/**
+	 * Get the cart token sent with the current HTTP request.
+	 *
+	 * The single source of truth for which session a request addresses. Reading it elsewhere (e.g. a
+	 * `/batch` sub-request header) lets the validated and the consumed token diverge.
+	 *
+	 * @since 11.1.0
+	 * @return string
+	 */
+	public static function get_request_cart_token(): string {
+		$cart_token = wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
+
+		return is_string( $cart_token ) ? $cart_token : '';
+	}
+
+	/**
 	 * Validate the cart token.
 	 *
 	 * @param string $cart_token The cart token.
@@ -44,10 +59,21 @@ class CartTokenUtils {
 	/**
 	 * Get the cart token payload.
 	 *
+	 * Returns an empty payload unless the signature validates.
+	 *
+	 * @since 11.1.0 Returns an empty payload for tokens that fail signature validation.
 	 * @param string $cart_token The cart token.
 	 * @return array
 	 */
 	public static function get_cart_token_payload( string $cart_token ): array {
+		if ( ! self::validate_cart_token( $cart_token ) ) {
+			return array(
+				'user_id' => '',
+				'exp'     => 0,
+				'iss'     => '',
+			);
+		}
+
 		$parts = JsonWebToken::get_parts( $cart_token )->payload;
 
 		return array(
@@ -69,9 +95,10 @@ class CartTokenUtils {
 	/**
 	 * Gets the expiration of the cart token. Defaults to 48h.
 	 *
+	 * @since 11.1.0 Made public.
 	 * @return int
 	 */
-	private static function get_cart_token_expiration(): int {
+	public static function get_cart_token_expiration(): int {
 		/**
 		 * Filters the session expiration.
 		 *
