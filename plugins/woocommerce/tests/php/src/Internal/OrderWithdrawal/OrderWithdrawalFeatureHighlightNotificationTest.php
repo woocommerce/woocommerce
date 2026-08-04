@@ -5,13 +5,13 @@ namespace Automattic\WooCommerce\Tests\Internal\OrderWithdrawal;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
-use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalInboxNotification;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFeatureHighlightNotification;
 use WC_Unit_Test_Case;
 
 /**
  * Tests for the order withdrawal inbox notification.
  */
-class OrderWithdrawalInboxNotificationTest extends WC_Unit_Test_Case {
+class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case {
 
 	private const FEATURE_OPTION              = 'woocommerce_feature_order_withdrawal_enabled';
 	private const COMING_SOON_OPTION          = 'woocommerce_coming_soon';
@@ -26,13 +26,13 @@ class OrderWithdrawalInboxNotificationTest extends WC_Unit_Test_Case {
 		self::ALLOWED_COUNTRIES_OPTION,
 		self::ALL_EXCEPT_COUNTRIES_OPTION,
 		self::SPECIFIC_COUNTRIES_OPTION,
-		OrderWithdrawalInboxNotification::CREATED_OPTION,
+		OrderWithdrawalFeatureHighlightNotification::CREATED_OPTION,
 	);
 
 	/**
 	 * The System Under Test.
 	 *
-	 * @var OrderWithdrawalInboxNotification
+	 * @var OrderWithdrawalFeatureHighlightNotification
 	 */
 	private $sut;
 
@@ -49,7 +49,7 @@ class OrderWithdrawalInboxNotificationTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut = new OrderWithdrawalInboxNotification();
+		$this->sut = new OrderWithdrawalFeatureHighlightNotification();
 		$this->store_original_options();
 		$this->delete_notification_state();
 		$this->set_live_eu_store_defaults();
@@ -73,7 +73,7 @@ class OrderWithdrawalInboxNotificationTest extends WC_Unit_Test_Case {
 		$actions = $note->get_actions();
 
 		$this->assertSame(
-			OrderWithdrawalInboxNotification::NOTE_NAME,
+			OrderWithdrawalFeatureHighlightNotification::NOTE_NAME,
 			$note->get_name(),
 			'The note should use the expected stable name.'
 		);
@@ -131,7 +131,7 @@ class OrderWithdrawalInboxNotificationTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame(
 			'yes',
-			get_option( OrderWithdrawalInboxNotification::CREATED_OPTION ),
+			get_option( OrderWithdrawalFeatureHighlightNotification::CREATED_OPTION ),
 			'Creating the note should persist the one-time creation flag.'
 		);
 	}
@@ -309,7 +309,7 @@ class OrderWithdrawalInboxNotificationTest extends WC_Unit_Test_Case {
 	 * Delete notification state created by tests.
 	 */
 	private function delete_notification_state(): void {
-		delete_option( OrderWithdrawalInboxNotification::CREATED_OPTION );
+		delete_option( OrderWithdrawalFeatureHighlightNotification::CREATED_OPTION );
 
 		foreach ( $this->get_notification_note_ids() as $note_id ) {
 			$note = Notes::get_note( $note_id );
@@ -330,7 +330,7 @@ class OrderWithdrawalInboxNotificationTest extends WC_Unit_Test_Case {
 
 		return array_map(
 			'absint',
-			$data_store->get_notes_with_name( OrderWithdrawalInboxNotification::NOTE_NAME )
+			$data_store->get_notes_with_name( OrderWithdrawalFeatureHighlightNotification::NOTE_NAME )
 		);
 	}
 

@@ -34,17 +34,26 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	private OrderWithdrawalFormView $form_view;
 
 	/**
+	 * Feature highlight notification.
+	 *
+	 * @var OrderWithdrawalFeatureHighlightNotification
+	 */
+	private OrderWithdrawalFeatureHighlightNotification $feature_highlight_notification;
+
+	/**
 	 * Initialize dependencies.
 	 *
-	 * @param OrderWithdrawalFormProcessor $form_processor Form processor.
-	 * @param OrderWithdrawalFormView      $form_view Form view.
+	 * @param OrderWithdrawalFormProcessor                $form_processor                 Form processor.
+	 * @param OrderWithdrawalFormView                     $form_view                      Form view.
+	 * @param OrderWithdrawalFeatureHighlightNotification $feature_highlight_notification Feature highlight notification.
 	 * @internal
 	 *
 	 * @since 11.1.0
 	 */
-	final public function init( OrderWithdrawalFormProcessor $form_processor, OrderWithdrawalFormView $form_view ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules.
-		$this->form_processor = $form_processor;
-		$this->form_view      = $form_view;
+	final public function init( OrderWithdrawalFormProcessor $form_processor, OrderWithdrawalFormView $form_view, OrderWithdrawalFeatureHighlightNotification $feature_highlight_notification ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- Required by WooCommerce injection method rules.
+		$this->form_processor                 = $form_processor;
+		$this->form_view                      = $form_view;
+		$this->feature_highlight_notification = $feature_highlight_notification;
 	}
 
 	/**
@@ -61,6 +70,8 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		add_action( 'woocommerce_before_delete_order', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
 		add_action( 'before_delete_post', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->form_processor, 'delete_order_withdrawal_inbox_note_for_order' ), 10, 1 );
+
+		$this->feature_highlight_notification->register();
 	}
 
 	/**

@@ -15,7 +15,7 @@ use Throwable;
  *
  * @internal Just for internal use.
  */
-final class OrderWithdrawalInboxNotification implements RegisterHooksInterface {
+final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooksInterface {
 
 	public const NOTE_NAME      = 'wc-admin-order-withdrawal-feature';
 	public const CREATED_OPTION = 'woocommerce_order_withdrawal_inbox_notification_created';
