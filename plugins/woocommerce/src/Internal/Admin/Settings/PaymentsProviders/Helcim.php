@@ -88,9 +88,20 @@ class Helcim extends PaymentGateway {
 			// Helcim stores the active environment ('sandbox'|'live') as a gateway option,
 			// read through the gateway's own get_option() so we follow whatever option key
 			// and precedence the extension uses internally.
-			$environment = strtolower( (string) $payment_gateway->get_option( 'environment', 'sandbox' ) );
+			$environment = $payment_gateway->get_option( 'environment', 'sandbox' );
+			if ( ! is_string( $environment ) ) {
+				return null;
+			}
 
-			return 'live' !== $environment;
+			$environment = strtolower( trim( $environment ) );
+			if ( 'sandbox' === $environment ) {
+				return true;
+			}
+			if ( 'live' === $environment ) {
+				return false;
+			}
+
+			return null;
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
