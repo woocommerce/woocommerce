@@ -1,18 +1,18 @@
 # Monorepo CI and package managers manifests.
-/.github/ @nerrad
-**/composer.json @nerrad
-**/package.json @nerrad
+/.github/ @adimoldovan
+**/composer.json @woocommerce/woo-fse
+**/package.json @woocommerce/woo-fse
 
 # Monorepo tooling folders.
-/bin/ @nerrad
-/tools/ @nerrad
-/packages/js/eslint-plugin/ @nerrad
-/packages/js/dependency-extraction-webpack-plugin/ @nerrad
-/packages/js/e2e-utils-playwright/ @nerrad
+/bin/ @kalessil
+/tools/ @manzoorwanijk
+/packages/js/eslint-plugin/ @manzoorwanijk
+/packages/js/dependency-extraction-webpack-plugin/ @woocommerce/woo-fse
+/packages/js/e2e-utils-playwright/ @adimoldovan
 
 # Files in root of repository
-/.* @nerrad
-/*.* @nerrad
+/.* @woocommerce/woo-fse
+/*.* @woocommerce/woo-fse
 /changelog.txt
 /pnpm-lock.yaml
 
