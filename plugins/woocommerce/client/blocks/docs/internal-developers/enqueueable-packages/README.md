@@ -48,7 +48,32 @@ The generated asset file for `wc-block-library` declares packages that remain se
 | `@woocommerce/shared-hocs` | `wc-blocks-shared-hocs` | `wc.wcBlocksSharedHocs` | Shares higher-order components across separately built scripts. |
 | `@woocommerce/types` | `wc-types` | `wc.wcTypes` | Shares runtime type guards used by the external package bundles. |
 
-This list is defined by `editorExternalPackages` in `bin/webpack-config-block-editor-unified-assets.js`. Other `@woocommerce/*` imports are bundled into `wc-block-library` for the unified editor build. Their standalone handles may still be registered for frontend assets or third-party scripts.
+Local public packages live in `packages/public-api/`. Only exports from a
+package root are stable unless a deep import is documented separately. Exports
+prefixed with `__experimental` or `__unstable` remain unstable.
+
+The `@woocommerce/data` and `@woocommerce/sanitize` packages live in the
+monorepo-level `packages/js` directory because they are independently published
+packages.
+
+### Internal runtime packages
+
+These packages remain external only to preserve a shared runtime instance:
+
+| Package import | Script handle | Global | Why it stays external |
+| --- | --- | --- | --- |
+| `@woocommerce/entities` | `wc-entities` | `wc.wcEntities` | Registers WooCommerce entities once for all editor bundles. It is not a supported extension API. |
+
+Local runtime-only packages live in `packages/internal/`. Their handles and
+globals are implementation details and do not carry a backward-compatibility
+guarantee.
+
+The unified build defines these groups as `publicApiPackages` and
+`internalRuntimePackages` in
+`bin/webpack-config-block-editor-unified-assets.js`. Other `@woocommerce/*`
+imports are bundled into `wc-block-library` for the unified editor build. Their
+standalone handles may still be registered for frontend assets or third-party
+scripts.
 
 `wc-blocks-middleware` is registered separately and loaded by both `wc-block-library` and `wc-blocks-data-store`. It does not map to an enqueueable `@woocommerce/*` package.
 
