@@ -9,30 +9,23 @@ declare( strict_types = 1 );
 class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * The `woocommerce_shop_page_id` option value before the test, restored in tearDown().
-	 *
-	 * @var string|false
-	 */
-	private $original_shop_page_id;
-
-	/**
 	 * Set up the admin context and load the class under test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		set_current_screen( 'options-permalink' );
 		require_once WC_ABSPATH . 'includes/admin/class-wc-admin-permalink-settings.php';
-		$this->original_shop_page_id = get_option( 'woocommerce_shop_page_id' );
 	}
 
 	/**
-	 * Restore the original option and superglobals after each test.
+	 * Reset superglobals after each test.
+	 *
+	 * Option changes made during the test (e.g. `woocommerce_permalinks`,
+	 * `woocommerce_shop_page_id`) don't need manual restoration here: WC_Unit_Test_Case
+	 * wraps every test in a DB transaction and flushes the object cache in its own
+	 * tearDown(), so option state always reverts to its pre-test baseline automatically.
 	 */
 	public function tearDown(): void {
-		delete_option( 'woocommerce_permalinks' );
-		if ( false !== $this->original_shop_page_id ) {
-			update_option( 'woocommerce_shop_page_id', $this->original_shop_page_id );
-		}
 		unset(
 			$_POST['permalink_structure'],
 			$_POST['wc-permalinks-nonce'],
