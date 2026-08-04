@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailScratchpadRefresher;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateAutoApplier;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
@@ -265,10 +266,37 @@ class Integration {
 	public function replace_editor( $replace, $post ) {
 		$current_screen = get_current_screen();
 		if ( self::EMAIL_POST_TYPE === $post->post_type && $current_screen ) {
+			$this->maybe_refresh_scratchpad( $post );
 			$this->editor_page_renderer->render();
 			return true;
 		}
 		return $replace;
+	}
+
+	/**
+	 * Refresh a never-edited scratchpad from the current file template when the
+	 * editor opens directly (bookmark, browser refresh) — the listing Edit flow
+	 * refreshes through the REST endpoint before redirecting here.
+	 *
+	 * @param WP_Post $post Post being opened in the editor.
+	 */
+	private function maybe_refresh_scratchpad( $post ): void {
+		if ( ! in_array( $post->post_status, array( 'auto-draft', 'draft' ), true ) ) {
+			return;
+		}
+
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+		$email_type   = $post_manager->get_email_type_from_post_id( $post->ID );
+		if ( ! is_string( $email_type ) || '' === $email_type ) {
+			return;
+		}
+
+		$email = $post_manager->get_email_by_id( $email_type );
+		if ( ! $email ) {
+			return;
+		}
+
+		( new WCEmailScratchpadRefresher() )->maybe_refresh( $post, $email );
 	}
 
 	/**
