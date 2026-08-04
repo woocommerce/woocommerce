@@ -134,6 +134,17 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 		}
 
 		if ( ! $mime_type || ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$log->info(
+				sprintf(
+					// translators: 1: ID of the attachment, 2: file mime type.
+					__( 'Skipping image regeneration for attachment ID: %1$s. No image editor supports its file type (%2$s).', 'woocommerce' ),
+					$this->attachment_id,
+					$mime_type ? $mime_type : 'unknown'
+				),
+				array(
+					'source' => 'wc-image-regeneration',
+				)
+			);
 			return false;
 		}
 
