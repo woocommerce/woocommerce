@@ -82,14 +82,23 @@ class Komoju extends PaymentGateway {
 	 */
 	private function is_komoju_in_sandbox_mode( WC_Payment_Gateway $payment_gateway ): ?bool {
 		try {
-			// KOMOJU has no dedicated test-mode setting; it infers the environment from
-			// whether the stored secret key has the `sk_test_` (vs. `sk_live_`) prefix.
-			// Read the key directly instead of relying on the extension's own
-			// `komoju_is_test_mode()` helper, which isn't present on older extension versions.
+			// Check for a saved key first. The extension's helper below reports a store with no
+			// key at all as live, but we want that case to stay undetermined so the caller decides.
 			$secret_key = $this->get_secret_key();
-			if ( ! empty( $secret_key ) ) {
-				return str_starts_with( $secret_key, 'sk_test_' );
+			if ( empty( $secret_key ) ) {
+				return null;
 			}
+
+			// Prefer the extension's own helper so we keep tracking how KOMOJU determines its
+			// environment, should that ever stop being a secret key check.
+			if ( class_exists( 'WC_Gateway_Komoju' ) && is_callable( 'WC_Gateway_Komoju::komoju_is_test_mode' ) ) {
+				return wc_string_to_bool( \WC_Gateway_Komoju::komoju_is_test_mode() );
+			}
+
+			// The helper only exists since extension version 3.2.9, so reproduce it for older
+			// versions: KOMOJU has no dedicated test-mode setting and infers the environment from
+			// whether the stored secret key has the `sk_test_` (vs. `sk_live_`) prefix.
+			return str_starts_with( $secret_key, 'sk_test_' );
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
