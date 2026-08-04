@@ -94,7 +94,7 @@ export const openEditorSettings = async ( {
  *
  * The Gutenberg editor mounts either inside an `iframe[name="editor-canvas"]`
  * (modern site/post editor) or directly on the outer page (non-iframed
- * contexts such as the classic editor or accessibility mode). Recent Gutenberg
+ * contexts, e.g. accessibility mode). Recent Gutenberg
  * builds mount the iframe slightly after initial paint, so callers that resolve
  * the canvas before the iframe attaches end up running locators against the
  * outer page and timing out inside the editor.
