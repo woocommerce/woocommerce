@@ -501,7 +501,6 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-<<<<<<< HEAD
 	 * @testdox Should warn merchants only when the matched order is older than fourteen days.
 	 * @testWith [15, true]
 	 *           [13, false]
@@ -551,10 +550,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add a merchant inbox notification without an order action when no order matches.
-=======
 	 * @testdox Should skip the merchant inbox notification when no order matches.
->>>>>>> add-withdraw-order-note
 	 */
 	public function test_process_current_request_skips_inbox_note_when_order_does_not_match(): void {
 		$order   = $this->create_order_for_form_data(
