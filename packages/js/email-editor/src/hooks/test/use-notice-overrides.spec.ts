@@ -161,7 +161,9 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		expect( result[ 0 ].content ).toBe( 'Email saved.' );
 	} );
 
-	it( 'transforms an editor-save notice with "Draft saved." content', () => {
+	it( 'leaves an editor-save notice with "Draft saved." content unchanged', () => {
+		// A saved draft is not used for sending; rewriting the notice to
+		// "Email saved." would suggest the opposite.
 		const originalNotice = makeNotice( {
 			id: 'editor-save',
 			content: 'Draft saved.',
@@ -173,7 +175,7 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		};
 		const result = selectors.getNotices();
 
-		expect( result[ 0 ].content ).toBe( 'Email saved.' );
+		expect( result[ 0 ].content ).toBe( 'Draft saved.' );
 	} );
 
 	it( 'leaves an editor-save notice with unrelated content unchanged', () => {
