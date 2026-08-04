@@ -27,8 +27,10 @@ class Formatter extends KeepAChangelogParser {
 	use PluginTrait;
 
 	/**
-	 * Marker appended after the significance of a major change. format() is its only source: it is
-	 * emitted from the significance on every write, and parse() discards whatever marker it reads.
+	 * Marker appended after the significance of a major change. format() regenerates it from the
+	 * significance on every write, so it is never read back: parse() discards whatever bracketed
+	 * decoration sits in that slot, including hand-written variants of the marker. Subentry rows are
+	 * exempt, since their text is content verbatim.
 	 *
 	 * @var string
 	 */
