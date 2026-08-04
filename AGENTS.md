@@ -195,12 +195,10 @@ WordPress exposes more contracts than class and function signatures. The followi
 
 ## Database Migrations
 
-Database migrations live in `WC_Install::$db_updates`, keyed by version. Each key runs once: when a site updates, only the callbacks under keys *newer* than the site's stored database version execute. This makes the choice of key load-bearing:
+Database migrations live in `WC_Install::$db_updates`; read that class for the current mechanics before adding one. Two invariants have broken real releases when violated:
 
-- **A migration added after a prerelease of the same version has shipped needs its own new key.** Adding a callback under a key that a beta already used (e.g. adding to `10.8.0` after `10.8.0-beta.1` shipped) means sites that installed the beta silently skip the new callback. Use a suffixed key instead: `10.8.0-1`.
-- **Never key a migration with a future patch version.** A fix shipping in `X.Y.0` must not use the `X.Y.1` key: patch keys are reserved for actual patch releases, and keys must never be ahead of the plugin version.
-- **Changing a feature flag's `enabled_by_default` does not affect existing sites.** Default flag values are persisted to the database on install/update (since 10.5.0), so flipping a default only changes behavior for new installs. If existing sites must pick up the new value, ship a migration, or stop gating the functionality behind a flag entirely if it must be always-on.
-- **Version comparisons must handle WooCommerce's version-string shapes.** Version strings include prerelease suffixes (`10.9.0-beta.1`, `-rc.4`, `-dev`) and migration keys include numeric suffixes (`10.8.0-1`). Helpers written for WordPress core's versioning scheme can mangle these (a real bug turned `10.1.0-rc.4` into `10.1.0.0-rc.4`), so test any version-compare logic against both forms.
+- Migration keys are one-shot: sites that updated past a key never re-run it. A migration added after a prerelease of the same version has shipped needs a new suffixed key (see existing examples in `$db_updates`), and a key must never be ahead of the version it ships in.
+- Feature flag defaults are persisted, so changing `enabled_by_default` alone doesn't change behavior on existing sites; ship a migration or remove the flag.
 
 ## Block Development
 
