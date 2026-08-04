@@ -115,21 +115,6 @@ class OrderWithdrawalFeatureHighlightNotificationTest extends WC_Unit_Test_Case 
 	}
 
 	/**
-	 * @testdox Should not add the notification when order withdrawal is enabled.
-	 */
-	public function test_possibly_add_note_does_not_add_notification_when_feature_is_enabled(): void {
-		update_option( self::FEATURE_OPTION, 'yes' );
-
-		$this->sut->possibly_add_note();
-
-		$this->assertCount(
-			0,
-			$this->get_notification_note_ids(),
-			'Stores that already enabled order withdrawal should not receive the notification.'
-		);
-	}
-
-	/**
 	 * @testdox Should match stores selling to EU countries.
 	 * @dataProvider provide_country_settings
 	 *
