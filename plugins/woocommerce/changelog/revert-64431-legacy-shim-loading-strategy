@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Revert the legacy script blocking change (#64431) that broke the classic cart and checkout on sites loading a second jQuery instance.
