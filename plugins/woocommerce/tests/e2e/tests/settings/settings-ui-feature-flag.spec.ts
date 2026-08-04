@@ -95,6 +95,37 @@ test.describe( 'Settings UI feature flag', { tag: tags.NOT_E2E }, () => {
 			page.locator( 'link[href*="/settings-ui/style.css"]' )
 		).toHaveCount( 1 );
 
+		const settingsUI = page.locator( '[data-wc-settings-ui]' );
+		await expect( settingsUI.locator( '.wc-settings-ui' ) ).toHaveCSS(
+			'gap',
+			'24px'
+		);
+		const sectionCard = settingsUI
+			.locator( '.wc-settings-ui__section-card' )
+			.first();
+		await expect( sectionCard ).toHaveCSS( 'display', 'flex' );
+		await expect( sectionCard ).toHaveCSS( 'border-top-width', '1px' );
+		await expect( sectionCard ).toHaveCSS( 'border-radius', '8px' );
+		await expect( sectionCard ).toHaveCSS(
+			'background-color',
+			'rgb(255, 255, 255)'
+		);
+		await expect(
+			sectionCard.locator( '.wc-settings-ui__section-header' )
+		).toHaveCSS( 'padding', '24px' );
+		await expect(
+			sectionCard.locator( '.wc-settings-ui__section-fields' )
+		).toHaveCSS( 'padding', '0px 24px 24px' );
+
+		const weightUnit = settingsUI.getByLabel( 'Weight unit' );
+		await expect( weightUnit ).toHaveValue( /^(kg|g|lbs|oz)$/ );
+		await expect( weightUnit.locator( 'option' ) ).toHaveText( [
+			'kg',
+			'g',
+			'lbs',
+			'oz',
+		] );
+
 		await page.evaluate( () => {
 			const browserWindow = window as typeof window & {
 				wc?: { settingsUi?: { DataForm?: unknown } };
