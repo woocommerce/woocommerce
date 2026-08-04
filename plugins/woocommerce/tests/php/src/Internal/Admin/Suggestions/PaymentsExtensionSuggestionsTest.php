@@ -218,7 +218,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'HK' => 8,
 			'IN' => 7,
 			'ID' => 4,
-			'JP' => 7,
+			'JP' => 9,
 			'MY' => 5,
 			'NC' => 3,
 			'NZ' => 9,
@@ -611,7 +611,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			'HK' => 8,
 			'IN' => 7,
 			'ID' => 4,
-			'JP' => 7,
+			'JP' => 9,
 			'MY' => 5,
 			'NC' => 3,
 			'NZ' => 9,
@@ -1064,6 +1064,66 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Visa is the last "other payment provider" in Japan.
+	 */
+	public function test_visa_is_last_other_payment_provider_in_jp(): void {
+		$extensions = $this->sut->get_country_extensions( 'JP' );
+		$psp_ids    = array_column(
+			array_filter(
+				$extensions,
+				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
+			),
+			'id'
+		);
+
+		$this->assertContains( PaymentsExtensionSuggestions::AIRWALLEX, $psp_ids, 'Airwallex should be suggested in JP.' );
+		$this->assertSame(
+			PaymentsExtensionSuggestions::VISA,
+			end( $psp_ids ),
+			'Visa should be the last PSP suggestion in JP.'
+		);
+	}
+
+	/**
+	 * @testdox KOMOJU is suggested between Square and Airwallex in Japan.
+	 */
+	public function test_komoju_is_suggested_between_square_and_airwallex_in_jp(): void {
+		$extensions       = $this->sut->get_country_extensions( 'JP' );
+		$extensions_by_id = array_column( $extensions, null, 'id' );
+		$psp_ids          = array_column(
+			array_filter(
+				$extensions,
+				static fn( array $extension ): bool => PaymentsExtensionSuggestions::TYPE_PSP === $extension['_type']
+			),
+			'id'
+		);
+		$komoju           = $extensions_by_id[ PaymentsExtensionSuggestions::KOMOJU ] ?? null;
+
+		$this->assertContains( PaymentsExtensionSuggestions::KOMOJU, $psp_ids, 'KOMOJU should be suggested in JP.' );
+		$this->assertSame(
+			array_search( PaymentsExtensionSuggestions::SQUARE, $psp_ids, true ) + 1,
+			array_search( PaymentsExtensionSuggestions::KOMOJU, $psp_ids, true ),
+			'KOMOJU should immediately follow Square in JP.'
+		);
+		$this->assertSame(
+			array_search( PaymentsExtensionSuggestions::KOMOJU, $psp_ids, true ) + 1,
+			array_search( PaymentsExtensionSuggestions::AIRWALLEX, $psp_ids, true ),
+			'KOMOJU should immediately precede Airwallex in JP.'
+		);
+
+		$this->assertIsArray( $komoju, 'KOMOJU should be suggested in JP.' );
+		if ( ! is_array( $komoju ) ) {
+			return;
+		}
+
+		$this->assertNotContains(
+			PaymentsExtensionSuggestions::TAG_PREFERRED,
+			$komoju['tags'],
+			'KOMOJU should remain in other payment options for JP.'
+		);
+	}
+
+	/**
 	 * Data provider for Helcim's supported countries.
 	 *
 	 * @return array<string, array{string}>
@@ -1115,6 +1175,55 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				array(
 					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=helcim-commerce-for-woocommerce',
+				),
+			),
+			$extension['links']
+		);
+		$this->assertNotEmpty( $extension['icon'] );
+		$this->assertNotEmpty( $extension['title'] );
+		$this->assertNotEmpty( $extension['description'] );
+	}
+
+	/**
+	 * @testdox KOMOJU has complete base suggestion details.
+	 */
+	public function test_komoju_has_complete_base_details(): void {
+		$extension = $this->sut->get_by_id( 'komoju' );
+
+		$this->assertIsArray( $extension );
+		if ( ! is_array( $extension ) ) {
+			return;
+		}
+
+		$this->assertSame( PaymentsExtensionSuggestions::TYPE_PSP, $extension['_type'] );
+		$this->assertSame(
+			array(
+				'_type' => PaymentsExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'komoju-japanese-payments',
+			),
+			$extension['plugin']
+		);
+		$this->assertEqualsCanonicalizing(
+			array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+					'url'   => 'https://en.komoju.com/pricing/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					'url'   => 'https://woocommerce.com/products/komoju-japanese-payments/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+					'url'   => 'https://toc.komoju.com/toc/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://woocommerce.com/document/komoju-japanese-payments/',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=komoju-japanese-payments',
 				),
 			),
 			$extension['links']
