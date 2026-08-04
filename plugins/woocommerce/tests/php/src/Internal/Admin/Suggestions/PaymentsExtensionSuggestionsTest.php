@@ -89,7 +89,8 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		// Arrange.
 		update_option(
 			OnboardingProfile::DATA_OPTION,
-			array() // No data.
+			array()
+			// No data.
 		);
 
 		// Act.
@@ -104,7 +105,8 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			OnboardingProfile::DATA_OPTION,
 			array(
 				'business_choice'       => 'im_already_selling',
-				'selling_online_answer' => '', // No answer.
+				'selling_online_answer' => '',
+			// No answer.
 			)
 		);
 
@@ -128,7 +130,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		$country_suggestions_count = array(
 			'CA' => 10,
 			'US' => 11,
-			'GB' => 14,
+			'GB' => 15,
 			'AT' => 13,
 			'BE' => 11,
 			'BG' => 7,
@@ -430,6 +432,88 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should tag Square as preferred (and preferred for offline) only when the merchant self-identified as selling offline.
+	 *
+	 * @dataProvider data_provider_square_offline_preferred_tags
+	 *
+	 * @param array|null $onboarding_profile     The onboarding profile option value. Null to simulate a skipped profiler.
+	 * @param bool       $expect_offline_preferred Whether Square is expected to carry the preferred (offline) tags.
+	 */
+	public function test_get_country_extensions_square_offline_preferred_tags( ?array $onboarding_profile, bool $expect_offline_preferred ) {
+		// Arrange.
+		if ( null === $onboarding_profile ) {
+			delete_option( OnboardingProfile::DATA_OPTION );
+		} else {
+			update_option( OnboardingProfile::DATA_OPTION, $onboarding_profile );
+		}
+
+		// Act.
+		$extensions   = $this->sut->get_country_extensions( 'US' );
+		$square_index = array_search( PaymentsExtensionSuggestions::SQUARE, array_column( $extensions, 'id' ), true );
+		$this->assertNotFalse( $square_index, 'Square should be in the US suggestions.' );
+		$square = $extensions[ $square_index ];
+
+		// Assert.
+		if ( $expect_offline_preferred ) {
+			$this->assertContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $square['tags'] );
+			$this->assertContains( PaymentsExtensionSuggestions::TAG_PREFERRED_OFFLINE, $square['tags'] );
+		} else {
+			$this->assertNotContains( PaymentsExtensionSuggestions::TAG_PREFERRED, $square['tags'] );
+			$this->assertNotContains( PaymentsExtensionSuggestions::TAG_PREFERRED_OFFLINE, $square['tags'] );
+		}
+
+		delete_option( OnboardingProfile::DATA_OPTION );
+	}
+
+	/**
+	 * Data provider for test_get_country_extensions_square_offline_preferred_tags.
+	 *
+	 * @return array
+	 */
+	public function data_provider_square_offline_preferred_tags(): array {
+		return array(
+			'selling offline only'              => array(
+				array(
+					'business_choice'       => 'im_already_selling',
+					'selling_online_answer' => 'no_im_selling_offline',
+				),
+				true,
+			),
+			'selling both online and offline'   => array(
+				array(
+					'business_choice'       => 'im_already_selling',
+					'selling_online_answer' => 'im_selling_both_online_and_offline',
+				),
+				true,
+			),
+			'selling online only'               => array(
+				array(
+					'business_choice'       => 'im_already_selling',
+					'selling_online_answer' => 'yes_im_selling_online',
+				),
+				false,
+			),
+			'not already selling'               => array(
+				array(
+					'business_choice'       => 'im_just_starting_my_business',
+					'selling_online_answer' => 'no_im_selling_offline',
+				),
+				false,
+			),
+			'already selling, no online answer' => array(
+				array(
+					'business_choice' => 'im_already_selling',
+				),
+				false,
+			),
+			'profiler skipped'                  => array(
+				null,
+				false,
+			),
+		);
+	}
+
+	/**
 	 * Data provider for test_get_country_extensions_count_with_merchant_selling_offline.
 	 *
 	 * @return array
@@ -439,7 +523,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		$country_suggestions_count = array(
 			'CA' => 10,
 			'US' => 11,
-			'GB' => 14,
+			'GB' => 15,
 			'AT' => 13,
 			'BE' => 11,
 			'BG' => 7,
@@ -691,6 +775,26 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Test that GoCardless is placed immediately after Klarna Checkout in the GB suggestions order.
+	 *
+	 * The order of entries in PaymentsExtensionSuggestions::$country_extensions determines the
+	 * suggestions' display priority, so this guards against accidental reordering.
+	 */
+	public function test_get_country_extensions_gb_gocardless_order() {
+		// Act.
+		$extensions = $this->sut->get_country_extensions( 'GB' );
+		$ids        = array_column( $extensions, 'id' );
+
+		// Assert.
+		$this->assertCount( 15, $ids );
+		$klarna_checkout_index = array_search( PaymentsExtensionSuggestions::KLARNA_CHECKOUT, $ids, true );
+		$gocardless_index      = array_search( PaymentsExtensionSuggestions::GOCARDLESS, $ids, true );
+		$this->assertNotFalse( $klarna_checkout_index, 'Klarna Checkout should be in the GB suggestions.' );
+		$this->assertNotFalse( $gocardless_index, 'GoCardless should be in the GB suggestions.' );
+		$this->assertSame( $klarna_checkout_index + 1, $gocardless_index, 'GoCardless should immediately follow Klarna Checkout in the GB suggestions.' );
 	}
 
 	/**

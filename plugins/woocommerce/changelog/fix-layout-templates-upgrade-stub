@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add no-op WC_REST_Layout_Templates_Controller and WC_REST_Products_Catalog_Controller stubs so an in-place update from 10.9.x does not fatal when the 10.9 controller list instantiates a class whose file has already been swapped away.
