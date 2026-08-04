@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent the Site Editor from showing unsaved changes when opening classic WooCommerce templates.
