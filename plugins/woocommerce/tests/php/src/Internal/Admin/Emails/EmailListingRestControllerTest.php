@@ -187,6 +187,15 @@ class EmailListingRestControllerTest extends WC_Unit_Test_Case {
 				return $template_html . "\n<!-- wp:paragraph --><p>FRESH_TEMPLATE_MARKER</p><!-- /wp:paragraph -->";
 			}
 		);
+		// The title is system-owned and must move with the content; the same
+		// post-data filter that customizes creation also drives the refresh.
+		add_filter(
+			'woocommerce_email_content_post_data',
+			static function ( $post_data ) {
+				$post_data['post_title'] = 'Fresh Template Title';
+				return $post_data;
+			}
+		);
 
 		// Simulate a template-version bump since creation: the refresh must
 		// restamp the version meta along with the content.
@@ -203,6 +212,7 @@ class EmailListingRestControllerTest extends WC_Unit_Test_Case {
 		$refreshed_post = get_post( $second_post_id );
 		$this->assertInstanceOf( \WP_Post::class, $refreshed_post );
 		$this->assertStringContainsString( 'FRESH_TEMPLATE_MARKER', $refreshed_post->post_content, 'The refreshed scratchpad must contain the current file template content' );
+		$this->assertSame( 'Fresh Template Title', $refreshed_post->post_title, 'The system-owned title must be refreshed along with the content' );
 
 		// The refresh must move the sync baseline along with the content, so the
 		// scratchpad still counts as never-edited on subsequent calls.
@@ -225,6 +235,31 @@ class EmailListingRestControllerTest extends WC_Unit_Test_Case {
 			get_post_meta( $second_post_id, '_wp_page_template', true ),
 			'The template meta must survive a content refresh'
 		);
+	}
+
+	/**
+	 * @testdox Should refresh the scratchpad when only the title changed, leaving the content identical.
+	 */
+	public function test_second_call_refreshes_scratchpad_on_title_only_change(): void {
+		$first_response = $this->call_recreate_email_post( self::EMAIL_ID );
+		$this->assertIsArray( $first_response );
+		$first_post_id = (int) $first_response['post_id'];
+
+		// Only the title moves — e.g. a plugin update renaming the email; the
+		// content-equality early return must not skip the refresh.
+		add_filter(
+			'woocommerce_email_content_post_data',
+			static function ( $post_data ) {
+				$post_data['post_title'] = 'Renamed Email Title';
+				return $post_data;
+			}
+		);
+
+		$second_response = $this->call_recreate_email_post( self::EMAIL_ID );
+		$this->assertIsArray( $second_response );
+
+		$refreshed_post = get_post( $first_post_id );
+		$this->assertSame( 'Renamed Email Title', $refreshed_post->post_title, 'A title-only change must still refresh the scratchpad' );
 	}
 
 	/**

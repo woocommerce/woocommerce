@@ -286,18 +286,22 @@ class EmailListingRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Refresh a never-edited scratchpad's content to the current file template.
+	 * Refresh a never-edited scratchpad's content and title to the current file template.
 	 *
-	 * Keeps the sync meta baseline in step with the new content so a later
+	 * The title is system-owned (it only surfaces in editor chrome and is not
+	 * editable in the email editor), so it moves with the content. Keeps the
+	 * sync meta baseline in step with the new content so a later
 	 * `was_never_edited()` check still recognizes the post as untouched.
 	 *
 	 * @param \WP_Post  $scratchpad The unpublished scratchpad post.
 	 * @param \WC_Email $email      The email instance.
 	 */
 	private function refresh_scratchpad_content( \WP_Post $scratchpad, \WC_Email $email ): void {
-		$canonical = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+		$post_data       = WCTransactionalEmailPostsGenerator::build_filtered_post_data( (string) $email->id, $email );
+		$canonical       = (string) ( $post_data['post_content'] ?? '' );
+		$canonical_title = (string) ( $post_data['post_title'] ?? '' );
 
-		if ( '' === $canonical || $canonical === $scratchpad->post_content ) {
+		if ( '' === $canonical || ( $canonical === $scratchpad->post_content && $canonical_title === $scratchpad->post_title ) ) {
 			return;
 		}
 
@@ -305,6 +309,7 @@ class EmailListingRestController extends RestApiControllerBase {
 			array(
 				'ID'            => $scratchpad->ID,
 				'post_content'  => $canonical,
+				'post_title'    => $canonical_title,
 				// Omitting the key would not help: wp_update_post() fills
 				// `page_template` from the stored `_wp_page_template` meta
 				// (WP_Post::to_array()), and wp_insert_post() then rejects the
@@ -338,6 +343,7 @@ class EmailListingRestController extends RestApiControllerBase {
 		}
 
 		$scratchpad->post_content = $saved_body;
+		$scratchpad->post_title   = $canonical_title;
 	}
 
 	/**
