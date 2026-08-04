@@ -139,11 +139,6 @@ final class OrderWithdrawalFeatureHighlightNotification implements RegisterHooks
 			return true;
 		}
 
-		/**
-		 * Data store instance.
-		 *
-		 * @var DataStore $data_store
-		 */
 		$data_store = Notes::load_data_store();
 		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
 
