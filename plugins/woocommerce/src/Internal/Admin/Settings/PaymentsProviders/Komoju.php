@@ -154,7 +154,10 @@ class Komoju extends PaymentGateway {
 		// Prefer the key the gateway resolved for itself, so we keep tracking where KOMOJU
 		// sources it from. Its `get_option_compat()` reads the current global option and falls
 		// back to the legacy per-gateway settings array, which is what we reproduce below.
-		if ( isset( $payment_gateway->secretKey ) && is_string( $payment_gateway->secretKey ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		// Guard on non-empty rather than isset(): versions older than 2.5.0 populate the property
+		// through `WC_Settings_API::get_option()`, which yields an empty string rather than null
+		// when nothing is stored, and that must still fall through to the reads below.
+		if ( ! empty( $payment_gateway->secretKey ) && is_string( $payment_gateway->secretKey ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			return $payment_gateway->secretKey; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		}
 

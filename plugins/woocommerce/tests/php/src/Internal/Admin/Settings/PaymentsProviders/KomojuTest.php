@@ -260,6 +260,27 @@ class KomojuTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An empty string on the gateway falls through to the options, since extension
+	 *          versions older than 2.5.0 populate the property via `WC_Settings_API::get_option()`,
+	 *          which yields '' rather than null when nothing is stored.
+	 */
+	public function test_secret_key_falls_back_when_the_gateway_resolved_an_empty_key(): void {
+		// Arrange. Only the global option holds a key; the gateway resolved an empty string.
+		update_option( 'komoju_woocommerce_secret_key', 'sk_test_global111' );
+		$gateway = new FakeKomojuPaymentGateway( 'komoju' );
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$gateway->secretKey = '';
+
+		// Act.
+		$is_test_mode = $this->sut->is_in_test_mode( $gateway );
+		$is_connected = $this->sut->is_account_connected( $gateway );
+
+		// Assert.
+		$this->assertTrue( $is_test_mode );
+		$this->assertTrue( $is_connected );
+	}
+
+	/**
 	 * @testdox is_account_connected() returns false when no secret key is saved anywhere.
 	 */
 	public function test_is_account_connected_returns_false_without_a_secret_key(): void {
